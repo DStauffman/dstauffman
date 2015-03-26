@@ -41,3 +41,13 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+
+# =========================
+# Compiled source #
+# =========================
+*.pyc
+
+# =========================
+# Folder/Files
+# =========================
+output/*
