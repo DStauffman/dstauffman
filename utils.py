@@ -15,8 +15,18 @@ Notes
 #%% Imports
 from __future__ import print_function
 from __future__ import division
+# for compatibility with v2.7 and 3+
+try:
+    from io import StringIO
+except ImportError:
+    from cStringIO import StringIO
+# normal imports
+from contextlib import contextmanager
+import doctest
+import h5py
 import os
 import numpy as np
+import sys
 import unittest
 from datetime import datetime, timedelta
 from dstauffman.constants import MONTHS_PER_YEAR
@@ -52,6 +62,7 @@ def rms(data, axis=None, keepdims=False):
     Examples
     --------
 
+    >>> from dstauffman import rms
     >>> rms([0, 1, 0., -1])
     0.70710678118654757
 
@@ -75,7 +86,7 @@ def setup_dir(folder, rec=False):
 
     See Also
     --------
-    os.mkdir, os.rmdir, os.remove
+    os.makedirs, os.rmdir, os.remove
 
     Raises
     ------
@@ -89,7 +100,8 @@ def setup_dir(folder, rec=False):
     Examples
     --------
 
-    >>> setup_dir(r'C:\Temp\test_folder')
+    >>> from dstauffman import setup_dir
+    >>> setup_dir(r'C:\Temp\test_folder') #doctest: +SKIP
 
     """
     if os.path.isdir(folder):
@@ -112,19 +124,155 @@ def setup_dir(folder, rec=False):
     else:
         # create directory if it does not exist
         try:
-            os.mkdir(folder)
+            os.makedirs(folder)
             print('Created directory: "' + folder + '"')
         except:
             # re-raise last exception, could try to handle differently in the future
             raise
 
-#%% Functions - compare_two_structures
-def compare_two_structures(c1, c2):
+#%% Functions - compare_two_classes
+def compare_two_classes(c1, c2, suppress_output=False, names=None):
     r"""
-    Compares to classes by going through all their public attributes and showing that they are equal.
+    Compares two classes by going through all their public attributes and showing that they are equal.
+
+    Parameters
+    ----------
+    c1 : class object
+        Any class object
+    c2 : class object
+        Any other class object
+    suppress_output : bool, optional
+        If True, suppress the information printed to the screen, defaults to False.
+    names : list of str, optional
+        List of the names to be printed to the screen for the two input classes.
+
+    Returns
+    -------
+    is_same : bool
+        True/False flag for whether the two class are the same.
+
+    Examples
+    --------
+
+    >>> from dstauffman import compare_two_classes
+    >>> c1 = type('Class1', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text'})
+    >>> c2 = type('Class2', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text'})
+    >>> is_same = compare_two_classes(c1, c2)
+    b is different.
+    c is only in c1.
+    d is only in c2.
+    "c1" and "c2" are not the same.
+
     """
-    # TODO: write this function
-    return True
+    # preallocate answer to True until proven otherwise
+    is_same = True
+    # get names if specified
+    if names is not None:
+        name1 = names[0]
+        name2 = names[1]
+    else:
+        # TODO: figure out Matlab inputname equivalent
+        name1 = 'c1'
+        name2 = 'c2'
+    # simple test
+    if c1 is not c2:
+        # get the list of public attributes
+        attrs1 = set((name for name in dir(c1) if not name.startswith('_')))
+        attrs2 = set((name for name in dir(c2) if not name.startswith('_')))
+        # compare the attributes that are in both
+        same = attrs1 & attrs2
+        for this_attr in sorted(same):
+            # if any differences, then this test fails
+            if np.any(getattr(c1, this_attr) != getattr(c2, this_attr)):
+                is_same = False
+                if not suppress_output:
+                    print(this_attr + ' is different.')
+        # find the attributes in one but not the other, if any, then this test fails
+        diff = attrs1 ^ attrs2
+        for this_attr in sorted(diff):
+            is_same = False
+            if not suppress_output:
+                if this_attr in attrs1:
+                    print(this_attr + ' is only in ' + name1 + '.')
+                else:
+                    print(this_attr + ' is only in ' + name2 + '.')
+    # display results
+    if not suppress_output:
+        if is_same:
+            print('"' + name1 + '" and "' + name2 + '" are the same.')
+        else:
+            print('"' + name1 + '" and "' + name2 + '" are not the same.')
+    return is_same
+
+#%% Functions - compare_two_dicts
+def compare_two_dicts(d1, d2, suppress_output=False, names=None):
+    r"""
+    Compares two dictionaries for the same keys, and the same value of those keys.
+
+    Parameters
+    ----------
+    d1 : class object
+        Any class object
+    d2 : class object
+        Any other class object
+    suppress_output : bool, optional
+        If True, suppress the information printed to the screen, defaults to False.
+    names : list of str, optional
+        List of the names to be printed to the screen for the two input classes.
+
+    Returns
+    -------
+    is_same : bool
+        True/False flag for whether the two class are the same.
+
+    Examples
+    --------
+
+    >>> d1 = {'a': 1, 'b': 2, 'c': 3}
+    >>> d2 = {'a': 1, 'b': 5, 'd': 6}
+    >>> is_same = compare_two_dicts(d1, d2)
+    b is different.
+    c is only in d1.
+    d is only in d2.
+    "d1" and "d2" are not the same.
+
+    """
+    # preallocate answer to True until proven otherwise
+    is_same = True
+    # get names if specified
+    if names is not None:
+        name1 = names[0]
+        name2 = names[1]
+    else:
+        # TODO: figure out Matlab inputname equivalent
+        name1 = 'd1'
+        name2 = 'd2'
+    # simple test
+    if d1 is not d2:
+        # compare the keys that are in both
+        same = d1.keys() & d2.keys()
+        for key in sorted(same):
+            # if any differences, then this test fails
+            if np.any(d1[key] != d2[key]):
+                is_same = False
+                if not suppress_output:
+                    print(key + ' is different.')
+        # find keys in one but not the other, if any, then this test fails
+        diff = d1.keys() ^ d2.keys()
+        for key in sorted(diff):
+            is_same = False
+            if not suppress_output:
+                if key in d1:
+                    print(key + ' is only in ' + name1 + '.')
+                else:
+                    print(key + ' is only in ' + name2 + '.')
+    # display results
+    if not suppress_output:
+        if is_same:
+            print('"' + name1 + '" and "' + name2 + '" are the same.')
+        else:
+            print('"' + name1 + '" and "' + name2 + '" are not the same.')
+    return is_same
 
 #%% Functions - round_time
 def round_time(dt=None, round_to_sec=60):
@@ -150,6 +298,7 @@ def round_time(dt=None, round_to_sec=60):
     Examples
     --------
 
+    >>> from dstauffman import round_time
     >>> from datetime import datetime
     >>> dt = datetime(2015, 3, 13, 8, 4, 10)
     >>> rounded_time = round_time(dt)
@@ -255,7 +404,14 @@ def read_text_file(filename):
     Examples
     --------
 
-    >>> text = read_text_file(r'temp_file.txt')
+    >>> from dstauffman import read_text_file, write_text_file, get_tests_dir
+    >>> import os
+    >>> text = 'Hello, World\n'
+    >>> write_text_file(os.path.join(get_tests_dir(), 'temp_file.txt'), text)
+    >>> text2 = read_text_file(os.path.join(get_tests_dir(), 'temp_file.txt'))
+    >>> print(text2)
+    Hello, World
+    <BLANKLINE>
 
     """
     try:
@@ -290,8 +446,10 @@ def write_text_file(filename, text):
     Examples
     --------
 
+    >>> from dstauffman import write_text_file, get_tests_dir
+    >>> import os
     >>> text = 'Hello, World\n'
-    >>> write_text_file(r'temp_file.txt', text)
+    >>> write_text_file(os.path.join(get_tests_dir(), 'temp_file.txt'), text)
 
     """
     try:
@@ -305,6 +463,31 @@ def write_text_file(filename, text):
 def disp(struct, level=0, padding=12):
     r"""
     Matlab like 'disp' or display function.
+
+    Parameters
+    ----------
+    struct : class
+        Structure to display
+    level : int, optional
+        Level to indent, used for substructures within structures.
+    padding : int, optional
+        Minimum number of spaces to pad the results to, default=12
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import disp
+    >>> a = type('a', (object, ), {'b': 0, 'c' : '[1, 2, 3]', 'd': 'text'})
+    >>> print(disp(a))
+    <BLANKLINE>
+    b ......... : 0
+    c ......... : [1, 2, 3]
+    d ......... : text
+
     """
     # padding per additional level
     pad_per_level = 4
@@ -314,6 +497,8 @@ def disp(struct, level=0, padding=12):
     x = '\n'
     # loop through dict of vars
     for name in sorted(d):
+        if name.startswith('_'):
+            continue
         # find out how many characters to pad on the front
         pad_len = padding - len(name) - 2
         # find out if an extra pad around the dots (" ... ") has room
@@ -341,11 +526,12 @@ def convert_annual_to_monthly_probability(annual):
     Raises
     ------
     ValueError
-        Any probabilities outside of the [0,1] range
+        Any probabilities outside of the [0, 1] range
 
     Examples
     --------
 
+    >>> from dstauffman import convert_annual_to_monthly_probability
     >>> import numpy as np
     >>> monthly = convert_annual_to_monthly_probability(np.array([0, 0.1, 1]))
     >>> print(monthly)
@@ -361,6 +547,112 @@ def convert_annual_to_monthly_probability(annual):
     monthly = 1-np.exp(np.log(1-annual)/MONTHS_PER_YEAR)
     return monthly
 
+#%% Functions - get_root_dir
+def get_root_dir():
+    r"""
+    Returns the folder that contains this source file and thus the root folder for the whole model.
+
+    Returns
+    -------
+    folder : str
+        Location of the folder that contains all the source files for the model.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_root_dir
+    >>> folder = get_root_dir()
+
+    """
+    folder = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+    return folder
+
+#%% Functions - get_tests_dir
+def get_tests_dir():
+    r"""
+    Returns the default test folder location.
+
+    Returns
+    -------
+    folder : str
+        Location of the folder that contains all the test files for the model.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2015.
+
+    Examples
+    --------
+
+
+    >>> from dstauffman import get_tests_dir
+    >>> folder = get_tests_dir()
+
+    """
+    folder = os.path.join(get_root_dir(), 'tests')
+    return folder
+
+#%% Functions - get_data_dir
+def get_data_dir():
+    r"""
+    Returns the default data folder location.
+
+    Returns
+    -------
+    folder : str
+        Location of the default folder for storing the model data.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_data_dir
+    >>> folder = get_data_dir()
+
+    """
+    folder = os.path.join(get_root_dir(), 'data')
+    return folder
+
+#%% Functions - capture_output
+@contextmanager
+def capture_output():
+    r"""
+    Captures the stdout and stderr streams instead of displaying to the screen.
+
+    Returns
+    -------
+    out : class StringIO
+        stdout stream output
+    err : class StringIO
+        stderr stream output
+
+    Examples
+    --------
+
+    >>> from dstauffman import capture_output
+    >>> with capture_output() as (out, err):
+    ...     print('Hello, World!')
+    >>> output = out.getvalue().strip()
+    >>> print(output)
+    Hello, World!
+
+    """
+    new_out, new_err = StringIO(), StringIO()
+    old_out, old_err = sys.stdout, sys.stderr
+    try:
+        sys.stdout, sys.stderr = new_out, new_err
+        yield sys.stdout, sys.stderr
+    finally:
+        sys.stdout, sys.stderr = old_out, old_err
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_utils', exit=False)
+    doctest.testmod(verbose=False)
