@@ -17,6 +17,7 @@ import doctest
 import os
 from PIL import Image
 import unittest
+from dstauffman.utils import setup_dir
 
 #%% Local Constants
 ALLOWABLE_EXTENSIONS = frozenset(['.jpg', '.ini', '.png', '.gif'])
@@ -265,17 +266,20 @@ def batch_resize(folder, max_width=INT_TOKEN, max_height=INT_TOKEN, \
         # If an argument is missing then return without doing anything
         return
 
+    # update status
+    print('Processing folder: "{}"'.format(folder))
+
     # Iterate through every image given in the folder argument and resize it.
     for image in os.listdir(folder):
         # check if valid image file
         if os.path.isdir(image):
             continue
         elif image[-4:] not in process_extensions:
-            print('Skipping file: "{}"'.format(image))
+            print(' Skipping file: "{}"'.format(image))
             continue
 
         # Update status
-        print('Resizing image: "{}"'.format(image))
+        print(' Resizing image: "{}"'.format(image))
 
         # Open the image file.
         img = Image.open(os.path.join(folder, image))
@@ -310,6 +314,10 @@ def batch_resize(folder, max_width=INT_TOKEN, max_height=INT_TOKEN, \
 
         # Resize it.
         img = img.resize((new_width, new_height), Image.ANTIALIAS)
+
+        # Create the output folder if necessary
+        if not os.path.isdir(os.path.join(folder, 'resized')):
+            setup_dir(os.path.join(folder, 'resized'))
 
         # Save it back to disk.
         img.save(os.path.join(folder, 'resized', image))
