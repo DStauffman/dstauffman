@@ -13,7 +13,7 @@ from .classes   import frozen, Frozen
 from .constants import MONTHS_PER_YEAR
 from .plotting  import Opts, storefig, titleprefix
 from .photos    import find_missing_nums, find_unexpected_ext, rename_old_picasa_files, \
-                           rename_upper_ext, find_long_filenames, batch_resize
+                           rename_upper_ext, find_long_filenames, batch_resize, convert_tif_to_jpg
 from .utils     import rms, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
                            make_python_init, get_python_definitions, read_text_file, \
                            write_text_file, disp, convert_annual_to_monthly_probability, \

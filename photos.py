@@ -13,6 +13,7 @@ Notes
 #%% Imports
 from __future__ import print_function
 from __future__ import division
+import doctest
 import os
 from PIL import Image
 import unittest
@@ -103,6 +104,13 @@ def find_missing_nums(folder, old_picasa=True, digit_check=True, \
 def find_unexpected_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
     r"""
     Lists any files in the folder that don't have the expected file extensions.
+
+    Parameters
+    ----------
+    folder : str
+        Name of folder to process
+    allowable_extensions : set of str, optional
+        List of extensions to consider allowable in the folder
     """
     # print status
     print('Finding any unexpected file extensions...')
@@ -121,6 +129,11 @@ def find_unexpected_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
 def rename_old_picasa_files(folder):
     r"""
     Renames the old ".picasa.ini" to the newer "Picasa.ini" standard.
+
+    Parameters
+    ----------
+    folder : str
+        Name of folder to process
     """
     # definitions
     old_name = r'Picasa.ini'
@@ -150,6 +163,13 @@ def rename_upper_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
     Renames any expected file types to have all lowercase file extensions.
 
     Common use is to rename the *.JPG extensions from my camera to *.jpg
+
+    Parameters
+    ----------
+    folder : str
+        Name of folder to process
+    allowable_extensions : set of str, optional
+        List of extensions to consider allowable in the folder
     """
     # update status
     print('Searching for file extensions to rename...')
@@ -181,6 +201,11 @@ def rename_upper_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
 def find_long_filenames(folder):
     r"""
     Finds any files with really long filenames.
+
+    Parameters
+    ----------
+    folder : str
+        Name of folder to process
     """
     print('Finding long filenames...')
     max_name = 0
@@ -222,6 +247,17 @@ def batch_resize(folder, max_width=INT_TOKEN, max_height=INT_TOKEN, \
         process_extensions=PROCESS_EXTENSIONS):
     r"""
     Resize the specified folder of images to the given max width and height.
+
+    Parameters
+    ----------
+    folder : str
+        Name of folder to process
+    max_width : int
+        Maximum width for the resized photo
+    max_height : int
+        Maximum height for the resized photo
+    process_extensions : set of str, optional
+        List of extensions to be processed within the folder
     """
     # We have to make sure that all of the arguments were passed.
     if max_width == INT_TOKEN or max_height == INT_TOKEN or not folder:
@@ -280,6 +316,62 @@ def batch_resize(folder, max_width=INT_TOKEN, max_height=INT_TOKEN, \
 
     print('Batch processing complete.')
 
+#%% Functions - convert_tif_to_jpg
+def convert_tif_to_jpg(folder, replace=False):
+    r"""
+    Converts *.tif images into *.jpg images.
+
+    Parameters
+    ----------
+    folder : str
+        Name of the folder to process
+    replace : bool, optional
+        Set to True to replace any existing *.jpg files
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_data_dir, convert_tif_to_jpg
+    >>> folder = get_data_dir()
+    >>> convert_tif_to_jpg(folder) #doctest: +ELLIPSIS
+    Processing folder: "..."
+     Skipping file: "README.txt"
+    Batch processing complete.
+
+    """
+    # update status
+    print('Processing folder: "{}"'.format(folder))
+
+    # Iterate through every image given in the folder argument and resize it.
+    for image in os.listdir(folder):
+
+        # check if valid image tif file
+        if os.path.isdir(image):
+            continue
+        elif image.split('.')[-1] not in {'tif','tiff'}:
+            print(' Skipping file: "{}"'.format(image))
+            continue
+
+        # get new name (handles *.tiff or *.tif)
+        new_name = '.'.join(image.split('.')[:-1]) + '.jpg'
+
+        # determine if the file already exists
+        if os.path.isfile(os.path.join(folder, new_name)) and not replace:
+            print(' Skipping due to pre-existing jpg file: "{}"'.format(image))
+            continue
+
+        # Update status
+        print(' Saving image: "{}" as "{}"'.format(image, new_name))
+
+        # Open the image file.
+        img = Image.open(os.path.join(folder, image))
+
+        # Save it back to disk.
+        img.save(os.path.join(folder, new_name))
+
+    print('Batch processing complete.')
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_photos', exit=False)
+    doctest.testmod(verbose=False)
