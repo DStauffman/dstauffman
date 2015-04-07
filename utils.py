@@ -228,6 +228,7 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
     Examples
     --------
 
+    >>> from dstauffman import compare_two_dicts
     >>> d1 = {'a': 1, 'b': 2, 'c': 3}
     >>> d2 = {'a': 1, 'b': 5, 'd': 6}
     >>> is_same = compare_two_dicts(d1, d2)
