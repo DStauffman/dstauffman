@@ -350,11 +350,16 @@ def convert_tif_to_jpg(folder, replace=False):
     # update status
     print('Processing folder: "{}"'.format(folder))
 
+    max_height = 2048
+    max_width  = 2048
+
     # Iterate through every image given in the folder argument and resize it.
     for image in os.listdir(folder):
 
         # check if valid image tif file
         if os.path.isdir(image):
+            continue
+        if image.startswith('.'):
             continue
         elif image.split('.')[-1] not in {'tif','tiff'}:
             print(' Skipping file: "{}"'.format(image))
@@ -374,8 +379,39 @@ def convert_tif_to_jpg(folder, replace=False):
         # Open the image file.
         img = Image.open(os.path.join(folder, image))
 
+        # Get current properties
+        cur_width    = img.size[0]
+        cur_height   = img.size[1]
+        aspect_ratio = cur_width / cur_height
+
+        # Calucalte desired size
+        cal_width  = int(max_height * aspect_ratio)
+        cal_height = int(max_width / aspect_ratio)
+
+        # set new size
+        if cal_height < max_height:
+            new_width  = max_width
+            new_height = cal_height
+        elif cal_width < max_width:
+            new_width  = cal_width
+            new_height = max_height
+        else:
+            # need to shrink further
+            scale1 = cal_width/max_width
+            scale2 = cal_height/max_height
+            if scale1 >= scale2:
+                new_width  = cal_width  / scale1
+                new_height = max_height / scale1
+            else:
+                new_width  = max_width  / scale2
+                new_height = cal_height / scale2
+
+        # Resize it.
+        img = img.resize((new_width, new_height), Image.ANTIALIAS)
+
         # Save it back to disk.
-        img.save(os.path.join(folder, new_name))
+        img.save(os.path.join(folder, new_name), "JPEG", quality=80)
+        #img.save(os.path.join(folder, new_name.replace('.jpg','.png')), compress_level=9)
 
     print('Batch processing complete.')
 
