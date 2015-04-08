@@ -8,31 +8,34 @@ Notes
 #.  Written by David C. Stauffer in April 2015.
 """
 
+# pylint: disable=E1101, C0326
+
 #%% Imports
 from __future__ import print_function
 from __future__ import division
 import doctest
 import numpy as np
 import unittest
+from dstauffman.constants import INT_TOKEN
 
 #%% Functions - qrot
-def qrot(k, a):
+def qrot(axis, angle):
     r"""
     Construct a quaternion expressing a rotation about a single axis
 
     Parameters
     ----------
-    k : int
+    axis : int
         Axis about which rotation is being made, from {1, 2, 3}
             (1) for x-axis
             (2) for y-axis
             (3) for z-axis
-    a : array_like
+    angle : array_like
         angle of rotation in radians
 
     Returns
     -------
-    q : ndarray, (4, N)
+    quat : ndarray, (4, N)
         quaternion representing the given rotations
 
     References
@@ -49,41 +52,41 @@ def qrot(k, a):
     --------
     >>> from dstauffman import qrot
     >>> import numpy as np
-    >>> q = qrot(3, np.pi/2)
-    >>> print(q) # doctest: +NORMALIZE_WHITESPACE
+    >>> quat = qrot(3, np.pi/2)
+    >>> print(quat) # doctest: +NORMALIZE_WHITESPACE
     [ 0. 0. 0.70710678  0.70710678]
 
     """
     # assertions
-    assert k in {1, 2, 3}
+    assert axis in {1, 2, 3}
     # calculations
-    if np.isscalar(a):
+    if np.isscalar(angle):
         # optimized scalar case
-        q = np.array([0, 0, 0, np.cos(a/2)])
-        q[k-1] = np.sin(a/2)
+        quat = np.array([0, 0, 0, np.cos(angle/2)])
+        quat[axis-1] = np.sin(angle/2)
     else:
         # general case
-        q = np.concatenate((np.zeros((len(a), 3)), np.vstack(np.cos(a/2))), axis=1).T
-        q[k-1, :] = np.sin(a/2)
-    return q
+        quat = np.concatenate((np.zeros((len(angle), 3)), np.vstack(np.cos(angle/2))), axis=1).T
+        quat[axis-1, :] = np.sin(angle/2)
+    return quat
 
 
 #%% Functions - quat_angle_diff
-def quat_angle_diff(q1, q2):
+def quat_angle_diff(quat1, quat2):
     r"""
     Calculates the angular difference between two quaternions
 
     This function takes a two quaternions and calculates a delta quaternion between them.
     It then uses the delta quaternion to generate both a total angular difference, and an
-    an angular difference expressed in X,Y,Z components based on the axis of rotation,
-    expressed in the original frame of the q1 input quaternion.  This function uses full
+    an angular difference expressed in X, Y, Z components based on the axis of rotation,
+    expressed in the original frame of the quat1 input quaternion.  This function uses full
     trignometric functions instead of any small angle approximations.
 
     Parameters
     ----------
-    q1 : ndarray (4, N)
+    quat1 : ndarray (4, N)
         quaternion one
-    q2 : ndarray (4, N)
+    quat2 : ndarray (4, N)
         quaternion two
 
     Returns
@@ -96,10 +99,10 @@ def quat_angle_diff(q1, q2):
     References
     ----------
     This function is based on this representation of a unit quaternion:
-    q = [nx * sin(theta/2);
-         ny * sin(theta/2);
-         nz * sin(theta/2);
-           cos(theta/2)  ];
+    quat = [[nx * sin(theta/2)]
+            [ny * sin(theta/2)]
+            [nz * sin(theta/2)]
+            [   cos(theta/2)  ]]
     Where: <nx,ny,nz> are the three components of a unit vector of rotation axis and
            theta is the angle of rotation
 
@@ -109,24 +112,26 @@ def quat_angle_diff(q1, q2):
 
     Examples
     --------
-    >>> from dstauffman import qrot, quat_mult, quat_angle_diff
+    >>> from dstauffman import qrot, quat_mult, quat_angle_diff, concat_vectors
     >>> import numpy as np
-    >>> q1    = np.array([0.5, 0.5, 0.5, 0.5])
-    >>> dq1   = qrot(1, 0.001)
-    >>> dq2   = qrot(2, 0.05)
-    >>> q2    = [quat_mult(dq1,q1), quat_mult(dq2,q1)]
-    >>> (theta, comp) = quat_angle_diff(q1,q2)
+    >>> quat1  = np.array([0.5, 0.5, 0.5, 0.5])
+    >>> dq1 = qrot(1, 0.001)
+    >>> dq2 = qrot(2, 0.05)
+    >>> quat2  = concat_vectors(quat_mult(dq1,quat1), quat_mult(dq2,quat1))
+    >>> (theta, comp) = quat_angle_diff(quat1, quat2)
     >>> print(theta) # doctest: +NORMALIZE_WHITESPACE
-    []
+    [ 0.001  0.05 ]
     >>> print(comp) # doctest: +NORMALIZE_WHITESPACE
-    []
+    [[ 0.001  0.   ]
+     [ 0.     0.05 ]
+     [ 0.     0.   ]]
 
     """
     # calculate delta quaternion
-    dq = quat_mult(q2,quat_inv(q1));
+    dq = quat_mult(quat2, quat_inv(quat1))
 
     # pull vector components out of delta quaternion
-    dv = dq[0:2, :]
+    dv = dq[0:3, :]
 
     # sum vector components to get sin(theta/2)^2
     mag2 = np.sum(dv**2, axis=0)
@@ -135,7 +140,7 @@ def quat_angle_diff(q1, q2):
     mag = np.sqrt(mag2)
 
     # take inverse sine to get theta/2
-    theta_over_2 = np.asin(mag)
+    theta_over_2 = np.arcsin(mag)
 
     # multiply by 2 to get theta
     theta = 2*theta_over_2
@@ -147,13 +152,13 @@ def quat_angle_diff(q1, q2):
     # normalize vector components
     nv = dv / mag
 
-    # find angle expressed in x,y,z components based on normalized vector
+    # find angle expressed in x, y, z components based on normalized vector
     comp = nv * theta
 
     return (theta, comp)
 
 #%% Functions - quat_from_euler
-def quat_from_euler(angles, seq=[3, 1, 2]):
+def quat_from_euler(angles, seq=np.array([3, 1, 2])):
     r"""
     Convert set(s) of euler angles to quaternion(s).
 
@@ -173,7 +178,7 @@ def quat_from_euler(angles, seq=[3, 1, 2]):
 
     Returns
     -------
-    dq : ndarray (4, N)
+    quat : ndarray (4, N)
         quaternion representing the euler rotation(s)
 
     Notes
@@ -186,44 +191,48 @@ def quat_from_euler(angles, seq=[3, 1, 2]):
 
     Examples
     --------
-    >>> from dstauffman import quat_from_euler
+    >>> from dstauffman import quat_from_euler, concat_vectors
     >>> import numpy as np
     >>> a   = np.array([0.01, 0.02, 0.03])
     >>> b   = np.array([0.04, 0.05, 0.06])
-    >>> angles = np.concatenate((a, b)).reshape(2, 3).T
+    >>> angles = concat_vectors(a, b)
     >>> seq = np.array([3, 2, 1])
-    >>> q = quat_from_euler([a,b], seq)
-    >>> print(q) # doctest: +NORMALIZE_WHITESPACE
+    >>> quat = quat_from_euler(angles, seq)
+    >>> print(quat) # doctest: +NORMALIZE_WHITESPACE
+    [[ 0.01504849  0.03047982]
+     [ 0.00992359  0.02438147]
+     [ 0.00514916  0.02073308]
+     [ 0.99982426  0.99902285]]
 
     """
     # get number of angles
-    n = angles.shape[1] # TODO: can be vector?
+    num = angles.shape[1] # TODO: can be vector?
     # initialize output
-    q = np.zeros((4, n))
+    quat = np.zeros((4, num))
     # loop through quaternions
-    for i in range(n):
-        q_temp = np.array([[0], [0], [0], [1]])
+    for i in range(num):
+        q_temp = np.array([0, 0, 0, 1])
         # apply each rotation
         for j in range(len(seq)):
-            q_single = qrot(seq[j], angles[j,i])
+            q_single = qrot(seq[j], angles[j, i])
             q_temp = quat_mult(q_temp, q_single)
         # save output
-        q[:, i] = q_temp
-    return q
+        quat[:, i] = q_temp
+    return quat
 
 #%% Functions - quat_interp
-def quat_interp(t, q, ti, inclusive=True):
+def quat_interp(time, quat, ti, inclusive=True):
     r"""
     Interpolate quaternions from a monotonic time series of quaternions.
 
     Parameters
     ----------
-    t : ndarray, (A, )
+    time : ndarray, (A, )
         monotonically increasing time series [sec]
-    q : ndarray, (4, A)
+    quat : ndarray, (4, A)
         quaternion series
     ti : ndarray (B, )
-        desired time of interpolation [sec]
+        desired time of interpolation, also monotonically increasing [sec]
     inclusive : bool {True, False}, optional
 
     Returns
@@ -239,12 +248,15 @@ def quat_interp(t, q, ti, inclusive=True):
     --------
     >>> from dstauffman import quat_interp
     >>> import numpy as np
-    >>> t  = np.array([1, 3, 5])
-    >>> q  = np.array([[0, 0, 0, 1], [0, 0, 0.1961, 0.9806], [0.5, -0.5, -0.5, 0.5]]).T
+    >>> time  = np.array([1, 3, 5])
+    >>> quat  = np.array([[0, 0, 0, 1], [0, 0, 0.1961, 0.9806], [0.5, -0.5, -0.5, 0.5]]).T
     >>> ti = np.array([1, 2, 4.5, 5])
-    >>> qout = quat_interp(t, q, ti)
+    >>> qout = quat_interp(time, quat, ti)
     >>> print(qout) # doctest: +NORMALIZE_WHITESPACE
-    []
+    [[ 0. 0.          0.41748298  0.5 ]
+     [ 0. 0.         -0.41748298 -0.5 ]
+     [ 0. 0.09852786 -0.35612893 -0.5 ]
+     [ 1. 0.99513429  0.72428455  0.5 ]]
 
     """
     # Initializations
@@ -252,97 +264,87 @@ def quat_interp(t, q, ti, inclusive=True):
     num   = len(ti)
 
     # initialize output
-    qout  = np.nan(4, num)
+    qout  = np.empty((4, num))
+    qout.fill(np.nan)
 
-    # Scalar case
-    # optimization for simple use case(s), where ti is a scalar and contained in t
-    #if num == 0:
-    #    return qout
-    #elif num == 1:
-    #    ix = find(ti == t,1,'first');
-    #    if not isempty(ix):
-    #        qout = q[:, ix]
-    #        return qout
-    #
-    ## Check time bounds
-    ## check for desired times that are outside the time vector
-    #ix_exclusive = ti < t(1) | ti > t(end);
-    #if any(ix_exclusive)
-    #    if inclusive
-    #        warning('utils:QuatInterpExtrap','Desired time not found within input time vector.');
-    #    else
-    #        error('Desired time not found within input time vector.');
-    #    end
-    #end
-    #
-    ## Given times
-    ## find desired points that are contained in input time vector
-    #[ix_known,ix_input] = ismember(ti,t);
-    #
-    ## set quaternions directly to known values
-    #qout(:,ix_known) = q(:,ix_input(ix_known));
-    #
-    ## find other points to be calculated
-    #ix_calc = ~ix_known & ~ix_exclusive;
-    #
-    ## Calculations
-    ## find index within t to surround ti
-    #index = nan(1,num);
-    ## If not compiling, then you can do a for i = find(ix_calc) and skip the if ix_calc(i) line,
-    ## which may make the non-compiled matlab version faster
-    #for i = find(ix_calc)
-    #    temp = find(ti(i) <= t,1,'first');
-    #    if temp(1) ~= 1
-    #        index(i) = temp(1);
-    #    else
-    #        index(i) = temp(1) + 1;
-    ## If you want to compile this function, then you need this instead of the last for loop,
-    ## plus a coder.extrinsic('warning') line.  These are not kept, because it makes the MATLAB-only
-    ## version less efficient:
-    ## for i = 1:length(ix_calc)
-    ##     if ix_calc(i)
-    ##         temp = find(ti(i) <= t,1,'first');
-    ##         if temp(1) ~= 1
-    ##             index(i) = temp(1);
-    ##         else
-    ##             index(i) = temp(1) + 1;
-    ##         end
-    ##     end
-    ## end
-    #
-    ## remove points that are NaN, either they weren't in the time vector, or they were next to a drop out
-    ## and cannot be interpolated.
-    #index(isnan(index)) = [];
-    ## pull out bounding times and quaternions
-    #t1 = t(index-1);
-    #t2 = t(index);
-    #q1 = q(:,index-1);
-    #q2 = q(:,index);
-    ## calculate delta quaternion
-    #dq12       = quat_norm(quat_mult(q2,quat_inv(q1)));
-    ## find delta quaternion axis of rotation
-    #vec        = dq12(1:3,:);
-    #norm_vec   = realsqrt(sum(vec.^2));
-    ## check for zero norm vectors
-    #norm_fix   = norm_vec;
-    #norm_fix(norm_fix == 0) = 1;
-    #ax         = bsxfun(@rdivide,vec,norm_fix);
-    ## find delta quaternion rotation angle
-    #ang        = 2*asin(norm_vec);
-    ## scale rotation angle based on time
-    #scaled_ang = ang.*(ti(ix_calc)-t1)./(t2-t1);
-    ## find scaled delta quaternion
-    #dq         = [bsxfun(@times,ax,sin(scaled_ang/2)); cos(scaled_ang/2)];
-    ## calculate desired quaternion
-    #qout_temp  = quat_norm(quat_mult(dq,q1));
-    ## store into output structure
-    #qout(:,ix_calc) = qout_temp;
-    #
-    ## Sign convention
-    ## Enforce sign convention on scalar quaternion element.
-    ## Scalar element (fourth element) of quaternion must not be negative.
-    ## So change sign on entire quaternion if qout(4) is less than zero.
-    #qout(:,qout(4,:) < 0) = -qout(:,qout(4,:) < 0);
+    # Simple cases
+    if num == 0:
+        # optimization for when ti is empty
+        return qout
+    elif num == 1:
+        # optimization for simple use case(s), where ti is a scalar and contained in time
+        if ti in time:
+            ix = np.where(ti == time)[0]
+            if not ix:
+                qout = quat[:, ix]
+                return qout
+
+    # Check time bounds
+    # check for desired times that are outside the time vector
+    ix_exclusive = (ti < time[0]) | (ti > time[-1])
+    if np.any(ix_exclusive):
+        if inclusive:
+            print('Desired time not found within input time vector.')
+        else:
+            raise ValueError('Desired time not found within input time vector.')
+
+    # Given times
+    # find desired points that are contained in input time vector
+    ix_known = np.in1d(ti, time, assume_unique=True)
+    ix_input = np.in1d(time, ti, assume_unique=True)
+
+    # set quaternions directly to known values
+    qout[:, ix_known] = quat[:, ix_input]
+
+    # find other points to be calculated
+    ix_calc = ~ix_known & ~ix_exclusive
+
+    # Calculations
+    # find index within time to surround ti
+    index = np.empty(num, dtype=int)
+    index.fill(INT_TOKEN)
+    # If not compiling, then you can do a for i = find(ix_calc) and skip the if ix_calc(i) line,
+    # which may make the non-compiled matlab version faster
+    for i in np.nonzero(ix_calc)[0]:
+        temp = np.nonzero(ti[i] <= time)[0]
+        if temp[0] != 0:
+            index[i] = temp[0]
+        else:
+            index[i] = temp[0] + 1
+
+    # remove points that are NaN, either they weren't in the time vector, or they were next to a
+    # drop out and cannot be interpolated.
+    index = index[index != INT_TOKEN]
+    # pull out bounding times and quaternions
+    t1 = time[index-1]
+    t2 = time[index]
+    q1 = quat[:, index-1]
+    q2 = quat[:, index]
+    # calculate delta quaternion
+    dq12       = quat_norm(quat_mult(q2, quat_inv(q1)))
+    # find delta quaternion axis of rotation
+    vec        = dq12[0:3, :]
+    norm_vec   = np.sqrt(np.sum(vec**2, axis=0))
+    # check for zero norm vectors
+    norm_fix   = norm_vec
+    norm_fix[norm_fix == 0] = 1
+    ax         = vec / norm_fix
+    # find delta quaternion rotation angle
+    ang        = 2*np.arcsin(norm_vec)
+    # scale rotation angle based on time
+    scaled_ang = ang*(ti[ix_calc]-t1) / (t2-t1)
+    # find scaled delta quaternion
+    dq         = np.concatenate((ax*np.sin(scaled_ang/2), np.expand_dims(np.cos(scaled_ang/2),0)), axis=0)
+    # calculate desired quaternion
+    qout_temp  = quat_norm(quat_mult(dq,q1))
+    # store into output structure
+    qout[:, ix_calc] = qout_temp
+
+    # Sign convention
+    # Enforce sign convention on scalar quaternion element.
+    # Scalar element (fourth element) of quaternion must not be negative.
+    # So change sign on entire quaternion if qout(4) is less than zero.
+    qout[:, qout[3, :] < 0] = -qout[:, qout[3, :] < 0]
 
     return qout
 
@@ -377,7 +379,7 @@ def quat_inv(q1):
     >>> q1 = qrot(1, pi/2)
     >>> q2 = quat_inv(q1)
     >>> print(q2) # doctest: +NORMALIZE_WHITESPACE
-    []
+    [-0.70710678 -0. -0. 0.70710678]
 
     """
     # invert the quaternions
@@ -386,7 +388,7 @@ def quat_inv(q1):
         q2 = q1 * np.array([-1, -1, -1, 1])
     else:
         # general case
-        q2 = np.concatenate((-q1[0, :], -q1[1, :], -q1[2, :], q1[3, :]), axis=0)
+        q2 = np.concatenate((-q1[0, :], -q1[1, :], -q1[2, :], q1[3, :]), axis=0).reshape(4, q1.shape[1])
     return q2
 
 #%% Functions - quat_mult
@@ -433,7 +435,7 @@ def quat_mult(a, b):
     >>> b = qrot(2, pi)
     >>> c = quat_mult(a, b)
     >>> print(c) # doctest: +NORMALIZE_WHITESPACE
-    []
+    [ 4.32978028e-17 7.07106781e-01 -7.07106781e-01 4.32978028e-17]
 
     """
     # check for vectorized inputs
@@ -445,7 +447,7 @@ def quat_mult(a, b):
             [ a[3],  a[2], -a[1],  a[0]], \
             [-a[2],  a[3],  a[0],  a[1]], \
             [ a[1], -a[0],  a[3],  a[2]], \
-            [-a[0], -a[1], -a[2],  a[3]]]).dot(b) # TODO: replace with @ in Python 3.5
+            [-a[0], -a[1], -a[2],  a[3]]]).dot(b[:, np.newaxis]) # TODO: replace w/ @ in Python 3.5
         # enforce positive scalar component
         if c[3] < 0:
             c = -c
@@ -464,13 +466,14 @@ def quat_mult(a, b):
         b3 = b[2, :]
         b4 = b[3, :]
         c = np.array([ \
-            [ b1*a4 + b2*a3 - b3*a2 + b4*a1], \
-            [-b1*a3 + b2*a4 + b3*a1 + b4*a2], \
-            [ b1*a2 - b2*a1 + b3*a4 + b4*a3], \
-            [-b1*a1 - b2*a2 - b3*a3 + b4*a4]]) # TODO: bug here
+             b1*a4 + b2*a3 - b3*a2 + b4*a1, \
+            -b1*a3 + b2*a4 + b3*a1 + b4*a2, \
+             b1*a2 - b2*a1 + b3*a4 + b4*a3, \
+            -b1*a1 - b2*a2 - b3*a3 + b4*a4])
+
         c[:, c[3, :]<0] = -c[:, c[3, :]<0]
-        if c.shape[1] == 1:
-            c = c.flatten()
+    if c.shape[1] == 1:
+        c = c.flatten()
     return c
 
 #%% Functions - quat_norm
@@ -538,21 +541,23 @@ def quat_prop(quat, delta_ang, renorm=True):
 
     Examples
     --------
+    >>> from dstauffman import quat_prop
+    >>> import numpy as np
     >>> quat      = np.array([0, 0, 0, 1])
     >>> delta_ang = np.array([0.01, 0.02, 0.03])
     >>> quat_new  = quat_prop(quat, delta_ang)
     >>> print(quat_new) # doctest: +NORMALIZE_WHITESPACE
-    []
+    [ 0.00499913  0.00999825  0.01499738  0.99982505]
 
     """
     #compute angle rate matrix
-    W = np.array([ \
+    omega = np.array([ \
         [      0      ,   delta_ang[2],   -delta_ang[1],   delta_ang[0]], \
         [-delta_ang[2],        0      ,    delta_ang[0],   delta_ang[1]], \
         [ delta_ang[1],  -delta_ang[0],        0       ,   delta_ang[2]], \
         [-delta_ang[0],  -delta_ang[1],   -delta_ang[2],        0      ]])
     #compute delta quaternion
-    delta_quaternion = 0.5 * W.dot(quat)
+    delta_quaternion = 0.5 * omega.dot(quat)
     # propagate over delta
     quat_new = quat + delta_quaternion
     # renormalize and return
@@ -561,13 +566,13 @@ def quat_prop(quat, delta_ang, renorm=True):
     return quat_new
 
 #%% Functions - quat_times_vector
-def quat_times_vector(q, v):
+def quat_times_vector(quat, v):
     r"""
     Multiply quaternion(s) against vector(s)
 
     Parameters
     ----------
-    q : ndarray, (4, N) or (4, )
+    quat : ndarray, (4, N) or (4, )
         quaternion(s)
     v : ndarray, (3, N) or (3 ,)
         input vector(s)
@@ -589,45 +594,47 @@ def quat_times_vector(q, v):
     References
     ----------
     Steps to algorithm
-    #.  qv = q(1:3) x v
-    #.  vec = v + 2*[ -( q(4) * qv ) + (q(1:3) x qv) ]
+    #.  qv = quat(1:3) x v
+    #.  vec = v + 2*[ -( quat(4) * qv ) + (quat(1:3) x qv) ]
 
     Examples
     --------
     >>> from dstauffman import quat_times_vector
     >>> import numpy as np
-    >>> q = np.array([[0, 1, 0, 0], [1, 0, 0, 0]]).T
+    >>> quat = np.array([[0, 1, 0, 0], [1, 0, 0, 0]]).T
     >>> v = np.array([[1, 0, 0], [2, 0, 0]]).T
-    >>> vec = quat_times_vector(q, v)
+    >>> vec = quat_times_vector(quat, v)
     >>> print(vec) # doctest: +NORMALIZE_WHITESPACE
-    []
+    [[-1.  2.]
+     [ 0.  0.]
+     [ 0.  0.]]
 
     """
     # determine input sizes
-    if q.ndim == 1:
-        q = q[:, np.newaxis]
+    if quat.ndim == 1:
+        quat = quat[:, np.newaxis]
     if v.ndim == 1:
         v = v[:, np.newaxis]
     # Multiple quaternions, multiple vectors
     qv  = np.array([ \
-        [q[1, :]*v[2, :] - q[2, :]*v[1, :]], \
-        [q[2, :]*v[0, :] - q[0, :]*v[2, :]], \
-        [q[0, :]*v[1, :] - q[1, :]*v[0, :]]]) # TODO: use cross product?
-    vec = v + 2*(-(np.ones((3,1)).dot(q[3, :])) * qv + \
+        quat[1, :]*v[2, :] - quat[2, :]*v[1, :], \
+        quat[2, :]*v[0, :] - quat[0, :]*v[2, :], \
+        quat[0, :]*v[1, :] - quat[1, :]*v[0, :]]) # TODO: use cross product?
+    vec = v + 2*(-(np.ones((3, 1)).dot(np.expand_dims(quat[3, :], 0))) * qv + \
         np.array([ \
-            [q[1, :]*qv[2, :] - q[2, :]*qv[1, :]], \
-            [q[2, :]*qv[0, :] - q[0, :]*qv[2, :]], \
-            [q[0, :]*qv[1, :] - q[1, :]*qv[0, :]]])) # TODO: check this, and use cross product?
+            quat[1, :]*qv[2, :] - quat[2, :]*qv[1, :], \
+            quat[2, :]*qv[0, :] - quat[0, :]*qv[2, :], \
+            quat[0, :]*qv[1, :] - quat[1, :]*qv[0, :]])) # TODO: check this, and use cross product?
     return vec
 
 #%% Functions - quat_to_dcm
-def quat_to_dcm(q):
+def quat_to_dcm(quat):
     r"""
     Converts quaternion to a direction cosine matrix
 
     Parameters
     ----------
-    q : ndarray (4, 1)
+    quat : ndarray (4, 1)
         quaternion
 
     Returns
@@ -648,32 +655,35 @@ def quat_to_dcm(q):
 
     >>> from dstauffman import quat_to_dcm
     >>> import numpy as np
-    >>> q = np.array([0.5, -0.5, 0.5, 0.5])
-    >>> dcm = quat_to_dcm(q)
+    >>> quat = np.array([0.5, -0.5, 0.5, 0.5])
+    >>> dcm = quat_to_dcm(quat)
     >>> print(dcm) # doctest: +NORMALIZE_WHITESPACE
+    [[ 0.  0.  1.]
+     [-1.  0.  0.]
+     [ 0. -1.  0.]]
 
     """
     #build dcm components
     dcm = np.zeros((3, 3))
-    dcm[0, 0] = q[3]**2 + q[0]**2 - q[1]**2 - q[2]**2
-    dcm[0, 1] = 2*(q[0]*q[1] + q[2]*q[3])
-    dcm[0, 2] = 2*(q[0]*q[2] - q[1]*q[3])
-    dcm[1, 0] = 2*(q[0]*q[1] - q[2]*q[3])
-    dcm[1, 1] = q[3]**2 - q[0]**2 + q[1]**2 - q[2]**2
-    dcm[1, 2] = 2*(q[1]*q[2] + q[0]*q[3])
-    dcm[2, 0] = 2*(q[0]*q[2] + q[1]*q[3])
-    dcm[2, 1] = 2*(q[1]*q[2] - q[0]*q[3])
-    dcm[2, 2] = q[3]**2 - q[0]**2 - q[1]**2 + q[2]**2
+    dcm[0, 0] = quat[3]**2 + quat[0]**2 - quat[1]**2 - quat[2]**2
+    dcm[0, 1] = 2*(quat[0]*quat[1] + quat[2]*quat[3])
+    dcm[0, 2] = 2*(quat[0]*quat[2] - quat[1]*quat[3])
+    dcm[1, 0] = 2*(quat[0]*quat[1] - quat[2]*quat[3])
+    dcm[1, 1] = quat[3]**2 - quat[0]**2 + quat[1]**2 - quat[2]**2
+    dcm[1, 2] = 2*(quat[1]*quat[2] + quat[0]*quat[3])
+    dcm[2, 0] = 2*(quat[0]*quat[2] + quat[1]*quat[3])
+    dcm[2, 1] = 2*(quat[1]*quat[2] - quat[0]*quat[3])
+    dcm[2, 2] = quat[3]**2 - quat[0]**2 - quat[1]**2 + quat[2]**2
     return dcm
 
 #%% Functions - quat_to_euler
-def quat_to_euler(q,seq):
+def quat_to_euler(quat,seq):
     r"""
     Converts quaternion to Euler angles for one of 6 input angle sequences.
 
     Parameters
     ----------
-    q : ndarray, (4, N)
+    quat : ndarray, (4, N)
         quaternion
     seq : ndarray, {(3, 1, 2), (1, 2, 3), (2, 3, 1), (1, 3, 2), (2, 1, 3), (3, 2, 1)}
         euler angle sequence, where:
@@ -703,115 +713,117 @@ def quat_to_euler(q,seq):
     --------
     >>> from dstauffman import quat_to_euler
     >>> import numpy as np
-    >>> q = np.array([[0, 1, 0, 0], [0, 0, 1, 0]]).T
+    >>> quat = np.array([[0, 1, 0, 0], [0, 0, 1, 0]]).T
     >>> seq = [3, 1, 2]
-    >>> euler = quat_to_euler(q, seq)
+    >>> euler = quat_to_euler(quat, seq)
     >>> print(euler) # doctest: +NORMALIZE_WHITESPACE
-    []
+    [[-0.         -3.14159265]
+     [ 0.          0.        ]
+     [ 3.14159265 -0.        ]]
 
     """
 
     # initialize output
-    n     = q.shape[1] # TODO: vector case?
+    n     = quat.shape[1] # TODO: vector case?
     euler = np.zeros((3, n))
 
     # Loop through quaternions
     for i in range(n):
         # calculate DCM from quaternion
-        C = quat_to_dcm(q[:, i])
+        dcm = quat_to_dcm(quat[:, i])
         # Find values of dir cosine matrix terms
         seq_str = str(int(seq[0])) + str(int(seq[1])) + str(int(seq[2]))
         # calculate terms based on sequence order
         if seq_str == '123':
             #Identical to KLL pg 423
-            c2_c3                       =  C[0, 0]
-            s1_s2_c3_plus_s3_c1         =  C[1, 0]
-            minus_c1_s2_c3_plus_s3_s1   =  C[2, 0]
-            minus_c2_s3                 =  C[0, 1]
-            minus_s1_s2_s3_plus_c3_c1   =  C[1, 1]
-            c1_s2_s3_plus_c3_s1         =  C[2, 1]
-            s2                          =  C[0, 2]
-            s1_c2                       =  C[1, 2]
-            c1_c2                       =  C[2, 2]
+            c2_c3                       =  dcm[0, 0]
+            s1_s2_c3_plus_s3_c1         =  dcm[1, 0]
+            minus_c1_s2_c3_plus_s3_s1   =  dcm[2, 0]
+            minus_c2_s3                 =  dcm[0, 1]
+            minus_s1_s2_s3_plus_c3_c1   =  dcm[1, 1]
+            c1_s2_s3_plus_c3_s1         =  dcm[2, 1]
+            s2                          =  dcm[0, 2]
+            s1_c2                       =  dcm[1, 2]
+            c1_c2                       =  dcm[2, 2]
             group = 1
-        if seq_str == '231':
-            c1_c2                       =  C[0, 0]
-            minus_c1_s2_c3_plus_s3_s1   =  C[0, 1]
-            c1_s2_s3_plus_c3_s1         =  C[0, 2]
-            s2                          =  C[1, 0]
-            c2_c3                       =  C[1, 1]
-            minus_c2_s3                 =  C[1, 2]
-            s1_c2                       =  C[2, 0]
-            s1_s2_c3_plus_s3_c1         =  C[2, 1]
-            minus_s1_s2_s3_plus_c3_c1   =  C[2, 2]
+        elif seq_str == '231':
+            c1_c2                       =  dcm[0, 0]
+            minus_c1_s2_c3_plus_s3_s1   =  dcm[0, 1]
+            c1_s2_s3_plus_c3_s1         =  dcm[0, 2]
+            s2                          =  dcm[1, 0]
+            c2_c3                       =  dcm[1, 1]
+            minus_c2_s3                 =  dcm[1, 2]
+            s1_c2                       =  dcm[2, 0]
+            s1_s2_c3_plus_s3_c1         =  dcm[2, 1]
+            minus_s1_s2_s3_plus_c3_c1   =  dcm[2, 2]
             group = 1
-        if seq_str == '312':
-            s1_s2_c3_plus_s3_c1         =  C[0, 2]
-            minus_c1_s2_c3_plus_s3_s1   =  C[1, 2]
-            minus_c2_s3                 =  C[2, 0]
-            minus_s1_s2_s3_plus_c3_c1   =  C[0, 0]
-            c1_s2_s3_plus_c3_s1         =  C[1, 0]
-            s2                          =  C[2, 1]
-            s1_c2                       =  C[0, 1]
-            c1_c2                       =  C[1, 1]
-            c2_c3                       =  C[2, 2]
+        elif seq_str == '312':
+            s1_s2_c3_plus_s3_c1         =  dcm[0, 2]
+            minus_c1_s2_c3_plus_s3_s1   =  dcm[1, 2]
+            minus_c2_s3                 =  dcm[2, 0]
+            minus_s1_s2_s3_plus_c3_c1   =  dcm[0, 0]
+            c1_s2_s3_plus_c3_s1         =  dcm[1, 0]
+            s2                          =  dcm[2, 1]
+            s1_c2                       =  dcm[0, 1]
+            c1_c2                       =  dcm[1, 1]
+            c2_c3                       =  dcm[2, 2]
             group = 1
-        if seq_str == '132':
-            c2_c3                        =  C[0, 0]
-            minus_c1_s2_c3_plus_s3_s1    =  C[1, 0]
-            s1_s2_c3_plus_s3_c1          = -C[2, 0]
-            s2                           = -C[0, 1]
-            c1_c2                        =  C[1, 1]
-            s1_c2                        =  C[2, 1]
-            minus_c2_s3                  = -C[0, 2]
-            c1_s2_s3_plus_c3_s1          = -C[1, 2]
-            minus_s1_s2_s3_plus_c3_c1    =  C[2, 2]
+        elif seq_str == '132':
+            c2_c3                        =  dcm[0, 0]
+            minus_c1_s2_c3_plus_s3_s1    =  dcm[1, 0]
+            s1_s2_c3_plus_s3_c1          = -dcm[2, 0]
+            s2                           = -dcm[0, 1]
+            c1_c2                        =  dcm[1, 1]
+            s1_c2                        =  dcm[2, 1]
+            minus_c2_s3                  = -dcm[0, 2]
+            c1_s2_s3_plus_c3_s1          = -dcm[1, 2]
+            minus_s1_s2_s3_plus_c3_c1    =  dcm[2, 2]
             group = 2
-        if seq_str == '213':
-            s1_s2_c3_plus_s3_c1          = -C[0, 1]
-            minus_c1_s2_c3_plus_s3_s1    =  C[2, 1]
-            minus_c2_s3                  = -C[1, 0]
-            minus_s1_s2_s3_plus_c3_c1    =  C[0, 0]
-            c1_s2_s3_plus_c3_s1          = -C[2, 0]
-            s2                           = -C[1, 2]
-            s1_c2                        =  C[0, 2]
-            c1_c2                        =  C[2, 2]
-            c2_c3                        =  C[1, 1]
+        elif seq_str == '213':
+            s1_s2_c3_plus_s3_c1          = -dcm[0, 1]
+            minus_c1_s2_c3_plus_s3_s1    =  dcm[2, 1]
+            minus_c2_s3                  = -dcm[1, 0]
+            minus_s1_s2_s3_plus_c3_c1    =  dcm[0, 0]
+            c1_s2_s3_plus_c3_s1          = -dcm[2, 0]
+            s2                           = -dcm[1, 2]
+            s1_c2                        =  dcm[0, 2]
+            c1_c2                        =  dcm[2, 2]
+            c2_c3                        =  dcm[1, 1]
             group = 2
-        if seq_str == '321':
-            s1_s2_c3_plus_s3_c1          = -C[1, 2]
-            minus_c1_s2_c3_plus_s3_s1    =  C[0, 2]
-            minus_c2_s3                  = -C[2, 1]
-            minus_s1_s2_s3_plus_c3_c1    =  C[1, 1]
-            c1_s2_s3_plus_c3_s1          = -C[0, 1]
-            s2                           = -C[2, 0]
-            s1_c2                        =  C[1, 0]
-            c1_c2                        =  C[0, 0]
-            c2_c3                        =  C[2, 2]
+        elif seq_str == '321':
+            s1_s2_c3_plus_s3_c1          = -dcm[1, 2]
+            minus_c1_s2_c3_plus_s3_s1    =  dcm[0, 2]
+            minus_c2_s3                  = -dcm[2, 1]
+            minus_s1_s2_s3_plus_c3_c1    =  dcm[1, 1]
+            c1_s2_s3_plus_c3_s1          = -dcm[0, 1]
+            s2                           = -dcm[2, 0]
+            s1_c2                        =  dcm[1, 0]
+            c1_c2                        =  dcm[0, 0]
+            c2_c3                        =  dcm[2, 2]
             group = 2
         else:
-            raise ValueError('Invalid axis rotation sequence: ' + seq_str)
+            raise ValueError('Invalid axis rotation sequence: "{}"'.format(seq_str))
 
         # Compute angles
         if s1_c2 == 0 and c1_c2 == 0:
             theta1 = 0
         else:
             if group == 1:
-                theta1 = np.artcan2(-s1_c2, c1_c2)
+                theta1 = np.arctan2(-s1_c2, c1_c2)
             else:
                 theta1 = np.arctan2( s1_c2, c1_c2)
         # compute sin and cos
         s1 = np.sin(theta1)
         c1 = np.cos(theta1)
         # build remaining thetas
-        s3     = s1_s2_c3_plus_s3_c1*c1       +  minus_c1_s2_c3_plus_s3_s1*s1;
-        c3     = minus_s1_s2_s3_plus_c3_c1*c1 +        c1_s2_s3_plus_c3_s1*s1;
+        s3     = s1_s2_c3_plus_s3_c1*c1       +  minus_c1_s2_c3_plus_s3_s1*s1
+        c3     = minus_s1_s2_s3_plus_c3_c1*c1 +        c1_s2_s3_plus_c3_s1*s1
         theta3 = np.arctan2(s3, c3)
         c2     = c2_c3*c3 - minus_c2_s3*s3
         theta2 = np.arctan2(s2, c2)
 
         # Store output
-        euler[:,i] = np.array([[theta1], [theta2], [theta3]])
+        euler[:,i] = np.array([theta1, theta2, theta3])
     return euler
 
 def concat_vectors(v1, v2):
@@ -827,19 +839,6 @@ def concat_vectors(v1, v2):
 
 #%% Unit test
 if __name__ == '__main__':
-    q1 = qrot(1, np.pi/2)
-    q2 = qrot(2, np.array([0, np.pi/2, np.pi/3]))
-    q3 = quat_inv(q1)
-    q4 = quat_mult(q1, q2)
-    q5 = quat_norm(q4)
-    dcm = quat_to_dcm(q1)
 
-    print('q1 = ' + str(q1))
-    print('q2 = ' + str(q2))
-    print('q3 = ' + str(q3))
-    print('q4 = ' + str(q4))
-    print('q5 = ' + str(q5))
-    print('dcm = ' + str(dcm))
-
-    #unittest.main(module='tests.test_quat', exit=False)
-    #doctest.testmod(verbose=False)
+    unittest.main(module='tests.test_quat', exit=False)
+    doctest.testmod(verbose=False)

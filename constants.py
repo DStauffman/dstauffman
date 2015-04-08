@@ -14,6 +14,7 @@ import unittest
 
 #%% Constants
 MONTHS_PER_YEAR = 12
+INT_TOKEN       = -1
 
 #%% Functions
 # None
@@ -22,6 +23,7 @@ MONTHS_PER_YEAR = 12
 def _main():
     r"""Unit test function."""
     print('MONTHS_PER_YEAR    = {}'.format(MONTHS_PER_YEAR))
+    print('INT_TOKEN          = {}'.format(INT_TOKEN))
 
 if __name__ == '__main__':
     unittest.main(module='tests.test_constants', exit=False)
