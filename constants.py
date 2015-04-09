@@ -16,6 +16,26 @@ import unittest
 MONTHS_PER_YEAR = 12
 INT_TOKEN       = -1
 
+#%% Spyder
+spyder_custom_colors = r"""
+custom/background = '#000000'
+custom/currentline = '#000000'
+custom/currentcell = '#000000'
+custom/occurence = '#cc0000'
+custom/ctrlclick = '#55ffff'
+custom/sideareas = '#181818'
+custom/matched_p = '#355835'
+custom/unmatched_p = '#9c171e'
+custom/normal = ('#ffffff', False, False)
+custom/keyword = ('#00bfff', False, False)
+custom/builtin = ('#ff55ff', False, False)
+custom/definition = ('#ffffff', True, False)
+custom/comment = ('#00ff00', False, True)
+custom/string = ('#ffff7f', False, False)
+custom/number = ('#ff7979', False, False)
+custom/instance = ('#ffff00', False, True)
+"""
+
 #%% Functions
 # None
 
