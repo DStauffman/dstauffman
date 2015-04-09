@@ -11,6 +11,8 @@ Notes
 #%% Imports
 from __future__ import print_function
 from __future__ import division
+import copy
+from datetime import datetime
 import numpy as np
 import os
 import sys
@@ -90,32 +92,131 @@ class Test_setup_dir(unittest.TestCase):
     r"""
     Tests the setup_dir function with these cases:
         create a new folder
+        create a new nested folder
         delete the contents of an existing folder
         fail to create a folder due to permissions
         fail to delete the contents of an existing folder due to permissions
         fail to create a folder due to a bad name
         delete the contents of an existing folder recursively
     """
+    def setUp(self):
+        self.folder   = os.path.join(dcs.get_tests_dir(), 'temp_dir')
+        self.subdir   = os.path.join(dcs.get_tests_dir(), 'temp_dir', 'temp_dir2')
+        self.filename = os.path.join(self.folder, 'temp_file.txt')
+        self.subfile  = os.path.join(self.subdir, 'temp_file.txt')
+        self.text     = 'Hello, World!\n'
+
     def test_create_folder(self):
-        pass
+        with dcs.capture_output() as (out, err):
+            dcs.setup_dir(self.folder)
+        output = out.getvalue().strip()
+        self.assertEqual(output, 'Created directory: "{}"'.format(self.folder))
+
+    def test_nested_folder(self):
+        with dcs.capture_output() as (out, err):
+            dcs.setup_dir(self.subdir)
+        output = out.getvalue().strip()
+        self.assertEqual(output, 'Created directory: "{}"'.format(self.subdir))
 
     def test_clean_up_folder(self):
-        pass
+        with dcs.capture_output():
+            dcs.setup_dir(self.folder)
+            dcs.write_text_file(self.filename, self.text)
+        with dcs.capture_output() as (out, err):
+            dcs.setup_dir(self.folder)
+        output = out.getvalue().strip()
+        self.assertEqual(output, 'Files/Sub-folders were removed from: "{}"'.format(self.folder))
 
     def test_fail_to_create_folder(self):
-        pass
+        pass #TODO: write this test
 
     def test_fail_to_clean_folder(self):
-        pass
+        pass #TODO: write this test
 
     def test_bad_name_file_ext(self):
-        pass
+        pass #TODO: write this test
 
     def test_clean_up_recursively(self):
-        pass
+        with dcs.capture_output():
+            dcs.setup_dir(self.subdir)
+            dcs.write_text_file(self.subfile, self.text)
+        with dcs.capture_output() as (out, err):
+            dcs.setup_dir(self.folder, rec=True)
+        output = out.getvalue().strip()
+        self.assertEqual(output, 'Files/Sub-folders were removed from: "{}"\n'.format(self.subdir) + \
+            'Files/Sub-folders were removed from: "{}"'.format(self.folder))
+
+    def tearDown(self):
+        if os.path.isfile(self.filename):
+            os.remove(self.filename)
+        if os.path.isfile(self.subfile):
+            os.remove(self.subfile)
+        if os.path.isdir(self.subdir):
+            os.rmdir(self.subdir)
+        if os.path.isdir(self.folder):
+            os.rmdir(self.folder)
 
 #%% compare_two_classes
-# TODO:
+class Test_compare_two_classes(unittest.TestCase):
+    r"""
+    Tests the compare_two_classes function with these cases:
+        compares the same classes
+        compares different classes
+        compares same with names passed in
+        compares with suppressed output
+        compare subclasses
+    """
+    def setUp(self):
+        self.c1 = type('Class1', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text'})
+        self.c2 = type('Class2', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text'})
+        self.names = ['Class 1', 'Class 2']
+
+    def test_is_comparison(self):
+        with dcs.capture_output() as (out, err):
+            is_same = dcs.compare_two_classes(self.c1, self.c1)
+        output = out.getvalue().strip()
+        self.assertEqual(output, '"c1" and "c2" are the same.')
+        self.assertTrue(is_same)
+
+    def test_good_comparison(self):
+        with dcs.capture_output() as (out, err):
+            is_same = dcs.compare_two_classes(self.c1, copy.copy(self.c1))
+        output = out.getvalue().strip()
+        self.assertEqual(output, '"c1" and "c2" are the same.')
+        self.assertTrue(is_same)
+
+    def test_bad_comparison(self):
+        with dcs.capture_output() as (out, err):
+            is_same = dcs.compare_two_classes(self.c1, self.c2)
+        output = out.getvalue().strip()
+        self.assertEqual(output, 'b is different.\nc is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
+        self.assertFalse(is_same)
+
+    def test_names(self):
+        with dcs.capture_output() as (out, err):
+            is_same = dcs.compare_two_classes(self.c2, self.c2, names=self.names)
+        output = out.getvalue().strip()
+        self.assertEqual(output, '"Class 1" and "Class 2" are the same.')
+        self.assertTrue(is_same)
+
+    def test_suppression(self):
+        with dcs.capture_output() as (out, err):
+            is_same = dcs.compare_two_classes(self.c1, self.c2, suppress_output=True, names=self.names)
+        output = out.getvalue().strip()
+        self.assertEqual(output, '')
+        self.assertFalse(is_same)
+
+    def test_subclasses(self):
+        temp1 = copy.copy(self.c1)
+        temp2 = copy.copy(self.c2)
+        temp1.e = copy.copy(self.c1)
+        temp2.e = copy.copy(self.c2)
+        with dcs.capture_output() as (out, err):
+            is_same = dcs.compare_two_classes(temp1, temp2)
+        output = out.getvalue().strip()
+        self.assertEqual(output, 'b is different.\ne is different.\nc is only in c1.\n' + \
+            'd is only in c2.\n"c1" and "c2" are not the same.')
+        self.assertFalse(is_same)
 
 #%% compare_two_dicts
 class Test_compare_two_dicts(unittest.TestCase):
@@ -124,7 +225,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         compares the same dicts
         compares different dicts
         compares same with names passed in
-        compares with/without suppressed output
+        compares with suppressed output
     """
     def setUp(self):
         self.d1 = {'a': 1, 'b': 2, 'c': 3}
@@ -159,14 +260,20 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertEqual(output, '')
         self.assertFalse(is_same)
 
-    def test_printing(self):
-        with dcs.capture_output() as (out, err):
-            is_same = dcs.compare_two_dicts(self.d1, self.d1)
-        output = out.getvalue().strip()
-        self.assertEqual(output, '"d1" and "d2" are the same.')
-        self.assertTrue(is_same)
-
 #%% round_time
+class Test_round_time(unittest.TestCase):
+    r"""
+    Tests the round_time function with these cases:
+        normal use (round to one minute)
+        extended use (round to a different specified time)
+    """
+    def test_normal_use(self):
+        rounded_time = dcs.round_time(datetime(2015, 3, 13, 8, 4, 10))
+        self.assertEqual(rounded_time, datetime(2015, 3, 13, 8, 4, 0))
+
+    def test_extended_use(self):
+        rounded_time = dcs.round_time(datetime(2015, 3, 13, 8, 4, 10), round_to_sec=300)
+        self.assertEqual(rounded_time, datetime(2015, 3, 13, 8, 5, 0))
 
 #%% read_text_file
 class Test_read_text_file(unittest.TestCase):
@@ -231,6 +338,13 @@ class Test_write_text_file(unittest.TestCase):
         os.remove(self.filepath)
 
 #%% disp
+class Test_disp(unittest.TestCase):
+    r"""
+    Tests the disp function with these cases:
+        TBD
+    """
+    def test_normal(self):
+        pass # TODO: finish these cases
 
 #%% convert_annual_to_monthly_probability
 class Test_convert_annual_to_monthly_probability(unittest.TestCase):
@@ -265,11 +379,31 @@ class Test_convert_annual_to_monthly_probability(unittest.TestCase):
             dcs.convert_annual_to_monthly_probability(np.array([0., 0.5, 1.5]))
 
 #%% get_root_dir
-pass
+class Test_get_root_dir(unittest.TestCase):
+    r"""Tests the get_root_dir function with these cases:
+        call the function
+    """
+    def test_function(self):
+        folder = dcs.get_root_dir()
+        self.assertTrue(folder) # TODO: don't know an independent way to test this
 
 #%% get_tests_dir
+class Test_get_tests_dir(unittest.TestCase):
+    r"""Tests the get_tests_dir function with these cases:
+        call the function
+    """
+    def test_function(self):
+        folder = dcs.get_tests_dir()
+        self.assertEqual(folder, os.path.join(dcs.get_root_dir(), 'tests'))
 
 #%% get_data_dir
+class Test_get_data_dir(unittest.TestCase):
+    r"""Tests the get_data_dir function with these cases:
+        call the function
+    """
+    def test_function(self):
+        folder = dcs.get_data_dir()
+        self.assertEqual(folder, os.path.join(dcs.get_root_dir(), 'data'))
 
 #%% capture_output
 class Test_capture_output(unittest.TestCase):

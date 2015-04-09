@@ -12,6 +12,7 @@ Notes
 #%% Imports
 from __future__ import print_function
 from __future__ import division
+import doctest
 import numpy as np
 import os
 import unittest
@@ -41,7 +42,7 @@ class Opts(Frozen):
         self.rms_xmax  =  np.inf
         self.name_one  = ''
         self.name_two  = ''
-        self.plot_true = 'none' # from {'none','SA','Rwanda'}
+        self.plot_true = 'none' # from {'none', 'SA', 'Rwanda', 'Rwanda_DHS', 'Rwanda_poly_fit'}
 
 #%% Functions - storefig
 def storefig(fig, folder=None, plot_type='png'):
@@ -57,6 +58,11 @@ def storefig(fig, folder=None, plot_type='png'):
     plot_type : str
         Type of figure to save to disk, like 'png' or 'jpg'
 
+    Raises
+    ------
+    ValueError
+        Specified folder to save figures to doesn't exist.
+
     Notes
     -----
     #. Uses the figure.canvas.get_window_title property to determine the figure name.
@@ -69,6 +75,7 @@ def storefig(fig, folder=None, plot_type='png'):
     --------
     Create figure and then save to disk
 
+    >>> from dstauffman import storefig
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> import os
@@ -76,28 +83,46 @@ def storefig(fig, folder=None, plot_type='png'):
     >>> fig.canvas.set_window_title('Figure Title')
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
-    >>> plt.plot(x, y)
-    >>> plt.title('X vs Y')
-    >>> plt.show()
+    >>> plt.plot(x, y) # doctest: +ELLIPSIS
+    [<matplotlib.lines.Line2D object at 0x...>]
+    >>> plt.title('X vs Y') # doctest: +ELLIPSIS
+    <matplotlib.text.Text object at 0x...>
+    >>> plt.show(block=False)
     >>> folder = os.getcwd()
     >>> plot_type = 'png'
     >>> storefig(fig, folder, plot_type)
 
+    Close plot
+    >>> plt.close()
+
+    Delete file
+    >>> os.remove(os.path.join(folder, 'Figure Title.png'))
+
     """
+    # make sure figs is a list
     if not isinstance(fig, list):
         figs = [fig]
     else:
         figs = fig
+    # make sure types is a list
     if not isinstance(plot_type, list):
         types = []
         types.append(plot_type)
     else:
         types = plot_type
+    # if no folder was specified, then use the current working directory
     if folder is None:
         folder = os.getcwd()
+    # confirm that the folder exists
+    if not os.path.isdir(folder):
+        raise ValueError('The specfied folder "{}" does not exist.'.format(folder))
+    # loop through the figures
     for this_fig in figs:
+        # get the title of the figure canvas
         this_title = fig.canvas.get_window_title()
+        # loop through the plot types
         for this_type in types:
+            # save the figure to the specified plot type
             this_fig.savefig(os.path.join(folder, this_title + '.' + this_type))
 
 #%% Functions - titleprefix
@@ -126,17 +151,23 @@ def titleprefix(fig, prefix=''):
     --------
     Create figure and then change the title
 
+    >>> from ghap import titleprefix
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
-    >>> plt.plot(x, y)
-    >>> plt.title('X vs Y')
-    >>> plt.show()
+    >>> plt.plot(x, y) # doctest: +ELLIPSIS
+    [<matplotlib.lines.Line2D object at 0x...>]
+    >>> plt.title('X vs Y') #doctest: +ELLIPSIS
+    <matplotlib.text.Text object at 0x...>
+    >>> plt.show(block=False)
     >>> prefix = 'Baseline'
     >>> titleprefix(fig, prefix)
+
+    Close plot
+    >>> plt.close()
 
     """
     # check for non-empty prefix
@@ -163,3 +194,4 @@ def titleprefix(fig, prefix=''):
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_plotting', exit=False)
+    doctest.testmod(verbose=False)

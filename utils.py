@@ -5,8 +5,8 @@ independently defined and used by other modules.
 
 Notes
 -----
-#.  By design, this model does not reference any other piece of the dstauffman code base exceptx
-        constans or enums to avoid circular references.
+#.  By design, this model does not reference any other piece of the dstauffman code base except
+        constants or enums to avoid circular references.
 #.  Written by David C. Stauffer in March 2015.
 """
 
@@ -183,7 +183,7 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None):
         same = attrs1 & attrs2
         for this_attr in sorted(same):
             # if any differences, then this test fails
-            if np.any(getattr(c1, this_attr) != getattr(c2, this_attr)):
+            if np.logical_not(_nan_equal(getattr(c1, this_attr), getattr(c2, this_attr))):
                 is_same = False
                 if not suppress_output:
                     print(this_attr + ' is different.')
@@ -652,6 +652,48 @@ def capture_output():
         yield sys.stdout, sys.stderr
     finally:
         sys.stdout, sys.stderr = old_out, old_err
+
+#%% Functions - _nan_equal
+def _nan_equal(a, b):
+    r"""
+    Test ndarrays for equality, but ignore NaNs.
+
+    Parameters
+    ----------
+    a : ndarray
+        Array one
+    b : ndarray
+        Array two
+
+    Returns
+    -------
+    is_same : bool
+        Flag for whether the inputs are the same or not
+
+    Examples
+    --------
+    >>> from dstauffman.utils import _nan_equal
+    >>> import numpy as np
+    >>> a = np.array([1, 2, np.nan])
+    >>> b = np.array([1, 2, np.nan])
+    >>> print(_nan_equal(a, b))
+    True
+
+    >>> a = np.array([1, 2, np.nan])
+    >>> b = np.array([3, 2, np.nan])
+    >>> print(_nan_equal(a, b))
+    False
+
+    """
+    # preallocate to True
+    is_same = True
+    try:
+        # use numpy testing module to assert that they are equal (ignores NaNs)
+        np.testing.assert_equal(a, b)
+    except AssertionError:
+        # if assertion fails, then they are not equal
+        is_same = False
+    return is_same
 
 #%% Unit test
 if __name__ == '__main__':

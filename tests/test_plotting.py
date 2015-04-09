@@ -27,8 +27,8 @@ class Test_storefig(unittest.TestCase):
         self.time = np.arange(0, 10, 0.1)
         self.data = np.sin(self.time)
         self.title = 'Test Plot'
-        self.folder = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-        self.plot_type = ['png','jpg']
+        self.folder = dcs.get_tests_dir()
+        self.plot_type = ['png', 'jpg']
         # turn interaction off to make the plots draw all at once on a show() command
         plt.ioff()
         # create the figure and set the title
