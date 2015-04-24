@@ -5,7 +5,7 @@ cases to demonstrate functionaliy and correct outcomes for all the functions wit
 
 Notes
 -----
-#. Written by David C. Stauffer in March 2015.
+#.  Written by David C. Stauffer in March 2015.
 """
 
 #%% Imports
@@ -107,24 +107,39 @@ class Test_setup_dir(unittest.TestCase):
         self.text     = 'Hello, World!\n'
 
     def test_create_folder(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             dcs.setup_dir(self.folder)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, 'Created directory: "{}"'.format(self.folder))
 
     def test_nested_folder(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             dcs.setup_dir(self.subdir)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, 'Created directory: "{}"'.format(self.subdir))
 
     def test_clean_up_folder(self):
         with dcs.capture_output():
             dcs.setup_dir(self.folder)
             dcs.write_text_file(self.filename, self.text)
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             dcs.setup_dir(self.folder)
         output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'Files/Sub-folders were removed from: "{}"'.format(self.folder))
+
+    def test_clean_up_partial(self):
+        with dcs.capture_output():
+            dcs.setup_dir(self.folder)
+            dcs.write_text_file(self.filename, '')
+            dcs.setup_dir(self.subdir)
+            dcs.write_text_file(self.subfile, '')
+        with dcs.capture_output() as (out, _):
+            dcs.setup_dir(self.folder, rec=False)
+        output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, 'Files/Sub-folders were removed from: "{}"'.format(self.folder))
 
     def test_fail_to_create_folder(self):
@@ -140,9 +155,10 @@ class Test_setup_dir(unittest.TestCase):
         with dcs.capture_output():
             dcs.setup_dir(self.subdir)
             dcs.write_text_file(self.subfile, self.text)
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             dcs.setup_dir(self.folder, rec=True)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, 'Files/Sub-folders were removed from: "{}"\n'.format(self.subdir) + \
             'Files/Sub-folders were removed from: "{}"'.format(self.folder))
 
@@ -172,37 +188,42 @@ class Test_compare_two_classes(unittest.TestCase):
         self.names = ['Class 1', 'Class 2']
 
     def test_is_comparison(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_classes(self.c1, self.c1)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, '"c1" and "c2" are the same.')
         self.assertTrue(is_same)
 
     def test_good_comparison(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_classes(self.c1, copy.copy(self.c1))
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, '"c1" and "c2" are the same.')
         self.assertTrue(is_same)
 
     def test_bad_comparison(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_classes(self.c1, self.c2)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, 'b is different.\nc is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 
     def test_names(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_classes(self.c2, self.c2, names=self.names)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, '"Class 1" and "Class 2" are the same.')
         self.assertTrue(is_same)
 
     def test_suppression(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_classes(self.c1, self.c2, suppress_output=True, names=self.names)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, '')
         self.assertFalse(is_same)
 
@@ -211,9 +232,10 @@ class Test_compare_two_classes(unittest.TestCase):
         temp2 = copy.copy(self.c2)
         temp1.e = copy.copy(self.c1)
         temp2.e = copy.copy(self.c2)
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_classes(temp1, temp2)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, 'b is different.\ne is different.\nc is only in c1.\n' + \
             'd is only in c2.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
@@ -233,30 +255,34 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.names = ['Dict 1', 'Dict 2']
 
     def test_good_comparison(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_dicts(self.d1, self.d1)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, '"d1" and "d2" are the same.')
         self.assertTrue(is_same)
 
     def test_bad_comparison(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_dicts(self.d1, self.d2)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, 'b is different.\nc is only in d1.\nd is only in d2.\n"d1" and "d2" are not the same.')
         self.assertFalse(is_same)
 
     def test_names(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_dicts(self.d2, self.d2, names=self.names)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, '"Dict 1" and "Dict 2" are the same.')
         self.assertTrue(is_same)
 
     def test_suppression(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_dicts(self.d1, self.d2, suppress_output=True, names=self.names)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, '')
         self.assertFalse(is_same)
 
@@ -266,6 +292,7 @@ class Test_round_time(unittest.TestCase):
     Tests the round_time function with these cases:
         normal use (round to one minute)
         extended use (round to a different specified time)
+        get current time
     """
     def test_normal_use(self):
         rounded_time = dcs.round_time(datetime(2015, 3, 13, 8, 4, 10))
@@ -275,6 +302,10 @@ class Test_round_time(unittest.TestCase):
         rounded_time = dcs.round_time(datetime(2015, 3, 13, 8, 4, 10), round_to_sec=300)
         self.assertEqual(rounded_time, datetime(2015, 3, 13, 8, 5, 0))
 
+    def test_current_time(self):
+        dcs.round_time()
+        self.assertTrue(True)
+
 #%% read_text_file
 class Test_read_text_file(unittest.TestCase):
     r"""
@@ -283,28 +314,38 @@ class Test_read_text_file(unittest.TestCase):
         read a file that does not exist (raise error)
     """
     @classmethod
-    def setUpClass(self):
-        self.folder   = dcs.get_tests_dir()
-        self.contents = 'Hello, World!\n'
-        self.filepath = os.path.join(self.folder, 'temp_file.txt')
-        self.badpath  = r'AA:\non_existent_path\bad_file.txt'
-        with open(self.filepath, 'wt') as file:
-            file.write(self.contents)
+    def setUpClass(cls):
+        cls.folder   = dcs.get_tests_dir()
+        cls.contents = 'Hello, World!\n'
+        cls.filepath = os.path.join(cls.folder, 'temp_file.txt')
+        cls.badpath  = r'AA:\non_existent_path\bad_file.txt'
+        with open(cls.filepath, 'wt') as file:
+            file.write(cls.contents)
 
     def test_reading(self):
         text = dcs.read_text_file(self.filepath)
         self.assertEqual(text, self.contents)
 
     def test_bad_reading(self):
-        with dcs.capture_output() as (out, err):
-            with self.assertRaises(OSError):
+        with dcs.capture_output() as (out, _):
+            count = 0
+            try:
                 dcs.read_text_file(self.badpath)
+            except OSError:
+                count += 1
+            except IOError:
+                count += 1
+            else:
+                raise
+            # must raise at least one of the two errors
+            self.assertTrue(count > 0)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for reading.')
 
     @classmethod
-    def tearDownClase(self):
-        os.remove(self.filepath)
+    def tearDownClase(cls):
+        os.remove(cls.filepath)
 
 #%% write_text_file
 class Test_write_text_file(unittest.TestCase):
@@ -314,11 +355,11 @@ class Test_write_text_file(unittest.TestCase):
         write a bad file location (raise error)
     """
     @classmethod
-    def setUpClass(self):
-        self.folder   = dcs.get_tests_dir()
-        self.contents = 'Hello, World!\n'
-        self.filepath = os.path.join(self.folder, 'temp_file.txt')
-        self.badpath  = r'AA:\non_existent_path\bad_file.txt'
+    def setUpClass(cls):
+        cls.folder   = dcs.get_tests_dir()
+        cls.contents = 'Hello, World!\n'
+        cls.filepath = os.path.join(cls.folder, 'temp_file.txt')
+        cls.badpath  = r'AA:\non_existent_path\bad_file.txt'
 
     def test_writing(self):
         dcs.write_text_file(self.filepath, self.contents)
@@ -327,15 +368,25 @@ class Test_write_text_file(unittest.TestCase):
         self.assertEqual(text, self.contents)
 
     def test_bad_writing(self):
-        with dcs.capture_output() as (out, err):
-            with self.assertRaises(OSError):
+        with dcs.capture_output() as (out, _):
+            count = 0
+            try:
                 dcs.write_text_file(self.badpath, self.contents)
+            except OSError:
+                count += 1
+            except IOError:
+                count += 1
+            else:
+                raise
+            # must raise at least one of the two errors
+            self.assertTrue(count > 0)
         output = out.getvalue().strip()
+        out.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for writing.')
 
     @classmethod
-    def tearDownClass(self):
-        os.remove(self.filepath)
+    def tearDownClass(cls):
+        os.remove(cls.filepath)
 
 #%% disp
 class Test_disp(unittest.TestCase):
@@ -343,8 +394,25 @@ class Test_disp(unittest.TestCase):
     Tests the disp function with these cases:
         TBD
     """
+    def setUp(self):
+        self.a      = type('a', (object, ), {'b': 0, 'c' : '[1, 2, 3]', 'd': 'text'})
+        self.output = 'b : 0\nc : [1, 2, 3]\nd : text'
+
     def test_normal(self):
-        pass # TODO: finish these cases
+        with dcs.capture_output() as (out, _):
+            text = dcs.disp(self.a)
+        output = out.getvalue().strip()
+        self.assertEqual(output, self.output)
+        self.assertEqual(output, text)
+
+    def test_padding(self):
+        pass #TODO: write this
+
+    def test_level(self):
+        pass #TODO: write this
+
+    def test_suppressed_output(self):
+        pass #TODO: write this
 
 #%% convert_annual_to_monthly_probability
 class Test_convert_annual_to_monthly_probability(unittest.TestCase):
@@ -416,6 +484,8 @@ class Test_capture_output(unittest.TestCase):
             print('Hello, World!')
         output = out.getvalue().strip()
         error  = err.getvalue().strip()
+        out.close()
+        err.close()
         self.assertEqual(output, 'Hello, World!')
         self.assertEqual(error, '')
 
@@ -424,6 +494,8 @@ class Test_capture_output(unittest.TestCase):
             print('Error Raised.', file=sys.stderr)
         output = out.getvalue().strip()
         error  = err.getvalue().strip()
+        out.close()
+        err.close()
         self.assertEqual(output, '')
         self.assertEqual(error, 'Error Raised.')
 

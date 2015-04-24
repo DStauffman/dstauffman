@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file to execute all the tests from the unittest library within the GHAP model using nose.
+Test file to execute all the tests from the unittest library within the dstauffman code using nose.
 
 Notes
 -----

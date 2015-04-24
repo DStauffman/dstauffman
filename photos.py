@@ -17,12 +17,12 @@ import doctest
 import os
 from PIL import Image
 import unittest
-from dstauffman.utils import setup_dir
+from dstauffman.utils     import setup_dir
+from dstauffman.constants import INT_TOKEN
 
 #%% Local Constants
 ALLOWABLE_EXTENSIONS = frozenset(['.jpg', '.ini', '.png', '.gif'])
 PROCESS_EXTENSIONS   = frozenset(['.jpg', '.png', '.gif'])
-INT_TOKEN            = -1
 
 #%% Functions - find_missing_nums
 def find_missing_nums(folder, old_picasa=True, digit_check=True, \

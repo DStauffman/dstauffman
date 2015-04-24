@@ -5,7 +5,7 @@ independently defined and used by other modules.
 
 Notes
 -----
-#.  By design, this model does not reference any other piece of the dstauffman code base except
+#.  By design, this module does not reference any other piece of the dstauffman code base except
         constants or enums to avoid circular references.
 #.  Written by David C. Stauffer in March 2015.
 """
@@ -15,21 +15,22 @@ Notes
 #%% Imports
 from __future__ import print_function
 from __future__ import division
-# for compatibility with v2.7 and 3+
-try:
-    from io import StringIO
-except ImportError:
-    from cStringIO import StringIO
-# normal imports
 from contextlib import contextmanager
 import doctest
-import h5py
 import os
 import numpy as np
 import sys
 import unittest
 from datetime import datetime, timedelta
 from dstauffman.constants import MONTHS_PER_YEAR
+# compatibility issues
+ver = sys.version_info
+if ver[0] == 2:
+    from io import BytesIO as StringIO
+elif ver[0] == 3:
+    from io import StringIO
+else:
+    raise('Unexpected Python version: "{}'.format(ver[0]))
 
 #%% Functions - rms
 def rms(data, axis=None, keepdims=False):
@@ -119,16 +120,17 @@ def setup_dir(folder, rec=False):
                 # if a file, then remove it
                 os.remove(this_full_elem)
             else:
-                raise RuntimeError('Unexpected file type, neither file nor folder: "{}".'.format(this_full_elem))
+                raise RuntimeError('Unexpected file type, neither file nor folder: "{}".'\
+                    .format(this_full_elem)) #pragma: no cover
         print('Files/Sub-folders were removed from: "' + folder + '"')
     else:
         # create directory if it does not exist
         try:
             os.makedirs(folder)
             print('Created directory: "' + folder + '"')
-        except:
+        except: #pragma: no cover
             # re-raise last exception, could try to handle differently in the future
-            raise
+            raise #pragma: no cover
 
 #%% Functions - compare_two_classes
 def compare_two_classes(c1, c2, suppress_output=False, names=None):
@@ -251,7 +253,7 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
     # simple test
     if d1 is not d2:
         # compare the keys that are in both
-        same = d1.keys() & d2.keys()
+        same = set(d1.keys()) & set(d2.keys())
         for key in sorted(same):
             # if any differences, then this test fails
             if np.any(d1[key] != d2[key]):
@@ -259,7 +261,7 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
                 if not suppress_output:
                     print(key + ' is different.')
         # find keys in one but not the other, if any, then this test fails
-        diff = d1.keys() ^ d2.keys()
+        diff = set(d1.keys()) ^ set(d2.keys())
         for key in sorted(diff):
             is_same = False
             if not suppress_output:
@@ -461,7 +463,7 @@ def write_text_file(filename, text):
         raise
 
 #%% Functions - disp
-def disp(struct, level=0, padding=12):
+def disp(struct, level=0, padding=None, suppress_output=False):
     r"""
     Matlab like 'disp' or display function.
 
@@ -472,7 +474,9 @@ def disp(struct, level=0, padding=12):
     level : int, optional
         Level to indent, used for substructures within structures.
     padding : int, optional
-        Minimum number of spaces to pad the results to, default=12
+        Minimum number of spaces to pad the results to
+    suppress_output : bool, optional
+        Choose whether to display results to the command window, default False, so show output
 
     Notes
     -----
@@ -483,19 +487,21 @@ def disp(struct, level=0, padding=12):
 
     >>> from dstauffman import disp
     >>> a = type('a', (object, ), {'b': 0, 'c' : '[1, 2, 3]', 'd': 'text'})
-    >>> print(disp(a))
-    <BLANKLINE>
-    b ......... : 0
-    c ......... : [1, 2, 3]
-    d ......... : text
+    >>> txt = disp(a)
+    b : 0
+    c : [1, 2, 3]
+    d : text
 
     """
     # padding per additional level
     pad_per_level = 4
     # get the variables within the structure
     d = vars(struct)
+    # determine padding level
+    if padding is None:
+        padding = max([len(name) for name in d if not name.startswith('_')]) + 1
     # initialize output
-    x = '\n'
+    x = ''
     # loop through dict of vars
     for name in sorted(d):
         if name.startswith('_'):
@@ -506,6 +512,9 @@ def disp(struct, level=0, padding=12):
         extra_pad = ' ' if pad_len > -1 else ''
         # append this variable
         x = x + pad_per_level*level * ' ' + (name + ' ' + (pad_len * '.') + extra_pad + ': ' + str(d[name]) + '\n')
+    # print the results to the screen
+    if not suppress_output:
+        print(x[:-1])
     # return the final results, minus the last newline character
     return x[:-1]
 
@@ -529,14 +538,19 @@ def convert_annual_to_monthly_probability(annual):
     ValueError
         Any probabilities outside of the [0, 1] range
 
+    Notes
+    -----
+    #.  Checks for boundary cases to avoid a divide by zero warning
+
     Examples
     --------
 
     >>> from dstauffman import convert_annual_to_monthly_probability
     >>> import numpy as np
-    >>> monthly = convert_annual_to_monthly_probability(np.array([0, 0.1, 1]))
-    >>> print(monthly)
-    [ 0.          0.00874161  1.        ]
+    >>> annual  = np.array([0, 0.1, 1])
+    >>> monthly = convert_annual_to_monthly_probability(annual)
+    >>> print(monthly) # doctest: +NORMALIZE_WHITESPACE
+    [ 0. 0.00874161  1. ]
 
     """
     # check ranges
@@ -544,19 +558,21 @@ def convert_annual_to_monthly_probability(annual):
         raise ValueError('annual must be >= 0')
     if np.any(annual > 1):
         raise ValueError('annual must be <= 1')
-    # convert to equivalent probability and return result
-    monthly = 1-np.exp(np.log(1-annual)/MONTHS_PER_YEAR)
+    # ignore divide by zero errors when annual == 1
+    with np.errstate(divide='ignore'):
+        # convert to equivalent probability and return result
+        monthly = 1-np.exp(np.log(1-annual)/MONTHS_PER_YEAR)
     return monthly
 
 #%% Functions - get_root_dir
 def get_root_dir():
     r"""
-    Returns the folder that contains this source file and thus the root folder for the whole model.
+    Returns the folder that contains this source file and thus the root folder for the whole code.
 
     Returns
     -------
     folder : str
-        Location of the folder that contains all the source files for the model.
+        Location of the folder that contains all the source files for the code.
 
     Notes
     -----
@@ -580,7 +596,7 @@ def get_tests_dir():
     Returns
     -------
     folder : str
-        Location of the folder that contains all the test files for the model.
+        Location of the folder that contains all the test files for the code.
 
     Notes
     -----
@@ -588,7 +604,6 @@ def get_tests_dir():
 
     Examples
     --------
-
 
     >>> from dstauffman import get_tests_dir
     >>> folder = get_tests_dir()
@@ -605,7 +620,7 @@ def get_data_dir():
     Returns
     -------
     folder : str
-        Location of the default folder for storing the model data.
+        Location of the default folder for storing the code data.
 
     Notes
     -----
@@ -638,9 +653,10 @@ def capture_output():
     --------
 
     >>> from dstauffman import capture_output
-    >>> with capture_output() as (out, err):
+    >>> with capture_output() as (out, _):
     ...     print('Hello, World!')
     >>> output = out.getvalue().strip()
+    >>> out.close()
     >>> print(output)
     Hello, World!
 
@@ -672,6 +688,7 @@ def _nan_equal(a, b):
 
     Examples
     --------
+
     >>> from dstauffman.utils import _nan_equal
     >>> import numpy as np
     >>> a = np.array([1, 2, np.nan])

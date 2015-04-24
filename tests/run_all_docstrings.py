@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file to execute all the docstrings within the GHAP model.
+Test file to execute all the docstrings within the dstauffman code.
 
 Notes
 -----

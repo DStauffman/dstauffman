@@ -50,6 +50,7 @@ def qrot(axis, angle):
 
     Examples
     --------
+
     >>> from dstauffman import qrot
     >>> import numpy as np
     >>> quat = qrot(3, np.pi/2)
@@ -112,6 +113,7 @@ def quat_angle_diff(quat1, quat2):
 
     Examples
     --------
+
     >>> from dstauffman import qrot, quat_mult, quat_angle_diff, concat_vectors
     >>> import numpy as np
     >>> quat1  = np.array([0.5, 0.5, 0.5, 0.5])
@@ -191,6 +193,7 @@ def quat_from_euler(angles, seq=np.array([3, 1, 2])):
 
     Examples
     --------
+
     >>> from dstauffman import quat_from_euler, concat_vectors
     >>> import numpy as np
     >>> a   = np.array([0.01, 0.02, 0.03])
@@ -246,6 +249,7 @@ def quat_interp(time, quat, ti, inclusive=True):
 
     Examples
     --------
+
     >>> from dstauffman import quat_interp
     >>> import numpy as np
     >>> time  = np.array([1, 3, 5])
@@ -374,6 +378,7 @@ def quat_inv(q1):
 
     Examples
     --------
+
     >>> from dstauffman import qrot, quat_inv
     >>> from numpy import pi
     >>> q1 = qrot(1, pi/2)
@@ -429,6 +434,7 @@ def quat_mult(a, b):
 
     Examples
     --------
+
     >>> from dstauffman import qrot, quat_mult
     >>> from numpy import pi
     >>> a = qrot(1, pi/2)
@@ -501,6 +507,7 @@ def quat_norm(x):
 
     Examples
     --------
+
     >>> from dstauffman import quat_norm
     >>> import numpy as np
     >>> x = np.array([0.1, 0, 0, 1])
@@ -541,6 +548,7 @@ def quat_prop(quat, delta_ang, renorm=True):
 
     Examples
     --------
+
     >>> from dstauffman import quat_prop
     >>> import numpy as np
     >>> quat      = np.array([0, 0, 0, 1])
@@ -599,6 +607,7 @@ def quat_times_vector(quat, v):
 
     Examples
     --------
+
     >>> from dstauffman import quat_times_vector
     >>> import numpy as np
     >>> quat = np.array([[0, 1, 0, 0], [1, 0, 0, 0]]).T
@@ -711,6 +720,7 @@ def quat_to_euler(quat,seq):
 
     Examples
     --------
+
     >>> from dstauffman import quat_to_euler
     >>> import numpy as np
     >>> quat = np.array([[0, 1, 0, 0], [0, 0, 1, 0]]).T
@@ -839,6 +849,5 @@ def concat_vectors(v1, v2):
 
 #%% Unit test
 if __name__ == '__main__':
-
     unittest.main(module='tests.test_quat', exit=False)
     doctest.testmod(verbose=False)

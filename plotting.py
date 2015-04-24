@@ -42,7 +42,6 @@ class Opts(Frozen):
         self.rms_xmax  =  np.inf
         self.name_one  = ''
         self.name_two  = ''
-        self.plot_true = 'none' # from {'none', 'SA', 'Rwanda', 'Rwanda_DHS', 'Rwanda_poly_fit'}
 
 #%% Functions - storefig
 def storefig(fig, folder=None, plot_type='png'):
@@ -100,10 +99,10 @@ def storefig(fig, folder=None, plot_type='png'):
 
     """
     # make sure figs is a list
-    if not isinstance(fig, list):
-        figs = [fig]
-    else:
+    if isinstance(fig, list):
         figs = fig
+    else:
+        figs = [fig]
     # make sure types is a list
     if not isinstance(plot_type, list):
         types = []
@@ -112,14 +111,14 @@ def storefig(fig, folder=None, plot_type='png'):
         types = plot_type
     # if no folder was specified, then use the current working directory
     if folder is None:
-        folder = os.getcwd()
+        folder = os.getcwd() #pragma: no cover
     # confirm that the folder exists
     if not os.path.isdir(folder):
         raise ValueError('The specfied folder "{}" does not exist.'.format(folder))
     # loop through the figures
     for this_fig in figs:
         # get the title of the figure canvas
-        this_title = fig.canvas.get_window_title()
+        this_title = this_fig.canvas.get_window_title()
         # loop through the plot types
         for this_type in types:
             # save the figure to the specified plot type
@@ -141,7 +140,8 @@ def titleprefix(fig, prefix=''):
 
     Notes
     -----
-    #. Written by David C. Stauffer in March 2015.
+    #.  Written by David C. Stauffer in March 2015.
+    #.  Desired this function to ignore empty titles, and also check for suptitles.
 
     See Also
     --------
@@ -151,7 +151,7 @@ def titleprefix(fig, prefix=''):
     --------
     Create figure and then change the title
 
-    >>> from ghap import titleprefix
+    >>> from dstauffman import titleprefix
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -174,7 +174,9 @@ def titleprefix(fig, prefix=''):
     if not prefix:
         return
     # force figs to be a list
-    if not isinstance(fig, list):
+    if isinstance(fig, list):
+        figs = fig
+    else:
         figs = [fig]
     # loop through figures
     for this_fig in figs:
