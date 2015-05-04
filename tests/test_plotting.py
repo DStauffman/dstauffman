@@ -38,9 +38,84 @@ class Test_Opts(unittest.TestCase):
         with self.assertRaises(AttributeError):
             opts.new_field_that_does_not_exist = 1
 
+#%% Functions for testing
+# plot_correlation_matrix
+class Test_plot_correlation_matrix(unittest.TestCase):
+    r"""
+    Tests plot_correlation_matrix function with the following cases:
+        normal mode
+        non-square inputs
+        default labels
+        all arguments passed in
+        symmetric matrix
+        coloring with values above 1
+        coloring with values below -1
+        coloring with values in -1 to 1 instead of 0 to 1
+        bad labels (should raise error)
+    """
+    def setUp(self):
+        self.figs   = []
+        self.data   = dcs.unit(np.random.rand(10, 10), axis=0)
+        self.labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+        self.opts   = dcs.Opts()
+        self.opts.case_name = 'Testing Correlation'
+        self.matrix_name    = 'Not a Correlation Matrix'
+
+    def test_normal(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels))
+
+    def test_nonsquare(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.data[:5, :3], [self.labels[:3], \
+            self.labels[:5]]))
+
+    def test_default_labels(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.data[:5, :3]))
+
+    def test_all_args(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, self.opts, \
+            self.matrix_name))
+
+    def test_symmetric(self):
+        sym = self.data.copy()
+        num = sym.shape[0]
+        for j in range(num):
+            for i in range(num):
+                if i == j:
+                    sym[i, j] = 1
+                elif i > j:
+                    sym[i, j] = self.data[j, i]
+        self.figs.append(dcs.plot_correlation_matrix(sym))
+
+    def test_above_one(self):
+        large_data = self.data * 1000
+        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels))
+
+    def test_below_one(self):
+        large_data = 1000*(self.data - 0.5)
+        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels))
+
+    def test_within_minus_one(self):
+        large_data = self.data - 0.5
+        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels))
+
+    def test_bad_labels(self):
+        with self.assertRaises(ValueError):
+            self.figs.append(dcs.plot_correlation_matrix(self.data, ['a']))
+
+    def tearDown(self):
+        for i in range(len(self.figs)):
+            plt.close(self.figs.pop())
+
 # storefig
 class Test_storefig(unittest.TestCase):
-
+    r"""
+    Tests the storefig function with the following cases:
+        saving one plot to disk
+        saving one plot to multiple plot types
+        saving multiple plots to one plot type
+        saving to a bad folder location (should raise error)
+        specifying a bad plot type (should raise error)
+    """
     @classmethod
     def setUpClass(cls):
         # create data
@@ -107,7 +182,12 @@ class Test_storefig(unittest.TestCase):
 
 # titleprefix
 class Test_titleprefix(unittest.TestCase):
-
+    r"""
+    Tests the titleprefix function with the following cases:
+        normal use
+        null prefix
+        multiple figures
+    """
     def setUp(self):
         self.fig = plt.figure()
         self.title = 'Figure Title'
@@ -127,6 +207,61 @@ class Test_titleprefix(unittest.TestCase):
 
     def test_multiple_figs(self):
         dcs.titleprefix([self.fig, self.fig], self.prefix)
+        plt.close()
+
+    def tearDown(self):
+        plt.close()
+
+# setup_plots
+class Test_setup_plots(unittest.TestCase):
+    r"""
+    Tests the setup_plots function with the following cases:
+        Prepend a title
+        Don't prepend a title
+        Don't show the plot
+        Multiple figures
+        Save the plot
+    """
+    def setUp(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        x = np.arange(0, 10, 0.1)
+        y = np.sin(x)
+        plt.plot(x, y) # doctest: +ELLIPSIS
+        plt.title('X vs Y') #doctest: +ELLIPSIS
+        plt.xlabel('time [years]') #doctest: +SKIP
+        plt.ylabel('value [radians]') #doctest: +SKIP
+        plt.show(block=False)
+        self.opts = dcs.Opts()
+        self.opts.case_name = 'Testing'
+        self.opts.show_plot = True
+        self.opts.save_plot = False
+        self.opts.save_path = dcs.get_tests_dir()
+
+    def test_title(self):
+        dcs.setup_plots(self.fig, self.opts)
+
+    def test_no_title(self):
+        self.opts.case_name = ''
+        dcs.setup_plots(self.fig, self.opts)
+
+    def test_not_showing_plot(self):
+        self.opts.show_plot = False
+        dcs.setup_plots(self.fig, self.opts)
+
+    def test_multiple_figs(self):
+        self.fig = [self.fig]
+        new_fig = plt.figure()
+        plt.plot(0, 0)
+        self.fig.append(new_fig)
+        dcs.setup_plots(self.fig, self.opts)
+
+    def test_saving_plot(self):
+        this_filename = os.path.join(dcs.get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
+        self.opts.save_plot = True
+        dcs.setup_plots(self.fig, self.opts)
+        # remove file
+        os.remove(this_filename)
 
     def tearDown(self):
         plt.close()

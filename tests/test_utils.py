@@ -19,6 +19,23 @@ import sys
 import unittest
 import dstauffman as dcs
 
+#%% _nan_equal
+class Test__nan_equal(unittest.TestCase):
+    r"""
+    Tests the local _nan_equal function with these cases:
+        TBD
+    """
+    def setUp(self):
+        self.a = np.array([1, 2, np.nan])
+        self.b = np.array([1, 2, np.nan])
+        self.c = np.array([3, 2, np.nan])
+
+    def test_equal(self):
+        self.assertTrue(dcs.utils._nan_equal(self.a, self.b))
+
+    def test_not_equal(self):
+        self.assertFalse(dcs.utils._nan_equal(self.a, self.c))
+
 #%% rms
 class Test_rms(unittest.TestCase):
     r"""
@@ -448,7 +465,8 @@ class Test_convert_annual_to_monthly_probability(unittest.TestCase):
 
 #%% get_root_dir
 class Test_get_root_dir(unittest.TestCase):
-    r"""Tests the get_root_dir function with these cases:
+    r"""
+    Tests the get_root_dir function with these cases:
         call the function
     """
     def test_function(self):
@@ -457,7 +475,8 @@ class Test_get_root_dir(unittest.TestCase):
 
 #%% get_tests_dir
 class Test_get_tests_dir(unittest.TestCase):
-    r"""Tests the get_tests_dir function with these cases:
+    r"""
+    Tests the get_tests_dir function with these cases:
         call the function
     """
     def test_function(self):
@@ -466,7 +485,8 @@ class Test_get_tests_dir(unittest.TestCase):
 
 #%% get_data_dir
 class Test_get_data_dir(unittest.TestCase):
-    r"""Tests the get_data_dir function with these cases:
+    r"""
+    Tests the get_data_dir function with these cases:
         call the function
     """
     def test_function(self):
@@ -475,7 +495,8 @@ class Test_get_data_dir(unittest.TestCase):
 
 #%% capture_output
 class Test_capture_output(unittest.TestCase):
-    r"""Tests the capture_output function with these cases:
+    r"""
+    Tests the capture_output function with these cases:
         capture standard output
         capture standard error
     """
@@ -499,6 +520,44 @@ class Test_capture_output(unittest.TestCase):
         self.assertEqual(output, '')
         self.assertEqual(error, 'Error Raised.')
 
+#%% unit
+class Test_unit(unittest.TestCase):
+    r"""
+    Tests the unit function with these cases:
+        Nominal case
+    """
+    def setUp(self):
+        self.data = np.array([[1, 0, -1],[0, 0, 0], [0, 0, 1]])
+        hr2 = np.sqrt(2)/2
+        self.norm_data = np.array([[1, 0, -hr2], [0, 0, 0], [0, 0, hr2]])
+
+    def test_nominal(self):
+        norm_data = dcs.unit(self.data, axis=0)
+        np.testing.assert_almost_equal(norm_data, self.norm_data)
+
+#%% nonzero_indices
+class Test_nonzero_indices(unittest.TestCase):
+    r"""
+    Tests the nonzero_indices function with these cases:
+        Nominal case
+        No matches case
+        Mixed types case
+    """
+    def setUp(self):
+        self.bools = np.array([True, True, False, False, True])
+        self.ix    = np.array([0, 1, 4])
+
+    def test_nominal(self):
+        ix = dcs.nonzero_indices(self.bools)
+        np.testing.assert_array_equal(ix, self.ix)
+
+    def no_matches(self):
+        ix = dcs.nonzero_indices(np.zeros(5, dtype=bool))
+        self.assertFalse(ix)
+
+    def test_weird_types(self):
+        ix = dcs.nonzero_indices([1, 'spam', 0, False, 0.0, '', 0.00001])
+        np.testing.assert_array_equal(ix, np.array([0, 1, 6]))
 
 #%% Unit test execution
 if __name__ == '__main__':

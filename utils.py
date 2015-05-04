@@ -26,11 +26,54 @@ from dstauffman.constants import MONTHS_PER_YEAR
 # compatibility issues
 ver = sys.version_info
 if ver[0] == 2:
-    from io import BytesIO as StringIO
+    from io import BytesIO as StringIO #pragma: no cover
 elif ver[0] == 3:
-    from io import StringIO
+    from io import StringIO #pragma: no cover
 else:
-    raise('Unexpected Python version: "{}'.format(ver[0]))
+    raise('Unexpected Python version: "{}'.format(ver[0])) #pragma: no cover
+
+#%% Functions - _nan_equal
+def _nan_equal(a, b):
+    r"""
+    Test ndarrays for equality, but ignore NaNs.
+
+    Parameters
+    ----------
+    a : ndarray
+        Array one
+    b : ndarray
+        Array two
+
+    Returns
+    -------
+    is_same : bool
+        Flag for whether the inputs are the same or not
+
+    Examples
+    --------
+
+    >>> from dstauffman.utils import _nan_equal
+    >>> import numpy as np
+    >>> a = np.array([1, 2, np.nan])
+    >>> b = np.array([1, 2, np.nan])
+    >>> print(_nan_equal(a, b))
+    True
+
+    >>> a = np.array([1, 2, np.nan])
+    >>> b = np.array([3, 2, np.nan])
+    >>> print(_nan_equal(a, b))
+    False
+
+    """
+    # preallocate to True
+    is_same = True
+    try:
+        # use numpy testing module to assert that they are equal (ignores NaNs)
+        np.testing.assert_equal(a, b)
+    except AssertionError:
+        # if assertion fails, then they are not equal
+        is_same = False
+    return is_same
 
 #%% Functions - rms
 def rms(data, axis=None, keepdims=False):
@@ -669,48 +712,85 @@ def capture_output():
     finally:
         sys.stdout, sys.stderr = old_out, old_err
 
-#%% Functions - _nan_equal
-def _nan_equal(a, b):
+#%% Functions - unit
+def unit(data, axis=1):
     r"""
-    Test ndarrays for equality, but ignore NaNs.
+    Normalizes a matrix into unit vectors along a specified dimension, default to column
+    normalization.
 
     Parameters
     ----------
-    a : ndarray
-        Array one
-    b : ndarray
-        Array two
+    data : ndarray
+        Data
+    axis : int, optional
+        Axis upon which to normalize
 
     Returns
     -------
-    is_same : bool
-        Flag for whether the inputs are the same or not
+    norm_data : ndarray
+        Normalized data
+
+    See Also
+    --------
+    sklearn.preprocessing.normalize
+
+    Notes
+    -----
+    #.  Written by David Stauffer in May 2015.
 
     Examples
     --------
 
-    >>> from dstauffman.utils import _nan_equal
+    >>> from dstauffman import unit
     >>> import numpy as np
-    >>> a = np.array([1, 2, np.nan])
-    >>> b = np.array([1, 2, np.nan])
-    >>> print(_nan_equal(a, b))
-    True
-
-    >>> a = np.array([1, 2, np.nan])
-    >>> b = np.array([3, 2, np.nan])
-    >>> print(_nan_equal(a, b))
-    False
+    >>> data = np.array([[1, 0, -1],[0, 0, 0], [0, 0, 1]])
+    >>> norm_data = unit(data, axis=0)
+    >>> print(norm_data) #doctest: +NORMALIZE_WHITESPACE
+    [[ 1. 0. -0.70710678]
+     [ 0. 0.  0.        ]
+     [ 0. 0.  0.70710678]]
 
     """
-    # preallocate to True
-    is_same = True
-    try:
-        # use numpy testing module to assert that they are equal (ignores NaNs)
-        np.testing.assert_equal(a, b)
-    except AssertionError:
-        # if assertion fails, then they are not equal
-        is_same = False
-    return is_same
+    # calculate the magnitude of each vector
+    mag = np.sqrt(np.sum(data * np.conj(data), axis=axis))
+    # check for zero vectors, and replace magnitude with 1 to make them unchanged
+    mag[mag == 0] = 1
+    # calculate the new normalized data
+    norm_data = data / mag
+    return norm_data
+
+#%% Functions - nonzero_indices
+def nonzero_indices(data):
+    r"""
+    Returns the indices for a boolean array, similar to the Matlab "find" command.
+
+    Parameters
+    ----------
+    data : array_like
+        Input data
+
+    Returns
+    -------
+    ix : ndarray
+        Indices to elements that evaluate as true
+
+    Notes
+    -----
+    #.  Written by David Stauffer in May 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import nonzero_indices
+    >>> data = [True, True, False, False, True]
+    >>> ix   = nonzero_indices(data)
+    >>> print(ix) # doctest: +NORMALIZE_WHITESPACE
+    [0 1 4]
+
+    """
+    # build and return the indices
+    ix = np.array([ix for (ix, val) in enumerate(data) if val], dtype=int)
+    return ix
 
 #%% Unit test
 if __name__ == '__main__':

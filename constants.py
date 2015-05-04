@@ -44,6 +44,8 @@ def _main():
     r"""Unit test function."""
     print('MONTHS_PER_YEAR    = {}'.format(MONTHS_PER_YEAR))
     print('INT_TOKEN          = {}'.format(INT_TOKEN))
+    print('spyder_custom_colors = ')
+    print(spyder_custom_colors)
 
 if __name__ == '__main__':
     unittest.main(module='tests.test_constants', exit=False)

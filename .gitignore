@@ -52,3 +52,6 @@ Temporary Items
 # =========================
 output/*
 scripts/script_photos.py
+tests/.coverage
+tests/coverage_html_report/*
+tests/temp_*
