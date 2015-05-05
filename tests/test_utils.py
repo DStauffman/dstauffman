@@ -345,17 +345,10 @@ class Test_read_text_file(unittest.TestCase):
 
     def test_bad_reading(self):
         with dcs.capture_output() as (out, _):
-            count = 0
             try:
                 dcs.read_text_file(self.badpath)
-            except OSError:
-                count += 1
-            except IOError:
-                count += 1
-            else:
-                raise
-            # must raise at least one of the two errors
-            self.assertTrue(count > 0)
+            except:
+                self.assertTrue(sys.exc_info()[0] in [OSError, IOError])
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for reading.')
@@ -386,17 +379,10 @@ class Test_write_text_file(unittest.TestCase):
 
     def test_bad_writing(self):
         with dcs.capture_output() as (out, _):
-            count = 0
             try:
                 dcs.write_text_file(self.badpath, self.contents)
-            except OSError:
-                count += 1
-            except IOError:
-                count += 1
-            else:
-                raise
-            # must raise at least one of the two errors
-            self.assertTrue(count > 0)
+            except:
+                self.assertTrue(sys.exc_info()[0] in [OSError, IOError])
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for writing.')
@@ -558,6 +544,89 @@ class Test_nonzero_indices(unittest.TestCase):
     def test_weird_types(self):
         ix = dcs.nonzero_indices([1, 'spam', 0, False, 0.0, '', 0.00001])
         np.testing.assert_array_equal(ix, np.array([0, 1, 6]))
+
+#%% combine_sets
+class Test_combine_sets(unittest.TestCase):
+    r"""
+    Tests the combine_sets function with the following cases:
+        Normal use
+        No deviation
+        Empty set 1
+        Empty set 2
+        All empty
+        Exactly one point
+        Negative values (should silently fail)
+        Negative values, weird exception case (should raise error)
+        Array cases (should raise error)
+    """
+    def setUp(self):
+        self.n1 = 5
+        self.u1 = 1
+        self.s1 = 0.5
+        self.n2 = 10
+        self.u2 = 2
+        self.s2 = 0.25
+        self.n  = 15
+        self.u  = 1.6666666666666667
+        self.s  = 0.59135639081046598
+
+    def test_nominal(self):
+        (n, u, s) = dcs.combine_sets(self.n1, self.u1, self.s1, self.n2, self.u2, self.s2)
+        self.assertEqual(n, self.n)
+        self.assertAlmostEqual(u, self.u)
+        self.assertAlmostEqual(s, self.s)
+
+    def test_no_deviation(self):
+        (n, u, s) = dcs.combine_sets(self.n1, self.u1, 0, self.n1, self.u1, 0)
+        self.assertEqual(n, 2*self.n1)
+        self.assertAlmostEqual(u, self.u1)
+        self.assertAlmostEqual(s, 0)
+
+    def test_empty1(self):
+        (n, u, s) = dcs.combine_sets(0, 0, 0, self.n2, self.u2, self.s2)
+        self.assertEqual(n, self.n2)
+        self.assertAlmostEqual(u, self.u2)
+        self.assertAlmostEqual(s, self.s2)
+
+    def test_empty2(self):
+        (n, u, s) = dcs.combine_sets(self.n1, self.u1, self.s1, 0, 0, 0)
+        self.assertEqual(n, self.n1)
+        self.assertAlmostEqual(u, self.u1)
+        self.assertAlmostEqual(s, self.s1)
+
+    def test_all_empty(self):
+        (n, u, s) = dcs.combine_sets(0, 0, 0, 0, 0, 0)
+        self.assertEqual(n, 0)
+        self.assertEqual(u, 0)
+        self.assertEqual(s, 0)
+
+    def test_exactly_one_point1(self):
+        (n, u, s) = dcs.combine_sets(1, self.u1, self.s1, 0, 0, 0)
+        self.assertEqual(n, 1)
+        self.assertAlmostEqual(u, self.u1)
+        self.assertAlmostEqual(s, self.s1)
+
+    def test_exactly_one_point2(self):
+        (n, u, s) = dcs.combine_sets(0, 0, 0, 1, self.u2, self.s2)
+        self.assertEqual(n, 1)
+        self.assertAlmostEqual(u, self.u2)
+        self.assertAlmostEqual(s, self.s2)
+
+    def test_negatives(self):
+        try:
+            dcs.combine_sets(-self.n1, -self.u1, -self.s1, -self.n2, -self.u2, -self.s2)
+        except:
+            self.assertTrue(sys.exc_info()[0] in [AssertionError, ValueError])
+
+    def test_negative_weird(self):
+        try:
+            dcs.combine_sets(5, self.u1, self.s1, -4, self.u2, self.s2)
+        except:
+            self.assertTrue(sys.exc_info()[0] in [AssertionError, ValueError])
+
+    def test_broadcasting(self):
+        with self.assertRaises(ValueError):
+            (n, u, s) = dcs.combine_sets(np.array([self.n1, self.n1]), self.u1, self.s1, self.n2, self.u2, self.s2)
 
 #%% Unit test execution
 if __name__ == '__main__':

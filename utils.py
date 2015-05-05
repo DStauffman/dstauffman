@@ -792,6 +792,106 @@ def nonzero_indices(data):
     ix = np.array([ix for (ix, val) in enumerate(data) if val], dtype=int)
     return ix
 
+#%% Functions - combine_sets
+def combine_sets(n1, u1, s1, n2, u2, s2):
+    r"""
+    Combines the mean and standard deviations for two non-overlapping sets of data.
+
+    This function combines two non-overlapping data sets, given a number of samples, mean
+    and standard deviation for the two data sets.  It first calculates the total number of samples
+    then calculates the total mean using a weighted average, and then calculates the combined
+    standard deviation using an equation found on wikipedia.  It also checks for special cases
+    where either data set is empty or if only one total point is in the combined set.
+
+    Parameters
+    ----------
+    n1 : float
+        number of points in data set 1
+    u1 : float
+        mean of data set 1
+    s1 : float
+        standard deviation of data set 1
+    n2 : float
+        number of points in data set 2
+    u2 : float
+        mean of data set 2
+    s2 : float
+        standard deviation of data set 2
+
+    Returns
+    -------
+    n  : float,
+        number of points in the combined data set
+    u  : float,
+        mean of the combined data set
+    s  : float,
+        standard deviation of the combined data set
+
+    See Also
+    --------
+    np.mean, np.std
+
+    References
+    ----------
+    #.  http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics, on 8/7/12
+
+    Notes
+    -----
+    #.  Written in Matlab by David Stauffer in Jul 2012.
+    #.  Ported to Python by David Stauffer in May 2015.
+    #.  Could be expanded to broadcast and handle array inputs.
+
+    Examples
+    --------
+
+    >>> from dstauffman import combine_sets
+    >>> n1 = 5
+    >>> u1 = 1
+    >>> s1 = 0.5
+    >>> n2 = 10
+    >>> u2 = 2
+    >>> s2 = 0.25
+    >>> (n, u, s) = combine_sets(n1, u1, s1, n2, u2, s2)
+    >>> print(n)
+    15
+    >>> print(u)
+    1.6666666666666667
+    >>> print(s)
+    0.59135639081
+
+    """
+    # assertions
+    assert n1 >= 0
+    assert n2 >= 0
+    assert s1 >= 0
+    assert s2 >= 0
+
+    # combine total number of samples
+    n = n1 + n2
+
+    # check for zero case
+    if n == 0:
+        u = 0
+        s = 0
+        return (n, u, s)
+
+    # calculate the combined mean
+    u = 1/n * (n1*u1 + n2*u2)
+
+    # calculate the combined standard deviation
+    if n != 1:
+        s = np.sqrt(1/(n-1) * ( (n1-1)*s1**2 + n1*u1**2 + (n2-1)*s2**2 + n2*u2**2 - n*u**2))
+    else:
+        # special case where one of the data sets is empty
+        if n1 == 1:
+            s = s1
+        elif n2 == 1:
+            s = s2
+        else:
+            # shouldn't be able to ever reach this line with assertions on
+            raise ValueError('Total samples are 1, but neither data set has only one item.') #pragma: no cover
+    return (n, u, s)
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_utils', exit=False)
