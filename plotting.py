@@ -107,7 +107,6 @@ class MyCustomToolbar():
         # make it the active window
         fig.canvas.manager.window.raise_()
 
-
 #%% Functions - plot_correlation_matrix
 def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correlation Matrix'):
     r"""
