@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 from matplotlib.patches import Rectangle
+from PyQt4 import QtGui
 # model imports
 from dstauffman.classes import Frozen
 
@@ -45,6 +46,36 @@ class Opts(Frozen):
         self.rms_xmax  =  np.inf
         self.name_one  = ''
         self.name_two  = ''
+
+#%% Classes - MyCustomToolbar
+class MyCustomToolbar():
+    def __init__(self, fig):
+        # create buttons - Prev Plot
+        self.btn_prev_plot = QtGui.QPushButton(' << ')
+        self.btn_prev_plot.setToolTip('Show the previous plot')
+        fig.canvas.toolbar.addWidget(self.btn_prev_plot)
+        self.btn_prev_plot.clicked.connect(self.prev_plot)
+        # create buttons - Next Plot
+        self.btn_next_plot = QtGui.QPushButton(' >> ')
+        self.btn_next_plot.setToolTip('Show the next plot')
+        fig.canvas.toolbar.addWidget(self.btn_next_plot)
+        self.btn_next_plot.clicked.connect(self.next_plot)
+        # create buttons - Close all
+        self.btn_close_all = QtGui.QPushButton('Close All')
+        self.btn_close_all.setToolTip('Close all the open plots')
+        fig.canvas.toolbar.addWidget(self.btn_close_all)
+        self.btn_close_all.clicked.connect(self.close_all)
+
+    def close_all(self, *args):
+        plt.close('all')
+
+    def next_plot(self, *args):
+        # TODO: make this work
+        print('Go to Next Plot.')
+
+    def prev_plot(self, *args):
+        # TODO: make this work
+        print('Go to Previous Plot.')
 
 #%% Functions - plot_correlation_matrix
 def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correlation Matrix'):
@@ -155,7 +186,6 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
 
     # Setup plots
     setup_plots(fig, opts, 'dist')
-    #figmenu
 
     return fig
 
@@ -362,12 +392,56 @@ def setup_plots(figs, opts, plot_type='time'):
     # prepend a title
     if opts.case_name:
         titleprefix(figs, opts.case_name)
+
+    # add a custom toolbar
+    figmenu(figs)
+
     # show the plot
     if opts.show_plot:
         plt.show(block=False)
+
     # optionally save the plot
     if opts.save_plot:
         storefig(figs, opts.save_path, opts.plot_type)
+
+#%% Functions - figmenu
+def figmenu(figs):
+    r"""
+    Adds a custom toolbar to the figures.
+
+    Parameters
+    ----------
+    figs : class matplotlib.pyplot.Figure, or list of such
+        List of figures
+
+    Examples
+    --------
+
+    >>> from dstauffman import figmenu
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> fig = plt.figure()
+    >>> fig.canvas.set_window_title('Figure Title')
+    >>> x = np.arange(0, 10, 0.1)
+    >>> y = np.sin(x)
+    >>> plt.plot(x, y) # doctest: +ELLIPSIS
+    [<matplotlib.lines.Line2D object at 0x...>]
+    >>> plt.title('X vs Y') #doctest: +ELLIPSIS
+    <matplotlib.text.Text object at 0x...>
+    >>> plt.xlabel('time [years]') #doctest: +SKIP
+    >>> plt.ylabel('value [radians]') #doctest: +SKIP
+    >>> plt.show(block=False)
+    >>> figmenu(fig)
+
+    Close plot
+    >>> plt.close(fig)
+
+    """
+    if not isinstance(figs, list):
+        figs.toolbar_custom_ = MyCustomToolbar(figs)
+    else:
+        for i in range(len(figs)):
+            figs[i].toolbar_custom_ = MyCustomToolbar(figs[i])
 
 #%% Unit test
 if __name__ == '__main__':
