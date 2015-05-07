@@ -70,12 +70,43 @@ class MyCustomToolbar():
         plt.close('all')
 
     def next_plot(self, *args):
-        # TODO: make this work
-        print('Go to Next Plot.')
+        # get all the figure numbers
+        all_figs = plt.get_fignums()
+        # get the active figure number
+        this_fig = plt.gcf().number
+        # loop through all the figures
+        for i in range(len(all_figs)):
+            # find the active figure within the list
+            if this_fig == all_figs[i]:
+                # find the next figure, with allowances for rolling over the list
+                if i < len(all_figs)-1:
+                    next_fig = all_figs[i+1]
+                else:
+                    next_fig = all_figs[0]
+        # set the appropriate active figure
+        fig = plt.figure(next_fig)
+        # make it the active window
+        fig.canvas.manager.window.raise_()
 
     def prev_plot(self, *args):
-        # TODO: make this work
-        print('Go to Previous Plot.')
+        # get all the figure numbers
+        all_figs = plt.get_fignums()
+        # get the active figure number
+        this_fig = plt.gcf().number
+        # loop through all the figures
+        for i in range(len(all_figs)):
+            # find the active figure within the list
+            if this_fig == all_figs[i]:
+                # find the next figure, with allowances for rolling over the list
+                if i > 0:
+                    prev_fig = all_figs[i-1]
+                else:
+                    prev_fig = all_figs[-1]
+        # set the appropriate active figure
+        fig = plt.figure(prev_fig)
+        # make it the active window
+        fig.canvas.manager.window.raise_()
+
 
 #%% Functions - plot_correlation_matrix
 def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correlation Matrix'):
