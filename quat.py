@@ -71,7 +71,6 @@ def qrot(axis, angle):
         quat[axis-1, :] = np.sin(angle/2)
     return quat
 
-
 #%% Functions - quat_angle_diff
 def quat_angle_diff(quat1, quat2):
     r"""
