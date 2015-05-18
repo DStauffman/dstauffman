@@ -20,7 +20,7 @@ verbose = False
 #%% Execution
 if __name__ == '__main__':
     folder = dcs.get_root_dir()
-    files  = ['classes', 'constants', 'photos', 'plotting', 'utils']
+    files  = ['classes', 'constants', 'photos', 'plotting', 'quat', 'utils']
     for file in files:
         if verbose:
             print('')

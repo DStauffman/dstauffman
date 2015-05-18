@@ -461,10 +461,14 @@ def read_text_file(filename):
 
     """
     try:
+        # open file for reading
         with open(filename, 'rt') as file: # pylint: disable=W1501
+            # read file
             text = file.read()
+        # return results
         return text
     except:
+        # on any exceptions, print a message and re-raise the error
         print('Unable to open file "{}" for reading.'.format(filename))
         raise
 
@@ -499,9 +503,12 @@ def write_text_file(filename, text):
 
     """
     try:
+        # open file for writing
         with open(filename, 'wt') as file: # pylint: disable=W1501
+            # write file
             file.write(text)
     except:
+        # on any exceptions, print a message and re-raise the error
         print('Unable to open file "{}" for writing.'.format(filename))
         raise
 
@@ -628,6 +635,7 @@ def get_root_dir():
     >>> folder = get_root_dir()
 
     """
+    # this folder is the root directory based on the location of this file (utils.py)
     folder = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
     return folder
 
@@ -652,6 +660,7 @@ def get_tests_dir():
     >>> folder = get_tests_dir()
 
     """
+    # this  folder is the 'tests' subfolder
     folder = os.path.join(get_root_dir(), 'tests')
     return folder
 
@@ -676,6 +685,7 @@ def get_data_dir():
     >>> folder = get_data_dir()
 
     """
+    # this folder is the 'data' subfolder
     folder = os.path.join(get_root_dir(), 'data')
     return folder
 
@@ -704,12 +714,17 @@ def capture_output():
     Hello, World!
 
     """
+    # create new string buffers
     new_out, new_err = StringIO(), StringIO()
+    # alias the old string buffers for restoration afterwards
     old_out, old_err = sys.stdout, sys.stderr
     try:
+        # override the system buffers with the new ones
         sys.stdout, sys.stderr = new_out, new_err
+        # yield results as desired
         yield sys.stdout, sys.stderr
     finally:
+        # restore the original buffers once all results are read
         sys.stdout, sys.stderr = old_out, old_err
 
 #%% Functions - unit
@@ -865,19 +880,15 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
     assert n2 >= 0
     assert s1 >= 0
     assert s2 >= 0
-
     # combine total number of samples
     n = n1 + n2
-
     # check for zero case
     if n == 0:
         u = 0
         s = 0
         return (n, u, s)
-
     # calculate the combined mean
     u = 1/n * (n1*u1 + n2*u2)
-
     # calculate the combined standard deviation
     if n != 1:
         s = np.sqrt(1/(n-1) * ( (n1-1)*s1**2 + n1*u1**2 + (n2-1)*s2**2 + n2*u2**2 - n*u**2))

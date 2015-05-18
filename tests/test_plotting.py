@@ -16,6 +16,8 @@ import numpy as np
 import os
 import unittest
 import dstauffman as dcs
+from PyQt4.QtTest import QTest
+from PyQt4.QtCore import Qt
 
 #%% Classes for testing
 # Opts
@@ -37,6 +39,58 @@ class Test_Opts(unittest.TestCase):
         opts = dcs.Opts()
         with self.assertRaises(AttributeError):
             opts.new_field_that_does_not_exist = 1
+
+#%% Classes for testing
+# MyCustomToolbar
+class Test_MyCustomToolbar(unittest.TestCase):
+    r"""
+    Tests the MyCustomToolbar class with the following cases:
+        No nothing
+        Next plot
+        Prev plot
+        Close all
+        Multiple nexts
+        Multiple prevs
+    """
+    def setUp(self):
+        self.fig1 = plt.figure()
+        self.fig2 = plt.figure()
+        self.fig1.toolbar_custom_ = dcs.MyCustomToolbar(self.fig1)
+        self.fig2.toolbar_custom_ = dcs.MyCustomToolbar(self.fig2)
+
+    def test_do_nothing(self):
+        self.assertEqual(plt.gcf().number, self.fig2.number)
+
+    def test_next_plot(self):
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)
+        self.assertEqual(plt.gcf().number, self.fig1.number)
+
+    def test_prev_plot(self):
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
+        self.assertEqual(plt.gcf().number, self.fig1.number)
+
+    def test_close_all(self):
+        self.assertTrue(plt.fignum_exists(self.fig1.number))
+        self.assertTrue(plt.fignum_exists(self.fig1.number))
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_close_all, Qt.LeftButton)
+        self.assertFalse(plt.fignum_exists(self.fig1.number))
+        self.assertFalse(plt.fignum_exists(self.fig1.number))
+
+    def test_multiple_nexts(self):
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)
+        self.assertEqual(plt.gcf().number, self.fig1.number)
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_next_plot, Qt.LeftButton)
+        self.assertEqual(plt.gcf().number, self.fig2.number)
+
+    def test_multiple_prevs(self):
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
+        self.assertEqual(plt.gcf().number, self.fig1.number)
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
+        self.assertEqual(plt.gcf().number, self.fig2.number)
+
+    def tearDown(self):
+        plt.close(self.fig1)
+        plt.close(self.fig2)
 
 #%% Functions for testing
 # plot_correlation_matrix
@@ -177,8 +231,8 @@ class Test_storefig(unittest.TestCase):
         pass
 
     @classmethod
-    def tearDownClass(self):
-        plt.close(self.fig)
+    def tearDownClass(cls):
+        plt.close(cls.fig)
 
 # titleprefix
 class Test_titleprefix(unittest.TestCase):
@@ -265,6 +319,27 @@ class Test_setup_plots(unittest.TestCase):
 
     def tearDown(self):
         plt.close()
+
+# figmenu
+class Test_figmenu(unittest.TestCase):
+    r"""
+    Tests the figmenu function with the following cases:
+        One input
+        List input
+    """
+    def setUp(self):
+        self.fig1 = plt.figure()
+        self.fig2 = plt.figure()
+
+    def test_one_input(self):
+        dcs.figmenu(self.fig1)
+
+    def test_list_input(self):
+        dcs.figmenu([self.fig1, self.fig2])
+
+    def tearDown(self):
+        plt.close(self.fig1)
+        plt.close(self.fig2)
 
 #%% Unit test execution
 if __name__ == '__main__':

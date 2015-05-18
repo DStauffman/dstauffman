@@ -16,6 +16,7 @@ from datetime import datetime
 import numpy as np
 import os
 import sys
+import time
 import unittest
 import dstauffman as dcs
 
@@ -180,14 +181,27 @@ class Test_setup_dir(unittest.TestCase):
             'Files/Sub-folders were removed from: "{}"'.format(self.folder))
 
     def tearDown(self):
-        if os.path.isfile(self.filename):
-            os.remove(self.filename)
-        if os.path.isfile(self.subfile):
-            os.remove(self.subfile)
-        if os.path.isdir(self.subdir):
-            os.rmdir(self.subdir)
-        if os.path.isdir(self.folder):
-            os.rmdir(self.folder)
+        try:
+            if os.path.isfile(self.filename):
+                os.remove(self.filename)
+            if os.path.isfile(self.subfile):
+                os.remove(self.subfile)
+            if os.path.isdir(self.subdir):
+                os.rmdir(self.subdir)
+            if os.path.isdir(self.folder):
+                os.rmdir(self.folder)
+        except PermissionError: # Also OSError?
+            # pause to let Windows catch up and close files
+            time.sleep(1)
+            # retry
+            if os.path.isfile(self.filename):
+                os.remove(self.filename)
+            if os.path.isfile(self.subfile):
+                os.remove(self.subfile)
+            if os.path.isdir(self.subdir):
+                os.rmdir(self.subdir)
+            if os.path.isdir(self.folder):
+                os.rmdir(self.folder)
 
 #%% compare_two_classes
 class Test_compare_two_classes(unittest.TestCase):

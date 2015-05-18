@@ -4,18 +4,20 @@ Plotting module file for the "dstauffman" library.  It defines useful plotting u
 
 Notes
 -----
-#. Written by David C. Stauffer in March 2015.
+#.  Written by David C. Stauffer in March 2015.
 """
 
 # pylint: disable=E1101
 
 #%% Imports
+# normal imports
 from __future__ import print_function
 from __future__ import division
 import doctest
 import numpy as np
 import os
 import unittest
+# plotting imports
 import matplotlib
 # set plotting backend (note, must happen before importing pyplot)
 matplotlib.use('QT4Agg') # TODO: works well for me in Python 3.4 on Windows, make configurable?
@@ -121,6 +123,7 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
 
     >>> from dstauffman import plot_correlation_matrix, unit
     >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
     >>> data = np.random.rand(10, 10)
     >>> labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
     >>> data = unit(data, axis=0)
