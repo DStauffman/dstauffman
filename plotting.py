@@ -46,8 +46,15 @@ class Opts(Frozen):
         self.disp_xmax =  np.inf
         self.rms_xmin  = -np.inf
         self.rms_xmax  =  np.inf
-        self.name_one  = ''
-        self.name_two  = ''
+        self.names     = list()
+
+    def get_names(self, ix):
+        r"""Gets the specified name from the list."""
+        if ix > len(self.names):
+            name = ''
+        else:
+            name = self.names[ix]
+        return name
 
 #%% Classes - MyCustomToolbar
 class MyCustomToolbar():
