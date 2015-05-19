@@ -101,7 +101,7 @@ def rms(data, axis=None, keepdims=False):
 
     Notes
     -----
-    #. Written by David C. Stauffer in Mar 2015.
+    #.  Written by David C. Stauffer in Mar 2015.
 
     Examples
     --------
@@ -139,7 +139,7 @@ def setup_dir(folder, rec=False):
 
     Notes
     -----
-    #. Written by David C. Stauffer in Feb 2015.
+    #.  Written by David C. Stauffer in Feb 2015.
 
     Examples
     --------

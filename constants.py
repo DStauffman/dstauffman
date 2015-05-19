@@ -4,7 +4,7 @@ Constants module file for the "dstauffman" library.  It defines constants.
 
 Notes
 -----
-#. Written by David C. Stauffer in March 2015.
+#.  Written by David C. Stauffer in March 2015.
 """
 
 #%% Imports
