@@ -59,6 +59,9 @@ class Opts(Frozen):
 #%% Classes - MyCustomToolbar
 class MyCustomToolbar():
     def __init__(self, fig):
+        # Store the figure number for use later (Note this works better than relying on plt.gcf()
+        # to determine which figure actually triggered the button events.)
+        self.fig_number = fig.number
         # create buttons - Prev Plot
         self.btn_prev_plot = QtGui.QPushButton(' << ')
         self.btn_prev_plot.setToolTip('Show the previous plot')
@@ -82,7 +85,7 @@ class MyCustomToolbar():
         # get all the figure numbers
         all_figs = plt.get_fignums()
         # get the active figure number
-        this_fig = plt.gcf().number
+        this_fig = self.fig_number
         # loop through all the figures
         for i in range(len(all_figs)):
             # find the active figure within the list
@@ -101,7 +104,7 @@ class MyCustomToolbar():
         # get all the figure numbers
         all_figs = plt.get_fignums()
         # get the active figure number
-        this_fig = plt.gcf().number
+        this_fig = self.fig_number
         # loop through all the figures
         for i in range(len(all_figs)):
             # find the active figure within the list
