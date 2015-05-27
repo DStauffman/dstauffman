@@ -25,14 +25,38 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 from matplotlib.patches import Rectangle
-from PyQt4 import QtGui
+from PyQt4 import QtGui, QtCore
 # model imports
 from dstauffman.classes import Frozen
+from dstauffman.utils   import get_images_dir
+
+#%% Private Classes - _HoverButton
+class _HoverButton(QtGui.QPushButton):
+    r"""Custom button that allows hovering and icons."""
+    def __init__(self, *args, **kwargs):
+        # initialize
+        super(_HoverButton, self).__init__(*args, **kwargs)
+        # Enable mouse hover event tracking
+        self.setMouseTracking(True)
+        self.setStyleSheet('border: 0px;')
+        # set icon
+        for this_arg in args:
+            if isinstance(this_arg, QtGui.QIcon):
+                self.setIcon(this_arg)
+                self.setIconSize(QtCore.QSize(24, 24))
+
+    def enterEvent(self, event):
+        # Draw border on hover
+        self.setStyleSheet('border: 1px; border-style: solid;')
+
+    def leaveEvent(self, event):
+        # Delete border after hover
+        self.setStyleSheet('border: 0px;')
 
 #%% Classes - Opts
 class Opts(Frozen):
     r"""
-    Opts is the class that holds all the optional plotting configurations.
+    Contains all the optional plotting configurations.
     """
     def __init__(self):
         # TODO: expand functionality
@@ -58,22 +82,46 @@ class Opts(Frozen):
 
 #%% Classes - MyCustomToolbar
 class MyCustomToolbar():
+    r"""
+    Defines a custom toolbar to use in any matplotlib plots.
+
+    Examples
+    --------
+
+    >>> from dstauffman import MyCustomToolbar
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> fig = plt.figure()
+    >>> fig.canvas.set_window_title('Figure Title')
+    >>> x = np.arange(0, 10, 0.1)
+    >>> y = np.sin(x)
+    >>> plt.plot(x, y) # doctest: +ELLIPSIS
+    [<matplotlib.lines.Line2D object at 0x...>]
+    >>> fig.toolbar_custom_ = MyCustomToolbar(fig)
+
+    Close plot
+    >>> plt.close(fig)
+
+    """
     def __init__(self, fig):
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
         # to determine which figure actually triggered the button events.)
         self.fig_number = fig.number
         # create buttons - Prev Plot
-        self.btn_prev_plot = QtGui.QPushButton(' << ')
+        icon = QtGui.QIcon(os.path.join(get_images_dir(), 'prev_plot.png'))
+        self.btn_prev_plot = _HoverButton(icon, '')
         self.btn_prev_plot.setToolTip('Show the previous plot')
         fig.canvas.toolbar.addWidget(self.btn_prev_plot)
         self.btn_prev_plot.clicked.connect(self.prev_plot)
         # create buttons - Next Plot
-        self.btn_next_plot = QtGui.QPushButton(' >> ')
+        icon = QtGui.QIcon(os.path.join(get_images_dir(), 'next_plot.png'))
+        self.btn_next_plot = _HoverButton(icon, '')
         self.btn_next_plot.setToolTip('Show the next plot')
         fig.canvas.toolbar.addWidget(self.btn_next_plot)
         self.btn_next_plot.clicked.connect(self.next_plot)
         # create buttons - Close all
-        self.btn_close_all = QtGui.QPushButton('Close All')
+        icon = QtGui.QIcon(os.path.join(get_images_dir(), 'close_all.png'))
+        self.btn_close_all = _HoverButton(icon, '')
         self.btn_close_all.setToolTip('Close all the open plots')
         fig.canvas.toolbar.addWidget(self.btn_close_all)
         self.btn_close_all.clicked.connect(self.close_all)

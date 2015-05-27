@@ -493,6 +493,16 @@ class Test_get_data_dir(unittest.TestCase):
         folder = dcs.get_data_dir()
         self.assertEqual(folder, os.path.join(dcs.get_root_dir(), 'data'))
 
+#%% get_images_dir
+class Test_get_images_dir(unittest.TestCase):
+    r"""
+    Tests the get_images_dir function with these cases:
+        call the function
+    """
+    def test_function(self):
+        folder = dcs.get_images_dir()
+        self.assertEqual(folder, os.path.join(dcs.get_root_dir(), 'images'))
+
 #%% capture_output
 class Test_capture_output(unittest.TestCase):
     r"""
