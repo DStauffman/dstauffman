@@ -15,12 +15,25 @@ import unittest
 import dstauffman as dcs
 
 #%% Classes for testing
-# function_name
-class Test_function_name(unittest.TestCase):
+# Frozen
+class Test_Frozen(unittest.TestCase):
+    r"""
+    Test Opts class, and by extension the frozen function and Frozen class using cases:
+        normal mode
+        add new attribute to existing instance
+    """
+    def setUp(self):
+        self.opts_fields = ['case_name']
 
     def test_calling(self):
-        # call something
-        self.assertTrue(True)
+        opts = dcs.Opts()
+        for field in self.opts_fields:
+            self.assertTrue(hasattr(opts, field))
+
+    def test_new_attr(self):
+        opts = dcs.Opts()
+        with self.assertRaises(AttributeError):
+            opts.new_field_that_does_not_exist = 1
 
 #%% Unit test execution
 if __name__ == '__main__':
