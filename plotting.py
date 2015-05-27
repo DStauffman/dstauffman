@@ -53,29 +53,6 @@ class _HoverButton(QtGui.QPushButton):
         # Delete border after hover
         self.setStyleSheet('border: 0px;')
 
-#%% Private Classes - _HoverButton
-class _HoverButton(QtGui.QPushButton):
-    r"""Custom button that allows hovering and icons."""
-    def __init__(self, *args, **kwargs):
-        # initialize
-        super(_HoverButton, self).__init__(*args, **kwargs)
-        # Enable mouse hover event tracking
-        self.setMouseTracking(True)
-        self.setStyleSheet('border: 0px;')
-        # set icon
-        for this_arg in args:
-            if isinstance(this_arg, QtGui.QIcon):
-                self.setIcon(this_arg)
-                self.setIconSize(QtCore.QSize(24, 24))
-
-    def enterEvent(self, event):
-        # Draw border on hover
-        self.setStyleSheet('border: 1px; border-style: solid;')
-
-    def leaveEvent(self, event):
-        # Delete border after hover
-        self.setStyleSheet('border: 0px;')
-
 #%% Classes - Opts
 class Opts(Frozen):
     r"""
