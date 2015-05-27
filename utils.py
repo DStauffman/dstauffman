@@ -894,8 +894,8 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
     >>> (n, u, s) = combine_sets(n1, u1, s1, n2, u2, s2)
     >>> print(n)
     15
-    >>> print(u)
-    1.6666666666666667
+    >>> print(u) #doctest: +ELLIPSIS
+    1.666666...67
     >>> print(s)
     0.59135639081
 
