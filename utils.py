@@ -17,6 +17,7 @@ from __future__ import print_function
 from __future__ import division
 from contextlib import contextmanager
 import doctest
+import inspect
 import os
 import numpy as np
 import sys
@@ -176,7 +177,7 @@ def setup_dir(folder, rec=False):
             raise #pragma: no cover
 
 #%% Functions - compare_two_classes
-def compare_two_classes(c1, c2, suppress_output=False, names=None):
+def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callables=True, compare_recursively=True):
     r"""
     Compares two classes by going through all their public attributes and showing that they are equal.
 
@@ -190,6 +191,8 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None):
         If True, suppress the information printed to the screen, defaults to False.
     names : list of str, optional
         List of the names to be printed to the screen for the two input classes.
+    ignore_callables : bool, optional
+        If True, ignore differences in callable attributes (i.e. methods), defaults to True.
 
     Returns
     -------
@@ -203,12 +206,17 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None):
     >>> c1 = type('Class1', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text'})
     >>> c2 = type('Class2', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text'})
     >>> is_same = compare_two_classes(c1, c2)
-    b is different.
+    b is different from c1 to c2.
     c is only in c1.
     d is only in c2.
     "c1" and "c2" are not the same.
 
     """
+    def _not_true_print():
+        nonlocal is_same
+        is_same = False
+        if not suppress_output:
+            print('{} is different from {} to {}.'.format(this_attr, name1, name2))
     # preallocate answer to True until proven otherwise
     is_same = True
     # get names if specified
@@ -227,11 +235,28 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None):
         # compare the attributes that are in both
         same = attrs1 & attrs2
         for this_attr in sorted(same):
+            # alias the attributes
+            attr1 = getattr(c1, this_attr)
+            attr2 = getattr(c2, this_attr)
+            # determine if this is a subclass
+            if inspect.isclass(attr1):
+                if inspect.isclass(attr2):
+                    if compare_recursively:
+                        is_same = compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
+                            names= [name1 + '.' + this_attr, name2 + '.' + this_attr], \
+                            ignore_callables=ignore_callables, compare_recursively=compare_recursively)
+                    else:
+                        continue
+                else:
+                    _not_true_print(this_attr)
+            else:
+                if inspect.isclass(attr2):
+                    _not_true_print(this_attr)
+            if ignore_callables and (hasattr(attr1, '__call__') or hasattr(attr2, '__call__')):
+                continue
             # if any differences, then this test fails
             if np.logical_not(_nan_equal(getattr(c1, this_attr), getattr(c2, this_attr))):
-                is_same = False
-                if not suppress_output:
-                    print(this_attr + ' is different.')
+                _not_true_print()
         # find the attributes in one but not the other, if any, then this test fails
         diff = attrs1 ^ attrs2
         for this_attr in sorted(diff):

@@ -228,7 +228,7 @@ class Test_compare_two_classes(unittest.TestCase):
 
     def test_good_comparison(self):
         with dcs.capture_output() as (out, _):
-            is_same = dcs.compare_two_classes(self.c1, copy.copy(self.c1))
+            is_same = dcs.compare_two_classes(self.c1, copy.deepcopy(self.c1))
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, '"c1" and "c2" are the same.')
@@ -239,7 +239,7 @@ class Test_compare_two_classes(unittest.TestCase):
             is_same = dcs.compare_two_classes(self.c1, self.c2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'b is different.\nc is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
+        self.assertEqual(output, 'b is different from c1 to c2.\nc is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 
     def test_names(self):
@@ -259,16 +259,15 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertFalse(is_same)
 
     def test_subclasses(self):
-        temp1 = copy.copy(self.c1)
-        temp2 = copy.copy(self.c2)
-        temp1.e = copy.copy(self.c1)
-        temp2.e = copy.copy(self.c2)
+        c3      = type('Class3', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text', 'e': self.c1})
+        c4      = type('Class4', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text', 'e': self.c2})
         with dcs.capture_output() as (out, _):
-            is_same = dcs.compare_two_classes(temp1, temp2)
+            is_same = dcs.compare_two_classes(c3, c4, ignore_callables=False)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'b is different.\ne is different.\nc is only in c1.\n' + \
-            'd is only in c2.\n"c1" and "c2" are not the same.')
+        self.assertEqual(output, 'b is different from c1 to c2.\nb is different from c1.e to c2.e.\n' + \
+            'c is only in c1.e.\nd is only in c2.e.\n"c1.e" and "c2.e" are not the same.\n' + \
+            'e is different from c1 to c2.\nc is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 
 #%% compare_two_dicts
