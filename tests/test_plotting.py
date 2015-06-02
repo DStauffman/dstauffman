@@ -46,6 +46,12 @@ class Test_Opts(unittest.TestCase):
         name = opts.get_names(0)
         self.assertEqual(name, 'Name 1')
 
+    def test_get_names_unsuccessful(self):
+        opts = dcs.Opts()
+        opts.names = ['Name 1', 'Name 2']
+        name = opts.get_names(2)
+        self.assertEqual(name, '')
+
 #%% Classes for testing
 # MyCustomToolbar
 class Test_MyCustomToolbar(unittest.TestCase):
@@ -93,6 +99,11 @@ class Test_MyCustomToolbar(unittest.TestCase):
         self.assertEqual(plt.gcf().number, self.fig1.number)
         QTest.mouseClick(self.fig1.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
         self.assertEqual(plt.gcf().number, self.fig2.number)
+
+    def test_enter_and_exit_events(self):
+        # TODO: this is not causing what I want to happen, the style changes aren't happening.
+        QTest.mouseMove(self.fig1.toolbar_custom_.btn_next_plot, delay=100)
+        QTest.mouseMove(self.fig1.toolbar_custom_.btn_prev_plot, delay=100)
 
     def tearDown(self):
         plt.close(self.fig1)
