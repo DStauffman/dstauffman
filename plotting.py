@@ -78,8 +78,6 @@ class Opts(Frozen):
             name = self.names[ix]
         except IndexError:
             name = ''
-        else:
-            raise
         return name
 
 #%% Classes - MyCustomToolbar

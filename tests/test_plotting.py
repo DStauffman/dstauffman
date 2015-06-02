@@ -40,6 +40,12 @@ class Test_Opts(unittest.TestCase):
         with self.assertRaises(AttributeError):
             opts.new_field_that_does_not_exist = 1
 
+    def test_get_names_successful(self):
+        opts = dcs.Opts()
+        opts.names = ['Name 1', 'Name 2']
+        name = opts.get_names(0)
+        self.assertEqual(name, 'Name 1')
+
 #%% Classes for testing
 # MyCustomToolbar
 class Test_MyCustomToolbar(unittest.TestCase):
