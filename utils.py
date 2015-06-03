@@ -246,14 +246,14 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
                             names= [name1 + '.' + this_attr, name2 + '.' + this_attr], \
                             ignore_callables=ignore_callables, compare_recursively=compare_recursively)
                     else:
-                        continue
+                        continue # pragma: no cover (actually covered, optimization issue)
                 else:
-                    _not_true_print(this_attr)
+                    _not_true_print()
             else:
                 if inspect.isclass(attr2):
-                    _not_true_print(this_attr)
+                    _not_true_print()
             if ignore_callables and (hasattr(attr1, '__call__') or hasattr(attr2, '__call__')):
-                continue
+                continue # pragma: no cover (actually covered, optimization issue)
             # if any differences, then this test fails
             if np.logical_not(_nan_equal(getattr(c1, this_attr), getattr(c2, this_attr))):
                 _not_true_print()
@@ -391,10 +391,30 @@ def round_time(dt=None, round_to_sec=60):
 def make_python_init(folder):
     r"""
     Makes the Python __init__.py file based on the files/definitions found within the specified folder.
+
+    Parameters
+    ----------
+    folder : str
+        Name of folder to process
+
+    Returns
+    -------
+    output : str
+        Resulting text for __init__.py file
+
+    Examples
+    --------
+
+    >>> from dstauffman import make_python_init, get_root_dir
+    >>> folder = get_root_dir()
+    >>> text = make_python_init(folder)
+    >>> print(text[0:20])
+    from .classes import
+
     """
     # exclusions
     exclusions = ['__init__.py']
-    # initialize output
+    # initialize intermediate results
     results = {}
     # Loop through the contained files/folders
     for this_elem in os.listdir(folder):
@@ -431,12 +451,34 @@ def make_python_init(folder):
     for k in sorted(results):
         temp = ', '.join(results[k])
         text.append('from .' + k + ' import ' + temp)
-    return '\n'.join(text)
+    # pass back the combined output text
+    output = '\n'.join(text)
+    return output
 
 #%% Functions - get_python_definitions
 def get_python_definitions(text):
     r"""
     Gets all public class and def names from the text of the file.
+
+    Parameters
+    ----------
+    text : str
+        The text of the python file
+
+    Returns
+    -------
+    funcs : array_like, str
+        List of functions within the text of the python file
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_python_definitions
+    >>> text = 'def a():\n    pass\n'
+    >>> funcs = get_python_definitions(text)
+    >>> print(funcs)
+    ['a']
+
     """
     funcs = []
     for line in text.split('\n'):

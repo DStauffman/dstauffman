@@ -2,9 +2,7 @@
 [run]
 branch = True
 omit =
-    test_*
-    run_all_*
-    __init__.py
+    *tests/*
 
 [report]
 # Regexes for lines to exclude from consideration

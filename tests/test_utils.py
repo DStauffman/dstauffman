@@ -217,6 +217,8 @@ class Test_compare_two_classes(unittest.TestCase):
         self.c1 = type('Class1', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text'})
         self.c2 = type('Class2', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text'})
         self.names = ['Class 1', 'Class 2']
+        self.c3 = type('Class3', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text', 'e': self.c1})
+        self.c4 = type('Class4', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text', 'e': self.c2})
 
     def test_is_comparison(self):
         with dcs.capture_output() as (out, _):
@@ -258,16 +260,71 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertEqual(output, '')
         self.assertFalse(is_same)
 
-    def test_subclasses(self):
-        c3      = type('Class3', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text', 'e': self.c1})
-        c4      = type('Class4', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text', 'e': self.c2})
+    def test_subclasses_match(self):
         with dcs.capture_output() as (out, _):
-            is_same = dcs.compare_two_classes(c3, c4, ignore_callables=False)
+            is_same = dcs.compare_two_classes(self.c3, self.c3, ignore_callables=False)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '"c1" and "c2" are the same.')
+        self.assertTrue(is_same)
+
+    def test_subclasses_recurse(self):
+        with dcs.capture_output() as (out, _):
+            is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False)
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, 'b is different from c1 to c2.\nb is different from c1.e to c2.e.\n' + \
             'c is only in c1.e.\nd is only in c2.e.\n"c1.e" and "c2.e" are not the same.\n' + \
             'e is different from c1 to c2.\nc is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
+        self.assertFalse(is_same)
+
+    def test_subclasses_norecurse(self):
+        with dcs.capture_output() as (out, _):
+            is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False, compare_recursively=False)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'b is different from c1 to c2.\nc is only in c1.\nd is only in c2.\n' + \
+            '"c1" and "c2" are not the same.')
+        self.assertFalse(is_same)
+
+    def test_mismatched_subclasses(self):
+        self.c4.e = 5
+        with dcs.capture_output() as (out, _):
+            is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'b is different from c1 to c2.\ne is different from c1 to c2.\n' + \
+            'e is different from c1 to c2.\nc is only in c1.\nd is only in c2.\n' + \
+            '"c1" and "c2" are not the same.')
+        self.assertFalse(is_same)
+        is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=False, suppress_output=True)
+        self.assertFalse(is_same)
+
+    def test_callables(self):
+        def f(x): return x
+        def g(x): return x
+        self.c3.e = f
+        self.c4.e = g
+        self.c4.b = self.c3.b
+        with dcs.capture_output() as (out, _):
+            is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=False)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'e is different from c1 to c2.\nc is only in c2.\nd is only in c1.\n' + \
+            '"c1" and "c2" are not the same.')
+        self.assertFalse(is_same)
+
+    def test_ignore_callables(self):
+        def f(x): return x
+        def g(x): return x
+        self.c3.e = f
+        self.c4.e = g
+        self.c4.b = self.c3.b
+        with dcs.capture_output() as (out, _):
+            is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=True)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'c is only in c2.\nd is only in c1.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 
 #%% compare_two_dicts
@@ -336,6 +393,50 @@ class Test_round_time(unittest.TestCase):
         dcs.round_time()
         self.assertTrue(True)
 
+#%% make_python_init
+class Test_make_python_init(unittest.TestCase):
+    r"""
+    Tests the make_python_init function with these cases:
+        TBD
+    """
+    def setUp(self):
+        self.folder   = dcs.get_root_dir()
+        self.text     = 'from .classes import'
+        self.folder2  = dcs.get_tests_dir()
+        self.filepath = os.path.join(self.folder2, 'temp_file.py')
+
+    def test_nominal_use(self):
+        text = dcs.make_python_init(self.folder)
+        self.assertEqual(text[0:20], self.text)
+
+    def test_duplicated_funcs(self):
+        with open(self.filepath, 'wt') as file:
+            file.write('def Test_Frozen():\n    pass\n')
+        with dcs.capture_output() as (out, _):
+            text = dcs.make_python_init(self.folder2)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(text[0:34], 'from .temp_file import Test_Frozen')
+        self.assertTrue(output.startswith('Uniqueness Problem'))
+
+    def tearDown(self):
+        if os.path.isfile(self.filepath):
+            os.remove(self.filepath)
+
+#%% get_python_definitions
+class Test_get_python_definitions(unittest.TestCase):
+    r"""
+    Tests the get_python_definitions function with these cases:
+        TBD
+    """
+    def setUp(self):
+        self.text = 'def a():\n    pass\ndef _b():\n    pass\n'
+        self.funcs = ['a']
+
+    def nominal_usage(self):
+        funcs = dcs.get_python_definitions(self.text)
+        self.assertEqual(funcs, self.funcs)
+
 #%% read_text_file
 class Test_read_text_file(unittest.TestCase):
     r"""
@@ -367,7 +468,7 @@ class Test_read_text_file(unittest.TestCase):
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for reading.')
 
     @classmethod
-    def tearDownClase(cls):
+    def tearDownClass(cls):
         os.remove(cls.filepath)
 
 #%% write_text_file
