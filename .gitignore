@@ -51,6 +51,7 @@ Temporary Items
 # Folder/Files
 # =========================
 output/*
+results/*
 scripts/script_photos.py
 tests/.coverage
 tests/coverage_html_report/*
