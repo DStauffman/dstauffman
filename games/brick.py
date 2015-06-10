@@ -5,7 +5,7 @@ the original name of the puzzle.
 
 Notes
 -----
-#.  Written by David Stauffer in June 2015 after he crashed his bike and had nothing to do for a bit.
+#.  Written by David C. Stauffer in June 2015 after he crashed his bike and had nothing to do for a bit.
 """
 # pylint: disable=E1101, C0326, C0103
 
@@ -20,9 +20,11 @@ matplotlib.use('QT4Agg')
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import matplotlib.pyplot as plt
 # regular imports
+from datetime import datetime
 import doctest
 import numpy as np
 import os
+import shutil
 # model imports
 from dstauffman import Opts, setup_plots, setup_dir, get_root_dir
 
@@ -97,7 +99,7 @@ def _get_color(value):
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
 
     Examples
     --------
@@ -127,7 +129,7 @@ def _support_rot_piece():
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
     #.  This function is not intended to be used, but is reference for where the maps came from
         for rotating the pieces.
     """
@@ -169,7 +171,7 @@ def _draw_cube(ax, xs=0, ys=0, zs=0, color='k'):
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
 
     Examples
     --------
@@ -199,6 +201,78 @@ def _draw_cube(ax, xs=0, ys=0, zs=0, color='k'):
         ax.add_collection3d(poly)
         ax.add_collection3d(line)
 
+def _check_seams(piece_combos, this_soln):
+    r"""
+    Checks that the solution set is physically able to be built based on where the seams
+    on the individual pieces are located.
+
+    Parameters
+    ----------
+    piece_combos : list of (3,3,3) ndarray of int
+        All the possible piece combinations
+    this_soln : ndarray of len 9
+        The indices into piece_combos to pull out which ones are in this solution
+
+    Returns
+    -------
+    is_valid : bool
+        True if all the seams are non-overlapping, otherwise False
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in June 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.brick import apply_solution_to_combos, pieces, get_all_positions, R, \
+    ...     soln, solve_puzzle, _check_seams
+    >>> soln[1,1,1] = R
+    >>> combos = [get_all_positions(piece) for piece in pieces]
+    >>> piece_combos = [apply_solution_to_combos(soln, this_combo) for this_combo in combos]
+    >>> soln_pieces = solve_puzzle(piece_combos)
+    >>> is_valid = _check_seams(piece_combos, soln_pieces[0])
+    >>> print(is_valid)
+    False
+
+    """
+    # intiailize a set for use later
+    seams = set()
+    # build this list of all diagonally adjacent cubes to check
+    permutations = [(1,1,0),(1,-1,0),(-1,1,0),(-1,-1,0),(1,0,1),(1,0,-1),(-1,0,1),(-1,0,-1), \
+        (0,1,1),(0,1,-1),(0,-1,1),(0,-1,-1)]
+    # loop through the piecese
+    for p in range(NUM_PIECES):
+        # alias this piece
+        this_piece = piece_combos[p][this_soln[p]]
+        # initialize a list
+        this_list = []
+        # loop through each piece in the 3x3x3 grid
+        for i in range(3):
+            for j in range(3):
+                for k in range(3):
+                    # see if this piece is not null
+                    if this_piece[i,j,k] != N:
+                        # go through all the possibly adjacent cubes
+                        for perm in permutations:
+                            # see if this adjacent cube is within the 3x3x3 bounds
+                            if not set((i+perm[0],j+perm[1],k+perm[2])) - {0, 1, 2}:
+                                # check if this valid adjacent cube is not null
+                                if this_piece[i+perm[0],j+perm[1],k+perm[2]] != N:
+                                    # append this seam to the list
+                                    this_list.append((2*np.array([i,j,k]) + np.array(perm))/2)
+        # make a set of the seams that were found (eliminates duplicates within one piece)
+        this_set = set(tuple(x) for x in this_list)
+        # see if any of the seams overlap with a previous piece
+        intersect = seams & this_set
+        if intersect:
+            # if the seams overlap, then this is not valid and you can exit
+            return False
+        else:
+            # if they don't overlap, then combine the sets and go to the next piece
+            seams = seams | this_set
+    return True
+
 #%% Functions - solve_center
 def solve_center(pieces):
     r"""
@@ -216,7 +290,7 @@ def solve_center(pieces):
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
 
     Examples
     --------
@@ -245,6 +319,9 @@ def solve_center(pieces):
         center = G
     elif d_red == 1 and d_gry == 0:
         center = R
+    elif d_red == 0 and d_gry == 0:
+        # Already solved and this function was called again, so return the current center color
+        center = soln[1,1,1]
     else:
         raise ValueError('Unable to solve for center color.')
     return center
@@ -263,7 +340,7 @@ def rot_piece(piece, axis):
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
 
     Examples
     --------
@@ -328,7 +405,7 @@ def trans_piece(piece, axis, step):
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
 
     Examples
     --------
@@ -407,7 +484,7 @@ def get_all_positions(piece):
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
     #.  This does not take into account the solution color pattern, that is done afterwards.
 
     Examples
@@ -450,7 +527,7 @@ def get_all_positions(piece):
 
         Notes
         -----
-        #.  Written by David Stauffer in June 2015.
+        #.  Written by David C. Stauffer in June 2015.
         #.  Modifies `all_pos` in-place.
         """
         # translate all rotations
@@ -472,7 +549,7 @@ def get_all_positions(piece):
 
         Notes
         -----
-        #.  Written by David Stauffer in 2015.
+        #.  Written by David C. Stauffer in 2015.
         #.  Does not take symmetry into account.
         """
         # convert to N positions by 27 element linear array
@@ -521,7 +598,7 @@ def plot_cube(piece, title=None, opts=None):
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
 
     Examples
     --------
@@ -587,7 +664,7 @@ def print_combos(piece_combos, text):
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
 
     Examples
     --------
@@ -631,7 +708,7 @@ def apply_solution_to_combos(soln, combos):
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
 
     Examples
     --------
@@ -657,7 +734,7 @@ def apply_solution_to_combos(soln, combos):
     return valid
 
 #%% Functions - solve_puzzle2
-def solve_puzzle(piece_combos, stop_at_first=True):
+def solve_puzzle(piece_combos, stop_at_first=True, check_seams=False):
     r"""
     Solves the puzzle once all the possible piece combinations have been found.
 
@@ -665,8 +742,10 @@ def solve_puzzle(piece_combos, stop_at_first=True):
     ----------
     piece_combos : list of (3,3,3) ndarray of int
         Piece combinations
-    stop_at_first : bool, optional
+    stop_at_first : bool, optional (True)
         Stop at the first valid solution
+    check_seams : bool, optional (False)
+        Check the physical seams to make sure the puzzle can be assembled
 
     Returns
     -------
@@ -675,7 +754,7 @@ def solve_puzzle(piece_combos, stop_at_first=True):
 
     Notes
     -----
-    #.  Written by David Stauffer in June 2015.
+    #.  Written by David C. Stauffer in June 2015.
 
     Examples
     --------
@@ -724,7 +803,7 @@ def solve_puzzle(piece_combos, stop_at_first=True):
         # if no pieces work, then continue to the next base piece
         if ix1.shape[0] == 0:
             continue
-        # otherwise continue down the spiral
+        # otherwise continue down the spiral of pieces
         for i1 in ix1:
             soln2 = _get_solution_sum(1) * r_comb[2]
             ix2 = np.nonzero(np.sum(soln2, axis=1) == 0)[0]
@@ -760,10 +839,17 @@ def solve_puzzle(piece_combos, stop_at_first=True):
                                     ix8 = np.nonzero(np.sum(soln8, axis=1) == 0)[0]
                                     if ix8.shape[0] == 0:
                                         continue
-                                    # solution found!!
-                                    soln_pieces.append(np.array([i0, i1, i2, i3, i4, i5, i6, i7, ix8[0]]))
-                                    if stop_at_first:
-                                        return soln_pieces
+                                    # potential solution found, but must check seams!
+                                    this_soln = np.array([i0, i1, i2, i3, i4, i5, i6, i7, ix8[0]])
+                                    if check_seams:
+                                        is_valid = _check_seams(piece_combos, this_soln)
+                                    else:
+                                        is_valid = True
+                                    if is_valid:
+                                        # append any valid solutions
+                                        soln_pieces.append(this_soln)
+                                        if stop_at_first:
+                                            return soln_pieces
     return soln_pieces
 
 def test_docstrings():
@@ -777,7 +863,7 @@ def test_docstrings():
 if __name__ == '__main__':
     # flags for running code
     run_tests    = False
-    make_plots   = False
+    make_plots   = True
     make_soln    = True
 
     if run_tests:
@@ -785,14 +871,15 @@ if __name__ == '__main__':
         test_docstrings()
 
     if make_soln:
+        # Create and set Opts
+        date = datetime.now()
+        opts = Opts()
+        opts.case_name = 'Brick'
+        opts.save_path = os.path.join(get_root_dir(), 'results', date.strftime('%Y-%m-%d'))
+        opts.save_plot = True
+        opts.show_plot = True
         if make_plots:
-            # Create and set Opts
-            opts = Opts()
-            opts.case_name = 'Brick'
-            opts.save_path = os.path.join(get_root_dir(), 'results', '2015_06_06')
-            opts.save_plot = True
-            opts.show_plot = True
-            setup_dir(opts.save_path)
+            setup_dir(opts.save_path, rec=True)
 
         # Solve for the center color
         soln[1,1,1] = solve_center(pieces)
@@ -829,8 +916,7 @@ if __name__ == '__main__':
         piece_combos = [piece_combos[x] for x in sort_ix]
 
         # solve puzzle
-        soln_pieces = solve_puzzle(piece_combos, stop_at_first=False)
-        print(soln_pieces)
+        soln_pieces = solve_puzzle(piece_combos, stop_at_first=False, check_seams=True)
 
         # verify solution
         for (ix, this_soln) in enumerate(soln_pieces):
@@ -838,3 +924,18 @@ if __name__ == '__main__':
             for i in range(NUM_PIECES):
                 soln2 = soln2 + piece_combos[i][this_soln[i]]
             np.testing.assert_equal(soln, soln2)
+
+        # print/save solution sets
+        unsort_ix = np.argsort(sort_ix)
+        for j in range(len(soln_pieces)):
+            setup_dir(os.path.join(opts.save_path, 'soln{}'.format(j+1)))
+            print('Solution #{}'.format(j+1))
+            for i in range(NUM_PIECES):
+                print('Piece {}, position {}'.format(i+1,soln_pieces[j][unsort_ix[i]]+1))
+                old_name = os.path.join(opts.save_path, '{} - P{} position {}.png'.format(opts.case_name, i+1, soln_pieces[j][unsort_ix[i]]+1))
+                new_name = os.path.join(opts.save_path, 'soln{}'.format(j+1), '{} - P{} position {}.png'.format(opts.case_name, i+1, soln_pieces[j][unsort_ix[i]]+1))
+                shutil.copyfile(old_name, new_name)
+            print('')
+            old_name = os.path.join(opts.save_path, '{} - Final Solution.png'.format(opts.case_name))
+            new_name = os.path.join(opts.save_path, 'soln{}'.format(j+1), '{} - Final Solution.png'.format(opts.case_name))
+            shutil.copyfile(old_name, new_name)
