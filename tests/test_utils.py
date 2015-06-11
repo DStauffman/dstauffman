@@ -539,6 +539,7 @@ class Test_convert_annual_to_monthly_probability(unittest.TestCase):
         convert a scalar
         convert a number less than zero (raise error)
         convert a number greater than one (raise error)
+        convert a vector from annual to monthly and then back
     """
     def setUp(self):
         self.monthly = np.arange(10)/1000.
@@ -562,14 +563,21 @@ class Test_convert_annual_to_monthly_probability(unittest.TestCase):
         with self.assertRaises(ValueError):
             dcs.convert_annual_to_monthly_probability(np.array([0., 0.5, 1.5]))
 
+    def test_circular(self):
+        monthly = dcs.convert_annual_to_monthly_probability(self.annuals)
+        np.testing.assert_almost_equal(monthly, self.monthly)
+        annual = dcs.convert_monthly_to_annual_probability(monthly)
+        np.testing.assert_almost_equal(annual, self.annuals)
+
 #%% convert_monthly_to_annual_probability
 class Test_convert_monthly_to_annual_probability(unittest.TestCase):
     r"""
     Tests the convert_annual_to_monthly_probability function with these cases:
-        convert a vector from annual to monthly
+        convert a vector from monthly to annual
         convert a scalar
         convert a number less than zero (raise error)
         convert a number greater than one (raise error)
+        convert a vector from monthly to annual and then back
     """
     def setUp(self):
         self.monthly = np.arange(10)/1000.
@@ -592,6 +600,12 @@ class Test_convert_monthly_to_annual_probability(unittest.TestCase):
     def test_gt_one(self):
         with self.assertRaises(ValueError):
             dcs.convert_monthly_to_annual_probability(np.array([0., 0.5, 1.5]))
+
+    def test_circular(self):
+        annual = dcs.convert_monthly_to_annual_probability(self.monthly)
+        np.testing.assert_almost_equal(annual, self.annuals)
+        monthly = dcs.convert_annual_to_monthly_probability(annual)
+        np.testing.assert_almost_equal(monthly, self.monthly)
 
 #%% get_root_dir
 class Test_get_root_dir(unittest.TestCase):
