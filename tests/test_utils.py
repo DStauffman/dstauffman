@@ -548,8 +548,7 @@ class Test_convert_annual_to_monthly_probability(unittest.TestCase):
 
     def test_conversion(self):
         monthly = dcs.convert_annual_to_monthly_probability(self.annuals)
-        for i in range(0, len(self.monthly)):
-            self.assertAlmostEqual(monthly[i], self.monthly[i])
+        np.testing.assert_almost_equal(monthly, self.monthly)
 
     def test_scalar(self):
         monthly = dcs.convert_annual_to_monthly_probability(0)
@@ -562,6 +561,37 @@ class Test_convert_annual_to_monthly_probability(unittest.TestCase):
     def test_gt_one(self):
         with self.assertRaises(ValueError):
             dcs.convert_annual_to_monthly_probability(np.array([0., 0.5, 1.5]))
+
+#%% convert_monthly_to_annual_probability
+class Test_convert_monthly_to_annual_probability(unittest.TestCase):
+    r"""
+    Tests the convert_annual_to_monthly_probability function with these cases:
+        convert a vector from annual to monthly
+        convert a scalar
+        convert a number less than zero (raise error)
+        convert a number greater than one (raise error)
+    """
+    def setUp(self):
+        self.monthly = np.arange(10)/1000.
+        self.annuals = self.monthly
+        for i in range(1, 12):
+            self.annuals = 1 - (1 - self.annuals) * (1 - self.monthly)
+
+    def test_conversion(self):
+        annual = dcs.convert_monthly_to_annual_probability(self.monthly)
+        np.testing.assert_almost_equal(annual, self.annuals)
+
+    def test_scalar(self):
+        annual = dcs.convert_monthly_to_annual_probability(0)
+        self.assertIn(annual, self.annuals)
+
+    def test_lt_zero(self):
+        with self.assertRaises(ValueError):
+            dcs.convert_monthly_to_annual_probability(np.array([0., 0.5, -1.]))
+
+    def test_gt_one(self):
+        with self.assertRaises(ValueError):
+            dcs.convert_monthly_to_annual_probability(np.array([0., 0.5, 1.5]))
 
 #%% get_root_dir
 class Test_get_root_dir(unittest.TestCase):

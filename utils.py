@@ -681,6 +681,41 @@ def convert_annual_to_monthly_probability(annual):
         monthly = 1-np.exp(np.log(1-annual)/MONTHS_PER_YEAR)
     return monthly
 
+#%% Functions - convert_monthly_to_annual_probability
+def convert_monthly_to_annual_probability(monthly):
+    r"""
+    Converts a given monthly probability into the equivalent annual one.
+
+    Parameters
+    ----------
+    monthly : numpy.nd_array
+        equivalent monthly probabilities, 0 <= monthly <= 1
+
+    Returns
+    -------
+    annual : numpy.nd_array
+        annual probabilities, 0 <= annual <= 1
+
+    Examples
+    --------
+
+    >>> from dstauffman import convert_monthly_to_annual_probability
+    >>> import numpy as np
+    >>> monthly = np.array([0, 0.1, 1])
+    >>> annual = convert_monthly_to_annual_probability(monthly)
+    >>> print(annual) # doctest: +NORMALIZE_WHITESPACE
+    [ 0. 0.71757046 1. ]
+
+    """
+    # check ranges
+    if np.any(monthly < 0):
+        raise ValueError('monthly must be >= 0')
+    if np.any(monthly > 1):
+        raise ValueError('annual must be <= 1')
+    # convert to equivalent probability and return result
+    annual = 1 - (1 - monthly)**MONTHS_PER_YEAR
+    return annual
+
 #%% Functions - get_root_dir
 def get_root_dir():
     r"""
