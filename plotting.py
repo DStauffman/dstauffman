@@ -104,6 +104,7 @@ class MyCustomToolbar():
 
     """
     def __init__(self, fig):
+        r"""Initializes the custom toolbar."""
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
         # to determine which figure actually triggered the button events.)
         self.fig_number = fig.number
@@ -127,9 +128,14 @@ class MyCustomToolbar():
         self.btn_close_all.clicked.connect(self.close_all)
 
     def close_all(self, *args):
-        plt.close('all')
+        r"""Closes all the currently open plots."""
+        # Note that it's better to loop through and close the plots individually than to use
+        # plt.close('all'), as that can sometimes cause the iPython kernel to quit #DCS: 2015-06-11
+        for this_fig in plt.get_fignums():
+            plt.close(this_fig)
 
     def next_plot(self, *args):
+        r"""Brings up the next plot in the series."""
         # get all the figure numbers
         all_figs = plt.get_fignums()
         # get the active figure number
@@ -149,6 +155,7 @@ class MyCustomToolbar():
         fig.canvas.manager.window.raise_()
 
     def prev_plot(self, *args):
+        r"""Brings up the previous plot in the series."""
         # get all the figure numbers
         all_figs = plt.get_fignums()
         # get the active figure number
