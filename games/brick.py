@@ -908,7 +908,8 @@ if __name__ == '__main__':
             for i in range(NUM_PIECES):
                 for (j, this_piece) in enumerate(piece_combos[i]):
                     plot_cube(this_piece, title='P{} position {}'.format(i+1, j+1), opts=opts)
-                    plt.close('all')
+                    for this_fig in plt.get_fignums():
+                        plt.close(this_fig)
 
         # sort pieces by their number of combinations
         num_combos = [len(x) for x in piece_combos]
