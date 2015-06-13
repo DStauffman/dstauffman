@@ -1,0 +1,56 @@
+table {
+    border-spacing: 0;
+    border-collapse: collapse;
+}
+
+tr {
+    line-height: 30px;
+}
+
+td {
+    height: 30px;
+    width: 300px;
+}
+
+td.vbt {
+    vertical-align: bottom;
+}
+
+td.vtp {
+    vertical-align: top;
+}
+
+td.bot {
+    border-bottom: 1px solid #000;
+}
+
+td.rgt {
+    border-right: 1px solid #000;
+}
+
+td.bar {
+    border-bottom: 1px solid #000;
+    border-right: 1px solid #000;
+}
+
+td.tar {
+    border-top: 1px solid #000;
+    border-right: 1px solid #000;
+}
+
+td.top {
+    border-top: 1px solid #000;
+}
+
+td.win {
+    text-align: center;
+    font-weight: bold;
+}
+
+td.dsh {
+    border-right: 1px dashed #000;
+}
+
+td.dlf {
+    border-left: 1px dashed #000;
+}
