@@ -503,7 +503,7 @@ def get_all_positions(piece):
     """
     def _rotations(all_pos):
         r"""
-        Rotates the list of pieces about all three axes 90 degrees at a time.
+        Rotates the list of pieces about all 24 possible 3D orientations.
 
         Notes
         -----
@@ -512,14 +512,31 @@ def get_all_positions(piece):
         # loop through the current list (use index to avoid infinite loops while growing in place)
         for i in range(len(all_pos)):
             this_pos = all_pos[i]
-            # loop through all 3 axes
-            for i in range(3):
-                # rotate four times about each axis
+            # rotate four times about the first axis
+            for j in range(4):
+                this_pos = rot_piece(this_pos, axis=0)
+                # keep the first 3, the 4th puts you back at the beginning
+                if j < 3:
+                    all_pos.append(this_pos)
+            for k in range(3):
+                # now rotate once about the 2nd axis and repeat
+                this_pos = rot_piece(this_pos, axis=1)
                 for j in range(4):
-                    this_pos = rot_piece(this_pos, axis=i)
-                    # only keep the first 3 rotations, the 4th one puts you back where you started
-                    if j < 3:
-                        all_pos.append(this_pos)
+                    this_pos = rot_piece(this_pos, axis=0)
+                    all_pos.append(this_pos)
+            # rotate once more to get back to original
+            this_pos = rot_piece(this_pos, axis=1)
+            # then rotate once about the 3rd axis and four times about the first
+            this_pos = rot_piece(this_pos, axis=2)
+            for j in range(4):
+                this_pos = rot_piece(this_pos, axis=0)
+                all_pos.append(this_pos)
+            # then rotate twice about the 3rd axis, and then four times about the first
+            for k in range(2):
+                this_pos = rot_piece(this_pos, axis=2)
+            for j in range(4):
+                this_pos = rot_piece(this_pos, axis=0)
+                all_pos.append(this_pos)
 
     def _translations(all_pos):
         r"""
@@ -566,12 +583,13 @@ def get_all_positions(piece):
     all_pos = []
     # get the starting piece and append it to the list
     all_pos.append(piece.copy())
-    for i in range(2):
-        # go through rotations
+    # repeat this process three times to get all the possible combinations of rotations and translations
+    for i in range(3):
+        # go through rotations (produces up to 24x orientations)
         _rotations(all_pos)
         # keep unique ones
         all_pos = _keep_unique(all_pos)
-        # go through translations
+        # go through translations (produces up to 12x translations)
         _translations(all_pos)
         # keep unique ones
         all_pos = _keep_unique(all_pos)
@@ -733,7 +751,7 @@ def apply_solution_to_combos(soln, combos):
     valid = [combos[x] for x in valid_ix]
     return valid
 
-#%% Functions - solve_puzzle2
+#%% Functions - solve_puzzle
 def solve_puzzle(piece_combos, stop_at_first=True, check_seams=False):
     r"""
     Solves the puzzle once all the possible piece combinations have been found.
@@ -852,6 +870,54 @@ def solve_puzzle(piece_combos, stop_at_first=True, check_seams=False):
                                             return soln_pieces
     return soln_pieces
 
+#%% Funccions - discard_symmetric_duplicates
+def discard_symmetric_duplicates(soln_pieces, piece_combos):
+    r"""
+    Discards solutions that are only rotations of other solutions
+    """
+    def _make_equal_solns(piece):
+        # initialize output and counter
+        pieces_array = np.empty((27,8), dtype=int)
+        counter = 0
+        # create a temp variable to use
+        temp_piece = piece.copy()
+        # store the original position
+        pieces_array[:,0] = temp_piece.ravel()
+        counter += 1
+        # create all possible permutations
+        for i in range(4):
+            temp_piece = rot_piece(temp_piece, axis=0)
+            if i < 3:
+                pieces_array[:,counter] = temp_piece.ravel()
+                counter += 1
+        # rotate 180 degrees
+        temp_piece = rot_piece(temp_piece, axis=1)
+        temp_piece = rot_piece(temp_piece, axis=1)
+        # repeat rotations
+        for i in range(4):
+            pieces_array[:,counter] = temp_piece.ravel()
+            temp_piece = rot_piece(temp_piece, axis=0)
+            counter += 1
+        return pieces_array
+
+    # initialize the output variable
+    reduced_soln_pieces = []
+    # append the first solution, it's unique by definition, with an if block in case no solutions were found
+    if soln_pieces:
+        reduced_soln_pieces.append(soln_pieces[0])
+    # loop through the remaining pieces
+    for i in range(1, len(soln_pieces)):
+        if np.all(np.prod(soln_pieces[i] - np.array(reduced_soln_pieces), axis=1) == 0):
+            # solution has at least one piece matching another answer, so it can't be strictly
+            # symmetric and thus must be new.
+            reduced_soln_pieces.append(soln_pieces[i])
+        else:
+            # solution may be a symmetric copy
+            # TODO: might not be, put additional test here!!!
+            pass
+    return reduced_soln_pieces
+
+#%% Functions - test_docstrings
 def test_docstrings():
     r"""
     Tests the docstrings within this file.
@@ -863,7 +929,7 @@ def test_docstrings():
 if __name__ == '__main__':
     # flags for running code
     run_tests    = False
-    make_plots   = True
+    make_plots   = False
     make_soln    = True
 
     if run_tests:
@@ -889,16 +955,15 @@ if __name__ == '__main__':
             plot_cube(soln, title='Final Solution', opts=opts)
 
         # find all possible orientations of all pieces
-        piece_combos = []
+        all_piece_combos = []
         for this_piece in pieces:
-            piece_combos.append(get_all_positions(this_piece))
+            all_piece_combos.append(get_all_positions(this_piece))
 
         # Print the total combinations before simplifying to the solution
-        print_combos(piece_combos, 'total')
+        print_combos(all_piece_combos, 'total')
 
         # Solve for only the valid piece combinations
-        for i in range(NUM_PIECES):
-            piece_combos[i] = apply_solution_to_combos(soln, piece_combos[i])
+        piece_combos = [apply_solution_to_combos(soln, this_piece_combos) for this_piece_combos in all_piece_combos]
 
         # Print the total combinations after simplifying to the solution
         print_combos(piece_combos, 'valid')
@@ -917,7 +982,10 @@ if __name__ == '__main__':
         piece_combos = [piece_combos[x] for x in sort_ix]
 
         # solve puzzle
-        soln_pieces = solve_puzzle(piece_combos, stop_at_first=False, check_seams=True)
+        soln_pieces_all = solve_puzzle(piece_combos, stop_at_first=False, check_seams=True)
+
+        # discard duplicates based on symmetry
+        soln_pieces = discard_symmetric_duplicates(soln_pieces_all, piece_combos)
 
         # verify solution
         for (ix, this_soln) in enumerate(soln_pieces):
