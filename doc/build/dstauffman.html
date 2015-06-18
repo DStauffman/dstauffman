@@ -1,0 +1,2081 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dstauffman package &mdash; dstauffman 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="dstauffman 0.1.0 documentation" href="index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dstauffman 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="dstauffman-package">
+<h1>dstauffman package<a class="headerlink" href="#dstauffman-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-dstauffman.classes">
+<span id="dstauffman-classes-module"></span><h2>dstauffman.classes module<a class="headerlink" href="#module-dstauffman.classes" title="Permalink to this headline">¶</a></h2>
+<p>Classes module file for the &#8220;dstauffman&#8221; library.  It contains the high level classes used to
+subclass other classes.</p>
+<div class="section" id="notes">
+<h3>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in March 2015.</li>
+</ol>
+<dl class="class">
+<dt id="dstauffman.classes.Frozen">
+<em class="property">class </em><code class="descclassname">dstauffman.classes.</code><code class="descname">Frozen</code><a class="reference internal" href="_modules/dstauffman/classes.html#Frozen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.classes.Frozen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Subclasses of Frozen are frozen, i.e. it is impossibile to add
+new attributes to them and their instances.</p>
+<p>Additionally a more pretty print and explicit form of __repr__ is
+defined based on the <cite>disp</cite> function.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.classes.frozen">
+<code class="descclassname">dstauffman.classes.</code><code class="descname">frozen</code><span class="sig-paren">(</span><em>set</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/classes.html#frozen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.classes.frozen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raise an error when trying to set an undeclared name, or when calling
+from a method other than Frozen.__init__ or the __init__ method of
+a class derived from Frozen.</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-dstauffman.constants">
+<span id="dstauffman-constants-module"></span><h2>dstauffman.constants module<a class="headerlink" href="#module-dstauffman.constants" title="Permalink to this headline">¶</a></h2>
+<p>Constants module file for the &#8220;dstauffman&#8221; library.  It defines constants.</p>
+<div class="section" id="id1">
+<h3>Notes<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in March 2015.</li>
+</ol>
+</div>
+</div>
+<div class="section" id="module-dstauffman.photos">
+<span id="dstauffman-photos-module"></span><h2>dstauffman.photos module<a class="headerlink" href="#module-dstauffman.photos" title="Permalink to this headline">¶</a></h2>
+<p>Photos module file for the &#8220;dstauffman&#8221; library.  It contains a collection of commands that are
+useful for maintaining photo galleries.</p>
+<div class="section" id="id2">
+<h3>Notes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in December 2013.</li>
+</ol>
+<dl class="function">
+<dt id="dstauffman.photos.batch_resize">
+<code class="descclassname">dstauffman.photos.</code><code class="descname">batch_resize</code><span class="sig-paren">(</span><em>folder</em>, <em>max_width=-1</em>, <em>max_height=-1</em>, <em>process_extensions=frozenset({'.png'</em>, <em>'.gif'</em>, <em>'.jpg'})</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/photos.html#batch_resize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.photos.batch_resize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Resize the specified folder of images to the given max width and height.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote>
+<div><p>Name of folder to process</p>
+</div></blockquote>
+<p><strong>max_width</strong> : int</p>
+<blockquote>
+<div><p>Maximum width for the resized photo</p>
+</div></blockquote>
+<p><strong>max_height</strong> : int</p>
+<blockquote>
+<div><p>Maximum height for the resized photo</p>
+</div></blockquote>
+<p><strong>process_extensions</strong> : set of str, optional</p>
+<blockquote class="last">
+<div><p>List of extensions to be processed within the folder</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.photos.convert_tif_to_jpg">
+<code class="descclassname">dstauffman.photos.</code><code class="descname">convert_tif_to_jpg</code><span class="sig-paren">(</span><em>folder</em>, <em>replace=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/photos.html#convert_tif_to_jpg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.photos.convert_tif_to_jpg" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts <a href="#id3"><span class="problematic" id="id4">*</span></a>.tif images into <a href="#id5"><span class="problematic" id="id6">*</span></a>.jpg images.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote>
+<div><p>Name of the folder to process</p>
+</div></blockquote>
+<p><strong>replace</strong> : bool, optional</p>
+<blockquote class="last">
+<div><p>Set to True to replace any existing <a href="#id7"><span class="problematic" id="id8">*</span></a>.jpg files</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">get_data_dir</span><span class="p">,</span> <span class="n">convert_tif_to_jpg</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">folder</span> <span class="o">=</span> <span class="n">get_data_dir</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">convert_tif_to_jpg</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span> 
+<span class="go">Processing folder: &quot;...&quot;</span>
+<span class="go"> Skipping file: &quot;README.txt&quot;</span>
+<span class="go">Batch processing complete.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.photos.find_long_filenames">
+<code class="descclassname">dstauffman.photos.</code><code class="descname">find_long_filenames</code><span class="sig-paren">(</span><em>folder</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/photos.html#find_long_filenames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.photos.find_long_filenames" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds any files with really long filenames.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote class="last">
+<div><p>Name of folder to process</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.photos.find_missing_nums">
+<code class="descclassname">dstauffman.photos.</code><code class="descname">find_missing_nums</code><span class="sig-paren">(</span><em>folder</em>, <em>old_picasa=True</em>, <em>digit_check=True</em>, <em>process_extensions=frozenset({'.png'</em>, <em>'.gif'</em>, <em>'.jpg'})</em>, <em>folder_exclusions=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/photos.html#find_missing_nums"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.photos.find_missing_nums" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds the missing numbers in a file sequence:
+Photos 001.jpg
+Photos 002.jpg
+Photos 004.jpg</p>
+<p>Finds missing Photos 003.jpg</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote>
+<div><p>Name of folder to process</p>
+</div></blockquote>
+<p><strong>old_picasa</strong> : bool, optional</p>
+<blockquote>
+<div><p>Determines if printing a warning about old .picasa.ini files, default is True</p>
+</div></blockquote>
+<p><strong>digit_check</strong> : bool, optional</p>
+<blockquote class="last">
+<div><p>Determines if checking for a consistent number of digits in the numbering
+01, 02, 03 versus 001, 02, 003, etc. Default is True</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.photos.find_unexpected_ext">
+<code class="descclassname">dstauffman.photos.</code><code class="descname">find_unexpected_ext</code><span class="sig-paren">(</span><em>folder</em>, <em>allowable_extensions=frozenset({'.png'</em>, <em>'.gif'</em>, <em>'.jpg'</em>, <em>'.ini'})</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/photos.html#find_unexpected_ext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.photos.find_unexpected_ext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Lists any files in the folder that don&#8217;t have the expected file extensions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote>
+<div><p>Name of folder to process</p>
+</div></blockquote>
+<p><strong>allowable_extensions</strong> : set of str, optional</p>
+<blockquote class="last">
+<div><p>List of extensions to consider allowable in the folder</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.photos.rename_old_picasa_files">
+<code class="descclassname">dstauffman.photos.</code><code class="descname">rename_old_picasa_files</code><span class="sig-paren">(</span><em>folder</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/photos.html#rename_old_picasa_files"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.photos.rename_old_picasa_files" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renames the old &#8221;.picasa.ini&#8221; to the newer &#8220;Picasa.ini&#8221; standard.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote class="last">
+<div><p>Name of folder to process</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.photos.rename_upper_ext">
+<code class="descclassname">dstauffman.photos.</code><code class="descname">rename_upper_ext</code><span class="sig-paren">(</span><em>folder</em>, <em>allowable_extensions=frozenset({'.png'</em>, <em>'.gif'</em>, <em>'.jpg'</em>, <em>'.ini'})</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/photos.html#rename_upper_ext"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.photos.rename_upper_ext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Renames any expected file types to have all lowercase file extensions.</p>
+<p>Common use is to rename the <a href="#id9"><span class="problematic" id="id10">*</span></a>.JPG extensions from my camera to <a href="#id11"><span class="problematic" id="id12">*</span></a>.jpg</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote>
+<div><p>Name of folder to process</p>
+</div></blockquote>
+<p><strong>allowable_extensions</strong> : set of str, optional</p>
+<blockquote class="last">
+<div><p>List of extensions to consider allowable in the folder</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-dstauffman.plotting">
+<span id="dstauffman-plotting-module"></span><h2>dstauffman.plotting module<a class="headerlink" href="#module-dstauffman.plotting" title="Permalink to this headline">¶</a></h2>
+<p>Plotting module file for the &#8220;dstauffman&#8221; library.  It defines useful plotting utilities.</p>
+<div class="section" id="id13">
+<h3>Notes<a class="headerlink" href="#id13" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in March 2015.</li>
+</ol>
+<dl class="class">
+<dt id="dstauffman.plotting.MyCustomToolbar">
+<em class="property">class </em><code class="descclassname">dstauffman.plotting.</code><code class="descname">MyCustomToolbar</code><span class="sig-paren">(</span><em>fig</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#MyCustomToolbar"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.MyCustomToolbar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="http://docs.python.org/library/functions.html#object" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">object</span></code></a></p>
+<p>Defines a custom toolbar to use in any matplotlib plots.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">MyCustomToolbar</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s">&#39;Figure Title&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> 
+<span class="go">[&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">toolbar_custom_</span> <span class="o">=</span> <span class="n">MyCustomToolbar</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Close plot
+&gt;&gt;&gt; plt.close(fig)</p>
+<dl class="method">
+<dt id="dstauffman.plotting.MyCustomToolbar.close_all">
+<code class="descname">close_all</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#MyCustomToolbar.close_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.MyCustomToolbar.close_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Closes all the currently open plots.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dstauffman.plotting.MyCustomToolbar.next_plot">
+<code class="descname">next_plot</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#MyCustomToolbar.next_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.MyCustomToolbar.next_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Brings up the next plot in the series.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="dstauffman.plotting.MyCustomToolbar.prev_plot">
+<code class="descname">prev_plot</code><span class="sig-paren">(</span><em>*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#MyCustomToolbar.prev_plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.MyCustomToolbar.prev_plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Brings up the previous plot in the series.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dstauffman.plotting.Opts">
+<em class="property">class </em><code class="descclassname">dstauffman.plotting.</code><code class="descname">Opts</code><a class="reference internal" href="_modules/dstauffman/plotting.html#Opts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.Opts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dstauffman.classes.Frozen" title="dstauffman.classes.Frozen"><code class="xref py py-class docutils literal"><span class="pre">dstauffman.classes.Frozen</span></code></a></p>
+<p>Contains all the optional plotting configurations.</p>
+<dl class="method">
+<dt id="dstauffman.plotting.Opts.get_names">
+<code class="descname">get_names</code><span class="sig-paren">(</span><em>ix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#Opts.get_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.Opts.get_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the specified name from the list.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.plotting.figmenu">
+<code class="descclassname">dstauffman.plotting.</code><code class="descname">figmenu</code><span class="sig-paren">(</span><em>figs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#figmenu"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.figmenu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a custom toolbar to the figures.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>figs</strong> : class matplotlib.pyplot.Figure, or list of such</p>
+<blockquote class="last">
+<div><p>List of figures</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">figmenu</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s">&#39;Figure Title&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> 
+<span class="go">[&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;X vs Y&#39;</span><span class="p">)</span> 
+<span class="go">&lt;matplotlib.text.Text object at 0x...&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;time [years]&#39;</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;value [radians]&#39;</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">figmenu</span><span class="p">(</span><span class="n">fig</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Close plot
+&gt;&gt;&gt; plt.close(fig)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.plotting.plot_correlation_matrix">
+<code class="descclassname">dstauffman.plotting.</code><code class="descname">plot_correlation_matrix</code><span class="sig-paren">(</span><em>data</em>, <em>labels=None</em>, <em>opts=case_name : baseline disp_xmax : inf disp_xmin : -inf names ... : [] plot_type : png rms_xmax  : inf rms_xmin  : -inf save_path : C:\Users\dcstauff\Documents\GitHub\dstauffman\doc\source save_plot : False show_plot : True sub_plots : True</em>, <em>matrix_name='Correlation Matrix'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#plot_correlation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.plot_correlation_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Visually plots a correlation matrix.</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">plot_correlation_matrix</span><span class="p">,</span> <span class="n">unit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">rand</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">,</span> <span class="s">&#39;e&#39;</span><span class="p">,</span> <span class="s">&#39;f&#39;</span><span class="p">,</span> <span class="s">&#39;g&#39;</span><span class="p">,</span> <span class="s">&#39;h&#39;</span><span class="p">,</span> <span class="s">&#39;i&#39;</span><span class="p">,</span> <span class="s">&#39;j&#39;</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">unit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plot_correlation_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">labels</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Close plots
+&gt;&gt;&gt; plt.close(fig)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.plotting.setup_plots">
+<code class="descclassname">dstauffman.plotting.</code><code class="descname">setup_plots</code><span class="sig-paren">(</span><em>figs</em>, <em>opts</em>, <em>plot_type='time'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#setup_plots"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.setup_plots" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines common plot operations into one easy command.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>figs</strong> : array_like</p>
+<blockquote>
+<div><p>List of figures</p>
+</div></blockquote>
+<p><strong>opts</strong> : class Opts</p>
+<blockquote>
+<div><p>Optional plotting controls</p>
+</div></blockquote>
+<p class="last"><strong>plot_type</strong> : optional, {&#8216;time&#8217;, &#8216;time_no_yscale&#8217;, &#8216;dist&#8217;, &#8216;dist_no_yscale&#8217;}</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David Stauffer in May 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">setup_plots</span><span class="p">,</span> <span class="n">Opts</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s">&#39;Figure Title&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> 
+<span class="go">[&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;X vs Y&#39;</span><span class="p">)</span> 
+<span class="go">&lt;matplotlib.text.Text object at 0x...&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s">&#39;time [years]&#39;</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s">&#39;value [radians]&#39;</span><span class="p">)</span> 
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">opts</span> <span class="o">=</span> <span class="n">Opts</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">opts</span><span class="o">.</span><span class="n">case_name</span> <span class="o">=</span> <span class="s">&#39;Testing&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">opts</span><span class="o">.</span><span class="n">show_plot</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">opts</span><span class="o">.</span><span class="n">save_plot</span> <span class="o">=</span> <span class="bp">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">setup_plots</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">opts</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Close plots
+&gt;&gt;&gt; plt.close(fig)</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.plotting.storefig">
+<code class="descclassname">dstauffman.plotting.</code><code class="descname">storefig</code><span class="sig-paren">(</span><em>fig</em>, <em>folder=None</em>, <em>plot_type='png'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#storefig"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.storefig" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stores the specified figures in the specified folder and with the specified plot type(s)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fig</strong> : list or single figure</p>
+<blockquote>
+<div><p>Figure object(s) to save to disk</p>
+</div></blockquote>
+<p><strong>folder</strong> : str</p>
+<blockquote>
+<div><p>Location to save figures to</p>
+</div></blockquote>
+<p><strong>plot_type</strong> : str</p>
+<blockquote>
+<div><p>Type of figure to save to disk, like &#8216;png&#8217; or &#8216;jpg&#8217;</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>ValueError</strong></p>
+<blockquote class="last">
+<div><p>Specified folder to save figures to doesn&#8217;t exist.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">matplotlib.pyplot.savefig</span></code>, <a class="reference internal" href="#dstauffman.plotting.titleprefix" title="dstauffman.plotting.titleprefix"><code class="xref py py-obj docutils literal"><span class="pre">titleprefix</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Uses the figure.canvas.get_window_title property to determine the figure name.</li>
+</ol>
+<p class="rubric">Examples</p>
+<p>Create figure and then save to disk</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">storefig</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s">&#39;Figure Title&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> 
+<span class="go">[&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;X vs Y&#39;</span><span class="p">)</span> 
+<span class="go">&lt;matplotlib.text.Text object at 0x...&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plot_type</span> <span class="o">=</span> <span class="s">&#39;png&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">storefig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">folder</span><span class="p">,</span> <span class="n">plot_type</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Close plot
+&gt;&gt;&gt; plt.close()</p>
+<p>Delete file
+&gt;&gt;&gt; os.remove(os.path.join(folder, &#8216;Figure Title.png&#8217;))</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.plotting.titleprefix">
+<code class="descclassname">dstauffman.plotting.</code><code class="descname">titleprefix</code><span class="sig-paren">(</span><em>fig</em>, <em>prefix=''</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#titleprefix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.titleprefix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Prepends a text string to all the titles on existing figures.</p>
+<p>It also sets the canvas title used by storefig when saving to a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>fig</strong> : list or single figure</p>
+<blockquote>
+<div><p>Figure object(s) to save to disk</p>
+</div></blockquote>
+<p><strong>prefix</strong> : str</p>
+<blockquote class="last">
+<div><p>Text to be prepended to the title and figure name</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.plotting.storefig" title="dstauffman.plotting.storefig"><code class="xref py py-obj docutils literal"><span class="pre">storefig</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in March 2015.</li>
+<li>Desired this function to also check for suptitles.</li>
+</ol>
+<p class="rubric">Examples</p>
+<p>Create figure and then change the title</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">titleprefix</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s">&#39;Figure Title&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span> 
+<span class="go">[&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s">&#39;X vs Y&#39;</span><span class="p">)</span> 
+<span class="go">&lt;matplotlib.text.Text object at 0x...&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prefix</span> <span class="o">=</span> <span class="s">&#39;Baseline&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">titleprefix</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">prefix</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Close plot
+&gt;&gt;&gt; plt.close()</p>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-dstauffman.quat">
+<span id="dstauffman-quat-module"></span><h2>dstauffman.quat module<a class="headerlink" href="#module-dstauffman.quat" title="Permalink to this headline">¶</a></h2>
+<p>Quat module file for the &#8220;dstauffman&#8221; library.  It contains generic quaternion
+utilities that can be independently defined and used by other modules.</p>
+<div class="section" id="id14">
+<h3>Notes<a class="headerlink" href="#id14" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in April 2015.</li>
+</ol>
+<dl class="function">
+<dt id="dstauffman.quat.concat_vectors">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">concat_vectors</code><span class="sig-paren">(</span><em>v1</em>, <em>v2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#concat_vectors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.concat_vectors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Concatenate two vectors as if they were column vectors.</p>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>TODO:Assumes &#8216;C&#8217; vectors as opposed to &#8216;F&#8217; vectors?</li>
+</ol>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.qrot">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">qrot</code><span class="sig-paren">(</span><em>axis</em>, <em>angle</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#qrot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.qrot" title="Permalink to this definition">¶</a></dt>
+<dd><p>Construct a quaternion expressing a rotation about a single axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>axis</strong> : int</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Axis about which rotation is being made, from {1, 2, 3}</dt>
+<dd><ol class="first last arabic simple">
+<li>for x-axis</li>
+<li>for y-axis</li>
+<li>for z-axis</li>
+</ol>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>angle</strong> : array_like</p>
+<blockquote>
+<div><p>angle of rotation in radians</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>quat</strong> : ndarray, (4, N)</p>
+<blockquote class="last">
+<div><p>quaternion representing the given rotations</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Adapted from GARSE by David C. Stauffer in April 2015.</li>
+</ol>
+<p class="rubric">References</p>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt>Wertz, James R. (editor), Equations 12.11 in Parameterization of the Attitude,</dt>
+<dd><p class="first last">Section 12.1, Spacecraft Attitude Determination and Control,
+Kluwer Academic Publishers, 1978.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">qrot</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat</span> <span class="o">=</span> <span class="n">qrot</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span> 
+<span class="go">[ 0. 0. 0.70710678  0.70710678]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.quat_angle_diff">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">quat_angle_diff</code><span class="sig-paren">(</span><em>quat1</em>, <em>quat2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#quat_angle_diff"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.quat_angle_diff" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the angular difference between two quaternions</p>
+<p>This function takes a two quaternions and calculates a delta quaternion between them.
+It then uses the delta quaternion to generate both a total angular difference, and an
+an angular difference expressed in X, Y, Z components based on the axis of rotation,
+expressed in the original frame of the quat1 input quaternion.  This function uses full
+trignometric functions instead of any small angle approximations.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quat1</strong> : ndarray (4, N)</p>
+<blockquote>
+<div><p>quaternion one</p>
+</div></blockquote>
+<p><strong>quat2</strong> : ndarray (4, N)</p>
+<blockquote>
+<div><p>quaternion two</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>theta</strong> : ndarray (1, N)</p>
+<blockquote>
+<div><p>angular different [rad]</p>
+</div></blockquote>
+<p><strong>comp</strong> : ndarray (3, N)</p>
+<blockquote class="last">
+<div><p>angle components in x, y, z frame [rad]</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Adapted from GARSE by David C. Stauffer in April 2015.</li>
+</ol>
+<p class="rubric">References</p>
+<p>This function is based on this representation of a unit quaternion:
+quat = [[nx * sin(theta/2)]</p>
+<blockquote>
+<div>[ny * sin(theta/2)]
+[nz * sin(theta/2)]
+[   cos(theta/2)  ]]</div></blockquote>
+<dl class="docutils">
+<dt>Where: &lt;nx,ny,nz&gt; are the three components of a unit vector of rotation axis and</dt>
+<dd>theta is the angle of rotation</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">qrot</span><span class="p">,</span> <span class="n">quat_mult</span><span class="p">,</span> <span class="n">quat_angle_diff</span><span class="p">,</span> <span class="n">concat_vectors</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat1</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dq1</span> <span class="o">=</span> <span class="n">qrot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dq2</span> <span class="o">=</span> <span class="n">qrot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat2</span>  <span class="o">=</span> <span class="n">concat_vectors</span><span class="p">(</span><span class="n">quat_mult</span><span class="p">(</span><span class="n">dq1</span><span class="p">,</span><span class="n">quat1</span><span class="p">),</span> <span class="n">quat_mult</span><span class="p">(</span><span class="n">dq2</span><span class="p">,</span><span class="n">quat1</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span> <span class="o">=</span> <span class="n">quat_angle_diff</span><span class="p">(</span><span class="n">quat1</span><span class="p">,</span> <span class="n">quat2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span> 
+<span class="go">[ 0.001  0.05 ]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span> 
+<span class="go">[[ 0.001  0.   ]</span>
+<span class="go"> [ 0.     0.05 ]</span>
+<span class="go"> [ 0.     0.   ]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.quat_from_euler">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">quat_from_euler</code><span class="sig-paren">(</span><em>angles</em>, <em>seq=array([3</em>, <em>1</em>, <em>2])</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#quat_from_euler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.quat_from_euler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert set(s) of euler angles to quaternion(s).</p>
+<p>Assumes angles are of (3 1 2) euler order and converts accordingly unless the
+optional &#8220;seq&#8221; argument defines a different euler order. This function will
+also take more than three angle sequences if desired.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>angles</strong> : ndarray, (A, N)</p>
+<blockquote>
+<div><p>Euler angels [rad]</p>
+</div></blockquote>
+<p><strong>seq</strong> : ndarray, (A, 1), optional</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Euler angle sequence, where:</dt>
+<dd><p class="first last">1 = X axis, or roll
+2 = Y axis, or pitch
+3 = Z axis, or yaw</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>quat</strong> : ndarray (4, N)</p>
+<blockquote class="last">
+<div><p>quaternion representing the euler rotation(s)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic">
+<li><p class="first">Adapted from GARSE by David C. Stauffer in April 2015.</p>
+</li>
+<li><p class="first">This function will take one angle sequence, but an arbitrary number of angles.</p>
+</li>
+<li><dl class="first docutils">
+<dt>Enumerated values are some selective permutation of (1, 2, 3) without successive</dt>
+<dd><p class="first last">repetition such as (3, 1, 2) or (3, 1, 3) but not (3, 1, 1) wherein 1, 1 is a successive
+repetition.  By default, it expects (3, 1, 2).</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">quat_from_euler</span><span class="p">,</span> <span class="n">concat_vectors</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.04</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.06</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">angles</span> <span class="o">=</span> <span class="n">concat_vectors</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat</span> <span class="o">=</span> <span class="n">quat_from_euler</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">seq</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span> 
+<span class="go">[[ 0.01504849  0.03047982]</span>
+<span class="go"> [ 0.00992359  0.02438147]</span>
+<span class="go"> [ 0.00514916  0.02073308]</span>
+<span class="go"> [ 0.99982426  0.99902285]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.quat_interp">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">quat_interp</code><span class="sig-paren">(</span><em>time</em>, <em>quat</em>, <em>ti</em>, <em>inclusive=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#quat_interp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.quat_interp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Interpolate quaternions from a monotonic time series of quaternions.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>time</strong> : ndarray, (A, )</p>
+<blockquote>
+<div><p>monotonically increasing time series [sec]</p>
+</div></blockquote>
+<p><strong>quat</strong> : ndarray, (4, A)</p>
+<blockquote>
+<div><p>quaternion series</p>
+</div></blockquote>
+<p><strong>ti</strong> : ndarray (B, )</p>
+<blockquote>
+<div><p>desired time of interpolation, also monotonically increasing [sec]</p>
+</div></blockquote>
+<p><strong>inclusive</strong> : bool {True, False}, optional</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>qout</strong> : ndarray (4, B)</p>
+<blockquote class="last">
+<div><p>interpolated quaternion at ti</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Adapted from GARSE by David C. Stauffer in April 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">quat_interp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mf">0.1961</span><span class="p">,</span> <span class="mf">0.9806</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ti</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">4.5</span><span class="p">,</span> <span class="mi">5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qout</span> <span class="o">=</span> <span class="n">quat_interp</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">quat</span><span class="p">,</span> <span class="n">ti</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">qout</span><span class="p">)</span> 
+<span class="go">[[ 0. 0.          0.41748298  0.5 ]</span>
+<span class="go"> [ 0. 0.         -0.41748298 -0.5 ]</span>
+<span class="go"> [ 0. 0.09852786 -0.35612893 -0.5 ]</span>
+<span class="go"> [ 1. 0.99513429  0.72428455  0.5 ]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.quat_inv">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">quat_inv</code><span class="sig-paren">(</span><em>q1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#quat_inv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.quat_inv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the inverse of a normalized quaternions</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>q1</strong> : ndarray, (4xN)</p>
+<blockquote>
+<div><p>input quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>q2</strong> : ndarray, (4xN)</p>
+<blockquote class="last">
+<div><p>inverse quaterion</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.quat.quat_norm" title="dstauffman.quat.quat_norm"><code class="xref py py-obj docutils literal"><span class="pre">quat_norm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_mult" title="dstauffman.quat.quat_mult"><code class="xref py py-obj docutils literal"><span class="pre">quat_mult</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_prop" title="dstauffman.quat.quat_prop"><code class="xref py py-obj docutils literal"><span class="pre">quat_prop</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_times_vector" title="dstauffman.quat.quat_times_vector"><code class="xref py py-obj docutils literal"><span class="pre">quat_times_vector</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_dcm" title="dstauffman.quat.quat_to_dcm"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_dcm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_euler" title="dstauffman.quat.quat_to_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_euler</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_from_euler" title="dstauffman.quat.quat_from_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_from_euler</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Adapted from GARSE by David C. Stauffer in April 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">qrot</span><span class="p">,</span> <span class="n">quat_inv</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q1</span> <span class="o">=</span> <span class="n">qrot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">q2</span> <span class="o">=</span> <span class="n">quat_inv</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">q2</span><span class="p">)</span> 
+<span class="go">[-0.70710678 -0. -0. 0.70710678]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.quat_mult">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">quat_mult</code><span class="sig-paren">(</span><em>a</em>, <em>b</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#quat_mult"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.quat_mult" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiplies quaternions together.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>a</strong> : ndarray, (4xN)</p>
+<blockquote>
+<div><p>input quaternion one</p>
+</div></blockquote>
+<p><strong>b</strong> : ndarray, (4xN)</p>
+<blockquote>
+<div><p>input quaternion two</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>c</strong> : ndarray, (4xN)</p>
+<blockquote class="last">
+<div><p>result of quaternion multiplication</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.quat.quat_inv" title="dstauffman.quat.quat_inv"><code class="xref py py-obj docutils literal"><span class="pre">quat_inv</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_norm" title="dstauffman.quat.quat_norm"><code class="xref py py-obj docutils literal"><span class="pre">quat_norm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_prop" title="dstauffman.quat.quat_prop"><code class="xref py py-obj docutils literal"><span class="pre">quat_prop</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_times_vector" title="dstauffman.quat.quat_times_vector"><code class="xref py py-obj docutils literal"><span class="pre">quat_times_vector</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_dcm" title="dstauffman.quat.quat_to_dcm"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_dcm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_euler" title="dstauffman.quat.quat_to_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_euler</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_from_euler" title="dstauffman.quat.quat_from_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_from_euler</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Adapted from GARSE by David C. Stauffer in April 2015.</li>
+<li>Each of (a, b) may be either a single quaternion (4, 1) or an array of quaternions (4, N).
+If <cite>a</cite> and <cite>b</cite> are both single quaternions, then return b*a. If either (but not both) is
+an array of quaternions, then return the product of the single quaternion times each element
+of the array. If both are rows of quaternions, multiply corresponding columns.
+<cite>c</cite> will have size (4, 1) in the first case, and (4, N) in the other cases.</li>
+<li>The quaternions <cite>a</cite> and <cite>b</cite> describe successive reference frame changes, i.e., a is
+expressed in the coordinate system resulting from b, not in the original coordinate system.
+In Don Reid&#8217;s tutorial, this is called the R- version.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">qrot</span><span class="p">,</span> <span class="n">quat_mult</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">numpy</span> <span class="kn">import</span> <span class="n">pi</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">qrot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">pi</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">b</span> <span class="o">=</span> <span class="n">qrot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="n">pi</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c</span> <span class="o">=</span> <span class="n">quat_mult</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> 
+<span class="go">[ 4.32978028e-17 7.07106781e-01 -7.07106781e-01 4.32978028e-17]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.quat_norm">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">quat_norm</code><span class="sig-paren">(</span><em>x</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#quat_norm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.quat_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes each column of the input matrix</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>x</strong> : ndarray</p>
+<blockquote>
+<div><p>input quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>y</strong> : ndarray</p>
+<blockquote class="last">
+<div><p>normalized quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.quat.quat_mult" title="dstauffman.quat.quat_mult"><code class="xref py py-obj docutils literal"><span class="pre">quat_mult</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_inv" title="dstauffman.quat.quat_inv"><code class="xref py py-obj docutils literal"><span class="pre">quat_inv</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_prop" title="dstauffman.quat.quat_prop"><code class="xref py py-obj docutils literal"><span class="pre">quat_prop</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_times_vector" title="dstauffman.quat.quat_times_vector"><code class="xref py py-obj docutils literal"><span class="pre">quat_times_vector</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_dcm" title="dstauffman.quat.quat_to_dcm"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_dcm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_euler" title="dstauffman.quat.quat_to_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_euler</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_from_euler" title="dstauffman.quat.quat_from_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_from_euler</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Adapted from GARSE by David C. Stauffer in April 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">quat_norm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">y</span> <span class="o">=</span> <span class="n">quat_norm</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> 
+<span class="go">[ 0.09950372 0. 0. 0.99503719]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.quat_prop">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">quat_prop</code><span class="sig-paren">(</span><em>quat</em>, <em>delta_ang</em>, <em>renorm=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#quat_prop"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.quat_prop" title="Permalink to this definition">¶</a></dt>
+<dd><p>Approximate propagation of a quaternion using a small delta angle.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quat</strong> : ndarray, (4, 1)</p>
+<blockquote>
+<div><p>normalized input quaternion</p>
+</div></blockquote>
+<p><strong>delta_ang</strong> : ndarray, (3, 1)</p>
+<blockquote>
+<div><p>delta angles in x, y, z order [rad]</p>
+</div></blockquote>
+<p><strong>renorm</strong> : bool {True, False}, optional</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>quat_new</strong> : ndarray, (4, 1)</p>
+<blockquote class="last">
+<div><p>propagated quaternion, optionally re-normalized</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.quat.quat_mult" title="dstauffman.quat.quat_mult"><code class="xref py py-obj docutils literal"><span class="pre">quat_mult</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_inv" title="dstauffman.quat.quat_inv"><code class="xref py py-obj docutils literal"><span class="pre">quat_inv</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_norm" title="dstauffman.quat.quat_norm"><code class="xref py py-obj docutils literal"><span class="pre">quat_norm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_times_vector" title="dstauffman.quat.quat_times_vector"><code class="xref py py-obj docutils literal"><span class="pre">quat_times_vector</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_dcm" title="dstauffman.quat.quat_to_dcm"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_dcm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_euler" title="dstauffman.quat.quat_to_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_euler</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_from_euler" title="dstauffman.quat.quat_from_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_from_euler</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Adapted from GARSE by David C. Stauffer in April 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">quat_prop</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat</span>      <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">delta_ang</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.02</span><span class="p">,</span> <span class="mf">0.03</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat_new</span>  <span class="o">=</span> <span class="n">quat_prop</span><span class="p">(</span><span class="n">quat</span><span class="p">,</span> <span class="n">delta_ang</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">quat_new</span><span class="p">)</span> 
+<span class="go">[ 0.00499913  0.00999825  0.01499738  0.99982505]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.quat_times_vector">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">quat_times_vector</code><span class="sig-paren">(</span><em>quat</em>, <em>v</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#quat_times_vector"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.quat_times_vector" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiply quaternion(s) against vector(s)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quat</strong> : ndarray, (4, N) or (4, )</p>
+<blockquote>
+<div><p>quaternion(s)</p>
+</div></blockquote>
+<p><strong>v</strong> : ndarray, (3, N) or (3 ,)</p>
+<blockquote>
+<div><p>input vector(s)</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>vec</strong> : ndarray, (3, N)</p>
+<blockquote class="last">
+<div><p>product vector(s)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.quat.quat_mult" title="dstauffman.quat.quat_mult"><code class="xref py py-obj docutils literal"><span class="pre">quat_mult</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_inv" title="dstauffman.quat.quat_inv"><code class="xref py py-obj docutils literal"><span class="pre">quat_inv</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_norm" title="dstauffman.quat.quat_norm"><code class="xref py py-obj docutils literal"><span class="pre">quat_norm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_prop" title="dstauffman.quat.quat_prop"><code class="xref py py-obj docutils literal"><span class="pre">quat_prop</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_dcm" title="dstauffman.quat.quat_to_dcm"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_dcm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_euler" title="dstauffman.quat.quat_to_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_euler</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_from_euler" title="dstauffman.quat.quat_from_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_from_euler</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Adapted from GARSE by David C. Stauffer in April 2015.</li>
+<li>This function will broadcast a single vector or quaternion to the other dimension</li>
+</ol>
+<p class="rubric">References</p>
+<p>Steps to algorithm
+#.  qv = quat(1:3) x v
+#.  vec = v + 2*[ -( quat(4) * qv ) + (quat(1:3) x qv) ]</p>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">quat_times_vector</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">v</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">vec</span> <span class="o">=</span> <span class="n">quat_times_vector</span><span class="p">(</span><span class="n">quat</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span> 
+<span class="go">[[-1.  2.]</span>
+<span class="go"> [ 0.  0.]</span>
+<span class="go"> [ 0.  0.]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.quat_to_dcm">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">quat_to_dcm</code><span class="sig-paren">(</span><em>quat</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#quat_to_dcm"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.quat_to_dcm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts quaternion to a direction cosine matrix</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quat</strong> : ndarray (4, 1)</p>
+<blockquote>
+<div><p>quaternion</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>dcm</strong> : ndarray (3, 3)</p>
+<blockquote class="last">
+<div><p>direction cosine matrix</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.quat.quat_mult" title="dstauffman.quat.quat_mult"><code class="xref py py-obj docutils literal"><span class="pre">quat_mult</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_inv" title="dstauffman.quat.quat_inv"><code class="xref py py-obj docutils literal"><span class="pre">quat_inv</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_norm" title="dstauffman.quat.quat_norm"><code class="xref py py-obj docutils literal"><span class="pre">quat_norm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_prop" title="dstauffman.quat.quat_prop"><code class="xref py py-obj docutils literal"><span class="pre">quat_prop</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_times_vector" title="dstauffman.quat.quat_times_vector"><code class="xref py py-obj docutils literal"><span class="pre">quat_times_vector</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_to_euler" title="dstauffman.quat.quat_to_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_to_euler</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_from_euler" title="dstauffman.quat.quat_from_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_from_euler</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Adapted from GARSE by David C. Stauffer in April 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">quat_to_dcm</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dcm</span> <span class="o">=</span> <span class="n">quat_to_dcm</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">dcm</span><span class="p">)</span> 
+<span class="go">[[ 0.  0.  1.]</span>
+<span class="go"> [-1.  0.  0.]</span>
+<span class="go"> [ 0. -1.  0.]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.quat.quat_to_euler">
+<code class="descclassname">dstauffman.quat.</code><code class="descname">quat_to_euler</code><span class="sig-paren">(</span><em>quat</em>, <em>seq</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/quat.html#quat_to_euler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.quat.quat_to_euler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts quaternion to Euler angles for one of 6 input angle sequences.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>quat</strong> : ndarray, (4, N)</p>
+<blockquote>
+<div><p>quaternion</p>
+</div></blockquote>
+<p><strong>seq</strong> : ndarray, {(3, 1, 2), (1, 2, 3), (2, 3, 1), (1, 3, 2), (2, 1, 3), (3, 2, 1)}</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>euler angle sequence, where:</dt>
+<dd><p class="first last">1 = X axis, or roll
+2 = Y axis, or pitch
+3 = Z axis, or yaw</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>euler</strong> : ndarray, (3, N)</p>
+<blockquote class="last">
+<div><p>Euler angles [rad]</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.quat.quat_mult" title="dstauffman.quat.quat_mult"><code class="xref py py-obj docutils literal"><span class="pre">quat_mult</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_inv" title="dstauffman.quat.quat_inv"><code class="xref py py-obj docutils literal"><span class="pre">quat_inv</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_norm" title="dstauffman.quat.quat_norm"><code class="xref py py-obj docutils literal"><span class="pre">quat_norm</span></code></a>, <a class="reference internal" href="#dstauffman.quat.quat_prop" title="dstauffman.quat.quat_prop"><code class="xref py py-obj docutils literal"><span class="pre">quat_prop</span></code></a>, <code class="xref py py-obj docutils literal"><span class="pre">quat_times_vectore</span></code>, <a class="reference internal" href="#dstauffman.quat.quat_from_euler" title="dstauffman.quat.quat_from_euler"><code class="xref py py-obj docutils literal"><span class="pre">quat_from_euler</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Adapted from GARSE by David C. Stauffer in April 2015.</li>
+</ol>
+<p class="rubric">References</p>
+<ol class="arabic simple">
+<li>Appendix E of Wertz, page 764</li>
+<li>Appendix I of Kane, Likins, and Levinson, page 423</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">quat_to_euler</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">quat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span><span class="o">.</span><span class="n">T</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">euler</span> <span class="o">=</span> <span class="n">quat_to_euler</span><span class="p">(</span><span class="n">quat</span><span class="p">,</span> <span class="n">seq</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">euler</span><span class="p">)</span> 
+<span class="go">[[-0.         -3.14159265]</span>
+<span class="go"> [ 0.          0.        ]</span>
+<span class="go"> [ 3.14159265 -0.        ]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-dstauffman.utils">
+<span id="dstauffman-utils-module"></span><h2>dstauffman.utils module<a class="headerlink" href="#module-dstauffman.utils" title="Permalink to this headline">¶</a></h2>
+<p>Utils module file for the &#8220;dstauffman&#8221; library.  It contains generic utilities that can be
+independently defined and used by other modules.</p>
+<div class="section" id="id15">
+<h3>Notes<a class="headerlink" href="#id15" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt>By design, this module does not reference any other piece of the dstauffman code base except</dt>
+<dd><p class="first last">constants or enums to avoid circular references.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Written by David C. Stauffer in March 2015.</p>
+</li>
+</ol>
+<dl class="function">
+<dt id="dstauffman.utils.capture_output">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">capture_output</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#capture_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.capture_output" title="Permalink to this definition">¶</a></dt>
+<dd><p>Captures the stdout and stderr streams instead of displaying to the screen.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> : class StringIO</p>
+<blockquote>
+<div><p>stdout stream output</p>
+</div></blockquote>
+<p><strong>err</strong> : class StringIO</p>
+<blockquote class="last">
+<div><p>stderr stream output</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">capture_output</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">capture_output</span><span class="p">()</span> <span class="k">as</span> <span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Hello, World!&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">output</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+<span class="go">Hello, World!</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.combine_sets">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">combine_sets</code><span class="sig-paren">(</span><em>n1</em>, <em>u1</em>, <em>s1</em>, <em>n2</em>, <em>u2</em>, <em>s2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#combine_sets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.combine_sets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines the mean and standard deviations for two non-overlapping sets of data.</p>
+<p>This function combines two non-overlapping data sets, given a number of samples, mean
+and standard deviation for the two data sets.  It first calculates the total number of samples
+then calculates the total mean using a weighted average, and then calculates the combined
+standard deviation using an equation found on wikipedia.  It also checks for special cases
+where either data set is empty or if only one total point is in the combined set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n1</strong> : float</p>
+<blockquote>
+<div><p>number of points in data set 1</p>
+</div></blockquote>
+<p><strong>u1</strong> : float</p>
+<blockquote>
+<div><p>mean of data set 1</p>
+</div></blockquote>
+<p><strong>s1</strong> : float</p>
+<blockquote>
+<div><p>standard deviation of data set 1</p>
+</div></blockquote>
+<p><strong>n2</strong> : float</p>
+<blockquote>
+<div><p>number of points in data set 2</p>
+</div></blockquote>
+<p><strong>u2</strong> : float</p>
+<blockquote>
+<div><p>mean of data set 2</p>
+</div></blockquote>
+<p><strong>s2</strong> : float</p>
+<blockquote>
+<div><p>standard deviation of data set 2</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>n</strong> : float,</p>
+<blockquote>
+<div><p>number of points in the combined data set</p>
+</div></blockquote>
+<p><strong>u</strong> : float,</p>
+<blockquote>
+<div><p>mean of the combined data set</p>
+</div></blockquote>
+<p><strong>s</strong> : float,</p>
+<blockquote class="last">
+<div><p>standard deviation of the combined data set</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">np.mean</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">np.std</span></code></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written in Matlab by David Stauffer in Jul 2012.</li>
+<li>Ported to Python by David Stauffer in May 2015.</li>
+<li>Could be expanded to broadcast and handle array inputs.</li>
+</ol>
+<p class="rubric">References</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics">http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics</a>, on 8/7/12</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">combine_sets</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n1</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u1</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n2</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u2</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="mf">0.25</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="o">=</span> <span class="n">combine_sets</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">u1</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">u2</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="go">15</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> 
+<span class="go">1.666666...67</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="go">0.59135639081</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.compare_two_classes">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">compare_two_classes</code><span class="sig-paren">(</span><em>c1</em>, <em>c2</em>, <em>suppress_output=False</em>, <em>names=None</em>, <em>ignore_callables=True</em>, <em>compare_recursively=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#compare_two_classes"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.compare_two_classes" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares two classes by going through all their public attributes and showing that they are equal.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>c1</strong> : class object</p>
+<blockquote>
+<div><p>Any class object</p>
+</div></blockquote>
+<p><strong>c2</strong> : class object</p>
+<blockquote>
+<div><p>Any other class object</p>
+</div></blockquote>
+<p><strong>suppress_output</strong> : bool, optional</p>
+<blockquote>
+<div><p>If True, suppress the information printed to the screen, defaults to False.</p>
+</div></blockquote>
+<p><strong>names</strong> : list of str, optional</p>
+<blockquote>
+<div><p>List of the names to be printed to the screen for the two input classes.</p>
+</div></blockquote>
+<p><strong>ignore_callables</strong> : bool, optional</p>
+<blockquote>
+<div><p>If True, ignore differences in callable attributes (i.e. methods), defaults to True.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>is_same</strong> : bool</p>
+<blockquote class="last">
+<div><p>True/False flag for whether the two class are the same.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">compare_two_classes</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c1</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s">&#39;Class1&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="p">),</span> <span class="p">{</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;b&#39;</span> <span class="p">:</span> <span class="s">&#39;[1, 2, 3]&#39;</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">c2</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s">&#39;Class2&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="p">),</span> <span class="p">{</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;b&#39;</span> <span class="p">:</span> <span class="s">&#39;[1, 2, 4]&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_same</span> <span class="o">=</span> <span class="n">compare_two_classes</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">)</span>
+<span class="go">b is different from c1 to c2.</span>
+<span class="go">c is only in c1.</span>
+<span class="go">d is only in c2.</span>
+<span class="go">&quot;c1&quot; and &quot;c2&quot; are not the same.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.compare_two_dicts">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">compare_two_dicts</code><span class="sig-paren">(</span><em>d1</em>, <em>d2</em>, <em>suppress_output=False</em>, <em>names=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#compare_two_dicts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.compare_two_dicts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compares two dictionaries for the same keys, and the same value of those keys.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>d1</strong> : class object</p>
+<blockquote>
+<div><p>Any class object</p>
+</div></blockquote>
+<p><strong>d2</strong> : class object</p>
+<blockquote>
+<div><p>Any other class object</p>
+</div></blockquote>
+<p><strong>suppress_output</strong> : bool, optional</p>
+<blockquote>
+<div><p>If True, suppress the information printed to the screen, defaults to False.</p>
+</div></blockquote>
+<p><strong>names</strong> : list of str, optional</p>
+<blockquote>
+<div><p>List of the names to be printed to the screen for the two input classes.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>is_same</strong> : bool</p>
+<blockquote class="last">
+<div><p>True/False flag for whether the two class are the same.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">compare_two_dicts</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d1</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="s">&#39;c&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">d2</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;a&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">is_same</span> <span class="o">=</span> <span class="n">compare_two_dicts</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">)</span>
+<span class="go">b is different.</span>
+<span class="go">c is only in d1.</span>
+<span class="go">d is only in d2.</span>
+<span class="go">&quot;d1&quot; and &quot;d2&quot; are not the same.</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.convert_annual_to_monthly_probability">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">convert_annual_to_monthly_probability</code><span class="sig-paren">(</span><em>annual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#convert_annual_to_monthly_probability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.convert_annual_to_monthly_probability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given annual probabily into the equivalent monthly one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>annual</strong> : numpy.nd_array</p>
+<blockquote>
+<div><p>annual probabilities, 0 &lt;= annual &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>monthly</strong> : numpy.nd_array</p>
+<blockquote>
+<div><p>equivalent monthly probabilities, 0 &lt;= monthly &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>ValueError</strong></p>
+<blockquote class="last">
+<div><p>Any probabilities outside of the [0, 1] range</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Checks for boundary cases to avoid a divide by zero warning</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">convert_annual_to_monthly_probability</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">annual</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">monthly</span> <span class="o">=</span> <span class="n">convert_annual_to_monthly_probability</span><span class="p">(</span><span class="n">annual</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">monthly</span><span class="p">)</span> 
+<span class="go">[ 0. 0.00874161  1. ]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.convert_monthly_to_annual_probability">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">convert_monthly_to_annual_probability</code><span class="sig-paren">(</span><em>monthly</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#convert_monthly_to_annual_probability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.convert_monthly_to_annual_probability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given monthly probability into the equivalent annual one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>monthly</strong> : numpy.nd_array</p>
+<blockquote>
+<div><p>equivalent monthly probabilities, 0 &lt;= monthly &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>annual</strong> : numpy.nd_array</p>
+<blockquote class="last">
+<div><p>annual probabilities, 0 &lt;= annual &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">convert_monthly_to_annual_probability</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">monthly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">annual</span> <span class="o">=</span> <span class="n">convert_monthly_to_annual_probability</span><span class="p">(</span><span class="n">monthly</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">annual</span><span class="p">)</span> 
+<span class="go">[ 0. 0.71757046 1. ]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.disp">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">disp</code><span class="sig-paren">(</span><em>struct</em>, <em>level=0</em>, <em>padding=None</em>, <em>suppress_output=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#disp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.disp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Matlab like &#8216;disp&#8217; or display function.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>struct</strong> : class</p>
+<blockquote>
+<div><p>Structure to display</p>
+</div></blockquote>
+<p><strong>level</strong> : int, optional</p>
+<blockquote>
+<div><p>Level to indent, used for substructures within structures.</p>
+</div></blockquote>
+<p><strong>padding</strong> : int, optional</p>
+<blockquote>
+<div><p>Minimum number of spaces to pad the results to</p>
+</div></blockquote>
+<p><strong>suppress_output</strong> : bool, optional</p>
+<blockquote class="last">
+<div><p>Choose whether to display results to the command window, default False, so show output</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in March 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">disp</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="s">&#39;a&#39;</span><span class="p">,</span> <span class="p">(</span><span class="nb">object</span><span class="p">,</span> <span class="p">),</span> <span class="p">{</span><span class="s">&#39;b&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&#39;c&#39;</span> <span class="p">:</span> <span class="s">&#39;[1, 2, 3]&#39;</span><span class="p">,</span> <span class="s">&#39;d&#39;</span><span class="p">:</span> <span class="s">&#39;text&#39;</span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">txt</span> <span class="o">=</span> <span class="n">disp</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<span class="go">b : 0</span>
+<span class="go">c : [1, 2, 3]</span>
+<span class="go">d : text</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.get_data_dir">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">get_data_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#get_data_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.get_data_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the default data folder location.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote class="last">
+<div><p>Location of the default folder for storing the code data.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in April 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">get_data_dir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">folder</span> <span class="o">=</span> <span class="n">get_data_dir</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.get_images_dir">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">get_images_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#get_images_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.get_images_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the default data folder location.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote class="last">
+<div><p>Location of the default folder for storing the code data.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in April 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">get_images_dir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">folder</span> <span class="o">=</span> <span class="n">get_images_dir</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.get_python_definitions">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">get_python_definitions</code><span class="sig-paren">(</span><em>text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#get_python_definitions"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.get_python_definitions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets all public class and def names from the text of the file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>text</strong> : str</p>
+<blockquote>
+<div><p>The text of the python file</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>funcs</strong> : array_like, str</p>
+<blockquote class="last">
+<div><p>List of functions within the text of the python file</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">get_python_definitions</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;def a():</span><span class="se">\n</span><span class="s">    pass</span><span class="se">\n</span><span class="s">&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">funcs</span> <span class="o">=</span> <span class="n">get_python_definitions</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">funcs</span><span class="p">)</span>
+<span class="go">[&#39;a&#39;]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.get_root_dir">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">get_root_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#get_root_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.get_root_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the folder that contains this source file and thus the root folder for the whole code.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote class="last">
+<div><p>Location of the folder that contains all the source files for the code.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in March 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">get_root_dir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">folder</span> <span class="o">=</span> <span class="n">get_root_dir</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.get_tests_dir">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">get_tests_dir</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#get_tests_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.get_tests_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the default test folder location.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote class="last">
+<div><p>Location of the folder that contains all the test files for the code.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in March 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">get_tests_dir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">folder</span> <span class="o">=</span> <span class="n">get_tests_dir</span><span class="p">()</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.make_python_init">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">make_python_init</code><span class="sig-paren">(</span><em>folder</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#make_python_init"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.make_python_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Makes the Python __init__.py file based on the files/definitions found within the specified folder.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote>
+<div><p>Name of folder to process</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>output</strong> : str</p>
+<blockquote class="last">
+<div><p>Resulting text for __init__.py file</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">make_python_init</span><span class="p">,</span> <span class="n">get_root_dir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">folder</span> <span class="o">=</span> <span class="n">get_root_dir</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="n">make_python_init</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">text</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">20</span><span class="p">])</span>
+<span class="go">from .classes import</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.nonzero_indices">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">nonzero_indices</code><span class="sig-paren">(</span><em>data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#nonzero_indices"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.nonzero_indices" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns the indices for a boolean array, similar to the Matlab &#8220;find&#8221; command.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : array_like</p>
+<blockquote>
+<div><p>Input data</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>ix</strong> : ndarray</p>
+<blockquote class="last">
+<div><p>Indices to elements that evaluate as true</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David Stauffer in May 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">nonzero_indices</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span><span class="p">,</span> <span class="bp">True</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">False</span><span class="p">,</span> <span class="bp">True</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ix</span>   <span class="o">=</span> <span class="n">nonzero_indices</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">ix</span><span class="p">)</span> 
+<span class="go">[0 1 4]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.read_text_file">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">read_text_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#read_text_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.read_text_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens and reads a complete text file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>fullpath name of the file to read</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>text</strong> : str</p>
+<blockquote>
+<div><p>text of the desired file</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>RuntimeError</strong></p>
+<blockquote class="last">
+<div><p>If unable to open, or unable to read file.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.utils.write_text_file" title="dstauffman.utils.write_text_file"><code class="xref py py-obj docutils literal"><span class="pre">write_text_file</span></code></a>, <a class="reference external" href="http://docs.python.org/library/functions.html#open" title="(in Python v2.7)"><code class="xref py py-obj docutils literal"><span class="pre">open</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">read_text_file</span><span class="p">,</span> <span class="n">write_text_file</span><span class="p">,</span> <span class="n">get_tests_dir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;Hello, World</span><span class="se">\n</span><span class="s">&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">write_text_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_tests_dir</span><span class="p">(),</span> <span class="s">&#39;temp_file.txt&#39;</span><span class="p">),</span> <span class="n">text</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text2</span> <span class="o">=</span> <span class="n">read_text_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_tests_dir</span><span class="p">(),</span> <span class="s">&#39;temp_file.txt&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">text2</span><span class="p">)</span>
+<span class="go">Hello, World</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.rms">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">rms</code><span class="sig-paren">(</span><em>data</em>, <em>axis=None</em>, <em>keepdims=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#rms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.rms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the root mean square of a number series</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : array_like</p>
+<blockquote>
+<div><p>input data</p>
+</div></blockquote>
+<p><strong>axis</strong> : int, optional</p>
+<blockquote>
+<div><p>Axis along which the RMS is computed. The default is to compute the RMS of the flattened array.</p>
+</div></blockquote>
+<p><strong>keepdims</strong> : bool, optional</p>
+<blockquote>
+<div><p>If true, the axes which are reduced are left in the result as dimensions ith size one.
+With this option, the result will broadcast correctly against the original <cite>data</cite>.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> : ndarray</p>
+<blockquote class="last">
+<div><p>RMS results</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">numpy.mean</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">numpy.conj</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">numpy.sqrt</span></code></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in Mar 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">rms</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rms</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+<span class="go">0.70710678118654757</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.round_time">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">round_time</code><span class="sig-paren">(</span><em>dt=None</em>, <em>round_to_sec=60</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#round_time"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.round_time" title="Permalink to this definition">¶</a></dt>
+<dd><p>Round a datetime object to any time lapse in seconds.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>dt</strong> : datetime.datetime</p>
+<blockquote>
+<div><p>time to round, default now.</p>
+</div></blockquote>
+<p><strong>round_to_sec</strong> : int</p>
+<blockquote class="last">
+<div><p>Closest number of seconds to round to, default 60 seconds (i.e. rounds to nearest minute)</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="http://docs.python.org/library/datetime.html#datetime.datetime" title="(in Python v2.7)"><code class="xref py py-obj docutils literal"><span class="pre">datetime.datetime</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Originally written by Thierry Husson 2012.  Freely distributed.</li>
+<li>Adapted by David C. Stauffer in Feb 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">round_time</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="p">(</span><span class="mi">2015</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rounded_time</span> <span class="o">=</span> <span class="n">round_time</span><span class="p">(</span><span class="n">dt</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">rounded_time</span><span class="p">)</span>
+<span class="go">2015-03-13 08:04:00</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.setup_dir">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">setup_dir</code><span class="sig-paren">(</span><em>folder</em>, <em>rec=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#setup_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.setup_dir" title="Permalink to this definition">¶</a></dt>
+<dd><p>Clears the contents for existing folders or instantiates the directory if it doesn&#8217;t exist.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>folder</strong> : str</p>
+<blockquote>
+<div><p>giving the fullpath location of the folder to empty or instantiate.</p>
+</div></blockquote>
+<p><strong>rec</strong> : {False, True}, optional</p>
+<blockquote>
+<div><p>whether to recursively delete contents.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>RuntimeError</strong></p>
+<blockquote class="last">
+<div><p>Problems creating or deleting a file or folder, likely due to permission issues.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference external" href="http://docs.python.org/library/os.html#os.makedirs" title="(in Python v2.7)"><code class="xref py py-obj docutils literal"><span class="pre">os.makedirs</span></code></a>, <a class="reference external" href="http://docs.python.org/library/os.html#os.rmdir" title="(in Python v2.7)"><code class="xref py py-obj docutils literal"><span class="pre">os.rmdir</span></code></a>, <a class="reference external" href="http://docs.python.org/library/os.html#os.remove" title="(in Python v2.7)"><code class="xref py py-obj docutils literal"><span class="pre">os.remove</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in Feb 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">setup_dir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">setup_dir</span><span class="p">(</span><span class="s">r&#39;C:\Temp\test_folder&#39;</span><span class="p">)</span> 
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.unit">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">unit</code><span class="sig-paren">(</span><em>data</em>, <em>axis=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#unit"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.unit" title="Permalink to this definition">¶</a></dt>
+<dd><p>Normalizes a matrix into unit vectors along a specified dimension, default to column
+normalization.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>data</strong> : ndarray</p>
+<blockquote>
+<div><p>Data</p>
+</div></blockquote>
+<p><strong>axis</strong> : int, optional</p>
+<blockquote>
+<div><p>Axis upon which to normalize</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>norm_data</strong> : ndarray</p>
+<blockquote class="last">
+<div><p>Normalized data</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">sklearn.preprocessing.normalize</span></code></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David Stauffer in May 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">unit</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">norm_data</span> <span class="o">=</span> <span class="n">unit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span><span class="p">(</span><span class="n">norm_data</span><span class="p">)</span> 
+<span class="go">[[ 1. 0. -0.70710678]</span>
+<span class="go"> [ 0. 0.  0.        ]</span>
+<span class="go"> [ 0. 0.  0.70710678]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.utils.write_text_file">
+<code class="descclassname">dstauffman.utils.</code><code class="descname">write_text_file</code><span class="sig-paren">(</span><em>filename</em>, <em>text</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#write_text_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.write_text_file" title="Permalink to this definition">¶</a></dt>
+<dd><p>Opens and writes the specified text to a file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>fullpath name of the file to read</p>
+</div></blockquote>
+<p><strong>text</strong> : str</p>
+<blockquote>
+<div><p>text to be written to the file</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>RuntimeError</strong></p>
+<blockquote class="last">
+<div><p>If unable to open, or unable to write file.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">open_text_file</span></code>, <a class="reference external" href="http://docs.python.org/library/functions.html#open" title="(in Python v2.7)"><code class="xref py py-obj docutils literal"><span class="pre">open</span></code></a></p>
+</div>
+<p class="rubric">Examples</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="kn">import</span> <span class="n">write_text_file</span><span class="p">,</span> <span class="n">get_tests_dir</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">text</span> <span class="o">=</span> <span class="s">&#39;Hello, World</span><span class="se">\n</span><span class="s">&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">write_text_file</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_tests_dir</span><span class="p">(),</span> <span class="s">&#39;temp_file.txt&#39;</span><span class="p">),</span> <span class="n">text</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-dstauffman">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dstauffman" title="Permalink to this headline">¶</a></h2>
+<p>The &#8220;dstauffman&#8221; module is a generic Python code library of functions that I (David C. Stauffer)
+have found useful.</p>
+<div class="section" id="id16">
+<h3>Notes<a class="headerlink" href="#id16" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in March 2015.</li>
+</ol>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">dstauffman package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-dstauffman.classes">dstauffman.classes module</a><ul>
+<li><a class="reference internal" href="#notes">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-dstauffman.constants">dstauffman.constants module</a><ul>
+<li><a class="reference internal" href="#id1">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-dstauffman.photos">dstauffman.photos module</a><ul>
+<li><a class="reference internal" href="#id2">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-dstauffman.plotting">dstauffman.plotting module</a><ul>
+<li><a class="reference internal" href="#id13">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-dstauffman.quat">dstauffman.quat module</a><ul>
+<li><a class="reference internal" href="#id14">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-dstauffman.utils">dstauffman.utils module</a><ul>
+<li><a class="reference internal" href="#id15">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-dstauffman">Module contents</a><ul>
+<li><a class="reference internal" href="#id16">Notes</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/dstauffman.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">dstauffman 0.1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, David C. Stauffer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

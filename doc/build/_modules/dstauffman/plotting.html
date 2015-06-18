@@ -1,0 +1,639 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dstauffman.plotting &mdash; dstauffman 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="dstauffman 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">dstauffman 0.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for dstauffman.plotting</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">Plotting module file for the &quot;dstauffman&quot; library.  It defines useful plotting utilities.</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">#.  Written by David C. Stauffer in March 2015.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># pylint: disable=E1101</span>
+
+<span class="c">#%% Imports</span>
+<span class="c"># normal imports</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">doctest</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="c"># plotting imports</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span>
+<span class="c"># set plotting backend (note, must happen before importing pyplot)</span>
+<span class="n">matplotlib</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s">&#39;QT4Agg&#39;</span><span class="p">)</span> <span class="c"># TODO: works well for me in Python 3.4 on Windows, make configurable?</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="kn">as</span> <span class="nn">colors</span>
+<span class="kn">import</span> <span class="nn">matplotlib.cm</span> <span class="kn">as</span> <span class="nn">cmx</span>
+<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Rectangle</span>
+<span class="kn">from</span> <span class="nn">PyQt4</span> <span class="kn">import</span> <span class="n">QtGui</span><span class="p">,</span> <span class="n">QtCore</span>
+<span class="c"># model imports</span>
+<span class="kn">from</span> <span class="nn">dstauffman.classes</span> <span class="kn">import</span> <span class="n">Frozen</span>
+<span class="kn">from</span> <span class="nn">dstauffman.utils</span>   <span class="kn">import</span> <span class="n">get_images_dir</span>
+
+<span class="c">#%% Private Classes - _HoverButton</span>
+<span class="k">class</span> <span class="nc">_HoverButton</span><span class="p">(</span><span class="n">QtGui</span><span class="o">.</span><span class="n">QPushButton</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;Custom button that allows hovering and icons.&quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c"># initialize</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">_HoverButton</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c"># Enable mouse hover event tracking</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setMouseTracking</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;border: 0px;&#39;</span><span class="p">)</span>
+        <span class="c"># set icon</span>
+        <span class="k">for</span> <span class="n">this_arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">this_arg</span><span class="p">,</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setIcon</span><span class="p">(</span><span class="n">this_arg</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">setIconSize</span><span class="p">(</span><span class="n">QtCore</span><span class="o">.</span><span class="n">QSize</span><span class="p">(</span><span class="mi">24</span><span class="p">,</span> <span class="mi">24</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">enterEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="c"># Draw border on hover</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;border: 1px; border-style: solid;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">leaveEvent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="c"># Delete border after hover</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">setStyleSheet</span><span class="p">(</span><span class="s">&#39;border: 0px;&#39;</span><span class="p">)</span>
+
+<span class="c">#%% Classes - Opts</span>
+<div class="viewcode-block" id="Opts"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.Opts">[docs]</a><span class="k">class</span> <span class="nc">Opts</span><span class="p">(</span><span class="n">Frozen</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Contains all the optional plotting configurations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c"># TODO: expand functionality</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">case_name</span> <span class="o">=</span> <span class="s">&#39;baseline&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_plot</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plot_type</span> <span class="o">=</span> <span class="s">&#39;png&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sub_plots</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">show_plot</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disp_xmin</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">disp_xmax</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rms_xmin</span>  <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rms_xmax</span>  <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">inf</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">names</span>     <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Opts.get_names"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.Opts.get_names">[docs]</a>    <span class="k">def</span> <span class="nf">get_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ix</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;Gets the specified name from the list.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">name</span>
+
+<span class="c">#%% Classes - MyCustomToolbar</span></div></div>
+<div class="viewcode-block" id="MyCustomToolbar"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.MyCustomToolbar">[docs]</a><span class="k">class</span> <span class="nc">MyCustomToolbar</span><span class="p">():</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Defines a custom toolbar to use in any matplotlib plots.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import MyCustomToolbar</span>
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; fig = plt.figure()</span>
+<span class="sd">    &gt;&gt;&gt; fig.canvas.set_window_title(&#39;Figure Title&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; x = np.arange(0, 10, 0.1)</span>
+<span class="sd">    &gt;&gt;&gt; y = np.sin(x)</span>
+<span class="sd">    &gt;&gt;&gt; plt.plot(x, y) # doctest: +ELLIPSIS</span>
+<span class="sd">    [&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="sd">    &gt;&gt;&gt; fig.toolbar_custom_ = MyCustomToolbar(fig)</span>
+
+<span class="sd">    Close plot</span>
+<span class="sd">    &gt;&gt;&gt; plt.close(fig)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;Initializes the custom toolbar.&quot;&quot;&quot;</span>
+        <span class="c"># Store the figure number for use later (Note this works better than relying on plt.gcf()</span>
+        <span class="c"># to determine which figure actually triggered the button events.)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fig_number</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">number</span>
+        <span class="c"># create buttons - Prev Plot</span>
+        <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_images_dir</span><span class="p">(),</span> <span class="s">&#39;prev_plot.png&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_prev_plot</span> <span class="o">=</span> <span class="n">_HoverButton</span><span class="p">(</span><span class="n">icon</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_prev_plot</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s">&#39;Show the previous plot&#39;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">btn_prev_plot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_prev_plot</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prev_plot</span><span class="p">)</span>
+        <span class="c"># create buttons - Next Plot</span>
+        <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_images_dir</span><span class="p">(),</span> <span class="s">&#39;next_plot.png&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_next_plot</span> <span class="o">=</span> <span class="n">_HoverButton</span><span class="p">(</span><span class="n">icon</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_next_plot</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s">&#39;Show the next plot&#39;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">btn_next_plot</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_next_plot</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">next_plot</span><span class="p">)</span>
+        <span class="c"># create buttons - Close all</span>
+        <span class="n">icon</span> <span class="o">=</span> <span class="n">QtGui</span><span class="o">.</span><span class="n">QIcon</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_images_dir</span><span class="p">(),</span> <span class="s">&#39;close_all.png&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_close_all</span> <span class="o">=</span> <span class="n">_HoverButton</span><span class="p">(</span><span class="n">icon</span><span class="p">,</span> <span class="s">&#39;&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_close_all</span><span class="o">.</span><span class="n">setToolTip</span><span class="p">(</span><span class="s">&#39;Close all the open plots&#39;</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">toolbar</span><span class="o">.</span><span class="n">addWidget</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">btn_close_all</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">btn_close_all</span><span class="o">.</span><span class="n">clicked</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">close_all</span><span class="p">)</span>
+
+<div class="viewcode-block" id="MyCustomToolbar.close_all"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.MyCustomToolbar.close_all">[docs]</a>    <span class="k">def</span> <span class="nf">close_all</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;Closes all the currently open plots.&quot;&quot;&quot;</span>
+        <span class="c"># Note that it&#39;s better to loop through and close the plots individually than to use</span>
+        <span class="c"># plt.close(&#39;all&#39;), as that can sometimes cause the iPython kernel to quit #DCS: 2015-06-11</span>
+        <span class="k">for</span> <span class="n">this_fig</span> <span class="ow">in</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_fignums</span><span class="p">():</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">this_fig</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="MyCustomToolbar.next_plot"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.MyCustomToolbar.next_plot">[docs]</a>    <span class="k">def</span> <span class="nf">next_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;Brings up the next plot in the series.&quot;&quot;&quot;</span>
+        <span class="c"># get all the figure numbers</span>
+        <span class="n">all_figs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_fignums</span><span class="p">()</span>
+        <span class="c"># get the active figure number</span>
+        <span class="n">this_fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig_number</span>
+        <span class="c"># loop through all the figures</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_figs</span><span class="p">)):</span>
+            <span class="c"># find the active figure within the list</span>
+            <span class="k">if</span> <span class="n">this_fig</span> <span class="o">==</span> <span class="n">all_figs</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="c"># find the next figure, with allowances for rolling over the list</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_figs</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                    <span class="n">next_fig</span> <span class="o">=</span> <span class="n">all_figs</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">next_fig</span> <span class="o">=</span> <span class="n">all_figs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c"># set the appropriate active figure</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">next_fig</span><span class="p">)</span>
+        <span class="c"># make it the active window</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="MyCustomToolbar.prev_plot"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.MyCustomToolbar.prev_plot">[docs]</a>    <span class="k">def</span> <span class="nf">prev_plot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;Brings up the previous plot in the series.&quot;&quot;&quot;</span>
+        <span class="c"># get all the figure numbers</span>
+        <span class="n">all_figs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_fignums</span><span class="p">()</span>
+        <span class="c"># get the active figure number</span>
+        <span class="n">this_fig</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fig_number</span>
+        <span class="c"># loop through all the figures</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_figs</span><span class="p">)):</span>
+            <span class="c"># find the active figure within the list</span>
+            <span class="k">if</span> <span class="n">this_fig</span> <span class="o">==</span> <span class="n">all_figs</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+                <span class="c"># find the next figure, with allowances for rolling over the list</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">prev_fig</span> <span class="o">=</span> <span class="n">all_figs</span><span class="p">[</span><span class="n">i</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">prev_fig</span> <span class="o">=</span> <span class="n">all_figs</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c"># set the appropriate active figure</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">prev_fig</span><span class="p">)</span>
+        <span class="c"># make it the active window</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">manager</span><span class="o">.</span><span class="n">window</span><span class="o">.</span><span class="n">raise_</span><span class="p">()</span>
+
+<span class="c">#%% Functions - plot_correlation_matrix</span></div></div>
+<div class="viewcode-block" id="plot_correlation_matrix"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.plot_correlation_matrix">[docs]</a><span class="k">def</span> <span class="nf">plot_correlation_matrix</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">opts</span><span class="o">=</span><span class="n">Opts</span><span class="p">(),</span> <span class="n">matrix_name</span><span class="o">=</span><span class="s">&#39;Correlation Matrix&#39;</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Visually plots a correlation matrix.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import plot_correlation_matrix, unit</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; data = np.random.rand(10, 10)</span>
+<span class="sd">    &gt;&gt;&gt; labels = [&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;, &#39;e&#39;, &#39;f&#39;, &#39;g&#39;, &#39;h&#39;, &#39;i&#39;, &#39;j&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; data = unit(data, axis=0)</span>
+<span class="sd">    &gt;&gt;&gt; fig = plot_correlation_matrix(data, labels)</span>
+
+<span class="sd">    Close plots</span>
+<span class="sd">    &gt;&gt;&gt; plt.close(fig)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Hard-coded values</span>
+    <span class="n">box_size</span>        <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">cmin</span>            <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">cmax</span>            <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">precision</span>       <span class="o">=</span> <span class="mf">1e-12</span>
+    <span class="c"># plot_lower_only is a stub for future development of optional outputs</span>
+    <span class="n">plot_lower_only</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="c"># the color map could also potentially be overriden in the future</span>
+    <span class="n">color_map</span>       <span class="o">=</span> <span class="s">&#39;cool&#39;</span>
+
+    <span class="c"># get sizes</span>
+    <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">shape</span>
+
+    <span class="c"># check labels</span>
+    <span class="k">if</span> <span class="n">labels</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">xlab</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">)]</span>
+        <span class="n">ylab</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">)]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">xlab</span> <span class="o">=</span> <span class="n">labels</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ylab</span> <span class="o">=</span> <span class="n">labels</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xlab</span> <span class="o">=</span> <span class="n">labels</span>
+            <span class="n">ylab</span> <span class="o">=</span> <span class="n">labels</span>
+    <span class="c"># check lengths</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">xlab</span><span class="p">)</span> <span class="o">!=</span> <span class="n">m</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">ylab</span><span class="p">)</span> <span class="o">!=</span> <span class="n">n</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Incorrectly sized labels.&#39;</span><span class="p">)</span>
+
+    <span class="c"># Determine if symmetric</span>
+    <span class="k">if</span> <span class="n">m</span> <span class="o">==</span> <span class="n">n</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">data</span><span class="p">))</span> <span class="o">&lt;</span> <span class="n">precision</span><span class="p">):</span>
+        <span class="n">is_symmetric</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">is_symmetric</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">plot_lower_only</span>  <span class="o">=</span> <span class="n">plot_lower_only</span> <span class="ow">and</span> <span class="n">is_symmetric</span>
+
+    <span class="c"># Override color ranges based on data</span>
+    <span class="c"># test if in -1 to 1 range instead of 0 to 1</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">data</span> <span class="o">&gt;=</span> <span class="o">-</span><span class="mi">1</span> <span class="o">+</span> <span class="n">precision</span><span class="p">)</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">data</span> <span class="o">&lt;=</span> <span class="o">-</span><span class="n">precision</span><span class="p">):</span>
+        <span class="n">cmin</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
+    <span class="c"># test if outside the cmin to cmax range, and if so, adjust range.</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">temp</span> <span class="o">&lt;</span> <span class="n">cmin</span><span class="p">:</span>
+        <span class="n">cmin</span> <span class="o">=</span> <span class="n">temp</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">temp</span> <span class="o">&gt;</span> <span class="n">cmax</span><span class="p">:</span>
+        <span class="n">cmax</span> <span class="o">=</span> <span class="n">temp</span>
+
+    <span class="c"># Create plots</span>
+    <span class="c"># turn interaction off</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
+    <span class="c"># create figure</span>
+    <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+    <span class="c"># set figure title</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="n">matrix_name</span><span class="p">)</span>
+    <span class="c"># get handle to axes for use later</span>
+    <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+    <span class="c"># set axis color to none</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">patch</span><span class="o">.</span><span class="n">set_facecolor</span><span class="p">(</span><span class="s">&#39;none&#39;</span><span class="p">)</span>
+    <span class="c"># set title</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">get_window_title</span><span class="p">())</span>
+    <span class="c"># get colormap based on high and low limits</span>
+    <span class="n">cmap</span>  <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="n">color_map</span><span class="p">)</span>
+    <span class="n">cnorm</span> <span class="o">=</span> <span class="n">colors</span><span class="o">.</span><span class="n">Normalize</span><span class="p">(</span><span class="n">vmin</span><span class="o">=</span><span class="n">cmin</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="n">cmax</span><span class="p">)</span>
+    <span class="n">smap</span>  <span class="o">=</span> <span class="n">cmx</span><span class="o">.</span><span class="n">ScalarMappable</span><span class="p">(</span><span class="n">norm</span><span class="o">=</span><span class="n">cnorm</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">cmap</span><span class="p">)</span>
+    <span class="c"># must initialize the empty scalar mapplable to show the colorbar</span>
+    <span class="n">smap</span><span class="o">.</span><span class="n">set_array</span><span class="p">([])</span>
+    <span class="c"># loop through and plot each element with a corresponding color</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">m</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">plot_lower_only</span> <span class="ow">or</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;=</span> <span class="n">j</span><span class="p">):</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">add_patch</span><span class="p">(</span><span class="n">Rectangle</span><span class="p">((</span><span class="n">box_size</span><span class="o">*</span><span class="n">i</span><span class="p">,</span><span class="n">box_size</span><span class="o">*</span><span class="n">j</span><span class="p">),</span><span class="n">box_size</span><span class="p">,</span> <span class="n">box_size</span><span class="p">,</span> \
+                    <span class="n">color</span><span class="o">=</span><span class="n">smap</span><span class="o">.</span><span class="n">to_rgba</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">]))))</span>
+    <span class="c"># show colorbar</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">smap</span><span class="p">)</span>
+    <span class="c"># make square</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="s">&#39;equal&#39;</span><span class="p">)</span>
+    <span class="c"># set limits and tick labels</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">m</span><span class="p">)</span><span class="o">+</span><span class="n">box_size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">xlab</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span><span class="o">+</span><span class="n">box_size</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">ylab</span><span class="p">)</span>
+    <span class="c"># reverse the y axis</span>
+    <span class="n">ax</span><span class="o">.</span><span class="n">invert_yaxis</span><span class="p">()</span>
+
+    <span class="c"># Setup plots</span>
+    <span class="n">setup_plots</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="s">&#39;dist&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">fig</span>
+
+<span class="c">#%% Functions - storefig</span></div>
+<div class="viewcode-block" id="storefig"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.storefig">[docs]</a><span class="k">def</span> <span class="nf">storefig</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">folder</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s">&#39;png&#39;</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Stores the specified figures in the specified folder and with the specified plot type(s)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fig : list or single figure</span>
+<span class="sd">        Figure object(s) to save to disk</span>
+<span class="sd">    folder : str</span>
+<span class="sd">        Location to save figures to</span>
+<span class="sd">    plot_type : str</span>
+<span class="sd">        Type of figure to save to disk, like &#39;png&#39; or &#39;jpg&#39;</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Specified folder to save figures to doesn&#39;t exist.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #. Uses the figure.canvas.get_window_title property to determine the figure name.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    matplotlib.pyplot.savefig, titleprefix</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Create figure and then save to disk</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import storefig</span>
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; fig = plt.figure()</span>
+<span class="sd">    &gt;&gt;&gt; fig.canvas.set_window_title(&#39;Figure Title&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; x = np.arange(0, 10, 0.1)</span>
+<span class="sd">    &gt;&gt;&gt; y = np.sin(x)</span>
+<span class="sd">    &gt;&gt;&gt; plt.plot(x, y) # doctest: +ELLIPSIS</span>
+<span class="sd">    [&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="sd">    &gt;&gt;&gt; plt.title(&#39;X vs Y&#39;) # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;matplotlib.text.Text object at 0x...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; plt.show(block=False)</span>
+<span class="sd">    &gt;&gt;&gt; folder = os.getcwd()</span>
+<span class="sd">    &gt;&gt;&gt; plot_type = &#39;png&#39;</span>
+<span class="sd">    &gt;&gt;&gt; storefig(fig, folder, plot_type)</span>
+
+<span class="sd">    Close plot</span>
+<span class="sd">    &gt;&gt;&gt; plt.close()</span>
+
+<span class="sd">    Delete file</span>
+<span class="sd">    &gt;&gt;&gt; os.remove(os.path.join(folder, &#39;Figure Title.png&#39;))</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># make sure figs is a list</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">figs</span> <span class="o">=</span> <span class="n">fig</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">figs</span> <span class="o">=</span> <span class="p">[</span><span class="n">fig</span><span class="p">]</span>
+    <span class="c"># make sure types is a list</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">plot_type</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">types</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">plot_type</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">types</span> <span class="o">=</span> <span class="n">plot_type</span>
+    <span class="c"># if no folder was specified, then use the current working directory</span>
+    <span class="k">if</span> <span class="n">folder</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span> <span class="c">#pragma: no cover</span>
+    <span class="c"># confirm that the folder exists</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;The specfied folder &quot;{}&quot; does not exist.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">folder</span><span class="p">))</span>
+    <span class="c"># loop through the figures</span>
+    <span class="k">for</span> <span class="n">this_fig</span> <span class="ow">in</span> <span class="n">figs</span><span class="p">:</span>
+        <span class="c"># get the title of the figure canvas</span>
+        <span class="n">this_title</span> <span class="o">=</span> <span class="n">this_fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">get_window_title</span><span class="p">()</span>
+        <span class="c"># loop through the plot types</span>
+        <span class="k">for</span> <span class="n">this_type</span> <span class="ow">in</span> <span class="n">types</span><span class="p">:</span>
+            <span class="c"># save the figure to the specified plot type</span>
+            <span class="n">this_fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">this_title</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">this_type</span><span class="p">))</span>
+
+<span class="c">#%% Functions - titleprefix</span></div>
+<div class="viewcode-block" id="titleprefix"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.titleprefix">[docs]</a><span class="k">def</span> <span class="nf">titleprefix</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Prepends a text string to all the titles on existing figures.</span>
+
+<span class="sd">    It also sets the canvas title used by storefig when saving to a file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    fig : list or single figure</span>
+<span class="sd">        Figure object(s) to save to disk</span>
+<span class="sd">    prefix : str</span>
+<span class="sd">        Text to be prepended to the title and figure name</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in March 2015.</span>
+<span class="sd">    #.  Desired this function to also check for suptitles.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    storefig</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Create figure and then change the title</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import titleprefix</span>
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; fig = plt.figure()</span>
+<span class="sd">    &gt;&gt;&gt; fig.canvas.set_window_title(&#39;Figure Title&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; x = np.arange(0, 10, 0.1)</span>
+<span class="sd">    &gt;&gt;&gt; y = np.sin(x)</span>
+<span class="sd">    &gt;&gt;&gt; plt.plot(x, y) # doctest: +ELLIPSIS</span>
+<span class="sd">    [&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="sd">    &gt;&gt;&gt; plt.title(&#39;X vs Y&#39;) #doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;matplotlib.text.Text object at 0x...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; plt.show(block=False)</span>
+<span class="sd">    &gt;&gt;&gt; prefix = &#39;Baseline&#39;</span>
+<span class="sd">    &gt;&gt;&gt; titleprefix(fig, prefix)</span>
+
+<span class="sd">    Close plot</span>
+<span class="sd">    &gt;&gt;&gt; plt.close()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># check for non-empty prefix</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">prefix</span><span class="p">:</span>
+        <span class="k">return</span>
+    <span class="c"># force figs to be a list</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">figs</span> <span class="o">=</span> <span class="n">fig</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">figs</span> <span class="o">=</span> <span class="p">[</span><span class="n">fig</span><span class="p">]</span>
+    <span class="c"># loop through figures</span>
+    <span class="k">for</span> <span class="n">this_fig</span> <span class="ow">in</span> <span class="n">figs</span><span class="p">:</span>
+        <span class="c"># get axis list and loop through them</span>
+        <span class="k">for</span> <span class="n">this_axis</span> <span class="ow">in</span> <span class="n">this_fig</span><span class="o">.</span><span class="n">axes</span><span class="p">:</span>
+            <span class="c"># get title for this axis</span>
+            <span class="n">this_title</span> <span class="o">=</span> <span class="n">this_axis</span><span class="o">.</span><span class="n">get_title</span><span class="p">()</span>
+            <span class="c"># if the title is empty, then don&#39;t do anything</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">this_title</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="c"># modify and set new title</span>
+            <span class="n">new_title</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="s">&#39; - &#39;</span> <span class="o">+</span> <span class="n">this_title</span>
+            <span class="n">this_axis</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="n">new_title</span><span class="p">)</span>
+        <span class="c"># update canvas name</span>
+        <span class="n">this_canvas_title</span> <span class="o">=</span> <span class="n">this_fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">get_window_title</span><span class="p">()</span>
+        <span class="n">this_fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="n">prefix</span> <span class="o">+</span> <span class="s">&#39; - &#39;</span> <span class="o">+</span> <span class="n">this_canvas_title</span><span class="p">)</span>
+    <span class="c"># force updating of all the figures</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">draw</span><span class="p">()</span>
+</div>
+<div class="viewcode-block" id="setup_plots"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.setup_plots">[docs]</a><span class="k">def</span> <span class="nf">setup_plots</span><span class="p">(</span><span class="n">figs</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="n">plot_type</span><span class="o">=</span><span class="s">&#39;time&#39;</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Combines common plot operations into one easy command.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    figs : array_like</span>
+<span class="sd">        List of figures</span>
+<span class="sd">    opts : class Opts</span>
+<span class="sd">        Optional plotting controls</span>
+<span class="sd">    plot_type : optional, {&#39;time&#39;, &#39;time_no_yscale&#39;, &#39;dist&#39;, &#39;dist_no_yscale&#39;}</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David Stauffer in May 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import setup_plots, Opts</span>
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; fig = plt.figure()</span>
+<span class="sd">    &gt;&gt;&gt; fig.canvas.set_window_title(&#39;Figure Title&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; x = np.arange(0, 10, 0.1)</span>
+<span class="sd">    &gt;&gt;&gt; y = np.sin(x)</span>
+<span class="sd">    &gt;&gt;&gt; plt.plot(x, y) # doctest: +ELLIPSIS</span>
+<span class="sd">    [&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="sd">    &gt;&gt;&gt; plt.title(&#39;X vs Y&#39;) #doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;matplotlib.text.Text object at 0x...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; plt.xlabel(&#39;time [years]&#39;) #doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; plt.ylabel(&#39;value [radians]&#39;) #doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; plt.show(block=False)</span>
+<span class="sd">    &gt;&gt;&gt; opts = Opts()</span>
+<span class="sd">    &gt;&gt;&gt; opts.case_name = &#39;Testing&#39;</span>
+<span class="sd">    &gt;&gt;&gt; opts.show_plot = True</span>
+<span class="sd">    &gt;&gt;&gt; opts.save_plot = False</span>
+<span class="sd">    &gt;&gt;&gt; setup_plots(fig, opts)</span>
+
+<span class="sd">    Close plots</span>
+<span class="sd">    &gt;&gt;&gt; plt.close(fig)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># check for single figure</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">figs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">figs</span> <span class="o">=</span> <span class="p">[</span><span class="n">figs</span><span class="p">]</span>
+
+    <span class="c"># prepend a title</span>
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">case_name</span><span class="p">:</span>
+        <span class="n">titleprefix</span><span class="p">(</span><span class="n">figs</span><span class="p">,</span> <span class="n">opts</span><span class="o">.</span><span class="n">case_name</span><span class="p">)</span>
+
+    <span class="c"># add a custom toolbar</span>
+    <span class="n">figmenu</span><span class="p">(</span><span class="n">figs</span><span class="p">)</span>
+
+    <span class="c"># show the plot</span>
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">show_plot</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">(</span><span class="n">block</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="c"># optionally save the plot</span>
+    <span class="k">if</span> <span class="n">opts</span><span class="o">.</span><span class="n">save_plot</span><span class="p">:</span>
+        <span class="n">storefig</span><span class="p">(</span><span class="n">figs</span><span class="p">,</span> <span class="n">opts</span><span class="o">.</span><span class="n">save_path</span><span class="p">,</span> <span class="n">opts</span><span class="o">.</span><span class="n">plot_type</span><span class="p">)</span>
+
+<span class="c">#%% Functions - figmenu</span></div>
+<div class="viewcode-block" id="figmenu"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.plotting.figmenu">[docs]</a><span class="k">def</span> <span class="nf">figmenu</span><span class="p">(</span><span class="n">figs</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Adds a custom toolbar to the figures.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    figs : class matplotlib.pyplot.Figure, or list of such</span>
+<span class="sd">        List of figures</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import figmenu</span>
+<span class="sd">    &gt;&gt;&gt; import matplotlib.pyplot as plt</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; fig = plt.figure()</span>
+<span class="sd">    &gt;&gt;&gt; fig.canvas.set_window_title(&#39;Figure Title&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; x = np.arange(0, 10, 0.1)</span>
+<span class="sd">    &gt;&gt;&gt; y = np.sin(x)</span>
+<span class="sd">    &gt;&gt;&gt; plt.plot(x, y) # doctest: +ELLIPSIS</span>
+<span class="sd">    [&lt;matplotlib.lines.Line2D object at 0x...&gt;]</span>
+<span class="sd">    &gt;&gt;&gt; plt.title(&#39;X vs Y&#39;) #doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;matplotlib.text.Text object at 0x...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; plt.xlabel(&#39;time [years]&#39;) #doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; plt.ylabel(&#39;value [radians]&#39;) #doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; plt.show(block=False)</span>
+<span class="sd">    &gt;&gt;&gt; figmenu(fig)</span>
+
+<span class="sd">    Close plot</span>
+<span class="sd">    &gt;&gt;&gt; plt.close(fig)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">figs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">figs</span><span class="o">.</span><span class="n">toolbar_custom_</span> <span class="o">=</span> <span class="n">MyCustomToolbar</span><span class="p">(</span><span class="n">figs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">figs</span><span class="p">)):</span>
+            <span class="n">figs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">toolbar_custom_</span> <span class="o">=</span> <span class="n">MyCustomToolbar</span><span class="p">(</span><span class="n">figs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+<span class="c">#%% Unit test</span></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="s">&#39;tests.test_plotting&#39;</span><span class="p">,</span> <span class="nb">exit</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">dstauffman 0.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, David C. Stauffer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

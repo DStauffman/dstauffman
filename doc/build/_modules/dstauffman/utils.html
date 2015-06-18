@@ -1,0 +1,1127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dstauffman.utils &mdash; dstauffman 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="dstauffman 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">dstauffman 0.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for dstauffman.utils</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">Utils module file for the &quot;dstauffman&quot; library.  It contains generic utilities that can be</span>
+<span class="sd">independently defined and used by other modules.</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">#.  By design, this module does not reference any other piece of the dstauffman code base except</span>
+<span class="sd">        constants or enums to avoid circular references.</span>
+<span class="sd">#.  Written by David C. Stauffer in March 2015.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c"># pylint: disable=E1101, C0301, C0103</span>
+
+<span class="c">#%% Imports</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">contextmanager</span>
+<span class="kn">import</span> <span class="nn">doctest</span>
+<span class="kn">import</span> <span class="nn">inspect</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">dstauffman.constants</span> <span class="kn">import</span> <span class="n">MONTHS_PER_YEAR</span>
+<span class="c"># compatibility issues</span>
+<span class="n">ver</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span>
+<span class="k">if</span> <span class="n">ver</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span> <span class="k">as</span> <span class="n">StringIO</span> <span class="c">#pragma: no cover</span>
+<span class="k">elif</span> <span class="n">ver</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span> <span class="c">#pragma: no cover</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="k">raise</span><span class="p">(</span><span class="s">&#39;Unexpected Python version: &quot;{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ver</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="c">#pragma: no cover</span>
+
+<span class="c">#%% Functions - _nan_equal</span>
+<span class="k">def</span> <span class="nf">_nan_equal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Test ndarrays for equality, but ignore NaNs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray</span>
+<span class="sd">        Array one</span>
+<span class="sd">    b : ndarray</span>
+<span class="sd">        Array two</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    is_same : bool</span>
+<span class="sd">        Flag for whether the inputs are the same or not</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman.utils import _nan_equal</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; a = np.array([1, 2, np.nan])</span>
+<span class="sd">    &gt;&gt;&gt; b = np.array([1, 2, np.nan])</span>
+<span class="sd">    &gt;&gt;&gt; print(_nan_equal(a, b))</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &gt;&gt;&gt; a = np.array([1, 2, np.nan])</span>
+<span class="sd">    &gt;&gt;&gt; b = np.array([3, 2, np.nan])</span>
+<span class="sd">    &gt;&gt;&gt; print(_nan_equal(a, b))</span>
+<span class="sd">    False</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># preallocate to True</span>
+    <span class="n">is_same</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># use numpy testing module to assert that they are equal (ignores NaNs)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">testing</span><span class="o">.</span><span class="n">assert_equal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+        <span class="c"># if assertion fails, then they are not equal</span>
+        <span class="n">is_same</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">return</span> <span class="n">is_same</span>
+
+<span class="c">#%% Functions - rms</span>
+<div class="viewcode-block" id="rms"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.rms">[docs]</a><span class="k">def</span> <span class="nf">rms</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the root mean square of a number series</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : array_like</span>
+<span class="sd">        input data</span>
+<span class="sd">    axis : int, optional</span>
+<span class="sd">        Axis along which the RMS is computed. The default is to compute the RMS of the flattened array.</span>
+<span class="sd">    keepdims : bool, optional</span>
+<span class="sd">        If true, the axes which are reduced are left in the result as dimensions ith size one.</span>
+<span class="sd">        With this option, the result will broadcast correctly against the original `data`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out : ndarray</span>
+<span class="sd">        RMS results</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    numpy.mean, numpy.conj, numpy.sqrt</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in Mar 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import rms</span>
+<span class="sd">    &gt;&gt;&gt; rms([0, 1, 0., -1])</span>
+<span class="sd">    0.70710678118654757</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">))</span>
+    <span class="c"># return the result</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+<span class="c">#%% Functions - setup_dir</span></div>
+<div class="viewcode-block" id="setup_dir"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.setup_dir">[docs]</a><span class="k">def</span> <span class="nf">setup_dir</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">rec</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Clears the contents for existing folders or instantiates the directory if it doesn&#39;t exist.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    folder : str</span>
+<span class="sd">        giving the fullpath location of the folder to empty or instantiate.</span>
+<span class="sd">    rec : {False, True}, optional</span>
+<span class="sd">        whether to recursively delete contents.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    os.makedirs, os.rmdir, os.remove</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    RuntimeError</span>
+<span class="sd">        Problems creating or deleting a file or folder, likely due to permission issues.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in Feb 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import setup_dir</span>
+<span class="sd">    &gt;&gt;&gt; setup_dir(r&#39;C:\Temp\test_folder&#39;) #doctest: +SKIP</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+        <span class="c"># Loop through the contained files/folders</span>
+        <span class="k">for</span> <span class="n">this_elem</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+            <span class="c"># alias the fullpath of this file element</span>
+            <span class="n">this_full_elem</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">this_elem</span><span class="p">)</span>
+            <span class="c"># check if a folder or file</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">):</span>
+                <span class="c"># if a folder, then delete recursively if rec is True</span>
+                <span class="k">if</span> <span class="n">rec</span><span class="p">:</span>
+                    <span class="n">setup_dir</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">):</span>
+                <span class="c"># if a file, then remove it</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Unexpected file type, neither file nor folder: &quot;{}&quot;.&#39;</span>\
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">))</span> <span class="c">#pragma: no cover</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Files/Sub-folders were removed from: &quot;&#39;</span> <span class="o">+</span> <span class="n">folder</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># create directory if it does not exist</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Created directory: &quot;&#39;</span> <span class="o">+</span> <span class="n">folder</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span> <span class="c">#pragma: no cover</span>
+            <span class="c"># re-raise last exception, could try to handle differently in the future</span>
+            <span class="k">raise</span> <span class="c">#pragma: no cover</span>
+
+<span class="c">#%% Functions - compare_two_classes</span></div>
+<div class="viewcode-block" id="compare_two_classes"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.compare_two_classes">[docs]</a><span class="k">def</span> <span class="nf">compare_two_classes</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">suppress_output</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ignore_callables</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">compare_recursively</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Compares two classes by going through all their public attributes and showing that they are equal.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    c1 : class object</span>
+<span class="sd">        Any class object</span>
+<span class="sd">    c2 : class object</span>
+<span class="sd">        Any other class object</span>
+<span class="sd">    suppress_output : bool, optional</span>
+<span class="sd">        If True, suppress the information printed to the screen, defaults to False.</span>
+<span class="sd">    names : list of str, optional</span>
+<span class="sd">        List of the names to be printed to the screen for the two input classes.</span>
+<span class="sd">    ignore_callables : bool, optional</span>
+<span class="sd">        If True, ignore differences in callable attributes (i.e. methods), defaults to True.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    is_same : bool</span>
+<span class="sd">        True/False flag for whether the two class are the same.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import compare_two_classes</span>
+<span class="sd">    &gt;&gt;&gt; c1 = type(&#39;Class1&#39;, (object, ), {&#39;a&#39;: 0, &#39;b&#39; : &#39;[1, 2, 3]&#39;, &#39;c&#39;: &#39;text&#39;})</span>
+<span class="sd">    &gt;&gt;&gt; c2 = type(&#39;Class2&#39;, (object, ), {&#39;a&#39;: 0, &#39;b&#39; : &#39;[1, 2, 4]&#39;, &#39;d&#39;: &#39;text&#39;})</span>
+<span class="sd">    &gt;&gt;&gt; is_same = compare_two_classes(c1, c2)</span>
+<span class="sd">    b is different from c1 to c2.</span>
+<span class="sd">    c is only in c1.</span>
+<span class="sd">    d is only in c2.</span>
+<span class="sd">    &quot;c1&quot; and &quot;c2&quot; are not the same.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_not_true_print</span><span class="p">():</span>
+        <span class="n">nonlocal</span> <span class="n">is_same</span>
+        <span class="n">is_same</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_output</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;{} is different from {} to {}.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">this_attr</span><span class="p">,</span> <span class="n">name1</span><span class="p">,</span> <span class="n">name2</span><span class="p">))</span>
+    <span class="c"># preallocate answer to True until proven otherwise</span>
+    <span class="n">is_same</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="c"># get names if specified</span>
+    <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">name1</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">name2</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># TODO: figure out Matlab inputname equivalent</span>
+        <span class="n">name1</span> <span class="o">=</span> <span class="s">&#39;c1&#39;</span>
+        <span class="n">name2</span> <span class="o">=</span> <span class="s">&#39;c2&#39;</span>
+    <span class="c"># simple test</span>
+    <span class="k">if</span> <span class="n">c1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">c2</span><span class="p">:</span>
+        <span class="c"># get the list of public attributes</span>
+        <span class="n">attrs1</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">c1</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)))</span>
+        <span class="n">attrs2</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">dir</span><span class="p">(</span><span class="n">c2</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)))</span>
+        <span class="c"># compare the attributes that are in both</span>
+        <span class="n">same</span> <span class="o">=</span> <span class="n">attrs1</span> <span class="o">&amp;</span> <span class="n">attrs2</span>
+        <span class="k">for</span> <span class="n">this_attr</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">same</span><span class="p">):</span>
+            <span class="c"># alias the attributes</span>
+            <span class="n">attr1</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">this_attr</span><span class="p">)</span>
+            <span class="n">attr2</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="n">this_attr</span><span class="p">)</span>
+            <span class="c"># determine if this is a subclass</span>
+            <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">attr1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">attr2</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="n">compare_recursively</span><span class="p">:</span>
+                        <span class="n">is_same</span> <span class="o">=</span> <span class="n">compare_two_classes</span><span class="p">(</span><span class="n">attr1</span><span class="p">,</span> <span class="n">attr2</span><span class="p">,</span> <span class="n">suppress_output</span><span class="o">=</span><span class="n">suppress_output</span><span class="p">,</span> \
+                            <span class="n">names</span><span class="o">=</span> <span class="p">[</span><span class="n">name1</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">this_attr</span><span class="p">,</span> <span class="n">name2</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">this_attr</span><span class="p">],</span> \
+                            <span class="n">ignore_callables</span><span class="o">=</span><span class="n">ignore_callables</span><span class="p">,</span> <span class="n">compare_recursively</span><span class="o">=</span><span class="n">compare_recursively</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">continue</span> <span class="c"># pragma: no cover (actually covered, optimization issue)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">_not_true_print</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">attr2</span><span class="p">):</span>
+                    <span class="n">_not_true_print</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">ignore_callables</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">attr1</span><span class="p">,</span> <span class="s">&#39;__call__&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr2</span><span class="p">,</span> <span class="s">&#39;__call__&#39;</span><span class="p">)):</span>
+                <span class="k">continue</span> <span class="c"># pragma: no cover (actually covered, optimization issue)</span>
+            <span class="c"># if any differences, then this test fails</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">_nan_equal</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">this_attr</span><span class="p">),</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="n">this_attr</span><span class="p">))):</span>
+                <span class="n">_not_true_print</span><span class="p">()</span>
+        <span class="c"># find the attributes in one but not the other, if any, then this test fails</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="n">attrs1</span> <span class="o">^</span> <span class="n">attrs2</span>
+        <span class="k">for</span> <span class="n">this_attr</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">diff</span><span class="p">):</span>
+            <span class="n">is_same</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_output</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">this_attr</span> <span class="ow">in</span> <span class="n">attrs1</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="n">this_attr</span> <span class="o">+</span> <span class="s">&#39; is only in &#39;</span> <span class="o">+</span> <span class="n">name1</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="n">this_attr</span> <span class="o">+</span> <span class="s">&#39; is only in &#39;</span> <span class="o">+</span> <span class="n">name2</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span><span class="p">)</span>
+    <span class="c"># display results</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_output</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_same</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">name1</span> <span class="o">+</span> <span class="s">&#39;&quot; and &quot;&#39;</span> <span class="o">+</span> <span class="n">name2</span> <span class="o">+</span> <span class="s">&#39;&quot; are the same.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">name1</span> <span class="o">+</span> <span class="s">&#39;&quot; and &quot;&#39;</span> <span class="o">+</span> <span class="n">name2</span> <span class="o">+</span> <span class="s">&#39;&quot; are not the same.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">is_same</span>
+
+<span class="c">#%% Functions - compare_two_dicts</span></div>
+<div class="viewcode-block" id="compare_two_dicts"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.compare_two_dicts">[docs]</a><span class="k">def</span> <span class="nf">compare_two_dicts</span><span class="p">(</span><span class="n">d1</span><span class="p">,</span> <span class="n">d2</span><span class="p">,</span> <span class="n">suppress_output</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Compares two dictionaries for the same keys, and the same value of those keys.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    d1 : class object</span>
+<span class="sd">        Any class object</span>
+<span class="sd">    d2 : class object</span>
+<span class="sd">        Any other class object</span>
+<span class="sd">    suppress_output : bool, optional</span>
+<span class="sd">        If True, suppress the information printed to the screen, defaults to False.</span>
+<span class="sd">    names : list of str, optional</span>
+<span class="sd">        List of the names to be printed to the screen for the two input classes.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    is_same : bool</span>
+<span class="sd">        True/False flag for whether the two class are the same.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import compare_two_dicts</span>
+<span class="sd">    &gt;&gt;&gt; d1 = {&#39;a&#39;: 1, &#39;b&#39;: 2, &#39;c&#39;: 3}</span>
+<span class="sd">    &gt;&gt;&gt; d2 = {&#39;a&#39;: 1, &#39;b&#39;: 5, &#39;d&#39;: 6}</span>
+<span class="sd">    &gt;&gt;&gt; is_same = compare_two_dicts(d1, d2)</span>
+<span class="sd">    b is different.</span>
+<span class="sd">    c is only in d1.</span>
+<span class="sd">    d is only in d2.</span>
+<span class="sd">    &quot;d1&quot; and &quot;d2&quot; are not the same.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># preallocate answer to True until proven otherwise</span>
+    <span class="n">is_same</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="c"># get names if specified</span>
+    <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">name1</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">name2</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># TODO: figure out Matlab inputname equivalent</span>
+        <span class="n">name1</span> <span class="o">=</span> <span class="s">&#39;d1&#39;</span>
+        <span class="n">name2</span> <span class="o">=</span> <span class="s">&#39;d2&#39;</span>
+    <span class="c"># simple test</span>
+    <span class="k">if</span> <span class="n">d1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">d2</span><span class="p">:</span>
+        <span class="c"># compare the keys that are in both</span>
+        <span class="n">same</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">d1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">same</span><span class="p">):</span>
+            <span class="c"># if any differences, then this test fails</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">d2</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
+                <span class="n">is_same</span> <span class="o">=</span> <span class="bp">False</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_output</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s">&#39; is different.&#39;</span><span class="p">)</span>
+        <span class="c"># find keys in one but not the other, if any, then this test fails</span>
+        <span class="n">diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">d1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">^</span> <span class="nb">set</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">diff</span><span class="p">):</span>
+            <span class="n">is_same</span> <span class="o">=</span> <span class="bp">False</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_output</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">d1</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s">&#39; is only in &#39;</span> <span class="o">+</span> <span class="n">name1</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s">&#39; is only in &#39;</span> <span class="o">+</span> <span class="n">name2</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span><span class="p">)</span>
+    <span class="c"># display results</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_output</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">is_same</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">name1</span> <span class="o">+</span> <span class="s">&#39;&quot; and &quot;&#39;</span> <span class="o">+</span> <span class="n">name2</span> <span class="o">+</span> <span class="s">&#39;&quot; are the same.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="n">name1</span> <span class="o">+</span> <span class="s">&#39;&quot; and &quot;&#39;</span> <span class="o">+</span> <span class="n">name2</span> <span class="o">+</span> <span class="s">&#39;&quot; are not the same.&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">is_same</span>
+
+<span class="c">#%% Functions - round_time</span></div>
+<div class="viewcode-block" id="round_time"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.round_time">[docs]</a><span class="k">def</span> <span class="nf">round_time</span><span class="p">(</span><span class="n">dt</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">round_to_sec</span><span class="o">=</span><span class="mi">60</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Round a datetime object to any time lapse in seconds.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dt           : datetime.datetime</span>
+<span class="sd">        time to round, default now.</span>
+<span class="sd">    round_to_sec : int</span>
+<span class="sd">        Closest number of seconds to round to, default 60 seconds (i.e. rounds to nearest minute)</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    datetime.datetime</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    #. Originally written by Thierry Husson 2012.  Freely distributed.</span>
+<span class="sd">    #. Adapted by David C. Stauffer in Feb 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import round_time</span>
+<span class="sd">    &gt;&gt;&gt; from datetime import datetime</span>
+<span class="sd">    &gt;&gt;&gt; dt = datetime(2015, 3, 13, 8, 4, 10)</span>
+<span class="sd">    &gt;&gt;&gt; rounded_time = round_time(dt)</span>
+<span class="sd">    &gt;&gt;&gt; print(rounded_time)</span>
+<span class="sd">    2015-03-13 08:04:00</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># set default for dt</span>
+    <span class="k">if</span> <span class="n">dt</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">dt</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+    <span class="c"># get the current elasped time in seconds</span>
+    <span class="n">seconds</span> <span class="o">=</span> <span class="p">(</span><span class="n">dt</span> <span class="o">-</span> <span class="n">dt</span><span class="o">.</span><span class="n">min</span><span class="p">)</span><span class="o">.</span><span class="n">seconds</span>
+    <span class="c"># round to the nearest whole second</span>
+    <span class="n">rounding</span> <span class="o">=</span> <span class="p">(</span><span class="n">seconds</span><span class="o">+</span><span class="n">round_to_sec</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span> <span class="o">//</span> <span class="n">round_to_sec</span> <span class="o">*</span> <span class="n">round_to_sec</span>
+    <span class="c"># return the rounded result</span>
+    <span class="k">return</span> <span class="n">dt</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">rounding</span><span class="o">-</span><span class="n">seconds</span><span class="p">,</span> <span class="o">-</span><span class="n">dt</span><span class="o">.</span><span class="n">microsecond</span><span class="p">)</span>
+
+<span class="c">#%% Functions - make_python_init</span></div>
+<div class="viewcode-block" id="make_python_init"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.make_python_init">[docs]</a><span class="k">def</span> <span class="nf">make_python_init</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Makes the Python __init__.py file based on the files/definitions found within the specified folder.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    folder : str</span>
+<span class="sd">        Name of folder to process</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    output : str</span>
+<span class="sd">        Resulting text for __init__.py file</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import make_python_init, get_root_dir</span>
+<span class="sd">    &gt;&gt;&gt; folder = get_root_dir()</span>
+<span class="sd">    &gt;&gt;&gt; text = make_python_init(folder)</span>
+<span class="sd">    &gt;&gt;&gt; print(text[0:20])</span>
+<span class="sd">    from .classes import</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># exclusions</span>
+    <span class="n">exclusions</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;__init__.py&#39;</span><span class="p">]</span>
+    <span class="c"># initialize intermediate results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="c"># Loop through the contained files/folders</span>
+    <span class="k">for</span> <span class="n">this_elem</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+        <span class="c"># alias the fullpath of this file element</span>
+        <span class="n">this_full_elem</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">this_elem</span><span class="p">)</span>
+        <span class="c"># check if a folder or file</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">):</span>
+            <span class="c"># get the file extension</span>
+            <span class="n">fileext</span> <span class="o">=</span> <span class="n">this_full_elem</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;.&#39;</span><span class="p">)</span>
+            <span class="c"># only process source *.py files</span>
+            <span class="k">if</span> <span class="n">fileext</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;py&#39;</span><span class="p">:</span>
+                <span class="c"># exclude any existing &#39;__init__.py&#39; file</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">([</span><span class="n">this_elem</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span> <span class="k">for</span> <span class="n">exc</span> <span class="ow">in</span> <span class="n">exclusions</span><span class="p">]):</span>
+                    <span class="k">continue</span>
+                <span class="c"># read the contents of the file</span>
+                <span class="n">text</span> <span class="o">=</span> <span class="n">read_text_file</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">)</span>
+                <span class="c"># get a list of definitions from the text file</span>
+                <span class="n">funcs</span> <span class="o">=</span> <span class="n">get_python_definitions</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+                <span class="c"># append these results (if not empty)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">funcs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">results</span><span class="p">[</span><span class="n">this_elem</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]]</span> <span class="o">=</span> <span class="n">funcs</span>
+    <span class="c"># check for duplicates</span>
+    <span class="n">all_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">func</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">results</span> <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">results</span><span class="p">[</span><span class="n">k</span><span class="p">]]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_funcs</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_funcs</span><span class="p">)):</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Uniqueness Problem: {funs} functions, but only {uni_funcs} unique functions&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span> \
+            <span class="n">funs</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">all_funcs</span><span class="p">),</span> <span class="n">uni_funcs</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">all_funcs</span><span class="p">))))</span>
+    <span class="n">dups</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_funcs</span> <span class="k">if</span> <span class="n">all_funcs</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">dups</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Duplicated functions:&#39;</span><span class="p">)</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">dups</span><span class="p">)</span>
+    <span class="c"># start building text output</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c"># loop through results and build text output</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="s">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">results</span><span class="p">[</span><span class="n">k</span><span class="p">])</span>
+        <span class="n">text</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s">&#39;from .&#39;</span> <span class="o">+</span> <span class="n">k</span> <span class="o">+</span> <span class="s">&#39; import &#39;</span> <span class="o">+</span> <span class="n">temp</span><span class="p">)</span>
+    <span class="c"># pass back the combined output text</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span>
+
+<span class="c">#%% Functions - get_python_definitions</span></div>
+<div class="viewcode-block" id="get_python_definitions"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.get_python_definitions">[docs]</a><span class="k">def</span> <span class="nf">get_python_definitions</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Gets all public class and def names from the text of the file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    text : str</span>
+<span class="sd">        The text of the python file</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    funcs : array_like, str</span>
+<span class="sd">        List of functions within the text of the python file</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import get_python_definitions</span>
+<span class="sd">    &gt;&gt;&gt; text = &#39;def a():\n    pass\n&#39;</span>
+<span class="sd">    &gt;&gt;&gt; funcs = get_python_definitions(text)</span>
+<span class="sd">    &gt;&gt;&gt; print(funcs)</span>
+<span class="sd">    [&#39;a&#39;]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">funcs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;class &#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;class _&#39;</span><span class="p">):</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s">&#39;class &#39;</span><span class="p">):]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">)</span>
+            <span class="n">funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;def &#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;def _&#39;</span><span class="p">):</span>
+            <span class="n">temp</span> <span class="o">=</span> <span class="n">line</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="s">&#39;def &#39;</span><span class="p">):]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;(&#39;</span><span class="p">)</span>
+            <span class="n">funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">funcs</span>
+
+<span class="c">#%% Functions - read_text_file</span></div>
+<div class="viewcode-block" id="read_text_file"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.read_text_file">[docs]</a><span class="k">def</span> <span class="nf">read_text_file</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Opens and reads a complete text file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        fullpath name of the file to read</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    text : str</span>
+<span class="sd">        text of the desired file</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    RuntimeError</span>
+<span class="sd">        If unable to open, or unable to read file.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    write_text_file, open</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import read_text_file, write_text_file, get_tests_dir</span>
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; text = &#39;Hello, World\n&#39;</span>
+<span class="sd">    &gt;&gt;&gt; write_text_file(os.path.join(get_tests_dir(), &#39;temp_file.txt&#39;), text)</span>
+<span class="sd">    &gt;&gt;&gt; text2 = read_text_file(os.path.join(get_tests_dir(), &#39;temp_file.txt&#39;))</span>
+<span class="sd">    &gt;&gt;&gt; print(text2)</span>
+<span class="sd">    Hello, World</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># open file for reading</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span> <span class="c"># pylint: disable=W1501</span>
+            <span class="c"># read file</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+        <span class="c"># return results</span>
+        <span class="k">return</span> <span class="n">text</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="c"># on any exceptions, print a message and re-raise the error</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Unable to open file &quot;{}&quot; for reading.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="k">raise</span>
+
+<span class="c">#%% Functions - write_text_file</span></div>
+<div class="viewcode-block" id="write_text_file"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.write_text_file">[docs]</a><span class="k">def</span> <span class="nf">write_text_file</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="n">text</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Opens and writes the specified text to a file.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    filename : str</span>
+<span class="sd">        fullpath name of the file to read</span>
+<span class="sd">    text : str</span>
+<span class="sd">        text to be written to the file</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    RuntimeError</span>
+<span class="sd">        If unable to open, or unable to write file.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    open_text_file, open</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import write_text_file, get_tests_dir</span>
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; text = &#39;Hello, World\n&#39;</span>
+<span class="sd">    &gt;&gt;&gt; write_text_file(os.path.join(get_tests_dir(), &#39;temp_file.txt&#39;), text)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># open file for writing</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span> <span class="c"># pylint: disable=W1501</span>
+            <span class="c"># write file</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="c"># on any exceptions, print a message and re-raise the error</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Unable to open file &quot;{}&quot; for writing.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
+        <span class="k">raise</span>
+
+<span class="c">#%% Functions - disp</span></div>
+<div class="viewcode-block" id="disp"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.disp">[docs]</a><span class="k">def</span> <span class="nf">disp</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">suppress_output</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Matlab like &#39;disp&#39; or display function.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    struct : class</span>
+<span class="sd">        Structure to display</span>
+<span class="sd">    level : int, optional</span>
+<span class="sd">        Level to indent, used for substructures within structures.</span>
+<span class="sd">    padding : int, optional</span>
+<span class="sd">        Minimum number of spaces to pad the results to</span>
+<span class="sd">    suppress_output : bool, optional</span>
+<span class="sd">        Choose whether to display results to the command window, default False, so show output</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in March 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import disp</span>
+<span class="sd">    &gt;&gt;&gt; a = type(&#39;a&#39;, (object, ), {&#39;b&#39;: 0, &#39;c&#39; : &#39;[1, 2, 3]&#39;, &#39;d&#39;: &#39;text&#39;})</span>
+<span class="sd">    &gt;&gt;&gt; txt = disp(a)</span>
+<span class="sd">    b : 0</span>
+<span class="sd">    c : [1, 2, 3]</span>
+<span class="sd">    d : text</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># padding per additional level</span>
+    <span class="n">pad_per_level</span> <span class="o">=</span> <span class="mi">4</span>
+    <span class="c"># get the variables within the structure</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>
+    <span class="c"># determine padding level</span>
+    <span class="k">if</span> <span class="n">padding</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">padding</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">d</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)])</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="c"># initialize output</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
+    <span class="c"># loop through dict of vars</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="c"># find out how many characters to pad on the front</span>
+        <span class="n">pad_len</span> <span class="o">=</span> <span class="n">padding</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
+        <span class="c"># find out if an extra pad around the dots (&quot; ... &quot;) has room</span>
+        <span class="n">extra_pad</span> <span class="o">=</span> <span class="s">&#39; &#39;</span> <span class="k">if</span> <span class="n">pad_len</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
+        <span class="c"># append this variable</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">pad_per_level</span><span class="o">*</span><span class="n">level</span> <span class="o">*</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="n">pad_len</span> <span class="o">*</span> <span class="s">&#39;.&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">extra_pad</span> <span class="o">+</span> <span class="s">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
+    <span class="c"># print the results to the screen</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_output</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="c"># return the final results, minus the last newline character</span>
+    <span class="k">return</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c">#%% Functions - convert_annual_to_monthly_probability</span></div>
+<div class="viewcode-block" id="convert_annual_to_monthly_probability"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.convert_annual_to_monthly_probability">[docs]</a><span class="k">def</span> <span class="nf">convert_annual_to_monthly_probability</span><span class="p">(</span><span class="n">annual</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Converts a given annual probabily into the equivalent monthly one.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    annual : numpy.nd_array</span>
+<span class="sd">        annual probabilities, 0 &lt;= annual &lt;= 1</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    monthly : numpy.nd_array</span>
+<span class="sd">        equivalent monthly probabilities, 0 &lt;= monthly &lt;= 1</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Any probabilities outside of the [0, 1] range</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Checks for boundary cases to avoid a divide by zero warning</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import convert_annual_to_monthly_probability</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; annual  = np.array([0, 0.1, 1])</span>
+<span class="sd">    &gt;&gt;&gt; monthly = convert_annual_to_monthly_probability(annual)</span>
+<span class="sd">    &gt;&gt;&gt; print(monthly) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0. 0.00874161  1. ]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># check ranges</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">annual</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;annual must be &gt;= 0&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">annual</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;annual must be &lt;= 1&#39;</span><span class="p">)</span>
+    <span class="c"># ignore divide by zero errors when annual == 1</span>
+    <span class="k">with</span> <span class="n">np</span><span class="o">.</span><span class="n">errstate</span><span class="p">(</span><span class="n">divide</span><span class="o">=</span><span class="s">&#39;ignore&#39;</span><span class="p">):</span>
+        <span class="c"># convert to equivalent probability and return result</span>
+        <span class="n">monthly</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">annual</span><span class="p">)</span><span class="o">/</span><span class="n">MONTHS_PER_YEAR</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">monthly</span>
+
+<span class="c">#%% Functions - convert_monthly_to_annual_probability</span></div>
+<div class="viewcode-block" id="convert_monthly_to_annual_probability"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.convert_monthly_to_annual_probability">[docs]</a><span class="k">def</span> <span class="nf">convert_monthly_to_annual_probability</span><span class="p">(</span><span class="n">monthly</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Converts a given monthly probability into the equivalent annual one.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    monthly : numpy.nd_array</span>
+<span class="sd">        equivalent monthly probabilities, 0 &lt;= monthly &lt;= 1</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    annual : numpy.nd_array</span>
+<span class="sd">        annual probabilities, 0 &lt;= annual &lt;= 1</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import convert_monthly_to_annual_probability</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; monthly = np.array([0, 0.1, 1])</span>
+<span class="sd">    &gt;&gt;&gt; annual = convert_monthly_to_annual_probability(monthly)</span>
+<span class="sd">    &gt;&gt;&gt; print(annual) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0. 0.71757046 1. ]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># check ranges</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">monthly</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;monthly must be &gt;= 0&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">monthly</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;annual must be &lt;= 1&#39;</span><span class="p">)</span>
+    <span class="c"># convert to equivalent probability and return result</span>
+    <span class="n">annual</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">monthly</span><span class="p">)</span><span class="o">**</span><span class="n">MONTHS_PER_YEAR</span>
+    <span class="k">return</span> <span class="n">annual</span>
+
+<span class="c">#%% Functions - get_root_dir</span></div>
+<div class="viewcode-block" id="get_root_dir"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.get_root_dir">[docs]</a><span class="k">def</span> <span class="nf">get_root_dir</span><span class="p">():</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Returns the folder that contains this source file and thus the root folder for the whole code.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    folder : str</span>
+<span class="sd">        Location of the folder that contains all the source files for the code.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in March 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import get_root_dir</span>
+<span class="sd">    &gt;&gt;&gt; folder = get_root_dir()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># this folder is the root directory based on the location of this file (utils.py)</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">__file__</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">folder</span>
+
+<span class="c">#%% Functions - get_tests_dir</span></div>
+<div class="viewcode-block" id="get_tests_dir"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.get_tests_dir">[docs]</a><span class="k">def</span> <span class="nf">get_tests_dir</span><span class="p">():</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Returns the default test folder location.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    folder : str</span>
+<span class="sd">        Location of the folder that contains all the test files for the code.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in March 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import get_tests_dir</span>
+<span class="sd">    &gt;&gt;&gt; folder = get_tests_dir()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># this  folder is the &#39;tests&#39; subfolder</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_root_dir</span><span class="p">(),</span> <span class="s">&#39;tests&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">folder</span>
+
+<span class="c">#%% Functions - get_data_dir</span></div>
+<div class="viewcode-block" id="get_data_dir"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.get_data_dir">[docs]</a><span class="k">def</span> <span class="nf">get_data_dir</span><span class="p">():</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Returns the default data folder location.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    folder : str</span>
+<span class="sd">        Location of the default folder for storing the code data.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import get_data_dir</span>
+<span class="sd">    &gt;&gt;&gt; folder = get_data_dir()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># this folder is the &#39;data&#39; subfolder</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_root_dir</span><span class="p">(),</span> <span class="s">&#39;data&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">folder</span>
+
+<span class="c">#%% Functions - get_images_dir</span></div>
+<div class="viewcode-block" id="get_images_dir"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.get_images_dir">[docs]</a><span class="k">def</span> <span class="nf">get_images_dir</span><span class="p">():</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Returns the default data folder location.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    folder : str</span>
+<span class="sd">        Location of the default folder for storing the code data.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import get_images_dir</span>
+<span class="sd">    &gt;&gt;&gt; folder = get_images_dir()</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># this folder is the &#39;images&#39; subfolder</span>
+    <span class="n">folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">get_root_dir</span><span class="p">(),</span> <span class="s">&#39;images&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">folder</span>
+
+<span class="c">#%% Functions - capture_output</span></div>
+<span class="nd">@contextmanager</span>
+<div class="viewcode-block" id="capture_output"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.capture_output">[docs]</a><span class="k">def</span> <span class="nf">capture_output</span><span class="p">():</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Captures the stdout and stderr streams instead of displaying to the screen.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    out : class StringIO</span>
+<span class="sd">        stdout stream output</span>
+<span class="sd">    err : class StringIO</span>
+<span class="sd">        stderr stream output</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import capture_output</span>
+<span class="sd">    &gt;&gt;&gt; with capture_output() as (out, _):</span>
+<span class="sd">    ...     print(&#39;Hello, World!&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; output = out.getvalue().strip()</span>
+<span class="sd">    &gt;&gt;&gt; out.close()</span>
+<span class="sd">    &gt;&gt;&gt; print(output)</span>
+<span class="sd">    Hello, World!</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># create new string buffers</span>
+    <span class="n">new_out</span><span class="p">,</span> <span class="n">new_err</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(),</span> <span class="n">StringIO</span><span class="p">()</span>
+    <span class="c"># alias the old string buffers for restoration afterwards</span>
+    <span class="n">old_out</span><span class="p">,</span> <span class="n">old_err</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c"># override the system buffers with the new ones</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">new_out</span><span class="p">,</span> <span class="n">new_err</span>
+        <span class="c"># yield results as desired</span>
+        <span class="k">yield</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="c"># restore the original buffers once all results are read</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">old_out</span><span class="p">,</span> <span class="n">old_err</span>
+
+<span class="c">#%% Functions - unit</span></div>
+<div class="viewcode-block" id="unit"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.unit">[docs]</a><span class="k">def</span> <span class="nf">unit</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Normalizes a matrix into unit vectors along a specified dimension, default to column</span>
+<span class="sd">    normalization.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : ndarray</span>
+<span class="sd">        Data</span>
+<span class="sd">    axis : int, optional</span>
+<span class="sd">        Axis upon which to normalize</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    norm_data : ndarray</span>
+<span class="sd">        Normalized data</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    sklearn.preprocessing.normalize</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David Stauffer in May 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import unit</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; data = np.array([[1, 0, -1],[0, 0, 0], [0, 0, 1]])</span>
+<span class="sd">    &gt;&gt;&gt; norm_data = unit(data, axis=0)</span>
+<span class="sd">    &gt;&gt;&gt; print(norm_data) #doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [[ 1. 0. -0.70710678]</span>
+<span class="sd">     [ 0. 0.  0.        ]</span>
+<span class="sd">     [ 0. 0.  0.70710678]]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># calculate the magnitude of each vector</span>
+    <span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">data</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">))</span>
+    <span class="c"># check for zero vectors, and replace magnitude with 1 to make them unchanged</span>
+    <span class="n">mag</span><span class="p">[</span><span class="n">mag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="c"># calculate the new normalized data</span>
+    <span class="n">norm_data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">/</span> <span class="n">mag</span>
+    <span class="k">return</span> <span class="n">norm_data</span>
+
+<span class="c">#%% Functions - nonzero_indices</span></div>
+<div class="viewcode-block" id="nonzero_indices"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.nonzero_indices">[docs]</a><span class="k">def</span> <span class="nf">nonzero_indices</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Returns the indices for a boolean array, similar to the Matlab &quot;find&quot; command.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data : array_like</span>
+<span class="sd">        Input data</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ix : ndarray</span>
+<span class="sd">        Indices to elements that evaluate as true</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David Stauffer in May 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import nonzero_indices</span>
+<span class="sd">    &gt;&gt;&gt; data = [True, True, False, False, True]</span>
+<span class="sd">    &gt;&gt;&gt; ix   = nonzero_indices(data)</span>
+<span class="sd">    &gt;&gt;&gt; print(ix) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [0 1 4]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># build and return the indices</span>
+    <span class="n">ix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ix</span> <span class="k">for</span> <span class="p">(</span><span class="n">ix</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">val</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ix</span>
+
+<span class="c">#%% Functions - combine_sets</span></div>
+<div class="viewcode-block" id="combine_sets"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.combine_sets">[docs]</a><span class="k">def</span> <span class="nf">combine_sets</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">u1</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">u2</span><span class="p">,</span> <span class="n">s2</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Combines the mean and standard deviations for two non-overlapping sets of data.</span>
+
+<span class="sd">    This function combines two non-overlapping data sets, given a number of samples, mean</span>
+<span class="sd">    and standard deviation for the two data sets.  It first calculates the total number of samples</span>
+<span class="sd">    then calculates the total mean using a weighted average, and then calculates the combined</span>
+<span class="sd">    standard deviation using an equation found on wikipedia.  It also checks for special cases</span>
+<span class="sd">    where either data set is empty or if only one total point is in the combined set.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n1 : float</span>
+<span class="sd">        number of points in data set 1</span>
+<span class="sd">    u1 : float</span>
+<span class="sd">        mean of data set 1</span>
+<span class="sd">    s1 : float</span>
+<span class="sd">        standard deviation of data set 1</span>
+<span class="sd">    n2 : float</span>
+<span class="sd">        number of points in data set 2</span>
+<span class="sd">    u2 : float</span>
+<span class="sd">        mean of data set 2</span>
+<span class="sd">    s2 : float</span>
+<span class="sd">        standard deviation of data set 2</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    n  : float,</span>
+<span class="sd">        number of points in the combined data set</span>
+<span class="sd">    u  : float,</span>
+<span class="sd">        mean of the combined data set</span>
+<span class="sd">    s  : float,</span>
+<span class="sd">        standard deviation of the combined data set</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    np.mean, np.std</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    #.  http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics, on 8/7/12</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written in Matlab by David Stauffer in Jul 2012.</span>
+<span class="sd">    #.  Ported to Python by David Stauffer in May 2015.</span>
+<span class="sd">    #.  Could be expanded to broadcast and handle array inputs.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import combine_sets</span>
+<span class="sd">    &gt;&gt;&gt; n1 = 5</span>
+<span class="sd">    &gt;&gt;&gt; u1 = 1</span>
+<span class="sd">    &gt;&gt;&gt; s1 = 0.5</span>
+<span class="sd">    &gt;&gt;&gt; n2 = 10</span>
+<span class="sd">    &gt;&gt;&gt; u2 = 2</span>
+<span class="sd">    &gt;&gt;&gt; s2 = 0.25</span>
+<span class="sd">    &gt;&gt;&gt; (n, u, s) = combine_sets(n1, u1, s1, n2, u2, s2)</span>
+<span class="sd">    &gt;&gt;&gt; print(n)</span>
+<span class="sd">    15</span>
+<span class="sd">    &gt;&gt;&gt; print(u) #doctest: +ELLIPSIS</span>
+<span class="sd">    1.666666...67</span>
+<span class="sd">    &gt;&gt;&gt; print(s)</span>
+<span class="sd">    0.59135639081</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># assertions</span>
+    <span class="k">assert</span> <span class="n">n1</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">n2</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">s1</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">s2</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="c"># combine total number of samples</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">n1</span> <span class="o">+</span> <span class="n">n2</span>
+    <span class="c"># check for zero case</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+    <span class="c"># calculate the combined mean</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n1</span><span class="o">*</span><span class="n">u1</span> <span class="o">+</span> <span class="n">n2</span><span class="o">*</span><span class="n">u2</span><span class="p">)</span>
+    <span class="c"># calculate the combined standard deviation</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span> <span class="p">(</span><span class="n">n1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">s1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">n1</span><span class="o">*</span><span class="n">u1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">n2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">s2</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">n2</span><span class="o">*</span><span class="n">u2</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">n</span><span class="o">*</span><span class="n">u</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># special case where one of the data sets is empty</span>
+        <span class="k">if</span> <span class="n">n1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s1</span>
+        <span class="k">elif</span> <span class="n">n2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c"># shouldn&#39;t be able to ever reach this line with assertions on</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Total samples are 1, but neither data set has only one item.&#39;</span><span class="p">)</span> <span class="c">#pragma: no cover</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+
+<span class="c">#%% Unit test</span></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="s">&#39;tests.test_utils&#39;</span><span class="p">,</span> <span class="nb">exit</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">dstauffman 0.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, David C. Stauffer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>

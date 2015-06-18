@@ -1,0 +1,944 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dstauffman.quat &mdash; dstauffman 0.1.0 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="dstauffman 0.1.0 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">dstauffman 0.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for dstauffman.quat</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">Quat module file for the &quot;dstauffman&quot; library.  It contains generic quaternion</span>
+<span class="sd">utilities that can be independently defined and used by other modules.</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">#.  Written by David C. Stauffer in April 2015.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># pylint: disable=E1101, C0326</span>
+
+<span class="c">#%% Imports</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">doctest</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">dstauffman.constants</span> <span class="kn">import</span> <span class="n">INT_TOKEN</span>
+
+<span class="c">#%% Functions - qrot</span>
+<div class="viewcode-block" id="qrot"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.qrot">[docs]</a><span class="k">def</span> <span class="nf">qrot</span><span class="p">(</span><span class="n">axis</span><span class="p">,</span> <span class="n">angle</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Construct a quaternion expressing a rotation about a single axis</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    axis : int</span>
+<span class="sd">        Axis about which rotation is being made, from {1, 2, 3}</span>
+<span class="sd">            (1) for x-axis</span>
+<span class="sd">            (2) for y-axis</span>
+<span class="sd">            (3) for z-axis</span>
+<span class="sd">    angle : array_like</span>
+<span class="sd">        angle of rotation in radians</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    quat : ndarray, (4, N)</span>
+<span class="sd">        quaternion representing the given rotations</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    #.  Wertz, James R. (editor), Equations 12.11 in Parameterization of the Attitude,</span>
+<span class="sd">            Section 12.1, Spacecraft Attitude Determination and Control,</span>
+<span class="sd">            Kluwer Academic Publishers, 1978.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import qrot</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; quat = qrot(3, np.pi/2)</span>
+<span class="sd">    &gt;&gt;&gt; print(quat) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0. 0. 0.70710678  0.70710678]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># assertions</span>
+    <span class="k">assert</span> <span class="n">axis</span> <span class="ow">in</span> <span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>
+    <span class="c"># calculations</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">angle</span><span class="p">):</span>
+        <span class="c"># optimized scalar case</span>
+        <span class="n">quat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">)])</span>
+        <span class="n">quat</span><span class="p">[</span><span class="n">axis</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># general case</span>
+        <span class="n">quat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">angle</span><span class="p">),</span> <span class="mi">3</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">))),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">quat</span><span class="p">[</span><span class="n">axis</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">angle</span><span class="o">/</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">quat</span>
+
+<span class="c">#%% Functions - quat_angle_diff</span></div>
+<div class="viewcode-block" id="quat_angle_diff"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.quat_angle_diff">[docs]</a><span class="k">def</span> <span class="nf">quat_angle_diff</span><span class="p">(</span><span class="n">quat1</span><span class="p">,</span> <span class="n">quat2</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the angular difference between two quaternions</span>
+
+<span class="sd">    This function takes a two quaternions and calculates a delta quaternion between them.</span>
+<span class="sd">    It then uses the delta quaternion to generate both a total angular difference, and an</span>
+<span class="sd">    an angular difference expressed in X, Y, Z components based on the axis of rotation,</span>
+<span class="sd">    expressed in the original frame of the quat1 input quaternion.  This function uses full</span>
+<span class="sd">    trignometric functions instead of any small angle approximations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    quat1 : ndarray (4, N)</span>
+<span class="sd">        quaternion one</span>
+<span class="sd">    quat2 : ndarray (4, N)</span>
+<span class="sd">        quaternion two</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    theta : ndarray (1, N)</span>
+<span class="sd">        angular different [rad]</span>
+<span class="sd">    comp  : ndarray (3, N)</span>
+<span class="sd">        angle components in x, y, z frame [rad]</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    This function is based on this representation of a unit quaternion:</span>
+<span class="sd">    quat = [[nx * sin(theta/2)]</span>
+<span class="sd">            [ny * sin(theta/2)]</span>
+<span class="sd">            [nz * sin(theta/2)]</span>
+<span class="sd">            [   cos(theta/2)  ]]</span>
+<span class="sd">    Where: &lt;nx,ny,nz&gt; are the three components of a unit vector of rotation axis and</span>
+<span class="sd">           theta is the angle of rotation</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import qrot, quat_mult, quat_angle_diff, concat_vectors</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; quat1  = np.array([0.5, 0.5, 0.5, 0.5])</span>
+<span class="sd">    &gt;&gt;&gt; dq1 = qrot(1, 0.001)</span>
+<span class="sd">    &gt;&gt;&gt; dq2 = qrot(2, 0.05)</span>
+<span class="sd">    &gt;&gt;&gt; quat2  = concat_vectors(quat_mult(dq1,quat1), quat_mult(dq2,quat1))</span>
+<span class="sd">    &gt;&gt;&gt; (theta, comp) = quat_angle_diff(quat1, quat2)</span>
+<span class="sd">    &gt;&gt;&gt; print(theta) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0.001  0.05 ]</span>
+<span class="sd">    &gt;&gt;&gt; print(comp) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [[ 0.001  0.   ]</span>
+<span class="sd">     [ 0.     0.05 ]</span>
+<span class="sd">     [ 0.     0.   ]]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># calculate delta quaternion</span>
+    <span class="n">dq</span> <span class="o">=</span> <span class="n">quat_mult</span><span class="p">(</span><span class="n">quat2</span><span class="p">,</span> <span class="n">quat_inv</span><span class="p">(</span><span class="n">quat1</span><span class="p">))</span>
+
+    <span class="c"># pull vector components out of delta quaternion</span>
+    <span class="n">dv</span> <span class="o">=</span> <span class="n">dq</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+
+    <span class="c"># sum vector components to get sin(theta/2)^2</span>
+    <span class="n">mag2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dv</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="c"># take square root to get sin(theta/2)</span>
+    <span class="n">mag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">mag2</span><span class="p">)</span>
+
+    <span class="c"># take inverse sine to get theta/2</span>
+    <span class="n">theta_over_2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">mag</span><span class="p">)</span>
+
+    <span class="c"># multiply by 2 to get theta</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">theta_over_2</span>
+
+    <span class="c"># set any magnitude that is identically 0 to be 1 instead</span>
+    <span class="c"># to avoid a divide by zero warning.</span>
+    <span class="n">mag</span><span class="p">[</span><span class="n">mag</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+    <span class="c"># normalize vector components</span>
+    <span class="n">nv</span> <span class="o">=</span> <span class="n">dv</span> <span class="o">/</span> <span class="n">mag</span>
+
+    <span class="c"># find angle expressed in x, y, z components based on normalized vector</span>
+    <span class="n">comp</span> <span class="o">=</span> <span class="n">nv</span> <span class="o">*</span> <span class="n">theta</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span>
+
+<span class="c">#%% Functions - quat_from_euler</span></div>
+<div class="viewcode-block" id="quat_from_euler"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.quat_from_euler">[docs]</a><span class="k">def</span> <span class="nf">quat_from_euler</span><span class="p">(</span><span class="n">angles</span><span class="p">,</span> <span class="n">seq</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">])):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Convert set(s) of euler angles to quaternion(s).</span>
+
+<span class="sd">    Assumes angles are of (3 1 2) euler order and converts accordingly unless the</span>
+<span class="sd">    optional &quot;seq&quot; argument defines a different euler order. This function will</span>
+<span class="sd">    also take more than three angle sequences if desired.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    angles : ndarray, (A, N)</span>
+<span class="sd">        Euler angels [rad]</span>
+<span class="sd">    seq : ndarray, (A, 1), optional</span>
+<span class="sd">        Euler angle sequence, where:</span>
+<span class="sd">            1 = X axis, or roll</span>
+<span class="sd">            2 = Y axis, or pitch</span>
+<span class="sd">            3 = Z axis, or yaw</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    quat : ndarray (4, N)</span>
+<span class="sd">        quaternion representing the euler rotation(s)</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+<span class="sd">    #.  This function will take one angle sequence, but an arbitrary number of angles.</span>
+<span class="sd">    #.  Enumerated values are some selective permutation of (1, 2, 3) without successive</span>
+<span class="sd">            repetition such as (3, 1, 2) or (3, 1, 3) but not (3, 1, 1) wherein 1, 1 is a successive</span>
+<span class="sd">            repetition.  By default, it expects (3, 1, 2).</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import quat_from_euler, concat_vectors</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; a   = np.array([0.01, 0.02, 0.03])</span>
+<span class="sd">    &gt;&gt;&gt; b   = np.array([0.04, 0.05, 0.06])</span>
+<span class="sd">    &gt;&gt;&gt; angles = concat_vectors(a, b)</span>
+<span class="sd">    &gt;&gt;&gt; seq = np.array([3, 2, 1])</span>
+<span class="sd">    &gt;&gt;&gt; quat = quat_from_euler(angles, seq)</span>
+<span class="sd">    &gt;&gt;&gt; print(quat) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [[ 0.01504849  0.03047982]</span>
+<span class="sd">     [ 0.00992359  0.02438147]</span>
+<span class="sd">     [ 0.00514916  0.02073308]</span>
+<span class="sd">     [ 0.99982426  0.99902285]]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># get number of angles</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="n">angles</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c"># TODO: can be vector?</span>
+    <span class="c"># initialize output</span>
+    <span class="n">quat</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="n">num</span><span class="p">))</span>
+    <span class="c"># loop through quaternions</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+        <span class="n">q_temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="c"># apply each rotation</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)):</span>
+            <span class="n">q_single</span> <span class="o">=</span> <span class="n">qrot</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">angles</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">q_temp</span> <span class="o">=</span> <span class="n">quat_mult</span><span class="p">(</span><span class="n">q_temp</span><span class="p">,</span> <span class="n">q_single</span><span class="p">)</span>
+        <span class="c"># save output</span>
+        <span class="n">quat</span><span class="p">[:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">q_temp</span>
+    <span class="k">return</span> <span class="n">quat</span>
+
+<span class="c">#%% Functions - quat_interp</span></div>
+<div class="viewcode-block" id="quat_interp"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.quat_interp">[docs]</a><span class="k">def</span> <span class="nf">quat_interp</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">quat</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">inclusive</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Interpolate quaternions from a monotonic time series of quaternions.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    time : ndarray, (A, )</span>
+<span class="sd">        monotonically increasing time series [sec]</span>
+<span class="sd">    quat : ndarray, (4, A)</span>
+<span class="sd">        quaternion series</span>
+<span class="sd">    ti : ndarray (B, )</span>
+<span class="sd">        desired time of interpolation, also monotonically increasing [sec]</span>
+<span class="sd">    inclusive : bool {True, False}, optional</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    qout : ndarray (4, B)</span>
+<span class="sd">        interpolated quaternion at ti</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import quat_interp</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; time  = np.array([1, 3, 5])</span>
+<span class="sd">    &gt;&gt;&gt; quat  = np.array([[0, 0, 0, 1], [0, 0, 0.1961, 0.9806], [0.5, -0.5, -0.5, 0.5]]).T</span>
+<span class="sd">    &gt;&gt;&gt; ti = np.array([1, 2, 4.5, 5])</span>
+<span class="sd">    &gt;&gt;&gt; qout = quat_interp(time, quat, ti)</span>
+<span class="sd">    &gt;&gt;&gt; print(qout) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [[ 0. 0.          0.41748298  0.5 ]</span>
+<span class="sd">     [ 0. 0.         -0.41748298 -0.5 ]</span>
+<span class="sd">     [ 0. 0.09852786 -0.35612893 -0.5 ]</span>
+<span class="sd">     [ 1. 0.99513429  0.72428455  0.5 ]]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># Initializations</span>
+    <span class="c"># number of data points to find</span>
+    <span class="n">num</span>   <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ti</span><span class="p">)</span>
+
+    <span class="c"># initialize output</span>
+    <span class="n">qout</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">4</span><span class="p">,</span> <span class="n">num</span><span class="p">))</span>
+    <span class="n">qout</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">)</span>
+
+    <span class="c"># Simple cases</span>
+    <span class="k">if</span> <span class="n">num</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c"># optimization for when ti is empty</span>
+        <span class="k">return</span> <span class="n">qout</span>
+    <span class="k">elif</span> <span class="n">num</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c"># optimization for simple use case(s), where ti is a scalar and contained in time</span>
+        <span class="k">if</span> <span class="n">ti</span> <span class="ow">in</span> <span class="n">time</span><span class="p">:</span>
+            <span class="n">ix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ti</span> <span class="o">==</span> <span class="n">time</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">ix</span><span class="p">:</span>
+                <span class="n">qout</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[:,</span> <span class="n">ix</span><span class="p">]</span>
+                <span class="k">return</span> <span class="n">qout</span>
+
+    <span class="c"># Check time bounds</span>
+    <span class="c"># check for desired times that are outside the time vector</span>
+    <span class="n">ix_exclusive</span> <span class="o">=</span> <span class="p">(</span><span class="n">ti</span> <span class="o">&lt;</span> <span class="n">time</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">|</span> <span class="p">(</span><span class="n">ti</span> <span class="o">&gt;</span> <span class="n">time</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">ix_exclusive</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">inclusive</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Desired time not found within input time vector.&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Desired time not found within input time vector.&#39;</span><span class="p">)</span>
+
+    <span class="c"># Given times</span>
+    <span class="c"># find desired points that are contained in input time vector</span>
+    <span class="n">ix_known</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">ti</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">assume_unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">ix_input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">in1d</span><span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">ti</span><span class="p">,</span> <span class="n">assume_unique</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+    <span class="c"># set quaternions directly to known values</span>
+    <span class="n">qout</span><span class="p">[:,</span> <span class="n">ix_known</span><span class="p">]</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[:,</span> <span class="n">ix_input</span><span class="p">]</span>
+
+    <span class="c"># find other points to be calculated</span>
+    <span class="n">ix_calc</span> <span class="o">=</span> <span class="o">~</span><span class="n">ix_known</span> <span class="o">&amp;</span> <span class="o">~</span><span class="n">ix_exclusive</span>
+
+    <span class="c"># Calculations</span>
+    <span class="c"># find index within time to surround ti</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+    <span class="n">index</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">INT_TOKEN</span><span class="p">)</span>
+    <span class="c"># If not compiling, then you can do a for i = find(ix_calc) and skip the if ix_calc(i) line,</span>
+    <span class="c"># which may make the non-compiled matlab version faster</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">ix_calc</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">ti</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">time</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">index</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+
+    <span class="c"># remove points that are NaN, either they weren&#39;t in the time vector, or they were next to a</span>
+    <span class="c"># drop out and cannot be interpolated.</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">index</span><span class="p">[</span><span class="n">index</span> <span class="o">!=</span> <span class="n">INT_TOKEN</span><span class="p">]</span>
+    <span class="c"># pull out bounding times and quaternions</span>
+    <span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="p">[</span><span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">t2</span> <span class="o">=</span> <span class="n">time</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+    <span class="n">q1</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[:,</span> <span class="n">index</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">q2</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[:,</span> <span class="n">index</span><span class="p">]</span>
+    <span class="c"># calculate delta quaternion</span>
+    <span class="n">dq12</span>       <span class="o">=</span> <span class="n">quat_norm</span><span class="p">(</span><span class="n">quat_mult</span><span class="p">(</span><span class="n">q2</span><span class="p">,</span> <span class="n">quat_inv</span><span class="p">(</span><span class="n">q1</span><span class="p">)))</span>
+    <span class="c"># find delta quaternion axis of rotation</span>
+    <span class="n">vec</span>        <span class="o">=</span> <span class="n">dq12</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+    <span class="n">norm_vec</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">vec</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="c"># check for zero norm vectors</span>
+    <span class="n">norm_fix</span>   <span class="o">=</span> <span class="n">norm_vec</span>
+    <span class="n">norm_fix</span><span class="p">[</span><span class="n">norm_fix</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">ax</span>         <span class="o">=</span> <span class="n">vec</span> <span class="o">/</span> <span class="n">norm_fix</span>
+    <span class="c"># find delta quaternion rotation angle</span>
+    <span class="n">ang</span>        <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">norm_vec</span><span class="p">)</span>
+    <span class="c"># scale rotation angle based on time</span>
+    <span class="n">scaled_ang</span> <span class="o">=</span> <span class="n">ang</span><span class="o">*</span><span class="p">(</span><span class="n">ti</span><span class="p">[</span><span class="n">ix_calc</span><span class="p">]</span><span class="o">-</span><span class="n">t1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">t2</span><span class="o">-</span><span class="n">t1</span><span class="p">)</span>
+    <span class="c"># find scaled delta quaternion</span>
+    <span class="n">dq</span>         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">ax</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">scaled_ang</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">scaled_ang</span><span class="o">/</span><span class="mi">2</span><span class="p">),</span><span class="mi">0</span><span class="p">)),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="c"># calculate desired quaternion</span>
+    <span class="n">qout_temp</span>  <span class="o">=</span> <span class="n">quat_norm</span><span class="p">(</span><span class="n">quat_mult</span><span class="p">(</span><span class="n">dq</span><span class="p">,</span><span class="n">q1</span><span class="p">))</span>
+    <span class="c"># store into output structure</span>
+    <span class="n">qout</span><span class="p">[:,</span> <span class="n">ix_calc</span><span class="p">]</span> <span class="o">=</span> <span class="n">qout_temp</span>
+
+    <span class="c"># Sign convention</span>
+    <span class="c"># Enforce sign convention on scalar quaternion element.</span>
+    <span class="c"># Scalar element (fourth element) of quaternion must not be negative.</span>
+    <span class="c"># So change sign on entire quaternion if qout(4) is less than zero.</span>
+    <span class="n">qout</span><span class="p">[:,</span> <span class="n">qout</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">qout</span><span class="p">[:,</span> <span class="n">qout</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">qout</span>
+
+<span class="c">#%% Functions - quat_inv</span></div>
+<div class="viewcode-block" id="quat_inv"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.quat_inv">[docs]</a><span class="k">def</span> <span class="nf">quat_inv</span><span class="p">(</span><span class="n">q1</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Returns the inverse of a normalized quaternions</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    q1 : ndarray, (4xN)</span>
+<span class="sd">        input quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    q2 : ndarray, (4xN)</span>
+<span class="sd">        inverse quaterion</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    quat_norm, quat_mult, quat_prop, quat_times_vector, quat_to_dcm, quat_to_euler,</span>
+<span class="sd">    quat_from_euler</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import qrot, quat_inv</span>
+<span class="sd">    &gt;&gt;&gt; from numpy import pi</span>
+<span class="sd">    &gt;&gt;&gt; q1 = qrot(1, pi/2)</span>
+<span class="sd">    &gt;&gt;&gt; q2 = quat_inv(q1)</span>
+<span class="sd">    &gt;&gt;&gt; print(q2) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [-0.70710678 -0. -0. 0.70710678]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># invert the quaternions</span>
+    <span class="k">if</span> <span class="n">q1</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c"># optimized single quaternion case</span>
+        <span class="n">q2</span> <span class="o">=</span> <span class="n">q1</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># general case</span>
+        <span class="n">q2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="o">-</span><span class="n">q1</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:],</span> <span class="o">-</span><span class="n">q1</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> <span class="o">-</span><span class="n">q1</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:],</span> <span class="n">q1</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">q1</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">q2</span>
+
+<span class="c">#%% Functions - quat_mult</span></div>
+<div class="viewcode-block" id="quat_mult"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.quat_mult">[docs]</a><span class="k">def</span> <span class="nf">quat_mult</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Multiplies quaternions together.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    a : ndarray, (4xN)</span>
+<span class="sd">        input quaternion one</span>
+<span class="sd">    b : ndarray, (4xN)</span>
+<span class="sd">        input quaternion two</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    c : ndarray, (4xN)</span>
+<span class="sd">        result of quaternion multiplication</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    quat_inv, quat_norm, quat_prop, quat_times_vector, quat_to_dcm, quat_to_euler,</span>
+<span class="sd">    quat_from_euler</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    #.  Each of (a, b) may be either a single quaternion (4, 1) or an array of quaternions (4, N).</span>
+<span class="sd">        If `a` and `b` are both single quaternions, then return b*a. If either (but not both) is</span>
+<span class="sd">        an array of quaternions, then return the product of the single quaternion times each element</span>
+<span class="sd">        of the array. If both are rows of quaternions, multiply corresponding columns.</span>
+<span class="sd">        `c` will have size (4, 1) in the first case, and (4, N) in the other cases.</span>
+
+<span class="sd">    #.  The quaternions `a` and `b` describe successive reference frame changes, i.e., a is</span>
+<span class="sd">        expressed in the coordinate system resulting from b, not in the original coordinate system.</span>
+<span class="sd">        In Don Reid&#39;s tutorial, this is called the R- version.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import qrot, quat_mult</span>
+<span class="sd">    &gt;&gt;&gt; from numpy import pi</span>
+<span class="sd">    &gt;&gt;&gt; a = qrot(1, pi/2)</span>
+<span class="sd">    &gt;&gt;&gt; b = qrot(2, pi)</span>
+<span class="sd">    &gt;&gt;&gt; c = quat_mult(a, b)</span>
+<span class="sd">    &gt;&gt;&gt; print(c) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 4.32978028e-17 7.07106781e-01 -7.07106781e-01 4.32978028e-17]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># check for vectorized inputs</span>
+    <span class="n">na</span> <span class="o">=</span> <span class="n">a</span><span class="o">.</span><span class="n">size</span>
+    <span class="n">nb</span> <span class="o">=</span> <span class="n">b</span><span class="o">.</span><span class="n">size</span>
+    <span class="c"># single quaternion inputs case</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">na</span><span class="o">==</span><span class="mi">4</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">nb</span><span class="o">==</span><span class="mi">4</span><span class="p">):</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> \
+            <span class="p">[</span> <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>  <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> \
+            <span class="p">[</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>  <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>  <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> \
+            <span class="p">[</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span>  <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> \
+            <span class="p">[</span><span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="o">-</span><span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>  <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">]]])</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">b</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span> <span class="c"># TODO: replace w/ @ in Python 3.5</span>
+        <span class="c"># enforce positive scalar component</span>
+        <span class="k">if</span> <span class="n">c</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">c</span> <span class="o">=</span> <span class="o">-</span><span class="n">c</span>
+    <span class="c"># vectorized inputs</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">a1</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">a2</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">a3</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">a4</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="k">if</span> <span class="n">b</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">b</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+        <span class="n">b1</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">b2</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">b3</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">b4</span> <span class="o">=</span> <span class="n">b</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> \
+             <span class="n">b1</span><span class="o">*</span><span class="n">a4</span> <span class="o">+</span> <span class="n">b2</span><span class="o">*</span><span class="n">a3</span> <span class="o">-</span> <span class="n">b3</span><span class="o">*</span><span class="n">a2</span> <span class="o">+</span> <span class="n">b4</span><span class="o">*</span><span class="n">a1</span><span class="p">,</span> \
+            <span class="o">-</span><span class="n">b1</span><span class="o">*</span><span class="n">a3</span> <span class="o">+</span> <span class="n">b2</span><span class="o">*</span><span class="n">a4</span> <span class="o">+</span> <span class="n">b3</span><span class="o">*</span><span class="n">a1</span> <span class="o">+</span> <span class="n">b4</span><span class="o">*</span><span class="n">a2</span><span class="p">,</span> \
+             <span class="n">b1</span><span class="o">*</span><span class="n">a2</span> <span class="o">-</span> <span class="n">b2</span><span class="o">*</span><span class="n">a1</span> <span class="o">+</span> <span class="n">b3</span><span class="o">*</span><span class="n">a4</span> <span class="o">+</span> <span class="n">b4</span><span class="o">*</span><span class="n">a3</span><span class="p">,</span> \
+            <span class="o">-</span><span class="n">b1</span><span class="o">*</span><span class="n">a1</span> <span class="o">-</span> <span class="n">b2</span><span class="o">*</span><span class="n">a2</span> <span class="o">-</span> <span class="n">b3</span><span class="o">*</span><span class="n">a3</span> <span class="o">+</span> <span class="n">b4</span><span class="o">*</span><span class="n">a4</span><span class="p">])</span>
+
+        <span class="n">c</span><span class="p">[:,</span> <span class="n">c</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">c</span><span class="p">[:,</span> <span class="n">c</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:]</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">c</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">c</span> <span class="o">=</span> <span class="n">c</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">c</span>
+
+<span class="c">#%% Functions - quat_norm</span></div>
+<div class="viewcode-block" id="quat_norm"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.quat_norm">[docs]</a><span class="k">def</span> <span class="nf">quat_norm</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Normalizes each column of the input matrix</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x : ndarray</span>
+<span class="sd">        input quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        normalized quaternion</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    quat_mult, quat_inv, quat_prop, quat_times_vector, quat_to_dcm, quat_to_euler, quat_from_euler</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import quat_norm</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; x = np.array([0.1, 0, 0, 1])</span>
+<span class="sd">    &gt;&gt;&gt; y = quat_norm(x)</span>
+<span class="sd">    &gt;&gt;&gt; print(y) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0.09950372 0. 0. 0.99503719]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># divide input by its column vector norm</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">x</span><span class="o">*</span><span class="n">x</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">y</span>
+
+<span class="c">#%% Functions - quat_prop</span></div>
+<div class="viewcode-block" id="quat_prop"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.quat_prop">[docs]</a><span class="k">def</span> <span class="nf">quat_prop</span><span class="p">(</span><span class="n">quat</span><span class="p">,</span> <span class="n">delta_ang</span><span class="p">,</span> <span class="n">renorm</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Approximate propagation of a quaternion using a small delta angle.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    quat : ndarray, (4, 1)</span>
+<span class="sd">        normalized input quaternion</span>
+<span class="sd">    delta_ang : ndarray, (3, 1)</span>
+<span class="sd">        delta angles in x, y, z order [rad]</span>
+<span class="sd">    renorm : bool {True, False}, optional</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    quat_new : ndarray, (4, 1)</span>
+<span class="sd">        propagated quaternion, optionally re-normalized</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    quat_mult, quat_inv, quat_norm, quat_times_vector, quat_to_dcm, quat_to_euler, quat_from_euler</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import quat_prop</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; quat      = np.array([0, 0, 0, 1])</span>
+<span class="sd">    &gt;&gt;&gt; delta_ang = np.array([0.01, 0.02, 0.03])</span>
+<span class="sd">    &gt;&gt;&gt; quat_new  = quat_prop(quat, delta_ang)</span>
+<span class="sd">    &gt;&gt;&gt; print(quat_new) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0.00499913  0.00999825  0.01499738  0.99982505]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#compute angle rate matrix</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> \
+        <span class="p">[</span>      <span class="mi">0</span>      <span class="p">,</span>   <span class="n">delta_ang</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>   <span class="o">-</span><span class="n">delta_ang</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>   <span class="n">delta_ang</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> \
+        <span class="p">[</span><span class="o">-</span><span class="n">delta_ang</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>        <span class="mi">0</span>      <span class="p">,</span>    <span class="n">delta_ang</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>   <span class="n">delta_ang</span><span class="p">[</span><span class="mi">1</span><span class="p">]],</span> \
+        <span class="p">[</span> <span class="n">delta_ang</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>  <span class="o">-</span><span class="n">delta_ang</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>        <span class="mi">0</span>       <span class="p">,</span>   <span class="n">delta_ang</span><span class="p">[</span><span class="mi">2</span><span class="p">]],</span> \
+        <span class="p">[</span><span class="o">-</span><span class="n">delta_ang</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>  <span class="o">-</span><span class="n">delta_ang</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>   <span class="o">-</span><span class="n">delta_ang</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span>        <span class="mi">0</span>      <span class="p">]])</span>
+    <span class="c">#compute delta quaternion</span>
+    <span class="n">delta_quaternion</span> <span class="o">=</span> <span class="mf">0.5</span> <span class="o">*</span> <span class="n">omega</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">quat</span><span class="p">)</span>
+    <span class="c"># propagate over delta</span>
+    <span class="n">quat_new</span> <span class="o">=</span> <span class="n">quat</span> <span class="o">+</span> <span class="n">delta_quaternion</span>
+    <span class="c"># renormalize and return</span>
+    <span class="k">if</span> <span class="n">renorm</span><span class="p">:</span>
+        <span class="n">quat_new</span> <span class="o">=</span> <span class="n">quat_norm</span><span class="p">(</span><span class="n">quat_new</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">quat_new</span>
+
+<span class="c">#%% Functions - quat_times_vector</span></div>
+<div class="viewcode-block" id="quat_times_vector"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.quat_times_vector">[docs]</a><span class="k">def</span> <span class="nf">quat_times_vector</span><span class="p">(</span><span class="n">quat</span><span class="p">,</span> <span class="n">v</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Multiply quaternion(s) against vector(s)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    quat : ndarray, (4, N) or (4, )</span>
+<span class="sd">        quaternion(s)</span>
+<span class="sd">    v : ndarray, (3, N) or (3 ,)</span>
+<span class="sd">        input vector(s)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    vec : ndarray, (3, N)</span>
+<span class="sd">        product vector(s)</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    quat_mult, quat_inv, quat_norm, quat_prop, quat_to_dcm, quat_to_euler, quat_from_euler</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+<span class="sd">    #.  This function will broadcast a single vector or quaternion to the other dimension</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    Steps to algorithm</span>
+<span class="sd">    #.  qv = quat(1:3) x v</span>
+<span class="sd">    #.  vec = v + 2*[ -( quat(4) * qv ) + (quat(1:3) x qv) ]</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import quat_times_vector</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; quat = np.array([[0, 1, 0, 0], [1, 0, 0, 0]]).T</span>
+<span class="sd">    &gt;&gt;&gt; v = np.array([[1, 0, 0], [2, 0, 0]]).T</span>
+<span class="sd">    &gt;&gt;&gt; vec = quat_times_vector(quat, v)</span>
+<span class="sd">    &gt;&gt;&gt; print(vec) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [[-1.  2.]</span>
+<span class="sd">     [ 0.  0.]</span>
+<span class="sd">     [ 0.  0.]]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># determine input sizes</span>
+    <span class="k">if</span> <span class="n">quat</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">quat</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span>
+    <span class="c"># Multiple quaternions, multiple vectors</span>
+    <span class="n">qv</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> \
+        <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">v</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> \
+        <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">v</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:],</span> \
+        <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">v</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]])</span> <span class="c"># TODO: use cross product?</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">v</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="o">-</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">expand_dims</span><span class="p">(</span><span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="p">:],</span> <span class="mi">0</span><span class="p">)))</span> <span class="o">*</span> <span class="n">qv</span> <span class="o">+</span> \
+        <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span> \
+            <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">qv</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">qv</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:],</span> \
+            <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">qv</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">qv</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="p">:],</span> \
+            <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">qv</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="p">:]</span><span class="o">*</span><span class="n">qv</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="p">:]]))</span> <span class="c"># TODO: check this, and use cross product?</span>
+    <span class="k">return</span> <span class="n">vec</span>
+
+<span class="c">#%% Functions - quat_to_dcm</span></div>
+<div class="viewcode-block" id="quat_to_dcm"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.quat_to_dcm">[docs]</a><span class="k">def</span> <span class="nf">quat_to_dcm</span><span class="p">(</span><span class="n">quat</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Converts quaternion to a direction cosine matrix</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    quat : ndarray (4, 1)</span>
+<span class="sd">        quaternion</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    dcm : ndarray (3, 3)</span>
+<span class="sd">        direction cosine matrix</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    quat_mult, quat_inv, quat_norm, quat_prop, quat_times_vector, quat_to_euler, quat_from_euler</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import quat_to_dcm</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; quat = np.array([0.5, -0.5, 0.5, 0.5])</span>
+<span class="sd">    &gt;&gt;&gt; dcm = quat_to_dcm(quat)</span>
+<span class="sd">    &gt;&gt;&gt; print(dcm) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [[ 0.  0.  1.]</span>
+<span class="sd">     [-1.  0.  0.]</span>
+<span class="sd">     [ 0. -1.  0.]]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c">#build dcm components</span>
+    <span class="n">dcm</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+    <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">quat</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">quat</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">quat</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span>
+    <span class="k">return</span> <span class="n">dcm</span>
+
+<span class="c">#%% Functions - quat_to_euler</span></div>
+<div class="viewcode-block" id="quat_to_euler"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.quat_to_euler">[docs]</a><span class="k">def</span> <span class="nf">quat_to_euler</span><span class="p">(</span><span class="n">quat</span><span class="p">,</span><span class="n">seq</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Converts quaternion to Euler angles for one of 6 input angle sequences.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    quat : ndarray, (4, N)</span>
+<span class="sd">        quaternion</span>
+<span class="sd">    seq : ndarray, {(3, 1, 2), (1, 2, 3), (2, 3, 1), (1, 3, 2), (2, 1, 3), (3, 2, 1)}</span>
+<span class="sd">        euler angle sequence, where:</span>
+<span class="sd">            1 = X axis, or roll</span>
+<span class="sd">            2 = Y axis, or pitch</span>
+<span class="sd">            3 = Z axis, or yaw</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    euler : ndarray, (3, N)</span>
+<span class="sd">        Euler angles [rad]</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    quat_mult, quat_inv, quat_norm, quat_prop, quat_times_vectore, quat_from_euler</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Adapted from GARSE by David C. Stauffer in April 2015.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    #.  Appendix E of Wertz, page 764</span>
+<span class="sd">    #.  Appendix I of Kane, Likins, and Levinson, page 423</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import quat_to_euler</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; quat = np.array([[0, 1, 0, 0], [0, 0, 1, 0]]).T</span>
+<span class="sd">    &gt;&gt;&gt; seq = [3, 1, 2]</span>
+<span class="sd">    &gt;&gt;&gt; euler = quat_to_euler(quat, seq)</span>
+<span class="sd">    &gt;&gt;&gt; print(euler) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [[-0.         -3.14159265]</span>
+<span class="sd">     [ 0.          0.        ]</span>
+<span class="sd">     [ 3.14159265 -0.        ]]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c"># initialize output</span>
+    <span class="n">n</span>     <span class="o">=</span> <span class="n">quat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="c"># TODO: vector case?</span>
+    <span class="n">euler</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">3</span><span class="p">,</span> <span class="n">n</span><span class="p">))</span>
+
+    <span class="c"># Loop through quaternions</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="c"># calculate DCM from quaternion</span>
+        <span class="n">dcm</span> <span class="o">=</span> <span class="n">quat_to_dcm</span><span class="p">(</span><span class="n">quat</span><span class="p">[:,</span> <span class="n">i</span><span class="p">])</span>
+        <span class="c"># Find values of dir cosine matrix terms</span>
+        <span class="n">seq_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">seq</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="c"># calculate terms based on sequence order</span>
+        <span class="k">if</span> <span class="n">seq_str</span> <span class="o">==</span> <span class="s">&#39;123&#39;</span><span class="p">:</span>
+            <span class="c">#Identical to KLL pg 423</span>
+            <span class="n">c2_c3</span>                       <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">s1_s2_c3_plus_s3_c1</span>         <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">minus_c1_s2_c3_plus_s3_s1</span>   <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">minus_c2_s3</span>                 <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">minus_s1_s2_s3_plus_c3_c1</span>   <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">c1_s2_s3_plus_c3_s1</span>         <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">s2</span>                          <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">s1_c2</span>                       <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">c1_c2</span>                       <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">seq_str</span> <span class="o">==</span> <span class="s">&#39;231&#39;</span><span class="p">:</span>
+            <span class="n">c1_c2</span>                       <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">minus_c1_s2_c3_plus_s3_s1</span>   <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">c1_s2_s3_plus_c3_s1</span>         <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">s2</span>                          <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">c2_c3</span>                       <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">minus_c2_s3</span>                 <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">s1_c2</span>                       <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">s1_s2_c3_plus_s3_c1</span>         <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">minus_s1_s2_s3_plus_c3_c1</span>   <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">seq_str</span> <span class="o">==</span> <span class="s">&#39;312&#39;</span><span class="p">:</span>
+            <span class="n">s1_s2_c3_plus_s3_c1</span>         <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">minus_c1_s2_c3_plus_s3_s1</span>   <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">minus_c2_s3</span>                 <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">minus_s1_s2_s3_plus_c3_c1</span>   <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">c1_s2_s3_plus_c3_s1</span>         <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">s2</span>                          <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">s1_c2</span>                       <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">c1_c2</span>                       <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">c2_c3</span>                       <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">elif</span> <span class="n">seq_str</span> <span class="o">==</span> <span class="s">&#39;132&#39;</span><span class="p">:</span>
+            <span class="n">c2_c3</span>                        <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">minus_c1_s2_c3_plus_s3_s1</span>    <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">s1_s2_c3_plus_s3_c1</span>          <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">s2</span>                           <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">c1_c2</span>                        <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">s1_c2</span>                        <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">minus_c2_s3</span>                  <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">c1_s2_s3_plus_c3_s1</span>          <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">minus_s1_s2_s3_plus_c3_c1</span>    <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">seq_str</span> <span class="o">==</span> <span class="s">&#39;213&#39;</span><span class="p">:</span>
+            <span class="n">s1_s2_c3_plus_s3_c1</span>          <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">minus_c1_s2_c3_plus_s3_s1</span>    <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">minus_c2_s3</span>                  <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">minus_s1_s2_s3_plus_c3_c1</span>    <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">c1_s2_s3_plus_c3_s1</span>          <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">s2</span>                           <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">s1_c2</span>                        <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">c1_c2</span>                        <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">c2_c3</span>                        <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">elif</span> <span class="n">seq_str</span> <span class="o">==</span> <span class="s">&#39;321&#39;</span><span class="p">:</span>
+            <span class="n">s1_s2_c3_plus_s3_c1</span>          <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">minus_c1_s2_c3_plus_s3_s1</span>    <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">minus_c2_s3</span>                  <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">minus_s1_s2_s3_plus_c3_c1</span>    <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">c1_s2_s3_plus_c3_s1</span>          <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="n">s2</span>                           <span class="o">=</span> <span class="o">-</span><span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">s1_c2</span>                        <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">c1_c2</span>                        <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+            <span class="n">c2_c3</span>                        <span class="o">=</span>  <span class="n">dcm</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+            <span class="n">group</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Invalid axis rotation sequence: &quot;{}&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">seq_str</span><span class="p">))</span>
+
+        <span class="c"># Compute angles</span>
+        <span class="k">if</span> <span class="n">s1_c2</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">c1_c2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">theta1</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">group</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">theta1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="o">-</span><span class="n">s1_c2</span><span class="p">,</span> <span class="n">c1_c2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">theta1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span> <span class="n">s1_c2</span><span class="p">,</span> <span class="n">c1_c2</span><span class="p">)</span>
+        <span class="c"># compute sin and cos</span>
+        <span class="n">s1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta1</span><span class="p">)</span>
+        <span class="n">c1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta1</span><span class="p">)</span>
+        <span class="c"># build remaining thetas</span>
+        <span class="n">s3</span>     <span class="o">=</span> <span class="n">s1_s2_c3_plus_s3_c1</span><span class="o">*</span><span class="n">c1</span>       <span class="o">+</span>  <span class="n">minus_c1_s2_c3_plus_s3_s1</span><span class="o">*</span><span class="n">s1</span>
+        <span class="n">c3</span>     <span class="o">=</span> <span class="n">minus_s1_s2_s3_plus_c3_c1</span><span class="o">*</span><span class="n">c1</span> <span class="o">+</span>        <span class="n">c1_s2_s3_plus_c3_s1</span><span class="o">*</span><span class="n">s1</span>
+        <span class="n">theta3</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">s3</span><span class="p">,</span> <span class="n">c3</span><span class="p">)</span>
+        <span class="n">c2</span>     <span class="o">=</span> <span class="n">c2_c3</span><span class="o">*</span><span class="n">c3</span> <span class="o">-</span> <span class="n">minus_c2_s3</span><span class="o">*</span><span class="n">s3</span>
+        <span class="n">theta2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arctan2</span><span class="p">(</span><span class="n">s2</span><span class="p">,</span> <span class="n">c2</span><span class="p">)</span>
+
+        <span class="c"># Store output</span>
+        <span class="n">euler</span><span class="p">[:,</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">theta1</span><span class="p">,</span> <span class="n">theta2</span><span class="p">,</span> <span class="n">theta3</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">euler</span>
+</div>
+<div class="viewcode-block" id="concat_vectors"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.quat.concat_vectors">[docs]</a><span class="k">def</span> <span class="nf">concat_vectors</span><span class="p">(</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Concatenate two vectors as if they were column vectors.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  TODO:Assumes &#39;C&#39; vectors as opposed to &#39;F&#39; vectors?</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">))</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">v1</span><span class="p">))</span><span class="o">.</span><span class="n">T</span>
+    <span class="k">return</span> <span class="n">out</span>
+
+<span class="c">#%% Unit test</span></div>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="s">&#39;tests.test_quat&#39;</span><span class="p">,</span> <span class="nb">exit</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">dstauffman 0.1.0 documentation</a> &raquo;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &copy; Copyright 2015, David C. Stauffer.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
+    </div>
+  </body>
+</html>
