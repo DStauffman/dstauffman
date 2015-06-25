@@ -273,18 +273,17 @@ class Test_compare_two_classes(unittest.TestCase):
             is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'b is different from c1 to c2.\nb is different from c1.e to c2.e.\n' + \
-            'c is only in c1.e.\nd is only in c2.e.\n"c1.e" and "c2.e" are not the same.\n' + \
-            'e is different from c1 to c2.\nc is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
+        self.assertEqual(output, 'b is different from c1 to c2.\ne is different from c1 to c2.\n' + \
+            'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
 
     def test_subclasses_norecurse(self):
         with dcs.capture_output() as (out, _):
             is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False, compare_recursively=False)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'b is different from c1 to c2.\nc is only in c1.\nd is only in c2.\n' + \
-            '"c1" and "c2" are not the same.')
+        self.assertEqual(output, 'b is different from c1 to c2.\ne is different from c1 to c2.\n' + \
+            'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 
     def test_mismatched_subclasses(self):
@@ -294,8 +293,7 @@ class Test_compare_two_classes(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, 'b is different from c1 to c2.\ne is different from c1 to c2.\n' + \
-            'e is different from c1 to c2.\nc is only in c1.\nd is only in c2.\n' + \
-            '"c1" and "c2" are not the same.')
+            'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
         is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=False, suppress_output=True)
         self.assertFalse(is_same)
@@ -310,9 +308,9 @@ class Test_compare_two_classes(unittest.TestCase):
             is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=False)
         output = out.getvalue().strip()
         out.close()
+        self.assertFalse(is_same)
         self.assertEqual(output, 'e is different from c1 to c2.\nc is only in c2.\nd is only in c1.\n' + \
             '"c1" and "c2" are not the same.')
-        self.assertFalse(is_same)
 
     def test_ignore_callables(self):
         def f(x): return x
@@ -324,8 +322,8 @@ class Test_compare_two_classes(unittest.TestCase):
             is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=True)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'c is only in c2.\nd is only in c1.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
+        self.assertEqual(output, 'c is only in c2.\nd is only in c1.\n"c1" and "c2" are not the same.')
 
 #%% compare_two_dicts
 class Test_compare_two_dicts(unittest.TestCase):

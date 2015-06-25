@@ -212,10 +212,12 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
 
     """
     def _not_true_print():
-        nonlocal is_same
         is_same = False
         if not suppress_output:
             print('{} is different from {} to {}.'.format(this_attr, name1, name2))
+        return is_same
+    def _is_class_instance(obj):
+        return hasattr(obj, '__dict__') and not hasattr(obj, '__call__')
     # preallocate answer to True until proven otherwise
     is_same = True
     # get names if specified
@@ -238,24 +240,29 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
             attr1 = getattr(c1, this_attr)
             attr2 = getattr(c2, this_attr)
             # determine if this is a subclass
-            if inspect.isclass(attr1):
-                if inspect.isclass(attr2):
+            if _is_class_instance(attr1):
+                if _is_class_instance(attr2):
                     if compare_recursively:
-                        is_same = compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
+                        is_same = is_same and compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
                             names= [name1 + '.' + this_attr, name2 + '.' + this_attr], \
                             ignore_callables=ignore_callables, compare_recursively=compare_recursively)
+                        continue
                     else:
                         continue # pragma: no cover (actually covered, optimization issue)
                 else:
-                    _not_true_print()
+                    is_same = _not_true_print()
             else:
-                if inspect.isclass(attr2):
-                    _not_true_print()
-            if ignore_callables and (hasattr(attr1, '__call__') or hasattr(attr2, '__call__')):
-                continue # pragma: no cover (actually covered, optimization issue)
+                if _is_class_instance(attr2):
+                    is_same = _not_true_print()
+            if hasattr(attr1, '__call__') or hasattr(attr2, '__call__'):
+                if ignore_callables:
+                    continue # pragma: no cover (actually covered, optimization issue)
+                else:
+                    is_same = _not_true_print()
+                    continue
             # if any differences, then this test fails
             if np.logical_not(_nan_equal(getattr(c1, this_attr), getattr(c2, this_attr))):
-                _not_true_print()
+                is_same = _not_true_print()
         # find the attributes in one but not the other, if any, then this test fails
         diff = attrs1 ^ attrs2
         for this_attr in sorted(diff):
