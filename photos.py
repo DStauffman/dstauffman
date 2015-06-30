@@ -58,9 +58,10 @@ def find_missing_nums(folder, old_picasa=True, digit_check=True, \
             if file_ext not in process_extensions:
                 continue
             excluded = False
-            for excl in folder_exclusions:
-                if excl == root[0:len(excl)]:
-                    excluded = True
+            if folder_exclusions is not None:
+                for excl in folder_exclusions:
+                    if excl == root[0:len(excl)]:
+                        excluded = True
             if excluded:
                 continue
             parts = file_name.split()
