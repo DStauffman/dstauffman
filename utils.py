@@ -16,10 +16,10 @@ from __future__ import print_function
 from __future__ import division
 from contextlib import contextmanager
 import doctest
-import inspect
 import os
 import numpy as np
 import sys
+import types
 import unittest
 from datetime import datetime, timedelta
 from dstauffman.constants import MONTHS_PER_YEAR
@@ -1035,6 +1035,54 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
             # shouldn't be able to ever reach this line with assertions on
             raise ValueError('Total samples are 1, but neither data set has only one item.') #pragma: no cover
     return (n, u, s)
+
+#%% Functions - reload_package
+def reload_package(root_module, disp_reloads=True): # pragma: no cover
+    r"""
+    Forces Python to reload all the items within a module.  Useful for interactive debugging in IPython.
+
+    Parameters
+    ----------
+    root_module : module
+        The module to force python to reload
+    disp_reloads : bool
+        Whether to display the modules that are reloaded
+
+    Notes
+    -----
+    #.  Added to the library in June 2015 from:
+        http://stackoverflow.com/questions/2918898/prevent-python-from-caching-the-imported-modules/2918951#2918951
+    #.  Restarting the IPython kernel is by far a safer option, but for some debugging cases this is useful,
+        however unit tests on this function will fail, because it reloads too many dependencies.
+
+    Examples
+    --------
+    >>> from dstauffman import reload_package
+    >>> import dstauffman as dcs
+    >>> reload_package(dcs) #doctest: +ELLIPSIS
+    loading dstauffman...
+
+    """
+    package_name = root_module.__name__
+
+    # get a reference to each loaded module
+    loaded_package_modules = dict([
+        (key, value) for key, value in sys.modules.items()
+        if key.startswith(package_name) and isinstance(value, types.ModuleType)])
+
+    # delete references to these loaded modules from sys.modules
+    for key in loaded_package_modules:
+        del sys.modules[key]
+
+    # load each of the modules again;
+    # make old modules share state with new modules
+    for key in loaded_package_modules:
+        if disp_reloads:
+            print('loading {}'.format(key))
+        newmodule = __import__(key)
+        oldmodule = loaded_package_modules[key]
+        oldmodule.__dict__.clear()
+        oldmodule.__dict__.update(newmodule.__dict__)
 
 #%% Unit test
 if __name__ == '__main__':

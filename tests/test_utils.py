@@ -794,6 +794,24 @@ class Test_combine_sets(unittest.TestCase):
         with self.assertRaises(ValueError):
             (n, u, s) = dcs.combine_sets(np.array([self.n1, self.n1]), self.u1, self.s1, self.n2, self.u2, self.s2)
 
+#%% reload_package
+# Note this this function can't be unittested correctly.  It deletes too many dependent references.
+#class Test_reload_package(unittest.TestCase):
+#    r"""
+#    Tests the reload_package function with the following cases:
+#        Normal reload
+#        Messages suppressed
+#    """
+#    def test_nominal(self):
+#        with dcs.capture_output() as (out, _):
+#            dcs.reload_package(dcs)
+#        output = out.getvalue().strip()
+#        out.close()
+#        self.assertTrue(output.startswith('loading dstauffman.'))
+#
+#    def test_suppressed(self):
+#        dcs.reload_package(dcs, disp_reloads=False)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)
