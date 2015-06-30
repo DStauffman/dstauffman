@@ -21,7 +21,7 @@ import dstauffman.archery as arch
 SIMULATE = True
 # folder and file locations
 folder              = arch.get_root_dir()
-output_folder       = os.path.join(folder, 'output')
+output_folder       = os.path.realpath(os.path.join(folder, '..', 'output'))
 file                = r'Test_Case_4.xlsx'
 test_file           = os.path.join(folder, 'tests', file)
 if not os.path.isfile(test_file):
