@@ -109,6 +109,10 @@ class Test_MyCustomToolbar(unittest.TestCase):
         plt.close(self.fig1)
         plt.close(self.fig2)
 
+# plot_time_history
+class Test_plot_time_history(unittest.TestCase):
+    pass
+
 #%% Functions for testing
 # plot_correlation_matrix
 class Test_plot_correlation_matrix(unittest.TestCase):
