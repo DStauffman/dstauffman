@@ -28,7 +28,7 @@ from matplotlib.patches import Rectangle
 from PyQt4 import QtGui, QtCore
 # model imports
 from dstauffman.classes import Frozen
-from dstauffman.utils   import get_images_dir
+from dstauffman.utils   import get_images_dir, rms
 
 #%% Private Classes - _HoverButton
 class _HoverButton(QtGui.QPushButton):
@@ -173,6 +173,132 @@ class MyCustomToolbar():
         fig = plt.figure(prev_fig)
         # make it the active window
         fig.canvas.manager.window.raise_()
+
+#%% Functions - plot_time_history
+def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True, \
+    truth_time=None, truth_data=None, plot_as_diffs=False):
+    r"""
+    Plots the given data channel versus time, with a generic description argument.
+
+    Parameters
+    ----------
+    time : array_like
+        time history
+    data : array_like
+        data for corresponding time history
+    description : str
+        generic text to put on the plot title and figure name
+    type_ : str {'population', 'percentage', 'cost'}
+        description of the type of data that is being plotted
+    opts : class Opts, optional
+        plotting options
+    plot_indiv : bool, optional
+        Plot the individual cycles, default is true
+    truth_time : array_like, optional
+        Truth time to plot
+    truth_data : array_like, optional
+        Truth data to plot
+    plot_as_diffs : bool, optional, default is False
+        Plot each entry in results against the other ones
+
+    Returns
+    -------
+    fig : object
+        figure handle
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in Mar 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import plot_time_history
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> time = np.arange(0, 10, 0.1)
+    >>> data = np.sin(time)
+    >>> description = 'Sin'
+    >>> type_ = 'population'
+    >>> plot_time_history(time, data, description, type_) # doctest: +ELLIPSIS
+    <matplotlib.figure.Figure object at 0x...>
+
+    Close plot
+    >>> plt.close()
+
+    """
+    # check optional inputs
+    if opts is None:
+        opts = Opts()
+    # determine which type of data to plot
+    if type_ == 'population':
+        scale = 1
+        units = '#'
+    elif type_ == 'percentage':
+        scale = 100
+        units = '%'
+    elif type_ == 'per 100K':
+        scale = 100000
+        units = 'per 100,000'
+    elif type_ == 'cost':
+        scale = 1e-3
+        units = "$K's"
+    else:
+        raise ValueError('Unknown data type "' + type_ + '" for plot.')
+
+    if plot_as_diffs:
+        rms_data = rms(scale*data, axis=1)
+    else:
+        # calculate the mean and std of data
+        if data.ndim == 1:
+            mean = data
+            std  = np.zeros(len(data))
+        else:
+            mean = np.mean(data, axis=0)
+            std  = np.std(data, axis=0)
+
+        # calculate an RMS
+        rms_data = rms(scale*mean, axis=0)
+
+    # turn interaction off to make the plots draw all at once on a show() command
+    plt.ioff()
+    # alias the title
+    this_title = description + ' vs. Time'
+    # create the figure and set the title
+    fig = plt.figure()
+    fig.canvas.set_window_title(this_title)
+    # add an axis and plot the data
+    ax = fig.add_subplot(111)
+    if plot_as_diffs:
+        for ix in range(data.shape[0]):
+            this_label = opts.get_names(ix)
+            if not this_label:
+                this_label = 'Series {}'.format(ix+1)
+            this_label = this_label + ' (RMS: {:.2f})'.format(rms_data[ix])
+            ax.plot(time, scale*data[ix, :], '.-', linewidth=2, zorder=10, label=this_label)
+    else:
+        ax.plot(time, scale*mean, 'b.-', linewidth=2, zorder=10, \
+            label=opts.get_names(0) + description + ' (RMS: {:.2f})'.format(rms_data))
+        ax.errorbar(time, scale*mean, scale*std, linestyle='None', marker='None', ecolor='c', zorder=6)
+        # inidividual line plots
+        if plot_indiv and data.ndim > 1:
+            for ix in range(data.shape[0]):
+                ax.plot(time, scale*data[ix, :], color='0.75', zorder=1)
+    # optionally plot truth (without changing the axis limits)
+    if truth_data is not None:
+        limits = plt.axis()
+        ax.plot(truth_time, scale*truth_data, 'k.-', linewidth=2, zorder=8, label='Truth')
+        plt.axis(limits)
+    # add labels and legends
+    plt.xlabel('Time [year]')
+    plt.ylabel(description + ' [' + units + ']')
+    plt.title(this_title)
+    plt.legend()
+    # show a grid
+    plt.grid(True)
+    # Setup plots
+    setup_plots(fig, opts, 'time')
+    return fig
 
 #%% Functions - plot_correlation_matrix
 def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correlation Matrix'):
