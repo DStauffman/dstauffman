@@ -30,7 +30,7 @@ def frozen(set):
             return
         elif sys._getframe(1).f_code.co_name is '__init__':
             # Allow __setattr__ calls in __init__ calls of proper object types
-            for key, val in sys._getframe(1).f_locals.items():
+            for key, val in sys._getframe(1).f_locals.items(): # pragma: no branch
                 if key=='self' and isinstance(val, self.__class__):
                     set(self, name, value)
                     return

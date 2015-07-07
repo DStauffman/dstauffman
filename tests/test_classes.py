@@ -29,6 +29,7 @@ class Test_Frozen(unittest.TestCase):
         opts = dcs.Opts()
         for field in self.opts_fields:
             self.assertTrue(hasattr(opts, field))
+            setattr(opts, field, getattr(opts, field))
 
     def test_new_attr(self):
         opts = dcs.Opts()
