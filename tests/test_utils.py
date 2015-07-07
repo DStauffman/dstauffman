@@ -181,7 +181,7 @@ class Test_setup_dir(unittest.TestCase):
             'Files/Sub-folders were removed from: "{}"'.format(self.folder))
 
     def tearDown(self):
-        try:
+        def _clean(self):
             if os.path.isfile(self.filename):
                 os.remove(self.filename)
             if os.path.isfile(self.subfile):
@@ -190,18 +190,18 @@ class Test_setup_dir(unittest.TestCase):
                 os.rmdir(self.subdir)
             if os.path.isdir(self.folder):
                 os.rmdir(self.folder)
-        except PermissionError: # Also OSError?
+        try:
+            _clean(self)
+        except PermissionError:
             # pause to let Windows catch up and close files
             time.sleep(1)
             # retry
-            if os.path.isfile(self.filename):
-                os.remove(self.filename)
-            if os.path.isfile(self.subfile):
-                os.remove(self.subfile)
-            if os.path.isdir(self.subdir):
-                os.rmdir(self.subdir)
-            if os.path.isdir(self.folder):
-                os.rmdir(self.folder)
+            _clean(self)
+        except OSError:
+            # pause to let Windows catch up and close files
+            time.sleep(1)
+            # retry
+            _clean(self)
 
 #%% compare_two_classes
 class Test_compare_two_classes(unittest.TestCase):
@@ -274,7 +274,8 @@ class Test_compare_two_classes(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         self.assertFalse(is_same)
-        self.assertEqual(output, 'b is different from c1 to c2.\ne is different from c1 to c2.\n' + \
+        self.assertEqual(output, 'b is different from c1 to c2.\nb is different from c1.e to c2.e.\n' + \
+            'c is only in c1.e.\nd is only in c2.e.\n"c1.e" and "c2.e" are not the same.\n' + \
             'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
 
     def test_subclasses_norecurse(self):
@@ -282,7 +283,7 @@ class Test_compare_two_classes(unittest.TestCase):
             is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False, compare_recursively=False)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'b is different from c1 to c2.\ne is different from c1 to c2.\n' + \
+        self.assertEqual(output, 'b is different from c1 to c2.\n' + \
             'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 

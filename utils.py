@@ -16,6 +16,7 @@ from __future__ import print_function
 from __future__ import division
 from contextlib import contextmanager
 import doctest
+import inspect
 import os
 import numpy as np
 import sys
@@ -217,7 +218,7 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
             print('{} is different from {} to {}.'.format(this_attr, name1, name2))
         return is_same
     def _is_class_instance(obj):
-        return hasattr(obj, '__dict__') and not hasattr(obj, '__call__')
+        return hasattr(obj, '__dict__') and not inspect.isfunction(obj) # and hasattr(obj, '__call__')
     # preallocate answer to True until proven otherwise
     is_same = True
     # get names if specified
@@ -225,7 +226,6 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
         name1 = names[0]
         name2 = names[1]
     else:
-        # TODO: figure out Matlab inputname equivalent
         name1 = 'c1'
         name2 = 'c2'
     # simple test
@@ -243,18 +243,20 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
             if _is_class_instance(attr1):
                 if _is_class_instance(attr2):
                     if compare_recursively:
-                        is_same = is_same and compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
+                        # Note: don't want the 'and' to short-circuit, so do the 'and is_same' last
+                        is_same = compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
                             names= [name1 + '.' + this_attr, name2 + '.' + this_attr], \
-                            ignore_callables=ignore_callables, compare_recursively=compare_recursively)
+                            ignore_callables=ignore_callables, compare_recursively=compare_recursively) and is_same
                         continue
                     else:
                         continue # pragma: no cover (actually covered, optimization issue)
                 else:
                     is_same = _not_true_print()
+                    continue
             else:
                 if _is_class_instance(attr2):
                     is_same = _not_true_print()
-            if hasattr(attr1, '__call__') or hasattr(attr2, '__call__'):
+            if inspect.isfunction(attr1) or inspect.isfunction(attr2):
                 if ignore_callables:
                     continue # pragma: no cover (actually covered, optimization issue)
                 else:
@@ -321,7 +323,6 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
         name1 = names[0]
         name2 = names[1]
     else:
-        # TODO: figure out Matlab inputname equivalent
         name1 = 'd1'
         name2 = 'd2'
     # simple test
