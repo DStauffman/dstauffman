@@ -293,9 +293,9 @@ class Test_compare_two_classes(unittest.TestCase):
             is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False)
         output = out.getvalue().strip()
         out.close()
+        self.assertFalse(is_same)
         self.assertEqual(output, 'b is different from c1 to c2.\ne is different from c1 to c2.\n' + \
             'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
-        self.assertFalse(is_same)
         is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=False, suppress_output=True)
         self.assertFalse(is_same)
 
