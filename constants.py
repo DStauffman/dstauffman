@@ -13,8 +13,9 @@ from __future__ import division
 import unittest
 
 #%% Constants
-MONTHS_PER_YEAR = 12
-INT_TOKEN       = -1
+MONTHS_PER_YEAR  = 12
+INT_TOKEN        = -1
+DEFAULT_COLORMAP = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
 
 #%% Spyder
 spyder_custom_colors = r"""

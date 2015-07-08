@@ -12,6 +12,7 @@ Notes
 from __future__ import print_function
 from __future__ import division
 import matplotlib.pyplot as plt
+import matplotlib.cm as cmx
 import numpy as np
 import os
 import unittest
@@ -52,7 +53,6 @@ class Test_Opts(unittest.TestCase):
         name = opts.get_names(2)
         self.assertEqual(name, '')
 
-#%% Classes for testing
 # MyCustomToolbar
 class Test_MyCustomToolbar(unittest.TestCase):
     r"""
@@ -109,6 +109,64 @@ class Test_MyCustomToolbar(unittest.TestCase):
         plt.close(self.fig1)
         plt.close(self.fig2)
 
+# ColorMap
+class Test_ColorMap(unittest.TestCase):
+    r"""
+    Tests ColorMap class with the following cases:
+        Nominal mode
+        Using num_colors specifier
+        No inputs
+        get_color method
+        get_smap method
+        set_colors method
+    """
+    def setUp(self):
+        self.colormap   = 'Paired'
+        self.low        = 0
+        self.high       = 1
+        self.num_colors = 5
+
+    def test_nominal(self):
+        cm = dcs.ColorMap(self.colormap, self.low, self.high)
+        self.assertTrue(cm.get_color(self.low))
+
+    def test_num_colors(self):
+        cm = dcs.ColorMap(self.colormap, num_colors=self.num_colors)
+        self.assertTrue(cm.get_color(self.low))
+
+    def test_no_inputs(self):
+        cm = dcs.ColorMap()
+        self.assertTrue(cm.get_color(self.low))
+
+    def test_get_color(self):
+        cm = dcs.ColorMap(num_colors=self.num_colors)
+        for i in range(self.num_colors):
+            self.assertTrue(cm.get_color(i))
+
+    def test_get_smap(self):
+        cm = dcs.ColorMap()
+        smap = cm.get_smap()
+        self.assertTrue(isinstance(smap, cmx.ScalarMappable))
+
+    def test_set_colors(self):
+        cm = dcs.ColorMap()
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(0, 0)
+        plt.colorbar(cm.get_smap())
+        plt.close()
+        self.assertTrue(True)
+
+    def test_set_color_failure(self):
+        cm = dcs.ColorMap()
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        ax.plot(0, 0)
+        with self.assertRaises(ValueError):
+            cm.set_colors(ax)
+        plt.close()
+
+#%% Functions for testing
 # plot_time_history
 class Test_plot_time_history(unittest.TestCase):
     r"""
@@ -145,7 +203,6 @@ class Test_plot_time_history(unittest.TestCase):
         if hasattr(self,'fig'):
             plt.close(self.fig)
 
-#%% Functions for testing
 # plot_correlation_matrix
 class Test_plot_correlation_matrix(unittest.TestCase):
     r"""

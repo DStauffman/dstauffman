@@ -27,8 +27,9 @@ import matplotlib.cm as cmx
 from matplotlib.patches import Rectangle
 from PyQt4 import QtGui, QtCore
 # model imports
-from dstauffman.classes import Frozen
-from dstauffman.utils   import get_images_dir, rms
+from dstauffman.classes   import Frozen
+from dstauffman.constants import DEFAULT_COLORMAP
+from dstauffman.utils     import get_images_dir, rms
 
 #%% Private Classes - _HoverButton
 class _HoverButton(QtGui.QPushButton):
@@ -173,9 +174,81 @@ class MyCustomToolbar():
         # make it the active window
         fig.canvas.manager.window.raise_()
 
+#%% Classes - ColorMap
+class ColorMap(Frozen):
+    r"""
+    Colormap class for easier setting of colormaps in matplotlib.
+
+    Parameters
+    ----------
+    colormap : str, optional
+        Name of the colormap to use
+    low : int, optional
+        Low value to use as an index to a specific color within the map
+    high : int, optional
+        High value to use as an index to a specific color within the map
+    num_colors : int, optional
+        If not None, then this replaces the low and high inputs
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import ColorMap
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> cm = ColorMap('Paired', 1, 2)
+    >>> time = np.arange(0, 10, 0.1)
+    >>> fig = plt.figure()
+    >>> ax = fig.add_subplot(111)
+    >>> ax.plot(time, np.sin(time), color=cm.get_color(1)) # doctest: +ELLIPSIS
+    [<matplotlib.lines.Line2D object at 0x...>]
+
+    >>> ax.plot(time, np.cos(time), color=cm.get_color(2)) # doctest: +ELLIPSIS
+    [<matplotlib.lines.Line2D object at 0x...>]
+
+    >>> plt.legend(['Sin', 'Cos']) # doctest: +ELLIPSIS
+    <matplotlib.legend.Legend object at 0x...>
+
+    >>> plt.show()
+
+    Close plot
+    >>> plt.close(fig)
+
+    """
+    def __init__(self, colormap=DEFAULT_COLORMAP, low=0, high=1, num_colors=None):
+        self.num_colors = num_colors
+        # check for optional inputs
+        if self.num_colors is not None:
+            low = 0
+            high = num_colors-1
+        # get colormap based on high and low limits
+        cmap  = plt.get_cmap(colormap)
+        cnorm = colors.Normalize(vmin=low, vmax=high)
+        self.smap = cmx.ScalarMappable(norm=cnorm, cmap=cmap)
+        # must initialize the empty scalar mapplable to show the colorbar correctly
+        self.smap.set_array([])
+
+    def get_color(self, value):
+        r"""Get the color based on the scalar value."""
+        return self.smap.to_rgba(value)
+
+    def get_smap(self):
+        r"""Returns the smap being used."""
+        return self.smap
+
+    def set_colors(self, ax):
+        r"""Set the colors for the given axis based on internal instance information."""
+        if self.num_colors is None:
+            raise ValueError("You can't call ColorMap.set_colors unless it was given a num_colors input.")
+        ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
+
 #%% Functions - plot_time_history
 def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True, \
-    truth_time=None, truth_data=None, plot_as_diffs=False):
+    truth_time=None, truth_data=None, plot_as_diffs=False, colormap=None):
     r"""
     Plots the given data channel versus time, with a generic description argument.
 
@@ -229,6 +302,8 @@ def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True
     # check optional inputs
     if opts is None:
         opts = Opts()
+    if colormap is None:
+        colormap = DEFAULT_COLORMAP
     # determine which type of data to plot
     if type_ == 'population':
         scale = 1
@@ -246,7 +321,10 @@ def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True
         raise ValueError('Unknown data type "' + type_ + '" for plot.')
 
     if plot_as_diffs:
+        # calculate RMS
         rms_data = rms(scale*data, axis=1)
+        # build colormap
+        cm = ColorMap(colormap, num_colors=data.shape[0])
     else:
         # calculate the mean and std of data
         if data.ndim == 1:
@@ -269,6 +347,7 @@ def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True
     # add an axis and plot the data
     ax = fig.add_subplot(111)
     if plot_as_diffs:
+        cm.set_colors(ax)
         for ix in range(data.shape[0]):
             this_label = opts.get_names(ix)
             if not this_label:
@@ -295,6 +374,8 @@ def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True
     plt.legend()
     # show a grid
     plt.grid(True)
+    # set the colormap (only applies to lines that don't specify a default color)
+    plt.set_cmap(colormap)
     # Setup plots
     setup_plots(fig, opts, 'time')
     return fig
@@ -384,19 +465,15 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
     # set title
     plt.title(fig.canvas.get_window_title())
     # get colormap based on high and low limits
-    cmap  = plt.get_cmap(color_map)
-    cnorm = colors.Normalize(vmin=cmin, vmax=cmax)
-    smap  = cmx.ScalarMappable(norm=cnorm, cmap=cmap)
-    # must initialize the empty scalar mapplable to show the colorbar
-    smap.set_array([])
+    cm = ColorMap(color_map, low=cmin, high=cmax)
     # loop through and plot each element with a corresponding color
     for i in range(m):
         for j in range(n):
             if not plot_lower_only or (i <= j):
                 ax.add_patch(Rectangle((box_size*i,box_size*j),box_size, box_size, \
-                    color=smap.to_rgba(np.abs(data[j, i]))))
+                    color=cm.get_color(np.abs(data[j, i]))))
     # show colorbar
-    plt.colorbar(smap)
+    plt.colorbar(cm.get_smap())
     # make square
     plt.axis('equal')
     # set limits and tick labels

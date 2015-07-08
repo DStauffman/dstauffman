@@ -19,7 +19,7 @@ class Test_all_values(unittest.TestCase):
 
     def setUp(self):
         self.ints = ['MONTHS_PER_YEAR', 'INT_TOKEN']
-        self.strs = ['spyder_custom_colors']
+        self.strs = ['DEFAULT_COLORMAP', 'spyder_custom_colors']
 
     def test_values(self):
         # confirm that all the expected values exist and have the correct type
