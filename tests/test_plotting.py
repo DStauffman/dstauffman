@@ -111,7 +111,39 @@ class Test_MyCustomToolbar(unittest.TestCase):
 
 # plot_time_history
 class Test_plot_time_history(unittest.TestCase):
-    pass
+    r"""
+    Tests plot_time_history function with the following cases:
+        Nominal usage
+    """
+    def setUp(self):
+        self.time = np.arange(0, 10, 0.1)
+        self.data = np.sin(self.time)
+        self.description = 'Sin'
+        self.type_ = 'population'
+        self.opts = dcs.Opts()
+        self.truth_time = self.time
+        self.truth_data = np.cos(self.time)
+        self.data_matrix = dcs.concat_vectors(self.data, self.truth_data).T
+
+    def test_normal(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_)
+
+    def test_truth(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+            truth_time=self.truth_time, truth_data=self.truth_data)
+
+    def test_opts(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, opts=self.opts)
+
+    def test_diffs(self):
+        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.description, self.type_, plot_as_diffs=True)
+
+    def test_group(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, opts=self.opts, plot_indiv=False)
+
+    def tearDown(self):
+        if hasattr(self,'fig'):
+            plt.close(self.fig)
 
 #%% Functions for testing
 # plot_correlation_matrix

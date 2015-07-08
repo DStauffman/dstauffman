@@ -47,11 +47,11 @@ class _HoverButton(QtGui.QPushButton):
 
     def enterEvent(self, event):
         # Draw border on hover
-        self.setStyleSheet('border: 1px; border-style: solid;')
+        self.setStyleSheet('border: 1px; border-style: solid;') # pragma: no cover
 
     def leaveEvent(self, event):
         # Delete border after hover
-        self.setStyleSheet('border: 0px;')
+        self.setStyleSheet('border: 0px;') # pragma: no cover
 
 #%% Classes - Opts
 class Opts(Frozen):
@@ -59,7 +59,6 @@ class Opts(Frozen):
     Contains all the optional plotting configurations.
     """
     def __init__(self):
-        # TODO: expand functionality
         self.case_name = 'baseline'
         self.save_path = os.getcwd()
         self.save_plot = False
@@ -74,9 +73,9 @@ class Opts(Frozen):
 
     def get_names(self, ix):
         r"""Gets the specified name from the list."""
-        try:
+        if hasattr(self, 'names') and len(self.names) >= ix+1:
             name = self.names[ix]
-        except IndexError:
+        else:
             name = ''
         return name
 
