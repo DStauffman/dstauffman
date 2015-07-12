@@ -15,6 +15,59 @@ import numpy as np
 import unittest
 import dstauffman as dcs
 
+class _Example_Enum(dcs.IntEnumPlus):
+    field_one = 1
+    field_two = 2
+    field_ten = 10
+
+#%% IntEnumPlus
+class Test_IntEnumPlus(unittest.TestCase):
+    r"""
+    Tests the IntEnumPlus class by making a enum instance and testing all the methods.
+    """
+    def test_printing_instance_str(self):
+        with dcs.capture_output() as (out, _):
+            print(_Example_Enum.field_one)
+            print(_Example_Enum.field_two)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '_Example_Enum.field_one: 1\n_Example_Enum.field_two: 2')
+
+    def test_printing_instance_repr(self):
+        with dcs.capture_output() as (out, _):
+            print(repr(_Example_Enum.field_one))
+            print(repr(_Example_Enum.field_two))
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '<_Example_Enum.field_one: 1>\n<_Example_Enum.field_two: 2>')
+
+    def test_printing_class_str(self):
+        with dcs.capture_output() as (out, _):
+            print(_Example_Enum)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '_Example_Enum.field_one: 1\n_Example_Enum.field_two: 2\n_Example_Enum.field_ten: 10')
+
+    def test_printing_class_repr(self):
+        with dcs.capture_output() as (out, _):
+            print(repr(_Example_Enum))
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '<_Example_Enum.field_one: 1>\n<_Example_Enum.field_two: 2>\n<_Example_Enum.field_ten: 10>')
+
+    def test_list_of_names(self):
+        list_of_names = _Example_Enum.list_of_names()
+        np.testing.assert_array_equal(list_of_names, ['field_one', 'field_two', 'field_ten'])
+
+
+    def test_list_of_values(self):
+        list_of_values = _Example_Enum.list_of_values()
+        np.testing.assert_array_equal(list_of_values, [1, 2, 10])
+
+    def test_bad_attribute(self):
+        with self.assertRaises(AttributeError):
+            _Example_Enum.non_existant_field
+
 #%% dist_enum_and_mons
 class Test_dist_enum_and_mons(unittest.TestCase):
     r"""
