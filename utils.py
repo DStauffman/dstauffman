@@ -538,7 +538,7 @@ def read_text_file(filename):
         # open file for reading
         with open(filename, 'rt') as file: # pylint: disable=W1501
             # read file
-            text = file.read()
+            text = file.read() # pragma: no branch
         # return results
         return text
     except:
@@ -580,7 +580,7 @@ def write_text_file(filename, text):
         # open file for writing
         with open(filename, 'wt') as file: # pylint: disable=W1501
             # write file
-            file.write(text)
+            file.write(text) # pragma: no branch
     except:
         # on any exceptions, print a message and re-raise the error
         print('Unable to open file "{}" for writing.'.format(filename))

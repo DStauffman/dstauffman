@@ -172,6 +172,16 @@ class Test_plot_time_history(unittest.TestCase):
     r"""
     Tests plot_time_history function with the following cases:
         Nominal usage
+        Truth data
+        Opts
+        plotting as diffs
+        plotting as diffs + Opts
+        plotting as a group
+        using a different colormap
+        plotting other types (x3)
+        plotting a bad type
+        plotting array data as individual
+        plotting array data as group
     """
     def setUp(self):
         self.time = np.arange(0, 10, 0.1)
@@ -179,6 +189,7 @@ class Test_plot_time_history(unittest.TestCase):
         self.description = 'Sin'
         self.type_ = 'population'
         self.opts = dcs.Opts()
+        self.opts.names = ['Name 1']
         self.truth_time = self.time
         self.truth_data = np.cos(self.time)
         self.data_matrix = dcs.concat_vectors(self.data, self.truth_data).T
@@ -196,8 +207,35 @@ class Test_plot_time_history(unittest.TestCase):
     def test_diffs(self):
         self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.description, self.type_, plot_as_diffs=True)
 
+    def test_diffs_and_opts(self):
+        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.description, self.type_, opts=self.opts, plot_as_diffs=True)
+
     def test_group(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, opts=self.opts, plot_indiv=False)
+
+    def test_colormap(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, colormap='Dark2')
+
+    def test_other_types1(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='percentage')
+
+    def test_other_types2(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='per 100K')
+
+    def test_other_types3(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='cost')
+
+    def test_bad_type(self):
+        with self.assertRaises(ValueError):
+            self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='bad_type')
+
+    def test_array_data1(self):
+        data = dcs.concat_vectors(self.data, self.data).T
+        self.fig = dcs.plot_time_history(self.time, data, self.description, self.type_)
+
+    def test_array_data2(self):
+        data = dcs.concat_vectors(self.data, self.data).T
+        self.fig = dcs.plot_time_history(self.time, data, self.description, self.type_, plot_as_diffs=True)
 
     def tearDown(self):
         if hasattr(self,'fig'):
