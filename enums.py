@@ -39,7 +39,8 @@ class _EnumMetaPlus(EnumMeta):
             return cls._member_map_[name]
         except KeyError:
             text = '"{}" does not have an attribute of "{}"'.format(cls.__name__,name)
-            raise AttributeError(text) from None
+            # Future Python v3 only option: raise AttributeError(text) from None
+            raise AttributeError(text)
     def list_of_names(self):
         r"""
         Returns a list of all the names within the enumerator.

@@ -213,12 +213,18 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
 
     """
     def _not_true_print():
+        r"""Sets is_same to False and optionally prints information to the screen."""
         is_same = False
         if not suppress_output:
             print('{} is different from {} to {}.'.format(this_attr, name1, name2))
         return is_same
+    def _is_function(obj):
+        r"""Determines whether the object is a function or not."""
+        # need second part for Python compatibility for v2.7, which distinguishes unbound methods from functions.
+        return inspect.isfunction(obj) or inspect.ismethod(obj)
     def _is_class_instance(obj):
-        return hasattr(obj, '__dict__') and not inspect.isfunction(obj) # and hasattr(obj, '__call__')
+        r"""Determines whether the object is an instance of a class or not."""
+        return hasattr(obj, '__dict__') and not _is_function(obj) # and hasattr(obj, '__call__')
     # preallocate answer to True until proven otherwise
     is_same = True
     # get names if specified
@@ -256,7 +262,7 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
             else:
                 if _is_class_instance(attr2):
                     is_same = _not_true_print()
-            if inspect.isfunction(attr1) or inspect.isfunction(attr2):
+            if _is_function(attr1) or _is_function(attr2):
                 if ignore_callables:
                     continue # pragma: no cover (actually covered, optimization issue)
                 else:
