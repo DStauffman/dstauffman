@@ -22,9 +22,9 @@ from .quat      import qrot, quat_angle_diff, quat_from_euler, quat_interp, quat
 from .utils     import rms, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
                            make_python_init, get_python_definitions, read_text_file, \
                            write_text_file, disp, convert_annual_to_monthly_probability, \
-                           convert_monthly_to_annual_probability, get_root_dir, get_tests_dir, \
-                           get_data_dir, get_images_dir, capture_output, unit, nonzero_indices, \
-                           combine_sets, reload_package
+                           convert_monthly_to_annual_probability, ca2mp, cm2ap, get_root_dir, \
+                           get_tests_dir, get_data_dir, get_images_dir, capture_output, unit, \
+                           nonzero_indices, combine_sets, reload_package
 
 #%% Unit test
 if __name__ == '__main__':

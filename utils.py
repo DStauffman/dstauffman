@@ -729,6 +729,10 @@ def convert_monthly_to_annual_probability(monthly):
     annual = 1 - (1 - monthly)**MONTHS_PER_YEAR
     return annual
 
+#%% Functions - ca2mp & cm2ap aliases
+ca2mp = convert_annual_to_monthly_probability
+cm2ap = convert_monthly_to_annual_probability
+
 #%% Functions - get_root_dir
 def get_root_dir():
     r"""
