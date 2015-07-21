@@ -813,6 +813,46 @@ class Test_combine_sets(unittest.TestCase):
 #    def test_suppressed(self):
 #        dcs.reload_package(dcs, disp_reloads=False)
 
+#%% delete_pyc
+class Test_delete_pyc(unittest.TestCase):
+    r"""
+    Tests the delete_pyc function with the following cases:
+        Recursive
+        Not recursive
+    """
+    def setUp(self):
+        self.fold1 = dcs.get_tests_dir()
+        self.file1 = os.path.join(self.fold1, 'temp_file.pyc')
+        self.fold2 = os.path.join(self.fold1, 'temp_sub_dir')
+        self.file2 = os.path.join(self.fold2, 'temp_file2.pyc')
+        dcs.write_text_file(self.file1, 'Text.')
+        os.makedirs(self.fold2)
+        dcs.write_text_file(self.file2, 'More text.')
+
+    def test_recursive(self):
+        self.assertTrue(os.path.isfile(self.file1))
+        self.assertTrue(os.path.isdir(self.fold2))
+        self.assertTrue(os.path.isfile(self.file2))
+        dcs.delete_pyc(self.fold1)
+        self.assertFalse(os.path.isfile(self.file1))
+        self.assertFalse(os.path.isfile(self.file2))
+
+    def test_not_recursive(self):
+        self.assertTrue(os.path.isfile(self.file1))
+        self.assertTrue(os.path.isdir(self.fold2))
+        self.assertTrue(os.path.isfile(self.file2))
+        dcs.delete_pyc(self.fold1, recursive=False)
+        self.assertFalse(os.path.isfile(self.file1))
+        self.assertTrue(os.path.isfile(self.file2))
+
+    def tearDown(self):
+        if os.path.isfile(self.file1):
+            os.remove(self.file1)
+        if os.path.isfile(self.file2):
+            os.remove(self.file2)
+        if os.path.isdir(self.fold2):
+            os.removedirs(self.fold2)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

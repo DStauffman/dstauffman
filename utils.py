@@ -1095,6 +1095,48 @@ def reload_package(root_module, disp_reloads=True): # pragma: no cover
         oldmodule.__dict__.clear()
         oldmodule.__dict__.update(newmodule.__dict__)
 
+#%% Functions - delete_pyc
+def delete_pyc(folder, recursive=True):
+    r"""
+    Deletes all the *.pyc files (Python Byte Code) in the specified directory.
+
+    Parameters
+    ----------
+    folder : str
+        Name of folder to delete the files from
+    recursive : bool, optional
+        Whether to delete files recursively
+
+    Examples
+    --------
+    >>> from dstauffman import get_root_dir, delete_pyc
+    >>> folder = get_root_dir()
+    >>> delete_pyc(folder)
+
+    """
+    def _remove_pyc(root, name):
+        r"""Does the actual file removal"""
+        # check for allowable extensions
+        (_, file_ext) = os.path.splitext(name)
+        if file_ext == '.pyc':
+            # remove this file
+            os.remove(os.path.join(root, name))
+
+    if recursive:
+        # walk through folder
+        for (root, _, files) in os.walk(folder):
+            # go through files
+            for name in files:
+                # remove relevant files
+                _remove_pyc(root, name)
+    else:
+        # list files in folder
+        for name in os.listdir(folder):
+            # check if it's a file
+            if os.path.isfile(os.path.join(folder, name)):
+                # remove relevant files
+                _remove_pyc(folder, name)
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_utils', exit=False)
