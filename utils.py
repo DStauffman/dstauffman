@@ -86,9 +86,9 @@ def rms(data, axis=None, keepdims=False):
     data : array_like
         input data
     axis : int, optional
-        Axis along which the RMS is computed. The default is to compute the RMS of the flattened array.
+        Axis along which RMS is computed. The default is to compute the RMS of the flattened array.
     keepdims : bool, optional
-        If true, the axes which are reduced are left in the result as dimensions ith size one.
+        If true, the axes which are reduced are left in the result as dimensions with size one.
         With this option, the result will broadcast correctly against the original `data`.
 
     Returns

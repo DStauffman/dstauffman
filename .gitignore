@@ -18,7 +18,7 @@ $RECYCLE.BIN/
 *.lnk
 
 # =========================
-# Operating System Files
+# Operating System Files #
 # =========================
 
 # OSX
@@ -48,11 +48,33 @@ Temporary Items
 *.pyc
 
 # =========================
-# Folder/Files
+# LaTeX Files #
+# =========================
+doc/tex/*/*.aux
+doc/tex/*/*.bbl
+doc/tex/*/*.bcf
+doc/tex/*/*.blg
+doc/tex/*/*.dvi
+doc/tex/*/*.gz
+doc/tex/*/*.hst
+doc/tex/*/*.lof
+doc/tex/*/*.log
+doc/tex/*/*.lot
+doc/tex/*/*.out
+doc/tex/*/*.pdf
+doc/tex/*/*.run.xml
+doc/tex/*/*.toc
+doc/tex/*/*.tcp
+doc/tex/*/*.tps
+doc/tex/*/*.ver
+
+# =========================
+# Folder/Files #
 # =========================
 output/*
 results/*
-scripts/script_photos.py
+scripts/case_*
+scripts/script_*
+temp/*
 tests/.coverage
 tests/coverage_html_report/*
-tests/temp_*
