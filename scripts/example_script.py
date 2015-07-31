@@ -14,7 +14,7 @@ from __future__ import division
 import numpy as np
 import dstauffman as dcs
 
-# protection needed for Windows when using joblib.Parallel
+#%% Main function
 if __name__=='__main__':
 
     #%% Create some fake data
@@ -33,6 +33,8 @@ if __name__=='__main__':
                 sym[i, j] = 1
             elif i > j:
                 sym[i, j] = data[j, i]
+            else:
+                pass
     # create opts
     opts = dcs.Opts()
 
