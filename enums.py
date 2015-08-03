@@ -53,6 +53,9 @@ class _EnumMetaPlus(EnumMeta):
         """
         output = [int(x) for x in re.findall(r":\s(.*)\n", str(self)+'\n')]
         return output
+    def num_values(self):
+        output = len(self.list_of_names())
+        return output
 
 @unique
 class IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
