@@ -59,10 +59,13 @@ class Test_IntEnumPlus(unittest.TestCase):
         list_of_names = _Example_Enum.list_of_names()
         np.testing.assert_array_equal(list_of_names, ['field_one', 'field_two', 'field_ten'])
 
-
     def test_list_of_values(self):
         list_of_values = _Example_Enum.list_of_values()
         np.testing.assert_array_equal(list_of_values, [1, 2, 10])
+
+    def test_num_values(self):
+        num_values = _Example_Enum.num_values()
+        self.assertEqual(num_values, 3)
 
     def test_bad_attribute(self):
         with self.assertRaises(AttributeError):
