@@ -381,7 +381,8 @@ def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True
     return fig
 
 #%% Functions - plot_correlation_matrix
-def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correlation Matrix'):
+def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correlation Matrix', \
+        cmin=0, cmax=1, colormap='cool', plot_lower_only=True):
     r"""
     Visually plots a correlation matrix.
 
@@ -406,13 +407,7 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
     """
     # Hard-coded values
     box_size        = 1
-    cmin            = 0
-    cmax            = 1
     precision       = 1e-12
-    # plot_lower_only is a stub for future development of optional outputs
-    plot_lower_only = True
-    # the color map could also potentially be overriden in the future
-    color_map       = 'cool'
 
     # get sizes
     (n, m) = data.shape
@@ -441,7 +436,7 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
 
     # Override color ranges based on data
     # test if in -1 to 1 range instead of 0 to 1
-    if np.all(data >= -1 + precision) and np.any(data <= -precision):
+    if np.all(data >= -1 + precision) and np.any(data <= -precision) and cmin == 0 and cmax == 1:
         cmin = -1
     # test if outside the cmin to cmax range, and if so, adjust range.
     temp = np.min(data)
@@ -465,13 +460,13 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
     # set title
     plt.title(fig.canvas.get_window_title())
     # get colormap based on high and low limits
-    cm = ColorMap(color_map, low=cmin, high=cmax)
+    cm = ColorMap(colormap, low=cmin, high=cmax)
     # loop through and plot each element with a corresponding color
     for i in range(m):
         for j in range(n):
             if not plot_lower_only or (i <= j):
                 ax.add_patch(Rectangle((box_size*i,box_size*j),box_size, box_size, \
-                    color=cm.get_color(np.abs(data[j, i]))))
+                    color=cm.get_color(data[j, i])))
     # show colorbar
     plt.colorbar(cm.get_smap())
     # make square

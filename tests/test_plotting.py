@@ -256,12 +256,20 @@ class Test_plot_correlation_matrix(unittest.TestCase):
         bad labels (should raise error)
     """
     def setUp(self):
+        num = 10
         self.figs   = []
-        self.data   = dcs.unit(np.random.rand(10, 10), axis=0)
+        self.data   = dcs.unit(np.random.rand(num, num), axis=0)
         self.labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
         self.opts   = dcs.Opts()
         self.opts.case_name = 'Testing Correlation'
         self.matrix_name    = 'Not a Correlation Matrix'
+        self.sym = self.data.copy()
+        for j in range(num):
+            for i in range(num):
+                if i == j:
+                    self.sym[i, j] = 1
+                elif i > j:
+                    self.sym[i, j] = self.data[j, i]
 
     def test_normal(self):
         self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels))
@@ -275,30 +283,40 @@ class Test_plot_correlation_matrix(unittest.TestCase):
 
     def test_all_args(self):
         self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, self.opts, \
-            self.matrix_name))
+            self.matrix_name, 0, 1, 'cool', True))
 
     def test_symmetric(self):
-        sym = self.data.copy()
-        num = sym.shape[0]
-        for j in range(num):
-            for i in range(num):
-                if i == j:
-                    sym[i, j] = 1
-                elif i > j:
-                    sym[i, j] = self.data[j, i]
-        self.figs.append(dcs.plot_correlation_matrix(sym))
+        self.figs.append(dcs.plot_correlation_matrix(self.sym))
+
+    def test_symmetric_all(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.sym, plot_lower_only=False))
 
     def test_above_one(self):
         large_data = self.data * 1000
         self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels))
 
+    def test_above_one_part2(self):
+        large_data = self.data * 1000
+        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels, cmax=2000))
+
     def test_below_one(self):
         large_data = 1000*(self.data - 0.5)
         self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels))
 
+    def test_below_one_part2(self):
+        large_data = 1000*(self.data - 0.5)
+        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels, cmin=-2))
+
     def test_within_minus_one(self):
         large_data = self.data - 0.5
         self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels))
+
+    def test_within_minus_one_part2(self):
+        large_data = self.data - 0.5
+        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels, cmin=-1, cmax=1))
+
+    def test_colormap(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.data, colormap='seismic_r'))
 
     def test_bad_labels(self):
         with self.assertRaises(ValueError):
