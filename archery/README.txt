@@ -13,6 +13,6 @@ The module is broken up into multiple files.
 
 The master data is defined in an excel spreadsheet.  Details TBD...
 
-Originally developed in January 2015 by David Stauffer for use by Stanford University.  It was then continued
+Originally developed in January 2015 by David C. Stauffer for use by Stanford University.  It was then continued
 as a fun coding project and a way to learn more about Python programming.  This code is intended to be open
 source and  freely distributed.  Hopefully it will grow to be useful for other people and other tournaments.

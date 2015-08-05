@@ -895,7 +895,7 @@ def unit(data, axis=1):
 
     Notes
     -----
-    #.  Written by David Stauffer in May 2015.
+    #.  Written by David C. Stauffer in May 2015.
 
     Examples
     --------
@@ -935,7 +935,7 @@ def nonzero_indices(data):
 
     Notes
     -----
-    #.  Written by David Stauffer in May 2015.
+    #.  Written by David C. Stauffer in May 2015.
 
     Examples
     --------
@@ -996,8 +996,8 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
 
     Notes
     -----
-    #.  Written in Matlab by David Stauffer in Jul 2012.
-    #.  Ported to Python by David Stauffer in May 2015.
+    #.  Written in Matlab by David C. Stauffer in Jul 2012.
+    #.  Ported to Python by David C. Stauffer in May 2015.
     #.  Could be expanded to broadcast and handle array inputs.
 
     Examples

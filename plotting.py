@@ -651,7 +651,7 @@ def setup_plots(figs, opts, plot_type='time'):
 
     Notes
     -----
-    #.  Written by David Stauffer in May 2015.
+    #.  Written by David C. Stauffer in May 2015.
 
     Examples
     --------

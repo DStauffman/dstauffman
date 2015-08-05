@@ -7,7 +7,7 @@ The "brick" file solves a 3D red and gray brick puzzle.
 
 Notes
 -----
-#.  Written by David Stauffer in June 2015.
+#.  Written by David C. Stauffer in June 2015.
 """
 
 #%% Imports
