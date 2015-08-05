@@ -45,6 +45,17 @@ def find_missing_nums(folder, old_picasa=True, digit_check=True, \
         Determines if checking for a consistent number of digits in the numbering
         01, 02, 03 versus 001, 02, 003, etc. Default is True
 
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2013.
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_data_dir, find_missing_nums
+    >>> folder = get_data_dir()
+    >>> find_missing_nums(folder)
+
     """
     for (root, _, files) in os.walk(folder):
         name_dict = dict()
@@ -84,7 +95,7 @@ def find_missing_nums(folder, old_picasa=True, digit_check=True, \
                 try:
                     nums_list[pos].append(nums)
                     digs_list[pos].append(digs)
-                except: # pylint: disable=W0702
+                except: # pragma: no cover # pylint: disable=W0702
                     nums_list.append([nums])
                     digs_list.append([digs])
             else:
@@ -113,6 +124,21 @@ def find_unexpected_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
         Name of folder to process
     allowable_extensions : set of str, optional
         List of extensions to consider allowable in the folder
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2013.
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_data_dir, find_unexpected_ext
+    >>> folder = get_data_dir()
+    >>> find_unexpected_ext(folder) #doctest: +ELLIPSIS
+    Finding any unexpected file extensions...
+     Unexpected: "..."
+    Done.
+
     """
     # print status
     print('Finding any unexpected file extensions...')
@@ -130,12 +156,24 @@ def find_unexpected_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
 #%% Functions - rename_old_picasa_files
 def rename_old_picasa_files(folder):
     r"""
-    Renames the old ".picasa.ini" to the newer "Picasa.ini" standard.
+    Renames the old "Picasa.ini" to the newer ".picasa.ini" standard.
 
     Parameters
     ----------
     folder : str
         Name of folder to process
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2013.
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_data_dir, rename_old_picasa_files
+    >>> folder = get_data_dir()
+    >>> rename_old_picasa_files(folder)
+
     """
     # definitions
     old_name = r'Picasa.ini'
@@ -154,7 +192,7 @@ def rename_old_picasa_files(folder):
                 try:
                     # do rename
                     os.rename(old_path, new_path)
-                except: # pylint: disable=W0702
+                except: #pragma: no cover # pylint: disable=W0702
                     # print any problems and then continue
                     print('Unable to rename: "{}"'.format(old_path))
                     continue
@@ -172,6 +210,20 @@ def rename_upper_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
         Name of folder to process
     allowable_extensions : set of str, optional
         List of extensions to consider allowable in the folder
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2013.
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_data_dir, rename_upper_ext
+    >>> folder = get_data_dir()
+    >>> rename_upper_ext(folder)
+    Searching for file extensions to rename...
+    Done.
+
     """
     # update status
     print('Searching for file extensions to rename...')
@@ -193,7 +245,7 @@ def rename_upper_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
                 try:
                     # do rename
                     os.rename(old_path, new_path)
-                except: # pylint: disable=W0702
+                except: # pragma: no cover # pylint: disable=W0702
                     # print any exceptions, but then continue
                     print(' Unable to rename: "{}"'.format(old_path))
                     continue
@@ -208,6 +260,23 @@ def find_long_filenames(folder):
     ----------
     folder : str
         Name of folder to process
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2013.
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_data_dir, find_long_filenames
+    >>> folder = get_data_dir()
+    >>> find_long_filenames(folder) #doctest: +ELLIPSIS
+    Finding long filenames...
+     max name = ...
+     max root = ...
+     max full = ...
+    Done.
+
     """
     print('Finding long filenames...')
     max_name = 0
@@ -225,19 +294,19 @@ def find_long_filenames(folder):
             #temp_name = ''.join(name.split())
             #if len(temp_name) < 5:
             #    print(os.path.join(root,name))
-            if temp > 106:
+            if temp > 106: # pragma: no cover
                 print(os.path.join(root, name))
             temp = len(root) - len_root
             if temp > max_root:
                 max_root = temp
-            if temp > 106:
-                pass# print(root)
+            if temp > 106:  # pragma: no cover
+                print(root)
             temp = len(name) + len(root) - len_root
             if temp > max_full:
                 max_full = temp
-            if temp > 212:
+            if temp > 212: # pragma: no cover
                 print(os.path.join(root, name))
-            if ';' in name:
+            if ';' in name: # pragma: no cover
                 print(os.path.join(root, name))
     print(' max name = {}'.format(max_name))
     print(' max root = {}'.format(max_root))
@@ -260,6 +329,21 @@ def batch_resize(folder, max_width=INT_TOKEN, max_height=INT_TOKEN, \
         Maximum height for the resized photo
     process_extensions : set of str, optional
         List of extensions to be processed within the folder
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2013.
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_data_dir, batch_resize
+    >>> folder = get_data_dir()
+    >>> batch_resize(folder, max_width=2048, max_height=2048) # doctest: +ELLIPSIS
+    Processing folder: "..."
+     Skipping file: "..."
+    Batch processing complete.
+
     """
     # We have to make sure that all of the arguments were passed.
     if max_width == INT_TOKEN or max_height == INT_TOKEN or not folder:
@@ -344,7 +428,7 @@ def convert_tif_to_jpg(folder, replace=False):
     >>> folder = get_data_dir()
     >>> convert_tif_to_jpg(folder) #doctest: +ELLIPSIS
     Processing folder: "..."
-     Skipping file: "README.txt"
+     Skipping file: "..."
     Batch processing complete.
 
     """
