@@ -591,7 +591,6 @@ def titleprefix(fig, prefix=''):
     Examples
     --------
     Create figure and then change the title
-
     >>> from dstauffman import titleprefix
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -637,6 +636,71 @@ def titleprefix(fig, prefix=''):
     # force updating of all the figures
     plt.draw()
 
+#%% Functions - disp_xlimits
+def disp_xlimits(figs, xmin=None, xmax=None):
+    r"""
+    Sets the xlimits to the specified xmin and xmax.
+
+    Parameters
+    ----------
+    figs : array_like
+        List of figures
+    xmin : scalar
+        Minimum X value
+    xmax : scalar
+        Maximum X value
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in August 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import disp_xlimits
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> fig = plt.figure()
+    >>> fig.canvas.set_window_title('Figure Title')
+    >>> x = np.arange(0, 10, 0.1)
+    >>> y = np.sin(x)
+    >>> plt.plot(x, y) # doctest: +ELLIPSIS
+    [<matplotlib.lines.Line2D object at 0x...>]
+    >>> plt.title('X vs Y') #doctest: +ELLIPSIS
+    <matplotlib.text.Text object at 0x...>
+    >>> plt.show(block=False)
+    >>> xmin = 2
+    >>> xmax = 5
+    >>> disp_xlimits(fig, xmin, xmax)
+
+    Close plot
+    >>> plt.close()
+
+    """
+    # check for single figure
+    if not isinstance(figs, list):
+        figs = [figs]
+    # loop through figures
+    for this_fig in figs:
+        # get axis list and loop through them
+        for this_axis in this_fig.axes:
+            # get xlimits for this axis
+            (old_xmin, old_xmax) = this_axis.get_xlim()
+            # set the new limits
+            if xmin is not None:
+                new_xmin = np.max([xmin, old_xmin])
+            else:
+                new_xmin = old_xmin
+            if xmax is not None:
+                new_xmax = np.min([xmax, old_xmax])
+            else:
+                new_xmax = old_xmax
+            # modify xlimits
+            this_axis.set_xlim((new_xmin, new_xmax))
+    # force updating of all the figures
+    plt.draw()
+
+#%% Functions - setup_plots
 def setup_plots(figs, opts, plot_type='time'):
     r"""
     Combines common plot operations into one easy command.
@@ -687,6 +751,9 @@ def setup_plots(figs, opts, plot_type='time'):
     # prepend a title
     if opts.case_name:
         titleprefix(figs, opts.case_name)
+
+    # change the display range
+    disp_xlimits(figs, opts.disp_xmin, opts.disp_xmax)
 
     # add a custom toolbar
     figmenu(figs)

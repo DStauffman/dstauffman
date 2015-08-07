@@ -432,6 +432,43 @@ class Test_titleprefix(unittest.TestCase):
     def tearDown(self):
         plt.close()
 
+# disp_xlimits
+class Test_disp_xlimits(unittest.TestCase):
+    r"""
+    Tests the disp_xlimits function with the following cases:
+        Normal use
+        Null action
+        Only xmin
+        Only xmax
+        Multiple figures
+    """
+    def setUp(self):
+        self.fig = plt.figure()
+        self.xmin = 2
+        self.xmax = 5
+        x = np.arange(0, 10, 0.1)
+        y = np.sin(x)
+        plt.plot(x, y)
+        plt.show(block=False)
+
+    def test_normal(self):
+        dcs.disp_xlimits(self.fig, self.xmin, self.xmax)
+
+    def test_null_action(self):
+        dcs.disp_xlimits(self.fig)
+
+    def test_just_xmin(self):
+        dcs.disp_xlimits(self.fig, xmin=self.xmin)
+
+    def test_just_xmax(self):
+        dcs.disp_xlimits(self.fig, xmax=self.xmax)
+
+    def test_multiple_figs(self):
+        dcs.disp_xlimits([self.fig, self.fig], self.xmin, self.xmax)
+
+    def tearDown(self):
+        plt.close()
+
 # setup_plots
 class Test_setup_plots(unittest.TestCase):
     r"""
