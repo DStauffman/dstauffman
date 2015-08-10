@@ -753,7 +753,8 @@ def setup_plots(figs, opts, plot_type='time'):
         titleprefix(figs, opts.case_name)
 
     # change the display range
-    disp_xlimits(figs, opts.disp_xmin, opts.disp_xmax)
+    if plot_type in {'time', 'time_no_yscale'}:
+        disp_xlimits(figs, opts.disp_xmin, opts.disp_xmax)
 
     # add a custom toolbar
     figmenu(figs)
