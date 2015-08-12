@@ -66,6 +66,7 @@ class Opts(Frozen):
         self.plot_type = 'png'
         self.sub_plots = True
         self.show_plot = True
+        self.show_link = False
         self.disp_xmin = -np.inf
         self.disp_xmax =  np.inf
         self.rms_xmin  = -np.inf
@@ -766,6 +767,8 @@ def setup_plots(figs, opts, plot_type='time'):
     # optionally save the plot
     if opts.save_plot:
         storefig(figs, opts.save_path, opts.plot_type)
+        if opts.show_link & len(figs) > 0:
+            print(r'Plots saved to <a href="{}">{}</a>'.format(opts.save_path, opts.save_path))
 
 #%% Functions - figmenu
 def figmenu(figs):
