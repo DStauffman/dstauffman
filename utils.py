@@ -337,7 +337,7 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
         same = set(d1.keys()) & set(d2.keys())
         for key in sorted(same):
             # if any differences, then this test fails
-            if np.any(d1[key] != d2[key]):
+            if np.any((d1[key] != d2[key]) ^ (np.isnan(d1[key]) & np.isnan(d2[key]))):
                 is_same = False
                 if not suppress_output:
                     print(key + ' is different.')

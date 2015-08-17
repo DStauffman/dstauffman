@@ -478,6 +478,7 @@ class Test_setup_plots(unittest.TestCase):
         Don't show the plot
         Multiple figures
         Save the plot
+        Show the plot link
     """
     def setUp(self):
         self.fig = plt.figure()
@@ -519,6 +520,20 @@ class Test_setup_plots(unittest.TestCase):
         dcs.setup_plots(self.fig, self.opts)
         # remove file
         os.remove(this_filename)
+
+    def test_show_link(self):
+        this_filename = os.path.join(dcs.get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
+        self.opts.save_plot = True
+        self.opts.show_link = True
+        with dcs.capture_output() as (out, _):
+            dcs.setup_plots(self.fig, self.opts)
+        output = out.getvalue().strip()
+        out.close()
+        # remove file
+        os.remove(this_filename)
+        text = r'Plots saved to <a href="C:\Users\dcstauff\Documents\GitHub\dstauffman\tests">' + \
+            r'C:\Users\dcstauff\Documents\GitHub\dstauffman\tests</a>'
+        self.assertEqual(output, text)
 
     def tearDown(self):
         plt.close()

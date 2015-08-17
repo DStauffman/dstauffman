@@ -14,6 +14,16 @@ from __future__ import division
 import unittest
 import dstauffman as dcs
 
+#%% Locals classes for testing
+class _Example_Frozen(dcs.Frozen):
+    def __init__(self, dummy=None):
+        if dummy is None:
+            dummy = 0
+        self.field_one = 1
+        self.field_two = 2
+        self.field_ten = 10
+        self.dummy     = dummy
+
 #%% Classes for testing
 # Frozen
 class Test_Frozen(unittest.TestCase):
@@ -23,18 +33,25 @@ class Test_Frozen(unittest.TestCase):
         add new attribute to existing instance
     """
     def setUp(self):
-        self.opts_fields = ['case_name']
+        self.fields = ['field_one', 'field_two', 'field_ten']
 
     def test_calling(self):
-        opts = dcs.Opts()
-        for field in self.opts_fields:
-            self.assertTrue(hasattr(opts, field))
-            setattr(opts, field, getattr(opts, field))
+        temp = _Example_Frozen()
+        for field in self.fields:
+            self.assertTrue(hasattr(temp, field))
+            setattr(temp, field, getattr(temp, field))
+
+    def test_override_existing(self):
+        temp = _Example_Frozen(dummy=5)
+        temp.field_one = 'not one'
+        temp.dummy = 10
+        setattr(temp, 'dummy', 15)
+        self.assertTrue(True)
 
     def test_new_attr(self):
-        opts = dcs.Opts()
+        temp = _Example_Frozen()
         with self.assertRaises(AttributeError):
-            opts.new_field_that_does_not_exist = 1
+            temp.new_field_that_does_not_exist = 1
 
 #%% Unit test execution
 if __name__ == '__main__':
