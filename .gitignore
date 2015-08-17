@@ -68,6 +68,11 @@ doc/tex/*/*.tcp
 doc/tex/*/*.tps
 doc/tex/*/*.ver
 
+# beamer files
+doc/tex/*/*.nav
+doc/tex/*/*.snm
+doc/tex/*/*.vrb
+
 # =========================
 # Folder/Files #
 # =========================
