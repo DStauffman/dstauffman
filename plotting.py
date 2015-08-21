@@ -18,9 +18,6 @@ import numpy as np
 import os
 import unittest
 # plotting imports
-import matplotlib
-# set plotting backend (note, must happen before importing pyplot)
-matplotlib.use('QT4Agg') # TODO: works well for me in Python 3.4 on Windows, make configurable?
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx

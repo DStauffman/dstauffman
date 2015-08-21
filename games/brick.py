@@ -14,9 +14,6 @@ Notes
 from __future__ import print_function
 from __future__ import division
 # plotting imports
-import matplotlib
-# set plotting backend (note, must happen before importing pyplot)
-matplotlib.use('QT4Agg')
 from mpl_toolkits.mplot3d.art3d import Poly3DCollection, Line3DCollection
 import matplotlib.pyplot as plt
 # regular imports
