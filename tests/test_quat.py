@@ -17,6 +17,12 @@ import dstauffman as dcs
 
 #%% _quat_assertions
 class Test__quat_assertions(unittest.TestCase):
+    r"""
+    Tests the _quat_assertions function with the following cases:
+        Nominal (x2)
+        Array (x2)
+        Bad (x7)
+    """
     def setUp(self):
         self.q1 = np.array([0, 0, 0, 1]) # zero quaternion
         self.q2 = np.array([0.5, 0.5, 0.5, 0.5]) # normal 1D quat
@@ -80,8 +86,10 @@ class Test_qrot(unittest.TestCase):
     Tests the qrot function with the following cases:
         Single input case
         Single axis, multiple angles
-        Multiple axes, single angle (Not working)
-        Multiple axes, multiple angles (Not working)
+        Multiple axes, single angle
+        Multiple axes, multiple angles
+        Null (x2)
+        Vector mismatch (causes AssertionError)
     """
     def setUp(self):
         self.axis   = np.array([1, 2, 3])
@@ -131,7 +139,10 @@ class Test_qrot(unittest.TestCase):
 class test_quat_angle_diff(unittest.TestCase):
     r"""
     Tests the quat_angle_diff function with the following cases:
-        TBD
+        Nominal (x2)
+        Array (x3)
+        Zero diff (x4)
+        Null (x4)
     """
     def setUp(self):
         self.quat1 = np.array([0.5, 0.5, 0.5, 0.5])
@@ -141,6 +152,8 @@ class test_quat_angle_diff(unittest.TestCase):
         self.dqq2  = dcs.quat_mult(self.dq2, self.quat1)
         self.theta = np.array([0.001, 0.05])
         self.comp  = np.array([[0.001, 0], [0, 0.05], [0, 0]])
+        self.null   = np.array([])
+        self.null_quat = np.zeros((4, 0))
 
     def test_nominal1(self):
         (theta, comp) = dcs.quat_angle_diff(self.quat1, self.dqq1)
@@ -189,11 +202,41 @@ class test_quat_angle_diff(unittest.TestCase):
         np.testing.assert_almost_equal(theta, 0)
         np.testing.assert_almost_equal(comp, 0)
 
+    def test_null1(self):
+        (theta, comp) = dcs.quat_angle_diff(self.quat1, self.null)
+        self.assertEqual(theta, None)
+        for i in range(3):
+            self.assertEqual(comp[i], None)
+
+    def test_null2(self):
+        (theta, comp) = dcs.quat_angle_diff(self.quat1, self.null_quat)
+        self.assertEqual(theta, None)
+        for i in range(3):
+            self.assertEqual(comp[i], None)
+
+    def test_null3(self):
+        (theta, comp) = dcs.quat_angle_diff(self.null, self.quat1)
+        self.assertEqual(theta, None)
+        for i in range(3):
+            self.assertEqual(comp[i], None)
+
+    def test_null4(self):
+        (theta, comp) = dcs.quat_angle_diff(self.null_quat, self.quat1)
+        self.assertEqual(theta, None)
+        for i in range(3):
+            self.assertEqual(comp[i], None)
+
 #%% quat_from_euler
 class test_quat_from_euler(unittest.TestCase):
     r"""
     Tests the quat_from_euler function with the following cases:
-        TBD
+        Nominal (x2 different values)
+        Default sequence
+        Repeated axis
+        Shorter than normal sequence
+        Single rotation sequence (x2 for actual scalar)
+        Longer than normal rotation sequence
+        Array cases (x3 2D, 2D with unit len, and >2D for error)
     """
     def setUp(self):
         self.a      = np.array([0.01, 0.02, 0.03])
@@ -206,9 +249,65 @@ class test_quat_from_euler(unittest.TestCase):
             [0.00514916, 0.02073308],
             [0.99982426, 0.99902285]])
 
-    def test_nominal(self):
+    def test_nominal1(self):
+        quat = dcs.quat_from_euler(self.a, self.seq)
+        np.testing.assert_almost_equal(quat, self.quat[:,0])
+        self.assertEqual(quat.ndim, 1)
+
+    def test_nominal2(self):
+        quat = dcs.quat_from_euler(self.b, self.seq)
+        np.testing.assert_almost_equal(quat, self.quat[:,1])
+        self.assertEqual(quat.ndim, 1)
+
+    def test_default_seq(self):
+        quat = dcs.quat_from_euler(self.a)
+        temp = dcs.quat_mult(dcs.quat_mult(dcs.qrot(3, self.a[0]), dcs.qrot(1, self.a[1])), dcs.qrot(2, self.a[2]))
+        np.testing.assert_almost_equal(quat, temp)
+        self.assertEqual(quat.ndim, 1)
+
+    def test_repeated(self):
+        quat1 = dcs.quat_from_euler(np.hstack((self.a, self.a)), seq=np.array([1, 1, 1, 1, 1, 1]))
+        quat2 = dcs.qrot(1, 2*np.sum(self.a))
+        np.testing.assert_almost_equal(quat1, quat2)
+        self.assertEqual(quat1.ndim, 1)
+
+    def test_short(self):
+        quat1 = dcs.quat_from_euler(self.a[0:2], self.seq[0:2])
+        quat2 = dcs.quat_mult(dcs.qrot(self.seq[0], self.a[0]), dcs.qrot(self.seq[1], self.a[1]))
+        np.testing.assert_almost_equal(quat1, quat2)
+        self.assertEqual(quat1.ndim, 1)
+
+    def test_single1(self):
+        quat1 = dcs.quat_from_euler(self.a[0], self.seq[0])
+        quat2 = dcs.qrot(self.seq[0], self.a[0])
+        np.testing.assert_almost_equal(quat1, quat2)
+        self.assertEqual(quat1.ndim, 1)
+
+    def test_single2(self):
+        quat1 = dcs.quat_from_euler(0.01, 3)
+        quat2 = dcs.qrot(3, 0.01)
+        np.testing.assert_almost_equal(quat1, quat2)
+        self.assertEqual(quat1.ndim, 1)
+
+    def test_long(self):
+        quat1 = dcs.quat_from_euler(np.hstack((self.a, self.b)), seq=np.hstack((self.seq, self.seq)))
+        quat2 = dcs.quat_mult(self.quat[:,0], self.quat[:,1])
+        np.testing.assert_almost_equal(quat1, quat2)
+        self.assertEqual(quat1.ndim, 1)
+
+    def test_array1(self):
         quat = dcs.quat_from_euler(self.angles, self.seq)
         np.testing.assert_almost_equal(quat, self.quat)
+        self.assertEqual(quat.ndim, 2)
+
+    def test_array2(self):
+        quat = dcs.quat_from_euler(np.expand_dims(self.a, axis=1), self.seq)
+        np.testing.assert_almost_equal(quat, np.expand_dims(self.quat[:,0], axis=1))
+        self.assertEqual(quat.ndim, 2)
+
+    def test_array3(self):
+        with self.assertRaises(ValueError):
+            dcs.quat_from_euler(np.zeros((3,3,1)))
 
 #%% quat_interp
 class test_quat_interp(unittest.TestCase):
@@ -238,9 +337,9 @@ class test_quat_interp(unittest.TestCase):
         q2 = dcs.quat_interp(self.time, self.quat, self.ti[0])
         np.testing.assert_almost_equal(q2, np.expand_dims(self.qout[:,0],1))
 
-#    def test_scalar2(self):
-#        q2 = dcs.quat_interp(self.time, self.quat, self.ti[1])
-#        np.testing.assert_almost_equal(q2, np.expand_dims(self.qout[:,1],1))
+    def test_scalar2(self):
+        q2 = dcs.quat_interp(self.time, self.quat, self.ti[1])
+        np.testing.assert_almost_equal(q2, np.expand_dims(self.qout[:,1],1))
 
 #%% quat_inv
 class test_quat_inv(unittest.TestCase):
@@ -455,7 +554,8 @@ class test_quat_norm(unittest.TestCase):
 class test_quat_prop(unittest.TestCase):
     r"""
     Tests the quat_prop function with the following cases:
-        TBD
+        Nominal case
+        No renormalization case (Raises norm AttributeError)
     """
     def setUp(self):
         self.quat      = np.array([0, 0, 0, 1])
@@ -463,8 +563,12 @@ class test_quat_prop(unittest.TestCase):
         self.quat_new  = np.array([0.00499913, 0.00999825, 0.01499738, 0.99982505])
 
     def test_nominal(self):
-        quat_new = dcs.quat_prop(self.quat, self.delta_ang)
-        np.testing.assert_almost_equal(quat_new, self.quat_new)
+        quat = dcs.quat_prop(self.quat, self.delta_ang)
+        np.testing.assert_almost_equal(quat, self.quat_new)
+
+    def test_no_renorm(self):
+        with self.assertRaises(AssertionError):
+            dcs.quat_prop(self.quat, self.delta_ang, renorm=False)
 
 #%% quat_times_vector
 class test_quat_times_vector(unittest.TestCase):
@@ -485,7 +589,7 @@ class test_quat_times_vector(unittest.TestCase):
 class test_quat_to_dcm(unittest.TestCase):
     r"""
     Tests the quat_to_dcm function with the following cases:
-        TBD
+        Nominal case
     """
     def setUp(self):
         self.quat = np.array([0.5, -0.5, 0.5, 0.5])
@@ -511,10 +615,35 @@ class test_quat_to_euler(unittest.TestCase):
             [-0.        , -3.14159265],
             [ 0.        ,  0.        ],
             [ 3.14159265, -0.        ]])
+        self.zero_quat = np.array([0, 0, 0, 1])
+        self.all_sequences = {\
+            (1, 1, 1), (1, 1, 2), (1, 1, 3), (1, 2, 1), (1, 2, 2), (1, 2, 3), (1, 3, 1), (1, 3, 2), (1, 3, 3), \
+            (2, 1, 1), (2, 1, 2), (2, 1, 3), (2, 2, 1), (2, 2, 2), (2, 2, 3), (2, 3, 1), (2, 3, 2), (2, 3, 3), \
+            (3, 1, 1), (3, 1, 2), (3, 1, 3), (3, 2, 1), (3, 2, 2), (3, 2, 3), (3, 3, 1), (3, 3, 2), (3, 3, 3)}
+        self.valid_sequences = {(1,2,3), (2,3,1), (3,1,2), (1,3,2), (2,1,3), (3,2,1)}
+        self.bad_sequences = self.all_sequences - self.valid_sequences
 
     def test_nominal(self):
         euler = dcs.quat_to_euler(self.quat, self.seq)
         np.testing.assert_almost_equal(euler, self.euler)
+
+    def test_zero_quat(self):
+        euler = dcs.quat_to_euler(self.zero_quat)
+        np.testing.assert_equal(euler, np.zeros(3))
+
+    def test_all_valid(self):
+        for this_seq in self.valid_sequences:
+            euler = dcs.quat_to_euler(self.zero_quat, np.array(this_seq))
+            np.testing.assert_equal(euler, np.zeros(3))
+
+    def test_all_invalid(self):
+        for this_seq in self.bad_sequences:
+            with self.assertRaises(ValueError):
+                dcs.quat_to_euler(self.zero_quat, np.array(this_seq))
+
+    def test_bad_sequence(self):
+        with self.assertRaises(AssertionError):
+            dcs.quat_to_euler(self.zero_quat, np.array([1, 2]))
 
 #%% Unit test execution
 if __name__ == '__main__':

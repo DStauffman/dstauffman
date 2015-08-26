@@ -8,7 +8,7 @@ Notes
 #.  Written by David C. Stauffer in April 2015.
 """
 
-# pylint: disable=E1101, C0326
+# pylint: disable=E1101, C0326, C0103
 
 #%% Imports
 from __future__ import print_function
@@ -42,7 +42,8 @@ def _quat_assertions(quat):
     if qndim == 1:
         assert (qsize == 0 or qsize == QUAT_SIZE), 'Quaternion has invalid size: "{}"'.format(qsize)
     elif qndim == 2:
-        assert (quat.shape[0] == QUAT_SIZE), 'Quaternion has invalid size for first dimension: "{}"'.format(quat.shape[0])
+        assert (quat.shape[0] == QUAT_SIZE), 'Quaternion has invalid size for first ' + \
+            'dimension: "{}"'.format(quat.shape[0])
     else:
         assert False, 'Quaternion has too many dimensions: "{}".'.format(qndim)
     # if a null quaternion, then checks are done
@@ -57,14 +58,19 @@ def _quat_assertions(quat):
         assert (-1 <= quat[2] <= 1), 'Quaternion has bad range in z value: "{}"'.format(quat[2])
         assert ( 0 <= quat[3] <= 1), 'Quaternion has bad range in s value: "{}"'.format(quat[3])
     else:
-        assert np.all(-1 <= quat[0,:]) and np.all(quat[0,:] <= 1), 'Quaternion has bad range in x value, min: "{}", max:"{}"'.format(min(quat[0,:]), max(quat[0,:]))
-        assert np.all(-1 <= quat[1,:]) and np.all(quat[1,:] <= 1), 'Quaternion has bad range in y value, min: "{}", max:"{}"'.format(min(quat[1,:]), max(quat[1,:]))
-        assert np.all(-1 <= quat[2,:]) and np.all(quat[2,:] <= 1), 'Quaternion has bad range in z value, min: "{}", max:"{}"'.format(min(quat[2,:]), max(quat[2,:]))
-        assert np.all( 0 <= quat[3,:]) and np.all(quat[3,:] <= 1), 'Quaternion has bad range in s value, min: "{}", max:"{}"'.format(min(quat[3,:]), max(quat[3,:]))
+        assert np.all(-1 <= quat[0,:]) and np.all(quat[0,:] <= 1), 'Quaternion has bad range ' + \
+            'in x value, min: "{}", max:"{}"'.format(np.min(quat[0,:]), np.max(quat[0,:]))
+        assert np.all(-1 <= quat[1,:]) and np.all(quat[1,:] <= 1), 'Quaternion has bad range ' + \
+            'in y value, min: "{}", max:"{}"'.format(np.min(quat[1,:]), np.max(quat[1,:]))
+        assert np.all(-1 <= quat[2,:]) and np.all(quat[2,:] <= 1), 'Quaternion has bad range ' + \
+            'in z value, min: "{}", max:"{}"'.format(np.min(quat[2,:]), np.max(quat[2,:]))
+        assert np.all( 0 <= quat[3,:]) and np.all(quat[3,:] <= 1), 'Quaternion has bad range ' + \
+            'in s value, min: "{}", max:"{}"'.format(np.min(quat[3,:]), np.max(quat[3,:]))
 
     # check normalization
     q_norm_err = np.abs(1 - np.sum(quat**2, axis=0))
-    assert np.all(q_norm_err <= precision), 'Quaternion has invalid normalization error "{}".'.format(max(q_norm_err))
+    assert np.all(q_norm_err <= precision), 'Quaternion has invalid normalization ' + \
+        'error "{}".'.format(np.max(q_norm_err))
 
 #%% Functions - qrot
 def qrot(axis, angle):
@@ -111,7 +117,7 @@ def qrot(axis, angle):
         axis_set = set(axis)
     except TypeError:
         axis_set = {axis}
-    assert len(axis_set - {1, 2, 3}) == 0
+    assert len(axis_set - {1, 2, 3}) == 0, 'axis_set = {}'.format(axis_set)
     # calculations
     if np.isscalar(angle) and np.isscalar(axis):
         # optimized scalar case
@@ -196,6 +202,10 @@ def quat_angle_diff(quat1, quat2):
     _quat_assertions(quat1)
     _quat_assertions(quat2)
 
+    # check for null quaternions
+    if quat1.size == 0 or quat2.size == 0:
+        return (None, np.array([None, None, None]))
+
     # calculate delta quaternion
     dq = quat_mult(quat2, quat_inv(quat1))
 
@@ -234,7 +244,7 @@ def quat_angle_diff(quat1, quat2):
     return (theta, comp)
 
 #%% Functions - quat_from_euler
-def quat_from_euler(angles, seq=np.array([3, 1, 2])):
+def quat_from_euler(angles, seq=None):
     r"""
     Convert set(s) of euler angles to quaternion(s).
 
@@ -282,10 +292,41 @@ def quat_from_euler(angles, seq=np.array([3, 1, 2])):
      [ 0.99982426  0.99902285]]
 
     """
-    # get number of angles
-    num = angles.shape[1] # TODO: can be vector?
+    # check for optional inputs
+    if seq is None:
+        seq = np.array([3, 1, 2])
+    # check for different combinations of angles (scalar, 1D, 2D)
+    try:
+        ndim = angles.ndim
+    except AttributeError:
+        if np.isscalar(angles):
+            # assume this is an integer and turn into ndarray with one element
+            angles = np.array([angles])
+            ndim = 1
+        else:
+            raise # pragma: no cover
+    # need this check for scalar float64 objects (but not float objects, don't know why)
+    if ndim == 0:
+        angles = np.array([angles])
+        ndim = 1
+    if ndim == 1:
+        # angles is a 1D, note and make 2D
+        is_vector = True
+        angles = np.expand_dims(angles, axis=1)
+    elif ndim == 2:
+        # note that was 2D
+        is_vector = False
+    else:
+        raise ValueError('Unexpected number of dimensions in angle: "{}"'.format(ndim))
+    # get the number of quaternions to end up making
+    num = angles.shape[1]
     # initialize output
     quat = np.zeros((QUAT_SIZE, num))
+    # check that seq is iterable
+    try:
+        len(seq)
+    except TypeError:
+        seq = np.array([seq])
     # loop through quaternions
     for i in range(num):
         q_temp = np.array([0, 0, 0, 1])
@@ -295,6 +336,9 @@ def quat_from_euler(angles, seq=np.array([3, 1, 2])):
             q_temp = quat_mult(q_temp, q_single)
         # save output
         quat[:, i] = q_temp
+    # optionally flatten result
+    if is_vector and num == 1:
+        quat = quat.flatten()
     return quat
 
 #%% Functions - quat_interp
@@ -485,7 +529,7 @@ def quat_inv(q1):
     return q2
 
 #%% Functions - quat_mult
-def quat_mult(a, b, renorm=True):
+def quat_mult(a, b):
     r"""
     Multiplies quaternions together.
 
@@ -792,7 +836,7 @@ def quat_to_dcm(quat):
     return dcm
 
 #%% Functions - quat_to_euler
-def quat_to_euler(quat,seq):
+def quat_to_euler(quat, seq=None):
     r"""
     Converts quaternion to Euler angles for one of 6 input angle sequences.
 
@@ -838,16 +882,29 @@ def quat_to_euler(quat,seq):
      [ 3.14159265 -0.        ]]
 
     """
+    # check for optional inputs
+    if seq is None:
+        seq = np.array([3, 1, 2])
+    # assert quaternion checks
+    _quat_assertions(quat)
+    assert len(seq) == 3, 'Sequence must have len of 3, not "{}"'.format(len(seq))
+    if quat.ndim == 1:
+        # quat is a 1D
+        is_vector = True
+        quat = np.expand_dims(quat, axis=1)
+    else:
+        # note that was 2D
+        is_vector = False
 
     # initialize output
-    n     = quat.shape[1] # TODO: vector case?
-    euler = np.zeros((3, n))
+    num   = quat.shape[1]
+    euler = np.zeros((3, num))
 
     # Loop through quaternions
-    for i in range(n):
+    for i in range(num):
         # calculate DCM from quaternion
         dcm = quat_to_dcm(quat[:, i])
-        # Find values of dir cosine matrix terms
+        # build sequence str
         seq_str = str(int(seq[0])) + str(int(seq[1])) + str(int(seq[2]))
         # calculate terms based on sequence order
         if seq_str == '123':
@@ -940,6 +997,10 @@ def quat_to_euler(quat,seq):
 
         # Store output
         euler[:,i] = np.array([theta1, theta2, theta3])
+
+    # optionally flatten result and then return answer
+    if is_vector:
+        euler = euler.flatten()
     return euler
 
 #%% Unit test
