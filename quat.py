@@ -355,6 +355,7 @@ def quat_interp(time, quat, ti, inclusive=True):
     ti : ndarray (B, )
         desired time of interpolation, also monotonically increasing [sec]
     inclusive : bool {True, False}, optional
+        Whether ti must be only inclusive to the `time` vector.
 
     Returns
     -------
@@ -368,17 +369,17 @@ def quat_interp(time, quat, ti, inclusive=True):
     Examples
     --------
 
-    >>> from dstauffman import quat_interp
+    >>> from dstauffman import quat_interp, qrot
     >>> import numpy as np
     >>> time  = np.array([1, 3, 5])
-    >>> quat  = np.array([[0, 0, 0, 1], [0, 0, 0.19611951356252125, 0.98058], [0.5, -0.5, -0.5, 0.5]]).T
+    >>> quat = np.column_stack((qrot(1, 0), qrot(1, np.pi/2), qrot(1, np.pi)))
     >>> ti = np.array([1, 2, 4.5, 5])
     >>> qout = quat_interp(time, quat, ti)
-    >>> print(qout) # doctest: +NORMALIZE_WHITESPACE
-    [[ 0. 0.          0.41748421  0.5 ]
-     [ 0. 0.         -0.41748421 -0.5 ]
-     [ 0. 0.09853933 -0.35612271 -0.5 ]
-     [ 1. 0.99513316  0.72428619  0.5 ]]
+    >>> print(np.array_str(qout, precision=8, suppress_small=True)) # doctest: +NORMALIZE_WHITESPACE
+    [[ 0. 0.38268343 0.98078528 1. ]
+     [ 0. 0.         0.         0. ]
+     [ 0. 0.         0.         0. ]
+     [ 1. 0.92387953 0.19509032 0. ]]
 
     """
     # Initializations
@@ -404,7 +405,7 @@ def quat_interp(time, quat, ti, inclusive=True):
         # optimization for simple use case(s), where ti is a scalar and contained in time
         if ti in time:
             ix = np.where(ti == time)[0]
-            if not ix:
+            if not ix: # pragma: no branch
                 qout = quat[:, ix]
                 return qout
 
@@ -413,9 +414,9 @@ def quat_interp(time, quat, ti, inclusive=True):
     ix_exclusive = (ti < time[0]) | (ti > time[-1])
     if np.any(ix_exclusive):
         if inclusive:
-            print('Desired time not found within input time vector.')
-        else:
             raise ValueError('Desired time not found within input time vector.')
+        else:
+            print('Desired time not found within input time vector.')
 
     # Given times
     # find desired points that are contained in input time vector
@@ -429,17 +430,15 @@ def quat_interp(time, quat, ti, inclusive=True):
     ix_calc = ~ix_known & ~ix_exclusive
 
     # Calculations
-    # find index within time to surround ti
+    # find index within time to surround ti, accounting for the end of the vector
     index = np.empty(num, dtype=int)
     index.fill(INT_TOKEN)
-    # If not compiling, then you can do a for i = find(ix_calc) and skip the if ix_calc(i) line,
-    # which may make the non-compiled matlab version faster
     for i in np.nonzero(ix_calc)[0]:
         temp = np.nonzero(ti[i] <= time)[0]
-        if temp[0] != 0:
-            index[i] = temp[0]
-        else:
+        if temp[0] != len(time)-1:
             index[i] = temp[0] + 1
+        else:
+            index[i] = temp[0]
 
     # remove points that are NaN, either they weren't in the time vector, or they were next to a
     # drop out and cannot be interpolated.
@@ -473,7 +472,9 @@ def quat_interp(time, quat, ti, inclusive=True):
     # Enforce sign convention on scalar quaternion element.
     # Scalar element (fourth element) of quaternion must not be negative.
     # So change sign on entire quaternion if qout(4) is less than zero.
-    qout[:, qout[3, :] < 0] = -qout[:, qout[3, :] < 0]
+    with np.errstate(invalid='ignore'): # because qout can be NaN
+        negs = qout[3, :] < 0
+    qout[:, negs] = -qout[:, negs]
 
     return qout
 
@@ -769,11 +770,17 @@ def quat_times_vector(quat, v):
      [ 0.  0.]]
 
     """
+    # assume single inputs until proven otherwise
+    is_single = True
     # determine input sizes
     if quat.ndim == 1:
         quat = quat[:, np.newaxis]
+    else:
+        is_single = False
     if v.ndim == 1:
         v = v[:, np.newaxis]
+    else:
+        is_single = False
     # Multiple quaternions, multiple vectors
     qv  = np.array([ \
         quat[1, :]*v[2, :] - quat[2, :]*v[1, :], \
@@ -784,6 +791,8 @@ def quat_times_vector(quat, v):
             quat[1, :]*qv[2, :] - quat[2, :]*qv[1, :], \
             quat[2, :]*qv[0, :] - quat[0, :]*qv[2, :], \
             quat[0, :]*qv[1, :] - quat[1, :]*qv[0, :]])) # TODO: check this, and use cross product?
+    if is_single:
+        vec = vec.flatten()
     return vec
 
 #%% Functions - quat_to_dcm

@@ -316,30 +316,40 @@ class test_quat_interp(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        self.time  = np.array([1, 3, 5])
-        self.quat  = np.array([[0, 0, 0, 1], [0, 0, 0.19611951356252125, 0.98058], [0.5, -0.5, -0.5, 0.5]]).T
-        self.ti    = np.array([1, 2, 4.5, 5])
-        self.qout  = np.array([\
-            [ 0., 0.        ,  0.41748421,  0.5 ],
-            [ 0., 0.        , -0.41748421, -0.5 ],
-            [ 0., 0.09853933, -0.35612271, -0.5 ],
-            [ 1., 0.99513316,  0.72428619,  0.5 ]])
+        self.time = np.array([1, 3, 5])
+        self.quat = np.column_stack((dcs.qrot(1, 0), dcs.qrot(1, np.pi/2), dcs.qrot(1, np.pi)))
+        self.ti   = np.array([1, 2, 4.5, 5])
+        self.qout = np.column_stack((dcs.qrot(1, 0), dcs.qrot(1, np.pi/4), dcs.qrot(1, 3.5/4*np.pi), dcs.qrot(1, np.pi)))
+        self.ti_extra = np.array([0, 1, 2, 4.5, 5, 10])
 
     def test_nominal(self):
         qout = dcs.quat_interp(self.time, self.quat, self.ti)
         np.testing.assert_almost_equal(qout, self.qout)
 
     def test_empty(self):
-        q2 = dcs.quat_interp(self.time, self.quat, np.array([]))
-        self.assertEqual(q2.size, 0)
+        qout = dcs.quat_interp(self.time, self.quat, np.array([]))
+        self.assertEqual(qout.size, 0)
 
     def test_scalar1(self):
-        q2 = dcs.quat_interp(self.time, self.quat, self.ti[0])
-        np.testing.assert_almost_equal(q2, np.expand_dims(self.qout[:,0],1))
+        qout = dcs.quat_interp(self.time, self.quat, self.ti[0])
+        np.testing.assert_almost_equal(qout, np.expand_dims(self.qout[:,0],1))
 
     def test_scalar2(self):
-        q2 = dcs.quat_interp(self.time, self.quat, self.ti[1])
-        np.testing.assert_almost_equal(q2, np.expand_dims(self.qout[:,1],1))
+        qout = dcs.quat_interp(self.time, self.quat, self.ti[1])
+        np.testing.assert_almost_equal(qout, np.expand_dims(self.qout[:,1],1))
+
+    def test_extra1(self):
+        with self.assertRaises(ValueError):
+            dcs.quat_interp(self.time, self.quat, self.ti_extra, inclusive=True)
+
+    def test_extra2(self):
+        with dcs.capture_output() as (out, _):
+            qout = dcs.quat_interp(self.time, self.quat, self.ti_extra, inclusive=False)
+        output = out.getvalue().strip()
+        out.close()
+        np.testing.assert_almost_equal(qout[:, 1:-1], self.qout)
+        np.testing.assert_equal(qout[:,[0, -1]], np.nan)
+        self.assertEqual(output, 'Desired time not found within input time vector.')
 
 #%% quat_inv
 class test_quat_inv(unittest.TestCase):
@@ -574,16 +584,23 @@ class test_quat_prop(unittest.TestCase):
 class test_quat_times_vector(unittest.TestCase):
     r"""
     Tests the quat_times_vector function with the following cases:
-        TBD
+        Nominal
+        Array inputs
     """
     def setUp(self):
+        # TODO: confirm that this is enough to test the correctness of the function
         self.quat = np.array([[0, 1, 0, 0], [1, 0, 0, 0]]).T
-        self.v = np.array([[1, 0, 0], [2, 0, 0]]).T
-        self.vec = np.array([[-1, 2], [0, 0], [0, 0]])
+        self.vec  = np.array([[1, 0, 0], [2, 0, 0]]).T
+        self.out  = np.array([[-1, 2], [0, 0], [0, 0]])
 
     def test_nominal(self):
-        vec = dcs.quat_times_vector(self.quat, self.v)
-        np.testing.assert_almost_equal(vec, self.vec)
+        for i in range(2):
+            vec = dcs.quat_times_vector(self.quat[:, i], self.vec[:, i])
+            np.testing.assert_almost_equal(vec, self.out[:, i])
+
+    def test_array(self):
+        vec = dcs.quat_times_vector(self.quat, self.vec)
+        np.testing.assert_almost_equal(vec, self.out)
 
 #%% quat_to_dcm
 class test_quat_to_dcm(unittest.TestCase):
@@ -606,15 +623,19 @@ class test_quat_to_dcm(unittest.TestCase):
 class test_quat_to_euler(unittest.TestCase):
     r"""
     Tests the quat_to_euler function with the following cases:
-        TBD
+        Nominal
+        Zero quat
+        All valid sequences
+        All invalid sequences
+        Bad length sequence
     """
     def setUp(self):
-        self.quat  = np.array([[0, 1, 0, 0], [0, 0, 1, 0]]).T
+        self.quat  = np.array([[0, 1, 0, 0], [0, 0, 1, 0], [np.sqrt(2)/2, 0, 0, np.sqrt(2)/2]]).T
         self.seq   = [3, 1, 2]
         self.euler = np.array([\
-            [-0.        , -3.14159265],
-            [ 0.        ,  0.        ],
-            [ 3.14159265, -0.        ]])
+            [ 0.   , -np.pi, 0.       ],
+            [ 0.   ,  0.   , -np.pi/2 ],
+            [ np.pi, -0.   , 0.       ]])
         self.zero_quat = np.array([0, 0, 0, 1])
         self.all_sequences = {\
             (1, 1, 1), (1, 1, 2), (1, 1, 3), (1, 2, 1), (1, 2, 2), (1, 2, 3), (1, 3, 1), (1, 3, 2), (1, 3, 3), \
@@ -632,6 +653,7 @@ class test_quat_to_euler(unittest.TestCase):
         np.testing.assert_equal(euler, np.zeros(3))
 
     def test_all_valid(self):
+        # TODO: this doesn't confirm that all of these give the correct answer, but just don't crash
         for this_seq in self.valid_sequences:
             euler = dcs.quat_to_euler(self.zero_quat, np.array(this_seq))
             np.testing.assert_equal(euler, np.zeros(3))
