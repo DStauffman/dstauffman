@@ -192,7 +192,7 @@ class Test_plot_time_history(unittest.TestCase):
         self.opts.names = ['Name 1']
         self.truth_time = self.time
         self.truth_data = np.cos(self.time)
-        self.data_matrix = dcs.concat_vectors(self.data, self.truth_data).T
+        self.data_matrix = np.column_stack((self.data, self.truth_data)).T
 
     def test_normal(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_)
@@ -230,11 +230,11 @@ class Test_plot_time_history(unittest.TestCase):
             self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='bad_type')
 
     def test_array_data1(self):
-        data = dcs.concat_vectors(self.data, self.data).T
+        data = np.column_stack((self.data, self.data)).T
         self.fig = dcs.plot_time_history(self.time, data, self.description, self.type_)
 
     def test_array_data2(self):
-        data = dcs.concat_vectors(self.data, self.data).T
+        data = np.column_stack((self.data, self.data)).T
         self.fig = dcs.plot_time_history(self.time, data, self.description, self.type_, plot_as_diffs=True)
 
     def tearDown(self):

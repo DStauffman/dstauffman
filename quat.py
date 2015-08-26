@@ -16,7 +16,55 @@ from __future__ import division
 import doctest
 import numpy as np
 import unittest
-from dstauffman.constants import INT_TOKEN
+from dstauffman.constants import INT_TOKEN, QUAT_SIZE
+
+#%% Master flags
+use_assertions = True
+
+#%% Functions - _quat_assertions
+def _quat_assertions(quat):
+    r"""
+    Checks assertions about valid quaternions.
+
+    Parameters
+    ----------
+    quat : ndarray, (4,) or (4, N)
+        Quaternion
+    """
+    if not use_assertions:
+        return # pragma: no cover
+    # hard-coded values
+    precision = 1e-12
+    # get sizes
+    qsize = quat.size
+    qndim = quat.ndim
+    # check sizes and dimensions
+    if qndim == 1:
+        assert (qsize == 0 or qsize == QUAT_SIZE), 'Quaternion has invalid size: "{}"'.format(qsize)
+    elif qndim == 2:
+        assert (quat.shape[0] == QUAT_SIZE), 'Quaternion has invalid size for first dimension: "{}"'.format(quat.shape[0])
+    else:
+        assert False, 'Quaternion has too many dimensions: "{}".'.format(qndim)
+    # if a null quaternion, then checks are done
+    if qsize == 0:
+        return
+    # check that values are all real
+    assert np.all(np.isreal(quat)), 'Quaternion is not real'
+    # check ranges
+    if qndim == 1:
+        assert (-1 <= quat[0] <= 1), 'Quaternion has bad range in x value: "{}"'.format(quat[0])
+        assert (-1 <= quat[1] <= 1), 'Quaternion has bad range in y value: "{}"'.format(quat[1])
+        assert (-1 <= quat[2] <= 1), 'Quaternion has bad range in z value: "{}"'.format(quat[2])
+        assert ( 0 <= quat[3] <= 1), 'Quaternion has bad range in s value: "{}"'.format(quat[3])
+    else:
+        assert np.all(-1 <= quat[0,:]) and np.all(quat[0,:] <= 1), 'Quaternion has bad range in x value, min: "{}", max:"{}"'.format(min(quat[0,:]), max(quat[0,:]))
+        assert np.all(-1 <= quat[1,:]) and np.all(quat[1,:] <= 1), 'Quaternion has bad range in y value, min: "{}", max:"{}"'.format(min(quat[1,:]), max(quat[1,:]))
+        assert np.all(-1 <= quat[2,:]) and np.all(quat[2,:] <= 1), 'Quaternion has bad range in z value, min: "{}", max:"{}"'.format(min(quat[2,:]), max(quat[2,:]))
+        assert np.all( 0 <= quat[3,:]) and np.all(quat[3,:] <= 1), 'Quaternion has bad range in s value, min: "{}", max:"{}"'.format(min(quat[3,:]), max(quat[3,:]))
+
+    # check normalization
+    q_norm_err = np.abs(1 - np.sum(quat**2, axis=0))
+    assert np.all(q_norm_err <= precision), 'Quaternion has invalid normalization error "{}".'.format(max(q_norm_err))
 
 #%% Functions - qrot
 def qrot(axis, angle):
@@ -35,7 +83,7 @@ def qrot(axis, angle):
 
     Returns
     -------
-    quat : ndarray, (4, N)
+    quat : ndarray, (4,) or (4, N)
         quaternion representing the given rotations
 
     References
@@ -59,16 +107,32 @@ def qrot(axis, angle):
 
     """
     # assertions
-    assert axis in {1, 2, 3}
+    try:
+        axis_set = set(axis)
+    except TypeError:
+        axis_set = {axis}
+    assert len(axis_set - {1, 2, 3}) == 0
     # calculations
-    if np.isscalar(angle):
+    if np.isscalar(angle) and np.isscalar(axis):
         # optimized scalar case
         quat = np.array([0, 0, 0, np.cos(angle/2)])
         quat[axis-1] = np.sin(angle/2)
-    else:
-        # general case
-        quat = np.concatenate((np.zeros((len(angle), 3)), np.vstack(np.cos(angle/2))), axis=1).T
+    elif np.isscalar(axis):
+        # single axis, multiple angle case
+        quat = np.vstack((np.zeros((3, len(angle))), np.expand_dims(np.cos(angle/2), axis=0)))
         quat[axis-1, :] = np.sin(angle/2)
+    elif np.isscalar(angle):
+        # single angle, multiple axis case
+        quat = np.array([[0], [0], [0], [np.cos(angle/2)]]) * np.ones((1, len(axis)))
+        for (i, this_axis) in enumerate(axis): # TODO: eliminate this for loop somehow?
+            quat[this_axis-1, i] = np.sin(angle/2)
+    else:
+        # multiple axis, multiple angle case
+        assert len(axis) == len(angle)
+        quat = np.vstack((np.zeros((3, len(angle))), np.expand_dims(np.cos(angle/2), axis=0)))
+        for i in range(len(axis)): # TODO: eliminate this for loop somehow?
+            quat[axis[i]-1, i] = np.sin(angle[i]/2)
+    _quat_assertions(quat)
     return quat
 
 #%% Functions - quat_angle_diff
@@ -84,9 +148,9 @@ def quat_angle_diff(quat1, quat2):
 
     Parameters
     ----------
-    quat1 : ndarray (4, N)
+    quat1 : ndarray (4,) or (4, N)
         quaternion one
-    quat2 : ndarray (4, N)
+    quat2 : ndarray (4,) or (4, N)
         quaternion two
 
     Returns
@@ -113,12 +177,12 @@ def quat_angle_diff(quat1, quat2):
     Examples
     --------
 
-    >>> from dstauffman import qrot, quat_mult, quat_angle_diff, concat_vectors
+    >>> from dstauffman import qrot, quat_mult, quat_angle_diff
     >>> import numpy as np
-    >>> quat1  = np.array([0.5, 0.5, 0.5, 0.5])
+    >>> quat1 = np.array([0.5, 0.5, 0.5, 0.5])
     >>> dq1 = qrot(1, 0.001)
     >>> dq2 = qrot(2, 0.05)
-    >>> quat2  = concat_vectors(quat_mult(dq1,quat1), quat_mult(dq2,quat1))
+    >>> quat2 = np.column_stack((quat_mult(dq1,quat1), quat_mult(dq2,quat1)))
     >>> (theta, comp) = quat_angle_diff(quat1, quat2)
     >>> print(theta) # doctest: +NORMALIZE_WHITESPACE
     [ 0.001  0.05 ]
@@ -128,11 +192,18 @@ def quat_angle_diff(quat1, quat2):
      [ 0.     0.   ]]
 
     """
+    # check assertions
+    _quat_assertions(quat1)
+    _quat_assertions(quat2)
+
     # calculate delta quaternion
     dq = quat_mult(quat2, quat_inv(quat1))
 
     # pull vector components out of delta quaternion
-    dv = dq[0:3, :]
+    if dq.ndim == 1:
+        dv = dq[0:3]
+    else:
+        dv = dq[0:3, :]
 
     # sum vector components to get sin(theta/2)^2
     mag2 = np.sum(dv**2, axis=0)
@@ -148,7 +219,11 @@ def quat_angle_diff(quat1, quat2):
 
     # set any magnitude that is identically 0 to be 1 instead
     # to avoid a divide by zero warning.
-    mag[mag == 0] = 1
+    if np.isscalar(mag):
+        if mag == 0:
+            mag = 1
+    else:
+        mag[mag == 0] = 1
 
     # normalize vector components
     nv = dv / mag
@@ -179,7 +254,7 @@ def quat_from_euler(angles, seq=np.array([3, 1, 2])):
 
     Returns
     -------
-    quat : ndarray (4, N)
+    quat : ndarray (4,) or (4, N)
         quaternion representing the euler rotation(s)
 
     Notes
@@ -193,11 +268,11 @@ def quat_from_euler(angles, seq=np.array([3, 1, 2])):
     Examples
     --------
 
-    >>> from dstauffman import quat_from_euler, concat_vectors
+    >>> from dstauffman import quat_from_euler
     >>> import numpy as np
     >>> a   = np.array([0.01, 0.02, 0.03])
     >>> b   = np.array([0.04, 0.05, 0.06])
-    >>> angles = concat_vectors(a, b)
+    >>> angles = np.column_stack((a, b))
     >>> seq = np.array([3, 2, 1])
     >>> quat = quat_from_euler(angles, seq)
     >>> print(quat) # doctest: +NORMALIZE_WHITESPACE
@@ -210,7 +285,7 @@ def quat_from_euler(angles, seq=np.array([3, 1, 2])):
     # get number of angles
     num = angles.shape[1] # TODO: can be vector?
     # initialize output
-    quat = np.zeros((4, num))
+    quat = np.zeros((QUAT_SIZE, num))
     # loop through quaternions
     for i in range(num):
         q_temp = np.array([0, 0, 0, 1])
@@ -252,22 +327,29 @@ def quat_interp(time, quat, ti, inclusive=True):
     >>> from dstauffman import quat_interp
     >>> import numpy as np
     >>> time  = np.array([1, 3, 5])
-    >>> quat  = np.array([[0, 0, 0, 1], [0, 0, 0.1961, 0.9806], [0.5, -0.5, -0.5, 0.5]]).T
+    >>> quat  = np.array([[0, 0, 0, 1], [0, 0, 0.19611951356252125, 0.98058], [0.5, -0.5, -0.5, 0.5]]).T
     >>> ti = np.array([1, 2, 4.5, 5])
     >>> qout = quat_interp(time, quat, ti)
     >>> print(qout) # doctest: +NORMALIZE_WHITESPACE
-    [[ 0. 0.          0.41748298  0.5 ]
-     [ 0. 0.         -0.41748298 -0.5 ]
-     [ 0. 0.09852786 -0.35612893 -0.5 ]
-     [ 1. 0.99513429  0.72428455  0.5 ]]
+    [[ 0. 0.          0.41748421  0.5 ]
+     [ 0. 0.         -0.41748421 -0.5 ]
+     [ 0. 0.09853933 -0.35612271 -0.5 ]
+     [ 1. 0.99513316  0.72428619  0.5 ]]
 
     """
     # Initializations
     # number of data points to find
-    num   = len(ti)
+    try:
+        num   = len(ti)
+    except TypeError:
+        if np.isscalar(ti):
+            ti = np.array([ti])
+            num = len(ti)
+        else: # pragma: no cover
+            raise
 
     # initialize output
-    qout  = np.empty((4, num))
+    qout  = np.empty((QUAT_SIZE, num))
     qout.fill(np.nan)
 
     # Simple cases
@@ -358,12 +440,12 @@ def quat_inv(q1):
 
     Parameters
     ----------
-    q1 : ndarray, (4xN)
+    q1 : ndarray, (4,) or (4, N)
         input quaternion
 
     Returns
     -------
-    q2 : ndarray, (4xN)
+    q2 : ndarray, (4,) or (4, N)
         inverse quaterion
 
     See Also
@@ -386,30 +468,37 @@ def quat_inv(q1):
     [-0.70710678 -0. -0. 0.70710678]
 
     """
+    # check for empty case
+    if q1.size == 0:
+        q2 = np.zeros(q1.shape)
+        return q2
+    # size check
+    _quat_assertions(q1)
     # invert the quaternions
     if q1.ndim == 1:
         # optimized single quaternion case
         q2 = q1 * np.array([-1, -1, -1, 1])
     else:
         # general case
-        q2 = np.concatenate((-q1[0, :], -q1[1, :], -q1[2, :], q1[3, :]), axis=0).reshape(4, q1.shape[1])
+        q2 = np.concatenate((-q1[0, :], -q1[1, :], -q1[2, :], q1[3, :]), axis=0).reshape(QUAT_SIZE, q1.shape[1])
+    _quat_assertions(q2)
     return q2
 
 #%% Functions - quat_mult
-def quat_mult(a, b):
+def quat_mult(a, b, renorm=True):
     r"""
     Multiplies quaternions together.
 
     Parameters
     ----------
-    a : ndarray, (4xN)
+    a : ndarray, (4,) or (4, N)
         input quaternion one
-    b : ndarray, (4xN)
+    b : ndarray, (4,) or (4, N)
         input quaternion two
 
     Returns
     -------
-    c : ndarray, (4xN)
+    c : ndarray, (4,) or (4, N)
         result of quaternion multiplication
 
     See Also
@@ -421,11 +510,11 @@ def quat_mult(a, b):
     -----
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
 
-    #.  Each of (a, b) may be either a single quaternion (4, 1) or an array of quaternions (4, N).
+    #.  Each of (a, b) may be either a single quaternion (4,) or an array of quaternions (4, N).
         If `a` and `b` are both single quaternions, then return b*a. If either (but not both) is
         an array of quaternions, then return the product of the single quaternion times each element
         of the array. If both are rows of quaternions, multiply corresponding columns.
-        `c` will have size (4, 1) in the first case, and (4, N) in the other cases.
+        `c` will have size (4,) in the first case, and (4, N) in the other cases.
 
     #.  The quaternions `a` and `b` describe successive reference frame changes, i.e., a is
         expressed in the coordinate system resulting from b, not in the original coordinate system.
@@ -444,41 +533,57 @@ def quat_mult(a, b):
 
     """
     # check for vectorized inputs
-    na = a.size
-    nb = b.size
+    is_single_a = a.ndim == 1 and a.size == QUAT_SIZE
+    is_single_b = b.ndim == 1 and b.size == QUAT_SIZE
+    # check for null case
+    if a.size * b.size == 0:
+        if min(a.shape[0], b.shape[0]) == 0:
+            c = np.array([])
+        else:
+            if a.size == 0:
+                c = np.zeros(a.shape)
+            else:
+                c = np.zeros(b.shape)
+        _quat_assertions(c)
+        return c
     # single quaternion inputs case
-    if (na==4) & (nb==4):
+    if is_single_a and is_single_b:
         c = np.array([ \
             [ a[3],  a[2], -a[1],  a[0]], \
             [-a[2],  a[3],  a[0],  a[1]], \
             [ a[1], -a[0],  a[3],  a[2]], \
             [-a[0], -a[1], -a[2],  a[3]]]).dot(b[:, np.newaxis]) # TODO: replace w/ @ in Python 3.5
+        # flatten back to a 1D vector
+        c = c.flatten()
         # enforce positive scalar component
         if c[3] < 0:
             c = -c
     # vectorized inputs
     else:
-        if a.ndim == 1:
+        # make A and B both 2D arrays
+        if is_single_a:
             a = a[:, np.newaxis]
+        if is_single_b:
+            b = b[:, np.newaxis]
+        # alias the rows
         a1 = a[0, :]
         a2 = a[1, :]
         a3 = a[2, :]
         a4 = a[3, :]
-        if b.ndim == 1:
-            b = b[:, np.newaxis]
         b1 = b[0, :]
         b2 = b[1, :]
         b3 = b[2, :]
         b4 = b[3, :]
+        # compute the combine multiplication result
         c = np.array([ \
              b1*a4 + b2*a3 - b3*a2 + b4*a1, \
             -b1*a3 + b2*a4 + b3*a1 + b4*a2, \
              b1*a2 - b2*a1 + b3*a4 + b4*a3, \
             -b1*a1 - b2*a2 - b3*a3 + b4*a4])
-
+        # enforce positive scalar component
         c[:, c[3, :]<0] = -c[:, c[3, :]<0]
-    if c.shape[1] == 1:
-        c = c.flatten()
+    c = quat_norm(c)
+    _quat_assertions(c)
     return c
 
 #%% Functions - quat_norm
@@ -517,6 +622,7 @@ def quat_norm(x):
     """
     # divide input by its column vector norm
     y = x / np.sqrt(np.sum(x*x, axis=0))
+    _quat_assertions(y)
     return y
 
 #%% Functions - quat_prop
@@ -570,6 +676,7 @@ def quat_prop(quat, delta_ang, renorm=True):
     # renormalize and return
     if renorm:
         quat_new = quat_norm(quat_new)
+    _quat_assertions(quat_new)
     return quat_new
 
 #%% Functions - quat_times_vector
@@ -579,14 +686,14 @@ def quat_times_vector(quat, v):
 
     Parameters
     ----------
-    quat : ndarray, (4, N) or (4, )
+    quat : ndarray, (4,) or (4, N)
         quaternion(s)
-    v : ndarray, (3, N) or (3 ,)
+    v : ndarray, (3,) or (3, N)
         input vector(s)
 
     Returns
     -------
-    vec : ndarray, (3, N)
+    vec : ndarray, (3,) or (3, N)
         product vector(s)
 
     See Also
@@ -691,7 +798,7 @@ def quat_to_euler(quat,seq):
 
     Parameters
     ----------
-    quat : ndarray, (4, N)
+    quat : ndarray, (4,) or (4, N)
         quaternion
     seq : ndarray, {(3, 1, 2), (1, 2, 3), (2, 3, 1), (1, 3, 2), (2, 1, 3), (3, 2, 1)}
         euler angle sequence, where:
@@ -834,17 +941,6 @@ def quat_to_euler(quat,seq):
         # Store output
         euler[:,i] = np.array([theta1, theta2, theta3])
     return euler
-
-def concat_vectors(v1, v2):
-    r"""
-    Concatenate two vectors as if they were column vectors.
-
-    Notes
-    -----
-    #.  TODO:Assumes 'C' vectors as opposed to 'F' vectors?
-    """
-    out = np.concatenate((v1, v2)).reshape(2, len(v1)).T
-    return out
 
 #%% Unit test
 if __name__ == '__main__':

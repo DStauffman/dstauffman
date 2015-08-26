@@ -18,7 +18,7 @@ import dstauffman as dcs
 class Test_all_values(unittest.TestCase):
 
     def setUp(self):
-        self.ints = ['MONTHS_PER_YEAR', 'INT_TOKEN']
+        self.ints = ['MONTHS_PER_YEAR', 'INT_TOKEN', 'QUAT_SIZE']
         self.strs = ['DEFAULT_COLORMAP', 'spyder_custom_colors']
 
     def test_values(self):

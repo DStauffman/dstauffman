@@ -10,7 +10,7 @@ Notes
 
 #%% Imports
 from .classes   import frozen, Frozen
-from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, spyder_custom_colors
+from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, spyder_custom_colors
 from .enums     import IntEnumPlus, dist_enum_and_mons
 from .plotting  import Opts, MyCustomToolbar, ColorMap, plot_time_history, \
                            plot_correlation_matrix, storefig, titleprefix, disp_xlimits, \
@@ -18,8 +18,7 @@ from .plotting  import Opts, MyCustomToolbar, ColorMap, plot_time_history, \
 from .photos    import find_missing_nums, find_unexpected_ext, rename_old_picasa_files, \
                            rename_upper_ext, find_long_filenames, batch_resize, convert_tif_to_jpg
 from .quat      import qrot, quat_angle_diff, quat_from_euler, quat_interp, quat_inv, quat_mult, \
-                       quat_norm, quat_prop, quat_times_vector, quat_to_dcm, quat_to_euler, \
-                       concat_vectors
+                       quat_norm, quat_prop, quat_times_vector, quat_to_dcm, quat_to_euler
 from .utils     import rms, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
                            make_python_init, get_python_definitions, read_text_file, \
                            write_text_file, disp, convert_annual_to_monthly_probability, \
