@@ -18,7 +18,6 @@ import os
 from PIL import Image
 import unittest
 from dstauffman.utils     import setup_dir
-from dstauffman.constants import INT_TOKEN
 
 #%% Local Constants
 ALLOWABLE_EXTENSIONS = frozenset(['.jpg', '.ini', '.png', '.gif'])
@@ -314,8 +313,8 @@ def find_long_filenames(folder):
     print('Done.')
 
 #%% Functions - batch_resize
-def batch_resize(folder, max_width=INT_TOKEN, max_height=INT_TOKEN, \
-        process_extensions=PROCESS_EXTENSIONS):
+def batch_resize(folder, max_width=8192, max_height=8192, \
+        process_extensions=PROCESS_EXTENSIONS, enlarge=False):
     r"""
     Resize the specified folder of images to the given max width and height.
 
@@ -329,10 +328,13 @@ def batch_resize(folder, max_width=INT_TOKEN, max_height=INT_TOKEN, \
         Maximum height for the resized photo
     process_extensions : set of str, optional
         List of extensions to be processed within the folder
+    enlarge : bool
+        Enlarge smaller images to the max size (True), or only shrink large ones (False)
 
     Notes
     -----
     #.  Written by David C. Stauffer in December 2013.
+    #.  Updated to optionally not enlarge small images by David C. Stauffer in August 2015.
 
     Examples
     --------
@@ -341,33 +343,27 @@ def batch_resize(folder, max_width=INT_TOKEN, max_height=INT_TOKEN, \
     >>> folder = get_data_dir()
     >>> batch_resize(folder, max_width=2048, max_height=2048) # doctest: +ELLIPSIS
     Processing folder: "..."
-     Skipping file: "..."
+     Skipping file   : "..."
     Batch processing complete.
 
     """
-    # We have to make sure that all of the arguments were passed.
-    if max_width == INT_TOKEN or max_height == INT_TOKEN or not folder:
-        print('Invalid arguments. You must overwrite all three options')
-        # If an argument is missing then return without doing anything
-        return
-
     # update status
     print('Processing folder: "{}"'.format(folder))
 
     # Iterate through every image given in the folder argument and resize it.
     for image in os.listdir(folder):
+        image_fullpath = os.path.join(folder, image)
         # check if valid image file
-        if os.path.isdir(image):
+        if os.path.isdir(image_fullpath):
             continue
         elif image[-4:] not in process_extensions:
-            print(' Skipping file: "{}"'.format(image))
+            print(' Skipping file   : "{}"'.format(image))
             continue
 
-        # Update status
-        print(' Resizing image: "{}"'.format(image))
-
-        # Open the image file.
-        img = Image.open(os.path.join(folder, image))
+        # Open and load the image file (slower, but file will always get opened in this routine).
+        with open(image_fullpath, 'rb') as file:
+            img = Image.open(file)
+            img.load()
 
         # Get current properties
         cur_width    = img.size[0]
@@ -385,32 +381,51 @@ def batch_resize(folder, max_width=INT_TOKEN, max_height=INT_TOKEN, \
         elif cal_width < max_width:
             new_width  = cal_width
             new_height = max_height
+        elif cal_height == max_height and cal_width == max_width:
+            new_width  = cal_width
+            new_height = cal_height
         else:
-            # need to shrink further
-            scale1 = cal_width/max_width
-            scale2 = cal_height/max_height
-            if scale1 >= scale2:
-                new_width  = cal_width  / scale1
-                new_height = max_height / scale1
-            else:
-                new_width  = max_width  / scale2
-                new_height = cal_height / scale2
+            raise ValueError("You shouldn't be able to get here, check out the logic and fix!") # pragma: no cover
 
+        # Assert that everything is as expected
+        assert new_width <= max_width, 'New width: "{}" is not <= max_width: "{}"'.format(new_width, max_width)
+        assert new_height <= max_height, 'New height: "{}" is not <= max_height: "{}"'.format(new_height, max_height)
+        temp = int(round(aspect_ratio * new_height))
+        assert temp-1 <= new_width <= temp+1, 'New width: "{}" gives wrong aspect ratio height: "{}"'.format(new_width, temp)
+        temp = int(round(new_width / aspect_ratio))
+        assert temp-1 <= new_height <= temp+1, 'New height: "{}" gives wrong aspect ratio width: "{}"'.format(new_height, temp)
+        assert new_width == max_width or new_height == max_height, 'New width: "{}" is not max_width: "{}" or new height "{}" is not max_height: "{}"'.format(new_width, max_width, new_height, max_height)
+
+        # Update status, with options for enlarging or not
+        status_msg = ' Resizing image  : "{}"'.format(image)
+        if new_width > cur_width or new_height > cur_height:
+            if not enlarge:
+                print(' Not enlarging   : "{}"'.format(image))
+                new_width  = cur_width
+                new_height = cur_height
+            else:
+                print(status_msg)
+        else:
+            print(status_msg)
 
         # Resize it.
-        img = img.resize((new_width, new_height), Image.ANTIALIAS)
+        new_img = img.resize((new_width, new_height), Image.ANTIALIAS)
 
         # Create the output folder if necessary
         if not os.path.isdir(os.path.join(folder, 'resized')):
             setup_dir(os.path.join(folder, 'resized'))
 
         # Save it back to disk.
-        img.save(os.path.join(folder, 'resized', image))
+        new_img.save(os.path.join(folder, 'resized', image))
+
+        # Close objects
+        img.close()
+        new_img.close()
 
     print('Batch processing complete.')
 
 #%% Functions - convert_tif_to_jpg
-def convert_tif_to_jpg(folder, replace=False):
+def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, enlarge=False):
     r"""
     Converts *.tif images into *.jpg images.
 
@@ -418,8 +433,14 @@ def convert_tif_to_jpg(folder, replace=False):
     ----------
     folder : str
         Name of the folder to process
+    max_width : int
+        Maximum width for the resized photo
+    max_height : int
+        Maximum height for the resized photo
     replace : bool, optional
         Set to True to replace any existing *.jpg files
+    enlarge : bool
+        Enlarge smaller images to the max size (True), or only shrink large ones (False)
 
     Examples
     --------
@@ -428,41 +449,35 @@ def convert_tif_to_jpg(folder, replace=False):
     >>> folder = get_data_dir()
     >>> convert_tif_to_jpg(folder) #doctest: +ELLIPSIS
     Processing folder: "..."
-     Skipping file: "..."
+     Skipping file   : "..."
     Batch processing complete.
 
     """
     # update status
     print('Processing folder: "{}"'.format(folder))
 
-    max_height = 2048
-    max_width  = 2048
-
     # Iterate through every image given in the folder argument and resize it.
     for image in os.listdir(folder):
-
+        image_fullpath = os.path.join(folder, image)
         # check if valid image tif file
-        if os.path.isdir(image):
+        if os.path.isdir(image_fullpath):
             continue
-        if image.startswith('.'):
-            continue
-        elif image.split('.')[-1] not in {'tif','tiff'}:
-            print(' Skipping file: "{}"'.format(image))
+        elif image_fullpath.split('.')[-1] not in {'tif','tiff'}:
+            print(' Skipping file   : "{}"'.format(image))
             continue
 
         # get new name (handles *.tiff or *.tif)
-        new_name = '.'.join(image.split('.')[:-1]) + '.jpg'
+        new_name = '.'.join(image_fullpath.split('.')[:-1]) + '.jpg'
 
         # determine if the file already exists
-        if os.path.isfile(os.path.join(folder, new_name)) and not replace:
+        if os.path.isfile(new_name) and not replace:
             print(' Skipping due to pre-existing jpg file: "{}"'.format(image))
             continue
 
-        # Update status
-        print(' Saving image: "{}" as "{}"'.format(image, new_name))
-
-        # Open the image file.
-        img = Image.open(os.path.join(folder, image))
+        # Open and load the image file (slower, but file will always get opened in this routine).
+        with open(image_fullpath, 'rb') as file:
+            img = Image.open(file)
+            img.load()
 
         # Get current properties
         cur_width    = img.size[0]
@@ -480,23 +495,43 @@ def convert_tif_to_jpg(folder, replace=False):
         elif cal_width < max_width:
             new_width  = cal_width
             new_height = max_height
+        elif cal_height == max_height and cal_width == max_width:
+            new_width  = cal_width
+            new_height = cal_height
         else:
-            # need to shrink further
-            scale1 = cal_width/max_width
-            scale2 = cal_height/max_height
-            if scale1 >= scale2:
-                new_width  = cal_width  / scale1
-                new_height = max_height / scale1
+            raise ValueError("You shouldn't be able to get here, check out the logic and fix!") # pragma: no cover
+
+        # Assert that everything is as expected
+        assert new_width <= max_width, 'New width: "{}" is not <= max_width: "{}"'.format(new_width, max_width)
+        assert new_height <= max_height, 'New height: "{}" is not <= max_height: "{}"'.format(new_height, max_height)
+        temp = int(round(aspect_ratio * new_height))
+        assert temp-1 <= new_width <= temp+1, 'New width: "{}" gives wrong aspect ratio height: "{}"'.format(new_width, temp)
+        temp = int(round(new_width / aspect_ratio))
+        assert temp-1 <= new_height <= temp+1, 'New height: "{}" gives wrong aspect ratio width: "{}"'.format(new_height, temp)
+        assert new_width == max_width or new_height == max_height, 'New width: "{}" is not max_width: "{}" or new height "{}" is not max_height: "{}"'.format(new_width, max_width, new_height, max_height)
+
+        # Update status, with options for enlarging or not
+        status_msg = ' Saving image    : "{}"'.format(new_name)
+        if new_width > cur_width or new_height > cur_height:
+            if not enlarge:
+                print(' Saving (not enlarging) : "{}"'.format(new_name))
+                new_width  = cur_width
+                new_height = cur_height
             else:
-                new_width  = max_width  / scale2
-                new_height = cal_height / scale2
+                print(status_msg)
+        else:
+            print(status_msg)
 
         # Resize it.
-        img = img.resize((new_width, new_height), Image.ANTIALIAS)
+        new_img = img.resize((new_width, new_height), Image.ANTIALIAS)
 
         # Save it back to disk.
-        img.save(os.path.join(folder, new_name), "JPEG", quality=80)
-        #img.save(os.path.join(folder, new_name.replace('.jpg','.png')), compress_level=9)
+        new_img.save(new_name, "JPEG", quality=80)
+        #img.save(new_name.replace('.jpg','.png'), compress_level=9)
+
+        # Close objects
+        img.close()
+        new_img.close()
 
     print('Batch processing complete.')
 

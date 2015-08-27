@@ -12,6 +12,7 @@ Notes
 from __future__ import print_function
 from __future__ import division
 import os
+from PIL import Image
 import unittest
 import dstauffman as dcs
 
@@ -50,7 +51,7 @@ class Test_find_missing_nums(unittest.TestCase):
         self.assertTrue(lines[0].startswith('Old Picasa file: "'))
         self.assertTrue(lines[1].startswith('Weird numbering: "'))
         self.assertTrue(lines[2].startswith('Missing: "'))
-        self.assertTrue(lines[2].endswith('": {3, 5}'))
+        self.assertTrue(lines[2].endswith('": {3, 5}') or lines[2].endswith('": set([3, 5])'))
         self.assertTrue(lines[3].startswith('Inconsistent digits: "'))
         self.assertTrue(lines[4].startswith('No number found: "'))
 
@@ -63,7 +64,7 @@ class Test_find_missing_nums(unittest.TestCase):
         self.assertTrue(lines[0].startswith('Old Picasa file: "'))
         self.assertTrue(lines[1].startswith('Weird numbering: "'))
         self.assertTrue(lines[2].startswith('Missing: "'))
-        self.assertTrue(lines[2].endswith('": {3, 5}'))
+        self.assertTrue(lines[2].endswith('": {3, 5}') or lines[2].endswith('": set([3, 5])'))
         self.assertTrue(lines[3].startswith('Inconsistent digits: "'))
         self.assertTrue(len(lines) < 5)
 
@@ -76,7 +77,7 @@ class Test_find_missing_nums(unittest.TestCase):
         self.assertTrue(lines[0].startswith('Old Picasa file: "'))
         self.assertTrue(lines[1].startswith('Weird numbering: "'))
         self.assertTrue(lines[2].startswith('Missing: "'))
-        self.assertTrue(lines[2].endswith('": {3, 5}'))
+        self.assertTrue(lines[2].endswith('": {3, 5}') or lines[2].endswith('": set([3, 5])'))
         self.assertFalse(lines[3].startswith('Inconsistent digits: "'))
 
     def test_nothing_missing(self):
@@ -182,44 +183,426 @@ class Test_batch_resize(unittest.TestCase):
     r"""
     Tests the batch_resize function with the following cases:
         Nominal Usage
-        Bad inputs
+        No images
+        No upscale
+        With upscale
     """
-    def setUp(self):
-        self.folder = dcs.get_tests_dir()
-        self.max_width  = 2048
-        self.max_height = 2048
+    @classmethod
+    def setUpClass(cls):
+        cls.source = os.path.join(dcs.get_images_dir(), 'close_all.png')
+        cls.name1  = 'image1.jpg'
+        cls.name2  = 'image2.jpg'
+        cls.name3  = 'image3.jpg'
+        cls.name4  = 'image4.jpg'
+        cls.name5  = 'image5.jpg'
+        cls.name6  = 'image6.jpeg'
+        cls.folder = os.path.join(dcs.get_tests_dir(), 'images')
+        cls.extra  = os.path.join(cls.folder, 'extra')
+        cls.size1  = 128
+        cls.size2  = 96
+        cls.size3  = 32
+        cls.size4  = 128*2
+        cls.size5  = 96*2
+        cls.size6  = 4
+        cls.output = os.path.join(cls.folder, 'resized')
+        with dcs.capture_output():
+            dcs.setup_dir(cls.folder)
+            dcs.setup_dir(cls.extra)
+        with open(cls.source, 'rb') as file:
+            img = Image.open(file)
+            img.load()
+        new_img = img.resize((cls.size1, cls.size1), Image.ANTIALIAS)
+        new_img.save(os.path.join(cls.folder, cls.name1))
+        new_img.save(os.path.join(cls.folder, cls.name6))
+        new_img.close()
+        new_img = img.resize((cls.size2, cls.size1), Image.ANTIALIAS)
+        new_img.save(os.path.join(cls.folder, cls.name2))
+        new_img.close()
+        new_img = img.resize((cls.size1, cls.size2), Image.ANTIALIAS)
+        new_img.save(os.path.join(cls.folder, cls.name3))
+        new_img.close()
+        new_img = img.resize((cls.size1, cls.size6), Image.ANTIALIAS)
+        new_img.save(os.path.join(cls.folder, cls.name4))
+        new_img.close()
+        new_img = img.resize((cls.size6, cls.size1), Image.ANTIALIAS)
+        new_img.save(os.path.join(cls.folder, cls.name5))
+        new_img.close()
+        img.close()
 
-    def test_nominal(self):
+    def test_resize(self):
         with dcs.capture_output() as (out, _):
-            dcs.batch_resize(self.folder, self.max_width, self.max_height)
+            dcs.batch_resize(self.folder, self.size3, self.size3)
         output = out.getvalue().strip()
         out.close()
+        lines = output.split('\n')
         self.assertTrue(output.startswith('Processing folder: "'))
         self.assertTrue(output.endswith('Batch processing complete.'))
+        for this_line in lines:
+            if this_line.startswith(' Resizing image  : "'):
+                break
+        else:
+            self.assertTrue(False,'No images were resized.')
+        for this_line in lines:
+            if this_line.startswith(' Skipping file   : "{}"'.format(self.name6)):
+                break
+        else:
+            self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
+        try:
+            img = Image.open(os.path.join(self.output, self.name1))
+            self.assertEqual(img.size[0], self.size3)
+            self.assertEqual(img.size[1], self.size3)
+            img.close()
+            fact = self.size2 / self.size1
+            img = Image.open(os.path.join(self.output, self.name2))
+            self.assertEqual(img.size[0], int(self.size3*fact))
+            self.assertEqual(img.size[1], self.size3)
+            img.close()
+            img = Image.open(os.path.join(self.output, self.name3))
+            self.assertEqual(img.size[0], self.size3)
+            self.assertEqual(img.size[1], int(self.size3*fact))
+            img.close()
+            img = Image.open(os.path.join(self.output, self.name4))
+            self.assertEqual(img.size[0], self.size3)
+            self.assertEqual(img.size[1], self.size6//4)
+            img.close()
+            img = Image.open(os.path.join(self.output, self.name5))
+            self.assertEqual(img.size[0], self.size6//4)
+            self.assertEqual(img.size[1], self.size3)
+            img.close()
+        except:
+            img.close()
+            raise
 
-    def test_bad_inputs(self):
+    def test_no_images(self):
         with dcs.capture_output() as (out, _):
-            dcs.batch_resize(self.folder)
+            dcs.batch_resize(dcs.get_data_dir())
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'Invalid arguments. You must overwrite all three options')
+        lines = output.split('\n')
+        self.assertTrue(output.startswith('Processing folder: "'))
+        self.assertTrue(output.endswith('Batch processing complete.'))
+        for this_line in lines:
+            self.assertFalse(this_line.startswith(' Resizing image'))
+
+    def test_no_upscale(self):
+        with dcs.capture_output() as (out, _):
+            dcs.batch_resize(self.folder, max_width=self.size4, max_height=self.size4, enlarge=False)
+        output = out.getvalue().strip()
+        out.close()
+        lines = output.split('\n')
+        self.assertTrue(output.startswith('Processing folder: "'))
+        self.assertTrue(output.endswith('Batch processing complete.'))
+        for this_line in lines:
+            if this_line.startswith(' Not enlarging'):
+                break
+        else:
+            self.assertTrue(False,'No images were resized.')
+        for this_line in lines:
+            if this_line.startswith(' Skipping file   : "{}"'.format(self.name6)):
+                break
+        else:
+            self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
+        try:
+            img = Image.open(os.path.join(self.output, self.name1))
+            self.assertEqual(img.size[0], self.size1)
+            self.assertEqual(img.size[1], self.size1)
+            img.close()
+            img = Image.open(os.path.join(self.output, self.name2))
+            self.assertEqual(img.size[0], self.size2)
+            self.assertEqual(img.size[1], self.size1)
+            img.close()
+            img = Image.open(os.path.join(self.output, self.name3))
+            self.assertEqual(img.size[0], self.size1)
+            self.assertEqual(img.size[1], self.size2)
+            img.close()
+            img = Image.open(os.path.join(self.output, self.name4))
+            self.assertEqual(img.size[0], self.size1)
+            self.assertEqual(img.size[1], self.size6)
+            img.close()
+            img = Image.open(os.path.join(self.output, self.name5))
+            self.assertEqual(img.size[0], self.size6)
+            self.assertEqual(img.size[1], self.size1)
+            img.close()
+        except:
+            img.close()
+            raise
+
+    def test_upscale(self):
+        with dcs.capture_output() as (out, _):
+            dcs.batch_resize(self.folder, max_width=self.size4, max_height=self.size4, enlarge=True)
+        output = out.getvalue().strip()
+        out.close()
+        lines = output.split('\n')
+        self.assertTrue(output.startswith('Processing folder: "'))
+        self.assertTrue(output.endswith('Batch processing complete.'))
+        for this_line in lines:
+            if this_line.startswith(' Resizing image'):
+                break
+        else:
+            self.assertTrue(False,'No images were resized.')
+        for this_line in lines:
+            if this_line.startswith(' Skipping file   : "{}"'.format(self.name6)):
+                break
+        else:
+            self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
+        try:
+            img = Image.open(os.path.join(self.output, self.name1))
+            self.assertEqual(img.size[0], self.size4)
+            self.assertEqual(img.size[1], self.size4)
+            img.close()
+            fact = self.size2 / self.size1
+            img = Image.open(os.path.join(self.output, self.name2))
+            self.assertEqual(img.size[0], int(self.size4*fact))
+            self.assertEqual(img.size[1], self.size4)
+            img.close()
+            img = Image.open(os.path.join(self.output, self.name3))
+            self.assertEqual(img.size[0], self.size4)
+            self.assertEqual(img.size[1], int(self.size4*fact))
+            img.close()
+            img = Image.open(os.path.join(self.output, self.name4))
+            self.assertEqual(img.size[0], self.size4)
+            self.assertEqual(img.size[1], self.size6*2)
+            img.close()
+            img = Image.open(os.path.join(self.output, self.name5))
+            self.assertEqual(img.size[0], self.size6*2)
+            self.assertEqual(img.size[1], self.size4)
+            img.close()
+        except:
+            img.close()
+            raise
+
+    @classmethod
+    def tearDownClass(cls):
+        if os.path.isdir(cls.extra):
+            os.rmdir(cls.extra)
+        if os.path.isdir(cls.output):
+            with dcs.capture_output():
+                dcs.setup_dir(cls.output)
+            os.rmdir(cls.output)
+        if os.path.isdir(cls.folder):
+            with dcs.capture_output():
+                dcs.setup_dir(cls.folder)
+            os.rmdir(cls.folder)
 
 # convert_tif_to_jpg
 class Test_convert_tif_to_jpg(unittest.TestCase):
     r"""
     Tests the convert_tif_to_jpg function with the following cases:
         Nominal Usage
+        No images
+        No upscale
+        With upscale
     """
-    def setUp(self):
-        self.folder = dcs.get_tests_dir()
+    @classmethod
+    def setUpClass(cls):
+        cls.source = os.path.join(dcs.get_images_dir(), 'close_all.png')
+        cls.name1  = 'image1.tif'
+        cls.name2  = 'image2.tif'
+        cls.name3  = 'image3.tif'
+        cls.name4  = 'image4.tif'
+        cls.name5  = 'image5.tif'
+        cls.name6  = 'image6.jpeg'
+        cls.folder = os.path.join(dcs.get_tests_dir(), 'images')
+        cls.extra  = os.path.join(cls.folder, 'extra')
+        cls.size1  = 128
+        cls.size2  = 96
+        cls.size3  = 32
+        cls.size4  = 128*2
+        cls.size5  = 96*2
+        cls.size6  = 4
+        with dcs.capture_output():
+            dcs.setup_dir(cls.folder)
+            dcs.setup_dir(cls.extra)
+        with open(cls.source, 'rb') as file:
+            img = Image.open(file)
+            img.load()
+        new_img = img.resize((cls.size1, cls.size1), Image.ANTIALIAS)
+        new_img.save(os.path.join(cls.folder, cls.name1))
+        new_img.save(os.path.join(cls.folder, cls.name6))
+        new_img.close()
+        new_img = img.resize((cls.size2, cls.size1), Image.ANTIALIAS)
+        new_img.save(os.path.join(cls.folder, cls.name2))
+        new_img.close()
+        new_img = img.resize((cls.size1, cls.size2), Image.ANTIALIAS)
+        new_img.save(os.path.join(cls.folder, cls.name3))
+        new_img.close()
+        new_img = img.resize((cls.size1, cls.size6), Image.ANTIALIAS)
+        new_img.save(os.path.join(cls.folder, cls.name4))
+        new_img.close()
+        new_img = img.resize((cls.size6, cls.size1), Image.ANTIALIAS)
+        new_img.save(os.path.join(cls.folder, cls.name5))
+        new_img.close()
+        img.close()
 
-    def test_nominal(self):
+    def test_resize(self):
         with dcs.capture_output() as (out, _):
-            dcs.convert_tif_to_jpg(self.folder)
+            dcs.convert_tif_to_jpg(self.folder, self.size3, self.size3, replace=True)
         output = out.getvalue().strip()
         out.close()
+        lines = output.split('\n')
         self.assertTrue(output.startswith('Processing folder: "'))
         self.assertTrue(output.endswith('Batch processing complete.'))
+        for this_line in lines:
+            if this_line.startswith(' Saving image    : "'):
+                break
+        else:
+            self.assertTrue(False,'No images were saved.')
+        for this_line in lines:
+            if this_line.startswith(' Skipping file   : "{}"'.format(self.name6)):
+                break
+        else:
+            self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
+        try:
+            img = Image.open(os.path.join(self.folder, self.name1.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size3)
+            self.assertEqual(img.size[1], self.size3)
+            img.close()
+            fact = self.size2 / self.size1
+            img = Image.open(os.path.join(self.folder, self.name2.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], int(self.size3*fact))
+            self.assertEqual(img.size[1], self.size3)
+            img.close()
+            img = Image.open(os.path.join(self.folder, self.name3.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size3)
+            self.assertEqual(img.size[1], int(self.size3*fact))
+            img.close()
+            img = Image.open(os.path.join(self.folder, self.name4.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size3)
+            self.assertEqual(img.size[1], self.size6//4)
+            img.close()
+            img = Image.open(os.path.join(self.folder, self.name5.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size6//4)
+            self.assertEqual(img.size[1], self.size3)
+            img.close()
+        except:
+            img.close()
+            raise
+
+    def test_no_images(self):
+        with dcs.capture_output() as (out, _):
+            dcs.convert_tif_to_jpg(dcs.get_data_dir())
+        output = out.getvalue().strip()
+        out.close()
+        lines = output.split('\n')
+        self.assertTrue(output.startswith('Processing folder: "'))
+        self.assertTrue(output.endswith('Batch processing complete.'))
+        for this_line in lines:
+            self.assertFalse(this_line.startswith(' Resizing image'))
+
+    def test_no_upscale(self):
+        with dcs.capture_output() as (out, _):
+            dcs.convert_tif_to_jpg(self.folder, max_width=self.size4, max_height=self.size4, enlarge=False, replace=True)
+        output = out.getvalue().strip()
+        out.close()
+        lines = output.split('\n')
+        self.assertTrue(output.startswith('Processing folder: "'))
+        self.assertTrue(output.endswith('Batch processing complete.'))
+        for this_line in lines:
+            if this_line.startswith(' Saving (not enlarging'):
+                break
+        else:
+            self.assertTrue(False,'No images were resized.')
+        for this_line in lines:
+            if this_line.startswith(' Skipping file   : "{}"'.format(self.name6)):
+                break
+        else:
+            self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
+        try:
+            img = Image.open(os.path.join(self.folder, self.name1.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size1)
+            self.assertEqual(img.size[1], self.size1)
+            img.close()
+            img = Image.open(os.path.join(self.folder, self.name2.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size2)
+            self.assertEqual(img.size[1], self.size1)
+            img.close()
+            img = Image.open(os.path.join(self.folder, self.name3.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size1)
+            self.assertEqual(img.size[1], self.size2)
+            img.close()
+            img = Image.open(os.path.join(self.folder, self.name4.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size1)
+            self.assertEqual(img.size[1], self.size6)
+            img.close()
+            img = Image.open(os.path.join(self.folder, self.name5.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size6)
+            self.assertEqual(img.size[1], self.size1)
+            img.close()
+        except:
+            img.close()
+            raise
+
+    def test_upscale(self):
+        with dcs.capture_output() as (out, _):
+            dcs.convert_tif_to_jpg(self.folder, max_width=self.size4, max_height=self.size4, enlarge=True, replace=True)
+        output = out.getvalue().strip()
+        out.close()
+        lines = output.split('\n')
+        self.assertTrue(output.startswith('Processing folder: "'))
+        self.assertTrue(output.endswith('Batch processing complete.'))
+        for this_line in lines:
+            if this_line.startswith(' Saving image    : "'):
+                break
+        else:
+            self.assertTrue(False,'No images were saved.')
+        for this_line in lines:
+            if this_line.startswith(' Skipping file   : "{}"'.format(self.name6)):
+                break
+        else:
+            self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
+        try:
+            img = Image.open(os.path.join(self.folder, self.name1.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size4)
+            self.assertEqual(img.size[1], self.size4)
+            img.close()
+            fact = self.size2 / self.size1
+            img = Image.open(os.path.join(self.folder, self.name2.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], int(self.size4*fact))
+            self.assertEqual(img.size[1], self.size4)
+            img.close()
+            img = Image.open(os.path.join(self.folder, self.name3.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size4)
+            self.assertEqual(img.size[1], int(self.size4*fact))
+            img.close()
+            img = Image.open(os.path.join(self.folder, self.name4.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size4)
+            self.assertEqual(img.size[1], self.size6*2)
+            img.close()
+            img = Image.open(os.path.join(self.folder, self.name5.replace('.tif','.jpg')))
+            self.assertEqual(img.size[0], self.size6*2)
+            self.assertEqual(img.size[1], self.size4)
+            img.close()
+        except:
+            img.close()
+            raise
+
+    def test_noreplace(self):
+        with dcs.capture_output() as (out, _):
+            dcs.convert_tif_to_jpg(self.folder, self.size3, self.size3, replace=False)
+        output = out.getvalue().strip()
+        out.close()
+        lines = output.split('\n')
+        self.assertTrue(output.startswith('Processing folder: "'))
+        self.assertTrue(output.endswith('Batch processing complete.'))
+        for this_line in lines:
+            if this_line.startswith(' Skipping due to pre-existing jpg file: "'):
+                break
+        else:
+            self.assertTrue(False,'No images were skipped due to pre-existing ones.')
+        for this_line in lines:
+            if this_line.startswith(' Skipping file   : "{}"'.format(self.name6)):
+                break
+        else:
+            self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
+
+    @classmethod
+    def tearDownClass(cls):
+        if os.path.isdir(cls.extra):
+            os.rmdir(cls.extra)
+        if os.path.isdir(cls.folder):
+            with dcs.capture_output():
+                dcs.setup_dir(cls.folder)
+            os.rmdir(cls.folder)
 
 #%% Unit test execution
 if __name__ == '__main__':
