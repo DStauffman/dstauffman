@@ -64,7 +64,7 @@ class Test_IntEnumPlus(unittest.TestCase):
         np.testing.assert_array_equal(list_of_values, [1, 2, 10])
 
     def test_num_values(self):
-        num_values = _Example_Enum.num_values()
+        num_values = _Example_Enum.num_values
         self.assertEqual(num_values, 3)
 
     def test_bad_attribute(self):

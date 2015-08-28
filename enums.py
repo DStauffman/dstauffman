@@ -24,11 +24,9 @@ class _EnumMetaPlus(EnumMeta):
     Also makes the __getattr__ attribute error more explicit.
     """
     def __repr__(cls):
-        text = [repr(field) for field in cls]
-        return '\n'.join(text)
+        return '\n'.join((repr(field) for field in cls))
     def __str__(cls):
-        text = [str(field) for field in cls]
-        return '\n'.join(text)
+        return '\n'.join((str(field) for field in cls))
     def __getattr__(cls, name):
         r"""
         Return the enum member matching `name`.
@@ -45,17 +43,15 @@ class _EnumMetaPlus(EnumMeta):
         r"""
         Returns a list of all the names within the enumerator.
         """
-        output = re.findall(r"\.(.*):", str(self))
-        return output
+        return re.findall(r"\.(.*):", str(self))
     def list_of_values(self):
         r"""
-        Returns a list of all the names within the enumerator.
+        Returns a list of all the values within the enumerator.
         """
-        output = [int(x) for x in re.findall(r":\s(.*)\n", str(self)+'\n')]
-        return output
+        return [int(x) for x in re.findall(r":\s(.*)\n", str(self)+'\n')]
+    @property
     def num_values(self):
-        output = len(self.list_of_names())
-        return output
+        return len(self.list_of_names())
 
 @unique
 class IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
@@ -64,7 +60,6 @@ class IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
 
     Also forces all values to be unique.
     """
-    #__metaclass__ = _EnumMetaPlus
     def __str__(self):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
