@@ -16,6 +16,7 @@ from __future__ import division
 import doctest
 import os
 from PIL import Image
+import shutil
 import unittest
 from dstauffman.utils     import setup_dir
 
@@ -532,6 +533,73 @@ def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, e
         # Close objects
         img.close()
         new_img.close()
+
+    print('Batch processing complete.')
+
+#%% number_files
+def number_files(folder, prefix='Image ', start=1, digits=2, process_extensions=PROCESS_EXTENSIONS):
+    r"""
+    Numbers the files in the folder using the given prefix, starting value, and number of digits.
+
+    Parameters
+    ----------
+    folder : str
+        Name of the folder to process
+    prefix : str
+        Filename to use as prefix to each photo
+    start  : int
+        Number to use as start of counter, default is 1
+    digits : int
+        Number of digits to put in str, default is 2
+    process_extensions : set of str, optional
+        List of extensions to be processed within the folder
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in August 2015.
+
+    Examples
+    --------
+    >>> from dstauffman import number_files, get_data_dir
+    >>> folder = get_data_dir()
+    >>> prefix = 'Photo '
+    >>> start  = 5
+    >>> digits = 3
+    >>> number_files(folder, prefix, start, digits) # doctest: +ELLIPSIS
+    Processing folder: "..."
+     Skipping file   : "..."
+    Batch processing complete.
+
+    """
+    # update status
+    print('Processing folder: "{}"'.format(folder))
+
+    # initialize counter
+    counter = start
+
+    # build digits str command
+    dig_str = '{:0' + '{}'.format(digits) + 'd}'
+
+    # Iterate through every image given in the folder argument and resize it.
+    for image in sorted(os.listdir(folder)):
+        image_fullpath = os.path.join(folder, image)
+        file_ext = image[-4:]
+        # check if valid image file
+        if os.path.isdir(image_fullpath):
+            continue
+        elif file_ext not in process_extensions:
+            print(' Skipping file   : "{}"'.format(image))
+            continue
+
+        # create the new path
+        new_name = prefix + dig_str.format(counter) + file_ext
+
+        # rename the image
+        print(' Renaming : "{}" to "{}"'.format(image, new_name))
+        shutil.move(image_fullpath, os.path.join(folder, new_name))
+
+        # increment counter
+        counter = counter + 1
 
     print('Batch processing complete.')
 

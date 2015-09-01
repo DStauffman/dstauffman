@@ -531,9 +531,7 @@ class Test_setup_plots(unittest.TestCase):
         out.close()
         # remove file
         os.remove(this_filename)
-        text = r'Plots saved to <a href="C:\Users\dcstauff\Documents\GitHub\dstauffman\tests">' + \
-            r'C:\Users\dcstauff\Documents\GitHub\dstauffman\tests</a>'
-        self.assertEqual(output, text)
+        self.assertTrue(output.startswith('Plots saved to <a href="'))
 
     def tearDown(self):
         plt.close()
