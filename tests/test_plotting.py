@@ -486,9 +486,9 @@ class Test_setup_plots(unittest.TestCase):
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)
         plt.plot(x, y) # doctest: +ELLIPSIS
-        plt.title('X vs Y') #doctest: +ELLIPSIS
-        plt.xlabel('time [years]') #doctest: +SKIP
-        plt.ylabel('value [radians]') #doctest: +SKIP
+        plt.title('X vs Y') # doctest: +ELLIPSIS
+        plt.xlabel('time [years]') # doctest: +SKIP
+        plt.ylabel('value [radians]') # doctest: +SKIP
         plt.show(block=False)
         self.opts = dcs.Opts()
         self.opts.case_name = 'Testing'

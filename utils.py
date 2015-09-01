@@ -27,11 +27,11 @@ from dstauffman.constants import MONTHS_PER_YEAR
 # compatibility issues
 ver = sys.version_info
 if ver[0] == 2:
-    from io import BytesIO as StringIO #pragma: no cover
+    from io import BytesIO as StringIO # pragma: no cover
 elif ver[0] == 3:
-    from io import StringIO #pragma: no cover
+    from io import StringIO # pragma: no cover
 else:
-    raise('Unexpected Python version: "{}'.format(ver[0])) #pragma: no cover
+    raise('Unexpected Python version: "{}'.format(ver[0])) # pragma: no cover
 
 #%% Functions - _nan_equal
 def _nan_equal(a, b):
@@ -146,7 +146,7 @@ def setup_dir(folder, rec=False):
     --------
 
     >>> from dstauffman import setup_dir
-    >>> setup_dir(r'C:\Temp\test_folder') #doctest: +SKIP
+    >>> setup_dir(r'C:\Temp\test_folder') # doctest: +SKIP
 
     """
     if os.path.isdir(folder):
@@ -165,16 +165,16 @@ def setup_dir(folder, rec=False):
                 os.remove(this_full_elem)
             else:
                 raise RuntimeError('Unexpected file type, neither file nor folder: "{}".'\
-                    .format(this_full_elem)) #pragma: no cover
+                    .format(this_full_elem)) # pragma: no cover
         print('Files/Sub-folders were removed from: "' + folder + '"')
     else:
         # create directory if it does not exist
         try:
             os.makedirs(folder)
             print('Created directory: "' + folder + '"')
-        except: #pragma: no cover
+        except: # pragma: no cover
             # re-raise last exception, could try to handle differently in the future
-            raise #pragma: no cover
+            raise # pragma: no cover
 
 #%% Functions - compare_two_classes
 def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callables=True, compare_recursively=True):
@@ -904,7 +904,7 @@ def unit(data, axis=1):
     >>> import numpy as np
     >>> data = np.array([[1, 0, -1],[0, 0, 0], [0, 0, 1]])
     >>> norm_data = unit(data, axis=0)
-    >>> print(norm_data) #doctest: +NORMALIZE_WHITESPACE
+    >>> print(norm_data) # doctest: +NORMALIZE_WHITESPACE
     [[ 1. 0. -0.70710678]
      [ 0. 0.  0.        ]
      [ 0. 0.  0.70710678]]
@@ -1013,7 +1013,7 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
     >>> (n, u, s) = combine_sets(n1, u1, s1, n2, u2, s2)
     >>> print(n)
     15
-    >>> print(u) #doctest: +ELLIPSIS
+    >>> print(u) # doctest: +ELLIPSIS
     1.666666...67
     >>> print(s)
     0.59135639081
@@ -1044,7 +1044,7 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
             s = s2
         else:
             # shouldn't be able to ever reach this line with assertions on
-            raise ValueError('Total samples are 1, but neither data set has only one item.') #pragma: no cover
+            raise ValueError('Total samples are 1, but neither data set has only one item.') # pragma: no cover
     return (n, u, s)
 
 #%% Functions - reload_package
@@ -1070,7 +1070,7 @@ def reload_package(root_module, disp_reloads=True): # pragma: no cover
     --------
     >>> from dstauffman import reload_package
     >>> import dstauffman as dcs
-    >>> reload_package(dcs) #doctest: +ELLIPSIS
+    >>> reload_package(dcs) # doctest: +ELLIPSIS
     loading dstauffman...
 
     """

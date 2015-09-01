@@ -550,7 +550,7 @@ def storefig(fig, folder=None, plot_type='png'):
         types = plot_type
     # if no folder was specified, then use the current working directory
     if folder is None:
-        folder = os.getcwd() #pragma: no cover
+        folder = os.getcwd() # pragma: no cover
     # confirm that the folder exists
     if not os.path.isdir(folder):
         raise ValueError('The specfied folder "{}" does not exist.'.format(folder))
@@ -598,7 +598,7 @@ def titleprefix(fig, prefix=''):
     >>> y = np.sin(x)
     >>> plt.plot(x, y) # doctest: +ELLIPSIS
     [<matplotlib.lines.Line2D object at 0x...>]
-    >>> plt.title('X vs Y') #doctest: +ELLIPSIS
+    >>> plt.title('X vs Y') # doctest: +ELLIPSIS
     <matplotlib.text.Text object at 0x...>
     >>> plt.show(block=False)
     >>> prefix = 'Baseline'
@@ -664,7 +664,7 @@ def disp_xlimits(figs, xmin=None, xmax=None):
     >>> y = np.sin(x)
     >>> plt.plot(x, y) # doctest: +ELLIPSIS
     [<matplotlib.lines.Line2D object at 0x...>]
-    >>> plt.title('X vs Y') #doctest: +ELLIPSIS
+    >>> plt.title('X vs Y') # doctest: +ELLIPSIS
     <matplotlib.text.Text object at 0x...>
     >>> plt.show(block=False)
     >>> xmin = 2
@@ -727,10 +727,10 @@ def setup_plots(figs, opts, plot_type='time'):
     >>> y = np.sin(x)
     >>> plt.plot(x, y) # doctest: +ELLIPSIS
     [<matplotlib.lines.Line2D object at 0x...>]
-    >>> plt.title('X vs Y') #doctest: +ELLIPSIS
+    >>> plt.title('X vs Y') # doctest: +ELLIPSIS
     <matplotlib.text.Text object at 0x...>
-    >>> plt.xlabel('time [years]') #doctest: +SKIP
-    >>> plt.ylabel('value [radians]') #doctest: +SKIP
+    >>> plt.xlabel('time [years]') # doctest: +SKIP
+    >>> plt.ylabel('value [radians]') # doctest: +SKIP
     >>> plt.show(block=False)
     >>> opts = Opts()
     >>> opts.case_name = 'Testing'
@@ -789,10 +789,10 @@ def figmenu(figs):
     >>> y = np.sin(x)
     >>> plt.plot(x, y) # doctest: +ELLIPSIS
     [<matplotlib.lines.Line2D object at 0x...>]
-    >>> plt.title('X vs Y') #doctest: +ELLIPSIS
+    >>> plt.title('X vs Y') # doctest: +ELLIPSIS
     <matplotlib.text.Text object at 0x...>
-    >>> plt.xlabel('time [years]') #doctest: +SKIP
-    >>> plt.ylabel('value [radians]') #doctest: +SKIP
+    >>> plt.xlabel('time [years]') # doctest: +SKIP
+    >>> plt.ylabel('value [radians]') # doctest: +SKIP
     >>> plt.show(block=False)
     >>> figmenu(fig)
 

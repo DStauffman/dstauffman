@@ -134,7 +134,7 @@ def find_unexpected_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
 
     >>> from dstauffman import get_data_dir, find_unexpected_ext
     >>> folder = get_data_dir()
-    >>> find_unexpected_ext(folder) #doctest: +ELLIPSIS
+    >>> find_unexpected_ext(folder) # doctest: +ELLIPSIS
     Finding any unexpected file extensions...
      Unexpected: "..."
     Done.
@@ -192,7 +192,7 @@ def rename_old_picasa_files(folder):
                 try:
                     # do rename
                     os.rename(old_path, new_path)
-                except: #pragma: no cover # pylint: disable=W0702
+                except: # pragma: no cover # pylint: disable=W0702
                     # print any problems and then continue
                     print('Unable to rename: "{}"'.format(old_path))
                     continue
@@ -270,7 +270,7 @@ def find_long_filenames(folder):
 
     >>> from dstauffman import get_data_dir, find_long_filenames
     >>> folder = get_data_dir()
-    >>> find_long_filenames(folder) #doctest: +ELLIPSIS
+    >>> find_long_filenames(folder) # doctest: +ELLIPSIS
     Finding long filenames...
      max name = ...
      max root = ...
@@ -448,7 +448,7 @@ def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, e
 
     >>> from dstauffman import get_data_dir, convert_tif_to_jpg
     >>> folder = get_data_dir()
-    >>> convert_tif_to_jpg(folder) #doctest: +ELLIPSIS
+    >>> convert_tif_to_jpg(folder) # doctest: +ELLIPSIS
     Processing folder: "..."
      Skipping file   : "..."
     Batch processing complete.
