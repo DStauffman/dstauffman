@@ -11,6 +11,7 @@ Notes
 #%% Imports
 from __future__ import print_function
 from __future__ import division
+from enum import unique
 import numpy as np
 import unittest
 import dstauffman as dcs
@@ -67,9 +68,27 @@ class Test_IntEnumPlus(unittest.TestCase):
         num_values = _Example_Enum.num_values
         self.assertEqual(num_values, 3)
 
+    def test_min_value(self):
+        min_value = _Example_Enum.min_value
+        self.assertEqual(min_value, 1)
+
+    def test_max_value(self):
+        max_value = _Example_Enum.max_value
+        self.assertEqual(max_value, 10)
+
     def test_bad_attribute(self):
         with self.assertRaises(AttributeError):
             _Example_Enum.non_existant_field
+
+    def test_bad_uniqueness(self):
+        # TODO: get this case working in the future without the extra unique line
+        with self.assertRaises(ValueError):
+            @unique
+            class _BadUnique(dcs.IntEnumPlus):
+                a = 1
+                b = 2
+                c = 2
+
 
 #%% dist_enum_and_mons
 class Test_dist_enum_and_mons(unittest.TestCase):
@@ -103,6 +122,14 @@ class Test_dist_enum_and_mons(unittest.TestCase):
 
     def test_alpha_and_beta(self):
         pass #TODO: write this
+
+    def test_different_start_num(self):
+        (state1, mons1) = dcs.dist_enum_and_mons(self.num, self.distribution, self.max_months, self.prng)
+        (state2, mons2) = dcs.dist_enum_and_mons(self.num, self.distribution, self.max_months, self.prng, start_num=101)
+        np.testing.assert_equal(set(state1), {1, 2, 3, 4})
+        np.testing.assert_equal(set(state2), {101, 102, 103, 104})
+        np.testing.assert_equal(set(mons1), {1})
+        np.testing.assert_equal(set(mons2), {1})
 
 #%% Unit test execution
 if __name__ == '__main__':

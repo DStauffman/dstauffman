@@ -51,7 +51,22 @@ class _EnumMetaPlus(EnumMeta):
         return [int(x) for x in re.findall(r":\s(.*)\n", str(self)+'\n')]
     @property
     def num_values(self):
+        r"""
+        Returns the number of values within the enumerator.
+        """
         return len(self.list_of_names())
+    @property
+    def min_value(self):
+        r"""
+        Returns the minimum value of the enumerator.
+        """
+        return min(self.list_of_values())
+    @property
+    def max_value(self):
+        r"""
+        Returns the maximum value of the enumerator.
+        """
+        return max(self.list_of_values())
 
 @unique
 class IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
@@ -64,7 +79,7 @@ class IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
 #%% Functions
-def dist_enum_and_mons(num, distribution, max_months, prng, alpha=1, beta=1):
+def dist_enum_and_mons(num, distribution, max_months, prng, start_num=1, alpha=1, beta=1):
     r"""
     Creates a distribution for an enumerated state with a duration (such as TB status).
 
@@ -78,6 +93,8 @@ def dist_enum_and_mons(num, distribution, max_months, prng, alpha=1, beta=1):
         Maximum number of months for being in each TB state
     prng : class numpy.random.RandomState
         Pseudo-random number generator
+    start_num : int, optional
+        Number to start counting from, default is 1
     alpha : int, optional
         The alpha parameter for the beta distribution
     beta : int, optional
@@ -111,10 +128,10 @@ def dist_enum_and_mons(num, distribution, max_months, prng, alpha=1, beta=1):
     """
     # do a random draw based on the cumulative distribution
     state = np.sum(prng.rand(num) >= np.expand_dims(np.cumsum(distribution), axis=1), \
-        axis=0, dtype=int) + 1
+        axis=0, dtype=int) + start_num
     # set the number of months in this state based on a beta distribution with the given
     # maximum number of months in each state
-    mons = np.ceil(max_months[state-1] * prng.beta(alpha, beta, num)).astype(int)
+    mons = np.ceil(max_months[state-start_num] * prng.beta(alpha, beta, num)).astype(int)
     return (state, mons)
 
 #%% Unit test
