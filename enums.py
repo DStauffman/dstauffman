@@ -11,7 +11,7 @@ Notes
 #%% Imports
 from __future__ import print_function
 from __future__ import division
-from enum import Enum, unique, EnumMeta, _is_dunder
+from enum import Enum, EnumMeta, _is_dunder
 import numpy as np
 from six import with_metaclass
 import re
@@ -68,12 +68,9 @@ class _EnumMetaPlus(EnumMeta):
         """
         return max(self.list_of_values())
 
-@unique
 class IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
     r"""
     Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str.
-
-    Also forces all values to be unique.
     """
     def __str__(self):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)

@@ -81,14 +81,12 @@ class Test_IntEnumPlus(unittest.TestCase):
             _Example_Enum.non_existant_field
 
     def test_bad_uniqueness(self):
-        # TODO: get this case working in the future without the extra unique line
         with self.assertRaises(ValueError):
             @unique
             class _BadUnique(dcs.IntEnumPlus):
                 a = 1
                 b = 2
                 c = 2
-
 
 #%% dist_enum_and_mons
 class Test_dist_enum_and_mons(unittest.TestCase):
