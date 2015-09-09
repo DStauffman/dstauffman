@@ -322,6 +322,9 @@ class Test_plot_correlation_matrix(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.figs.append(dcs.plot_correlation_matrix(self.data, ['a']))
 
+    def test_label_values(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.data, label_values=True))
+
     def tearDown(self):
         for i in range(len(self.figs)):
             plt.close(self.figs.pop())

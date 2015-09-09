@@ -380,7 +380,7 @@ def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True
 
 #%% Functions - plot_correlation_matrix
 def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correlation Matrix', \
-        cmin=0, cmax=1, colormap='cool', plot_lower_only=True):
+        cmin=0, cmax=1, colormap='cool', plot_lower_only=True, label_values=False):
     r"""
     Visually plots a correlation matrix.
 
@@ -465,6 +465,13 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
             if not plot_lower_only or (i <= j):
                 ax.add_patch(Rectangle((box_size*i,box_size*j),box_size, box_size, \
                     color=cm.get_color(data[j, i])))
+                if label_values:
+                    #ax.text(box_size*i+box_size/2, box_size*j+box_size/2, '99', \
+                    #    verticalalignment='center', horizontalalignment='center', \
+                    #    transform=ax.transAxes, color='black', fontsize=15)
+                    ax.annotate('{:.2g}'.format(data[j,i]), xy=(box_size*i + box_size/2, box_size*j + box_size/2), \
+                        xycoords='data', horizontalalignment='center', \
+                        verticalalignment='center', fontsize=15)
     # show colorbar
     plt.colorbar(cm.get_smap())
     # make square
