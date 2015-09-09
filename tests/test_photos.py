@@ -604,6 +604,49 @@ class Test_convert_tif_to_jpg(unittest.TestCase):
                 dcs.setup_dir(cls.folder)
             os.rmdir(cls.folder)
 
+
+#%% number_files
+class Test_number_files(unittest.TestCase):
+    r""" Tests the number_files function with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.folder    = dcs.get_tests_dir()
+        self.file_old1 = os.path.join(self.folder, 'temp image A.jpg')
+        self.file_old2 = os.path.join(self.folder, 'temp xtra image B.jpg')
+        self.file_new1 = os.path.join(self.folder, 'Photo 01.jpg')
+        self.file_new2 = os.path.join(self.folder, 'Photo 02.jpg')
+        self.prefix    = 'Photo '
+        self.start     = 1
+        self.digits    = 2
+        dcs.write_text_file(self.file_old1, '')
+        dcs.write_text_file(self.file_old2, '')
+
+    def test_nominal(self):
+        with dcs.capture_output() as (out, _):
+            dcs.number_files(self.folder, self.prefix, self.start, self.digits)
+        output = out.getvalue().strip()
+        out.close()
+        lines = output.split('\n')
+        self.assertTrue(output.startswith('Processing folder: "'))
+        for this_line in lines:
+            if this_line == ' Renaming : "temp image A.jpg" to "Photo 01.jpg"':
+                break
+        else:
+            self.assertTrue(False, 'File "{}" was not renamed.'.format(self.file_old2))
+        for this_line in lines:
+            if this_line == ' Renaming : "temp xtra image B.jpg" to "Photo 02.jpg"':
+                break
+        else:
+            self.assertTrue(False, 'File "{}" was not renamed.'.format(self.file_old2))
+        self.assertTrue(output.endswith('Batch processing complete.'))
+
+    def tearDown(self):
+        files = [self.file_new1, self.file_new2]
+        for this_file in files:
+            if os.path.isfile(this_file):
+                os.remove(this_file)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)
