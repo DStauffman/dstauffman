@@ -488,10 +488,10 @@ class Test_setup_plots(unittest.TestCase):
         self.fig.canvas.set_window_title('Figure Title')
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)
-        plt.plot(x, y) # doctest: +ELLIPSIS
-        plt.title('X vs Y') # doctest: +ELLIPSIS
-        plt.xlabel('time [years]') # doctest: +SKIP
-        plt.ylabel('value [radians]') # doctest: +SKIP
+        plt.plot(x, y)
+        plt.title('X vs Y')
+        plt.xlabel('time [years]')
+        plt.ylabel('value [radians]')
         plt.show(block=False)
         self.opts = dcs.Opts()
         self.opts.case_name = 'Testing'
