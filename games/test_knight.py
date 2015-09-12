@@ -17,31 +17,33 @@ from dstauffman import capture_output
 import dstauffman.games.knight as knight
 
 #%% n2c & c2n & CHAR_DICT
-class Test_num_to_char_and_back(unittest.TestCase):
+class Test_char_board_to_nums(unittest.TestCase):
     r"""
-    Tests the n2c and c2n functions, thus ensuring all the mappings are covered.
+    Tests the char_board_to_nums function and CHAR_DICT and NUM_DICT, thus ensuring all the mappings
+    are covered.
     """
     def setUp(self):
-        self.nums  = knight.Piece.list_of_values()
+        self.nums  = knight.NUM_DICT.keys()
         self.chars = knight.CHAR_DICT.keys()
+        self.enums = knight.Piece.list_of_values()
 
-    def test_c2n(self):
+    def test_char_dict(self):
         for this_char in self.chars:
-            this_num = knight.c2n(this_char)
+            this_num = knight.CHAR_DICT[this_char]
             self.assertTrue(this_num in self.nums)
 
-    def test_n2c(self):
+    def test_num_dict(self):
         for this_num in self.nums:
-            this_char = knight.n2c(this_num)
+            this_char = knight.NUM_DICT[this_num]
             self.assertTrue(this_char in self.chars)
 
     def test_bad_char(self):
         with self.assertRaises(KeyError):
-            knight.c2n('Z')
+            knight.CHAR_DICT['Z']
 
     def test_bad_num(self):
-        with self.assertRaises(ValueError):
-            knight.n2c(10000)
+        with self.assertRaises(KeyError):
+            knight.NUM_DICT[10000]
 
 #%% print_board
 class Test_print_board(unittest.TestCase):
@@ -62,21 +64,21 @@ class Test_print_board(unittest.TestCase):
             knight.print_board(self.board1)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'S S S S \nS S S S \nS S S S \nS S S S')
+        self.assertEqual(output, 'S S S S\nS S S S\nS S S S\nS S X S')
 
     def test_rect_board(self):
         with capture_output() as (out, _):
             knight.print_board(self.board2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, '. . . . . \n. . . . . \n. . . . .')
+        self.assertEqual(output, '. . . . .\n. . . . .\n. . . . .')
 
     def test_all_board_piece_types(self):
         with capture_output() as (out, _):
             knight.print_board(self.board3)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, '. S E \nK W R \nB T L \nx . .')
+        self.assertEqual(output, '. S E\nK W R\nB T L\nx . .')
 
 class Test_get_new_position(unittest.TestCase):
     r"""
@@ -85,13 +87,12 @@ class Test_get_new_position(unittest.TestCase):
         Not yet done moves
         Invalid moves
     """
-
-#  Move -1       Move +1        Move -2      Move +2       Move -3       Move +3       Move -4       Move +4
-# . E x . .  |  . . x E .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .
-# . . x . .  |  . . x . .  |  . . . . E  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  E . . . .
-# . . S . .  |  . . S . .  |  . . S x x  |  . . S x x  |  . . S . .  |  . . S . .  |  x x S . .  |  x x S . .
-# . . . . .  |  . . . . .  |  . . . . .  |  . . . . E  |  . . x . .  |  . . x . .  |  E . . . .  |  . . . . .
-# . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . x E .  |  . E x . .  |  . . . . .  |  . . . . .
+    #  Move -1       Move +1        Move -2      Move +2       Move -3       Move +3       Move -4       Move +4
+    # . E x . .  |  . . x E .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .
+    # . . x . .  |  . . x . .  |  . . . . E  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  E . . . .
+    # . . S . .  |  . . S . .  |  . . S x x  |  . . S x x  |  . . S . .  |  . . S . .  |  x x S . .  |  x x S . .
+    # . . . . .  |  . . . . .  |  . . . . .  |  . . . . E  |  . . x . .  |  . . x . .  |  E . . . .  |  . . . . .
+    # . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . x E .  |  . E x . .  |  . . . . .  |  . . . . .
     def setUp(self):
         self.x = 2
         self.y = 2

@@ -64,10 +64,10 @@ Level 4: Now repeat the Level 3 task for this 32x32 board.  Also, modify
     . . . . . . . . . . . B . . . . . R R . . . . . . . . . . . . .
     . . . . . . . . . . . B . . . . . . . . . . R R . . . . . . . .
     . . . . . . . . . . . B . . . . . . . . . . R R . . . . . . . .
-    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .  # The last four rows originally missing
-    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-    . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+    . . . . . . . . . . . B . . . . . . . . . . . . . . . . . . . .  # The last four rows originally missing
+    . . . . . . . . . . . B . . . R R . . . . . . . . . . . . . . .
+    . . . . . . . . . . . B . . . R R . . . . . . . . . . . . . . .
+    . . . . . . . . . . . B . . . . . . . . . . . . . . . . . . . .
 Level 5 [HARD]: Compute the longest sequence of moves to complete Level 3 without
     visiting the same square twice.  Use the 32x32 board.
 """
@@ -86,6 +86,7 @@ from dstauffman import IntEnumPlus
 
 #%% Constants
 CHAR_DICT = {'.':0, 'S':1, 'E':2, 'K':3, 'W':4, 'R':5, 'B':6, 'T':7, 'L':8, 'x': 9}
+NUM_DICT = {value:key for (key, value) in CHAR_DICT.items()}
 BOARD1 = r"""
 . . . . . . . .
 . . . . . . . .
@@ -125,10 +126,10 @@ W W W W . . . . . . . . . . . B . . . W W W W W W W . . . . . .
 . . . . . . . . . . . B . . . . . R R . . . . . . . . . . . . .
 . . . . . . . . . . . B . . . . . . . . . . R R . . . . . . . .
 . . . . . . . . . . . B . . . . . . . . . . R R . . . . . . . .
-. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
-. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .
+. . . . . . . . . . . B . . . . . . . . . . . . . . . . . . . .
+. . . . . . . . . . . B . . . R R . . . . . . . . . . . . . . .
+. . . . . . . . . . . B . . . R R . . . . . . . . . . . . . . .
+. . . . . . . . . . . B . . . . . . . . . . . . . . . . . . . .
 """
 MOVES = frozenset({-4, -3, -2, -1, 1, 2, 3, 4})
 #MOVES = frozenset({-4, -3, -2, -1, 1, 2, 3, 4, -5, 5, -6, 6, -7, 7, -8, 8})
@@ -157,15 +158,18 @@ MOVES = frozenset({-4, -3, -2, -1, 1, 2, 3, 4})
 # . . . . .  |  . . . . .  |  . . . . .  |  . . x x E  |  . . . x .  |  . x . . .  |  E x x . .  |  . . . . .
 # . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . E .  |  . E . . .  |  . . . . .  |  . . . . .
 """
-NORMAL_COST = 1
+NORMAL_COST    = 1
 TRANSPORT_COST = 1
-WATER_COST = 2
-LAVA_COST = 5
-INVALID_COST = 0
+WATER_COST     = 2
+LAVA_COST      = 5
+INVALID_COST   = 0
 
 #%% Classes
 @unique
 class Piece(IntEnumPlus):
+    r"""
+    Enumerator for all the possible types of squares within the board, including start and end positions
+    """
     null      = 0 # Empty square that has never been used
     start     = 1 # Original starting position
     final     = 2 # Final ending position
@@ -179,6 +183,7 @@ class Piece(IntEnumPlus):
 
     @staticmethod
     def is_valid_place(enumerator):
+        r"""Determines if the piece is a valid place to put a knight."""
         if enumerator in {Piece.null, Piece.final, Piece.water, Piece.transport, Piece.lava}:
             return True
         else:
@@ -188,11 +193,40 @@ class Piece(IntEnumPlus):
 def print_board(board):
     r"""
     Prints the current board position to the console window.
+
+    Parameters
+    ----------
+    board : 2D ndarray of int
+        Board layout
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.knight import print_board, Piece
+    >>> import numpy as np
+    >>> board = np.zeros((5,5), dtype=int)
+    >>> board[2,2] = Piece.current
+    >>> print_board(board)
+    . . . . .
+    . . . . .
+    . . K . .
+    . . . . .
+    . . . . .
+
     """
+    # get the board shape
     (rows, cols) = board.shape
+    # loop through pieces
     for i in range(rows):
         for j in range(cols):
-            print(n2c(board[i,j]) + ' ', end='')
+            # print each piece in the row without a line continuation
+            pad = ' ' if j < cols-1 else ''
+            print(NUM_DICT[board[i,j]] + pad, end='')
+        # add the line continuation at the end of each row
         print('')
 
 #%% char_board_to_nums
@@ -203,101 +237,17 @@ def char_board_to_nums(char_board):
     # convert to rows of lines
     lines = char_board.split('\n')
     # remove any empty rows
-    lines = [this_line for this_line in lines if this_line]
+    lines = [this_line.split(' ') for this_line in lines if this_line]
+    # get the size of the board
     rows = len(lines)
-    cols = (len(lines[0]) + 1)//2
-    board = 100*np.ones((rows, cols), dtype=int)
+    cols = len(lines[0])
+    # preallocate null board
+    board = np.zeros((rows, cols), dtype=int)
+    # loop through and store all pieces and integer equivalents
     for i in range(rows):
         for j in range(cols):
-            board[i,j] = c2n(lines[i][2*j])
+            board[i,j] = CHAR_DICT[lines[i][j]]
     return board
-
-#%% n2c
-def n2c(num):
-    r"""
-    Converts from the given integer to a character for printing to the console.
-
-    Parameters
-    ----------
-    num : int
-        Number representing a piece on the board
-
-    Returns
-    -------
-    char : str
-        Single character representing the same piece on the board
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in September 2015.
-
-    Examples
-    --------
-
-    >>> from dstauffman.games.knight import n2c
-    >>> num  = [0, 1, 2, 3, 4, 5, 6, 7, 8]
-    >>> char = [n2c(this_num) for this_num in num]
-    >>> print(char)
-    ['.', 'S', 'E', 'K', 'W', 'R', 'B', 'T', 'L']
-
-    """
-    # determine result based on simple lookup
-    if num == Piece.null:
-        char = '.'
-    elif num == Piece.start:
-        char = 'S'
-    elif num == Piece.final:
-        char = 'E'
-    elif num == Piece.current:
-        char = 'K'
-    elif num == Piece.water:
-        char = 'W'
-    elif num == Piece.rock:
-        char = 'R'
-    elif num == Piece.barrier:
-        char = 'B'
-    elif num == Piece.transport:
-        char = 'T'
-    elif num == Piece.lava:
-        char = 'L'
-    elif num == Piece.visited:
-        char = 'x'
-    else:
-        raise ValueError('Unexpected number = "{}"'.format(num))
-    # return result
-    return char
-
-#%% c2n
-def c2n(char):
-    r"""
-    Converts a given character to an integer to use in an ndarray.
-
-    Parameters
-    ----------
-    char : str
-        Single character representing the same piece on the board
-
-    Returns
-    -------
-    num : int
-        Number representing a piece on the board
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in September 2015.
-
-    Examples
-    --------
-
-    >>> from dstauffman.games.knight import c2n
-    >>> char = ['.', 'S', 'E', 'K', 'W', 'R', 'B', 'T', 'L']
-    >>> num = [c2n(this_char) for this_char in char]
-    >>> print(num)
-    [0, 1, 2, 3, 4, 5, 6, 7, 8]
-
-    """
-    num = CHAR_DICT[char]
-    return num
 
 #%% get_current_position
 def get_current_position(board):
@@ -318,15 +268,6 @@ def get_new_position(x, y, move):
     r"""
     Gets the new position of the knight after making the desired move.
     """
-
-    """
-#  Move -1       Move +1        Move -2      Move +2       Move -3       Move +3       Move -4       Move +4
-# . E x . .  |  . . x E .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .
-# . . x . .  |  . . x . .  |  . . . . E  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  E . . . .
-# . . S . .  |  . . S . .  |  . . S x x  |  . . S x x  |  . . S . .  |  . . S . .  |  x x S . .  |  x x S . .
-# . . . . .  |  . . . . .  |  . . . . .  |  . . . . E  |  . . x . .  |  . . x . .  |  E . . . .  |  . . . . .
-# . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . x E .  |  . E x . .  |  . . . . .  |  . . . . .
-"""
     # move the piece
     if move == -1:
         pos1 = (x-1, y)
@@ -465,6 +406,9 @@ def check_valid_sequence(board, moves, print_status=False):
 
 #%% print_sequence
 def print_sequence(board, moves):
+    r"""
+    Prints the every board position for the given move sequence.
+    """
     # create internal board for calculations
     temp_board = board.copy()
     print('Starting position: ')
@@ -482,6 +426,14 @@ def print_sequence(board, moves):
             print_board(temp_board)
         else:
             raise ValueError('Bad sequence.')
+
+#%% solve_puzzle
+def solve_puzzle(board, solve_type='min'):
+    r"""
+    Solves the puzzle with the desired solution type, from 'min', 'max', 'first'.
+    """
+    moves = []
+    return moves
 
 #%% Unit test
 def main():
@@ -508,3 +460,10 @@ if __name__ == '__main__':
     is_valid = check_valid_sequence(board1, moves1, print_status=True)
     if is_valid:
         print_sequence(board1, moves1)
+
+    # Step 2
+    print('')
+    moves2 = solve_puzzle(board1, solve_type='first')
+    is_valid = check_valid_sequence(board1, moves2, print_status=True)
+    if is_valid:
+        print_sequence(board1, moves2)
