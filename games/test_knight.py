@@ -64,7 +64,7 @@ class Test_print_board(unittest.TestCase):
             knight.print_board(self.board1)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'S S S S\nS S S S\nS S S S\nS S X S')
+        self.assertEqual(output, 'S S S S\nS S S S\nS S S S\nS S S S')
 
     def test_rect_board(self):
         with capture_output() as (out, _):

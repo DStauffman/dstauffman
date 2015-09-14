@@ -322,7 +322,7 @@ def move_cost(board, move):
     # find the traversal for the desired move
     (pos1, pos2, pos3) = get_new_position(x, y, move)
     # first check that pos3 is on the board and if not return
-    if pos3[0] < 0 or pos3[0] > xmax or pos3[1] < 0 or pos3[1] > ymax:
+    if pos3[0] < 0 or pos3[0] > xmax - 1 or pos3[1] < 0 or pos3[1] > ymax - 1:
         return INVALID_COST
     # check that pos1 and pos2 are on the board
     pass # TODO: this only matters for non-rectangular boards
@@ -372,6 +372,36 @@ def update_board(board, move):
         board[new_x, new_y] = Piece.current
     # return the cost of the update, zero means no update occured
     return cost
+
+#%% undo_move
+def undo_move(board, last_move):
+    r"""
+    Undoes the last move on the board.
+
+    Notes
+    -----
+    #.  Modifies `board` in-place.
+    """
+    # find the current position
+    (x, y) = get_current_position(board)
+    # set the current position back to a null piece
+    board[x, y] = Piece.null # TODO: might need better than this for cost function in future?
+    # find the inverse move
+    new_move = get_move_inverse(last_move)
+    # get the new position
+    (_, _, (new_x, new_y)) = get_new_position(x, y, new_move)
+    # set the new position to current
+    board[new_x, new_y] = Piece.current
+
+#%% get_move_inverse
+def get_move_inverse(move):
+    r"""
+    Gets the inverse move to go back where you were:
+        -/+1 <-> -/+3
+        -/+2 <-> -/+4
+    """
+    inv_move = np.sign(move) * (np.mod(np.abs(move) + 1, 4) + 1)
+    return inv_move
 
 #%% check_valid_sequence
 def check_valid_sequence(board, moves, print_status=False):
@@ -428,12 +458,43 @@ def print_sequence(board, moves):
             raise ValueError('Bad sequence.')
 
 #%% solve_puzzle
-def solve_puzzle(board, solve_type='min'):
+def solve_puzzle(board, moves=None, solve_type='min'):
     r"""
     Solves the puzzle with the desired solution type, from 'min', 'max', 'first'.
     """
-    moves = []
-    return moves
+    if moves is None:
+        raise ValueError('Moves needs to be initialized to a mutable list')
+    if len(moves) == 0:
+        # set the current position to the start
+        board[board == Piece.start] = Piece.current
+    # try all the next possible moves
+    for this_move in MOVES:
+        # make the move
+        cost = update_board(board, this_move)
+        # if the move was invalid, the go to the next one, legal, then call recursively, otherwise go to the next one
+        if cost == 0:
+            continue
+        elif cost < 0:
+            # solution is found
+            moves.append(this_move)
+            print('Solution found!')
+            return
+        elif cost > 0:
+            # continue recursively
+            moves.append(this_move)
+            temp = len(moves)
+            solve_puzzle(board, moves, solve_type=solve_type)
+            if len(moves) < temp:
+                continue
+            else:
+                return
+    # all possible moves didn't work, so this leg is dead, back out last move and exit
+    if len(moves) > 0:
+        last_move = moves.pop()
+        undo_move(board, last_move)
+    else:
+        print('No solution found.')
+    return
 
 #%% Unit test
 def main():
@@ -443,27 +504,39 @@ def main():
 #%% Script
 if __name__ == '__main__':
     # run unit tests
-    main()
+    #main()
 
     #%% Solve puzzle
+    do_steps = {0, 2} #do_steps = {0, 1, 2, 3, 4, 5}
     # convert board to numeric representation for efficiency
     board1 = char_board_to_nums(BOARD1)
     board2 = char_board_to_nums(BOARD2)
     board3 = np.zeros((5,5), dtype=int)
     board3[2,2] = Piece.start
+    board3[3,4] = Piece.final
+    board3 = np.zeros((2,5), dtype=int)
+    board3[0,0] = Piece.start
+    board3[0,4] = Piece.final
 
-    print_board(board1)
-    print_board(board2)
+    if 0 in do_steps:
+        #print_board(board1)
+        #print_board(board2)
+        print_board(board3)
 
     # Step 1
-    moves1 = [2, 2]
-    is_valid = check_valid_sequence(board1, moves1, print_status=True)
-    if is_valid:
-        print_sequence(board1, moves1)
+    if 1 in do_steps:
+        moves1 = [2, 2]
+        is_valid = check_valid_sequence(board1, moves1, print_status=True)
+        if is_valid:
+            print_sequence(board1, moves1)
 
     # Step 2
-    print('')
-    moves2 = solve_puzzle(board1, solve_type='first')
-    is_valid = check_valid_sequence(board1, moves2, print_status=True)
-    if is_valid:
-        print_sequence(board1, moves2)
+    if 2 in do_steps:
+        print('')
+        moves2 = []
+        soln_board = board1.copy()
+        solve_puzzle(soln_board, moves=moves2, solve_type='first')
+        print(moves2)
+        is_valid = check_valid_sequence(board1, moves2, print_status=True)
+        if is_valid:
+            print_sequence(board1, moves2)
