@@ -177,11 +177,11 @@ class Test_get_axes_scales(unittest.TestCase):
     def setUp(self):
         self.types  = ['population', 'percentage', 'per 100K', 'cost']
         self.scales = [1, 100, 100000, 1e-3]
-        self.units  = ['#', '%', 'per 100,000', "K's"]
+        self.units  = ['#', '%', 'per 100,000', "$K's"]
         self.bad_type = 'nonexistant'
 
     def test_nominal_usage(self):
-        for (ix, this_type) in self.types:
+        for (ix, this_type) in enumerate(self.types):
             (scale, units) = dcs.get_axes_scales(this_type)
             self.assertEqual(scale, self.scales[ix])
             self.assertEqual(units, self.units[ix])
@@ -201,8 +201,6 @@ class Test_plot_time_history(unittest.TestCase):
         plotting as diffs + Opts
         plotting as a group
         using a different colormap
-        plotting other types (x3)
-        plotting a bad type
         plotting array data as individual
         plotting array data as group
     """
@@ -238,19 +236,6 @@ class Test_plot_time_history(unittest.TestCase):
 
     def test_colormap(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, colormap='Dark2')
-
-    def test_other_types1(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='percentage')
-
-    def test_other_types2(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='per 100K')
-
-    def test_other_types3(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='cost')
-
-    def test_bad_type(self):
-        with self.assertRaises(ValueError):
-            self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='bad_type')
 
     def test_array_data1(self):
         data = np.column_stack((self.data, self.data)).T
