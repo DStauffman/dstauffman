@@ -49,9 +49,9 @@ def export_to_excel(data, filename, sheet=SHEET_NAME_INDIV):
     """
     # force inputs to always be lists
     if not isinstance(data, list):
-        data = list([data])
+        data = [data]
     if not isinstance(sheet, list):
-        sheet = list([sheet])
+        sheet = [sheet]
     # Determine if writing to csv or excel
     file_ext = filename.split('.')[-1]
     if file_ext in {'xlsx', 'xls'}:

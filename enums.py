@@ -43,18 +43,22 @@ class _EnumMetaPlus(EnumMeta):
         r"""
         Returns a list of all the names within the enumerator.
         """
-        return re.findall(r"\.(.*):", str(self))
+        names = re.findall(r"\.(.*):", str(self))
+        assert len(names) == len(self)
+        return names
     def list_of_values(self):
         r"""
         Returns a list of all the values within the enumerator.
         """
-        return [int(x) for x in re.findall(r":\s(.*)\n", str(self)+'\n')]
+        values = [int(x) for x in re.findall(r":\s(.*)\n", str(self)+'\n')]
+        assert len(values) == len(self)
+        return values
     @property
     def num_values(self):
         r"""
         Returns the number of values within the enumerator.
         """
-        return len(self.list_of_names())
+        return len(self)
     @property
     def min_value(self):
         r"""

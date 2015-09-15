@@ -258,7 +258,7 @@ def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True
         data for corresponding time history
     description : str
         generic text to put on the plot title and figure name
-    type_ : str {'population', 'percentage', 'cost'}
+    type_ : str {'population', 'percentage', 'per 100K', 'cost'}
         description of the type of data that is being plotted
     opts : class Opts, optional
         plotting options
