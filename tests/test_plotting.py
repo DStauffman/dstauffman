@@ -167,6 +167,29 @@ class Test_ColorMap(unittest.TestCase):
         plt.close()
 
 #%% Functions for testing
+# get_axes_scales
+class Test_get_axes_scales(unittest.TestCase):
+    r"""
+    Tests get_axes_scales function with the following cases:
+        Nominal usage
+        Bad type (should raise ValueError)
+    """
+    def setUp(self):
+        self.types  = ['population', 'percentage', 'per 100K', 'cost']
+        self.scales = [1, 100, 100000, 1e-3]
+        self.units  = ['#', '%', 'per 100,000', "K's"]
+        self.bad_type = 'nonexistant'
+
+    def test_nominal_usage(self):
+        for (ix, this_type) in self.types:
+            (scale, units) = dcs.get_axes_scales(this_type)
+            self.assertEqual(scale, self.scales[ix])
+            self.assertEqual(units, self.units[ix])
+
+    def test_bad_type(self):
+        with self.assertRaises(ValueError):
+            dcs.get_axes_scales(self.bad_type)
+
 # plot_time_history
 class Test_plot_time_history(unittest.TestCase):
     r"""

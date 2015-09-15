@@ -244,6 +244,57 @@ class ColorMap(Frozen):
             raise ValueError("You can't call ColorMap.set_colors unless it was given a num_colors input.")
         ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
 
+#%% Functions - get_axes_scales
+def get_axes_scales(type_):
+    r"""
+    Determines the scale factor and units to apply to the plot based on the desired `type_`
+
+    Parameters
+    ----------
+    type_ : str {'population', 'percentage', 'per 100K', 'cost'}
+        description of the type of data that is being plotted
+
+    Returns
+    -------
+    scale : int or float
+        Scale factor to multiply the raw values by
+    units : str
+        Units string to apply to the plot axis label
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_axes_scale
+    >>> type_ = 'percentage'
+    >>> (scale, units) = get_axes_scale(type_)
+
+    >>> print(scale)
+    100
+    >>> print(units)
+    '%'
+
+    """
+    # determine results based on simple switch statement
+    if type_ == 'population':
+        scale = 1
+        units = '#'
+    elif type_ == 'percentage':
+        scale = 100
+        units = '%'
+    elif type_ == 'per 100K':
+        scale = 100000
+        units = 'per 100,000'
+    elif type_ == 'cost':
+        scale = 1e-3
+        units = "$K's"
+    else:
+        raise ValueError('Unexpected data type_ "{}" for plot.'.format(type_))
+    return (scale, units)
+
 #%% Functions - plot_time_history
 def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True, \
     truth_time=None, truth_data=None, plot_as_diffs=False, colormap=None):
@@ -303,20 +354,7 @@ def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True
     if colormap is None:
         colormap = DEFAULT_COLORMAP
     # determine which type of data to plot
-    if type_ == 'population':
-        scale = 1
-        units = '#'
-    elif type_ == 'percentage':
-        scale = 100
-        units = '%'
-    elif type_ == 'per 100K':
-        scale = 100000
-        units = 'per 100,000'
-    elif type_ == 'cost':
-        scale = 1e-3
-        units = "$K's"
-    else:
-        raise ValueError('Unknown data type "' + type_ + '" for plot.')
+    (scale, units) = get_axes_scales(type_)
 
     if plot_as_diffs:
         # calculate RMS

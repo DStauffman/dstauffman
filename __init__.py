@@ -12,7 +12,7 @@ Notes
 from .classes   import frozen, Frozen
 from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, spyder_custom_colors
 from .enums     import IntEnumPlus, dist_enum_and_mons
-from .plotting  import Opts, MyCustomToolbar, ColorMap, plot_time_history, \
+from .plotting  import Opts, MyCustomToolbar, ColorMap, get_axes_scales, plot_time_history, \
                            plot_correlation_matrix, storefig, titleprefix, disp_xlimits, \
                            setup_plots, figmenu
 from .photos    import find_missing_nums, find_unexpected_ext, rename_old_picasa_files, \
