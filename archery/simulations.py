@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Simulations module file for the "dstauffman.archery" library.  It defines constants.
+Simulations module file for the "dcstools.archery" library.  It defines constants.
 
 Notes
 -----
@@ -14,8 +14,8 @@ from __future__ import print_function
 from __future__ import division
 import numpy as np
 # model imports
-from dstauffman.archery.constants import COL_SCORE1, COL_X_COUNT1, COL_SCORE2, COL_X_COUNT2, \
-                                         COL_SCORE_TOT, COL_X_COUNT_TOT
+from dcstools.archery.constants import COL_SCORE1, COL_X_COUNT1, COL_SCORE2, COL_X_COUNT2, \
+                                       COL_SCORE_TOT, COL_X_COUNT_TOT
 
 #%% Local constants
 MAX_INDIV_SCORE = 360

@@ -23,7 +23,7 @@ import numpy as np
 import os
 import shutil
 # model imports
-from dstauffman import Opts, setup_plots, setup_dir, get_root_dir
+from dcstools import Opts, setup_plots, setup_dir, get_root_dir
 
 #%% Hard-coded values
 N = 0 # Null cube - not defined
@@ -101,7 +101,7 @@ def _get_color(value):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import _get_color, R
+    >>> from dcstools.games.brick import _get_color, R
     >>> color = _get_color(R)
     >>> print(color)
     r
@@ -173,7 +173,7 @@ def _draw_cube(ax, xs=0, ys=0, zs=0, color='k'):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import _draw_cube
+    >>> from dcstools.games.brick import _draw_cube
     >>> import matplotlib.pyplot as plt
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111, projection='3d')
@@ -222,7 +222,7 @@ def _check_seams(piece_combos, this_soln):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import apply_solution_to_combos, pieces, get_all_positions, R, \
+    >>> from dcstools.games.brick import apply_solution_to_combos, pieces, get_all_positions, R, \
     ...     soln, solve_puzzle, _check_seams
     >>> soln[1,1,1] = R
     >>> combos = [get_all_positions(piece) for piece in pieces]
@@ -292,7 +292,7 @@ def solve_center(pieces):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import solve_center, pieces
+    >>> from dcstools.games.brick import solve_center, pieces
     >>> center = solve_center(pieces)
     >>> print(center)
     1
@@ -342,7 +342,7 @@ def rot_piece(piece, axis):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import rot_piece, N, R
+    >>> from dcstools.games.brick import rot_piece, N, R
     >>> import numpy as np
     >>> piece = np.array([\
     ...    [[R, N, N],[N, N, N],[N, N, N]], \
@@ -407,7 +407,7 @@ def trans_piece(piece, axis, step):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import trans_piece, R, N
+    >>> from dcstools.games.brick import trans_piece, R, N
     >>> import numpy as np
     >>> piece = np.array([\
     ...    [[R, N, N],[N, N, N],[N, N, N]], \
@@ -487,7 +487,7 @@ def get_all_positions(piece):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import get_all_positions, R, N
+    >>> from dcstools.games.brick import get_all_positions, R, N
     >>> import numpy as np
     >>> piece = np.array([\
     ...    [[R, N, N],[N, N, N],[N, N, N]], \
@@ -603,7 +603,7 @@ def plot_cube(piece, title=None, opts=None):
         Piece layout
     title : str, optional
         Title to put on the plot and use to save to disk
-    opts : class dstauffman.Opts, optional
+    opts : class dcstools.Opts, optional
         Plotting options
 
     Returns
@@ -618,7 +618,7 @@ def plot_cube(piece, title=None, opts=None):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import plot_cube, R, N
+    >>> from dcstools.games.brick import plot_cube, R, N
     >>> import numpy as np
     >>> piece = np.array([\
     ...    [[R, N, N],[N, N, N],[N, N, N]], \
@@ -684,7 +684,7 @@ def print_combos(piece_combos, text):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import print_combos, pieces, get_all_positions
+    >>> from dcstools.games.brick import print_combos, pieces, get_all_positions
     >>> piece_combos = [get_all_positions(piece) for piece in pieces]
     >>> text = 'testing'
     >>> print_combos(piece_combos, text) # doctest: +ELLIPSIS
@@ -728,7 +728,7 @@ def apply_solution_to_combos(soln, combos):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import apply_solution_to_combos, pieces, get_all_positions, soln, solve_center
+    >>> from dcstools.games.brick import apply_solution_to_combos, pieces, get_all_positions, soln, solve_center
     >>> soln[1,1,1] = solve_center(pieces)
     >>> combos = [get_all_positions(piece) for piece in pieces]
     >>> valid = apply_solution_to_combos(soln, combos[0])
@@ -774,7 +774,7 @@ def solve_puzzle(piece_combos, stop_at_first=True, check_seams=False):
     Examples
     --------
 
-    >>> from dstauffman.games.brick import apply_solution_to_combos, pieces, get_all_positions, R, \
+    >>> from dcstools.games.brick import apply_solution_to_combos, pieces, get_all_positions, R, \
     ...     soln, solve_puzzle
     >>> soln[1,1,1] = R
     >>> combos = [get_all_positions(piece) for piece in pieces]

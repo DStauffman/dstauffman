@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file to execute all the tests from the unittest library within the dstauffman code using nose.
+Test file to execute all the tests from the unittest library within the dcstools code using nose.
 
 Notes
 -----
@@ -11,7 +11,7 @@ Notes
 from __future__ import print_function
 from __future__ import division
 import nose
-import dstauffman as dcs
+import dcstools as dcs
 
 if __name__ == '__main__':
     nose.run(dcs)

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-The "games" submodule within the "dstauffman" module is a playground for simulating and solving
+The "games" submodule within the "dcstools" module is a playground for simulating and solving
 different types of games.
 
 The "brick" file solves a 3D red and gray brick puzzle.

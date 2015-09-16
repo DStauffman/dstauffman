@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 r"""
-Support module file for the dstauffman code.  It defines stuff done outside of the model, but
-creates stuff used within the model.  Such as porting stuff from ghap to dstauffman automatically.
+Support module file for the dcstools code.  It defines stuff done outside of the model, but
+creates stuff used within the model.  Such as porting stuff from ghap to dcstools automatically.
 
 Notes
 -----
@@ -15,14 +15,14 @@ from __future__ import print_function
 from __future__ import division
 import os
 import ghap as model
-import dstauffman as dcs
+import dcstools as dcs
 
 #%% Functions
 
 #%% Unittest
 if __name__ == '__main__':
     files        = ['classes', 'constants', 'plotting', 'utils']
-    replacements = [('ghap', 'dstauffman'), ('model', 'dcs'), ('GHAP', 'dstauffman')]
+    replacements = [('ghap', 'dcstools'), ('model', 'dcs'), ('GHAP', 'dcstools')]
     ghap_folder  = model.get_root_dir()
     dcs_folder   = dcs.get_root_dir()
     stage_folder = dcs.get_data_dir()

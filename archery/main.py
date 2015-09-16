@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Main module file for the "dstauffman.archery" library.  It defines the main update and display
+Main module file for the "dcstools.archery" library.  It defines the main update and display
 functions.
 
 Notes
@@ -15,20 +15,20 @@ from __future__ import division
 import os
 import pandas as pd
 # model imports
-from dstauffman import write_text_file
-from dstauffman.archery.constants import TEAMS_SIZE, MIXED_SIZE, COL_LASTNAME, COL_FIRSTNAME, \
-                                         COL_GENDER, COL_SCHOOL, COL_DIVISION, COL_BALE, \
-                                         COL_SCORE1, COL_X_COUNT1, COL_SCORE2, COL_X_COUNT2, \
-                                         COL_SCORE_TOT, COL_X_COUNT_TOT, COL_SEED, COL_TEAM_NUM, \
-                                         COL_LASTNAME1, COL_LASTNAME2, COL_LASTNAME3, \
-                                         COL_FIRSTNAME1, COL_FIRSTNAME2, COL_FIRSTNAME3, \
-                                         COL_SCORE_PER1, COL_SCORE_PER2, COL_SCORE_PER3, \
-                                         COL_X_COUNT_PER1, COL_X_COUNT_PER2, COL_X_COUNT_PER3, \
-                                         COL_FEMALE_LASTNAME, COL_FEMALE_FIRSTNAME, \
-                                         COL_MALE_LASTNAME, COL_MALE_FIRSTNAME, \
-                                         COL_FEMALE_SCORE, COL_FEMALE_X_COUNT, \
-                                         COL_MALE_SCORE, COL_MALE_X_COUNT
-from dstauffman.archery.utils     import generic_html_start, generic_html_end
+from dcstools import write_text_file
+from dcstools.archery.constants import TEAMS_SIZE, MIXED_SIZE, COL_LASTNAME, COL_FIRSTNAME, \
+                                       COL_GENDER, COL_SCHOOL, COL_DIVISION, COL_BALE, \
+                                       COL_SCORE1, COL_X_COUNT1, COL_SCORE2, COL_X_COUNT2, \
+                                       COL_SCORE_TOT, COL_X_COUNT_TOT, COL_SEED, COL_TEAM_NUM, \
+                                       COL_LASTNAME1, COL_LASTNAME2, COL_LASTNAME3, \
+                                       COL_FIRSTNAME1, COL_FIRSTNAME2, COL_FIRSTNAME3, \
+                                       COL_SCORE_PER1, COL_SCORE_PER2, COL_SCORE_PER3, \
+                                       COL_X_COUNT_PER1, COL_X_COUNT_PER2, COL_X_COUNT_PER3, \
+                                       COL_FEMALE_LASTNAME, COL_FEMALE_FIRSTNAME, \
+                                       COL_MALE_LASTNAME, COL_MALE_FIRSTNAME, \
+                                       COL_FEMALE_SCORE, COL_FEMALE_X_COUNT, \
+                                       COL_MALE_SCORE, COL_MALE_X_COUNT
+from dcstools.archery.utils     import generic_html_start, generic_html_end
 
 #%% Functions (Private) - _set_seeds
 def _set_seeds(data, max_seed=None):

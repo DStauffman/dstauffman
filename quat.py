@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Quat module file for the "dstauffman" library.  It contains generic quaternion
+Quat module file for the "dcstools" library.  It contains generic quaternion
 utilities that can be independently defined and used by other modules.
 
 Notes
@@ -16,7 +16,7 @@ from __future__ import division
 import doctest
 import numpy as np
 import unittest
-from dstauffman.constants import INT_TOKEN, QUAT_SIZE
+from dcstools.constants import INT_TOKEN, QUAT_SIZE
 
 #%% Master flags
 use_assertions = True
@@ -105,7 +105,7 @@ def qrot(axis, angle):
     Examples
     --------
 
-    >>> from dstauffman import qrot
+    >>> from dcstools import qrot
     >>> import numpy as np
     >>> quat = qrot(3, np.pi/2)
     >>> print(quat) # doctest: +NORMALIZE_WHITESPACE
@@ -183,7 +183,7 @@ def quat_angle_diff(quat1, quat2):
     Examples
     --------
 
-    >>> from dstauffman import qrot, quat_mult, quat_angle_diff
+    >>> from dcstools import qrot, quat_mult, quat_angle_diff
     >>> import numpy as np
     >>> quat1 = np.array([0.5, 0.5, 0.5, 0.5])
     >>> dq1 = qrot(1, 0.001)
@@ -278,7 +278,7 @@ def quat_from_euler(angles, seq=None):
     Examples
     --------
 
-    >>> from dstauffman import quat_from_euler
+    >>> from dcstools import quat_from_euler
     >>> import numpy as np
     >>> a   = np.array([0.01, 0.02, 0.03])
     >>> b   = np.array([0.04, 0.05, 0.06])
@@ -369,7 +369,7 @@ def quat_interp(time, quat, ti, inclusive=True):
     Examples
     --------
 
-    >>> from dstauffman import quat_interp, qrot
+    >>> from dcstools import quat_interp, qrot
     >>> import numpy as np
     >>> time  = np.array([1, 3, 5])
     >>> quat = np.column_stack((qrot(1, 0), qrot(1, np.pi/2), qrot(1, np.pi)))
@@ -505,7 +505,7 @@ def quat_inv(q1):
     Examples
     --------
 
-    >>> from dstauffman import qrot, quat_inv
+    >>> from dcstools import qrot, quat_inv
     >>> from numpy import pi
     >>> q1 = qrot(1, pi/2)
     >>> q2 = quat_inv(q1)
@@ -568,7 +568,7 @@ def quat_mult(a, b):
     Examples
     --------
 
-    >>> from dstauffman import qrot, quat_mult
+    >>> from dcstools import qrot, quat_mult
     >>> from numpy import pi
     >>> a = qrot(1, pi/2)
     >>> b = qrot(2, pi)
@@ -657,7 +657,7 @@ def quat_norm(x):
     Examples
     --------
 
-    >>> from dstauffman import quat_norm
+    >>> from dcstools import quat_norm
     >>> import numpy as np
     >>> x = np.array([0.1, 0, 0, 1])
     >>> y = quat_norm(x)
@@ -699,7 +699,7 @@ def quat_prop(quat, delta_ang, renorm=True):
     Examples
     --------
 
-    >>> from dstauffman import quat_prop
+    >>> from dcstools import quat_prop
     >>> import numpy as np
     >>> quat      = np.array([0, 0, 0, 1])
     >>> delta_ang = np.array([0.01, 0.02, 0.03])
@@ -759,7 +759,7 @@ def quat_times_vector(quat, v):
     Examples
     --------
 
-    >>> from dstauffman import quat_times_vector
+    >>> from dcstools import quat_times_vector
     >>> import numpy as np
     >>> quat = np.array([[0, 1, 0, 0], [1, 0, 0, 0]]).T
     >>> v = np.array([[1, 0, 0], [2, 0, 0]]).T
@@ -821,7 +821,7 @@ def quat_to_dcm(quat):
     Examples
     --------
 
-    >>> from dstauffman import quat_to_dcm
+    >>> from dcstools import quat_to_dcm
     >>> import numpy as np
     >>> quat = np.array([0.5, -0.5, 0.5, 0.5])
     >>> dcm = quat_to_dcm(quat)
@@ -880,7 +880,7 @@ def quat_to_euler(quat, seq=None):
     Examples
     --------
 
-    >>> from dstauffman import quat_to_euler
+    >>> from dcstools import quat_to_euler
     >>> import numpy as np
     >>> quat = np.array([[0, 1, 0, 0], [0, 0, 1, 0]]).T
     >>> seq = [3, 1, 2]

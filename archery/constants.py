@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Constants module file for the "dstauffman.archery" library.  It defines constants.
+Constants module file for the "dcstools.archery" library.  It defines constants.
 
 Notes
 -----

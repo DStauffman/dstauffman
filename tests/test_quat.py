@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file for the `quat` module of the "dstauffman" library.  It is intented to contain test
+Test file for the `quat` module of the "dcstools" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
 
 Notes
@@ -13,7 +13,7 @@ from __future__ import print_function
 from __future__ import division
 import numpy as np
 import unittest
-import dstauffman as dcs
+import dcstools as dcs
 
 #%% _quat_assertions
 class Test__quat_assertions(unittest.TestCase):

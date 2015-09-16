@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Plotting module file for the "dstauffman" library.  It defines useful plotting utilities.
+Plotting module file for the "dcstools" library.  It defines useful plotting utilities.
 
 Notes
 -----
@@ -24,9 +24,9 @@ import matplotlib.cm as cmx
 from matplotlib.patches import Rectangle
 from PyQt4 import QtGui, QtCore
 # model imports
-from dstauffman.classes   import Frozen
-from dstauffman.constants import DEFAULT_COLORMAP
-from dstauffman.utils     import get_images_dir, rms
+from dcstools.classes   import Frozen
+from dcstools.constants import DEFAULT_COLORMAP
+from dcstools.utils     import get_images_dir, rms
 
 #%% Private Classes - _HoverButton
 class _HoverButton(QtGui.QPushButton):
@@ -86,7 +86,7 @@ class MyCustomToolbar():
     Examples
     --------
 
-    >>> from dstauffman import MyCustomToolbar
+    >>> from dcstools import MyCustomToolbar
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -195,7 +195,7 @@ class ColorMap(Frozen):
     Examples
     --------
 
-    >>> from dstauffman import ColorMap
+    >>> from dcstools import ColorMap
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> cm = ColorMap('Paired', 1, 2)
@@ -283,7 +283,7 @@ def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True
     Examples
     --------
 
-    >>> from dstauffman import plot_time_history
+    >>> from dcstools import plot_time_history
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> time = np.arange(0, 10, 0.1)
@@ -391,7 +391,7 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
     Examples
     --------
 
-    >>> from dstauffman import plot_correlation_matrix, unit
+    >>> from dcstools import plot_correlation_matrix, unit
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> data = np.random.rand(10, 10)
@@ -520,7 +520,7 @@ def storefig(fig, folder=None, plot_type='png'):
     --------
     Create figure and then save to disk
 
-    >>> from dstauffman import storefig
+    >>> from dcstools import storefig
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> import os
@@ -596,7 +596,7 @@ def titleprefix(fig, prefix=''):
     Examples
     --------
     Create figure and then change the title
-    >>> from dstauffman import titleprefix
+    >>> from dcstools import titleprefix
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -662,7 +662,7 @@ def disp_xlimits(figs, xmin=None, xmax=None):
     Examples
     --------
 
-    >>> from dstauffman import disp_xlimits
+    >>> from dcstools import disp_xlimits
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -725,7 +725,7 @@ def setup_plots(figs, opts, plot_type='time'):
     Examples
     --------
 
-    >>> from dstauffman import setup_plots, Opts
+    >>> from dcstools import setup_plots, Opts
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -787,7 +787,7 @@ def figmenu(figs):
     Examples
     --------
 
-    >>> from dstauffman import figmenu
+    >>> from dcstools import figmenu
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()

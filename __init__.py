@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-The "dstauffman" module is a generic Python code library of functions that I (David C. Stauffer)
+The "dcstools" module is a generic Python code library of functions that I (David C. Stauffer)
 have found useful.
 
 Notes

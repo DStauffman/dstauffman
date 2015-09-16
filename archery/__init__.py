@@ -24,7 +24,7 @@ Notes
     then continued as a fun coding project and a way to learn more about Python programming.  This
     code is intended to be open source and  freely distributed.  Hopefully it will grow to be useful
     for other people and other tournaments.
-#.  Ported to the "dstauffman" library by David C. Stauffer in June 2015.
+#.  Ported to the "dcstools" library by David C. Stauffer in June 2015.
 """
 # pylint: disable=C0301
 

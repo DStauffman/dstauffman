@@ -81,8 +81,8 @@ import doctest
 from enum import unique
 import numpy as np
 import unittest
-# personal dstauffman libary imports
-from dstauffman import IntEnumPlus
+# personal dcstools libary imports
+from dcstools import IntEnumPlus
 
 #%% Constants
 CHAR_DICT = {'.':0, 'S':1, 'E':2, 'K':3, 'W':4, 'R':5, 'B':6, 'T':7, 'L':8, 'x': 9}
@@ -234,7 +234,7 @@ def n2c(num):
     Examples
     --------
 
-    >>> from dstauffman.games.knight import n2c
+    >>> from dcstools.games.knight import n2c
     >>> num  = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     >>> char = [n2c(this_num) for this_num in num]
     >>> print(char)
@@ -289,7 +289,7 @@ def c2n(char):
     Examples
     --------
 
-    >>> from dstauffman.games.knight import c2n
+    >>> from dcstools.games.knight import c2n
     >>> char = ['.', 'S', 'E', 'K', 'W', 'R', 'B', 'T', 'L']
     >>> num = [c2n(this_char) for this_char in char]
     >>> print(num)
@@ -485,7 +485,7 @@ def print_sequence(board, moves):
 
 #%% Unit test
 def main():
-    unittest.main(module='dstauffman.games.test_knight', exit=False)
+    unittest.main(module='dcstools.games.test_knight', exit=False)
     doctest.testmod(verbose=False)
 
 #%% Script

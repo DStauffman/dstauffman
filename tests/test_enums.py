@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file for the `enums` module of the "dstauffman" library.  It is intented to contain test
+Test file for the `enums` module of the "dcstools" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
 
 Notes
@@ -14,7 +14,7 @@ from __future__ import division
 from enum import unique
 import numpy as np
 import unittest
-import dstauffman as dcs
+import dcstools as dcs
 
 class _Example_Enum(dcs.IntEnumPlus):
     field_one = 1

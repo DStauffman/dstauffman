@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 r"""
-Utils module file for the "dstauffman" library.  It contains generic utilities that can be
+Utils module file for the "dcstools" library.  It contains generic utilities that can be
 independently defined and used by other modules.
 
 Notes
 -----
-#.  By design, this module does not reference any other piece of the dstauffman code base except
+#.  By design, this module does not reference any other piece of the dcstools code base except
         constants or enums to avoid circular references.
 #.  Written by David C. Stauffer in March 2015.
 """
@@ -23,7 +23,7 @@ import sys
 import types
 import unittest
 from datetime import datetime, timedelta
-from dstauffman.constants import MONTHS_PER_YEAR
+from dcstools.constants import MONTHS_PER_YEAR
 # compatibility issues
 ver = sys.version_info
 if ver[0] == 2:
@@ -53,7 +53,7 @@ def _nan_equal(a, b):
     Examples
     --------
 
-    >>> from dstauffman.utils import _nan_equal
+    >>> from dcstools.utils import _nan_equal
     >>> import numpy as np
     >>> a = np.array([1, 2, np.nan])
     >>> b = np.array([1, 2, np.nan])
@@ -107,7 +107,7 @@ def rms(data, axis=None, keepdims=False):
     Examples
     --------
 
-    >>> from dstauffman import rms
+    >>> from dcstools import rms
     >>> rms([0, 1, 0., -1])
     0.70710678118654757
 
@@ -145,7 +145,7 @@ def setup_dir(folder, rec=False):
     Examples
     --------
 
-    >>> from dstauffman import setup_dir
+    >>> from dcstools import setup_dir
     >>> setup_dir(r'C:\Temp\test_folder') # doctest: +SKIP
 
     """
@@ -202,7 +202,7 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
     Examples
     --------
 
-    >>> from dstauffman import compare_two_classes
+    >>> from dcstools import compare_two_classes
     >>> c1 = type('Class1', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text'})
     >>> c2 = type('Class2', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text'})
     >>> is_same = compare_two_classes(c1, c2)
@@ -312,7 +312,7 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
     Examples
     --------
 
-    >>> from dstauffman import compare_two_dicts
+    >>> from dcstools import compare_two_dicts
     >>> d1 = {'a': 1, 'b': 2, 'c': 3}
     >>> d2 = {'a': 1, 'b': 5, 'd': 6}
     >>> is_same = compare_two_dicts(d1, d2)
@@ -382,7 +382,7 @@ def round_time(dt=None, round_to_sec=60):
     Examples
     --------
 
-    >>> from dstauffman import round_time
+    >>> from dcstools import round_time
     >>> from datetime import datetime
     >>> dt = datetime(2015, 3, 13, 8, 4, 10)
     >>> rounded_time = round_time(dt)
@@ -418,7 +418,7 @@ def make_python_init(folder):
     Examples
     --------
 
-    >>> from dstauffman import make_python_init, get_root_dir
+    >>> from dcstools import make_python_init, get_root_dir
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
     >>> print(text[0:20])
@@ -486,7 +486,7 @@ def get_python_definitions(text):
     Examples
     --------
 
-    >>> from dstauffman import get_python_definitions
+    >>> from dcstools import get_python_definitions
     >>> text = 'def a():\n    pass\n'
     >>> funcs = get_python_definitions(text)
     >>> print(funcs)
@@ -530,7 +530,7 @@ def read_text_file(filename):
     Examples
     --------
 
-    >>> from dstauffman import read_text_file, write_text_file, get_tests_dir
+    >>> from dcstools import read_text_file, write_text_file, get_tests_dir
     >>> import os
     >>> text = 'Hello, World\n'
     >>> write_text_file(os.path.join(get_tests_dir(), 'temp_file.txt'), text)
@@ -576,7 +576,7 @@ def write_text_file(filename, text):
     Examples
     --------
 
-    >>> from dstauffman import write_text_file, get_tests_dir
+    >>> from dcstools import write_text_file, get_tests_dir
     >>> import os
     >>> text = 'Hello, World\n'
     >>> write_text_file(os.path.join(get_tests_dir(), 'temp_file.txt'), text)
@@ -615,7 +615,7 @@ def disp(struct, level=0, padding=None, suppress_output=False):
     Examples
     --------
 
-    >>> from dstauffman import disp
+    >>> from dcstools import disp
     >>> a = type('a', (object, ), {'b': 0, 'c' : '[1, 2, 3]', 'd': 'text'})
     >>> txt = disp(a)
     b : 0
@@ -675,7 +675,7 @@ def convert_annual_to_monthly_probability(annual):
     Examples
     --------
 
-    >>> from dstauffman import convert_annual_to_monthly_probability
+    >>> from dcstools import convert_annual_to_monthly_probability
     >>> import numpy as np
     >>> annual  = np.array([0, 0.1, 1])
     >>> monthly = convert_annual_to_monthly_probability(annual)
@@ -712,7 +712,7 @@ def convert_monthly_to_annual_probability(monthly):
     Examples
     --------
 
-    >>> from dstauffman import convert_monthly_to_annual_probability
+    >>> from dcstools import convert_monthly_to_annual_probability
     >>> import numpy as np
     >>> monthly = np.array([0, 0.1, 1])
     >>> annual = convert_monthly_to_annual_probability(monthly)
@@ -750,7 +750,7 @@ def get_root_dir():
     Examples
     --------
 
-    >>> from dstauffman import get_root_dir
+    >>> from dcstools import get_root_dir
     >>> folder = get_root_dir()
 
     """
@@ -775,7 +775,7 @@ def get_tests_dir():
     Examples
     --------
 
-    >>> from dstauffman import get_tests_dir
+    >>> from dcstools import get_tests_dir
     >>> folder = get_tests_dir()
 
     """
@@ -800,7 +800,7 @@ def get_data_dir():
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir
+    >>> from dcstools import get_data_dir
     >>> folder = get_data_dir()
 
     """
@@ -825,7 +825,7 @@ def get_images_dir():
     Examples
     --------
 
-    >>> from dstauffman import get_images_dir
+    >>> from dcstools import get_images_dir
     >>> folder = get_images_dir()
 
     """
@@ -849,7 +849,7 @@ def capture_output():
     Examples
     --------
 
-    >>> from dstauffman import capture_output
+    >>> from dcstools import capture_output
     >>> with capture_output() as (out, _):
     ...     print('Hello, World!')
     >>> output = out.getvalue().strip()
@@ -900,7 +900,7 @@ def unit(data, axis=1):
     Examples
     --------
 
-    >>> from dstauffman import unit
+    >>> from dcstools import unit
     >>> import numpy as np
     >>> data = np.array([[1, 0, -1],[0, 0, 0], [0, 0, 1]])
     >>> norm_data = unit(data, axis=0)
@@ -940,7 +940,7 @@ def nonzero_indices(data):
     Examples
     --------
 
-    >>> from dstauffman import nonzero_indices
+    >>> from dcstools import nonzero_indices
     >>> data = [True, True, False, False, True]
     >>> ix   = nonzero_indices(data)
     >>> print(ix) # doctest: +NORMALIZE_WHITESPACE
@@ -1003,7 +1003,7 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
     Examples
     --------
 
-    >>> from dstauffman import combine_sets
+    >>> from dcstools import combine_sets
     >>> n1 = 5
     >>> u1 = 1
     >>> s1 = 0.5
@@ -1068,10 +1068,10 @@ def reload_package(root_module, disp_reloads=True): # pragma: no cover
 
     Examples
     --------
-    >>> from dstauffman import reload_package
-    >>> import dstauffman as dcs
+    >>> from dcstools import reload_package
+    >>> import dcstools as dcs
     >>> reload_package(dcs) # doctest: +ELLIPSIS
-    loading dstauffman...
+    loading dcstools...
 
     """
     package_name = root_module.__name__
@@ -1109,7 +1109,7 @@ def delete_pyc(folder, recursive=True):
 
     Examples
     --------
-    >>> from dstauffman import get_root_dir, delete_pyc
+    >>> from dcstools import get_root_dir, delete_pyc
     >>> folder = get_root_dir()
     >>> delete_pyc(folder)
 

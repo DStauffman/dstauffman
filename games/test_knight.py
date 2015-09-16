@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file for the `games.knight` module of the dstauffman code.  It is intented to contain test
+Test file for the `games.knight` module of the dcstools code.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
 
 Notes
@@ -13,8 +13,8 @@ from __future__ import print_function
 from __future__ import division
 import numpy as np
 import unittest
-from dstauffman import capture_output
-import dstauffman.games.knight as knight
+from dcstools import capture_output
+import dcstools.games.knight as knight
 
 #%% n2c & c2n & CHAR_DICT
 class Test_num_to_char_and_back(unittest.TestCase):

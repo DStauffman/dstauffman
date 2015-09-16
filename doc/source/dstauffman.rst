@@ -1,53 +1,53 @@
-dstauffman package
+dcstools package
 =================
 
 Submodules
 ----------
 
-dstauffman.classes module
+dcstools.classes module
 -------------------------
 
-.. automodule:: dstauffman.classes
+.. automodule:: dcstools.classes
     :members:
     :undoc-members:
     :show-inheritance:
 
-dstauffman.constants module
+dcstools.constants module
 ---------------------------
 
-.. automodule:: dstauffman.constants
+.. automodule:: dcstools.constants
     :members:
     :undoc-members:
     :show-inheritance:
 
-dstauffman.photos module
+dcstools.photos module
 ------------------------
 
-.. automodule:: dstauffman.photos
+.. automodule:: dcstools.photos
     :members:
     :undoc-members:
     :show-inheritance:
 
-dstauffman.plotting module
+dcstools.plotting module
 --------------------------
 
-.. automodule:: dstauffman.plotting
+.. automodule:: dcstools.plotting
     :members:
     :undoc-members:
     :show-inheritance:
 
-dstauffman.quat module
+dcstools.quat module
 ----------------------
 
-.. automodule:: dstauffman.quat
+.. automodule:: dcstools.quat
     :members:
     :undoc-members:
     :show-inheritance:
 
-dstauffman.utils module
+dcstools.utils module
 -----------------------
 
-.. automodule:: dstauffman.utils
+.. automodule:: dcstools.utils
     :members:
     :undoc-members:
     :show-inheritance:
@@ -56,7 +56,7 @@ dstauffman.utils module
 Module contents
 ---------------
 
-.. automodule:: dstauffman
+.. automodule:: dcstools
     :members:
     :undoc-members:
     :show-inheritance:

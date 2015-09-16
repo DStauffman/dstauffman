@@ -1,7 +1,7 @@
-dstauffman
+dcstools
 ==========
 
 .. toctree::
    :maxdepth: 4
 
-   dstauffman
+   dcstools

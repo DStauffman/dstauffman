@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file to execute all the docstrings within the dstauffman code.
+Test file to execute all the docstrings within the dcstools code.
 
 Notes
 -----
@@ -12,7 +12,7 @@ from __future__ import print_function
 from __future__ import division
 import doctest
 import os
-import dstauffman as dcs
+import dcstools as dcs
 
 #%% Locals
 verbose = False

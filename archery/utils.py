@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Utils module file for the "dstauffman.archery" library.  It defines common utilities for use in
+Utils module file for the "dcstools.archery" library.  It defines common utilities for use in
 the rest of the code.
 
 Notes
@@ -15,7 +15,7 @@ from __future__ import division
 import os
 import pandas as pd
 # model imports
-from dstauffman.archery.constants import COL_GENDER, COL_DIVISION, DIVISIONS, GENDERS, \
+from dcstools.archery.constants import COL_GENDER, COL_DIVISION, DIVISIONS, GENDERS, \
                                          SHEET_NAME_INDIV
 
 #%% Functions - display_info
@@ -113,7 +113,7 @@ def get_root_dir():
     Examples
     --------
 
-    >>> from dstauffman import get_root_dir
+    >>> from dcstools import get_root_dir
     >>> folder = get_root_dir()
 
     """

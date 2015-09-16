@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Classes module file for the "dstauffman" library.  It contains the high level classes used to
+Classes module file for the "dcstools" library.  It contains the high level classes used to
 subclass other classes.
 
 Notes
@@ -13,7 +13,7 @@ from __future__ import print_function
 from __future__ import division
 import sys
 import unittest
-from dstauffman.utils import disp
+from dcstools.utils import disp
 
 #%% Functions - frozen
 def frozen(set):

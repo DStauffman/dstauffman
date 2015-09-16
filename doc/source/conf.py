@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# dstauffman documentation build configuration file, created by
+# dcstools documentation build configuration file, created by
 # sphinx-quickstart on Thu Mar 12 12:36:30 2015.
 #
 # This file is execfile()d with the current directory set to its
@@ -15,7 +15,7 @@
 
 import sys
 import os
-import dstauffman
+import dcstools
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -52,7 +52,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = 'dstauffman'
+project = 'dcstools'
 copyright = '2015, David C. Stauffer'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -185,7 +185,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'dstauffmandoc'
+htmlhelp_basename = 'dcstoolsdoc'
 
 
 # -- Options for LaTeX output ---------------------------------------------
@@ -205,7 +205,7 @@ latex_elements = {
 # (source start file, target name, title,
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
-  ('index', 'dstauffman.tex', 'dstauffman Documentation',
+  ('index', 'dcstools.tex', 'dcstools Documentation',
    'David C. Stauffer', 'manual'),
 ]
 
@@ -235,7 +235,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'dstauffman', 'dstauffman Documentation',
+    ('index', 'dcstools', 'dcstools Documentation',
      ['David C. Stauffer'], 1)
 ]
 
@@ -249,8 +249,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'dstauffman', 'dstauffman Documentation',
-   'David C. Stauffer', 'dstauffman', 'One line description of project.',
+  ('index', 'dcstools', 'dcstools Documentation',
+   'David C. Stauffer', 'dcstools', 'One line description of project.',
    'Miscellaneous'),
 ]
 

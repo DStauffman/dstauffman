@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Brackets module file for the "dstauffman.archery" library.  It defines functions to generate
+Brackets module file for the "dcstools.archery" library.  It defines functions to generate
 brackets based on individual seed order.
 
 Notes
@@ -16,12 +16,12 @@ from __future__ import division
 import math
 import os
 # model imports
-from dstauffman import read_text_file, write_text_file
-from dstauffman.archery.constants import GENDERS, DIVISIONS, COL_LASTNAME, COL_FIRSTNAME, \
+from dcstools import read_text_file, write_text_file
+from dcstools.archery.constants import GENDERS, DIVISIONS, COL_LASTNAME, COL_FIRSTNAME, \
                                          COL_GENDER, COL_DIVISION, MAX_WAVES, COL_32_WIN, \
                                          COL_16_WIN, COL_08_WIN, COL_04_WIN, COL_02_WIN, COL_01_WIN
-from dstauffman.archery.utils     import import_from_excel, export_to_excel, display_info
-from dstauffman.archery.bales     import assign_bales, validate_bales
+from dcstools.archery.utils     import import_from_excel, export_to_excel, display_info
+from dcstools.archery.bales     import assign_bales, validate_bales
 
 #%% Functions - write_brackets
 def write_brackets(data, filename='', team='indiv', display=True):

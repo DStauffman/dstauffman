@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file for the `utils` module of the "dstauffman" library.  It is intented to contain test
+Test file for the `utils` module of the "dcstools" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
 
 Notes
@@ -18,7 +18,7 @@ import os
 import sys
 import time
 import unittest
-import dstauffman as dcs
+import dcstools as dcs
 
 #%% _nan_equal
 class Test__nan_equal(unittest.TestCase):
@@ -826,7 +826,7 @@ class Test_combine_sets(unittest.TestCase):
 #            dcs.reload_package(dcs)
 #        output = out.getvalue().strip()
 #        out.close()
-#        self.assertTrue(output.startswith('loading dstauffman.'))
+#        self.assertTrue(output.startswith('loading dcstools.'))
 #
 #    def test_suppressed(self):
 #        dcs.reload_package(dcs, disp_reloads=False)

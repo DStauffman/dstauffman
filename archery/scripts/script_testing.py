@@ -13,8 +13,8 @@ from __future__ import print_function
 from __future__ import division
 import os
 # model imports
-import dstauffman as dcs
-import dstauffman.archery as arch
+import dcstools as dcs
+import dcstools.archery as arch
 
 #%% Variables
 # simulate stuff?

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Photos module file for the "dstauffman" library.  It contains a collection of commands that are
+Photos module file for the "dcstools" library.  It contains a collection of commands that are
 useful for maintaining photo galleries.
 
 Notes
@@ -18,7 +18,7 @@ import os
 from PIL import Image
 import shutil
 import unittest
-from dstauffman.utils     import setup_dir
+from dcstools.utils     import setup_dir
 
 #%% Local Constants
 ALLOWABLE_EXTENSIONS = frozenset(['.jpg', '.ini', '.png', '.gif'])
@@ -52,7 +52,7 @@ def find_missing_nums(folder, old_picasa=True, digit_check=True, \
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, find_missing_nums
+    >>> from dcstools import get_data_dir, find_missing_nums
     >>> folder = get_data_dir()
     >>> find_missing_nums(folder)
 
@@ -132,7 +132,7 @@ def find_unexpected_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, find_unexpected_ext
+    >>> from dcstools import get_data_dir, find_unexpected_ext
     >>> folder = get_data_dir()
     >>> find_unexpected_ext(folder) # doctest: +ELLIPSIS
     Finding any unexpected file extensions...
@@ -170,7 +170,7 @@ def rename_old_picasa_files(folder):
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, rename_old_picasa_files
+    >>> from dcstools import get_data_dir, rename_old_picasa_files
     >>> folder = get_data_dir()
     >>> rename_old_picasa_files(folder)
 
@@ -218,7 +218,7 @@ def rename_upper_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, rename_upper_ext
+    >>> from dcstools import get_data_dir, rename_upper_ext
     >>> folder = get_data_dir()
     >>> rename_upper_ext(folder)
     Searching for file extensions to rename...
@@ -268,7 +268,7 @@ def find_long_filenames(folder):
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, find_long_filenames
+    >>> from dcstools import get_data_dir, find_long_filenames
     >>> folder = get_data_dir()
     >>> find_long_filenames(folder) # doctest: +ELLIPSIS
     Finding long filenames...
@@ -340,7 +340,7 @@ def batch_resize(folder, max_width=8192, max_height=8192, \
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, batch_resize
+    >>> from dcstools import get_data_dir, batch_resize
     >>> folder = get_data_dir()
     >>> batch_resize(folder, max_width=2048, max_height=2048) # doctest: +ELLIPSIS
     Processing folder: "..."
@@ -446,7 +446,7 @@ def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, e
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, convert_tif_to_jpg
+    >>> from dcstools import get_data_dir, convert_tif_to_jpg
     >>> folder = get_data_dir()
     >>> convert_tif_to_jpg(folder) # doctest: +ELLIPSIS
     Processing folder: "..."
@@ -560,7 +560,7 @@ def number_files(folder, prefix='Image ', start=1, digits=2, process_extensions=
 
     Examples
     --------
-    >>> from dstauffman import number_files, get_data_dir
+    >>> from dcstools import number_files, get_data_dir
     >>> folder = get_data_dir()
     >>> prefix = 'Photo '
     >>> start  = 5

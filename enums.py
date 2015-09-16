@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Enums module file for the dstauffman library.  It defines enumerator related functions for the rest
+Enums module file for the dcstools library.  It defines enumerator related functions for the rest
 of the code..
 
 Notes
@@ -109,12 +109,12 @@ def dist_enum_and_mons(num, distribution, max_months, prng, start_num=1, alpha=1
     #.  Written by David C. Stauffer in April 2015.
     #.  Updated by David C. Stauffer in June 2015 to use a beta curve to distribute the number of
         months spent in each state.
-    #.  Made into a generic function for the dstauffman library by David C. Stauffer in July 2015.
+    #.  Made into a generic function for the dcstools library by David C. Stauffer in July 2015.
 
     Examples
     --------
 
-    >>> from dstauffman import dist_enum_and_mons
+    >>> from dcstools import dist_enum_and_mons
     >>> import numpy as np
     >>> num = 10000
     >>> distribution = 1./100*np.array([9.5, 90, 0.25, 0.25])

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Example script for generating plots using the dstauffman library.
+Example script for generating plots using the dcstools library.
 
 Notes
 -----
@@ -12,7 +12,7 @@ Notes
 from __future__ import print_function
 from __future__ import division
 import numpy as np
-import dstauffman as dcs
+import dcstools as dcs
 
 #%% Main function
 if __name__=='__main__':

@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file for the `plotting` module module of the "dstauffman" library.  It is intented to contain test
+Test file for the `plotting` module module of the "dcstools" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
 
 Notes
@@ -16,7 +16,7 @@ import matplotlib.cm as cmx
 import numpy as np
 import os
 import unittest
-import dstauffman as dcs
+import dcstools as dcs
 from PyQt4.QtTest import QTest
 from PyQt4.QtCore import Qt
 
