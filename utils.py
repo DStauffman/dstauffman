@@ -1096,7 +1096,7 @@ def reload_package(root_module, disp_reloads=True): # pragma: no cover
         oldmodule.__dict__.update(newmodule.__dict__)
 
 #%% Functions - delete_pyc
-def delete_pyc(folder, recursive=True):
+def delete_pyc(folder, recursive=True, print_progress=True):
     r"""
     Deletes all the *.pyc files (Python Byte Code) in the specified directory.
 
@@ -1120,6 +1120,8 @@ def delete_pyc(folder, recursive=True):
         (_, file_ext) = os.path.splitext(name)
         if file_ext == '.pyc':
             # remove this file
+            if print_progress:
+                print('Removing "{}"'.format(os.path.join(root, name)))
             os.remove(os.path.join(root, name))
 
     if recursive:

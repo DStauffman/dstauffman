@@ -3,6 +3,7 @@
 branch = True
 omit =
     *tests/*
+    *games/*
 
 [report]
 # Regexes for lines to exclude from consideration

@@ -851,17 +851,43 @@ class Test_delete_pyc(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.file1))
         self.assertTrue(os.path.isdir(self.fold2))
         self.assertTrue(os.path.isfile(self.file2))
-        dcs.delete_pyc(self.fold1)
+        with dcs.capture_output() as (out, _):
+            dcs.delete_pyc(self.fold1)
+        output = out.getvalue().strip()
+        out.close()
+        lines = output.split('\n')
         self.assertFalse(os.path.isfile(self.file1))
         self.assertFalse(os.path.isfile(self.file2))
+        for this_line in lines:
+            self.assertTrue(this_line.startswith('Removing "'))
+            self.assertTrue(this_line.endswith('temp_file.pyc"') or this_line.endswith('temp_file2.pyc"'))
 
     def test_not_recursive(self):
         self.assertTrue(os.path.isfile(self.file1))
         self.assertTrue(os.path.isdir(self.fold2))
         self.assertTrue(os.path.isfile(self.file2))
-        dcs.delete_pyc(self.fold1, recursive=False)
+        with dcs.capture_output() as (out, _):
+            dcs.delete_pyc(self.fold1, recursive=False)
+        output = out.getvalue().strip()
+        out.close()
+        lines = output.split('\n')
         self.assertFalse(os.path.isfile(self.file1))
         self.assertTrue(os.path.isfile(self.file2))
+        for this_line in lines:
+            self.assertTrue(this_line.startswith('Removing "'))
+            self.assertTrue(this_line.endswith('temp_file.pyc"'))
+
+    def test_no_logging(self):
+        self.assertTrue(os.path.isfile(self.file1))
+        self.assertTrue(os.path.isdir(self.fold2))
+        self.assertTrue(os.path.isfile(self.file2))
+        with dcs.capture_output() as (out, _):
+            dcs.delete_pyc(self.fold1, print_progress=False)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertFalse(os.path.isfile(self.file1))
+        self.assertFalse(os.path.isfile(self.file2))
+        self.assertEqual(output, '')
 
     def tearDown(self):
         if os.path.isfile(self.file1):
