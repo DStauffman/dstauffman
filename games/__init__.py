@@ -4,6 +4,7 @@ The "games" submodule within the "dstauffman" module is a playground for simulat
 different types of games.
 
 The "brick" file solves a 3D red and gray brick puzzle.
+The "knight" file solves chessboard and knight related logic puzzles.
 
 Notes
 -----
