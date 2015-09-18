@@ -22,14 +22,20 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 from matplotlib.patches import Rectangle
-from PyQt4 import QtGui, QtCore
+try:
+    from PyQt5.QtWidgets import QPushButton
+    from PyQt5.QtGui import QIcon
+    from PyQt5.QtCore import QSize
+except ImportError:
+    from PyQt4.QtGui import QPushButton, QIcon
+    from PyQt4.QtCore import QSize
 # model imports
 from dstauffman.classes   import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
 from dstauffman.utils     import get_images_dir, rms
 
 #%% Private Classes - _HoverButton
-class _HoverButton(QtGui.QPushButton):
+class _HoverButton(QPushButton):
     r"""Custom button that allows hovering and icons."""
     def __init__(self, *args, **kwargs):
         # initialize
@@ -39,9 +45,9 @@ class _HoverButton(QtGui.QPushButton):
         self.setStyleSheet('border: 0px;')
         # set icon
         for this_arg in args:
-            if isinstance(this_arg, QtGui.QIcon):
+            if isinstance(this_arg, QIcon):
                 self.setIcon(this_arg)
-                self.setIconSize(QtCore.QSize(24, 24))
+                self.setIconSize(QSize(24, 24))
 
     def enterEvent(self, event):
         # Draw border on hover
@@ -107,19 +113,19 @@ class MyCustomToolbar():
         # to determine which figure actually triggered the button events.)
         self.fig_number = fig.number
         # create buttons - Prev Plot
-        icon = QtGui.QIcon(os.path.join(get_images_dir(), 'prev_plot.png'))
+        icon = QIcon(os.path.join(get_images_dir(), 'prev_plot.png'))
         self.btn_prev_plot = _HoverButton(icon, '')
         self.btn_prev_plot.setToolTip('Show the previous plot')
         fig.canvas.toolbar.addWidget(self.btn_prev_plot)
         self.btn_prev_plot.clicked.connect(self.prev_plot)
         # create buttons - Next Plot
-        icon = QtGui.QIcon(os.path.join(get_images_dir(), 'next_plot.png'))
+        icon = QIcon(os.path.join(get_images_dir(), 'next_plot.png'))
         self.btn_next_plot = _HoverButton(icon, '')
         self.btn_next_plot.setToolTip('Show the next plot')
         fig.canvas.toolbar.addWidget(self.btn_next_plot)
         self.btn_next_plot.clicked.connect(self.next_plot)
         # create buttons - Close all
-        icon = QtGui.QIcon(os.path.join(get_images_dir(), 'close_all.png'))
+        icon = QIcon(os.path.join(get_images_dir(), 'close_all.png'))
         self.btn_close_all = _HoverButton(icon, '')
         self.btn_close_all.setToolTip('Close all the open plots')
         fig.canvas.toolbar.addWidget(self.btn_close_all)

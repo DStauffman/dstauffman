@@ -17,8 +17,12 @@ import numpy as np
 import os
 import unittest
 import dstauffman as dcs
-from PyQt4.QtTest import QTest
-from PyQt4.QtCore import Qt
+try:
+    from PyQt5.QtTest import QTest
+    from PyQt5.QtCore import Qt
+except ImportError:
+    from PyQt4.QtTest import QTest
+    from PyQt4.QtCore import Qt
 
 #%% Classes for testing
 # Opts
