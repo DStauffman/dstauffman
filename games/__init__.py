@@ -5,6 +5,7 @@ different types of games.
 
 The "brick" file solves a 3D red and gray brick puzzle.
 The "knight" file solves chessboard and knight related logic puzzles.
+The "rubik" file solves Rubik's Cube related permutation puzzles.
 
 Notes
 -----
