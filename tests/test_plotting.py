@@ -20,7 +20,7 @@ import dstauffman as dcs
 try:
     from PyQt5.QtTest import QTest
     from PyQt5.QtCore import Qt
-except ImportError:
+except ImportError: # pragma: no cover
     from PyQt4.QtTest import QTest
     from PyQt4.QtCore import Qt
 

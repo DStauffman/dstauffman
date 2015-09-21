@@ -26,7 +26,7 @@ try:
     from PyQt5.QtWidgets import QPushButton
     from PyQt5.QtGui import QIcon
     from PyQt5.QtCore import QSize
-except ImportError:
+except ImportError: # pragma: no cover
     from PyQt4.QtGui import QPushButton, QIcon
     from PyQt4.QtCore import QSize
 # model imports
