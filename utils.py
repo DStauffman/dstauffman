@@ -1111,7 +1111,7 @@ def delete_pyc(folder, recursive=True, print_progress=True):
     --------
     >>> from dstauffman import get_root_dir, delete_pyc
     >>> folder = get_root_dir()
-    >>> delete_pyc(folder)
+    >>> delete_pyc(folder, print_progress=False)
 
     """
     def _remove_pyc(root, name):
