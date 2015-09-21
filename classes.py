@@ -13,7 +13,6 @@ from __future__ import print_function
 from __future__ import division
 import sys
 import unittest
-from dstauffman.utils import disp
 
 #%% Functions - frozen
 def frozen(set):
@@ -51,9 +50,6 @@ class Frozen(object):
     __setattr__ = frozen(object.__setattr__)
     class __metaclass__(type):
         __setattr__ = frozen(type.__setattr__)
-    # override the default repr options
-    def __repr__(self):
-        return disp(self, suppress_output=True)
 
 #%% Unit test
 if __name__ == '__main__':

@@ -592,62 +592,6 @@ def write_text_file(filename, text):
         print('Unable to open file "{}" for writing.'.format(filename))
         raise
 
-#%% Functions - disp
-def disp(struct, level=0, padding=None, suppress_output=False):
-    r"""
-    Matlab like 'disp' or display function.
-
-    Parameters
-    ----------
-    struct : class
-        Structure to display
-    level : int, optional
-        Level to indent, used for substructures within structures.
-    padding : int, optional
-        Minimum number of spaces to pad the results to
-    suppress_output : bool, optional
-        Choose whether to display results to the command window, default False, so show output
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in March 2015.
-
-    Examples
-    --------
-
-    >>> from dstauffman import disp
-    >>> a = type('a', (object, ), {'b': 0, 'c' : '[1, 2, 3]', 'd': 'text'})
-    >>> txt = disp(a)
-    b : 0
-    c : [1, 2, 3]
-    d : text
-
-    """
-    # padding per additional level
-    pad_per_level = 4
-    # get the variables within the structure
-    d = vars(struct)
-    # determine padding level
-    if padding is None:
-        padding = max([len(name) for name in d if not name.startswith('_')]) + 1
-    # initialize output
-    x = ''
-    # loop through dict of vars
-    for name in sorted(d):
-        if name.startswith('_'):
-            continue
-        # find out how many characters to pad on the front
-        pad_len = padding - len(name) - 2
-        # find out if an extra pad around the dots (" ... ") has room
-        extra_pad = ' ' if pad_len > -1 else ''
-        # append this variable
-        x = x + pad_per_level*level * ' ' + (name + ' ' + (pad_len * '.') + extra_pad + ': ' + str(d[name]) + '\n')
-    # print the results to the screen
-    if not suppress_output:
-        print(x[:-1])
-    # return the final results, minus the last newline character
-    return x[:-1]
-
 #%% Functions - convert_annual_to_monthly_probability
 def convert_annual_to_monthly_probability(annual):
     r"""

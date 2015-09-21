@@ -504,50 +504,6 @@ class Test_write_text_file(unittest.TestCase):
     def tearDownClass(cls):
         os.remove(cls.filepath)
 
-#%% disp
-class Test_disp(unittest.TestCase):
-    r"""
-    Tests the disp function with these cases:
-        TBD
-    """
-    def setUp(self):
-        self.a       = type('a', (object, ), {'b': 0, 'c' : '[1, 2, 3]', 'd': 'text'})
-        self.output1 = 'b : 0\nc : [1, 2, 3]\nd : text'
-        self.output2 = 'b .... : 0\nc .... : [1, 2, 3]\nd .... : text'
-        self.output3 = '    b : 0\n    c : [1, 2, 3]\n    d : text'
-
-    def test_normal(self):
-        with dcs.capture_output() as (out, _):
-            text = dcs.disp(self.a)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, self.output1)
-        self.assertEqual(text, self.output1)
-
-    def test_padding(self):
-        with dcs.capture_output() as (out, _):
-            text = dcs.disp(self.a, padding=7)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, self.output2)
-        self.assertEqual(text, self.output2)
-
-    def test_level(self):
-        with dcs.capture_output() as (out, _):
-            text = dcs.disp(self.a, level=1)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, self.output3[4:])
-        self.assertEqual(text, self.output3)
-
-    def test_suppressed_output(self):
-        with dcs.capture_output() as (out, _):
-            text = dcs.disp(self.a, suppress_output=True)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, '')
-        self.assertEqual(text, self.output1)
-
 #%% convert_annual_to_monthly_probability
 class Test_convert_annual_to_monthly_probability(unittest.TestCase):
     r"""
