@@ -30,7 +30,7 @@ def frozen(set):
         elif sys._getframe(1).f_code.co_name is '__init__':
             # Allow __setattr__ calls in __init__ calls of proper object types
             for key, val in sys._getframe(1).f_locals.items(): # pragma: no branch
-                if key=='self' and isinstance(val, self.__class__):
+                if key=='self' and isinstance(val, self.__class__): # pragma: no branch
                     set(self, name, value)
                     return
         raise AttributeError('You cannot add attributes to {}'.format(self))
