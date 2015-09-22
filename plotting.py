@@ -612,7 +612,7 @@ def storefig(fig, folder=None, plot_type='png'):
         # loop through the plot types
         for this_type in types:
             # save the figure to the specified plot type
-            this_fig.savefig(os.path.join(folder, this_title + '.' + this_type))
+            this_fig.savefig(os.path.join(folder, this_title + '.' + this_type), dpi=160)
 
 #%% Functions - titleprefix
 def titleprefix(fig, prefix=''):
