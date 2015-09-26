@@ -71,6 +71,7 @@ Level 4: Now repeat the Level 3 task for this 32x32 board.  Also, modify
 Level 5 [HARD]: Compute the longest sequence of moves to complete Level 3 without
     visiting the same square twice.  Use the 32x32 board.
 """
+# pylint: disable=C0326, C0103, C0301, E1101
 
 #%% Imports
 # backwards compatibility with v2.7
@@ -146,30 +147,27 @@ MOVES = frozenset({-4, -3, -2, -1, 1, 2, 3, 4})
 # The number represents the cardinal direction of the move: 1=North, 2=East, 3=South, 4=West
 # The sign of the number represents whether the second step is left or right (positive is clockwise)
 # Therefore:
-"""
 #  Move -1       Move +1        Move -2      Move +2       Move -3       Move +3       Move -4       Move +4
 # . E x . .  |  . . x E .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .
 # . . x . .  |  . . x . .  |  . . . . E  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  E . . . .
 # . . S . .  |  . . S . .  |  . . S x x  |  . . S x x  |  . . S . .  |  . . S . .  |  x x S . .  |  x x S . .
 # . . . . .  |  . . . . .  |  . . . . .  |  . . . . E  |  . . x . .  |  . . x . .  |  E . . . .  |  . . . . .
 # . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . x E .  |  . E x . .  |  . . . . .  |  . . . . .
-"""
 
 # Optional extended set?
-"""
 #  Move -5       Move +5        Move -6      Move +6       Move -7       Move +7       Move -8       Move +8
 # . E . . .  |  . . . E .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .
 # . x . . .  |  . . . x .  |  . . x x E  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  E x x . .
 # . x S . .  |  . . S x .  |  . . S . .  |  . . S . .  |  . . S x .  |  . x S . .  |  . . S . .  |  . . S . .
 # . . . . .  |  . . . . .  |  . . . . .  |  . . x x E  |  . . . x .  |  . x . . .  |  E x x . .  |  . . . . .
 # . . . . .  |  . . . . .  |  . . . . .  |  . . . . .  |  . . . E .  |  . E . . .  |  . . . . .  |  . . . . .
-"""
 
 #%% Classes - Piece
 @unique
 class Piece(IntEnumPlus):
     r"""
-    Enumerator for all the possible types of squares within the board, including start and end positions
+    Enumerator for all the possible types of squares within the board, including start and end
+    positions
     """
     null      = 0 # Empty square that has never been used
     start     = 1 # Original starting position
@@ -956,7 +954,7 @@ def solve_puzzle(board, costs, moves=None, solve_type='min', original_board=None
                     return
             else:
                 # this move is not better, so don't accept it
-                undo_move(board, this_move)
+                undo_move(board, this_move, original_board)
     # all possible moves didn't work, so this leg is dead, back out last move and exit
     if len(moves) > 0:
         last_move = moves.pop()
@@ -967,6 +965,7 @@ def solve_puzzle(board, costs, moves=None, solve_type='min', original_board=None
 
 #%% Unit test
 def main():
+    r"""Unit tests."""
     unittest.main(module='dstauffman.games.test_knight', exit=False)
     doctest.testmod(verbose=False)
 
@@ -1003,8 +1002,8 @@ if __name__ == '__main__':
     if 1 in do_steps:
         print('\nStep 1: see if the sequence is valid.')
         moves1 = [2, 2]
-        is_valid = check_valid_sequence(board1, moves1, costs1, print_status=True)
-        if is_valid:
+        is_valid1 = check_valid_sequence(board1, moves1, costs1, print_status=True)
+        if is_valid1:
             print_sequence(board1, moves1)
 
     # Step 2
@@ -1015,8 +1014,8 @@ if __name__ == '__main__':
         #best_cost = LARGE_INT*np.ones(soln_board.shape, dtype=int)
         solve_puzzle(soln_board, costs1, moves=moves2, solve_type='first')
         print(moves2)
-        is_valid = check_valid_sequence(board1, moves2, costs1, print_status=True)
-        if is_valid:
+        is_valid2 = check_valid_sequence(board1, moves2, costs1, print_status=True)
+        if is_valid2:
             print_sequence(board1, moves2)
 
     # Step 3
@@ -1027,8 +1026,8 @@ if __name__ == '__main__':
         #best_cost = LARGE_INT*np.ones(soln_board.shape, dtype=int)
         solve_puzzle(soln_board, costs1, moves=moves3, solve_type='min')
         print(moves3)
-        is_valid = check_valid_sequence(board1, moves3, costs1, print_status=True)
-        if is_valid:
+        is_valid3 = check_valid_sequence(board1, moves3, costs1, print_status=True)
+        if is_valid3:
             print_sequence(board1, moves3)
 
     # Step 4
