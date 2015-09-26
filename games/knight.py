@@ -85,10 +85,12 @@ import unittest
 from dstauffman import IntEnumPlus
 
 #%% Constants
+# hard-coded values
+LARGE_INT = 1000000
 # dictionaries
 CHAR_DICT = {'.':0, 'S':1, 'E':2, 'K':3, 'W':4, 'R':5, 'B':6, 'T':7, 'L':8, 'x': 9}
 NUM_DICT  = {value:key for (key, value) in CHAR_DICT.items()}
-COST_DICT = {'normal': 1, 'transport': 1, 'water': 2, 'lava': 5, 'invalid': 0, 'winning': -1}
+COST_DICT = {'normal': 1, 'transport': 1, 'water': 2, 'lava': 5, 'invalid': LARGE_INT, 'start': 0}
 # boards
 BOARD1 = r"""
 . . . . . . . .
@@ -280,6 +282,62 @@ def char_board_to_nums(char_board):
             board[i,j] = CHAR_DICT[lines[i][j]]
     return board
 
+#%% board_to_costs
+def board_to_costs(board):
+    r"""
+    Translates a board to the associated costs for landing on any square within the board.
+
+    Parameters
+    ----------
+    board : 2D ndarray of int
+        Board layout
+
+    Returns
+    -------
+    costs : 2D ndarray of int
+        Costs for each square on the board layout
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.knight import board_to_costs, Piece
+    >>> import numpy as np
+    >>> board = Piece.null * np.ones((3, 3), dtype=int)
+    >>> board[0, 0] = Piece.water
+    >>> board[1, 1] = Piece.start
+    >>> board[2, 2] = Piece.barrier
+    >>> costs = board_to_costs(board)
+    >>> print(costs) # doctest: +NORMALIZE_WHITESPACE
+    [[      2       1       1]
+     [      1       0       1]
+     [      1       1 1000000]]
+
+    """
+    costs = np.empty(board.shape, dtype=int)
+    costs.fill(COST_DICT['invalid'])
+    for i in range(costs.shape[0]):
+        for j in range(costs.shape[1]):
+            this_piece = board[i, j]
+            if this_piece in {Piece.rock, Piece.barrier}:
+                continue
+            elif this_piece in {Piece.null, Piece.final}:
+                costs[i, j] = COST_DICT['normal']
+            elif this_piece == Piece.start:
+                costs[i, j] = COST_DICT['start']
+            elif this_piece == Piece.transport:
+                costs[i, j] = COST_DICT['transport']
+            elif this_piece == Piece.water:
+                costs[i, j] = COST_DICT['water']
+            elif this_piece == Piece.lava:
+                costs[i, j] = COST_DICT['lava']
+            else:
+                raise ValueError('Cannot convert piece "{}" to a cost.'.format(this_piece))
+    return costs
+
 #%% get_current_position
 def get_current_position(board):
     r"""
@@ -310,7 +368,7 @@ def get_current_position(board):
     >>> board[1,4] = Piece.current
     >>> (x, y) = get_current_position(board)
     >>> print(x, y)
-    [1] [4]
+    1 4
 
     """
     # find position
@@ -324,7 +382,7 @@ def get_current_position(board):
         print_board(board)
     assert is_valid, 'Only exactly one current position may be found.'
     # otherwise if all is good, return the location
-    return (x, y)
+    return (x[0], y[0])
 
 #%% get_new_position
 def get_new_position(x, y, move):
@@ -405,6 +463,54 @@ def get_new_position(x, y, move):
     # return the whole set of stuff
     return (pos1, pos2, pos3)
 
+#%% check_board_boundaries
+def check_board_boundaries(x, y, xmax, ymax):
+    r"""
+    Checks that a given position is on the board.
+
+    Parameters
+    ----------
+    x : int
+        Current X position
+    y : int
+        Current Y position
+    xmax : int
+        Current board X maximum
+    ymax : int
+        Current board Y maximum
+
+    Returns
+    -------
+    is_valid : bool
+        Whether position is valid (defined as on the board)
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2015.
+    #.  This current assumes a rectangular board, but is a separate function in case that ever gets
+        more complicated.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.knight import check_board_boundaries
+    >>> x = 2
+    >>> y = 5
+    >>> xmax = 7
+    >>> ymax = 7
+    >>> is_valid = check_board_boundaries(x, y, xmax, ymax)
+    >>> print(is_valid)
+    True
+
+    """
+    # determine if X position is valid
+    x_valid = 0 <= x <= xmax
+    # determine if Y position is valid
+    y_valid = 0 <= y <= ymax
+    # combine results and return
+    is_valid = x_valid and y_valid
+    return is_valid
+
 #%% classify_move
 def classify_move(board, move):
     r"""
@@ -440,20 +546,20 @@ def classify_move(board, move):
 
     """
     # find the size of the board
-    (xmax, ymax) = board.shape
+    xmax = board.shape[0] - 1
+    ymax = board.shape[1] - 1
     # find current position
     (x, y) = get_current_position(board)
     # find the traversal for the desired move
     (pos1, pos2, pos3) = get_new_position(x, y, move)
-    # first check that pos3 is on the board and if not return
-    if pos3[0] < 0 or pos3[0] > xmax - 1 or pos3[1] < 0 or pos3[1] > ymax - 1:
+    # check that the final and intermediate positions were all on the board
+    valid_moves = np.array([check_board_boundaries(pos[0], pos[1], xmax, ymax) for pos in (pos1, pos2, pos3)])
+    if np.any(~valid_moves):
         return Move.off_board
-    # check that pos1 and pos2 are on the board
-    pass # TODO: this only matters for non-rectangular boards
     # get the values for each position
-    p1 = board[pos1[0], pos1[1]][0]
-    p2 = board[pos2[0], pos2[1]][0]
-    p3 = board[pos3[0], pos3[1]][0]
+    p1 = board[pos1[0], pos1[1]]
+    p2 = board[pos2[0], pos2[1]]
+    p3 = board[pos3[0], pos3[1]]
     # check for error conditions
     if p3 in {Piece.start, Piece.current}:
         raise ValueError("The piece should never be able to move to it's current or starting position.")
@@ -466,63 +572,19 @@ def classify_move(board, move):
     elif p3 == Piece.null:
         move_type = Move.normal
     elif p3 == Piece.final:
-        move_type = Move.winning # TODO: can the final piece be something besides a normal empty square?
+        move_type = Move.winning
     elif p3 == Piece.transport:
         move_type = Move.transport
     elif p3 == Piece.water:
         move_type = Move.water
     elif p3 == Piece.lava:
         move_type = Move.lava
+    else:
+        raise ValueError('Unexpected piece type "{}"'.format(p3))
     return move_type
 
-#%% get_move_cost
-def get_move_cost(move_type):
-    r"""
-    Determines the move cost based on the move type.
-
-    Parameters
-    ----------
-    move_type : class Move
-        Move type
-
-    Returns
-    -------
-    cost : int
-        Cost of the specified move type
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in September 2015.
-    #.  Uses the `COST_DICT` dictionary to determine the cost of the move.
-
-    Examples
-    --------
-
-    >>> from dstauffman.games.knight import get_move_cost, Move
-    >>> move_type = Move.normal
-    >>> cost = get_move_cost(move_type)
-    >>> print(cost)
-    1
-
-    """
-    if move_type <= 0:
-        cost = COST_DICT['invalid']
-    elif move_type == Move.normal:
-        cost = COST_DICT['normal']
-    elif move_type == Move.winning:
-        cost = COST_DICT['winning'] # TODO: this could be a limitation for only one cost here
-    elif move_type == Move.transport:
-        cost = COST_DICT['transport']
-    elif move_type == Move.water:
-        cost = COST_DICT['water']
-    elif move_type == Move.lava:
-        cost = COST_DICT['lava']
-    else:
-        raise ValueError('Unexpected move_type of "{}"'.format(move_type))
-    return cost
-
 #%% update_board
-def update_board(board, move):
+def update_board(board, move, costs=None):
     r"""
     Updates the new board based on the desired move.
 
@@ -532,6 +594,8 @@ def update_board(board, move):
         Board layout
     move : int
         Move to be performed
+    costs : 2D ndarray of int, optional
+        Costs for each square on the board layout
 
     Returns
     -------
@@ -560,25 +624,31 @@ def update_board(board, move):
     . . . . K
 
     """
+    # check for optional inputs
+    if costs is None:
+        costs = np.ones(board.shape, dtype=int)
+    # initialize output
+    cost = LARGE_INT
     # find current position
     (x, y) = get_current_position(board)
     # determine the move type
     move_type = classify_move(board, move)
-    # determine the move cost
-    cost = get_move_cost(move_type)
     # if valid, apply the move
-    if cost:
+    if move_type > 0:
         # set the current position to visited
         board[x, y] = Piece.visited
         # get the new position
         (_, _, (new_x, new_y)) = get_new_position(x, y, move)
         # set the new position to current
         board[new_x, new_y] = Piece.current
-    # return the cost of the update, zero means no update occured
+        # determine what the cost was
+        cost = costs[new_x, new_y]
+        if move_type == Move.winning:
+            cost = -cost
     return cost
 
 #%% undo_move
-def undo_move(board, last_move):
+def undo_move(board, last_move, original_board):
     r"""
     Undoes the last move on the board.
 
@@ -588,6 +658,8 @@ def undo_move(board, last_move):
         Board layout
     last_move : int
         Last move that was previously performed
+    original_board : 2D ndarray of int
+        Original board layout before starting solver
 
     Notes
     -----
@@ -598,15 +670,17 @@ def undo_move(board, last_move):
     --------
     >>> from dstauffman.games.knight import undo_move, print_board, Piece
     >>> import numpy as np
-    >>> board = np.zeros((2,5), dtype=int)
+    >>> board = np.zeros((2, 5), dtype=int)
     >>> board[0, 2] = Piece.visited
     >>> board[1, 4] = Piece.current
     >>> last_move = 2 # (2 right and 1 down)
+    >>> original_board = np.zeros((2, 5), dtype=int)
+    >>> original_board[0, 2] = Piece.start
     >>> print_board(board)
     . . x . .
     . . . . K
 
-    >>> undo_move(board, last_move)
+    >>> undo_move(board, last_move, original_board)
     >>> print_board(board)
     . . K . .
     . . . . .
@@ -615,7 +689,7 @@ def undo_move(board, last_move):
     # find the current position
     (x, y) = get_current_position(board)
     # set the current position back to a null piece
-    board[x, y] = Piece.null # TODO: might need better than this for cost function in future?
+    board[x, y] = original_board[x, y]
     # find the inverse move
     new_move = get_move_inverse(last_move)
     # get the new position
@@ -661,7 +735,7 @@ def get_move_inverse(move):
     return inv_move
 
 #%% check_valid_sequence
-def check_valid_sequence(board, moves, print_status=False):
+def check_valid_sequence(board, moves, costs, print_status=False):
     r"""
     Checks that the list of moves is a valid sequence to go from start to final position.
 
@@ -671,6 +745,8 @@ def check_valid_sequence(board, moves, print_status=False):
         Board layout
     moves : ndarray of int
         Moves to be performed
+    costs : 2D ndarray of int
+        Costs for each square on the board layout
     print_status : bool, optional
         Whether to print the board after each move is made, default is False
 
@@ -686,13 +762,14 @@ def check_valid_sequence(board, moves, print_status=False):
     Examples
     --------
 
-    >>> from dstauffman.games.knight import check_valid_sequence, Piece
+    >>> from dstauffman.games.knight import check_valid_sequence, Piece, board_to_costs
     >>> import numpy as np
     >>> board = np.zeros((3, 5), dtype=int)
     >>> board[0, 0] = Piece.start
     >>> board[2, 4] = Piece.final
     >>> moves = [2, 2]
-    >>> is_valid = check_valid_sequence(board, moves)
+    >>> costs = board_to_costs(board)
+    >>> is_valid = check_valid_sequence(board, moves, costs)
     >>> print(is_valid)
     True
 
@@ -704,11 +781,17 @@ def check_valid_sequence(board, moves, print_status=False):
     temp_board = board.copy()
     # set the current position to the start
     temp_board[temp_board == Piece.start] = Piece.current
+    # check that the board has a final goal
+    if not np.any(temp_board == Piece.final):
+        raise ValueError('The board does not have a finishing location.')
     for (i, this_move) in enumerate(moves):
-        cost = update_board(temp_board, this_move)
-        if cost == 0:
+        # update the board and determine the cost
+        cost = update_board(temp_board, this_move, costs)
+        # if cost was zero, then the move was invalid
+        if cost == COST_DICT['invalid']:
             is_valid = False
             break
+        # check for winning conditions (based on negative cost value)
         if cost < 0:
             is_done = True
             if i < len(moves)-1:
@@ -724,7 +807,7 @@ def check_valid_sequence(board, moves, print_status=False):
     return is_valid
 
 #%% print_sequence
-def print_sequence(board, moves):
+def print_sequence(board, moves, costs=None):
     r"""
     Prints the every board position for the given move sequence.
 
@@ -734,6 +817,8 @@ def print_sequence(board, moves):
         Board layout
     moves : ndarray of int
         Moves to be performed
+    costs : 2D ndarray of int, optional
+        Costs for each square on the board layout
 
     Notes
     -----
@@ -765,6 +850,9 @@ def print_sequence(board, moves):
     . . . . K
 
     """
+    # check for optional inputs
+    if costs is None:
+        costs = np.ones(board.shape, dtype=int)
     # create internal board for calculations
     temp_board = board.copy()
     print('Starting position:')
@@ -776,54 +864,92 @@ def print_sequence(board, moves):
         # print header
         print('\nAfter move {}'.format(i+1))
         # update board
-        cost = update_board(temp_board, this_move)
+        cost = update_board(temp_board, this_move, costs)
         # print new board
-        if cost:
+        if cost != COST_DICT['invalid']:
             print_board(temp_board)
         else:
             raise ValueError('Bad sequence.')
 
 #%% solve_puzzle
-def solve_puzzle(board, moves=None, num_moves=None, solve_type='min'):
+def solve_puzzle(board, costs, moves=None, solve_type='min', original_board=None):
     r"""
     Solves the puzzle with the desired solution type, from 'min', 'max', 'first'.
+
+    Parameters
+    ----------
+    board : 2D ndarray of int
+        Board layout
+    costs : 2D ndarray of int, optional
+        Costs for each square on the board layout
+    moves : ndarray of int
+        Moves to be performed
+    solve_type : str
+        Solver type, from {'min', 'max', 'first'}
+    original_board : 2D ndarray of int
+        Original board layout before doing any moves
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2015.
+    #.  Modifies `moves` inplace.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.knight import solve_puzzle, Piece, board_to_costs
+    >>> import numpy as np
+    >>> board = np.zeros((2,5), dtype=int)
+    >>> board[0,0] = Piece.start
+    >>> board[0,4] = Piece.final
+    >>> costs = board_to_costs(board)
+    >>> moves = []
+    >>> solve_type = 'first'
+    >>> solve_puzzle(board, costs, moves, solve_type)
+    Solution found!
+
+    >>> print(moves)
+    [2, -2]
+
     """
+    # check for correct inputs
     if moves is None:
         raise ValueError('`moves` needs to be initialized to a mutable list.')
-    if num_moves is None:
-        raise ValueError('`num_moves` needs to be initialized to a mutable list.')
+    # save original board for use in undoing moves
+    if original_board is None:
+        original_board = board.copy()
+    # check for initial start conditions
     if len(moves) == 0:
         # set the current position to the start
         board[board == Piece.start] = Piece.current
-        # set the number of moves necessary to get here
-        num_moves[board == Piece.current] = 0
     # try all the next possible moves
     for this_move in MOVES:
         # make the move
-        cost = update_board(board, this_move)
+        cost = update_board(board, this_move, costs)
         # if the move was invalid then go to the next one, if legal check if done, otherwise call recursively
-        if cost == 0:
-            continue
+        if cost == COST_DICT['invalid']:
+            # if the move was invalid, determine if it's because of a previously visited square
+            if solve_type == 'first':
+                continue
+            else: # TODO: code this
+                raise ValueError('Not yet implemented.')
         elif cost < 0:
-            # solution is found, check if better
-            this_move_len = len(moves) + 1
-            if this_move_len < num_moves[board == Piece.current] or solve_type == 'first':
-                num_moves[board == Piece.current] = this_move_len
+            # solution is found
+            if solve_type == 'first':
                 moves.append(this_move)
                 print('Solution found!')
                 return
-            else:
+            else: # TODO: Work on this
+                raise ValueError('Not yet implemented.')
                 # this move is not better, so don't accept it
-                undo_move(board, this_move)
+                undo_move(board, this_move, original_board)
                 continue
-        elif cost > 0:
-            this_move_len = len(moves) + 1
-            if this_move_len < num_moves[board == Piece.current] or solve_type == 'first':
-                # continue recursively
-                num_moves[board == Piece.current] = this_move_len
+        else:
+            if solve_type == 'first': # or this move is better
                 moves.append(this_move)
                 temp = len(moves)
-                solve_puzzle(board, moves=moves, num_moves=num_moves, solve_type=solve_type)
+                solve_puzzle(board, costs, moves=moves, solve_type=solve_type, \
+                    original_board=original_board)
                 if len(moves) < temp:
                     continue
                 else:
@@ -834,7 +960,7 @@ def solve_puzzle(board, moves=None, num_moves=None, solve_type='min'):
     # all possible moves didn't work, so this leg is dead, back out last move and exit
     if len(moves) > 0:
         last_move = moves.pop()
-        undo_move(board, last_move)
+        undo_move(board, last_move, original_board)
     else:
         print('No solution found.')
     return
@@ -846,11 +972,13 @@ def main():
 
 #%% Script
 if __name__ == '__main__':
-    # run unit tests
-    #main()
+    # flags for what steps to do
+    do_steps = {-1, 0, 1, 2} #do_steps = {-1, 0, 1, 2, 3, 4, 5}
 
-    #%% Solve puzzle
-    do_steps = {3} #do_steps = {0, 1, 2, 3, 4, 5}
+    # Step -1 (Run unit tests)
+    if -1 in do_steps:
+        main()
+
     # convert board to numeric representation for efficiency
     board1 = char_board_to_nums(BOARD1)
     board2 = char_board_to_nums(BOARD2)
@@ -860,7 +988,11 @@ if __name__ == '__main__':
     board3 = np.zeros((2,5), dtype=int)
     board3[0,0] = Piece.start
     board3[0,4] = Piece.final
+    costs1 = board_to_costs(board1)
+    costs2 = board_to_costs(board2)
+    costs3 = board_to_costs(board3)
 
+    # Step 0
     if 0 in do_steps:
         print('Step 0: print the boards.')
         print_board(board1)
@@ -871,7 +1003,7 @@ if __name__ == '__main__':
     if 1 in do_steps:
         print('\nStep 1: see if the sequence is valid.')
         moves1 = [2, 2]
-        is_valid = check_valid_sequence(board1, moves1, print_status=True)
+        is_valid = check_valid_sequence(board1, moves1, costs1, print_status=True)
         if is_valid:
             print_sequence(board1, moves1)
 
@@ -880,10 +1012,10 @@ if __name__ == '__main__':
         print('\nStep 2: solve the first board for any length solution.')
         moves2 = []
         soln_board = board1.copy()
-        num_moves = 1000000*np.ones(soln_board.shape, dtype=int)
-        solve_puzzle(soln_board, moves=moves2, num_moves=num_moves, solve_type='first')
+        #best_cost = LARGE_INT*np.ones(soln_board.shape, dtype=int)
+        solve_puzzle(soln_board, costs1, moves=moves2, solve_type='first')
         print(moves2)
-        is_valid = check_valid_sequence(board1, moves2, print_status=True)
+        is_valid = check_valid_sequence(board1, moves2, costs1, print_status=True)
         if is_valid:
             print_sequence(board1, moves2)
 
@@ -892,10 +1024,10 @@ if __name__ == '__main__':
         print('\nStep 3: solve the first board for the minimum length solution.')
         moves3 = []
         soln_board = board1.copy()
-        num_moves = 1000000*np.ones(soln_board.shape, dtype=int)
-        solve_puzzle(soln_board, moves=moves3, num_moves=num_moves, solve_type='min')
+        #best_cost = LARGE_INT*np.ones(soln_board.shape, dtype=int)
+        solve_puzzle(soln_board, costs1, moves=moves3, solve_type='min')
         print(moves3)
-        is_valid = check_valid_sequence(board1, moves3, print_status=True)
+        is_valid = check_valid_sequence(board1, moves3, costs1, print_status=True)
         if is_valid:
             print_sequence(board1, moves3)
 
