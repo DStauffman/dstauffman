@@ -231,7 +231,7 @@ def print_board(board):
         for j in range(cols):
             # print each piece in the row without a line continuation
             pad = ' ' if j < cols-1 else ''
-            print(NUM_DICT[board[i,j]] + pad, end='')
+            print(NUM_DICT[board[i, j]] + pad, end='')
         # add the line continuation at the end of each row
         print('')
 
@@ -277,7 +277,7 @@ def char_board_to_nums(char_board):
     # loop through and store all pieces and integer equivalents
     for i in range(rows):
         for j in range(cols):
-            board[i,j] = CHAR_DICT[lines[i][j]]
+            board[i, j] = CHAR_DICT[lines[i][j]]
     return board
 
 #%% board_to_costs
@@ -610,7 +610,7 @@ def update_board(board, move, costs=None):
 
     >>> from dstauffman.games.knight import update_board, print_board, Piece
     >>> import numpy as np
-    >>> board = np.zeros((2,5), dtype=int)
+    >>> board = np.zeros((2, 5), dtype=int)
     >>> board[0, 2] = Piece.current
     >>> move = 2 # (2 right and 1 down)
     >>> cost = update_board(board, move)
@@ -729,6 +729,7 @@ def get_move_inverse(move):
     2
 
     """
+    assert move in MOVES, 'Invalid move.'
     inv_move = np.sign(move) * (np.mod(np.abs(move) + 1, 4) + 1)
     return inv_move
 
@@ -858,7 +859,7 @@ def print_sequence(board, moves, costs=None):
     # set the current position to the start
     temp_board[temp_board == Piece.start] = Piece.current
     # loop through move sequence
-    for (i,this_move) in enumerate(moves):
+    for (i, this_move) in enumerate(moves):
         # print header
         print('\nAfter move {}'.format(i+1))
         # update board
@@ -898,8 +899,8 @@ def solve_puzzle(board, costs, moves=None, solve_type='min', original_board=None
     >>> from dstauffman.games.knight import solve_puzzle, Piece, board_to_costs
     >>> import numpy as np
     >>> board = np.zeros((2,5), dtype=int)
-    >>> board[0,0] = Piece.start
-    >>> board[0,4] = Piece.final
+    >>> board[0, 0] = Piece.start
+    >>> board[0, 4] = Piece.final
     >>> costs = board_to_costs(board)
     >>> moves = []
     >>> solve_type = 'first'
@@ -981,12 +982,12 @@ if __name__ == '__main__':
     # convert board to numeric representation for efficiency
     board1 = char_board_to_nums(BOARD1)
     board2 = char_board_to_nums(BOARD2)
-    board3 = np.zeros((5,5), dtype=int)
-    board3[2,2] = Piece.start
-    board3[3,4] = Piece.final
-    board3 = np.zeros((2,5), dtype=int)
-    board3[0,0] = Piece.start
-    board3[0,4] = Piece.final
+    board3 = np.zeros((5, 5), dtype=int)
+    board3[2, 2] = Piece.start
+    board3[3, 4] = Piece.final
+    board3 = np.zeros((2, 5), dtype=int)
+    board3[0, 0] = Piece.start
+    board3[0, 4] = Piece.final
     costs1 = board_to_costs(board1)
     costs2 = board_to_costs(board2)
     costs3 = board_to_costs(board3)

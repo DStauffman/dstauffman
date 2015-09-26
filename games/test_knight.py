@@ -212,10 +212,10 @@ class Test_check_board_boundaries(unittest.TestCase):
         Bad X and Y values
     """
     def setUp(self):
-        self.xmax = 4
-        self.ymax = 3
-        self.x = np.arange(self.xmax + 1)
-        self.y = np.arange(self.ymax + 1)
+        self.xmax  = 4
+        self.ymax  = 3
+        self.x     = np.arange(self.xmax + 1)
+        self.y     = np.arange(self.ymax + 1)
         self.bad_x = [-1, self.xmax + 1]
         self.bad_y = [-1, self.ymax + 1]
 
@@ -244,25 +244,309 @@ class Test_check_board_boundaries(unittest.TestCase):
                 self.assertFalse(is_valid)
 
 #%% classify_move
-pass # TODO: write this
+class Test_classify_move(unittest.TestCase):
+    r"""
+    Tests the classify_move function with the following cases:
+        Normal
+        Off board
+        Land on barrier or rock
+        Try to jump barrier
+        Land on rock
+        Visited
+        Winning
+        Transport
+        Water
+        Lava
+    """
+    def setUp(self):
+        self.board       = knight.Piece.null * np.ones((2, 5), dtype=int)
+        self.board[0, 2] = knight.Piece.current
+        self.move        = 2 # (2 right and 1 down, so end at [1, 4]
+        self.move_type   = knight.Move.normal
+
+    def test_normal(self):
+        move_type = knight.classify_move(self.board, self.move)
+        self.assertEqual(move_type, self.move_type)
+
+    def test_off_board(self):
+        move_type = knight.classify_move(self.board, -2)
+        self.assertEqual(move_type, knight.Move.off_board)
+
+    def test_land_on_barrier_or_rock(self):
+        self.board[1, 4] = knight.Piece.rock
+        move_type = knight.classify_move(self.board, self.move)
+        self.assertEqual(move_type, knight.Move.blocked)
+        self.board[1, 4] = knight.Piece.barrier
+        move_type = knight.classify_move(self.board, self.move)
+        self.assertEqual(move_type, knight.Move.blocked)
+
+    def test_cant_pass_barrier(self):
+        self.board[0, 4] = knight.Piece.barrier
+        move_type = knight.classify_move(self.board, self.move)
+        self.assertEqual(move_type, knight.Move.blocked)
+
+    def test_over_rock(self):
+        self.board[0, 4] = knight.Piece.rock
+        move_type = knight.classify_move(self.board, self.move)
+        self.assertEqual(move_type, self.move_type)
+
+    def test_visited(self):
+        self.board[1, 4] = knight.Piece.visited
+        move_type = knight.classify_move(self.board, self.move)
+        self.assertEqual(move_type, knight.Move.visited)
+
+    def test_winning(self):
+        self.board[1, 4] = knight.Piece.final
+        move_type = knight.classify_move(self.board, self.move)
+        self.assertEqual(move_type, knight.Move.winning)
+
+    def test_transport(self):
+        self.board[1, 4] = knight.Piece.transport
+        move_type = knight.classify_move(self.board, self.move)
+        self.assertEqual(move_type, knight.Move.transport)
+
+    def test_water(self):
+        self.board[1, 4] = knight.Piece.water
+        move_type = knight.classify_move(self.board, self.move)
+        self.assertEqual(move_type, knight.Move.water)
+
+    def test_lava(self):
+        self.board[1, 4] = knight.Piece.lava
+        move_type = knight.classify_move(self.board, self.move)
+        self.assertEqual(move_type, knight.Move.lava)
+
+    def test_unexpected_piece(self):
+        pass
 
 #%% update_board
-pass # TODO: write this
+class Test_update_board(unittest.TestCase):
+    r"""
+    Tests the update_board function with the following cases:
+        Normal
+        With different costs
+        Invalid move
+    """
+    def setUp(self):
+        self.board       = knight.Piece.null * np.ones((2, 5), dtype=int)
+        self.board[0, 2] = knight.Piece.current
+        self.move        = 2 # 2 right and 1 down
+        self.costs       = 5 * np.ones(self.board.shape, dtype=int)
+        self.cost        = 1
+
+    def test_normal(self):
+        cost = knight.update_board(self.board, self.move)
+        self.assertEqual(cost, self.cost)
+        self.assertEqual(self.board[0, 2], knight.Piece.visited)
+        self.assertEqual(self.board[1, 4], knight.Piece.current)
+
+    def test_with_costs(self):
+        cost = knight.update_board(self.board, self.move, self.costs)
+        self.assertEqual(cost, self.costs[1, 4])
+        self.assertEqual(self.board[0, 2], knight.Piece.visited)
+        self.assertEqual(self.board[1, 4], knight.Piece.current)
+
+    def test_invalid_move(self):
+        cost = knight.update_board(self.board, -2)
+        self.assertEqual(cost, knight.LARGE_INT)
+        self.assertEqual(self.board[0, 2], knight.Piece.current)
+        self.assertEqual(self.board[1, 4], knight.Piece.null)
 
 #%% undo_move
-pass # TODO: write this
+class Test_undo_move(unittest.TestCase):
+    r"""
+    Tests the undo_move function with the following cases:
+        Normal
+        Other piece to replace
+    """
+    def setUp(self):
+        self.board       = knight.Piece.null * np.ones((2, 5), dtype=int)
+        self.board[0, 2] = knight.Piece.visited
+        self.board[1, 4] = knight.Piece.current
+        self.last_move   = 2 # 2 right and 1 down
+        self.original_board       = knight.Piece.null * np.ones((2, 5), dtype=int)
+        self.original_board[0, 2] = knight.Piece.start
+
+    def test_normal(self):
+        knight.undo_move(self.board, self.last_move, self.original_board)
+        self.assertEqual(self.board[0, 2], knight.Piece.current)
+        self.assertEqual(self.board[1, 4], self.original_board[1, 4])
+
+    def test_other_piece(self):
+        self.original_board[1, 4] = knight.Piece.water
+        knight.undo_move(self.board, self.last_move, self.original_board)
+        self.assertEqual(self.board[0, 2], knight.Piece.current)
+        self.assertEqual(self.board[1, 4], self.original_board[1, 4])
 
 #%% get_move_inverse
-pass # TODO: write this
+class Test_get_move_inverse(unittest.TestCase):
+    r"""
+    Tests the get_move_inverse function with the following cases:
+        All inverses
+        Bad moves
+    """
+    def setUp(self):
+        self.moves     = [-4, -3, -2, -1, 1, 2, 3, 4]
+        self.inv_moves = [-2, -1, -4, -3, 3, 4, 1, 2]
+        self.bad_moves = [1000, -2000]
+
+    def test_nominal(self):
+        for (this_move, this_inv_move) in zip(self.moves, self.inv_moves):
+            inv_move = knight.get_move_inverse(this_move)
+            self.assertEqual(inv_move, this_inv_move)
+
+    def test_bad_moves(self):
+        for this_move in self.bad_moves:
+            with self.assertRaises(AssertionError):
+                knight.get_move_inverse(this_move)
 
 #%% check_valid_sequence
-pass # TODO: write this
+class Test_check_valid_sequence(unittest.TestCase):
+    r"""
+    Tests the check_valid_sequence function with the following cases:
+        Normal, no printing
+        Normal, with printing
+        No final position on board
+        Invalid sequence
+        Repeated square sequence
+        Good, but incomplete sequence
+        Good, but extra moves in sequence
+    """
+    def setUp(self):
+        self.board       = knight.Piece.null * np.ones((3, 5), dtype=int)
+        self.board[0, 0] = knight.Piece.start
+        self.board[2, 4] = knight.Piece.final
+        self.moves       = [2, 2]
+        self.costs       = np.ones((3, 5), dtype=int)
+
+    def test_normal(self):
+        is_valid = knight.check_valid_sequence(self.board, self.moves, self.costs, print_status=False)
+        self.assertTrue(is_valid)
+
+    def test_printing(self):
+        with capture_output() as (out, _):
+            is_valid = knight.check_valid_sequence(self.board, self.moves, self.costs, print_status=True)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(is_valid)
+        self.assertEqual(output, 'Sequence is valid and finished the puzzle.')
+
+    def test_no_final(self):
+        self.board[2, 4] = knight.Piece.water
+        with self.assertRaises(ValueError):
+            knight.check_valid_sequence(self.board, self.moves, self.costs, print_status=False)
+
+    def test_bad_sequence(self):
+        with capture_output() as (out, _):
+            is_valid = knight.check_valid_sequence(self.board, [-2, -2], self.costs, print_status=True)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertFalse(is_valid)
+        self.assertEqual(output, 'Sequence is not valid.')
+
+    def test_repeated_sequence(self):
+        is_valid = knight.check_valid_sequence(self.board, [2, 4, 2, 2], self.costs)
+        self.assertFalse(is_valid)
+
+    def test_good_but_incomplete_sequence(self):
+        with capture_output() as (out, _):
+            is_valid = knight.check_valid_sequence(self.board, self.moves[:-1], self.costs, print_status=True)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(is_valid)
+        self.assertEqual(output, 'Sequence is valid, but did not finish the puzzle.')
+
+    def test_good_but_extra_sequence(self):
+        self.moves.append(2)
+        with self.assertRaises(ValueError):
+            knight.check_valid_sequence(self.board, self.moves, self.costs, print_status=False)
 
 #%% print_sequence
-pass # TODO: write this
+class Test_print_sequence(unittest.TestCase):
+    r"""
+    Tests the print_sequence function with the following cases:
+        Normal
+        Non default costs
+        Bad cost
+    """
+    def setUp(self):
+        self.board       = knight.Piece.null * np.ones((3, 5), dtype=int)
+        self.board[0, 0] = knight.Piece.start
+        self.board[2, 4] = knight.Piece.final
+        self.moves       = [2, 2]
+        self.costs       = 5 * np.ones((3, 5), dtype=int)
+        self.output      = 'Starting position:\nS . . . .\n. . . . .\n. . . . E\n\n' + \
+            'After move 1\nx . . . .\n. . K . .\n. . . . E\n\nAfter move 2\n' + \
+            'x . . . .\n. . x . .\n. . . . K'
+
+    def test_normal(self):
+        with capture_output() as (out, _):
+            knight.print_sequence(self.board, self.moves)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, self.output)
+
+    def test_with_costs(self):
+        with capture_output() as (out, _):
+            knight.print_sequence(self.board, self.moves, self.costs)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, self.output)
+
+    def test_with_bad_cost(self):
+        self.costs[1, 2] = knight.LARGE_INT
+        with capture_output() as (out, _):
+            with self.assertRaises(ValueError):
+                knight.print_sequence(self.board, self.moves, self.costs)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, self.output[0:62])
 
 #%% solve_puzzle
-pass # TODO: write this
+class Test_solve_puzzle(unittest.TestCase):
+    r"""
+    Tests the solve_puzzle function with the following cases:
+        first solver
+        min solver
+        max solver
+    """
+    def setUp(self):
+        self.board         = knight.Piece.null * np.ones((3, 5), dtype=int)
+        self.board[0, 0]   = knight.Piece.start
+        self.board[0, 4]   = knight.Piece.final
+        self.costs         = np.ones(self.board.shape, dtype=int)
+        self.moves         = []
+        self.first_moves   = [2, 2, -1, 3, 4, -2, -3, 1]
+        self.min_moves     = [2, -2]
+        self.max_num_moves = 8
+
+    def test_first(self):
+        self.assertTrue(len(self.moves) == 0)
+        with capture_output() as (out, _):
+            knight.solve_puzzle(self.board, self.costs, self.moves, 'first')
+        output = out.getvalue().strip()
+        out.close()
+        np.testing.assert_array_equal(self.moves, self.first_moves)
+        self.assertEqual(output, 'Solution found!')
+
+    @unittest.skip('Not yet implemented.')
+    def test_min(self):
+        self.assertTrue(len(self.moves) == 0)
+        with capture_output() as (out, _):
+            knight.solve_puzzle(self.board, self.costs, self.moves, 'min')
+        output = out.getvalue().strip()
+        out.close()
+        np.testing.assert_array_equal(self.moves, self.min_moves)
+        self.assertEqual(output, 'Solution found!')
+
+    @unittest.skip('Not yet implemented.')
+    def test_max(self):
+        self.assertTrue(len(self.moves) == 0)
+        with capture_output() as (out, _):
+            knight.solve_puzzle(self.board, self.costs, self.moves, 'max')
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(self.moves, self.max_num_moves)
+        self.assertEqual(output, 'Solution found!')
 
 #%% Unit test execution
 if __name__ == '__main__':
