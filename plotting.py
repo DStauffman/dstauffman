@@ -257,7 +257,7 @@ def get_axes_scales(type_):
 
     Parameters
     ----------
-    type_ : str {'population', 'percentage', 'per 100K', 'cost'}
+    type_ : str {'unity', 'population', 'percentage', 'per 100K', 'cost'}
         description of the type of data that is being plotted
 
     Returns
@@ -285,7 +285,10 @@ def get_axes_scales(type_):
 
     """
     # determine results based on simple switch statement
-    if type_ == 'population':
+    if type_ == 'unity':
+        scale = 1;
+        units = ''
+    elif type_ == 'population':
         scale = 1
         units = '#'
     elif type_ == 'percentage':
@@ -302,7 +305,7 @@ def get_axes_scales(type_):
     return (scale, units)
 
 #%% Functions - plot_time_history
-def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True, \
+def plot_time_history(time, data, description='', type_='unity', opts=None, plot_indiv=True, \
     truth_time=None, truth_data=None, plot_as_diffs=False, colormap=None):
     r"""
     Plots the given data channel versus time, with a generic description argument.
@@ -313,10 +316,10 @@ def plot_time_history(time, data, description, type_, opts=None, plot_indiv=True
         time history
     data : array_like
         data for corresponding time history
-    description : str
-        generic text to put on the plot title and figure name
-    type_ : str {'population', 'percentage', 'per 100K', 'cost'}
-        description of the type of data that is being plotted
+    description : str, optional
+        generic text to put on the plot title and figure name, default is empty
+    type_ : str, optional, from {'unity', 'population', 'percentage', 'per 100K', 'cost'}
+        description of the type of data that is being plotted, default is 'unity'
     opts : class Opts, optional
         plotting options
     plot_indiv : bool, optional
@@ -430,7 +433,33 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
 
     Parameters
     ----------
+    data : array_like
+        data for corresponding time history
+    labels : list of str, optional
+        Names to put on row and column headers
+    opts : class Opts, optional
+        plotting options
+    matrix_name : str, optional
+        Name to put on figure and plot title
+    cmin : float, optional
+        Minimum value for color range, default is zero
+    cmax : float, optional
+        Maximum value for color range, default is one
+    colormap : str, optional
+        Name of colormap to use for plot
+    plot_lower_only : bool, optional
+        Plots only the lower half of a symmetric matrix, default is True
+    label_values : bool, optional
+        Annotate the numerical values of each square in addition to the color code, default is False
 
+    Returns
+    -------
+    fig : object
+        figure handle
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2015.
 
     Examples
     --------
@@ -531,6 +560,99 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
     # Setup plots
     setup_plots(fig, opts, 'dist')
 
+    return fig
+
+#%% Functions - plot_multiline_history
+def plot_multiline_history(time, data, type_='unity', label='', opts=None, legend=None, \
+        colormap=None):
+    r"""
+    Plots multiple metrics over time.
+
+    Parameters
+    ----------
+    time : 1D ndarray
+        time history
+    data : 2D or 3D ndarray
+        data for corresponding time history, 2D: time by value in each category
+    type_ : str, optional, from {'unity', 'population', 'percentage', 'per 100K', 'cost'}
+        description of the type of data that is being plotted, default is 'unity'
+    label : str, optional
+        Disease name to label on the plots
+    opts : class Opts, optional
+        plotting options
+    legend : list of str, optional
+        Names to use for each channel of data
+    colormap : str, optional
+        Name of colormap to use for plot
+
+    Returns
+    -------
+    fig : object
+        figure handle, if None, no figure was created
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import plot_multiline_history
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> time  = np.arange(0, 5, 1./12) + 2000
+    >>> data  = np.random.rand(len(time), 5)
+    >>> mag   = data.cumsum(axis=1)[:,-1]
+    >>> data  = 10 * data / np.expand_dims(mag, axis=1)
+    >>> fig   = plot_multiline_history(time, data)
+
+    Close plot
+    >>> plt.close(fig)
+
+    """
+    # check optional inputs
+    if opts is None:
+        opts = Opts()
+    if colormap is None:
+        colormap = DEFAULT_COLORMAP
+
+    # check for valid data
+    if data is None:
+        print(' ' + label + ' plot skipped due to missing data.')
+        return None
+
+    # process other inputs
+    description = label if label else 'Values over time'
+    (scale, units) = get_axes_scales(type_)
+    unit_text = ' [' + units + ']' if units else ''
+    num_bins = data.shape[1]
+    if legend is not None:
+        assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
+    else:
+        legend = ['Channel {}'.format(i+1) for i in range(num_bins)]
+
+    # turn interactive plotting off
+    plt.ioff()
+
+    # get colormap based on high and low limits
+    cm = ColorMap(colormap, num_colors=num_bins)
+
+    # plot data
+    fig = plt.figure()
+    fig.canvas.set_window_title(description + unit_text)
+    ax = fig.add_subplot(111)
+    cm.set_colors(ax)
+    for i in range(num_bins):
+        ax.plot(time, scale*data[:, i], '.-', label=legend[i])
+
+    # add labels and legends
+    plt.xlabel('Time [year]')
+    plt.ylabel(fig.canvas.get_window_title())
+    plt.title(description + ' vs. Time')
+    plt.legend(legend)
+    plt.grid(True)
+    # setup plots
+    setup_plots(fig, opts, 'time')
     return fig
 
 #%% Functions - storefig

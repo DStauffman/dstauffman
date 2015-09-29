@@ -179,9 +179,9 @@ class Test_get_axes_scales(unittest.TestCase):
         Bad type (should raise ValueError)
     """
     def setUp(self):
-        self.types  = ['population', 'percentage', 'per 100K', 'cost']
-        self.scales = [1, 100, 100000, 1e-3]
-        self.units  = ['#', '%', 'per 100,000', "$K's"]
+        self.types  = ['unity', 'population', 'percentage', 'per 100K', 'cost']
+        self.scales = [1, 1, 100, 100000, 1e-3]
+        self.units  = ['', '#', '%', 'per 100,000', "$K's"]
         self.bad_type = 'nonexistant'
 
     def test_nominal_usage(self):
@@ -340,6 +340,72 @@ class Test_plot_correlation_matrix(unittest.TestCase):
     def tearDown(self):
         for i in range(len(self.figs)):
             plt.close(self.figs.pop())
+
+# plot_multiline_history
+class Test_plot_multiline_history(unittest.TestCase):
+    r"""
+    Tests the plot_multipline_history function with the following cases:
+        Nominal
+        Defaults
+        With label
+        With type
+        With Opts
+        With legend
+        With Colormap
+        No data
+        Bad legend
+    """
+    def setUp(self):
+        self.time     = np.arange(0, 10, 0.1) + 2000
+        num_channels  = 5
+        self.data     = np.random.rand(len(self.time), num_channels)
+        mag           = self.data.cumsum(axis=1)[:,-1]
+        self.data     = 10 * self.data / np.expand_dims(mag, axis=1)
+        self.type_    = 'percentage'
+        self.label    = 'Plot description'
+        self.opts     = dcs.Opts()
+        self.opts.show_plot = False
+        self.legend   = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
+        self.colormap = 'seismic'
+        self.figs     = []
+
+    def test_nominal(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, type_=self.type_, \
+            label = self.label, opts=self.opts, legend=self.legend, colormap=self.colormap))
+
+    def test_defaults(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data))
+
+    def test_with_label(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, label=self.label))
+
+    def test_with_type_(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.type_))
+
+    def test_with_opts(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, opts=self.opts))
+
+    def test_with_legend(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, legend=self.legend))
+
+    def test_with_colormap(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, colormap=self.colormap))
+
+    def test_no_data(self):
+        with dcs.capture_output() as (out, _):
+            dcs.plot_multiline_history(self.time, None)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'plot skipped due to missing data.')
+
+    def test_bad_legend(self):
+        with self.assertRaises(AssertionError):
+            self.figs.append(dcs.plot_multiline_history(self.time, self.data, legend=self.legend[:-1]))
+
+    def tearDown(self):
+        if self.figs:
+            for this_fig in self.figs:
+                plt.close(this_fig)
 
 # storefig
 class Test_storefig(unittest.TestCase):
