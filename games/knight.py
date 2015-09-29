@@ -88,6 +88,7 @@ from dstauffman import IntEnumPlus
 #%% Constants
 # hard-coded values
 LARGE_INT = 1000000
+LOGGING = False # for debugging the recursive solver
 # dictionaries
 CHAR_DICT = {'.':0, 'S':1, 'E':2, 'K':3, 'W':4, 'R':5, 'B':6, 'T':7, 'L':8, 'x': 9}
 NUM_DICT  = {value:key for (key, value) in CHAR_DICT.items()}
@@ -138,7 +139,8 @@ W W W W . . . . . . . . . . . B . . . W W W W W W W . . . . . .
 . . . . . . . . . . . B . . . . . . . . . . . . . . . . . . . .
 """
 # moves
-MOVES = frozenset({-4, -3, -2, -1, 1, 2, 3, 4})
+#MOVES = frozenset({-4, -3, -2, -1, 1, 2, 3, 4})
+MOVES = [-4, -3, -2, -1, 1, 2, 3, 4]
 #MOVES = frozenset({-4, -3, -2, -1, 1, 2, 3, 4, -5, 5, -6, 6, -7, 7, -8, 8})
 # Move design is based on a first direction step of two moves, followed by a single step to the
 # left or right of the first one.
@@ -599,6 +601,8 @@ def update_board(board, move, costs=None):
     -------
     cost : int
         Cost of the specified move type
+    is_repeat : bool
+        Whether the last move was a repeated visit or not
 
     Notes
     -----
@@ -613,9 +617,12 @@ def update_board(board, move, costs=None):
     >>> board = np.zeros((2, 5), dtype=int)
     >>> board[0, 2] = Piece.current
     >>> move = 2 # (2 right and 1 down)
-    >>> cost = update_board(board, move)
+    >>> (cost, is_repeat) = update_board(board, move)
     >>> print(cost)
     1
+
+    >>> print(is_repeat)
+    False
 
     >>> print_board(board)
     . . x . .
@@ -625,14 +632,15 @@ def update_board(board, move, costs=None):
     # check for optional inputs
     if costs is None:
         costs = np.ones(board.shape, dtype=int)
-    # initialize output
-    cost = LARGE_INT
+    # initialize outputs
+    cost      = LARGE_INT
+    is_repeat = False
     # find current position
     (x, y) = get_current_position(board)
     # determine the move type
     move_type = classify_move(board, move)
     # if valid, apply the move
-    if move_type > 0:
+    if move_type >= 0:
         # set the current position to visited
         board[x, y] = Piece.visited
         # get the new position
@@ -643,7 +651,9 @@ def update_board(board, move, costs=None):
         cost = costs[new_x, new_y]
         if move_type == Move.winning:
             cost = -cost
-    return cost
+        if move_type == 0:
+            is_repeat = True
+    return (cost, is_repeat)
 
 #%% undo_move
 def undo_move(board, last_move, original_board):
@@ -734,7 +744,7 @@ def get_move_inverse(move):
     return inv_move
 
 #%% check_valid_sequence
-def check_valid_sequence(board, moves, costs, print_status=False):
+def check_valid_sequence(board, moves, costs, print_status=False, allow_repeats=False):
     r"""
     Checks that the list of moves is a valid sequence to go from start to final position.
 
@@ -748,6 +758,8 @@ def check_valid_sequence(board, moves, costs, print_status=False):
         Costs for each square on the board layout
     print_status : bool, optional
         Whether to print the board after each move is made, default is False
+    allow_repeats : bool, optional
+        Whether to allow repeat visits to the same square
 
     Returns
     -------
@@ -785,10 +797,16 @@ def check_valid_sequence(board, moves, costs, print_status=False):
         raise ValueError('The board does not have a finishing location.')
     for (i, this_move) in enumerate(moves):
         # update the board and determine the cost
-        cost = update_board(temp_board, this_move, costs)
+        (cost, is_repeat) = update_board(temp_board, this_move, costs)
         # if cost was zero, then the move was invalid
         if cost == COST_DICT['invalid']:
             is_valid = False
+            break
+        # check for repeated conditions
+        if not allow_repeats and is_repeat:
+            is_valid = False
+            if print_status:
+                print('No repeats allowed.')
             break
         # check for winning conditions (based on negative cost value)
         if cost < 0:
@@ -863,7 +881,7 @@ def print_sequence(board, moves, costs=None):
         # print header
         print('\nAfter move {}'.format(i+1))
         # update board
-        cost = update_board(temp_board, this_move, costs)
+        (cost, _) = update_board(temp_board, this_move, costs)
         # print new board
         if cost != COST_DICT['invalid']:
             print_board(temp_board)
@@ -871,7 +889,7 @@ def print_sequence(board, moves, costs=None):
             raise ValueError('Bad sequence.')
 
 #%% solve_puzzle
-def solve_puzzle(board, costs, moves=None, solve_type='min', original_board=None):
+def solve_puzzle(board, costs, solve_type='min', data={}):
     r"""
     Solves the puzzle with the desired solution type, from 'min', 'max', 'first'.
 
@@ -881,17 +899,23 @@ def solve_puzzle(board, costs, moves=None, solve_type='min', original_board=None
         Board layout
     costs : 2D ndarray of int, optional
         Costs for each square on the board layout
-    moves : ndarray of int
-        Moves to be performed
     solve_type : str
         Solver type, from {'min', 'max', 'first'}
-    original_board : 2D ndarray of int
+    data : dict
+        Mutable internal data dictionary for storing information through recursive calls
+
+    moves : ndarray of int
+        Moves to be performed
+    original_board : 2D ndarray of int, optional, not intended by user, only recursively
         Original board layout before doing any moves
+    current_cost : int, optional, not intended by user, only recursively
+        Cumulative current cost for the solution
 
     Notes
     -----
     #.  Written by David C. Stauffer in September 2015.
-    #.  Modifies `moves` inplace.
+    #.  Modifies `data` inplace and should always be called by the user with an empty dictionary.
+        Updates keys: 'moves', TBD...
 
     Examples
     --------
@@ -902,66 +926,136 @@ def solve_puzzle(board, costs, moves=None, solve_type='min', original_board=None
     >>> board[0, 0] = Piece.start
     >>> board[0, 4] = Piece.final
     >>> costs = board_to_costs(board)
-    >>> moves = []
     >>> solve_type = 'first'
-    >>> solve_puzzle(board, costs, moves, solve_type)
+    >>> data = {}
+    >>> solve_puzzle(board, costs, solve_type, data)
+    Initializing solver.
     Solution found!
 
-    >>> print(moves)
+    >>> print(data['moves'])
     [2, -2]
 
     """
-    # check for correct inputs
-    if moves is None:
-        raise ValueError('`moves` needs to be initialized to a mutable list.')
-    # save original board for use in undoing moves
-    if original_board is None:
-        original_board = board.copy()
-    # check for initial start conditions
-    if len(moves) == 0:
+    if len(data) == 0:
+        # print message
+        print('Initializing solver.')
+        # check that the board has a final goal
+        if not np.any(board == Piece.final):
+            raise ValueError('The board does not have a finishing location.')
+        # save original board for use in undoing moves
+        data['original_board'] = board.copy()
+        # alias the final location for use later
+        temp = np.nonzero(board == Piece.final)
+        data['final_loc_x'] = temp[0][0]
+        data['final_loc_y'] = temp[1][0]
+        # initialize best costs on first run
+        data['best_costs'] = LARGE_INT * np.ones(board.shape, dtype=int)
+        # initialize best solution
+        data['best_moves'] = None
+        # initialize moves array and solved status
+        data['moves'] = []
+        data['is_solved'] = False
+        # initialize current cost and update in best_costs
+        data['current_cost'] = 0
+        data['best_costs'][board == Piece.start] = data['current_cost']
         # set the current position to the start
         board[board == Piece.start] = Piece.current
+    else:
+        # check for a start piece, in which case something is messed up
+        assert not np.any(board == Piece.start), 'Empty dicts should not have a start piece and vice versa.'
     # try all the next possible moves
     for this_move in MOVES:
+        # optimization for longer moves that we know won't be better
+        if solve_type == 'min' and data['current_cost'] >= data['best_costs'][data['final_loc_x'],data['final_loc_y']]:
+            break
         # make the move
-        cost = update_board(board, this_move, costs)
+        (cost, is_repeat) = update_board(board, this_move, costs)
+        if LOGGING:
+            print('this_move = {}, this_cost = {}, total moves = {}'.format(this_move, cost, data['moves']), end='')
         # if the move was invalid then go to the next one, if legal check if done, otherwise call recursively
         if cost == COST_DICT['invalid']:
-            # if the move was invalid, determine if it's because of a previously visited square
-            if solve_type == 'first':
-                continue
-            else: # TODO: code this
-                raise ValueError('Not yet implemented.')
+            if LOGGING:
+                print(' - invalid')
+            continue
+        # winning move
         elif cost < 0:
+            if LOGGING:
+                print(' - solution')
+            # get the new current location
+            temp_loc = board == Piece.current
+            if LOGGING:
+                print('Potential solution found, moves = {} + {}'.format(data['moves'], this_move))
             # solution is found
-            if solve_type == 'first':
-                moves.append(this_move)
-                print('Solution found!')
-                return
-            else: # TODO: Work on this
-                raise ValueError('Not yet implemented.')
-                # this move is not better, so don't accept it
-                undo_move(board, this_move, original_board)
-                continue
-        else:
-            if solve_type == 'first': # or this move is better
-                moves.append(this_move)
-                temp = len(moves)
-                solve_puzzle(board, costs, moves=moves, solve_type=solve_type, \
-                    original_board=original_board)
-                if len(moves) < temp:
-                    continue
+            if solve_type == 'first' or data['current_cost'] + abs(cost) < data['best_costs'][temp_loc]:
+                if solve_type == 'first':
+                    print('Solution found!')
                 else:
-                    return
+                    print('Solution found for cost of: {}.'.format(data['current_cost'] + abs(cost)))
+                data['current_cost'] = data['current_cost'] + abs(cost)
+                data['best_costs'][temp_loc] = data['current_cost']
+                data['moves'].append(this_move)
+                data['is_solved'] = True
+                data['best_moves'] = data['moves'].copy()
+                return
             else:
-                # this move is not better, so don't accept it
-                undo_move(board, this_move, original_board)
+                # reject move and re-establish the visited state
+                undo_move(board, this_move, data['original_board'])
+                board[temp_loc] = Piece.final
+                continue
+        # valid, but not winning move
+        else:
+            # get the new current location
+            temp_loc = board == Piece.current
+            # determine if move was to a previously visited square
+            if is_repeat:
+                # determine if a better sequence
+                if solve_type == 'first' or data['current_cost'] + cost >= data['best_costs'][temp_loc]:
+                    if LOGGING:
+                        print(' - worse repeat')
+                    # reject move and re-establish the visited state
+                    undo_move(board, this_move, data['original_board'])
+                    board[temp_loc] = Piece.visited
+                    continue
+            if LOGGING:
+                if is_repeat:
+                    print(' - better repeat')
+                else:
+                    print(' - new step')
+            # move is new or better, update current and best costs and append move
+            data['current_cost'] = data['current_cost'] + cost
+            data['best_costs'][temp_loc] = data['current_cost']
+            data['moves'].append(this_move)
+            # make next move recursively
+            solve_puzzle(board, costs, solve_type, data)
+            # if this didn't solve the puzzle, then the branch is dead, so continue to next move
+            if not data['is_solved']:
+                continue
+            else:
+                # if solver is the 'first' type, then exit now once you have a solution
+                if solve_type == 'first':
+                    return
+                # if looking for more solutions, then back out (2 moves) and let algorithm continue
+                else:
+                    for i in range(2):
+                        last_move = data['moves'].pop()
+                        data['current_cost'] = data['current_cost'] - costs[board == Piece.current][0]
+                        undo_move(board, last_move, data['original_board'])
+                    data['is_solved'] = False
+                    continue # (not return, need to go through other moves at this level)
     # all possible moves didn't work, so this leg is dead, back out last move and exit
-    if len(moves) > 0:
-        last_move = moves.pop()
-        undo_move(board, last_move, original_board)
+    if len(data['moves']) > 0:
+        if LOGGING:
+            print('moves = {} is dead, backing out last_move = {}'.format(data['moves'], data['moves'][-1]))
+        last_move = data['moves'].pop()
+        data['current_cost'] = data['current_cost'] - costs[board == Piece.current][0]
+        undo_move(board, last_move, data['original_board'])
     else:
-        print('No solution found.')
+        # check if any branches solved the puzzle
+        if data['best_moves'] is not None:
+            data['is_solved'] = True
+            data['moves'] = data['best_moves'].copy()
+        else:
+            print('No solution found.')
     return
 
 #%% Unit test
@@ -973,7 +1067,10 @@ def main():
 #%% Script
 if __name__ == '__main__':
     # flags for what steps to do
-    do_steps = {-1, 0, 1, 2} #do_steps = {-1, 0, 1, 2, 3, 4, 5}
+    do_steps = {-1, 0, 1, 2, 3, 4, 5}
+    do_steps = {4}
+    do_steps = {-1, 0, 1, 2, 3}
+    print_seq = False
 
     # Step -1 (Run unit tests)
     if -1 in do_steps:
@@ -982,12 +1079,15 @@ if __name__ == '__main__':
     # convert board to numeric representation for efficiency
     board1 = char_board_to_nums(BOARD1)
     board2 = char_board_to_nums(BOARD2)
-    board3 = np.zeros((5, 5), dtype=int)
-    board3[2, 2] = Piece.start
-    board3[3, 4] = Piece.final
-    board3 = np.zeros((2, 5), dtype=int)
+    #board3 = np.zeros((5, 5), dtype=int)
+    #board3[2, 2] = Piece.start
+    #board3[3, 4] = Piece.final
+    board3 = np.zeros((3, 5), dtype=int)
     board3[0, 0] = Piece.start
     board3[0, 4] = Piece.final
+    #board3 = np.zeros((3, 3), dtype=int)
+    #board3[0, 2] = Piece.start
+    #board3[0, 0] = Piece.final
     costs1 = board_to_costs(board1)
     costs2 = board_to_costs(board2)
     costs3 = board_to_costs(board3)
@@ -996,44 +1096,55 @@ if __name__ == '__main__':
     if 0 in do_steps:
         print('Step 0: print the boards.')
         print_board(board1)
+        print('')
         print_board(board2)
+        print('')
         #print_board(board3)
+        #print('')
 
     # Step 1
     if 1 in do_steps:
         print('\nStep 1: see if the sequence is valid.')
         moves1 = [2, 2]
         is_valid1 = check_valid_sequence(board1, moves1, costs1, print_status=True)
-        if is_valid1:
+        if is_valid1 and print_seq:
             print_sequence(board1, moves1)
 
     # Step 2
     if 2 in do_steps:
         print('\nStep 2: solve the first board for any length solution.')
-        moves2 = []
         soln_board = board1.copy()
-        #best_cost = LARGE_INT*np.ones(soln_board.shape, dtype=int)
-        solve_puzzle(soln_board, costs1, moves=moves2, solve_type='first')
-        print(moves2)
-        is_valid2 = check_valid_sequence(board1, moves2, costs1, print_status=True)
-        if is_valid2:
-            print_sequence(board1, moves2)
+        data2 = {}
+        solve_puzzle(soln_board, costs1, solve_type='first', data=data2)
+        print(data2['moves'])
+        is_valid2 = check_valid_sequence(board1, data2['moves'], costs1, print_status=True)
+        if is_valid2 and print_seq:
+            print_sequence(board1, data2['moves'])
 
     # Step 3
     if 3 in do_steps:
         print('\nStep 3: solve the first board for the minimum length solution.')
-        moves3 = []
         soln_board = board1.copy()
-        #best_cost = LARGE_INT*np.ones(soln_board.shape, dtype=int)
-        solve_puzzle(soln_board, costs1, moves=moves3, solve_type='min')
-        print(moves3)
-        is_valid3 = check_valid_sequence(board1, moves3, costs1, print_status=True)
+        data3 = {}
+        solve_puzzle(soln_board, costs1, solve_type='min', data=data3)
+        print(data3['moves'])
+        is_valid3 = check_valid_sequence(board1, data3['moves'], costs1, print_status=True)
         if is_valid3:
-            print_sequence(board1, moves3)
+            print_sequence(board1, data3['moves'])
 
     # Step 4
     if 4 in do_steps:
-        pass
+        print('\nStep 4: solve the second board for the minimum length solution.')
+        board2[0, 0] = Piece.start
+        board2[-1, -1] = Piece.final
+        costs2 = board_to_costs(board2)
+        soln_board = board2.copy()
+        data4 = {}
+        solve_puzzle(soln_board, costs2, solve_type='min', data=data4)
+        print(data4['moves'])
+        is_valid4 = check_valid_sequence(board2, data4['moves'], costs2, print_status=True)
+        if is_valid4:
+            print_sequence(board2, data4['moves'])
 
     # Step 5
     if 5 in do_steps:
