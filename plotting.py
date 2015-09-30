@@ -559,7 +559,6 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
 
     # Setup plots
     setup_plots(fig, opts, 'dist')
-
     return fig
 
 #%% Functions - plot_multiline_history
@@ -652,6 +651,101 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, legen
     plt.legend(legend)
     plt.grid(True)
     # setup plots
+    setup_plots(fig, opts, 'time')
+    return fig
+
+#%% Functions - plot_bar_breakdown
+def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=None):
+    r"""
+    Plots the pie chart like breakdown by percentage in each category over time.
+
+    Parameters
+    ----------
+    time : array_like
+        time history
+    data : array_like
+        data for corresponding time history, 2D: time by ratio in each category
+    label : str, optional
+        Disease name to label on the plots
+    opts : class Opts, optional
+        plotting options
+    legend : list of str, optional
+        Names to use for each channel of data
+    colormap : str, optional
+        Name of colormap to use for plot
+
+    Returns
+    -------
+    fig : object
+        figure handle
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in June 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import plot_bar_breakdown
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> time = np.arange(0, 5, 1./12) + 2000
+    >>> data = np.random.rand(len(time), 5)
+    >>> mag  = data.cumsum(axis=1)[:,-1]
+    >>> data = data / np.expand_dims(mag, axis=1)
+    >>> fig  = plot_bar_breakdown(time, data)
+
+    Close plots
+    >>> plt.close(fig)
+
+    """
+    # check optional inputs
+    if opts is None:
+        opts = Opts()
+    if colormap is None:
+        colormap = DEFAULT_COLORMAP
+
+    # check for valid data
+    if data is None:
+        print(' ' + label + ' plot skipped due to missing data.')
+        return
+
+    # hard-coded values
+    description = 'Ratios over time'
+    if label:
+        description = label + ' ' + description
+    scale    = 100
+    units    = '%'
+    width    = time[1] - time[0]
+    num_bins = data.shape[1]
+    if legend is not None:
+        assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
+    else:
+        legend = ['Series {}'.format(i+1) for i in range(num_bins)]
+
+    # turn interactive plotting off
+    plt.ioff()
+
+    # get colormap based on high and low limits
+    cm = ColorMap(colormap, 0, num_bins-1)
+
+    # figure out where the bottoms should be to stack the data
+    bottoms = np.concatenate((np.zeros((len(time),1)), np.cumsum(data, axis=1)), axis=1)
+
+    # plot breakdown
+    fig = plt.figure()
+    fig.canvas.set_window_title(description + ' [' + units + ']')
+    ax = fig.add_subplot(111)
+    for i in range(num_bins-1, -1, -1):
+        ax.bar(time-width/2, scale*data[:, i], width=width, bottom=scale*bottoms[:, i], \
+            label=legend[i], color=cm.get_color(i), edgecolor='none')
+    plt.ylabel(label + ' [' + units + ']')
+    plt.ylim(0, 100)
+    plt.grid(True)
+    plt.legend()
+    plt.title(fig.canvas.get_window_title())
+
+    # Setup plots
     setup_plots(fig, opts, 'time')
     return fig
 

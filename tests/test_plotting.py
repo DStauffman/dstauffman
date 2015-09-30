@@ -407,6 +407,67 @@ class Test_plot_multiline_history(unittest.TestCase):
             for this_fig in self.figs:
                 plt.close(this_fig)
 
+# plot_bar_breakdown
+class Test_plot_bar_breakdown(unittest.TestCase):
+    r"""
+    Tests the plot_bar_breakdown function with the following cases:
+        Nominal
+        Defaults
+        With label
+        With opts
+        With legend
+        With colormap
+        Null data
+        Bad legend
+    """
+    def setUp(self):
+        self.time = np.arange(0, 5, 1./12) + 2000
+        num_bins = 5
+        self.data = np.random.rand(len(self.time), num_bins)
+        mag = self.data.cumsum(axis=1)[:,-1]
+        self.data = self.data / np.expand_dims(mag, axis=1)
+        self.label = 'TB testing'
+        self.legend = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
+        self.opts = dcs.Opts()
+        self.opts.show_plot = False
+        self.colormap = 'seismic'
+        self.figs = []
+
+    def test_nominal(self):
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts, \
+            legend=self.legend, colormap=self.colormap))
+
+    def test_defaults(self):
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data))
+
+    def test_label(self):
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label))
+
+    def test_opts(self):
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, opts=self.opts))
+
+    def test_legend(self):
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, legend=self.legend))
+
+    def test_colormap(self):
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, colormap=self.colormap))
+
+    def test_null_data(self):
+        with dcs.capture_output() as (out, _):
+            dcs.plot_bar_breakdown(self.time, None)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'plot skipped due to missing data.')
+
+    def test_bad_legend(self):
+        with self.assertRaises(AssertionError):
+            dcs.plot_bar_breakdown(self.time, self.data, legend=self.legend[:-1])
+
+    def tearDown(self):
+        if self.figs:
+            for this_fig in self.figs:
+                plt.close(this_fig)
+
 # storefig
 class Test_storefig(unittest.TestCase):
     r"""
