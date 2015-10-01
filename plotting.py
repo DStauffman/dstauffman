@@ -23,11 +23,11 @@ import matplotlib.colors as colors
 import matplotlib.cm as cmx
 from matplotlib.patches import Rectangle
 try:
-    from PyQt5.QtWidgets import QPushButton
+    from PyQt5.QtWidgets import QApplication, QPushButton
     from PyQt5.QtGui import QIcon
     from PyQt5.QtCore import QSize
 except ImportError: # pragma: no cover
-    from PyQt4.QtGui import QPushButton, QIcon
+    from PyQt4.QtGui import QApplication, QPushButton, QIcon
     from PyQt4.QtCore import QSize
 # model imports
 from dstauffman.classes   import Frozen
@@ -109,6 +109,12 @@ class MyCustomToolbar():
     """
     def __init__(self, fig):
         r"""Initializes the custom toolbar."""
+        # check to see if a QApplication exists, and if not, make one
+        # open a qapp
+        if QApplication.instance() is None:
+            self.qapp = QApplication()
+        else:
+            self.qapp = QApplication.instance()
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
         # to determine which figure actually triggered the button events.)
         self.fig_number = fig.number
