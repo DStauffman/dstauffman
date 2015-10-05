@@ -16,6 +16,7 @@ from __future__ import division
 import doctest
 import numpy as np
 import os
+import sys
 import unittest
 # plotting imports
 import matplotlib.pyplot as plt
@@ -112,7 +113,7 @@ class MyCustomToolbar():
         # check to see if a QApplication exists, and if not, make one
         # open a qapp
         if QApplication.instance() is None:
-            self.qapp = QApplication()
+            self.qapp = QApplication(sys.argv)
         else:
             self.qapp = QApplication.instance()
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
