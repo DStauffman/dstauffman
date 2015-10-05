@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 r"""
-Bales module file for the "dstauffman.archery" library.  It defines functions to assign bales based
-on the list of registered archers.
+Bales module file for the "dstauffman.archery.tournaments" library.  It defines functions to assign
+bales based on the list of registered archers.
 
 Notes
 -----
@@ -12,8 +12,8 @@ Notes
 from __future__ import print_function
 from __future__ import division
 import random
-from dstauffman.archery.constants import DIVISIONS, GENDERS, COL_GENDER, COL_DIVISION, COL_BALE, \
-                                         BALE_POS
+from dstauffman.archery.tournaments.constants import \
+    DIVISIONS, GENDERS, COL_GENDER, COL_DIVISION, COL_BALE, BALE_POS
 
 #%% Functions - assign_bales
 def assign_bales(data):
@@ -71,3 +71,4 @@ def validate_bales(data):
 #%% Unit test
 if __name__ == '__main__':
     pass
+

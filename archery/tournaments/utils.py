@@ -15,8 +15,8 @@ from __future__ import division
 import os
 import pandas as pd
 # model imports
-from dstauffman.archery.constants import COL_GENDER, COL_DIVISION, DIVISIONS, GENDERS, \
-                                         SHEET_NAME_INDIV
+from dstauffman.archery.tournaments.constants import \
+    COL_GENDER, COL_DIVISION, DIVISIONS, GENDERS, SHEET_NAME_INDIV
 
 #%% Functions - display_info
 def display_info(data):
@@ -124,3 +124,4 @@ def get_root_dir():
 #%% Unit test
 if __name__ == '__main__':
     pass
+

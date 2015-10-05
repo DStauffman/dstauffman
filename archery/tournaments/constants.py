@@ -6,6 +6,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in February 2015.
 """
+# pylint: disable=C0326
 
 #%% Imports
 from __future__ import print_function
@@ -93,3 +94,4 @@ MAX_WAVES = 5 # (1/16 round with 32 people as maximum starting round)
 #%% Unit test
 if __name__ == '__main__':
     pass
+

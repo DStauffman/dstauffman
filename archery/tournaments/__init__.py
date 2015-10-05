@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 r"""
-The "archery" module is a collection of code to support tournament scoring, bracket generation and
-field layout.
+The "archery.tournaments" module is a collection of code to support tournament scoring, bracket
+generation and field layout.
 
 The module is broken up into multiple files.
 .__init__.py  includes the relative imports to be executed when someone does "import archery"
@@ -12,10 +12,7 @@ The module is broken up into multiple files.
 .pretty.py    includes the functions that create files for user output in a "pretty" format.
 .utils.py     includes general utilities that are used by the different pieces of the code.
 
-
 The master data is defined in an excel spreadsheet.  Details TBD...
-
-
 
 Notes
 -----

@@ -14,7 +14,7 @@ from __future__ import division
 import os
 # model imports
 import dstauffman as dcs
-import dstauffman.archery as arch
+import dstauffman.archery.tournaments as arch
 
 #%% Variables
 # simulate stuff?
