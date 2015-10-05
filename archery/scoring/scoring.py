@@ -12,17 +12,16 @@ Notes
 # pylint: disable=C0326, C0103, E1101
 
 #%% Imports
-import csv
 from datetime import datetime, timedelta
 import doctest
+import getpass
 import os
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 import unittest
-from xml.dom import minidom
 # library imports
-from dstauffman import setup_dir
+from dstauffman import setup_dir, Opts, setup_plots
 
 #%% Constants
 PLOT_LIMITS  = [250,300]
@@ -108,43 +107,91 @@ def score_text_to_number(text, flag='nfaa'):
         else:
             return value
 
-#%% Functions - scores_to_totals
-def scores_to_totals(scores,flag='nfaa'):
-    r"""
-    Convert an ndarray of mixed text and numeric scores into the desired total score history.
-    """
-    x=scores
-    if flag == 'nfaa':
-        num_scores = np.reshape(np.array([0 if x[i,j] == 'M' else x[i,j] if x[i,j] != 'X' else 10 \
-        for i in range(0,x.shape[0]) for j in range(0,x.shape[1])],dtype=int),x.shape)
-    elif flag == 'usaa':
-        num_scores = np.reshape(np.array([0 if x[i,j] == 'M' else 9 if x[i,j]==10 else 10 if x[i,j] == 'X' else x[i,j] \
-        for i in range(0,x.shape[0]) for j in range(0,x.shape[1])],dtype=int),x.shape)
-    else:
-        raise ValueError('Unexpected value for flag = "{}"'.format(flag))
-    total_scores = np.sum(num_scores,axis=1)
-    return total_scores
-
 #%% Functions - convert_data_to_scores
-def convert_data_to_scores(all_data):
+def convert_data_to_scores(scores):
     r"""
     Makes the USAA and NFAA scores from the individual arrow score histories.
+
+    Parameters
+    ----------
+    scores : list of list of int/str
+        List of scores for each round based on sublist of scores for each arrow in the round
+
+    Returns
+    -------
+    nfaa_score : ndarray of int
+        Total round score for each given round in the original list
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.archery.scoring import convert_data_to_scores
+    >>> scores = [10*['X', 10, 9], 10*[9, 9, 9]]
+    >>> (nfaa_score, usaa_score) = convert_data_to_scores(scores)
+    >>> print(nfaa_score)
+    [290, 270]
+
+    >>> print(usaa_score)
+    [280, 270]
+
     """
     # initialize lists
     nfaa_score = []
     usaa_score = []
     # convert string scores into numbers based on NFAA and USAA scoring rules
-    for i in range(0,len(all_data)):
-        nfaa_score.append(sum([score_text_to_number(x,'nfaa') for x in all_data[i]]))
-        usaa_score.append(sum([score_text_to_number(x,'usaa') for x in all_data[i]]))
-    return (nfaa_score,usaa_score)
+    for this_round in scores:
+        nfaa_score.append(sum([score_text_to_number(x, 'nfaa') for x in this_round]))
+        usaa_score.append(sum([score_text_to_number(x, 'usaa') for x in this_round]))
+    return (nfaa_score, usaa_score)
 
 #%% Functions - plot_mean_and_std
-def plot_mean_and_std(all_data, filename=''):
+def plot_mean_and_std(scores, opts=None, perfect_score=300):
     r"""
     Plots the bell curve based on the given scores.
+
+    Parameters
+    ----------
+    scores : list of list of int/str
+        List of scores for each round based on sublist of scores for each arrow in the round
+    opts : class Opts
+        Optional plotting controls
+    perfect_score : int, optional, defaults to 300
+        Value of a perfect score used to determine range for plotting
+
+    Returns
+    -------
+    fig : class object
+        Figure handle
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2015.
+    #.  Updated by David C. Stauffer in October 2015 to use setup_plots and Opts functionality.
+
+    Examples
+    --------
+
+    >>> from dstauffman.archery.scoring import plot_mean_and_std
+    >>> import matplotlib.pyplot as plt
+    >>> scores = [10*['X', 10, 9], 10*[9, 9, 9]]
+    >>> fig = plot_mean_and_std(scores)
+
+    Close the figure
+    >>> plt.close(fig)
+
     """
-    (nfaa_score,usaa_score) = convert_data_to_scores(all_data)
+    # hard-coded values
+    num2per = 100
+    # check for optional arguments
+    if opts is None:
+        opts = Opts()
+        opts.case_name = ''
+    # split into NFAA and USAA scores
+    (nfaa_score, usaa_score) = convert_data_to_scores(scores)
     # calculate mean and standard deviations, use pandas Series instead of numpy for N-1 definition of std.
     nfaa_mean   = np.mean(nfaa_score)
     usaa_mean   = np.mean(usaa_score)
@@ -152,34 +199,37 @@ def plot_mean_and_std(all_data, filename=''):
     usaa_std    = pd.Series(usaa_score).std()
     # create score range to evaluate for plotting
     dt          = 0.1
-    score_range = np.arange(0,300+dt,dt)
+    score_range = np.arange(0, perfect_score+dt, dt)
     # create actuals for scores
-    act_range   = np.arange(PLOT_LIMITS[0],PLOT_LIMITS[1]+1)
-    nfaa_acts   = np.empty(len(act_range))
-    usaa_acts   = np.empty(len(act_range))
+    act_range   = np.arange(PLOT_LIMITS[0], PLOT_LIMITS[1]+1)
+    nfaa_acts   = np.empty(act_range.shape)
+    usaa_acts   = np.empty(act_range.shape)
     num_scores  = len(nfaa_score)
-    for ix, score in enumerate(act_range):
+    for (ix, score) in enumerate(act_range):
         nfaa_acts[ix] = np.sum(nfaa_score == score) / num_scores
         usaa_acts[ix] = np.sum(usaa_score == score) / num_scores
-    # create plot
-    plt.figure()
-    plt.plot(score_range,100*normal_curve(score_range,nfaa_mean,nfaa_std),'r')
+    # create figure
+    fig = plt.figure()
+    fig.canvas.set_window_title('Score Distribution')
+    ax = fig.add_subplot(111)
+    # plot data
+    ax.plot(score_range, num2per*normal_curve(score_range, nfaa_mean, nfaa_std), 'r', label='NFAA Normal')
     if PLOT_ACTUALS:
-        plt.plot(act_range,100*nfaa_acts,'r.')
-    plt.plot(score_range,100*normal_curve(score_range,usaa_mean,usaa_std),'b')
+        ax.plot(act_range, num2per*nfaa_acts, 'r.', label='NFAA Actuals')
+    ax.plot(score_range, num2per*normal_curve(score_range, usaa_mean, usaa_std), 'b', label='USAA Normal')
     if PLOT_ACTUALS:
-        plt.plot(act_range,100*usaa_acts,'b.')
+        ax.plot(act_range, num2per*usaa_acts, 'b.', label='USAA Actuals')
+    # add labels and legends
     plt.xlabel('Score')
     plt.ylabel('Distribution [%]')
-    plt.title('Score Distribution')
+    plt.title(fig.canvas.get_window_title())
     plt.xlim(PLOT_LIMITS)
-    if PLOT_ACTUALS:
-        plt.legend(['NFAA Normal','NFAA Actuals','USAA Normal','USAA Actuals'])
-    else:
-        plt.legend(['NFAA','USAA'])
+    plt.legend()
     plt.grid(True)
     plt.show()
-    plt.savefig(filename)
+    # optionally save and format plot
+    setup_plots(fig, opts, 'dist_no_y_scale')
+    return fig
 
 #%% Functions - normal_curve
 def normal_curve(x, mu=0, sigma=1):
@@ -221,14 +271,42 @@ def normal_curve(x, mu=0, sigma=1):
 def excel_date_to_str(excel_num):
     r"""
     Convert an excel date to a Python datetime.datetime object.
+
+    Parameters
+    ----------
+    excel_num : float
+        Scalar number that Excel uses to represent a date
+
+    Returns
+    -------
+    date : str
+        Equivalent string (YYYY-MM-DD) representation of the Excel date
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.archery.scoring import excel_date_to_str
+    >>> excel_num = 36526
+    >>> date = excel_date_to_str(excel_num)
+    >>> print(date)
+    2000-01-01
+
     """
+    # Excel's date zero as a Python datetime object
     date_zero = datetime(1899, 12, 30, 0, 0, 0)
     num_zero = 0
 
+    # calculate the number of days since date zero
     dt = timedelta(days=excel_num - num_zero)
 
+    # increment the datetime object
     date = date_zero + dt
 
+    # output the object as a string
     return date.strftime('%Y-%m-%d')
 
 #%% Functions - read_from_excel_datafile
@@ -255,9 +333,15 @@ def read_from_excel_datafile(filename):
     Examples
     --------
 
-    >>> from dstauffman.archery.scoring import read_from_excel_datafile
-    >>> filename = r"C:\Users\DStauffman\Documents\Archery\2015-16 Indoor\2015-16 Indoor Scorecards.xlsx"
+    >>> from dstauffman.archery.scoring import read_from_excel_datafile, get_root_dir
+    >>> import os
+    >>> filename = os.path.join(get_root_dir(), 'test_score_template.xlsx')
     >>> (scores, names) = read_from_excel_datafile(filename)
+    >>> print(scores[0][0:3])
+    ['X' 9.0 9.0]
+
+    >>> print(names[0])
+    10/1/2015
 
     """
     # read data from excel into DataFrame
@@ -284,51 +368,44 @@ def read_from_excel_datafile(filename):
     # return a tuple of the scores and associated names
     return (scores, names)
 
-#%% Functions - read_from_xml_datafile
-def read_from_xml_datafile(filename, display=True):
-    r"""
-    Reads the score data from the given xml data file and also returns the archer names.
-    """
-    dom    = minidom.parse(filename)
-    rounds = dom.getElementsByTagName('round')
-    all_data = []
-    names    = []
-    for i in range(0,len(rounds)):
-        this_round = rounds[i]
-        data       = []
-        archer     = this_round.getAttribute('archer')
-        date       = this_round.getAttribute('date')
-        # TODO: make this check for <end> tag in future.
-        ends       = this_round.childNodes
-        for end in ends:
-            scores = end.childNodes
-            for score in scores:
-                if score.nodeType == score.ELEMENT_NODE:
-                    data.append(score.firstChild.nodeValue)
-        all_data.append(data)
-        names.append(archer + ' (' + date + ')')
-        if display:
-            print('Archer: ' + archer)
-            print('Date:   ' + date)
-            print('Scores: ',data,sep='')
-    if display:
-        print(' ')
-    return (all_data,names)
-
-#%% Functions - read_from_csv_datafile
-def read_from_csv_datafile(filename):
-    r"""
-    Reads the score data from the given csv data file.
-    """
-    with open(filename, newline='') as csvfile:
-        reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-        for row in reader:
-            print(', '.join(row))
-
 #%% Functions - create_scoresheet
-def create_scoresheet(filename, data, names, plotname='scores.png'):
+def create_scoresheet(filename, scores, names, plotname='Score Distribution.png'):
     r"""
     Creates an HTML file scoresheet of the given information.
+
+    Parameters
+    ----------
+    filename : str
+        Filename to read data from
+    scores : list of list of int/str
+        Scores for each round
+    names : list of str
+        List of names for the scoring rounds
+    plotname : str, optional
+        Name of the plot to include in the scoresheet
+
+    Returns
+    -------
+    html : str
+        Resulting HTML mark-up code for htm file
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.archery.scoring import create_scoresheet
+    >>> filename = ''
+    >>> scores = [10*['X', 10, 9], 10*[9, 9, 9]]
+    >>> names = ['First Round', 'Second Round']
+    >>> html = create_scoresheet(filename, scores, names)
+    >>> print(html[:49])
+    <!DOCTYPE html>
+    <html>
+    <title>Score Sheet</title>
+
     """
 
     # determine if making a file
@@ -434,9 +511,9 @@ span.white {color: #ffffff;}
     plot1 = """<p><img src=""" + plotname + """ alt="Normal Distribution plot" height="597" width="800"> </p>
 """
 
-    for i in range(0,len(data)):
+    for i in range(0,len(scores)):
         table1 = table1 + ' <tr>\n  <td rowspan="2">' + names[i] + '</td>\n'
-        this_data   = data[i]
+        this_data   = scores[i]
         this_data   = [x if isinstance(x,str) else str(int(x)) for x in this_data]
         this_nums   = [score_text_to_number(x) for x in this_data]
         this_cumsum = np.cumsum(this_nums)
@@ -501,31 +578,40 @@ span.white {color: #ffffff;}
         folder = os.path.split(filename)[0]
         if not os.path.isdir(folder):
             setup_dir(folder)
-        with open(filename,'w') as f:
-            f.write(htm)
+        with open(filename, 'w') as file:
+            file.write(htm)
 
     return htm
 
-#%% Unit test logic
+#%% Unit test function
 def main():
-    folder          = r'C:\Users\DStauffman\Documents\Archery\2015-16 Indoor'
+    r"""Unit test logic."""
+    # folder and file locations
+    username        = getpass.getuser()
+    folder          = os.path.join(r'C:\Users', username, r'Google Drive\Python\2015-16_Indoor_Scores')
     xlsx_datafile   = os.path.join(folder, '2015-16 Indoor Scorecards.xlsx')
-    #xml_datafile    = os.path.join(folder, 'score_sheet.xml')
     html_scoresheet = os.path.join(folder, 'scoresheet.htm')
-    csv_datafile    = os.path.join(folder, '2015-16 Score History.csv')
 
-    # (all_data,names) = read_from_xml_datafile(xml_datafile)
-    (all_data,names) = read_from_excel_datafile(xlsx_datafile)
-    create_scoresheet(html_scoresheet,all_data,names)
-    plot_mean_and_std(all_data,os.path.join(folder,'scores.png'))
+    # opts settings for plots
+    opts = Opts()
+    opts.case_name = 'David'
+    opts.save_path = folder
+    opts.save_plot = True
+    opts.plot_type = 'png'
+
+    # process data and create HTML report
+    (scores, names) = read_from_excel_datafile(xlsx_datafile)
+    fig = plot_mean_and_std(scores, opts)
+    create_scoresheet(html_scoresheet, scores, names, 'David - Score Distribution.png')
+    plt.close(fig)
 
     # For Katie:
-    #xlsx_datafile2   = os.path.join(folder,'2014-15 Indoor Scorecards-Katie Novotny.xlsx')
-    #html_scoresheet2 = os.path.join(folder,'scoresheet_katie.htm')
-    #(all_data2,names2) = read_from_excel_datafile(xlsx_datafile2)
-    #create_scoresheet(html_scoresheet2,all_data2,names2,'scores_katie.png')
-    #plot_mean_and_std(all_data2,os.path.join(folder,'scores_katie.png'))
-
+    #xlsx_datafile2   = os.path.join(folder, '2014-15 Indoor Scorecards-Katie Novotny.xlsx')
+    #html_scoresheet2 = os.path.join(folder, 'scoresheet_katie.htm')
+    #opts.case_name = 'Katie'
+    #(scores2, names2) = read_from_excel_datafile(xlsx_datafile2)
+    #plot_mean_and_std(scores2, opts)
+    #create_scoresheet(html_scoresheet2, scores2, names2, 'Katie - Score Distribution.png')
 
 #%% Unit test
 if __name__ == '__main__':

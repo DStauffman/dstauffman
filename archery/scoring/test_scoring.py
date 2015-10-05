@@ -8,15 +8,26 @@ Notes
 #.  Written by David C. Stauffer in October 2015.
 """
 
+
 #%% Imports
 from __future__ import print_function
 from __future__ import division
-import unittest
+import matplotlib.pyplot as plt
 import numpy as np
+import unittest
 import dstauffman.archery.scoring as arch
 
-#%% Classes for testing
-# score_text_to_number
+#%% get_root_dir
+class Test_get_root_dir(unittest.TestCase):
+    r"""
+    Tests the get_root_dir function with these cases:
+        call the function
+    """
+    def test_function(self):
+        folder = arch.get_root_dir()
+        self.assertTrue(folder) # TODO: don't know an independent way to test this
+
+#%% score_text_to_number
 class Test_score_text_to_number(unittest.TestCase):
     r"""
     Tests the score_text_to_number function with the following cases:
@@ -67,6 +78,65 @@ class Test_score_text_to_number(unittest.TestCase):
     def test_bad_value(self):
         with self.assertRaises(ValueError):
             arch.score_text_to_number('z')
+
+#%% convert_data_to_scores
+class Test_convert_data_to_scores(unittest.TestCase):
+    r"""
+    Tests the convert_data_to_scores function with these cases:
+        Nominal
+    """
+    def setUp(self):
+        self.scores = [10*['X', 10, 9], 10*[9, 9, 9]]
+        self.nfaa_scores = [290, 270]
+        self.usaa_scores = [280, 270]
+
+    def test_nominal(self):
+        (nfaa_score, usaa_score) = arch.convert_data_to_scores(self.scores)
+        np.testing.assert_array_equal(nfaa_score, self.nfaa_scores)
+        np.testing.assert_array_equal(usaa_score, self.usaa_scores)
+
+#%% plot_mean_and_std
+class Test_plot_mean_and_std(unittest.TestCase):
+    r"""
+    Tests the plot_mean_and_std function with these cases:
+        TBD
+    """
+    def setUp(self):
+        self.scores = [10*['X', 10, 9], 10*[9, 9, 9]]
+        self.fig = None
+
+    def test_nominal(self):
+        self.fig = arch.plot_mean_and_std(self.scores)
+
+    # TODO: write more of these
+
+    def tearDown(self):
+        if self.fig is not None:
+            plt.close(self.fig)
+
+#%% normal_curve
+class Test_normal_curve(unittest.TestCase):
+    r"""
+    Tests the normal_curve function with these cases:
+        TBD
+    """
+    pass
+
+#%% read_from_excel_datafile
+class Test_read_from_excel_datafile(unittest.TestCase):
+    r"""
+    Tests the read_from_excel_datafile function with these cases:
+        TBD
+    """
+    pass
+
+#%% create_scoresheet
+class Test_create_scoresheet(unittest.TestCase):
+    r"""
+    Tests the create_scoresheet function with these cases:
+        TBD
+    """
+    pass
 
 #%% Unit test execution
 if __name__ == '__main__':
