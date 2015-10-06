@@ -195,8 +195,12 @@ def plot_mean_and_std(scores, opts=None, perfect_score=300):
     # calculate mean and standard deviations, use pandas Series instead of numpy for N-1 definition of std.
     nfaa_mean   = np.mean(nfaa_score)
     usaa_mean   = np.mean(usaa_score)
-    nfaa_std    = pd.Series(nfaa_score).std()
-    usaa_std    = pd.Series(usaa_score).std()
+    if len(nfaa_score) > 1:
+        nfaa_std    = pd.Series(nfaa_score).std()
+        usaa_std    = pd.Series(usaa_score).std()
+    else:
+        nfaa_std = 0
+        usaa_std = 0
     # create score range to evaluate for plotting
     dt          = 0.1
     score_range = np.arange(0, perfect_score+dt, dt)
@@ -215,10 +219,10 @@ def plot_mean_and_std(scores, opts=None, perfect_score=300):
     # plot data
     ax.plot(score_range, num2per*normal_curve(score_range, nfaa_mean, nfaa_std), 'r', label='NFAA Normal')
     if PLOT_ACTUALS:
-        ax.plot(act_range, num2per*nfaa_acts, 'r.', label='NFAA Actuals')
+        ax.bar(act_range, num2per*nfaa_acts, color='r', label='NFAA Actuals')
     ax.plot(score_range, num2per*normal_curve(score_range, usaa_mean, usaa_std), 'b', label='USAA Normal')
     if PLOT_ACTUALS:
-        ax.plot(act_range, num2per*usaa_acts, 'b.', label='USAA Actuals')
+        ax.bar(act_range, num2per*usaa_acts, color='b', label='USAA Actuals')
     # add labels and legends
     plt.xlabel('Score')
     plt.ylabel('Distribution [%]')
@@ -263,7 +267,12 @@ def normal_curve(x, mu=0, sigma=1):
     >>> y = normal_curve(x)
 
     """
-    with np.errstate(invalid='ignore'): # because mu or sigma can be zero
+    if sigma < 0:
+        raise ValueError('The sigma must be positive, not {}.'.format(sigma))
+    elif sigma == 0:
+        y = np.where(x == mu, 1, 0)
+    else:
+    #with np.errstate(invalid='ignore', divide='ignore'): # because mu or sigma can be zero
         y = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (x - mu)**2 / (2 * sigma**2) )
     return y
 
@@ -508,7 +517,7 @@ span.white {color: #ffffff;}
  </thead>
 """
 
-    plot1 = """<p><img src=""" + plotname + """ alt="Normal Distribution plot" height="597" width="800"> </p>
+    plot1 = """<p><img src=""" + plotname.replace(' ','%20') + """ alt="Normal Distribution plot" height="597" width="800"> </p>
 """
 
     for i in range(0,len(scores)):
@@ -603,7 +612,7 @@ def main():
     (scores, names) = read_from_excel_datafile(xlsx_datafile)
     fig = plot_mean_and_std(scores, opts)
     create_scoresheet(html_scoresheet, scores, names, 'David - Score Distribution.png')
-    plt.close(fig)
+    #plt.close(fig)
 
     # For Katie:
     #xlsx_datafile2   = os.path.join(folder, '2014-15 Indoor Scorecards-Katie Novotny.xlsx')

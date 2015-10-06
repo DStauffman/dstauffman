@@ -120,7 +120,27 @@ class Test_normal_curve(unittest.TestCase):
     Tests the normal_curve function with these cases:
         TBD
     """
-    pass
+    def setUp(self):
+        self.x = np.arange(-5, 5.01, 0.01)
+        self.mu = 0
+        self.sigma = 1
+        self.y = np.exp(-self.x**2/2)/np.sqrt(2*np.pi)
+
+    def test_nominal(self):
+        y = arch.normal_curve(self.x, self.mu, self.sigma)
+        np.testing.assert_array_almost_equal(y, self.y)
+
+    def test_nonzero_mean(self):
+        offset = 2.5
+        y = arch.normal_curve(self.x + offset, self.mu + offset, self.sigma)
+        np.testing.assert_array_almost_equal(y, self.y)
+
+    def test_no_std(self):
+        y = arch.normal_curve(self.x, 3.3, 0)
+        out = np.zeros(self.x.shape)
+        ix = np.nonzero(y == 3.3)[0]
+        out[ix] = 1
+        np.testing.assert_array_almost_equal(y, out)
 
 #%% read_from_excel_datafile
 class Test_read_from_excel_datafile(unittest.TestCase):
