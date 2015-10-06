@@ -8,7 +8,6 @@ Notes
 #.  Written by David C. Stauffer in October 2015.
 """
 
-
 #%% Imports
 from __future__ import print_function
 from __future__ import division

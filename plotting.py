@@ -113,7 +113,7 @@ class MyCustomToolbar():
         # check to see if a QApplication exists, and if not, make one
         # open a qapp
         if QApplication.instance() is None:
-            self.qapp = QApplication(sys.argv)
+            self.qapp = QApplication(sys.argv) # pragma: no cover
         else:
             self.qapp = QApplication.instance()
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
