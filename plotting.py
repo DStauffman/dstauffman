@@ -383,8 +383,8 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, plot
             mean = data
             std  = np.zeros(len(data))
         else:
-            mean = np.mean(data, axis=0)
-            std  = np.std(data, axis=0)
+            mean = np.mean(data, axis=1)
+            std  = np.std(data, axis=1)
 
         # calculate an RMS
         rms_data = rms(scale*mean, axis=0)
@@ -400,20 +400,20 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, plot
     ax = fig.add_subplot(111)
     if plot_as_diffs:
         cm.set_colors(ax)
-        for ix in range(data.shape[0]):
+        for ix in range(data.shape[1]):
             this_label = opts.get_names(ix)
             if not this_label:
                 this_label = 'Series {}'.format(ix+1)
             this_label = this_label + ' (RMS: {:.2f})'.format(rms_data[ix])
-            ax.plot(time, scale*data[ix, :], '.-', linewidth=2, zorder=10, label=this_label)
+            ax.plot(time, scale*data[:, ix], '.-', linewidth=2, zorder=10, label=this_label)
     else:
         ax.plot(time, scale*mean, 'b.-', linewidth=2, zorder=10, \
             label=opts.get_names(0) + description + ' (RMS: {:.2f})'.format(rms_data))
         ax.errorbar(time, scale*mean, scale*std, linestyle='None', marker='None', ecolor='c', zorder=6)
         # inidividual line plots
         if plot_indiv and data.ndim > 1:
-            for ix in range(data.shape[0]):
-                ax.plot(time, scale*data[ix, :], color='0.75', zorder=1)
+            for ix in range(data.shape[1]):
+                ax.plot(time, scale*data[:, ix], color='0.75', zorder=1)
     # optionally plot truth (without changing the axis limits)
     if truth_data is not None:
         limits = plt.axis()
