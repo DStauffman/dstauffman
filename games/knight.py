@@ -888,6 +888,104 @@ def print_sequence(board, moves, costs=None):
         else:
             raise ValueError('Bad sequence.')
 
+#%% predict_cost
+def predict_cost(board):
+    r"""
+    Predicts the cost from all locations on the board to the final square.
+
+    Parameters
+    ----------
+    board : 2D ndarray of int
+        Board layout
+
+    Returns
+    -------
+    costs : 2D ndarray of float
+        Predicted cost to finish
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.knight import predict_cost, Piece
+    >>> import numpy as np
+    >>> board = np.zeros((2,5), dtype=int)
+    >>> board[0, 0] = Piece.start
+    >>> board[0, 4] = Piece.final
+    >>> costs = predict_cost(board)
+    >>> print(costs)
+    [[ 2.   1.5  1.   0.5  0. ]
+     [ 2.   1.5  1.   1.   0.5]]
+
+    """
+    # find the final position
+    temp = np.nonzero(board == Piece.final)
+    x_fin = temp[0][0]
+    y_fin = temp[1][0]
+    # build a grid of points to evaluate
+    (X, Y) = np.meshgrid(np.arange(board.shape[0]), np.arange(board.shape[1]), indexing='ij')
+    x_dist = np.abs(X - x_fin)
+    y_dist = np.abs(Y - y_fin)
+    costs = np.where(x_dist > y_dist, np.maximum(x_dist / 2, y_dist), np.maximum(x_dist, y_dist / 2))
+    return costs
+
+#%% sort_best_moves
+def sort_best_moves(board, moves, costs):
+    r"""
+    Sorts the given moves into the most likely best order based on a predicted cost
+
+    Parameters
+    ----------
+    board : 2D ndarray of int
+        Board layout
+    moves : list of int
+        Possible moves to check
+    costs : 2D ndarray of float
+        Predicted cost to finish
+
+    Returns
+    -------
+    sorted_moves : list of int
+        Moves sorted by most likely
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.knight import sort_best_moves, Piece, MOVES, predict_cost
+    >>> import numpy as np
+    >>> board = np.zeros((2,5), dtype=int)
+    >>> board[0, 0] = Piece.current
+    >>> board[0, 4] = Piece.final
+    >>> moves = MOVES
+    >>> costs = predict_cost(board)
+    >>> sorted_moves = sort_best_moves(board, moves, costs)
+    >>> print(sorted_moves)
+    [-1, -4, -2, 2, 4, 1]
+
+    """
+    # get the current position
+    (x, y) = get_current_position(board)
+    # initialize the costs
+    pred_costs = np.empty(len(moves))
+    pred_costs.fill(np.nan)
+    for (ix, move) in enumerate(moves):
+        (_, _, new_pos) = get_new_position(x, y, move)
+        try:
+            this_cost = costs[new_pos[0], new_pos[1]]
+            pred_costs[ix] = this_cost
+        except IndexError:
+            pass
+    sorted_ix = pred_costs.argsort()
+    sorted_moves = [moves[i] for i in sorted_ix if not np.isnan(pred_costs[i])]
+    return sorted_moves
+
 #%% solve_puzzle
 def solve_puzzle(board, costs, solve_type='min', data={}):
     r"""
@@ -948,6 +1046,8 @@ def solve_puzzle(board, costs, solve_type='min', data={}):
         temp = np.nonzero(board == Piece.final)
         data['final_loc_x'] = temp[0][0]
         data['final_loc_y'] = temp[1][0]
+        # crudely predict all the costs
+        data['pred_costs'] = predict_cost(board)
         # initialize best costs on first run
         data['best_costs'] = LARGE_INT * np.ones(board.shape, dtype=int)
         # initialize best solution
@@ -963,8 +1063,10 @@ def solve_puzzle(board, costs, solve_type='min', data={}):
     else:
         # check for a start piece, in which case something is messed up
         assert not np.any(board == Piece.start), 'Empty dicts should not have a start piece and vice versa.'
+    # guess the order for the best moves based on predicited costs
+    sorted_moves = sort_best_moves(board, MOVES, data['pred_costs'])
     # try all the next possible moves
-    for this_move in MOVES:
+    for this_move in sorted_moves:
         # optimization for longer moves that we know won't be better
         if solve_type == 'min' and data['current_cost'] >= data['best_costs'][data['final_loc_x'],data['final_loc_y']]:
             break

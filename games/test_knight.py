@@ -539,7 +539,7 @@ class Test_solve_puzzle(unittest.TestCase):
         self.board[0, 4]   = knight.Piece.final
         self.costs         = np.ones(self.board.shape, dtype=int)
         self.data          = {}
-        self.first_moves   = [-3, -2, 4, -3, -2, 4, -3, 1]
+        self.first_moves   = [2, -2] # [-3, -2, 4, -3, -2, 4, -3, 1] (before predicting costs)
         self.min_moves     = [2, -2]
         self.max_num_moves = 8
 
@@ -568,8 +568,9 @@ class Test_solve_puzzle(unittest.TestCase):
         self.assertTrue(self.data['is_solved'])
         np.testing.assert_array_equal(self.data['moves'], self.min_moves)
         if not knight.LOGGING:
-            self.assertEqual(output, 'Initializing solver.\nSolution found for cost of: 8.\n' + \
-                'Solution found for cost of: 6.\nSolution found for cost of: 4.\nSolution found for cost of: 2.')
+            #self.assertEqual(output, 'Initializing solver.\nSolution found for cost of: 8.\n' + \
+            #    'Solution found for cost of: 6.\nSolution found for cost of: 4.\nSolution found for cost of: 2.')
+            self.assertEqual(output, 'Initializing solver.\nSolution found for cost of: 2.')
         else:
             self.assertTrue(output.startswith('Initializing solver.'))
             self.assertTrue(output.endswith('this_move = 4, this_cost = 1000000, total moves = [] - invalid'))
