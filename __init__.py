@@ -25,7 +25,7 @@ from .utils     import rms, setup_dir, compare_two_classes, compare_two_dicts, r
                            write_text_file, convert_annual_to_monthly_probability, \
                            convert_monthly_to_annual_probability, ca2mp, cm2ap, get_root_dir, \
                            get_tests_dir, get_data_dir, get_images_dir, capture_output, unit, \
-                           nonzero_indices, combine_sets, reload_package, delete_pyc, rename_module
+                           combine_sets, reload_package, delete_pyc, rename_module, modd
 
 #%% Unit test
 if __name__ == '__main__':

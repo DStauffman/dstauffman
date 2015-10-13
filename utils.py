@@ -862,39 +862,6 @@ def unit(data, axis=1):
     norm_data = data / mag
     return norm_data
 
-#%% Functions - nonzero_indices
-def nonzero_indices(data):
-    r"""
-    Returns the indices for a boolean array, similar to the Matlab "find" command.
-
-    Parameters
-    ----------
-    data : array_like
-        Input data
-
-    Returns
-    -------
-    ix : ndarray
-        Indices to elements that evaluate as true
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in May 2015.
-
-    Examples
-    --------
-
-    >>> from dstauffman import nonzero_indices
-    >>> data = [True, True, False, False, True]
-    >>> ix   = nonzero_indices(data)
-    >>> print(ix) # doctest: +NORMALIZE_WHITESPACE
-    [0 1 4]
-
-    """
-    # build and return the indices
-    ix = np.array([ix for (ix, val) in enumerate(data) if val], dtype=int)
-    return ix
-
 #%% Functions - combine_sets
 def combine_sets(n1, u1, s1, n2, u2, s2):
     r"""
@@ -1140,6 +1107,20 @@ def rename_module(folder, old_name, new_name, print_status=True):
                     if print_status:
                         print('Copying: {}'.format(os.path.join(root, name)))
                     # TODO: copy over file
+
+#%% modd
+def modd(x1, x2, out=None):
+    r"""
+    Return element-wise remainder of division, except that instead of zero it gives the divisor instead.
+    """
+    if isinstance(x1, list):
+        x1 = np.array(x1)
+    if out is None:
+        y = np.mod(x1 - 1, x2) + 1
+        return y
+    else:
+        np.mod(x1 - 1, x2, out)
+        np.add(out, 1, out) # needed to force add to be inplace operation
 
 #%% Unit test
 if __name__ == '__main__':

@@ -662,30 +662,6 @@ class Test_unit(unittest.TestCase):
         norm_data = dcs.unit(self.data, axis=0)
         np.testing.assert_almost_equal(norm_data, self.norm_data)
 
-#%% nonzero_indices
-class Test_nonzero_indices(unittest.TestCase):
-    r"""
-    Tests the nonzero_indices function with these cases:
-        Nominal case
-        No matches case
-        Mixed types case
-    """
-    def setUp(self):
-        self.bools = np.array([True, True, False, False, True])
-        self.ix    = np.array([0, 1, 4])
-
-    def test_nominal(self):
-        ix = dcs.nonzero_indices(self.bools)
-        np.testing.assert_array_equal(ix, self.ix)
-
-    def no_matches(self):
-        ix = dcs.nonzero_indices(np.zeros(5, dtype=bool))
-        self.assertFalse(ix)
-
-    def test_weird_types(self):
-        ix = dcs.nonzero_indices([1, 'spam', 0, False, 0.0, '', 0.00001])
-        np.testing.assert_array_equal(ix, np.array([0, 1, 6]))
-
 #%% combine_sets
 class Test_combine_sets(unittest.TestCase):
     r"""
@@ -852,6 +828,44 @@ class Test_delete_pyc(unittest.TestCase):
             os.remove(self.file2)
         if os.path.isdir(self.fold2):
             os.removedirs(self.fold2)
+
+#%% rename_module
+pass
+
+#%% modd
+class Test_modd(unittest.TestCase):
+    r"""
+    Tests the modd function with the following cases:
+        Nominal
+        Scalar
+        List (x2)
+        Modify in-place
+    """
+    def setUp(self):
+        self.x = np.array([-4, -3, -2, -1, 0, 1, 2, 3, 4])
+        self.y = np.array([ 4,  1,  2,  3, 4, 1, 2, 3, 4])
+        self.mod = 4
+
+    def test_nominal(self):
+        y = dcs.modd(self.x, self.mod)
+        np.testing.assert_array_equal(y, self.y)
+
+    def test_scalar(self):
+        y = dcs.modd(4, 4)
+        self.assertEqual(y, 4)
+
+    def test_list1(self):
+        y = dcs.modd([2, 4], 4)
+        np.testing.assert_array_equal(y, np.array([2, 4]))
+
+    def test_list2(self):
+        y = dcs.modd(4, [3, 4])
+        np.testing.assert_array_equal(y, np.array([1, 4]))
+
+    def test_modify_inplace(self):
+        out = np.zeros(self.x.shape, dtype=int)
+        dcs.modd(self.x, self.mod, out)
+        np.testing.assert_array_equal(out, self.y)
 
 #%% Unit test execution
 if __name__ == '__main__':
