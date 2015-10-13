@@ -1083,6 +1083,64 @@ def delete_pyc(folder, recursive=True, print_progress=True):
                 # remove relevant files
                 _remove_pyc(folder, name)
 
+#%% rename_module
+def rename_module(folder, old_name, new_name, print_status=True):
+    r"""
+    Renames the given module from the old to new name.
+
+    Parameters
+    ----------
+    folder : str
+        Name of folder to operate within
+    old_name : str
+        The original name of the module
+    new_name : str
+        The new name of the module
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015 mostly for Matt Beck, because he doesn't
+        like the name of my library.
+
+    Examples
+    --------
+
+    >>> from dstauffman import rename_module, get_root_dir
+    >>> import os
+    >>> folder = os.path.split(get_root_dir())[0]
+    >>> old_name = 'dstauffman'
+    >>> new_name = 'dcs_tools'
+    >>> rename_module(folder, old_name, new_name) # doctest: +SKIP
+
+    """
+    # hard-coded values
+    folder_exclusions = {'.git'}
+    file_exclusions = {'.pyc'}
+    files_to_edit = {'.py'}
+    for (root, _, files) in os.walk(os.path.join(folder, old_name)):
+        for skip in folder_exclusions:
+            if root.endswith(skip) or root.find(skip + os.path.sep) >= 0:
+                if print_status:
+                    print('Skipping: {}'.format(root))
+                break
+        else:
+            for name in files:
+                (file_name, file_ext) = os.path.splitext(name)
+                if file_ext in file_exclusions:
+                    if print_status:
+                        print('Skipping: {}'.format(os.path.join(root, name)))
+                    continue
+                if file_ext in files_to_edit:
+                    # edit files
+                    if print_status:
+                        print('Editing: {}'.format(os.path.join(root, name)))
+                    # TODO: open, edit and save as new file
+                else:
+                    # copy file as-is
+                    if print_status:
+                        print('Copying: {}'.format(os.path.join(root, name)))
+                    # TODO: copy over file
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_utils', exit=False)
