@@ -1112,6 +1112,38 @@ def rename_module(folder, old_name, new_name, print_status=True):
 def modd(x1, x2, out=None):
     r"""
     Return element-wise remainder of division, except that instead of zero it gives the divisor instead.
+
+    Parameters
+    ----------
+    x1 : array_like
+        Dividend array.
+    x2 : array_like
+        Divisor array.
+    out : ndarray, optional
+        Array into which the output is placed. Its type is preserved and it must be of the right
+        shape to hold the output. See doc.ufuncs.
+
+    Returns
+    -------
+    y : ndarray
+        The remainder of the quotient x1/x2, element-wise. Returns a scalar if both x1 and x2 are
+        scalars.  Replaces what would be zeros in the normal modulo command with the divisor instead.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman import modd
+    >>> import numpy as np
+    >>> x1 = np.array([-4, -3, -2, -1, 0, 1, 2, 3, 4])
+    >>> x2 = 4
+    >>> y = modd(x1, x2)
+    >>> print(y)
+    [4 1 2 3 4 1 2 3 4]
+
     """
     if isinstance(x1, list):
         x1 = np.array(x1)
