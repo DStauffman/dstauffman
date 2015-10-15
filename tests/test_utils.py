@@ -830,7 +830,25 @@ class Test_delete_pyc(unittest.TestCase):
             os.removedirs(self.fold2)
 
 #%% rename_module
-pass
+class Test_rename_module(unittest.TestCase):
+    r"""
+    Tests the rename_module function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.folder = os.path.split(dcs.get_root_dir())[0]
+        self.old_name = 'dstauffman'
+        self.new_name = 'dcs_tools'
+        self.print_status = True
+
+    @unittest.skip # TODO: only print without executing??
+    def test_nominal(self):
+        with dcs.capture_output() as (out, _):
+            dcs.rename_module(self.folder, self.new_name, self.old_name, self.print_status)
+        output = out.getvalue().strip()
+        out.close()
+        print(output)
+        self.assertEqual(output, 'Text to match...')
 
 #%% modd
 class Test_modd(unittest.TestCase):

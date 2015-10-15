@@ -217,14 +217,24 @@ class Test_plot_time_history(unittest.TestCase):
         self.opts.names = ['Name 1']
         self.truth_time = self.time
         self.truth_data = np.cos(self.time)
+        self.truth_matrix = np.column_stack((self.truth_data-0.1, self.truth_data, self.truth_data+0.1))
         self.data_matrix = np.column_stack((self.data, self.truth_data))
 
     def test_normal(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_)
 
-    def test_truth(self):
+    def test_truth1(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
             truth_time=self.truth_time, truth_data=self.truth_data)
+
+    def test_truth2(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+            truth_time=self.truth_time, truth_data=self.truth_matrix)
+
+    def test_bad_truth_size(self):
+        with self.assertRaises(ValueError):
+            dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+                truth_time=self.truth_time, truth_data=self.truth_matrix[:, :-1])
 
     def test_opts(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, opts=self.opts)
