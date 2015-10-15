@@ -417,7 +417,14 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, plot
     # optionally plot truth (without changing the axis limits)
     if truth_data is not None:
         limits = plt.axis()
-        ax.plot(truth_time, scale*truth_data, 'k.-', linewidth=2, zorder=8, label='Truth')
+        if truth_data.ndim == 1:
+            ax.plot(truth_time, scale*truth_data, 'k.-', linewidth=2, zorder=8, label='Truth')
+        elif truth_data.shape[1] == 3:
+            ax.plot(truth_time, scale*truth_data[:, 1], 'k.-', linewidth=2, zorder=8, label='Truth')
+            ax.plot(truth_time, scale*truth_data[:, 0], '.-', color='0.5', linewidth=2, zorder=6)
+            ax.plot(truth_time, scale*truth_data[:, 2], '.-', color='0.5', linewidth=2, zorder=6)
+        else:
+            raise ValueError('Unexpected size for truth_data.')
         plt.axis(limits)
     # add labels and legends
     plt.xlabel('Time [year]')
