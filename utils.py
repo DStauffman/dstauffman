@@ -77,7 +77,7 @@ def _nan_equal(a, b):
     return is_same
 
 #%% Functions - rms
-def rms(data, axis=None, keepdims=False):
+def rms(data, axis=None, keepdims=False, ignore_nans=False):
     r"""
     Calculates the root mean square of a number series
 
@@ -112,8 +112,18 @@ def rms(data, axis=None, keepdims=False):
     0.70710678118654757
 
     """
+    # check for empty data
+    if not np.isscalar(data) and len(data) == 0:
+        return np.nan
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
-    out = np.sqrt(np.mean(data * np.conj(data), axis=axis, keepdims=keepdims))
+    if not ignore_nans:
+        out = np.sqrt(np.mean(data * np.conj(data), axis=axis, keepdims=keepdims))
+    else:
+        # check for all NaNs case
+        if np.all(np.isnan(data)):
+            out = np.nan
+        else:
+            out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))
     # return the result
     return out
 

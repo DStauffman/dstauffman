@@ -374,7 +374,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, plot
 
     if plot_as_diffs:
         # calculate RMS
-        rms_data = rms(scale*data, axis=1)
+        rms_data = rms(scale*data, axis=1, ignore_nans=True)
         # build colormap
         cm = ColorMap(colormap, num_colors=data.shape[0])
     else:
@@ -387,7 +387,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, plot
             std  = np.std(data, axis=1)
 
         # calculate an RMS
-        rms_data = rms(scale*mean, axis=0)
+        rms_data = rms(scale*mean, axis=0, ignore_nans=True)
 
     # turn interaction off to make the plots draw all at once on a show() command
     plt.ioff()

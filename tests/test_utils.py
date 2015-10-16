@@ -60,10 +60,19 @@ class Test_rms(unittest.TestCase):
         self.outputs2b = np.array([np.sqrt(2)/2, 1, np.sqrt(2)/2, 1])
         self.outputs2c = np.array([np.sqrt(2)/2, 1])
         self.outputs2d = np.matrix([[np.sqrt(2)/2], [1]])
+        self.inputs3   = np.hstack((self.inputs1, np.nan))
+        self.inputs4   = [[0, 0., np.nan], [1., np.nan, 1]]
+        self.outputs4a = np.sqrt(2)/2
+        self.outputs4b = np.array([np.sqrt(2)/2, 0, 1])
+        self.outputs4c = np.array([0, 1])
 
     def test_scalar_input(self):
         out = dcs.rms(-1.5)
         self.assertEqual(out, 1.5)
+
+    def test_empty(self):
+        out = dcs.rms([])
+        self.assertTrue(np.isnan(out))
 
     def test_rms_series(self):
         out = dcs.rms(self.inputs1)
@@ -104,6 +113,30 @@ class Test_rms(unittest.TestCase):
     def test_complex_conj(self):
         out = dcs.rms(np.array([1+1j, 1-1j]))
         self.assertAlmostEqual(out, np.sqrt(2))
+
+    def test_with_nans(self):
+        out = dcs.rms(self.inputs3, ignore_nans=False)
+        self.assertTrue(np.isnan(out))
+
+    def test_ignore_nans1(self):
+        out = dcs.rms(self.inputs3, ignore_nans=True)
+        self.assertAlmostEqual(out, self.outputs1)
+
+    def test_ignore_nans2(self):
+        out = dcs.rms(self.inputs4, ignore_nans=True)
+        self.assertAlmostEqual(out, self.outputs4a)
+
+    def test_ignore_nans3(self):
+        out = dcs.rms(self.inputs4, ignore_nans=True, axis=0)
+        np.testing.assert_array_almost_equal(out, self.outputs4b)
+
+    def test_ignore_nans4(self):
+        out = dcs.rms(self.inputs4, ignore_nans=True, axis=1)
+        np.testing.assert_array_almost_equal(out, self.outputs4c)
+
+    def test_all_nans(self):
+        out = dcs.rms(np.array([np.nan, np.nan]), ignore_nans=True)
+        self.assertTrue(np.isnan(out))
 
 #%% setup_dir
 class Test_setup_dir(unittest.TestCase):
