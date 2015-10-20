@@ -410,9 +410,10 @@ def create_scoresheet(filename, scores, names, plotname='Score Distribution.png'
     >>> scores = [10*['X', 10, 9], 10*[9, 9, 9]]
     >>> names = ['First Round', 'Second Round']
     >>> html = create_scoresheet(filename, scores, names)
-    >>> print(html[:49])
+    >>> print(html[:56])
     <!DOCTYPE html>
     <html>
+    <head>
     <title>Score Sheet</title>
 
     """
@@ -426,6 +427,7 @@ def create_scoresheet(filename, scores, names, plotname='Score Distribution.png'
     # TODO: want to move CSS information into a separate style sheet in the future.
     htm = """<!DOCTYPE html>
 <html>
+<head>
 <title>Score Sheet</title>
 
 <style type="text/css">
@@ -473,25 +475,28 @@ table.score_table td.M {
 span.red {color: #ff0000;}
 span.white {color: #ffffff;}
 </style>
+</head>
 
 <body>
 """
     table1 = """<table class="score_table">
- <th>Archer</th>
- <th colspan="4">End 1</th>
- <th colspan="4">End 2</th>
- <th colspan="4">End 3</th>
- <th colspan="4">End 4</th>
- <th colspan="4">End 5</th>
- <th colspan="4">End 6</th>
- <th colspan="4">End 7</th>
- <th colspan="4">End 8</th>
- <th colspan="4">End 9</th>
- <th colspan="4">End 10</th>
- <th>Total (NFAA)</th>
- <th>Total (USAA)</th>
- <th>Total (X's)</th>
- <th>Total (Hits)</th>
+ <tr>
+  <th>Archer</th>
+  <th colspan="4">End 1</th>
+  <th colspan="4">End 2</th>
+  <th colspan="4">End 3</th>
+  <th colspan="4">End 4</th>
+  <th colspan="4">End 5</th>
+  <th colspan="4">End 6</th>
+  <th colspan="4">End 7</th>
+  <th colspan="4">End 8</th>
+  <th colspan="4">End 9</th>
+  <th colspan="4">End 10</th>
+  <th>Total (NFAA)</th>
+  <th>Total (USAA)</th>
+  <th>Total (X's)</th>
+  <th>Total (Hits)</th>
+ </tr>
 """
 
     table2 = """<table class="score_table">
