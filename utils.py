@@ -19,6 +19,7 @@ import doctest
 import inspect
 import os
 import numpy as np
+import shutil
 import sys
 import types
 import unittest
@@ -1093,7 +1094,8 @@ def rename_module(folder, old_name, new_name, print_status=True):
     # hard-coded values
     folder_exclusions = {'.git'}
     file_exclusions = {'.pyc'}
-    files_to_edit = {'.py'}
+    files_to_edit = {'.py', '.rst', '.bat', '.txt'}
+    root_ix = len(folder)
     for (root, _, files) in os.walk(os.path.join(folder, old_name)):
         for skip in folder_exclusions:
             if root.endswith(skip) or root.find(skip + os.path.sep) >= 0:
@@ -1103,20 +1105,30 @@ def rename_module(folder, old_name, new_name, print_status=True):
         else:
             for name in files:
                 (file_name, file_ext) = os.path.splitext(name)
+                this_old_file = os.path.join(root, name)
+                this_new_file = os.path.join(folder + root[root_ix:].replace(old_name, new_name), \
+                    name.replace(old_name, new_name))
                 if file_ext in file_exclusions:
                     if print_status:
-                        print('Skipping: {}'.format(os.path.join(root, name)))
+                        print('Skipping: {}'.format(this_old_file))
                     continue
+                new_folder = os.path.split(this_new_file)[0]
+                if not os.path.isdir(new_folder):
+                    setup_dir(new_folder)
                 if file_ext in files_to_edit:
                     # edit files
                     if print_status:
-                        print('Editing: {}'.format(os.path.join(root, name)))
-                    # TODO: open, edit and save as new file
+                        print('Editing : {}'.format(this_old_file))
+                        print('     To : {}'.format(this_new_file))
+                    text = read_text_file(this_old_file)
+                    text = text.replace(old_name, new_name)
+                    write_text_file(this_new_file, text)
                 else:
                     # copy file as-is
                     if print_status:
-                        print('Copying: {}'.format(os.path.join(root, name)))
-                    # TODO: copy over file
+                        print('Copying : {}'.format(this_old_file))
+                        print('     To : {}'.format(this_new_file))
+                    shutil.copyfile(this_old_file, this_new_file)
 
 #%% modd
 def modd(x1, x2, out=None):
