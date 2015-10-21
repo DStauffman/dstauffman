@@ -424,6 +424,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, plot
             ax.plot(truth_time, scale*truth_data[:, 0], '.-', color='0.5', linewidth=2, zorder=6)
             ax.plot(truth_time, scale*truth_data[:, 2], '.-', color='0.5', linewidth=2, zorder=6)
         else:
+            plt.close(fig)
             raise ValueError('Unexpected size for truth_data.')
         plt.axis(limits)
     # add labels and legends

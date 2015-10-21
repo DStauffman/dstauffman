@@ -29,7 +29,7 @@ class Test_find_missing_nums(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.folder = dcs.get_tests_dir()
-        cls.folder_exclusions = [os.path.join(cls.folder, 'coverage_html_report')]
+        cls.folder_exclusions = [os.path.join(cls.folder, 'temp_dir')]
         file1 = os.path.join(cls.folder, 'temp image 01.jpg')
         file2 = os.path.join(cls.folder, 'temp image 02.jpg')
         file3 = os.path.join(cls.folder, 'temp image 04.jpg')
@@ -37,8 +37,11 @@ class Test_find_missing_nums(unittest.TestCase):
         file5 = os.path.join(cls.folder, 'temp something else 1.jpg')
         file6 = os.path.join(cls.folder, 'Picasa.ini')
         file7 = os.path.join(cls.folder, 'temp image 10 10.jpg')
+        if not os.path.isdir(cls.folder_exclusions[0]):
+            os.mkdir(cls.folder_exclusions[0])
         file8 = os.path.join(cls.folder_exclusions[0], 'temp image 01.jpg')
-        cls.files = [file1, file2, file3, file4, file5, file6, file7, file8]
+        file9 = os.path.join(cls.folder_exclusions[0], 'temp longimagename.jpg')
+        cls.files = [file1, file2, file3, file4, file5, file6, file7, file8, file9]
         for this_file in cls.files:
             dcs.write_text_file(this_file, '')
 
@@ -93,6 +96,8 @@ class Test_find_missing_nums(unittest.TestCase):
         for this_file in cls.files:
             if os.path.isfile(this_file):
                 os.remove(this_file)
+        if os.path.isdir(cls.folder_exclusions[0]):
+            os.rmdir(cls.folder_exclusions[0])
 
 # find_unexpected_ext
 class Test_find_unexpected_ext(unittest.TestCase):
