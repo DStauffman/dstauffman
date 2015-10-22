@@ -78,6 +78,7 @@ Level 5 [HARD]: Compute the longest sequence of moves to complete Level 3 withou
 from __future__ import print_function
 from __future__ import division
 # regular imports
+import copy
 import doctest
 from enum import unique
 import numpy as np
@@ -1097,7 +1098,7 @@ def solve_puzzle(board, costs, solve_type='min', data={}):
                 data['best_costs'][temp_loc] = data['current_cost']
                 data['moves'].append(this_move)
                 data['is_solved'] = True
-                data['best_moves'] = data['moves'].copy()
+                data['best_moves'] = copy.copy(data['moves'])
                 return
             else:
                 # reject move and re-establish the visited state
@@ -1155,7 +1156,7 @@ def solve_puzzle(board, costs, solve_type='min', data={}):
         # check if any branches solved the puzzle
         if data['best_moves'] is not None:
             data['is_solved'] = True
-            data['moves'] = data['best_moves'].copy()
+            data['moves'] = copy.copy(data['best_moves'])
         else:
             print('No solution found.')
     return

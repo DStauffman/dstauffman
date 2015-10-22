@@ -29,7 +29,8 @@ class Test_find_missing_nums(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.folder = dcs.get_tests_dir()
-        cls.folder_exclusions = [os.path.join(cls.folder, 'temp_dir')]
+        cls.folder_exclusions = [os.path.join(cls.folder, 'temp_dir'), \
+            os.path.join(cls.folder, 'coverage_html_report')]
         file1 = os.path.join(cls.folder, 'temp image 01.jpg')
         file2 = os.path.join(cls.folder, 'temp image 02.jpg')
         file3 = os.path.join(cls.folder, 'temp image 04.jpg')

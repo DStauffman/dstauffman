@@ -1111,7 +1111,7 @@ def rename_module(folder, old_name, new_name, print_status=True):
                 if file_ext in file_exclusions:
                     if print_status:
                         print('Skipping: {}'.format(this_old_file))
-                    continue
+                    continue # pragma: no cover (actually covered, optimization issue)
                 new_folder = os.path.split(this_new_file)[0]
                 if not os.path.isdir(new_folder):
                     setup_dir(new_folder)
