@@ -42,20 +42,77 @@ BOARD2[7:9, 7:9] = NUM_PIECES+1
 
 #%% Functions - _pad_piece
 def _pad_piece(piece, max_size, pad_value=0):
+    r"""
+    Pads a piece to a given size.
+
+    Parameters
+    ----------
+    piece : 2D ndarray
+        Piece or board to pad
+    max_size : int, or 2 element list of int
+        Maximum size of each axis
+    pad_value : int, optional, default is 0
+        Value to use when padding
+
+    Returns
+    -------
+    new_piece : 2D ndarray of int
+        Padded piece or board
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.fiver import _pad_piece
+    >>> import numpy as np
+    >>> piece = np.array([[1, 1, 1, 1], [0, 0, 0, 1]], dtype=int)
+    >>> max_size = 5
+    >>> new_piece = _pad_piece(piece, max_size)
+    >>> print(new_piece)
+    [[1 1 1 1 0]
+     [0 0 0 1 0]
+     [0 0 0 0 0]
+     [0 0 0 0 0]
+     [0 0 0 0 0]]
+
+    """
+    # determine if max_size is a scalar or specified per axis
     if np.isscalar(max_size):
         max_size = [max_size, max_size]
+    # get the current size
     (i, j) = piece.shape
+    # initialize the output
     new_piece = piece.copy()
+    # pad the horizontal direction
     if j < max_size[0]:
         new_piece = np.hstack((new_piece, pad_value*np.ones((i, max_size[1]-j), dtype=int)))
+    # pad the vertical direction
     if i < max_size[1]:
         new_piece = np.vstack((new_piece, pad_value*np.ones((max_size[0]-i, max_size[1]), dtype=int)))
+    # return the resulting piece
     return new_piece
 
 #%% Functions - _shift_piece
 def _shift_piece(piece):
     r"""
-    TBD
+    Shifts a piece to the most upper left location within an array.
+
+    Parameters
+    ----------
+    piece : 2D ndarray of int
+        Piece
+
+    Returns
+    -------
+    new_piece : 2D ndarray of int
+        Shifted piece
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
 
     Examples
     --------
@@ -84,7 +141,21 @@ def _shift_piece(piece):
 #%% Functions - _rotate_piece
 def _rotate_piece(piece):
     r"""
-    TBD
+    Rotates a piece 90 degrees to the right.
+
+    Parameters
+    ----------
+    piece : 2D ndarray of int
+        Piece
+
+    Returns
+    -------
+    new_piece : 2D ndarray of int
+        Shifted piece
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
 
     Examples
     --------
@@ -113,7 +184,21 @@ def _rotate_piece(piece):
 #%% Functions - _flip_piece
 def _flip_piece(piece):
     r"""
-    TBD
+    Flips a piece about the horizontal axis.
+
+    Parameters
+    ----------
+    piece : 2D ndarray of int
+        Piece
+
+    Returns
+    -------
+    new_piece : 2D ndarray of int
+        Shifted piece
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
 
     Examples
     --------
@@ -139,7 +224,21 @@ def _flip_piece(piece):
 #%% Functions - _get_unique_pieces
 def _get_unique_pieces(pieces):
     r"""
-    TBD
+    Returns the indices to the third dimension for the unique pieces.
+
+    Parameters
+    ----------
+    pieces : 3D ndarray of int
+        3D array of pieces
+
+    Returns
+    -------
+    ix_unique : ndarray of int
+        Unique indices
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
 
     Examples
     --------
@@ -172,43 +271,6 @@ def _get_unique_pieces(pieces):
             ix_unique.append(ix)
             sets.append(inds)
     return ix_unique
-
-#%% Functions - _draw_cube
-def _draw_cube(ax, xs=0, ys=0, color='k'):
-    r"""
-    Draws a plot of the square at a possibly shifted position, with a given color.
-
-    Parameters
-    ----------
-    ax : matplotlib.pyplot.figure.axis
-        Axis to draw the cube on, axis must be a 3D projection
-    xs : int, optional
-        Amount to shift the cube in the X direction
-    ys : int, optional
-        Amount to shift the cube in the Y direction
-    color : str, optional
-        Color code to use to override the default of black
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in October 2015.
-
-    Examples
-    --------
-
-    >>> from dstauffman.games.fiver import _draw_cube
-    >>> import matplotlib.pyplot as plt
-    >>> fig = plt.figure()
-    >>> ax = fig.add_subplot(111)
-    >>> _draw_cube(ax)
-
-    Close the plot
-    >>> plt.close(fig)
-
-    """
-    box_size = 1
-    ax.add_patch(Rectangle((box_size*xs,box_size*ys),box_size, box_size, \
-        facecolor=color, edgecolor='k'))
 
 #%% Functions - make_all_pieces
 def make_all_pieces():
@@ -300,6 +362,8 @@ def plot_board(board, title=None, opts=None):
     r"""
     Plots the board or the individual pieces.
     """
+    # hard-coded square size
+    box_size = 1
     # check for opts
     if opts is None:
         opts = Opts()
@@ -316,7 +380,9 @@ def plot_board(board, title=None, opts=None):
     # draw each square
     for i in range(board.shape[0]):
         for j in range(board.shape[1]):
-            _draw_cube(ax, xs=i, ys=j, color=COLORS[board[i,j]])
+            # add the rectangle patch to the existing axis
+            ax.add_patch(Rectangle((box_size*i,box_size*j),box_size, box_size, \
+                facecolor=COLORS[board[i,j]], edgecolor='k'))
     # make square
     plt.axis('equal')
     # set limits
@@ -342,7 +408,7 @@ def test_docstrings():
 #%% Main script
 if __name__ == '__main__':
     # flags for running code
-    run_tests    = False
+    run_tests    = True
     make_plots   = True
     make_soln    = True
 
