@@ -357,6 +357,43 @@ def make_all_permutations(pieces):
         all_pieces.append(all_this_piece[:, :, ix_unique])
     return all_pieces
 
+#%% Functions - is_valid
+def is_valid(board, piece):
+    r"""
+    Determines if the piece is valid for the given board.
+    """
+    return np.logical_not(np.any(board * piece))
+
+#%% Functions - find_all_valid_locations
+def find_all_valid_locations(board, all_pieces):
+    (m, n) = board.shape
+    max_pieces = (m - SIZE_PIECES - 1)*(n - SIZE_PIECES - 1) * NUM_ORIENTS
+    locations = []
+    for these_pieces in all_pieces:
+        # over-allocate a possible array
+        these_locs = np.zeros((m, n, max_pieces), dtype=int)
+        counter = 0
+        for ix in range(these_pieces.shape[2]):
+            start_piece = _pad_piece(these_pieces[:,:,ix], board.shape)
+            for i in range(m - SIZE_PIECES + 1):
+                this_piece = np.roll(start_piece, i, axis=1)
+                if is_valid(board, this_piece):
+                    these_locs[:, :, counter] = this_piece
+                    counter += 1
+                for j in range(1, n - SIZE_PIECES + 1):
+                    this_piece2 = np.roll(this_piece, j, axis=0)
+                    if is_valid(board, this_piece2):
+                        these_locs[:, :, counter] = this_piece2
+                        counter += 1
+        locations.append(these_locs[:, :, :counter])
+    return locations
+
+#%% Functions - solve_puzzle
+def solve_puzzle(board, locations):
+    solutions = []
+    #TODO: write this
+    return solutions
+
 #%% Functions - plot_board
 def plot_board(board, title=None, opts=None):
     r"""
@@ -409,7 +446,7 @@ def test_docstrings():
 if __name__ == '__main__':
     # flags for running code
     run_tests    = True
-    make_plots   = True
+    make_plots   = False
     make_soln    = True
 
     if run_tests:
@@ -444,4 +481,5 @@ if __name__ == '__main__':
             plot_board(BOARD2[3:-3,3:-3], title='Empty Board 2', opts=opts)
 
         # solve the puzzle
-        pass # TODO: solve puzzle
+        locations1 = find_all_valid_locations(BOARD1, all_pieces)
+        solutions1 = solve_puzzle(BOARD1, locations1)
