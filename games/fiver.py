@@ -22,7 +22,6 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import numpy as np
 import os
-import shutil
 # model imports
 from dstauffman import Opts, setup_plots, setup_dir, get_root_dir, ColorMap
 
@@ -362,7 +361,14 @@ def is_valid(board, piece):
     r"""
     Determines if the piece is valid for the given board.
     """
-    return np.logical_not(np.any(board * piece))
+    if piece.ndim == 2:
+        out = np.logical_not(np.any(board * piece))
+    elif piece.ndim == 3:
+        temp = np.expand_dims(board, axis=2) * piece
+        out = np.squeeze(np.logical_not(np.any(np.any(temp, axis=0, keepdims=True), axis=1, keepdims=True)))
+    else:
+        raise ValueError('Unexpected number of dimensions for piece = "{}"'.format(piece.ndim))
+    return out
 
 #%% Functions - find_all_valid_locations
 def find_all_valid_locations(board, all_pieces):
@@ -376,12 +382,12 @@ def find_all_valid_locations(board, all_pieces):
         for ix in range(these_pieces.shape[2]):
             start_piece = _pad_piece(these_pieces[:,:,ix], board.shape)
             for i in range(m - SIZE_PIECES + 1):
-                this_piece = np.roll(start_piece, i, axis=1)
+                this_piece = np.roll(start_piece, i, axis=0)
                 if is_valid(board, this_piece):
                     these_locs[:, :, counter] = this_piece
                     counter += 1
                 for j in range(1, n - SIZE_PIECES + 1):
-                    this_piece2 = np.roll(this_piece, j, axis=0)
+                    this_piece2 = np.roll(this_piece, j, axis=1)
                     if is_valid(board, this_piece2):
                         these_locs[:, :, counter] = this_piece2
                         counter += 1
@@ -390,8 +396,64 @@ def find_all_valid_locations(board, all_pieces):
 
 #%% Functions - solve_puzzle
 def solve_puzzle(board, locations):
+    r"""
+    Solves the puzzle for the given board and all possible piece locations.
+    """
     solutions = []
-    #TODO: write this
+    this_board = board
+    # resort pieces based on numbers, for lowest to highest
+    sort_ix = np.array([x.shape[2] for x in locations]).argsort()
+    locations = [locations[ix] for ix in sort_ix]
+    ix0 = np.arange(locations[0].shape[2])
+    for i0 in ix0:
+        np.add(this_board, locations[0][:, :, i0], this_board)
+        ix1 = np.nonzero(is_valid(this_board, locations[1]))[0]
+        for i1 in ix1:
+            np.add(this_board, locations[1][:, :, i1], this_board)
+            ix2 = np.nonzero(is_valid(this_board, locations[2]))[0]
+            for i2 in ix2:
+                np.add(this_board, locations[2][:, :, i2], this_board)
+                ix3 = np.nonzero(is_valid(this_board, locations[3]))[0]
+                for i3 in ix3:
+                    np.add(this_board, locations[3][:, :, i3], this_board)
+                    ix4 = np.nonzero(is_valid(this_board, locations[4]))[0]
+                    for i4 in ix4:
+                        np.add(this_board, locations[4][:, :, i4], this_board)
+                        ix5 = np.nonzero(is_valid(this_board, locations[5]))[0]
+                        for i5 in ix5:
+                            np.add(this_board, locations[5][:, :, i5], this_board)
+                            ix6 = np.nonzero(is_valid(this_board, locations[6]))[0]
+                            for i6 in ix6:
+                                np.add(this_board, locations[6][:, :, i6], this_board)
+                                ix7 = np.nonzero(is_valid(this_board, locations[7]))[0]
+                                for i7 in ix7:
+                                    np.add(this_board, locations[7][:, :, i7], this_board)
+                                    ix8 = np.nonzero(is_valid(this_board, locations[8]))[0]
+                                    for i8 in ix8:
+                                        np.add(this_board, locations[8][:, :, i8], this_board)
+                                        ix9 = np.nonzero(is_valid(this_board, locations[9]))[0]
+                                        for i9 in ix9:
+                                            np.add(this_board, locations[9][:, :, i9], this_board)
+                                            ix10 = np.nonzero(is_valid(this_board, locations[10]))[0]
+                                            for i10 in ix10:
+                                                np.add(this_board, locations[10][:, :, i10], this_board)
+                                                ix11 = np.nonzero(is_valid(this_board, locations[11]))[0]
+                                                for i11 in ix11:
+                                                    np.add(this_board, locations[11][:, :, i11], this_board)
+                                                    solutions.append(this_board)
+                                                    return solutions
+                                                    np.subtract(this_board, locations[11][:, :, i11], this_board)
+                                                np.subtract(this_board, locations[10][:, :, i10], this_board)
+                                            np.subtract(this_board, locations[9][:, :, i9], this_board)
+                                        np.subtract(this_board, locations[8][:, :, i8], this_board)
+                                    np.subtract(this_board, locations[7][:, :, i7], this_board)
+                                np.subtract(this_board, locations[6][:, :, i6], this_board)
+                            np.subtract(this_board, locations[5][:, :, i5], this_board)
+                        np.subtract(this_board, locations[4][:, :, i4], this_board)
+                    np.subtract(this_board, locations[3][:, :, i3], this_board)
+                np.subtract(this_board, locations[2][:, :, i2], this_board)
+            np.subtract(this_board, locations[1][:, :, i1], this_board)
+        np.subtract(this_board, locations[0][:, :, i0], this_board)
     return solutions
 
 #%% Functions - plot_board
@@ -483,3 +545,12 @@ if __name__ == '__main__':
         # solve the puzzle
         locations1 = find_all_valid_locations(BOARD1, all_pieces)
         solutions1 = solve_puzzle(BOARD1, locations1)
+        if False:
+            p = 6
+            for i in range(locations1[p].shape[2]):
+                opts.case_name = 'Piece {}, Position {}'.format(p, i+1)
+                plot_board(BOARD1 + locations1[p][:,:,i], title=opts.case_name, opts=opts)
+
+        if True and solutions1:
+            opts.case_name = 'Solution 1'
+            plot_board(solutions1[0], title=opts.case_name, opts=opts)
