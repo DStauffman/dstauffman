@@ -271,6 +271,19 @@ def _get_unique_pieces(pieces):
             sets.append(inds)
     return ix_unique
 
+#%% Functions - _display_progress
+def _display_progress(ix, nums):
+    r"""
+    Displays the total progress to the command window.
+    """
+    complete = np.flipud(np.cumprod(np.flipud(nums.astype(np.float))))
+    done = 0
+    for i in range(len(ix)):
+        done = done + ix[i]*complete[i]/nums[i]
+    ratio = done / complete[0]
+    print(ix)
+    print('Progess: {:.6f}%'.format(ratio*100))
+
 #%% Functions - make_all_pieces
 def make_all_pieces():
     r"""
@@ -357,12 +370,21 @@ def make_all_permutations(pieces):
     return all_pieces
 
 #%% Functions - is_valid
-def is_valid(board, piece):
+def is_valid(board, piece, use_blobbing=True):
     r"""
     Determines if the piece is valid for the given board.
     """
     if piece.ndim == 2:
         out = np.logical_not(np.any(board * piece))
+        if out and use_blobbing:
+            temp = board + piece
+            (m, n) = board.shape
+            for i in range(m):
+                for j in range(n):
+                    if temp[i, j] == 0:
+                        if temp[i-1,j] and temp[i, j-1] and temp[i+1, j] and temp[i, j+1]:
+                            out = False
+                            return out
     elif piece.ndim == 3:
         temp = np.expand_dims(board, axis=2) * piece
         out = np.squeeze(np.logical_not(np.any(np.any(temp, axis=0, keepdims=True), axis=1, keepdims=True)))
@@ -372,6 +394,9 @@ def is_valid(board, piece):
 
 #%% Functions - find_all_valid_locations
 def find_all_valid_locations(board, all_pieces):
+    r"""
+    Finds all the valid locations for each piece on the board.
+    """
     (m, n) = board.shape
     max_pieces = (m - SIZE_PIECES - 1)*(n - SIZE_PIECES - 1) * NUM_ORIENTS
     locations = []
@@ -392,6 +417,9 @@ def find_all_valid_locations(board, all_pieces):
                         these_locs[:, :, counter] = this_piece2
                         counter += 1
         locations.append(these_locs[:, :, :counter])
+    # resort pieces based on numbers, for lowest to highest
+    sort_ix = np.array([x.shape[2] for x in locations]).argsort()
+    locations = [locations[ix] for ix in sort_ix]
     return locations
 
 #%% Functions - solve_puzzle
@@ -399,11 +427,13 @@ def solve_puzzle(board, locations):
     r"""
     Solves the puzzle for the given board and all possible piece locations.
     """
+    # initialize the solutions
     solutions = []
-    this_board = board
-    # resort pieces based on numbers, for lowest to highest
-    sort_ix = np.array([x.shape[2] for x in locations]).argsort()
-    locations = [locations[ix] for ix in sort_ix]
+    # create a working board
+    this_board = board.copy()
+    # get the number of permutations for each piece
+    nums = np.array([x.shape[2] for x in locations])
+    # start solving
     ix0 = np.arange(locations[0].shape[2])
     for i0 in ix0:
         np.add(this_board, locations[0][:, :, i0], this_board)
@@ -418,6 +448,7 @@ def solve_puzzle(board, locations):
                     np.add(this_board, locations[3][:, :, i3], this_board)
                     ix4 = np.nonzero(is_valid(this_board, locations[4]))[0]
                     for i4 in ix4:
+                        _display_progress(np.array([i0, i1, i2, i3, i4]), nums)
                         np.add(this_board, locations[4][:, :, i4], this_board)
                         ix5 = np.nonzero(is_valid(this_board, locations[5]))[0]
                         for i5 in ix5:
@@ -515,42 +546,50 @@ if __name__ == '__main__':
         # Run docstring test
         test_docstrings()
 
+    # make all the pieces
+    pieces = make_all_pieces()
+    # create all the possible permutations of all the pieces
+    all_pieces = make_all_permutations(pieces)
+
+    # Create and set Opts
+    date = datetime.now()
+    opts = Opts()
+    opts.case_name = 'Board'
+    opts.save_path = os.path.join(get_root_dir(), 'results', date.strftime('%Y-%m-%d'))
+    opts.save_plot = True
+    opts.show_plot = False
+    # Save plots of the possible piece orientations
+    if make_plots:
+        setup_dir(opts.save_path, rec=True)
+        for (ix, these_pieces) in enumerate(all_pieces):
+            for ix2 in range(these_pieces.shape[2]):
+                this_title = 'Piece {}, Permutation {}'.format(ix+1, ix2+1)
+                opts.case_name = this_title
+                fig = plot_board(these_pieces[:, :, ix2], title=this_title, opts=opts)
+                plt.close(fig)
+        # print empty boards
+        opts.case_name = 'Empty Board 1'
+        fig = plot_board(BOARD1[3:-3,3:-3], title='Empty Board 1', opts=opts)
+        plt.close(fig)
+        opts.case_name = 'Empty Board 2'
+        fig = plot_board(BOARD2[3:-3,3:-3], title='Empty Board 2', opts=opts)
+        plt.close(fig)
+
+    # solve the puzzle
+    locations1 = find_all_valid_locations(BOARD1, all_pieces)
+    nums = np.array([x.shape[2] for x in locations1])
+    print(nums)
     if make_soln:
-        # make all the pieces
-        pieces = make_all_pieces()
-        # create all the possible permutations of all the pieces
-        all_pieces = make_all_permutations(pieces)
-
-        # Create and set Opts
-        date = datetime.now()
-        opts = Opts()
-        opts.case_name = 'Board'
-        opts.save_path = os.path.join(get_root_dir(), 'results', date.strftime('%Y-%m-%d'))
-        opts.save_plot = True
-        opts.show_plot = True
-        # Save plots of the possible piece orientations
-        if make_plots:
-            setup_dir(opts.save_path, rec=True)
-            for (ix, these_pieces) in enumerate(all_pieces):
-                for ix2 in range(these_pieces.shape[2]):
-                    this_title = 'Piece {}, Permutation {}'.format(ix+1, ix2+1)
-                    opts.case_name = this_title
-                    plot_board(these_pieces[:, :, ix2], title=this_title, opts=opts)
-            # print empty boards
-            opts.case_name = 'Empty Board 1'
-            plot_board(BOARD1[3:-3,3:-3], title='Empty Board 1', opts=opts)
-            opts.case_name = 'Empty Board 2'
-            plot_board(BOARD2[3:-3,3:-3], title='Empty Board 2', opts=opts)
-
-        # solve the puzzle
-        locations1 = find_all_valid_locations(BOARD1, all_pieces)
         solutions1 = solve_puzzle(BOARD1, locations1)
-        if False:
-            p = 6
-            for i in range(locations1[p].shape[2]):
-                opts.case_name = 'Piece {}, Position {}'.format(p, i+1)
-                plot_board(BOARD1 + locations1[p][:,:,i], title=opts.case_name, opts=opts)
 
-        if True and solutions1:
-            opts.case_name = 'Solution 1'
-            plot_board(solutions1[0], title=opts.case_name, opts=opts)
+    # plot all the piece locations
+    if False:
+        for p in [6]: #range(NUM_PIECES):
+            for i in range(locations1[p].shape[2]):
+                opts.case_name = 'Piece {}, Position {}'.format(p+1, i+1)
+                fig = plot_board(BOARD1 + locations1[p][:,:,i], title=opts.case_name, opts=opts)
+                plt.close(fig)
+
+    if make_soln and solutions1:
+        opts.case_name = 'Solution 1'
+        plot_board(solutions1[0], title=opts.case_name, opts=opts)
