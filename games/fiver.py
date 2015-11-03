@@ -22,6 +22,8 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
 import numpy as np
 import os
+import pickle
+import unittest
 # model imports
 from dstauffman import Opts, setup_plots, setup_dir, get_root_dir, ColorMap
 
@@ -140,7 +142,7 @@ def _shift_piece(piece):
 #%% Functions - _rotate_piece
 def _rotate_piece(piece):
     r"""
-    Rotates a piece 90 degrees to the right.
+    Rotates a piece 90 degrees to the left.
 
     Parameters
     ----------
@@ -150,7 +152,7 @@ def _rotate_piece(piece):
     Returns
     -------
     new_piece : 2D ndarray of int
-        Shifted piece
+        Rotated piece
 
     Notes
     -----
@@ -164,18 +166,15 @@ def _rotate_piece(piece):
     >>> x = np.arange(25).reshape((5, 5))
     >>> y = _rotate_piece(x)
     >>> print(y)
-    [[20 15 10  5  0]
-     [21 16 11  6  1]
-     [22 17 12  7  2]
-     [23 18 13  8  3]
-     [24 19 14  9  4]]
+    [[ 4  9 14 19 24]
+     [ 3  8 13 18 23]
+     [ 2  7 12 17 22]
+     [ 1  6 11 16 21]
+     [ 0  5 10 15 20]]
 
     """
-    # build the correct map based on the given axis
-    map_ = np.array([20, 15, 10,  5,  0, 21, 16, 11,  6,  1, 22, 17, 12,  7,  2, \
-        23, 18, 13,  8,  3, 24, 19, 14,  9,  4])
-    # rotate the piece by using the map and return
-    temp_piece = piece.ravel()[map_].reshape((SIZE_PIECES, SIZE_PIECES))
+    # rotate the piece
+    temp_piece = np.rot90(piece)
     # shift to upper left most position
     new_piece = _shift_piece(temp_piece)
     return new_piece
@@ -214,16 +213,13 @@ def _flip_piece(piece):
      [ 0  1  2  3  4]]
 
     """
-    ix = [4, 3, 2, 1, 0]
-    temp_piece = piece[ix, :]
-    # shift to upper left most position
-    new_piece = _shift_piece(temp_piece)
-    return new_piece
+    # flip and shift to upper left most position
+    return _shift_piece(np.flipud(piece))
 
 #%% Functions - _get_unique_pieces
 def _get_unique_pieces(pieces):
     r"""
-    Returns the indices to the third dimension for the unique pieces.
+    Returns the indices to the first dimension for the unique pieces.
 
     Parameters
     ----------
@@ -244,24 +240,24 @@ def _get_unique_pieces(pieces):
 
     >>> from dstauffman.games.fiver import _get_unique_pieces, _rotate_piece
     >>> import numpy as np
-    >>> pieces = np.zeros((5, 5, 3), dtype=int)
+    >>> pieces = np.zeros((3, 5, 5), dtype=int)
     >>> pieces[0, :, 0] = 1
     >>> pieces[1, :, 1] = 1
-    >>> pieces[0, :, 2] = 1
+    >>> pieces[2, :, 0] = 1
     >>> ix_unique = _get_unique_pieces(pieces)
     >>> print(ix_unique)
     [0, 1]
 
     """
     # find the number of pieces
-    num = pieces.shape[2]
+    num = pieces.shape[0]
     # initialize some lists
     ix_unique = []
     sets = []
     # loop through pieces
     for ix in range(num):
         # alias this piece
-        this_piece = pieces[:, :, ix]
+        this_piece = pieces[ix]
         # find the indices in the single vector version of the array and convert to a unique set
         inds = set(np.nonzero(this_piece.ravel())[0])
         # see if this set is in the master set
@@ -272,22 +268,173 @@ def _get_unique_pieces(pieces):
     return ix_unique
 
 #%% Functions - _display_progress
-def _display_progress(ix, nums):
+def _display_progress(ix, nums, last_ratio=0):
     r"""
     Displays the total progress to the command window.
+
+    Parameters
+    ----------
+    ix : 1D ndarray of int
+        Index into which pieces are being evaluated
+    nums : 1D ndarray of int
+        Possible permutations for each individual piece
+
+    Returns
+    -------
+    ratio : float
+        The amount of possible permutations that have been evaluated
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in November 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.fiver import _display_progress
+    >>> import numpy as np
+    >>> ix = np.array([1, 0, 4, 0])
+    >>> nums = np.array([2, 4, 8, 16])
+    >>> ratio = _display_progress(ix, nums) # ratio = (512+64)/1024
+    Progess: 56.2%
+
     """
+    # determine the number of permutations in each piece level
     complete = np.flipud(np.cumprod(np.flipud(nums.astype(np.float))))
+    # count how many branches have been evaluated
     done = 0
     for i in range(len(ix)):
         done = done + ix[i]*complete[i]/nums[i]
+    # determine the completion ratio
     ratio = done / complete[0]
-    print(ix)
-    print('Progess: {:.6f}%'.format(ratio*100))
+    # print the status
+    if np.round(1000*ratio) > np.round(1000*last_ratio):
+        print('Progess: {:.1f}%'.format(ratio*100))
+        return ratio
+    else:
+        return last_ratio
+
+#%% Functions - _blobbing
+def _blobbing(board):
+    r"""
+    Blobbing algorithm 2.  Checks that all empty blobs are multiples of 5 squares.
+    """
+    # set sizes
+    (m, n) = board.shape
+    # initialize some lists, labels and counter
+    linked  = []
+    labels  = np.zeros((m, n), dtype=int)
+    counter = 0
+    # first pass
+    for i in range(m):
+        for j in range(n):
+            # see if this is an empty piece
+            if board[i, j]:
+                # get the north and west neighbors
+                try:
+                    north = labels[i-1, j]
+                except IndexError:
+                    north = 0
+                try:
+                    west = labels[i, j-1]
+                except IndexError:
+                    west = 0
+                # check one of four conditions
+                if north > 0:
+                    if west > 0:
+                        # both neighbors are valid
+                        if north == west:
+                            # simple case with same labels
+                            labels[i, j] = north
+                        else:
+                            # neighbors have different labels, so combine the sets
+                            min_label = min(north, west)
+                            labels[i, j] = min_label
+                            linked[north-1] = linked[north-1] | {west}
+                            linked[west-1]  = linked[west-1] | {north}
+                    else:
+                        # join with north neighbor
+                        labels[i, j] = north
+                else:
+                    if west > 0:
+                        # join with west neighbor
+                        labels[i, j] = west
+                    else:
+                        # not part of a previous blob, so start a new one
+                        counter += 1
+                        labels[i, j] = counter
+                        linked.append({counter})
+
+    # second pass
+    for i in range(m):
+        for j in range(n):
+            if board[i, j]:
+                labels[i, j] = min(linked[labels[i, j] - 1])
+
+    # check for valid blob sizes
+    for s in range(np.max(labels)):
+        size = np.sum(labels == s + 1)
+        if np.mod(size, SIZE_PIECES) != 0:
+            return False
+    return True
+
+#%% Functions - _save_solution
+def _save_solution(solutions, this_board):
+    r"""
+    Saves the given solution if it's unique.
+    """
+    if len(solutions) == 0:
+        # if this is the first solution, then simply save it
+        solutions.append(this_board.copy())
+    else:
+        # determine if unique
+        temp = this_board.copy()
+        (m, n) = temp.shape
+        rots = NUM_ORIENTS//2
+        for i in range(rots):
+            temp = _rotate_piece(temp)
+            if temp.shape[0] != m or temp.shape[1] != n:
+                continue
+            for j in range(len(solutions)):
+                if not np.any(solutions[j] - temp):
+                    return
+        temp = _flip_piece(temp)
+        for i in range(rots):
+            temp = _rotate_piece(temp)
+            if temp.shape[0] != m or temp.shape[1] != n:
+                continue
+            for j in range(len(solutions)):
+                if not np.any(solutions[j] - temp):
+                    return
+        solutions.append(this_board.copy())
+    print('Solution {} found!'.format(len(solutions)))
 
 #%% Functions - make_all_pieces
 def make_all_pieces():
     r"""
-    TBD
+    Makes all the possible pieces of the game.
+
+    Returns
+    -------
+    pieces : 3D ndarray of int
+        3D array of pieces
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.fiver import make_all_pieces
+    >>> pieces = make_all_pieces()
+    >>> print(pieces[0])
+    [[1 1 1 1 1]
+     [0 0 0 0 0]
+     [0 0 0 0 0]
+     [0 0 0 0 0]
+     [0 0 0 0 0]]
+
     """
     # Hard-coded values
     p1 = np.array([[1, 1, 1, 1, 1]])
@@ -331,63 +478,121 @@ def make_all_pieces():
         [0, 1, 1], \
         [1, 1, 0], \
         [1, 0, 0]])
-    # loop through all these and make to 5x5
-    pieces = -1 * np.ones((SIZE_PIECES, SIZE_PIECES, NUM_PIECES), dtype=int);
+    # preallocate output
+    pieces = -1 * np.ones((NUM_PIECES, SIZE_PIECES, SIZE_PIECES), dtype=int);
     for (ix, this_piece) in enumerate([p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12]):
+        # pad each piece
         new_piece = _pad_piece(this_piece, SIZE_PIECES)
-        pieces[:, :, ix] = (ix + 1) * new_piece
+        # save this piece with an appropriate numerical value
+        pieces[ix] = (ix + 1) * new_piece
     return pieces
 
 #%% Functions - make_all_permutations
 def make_all_permutations(pieces):
     r"""
-    TBD
+    Makes all the possible permutations of every possible piece.
+
+    Parameters
+    ----------
+    pieces : 3D ndarray of int
+        3D array of pieces
+
+    Returns
+    -------
+    all_pieces : list of 3D ndarray of int
+        List of all 3D array of piece permutations
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.fiver import make_all_pieces, make_all_permutations
+    >>> pieces = make_all_pieces()
+    >>> all_pieces = make_all_permutations(pieces)
+
     """
     # initialize the output
     all_pieces = []
     # loop through all the pieces
     for ix in range(NUM_PIECES):
         # preallocate the array
-        all_this_piece = -1 * np.ones((SIZE_PIECES, SIZE_PIECES, NUM_ORIENTS), dtype=int)
+        all_this_piece = -1 * np.ones((NUM_ORIENTS, SIZE_PIECES, SIZE_PIECES), dtype=int)
         # alias this piece
-        this_piece = pieces[:, :, ix]
+        this_piece = pieces[ix]
         # find the number of rotations (4)
         rots = NUM_ORIENTS//2
         # do the rotations and keep each piece
         for counter in range(rots):
             this_piece = _rotate_piece(this_piece)
-            all_this_piece[:, :, counter] = this_piece
+            all_this_piece[counter] = this_piece
         # flip the piece
         this_piece = _flip_piece(this_piece)
         # do another set of rotations and keep each piece
         for counter in range(rots):
             this_piece = _rotate_piece(this_piece)
-            all_this_piece[:, :, counter+rots] = this_piece
+            all_this_piece[counter+rots] = this_piece
         # find the indices to the unique pieces
         ix_unique = _get_unique_pieces(all_this_piece)
         # gather the unique combinations
-        all_pieces.append(all_this_piece[:, :, ix_unique])
+        all_pieces.append(all_this_piece[ix_unique])
     return all_pieces
 
 #%% Functions - is_valid
 def is_valid(board, piece, use_blobbing=True):
     r"""
     Determines if the piece is valid for the given board.
+
+    Parameters
+    ----------
+    board : 2D ndarray
+        Board
+    piece : 2D or 3D ndarray
+        Piece
+    use_blobbing : bool, optional
+        Whether to look for continuous blobs that show the board will not work
+
+    Returns
+    -------
+    out : ndarray of bool
+        True/False flags for whether the pieces were valid.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in November 2015.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.fiver import is_valid
+    >>> import numpy as np
+    >>> board = np.ones((5, 5), dtype=int)
+    >>> board[1:-1, 1:-1] = 0
+    >>> piece = np.zeros((5,5), dtype=int)
+    >>> piece[1, 1:4] = 2
+    >>> piece[2, 2] = 2
+    >>> out = is_valid(board, piece)
+    >>> print(out)
+    True
+
     """
+    # check if only one piece
     if piece.ndim == 2:
+        # do simple test first
         out = np.logical_not(np.any(board * piece))
+        # see if blobbing
         if out and use_blobbing:
-            temp = board + piece
-            (m, n) = board.shape
-            for i in range(m):
-                for j in range(n):
-                    if temp[i, j] == 0:
-                        if temp[i-1,j] and temp[i, j-1] and temp[i+1, j] and temp[i, j+1]:
-                            out = False
-                            return out
+            out = _blobbing((board + piece) == 0)
     elif piece.ndim == 3:
-        temp = np.expand_dims(board, axis=2) * piece
-        out = np.squeeze(np.logical_not(np.any(np.any(temp, axis=0, keepdims=True), axis=1, keepdims=True)))
+        # do multiple pieces
+        temp = np.expand_dims(board, axis=0) * piece
+        out = np.logical_not(np.any(np.any(temp, axis=2), axis=1))
+        if np.any(out) and use_blobbing:
+            for k in range(piece.shape[0]):
+                if out[k]:
+                    out[k] = _blobbing((board + piece[k]) == 0)
     else:
         raise ValueError('Unexpected number of dimensions for piece = "{}"'.format(piece.ndim))
     return out
@@ -402,28 +607,28 @@ def find_all_valid_locations(board, all_pieces):
     locations = []
     for these_pieces in all_pieces:
         # over-allocate a possible array
-        these_locs = np.zeros((m, n, max_pieces), dtype=int)
+        these_locs = np.zeros((max_pieces, m, n), dtype=int)
         counter = 0
-        for ix in range(these_pieces.shape[2]):
-            start_piece = _pad_piece(these_pieces[:,:,ix], board.shape)
+        for ix in range(these_pieces.shape[0]):
+            start_piece = _pad_piece(these_pieces[ix,:,:], board.shape)
             for i in range(m - SIZE_PIECES + 1):
                 this_piece = np.roll(start_piece, i, axis=0)
                 if is_valid(board, this_piece):
-                    these_locs[:, :, counter] = this_piece
+                    these_locs[counter] = this_piece
                     counter += 1
                 for j in range(1, n - SIZE_PIECES + 1):
                     this_piece2 = np.roll(this_piece, j, axis=1)
                     if is_valid(board, this_piece2):
-                        these_locs[:, :, counter] = this_piece2
+                        these_locs[counter] = this_piece2
                         counter += 1
-        locations.append(these_locs[:, :, :counter])
+        locations.append(these_locs[:counter])
     # resort pieces based on numbers, for lowest to highest
-    sort_ix = np.array([x.shape[2] for x in locations]).argsort()
+    sort_ix = np.array([x.shape[0] for x in locations]).argsort()
     locations = [locations[ix] for ix in sort_ix]
     return locations
 
 #%% Functions - solve_puzzle
-def solve_puzzle(board, locations):
+def solve_puzzle(board, locations, find_all=False):
     r"""
     Solves the puzzle for the given board and all possible piece locations.
     """
@@ -432,63 +637,67 @@ def solve_puzzle(board, locations):
     # create a working board
     this_board = board.copy()
     # get the number of permutations for each piece
-    nums = np.array([x.shape[2] for x in locations])
+    nums = np.array([x.shape[0] for x in locations])
     # start solving
-    ix0 = np.arange(locations[0].shape[2])
+    last_ratio = 0
+    ix0 = np.arange(locations[0].shape[0])
     for i0 in ix0:
-        np.add(this_board, locations[0][:, :, i0], this_board)
+        np.add(this_board, locations[0][i0], this_board)
         ix1 = np.nonzero(is_valid(this_board, locations[1]))[0]
         for i1 in ix1:
-            np.add(this_board, locations[1][:, :, i1], this_board)
+            np.add(this_board, locations[1][i1], this_board)
             ix2 = np.nonzero(is_valid(this_board, locations[2]))[0]
             for i2 in ix2:
-                np.add(this_board, locations[2][:, :, i2], this_board)
+                np.add(this_board, locations[2][i2], this_board)
                 ix3 = np.nonzero(is_valid(this_board, locations[3]))[0]
                 for i3 in ix3:
-                    np.add(this_board, locations[3][:, :, i3], this_board)
+                    # display progress
+                    last_ratio = _display_progress(np.array([i0, i1, i2, i3]), nums, last_ratio)
+                    np.add(this_board, locations[3][i3], this_board)
                     ix4 = np.nonzero(is_valid(this_board, locations[4]))[0]
                     for i4 in ix4:
-                        _display_progress(np.array([i0, i1, i2, i3, i4]), nums)
-                        np.add(this_board, locations[4][:, :, i4], this_board)
+                        np.add(this_board, locations[4][i4], this_board)
                         ix5 = np.nonzero(is_valid(this_board, locations[5]))[0]
                         for i5 in ix5:
-                            np.add(this_board, locations[5][:, :, i5], this_board)
+                            np.add(this_board, locations[5][i5], this_board)
                             ix6 = np.nonzero(is_valid(this_board, locations[6]))[0]
                             for i6 in ix6:
-                                np.add(this_board, locations[6][:, :, i6], this_board)
+                                np.add(this_board, locations[6][i6], this_board)
                                 ix7 = np.nonzero(is_valid(this_board, locations[7]))[0]
                                 for i7 in ix7:
-                                    np.add(this_board, locations[7][:, :, i7], this_board)
+                                    np.add(this_board, locations[7][i7], this_board)
                                     ix8 = np.nonzero(is_valid(this_board, locations[8]))[0]
                                     for i8 in ix8:
-                                        np.add(this_board, locations[8][:, :, i8], this_board)
+                                        np.add(this_board, locations[8][i8], this_board)
                                         ix9 = np.nonzero(is_valid(this_board, locations[9]))[0]
                                         for i9 in ix9:
-                                            np.add(this_board, locations[9][:, :, i9], this_board)
+                                            np.add(this_board, locations[9][i9], this_board)
                                             ix10 = np.nonzero(is_valid(this_board, locations[10]))[0]
                                             for i10 in ix10:
-                                                np.add(this_board, locations[10][:, :, i10], this_board)
+                                                np.add(this_board, locations[10][i10], this_board)
                                                 ix11 = np.nonzero(is_valid(this_board, locations[11]))[0]
                                                 for i11 in ix11:
-                                                    np.add(this_board, locations[11][:, :, i11], this_board)
-                                                    solutions.append(this_board)
-                                                    return solutions
-                                                    np.subtract(this_board, locations[11][:, :, i11], this_board)
-                                                np.subtract(this_board, locations[10][:, :, i10], this_board)
-                                            np.subtract(this_board, locations[9][:, :, i9], this_board)
-                                        np.subtract(this_board, locations[8][:, :, i8], this_board)
-                                    np.subtract(this_board, locations[7][:, :, i7], this_board)
-                                np.subtract(this_board, locations[6][:, :, i6], this_board)
-                            np.subtract(this_board, locations[5][:, :, i5], this_board)
-                        np.subtract(this_board, locations[4][:, :, i4], this_board)
-                    np.subtract(this_board, locations[3][:, :, i3], this_board)
-                np.subtract(this_board, locations[2][:, :, i2], this_board)
-            np.subtract(this_board, locations[1][:, :, i1], this_board)
-        np.subtract(this_board, locations[0][:, :, i0], this_board)
+                                                    np.add(this_board, locations[11][i11], this_board)
+                                                    # keep solution
+                                                    _save_solution(solutions, this_board)
+                                                    if not find_all:
+                                                        return solutions
+                                                    np.subtract(this_board, locations[11][i11], this_board)
+                                                np.subtract(this_board, locations[10][i10], this_board)
+                                            np.subtract(this_board, locations[9][i9], this_board)
+                                        np.subtract(this_board, locations[8][i8], this_board)
+                                    np.subtract(this_board, locations[7][i7], this_board)
+                                np.subtract(this_board, locations[6][i6], this_board)
+                            np.subtract(this_board, locations[5][i5], this_board)
+                        np.subtract(this_board, locations[4][i4], this_board)
+                    np.subtract(this_board, locations[3][i3], this_board)
+                np.subtract(this_board, locations[2][i2], this_board)
+            np.subtract(this_board, locations[1][i1], this_board)
+        np.subtract(this_board, locations[0][i0], this_board)
     return solutions
 
 #%% Functions - plot_board
-def plot_board(board, title=None, opts=None):
+def plot_board(board, opts=None):
     r"""
     Plots the board or the individual pieces.
     """
@@ -504,9 +713,9 @@ def plot_board(board, title=None, opts=None):
     # create the axis
     ax = fig.add_subplot(111)
     # set the title
-    if title is not None:
-        fig.canvas.set_window_title(title)
-        plt.title(title)
+    if opts.case_name is not None:
+        fig.canvas.set_window_title(opts.case_name)
+        plt.title(opts.case_name)
     # draw each square
     for i in range(board.shape[0]):
         for j in range(board.shape[1]):
@@ -532,15 +741,17 @@ def test_docstrings():
     r"""
     Tests the docstrings within this file.
     """
-    file = os.path.join(get_root_dir(), 'games', 'fiver.py')
-    doctest.testfile(file, report=True, verbose=False, module_relative=True)
+    unittest.main(module='dstauffman.games.test_fiver', exit=False)
+    doctest.testmod(verbose=False)
 
 #%% Main script
 if __name__ == '__main__':
     # flags for running code
     run_tests    = True
-    make_plots   = False
+    make_plots   = True
     make_soln    = True
+    find_all     = True
+    save_results = True
 
     if run_tests:
         # Run docstring test
@@ -562,34 +773,51 @@ if __name__ == '__main__':
     if make_plots:
         setup_dir(opts.save_path, rec=True)
         for (ix, these_pieces) in enumerate(all_pieces):
-            for ix2 in range(these_pieces.shape[2]):
+            for ix2 in range(these_pieces.shape[0]):
                 this_title = 'Piece {}, Permutation {}'.format(ix+1, ix2+1)
                 opts.case_name = this_title
-                fig = plot_board(these_pieces[:, :, ix2], title=this_title, opts=opts)
+                fig = plot_board(these_pieces[ix2], opts=opts)
                 plt.close(fig)
         # print empty boards
         opts.case_name = 'Empty Board 1'
-        fig = plot_board(BOARD1[3:-3,3:-3], title='Empty Board 1', opts=opts)
+        fig = plot_board(BOARD1[3:-3,3:-3], opts=opts)
         plt.close(fig)
         opts.case_name = 'Empty Board 2'
-        fig = plot_board(BOARD2[3:-3,3:-3], title='Empty Board 2', opts=opts)
+        fig = plot_board(BOARD2[3:-3,3:-3], opts=opts)
         plt.close(fig)
 
     # solve the puzzle
     locations1 = find_all_valid_locations(BOARD1, all_pieces)
-    nums = np.array([x.shape[2] for x in locations1])
-    print(nums)
+    locations2 = find_all_valid_locations(BOARD2, all_pieces)
     if make_soln:
-        solutions1 = solve_puzzle(BOARD1, locations1)
+        print('Solving puzzle 1.')
+        solutions1 = solve_puzzle(BOARD1, locations1, find_all=find_all)
+        print('Solving puzzle 2.')
+        solutions2 = solve_puzzle(BOARD2, locations2, find_all=find_all)
 
-    # plot all the piece locations
-    if False:
-        for p in [6]: #range(NUM_PIECES):
-            for i in range(locations1[p].shape[2]):
-                opts.case_name = 'Piece {}, Position {}'.format(p+1, i+1)
-                fig = plot_board(BOARD1 + locations1[p][:,:,i], title=opts.case_name, opts=opts)
-                plt.close(fig)
+    # save the results
+    if save_results:
+        with open(os.path.join(opts.save_path, 'solutions1.p'), 'wb') as file:
+            pickle.dump(solutions1, file)
+        with open(os.path.join(opts.save_path, 'solutions2.p'), 'wb') as file:
+            pickle.dump(solutions2, file)
 
+    # plot the results
     if make_soln and solutions1:
-        opts.case_name = 'Solution 1'
-        plot_board(solutions1[0], title=opts.case_name, opts=opts)
+        opts.show_plot = True
+        figs1 = []
+        for i in range(len(solutions1)):
+            opts.case_name = 'Puzzle 1, Solution {}'.format(i+1)
+            figs1.append(plot_board(solutions1[i][3:-3,3:-3], opts=opts))
+            if np.mod(i, 10) == 0:
+                while figs1:
+                    plt.close(figs1.pop())
+    if make_soln and solutions2:
+        opts.show_plot = True
+        figs2 = []
+        for i in range(len(solutions2)):
+            opts.case_name = 'Puzzle 2, Solution {}'.format(i+1)
+            figs2.append(plot_board(solutions2[i][3:-3,3:-3], opts=opts))
+            if np.mod(i, 10) == 0:
+                while figs2:
+                    plt.close(figs2.pop())
