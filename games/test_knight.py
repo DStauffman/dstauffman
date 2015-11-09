@@ -327,40 +327,52 @@ class Test_update_board(unittest.TestCase):
         Invalid move
     """
     def setUp(self):
-        self.board       = knight.Piece.null * np.ones((2, 5), dtype=int)
-        self.board[0, 2] = knight.Piece.current
+        self.old_x       = 0
+        self.old_y       = 2
         self.move        = 2 # 2 right and 1 down
+        self.new_x       = 1
+        self.new_y       = 4
+        self.board       = knight.Piece.null * np.ones((2, 5), dtype=int)
+        self.board[self.old_x, self.old_y] = knight.Piece.current
         self.costs       = 5 * np.ones(self.board.shape, dtype=int)
         self.cost        = 1
 
     def test_normal(self):
-        (cost, is_repeat) = knight.update_board(self.board, self.move)
+        (cost, is_repeat, new_x, new_y) = knight.update_board(self.board, self.move)
         self.assertEqual(cost, self.cost)
         self.assertFalse(is_repeat)
-        self.assertEqual(self.board[0, 2], knight.Piece.visited)
-        self.assertEqual(self.board[1, 4], knight.Piece.current)
+        self.assertEqual(new_x, self.new_x)
+        self.assertEqual(new_y, self.new_y)
+        self.assertEqual(self.board[self.old_x, self.old_y], knight.Piece.visited)
+        self.assertEqual(self.board[self.new_x, self.new_y], knight.Piece.current)
 
     def test_with_costs(self):
-        (cost, is_repeat) = knight.update_board(self.board, self.move, self.costs)
-        self.assertEqual(cost, self.costs[1, 4])
+        (cost, is_repeat, new_x, new_y) = knight.update_board(self.board, self.move, self.costs)
+        self.assertEqual(cost, self.costs[self.new_x, self.new_y])
         self.assertFalse(is_repeat)
-        self.assertEqual(self.board[0, 2], knight.Piece.visited)
-        self.assertEqual(self.board[1, 4], knight.Piece.current)
+        self.assertEqual(new_x, self.new_x)
+        self.assertEqual(new_y, self.new_y)
+        self.assertEqual(self.board[self.old_x, self.old_y], knight.Piece.visited)
+        self.assertEqual(self.board[self.new_x, self.new_y], knight.Piece.current)
 
     def test_invalid_move(self):
-        (cost, is_repeat) = knight.update_board(self.board, -2)
+        (cost, is_repeat, new_x, new_y) = knight.update_board(self.board, -2)
         self.assertEqual(cost, knight.LARGE_INT)
         self.assertFalse(is_repeat)
-        self.assertEqual(self.board[0, 2], knight.Piece.current)
-        self.assertEqual(self.board[1, 4], knight.Piece.null)
+        self.assertEqual(new_x, self.old_x)
+        self.assertEqual(new_y, self.old_y)
+        self.assertEqual(self.board[self.old_x, self.old_y], knight.Piece.current)
+        self.assertEqual(self.board[self.new_x, self.new_y], knight.Piece.null)
 
     def test_repeated_move(self):
-        self.board[1, 4] = knight.Piece.visited
-        (cost, is_repeat) = knight.update_board(self.board, self.move)
+        self.board[self.new_x, self.new_y] = knight.Piece.visited
+        (cost, is_repeat, new_x, new_y) = knight.update_board(self.board, self.move)
         self.assertEqual(cost, self.cost)
         self.assertTrue(is_repeat)
-        self.assertEqual(self.board[0, 2], knight.Piece.visited)
-        self.assertEqual(self.board[1, 4], knight.Piece.current)
+        self.assertEqual(new_x, self.new_x)
+        self.assertEqual(new_y, self.new_y)
+        self.assertEqual(self.board[self.old_x, self.old_y], knight.Piece.visited)
+        self.assertEqual(self.board[self.new_x, self.new_y], knight.Piece.current)
 
 #%% undo_move
 class Test_undo_move(unittest.TestCase):
@@ -498,7 +510,7 @@ class Test_print_sequence(unittest.TestCase):
         self.moves       = [2, 2]
         self.costs       = 5 * np.ones((3, 5), dtype=int)
         self.output      = 'Starting position:\nS . . . .\n. . . . .\n. . . . E\n\n' + \
-            'After move 1\nx . . . .\n. . K . .\n. . . . E\n\nAfter move 2\n' + \
+            'After move 1, cost: 5\nx . . . .\n. . K . .\n. . . . E\n\nAfter move 2, cost: 10\n' + \
             'x . . . .\n. . x . .\n. . . . K'
 
     def test_normal(self):
@@ -506,7 +518,7 @@ class Test_print_sequence(unittest.TestCase):
             knight.print_sequence(self.board, self.moves)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, self.output)
+        self.assertEqual(output, self.output.replace('5','1').replace('10','2'))
 
     def test_with_costs(self):
         with capture_output() as (out, _):
@@ -522,7 +534,7 @@ class Test_print_sequence(unittest.TestCase):
                 knight.print_sequence(self.board, self.moves, self.costs)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, self.output[0:62])
+        self.assertEqual(output, self.output[0:48])
 
 #%% solve_puzzle
 class Test_solve_puzzle(unittest.TestCase):
@@ -537,75 +549,42 @@ class Test_solve_puzzle(unittest.TestCase):
         self.board         = knight.Piece.null * np.ones((3, 5), dtype=int)
         self.board[0, 0]   = knight.Piece.start
         self.board[0, 4]   = knight.Piece.final
-        self.costs         = np.ones(self.board.shape, dtype=int)
-        self.data          = {}
-        self.first_moves   = [2, -2] # [-3, -2, 4, -3, -2, 4, -3, 1] (before predicting costs)
         self.min_moves     = [2, -2]
         self.max_num_moves = 8
 
-    #@unittest.skip('Skip while testing other changes.')
-    def test_first(self):
-        self.assertTrue(len(self.data) == 0)
-        with capture_output() as (out, _):
-            knight.solve_puzzle(self.board, self.costs, 'first', self.data)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertTrue(self.data['is_solved'])
-        np.testing.assert_array_equal(self.data['moves'], self.first_moves)
-        if not knight.LOGGING:
-            self.assertEqual(output, 'Initializing solver.\nSolution found!')
-        else:
-            self.assertTrue(output.startswith('Initializing solver.'))
-            self.assertTrue(output.endswith('Solution found!'))
-
-    #@unittest.skip('Not yet implemented.')
     def test_min(self):
-        self.assertTrue(len(self.data) == 0)
         with capture_output() as (out, _):
-            knight.solve_puzzle(self.board, self.costs, 'min', self.data)
+            data = knight.solve_puzzle(self.board, 'min')
         output = out.getvalue().strip()
         out.close()
-        self.assertTrue(self.data['is_solved'])
-        np.testing.assert_array_equal(self.data['moves'], self.min_moves)
-        if not knight.LOGGING:
-            #self.assertEqual(output, 'Initializing solver.\nSolution found for cost of: 8.\n' + \
-            #    'Solution found for cost of: 6.\nSolution found for cost of: 4.\nSolution found for cost of: 2.')
-            self.assertEqual(output, 'Initializing solver.\nSolution found for cost of: 2.')
-        else:
-            self.assertTrue(output.startswith('Initializing solver.'))
-            self.assertTrue(output.endswith('this_move = 4, this_cost = 1000000, total moves = [] - invalid'))
+        self.assertTrue(data['is_solved'])
+        np.testing.assert_array_equal(data['moves'], self.min_moves)
+        expected_output_start = 'Initializing solver.\nSolution found for cost of: 2.'
+        self.assertEqual(output[:len(expected_output_start)], expected_output_start)
 
     @unittest.skip('Not yet implemented.')
     def test_max(self):
-        self.assertTrue(len(self.data) == 0)
         with capture_output() as (out, _):
-            knight.solve_puzzle(self.board, self.costs, 'max', self.data)
+            data = knight.solve_puzzle(self.board, 'max')
         output = out.getvalue().strip()
         out.close()
-        self.assertTrue(self.data['is_solved'])
-        self.assertEqual(self.data['moves'], self.max_num_moves)
-        if not knight.LOGGING:
-            self.assertEqual(output, 'Initializing solver.\nSolution found!')
-        else:
-            self.assertTrue(False) # TODO:
+        self.assertTrue(data['is_solved'])
+        self.assertEqual(data['moves'], self.max_num_moves)
+        expected_output_start = 'Initializing solver.\nSolution found for cost of: 8.'
+        self.assertEqual(output[:len(expected_output_start)], expected_output_start)
 
     def test_no_solution(self):
         board = knight.Piece.null * np.ones((2, 5), dtype=int)
         board[0, 0] = knight.Piece.start
         board[1, 4] = knight.Piece.final
-        costs = np.ones(board.shape, dtype=int)
-        self.assertTrue(len(self.data) == 0)
         with capture_output() as (out, _):
-            knight.solve_puzzle(board, costs, 'first', self.data)
+            data = knight.solve_puzzle(board)
         output = out.getvalue().strip()
         out.close()
-        self.assertFalse(self.data['is_solved'])
-        self.assertTrue(len(self.data['moves']) == 0)
-        if not knight.LOGGING:
-            self.assertEqual(output, 'Initializing solver.\nNo solution found.')
-        else:
-            self.assertTrue(output.startswith('Initializing solver.'))
-            self.assertTrue(output.endswith('No solution found.'))
+        self.assertFalse(data['is_solved'])
+        self.assertTrue(len(data['moves']) == 0)
+        expected_output_start = 'Initializing solver.\nNo solution found.'
+        self.assertEqual(output[:len(expected_output_start)], expected_output_start)
 
 #%% Unit test execution
 if __name__ == '__main__':
