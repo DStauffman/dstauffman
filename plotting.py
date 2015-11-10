@@ -224,7 +224,7 @@ class ColorMap(Frozen):
     >>> plt.legend(['Sin', 'Cos']) # doctest: +ELLIPSIS
     <matplotlib.legend.Legend object at 0x...>
 
-    >>> plt.show()
+    >>> plt.show(block=False)
 
     Close plot
     >>> plt.close(fig)
@@ -255,7 +255,11 @@ class ColorMap(Frozen):
         r"""Set the colors for the given axis based on internal instance information."""
         if self.num_colors is None:
             raise ValueError("You can't call ColorMap.set_colors unless it was given a num_colors input.")
-        ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
+        try:
+            ax.set_prop_cycle('color', [self.get_color(i) for i in range(self.num_colors)])
+        except AttributeError: # pragma: no cover
+            # for older matplotlib versions, use deprecated set_color_cycle
+            ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
 
 #%% Functions - get_axes_scales
 def get_axes_scales(type_):
@@ -281,14 +285,14 @@ def get_axes_scales(type_):
     Examples
     --------
 
-    >>> from dstauffman import get_axes_scale
+    >>> from dstauffman import get_axes_scales
     >>> type_ = 'percentage'
-    >>> (scale, units) = get_axes_scale(type_)
+    >>> (scale, units) = get_axes_scales(type_)
 
     >>> print(scale)
     100
     >>> print(units)
-    '%'
+    %
 
     """
     # determine results based on simple switch statement
@@ -663,7 +667,7 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, legen
     plt.xlabel('Time [year]')
     plt.ylabel(fig.canvas.get_window_title())
     plt.title(description + ' vs. Time')
-    plt.legend(legend)
+    plt.legend()
     plt.grid(True)
     # setup plots
     setup_plots(fig, opts, 'time')

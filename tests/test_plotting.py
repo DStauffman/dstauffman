@@ -153,11 +153,11 @@ class Test_ColorMap(unittest.TestCase):
         self.assertTrue(isinstance(smap, cmx.ScalarMappable))
 
     def test_set_colors(self):
-        cm = dcs.ColorMap()
+        cm = dcs.ColorMap(num_colors=5)
         fig = plt.figure()
         ax = fig.add_subplot(111)
+        cm.set_colors(ax)
         ax.plot(0, 0)
-        plt.colorbar(cm.get_smap())
         plt.close()
         self.assertTrue(True)
 
