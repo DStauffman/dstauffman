@@ -76,6 +76,8 @@ doc/tex/*/*.vrb
 # =========================
 # Folder/Files #
 # =========================
+games/coverage_html_report/*
+games/.coverage
 output/*
 results/*
 scripts/case_*
