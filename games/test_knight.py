@@ -219,61 +219,63 @@ class Test__classify_move(unittest.TestCase):
         Lava
     """
     def setUp(self):
-        self.board       = knight.Piece.null * np.ones((2, 5), dtype=int)
-        self.board[0, 2] = knight.Piece.current
-        self.move        = 2 # (2 right and 1 down, so end at [1, 4]
-        self.move_type   = knight.Move.normal
-        self.transports  = knight._get_transports(self.board)
+        self.board      = knight.Piece.null * np.ones((2, 5), dtype=int)
+        self.move       = 2 # (2 right and 1 down, so end at [1, 4]
+        self.move_type  = knight.Move.normal
+        self.transports = knight._get_transports(self.board)
+        self.start_x    = 0
+        self.start_y    = 2
+        self.board[self.start_x, self.start_y] = knight.Piece.current
 
     def test_normal(self):
-        move_type = knight._classify_move(self.board, self.move, self.transports)
+        move_type = knight._classify_move(self.board, self.move, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, self.move_type)
 
     def test_off_board(self):
-        move_type = knight._classify_move(self.board, -2, self.transports)
+        move_type = knight._classify_move(self.board, -2, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, knight.Move.off_board)
 
     def test_land_on_barrier_or_rock(self):
         self.board[1, 4] = knight.Piece.rock
-        move_type = knight._classify_move(self.board, self.move, self.transports)
+        move_type = knight._classify_move(self.board, self.move, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, knight.Move.blocked)
         self.board[1, 4] = knight.Piece.barrier
-        move_type = knight._classify_move(self.board, self.move, self.transports)
+        move_type = knight._classify_move(self.board, self.move, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, knight.Move.blocked)
 
     def test_cant_pass_barrier(self):
         self.board[0, 4] = knight.Piece.barrier
-        move_type = knight._classify_move(self.board, self.move, self.transports)
+        move_type = knight._classify_move(self.board, self.move, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, knight.Move.blocked)
 
     def test_over_rock(self):
         self.board[0, 4] = knight.Piece.rock
-        move_type = knight._classify_move(self.board, self.move, self.transports)
+        move_type = knight._classify_move(self.board, self.move, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, self.move_type)
 
     def test_visited(self):
         self.board[1, 4] = knight.Piece.visited
-        move_type = knight._classify_move(self.board, self.move, self.transports)
+        move_type = knight._classify_move(self.board, self.move, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, knight.Move.visited)
 
     def test_winning(self):
         self.board[1, 4] = knight.Piece.final
-        move_type = knight._classify_move(self.board, self.move, self.transports)
+        move_type = knight._classify_move(self.board, self.move, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, knight.Move.winning)
 
     def test_transport(self):
         self.board[1, 4] = knight.Piece.transport
-        move_type = knight._classify_move(self.board, self.move, self.transports)
+        move_type = knight._classify_move(self.board, self.move, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, knight.Move.transport)
 
     def test_water(self):
         self.board[1, 4] = knight.Piece.water
-        move_type = knight._classify_move(self.board, self.move, self.transports)
+        move_type = knight._classify_move(self.board, self.move, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, knight.Move.water)
 
     def test_lava(self):
         self.board[1, 4] = knight.Piece.lava
-        move_type = knight._classify_move(self.board, self.move, self.transports)
+        move_type = knight._classify_move(self.board, self.move, self.transports, self.start_x, self.start_y)
         self.assertEqual(move_type, knight.Move.lava)
 
     def test_unexpected_piece(self):
@@ -300,7 +302,8 @@ class Test__update_board(unittest.TestCase):
         self.transports  = knight._get_transports(self.board)
 
     def test_normal(self):
-        (cost, is_repeat, new_x, new_y) = knight._update_board(self.board, self.move, self.costs, self.transports)
+        (cost, is_repeat, new_x, new_y) = knight._update_board(self.board, self.move, self.costs, \
+            self.transports, self.old_x, self.old_y)
         self.assertEqual(cost, self.costs[self.new_x, self.new_y])
         self.assertFalse(is_repeat)
         self.assertEqual(new_x, self.new_x)
@@ -309,7 +312,8 @@ class Test__update_board(unittest.TestCase):
         self.assertEqual(self.board[self.new_x, self.new_y], knight.Piece.current)
 
     def test_invalid_move(self):
-        (cost, is_repeat, new_x, new_y) = knight._update_board(self.board, -2, self.costs, self.transports)
+        (cost, is_repeat, new_x, new_y) = knight._update_board(self.board, -2, self.costs, \
+            self.transports, self.old_x, self.old_y)
         self.assertEqual(cost, knight.LARGE_INT)
         self.assertFalse(is_repeat)
         self.assertEqual(new_x, self.old_x)
@@ -319,7 +323,8 @@ class Test__update_board(unittest.TestCase):
 
     def test_repeated_move(self):
         self.board[self.new_x, self.new_y] = knight.Piece.visited
-        (cost, is_repeat, new_x, new_y) = knight._update_board(self.board, self.move, self.costs, self.transports)
+        (cost, is_repeat, new_x, new_y) = knight._update_board(self.board, self.move, self.costs, \
+            self.transports, self.old_x, self.old_y)
         self.assertEqual(cost, self.cost)
         self.assertTrue(is_repeat)
         self.assertEqual(new_x, self.new_x)
@@ -338,20 +343,22 @@ class Test__undo_move(unittest.TestCase):
     def setUp(self):
         self.board       = knight.Piece.null * np.ones((2, 5), dtype=int)
         self.board[0, 2] = knight.Piece.visited
-        self.board[1, 4] = knight.Piece.current
         self.last_move   = 2 # 2 right and 1 down
         self.original_board       = knight.Piece.null * np.ones((2, 5), dtype=int)
         self.original_board[0, 2] = knight.Piece.start
         self.transports  = knight._get_transports(self.original_board)
+        self.start_x     = 1
+        self.start_y     = 4
+        self.board[self.start_x, self.start_y] = knight.Piece.current
 
     def test_normal(self):
-        knight._undo_move(self.board, self.last_move, self.original_board, self.transports)
+        knight._undo_move(self.board, self.last_move, self.original_board, self.transports, self.start_x, self.start_y)
         self.assertEqual(self.board[0, 2], knight.Piece.current)
         self.assertEqual(self.board[1, 4], self.original_board[1, 4])
 
     def test_other_piece(self):
         self.original_board[1, 4] = knight.Piece.water
-        knight._undo_move(self.board, self.last_move, self.original_board, self.transports)
+        knight._undo_move(self.board, self.last_move, self.original_board, self.transports, self.start_x, self.start_y)
         self.assertEqual(self.board[0, 2], knight.Piece.current)
         self.assertEqual(self.board[1, 4], self.original_board[1, 4])
 
@@ -359,7 +366,7 @@ class Test__undo_move(unittest.TestCase):
         self.board[0, 0] = knight.Piece.transport
         self.board[1, 1] = knight.Piece.transport
         self.transports  = knight._get_transports(self.board)
-        knight._undo_move(self.board, self.last_move, self.original_board, self.transports)
+        knight._undo_move(self.board, self.last_move, self.original_board, self.transports, self.start_x, self.start_y)
         self.assertEqual(self.board[0, 2], knight.Piece.current)
         self.assertEqual(self.board[1, 4], self.original_board[1, 4])
 
@@ -367,19 +374,19 @@ class Test__undo_move(unittest.TestCase):
         self.board[0, 0] = knight.Piece.transport
         self.board[0, 2] = knight.Piece.transport
         self.transports  = knight._get_transports(self.board)
-        knight._undo_move(self.board, self.last_move, self.original_board, self.transports)
-        self.assertEqual(self.board[0, 0], knight.Piece.current)
+        knight._undo_move(self.board, self.last_move, self.original_board, self.transports, self.start_x, self.start_y)
+        self.assertEqual(self.board[0, 2], knight.Piece.current)
         self.assertEqual(self.board[1, 4], self.original_board[1, 4])
-        self.assertEqual(self.board[0, 2], knight.Piece.transport)
+        self.assertEqual(self.board[0, 0], knight.Piece.transport)
 
     def test_transport3(self):
         self.board[0, 2] = knight.Piece.transport
         self.board[0, 4] = knight.Piece.transport
         self.transports  = knight._get_transports(self.board)
-        knight._undo_move(self.board, self.last_move, self.original_board, self.transports)
-        self.assertEqual(self.board[0, 4], knight.Piece.current)
+        knight._undo_move(self.board, self.last_move, self.original_board, self.transports, self.start_x, self.start_y)
+        self.assertEqual(self.board[0, 2], knight.Piece.current)
         self.assertEqual(self.board[1, 4], self.original_board[1, 4])
-        self.assertEqual(self.board[0, 2], knight.Piece.transport)
+        self.assertEqual(self.board[0, 4], knight.Piece.transport)
 
     def test_transport4(self):
         self.last_move = 4
@@ -387,7 +394,7 @@ class Test__undo_move(unittest.TestCase):
         self.original_board[0, 0] = knight.Piece.transport
         self.original_board[1, 4] = knight.Piece.transport
         self.transports  = [(0, 0), (1, 4)]
-        knight._undo_move(self.board, self.last_move, self.original_board, self.transports)
+        knight._undo_move(self.board, self.last_move, self.original_board, self.transports, self.start_x, self.start_y)
         self.assertEqual(self.board[1, 2], knight.Piece.current)
         self.assertEqual(self.board[1, 4], knight.Piece.transport)
         self.assertEqual(self.board[0, 0], knight.Piece.transport)
@@ -398,7 +405,7 @@ class Test__undo_move(unittest.TestCase):
         self.original_board[0, 0] = knight.Piece.transport
         self.original_board[1, 4] = knight.Piece.transport
         self.transports  = [(1, 4), (0, 0)] # manually reverse their order
-        knight._undo_move(self.board, self.last_move, self.original_board, self.transports)
+        knight._undo_move(self.board, self.last_move, self.original_board, self.transports, self.start_x, self.start_y)
         self.assertEqual(self.board[1, 2], knight.Piece.current)
         self.assertEqual(self.board[1, 4], knight.Piece.transport)
         self.assertEqual(self.board[0, 0], knight.Piece.transport)
@@ -454,10 +461,13 @@ class Test__sort_best_moves(unittest.TestCase):
         self.moves = knight.MOVES
         self.costs = knight._predict_cost(self.board)
         self.transports = None
+        self.start_x = 0
+        self.start_y = 0
         self.sorted_moves = np.array([-1, -4, -2, 2, 4, 1], dtype=int)
 
     def test_nominal(self):
-        sorted_moves = knight._sort_best_moves(self.board, self.moves, self.costs, self.transports)
+        sorted_moves = knight._sort_best_moves(self.board, self.moves, self.costs, self.transports, \
+            self.start_x, self.start_y)
         np.testing.assert_array_equal(sorted_moves, self.sorted_moves)
 
 #%% print_board
