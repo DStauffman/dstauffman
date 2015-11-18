@@ -445,7 +445,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, plot
     return fig
 
 #%% Functions - plot_correlation_matrix
-def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correlation Matrix', \
+def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlation Matrix', \
         cmin=0, cmax=1, colormap='cool', plot_lower_only=True, label_values=False):
     r"""
     Visually plots a correlation matrix.
@@ -495,6 +495,10 @@ def plot_correlation_matrix(data, labels=None, opts=Opts(), matrix_name='Correla
     >>> plt.close(fig)
 
     """
+    # check optional inputs
+    if opts is None:
+        opts = Opts()
+
     # Hard-coded values
     box_size        = 1
     precision       = 1e-12
