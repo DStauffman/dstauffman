@@ -79,12 +79,10 @@ from __future__ import print_function
 from __future__ import division
 # regular imports
 import doctest
-from enum import unique
+from enum import unique, IntEnum
 import numpy as np
 import time
 import unittest
-# personal dstauffman libary imports
-from dstauffman import IntEnumPlus
 
 #%% Constants
 # hard-coded values
@@ -167,7 +165,7 @@ MOVES = [-4, -3, -2, -1, 1, 2, 3, 4]
 
 #%% Classes - Piece
 @unique
-class Piece(IntEnumPlus):
+class Piece(IntEnum):
     r"""
     Enumerator for all the possible types of squares within the board, including start and end
     positions
@@ -185,7 +183,7 @@ class Piece(IntEnumPlus):
 
 #%% Classes - Move
 @unique
-class Move(IntEnumPlus):
+class Move(IntEnum):
     r"""
     Enumerator for all the cost outcomes for moving a piece.
     """
@@ -199,8 +197,8 @@ class Move(IntEnumPlus):
     winning   = 5
 
 #%% alternates for speed
-Piece2 = {key: value for (key, value) in zip(Piece.list_of_names(), Piece.list_of_values())}
-Move2  = {key: value for (key, value) in zip(Move.list_of_names(),  Move.list_of_values())}
+Piece2 = {x.name: x.value for x in Piece}
+Move2  = {x.name: x.value for x in Move}
 
 #%% _board_to_costs
 def _board_to_costs(board):

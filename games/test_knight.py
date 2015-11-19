@@ -482,7 +482,7 @@ class Test_print_board(unittest.TestCase):
         self.board1 = np.ones((4,4), dtype=int)
         self.board2 = np.zeros((3,5), dtype=int)
         self.board3 = np.arange(12).reshape((4,3))
-        self.board3[self.board3 > knight.Piece.max_value] = 0
+        self.board3[self.board3 > max(knight.Piece).value] = 0
 
     def test_square_board(self):
         with capture_output() as (out, _):
@@ -520,7 +520,7 @@ class Test_char_board_to_nums(unittest.TestCase):
     def setUp(self):
         self.nums        = knight.NUM_DICT.keys()
         self.chars       = knight.CHAR_DICT.keys()
-        self.enums       = knight.Piece.list_of_values()
+        self.enums       = knight.Piece.__members__.values()
         self.char_board  = '. S E K W\nR B T L x'
         self.board       = np.array([[0, 1, 2, 3, 4], [5, 6, 7, 8, 9]])
         self.char_board2 = '\n' + self.char_board + '\n'
