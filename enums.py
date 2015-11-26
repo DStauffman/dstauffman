@@ -80,7 +80,7 @@ class IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
 #%% Functions
-def dist_enum_and_mons(num, distribution, max_months, prng, start_num=1, alpha=1, beta=1):
+def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
     r"""
     Creates a distribution for an enumerated state with a duration (such as TB status).
 
@@ -90,10 +90,10 @@ def dist_enum_and_mons(num, distribution, max_months, prng, start_num=1, alpha=1
         Number of people in the population
     distribution : array_like
         Likelihood of being in each TB state (should be 4 states and cumsum to 100%)
-    max_months : array_like
-        Maximum number of months for being in each TB state
     prng : class numpy.random.RandomState
         Pseudo-random number generator
+    max_months : scalar or array_like, optional
+        Maximum number of months for being in each TB state
     start_num : int, optional
         Number to start counting from, default is 1
     alpha : int, optional
@@ -114,6 +114,8 @@ def dist_enum_and_mons(num, distribution, max_months, prng, start_num=1, alpha=1
     #.  Updated by David C. Stauffer in June 2015 to use a beta curve to distribute the number of
         months spent in each state.
     #.  Made into a generic function for the dstauffman library by David C. Stauffer in July 2015.
+    #.  Updated by David C. Stauffer in November 2015 to change the inputs to allow max_months and
+        mons output to be optional.
 
     Examples
     --------
@@ -124,7 +126,7 @@ def dist_enum_and_mons(num, distribution, max_months, prng, start_num=1, alpha=1
     >>> distribution = 1./100*np.array([9.5, 90, 0.25, 0.25])
     >>> max_months = np.array([60, 120, 36, 6])
     >>> prng = np.random.RandomState()
-    >>> (state, mons) = dist_enum_and_mons(num, distribution, max_months, prng)
+    >>> (state, mons) = dist_enum_and_mons(num, distribution, prng, max_months=max_months)
 
     """
     # do a random draw based on the cumulative distribution
@@ -132,7 +134,12 @@ def dist_enum_and_mons(num, distribution, max_months, prng, start_num=1, alpha=1
         axis=0, dtype=int) + start_num
     # set the number of months in this state based on a beta distribution with the given
     # maximum number of months in each state
-    mons = np.ceil(max_months[state-start_num] * prng.beta(alpha, beta, num)).astype(int)
+    if max_months is None:
+        mons = None
+    else:
+        if np.isscalar(max_months):
+            max_months = max_months *np.ones(len(state))
+        mons = np.ceil(max_months[state-start_num] * prng.beta(alpha, beta, num)).astype(int)
     return (state, mons)
 
 #%% Unit test
