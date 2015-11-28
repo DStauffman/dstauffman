@@ -230,7 +230,6 @@ def plot_mean_and_std(scores, opts=None, perfect_score=300):
     plt.xlim(PLOT_LIMITS)
     plt.legend()
     plt.grid(True)
-    plt.show(block=False)
     # optionally save and format plot
     setup_plots(fig, opts, 'dist_no_y_scale')
     return fig

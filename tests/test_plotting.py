@@ -510,8 +510,6 @@ class Test_storefig(unittest.TestCase):
         plt.title(cls.title)
         # show a grid
         plt.grid(True)
-        # show the plot
-        plt.show(block=False)
 
     def test_saving(self):
         dcs.storefig(self.fig, self.folder, self.plot_type[0])
@@ -569,7 +567,6 @@ class Test_titleprefix(unittest.TestCase):
         y = np.sin(x)
         plt.plot(x, y)
         plt.title('X vs Y')
-        plt.show(block=False)
 
     def test_normal(self):
         dcs.titleprefix(self.fig, self.prefix)
@@ -601,7 +598,6 @@ class Test_disp_xlimits(unittest.TestCase):
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)
         plt.plot(x, y)
-        plt.show(block=False)
 
     def test_normal(self):
         dcs.disp_xlimits(self.fig, self.xmin, self.xmax)
@@ -641,7 +637,6 @@ class Test_setup_plots(unittest.TestCase):
         plt.title('X vs Y')
         plt.xlabel('time [years]')
         plt.ylabel('value [radians]')
-        plt.show(block=False)
         self.opts = dcs.Opts()
         self.opts.case_name = 'Testing'
         self.opts.show_plot = True
