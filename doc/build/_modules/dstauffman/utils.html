@@ -6,15 +6,15 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dstauffman.utils &mdash; dstauffman 0.1.0 documentation</title>
+    <title>dstauffman.utils &mdash; dstauffman 0.0.1 documentation</title>
     
-    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.1.0',
+        VERSION:     '0.0.1',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,23 +23,14 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="dstauffman 0.1.0 documentation" href="../../index.html" />
-    <link rel="up" title="Module code" href="../index.html" /> 
+    <link rel="top" title="dstauffman 0.0.1 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9">
+
   </head>
-  <body role="document">
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">dstauffman 0.1.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
-      </ul>
-    </div>  
+  <body role="document">  
 
     <div class="document">
       <div class="documentwrapper">
@@ -68,18 +59,20 @@
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">types</span>
 <span class="kn">import</span> <span class="nn">unittest</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
 <span class="kn">from</span> <span class="nn">dstauffman.constants</span> <span class="kn">import</span> <span class="n">MONTHS_PER_YEAR</span>
 <span class="c"># compatibility issues</span>
 <span class="n">ver</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span>
 <span class="k">if</span> <span class="n">ver</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span> <span class="k">as</span> <span class="n">StringIO</span> <span class="c">#pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">BytesIO</span> <span class="k">as</span> <span class="n">StringIO</span> <span class="c"># pragma: no cover</span>
 <span class="k">elif</span> <span class="n">ver</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span> <span class="c">#pragma: no cover</span>
+    <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span> <span class="c"># pragma: no cover</span>
 <span class="k">else</span><span class="p">:</span>
-    <span class="k">raise</span><span class="p">(</span><span class="s">&#39;Unexpected Python version: &quot;{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ver</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="c">#pragma: no cover</span>
+    <span class="k">raise</span><span class="p">(</span><span class="s">&#39;Unexpected Python version: &quot;{}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">ver</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="c"># pragma: no cover</span>
 
 <span class="c">#%% Functions - _nan_equal</span>
 <span class="k">def</span> <span class="nf">_nan_equal</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">):</span>
@@ -125,7 +118,7 @@
     <span class="k">return</span> <span class="n">is_same</span>
 
 <span class="c">#%% Functions - rms</span>
-<div class="viewcode-block" id="rms"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.rms">[docs]</a><span class="k">def</span> <span class="nf">rms</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+<div class="viewcode-block" id="rms"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.rms">[docs]</a><span class="k">def</span> <span class="nf">rms</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">ignore_nans</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Calculates the root mean square of a number series</span>
 
@@ -134,9 +127,9 @@
 <span class="sd">    data : array_like</span>
 <span class="sd">        input data</span>
 <span class="sd">    axis : int, optional</span>
-<span class="sd">        Axis along which the RMS is computed. The default is to compute the RMS of the flattened array.</span>
+<span class="sd">        Axis along which RMS is computed. The default is to compute the RMS of the flattened array.</span>
 <span class="sd">    keepdims : bool, optional</span>
-<span class="sd">        If true, the axes which are reduced are left in the result as dimensions ith size one.</span>
+<span class="sd">        If true, the axes which are reduced are left in the result as dimensions with size one.</span>
 <span class="sd">        With this option, the result will broadcast correctly against the original `data`.</span>
 
 <span class="sd">    Returns</span>
@@ -160,8 +153,18 @@
 <span class="sd">    0.70710678118654757</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># check for empty data</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isscalar</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="c"># do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly</span>
-    <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_nans</span><span class="p">:</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">data</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># check for all NaNs case</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">data</span><span class="p">)):</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">data</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">conj</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="n">axis</span><span class="p">,</span> <span class="n">keepdims</span><span class="o">=</span><span class="n">keepdims</span><span class="p">))</span>
     <span class="c"># return the result</span>
     <span class="k">return</span> <span class="n">out</span>
 
@@ -194,7 +197,7 @@
 <span class="sd">    --------</span>
 
 <span class="sd">    &gt;&gt;&gt; from dstauffman import setup_dir</span>
-<span class="sd">    &gt;&gt;&gt; setup_dir(r&#39;C:\Temp\test_folder&#39;) #doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; setup_dir(r&#39;C:\Temp\test_folder&#39;) # doctest: +SKIP</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
@@ -213,16 +216,16 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s">&#39;Unexpected file type, neither file nor folder: &quot;{}&quot;.&#39;</span>\
-                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">))</span> <span class="c">#pragma: no cover</span>
+                    <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">this_full_elem</span><span class="p">))</span> <span class="c"># pragma: no cover</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&#39;Files/Sub-folders were removed from: &quot;&#39;</span> <span class="o">+</span> <span class="n">folder</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c"># create directory if it does not exist</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
             <span class="k">print</span><span class="p">(</span><span class="s">&#39;Created directory: &quot;&#39;</span> <span class="o">+</span> <span class="n">folder</span> <span class="o">+</span> <span class="s">&#39;&quot;&#39;</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span> <span class="c">#pragma: no cover</span>
+        <span class="k">except</span><span class="p">:</span> <span class="c"># pragma: no cover</span>
             <span class="c"># re-raise last exception, could try to handle differently in the future</span>
-            <span class="k">raise</span> <span class="c">#pragma: no cover</span>
+            <span class="k">raise</span> <span class="c"># pragma: no cover</span>
 
 <span class="c">#%% Functions - compare_two_classes</span></div>
 <div class="viewcode-block" id="compare_two_classes"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.compare_two_classes">[docs]</a><span class="k">def</span> <span class="nf">compare_two_classes</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">c2</span><span class="p">,</span> <span class="n">suppress_output</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">ignore_callables</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">compare_recursively</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
@@ -261,10 +264,18 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">_not_true_print</span><span class="p">():</span>
-        <span class="n">nonlocal</span> <span class="n">is_same</span>
+        <span class="sd">r&quot;&quot;&quot;Sets is_same to False and optionally prints information to the screen.&quot;&quot;&quot;</span>
         <span class="n">is_same</span> <span class="o">=</span> <span class="bp">False</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_output</span><span class="p">:</span>
             <span class="k">print</span><span class="p">(</span><span class="s">&#39;{} is different from {} to {}.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">this_attr</span><span class="p">,</span> <span class="n">name1</span><span class="p">,</span> <span class="n">name2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">is_same</span>
+    <span class="k">def</span> <span class="nf">_is_function</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;Determines whether the object is a function or not.&quot;&quot;&quot;</span>
+        <span class="c"># need second part for Python compatibility for v2.7, which distinguishes unbound methods from functions.</span>
+        <span class="k">return</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isfunction</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="ow">or</span> <span class="n">inspect</span><span class="o">.</span><span class="n">ismethod</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">_is_class_instance</span><span class="p">(</span><span class="n">obj</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;Determines whether the object is an instance of a class or not.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;__dict__&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_function</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="c"># and hasattr(obj, &#39;__call__&#39;)</span>
     <span class="c"># preallocate answer to True until proven otherwise</span>
     <span class="n">is_same</span> <span class="o">=</span> <span class="bp">True</span>
     <span class="c"># get names if specified</span>
@@ -272,7 +283,6 @@
         <span class="n">name1</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">name2</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c"># TODO: figure out Matlab inputname equivalent</span>
         <span class="n">name1</span> <span class="o">=</span> <span class="s">&#39;c1&#39;</span>
         <span class="n">name2</span> <span class="o">=</span> <span class="s">&#39;c2&#39;</span>
     <span class="c"># simple test</span>
@@ -287,24 +297,31 @@
             <span class="n">attr1</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">this_attr</span><span class="p">)</span>
             <span class="n">attr2</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="n">this_attr</span><span class="p">)</span>
             <span class="c"># determine if this is a subclass</span>
-            <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">attr1</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">attr2</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">_is_class_instance</span><span class="p">(</span><span class="n">attr1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">_is_class_instance</span><span class="p">(</span><span class="n">attr2</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">compare_recursively</span><span class="p">:</span>
+                        <span class="c"># Note: don&#39;t want the &#39;and&#39; to short-circuit, so do the &#39;and is_same&#39; last</span>
                         <span class="n">is_same</span> <span class="o">=</span> <span class="n">compare_two_classes</span><span class="p">(</span><span class="n">attr1</span><span class="p">,</span> <span class="n">attr2</span><span class="p">,</span> <span class="n">suppress_output</span><span class="o">=</span><span class="n">suppress_output</span><span class="p">,</span> \
                             <span class="n">names</span><span class="o">=</span> <span class="p">[</span><span class="n">name1</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">this_attr</span><span class="p">,</span> <span class="n">name2</span> <span class="o">+</span> <span class="s">&#39;.&#39;</span> <span class="o">+</span> <span class="n">this_attr</span><span class="p">],</span> \
-                            <span class="n">ignore_callables</span><span class="o">=</span><span class="n">ignore_callables</span><span class="p">,</span> <span class="n">compare_recursively</span><span class="o">=</span><span class="n">compare_recursively</span><span class="p">)</span>
+                            <span class="n">ignore_callables</span><span class="o">=</span><span class="n">ignore_callables</span><span class="p">,</span> <span class="n">compare_recursively</span><span class="o">=</span><span class="n">compare_recursively</span><span class="p">)</span> <span class="ow">and</span> <span class="n">is_same</span>
+                        <span class="k">continue</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">continue</span> <span class="c"># pragma: no cover (actually covered, optimization issue)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">_not_true_print</span><span class="p">()</span>
+                    <span class="n">is_same</span> <span class="o">=</span> <span class="n">_not_true_print</span><span class="p">()</span>
+                    <span class="k">continue</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">inspect</span><span class="o">.</span><span class="n">isclass</span><span class="p">(</span><span class="n">attr2</span><span class="p">):</span>
-                    <span class="n">_not_true_print</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">ignore_callables</span> <span class="ow">and</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">attr1</span><span class="p">,</span> <span class="s">&#39;__call__&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">attr2</span><span class="p">,</span> <span class="s">&#39;__call__&#39;</span><span class="p">)):</span>
-                <span class="k">continue</span> <span class="c"># pragma: no cover (actually covered, optimization issue)</span>
+                <span class="k">if</span> <span class="n">_is_class_instance</span><span class="p">(</span><span class="n">attr2</span><span class="p">):</span>
+                    <span class="n">is_same</span> <span class="o">=</span> <span class="n">_not_true_print</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">_is_function</span><span class="p">(</span><span class="n">attr1</span><span class="p">)</span> <span class="ow">or</span> <span class="n">_is_function</span><span class="p">(</span><span class="n">attr2</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">ignore_callables</span><span class="p">:</span>
+                    <span class="k">continue</span> <span class="c"># pragma: no cover (actually covered, optimization issue)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">is_same</span> <span class="o">=</span> <span class="n">_not_true_print</span><span class="p">()</span>
+                    <span class="k">continue</span>
             <span class="c"># if any differences, then this test fails</span>
             <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">_nan_equal</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">c1</span><span class="p">,</span> <span class="n">this_attr</span><span class="p">),</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">c2</span><span class="p">,</span> <span class="n">this_attr</span><span class="p">))):</span>
-                <span class="n">_not_true_print</span><span class="p">()</span>
+                <span class="n">is_same</span> <span class="o">=</span> <span class="n">_not_true_print</span><span class="p">()</span>
         <span class="c"># find the attributes in one but not the other, if any, then this test fails</span>
         <span class="n">diff</span> <span class="o">=</span> <span class="n">attrs1</span> <span class="o">^</span> <span class="n">attrs2</span>
         <span class="k">for</span> <span class="n">this_attr</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">diff</span><span class="p">):</span>
@@ -363,7 +380,6 @@
         <span class="n">name1</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">name2</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="c"># TODO: figure out Matlab inputname equivalent</span>
         <span class="n">name1</span> <span class="o">=</span> <span class="s">&#39;d1&#39;</span>
         <span class="n">name2</span> <span class="o">=</span> <span class="s">&#39;d2&#39;</span>
     <span class="c"># simple test</span>
@@ -372,7 +388,7 @@
         <span class="n">same</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">d1</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">d2</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">same</span><span class="p">):</span>
             <span class="c"># if any differences, then this test fails</span>
-            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">d2</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
+            <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">((</span><span class="n">d1</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">d2</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">^</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">d1</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">d2</span><span class="p">[</span><span class="n">key</span><span class="p">]))):</span>
                 <span class="n">is_same</span> <span class="o">=</span> <span class="bp">False</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_output</span><span class="p">:</span>
                     <span class="k">print</span><span class="p">(</span><span class="n">key</span> <span class="o">+</span> <span class="s">&#39; is different.&#39;</span><span class="p">)</span>
@@ -579,7 +595,7 @@
         <span class="c"># open file for reading</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span> <span class="c"># pylint: disable=W1501</span>
             <span class="c"># read file</span>
-            <span class="n">text</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="nb">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="c"># pragma: no branch</span>
         <span class="c"># return results</span>
         <span class="k">return</span> <span class="n">text</span>
     <span class="k">except</span><span class="p">:</span>
@@ -621,67 +637,11 @@
         <span class="c"># open file for writing</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s">&#39;wt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="nb">file</span><span class="p">:</span> <span class="c"># pylint: disable=W1501</span>
             <span class="c"># write file</span>
-            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+            <span class="nb">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="c"># pragma: no branch</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="c"># on any exceptions, print a message and re-raise the error</span>
         <span class="k">print</span><span class="p">(</span><span class="s">&#39;Unable to open file &quot;{}&quot; for writing.&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>
         <span class="k">raise</span>
-
-<span class="c">#%% Functions - disp</span></div>
-<div class="viewcode-block" id="disp"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.disp">[docs]</a><span class="k">def</span> <span class="nf">disp</span><span class="p">(</span><span class="n">struct</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">padding</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">suppress_output</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    Matlab like &#39;disp&#39; or display function.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    struct : class</span>
-<span class="sd">        Structure to display</span>
-<span class="sd">    level : int, optional</span>
-<span class="sd">        Level to indent, used for substructures within structures.</span>
-<span class="sd">    padding : int, optional</span>
-<span class="sd">        Minimum number of spaces to pad the results to</span>
-<span class="sd">    suppress_output : bool, optional</span>
-<span class="sd">        Choose whether to display results to the command window, default False, so show output</span>
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    #.  Written by David C. Stauffer in March 2015.</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-
-<span class="sd">    &gt;&gt;&gt; from dstauffman import disp</span>
-<span class="sd">    &gt;&gt;&gt; a = type(&#39;a&#39;, (object, ), {&#39;b&#39;: 0, &#39;c&#39; : &#39;[1, 2, 3]&#39;, &#39;d&#39;: &#39;text&#39;})</span>
-<span class="sd">    &gt;&gt;&gt; txt = disp(a)</span>
-<span class="sd">    b : 0</span>
-<span class="sd">    c : [1, 2, 3]</span>
-<span class="sd">    d : text</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c"># padding per additional level</span>
-    <span class="n">pad_per_level</span> <span class="o">=</span> <span class="mi">4</span>
-    <span class="c"># get the variables within the structure</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="nb">vars</span><span class="p">(</span><span class="n">struct</span><span class="p">)</span>
-    <span class="c"># determine padding level</span>
-    <span class="k">if</span> <span class="n">padding</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
-        <span class="n">padding</span> <span class="o">=</span> <span class="nb">max</span><span class="p">([</span><span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">d</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">)])</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="c"># initialize output</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="s">&#39;&#39;</span>
-    <span class="c"># loop through dict of vars</span>
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s">&#39;_&#39;</span><span class="p">):</span>
-            <span class="k">continue</span>
-        <span class="c"># find out how many characters to pad on the front</span>
-        <span class="n">pad_len</span> <span class="o">=</span> <span class="n">padding</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span>
-        <span class="c"># find out if an extra pad around the dots (&quot; ... &quot;) has room</span>
-        <span class="n">extra_pad</span> <span class="o">=</span> <span class="s">&#39; &#39;</span> <span class="k">if</span> <span class="n">pad_len</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="s">&#39;&#39;</span>
-        <span class="c"># append this variable</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span> <span class="o">+</span> <span class="n">pad_per_level</span><span class="o">*</span><span class="n">level</span> <span class="o">*</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s">&#39; &#39;</span> <span class="o">+</span> <span class="p">(</span><span class="n">pad_len</span> <span class="o">*</span> <span class="s">&#39;.&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">extra_pad</span> <span class="o">+</span> <span class="s">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">])</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\n</span><span class="s">&#39;</span><span class="p">)</span>
-    <span class="c"># print the results to the screen</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">suppress_output</span><span class="p">:</span>
-        <span class="k">print</span><span class="p">(</span><span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-    <span class="c"># return the final results, minus the last newline character</span>
-    <span class="k">return</span> <span class="n">x</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
 <span class="c">#%% Functions - convert_annual_to_monthly_probability</span></div>
 <div class="viewcode-block" id="convert_annual_to_monthly_probability"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.convert_annual_to_monthly_probability">[docs]</a><span class="k">def</span> <span class="nf">convert_annual_to_monthly_probability</span><span class="p">(</span><span class="n">annual</span><span class="p">):</span>
@@ -764,7 +724,11 @@
     <span class="n">annual</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">monthly</span><span class="p">)</span><span class="o">**</span><span class="n">MONTHS_PER_YEAR</span>
     <span class="k">return</span> <span class="n">annual</span>
 
-<span class="c">#%% Functions - get_root_dir</span></div>
+<span class="c">#%% Functions - ca2mp &amp; cm2ap aliases</span></div>
+<span class="n">ca2mp</span> <span class="o">=</span> <span class="n">convert_annual_to_monthly_probability</span>
+<span class="n">cm2ap</span> <span class="o">=</span> <span class="n">convert_monthly_to_annual_probability</span>
+
+<span class="c">#%% Functions - get_root_dir</span>
 <div class="viewcode-block" id="get_root_dir"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.get_root_dir">[docs]</a><span class="k">def</span> <span class="nf">get_root_dir</span><span class="p">():</span>
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Returns the folder that contains this source file and thus the root folder for the whole code.</span>
@@ -926,7 +890,7 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    #.  Written by David Stauffer in May 2015.</span>
+<span class="sd">    #.  Written by David C. Stauffer in May 2015.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -935,7 +899,7 @@
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">    &gt;&gt;&gt; data = np.array([[1, 0, -1],[0, 0, 0], [0, 0, 1]])</span>
 <span class="sd">    &gt;&gt;&gt; norm_data = unit(data, axis=0)</span>
-<span class="sd">    &gt;&gt;&gt; print(norm_data) #doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    &gt;&gt;&gt; print(norm_data) # doctest: +NORMALIZE_WHITESPACE</span>
 <span class="sd">    [[ 1. 0. -0.70710678]</span>
 <span class="sd">     [ 0. 0.  0.        ]</span>
 <span class="sd">     [ 0. 0.  0.70710678]]</span>
@@ -948,39 +912,6 @@
     <span class="c"># calculate the new normalized data</span>
     <span class="n">norm_data</span> <span class="o">=</span> <span class="n">data</span> <span class="o">/</span> <span class="n">mag</span>
     <span class="k">return</span> <span class="n">norm_data</span>
-
-<span class="c">#%% Functions - nonzero_indices</span></div>
-<div class="viewcode-block" id="nonzero_indices"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.nonzero_indices">[docs]</a><span class="k">def</span> <span class="nf">nonzero_indices</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-    <span class="sd">r&quot;&quot;&quot;</span>
-<span class="sd">    Returns the indices for a boolean array, similar to the Matlab &quot;find&quot; command.</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    data : array_like</span>
-<span class="sd">        Input data</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    ix : ndarray</span>
-<span class="sd">        Indices to elements that evaluate as true</span>
-
-<span class="sd">    Notes</span>
-<span class="sd">    -----</span>
-<span class="sd">    #.  Written by David Stauffer in May 2015.</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-
-<span class="sd">    &gt;&gt;&gt; from dstauffman import nonzero_indices</span>
-<span class="sd">    &gt;&gt;&gt; data = [True, True, False, False, True]</span>
-<span class="sd">    &gt;&gt;&gt; ix   = nonzero_indices(data)</span>
-<span class="sd">    &gt;&gt;&gt; print(ix) # doctest: +NORMALIZE_WHITESPACE</span>
-<span class="sd">    [0 1 4]</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c"># build and return the indices</span>
-    <span class="n">ix</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">ix</span> <span class="k">for</span> <span class="p">(</span><span class="n">ix</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="k">if</span> <span class="n">val</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">ix</span>
 
 <span class="c">#%% Functions - combine_sets</span></div>
 <div class="viewcode-block" id="combine_sets"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.combine_sets">[docs]</a><span class="k">def</span> <span class="nf">combine_sets</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">u1</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">u2</span><span class="p">,</span> <span class="n">s2</span><span class="p">):</span>
@@ -1027,8 +958,8 @@
 
 <span class="sd">    Notes</span>
 <span class="sd">    -----</span>
-<span class="sd">    #.  Written in Matlab by David Stauffer in Jul 2012.</span>
-<span class="sd">    #.  Ported to Python by David Stauffer in May 2015.</span>
+<span class="sd">    #.  Written in Matlab by David C. Stauffer in Jul 2012.</span>
+<span class="sd">    #.  Ported to Python by David C. Stauffer in May 2015.</span>
 <span class="sd">    #.  Could be expanded to broadcast and handle array inputs.</span>
 
 <span class="sd">    Examples</span>
@@ -1044,7 +975,7 @@
 <span class="sd">    &gt;&gt;&gt; (n, u, s) = combine_sets(n1, u1, s1, n2, u2, s2)</span>
 <span class="sd">    &gt;&gt;&gt; print(n)</span>
 <span class="sd">    15</span>
-<span class="sd">    &gt;&gt;&gt; print(u) #doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; print(u) # doctest: +ELLIPSIS</span>
 <span class="sd">    1.666666...67</span>
 <span class="sd">    &gt;&gt;&gt; print(s)</span>
 <span class="sd">    0.59135639081</span>
@@ -1075,8 +1006,215 @@
             <span class="n">s</span> <span class="o">=</span> <span class="n">s2</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c"># shouldn&#39;t be able to ever reach this line with assertions on</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Total samples are 1, but neither data set has only one item.&#39;</span><span class="p">)</span> <span class="c">#pragma: no cover</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s">&#39;Total samples are 1, but neither data set has only one item.&#39;</span><span class="p">)</span> <span class="c"># pragma: no cover</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+
+<span class="c">#%% Functions - reload_package</span></div>
+<div class="viewcode-block" id="reload_package"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.reload_package">[docs]</a><span class="k">def</span> <span class="nf">reload_package</span><span class="p">(</span><span class="n">root_module</span><span class="p">,</span> <span class="n">disp_reloads</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span> <span class="c"># pragma: no cover</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Forces Python to reload all the items within a module.  Useful for interactive debugging in IPython.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    root_module : module</span>
+<span class="sd">        The module to force python to reload</span>
+<span class="sd">    disp_reloads : bool</span>
+<span class="sd">        Whether to display the modules that are reloaded</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Added to the library in June 2015 from:</span>
+<span class="sd">        http://stackoverflow.com/questions/2918898/prevent-python-from-caching-the-imported-modules/2918951#2918951</span>
+<span class="sd">    #.  Restarting the IPython kernel is by far a safer option, but for some debugging cases this is useful,</span>
+<span class="sd">        however unit tests on this function will fail, because it reloads too many dependencies.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from dstauffman import reload_package</span>
+<span class="sd">    &gt;&gt;&gt; import dstauffman as dcs</span>
+<span class="sd">    &gt;&gt;&gt; reload_package(dcs) # doctest: +ELLIPSIS</span>
+<span class="sd">    loading dstauffman...</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">package_name</span> <span class="o">=</span> <span class="n">root_module</span><span class="o">.</span><span class="n">__name__</span>
+
+    <span class="c"># get a reference to each loaded module</span>
+    <span class="n">loaded_package_modules</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">([</span>
+        <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">package_name</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">)])</span>
+
+    <span class="c"># delete references to these loaded modules from sys.modules</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">loaded_package_modules</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+    <span class="c"># load each of the modules again;</span>
+    <span class="c"># make old modules share state with new modules</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">loaded_package_modules</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">disp_reloads</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;loading {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+        <span class="n">newmodule</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">oldmodule</span> <span class="o">=</span> <span class="n">loaded_package_modules</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="n">oldmodule</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+        <span class="n">oldmodule</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">newmodule</span><span class="o">.</span><span class="n">__dict__</span><span class="p">)</span>
+
+<span class="c">#%% Functions - delete_pyc</span></div>
+<div class="viewcode-block" id="delete_pyc"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.delete_pyc">[docs]</a><span class="k">def</span> <span class="nf">delete_pyc</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">print_progress</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Deletes all the *.pyc files (Python Byte Code) in the specified directory.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    folder : str</span>
+<span class="sd">        Name of folder to delete the files from</span>
+<span class="sd">    recursive : bool, optional</span>
+<span class="sd">        Whether to delete files recursively</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from dstauffman import get_root_dir, delete_pyc</span>
+<span class="sd">    &gt;&gt;&gt; folder = get_root_dir()</span>
+<span class="sd">    &gt;&gt;&gt; delete_pyc(folder, print_progress=False) # doctest: +SKIP</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">_remove_pyc</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">r&quot;&quot;&quot;Does the actual file removal&quot;&quot;&quot;</span>
+        <span class="c"># check for allowable extensions</span>
+        <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">file_ext</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">file_ext</span> <span class="o">==</span> <span class="s">&#39;.pyc&#39;</span><span class="p">:</span>
+            <span class="c"># remove this file</span>
+            <span class="k">if</span> <span class="n">print_progress</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Removing &quot;{}&quot;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">name</span><span class="p">)))</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">name</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">recursive</span><span class="p">:</span>
+        <span class="c"># walk through folder</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+            <span class="c"># go through files</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="c"># remove relevant files</span>
+                <span class="n">_remove_pyc</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c"># list files in folder</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder</span><span class="p">):</span>
+            <span class="c"># check if it&#39;s a file</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">name</span><span class="p">)):</span>
+                <span class="c"># remove relevant files</span>
+                <span class="n">_remove_pyc</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+<span class="c">#%% rename_module</span></div>
+<div class="viewcode-block" id="rename_module"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.rename_module">[docs]</a><span class="k">def</span> <span class="nf">rename_module</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">,</span> <span class="n">print_status</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Renames the given module from the old to new name.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    folder : str</span>
+<span class="sd">        Name of folder to operate within</span>
+<span class="sd">    old_name : str</span>
+<span class="sd">        The original name of the module</span>
+<span class="sd">    new_name : str</span>
+<span class="sd">        The new name of the module</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in October 2015 mostly for Matt Beck, because he doesn&#39;t</span>
+<span class="sd">        like the name of my library.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import rename_module, get_root_dir</span>
+<span class="sd">    &gt;&gt;&gt; import os</span>
+<span class="sd">    &gt;&gt;&gt; folder = os.path.split(get_root_dir())[0]</span>
+<span class="sd">    &gt;&gt;&gt; old_name = &#39;dstauffman&#39;</span>
+<span class="sd">    &gt;&gt;&gt; new_name = &#39;dcs_tools&#39;</span>
+<span class="sd">    &gt;&gt;&gt; rename_module(folder, old_name, new_name) # doctest: +SKIP</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c"># hard-coded values</span>
+    <span class="n">folder_exclusions</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;.git&#39;</span><span class="p">}</span>
+    <span class="n">file_exclusions</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;.pyc&#39;</span><span class="p">}</span>
+    <span class="n">files_to_edit</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;.py&#39;</span><span class="p">,</span> <span class="s">&#39;.rst&#39;</span><span class="p">,</span> <span class="s">&#39;.bat&#39;</span><span class="p">,</span> <span class="s">&#39;.txt&#39;</span><span class="p">}</span>
+    <span class="n">root_ix</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">folder</span><span class="p">)</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">files</span><span class="p">)</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span><span class="p">,</span> <span class="n">old_name</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">skip</span> <span class="ow">in</span> <span class="n">folder_exclusions</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">root</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">skip</span><span class="p">)</span> <span class="ow">or</span> <span class="n">root</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">skip</span> <span class="o">+</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">print_status</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Skipping: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">file_name</span><span class="p">,</span> <span class="n">file_ext</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">this_old_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+                <span class="n">this_new_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder</span> <span class="o">+</span> <span class="n">root</span><span class="p">[</span><span class="n">root_ix</span><span class="p">:]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">),</span> \
+                    <span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">file_ext</span> <span class="ow">in</span> <span class="n">file_exclusions</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">print_status</span><span class="p">:</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Skipping: {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">this_old_file</span><span class="p">))</span>
+                    <span class="k">continue</span> <span class="c"># pragma: no cover (actually covered, optimization issue)</span>
+                <span class="n">new_folder</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">this_new_file</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">new_folder</span><span class="p">):</span>
+                    <span class="n">setup_dir</span><span class="p">(</span><span class="n">new_folder</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">file_ext</span> <span class="ow">in</span> <span class="n">files_to_edit</span><span class="p">:</span>
+                    <span class="c"># edit files</span>
+                    <span class="k">if</span> <span class="n">print_status</span><span class="p">:</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Editing : {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">this_old_file</span><span class="p">))</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s">&#39;     To : {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">this_new_file</span><span class="p">))</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="n">read_text_file</span><span class="p">(</span><span class="n">this_old_file</span><span class="p">)</span>
+                    <span class="n">text</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">)</span>
+                    <span class="n">write_text_file</span><span class="p">(</span><span class="n">this_new_file</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c"># copy file as-is</span>
+                    <span class="k">if</span> <span class="n">print_status</span><span class="p">:</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s">&#39;Copying : {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">this_old_file</span><span class="p">))</span>
+                        <span class="k">print</span><span class="p">(</span><span class="s">&#39;     To : {}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">this_new_file</span><span class="p">))</span>
+                    <span class="n">shutil</span><span class="o">.</span><span class="n">copyfile</span><span class="p">(</span><span class="n">this_old_file</span><span class="p">,</span> <span class="n">this_new_file</span><span class="p">)</span>
+
+<span class="c">#%% modd</span></div>
+<div class="viewcode-block" id="modd"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.modd">[docs]</a><span class="k">def</span> <span class="nf">modd</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Return element-wise remainder of division, except that instead of zero it gives the divisor instead.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    x1 : array_like</span>
+<span class="sd">        Dividend array.</span>
+<span class="sd">    x2 : array_like</span>
+<span class="sd">        Divisor array.</span>
+<span class="sd">    out : ndarray, optional</span>
+<span class="sd">        Array into which the output is placed. Its type is preserved and it must be of the right</span>
+<span class="sd">        shape to hold the output. See doc.ufuncs.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    y : ndarray</span>
+<span class="sd">        The remainder of the quotient x1/x2, element-wise. Returns a scalar if both x1 and x2 are</span>
+<span class="sd">        scalars.  Replaces what would be zeros in the normal modulo command with the divisor instead.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in October 2015.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import modd</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; x1 = np.array([-4, -3, -2, -1, 0, 1, 2, 3, 4])</span>
+<span class="sd">    &gt;&gt;&gt; x2 = 4</span>
+<span class="sd">    &gt;&gt;&gt; y = modd(x1, x2)</span>
+<span class="sd">    &gt;&gt;&gt; print(y)</span>
+<span class="sd">    [4 1 2 3 4 1 2 3 4]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">x1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">out</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="n">y</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">mod</span><span class="p">(</span><span class="n">x1</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">x2</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">out</span><span class="p">)</span> <span class="c"># needed to force add to be inplace operation</span>
 
 <span class="c">#%% Unit test</span></div>
 <span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s">&#39;__main__&#39;</span><span class="p">:</span>
@@ -1088,7 +1226,15 @@
         </div>
       </div>
       <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
 <div id="searchbox" style="display: none" role="search">
   <h3>Quick search</h3>
     <form class="search" action="../../search.html" method="get">
@@ -1106,22 +1252,17 @@
       </div>
       <div class="clearer"></div>
     </div>
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="../../genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="../../py-modindex.html" title="Python Module Index"
-             >modules</a> |</li>
-        <li class="nav-item nav-item-0"><a href="../../index.html">dstauffman 0.1.0 documentation</a> &raquo;</li>
-          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &raquo;</li> 
-      </ul>
+    <div class="footer">
+      &copy;2015, David C. Stauffer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.3.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.6</a>
+      
     </div>
-    <div class="footer" role="contentinfo">
-        &copy; Copyright 2015, David C. Stauffer.
-      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.3.1.
-    </div>
+
+    
+
+    
   </body>
 </html>
