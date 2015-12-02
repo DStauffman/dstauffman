@@ -12,7 +12,13 @@ Notes
 from __future__ import print_function
 from __future__ import division
 import os
-from PIL import Image
+try:
+    from PyQt5 import QtGui, QtCore
+    from PyQt5.QtWidgets import QApplication
+except ImportError: # pragma: no cover
+    from PyQt4 import QtGui, QtCore
+    from PyQt4.QtGui import QApplication
+import sys
 import unittest
 import dstauffman as dcs
 
@@ -214,26 +220,18 @@ class Test_batch_resize(unittest.TestCase):
         with dcs.capture_output():
             dcs.setup_dir(cls.folder)
             dcs.setup_dir(cls.extra)
-        with open(cls.source, 'rb') as file:
-            img = Image.open(file)
-            img.load()
-        new_img = img.resize((cls.size1, cls.size1), Image.ANTIALIAS)
-        new_img.save(os.path.join(cls.folder, cls.name1))
+        img = QtGui.QImage(cls.source)
+        new_img = img.scaled(cls.size1, cls.size1)
+        new_img.save(os.path.join(cls.folder, cls.name1), 'JPG', -1)
         new_img.save(os.path.join(cls.folder, cls.name6))
-        new_img.close()
-        new_img = img.resize((cls.size2, cls.size1), Image.ANTIALIAS)
+        new_img = img.scaled(cls.size2, cls.size1)
         new_img.save(os.path.join(cls.folder, cls.name2))
-        new_img.close()
-        new_img = img.resize((cls.size1, cls.size2), Image.ANTIALIAS)
+        new_img = img.scaled(cls.size1, cls.size2)
         new_img.save(os.path.join(cls.folder, cls.name3))
-        new_img.close()
-        new_img = img.resize((cls.size1, cls.size6), Image.ANTIALIAS)
+        new_img = img.scaled(cls.size1, cls.size6)
         new_img.save(os.path.join(cls.folder, cls.name4))
-        new_img.close()
-        new_img = img.resize((cls.size6, cls.size1), Image.ANTIALIAS)
+        new_img = img.scaled(cls.size6, cls.size1)
         new_img.save(os.path.join(cls.folder, cls.name5))
-        new_img.close()
-        img.close()
 
     def test_resize(self):
         with dcs.capture_output() as (out, _):
@@ -253,31 +251,17 @@ class Test_batch_resize(unittest.TestCase):
                 break
         else:
             self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
-        try:
-            img = Image.open(os.path.join(self.output, self.name1))
-            self.assertEqual(img.size[0], self.size3)
-            self.assertEqual(img.size[1], self.size3)
-            img.close()
-            fact = self.size2 / self.size1
-            img = Image.open(os.path.join(self.output, self.name2))
-            self.assertEqual(img.size[0], int(self.size3*fact))
-            self.assertEqual(img.size[1], self.size3)
-            img.close()
-            img = Image.open(os.path.join(self.output, self.name3))
-            self.assertEqual(img.size[0], self.size3)
-            self.assertEqual(img.size[1], int(self.size3*fact))
-            img.close()
-            img = Image.open(os.path.join(self.output, self.name4))
-            self.assertEqual(img.size[0], self.size3)
-            self.assertEqual(img.size[1], self.size6//4)
-            img.close()
-            img = Image.open(os.path.join(self.output, self.name5))
-            self.assertEqual(img.size[0], self.size6//4)
-            self.assertEqual(img.size[1], self.size3)
-            img.close()
-        except:
-            img.close()
-            raise
+        img = QtGui.QImage(os.path.join(self.output, self.name1))
+        self.assertTrue(img.size(), QtCore.QSize(self.size3, self.size3))
+        fact = self.size2 / self.size1
+        img = QtGui.QImage(os.path.join(self.output, self.name2))
+        self.assertTrue(img.size(), QtCore.QSize(int(self.size3*fact), self.size3))
+        img = QtGui.QImage(os.path.join(self.output, self.name3))
+        self.assertTrue(img.size(), QtCore.QSize(self.size3, int(self.size3*fact)))
+        img = QtGui.QImage(os.path.join(self.output, self.name4))
+        self.assertTrue(img.size(), QtCore.QSize(self.size3, self.size6//4))
+        img = QtGui.QImage(os.path.join(self.output, self.name5))
+        self.assertTrue(img.size(), QtCore.QSize(self.size6//4, self.size3))
 
     def test_no_images(self):
         with dcs.capture_output() as (out, _):
@@ -308,30 +292,16 @@ class Test_batch_resize(unittest.TestCase):
                 break
         else:
             self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
-        try:
-            img = Image.open(os.path.join(self.output, self.name1))
-            self.assertEqual(img.size[0], self.size1)
-            self.assertEqual(img.size[1], self.size1)
-            img.close()
-            img = Image.open(os.path.join(self.output, self.name2))
-            self.assertEqual(img.size[0], self.size2)
-            self.assertEqual(img.size[1], self.size1)
-            img.close()
-            img = Image.open(os.path.join(self.output, self.name3))
-            self.assertEqual(img.size[0], self.size1)
-            self.assertEqual(img.size[1], self.size2)
-            img.close()
-            img = Image.open(os.path.join(self.output, self.name4))
-            self.assertEqual(img.size[0], self.size1)
-            self.assertEqual(img.size[1], self.size6)
-            img.close()
-            img = Image.open(os.path.join(self.output, self.name5))
-            self.assertEqual(img.size[0], self.size6)
-            self.assertEqual(img.size[1], self.size1)
-            img.close()
-        except:
-            img.close()
-            raise
+        img = QtGui.QImage(os.path.join(self.output, self.name1))
+        self.assertTrue(img.size(), QtCore.QSize(self.size1, self.size1))
+        img = QtGui.QImage(os.path.join(self.output, self.name2))
+        self.assertTrue(img.size(), QtCore.QSize(self.size2, self.size1))
+        img = QtGui.QImage(os.path.join(self.output, self.name3))
+        self.assertTrue(img.size(), QtCore.QSize(self.size1, self.size2))
+        img = QtGui.QImage(os.path.join(self.output, self.name4))
+        self.assertTrue(img.size(), QtCore.QSize(self.size1, self.size6))
+        img = QtGui.QImage(os.path.join(self.output, self.name5))
+        self.assertTrue(img.size(), QtCore.QSize(self.size6, self.size1))
 
     def test_upscale(self):
         with dcs.capture_output() as (out, _):
@@ -351,31 +321,17 @@ class Test_batch_resize(unittest.TestCase):
                 break
         else:
             self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
-        try:
-            img = Image.open(os.path.join(self.output, self.name1))
-            self.assertEqual(img.size[0], self.size4)
-            self.assertEqual(img.size[1], self.size4)
-            img.close()
-            fact = self.size2 / self.size1
-            img = Image.open(os.path.join(self.output, self.name2))
-            self.assertEqual(img.size[0], int(self.size4*fact))
-            self.assertEqual(img.size[1], self.size4)
-            img.close()
-            img = Image.open(os.path.join(self.output, self.name3))
-            self.assertEqual(img.size[0], self.size4)
-            self.assertEqual(img.size[1], int(self.size4*fact))
-            img.close()
-            img = Image.open(os.path.join(self.output, self.name4))
-            self.assertEqual(img.size[0], self.size4)
-            self.assertEqual(img.size[1], self.size6*2)
-            img.close()
-            img = Image.open(os.path.join(self.output, self.name5))
-            self.assertEqual(img.size[0], self.size6*2)
-            self.assertEqual(img.size[1], self.size4)
-            img.close()
-        except:
-            img.close()
-            raise
+        img = QtGui.QImage(os.path.join(self.output, self.name1))
+        self.assertTrue(img.size(), QtCore.QSize(self.size4, self.size4))
+        fact = self.size2 / self.size1
+        img = QtGui.QImage(os.path.join(self.output, self.name2))
+        self.assertTrue(img.size(), QtCore.QSize(self.size4*fact, self.size4))
+        img = QtGui.QImage(os.path.join(self.output, self.name3))
+        self.assertTrue(img.size(), QtCore.QSize(self.size4, self.size4*fact))
+        img = QtGui.QImage(os.path.join(self.output, self.name4))
+        self.assertTrue(img.size(), QtCore.QSize(self.size4, self.size6*2))
+        img = QtGui.QImage(os.path.join(self.output, self.name5))
+        self.assertTrue(img.size(), QtCore.QSize(self.size6*2, self.size4))
 
     @classmethod
     def tearDownClass(cls):
@@ -419,26 +375,18 @@ class Test_convert_tif_to_jpg(unittest.TestCase):
         with dcs.capture_output():
             dcs.setup_dir(cls.folder)
             dcs.setup_dir(cls.extra)
-        with open(cls.source, 'rb') as file:
-            img = Image.open(file)
-            img.load()
-        new_img = img.resize((cls.size1, cls.size1), Image.ANTIALIAS)
+        img = QtGui.QImage(cls.source)
+        new_img = img.scaled(cls.size1, cls.size1)
         new_img.save(os.path.join(cls.folder, cls.name1))
         new_img.save(os.path.join(cls.folder, cls.name6))
-        new_img.close()
-        new_img = img.resize((cls.size2, cls.size1), Image.ANTIALIAS)
+        new_img = img.scaled(cls.size2, cls.size1)
         new_img.save(os.path.join(cls.folder, cls.name2))
-        new_img.close()
-        new_img = img.resize((cls.size1, cls.size2), Image.ANTIALIAS)
+        new_img = img.scaled(cls.size1, cls.size2)
         new_img.save(os.path.join(cls.folder, cls.name3))
-        new_img.close()
-        new_img = img.resize((cls.size1, cls.size6), Image.ANTIALIAS)
+        new_img = img.scaled(cls.size1, cls.size6)
         new_img.save(os.path.join(cls.folder, cls.name4))
-        new_img.close()
-        new_img = img.resize((cls.size6, cls.size1), Image.ANTIALIAS)
+        new_img = img.scaled(cls.size6, cls.size1)
         new_img.save(os.path.join(cls.folder, cls.name5))
-        new_img.close()
-        img.close()
 
     def test_resize(self):
         with dcs.capture_output() as (out, _):
@@ -458,31 +406,17 @@ class Test_convert_tif_to_jpg(unittest.TestCase):
                 break
         else:
             self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
-        try:
-            img = Image.open(os.path.join(self.folder, self.name1.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size3)
-            self.assertEqual(img.size[1], self.size3)
-            img.close()
-            fact = self.size2 / self.size1
-            img = Image.open(os.path.join(self.folder, self.name2.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], int(self.size3*fact))
-            self.assertEqual(img.size[1], self.size3)
-            img.close()
-            img = Image.open(os.path.join(self.folder, self.name3.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size3)
-            self.assertEqual(img.size[1], int(self.size3*fact))
-            img.close()
-            img = Image.open(os.path.join(self.folder, self.name4.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size3)
-            self.assertEqual(img.size[1], self.size6//4)
-            img.close()
-            img = Image.open(os.path.join(self.folder, self.name5.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size6//4)
-            self.assertEqual(img.size[1], self.size3)
-            img.close()
-        except:
-            img.close()
-            raise
+        img = QtGui.QImage(os.path.join(self.folder, self.name1.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size3, self.size3))
+        fact = self.size2 / self.size1
+        img = QtGui.QImage(os.path.join(self.folder, self.name2.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(int(self.size3*fact), self.size3))
+        img = QtGui.QImage(os.path.join(self.folder, self.name3.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size3, int(self.size3*fact)))
+        img = QtGui.QImage(os.path.join(self.folder, self.name4.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size3, self.size6//4))
+        img = QtGui.QImage(os.path.join(self.folder, self.name5.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size6//4, self.size3))
 
     def test_no_images(self):
         with dcs.capture_output() as (out, _):
@@ -513,30 +447,16 @@ class Test_convert_tif_to_jpg(unittest.TestCase):
                 break
         else:
             self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
-        try:
-            img = Image.open(os.path.join(self.folder, self.name1.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size1)
-            self.assertEqual(img.size[1], self.size1)
-            img.close()
-            img = Image.open(os.path.join(self.folder, self.name2.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size2)
-            self.assertEqual(img.size[1], self.size1)
-            img.close()
-            img = Image.open(os.path.join(self.folder, self.name3.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size1)
-            self.assertEqual(img.size[1], self.size2)
-            img.close()
-            img = Image.open(os.path.join(self.folder, self.name4.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size1)
-            self.assertEqual(img.size[1], self.size6)
-            img.close()
-            img = Image.open(os.path.join(self.folder, self.name5.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size6)
-            self.assertEqual(img.size[1], self.size1)
-            img.close()
-        except:
-            img.close()
-            raise
+        img = QtGui.QImage(os.path.join(self.folder, self.name1.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size1, self.size1))
+        img = QtGui.QImage(os.path.join(self.folder, self.name2.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size2, self.size1))
+        img = QtGui.QImage(os.path.join(self.folder, self.name3.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size1, self.size2))
+        img = QtGui.QImage(os.path.join(self.folder, self.name4.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size1, self.size6))
+        img = QtGui.QImage(os.path.join(self.folder, self.name5.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size6, self.size1))
 
     def test_upscale(self):
         with dcs.capture_output() as (out, _):
@@ -556,31 +476,17 @@ class Test_convert_tif_to_jpg(unittest.TestCase):
                 break
         else:
             self.assertTrue(False,'File "{}" was not skipped.'.format(self.name6))
-        try:
-            img = Image.open(os.path.join(self.folder, self.name1.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size4)
-            self.assertEqual(img.size[1], self.size4)
-            img.close()
-            fact = self.size2 / self.size1
-            img = Image.open(os.path.join(self.folder, self.name2.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], int(self.size4*fact))
-            self.assertEqual(img.size[1], self.size4)
-            img.close()
-            img = Image.open(os.path.join(self.folder, self.name3.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size4)
-            self.assertEqual(img.size[1], int(self.size4*fact))
-            img.close()
-            img = Image.open(os.path.join(self.folder, self.name4.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size4)
-            self.assertEqual(img.size[1], self.size6*2)
-            img.close()
-            img = Image.open(os.path.join(self.folder, self.name5.replace('.tif','.jpg')))
-            self.assertEqual(img.size[0], self.size6*2)
-            self.assertEqual(img.size[1], self.size4)
-            img.close()
-        except:
-            img.close()
-            raise
+        img = QtGui.QImage(os.path.join(self.folder, self.name1.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size4, self.size4))
+        fact = self.size2 / self.size1
+        img = QtGui.QImage(os.path.join(self.folder, self.name2.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(int(self.size4*fact), self.size4))
+        img = QtGui.QImage(os.path.join(self.folder, self.name3.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size4, int(self.size4*fact)))
+        img = QtGui.QImage(os.path.join(self.folder, self.name4.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size4, self.size6*2))
+        img = QtGui.QImage(os.path.join(self.folder, self.name5.replace('.tif','.jpg')))
+        self.assertTrue(img.size(), QtCore.QSize(self.size6*2, self.size4))
 
     def test_noreplace(self):
         with dcs.capture_output() as (out, _):
@@ -655,4 +561,12 @@ class Test_number_files(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
+    # open a qapp
+    if QApplication.instance() is None:
+        qapp = QApplication(sys.argv)
+    else:
+        qapp = QApplication.instance()
+    # run the tests
     unittest.main(exit=False)
+    # close the qapp
+    qapp.closeAllWindows()

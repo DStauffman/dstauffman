@@ -15,8 +15,14 @@ from __future__ import print_function
 from __future__ import division
 import doctest
 import os
-from PIL import Image
+try:
+    from PyQt5 import QtGui
+    from PyQt5.QtWidgets import QApplication
+except ImportError: # pragma: no cover
+    from PyQt4 import QtGui
+    from PyQt4.QtGui import QApplication
 import shutil
+import sys
 import unittest
 from dstauffman.utils     import setup_dir
 
@@ -336,6 +342,9 @@ def batch_resize(folder, max_width=8192, max_height=8192, \
     -----
     #.  Written by David C. Stauffer in December 2013.
     #.  Updated to optionally not enlarge small images by David C. Stauffer in August 2015.
+    #.  Updated by David C. Stauffer in December 2015 to use QImage instead of PIL (which is no
+        longer maintained).  QImage is more powerful, but harder to use.  This function could now be
+        rewritten to use the better resize options of QImage if desired.
 
     Examples
     --------
@@ -361,14 +370,12 @@ def batch_resize(folder, max_width=8192, max_height=8192, \
             print(' Skipping file   : "{}"'.format(image))
             continue
 
-        # Open and load the image file (slower, but file will always get opened in this routine).
-        with open(image_fullpath, 'rb') as file:
-            img = Image.open(file)
-            img.load()
+        # Open and load the image file
+        img = QtGui.QImage(image_fullpath)
 
         # Get current properties
-        cur_width    = img.size[0]
-        cur_height   = img.size[1]
+        cur_width    = img.size().width()
+        cur_height   = img.size().height()
         aspect_ratio = cur_width / cur_height
 
         # Calucalte desired size
@@ -410,7 +417,7 @@ def batch_resize(folder, max_width=8192, max_height=8192, \
             print(status_msg)
 
         # Resize it.
-        new_img = img.resize((new_width, new_height), Image.ANTIALIAS)
+        new_img = img.scaled(new_width, new_height)
 
         # Create the output folder if necessary
         if not os.path.isdir(os.path.join(folder, 'resized')):
@@ -418,10 +425,6 @@ def batch_resize(folder, max_width=8192, max_height=8192, \
 
         # Save it back to disk.
         new_img.save(os.path.join(folder, 'resized', image))
-
-        # Close objects
-        img.close()
-        new_img.close()
 
     print('Batch processing complete.')
 
@@ -442,6 +445,13 @@ def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, e
         Set to True to replace any existing *.jpg files
     enlarge : bool
         Enlarge smaller images to the max size (True), or only shrink large ones (False)
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in August 2015.
+    #.  Updated by David C. Stauffer in December 2015 to use QImage instead of PIL (which is no
+        longer maintained).  QImage is more powerful, but harder to use.  This function could now be
+        rewritten to use the better resize options of QImage if desired.
 
     Examples
     --------
@@ -475,14 +485,12 @@ def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, e
             print(' Skipping due to pre-existing jpg file: "{}"'.format(image))
             continue
 
-        # Open and load the image file (slower, but file will always get opened in this routine).
-        with open(image_fullpath, 'rb') as file:
-            img = Image.open(file)
-            img.load()
+        # Open and load the image file
+        img = QtGui.QImage(image_fullpath)
 
         # Get current properties
-        cur_width    = img.size[0]
-        cur_height   = img.size[1]
+        cur_width    = img.size().width()
+        cur_height   = img.size().height()
         aspect_ratio = cur_width / cur_height
 
         # Calucalte desired size
@@ -524,15 +532,10 @@ def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, e
             print(status_msg)
 
         # Resize it.
-        new_img = img.resize((new_width, new_height), Image.ANTIALIAS)
+        new_img = img.scaled(new_width, new_height)
 
         # Save it back to disk.
         new_img.save(new_name, "JPEG", quality=80)
-        #img.save(new_name.replace('.jpg','.png'), compress_level=9)
-
-        # Close objects
-        img.close()
-        new_img.close()
 
     print('Batch processing complete.')
 
@@ -605,5 +608,13 @@ def number_files(folder, prefix='Image ', start=1, digits=2, process_extensions=
 
 #%% Unit test
 if __name__ == '__main__':
+    # open a qapp
+    if QApplication.instance() is None:
+        qapp = QApplication(sys.argv)
+    else:
+        qapp = QApplication.instance()
+    # run the tests
     unittest.main(module='tests.test_photos', exit=False)
     doctest.testmod(verbose=False)
+    # close the qapp
+    qapp.closeAllWindows()
