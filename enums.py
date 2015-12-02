@@ -80,7 +80,8 @@ class IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
 #%% Functions
-def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
+#def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1): # TODO: for Python 3 (better!)
+def dist_enum_and_mons(num, distribution, prng, max_months=None, start_num=1, alpha=1, beta=1): # for Python 2.x
     r"""
     Creates a distribution for an enumerated state with a duration (such as TB status).
 
