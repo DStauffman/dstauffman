@@ -12,8 +12,6 @@ Notes
 # pylint: disable=E1101, C0301, C0103
 
 #%% Imports
-from __future__ import print_function
-from __future__ import division
 from contextlib import contextmanager
 import doctest
 import inspect

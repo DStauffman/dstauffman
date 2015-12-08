@@ -8,10 +8,6 @@ Notes
 """
 # pylint: disable=C0326
 
-#%% Imports
-from __future__ import print_function
-from __future__ import division
-
 #%% Constants
 # genders, divisions and possible bale positions
 GENDERS   = ['Female', 'Male']

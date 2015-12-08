@@ -9,8 +9,6 @@ Notes
 """
 
 #%% Imports
-from __future__ import print_function
-from __future__ import division
 from enum import unique
 import numpy as np
 import unittest

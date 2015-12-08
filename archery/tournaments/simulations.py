@@ -10,8 +10,6 @@ Notes
 
 #%% Imports
 # normal imports
-from __future__ import print_function
-from __future__ import division
 import numpy as np
 # model imports
 from dstauffman.archery.tournaments.constants import \

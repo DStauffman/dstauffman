@@ -10,9 +10,6 @@ Notes
 # pylint: disable=E1101, C0326, C0103
 
 #%% Imports
-# backwards compatibility
-from __future__ import print_function
-from __future__ import division
 # regular imports
 import doctest
 import math

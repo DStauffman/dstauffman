@@ -11,8 +11,6 @@ Notes
 # pylint: disable=C0103, C0326
 
 #%% Imports
-from __future__ import print_function
-from __future__ import division
 import os
 import ghap as model
 import dstauffman as dcs

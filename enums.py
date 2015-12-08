@@ -9,11 +9,8 @@ Notes
 """
 
 #%% Imports
-from __future__ import print_function
-from __future__ import division
 from enum import Enum, EnumMeta, _is_dunder
 import numpy as np
-from six import with_metaclass
 import re
 import unittest
 
@@ -37,8 +34,7 @@ class _EnumMetaPlus(EnumMeta):
             return cls._member_map_[name]
         except KeyError:
             text = '"{}" does not have an attribute of "{}"'.format(cls.__name__,name)
-            raise AttributeError(text) # for Python 2.x
-            # raise AttributeError(text) from None # Future Python v3 only option
+            raise AttributeError(text) from None
     def list_of_names(self):
         r"""
         Returns a list of all the names within the enumerator.
@@ -72,7 +68,7 @@ class _EnumMetaPlus(EnumMeta):
         """
         return max(self.list_of_values())
 
-class IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
+class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
     r"""
     Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str.
     """
@@ -80,8 +76,7 @@ class IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
 #%% Functions
-#def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1): # TODO: for Python 3 (better!)
-def dist_enum_and_mons(num, distribution, prng, max_months=None, start_num=1, alpha=1, beta=1): # for Python 2.x
+def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
     r"""
     Creates a distribution for an enumerated state with a duration (such as TB status).
 

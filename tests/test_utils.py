@@ -9,8 +9,6 @@ Notes
 """
 
 #%% Imports
-from __future__ import print_function
-from __future__ import division
 import copy
 from datetime import datetime
 import numpy as np
@@ -224,11 +222,6 @@ class Test_setup_dir(unittest.TestCase):
             if os.path.isdir(self.folder):
                 os.rmdir(self.folder)
         try:
-            _clean(self)
-        except OSError:
-            # needs to come first for Python v2.7, as PermissionError doesn't exist
-            time.sleep(1)
-            # retry
             _clean(self)
         except PermissionError:
             # pause to let Windows catch up and close files

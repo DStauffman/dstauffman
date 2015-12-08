@@ -74,9 +74,6 @@ Level 5 [HARD]: Compute the longest sequence of moves to complete Level 3 withou
 # pylint: disable=C0326, C0103, C0301, E1101
 
 #%% Imports
-# backwards compatibility with v2.7
-from __future__ import print_function
-from __future__ import division
 # regular imports
 import doctest
 from enum import unique, IntEnum
@@ -840,7 +837,7 @@ def _sort_best_moves(board, moves, costs, transports, start_x, start_y):
     >>> start_y = 0
     >>> sorted_moves = _sort_best_moves(board, moves, costs, transports, start_x, start_y)
     >>> print(sorted_moves)
-    [-1, -4, -2, 2, 4, 1]
+    [2]
 
     """
     # initialize the costs
@@ -848,11 +845,12 @@ def _sort_best_moves(board, moves, costs, transports, start_x, start_y):
     pred_costs.fill(np.nan)
     for (ix, move) in enumerate(moves):
         (_, _, (new_x, new_y)) = _get_new_position(start_x, start_y, move, transports)
-        try:
-            this_cost = costs[new_x, new_y]
-            pred_costs[ix] = this_cost
-        except IndexError:
-            pass
+        if new_x >= 0 and new_y >= 0:
+            try:
+                this_cost = costs[new_x, new_y]
+                pred_costs[ix] = this_cost
+            except IndexError:
+                pass
     sorted_ix = pred_costs.argsort()
     sorted_moves = [moves[i] for i in sorted_ix if not np.isnan(pred_costs[i])]
     return sorted_moves
@@ -1229,13 +1227,13 @@ def _solve_next_move(board, data, start_x, start_y):
         else:
             # determine if move was to a previously visited square of worse cost than another sequence
             if is_repeat or data['current_cost'] + abs(cost) >= data['best_costs'][new_x, new_y]:
-                    if LOGGING: # pragma: no cover
-                        print(' - worse repeat')
-                    # reject move and re-establish the visited state
-                    _undo_move(board, this_move, data['original_board'], data['transports'], new_x, new_y)
-                    if cost > 0 and is_repeat:
-                        board[new_x, new_y] = Piece2['visited']
-                    continue # pragma: no cover - Actually covered, error in coverage tool
+                if LOGGING: # pragma: no cover
+                    print(' - worse repeat')
+                # reject move and re-establish the visited state
+                _undo_move(board, this_move, data['original_board'], data['transports'], new_x, new_y)
+                if cost > 0 and is_repeat:
+                    board[new_x, new_y] = Piece2['visited']
+                continue # pragma: no cover - Actually covered, error in coverage tool
             # optional logging for debugging
             if LOGGING: # pragma: no cover
                 if cost < 0:

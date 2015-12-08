@@ -9,8 +9,6 @@ Notes
 # pylint: disable=E1101, C0103
 
 #%% Imports
-from __future__ import print_function
-from __future__ import division
 import numpy as np
 import dstauffman as dcs
 

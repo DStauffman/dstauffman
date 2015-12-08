@@ -9,8 +9,6 @@ Notes
 """
 
 #%% Imports
-from __future__ import print_function
-from __future__ import division
 import numpy as np
 import unittest
 from dstauffman import capture_output
@@ -455,17 +453,29 @@ class Test__sort_best_moves(unittest.TestCase):
         Nominal
     """
     def setUp(self):
-        self.board = np.zeros((2,5), dtype=int)
-        self.board[0, 0] = knight.Piece.current
-        self.board[0, 4] = knight.Piece.final
+        self.board = np.zeros((5,8), dtype=int)
+        self.board[2, 2] = knight.Piece.current
+        self.board[4, 7] = knight.Piece.final
         self.moves = knight.MOVES
         self.costs = knight._predict_cost(self.board)
         self.transports = None
-        self.start_x = 0
-        self.start_y = 0
-        self.sorted_moves = np.array([-1, -4, -2, 2, 4, 1], dtype=int)
+        self.start_x = 2
+        self.start_y = 2
+        self.sorted_moves = np.array([2, -3, -2, 3, -4, 4, -1, 1], dtype=int)
 
     def test_nominal(self):
+        sorted_moves = knight._sort_best_moves(self.board, self.moves, self.costs, self.transports, \
+            self.start_x, self.start_y)
+        np.testing.assert_array_equal(sorted_moves, self.sorted_moves)
+
+    def test_small_board(self):
+        self.board = np.zeros((2,5), dtype=int)
+        self.board[0, 0] = knight.Piece.current
+        self.board[0, 4] = knight.Piece.final
+        self.costs = knight._predict_cost(self.board)
+        self.start_x = 0
+        self.start_y = 0
+        self.sorted_moves = np.array([2], dtype=int)
         sorted_moves = knight._sort_best_moves(self.board, self.moves, self.costs, self.transports, \
             self.start_x, self.start_y)
         np.testing.assert_array_equal(sorted_moves, self.sorted_moves)

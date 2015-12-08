@@ -11,8 +11,6 @@ Notes
 
 #%% Imports
 # normal imports
-from __future__ import print_function
-from __future__ import division
 import math
 import os
 # model imports

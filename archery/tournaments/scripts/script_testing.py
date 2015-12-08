@@ -9,8 +9,6 @@ Created on Mon Dec 15 13:21:07 2014
 
 #%% Imports
 # normal imports
-from __future__ import print_function
-from __future__ import division
 import os
 # model imports
 import dstauffman as dcs
