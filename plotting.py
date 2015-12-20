@@ -314,8 +314,8 @@ def get_axes_scales(type_):
     return (scale, units)
 
 #%% Functions - plot_time_history
-def plot_time_history(time, data, description='', type_='unity', opts=None, plot_indiv=True, \
-    truth_time=None, truth_data=None, plot_as_diffs=False, colormap=None):
+def plot_time_history(time, data, description='', type_='unity', opts=None, *, plot_indiv=True, \
+    truth_time=None, truth_data=None, plot_as_diffs=False, colormap=None, second_y_scale=None):
     r"""
     Plots the given data channel versus time, with a generic description argument.
 
@@ -339,6 +339,8 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, plot
         Truth data to plot
     plot_as_diffs : bool, optional, default is False
         Plot each entry in results against the other ones
+    second_y_scale : float, optional
+        Multiplication scale factor to use to display on a secondary Y axis
 
     Returns
     -------
@@ -347,7 +349,8 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, plot
 
     Notes
     -----
-    #.  Written by David C. Stauffer in Mar 2015.
+    #.  Written by David C. Stauffer in March 2015.
+    #.  Updated by David C. Stauffer in December 2015 to include an optional secondary Y axis.
 
     Examples
     --------
@@ -438,6 +441,12 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, plot
     plt.grid(True)
     # set the colormap (only applies to lines that don't specify a default color)
     plt.set_cmap(colormap)
+    # optionally add second Y axis
+    if second_y_scale is not None:
+        ax2 = ax.twinx()
+        ax2.set_ylim(np.multiply(second_y_scale,ax.get_ylim()))
+        if type_ == 'population':
+            ax2.set_ylabel('Actual Population [#]')
     # Setup plots
     setup_plots(fig, opts, 'time')
     return fig
@@ -583,8 +592,8 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
     return fig
 
 #%% Functions - plot_multiline_history
-def plot_multiline_history(time, data, type_='unity', label='', opts=None, legend=None, \
-        colormap=None):
+def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, legend=None, \
+        colormap=None, second_y_scale=None):
     r"""
     Plots multiple metrics over time.
 
@@ -604,6 +613,8 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, legen
         Names to use for each channel of data
     colormap : str, optional
         Name of colormap to use for plot
+    second_y_scale : float, optional
+        Multiplication scale factor to use to display on a secondary Y axis
 
     Returns
     -------
@@ -671,6 +682,14 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, legen
     plt.title(description + ' vs. Time')
     plt.legend()
     plt.grid(True)
+
+    # optionally add second Y axis
+    if second_y_scale is not None:
+        ax2 = ax.twinx()
+        ax2.set_ylim(np.multiply(second_y_scale,ax.get_ylim()))
+        if type_ == 'population':
+            ax2.set_ylabel('Actual Population [#]')
+
     # setup plots
     setup_plots(fig, opts, 'time')
     return fig
