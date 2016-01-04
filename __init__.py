@@ -22,12 +22,14 @@ from .photos    import find_missing_nums, find_unexpected_ext, rename_old_picasa
                            convert_tif_to_jpg, number_files
 from .quat      import qrot, quat_angle_diff, quat_from_euler, quat_interp, quat_inv, quat_mult, \
                        quat_norm, quat_prop, quat_times_vector, quat_to_dcm, quat_to_euler
+from .stats     import convert_annual_to_monthly_probability, \
+                           convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
+                           rate_to_prob, month_prob_mult_ratio, combine_sets
 from .utils     import rms, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
                            make_python_init, get_python_definitions, read_text_file, \
-                           write_text_file, convert_annual_to_monthly_probability, \
-                           convert_monthly_to_annual_probability, ca2mp, cm2ap, get_root_dir, \
-                           get_tests_dir, get_data_dir, get_images_dir, capture_output, unit, \
-                           combine_sets, reload_package, delete_pyc, rename_module, modd
+                           write_text_file, get_root_dir, get_tests_dir, get_data_dir, \
+                           get_images_dir, capture_output, unit, reload_package, delete_pyc, \
+                           rename_module, modd
 
 #%% Unit test
 if __name__ == '__main__':
