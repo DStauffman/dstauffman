@@ -916,7 +916,8 @@ def wrapper(self):
     self.board_canvas.draw()
 
     # update game stats on GUI
-    _update_game_stats(self, results=list(x.winner for x in game_hist)) # TODO: make better?
+    results = [x.winner for x in game_hist]
+    _update_game_stats(self, results=np.array(results)) # TODO: make better?
     self.update()
 
 #%% Unit Test
