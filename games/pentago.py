@@ -898,8 +898,6 @@ def wrapper(self):
 
     # draw the board
     _plot_board(self.board_axes)
-    #self.board_axes.set_axis_off() # Turn this off for debugging
-    self.board_canvas.draw()
 
     # check for win
     (winner, win_mask) = _check_for_win(board)
@@ -913,8 +911,13 @@ def wrapper(self):
     # plot possible winning moves
     # TODO:
 
+    # redraw with the final board
+    #self.board_axes.set_axis_off() # Turn this off for debugging
+    self.board_canvas.draw()
+
     # update game stats on GUI
     _update_game_stats(self, results=list(x.winner for x in game_hist)) # TODO: make better?
+    self.update()
 
 #%% Unit Test
 def _main():
