@@ -232,8 +232,7 @@ def _board_to_costs(board):
      [      1       1 1000000]]
 
     """
-    costs = np.empty(board.shape, dtype=int)
-    costs.fill(COST_DICT['invalid'])
+    costs = COST_DICT['invalid'] * np.ones(board.shape, dtype=int)
     for i in range(costs.shape[0]):
         for j in range(costs.shape[1]):
             this_piece = board[i, j]
@@ -841,7 +840,7 @@ def _sort_best_moves(board, moves, costs, transports, start_x, start_y):
 
     """
     # initialize the costs
-    pred_costs = np.empty(len(moves))
+    pred_costs = np.nan * np.ones(len(moves))
     pred_costs.fill(np.nan)
     for (ix, move) in enumerate(moves):
         (_, _, (new_x, new_y)) = _get_new_position(start_x, start_y, move, transports)

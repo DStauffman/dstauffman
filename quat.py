@@ -392,8 +392,7 @@ def quat_interp(time, quat, ti, inclusive=True):
             raise
 
     # initialize output
-    qout  = np.empty((QUAT_SIZE, num))
-    qout.fill(np.nan)
+    qout  = np.nan * np.ones((QUAT_SIZE, num))
 
     # Simple cases
     if num == 0:
@@ -429,8 +428,7 @@ def quat_interp(time, quat, ti, inclusive=True):
 
     # Calculations
     # find index within time to surround ti, accounting for the end of the vector
-    index = np.empty(num, dtype=int)
-    index.fill(INT_TOKEN)
+    index = INT_TOKEN * np.ones(num, dtype=int)
     for i in np.nonzero(ix_calc)[0]:
         temp = np.nonzero(ti[i] <= time)[0]
         if temp[0] != len(time)-1:
