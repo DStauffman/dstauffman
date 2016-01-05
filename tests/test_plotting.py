@@ -18,7 +18,7 @@ import dstauffman as dcs
 try:
     from PyQt5.QtTest import QTest
     from PyQt5.QtCore import Qt
-except ImportError: # pragma: no cover
+except ImportError:
     from PyQt4.QtTest import QTest
     from PyQt4.QtCore import Qt
 
@@ -217,6 +217,7 @@ class Test_plot_time_history(unittest.TestCase):
         self.truth_data = np.cos(self.time)
         self.truth_matrix = np.column_stack((self.truth_data-0.1, self.truth_data, self.truth_data+0.1))
         self.data_matrix = np.column_stack((self.data, self.truth_data))
+        self.second_y_scale = 1000000
 
     def test_normal(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_)
@@ -256,6 +257,14 @@ class Test_plot_time_history(unittest.TestCase):
     def test_array_data2(self):
         data = np.column_stack((self.data, self.data))
         self.fig = dcs.plot_time_history(self.time, data, self.description, self.type_, plot_as_diffs=True)
+        
+    def test_second_y_scale1(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+            second_y_scale=self.second_y_scale)
+        
+    def test_second_y_scale2(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='percentage', \
+            second_y_scale=self.second_y_scale)
 
     def tearDown(self):
         if hasattr(self,'fig'):
@@ -376,6 +385,7 @@ class Test_plot_multiline_history(unittest.TestCase):
         self.legend   = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
         self.colormap = 'seismic'
         self.figs     = []
+        self.second_y_scale = 1000000
 
     def test_nominal(self):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, type_=self.type_, \
@@ -409,6 +419,14 @@ class Test_plot_multiline_history(unittest.TestCase):
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):
             self.figs.append(dcs.plot_multiline_history(self.time, self.data, legend=self.legend[:-1]))
+        
+    def test_second_y_scale1(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, type_='population', \
+            second_y_scale=self.second_y_scale))
+        
+    def test_second_y_scale2(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, \
+            second_y_scale=self.second_y_scale))
 
     def tearDown(self):
         if self.figs:

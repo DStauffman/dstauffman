@@ -16,7 +16,7 @@ import os
 import pickle
 import sys
 import unittest
-try:
+try: # pragma: no cover
     from PyQt5 import QtGui, QtCore
     from PyQt5.QtWidgets import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas

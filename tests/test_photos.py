@@ -13,7 +13,7 @@ import os
 try:
     from PyQt5 import QtGui, QtCore
     from PyQt5.QtWidgets import QApplication
-except ImportError: # pragma: no cover
+except ImportError:
     from PyQt4 import QtGui, QtCore
     from PyQt4.QtGui import QApplication
 import sys

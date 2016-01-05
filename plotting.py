@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 from matplotlib.patches import Rectangle
-try:
+try: # pragma: no cover
     from PyQt5.QtWidgets import QApplication, QPushButton
     from PyQt5.QtGui import QIcon
     from PyQt5.QtCore import QSize

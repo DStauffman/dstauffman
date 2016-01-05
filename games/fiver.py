@@ -328,13 +328,13 @@ def _blobbing(board):
             # see if this is an empty piece
             if board[i, j]:
                 # get the north and west neighbors
-                try:
+                if i > 0:
                     north = labels[i-1, j]
-                except IndexError:
+                else:
                     north = 0
-                try:
+                if j > 0:
                     west = labels[i, j-1]
-                except IndexError:
+                else:
                     west = 0
                 # check one of four conditions
                 if north > 0:

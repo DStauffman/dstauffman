@@ -13,7 +13,7 @@ Notes
 #%% Imports
 import doctest
 import os
-try:
+try: # pragma: no cover
     from PyQt5 import QtGui
     from PyQt5.QtWidgets import QApplication
 except ImportError: # pragma: no cover
