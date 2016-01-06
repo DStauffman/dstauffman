@@ -381,7 +381,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         # calculate RMS
         rms_data = rms(scale*data, axis=1, ignore_nans=True)
         # build colormap
-        cm = ColorMap(colormap, num_colors=data.shape[0])
+        cm = ColorMap(colormap, num_colors=data.shape[1])
     else:
         # calculate the mean and std of data
         if data.ndim == 1:
