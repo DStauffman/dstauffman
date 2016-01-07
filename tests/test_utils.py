@@ -530,82 +530,6 @@ class Test_write_text_file(unittest.TestCase):
     def tearDownClass(cls):
         os.remove(cls.filepath)
 
-#%% convert_annual_to_monthly_probability
-class Test_convert_annual_to_monthly_probability(unittest.TestCase):
-    r"""
-    Tests the convert_annual_to_monthly_probability function with these cases:
-        convert a vector from annual to monthly
-        convert a scalar
-        convert a number less than zero (raise error)
-        convert a number greater than one (raise error)
-        convert a vector from annual to monthly and then back
-    """
-    def setUp(self):
-        self.monthly = np.arange(10)/1000.
-        self.annuals = self.monthly
-        for i in range(1, 12):
-            self.annuals = 1 - (1 - self.annuals) * (1 - self.monthly)
-
-    def test_conversion(self):
-        monthly = dcs.convert_annual_to_monthly_probability(self.annuals)
-        np.testing.assert_almost_equal(monthly, self.monthly)
-
-    def test_scalar(self):
-        monthly = dcs.convert_annual_to_monthly_probability(0)
-        self.assertIn(monthly, self.monthly)
-
-    def test_lt_zero(self):
-        with self.assertRaises(ValueError):
-            dcs.convert_annual_to_monthly_probability(np.array([0., 0.5, -1.]))
-
-    def test_gt_one(self):
-        with self.assertRaises(ValueError):
-            dcs.convert_annual_to_monthly_probability(np.array([0., 0.5, 1.5]))
-
-    def test_circular(self):
-        monthly = dcs.convert_annual_to_monthly_probability(self.annuals)
-        np.testing.assert_almost_equal(monthly, self.monthly)
-        annual = dcs.convert_monthly_to_annual_probability(monthly)
-        np.testing.assert_almost_equal(annual, self.annuals)
-
-#%% convert_monthly_to_annual_probability
-class Test_convert_monthly_to_annual_probability(unittest.TestCase):
-    r"""
-    Tests the convert_annual_to_monthly_probability function with these cases:
-        convert a vector from monthly to annual
-        convert a scalar
-        convert a number less than zero (raise error)
-        convert a number greater than one (raise error)
-        convert a vector from monthly to annual and then back
-    """
-    def setUp(self):
-        self.monthly = np.arange(10)/1000.
-        self.annuals = self.monthly
-        for i in range(1, 12):
-            self.annuals = 1 - (1 - self.annuals) * (1 - self.monthly)
-
-    def test_conversion(self):
-        annual = dcs.convert_monthly_to_annual_probability(self.monthly)
-        np.testing.assert_almost_equal(annual, self.annuals)
-
-    def test_scalar(self):
-        annual = dcs.convert_monthly_to_annual_probability(0)
-        self.assertIn(annual, self.annuals)
-
-    def test_lt_zero(self):
-        with self.assertRaises(ValueError):
-            dcs.convert_monthly_to_annual_probability(np.array([0., 0.5, -1.]))
-
-    def test_gt_one(self):
-        with self.assertRaises(ValueError):
-            dcs.convert_monthly_to_annual_probability(np.array([0., 0.5, 1.5]))
-
-    def test_circular(self):
-        annual = dcs.convert_monthly_to_annual_probability(self.monthly)
-        np.testing.assert_almost_equal(annual, self.annuals)
-        monthly = dcs.convert_annual_to_monthly_probability(annual)
-        np.testing.assert_almost_equal(monthly, self.monthly)
-
 #%% get_root_dir
 class Test_get_root_dir(unittest.TestCase):
     r"""
@@ -645,6 +569,16 @@ class Test_get_images_dir(unittest.TestCase):
     def test_function(self):
         folder = dcs.get_images_dir()
         self.assertEqual(folder, os.path.join(dcs.get_root_dir(), 'images'))
+
+#%% get_output_dir
+class Test_get_output_dir(unittest.TestCase):
+    r"""
+    Tests the get_output_dir function with these cases:
+        call the function
+    """
+    def test_function(self):
+        folder = dcs.get_output_dir()
+        self.assertEqual(folder, os.path.join(dcs.get_root_dir(), 'results'))
 
 #%% capture_output
 class Test_capture_output(unittest.TestCase):
@@ -876,7 +810,7 @@ class Test_rename_module(unittest.TestCase):
         if not os.path.isdir(self.git_dir):
             os.mkdir(self.git_dir)
         dcs.write_text_file(os.path.join(self.old_dir, '__init__.py'),'# Init file for "temp1".\n')
-        dcs.write_text_file(os.path.join(self.old_dir, '__init__.pyc'),'')        
+        dcs.write_text_file(os.path.join(self.old_dir, '__init__.pyc'),'')
         dcs.write_text_file(os.path.join(self.old_dir, '__init__.misc'),'# Misc file for "temp1".\n')
 
     def test_nominal(self):
@@ -904,7 +838,7 @@ class Test_rename_module(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.new_dir, '__init__.py')))
         self.assertFalse(os.path.isfile(os.path.join(self.new_dir, '__init__.pyc')))
         self.assertTrue(os.path.isfile(os.path.join(self.new_dir, '__init__.misc')))
-        
+
     def test_no_printing(self):
         with dcs.capture_output() as (out, _):
             dcs.rename_module(self.folder, self.old_name, self.new_name, print_status=False)
@@ -915,7 +849,7 @@ class Test_rename_module(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.new_dir, '__init__.py')))
         self.assertFalse(os.path.isfile(os.path.join(self.new_dir, '__init__.pyc')))
         self.assertTrue(os.path.isfile(os.path.join(self.new_dir, '__init__.misc')))
-        
+
     def tearDown(self):
         for this_file in self.files:
             if os.path.isfile(os.path.join(self.old_dir, this_file)):

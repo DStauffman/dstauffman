@@ -28,8 +28,8 @@ from .stats     import convert_annual_to_monthly_probability, \
 from .utils     import rms, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
                            make_python_init, get_python_definitions, read_text_file, \
                            write_text_file, get_root_dir, get_tests_dir, get_data_dir, \
-                           get_images_dir, capture_output, unit, reload_package, delete_pyc, \
-                           rename_module, modd
+                           get_images_dir, get_output_dir, capture_output, unit, reload_package, \
+                           delete_pyc, rename_module, modd
 
 #%% Unit test
 if __name__ == '__main__':

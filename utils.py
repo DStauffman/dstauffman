@@ -701,6 +701,31 @@ def get_images_dir():
     folder = os.path.join(get_root_dir(), 'images')
     return folder
 
+#%% Functions - get_output_dir
+def get_output_dir():
+    r"""
+    Returns the default output folder location.
+
+    Returns
+    -------
+    folder : str
+        Location of the default folder for storing the code data.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in January 2016.
+
+    Examples
+    --------
+
+    >>> from dstauffman import get_output_dir
+    >>> folder = get_output_dir()
+
+    """
+    # this folder is the 'images' subfolder
+    folder = os.path.join(get_root_dir(), 'results')
+    return folder
+
 #%% Functions - capture_output
 @contextmanager
 def capture_output():
