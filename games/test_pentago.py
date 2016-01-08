@@ -16,52 +16,6 @@ import dstauffman.games.pentago as pentago
 #%% Setup
 pentago.LOGGING = False
 
-#%% Move
-pass
-
-#%% GameStats
-pass
-
-#%% PentagoGui
-pass
-
-#%% _mouse_click_callback
-pass
-
-#%% _calc_cur_move
-class Test__calc_cur_move(unittest.TestCase):
-    r"""
-    Tests the _board_to_costs function with the following cases:
-        Odd game, odd move
-        Odd game, even move
-        Even game, odd move
-        Even game, even move
-    """
-    def setUp(self):
-        self.odd_num  = 3
-        self.even_num = 4
-        self.white = 1
-        self.black = -1
-
-    def test_odd_odd(self):
-        move = pentago._calc_cur_move(self.odd_num, self.odd_num)
-        self.assertEqual(move, self.white)
-
-    def test_odd_even(self):
-        move = pentago._calc_cur_move(self.odd_num, self.even_num)
-        self.assertEqual(move, self.black)
-
-    def test_even_odd(self):
-        move = pentago._calc_cur_move(self.even_num, self.odd_num)
-        self.assertEqual(move, self.black)
-
-    def test_even_even(self):
-        move = pentago._calc_cur_move(self.even_num, self.even_num)
-        self.assertEqual(move, self.white)
-
-#%% _execute_move
-pass
-
 #%% _rotate_board
 class Test__rotate_board(unittest.TestCase):
     r"""
@@ -126,6 +80,91 @@ class Test__rotate_board(unittest.TestCase):
         expected_board[3:6, 3:6] = self.right + 21
         pentago._rotate_board(self.board, quadrant=4, direction=1)
         np.testing.assert_array_equal(self.board, expected_board)
+
+    def test_large_boards(self):
+        board1 = self.board.copy()
+        board1[0:3, 0:3] = self.left
+        board2 = self.board.copy()
+        board2[0:3, 0:3] = self.right
+        board3 = self.board.copy()
+        board3[0:3, 3:6] = self.left + 3
+        board4 = self.board.copy()
+        board4[0:3, 3:6] = self.right + 3
+        board5 = self.board.copy()
+        board5[3:6, 0:3] = self.left + 18
+        board6 = self.board.copy()
+        board6[3:6, 0:3] = self.right + 18
+        board7 = self.board.copy()
+        board7[3:6, 3:6] = self.left + 21
+        board8 = self.board.copy()
+        board8[3:6, 3:6] = self.right + 21
+        expected_board = np.vstack((board1.ravel(), board2.ravel(), board3.ravel(), board4.ravel(), \
+            board5.ravel(), board6.ravel(), board7.ravel(), board8.ravel())).T
+        temp_board = np.ones((1, 8), dtype=int) * np.expand_dims(self.board.ravel(), axis=1)
+        quad_dirs = [(1, -1), (1, 1), (2, -1), (2, 1), (3, -1), (3, 1), (4, -1), (4, 1)]
+        for (ix, (quad, dir_)) in enumerate(quad_dirs):
+            temp = temp_board.copy()
+            pentago._rotate_board(temp, quadrant=quad, direction=dir_)
+            np.testing.assert_array_equal(temp[:, ix], expected_board[:, ix], 'Quad {}, Dir {}, ix {}'.format(quad, dir_, ix))
+
+    def test_not_inplace(self):
+        expected_board = self.board.copy()
+        expected_board[0:3, 0:3] = self.left
+        temp1 = np.expand_dims(self.board.ravel(), axis=1)
+        temp2 = self.board.copy().ravel()
+        new_board = pentago._rotate_board(temp1, quadrant=1, direction=-1, inplace=False)
+        np.testing.assert_array_equal(np.reshape(new_board, (6,6)), expected_board)
+        np.testing.assert_array_equal(temp1, temp2[:, np.newaxis])
+
+    def test_bad_not_inplace(self):
+        with self.assertRaises(AssertionError):
+            pentago._rotate_board(self.board, quadrant=1, direction=-1, inplace=False)
+
+#%% Move
+pass
+
+#%% GameStats
+pass
+
+#%% PentagoGui
+pass
+
+#%% _mouse_click_callback
+pass
+
+#%% _calc_cur_move
+class Test__calc_cur_move(unittest.TestCase):
+    r"""
+    Tests the _board_to_costs function with the following cases:
+        Odd game, odd move
+        Odd game, even move
+        Even game, odd move
+        Even game, even move
+    """
+    def setUp(self):
+        self.odd_num  = 3
+        self.even_num = 4
+        self.white = 1
+        self.black = -1
+
+    def test_odd_odd(self):
+        move = pentago._calc_cur_move(self.odd_num, self.odd_num)
+        self.assertEqual(move, self.white)
+
+    def test_odd_even(self):
+        move = pentago._calc_cur_move(self.odd_num, self.even_num)
+        self.assertEqual(move, self.black)
+
+    def test_even_odd(self):
+        move = pentago._calc_cur_move(self.even_num, self.odd_num)
+        self.assertEqual(move, self.black)
+
+    def test_even_even(self):
+        move = pentago._calc_cur_move(self.even_num, self.even_num)
+        self.assertEqual(move, self.white)
+
+#%% _execute_move
+pass
 
 #%% _check_for_win
 class Test__check_for_win(unittest.TestCase):
@@ -211,6 +250,26 @@ class Test__check_for_win(unittest.TestCase):
         (winner, win_mask) = pentago._check_for_win(self.board)
         self.assertEqual(winner, pentago.PLAYER['draw'])
         np.testing.assert_array_equal(win_mask, self.win_mask)
+
+#%% _find_moves
+@unittest.skip('Not yet fully implemented.')
+class Test__find_moves(unittest.TestCase):
+    r"""
+    Tests the _find_moves function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.position = np.reshape(np.hstack((np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1]), np.zeros(24, dtype=int))), (6, 6))
+        self.white_moves = set((pentago.Move(2, 3, 1, 1, 5), pentago.Move(3, 2, 2, 1, 5), pentago.Move(3, 2, 4, 1, 5), \
+            pentago.Move(2, 1, 1, -1, 5), pentago.Move(3, 2, 2, -1, 5), pentago.Move(3, 2, 4, -1, 5)))
+        self.black_moves = []
+
+    def test_nominal(self):
+        (white_moves, black_moves) = pentago._find_moves(self.position)
+        white_set = set((this_move for this_move in white_moves))
+        white_set.add(pentago.Move(2, 3, 1, 1, 0))
+        np.testing.assert_equal(white_set, self.white_moves)
+        self.assertTrue(len(black_moves) == 0)
 
 #%% _update_game_stats
 pass

@@ -9,7 +9,8 @@ Notes
 
 #%% Imports
 import doctest
-from matplotlib.figure import Figure, SubplotParams
+from matplotlib.pyplot import Axes
+from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle, Circle, Wedge
 import numpy as np
 import os
@@ -24,7 +25,7 @@ except ImportError: # pragma: no cover
     from PyQt4 import QtGui, QtCore
     from PyQt4.QtGui import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from dstauffman     import get_images_dir, get_data_dir, Frozen
+from dstauffman     import get_images_dir, get_output_dir, Frozen, modd
 
 #%% Constants
 # color definitions
@@ -70,6 +71,9 @@ OPTIONS['load_previous_game'] = 'Yes' # from ['Yes','No','Ask']
 OPTIONS['name_white'] = 'Player 1'
 OPTIONS['name_black'] = 'Player 2'
 OPTIONS['plot_winning_moves'] = True
+
+# TODO: this might be temporary
+INT_TOKEN = -101
 
 # all possible winning combinations
 WIN = np.array([\
@@ -119,19 +123,154 @@ WIN = np.array([\
 # boolean flag for whether to log extra information or not
 LOGGING = True
 
+#%% _rotate_board
+def _rotate_board(board, quadrant, direction, inplace=True):
+    r"""
+    Rotates the specified board position.
+
+    Notes
+    -----
+    #.  Modifies board in-place.
+    """
+    # determine if 6x6 board or 36xN
+    (r, c) = board.shape
+
+    if r == 6 and c == 6:
+        assert inplace, '6x6 boards must be modified inplace.'
+        # get quad
+        if quadrant == 1:
+            old_sub = board[0:3, 0:3]
+        elif quadrant == 2:
+            old_sub = board[0:3, 3:6]
+        elif quadrant == 3:
+            old_sub = board[3:6, 0:3]
+        elif quadrant == 4:
+            old_sub = board[3:6, 3:6]
+        else:
+            raise ValueError('Unexpected value for quadrant.')
+
+        # rotate quad
+        if direction == -1:
+            new_sub = np.rot90(old_sub)
+        elif direction == 1:
+            new_sub = np.rot90(old_sub, 3)
+        else:
+            raise ValueError('Unexpected value for dir')
+
+        # update rotated quad
+        if quadrant == 1:
+            board[0:3, 0:3] = new_sub
+        elif quadrant == 2:
+            board[0:3, 3:6] = new_sub
+        elif quadrant == 3:
+            board[3:6, 0:3] = new_sub
+        elif quadrant == 4:
+            board[3:6, 3:6] = new_sub
+
+    elif r == 36:
+        # get quad
+        if quadrant == 1:
+            ix_old = np.array([ 0,  1,  2,  6,  7,  8, 12, 13, 14])
+        elif quadrant == 2:
+            ix_old = np.array([ 3,  4,  5,  9, 10, 11, 15, 16, 17])
+        elif quadrant == 3:
+            ix_old = np.array([18, 19, 20, 24, 25, 26, 30, 31, 32])
+        elif quadrant == 4:
+            ix_old = np.array([21, 22, 23, 27, 28, 29, 33, 34, 35])
+        else:
+            raise ValueError('Unexpected value for quad')
+        # rotate quad
+        if direction == -1:
+            ix_new = ix_old[np.array([2, 5, 8, 1, 4, 7, 0, 3, 6])]
+        elif direction == 1:
+            ix_new = ix_old[np.array([6, 3, 0, 7, 4, 1, 8, 5, 2])]
+        else:
+            raise ValueError('Unexpected value for dir')
+        # update placements
+        if inplace:
+            board[ix_old, :]     = board[ix_new, :]
+        else:
+            new_board            = board.copy()
+            new_board[ix_old, :] = board[ix_new, :]
+            return new_board
+    else:
+        raise ValueError('Unexpected size of board.')
+
+#%% Calculated constants
+# get all possible rotation to win states # TODO: do this once outside of function or make persistent?
+ONE_OFF = np.hstack(( \
+    _rotate_board(WIN, 1, -1, inplace=False), \
+    _rotate_board(WIN, 2, -1, inplace=False), \
+    _rotate_board(WIN, 3, -1, inplace=False), \
+    _rotate_board(WIN, 4, -1, inplace=False), \
+    _rotate_board(WIN, 1,  1, inplace=False), \
+    _rotate_board(WIN, 2,  1, inplace=False), \
+    _rotate_board(WIN, 3,  1, inplace=False), \
+    _rotate_board(WIN, 4,  1, inplace=False)))
+
 #%% Classes - Moves
 class Move(Frozen):
     r"""
     Class that keeps track of each individual move.
     """
-    def __init__(self, row, column, quadrant, direction):
+    def __init__(self, row, column, quadrant, direction, power=None):
         self.row       = row
         self.column    = column
         self.quadrant  = quadrant
         self.direction = direction
+        self.power     = power
+
+    def __eq__(self, other):
+        r"""Equality is based on row, column, quadrant and direction, but not on power."""
+        return (self.row == other.row and self.column == other.column and self.quadrant == other.quadrant \
+            and self.direction == other.direction)
+
+    def __ne__(self, other):
+        r"""Inequality is based on row, column, quadrant and direction, but not on power."""
+        return not self.__eq__(other)
+
+    def __lt__(self, other):
+        r"""Sorts by power, then row, then column, then quadrant, then direction."""
+        if self.power is None:
+            if other.power is not None:
+                return True
+        else:
+            if other.power is None:
+                return False
+            else:
+                if self.power < other.power:
+                    return True
+                elif self.power > other.power:
+                    return False
+        if self.row < other.row:
+            return True
+        elif self.row > other.row:
+            return False
+        if self.column < other.column:
+            return True
+        elif self.column > other.column:
+            return False
+        if self.quadrant < other.quadrant:
+            return True
+        elif self.quadrant > other.quadrant:
+            return False
+        if self.direction < other.direction:
+            return True
+        elif self.direction < other.direction:
+            return False
+        return False # make True if __le__
+
+    def __hash__(self):
+        r"""Hash uses str instead of repr, and thus power does not distinguish values."""
+        return hash(self.__str__())
 
     def __str__(self):
+        r"""String returns values except for power."""
         return 'row: {}, col: {}, quad: {}, dir: {}'.format(self.row, self.column, self.quadrant, self.direction)
+
+    def __repr__(self):
+        r"""Repr returns all values, including power."""
+        return '<' + self.__str__() + ', pwr: {}'.format(self.power) + '>'
 
 #%% Classes - GameStats
 class GameStats(Frozen):
@@ -179,10 +318,19 @@ class GameStats(Frozen):
 #%% Dynamic globals
 cur_move    = 0
 cur_game    = 0
-board    = PLAYER['none'] * np.ones((6, 6), dtype=int)
+board       = PLAYER['none'] * np.ones((6, 6), dtype=int)
 move_status = {'ok': False, 'pos': None, 'patch_object': None}
 game_hist   = []
 game_hist.append(GameStats(number=cur_game, first_move=PLAYER['white']))
+
+#%% Debugging
+board = np.array([\
+    [0,-1, 0, 0, 0, 0],\
+    [0, 1, 0, 1, 1, 1],\
+    [0, 0, 0, 0, 0, 0],\
+    [0,-1, 0, 0, 0, 0],\
+    [0,-1, 1,-1,-1,-1],\
+    [0, 1, 0, 0, 0, 0]], dtype=int)
 
 #%% Classes - PentagoGui
 class PentagoGui(QWidget):
@@ -246,23 +394,29 @@ class PentagoGui(QWidget):
         self.lbl_games_tied.setAlignment(QtCore.Qt.AlignRight)
 
         #%% Axes
+        # board
         self.wid_board = QWidget(self)
         self.wid_board.setGeometry(260, 140, 420, 420)
-        # TODO: figure out how to kill the fucking frame
-        fig = Figure(figsize=(4.2, 4.2), dpi=100, frameon=True, subplotpars=SubplotParams(left=0, \
-            right=1, wspace=0, hspace=0))
+        fig = Figure(figsize=(4.2, 4.2), dpi=100, frameon=False)
         self.board_canvas = FigureCanvas(fig)
         self.board_canvas.setParent(self.wid_board)
         self.board_canvas.mpl_connect('button_release_event', lambda event: _mouse_click_callback(self, event))
-        self.board_axes = fig.add_subplot(111, aspect='equal')
+        self.board_axes = Axes(fig, [0., 0., 1., 1.])
         self.board_axes.invert_yaxis()
+        self.board_axes.set_axis_off()
+        fig.add_axes(self.board_axes)
 
+        # current move
         self.wid_move = QWidget(self)
         self.wid_move.setGeometry(780, 700-350-71, 70, 70)
-        fig = Figure(figsize=(.7, .7), dpi=100)
+        fig = Figure(figsize=(.7, .7), dpi=100, frameon=False)
         self.move_canvas = FigureCanvas(fig)
         self.move_canvas.setParent(self.wid_move)
-        self.move_axes = fig.add_subplot(111, aspect='equal')
+        self.move_axes = Axes(fig, [0., 0., 1., 1.])
+        self.move_axes.set_xlim(-RADIUS['square'], RADIUS['square'])
+        self.move_axes.set_ylim(-RADIUS['square'], RADIUS['square'])
+        self.move_axes.set_axis_off()
+        fig.add_axes(self.move_axes)
 
         #%% Buttons
         # Undo button
@@ -354,7 +508,7 @@ class PentagoGui(QWidget):
     def closeEvent(self, event):
         """Things in here happen on GUI closing."""
         close_immediately = True
-        filename = os.path.join(get_data_dir(), 'pentago.p')
+        filename = os.path.join(get_output_dir(), 'pentago.p')
         if close_immediately:
             GameStats.save(filename, game_hist)
             event.accept()
@@ -498,12 +652,13 @@ def _mouse_click_callback(self, event):
         move_status['pos'] = (x, y)
         if LOGGING:
             print('Placing current piece.')
-        if _calc_cur_move(cur_move, cur_game) == PLAYER['white']:
+        current_player = _calc_cur_move(cur_move, cur_game)
+        if current_player == PLAYER['white']:
             move_status['patch_object'] = _plot_piece(self.board_axes, x, y, RADIUS['piece'], COLOR['next_wht'])
-        elif _calc_cur_move(cur_move, cur_game) == PLAYER['black']:
+        elif current_player == PLAYER['black']:
             move_status['patch_object'] = _plot_piece(self.board_axes, x, y, RADIUS['piece'], COLOR['next_blk'])
         else:
-            raise ValueError('Unexpected player to move next')
+            raise ValueError('Unexpected player to move next.')
     else:
         # delete a previously placed piece
         if move_status['ok']:
@@ -578,72 +733,6 @@ def _execute_move(*, quadrant, direction):
         if LOGGING:
             print('No move to execute.')
 
-#%% _rotate_board
-def _rotate_board(board, quadrant, direction):
-    r"""
-    Rotates the specified board position.
-
-    Notes
-    -----
-    #.  Modifies board in-place.
-    """
-    # determine if 6x6 board or 36xN
-    (r, c) = board.shape
-
-    if r == 6 and c == 6:
-        # get quad
-        if quadrant == 1:
-            old_sub = board[0:3, 0:3]
-        elif quadrant == 2:
-            old_sub = board[0:3, 3:6]
-        elif quadrant == 3:
-            old_sub = board[3:6, 0:3]
-        elif quadrant == 4:
-            old_sub = board[3:6, 3:6]
-        else:
-            raise ValueError('Unexpected value for quadrant.')
-
-        # rotate quad
-        if direction == -1:
-            new_sub = np.rot90(old_sub)
-        elif direction == 1:
-            new_sub = np.rot90(old_sub, 3)
-        else:
-            raise ValueError('Unexpected value for dir')
-
-        # update rotated quad
-        if quadrant == 1:
-            board[0:3, 0:3] = new_sub
-        elif quadrant == 2:
-            board[0:3, 3:6] = new_sub
-        elif quadrant == 3:
-            board[3:6, 0:3] = new_sub
-        elif quadrant == 4:
-            board[3:6, 3:6] = new_sub
-    elif r == 36: # TODO: fix this case
-        # get quad
-        if quadrant == 1:
-            ix_old = np.array([ 1,  2,  3,  7,  8,  9, 13, 14, 15]) # TODO: update these numbers
-        elif quadrant == 2:
-            ix_old = np.array([19, 20, 21, 25, 26, 27, 31, 32, 33])
-        elif quadrant == 3:
-            ix_old = np.array([ 4,  5,  6, 10, 11, 12, 16, 17, 18])
-        elif quadrant == 4:
-            ix_old = np.array([22, 23, 24, 28, 29, 30, 34, 35, 36])
-        else:
-            raise ValueError('Unexpected value for quad')
-        # rotate quad
-        if direction == -1:
-            ix_new = ix_old([7, 4, 1, 8, 5, 2, 9, 6, 3]);
-        elif direction == 1:
-            ix_new = ix_old([3, 6, 9, 2, 5, 8, 1, 4, 7]);
-        else:
-            raise ValueError('Unexpected value for dir')
-        # update placements
-        board[ix_old, :] = board[ix_new, :]
-    else:
-        raise ValueError('Unexpected size of board.')
-
 #%% _check_for_win
 def _check_for_win(board):
     r"""
@@ -681,6 +770,160 @@ def _check_for_win(board):
     game_hist[cur_game].winner = winner
 
     return (winner, win_mask)
+
+#%% _find_moves
+def _find_moves(board):
+    r"""
+    Finds the best current move.
+
+    Notes
+    -----
+    #.  Currently this function is only trying to find a win in one move situation.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.pentago import _find_moves
+    >>> import numpy as np
+    >>> board = np.reshape(np.hstack((np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1]), np.zeros(24, dtype=int))), (6, 6))
+    >>> (white_moves, black_moves) = _find_moves(board)
+    >>> print(white_moves) # doctest: +SKIP
+    # TODO: write the correct answer
+
+    >>> print(black_moves)
+    []
+
+    """
+    # expand the board to a linear 2D matrix
+    big_board = np.expand_dims(board.ravel(), axis=1)
+
+    # cross reference two matrices with element-wise multiplication
+    test = big_board * ONE_OFF
+
+    # find score
+    score = np.sum(test, axis=0)
+
+    # find white and black rotate to win moves
+    rot_white = np.nonzero(score >=  5)[0]
+    rot_black = np.nonzero(score <= -5)[0]
+
+    # find white and black one off potentials
+    white = np.nonzero((score >=  4) & (score <  5))[0]
+    black = np.nonzero((score <= -4) & (score > -5))[0]
+
+    # see if the remaining piece is an open square
+    if len(white) > 0:
+        pos_white = ONE_OFF[:, white]
+        needed    = pos_white ^ big_board
+        free      = needed & ~big_board
+        ix_white  = white[np.any(free, axis=0)]
+    else:
+        ix_white  = np.array([], dtype=int)
+    if len(black) > 0:
+        pos_black = ONE_OFF[:, black]
+        needed    = pos_black ^ big_board
+        free      = needed & ~big_board
+        ix_black  = black[np.any(free, axis=0)]
+    else:
+        ix_black  = np.array([], dtype=int)
+
+    # find winning moves
+    # placement winning moves
+    white_moves = _get_move_from_one_off(big_board, ix_white, ONE_OFF)
+    black_moves = _get_move_from_one_off(big_board, ix_black, ONE_OFF)
+    # rotation only winning moves
+    #white_rotations = _get_move_from_one_off(big_board, rot_white, ONE_OFF)
+    #black_rotations = _get_move_from_one_off(big_board, rot_black, ONE_OFF)
+
+    # combine the possible moves
+    #white_moves += white_rotations
+    #black_moves += black_rotations
+
+    # sort by power, such that ties go at the end
+    white_moves.sort()
+    black_moves.sort()
+
+    return (white_moves, black_moves)
+
+#    [xwr, ywr, qwr, dwr] =
+#    [xbr, ybr, qbr, dbr] =
+#
+#    # Add moves that are just a place anywhere and rotate to win
+#    empty = np.nonzero(big_board == PLAYER.none)[0]
+#    # white
+#    pos_wr = np.ones((1, len(qwr)), dtype=int) * empty
+#    xwr = modd(pos_wr.ravel(), 6)
+#    ywr = np.ceil(pos_wr.ravel() / 6).astype(int)
+#    qwr = repmat(qwr,length(empty),1);
+#    qwr = qwr(:)';
+#    dwr = repmat(dwr,length(empty),1);
+#    dwr = dwr(:)';
+#    # black
+#    pos_br = repmat(empty,1,length(qbr));
+#    xbr = mod(pos_br(:)',6);
+#    xbr(xbr == 0) = 6;
+#    ybr = ceil(pos_br(:)'/6);
+#    qbr = repmat(qbr,length(empty),1);
+#    qbr = qbr(:)';
+#    dbr = repmat(dbr,length(empty),1);
+#    dbr = dbr(:)';
+#    # white win moves
+#    moves.white.x    = [xwp, xwr];
+#    moves.white.y    = [ywp, ywr];
+#    moves.white.quad = [qwp, qwr];
+#    moves.white.dir  = [dwp, dwr];
+#    moves.white.pwr  = 5*ones(size(moves.white.x));
+#    # mark moves that are really a tie, instead of a win
+#    white_moves.white.pwr(ismember([qwp+4*dwp,qwr+4*dwr],qbr+4*dbr)) = np.nan
+
+#    # black win moves
+#    moves.black.x    = [xbp, xbr];
+#    moves.black.y    = [ybp, ybr];
+#    moves.black.quad = [qbp, qbr];
+#    moves.black.dir  = [dbp, dbr];
+#    moves.black.pwr  = 5*ones(size(moves.black.x));
+#    # mark moves that are really a tie, instead of a win
+#    moves.black.pwr(ismember([qbp+4*dbp,qbr+4*dbr],qwr+4*dwr)) = nan;
+#    # resort ties at end
+#    moves.black = resort_moves(moves.black);
+
+#%% _get_move_from_one_off
+def _get_move_from_one_off(big_board, ix, ONE_OFF):
+    r"""
+    Turns the given index into a Move instance.
+    """
+    # preallocate x & y to NaNs in case the winning move is just a rotation
+    row = INT_TOKEN * np.ones(len(ix), dtype=int)
+    column = row.copy()
+
+    # find missing piece
+    pos_ix = (np.abs(big_board) ^ ONE_OFF[:,ix]) & ONE_OFF[:,ix]
+
+    assert np.all(np.sum(pos_ix, axis=0) <= 1), 'Only exactly one or fewer places should be found.'
+    assert np.all(np.sum(pos_ix, axis=0) == 1), 'Exactly one place was not found.' # TODO: 0 is okay later
+
+    # pull out element number from 0 to 35
+    (one_off_row, one_off_col) = np.nonzero(pos_ix)
+    # convert to row and column
+    row[one_off_col]    = one_off_row//6
+    column[one_off_col] = np.mod(one_off_row, 6)
+
+    # get quadrant and rotation number
+    # based on order that ONE_OFF was built, so permutations of first quads 1,2,3,4, second left,right;
+    num = np.ceil(ix/WIN.shape[1]).astype(int)
+
+    # pull out quadrant number
+    quadrant = modd(num, 4)
+
+    # pull out rotation direction
+    direction = -1 * np.ones(len(ix), dtype=int)
+    direction[num < 5] = 1
+
+    # convert to a move class
+    move = []
+    for i in range(len(ix)):
+        move.append(Move(row[i], column[i], quadrant[i], direction[i]))
+    return move
 
 #%% _update_game_stats
 def _update_game_stats(self, results):
@@ -730,21 +973,19 @@ def _plot_cur_move(ax, move):
 
     # fill background
     ax.add_patch(Rectangle((-half_box_size, -half_box_size), 2*half_box_size, 2*half_box_size, \
-        color=COLOR['board']))
+        facecolor=COLOR['board'], edgecolor='k'))
 
     # draw the piece
     if move == PLAYER['white']:
         _plot_piece(ax, 0, 0, RADIUS['piece'], COLOR['white'])
     elif move == PLAYER['black']:
-        _plot_piece(ax, 0, 0, RADIUS['piece'], COLOR['white'])
+        _plot_piece(ax, 0, 0, RADIUS['piece'], COLOR['black'])
     elif move == PLAYER['none']:
         pass
     else:
         raise ValueError('Unexpected player.')
 
-    # set axis limits (TODO: can these be moved into just the initialization?)
-    ax.set_xlim(-half_box_size, half_box_size)
-    ax.set_ylim(-half_box_size, half_box_size)
+    # turn the axes back off (they get reinitialized at some point)
     ax.set_axis_off()
 
 #%% _plot_picee
@@ -780,7 +1021,7 @@ def _plot_piece(ax, vc, hc, r, c, half=False):
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.set_xlim(0.5, 1.5)
     >>> _ = ax.set_ylim(0.5, 1.5)
-    >>> _plot_piece(ax, 1, 1, 0.45, (0, 0, 1))
+    >>> obj = _plot_piece(ax, 1, 1, 0.45, (0, 0, 1))
     >>> plt.show(block=False)
 
     >>> plt.close()
@@ -802,10 +1043,6 @@ def _plot_board(ax):
     r"""
     Plots the board (and the current player move).
     """
-
-    # delete previous children
-    # TODO: write this
-
     # get axes limits
     (m, n) = board.shape
     s = RADIUS['square']
@@ -890,10 +1127,10 @@ def wrapper(self):
     self.move_axes.clear()
 
     # plot the current move
-    _plot_cur_move(self.move_axes, 1)
+    _plot_cur_move(self.move_axes, _calc_cur_move(cur_move, cur_game))
     self.move_canvas.draw()
 
-    # draw turn arrows
+    # draw turn arrows in default colors
     # TODO: write this
 
     # draw the board
@@ -908,11 +1145,11 @@ def wrapper(self):
     # display relevant controls
     _display_controls(self)
 
-    # plot possible winning moves
+    # plot possible winning moves (includes updating turn arrows)
     # TODO:
 
     # redraw with the final board
-    #self.board_axes.set_axis_off() # Turn this off for debugging
+    self.board_axes.set_axis_off()
     self.board_canvas.draw()
 
     # update game stats on GUI
@@ -929,7 +1166,7 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         mode = sys.argv[1]
     else:
-        mode = 'null'
+        mode = 'test'
     if mode == 'run':
         # Runs the GUI application
         app = QApplication(sys.argv)
