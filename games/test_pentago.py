@@ -16,6 +16,10 @@ import dstauffman.games.pentago as pentago
 #%% Setup
 pentago.LOGGING = False
 
+#%% Aliases
+b = pentago.PLAYER['black']
+w = pentago.PLAYER['white']
+
 #%% _rotate_board
 class Test__rotate_board(unittest.TestCase):
     r"""
@@ -182,69 +186,69 @@ class Test__check_for_win(unittest.TestCase):
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_no_winner(self):
-        self.board[0, 0] = pentago.PLAYER['white']
-        self.board[1, 1] = pentago.PLAYER['black']
+        self.board[0, 0] = w
+        self.board[1, 1] = b
         (winner, win_mask) = pentago._check_for_win(self.board)
         self.assertEqual(winner, pentago.PLAYER['none'])
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_white_wins(self):
-        self.board[0:5, 0] = pentago.PLAYER['white']
-        self.board[1:4, 1] = pentago.PLAYER['black']
-        self.board[5, 1] = pentago.PLAYER['black']
+        self.board[0:5, 0] = w
+        self.board[1:4, 1] = b
+        self.board[5, 1] = b
         self.win_mask[0:5, 0] = True
         (winner, win_mask) = pentago._check_for_win(self.board)
-        self.assertEqual(winner, pentago.PLAYER['white'])
+        self.assertEqual(winner, w)
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_black_wins(self):
-        self.board[2, 1:6] = pentago.PLAYER['black']
-        self.board[3, 1:4] = pentago.PLAYER['white']
-        self.board[3, 1] = pentago.PLAYER['white']
+        self.board[2, 1:6] = b
+        self.board[3, 1:4] = w
+        self.board[3, 1] = w
         self.win_mask[2, 1:6] = True
         (winner, win_mask) = pentago._check_for_win(self.board)
-        self.assertEqual(winner, pentago.PLAYER['black'])
+        self.assertEqual(winner, b)
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_white_wins_6(self):
-        self.board[0:6, 2] = pentago.PLAYER['white']
-        self.board[1:4, 1] = pentago.PLAYER['black']
-        self.board[5, 1] = pentago.PLAYER['black']
+        self.board[0:6, 2] = w
+        self.board[1:4, 1] = b
+        self.board[5, 1] = b
         self.win_mask[0:6, 2] = True
         (winner, win_mask) = pentago._check_for_win(self.board)
-        self.assertEqual(winner, pentago.PLAYER['white'])
+        self.assertEqual(winner, w)
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_black_wins_mult(self):
-        self.board[1:4, 0] = pentago.PLAYER['white']
-        self.board[5, 0]   = pentago.PLAYER['white']
-        self.board[1:4, 1] = pentago.PLAYER['white']
-        self.board[5, 1]   = pentago.PLAYER['white']
-        self.board[1:3, 2] = pentago.PLAYER['white']
-        self.board[0:6, 3] = pentago.PLAYER['black']
-        self.board[0:6, 5] = pentago.PLAYER['black']
+        self.board[1:4, 0] = w
+        self.board[5, 0]   = w
+        self.board[1:4, 1] = w
+        self.board[5, 1]   = w
+        self.board[1:3, 2] = w
+        self.board[0:6, 3] = b
+        self.board[0:6, 5] = b
         self.win_mask[0:6, 3] = True
         self.win_mask[0:6, 5] = True
         (winner, win_mask) = pentago._check_for_win(self.board)
-        self.assertEqual(winner, pentago.PLAYER['black'])
+        self.assertEqual(winner, b)
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_draw_no_moves_left(self):
-        self.board[0:3, 0:3] = pentago.PLAYER['white']
-        self.board[0:3, 3:6] = pentago.PLAYER['black']
-        self.board[3:6, 0:3] = pentago.PLAYER['black']
-        self.board[3:6, 3:6] = pentago.PLAYER['white']
-        self.board[1, 1] = pentago.PLAYER['black']
-        self.board[4, 4] = pentago.PLAYER['black']
-        self.board[1, 4] = pentago.PLAYER['white']
-        self.board[1, 4] = pentago.PLAYER['white']
+        self.board[0:3, 0:3] = w
+        self.board[0:3, 3:6] = b
+        self.board[3:6, 0:3] = b
+        self.board[3:6, 3:6] = w
+        self.board[1, 1] = b
+        self.board[4, 4] = b
+        self.board[1, 4] = w
+        self.board[1, 4] = w
         (winner, win_mask) = pentago._check_for_win(self.board)
         self.assertEqual(winner, pentago.PLAYER['draw'])
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_draw_simult_wins(self):
-        self.board[1, 1:6] = pentago.PLAYER['black']
-        self.board[4, 0:5] = pentago.PLAYER['white']
+        self.board[1, 1:6] = b
+        self.board[4, 0:5] = w
         self.win_mask[1, 1:6] = True
         self.win_mask[4, 0:5] = True
         (winner, win_mask) = pentago._check_for_win(self.board)
@@ -252,19 +256,94 @@ class Test__check_for_win(unittest.TestCase):
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
 #%% _find_moves
-@unittest.skip('Not yet fully implemented.')
 class Test__find_moves(unittest.TestCase):
     r"""
     Tests the _find_moves function with the following cases:
         TBD
     """
     def setUp(self):
-        self.position = np.reshape(np.hstack((np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1]), np.zeros(24, dtype=int))), (6, 6))
-        self.white_moves = set((pentago.Move(2, 3, 1, 1, 5), pentago.Move(3, 2, 2, 1, 5), pentago.Move(3, 2, 4, 1, 5), \
-            pentago.Move(2, 1, 1, -1, 5), pentago.Move(3, 2, 2, -1, 5), pentago.Move(3, 2, 4, -1, 5)))
+        self.board = np.zeros((6, 6), dtype=int)
+        self.white_moves = []
         self.black_moves = []
 
-    def test_nominal(self):
+    def test_no_wins(self):
+        (white_moves, black_moves) = pentago._find_moves(self.board)
+        np.testing.assert_array_equal(white_moves, self.white_moves)
+        np.testing.assert_array_equal(black_moves, self.black_moves)
+
+    def test_already_won(self):
+        self.board[2, 0:5] = w
+        with self.assertRaises(ValueError):
+            (white_moves, black_moves) = pentago._find_moves(self.board)
+
+    def test_place_to_win(self):
+        self.board[2, 0:3] = w
+        self.board[1, 3] = w
+        self.white_moves.append(pentago.Move(0, 3, 2, -1, 5))
+        (white_moves, black_moves) = pentago._find_moves(self.board)
+        np.testing.assert_array_equal(white_moves, self.white_moves)
+        np.testing.assert_array_equal(black_moves, self.black_moves)
+
+    def test_place_to_win_x6(self):
+        self.board[0, 0] = w
+        self.board[1, 1] = w
+        self.board[3, 3] = w
+        self.board[4, 4] = w
+        self.board[5, 5] = w
+        self.board[0, 2] = b
+        self.board[2, 0] = b
+        self.white_moves.append(pentago.Move(2, 2, 2, -1, 5))
+        self.white_moves.append(pentago.Move(2, 2, 2,  1, 5))
+        self.white_moves.append(pentago.Move(2, 2, 3, -1, 5))
+        self.white_moves.append(pentago.Move(2, 2, 3,  1, 5))
+        (white_moves, black_moves) = pentago._find_moves(self.board)
+        np.testing.assert_array_equal(white_moves, self.white_moves)
+        np.testing.assert_array_equal(black_moves, self.black_moves)
+
+    def test_rotate_to_win(self):
+        pass
+
+    def test_rotate_to_win_x6(self):
+        pass
+
+    def test_wins_blocked(self):
+        pass
+
+    def test_no_valid_moves(self):
+        pass
+
+    def test_black_place_to_win(self):
+        pass
+
+    def test_black_rotate_to_win(self):
+        pass
+
+    def test_draw_move(self):
+        pass
+
+    def test_same_win_square(self):
+        pass
+
+    def test_same_win_rot(self):
+        pass
+
+    def test_same_everything(self):
+        pass
+
+    def test_win_over_draw(self):
+        pass
+
+    def test_win_rot_blocked_draw(self):
+        pass
+
+    def test_other_invalids(self):
+        pass
+
+    @unittest.skip('Not yet fully implemented.')
+    def test_everything(self):
+        self.board = np.reshape(np.hstack((np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1]), np.zeros(24, dtype=int))), (6, 6))
+        self.white_moves = set((pentago.Move(2, 3, 1, 1, 5), pentago.Move(3, 2, 2, 1, 5), pentago.Move(3, 2, 4, 1, 5), \
+            pentago.Move(2, 1, 1, -1, 5), pentago.Move(3, 2, 2, -1, 5), pentago.Move(3, 2, 4, -1, 5)))
         (white_moves, black_moves) = pentago._find_moves(self.position)
         white_set = set((this_move for this_move in white_moves))
         white_set.add(pentago.Move(2, 3, 1, 1, 0))
