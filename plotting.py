@@ -62,7 +62,7 @@ class Opts(Frozen):
     Contains all the optional plotting configurations.
     """
     def __init__(self):
-        self.case_name = 'baseline'
+        self.case_name = ''
         self.save_path = os.getcwd()
         self.save_plot = False
         self.plot_type = 'png'
