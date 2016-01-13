@@ -197,7 +197,7 @@ def _rotate_board(board, quadrant, direction, inplace=True):
         raise ValueError('Unexpected size of board.')
 
 #%% Calculated constants
-# get all possible rotation to win states # TODO: do this once outside of function or make persistent?
+# get all possible rotation to win states
 ONE_OFF = np.hstack(( \
     _rotate_board(WIN, 1, -1, inplace=False), \
     _rotate_board(WIN, 2, -1, inplace=False), \
@@ -271,6 +271,22 @@ class Move(Frozen):
     def __repr__(self):
         r"""Repr returns all values, including power."""
         return '<' + self.__str__() + ', pwr: {}'.format(self.power) + '>'
+        
+    @staticmethod
+    def get_pos(move_list):
+        r"""Converts the move list into position numbers."""
+        pos = []
+        for this_move in move_list:
+            pos.append(this_move.row + 6 * this_move.column)
+        return pos
+        
+    @staticmethod
+    def get_rot(move_list):
+        r"""Converts the quadrant rotation and direction into a representative number."""
+        rot = []
+        for this_move in move_list:
+            rot.append(this_move.quadrant + 4 * (this_move.direction == 1))
+        return rot
 
 #%% Classes - GameStats
 class GameStats(Frozen):
@@ -494,6 +510,9 @@ class PentagoGui(QWidget):
         self.btn_4L.setIconSize(QtCore.QSize(71, 71))
         self.btn_4L.setGeometry(700, 489, 71, 71)
         self.btn_4L.clicked.connect(self.btn_4L_function)
+        # buttons dictionary for use later
+        self.rot_buttons = {1:self.btn_1L, 2:self.btn_2L, 3:self.btn_3L, 4:self.btn_4L, \
+        5:self.btn_1R, 6:self.btn_2R, 7:self.btn_3R, 8:self.btn_4R}
 
         #%% Call wrapper to initialize GUI
         wrapper(self)
@@ -820,15 +839,15 @@ def _find_moves(board):
     # see if the remaining piece is an open square
     if len(white) > 0:
         pos_white = ONE_OFF[:, white]
-        needed    = pos_white ^ big_board
-        free      = needed & ~big_board
+        needed    = np.logical_xor(pos_white, big_board)
+        free      = np.logical_and(needed, np.logical_not(big_board))
         ix_white  = white[np.any(free, axis=0)]
     else:
         ix_white  = np.array([], dtype=int)
     if len(black) > 0:
         pos_black = ONE_OFF[:, black]
-        needed    = pos_black ^ big_board
-        free      = needed & ~big_board
+        needed    = np.logical_xor(pos_black, big_board)
+        free      = np.logical_and(needed, np.logical_not(big_board))
         ix_black  = black[np.any(free, axis=0)]
     else:
         ix_black  = np.array([], dtype=int)
@@ -903,7 +922,7 @@ def _get_move_from_one_off(big_board, ix, ONE_OFF):
     column = row.copy()
 
     # find missing piece
-    pos_ix = (np.abs(big_board) ^ ONE_OFF[:,ix]) & ONE_OFF[:,ix]
+    pos_ix = np.logical_and(np.logical_xor(np.abs(big_board), ONE_OFF[:,ix]), ONE_OFF[:,ix])
 
     assert np.all(np.sum(pos_ix, axis=0) <= 1), 'Only exactly one or fewer places should be found.'
     assert np.all(np.sum(pos_ix, axis=0) == 1), 'Exactly one place was not found.' # TODO: 0 is okay later
@@ -1125,136 +1144,85 @@ def _plot_win(ax, mask):
 
 
 #%% _plot_possible_win
-def _plot_possible_win(moves):
+def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
     r"""
     Plots the possible wins on the board.
 
     Examples
     --------
 
-    %     board = reshape([0 0 0 0 0 0 0 1 0 1 1 1 zeros(1,24)],6,6);
-    %     moves = find_moves(board);
-    %     plot_possible_win(handles,moves);
+    >>> from dstauffman.games.pentago import _plot_possible_win, _find_moves
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> fig = plt.figure()
+    >>> ax = fig.add_subplot(111, aspect='equal')
+    >>> _ = ax.set_xlim(-0.5, 5.5)
+    >>> _ = ax.set_ylim(-0.5, 5.5)
+    >>> ax.invert_yaxis()
+    >>> board = np.reshape(np.hstack((0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, np.zeros(24))), (6, 6))
+    >>> (white_moves, black_moves) = _find_moves(board)
+    >>> _plot_possible_win(ax, white_moves, black_moves) # doctest: +SKIP
+    >>> plt.show(block=False)
+    
+    >>> plt.close()
 
     """
-    # find overlapping pieces
-    pos_white = moves.white.x + 6*(moves.white.y-1);
-    pos_black = moves.black.x + 6*(moves.black.y-1);
+    # find set of positions to plot
+    pos_white = set(Move.get_pos(white_moves))
+    pos_black = set(Move.get_pos(black_moves))
+    # find intersecting positions
+    pos_both  = pos_white & pos_black
+    
+    # plot the whole pieces
+    for pos in pos_white ^ pos_both:
+        _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_wht'])
+    for pos in pos_black ^ pos_both:
+        _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_blk'])
 
-    # find overlapping quadrant rotations
-    rot_white = moves.white.quad + 4*moves.white.dir;
-    rot_black = moves.black.quad + 4*moves.black.dir;
-
-    # if it's white's turn, then draw the white wins last, so they show on top of black wins
-    # and draw last moves as half pieces if they overlap
-    cur_move = calc_cur_move;
-    if cur_move == PLAYER['white']:
-        order = [2, 1];
-        half_piece_white = ismember(pos_white,pos_black);
-        half_piece_black = false(size(moves.black.x));
-        half_arrow_white = -ismember(rot_white,rot_black);
-        half_arrow_black = ismember(rot_black,rot_white);
+    # plot the half pieces, with the current players move as whole
+    next_move = _calc_cur_move(cur_move, cur_game)
+    if next_move == PLAYER['white']:
+        for pos in pos_both:
+            _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_wht'])
+            _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_blk'], half=True)
+    elif next_move == PLAYER['black']:
+        for pos in pos_both:
+            _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_blk'])
+            _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_wht'], half=True)
     else:
-        order = [1, 2];
-        half_piece_white = false(size(moves.white.x));
-        half_piece_black = ismember(pos_black,pos_white);
-        half_arrow_white = ismember(rot_white,rot_black);
-        half_arrow_black = -ismember(rot_black,rot_white);
+        raise ValueError('Unexpected next player.')
 
-    # loop through and plot possible wins
-    for this_one in order:
-        if this_one == 1:
-            plot_pos_win(handles,moves.white.x,moves.white.y,moves.white.quad,moves.white.dir,\
-                moves.white.pwr,PLAYER.white,half_piece_white,half_arrow_white);
-        elif this_one == 2:
-            plot_pos_win(handles,moves.black.x,moves.black.y,moves.black.quad,moves.black.dir,\
-                moves.black.pwr,PLAYER.black,half_piece_black,half_arrow_black);
+    # find set of quadrant rotations
+    rot_white = set(Move.get_rot(white_moves))
+    rot_black = set(Move.get_rot(black_moves))
+    # find intersection rotations
+    rot_both  = rot_white & rot_black
 
-
-#%% Subfunction 1
-def plot_pos_win(handles,x,y,quad,dir,pwr,player,half_piece,half_arrow):
-    r"""
-    Plots the possible wins on the board.
-    """
-    # get the appropriate player color
-    if player == PLAYER['white']:
-        color   = COLOR['win_wht']
-        rot_col = repmat(COLOR.rot_wht, len(x), 1)
-    elif player ==  PLAYER['black']:
-        color   = COLOR.win_blk;
-        rot_col = repmat(COLOR.rot_blk,length(x),1);
+    # update the rot button backgrounds
+    for this_rot in rot_white ^ rot_both:
+        _plot_rot_color(rot_buttons[this_rot], COLOR['rot_wht'])
+    for this_rot in rot_black ^ rot_both:
+        _plot_rot_color(rot_buttons[this_rot], COLOR['rot_blk'])
+    if next_move == PLAYER['white']:
+        for rot in rot_both:
+            _plot_rot_color(rot_buttons[rot], COLOR['rot_wht'])
+            _plot_rot_color(rot_buttons[rot], COLOR['rot_blk'], half=True)
     else:
-        raise ValueError('Unexpected value for player')
+        for rot in rot_both:
+            _plot_rot_color(rot_buttons[rot], COLOR['rot_blk'])
+            _plot_rot_color(rot_buttons[rot], COLOR['rot_wht'], half=True)
 
-    tie_col = COLOR.win_tie;
-    tie_ix  = find(isnan(pwr));
-    rot_col[tie_ix,:] = repmat(tie_col,length(tie_ix),1);
-
-    # plot the winning moves in backwards order, so wins replace ties
-    set(handles.pentago_figure,'CurrentAxes',handles.board);
-    for i in range(len(x)-1,-1,-1):
-        if pwr[i] >= 5:
-            plot_piece(x(i),y(i),RADIUS.win,color,half_piece(i));
-        elif isnan(pwr(i)):
-            plot_piece(x(i),y(i),RADIUS.win,COLOR.win_tie,half_piece(i));
-
-    # plot the winning rotations
-    [rot_win,rot_ix] = unique(quad+4*dir,'last');
-    for i in range(len(rot_win)):
-        if rot_win[i] == 1: # quad 1, dir 0
-            plot_rot_color(handles.button_1L,rot_col[rot_ix[i], :],half_arrow(rot_ix[i]));
-        elif rot_win[i] == 2: # quad 2, dir 0
-                plot_rot_color(handles.button_2L,rot_col[rot_ix[i], :],half_arrow(rot_ix[i]));
-        elif rot_win[i] == 3: # quad 3, dir 0
-                plot_rot_color(handles.button_3L,rot_col[rot_ix[i], :],half_arrow(rot_ix[i]));
-        elif rot_win[i] == 4: # quad 4, dir 0
-            plot_rot_color(handles.button_4L,rot_col[rot_ix[i], :],half_arrow(rot_ix[i]));
-        elif rot_win[i] == 5: # quad 1, dir 1
-            plot_rot_color(handles.button_1R,rot_col[rot_ix[i], :],half_arrow(rot_ix[i]));
-        elif rot_win[i] == 6: # quad 2, dir 1
-            plot_rot_color(handles.button_2R,rot_col[rot_ix[i], :],half_arrow(rot_ix[i]));
-        elif rot_win[i] == 7: # quad 3, dir 1
-            plot_rot_color(handles.button_3R,rot_col[rot_ix[i], :],half_arrow(rot_ix[i]));
-        elif rot_win[i] == 8: # quad 4, dir 1
-            plot_rot_color(handles.button_4R,rot_col[rot_ix[i], :],half_arrow(rot_ix[i]));
-        else:
-            raise ValueError('Unexpected value for rotation')
-
-#%% Subfunction 2
-def plot_rot_color(rot_hand,color,half):
+#%% _plot_rot_color
+def _plot_rot_color(rot_hand, color=None, half=False):
     r"""
     Plots the rotation arrow in the specified color.
     """
-    # get current color scheme
-    cdata = get(rot_hand,'CData');
-    (x1,x2,x3) = size(cdata);
-    # find values in old scheme that match the specified background color
-    temp[1,1,:] = round(COLOR.button*255);
-    temp = repmat(temp,x1,x2);
-    map_log = all(cdata == temp,3);
-    if half == 0:
-        pass
-    elif half == 1:
-        # cut out the left half
-        map_log[:,1:ceil(x1/2)]   = false;
-    elif half == -1:
-        # cut out the right half
-        map_log[:,ceil(x1/2):] = false;
+    if color is None:
+        color_name = 'none'
     else:
-        raise ValueError('Unexpected value for half')
-    # convert logical array to index numbers
-    map = find(map_log);
-    # initialize new color scheme
-    color_rep = cdata;
-    for i in range(x3):
-        color_rep[map+(x1*x2*(i-1))] = round(255*color(i));
-    # limit values for saturation
-    color_rep[color_rep > 255] = 255;
-    color_rep[color_rep < 0]   = 0;
-    # cast result back to uint8 for appriate scaling
-    color_rep = cast(color_rep,'uint8');
-    # update button
-    set(rot_hand,'CData',color_rep);
+        color_name = '#{:02x}{:02x}{:02x}'.format(*(int(c*255) for c in color))
+    rot_hand.setStyleSheet('background-color: ' + color_name + ';')
+    # TODO: make work for half buttons
 
 #%% move_wrapper
 def wrapper(self):
@@ -1270,7 +1238,8 @@ def wrapper(self):
     self.move_canvas.draw()
 
     # draw turn arrows in default colors
-    # TODO: write this
+    for button in self.rot_buttons.values():
+        _plot_rot_color(button)
 
     # draw the board
     _plot_board(self.board_axes)
@@ -1285,7 +1254,9 @@ def wrapper(self):
     _display_controls(self)
 
     # plot possible winning moves (includes updating turn arrows)
-    # TODO:
+    if winner == PLAYER['none']:
+        (white_moves, black_moves) = _find_moves(board)
+        _plot_possible_win(self.board_axes, self.rot_buttons, white_moves, black_moves)
 
     # redraw with the final board
     self.board_axes.set_axis_off()
