@@ -99,13 +99,111 @@ class Test_convert_monthly_to_annual_probability(unittest.TestCase):
         np.testing.assert_almost_equal(annual, self.annuals)
 
 #%% prob_to_rate
-pass
+class Test_prob_to_rate(unittest.TestCase):
+    r"""
+    Tests the prob_to_rate function with these cases:
+        TBD
+    """
+    def setUp(self):
+        self.prob = np.arange(0, 1.01, 0.01)
+        self.time = 5
+        with np.errstate(divide='ignore'):
+            self.rate = -np.log(1 - self.prob) / self.time
+        
+    def test_conversion(self):
+        rate = dcs.prob_to_rate(self.prob, self.time)
+        np.testing.assert_array_almost_equal(rate, self.rate)
+        
+    def test_scalar(self):
+        rate = dcs.prob_to_rate(0)
+        self.assertIn(rate, self.rate)
+
+    def test_lt_zero(self):
+        with self.assertRaises(ValueError):
+            dcs.prob_to_rate(np.array([0., 0.5, -1.]))
+
+    def test_gt_one(self):
+        with self.assertRaises(ValueError):
+            dcs.prob_to_rate(np.array([0., 0.5, 1.5]))
+
+    def test_circular(self):
+        rate = dcs.prob_to_rate(self.prob, self.time)
+        np.testing.assert_almost_equal(rate, self.rate)
+        prob = dcs.rate_to_prob(rate, self.time)
+        np.testing.assert_almost_equal(prob, self.prob)
 
 #%% rate_to_prob
-pass
+class Test_rate_to_prob(unittest.TestCase):
+    r"""
+    Tests the rate_to_prob function with these cases:
+        TBD
+    """
+    def setUp(self):
+        self.prob = np.arange(0, 1.01, 0.01)
+        self.time = 5
+        with np.errstate(divide='ignore'):
+            self.rate = -np.log(1 - self.prob) / self.time
+        
+    def test_conversion(self):
+        prob = dcs.rate_to_prob(self.rate, self.time)
+        np.testing.assert_array_almost_equal(prob, self.prob)
+        
+    def test_scalar(self):
+        prob = dcs.rate_to_prob(0)
+        self.assertIn(prob, self.prob)
+
+    def test_lt_zero(self):
+        with self.assertRaises(ValueError):
+            dcs.rate_to_prob(np.array([0., 0.5, -1.]))
+
+    def test_infinity(self):
+        prob = dcs.rate_to_prob(np.inf)
+        self.assertAlmostEqual(prob, 1.)
+
+    def test_circular(self):
+        prob = dcs.rate_to_prob(self.rate, self.time)
+        np.testing.assert_almost_equal(prob, self.prob)
+        rate = dcs.prob_to_rate(prob, self.time)
+        np.testing.assert_almost_equal(rate, self.rate)
 
 #%% month_prob_mult_ratio
-pass
+class Test_month_prob_mult_ratio(unittest.TestCase):
+    r"""
+    Tests the month_prob_mult_ratio function with these cases:
+        TBD
+    """
+    def setUp(self):
+        self.prob = np.arange(0, 1.01, 0.01)
+        rate           = dcs.prob_to_rate(self.prob, time=1./12)
+        mult_rate_2    = rate * 2
+        mult_rate_half = rate * 0.5
+        self.mult_prob_2    = dcs.rate_to_prob(mult_rate_2, time=1./12)
+        self.mult_prob_half = dcs.rate_to_prob(mult_rate_half, time=1./12)
+        
+    def test_no_mult(self):
+        mult_prob = dcs.month_prob_mult_ratio(self.prob, 1)
+        np.testing.assert_array_almost_equal(mult_prob, self.prob)
+        
+    def test_gt_one_mult(self):
+        mult_prob = dcs.month_prob_mult_ratio(self.prob, 2)
+        np.testing.assert_array_almost_equal(mult_prob, self.mult_prob_2)
+    
+    def test_lt_one_mult(self):
+        mult_prob = dcs.month_prob_mult_ratio(self.prob, 0.5)
+        np.testing.assert_array_almost_equal(mult_prob, self.mult_prob_half)
+    
+    def test_zero_mult(self):
+        mult_prob = dcs.month_prob_mult_ratio(self.prob[:-1], 0)
+        np.testing.assert_array_almost_equal(mult_prob, np.zeros(len(self.prob)-1))
+    
+#%% annual_rate_to_monthly_probability
+class Test_annual_rate_to_monthly_probability(unittest.TestCase):
+    r"""
+    Tests the annual_rate_to_monthly_probability function with these cases:
+        TBD
+    """
+    rate = np.array([0, 0.5, 1, 5, np.inf])
+    prob = dcs.annual_rate_to_monthly_probability(rate)
 
 #%% combine_sets
 class Test_combine_sets(unittest.TestCase):
