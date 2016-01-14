@@ -36,19 +36,10 @@ COLOR['white']    = (1., 1., 1.)
 COLOR['black']    = (0., 0., 0.)
 COLOR['maj_edge'] = (0., 0., 0.)
 COLOR['min_edge'] = (0., 0., 1.)
-COLOR['button']   = (1., 1., 0.75)
-COLOR['gui_bkgd'] = (225./255, 224./255, 228./255)
 COLOR['next_wht'] = (0.6, 0.6, 1.0) # (0.8, 0.8, 0.8)
 COLOR['next_blk'] = (0.0, 0.0, 0.4) # (0.4, 0.4, 0.4)
-COLOR['redo']     = (1.0, 0.0, 1.0)
 COLOR['win_wht']  = (1.0, 0.9, 0.9) # (1.0, 0.9, 0.9)
 COLOR['win_blk']  = (0.2, 0.0, 0.0) # (0.6, 0.0, 0.0)
-COLOR['win_tie']  = (1.0, 0.0, 0.6)
-COLOR['rot_wht']  = (0.0, 1.0, 1.0) # COLOR['next_wht']
-COLOR['rot_blk']  = (0.0, 0.0, 0.5) # COLOR['next_blk']
-COLOR['rot_grey'] = (0.6, 0.6, 0.6)
-COLOR['rot_move'] = (0.0, 0.0, 1.0)
-COLOR['rot_undo'] = (0.6, 0.6, 1.0)
 
 # player enumerations
 PLAYER          = {}
@@ -60,16 +51,14 @@ PLAYER['draw']  = 2
 # sizes of the different pieces and squares
 RADIUS           = {}
 RADIUS['piece']  = 0.45;
-RADIUS['next']   = 0.35;
-RADIUS['move']   = 0.30;
 RADIUS['win']    = 0.25;
 RADIUS['square'] = 0.5;
 
-# Gameplay options
-OPTIONS = {}
+# Gameplay options # TODO: implement these
+OPTIONS                       = {}
 OPTIONS['load_previous_game'] = 'Yes' # from ['Yes','No','Ask']
-OPTIONS['name_white'] = 'Player 1'
-OPTIONS['name_black'] = 'Player 2'
+OPTIONS['name_white']         = 'Player 1'
+OPTIONS['name_black']         = 'Player 2'
 OPTIONS['plot_winning_moves'] = True
 
 # TODO: this might be temporary
@@ -347,6 +336,31 @@ board = np.array([\
     [0,-1, 0, 0, 0, 0],\
     [0,-1, 1,-1,-1,-1],\
     [0, 1, 0, 0, 0, 0]], dtype=int)
+    
+#%% Classes - RotationButton
+class RotationButton(QPushButton):
+    def __init__(self, text, parent, quadrant, direction):
+        super(RotationButton, self).__init__(text, parent)
+        self.quadrant  = quadrant
+        self.direction = direction
+        self.overlay   = None
+        
+    def paintEvent(self, event):
+        # call super method
+        QPushButton.paintEvent(self, event)
+        # create painter and load base image
+        painter = QtGui.QPainter(self)
+        pixmap_key = str(self.quadrant) + ('L' if self.direction == -1 else 'R')
+        pixmap = IMAGES[pixmap_key].pixmap(QtCore.QSize(71, 71))
+        if self.overlay is None:
+            painter.drawPixmap(0, 0, pixmap)            
+        else:
+            # optionally load the overlaid image
+            overlay_pixmap = IMAGES[self.overlay].pixmap(QtCore.QSize(71, 71))
+            painter.drawPixmap(0, 0, overlay_pixmap)
+            painter.setCompositionMode(painter.CompositionMode_SourceOver)
+            painter.drawPixmap(0, 0, pixmap)
+        painter.end()
 
 #%% Classes - PentagoGui
 class PentagoGui(QWidget):
@@ -362,16 +376,6 @@ class PentagoGui(QWidget):
 
         #%% properties
         QToolTip.setFont(QtGui.QFont('SansSerif', 10))
-
-        #%% Icons
-        icon1R = QtGui.QIcon(os.path.join(get_images_dir(), 'right1.png'))
-        icon2R = QtGui.QIcon(os.path.join(get_images_dir(), 'right2.png'))
-        icon3R = QtGui.QIcon(os.path.join(get_images_dir(), 'right3.png'))
-        icon4R = QtGui.QIcon(os.path.join(get_images_dir(), 'right4.png'))
-        icon1L = QtGui.QIcon(os.path.join(get_images_dir(), 'left1.png'))
-        icon2L = QtGui.QIcon(os.path.join(get_images_dir(), 'left2.png'))
-        icon3L = QtGui.QIcon(os.path.join(get_images_dir(), 'left3.png'))
-        icon4L = QtGui.QIcon(os.path.join(get_images_dir(), 'left4.png'))
 
         #%% Text
         # Pentago
@@ -455,64 +459,56 @@ class PentagoGui(QWidget):
         self.btn_redo.clicked.connect(self.btn_redo_function)
 
         # 1R button
-        self.btn_1R = QPushButton('', self)
+        self.btn_1R = RotationButton('', self, quadrant=1, direction=1)
         self.btn_1R.setToolTip('Rotates quadrant 1 to the right 90 degrees.')
-        self.btn_1R.setIcon(icon1R)
         self.btn_1R.setIconSize(QtCore.QSize(71, 71))
         self.btn_1R.setGeometry(260, 49, 71, 71)
         self.btn_1R.clicked.connect(self.btn_1R_function)
         # 2R button
-        self.btn_2R = QPushButton('', self)
+        self.btn_2R = RotationButton('', self, quadrant=2, direction=1)
         self.btn_2R.setToolTip('Rotates quadrant 2 to the right 90 degrees.')
-        self.btn_2R.setIcon(icon2R)
         self.btn_2R.setIconSize(QtCore.QSize(71, 71))
         self.btn_2R.setGeometry(700, 139, 71, 71)
         self.btn_2R.clicked.connect(self.btn_2R_function)
         # 3R button
-        self.btn_3R = QPushButton('', self)
+        self.btn_3R = RotationButton('', self, quadrant=3, direction=1)
         self.btn_3R.setToolTip('Rotates quadrant 3 to the right 90 degrees.')
-        self.btn_3R.setIcon(icon3R)
         self.btn_3R.setIconSize(QtCore.QSize(71, 71))
         self.btn_3R.setGeometry(170, 489, 71, 71)
         self.btn_3R.clicked.connect(self.btn_3R_function)
         # 4R button
-        self.btn_4R = QPushButton('', self)
+        self.btn_4R = RotationButton('', self, quadrant=4, direction=1)
         self.btn_4R.setToolTip('Rotates quadrant 4 to the right 90 degrees.')
-        self.btn_4R.setIcon(icon4R)
         self.btn_4R.setIconSize(QtCore.QSize(71, 71))
         self.btn_4R.setGeometry(610, 579, 71, 71)
         self.btn_4R.clicked.connect(self.btn_4R_function)
         # 1L button
-        self.btn_1L = QPushButton('', self)
+        self.btn_1L = RotationButton('', self, quadrant=1, direction=-1)
         self.btn_1L.setToolTip('Rotates quadrant 1 to the left 90 degrees.')
-        self.btn_1L.setIcon(icon1L)
         self.btn_1L.setIconSize(QtCore.QSize(71, 71))
         self.btn_1L.setGeometry(170, 139, 71, 71)
         self.btn_1L.clicked.connect(self.btn_1L_function)
         # 2L button
-        self.btn_2L = QPushButton('', self)
+        self.btn_2L = RotationButton('', self, quadrant=2, direction=-1)
         self.btn_2L.setToolTip('Rotates quadrant 2 to the left 90 degrees.')
-        self.btn_2L.setIcon(icon2L)
         self.btn_2L.setIconSize(QtCore.QSize(71, 71))
         self.btn_2L.setGeometry(610, 49, 71, 71)
         self.btn_2L.clicked.connect(self.btn_2L_function)
         # 3L button
-        self.btn_3L = QPushButton('', self)
+        self.btn_3L = RotationButton('', self, quadrant=3, direction=-1)
         self.btn_3L.setToolTip('Rotates quadrant 3 to the left 90 degrees.')
-        self.btn_3L.setIcon(icon3L)
         self.btn_3L.setIconSize(QtCore.QSize(71, 71))
         self.btn_3L.setGeometry(260, 579, 71, 71)
         self.btn_3L.clicked.connect(self.btn_3L_function)
         # 4L button
-        self.btn_4L = QPushButton('', self)
+        self.btn_4L = RotationButton('', self, quadrant=4, direction=-1)
         self.btn_4L.setToolTip('Rotates quadrant 4 to the left 90 degrees.')
-        self.btn_4L.setIcon(icon4L)
         self.btn_4L.setIconSize(QtCore.QSize(71, 71))
         self.btn_4L.setGeometry(700, 489, 71, 71)
         self.btn_4L.clicked.connect(self.btn_4L_function)
         # buttons dictionary for use later
         self.rot_buttons = {1:self.btn_1L, 2:self.btn_2L, 3:self.btn_3L, 4:self.btn_4L, \
-        5:self.btn_1R, 6:self.btn_2R, 7:self.btn_3R, 8:self.btn_4R}
+            5:self.btn_1R, 6:self.btn_2R, 7:self.btn_3R, 8:self.btn_4R}
 
         #%% Call wrapper to initialize GUI
         wrapper(self)
@@ -1055,7 +1051,7 @@ def _plot_piece(ax, vc, hc, r, c, half=False):
 
     # theta angle to sweep out 2*pi
     if half:
-        piece = Wedge((hc, vc), r, 180, 360, facecolor=c, edgecolor='k')
+        piece = Wedge((hc, vc), r, 270, 90, facecolor=c, edgecolor='k')
     else:
         piece = Circle((hc, vc), r, facecolor=c, edgecolor='k')
 
@@ -1198,31 +1194,37 @@ def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
     # find intersection rotations
     rot_both  = rot_white & rot_black
 
-    # update the rot button backgrounds
+    # update the overlay information in the buttons
     for this_rot in rot_white ^ rot_both:
-        _plot_rot_color(rot_buttons[this_rot], COLOR['rot_wht'])
+        rot_buttons[this_rot].overlay = 'wht'
     for this_rot in rot_black ^ rot_both:
-        _plot_rot_color(rot_buttons[this_rot], COLOR['rot_blk'])
+        rot_buttons[this_rot].overlay = 'blk'
     if next_move == PLAYER['white']:
         for rot in rot_both:
-            _plot_rot_color(rot_buttons[rot], COLOR['rot_wht'])
-            _plot_rot_color(rot_buttons[rot], COLOR['rot_blk'], half=True)
+            rot_buttons[this_rot].overlay = 'w_b'
     else:
         for rot in rot_both:
-            _plot_rot_color(rot_buttons[rot], COLOR['rot_blk'])
-            _plot_rot_color(rot_buttons[rot], COLOR['rot_wht'], half=True)
-
-#%% _plot_rot_color
-def _plot_rot_color(rot_hand, color=None, half=False):
-    r"""
-    Plots the rotation arrow in the specified color.
-    """
-    if color is None:
-        color_name = 'none'
-    else:
-        color_name = '#{:02x}{:02x}{:02x}'.format(*(int(c*255) for c in color))
-    rot_hand.setStyleSheet('background-color: ' + color_name + ';')
-    # TODO: make work for half buttons
+            rot_buttons[this_rot].overlay = 'b_w'
+      
+#%% _load_images      
+def _load_images():
+    r"""Loads the images for use later on."""
+    # TODO: needs a QApplication to exist first.  Play around with making this earlier.
+    images_dir = get_images_dir()
+    images        = {}
+    images['1R']  = QtGui.QIcon(os.path.join(images_dir, 'right1.png'))
+    images['2R']  = QtGui.QIcon(os.path.join(images_dir, 'right2.png'))
+    images['3R']  = QtGui.QIcon(os.path.join(images_dir, 'right3.png'))
+    images['4R']  = QtGui.QIcon(os.path.join(images_dir, 'right4.png'))
+    images['1L']  = QtGui.QIcon(os.path.join(images_dir, 'left1.png'))
+    images['2L']  = QtGui.QIcon(os.path.join(images_dir, 'left2.png'))
+    images['3L']  = QtGui.QIcon(os.path.join(images_dir, 'left3.png'))
+    images['4L']  = QtGui.QIcon(os.path.join(images_dir, 'left4.png'))
+    images['wht'] = QtGui.QIcon(os.path.join(images_dir, 'blue_button.png'))
+    images['blk'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_button.png'))
+    images['w_b'] = QtGui.QIcon(os.path.join(images_dir, 'blue_cyan_button.png'))
+    images['b_w'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_blue_button.png'))
+    return images
 
 #%% move_wrapper
 def wrapper(self):
@@ -1239,7 +1241,7 @@ def wrapper(self):
 
     # draw turn arrows in default colors
     for button in self.rot_buttons.values():
-        _plot_rot_color(button)
+        button.overlay = None
 
     # draw the board
     _plot_board(self.board_axes)
@@ -1280,6 +1282,9 @@ if __name__ == '__main__':
     if mode == 'run':
         # Runs the GUI application
         app = QApplication(sys.argv)
+        # load the images
+        IMAGES = _load_images()
+        # instatiates the GUI
         gui = PentagoGui()
         gui.show()
         sys.exit(app.exec_())
