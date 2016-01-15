@@ -301,7 +301,23 @@ class Test__find_moves(unittest.TestCase):
         np.testing.assert_array_equal(black_moves, self.black_moves)
 
     def test_rotate_to_win(self):
-        pass
+        self.board[3, 1]   = w
+        self.board[4, 1]   = w
+        self.board[4, 3:6] = w
+        for i in range(6):
+            for j in range(6):
+                if self.board[i, j] == pentago.PLAYER['none']:
+                    self.white_moves.append(pentago.Move(i, j, 3, 1, 5))
+        self.white_moves.append(pentago.Move(4, 2, 1, -1, 5))
+        self.white_moves.append(pentago.Move(4, 2, 1, 1, 5))
+        self.white_moves.append(pentago.Move(4, 2, 2, -1, 5))
+        self.white_moves.append(pentago.Move(4, 2, 2, 1, 5))
+        #self.white_moves.append(pentago.Move(3, 1, 3, 1, 5)) # covered in for loop
+        self.white_moves.append(pentago.Move(5, 1, 3, -1, 5))
+        #self.white_moves.append(pentago.Move(5, 1, 3, 1, 5)) # covered in for loop
+        (white_moves, black_moves) = pentago._find_moves(self.board)
+        np.testing.assert_array_equal(white_moves, sorted(self.white_moves))
+        np.testing.assert_array_equal(black_moves, self.black_moves)
 
     def test_rotate_to_win_x6(self):
         pass

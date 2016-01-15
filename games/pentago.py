@@ -49,10 +49,12 @@ PLAYER['none']  = 0
 PLAYER['draw']  = 2
 
 # sizes of the different pieces and squares
-RADIUS           = {}
-RADIUS['piece']  = 0.45;
-RADIUS['win']    = 0.25;
-RADIUS['square'] = 0.5;
+SIZES           = {}
+SIZES['piece']  = 0.45
+SIZES['win']    = 0.25
+SIZES['square'] = 1.0
+SIZES['board']  = 6
+SIZES['button'] = 71 # number of pixels on rotation buttons
 
 # Gameplay options # TODO: implement these
 OPTIONS                       = {}
@@ -121,11 +123,13 @@ def _rotate_board(board, quadrant, direction, inplace=True):
     -----
     #.  Modifies board in-place.
     """
+    assert SIZES['board'] == 6, 'Only a 6x6 board is currently allowed.' # TODO: make this function more arbitrary
+    
     # determine if 6x6 board or 36xN
     (r, c) = board.shape
 
-    if r == 6 and c == 6:
-        assert inplace, '6x6 boards must be modified inplace.'
+    if r == SIZES['board'] and c == SIZES['board']:
+        assert inplace, '{0}x{0} boards must be modified inplace.'.format(SIZES['board'])
         # get quad
         if quadrant == 1:
             old_sub = board[0:3, 0:3]
@@ -156,7 +160,7 @@ def _rotate_board(board, quadrant, direction, inplace=True):
         elif quadrant == 4:
             board[3:6, 3:6] = new_sub
 
-    elif r == 36:
+    elif r == SIZES['board']*SIZES['board']:
         # get quad
         if quadrant == 1:
             ix_old = np.array([ 0,  1,  2,  6,  7,  8, 12, 13, 14])
@@ -266,7 +270,7 @@ class Move(Frozen):
         r"""Converts the move list into position numbers."""
         pos = []
         for this_move in move_list:
-            pos.append(this_move.row + 6 * this_move.column)
+            pos.append(this_move.row + SIZES['board'] * this_move.column)
         return pos
         
     @staticmethod
@@ -323,7 +327,7 @@ class GameStats(Frozen):
 #%% Dynamic globals
 cur_move    = 0
 cur_game    = 0
-board       = PLAYER['none'] * np.ones((6, 6), dtype=int)
+board       = PLAYER['none'] * np.ones((SIZES['board'], SIZES['board']), dtype=int)
 move_status = {'ok': False, 'pos': None, 'patch_object': None}
 game_hist   = []
 game_hist.append(GameStats(number=cur_game, first_move=PLAYER['white']))
@@ -336,6 +340,12 @@ board = np.array([\
     [0,-1, 0, 0, 0, 0],\
     [0,-1, 1,-1,-1,-1],\
     [0, 1, 0, 0, 0, 0]], dtype=int)
+
+# for debugging:
+#board = np.zeros((6, 6), dtype=int)
+#board[3, 1]   = 1
+#board[4, 1]   = 1
+#board[4, 3:6] = 1
     
 #%% Classes - RotationButton
 class RotationButton(QPushButton):
@@ -351,12 +361,12 @@ class RotationButton(QPushButton):
         # create painter and load base image
         painter = QtGui.QPainter(self)
         pixmap_key = str(self.quadrant) + ('L' if self.direction == -1 else 'R')
-        pixmap = IMAGES[pixmap_key].pixmap(QtCore.QSize(71, 71))
+        pixmap = IMAGES[pixmap_key].pixmap(QtCore.QSize(SIZES['button'], SIZES['button']))
         if self.overlay is None:
             painter.drawPixmap(0, 0, pixmap)            
         else:
             # optionally load the overlaid image
-            overlay_pixmap = IMAGES[self.overlay].pixmap(QtCore.QSize(71, 71))
+            overlay_pixmap = IMAGES[self.overlay].pixmap(QtCore.QSize(SIZES['button'], SIZES['button']))
             painter.drawPixmap(0, 0, overlay_pixmap)
             painter.setCompositionMode(painter.CompositionMode_SourceOver)
             painter.drawPixmap(0, 0, pixmap)
@@ -428,17 +438,18 @@ class PentagoGui(QWidget):
 
         # current move
         self.wid_move = QWidget(self)
-        self.wid_move.setGeometry(780, 700-350-71, 70, 70)
+        self.wid_move.setGeometry(780, 279, 70, 70)
         fig = Figure(figsize=(.7, .7), dpi=100, frameon=False)
         self.move_canvas = FigureCanvas(fig)
         self.move_canvas.setParent(self.wid_move)
         self.move_axes = Axes(fig, [0., 0., 1., 1.])
-        self.move_axes.set_xlim(-RADIUS['square'], RADIUS['square'])
-        self.move_axes.set_ylim(-RADIUS['square'], RADIUS['square'])
+        self.move_axes.set_xlim(-SIZES['square']/2, SIZES['square']/2)
+        self.move_axes.set_ylim(-SIZES['square']/2, SIZES['square']/2)
         self.move_axes.set_axis_off()
         fig.add_axes(self.move_axes)
 
         #%% Buttons
+        button_size = QtCore.QSize(SIZES['button'], SIZES['button'])
         # Undo button
         self.btn_undo = QPushButton('Undo', self)
         self.btn_undo.setToolTip('Undoes the last move.')
@@ -461,50 +472,50 @@ class PentagoGui(QWidget):
         # 1R button
         self.btn_1R = RotationButton('', self, quadrant=1, direction=1)
         self.btn_1R.setToolTip('Rotates quadrant 1 to the right 90 degrees.')
-        self.btn_1R.setIconSize(QtCore.QSize(71, 71))
-        self.btn_1R.setGeometry(260, 49, 71, 71)
+        self.btn_1R.setIconSize(button_size)
+        self.btn_1R.setGeometry(260, 49, SIZES['button'], SIZES['button'])
         self.btn_1R.clicked.connect(self.btn_1R_function)
         # 2R button
         self.btn_2R = RotationButton('', self, quadrant=2, direction=1)
         self.btn_2R.setToolTip('Rotates quadrant 2 to the right 90 degrees.')
-        self.btn_2R.setIconSize(QtCore.QSize(71, 71))
-        self.btn_2R.setGeometry(700, 139, 71, 71)
+        self.btn_2R.setIconSize(button_size)
+        self.btn_2R.setGeometry(700, 139, SIZES['button'], SIZES['button'])
         self.btn_2R.clicked.connect(self.btn_2R_function)
         # 3R button
         self.btn_3R = RotationButton('', self, quadrant=3, direction=1)
         self.btn_3R.setToolTip('Rotates quadrant 3 to the right 90 degrees.')
-        self.btn_3R.setIconSize(QtCore.QSize(71, 71))
-        self.btn_3R.setGeometry(170, 489, 71, 71)
+        self.btn_3R.setIconSize(button_size)
+        self.btn_3R.setGeometry(170, 489, SIZES['button'], SIZES['button'])
         self.btn_3R.clicked.connect(self.btn_3R_function)
         # 4R button
         self.btn_4R = RotationButton('', self, quadrant=4, direction=1)
         self.btn_4R.setToolTip('Rotates quadrant 4 to the right 90 degrees.')
-        self.btn_4R.setIconSize(QtCore.QSize(71, 71))
-        self.btn_4R.setGeometry(610, 579, 71, 71)
+        self.btn_4R.setIconSize(button_size)
+        self.btn_4R.setGeometry(610, 579, SIZES['button'], SIZES['button'])
         self.btn_4R.clicked.connect(self.btn_4R_function)
         # 1L button
         self.btn_1L = RotationButton('', self, quadrant=1, direction=-1)
         self.btn_1L.setToolTip('Rotates quadrant 1 to the left 90 degrees.')
-        self.btn_1L.setIconSize(QtCore.QSize(71, 71))
-        self.btn_1L.setGeometry(170, 139, 71, 71)
+        self.btn_1L.setIconSize(button_size)
+        self.btn_1L.setGeometry(170, 139, SIZES['button'], SIZES['button'])
         self.btn_1L.clicked.connect(self.btn_1L_function)
         # 2L button
         self.btn_2L = RotationButton('', self, quadrant=2, direction=-1)
         self.btn_2L.setToolTip('Rotates quadrant 2 to the left 90 degrees.')
-        self.btn_2L.setIconSize(QtCore.QSize(71, 71))
-        self.btn_2L.setGeometry(610, 49, 71, 71)
+        self.btn_2L.setIconSize(button_size)
+        self.btn_2L.setGeometry(610, 49, SIZES['button'], SIZES['button'])
         self.btn_2L.clicked.connect(self.btn_2L_function)
         # 3L button
         self.btn_3L = RotationButton('', self, quadrant=3, direction=-1)
         self.btn_3L.setToolTip('Rotates quadrant 3 to the left 90 degrees.')
-        self.btn_3L.setIconSize(QtCore.QSize(71, 71))
-        self.btn_3L.setGeometry(260, 579, 71, 71)
+        self.btn_3L.setIconSize(button_size)
+        self.btn_3L.setGeometry(260, 579, SIZES['button'], SIZES['button'])
         self.btn_3L.clicked.connect(self.btn_3L_function)
         # 4L button
         self.btn_4L = RotationButton('', self, quadrant=4, direction=-1)
         self.btn_4L.setToolTip('Rotates quadrant 4 to the left 90 degrees.')
-        self.btn_4L.setIconSize(QtCore.QSize(71, 71))
-        self.btn_4L.setGeometry(700, 489, 71, 71)
+        self.btn_4L.setIconSize(button_size)
+        self.btn_4L.setGeometry(700, 489, SIZES['button'], SIZES['button'])
         self.btn_4L.clicked.connect(self.btn_4L_function)
         # buttons dictionary for use later
         self.rot_buttons = {1:self.btn_1L, 2:self.btn_2L, 3:self.btn_3L, 4:self.btn_4L, \
@@ -567,7 +578,7 @@ class PentagoGui(QWidget):
         cur_game += 1
         cur_move = 0
         game_hist.append(GameStats(number=cur_game, first_move=next_lead, winner=PLAYER['none']))
-        board = PLAYER['none'] * np.ones((6, 6), dtype=int)
+        board = PLAYER['none'] * np.ones((SIZES['board'], SIZES['board']), dtype=int)
         # call GUI wrapper
         wrapper(self)
 
@@ -669,9 +680,9 @@ def _mouse_click_callback(self, event):
             print('Placing current piece.')
         current_player = _calc_cur_move(cur_move, cur_game)
         if current_player == PLAYER['white']:
-            move_status['patch_object'] = _plot_piece(self.board_axes, x, y, RADIUS['piece'], COLOR['next_wht'])
+            move_status['patch_object'] = _plot_piece(self.board_axes, x, y, SIZES['piece'], COLOR['next_wht'])
         elif current_player == PLAYER['black']:
-            move_status['patch_object'] = _plot_piece(self.board_axes, x, y, RADIUS['piece'], COLOR['next_blk'])
+            move_status['patch_object'] = _plot_piece(self.board_axes, x, y, SIZES['piece'], COLOR['next_blk'])
         else:
             raise ValueError('Unexpected player to move next.')
     else:
@@ -775,11 +786,11 @@ def _check_for_win(board):
 
     # find winning pieces on the board
     if winner == PLAYER['none']:
-        win_mask = np.zeros((6,6), dtype=bool)
+        win_mask = np.zeros((SIZES['board'],SIZES['board']), dtype=bool)
     else:
         if LOGGING:
             print('Win detected.  Winner is {}.'.format(list(PLAYER.keys())[list(PLAYER.values()).index(winner)]))
-        win_mask = np.reshape(np.sum(WIN[:, white], axis=1) + np.sum(WIN[:, black], axis=1), (6, 6)) != 0
+        win_mask = np.reshape(np.sum(WIN[:, white], axis=1) + np.sum(WIN[:, black], axis=1), (SIZES['board'], SIZES['board'])) != 0
 
     # update statistics
     game_hist[cur_game].winner = winner
@@ -853,60 +864,35 @@ def _find_moves(board):
     white_set = _get_move_from_one_off(big_board, ix_white, ONE_OFF)
     black_set = _get_move_from_one_off(big_board, ix_black, ONE_OFF)
     # rotation only winning moves
-    #white_rotations = _get_move_from_one_off(big_board, rot_white, ONE_OFF)
-    #black_rotations = _get_move_from_one_off(big_board, rot_black, ONE_OFF)
-
-    # combine the possible moves
-    #white_set = white_set | white_rotations
-    #black_set = black_set | black_rotations
+    white_rotations = _get_move_from_one_off(big_board, rot_white, ONE_OFF)
+    black_rotations = _get_move_from_one_off(big_board, rot_black, ONE_OFF)
+    
+    # fill in all available row and columns positions for the rotate to win moves
+    empty = np.nonzero(big_board == PLAYER['none'])[0]
+    for ix in empty:
+        this_row = ix // SIZES['board']
+        this_col = np.mod(ix, SIZES['board'])
+        for this_rot in white_rotations:
+            this_move = Move(this_row, this_col, this_rot.quadrant, this_rot.direction, power=5)
+            white_set.add(this_move)
+        for this_rot in black_rotations:
+            this_move = Move(this_row, this_col, this_rot.quadrant, this_rot.direction, power=5)
+            black_set.add(this_move)
+            
+    # check for ties and set their power to -1
+    ties = white_set & black_set
+    for this_move in ties:
+        white_set.remove(this_move)
+        black_set.remove(this_move)
+        this_move.power = -1
+        white_set.add(this_move)
+        black_set.add(this_move)
 
     # convert to list, sort by power, such that ties go at the end
     white_moves = sorted(list(white_set))
     black_moves = sorted(list(black_set))
 
     return (white_moves, black_moves)
-
-#    [xwr, ywr, qwr, dwr] =
-#    [xbr, ybr, qbr, dbr] =
-#
-#    # Add moves that are just a place anywhere and rotate to win
-#    empty = np.nonzero(big_board == PLAYER.none)[0]
-#    # white
-#    pos_wr = np.ones((1, len(qwr)), dtype=int) * empty
-#    xwr = modd(pos_wr.ravel(), 6)
-#    ywr = np.ceil(pos_wr.ravel() / 6).astype(int)
-#    qwr = repmat(qwr,length(empty),1);
-#    qwr = qwr(:)';
-#    dwr = repmat(dwr,length(empty),1);
-#    dwr = dwr(:)';
-#    # black
-#    pos_br = repmat(empty,1,length(qbr));
-#    xbr = mod(pos_br(:)',6);
-#    xbr(xbr == 0) = 6;
-#    ybr = ceil(pos_br(:)'/6);
-#    qbr = repmat(qbr,length(empty),1);
-#    qbr = qbr(:)';
-#    dbr = repmat(dbr,length(empty),1);
-#    dbr = dbr(:)';
-#    # white win moves
-#    moves.white.x    = [xwp, xwr];
-#    moves.white.y    = [ywp, ywr];
-#    moves.white.quad = [qwp, qwr];
-#    moves.white.dir  = [dwp, dwr];
-#    moves.white.pwr  = 5*ones(size(moves.white.x));
-#    # mark moves that are really a tie, instead of a win
-#    white_moves.white.pwr(ismember([qwp+4*dwp,qwr+4*dwr],qbr+4*dbr)) = np.nan
-
-#    # black win moves
-#    moves.black.x    = [xbp, xbr];
-#    moves.black.y    = [ybp, ybr];
-#    moves.black.quad = [qbp, qbr];
-#    moves.black.dir  = [dbp, dbr];
-#    moves.black.pwr  = 5*ones(size(moves.black.x));
-#    # mark moves that are really a tie, instead of a win
-#    moves.black.pwr(ismember([qbp+4*dbp,qbr+4*dbr],qwr+4*dwr)) = nan;
-#    # resort ties at end
-#    moves.black = resort_moves(moves.black);
 
 #%% _get_move_from_one_off
 def _get_move_from_one_off(big_board, ix, ONE_OFF):
@@ -921,13 +907,13 @@ def _get_move_from_one_off(big_board, ix, ONE_OFF):
     pos_ix = np.logical_and(np.logical_xor(np.abs(big_board), ONE_OFF[:,ix]), ONE_OFF[:,ix])
 
     assert np.all(np.sum(pos_ix, axis=0) <= 1), 'Only exactly one or fewer places should be found.'
-    assert np.all(np.sum(pos_ix, axis=0) == 1), 'Exactly one place was not found.' # TODO: 0 is okay later
+    assert np.all(np.sum(pos_ix, axis=0) <= 1), 'Exactly one place was not found.' # TODO: 0 is okay later
 
     # pull out element number from 0 to 35
     (one_off_row, one_off_col) = np.nonzero(pos_ix)
     # convert to row and column
-    row[one_off_col]    = one_off_row//6
-    column[one_off_col] = np.mod(one_off_row, 6)
+    row[one_off_col]    = one_off_row // SIZES['board']
+    column[one_off_col] = np.mod(one_off_row, SIZES['board'])
 
     # get quadrant and rotation number
     # based on order that ONE_OFF was built, so permutations of first quads 1,2,3,4, second left,right;
@@ -943,7 +929,7 @@ def _get_move_from_one_off(big_board, ix, ONE_OFF):
     # convert to a move class
     move = set()
     for i in range(len(ix)):
-        move.add(Move(row[i], column[i], quadrant[i], direction[i]))
+        move.add(Move(row[i], column[i], quadrant[i], direction[i], power=5))
     return move
 
 #%% _update_game_stats
@@ -990,17 +976,17 @@ def _plot_cur_move(ax, move):
     Plots the piece corresponding the current players move.
     """
     # local alias
-    half_box_size = RADIUS['square']
+    box_size = SIZES['square']
 
     # fill background
-    ax.add_patch(Rectangle((-half_box_size, -half_box_size), 2*half_box_size, 2*half_box_size, \
+    ax.add_patch(Rectangle((-box_size/2, -box_size/2), box_size, box_size, \
         facecolor=COLOR['board'], edgecolor='k'))
 
     # draw the piece
     if move == PLAYER['white']:
-        _plot_piece(ax, 0, 0, RADIUS['piece'], COLOR['white'])
+        _plot_piece(ax, 0, 0, SIZES['piece'], COLOR['white'])
     elif move == PLAYER['black']:
-        _plot_piece(ax, 0, 0, RADIUS['piece'], COLOR['black'])
+        _plot_piece(ax, 0, 0, SIZES['piece'], COLOR['black'])
     elif move == PLAYER['none']:
         pass
     else:
@@ -1066,7 +1052,7 @@ def _plot_board(ax):
     """
     # get axes limits
     (m, n) = board.shape
-    s = RADIUS['square']
+    s = SIZES['square']/2
     xmin = 0 - s
     xmax = m - 1 + s
     ymin = 0 - s
@@ -1096,9 +1082,9 @@ def _plot_board(ax):
             if board[i, j] == PLAYER['none']:
                 pass
             elif board[i, j] == PLAYER['white']:
-                _plot_piece(ax, i, j, RADIUS['piece'], COLOR['white'])
+                _plot_piece(ax, i, j, SIZES['piece'], COLOR['white'])
             elif board[i, j] == PLAYER['black']:
-                _plot_piece(ax, i, j, RADIUS['piece'], COLOR['black'])
+                _plot_piece(ax, i, j, SIZES['piece'], COLOR['black'])
             else:
                 raise ValueError('Bad board position.')
 
@@ -1136,7 +1122,7 @@ def _plot_win(ax, mask):
     for i in range(m):
         for j in range(n):
             if mask[i, j]:
-                _plot_piece(ax, i, j, RADIUS['win'], COLOR['win'])
+                _plot_piece(ax, i, j, SIZES['win'], COLOR['win'])
 
 
 #%% _plot_possible_win
@@ -1171,20 +1157,20 @@ def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
     
     # plot the whole pieces
     for pos in pos_white ^ pos_both:
-        _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_wht'])
+        _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_wht'])
     for pos in pos_black ^ pos_both:
-        _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_blk'])
+        _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_blk'])
 
     # plot the half pieces, with the current players move as whole
     next_move = _calc_cur_move(cur_move, cur_game)
     if next_move == PLAYER['white']:
         for pos in pos_both:
-            _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_wht'])
-            _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_blk'], half=True)
+            _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_wht'])
+            _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_blk'], half=True)
     elif next_move == PLAYER['black']:
         for pos in pos_both:
-            _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_blk'])
-            _plot_piece(ax, np.mod(pos, 6), pos//6, RADIUS['win'], COLOR['win_wht'], half=True)
+            _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_blk'])
+            _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_wht'], half=True)
     else:
         raise ValueError('Unexpected next player.')
 
