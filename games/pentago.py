@@ -63,7 +63,7 @@ OPTIONS['name_white']         = 'Player 1'
 OPTIONS['name_black']         = 'Player 2'
 OPTIONS['plot_winning_moves'] = True
 
-# TODO: this might be temporary
+# Token value for invalid board positions and such
 INT_TOKEN = -101
 
 # all possible winning combinations
@@ -112,7 +112,7 @@ WIN = np.array([\
 ], dtype=bool)
 
 # boolean flag for whether to log extra information or not
-LOGGING = True
+LOGGING = False
 
 #%% _rotate_board
 def _rotate_board(board, quadrant, direction, inplace=True):
@@ -333,19 +333,7 @@ game_hist   = []
 game_hist.append(GameStats(number=cur_game, first_move=PLAYER['white']))
 
 #%% Debugging
-board = np.array([\
-    [0,-1, 0, 0, 0, 0],\
-    [0, 1, 0, 1, 1, 1],\
-    [0, 0, 0, 0, 0, 0],\
-    [0,-1, 0, 0, 0, 0],\
-    [0,-1, 1,-1,-1,-1],\
-    [0, 1, 0, 0, 0, 0]], dtype=int)
-
-# for debugging:
-#board = np.zeros((6, 6), dtype=int)
-#board[3, 1]   = 1
-#board[4, 1]   = 1
-#board[4, 3:6] = 1
+board = np.zeros((6, 6), dtype=int)
 
 #%% Classes - RotationButton
 class RotationButton(QPushButton):
@@ -660,6 +648,39 @@ def _mouse_click_callback(self, event):
     # redraw the board
     self.board_canvas.draw()
 
+#%% _load_images
+def _load_images():
+    r"""
+    Loads the images for use later on.
+
+    Returns
+    -------
+    images : dict
+        Images for use on the rotation buttons.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in January 2016.
+    #.  TODO: needs a QApplication to exist first.  Play around with making this earlier.
+
+    """
+    #
+    images_dir = get_images_dir()
+    images        = {}
+    images['1R']  = QtGui.QIcon(os.path.join(images_dir, 'right1.png'))
+    images['2R']  = QtGui.QIcon(os.path.join(images_dir, 'right2.png'))
+    images['3R']  = QtGui.QIcon(os.path.join(images_dir, 'right3.png'))
+    images['4R']  = QtGui.QIcon(os.path.join(images_dir, 'right4.png'))
+    images['1L']  = QtGui.QIcon(os.path.join(images_dir, 'left1.png'))
+    images['2L']  = QtGui.QIcon(os.path.join(images_dir, 'left2.png'))
+    images['3L']  = QtGui.QIcon(os.path.join(images_dir, 'left3.png'))
+    images['4L']  = QtGui.QIcon(os.path.join(images_dir, 'left4.png'))
+    images['wht'] = QtGui.QIcon(os.path.join(images_dir, 'blue_button.png'))
+    images['blk'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_button.png'))
+    images['w_b'] = QtGui.QIcon(os.path.join(images_dir, 'blue_cyan_button.png'))
+    images['b_w'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_blue_button.png'))
+    return images
+
 #%% _calc_cur_move
 def _calc_cur_move(cur_move, cur_game):
     r"""
@@ -779,8 +800,8 @@ def _find_moves(board):
     >>> import numpy as np
     >>> board = np.reshape(np.hstack((np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1]), np.zeros(24, dtype=int))), (6, 6))
     >>> (white_moves, black_moves) = _find_moves(board)
-    >>> print(white_moves) # doctest: +SKIP
-    # TODO: write the correct answer
+    >>> print(white_moves[0])
+    row: 0, col: 1, quad: 1, dir: 1
 
     >>> print(black_moves)
     []
@@ -873,7 +894,6 @@ def _get_move_from_one_off(big_board, ix, ONE_OFF):
     pos_ix = np.logical_and(np.logical_xor(np.abs(big_board), ONE_OFF[:,ix]), ONE_OFF[:,ix])
 
     assert np.all(np.sum(pos_ix, axis=0) <= 1), 'Only exactly one or fewer places should be found.'
-    assert np.all(np.sum(pos_ix, axis=0) <= 1), 'Exactly one place was not found.' # TODO: 0 is okay later
 
     # pull out element number from 0 to 35
     (one_off_row, one_off_col) = np.nonzero(pos_ix)
@@ -1152,31 +1172,11 @@ def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
     for this_rot in rot_black ^ rot_both:
         rot_buttons[this_rot].overlay = 'blk'
     if next_move == PLAYER['white']:
-        for rot in rot_both:
+        for this_rot in rot_both:
             rot_buttons[this_rot].overlay = 'w_b'
     else:
-        for rot in rot_both:
+        for this_rot in rot_both:
             rot_buttons[this_rot].overlay = 'b_w'
-
-#%% _load_images
-def _load_images():
-    r"""Loads the images for use later on."""
-    # TODO: needs a QApplication to exist first.  Play around with making this earlier.
-    images_dir = get_images_dir()
-    images        = {}
-    images['1R']  = QtGui.QIcon(os.path.join(images_dir, 'right1.png'))
-    images['2R']  = QtGui.QIcon(os.path.join(images_dir, 'right2.png'))
-    images['3R']  = QtGui.QIcon(os.path.join(images_dir, 'right3.png'))
-    images['4R']  = QtGui.QIcon(os.path.join(images_dir, 'right4.png'))
-    images['1L']  = QtGui.QIcon(os.path.join(images_dir, 'left1.png'))
-    images['2L']  = QtGui.QIcon(os.path.join(images_dir, 'left2.png'))
-    images['3L']  = QtGui.QIcon(os.path.join(images_dir, 'left3.png'))
-    images['4L']  = QtGui.QIcon(os.path.join(images_dir, 'left4.png'))
-    images['wht'] = QtGui.QIcon(os.path.join(images_dir, 'blue_button.png'))
-    images['blk'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_button.png'))
-    images['w_b'] = QtGui.QIcon(os.path.join(images_dir, 'blue_cyan_button.png'))
-    images['b_w'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_blue_button.png'))
-    return images
 
 #%% move_wrapper
 def wrapper(self):
