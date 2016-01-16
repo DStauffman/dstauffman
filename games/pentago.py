@@ -124,7 +124,7 @@ def _rotate_board(board, quadrant, direction, inplace=True):
     #.  Modifies board in-place.
     """
     assert SIZES['board'] == 6, 'Only a 6x6 board is currently allowed.' # TODO: make this function more arbitrary
-    
+
     # determine if 6x6 board or 36xN
     (r, c) = board.shape
 
@@ -264,7 +264,7 @@ class Move(Frozen):
     def __repr__(self):
         r"""Repr returns all values, including power."""
         return '<' + self.__str__() + ', pwr: {}'.format(self.power) + '>'
-        
+
     @staticmethod
     def get_pos(move_list):
         r"""Converts the move list into position numbers."""
@@ -272,7 +272,7 @@ class Move(Frozen):
         for this_move in move_list:
             pos.append(this_move.row + SIZES['board'] * this_move.column)
         return pos
-        
+
     @staticmethod
     def get_rot(move_list):
         r"""Converts the quadrant rotation and direction into a representative number."""
@@ -346,7 +346,7 @@ board = np.array([\
 #board[3, 1]   = 1
 #board[4, 1]   = 1
 #board[4, 3:6] = 1
-    
+
 #%% Classes - RotationButton
 class RotationButton(QPushButton):
     def __init__(self, text, parent, quadrant, direction):
@@ -354,7 +354,7 @@ class RotationButton(QPushButton):
         self.quadrant  = quadrant
         self.direction = direction
         self.overlay   = None
-        
+
     def paintEvent(self, event):
         # call super method
         QPushButton.paintEvent(self, event)
@@ -363,7 +363,7 @@ class RotationButton(QPushButton):
         pixmap_key = str(self.quadrant) + ('L' if self.direction == -1 else 'R')
         pixmap = IMAGES[pixmap_key].pixmap(QtCore.QSize(SIZES['button'], SIZES['button']))
         if self.overlay is None:
-            painter.drawPixmap(0, 0, pixmap)            
+            painter.drawPixmap(0, 0, pixmap)
         else:
             # optionally load the overlaid image
             overlay_pixmap = IMAGES[self.overlay].pixmap(QtCore.QSize(SIZES['button'], SIZES['button']))
@@ -474,49 +474,49 @@ class PentagoGui(QWidget):
         self.btn_1R.setToolTip('Rotates quadrant 1 to the right 90 degrees.')
         self.btn_1R.setIconSize(button_size)
         self.btn_1R.setGeometry(260, 49, SIZES['button'], SIZES['button'])
-        self.btn_1R.clicked.connect(self.btn_1R_function)
+        self.btn_1R.clicked.connect(self.btn_rot_function)
         # 2R button
         self.btn_2R = RotationButton('', self, quadrant=2, direction=1)
         self.btn_2R.setToolTip('Rotates quadrant 2 to the right 90 degrees.')
         self.btn_2R.setIconSize(button_size)
         self.btn_2R.setGeometry(700, 139, SIZES['button'], SIZES['button'])
-        self.btn_2R.clicked.connect(self.btn_2R_function)
+        self.btn_2R.clicked.connect(self.btn_rot_function)
         # 3R button
         self.btn_3R = RotationButton('', self, quadrant=3, direction=1)
         self.btn_3R.setToolTip('Rotates quadrant 3 to the right 90 degrees.')
         self.btn_3R.setIconSize(button_size)
         self.btn_3R.setGeometry(170, 489, SIZES['button'], SIZES['button'])
-        self.btn_3R.clicked.connect(self.btn_3R_function)
+        self.btn_3R.clicked.connect(self.btn_rot_function)
         # 4R button
         self.btn_4R = RotationButton('', self, quadrant=4, direction=1)
         self.btn_4R.setToolTip('Rotates quadrant 4 to the right 90 degrees.')
         self.btn_4R.setIconSize(button_size)
         self.btn_4R.setGeometry(610, 579, SIZES['button'], SIZES['button'])
-        self.btn_4R.clicked.connect(self.btn_4R_function)
+        self.btn_4R.clicked.connect(self.btn_rot_function)
         # 1L button
         self.btn_1L = RotationButton('', self, quadrant=1, direction=-1)
         self.btn_1L.setToolTip('Rotates quadrant 1 to the left 90 degrees.')
         self.btn_1L.setIconSize(button_size)
         self.btn_1L.setGeometry(170, 139, SIZES['button'], SIZES['button'])
-        self.btn_1L.clicked.connect(self.btn_1L_function)
+        self.btn_1L.clicked.connect(self.btn_rot_function)
         # 2L button
         self.btn_2L = RotationButton('', self, quadrant=2, direction=-1)
         self.btn_2L.setToolTip('Rotates quadrant 2 to the left 90 degrees.')
         self.btn_2L.setIconSize(button_size)
         self.btn_2L.setGeometry(610, 49, SIZES['button'], SIZES['button'])
-        self.btn_2L.clicked.connect(self.btn_2L_function)
+        self.btn_2L.clicked.connect(self.btn_rot_function)
         # 3L button
         self.btn_3L = RotationButton('', self, quadrant=3, direction=-1)
         self.btn_3L.setToolTip('Rotates quadrant 3 to the left 90 degrees.')
         self.btn_3L.setIconSize(button_size)
         self.btn_3L.setGeometry(260, 579, SIZES['button'], SIZES['button'])
-        self.btn_3L.clicked.connect(self.btn_3L_function)
+        self.btn_3L.clicked.connect(self.btn_rot_function)
         # 4L button
         self.btn_4L = RotationButton('', self, quadrant=4, direction=-1)
         self.btn_4L.setToolTip('Rotates quadrant 4 to the left 90 degrees.')
         self.btn_4L.setIconSize(button_size)
         self.btn_4L.setGeometry(700, 489, SIZES['button'], SIZES['button'])
-        self.btn_4L.clicked.connect(self.btn_4L_function)
+        self.btn_4L.clicked.connect(self.btn_rot_function)
         # buttons dictionary for use later
         self.rot_buttons = {1:self.btn_1L, 2:self.btn_2L, 3:self.btn_3L, 4:self.btn_4L, \
             5:self.btn_1R, 6:self.btn_2R, 7:self.btn_3R, 8:self.btn_4R}
@@ -599,44 +599,10 @@ class PentagoGui(QWidget):
         # call GUI wrapper
         wrapper(self)
 
-    def btn_1R_function(self):
-        """Functions that executes on 1R button press."""
-        _execute_move(quadrant=1, direction=1)
-        wrapper(self)
-
-    def btn_2R_function(self):
-        """Functions that executes on 2R button press."""
-        _execute_move(quadrant=2, direction=1)
-        wrapper(self)
-
-    def btn_3R_function(self):
-        """Functions that executes on 3R button press."""
-        _execute_move(quadrant=3, direction=1)
-        wrapper(self)
-
-    def btn_4R_function(self):
-        """Functions that executes on 4R button press."""
-        _execute_move(quadrant=4, direction=1)
-        wrapper(self)
-
-    def btn_1L_function(self):
-        """Functions that executes on 1L button press."""
-        _execute_move(quadrant=1, direction=-1)
-        wrapper(self)
-
-    def btn_2L_function(self):
-        """Functions that executes on 2L button press."""
-        _execute_move(quadrant=2, direction=-1)
-        wrapper(self)
-
-    def btn_3L_function(self):
-        """Functions that executes on 3L button press."""
-        _execute_move(quadrant=3, direction=-1)
-        wrapper(self)
-
-    def btn_4L_function(self):
-        """Functions that executes on 4L button press."""
-        _execute_move(quadrant=4, direction=-1)
+    def btn_rot_function(self):
+        """Functions that executes on rotation button press."""
+        button = self.sender()
+        _execute_move(quadrant=button.quadrant, direction=button.direction)
         wrapper(self)
 
 #%% _mouse_click_callback
@@ -866,7 +832,7 @@ def _find_moves(board):
     # rotation only winning moves
     white_rotations = _get_move_from_one_off(big_board, rot_white, ONE_OFF)
     black_rotations = _get_move_from_one_off(big_board, rot_black, ONE_OFF)
-    
+
     # fill in all available row and columns positions for the rotate to win moves
     empty = np.nonzero(big_board == PLAYER['none'])[0]
     for ix in empty:
@@ -878,7 +844,7 @@ def _find_moves(board):
         for this_rot in black_rotations:
             this_move = Move(this_row, this_col, this_rot.quadrant, this_rot.direction, power=5)
             black_set.add(this_move)
-            
+
     # check for ties and set their power to -1
     ties = white_set & black_set
     for this_move in ties:
@@ -1145,7 +1111,7 @@ def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
     >>> (white_moves, black_moves) = _find_moves(board)
     >>> _plot_possible_win(ax, white_moves, black_moves) # doctest: +SKIP
     >>> plt.show(block=False)
-    
+
     >>> plt.close()
 
     """
@@ -1154,7 +1120,7 @@ def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
     pos_black = set(Move.get_pos(black_moves))
     # find intersecting positions
     pos_both  = pos_white & pos_black
-    
+
     # plot the whole pieces
     for pos in pos_white ^ pos_both:
         _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_wht'])
@@ -1191,8 +1157,8 @@ def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
     else:
         for rot in rot_both:
             rot_buttons[this_rot].overlay = 'b_w'
-      
-#%% _load_images      
+
+#%% _load_images
 def _load_images():
     r"""Loads the images for use later on."""
     # TODO: needs a QApplication to exist first.  Play around with making this earlier.
