@@ -123,22 +123,24 @@ def _rotate_board(board, quadrant, direction, inplace=True):
     -----
     #.  Modifies board in-place.
     """
-    assert SIZES['board'] == 6, 'Only a 6x6 board is currently allowed.' # TODO: make this function more arbitrary
+    assert np.mod(SIZES['board'], 2) == 0, 'Board must be square and have an even number of rows and columns.'
 
     # determine if 6x6 board or 36xN
-    (r, c) = board.shape
+    (r, c) = board.shape  # current board size
+    f = SIZES['board']    # full board size
+    h = SIZES['board']//2 # half board size
 
-    if r == SIZES['board'] and c == SIZES['board']:
-        assert inplace, '{0}x{0} boards must be modified inplace.'.format(SIZES['board'])
+    if r == f and c == f:
+        assert inplace, '{0}x{0} boards must be modified inplace.'.format(f)
         # get quad
         if quadrant == 1:
-            old_sub = board[0:3, 0:3]
+            old_sub = board[0:h, 0:h]
         elif quadrant == 2:
-            old_sub = board[0:3, 3:6]
+            old_sub = board[0:h, h:f]
         elif quadrant == 3:
-            old_sub = board[3:6, 0:3]
+            old_sub = board[h:f, 0:h]
         elif quadrant == 4:
-            old_sub = board[3:6, 3:6]
+            old_sub = board[h:f, h:f]
         else:
             raise ValueError('Unexpected value for quadrant.')
 
@@ -152,31 +154,32 @@ def _rotate_board(board, quadrant, direction, inplace=True):
 
         # update rotated quad
         if quadrant == 1:
-            board[0:3, 0:3] = new_sub
+            board[0:h, 0:h] = new_sub
         elif quadrant == 2:
-            board[0:3, 3:6] = new_sub
-        elif quadrant == 3:
-            board[3:6, 0:3] = new_sub
+            board[0:h, h:f] = new_sub
+        elif quadrant == h:
+            board[h:f, 0:h] = new_sub
         elif quadrant == 4:
-            board[3:6, 3:6] = new_sub
+            board[h:f, h:f] = new_sub
 
-    elif r == SIZES['board']*SIZES['board']:
+    elif r == f*f:
+        ix_old = np.tile(np.arange(h), h) + f * np.repeat(np.arange(h), h, axis=0)
         # get quad
         if quadrant == 1:
-            ix_old = np.array([ 0,  1,  2,  6,  7,  8, 12, 13, 14])
+            ix_old += 0
         elif quadrant == 2:
-            ix_old = np.array([ 3,  4,  5,  9, 10, 11, 15, 16, 17])
+            ix_old += h
         elif quadrant == 3:
-            ix_old = np.array([18, 19, 20, 24, 25, 26, 30, 31, 32])
+            ix_old += (h*f)
         elif quadrant == 4:
-            ix_old = np.array([21, 22, 23, 27, 28, 29, 33, 34, 35])
+            ix_old += (h*f +h)
         else:
             raise ValueError('Unexpected value for quad')
         # rotate quad
         if direction == -1:
-            ix_new = ix_old[np.array([2, 5, 8, 1, 4, 7, 0, 3, 6])]
+            ix_new = ix_old[h * np.tile(np.arange(h), h) + np.repeat(np.arange(h-1, -1, -1), h, axis=0)]
         elif direction == 1:
-            ix_new = ix_old[np.array([6, 3, 0, 7, 4, 1, 8, 5, 2])]
+            ix_new = ix_old[h * np.tile(np.arange(h-1, -1, -1), h) + np.repeat(np.arange(h), h, axis=0)]
         else:
             raise ValueError('Unexpected value for dir')
         # update placements
@@ -309,7 +312,14 @@ class GameStats(Frozen):
 
     @property
     def num_moves(self):
+        r"""Calculates the number of moves in a move list."""
         return len(self.move_list)
+
+    @staticmethod
+    def get_results(game_hist):
+        r"""Pulls the results out of a list of game histories."""
+        return np.array([x.winner for x in game_hist])
+
 
     @staticmethod
     def save(filename, game_hist):
@@ -1208,7 +1218,7 @@ def wrapper(self):
     _display_controls(self)
 
     # plot possible winning moves (includes updating turn arrows)
-    if winner == PLAYER['none']:
+    if winner == PLAYER['none'] and OPTIONS['plot_winning_moves']:
         (white_moves, black_moves) = _find_moves(board)
         _plot_possible_win(self.board_axes, self.rot_buttons, white_moves, black_moves)
 
@@ -1217,8 +1227,7 @@ def wrapper(self):
     self.board_canvas.draw()
 
     # update game stats on GUI
-    results = [x.winner for x in game_hist]
-    _update_game_stats(self, results=np.array(results)) # TODO: make better?
+    _update_game_stats(self, results=GameStats.get_results(game_hist))
     self.update()
 
 #%% Unit Test
@@ -1233,13 +1242,13 @@ if __name__ == '__main__':
         mode = 'test'
     if mode == 'run':
         # Runs the GUI application
-        app = QApplication(sys.argv)
+        qapp = QApplication(sys.argv)
         # load the images
         IMAGES = _load_images()
         # instatiates the GUI
         gui = PentagoGui()
         gui.show()
-        sys.exit(app.exec_())
+        sys.exit(qapp.exec_())
     elif mode == 'test':
         _main()
         # open a qapp
@@ -1252,6 +1261,7 @@ if __name__ == '__main__':
         doctest.testmod(verbose=False)
         # close the qapp
         qapp.closeAllWindows()
+        qapp.exit()
     elif mode == 'null':
         pass
     else:
