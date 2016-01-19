@@ -58,9 +58,7 @@ SIZES['button'] = 71 # number of pixels on rotation buttons
 
 # Gameplay options # TODO: implement these
 OPTIONS                       = {}
-OPTIONS['load_previous_game'] = 'Yes' # from ['Yes','No','Ask']
-OPTIONS['name_white']         = 'Player 1'
-OPTIONS['name_black']         = 'Player 2'
+OPTIONS['load_previous_game'] = 'Ask' # from ['Yes','No','Ask']
 OPTIONS['plot_winning_moves'] = True
 
 # Token value for invalid board positions and such
@@ -691,6 +689,37 @@ def _load_images():
     images['b_w'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_blue_button.png'))
     return images
 
+#%% _load_previous_game
+def _load_previous_game():
+    r"""
+    Loads the previous game based on settings and whether it exists.
+    """
+    global cur_game, cur_move, board, move_status, game_hist
+    # preallocate to not load
+    load_game = False
+    if OPTIONS['load_previous_game'] == 'No':
+        pass
+    elif OPTIONS['load_previous_game'] == 'Yes':
+        load_game = True
+    # ask if loading
+    elif OPTIONS['load_previous_game'] == 'Ask':
+        widget = QWidget()
+        reply = QMessageBox.question(widget, 'Message', \
+            "Do you want to load the previous game?", QMessageBox.Yes | \
+            QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            load_game = True
+    else:
+        raise ValueError('Unexpected value for the load_previous_game option.')
+    if load_game:
+        filename  = os.path.join(get_output_dir(), 'pentago.p')
+        if os.path.isfile(filename):
+            game_hist   = GameStats.load(filename)
+            cur_game    = len(game_hist)-1
+            cur_move    = len(game_hist[-1].move_list)
+            board       = _create_board_from_moves(game_hist[-1].move_list, game_hist[-1].first_move)
+            move_status = {'ok': False, 'pos': None, 'patch_object': None}
+
 #%% _calc_cur_move
 def _calc_cur_move(cur_move, cur_game):
     r"""
@@ -927,6 +956,27 @@ def _get_move_from_one_off(big_board, ix, ONE_OFF):
     for i in range(len(ix)):
         move.add(Move(row[i], column[i], quadrant[i], direction[i], power=5))
     return move
+
+#%% _create_board_from_moves
+def _create_board_from_moves(moves, first_player):
+    r"""
+    Recreates a board from a move history.
+    """
+    # make sure the first player is valid
+    assert first_player == PLAYER['white'] or first_player == PLAYER['black']
+    # create the initial board
+    board = PLAYER['none'] * np.ones((SIZES['board'], SIZES['board']), dtype=int)
+    # alias this player
+    this_player = first_player
+    # loop through the move history
+    for this_move in moves:
+        # place the piece
+        board[this_move.row, this_move.column] = this_player
+        # rotate the board
+        _rotate_board(board, this_move.quadrant, this_move.direction, inplace=True)
+        # update the next player to move
+        this_player = PLAYER['white'] if this_player == PLAYER['black'] else PLAYER['black']
+    return board
 
 #%% _update_game_stats
 def _update_game_stats(self, results):
@@ -1188,7 +1238,7 @@ def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
         for this_rot in rot_both:
             rot_buttons[this_rot].overlay = 'b_w'
 
-#%% move_wrapper
+#%% wrapper
 def wrapper(self):
     r"""
     Acts as a wrapper to everything the GUI needs to do.
@@ -1245,6 +1295,8 @@ if __name__ == '__main__':
         qapp = QApplication(sys.argv)
         # load the images
         IMAGES = _load_images()
+        # load the previous game content
+        _load_previous_game()
         # instatiates the GUI
         gui = PentagoGui()
         gui.show()
