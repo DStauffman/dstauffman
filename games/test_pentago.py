@@ -130,10 +130,19 @@ pass
 #%% GameStats
 pass
 
+#%% RotationButton
+pass
+
 #%% PentagoGui
 pass
 
 #%% _mouse_click_callback
+pass
+
+#%% _load_images
+pass
+
+#%% _load_previous_game
 pass
 
 #%% _calc_cur_move
@@ -359,6 +368,12 @@ class Test__find_moves(unittest.TestCase):
         self.board = np.reshape(np.hstack((np.array([0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1]), np.zeros(24, dtype=int))), (6, 6))
         pass
 
+#%% _get_move_from_one_off
+pass
+
+#%% _create_board_from_moves
+pass
+
 #%% _update_game_stats
 pass
 
@@ -375,6 +390,9 @@ pass
 pass
 
 #%% _plot_win
+pass
+
+#%% _plot_possible_win
 pass
 
 #%% wrapper

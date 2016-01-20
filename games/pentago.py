@@ -25,7 +25,7 @@ except ImportError: # pragma: no cover
     from PyQt4 import QtGui, QtCore
     from PyQt4.QtGui import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from dstauffman     import get_images_dir, get_output_dir, Frozen, modd
+from dstauffman import get_images_dir, get_output_dir, Frozen, modd
 
 #%% Constants
 # color definitions
@@ -36,10 +36,10 @@ COLOR['white']    = (1., 1., 1.)
 COLOR['black']    = (0., 0., 0.)
 COLOR['maj_edge'] = (0., 0., 0.)
 COLOR['min_edge'] = (0., 0., 1.)
-COLOR['next_wht'] = (0.6, 0.6, 1.0) # (0.8, 0.8, 0.8)
-COLOR['next_blk'] = (0.0, 0.0, 0.4) # (0.4, 0.4, 0.4)
-COLOR['win_wht']  = (1.0, 0.9, 0.9) # (1.0, 0.9, 0.9)
-COLOR['win_blk']  = (0.2, 0.0, 0.0) # (0.6, 0.0, 0.0)
+COLOR['next_wht'] = (0.6, 0.6, 1.0)
+COLOR['next_blk'] = (0.0, 0.0, 0.4)
+COLOR['win_wht']  = (1.0, 0.9, 0.9)
+COLOR['win_blk']  = (0.2, 0.0, 0.0)
 
 # player enumerations
 PLAYER          = {}
@@ -56,7 +56,7 @@ SIZES['square'] = 1.0
 SIZES['board']  = 6
 SIZES['button'] = 71 # number of pixels on rotation buttons
 
-# Gameplay options # TODO: implement these
+# Gameplay options
 OPTIONS                       = {}
 OPTIONS['load_previous_game'] = 'Ask' # from ['Yes','No','Ask']
 OPTIONS['plot_winning_moves'] = True
@@ -117,10 +117,48 @@ def _rotate_board(board, quadrant, direction, inplace=True):
     r"""
     Rotates the specified board position.
 
+    Parameters
+    ----------
+    board : 2D ndarray of int
+        Board position
+    quadrant : int
+        Quadrant to rotate
+    direction : int
+        Direction to rotate the quadrant
+    inplace : bool, optional
+        Whether to update the `board` variable inplace
+
+    Returns
+    -------
+    new_board : 2D ndarray of int
+        New resulting board, may modify `board` inplace depending on flag
+
     Notes
     -----
     #.  Modifies board in-place.
+
+    Example
+    -------
+
+    >>> from dstauffman.games.pentago import _rotate_board, PLAYER
+    >>> import numpy as np
+    >>> board = PLAYER['none'] * np.ones((6, 6), dtype=int)
+    >>> board[1, 0:3] = PLAYER['white']
+    >>> print(board[0:3, 0:3])
+    [[0 0 0]
+     [1 1 1]
+     [0 0 0]]
+
+    >>> quadrant = 1
+    >>> direction = -1
+    >>> _rotate_board(board, quadrant, direction)
+    >>> print(board[0:3, 0:3])
+    [[0 1 0]
+     [0 1 0]
+     [0 1 0]]
+
     """
+    # check the board dimenions
     assert np.mod(SIZES['board'], 2) == 0, 'Board must be square and have an even number of rows and columns.'
 
     # determine if 6x6 board or 36xN
@@ -128,9 +166,10 @@ def _rotate_board(board, quadrant, direction, inplace=True):
     f = SIZES['board']    # full board size
     h = SIZES['board']//2 # half board size
 
+    # determine if square versus linearized
     if r == f and c == f:
         assert inplace, '{0}x{0} boards must be modified inplace.'.format(f)
-        # get quad
+        # pull out the quadrant from the whole board
         if quadrant == 1:
             old_sub = board[0:h, 0:h]
         elif quadrant == 2:
@@ -142,7 +181,7 @@ def _rotate_board(board, quadrant, direction, inplace=True):
         else:
             raise ValueError('Unexpected value for quadrant.')
 
-        # rotate quad
+        # rotate quadrant
         if direction == -1:
             new_sub = np.rot90(old_sub)
         elif direction == 1:
@@ -150,7 +189,7 @@ def _rotate_board(board, quadrant, direction, inplace=True):
         else:
             raise ValueError('Unexpected value for dir')
 
-        # update rotated quad
+        # update rotated quadrant
         if quadrant == 1:
             board[0:h, 0:h] = new_sub
         elif quadrant == 2:
@@ -162,7 +201,7 @@ def _rotate_board(board, quadrant, direction, inplace=True):
 
     elif r == f*f:
         ix_old = np.tile(np.arange(h), h) + f * np.repeat(np.arange(h), h, axis=0)
-        # get quad
+        # pull out the quadrant from the whole board
         if quadrant == 1:
             ix_old += 0
         elif quadrant == 2:
@@ -173,14 +212,14 @@ def _rotate_board(board, quadrant, direction, inplace=True):
             ix_old += (h*f +h)
         else:
             raise ValueError('Unexpected value for quad')
-        # rotate quad
+        # rotate quadrant
         if direction == -1:
             ix_new = ix_old[h * np.tile(np.arange(h), h) + np.repeat(np.arange(h-1, -1, -1), h, axis=0)]
         elif direction == 1:
             ix_new = ix_old[h * np.tile(np.arange(h-1, -1, -1), h) + np.repeat(np.arange(h), h, axis=0)]
         else:
             raise ValueError('Unexpected value for dir')
-        # update placements
+        # update rotated quadrant
         if inplace:
             board[ix_old, :]     = board[ix_new, :]
         else:
@@ -318,7 +357,6 @@ class GameStats(Frozen):
         r"""Pulls the results out of a list of game histories."""
         return np.array([x.winner for x in game_hist])
 
-
     @staticmethod
     def save(filename, game_hist):
         r"""Saves a list of GameStats objects to disk."""
@@ -340,11 +378,11 @@ move_status = {'ok': False, 'pos': None, 'patch_object': None}
 game_hist   = []
 game_hist.append(GameStats(number=cur_game, first_move=PLAYER['white']))
 
-#%% Debugging
-board = np.zeros((6, 6), dtype=int)
-
 #%% Classes - RotationButton
 class RotationButton(QPushButton):
+    r"""
+    Custom QPushButton to allow drawing multiple images on the buttons for plotting possible winning rotations.
+    """
     def __init__(self, text, parent, quadrant, direction):
         super(RotationButton, self).__init__(text, parent)
         self.quadrant  = quadrant
@@ -352,6 +390,7 @@ class RotationButton(QPushButton):
         self.overlay   = None
 
     def paintEvent(self, event):
+        r"""Custom paint event to update the buttons."""
         # call super method
         QPushButton.paintEvent(self, event)
         # create painter and load base image
@@ -547,7 +586,7 @@ class PentagoGui(QWidget):
 
     #%% Button callbacks
     def btn_undo_function(self):
-        """Functions that executes on undo button press."""
+        r"""Functions that executes on undo button press."""
         # declare globals
         global cur_move, cur_game, board
         # get last move
@@ -564,7 +603,7 @@ class PentagoGui(QWidget):
         wrapper(self)
 
     def btn_new_function(self):
-        """Functions that executes on new game button press."""
+        r"""Functions that executes on new game button press."""
         # declare globals
         global cur_move, cur_game, board
         # update values
@@ -579,7 +618,7 @@ class PentagoGui(QWidget):
         wrapper(self)
 
     def btn_redo_function(self):
-        """Functions that executes on redo button press."""
+        r"""Functions that executes on redo button press."""
         # declare globals
         global cur_move, cur_game, board
         # get next move
@@ -596,9 +635,12 @@ class PentagoGui(QWidget):
         wrapper(self)
 
     def btn_rot_function(self):
-        """Functions that executes on rotation button press."""
+        r"""Functions that executes on rotation button press."""
+        # determine sending button
         button = self.sender()
+        # execute the move
         _execute_move(quadrant=button.quadrant, direction=button.direction)
+        # call GUI wrapper
         wrapper(self)
 
 #%% _mouse_click_callback
@@ -970,6 +1012,8 @@ def _create_board_from_moves(moves, first_player):
     this_player = first_player
     # loop through the move history
     for this_move in moves:
+        # check that square is empty
+        assert board[this_move.row, this_move.column] == PLAYER['none'], 'Invalid move encountered.'
         # place the piece
         board[this_move.row, this_move.column] = this_player
         # rotate the board
@@ -1170,7 +1214,6 @@ def _plot_win(ax, mask):
             if mask[i, j]:
                 _plot_piece(ax, i, j, SIZES['win'], COLOR['win'])
 
-
 #%% _plot_possible_win
 def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
     r"""
@@ -1189,7 +1232,8 @@ def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
     >>> ax.invert_yaxis()
     >>> board = np.reshape(np.hstack((0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, np.zeros(24))), (6, 6))
     >>> (white_moves, black_moves) = _find_moves(board)
-    >>> _plot_possible_win(ax, white_moves, black_moves) # doctest: +SKIP
+    >>> rot_buttons = dict() # TODO: write this # doctest: +SKIP
+    >>> _plot_possible_win(ax, rot_buttons, white_moves, black_moves) # doctest: +SKIP
     >>> plt.show(block=False)
 
     >>> plt.close()
@@ -1281,10 +1325,6 @@ def wrapper(self):
     self.update()
 
 #%% Unit Test
-def _main():
-    """Unit test function."""
-    pass
-
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         mode = sys.argv[1]
@@ -1302,7 +1342,6 @@ if __name__ == '__main__':
         gui.show()
         sys.exit(qapp.exec_())
     elif mode == 'test':
-        _main()
         # open a qapp
         if QApplication.instance() is None:
             qapp = QApplication(sys.argv)
