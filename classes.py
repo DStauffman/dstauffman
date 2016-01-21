@@ -48,7 +48,7 @@ class Frozen(object):
     __setattr__ = frozen(object.__setattr__)
     class __metaclass__(type):
         __setattr__ = frozen(type.__setattr__)
-        
+
 #%% Classes - Counter
 class Counter(Frozen):
     r"""
@@ -60,12 +60,36 @@ class Counter(Frozen):
         if type(other) == Counter:
             return self._val == other._val
         return self._val == other
+    def __lt__(self, other):
+        if type(other) == Counter:
+            return self._val < other._val
+        return self._val < other
+    def __le__(self, other):
+        if type(other) == Counter:
+            return self._val <= other._val
+        return self._val <= other
+    def __gt__(self, other):
+        if type(other) == Counter:
+            return self._val > other._val
+        return self._val > other
+    def __ge__(self, other):
+        if type(other) == Counter:
+            return self._val >= other._val
+        return self._val >= other
     def __add__(self, other):
         if type(other) == Counter:
             return Counter(self._val + other._val)
-        return self._val + other
+        elif type(other) == int:
+            return self._val + other
+        else:
+            return NotImplemented
     def __iadd__(self, other):
-        self._val += other
+        if type(other) == Counter:
+            self._val += other._val
+        elif type(other) == int:
+            self._val += other
+        else:
+            return NotImplemented
         return self
     def __str__(self):
         return str(self._val)
