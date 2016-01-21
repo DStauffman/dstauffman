@@ -48,6 +48,29 @@ class Frozen(object):
     __setattr__ = frozen(object.__setattr__)
     class __metaclass__(type):
         __setattr__ = frozen(type.__setattr__)
+        
+#%% Classes - Counter
+class Counter(Frozen):
+    r"""
+    Mutable integer counter wrapper class.
+    """
+    def __init__(self, other=0):
+        self._val = int(other)
+    def __eq__(self, other):
+        if type(other) == Counter:
+            return self._val == other._val
+        return self._val == other
+    def __add__(self, other):
+        if type(other) == Counter:
+            return Counter(self._val + other._val)
+        return self._val + other
+    def __iadd__(self, other):
+        self._val += other
+        return self
+    def __str__(self):
+        return str(self._val)
+    def __repr__(self):
+        return 'Counter({})'.format(self._val)
 
 #%% Unit test
 if __name__ == '__main__':
