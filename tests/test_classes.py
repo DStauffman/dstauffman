@@ -57,91 +57,73 @@ class Test_Counter(unittest.TestCase):
     Tests Counter class with the following cases:
         TBD
     """
-    def test_incrementing1(self):
+    def test_math_int(self):
         c = dcs.Counter()
         c = c + 1
         self.assertEqual(c, 1)
+        c += 2
+        self.assertEqual(c, 3)
+        c = c - 5
+        self.assertEqual(c, -2)
+        c -= 2
+        self.assertEqual(c, -4)
+        c = 1 + c
+        self.assertEqual(c, -3)
+        c = 1 - c
+        self.assertEqual(c, 4)
+        
+    def test_math_counter(self):
+        c1 = dcs.Counter(10)
+        c2 = dcs.Counter(-5)
+        c3 = c1 + c2
+        self.assertEqual(c3, dcs.Counter(5))
+        c1 += c2
+        self.assertEqual(c1, dcs.Counter(5))
+        c3 = c1 - c2
+        self.assertEqual(c3, dcs.Counter(10))
+        c1 -= c2
+        self.assertEqual(c1, dcs.Counter(10))
 
-    def test_incrementing2(self):
-        c = dcs.Counter(1)
-        c = c + 5
-        self.assertEqual(c, 6)
-
-    def test_incrementing3(self):
-        c = dcs.Counter(7)
-        c += 3
-        self.assertEqual(c, 10)
-
-    def test_incrementing4(self):
+    def test_math_float(self):
         c = dcs.Counter(0)
         with self.assertRaises(TypeError):
             c = c + 1.5
-
-    def test_incrementing5(self):
-        c = dcs.Counter(0)
         with self.assertRaises(TypeError):
-            c += 1.5
-
-    def test_incrementing6(self):
-        c1 = dcs.Counter(10)
-        c2 = dcs.Counter(2)
-        c1 += c2
-        self.assertEqual(c1, 12)
-
-    def test_comparing1(self):
-        c = dcs.Counter()
-        self.assertEqual(c, 0)
-
-    def test_comparing2(self):
-        c = dcs.Counter()
-        self.assertNotEqual(c, 1)
-
-    def test_comparing3(self):
-        c1 = dcs.Counter(10)
-        c2 = dcs.Counter(11)
-        c1 += 1
-        self.assertEqual(c1, c2)
-
-    def test_comparing4(self):
-        c1 = dcs.Counter(20)
-        c2 = dcs.Counter(21)
-        self.assertNotEqual(c1, c2)
-
-    def test_less_than1(self):
-        c = dcs.Counter()
-        self.assertTrue(c < 5)
-
-    def test_less_than2(self):
-        c1 = dcs.Counter()
-        c2 = dcs.Counter(5)
-        self.assertLess(c1, c2)
-
-    def test_less_than3(self):
-        c = dcs.Counter()
-        self.assertTrue(c <= 0)
-
-    def test_less_than4(self):
-        c1 = dcs.Counter()
-        c2 = dcs.Counter(0)
-        self.assertLessEqual(c1, c2)
-
-    def test_greater_than1(self):
+            c = c - 1.5
+            
+    def test_comp_int(self):
         c = dcs.Counter(10)
-        self.assertTrue(c > 5)
-
-    def test_greater_than2(self):
-        c1 = dcs.Counter(4)
-        c2 = dcs.Counter(3)
-        self.assertGreater(c1, c2)
-
-    def test_greater_than3(self):
-        c = dcs.Counter()
-        self.assertTrue(c >= 0)
-
-    def test_greater_than4(self):
-        c1 = dcs.Counter()
-        c2 = dcs.Counter(0)
-        self.assertGreaterEqual(c1, c2)
+        self.assertEqual(c, 10)
+        self.assertNotEqual(c, 0)
+        self.assertTrue(c < 100)
+        self.assertTrue(c > 0)
+        self.assertTrue(c <= 10)
+        self.assertTrue(c >= 10)
+        
+    def test_comp_counter(self):
+        c1 = dcs.Counter(1)
+        c2 = dcs.Counter(2)
+        self.assertEqual(c1, c1)
+        self.assertNotEqual(c1, c2)
+        self.assertLess(c1, c2)
+        self.assertGreater(c2, c1)
+        self.assertLessEqual(c1, c1)
+        self.assertGreaterEqual(c2, c2)
+        
+    def test_lists(self):
+        c_list = [dcs.Counter(3), dcs.Counter(-5), dcs.Counter(1)]
+        c_list.sort()
+        self.assertEqual(c_list[0], -5)
+        self.assertEqual(c_list[1], 1)
+        self.assertEqual(c_list[2], 3)
+        
+    def test_sets(self):
+        c1 = dcs.Counter(1)
+        c2 = dcs.Counter(2)
+        c3 = dcs.Counter(3)
+        s1 = {1, 2, 3}
+        s2 = set((c1, c2, c3))
+        self.assertEqual(s1, s2)
 
 #%% Unit test execution
 if __name__ == '__main__':

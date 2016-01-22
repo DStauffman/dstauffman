@@ -25,7 +25,10 @@ except ImportError: # pragma: no cover
     from PyQt4 import QtGui, QtCore
     from PyQt4.QtGui import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from dstauffman import get_images_dir, get_output_dir, Frozen, modd
+from dstauffman import get_images_dir, get_output_dir, Frozen, modd, Counter
+
+# TODO: use grid layout
+# TODO: add option box for showing winning moves
 
 #%% Constants
 # color definitions
@@ -241,7 +244,19 @@ ONE_OFF = np.hstack(( \
     _rotate_board(WIN, 3,  1, inplace=False), \
     _rotate_board(WIN, 4,  1, inplace=False)))
 
-#%% Classes - Moves
+#%% Classes - State
+class State(Frozen):
+    r"""
+    Class that keeps track of the GUI state.
+    """
+    def __init__(self):
+        self.board       = PLAYER['none'] * np.ones((SIZES['board'], SIZES['board']), dtype=int)
+        self.cur_move    = Counter(0)
+        self.cur_game    = Counter(0)
+        self.move_status = {'ok': False, 'pos': None, 'patch_object': None}
+        self.game_hist   = [GameStats(number=self.cur_game, first_move=PLAYER['white'])]
+
+#%% Classes - Move
 class Move(Frozen):
     r"""
     Class that keeps track of each individual move.
@@ -304,22 +319,11 @@ class Move(Frozen):
     def __repr__(self):
         r"""Repr returns all values, including power."""
         return '<' + self.__str__() + ', pwr: {}'.format(self.power) + '>'
-
-    @staticmethod
-    def get_pos(move_list):
-        r"""Converts the move list into position numbers."""
-        pos = []
-        for this_move in move_list:
-            pos.append(this_move.row + SIZES['board'] * this_move.column)
-        return pos
-
-    @staticmethod
-    def get_rot(move_list):
-        r"""Converts the quadrant rotation and direction into a representative number."""
-        rot = []
-        for this_move in move_list:
-            rot.append(this_move.quadrant + 4 * (this_move.direction == 1))
-        return rot
+        
+    @property
+    def rot_key(self):
+        r"""Gets the key for the rotation that this move represents."""
+        return '{}{}'.format(self.quadrant, 'L' if self.direction == -1 else 'R')
 
 #%% Classes - GameStats
 class GameStats(Frozen):
@@ -370,14 +374,6 @@ class GameStats(Frozen):
             game_hist = pickle.load(file)
         return game_hist
 
-#%% Dynamic globals
-cur_move    = 0
-cur_game    = 0
-board       = PLAYER['none'] * np.ones((SIZES['board'], SIZES['board']), dtype=int)
-move_status = {'ok': False, 'pos': None, 'patch_object': None}
-game_hist   = []
-game_hist.append(GameStats(number=cur_game, first_move=PLAYER['white']))
-
 #%% Classes - RotationButton
 class RotationButton(QPushButton):
     r"""
@@ -396,12 +392,13 @@ class RotationButton(QPushButton):
         # create painter and load base image
         painter = QtGui.QPainter(self)
         pixmap_key = str(self.quadrant) + ('L' if self.direction == -1 else 'R')
-        pixmap = IMAGES[pixmap_key].pixmap(QtCore.QSize(SIZES['button'], SIZES['button']))
+        images = self.parent().images
+        pixmap = images[pixmap_key].pixmap(QtCore.QSize(SIZES['button'], SIZES['button']))
         if self.overlay is None:
             painter.drawPixmap(0, 0, pixmap)
         else:
             # optionally load the overlaid image
-            overlay_pixmap = IMAGES[self.overlay].pixmap(QtCore.QSize(SIZES['button'], SIZES['button']))
+            overlay_pixmap = images[self.overlay].pixmap(QtCore.QSize(SIZES['button'], SIZES['button']))
             painter.drawPixmap(0, 0, overlay_pixmap)
             painter.setCompositionMode(painter.CompositionMode_SourceOver)
             painter.drawPixmap(0, 0, pixmap)
@@ -413,12 +410,84 @@ class PentagoGui(QWidget):
     The Pentago GUI.
     """
     def __init__(self, **kwargs):
+        # call super method
         super(PentagoGui, self).__init__(**kwargs)
+        # initialized the state data
+        self.initialize_state()
+        # load the image data
+        self.load_images()
+        # call init method to instantiate the GUI
         self.init()
+        
+    #%% State initialization
+    def initialize_state(self):
+        r"""
+        Loads the previous game based on settings and whether the file exists.
+        """
+        # preallocate to not load
+        load_game = False
+        if OPTIONS['load_previous_game'] == 'No':
+            pass
+        elif OPTIONS['load_previous_game'] == 'Yes':
+            load_game = True
+        # ask if loading
+        elif OPTIONS['load_previous_game'] == 'Ask':
+            widget = QWidget()
+            reply = QMessageBox.question(widget, 'Message', \
+                "Do you want to load the previous game?", QMessageBox.Yes | \
+                QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                load_game = True
+        else:
+            raise ValueError('Unexpected value for the load_previous_game option.')
+        # initialize outputs
+        self.state = State()
+        if load_game:
+            filename  = os.path.join(get_output_dir(), 'pentago.p')
+            if os.path.isfile(filename):
+                self.state.game_hist   = GameStats.load(filename)
+                self.state.cur_game    = Counter(len(self.state.game_hist)-1)
+                self.state.cur_move    = Counter(len(self.state.game_hist[-1].move_list))
+                self.state.board       = _create_board_from_moves(self.state.game_hist[-1].move_list, \
+                    self.state.game_hist[-1].first_move)
+                self.state.move_status = {'ok': False, 'pos': None, 'patch_object': None}
+    
+    #%% load_images
+    def load_images(self):
+        r"""
+        Loads the images for use later on.
+    
+        Returns
+        -------
+        images : dict
+            Images for use on the rotation buttons.
+    
+        Notes
+        -----
+        #.  Written by David C. Stauffer in January 2016.
+        #.  TODO: needs a QApplication to exist first.  Play around with making this earlier.
+    
+        """
+        # get the directory for the images
+        images_dir = get_images_dir()
+        # create a dictionary for saving all the images in
+        self.images        = {}
+        self.images['1R']  = QtGui.QIcon(os.path.join(images_dir, 'right1.png'))
+        self.images['2R']  = QtGui.QIcon(os.path.join(images_dir, 'right2.png'))
+        self.images['3R']  = QtGui.QIcon(os.path.join(images_dir, 'right3.png'))
+        self.images['4R']  = QtGui.QIcon(os.path.join(images_dir, 'right4.png'))
+        self.images['1L']  = QtGui.QIcon(os.path.join(images_dir, 'left1.png'))
+        self.images['2L']  = QtGui.QIcon(os.path.join(images_dir, 'left2.png'))
+        self.images['3L']  = QtGui.QIcon(os.path.join(images_dir, 'left3.png'))
+        self.images['4L']  = QtGui.QIcon(os.path.join(images_dir, 'left4.png'))
+        self.images['wht'] = QtGui.QIcon(os.path.join(images_dir, 'blue_button.png'))
+        self.images['blk'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_button.png'))
+        self.images['w_b'] = QtGui.QIcon(os.path.join(images_dir, 'blue_cyan_button.png'))
+        self.images['b_w'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_blue_button.png'))
 
+    #%% GUI initialization
     def init(self):
-        r"""Creates the actual GUI."""
-
+        r"""Initializes the GUI."""
         #%% properties
         QToolTip.setFont(QtGui.QFont('SansSerif', 10))
 
@@ -465,7 +534,7 @@ class PentagoGui(QWidget):
         fig = Figure(figsize=(4.2, 4.2), dpi=100, frameon=False)
         self.board_canvas = FigureCanvas(fig)
         self.board_canvas.setParent(self.wid_board)
-        self.board_canvas.mpl_connect('button_release_event', lambda event: _mouse_click_callback(self, event))
+        self.board_canvas.mpl_connect('button_release_event', lambda event: self.mouse_click_callback(event))
         self.board_axes = Axes(fig, [0., 0., 1., 1.])
         self.board_axes.invert_yaxis()
         self.board_axes.set_axis_off()
@@ -553,25 +622,26 @@ class PentagoGui(QWidget):
         self.btn_4L.setGeometry(700, 489, SIZES['button'], SIZES['button'])
         self.btn_4L.clicked.connect(self.btn_rot_function)
         # buttons dictionary for use later
-        self.rot_buttons = {1:self.btn_1L, 2:self.btn_2L, 3:self.btn_3L, 4:self.btn_4L, \
-            5:self.btn_1R, 6:self.btn_2R, 7:self.btn_3R, 8:self.btn_4R}
+        self.rot_buttons = {'1L':self.btn_1L, '2L':self.btn_2L, '3L':self.btn_3L, '4L':self.btn_4L, \
+            '1R':self.btn_1R, '2R':self.btn_2R, '3R':self.btn_3R, '4R':self.btn_4R}
 
         #%% Call wrapper to initialize GUI
-        wrapper(self)
+        self.wrapper()
 
         #%% GUI properties
-        self.setGeometry(520, 380, 1000, 700)
+        self.resize(1000, 700)
+        self.center()
         self.setWindowTitle('Pentago')
         self.setWindowIcon(QtGui.QIcon(os.path.join(get_images_dir(),'pentago.png')))
         self.show()
 
-    #%% Other callbacks
+    #%% Other callbacks - closing
     def closeEvent(self, event):
         """Things in here happen on GUI closing."""
         close_immediately = True
         filename = os.path.join(get_output_dir(), 'pentago.p')
         if close_immediately:
-            GameStats.save(filename, game_hist)
+            GameStats.save(filename, self.state.game_hist)
             event.accept()
         else:
             # Alternative with user choice
@@ -579,188 +649,243 @@ class PentagoGui(QWidget):
                 "Are you sure to quit?", QMessageBox.Yes | \
                 QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.Yes:
-                GameStats.save(filename, game_hist)
+                GameStats.save(filename, self.state.game_hist)
                 event.accept()
             else:
                 event.ignore()
+                
+    #%% Other callbacks - center the GUI on the screen
+    def center(self):
+        r"""Makes the GUI centered on the active screen."""
+        frameGm = self.frameGeometry()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
+        
+    #%% Other callbacks - display_controls
+    def display_controls(self):
+        r"""
+        Determines what controls to display on the GUI.
+        """
+        # show/hide New Game Button
+        if self.state.game_hist[self.state.cur_game].winner == PLAYER['none']:
+            self.btn_new.hide()
+        else:
+            self.btn_new.show()
+    
+        # show/hide Undo Button
+        if self.state.cur_move > 0:
+            self.btn_undo.show()
+        else:
+            self.btn_undo.hide()
+    
+        # show/hide Redo Button
+        if self.state.game_hist[self.state.cur_game].num_moves > self.state.cur_move:
+            self.btn_redo.show()
+        else:
+            self.btn_redo.hide()
+
+    #%% update_game_stats
+    def update_game_stats(self, results):
+        r"""
+        Updates the game stats on the left of the GUI.
+        """
+        # calculate the number of wins
+        white_wins = np.sum(results == PLAYER['white'])
+        black_wins = np.sum(results == PLAYER['black'])
+        games_tied = np.sum(results == PLAYER['draw'])
+    
+        # update the gui
+        self.lbl_white_wins.setText("{}".format(white_wins))
+        self.lbl_black_wins.setText("{}".format(black_wins))
+        self.lbl_games_tied.setText("{}".format(games_tied))
 
     #%% Button callbacks
     def btn_undo_function(self):
         r"""Functions that executes on undo button press."""
-        # declare globals
-        global cur_move, cur_game, board
         # get last move
-        last_move = game_hist[cur_game].move_list[cur_move-1]
+        last_move = self.state.game_hist[self.state.cur_game].move_list[self.state.cur_move-1]
         if LOGGING:
             print('Undoing move = {}'.format(last_move))
         # undo rotation
-        _rotate_board(board, last_move.quadrant, -last_move.direction)
+        _rotate_board(self.state.board, last_move.quadrant, -last_move.direction)
         # delete piece
-        board[last_move.row, last_move.column] = PLAYER['none']
+        self.state.board[last_move.row, last_move.column] = PLAYER['none']
         # update current move
-        cur_move -= 1
+        self.state.cur_move -= 1
         # call GUI wrapper
-        wrapper(self)
+        self.wrapper()
 
     def btn_new_function(self):
         r"""Functions that executes on new game button press."""
-        # declare globals
-        global cur_move, cur_game, board
         # update values
-        last_lead = game_hist[cur_game].first_move
+        last_lead = self.state.game_hist[self.state.cur_game].first_move
         next_lead = PLAYER['black'] if last_lead == PLAYER['white'] else PLAYER['white']
-        assert len(game_hist) == cur_game + 1
-        cur_game += 1
-        cur_move = 0
-        game_hist.append(GameStats(number=cur_game, first_move=next_lead, winner=PLAYER['none']))
-        board = PLAYER['none'] * np.ones((SIZES['board'], SIZES['board']), dtype=int)
+        assert len(self.state.game_hist) == self.state.cur_game + 1
+        self.state.cur_game += 1
+        self.state.cur_move = Counter(0)
+        self.state.game_hist.append(GameStats(number=self.state.cur_game, first_move=next_lead, winner=PLAYER['none']))
+        self.state.board = PLAYER['none'] * np.ones((SIZES['board'], SIZES['board']), dtype=int)
         # call GUI wrapper
-        wrapper(self)
+        self.wrapper()
 
     def btn_redo_function(self):
         r"""Functions that executes on redo button press."""
-        # declare globals
-        global cur_move, cur_game, board
         # get next move
-        redo_move = game_hist[cur_game].move_list[cur_move]
+        redo_move = self.state.game_hist[self.state.cur_game].move_list[self.state.cur_move]
         if LOGGING:
             print('Redoing move = {}'.format(redo_move))
         # place piece
-        board[redo_move.row, redo_move.column] = _calc_cur_move(cur_move, cur_game)
+        self.state.board[redo_move.row, redo_move.column] = _calc_cur_move(self.state.cur_move, self.state.cur_game)
         # redo rotation
-        _rotate_board(board, redo_move.quadrant, redo_move.direction)
+        _rotate_board(self.state.board, redo_move.quadrant, redo_move.direction)
         # update current move
-        cur_move += 1
+        self.state.cur_move += 1
         # call GUI wrapper
-        wrapper(self)
+        self.wrapper()
 
     def btn_rot_function(self):
         r"""Functions that executes on rotation button press."""
         # determine sending button
         button = self.sender()
         # execute the move
-        _execute_move(quadrant=button.quadrant, direction=button.direction)
+        self.execute_move(quadrant=button.quadrant, direction=button.direction)
         # call GUI wrapper
-        wrapper(self)
+        self.wrapper()
 
-#%% _mouse_click_callback
-def _mouse_click_callback(self, event):
-    r"""
-    Function that executes on mouse click on the board axes.  Ends up placing a piece on the board.
-    """
-    # ignore events that are outside the axes
-    if event.xdata is None or event.ydata is None:
-        if LOGGING:
-            print('Click is off the board.')
-        return
-    # test for a game that has already been concluded
-    if game_hist[cur_game].winner != PLAYER['none']:
-        if LOGGING:
-            print('Game is over.')
-        move_status['ok'] = False
-        move_status['pos'] = None
-        return
-    # alias the rounded values of the mouse click location
-    x = np.round(event.ydata).astype(int)
-    y = np.round(event.xdata).astype(int)
-    if LOGGING:
-        print('Clicked on (x,y) = ({}, {})'.format(x, y))
-    # get axes limits
-    (m, n) = board.shape
-    # ignore values that are outside the board
-    if x < 0 or y < 0 or x >= m or y >= n:
-        if LOGGING:
-            print('Click is outside playable board.')
-        return
-    if board[x, y] == PLAYER['none']:
-        # check for previous good move
-        if move_status['ok']:
+    #%% mouse_click_callback
+    def mouse_click_callback(self, event):
+        r"""
+        Function that executes on mouse click on the board axes.  Ends up placing a piece on the board.
+        """
+        # ignore events that are outside the axes
+        if event.xdata is None or event.ydata is None:
             if LOGGING:
-                print('removing previous piece.')
-            move_status['patch_object'].remove()
-        move_status['ok'] = True
-        move_status['pos'] = (x, y)
+                print('Click is off the board.')
+            return
+        # test for a game that has already been concluded
+        if self.state.game_hist[self.state.cur_game].winner != PLAYER['none']:
+            if LOGGING:
+                print('Game is over.')
+            self.state.move_status['ok'] = False
+            self.state.move_status['pos'] = None
+            return
+        # alias the rounded values of the mouse click location
+        x = np.round(event.ydata).astype(int)
+        y = np.round(event.xdata).astype(int)
         if LOGGING:
-            print('Placing current piece.')
-        current_player = _calc_cur_move(cur_move, cur_game)
-        if current_player == PLAYER['white']:
-            move_status['patch_object'] = _plot_piece(self.board_axes, x, y, SIZES['piece'], COLOR['next_wht'])
-        elif current_player == PLAYER['black']:
-            move_status['patch_object'] = _plot_piece(self.board_axes, x, y, SIZES['piece'], COLOR['next_blk'])
+            print('Clicked on (x,y) = ({}, {})'.format(x, y))
+        # get axes limits
+        (m, n) = self.state.board.shape
+        # ignore values that are outside the board
+        if x < 0 or y < 0 or x >= m or y >= n:
+            if LOGGING:
+                print('Click is outside playable board.')
+            return
+        if self.state.board[x, y] == PLAYER['none']:
+            # check for previous good move
+            if self.state.move_status['ok']:
+                if LOGGING:
+                    print('removing previous piece.')
+                self.state.move_status['patch_object'].remove()
+            self.state.move_status['ok'] = True
+            self.state.move_status['pos'] = (x, y)
+            if LOGGING:
+                print('Placing current piece.')
+            current_player = _calc_cur_move(self.state.cur_move, self.state.cur_game)
+            if current_player == PLAYER['white']:
+                self.state.move_status['patch_object'] = _plot_piece(self.board_axes, x, y, SIZES['piece'], COLOR['next_wht'])
+            elif current_player == PLAYER['black']:
+                self.state.move_status['patch_object'] = _plot_piece(self.board_axes, x, y, SIZES['piece'], COLOR['next_blk'])
+            else:
+                raise ValueError('Unexpected player to move next.')
         else:
-            raise ValueError('Unexpected player to move next.')
-    else:
-        # delete a previously placed piece
-        if move_status['ok']:
-            move_status['patch_object'].remove()
-        move_status['ok'] = False
-        move_status['pos'] = None
-    # redraw the board
-    self.board_canvas.draw()
-
-#%% _load_images
-def _load_images():
-    r"""
-    Loads the images for use later on.
-
-    Returns
-    -------
-    images : dict
-        Images for use on the rotation buttons.
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in January 2016.
-    #.  TODO: needs a QApplication to exist first.  Play around with making this earlier.
-
-    """
-    #
-    images_dir = get_images_dir()
-    images        = {}
-    images['1R']  = QtGui.QIcon(os.path.join(images_dir, 'right1.png'))
-    images['2R']  = QtGui.QIcon(os.path.join(images_dir, 'right2.png'))
-    images['3R']  = QtGui.QIcon(os.path.join(images_dir, 'right3.png'))
-    images['4R']  = QtGui.QIcon(os.path.join(images_dir, 'right4.png'))
-    images['1L']  = QtGui.QIcon(os.path.join(images_dir, 'left1.png'))
-    images['2L']  = QtGui.QIcon(os.path.join(images_dir, 'left2.png'))
-    images['3L']  = QtGui.QIcon(os.path.join(images_dir, 'left3.png'))
-    images['4L']  = QtGui.QIcon(os.path.join(images_dir, 'left4.png'))
-    images['wht'] = QtGui.QIcon(os.path.join(images_dir, 'blue_button.png'))
-    images['blk'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_button.png'))
-    images['w_b'] = QtGui.QIcon(os.path.join(images_dir, 'blue_cyan_button.png'))
-    images['b_w'] = QtGui.QIcon(os.path.join(images_dir, 'cyan_blue_button.png'))
-    return images
-
-#%% _load_previous_game
-def _load_previous_game():
-    r"""
-    Loads the previous game based on settings and whether it exists.
-    """
-    global cur_game, cur_move, board, move_status, game_hist
-    # preallocate to not load
-    load_game = False
-    if OPTIONS['load_previous_game'] == 'No':
-        pass
-    elif OPTIONS['load_previous_game'] == 'Yes':
-        load_game = True
-    # ask if loading
-    elif OPTIONS['load_previous_game'] == 'Ask':
-        widget = QWidget()
-        reply = QMessageBox.question(widget, 'Message', \
-            "Do you want to load the previous game?", QMessageBox.Yes | \
-            QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            load_game = True
-    else:
-        raise ValueError('Unexpected value for the load_previous_game option.')
-    if load_game:
-        filename  = os.path.join(get_output_dir(), 'pentago.p')
-        if os.path.isfile(filename):
-            game_hist   = GameStats.load(filename)
-            cur_game    = len(game_hist)-1
-            cur_move    = len(game_hist[-1].move_list)
-            board       = _create_board_from_moves(game_hist[-1].move_list, game_hist[-1].first_move)
-            move_status = {'ok': False, 'pos': None, 'patch_object': None}
+            # delete a previously placed piece
+            if self.state.move_status['ok']:
+                self.state.move_status['patch_object'].remove()
+            self.state.move_status['ok'] = False
+            self.state.move_status['pos'] = None
+        # redraw the board
+        self.board_canvas.draw()
+        
+    #%% execute_move
+    def execute_move(self, *, quadrant, direction):
+        r"""
+        Tests and then executes a move.
+        """
+        if self.state.move_status['ok']:
+            if LOGGING:
+                print('Rotating Quadrant {} in Direction {}.'.format(quadrant, direction))
+            # delete gray piece
+            self.state.move_status['patch_object'].remove()
+            self.state.move_status['patch_object'] = None
+            # add new piece to board
+            self.state.board[self.state.move_status['pos'][0], self.state.move_status['pos'][1]] = \
+                _calc_cur_move(self.state.cur_move, self.state.cur_game)
+            # rotate board
+            _rotate_board(self.state.board, quadrant, direction)
+            # increment move list
+            assert self.state.game_hist[self.state.cur_game].num_moves >= self.state.cur_move, \
+                'Number of moves = {}, Current Move = {}'.format(self.state.game_hist[self.state.cur_game].num_moves, self.state.cur_move)
+            this_move = Move(self.state.move_status['pos'][0], self.state.move_status['pos'][1], quadrant, direction)
+            if self.state.game_hist[self.state.cur_game].num_moves == self.state.cur_move:
+                self.state.game_hist[self.state.cur_game].add_move(this_move)
+            else:
+                self.state.game_hist[self.state.cur_game].move_list[self.state.cur_move] = this_move
+                self.state.game_hist[self.state.cur_game].remove_moves(self.state.cur_move+1)
+            # increment current move
+            self.state.cur_move += 1
+            # reset status for next move
+            self.state.move_status['ok'] = False
+            self.state.move_status['pos'] = None
+        else:
+            if LOGGING:
+                print('No move to execute.')
+        
+    #%% wrapper
+    def wrapper(self):
+        r"""
+        Acts as a wrapper to everything the GUI needs to do.
+        """
+        # clean up an existing artifacts
+        self.board_axes.clear()
+        self.move_axes.clear()
+    
+        # plot the current move
+        _plot_cur_move(self.move_axes, _calc_cur_move(self.state.cur_move, self.state.cur_game))
+        self.move_canvas.draw()
+    
+        # draw turn arrows in default colors
+        for button in self.rot_buttons.values():
+            button.overlay = None
+    
+        # draw the board
+        _plot_board(self.board_axes, self.state.board)
+    
+        # check for win
+        (winner, win_mask) = _check_for_win(self.state.board)
+        # update winner
+        self.state.game_hist[self.state.cur_game].winner = winner
+    
+        # plot win
+        _plot_win(self.board_axes, win_mask)
+    
+        # display relevant controls
+        self.display_controls()
+    
+        # plot possible winning moves (includes updating turn arrows)
+        if winner == PLAYER['none'] and OPTIONS['plot_winning_moves']:
+            (white_moves, black_moves) = _find_moves(self.state.board)
+            _plot_possible_win(self.board_axes, self.rot_buttons, white_moves, black_moves, self.state.cur_move, self.state.cur_game)
+    
+        # redraw with the final board
+        self.board_axes.set_axis_off()
+        self.board_canvas.draw()
+    
+        # update game stats on GUI
+        self.update_game_stats(results=GameStats.get_results(self.state.game_hist))
+        self.update()
 
 #%% _calc_cur_move
 def _calc_cur_move(cur_move, cur_game):
@@ -792,40 +917,6 @@ def _calc_cur_move(cur_move, cur_game):
     else:
         move = PLAYER['black']
     return move
-
-#%% _execute_move
-def _execute_move(*, quadrant, direction):
-    r"""
-    Tests and then executes a move.
-    """
-    global board, cur_move
-    if move_status['ok']:
-        if LOGGING:
-            print('Rotating Quadrant {} in Direction {}.'.format(quadrant, direction))
-        # delete gray piece
-        move_status['patch_object'].remove()
-        move_status['patch_object'] = None
-        # add new piece to board
-        board[move_status['pos'][0], move_status['pos'][1]] = _calc_cur_move(cur_move, cur_game)
-        # rotate board
-        _rotate_board(board, quadrant, direction)
-        # increment move list
-        assert game_hist[cur_game].num_moves >= cur_move, \
-            'Number of moves = {}, Current Move = {}'.format(game_hist[cur_game].num_moves, cur_move)
-        this_move = Move(move_status['pos'][0], move_status['pos'][1], quadrant, direction)
-        if game_hist[cur_game].num_moves == cur_move:
-            game_hist[cur_game].add_move(this_move)
-        else:
-            game_hist[cur_game].move_list[cur_move] = this_move
-            game_hist[cur_game].remove_moves(cur_move+1)
-        # increment current move
-        cur_move += 1
-        # reset status for next move
-        move_status['ok'] = False
-        move_status['pos'] = None
-    else:
-        if LOGGING:
-            print('No move to execute.')
 
 #%% _check_for_win
 def _check_for_win(board):
@@ -859,9 +950,6 @@ def _check_for_win(board):
         if LOGGING:
             print('Win detected.  Winner is {}.'.format(list(PLAYER.keys())[list(PLAYER.values()).index(winner)]))
         win_mask = np.reshape(np.sum(WIN[:, white], axis=1) + np.sum(WIN[:, black], axis=1), (SIZES['board'], SIZES['board'])) != 0
-
-    # update statistics
-    game_hist[cur_game].winner = winner
 
     return (winner, win_mask)
 
@@ -1022,44 +1110,6 @@ def _create_board_from_moves(moves, first_player):
         this_player = PLAYER['white'] if this_player == PLAYER['black'] else PLAYER['black']
     return board
 
-#%% _update_game_stats
-def _update_game_stats(self, results):
-    r"""
-    Updates the game stats on the left of the GUI.
-    """
-    # calculate the number of wins
-    white_wins = np.sum(results == PLAYER['white'])
-    black_wins = np.sum(results == PLAYER['black'])
-    games_tied = np.sum(results == PLAYER['draw'])
-
-    # update the gui
-    self.lbl_white_wins.setText("{}".format(white_wins))
-    self.lbl_black_wins.setText("{}".format(black_wins))
-    self.lbl_games_tied.setText("{}".format(games_tied))
-
-#%% _display_controls
-def _display_controls(self):
-    r"""
-    Determines what controls to display on the GUI.
-    """
-    # show/hide New Game Button
-    if game_hist[cur_game].winner == PLAYER['none']:
-        self.btn_new.hide()
-    else:
-        self.btn_new.show()
-
-    # show/hide Undo Button
-    if cur_move > 0:
-        self.btn_undo.show()
-    else:
-        self.btn_undo.hide()
-
-    # show/hide Redo Button
-    if game_hist[cur_game].num_moves > cur_move:
-        self.btn_redo.show()
-    else:
-        self.btn_redo.hide()
-
 #%% _plot_cur_move
 def _plot_cur_move(ax, move):
     r"""
@@ -1136,7 +1186,7 @@ def _plot_piece(ax, vc, hc, r, c, half=False):
     return piece
 
 #%% _plot_board
-def _plot_board(ax):
+def _plot_board(ax, board):
     r"""
     Plots the board (and the current player move).
     """
@@ -1215,7 +1265,7 @@ def _plot_win(ax, mask):
                 _plot_piece(ax, i, j, SIZES['win'], COLOR['win'])
 
 #%% _plot_possible_win
-def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
+def _plot_possible_win(ax, rot_buttons, white_moves, black_moves, cur_move, cur_game):
     r"""
     Plots the possible wins on the board.
 
@@ -1233,96 +1283,42 @@ def _plot_possible_win(ax, rot_buttons, white_moves, black_moves):
     >>> board = np.reshape(np.hstack((0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, np.zeros(24))), (6, 6))
     >>> (white_moves, black_moves) = _find_moves(board)
     >>> rot_buttons = dict() # TODO: write this # doctest: +SKIP
-    >>> _plot_possible_win(ax, rot_buttons, white_moves, black_moves) # doctest: +SKIP
+    >>> cur_move = 0
+    >>> cur_game = 0
+    >>> _plot_possible_win(ax, rot_buttons, white_moves, black_moves, cur_move, cur_game) # doctest: +SKIP
     >>> plt.show(block=False)
 
     >>> plt.close()
 
     """
     # find set of positions to plot
-    pos_white = set(Move.get_pos(white_moves))
-    pos_black = set(Move.get_pos(black_moves))
+    pos_white = set(white_moves)
+    pos_black = set(black_moves)
     # find intersecting positions
     pos_both  = pos_white & pos_black
 
     # plot the whole pieces
-    for pos in pos_white ^ pos_both:
-        _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_wht'])
-    for pos in pos_black ^ pos_both:
-        _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_blk'])
+    for this_move in pos_white ^ pos_both:
+        _plot_piece(ax, this_move.row, this_move.column, SIZES['win'], COLOR['win_wht'])
+        rot_buttons[this_move.rot_key].overlay = 'wht'
+    for this_move in pos_black ^ pos_both:
+        _plot_piece(ax, this_move.row, this_move.column, SIZES['win'], COLOR['win_blk'])
+        rot_buttons[this_move.rot_key].overlay = 'blk'
 
     # plot the half pieces, with the current players move as whole
     next_move = _calc_cur_move(cur_move, cur_game)
     if next_move == PLAYER['white']:
-        for pos in pos_both:
-            _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_wht'])
-            _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_blk'], half=True)
+        for this_move in pos_both:
+            _plot_piece(ax, this_move.row, this_move.column, SIZES['win'], COLOR['win_wht'])
+            _plot_piece(ax, this_move.row, this_move.column, SIZES['win'], COLOR['win_blk'], half=True)
+            rot_buttons[this_move.rot_key].overlay = 'w_b'
     elif next_move == PLAYER['black']:
-        for pos in pos_both:
-            _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_blk'])
-            _plot_piece(ax, np.mod(pos, SIZES['board']), pos//SIZES['board'], SIZES['win'], COLOR['win_wht'], half=True)
+        for this_move in pos_both:
+            _plot_piece(ax, this_move.row, this_move.column, SIZES['win'], COLOR['win_blk'])
+            _plot_piece(ax, this_move.row, this_move.column, SIZES['win'], COLOR['win_wht'], half=True)
+            rot_buttons[this_move.rot_key].overlay = 'b_w'
     else:
         raise ValueError('Unexpected next player.')
-
-    # find set of quadrant rotations
-    rot_white = set(Move.get_rot(white_moves))
-    rot_black = set(Move.get_rot(black_moves))
-    # find intersection rotations
-    rot_both  = rot_white & rot_black
-
-    # update the overlay information in the buttons
-    for this_rot in rot_white ^ rot_both:
-        rot_buttons[this_rot].overlay = 'wht'
-    for this_rot in rot_black ^ rot_both:
-        rot_buttons[this_rot].overlay = 'blk'
-    if next_move == PLAYER['white']:
-        for this_rot in rot_both:
-            rot_buttons[this_rot].overlay = 'w_b'
-    else:
-        for this_rot in rot_both:
-            rot_buttons[this_rot].overlay = 'b_w'
-
-#%% wrapper
-def wrapper(self):
-    r"""
-    Acts as a wrapper to everything the GUI needs to do.
-    """
-    # clean up an existing artifacts
-    self.board_axes.clear()
-    self.move_axes.clear()
-
-    # plot the current move
-    _plot_cur_move(self.move_axes, _calc_cur_move(cur_move, cur_game))
-    self.move_canvas.draw()
-
-    # draw turn arrows in default colors
-    for button in self.rot_buttons.values():
-        button.overlay = None
-
-    # draw the board
-    _plot_board(self.board_axes)
-
-    # check for win
-    (winner, win_mask) = _check_for_win(board)
-
-    # plot win
-    _plot_win(self.board_axes, win_mask)
-
-    # display relevant controls
-    _display_controls(self)
-
-    # plot possible winning moves (includes updating turn arrows)
-    if winner == PLAYER['none'] and OPTIONS['plot_winning_moves']:
-        (white_moves, black_moves) = _find_moves(board)
-        _plot_possible_win(self.board_axes, self.rot_buttons, white_moves, black_moves)
-
-    # redraw with the final board
-    self.board_axes.set_axis_off()
-    self.board_canvas.draw()
-
-    # update game stats on GUI
-    _update_game_stats(self, results=GameStats.get_results(game_hist))
-    self.update()
 
 #%% Unit Test
 if __name__ == '__main__':
@@ -1333,10 +1329,6 @@ if __name__ == '__main__':
     if mode == 'run':
         # Runs the GUI application
         qapp = QApplication(sys.argv)
-        # load the images
-        IMAGES = _load_images()
-        # load the previous game content
-        _load_previous_game()
         # instatiates the GUI
         gui = PentagoGui()
         gui.show()

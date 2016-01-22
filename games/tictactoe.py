@@ -25,7 +25,10 @@ except ImportError: # pragma: no cover
     from PyQt4 import QtGui, QtCore
     from PyQt4.QtGui import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from dstauffman import get_images_dir, get_output_dir, Frozen
+from dstauffman import get_images_dir, get_output_dir, Frozen, Counter
+
+# TODO: make into grid layout
+# TODO: add boxes for flipping settings
 
 #%% Constants
 # color definitions
@@ -37,7 +40,7 @@ COLOR['x']        = (0., 0., 0.)
 COLOR['edge']     = (0., 0., 0.)
 COLOR['win_o']    = (1.0, 0.9, 0.9)
 COLOR['win_x']    = (0.2, 0.0, 0.0)
-COLOR['win_ox']   = (0.8, 0.0, 0.0)
+COLOR['win_ox']   = (0.7, 0.7, 0.7)
 
 # player enumerations
 PLAYER          = {}
@@ -54,11 +57,11 @@ SIZES['board']  = 3
 
 # Gameplay options
 OPTIONS                       = {}
-OPTIONS['load_previous_game'] = 'Ask' # from ['Yes','No','Ask'] # TODO: change back to Ask eventually
-OPTIONS['plot_winning_moves'] = False
+OPTIONS['load_previous_game'] = 'Ask' # from ['Yes','No','Ask']
+OPTIONS['plot_best_moves']    = False
 OPTIONS['plot_move_power']    = False
-OPTIONS['o_is_computer']      = False # TODO: needs fixing
-OPTIONS['x_is_computer']      = False
+OPTIONS['o_is_computer']      = False
+OPTIONS['x_is_computer']      = True
 
 # all possible winning combinations
 WIN = np.array([\
@@ -77,6 +80,17 @@ WIN = np.array([\
 
 # for debugging
 LOGGING = True
+
+#%% Classes - State
+class State(Frozen):
+    r"""
+    Class that keeps track of the GUI state.
+    """
+    def __init__(self):
+        self.board     = PLAYER['none'] * np.ones((3, 3), dtype=int)
+        self.cur_move  = Counter(0)
+        self.cur_game  = Counter(0)
+        self.game_hist = [GameStats(number=self.cur_game, first_move=PLAYER['o'])]
 
 #%% Classes - Moves
 class Move(Frozen):
@@ -180,25 +194,57 @@ class GameStats(Frozen):
             game_hist = pickle.load(file)
         return game_hist
 
-#%% Dynamic globals
-cur_move  = 0 # TODO: make mutable, explicitly pass and eliminate globals
-cur_game  = 0
-board     = PLAYER['none'] * np.ones((3, 3), dtype=int)
-game_hist = []
-game_hist.append(GameStats(number=cur_game, first_move=PLAYER['o']))
-
 #%% Classes - TicTacToeGui
 class TicTacToeGui(QWidget):
     r"""
     The Tic Tac Toe GUI.
     """
-    def __init__(self, **kwargs):
-        super(TicTacToeGui, self).__init__(**kwargs)
+    def __init__(self, filename=None, board=None, cur_move=None, cur_game=None, game_hist=None):
+        # call super method
+        super(TicTacToeGui, self).__init__()
+        # initialize the state data
+        self.initialize_state()
+        # call init method to instantiate the GUI
         self.init()
-
+        
+    #%% State initialization
+    def initialize_state(self):
+        r"""
+        Loads the previous game based on settings and whether the file exists.
+        """
+        # preallocate to not load
+        load_game = False
+        if OPTIONS['load_previous_game'] == 'No':
+            pass
+        elif OPTIONS['load_previous_game'] == 'Yes':
+            load_game = True
+        # ask if loading
+        elif OPTIONS['load_previous_game'] == 'Ask':
+            widget = QWidget()
+            reply = QMessageBox.question(widget, 'Message', \
+                "Do you want to load the previous game?", QMessageBox.Yes | \
+                QMessageBox.No, QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                load_game = True
+        else:
+            raise ValueError('Unexpected value for the load_previous_game option.')
+        # initialize outputs
+        self.state = State()
+        # load previous game
+        if load_game:
+            filename  = os.path.join(get_output_dir(), 'tictactoe.p')
+            if os.path.isfile(filename):
+                self.state.game_hist   = GameStats.load(filename)
+                self.state.cur_game    = Counter(len(self.state.game_hist)-1)
+                self.state.cur_move    = Counter(len(self.state.game_hist[-1].move_list))
+                self.state.board       = _create_board_from_moves(self.state.game_hist[-1].move_list, \
+                    self.state.game_hist[-1].first_move)
+            else:
+                raise ValueError('Could not find file: "{}"'.format(filename))
+    
+    #%% GUI initialization    
     def init(self):
-        r"""Creates the actual GUI."""
-
+        r"""Initializes the GUI."""
         #%% properties
         QToolTip.setFont(QtGui.QFont('SansSerif', 10))
 
@@ -245,7 +291,7 @@ class TicTacToeGui(QWidget):
         fig = Figure(figsize=(4.2, 4.2), dpi=100, frameon=False)
         self.board_canvas = FigureCanvas(fig)
         self.board_canvas.setParent(self.wid_board)
-        self.board_canvas.mpl_connect('button_release_event', lambda event: _mouse_click_callback(self, event))
+        self.board_canvas.mpl_connect('button_release_event', lambda event: self.mouse_click_callback(event))
         self.board_axes = Axes(fig, [0., 0., 1., 1.])
         self.board_axes.invert_yaxis()
         fig.add_axes(self.board_axes)
@@ -283,108 +329,215 @@ class TicTacToeGui(QWidget):
         self.btn_redo.clicked.connect(self.btn_redo_function)
 
         #%% Call wrapper to initialize GUI
-        wrapper(self)
+        self.wrapper()
 
         #%% GUI properties
-        self.setGeometry(520, 380, 1000, 700)
+        self.resize(1000, 700)
+        self.center()
         self.setWindowTitle('Tic Tac Toe')
         self.setWindowIcon(QtGui.QIcon(os.path.join(get_images_dir(),'tictactoe.png')))
         self.show()
 
-    #%% Other callbacks
+    #%% Other callbacks - closing
     def closeEvent(self, event):
         r"""Things in here happen on GUI closing."""
         filename = os.path.join(get_output_dir(), 'tictactoe.p')
-        GameStats.save(filename, game_hist)
+        GameStats.save(filename, self.state.game_hist)
         event.accept()
+        
+    #%% Other callbacks - center the GUI on the screen
+    def center(self):
+        r"""Makes the GUI centered on the active screen."""
+        frameGm = self.frameGeometry()
+        screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
+        centerPoint = QApplication.desktop().screenGeometry(screen).center()
+        frameGm.moveCenter(centerPoint)
+        self.move(frameGm.topLeft())
+
+    #%% Other callbacks - display_controls
+    def display_controls(self):
+        r"""
+        Determines what controls to display on the GUI.
+        """
+        # show/hide New Game Button
+        if self.state.game_hist[self.state.cur_game].winner == PLAYER['none']:
+            self.btn_new.hide()
+        else:
+            self.btn_new.show()
+    
+        # show/hide Undo Button
+        if self.state.cur_move > 0:
+            self.btn_undo.show()
+        else:
+            self.btn_undo.hide()
+    
+        # show/hide Redo Button
+        if self.state.game_hist[self.state.cur_game].num_moves > self.state.cur_move:
+            self.btn_redo.show()
+        else:
+            self.btn_redo.hide()
+            
+    #%% Other callbacks - update_game_stats
+    def update_game_stats(self, results):
+        r"""
+        Updates the game stats on the left of the GUI.
+        """
+        # calculate the number of wins
+        o_wins     = np.sum(results == PLAYER['o'])
+        x_wins     = np.sum(results == PLAYER['x'])
+        games_tied = np.sum(results == PLAYER['draw'])
+    
+        # update the gui
+        self.lbl_o_wins.setText("{}".format(o_wins))
+        self.lbl_x_wins.setText("{}".format(x_wins))
+        self.lbl_games_tied.setText("{}".format(games_tied))
 
     #%% Button callbacks
-    def btn_undo_function(self):
+    def btn_undo_function(self): # TODO: deal with AI moves, too
         r"""Functions that executes on undo button press."""
-        # declare globals
-        global cur_move, cur_game, board
         # get last move
-        last_move = game_hist[cur_game].move_list[cur_move-1]
+        last_move = self.state.game_hist[self.state.cur_game].move_list[self.state.cur_move-1]
         if LOGGING:
             print('Undoing move = {}'.format(last_move))
         # delete piece
-        board[last_move.row, last_move.column] = PLAYER['none']
+        self.state.board[last_move.row, last_move.column] = PLAYER['none']
         # update current move
-        cur_move -= 1
+        self.state.cur_move -= 1
         # call GUI wrapper
-        wrapper(self)
+        self.wrapper()
 
     def btn_new_function(self):
         r"""Functions that executes on new game button press."""
-        # declare globals
-        global cur_move, cur_game, board
         # update values
-        last_lead = game_hist[cur_game].first_move
+        last_lead = self.state.game_hist[self.state.cur_game].first_move
         next_lead = PLAYER['x'] if last_lead == PLAYER['o'] else PLAYER['o']
-        assert len(game_hist) == cur_game + 1
-        cur_game += 1
-        cur_move = 0
-        game_hist.append(GameStats(number=cur_game, first_move=next_lead, winner=PLAYER['none']))
-        board = PLAYER['none'] * np.ones((SIZES['board'], SIZES['board']), dtype=int)
+        assert len(self.state.game_hist) == self.state.cur_game + 1
+        self.state.cur_game += 1
+        self.state.cur_move = Counter(0)
+        self.state.game_hist.append(GameStats(number=self.state.cur_game, first_move=next_lead, winner=PLAYER['none']))
+        self.state.board = PLAYER['none'] * np.ones((SIZES['board'], SIZES['board']), dtype=int)
         # call GUI wrapper
-        wrapper(self)
+        self.wrapper()
 
     def btn_redo_function(self):
         r"""Functions that executes on redo button press."""
-        # declare globals
-        global cur_move, cur_game, board
         # get next move
-        redo_move = game_hist[cur_game].move_list[cur_move]
+        redo_move = self.state.game_hist[self.state.cur_game].move_list[self.state.cur_move]
         if LOGGING:
             print('Redoing move = {}'.format(redo_move))
         # place piece
-        board[redo_move.row, redo_move.column] = _calc_cur_move(cur_move, cur_game)
+        self.state.board[redo_move.row, redo_move.column] = _calc_cur_move(self.state.cur_move, self.state.cur_game)
         # update current move
-        cur_move += 1
+        self.state.cur_move += 1
         # call GUI wrapper
-        wrapper(self)
+        self.wrapper()
 
-#%% _mouse_click_callback
-def _mouse_click_callback(self, event):
-    r"""
-    Function that executes on mouse click on the board axes.  Ends up placing a piece on the board.
-    """
-    global board, cur_move
-    # ignore events that are outside the axes
-    if event.xdata is None or event.ydata is None:
+    #%% mouse_click_callback
+    def mouse_click_callback(self, event):
+        r"""
+        Function that executes on mouse click on the board axes.  Ends up placing a piece on the board.
+        """
+        # ignore events that are outside the axes
+        if event.xdata is None or event.ydata is None:
+            if LOGGING:
+                print('Click is off the board.')
+            return
+        # test for a game that has already been concluded
+        if self.state.game_hist[self.state.cur_game].winner != PLAYER['none']:
+            if LOGGING:
+                print('Game is over.')
+            return
+        # alias the rounded values of the mouse click location
+        x = np.round(event.ydata).astype(int)
+        y = np.round(event.xdata).astype(int)
         if LOGGING:
-            print('Click is off the board.')
-        return
-    # test for a game that has already been concluded
-    if game_hist[cur_game].winner != PLAYER['none']:
-        if LOGGING:
-            print('Game is over.')
-        return
-    # alias the rounded values of the mouse click location
-    x = np.round(event.ydata).astype(int)
-    y = np.round(event.xdata).astype(int)
-    if LOGGING:
-        print('Clicked on (x,y) = ({}, {})'.format(x, y))
-    # get axes limits
-    (m, n) = board.shape
-    # ignore values that are outside the board
-    if x < 0 or y < 0 or x >= m or y >= n:
-        if LOGGING:
-            print('Click is outside playable board.')
-        return
-    # check that move is on a free square
-    if board[x, y] == PLAYER['none']:
-        # make the move
-        _make_move(self.board_axes, board, x, y)
-    # redraw the game/board
-    wrapper(self)
+            print('Clicked on (x,y) = ({}, {})'.format(x, y))
+        # get axes limits
+        (m, n) = self.state.board.shape
+        # ignore values that are outside the board
+        if x < 0 or y < 0 or x >= m or y >= n:
+            if LOGGING:
+                print('Click is outside playable board.')
+            return
+        # check that move is on a free square
+        if self.state.board[x, y] == PLAYER['none']:
+            # make the move
+            _make_move(self.board_axes, self.state.board, x, y, self.state.cur_move, \
+                self.state.cur_game, self.state.game_hist)
+        # redraw the game/board
+        self.wrapper()
+        
+    #%% wrapper
+    def wrapper(self):
+        r"""
+        Acts as a wrapper to everything the GUI needs to do.
+        """
+        def sub_wrapper(self):
+            r"""
+            Sub-wrapper so that the wrapper can call itself for making AI moves.
+            """
+            # clean up an existing artifacts
+            self.board_axes.clear()
+            self.move_axes.clear()
+        
+            # plot the current move
+            current_player = _calc_cur_move(self.state.cur_move, self.state.cur_game)
+            _plot_cur_move(self.move_axes, current_player)
+            self.move_canvas.draw()
+        
+            # draw the board
+            _plot_board(self.board_axes, self.state.board)
+        
+            # check for win
+            (winner, win_mask) = _check_for_win(self.state.board)
+            # update winner
+            self.state.game_hist[self.state.cur_game].winner = winner
+        
+            # plot win
+            _plot_win(self.board_axes, win_mask, self.state.board)
+        
+            # display relevant controls
+            self.display_controls()
+        
+            # plot possible winning moves (includes updating turn arrows)
+            if winner == PLAYER['none'] and OPTIONS['plot_best_moves']:
+                (o_moves, x_moves) = _find_moves(self.state.board)
+                _plot_possible_win(self.board_axes, o_moves, x_moves)
+                
+            # plot the move power
+            if winner == PLAYER['none'] and OPTIONS['plot_move_power']:
+                _plot_powers(self.board_axes, self.state.board, o_moves, x_moves)
+        
+            # redraw with the final board
+            self.board_axes.set_axis_off()
+            self.board_canvas.draw()
+        
+            # update game stats on GUI
+            self.update_game_stats(results=GameStats.get_results(self.state.game_hist))
+            self.update()
+            
+            return (winner, current_player)
+        
+        # call the wrapper
+        (winner, current_player) = sub_wrapper(self)
+        
+        # make computer AI move
+        while winner == PLAYER['none'] and (\
+            (OPTIONS['o_is_computer'] and current_player == PLAYER['o']) or \
+            (OPTIONS['x_is_computer'] and current_player == PLAYER['x'])):
+            _play_ai_game(self.board_axes, self.state.board, self.state.cur_move, self.state.cur_game, \
+                self.state.game_hist)
+            (winner, current_player) = sub_wrapper(self)
     
 #%% _make_move
-def _make_move(ax, board, x, y):
+def _make_move(ax, board, x, y, cur_move, cur_game, game_hist):
     r"""
     Does the actual move.
+    
+    Notes
+    -----
+    #.  Modifies `board`, `cur_move` and `game_hist` in-place.
     """
-    global cur_move
     if LOGGING:
         print('Placing current piece.')
     current_player = _calc_cur_move(cur_move, cur_game)
@@ -409,36 +562,6 @@ def _make_move(ax, board, x, y):
         game_hist[cur_game].remove_moves(cur_move+1)
     # increment current move
     cur_move += 1
-
-#%% _load_previous_game
-def _load_previous_game():
-    r"""
-    Loads the previous game based on settings and whether it exists.
-    """
-    global cur_game, cur_move, board, game_hist
-    # preallocate to not load
-    load_game = False
-    if OPTIONS['load_previous_game'] == 'No':
-        pass
-    elif OPTIONS['load_previous_game'] == 'Yes':
-        load_game = True
-    # ask if loading
-    elif OPTIONS['load_previous_game'] == 'Ask':
-        widget = QWidget()
-        reply = QMessageBox.question(widget, 'Message', \
-            "Do you want to load the previous game?", QMessageBox.Yes | \
-            QMessageBox.No, QMessageBox.No)
-        if reply == QMessageBox.Yes:
-            load_game = True
-    else:
-        raise ValueError('Unexpected value for the load_previous_game option.')
-    if load_game:
-        filename  = os.path.join(get_output_dir(), 'tictactoe.p')
-        if os.path.isfile(filename):
-            game_hist   = GameStats.load(filename)
-            cur_game    = len(game_hist)-1
-            cur_move    = len(game_hist[-1].move_list)
-            board       = _create_board_from_moves(game_hist[-1].move_list, game_hist[-1].first_move)
 
 #%% _calc_cur_move
 def _calc_cur_move(cur_move, cur_game):
@@ -503,9 +626,6 @@ def _check_for_win(board):
         if LOGGING:
             print('Win detected.  Winner is {}.'.format(list(PLAYER.keys())[list(PLAYER.values()).index(winner)]))
         win_mask = np.reshape(np.sum(WIN[:, x], axis=1) + np.sum(WIN[:, o], axis=1), (SIZES['board'], SIZES['board'])) != 0
-
-    # update statistics
-    game_hist[cur_game].winner = winner
 
     return (winner, win_mask)
 
@@ -581,11 +701,10 @@ def _find_moves(board):
     return (o_moves, x_moves)
     
 #%% _play_ai_game
-def _play_ai_game(ax, cur_game):
+def _play_ai_game(ax, board, cur_move, cur_game, game_hist):
     r"""
     Computer AI based play.
     """
-    global board, cur_move
     current_player = _calc_cur_move(cur_move, cur_game)
     if current_player == PLAYER['o'] and OPTIONS['o_is_computer']:
         (moves, _) = _find_moves(board)
@@ -594,7 +713,12 @@ def _play_ai_game(ax, cur_game):
     else:
         return
     this_move = moves[0]
-    _make_move(ax, board, this_move.row, this_move.column)
+    # potentially pick another equivalent move
+    for next_move in moves[1:]:
+        if next_move.power == this_move.power:
+            if np.random.rand() < 0.5:
+                this_move = next_move
+    _make_move(ax, board, this_move.row, this_move.column, cur_move, cur_game, game_hist)
 
 #%% _create_board_from_moves
 def _create_board_from_moves(moves, first_player):
@@ -616,44 +740,6 @@ def _create_board_from_moves(moves, first_player):
         # update the next player to move
         this_player = PLAYER['x'] if this_player == PLAYER['o'] else PLAYER['o']
     return board
-
-#%% _update_game_stats
-def _update_game_stats(self, results):
-    r"""
-    Updates the game stats on the left of the GUI.
-    """
-    # calculate the number of wins
-    o_wins     = np.sum(results == PLAYER['o'])
-    x_wins     = np.sum(results == PLAYER['x'])
-    games_tied = np.sum(results == PLAYER['draw'])
-
-    # update the gui
-    self.lbl_o_wins.setText("{}".format(o_wins))
-    self.lbl_x_wins.setText("{}".format(x_wins))
-    self.lbl_games_tied.setText("{}".format(games_tied))
-
-#%% _display_controls
-def _display_controls(self):
-    r"""
-    Determines what controls to display on the GUI.
-    """
-    # show/hide New Game Button
-    if game_hist[cur_game].winner == PLAYER['none']:
-        self.btn_new.hide()
-    else:
-        self.btn_new.show()
-
-    # show/hide Undo Button
-    if cur_move > 0:
-        self.btn_undo.show()
-    else:
-        self.btn_undo.hide()
-
-    # show/hide Redo Button
-    if game_hist[cur_game].num_moves > cur_move:
-        self.btn_redo.show()
-    else:
-        self.btn_redo.hide()
 
 #%% _plot_cur_move
 def _plot_cur_move(ax, move):
@@ -862,10 +948,9 @@ def _plot_possible_win(ax, o_moves, x_moves):
 
     """
     # find set of winning positions to plot
-    best_power = 3
-    best_power = o_moves[0].power # TODO: temporary for best moves
+    best_power = o_moves[0].power
     pos_o = set([move for move in o_moves if move.power >= best_power])
-    best_power = x_moves[0].power # TODO: temporary for best moves
+    best_power = x_moves[0].power
     pos_x = set([move for move in x_moves if move.power >= best_power])
 
     # find intersecting positions
@@ -908,58 +993,11 @@ def _plot_powers(ax, board, o_moves, x_moves):
     """
     for this_move in o_moves:
         ax.annotate('{}'.format(this_move.power), xy=(this_move.column-0.4, this_move.row-0.4), \
-            xycoords='data', horizontalalignment='center', verticalalignment='center', fontsize=15, color='b')
+            xycoords='data', horizontalalignment='left', verticalalignment='center', fontsize=15, color='b')
     for this_move in x_moves:
         ax.annotate('{}'.format(this_move.power), xy=(this_move.column+0.4, this_move.row+0.4), \
-            xycoords='data', horizontalalignment='center', verticalalignment='center', fontsize=15, color='k')
-
-#%% move_wrapper
-def wrapper(self):
-    r"""
-    Acts as a wrapper to everything the GUI needs to do.
-    """
-    # clean up an existing artifacts
-    self.board_axes.clear()
-    self.move_axes.clear()
-
-    # plot the current move
-    _plot_cur_move(self.move_axes, _calc_cur_move(cur_move, cur_game))
-    self.move_canvas.draw()
-
-    # draw the board
-    _plot_board(self.board_axes, board)
-
-    # check for win
-    (winner, win_mask) = _check_for_win(board)
-
-    # plot win
-    _plot_win(self.board_axes, win_mask, board)
-
-    # display relevant controls
-    _display_controls(self)
-
-    # plot possible winning moves (includes updating turn arrows)
-    if winner == PLAYER['none'] and OPTIONS['plot_winning_moves']:
-        (o_moves, x_moves) = _find_moves(board)
-        _plot_possible_win(self.board_axes, o_moves, x_moves)
+            xycoords='data', horizontalalignment='right', verticalalignment='center', fontsize=15, color='k')
         
-    # plot the move power
-    if winner == PLAYER['none'] and OPTIONS['plot_move_power']:
-        _plot_powers(self.board_axes, board, o_moves, x_moves)
-
-    # redraw with the final board
-    self.board_axes.set_axis_off()
-    self.board_canvas.draw()
-
-    # update game stats on GUI
-    _update_game_stats(self, results=GameStats.get_results(game_hist))
-    self.update()
-    
-    # make computer AI move
-    if winner == PLAYER['none'] and (OPTIONS['o_is_computer'] or OPTIONS['x_is_computer']):
-        _play_ai_game(self.board_axes, cur_game) # TODO: make this work
-        self.update()
-
 #%% Unit Test
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -969,8 +1007,6 @@ if __name__ == '__main__':
     if mode == 'run':
         # Runs the GUI application
         qapp = QApplication(sys.argv)
-        # load the previous game content
-        _load_previous_game()
         # instatiates the GUI
         gui = TicTacToeGui()
         gui.show()

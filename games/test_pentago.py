@@ -124,6 +124,9 @@ class Test__rotate_board(unittest.TestCase):
         with self.assertRaises(AssertionError):
             pentago._rotate_board(self.board, quadrant=1, direction=-1, inplace=False)
 
+#%% State
+pass
+
 #%% Move
 pass
 
@@ -134,15 +137,33 @@ pass
 pass
 
 #%% PentagoGui
+#PentagoGui.initialize_state
 pass
-
-#%% _mouse_click_callback
+#PentagoGui.load_images
 pass
-
-#%% _load_images
+#PentagoGui.init
 pass
-
-#%% _load_previous_game
+#PentagoGui.closeEvent
+pass
+#PentagoGui.center
+pass
+#PentagoGui.display_controls
+pass
+#PentagoGui.update_game_stats
+pass
+#PentagoGui.btn_undo_function
+pass
+#PentagoGui.btn_new_function
+pass
+#PentagoGui.btn_redo_function
+pass
+#PentagoGui.btn_rot_function
+pass
+#PentagoGui.mouse_click_callback
+pass
+#PentagoGui.execute_move
+pass
+#PentagoGui.wrapper
 pass
 
 #%% _calc_cur_move
@@ -175,9 +196,6 @@ class Test__calc_cur_move(unittest.TestCase):
     def test_even_even(self):
         move = pentago._calc_cur_move(self.even_num, self.even_num)
         self.assertEqual(move, self.white)
-
-#%% _execute_move
-pass
 
 #%% _check_for_win
 class Test__check_for_win(unittest.TestCase):
@@ -374,12 +392,6 @@ pass
 #%% _create_board_from_moves
 pass
 
-#%% _update_game_stats
-pass
-
-#%% _display_controls
-pass
-
 #%% _plot_cur_move
 pass
 
@@ -393,9 +405,6 @@ pass
 pass
 
 #%% _plot_possible_win
-pass
-
-#%% wrapper
 pass
 
 #%% Unit test execution
