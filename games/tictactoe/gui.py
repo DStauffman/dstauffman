@@ -339,9 +339,12 @@ class TicTacToeGui(QWidget):
             # display relevant controls
             self.display_controls()
 
+            # find the best moves
+            if winner == PLAYER['none'] and (OPTIONS['plot_best_moves'] or OPTIONS['plot_move_power']):
+                (o_moves, x_moves) = find_moves(self.state.board)
+
             # plot possible winning moves (includes updating turn arrows)
             if winner == PLAYER['none'] and OPTIONS['plot_best_moves']:
-                (o_moves, x_moves) = find_moves(self.state.board)
                 plot_possible_win(self.board_axes, o_moves, x_moves)
 
             # plot the move power
