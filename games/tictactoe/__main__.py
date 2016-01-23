@@ -40,7 +40,7 @@ elif mode == 'test':
     else:
         qapp = QApplication.instance()
     # run the tests
-    unittest.main(module='dstauffman.games.tests.run_all_tests', exit=False)
+    unittest.main(module='dstauffman.games.tictactoe.tests.run_all_tests', exit=False)
     doctest.testmod(verbose=False)
     # close the qapp
     qapp.closeAllWindows()

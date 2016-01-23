@@ -380,7 +380,7 @@ if __name__ == '__main__':
     else:
         qapp = QApplication.instance()
     # run the tests
-    unittest.main(module='dstauffman.games.tests.test_gui', exit=False)
+    unittest.main(module='dstauffman.games.tictactoe.tests.test_gui', exit=False)
     doctest.testmod(verbose=False)
     # close the qapp
     qapp.closeAllWindows()

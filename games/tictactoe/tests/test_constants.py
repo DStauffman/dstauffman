@@ -19,13 +19,22 @@ ttt.LOGGING = False
 o = ttt.PLAYER['o']
 x = ttt.PLAYER['x']
 
-#%% State
+#%% COLOR
 pass
 
-#%% Move
+#%% LOGGING
 pass
 
-#%% GameStats
+#%% PLAYER
+pass
+
+#%% OPTIONS
+pass
+
+#%% SIZES
+pass
+
+#%% WIN
 pass
 
 #%% Unit test execution
