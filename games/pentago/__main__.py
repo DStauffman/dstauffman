@@ -11,9 +11,9 @@ Notes
 
 #%% Imports
 import doctest
-import nose
 import os
 import sys
+import unittest
 try:
     from PyQt5.QtWidgets import QApplication
 except ImportError:
@@ -40,8 +40,11 @@ elif mode == 'test':
         qapp = QApplication(sys.argv)
     else:
         qapp = QApplication.instance()
-    # run the unit tests
-    nose.run(pentago)
+    # run the tests
+    loader = unittest.TestLoader()
+    tests  = loader.discover('dstauffman.games.pentago.tests')
+    runner = unittest.runner.TextTestRunner()
+    runner.run(tests)
     # run the docstrings
     verbose = False
     folder = pentago.get_root_dir()

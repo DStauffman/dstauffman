@@ -77,14 +77,17 @@ Level 5 [HARD]: Compute the longest sequence of moves to complete Level 3 withou
 # regular imports
 import doctest
 from enum import unique, IntEnum
+import logging
 import numpy as np
 import time
 import unittest
 
+#%% Logging
+logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
+
 #%% Constants
 # hard-coded values
 LARGE_INT = 1000000
-LOGGING = False # for debugging the recursive solver
 # dictionaries
 CHAR_DICT = {'.':0, 'S':1, 'E':2, 'K':3, 'W':4, 'R':5, 'B':6, 'T':7, 'L':8, 'x': 9}
 NUM_DICT  = {value:key for (key, value) in CHAR_DICT.items()}
@@ -1215,33 +1218,29 @@ def _solve_next_move(board, data, start_x, start_y):
         (cost, is_repeat, new_x, new_y) = _update_board(board, this_move, data['costs'], \
             data['transports'], start_x, start_y)
         # optional logging for debugging
-        if LOGGING: # pragma: no cover
-            print('this_move = {}, this_cost = {}, total moves = {}'.format(this_move, cost, data['moves']), end='')
+        log_message = 'this_move = {}, this_cost = {}, total moves = {}'.format(this_move, cost, data['moves'])
         # if the move was invalid then go to the next one
         if cost == COST_DICT['invalid']:
-            if LOGGING: # pragma: no cover
-                print(' - invalid')
+            logging.debug(log_message + ' - invalid')
             continue # pragma: no cover - Actually covered, error in coverage tool
         # valid move
         else:
             # determine if move was to a previously visited square of worse cost than another sequence
             if is_repeat or data['current_cost'] + abs(cost) >= data['best_costs'][new_x, new_y]:
-                if LOGGING: # pragma: no cover
-                    print(' - worse repeat')
+                logging.debug(log_message + ' - worse repeat')
                 # reject move and re-establish the visited state
                 _undo_move(board, this_move, data['original_board'], data['transports'], new_x, new_y)
                 if cost > 0 and is_repeat:
                     board[new_x, new_y] = Piece2['visited']
                 continue # pragma: no cover - Actually covered, error in coverage tool
             # optional logging for debugging
-            if LOGGING: # pragma: no cover
-                if cost < 0:
-                    print(' - solution')
-                    print('Potential solution found, moves = {} + {}'.format(data['moves'], this_move))
-                elif is_repeat:
-                    print(' - better repeat')
-                else:
-                    print(' - new step')
+            if cost < 0:
+                logging.debug(log_message + ' - solution')
+                logging.debug('Potential solution found, moves = {} + {}'.format(data['moves'], this_move))
+            elif is_repeat:
+                logging.debug(log_message + ' - better repeat')
+            else:
+                logging.debug(log_message + ' - new step')
             # move is new or better, update current and best costs and append move
             assert data['best_costs'][new_x, new_y] > 50000
             data['best_costs'][new_x, new_y] = data['current_cost'] + cost

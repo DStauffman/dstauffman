@@ -41,7 +41,10 @@ elif mode == 'test':
     else:
         qapp = QApplication.instance()
     # run the tests
-    unittest.main(module='dstauffman.games.tictactoe.tests.run_all_tests', exit=False)
+    loader = unittest.TestLoader()
+    tests  = loader.discover('dstauffman.games.tictactoe.tests')
+    runner = unittest.runner.TextTestRunner()
+    runner.run(tests)
     # run the docstrings
     verbose = False
     folder = ttt.get_root_dir()

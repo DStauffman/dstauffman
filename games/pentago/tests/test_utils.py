@@ -13,9 +13,6 @@ import numpy as np
 import unittest
 import dstauffman.games.pentago as pentago
 
-#%% Setup
-pentago.LOGGING = False
-
 #%% Aliases
 w = pentago.PLAYER['white']
 b = pentago.PLAYER['black']

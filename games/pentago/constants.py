@@ -94,9 +94,6 @@ WIN = np.array([\
     [0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0],\
 ], dtype=bool)
 
-# boolean flag for whether to log extra information or not
-LOGGING = False
-
 #%% _rotate_board
 def _rotate_board(board, quadrant, direction, inplace=True):
     r"""
@@ -125,7 +122,7 @@ def _rotate_board(board, quadrant, direction, inplace=True):
     Example
     -------
 
-    >>> from dstauffman.games.pentago import _rotate_board, PLAYER
+    >>> from dstauffman.games.pentago.constants import _rotate_board, PLAYER
     >>> import numpy as np
     >>> board = PLAYER['none'] * np.ones((6, 6), dtype=int)
     >>> board[1, 0:3] = PLAYER['white']

@@ -176,7 +176,7 @@ def plot_possible_win(ax, rot_buttons, white_moves, black_moves, cur_move, cur_g
     Examples
     --------
 
-    >>> from dstauffman.games.pentago import plot_possible_win, _find_moves
+    >>> from dstauffman.games.pentago import plot_possible_win, find_moves
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -185,7 +185,7 @@ def plot_possible_win(ax, rot_buttons, white_moves, black_moves, cur_move, cur_g
     >>> _ = ax.set_ylim(-0.5, 5.5)
     >>> ax.invert_yaxis()
     >>> board = np.reshape(np.hstack((0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 1, np.zeros(24))), (6, 6))
-    >>> (white_moves, black_moves) = _find_moves(board)
+    >>> (white_moves, black_moves) = find_moves(board)
     >>> rot_buttons = dict() # TODO: write this # doctest: +SKIP
     >>> cur_move = 0
     >>> cur_game = 0

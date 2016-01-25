@@ -12,9 +12,6 @@ Notes
 import unittest
 import dstauffman.games.tictactoe as ttt
 
-#%% Setup
-ttt.LOGGING = False
-
 #%% Aliases
 o = ttt.PLAYER['o']
 x = ttt.PLAYER['x']

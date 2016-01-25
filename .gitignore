@@ -76,12 +76,10 @@ doc/tex/*/*.vrb
 # =========================
 # Folder/Files #
 # =========================
-games/coverage_html_report/*
-games/.coverage
+coverage_html_report/
+.coverage
 output/*
 results/*
 scripts/case_*
 scripts/script_*
 temp/*
-tests/.coverage
-tests/coverage_html_report/*

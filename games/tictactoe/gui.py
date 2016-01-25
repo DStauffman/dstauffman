@@ -9,6 +9,7 @@ Notes
 
 #%% Imports
 import doctest
+import logging
 from matplotlib.pyplot import Axes
 from matplotlib.figure import Figure
 import numpy as np
@@ -25,7 +26,7 @@ except ImportError: # pragma: no cover
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from dstauffman import get_images_dir, get_output_dir, Counter
 from dstauffman.games.tictactoe.classes   import GameStats, State
-from dstauffman.games.tictactoe.constants import LOGGING, PLAYER, OPTIONS, SIZES
+from dstauffman.games.tictactoe.constants import PLAYER, OPTIONS, SIZES
 from dstauffman.games.tictactoe.plotting  import plot_board, plot_cur_move, plot_possible_win, \
                                                  plot_powers, plot_win
 from dstauffman.games.tictactoe.utils     import calc_cur_move, check_for_win, create_board_from_moves, \
@@ -237,8 +238,7 @@ class TicTacToeGui(QWidget):
         r"""Functions that executes on undo button press."""
         # get last move
         last_move = self.state.game_hist[self.state.cur_game].move_list[self.state.cur_move-1]
-        if LOGGING:
-            print('Undoing move = {}'.format(last_move))
+        logging.debug('Undoing move = {}'.format(last_move))
         # delete piece
         self.state.board[last_move.row, last_move.column] = PLAYER['none']
         # update current move
@@ -263,8 +263,7 @@ class TicTacToeGui(QWidget):
         r"""Functions that executes on redo button press."""
         # get next move
         redo_move = self.state.game_hist[self.state.cur_game].move_list[self.state.cur_move]
-        if LOGGING:
-            print('Redoing move = {}'.format(redo_move))
+        logging.debug('Redoing move = {}'.format(redo_move))
         # place piece
         self.state.board[redo_move.row, redo_move.column] = calc_cur_move(self.state.cur_move, self.state.cur_game)
         # update current move
@@ -279,25 +278,21 @@ class TicTacToeGui(QWidget):
         """
         # ignore events that are outside the axes
         if event.xdata is None or event.ydata is None:
-            if LOGGING:
-                print('Click is off the board.')
+            logging.debug('Click is off the board.')
             return
         # test for a game that has already been concluded
         if self.state.game_hist[self.state.cur_game].winner != PLAYER['none']:
-            if LOGGING:
-                print('Game is over.')
+            logging.debug('Game is over.')
             return
         # alias the rounded values of the mouse click location
         x = np.round(event.ydata).astype(int)
         y = np.round(event.xdata).astype(int)
-        if LOGGING:
-            print('Clicked on (x,y) = ({}, {})'.format(x, y))
+        logging.debug('Clicked on (x,y) = ({}, {})'.format(x, y))
         # get axes limits
         (m, n) = self.state.board.shape
         # ignore values that are outside the board
         if x < 0 or y < 0 or x >= m or y >= n:
-            if LOGGING:
-                print('Click is outside playable board.')
+            logging.debug('Click is outside playable board.')
             return
         # check that move is on a free square
         if self.state.board[x, y] == PLAYER['none']:

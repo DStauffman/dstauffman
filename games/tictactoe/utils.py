@@ -9,12 +9,13 @@ Notes
 
 #%% Imports
 import doctest
+import logging
 import numpy as np
 import os
 import unittest
 from dstauffman import get_root_dir as dcs_root_dir
 from dstauffman.games.tictactoe.classes   import Move
-from dstauffman.games.tictactoe.constants import COLOR, LOGGING, PLAYER, OPTIONS, SIZES, WIN
+from dstauffman.games.tictactoe.constants import COLOR, PLAYER, OPTIONS, SIZES, WIN
 from dstauffman.games.tictactoe.plotting  import plot_piece
 
 #%% get_root_dir
@@ -105,8 +106,7 @@ def check_for_win(board):
     if winner == PLAYER['none']:
         win_mask = np.zeros((3,3), dtype=bool)
     else:
-        if LOGGING:
-            print('Win detected.  Winner is {}.'.format(list(PLAYER.keys())[list(PLAYER.values()).index(winner)]))
+        logging.debug('Win detected.  Winner is {}.'.format(list(PLAYER.keys())[list(PLAYER.values()).index(winner)]))
         win_mask = np.reshape(np.sum(WIN[:, x], axis=1) + np.sum(WIN[:, o], axis=1), (SIZES['board'], SIZES['board'])) != 0
 
     return (winner, win_mask)
@@ -191,8 +191,7 @@ def make_move(ax, board, x, y, cur_move, cur_game, game_hist):
     -----
     #.  Modifies `board`, `cur_move` and `game_hist` in-place.
     """
-    if LOGGING:
-        print('Placing current piece.')
+    logging.debug('Placing current piece.')
     current_player = calc_cur_move(cur_move, cur_game)
     # update board position
     board[x, y] = current_player

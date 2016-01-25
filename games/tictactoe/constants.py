@@ -60,9 +60,6 @@ WIN = np.array([\
 [0,0,1,0,0,1,1,0],\
 ], dtype=bool)
 
-# for debugging
-LOGGING = True
-
 #%% Unit Test
 if __name__ == '__main__':
     unittest.main(module='dstauffman.games.tictactoe.tests.test_constants', exit=False)
