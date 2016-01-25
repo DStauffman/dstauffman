@@ -11,13 +11,14 @@ Notes
 
 #%% Imports
 import doctest
+import os
 import sys
 import unittest
 try:
     from PyQt5.QtWidgets import QApplication
 except ImportError:
     from PyQt4.QtGui import QApplication
-from dstauffman.games.tictactoe import TicTacToeGui
+import dstauffman.games.tictactoe as ttt
 
 #%% Argument parsing
 if len(sys.argv) > 1:
@@ -30,7 +31,7 @@ if mode == 'run':
     # Runs the GUI application
     qapp = QApplication(sys.argv)
     # instatiates the GUI
-    gui = TicTacToeGui()
+    gui = ttt.TicTacToeGui()
     gui.show()
     sys.exit(qapp.exec_())
 elif mode == 'test':
@@ -41,7 +42,17 @@ elif mode == 'test':
         qapp = QApplication.instance()
     # run the tests
     unittest.main(module='dstauffman.games.tictactoe.tests.run_all_tests', exit=False)
-    doctest.testmod(verbose=False)
+    # run the docstrings
+    verbose = False
+    folder = ttt.get_root_dir()
+    files = ['classes', 'constants', 'gui', 'plotting', 'utils']
+    for file in files:
+        if verbose:
+            print('')
+            print('******************************')
+            print('******************************')
+            print('Testing ' + file + '.py:')
+        doctest.testfile(os.path.join(folder, file+'.py'), report=True, verbose=verbose, module_relative=True)
     # close the qapp
     qapp.closeAllWindows()
     qapp.exit()
