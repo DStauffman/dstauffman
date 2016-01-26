@@ -32,7 +32,6 @@ from dstauffman.games.pentago.plotting  import plot_board, plot_cur_move, plot_p
 from dstauffman.games.pentago.utils     import calc_cur_move, check_for_win, create_board_from_moves, \
                                                find_moves, rotate_board
 
-# TODO: make into grid layout
 # TODO: add boxes for flipping settings
 
 #%% Classes - RotationButton
@@ -155,28 +154,28 @@ class PentagoGui(QWidget):
         #%% Text
         # Pentago
         lbl_pentago = QLabel('Pentago', self)
-        lbl_pentago.setGeometry(360, 51, 220, 40)
+        lbl_pentago.setGeometry(390, 50, 220, 40)
         lbl_pentago.setAlignment(QtCore.Qt.AlignCenter)
         lbl_pentago.setStyleSheet('font-size: 18pt; font: bold;')
         # Score
         lbl_score = QLabel('Score:', self)
-        lbl_score.setGeometry(50, 220, 220, 40)
+        lbl_score.setGeometry(35, 220, 220, 40)
         lbl_score.setAlignment(QtCore.Qt.AlignCenter)
         lbl_score.setStyleSheet('font-size: 12pt; font: bold;')
         # Move
         lbl_move = QLabel('Move:', self)
-        lbl_move.setGeometry(740, 220, 220, 40)
+        lbl_move.setGeometry(725, 220, 220, 40)
         lbl_move.setAlignment(QtCore.Qt.AlignCenter)
         lbl_move.setStyleSheet('font-size: 12pt; font: bold;')
         # White Wins
         lbl_white = QLabel('White Wins:', self)
-        lbl_white.setGeometry(50, 280, 80, 20)
+        lbl_white.setGeometry(80, 280, 80, 20)
         # Black Wins
         lbl_black = QLabel('Black Wins:', self)
-        lbl_black.setGeometry(50, 310, 80, 20)
+        lbl_black.setGeometry(80, 310, 80, 20)
         # Games Tied
         lbl_games = QLabel('Games Tied:', self)
-        lbl_games.setGeometry(50, 340, 80, 20)
+        lbl_games.setGeometry(80, 340, 80, 20)
         # Changeable labels
         self.lbl_white_wins = QLabel('0', self)
         self.lbl_white_wins.setGeometry(140, 280, 60, 20)
@@ -191,7 +190,7 @@ class PentagoGui(QWidget):
         #%% Axes
         # board
         self.wid_board = QWidget(self)
-        self.wid_board.setGeometry(260, 140, 420, 420)
+        self.wid_board.setGeometry(290, 140, 420, 420)
         fig = Figure(figsize=(4.2, 4.2), dpi=100, frameon=False)
         self.board_canvas = FigureCanvas(fig)
         self.board_canvas.setParent(self.wid_board)
@@ -203,7 +202,7 @@ class PentagoGui(QWidget):
 
         # current move
         self.wid_move = QWidget(self)
-        self.wid_move.setGeometry(780, 279, 70, 70)
+        self.wid_move.setGeometry(800, 280, 70, 70)
         fig = Figure(figsize=(.7, .7), dpi=100, frameon=False)
         self.move_canvas = FigureCanvas(fig)
         self.move_canvas.setParent(self.wid_move)
@@ -218,19 +217,19 @@ class PentagoGui(QWidget):
         # Undo button
         self.btn_undo = QPushButton('Undo', self)
         self.btn_undo.setToolTip('Undoes the last move.')
-        self.btn_undo.setGeometry(350, 600, 60, 30)
+        self.btn_undo.setGeometry(380, 600, 60, 30)
         self.btn_undo.setStyleSheet('color: yellow; background-color: #990000; font: bold;')
         self.btn_undo.clicked.connect(self.btn_undo_function)
         # New Game button
         self.btn_new = QPushButton('New Game', self)
         self.btn_new.setToolTip('Starts a new game.')
-        self.btn_new.setGeometry(430, 600, 80, 50)
+        self.btn_new.setGeometry(460, 600, 80, 50)
         self.btn_new.setStyleSheet('color: yellow; background-color: #006633; font: bold;')
         self.btn_new.clicked.connect(self.btn_new_function)
         # Redo button
         self.btn_redo = QPushButton('Redo', self)
         self.btn_redo.setToolTip('Redoes the last move.')
-        self.btn_redo.setGeometry(530, 600, 60, 30)
+        self.btn_redo.setGeometry(560, 600, 60, 30)
         self.btn_redo.setStyleSheet('color: yellow; background-color: #000099; font: bold;')
         self.btn_redo.clicked.connect(self.btn_redo_function)
 
@@ -238,49 +237,49 @@ class PentagoGui(QWidget):
         self.btn_1R = RotationButton('', self, quadrant=1, direction=1)
         self.btn_1R.setToolTip('Rotates quadrant 1 to the right 90 degrees.')
         self.btn_1R.setIconSize(button_size)
-        self.btn_1R.setGeometry(260, 49, SIZES['button'], SIZES['button'])
+        self.btn_1R.setGeometry(290, 49, SIZES['button'], SIZES['button'])
         self.btn_1R.clicked.connect(self.btn_rot_function)
         # 2R button
         self.btn_2R = RotationButton('', self, quadrant=2, direction=1)
         self.btn_2R.setToolTip('Rotates quadrant 2 to the right 90 degrees.')
         self.btn_2R.setIconSize(button_size)
-        self.btn_2R.setGeometry(700, 139, SIZES['button'], SIZES['button'])
+        self.btn_2R.setGeometry(730, 139, SIZES['button'], SIZES['button'])
         self.btn_2R.clicked.connect(self.btn_rot_function)
         # 3R button
         self.btn_3R = RotationButton('', self, quadrant=3, direction=1)
         self.btn_3R.setToolTip('Rotates quadrant 3 to the right 90 degrees.')
         self.btn_3R.setIconSize(button_size)
-        self.btn_3R.setGeometry(170, 489, SIZES['button'], SIZES['button'])
+        self.btn_3R.setGeometry(200, 489, SIZES['button'], SIZES['button'])
         self.btn_3R.clicked.connect(self.btn_rot_function)
         # 4R button
         self.btn_4R = RotationButton('', self, quadrant=4, direction=1)
         self.btn_4R.setToolTip('Rotates quadrant 4 to the right 90 degrees.')
         self.btn_4R.setIconSize(button_size)
-        self.btn_4R.setGeometry(610, 579, SIZES['button'], SIZES['button'])
+        self.btn_4R.setGeometry(640, 579, SIZES['button'], SIZES['button'])
         self.btn_4R.clicked.connect(self.btn_rot_function)
         # 1L button
         self.btn_1L = RotationButton('', self, quadrant=1, direction=-1)
         self.btn_1L.setToolTip('Rotates quadrant 1 to the left 90 degrees.')
         self.btn_1L.setIconSize(button_size)
-        self.btn_1L.setGeometry(170, 139, SIZES['button'], SIZES['button'])
+        self.btn_1L.setGeometry(200, 139, SIZES['button'], SIZES['button'])
         self.btn_1L.clicked.connect(self.btn_rot_function)
         # 2L button
         self.btn_2L = RotationButton('', self, quadrant=2, direction=-1)
         self.btn_2L.setToolTip('Rotates quadrant 2 to the left 90 degrees.')
         self.btn_2L.setIconSize(button_size)
-        self.btn_2L.setGeometry(610, 49, SIZES['button'], SIZES['button'])
+        self.btn_2L.setGeometry(640, 49, SIZES['button'], SIZES['button'])
         self.btn_2L.clicked.connect(self.btn_rot_function)
         # 3L button
         self.btn_3L = RotationButton('', self, quadrant=3, direction=-1)
         self.btn_3L.setToolTip('Rotates quadrant 3 to the left 90 degrees.')
         self.btn_3L.setIconSize(button_size)
-        self.btn_3L.setGeometry(260, 579, SIZES['button'], SIZES['button'])
+        self.btn_3L.setGeometry(290, 579, SIZES['button'], SIZES['button'])
         self.btn_3L.clicked.connect(self.btn_rot_function)
         # 4L button
         self.btn_4L = RotationButton('', self, quadrant=4, direction=-1)
         self.btn_4L.setToolTip('Rotates quadrant 4 to the left 90 degrees.')
         self.btn_4L.setIconSize(button_size)
-        self.btn_4L.setGeometry(700, 489, SIZES['button'], SIZES['button'])
+        self.btn_4L.setGeometry(730, 489, SIZES['button'], SIZES['button'])
         self.btn_4L.clicked.connect(self.btn_rot_function)
         # buttons dictionary for use later
         self.rot_buttons = {'1L':self.btn_1L, '2L':self.btn_2L, '3L':self.btn_3L, '4L':self.btn_4L, \
