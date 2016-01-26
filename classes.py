@@ -53,27 +53,27 @@ class Frozen(object):
 class Counter(Frozen):
     r"""
     Mutable integer counter wrapper class.
-    
+
     Has methods for comparisons, negations, adding and subtracting, hashing for sets, and sorting.
-    
+
     Parameters
     ----------
     other : int
         Initial value
-        
+
     Notes
     -----
     #.  Written by David C. Stauffer in January 2016.
-    
+
     Examples
     --------
-    
+
     >>> from dstauffman import Counter
     >>> c = Counter(0)
     >>> c += 1
     >>> print(c)
     1
-    
+
     """
     def __init__(self, other=0):
         self._val = int(other)
@@ -102,13 +102,11 @@ class Counter(Frozen):
     def __index__(self):
         return self._val
     def __pos__(self):
-        return self
+        return Counter(self._val)
     def __neg__(self):
-        self._val = -self._val
-        return self
+        return Counter(-self._val)
     def __abs__(self):
-        self._val = abs(self._val)
-        return self
+        return Counter(abs(self._val))
     def __add__(self, other):
         if type(other) == Counter:
             return Counter(self._val + other._val)
@@ -124,6 +122,8 @@ class Counter(Frozen):
         else:
             return NotImplemented
         return self
+    def __radd__(self, other):
+        return self.__add__(other)
     def __sub__(self, other):
         if type(other) == Counter:
             return Counter(self._val - other._val)
@@ -139,11 +139,20 @@ class Counter(Frozen):
         else:
             return NotImplemented
         return self
-        
+    def __rsub__(self, other):
+        return -self.__sub__(other)
     def __truediv__(self, other):
-        return NotImplemented # TODO: write this
+        if type(other) == int or type(other) == float:
+            return self._val / other
+        else:
+            return NotImplemented
     def __floordiv__(self, other):
-        return NotImplemented # TODO: write this
+        if type(other) == Counter:
+            return Counter(self._val // other._val)
+        elif type(other) == int:
+            return self._val // other
+        else:
+            return NotImplemented
     def __mod__(self, other):
         if type(other) == Counter:
             return Counter(self._val % other._val)
