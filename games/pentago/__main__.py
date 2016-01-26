@@ -40,11 +40,10 @@ elif mode == 'test':
         qapp = QApplication(sys.argv)
     else:
         qapp = QApplication.instance()
+    # find the test cases
+    test_suite = unittest.TestLoader().discover('dstauffman.games.pentago.tests')
     # run the tests
-    loader = unittest.TestLoader()
-    tests  = loader.discover('dstauffman.games.pentago.tests')
-    runner = unittest.runner.TextTestRunner()
-    runner.run(tests)
+    unittest.TextTestRunner(verbosity=1).run(test_suite)
     # run the docstrings
     verbose = False
     folder = pentago.get_root_dir()
