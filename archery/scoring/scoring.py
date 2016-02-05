@@ -14,7 +14,6 @@ Notes
 #%% Imports
 from datetime import datetime, timedelta
 import doctest
-import getpass
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -344,12 +343,15 @@ def read_from_excel_datafile(filename):
     >>> from dstauffman.archery.scoring import read_from_excel_datafile, get_root_dir
     >>> import os
     >>> filename = os.path.join(get_root_dir(), 'test_score_template.xlsx')
-    >>> (scores, names) = read_from_excel_datafile(filename)
+    >>> (scores, names, dates) = read_from_excel_datafile(filename)
     >>> print(scores[0][0:3])
     ['X' 9.0 9.0]
 
     >>> print(names[0])
     10/1/2015
+
+    >>> print(dates[0])
+    2015-10-01 00:00:00
 
     """
     # read data from excel into DataFrame
@@ -373,8 +375,11 @@ def read_from_excel_datafile(filename):
     # pull out names
     names = subdata['Archer'].values
 
+    # convert names to dates
+    dates = [datetime.strptime(this_name.split(' ')[0], '%m/%d/%Y') for this_name in names]
+
     # return a tuple of the scores and associated names
-    return (scores, names)
+    return (scores, names, dates)
 
 #%% Functions - create_scoresheet
 def create_scoresheet(filename, scores, names, plotname='Score Distribution.png'):
@@ -596,38 +601,7 @@ span.white {color: #ffffff;}
 
     return htm
 
-#%% Unit test function
-def main():
-    r"""Unit test logic."""
-    # folder and file locations
-    username        = getpass.getuser()
-    folder          = os.path.join(r'C:\Users', username, r'Google Drive\Python\2015-16_Indoor_Scores')
-    xlsx_datafile   = os.path.join(folder, '2015-16 Indoor Scorecards.xlsx')
-    html_scoresheet = os.path.join(folder, 'scoresheet.htm')
-
-    # opts settings for plots
-    opts = Opts()
-    opts.case_name = 'David'
-    opts.save_path = folder
-    opts.save_plot = True
-    opts.plot_type = 'png'
-
-    # process data and create HTML report
-    (scores, names) = read_from_excel_datafile(xlsx_datafile)
-    fig = plot_mean_and_std(scores, opts)
-    create_scoresheet(html_scoresheet, scores, names, 'David - Score Distribution.png')
-    #plt.close(fig)
-
-    # For Katie:
-    #xlsx_datafile2   = os.path.join(folder, '2014-15 Indoor Scorecards-Katie Novotny.xlsx')
-    #html_scoresheet2 = os.path.join(folder, 'scoresheet_katie.htm')
-    #opts.case_name = 'Katie'
-    #(scores2, names2) = read_from_excel_datafile(xlsx_datafile2)
-    #plot_mean_and_std(scores2, opts)
-    #create_scoresheet(html_scoresheet2, scores2, names2, 'Katie - Score Distribution.png')
-
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='test_scoring', exit=False)
     doctest.testmod(verbose=False)
-    main()
