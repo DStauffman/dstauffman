@@ -9,7 +9,7 @@ import numpy as np
 import os
 import pandas as pd
 import dstauffman.archery.scoring as score
-from dstauffman import Opts, setup_plots
+from dstauffman import Opts, setup_plots, get_output_dir
 
 #%% folder and file locations
 username        = getpass.getuser()
@@ -18,7 +18,7 @@ xlsx_datafile   = os.path.join(folder, '2015-16 Indoor Scorecards.xlsx')
 
 #%% opts settings for plots
 opts = Opts()
-opts.save_path = folder
+opts.save_path = get_output_dir()
 opts.save_plot = True
 opts.plot_type = 'png'
 
@@ -69,66 +69,109 @@ for (ix, this_score) in enumerate(act_range):
 
 #%% Tulare
 # create figure
-fig = plt.figure()
-fig.canvas.set_window_title('Score Distribution')
+fig = plt.figure(facecolor='w')
+fig.canvas.set_window_title('Tulare Score Distribution vs. Expectation')
 ax = fig.add_subplot(111)
 
+# remove plot frame lines
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+# set ticks to only bottom and left
+ax.get_xaxis().tick_bottom()
+ax.get_yaxis().tick_left()
+
 # plot data
-norm = ax.plot(score_range, num2per*score.normal_curve(score_range, inner10_mean, inner10_std), color='#396AB1', label='Normal')
-acts = ax.bar(act_range, num2per*inner10_acts, color='#7293CB', label='Actuals')
+norm = ax.plot(score_range, num2per*score.normal_curve(score_range, inner10_mean, inner10_std), \
+    color='#396AB1', label='Normal', linewidth=3)
+acts = ax.bar(act_range, num2per*inner10_acts, color='#7293CB', label='Actuals', width=0.9)
 
 # plot tournament scores
 val = 1/len(inner10)
 patches = []
-for this_score in set(tulare):
+for this_score in tulare: # set(tulare)
     num_this_one = tulare.count(this_score)
     label = 'Tournament' if len(patches) == 0 else ''
-    this_patch = Rectangle((this_score, 0), 0.6, num2per*val*num_this_one, facecolor='#D35E60', label=label)
+    this_patch = Rectangle((this_score, 0), 0.8, num2per*val*num_this_one, facecolor='#D35E60', label=label)
     patches.append(this_patch)
     ax.add_patch(this_patch)
+    plt.text(this_score+0.1, 0.25, 'Session {}'.format(len(patches)), rotation=90, ha='left', va='bottom', \
+        fontsize=12, color='w', fontweight='bold')
 
 # add labels and legends
-plt.xlabel('Score')
-plt.ylabel('Distribution [%]')
-plt.title(fig.canvas.get_window_title())
+plt.xlabel('Score', fontsize=14)
+plt.ylabel('Distribution [%]', fontsize=14)
+plt.title(fig.canvas.get_window_title(), fontsize=20)
 plt.xlim(265, 290)
-plt.legend()
-plt.grid(True)
+(handles, labels) = ax.get_legend_handles_labels()
+order = [0, 2, 1]
+ax.legend([handles[i] for i in order], [labels[i] for i in order])
+
+# add more information
+plt.text(266, 14.5, 'N = 21 samples from Oct 2015 to Jan 2016', fontsize=10)
+plt.text(266, 13.8, 'Inner 10 scoring', fontsize=10)
+plt.text(266, 13.1, 'Mean = {:1.1f}'.format(inner10_mean), fontsize=10)
+plt.text(266, 12.4, 'Std Dev = {:1.1f}'.format(inner10_std), fontsize=10)
+
+plt.text(283, 11.0, 'Goal: 276 ave. to beat 1103 PR', fontsize=10)
+plt.text(283, 10.3, 'Stretch Goal: 280 ave. for 1120', fontsize=10)
+plt.text(283,  9.6, 'Result: 1084.  Failed Miserably!', fontsize=10)
 
 # optionally save and format plot
-opts.case_name = 'Tulare'
 setup_plots(fig, opts, 'dist_no_y_scale')
 plt.show(block=False)
 
 #%% Vegas
 # create figure
-fig = plt.figure()
-fig.canvas.set_window_title('Score Distribution')
+fig = plt.figure(facecolor='w')
+fig.canvas.set_window_title('Vegas Score Distribution vs. Expectation')
 ax = fig.add_subplot(111)
 
+# remove plot frame lines
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+
+# set ticks to only bottom and left
+ax.get_xaxis().tick_bottom()
+ax.get_yaxis().tick_left()
+
 # plot data
-ax.plot(score_range, num2per*score.normal_curve(score_range, outer10_mean, outer10_std), color='#396AB1', label='Normal')
-ax.bar(act_range, num2per*outer10_acts, color='#7293CB', label='Actuals')
+ax.plot(score_range, num2per*score.normal_curve(score_range, outer10_mean, outer10_std), \
+    color='#396AB1', label='Normal', linewidth=3)
+ax.bar(act_range, num2per*outer10_acts, color='#7293CB', label='Actuals', width=0.9)
 
 # plot tournament scores
 val = 1/len(outer10)
 patches = []
-for this_score in set(vegas):
+for this_score in vegas: # set(vegas) to handle duplicates
     num_this_one = vegas.count(this_score)
     label = 'Tournament' if len(patches) == 0 else ''
-    this_patch = Rectangle((this_score, 0), 0.6, num2per*val*num_this_one, facecolor='#D35E60', label=label)
+    this_patch = Rectangle((this_score, 0), 0.8, num2per*val*num_this_one, facecolor='#D35E60', label=label)
     patches.append(this_patch)
     ax.add_patch(this_patch)
+    plt.text(this_score+0.1, 0.25, 'Day {}'.format(len(patches)), rotation=90, ha='left', va='bottom', \
+        fontsize=12, color='w', fontweight='bold')
 
 # add labels and legends
-plt.xlabel('Score')
-plt.ylabel('Distribution [%]')
-plt.title(fig.canvas.get_window_title())
+plt.xlabel('Score', fontsize=14)
+plt.ylabel('Distribution [%]', fontsize=14)
+plt.title(fig.canvas.get_window_title(), fontsize=20)
 plt.xlim(275, 300)
-plt.legend()
-plt.grid(True)
+(handles, labels) = ax.get_legend_handles_labels()
+order = [0, 2, 1]
+ax.legend([handles[i] for i in order], [labels[i] for i in order])
+
+# add more information
+plt.text(275.5, 17.5, 'N = 21 samples from Oct 2015 to Jan 2016', fontsize=10)
+plt.text(275.5, 16.8, 'Outer 10 scoring', fontsize=10)
+plt.text(275.5, 16.1, 'Mean = {:1.1f}'.format(outer10_mean), fontsize=10)
+plt.text(275.5, 15.4, 'Std Dev = {:1.1f}'.format(outer10_std), fontsize=10)
+
+plt.text(293, 13.0, 'Goal: 290 average for 870', fontsize=10)
+plt.text(293, 12.3, 'Stretch Goal: Beat PR.', fontsize=10)
+plt.text(293, 11.6, '  (Needs 292+ ave. for >876)', fontsize=10)
+plt.text(293, 10.9, 'Result: 865.  Won $65.  Meh.', fontsize=10)
 
 # optionally save and format plot
-opts.case_name = 'Vegas'
 setup_plots(fig, opts, 'dist_no_y_scale')
 plt.show(block=False)
