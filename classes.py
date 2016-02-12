@@ -6,6 +6,7 @@ subclass other classes.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+#.  Added mutable integer Counter class in January 2016.
 """
 
 #%% Imports

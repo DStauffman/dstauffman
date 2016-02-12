@@ -849,7 +849,7 @@ def reload_package(root_module, disp_reloads=True): # pragma: no cover
     for key in loaded_package_modules:
         del sys.modules[key]
 
-    # load each of the modules again;
+    # load each of the modules again
     # make old modules share state with new modules
     for key in loaded_package_modules:
         if disp_reloads:

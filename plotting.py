@@ -295,7 +295,7 @@ def get_axes_scales(type_):
     """
     # determine results based on simple switch statement
     if type_ == 'unity':
-        scale = 1;
+        scale = 1
         units = ''
     elif type_ == 'population':
         scale = 1
