@@ -22,7 +22,6 @@ import sys
 import types
 import unittest
 from datetime import datetime, timedelta
-from dstauffman.constants import MONTHS_PER_YEAR
 # compatibility issues
 ver = sys.version_info
 if ver[0] == 2:
