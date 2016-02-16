@@ -26,6 +26,7 @@ from .stats     import convert_annual_to_monthly_probability, \
                            convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
                            rate_to_prob, month_prob_mult_ratio, \
                            annual_rate_to_monthly_probability, ar2mp, combine_sets
+from .units     import Units, Param, get_factors
 from .utils     import rms, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
                            make_python_init, get_python_definitions, read_text_file, \
                            write_text_file, get_root_dir, get_tests_dir, get_data_dir, \
