@@ -11,6 +11,7 @@ Notes
 #%% Imports
 import copy
 from datetime import datetime
+import inspect
 import numpy as np
 import os
 import sys
@@ -537,8 +538,11 @@ class Test_get_root_dir(unittest.TestCase):
         call the function
     """
     def test_function(self):
+        filepath      = inspect.getfile(dcs.get_root_dir)
+        expected_root = os.path.split(filepath)[0]
         folder = dcs.get_root_dir()
-        self.assertTrue(folder) # TODO: don't know an independent way to test this
+        self.assertEqual(folder, expected_root)
+        self.assertTrue(os.path.isdir(folder))
 
 #%% get_tests_dir
 class Test_get_tests_dir(unittest.TestCase):
