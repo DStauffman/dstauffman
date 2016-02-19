@@ -28,10 +28,6 @@ def get_root_dir():
     folder : str
         Path to the tictactoe root folder
 
-    Notes
-    -----
-    #.  Written by David C. Stauffer in January 2016.
-
     Examples
     --------
 
@@ -59,10 +55,6 @@ def calc_cur_move(cur_move, cur_game):
     move : int
         Current move, from {1=o, -1=x}
 
-    Notes
-    -----
-    #.  Written by David C. Stauffer in January 2016.
-
     Examples
     --------
     >>> from dstauffman.games.tictactoe import calc_cur_move
@@ -81,6 +73,29 @@ def calc_cur_move(cur_move, cur_game):
 def check_for_win(board):
     r"""
     Checks for a win.
+
+    Parameters
+    ---------
+    board : 2D int ndarray
+        Board position
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.tictactoe import check_for_win, PLAYER
+    >>> import numpy as np
+    >>> board = PLAYER['none'] * np.ones((3, 3), dtype=int)
+    >>> board[0:3, 0] = PLAYER['x']
+    >>> board[1:3, 1] = PLAYER['o']
+    >>> (winner, win_mask) = check_for_win(board)
+    >>> print(winner)
+    -1
+
+    >>> print(win_mask)
+    [[ True False False]
+     [ True False False]
+     [ True False False]]
+
     """
     # find wins
     o = np.nonzero(np.sum(np.expand_dims(board.ravel() == PLAYER['o'], axis=1) * WIN, axis=0) == 3)[0]
@@ -115,6 +130,11 @@ def check_for_win(board):
 def find_moves(board):
     r"""
     Finds the best current move.
+
+    Parameters
+    ---------
+    board : 2D int ndarray
+        Board position
 
     Examples
     --------
@@ -187,9 +207,58 @@ def make_move(ax, board, x, y, cur_move, cur_game, game_hist):
     r"""
     Does the actual move.
 
+    Parameters
+    ---------
+    ax : object
+        Axis to plot on
+    board : 2D int ndarray
+        Board position
+    x : float
+        X-axis (board row)
+    y : float
+        Y-axis (board column)
+    cur_move : int
+        Current move number
+    cur_game : int
+        Current game number
+    game_hist : list of class GameStats
+        Game history of statistics for each game
+
     Notes
     -----
     #.  Modifies `board`, `cur_move` and `game_hist` in-place.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.tictactoe import make_move, PLAYER, GameStats
+    >>> from dstauffman import Counter
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> fig = plt.figure()
+    >>> ax = fig.add_subplot(111)
+    >>> _ = ax.set_xlim(-0.5, 2.5)
+    >>> _ = ax.set_ylim(-0.5, 2.5)
+    >>> ax.invert_yaxis()
+    >>> board = PLAYER['none'] * np.ones((3, 3), dtype=int)
+    >>> x = 1
+    >>> y = 0
+    >>> cur_move = Counter(0)
+    >>> cur_game = Counter(0)
+    >>> game_hist = [GameStats(1, PLAYER['o'])]
+    >>> make_move(ax, board, x, y, cur_move, cur_game, game_hist)
+
+    >>> print(board)
+    [[0 0 0]
+     [1 0 0]
+     [0 0 0]]
+
+    >>> print(cur_move)
+    Counter(1)
+
+    >>> print(game_hist[0].move_list)
+    [<row: 1, col: 0, pwr: None>]
+
     """
     logging.debug('Placing current piece.')
     current_player = calc_cur_move(cur_move, cur_game)
@@ -201,7 +270,7 @@ def make_move(ax, board, x, y, cur_move, cur_game, game_hist):
     elif current_player == PLAYER['x']:
         piece = plot_piece(ax, x, y, SIZES['piece'], COLOR['x'], PLAYER['x'])
     else:
-        raise ValueError('Unexpected player to move next.')
+        raise ValueError('Unexpected player to move next.') # pragma: no cover
     assert piece
     # increment move list
     assert game_hist[cur_game].num_moves >= cur_move, \

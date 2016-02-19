@@ -9,13 +9,28 @@ Notes
 """
 
 #%% Imports
+import inspect
+import matplotlib.pyplot as plt
 import numpy as np
+import os
 import unittest
+from dstauffman import Counter
 import dstauffman.games.tictactoe as ttt
 
 #%% Aliases
 o = ttt.PLAYER['o']
 x = ttt.PLAYER['x']
+n = ttt.PLAYER['none']
+
+#%% Private Functions
+def _make_board():
+    r"""Makes a board and returns the figure and axis for use in testing."""
+    fig = plt.figure()
+    ax  = fig.add_subplot(111)
+    ax.set_xlim(-0.5, 2.5)
+    ax.set_ylim(-0.5, 2.5)
+    ax.invert_yaxis()
+    return (fig, ax)
 
 #%% get_root_dir
 class Test_get_root_dir(unittest.TestCase):
@@ -24,8 +39,11 @@ class Test_get_root_dir(unittest.TestCase):
         call the function
     """
     def test_function(self):
+        filepath      = inspect.getfile(ttt.get_root_dir)
+        expected_root = os.path.split(filepath)[0]
         folder = ttt.get_root_dir()
-        self.assertTrue(folder)
+        self.assertEqual(folder, expected_root)
+        self.assertTrue(os.path.isdir(folder))
 
 #%% calc_cur_move
 class Test_calc_cur_move(unittest.TestCase):
@@ -106,7 +124,6 @@ class Test_check_for_win(unittest.TestCase):
         pass
 
 #%% find_moves
-@unittest.skip('Rewriting this function to cover all possible moves.')
 class Test_find_moves(unittest.TestCase):
     r"""
     Tests the find_moves function with the following cases:
@@ -114,36 +131,35 @@ class Test_find_moves(unittest.TestCase):
     """
     def setUp(self):
         self.board = np.zeros((3, 3), dtype=int)
-        self.white_moves = []
-        self.black_moves = []
 
     def test_no_wins(self):
         (white_moves, black_moves) = ttt.find_moves(self.board)
-        np.testing.assert_array_equal(white_moves, self.white_moves)
-        np.testing.assert_array_equal(black_moves, self.black_moves)
+        self.assertEqual(white_moves[0], ttt.Move(1, 1))
+        self.assertEqual(black_moves[0], ttt.Move(1, 1))
 
     def test_already_won(self):
         self.board[1, 0] = x
         self.board[1, 1] = x
         self.board[1, 2] = x
         with self.assertRaises(ValueError):
-            (white_moves, black_moves) = ttt.find_moves(self.board)
+            ttt.find_moves(self.board)
 
     def test_o_place_to_win(self):
         self.board[2, 0] = o
         self.board[2, 1] = o
-        self.white_moves.append(ttt.Move(2, 2, 3))
         (white_moves, black_moves) = ttt.find_moves(self.board)
-        np.testing.assert_array_equal(white_moves, self.white_moves)
-        np.testing.assert_array_equal(black_moves, self.black_moves)
+        self.assertEqual(white_moves[0], ttt.Move(2, 2))
+        self.assertEqual(black_moves[0], ttt.Move(2, 2))
+        self.assertEqual(white_moves[0].power, 100)
+        self.assertEqual(black_moves[0].power, 10)
 
     def test_wins_blocked(self):
         self.board[2, 0] = o
         self.board[2, 1] = o
         self.board[2, 2] = x
         (white_moves, black_moves) = ttt.find_moves(self.board)
-        np.testing.assert_array_equal(white_moves, self.white_moves)
-        np.testing.assert_array_equal(black_moves, self.black_moves)
+        self.assertEqual(white_moves[0], ttt.Move(1, 1))
+        self.assertEqual(black_moves[0], ttt.Move(1, 1))
 
     def test_no_valid_moves(self):
         self.board[0, 0] = x
@@ -155,31 +171,81 @@ class Test_find_moves(unittest.TestCase):
         self.board[2, 0] = o
         self.board[2, 1] = x
         self.board[2, 2] = o
-        (white_moves, black_moves) = ttt.find_moves(self.board)
-        np.testing.assert_array_equal(white_moves, self.white_moves)
-        np.testing.assert_array_equal(black_moves, self.black_moves)
+        with self.assertRaises(AssertionError):
+            ttt.find_moves(self.board)
 
     def test_x_place_to_win(self):
         self.board[0, 0] = x
         self.board[2, 2] = x
-        self.black_moves.append(ttt.Move(1, 1, 3))
         (white_moves, black_moves) = ttt.find_moves(self.board)
-        np.testing.assert_array_equal(white_moves, self.white_moves)
-        np.testing.assert_array_equal(black_moves, self.black_moves)
+        self.assertEqual(white_moves[0], ttt.Move(1, 1))
+        self.assertEqual(black_moves[0], ttt.Move(1, 1))
+        self.assertEqual(white_moves[0].power, 10)
+        self.assertEqual(black_moves[0].power, 100)
 
     def test_same_win_square(self):
         self.board[0, 0] = x
         self.board[2, 2] = x
         self.board[1, 0] = o
         self.board[1, 2] = o
-        self.white_moves.append(ttt.Move(1, 1, 3))
-        self.black_moves.append(ttt.Move(1, 1, 3))
         (white_moves, black_moves) = ttt.find_moves(self.board)
-        np.testing.assert_array_equal(white_moves, self.white_moves)
-        np.testing.assert_array_equal(black_moves, self.black_moves)
+        self.assertEqual(white_moves[0], ttt.Move(1, 1))
+        self.assertEqual(black_moves[0], ttt.Move(1, 1))
+        self.assertEqual(white_moves[0].power, 100)
+        self.assertEqual(black_moves[0].power, 100)
 
 #%% make_move
-pass
+class Test_make_move(unittest.TestCase):
+    r"""
+    Tests the make_move function with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        (self.fig, self.ax) = _make_board()
+        self.board = n * np.ones((3, 3), dtype=int)
+
+    def test_first_and_second_move(self):
+        board = self.board.copy()
+        xc = 1
+        yc = 0
+        cur_move = Counter(0)
+        cur_game = Counter(0)
+        game_hist = [ttt.GameStats(1, o)]
+        self.assertEqual(cur_move, 0)
+        self.assertEqual(len(game_hist[0].move_list), 0)
+        np.testing.assert_array_equal(board, self.board)
+        ttt.make_move(self.ax, board, xc, yc, cur_move, cur_game, game_hist)
+        self.assertEqual(cur_move, 1)
+        self.assertEqual(len(game_hist[0].move_list), 1)
+        self.board[1, 0] = o
+        np.testing.assert_array_equal(board, self.board)
+        yc = 1
+        ttt.make_move(self.ax, board, xc, yc, cur_move, cur_game, game_hist)
+        self.assertEqual(cur_move, 2)
+        self.assertEqual(len(game_hist[0].move_list), 2)
+        self.board[1, 1] = x
+        np.testing.assert_array_equal(board, self.board)
+
+    def test_inserting_move(self):
+        board = self.board.copy()
+        xc = 2
+        yc = 2
+        cur_move = Counter(1) # 2 would be the next move, 1 makes this replace the last move
+        cur_game = Counter(1)
+        game_hist = [ttt.GameStats(1, o), ttt.GameStats(2, x)]
+        game_hist[1].add_move(ttt.Move(0,0))
+        game_hist[1].add_move(ttt.Move(1,1)) # setting a move that will be replaced
+        board[0, 0] = x
+        self.assertEqual(game_hist[1].num_moves, 2)
+        ttt.make_move(self.ax, board, xc, yc, cur_move, cur_game, game_hist)
+        self.assertEqual(cur_move, 2)
+        self.assertEqual(cur_game, 1)
+        self.board[0, 0] = x
+        self.board[2, 2] = o
+        np.testing.assert_array_equal(board, self.board)
+
+    def tearDown(self):
+        plt.close(self.fig)
 
 #%% play_ai_game
 pass

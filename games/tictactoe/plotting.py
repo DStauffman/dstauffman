@@ -18,6 +18,13 @@ def plot_cur_move(ax, move):
     r"""
     Plots the piece corresponding the current players move.
 
+    Parameters
+    ----------
+    ax : object
+        Axis to plot on
+    move : int
+        current player to move
+
     Examples
     --------
 
@@ -82,6 +89,7 @@ def plot_piece(ax, vc, hc, size, color, shape, thick=True):
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.set_xlim(-0.5, 2.5)
     >>> _ = ax.set_ylim(-0.5, 2.5)
+    >>> ax.invert_yaxis()
     >>> _ = plot_piece(ax, 1, 1, 0.9, (0, 0, 1), PLAYER['x'])
     >>> plt.show(block=False)
 
@@ -123,6 +131,31 @@ def plot_piece(ax, vc, hc, size, color, shape, thick=True):
 def plot_board(ax, board):
     r"""
     Plots the board (and the current player move).
+
+    Parameters
+    ----------
+    ax : object
+        Axis to plot on
+    board : 2D int ndarray
+        Board position
+
+    Examples
+    --------
+    >>> from dstauffman.games.tictactoe import plot_board, PLAYER
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> fig = plt.figure()
+    >>> ax = fig.add_subplot(111, aspect='equal')
+    >>> _ = ax.set_xlim(-0.5, 2.5)
+    >>> _ = ax.set_ylim(-0.5, 2.5)
+    >>> ax.invert_yaxis()
+    >>> board = PLAYER['none'] * np.ones((3, 3), dtype=int)
+    >>> board[0, 0:2] = PLAYER['x']
+    >>> plot_board(ax, board)
+    >>> plt.show(block=False)
+
+    >>> plt.close()
+
     """
     # get axes limits
     (m, n) = board.shape

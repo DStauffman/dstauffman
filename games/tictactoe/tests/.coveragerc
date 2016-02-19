@@ -3,6 +3,16 @@
 branch = True
 omit =
     *tests\*
+    *dstauffman\__init__.py
+    *dstauffman\classes.py
+    *dstauffman\constants.py
+    *dstauffman\enums.py
+    *dstauffman\photos.py
+    *dstauffman\plotting.py
+    *dstauffman\quat.py
+    *dstauffman\stats.py
+    *dstauffman\units.py
+    *dstauffman\utils.py
 
 [report]
 # Regexes for lines to exclude from consideration

@@ -9,12 +9,12 @@ Notes
 
 #%% Imports
 import nose
+import sys
 import dstauffman as dcs
 try:
     from PyQt5.QtWidgets import QApplication
 except ImportError:
     from PyQt4.QtGui import QApplication
-import sys
 
 import warnings
 warnings.simplefilter(action='ignore', category=FutureWarning) # TODO: temporary

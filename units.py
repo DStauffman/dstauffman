@@ -50,14 +50,14 @@ class Units(IntEnumPlus):
                 elif new_unit == Units.AP:
                     new_value = rate_to_prob(value)
                 else:
-                    raise NotImplemented('Shouldn''t be able to get to this line.') # pragma: no cover
+                    raise NotImplementedError('Shouldn''t be able to get to this line.')
             elif base_unit == Units.AP:
                 if new_unit == Units.AR:
                     new_value = prob_to_rate(value)
                 elif new_unit == Units.MP:
                     new_value = convert_annual_to_monthly_probability(value)
                 else:
-                    raise NotImplemented('Shouldn''t be able to get to this line.') # pragma: no cover
+                    raise NotImplementedError('Shouldn''t be able to get to this line.')
             elif base_unit == Units.MP:
                 AR = MONTHS_PER_YEAR * prob_to_rate(value)
                 if new_unit == Units.AR:
@@ -65,9 +65,9 @@ class Units(IntEnumPlus):
                 elif new_unit == Units.AP:
                     new_value = rate_to_prob(AR)
                 else:
-                    raise NotImplemented('Shouldn''t be able to get to this line.') # pragma: no cover
+                    raise NotImplementedError('Shouldn''t be able to get to this line.')
             else:
-                raise NotImplemented('Shouldn''t be able to get to this line.') # pragma: no cover
+                raise NotImplementedError('Shouldn''t be able to get to this line.')
         else:
             mult1 = factors[base_unit]
             mult2 = factors[new_unit]

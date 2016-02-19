@@ -39,7 +39,7 @@ SIZES['board']  = 3
 
 # Gameplay options
 OPTIONS                       = {}
-OPTIONS['load_previous_game'] = 'Ask' # from ['Yes','No','Ask']
+OPTIONS['load_previous_game'] = 'No' # from ['Yes','No','Ask']
 OPTIONS['plot_best_moves']    = False
 OPTIONS['plot_move_power']    = False
 OPTIONS['o_is_computer']      = False
