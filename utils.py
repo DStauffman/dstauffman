@@ -1008,8 +1008,7 @@ def modd(x1, x2, out=None):
     [4 1 2 3 4 1 2 3 4]
 
     """
-    if isinstance(x1, list):
-        x1 = np.array(x1)
+    x1 = np.asanyarray(x1)
     if out is None:
         y = np.mod(x1 - 1, x2) + 1
         return y
