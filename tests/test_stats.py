@@ -109,11 +109,11 @@ class Test_prob_to_rate(unittest.TestCase):
         self.time = 5
         with np.errstate(divide='ignore'):
             self.rate = -np.log(1 - self.prob) / self.time
-        
+
     def test_conversion(self):
         rate = dcs.prob_to_rate(self.prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
-        
+
     def test_scalar(self):
         rate = dcs.prob_to_rate(0)
         self.assertIn(rate, self.rate)
@@ -143,11 +143,11 @@ class Test_rate_to_prob(unittest.TestCase):
         self.time = 5
         with np.errstate(divide='ignore'):
             self.rate = -np.log(1 - self.prob) / self.time
-        
+
     def test_conversion(self):
         prob = dcs.rate_to_prob(self.rate, self.time)
         np.testing.assert_array_almost_equal(prob, self.prob)
-        
+
     def test_scalar(self):
         prob = dcs.rate_to_prob(0)
         self.assertIn(prob, self.prob)
@@ -179,23 +179,23 @@ class Test_month_prob_mult_ratio(unittest.TestCase):
         mult_rate_half = rate * 0.5
         self.mult_prob_2    = dcs.rate_to_prob(mult_rate_2, time=1./12)
         self.mult_prob_half = dcs.rate_to_prob(mult_rate_half, time=1./12)
-        
+
     def test_no_mult(self):
         mult_prob = dcs.month_prob_mult_ratio(self.prob, 1)
         np.testing.assert_array_almost_equal(mult_prob, self.prob)
-        
+
     def test_gt_one_mult(self):
         mult_prob = dcs.month_prob_mult_ratio(self.prob, 2)
         np.testing.assert_array_almost_equal(mult_prob, self.mult_prob_2)
-    
+
     def test_lt_one_mult(self):
         mult_prob = dcs.month_prob_mult_ratio(self.prob, 0.5)
         np.testing.assert_array_almost_equal(mult_prob, self.mult_prob_half)
-    
+
     def test_zero_mult(self):
         mult_prob = dcs.month_prob_mult_ratio(self.prob[:-1], 0)
         np.testing.assert_array_almost_equal(mult_prob, np.zeros(len(self.prob)-1))
-    
+
 #%% annual_rate_to_monthly_probability
 class Test_annual_rate_to_monthly_probability(unittest.TestCase):
     r"""
@@ -287,6 +287,79 @@ class Test_combine_sets(unittest.TestCase):
     def test_broadcasting(self):
         with self.assertRaises(ValueError):
             (n, u, s) = dcs.combine_sets(np.array([self.n1, self.n1]), self.u1, self.s1, self.n2, self.u2, self.s2)
+
+#%% icer
+class Test_icer(unittest.TestCase):
+    r"""
+    Tests the icer function with the following cases:
+        nominal
+        no domination
+        reverse order
+        single scalar input
+        list inputs
+        bad values (should error)
+        bad sizes (should error)
+    """
+
+    def setUp(self):
+        self.cost     = np.array([250e3, 750e3, 2.25e6, 3.75e6])
+        self.qaly     = np.array([20., 30, 40, 80])
+        self.inc_cost = np.array([250e3, 500e3, 3e6])
+        self.inc_qaly = np.array([20., 10, 50])
+        self.icer_out = np.array([12500., 50000, 60000])
+        self.order    = np.array([0., 1, np.nan, 2])
+
+    def test_slide_example(self):
+        (inc_cost, inc_qaly, icer_out, order) = dcs.icer(self.cost, self.qaly)
+        np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
+        np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, self.icer_out, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(order, self.order, 'Incremental QALY mismatch.')
+
+    def test_no_domination(self):
+        ix = [0, 1, 3]
+        (inc_cost, inc_qaly, icer_out, order) = dcs.icer(self.cost[ix], self.qaly[ix])
+        np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
+        np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, self.icer_out, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(order, self.order[ix], 'Incremental QALY mismatch.')
+
+    def test_reverse_order(self):
+        ix = [3, 2, 1, 0]
+        (inc_cost, inc_qaly, icer_out, order) = dcs.icer(self.cost[ix], self.qaly[ix])
+        np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
+        np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, self.icer_out, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(order, self.order[ix], 'Incremental QALY mismatch.')
+
+    def test_single_input(self):
+        ix = 0
+        (inc_cost, inc_qaly, icer_out, order) = dcs.icer(self.cost[ix], self.qaly[ix])
+        np.testing.assert_array_equal(inc_cost, self.inc_cost[ix], 'Incremental cost mismatch.')
+        np.testing.assert_array_equal(inc_qaly, self.inc_qaly[ix], 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, self.icer_out[ix], 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(order, self.order[ix], 'Incremental QALY mismatch.')
+
+    def test_list_inputs(self):
+        cost = [this_cost for this_cost in self.cost]
+        qaly = [this_cost for this_cost in self.qaly]
+        (inc_cost, inc_qaly, icer_out, order) = dcs.icer(cost, qaly)
+        np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
+        np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, self.icer_out, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(order, self.order, 'Incremental QALY mismatch.')
+
+    def test_bad_values(self):
+        with self.assertRaises(AssertionError):
+            dcs.icer([1, -2, 3], [4, 5, 6])
+        with self.assertRaises(AssertionError):
+            dcs.icer([1, 2, 3], [4, -5, 6])
+
+    def test_bad_input_sizes(self):
+        with self.assertRaises(AssertionError):
+            dcs.icer([], [])
+        with self.assertRaises(AssertionError):
+            dcs.icer([1, 2, 3], [4, 5])
 
 #%% Unit test execution
 if __name__ == '__main__':

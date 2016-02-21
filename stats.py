@@ -104,26 +104,26 @@ cm2ap = convert_monthly_to_annual_probability
 def prob_to_rate(prob, time=1):
     r"""
     Converts a given probability and time to a rate.
-    
+
     Parameters
     ----------
     prob : numpy.ndarray
         Probability of event happening over the given time
     time : float
         Time for the given probability in years
-        
+
     Returns
     -------
     rate : numpy.ndarray
         Equivalent annual rate for the given probability and time
-        
+
     Notes
     -----
     #.  Written by David C. Stauffer in January 2016.
-    
+
     Examples
     --------
-    
+
     >>> from dstauffman import prob_to_rate
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
@@ -131,13 +131,13 @@ def prob_to_rate(prob, time=1):
     >>> rate = prob_to_rate(prob, time)
     >>> print(rate) # doctest: +NORMALIZE_WHITESPACE
     [-0. 0.03512017 inf]
-    
+
     """
     # check ranges
     if np.any(prob < 0):
         raise ValueError('Probability must be >= 0')
     if np.any(prob > 1):
-        raise ValueError('Probability must be <= 1')    
+        raise ValueError('Probability must be <= 1')
     # ignore log of zero errors when prob == 1
     with np.errstate(divide='ignore'):
         # calculate rate
@@ -155,19 +155,19 @@ def rate_to_prob(rate, time=1):
         Equivalent annual rate for the given time
     time : float
         Time period for the desired probability to be calculated from, in years
-        
+
     Returns
     -------
     prob : numpy.ndarray
         Probability of event happening over the given time
-        
+
     Notes
     -----
     #.  Written by David C. Stauffer in January 2016.
-    
+
     Examples
     --------
-    
+
     >>> from dstauffman import rate_to_prob
     >>> import numpy as np
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
@@ -175,7 +175,7 @@ def rate_to_prob(rate, time=1):
     >>> prob = rate_to_prob(rate, time)
     >>> print(prob) # doctest: +NORMALIZE_WHITESPACE
     [ 0. 0.00829871 0.07995559 0.99975963 1. ]
-    
+
     """
     # check ranges
     if np.any(rate < 0):
@@ -188,26 +188,26 @@ def rate_to_prob(rate, time=1):
 def month_prob_mult_ratio(prob, ratio):
     r"""
     Multiplies a monthly probability by a given risk or hazard ratio.
-    
+
     Parameters
     ----------
     prob : numpy.ndarray
         Probability of event happening over one month
     ratio : float
         Multiplication ratio to apply to probability
-        
+
     Returns
     -------
     mult_prob : numpy.ndarray
         Equivalent multiplicative monthly probability
-        
+
     Notes
     -----
     #.  Written by David C. Staufer in January 2016.
-    
+
     Examples
     --------
-    
+
     >>> from dstauffman import month_prob_mult_ratio
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
@@ -215,12 +215,12 @@ def month_prob_mult_ratio(prob, ratio):
     >>> mult_prob = month_prob_mult_ratio(prob, ratio)
     >>> print(mult_prob) # doctest: +NORMALIZE_WHITESPACE
     [ 0. 0.19 1. ]
-    
+
     >>> ratio = 0.5
     >>> mult_prob = month_prob_mult_ratio(prob, ratio)
     >>> print(mult_prob) # doctest: +NORMALIZE_WHITESPACE
     [ 0. 0.0513167 1. ]
-    
+
     """
     # convert the probability to a rate
     rate = prob_to_rate(prob, time=1./MONTHS_PER_YEAR)
@@ -229,45 +229,45 @@ def month_prob_mult_ratio(prob, ratio):
     # convert back to a probability
     mult_prob = rate_to_prob(mult_rate, time=1./MONTHS_PER_YEAR)
     return mult_prob
-    
+
 #%% Functions - annual_rate_to_monthly_probability
 def annual_rate_to_monthly_probability(rate):
     r"""
     Converts a given annual rate to a monthly probability.
-    
+
     Parameters
     ----------
     rate : numpy.ndarray
         Annual rate
-        
+
     Returns
     -------
     prob : numpy.ndarray
         Equivalent monthly probability
-        
+
     Notes
     -----
     #.  Written by David C. Stauffer in January 2016.
-    
+
     See Also
     --------
     rate_to_prob
-    
+
     Examples
     --------
-    
+
     >>> from dstauffman import annual_rate_to_monthly_probability
     >>> import numpy as np
     >>> rate = np.array([0, 0.5, 1, 5, np.inf])
     >>> prob = annual_rate_to_monthly_probability(rate)
     >>> print(prob) # doctest: +NORMALIZE_WHITESPACE
     [ 0. 0.04081054 0.07995559 0.34075937 1. ]
-    
+
     """
     # divide rate and calculate probability
     prob = rate_to_prob(rate/MONTHS_PER_YEAR)
     return prob
-    
+
 #%% Functions - ar2mp
 ar2mp = annual_rate_to_monthly_probability
 
@@ -366,6 +366,120 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
             # shouldn't be able to ever reach this line with assertions on
             raise ValueError('Total samples are 1, but neither data set has only one item.') # pragma: no cover
     return (n, u, s)
+
+#%% Functions - icer
+def icer(cost, qaly):
+    r"""
+    Calculates the incremental cost effectiveness ratios with steps to throw out dominated strategies.
+
+    Summary
+    -------
+        In a loop, the code sorts by cost, throws out strongly dominated strategies (qaly doesn't
+        improve despite higher costs), calculates an incremental cost, qaly and cost effectiveness
+        ratio, then throws out weakly dominated strategies (icer doesn't improve over cheaper options)
+        and finally returns the incremental cost, qaly and ratios for the remaining "frontier" options
+        along with an order variable to map them back to the inputs.
+
+    Parameters
+    ----------
+    cost : (N) array_like
+        Cost of each strategy
+    qaly : (N) array_like
+        Quality adjusted life years (QALY) gained by each strategy
+
+    Results
+    -------
+    inc_cost : (M) ndarray
+        incremental costs - see note 1
+    inc_qaly : (M) ndarray
+        incremental QALYs gained
+    icer_out : (M) ndarray
+        incremental cost effectiveness ratios
+    order    : (N) ndarray
+        order mapping to the original inputs, with NaNs for dominated strategies
+
+    Notes
+    -----
+    #.  N may be smaller than M due to dominated strategies being removed.  The order variable
+            will have (M - N) values set to NaN.
+
+    Examples
+    --------
+
+    >>> from dstauffman import icer
+    >>> cost = [250e3, 750e3, 2.25e6, 3.75e6]
+    >>> qaly = [20., 30, 40, 80]
+    >>> (inc_cost, inc_qaly, icer_out, order) = icer(cost, qaly)
+    >>> print(inc_cost) # doctest: +NORMALIZE_WHITESPACE
+    [ 250000. 500000. 3000000.]
+
+    >>> print(inc_qaly) # doctest: +NORMALIZE_WHITESPACE
+    [ 20. 10. 50.]
+
+    >>> print(icer_out) # doctest: +NORMALIZE_WHITESPACE
+    [ 12500. 50000. 60000.]
+
+    >>> print(order) # doctest: +NORMALIZE_WHITESPACE
+    [ 0. 1. nan 2.]
+
+    """
+    # force inputs to be ndarrays
+    cost = np.asarray(cost)
+    qaly = np.asarray(qaly)
+
+    # check inputs
+    assert np.all(cost > 0), 'Costs must be positive.'
+    assert np.all(qaly > 0), 'Qalys must be positive.'
+    assert cost.shape == qaly.shape, 'Cost and Qalys must have same size.'
+    assert cost.size > 0, 'Costs and Qalys cannot be empty.'
+
+    # build an index order variable to keep track of strategies
+    order = np.zeros(cost.shape)
+
+    # enter processing loop
+    while True:
+        # pull out current values based on evolving order mask
+        mask      = ~np.isnan(order)
+        this_cost = cost[mask]
+        this_qaly = qaly[mask]
+
+        # sort by cost
+        ix_sort     = np.argsort(this_cost)
+        sorted_cost = this_cost[ix_sort]
+        sorted_qaly = this_qaly[ix_sort]
+
+        # check for strongly dominated strategies
+        if not np.all(np.diff(sorted_qaly) >= 0):
+            # find the first occurence (increment by one to find the one less effective than the last)
+            bad = np.nonzero(np.diff(sorted_qaly) < 0)[0] + 1
+            if len(bad) == 0:
+                raise ValueError('Index should never be empty, something unexpected happended.')
+            # update the mask and continue to next pass of while loop
+            order[ix_sort[bad[0]]] = np.nan
+            continue
+
+        # calculate incremental costs
+        inc_cost = np.hstack((sorted_cost[0], np.diff(sorted_cost)))
+        inc_qaly = np.hstack((sorted_qaly[0], np.diff(sorted_qaly)))
+        icer_out = inc_cost / inc_qaly
+
+        # check for weakly dominated strategies
+        if not np.all(np.diff(icer_out) >= 0):
+            # find the first bad occurence
+            bad = np.nonzero(np.diff(icer_out) < 0)[0]
+            if len(bad) == 0:
+                raise ValueError('Index should never be empty, something unexpected happended.')
+            # update mask and continue to next pass
+            order[ix_sort[bad[0]]] = np.nan
+            continue
+
+        # if no continue statements were reached, then another iteration is not necessary, so break out
+        break
+
+    # save the final ordering
+    order[~np.isnan(order)] = ix_sort
+
+    return (inc_cost, inc_qaly, icer_out, order)
 
 #%% Unit test
 if __name__ == '__main__':
