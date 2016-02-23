@@ -313,32 +313,32 @@ class Test_icer(unittest.TestCase):
         (inc_cost, inc_qaly, icer_out, order) = dcs.icer(self.cost, self.qaly)
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
-        np.testing.assert_array_equal(icer_out, self.icer_out, 'Incremental QALY mismatch.')
-        np.testing.assert_array_equal(order, self.order, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, self.icer_out, 'ICER mismatch.')
+        np.testing.assert_array_equal(order, self.order, 'Order mismatch.')
 
     def test_no_domination(self):
         ix = [0, 1, 3]
         (inc_cost, inc_qaly, icer_out, order) = dcs.icer(self.cost[ix], self.qaly[ix])
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
-        np.testing.assert_array_equal(icer_out, self.icer_out, 'Incremental QALY mismatch.')
-        np.testing.assert_array_equal(order, self.order[ix], 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, self.icer_out, 'ICER mismatch.')
+        np.testing.assert_array_equal(order, self.order[ix], 'Order mismatch.')
 
     def test_reverse_order(self):
         ix = [3, 2, 1, 0]
         (inc_cost, inc_qaly, icer_out, order) = dcs.icer(self.cost[ix], self.qaly[ix])
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
-        np.testing.assert_array_equal(icer_out, self.icer_out, 'Incremental QALY mismatch.')
-        np.testing.assert_array_equal(order, self.order[ix], 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, self.icer_out, 'ICER mismatch.')
+        np.testing.assert_array_equal(order, self.order[ix], 'Order mismatch.')
 
     def test_single_input(self):
         ix = 0
         (inc_cost, inc_qaly, icer_out, order) = dcs.icer(self.cost[ix], self.qaly[ix])
         np.testing.assert_array_equal(inc_cost, self.inc_cost[ix], 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly[ix], 'Incremental QALY mismatch.')
-        np.testing.assert_array_equal(icer_out, self.icer_out[ix], 'Incremental QALY mismatch.')
-        np.testing.assert_array_equal(order, self.order[ix], 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, self.icer_out[ix], 'ICER mismatch.')
+        np.testing.assert_array_equal(order, self.order[ix], 'Order mismatch.')
 
     def test_list_inputs(self):
         cost = [this_cost for this_cost in self.cost]
@@ -346,8 +346,8 @@ class Test_icer(unittest.TestCase):
         (inc_cost, inc_qaly, icer_out, order) = dcs.icer(cost, qaly)
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
-        np.testing.assert_array_equal(icer_out, self.icer_out, 'Incremental QALY mismatch.')
-        np.testing.assert_array_equal(order, self.order, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, self.icer_out, 'ICER mismatch.')
+        np.testing.assert_array_equal(order, self.order, 'Order mismatch.')
 
     def test_bad_values(self):
         with self.assertRaises(AssertionError):
@@ -360,6 +360,15 @@ class Test_icer(unittest.TestCase):
             dcs.icer([], [])
         with self.assertRaises(AssertionError):
             dcs.icer([1, 2, 3], [4, 5])
+
+    def test_all_dominated_by_last(self):
+        cost = np.array([10, 20, 30, 1])
+        qaly = np.array([1, 2, 3, 100])
+        (inc_cost, inc_qaly, icer_out, order) = dcs.icer(cost, qaly)
+        np.testing.assert_array_equal(inc_cost, 1, 'Incremental cost mismatch.')
+        np.testing.assert_array_equal(inc_qaly, 100, 'Incremental QALY mismatch.')
+        np.testing.assert_array_equal(icer_out, 0.01, 'ICER mismatch.')
+        np.testing.assert_array_equal(order, np.array([np.nan, np.nan, np.nan, 0]), 'Order mismatch.')
 
 #%% Unit test execution
 if __name__ == '__main__':

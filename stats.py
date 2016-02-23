@@ -434,14 +434,19 @@ def icer(cost, qaly):
     assert cost.size > 0, 'Costs and Qalys cannot be empty.'
 
     # build an index order variable to keep track of strategies
-    order = np.zeros(cost.shape)
+    keep = list(range(cost.size))
+
+    # deal with garbage 0D arrays so that they can be indexed by keep
+    if cost.ndim == 0:
+        cost = cost[np.newaxis]
+    if qaly.ndim == 0:
+        qaly = qaly[np.newaxis]
 
     # enter processing loop
     while True:
         # pull out current values based on evolving order mask
-        mask      = ~np.isnan(order)
-        this_cost = cost[mask]
-        this_qaly = qaly[mask]
+        this_cost = cost[keep]
+        this_qaly = qaly[keep]
 
         # sort by cost
         ix_sort     = np.argsort(this_cost)
@@ -455,7 +460,7 @@ def icer(cost, qaly):
             if len(bad) == 0:
                 raise ValueError('Index should never be empty, something unexpected happended.')
             # update the mask and continue to next pass of while loop
-            order[ix_sort[bad[0]]] = np.nan
+            keep.pop(ix_sort[bad[0]])
             continue
 
         # calculate incremental costs
@@ -470,14 +475,15 @@ def icer(cost, qaly):
             if len(bad) == 0:
                 raise ValueError('Index should never be empty, something unexpected happended.')
             # update mask and continue to next pass
-            order[ix_sort[bad[0]]] = np.nan
+            keep.pop(ix_sort[bad[0]])
             continue
 
         # if no continue statements were reached, then another iteration is not necessary, so break out
         break
 
     # save the final ordering
-    order[~np.isnan(order)] = ix_sort
+    order = np.nan * np.ones(cost.shape)
+    order[keep] = ix_sort
 
     return (inc_cost, inc_qaly, icer_out, order)
 
