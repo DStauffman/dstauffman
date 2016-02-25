@@ -186,14 +186,20 @@ def find_moves(board):
     o_win = np.nonzero(o_pos)[0]
     x_win = np.nonzero(x_pos)[0]
 
+    # find win in two moves
+    o_win_in_two = np.nonzero(np.sum(rem_o_wins[:, np.sum(big_board * rem_o_wins, axis=0) == 1], axis=1) > 1)[0]
+    x_win_in_two = np.nonzero(np.sum(rem_x_wins[:, np.sum(big_board * rem_x_wins, axis=0) == 1], axis=1) > 1)[0]
+
     # create the list of moves and incorporate the score
     o_moves = []
     x_moves = []
     for this_move in open_moves:
         row = this_move // SIZES['board']
         column = np.mod(this_move, SIZES['board'])
-        o_score = 100 if this_move in o_win else 10 if this_move in x_win else o_scores[this_move] + x_scores[this_move]/10
-        x_score = 100 if this_move in x_win else 10 if this_move in o_win else x_scores[this_move] + o_scores[this_move]/10
+        o_score = 100 if this_move in o_win else 10 if this_move in x_win else 5 if this_move in o_win_in_two \
+            else 5 if this_move in x_win_in_two else o_scores[this_move] + x_scores[this_move]/10
+        x_score = 100 if this_move in x_win else 10 if this_move in o_win else 5 if this_move in x_win_in_two \
+            else 5 if this_move in o_win_in_two else x_scores[this_move] + o_scores[this_move]/10
         o_moves.append(Move(row, column, o_score))
         x_moves.append(Move(row, column, x_score))
 
@@ -254,10 +260,12 @@ def make_move(ax, board, x, y, cur_move, cur_game, game_hist):
      [0 0 0]]
 
     >>> print(cur_move)
-    Counter(1)
+    1
 
     >>> print(game_hist[0].move_list)
     [<row: 1, col: 0, pwr: None>]
+
+    >>> plt.close(fig)
 
     """
     logging.debug('Placing current piece.')
