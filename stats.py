@@ -424,8 +424,8 @@ def icer(cost, qaly):
 
     """
     # force inputs to be ndarrays
-    cost = np.asarray(cost)
-    qaly = np.asarray(qaly)
+    cost = np.atleast_1d(np.asarray(cost))
+    qaly = np.atleast_1d(np.asarray(qaly))
 
     # check inputs
     assert np.all(cost > 0), 'Costs must be positive.'
@@ -435,12 +435,6 @@ def icer(cost, qaly):
 
     # build an index order variable to keep track of strategies
     keep = list(range(cost.size))
-
-    # deal with garbage 0D arrays so that they can be indexed by keep
-    if cost.ndim == 0:
-        cost = cost[np.newaxis]
-    if qaly.ndim == 0:
-        qaly = qaly[np.newaxis]
 
     # enter processing loop
     while True:
