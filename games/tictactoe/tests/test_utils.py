@@ -201,18 +201,33 @@ class Test_find_moves(unittest.TestCase):
         (white_moves, black_moves) = ttt.find_moves(self.board)
         self.assertEqual(white_moves[0], ttt.Move(0, 2))
         self.assertEqual(black_moves[0], ttt.Move(0, 2))
-        self.assertEqual(white_moves[0].power, 5)
+        self.assertEqual(white_moves[0].power, 6)
         self.assertEqual(black_moves[0].power, 5)
 
     def test_another_off_one_win(self):
-        self.board[0, 0] = x
-        self.board[0, 1] = o
-        self.board[1, 2] = o
+        self.board[0, 0] = o
+        self.board[0, 1] = x
+        self.board[1, 2] = x
         (white_moves, black_moves) = ttt.find_moves(self.board)
         self.assertEqual(white_moves[0], ttt.Move(1, 1))
         self.assertEqual(black_moves[0], ttt.Move(1, 1))
         self.assertEqual(white_moves[0].power, 5)
-        self.assertEqual(black_moves[0].power, 5)
+        self.assertEqual(black_moves[0].power, 6)
+
+    def test_double_win_in_two(self):
+        self.board[0, 1] = o
+        self.board[1, 2] = o
+        self.board[1, 0] = x
+        self.board[2, 1] = x
+        (white_moves, black_moves) = ttt.find_moves(self.board)
+        self.assertEqual(white_moves[0], ttt.Move(0, 2))
+        self.assertEqual(black_moves[0], ttt.Move(2, 0))
+        self.assertEqual(white_moves[0].power, 6)
+        self.assertEqual(black_moves[0].power, 6)
+        self.assertEqual(white_moves[1], ttt.Move(2, 0))
+        self.assertEqual(black_moves[1], ttt.Move(0, 2))
+        self.assertEqual(white_moves[1].power, 5)
+        self.assertEqual(black_moves[1].power, 5)
 
 #%% make_move
 class Test_make_move(unittest.TestCase):
