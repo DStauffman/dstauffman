@@ -6,6 +6,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in January 2016.
 """
+# pylint: disable=E0611, E1101, C0103, C0326, C0411, C0412, W0108
 
 #%% Imports
 import doctest
@@ -18,25 +19,32 @@ import sys
 import unittest
 try: # pragma: no cover
     from PyQt5 import QtGui, QtCore
-    from PyQt5.QtWidgets import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox
+    from PyQt5.QtWidgets import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox, \
+        QMainWindow, QAction
     from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 except ImportError: # pragma: no cover
     from PyQt4 import QtGui, QtCore
-    from PyQt4.QtGui import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox
+    from PyQt4.QtGui import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox, \
+        QMainWindow, QAction
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from dstauffman import get_images_dir, get_output_dir, Counter
 from dstauffman.games.tictactoe.classes   import GameStats, State
 from dstauffman.games.tictactoe.constants import PLAYER, OPTIONS, SIZES
 from dstauffman.games.tictactoe.plotting  import plot_board, plot_cur_move, plot_possible_win, \
                                                  plot_powers, plot_win
-from dstauffman.games.tictactoe.utils     import calc_cur_move, check_for_win, create_board_from_moves, \
-                                                 find_moves, make_move, play_ai_game
+from dstauffman.games.tictactoe.utils     import calc_cur_move, check_for_win, \
+                                                 create_board_from_moves, find_moves, make_move, \
+                                                 play_ai_game
 
 # TODO: make into grid layout
 # TODO: add boxes for flipping settings
 
+#%% Logging options
+# logger = logging.getLogger()
+# logger.setLevel(logging.DEBUG)
+
 #%% Classes - TicTacToeGui
-class TicTacToeGui(QWidget):
+class TicTacToeGui(QMainWindow):
     r"""
     The Tic Tac Toe GUI.
     """
@@ -44,12 +52,12 @@ class TicTacToeGui(QWidget):
         # call super method
         super(TicTacToeGui, self).__init__()
         # initialize the state data
-        self.initialize_state()
+        self.initialize_state(filename, board, cur_move, cur_game, game_hist)
         # call init method to instantiate the GUI
         self.init()
 
     #%% State initialization
-    def initialize_state(self):
+    def initialize_state(self, filename, board, cur_move, cur_game, game_hist): # TODO: use these other arguments
         r"""
         Loads the previous game based on settings and whether the file exists.
         """
@@ -73,7 +81,8 @@ class TicTacToeGui(QWidget):
         self.state = State()
         # load previous game
         if load_game:
-            filename  = os.path.join(get_output_dir(), 'tictactoe.p')
+            if filename is None:
+                filename = os.path.join(get_output_dir(), 'tictactoe.p')
             if os.path.isfile(filename):
                 self.state.game_hist   = GameStats.load(filename)
                 self.state.cur_game    = Counter(len(self.state.game_hist)-1)
@@ -169,6 +178,31 @@ class TicTacToeGui(QWidget):
         self.btn_redo.setStyleSheet('color: yellow; background-color: #000099; font: bold;')
         self.btn_redo.clicked.connect(self.btn_redo_function)
 
+        #%% File Menu
+        # actions - new game
+        act_new_game = QAction('New Game', self)
+        act_new_game.setShortcut('Ctrl+N')
+        act_new_game.setStatusTip('Starts a new game.')
+        act_new_game.triggered.connect(self.act_new_game_func)
+        # actions - options
+        act_options = QAction('Options', self)
+        act_options.setShortcut('Ctrl+O')
+        act_options.setStatusTip('Opens the advanced option settings.')
+        act_options.triggered.connect(self.act_options_func)
+        # actions - quit game
+        act_quit = QAction('Exit', self)
+        act_quit.setShortcut('Ctrl+Q')
+        act_quit.setStatusTip('Exits the application.')
+        act_quit.triggered.connect(self.close)
+
+        # menubar
+        self.statusBar()
+        menu_bar = self.menuBar()
+        file_menu = menu_bar.addMenu('&File')
+        file_menu.addAction(act_new_game)
+        file_menu.addAction(act_options)
+        file_menu.addAction(act_quit)
+
         #%% Call wrapper to initialize GUI
         self.wrapper()
 
@@ -176,7 +210,7 @@ class TicTacToeGui(QWidget):
         self.resize(1000, 700)
         self.center()
         self.setWindowTitle('Tic Tac Toe')
-        self.setWindowIcon(QtGui.QIcon(os.path.join(get_images_dir(),'tictactoe.png')))
+        self.setWindowIcon(QtGui.QIcon(os.path.join(get_images_dir(), 'tictactoe.png')))
         self.show()
 
     #%% Other callbacks - closing
@@ -189,11 +223,11 @@ class TicTacToeGui(QWidget):
     #%% Other callbacks - center the GUI on the screen
     def center(self):
         r"""Makes the GUI centered on the active screen."""
-        frameGm = self.frameGeometry()
+        frame_gm = self.frameGeometry()
         screen = QApplication.desktop().screenNumber(QApplication.desktop().cursor().pos())
-        centerPoint = QApplication.desktop().screenGeometry(screen).center()
-        frameGm.moveCenter(centerPoint)
-        self.move(frameGm.topLeft())
+        center_point = QApplication.desktop().screenGeometry(screen).center()
+        frame_gm.moveCenter(center_point)
+        self.move(frame_gm.topLeft())
 
     #%% Other callbacks - display_controls
     def display_controls(self):
@@ -235,10 +269,10 @@ class TicTacToeGui(QWidget):
 
     #%% Button callbacks
     def btn_undo_function(self): # TODO: deal with AI moves, too
-        r"""Functions that executes on undo button press."""
+        r"""Function that executes on undo button press."""
         # get last move
         last_move = self.state.game_hist[self.state.cur_game].move_list[self.state.cur_move-1]
-        logging.debug('Undoing move = {}'.format(last_move))
+        logging.debug('Undoing move = %s', last_move)
         # delete piece
         self.state.board[last_move.row, last_move.column] = PLAYER['none']
         # update current move
@@ -247,29 +281,40 @@ class TicTacToeGui(QWidget):
         self.wrapper()
 
     def btn_new_function(self):
-        r"""Functions that executes on new game button press."""
+        r"""Function that executes on new game button press."""
         # update values
         last_lead = self.state.game_hist[self.state.cur_game].first_move
         next_lead = PLAYER['x'] if last_lead == PLAYER['o'] else PLAYER['o']
         assert len(self.state.game_hist) == self.state.cur_game + 1
         self.state.cur_game += 1
         self.state.cur_move = Counter(0)
-        self.state.game_hist.append(GameStats(number=self.state.cur_game, first_move=next_lead, winner=PLAYER['none']))
+        self.state.game_hist.append(GameStats(number=self.state.cur_game, first_move=next_lead, \
+            winner=PLAYER['none']))
         self.state.board = PLAYER['none'] * np.ones((SIZES['board'], SIZES['board']), dtype=int)
         # call GUI wrapper
         self.wrapper()
 
     def btn_redo_function(self):
-        r"""Functions that executes on redo button press."""
+        r"""Function that executes on redo button press."""
         # get next move
         redo_move = self.state.game_hist[self.state.cur_game].move_list[self.state.cur_move]
-        logging.debug('Redoing move = {}'.format(redo_move))
+        logging.debug('Redoing move = %s', redo_move)
         # place piece
-        self.state.board[redo_move.row, redo_move.column] = calc_cur_move(self.state.cur_move, self.state.cur_game)
+        self.state.board[redo_move.row, redo_move.column] = calc_cur_move(self.state.cur_move, \
+            self.state.cur_game)
         # update current move
         self.state.cur_move += 1
         # call GUI wrapper
         self.wrapper()
+
+    #%% Menu action callbacks
+    def act_new_game_func(self):
+        r"""Function that executes on new game menu selection."""
+        self.btn_new_function()
+
+    def act_options_func(self):
+        r"""Function that executes on options menu selection."""
+        pass # TODO: write this
 
     #%% mouse_click_callback
     def mouse_click_callback(self, event):
@@ -287,7 +332,7 @@ class TicTacToeGui(QWidget):
         # alias the rounded values of the mouse click location
         x = np.round(event.ydata).astype(int)
         y = np.round(event.xdata).astype(int)
-        logging.debug('Clicked on (x,y) = ({}, {})'.format(x, y))
+        logging.debug('Clicked on (x,y) = (%s, %s)', x, y)
         # get axes limits
         (m, n) = self.state.board.shape
         # ignore values that are outside the board
@@ -363,8 +408,8 @@ class TicTacToeGui(QWidget):
         while winner == PLAYER['none'] and (\
             (OPTIONS['o_is_computer'] and current_player == PLAYER['o']) or \
             (OPTIONS['x_is_computer'] and current_player == PLAYER['x'])):
-            play_ai_game(self.board_axes, self.state.board, self.state.cur_move, self.state.cur_game, \
-                self.state.game_hist)
+            play_ai_game(self.board_axes, self.state.board, self.state.cur_move, \
+                self.state.cur_game, self.state.game_hist)
             (winner, current_player) = sub_wrapper(self)
 
 #%% Unit Test
