@@ -40,6 +40,7 @@ class _EnumMetaPlus(EnumMeta):
         r"""
         Returns a list of all the names within the enumerator.
         """
+        # look for class.name: pattern, ignore class, return names only
         names = re.findall(r"\.(.*):", str(self))
         assert len(names) == len(self)
         return names
