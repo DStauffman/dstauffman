@@ -80,22 +80,28 @@ class Test_calc_cur_move(unittest.TestCase):
 class Test_check_for_win(unittest.TestCase):
     r"""
     Tests the check_for_win function with the following cases:
-        TBD
+        No Moves
+        No winner
+        X wins
+        O wins
+        x wins multiple lines
+        draw with no moves left
+        draw with simultaneous wins
     """
     def setUp(self):
-        self.board = ttt.PLAYER['none'] * np.ones((3, 3), dtype=int)
+        self.board = n * np.ones((3, 3), dtype=int)
         self.win_mask = np.zeros((3, 3), dtype=bool)
 
     def test_no_moves(self):
         (winner, win_mask) = ttt.check_for_win(self.board)
-        self.assertEqual(winner, ttt.PLAYER['none'])
+        self.assertEqual(winner, n)
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_no_winner(self):
         self.board[0, 0] = x
         self.board[1, 1] = o
         (winner, win_mask) = ttt.check_for_win(self.board)
-        self.assertEqual(winner, ttt.PLAYER['none'])
+        self.assertEqual(winner, n)
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_x_wins(self):
@@ -115,13 +121,41 @@ class Test_check_for_win(unittest.TestCase):
         np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_black_wins_mult(self):
-        pass
+        self.board[0, 0] = o
+        self.board[0, 1] = o
+        self.board[0, 2] = x
+        self.board[1, 0] = o
+        self.board[1, 1] = x
+        self.board[1, 2] = o
+        self.board[2, 0] = x
+        self.board[2, 1] = x
+        self.board[2, 2] = x
+        (winner, win_mask) = ttt.check_for_win(self.board)
+        self.assertEqual(winner, x)
+        win_mask2 = self.board == x
+        np.testing.assert_array_equal(win_mask, win_mask2)
 
     def test_draw_no_moves_left(self):
-        pass
+        self.board[0, 0] = o
+        self.board[0, 1] = o
+        self.board[0, 2] = x
+        self.board[1, 0] = x
+        self.board[1, 1] = x
+        self.board[1, 2] = o
+        self.board[2, 0] = o
+        self.board[2, 1] = o
+        self.board[2, 2] = x
+        (winner, win_mask) = ttt.check_for_win(self.board)
+        self.assertEqual(winner, ttt.PLAYER['draw'])
+        np.testing.assert_array_equal(win_mask, self.win_mask)
 
     def test_draw_simult_wins(self):
-        pass
+        self.board[0, :] = o
+        self.board[1, :] = x
+        (winner, win_mask) = ttt.check_for_win(self.board)
+        self.assertEqual(winner, ttt.PLAYER['draw'])
+        win_mask2 = (self.board == x) | (self.board == o)
+        np.testing.assert_array_equal(win_mask, win_mask2)
 
 #%% find_moves
 class Test_find_moves(unittest.TestCase):
@@ -283,10 +317,52 @@ class Test_make_move(unittest.TestCase):
         plt.close(self.fig)
 
 #%% play_ai_game
-pass
+class Test_play_ai_game(unittest.TestCase):
+    r"""
+    Tests the play_ai_game function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        (self.fig, self.ax) = _make_board()
+        self.board = n * np.ones((3, 3), dtype=int)
+        self.cur_move = Counter(0)
+        self.cur_game = Counter(0)
+        self.game_hist = [ttt.GameStats(1, o)]
+
+    def test_nominal(self):
+        board = self.board.copy()
+        # TODO: need to be able to change OPTIONS on the fly
+        ttt.play_ai_game(self.ax, board, self.cur_move, self.cur_game, self.game_hist)
+        np.testing.assert_array_equal(board, self.board)
+        self.assertEqual(self.cur_move, 0)
+        self.assertEqual(self.cur_game, 0)
 
 #%% create_board_from_moves
-pass
+class Test_create_board_from_moves(unittest.TestCase):
+    r"""
+    Tests the create_board_From_moves function with the following cases:
+        O to move first
+        X to move first
+    """
+    def setUp(self):
+        self.moves = [ttt.Move(0, 0), ttt.Move(1, 1), ttt.Move(2, 1)]
+        self.board = n * np.ones((3, 3), dtype=int)
+
+    def test_o_first(self):
+        first_player     = o
+        self.board[0, 0] = o
+        self.board[1, 1] = x
+        self.board[2, 1] = o
+        board = ttt.create_board_from_moves(self.moves, first_player)
+        np.testing.assert_array_equal(board, self.board)
+
+    def test_x_first(self):
+        first_player = x
+        self.board[0, 0] = x
+        self.board[1, 1] = o
+        self.board[2, 1] = x
+        board = ttt.create_board_from_moves(self.moves, first_player)
+        np.testing.assert_array_equal(board, self.board)
 
 #%% Unit test execution
 if __name__ == '__main__':

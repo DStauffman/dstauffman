@@ -40,7 +40,6 @@ class Test_TicTacToeGui(unittest.TestCase):
         Press All button
         TODO: put in many more
     """
-
     def _default(self):
         # assert default starting conditions
         self.assertTrue(compare_two_classes(self.gui.state, self.state, suppress_output=True))

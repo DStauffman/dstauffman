@@ -296,6 +296,55 @@ def make_move(ax, board, x, y, cur_move, cur_game, game_hist):
 def play_ai_game(ax, board, cur_move, cur_game, game_hist):
     r"""
     Computer AI based play.
+
+    Parameters
+    ---------
+    ax : object
+        Axis to plot on
+    board : 2D int ndarray
+        Board position
+    cur_move : int
+        Current move number
+    cur_game : int
+        Current game number
+    game_hist : list of class GameStats
+        Game history of statistics for each game
+
+    Notes
+    -----
+    #.  Modifies `board`, `cur_move` and `game_hist` in-place.
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.tictactoe import play_ai_game, PLAYER, GameStats
+    >>> from dstauffman import Counter
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> fig = plt.figure()
+    >>> ax = fig.add_subplot(111)
+    >>> _ = ax.set_xlim(-0.5, 2.5)
+    >>> _ = ax.set_ylim(-0.5, 2.5)
+    >>> ax.invert_yaxis()
+    >>> board = PLAYER['none'] * np.ones((3, 3), dtype=int)
+    >>> cur_move = Counter(0)
+    >>> cur_game = Counter(0)
+    >>> game_hist = [GameStats(1, PLAYER['o'])]
+    >>> play_ai_game(ax, board, cur_move, cur_game, game_hist) # doesn't play move as it's not the computers turn
+
+    >>> print(board)
+    [[0 0 0]
+     [0 0 0]
+     [0 0 0]]
+
+    >>> print(cur_move)
+    0
+
+    >>> print(game_hist[0].move_list)
+    []
+
+    >>> plt.close(fig)
+
     """
     current_player = calc_cur_move(cur_move, cur_game)
     if current_player == PLAYER['o'] and OPTIONS['o_is_computer']:
@@ -316,6 +365,31 @@ def play_ai_game(ax, board, cur_move, cur_game, game_hist):
 def create_board_from_moves(moves, first_player):
     r"""
     Recreates a board from a move history.
+
+    Parameters
+    ----------
+    moves : list of class Move
+        Move list
+    first_player : int
+        First player to move
+
+    Returns
+    -------
+    board : 2D int ndarray
+        Board position
+
+    Examples
+    --------
+
+    >>> from dstauffman.games.tictactoe import create_board_from_moves, Move, PLAYER
+    >>> moves = [Move(0, 0), Move(1, 1), Move(2, 2)]
+    >>> first_player = PLAYER['x']
+    >>> board = create_board_from_moves(moves, first_player)
+    >>> print(board)
+    [[-1  0  0]
+     [ 0  1  0]
+     [ 0  0 -1]]
+
     """
     # make sure the first player is valid
     assert first_player == PLAYER['x'] or first_player == PLAYER['o']
