@@ -14,9 +14,12 @@ import numpy as np
 import os
 import unittest
 from dstauffman import get_root_dir as dcs_root_dir
-from dstauffman.games.tictactoe.classes   import Move
-from dstauffman.games.tictactoe.constants import COLOR, PLAYER, OPTIONS, SIZES, WIN
+from dstauffman.games.tictactoe.classes   import Move, Options
+from dstauffman.games.tictactoe.constants import COLOR, PLAYER, SIZES, WIN
 from dstauffman.games.tictactoe.plotting  import plot_piece
+
+#%% Option instance
+OPTS = Options()
 
 #%% get_root_dir
 def get_root_dir():
@@ -347,9 +350,9 @@ def play_ai_game(ax, board, cur_move, cur_game, game_hist):
 
     """
     current_player = calc_cur_move(cur_move, cur_game)
-    if current_player == PLAYER['o'] and OPTIONS['o_is_computer']:
+    if current_player == PLAYER['o'] and OPTS.o_is_computer:
         (moves, _) = find_moves(board)
-    elif current_player == PLAYER['x'] and OPTIONS['x_is_computer']:
+    elif current_player == PLAYER['x'] and OPTS.x_is_computer:
         (_, moves) = find_moves(board)
     else:
         return

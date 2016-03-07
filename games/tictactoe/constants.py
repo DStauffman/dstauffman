@@ -31,19 +31,20 @@ PLAYER['x']     = -1
 PLAYER['none']  = 0
 PLAYER['draw']  = 2
 
+# scoring
+SCORING                 = {}
+SCORING['win']          = 100
+SCORING['block_win']    = 10
+SCORING['win_in_two']   = 6
+SCORING['block_in_two'] = 5
+SCORING['normal_line']  = 1
+SCORING['block_line']   = 0.1
+
 # piece radius
 SIZES           = {}
 SIZES['piece']  = 0.9
 SIZES['square'] = 1.0
 SIZES['board']  = 3
-
-# Gameplay options
-OPTIONS                       = {}
-OPTIONS['load_previous_game'] = 'No' # from ['Yes','No','Ask']
-OPTIONS['plot_best_moves']    = False
-OPTIONS['plot_move_power']    = False
-OPTIONS['o_is_computer']      = False
-OPTIONS['x_is_computer']      = True
 
 # all possible winning combinations
 WIN = np.array([\

@@ -12,8 +12,8 @@ import logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 
 #%% Imports
-from .classes   import GameStats, Move, State
-from .constants import COLOR, PLAYER, OPTIONS, SIZES, WIN
+from .classes   import GameStats, Move, Options, State
+from .constants import COLOR, PLAYER, SCORING, SIZES, WIN
 from .gui       import TicTacToeGui
 from .plotting  import plot_board, plot_cur_move, plot_piece, plot_possible_win, plot_powers, \
                        plot_win

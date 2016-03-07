@@ -28,8 +28,8 @@ except ImportError: # pragma: no cover
         QMainWindow, QAction
     from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from dstauffman import get_images_dir, get_output_dir, Counter
-from dstauffman.games.tictactoe.classes   import GameStats, State
-from dstauffman.games.tictactoe.constants import PLAYER, OPTIONS, SIZES
+from dstauffman.games.tictactoe.classes   import GameStats, Options, State
+from dstauffman.games.tictactoe.constants import PLAYER, SIZES
 from dstauffman.games.tictactoe.plotting  import plot_board, plot_cur_move, plot_possible_win, \
                                                  plot_powers, plot_win
 from dstauffman.games.tictactoe.utils     import calc_cur_move, check_for_win, \
@@ -42,6 +42,9 @@ from dstauffman.games.tictactoe.utils     import calc_cur_move, check_for_win, \
 #%% Logging options
 # logger = logging.getLogger()
 # logger.setLevel(logging.DEBUG)
+
+#%% Option instance
+OPTS = Options()
 
 #%% Classes - TicTacToeGui
 class TicTacToeGui(QMainWindow):
@@ -63,12 +66,12 @@ class TicTacToeGui(QMainWindow):
         """
         # preallocate to not load
         load_game = False
-        if OPTIONS['load_previous_game'] == 'No':
+        if OPTS.load_previous_game == 'No':
             pass
-        elif OPTIONS['load_previous_game'] == 'Yes':
+        elif OPTS.load_previous_game == 'Yes':
             load_game = True
         # ask if loading
-        elif OPTIONS['load_previous_game'] == 'Ask':
+        elif OPTS.load_previous_game == 'Ask':
             widget = QWidget()
             reply = QMessageBox.question(widget, 'Message', \
                 "Do you want to load the previous game?", QMessageBox.Yes | \
@@ -380,15 +383,15 @@ class TicTacToeGui(QMainWindow):
             self.display_controls()
 
             # find the best moves
-            if winner == PLAYER['none'] and (OPTIONS['plot_best_moves'] or OPTIONS['plot_move_power']):
+            if winner == PLAYER['none'] and (OPTS.plot_best_moves or OPTS.plot_move_power):
                 (o_moves, x_moves) = find_moves(self.state.board)
 
             # plot possible winning moves (includes updating turn arrows)
-            if winner == PLAYER['none'] and OPTIONS['plot_best_moves']:
+            if winner == PLAYER['none'] and OPTS.plot_best_moves:
                 plot_possible_win(self.board_axes, o_moves, x_moves)
 
             # plot the move power
-            if winner == PLAYER['none'] and OPTIONS['plot_move_power']:
+            if winner == PLAYER['none'] and OPTS.plot_move_power:
                 plot_powers(self.board_axes, self.state.board, o_moves, x_moves)
 
             # redraw with the final board
@@ -406,8 +409,8 @@ class TicTacToeGui(QMainWindow):
 
         # make computer AI move
         while winner == PLAYER['none'] and (\
-            (OPTIONS['o_is_computer'] and current_player == PLAYER['o']) or \
-            (OPTIONS['x_is_computer'] and current_player == PLAYER['x'])):
+            (OPTS.o_is_computer and current_player == PLAYER['o']) or \
+            (OPTS.x_is_computer and current_player == PLAYER['x'])):
             play_ai_game(self.board_axes, self.state.board, self.state.cur_move, \
                 self.state.cur_game, self.state.game_hist)
             (winner, current_player) = sub_wrapper(self)

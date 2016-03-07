@@ -15,6 +15,27 @@ import unittest
 from dstauffman import Frozen, Counter
 from dstauffman.games.tictactoe.constants import PLAYER
 
+#%% Options
+class Options(Frozen):
+    r"""
+    Class that keeps track of the options for the game.
+    """
+    # Gameplay default options
+    load_previous_game = 'No' # from ['Yes','No','Ask']
+    plot_best_moves    = False
+    plot_move_power    = False
+    o_is_computer      = False
+    x_is_computer      = False
+
+    def __init__(self, **kwargs):
+        r"""Creates options instance with ability to override defaults."""
+        # override attributes
+        for key in kwargs:
+            if hasattr(self, key):
+                setattr(self, key, kwargs[key])
+            else:
+                raise ValueError('Unexpected attribute: {}'.format(key))
+
 #%% State
 class State(Frozen):
     r"""
