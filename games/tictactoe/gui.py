@@ -66,14 +66,15 @@ class TicTacToeGui(QMainWindow):
         """
         # preallocate to not load
         load_game = False
+        self.load_widget = None
         if OPTS.load_previous_game == 'No':
             pass
         elif OPTS.load_previous_game == 'Yes':
             load_game = True
         # ask if loading
         elif OPTS.load_previous_game == 'Ask':
-            widget = QWidget()
-            reply = QMessageBox.question(widget, 'Message', \
+            self.load_widget = QWidget()
+            reply = QMessageBox.question(self.load_widget, 'Message', \
                 "Do you want to load the previous game?", QMessageBox.Yes | \
                 QMessageBox.No, QMessageBox.No)
             if reply == QMessageBox.Yes:
@@ -93,7 +94,7 @@ class TicTacToeGui(QMainWindow):
                 self.state.board       = create_board_from_moves(self.state.game_hist[-1].move_list, \
                     self.state.game_hist[-1].first_move)
             else:
-                raise ValueError('Could not find file: "{}"'.format(filename))
+                raise ValueError('Could not find file: "{}"'.format(filename)) # pragma: no cover
 
     #%% GUI initialization
     def init(self):
@@ -339,7 +340,7 @@ class TicTacToeGui(QMainWindow):
         # get axes limits
         (m, n) = self.state.board.shape
         # ignore values that are outside the board
-        if x < 0 or y < 0 or x >= m or y >= n:
+        if x < 0 or y < 0 or x >= m or y >= n: # pragma: no cover
             logging.debug('Click is outside playable board.')
             return
         # check that move is on a free square

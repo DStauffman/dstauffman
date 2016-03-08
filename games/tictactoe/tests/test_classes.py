@@ -19,6 +19,30 @@ o = ttt.PLAYER['o']
 x = ttt.PLAYER['x']
 n = ttt.PLAYER['none']
 
+#%% Options
+class Test_Options(unittest.TestCase):
+    r"""
+    Tests the Options class with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.options_dict = {'load_previous_game': 'No', 'plot_best_moves': True, \
+            'plot_move_power': True, 'o_is_computer': True, 'x_is_computer': True}
+
+    def test_nominal(self):
+        opts = ttt.Options()
+        self.assertTrue(isinstance(opts, ttt.Options))
+
+    def test_inputs(self):
+        opts = ttt.Options(**self.options_dict)
+        self.assertTrue(isinstance(opts, ttt.Options))
+        for this_key in self.options_dict:
+            self.assertEqual(getattr(opts, this_key), self.options_dict[this_key])
+
+    def test_bad_input(self):
+        with self.assertRaises(ValueError):
+            ttt.Options(bad_input_value='Whatever')
+
 #%% State
 class Test_State(unittest.TestCase):
     r"""

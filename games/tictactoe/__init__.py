@@ -9,7 +9,9 @@ Notes
 
 #%% Logging
 import logging
-logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
+logger = logging.getLogger()
+logger.setLevel(logging.WARNING)
+#logger.setLevel(logging.DEBUG)
 
 #%% Imports
 from .classes   import GameStats, Move, Options, State

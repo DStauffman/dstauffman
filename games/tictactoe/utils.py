@@ -15,7 +15,7 @@ import os
 import unittest
 from dstauffman import get_root_dir as dcs_root_dir
 from dstauffman.games.tictactoe.classes   import Move, Options
-from dstauffman.games.tictactoe.constants import COLOR, PLAYER, SIZES, WIN
+from dstauffman.games.tictactoe.constants import COLOR, PLAYER, SCORING, SIZES, WIN
 from dstauffman.games.tictactoe.plotting  import plot_piece
 
 #%% Option instance
@@ -151,6 +151,20 @@ def find_moves(board):
     >>> (o_moves, x_moves) = find_moves(board)
 
     """
+    def calculate_move_score(wins, block_wins, win_in_2, block_in_2, lines, block_lines):
+        r"""Calculates the numeric value for the current move."""
+        if this_move in wins:
+            score = SCORING['win']
+        elif this_move in block_wins:
+            score = SCORING['block_win']
+        elif this_move in win_in_2:
+            score = SCORING['win_in_two']
+        elif this_move in block_in_2:
+            score = SCORING['block_in_two']
+        else:
+            score = SCORING['normal_line'] * lines + SCORING['block_line'] * block_lines
+        return score
+
     # calculate the number of total squares
     num_pieces = SIZES['board']*SIZES['board']
 
@@ -197,12 +211,10 @@ def find_moves(board):
     o_moves = []
     x_moves = []
     for this_move in open_moves:
-        row = this_move // SIZES['board']
-        column = np.mod(this_move, SIZES['board'])
-        o_score = 100 if this_move in o_win else 10 if this_move in x_win else 6 if this_move in o_win_in_two \
-            else 5 if this_move in x_win_in_two else o_scores[this_move] + x_scores[this_move]/10
-        x_score = 100 if this_move in x_win else 10 if this_move in o_win else 6 if this_move in x_win_in_two \
-            else 5 if this_move in o_win_in_two else x_scores[this_move] + o_scores[this_move]/10
+        row     = this_move // SIZES['board']
+        column  = np.mod(this_move, SIZES['board'])
+        o_score = calculate_move_score(o_win, x_win, o_win_in_two, x_win_in_two, o_scores[this_move], x_scores[this_move])
+        x_score = calculate_move_score(x_win, o_win, x_win_in_two, o_win_in_two, x_scores[this_move], o_scores[this_move])
         o_moves.append(Move(row, column, o_score))
         x_moves.append(Move(row, column, x_score))
 
@@ -320,7 +332,7 @@ def play_ai_game(ax, board, cur_move, cur_game, game_hist):
     Examples
     --------
 
-    >>> from dstauffman.games.tictactoe import play_ai_game, PLAYER, GameStats
+    >>> from dstauffman.games.tictactoe import play_ai_game, PLAYER, GameStats, Options
     >>> from dstauffman import Counter
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
@@ -333,18 +345,20 @@ def play_ai_game(ax, board, cur_move, cur_game, game_hist):
     >>> cur_move = Counter(0)
     >>> cur_game = Counter(0)
     >>> game_hist = [GameStats(1, PLAYER['o'])]
+    >>> Options.o_is_computer = True
+    >>> Options.x_is_computer = True
     >>> play_ai_game(ax, board, cur_move, cur_game, game_hist) # doesn't play move as it's not the computers turn
 
     >>> print(board)
     [[0 0 0]
-     [0 0 0]
+     [0 1 0]
      [0 0 0]]
 
     >>> print(cur_move)
-    0
+    1
 
     >>> print(game_hist[0].move_list)
-    []
+    [<row: 1, col: 1, pwr: None>]
 
     >>> plt.close(fig)
 

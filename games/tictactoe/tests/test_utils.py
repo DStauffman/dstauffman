@@ -320,7 +320,7 @@ class Test_make_move(unittest.TestCase):
 class Test_play_ai_game(unittest.TestCase):
     r"""
     Tests the play_ai_game function with the following cases:
-        TBD
+        Nominal (O to play first move)
     """
     def setUp(self):
         (self.fig, self.ax) = _make_board()
@@ -330,12 +330,43 @@ class Test_play_ai_game(unittest.TestCase):
         self.game_hist = [ttt.GameStats(1, o)]
 
     def test_nominal(self):
+        # set AI options
+        ttt.Options.x_is_computer = True
+        ttt.Options.o_is_computer = True
+        # play game
         board = self.board.copy()
-        # TODO: need to be able to change OPTIONS on the fly
+        ttt.play_ai_game(self.ax, board, self.cur_move, self.cur_game, self.game_hist)
+        self.board[1, 1] = o
+        np.testing.assert_array_equal(board, self.board)
+        self.assertEqual(self.cur_move, 1)
+        self.assertEqual(self.cur_game, 0)
+
+    def test_two_moves(self):
+        # set AI options
+        ttt.Options.x_is_computer = True
+        ttt.Options.o_is_computer = True
+        # play game
+        board = self.board.copy()
+        ttt.play_ai_game(self.ax, board, self.cur_move, self.cur_game, self.game_hist)
+        self.assertEqual(self.cur_move, 1)
+        self.assertEqual(self.cur_game, 0)
+        ttt.play_ai_game(self.ax, board, self.cur_move, self.cur_game, self.game_hist)
+        self.assertEqual(self.cur_move, 2)
+        self.assertEqual(self.cur_game, 0)
+
+    def test_no_ai(self):
+        # set AI options
+        ttt.Options.x_is_computer = False
+        ttt.Options.o_is_computer = False
+        # play game
+        board = self.board.copy()
         ttt.play_ai_game(self.ax, board, self.cur_move, self.cur_game, self.game_hist)
         np.testing.assert_array_equal(board, self.board)
         self.assertEqual(self.cur_move, 0)
         self.assertEqual(self.cur_game, 0)
+
+    def tearDown(self):
+        plt.close(self.fig)
 
 #%% create_board_from_moves
 class Test_create_board_from_moves(unittest.TestCase):
