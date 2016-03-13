@@ -452,7 +452,7 @@ def icer(cost, qaly):
             # find the first occurence (increment by one to find the one less effective than the last)
             bad = np.nonzero(np.diff(sorted_qaly) < 0)[0] + 1
             if len(bad) == 0:
-                raise ValueError('Index should never be empty, something unexpected happended.')
+                raise ValueError('Index should never be empty, something unexpected happended.') # pragma: no cover
             # update the mask and continue to next pass of while loop
             keep.pop(ix_sort[bad[0]])
             continue
@@ -467,7 +467,7 @@ def icer(cost, qaly):
             # find the first bad occurence
             bad = np.nonzero(np.diff(icer_out) < 0)[0]
             if len(bad) == 0:
-                raise ValueError('Index should never be empty, something unexpected happended.')
+                raise ValueError('Index should never be empty, something unexpected happended.') # pragma: no cover
             # update mask and continue to next pass
             keep.pop(ix_sort[bad[0]])
             continue

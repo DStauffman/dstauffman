@@ -12,10 +12,9 @@ Notes
 import doctest
 from enum import Enum, EnumMeta, _is_dunder
 import numpy as np
-import re
 import unittest
 
-#%% Private Classes
+#%% Private Classes - _EnumMetaPlus
 class _EnumMetaPlus(EnumMeta):
     r"""
     Overrides the repr/str methods of the EnumMeta class to display all possible values.
@@ -41,15 +40,13 @@ class _EnumMetaPlus(EnumMeta):
         Returns a list of all the names within the enumerator.
         """
         # look for class.name: pattern, ignore class, return names only
-        names = re.findall(r"\.(.*):", str(self))
-        assert len(names) == len(self)
+        names = list(self.__members__.keys())
         return names
     def list_of_values(self):
         r"""
         Returns a list of all the values within the enumerator.
         """
-        values = [int(x) for x in re.findall(r":\s(.*)\n", str(self)+'\n')]
-        assert len(values) == len(self)
+        values = list(self.__members__.values())
         return values
     @property
     def num_values(self):
@@ -62,20 +59,45 @@ class _EnumMetaPlus(EnumMeta):
         r"""
         Returns the minimum value of the enumerator.
         """
-        return min(self.list_of_values())
+        return min(self.__members__.values())
     @property
     def max_value(self):
         r"""
         Returns the maximum value of the enumerator.
         """
-        return max(self.list_of_values())
+        return max(self.__members__.values())
 
+#%% Public Classes - IntEnumPlus
 class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
     r"""
     Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str.
     """
     def __str__(self):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
+
+#%% Public Decorators - contiguous
+def consecutive(enumeration):
+    r"""
+    Class decorator for enumerations ensuring unique and consecutive member values.
+    """
+    duplicates = []
+    non_consecutive = []
+    last_value = min(enumeration.__members__.values()) - 1
+    for name, member in enumeration.__members__.items():
+        if name != member.name:
+            duplicates.append((name, member.name))
+        if member != last_value + 1:
+            non_consecutive.append((name, member))
+        last_value = member
+    if duplicates:
+        alias_details = ', '.join(
+                ["%s -> %s" % (alias, name) for (alias, name) in duplicates])
+        raise ValueError('duplicate values found in %r: %s' %
+                (enumeration, alias_details))
+    if non_consecutive:
+        alias_details = ', '.join('{}:{}'.format(name, member) for (name, member) in non_consecutive)
+        raise ValueError('non-consecutive values found in {}: {}'.format(enumeration.__name__, alias_details))
+    return enumeration
 
 #%% Functions
 def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
