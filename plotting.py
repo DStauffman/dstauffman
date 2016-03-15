@@ -1113,6 +1113,38 @@ def figmenu(figs):
         for i in range(len(figs)):
             figs[i].toolbar_custom_ = MyCustomToolbar(figs[i])
 
+#%% rgb_ints_to_hex
+def rgb_ints_to_hex(int_tuple):
+    r"""
+    Converts a tuple of ints with (0, 255) to the equivalent hex color code.
+
+    Parameters
+    ----------
+    int_tuple : (3-tuple) of int
+        RGB Integer code colors
+
+    Returns
+    -------
+    hex_code : str
+        Hexidecimal color code
+
+    Examples
+    --------
+
+    >>> from dstauffman import rgb_ints_to_hex
+    >>> hex_code = rgb_ints_to_hex((79, 129, 189))
+    >>> print(hex_code)
+    #4f81bd
+
+    """
+    def clamp(x, min_=0, max_=255):
+        r"""Clamps a value within the specified minimum and maximum."""
+        return max(min_, min(x, max_))
+
+    (r, g, b) = int_tuple
+    hex_code = "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
+    return hex_code
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_plotting', exit=False)
