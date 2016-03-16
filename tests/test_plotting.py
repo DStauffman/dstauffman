@@ -257,11 +257,11 @@ class Test_plot_time_history(unittest.TestCase):
     def test_array_data2(self):
         data = np.column_stack((self.data, self.data))
         self.fig = dcs.plot_time_history(self.time, data, self.description, self.type_, plot_as_diffs=True)
-        
+
     def test_second_y_scale1(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
             second_y_scale=self.second_y_scale)
-        
+
     def test_second_y_scale2(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='percentage', \
             second_y_scale=self.second_y_scale)
@@ -419,11 +419,11 @@ class Test_plot_multiline_history(unittest.TestCase):
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):
             self.figs.append(dcs.plot_multiline_history(self.time, self.data, legend=self.legend[:-1]))
-        
+
     def test_second_y_scale1(self):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, type_='population', \
             second_y_scale=self.second_y_scale))
-        
+
     def test_second_y_scale2(self):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, \
             second_y_scale=self.second_y_scale))
@@ -719,6 +719,26 @@ class Test_figmenu(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig1)
         plt.close(self.fig2)
+
+# rgb_ints_to_hex
+class Test_rgb_ints_to_hex(unittest.TestCase):
+    r"""
+    Tests the rgb_ints_to_hex function with the following cases:
+        Nominal
+        Out of range
+    """
+    def setUp(self):
+        self.colors    = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (79, 129, 189), (0, 0, 0)]
+        self.hex_codes = ['#ff0000', '#00ff00', '#0000ff', '#4f81bd', '#000000']
+
+    def test_nominal(self):
+        for (ix, this_color) in enumerate(self.colors):
+            hex_codes = dcs.rgb_ints_to_hex(this_color)
+            self.assertEqual(hex_codes, self.hex_codes[ix])
+
+    def test_bad_range(self):
+        hex_code = dcs.rgb_ints_to_hex((-100, 500, 9))
+        self.assertEqual(hex_code, '#00ff09')
 
 #%% Unit test execution
 if __name__ == '__main__':
