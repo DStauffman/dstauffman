@@ -794,7 +794,7 @@ def unit(data, axis=1):
 
     >>> from dstauffman import unit
     >>> import numpy as np
-    >>> data = np.array([[1, 0, -1],[0, 0, 0], [0, 0, 1]])
+    >>> data = np.array([[1, 0, -1], [0, 0, 0], [0, 0, 1]])
     >>> norm_data = unit(data, axis=0)
     >>> print(norm_data) # doctest: +NORMALIZE_WHITESPACE
     [[ 1. 0. -0.70710678]
@@ -1015,6 +1015,53 @@ def modd(x1, x2, out=None):
     else:
         np.mod(x1 - 1, x2, out)
         np.add(out, 1, out) # needed to force add to be inplace operation
+
+#%% find_tabs
+def find_tabs(folder, extensions=None, list_all=False, trailing=False):
+    r"""
+    Finds all the tabs in source code that should be spaces instead
+
+    Parameters
+    ----------
+    folder : str
+        Folder path to search
+    list_all : bool, optional, default is False
+        Whether to list all the files, or only those with tabs in them
+    trailing : bool, optional, default is False
+        Whether to consider trailing whitespace a problem, too
+
+    Examples
+    --------
+
+    >>> from dstauffman import find_tabs, get_root_dir
+    >>> folder = get_root_dir()
+    >>> find_tabs(folder)
+
+    """
+    if extensions is None:
+        extensions = frozenset(('m', 'py'))
+    for (root, dirs, files) in os.walk(folder, topdown=True):
+        dirs.sort()
+        for name in sorted(files):
+            fileparts = name.split('.')
+            if fileparts[-1] in extensions:
+                already_listed = list_all
+                if already_listed:
+                    print('Evaluating: "' + os.path.join(root, name) + '"')
+                with open(os.path.join(root, name)) as fid:
+                    c = 0
+                    for line in fid:
+                        c += 1
+                        if line.count('\t') > 0:
+                            if not already_listed:
+                                print('Evaluating: "' + os.path.join(root, name) + '"')
+                                already_listed = True
+                            print('    Line {:03}: '.format(c) + repr(line))
+                        elif trailing and len(line) >= 2 and line[-2] == ' ' and sum(1 for x in line if not x in ' \n')>0:
+                            if not already_listed:
+                                print('Evaluating: "' + os.path.join(root, name) + '"')
+                                already_listed = True
+                            print('    Line {:03}: '.format(c) + repr(line))
 
 #%% Unit test
 if __name__ == '__main__':
