@@ -452,7 +452,7 @@ class Test_plot_bar_breakdown(unittest.TestCase):
         self.data = np.random.rand(len(self.time), num_bins)
         mag = self.data.cumsum(axis=1)[:,-1]
         self.data = self.data / np.expand_dims(mag, axis=1)
-        self.label = 'TB testing'
+        self.label = 'Plot bar testing'
         self.legend = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
         self.opts = dcs.Opts()
         self.opts.show_plot = False

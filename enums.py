@@ -102,18 +102,18 @@ def consecutive(enumeration):
 #%% Functions
 def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
     r"""
-    Creates a distribution for an enumerated state with a duration (such as TB status).
+    Creates a distribution for an enumerated state with a duration (such as a disease status).
 
     Parameters
     ----------
     num : int
         Number of people in the population
     distribution : array_like
-        Likelihood of being in each TB state (should be 4 states and cumsum to 100%)
+        Likelihood of being in each state (should cumsum to 100%)
     prng : class numpy.random.RandomState
         Pseudo-random number generator
     max_months : scalar or array_like, optional
-        Maximum number of months for being in each TB state
+        Maximum number of months for being in each state
     start_num : int, optional
         Number to start counting from, default is 1
     alpha : int, optional
