@@ -777,7 +777,7 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
     fig.canvas.set_window_title(description + ' [' + units + ']')
     ax = fig.add_subplot(111)
     for i in range(num_bins-1, -1, -1):
-        ax.bar(time-width/2, scale*data[:, i], width=width, bottom=scale*bottoms[:, i], \
+        ax.bar(time-width/2, scale*data[:, i], width=width.astype(float), bottom=scale*bottoms[:, i], \
             label=legend[i], color=cm.get_color(i), edgecolor='none')
     plt.ylabel(label + ' [' + units + ']')
     plt.ylim(0, 100)
