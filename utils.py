@@ -1063,6 +1063,73 @@ def find_tabs(folder, extensions=None, list_all=False, trailing=False):
                                 already_listed = True
                             print('    Line {:03}: '.format(c) + repr(line))
 
+#%% np_digitize
+def np_digitize(x, bins, right=False):
+    r"""
+    Acts as a wrapper to the numpy.digitize function, but with additional error checks, and bins
+    starting from 0 instead of 1.
+
+    Parameters
+    ----------
+    x : array_like
+        Input array to be binned.
+    bins : array_like
+        Array of bins. It has to be 1-dimensional and monotonic.
+    right : bool, optional
+        Indicating whether the intervals include the right or the left bin
+        edge. Default behavior is (right==False) indicating that the interval
+        does not include the right edge. The left bin end is open in this
+        case, i.e., bins[i-1] <= x < bins[i] is the default behavior for
+        monotonically increasing bins.
+
+    Returns
+    -------
+    out : ndarray of ints
+        Output array of indices, of same shape as `x`.
+
+    Raises
+    ------
+    ValueError
+        If `bins` is not monotonic.
+    TypeError
+        If the type of the input is complex.
+
+    See Also
+    --------
+    numpy.digitize
+
+    Examples
+    --------
+
+    >>> from dstauffman import np_digitize
+    >>> import numpy as np
+    >>> x    = np.array([0.2, 6.4, 3.0, 1.6])
+    >>> bins = np.array([0.0, 1.0, 2.5, 4.0, 10.0])
+    >>> out  = np_digitize(x, bins)
+    >>> print(out)
+    array([0, 3, 2, 1])
+
+    """
+    # allow an empty x to pass through just fine
+    if x.size == 0:
+        return np.array([], dtype=int)
+
+    # check for NaNs
+    if np.any(np.isnan(x)):
+        raise ValueError('Some values were NaN.')
+
+    # check the bounds
+    if right:
+        if np.any(x < bins[0]) or np.any(x >= bins[-1]):
+            raise ValueError('Some values of x are outside the given bins.')
+    else:
+        if np.any(x <= bins[0]) or np.any(x > bins[-1]):
+            raise ValueError('Some values of x are outside the given bins.')
+
+    # do the calculations by calling the numpy command and shift results by one
+    out = np.digitize(x, bins, right) - 1
+    return out
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_utils', exit=False)

@@ -972,6 +972,50 @@ class Test_find_tabs(unittest.TestCase):
             if os.path.isfile(this_file):
                 os.remove(this_file)
 
+#%% np_digitize
+class Test_np_digitize(unittest.TestCase):
+    r"""
+    Tests the np_digitize function with the following cases:
+        Nominal
+        Bad minimum
+        Bad maximum
+        Empty input
+        Optional right flag
+        Bad NaNs
+    """
+    def setUp(self):
+        self.x    = np.array([1.1, 2.2, 3.3, 3.3, 5.5, 10])
+        self.bins = np.array([-1, 2, 3.1, 4, 4.4, 6, 20])
+        self.out  = np.array([0, 1, 2, 2, 4, 5], dtype=int)
+
+    def test_nominal(self):
+        out = dcs.np_digitize(self.x, self.bins)
+        np.testing.assert_equal(out, self.out)
+
+    def test_bad_min(self):
+        with self.assertRaises(ValueError):
+            dcs.np_digitize(np.array([-5, 5]), self.bins)
+
+    def test_bad_max(self):
+        with self.assertRaises(ValueError):
+            dcs.np_digitize(np.array([5, 25]), self.bins)
+
+    def test_empty(self):
+        out = dcs.np_digitize(np.array([]), self.bins)
+        self.assertEqual(out.size, 0)
+
+    def test_right(self):
+        out = dcs.np_digitize(self.x, self.bins, right=True)
+        np.testing.assert_equal(out, self.out)
+
+    def test_bad_right(self):
+        with self.assertRaises(ValueError):
+            dcs.np_digitize(np.array([5, 25]), self.bins, right=True)
+
+    def test_for_nans(self):
+        with self.assertRaises(ValueError):
+            dcs.np_digitize(np.array([1, 10, np.nan]), self.bins)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)
