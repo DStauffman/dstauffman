@@ -1110,6 +1110,9 @@ def np_digitize(x, bins, right=False):
     array([0, 3, 2, 1])
 
     """
+    # hard-coded values
+    precision = 1e-13
+
     # allow an empty x to pass through just fine
     if x.size == 0:
         return np.array([], dtype=int)
@@ -1120,10 +1123,10 @@ def np_digitize(x, bins, right=False):
 
     # check the bounds
     if right:
-        if np.any(x < bins[0]) or np.any(x >= bins[-1]):
+        if np.any(x < bins[0]-precision) or np.any(x >= bins[-1]+precision):
             raise ValueError('Some values of x are outside the given bins.')
     else:
-        if np.any(x <= bins[0]) or np.any(x > bins[-1]):
+        if np.any(x <= bins[0]-precision) or np.any(x > bins[-1]+precision):
             raise ValueError('Some values of x are outside the given bins.')
 
     # do the calculations by calling the numpy command and shift results by one
