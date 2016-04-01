@@ -78,9 +78,6 @@ class Test_Units(unittest.TestCase):
         with self.assertRaises(KeyError):
             dcs.Units.convert(1, 100, dcs.Units.PER)
 
-#%% Param
-pass
-
 #%% get_factors
 class Test_get_factors(unittest.TestCase):
     r"""

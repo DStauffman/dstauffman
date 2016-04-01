@@ -74,27 +74,6 @@ class Units(IntEnumPlus):
             new_value = mult2 / mult1
         return new_value
 
-#%% Param
-class Param(Frozen):
-    def __init__(self, value, name='', reference='', *, base_unit=None, disp_unit=None):
-        self.value     = value
-        self.name      = name
-        self.reference = reference
-        self.base_unit = base_unit
-        self.disp_unit = disp_unit
-
-    def __call__(self):
-        return self.value
-
-    def pretty_print(self):
-        return '{} {}'.format(self.get_value(), self.get_units())
-
-    def get_value(self):
-        pass
-
-    def get_units(self):
-        pass
-
 #%% get_factors
 def get_factors(prefix):
     r"""
