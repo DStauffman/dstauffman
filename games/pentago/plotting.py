@@ -68,12 +68,13 @@ def plot_piece(ax, vc, hc, r, c, half=False):
     --------
     >>> from dstauffman.games.pentago import plot_piece
     >>> import matplotlib.pyplot as plt
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.set_xlim(0.5, 1.5)
     >>> _ = ax.set_ylim(0.5, 1.5)
     >>> obj = plot_piece(ax, 1, 1, 0.45, (0, 0, 1))
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close()
 
@@ -149,6 +150,7 @@ def plot_win(ax, mask):
     >>> from dstauffman.games.pentago import plot_win
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111, aspect='equal')
     >>> _ = ax.set_xlim(-0.5, 5.5)
@@ -157,7 +159,7 @@ def plot_win(ax, mask):
     >>> mask = np.zeros((6, 6), dtype=bool)
     >>> mask[0, 0:5] = True
     >>> plot_win(ax, mask)
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close()
 
@@ -179,6 +181,7 @@ def plot_possible_win(ax, rot_buttons, white_moves, black_moves, cur_move, cur_g
     >>> from dstauffman.games.pentago import plot_possible_win, find_moves
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111, aspect='equal')
     >>> _ = ax.set_xlim(-0.5, 5.5)
@@ -190,7 +193,7 @@ def plot_possible_win(ax, rot_buttons, white_moves, black_moves, cur_move, cur_g
     >>> cur_move = 0
     >>> cur_game = 0
     >>> plot_possible_win(ax, rot_buttons, white_moves, black_moves, cur_move, cur_game) # doctest: +SKIP
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close()
 

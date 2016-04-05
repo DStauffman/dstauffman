@@ -30,12 +30,13 @@ def plot_cur_move(ax, move):
 
     >>> from dstauffman.games.tictactoe import plot_cur_move, PLAYER
     >>> import matplotlib.pyplot as plt
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.set_xlim(-0.5, 0.5)
     >>> _ = ax.set_ylim(-0.5, 0.5)
     >>> plot_cur_move(ax, PLAYER['x'])
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close()
 
@@ -85,13 +86,14 @@ def plot_piece(ax, vc, hc, size, color, shape, thick=True):
 
     >>> from dstauffman.games.tictactoe import plot_piece, PLAYER
     >>> import matplotlib.pyplot as plt
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.set_xlim(-0.5, 2.5)
     >>> _ = ax.set_ylim(-0.5, 2.5)
     >>> ax.invert_yaxis()
     >>> _ = plot_piece(ax, 1, 1, 0.9, (0, 0, 1), PLAYER['x'])
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close()
 
@@ -144,6 +146,7 @@ def plot_board(ax, board):
     >>> from dstauffman.games.tictactoe import plot_board, PLAYER
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111, aspect='equal')
     >>> _ = ax.set_xlim(-0.5, 2.5)
@@ -152,7 +155,7 @@ def plot_board(ax, board):
     >>> board = PLAYER['none'] * np.ones((3, 3), dtype=int)
     >>> board[0, 0:2] = PLAYER['x']
     >>> plot_board(ax, board)
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close()
 
@@ -207,6 +210,7 @@ def plot_win(ax, mask, board):
     >>> from dstauffman.games.tictactoe import plot_win, PLAYER
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111, aspect='equal')
     >>> _ = ax.set_xlim(-0.5, 2.5)
@@ -217,7 +221,7 @@ def plot_win(ax, mask, board):
     >>> board = PLAYER['none'] * np.ones((3, 3), dtype=int)
     >>> board[0, 0:2] = PLAYER['x']
     >>> plot_win(ax, mask, board)
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close()
 
@@ -239,6 +243,7 @@ def plot_possible_win(ax, o_moves, x_moves):
     >>> from dstauffman.games.tictactoe import plot_possible_win, find_moves
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111, aspect='equal')
     >>> _ = ax.set_xlim(-0.5, 2.5)
@@ -247,7 +252,7 @@ def plot_possible_win(ax, o_moves, x_moves):
     >>> board = np.array([[1, 1, 0], [0, 0, 0], [0, 0, 0]], dtype=int)
     >>> (o_moves, x_moves) = find_moves(board)
     >>> plot_possible_win(ax, o_moves, x_moves)
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close()
 
@@ -282,6 +287,7 @@ def plot_powers(ax, board, o_moves, x_moves):
     >>> from dstauffman.games.tictactoe import plot_powers, find_moves, plot_board
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111, aspect='equal')
     >>> _ = ax.set_xlim(-0.5, 2.5)
@@ -291,7 +297,7 @@ def plot_powers(ax, board, o_moves, x_moves):
     >>> plot_board(ax, board)
     >>> (o_moves, x_moves) = find_moves(board)
     >>> plot_powers(ax, board, o_moves, x_moves)
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close()
 

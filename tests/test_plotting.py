@@ -22,6 +22,9 @@ except ImportError:
     from PyQt4.QtTest import QTest
     from PyQt4.QtCore import Qt
 
+#%% Plotter for testing
+plotter = dcs.Plotter(False)
+
 #%% Classes for testing
 # Opts
 class Test_Opts(unittest.TestCase):
@@ -67,6 +70,7 @@ class Test_MyCustomToolbar(unittest.TestCase):
         Multiple prevs
     """
     def setUp(self):
+        plt.ioff()
         self.fig1 = plt.figure()
         self.fig2 = plt.figure()
         self.fig1.toolbar_custom_ = dcs.MyCustomToolbar(self.fig1)
@@ -152,6 +156,7 @@ class Test_ColorMap(unittest.TestCase):
 
     def test_set_colors(self):
         cm = dcs.ColorMap(num_colors=5)
+        plt.ioff()
         fig = plt.figure()
         ax = fig.add_subplot(111)
         cm.set_colors(ax)
@@ -161,6 +166,7 @@ class Test_ColorMap(unittest.TestCase):
 
     def test_set_color_failure(self):
         cm = dcs.ColorMap()
+        plt.ioff()
         fig = plt.figure()
         ax = fig.add_subplot(111)
         ax.plot(0, 0)
@@ -575,6 +581,7 @@ class Test_titleprefix(unittest.TestCase):
         multiple figures
     """
     def setUp(self):
+        plt.ioff()
         self.fig = plt.figure()
         self.title = 'Figure Title'
         self.prefix = 'Prefix'
@@ -608,6 +615,7 @@ class Test_disp_xlimits(unittest.TestCase):
         Multiple figures
     """
     def setUp(self):
+        plt.ioff()
         self.fig = plt.figure()
         self.xmin = 2
         self.xmax = 5
@@ -645,6 +653,7 @@ class Test_setup_plots(unittest.TestCase):
         Show the plot link
     """
     def setUp(self):
+        plt.ioff()
         self.fig = plt.figure()
         self.fig.canvas.set_window_title('Figure Title')
         x = np.arange(0, 10, 0.1)
@@ -672,6 +681,7 @@ class Test_setup_plots(unittest.TestCase):
 
     def test_multiple_figs(self):
         self.fig = [self.fig]
+        plt.ioff()
         new_fig = plt.figure()
         plt.plot(0, 0)
         self.fig.append(new_fig)
@@ -707,6 +717,7 @@ class Test_figmenu(unittest.TestCase):
         List input
     """
     def setUp(self):
+        plt.ioff()
         self.fig1 = plt.figure()
         self.fig2 = plt.figure()
 

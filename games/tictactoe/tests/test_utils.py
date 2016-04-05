@@ -25,6 +25,7 @@ n = ttt.PLAYER['none']
 #%% Private Functions
 def _make_board():
     r"""Makes a board and returns the figure and axis for use in testing."""
+    plt.ioff()
     fig = plt.figure()
     ax  = fig.add_subplot(111)
     ax.set_xlim(-0.5, 2.5)

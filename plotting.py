@@ -56,6 +56,23 @@ class _HoverButton(QPushButton):
         # Delete border after hover
         self.setStyleSheet('border: 0px;') # pragma: no cover
 
+#%% Classes - Plotter
+class Plotter(Frozen):
+    r"""
+    Class that allows customization of when to show or not show plots (for use with testing plotting
+    functions)
+    """
+    show_plot = True
+
+    def __init__(self, show=True):
+        Plotter.show_plot = show
+
+    def get_plotter(self):
+        return Plotter.show_plot
+
+    def set_plotter(self, show):
+        Plotter.show_plot = show
+
 #%% Classes - Opts
 class Opts(Frozen):
     r"""
@@ -94,6 +111,7 @@ class MyCustomToolbar():
     >>> from dstauffman import MyCustomToolbar
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
     >>> x = np.arange(0, 10, 0.1)
@@ -109,7 +127,6 @@ class MyCustomToolbar():
     def __init__(self, fig):
         r"""Initializes the custom toolbar."""
         # check to see if a QApplication exists, and if not, make one
-        # open a qapp
         if QApplication.instance() is None:
             self.qapp = QApplication(sys.argv) # pragma: no cover
         else:
@@ -209,6 +226,7 @@ class ColorMap(Frozen):
     >>> from dstauffman import ColorMap
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> cm = ColorMap('Paired', 1, 2)
     >>> time = np.arange(0, 10, 0.1)
     >>> fig = plt.figure()
@@ -222,7 +240,7 @@ class ColorMap(Frozen):
     >>> plt.legend(['Sin', 'Cos']) # doctest: +ELLIPSIS
     <matplotlib.legend.Legend object at 0x...>
 
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     Close plot
     >>> plt.close(fig)
@@ -824,6 +842,7 @@ def storefig(fig, folder=None, plot_type='png'):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> import os
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
     >>> x = np.arange(0, 10, 0.1)
@@ -832,7 +851,7 @@ def storefig(fig, folder=None, plot_type='png'):
     [<matplotlib.lines.Line2D object at 0x...>]
     >>> plt.title('X vs Y') # doctest: +ELLIPSIS
     <matplotlib.text.Text object at 0x...>
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
     >>> folder = os.getcwd()
     >>> plot_type = 'png'
     >>> storefig(fig, folder, plot_type)
@@ -899,6 +918,7 @@ def titleprefix(fig, prefix=''):
     >>> from dstauffman import titleprefix
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
     >>> x = np.arange(0, 10, 0.1)
@@ -907,9 +927,10 @@ def titleprefix(fig, prefix=''):
     [<matplotlib.lines.Line2D object at 0x...>]
     >>> plt.title('X vs Y') # doctest: +ELLIPSIS
     <matplotlib.text.Text object at 0x...>
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
     >>> prefix = 'Baseline'
     >>> titleprefix(fig, prefix)
+    >>> plt.draw() # doctest: +SKIP
 
     Close plot
     >>> plt.close()
@@ -938,8 +959,6 @@ def titleprefix(fig, prefix=''):
         # update canvas name
         this_canvas_title = this_fig.canvas.get_window_title()
         this_fig.canvas.set_window_title(prefix + ' - ' + this_canvas_title)
-    # force updating of all the figures
-    plt.draw()
 
 #%% Functions - disp_xlimits
 def disp_xlimits(figs, xmin=None, xmax=None):
@@ -965,6 +984,7 @@ def disp_xlimits(figs, xmin=None, xmax=None):
     >>> from dstauffman import disp_xlimits
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
     >>> x = np.arange(0, 10, 0.1)
@@ -973,10 +993,11 @@ def disp_xlimits(figs, xmin=None, xmax=None):
     [<matplotlib.lines.Line2D object at 0x...>]
     >>> plt.title('X vs Y') # doctest: +ELLIPSIS
     <matplotlib.text.Text object at 0x...>
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
     >>> xmin = 2
     >>> xmax = 5
     >>> disp_xlimits(fig, xmin, xmax)
+    >>> plt.draw() # doctest: +SKIP
 
     Close plot
     >>> plt.close()
@@ -1002,8 +1023,6 @@ def disp_xlimits(figs, xmin=None, xmax=None):
                 new_xmax = old_xmax
             # modify xlimits
             this_axis.set_xlim((new_xmin, new_xmax))
-    # force updating of all the figures
-    plt.draw()
 
 #%% Functions - setup_plots
 def setup_plots(figs, opts, plot_type='time'):
@@ -1028,6 +1047,7 @@ def setup_plots(figs, opts, plot_type='time'):
     >>> from dstauffman import setup_plots, Opts
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
     >>> x = np.arange(0, 10, 0.1)
@@ -1038,7 +1058,7 @@ def setup_plots(figs, opts, plot_type='time'):
     <matplotlib.text.Text object at 0x...>
     >>> plt.xlabel('time [years]') # doctest: +SKIP
     >>> plt.ylabel('value [radians]') # doctest: +SKIP
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
     >>> opts = Opts()
     >>> opts.case_name = 'Testing'
     >>> opts.show_plot = True
@@ -1065,7 +1085,7 @@ def setup_plots(figs, opts, plot_type='time'):
     figmenu(figs)
 
     # show the plot
-    if opts.show_plot:
+    if opts.show_plot and Plotter.show_plot:
         plt.show(block=False)
 
     # optionally save the plot
@@ -1090,6 +1110,7 @@ def figmenu(figs):
     >>> from dstauffman import figmenu
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
     >>> x = np.arange(0, 10, 0.1)
@@ -1100,7 +1121,7 @@ def figmenu(figs):
     <matplotlib.text.Text object at 0x...>
     >>> plt.xlabel('time [years]') # doctest: +SKIP
     >>> plt.ylabel('value [radians]') # doctest: +SKIP
-    >>> plt.show(block=False)
+    >>> plt.show(block=False) # doctest: +SKIP
     >>> figmenu(fig)
 
     Close plot

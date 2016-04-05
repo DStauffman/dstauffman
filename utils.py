@@ -429,8 +429,8 @@ def make_python_init(folder):
     >>> from dstauffman import make_python_init, get_root_dir
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
-    >>> print(text[0:20])
-    from .classes import
+    >>> print(text[0:16])
+    from .bpe import
 
     """
     # exclusions
@@ -1107,7 +1107,7 @@ def np_digitize(x, bins, right=False):
     >>> bins = np.array([0.0, 1.0, 2.5, 4.0, 10.0])
     >>> out  = np_digitize(x, bins)
     >>> print(out)
-    array([0, 3, 2, 1])
+    [0 3 2 1]
 
     """
     # hard-coded values

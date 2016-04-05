@@ -67,6 +67,9 @@ for (ix, this_score) in enumerate(act_range):
     outer10_acts[ix] = np.sum(outer10 == this_score) / num_scores
     inner10_acts[ix] = np.sum(inner10 == this_score) / num_scores
 
+# turn interactive plotting off
+plt.ioff()
+
 #%% Tulare
 # create figure
 fig = plt.figure(facecolor='w')
@@ -119,7 +122,6 @@ plt.text(283,  9.6, 'Result: 1084.  Failed Miserably!', fontsize=10)
 
 # optionally save and format plot
 setup_plots(fig, opts, 'dist_no_y_scale')
-plt.show(block=False)
 
 #%% Vegas
 # create figure
@@ -174,4 +176,3 @@ plt.text(293, 10.9, 'Result: 865.  Won $65.  Meh.', fontsize=10)
 
 # optionally save and format plot
 setup_plots(fig, opts, 'dist_no_y_scale')
-plt.show(block=False)

@@ -15,10 +15,10 @@ from .bpe       import validate_opti_opts, OptiOpts, OptiParam, run_bpe, plot_bp
 from .classes   import frozen, Frozen, Counter
 from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, spyder_custom_colors
 from .enums     import IntEnumPlus, consecutive, dist_enum_and_mons
-from .plotting  import Opts, MyCustomToolbar, ColorMap, get_axes_scales, plot_time_history, \
-                           plot_correlation_matrix, plot_multiline_history, plot_bar_breakdown, \
-                           storefig, titleprefix, disp_xlimits, setup_plots, figmenu, \
-                           rgb_ints_to_hex
+from .plotting  import Plotter, Opts, MyCustomToolbar, ColorMap, get_axes_scales, \
+                           plot_time_history, plot_correlation_matrix, plot_multiline_history, \
+                           plot_bar_breakdown, storefig, titleprefix, disp_xlimits, setup_plots, \
+                           figmenu, rgb_ints_to_hex
 from .photos    import find_missing_nums, find_unexpected_ext, rename_old_picasa_files, \
                            rename_upper_ext, find_long_filenames, batch_resize, \
                            convert_tif_to_jpg, number_files

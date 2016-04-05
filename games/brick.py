@@ -172,9 +172,11 @@ def _draw_cube(ax, xs=0, ys=0, zs=0, color='k'):
 
     >>> from dstauffman.games.brick import _draw_cube
     >>> import matplotlib.pyplot as plt
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111, projection='3d')
     >>> _draw_cube(ax)
+    >>> plt.show(block=False) # doctest: +SKIP
 
     Close the plot
     >>> plt.close(fig)

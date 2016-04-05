@@ -256,6 +256,7 @@ def make_move(ax, board, x, y, cur_move, cur_game, game_hist):
     >>> from dstauffman import Counter
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.set_xlim(-0.5, 2.5)
@@ -336,6 +337,7 @@ def play_ai_game(ax, board, cur_move, cur_game, game_hist):
     >>> from dstauffman import Counter
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
+    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.set_xlim(-0.5, 2.5)

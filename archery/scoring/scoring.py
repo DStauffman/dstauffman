@@ -211,6 +211,8 @@ def plot_mean_and_std(scores, opts=None, perfect_score=300):
     for (ix, score) in enumerate(act_range):
         nfaa_acts[ix] = np.sum(nfaa_score == score) / num_scores
         usaa_acts[ix] = np.sum(usaa_score == score) / num_scores
+    # turn interactive plotting off
+    plt.ioff()
     # create figure
     fig = plt.figure()
     fig.canvas.set_window_title('Score Distribution')
