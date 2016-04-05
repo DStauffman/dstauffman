@@ -427,13 +427,13 @@ class Test_make_python_init(unittest.TestCase):
     """
     def setUp(self):
         self.folder   = dcs.get_root_dir()
-        self.text     = 'from .classes import'
+        self.text     = 'from .bpe import'
         self.folder2  = dcs.get_tests_dir()
         self.filepath = os.path.join(self.folder2, 'temp_file.py')
 
     def test_nominal_use(self):
         text = dcs.make_python_init(self.folder)
-        self.assertEqual(text[0:20], self.text)
+        self.assertEqual(text[0:len(self.text)], self.text)
 
     def test_duplicated_funcs(self):
         with open(self.filepath, 'wt') as file:

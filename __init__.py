@@ -11,7 +11,7 @@ Notes
 """
 
 #%% Imports
-from .bpe       import OptiOpts, OptiParam, run_bpe, plot_bpe_results
+from .bpe       import validate_opti_opts, OptiOpts, OptiParam, run_bpe, plot_bpe_results
 from .classes   import frozen, Frozen, Counter
 from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, spyder_custom_colors
 from .enums     import IntEnumPlus, consecutive, dist_enum_and_mons

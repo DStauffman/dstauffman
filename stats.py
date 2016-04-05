@@ -10,10 +10,14 @@ Notes
 # pylint: disable=E1101, C0301, C0103
 
 #%% Imports
+from collections import OrderedDict
 import doctest
+import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 import unittest
 from dstauffman.constants import MONTHS_PER_YEAR
+from dstauffman.plotting import Opts, setup_plots
 
 #%% Functions - convert_annual_to_monthly_probability
 def convert_annual_to_monthly_probability(annual):
@@ -368,7 +372,7 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
     return (n, u, s)
 
 #%% Functions - icer
-def icer(cost, qaly):
+def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     r"""
     Calculates the incremental cost effectiveness ratios with steps to throw out dominated strategies.
 
@@ -386,17 +390,27 @@ def icer(cost, qaly):
         Cost of each strategy
     qaly : (N) array_like
         Quality adjusted life years (QALY) gained by each strategy
+    names : (N) array_like, optional
+        Names of the different strategies
+    baseline : int, optional
+        Index of baseline strategy to use for cost comparisons, if not nan
+    make_plot : bool, optional
+        True/false flag for whether to plot the data
+    opts : class Opts, optional
+        Plotting options
 
     Results
     -------
-    inc_cost : (M) ndarray
+    inc_cost  : (M) ndarray
         incremental costs - see note 1
-    inc_qaly : (M) ndarray
+    inc_qaly  : (M) ndarray
         incremental QALYs gained
-    icer_out : (M) ndarray
+    icer_out  : (M) ndarray
         incremental cost effectiveness ratios
-    order    : (N) ndarray
+    order     : (N) ndarray
         order mapping to the original inputs, with NaNs for dominated strategies
+    icer_data : (N) pandas dataframe
+        ICER data as a pandas dataframe
 
     Notes
     -----
@@ -409,7 +423,7 @@ def icer(cost, qaly):
     >>> from dstauffman import icer
     >>> cost = [250e3, 750e3, 2.25e6, 3.75e6]
     >>> qaly = [20., 30, 40, 80]
-    >>> (inc_cost, inc_qaly, icer_out, order) = icer(cost, qaly)
+    >>> (inc_cost, inc_qaly, icer_out, order, icer_data) = icer(cost, qaly)
     >>> print(inc_cost) # doctest: +NORMALIZE_WHITESPACE
     [ 250000. 500000. 3000000.]
 
@@ -433,8 +447,11 @@ def icer(cost, qaly):
     assert cost.shape == qaly.shape, 'Cost and Qalys must have same size.'
     assert cost.size > 0, 'Costs and Qalys cannot be empty.'
 
+    # alias the number of strategies
+    num = cost.size
+
     # build an index order variable to keep track of strategies
-    keep = list(range(cost.size))
+    keep = list(range(num))
 
     # enter processing loop
     while True:
@@ -479,7 +496,81 @@ def icer(cost, qaly):
     order = np.nan * np.ones(cost.shape)
     order[keep] = ix_sort
 
-    return (inc_cost, inc_qaly, icer_out, order)
+    # build an index to pull data out
+    temp = np.nonzero(~np.isnan(order))[0]
+    ix   = temp[order[~np.isnan(order)].astype(int)]
+
+    # recalculate based on given baseline
+    if baseline is not None:
+        inc_cost = np.diff(np.hstack((cost[baseline], cost[ix])))
+        inc_qaly = np.diff(np.hstack((qaly[baseline], qaly(ix))))
+        icer_out = inc_cost / inc_qaly
+
+    # output as dataframe
+    # build a name list if not given
+    if names is None:
+        names = ['Strategy {}'.format(i+1) for i in range(num)]
+    # preallocate some variables
+    full_inc_costs     = np.nan * np.ones((num))
+    full_inc_qalys     = np.nan * np.ones((num))
+    full_icers         = np.nan * np.ones((num))
+    # fill the calculations in where applicable
+    full_inc_costs[ix] = inc_cost
+    full_inc_qalys[ix] = inc_qaly
+    full_icers[ix]     = icer_out
+    # make into dictionary with more explicit column names
+    data = OrderedDict()
+    data['Strategy'] = names
+    data['Cost'] = cost
+    data['QALYs'] = qaly
+    data['Increment_Costs'] = full_inc_costs
+    data['Incremental_QALYs'] = full_inc_qalys
+    data['ICER'] = full_icers
+    data['Order'] = order
+
+    # make the whole data set into a dataframe
+    icer_data = pd.DataFrame.from_dict(data)
+    icer_data.set_index('Strategy', inplace=True)
+
+    # Make a plot
+    if make_plot:
+        # check optional inputs
+        if opts is None:
+            opts = Opts()
+        # turn interactive plotting off
+        plt.ioff()
+        # create a figure and axis
+        fig = plt.figure()
+        fig.canvas.set_window_title('Cost Benefit Frontier')
+        ax = fig.add_subplot(111)
+        # plot the data
+        ax.plot(qaly, cost, 'ko', label='strategies')
+        ax.plot(qaly[ix], cost[ix], 'r.', markersize=20, label='frontier')
+        # get axis limits before (0,0) point is added
+        lim = ax.axis()
+        # add ICER lines
+        if baseline is None:
+            ax.plot(np.hstack((0, qaly[ix])), np.hstack((0, cost[ix])), 'r-', label='ICERs')
+        else:
+            ax.plot(np.hstack((0, qaly[ix[0]])), np.hstack((0, cost[ix[0]])), 'r:')
+            ax.plot(np.hstack((qaly[baseline], qaly[ix])), np.hstack((cost[baseline], cost[ix])), 'r-', label='ICERs')
+        # Label each point
+        dy = (lim[3] - lim[2]) / 100
+        for i in range(num):
+            ax.annotate(names[i], xy=(qaly[i], cost[i]+dy), xycoords='data', horizontalalignment='center', \
+                verticalalignment='bottom', fontsize=12)
+        # add some labels and such
+        plt.title(fig.canvas.get_window_title())
+        plt.xlabel('Benefits')
+        plt.ylabel('Costs')
+        plt.legend(loc='upper left')
+        plt.grid(True)
+        # reset limits with including (0,0) point in case it skews everything too much
+        ax.axis(lim)
+        # add standard plotting features
+        setup_plots(fig, opts, 'dist_no_yscale')
+
+    return (inc_cost, inc_qaly, icer_out, order, icer_data)
 
 #%% Unit test
 if __name__ == '__main__':

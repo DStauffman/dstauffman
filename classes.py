@@ -10,6 +10,7 @@ Notes
 """
 
 #%% Imports
+import doctest
 import sys
 import unittest
 
@@ -169,3 +170,4 @@ class Counter(Frozen):
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_classes', exit=False)
+    doctest.testmod(verbose=False)

@@ -20,7 +20,7 @@ class Test_OptiOpts(unittest.TestCase):
     """
     def test_init(self):
         opti_opts = dcs.OptiOpts()
-        for this_attr in ['log_level', 'params', 'slope_method']:
+        for this_attr in ['params', 'slope_method']:
             self.assertTrue(hasattr(opti_opts, this_attr))
 
 #%% OptiParams
@@ -29,29 +29,30 @@ pass
 #%% _calculate_jacobian
 pass
 
-#%% _validate_opti_opts
-class Test__validate_opti_opts(unittest.TestCase):
+#%% validate_opti_opts
+@unittest.skip('Code is still being actively developed.')
+class Test_validate_opti_opts(unittest.TestCase):
     r"""
-    Tests the _validate_opti_opts function with the following cases:
+    Tests the validate_opti_opts function with the following cases:
         TBD
     """
     def setUp(self):
         self.opti_opts           = dcs.OptiOpts()
-        self.opti_opts.log_level = 10
+        # TODO: set log level
         self.opti_opts.params    = [dcs.OptiParam('param.life.age_calibration', 1.0, 0, 10.)]
 
     def test_nominal(self):
         with dcs.capture_output() as (out, _):
-            is_valid = dcs.bpe._validate_opti_opts(self.opti_opts)
+            is_valid = dcs.validate_opti_opts(self.opti_opts)
         output = out.getvalue().strip()
         out.close()
         self.assertTrue(is_valid)
         self.assertEqual(output,'Validating optimization options.')
 
     def test_no_logging(self):
-        self.opti_opts.log_level = 0
+        # TODO: set log level self.opti_opts.log_level = 0
         with dcs.capture_output() as (out, _):
-            is_valid = dcs.bpe._validate_opti_opts(self.opti_opts)
+            is_valid = dcs.validate_opti_opts(self.opti_opts)
         output = out.getvalue().strip()
         out.close()
         self.assertTrue(is_valid)
@@ -60,7 +61,7 @@ class Test__validate_opti_opts(unittest.TestCase):
     def test_not_valid(self):
         with dcs.capture_output() as (out, err):
             with self.assertRaises(AssertionError):
-                dcs.bpe._validate_opti_opts(dcs.OptiOpts())
+                dcs.validate_opti_opts(dcs.OptiOpts())
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output,'Validating optimization options.')
