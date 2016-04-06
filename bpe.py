@@ -406,7 +406,7 @@ def run_bpe(opti_opts):
     iter_count += 1
 
     # initialize costs
-    first_cost = 0.5 * rms(innovs_start**2)
+    first_cost = 0.5 * rms(innovs_start**2, ignore_nans=True)
     prev_cost  = first_cost
     best_cost  = first_cost
 
