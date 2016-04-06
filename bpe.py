@@ -32,20 +32,20 @@ class Logger(Frozen):
         r"""Creates options instance with ability to override defaults."""
         # override attributes
         for key in kwargs:
-            if hasattr(self, key):
-                setattr(self, key, kwargs[key])
+            if hasattr(Logger, key):
+                setattr(Logger, key, kwargs[key])
             else:
                 raise ValueError('Unexpected attribute: {}'.format(key))
 
     def get_level(self):
         r"""Gets the logging level."""
-        return self.level
+        return Logger.level
 
     def set_level(self, level):
         r"""Sets the logging level."""
         if level < 0 or level > 10:
             raise ValueError('Invalid logging level: "{}"'.format(level))
-        self.level = level
+        Logger.level = level
 
 #%% OptiOpts
 class OptiOpts(Frozen):
@@ -93,7 +93,7 @@ def _function_wrapper(opti_opts, model_args=None, cost_args=None):
     results = opti_opts.model_func(**model_args)
 
     # Run the cost function to get the innovations
-    innovs = opti_opts.cost_func(**cost_args)
+    innovs = opti_opts.cost_func(results, **cost_args)
 
     return (results, innovs)
 
