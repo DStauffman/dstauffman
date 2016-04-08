@@ -16,9 +16,6 @@ try:
 except ImportError:
     from PyQt4.QtGui import QApplication
 
-import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning) # TODO: temporary
-
 #%% Tests
 if __name__ == '__main__':
     # open a qapp

@@ -62,16 +62,27 @@ class Plotter(Frozen):
     Class that allows customization of when to show or not show plots (for use with testing plotting
     functions)
     """
+    # class attribute for plotting flag
     show_plot = True
 
-    def __init__(self, show=True):
-        Plotter.show_plot = show
+    def __init__(self, show=None):
+        r"""Creates options instance with ability to override defaults."""
+        if show is not None:
+            type(self).show_plot = bool(show)
 
-    def get_plotter(self):
-        return Plotter.show_plot
+    def __str__(self):
+        r"""Prints the current plotting flag."""
+        return '{}({})'.format(type(self).__name__, self.show_plot)
 
-    def set_plotter(self, show):
-        Plotter.show_plot = show
+    @classmethod
+    def get_plotter(cls):
+        r"""Gets the plotting flag."""
+        return cls.show_plot
+
+    @classmethod
+    def set_plotter(cls, show):
+        r"""Sets the plotting flag."""
+        cls.show_plot = bool(show)
 
 #%% Classes - Opts
 class Opts(Frozen):

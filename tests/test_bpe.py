@@ -12,6 +12,46 @@ Notes
 import unittest
 import dstauffman as dcs
 
+#%% Logger
+class Test_Logger(unittest.TestCase):
+    r"""
+    Tests the Logger class with the following cases:
+        Get level
+        Set level
+        Bad level (raises ValueError)
+        printing
+    """
+    def setUp(self):
+        self.level  = 8
+        self.logger = dcs.Logger(self.level)
+        self.print  = 'Logger(8)'
+
+    def test_get_level(self):
+        level = self.logger.get_level()
+        self.assertEqual(level, self.level)
+
+    def test_set_level(self):
+        level = self.logger.get_level()
+        self.assertEqual(level, self.level)
+        self.logger.set_level(5)
+        self.assertEqual(self.logger.get_level(), 5)
+
+    def test_null_instantiation(self):
+        level = self.logger.get_level()
+        logger = dcs.Logger()
+        self.assertEqual(level, logger.get_level())
+
+    def test_bad_level(self):
+        with self.assertRaises(ValueError):
+            self.logger.set_level(-1)
+
+    def test_printing(self):
+        with dcs.capture_output() as (out, _):
+            print(self.logger)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, self.print)
+
 #%% OptiOpts
 class Test_OptiOpts(unittest.TestCase):
     r"""

@@ -25,27 +25,34 @@ class Logger(Frozen):
     r"""
     Class that keeps track of the logger options.
     """
-    # Logging level
+    # class attribute for Logging level
     level = 10
 
-    def __init__(self, **kwargs):
+    def __init__(self, level=None):
         r"""Creates options instance with ability to override defaults."""
-        # override attributes
-        for key in kwargs:
-            if hasattr(Logger, key):
-                setattr(Logger, key, kwargs[key])
-            else:
-                raise ValueError('Unexpected attribute: {}'.format(key))
+        if level is not None:
+            type(self).level = self._check_level(level)
 
-    def get_level(self):
-        r"""Gets the logging level."""
-        return Logger.level
+    def __str__(self):
+        r"""Prints the current level."""
+        return '{}({})'.format(type(self).__name__, self.level)
 
-    def set_level(self, level):
-        r"""Sets the logging level."""
+    @staticmethod
+    def _check_level(level):
+        r"""Checks for a valid logging level."""
         if level < 0 or level > 10:
             raise ValueError('Invalid logging level: "{}"'.format(level))
-        Logger.level = level
+        return level
+
+    @classmethod
+    def get_level(cls):
+        r"""Gets the logging level."""
+        return cls.level
+
+    @ classmethod
+    def set_level(cls, level):
+        r"""Sets the logging level."""
+        cls.level = cls._check_level(level)
 
 #%% OptiOpts
 class OptiOpts(Frozen):
@@ -73,9 +80,6 @@ class OptiParam(Frozen):
         self.best = best
         self.min_ = min_
         self.max_ = max_
-
-#%% global logger
-logger = Logger()
 
 #%% _function_wrapper
 def _function_wrapper(opti_opts, model_args=None, cost_args=None):
@@ -132,9 +136,9 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
 
     >>> from dstauffman.bpe import _levenberg_marquardt
     >>> import numpy as np
-    >>> jacobian = np.array([[1], [2]])
-    >>> innovs = np.array([3, 4])
-    >>> lamba_ = 0.1
+    >>> jacobian    = np.array([[1], [2]])
+    >>> innovs      = np.array([3, 4])
+    >>> lambda_     = 0.1
     >>> delta_param = _levenberg_marquardt(jacobian, innovs, lambda_)
 
     """
@@ -326,7 +330,7 @@ def validate_opti_opts(opti_opts):
     Examples
     --------
 
-    >>> from dstauffman import OptiOpts, OptiParams, validate_opti_opts
+    >>> from dstauffman import OptiOpts, OptiParam, validate_opti_opts
     >>> opti_opts = OptiOpts()
     >>> opti_opts.params = [OptiParam('param.life.age_calibration', 1.0, 0., 10.)]
     >>> is_valid = validate_opti_opts(opti_opts)
@@ -380,7 +384,7 @@ def run_bpe(opti_opts):
     Examples
     --------
 
-    >>> from dstauffman import run_bpe, Parameters, OptiOpts #TODO: finish this
+    >>> from dstauffman import run_bpe, OptiOpts #TODO: finish this
 
     """
     # alias the log level

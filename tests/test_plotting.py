@@ -26,6 +26,40 @@ except ImportError:
 plotter = dcs.Plotter(False)
 
 #%% Classes for testing
+# Plotter
+class Test_Plotter(unittest.TestCase):
+    r"""
+    Tests the Plotter class with the following cases:
+        Get level
+        Set level
+        Bad level (raises ValueError)
+        printing
+    """
+    def setUp(self):
+        self.flag    = True
+        self.plotter = dcs.Plotter(self.flag)
+        self.print   = 'Plotter(True)'
+
+    def test_get_plotter(self):
+        flag = self.plotter.get_plotter()
+        self.assertTrue(flag)
+
+    def test_set_plotter(self):
+        flag = self.plotter.get_plotter()
+        self.assertTrue(flag)
+        self.plotter.set_plotter(False)
+        self.assertFalse(plotter.get_plotter())
+
+    def test_printing(self):
+        with dcs.capture_output() as (out, _):
+            print(self.plotter)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, self.print)
+
+    def tearDown(self):
+        self.plotter.set_plotter(False)
+
 # Opts
 class Test_Opts(unittest.TestCase):
     r"""
