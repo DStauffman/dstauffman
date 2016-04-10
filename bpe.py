@@ -75,11 +75,36 @@ class OptiParam(Frozen):
     r"""
     Optimization parameter to be estimated by the batch parameters estimator.
     """
-    def __init__(self, name, best=0., min_=-np.inf, max_=np.inf):
+    def __init__(self, name, best=0., min_=-np.inf, max_=np.inf, typical=1.):
         self.name = name
         self.best = best
         self.min_ = min_
         self.max_ = max_
+        self.typical = typical
+
+    @staticmethod
+    def get_array(opti_param, type_='best'):
+        r"""
+        Gets a numpy vector of all the optimization parameters for the desired type.
+        """
+        # check for valid types
+        if type_ in ['best', 'min_', 'max_', 'typical']:
+            key = type_
+        elif type_ in ['min', 'max']:
+            key = type[:-1]
+        else:
+            raise ValueError('Unexpected type of "{}"'.format(type_))
+        # pull out the data
+        out = np.array([getattr(x, key) for x in opti_param])
+        return out
+
+    @staticmethod
+    def get_names(opti_param):
+        r"""
+        Gets the names of the optimization parameters as a list.
+        """
+        names = [x.name for x in opti_param]
+        return names
 
 #%% _function_wrapper
 def _function_wrapper(opti_opts, model_args=None, cost_args=None):
@@ -102,13 +127,74 @@ def _function_wrapper(opti_opts, model_args=None, cost_args=None):
     return (results, innovs)
 
 #%% _calculate_jacobian
-def _calculate_jacobian(func, old_param, old_innovs, opti_opts):
+def _calculate_jacobian(opti_opts, old_params, old_innovs, *, two_sided=False, normalized=False):
     r"""
     Perturbs the state by a litte bit and calculates the numerical slope (i.e. Jacobian approximation)
 
     Has options for first or second order approximations.
+
+    References
+    ----------
+    #.  Conn, Andrew R., Gould, Nicholas, Toint, Philippe, "Trust-Region Methods," MPS-SIAM Series
+        on Optimization, 2000.
+
     """
-    jacobian = np.array([[]])
+    # alias useful values
+    sqrt_eps      = np.sqrt(np.finfo(float).eps)
+    num_param     = old_params.size
+    num_innov     = old_innovs.size
+    param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
+    param_signs   = np.sign(old_params)
+    param_signs[param_signs == 0] = 1
+    names         = OptiParam.get_names(opti_opts.params)
+
+    # initialize output
+    jacobian = np.zeros((num_innov, num_param), dtype=float)
+
+    # initialize loop variables
+    # set parameter pertubation (Reference 1, section 8.4.3)
+    if normalized:
+        param_perturb = perturb_fact * sqrt_eps * param_signs # TODO: pass in perturb_fact?
+    else:
+        param_perturb = sqrt_eps * param_signs * np.maximum(np.abs(old_params), np.abs(param_typical))
+
+    param_current_plus  = old_params.copy()
+    param_current_minus = old_params.copy()
+
+    for i_param in range(num_param):
+        # update the parameters for this run
+        param_current_plus[i_param]  = old_params[i_param] + param_perturb[i_param]
+        param_current_minus[i_param] = old_params[i_param] - param_perturb[i_param]
+
+        # get the new parameters for this run
+        if normalized:
+            new_params = param_current_plus * param_typical
+        else:
+            new_params = param_current_plus.copy()
+
+        # call model with new parameters
+        opti_opts.set_param_func(names, new_params, **opti_opts.model_args)
+        (_, new_innovs) = _function_wrapper(opti_opts)
+
+        if two_sided:
+            if normalized:
+                new_params = param_current_minus * param_typical
+            else:
+                new_params = param_current_minus.copy()
+            opti_opts.set_param_func(names, new_params, **opti_opts.model_args)
+            (_, new_innovs_minus) = _function_wrapper(opti_opts)
+
+        # compute the jacobian
+        if two_sided:
+            jacobian[:, i_param] = 0.5 * (new_innovs - new_innovs_minus) / param_perturb[i_param]
+            #grad_log_det_b[i_param] = 0.25 *
+        else:
+            jacobian[:, i_param] = (new_innovs - old_innovs) / param_perturb[i_param]
+
+        # reset the parameter to the original value for next loop
+        param_current_plus[i_param]  = old_params[i_param]
+        param_current_minus[i_param] = old_params[i_param]
+
     return jacobian
 
 #%% _levenberg_marquardt
@@ -393,12 +479,9 @@ def run_bpe(opti_opts):
     # check for valid parameters
     validate_opti_opts(opti_opts)
 
-    # create a working copy of the model inputs
-    model_args = deepcopy(opti_opts.model_args)
-
     # alias the parameter getter and setters
-    getter = opti_opts.get_param_func
     setter = opti_opts.set_param_func
+    names  = OptiParam.get_names(opti_opts.params)
 
     # initialize counters
     iter_count = 0
@@ -406,13 +489,17 @@ def run_bpe(opti_opts):
     # run the model
     if log_level >= 2:
         print('Running initial simulation.')
-    (_, innovs_start) = _function_wrapper(opti_opts, model_args)
+    (_, innovs_start) = _function_wrapper(opti_opts)
     iter_count += 1
 
     # initialize costs
     first_cost = 0.5 * rms(innovs_start**2, ignore_nans=True)
     prev_cost  = first_cost
     best_cost  = first_cost
+
+    # initialize loop variables
+    old_innovs = innovs_start.copy()
+    old_params = opti_opts.get_param_func(names, **opti_opts.model_args)
 
     # Do some stuff
     while iter_count <= opti_opts.max_iters:
@@ -421,10 +508,10 @@ def run_bpe(opti_opts):
             print('Running iteration {}.'.format(iter_count))
 
         # run finite differences code to numerically approximate the Jacobian matrix
-        jacobian = _calculate_jacobian(func, old_param, old_innovs, opti_opts)
+        jacobian = _calculate_jacobian(opti_opts, old_params, old_innovs)
 
         # calculate the numerical gradient with respect to the estimated parameters
-        grad_innovs = jacobian.T.dot(innovs)
+        grad_innovs = jacobian.T.dot(old_innovs)
 
         # calculate the hessian matrix
         hessian = jacobian.T.dot(jacobian)
