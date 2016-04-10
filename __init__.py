@@ -15,6 +15,7 @@ from .bpe       import Logger, OptiOpts, OptiParam, validate_opti_opts, run_bpe,
 from .classes   import frozen, Frozen, Counter
 from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, spyder_custom_colors
 from .enums     import IntEnumPlus, consecutive, dist_enum_and_mons
+from .linalg    import orth, subspace
 from .plotting  import Plotter, Opts, MyCustomToolbar, ColorMap, get_axes_scales, \
                            plot_time_history, plot_correlation_matrix, plot_multiline_history, \
                            plot_bar_breakdown, storefig, titleprefix, disp_xlimits, setup_plots, \
