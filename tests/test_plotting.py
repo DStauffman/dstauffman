@@ -123,10 +123,10 @@ class Test_MyCustomToolbar(unittest.TestCase):
 
     def test_close_all(self):
         self.assertTrue(plt.fignum_exists(self.fig1.number))
-        self.assertTrue(plt.fignum_exists(self.fig1.number))
+        self.assertTrue(plt.fignum_exists(self.fig2.number))
         QTest.mouseClick(self.fig1.toolbar_custom_.btn_close_all, Qt.LeftButton)
         self.assertFalse(plt.fignum_exists(self.fig1.number))
-        self.assertFalse(plt.fignum_exists(self.fig1.number))
+        self.assertFalse(plt.fignum_exists(self.fig2.number))
 
     def test_multiple_nexts(self):
         QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)
@@ -209,6 +209,34 @@ class Test_ColorMap(unittest.TestCase):
         plt.close()
 
 #%% Functions for testing
+# close_all
+class Test_close_all(unittest.TestCase):
+    r"""
+    Tests the close_all function with the following cases:
+        Nominal
+        Specified list
+    """
+    def test_nominal(self):
+        fig1 = plt.figure()
+        fig2 = plt.figure()
+        self.assertTrue(plt.fignum_exists(fig1.number))
+        self.assertTrue(plt.fignum_exists(fig2.number))
+        dcs.close_all()
+        self.assertFalse(plt.fignum_exists(fig1.number))
+        self.assertFalse(plt.fignum_exists(fig2.number))
+
+    def test_list(self):
+        fig1 = plt.figure()
+        fig2 = plt.figure()
+        self.assertTrue(plt.fignum_exists(fig1.number))
+        self.assertTrue(plt.fignum_exists(fig2.number))
+        dcs.close_all([fig1])
+        self.assertFalse(plt.fignum_exists(fig1.number))
+        self.assertTrue(plt.fignum_exists(fig2.number))
+        plt.close(fig2)
+        self.assertFalse(plt.fignum_exists(fig1.number))
+        self.assertFalse(plt.fignum_exists(fig2.number))
+
 # get_axes_scales
 class Test_get_axes_scales(unittest.TestCase):
     r"""

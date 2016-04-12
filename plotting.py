@@ -162,14 +162,11 @@ class MyCustomToolbar():
         self.btn_close_all = _HoverButton(icon, '')
         self.btn_close_all.setToolTip('Close all the open plots')
         fig.canvas.toolbar.addWidget(self.btn_close_all)
-        self.btn_close_all.clicked.connect(self.close_all)
+        self.btn_close_all.clicked.connect(self._close_all)
 
-    def close_all(self, *args):
+    def _close_all(self, *args):
         r"""Closes all the currently open plots."""
-        # Note that it's better to loop through and close the plots individually than to use
-        # plt.close('all'), as that can sometimes cause the iPython kernel to quit #DCS: 2015-06-11
-        for this_fig in plt.get_fignums():
-            plt.close(this_fig)
+        close_all()
 
     def next_plot(self, *args):
         r"""Brings up the next plot in the series."""
@@ -287,6 +284,20 @@ class ColorMap(Frozen):
         except AttributeError: # pragma: no cover
             # for older matplotlib versions, use deprecated set_color_cycle
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
+
+#%% Functions - close_all
+def close_all(figs=None):
+    r"""
+    Close all the open figures, or if a list is specified, then close all of them.
+    """
+    # Note that it's better to loop through and close the plots individually than to use
+    # plt.close('all'), as that can sometimes cause the iPython kernel to quit #DCS: 2015-06-11
+    if figs is None:
+        for this_fig in plt.get_fignums():
+            plt.close(this_fig)
+    else:
+        for this_fig in figs:
+            plt.close(this_fig)
 
 #%% Functions - get_axes_scales
 def get_axes_scales(type_):
@@ -473,7 +484,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     # optionally add second Y axis
     if second_y_scale is not None:
         ax2 = ax.twinx()
-        ax2.set_ylim(np.multiply(second_y_scale,ax.get_ylim()))
+        ax2.set_ylim(np.multiply(second_y_scale, ax.get_ylim()))
         if type_ == 'population':
             ax2.set_ylabel('Actual Population [#]')
     # Setup plots
