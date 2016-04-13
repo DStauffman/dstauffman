@@ -9,6 +9,7 @@ Notes
 """
 
 #%% Imports
+import numpy as np
 import unittest
 import dstauffman as dcs
 
@@ -66,7 +67,44 @@ class Test_OptiOpts(unittest.TestCase):
 #%% OptiParams
 pass
 
+#%% _function_wrapper
+pass
+
 #%% _calculate_jacobian
+pass
+
+#%% _levenberg_marquardt
+class Test__levenberg_marquardt(unittest.TestCase):
+    r"""
+    Tests the _levenberg_marquardt function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.jacobian    = np.array([[1, 2], [3, 4], [5, 6]])
+        self.innovs      = np.array([7, 8, 9])
+        self.lambda_     = 5
+        self.delta_param = np.array([-0.46825397, -1.3015873])
+
+    def test_nominal(self):
+        delta_param = dcs.bpe._levenberg_marquardt(self.jacobian, self.innovs, self.lambda_)
+        np.testing.assert_array_almost_equal(delta_param, self.delta_param)
+
+    def test_lambda_zero(self):
+        pass
+
+#%% _predict_func_change
+pass
+
+#%% _check_for_convergence
+pass
+
+#%% _double_dogleg
+pass
+
+#%% _dogleg_search
+pass
+
+#%% _analyze_results
 pass
 
 #%% validate_opti_opts
@@ -105,15 +143,6 @@ class Test_validate_opti_opts(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output,'Validating optimization options.')
-
-#%% _analyze_results
-pass
-
-#%% get_parameters
-pass
-
-#%% set_parameters
-pass
 
 #%% run_bpe
 pass

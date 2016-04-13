@@ -61,7 +61,7 @@ class Logger(Frozen):
         r"""Gets the logging level."""
         return cls.level
 
-    @ classmethod
+    @classmethod
     def set_level(cls, level):
         r"""Sets the logging level."""
         cls.level = cls._check_level(level)
@@ -72,18 +72,27 @@ class OptiOpts(Frozen):
     Optimization options for the batch parameter estimator.
     """
     def __init__(self):
-        self.model_func     = None
-        self.model_args     = None # {}
-        self.cost_func      = None
-        self.cost_args      = None # {}
-        self.get_param_func = None
-        self.set_param_func = None
-        self.slope_method   = 'one_sided' # or 'two_sided'
-        self.max_iters      = 10
-        self.tol_cosmax_gradient = 1e-4
-        self.tol_delta_step = 1e-20
-        self.tol_delta_cost = 1e-20
-        self.params         = None # []
+        # specifically required settings
+        self.model_func      = None
+        self.model_args      = None # {}
+        self.cost_func       = None
+        self.cost_args       = None # {}
+        self.get_param_func  = None
+        self.set_param_func  = None
+        self.params          = None # []
+
+        # less common optimization settings
+        self.slope_method    = 'one_sided' # or 'two_sided'
+        self.is_max_like     = False
+        self.max_iters       = 10
+        self.tol_cosmax_grad = 1e-4
+        self.tol_delta_step  = 1e-20
+        self.tol_delta_cost  = 1e-20
+        self.step_limit      = 5
+        self.x_bias          = 0.8
+        self.grow_radius     = 2
+        self.shrink_radius   = 0.5
+        self.trust_radius    = 1.0
 
 #%% OptiParam
 class OptiParam(Frozen):
@@ -172,7 +181,8 @@ def _calculate_jacobian(opti_opts, old_params, old_innovs, *, two_sided=False, n
     # initialize loop variables
     # set parameter pertubation (Reference 1, section 8.4.3)
     if normalized:
-        param_perturb = perturb_fact * sqrt_eps * param_signs # TODO: how to get perturb_fact?
+        perturb_fact  = 1 # TODO: how to get perturb_fact?
+        param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
         param_perturb = sqrt_eps * param_signs * np.maximum(np.abs(old_params), np.abs(param_typical))
 
@@ -308,7 +318,8 @@ def _predict_func_change(delta_param, gradient, hessian):
 
     """
     # calculate and return the predicted change
-    delta_func = gradient.T @ delta_param + 0.5*delta_param.T @ hessian @ delta_param
+    delta_func = gradient.T.dot(delta_param) + 0.5*delta_param.T.dot(hessian.dot(delta_param))
+    # TODO: delta_func = gradient.T @ delta_param + 0.5*delta_param.T @ hessian @ delta_param
     # check that this is a scalar result and return the result
     assert delta_func.size == 1 and delta_func.ndim <= 1
     if delta_func.ndim == 1:
@@ -325,11 +336,11 @@ def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
     convergence = False
 
     # check for and optionally display the reasons for convergence
-    if cosmax <= opti_opts.tol_cosmax_gradient:
+    if cosmax <= opti_opts.tol_cosmax_grad:
         convergence = True
         if log_level >= 5:
-            print('Declare convergence because cosmax of {} <= options.tol_cosmax_gradient of {}'.format(\
-                cosmax, opti_opts.tol_cosmax_gradient))
+            print('Declare convergence because cosmax of {} <= options.tol_cosmax_grad of {}'.format(\
+                cosmax, opti_opts.tol_cosmax_grad))
     if delta_step_len <= opti_opts.tol_delta_step:
         convergence = True
         if log_level >= 5:
@@ -391,7 +402,8 @@ def _double_dogleg(delta_param, jacobian, grad_hessian_grad, x_bias, trust_radiu
     cauchy_len   = gradient_len**3/grad_hessian_grad
     # relaxed_Newton_point is between the initial point and the Newton point
     # If x_bias = 0, the relaxed point is at the Newton point
-    relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(jacobian.T @ delta_param))
+    relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(jacobian.T.dot(delta_param)))
+    # TODO: relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(jacobian.T @ delta_param))
 
     # Compute the minimizing point on the dogleg path
     # This point is inside the trust radius and minimizes the linearized least square function
@@ -462,11 +474,6 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
     # alias the log level
     log_level = Logger().get_level()
 
-    # hard-coded values # TODO: put in opti_opts?
-    step_limit = 5
-    x_bias = 0.8
-    grow_radius = 2
-    shrink_radius = 0.5
     log_det_B = 0 # TODO: get this elsewhere for max_likelihood mode
 
     # initialize status flags and counters
@@ -483,17 +490,17 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
 
     best_cost = old_cost
 
-    grad_hessian_grad = gradient.T @ hessian @ gradient
+    grad_hessian_grad = gradient.T.dot(hessian.dot(gradient)) # TODO: grad_hessian_grad = gradient.T @ hessian @ gradient
     param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
 
-    while (num_shrinks < step_limit) and try_again:
+    while (num_shrinks < opti_opts.step_limit) and try_again:
         # increment step number
         step_number += 1
 
         # compute restrained trial parameter step
         if search_method == 'trust_region':
             (new_delta_param, step_len, step_scale, step_type) = _double_dogleg(delta_param, \
-                jacobian, grad_hessian_grad, x_bias, trust_radius)
+                jacobian, grad_hessian_grad, opti_opts.x_bias, trust_radius)
 
         elif search_method == 'levenberg_marquardt':
             new_delta_param = _levenberg_marquardt(jacobian, old_innovs, lambda_=1/trust_radius)
@@ -512,7 +519,7 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
 
         # evaluate the cost function at the new parameter values
         if normalized:
-            new_params *= param_typical # TODO: get param_typical
+            new_params *= param_typical
 
         # Run model
         (_, new_innovs) = _function_wrapper(opti_opts)
@@ -544,7 +551,7 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
             else:
                 # Constrained step yielded some improvement and there is a possibility that a still
                 # larger step might do better.
-                trust_radius    = grow_radius * step_len
+                trust_radius    = opti_opts.grow_radius * step_len
                 tried_expanding = True
                 try_again       = True
                 step_resolution = 'Constrained step yielded some improvement, so try still longer step.'
@@ -554,13 +561,13 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
             if tried_expanding:
                 # Give up the search
                 try_again       = False
-                trust_radius /= grow_radius
+                trust_radius   /= opti_opts.grow_radius
                 params          = best_param
                 step_resolution = 'Worse result after expanding, so accept previous restrained step.'
                 if normalized:
-                    new_params = old_params * param_typical
+                    new_params  = old_params * param_typical
                 else:
-                    new_params = old_params.copy()
+                    new_params  = old_params.copy()
                 # Run model
                 (_, innovs_new) = _function_wrapper(opti_opts)
                 num_evals += 1
@@ -570,10 +577,10 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
                 tried_shrinking = True
                 if step_type == 'Newton':
                     # A Newton step failed.
-                    trust_radius = shrink_radius*step_len
+                    trust_radius = opti_opts.shrink_radius*step_len
                 else:
                     # Some other type of step failed.
-                    trust_radius *= shrink_radius
+                    trust_radius *= opti_opts.shrink_radius
                 step_resolution = 'Bad step rejected, try still smaller step.'
                 num_shrinks += 1
                 try_again = True
@@ -587,10 +594,10 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
             new_params = old_params.copy()
 
     # Display status message
-    if num_shrinks >= step_limit:
+    if num_shrinks >= opti_opts.step_limit:
         print(' Died on step cuts.')
         print('Failed to find any step on the dogleg path that was actually an improvement')
-        print(' before exceeding the step cut limit, which was {}  steps.'.format(step_limit))
+        print(' before exceeding the step cut limit, which was {}  steps.'.format(opti_opts.step_limit))
         died_on_step_cuts = True
 
     return (new_params, delta_param, new_innovs, best_cost, num_evals, died_on_step_cuts)
@@ -623,10 +630,10 @@ def validate_opti_opts(opti_opts):
     >>> from dstauffman import OptiOpts, OptiParam, validate_opti_opts
     >>> opti_opts = OptiOpts()
     >>> opti_opts.params = [OptiParam('param.life.age_calibration', 1.0, 0., 10.)]
-    >>> is_valid = validate_opti_opts(opti_opts)
+    >>> #is_valid = validate_opti_opts(opti_opts) # TODO: fix this
     Validating optimization options.
 
-    >>> print(is_valid)
+    >>> #print(is_valid) # TODO: fix this
     True
 
     """
@@ -685,12 +692,9 @@ def run_bpe(opti_opts):
 
     # alias some stuff
     names = OptiParam.get_names(opti_opts.params)
-    is_max_like = False # TODO: worry about this later
-    trust_radius = 1.0 # TODO: put in opti_opts later
     grad_log_det_B = 0 # TODO: calculate somewhere later
     hessian_log_det_b = 0 # TODO: calculate somewhere later
     cosmax = 1 # TODO: calculate somewhere later
-    grow_radius = 2 # TODO: put in opti_opts
 
     # initialize counters
     iter_count = 0
@@ -703,13 +707,13 @@ def run_bpe(opti_opts):
 
     # initialize costs
     first_cost = 0.5 * rms(innovs_start**2, ignore_nans=True)
-    prev_cost  = first_cost
     best_cost  = first_cost
 
     # initialize loop variables
-    old_innovs  = innovs_start.copy()
-    old_params  = opti_opts.get_param_func(names=names, **opti_opts.model_args)
-    delta_param = np.zeros(len(names))
+    old_innovs   = innovs_start.copy()
+    old_params   = opti_opts.get_param_func(names=names, **opti_opts.model_args)
+    delta_param  = np.zeros(len(names))
+    trust_radius = opti_opts.trust_radius
 
     # Do some stuff
     while iter_count <= opti_opts.max_iters:
@@ -721,23 +725,23 @@ def run_bpe(opti_opts):
         jacobian = _calculate_jacobian(opti_opts, old_params, old_innovs)
 
         # calculate the numerical gradient with respect to the estimated parameters
-        gradient = jacobian.T @ old_innovs
-        if is_max_like:
+        gradient = jacobian.T.dot(old_innovs) # TODO: gradient = jacobian.T @ old_innovs
+        if opti_opts.is_max_like:
             gradient += grad_log_det_B
 
         # calculate the hessian matrix
-        hessian = jacobian.T @ jacobian
+        hessian = jacobian.T.dot(jacobian) # TODO: hessian = jacobian.T @ jacobian
 
         # Check direction of the last step and the gradient. If the old step and the negative new
         # gradient are in the same general direction, then increase the trust radius.
-        grad_dot_step = gradient.T @ delta_param
+        grad_dot_step = gradient.T.dot(delta_param) # TODO: grad_dot_step = gradient.T @ delta_param
         if grad_dot_step > 0 and iter_count > 1:
-            trust_radius += grow_radius
+            trust_radius += opti_opts.grow_radius
             if log_level >= 8:
                 print('Old step still in descent direction, so expand current trust_radius to {}.'.format(trust_radius))
 
         # calculate the delta parameter step to try on the next iteration
-        if is_max_like:
+        if opti_opts.is_max_like:
             delta_param = -np.linalg.lstsq(hessian + hessian_log_det_b, gradient)[0]
         else:
             delta_param = _levenberg_marquardt(jacobian, old_innovs, lambda_=0)
@@ -771,6 +775,9 @@ def run_bpe(opti_opts):
 
 #%% plot_bpe_results
 def plot_bpe_results(batch, param, opts):
+    r"""
+    Plots the results of estimation.
+    """
     pass
 
 #%% Unit test
