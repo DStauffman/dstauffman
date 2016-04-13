@@ -191,7 +191,7 @@ def _calculate_jacobian(opti_opts, old_params, old_innovs, *, two_sided=False, n
             new_params = param_current_plus.copy()
 
         # call model with new parameters
-        opti_opts.set_param_func(names, new_params, **opti_opts.model_args)
+        opti_opts.set_param_func(names=names, values=new_params, **opti_opts.model_args)
         (_, new_innovs) = _function_wrapper(opti_opts)
 
         if two_sided:
@@ -199,7 +199,7 @@ def _calculate_jacobian(opti_opts, old_params, old_innovs, *, two_sided=False, n
                 new_params = param_current_minus * param_typical
             else:
                 new_params = param_current_minus.copy()
-            opti_opts.set_param_func(names, new_params, **opti_opts.model_args)
+            opti_opts.set_param_func(names=names, values=new_params, **opti_opts.model_args)
             (_, new_innovs_minus) = _function_wrapper(opti_opts)
 
         # compute the jacobian
@@ -328,15 +328,18 @@ def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
     if cosmax <= opti_opts.tol_cosmax_gradient:
         convergence = True
         if log_level >= 5:
-            print('Declare convergence because cosmax <= options.tol_cosmax_gradient')
+            print('Declare convergence because cosmax of {} <= options.tol_cosmax_gradient of {}'.format(\
+                cosmax, opti_opts.tol_cosmax_gradient))
     if delta_step_len <= opti_opts.tol_delta_step:
         convergence = True
         if log_level >= 5:
-            print('Declare convergence because delta_step_len <= options.tol_delta_step')
+            print('Declare convergence because delta_step_len of {} <= options.tol_delta_step of {}'.format(\
+                delta_step_len, opti_opts.tol_delta_step))
     if abs(pred_func_change) <= opti_opts.tol_delta_cost:
         convergence = True
         if log_level >= 5:
-            print('Declare convergence because abs(pred_func_change) <= options.tol_delta_cost')
+            print('Declare convergence because abs(pred_func_change) of {} <= options.tol_delta_cost of {}'.format(\
+                pred_func_change, opti_opts.tol_delta_cost))
     return convergence
 
 #%% _double_dogleg
@@ -705,7 +708,7 @@ def run_bpe(opti_opts):
 
     # initialize loop variables
     old_innovs  = innovs_start.copy()
-    old_params  = opti_opts.get_param_func(names, **opti_opts.model_args)
+    old_params  = opti_opts.get_param_func(names=names, **opti_opts.model_args)
     delta_param = np.zeros(len(names))
 
     # Do some stuff
