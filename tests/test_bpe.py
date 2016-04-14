@@ -10,6 +10,7 @@ Notes
 
 #%% Imports
 import numpy as np
+import os
 import unittest
 import dstauffman as dcs
 
@@ -68,12 +69,47 @@ class Test_OptiOpts(unittest.TestCase):
 pass
 
 #%% BpeResults
-pass
+class Test_BpeResults(unittest.TestCase):
+    r"""
+    Tests the BpeResults class with the following cases:
+        Save (HDF5)
+        Load (HDF5)
+    """
+    def setUp(self):
+        self.bpe_results = dcs.BpeResults()
+        self.bpe_results.num_evals = 5
+        self.filename    = os.path.join(dcs.get_tests_dir(), 'test_bpe_results.hdf5')
+        self.filename2   = self.filename.replace('hdf5', 'p')
+        dcs.Logger.set_level(1)
+
+    def test_save(self):
+        self.bpe_results.save(self.filename)
+        self.assertTrue(os.path.isfile(self.filename))
+
+    def test_save2(self):
+        self.bpe_results.save(self.filename, use_hdf5=False)
+        self.assertTrue(os.path.isfile(self.filename2))
+
+    def test_load(self):
+        self.bpe_results.save(self.filename)
+        bpe_results = dcs.BpeResults.load(self.filename)
+        self.assertTrue(dcs.compare_two_classes(bpe_results, self.bpe_results, suppress_output=True))
+
+    def test_load2(self):
+        self.bpe_results.save(self.filename, use_hdf5=False)
+        bpe_results = dcs.BpeResults.load(self.filename, use_hdf5=False)
+        self.assertTrue(dcs.compare_two_classes(bpe_results, self.bpe_results, suppress_output=True))
+
+    def tearDown(self):
+        if os.path.isfile(self.filename):
+            os.remove(self.filename)
+        if os.path.isfile(self.filename2):
+            os.remove(self.filename2)
 
 #%% _function_wrapper
 pass
 
-#%% _calculate_jacobian
+#%% _finite_differences
 pass
 
 #%% _levenberg_marquardt

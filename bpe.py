@@ -12,12 +12,16 @@ Notes
 # pylint: disable=E1101, C0301, C0326
 
 #%% Imports
+from copy import deepcopy
 import doctest
+import h5py
 import numpy as np
+import os
+import pickle
 from scipy.linalg import norm
 import unittest
 from dstauffman.classes import Frozen
-from dstauffman.utils import rss
+from dstauffman.utils import rss, setup_dir
 
 #%% Logger
 class Logger(Frozen):
@@ -138,25 +142,62 @@ class BpeResults(Frozen):
     Results of the Batch Parameter Estimator.
     """
     def __init__(self):
-        self.field = None
+        self.begin_innovs = None
+        self.final_innovs = None
+        self.num_evals    = 0
+        self.num_iters    = 0
+        self.params       = None
+        self.costs        = None
+        self.step_info    = None
+        self.covariance   = None
+        self.info_svd     = None
+        self.final_params = None
 
-    def save(self, filename=''):
+    def save(self, filename='', use_hdf5=True):
         r"""Save the BpeResults to disk."""
+        # exit if no filename is given
         if not filename:
             return
+        # potentially convert the filename
+        if not use_hdf5:
+            filename = filename.replace('hdf5', 'p')
+        # log some status
         if Logger.get_level() > 2:
             print('Saving results to: "{}".'.format(filename))
-        pass # TODO: write this
+        if not use_hdf5:
+            # Version 1 (Pickle):
+            with open(filename, 'wb') as file:
+                pickle.dump(self, file)
+        else:
+            # Version 2 (HDF5):
+            with h5py.File(filename, 'w') as file:
+                grp = file.create_group('self')
+                for key in vars(self):
+                    value = getattr(self, key)
+                    if value is not None:
+                        grp.create_dataset(key, data=value)
 
     @classmethod
-    def load(cls, filename=''):
+    def load(cls, filename='', use_hdf5=True):
         r"""Loads the BpeResults from disk."""
         if not filename:
             raise ValueError('No file specified to load.')
-        pass # TODO: write this
+        if not use_hdf5:
+            # Version 1 (Pickle):
+            with open(filename.replace('hdf5', 'p'), 'rb') as file:
+                out = pickle.load(file)
+        else:
+            # Version 2 (HDF5):
+            out = cls()
+            with h5py.File(filename, 'r') as file:
+                for key in sorted(file.keys()):
+                    grp = file[key]
+                    for (ix, field) in enumerate(sorted(grp.keys())):
+                        setattr(out, field, grp[field].value)
+        return out
 
 #%% _function_wrapper
-def _function_wrapper(opti_opts, model_args=None, cost_args=None):
+def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
     r"""
     Wraps the call to the model function, and returns the results from the model, plus the
     innovations as defined by the given cost function.
@@ -169,6 +210,7 @@ def _function_wrapper(opti_opts, model_args=None, cost_args=None):
 
     # Run the model to get the results
     results = opti_opts.model_func(**model_args)
+    bpe_results.num_evals += 1
 
     # Run the cost function to get the innovations
     innovs = opti_opts.cost_func(results, **cost_args)
@@ -178,8 +220,8 @@ def _function_wrapper(opti_opts, model_args=None, cost_args=None):
 
     return (results, innovs)
 
-#%% _calculate_jacobian
-def _calculate_jacobian(opti_opts, old_params, old_innovs, *, two_sided=False, normalized=False, perturb_fact=None):
+#%% _finite_differences
+def _finite_differences(opti_opts, model_args, bpe_results, params, innovs, *, two_sided=False, normalized=False):
     r"""
     Perturbs the state by a litte bit and calculates the numerical slope (i.e. Jacobian approximation)
 
@@ -193,64 +235,71 @@ def _calculate_jacobian(opti_opts, old_params, old_innovs, *, two_sided=False, n
     """
     # alias useful values
     sqrt_eps      = np.sqrt(np.finfo(float).eps)
-    num_param     = old_params.size
-    num_innov     = old_innovs.size
+    num_param     = params.size
+    num_innov     = innovs.size
     param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
-    param_signs   = np.sign(old_params)
+    param_signs   = np.sign(params)
     param_signs[param_signs == 0] = 1
     names         = OptiParam.get_names(opti_opts.params)
-
-    # TODO: copy the model_args so that it's not modified in place while running
 
     # initialize output
     jacobian = np.zeros((num_innov, num_param), dtype=float)
 
     # initialize loop variables
+    grad_log_det_B = 0 # TODO: calculate somewhere later
     # set parameter pertubation (Reference 1, section 8.4.3)
     if normalized:
         perturb_fact  = 1 # TODO: how to get perturb_fact?
         param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
-        param_perturb = sqrt_eps * param_signs * np.maximum(np.abs(old_params), np.abs(param_typical))
+        param_perturb = sqrt_eps * param_signs * np.maximum(np.abs(params), np.abs(param_typical))
 
-    param_current_plus  = old_params.copy()
-    param_current_minus = old_params.copy()
+    temp_params_plus  = params.copy()
+    temp_params_minus = params.copy()
 
     for i_param in range(num_param):
         # update the parameters for this run
-        param_current_plus[i_param]  = old_params[i_param] + param_perturb[i_param]
-        param_current_minus[i_param] = old_params[i_param] - param_perturb[i_param]
+        temp_params_plus[i_param]  = params[i_param] + param_perturb[i_param]
+        temp_params_minus[i_param] = params[i_param] - param_perturb[i_param]
 
         # get the new parameters for this run
         if normalized:
-            new_params = param_current_plus * param_typical
+            temp_params = temp_params_plus * param_typical
         else:
-            new_params = param_current_plus.copy()
+            temp_params = temp_params_plus.copy()
 
         # call model with new parameters
-        opti_opts.set_param_func(names=names, values=new_params, **opti_opts.model_args)
-        (_, new_innovs) = _function_wrapper(opti_opts)
+        opti_opts.set_param_func(names=names, values=temp_params, **model_args)
+        (_, new_innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 
         if two_sided:
             if normalized:
-                new_params = param_current_minus * param_typical
+                temp_params = temp_params_minus * param_typical
             else:
-                new_params = param_current_minus.copy()
-            opti_opts.set_param_func(names=names, values=new_params, **opti_opts.model_args)
-            (_, new_innovs_minus) = _function_wrapper(opti_opts)
+                temp_params = temp_params_minus.copy()
+            opti_opts.set_param_func(names=names, values=temp_params, **model_args)
+            (_, new_innovs_minus) = _function_wrapper(opti_opts, bpe_results, model_args)
 
         # compute the jacobian
         if two_sided:
             jacobian[:, i_param] = 0.5 * (new_innovs - new_innovs_minus) / param_perturb[i_param]
             #grad_log_det_b[i_param] = 0.25 *
         else:
-            jacobian[:, i_param] = (new_innovs - old_innovs) / param_perturb[i_param]
+            jacobian[:, i_param] = (new_innovs - innovs) / param_perturb[i_param]
 
         # reset the parameter to the original value for next loop
-        param_current_plus[i_param]  = old_params[i_param]
-        param_current_minus[i_param] = old_params[i_param]
+        temp_params_plus[i_param]  = params[i_param]
+        temp_params_minus[i_param] = params[i_param]
 
-    return jacobian
+    # calculate the numerical gradient with respect to the estimated parameters
+    gradient = jacobian.T.dot(innovs) # TODO: gradient = jacobian.T @ innovs
+    if opti_opts.is_max_like:
+        gradient += grad_log_det_B
+
+    # calculate the hessian matrix
+    hessian = jacobian.T.dot(jacobian) # TODO: hessian = jacobian.T @ jacobian
+
+    return (jacobian, gradient, hessian)
 
 #%% _levenberg_marquardt
 def _levenberg_marquardt(jacobian, innovs, lambda_=0):
@@ -487,8 +536,8 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
     return (new_delta_param, step_len, step_scale, step_type)
 
 #%% _dogleg_search
-def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gradient, hessian, \
-    trust_radius, old_cost, *, normalized=False):
+def _dogleg_search(opti_opts, model_args, bpe_results, params, delta_param, innovs, jacobian, gradient, hessian, \
+    trust_radius, best_cost, *, normalized=False):
     r"""
     Searchs for improved parameters for nonlinear least square or maximum likelihood function, using
     a trust radius search path.
@@ -496,29 +545,27 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
     """
     # process inputs
     search_method = opti_opts.search_method.lower().replace(' ', '_')
+    names = OptiParam.get_names(opti_opts.params)
+    param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
 
     # alias the log level
     log_level = Logger().get_level()
 
+    # save a copy of the original param values
+    orig_params = params.copy()
+
+    # do some calculations for things constant within the loop
+    grad_hessian_grad = gradient.T.dot(hessian.dot(gradient)) # TODO: grad_hessian_grad = gradient.T @ hessian @ gradient
     log_det_B = 0 # TODO: get this elsewhere for max_likelihood mode
 
     # initialize status flags and counters
-    try_again = True
+    try_again       = True
     tried_expanding = False
     tried_shrinking = False
-    died_on_step_cuts = False
+    num_shrinks     = 0
+    step_number     = 0
 
-    num_shrinks = 0
-    step_number = 0
-    num_evals   = 0
-
-    new_params = old_params.copy()
-
-    best_cost = old_cost.copy()
-
-    grad_hessian_grad = gradient.T.dot(hessian.dot(gradient)) # TODO: grad_hessian_grad = gradient.T @ hessian @ gradient
-    param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
-
+    # try a step
     while (num_shrinks < opti_opts.step_limit) and try_again:
         # increment step number
         step_number += 1
@@ -529,7 +576,7 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
                 gradient, grad_hessian_grad, opti_opts.x_bias, trust_radius)
 
         elif search_method == 'levenberg_marquardt':
-            new_delta_param = _levenberg_marquardt(jacobian, old_innovs, lambda_=1/trust_radius)
+            new_delta_param = _levenberg_marquardt(jacobian, innovs, lambda_=1/trust_radius)
             step_type       = 'Levenberg-Marquardt'
             step_len        = norm(new_delta_param)
             step_scale      = step_len/norm(new_delta_param)
@@ -541,31 +588,30 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
         pred_func_change = _predict_func_change(new_delta_param, gradient, hessian)
 
         # set new parameter values
-        new_params += new_delta_param
-
-        # evaluate the cost function at the new parameter values
+        params = orig_params + new_delta_param
         if normalized:
-            new_params *= param_typical
+            params *= param_typical
 
         # Run model
-        (_, new_innovs) = _function_wrapper(opti_opts)
+        opti_opts.set_param_func(names=names, values=params, **model_args)
+        (_, new_innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 
+        # evaluate the cost function at the new parameter values
         sum_sq_innov = rss(new_innovs, ignore_nans=True)
         if opti_opts.is_max_like:
-            trial_cost = 0.5*(sum_sq_innov + log_det_B) # TODO: match to RMS instead of RSS?
+            trial_cost = 0.5*(sum_sq_innov + log_det_B)
         else:
             trial_cost = 0.5 * sum_sq_innov
-        print('New trial cost: {}'.format(trial_cost))
-
-        num_evals += 1
 
         # check if this step actually an improvement
         is_improvement = trial_cost < best_cost
 
         # decide what to do with this step
         if is_improvement:
-            best_cost = trial_cost
-            best_param = new_params.copy()
+            # update the new best cost
+            best_cost   = trial_cost
+            # save this param set in case we need to go back to it
+            best_params = params.copy()
             if step_type == 'Newton':
                 # this was a Newton step.
                 trust_radius = step_len
@@ -589,15 +635,12 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
                 # Give up the search
                 try_again       = False
                 trust_radius   /= opti_opts.grow_radius
-                params          = best_param
                 step_resolution = 'Worse result after expanding, so accept previous restrained step.'
-                if normalized:
-                    new_params  = old_params * param_typical
-                else:
-                    new_params  = old_params.copy()
+                # reset the params to the best previous results
+                params  = best_params.copy()
                 # Run model
-                (_, innovs_new) = _function_wrapper(opti_opts)
-                num_evals += 1
+                opti_opts.set_param_func(names=names, values=params, **model_args)
+                (_, innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 
             else:
                 # There is still hope. Reduce step size.
@@ -613,34 +656,33 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
                 try_again = True
 
         if log_level >= 5:
-            # Show the user what is going on.
-            print(step_resolution)
-            pass # TODO: write this
+            print(' Tried a {} step of len {} .'.format(step_type, step_len))
+            print(' New trial cost: {}'.format(trial_cost))
+            print(' With result: {}'.format(step_resolution))
 
         if try_again:
             # Reset params to get ready to try new delta_params
-            new_params = old_params.copy()
+            params = orig_params.copy()
 
     # Display status message
-    if num_shrinks >= opti_opts.step_limit:
+    if num_shrinks >= opti_opts.step_limit and log_level >= 8:
         print(' Died on step cuts.')
-        print('Failed to find any step on the dogleg path that was actually an improvement')
+        print(' Failed to find any step on the dogleg path that was actually an improvement')
         print(' before exceeding the step cut limit, which was {}  steps.'.format(opti_opts.step_limit))
-        died_on_step_cuts = True
 
-    return (new_params, new_delta_param, new_innovs, best_cost, num_evals, died_on_step_cuts)
+    return trust_radius
 
 #%% _analyze_results
-def _analyze_results(innovs_final, log_level=10):
+def _analyze_results(bpe_results):
     r"""Analyze the results."""
     # alias the log level
     log_level = Logger().get_level()
     # update the status
     if log_level >= 5:
         print('Analyzing final results.')
-    # build the results
-    bpe_results = BpeResults()
-    return bpe_results
+    if log_level >= 8:
+        print('There were a total of {} function model evaluations.'.format(bpe_results.num_evals))
+    # TODO: analyze stuff (build covariance matrix and info SVD, etc.)
 
 #%% validate_opti_opts
 def validate_opti_opts(opti_opts):
@@ -714,35 +756,40 @@ def run_bpe(opti_opts):
     >>> from dstauffman import run_bpe, OptiOpts #TODO: finish this
 
     """
-    # alias the log level
-    log_level = Logger().get_level()
-
     # check for valid parameters
     validate_opti_opts(opti_opts)
 
     # alias some stuff
-    names = OptiParam.get_names(opti_opts.params)
-    grad_log_det_B = 0 # TODO: calculate somewhere later
+    log_level = Logger().get_level()
+    names     = OptiParam.get_names(opti_opts.params)
+    two_sided = True if opti_opts.slope_method == 'two_sided' else False
+
+    # initialize the output instance
+    bpe_results = BpeResults()
+
+    # create a working copy of the model arguments that can be modified in place while running
+    model_args = deepcopy(opti_opts.model_args)
+
+    # future calculations
     hessian_log_det_b = 0 # TODO: calculate somewhere later
     cosmax = 1 # TODO: calculate somewhere later
 
-    # initialize counters
-    iter_count = 0
-
-    # run the model
+    # run the initial model
     if log_level >= 2:
         print('Running initial simulation.')
-    (_, innovs_start) = _function_wrapper(opti_opts)
-    iter_count += 1
+    (_, innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
+    bpe_results.begin_innovs = innovs.copy()
 
     # initialize costs
-    first_cost = 0.5 * rss(innovs_start, ignore_nans=True)
-    best_cost  = first_cost.copy()
-    print('Best cost: {}'.format(best_cost))
+    best_cost = 0.5 * rss(innovs, ignore_nans=True)
+    bpe_results.costs = [best_cost]
+    if log_level >= 6:
+        print('Best cost: {}'.format(best_cost))
 
     # initialize loop variables
-    old_innovs   = innovs_start.copy()
-    old_params   = opti_opts.get_param_func(names=names, **opti_opts.model_args)
+    iter_count   = 1
+    innovs       = innovs.copy()
+    params       = opti_opts.get_param_func(names=names, **model_args)
     delta_param  = np.zeros(len(names))
     trust_radius = opti_opts.trust_radius
 
@@ -752,16 +799,9 @@ def run_bpe(opti_opts):
         if log_level >= 2:
             print('Running iteration {}.'.format(iter_count))
 
-        # run finite differences code to numerically approximate the Jacobian matrix
-        jacobian = _calculate_jacobian(opti_opts, old_params, old_innovs)
-
-        # calculate the numerical gradient with respect to the estimated parameters
-        gradient = jacobian.T.dot(old_innovs) # TODO: gradient = jacobian.T @ old_innovs
-        if opti_opts.is_max_like:
-            gradient += grad_log_det_B
-
-        # calculate the hessian matrix
-        hessian = jacobian.T.dot(jacobian) # TODO: hessian = jacobian.T @ jacobian
+        # run finite differences code to numerically approximate the Jacobian, gradient and Hessian
+        (jacobian, gradient, hessian) = _finite_differences(opti_opts, model_args, bpe_results, \
+            params, innovs, two_sided=two_sided)
 
         # Check direction of the last step and the gradient. If the old step and the negative new
         # gradient are in the same general direction, then increase the trust radius.
@@ -775,7 +815,7 @@ def run_bpe(opti_opts):
         if opti_opts.is_max_like:
             delta_param = -np.linalg.lstsq(hessian + hessian_log_det_b, gradient)[0]
         else:
-            delta_param = _levenberg_marquardt(jacobian, old_innovs, lambda_=0)
+            delta_param = _levenberg_marquardt(jacobian, innovs, lambda_=0)
 
         # find the step length
         delta_step_len = norm(delta_param)
@@ -787,8 +827,7 @@ def run_bpe(opti_opts):
             break
 
         # search for parameter set that is better than the current set
-        (new_params, delta_param, new_innovs, best_cost, num_evals, died_on_step_cuts) = \
-            _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, \
+        trust_radius = _dogleg_search(opti_opts, model_args, bpe_results, params, delta_param, innovs, jacobian, \
             gradient, hessian, trust_radius, best_cost)
 
         # increment counter
@@ -797,13 +836,19 @@ def run_bpe(opti_opts):
     # Run for final time
     if log_level >= 2:
         print('Running final simulation.')
-    opti_opts.set_param_func(names=names, values=new_params, **opti_opts.model_args)
-    (results, innovs_final) = _function_wrapper(opti_opts)
+    opti_opts.set_param_func(names=names, values=params, **model_args)
+    (results, innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
+    bpe_results.final_innovs = innovs.copy()
 
     # analyze BPE results
-    bpe_results = _analyze_results(innovs_final, log_level=log_level)
+    _analyze_results(bpe_results)
 
     # save results
+    # check that the folder exists
+    folder = os.path.split(opti_opts.output_loc)[0]
+    if not os.path.isdir(folder):
+        # if the folder doesn't exist, then create it
+        setup_dir(folder) # pragma: no cover
     bpe_results.save(opti_opts.output_loc)
 
     return (bpe_results, results)

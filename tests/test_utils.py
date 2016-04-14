@@ -137,6 +137,107 @@ class Test_rms(unittest.TestCase):
         out = dcs.rms(np.array([np.nan, np.nan]), ignore_nans=True)
         self.assertTrue(np.isnan(out))
 
+#%% rss
+class Test_rss(unittest.TestCase):
+    r"""
+    Tests the rss function with these cases:
+        rss on just a scalar input
+        normal rss on vector input
+        rss on vector with axis specified
+        rss on vector with bad axis specified
+        rss on matrix without keeping dimensions, no axis
+        rss on matrix without keeping dimensions, axis 0
+        rss on matrix without keeping dimensions, axis 1
+        rss on matrix with keeping dimensions
+        rss on complex numbers
+        rss on complex numbers that would return a real if done incorrectly
+    """
+    def setUp(self):
+        self.inputs1   = np.array([0, 1, 0, -1])
+        self.outputs1  = 2
+        self.inputs2   = [[0, 1, 0, -1], [1, 1, 1, 1]]
+        self.outputs2a = 6
+        self.outputs2b = np.array([1, 2, 1, 2])
+        self.outputs2c = np.array([2, 4])
+        self.outputs2d = np.matrix([[2], [4]])
+        self.inputs3   = np.hstack((self.inputs1, np.nan))
+        self.inputs4   = [[0, 0, np.nan], [1, np.nan, 1]]
+        self.outputs4a = 2
+        self.outputs4b = np.array([1, 0, 1])
+        self.outputs4c = np.array([0, 2])
+
+    def test_scalar_input(self):
+        out = dcs.rss(-1.5)
+        self.assertEqual(out, 1.5**2)
+
+    def test_empty(self):
+        out = dcs.rss([])
+        self.assertTrue(np.isnan(out))
+
+    def test_rss_series(self):
+        out = dcs.rss(self.inputs1)
+        self.assertAlmostEqual(out, self.outputs1)
+
+    def test_axis_drop1a(self):
+        out = dcs.rss(self.inputs1, axis=0)
+        self.assertAlmostEqual(out, self.outputs1)
+
+    def test_axis_drop1b(self):
+        with self.assertRaises(ValueError):
+            dcs.rss(self.inputs1, axis=1)
+
+    def test_axis_drop2a(self):
+        out = dcs.rss(self.inputs2)
+        self.assertAlmostEqual(out, self.outputs2a)
+
+    def test_axis_drop2b(self):
+        out = dcs.rss(self.inputs2, axis=0, keepdims=False)
+        for (ix, val) in enumerate(out):
+            self.assertAlmostEqual(val, self.outputs2b[ix])
+
+    def test_axis_drop2c(self):
+        out = dcs.rss(self.inputs2, axis=1, keepdims=False)
+        for (ix, val) in enumerate(out):
+            self.assertAlmostEqual(val, self.outputs2c[ix])
+
+    def test_axis_keep(self):
+        out = dcs.rss(self.inputs2, axis=1, keepdims=True)
+        for i in range(0, len(out)):
+            for j in range(0, len(out[i])):
+                self.assertAlmostEqual(out[i, j], self.outputs2d[i, j])
+
+    def test_complex_rss(self):
+        out = dcs.rss(1.5j)
+        self.assertEqual(out, 1.5**2)
+
+    def test_complex_conj(self):
+        out = dcs.rss(np.array([1+1j, 1-1j]))
+        self.assertAlmostEqual(out, 4)
+
+    def test_with_nans(self):
+        out = dcs.rss(self.inputs3, ignore_nans=False)
+        self.assertTrue(np.isnan(out))
+
+    def test_ignore_nans1(self):
+        out = dcs.rss(self.inputs3, ignore_nans=True)
+        self.assertAlmostEqual(out, self.outputs1)
+
+    def test_ignore_nans2(self):
+        out = dcs.rss(self.inputs4, ignore_nans=True)
+        self.assertAlmostEqual(out, self.outputs4a)
+
+    def test_ignore_nans3(self):
+        out = dcs.rss(self.inputs4, ignore_nans=True, axis=0)
+        np.testing.assert_array_almost_equal(out, self.outputs4b)
+
+    def test_ignore_nans4(self):
+        out = dcs.rss(self.inputs4, ignore_nans=True, axis=1)
+        np.testing.assert_array_almost_equal(out, self.outputs4c)
+
+    def test_all_nans(self):
+        out = dcs.rss(np.array([np.nan, np.nan]), ignore_nans=True)
+        self.assertTrue(np.isnan(out))
+
 #%% setup_dir
 class Test_setup_dir(unittest.TestCase):
     r"""

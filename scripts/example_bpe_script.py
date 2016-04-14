@@ -132,6 +132,8 @@ if __name__=='__main__':
     opti_opts.params.append(dcs.OptiParam('frequency', 20, 1, 1000, typical=60))
     opti_opts.params.append(dcs.OptiParam('phase', 180, 0, 360, typical=100))
 
+    opti_opts_copy = copy.deepcopy(opti_opts)
+
     # optional tests
     if False:
         temp1 = sim_model(sim_params)
@@ -174,3 +176,6 @@ if __name__=='__main__':
 
     # make BPE plots
     dcs.plot_bpe_results(bpe_results, opti_opts, opts)
+
+    # check that running didn't change the structures
+    dcs.compare_two_classes(opti_opts.params, opti_opts_copy.params, names=['Model', 'Orig'])
