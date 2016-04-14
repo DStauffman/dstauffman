@@ -454,6 +454,16 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertFalse(is_same)
         self.assertEqual(output, 'c is only in c2.\nd is only in c1.\n"c1" and "c2" are not the same.')
 
+    def test_two_different_lists(self):
+        c1 = [1]
+        c2 = [1]
+        with dcs.capture_output() as (out, _):
+            is_same = dcs.compare_two_classes(c1, c2, ignore_callables=True)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '"c1" and "c2" are the same.')
+        self.assertTrue(is_same)
+
 #%% compare_two_dicts
 class Test_compare_two_dicts(unittest.TestCase):
     r"""
