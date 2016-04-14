@@ -96,7 +96,7 @@ def rms(data, axis=None, keepdims=False, ignore_nans=False):
 
     See Also
     --------
-    numpy.mean, numpy.conj, numpy.sqrt
+    numpy.mean, numpy.nanmean, numpy.conj, numpy.sqrt
 
     Notes
     -----
@@ -122,6 +122,57 @@ def rms(data, axis=None, keepdims=False, ignore_nans=False):
             out = np.nan
         else:
             out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))
+    # return the result
+    return out
+
+#%% Functions - rss
+def rss(data, axis=None, keepdims=False, ignore_nans=False):
+    r"""
+    Calculates the root sum square of a number series
+
+    Parameters
+    ----------
+    data : array_like
+        input data
+    axis : int, optional
+        Axis along which RMS is computed. The default is to compute the RMS of the flattened array.
+    keepdims : bool, optional
+        If true, the axes which are reduced are left in the result as dimensions with size one.
+        With this option, the result will broadcast correctly against the original `data`.
+
+    Returns
+    -------
+    out : ndarray
+        RSS results
+
+    See Also
+    --------
+    numpy.sum, numpy.nansum, numpy.conj
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2016.
+
+    Examples
+    --------
+
+    >>> from dstauffman import rss
+    >>> rss([0, 1, 0., -1])
+    2.0
+
+    """
+    # check for empty data
+    if not np.isscalar(data) and len(data) == 0:
+        return np.nan
+    # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
+    if not ignore_nans:
+        out = np.sum(data * np.conj(data), axis=axis, keepdims=keepdims)
+    else:
+        # check for all NaNs case
+        if np.all(np.isnan(data)):
+            out = np.nan
+        else:
+            out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
     # return the result
     return out
 

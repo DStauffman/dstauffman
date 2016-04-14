@@ -67,6 +67,9 @@ class Test_OptiOpts(unittest.TestCase):
 #%% OptiParams
 pass
 
+#%% BpeResults
+pass
+
 #%% _function_wrapper
 pass
 

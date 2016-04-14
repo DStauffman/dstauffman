@@ -409,6 +409,8 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     >>> plt.close()
 
     """
+    # hard-coded values
+    time_units = 'year' # TODO: make an input
     # check optional inputs
     if opts is None:
         opts = Opts()
@@ -473,7 +475,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
             raise ValueError('Unexpected size for truth_data.')
         plt.axis(limits)
     # add labels and legends
-    plt.xlabel('Time [year]')
+    plt.xlabel('Time [' + time_units + ']')
     plt.ylabel(description + ' [' + units + ']')
     plt.title(this_title)
     plt.legend()

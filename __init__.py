@@ -11,7 +11,8 @@ Notes
 """
 
 #%% Imports
-from .bpe       import Logger, OptiOpts, OptiParam, validate_opti_opts, run_bpe, plot_bpe_results
+from .bpe       import Logger, OptiOpts, OptiParam, BpeResults, validate_opti_opts, run_bpe, \
+                           plot_bpe_results
 from .classes   import frozen, Frozen, Counter
 from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, spyder_custom_colors
 from .enums     import IntEnumPlus, consecutive, dist_enum_and_mons
@@ -30,7 +31,7 @@ from .stats     import convert_annual_to_monthly_probability, \
                            rate_to_prob, month_prob_mult_ratio, \
                            annual_rate_to_monthly_probability, ar2mp, combine_sets, icer
 from .units     import Units, get_factors
-from .utils     import rms, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
+from .utils     import rms, rss, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
                            make_python_init, get_python_definitions, read_text_file, \
                            write_text_file, get_root_dir, get_tests_dir, get_data_dir, \
                            get_images_dir, get_output_dir, capture_output, unit, reload_package, \

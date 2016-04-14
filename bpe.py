@@ -17,7 +17,7 @@ import numpy as np
 from scipy.linalg import norm
 import unittest
 from dstauffman.classes import Frozen
-from dstauffman.utils import rms
+from dstauffman.utils import rss
 
 #%% Logger
 class Logger(Frozen):
@@ -79,11 +79,13 @@ class OptiOpts(Frozen):
         self.cost_args       = None # {}
         self.get_param_func  = None
         self.set_param_func  = None
+        self.output_loc      = ''
         self.params          = None # []
 
         # less common optimization settings
-        self.slope_method    = 'one_sided' # or 'two_sided'
+        self.slope_method    = 'one_sided' # from {'one_sided', 'two_sided'}
         self.is_max_like     = False
+        self.search_method   = 'trust_region' # from {'trust_region', 'levenberg_marquardt'}
         self.max_iters       = 10
         self.tol_cosmax_grad = 1e-4
         self.tol_delta_step  = 1e-20
@@ -130,6 +132,29 @@ class OptiParam(Frozen):
         names = [x.name for x in opti_param]
         return names
 
+#%% BpeResults
+class BpeResults(Frozen):
+    r"""
+    Results of the Batch Parameter Estimator.
+    """
+    def __init__(self):
+        self.field = None
+
+    def save(self, filename=''):
+        r"""Save the BpeResults to disk."""
+        if not filename:
+            return
+        if Logger.get_level() > 2:
+            print('Saving results to: "{}".'.format(filename))
+        pass # TODO: write this
+
+    @classmethod
+    def load(cls, filename=''):
+        r"""Loads the BpeResults from disk."""
+        if not filename:
+            raise ValueError('No file specified to load.')
+        pass # TODO: write this
+
 #%% _function_wrapper
 def _function_wrapper(opti_opts, model_args=None, cost_args=None):
     r"""
@@ -174,6 +199,8 @@ def _calculate_jacobian(opti_opts, old_params, old_innovs, *, two_sided=False, n
     param_signs   = np.sign(old_params)
     param_signs[param_signs == 0] = 1
     names         = OptiParam.get_names(opti_opts.params)
+
+    # TODO: copy the model_args so that it's not modified in place while running
 
     # initialize output
     jacobian = np.zeros((num_innov, num_param), dtype=float)
@@ -354,7 +381,7 @@ def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
     return convergence
 
 #%% _double_dogleg
-def _double_dogleg(delta_param, jacobian, grad_hessian_grad, x_bias, trust_radius):
+def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radius):
     r"""
     Compute a double dog-leg parameter search.
 
@@ -362,7 +389,7 @@ def _double_dogleg(delta_param, jacobian, grad_hessian_grad, x_bias, trust_radiu
     ----------
     delta_param :
         Small change in parameter values
-    jacobian :
+    gradient :
         Gradient of cost function with respect to parameters
     grad_hessian_grad : float
         g'*Hess*g, units of (cost_func)**3/param**4
@@ -388,28 +415,28 @@ def _double_dogleg(delta_param, jacobian, grad_hessian_grad, x_bias, trust_radiu
     >>> from dstauffman.bpe import _double_dogleg
     >>> import numpy as np
     >>> delta_param = np.array([1, 2])
-    >>> jacobian = np.array([[3], [4]])
+    >>> gradient = np.array([[3], [4]])
     >>> grad_hessian_grad = 5
     >>> x_bias = 0.1
     >>> trust_radius = 2
     >>> (new_delta_param, step_len, step_scale, step_type) = _double_dogleg(delta_param, \
-    ...     jacobian, grad_hessian_grad, x_bias, trust_radius)
+    ...     gradient, grad_hessian_grad, x_bias, trust_radius)
 
     """
     # Calculate some norms
     newton_len   = norm(delta_param)
-    gradient_len = norm(jacobian)
+    gradient_len = norm(gradient)
     cauchy_len   = gradient_len**3/grad_hessian_grad
     # relaxed_Newton_point is between the initial point and the Newton point
     # If x_bias = 0, the relaxed point is at the Newton point
-    relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(jacobian.T.dot(delta_param)))
-    # TODO: relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(jacobian.T @ delta_param))
+    relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(gradient.T.dot(delta_param)))
+    # TODO: relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(gradient.T @ delta_param))
 
     # Compute the minimizing point on the dogleg path
     # This point is inside the trust radius and minimizes the linearized least square function
     if newton_len <= trust_radius:
         # Newton step is inside the trust region so take it
-        new_delta_param = delta_param
+        new_delta_param = delta_param.copy()
         step_type       = 'Newton'
         step_scale      = 1
     else:
@@ -423,7 +450,7 @@ def _double_dogleg(delta_param, jacobian, grad_hessian_grad, x_bias, trust_radiu
             # Cauchy step is outside trust region so take gradient step
             step_scale      = trust_radius / cauchy_len
             step_type       = 'gradient'
-            new_delta_param = -(trust_radius / gradient_len)*jacobian
+            new_delta_param = -(trust_radius / gradient_len)*gradient
         else:
             # Take a dogleg step between relaxed Newton and Cauchy steps
             # This will be on a line between the Cauchy point and the relaxed
@@ -432,7 +459,7 @@ def _double_dogleg(delta_param, jacobian, grad_hessian_grad, x_bias, trust_radiu
 
             # Cauchy point is at the predicted minimum of the function along the
             # gradient search direction
-            cauchy_pt             = -cauchy_len / gradient_len*jacobian
+            cauchy_pt             = -cauchy_len / gradient_len*gradient
             new_minus_cau         = relaxed_newton_len * delta_param - cauchy_pt
             cau_dot_new_minus_cau = cauchy_pt.T*new_minus_cau
             cau_len_sq            = cauchy_pt.T*cauchy_pt
@@ -461,15 +488,14 @@ def _double_dogleg(delta_param, jacobian, grad_hessian_grad, x_bias, trust_radiu
 
 #%% _dogleg_search
 def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gradient, hessian, \
-    trust_radius, old_cost, *, \
-    search_method='trust_region', normalized=False, is_max_like=False):
+    trust_radius, old_cost, *, normalized=False):
     r"""
     Searchs for improved parameters for nonlinear least square or maximum likelihood function, using
     a trust radius search path.
 
     """
     # process inputs
-    search_method = search_method.lower().replace(' ', '_')
+    search_method = opti_opts.search_method.lower().replace(' ', '_')
 
     # alias the log level
     log_level = Logger().get_level()
@@ -488,7 +514,7 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
 
     new_params = old_params.copy()
 
-    best_cost = old_cost
+    best_cost = old_cost.copy()
 
     grad_hessian_grad = gradient.T.dot(hessian.dot(gradient)) # TODO: grad_hessian_grad = gradient.T @ hessian @ gradient
     param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
@@ -500,7 +526,7 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
         # compute restrained trial parameter step
         if search_method == 'trust_region':
             (new_delta_param, step_len, step_scale, step_type) = _double_dogleg(delta_param, \
-                jacobian, grad_hessian_grad, opti_opts.x_bias, trust_radius)
+                gradient, grad_hessian_grad, opti_opts.x_bias, trust_radius)
 
         elif search_method == 'levenberg_marquardt':
             new_delta_param = _levenberg_marquardt(jacobian, old_innovs, lambda_=1/trust_radius)
@@ -515,7 +541,7 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
         pred_func_change = _predict_func_change(new_delta_param, gradient, hessian)
 
         # set new parameter values
-        new_params += delta_param
+        new_params += new_delta_param
 
         # evaluate the cost function at the new parameter values
         if normalized:
@@ -524,11 +550,12 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
         # Run model
         (_, new_innovs) = _function_wrapper(opti_opts)
 
-        sum_sq_innov = np.sum(new_innovs**2)
-        if is_max_like:
-            trial_cost = 0.5*(sum_sq_innov + log_det_B)
+        sum_sq_innov = rss(new_innovs, ignore_nans=True)
+        if opti_opts.is_max_like:
+            trial_cost = 0.5*(sum_sq_innov + log_det_B) # TODO: match to RMS instead of RSS?
         else:
-            trial_cost = 0.5*sum_sq_innov
+            trial_cost = 0.5 * sum_sq_innov
+        print('New trial cost: {}'.format(trial_cost))
 
         num_evals += 1
 
@@ -587,6 +614,7 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
 
         if log_level >= 5:
             # Show the user what is going on.
+            print(step_resolution)
             pass # TODO: write this
 
         if try_again:
@@ -600,7 +628,7 @@ def _dogleg_search(opti_opts, old_params, delta_param, old_innovs, jacobian, gra
         print(' before exceeding the step cut limit, which was {}  steps.'.format(opti_opts.step_limit))
         died_on_step_cuts = True
 
-    return (new_params, delta_param, new_innovs, best_cost, num_evals, died_on_step_cuts)
+    return (new_params, new_delta_param, new_innovs, best_cost, num_evals, died_on_step_cuts)
 
 #%% _analyze_results
 def _analyze_results(innovs_final, log_level=10):
@@ -611,7 +639,7 @@ def _analyze_results(innovs_final, log_level=10):
     if log_level >= 5:
         print('Analyzing final results.')
     # build the results
-    bpe_results = {}
+    bpe_results = BpeResults()
     return bpe_results
 
 #%% validate_opti_opts
@@ -649,10 +677,12 @@ def validate_opti_opts(opti_opts):
     assert isinstance(opti_opts.cost_args, dict)
     assert callable(opti_opts.get_param_func)
     assert callable(opti_opts.set_param_func)
-    # Must be one of these two slope methods
-    assert opti_opts.slope_method in {'one_sided', 'two_sided'}
     # Must estimate at least one parameter (TODO: make work with zero?)
     assert isinstance(opti_opts.params, list) and len(opti_opts.params) > 0
+    # Must be one of these two slope methods
+    assert opti_opts.slope_method in {'one_sided', 'two_sided'}
+    # Must be one of these two seach methods
+    assert opti_opts.search_method in {'trust_region', 'levenberg_marquardt'}
     # Return True to signify that everything validated correctly
     return True
 
@@ -706,8 +736,9 @@ def run_bpe(opti_opts):
     iter_count += 1
 
     # initialize costs
-    first_cost = 0.5 * rms(innovs_start**2, ignore_nans=True)
-    best_cost  = first_cost
+    first_cost = 0.5 * rss(innovs_start, ignore_nans=True)
+    best_cost  = first_cost.copy()
+    print('Best cost: {}'.format(best_cost))
 
     # initialize loop variables
     old_innovs   = innovs_start.copy()
@@ -766,15 +797,19 @@ def run_bpe(opti_opts):
     # Run for final time
     if log_level >= 2:
         print('Running final simulation.')
+    opti_opts.set_param_func(names=names, values=new_params, **opti_opts.model_args)
     (results, innovs_final) = _function_wrapper(opti_opts)
 
     # analyze BPE results
     bpe_results = _analyze_results(innovs_final, log_level=log_level)
 
+    # save results
+    bpe_results.save(opti_opts.output_loc)
+
     return (bpe_results, results)
 
 #%% plot_bpe_results
-def plot_bpe_results(batch, param, opts):
+def plot_bpe_results(bpe_results, opti_opts, opts):
     r"""
     Plots the results of estimation.
     """
