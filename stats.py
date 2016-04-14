@@ -156,14 +156,14 @@ def rate_to_prob(rate, time=1):
     Parameters
     ----------
     rate : numpy.ndarray
-        Equivalent annual rate for the given time
+        Annual rate for the given time
     time : float
         Time period for the desired probability to be calculated from, in years
 
     Returns
     -------
     prob : numpy.ndarray
-        Probability of event happening over the given time
+        Equivalent probability of event happening over the given time
 
     Notes
     -----
