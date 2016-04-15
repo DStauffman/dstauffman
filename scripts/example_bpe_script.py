@@ -24,6 +24,14 @@ class SimParams(dcs.Frozen):
         self.frequency = frequency
         self.phase     = phase
 
+    def __eq__(self, other):
+        if type(other) != type(self):
+            return False
+        for key in vars(self):
+            if np.any(getattr(self, key) != getattr(other, key)):
+                return False
+        return True
+
 #%% Functions - _get_truth_index
 def _get_truth_index(results_time, truth_time):
     r"""
@@ -178,4 +186,4 @@ if __name__=='__main__':
     dcs.plot_bpe_results(bpe_results, opti_opts, opts)
 
     # check that running didn't change the structures
-    dcs.compare_two_classes(opti_opts.params, opti_opts_copy.params, names=['Model', 'Orig'])
+    dcs.compare_two_classes(opti_opts, opti_opts_copy, names=['Model', 'Orig'])

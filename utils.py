@@ -68,7 +68,7 @@ def _nan_equal(a, b):
     is_same = True
     try:
         # use numpy testing module to assert that they are equal (ignores NaNs)
-        np.testing.assert_equal(a, b)
+        np.testing.assert_array_equal(a, b)
     except AssertionError:
         # if assertion fails, then they are not equal
         is_same = False
@@ -280,7 +280,7 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
     def _is_function(obj):
         r"""Determines whether the object is a function or not."""
         # need second part for Python compatibility for v2.7, which distinguishes unbound methods from functions.
-        return inspect.isfunction(obj) or inspect.ismethod(obj)
+        return inspect.isfunction(obj) or inspect.ismethod(obj) or inspect.isbuiltin(obj)
     def _is_class_instance(obj):
         r"""Determines whether the object is an instance of a class or not."""
         return hasattr(obj, '__dict__') and not _is_function(obj) # and hasattr(obj, '__call__')
@@ -328,7 +328,9 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
                     is_same = _not_true_print()
                     continue
             # if any differences, then this test fails
-            if np.logical_not(_nan_equal(getattr(c1, this_attr), getattr(c2, this_attr))):
+            if isinstance(attr1, dict) and isinstance(attr2, dict):
+                is_same = compare_two_dicts(attr1, attr2, suppress_output=True)
+            elif np.logical_not(_nan_equal(attr1, attr2)):
                 is_same = _not_true_print()
         # find the attributes in one but not the other, if any, then this test fails
         diff = attrs1 ^ attrs2
@@ -396,7 +398,7 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
         same = set(d1.keys()) & set(d2.keys())
         for key in sorted(same):
             # if any differences, then this test fails
-            if np.any((d1[key] != d2[key]) ^ (np.isnan(d1[key]) & np.isnan(d2[key]))):
+            if np.logical_not(_nan_equal(d1[key], d2[key])):
                 is_same = False
                 if not suppress_output:
                     print(key + ' is different.')

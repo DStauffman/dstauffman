@@ -100,6 +100,14 @@ class OptiOpts(Frozen):
         self.shrink_radius   = 0.5
         self.trust_radius    = 1.0
 
+    def __eq__(self, other):
+        if type(other) != type(self):
+            return False
+        for key in vars(self):
+            if getattr(self, key) != getattr(other, key):
+                return False
+        return True
+
 #%% OptiParam
 class OptiParam(Frozen):
     r"""
@@ -111,6 +119,14 @@ class OptiParam(Frozen):
         self.min_ = min_
         self.max_ = max_
         self.typical = typical
+
+    def __eq__(self, other):
+        if type(other) != type(self):
+            return False
+        for key in vars(self):
+            if getattr(self, key) != getattr(other, key):
+                return False
+        return True
 
     @staticmethod
     def get_array(opti_param, type_='best'):
