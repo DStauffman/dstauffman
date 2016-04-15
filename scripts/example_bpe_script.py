@@ -109,7 +109,7 @@ if __name__=='__main__':
     truth_data = truth(truth_time)
 
     # Logger
-    dcs.Logger().set_level(5)
+    dcs.Logger().set_level(10)
 
     # BPE Settings
     opti_opts = dcs.OptiOpts()
@@ -125,10 +125,10 @@ if __name__=='__main__':
     # less common optimization settings
     opti_opts.slope_method    = 'one_sided' # or 'two_sided'
     opti_opts.is_max_like     = False
-    opti_opts.max_iters       = 2
+    opti_opts.max_iters       = 10
     opti_opts.tol_cosmax_grad = 1e-4
-    opti_opts.tol_delta_step  = 1e-20
-    opti_opts.tol_delta_cost  = 1e-20
+    opti_opts.tol_delta_step  = 1e-8
+    opti_opts.tol_delta_cost  = 1e-10
     opti_opts.step_limit      = 5
     opti_opts.x_bias          = 0.8
     opti_opts.grow_radius     = 2
@@ -171,6 +171,9 @@ if __name__=='__main__':
         bpe_results = dcs.BpeResults.load(filename)
         results     = sim_model(sim_params) # just re-run, nothing is actually saved by this model
 
+    # check that running didn't change the structures
+    dcs.compare_two_classes(opti_opts, opti_opts_copy, names=['Model', 'Orig'])
+
     # Plot results
     # build opts
     opts           = dcs.Opts()
@@ -183,7 +186,5 @@ if __name__=='__main__':
         truth_time=truth_time, truth_data=truth_data)
 
     # make BPE plots
-    dcs.plot_bpe_results(bpe_results, opti_opts, opts)
-
-    # check that running didn't change the structures
-    dcs.compare_two_classes(opti_opts, opti_opts_copy, names=['Model', 'Orig'])
+    plots = {'innovs': True}
+    dcs.plot_bpe_results(bpe_results, opti_opts, opts, plots=plots)

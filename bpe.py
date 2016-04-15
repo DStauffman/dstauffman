@@ -21,6 +21,7 @@ import pickle
 from scipy.linalg import norm
 import unittest
 from dstauffman.classes import Frozen
+from dstauffman.plotting import Opts, plot_correlation_matrix, plot_multiline_history
 from dstauffman.utils import rss, setup_dir
 
 #%% Logger
@@ -165,8 +166,9 @@ class BpeResults(Frozen):
         self.params       = None
         self.costs        = None
         self.step_info    = None
-        self.covariance   = None
+        self.correlation  = None
         self.info_svd     = None
+        self.covariance   = None
         self.final_params = None
 
     def save(self, filename='', use_hdf5=True):
@@ -206,11 +208,22 @@ class BpeResults(Frozen):
             # Version 2 (HDF5):
             out = cls()
             with h5py.File(filename, 'r') as file:
-                for key in sorted(file.keys()):
+                for key in file.keys():
                     grp = file[key]
-                    for (ix, field) in enumerate(sorted(grp.keys())):
+                    for field in grp.keys():
                         setattr(out, field, grp[field].value)
         return out
+
+#%% _print_divider
+def _print_divider(new_line=True):
+    r"""
+    Prints some characters to the std out to break apart the different stpes within the model.
+    """
+    text = '\n******************************'
+    if new_line:
+        print(text)
+    else:
+        print(text[1:])
 
 #%% _function_wrapper
 def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
@@ -524,11 +537,11 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
 
             # Cauchy point is at the predicted minimum of the function along the
             # gradient search direction
-            cauchy_pt             = -cauchy_len / gradient_len*gradient
+            cauchy_pt             = -cauchy_len / gradient_len * gradient
             new_minus_cau         = relaxed_newton_len * delta_param - cauchy_pt
-            cau_dot_new_minus_cau = cauchy_pt.T*new_minus_cau
-            cau_len_sq            = cauchy_pt.T*cauchy_pt
-            new_minus_cau_len_sq  = new_minus_cau.T*new_minus_cau
+            cau_dot_new_minus_cau = cauchy_pt.T.dot(new_minus_cau)
+            cau_len_sq            = cauchy_pt.T.dot(cauchy_pt)
+            new_minus_cau_len_sq  = new_minus_cau.T.dot(new_minus_cau)
             tr_sq_minus_cau_sq    = trust_radius**2 - cau_len_sq
             discr                 = np.sqrt(cau_dot_new_minus_cau**2 + \
                 new_minus_cau_len_sq*tr_sq_minus_cau_sq)
@@ -557,7 +570,6 @@ def _dogleg_search(opti_opts, model_args, bpe_results, params, delta_param, inno
     r"""
     Searchs for improved parameters for nonlinear least square or maximum likelihood function, using
     a trust radius search path.
-
     """
     # process inputs
     search_method = opti_opts.search_method.lower().replace(' ', '_')
@@ -671,8 +683,8 @@ def _dogleg_search(opti_opts, model_args, bpe_results, params, delta_param, inno
                 num_shrinks += 1
                 try_again = True
 
-        if log_level >= 5:
-            print(' Tried a {} step of len {} .'.format(step_type, step_len))
+        if log_level >= 8:
+            print(' Tried a {} step of length: {}.'.format(step_type, step_len))
             print(' New trial cost: {}'.format(trial_cost))
             print(' With result: {}'.format(step_resolution))
 
@@ -681,10 +693,12 @@ def _dogleg_search(opti_opts, model_args, bpe_results, params, delta_param, inno
             params = orig_params.copy()
 
     # Display status message
-    if num_shrinks >= opti_opts.step_limit and log_level >= 8:
+    if log_level >= 8 and num_shrinks >= opti_opts.step_limit:
         print(' Died on step cuts.')
         print(' Failed to find any step on the dogleg path that was actually an improvement')
         print(' before exceeding the step cut limit, which was {}  steps.'.format(opti_opts.step_limit))
+    if log_level >= 5:
+        print(' New parameters are: {}'.format(params))
 
     return trust_radius
 
@@ -727,6 +741,7 @@ def validate_opti_opts(opti_opts):
     log_level = Logger().get_level()
     # display some information
     if log_level >= 5:
+        _print_divider(new_line=False)
         print('Validating optimization options.')
     # Must have specified all parameters
     assert callable(opti_opts.model_func)
@@ -792,6 +807,8 @@ def run_bpe(opti_opts):
 
     # run the initial model
     if log_level >= 2:
+        new_line = log_level > 5
+        _print_divider(new_line)
         print('Running initial simulation.')
     (_, innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
     bpe_results.begin_innovs = innovs.copy()
@@ -799,8 +816,6 @@ def run_bpe(opti_opts):
     # initialize costs
     best_cost = 0.5 * rss(innovs, ignore_nans=True)
     bpe_results.costs = [best_cost]
-    if log_level >= 6:
-        print('Best cost: {}'.format(best_cost))
 
     # initialize loop variables
     iter_count   = 1
@@ -809,11 +824,20 @@ def run_bpe(opti_opts):
     delta_param  = np.zeros(len(names))
     trust_radius = opti_opts.trust_radius
 
+    # display initial status
+    if log_level >= 6:
+        print(' Initial parameters: {}'.format(params))
+        print(' Initial cost: {}'.format(best_cost))
+
     # Do some stuff
     while iter_count <= opti_opts.max_iters:
         # update status
         if log_level >= 2:
+            _print_divider()
             print('Running iteration {}.'.format(iter_count))
+
+        # update the parameters based on the latest delta
+        params += delta_param
 
         # run finite differences code to numerically approximate the Jacobian, gradient and Hessian
         (jacobian, gradient, hessian) = _finite_differences(opti_opts, model_args, bpe_results, \
@@ -849,12 +873,19 @@ def run_bpe(opti_opts):
         # increment counter
         iter_count += 1
 
-    # Run for final time
+    # Run for final time # TODO: is this not already run after the doglegsearch or does convergence mean something else ran?
     if log_level >= 2:
+        _print_divider()
         print('Running final simulation.')
     opti_opts.set_param_func(names=names, values=params, **model_args)
     (results, innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
     bpe_results.final_innovs = innovs.copy()
+    final_cost = 0.5 * rss(innovs, ignore_nans=True)
+
+    # display final status
+    if log_level >= 6:
+        print(' Final parameters: {}'.format(params))
+        print(' Final cost: {}'.format(final_cost))
 
     # analyze BPE results
     _analyze_results(bpe_results)
@@ -870,11 +901,63 @@ def run_bpe(opti_opts):
     return (bpe_results, results)
 
 #%% plot_bpe_results
-def plot_bpe_results(bpe_results, opti_opts, opts):
+def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
     r"""
     Plots the results of estimation.
     """
-    pass
+    # get the logging level
+    log_level = Logger.get_level()
+
+    # defaults for which plots to make
+    default_plots = {'innovs': True, 'convergence': False, 'correlation': True, 'info_svd': True, \
+        'covariance': False}
+
+    # check for optional variables
+    if opts is None:
+        opts = Opts()
+    if plots is None:
+        plots = default_plots
+    else:
+        # check for unexpected keys
+        for key in plots:
+            if key not in default_plots:
+                raise ValueError('Unexpected plotting option: "{}".'.format(key))
+        # start with the defaults, and then overlay any specified inputs
+        for key in default_plots:
+            if key not in plots:
+                plots[key] = default_plots[key]
+
+    # alias the names
+    names = OptiParam.get_names(opti_opts.params)
+
+    # time based plots
+    if plots['innovs']:
+        if bpe_results.begin_innovs is not None and bpe_results.final_innovs is not None:
+            time = np.arange(len(bpe_results.begin_innovs))
+            data = np.vstack((bpe_results.begin_innovs, bpe_results.final_innovs)).T
+            plot_multiline_history(time, data, label='Innovs Before and After', opts=opts, colormap='bwr_r', \
+                legend=['Before', 'After'])
+        elif log_level >= 2:
+            print("Data isn't available for Innovations plot.")
+    if plots['convergence']:
+        pass # TODO: plot the bpe_results.params and bpe_results.costs vs bpe_results.num_iters and bpe_results.step_info
+
+    # matrix based plots
+    matrix_keys    = ['correlation',   'info_svd',      'covariance']
+    plotting_names = ['Correlation', 'Information SVD', 'Covariance']
+    for (this_key, this_name) in zip(matrix_keys, plotting_names):
+        # loop through and potentially make each plotting type
+        if plots[this_key]:
+            # get the data for this key
+            data = getattr(bpe_results, this_key)
+            # check that data exists, and if not, continue to next key
+            if data is None:
+                if log_level >= 2:
+                    print("Data isn't available for {} plot.".format(this_name))
+                continue
+            # plot the matrix
+            plot_correlation_matrix(data, labels=names, opts=opts, matrix_name=this_name + ' Matrix', \
+                cmin=0, cmax=1, colormap='cool', plot_lower_only=True, label_values=False)
 
 #%% Unit test
 if __name__ == '__main__':
