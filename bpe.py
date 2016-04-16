@@ -703,16 +703,56 @@ def _dogleg_search(opti_opts, model_args, bpe_results, params, delta_param, inno
     return trust_radius
 
 #%% _analyze_results
-def _analyze_results(bpe_results):
+def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     r"""Analyze the results."""
     # alias the log level
     log_level = Logger().get_level()
+
+    # get the typical param values, names and number of parameters
+    param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
+    names         = OptiParam.get_names(opti_opts.params)
+    num_params    = len(names)
+
     # update the status
     if log_level >= 5:
         print('Analyzing final results.')
     if log_level >= 8:
         print('There were a total of {} function model evaluations.'.format(bpe_results.num_evals))
-    # TODO: analyze stuff (build covariance matrix and info SVD, etc.)
+
+    # Compute values of un-normalized parameters.
+    if normalized:
+        normalize_matrix  = np.eye(num_params).dot(1 / param_typical)
+    else:
+        normalize_matrix  = np.eye(num_params)
+
+    # Make information, covariance matrix, compute Singular Value Decomposition (SVD).
+    try:
+        # note, python has x = U*S*Vh instead of U*S*V', when V = Vh'
+        (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian.dot(normalize_matrix), full_matrices=False)
+        V_jacobian = Vh_jacobian.T
+        covariance = V_jacobian.dot(np.diag(S_jacobian**-2).dot(Vh_jacobian))
+    except MemoryError:
+        if log_level >= 6:
+            print('Singular value decomposition of Jacobian failed.')
+        V_jacobian = np.nan * np.ones((num_params, num_params))
+        covariance = np.inv(jacobian.T.dot(jacobian))
+
+    param_one_sigmas = np.sqrt(np.diag(covariance))
+    correlation    = covariance / (param_one_sigmas[:, np.newaxis].dot(param_one_sigmas[np.newaxis, :]))
+
+    # Update SVD and covariance for the normalized parameters (but correlation remains as calculated above)
+    if normalized:
+        try:
+            (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian, full_matrices=False)
+            V_jacobian = Vh_jacobian.T
+            covariance = V_jacobian.dot(np.diag(S_jacobian**-2).dot(Vh_jacobian))
+        except MemoryError:
+            pass # caught in earlier exception (hopefully?)
+
+    # update the results
+    bpe_results.correlation  = correlation
+    bpe_results.info_svd     = V_jacobian.T
+    bpe_results.covariance   = covariance
 
 #%% validate_opti_opts
 def validate_opti_opts(opti_opts):
@@ -888,7 +928,7 @@ def run_bpe(opti_opts):
         print(' Final cost: {}'.format(final_cost))
 
     # analyze BPE results
-    _analyze_results(bpe_results)
+    _analyze_results(opti_opts, bpe_results, jacobian)
 
     # save results
     # check that the folder exists
@@ -905,6 +945,9 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
     r"""
     Plots the results of estimation.
     """
+    # hard-coded options
+    colormap = 'cool'
+    label_values = False
     # get the logging level
     log_level = Logger.get_level()
 
@@ -942,22 +985,29 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
     if plots['convergence']:
         pass # TODO: plot the bpe_results.params and bpe_results.costs vs bpe_results.num_iters and bpe_results.step_info
 
-    # matrix based plots
-    matrix_keys    = ['correlation',   'info_svd',      'covariance']
-    plotting_names = ['Correlation', 'Information SVD', 'Covariance']
-    for (this_key, this_name) in zip(matrix_keys, plotting_names):
-        # loop through and potentially make each plotting type
-        if plots[this_key]:
-            # get the data for this key
-            data = getattr(bpe_results, this_key)
-            # check that data exists, and if not, continue to next key
-            if data is None:
-                if log_level >= 2:
-                    print("Data isn't available for {} plot.".format(this_name))
-                continue
-            # plot the matrix
-            plot_correlation_matrix(data, labels=names, opts=opts, matrix_name=this_name + ' Matrix', \
-                cmin=0, cmax=1, colormap='cool', plot_lower_only=True, label_values=False)
+    if plots['correlation']:
+        if bpe_results.correlation is None:
+            print("Data isn't avaliable for correlation plot.")
+        else:
+            plot_correlation_matrix(bpe_results.correlation, labels=names, opts=opts, \
+                matrix_name='Correlation Matrix', cmin=-1, colormap=colormap, plot_lower_only=True, \
+                label_values=label_values)
+
+    if plots['info_svd']:
+        if bpe_results.info_svd is None:
+            print("Data isn't avaliable for infomation SVD plot.")
+        else:
+            plot_correlation_matrix(np.abs(bpe_results.info_svd), opts=opts, cmin=0, \
+                matrix_name='Information SVD Matrix', colormap=colormap, label_values=label_values, \
+                labels=[['{}'.format(i+1) for i in range(len(names))], names])
+
+    if plots['covariance']:
+        if bpe_results.covariance is None:
+            print("Data isn't avaliable for covariance plot.")
+        else:
+            plot_correlation_matrix(bpe_results.covariance, labels=names, opts=opts, \
+                matrix_name='Covariance Matrix', cmin=-1, colormap=colormap, plot_lower_only=True, \
+                label_values=label_values)
 
 #%% Unit test
 if __name__ == '__main__':
