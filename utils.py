@@ -329,7 +329,7 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
                     continue
             # if any differences, then this test fails
             if isinstance(attr1, dict) and isinstance(attr2, dict):
-                is_same = compare_two_dicts(attr1, attr2, suppress_output=True)
+                is_same = compare_two_dicts(attr1, attr2, suppress_output=True) and is_same
             elif np.logical_not(_nan_equal(attr1, attr2)):
                 is_same = _not_true_print()
         # find the attributes in one but not the other, if any, then this test fails
