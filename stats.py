@@ -272,8 +272,47 @@ def annual_rate_to_monthly_probability(rate):
     prob = rate_to_prob(rate/MONTHS_PER_YEAR)
     return prob
 
+#%% Functions - monthly_probability_to_annual_rate
+def monthly_probability_to_annual_rate(prob):
+    r"""
+    Converts a given monthly probability to an annual rate.
+
+    Parameters
+    ----------
+    prob : numpy.ndarray
+        Monthly probability
+
+    Returns
+    -------
+    rate : numpy.ndarray
+        Equivalent annual rate
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2016.
+
+    See Also
+    --------
+    prob_to_rate
+
+    Examples
+    --------
+
+    >>> from dstauffman import monthly_probability_to_annual_rate
+    >>> import numpy as np
+    >>> prob = np.array([0, 0.5, 1, 5, np.inf])
+    >>> rate = monthly_probability_to_annual_rate(prob)
+    >>> print(prob) # doctest: +NORMALIZE_WHITESPACE
+    [ 0. 0.04081054 0.07995559 0.34075937 1. ]
+
+    """
+    # divide rate and calculate probability
+    rate = prob_to_rate(prob, time=1/MONTHS_PER_YEAR)
+    return rate
+
 #%% Functions - ar2mp
 ar2mp = annual_rate_to_monthly_probability
+mp2ar = monthly_probability_to_annual_rate
 
 #%% Functions - combine_sets
 def combine_sets(n1, u1, s1, n2, u2, s2):
