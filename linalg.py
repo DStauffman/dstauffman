@@ -38,7 +38,6 @@ def orth(A):
     Examples
     --------
 
-    >>> from dstauffman.bpe import orth
     >>> import numpy as np
 
     Full rank matrix
@@ -105,7 +104,6 @@ def subspace(A, B):
     Examples
     --------
 
-    >>> from dstauffman.bpe import subspace
     >>> import numpy as np
     >>> A = np.array([[1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1], [1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1]])
     >>> B = np.array([[1, 1, 1, 1], [1, -1, 1, -1],[1, 1, -1, -1], [1, -1, -1, 1], [-1, -1, -1, -1], \
