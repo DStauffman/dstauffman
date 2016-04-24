@@ -594,11 +594,14 @@ def read_text_file(filename):
     >>> from dstauffman import read_text_file, write_text_file, get_tests_dir
     >>> import os
     >>> text = 'Hello, World\n'
-    >>> write_text_file(os.path.join(get_tests_dir(), 'temp_file.txt'), text)
+    >>> filename = os.path.join(get_tests_dir(), 'temp_file.txt')
+    >>> write_text_file(filename, text)
     >>> text2 = read_text_file(os.path.join(get_tests_dir(), 'temp_file.txt'))
     >>> print(text2)
     Hello, World
     <BLANKLINE>
+
+    >>> os.remove(filename)
 
     """
     try:
@@ -640,7 +643,10 @@ def write_text_file(filename, text):
     >>> from dstauffman import write_text_file, get_tests_dir
     >>> import os
     >>> text = 'Hello, World\n'
-    >>> write_text_file(os.path.join(get_tests_dir(), 'temp_file.txt'), text)
+    >>> filename = os.path.join(get_tests_dir(), 'temp_file.txt')
+    >>> write_text_file(filename, text)
+
+    >>> os.remove(filename)
 
     """
     try:

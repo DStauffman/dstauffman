@@ -300,10 +300,10 @@ def monthly_probability_to_annual_rate(prob):
 
     >>> from dstauffman import monthly_probability_to_annual_rate
     >>> import numpy as np
-    >>> prob = np.array([0, 0.5, 1, 5, np.inf])
+    >>> prob = np.array([0, 0.04081054, 0.07995559, 0.34075937, 1])
     >>> rate = monthly_probability_to_annual_rate(prob)
-    >>> print(prob) # doctest: +NORMALIZE_WHITESPACE
-    [ 0. 0.04081054 0.07995559 0.34075937 1. ]
+    >>> print(' '.join(('{:.2f}'.format(x) for x in rate))) # doctest: +NORMALIZE_WHITESPACE
+    -0.00 0.50 1.00 5.00 inf
 
     """
     # divide rate and calculate probability

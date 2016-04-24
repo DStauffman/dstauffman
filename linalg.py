@@ -38,6 +38,7 @@ def orth(A):
     Examples
     --------
 
+    >>> from dstauffman import orth
     >>> import numpy as np
 
     Full rank matrix
@@ -104,12 +105,13 @@ def subspace(A, B):
     Examples
     --------
 
+    >>> from dstauffman import subspace
     >>> import numpy as np
     >>> A = np.array([[1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1], [1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1]])
     >>> B = np.array([[1, 1, 1, 1], [1, -1, 1, -1],[1, 1, -1, -1], [1, -1, -1, 1], [-1, -1, -1, -1], \
     ...     [-1, 1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, -1]])
     >>> theta = subspace(A, B)
-    >>> print(theta)
+    >>> print('{:.4f}'.format(theta))
     1.5708
 
     """
