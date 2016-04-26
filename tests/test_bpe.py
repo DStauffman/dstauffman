@@ -154,9 +154,8 @@ class Test_validate_opti_opts(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        self.opti_opts           = dcs.OptiOpts()
-        # TODO: set log level
-        self.opti_opts.params    = [dcs.OptiParam('param.life.age_calibration', 1.0, 0, 10.)]
+        self.opti_opts        = dcs.OptiOpts()
+        self.opti_opts.params = [dcs.OptiParam("param[:].tb.tb_new_inf['beta']", 0.1375, 0.1, 0.2, typical=0.14)]
 
     def test_nominal(self):
         with dcs.capture_output() as (out, _):

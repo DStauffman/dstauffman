@@ -769,7 +769,7 @@ def validate_opti_opts(opti_opts):
 
     >>> from dstauffman import OptiOpts, OptiParam, validate_opti_opts
     >>> opti_opts = OptiOpts()
-    >>> opti_opts.params = [OptiParam('param.life.age_calibration', 1.0, 0., 10.)]
+    >>> opti_opts.params = [OptiParam("param[:].tb.tb_new_inf['beta']", 0.1375, 0.1, 0.2, typical=0.14)]
     >>> #is_valid = validate_opti_opts(opti_opts) # TODO: fix this
     Validating optimization options.
 
@@ -912,6 +912,10 @@ def run_bpe(opti_opts):
 
         # increment counter
         iter_count += 1
+
+    # display if this converged out timed out on iteration steps
+    if log_level >= 6 and not convergence:
+        print('Stopped iterating due to hitting the max number of iterations: {}.'.format(opti_opts.max_iters))
 
     # Run for final time # TODO: is this not already run after the doglegsearch or does convergence mean something else ran?
     if log_level >= 2:

@@ -127,8 +127,8 @@ if __name__=='__main__':
     opti_opts.is_max_like     = False
     opti_opts.max_iters       = 10
     opti_opts.tol_cosmax_grad = 1e-4
-    opti_opts.tol_delta_step  = 1e-8
-    opti_opts.tol_delta_cost  = 1e-10
+    opti_opts.tol_delta_step  = 1e-7
+    opti_opts.tol_delta_cost  = 1e-8
     opti_opts.step_limit      = 5
     opti_opts.x_bias          = 0.8
     opti_opts.grow_radius     = 2
