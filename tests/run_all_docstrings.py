@@ -18,11 +18,12 @@ verbose = False
 #%% Execution
 if __name__ == '__main__':
     folder = dcs.get_root_dir()
-    files  = ['bpe', 'classes', 'constants', 'enums', 'linalg', 'photos', 'plotting', 'quat', 'stats', 'units', 'utils']
-    for file in files:
+    all_files = os.listdir(folder)
+    pyfiles = [f for f in all_files if f.endswith('.py') and not f.startswith('__init__')]
+    for file in pyfiles:
         if verbose:
             print('')
             print('******************************')
             print('******************************')
-            print('Testing ' + file + '.py:')
-        doctest.testfile(os.path.join(folder, file+'.py'), report=True, verbose=verbose, module_relative=True)
+            print('Testing ' + file + ':')
+        doctest.testfile(os.path.join(folder, file), report=True, verbose=verbose, module_relative=True)
