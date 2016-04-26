@@ -61,14 +61,14 @@ elif mode == 'test':
     # run the docstrings
     verbose = False
     folder = score.get_root_dir()
-    files = ['scoring']
+    files  = [f for f in os.listdir(folder) if f.endswith('.py') and not f.startswith('__')]
     for file in files:
         if verbose:
             print('')
             print('******************************')
             print('******************************')
-            print('Testing ' + file + '.py:')
-        doctest.testfile(os.path.join(folder, file+'.py'), report=True, verbose=verbose, module_relative=True)
+            print('Testing "{}":'.format(file))
+        doctest.testfile(os.path.join(folder, file), report=True, verbose=verbose, module_relative=True)
 elif mode == 'null':
     pass
 else:
