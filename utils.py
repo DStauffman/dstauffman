@@ -208,6 +208,9 @@ def setup_dir(folder, rec=False):
     >>> setup_dir(r'C:\Temp\test_folder') # doctest: +SKIP
 
     """
+    # check for an empty string and exit
+    if not folder:
+        return
     if os.path.isdir(folder):
         # Loop through the contained files/folders
         for this_elem in os.listdir(folder):

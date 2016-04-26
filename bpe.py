@@ -933,7 +933,7 @@ def run_bpe(opti_opts):
     # save results
     # check that the folder exists
     folder = os.path.split(opti_opts.output_loc)[0]
-    if not os.path.isdir(folder):
+    if folder and not os.path.isdir(folder):
         # if the folder doesn't exist, then create it
         setup_dir(folder) # pragma: no cover
     bpe_results.save(opti_opts.output_loc)
