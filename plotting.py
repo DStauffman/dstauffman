@@ -391,6 +391,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     -----
     #.  Written by David C. Stauffer in March 2015.
     #.  Updated by David C. Stauffer in December 2015 to include an optional secondary Y axis.
+    #.  If ndim == 2, then dimension 0 is time and dimension 1 is the number of runs.
 
     Examples
     --------
@@ -421,7 +422,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
 
     if plot_as_diffs:
         # calculate RMS
-        rms_data = rms(scale*data, axis=1, ignore_nans=True)
+        rms_data = rms(scale*data, axis=0, ignore_nans=True)
         # build colormap
         cm = ColorMap(colormap, num_colors=data.shape[1])
     else:
