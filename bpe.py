@@ -218,6 +218,20 @@ class BpeResults(Frozen):
 def _print_divider(new_line=True):
     r"""
     Prints some characters to the std out to break apart the different stpes within the model.
+
+    Parameters
+    ----------
+    new_line : bool, optional
+        Whether to include a newline in the print statement
+
+    Examples
+    --------
+
+    >>> from dstauffman.bpe import _print_divider
+    >>> _print_divider()
+    <BLANKLINE>
+    ******************************
+
     """
     text = '\n******************************'
     if new_line:

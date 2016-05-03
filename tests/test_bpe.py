@@ -14,6 +14,85 @@ import os
 import unittest
 import dstauffman as dcs
 
+#%% Setup for testing
+# Classes - SimParams
+class SimParams(dcs.Frozen):
+    r"""Simulation model parameters."""
+    def __init__(self, time, *, magnitude, frequency, phase):
+        self.time      = time
+        self.magnitude = magnitude
+        self.frequency = frequency
+        self.phase     = phase
+
+    def __eq__(self, other):
+        if type(other) != type(self):
+            return False
+        for key in vars(self):
+            if np.any(getattr(self, key) != getattr(other, key)):
+                return False
+        return True
+
+# Functions - _get_truth_index
+def _get_truth_index(results_time, truth_time):
+    r"""
+    Finds the indices to the truth data from the results time.
+    """
+    # Hard-coded values
+    precision    = 1e-7
+    # find the indices to truth
+    ix_truth     = np.nonzero((truth_time >= results_time[0] - precision) & (truth_time <= \
+        results_time[-1] + precision))[0]
+    # find the indices to results (in case truth isn't long enough)
+    ix_results   = np.nonzero(results_time <= truth_time[-1] + precision)[0]
+    # return the indices
+    return (ix_truth, ix_results)
+
+# Functions - sim_model
+def sim_model(sim_params):
+    r"""Simple example simulation model."""
+    return sim_params.magnitude * np.sin(2*np.pi*sim_params.frequency*sim_params.time/1000 + \
+        sim_params.phase*np.pi/180)
+
+# Functions - truth
+def truth(time, magnitude=5, frequency=10, phase=90):
+    r"""Simple example truth data."""
+    return magnitude * np.sin(2*np.pi*frequency*time/1000 + phase*np.pi/180)
+
+# Functions - cost_wrapper
+def cost_wrapper(results_data, *, results_time, truth_time, truth_data):
+    r"""Example Cost wrapper for the model."""
+    # Pull out overlapping time points and indices
+    (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
+    sub_truth  = truth_data[ix_truth]
+    sub_result = results_data[ix_results]
+
+    # calculate the innovations
+    innovs = sub_result - sub_truth
+    return innovs
+
+# Functions - get_parameter
+def get_parameter(sim_params, *, names):
+    r"""Simple example parameter getter."""
+    num = len(names)
+    values = np.nan * np.ones(num)
+    for (ix, name) in enumerate(names):
+        if hasattr(sim_params, name):
+            values[ix] = getattr(sim_params, name)
+        else:
+            raise ValueError('Bad parameter name: "{}".'.format(name))
+    return values
+
+# Functions - set_parameter
+def set_parameter(sim_params, *, names, values):
+    r"""Simple example parameter setter."""
+    num = len(names)
+    assert len(values) == num, 'Names and Values must have the same length.'
+    for (ix, name) in enumerate(names):
+        if hasattr(sim_params, name):
+            setattr(sim_params, name, values[ix])
+        else:
+            raise ValueError('Bad parameter name: "{}".'.format(name))
+
 #%% Logger
 class Test_Logger(unittest.TestCase):
     r"""
@@ -59,14 +138,69 @@ class Test_OptiOpts(unittest.TestCase):
     r"""
     Tests the OptiOpts class with the following cases:
         Initialization
+        Equality
+        Inequality
     """
     def test_init(self):
         opti_opts = dcs.OptiOpts()
-        for this_attr in ['params', 'slope_method']:
-            self.assertTrue(hasattr(opti_opts, this_attr))
+        self.assertTrue(isinstance(opti_opts, dcs.OptiOpts))
 
-#%% OptiParams
-pass
+    def test_equality(self):
+        opti_opts1 = dcs.OptiOpts()
+        opti_opts2 = dcs.OptiOpts()
+        self.assertEqual(opti_opts1, opti_opts2)
+
+    def test_inequality(self):
+        opti_opts1 = dcs.OptiOpts()
+        opti_opts2 = dcs.OptiOpts()
+        opti_opts2.grow_radius = 5.5
+        self.assertNotEqual(opti_opts1, opti_opts2)
+
+    def test_inequality2(self):
+        opti_opts = dcs.OptiOpts()
+        self.assertNotEqual(opti_opts, 2)
+
+#%% OptiParam
+class Test_OptiParam(unittest.TestCase):
+    r"""
+    Tests the OptiParam class with the following cases:
+        Initialization
+        Equality
+        Inequality
+        Get array
+        Get names
+    """
+    def test_init(self):
+        opti_param = dcs.OptiParam('test')
+        self.assertTrue(isinstance(opti_param, dcs.OptiParam))
+
+    def test_equality(self):
+        opti_param1 = dcs.OptiParam('test')
+        opti_param2 = dcs.OptiParam('test')
+        self.assertEqual(opti_param1, opti_param2)
+
+    def test_inequality(self):
+        opti_param1 = dcs.OptiParam('test')
+        opti_param2 = dcs.OptiParam('test')
+        opti_param2.min_ = 5.5
+        self.assertNotEqual(opti_param1, opti_param2)
+
+    def test_inequality2(self):
+        opti_param = dcs.OptiParam('test')
+        self.assertNotEqual(opti_param, 2)
+
+    def test_get_array(self):
+        opti_param = dcs.OptiParam('test')
+        params = [opti_param, opti_param]
+        best = dcs.OptiParam.get_array(params)
+        np.testing.assert_array_equal(best, np.array([0, 0]))
+
+    def test_get_names(self):
+        opti_param1 = dcs.OptiParam('test1')
+        opti_param2 = dcs.OptiParam('test2')
+        params = [opti_param1, opti_param2]
+        names = dcs.OptiParam.get_names(params)
+        self.assertEqual(names, ['test1', 'test2'])
 
 #%% BpeResults
 class Test_BpeResults(unittest.TestCase):
@@ -106,8 +240,57 @@ class Test_BpeResults(unittest.TestCase):
         if os.path.isfile(self.filename2):
             os.remove(self.filename2)
 
+#%% _print_divider
+class Test__print_divider(unittest.TestCase):
+    r"""
+    Tests the _print_divider function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.output = '******************************'
+
+    def test_with_new_line(self):
+        with dcs.capture_output() as (out, _):
+            dcs.bpe._print_divider()
+        lines = out.getvalue().split('\n')
+        self.assertEqual(lines[0], '')
+        self.assertEqual(lines[1], self.output)
+
+    def test_no_new_line(self):
+        with dcs.capture_output() as (out, _):
+            dcs.bpe._print_divider(new_line=False)
+        lines = out.getvalue().split('\n')
+        self.assertEqual(lines[0], self.output)
+
 #%% _function_wrapper
-pass
+class Test__function_wrapper(unittest.TestCase):
+    r"""
+    Tests the _function_wrapper function with the following cases:
+        Nominal
+        Model args
+        Cost args
+    """
+    def setUp(self):
+        self.results = np.array([1, 2, np.nan])
+        self.innovs  = np.array([1, 2, 0])
+        func = lambda *args, **kwargs: np.array([1, 2, np.nan])
+        self.opti_opts = type('Class1', (object, ), {'model_args': {}, 'cost_args': {}, 'model_func': func, 'cost_func': func})
+        self.bpe_results = type('Class2', (object, ), {'num_evals': 0})
+
+    def test_nominal(self):
+        (results, innovs) = dcs.bpe._function_wrapper(self.opti_opts, self.bpe_results)
+        np.testing.assert_array_equal(results, self.results)
+        np.testing.assert_array_equal(innovs, self.innovs)
+
+    def test_model_args(self):
+        (results, innovs) = dcs.bpe._function_wrapper(self.opti_opts, self.bpe_results, model_args={'a': 5})
+        np.testing.assert_array_equal(results, self.results)
+        np.testing.assert_array_equal(innovs, self.innovs)
+
+    def test_cost_args(self):
+        (results, innovs) = dcs.bpe._function_wrapper(self.opti_opts, self.bpe_results, cost_args={'a': 5})
+        np.testing.assert_array_equal(results, self.results)
+        np.testing.assert_array_equal(innovs, self.innovs)
 
 #%% _finite_differences
 pass
@@ -116,7 +299,8 @@ pass
 class Test__levenberg_marquardt(unittest.TestCase):
     r"""
     Tests the _levenberg_marquardt function with the following cases:
-        TBD
+        with lambda_
+        without lambda_
     """
     def setUp(self):
         self.jacobian    = np.array([[1, 2], [3, 4], [5, 6]])
