@@ -313,7 +313,9 @@ class Test__levenberg_marquardt(unittest.TestCase):
         np.testing.assert_array_almost_equal(delta_param, self.delta_param)
 
     def test_lambda_zero(self):
-        pass
+        b = -np.linalg.pinv(self.jacobian).dot(self.innovs)
+        delta_param = dcs.bpe._levenberg_marquardt(self.jacobian, self.innovs, 0)
+        np.testing.assert_array_almost_equal(delta_param, b)
 
 #%% _predict_func_change
 pass
