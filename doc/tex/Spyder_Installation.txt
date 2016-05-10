@@ -1,0 +1,100 @@
+#####################
+In settings, change:
+
+Syntax coloring:
+Color scheme, Custom: (Can be changed in "C:\Programs\WinPython-64bit-3.4.3.2\settings\.spyder2-py3\spyder.ini")
+custom/background = '#000000'
+custom/currentline = '#000000'
+custom/currentcell = '#000000'
+custom/occurence = '#cc0000'
+custom/ctrlclick = '#55ffff'
+custom/sideareas = '#181818'
+custom/matched_p = '#355835'
+custom/unmatched_p = '#9c171e'
+custom/normal = ('#ffffff', False, False)
+custom/keyword = ('#00bfff', False, False)
+custom/builtin = ('#ff55ff', False, False)
+custom/definition = ('#ffffff', True, False)
+custom/comment = ('#00ff00', False, True)
+custom/string = ('#ffff7f', False, False)
+custom/number = ('#ff7979', False, False)
+custom/instance = ('#ffff00', False, True)
+
+Editor, Display
+Show vertical line after 100 characters
+Don't wrap lines
+Syntax color scheme: Custom
+
+Editor, Advanced settings
+Undo all the automatic insertions
+Uncheck intelligent backspace
+Check automatically remove trailing spaces when saving files
+
+Console, Dislay
+Uncheck Light background
+
+Console, External modules
+Check: GUI backend: Qt4Agg
+
+IPython console, Display
+Select Dark background
+
+IPython console, Graphics
+Backend: Qt
+
+IPython console, Startup
+Lines: import autoreload, import IPython, IPython.get_ipython().magic('autoreload 2')
+
+Object inspector
+Syntax color scheme: Custom
+
+
+#####################
+In "C:\Programs\WinPython-64bit-3.4.2.4\python-3.4.2.amd64\Lib\site-packages\spyderlib\widgets\externalshell\sitecustomize.py"
+
+Add an __init__ method to the SpyderLib class.  Include nosigint.
+
+class SpyderPdb(pdb.Pdb):
+    def __init__(self, completekey='tab', stdin=None, stdout=None, skip=None, nosigint=False):
+       super(pdb.Pdb, self).__init__()
+
+
+######################
+In "C:\Programs\WinPython-64bit-3.4.2.4\python-3.4.2.amd64\Lib\site-packages\matplotlib\ticker.py"
+
+Modify line 500 or 540-ish
+
+Was:
+if np.absolute(ave_oom - range_oom) >= 3:  # four sig-figs
+
+Is:
+if np.absolute(ave_oom - range_oom) >= 4:  # five sig-figs
+
+
+######################
+In "C:\Programs\WinPython-64bit-3.4.2.4\python-3.4.2.amd64\Lib\site-packages\matplotlib\mpl-data\matplotlibrc"
+
+Modify line 38 and 43 or so:
+
+Was:
+backend      : TkAgg
+#backend.qt4 : PyQt4        # PyQt4 | PySide
+
+Is:
+backend      : Qt4Agg
+backend.qt4  : PyQt4        # PyQt4 | PySide
+
+
+######################
+Edit environment variables for your account
+PATH
+C:\Programs\WinPython-64bit-3.5.1.2\python-3.5.1.amd64;C:\Programs\WinPython-64bit-3.5.1.2\python-3.5.1.amd64\Scripts;C:\Programs\WinPython-64bit-3.5.1.2\python-3.5.1.amd64\Lib;
+
+PYTHONPATH
+C:\Users\dcstauff\Documents\GitHub;
+
+
+######################
+Additional modules
+cmd: easy_install coverage
+cmd: easy_install Sphinx

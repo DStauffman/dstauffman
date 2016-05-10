@@ -1,0 +1,487 @@
+\documentclass[12pt]{article}
+
+% Packages
+\usepackage{kpfonts} % or \usepackage{lmodern} for different font
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+
+\usepackage{graphicx}
+\usepackage{grffile}
+
+\usepackage[procnames]{listings}
+\usepackage{color}
+\usepackage{textcomp}
+\usepackage[margin=1in]{geometry}
+\usepackage[parfill]{parskip}
+\usepackage{float}
+
+\usepackage[all]{nowidow}
+
+\usepackage{vhistory}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{tocloft}
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.12}
+
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{chngcntr}
+\counterwithin{figure}{section}
+\counterwithin{table}{section}
+
+\usepackage[american]{babel}
+\usepackage{csquotes}
+\usepackage[backend=biber,
+    doi=true,
+    natbib=true,
+    sorting=none,
+    style=numeric,]{biblatex}
+\addbibresource{../References.bib}
+\DeclareLanguageMapping{american}{american-apa}
+
+\usepackage[]{hyperref}
+\hypersetup{colorlinks=true,allcolors=blue}
+
+% Reset some useful definitions
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1em}
+\setlength{\tabcolsep}{.2em}
+
+% Definitions for Python code
+\definecolor{Code}{rgb}{0,0,0}
+\definecolor{Decorators}{rgb}{0.5,0.5,0.5}
+\definecolor{Numbers}{rgb}{0.5,0,0}
+\definecolor{MatchingBrackets}{rgb}{0.25,0.5,0.5}
+\definecolor{Keywords}{rgb}{0,0,1}
+\definecolor{self}{rgb}{0,0,0}
+\definecolor{Strings}{rgb}{0,0.63,0}
+\definecolor{Comments}{rgb}{0,0.63,1}
+\definecolor{Backquotes}{rgb}{0,0,0}
+\definecolor{Classname}{rgb}{0,0,0}
+\definecolor{FunctionName}{rgb}{0,0,0}
+\definecolor{Operators}{rgb}{0,0,0}
+\definecolor{Background}{rgb}{0.98,0.98,0.98}
+
+% Define PlainText and Python listings
+\lstnewenvironment{PlainText}
+    {\lstset{language=TeX,
+        basicstyle=\ttfamily\scriptsize,
+        upquote=true,
+        linewidth=7in,
+        frame=none, % frame=single
+        }
+    }
+{}
+
+\lstnewenvironment{Python}[1][]{
+    \lstset{
+        %numbers=left,
+        %numberstyle=\footnotesize,
+        %numbersep=1em,
+        %xleftmargin=1em,
+        %framextopmargin=2em,
+        %framexbottommargin=2em,
+        showspaces=false,
+        showtabs=false,
+        showstringspaces=false,
+        frame=none, %frame=single,
+        tabsize=4,
+        % Basic
+        basicstyle=\ttfamily\scriptsize,
+        backgroundcolor=\color{Background},
+        language=Python,
+        upquote=true,
+        % Comments
+        commentstyle=\color{Comments}\slshape,
+        % Strings
+        stringstyle=\color{Strings},
+        morecomment=[s][\color{Strings}]{"""}{"""},
+        morecomment=[s][\color{Strings}]{'''}{'''},
+        % keywords
+        morekeywords={import,from,class,def,for,while,if,is,in,elif,else,not,and,or,print,break,continue,return,True,False,None,access,as,,del,except,exec,finally,global,import,lambda,pass,print,raise,try,assert},
+        keywordstyle={\color{Keywords}\bfseries},
+        % additional keywords
+        morekeywords={[2]@invariant},
+        keywordstyle={[2]\color{Decorators}\slshape},
+        emph={self},
+        emphstyle={\color{self}\slshape},
+        linewidth=7.1in, % extra-width for source code
+        %
+    }
+}{}
+
+% Custom commands
+\renewcommand{\UrlFont}{\ttfamily\small}
+\newcommand{\cfootnote}[1]{\footnote{\centering #1}}
+\renewcommand{\footnoterule}{%
+    \kern -3pt
+    \hrule width \textwidth height 1pt
+    \kern 2pt
+}
+
+% Document
+\begin{document}
+
+\title{Enum Lessons Learned}
+\author{David C. Stauffer}
+\date{June 16, 2015}
+\maketitle
+
+\begin{abstract}\label{Abstract}
+This document captures the lessons learned from using Python enums in the GHAP code.
+\end{abstract}
+
+\begin{versionhistory}
+    \vhEntry{--}{2015-04-22}{DCS}{Initial Release.}
+    \vhEntry{A}{2015-05-20}{DCS}{Added compatibility to Python v2.7 and v3.4+.}
+    \vhEntry{B}{2015-06-16}{DCS}{Converted to PDF using \LaTeX.}
+\end{versionhistory}
+
+\pagebreak
+\section{Enum Details}\label{h1:Enum_details}
+\subsection{Python Enums}\label{h2:Python_enums}
+First let's define an enumerator, or enum.  Enums were introduced to Python in v3.4 and then back ported a long way back.  They are incredibly useful, and I'm really surprised it took them that long to get around to it.  The Python enum is defined entirely in the enum.py file in the lib folder and is only about 525 lines.  It's also pure python without any C or other compiled libraries, so it's easy to dig into the details.
+
+\subsection{Defining Enums}\label{h2:Defining_enums}
+\begin{Python}
+from enum import IntEnum
+class TbStatus(IntEnum):
+    r"""
+    Enumerator definitions for the possible Tuberculosis infection status.
+
+    Notes
+    -----
+    #.  Negative values are uninfected, positive values are infected, zero
+        is undefined.
+    """
+    null           =  0 # not set, used for preallocation
+    uninfected     = -1 # never been infected
+    recovered      = -2 # currently uninfected, but has been infected in the past
+    latent_recent  =  1 # recently infected (<2 years)
+    latent_remote  =  2 # immune stabilized infection
+    active_untreat =  3 # active TB, not on treatment, or on ineffective treatment
+    active_treated =  4 # active TB, on effective treatment
+\end{Python}
+
+The first lesson is that if you ever really care about the numeric value of the enum, then you should use IntEnum instead of Enum.  With a pure Enum, you can't do any numeric comparisons.
+
+So for instance, if you want to find anyone who is infected, then with the IntEnum, and carefully chosen values, such that all infected states are greater than zero, then you can just do this:
+
+\begin{Python}
+    ix_infected = tb_status > 0
+    ix_uninfected = tb_status < 0
+\end{Python}
+
+You could define functions to do this for you, but the simple greater than or less than comparison will be much more efficient, and won't have to be updated if you add more states later.
+
+\begin{Python}
+def get_those_infected(tb_status):
+    r"""
+    Finds anyone who is infected with TB.
+    """
+    ix_infected = (tb_status == TbStatus.latent_recent) | (tb_status == TbStatus.latent_remote) | \
+        (tb_status == TbStatus.active_treated) | (tb_status == TbStatus.active_untreat)
+    return ix_infected
+
+def get_those_uninfected(tb_status):
+    r"""
+    Finds anyone who is not infected with TB.
+    """
+    ix_uninfected = (tb_status == TbStatus.uninfected) | (tb_status == TbStatus.recovered)
+    return ix_uninfected
+\end{Python}
+
+\subsection{Printing Enums}\label{h2:Printing_enums}
+All python objects define a repr() response in the method \_\_repr\_\_.  Some objects also define a \_\_str\_\_ method to be used by str() or implicitly called by print().  If the \_\_str\_\_ method is not defined, then \_\_repr\_\_ is called instead.
+
+However, for enums, there are two levels of printing that we care about.  One on the enum value, and one on the enum class.  So with repr and str, there are four levels of printing that we care about.
+
+\begin{Python}
+    print(TbStatus2.uninfected)
+    print(repr(TbStatus2.uninfected))
+    print(TbStatus2)
+    print(repr(TbStatus2))
+\end{Python}
+
+In general, the repr method should be explicit, and the str method should be a more pretty print idea.  In the Python enum class, the enum instance defines both:
+
+\begin{Python}
+class Enum(metaclass=EnumMeta):
+    """Generic enumeration.
+
+    Derive from this class to define new enumerations.
+
+    """
+. . .
+
+    def __repr__(self):
+        return "<%s.%s: %r>" % (
+                self.__class__.__name__, self._name_, self._value_)
+
+    def __str__(self):
+        return "%s.%s" % (self.__class__.__name__, self._name_)
+\end{Python}
+
+Thus printing these:
+\begin{Python}
+    print(TbStatus2.uninfected)
+    print(repr(TbStatus2.uninfected))
+\end{Python}
+Gives this:
+\begin{Python}
+TbStatus2.uninfected
+<TbStatus2.uninfected: -1>
+\end{Python}
+
+While this:
+\begin{Python}
+    print(TbStatus2)
+    print(repr(TbStatus2))
+\end{Python}
+
+Gives this:
+\begin{Python}
+<enum 'TbStatus2'>
+<enum 'TbStatus2'>
+\end{Python}
+
+The first str method doesn't tell you anything except the name you already used, however the first repr method does show something useful.  It shows the name and the value.
+
+The two print and repr methods on the class themselves only show you the name of the enum it's derived from.  Also not very useful.  So let's use the one useful example to extend the built-in class.
+
+\begin{Python}
+class _IntEnumPlus(int, Enum):
+    r"""
+    Custom IntEnum class based on _EnumMetaPlus metaclass to get more details
+    from repr/str.
+    """
+    def __str__(self):
+        return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
+\end{Python}
+
+Now the print(TbStatus) becomes a clean version (i.e. no \textless \textgreater brackets) of the repr method.
+\begin{Python}
+TbStatus.uninfected: -1
+\end{Python}
+
+In order to override the methods on the class, we actually have to modify the metaclass that it is derived from.  So let's derive our own metaclass, and then derive our own enum class from that.  
+
+\begin{Python}
+#%% Meta Class
+class _EnumMetaPlus(EnumMeta):
+    r"""
+    Overrides the repr/str methods of the EnumMeta class to display all possible
+    values.
+    """
+    def __repr__(cls):
+        text = [repr(field) for field in cls]
+        return '\n'.join(text)
+    def __str__(cls):
+        text = [str(field) for field in cls]
+        return '\n'.join(text)
+
+#%% Extened IntEnum class
+@unique
+class _IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
+    r"""
+    Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from
+    repr/str.
+
+    Also forces all values to be unique.
+    """
+    def __str__(self):
+        return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
+\end{Python}
+
+Note, that looking at the python code shows a ridiculously simple definition for IntEnum, so derive this class in the same way directly from Enum.
+
+\begin{Python}
+class IntEnum(int, Enum):
+    """Enum where members are also (and must be) ints"""
+\end{Python}
+
+Also, hidden in the enum options is a “unique” decorator that forces the names and values to be unique.  In my use cases, I also want this, so I added that line to the class.
+
+Putting this all together and printing the results:
+\begin{Python}
+    print(TbStatus)
+    print(repr(TbStatus))
+\end{Python}
+
+Gives this:
+
+\begin{Python}
+TbStatus.null: 0
+TbStatus.uninfected: -1
+TbStatus.recovered: -2
+TbStatus.latent_recent: 1
+TbStatus.latent_remote: 2
+TbStatus.active_untreat: 3
+TbStatus.active_treated: 4
+\end{Python}
+
+And this:
+
+\begin{Python}
+<TbStatus.null: 0>
+<TbStatus.uninfected: -1>
+<TbStatus.recovered: -2>
+<TbStatus.latent_recent: 1>
+<TbStatus.latent_remote: 2>
+<TbStatus.active_untreat: 3>
+<TbStatus.active_treated: 4>
+\end{Python}
+
+\subsection{Backwards Compatibility}\label{h2:Backwards_compatibility}
+Subclassing the metaclass introduces a backwards compatibility issue into the code.  In Python v2.7 and before, you would do this via:
+
+\begin{Python}
+class _IntEnumPlus(int, Enum):
+    __metaclass__ =_EnumMetaPlus
+\end{Python}
+
+In Python v3.4 and beyond you would do this via:
+
+\begin{Python}
+class _IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
+\end{Python}
+
+However, each form triggers an error in the other version of the language.  If you want to simultaneously support both versions, then you need to use the “six” library.  That library is made specifically for situations like this (the name six comes from Python 2 * 3).  So now it becomes:
+
+\begin{Python}
+from six import with_metaclass
+class _IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
+\end{Python}
+
+\section{Appendix}\label{Appendix}
+The full source code for these examples is thus:
+
+\begin{Python}
+# -*- coding: utf-8 -*-
+r"""
+Enum lessons learned examples.
+
+Notes
+-----
+#.  Written by David C. Stauffer in May 2015.
+"""
+
+#%% Imports
+from __future__ import print_function
+from __future__ import division
+from enum import IntEnum, Enum, unique, EnumMeta
+import numpy as np
+from six import with_metaclass
+
+#%% Meta Class
+class _EnumMetaPlus(EnumMeta):
+    r"""
+    Overrides the repr/str methods of the EnumMeta class to display all possible
+    values.
+    """
+    def __repr__(cls):
+        text = [repr(field) for field in cls]
+        return '\n'.join(text)
+    def __str__(cls):
+        text = [str(field) for field in cls]
+        return '\n'.join(text)
+
+#%% Extened IntEnum class
+@unique
+class _IntEnumPlus(with_metaclass(_EnumMetaPlus, int, Enum)):
+    r"""
+    Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from
+    repr/str.
+
+    Also forces all values to be unique.
+    """
+    def __str__(self):
+        return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
+
+#%% TB Status
+class TbStatus(_IntEnumPlus):
+    r"""
+    Enumerator definitions for the possible Tuberculosis infection status.
+
+    Notes
+    -----
+    #.  Negative values are uninfected, positive values are infected, zero
+        is undefined.
+    """
+    null           =  0 # not set, used for preallocation
+    uninfected     = -1 # never been infected
+    recovered      = -2 # currently uninfected, but have been infected in the past
+    latent_recent  =  1 # recently infected (<2 years)
+    latent_remote  =  2 # immune stabilized infection
+    active_untreat =  3 # active TB, not on treatment, or on ineffective treatment
+    active_treated =  4 # active TB, on effective treatment
+
+class TbStatus2(IntEnum):
+    r"""
+    Standard Enumerator
+    """
+    null           =  0
+    uninfected     = -1
+    recovered      = -2
+    latent_recent  =  1
+    latent_remote  =  2
+    active_untreat =  3
+    active_treated =  4
+
+#%% Functions
+def get_those_infected(tb_status):
+    r"""
+    Finds anyone who is infected with TB.
+    """
+    ix_infected = (tb_status == TbStatus.latent_recent) | (tb_status == \
+        TbStatus.latent_remote) | (tb_status == TbStatus.active_treated) | \
+        (tb_status == TbStatus.active_untreat)
+    return ix_infected
+
+def get_those_uninfected(tb_status):
+    r"""
+    Finds anyone who is not infected with TB.
+    """
+    ix_uninfected = (tb_status == TbStatus.uninfected) | \
+        (tb_status == TbStatus.recovered)
+    return ix_uninfected
+
+#%% Example usage
+if __name__ == '__main__':
+    num = 100
+    tb_status = np.empty(num, dtype=int)
+    tb_status.fill(TbStatus.null)
+    ix = np.random.rand(num)
+    tb_status[ix >= 0.5] = TbStatus.active_treated
+    tb_status[ix <  0.5] = TbStatus.uninfected
+
+
+    ix_infected1 = tb_status > 0
+    ix_infected2 = get_those_infected(tb_status)
+
+    ix_uninfected1 = tb_status < 0
+    ix_uninfected2 = get_those_uninfected(tb_status)
+
+    np.testing.assert_equal(ix_infected1, ix_infected2)
+    np.testing.assert_equal(ix_uninfected1, ix_uninfected2)
+
+    # normal Enums
+    print('Normal')
+    print(TbStatus2.uninfected)
+    print(repr(TbStatus2.uninfected))
+    print(TbStatus2)
+    print(repr(TbStatus2))
+
+    # extended Enums
+    print('Extended')
+    print(TbStatus.uninfected)
+    print(repr(TbStatus.uninfected))
+    print(TbStatus)
+    print(repr(TbStatus))
+\end{Python}
+
+\end{document}

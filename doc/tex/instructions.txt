@@ -1,0 +1,49 @@
+All examples are based on my current directory structure and may need updates to run elsewhere.
+
+
+*****************************
+For auto-documentation:
+>>> sphinx-build -b html "C:\Users\%username%\Documents\GitHub\dstauffman\doc\source" "C:\Users\%username%\Documents\GitHub\dstauffman\doc\build"
+*****************************
+
+
+*****************************
+For code coverage:
+>>> cd "C:\Users\%username%\Documents\GitHub\dstauffman\tests"
+>>> coverage run run_all_tests.py
+>>> coverage html
+>>> open coverage_html_report/index.html
+*****************************
+
+*****************************
+For Git:
+create a tag
+>>> git tag -a v1.0.0 -m 'Tag comments'
+
+Get all the tags, regardless of branch, from the repository
+>>> git fetch origin --tags
+
+Push all tags to the repository
+>>> git push --tags
+
+Create a branch
+>>> git branch newbranch
+
+Switch to a branch
+>>> git checkout newbranch
+
+Create and immediately switch to branch
+>>> git checkout -b newbranch
+
+Merge branch (go to master, merge, push, then optionally go back to branch)
+>>> git checkout master
+>>> git merge branchname
+>>> git push
+>>> git checkout branchname
+
+Delete local files
+(Dry run)
+>>> git clean -dnx
+(Official run)
+>>> git clean -dfx
+*****************************
