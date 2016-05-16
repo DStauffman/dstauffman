@@ -403,8 +403,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     >>> data = np.sin(time)
     >>> description = 'Sin'
     >>> type_ = 'population'
-    >>> plot_time_history(time, data, description, type_) # doctest: +ELLIPSIS
-    <matplotlib.figure.Figure object at 0x...>
+    >>> fig = plot_time_history(time, data, description, type_) # doctest: +ELLIPSIS
 
     Close plot
     >>> plt.close()
