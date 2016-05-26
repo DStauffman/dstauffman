@@ -42,9 +42,6 @@ Select Dark background
 IPython console, Graphics
 Backend: Qt
 
-IPython console, Startup
-Lines: import autoreload, import IPython, IPython.get_ipython().magic('autoreload 2')
-
 Object inspector
 Syntax color scheme: Custom
 
