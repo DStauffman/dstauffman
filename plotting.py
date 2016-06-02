@@ -343,6 +343,9 @@ def get_axes_scales(type_):
     elif type_ == 'percentage':
         scale = 100
         units = '%'
+    elif type_ == 'per 1K':
+        scale = 1000
+        units = 'per 1,000'
     elif type_ == 'per 100K':
         scale = 100000
         units = 'per 100,000'
