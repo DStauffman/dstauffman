@@ -419,22 +419,28 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         opts = Opts()
     if colormap is None:
         colormap = DEFAULT_COLORMAP
+
+    # ensure that data is at least 2D
+    if data.ndim == 0:
+        data = np.atleast_2d(data)
+    elif data.ndim == 1:
+        data = data[:, np.newaxis] # forces to grow in second dimension, instead of first
+
+    # get number of different series
+    num_series = data.shape[1]
+
     # determine which type of data to plot
     (scale, units) = get_axes_scales(type_)
 
     if plot_as_diffs:
         # calculate RMS
-        rms_data = rms(scale*data, axis=0, ignore_nans=True)
+        rms_data = np.atleast_1d(rms(scale*data, axis=0, ignore_nans=True))
         # build colormap
         cm = ColorMap(colormap, num_colors=data.shape[1])
     else:
         # calculate the mean and std of data
-        if data.ndim == 1:
-            mean = data
-            std  = np.zeros(len(data))
-        else:
-            mean = np.mean(data, axis=1)
-            std  = np.std(data, axis=1)
+        mean = np.mean(data, axis=1)
+        std  = np.std(data, axis=1)
 
         # calculate an RMS
         rms_data = rms(scale*mean, axis=0, ignore_nans=True)
@@ -462,7 +468,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         ax.errorbar(time, scale*mean, scale*std, linestyle='None', marker='None', ecolor='c', zorder=6)
         # inidividual line plots
         if plot_indiv and data.ndim > 1:
-            for ix in range(data.shape[1]):
+            for ix in range(num_series):
                 ax.plot(time, scale*data[:, ix], color='0.75', zorder=1)
     # optionally plot truth (without changing the axis limits)
     if truth_data is not None:
