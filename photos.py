@@ -13,14 +13,8 @@ Notes
 #%% Imports
 import doctest
 import os
-try: # pragma: no cover
-    from PyQt5 import QtGui
-    from PyQt5.QtWidgets import QApplication
-except ImportError: # pragma: no cover
-    from PyQt4 import QtGui
-    from PyQt4.QtGui import QApplication
+from PIL import Image
 import shutil
-import sys
 import unittest
 from dstauffman.utils     import setup_dir
 
@@ -343,6 +337,8 @@ def batch_resize(folder, max_width=8192, max_height=8192, \
     #.  Updated by David C. Stauffer in December 2015 to use QImage instead of PIL (which is no
         longer maintained).  QImage is more powerful, but harder to use.  This function could now be
         rewritten to use the better resize options of QImage if desired.
+    #.  Updated by David C. Stauffer in June 2016 to go back to PIL now that it (finally) supports
+        Python 3.X.
 
     Examples
     --------
@@ -369,11 +365,13 @@ def batch_resize(folder, max_width=8192, max_height=8192, \
             continue
 
         # Open and load the image file
-        img = QtGui.QImage(image_fullpath)
+        with open(image_fullpath, 'rb') as file:
+            img = Image.open(file)
+            img.load()
 
         # Get current properties
-        cur_width    = img.size().width()
-        cur_height   = img.size().height()
+        cur_width    = img.size[0]
+        cur_height   = img.size[1]
         aspect_ratio = cur_width / cur_height
 
         # Calucalte desired size
@@ -415,7 +413,7 @@ def batch_resize(folder, max_width=8192, max_height=8192, \
             print(status_msg)
 
         # Resize it.
-        new_img = img.scaled(new_width, new_height)
+        new_img = img.resize((new_width, new_height), Image.ANTIALIAS)
 
         # Create the output folder if necessary
         if not os.path.isdir(os.path.join(folder, 'resized')):
@@ -423,6 +421,10 @@ def batch_resize(folder, max_width=8192, max_height=8192, \
 
         # Save it back to disk.
         new_img.save(os.path.join(folder, 'resized', image))
+
+        # Close objects
+        img.close()
+        new_img.close()
 
     print('Batch processing complete.')
 
@@ -450,6 +452,8 @@ def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, e
     #.  Updated by David C. Stauffer in December 2015 to use QImage instead of PIL (which is no
         longer maintained).  QImage is more powerful, but harder to use.  This function could now be
         rewritten to use the better resize options of QImage if desired.
+    #.  Updated by David C. Stauffer in June 2016 to go back to PIL now that it (finally) supports
+        Python 3.X.
 
     Examples
     --------
@@ -484,11 +488,13 @@ def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, e
             continue
 
         # Open and load the image file
-        img = QtGui.QImage(image_fullpath)
+        with open(image_fullpath, 'rb') as file:
+            img = Image.open(file)
+            img.load()
 
         # Get current properties
-        cur_width    = img.size().width()
-        cur_height   = img.size().height()
+        cur_width    = img.size[0]
+        cur_height   = img.size[1]
         aspect_ratio = cur_width / cur_height
 
         # Calucalte desired size
@@ -530,10 +536,14 @@ def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, e
             print(status_msg)
 
         # Resize it.
-        new_img = img.scaled(new_width, new_height)
+        new_img = img.resize((new_width, new_height), Image.ANTIALIAS)
 
         # Save it back to disk.
-        new_img.save(new_name, "JPEG", quality=80)
+        new_img.save(new_name)
+
+        # Close objects
+        img.close()
+        new_img.close()
 
     print('Batch processing complete.')
 
@@ -606,13 +616,6 @@ def number_files(folder, prefix='Image ', start=1, digits=2, process_extensions=
 
 #%% Unit test
 if __name__ == '__main__':
-    # open a qapp
-    if QApplication.instance() is None:
-        qapp = QApplication(sys.argv)
-    else:
-        qapp = QApplication.instance()
     # run the tests
     unittest.main(module='tests.test_photos', exit=False)
     doctest.testmod(verbose=False)
-    # close the qapp
-    qapp.closeAllWindows()
