@@ -90,3 +90,4 @@ scripts/script_*
 temp/*
 apps/bac_gui/*.pkl
 apps/bac_gui/*.png
+!apps/bac_gui/bac_gui.png
