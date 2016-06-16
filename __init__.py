@@ -13,7 +13,7 @@ Notes
 #%% Imports
 from .bpe       import Logger, OptiOpts, OptiParam, BpeResults, validate_opti_opts, run_bpe, \
                            plot_bpe_results
-from .classes   import frozen, Frozen, Counter
+from .classes   import Frozen, SaveAndLoad, Counter
 from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, spyder_custom_colors
 from .enums     import IntEnumPlus, consecutive, dist_enum_and_mons
 from .linalg    import orth, subspace

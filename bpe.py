@@ -14,14 +14,12 @@ Notes
 #%% Imports
 from copy import deepcopy
 import doctest
-import h5py
 import numpy as np
 import os
-import pickle
 from scipy.linalg import norm
 import time
 import unittest
-from dstauffman.classes import Frozen
+from dstauffman.classes import Frozen, SaveAndLoad
 from dstauffman.plotting import Opts, plot_correlation_matrix, plot_multiline_history
 from dstauffman.utils import rss, setup_dir
 
@@ -159,7 +157,7 @@ class OptiParam(Frozen):
         return names
 
 #%% BpeResults
-class BpeResults(Frozen):
+class BpeResults(Frozen, metaclass=SaveAndLoad):
     r"""
     Results of the Batch Parameter Estimator.
     """
@@ -193,53 +191,6 @@ class BpeResults(Frozen):
             text.append('  {}: {}'.format(key, getattr(self, key)))
         # return everything as a single string
         return '\n'.join(text)
-
-    def save(self, filename='', use_hdf5=True):
-        r"""
-        Save the BpeResults to disk.
-        """
-        # exit if no filename is given
-        if not filename:
-            return
-        # potentially convert the filename
-        if not use_hdf5:
-            filename = filename.replace('hdf5', 'p')
-        # log some status
-        if Logger.get_level() > 2:
-            print('Saving results to: "{}".'.format(filename))
-        if not use_hdf5:
-            # Version 1 (Pickle):
-            with open(filename, 'wb') as file:
-                pickle.dump(self, file)
-        else:
-            # Version 2 (HDF5):
-            with h5py.File(filename, 'w') as file:
-                grp = file.create_group('self')
-                for key in vars(self):
-                    value = getattr(self, key)
-                    if value is not None:
-                        grp.create_dataset(key, data=value)
-
-    @classmethod
-    def load(cls, filename='', use_hdf5=True):
-        r"""
-        Loads the BpeResults from disk.
-        """
-        if not filename:
-            raise ValueError('No file specified to load.')
-        if not use_hdf5:
-            # Version 1 (Pickle):
-            with open(filename.replace('hdf5', 'p'), 'rb') as file:
-                out = pickle.load(file)
-        else:
-            # Version 2 (HDF5):
-            out = cls()
-            with h5py.File(filename, 'r') as file:
-                for key in file.keys():
-                    grp = file[key]
-                    for field in grp.keys():
-                        setattr(out, field, grp[field].value)
-        return out
 
 #%% CurrentResults
 class CurrentResults(Frozen):
@@ -1008,6 +959,9 @@ def run_bpe(opti_opts):
     if folder and not os.path.isdir(folder):
         # if the folder doesn't exist, then create it
         setup_dir(folder) # pragma: no cover
+    # show status and save file
+    if log_level > 2 and opti_opts.output_loc:
+        print('Saving results to: "{}".'.format(opti_opts.output_loc))
     bpe_results.save(opti_opts.output_loc)
 
     # display total elapsed time

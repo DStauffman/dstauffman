@@ -11,11 +11,18 @@ Notes
 
 #%% Imports
 import doctest
+import pickle
 import sys
 import unittest
+import warnings
 
-#%% Functions - frozen
-def frozen(set):
+try:
+    import h5py
+except ImportError:
+    warnings.warn('The h5py library failed to import, so pickle files will be used instead.', RuntimeWarning)
+
+#%% Functions - _frozen
+def _frozen(set):
     r"""
     Raise an error when trying to set an undeclared name, or when calling
     from a method other than Frozen.__init__ or the __init__ method of
@@ -37,6 +44,80 @@ def frozen(set):
     # return the custom defined function
     return set_attr
 
+#%% Methods - save
+def _save_method(self, filename='', use_hdf5=True):
+    r"""
+    Save the object to disk.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to save
+    use_hdf5 : bool, optional, defaults to False
+        Write as *.hdf5 instead of *.pkl
+
+    """
+    # exit if no filename is given
+    if not filename:
+        return
+    # check that the library exists
+    if use_hdf5:
+        try:
+            isinstance(h5py, object)
+        except NameError: #pragma: no cover
+            use_hdf5=False
+    # potentially convert the filename
+    if not use_hdf5:
+        filename = filename.replace('hdf5', 'pkl')
+    if not use_hdf5:
+        # Version 1 (Pickle):
+        with open(filename, 'wb') as file:
+            pickle.dump(self, file)
+    else:
+        # Version 2 (HDF5):
+        with h5py.File(filename, 'w') as file:
+            grp = file.create_group('self')
+            for key in vars(self):
+                value = getattr(self, key)
+                if value is not None:
+                    grp.create_dataset(key, data=value)
+
+#%% Methods - load
+@classmethod
+def _load_method(cls, filename='', use_hdf5=True):
+    r"""
+    Load the object from disk.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to load
+    use_hdf5 : bool, optional, defaults to False
+        Write as *.hdf5 instead of *.pkl
+
+    """
+    if not filename:
+        raise ValueError('No file specified to load.')
+    # check that the library exists
+    if use_hdf5:
+        try:
+            isinstance(h5py, object)
+        except NameError: #pragma: no cover
+            use_hdf5=False
+    if not use_hdf5:
+        # Version 1 (Pickle):
+        with open(filename.replace('hdf5', 'pkl'), 'rb') as file:
+            out = pickle.load(file)
+    else:
+        # Version 2 (HDF5):
+        out = cls()
+        with h5py.File(filename, 'r') as file:
+            for key in file.keys():
+                grp = file[key]
+                for field in grp.keys():
+                    setattr(out, field, grp[field].value)
+    return out
+
 #%% Classes - Frozen
 class Frozen(object):
     r"""
@@ -47,9 +128,18 @@ class Frozen(object):
     defined based on the `disp` function.
     """
     # freeze the set attributes function based on the above `frozen` funcion
-    __setattr__ = frozen(object.__setattr__)
+    __setattr__ = _frozen(object.__setattr__)
     class __metaclass__(type):
-        __setattr__ = frozen(type.__setattr__)
+        __setattr__ = _frozen(type.__setattr__)
+
+#%% MetaClasses - save_and_load
+class SaveAndLoad(type):
+    def __init__(cls, name, bases, dct):
+        if not hasattr(cls, 'save'):
+            setattr(cls, 'save', _save_method)
+        if not hasattr(cls, 'load'):
+            setattr(cls, 'load', _load_method)
+        super(SaveAndLoad, cls).__init__(name, bases, dct)
 
 #%% Classes - Counter
 class Counter(Frozen):
