@@ -794,9 +794,9 @@ if __name__ == '__main__':
 
     # save the results
     if save_results:
-        with open(os.path.join(opts.save_path, 'solutions1.p'), 'wb') as file:
+        with open(os.path.join(opts.save_path, 'solutions1.pkl'), 'wb') as file:
             pickle.dump(solutions1, file)
-        with open(os.path.join(opts.save_path, 'solutions2.p'), 'wb') as file:
+        with open(os.path.join(opts.save_path, 'solutions2.pkl'), 'wb') as file:
             pickle.dump(solutions2, file)
 
     # plot the results

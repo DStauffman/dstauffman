@@ -213,7 +213,7 @@ class Test_BpeResults(unittest.TestCase):
         self.bpe_results = dcs.BpeResults()
         self.bpe_results.num_evals = 5
         self.filename    = os.path.join(dcs.get_tests_dir(), 'test_bpe_results.hdf5')
-        self.filename2   = self.filename.replace('hdf5', 'p')
+        self.filename2   = self.filename.replace('hdf5', 'pkl')
         dcs.Logger.set_level(1)
 
     def test_save(self):

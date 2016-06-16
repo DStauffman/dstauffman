@@ -103,7 +103,7 @@ class PentagoGui(QWidget):
         # initialize outputs
         self.state = State()
         if load_game:
-            filename  = os.path.join(get_output_dir(), 'pentago.p')
+            filename  = os.path.join(get_output_dir(), 'pentago.pkl')
             if os.path.isfile(filename):
                 self.state.game_hist   = GameStats.load(filename)
                 self.state.cur_game    = Counter(len(self.state.game_hist)-1)
@@ -299,7 +299,7 @@ class PentagoGui(QWidget):
     def closeEvent(self, event):
         """Things in here happen on GUI closing."""
         close_immediately = True
-        filename = os.path.join(get_output_dir(), 'pentago.p')
+        filename = os.path.join(get_output_dir(), 'pentago.pkl')
         if close_immediately:
             GameStats.save(filename, self.state.game_hist)
             event.accept()

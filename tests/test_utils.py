@@ -325,7 +325,7 @@ class Test_setup_dir(unittest.TestCase):
                 os.rmdir(self.folder)
         try:
             _clean(self)
-        except PermissionError:
+        except {PermissionError, OSError}:
             # pause to let Windows catch up and close files
             time.sleep(1)
             # retry

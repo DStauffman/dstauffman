@@ -86,7 +86,7 @@ class TicTacToeGui(QMainWindow):
         # load previous game
         if load_game:
             if filename is None:
-                filename = os.path.join(get_output_dir(), 'tictactoe.p')
+                filename = os.path.join(get_output_dir(), 'tictactoe.pkl')
             if os.path.isfile(filename):
                 self.state.game_hist   = GameStats.load(filename)
                 self.state.cur_game    = Counter(len(self.state.game_hist)-1)
@@ -220,7 +220,7 @@ class TicTacToeGui(QMainWindow):
     #%% Other callbacks - closing
     def closeEvent(self, event):
         r"""Things in here happen on GUI closing."""
-        filename = os.path.join(get_output_dir(), 'tictactoe.p')
+        filename = os.path.join(get_output_dir(), 'tictactoe.pkl')
         GameStats.save(filename, self.state.game_hist)
         event.accept()
 

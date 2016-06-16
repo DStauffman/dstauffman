@@ -164,7 +164,7 @@ class Test_GameStats(unittest.TestCase):
         np.testing.assert_array_equal(results, [n, n])
 
     def test_save_and_load(self):
-        filename = os.path.join(ttt.get_root_dir(), 'tests', 'temp_save.p')
+        filename = os.path.join(ttt.get_root_dir(), 'tests', 'temp_save.pkl')
         ttt.GameStats.save(filename, self.game_hist)
         self.assertTrue(os.path.isfile(filename))
         game_hist = ttt.GameStats.load(filename)
@@ -173,7 +173,7 @@ class Test_GameStats(unittest.TestCase):
                 self.assertEqual(self.game_hist[i].move_list[j], game_hist[i].move_list[j])
 
     def tearDown(self):
-        filename = os.path.join(ttt.get_root_dir(), 'tests', 'temp_save.p')
+        filename = os.path.join(ttt.get_root_dir(), 'tests', 'temp_save.pkl')
         if os.path.isfile(filename):
             os.remove(filename)
 
