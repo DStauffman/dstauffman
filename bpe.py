@@ -23,6 +23,13 @@ from dstauffman.classes import Frozen, SaveAndLoad
 from dstauffman.plotting import Opts, plot_correlation_matrix, plot_multiline_history
 from dstauffman.utils import rss, setup_dir
 
+# Determine if you can use matrix mulitplies
+import sys
+if sys.version_info[0] > 3 or (sys.version_info[0] == 3 and sys.version_info[1] >= 5):
+    py35 = True # TODO: eventually only support this version!
+else:
+    py35 = False
+
 #%% Logger
 class Logger(Frozen):
     r"""
@@ -342,12 +349,18 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         temp_params_minus[i_param] = cur_results.params[i_param]
 
     # calculate the numerical gradient with respect to the estimated parameters
-    gradient = jacobian.T.dot(cur_results.innovs) # TODO: gradient = jacobian.T @ innovs
+    if py35:
+        gradient = jacobian.T @ cur_results.innovs
+    else: # pragma: no cover
+        gradient = jacobian.T.dot(cur_results.innovs)
     if opti_opts.is_max_like:
         gradient += grad_log_det_B
 
     # calculate the hessian matrix
-    hessian = jacobian.T.dot(jacobian) # TODO: hessian = jacobian.T @ jacobian
+    if py35:
+        hessian = jacobian.T @ jacobian
+    else: # pragma: no cover
+        hessian = jacobian.T.dot(jacobian)
 
     return (jacobian, gradient, hessian)
 
@@ -444,8 +457,10 @@ def _predict_func_change(delta_param, gradient, hessian):
 
     """
     # calculate and return the predicted change
-    delta_func = gradient.T.dot(delta_param) + 0.5*delta_param.T.dot(hessian.dot(delta_param))
-    # TODO: delta_func = gradient.T @ delta_param + 0.5*delta_param.T @ hessian @ delta_param
+    if py35:
+        delta_func = gradient.T @ delta_param + 0.5*delta_param.T @ hessian @ delta_param
+    else: # pragma: no cover
+        delta_func = gradient.T.dot(delta_param) + 0.5*delta_param.T.dot(hessian.dot(delta_param))
     # check that this is a scalar result and return the result
     assert delta_func.size == 1 and delta_func.ndim <= 1
     if delta_func.ndim == 1:
@@ -528,8 +543,10 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
     cauchy_len   = gradient_len**3/grad_hessian_grad
     # relaxed_Newton_point is between the initial point and the Newton point
     # If x_bias = 0, the relaxed point is at the Newton point
-    relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(gradient.T.dot(delta_param)))
-    # TODO: relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(gradient.T @ delta_param))
+    if py35:
+        relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(gradient.T @ delta_param))
+    else: # pragma: no cover
+        relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(gradient.T.dot(delta_param)))
 
     # Compute the minimizing point on the dogleg path
     # This point is inside the trust radius and minimizes the linearized least square function
@@ -560,9 +577,14 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
             # gradient search direction
             cauchy_pt             = -cauchy_len / gradient_len * gradient
             new_minus_cau         = relaxed_newton_len * delta_param - cauchy_pt
-            cau_dot_new_minus_cau = cauchy_pt.T.dot(new_minus_cau)
-            cau_len_sq            = cauchy_pt.T.dot(cauchy_pt)
-            new_minus_cau_len_sq  = new_minus_cau.T.dot(new_minus_cau)
+            if py35:
+                cau_dot_new_minus_cau = cauchy_pt.T @ new_minus_cau
+                cau_len_sq            = cauchy_pt.T @ cauchy_pt
+                new_minus_cau_len_sq  = new_minus_cau.T @ new_minus_cau
+            else: # pragma: no cover
+                cau_dot_new_minus_cau = cauchy_pt.T.dot(new_minus_cau)
+                cau_len_sq            = cauchy_pt.T.dot(cauchy_pt)
+                new_minus_cau_len_sq  = new_minus_cau.T.dot(new_minus_cau)
             tr_sq_minus_cau_sq    = trust_radius**2 - cau_len_sq
             discr                 = np.sqrt(cau_dot_new_minus_cau**2 + \
                 new_minus_cau_len_sq*tr_sq_minus_cau_sq)
@@ -605,7 +627,10 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
     orig_params = cur_results.params.copy()
 
     # do some calculations for things constant within the loop
-    grad_hessian_grad = gradient.T.dot(hessian.dot(gradient)) # TODO: grad_hessian_grad = gradient.T @ hessian @ gradient
+    if py35:
+        grad_hessian_grad = gradient.T @ hessian @ gradient
+    else: # pragma: no cover
+        grad_hessian_grad = gradient.T.dot(hessian.dot(gradient))
     log_det_B = 0 # TODO: get this elsewhere for max_likelihood mode
 
     # initialize status flags and counters
@@ -732,31 +757,48 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
 
     # Compute values of un-normalized parameters.
     if normalized:
-        normalize_matrix  = np.eye(num_params).dot(1 / param_typical)
+        if py35:
+            normalize_matrix  = np.eye(num_params) @ (1 / param_typical)
+        else: # pragma: no cover
+            normalize_matrix  = np.eye(num_params).dot(1 / param_typical)
     else:
         normalize_matrix  = np.eye(num_params)
 
     # Make information, covariance matrix, compute Singular Value Decomposition (SVD).
     try:
         # note, python has x = U*S*Vh instead of U*S*V', when V = Vh'
-        (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian.dot(normalize_matrix), full_matrices=False)
-        V_jacobian = Vh_jacobian.T
-        covariance = V_jacobian.dot(np.diag(S_jacobian**-2).dot(Vh_jacobian))
+        if py35:
+            (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian @ normalize_matrix, full_matrices=False)
+            V_jacobian = Vh_jacobian.T
+            covariance = V_jacobian @ np.diag(S_jacobian**-2) @ Vh_jacobian
+        else: # pragma: no cover
+            (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian.dot(normalize_matrix), full_matrices=False)
+            V_jacobian = Vh_jacobian.T
+            covariance = V_jacobian.dot(np.diag(S_jacobian**-2).dot(Vh_jacobian))
     except MemoryError:
         if log_level >= 6:
             print('Singular value decomposition of Jacobian failed.')
         V_jacobian = np.nan * np.ones((num_params, num_params))
-        covariance = np.inv(jacobian.T.dot(jacobian))
+        if py35:
+            covariance = np.inv(jacobian.T @ jacobian)
+        else: # pragma: no cover
+            covariance = np.inv(jacobian.T.dot(jacobian))
 
     param_one_sigmas = np.sqrt(np.diag(covariance))
-    correlation    = covariance / (param_one_sigmas[:, np.newaxis].dot(param_one_sigmas[np.newaxis, :]))
+    if py35:
+        correlation    = covariance / (param_one_sigmas[:, np.newaxis] @ param_one_sigmas[np.newaxis, :])
+    else: # pragma: no cover
+        correlation    = covariance / (param_one_sigmas[:, np.newaxis].dot(param_one_sigmas[np.newaxis, :]))
 
     # Update SVD and covariance for the normalized parameters (but correlation remains as calculated above)
     if normalized:
         try:
             (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian, full_matrices=False)
             V_jacobian = Vh_jacobian.T
-            covariance = V_jacobian.dot(np.diag(S_jacobian**-2).dot(Vh_jacobian))
+            if py35:
+                covariance = V_jacobian @ np.diag(S_jacobian**-2) @ Vh_jacobian
+            else: # pragma: no cover
+                covariance = V_jacobian.dot(np.diag(S_jacobian**-2).dot(Vh_jacobian))
         except MemoryError:
             pass # caught in earlier exception (hopefully?)
 
@@ -901,7 +943,10 @@ def run_bpe(opti_opts):
 
         # Check direction of the last step and the gradient. If the old step and the negative new
         # gradient are in the same general direction, then increase the trust radius.
-        grad_dot_step = gradient.T.dot(delta_param) # TODO: grad_dot_step = gradient.T @ delta_param
+        if py35:
+            grad_dot_step = gradient.T @ delta_param
+        else: # pragma: no cover
+            grad_dot_step = gradient.T.dot(delta_param)
         if grad_dot_step > 0 and iter_count > 1:
             cur_results.trust_rad += opti_opts.grow_radius
             if log_level >= 8:
