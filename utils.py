@@ -13,23 +13,16 @@ Notes
 
 #%% Imports
 from contextlib import contextmanager
+from datetime import datetime, timedelta
 import doctest
 import inspect
+from io import StringIO
 import os
 import numpy as np
 import shutil
 import sys
 import types
 import unittest
-from datetime import datetime, timedelta
-# compatibility issues
-ver = sys.version_info
-if ver[0] == 2:
-    from io import BytesIO as StringIO # pragma: no cover
-elif ver[0] == 3:
-    from io import StringIO # pragma: no cover
-else:
-    raise('Unexpected Python version: "{}'.format(ver[0])) # pragma: no cover
 
 #%% Functions - _nan_equal
 def _nan_equal(a, b):
