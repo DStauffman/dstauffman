@@ -979,7 +979,7 @@ def run_bpe(opti_opts):
     if log_level >= 6 and not convergence:
         print('Stopped iterating due to hitting the max number of iterations: {}.'.format(opti_opts.max_iters))
 
-    # Run for final time # TODO: is this not already run after the doglegsearch or does convergence mean something else ran?
+    # Run for final time (TODO: make this one, and only this one, save the results)
     if log_level >= 2:
         _print_divider()
         print('Running final simulation.')
@@ -1048,13 +1048,19 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
     # alias the names
     names = OptiParam.get_names(opti_opts.params)
 
+    # preallocate output
+    figs = []
+
     # time based plots
     if plots['innovs']:
         if bpe_results.begin_innovs is not None and bpe_results.final_innovs is not None:
             time = np.arange(len(bpe_results.begin_innovs))
             data = np.vstack((bpe_results.begin_innovs, bpe_results.final_innovs)).T
-            plot_multiline_history(time, data, label='Innovs Before and After', opts=opts, colormap='bwr_r', \
+            fig = plot_multiline_history(time, data, label='Innovs Before and After', opts=opts, colormap='bwr_r', \
                 legend=['Before', 'After'])
+            figs.append(fig)
+            # plot as distribution
+
         elif log_level >= 2:
             print("Data isn't available for Innovations plot.")
     if plots['convergence']:
@@ -1064,25 +1070,29 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
         if bpe_results.correlation is None:
             print("Data isn't avaliable for correlation plot.")
         else:
-            plot_correlation_matrix(bpe_results.correlation, labels=names, opts=opts, \
+            fig = plot_correlation_matrix(bpe_results.correlation, labels=names, opts=opts, \
                 matrix_name='Correlation Matrix', cmin=-1, colormap=colormap, plot_lower_only=True, \
                 label_values=label_values)
+            figs.append(fig)
 
     if plots['info_svd']:
         if bpe_results.info_svd is None:
             print("Data isn't avaliable for infomation SVD plot.")
         else:
-            plot_correlation_matrix(np.abs(bpe_results.info_svd), opts=opts, cmin=0, \
+            fig = plot_correlation_matrix(np.abs(bpe_results.info_svd), opts=opts, cmin=0, \
                 matrix_name='Information SVD Matrix', colormap=colormap, label_values=label_values, \
                 labels=[['{}'.format(i+1) for i in range(len(names))], names])
+            figs.append(fig)
 
     if plots['covariance']:
         if bpe_results.covariance is None:
             print("Data isn't avaliable for covariance plot.")
         else:
-            plot_correlation_matrix(bpe_results.covariance, labels=names, opts=opts, \
+            fig = plot_correlation_matrix(bpe_results.covariance, labels=names, opts=opts, \
                 matrix_name='Covariance Matrix', cmin=-1, colormap=colormap, plot_lower_only=True, \
                 label_values=label_values)
+            figs.append(fig)
+    return figs
 
 #%% Unit test
 if __name__ == '__main__':
