@@ -20,6 +20,26 @@ custom/string = ('#ffff7f', False, False)
 custom/number = ('#ff7979', False, False)
 custom/instance = ('#ffff00', False, True)
 
+# (Spyder v3 with new custom themes)
+custom_names = ['custom-0']
+custom-0/currentcell = #000000
+custom-0/occurrence = #cc0000
+custom-0/background = #000000
+custom-0/comment = ('#00ff00', False, True)
+custom-0/unmatched_p = #9c171e
+custom-0/keyword = ('#000bff', False, False)
+custom-0/ctrlclick = #55ffff
+custom-0/normal = ('#ffffff', False, False)
+custom-0/instance = ('#ffff00', False, True)
+custom-0/currentline = #000000
+custom-0/matched_p = #355835
+custom-0/sideareas = #181818
+custom-0/builtin = ('#ff55ff', False, False)
+custom-0/definition = ('#ffffff', True, False)
+custom-0/string = ('#ffff7f', False, False)
+custom-0/number = ('#ff7979', False, False)
+custom-0/name = DStauffman
+
 Editor, Display
 Show vertical line after 100 characters
 Don't wrap lines

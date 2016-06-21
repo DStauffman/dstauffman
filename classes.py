@@ -134,7 +134,13 @@ class Frozen(object):
 
 #%% MetaClasses - save_and_load
 class SaveAndLoad(type):
+    r"""
+    Metaclass to add 'save' and 'load' methods to the given class.
+    """
     def __init__(cls, name, bases, dct):
+        r"""
+        Adds the 'save' and 'load' classes if they are not already present.
+        """
         if not hasattr(cls, 'save'):
             setattr(cls, 'save', _save_method)
         if not hasattr(cls, 'load'):
