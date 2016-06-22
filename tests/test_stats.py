@@ -107,8 +107,7 @@ class Test_prob_to_rate(unittest.TestCase):
     def setUp(self):
         self.prob = np.arange(0, 1.01, 0.01)
         self.time = 5
-        with np.errstate(divide='ignore'):
-            self.rate = -np.log(1 - self.prob) / self.time
+        self.rate = -np.log(1 - self.prob) / self.time
 
     def test_conversion(self):
         rate = dcs.prob_to_rate(self.prob, self.time)
@@ -141,8 +140,7 @@ class Test_rate_to_prob(unittest.TestCase):
     def setUp(self):
         self.prob = np.arange(0, 1.01, 0.01)
         self.time = 5
-        with np.errstate(divide='ignore'):
-            self.rate = -np.log(1 - self.prob) / self.time
+        self.rate = -np.log(1 - self.prob) / self.time
 
     def test_conversion(self):
         prob = dcs.rate_to_prob(self.rate, self.time)
@@ -204,8 +202,7 @@ class Test_annual_rate_to_monthly_probability(unittest.TestCase):
     """
     def setUp(self):
         self.prob = np.arange(0, 0.05, 1)
-        with np.errstate(divide='ignore'):
-            self.rate = -np.log(1 - self.prob) * 12
+        self.rate = -np.log(1 - self.prob) * 12
 
     def test_conversion(self):
         prob = dcs.annual_rate_to_monthly_probability(self.rate)
@@ -237,8 +234,7 @@ class Test_monthly_probability_to_annual_rate(unittest.TestCase):
     """
     def setUp(self):
         self.prob = np.arange(0, 0.05, 1)
-        with np.errstate(divide='ignore'):
-            self.rate = -np.log(1 - self.prob) * 12
+        self.rate = -np.log(1 - self.prob) * 12
 
     def test_conversion(self):
         rate = dcs.monthly_probability_to_annual_rate(self.prob)

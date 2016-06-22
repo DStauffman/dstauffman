@@ -468,8 +468,8 @@ def quat_interp(time, quat, ti, inclusive=True):
     # Enforce sign convention on scalar quaternion element.
     # Scalar element (fourth element) of quaternion must not be negative.
     # So change sign on entire quaternion if qout(4) is less than zero.
-    with np.errstate(invalid='ignore'): # because qout can be NaN
-        negs = qout[3, :] < 0
+    negs = np.zeros(qout.shape[1], dtype=bool)
+    np.less(qout[3, :], 0, out=negs, where=~np.isnan(qout[3, :]))
     qout[:, negs] = -qout[:, negs]
 
     return qout

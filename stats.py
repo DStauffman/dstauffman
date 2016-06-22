@@ -59,10 +59,8 @@ def convert_annual_to_monthly_probability(annual):
         raise ValueError('annual must be >= 0')
     if np.any(annual > 1):
         raise ValueError('annual must be <= 1')
-    # ignore divide by zero errors when annual == 1
-    with np.errstate(divide='ignore'):
-        # convert to equivalent probability and return result
-        monthly = 1-np.exp(np.log(1-annual)/MONTHS_PER_YEAR)
+    # convert to equivalent probability and return result
+    monthly = 1-np.exp(np.log(1-annual)/MONTHS_PER_YEAR)
     return monthly
 
 #%% Functions - convert_monthly_to_annual_probability
@@ -142,10 +140,8 @@ def prob_to_rate(prob, time=1):
         raise ValueError('Probability must be >= 0')
     if np.any(prob > 1):
         raise ValueError('Probability must be <= 1')
-    # ignore log of zero errors when prob == 1
-    with np.errstate(divide='ignore'):
-        # calculate rate
-        rate = -np.log(1 - prob) / time
+    # calculate rate
+    rate = -np.log(1 - prob) / time
     return rate
 
 #%% Functions - rate_to_prob

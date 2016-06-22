@@ -272,7 +272,6 @@ def normal_curve(x, mu=0, sigma=1):
     elif sigma == 0:
         y = np.where(x == mu, 1, 0)
     else:
-    #with np.errstate(invalid='ignore', divide='ignore'): # because mu or sigma can be zero
         y = 1/(sigma * np.sqrt(2 * np.pi)) * np.exp( - (x - mu)**2 / (2 * sigma**2) )
     return y
 
