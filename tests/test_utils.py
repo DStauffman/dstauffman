@@ -600,7 +600,7 @@ class Test_read_text_file(unittest.TestCase):
             try:
                 dcs.read_text_file(self.badpath)
             except:
-                self.assertTrue(sys.exc_info()[0] in [OSError, IOError])
+                self.assertTrue(sys.exc_info()[0] in [OSError, IOError, FileNotFoundError])
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for reading.')
@@ -636,7 +636,7 @@ class Test_write_text_file(unittest.TestCase):
             try:
                 dcs.write_text_file(self.badpath, self.contents)
             except:
-                self.assertTrue(sys.exc_info()[0] in [OSError, IOError])
+                self.assertTrue(sys.exc_info()[0] in [OSError, IOError, FileNotFoundError])
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for writing.')
