@@ -14,6 +14,7 @@ from datetime import datetime
 import inspect
 import numpy as np
 import os
+import platform
 import sys
 import time
 import unittest
@@ -629,6 +630,8 @@ class Test_write_text_file(unittest.TestCase):
         self.assertEqual(text, self.contents)
 
     def test_bad_writing(self):
+        if platform.system() != 'Windows':
+            return
         with dcs.capture_output() as (out, _):
             try:
                 dcs.write_text_file(self.badpath, self.contents)
