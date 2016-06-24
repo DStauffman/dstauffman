@@ -82,6 +82,13 @@ import numpy as np
 import time
 import unittest
 
+#%% Pyrex imports
+use_cython = False # TODO: try to use Cython eventually?
+if use_cython:
+    import pyximport;
+    pyximport.install()
+    from dstauffman.games.knight2 import check_board_boundaries as _check_board_boundaries2
+
 #%% Logging
 logging.basicConfig(format='%(levelname)s:%(message)s', level=logging.WARNING)
 
@@ -530,6 +537,9 @@ def _classify_move(board, move, transports, start_x, start_y):
     (pos1, pos2, pos3) = _get_new_position(start_x, start_y, move, transports)
     # check that the final and intermediate positions were all on the board
     valid_moves = np.array([_check_board_boundaries(pos[0], pos[1], xmax, ymax) for pos in (pos1, pos2, pos3)])
+    if use_cython:
+        valid_moves2 = np.array([_check_board_boundaries2(pos[0], pos[1], xmax, ymax) for pos in (pos1, pos2, pos3)])
+        np.testing.assert_array_equal(valid_moves, valid_moves2)
     if np.any(~valid_moves):
         return Move2['off_board']
     # get the values for each position
