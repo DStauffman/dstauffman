@@ -120,7 +120,7 @@ class OptiParam(Frozen):
     r"""
     Optimization parameter to be estimated by the batch parameters estimator.
     """
-    def __init__(self, name, best=0., min_=-np.inf, max_=np.inf, *, minstep=1e-4, typical=1.):
+    def __init__(self, name, *, best=np.nan, min_=-np.inf, max_=np.inf, minstep=1e-4, typical=1.):
         self.name = name
         self.best = best
         self.min_ = min_
@@ -145,10 +145,12 @@ class OptiParam(Frozen):
         Gets a numpy vector of all the optimization parameters for the desired type.
         """
         # check for valid types
-        if type_ in ['best', 'min_', 'max_', 'minstep', 'typical']:
+        if type_ in {'best', 'min_', 'max_'}:
             key = type_
-        elif type_ in ['min', 'max']:
+        elif type_ in {'min', 'max'}:
             key = type_ + '_'
+        elif type_ in {'typical', 'minstep'}:
+            raise ValueError('"{}" is a placeholder for later on.'.format(type_))
         else:
             raise ValueError('Unexpected type of "{}"'.format(type_))
         # pull out the data
@@ -288,15 +290,18 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         on Optimization, 2000.
 
     """
+    # hard-coded values
+    min_step = 1e-4
+
     # alias useful values
     sqrt_eps      = np.sqrt(np.finfo(float).eps)
     num_param     = cur_results.params.size
     num_innov     = cur_results.innovs.size
-    param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
-    param_minstep = OptiParam.get_array(opti_opts.params, type_='minstep')
     param_signs   = np.sign(cur_results.params)
     param_signs[param_signs == 0] = 1
     names         = OptiParam.get_names(opti_opts.params)
+    if normalized:
+        param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
 
     # initialize output
     jacobian = np.zeros((num_innov, num_param), dtype=float)
@@ -308,8 +313,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         perturb_fact  = 1 # TODO: how to get perturb_fact?
         param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
-        param_perturb = sqrt_eps * param_signs * np.maximum(np.abs(cur_results.params), np.abs(param_typical))
-    param_perturb = np.maximum(param_perturb, param_minstep)
+        param_perturb = sqrt_eps * param_signs * np.maximum(np.abs(cur_results.params), min_step)
 
     temp_params_plus  = cur_results.params.copy()
     temp_params_minus = cur_results.params.copy()
@@ -617,7 +621,8 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
     # process inputs
     search_method = opti_opts.search_method.lower().replace(' ', '_')
     names         = OptiParam.get_names(opti_opts.params)
-    param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
+    if normalized:
+        param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
 
     # alias the log level and trust radius
     log_level = Logger().get_level()
@@ -744,8 +749,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     # alias the log level
     log_level = Logger().get_level()
 
-    # get the typical param values, names and number of parameters
-    param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
+    # get the names and number of parameters
     names         = OptiParam.get_names(opti_opts.params)
     num_params    = len(names)
 
@@ -757,6 +761,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
 
     # Compute values of un-normalized parameters.
     if normalized:
+        param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
         if py35:
             normalize_matrix  = np.eye(num_params) @ (1 / param_typical)
         else: # pragma: no cover

@@ -102,7 +102,7 @@ if __name__=='__main__':
     time     = np.arange(251)
 
     # Parameters
-    sim_params = SimParams(time, magnitude=4.9, frequency=9.9, phase=89.9)
+    sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
 
     # Truth data
     truth_time = np.arange(-10, 201)
@@ -136,9 +136,9 @@ if __name__=='__main__':
     opti_opts.trust_radius    = 1.0
 
     # Parameters to estimate
-    opti_opts.params.append(dcs.OptiParam('magnitude', 2.5, 1, 10, typical=5))
-    opti_opts.params.append(dcs.OptiParam('frequency', 20, 1, 1000, typical=60))
-    opti_opts.params.append(dcs.OptiParam('phase', 180, 0, 360, typical=100))
+    opti_opts.params.append(dcs.OptiParam('magnitude', best=2.5, min_=1, max_=10, typical=5))
+    opti_opts.params.append(dcs.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60))
+    opti_opts.params.append(dcs.OptiParam('phase', best=180, min_=0, max_=360, typical=100))
 
     opti_opts_copy = copy.deepcopy(opti_opts)
 
