@@ -92,6 +92,8 @@ class OptiOpts(Frozen):
         self.set_param_func  = None
         self.output_loc      = ''
         self.params          = None # []
+        self.start_func      = None
+        self.final_func      = None
 
         # less common optimization settings
         self.slope_method    = 'one_sided' # from {'one_sided', 'two_sided'}
@@ -294,7 +296,6 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     min_step = 1e-4
 
     # alias useful values
-    sqrt_eps      = np.sqrt(np.finfo(float).eps)
     num_param     = cur_results.params.size
     num_innov     = cur_results.innovs.size
     param_signs   = np.sign(cur_results.params)
@@ -311,9 +312,10 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     # set parameter pertubation (Reference 1, section 8.4.3)
     if normalized:
         perturb_fact  = 1 # TODO: how to get perturb_fact?
+        sqrt_eps      = np.sqrt(np.finfo(float).eps)
         param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
-        param_perturb = sqrt_eps * param_signs * np.maximum(np.abs(cur_results.params), min_step)
+        param_perturb = param_signs * np.maximum(np.abs(cur_results.params), min_step)
 
     temp_params_plus  = cur_results.params.copy()
     temp_params_minus = cur_results.params.copy()
@@ -903,6 +905,12 @@ def run_bpe(opti_opts):
     # create a working copy of the model arguments that can be modified in place while running
     model_args = deepcopy(opti_opts.model_args)
 
+    # run an optional initialization function
+    if opti_opts.start_func is not None:
+        init_saves = opti_opts.start_func(**model_args)
+    else:
+        init_saves = {}
+
     # future calculations
     hessian_log_det_b = 0 # TODO: calculate somewhere later
     cosmax = 1 # TODO: calculate somewhere later
@@ -984,7 +992,11 @@ def run_bpe(opti_opts):
     if log_level >= 6 and not convergence:
         print('Stopped iterating due to hitting the max number of iterations: {}.'.format(opti_opts.max_iters))
 
-    # Run for final time (TODO: make this one, and only this one, save the results)
+    # run an optional final function before doing the final simulation
+    if opti_opts.final_func is not None:
+        opti_opts.final_func(**model_args, settings=init_saves)
+
+    # Run for final time
     if log_level >= 2:
         _print_divider()
         print('Running final simulation.')
