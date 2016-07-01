@@ -204,7 +204,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         return '\n'.join(text)
 
 #%% CurrentResults
-class CurrentResults(Frozen):
+class CurrentResults(Frozen, metaclass=SaveAndLoad):
     r"""
     Current results used as temporary values through the analysis.
     """
@@ -898,6 +898,10 @@ def run_bpe(opti_opts):
     names     = OptiParam.get_names(opti_opts.params)
     two_sided = True if opti_opts.slope_method == 'two_sided' else False
 
+    # determine if saving data
+    is_saving = bool(opti_opts.output_loc)
+
+    # TODO: write ability to resume from previously saved iteration results
     # initialize the output and current results instances
     bpe_results = BpeResults()
     cur_results = CurrentResults()
@@ -943,6 +947,13 @@ def run_bpe(opti_opts):
         print(' Initial parameters: {}'.format(cur_results.params))
         print(' Initial cost: {}'.format(cur_results.cost))
 
+    # Set-up saving: check that the folder exists
+    if is_saving:
+        folder = os.path.split(opti_opts.output_loc)[0]
+        if folder and not os.path.isdir(folder):
+            # if the folder doesn't exist, then create it
+            setup_dir(folder) # pragma: no cover
+
     # Do some stuff
     while iter_count <= opti_opts.max_iters:
         # update status
@@ -985,6 +996,11 @@ def run_bpe(opti_opts):
         _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param, jacobian, \
             gradient, hessian)
 
+        # save results from this iteration
+        if is_saving:
+            bpe_results.save(os.path.join(folder, 'bpe_results_iter_{}.hdf5'.format(iter_count)))
+            cur_results.save(os.path.join(folder, 'cur_results_iter_{}.hdf5'.format(iter_count)))
+
         # increment counter
         iter_count += 1
 
@@ -1015,13 +1031,7 @@ def run_bpe(opti_opts):
     # analyze BPE results
     _analyze_results(opti_opts, bpe_results, jacobian)
 
-    # save results
-    # check that the folder exists
-    folder = os.path.split(opti_opts.output_loc)[0]
-    if folder and not os.path.isdir(folder):
-        # if the folder doesn't exist, then create it
-        setup_dir(folder) # pragma: no cover
-    # show status and save file
+    # show status and save results
     if log_level > 2 and opti_opts.output_loc:
         print('Saving results to: "{}".'.format(opti_opts.output_loc))
     bpe_results.save(opti_opts.output_loc)
