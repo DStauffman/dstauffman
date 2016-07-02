@@ -665,7 +665,6 @@ def plot_cube(piece, title=None, opts=None):
     # return the resulting figure handle
     return fig
 
-
 #%% Functions - print_combos
 def print_combos(piece_combos, text):
     r"""

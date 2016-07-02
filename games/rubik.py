@@ -12,10 +12,19 @@ Notes
 #%% Imports
 # regular imports
 import doctest
-import math
+from math import factorial
 import os
 # model imports
 from dstauffman import get_root_dir
+
+#%% Constants
+COLORS = {}
+COLORS['U'] = '#ffffff' # white
+COLORS['L'] = '#ff6600' # orange
+COLORS['F'] = '#00cc00' # green
+COLORS['R'] = '#cc0000' # red
+COLORS['B'] = '#ffff00' # yellow
+COLORS['D'] = '#0000cc' # blue
 
 #%% Functions
 def rubiks_cube_permutations(size=3):
@@ -49,10 +58,10 @@ def rubiks_cube_permutations(size=3):
     if size == 1:
         perms = 1
     elif size == 2:
-        perms = math.factorial(8) * 3**8 // (2 * 3)
+        perms = factorial(8) * 3**8 // (2 * 3)
         perms = 3674160 # TODO: calculate this
     elif size == 3:
-        return math.factorial(8) * 3**8 * math.factorial(12) * 2**12 // (2 * 3 * 2)
+        return factorial(8) * 3**8 * factorial(12) * 2**12 // (2 * 3 * 2)
     elif size == 4:
         perms = 7401196841564901869874093974498574336000000000 # TODO: find generic algorithm for all the rest of them!
     elif size == 5:
