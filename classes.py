@@ -11,15 +11,10 @@ Notes
 
 #%% Imports
 import doctest
+import h5py
 import pickle
 import sys
 import unittest
-import warnings
-
-try:
-    import h5py
-except ImportError:
-    warnings.warn('The h5py library failed to import, so pickle files will be used instead.', RuntimeWarning)
 
 #%% Functions - _frozen
 def _frozen(set):
@@ -60,18 +55,10 @@ def _save_method(self, filename='', use_hdf5=True):
     # exit if no filename is given
     if not filename:
         return
-    # check that the library exists
-    if use_hdf5:
-        try:
-            isinstance(h5py, object)
-        except NameError: #pragma: no cover
-            use_hdf5=False
     # potentially convert the filename
     if not use_hdf5:
-        filename = filename.replace('hdf5', 'pkl')
-    if not use_hdf5:
         # Version 1 (Pickle):
-        with open(filename, 'wb') as file:
+        with open(filename.replace('hdf5', 'pkl'), 'wb') as file:
             pickle.dump(self, file)
     else:
         # Version 2 (HDF5):
@@ -98,12 +85,6 @@ def _load_method(cls, filename='', use_hdf5=True):
     """
     if not filename:
         raise ValueError('No file specified to load.')
-    # check that the library exists
-    if use_hdf5:
-        try:
-            isinstance(h5py, object)
-        except NameError: #pragma: no cover
-            use_hdf5=False
     if not use_hdf5:
         # Version 1 (Pickle):
         with open(filename.replace('hdf5', 'pkl'), 'rb') as file:

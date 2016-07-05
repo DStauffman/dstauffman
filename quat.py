@@ -593,7 +593,7 @@ def quat_mult(a, b):
             [ a[3],  a[2], -a[1],  a[0]], \
             [-a[2],  a[3],  a[0],  a[1]], \
             [ a[1], -a[0],  a[3],  a[2]], \
-            [-a[0], -a[1], -a[2],  a[3]]]).dot(b[:, np.newaxis]) # TODO: replace w/ @ in Python 3.5
+            [-a[0], -a[1], -a[2],  a[3]]]) @ b[:, np.newaxis]
         # flatten back to a 1D vector
         c = c.flatten()
         # enforce positive scalar component
