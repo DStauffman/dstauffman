@@ -44,7 +44,7 @@ def _frozen(set):
     # return the custom defined function
     return set_attr
 
-#%% Methods - save
+#%% Methods - _save_method
 def _save_method(self, filename='', use_hdf5=True):
     r"""
     Save the object to disk.
@@ -82,7 +82,7 @@ def _save_method(self, filename='', use_hdf5=True):
                 if value is not None:
                     grp.create_dataset(key, data=value)
 
-#%% Methods - load
+#%% Methods - _load_method
 @classmethod
 def _load_method(cls, filename='', use_hdf5=True):
     r"""
@@ -118,6 +118,46 @@ def _load_method(cls, filename='', use_hdf5=True):
                     setattr(out, field, grp[field].value)
     return out
 
+#%% Methods - _save_pickle
+def _save_pickle(results, filename):
+    r"""
+    Saves a list of class instances to a pickle file.
+
+    Parameters
+    ----------
+    results : list
+        List of the objects to save
+    filename : str
+        Name of the file to load
+    """
+    with open(filename, 'wb') as file:
+        for this_result in results:
+            pickle.dump(this_result, file)
+
+#%% Methods - _load_pickle
+def _load_pickle(filename):
+    r"""
+    Loads a list of class instances from a pickle file.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to load
+
+    Returns
+    -------
+    results : list
+        List of the objects found within the file
+    """
+    results = []
+    with open(filename, 'rb') as file:
+        while True:
+            try:
+                results.append(pickle.load(file))
+            except EOFError:
+                break
+    return results
+
 #%% Classes - Frozen
 class Frozen(object):
     r"""
@@ -132,7 +172,7 @@ class Frozen(object):
     class __metaclass__(type):
         __setattr__ = _frozen(type.__setattr__)
 
-#%% MetaClasses - save_and_load
+#%% MetaClasses - SaveAndLoad
 class SaveAndLoad(type):
     r"""
     Metaclass to add 'save' and 'load' methods to the given class.
@@ -146,6 +186,21 @@ class SaveAndLoad(type):
         if not hasattr(cls, 'load'):
             setattr(cls, 'load', _load_method)
         super(SaveAndLoad, cls).__init__(name, bases, dct)
+
+#%% MetaClasses - SaveAndLoadPickle
+class SaveAndLoadPickle(type):
+    r"""
+    Metaclass to add 'save' and 'load' methods to the given class.
+    """
+    def __init__(cls, name, bases, dct):
+        r"""
+        Adds the 'save' and 'load' classes if they are not already present.
+        """
+        if not hasattr(cls, 'save'):
+            setattr(cls, 'save', _save_pickle)
+        if not hasattr(cls, 'load'):
+            setattr(cls, 'load', _load_pickle)
+        super(SaveAndLoadPickle, cls).__init__(name, bases, dct)
 
 #%% Classes - Counter
 class Counter(Frozen):
