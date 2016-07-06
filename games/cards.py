@@ -9,15 +9,14 @@ Notes
 """
 
 #%% Imports
+from collections import Counter
 import doctest
-from enum import unique
-import numpy as np
+from enum import unique, IntEnum
 import unittest
-from dstauffman import IntEnumPlus
 
 #%% Enums  - Suit
 @unique
-class Suit(IntEnumPlus):
+class Suit(IntEnum):
     r"""
     Enumerator definitions for the possible card suits.
     """
@@ -28,7 +27,7 @@ class Suit(IntEnumPlus):
 
 #%% Enums - Rank
 @unique
-class Rank(IntEnumPlus):
+class Rank(IntEnum):
     r"""
     Enumerator definitions for the possible hand ranks.
     """
@@ -46,11 +45,9 @@ class Rank(IntEnumPlus):
     KING  = 11
     ACE   = 12
 
-#%% Classes
+#%% Constants
 NUM_SUITS = 4
 NUM_RANKS = 13
-
-#%% Constants
 suit_symbol                = {}
 suit_symbol[Suit.CLUBS]    = '\u2663'
 suit_symbol[Suit.DIAMONDS] = '\u2666'
@@ -72,95 +69,139 @@ rank_symbol[Rank.QUEEN] = 'Q'
 rank_symbol[Rank.KING]  = 'K'
 rank_symbol[Rank.ACE]   = 'A'
 
-STRAIGHTS = np.array([\
-    [1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1],\
-    [1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0],\
-    [0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0],\
-    [0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],\
-    [0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0],\
-    [0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0],\
-    [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0],\
-    [0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0],\
-    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1]], dtype=bool)
+STRAIGHTS = [set(range(i, i+5)) for i in range(9)]
 
-#%% Functions - card2rank
-def card2rank(card):
+#%% Classes - Card
+class Card(object):
     r"""
-    Converts a given numeric card to it's rank.
+    A Single card.
     """
-    return card % NUM_RANKS
+    def __init__(self, rank, suit):
+        r"""
+        Initialize the card.
+        """
+        self._card = self._ranksuit2card(rank, suit)
 
-#%% Functions - card2suit
-def card2suit(card):
+    def __str__(self):
+        r"""
+        Return a text based version of the card.
+        """
+        suit = self.get_suit()
+        rank = self.get_rank()
+        text = rank_symbol[rank] + suit_symbol[suit]
+        return text
+
+    @staticmethod
+    def _card2rank(card):
+        r"""
+        Converts a given numeric card to it's rank.
+        """
+        return card % NUM_RANKS
+
+    @staticmethod
+    def _card2suit(card):
+        r"""
+        Converts a given numeric card to it's suit.
+        """
+        return card // NUM_RANKS
+
+    @staticmethod
+    def _ranksuit2card(rank, suit):
+        r"""
+        Converts a given rank and suit to a numeric card.
+        """
+        return rank + NUM_RANKS*suit
+
+    def get_rank(self):
+        r"""
+        Gets the rank of the current card.
+        """
+        return self._card2rank(self._card)
+
+    def get_suit(self):
+        r"""
+        Gets the suit of the current card.
+        """
+        return self._card2suit(self._card)
+
+class Hand(object):
     r"""
-    Converts a given numeric card to it's suit.
+    Poker hand
     """
-    return card // NUM_RANKS
+    def __init__(self, cards=None):
+        r"""Creates the initial empty hand."""
+        self._cards = []
+        if cards is not None:
+            for this_card in cards:
+                self._cards.append(this_card)
 
-#%% Functions - ranksuit2card
-def ranksuit2card(rank, suit):
-    r"""
-    Converts a given rank and suit to a numeric card.
-    """
-    return rank + NUM_RANKS*suit
+    def __str__(self):
+        text = ', '.join(str(card) for card in self._cards)
+        return text
 
-#%% Functions - print_card
-def print_cards(hand):
-    r"""
-    Prints the given hand to the screen
-    """
-    suits = card2suit(hand)
-    ranks = card2rank(hand)
-    text  = []
-    for (suit, rank) in zip(suits, ranks):
-        text.append(rank_symbol[rank] + suit_symbol[suit])
-    print(', '.join(text))
+    def add_card(self, card):
+        self._cards.append(card)
 
-#%% Functions - eval_hand
-def eval_hand(hand):
-    # hand order:
-    # 9. five of a kind (not possible without wilds)
-    # 8. straight flush (includes royal flush)
-    # 7. four of a kind
-    # 6. full house
-    # 5. flush
-    # 4. straight
-    # 3. three of a kind
-    # 2. two pair
-    # 1. pair
-    # 0. high card
+    def remove_card(self, card):
+        self._cards.remove(card)
 
+    def get_ranks(self):
+        ranks = [card.get_rank() for card in self._cards]
+        return ranks
 
-    # place-holder, delete later
-    score = 0
+    def get_suits(self):
+        suits = [card.get_suit() for card in self._cards]
+        return suits
 
+    def score_hand(self):
+        # hand order:
+        # 9. five of a kind (not possible without wilds)
+        # 8. straight flush (includes royal flush)
+        # 7. four of a kind
+        # 6. full house
+        # 5. flush
+        # 4. straight
+        # 3. three of a kind
+        # 2. two pair
+        # 1. pair
+        # 0. high card
 
-    # check if enough cards for flush
-    ranks = card2rank(hand)
-    suits = card2suit(hand)
-    suits_count = np.bincount(suits, minlength=NUM_SUITS)
-    ranks_count = np.bincount(ranks, minlength=NUM_RANKS)
-    straight_count = np.sum((ranks_count > 0) * STRAIGHTS, axis=1)
-    # check for five of a kind
-    if np.any(ranks_count) >= 5:
-        rank_ix = np.argmax(ranks_count[::-1])
-        score = 9 + (rank_ix-NUM_RANKS) / NUM_RANKS
-    # check for straight flush
-    elif np.any(suits_count) >= 5 and np.any(straight_count) >= 5:
-        # check that cards from the straight also make the flush
-        straight_ix = np.nonzero(straight_count == 5)[0]
-        for this_straight in straight_ix[::-1]:
-            for this_suit in NUM_SUITS:
-                has_all_ranks = True
-                for ranks in STRAIGHTS[this_straight, :]:
-                    pass
-    return score
+        # place-holder, delete later
+        score = 0
+
+        # get the ranks and suits
+        ranks = self.get_ranks()
+        suits = self.get_suits()
+
+        # count the number of suits and get unique sets for straights
+        suits_count = Counter(suits)
+        ranks_count = Counter(ranks)
+        ranks_set   = set(ranks)
+
+        # determine if there is a flush or straight
+        has_flush    = max(suits_count.values()) >= 5
+        has_straight = ranks_set in STRAIGHTS
+
+        # check for five of a kind
+        if max(ranks_count.values()) >= 5:
+            pass
+            #rank_ix = np.argmax(ranks_count[::-1])
+            #score = 9 + (rank_ix-NUM_RANKS) / NUM_RANKS
+        # check for straight flush
+        #elif np.any(suits_count) >= 5 and np.any(straight_count) >= 5:
+        #    # check that cards from the straight also make the flush
+        #    straight_ix = np.nonzero(straight_count == 5)[0]
+        #    for this_straight in straight_ix[::-1]:
+        #        for this_suit in NUM_SUITS:
+        #            has_all_ranks = True
+        #            for ranks in STRAIGHTS[this_straight, :]:
+        #                pass
+        return score
 
 #%% Unit test
 if __name__ == '__main__':
-    hand1 = [(Rank.ACE, Suit.SPADES), (Rank.KING, Suit.SPADES), (Rank.QUEEN, Suit.HEARTS), \
-        (Rank.JACK, Suit.DIAMONDS), (Rank.TEN, Suit.CLUBS)]
-    hand = np.array([ranksuit2card(x, y) for (x,y) in hand1])
-    print_cards(hand)
+    hand = Hand([Card(Rank.ACE, Suit.SPADES), Card(Rank.KING, Suit.SPADES), Card(Rank.QUEEN, Suit.HEARTS), \
+        Card(Rank.JACK, Suit.DIAMONDS), Card(Rank.TEN, Suit.CLUBS)])
+    print(hand)
     unittest.main(module='dstauffman.games.test_cards', exit=False)
     doctest.testmod(verbose=False)

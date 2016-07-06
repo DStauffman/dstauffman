@@ -9,20 +9,21 @@ Notes
 """
 
 #%% Imports
-import numpy as np
 import unittest
-
 import dstauffman.games.cards as cards
+
+#%% Local aliases
 R = cards.Rank
 S = cards.Suit
+H = cards.Hand
+C = cards.Card
 
-hands1 = [\
-    [(R.ACE, S.SPADES), (R.KING, S.SPADES), (R.QUEEN, S.SPADES), (R.JACK, S.SPADES), (R.TEN, S.SPADES)],\
-    [(R.FIVE, S.SPADES), (R.THREE, S.SPADES), (R.FOUR, S.SPADES), (R.TWO, S.SPADES), (R.ACE, S.SPADES)],\
-    #[(R.ACE, S.SPADES), (R.KING, S.SPADES), (R.QUEEN, S.HEARTS), (R.JACK, S.DIAMONDS), (R.TEN, S.CLUBS)],\
-    #[(R.ACE, S.SPADES), (R.KING, S.SPADES), (R.QUEEN, S.HEARTS), (R.JACK, S.DIAMONDS), (R.TEN, S.CLUBS)],\
+hands = [\
+    H([C(R.ACE, S.SPADES), C(R.KING, S.SPADES), C(R.QUEEN, S.SPADES), C(R.JACK, S.SPADES), C(R.TEN, S.SPADES)]),\
+    H([C(R.FIVE, S.SPADES), C(R.THREE, S.SPADES), C(R.FOUR, S.SPADES), C(R.TWO, S.SPADES), C(R.ACE, S.SPADES)]),\
+    #H([C(R.ACE, S.SPADES), C(R.KING, S.SPADES), C(R.QUEEN, S.HEARTS), C(R.JACK, S.DIAMONDS), C(R.TEN, S.CLUBS)]),\
+    #H([C(R.ACE, S.SPADES), C(R.KING, S.SPADES), C(R.QUEEN, S.HEARTS), C(R.JACK, S.DIAMONDS), C(R.TEN, S.CLUBS)]),\
     ]
-hands = [np.array([cards.ranksuit2card(x, y) for (x,y) in hand1], dtype=int) for hand1 in hands1]
 
 #%% eval_hand
 class Test_eval_hand(unittest.TestCase):
@@ -36,7 +37,7 @@ class Test_eval_hand(unittest.TestCase):
     def test_scores(self):
         scores = []
         for hand in hands:
-            scores.append(cards.eval_hand(hand))
+            scores.append(hand.score_hand())
         #print(scores)
         # TODO: finish writing test
 
