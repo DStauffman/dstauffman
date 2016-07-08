@@ -81,7 +81,7 @@ class OptiOpts(Frozen):
         self.model_func      = None
         self.model_args      = None # {}
         self.cost_func       = None
-        self.cost_args       = None # {}
+        self.cost_args       = None # {} # TODO: add note, these are additional cost args, plus model_args
         self.get_param_func  = None
         self.set_param_func  = None
         self.output_loc      = ''
@@ -262,7 +262,7 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
     bpe_results.num_evals += 1
 
     # Run the cost function to get the innovations
-    innovs = opti_opts.cost_func(results, **cost_args)
+    innovs = opti_opts.cost_func(results, **model_args, **cost_args)
 
     # Set any NaNs to zero so that they are ignored
     innovs[np.isnan(innovs)] = 0
@@ -287,7 +287,8 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 
     """
     # hard-coded values
-    min_step = 1e-4
+    min_step = 1e-3
+    sqrt_eps = np.sqrt(np.finfo(float).eps)
 
     # alias useful values
     num_param     = cur_results.params.size
@@ -306,10 +307,9 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     # set parameter pertubation (Reference 1, section 8.4.3)
     if normalized:
         perturb_fact  = 1 # TODO: how to get perturb_fact?
-        sqrt_eps      = np.sqrt(np.finfo(float).eps)
         param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
-        param_perturb = param_signs * np.maximum(np.abs(cur_results.params), min_step)
+        param_perturb = param_signs * np.maximum(np.abs(cur_results.params)*sqrt_eps, min_step)
 
     temp_params_plus  = cur_results.params.copy()
     temp_params_minus = cur_results.params.copy()

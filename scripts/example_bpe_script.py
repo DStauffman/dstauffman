@@ -9,7 +9,6 @@ Notes
 # pylint: disable=E1101, C0103, C0326
 
 #%% Imports
-import copy
 from datetime import datetime
 import numpy as np
 import os
@@ -59,7 +58,7 @@ def truth(time, magnitude=5, frequency=10, phase=90):
     return magnitude * np.sin(2*np.pi*frequency*time/1000 + phase*np.pi/180)
 
 #%% Functions - cost_wrapper
-def cost_wrapper(results_data, *, results_time, truth_time, truth_data):
+def cost_wrapper(results_data, *, results_time, truth_time, truth_data, sim_params):
     r"""Example Cost wrapper for the model."""
     # Pull out overlapping time points and indices
     (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
@@ -140,39 +139,12 @@ if __name__=='__main__':
     opti_opts.params.append(dcs.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60))
     opti_opts.params.append(dcs.OptiParam('phase', best=180, min_=0, max_=360, typical=100))
 
-    opti_opts_copy = copy.deepcopy(opti_opts)
-
-    # optional tests
-    if False:
-        temp1 = sim_model(sim_params)
-        temp2 = opti_opts.model_func(sim_params)
-        temp3 = opti_opts.model_func(**opti_opts.model_args)
-        np.testing.assert_array_almost_equal(temp1, temp2)
-        np.testing.assert_array_almost_equal(temp1, temp3)
-
-        names = dcs.OptiParam.get_names(opti_opts.params)
-        temp4 = get_parameter(sim_params, names=names)
-
-        assert temp4[0] == 2
-        temp_args = copy.deepcopy(opti_opts.model_args)
-        assert temp_args['sim_params'].magnitude == 2
-        assert temp_args['sim_params'].frequency == 20
-        set_parameter(names=names, values=[3, 24], **temp_args)
-        #opti_opts.set_param_func(names=names, values=[3], **temp_args)
-        assert temp_args['sim_params'].magnitude == 3
-        assert temp_args['sim_params'].frequency == 24
-        temp5 = get_parameter(names=names, **temp_args)
-        assert temp5[0] == 3
-
     # Run code
     if rerun:
         (bpe_results, results) = dcs.run_bpe(opti_opts)
     else:
         bpe_results = dcs.BpeResults.load(filename)
         results     = sim_model(sim_params) # just re-run, nothing is actually saved by this model
-
-    # check that running didn't change the structures
-    dcs.compare_two_classes(opti_opts, opti_opts_copy, names=['Model', 'Orig'])
 
     # Plot results
     # build opts
@@ -186,5 +158,6 @@ if __name__=='__main__':
         truth_time=truth_time, truth_data=truth_data)
 
     # make BPE plots
-    plots = {'innovs': True}
-    dcs.plot_bpe_results(bpe_results, opti_opts, opts, plots=plots)
+    bpe_plots = {'innovs': True, 'convergence': False, 'correlation': True, 'info_svd': True, \
+        'covariance': False}
+    dcs.plot_bpe_results(bpe_results, opti_opts, opts, plots=bpe_plots)
