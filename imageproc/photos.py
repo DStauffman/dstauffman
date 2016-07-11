@@ -50,7 +50,8 @@ def find_missing_nums(folder, old_picasa=True, digit_check=True, \
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, find_missing_nums
+    >>> from dstauffman import get_data_dir
+    >>> from dstauffman.imageproc import find_missing_nums
     >>> folder = get_data_dir()
     >>> find_missing_nums(folder)
 
@@ -130,7 +131,8 @@ def find_unexpected_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, find_unexpected_ext
+    >>> from dstauffman import get_data_dir
+    >>> from dstauffman.imageproc import find_unexpected_ext
     >>> folder = get_data_dir()
     >>> find_unexpected_ext(folder) # doctest: +ELLIPSIS
     Finding any unexpected file extensions...
@@ -168,7 +170,8 @@ def rename_old_picasa_files(folder):
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, rename_old_picasa_files
+    >>> from dstauffman import get_data_dir
+    >>> from dstauffman.imageproc import rename_old_picasa_files
     >>> folder = get_data_dir()
     >>> rename_old_picasa_files(folder)
 
@@ -216,7 +219,8 @@ def rename_upper_ext(folder, allowable_extensions=ALLOWABLE_EXTENSIONS):
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, rename_upper_ext
+    >>> from dstauffman import get_data_dir
+    >>> from dstauffman.imageproc import rename_upper_ext
     >>> folder = get_data_dir()
     >>> rename_upper_ext(folder)
     Searching for file extensions to rename...
@@ -266,7 +270,8 @@ def find_long_filenames(folder):
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, find_long_filenames
+    >>> from dstauffman import get_data_dir
+    >>> from dstauffman.imageproc import find_long_filenames
     >>> folder = get_data_dir()
     >>> find_long_filenames(folder) # doctest: +ELLIPSIS
     Finding long filenames...
@@ -343,7 +348,8 @@ def batch_resize(folder, max_width=8192, max_height=8192, \
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, batch_resize
+    >>> from dstauffman import get_data_dir
+    >>> from dstauffman.imageproc import batch_resize
     >>> folder = get_data_dir()
     >>> batch_resize(folder, max_width=2048, max_height=2048) # doctest: +ELLIPSIS
     Processing folder: "..."
@@ -458,7 +464,8 @@ def convert_tif_to_jpg(folder, max_width=8192, max_height=8192, replace=False, e
     Examples
     --------
 
-    >>> from dstauffman import get_data_dir, convert_tif_to_jpg
+    >>> from dstauffman import get_data_dir
+    >>> from dstauffman.imageproc import convert_tif_to_jpg
     >>> folder = get_data_dir()
     >>> convert_tif_to_jpg(folder) # doctest: +ELLIPSIS
     Processing folder: "..."
@@ -571,7 +578,8 @@ def number_files(folder, prefix='Image ', start=1, digits=2, process_extensions=
 
     Examples
     --------
-    >>> from dstauffman import number_files, get_data_dir
+    >>> from dstauffman import get_data_dir
+    >>> from dstauffman.imageproc import number_files
     >>> folder = get_data_dir()
     >>> prefix = 'Photo '
     >>> start  = 5
@@ -617,5 +625,5 @@ def number_files(folder, prefix='Image ', start=1, digits=2, process_extensions=
 #%% Unit test
 if __name__ == '__main__':
     # run the tests
-    unittest.main(module='tests.test_photos', exit=False)
+    unittest.main(module='dstauffman.imageproc.test_photos', exit=False)
     doctest.testmod(verbose=False)

@@ -32,6 +32,7 @@ if __name__ == '__main__':
         test_suite = loader.discover('dstauffman.apps')
         test_suite.addTests(loader.discover('dstauffman.archery'))
         test_suite.addTests(loader.discover('dstauffman.games'))
+        test_suite.addTests(loader.discover('dstauffman.imageproc'))
         test_suite.addTests(loader.discover('dstauffman.tests'))
     else:
         test_suite = loader.discover('dstauffman.tests')

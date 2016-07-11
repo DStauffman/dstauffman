@@ -21,9 +21,6 @@ from .plotting  import Plotter, Opts, MyCustomToolbar, ColorMap, close_all, get_
                            plot_time_history, plot_correlation_matrix, plot_multiline_history, \
                            plot_bar_breakdown, storefig, titleprefix, disp_xlimits, setup_plots, \
                            figmenu, rgb_ints_to_hex
-from .photos    import find_missing_nums, find_unexpected_ext, rename_old_picasa_files, \
-                           rename_upper_ext, find_long_filenames, batch_resize, \
-                           convert_tif_to_jpg, number_files
 from .quat      import qrot, quat_angle_diff, quat_from_euler, quat_interp, quat_inv, quat_mult, \
                        quat_norm, quat_prop, quat_times_vector, quat_to_dcm, quat_to_euler
 from .stats     import convert_annual_to_monthly_probability, \
