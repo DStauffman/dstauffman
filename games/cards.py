@@ -189,6 +189,7 @@ class Hand(object):
         text = ', '.join(str(card) for card in self._cards)
         return text
 
+    @property
     def num_cards(self):
         return len(self._cards)
 
@@ -262,55 +263,130 @@ class WarGame(object):
     r"""
     The game of War implemented as a class.
     """
+    war_downs = 3
     def __init__(self):
         r"""
         Deal the cards to start the game.
         """
-        deck = Deck()
-        deck.shuffle()
+        # display a banner
+        print('************')
+        print('Playing war!')
+        # initialize variables
         self._hand1 = Hand()
         self._hand2 = Hand()
-        self._hand1_hold = Hand()
-        self._hand2_hold = Hand()
+        self._hold1 = Hand()
+        self._hold2 = Hand()
+        self._pot   = Hand()
+        self.move   = 0
+        # create and distribute cards
+        deck = Deck()
+        deck.shuffle()
         while deck.count_remaining_cards():
             self._hand1.add_card(deck.get_next_card())
             self._hand2.add_card(deck.get_next_card())
 
     def play_move(self):
+        r"""
+        Make a single move.
+        """
+        # increment the move number
+        self.move += 1
+        # get the two cards to play
         card1 = self._hand1.play_card()
         card2 = self._hand2.play_card()
+        # carry a pot of cards to win, allowing for wars to extend beyond one hand
+        self._pot.add_card(card1)
+        self._pot.add_card(card2)
+        # determine which card won, with ties going to wars
         if card1 > card2:
-            print('{} beats {}'.format(card1, card2))
-            self._hand1_hold.add_card(card1)
-            self._hand1_hold.add_card(card2)
+            print('Move {}: {} beats {}'.format(self.move, card1, card2), end='')
+            while self._pot.num_cards > 0:
+                self._hold1.add_card(self._pot.play_card())
+            self._check_shuffle()
+            self.print_card_count()
         elif card1 < card2:
-            print('{} loses {}'.format(card1, card2))
-            self._hand2_hold.add_card(card1)
-            self._hand2_hold.add_card(card2)
+            print('Move {}: {} loses {}'.format(self.move, card1, card2), end='')
+            while self._pot.num_cards > 0:
+                self._hold2.add_card(self._pot.play_card())
+            self._check_shuffle()
+            self.print_card_count()
         else:
-            print('{} wars {}'.format(card1, card2))
+            print('Move {}: {} wars {}'.format(self.move, card1, card2), end='')
+            self._check_shuffle()
+            self._play_war()
 
     def _check_shuffle(self):
-        pass
+        r"""
+        Checks to see a player is out of cards, and if so shuffles their hold cards.
+        """
+        # If you have no cards in your hand, then shuffle your hold cards and then transfer them to
+        # the hand
+        if self._hand1.num_cards == 0:
+            self._hold1.shuffle()
+            while self._hold1.num_cards > 0:
+                self._hand1.add_card(self._hold1.play_card())
+        if self._hand2.num_cards == 0:
+            self._hold2.shuffle()
+            while self._hold2.num_cards > 0:
+                self._hand2.add_card(self._hold2.play_card())
 
     def _play_war(self):
-        pass
+        r"""
+        Plays the down cards when a war happens.
+        """
+        print(' Down cards (x{})'.format(self.war_downs), end='')
+        for i in range(self.war_downs):
+            self._pot.add_card(self._hand1.play_card())
+            self._pot.add_card(self._hand2.play_card())
+            self._check_shuffle()
+            if self.is_winner():
+                self.print_card_count()
+                return
+        self.print_card_count()
+        self.play_move()
 
     def is_winner(self):
-        return self._hand1.num_cards() == 0 or self._hand2.num_cards() == 0
+        r"""
+        Determines if their is a winner (because someone is out of cards)
+        """
+        return self._hand1.num_cards == 0 or self._hand2.num_cards == 0
 
     def who_won(self):
-        if self._hand1.num_cards() == 52 and self._hand2.num_cards() == 0:
+        r"""
+        Determines who won (based on someone being out of cards, and someone else
+        still having cards.
+
+        Notes
+        -----
+        #.  A game can theoretically draw with repeated wars such that both players run out of cards.
+        """
+        n1 = self._hand1.num_cards
+        n2 = self._hand2.num_cards
+        if n1 > 0 and n2 == 0:
             return 'Player 1 won!'
-        elif self._hand1.num_cards() == 0 and self._hand2.num_cards() == 52:
+        elif n1 == 0 and n2 > 0:
             return 'Player 2 won!'
+        elif n1 == 0 and n2 == 0:
+            return 'Draw game!'
         else:
-            raise ValueError('No one has won yet!')
+            print('Card count: ', end='')
+            self.print_card_count()
+            raise ValueError('Undetermined winner!')
 
     def play_game(self):
+        r"""
+        Wrapper function that plays a game until a winner is determined.
+        """
         while not self.is_winner():
             self.play_move()
         print(self.who_won())
+
+    def print_card_count(self):
+        r"""
+        Prints the current number of cards that each player has.
+        """
+        print(' ({} to {})'.format(self._hand1.num_cards+self._hold1.num_cards, \
+            self._hand2.num_cards+self._hold2.num_cards))
 
 #%% Unit test
 if __name__ == '__main__':
@@ -326,5 +402,5 @@ if __name__ == '__main__':
     doctest.testmod(verbose=False)
 
     # play War
-    war = WarGame()
+    #war = WarGame()
     #war.play_game()

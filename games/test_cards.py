@@ -108,7 +108,7 @@ class Test_Hand(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        self.hand = cards.Hand()
+        self.hand  = cards.Hand()
         self.card1 = cards.Card(R.ACE, S.SPADES)
         self.card2 = cards.Card(R.FOUR, S.HEARTS)
 
@@ -116,40 +116,40 @@ class Test_Hand(unittest.TestCase):
         self.assertEqual(len(self.hand._cards), 0)
 
     def test_num_cards(self):
-        self.assertEqual(self.hand.num_cards(), 0)
+        self.assertEqual(self.hand.num_cards, 0)
         self.hand.add_card(self.card1)
         self.assertEqual(len(self.hand._cards), 1)
-        self.assertEqual(self.hand.num_cards(), 1)
+        self.assertEqual(self.hand.num_cards, 1)
 
     def test_add_card(self):
         self.hand.add_card(self.card1)
-        self.assertEqual(self.hand.num_cards(), 1)
+        self.assertEqual(self.hand.num_cards, 1)
         self.assertTrue(self.hand._cards[0] is self.card1)
 
     def test_play_card(self):
         self.hand.add_card(self.card1)
         self.hand.add_card(self.card2)
         self.hand.add_card(self.card2)
-        self.assertEqual(self.hand.num_cards(), 3)
+        self.assertEqual(self.hand.num_cards, 3)
         self.assertTrue(self.hand.play_card() is self.card2)
-        self.assertEqual(self.hand.num_cards(), 2)
+        self.assertEqual(self.hand.num_cards, 2)
         self.assertTrue(self.hand.play_card() is self.card2)
-        self.assertEqual(self.hand.num_cards(), 1)
+        self.assertEqual(self.hand.num_cards, 1)
         self.assertTrue(self.hand.play_card() is self.card1)
-        self.assertEqual(self.hand.num_cards(), 0)
+        self.assertEqual(self.hand.num_cards, 0)
         with self.assertRaises(IndexError):
             self.hand.play_card()
 
     def test_remove_card(self):
         self.hand.add_card(self.card1)
         self.hand.add_card(self.card2)
-        self.assertEqual(self.hand.num_cards(), 2)
+        self.assertEqual(self.hand.num_cards, 2)
         self.assertTrue(self.hand._cards[-1] is self.card2)
         self.hand.remove_card(self.card2)
-        self.assertEqual(self.hand.num_cards(), 1)
+        self.assertEqual(self.hand.num_cards, 1)
         self.assertTrue(self.hand._cards[-1] is self.card1)
         self.hand.remove_card(self.card1)
-        self.assertEqual(self.hand.num_cards(), 0)
+        self.assertEqual(self.hand.num_cards, 0)
         with self.assertRaises(ValueError):
             self.hand.remove_card(self.card1)
 
