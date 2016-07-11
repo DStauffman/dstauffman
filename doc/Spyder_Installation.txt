@@ -103,7 +103,7 @@ backend.qt4  : PyQt4        # PyQt4 | PySide
 
 
 Farther down (search for it):
-figure.max_open_warning : 100 # Was 20
+figure.max_open_warning : 80 # Was 20
 
 
 ######################
@@ -117,5 +117,4 @@ C:\Users\dcstauff\Documents\GitHub;
 
 ######################
 Additional modules
-cmd: easy_install coverage
-cmd: easy_install Sphinx
+cmd: pip install coverage
