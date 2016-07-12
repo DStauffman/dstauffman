@@ -20,9 +20,10 @@ import os
 from scipy.linalg import norm
 import time
 import unittest
-from dstauffman.classes import Frozen, SaveAndLoad
-from dstauffman.plotting import Opts, plot_correlation_matrix, plot_multiline_history
-from dstauffman.utils import rss, setup_dir
+from dstauffman.classes  import Frozen, SaveAndLoad
+from dstauffman.plotting import Opts, plot_correlation_matrix, plot_multiline_history, \
+                                    plot_bpe_convergence
+from dstauffman.utils    import rss, setup_dir
 
 #%% Logger
 class Logger(Frozen):
@@ -104,11 +105,17 @@ class OptiOpts(Frozen):
         self.trust_radius    = 1.0
 
     def __eq__(self, other):
+        r"""
+        Checks for equality based on the values of the fields.
+        """
+        # if not of the same type, then they are not equal
         if type(other) != type(self):
             return False
+        # loop through the fields, and if any are not equal, then it's not equal
         for key in vars(self):
             if getattr(self, key) != getattr(other, key):
                 return False
+        # if it made it all the way through the fields, then things must be equal
         return True
 
 #%% OptiParam
@@ -126,13 +133,18 @@ class OptiParam(Frozen):
 
     def __eq__(self, other):
         r"""
-        Checks for equality between two OpitParam instances.
+        Checks for equality between two OptiParam instances.
         """
+        # if not of the same type, then they are not equal
         if type(other) != type(self):
             return False
+        # loop through the fields, and if any are not equal (or both NaNs), then it's not equal
         for key in vars(self):
-            if getattr(self, key) != getattr(other, key):
+            v1 = getattr(self, key)
+            v2 = getattr(other, key)
+            if v1 != v2 and (not np.isnan(v1) or not np.isnan(v2)):
                 return False
+        # if it made it all the way through the fields, then things must be equal
         return True
 
     @staticmethod
@@ -172,9 +184,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         self.begin_cost   = None
         self.num_evals    = 0
         self.num_iters    = 0
-        #self.params       = None
-        #self.costs        = None
-        #self.step_info    = None
+        self.costs        = []
         self.correlation  = None
         self.info_svd     = None
         self.covariance   = None
@@ -188,7 +198,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         """
         # fields to print
         keys = ['begin_params', 'begin_cost', 'num_evals', 'num_iters', 'final_params', \
-            'final_cost', 'correlation', 'info_svd', 'covariance']
+            'final_cost', 'correlation', 'info_svd', 'covariance', 'costs']
         # initialize output text
         text = [' BpeResults:']
         # loop through fields
@@ -245,6 +255,17 @@ def _print_divider(new_line=True):
     # print with or without newline
     print(text) if new_line else print(text[1:])
 
+#%% _pprint_params
+def _pprint_params(names, values):
+    r"""
+    Prints the current name and value pairs for all the estimated parameters.
+    """
+    max_len = max(len(x) for x in names)
+    for (ix, this_name) in enumerate(names):
+        this_value = values[ix]
+        pad = max_len - len(this_name)
+        print('    ' + this_name + ' ' + ' '*pad + '= {:g}'.format(this_value))
+
 #%% _function_wrapper
 def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
     r"""
@@ -291,6 +312,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     sqrt_eps = np.sqrt(np.finfo(float).eps)
 
     # alias useful values
+    log_level     = Logger().get_level()
     num_param     = cur_results.params.size
     num_innov     = cur_results.innovs.size
     param_signs   = np.sign(cur_results.params)
@@ -327,6 +349,8 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 
         # call model with new parameters
         opti_opts.set_param_func(names=names, values=temp_params, **model_args)
+        if log_level >= 8:
+            print('  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
         (_, new_innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 
         if two_sided:
@@ -335,6 +359,8 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
             else:
                 temp_params = temp_params_minus.copy()
             opti_opts.set_param_func(names=names, values=temp_params, **model_args)
+            if log_level >= 8:
+                print('  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
             (_, new_innovs_minus) = _function_wrapper(opti_opts, bpe_results, model_args)
 
         # compute the jacobian
@@ -707,7 +733,7 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
                 try_again = True
 
         if log_level >= 8:
-            print(' Tried a {} step of length: {}.'.format(step_type, step_len))
+            print(' Tried a {} step of length: {}, (with scale: {}).'.format(step_type, step_len, step_scale))
             print(' New trial cost: {}'.format(trial_cost))
             print(' With result: {}'.format(step_resolution))
 
@@ -734,6 +760,10 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
         print('Analyzing final results.')
     if log_level >= 8:
         print('There were a total of {} function model evaluations.'.format(bpe_results.num_evals))
+
+    # exit if nothing else to analyze
+    if opti_opts.max_iters == 0:
+        return
 
     # Compute values of un-normalized parameters.
     if normalized:
@@ -786,7 +816,7 @@ def validate_opti_opts(opti_opts):
 
     >>> from dstauffman import OptiOpts, OptiParam, validate_opti_opts
     >>> opti_opts = OptiOpts()
-    >>> opti_opts.params = [OptiParam("param[:].tb.tb_new_inf['beta']", 0.1375, 0.1, 0.2, typical=0.14)]
+    >>> opti_opts.params = [OptiParam("param[:].tb.tb_new_inf['beta']")]
     >>> #is_valid = validate_opti_opts(opti_opts) # TODO: fix this
     Validating optimization options.
 
@@ -896,8 +926,7 @@ def run_bpe(opti_opts):
     bpe_results.begin_params = cur_results.params.copy()
     bpe_results.begin_innovs = cur_results.innovs.copy()
     bpe_results.begin_cost   = cur_results.cost
-    #bpe_results.costs        = [cur_results.cost]
-    #bpe_results.params       = [cur_results.params.copy()]
+    bpe_results.costs.append(cur_results.cost)
 
     # display initial status
     if log_level >= 6:
@@ -912,6 +941,8 @@ def run_bpe(opti_opts):
             setup_dir(folder) # pragma: no cover
 
     # Do some stuff
+    convergence = False
+    jacobian = 0
     while iter_count <= opti_opts.max_iters:
         # update status
         if log_level >= 2:
@@ -949,6 +980,7 @@ def run_bpe(opti_opts):
         # search for parameter set that is better than the current set
         _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param, jacobian, \
             gradient, hessian)
+        bpe_results.costs.append(cur_results.cost)
 
         # save results from this iteration
         if is_saving:
@@ -976,11 +1008,15 @@ def run_bpe(opti_opts):
     bpe_results.final_innovs = cur_results.innovs.copy()
     bpe_results.final_params = cur_results.params.copy()
     bpe_results.final_cost   = cur_results.cost
+    bpe_results.costs.append(cur_results.cost)
 
     # display final status
     if log_level >= 6:
         print(' Final parameters: {}'.format(bpe_results.final_params))
         print(' Final cost: {}'.format(bpe_results.final_cost))
+    if log_level >= 8:
+        print(' Final individual parameters:')
+        _pprint_params(names, bpe_results.final_params)
 
     # analyze BPE results
     _analyze_results(opti_opts, bpe_results, jacobian)
@@ -1045,7 +1081,11 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
         elif log_level >= 2:
             print("Data isn't available for Innovations plot.")
     if plots['convergence']:
-        pass # TODO: plot the bpe_results.params and bpe_results.costs vs bpe_results.num_iters and bpe_results.step_info
+        if len(bpe_results.costs) == 0:
+            print("Data isn't available for convergence plot.")
+        else:
+            fig = plot_bpe_convergence(bpe_results.costs, opts=opts)
+            figs.append(fig)
 
     if plots['correlation']:
         if bpe_results.correlation is None:

@@ -193,7 +193,7 @@ class Test_OptiParam(unittest.TestCase):
         opti_param = dcs.OptiParam('test')
         params = [opti_param, opti_param]
         best = dcs.OptiParam.get_array(params)
-        np.testing.assert_array_equal(best, np.array([0, 0]))
+        np.testing.assert_array_equal(best, np.array([np.nan, np.nan]))
 
     def test_get_names(self):
         opti_param1 = dcs.OptiParam('test1')
@@ -261,6 +261,24 @@ class Test__print_divider(unittest.TestCase):
             dcs.bpe._print_divider(new_line=False)
         lines = out.getvalue().split('\n')
         self.assertEqual(lines[0], self.output)
+
+#%% _pprint_params
+class Test__pprint_params(unittest.TestCase):
+    r"""
+    Tests the _pprint_params function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.names  = ['Name 1', 'Longer name 2', 'Name 42']
+        self.values = [0.10000000002, 1999999999, 1e-14]
+        self.lines  = ['    Name 1        = 0.1', '    Longer name 2 = 2e+09', '    Name 42       = 1e-14', '']
+
+    def test_nominal(self):
+        with dcs.capture_output() as (out, _):
+            dcs.bpe._pprint_params(self.names, self.values)
+        lines = out.getvalue().split('\n')
+        for i in range(len(self.lines)):
+            self.assertEqual(lines[i], self.lines[i])
 
 #%% _function_wrapper
 class Test__function_wrapper(unittest.TestCase):
