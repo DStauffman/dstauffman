@@ -580,7 +580,7 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
         raise ValueError('Incorrectly sized labels.')
 
     # Determine if symmetric
-    if m == n and np.all(np.abs(data - np.transpose(data)) < precision):
+    if m == n and np.all((np.abs(data - np.transpose(data)) < precision) | np.isnan(data)):
         is_symmetric = True
     else:
         is_symmetric = False
@@ -617,12 +617,10 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
     for i in range(m):
         for j in range(n):
             if not plot_lower_only or (i <= j):
-                ax.add_patch(Rectangle((box_size*i,box_size*j),box_size, box_size, \
-                    color=cm.get_color(data[j, i])))
+                if not np.isnan(data[j, i]):
+                    ax.add_patch(Rectangle((box_size*i,box_size*j),box_size, box_size, \
+                        color=cm.get_color(data[j, i])))
                 if label_values:
-                    #ax.text(box_size*i+box_size/2, box_size*j+box_size/2, '99', \
-                    #    verticalalignment='center', horizontalalignment='center', \
-                    #    transform=ax.transAxes, color='black', fontsize=15)
                     ax.annotate('{:.2g}'.format(data[j,i]), xy=(box_size*i + box_size/2, box_size*j + box_size/2), \
                         xycoords='data', horizontalalignment='center', \
                         verticalalignment='center', fontsize=15)
@@ -633,7 +631,7 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
     # set limits and tick labels
     plt.xlim(0, m)
     plt.ylim(0, n)
-    plt.xticks(np.arange(0, m)+box_size/2, xlab)
+    plt.xticks(np.arange(0, m)+box_size/2, xlab, rotation=90)
     plt.yticks(np.arange(0, n)+box_size/2, ylab)
     # reverse the y axis
     ax.invert_yaxis()

@@ -748,6 +748,9 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
 #%% _analyze_results
 def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     r"""Analyze the results."""
+    # hard-coded values
+    min_eig = 1e-14 # minimum allowed eigenvalue
+
     # alias the log level
     log_level = Logger().get_level()
 
@@ -777,7 +780,8 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
         # note, python has x = U*S*Vh instead of U*S*V', when V = Vh'
         (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian @ normalize_matrix, full_matrices=False)
         V_jacobian = Vh_jacobian.T
-        covariance = V_jacobian @ np.diag(S_jacobian**-2) @ Vh_jacobian
+        temp = np.power(S_jacobian, -2, out=np.zeros(S_jacobian.shape), where=S_jacobian > min_eig)
+        covariance = V_jacobian @ np.diag(temp) @ Vh_jacobian
     except MemoryError:
         if log_level >= 6:
             print('Singular value decomposition of Jacobian failed.')
@@ -785,7 +789,9 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
         covariance = np.inv(jacobian.T @ jacobian)
 
     param_one_sigmas = np.sqrt(np.diag(covariance))
+    param_one_sigmas[param_one_sigmas < min_eig] = np.nan
     correlation    = covariance / (param_one_sigmas[:, np.newaxis] @ param_one_sigmas[np.newaxis, :])
+    covariance[np.isnan(correlation)] = np.nan
 
     # Update SVD and covariance for the normalized parameters (but correlation remains as calculated above)
     if normalized:
@@ -1038,7 +1044,6 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
     Plots the results of estimation.
     """
     # hard-coded options
-    colormap = 'cool'
     label_values = False
     # get the logging level
     log_level = Logger.get_level()
@@ -1092,7 +1097,7 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
             print("Data isn't avaliable for correlation plot.")
         else:
             fig = plot_correlation_matrix(bpe_results.correlation, labels=names, opts=opts, \
-                matrix_name='Correlation Matrix', cmin=-1, colormap=colormap, plot_lower_only=True, \
+                matrix_name='Correlation Matrix', cmin=-1, colormap='bwr', plot_lower_only=True, \
                 label_values=label_values)
             figs.append(fig)
 
@@ -1101,7 +1106,7 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
             print("Data isn't avaliable for infomation SVD plot.")
         else:
             fig = plot_correlation_matrix(np.abs(bpe_results.info_svd), opts=opts, cmin=0, \
-                matrix_name='Information SVD Matrix', colormap=colormap, label_values=label_values, \
+                matrix_name='Information SVD Matrix', colormap='cool', label_values=label_values, \
                 labels=[['{}'.format(i+1) for i in range(len(names))], names])
             figs.append(fig)
 
@@ -1109,9 +1114,10 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
         if bpe_results.covariance is None:
             print("Data isn't avaliable for covariance plot.")
         else:
+            max_mag = np.nanmax(np.abs(bpe_results.covariance))
             fig = plot_correlation_matrix(bpe_results.covariance, labels=names, opts=opts, \
-                matrix_name='Covariance Matrix', cmin=-1, colormap=colormap, plot_lower_only=True, \
-                label_values=label_values)
+                matrix_name='Covariance Matrix', cmin=-max_mag, cmax=max_mag, colormap='bwr', \
+                plot_lower_only=True, label_values=label_values)
             figs.append(fig)
     return figs
 
