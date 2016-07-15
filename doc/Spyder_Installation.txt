@@ -73,7 +73,7 @@ Add an __init__ method to the SpyderLib class.  Include nosigint.
 
 class SpyderPdb(pdb.Pdb):
     def __init__(self, completekey='tab', stdin=None, stdout=None, skip=None, nosigint=False):
-       super(pdb.Pdb, self).__init__()
+        super(pdb.Pdb, self).__init__()
 
 
 ######################
