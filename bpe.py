@@ -179,6 +179,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     Results of the Batch Parameter Estimator.
     """
     def __init__(self):
+        self.param_names  = None
         self.begin_params = None
         self.begin_innovs = None
         self.begin_cost   = None
@@ -207,6 +208,13 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         # return everything as a single string
         return '\n'.join(text)
 
+    def pprint(self):
+        names = [name.decode('utf-8') for name in self.param_names]
+        print('Initial parameters:')
+        _pprint_args(names, self.begin_params)
+        print('Final parameters:')
+        _pprint_args(names, self.final_params)
+
 #%% CurrentResults
 class CurrentResults(Frozen, metaclass=SaveAndLoad):
     r"""
@@ -231,6 +239,29 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
         text.append('  Best Params: {}'.format(self.params))
         return '\n'.join(text)
 
+#%% _pprint_args
+def _pprint_args(names, values):
+    r"""
+    Prints the current name and value pairs for all the estimated parameters.
+    """
+    # get the maximum length of any parameter name
+    max_len = max(len(x) for x in names)
+    # initialize the lines
+    lines = []
+    # loop through all the names
+    for (ix, this_name) in enumerate(names):
+        # get this value
+        this_value = values[ix]
+        # find how much to pad this particular name
+        pad = max_len - len(this_name)
+        # append this line
+        lines.append('    ' + this_name + ' ' + ' '*pad + '= {:g}'.format(this_value))
+    # combine all the lines into one string
+    text = '\n'.join(lines)
+    # print the resulting string and return it
+    print(text)
+    return text
+
 #%% _print_divider
 def _print_divider(new_line=True):
     r"""
@@ -254,17 +285,6 @@ def _print_divider(new_line=True):
     text = '\n******************************'
     # print with or without newline
     print(text) if new_line else print(text[1:])
-
-#%% _pprint_params
-def _pprint_params(names, values):
-    r"""
-    Prints the current name and value pairs for all the estimated parameters.
-    """
-    max_len = max(len(x) for x in names)
-    for (ix, this_name) in enumerate(names):
-        this_value = values[ix]
-        pad = max_len - len(this_name)
-        print('    ' + this_name + ' ' + ' '*pad + '= {:g}'.format(this_value))
 
 #%% _function_wrapper
 def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
@@ -313,11 +333,11 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 
     # alias useful values
     log_level     = Logger().get_level()
+    names         = [name.decode('utf-8') for name in bpe_results.param_names]
     num_param     = cur_results.params.size
     num_innov     = cur_results.innovs.size
     param_signs   = np.sign(cur_results.params)
     param_signs[param_signs == 0] = 1
-    names         = OptiParam.get_names(opti_opts.params)
     if normalized:
         param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
 
@@ -625,13 +645,13 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
     """
     # process inputs
     search_method = opti_opts.search_method.lower().replace(' ', '_')
-    names         = OptiParam.get_names(opti_opts.params)
     if normalized:
         param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
 
-    # alias the log level and trust radius
+    # alias the log level, trust radius and parameters names
     log_level = Logger().get_level()
     trust_radius = cur_results.trust_rad
+    names = [name.decode('utf-8') for name in bpe_results.param_names]
 
     # save a copy of the original param values
     orig_params = cur_results.params.copy()
@@ -755,8 +775,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     log_level = Logger().get_level()
 
     # get the names and number of parameters
-    names         = OptiParam.get_names(opti_opts.params)
-    num_params    = len(names)
+    num_params    = len(bpe_results.param_names)
 
     # update the status
     if log_level >= 5:
@@ -899,6 +918,9 @@ def run_bpe(opti_opts):
     bpe_results = BpeResults()
     cur_results = CurrentResults()
 
+    # save the parameter names
+    bpe_results.param_names = [name.encode('utf-8') for name in names]
+
     # create a working copy of the model arguments that can be modified in place while running
     model_args = deepcopy(opti_opts.model_args)
 
@@ -1022,7 +1044,7 @@ def run_bpe(opti_opts):
         print(' Final cost: {}'.format(bpe_results.final_cost))
     if log_level >= 8:
         print(' Final individual parameters:')
-        _pprint_params(names, bpe_results.final_params)
+        _pprint_args(names, bpe_results.final_params)
 
     # analyze BPE results
     _analyze_results(opti_opts, bpe_results, jacobian)
@@ -1045,8 +1067,12 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
     """
     # hard-coded options
     label_values = False
+
     # get the logging level
     log_level = Logger.get_level()
+
+    # alias the names
+    names = [name.decode('utf-8') for name in bpe_results.param_names]
 
     # defaults for which plots to make
     default_plots = {'innovs': False, 'convergence': False, 'correlation': False, 'info_svd': False, \
@@ -1066,9 +1092,6 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
         for key in default_plots:
             if key not in plots:
                 plots[key] = default_plots[key]
-
-    # alias the names
-    names = OptiParam.get_names(opti_opts.params)
 
     # preallocate output
     figs = []

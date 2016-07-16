@@ -262,10 +262,10 @@ class Test__print_divider(unittest.TestCase):
         lines = out.getvalue().split('\n')
         self.assertEqual(lines[0], self.output)
 
-#%% _pprint_params
-class Test__pprint_params(unittest.TestCase):
+#%% _pprint_args
+class Test__pprint_args(unittest.TestCase):
     r"""
-    Tests the _pprint_params function with the following cases:
+    Tests the _pprint_args function with the following cases:
         TBD
     """
     def setUp(self):
@@ -275,7 +275,7 @@ class Test__pprint_params(unittest.TestCase):
 
     def test_nominal(self):
         with dcs.capture_output() as (out, _):
-            dcs.bpe._pprint_params(self.names, self.values)
+            dcs.bpe._pprint_args(self.names, self.values)
         lines = out.getvalue().split('\n')
         for i in range(len(self.lines)):
             self.assertEqual(lines[i], self.lines[i])

@@ -31,6 +31,9 @@ class SimParams(dcs.Frozen):
                 return False
         return True
 
+    def __repr__(self):
+        return 'mag={}, freq={}, phs={}'.format(self.magnitude, self.frequency, self.phase)
+
 #%% Functions - _get_truth_index
 def _get_truth_index(results_time, truth_time):
     r"""
