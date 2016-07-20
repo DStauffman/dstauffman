@@ -273,6 +273,9 @@ class Test_plot_time_history(unittest.TestCase):
         using a different colormap
         plotting array data as individual
         plotting array data as group
+        plotting with second Y axis (x2)
+        plotting single scalars
+        plotting empty lists
     """
     def setUp(self):
         self.time = np.arange(0, 10, 0.1)
@@ -333,6 +336,12 @@ class Test_plot_time_history(unittest.TestCase):
     def test_second_y_scale2(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='percentage', \
             second_y_scale=self.second_y_scale)
+
+    def test_simple(self):
+        self.fig = dcs.plot_time_history(0, 0)
+
+    def test_plot_empty(self):
+        self.fig = dcs.plot_time_history([], [])
 
     def tearDown(self):
         if hasattr(self,'fig'):
