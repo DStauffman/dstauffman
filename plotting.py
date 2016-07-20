@@ -414,6 +414,11 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     """
     # hard-coded values
     time_units = 'year' # TODO: make an input
+
+    # force inputs to be ndarrays
+    time = np.asanyarray(time)
+    data = np.asanyarray(data)
+
     # check optional inputs
     if opts is None:
         opts = Opts()
