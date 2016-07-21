@@ -328,7 +328,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 
     """
     # hard-coded values
-    min_step = 1e-3
+    min_step = 1e-1
     sqrt_eps = np.sqrt(np.finfo(float).eps)
 
     # alias useful values
@@ -695,6 +695,8 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
             params *= param_typical
 
         # Run model
+        if log_level >= 8:
+            print('  Running model with new trial parameters.')
         opti_opts.set_param_func(names=names, values=params, **model_args)
         (_, innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 

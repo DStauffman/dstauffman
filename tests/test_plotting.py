@@ -343,6 +343,9 @@ class Test_plot_time_history(unittest.TestCase):
     def test_plot_empty(self):
         self.fig = dcs.plot_time_history([], [])
 
+    def test_plot_all_nans(self):
+        self.fig = dcs.plot_time_history(np.array([np.nan, np.nan]), np.array([np.nan, np.nan]))
+
     def tearDown(self):
         if hasattr(self,'fig'):
             plt.close(self.fig)
