@@ -99,8 +99,6 @@ def set_parameter(sim_params, *, names, values):
 if __name__=='__main__':
     # Constants
     rerun    = True
-    folder   = os.path.join(dcs.get_output_dir(), datetime.now().strftime('%Y-%m-%d'))
-    filename = os.path.join(folder, 'bpe_results.hdf5')
     time     = np.arange(251)
 
     # Parameters
@@ -121,7 +119,8 @@ if __name__=='__main__':
     opti_opts.cost_args      = {'results_time': time, 'truth_time': truth_time, 'truth_data': truth_data}
     opti_opts.get_param_func = get_parameter
     opti_opts.set_param_func = set_parameter
-    opti_opts.output_loc     = filename
+    opti_opts.output_folder  = os.path.join(dcs.get_output_dir(), datetime.now().strftime('%Y-%m-%d'))
+    opti_opts.output_results = 'bpe_results.hdf5'
     opti_opts.params         = []
 
     # less common optimization settings
@@ -146,7 +145,7 @@ if __name__=='__main__':
     if rerun:
         (bpe_results, results) = dcs.run_bpe(opti_opts)
     else:
-        bpe_results = dcs.BpeResults.load(filename)
+        bpe_results = dcs.BpeResults.load(os.path.join(opti_opts.output_folder, opti_opts.output_results))
         results     = sim_model(sim_params) # just re-run, nothing is actually saved by this model
 
     # Plot results

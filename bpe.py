@@ -85,7 +85,8 @@ class OptiOpts(Frozen):
         self.cost_args       = None # {} # TODO: add note, these are additional cost args, plus model_args
         self.get_param_func  = None
         self.set_param_func  = None
-        self.output_loc      = ''
+        self.output_folder   = ''
+        self.output_results  = 'bpe_results.hdf5'
         self.params          = None # []
         self.start_func      = None
         self.final_func      = None
@@ -328,7 +329,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 
     """
     # hard-coded values
-    min_step = 1e-1
+    min_step = 5e-2
     sqrt_eps = np.sqrt(np.finfo(float).eps)
 
     # alias useful values
@@ -913,7 +914,8 @@ def run_bpe(opti_opts):
     two_sided = True if opti_opts.slope_method == 'two_sided' else False
 
     # determine if saving data
-    is_saving = bool(opti_opts.output_loc)
+    filename  = os.path.join(opti_opts.output_folder, opti_opts.output_results)
+    is_saving = bool(opti_opts.output_folder) and bool(opti_opts.output_results)
 
     # TODO: write ability to resume from previously saved iteration results
     # initialize the output and current results instances
@@ -965,10 +967,9 @@ def run_bpe(opti_opts):
 
     # Set-up saving: check that the folder exists
     if is_saving:
-        folder = os.path.split(opti_opts.output_loc)[0]
-        if folder and not os.path.isdir(folder):
+        if opti_opts.output_folder and not os.path.isdir(opti_opts.output_folder):
             # if the folder doesn't exist, then create it
-            setup_dir(folder) # pragma: no cover
+            setup_dir(opti_opts.output_folder) # pragma: no cover
 
     # Do some stuff
     convergence = False
@@ -1014,8 +1015,8 @@ def run_bpe(opti_opts):
 
         # save results from this iteration
         if is_saving:
-            bpe_results.save(os.path.join(folder, 'bpe_results_iter_{}.hdf5'.format(iter_count)))
-            cur_results.save(os.path.join(folder, 'cur_results_iter_{}.hdf5'.format(iter_count)))
+            bpe_results.save(os.path.join(opti_opts.output_folder, 'bpe_results_iter_{}.hdf5'.format(iter_count)))
+            cur_results.save(os.path.join(opti_opts.output_folder, 'cur_results_iter_{}.hdf5'.format(iter_count)))
 
         # increment counter
         iter_count += 1
@@ -1052,9 +1053,10 @@ def run_bpe(opti_opts):
     _analyze_results(opti_opts, bpe_results, jacobian)
 
     # show status and save results
-    if log_level > 2 and opti_opts.output_loc:
-        print('Saving results to: "{}".'.format(opti_opts.output_loc))
-    bpe_results.save(opti_opts.output_loc)
+    if log_level > 2 and is_saving:
+        print('Saving results to: "{}".'.format(filename))
+    if is_saving:
+        bpe_results.save(filename)
 
     # display total elapsed time
     if log_level >= 3:
