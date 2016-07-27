@@ -117,4 +117,6 @@ C:\Users\dcstauff\Documents\GitHub;
 
 ######################
 Additional modules
+cmd: pip install --upgrade pip
 cmd: pip install coverage
+cmd: pip install pprofile
