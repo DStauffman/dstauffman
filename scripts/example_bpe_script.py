@@ -137,9 +137,9 @@ if __name__=='__main__':
     opti_opts.trust_radius    = 1.0
 
     # Parameters to estimate
-    opti_opts.params.append(dcs.OptiParam('magnitude', best=2.5, min_=1, max_=10, typical=5))
-    opti_opts.params.append(dcs.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60))
-    opti_opts.params.append(dcs.OptiParam('phase', best=180, min_=0, max_=360, typical=100))
+    opti_opts.params.append(dcs.OptiParam('magnitude', best=2.5, min_=1, max_=10, typical=5, minstep=0.01))
+    opti_opts.params.append(dcs.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+    opti_opts.params.append(dcs.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
     # Run code
     if rerun:

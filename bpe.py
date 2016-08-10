@@ -154,11 +154,11 @@ class OptiParam(Frozen):
         Gets a numpy vector of all the optimization parameters for the desired type.
         """
         # check for valid types
-        if type_ in {'best', 'min_', 'max_'}:
+        if type_ in {'best', 'min_', 'max_', 'minstep'}:
             key = type_
         elif type_ in {'min', 'max'}:
             key = type_ + '_'
-        elif type_ in {'typical', 'minstep'}:
+        elif type_ in {'typical'}:
             raise ValueError('"{}" is a placeholder for later on.'.format(type_))
         else:
             raise ValueError('Unexpected type of "{}"'.format(type_))
@@ -329,7 +329,6 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 
     """
     # hard-coded values
-    min_step = 5e-2
     sqrt_eps = np.sqrt(np.finfo(float).eps)
 
     # alias useful values
@@ -339,6 +338,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     num_innov     = cur_results.innovs.size
     param_signs   = np.sign(cur_results.params)
     param_signs[param_signs == 0] = 1
+    param_minstep = OptiParam.get_array(opti_opts.params, type_='minstep')
     if normalized:
         param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
 
@@ -352,7 +352,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         perturb_fact  = 1 # TODO: how to get perturb_fact?
         param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
-        param_perturb = param_signs * np.maximum(np.abs(cur_results.params)*sqrt_eps, min_step)
+        param_perturb = param_signs * np.maximum(np.abs(cur_results.params)*sqrt_eps, param_minstep)
 
     temp_params_plus  = cur_results.params.copy()
     temp_params_minus = cur_results.params.copy()
