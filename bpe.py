@@ -667,6 +667,7 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
     tried_shrinking = False
     num_shrinks     = 0
     step_number     = 0
+    failed          = False
 
     # try a step
     while (num_shrinks < opti_opts.step_limit) and try_again:
@@ -762,11 +763,13 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
 
     # Display status message
     if log_level >= 8 and num_shrinks >= opti_opts.step_limit:
-        print(' Died on step cuts.')
+        print('Died on step cuts.')
         print(' Failed to find any step on the dogleg path that was actually an improvement')
         print(' before exceeding the step cut limit, which was {}  steps.'.format(opti_opts.step_limit))
+        failed = True
     if log_level >= 5:
         print(' New parameters are: {}'.format(cur_results.params))
+    return failed
 
 #%% _analyze_results
 def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
@@ -1009,7 +1012,7 @@ def run_bpe(opti_opts):
             break
 
         # search for parameter set that is better than the current set
-        _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param, jacobian, \
+        failed = _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param, jacobian, \
             gradient, hessian)
         bpe_results.costs.append(cur_results.cost)
 
@@ -1021,8 +1024,11 @@ def run_bpe(opti_opts):
         # increment counter
         iter_count += 1
 
+        if failed:
+            break
+
     # display if this converged out timed out on iteration steps
-    if log_level >= 6 and not convergence:
+    if log_level >= 6 and not convergence and not failed:
         print('Stopped iterating due to hitting the max number of iterations: {}.'.format(opti_opts.max_iters))
 
     # run an optional final function before doing the final simulation
