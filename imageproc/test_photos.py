@@ -47,7 +47,7 @@ class Test_find_missing_nums(unittest.TestCase):
             dcs.write_text_file(this_file, '')
 
     def test_nominal(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.find_missing_nums(self.folder)
         output = out.getvalue().strip()
         out.close()
@@ -60,7 +60,7 @@ class Test_find_missing_nums(unittest.TestCase):
         self.assertTrue(lines[4].startswith('No number found: "'))
 
     def test_folder_exclusions(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.find_missing_nums(self.folder, folder_exclusions=self.folder_exclusions)
         output = out.getvalue().strip()
         out.close()
@@ -73,7 +73,7 @@ class Test_find_missing_nums(unittest.TestCase):
         self.assertTrue(len(lines) < 5)
 
     def test_ignore_digits(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.find_missing_nums(self.folder, digit_check=False)
         output = out.getvalue().strip()
         out.close()
@@ -85,7 +85,7 @@ class Test_find_missing_nums(unittest.TestCase):
         self.assertFalse(lines[3].startswith('Inconsistent digits: "'))
 
     def test_nothing_missing(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.find_missing_nums(self.folder_exclusions[0])
         output = out.getvalue().strip()
         out.close()
@@ -110,7 +110,7 @@ class Test_find_unexpected_ext(unittest.TestCase):
         self.folder = dcs.get_tests_dir()
 
     def test_nominal(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.find_unexpected_ext(self.folder)
         output = out.getvalue().strip()
         out.close()
@@ -130,7 +130,7 @@ class Test_rename_old_picasa_files(unittest.TestCase):
         dcs.write_text_file(self.file_old, '')
 
     def test_nominal(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.rename_old_picasa_files(self.folder)
         output = out.getvalue().strip()
         out.close()
@@ -153,7 +153,7 @@ class Test_rename_upper_ext(unittest.TestCase):
         dcs.write_text_file(self.file_old, '')
 
     def test_nominal(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.rename_upper_ext(self.folder)
         output = out.getvalue().strip()
         out.close()
@@ -174,7 +174,7 @@ class Test_find_long_filenames(unittest.TestCase):
         self.folder = dcs.get_tests_dir()
 
     def test_nominal(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.find_long_filenames(self.folder)
         output = out.getvalue().strip()
         out.close()
@@ -232,7 +232,7 @@ class Test_batch_resize(unittest.TestCase):
         new_img.close()
 
     def test_resize(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.batch_resize(self.folder, self.size3, self.size3)
         output = out.getvalue().strip()
         out.close()
@@ -273,7 +273,7 @@ class Test_batch_resize(unittest.TestCase):
         img.close()
 
     def test_no_images(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.batch_resize(dcs.get_data_dir())
         output = out.getvalue().strip()
         out.close()
@@ -284,7 +284,7 @@ class Test_batch_resize(unittest.TestCase):
             self.assertFalse(this_line.startswith(' Resizing image'))
 
     def test_no_upscale(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.batch_resize(self.folder, max_width=self.size4, max_height=self.size4, enlarge=False)
         output = out.getvalue().strip()
         out.close()
@@ -324,7 +324,7 @@ class Test_batch_resize(unittest.TestCase):
         img.close()
 
     def test_upscale(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.batch_resize(self.folder, max_width=self.size4, max_height=self.size4, enlarge=True)
         output = out.getvalue().strip()
         out.close()
@@ -424,7 +424,7 @@ class Test_convert_tif_to_jpg(unittest.TestCase):
         new_img.close()
 
     def test_resize(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.convert_tif_to_jpg(self.folder, self.size3, self.size3, replace=True)
         output = out.getvalue().strip()
         out.close()
@@ -465,7 +465,7 @@ class Test_convert_tif_to_jpg(unittest.TestCase):
         img.close()
 
     def test_no_images(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.convert_tif_to_jpg(dcs.get_data_dir())
         output = out.getvalue().strip()
         out.close()
@@ -476,7 +476,7 @@ class Test_convert_tif_to_jpg(unittest.TestCase):
             self.assertFalse(this_line.startswith(' Resizing image'))
 
     def test_no_upscale(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.convert_tif_to_jpg(self.folder, max_width=self.size4, max_height=self.size4, enlarge=False, replace=True)
         output = out.getvalue().strip()
         out.close()
@@ -516,7 +516,7 @@ class Test_convert_tif_to_jpg(unittest.TestCase):
         img.close()
 
     def test_upscale(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.convert_tif_to_jpg(self.folder, max_width=self.size4, max_height=self.size4, enlarge=True, replace=True)
         output = out.getvalue().strip()
         out.close()
@@ -557,7 +557,7 @@ class Test_convert_tif_to_jpg(unittest.TestCase):
         img.close()
 
     def test_noreplace(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.convert_tif_to_jpg(self.folder, self.size3, self.size3, replace=False)
         output = out.getvalue().strip()
         out.close()
@@ -603,7 +603,7 @@ class Test_number_files(unittest.TestCase):
         dcs.write_text_file(self.file_old2, '')
 
     def test_nominal(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dip.number_files(self.folder, self.prefix, self.start, self.digits)
         output = out.getvalue().strip()
         out.close()

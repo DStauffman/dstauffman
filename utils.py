@@ -782,9 +782,17 @@ def get_output_dir():
 
 #%% Functions - capture_output
 @contextmanager
-def capture_output():
+def capture_output(mode='out'):
     r"""
     Captures the stdout and stderr streams instead of displaying to the screen.
+
+    Parameters
+    ----------
+    mode : str
+        Mode to use when capturing output
+            'out' captures just sys.stdout
+            'err' captures just sys.stderr
+            'all' captures both sys.stdout and sys.stderr
 
     Returns
     -------
@@ -797,7 +805,7 @@ def capture_output():
     --------
 
     >>> from dstauffman import capture_output
-    >>> with capture_output() as (out, _):
+    >>> with capture_output() as out:
     ...     print('Hello, World!')
     >>> output = out.getvalue().strip()
     >>> out.close()
@@ -805,15 +813,26 @@ def capture_output():
     Hello, World!
 
     """
+    # alias modes
+    capture_out = True if mode == 'out' or mode == 'all' else False
+    capture_err = True if mode == 'err' or mode == 'all' else False
     # create new string buffers
     new_out, new_err = StringIO(), StringIO()
     # alias the old string buffers for restoration afterwards
     old_out, old_err = sys.stdout, sys.stderr
     try:
         # override the system buffers with the new ones
-        sys.stdout, sys.stderr = new_out, new_err
+        if capture_out:
+            sys.stdout = new_out
+        if capture_err:
+            sys.stderr = new_err
         # yield results as desired
-        yield sys.stdout, sys.stderr
+        if mode == 'out':
+            yield sys.stdout
+        elif mode == 'err':
+            yield sys.stderr
+        elif mode == 'all':
+            yield sys.stdout, sys.stderr
     finally:
         # restore the original buffers once all results are read
         sys.stdout, sys.stderr = old_out, old_err

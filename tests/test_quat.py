@@ -341,7 +341,7 @@ class test_quat_interp(unittest.TestCase):
             dcs.quat_interp(self.time, self.quat, self.ti_extra, inclusive=True)
 
     def test_extra2(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             qout = dcs.quat_interp(self.time, self.quat, self.ti_extra, inclusive=False)
         output = out.getvalue().strip()
         out.close()

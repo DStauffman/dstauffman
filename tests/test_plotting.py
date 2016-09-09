@@ -51,7 +51,7 @@ class Test_Plotter(unittest.TestCase):
         self.assertFalse(plotter.get_plotter())
 
     def test_printing(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             print(self.plotter)
         output = out.getvalue().strip()
         out.close()
@@ -490,7 +490,7 @@ class Test_plot_multiline_history(unittest.TestCase):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, colormap=self.colormap))
 
     def test_no_data(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.plot_multiline_history(self.time, None)
         output = out.getvalue().strip()
         out.close()
@@ -559,7 +559,7 @@ class Test_plot_bar_breakdown(unittest.TestCase):
         self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, colormap=self.colormap))
 
     def test_null_data(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.plot_bar_breakdown(self.time, None)
         output = out.getvalue().strip()
         out.close()
@@ -804,7 +804,7 @@ class Test_setup_plots(unittest.TestCase):
         this_filename = os.path.join(dcs.get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
         self.opts.save_plot = True
         self.opts.show_link = True
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.setup_plots(self.fig, self.opts)
         output = out.getvalue().strip()
         out.close()

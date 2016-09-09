@@ -105,7 +105,7 @@ class Test__display_progress(unittest.TestCase):
         self.ratio = (512+64) / 1024
 
     def test_nominal(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             ratio = fiver._display_progress(self.ix, self.nums)
         output = out.getvalue().strip()
         out.close()
@@ -179,7 +179,7 @@ class Test__save_solution(unittest.TestCase):
     def test_is_new(self):
         solutions = self.solutions[:]
         self.assertEqual(len(solutions), 1)
-        with capture_output() as (out, _):
+        with capture_output() as out:
             fiver._save_solution(solutions, self.this_board2)
         output = out.getvalue().strip()
         out.close()

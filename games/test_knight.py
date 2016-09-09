@@ -90,7 +90,7 @@ class Test__get_current_position(unittest.TestCase):
     def test_no_current(self):
         self.board[self.x, self.y] = knight.Piece.start
         with self.assertRaises(AssertionError):
-            with capture_output() as (out, _):
+            with capture_output() as out:
                 knight._get_current_position(self.board)
         output = out.getvalue().strip()
         out.close()
@@ -99,7 +99,7 @@ class Test__get_current_position(unittest.TestCase):
     def test_multiple_currents(self):
         self.board[self.x + 1, self.y + 1] = knight.Piece.current
         with self.assertRaises(AssertionError):
-            with capture_output() as (out, _):
+            with capture_output() as out:
                 knight._get_current_position(self.board)
         output = out.getvalue().strip()
         out.close()
@@ -495,21 +495,21 @@ class Test_print_board(unittest.TestCase):
         self.board3[self.board3 > max(knight.Piece).value] = 0
 
     def test_square_board(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             knight.print_board(self.board1)
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, 'S S S S\nS S S S\nS S S S\nS S S S')
 
     def test_rect_board(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             knight.print_board(self.board2)
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, '. . . . .\n. . . . .\n. . . . .')
 
     def test_all_board_piece_types(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             knight.print_board(self.board3)
         output = out.getvalue().strip()
         out.close()
@@ -584,7 +584,7 @@ class Test_check_valid_sequence(unittest.TestCase):
         self.assertTrue(is_valid)
 
     def test_printing(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             is_valid = knight.check_valid_sequence(self.board, self.moves, print_status=True)
         output = out.getvalue().strip()
         out.close()
@@ -597,7 +597,7 @@ class Test_check_valid_sequence(unittest.TestCase):
             knight.check_valid_sequence(self.board, self.moves, print_status=False)
 
     def test_bad_sequence(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             is_valid = knight.check_valid_sequence(self.board, [-2, -2], print_status=True)
         output = out.getvalue().strip()
         out.close()
@@ -609,7 +609,7 @@ class Test_check_valid_sequence(unittest.TestCase):
         self.assertFalse(is_valid)
 
     def test_repeated_sequence2(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             is_valid = knight.check_valid_sequence(self.board, [2, 4, 2, 2], print_status=True)
         output = out.getvalue().strip()
         out.close()
@@ -621,7 +621,7 @@ class Test_check_valid_sequence(unittest.TestCase):
         self.assertTrue(is_valid)
 
     def test_good_but_incomplete_sequence(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             is_valid = knight.check_valid_sequence(self.board, self.moves[:-1], print_status=True)
         output = out.getvalue().strip()
         out.close()
@@ -654,7 +654,7 @@ class Test_print_sequence(unittest.TestCase):
             'x W W W W\nW W x W W\nW W W W K'
 
     def test_normal(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             knight.print_sequence(self.board, self.moves)
         output = out.getvalue().strip()
         out.close()
@@ -662,7 +662,7 @@ class Test_print_sequence(unittest.TestCase):
 
     def test_other_costs(self):
         self.board = np.where(self.board == knight.Piece.null, knight.Piece.water, self.board)
-        with capture_output() as (out, _):
+        with capture_output() as out:
             knight.print_sequence(self.board, self.moves)
         output = out.getvalue().strip()
         out.close()
@@ -670,7 +670,7 @@ class Test_print_sequence(unittest.TestCase):
 
     def test_invalid_sequence(self):
         self.moves = [-2, -2]
-        with capture_output() as (out, _):
+        with capture_output() as out:
             with self.assertRaises(ValueError):
                 knight.print_sequence(self.board, self.moves)
         output = out.getvalue().strip()
@@ -692,7 +692,7 @@ class Test_solve_min_puzzle(unittest.TestCase):
         self.moves       = [2, -2]
 
     def test_min(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             moves = knight.solve_min_puzzle(self.board)
         output = out.getvalue().strip()
         out.close()
@@ -704,7 +704,7 @@ class Test_solve_min_puzzle(unittest.TestCase):
         board = knight.Piece.null * np.ones((2, 5), dtype=int)
         board[0, 0] = knight.Piece.start
         board[1, 4] = knight.Piece.final
-        with capture_output() as (out, _):
+        with capture_output() as out:
             moves = knight.solve_min_puzzle(board)
         output = out.getvalue().strip()
         out.close()
@@ -714,7 +714,7 @@ class Test_solve_min_puzzle(unittest.TestCase):
 
     def test_no_final_position(self):
         self.board[0, 4] = knight.Piece.null
-        with capture_output() as (out, _):
+        with capture_output() as out:
             with self.assertRaises(ValueError):
                 knight.solve_min_puzzle(self.board)
         output = out.getvalue().strip()
@@ -736,7 +736,7 @@ class Test_solve_max_puzzle(unittest.TestCase):
 
     @unittest.skip('Not yet implemented.')
     def test_max(self):
-        with capture_output() as (out, _):
+        with capture_output() as out:
             moves = knight.solve_max_puzzle(self.board)
         output = out.getvalue().strip()
         out.close()
@@ -748,7 +748,7 @@ class Test_solve_max_puzzle(unittest.TestCase):
         board = knight.Piece.null * np.ones((2, 5), dtype=int)
         board[0, 0] = knight.Piece.start
         board[1, 4] = knight.Piece.final
-        with capture_output() as (out, _):
+        with capture_output() as out:
             moves = knight.solve_max_puzzle(board)
         output = out.getvalue().strip()
         out.close()

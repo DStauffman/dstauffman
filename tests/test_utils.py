@@ -259,14 +259,14 @@ class Test_setup_dir(unittest.TestCase):
         self.text     = 'Hello, World!\n'
 
     def test_create_folder(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.setup_dir(self.folder)
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, 'Created directory: "{}"'.format(self.folder))
 
     def test_nested_folder(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.setup_dir(self.subdir)
         output = out.getvalue().strip()
         out.close()
@@ -276,7 +276,7 @@ class Test_setup_dir(unittest.TestCase):
         with dcs.capture_output():
             dcs.setup_dir(self.folder)
             dcs.write_text_file(self.filename, self.text)
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.setup_dir(self.folder)
         output = out.getvalue().strip()
         out.close()
@@ -288,7 +288,7 @@ class Test_setup_dir(unittest.TestCase):
             dcs.write_text_file(self.filename, '')
             dcs.setup_dir(self.subdir)
             dcs.write_text_file(self.subfile, '')
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.setup_dir(self.folder, rec=False)
         output = out.getvalue().strip()
         out.close()
@@ -307,7 +307,7 @@ class Test_setup_dir(unittest.TestCase):
         with dcs.capture_output():
             dcs.setup_dir(self.subdir)
             dcs.write_text_file(self.subfile, self.text)
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.setup_dir(self.folder, rec=True)
         output = out.getvalue().strip()
         out.close()
@@ -350,7 +350,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.c4 = type('Class4', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text', 'e': self.c2})
 
     def test_is_comparison(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c1, self.c1)
         output = out.getvalue().strip()
         out.close()
@@ -358,7 +358,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertTrue(is_same)
 
     def test_good_comparison(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c1, copy.deepcopy(self.c1))
         output = out.getvalue().strip()
         out.close()
@@ -366,7 +366,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertTrue(is_same)
 
     def test_bad_comparison(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c1, self.c2)
         output = out.getvalue().strip()
         out.close()
@@ -374,7 +374,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertFalse(is_same)
 
     def test_names(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c2, self.c2, names=self.names)
         output = out.getvalue().strip()
         out.close()
@@ -382,7 +382,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertTrue(is_same)
 
     def test_suppression(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c1, self.c2, suppress_output=True, names=self.names)
         output = out.getvalue().strip()
         out.close()
@@ -390,7 +390,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertFalse(is_same)
 
     def test_subclasses_match(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c3, self.c3, ignore_callables=False)
         output = out.getvalue().strip()
         out.close()
@@ -398,7 +398,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertTrue(is_same)
 
     def test_subclasses_recurse(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False)
         output = out.getvalue().strip()
         out.close()
@@ -408,7 +408,7 @@ class Test_compare_two_classes(unittest.TestCase):
             'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
 
     def test_subclasses_norecurse(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False, compare_recursively=False)
         output = out.getvalue().strip()
         out.close()
@@ -418,7 +418,7 @@ class Test_compare_two_classes(unittest.TestCase):
 
     def test_mismatched_subclasses(self):
         self.c4.e = 5
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False)
         output = out.getvalue().strip()
         out.close()
@@ -434,7 +434,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.c3.e = f
         self.c4.e = g
         self.c4.b = self.c3.b
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=False)
         output = out.getvalue().strip()
         out.close()
@@ -448,7 +448,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.c3.e = f
         self.c4.e = g
         self.c4.b = self.c3.b
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=True)
         output = out.getvalue().strip()
         out.close()
@@ -458,7 +458,7 @@ class Test_compare_two_classes(unittest.TestCase):
     def test_two_different_lists(self):
         c1 = [1]
         c2 = [1]
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(c1, c2, ignore_callables=True)
         output = out.getvalue().strip()
         out.close()
@@ -480,7 +480,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.names = ['Dict 1', 'Dict 2']
 
     def test_good_comparison(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_dicts(self.d1, self.d1)
         output = out.getvalue().strip()
         out.close()
@@ -488,7 +488,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertTrue(is_same)
 
     def test_bad_comparison(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_dicts(self.d1, self.d2)
         output = out.getvalue().strip()
         out.close()
@@ -496,7 +496,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertFalse(is_same)
 
     def test_names(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_dicts(self.d2, self.d2, names=self.names)
         output = out.getvalue().strip()
         out.close()
@@ -504,7 +504,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertTrue(is_same)
 
     def test_suppression(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_same = dcs.compare_two_dicts(self.d1, self.d2, suppress_output=True, names=self.names)
         output = out.getvalue().strip()
         out.close()
@@ -550,7 +550,7 @@ class Test_make_python_init(unittest.TestCase):
     def test_duplicated_funcs(self):
         with open(self.filepath, 'wt') as file:
             file.write('def Test_Frozen():\n    pass\n')
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             text = dcs.make_python_init(self.folder2)
         output = out.getvalue().strip()
         out.close()
@@ -596,7 +596,7 @@ class Test_read_text_file(unittest.TestCase):
         self.assertEqual(text, self.contents)
 
     def test_bad_reading(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             try:
                 dcs.read_text_file(self.badpath)
             except:
@@ -632,7 +632,7 @@ class Test_write_text_file(unittest.TestCase):
     def test_bad_writing(self):
         if platform.system() != 'Windows':
             return
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             try:
                 dcs.write_text_file(self.badpath, self.contents)
             except:
@@ -706,23 +706,28 @@ class Test_capture_output(unittest.TestCase):
         capture standard error
     """
     def test_std_out(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as out:
             print('Hello, World!')
         output = out.getvalue().strip()
-        error  = err.getvalue().strip()
         out.close()
-        err.close()
         self.assertEqual(output, 'Hello, World!')
-        self.assertEqual(error, '')
 
     def test_std_err(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output('err') as err:
+            print('Error Raised.', file=sys.stderr)
+        error  = err.getvalue().strip()
+        err.close()
+        self.assertEqual(error, 'Error Raised.')
+
+    def test_all(self):
+        with dcs.capture_output('all') as (out, err):
+            print('Hello, World!')
             print('Error Raised.', file=sys.stderr)
         output = out.getvalue().strip()
         error  = err.getvalue().strip()
         out.close()
         err.close()
-        self.assertEqual(output, '')
+        self.assertEqual(output, 'Hello, World!')
         self.assertEqual(error, 'Error Raised.')
 
 #%% unit
@@ -832,7 +837,7 @@ class Test_combine_sets(unittest.TestCase):
 #        Messages suppressed
 #    """
 #    def test_nominal(self):
-#        with dcs.capture_output() as (out, _):
+#        with dcs.capture_output() as out:
 #            dcs.reload_package(dcs)
 #        output = out.getvalue().strip()
 #        out.close()
@@ -861,7 +866,7 @@ class Test_delete_pyc(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.file1))
         self.assertTrue(os.path.isdir(self.fold2))
         self.assertTrue(os.path.isfile(self.file2))
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.delete_pyc(self.fold1)
         output = out.getvalue().strip()
         out.close()
@@ -876,7 +881,7 @@ class Test_delete_pyc(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.file1))
         self.assertTrue(os.path.isdir(self.fold2))
         self.assertTrue(os.path.isfile(self.file2))
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.delete_pyc(self.fold1, recursive=False)
         output = out.getvalue().strip()
         out.close()
@@ -891,7 +896,7 @@ class Test_delete_pyc(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.file1))
         self.assertTrue(os.path.isdir(self.fold2))
         self.assertTrue(os.path.isfile(self.file2))
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.delete_pyc(self.fold1, print_progress=False)
         output = out.getvalue().strip()
         out.close()
@@ -932,7 +937,7 @@ class Test_rename_module(unittest.TestCase):
         dcs.write_text_file(os.path.join(self.old_dir, '__init__.misc'),'# Misc file for "temp1".\n')
 
     def test_nominal(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.rename_module(self.folder, self.old_name, self.new_name, self.print_status)
         output = out.getvalue().strip()
         out.close()
@@ -958,7 +963,7 @@ class Test_rename_module(unittest.TestCase):
         self.assertTrue(os.path.isfile(os.path.join(self.new_dir, '__init__.misc')))
 
     def test_no_printing(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.rename_module(self.folder, self.old_name, self.new_name, print_status=False)
         output = out.getvalue().strip()
         out.close()
@@ -1043,7 +1048,7 @@ class Test_find_tabs(unittest.TestCase):
         cls.bad2 = "    Line 005: '    Start and end line    \\n'"
 
     def test_nominal(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.find_tabs(self.folder, extensions='m', list_all=False, trailing=False)
         lines = out.getvalue().strip().split('\n')
         out.close()
@@ -1052,7 +1057,7 @@ class Test_find_tabs(unittest.TestCase):
         self.assertEqual(len(lines), 2)
 
     def test_different_extensions(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.find_tabs(self.folder, extensions='txt')
         lines = out.getvalue().strip().split('\n')
         out.close()
@@ -1060,7 +1065,7 @@ class Test_find_tabs(unittest.TestCase):
         self.assertEqual(len(lines), 1)
 
     def test_list_all(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.find_tabs(self.folder, list_all=True)
         lines = out.getvalue().strip().split('\n')
         out.close()
@@ -1068,7 +1073,7 @@ class Test_find_tabs(unittest.TestCase):
         self.assertFalse(self.bad2 in lines)
 
     def test_trailing_spaces(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.find_tabs(self.folder, trailing=True)
         lines = out.getvalue().strip().split('\n')
         out.close()

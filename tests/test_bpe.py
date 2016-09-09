@@ -127,7 +127,7 @@ class Test_Logger(unittest.TestCase):
             self.logger.set_level(-1)
 
     def test_printing(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             print(self.logger)
         output = out.getvalue().strip()
         out.close()
@@ -250,14 +250,14 @@ class Test__print_divider(unittest.TestCase):
         self.output = '******************************'
 
     def test_with_new_line(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.bpe._print_divider()
         lines = out.getvalue().split('\n')
         self.assertEqual(lines[0], '')
         self.assertEqual(lines[1], self.output)
 
     def test_no_new_line(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.bpe._print_divider(new_line=False)
         lines = out.getvalue().split('\n')
         self.assertEqual(lines[0], self.output)
@@ -274,7 +274,7 @@ class Test__pprint_args(unittest.TestCase):
         self.lines  = ['    Name 1        = 0.1', '    Longer name 2 = 2e+09', '    Name 42       = 1e-14', '']
 
     def test_nominal(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             dcs.bpe._pprint_args(self.names, self.values)
         lines = out.getvalue().split('\n')
         for i in range(len(self.lines)):
@@ -362,7 +362,7 @@ class Test_validate_opti_opts(unittest.TestCase):
         self.opti_opts.params = [dcs.OptiParam("param[:].tb.tb_new_inf['beta']", 0.1375, 0.1, 0.2, typical=0.14)]
 
     def test_nominal(self):
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_valid = dcs.validate_opti_opts(self.opti_opts)
         output = out.getvalue().strip()
         out.close()
@@ -371,7 +371,7 @@ class Test_validate_opti_opts(unittest.TestCase):
 
     def test_no_logging(self):
         # TODO: set log level self.opti_opts.log_level = 0
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             is_valid = dcs.validate_opti_opts(self.opti_opts)
         output = out.getvalue().strip()
         out.close()
@@ -379,7 +379,7 @@ class Test_validate_opti_opts(unittest.TestCase):
         self.assertEqual(output,'')
 
     def test_not_valid(self):
-        with dcs.capture_output() as (out, err):
+        with dcs.capture_output() as out:
             with self.assertRaises(AssertionError):
                 dcs.validate_opti_opts(dcs.OptiOpts())
         output = out.getvalue().strip()

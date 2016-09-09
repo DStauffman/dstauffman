@@ -188,7 +188,7 @@ class Test_Counter(unittest.TestCase):
 
     def test_print(self):
         c1 = dcs.Counter(1)
-        with dcs.capture_output() as (out, _):
+        with dcs.capture_output() as out:
             print(c1)
         output = out.getvalue().strip()
         out.close()
