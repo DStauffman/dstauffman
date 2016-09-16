@@ -330,6 +330,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     """
     # hard-coded values
     sqrt_eps = np.sqrt(np.finfo(float).eps)
+    step_sf  = 0.1
 
     # alias useful values
     log_level     = Logger().get_level()
@@ -352,7 +353,8 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         perturb_fact  = 1 # TODO: how to get perturb_fact?
         param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
-        param_perturb = param_signs * np.maximum(np.abs(cur_results.params)*sqrt_eps, param_minstep)
+        temp_step     = np.abs(cur_results.params)*step_sf * 1/cur_results.trust_rad
+        param_perturb = param_signs * np.maximum(temp_step, param_minstep)
 
     temp_params_plus  = cur_results.params.copy()
     temp_params_minus = cur_results.params.copy()
