@@ -362,6 +362,7 @@ class Test_plot_correlation_matrix(unittest.TestCase):
         coloring with values above 1
         coloring with values below -1
         coloring with values in -1 to 1 instead of 0 to 1
+        x label rotation
         bad labels (should raise error)
     """
     def setUp(self):
@@ -426,6 +427,9 @@ class Test_plot_correlation_matrix(unittest.TestCase):
 
     def test_colormap(self):
         self.figs.append(dcs.plot_correlation_matrix(self.data, colormap='seismic_r'))
+
+    def test_x_label_rotation(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, x_lab_rot=0))
 
     def test_bad_labels(self):
         with self.assertRaises(ValueError):

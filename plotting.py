@@ -509,7 +509,8 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
 
 #%% Functions - plot_correlation_matrix
 def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlation Matrix', \
-        cmin=0, cmax=1, colormap='cool', plot_lower_only=True, label_values=False):
+        cmin=0, cmax=1, colormap='cool', plot_lower_only=True, label_values=False, \
+        x_lab_rot=90):
     r"""
     Visually plots a correlation matrix.
 
@@ -533,6 +534,8 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
         Plots only the lower half of a symmetric matrix, default is True
     label_values : bool, optional
         Annotate the numerical values of each square in addition to the color code, default is False
+    x_lab_rot : float, optional
+        Amount in degrees to rotate the X labels, default is 90
 
     Returns
     -------
@@ -636,7 +639,7 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
     # set limits and tick labels
     plt.xlim(0, m)
     plt.ylim(0, n)
-    plt.xticks(np.arange(0, m)+box_size/2, xlab, rotation=90)
+    plt.xticks(np.arange(0, m)+box_size/2, xlab, rotation=x_lab_rot)
     plt.yticks(np.arange(0, n)+box_size/2, ylab)
     # reverse the y axis
     ax.invert_yaxis()
