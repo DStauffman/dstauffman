@@ -454,6 +454,7 @@ class Test_plot_multiline_history(unittest.TestCase):
         With legend
         With Colormap
         No data
+        Ignore all zeros
         Bad legend
     """
     def setUp(self):
@@ -499,6 +500,15 @@ class Test_plot_multiline_history(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, 'plot skipped due to missing data.')
+
+    def test_ignore_zeros(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, ignore_all_zeros=True))
+
+    def test_ignore_zeros2(self):
+        data = self.data.copy()
+        data[:,1] = 0
+        data[:,3] = 0
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, ignore_all_zeros=True))
 
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):

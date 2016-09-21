@@ -650,7 +650,7 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
 
 #%% Functions - plot_multiline_history
 def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, legend=None, \
-        colormap=None, second_y_scale=None):
+        colormap=None, second_y_scale=None, ignore_all_zeros=False):
     r"""
     Plots multiple metrics over time.
 
@@ -731,7 +731,8 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
     ax = fig.add_subplot(111)
     cm.set_colors(ax)
     for i in range(num_bins):
-        ax.plot(time, scale*data[:, i], '.-', label=legend[i])
+        if not ignore_all_zeros or not np.all(data[:, i] == 0):
+            ax.plot(time, scale*data[:, i], '.-', label=legend[i])
 
     # add labels and legends
     plt.xlabel('Time [year]')
