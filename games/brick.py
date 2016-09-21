@@ -302,11 +302,11 @@ def solve_center(pieces):
     p_red  = 0
     p_gry  = 0
     # count the numbers of red and gray pieces in the known solution
-    s_red  = np.sum(soln.ravel() == R)
-    s_gry  = np.sum(soln.ravel() == G)
+    s_red  = np.count_nonzero(soln.ravel() == R)
+    s_gry  = np.count_nonzero(soln.ravel() == G)
     # count the numbers of red and gray pieces in the total collection of pieces
-    p_red = np.sum(np.array([x.ravel() for x in pieces]) == R)
-    p_gry = np.sum(np.array([x.ravel() for x in pieces]) == G)
+    p_red = np.count_nonzero(np.array([x.ravel() for x in pieces]) == R)
+    p_gry = np.count_nonzero(np.array([x.ravel() for x in pieces]) == G)
     # find the differences
     d_red = p_red - s_red
     d_gry = p_gry - s_gry

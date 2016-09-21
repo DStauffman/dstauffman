@@ -352,9 +352,9 @@ class PentagoGui(QWidget):
         Updates the game stats on the left of the GUI.
         """
         # calculate the number of wins
-        white_wins = np.sum(results == PLAYER['white'])
-        black_wins = np.sum(results == PLAYER['black'])
-        games_tied = np.sum(results == PLAYER['draw'])
+        white_wins = np.count_nonzero(results == PLAYER['white'])
+        black_wins = np.count_nonzero(results == PLAYER['black'])
+        games_tied = np.count_nonzero(results == PLAYER['draw'])
 
         # update the gui
         self.lbl_white_wins.setText("{}".format(white_wins))

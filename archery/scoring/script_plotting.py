@@ -67,8 +67,8 @@ if __name__ == '__main__':
     inner10_acts   = np.empty(act_range.shape)
     num_scores  = len(outer10)
     for (ix, this_score) in enumerate(act_range):
-        outer10_acts[ix] = np.sum(outer10 == this_score) / num_scores
-        inner10_acts[ix] = np.sum(inner10 == this_score) / num_scores
+        outer10_acts[ix] = np.count_nonzero(outer10 == this_score) / num_scores
+        inner10_acts[ix] = np.count_nonzero(inner10 == this_score) / num_scores
 
     # turn interactive plotting off
     plt.ioff()

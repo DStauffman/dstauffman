@@ -262,9 +262,9 @@ class TicTacToeGui(QMainWindow):
         Updates the game stats on the left of the GUI.
         """
         # calculate the number of wins
-        o_wins     = np.sum(results == PLAYER['o'])
-        x_wins     = np.sum(results == PLAYER['x'])
-        games_tied = np.sum(results == PLAYER['draw'])
+        o_wins     = np.count_nonzero(results == PLAYER['o'])
+        x_wins     = np.count_nonzero(results == PLAYER['x'])
+        games_tied = np.count_nonzero(results == PLAYER['draw'])
 
         # update the gui
         self.lbl_o_wins.setText("{}".format(o_wins))

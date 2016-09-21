@@ -209,8 +209,8 @@ def plot_mean_and_std(scores, opts=None, perfect_score=300):
     usaa_acts   = np.empty(act_range.shape)
     num_scores  = len(nfaa_score)
     for (ix, score) in enumerate(act_range):
-        nfaa_acts[ix] = np.sum(nfaa_score == score) / num_scores
-        usaa_acts[ix] = np.sum(usaa_score == score) / num_scores
+        nfaa_acts[ix] = np.count_nonzero(nfaa_score == score) / num_scores
+        usaa_acts[ix] = np.count_nonzero(usaa_score == score) / num_scores
     # turn interactive plotting off
     plt.ioff()
     # create figure
@@ -561,10 +561,10 @@ span.white {color: #ffffff;}
             table1 = table1 + '  <td class="' + c + '">' + this_text + s + '</td>\n'
             if j % 3 == 2:
                 table1 = table1 + '  <td>{}</td>\n'.format(np.sum(this_nums[j-2:j+1]))
-        num_tens = np.sum([x=='10' for x in this_data])
+        num_tens = np.count_nonzero([x=='10' for x in this_data])
         table1 = table1 + '  <td rowspan="2">{}</td>\n'.format(this_cumsum[-1])
         table1 = table1 + '  <td rowspan="2">{}</td>\n'.format(this_cumsum[-1]-num_tens)
-        table1 = table1 + '  <td rowspan="2">{}</td>\n'.format(np.sum([x.lower()=='x' for x in this_data]))
+        table1 = table1 + '  <td rowspan="2">{}</td>\n'.format(np.count_nonzero([x.lower()=='x' for x in this_data]))
         table1 = table1 + '  <td rowspan="2">{}</td>\n'.format(num_tens)
         table1 = table1 + ' </tr>\n <tr>\n'
         for j in range(0,len(this_data)):
@@ -573,18 +573,18 @@ span.white {color: #ffffff;}
         table1 = table1 + ' </tr>\n'
         table2 = table2 + '<tr>'
         table2 = table2 + '<td>' + names[i] + '</td>\n'
-        table2 = table2 + '<td class="Y">{}</td>\n'.format(np.sum([x.lower()=='x' for x in this_data]))
-        table2 = table2 + '<td class="Y">{}</td>\n'.format(np.sum([x=='10' for x in this_data]))
-        table2 = table2 + '<td class="Y">{}</td>\n'.format(np.sum([x=='9' for x in this_data]))
-        table2 = table2 + '<td class="R">{}</td>\n'.format(np.sum([x=='8' for x in this_data]))
-        table2 = table2 + '<td class="R">{}</td>\n'.format(np.sum([x=='7' for x in this_data]))
-        table2 = table2 + '<td class="B">{}</td>\n'.format(np.sum([x=='6' for x in this_data]))
-        table2 = table2 + '<td class="B">{}</td>\n'.format(np.sum([x=='5' for x in this_data]))
-        table2 = table2 + '<td class="K"><span class="white">{}</span></td>\n'.format(np.sum([x=='4' for x in this_data]))
-        table2 = table2 + '<td class="K"><span class="white">{}</span></td>\n'.format(np.sum([x=='3' for x in this_data]))
-        table2 = table2 + '<td class="W">{}</td>\n'.format(np.sum([x=='2' for x in this_data]))
-        table2 = table2 + '<td class="W">{}</td>\n'.format(np.sum([x=='1' for x in this_data]))
-        table2 = table2 + '<td class="W"><span class="red">{}</span></td>\n'.format(np.sum([x.lower()=='m' or x == '0' for x in this_data]))
+        table2 = table2 + '<td class="Y">{}</td>\n'.format(np.count_nonzero([x.lower()=='x' for x in this_data]))
+        table2 = table2 + '<td class="Y">{}</td>\n'.format(np.count_nonzero([x=='10' for x in this_data]))
+        table2 = table2 + '<td class="Y">{}</td>\n'.format(np.count_nonzero([x=='9' for x in this_data]))
+        table2 = table2 + '<td class="R">{}</td>\n'.format(np.count_nonzero([x=='8' for x in this_data]))
+        table2 = table2 + '<td class="R">{}</td>\n'.format(np.count_nonzero([x=='7' for x in this_data]))
+        table2 = table2 + '<td class="B">{}</td>\n'.format(np.count_nonzero([x=='6' for x in this_data]))
+        table2 = table2 + '<td class="B">{}</td>\n'.format(np.count_nonzero([x=='5' for x in this_data]))
+        table2 = table2 + '<td class="K"><span class="white">{}</span></td>\n'.format(np.count_nonzero([x=='4' for x in this_data]))
+        table2 = table2 + '<td class="K"><span class="white">{}</span></td>\n'.format(np.count_nonzero([x=='3' for x in this_data]))
+        table2 = table2 + '<td class="W">{}</td>\n'.format(np.count_nonzero([x=='2' for x in this_data]))
+        table2 = table2 + '<td class="W">{}</td>\n'.format(np.count_nonzero([x=='1' for x in this_data]))
+        table2 = table2 + '<td class="W"><span class="red">{}</span></td>\n'.format(np.count_nonzero([x.lower()=='m' or x == '0' for x in this_data]))
         table2 = table2 + '</tr>\n'
     table1 = table1 + '</table>\n'
 

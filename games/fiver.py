@@ -370,7 +370,7 @@ def _blobbing(board):
 
     # check for valid blob sizes
     for s in range(np.max(labels)):
-        size = np.sum(labels == s + 1)
+        size = np.count_nonzero(labels == s + 1)
         if np.mod(size, SIZE_PIECES) != 0:
             return False
     return True
