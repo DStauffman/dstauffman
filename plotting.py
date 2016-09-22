@@ -705,7 +705,7 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
         colormap = DEFAULT_COLORMAP
 
     # check for valid data
-    if data is None:
+    if data is None or (ignore_all_zeros and np.all(data == 0)):
         print(' ' + label + ' plot skipped due to missing data.')
         return None
 

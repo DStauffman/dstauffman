@@ -510,6 +510,15 @@ class Test_plot_multiline_history(unittest.TestCase):
         data[:,3] = 0
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, ignore_all_zeros=True))
 
+    def test_ignore_zeros3(self):
+        data = np.zeros(self.data.shape)
+        with dcs.capture_output() as out:
+            not_a_fig = dcs.plot_multiline_history(self.time, data, label='All Zeros', ignore_all_zeros=True)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertIs(not_a_fig, None)
+        self.assertEqual(output,'All Zeros plot skipped due to missing data.')
+
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):
             self.figs.append(dcs.plot_multiline_history(self.time, self.data, legend=self.legend[:-1]))
