@@ -508,8 +508,8 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     return fig
 
 #%% Functions - plot_correlation_matrix
-def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlation Matrix', \
-        cmin=0, cmax=1, colormap='cool', plot_lower_only=True, label_values=False, \
+def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matrix_name='Correlation Matrix', \
+        cmin=0, cmax=1, colormap='cool', xlabel='', ylabel='', plot_lower_only=True, label_values=False, \
         x_lab_rot=90):
     r"""
     Visually plots a correlation matrix.
@@ -520,6 +520,8 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
         data for corresponding time history
     labels : list of str, optional
         Names to put on row and column headers
+    type_ : str, optional, from {'unity', 'population', 'percentage', 'per 100K', 'cost'}
+        description of the type of data that is being plotted, default is 'unity'
     opts : class Opts, optional
         plotting options
     matrix_name : str, optional
@@ -530,6 +532,10 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
         Maximum value for color range, default is one
     colormap : str, optional
         Name of colormap to use for plot
+    xlabel : str, optional
+        X label to put on plot
+    ylabel : str, optional
+        Y label to put on plot
     plot_lower_only : bool, optional
         Plots only the lower half of a symmetric matrix, default is True
     label_values : bool, optional
@@ -606,30 +612,34 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
     if temp > cmax:
         cmax = temp
 
+    # determine which type of data to plot
+    (scale, units) = get_axes_scales(type_)
+    this_title = matrix_name # + (' [' + units + ']' if units else '')
+
     # Create plots
     # turn interaction off
     plt.ioff()
     # create figure
     fig = plt.figure()
     # set figure title
-    fig.canvas.set_window_title(matrix_name)
+    fig.canvas.set_window_title(this_title)
     # get handle to axes for use later
     ax = fig.add_subplot(111)
     # set axis color to none
     ax.patch.set_facecolor('none')
     # set title
-    plt.title(fig.canvas.get_window_title())
+    plt.title(this_title)
     # get colormap based on high and low limits
-    cm = ColorMap(colormap, low=cmin, high=cmax)
+    cm = ColorMap(colormap, low=scale*cmin, high=scale*cmax)
     # loop through and plot each element with a corresponding color
     for i in range(m):
         for j in range(n):
             if not plot_lower_only or (i <= j):
                 if not np.isnan(data[j, i]):
                     ax.add_patch(Rectangle((box_size*i,box_size*j),box_size, box_size, \
-                        color=cm.get_color(data[j, i])))
+                        color=cm.get_color(scale*data[j, i])))
                 if label_values:
-                    ax.annotate('{:.2g}'.format(data[j,i]), xy=(box_size*i + box_size/2, box_size*j + box_size/2), \
+                    ax.annotate('{:.2g}'.format(scale*data[j,i]), xy=(box_size*i + box_size/2, box_size*j + box_size/2), \
                         xycoords='data', horizontalalignment='center', \
                         verticalalignment='center', fontsize=15)
     # show colorbar
@@ -641,6 +651,9 @@ def plot_correlation_matrix(data, labels=None, opts=None, matrix_name='Correlati
     plt.ylim(0, n)
     plt.xticks(np.arange(0, m)+box_size/2, xlab, rotation=x_lab_rot)
     plt.yticks(np.arange(0, n)+box_size/2, ylab)
+    # label axes
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
     # reverse the y axis
     ax.invert_yaxis()
 

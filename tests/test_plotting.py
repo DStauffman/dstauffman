@@ -370,6 +370,7 @@ class Test_plot_correlation_matrix(unittest.TestCase):
         self.figs   = []
         self.data   = dcs.unit(np.random.rand(num, num), axis=0)
         self.labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+        self.type_  = 'percentage'
         self.opts   = dcs.Opts()
         self.opts.case_name = 'Testing Correlation'
         self.matrix_name    = 'Not a Correlation Matrix'
@@ -391,9 +392,13 @@ class Test_plot_correlation_matrix(unittest.TestCase):
     def test_default_labels(self):
         self.figs.append(dcs.plot_correlation_matrix(self.data[:5, :3]))
 
+    def test_type(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.data, type_=self.type_))
+
     def test_all_args(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, self.opts, \
-            self.matrix_name, 0, 1, 'cool', True))
+        self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, self.type_, self.opts, \
+            matrix_name=self.matrix_name, cmin=0, cmax=1, colormap='viridis', xlabel='', ylabel='', \
+            plot_lower_only=False, label_values=True, x_lab_rot=180))
 
     def test_symmetric(self):
         self.figs.append(dcs.plot_correlation_matrix(self.sym))
@@ -427,6 +432,12 @@ class Test_plot_correlation_matrix(unittest.TestCase):
 
     def test_colormap(self):
         self.figs.append(dcs.plot_correlation_matrix(self.data, colormap='seismic_r'))
+
+    def test_xlabel(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.data, xlabel='Testing Label'))
+
+    def test_ylabel(self):
+        self.figs.append(dcs.plot_correlation_matrix(self.data, ylabel='Testing Label'))
 
     def test_x_label_rotation(self):
         self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, x_lab_rot=0))
