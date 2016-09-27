@@ -674,9 +674,10 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
     num_shrinks     = 0
     step_number     = 0
     failed          = False
+    was_limited     = False
 
     # try a step
-    while (num_shrinks < opti_opts.step_limit) and try_again:
+    while (num_shrinks < opti_opts.step_limit) and try_again and not was_limited:
         # increment step number
         step_number += 1
 
@@ -703,8 +704,12 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
             params *= param_typical
 
         # enforce min/max bounds
-        params = np.minimum(params, params_max)
-        params = np.maximum(params, params_min)
+        if np.any(params > params_max):
+            was_limited = True
+            params = np.minimum(params, params_max)
+        if np.any(params < params_min):
+            was_limited = True
+            params = np.maximum(params, params_min)
 
         # Run model
         if log_level >= 8:
@@ -770,6 +775,8 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
             print(' Tried a {} step of length: {}, (with scale: {}).'.format(step_type, step_len, step_scale))
             print(' New trial cost: {}'.format(trial_cost))
             print(' With result: {}'.format(step_resolution))
+            if was_limited:
+                print(' Caution, the step length was limited by the given bounds.')
 
     # Display status message
     if log_level >= 8 and num_shrinks >= opti_opts.step_limit:

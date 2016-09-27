@@ -98,8 +98,9 @@ def set_parameter(sim_params, *, names, values):
 #%% Script
 if __name__=='__main__':
     # Constants
-    rerun    = True
-    time     = np.arange(251)
+    rerun      = True
+    make_plots = True
+    time       = np.arange(251)
 
     # Parameters
     sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
@@ -137,7 +138,7 @@ if __name__=='__main__':
     opti_opts.trust_radius    = 1.0
 
     # Parameters to estimate
-    opti_opts.params.append(dcs.OptiParam('magnitude', best=2.5, min_=1, max_=10, typical=5, minstep=0.01))
+    opti_opts.params.append(dcs.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
     opti_opts.params.append(dcs.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
     opti_opts.params.append(dcs.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
@@ -149,17 +150,18 @@ if __name__=='__main__':
         results     = sim_model(sim_params) # just re-run, nothing is actually saved by this model
 
     # Plot results
-    # build opts
-    opts           = dcs.Opts()
-    opts.case_name = 'Model Results'
-    opts.save_path = dcs.get_output_dir()
-    opts.save_plot = True
+    if make_plots:
+        # build opts
+        opts           = dcs.Opts()
+        opts.case_name = 'Model Results'
+        opts.save_path = dcs.get_output_dir()
+        opts.save_plot = True
 
-    # make model plots
-    dcs.plot_time_history(time, results, description='Output vs. Time', opts=opts, \
-        truth_time=truth_time, truth_data=truth_data)
+        # make model plots
+        dcs.plot_time_history(time, results, description='Output vs. Time', opts=opts, \
+            truth_time=truth_time, truth_data=truth_data)
 
-    # make BPE plots
-    bpe_plots = {'innovs': True, 'convergence': False, 'correlation': True, 'info_svd': True, \
-        'covariance': False}
-    dcs.plot_bpe_results(bpe_results, opti_opts, opts, plots=bpe_plots)
+        # make BPE plots
+        bpe_plots = {'innovs': True, 'convergence': False, 'correlation': True, 'info_svd': True, \
+            'covariance': False}
+        dcs.plot_bpe_results(bpe_results, opti_opts, opts, plots=bpe_plots)
