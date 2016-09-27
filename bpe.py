@@ -356,8 +356,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
         temp_step     = np.abs(cur_results.params)*step_sf * 1/cur_results.trust_rad
-        minstep       = np.minimum(param_minstep, 0.9 * np.abs(cur_results.params))
-        param_perturb = param_signs * np.maximum(temp_step, minstep)
+        param_perturb = param_signs * np.maximum(temp_step, param_minstep)
 
     temp_params_plus  = cur_results.params.copy()
     temp_params_minus = cur_results.params.copy()
