@@ -340,6 +340,8 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     param_signs   = np.sign(cur_results.params)
     param_signs[param_signs == 0] = 1
     param_minstep = OptiParam.get_array(opti_opts.params, type_='minstep')
+    params_min    = OptiParam.get_array(opti_opts.params, type_='min')
+    params_max    = OptiParam.get_array(opti_opts.params, type_='max')
     if normalized:
         param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
 
@@ -354,15 +356,16 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
         temp_step     = np.abs(cur_results.params)*step_sf * 1/cur_results.trust_rad
-        param_perturb = param_signs * np.maximum(temp_step, param_minstep)
+        minstep       = np.minimum(param_minstep, 0.9 * np.abs(cur_results.params))
+        param_perturb = param_signs * np.maximum(temp_step, minstep)
 
     temp_params_plus  = cur_results.params.copy()
     temp_params_minus = cur_results.params.copy()
 
     for i_param in range(num_param):
         # update the parameters for this run
-        temp_params_plus[i_param]  = cur_results.params[i_param] + param_perturb[i_param]
-        temp_params_minus[i_param] = cur_results.params[i_param] - param_perturb[i_param]
+        temp_params_plus[i_param]  = np.minimum(cur_results.params[i_param] + param_perturb[i_param], params_max[i_param])
+        temp_params_minus[i_param] = np.maximum(cur_results.params[i_param] - param_perturb[i_param], params_min[i_param])
 
         # get the new parameters for this run
         if normalized:
@@ -651,10 +654,12 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
     if normalized:
         param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
 
-    # alias the log level, trust radius and parameters names
+    # alias the log level, trust radius, parameters names and bounds
     log_level = Logger().get_level()
     trust_radius = cur_results.trust_rad
     names = [name.decode('utf-8') for name in bpe_results.param_names]
+    params_min = OptiParam.get_array(opti_opts.params, type_='min')
+    params_max = OptiParam.get_array(opti_opts.params, type_='max')
 
     # save a copy of the original param values
     orig_params = cur_results.params.copy()
@@ -697,6 +702,10 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
         params = orig_params + new_delta_param
         if normalized:
             params *= param_typical
+
+        # enforce min/max bounds
+        params = np.minimum(params, params_max)
+        params = np.maximum(params, params_min)
 
         # Run model
         if log_level >= 8:
