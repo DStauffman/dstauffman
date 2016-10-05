@@ -251,12 +251,14 @@ def _pprint_args(names, values):
     lines = []
     # loop through all the names
     for (ix, this_name) in enumerate(names):
+        # add the .ix part into param
+        this_name = this_name.replace('param.','param.ix(c).')
         # get this value
         this_value = values[ix]
         # find how much to pad this particular name
         pad = max_len - len(this_name)
         # append this line
-        lines.append('    ' + this_name + ' ' + ' '*pad + '= {:g}'.format(this_value))
+        lines.append('        ' + this_name + ' ' + ' '*pad + '= {:g}'.format(this_value))
     # combine all the lines into one string
     text = '\n'.join(lines)
     # print the resulting string and return it
