@@ -1,0 +1,698 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dstauffman.stats &mdash; dstauffman 0.0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="dstauffman 0.0.2 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for dstauffman.stats</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">Stats module file for the &quot;dstauffman&quot; library.  It contains generic statistics related routines</span>
+<span class="sd">that can be independently defined and used by other modules.</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">#.  Written by David C. Stauffer in December 2015.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># pylint: disable=E1101, C0301, C0103</span>
+
+<span class="c1">#%% Imports</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">OrderedDict</span>
+<span class="kn">import</span> <span class="nn">doctest</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+<span class="kn">from</span> <span class="nn">dstauffman.constants</span> <span class="k">import</span> <span class="n">MONTHS_PER_YEAR</span>
+<span class="kn">from</span> <span class="nn">dstauffman.plotting</span> <span class="k">import</span> <span class="n">Opts</span><span class="p">,</span> <span class="n">setup_plots</span>
+
+<span class="c1">#%% Functions - convert_annual_to_monthly_probability</span>
+<div class="viewcode-block" id="convert_annual_to_monthly_probability"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.stats.convert_annual_to_monthly_probability">[docs]</a><span class="k">def</span> <span class="nf">convert_annual_to_monthly_probability</span><span class="p">(</span><span class="n">annual</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Converts a given annual probabily into the equivalent monthly one.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    annual : numpy.ndarray</span>
+<span class="sd">        annual probabilities, 0 &lt;= annual &lt;= 1</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    monthly : numpy.ndarray</span>
+<span class="sd">        equivalent monthly probabilities, 0 &lt;= monthly &lt;= 1</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        Any probabilities outside of the [0, 1] range</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Checks for boundary cases to avoid a divide by zero warning</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import convert_annual_to_monthly_probability</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; annual  = np.array([0, 0.1, 1])</span>
+<span class="sd">    &gt;&gt;&gt; monthly = convert_annual_to_monthly_probability(annual)</span>
+<span class="sd">    &gt;&gt;&gt; print(monthly) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0. 0.00874161  1. ]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check ranges</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">annual</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;annual must be &gt;= 0&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">annual</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;annual must be &lt;= 1&#39;</span><span class="p">)</span>
+    <span class="c1"># convert to equivalent probability and return result</span>
+    <span class="n">monthly</span> <span class="o">=</span> <span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">annual</span><span class="p">)</span><span class="o">/</span><span class="n">MONTHS_PER_YEAR</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">monthly</span></div>
+
+<span class="c1">#%% Functions - convert_monthly_to_annual_probability</span>
+<div class="viewcode-block" id="convert_monthly_to_annual_probability"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.stats.convert_monthly_to_annual_probability">[docs]</a><span class="k">def</span> <span class="nf">convert_monthly_to_annual_probability</span><span class="p">(</span><span class="n">monthly</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Converts a given monthly probability into the equivalent annual one.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    monthly : numpy.ndarray</span>
+<span class="sd">        equivalent monthly probabilities, 0 &lt;= monthly &lt;= 1</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    annual : numpy.ndarray</span>
+<span class="sd">        annual probabilities, 0 &lt;= annual &lt;= 1</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import convert_monthly_to_annual_probability</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; monthly = np.array([0, 0.1, 1])</span>
+<span class="sd">    &gt;&gt;&gt; annual = convert_monthly_to_annual_probability(monthly)</span>
+<span class="sd">    &gt;&gt;&gt; print(annual) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0. 0.71757046 1. ]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check ranges</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">monthly</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;monthly must be &gt;= 0&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">monthly</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;annual must be &lt;= 1&#39;</span><span class="p">)</span>
+    <span class="c1"># convert to equivalent probability and return result</span>
+    <span class="n">annual</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">monthly</span><span class="p">)</span><span class="o">**</span><span class="n">MONTHS_PER_YEAR</span>
+    <span class="k">return</span> <span class="n">annual</span></div>
+
+<span class="c1">#%% Functions - ca2mp &amp; cm2ap aliases</span>
+<span class="n">ca2mp</span> <span class="o">=</span> <span class="n">convert_annual_to_monthly_probability</span>
+<span class="n">cm2ap</span> <span class="o">=</span> <span class="n">convert_monthly_to_annual_probability</span>
+
+<span class="c1">#%% Functions - prob_to_rate</span>
+<div class="viewcode-block" id="prob_to_rate"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.stats.prob_to_rate">[docs]</a><span class="k">def</span> <span class="nf">prob_to_rate</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Converts a given probability and time to a rate.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    prob : numpy.ndarray</span>
+<span class="sd">        Probability of event happening over the given time</span>
+<span class="sd">    time : float</span>
+<span class="sd">        Time for the given probability in years</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    rate : numpy.ndarray</span>
+<span class="sd">        Equivalent annual rate for the given probability and time</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in January 2016.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import prob_to_rate</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; prob = np.array([0, 0.1, 1])</span>
+<span class="sd">    &gt;&gt;&gt; time = 3</span>
+<span class="sd">    &gt;&gt;&gt; rate = prob_to_rate(prob, time)</span>
+<span class="sd">    &gt;&gt;&gt; print(rate) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [-0. 0.03512017 inf]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check ranges</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">prob</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Probability must be &gt;= 0&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">prob</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Probability must be &lt;= 1&#39;</span><span class="p">)</span>
+    <span class="c1"># calculate rate</span>
+    <span class="n">rate</span> <span class="o">=</span> <span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">prob</span><span class="p">)</span> <span class="o">/</span> <span class="n">time</span>
+    <span class="k">return</span> <span class="n">rate</span></div>
+
+<span class="c1">#%% Functions - rate_to_prob</span>
+<div class="viewcode-block" id="rate_to_prob"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.stats.rate_to_prob">[docs]</a><span class="k">def</span> <span class="nf">rate_to_prob</span><span class="p">(</span><span class="n">rate</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Converts a given rate and time to a probability.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rate : numpy.ndarray</span>
+<span class="sd">        Annual rate for the given time</span>
+<span class="sd">    time : float</span>
+<span class="sd">        Time period for the desired probability to be calculated from, in years</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    prob : numpy.ndarray</span>
+<span class="sd">        Equivalent probability of event happening over the given time</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in January 2016.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import rate_to_prob</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; rate = np.array([0, 0.1, 1, 100, np.inf])</span>
+<span class="sd">    &gt;&gt;&gt; time = 1./12</span>
+<span class="sd">    &gt;&gt;&gt; prob = rate_to_prob(rate, time)</span>
+<span class="sd">    &gt;&gt;&gt; print(prob) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0. 0.00829871 0.07995559 0.99975963 1. ]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># check ranges</span>
+    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">rate</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Rate must be &gt;= 0&#39;</span><span class="p">)</span>
+    <span class="c1"># calculate probability</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">rate</span> <span class="o">*</span> <span class="n">time</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">prob</span></div>
+
+<span class="c1">#%% Functions - month_prob_mult_ratio</span>
+<div class="viewcode-block" id="month_prob_mult_ratio"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.stats.month_prob_mult_ratio">[docs]</a><span class="k">def</span> <span class="nf">month_prob_mult_ratio</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">ratio</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Multiplies a monthly probability by a given risk or hazard ratio.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    prob : numpy.ndarray</span>
+<span class="sd">        Probability of event happening over one month</span>
+<span class="sd">    ratio : float</span>
+<span class="sd">        Multiplication ratio to apply to probability</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    mult_prob : numpy.ndarray</span>
+<span class="sd">        Equivalent multiplicative monthly probability</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Staufer in January 2016.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import month_prob_mult_ratio</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; prob = np.array([0, 0.1, 1])</span>
+<span class="sd">    &gt;&gt;&gt; ratio = 2</span>
+<span class="sd">    &gt;&gt;&gt; mult_prob = month_prob_mult_ratio(prob, ratio)</span>
+<span class="sd">    &gt;&gt;&gt; print(mult_prob) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0. 0.19 1. ]</span>
+
+<span class="sd">    &gt;&gt;&gt; ratio = 0.5</span>
+<span class="sd">    &gt;&gt;&gt; mult_prob = month_prob_mult_ratio(prob, ratio)</span>
+<span class="sd">    &gt;&gt;&gt; print(mult_prob) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0. 0.0513167 1. ]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># convert the probability to a rate</span>
+    <span class="n">rate</span> <span class="o">=</span> <span class="n">prob_to_rate</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="n">MONTHS_PER_YEAR</span><span class="p">)</span>
+    <span class="c1"># scale the rate</span>
+    <span class="n">mult_rate</span> <span class="o">=</span> <span class="n">rate</span> <span class="o">*</span> <span class="n">ratio</span>
+    <span class="c1"># convert back to a probability</span>
+    <span class="n">mult_prob</span> <span class="o">=</span> <span class="n">rate_to_prob</span><span class="p">(</span><span class="n">mult_rate</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mf">1.</span><span class="o">/</span><span class="n">MONTHS_PER_YEAR</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">mult_prob</span></div>
+
+<span class="c1">#%% Functions - annual_rate_to_monthly_probability</span>
+<div class="viewcode-block" id="annual_rate_to_monthly_probability"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.stats.annual_rate_to_monthly_probability">[docs]</a><span class="k">def</span> <span class="nf">annual_rate_to_monthly_probability</span><span class="p">(</span><span class="n">rate</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Converts a given annual rate to a monthly probability.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    rate : numpy.ndarray</span>
+<span class="sd">        Annual rate</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    prob : numpy.ndarray</span>
+<span class="sd">        Equivalent monthly probability</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in January 2016.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    rate_to_prob</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import annual_rate_to_monthly_probability</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; rate = np.array([0, 0.5, 1, 5, np.inf])</span>
+<span class="sd">    &gt;&gt;&gt; prob = annual_rate_to_monthly_probability(rate)</span>
+<span class="sd">    &gt;&gt;&gt; print(prob) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0. 0.04081054 0.07995559 0.34075937 1. ]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># divide rate and calculate probability</span>
+    <span class="n">prob</span> <span class="o">=</span> <span class="n">rate_to_prob</span><span class="p">(</span><span class="n">rate</span><span class="o">/</span><span class="n">MONTHS_PER_YEAR</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">prob</span></div>
+
+<span class="c1">#%% Functions - monthly_probability_to_annual_rate</span>
+<div class="viewcode-block" id="monthly_probability_to_annual_rate"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.stats.monthly_probability_to_annual_rate">[docs]</a><span class="k">def</span> <span class="nf">monthly_probability_to_annual_rate</span><span class="p">(</span><span class="n">prob</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Converts a given monthly probability to an annual rate.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    prob : numpy.ndarray</span>
+<span class="sd">        Monthly probability</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    rate : numpy.ndarray</span>
+<span class="sd">        Equivalent annual rate</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written by David C. Stauffer in April 2016.</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    prob_to_rate</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import monthly_probability_to_annual_rate</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; prob = np.array([0, 0.04081054, 0.07995559, 0.34075937, 1])</span>
+<span class="sd">    &gt;&gt;&gt; rate = monthly_probability_to_annual_rate(prob)</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39; &#39;.join((&#39;{:.2f}&#39;.format(x) for x in rate))) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    -0.00 0.50 1.00 5.00 inf</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># divide rate and calculate probability</span>
+    <span class="n">rate</span> <span class="o">=</span> <span class="n">prob_to_rate</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">time</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="n">MONTHS_PER_YEAR</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rate</span></div>
+
+<span class="c1">#%% Functions - ar2mp</span>
+<span class="n">ar2mp</span> <span class="o">=</span> <span class="n">annual_rate_to_monthly_probability</span>
+<span class="n">mp2ar</span> <span class="o">=</span> <span class="n">monthly_probability_to_annual_rate</span>
+
+<span class="c1">#%% Functions - combine_sets</span>
+<div class="viewcode-block" id="combine_sets"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.stats.combine_sets">[docs]</a><span class="k">def</span> <span class="nf">combine_sets</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">u1</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">u2</span><span class="p">,</span> <span class="n">s2</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Combines the mean and standard deviations for two non-overlapping sets of data.</span>
+
+<span class="sd">    This function combines two non-overlapping data sets, given a number of samples, mean</span>
+<span class="sd">    and standard deviation for the two data sets.  It first calculates the total number of samples</span>
+<span class="sd">    then calculates the total mean using a weighted average, and then calculates the combined</span>
+<span class="sd">    standard deviation using an equation found on wikipedia.  It also checks for special cases</span>
+<span class="sd">    where either data set is empty or if only one total point is in the combined set.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    n1 : float</span>
+<span class="sd">        number of points in data set 1</span>
+<span class="sd">    u1 : float</span>
+<span class="sd">        mean of data set 1</span>
+<span class="sd">    s1 : float</span>
+<span class="sd">        standard deviation of data set 1</span>
+<span class="sd">    n2 : float</span>
+<span class="sd">        number of points in data set 2</span>
+<span class="sd">    u2 : float</span>
+<span class="sd">        mean of data set 2</span>
+<span class="sd">    s2 : float</span>
+<span class="sd">        standard deviation of data set 2</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    n  : float,</span>
+<span class="sd">        number of points in the combined data set</span>
+<span class="sd">    u  : float,</span>
+<span class="sd">        mean of the combined data set</span>
+<span class="sd">    s  : float,</span>
+<span class="sd">        standard deviation of the combined data set</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    np.mean, np.std</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    #.  http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics, on 8/7/12</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Written in Matlab by David C. Stauffer in Jul 2012.</span>
+<span class="sd">    #.  Ported to Python by David C. Stauffer in May 2015.</span>
+<span class="sd">    #.  Could be expanded to broadcast and handle array inputs.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import combine_sets</span>
+<span class="sd">    &gt;&gt;&gt; n1 = 5</span>
+<span class="sd">    &gt;&gt;&gt; u1 = 1</span>
+<span class="sd">    &gt;&gt;&gt; s1 = 0.5</span>
+<span class="sd">    &gt;&gt;&gt; n2 = 10</span>
+<span class="sd">    &gt;&gt;&gt; u2 = 2</span>
+<span class="sd">    &gt;&gt;&gt; s2 = 0.25</span>
+<span class="sd">    &gt;&gt;&gt; (n, u, s) = combine_sets(n1, u1, s1, n2, u2, s2)</span>
+<span class="sd">    &gt;&gt;&gt; print(n)</span>
+<span class="sd">    15</span>
+<span class="sd">    &gt;&gt;&gt; print(u) # doctest: +ELLIPSIS</span>
+<span class="sd">    1.666666...67</span>
+<span class="sd">    &gt;&gt;&gt; print(s)</span>
+<span class="sd">    0.59135639081</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># assertions</span>
+    <span class="k">assert</span> <span class="n">n1</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">n2</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">s1</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="k">assert</span> <span class="n">s2</span> <span class="o">&gt;=</span> <span class="mi">0</span>
+    <span class="c1"># combine total number of samples</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">n1</span> <span class="o">+</span> <span class="n">n2</span>
+    <span class="c1"># check for zero case</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+    <span class="c1"># calculate the combined mean</span>
+    <span class="n">u</span> <span class="o">=</span> <span class="mi">1</span><span class="o">/</span><span class="n">n</span> <span class="o">*</span> <span class="p">(</span><span class="n">n1</span><span class="o">*</span><span class="n">u1</span> <span class="o">+</span> <span class="n">n2</span><span class="o">*</span><span class="n">u2</span><span class="p">)</span>
+    <span class="c1"># calculate the combined standard deviation</span>
+    <span class="k">if</span> <span class="n">n</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span> <span class="p">(</span><span class="n">n1</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">s1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">n1</span><span class="o">*</span><span class="n">u1</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">n2</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">s2</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">n2</span><span class="o">*</span><span class="n">u2</span><span class="o">**</span><span class="mi">2</span> <span class="o">-</span> <span class="n">n</span><span class="o">*</span><span class="n">u</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># special case where one of the data sets is empty</span>
+        <span class="k">if</span> <span class="n">n1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s1</span>
+        <span class="k">elif</span> <span class="n">n2</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">s2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># shouldn&#39;t be able to ever reach this line with assertions on</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Total samples are 1, but neither data set has only one item.&#39;</span><span class="p">)</span> <span class="c1"># pragma: no cover</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span></div>
+
+<span class="c1">#%% Functions - icer</span>
+<div class="viewcode-block" id="icer"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.stats.icer">[docs]</a><span class="k">def</span> <span class="nf">icer</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">qaly</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">baseline</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">make_plot</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">opts</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Calculates the incremental cost effectiveness ratios with steps to throw out dominated strategies.</span>
+
+<span class="sd">    Summary</span>
+<span class="sd">    -------</span>
+<span class="sd">        In a loop, the code sorts by cost, throws out strongly dominated strategies (qaly doesn&#39;t</span>
+<span class="sd">        improve despite higher costs), calculates an incremental cost, qaly and cost effectiveness</span>
+<span class="sd">        ratio, then throws out weakly dominated strategies (icer doesn&#39;t improve over cheaper options)</span>
+<span class="sd">        and finally returns the incremental cost, qaly and ratios for the remaining &quot;frontier&quot; options</span>
+<span class="sd">        along with an order variable to map them back to the inputs.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cost : (N) array_like</span>
+<span class="sd">        Cost of each strategy</span>
+<span class="sd">    qaly : (N) array_like</span>
+<span class="sd">        Quality adjusted life years (QALY) gained by each strategy</span>
+<span class="sd">    names : (N) array_like, optional</span>
+<span class="sd">        Names of the different strategies</span>
+<span class="sd">    baseline : int, optional</span>
+<span class="sd">        Index of baseline strategy to use for cost comparisons, if not nan</span>
+<span class="sd">    make_plot : bool, optional</span>
+<span class="sd">        True/false flag for whether to plot the data</span>
+<span class="sd">    opts : class Opts, optional</span>
+<span class="sd">        Plotting options</span>
+
+<span class="sd">    Results</span>
+<span class="sd">    -------</span>
+<span class="sd">    inc_cost  : (M) ndarray</span>
+<span class="sd">        incremental costs - see note 1</span>
+<span class="sd">    inc_qaly  : (M) ndarray</span>
+<span class="sd">        incremental QALYs gained</span>
+<span class="sd">    icer_out  : (M) ndarray</span>
+<span class="sd">        incremental cost effectiveness ratios</span>
+<span class="sd">    order     : (N) ndarray</span>
+<span class="sd">        order mapping to the original inputs, with NaNs for dominated strategies</span>
+<span class="sd">    icer_data : (N) pandas dataframe</span>
+<span class="sd">        ICER data as a pandas dataframe</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  N may be smaller than M due to dominated strategies being removed.  The order variable</span>
+<span class="sd">            will have (M - N) values set to NaN.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import icer</span>
+<span class="sd">    &gt;&gt;&gt; cost = [250e3, 750e3, 2.25e6, 3.75e6]</span>
+<span class="sd">    &gt;&gt;&gt; qaly = [20., 30, 40, 80]</span>
+<span class="sd">    &gt;&gt;&gt; (inc_cost, inc_qaly, icer_out, order, icer_data) = icer(cost, qaly)</span>
+<span class="sd">    &gt;&gt;&gt; print(inc_cost) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 250000. 500000. 3000000.]</span>
+
+<span class="sd">    &gt;&gt;&gt; print(inc_qaly) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 20. 10. 50.]</span>
+
+<span class="sd">    &gt;&gt;&gt; print(icer_out) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 12500. 50000. 60000.]</span>
+
+<span class="sd">    &gt;&gt;&gt; print(order) # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">    [ 0. 1. nan 2.]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># force inputs to be ndarrays</span>
+    <span class="n">cost</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">cost</span><span class="p">))</span>
+    <span class="n">qaly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">atleast_1d</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">qaly</span><span class="p">))</span>
+
+    <span class="c1"># check inputs</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">cost</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;Costs must be positive.&#39;</span>
+    <span class="k">assert</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">qaly</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="s1">&#39;Qalys must be positive.&#39;</span>
+    <span class="k">assert</span> <span class="n">cost</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="n">qaly</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="s1">&#39;Cost and Qalys must have same size.&#39;</span>
+    <span class="k">assert</span> <span class="n">cost</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;Costs and Qalys cannot be empty.&#39;</span>
+
+    <span class="c1"># alias the number of strategies</span>
+    <span class="n">num</span> <span class="o">=</span> <span class="n">cost</span><span class="o">.</span><span class="n">size</span>
+
+    <span class="c1"># build an index order variable to keep track of strategies</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">))</span>
+
+    <span class="c1"># enter processing loop</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="c1"># pull out current values based on evolving order mask</span>
+        <span class="n">this_cost</span> <span class="o">=</span> <span class="n">cost</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+        <span class="n">this_qaly</span> <span class="o">=</span> <span class="n">qaly</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
+
+        <span class="c1"># sort by cost</span>
+        <span class="n">ix_sort</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argsort</span><span class="p">(</span><span class="n">this_cost</span><span class="p">)</span>
+        <span class="n">sorted_cost</span> <span class="o">=</span> <span class="n">this_cost</span><span class="p">[</span><span class="n">ix_sort</span><span class="p">]</span>
+        <span class="n">sorted_qaly</span> <span class="o">=</span> <span class="n">this_qaly</span><span class="p">[</span><span class="n">ix_sort</span><span class="p">]</span>
+
+        <span class="c1"># check for strongly dominated strategies</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sorted_qaly</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="c1"># find the first occurence (increment by one to find the one less effective than the last)</span>
+            <span class="n">bad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sorted_qaly</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Index should never be empty, something unexpected happended.&#39;</span><span class="p">)</span> <span class="c1"># pragma: no cover</span>
+            <span class="c1"># update the mask and continue to next pass of while loop</span>
+            <span class="n">keep</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ix_sort</span><span class="p">[</span><span class="n">bad</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># calculate incremental costs</span>
+        <span class="n">inc_cost</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">sorted_cost</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sorted_cost</span><span class="p">)))</span>
+        <span class="n">inc_qaly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">sorted_qaly</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sorted_qaly</span><span class="p">)))</span>
+        <span class="n">icer_out</span> <span class="o">=</span> <span class="n">inc_cost</span> <span class="o">/</span> <span class="n">inc_qaly</span>
+
+        <span class="c1"># check for weakly dominated strategies</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">icer_out</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="c1"># find the first bad occurence</span>
+            <span class="n">bad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">icer_out</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">bad</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Index should never be empty, something unexpected happended.&#39;</span><span class="p">)</span> <span class="c1"># pragma: no cover</span>
+            <span class="c1"># update mask and continue to next pass</span>
+            <span class="n">keep</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">ix_sort</span><span class="p">[</span><span class="n">bad</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+            <span class="k">continue</span>
+
+        <span class="c1"># if no continue statements were reached, then another iteration is not necessary, so break out</span>
+        <span class="k">break</span>
+
+    <span class="c1"># save the final ordering</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">cost</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+    <span class="n">order</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span> <span class="o">=</span> <span class="n">ix_sort</span>
+
+    <span class="c1"># build an index to pull data out</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">order</span><span class="p">))[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">ix</span>   <span class="o">=</span> <span class="n">temp</span><span class="p">[</span><span class="n">order</span><span class="p">[</span><span class="o">~</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">order</span><span class="p">)]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)]</span>
+
+    <span class="c1"># recalculate based on given baseline</span>
+    <span class="k">if</span> <span class="n">baseline</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">inc_cost</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">cost</span><span class="p">[</span><span class="n">baseline</span><span class="p">],</span> <span class="n">cost</span><span class="p">[</span><span class="n">ix</span><span class="p">])))</span>
+        <span class="n">inc_qaly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">qaly</span><span class="p">[</span><span class="n">baseline</span><span class="p">],</span> <span class="n">qaly</span><span class="p">(</span><span class="n">ix</span><span class="p">))))</span>
+        <span class="n">icer_out</span> <span class="o">=</span> <span class="n">inc_cost</span> <span class="o">/</span> <span class="n">inc_qaly</span>
+
+    <span class="c1"># output as dataframe</span>
+    <span class="c1"># build a name list if not given</span>
+    <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Strategy </span><span class="si">{}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">)]</span>
+    <span class="c1"># preallocate some variables</span>
+    <span class="n">full_inc_costs</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">num</span><span class="p">))</span>
+    <span class="n">full_inc_qalys</span>     <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">num</span><span class="p">))</span>
+    <span class="n">full_icers</span>         <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">num</span><span class="p">))</span>
+    <span class="c1"># fill the calculations in where applicable</span>
+    <span class="n">full_inc_costs</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">=</span> <span class="n">inc_cost</span>
+    <span class="n">full_inc_qalys</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span> <span class="o">=</span> <span class="n">inc_qaly</span>
+    <span class="n">full_icers</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span>     <span class="o">=</span> <span class="n">icer_out</span>
+    <span class="c1"># make into dictionary with more explicit column names</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Strategy&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">names</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Cost&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cost</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;QALYs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">qaly</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Increment_Costs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_inc_costs</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Incremental_QALYs&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_inc_qalys</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;ICER&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_icers</span>
+    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;Order&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">order</span>
+
+    <span class="c1"># make the whole data set into a dataframe</span>
+    <span class="n">icer_data</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">icer_data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;Strategy&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Make a plot</span>
+    <span class="k">if</span> <span class="n">make_plot</span><span class="p">:</span>
+        <span class="c1"># check optional inputs</span>
+        <span class="k">if</span> <span class="n">opts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">opts</span> <span class="o">=</span> <span class="n">Opts</span><span class="p">()</span>
+        <span class="c1"># turn interactive plotting off</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ioff</span><span class="p">()</span>
+        <span class="c1"># create a figure and axis</span>
+        <span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;Cost Benefit Frontier&#39;</span><span class="p">)</span>
+        <span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+        <span class="c1"># plot the data</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">qaly</span><span class="p">,</span> <span class="n">cost</span><span class="p">,</span> <span class="s1">&#39;ko&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;strategies&#39;</span><span class="p">)</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">qaly</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">cost</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="s1">&#39;r.&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;frontier&#39;</span><span class="p">)</span>
+        <span class="c1"># get axis limits before (0,0) point is added</span>
+        <span class="n">lim</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">()</span>
+        <span class="c1"># add ICER lines</span>
+        <span class="k">if</span> <span class="n">baseline</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">qaly</span><span class="p">[</span><span class="n">ix</span><span class="p">])),</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">cost</span><span class="p">[</span><span class="n">ix</span><span class="p">])),</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;ICERs&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">qaly</span><span class="p">[</span><span class="n">ix</span><span class="p">[</span><span class="mi">0</span><span class="p">]])),</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">cost</span><span class="p">[</span><span class="n">ix</span><span class="p">[</span><span class="mi">0</span><span class="p">]])),</span> <span class="s1">&#39;r:&#39;</span><span class="p">)</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">qaly</span><span class="p">[</span><span class="n">baseline</span><span class="p">],</span> <span class="n">qaly</span><span class="p">[</span><span class="n">ix</span><span class="p">])),</span> <span class="n">np</span><span class="o">.</span><span class="n">hstack</span><span class="p">((</span><span class="n">cost</span><span class="p">[</span><span class="n">baseline</span><span class="p">],</span> <span class="n">cost</span><span class="p">[</span><span class="n">ix</span><span class="p">])),</span> <span class="s1">&#39;r-&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;ICERs&#39;</span><span class="p">)</span>
+        <span class="c1"># Label each point</span>
+        <span class="n">dy</span> <span class="o">=</span> <span class="p">(</span><span class="n">lim</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">-</span> <span class="n">lim</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> <span class="o">/</span> <span class="mi">100</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num</span><span class="p">):</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">annotate</span><span class="p">(</span><span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xy</span><span class="o">=</span><span class="p">(</span><span class="n">qaly</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">cost</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">dy</span><span class="p">),</span> <span class="n">xycoords</span><span class="o">=</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">,</span> \
+                <span class="n">verticalalignment</span><span class="o">=</span><span class="s1">&#39;bottom&#39;</span><span class="p">,</span> <span class="n">fontsize</span><span class="o">=</span><span class="mi">12</span><span class="p">)</span>
+        <span class="c1"># add some labels and such</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">get_window_title</span><span class="p">())</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Benefits&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Costs&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;upper left&#39;</span><span class="p">)</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># reset limits with including (0,0) point in case it skews everything too much</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">axis</span><span class="p">(</span><span class="n">lim</span><span class="p">)</span>
+        <span class="c1"># add standard plotting features</span>
+        <span class="n">setup_plots</span><span class="p">(</span><span class="n">fig</span><span class="p">,</span> <span class="n">opts</span><span class="p">,</span> <span class="s1">&#39;dist_no_yscale&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">inc_cost</span><span class="p">,</span> <span class="n">inc_qaly</span><span class="p">,</span> <span class="n">icer_out</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">icer_data</span><span class="p">)</span></div>
+
+<span class="c1">#%% Unit test</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="s1">&#39;tests.test_stats&#39;</span><span class="p">,</span> <span class="n">exit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, David C. Stauffer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

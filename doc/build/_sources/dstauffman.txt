@@ -4,6 +4,14 @@ dstauffman package
 Submodules
 ----------
 
+dstauffman.bpe module
+-------------------------
+
+.. automodule:: dstauffman.bpe
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 dstauffman.classes module
 -------------------------
 
@@ -19,11 +27,19 @@ dstauffman.constants module
     :members:
     :undoc-members:
     :show-inheritance:
+    
+dstauffman.enums module
+---------------------------
 
-dstauffman.photos module
+.. automodule:: dstauffman.enums
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dstauffman.linalg module
 ------------------------
 
-.. automodule:: dstauffman.photos
+.. automodule:: dstauffman.linalg
     :members:
     :undoc-members:
     :show-inheritance:
@@ -44,6 +60,22 @@ dstauffman.quat module
     :undoc-members:
     :show-inheritance:
 
+dstauffman.stats module
+-----------------------
+
+.. automodule:: dstauffman.stats
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    
+dstauffman.units module
+-----------------------
+
+.. automodule:: dstauffman.units
+    :members:
+    :undoc-members:
+    :show-inheritance:
+    
 dstauffman.utils module
 -----------------------
 

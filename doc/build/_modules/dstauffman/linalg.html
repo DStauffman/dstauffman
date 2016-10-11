@@ -1,0 +1,218 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>dstauffman.linalg &mdash; dstauffman 0.0.2 documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.0.2',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="dstauffman 0.0.2 documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head>
+  <body role="document">
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for dstauffman.linalg</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">Linalg module file for the dstauffman code.  It defines useful linear algebra methods that are not in</span>
+<span class="sd">NumPy or SciPy.</span>
+
+<span class="sd">Notes</span>
+<span class="sd">-----</span>
+<span class="sd">#.  Written by David C. Stauffer in May 2016.  Mostly based on Matlab routines.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="c1"># pylint: disable=E1101, C0301, C0326</span>
+
+<span class="c1">#%% Imports</span>
+<span class="kn">import</span> <span class="nn">doctest</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.linalg</span> <span class="k">import</span> <span class="n">norm</span><span class="p">,</span> <span class="n">svd</span>
+<span class="kn">import</span> <span class="nn">unittest</span>
+
+<span class="c1">#%% orth</span>
+<div class="viewcode-block" id="orth"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.linalg.orth">[docs]</a><span class="k">def</span> <span class="nf">orth</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Orthogonalization basis for the range of A.  That is, Q&#39;*Q = I, the columns of Q span the same</span>
+<span class="sd">    space as the columns of A, and the number of columns of Q is the rank of A.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : 2D ndarray</span>
+<span class="sd">        Input matrix</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Q : 2D ndarray</span>
+<span class="sd">        Orthogonalization matrix of A</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Based on the Matlab orth.m function.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import orth</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+
+<span class="sd">    Full rank matrix</span>
+<span class="sd">    &gt;&gt;&gt; A = np.array([[1, 0, 1], [-1, -2, 0], [0, 1, -1]])</span>
+<span class="sd">    &gt;&gt;&gt; r = np.linalg.matrix_rank(A)</span>
+<span class="sd">    &gt;&gt;&gt; print(r)</span>
+<span class="sd">    3</span>
+
+<span class="sd">    &gt;&gt;&gt; Q = orth(A)</span>
+<span class="sd">    &gt;&gt;&gt; print(Q)</span>
+<span class="sd">    [[-0.12000026 -0.80971228  0.57442663]</span>
+<span class="sd">     [ 0.90175265  0.15312282  0.40422217]</span>
+<span class="sd">     [-0.41526149  0.5664975   0.71178541]]</span>
+
+<span class="sd">    Rank deficient matrix</span>
+<span class="sd">    &gt;&gt;&gt; A = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]])</span>
+<span class="sd">    &gt;&gt;&gt; r = np.linalg.matrix_rank(A)</span>
+<span class="sd">    &gt;&gt;&gt; print(r)</span>
+<span class="sd">    2</span>
+
+<span class="sd">    &gt;&gt;&gt; Q = orth(A)</span>
+<span class="sd">    &gt;&gt;&gt; print(Q)</span>
+<span class="sd">    [[-0.70710678  0.        ]</span>
+<span class="sd">     [ 0.          1.        ]</span>
+<span class="sd">     [-0.70710678  0.        ]]</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="p">(</span><span class="n">Q</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">_</span><span class="p">)</span> <span class="o">=</span> <span class="n">svd</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">full_matrices</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">S</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">tol</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">*</span> <span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">finfo</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span><span class="o">.</span><span class="n">eps</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">S</span> <span class="o">&gt;</span> <span class="n">tol</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">Q</span> <span class="o">=</span> <span class="n">Q</span><span class="p">[:,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">r</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">Q</span></div>
+
+<span class="c1">#%% subspace</span>
+<div class="viewcode-block" id="subspace"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.linalg.subspace">[docs]</a><span class="k">def</span> <span class="nf">subspace</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">):</span>
+    <span class="sd">r&quot;&quot;&quot;</span>
+<span class="sd">    Angle between two subspaces specified by the columns of A and B.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    A : 2D ndarray</span>
+<span class="sd">        Matrix A</span>
+<span class="sd">    B : 2D ndarray</span>
+<span class="sd">        Matrix B</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    theta : scalar</span>
+<span class="sd">        Angle between the column subspaces of A and B.</span>
+
+<span class="sd">    Notes</span>
+<span class="sd">    -----</span>
+<span class="sd">    #.  Based on the Matlab subspace.m function.</span>
+
+<span class="sd">    References</span>
+<span class="sd">    ----------</span>
+<span class="sd">    #.  A. Bjorck &amp; G. Golub, Numerical methods for computing</span>
+<span class="sd">        angles between linear subspaces, Math. Comp. 27 (1973), pp. 579-594.</span>
+<span class="sd">    #.  P.-A. Wedin, On angles between subspaces of a finite</span>
+<span class="sd">        dimensional inner product space, in B. Kagstrom &amp; A. Ruhe (Eds.),</span>
+<span class="sd">        Matrix Pencils, Lecture Notes in Mathematics 973, Springer, 1983, pp. 263-285.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+
+<span class="sd">    &gt;&gt;&gt; from dstauffman import subspace</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; A = np.array([[1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1], [1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1]])</span>
+<span class="sd">    &gt;&gt;&gt; B = np.array([[1, 1, 1, 1], [1, -1, 1, -1],[1, 1, -1, -1], [1, -1, -1, 1], [-1, -1, -1, -1], \</span>
+<span class="sd">    ...     [-1, 1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, -1]])</span>
+<span class="sd">    &gt;&gt;&gt; theta = subspace(A, B)</span>
+<span class="sd">    &gt;&gt;&gt; print(&#39;{:.4f}&#39;.format(theta))</span>
+<span class="sd">    1.5708</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># compute orthonormal bases (avoids problems when A and/or B is nearly rank deficient)</span>
+    <span class="n">A</span> <span class="o">=</span> <span class="n">orth</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">orth</span><span class="p">(</span><span class="n">B</span><span class="p">)</span>
+    <span class="c1"># check rank and swap</span>
+    <span class="k">if</span> <span class="n">A</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">B</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="p">(</span><span class="n">B</span><span class="p">,</span> <span class="n">A</span><span class="p">)</span> <span class="o">=</span> <span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+    <span class="c1"># compute the projection according to Ref 1</span>
+    <span class="n">B</span> <span class="o">=</span> <span class="n">B</span> <span class="o">-</span> <span class="n">A</span> <span class="o">@</span> <span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">T</span> <span class="o">@</span> <span class="n">B</span><span class="p">)</span>
+    <span class="c1"># make sure it&#39;s magnitude is less than 1 and compute arcsin</span>
+    <span class="n">theta</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arcsin</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">minimum</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">norm</span><span class="p">(</span><span class="n">B</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">theta</span></div>
+
+<span class="c1">#%% Unit test</span>
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">unittest</span><span class="o">.</span><span class="n">main</span><span class="p">(</span><span class="n">module</span><span class="o">=</span><span class="s1">&#39;tests.test_linalg&#39;</span><span class="p">,</span> <span class="n">exit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">doctest</span><span class="o">.</span><span class="n">testmod</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper"><div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2016, David C. Stauffer.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.4.5</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.8</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

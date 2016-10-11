@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dstauffman package &mdash; dstauffman 0.0.1 documentation</title>
+    <title>dstauffman package &mdash; dstauffman 0.0.2 documentation</title>
     
     <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    './',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="dstauffman 0.0.1 documentation" href="index.html" />
+    <link rel="top" title="dstauffman 0.0.2 documentation" href="index.html" />
    
   <link rel="stylesheet" href="_static/custom.css" type="text/css" />
   
@@ -43,12 +43,278 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
+<div class="section" id="module-dstauffman.bpe">
+<span id="dstauffman-bpe-module"></span><h2>dstauffman.bpe module<a class="headerlink" href="#module-dstauffman.bpe" title="Permalink to this headline">¶</a></h2>
+<p>BPE module file for the dstauffman code.  It defines the code necessary for doing batch parameter
+estimation analysis, and is arbitrary enough to be called with many different modules.</p>
+<div class="section" id="notes">
+<h3>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in May 2015 and continued in April 2016.  This work is based
+loosely on prior experience at Lockheed Martin using the GOLF/BPE code with GARSE, but all the
+numeric algorithms are re-coded from external sources to avoid any potential proprietary issues.</li>
+<li>Uses the Python &#64; infix operator, so you must be on v3.5 or newer</li>
+</ol>
+<dl class="class">
+<dt id="dstauffman.bpe.BpeResults">
+<em class="property">class </em><code class="descclassname">dstauffman.bpe.</code><code class="descname">BpeResults</code><a class="reference internal" href="_modules/dstauffman/bpe.html#BpeResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.BpeResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dstauffman.classes.Frozen" title="dstauffman.classes.Frozen"><code class="xref py py-class docutils literal"><span class="pre">dstauffman.classes.Frozen</span></code></a></p>
+<p>Results of the Batch Parameter Estimator.</p>
+<dl class="classmethod">
+<dt id="dstauffman.bpe.BpeResults.load">
+<em class="property">classmethod </em><code class="descname">load</code><span class="sig-paren">(</span><em>filename=''</em>, <em>use_hdf5=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dstauffman.bpe.BpeResults.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the object from disk.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>Name of the file to load</p>
+</div></blockquote>
+<p><strong>use_hdf5</strong> : bool, optional, defaults to False</p>
+<blockquote class="last">
+<div><p>Write as <a href="#id1"><span class="problematic" id="id2">*</span></a>.hdf5 instead of <a href="#id3"><span class="problematic" id="id4">*</span></a>.pkl</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dstauffman.bpe.BpeResults.pprint">
+<code class="descname">pprint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/bpe.html#BpeResults.pprint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.BpeResults.pprint" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="dstauffman.bpe.BpeResults.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>filename=''</em>, <em>use_hdf5=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dstauffman.bpe.BpeResults.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the object to disk.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>Name of the file to save</p>
+</div></blockquote>
+<p><strong>use_hdf5</strong> : bool, optional, defaults to False</p>
+<blockquote class="last">
+<div><p>Write as <a href="#id5"><span class="problematic" id="id6">*</span></a>.hdf5 instead of <a href="#id7"><span class="problematic" id="id8">*</span></a>.pkl</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dstauffman.bpe.CurrentResults">
+<em class="property">class </em><code class="descclassname">dstauffman.bpe.</code><code class="descname">CurrentResults</code><a class="reference internal" href="_modules/dstauffman/bpe.html#CurrentResults"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.CurrentResults" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dstauffman.classes.Frozen" title="dstauffman.classes.Frozen"><code class="xref py py-class docutils literal"><span class="pre">dstauffman.classes.Frozen</span></code></a></p>
+<p>Current results used as temporary values through the analysis.</p>
+<dl class="classmethod">
+<dt id="dstauffman.bpe.CurrentResults.load">
+<em class="property">classmethod </em><code class="descname">load</code><span class="sig-paren">(</span><em>filename=''</em>, <em>use_hdf5=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dstauffman.bpe.CurrentResults.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load the object from disk.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>Name of the file to load</p>
+</div></blockquote>
+<p><strong>use_hdf5</strong> : bool, optional, defaults to False</p>
+<blockquote class="last">
+<div><p>Write as <a href="#id9"><span class="problematic" id="id10">*</span></a>.hdf5 instead of <a href="#id11"><span class="problematic" id="id12">*</span></a>.pkl</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="method">
+<dt id="dstauffman.bpe.CurrentResults.save">
+<code class="descname">save</code><span class="sig-paren">(</span><em>filename=''</em>, <em>use_hdf5=True</em><span class="sig-paren">)</span><a class="headerlink" href="#dstauffman.bpe.CurrentResults.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save the object to disk.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>filename</strong> : str</p>
+<blockquote>
+<div><p>Name of the file to save</p>
+</div></blockquote>
+<p><strong>use_hdf5</strong> : bool, optional, defaults to False</p>
+<blockquote class="last">
+<div><p>Write as <a href="#id13"><span class="problematic" id="id14">*</span></a>.hdf5 instead of <a href="#id15"><span class="problematic" id="id16">*</span></a>.pkl</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dstauffman.bpe.Logger">
+<em class="property">class </em><code class="descclassname">dstauffman.bpe.</code><code class="descname">Logger</code><span class="sig-paren">(</span><em>level=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/bpe.html#Logger"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.Logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dstauffman.classes.Frozen" title="dstauffman.classes.Frozen"><code class="xref py py-class docutils literal"><span class="pre">dstauffman.classes.Frozen</span></code></a></p>
+<p>Class that keeps track of the logger options.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>level</strong> : int</p>
+<blockquote class="last">
+<div><p>Level of logger</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">Logger</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">logger</span> <span class="o">=</span> <span class="n">Logger</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">logger</span><span class="p">)</span>
+<span class="go">Logger(5)</span>
+</pre></div>
+</div>
+<dl class="classmethod">
+<dt id="dstauffman.bpe.Logger.get_level">
+<em class="property">classmethod </em><code class="descname">get_level</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/bpe.html#Logger.get_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.Logger.get_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the logging level.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="dstauffman.bpe.Logger.level">
+<code class="descname">level</code><em class="property"> = 10</em><a class="headerlink" href="#dstauffman.bpe.Logger.level" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="dstauffman.bpe.Logger.set_level">
+<em class="property">classmethod </em><code class="descname">set_level</code><span class="sig-paren">(</span><em>level</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/bpe.html#Logger.set_level"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.Logger.set_level" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sets the logging level.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="dstauffman.bpe.OptiOpts">
+<em class="property">class </em><code class="descclassname">dstauffman.bpe.</code><code class="descname">OptiOpts</code><a class="reference internal" href="_modules/dstauffman/bpe.html#OptiOpts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.OptiOpts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dstauffman.classes.Frozen" title="dstauffman.classes.Frozen"><code class="xref py py-class docutils literal"><span class="pre">dstauffman.classes.Frozen</span></code></a></p>
+<p>Optimization options for the batch parameter estimator.</p>
+</dd></dl>
+
+<dl class="class">
+<dt id="dstauffman.bpe.OptiParam">
+<em class="property">class </em><code class="descclassname">dstauffman.bpe.</code><code class="descname">OptiParam</code><span class="sig-paren">(</span><em>name</em>, <em>*</em>, <em>best=nan</em>, <em>min_=-inf</em>, <em>max_=inf</em>, <em>minstep=0.0001</em>, <em>typical=1.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/bpe.html#OptiParam"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.OptiParam" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dstauffman.classes.Frozen" title="dstauffman.classes.Frozen"><code class="xref py py-class docutils literal"><span class="pre">dstauffman.classes.Frozen</span></code></a></p>
+<p>Optimization parameter to be estimated by the batch parameters estimator.</p>
+<dl class="staticmethod">
+<dt id="dstauffman.bpe.OptiParam.get_array">
+<em class="property">static </em><code class="descname">get_array</code><span class="sig-paren">(</span><em>opti_param</em>, <em>type_='best'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/bpe.html#OptiParam.get_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.OptiParam.get_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets a numpy vector of all the optimization parameters for the desired type.</p>
+</dd></dl>
+
+<dl class="staticmethod">
+<dt id="dstauffman.bpe.OptiParam.get_names">
+<em class="property">static </em><code class="descname">get_names</code><span class="sig-paren">(</span><em>opti_param</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/bpe.html#OptiParam.get_names"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.OptiParam.get_names" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the names of the optimization parameters as a list.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.bpe.plot_bpe_results">
+<code class="descclassname">dstauffman.bpe.</code><code class="descname">plot_bpe_results</code><span class="sig-paren">(</span><em>bpe_results</em>, <em>opti_opts</em>, <em>opts=None</em>, <em>plots=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/bpe.html#plot_bpe_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.plot_bpe_results" title="Permalink to this definition">¶</a></dt>
+<dd><p>Plots the results of estimation.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.bpe.run_bpe">
+<code class="descclassname">dstauffman.bpe.</code><code class="descname">run_bpe</code><span class="sig-paren">(</span><em>opti_opts</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/bpe.html#run_bpe"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.run_bpe" title="Permalink to this definition">¶</a></dt>
+<dd><p>Runs the batch parameter estimator with the given model optimization options.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>opti_opts</strong> : class OptiOpts</p>
+<blockquote>
+<div><p>estimation options</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>bpe_results</strong> : dict</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>BPE results as a dictionary with the following keys:</dt>
+<dd><p class="first last">TBD</p>
+</dd>
+</dl>
+</div></blockquote>
+<p><strong>results</strong> : class Results</p>
+<blockquote class="last">
+<div><p>Results of the model using the final set of parameters as determined by BPE</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in September 2015.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">run_bpe</span><span class="p">,</span> <span class="n">OptiOpts</span> <span class="c1">#TODO: finish this</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.bpe.validate_opti_opts">
+<code class="descclassname">dstauffman.bpe.</code><code class="descname">validate_opti_opts</code><span class="sig-paren">(</span><em>opti_opts</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/bpe.html#validate_opti_opts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.bpe.validate_opti_opts" title="Permalink to this definition">¶</a></dt>
+<dd><p>Validates that the optimization options are valid.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>opti_opts</strong> : class OptiOpts</p>
+<blockquote class="last">
+<div><p>Optimization options</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">OptiOpts</span><span class="p">,</span> <span class="n">OptiParam</span><span class="p">,</span> <span class="n">validate_opti_opts</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">opti_opts</span> <span class="o">=</span> <span class="n">OptiOpts</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">opti_opts</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">OptiParam</span><span class="p">(</span><span class="s2">&quot;param[:].tb.tb_new_inf[&#39;beta&#39;]&quot;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1">#is_valid = validate_opti_opts(opti_opts) # TODO: fix this</span>
+<span class="go">Validating optimization options.</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1">#print(is_valid) # TODO: fix this</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
 <div class="section" id="module-dstauffman.classes">
 <span id="dstauffman-classes-module"></span><h2>dstauffman.classes module<a class="headerlink" href="#module-dstauffman.classes" title="Permalink to this headline">¶</a></h2>
 <p>Classes module file for the &#8220;dstauffman&#8221; library.  It contains the high level classes used to
 subclass other classes.</p>
-<div class="section" id="notes">
-<h3>Notes<a class="headerlink" href="#notes" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id17">
+<h3>Notes<a class="headerlink" href="#id17" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li>Written by David C. Stauffer in March 2015.</li>
 <li>Added mutable integer Counter class in January 2016.</li>
@@ -114,21 +380,233 @@ defined based on the <cite>disp</cite> function.</p>
 <div class="section" id="module-dstauffman.constants">
 <span id="dstauffman-constants-module"></span><h2>dstauffman.constants module<a class="headerlink" href="#module-dstauffman.constants" title="Permalink to this headline">¶</a></h2>
 <p>Constants module file for the &#8220;dstauffman&#8221; library.  It defines constants.</p>
-<div class="section" id="id1">
-<h3>Notes<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id18">
+<h3>Notes<a class="headerlink" href="#id18" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li>Written by David C. Stauffer in March 2015.</li>
 </ol>
 </div>
 </div>
-<div class="section" id="dstauffman-photos-module">
-<h2>dstauffman.photos module<a class="headerlink" href="#dstauffman-photos-module" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="module-dstauffman.enums">
+<span id="dstauffman-enums-module"></span><h2>dstauffman.enums module<a class="headerlink" href="#module-dstauffman.enums" title="Permalink to this headline">¶</a></h2>
+<p>Enums module file for the dstauffman library.  It defines enumerator related functions for the rest
+of the code..</p>
+<div class="section" id="id19">
+<h3>Notes<a class="headerlink" href="#id19" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in July 2015.</li>
+</ol>
+<dl class="class">
+<dt id="dstauffman.enums.IntEnumPlus">
+<em class="property">class </em><code class="descclassname">dstauffman.enums.</code><code class="descname">IntEnumPlus</code><a class="reference internal" href="_modules/dstauffman/enums.html#IntEnumPlus"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.enums.IntEnumPlus" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><code class="xref py py-class docutils literal"><span class="pre">int</span></code></a>, <code class="xref py py-class docutils literal"><span class="pre">enum.Enum</span></code></p>
+<p>Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.enums.consecutive">
+<code class="descclassname">dstauffman.enums.</code><code class="descname">consecutive</code><span class="sig-paren">(</span><em>enumeration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/enums.html#consecutive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.enums.consecutive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class decorator for enumerations ensuring unique and consecutive member values.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.enums.dist_enum_and_mons">
+<code class="descclassname">dstauffman.enums.</code><code class="descname">dist_enum_and_mons</code><span class="sig-paren">(</span><em>num</em>, <em>distribution</em>, <em>prng</em>, <em>*</em>, <em>max_months=None</em>, <em>start_num=1</em>, <em>alpha=1</em>, <em>beta=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/enums.html#dist_enum_and_mons"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.enums.dist_enum_and_mons" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a distribution for an enumerated state with a duration (such as a disease status).</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>num</strong> : int</p>
+<blockquote>
+<div><p>Number of people in the population</p>
+</div></blockquote>
+<p><strong>distribution</strong> : array_like</p>
+<blockquote>
+<div><p>Likelihood of being in each state (should cumsum to 100%)</p>
+</div></blockquote>
+<p><strong>prng</strong> : class numpy.random.RandomState</p>
+<blockquote>
+<div><p>Pseudo-random number generator</p>
+</div></blockquote>
+<p><strong>max_months</strong> : scalar or array_like, optional</p>
+<blockquote>
+<div><p>Maximum number of months for being in each state</p>
+</div></blockquote>
+<p><strong>start_num</strong> : int, optional</p>
+<blockquote>
+<div><p>Number to start counting from, default is 1</p>
+</div></blockquote>
+<p><strong>alpha</strong> : int, optional</p>
+<blockquote>
+<div><p>The alpha parameter for the beta distribution</p>
+</div></blockquote>
+<p><strong>beta</strong> : int, optional</p>
+<blockquote>
+<div><p>The beta parameter for the beta distribution</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>state</strong> : ndarray</p>
+<blockquote>
+<div><p>Enumerated status for this month for everyone in the population</p>
+</div></blockquote>
+<p><strong>mons</strong> : ndarray</p>
+<blockquote class="last">
+<div><p>Number of months in this state for anyone with an infection</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in April 2015.</li>
+<li>Updated by David C. Stauffer in June 2015 to use a beta curve to distribute the number of
+months spent in each state.</li>
+<li>Made into a generic function for the dstauffman library by David C. Stauffer in July 2015.</li>
+<li>Updated by David C. Stauffer in November 2015 to change the inputs to allow max_months and
+mons output to be optional.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">dist_enum_and_mons</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">num</span> <span class="o">=</span> <span class="mi">10000</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">distribution</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="mi">100</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">9.5</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">max_months</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">60</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="mi">36</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">RandomState</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">state</span><span class="p">,</span> <span class="n">mons</span><span class="p">)</span> <span class="o">=</span> <span class="n">dist_enum_and_mons</span><span class="p">(</span><span class="n">num</span><span class="p">,</span> <span class="n">distribution</span><span class="p">,</span> <span class="n">prng</span><span class="p">,</span> <span class="n">max_months</span><span class="o">=</span><span class="n">max_months</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-dstauffman.linalg">
+<span id="dstauffman-linalg-module"></span><h2>dstauffman.linalg module<a class="headerlink" href="#module-dstauffman.linalg" title="Permalink to this headline">¶</a></h2>
+<p>Linalg module file for the dstauffman code.  It defines useful linear algebra methods that are not in
+NumPy or SciPy.</p>
+<div class="section" id="id20">
+<h3>Notes<a class="headerlink" href="#id20" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in May 2016.  Mostly based on Matlab routines.</li>
+</ol>
+<dl class="function">
+<dt id="dstauffman.linalg.orth">
+<code class="descclassname">dstauffman.linalg.</code><code class="descname">orth</code><span class="sig-paren">(</span><em>A</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/linalg.html#orth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.linalg.orth" title="Permalink to this definition">¶</a></dt>
+<dd><p>Orthogonalization basis for the range of A.  That is, Q&#8217;<a href="#id21"><span class="problematic" id="id22">*</span></a>Q = I, the columns of Q span the same
+space as the columns of A, and the number of columns of Q is the rank of A.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>A</strong> : 2D ndarray</p>
+<blockquote>
+<div><p>Input matrix</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>Q</strong> : 2D ndarray</p>
+<blockquote class="last">
+<div><p>Orthogonalization matrix of A</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Based on the Matlab orth.m function.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">orth</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>Full rank matrix
+&gt;&gt;&gt; A = np.array([[1, 0, 1], [-1, -2, 0], [0, 1, -1]])
+&gt;&gt;&gt; r = np.linalg.matrix_rank(A)
+&gt;&gt;&gt; print(r)
+3</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span> <span class="o">=</span> <span class="n">orth</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+<span class="go">[[-0.12000026 -0.80971228  0.57442663]</span>
+<span class="go"> [ 0.90175265  0.15312282  0.40422217]</span>
+<span class="go"> [-0.41526149  0.5664975   0.71178541]]</span>
+</pre></div>
+</div>
+<p>Rank deficient matrix
+&gt;&gt;&gt; A = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
+&gt;&gt;&gt; r = np.linalg.matrix_rank(A)
+&gt;&gt;&gt; print(r)
+2</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">Q</span> <span class="o">=</span> <span class="n">orth</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">Q</span><span class="p">)</span>
+<span class="go">[[-0.70710678  0.        ]</span>
+<span class="go"> [ 0.          1.        ]</span>
+<span class="go"> [-0.70710678  0.        ]]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.linalg.subspace">
+<code class="descclassname">dstauffman.linalg.</code><code class="descname">subspace</code><span class="sig-paren">(</span><em>A</em>, <em>B</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/linalg.html#subspace"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.linalg.subspace" title="Permalink to this definition">¶</a></dt>
+<dd><p>Angle between two subspaces specified by the columns of A and B.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>A</strong> : 2D ndarray</p>
+<blockquote>
+<div><p>Matrix A</p>
+</div></blockquote>
+<p><strong>B</strong> : 2D ndarray</p>
+<blockquote>
+<div><p>Matrix B</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>theta</strong> : scalar</p>
+<blockquote class="last">
+<div><p>Angle between the column subspaces of A and B.</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Based on the Matlab subspace.m function.</li>
+</ol>
+<p class="rubric">References</p>
+<ol class="arabic simple">
+<li>A. Bjorck &amp; G. Golub, Numerical methods for computing
+angles between linear subspaces, Math. Comp. 27 (1973), pp. 579-594.</li>
+<li>P.-A. Wedin, On angles between subspaces of a finite
+dimensional inner product space, in B. Kagstrom &amp; A. Ruhe (Eds.),
+Matrix Pencils, Lecture Notes in Mathematics 973, Springer, 1983, pp. 263-285.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">subspace</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">B</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">],</span> \
+<span class="gp">... </span>    <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">theta</span> <span class="o">=</span> <span class="n">subspace</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">{:.4f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">theta</span><span class="p">))</span>
+<span class="go">1.5708</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
 </div>
 <div class="section" id="module-dstauffman.plotting">
 <span id="dstauffman-plotting-module"></span><h2>dstauffman.plotting module<a class="headerlink" href="#module-dstauffman.plotting" title="Permalink to this headline">¶</a></h2>
 <p>Plotting module file for the &#8220;dstauffman&#8221; library.  It defines useful plotting utilities.</p>
-<div class="section" id="id2">
-<h3>Notes<a class="headerlink" href="#id2" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id23">
+<h3>Notes<a class="headerlink" href="#id23" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li>Written by David C. Stauffer in March 2015.</li>
 </ol>
@@ -530,7 +1008,7 @@ functions)</p>
 
 <dl class="function">
 <dt id="dstauffman.plotting.plot_correlation_matrix">
-<code class="descclassname">dstauffman.plotting.</code><code class="descname">plot_correlation_matrix</code><span class="sig-paren">(</span><em>data</em>, <em>labels=None</em>, <em>opts=None</em>, <em>matrix_name='Correlation Matrix'</em>, <em>cmin=0</em>, <em>cmax=1</em>, <em>colormap='cool'</em>, <em>plot_lower_only=True</em>, <em>label_values=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#plot_correlation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.plot_correlation_matrix" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">dstauffman.plotting.</code><code class="descname">plot_correlation_matrix</code><span class="sig-paren">(</span><em>data</em>, <em>labels=None</em>, <em>type_='unity'</em>, <em>opts=None</em>, <em>*</em>, <em>matrix_name='Correlation Matrix'</em>, <em>cmin=0</em>, <em>cmax=1</em>, <em>colormap='cool'</em>, <em>xlabel=''</em>, <em>ylabel=''</em>, <em>plot_lower_only=True</em>, <em>label_values=False</em>, <em>x_lab_rot=90</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#plot_correlation_matrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.plot_correlation_matrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Visually plots a correlation matrix.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -543,6 +1021,10 @@ functions)</p>
 <p><strong>labels</strong> : list of str, optional</p>
 <blockquote>
 <div><p>Names to put on row and column headers</p>
+</div></blockquote>
+<p><strong>type_</strong> : str, optional, from {&#8216;unity&#8217;, &#8216;population&#8217;, &#8216;percentage&#8217;, &#8216;per 100K&#8217;, &#8216;cost&#8217;}</p>
+<blockquote>
+<div><p>description of the type of data that is being plotted, default is &#8216;unity&#8217;</p>
 </div></blockquote>
 <p><strong>opts</strong> : class Opts, optional</p>
 <blockquote>
@@ -564,6 +1046,14 @@ functions)</p>
 <blockquote>
 <div><p>Name of colormap to use for plot</p>
 </div></blockquote>
+<p><strong>xlabel</strong> : str, optional</p>
+<blockquote>
+<div><p>X label to put on plot</p>
+</div></blockquote>
+<p><strong>ylabel</strong> : str, optional</p>
+<blockquote>
+<div><p>Y label to put on plot</p>
+</div></blockquote>
 <p><strong>plot_lower_only</strong> : bool, optional</p>
 <blockquote>
 <div><p>Plots only the lower half of a symmetric matrix, default is True</p>
@@ -571,6 +1061,10 @@ functions)</p>
 <p><strong>label_values</strong> : bool, optional</p>
 <blockquote>
 <div><p>Annotate the numerical values of each square in addition to the color code, default is False</p>
+</div></blockquote>
+<p><strong>x_lab_rot</strong> : float, optional</p>
+<blockquote>
+<div><p>Amount in degrees to rotate the X labels, default is 90</p>
 </div></blockquote>
 </td>
 </tr>
@@ -602,7 +1096,7 @@ functions)</p>
 
 <dl class="function">
 <dt id="dstauffman.plotting.plot_multiline_history">
-<code class="descclassname">dstauffman.plotting.</code><code class="descname">plot_multiline_history</code><span class="sig-paren">(</span><em>time</em>, <em>data</em>, <em>type_='unity'</em>, <em>label=''</em>, <em>opts=None</em>, <em>*</em>, <em>legend=None</em>, <em>colormap=None</em>, <em>second_y_scale=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#plot_multiline_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.plot_multiline_history" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">dstauffman.plotting.</code><code class="descname">plot_multiline_history</code><span class="sig-paren">(</span><em>time</em>, <em>data</em>, <em>type_='unity'</em>, <em>label=''</em>, <em>opts=None</em>, <em>*</em>, <em>legend=None</em>, <em>colormap=None</em>, <em>second_y_scale=None</em>, <em>ignore_all_zeros=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/plotting.html#plot_multiline_history"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.plotting.plot_multiline_history" title="Permalink to this definition">¶</a></dt>
 <dd><p>Plots multiple metrics over time.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -954,8 +1448,8 @@ functions)</p>
 <span id="dstauffman-quat-module"></span><h2>dstauffman.quat module<a class="headerlink" href="#module-dstauffman.quat" title="Permalink to this headline">¶</a></h2>
 <p>Quat module file for the &#8220;dstauffman&#8221; library.  It contains generic quaternion
 utilities that can be independently defined and used by other modules.</p>
-<div class="section" id="id3">
-<h3>Notes<a class="headerlink" href="#id3" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id24">
+<h3>Notes<a class="headerlink" href="#id24" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li>Written by David C. Stauffer in April 2015.</li>
 </ol>
@@ -1545,12 +2039,745 @@ In Don Reid&#8217;s tutorial, this is called the R- version.</li>
 
 </div>
 </div>
+<div class="section" id="module-dstauffman.stats">
+<span id="dstauffman-stats-module"></span><h2>dstauffman.stats module<a class="headerlink" href="#module-dstauffman.stats" title="Permalink to this headline">¶</a></h2>
+<p>Stats module file for the &#8220;dstauffman&#8221; library.  It contains generic statistics related routines
+that can be independently defined and used by other modules.</p>
+<div class="section" id="id25">
+<h3>Notes<a class="headerlink" href="#id25" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in December 2015.</li>
+</ol>
+<dl class="function">
+<dt id="dstauffman.stats.annual_rate_to_monthly_probability">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">annual_rate_to_monthly_probability</code><span class="sig-paren">(</span><em>rate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/stats.html#annual_rate_to_monthly_probability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.stats.annual_rate_to_monthly_probability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given annual rate to a monthly probability.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>rate</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>Annual rate</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>prob</strong> : numpy.ndarray</p>
+<blockquote class="last">
+<div><p>Equivalent monthly probability</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.stats.rate_to_prob" title="dstauffman.stats.rate_to_prob"><code class="xref py py-obj docutils literal"><span class="pre">rate_to_prob</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in January 2016.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">annual_rate_to_monthly_probability</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prob</span> <span class="o">=</span> <span class="n">annual_rate_to_monthly_probability</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span> 
+<span class="go">[ 0. 0.04081054 0.07995559 0.34075937 1. ]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.ar2mp">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">ar2mp</code><span class="sig-paren">(</span><em>rate</em><span class="sig-paren">)</span><a class="headerlink" href="#dstauffman.stats.ar2mp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given annual rate to a monthly probability.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>rate</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>Annual rate</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>prob</strong> : numpy.ndarray</p>
+<blockquote class="last">
+<div><p>Equivalent monthly probability</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.stats.rate_to_prob" title="dstauffman.stats.rate_to_prob"><code class="xref py py-obj docutils literal"><span class="pre">rate_to_prob</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in January 2016.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">annual_rate_to_monthly_probability</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prob</span> <span class="o">=</span> <span class="n">annual_rate_to_monthly_probability</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span> 
+<span class="go">[ 0. 0.04081054 0.07995559 0.34075937 1. ]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.ca2mp">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">ca2mp</code><span class="sig-paren">(</span><em>annual</em><span class="sig-paren">)</span><a class="headerlink" href="#dstauffman.stats.ca2mp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given annual probabily into the equivalent monthly one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>annual</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>annual probabilities, 0 &lt;= annual &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>monthly</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>equivalent monthly probabilities, 0 &lt;= monthly &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>ValueError</strong></p>
+<blockquote class="last">
+<div><p>Any probabilities outside of the [0, 1] range</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Checks for boundary cases to avoid a divide by zero warning</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">convert_annual_to_monthly_probability</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">annual</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">monthly</span> <span class="o">=</span> <span class="n">convert_annual_to_monthly_probability</span><span class="p">(</span><span class="n">annual</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">monthly</span><span class="p">)</span> 
+<span class="go">[ 0. 0.00874161  1. ]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.cm2ap">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">cm2ap</code><span class="sig-paren">(</span><em>monthly</em><span class="sig-paren">)</span><a class="headerlink" href="#dstauffman.stats.cm2ap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given monthly probability into the equivalent annual one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>monthly</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>equivalent monthly probabilities, 0 &lt;= monthly &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>annual</strong> : numpy.ndarray</p>
+<blockquote class="last">
+<div><p>annual probabilities, 0 &lt;= annual &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">convert_monthly_to_annual_probability</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">monthly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">annual</span> <span class="o">=</span> <span class="n">convert_monthly_to_annual_probability</span><span class="p">(</span><span class="n">monthly</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">annual</span><span class="p">)</span> 
+<span class="go">[ 0. 0.71757046 1. ]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.combine_sets">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">combine_sets</code><span class="sig-paren">(</span><em>n1</em>, <em>u1</em>, <em>s1</em>, <em>n2</em>, <em>u2</em>, <em>s2</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/stats.html#combine_sets"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.stats.combine_sets" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combines the mean and standard deviations for two non-overlapping sets of data.</p>
+<p>This function combines two non-overlapping data sets, given a number of samples, mean
+and standard deviation for the two data sets.  It first calculates the total number of samples
+then calculates the total mean using a weighted average, and then calculates the combined
+standard deviation using an equation found on wikipedia.  It also checks for special cases
+where either data set is empty or if only one total point is in the combined set.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>n1</strong> : float</p>
+<blockquote>
+<div><p>number of points in data set 1</p>
+</div></blockquote>
+<p><strong>u1</strong> : float</p>
+<blockquote>
+<div><p>mean of data set 1</p>
+</div></blockquote>
+<p><strong>s1</strong> : float</p>
+<blockquote>
+<div><p>standard deviation of data set 1</p>
+</div></blockquote>
+<p><strong>n2</strong> : float</p>
+<blockquote>
+<div><p>number of points in data set 2</p>
+</div></blockquote>
+<p><strong>u2</strong> : float</p>
+<blockquote>
+<div><p>mean of data set 2</p>
+</div></blockquote>
+<p><strong>s2</strong> : float</p>
+<blockquote>
+<div><p>standard deviation of data set 2</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>n</strong> : float,</p>
+<blockquote>
+<div><p>number of points in the combined data set</p>
+</div></blockquote>
+<p><strong>u</strong> : float,</p>
+<blockquote>
+<div><p>mean of the combined data set</p>
+</div></blockquote>
+<p><strong>s</strong> : float,</p>
+<blockquote class="last">
+<div><p>standard deviation of the combined data set</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><code class="xref py py-obj docutils literal"><span class="pre">np.mean</span></code>, <code class="xref py py-obj docutils literal"><span class="pre">np.std</span></code></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written in Matlab by David C. Stauffer in Jul 2012.</li>
+<li>Ported to Python by David C. Stauffer in May 2015.</li>
+<li>Could be expanded to broadcast and handle array inputs.</li>
+</ol>
+<p class="rubric">References</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics">http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics</a>, on 8/7/12</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">combine_sets</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n1</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u1</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s1</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">n2</span> <span class="o">=</span> <span class="mi">10</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">u2</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s2</span> <span class="o">=</span> <span class="mf">0.25</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="n">u</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span> <span class="o">=</span> <span class="n">combine_sets</span><span class="p">(</span><span class="n">n1</span><span class="p">,</span> <span class="n">u1</span><span class="p">,</span> <span class="n">s1</span><span class="p">,</span> <span class="n">n2</span><span class="p">,</span> <span class="n">u2</span><span class="p">,</span> <span class="n">s2</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+<span class="go">15</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">u</span><span class="p">)</span> 
+<span class="go">1.666666...67</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="go">0.59135639081</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.convert_annual_to_monthly_probability">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">convert_annual_to_monthly_probability</code><span class="sig-paren">(</span><em>annual</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/stats.html#convert_annual_to_monthly_probability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.stats.convert_annual_to_monthly_probability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given annual probabily into the equivalent monthly one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>annual</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>annual probabilities, 0 &lt;= annual &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>monthly</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>equivalent monthly probabilities, 0 &lt;= monthly &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Raises:</th><td class="field-body"><p class="first"><strong>ValueError</strong></p>
+<blockquote class="last">
+<div><p>Any probabilities outside of the [0, 1] range</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Checks for boundary cases to avoid a divide by zero warning</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">convert_annual_to_monthly_probability</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">annual</span>  <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">monthly</span> <span class="o">=</span> <span class="n">convert_annual_to_monthly_probability</span><span class="p">(</span><span class="n">annual</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">monthly</span><span class="p">)</span> 
+<span class="go">[ 0. 0.00874161  1. ]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.convert_monthly_to_annual_probability">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">convert_monthly_to_annual_probability</code><span class="sig-paren">(</span><em>monthly</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/stats.html#convert_monthly_to_annual_probability"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.stats.convert_monthly_to_annual_probability" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given monthly probability into the equivalent annual one.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>monthly</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>equivalent monthly probabilities, 0 &lt;= monthly &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>annual</strong> : numpy.ndarray</p>
+<blockquote class="last">
+<div><p>annual probabilities, 0 &lt;= annual &lt;= 1</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">convert_monthly_to_annual_probability</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">monthly</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">annual</span> <span class="o">=</span> <span class="n">convert_monthly_to_annual_probability</span><span class="p">(</span><span class="n">monthly</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">annual</span><span class="p">)</span> 
+<span class="go">[ 0. 0.71757046 1. ]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.icer">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">icer</code><span class="sig-paren">(</span><em>cost</em>, <em>qaly</em>, <em>names=None</em>, <em>baseline=None</em>, <em>make_plot=False</em>, <em>opts=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/stats.html#icer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.stats.icer" title="Permalink to this definition">¶</a></dt>
+<dd><blockquote>
+<div>In a loop, the code sorts by cost, throws out strongly dominated strategies (qaly doesn&#8217;t
+improve despite higher costs), calculates an incremental cost, qaly and cost effectiveness
+ratio, then throws out weakly dominated strategies (icer doesn&#8217;t improve over cheaper options)
+and finally returns the incremental cost, qaly and ratios for the remaining &#8220;frontier&#8221; options
+along with an order variable to map them back to the inputs.</div></blockquote>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>cost</strong> : (N) array_like</p>
+<blockquote>
+<div><p>Cost of each strategy</p>
+</div></blockquote>
+<p><strong>qaly</strong> : (N) array_like</p>
+<blockquote>
+<div><p>Quality adjusted life years (QALY) gained by each strategy</p>
+</div></blockquote>
+<p><strong>names</strong> : (N) array_like, optional</p>
+<blockquote>
+<div><p>Names of the different strategies</p>
+</div></blockquote>
+<p><strong>baseline</strong> : int, optional</p>
+<blockquote>
+<div><p>Index of baseline strategy to use for cost comparisons, if not nan</p>
+</div></blockquote>
+<p><strong>make_plot</strong> : bool, optional</p>
+<blockquote>
+<div><p>True/false flag for whether to plot the data</p>
+</div></blockquote>
+<p><strong>opts</strong> : class Opts, optional</p>
+<blockquote class="last">
+<div><p>Plotting options</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt>N may be smaller than M due to dominated strategies being removed.  The order variable</dt>
+<dd><p class="first last">will have (M - N) values set to NaN.</p>
+</dd>
+</dl>
+</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">icer</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cost</span> <span class="o">=</span> <span class="p">[</span><span class="mi">250</span><span class="n">e3</span><span class="p">,</span> <span class="mi">750</span><span class="n">e3</span><span class="p">,</span> <span class="mf">2.25e6</span><span class="p">,</span> <span class="mf">3.75e6</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">qaly</span> <span class="o">=</span> <span class="p">[</span><span class="mf">20.</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">80</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">inc_cost</span><span class="p">,</span> <span class="n">inc_qaly</span><span class="p">,</span> <span class="n">icer_out</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">icer_data</span><span class="p">)</span> <span class="o">=</span> <span class="n">icer</span><span class="p">(</span><span class="n">cost</span><span class="p">,</span> <span class="n">qaly</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">inc_cost</span><span class="p">)</span> 
+<span class="go">[ 250000. 500000. 3000000.]</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">inc_qaly</span><span class="p">)</span> 
+<span class="go">[ 20. 10. 50.]</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">icer_out</span><span class="p">)</span> 
+<span class="go">[ 12500. 50000. 60000.]</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">order</span><span class="p">)</span> 
+<span class="go">[ 0. 1. nan 2.]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.month_prob_mult_ratio">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">month_prob_mult_ratio</code><span class="sig-paren">(</span><em>prob</em>, <em>ratio</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/stats.html#month_prob_mult_ratio"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.stats.month_prob_mult_ratio" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiplies a monthly probability by a given risk or hazard ratio.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>prob</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>Probability of event happening over one month</p>
+</div></blockquote>
+<p><strong>ratio</strong> : float</p>
+<blockquote>
+<div><p>Multiplication ratio to apply to probability</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>mult_prob</strong> : numpy.ndarray</p>
+<blockquote class="last">
+<div><p>Equivalent multiplicative monthly probability</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Staufer in January 2016.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">month_prob_mult_ratio</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ratio</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mult_prob</span> <span class="o">=</span> <span class="n">month_prob_mult_ratio</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">ratio</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mult_prob</span><span class="p">)</span> 
+<span class="go">[ 0. 0.19 1. ]</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">ratio</span> <span class="o">=</span> <span class="mf">0.5</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mult_prob</span> <span class="o">=</span> <span class="n">month_prob_mult_ratio</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">ratio</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mult_prob</span><span class="p">)</span> 
+<span class="go">[ 0. 0.0513167 1. ]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.monthly_probability_to_annual_rate">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">monthly_probability_to_annual_rate</code><span class="sig-paren">(</span><em>prob</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/stats.html#monthly_probability_to_annual_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.stats.monthly_probability_to_annual_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given monthly probability to an annual rate.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>prob</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>Monthly probability</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>rate</strong> : numpy.ndarray</p>
+<blockquote class="last">
+<div><p>Equivalent annual rate</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.stats.prob_to_rate" title="dstauffman.stats.prob_to_rate"><code class="xref py py-obj docutils literal"><span class="pre">prob_to_rate</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in April 2016.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">monthly_probability_to_annual_rate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.04081054</span><span class="p">,</span> <span class="mf">0.07995559</span><span class="p">,</span> <span class="mf">0.34075937</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rate</span> <span class="o">=</span> <span class="n">monthly_probability_to_annual_rate</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">rate</span><span class="p">)))</span> 
+<span class="go">-0.00 0.50 1.00 5.00 inf</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.mp2ar">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">mp2ar</code><span class="sig-paren">(</span><em>prob</em><span class="sig-paren">)</span><a class="headerlink" href="#dstauffman.stats.mp2ar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given monthly probability to an annual rate.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>prob</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>Monthly probability</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>rate</strong> : numpy.ndarray</p>
+<blockquote class="last">
+<div><p>Equivalent annual rate</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="admonition seealso">
+<p class="first admonition-title">See also</p>
+<p class="last"><a class="reference internal" href="#dstauffman.stats.prob_to_rate" title="dstauffman.stats.prob_to_rate"><code class="xref py py-obj docutils literal"><span class="pre">prob_to_rate</span></code></a></p>
+</div>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in April 2016.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">monthly_probability_to_annual_rate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.04081054</span><span class="p">,</span> <span class="mf">0.07995559</span><span class="p">,</span> <span class="mf">0.34075937</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rate</span> <span class="o">=</span> <span class="n">monthly_probability_to_annual_rate</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="s1">&#39;</span><span class="si">{:.2f}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">rate</span><span class="p">)))</span> 
+<span class="go">-0.00 0.50 1.00 5.00 inf</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.prob_to_rate">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">prob_to_rate</code><span class="sig-paren">(</span><em>prob</em>, <em>time=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/stats.html#prob_to_rate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.stats.prob_to_rate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given probability and time to a rate.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>prob</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>Probability of event happening over the given time</p>
+</div></blockquote>
+<p><strong>time</strong> : float</p>
+<blockquote>
+<div><p>Time for the given probability in years</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>rate</strong> : numpy.ndarray</p>
+<blockquote class="last">
+<div><p>Equivalent annual rate for the given probability and time</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in January 2016.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">prob_to_rate</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prob</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rate</span> <span class="o">=</span> <span class="n">prob_to_rate</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span> 
+<span class="go">[-0. 0.03512017 inf]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.stats.rate_to_prob">
+<code class="descclassname">dstauffman.stats.</code><code class="descname">rate_to_prob</code><span class="sig-paren">(</span><em>rate</em>, <em>time=1</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/stats.html#rate_to_prob"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.stats.rate_to_prob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given rate and time to a probability.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>rate</strong> : numpy.ndarray</p>
+<blockquote>
+<div><p>Annual rate for the given time</p>
+</div></blockquote>
+<p><strong>time</strong> : float</p>
+<blockquote>
+<div><p>Time period for the desired probability to be calculated from, in years</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>prob</strong> : numpy.ndarray</p>
+<blockquote class="last">
+<div><p>Equivalent probability of event happening over the given time</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Notes</p>
+<ol class="arabic simple">
+<li>Written by David C. Stauffer in January 2016.</li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">rate_to_prob</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rate</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">inf</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">time</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="mi">12</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">prob</span> <span class="o">=</span> <span class="n">rate_to_prob</span><span class="p">(</span><span class="n">rate</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">prob</span><span class="p">)</span> 
+<span class="go">[ 0. 0.00829871 0.07995559 0.99975963 1. ]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="module-dstauffman.units">
+<span id="dstauffman-units-module"></span><h2>dstauffman.units module<a class="headerlink" href="#module-dstauffman.units" title="Permalink to this headline">¶</a></h2>
+<p>Units module file for the &#8220;dstauffman&#8221; library.  It contains generic utilities that can be
+independently defined and used by other modules.</p>
+<div class="section" id="id26">
+<h3>Notes<a class="headerlink" href="#id26" title="Permalink to this headline">¶</a></h3>
+<ol class="arabic">
+<li><dl class="first docutils">
+<dt>By design, this module does not reference any other piece of the dstauffman code base except</dt>
+<dd><p class="first last">constants or enums to avoid circular references.</p>
+</dd>
+</dl>
+</li>
+<li><p class="first">Written by David C. Stauffer in February 2016.</p>
+</li>
+</ol>
+<dl class="class">
+<dt id="dstauffman.units.Units">
+<em class="property">class </em><code class="descclassname">dstauffman.units.</code><code class="descname">Units</code><a class="reference internal" href="_modules/dstauffman/units.html#Units"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.units.Units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#dstauffman.enums.IntEnumPlus" title="dstauffman.enums.IntEnumPlus"><code class="xref py py-class docutils literal"><span class="pre">dstauffman.enums.IntEnumPlus</span></code></a></p>
+<p>An enumeration.</p>
+<dl class="attribute">
+<dt id="dstauffman.units.Units.AP">
+<code class="descname">AP</code><em class="property"> = &lt;Units.AP: 2&gt;</em><a class="headerlink" href="#dstauffman.units.Units.AP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dstauffman.units.Units.AR">
+<code class="descname">AR</code><em class="property"> = &lt;Units.AR: 1&gt;</em><a class="headerlink" href="#dstauffman.units.Units.AR" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dstauffman.units.Units.MP">
+<code class="descname">MP</code><em class="property"> = &lt;Units.MP: 3&gt;</em><a class="headerlink" href="#dstauffman.units.Units.MP" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dstauffman.units.Units.ND">
+<code class="descname">ND</code><em class="property"> = &lt;Units.ND: 4&gt;</em><a class="headerlink" href="#dstauffman.units.Units.ND" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dstauffman.units.Units.P100K">
+<code class="descname">P100K</code><em class="property"> = &lt;Units.P100K: 6&gt;</em><a class="headerlink" href="#dstauffman.units.Units.P100K" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="attribute">
+<dt id="dstauffman.units.Units.PER">
+<code class="descname">PER</code><em class="property"> = &lt;Units.PER: 5&gt;</em><a class="headerlink" href="#dstauffman.units.Units.PER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="classmethod">
+<dt id="dstauffman.units.Units.convert">
+<em class="property">classmethod </em><code class="descname">convert</code><span class="sig-paren">(</span><em>value</em>, <em>base_unit</em>, <em>new_unit</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/units.html#Units.convert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.units.Units.convert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Converts a given value from a base_unit to a new_unit.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="dstauffman.units.get_factors">
+<code class="descclassname">dstauffman.units.</code><code class="descname">get_factors</code><span class="sig-paren">(</span><em>prefix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/units.html#get_factors"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.units.get_factors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Gets the multiplication factor and unit label for the desired units.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>prefix</strong> : str</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Unit standard metric prefix, from:</dt>
+<dd><dl class="first last docutils">
+<dt>{&#8216;yotta&#8217;,&#8217;zetta&#8217;,&#8217;exa&#8217;,&#8217;peta&#8217;,&#8217;tera&#8217;,&#8217;giga&#8217;,&#8217;mega&#8217;,</dt>
+<dd><p class="first last">&#8216;kilo&#8217;,&#8217;hecto&#8217;,&#8217;deca&#8217;,&#8217;unity&#8217;,&#8217;deci&#8217;,&#8217;centi&#8217;,&#8217;milli&#8217;,
+&#8216;micro&#8217;,&#8217;nano&#8217;,&#8217;pico&#8217;,&#8217;femto&#8217;,&#8217;atto&#8217;,&#8217;zepto&#8217;,&#8217;yocto&#8217;}</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>mult</strong> : float</p>
+<blockquote>
+<div><p>Multiplication factor</p>
+</div></blockquote>
+<p><strong>label</strong> : str</p>
+<blockquote class="last">
+<div><p>Abbreviation for the prefix</p>
+</div></blockquote>
+</td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">References</p>
+<ol class="arabic simple">
+<li><a class="reference external" href="http://en.wikipedia.org/wiki/Metric_prefix">http://en.wikipedia.org/wiki/Metric_prefix</a></li>
+</ol>
+<p class="rubric">Examples</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">get_factors</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="p">(</span><span class="n">mult</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span> <span class="o">=</span> <span class="n">get_factors</span><span class="p">(</span><span class="s1">&#39;micro&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">mult</span><span class="p">)</span>
+<span class="go">1e-06</span>
+</pre></div>
+</div>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">label</span><span class="p">)</span>
+<span class="go">μ</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
 <div class="section" id="module-dstauffman.utils">
 <span id="dstauffman-utils-module"></span><h2>dstauffman.utils module<a class="headerlink" href="#module-dstauffman.utils" title="Permalink to this headline">¶</a></h2>
 <p>Utils module file for the &#8220;dstauffman&#8221; library.  It contains generic utilities that can be
 independently defined and used by other modules.</p>
-<div class="section" id="id4">
-<h3>Notes<a class="headerlink" href="#id4" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id27">
+<h3>Notes<a class="headerlink" href="#id27" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic">
 <li><dl class="first docutils">
 <dt>By design, this module does not reference any other piece of the dstauffman code base except</dt>
@@ -1563,13 +2790,25 @@ independently defined and used by other modules.</p>
 </ol>
 <dl class="function">
 <dt id="dstauffman.utils.capture_output">
-<code class="descclassname">dstauffman.utils.</code><code class="descname">capture_output</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#capture_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.capture_output" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">dstauffman.utils.</code><code class="descname">capture_output</code><span class="sig-paren">(</span><em>mode='out'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#capture_output"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.capture_output" title="Permalink to this definition">¶</a></dt>
 <dd><p>Captures the stdout and stderr streams instead of displaying to the screen.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> : class StringIO</p>
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><p class="first"><strong>mode</strong> : str</p>
+<blockquote>
+<div><dl class="docutils">
+<dt>Mode to use when capturing output</dt>
+<dd><p class="first last">&#8216;out&#8217; captures just sys.stdout
+&#8216;err&#8217; captures just sys.stderr
+&#8216;all&#8217; captures both sys.stdout and sys.stderr</p>
+</dd>
+</dl>
+</div></blockquote>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first"><strong>out</strong> : class StringIO</p>
 <blockquote>
 <div><p>stdout stream output</p>
 </div></blockquote>
@@ -1583,7 +2822,7 @@ independently defined and used by other modules.</p>
 </table>
 <p class="rubric">Examples</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">dstauffman</span> <span class="k">import</span> <span class="n">capture_output</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">capture_output</span><span class="p">()</span> <span class="k">as</span> <span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">_</span><span class="p">):</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="n">capture_output</span><span class="p">()</span> <span class="k">as</span> <span class="n">out</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Hello, World!&#39;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">output</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">getvalue</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -1694,7 +2933,7 @@ independently defined and used by other modules.</p>
 <dl class="function">
 <dt id="dstauffman.utils.delete_pyc">
 <code class="descclassname">dstauffman.utils.</code><code class="descname">delete_pyc</code><span class="sig-paren">(</span><em>folder</em>, <em>recursive=True</em>, <em>print_progress=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/dstauffman/utils.html#delete_pyc"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#dstauffman.utils.delete_pyc" title="Permalink to this definition">¶</a></dt>
-<dd><p>Deletes all the <a href="#id5"><span class="problematic" id="id6">*</span></a>.pyc files (Python Byte Code) in the specified directory.</p>
+<dd><p>Deletes all the <a href="#id28"><span class="problematic" id="id29">*</span></a>.pyc files (Python Byte Code) in the specified directory.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2455,8 +3694,8 @@ normalization.</p>
 <span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-dstauffman" title="Permalink to this headline">¶</a></h2>
 <p>The &#8220;dstauffman&#8221; module is a generic Python code library of functions that I (David C. Stauffer)
 have found useful.</p>
-<div class="section" id="id7">
-<h3>Notes<a class="headerlink" href="#id7" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="id30">
+<h3>Notes<a class="headerlink" href="#id30" title="Permalink to this headline">¶</a></h3>
 <ol class="arabic simple">
 <li>Written by David C. Stauffer in March 2015.</li>
 <li>Updated by David C. Stauffer in December 2015 to no longer support Python v2.7.  Too many of the
@@ -2476,29 +3715,48 @@ newer language features were appealing and couldn&#8217;t be used if compatibili
   <ul>
 <li><a class="reference internal" href="#">dstauffman package</a><ul>
 <li><a class="reference internal" href="#submodules">Submodules</a></li>
-<li><a class="reference internal" href="#module-dstauffman.classes">dstauffman.classes module</a><ul>
+<li><a class="reference internal" href="#module-dstauffman.bpe">dstauffman.bpe module</a><ul>
 <li><a class="reference internal" href="#notes">Notes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#module-dstauffman.constants">dstauffman.constants module</a><ul>
-<li><a class="reference internal" href="#id1">Notes</a></li>
+<li><a class="reference internal" href="#module-dstauffman.classes">dstauffman.classes module</a><ul>
+<li><a class="reference internal" href="#id17">Notes</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#dstauffman-photos-module">dstauffman.photos module</a></li>
+<li><a class="reference internal" href="#module-dstauffman.constants">dstauffman.constants module</a><ul>
+<li><a class="reference internal" href="#id18">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-dstauffman.enums">dstauffman.enums module</a><ul>
+<li><a class="reference internal" href="#id19">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-dstauffman.linalg">dstauffman.linalg module</a><ul>
+<li><a class="reference internal" href="#id20">Notes</a></li>
+</ul>
+</li>
 <li><a class="reference internal" href="#module-dstauffman.plotting">dstauffman.plotting module</a><ul>
-<li><a class="reference internal" href="#id2">Notes</a></li>
+<li><a class="reference internal" href="#id23">Notes</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-dstauffman.quat">dstauffman.quat module</a><ul>
-<li><a class="reference internal" href="#id3">Notes</a></li>
+<li><a class="reference internal" href="#id24">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-dstauffman.stats">dstauffman.stats module</a><ul>
+<li><a class="reference internal" href="#id25">Notes</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-dstauffman.units">dstauffman.units module</a><ul>
+<li><a class="reference internal" href="#id26">Notes</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-dstauffman.utils">dstauffman.utils module</a><ul>
-<li><a class="reference internal" href="#id4">Notes</a></li>
+<li><a class="reference internal" href="#id27">Notes</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-dstauffman">Module contents</a><ul>
-<li><a class="reference internal" href="#id7">Notes</a></li>
+<li><a class="reference internal" href="#id30">Notes</a></li>
 </ul>
 </li>
 </ul>

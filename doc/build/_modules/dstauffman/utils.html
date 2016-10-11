@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dstauffman.utils &mdash; dstauffman 0.0.1 documentation</title>
+    <title>dstauffman.utils &mdash; dstauffman 0.0.2 documentation</title>
     
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="dstauffman 0.0.1 documentation" href="../../index.html" />
+    <link rel="top" title="dstauffman 0.0.2 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -824,9 +824,17 @@
 
 <span class="c1">#%% Functions - capture_output</span>
 <span class="nd">@contextmanager</span>
-<div class="viewcode-block" id="capture_output"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.capture_output">[docs]</a><span class="k">def</span> <span class="nf">capture_output</span><span class="p">():</span>
+<div class="viewcode-block" id="capture_output"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.utils.capture_output">[docs]</a><span class="k">def</span> <span class="nf">capture_output</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;out&#39;</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Captures the stdout and stderr streams instead of displaying to the screen.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    mode : str</span>
+<span class="sd">        Mode to use when capturing output</span>
+<span class="sd">            &#39;out&#39; captures just sys.stdout</span>
+<span class="sd">            &#39;err&#39; captures just sys.stderr</span>
+<span class="sd">            &#39;all&#39; captures both sys.stdout and sys.stderr</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -839,7 +847,7 @@
 <span class="sd">    --------</span>
 
 <span class="sd">    &gt;&gt;&gt; from dstauffman import capture_output</span>
-<span class="sd">    &gt;&gt;&gt; with capture_output() as (out, _):</span>
+<span class="sd">    &gt;&gt;&gt; with capture_output() as out:</span>
 <span class="sd">    ...     print(&#39;Hello, World!&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; output = out.getvalue().strip()</span>
 <span class="sd">    &gt;&gt;&gt; out.close()</span>
@@ -847,15 +855,26 @@
 <span class="sd">    Hello, World!</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># alias modes</span>
+    <span class="n">capture_out</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;out&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span> <span class="k">else</span> <span class="kc">False</span>
+    <span class="n">capture_err</span> <span class="o">=</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;err&#39;</span> <span class="ow">or</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span> <span class="k">else</span> <span class="kc">False</span>
     <span class="c1"># create new string buffers</span>
     <span class="n">new_out</span><span class="p">,</span> <span class="n">new_err</span> <span class="o">=</span> <span class="n">StringIO</span><span class="p">(),</span> <span class="n">StringIO</span><span class="p">()</span>
     <span class="c1"># alias the old string buffers for restoration afterwards</span>
     <span class="n">old_out</span><span class="p">,</span> <span class="n">old_err</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># override the system buffers with the new ones</span>
-        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">new_out</span><span class="p">,</span> <span class="n">new_err</span>
+        <span class="k">if</span> <span class="n">capture_out</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">new_out</span>
+        <span class="k">if</span> <span class="n">capture_err</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">new_err</span>
         <span class="c1"># yield results as desired</span>
-        <span class="k">yield</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;out&#39;</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;err&#39;</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
     <span class="k">finally</span><span class="p">:</span>
         <span class="c1"># restore the original buffers once all results are read</span>
         <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">stderr</span> <span class="o">=</span> <span class="n">old_out</span><span class="p">,</span> <span class="n">old_err</span></div>

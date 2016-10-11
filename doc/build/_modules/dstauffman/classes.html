@@ -6,7 +6,7 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>dstauffman.classes &mdash; dstauffman 0.0.1 documentation</title>
+    <title>dstauffman.classes &mdash; dstauffman 0.0.2 documentation</title>
     
     <link rel="stylesheet" href="../../_static/alabaster.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
@@ -14,7 +14,7 @@
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '../../',
-        VERSION:     '0.0.1',
+        VERSION:     '0.0.2',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -23,7 +23,7 @@
     <script type="text/javascript" src="../../_static/jquery.js"></script>
     <script type="text/javascript" src="../../_static/underscore.js"></script>
     <script type="text/javascript" src="../../_static/doctools.js"></script>
-    <link rel="top" title="dstauffman 0.0.1 documentation" href="../../index.html" />
+    <link rel="top" title="dstauffman 0.0.2 documentation" href="../../index.html" />
     <link rel="up" title="Module code" href="../index.html" />
    
   <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
@@ -182,7 +182,7 @@
     <span class="k">return</span> <span class="n">results</span>
 
 <span class="c1">#%% Classes - Frozen</span>
-<div class="viewcode-block" id="Frozen"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.classes.Frozen">[docs]</a><span class="k">class</span> <span class="nc">Frozen</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Frozen"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.bpe.Frozen">[docs]</a><span class="k">class</span> <span class="nc">Frozen</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Subclasses of Frozen are frozen, i.e. it is impossibile to add</span>
 <span class="sd">    new attributes to them and their instances.</span>
@@ -196,7 +196,7 @@
         <span class="n">__setattr__</span> <span class="o">=</span> <span class="n">_frozen</span><span class="p">(</span><span class="nb">type</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">)</span></div>
 
 <span class="c1">#%% MetaClasses - SaveAndLoad</span>
-<div class="viewcode-block" id="SaveAndLoad"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.classes.SaveAndLoad">[docs]</a><span class="k">class</span> <span class="nc">SaveAndLoad</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+<div class="viewcode-block" id="SaveAndLoad"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.bpe.SaveAndLoad">[docs]</a><span class="k">class</span> <span class="nc">SaveAndLoad</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Metaclass to add &#39;save&#39; and &#39;load&#39; methods to the given class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -211,7 +211,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">SaveAndLoad</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span></div>
 
 <span class="c1">#%% MetaClasses - SaveAndLoadPickle</span>
-<div class="viewcode-block" id="SaveAndLoadPickle"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.classes.SaveAndLoadPickle">[docs]</a><span class="k">class</span> <span class="nc">SaveAndLoadPickle</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+<div class="viewcode-block" id="SaveAndLoadPickle"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.bpe.SaveAndLoadPickle">[docs]</a><span class="k">class</span> <span class="nc">SaveAndLoadPickle</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Metaclass to add &#39;save&#39; and &#39;load&#39; methods to the given class.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -226,7 +226,7 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">SaveAndLoadPickle</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">dct</span><span class="p">)</span></div>
 
 <span class="c1">#%% Classes - Counter</span>
-<div class="viewcode-block" id="Counter"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.classes.Counter">[docs]</a><span class="k">class</span> <span class="nc">Counter</span><span class="p">(</span><span class="n">Frozen</span><span class="p">):</span>
+<div class="viewcode-block" id="Counter"><a class="viewcode-back" href="../../dstauffman.html#dstauffman.bpe.Counter">[docs]</a><span class="k">class</span> <span class="nc">Counter</span><span class="p">(</span><span class="n">Frozen</span><span class="p">):</span>
     <span class="sd">r&quot;&quot;&quot;</span>
 <span class="sd">    Mutable integer counter wrapper class.</span>
 
