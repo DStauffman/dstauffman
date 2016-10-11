@@ -271,7 +271,7 @@ class Test__pprint_args(unittest.TestCase):
     def setUp(self):
         self.names  = ['Name 1', 'Longer name 2', 'Name 42']
         self.values = [0.10000000002, 1999999999, 1e-14]
-        self.lines  = ['    Name 1        = 0.1', '    Longer name 2 = 2e+09', '    Name 42       = 1e-14', '']
+        self.lines  = ['        Name 1        = 0.1', '        Longer name 2 = 2e+09', '        Name 42       = 1e-14', '']
 
     def test_nominal(self):
         with dcs.capture_output() as out:
