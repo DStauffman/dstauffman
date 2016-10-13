@@ -101,6 +101,7 @@ class Opts(Frozen):
         self.disp_xmax =  np.inf
         self.rms_xmin  = -np.inf
         self.rms_xmax  =  np.inf
+        self.show_rms  = True
         self.names     = list()
 
     def get_names(self, ix):
@@ -358,7 +359,8 @@ def get_axes_scales(type_):
 
 #%% Functions - plot_time_history
 def plot_time_history(time, data, description='', type_='unity', opts=None, *, plot_indiv=True, \
-    truth_time=None, truth_data=None, plot_as_diffs=False, colormap=None, second_y_scale=None):
+    truth_time=None, truth_data=None, plot_as_diffs=False, colormap=None, second_y_scale=None, \
+    rms_in_legend=True):
     r"""
     Plots the given data channel versus time, with a generic description argument.
 
@@ -384,6 +386,8 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         Plot each entry in results against the other ones
     second_y_scale : float, optional
         Multiplication scale factor to use to display on a secondary Y axis
+    rms_in_legend : bool, optional
+        Whether to show the RMS value numerically in the plotting legend
 
     Returns
     -------
@@ -425,6 +429,9 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     if colormap is None:
         colormap = DEFAULT_COLORMAP
 
+    # override the RMS option from opts (both must be true to plot the RMS in the legend)
+    rms_in_legend &= opts.show_rms
+
     # ensure that data is at least 2D
     if data.ndim == 0:
         data = np.atleast_2d(data)
@@ -438,17 +445,19 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     (scale, units) = get_axes_scales(type_)
 
     if plot_as_diffs:
-        # calculate RMS
-        rms_data = np.atleast_1d(rms(scale*data, axis=0, ignore_nans=True))
         # build colormap
         cm = ColorMap(colormap, num_colors=data.shape[1])
+        # calculate RMS
+        if rms_in_legend:
+            rms_data = np.atleast_1d(rms(scale*data, axis=0, ignore_nans=True))
     else:
         # calculate the mean and std of data
         mean = np.mean(data, axis=1)
         std  = np.std(data, axis=1)
 
         # calculate an RMS
-        rms_data = rms(scale*mean, axis=0, ignore_nans=True)
+        if rms_in_legend:
+            rms_data = rms(scale*mean, axis=0, ignore_nans=True)
 
     # turn interaction off to make the plots draw all at once on a show() command
     plt.ioff()
@@ -465,11 +474,14 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
             this_label = opts.get_names(ix)
             if not this_label:
                 this_label = 'Series {}'.format(ix+1)
-            this_label = this_label + ' (RMS: {:.2f})'.format(rms_data[ix])
+            if rms_in_legend:
+                this_label += ' (RMS: {:.2f})'.format(rms_data[ix])
             ax.plot(time, scale*data[:, ix], '.-', linewidth=2, zorder=10, label=this_label)
     else:
-        ax.plot(time, scale*mean, 'b.-', linewidth=2, zorder=10, \
-            label=opts.get_names(0) + description + ' (RMS: {:.2f})'.format(rms_data))
+        this_label = opts.get_names(0) + description
+        if rms_in_legend:
+             this_label += ' (RMS: {:.2f})'.format(rms_data)
+        ax.plot(time, scale*mean, 'b.-', linewidth=2, zorder=10, label=this_label)
         ax.errorbar(time, scale*mean, scale*std, linestyle='None', marker='None', ecolor='c', zorder=6)
         # inidividual line plots
         if plot_indiv and data.ndim > 1:
