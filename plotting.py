@@ -1210,11 +1210,11 @@ def setup_plots(figs, opts, plot_type='time'):
     if plot_type in {'time', 'time_no_yscale'}:
         disp_xlimits(figs, opts.disp_xmin, opts.disp_xmax)
 
-    # add a custom toolbar
-    figmenu(figs)
-
-    # show the plot
+    # things to do if displaying the plots
     if opts.show_plot and Plotter.show_plot:
+        # add a custom toolbar
+        figmenu(figs)
+        # show the plot
         plt.show(block=False)
 
     # optionally save the plot
