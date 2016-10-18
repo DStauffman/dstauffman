@@ -54,13 +54,13 @@ Console, Dislay
 Uncheck Light background
 
 Console, External modules
-Check: GUI backend: Qt4Agg
+Check: GUI backend: Qt5Agg
 
 IPython console, Display
 Select Dark background
 
 IPython console, Graphics
-Backend: Qt
+Backend: Qt5
 
 Object inspector
 Syntax color scheme: Custom
@@ -68,6 +68,7 @@ Syntax color scheme: Custom
 
 #####################
 In "C:\Programs\WinPython-64bit-3.4.2.4\python-3.4.2.amd64\Lib\site-packages\spyderlib\widgets\externalshell\sitecustomize.py"
+Or "C:\Programs\WinPython-64bit-3.5.2.3Qt5b3\python-3.5.2.amd64\Lib\site-packages\spyder\utils\site\sitecustomize.py"
 
 Add an __init__ method to the SpyderLib class.  Include nosigint.
 
@@ -77,7 +78,7 @@ class SpyderPdb(pdb.Pdb):
 
 
 ######################
-In "C:\Programs\WinPython-64bit-3.4.2.4\python-3.4.2.amd64\Lib\site-packages\matplotlib\ticker.py"
+In "C:\Programs\WinPython-64bit-3.5.2.3Qt5b3\python-3.5.2.amd64\Lib\site-packages\matplotlib\ticker.py"
 
 Modify line 500 or 540-ish
 
@@ -89,7 +90,7 @@ if np.absolute(ave_oom - range_oom) >= 4:  # five sig-figs
 
 
 ######################
-In "C:\Programs\WinPython-64bit-3.4.2.4\python-3.4.2.amd64\Lib\site-packages\matplotlib\mpl-data\matplotlibrc"
+In "C:\Programs\WinPython-64bit-3.5.2.3Qt5b3\python-3.5.2.amd64\Lib\site-packages\matplotlib\mpl-data\matplotlibrc"
 
 Modify line 38 and 43 or so:
 
@@ -98,8 +99,8 @@ backend      : TkAgg
 #backend.qt4 : PyQt4        # PyQt4 | PySide
 
 Is:
-backend      : Qt4Agg
-backend.qt4  : PyQt4        # PyQt4 | PySide
+backend      : Qt5Agg
+backend.qt5  : PyQt5
 
 
 Farther down (search for it):
@@ -109,7 +110,7 @@ figure.max_open_warning : 80 # Was 20
 ######################
 Edit environment variables for your account
 PATH
-C:\Programs\WinPython-64bit-3.5.1.2\python-3.5.1.amd64;C:\Programs\WinPython-64bit-3.5.1.2\python-3.5.1.amd64\Scripts;C:\Programs\WinPython-64bit-3.5.1.2\python-3.5.1.amd64\Lib;
+C:\Programs\WinPython-64bit-3.5.2.3Qt5b3\python-3.5.2.amd64;C:\Programs\WinPython-64bit-3.5.2.3Qt5b3\python-3.5.2.amd64\Scripts;C:\Programs\WinPython-64bit-3.5.2.3Qt5b3\python-3.5.2.amd64\Lib;
 
 PYTHONPATH
 C:\Users\dcstauff\Documents\GitHub;
