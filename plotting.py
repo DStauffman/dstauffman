@@ -675,7 +675,7 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
 
 #%% Functions - plot_multiline_history
 def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, legend=None, \
-        colormap=None, second_y_scale=None, ignore_all_zeros=False):
+        colormap=None, second_y_scale=None, ignore_empties=False):
     r"""
     Plots multiple metrics over time.
 
@@ -697,6 +697,8 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
         Name of colormap to use for plot
     second_y_scale : float, optional
         Multiplication scale factor to use to display on a secondary Y axis
+    ignore_empties : bool, optional
+        Removes any entries from the plot and legend that contain only zeros or only NaNs
 
     Returns
     -------
@@ -730,7 +732,7 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
         colormap = DEFAULT_COLORMAP
 
     # check for valid data
-    if data is None or (ignore_all_zeros and np.all(data == 0)):
+    if data is None or (ignore_empties and (np.all(data == 0) or np.all(np.isnan(data)))):
         print(' ' + label + ' plot skipped due to missing data.')
         return None
 
@@ -756,7 +758,7 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
     ax = fig.add_subplot(111)
     cm.set_colors(ax)
     for i in range(num_bins):
-        if not ignore_all_zeros or not np.all(data[:, i] == 0):
+        if not ignore_empties or (not np.all(data[:, i] == 0) and not np.all(np.isnan(data[:, i]))):
             ax.plot(time, scale*data[:, i], '.-', label=legend[i])
 
     # add labels and legends
@@ -778,7 +780,8 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
     return fig
 
 #%% Functions - plot_bar_breakdown
-def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=None):
+def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=None, \
+        ignore_empties=False):
     r"""
     Plots the pie chart like breakdown by percentage in each category over time.
 
@@ -796,6 +799,8 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
         Names to use for each channel of data
     colormap : str, optional
         Name of colormap to use for plot
+    ignore_empties : bool, optional
+        Removes any entries from the plot and legend that contain only zeros or only NaNs
 
     Returns
     -------
@@ -829,7 +834,7 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
         colormap = DEFAULT_COLORMAP
 
     # check for valid data
-    if data is None:
+    if data is None or (ignore_empties and (np.all(data == 0) or np.all(np.isnan(data)))):
         print(' ' + label + ' plot skipped due to missing data.')
         return
 
@@ -859,9 +864,10 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
     fig = plt.figure()
     fig.canvas.set_window_title(description + ' [' + units + ']')
     ax = fig.add_subplot(111)
-    for i in range(num_bins-1, -1, -1):
-        ax.bar(time-width/2, scale*data[:, i], width=width.astype(float), bottom=scale*bottoms[:, i], \
-            label=legend[i], color=cm.get_color(i), edgecolor='none')
+    for i in range(num_bins):
+        if not ignore_empties or (not np.all(data[:, i] == 0) and not np.all(np.isnan(data[:, i]))):
+            ax.bar(time-width/2, scale*data[:, i], width=width.astype(float), bottom=scale*bottoms[:, i], \
+                label=legend[i], color=cm.get_color(i), edgecolor='none')
     plt.ylabel(label + ' [' + units + ']')
     plt.ylim(0, 100)
     plt.grid(True)
