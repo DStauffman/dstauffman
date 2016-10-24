@@ -112,6 +112,48 @@ class Opts(Frozen):
             name = ''
         return name
 
+#%% Classes - TruthPlotter
+class TruthPlotter(Frozen):
+    r"""
+    Class wrapper for the different types of truth data to include on plots.
+    """
+    def __init__(self, time=None, data=None, lo=None, hi=None, type_='time', name='Truth'):
+        self.time    = time
+        self.data    = None
+        self.type_   = type_ # from {'time', 'time_hilo', 'errorbars', 'series'} # TODO: implement this
+        self.data_lo = lo
+        self.data_hi = hi
+        self.name    = name
+        # TODO: keep this old API? (otherwise just: self.data = data)
+        if data is not None:
+            if data.ndim == 1:
+                self.data = data
+            elif data.shape[1] == 1:
+                self.data = data
+            elif data.shape[1] == 3:
+                self.data    = data[:, 1]
+                self.data_lo = data[:, 0]
+                self.data_hi = data[:, 2]
+
+    def plot_truth(self, ax, scale=1):
+        r"""Adds the information in the TruthPlotter instance to the given axis, with the optional scale."""
+        # check for null case
+        if self.data is None and self.data_lo is None and self.data_hi is None:
+            return
+        # get original limits
+        x_lim = ax.get_xlim()
+        y_lim = ax.get_ylim()
+        # plot the new data
+        if self.data is not None:
+            ax.plot(self.time, scale*self.data, 'k.-', linewidth=2, zorder=8, label=self.name)
+        if self.data_lo is not None:
+            ax.plot(self.time, scale*self.data_lo, '.-', color='0.5', linewidth=2, zorder=6)
+        if self.data_hi is not None:
+            ax.plot(self.time, scale*self.data_hi, '.-', color='0.5', linewidth=2, zorder=6)
+        # restore the original limits, since they might have been changed by the truth data
+        ax.set_xlim(x_lim)
+        ax.set_ylim(y_lim)
+
 #%% Classes - MyCustomToolbar
 class MyCustomToolbar():
     r"""
@@ -359,8 +401,8 @@ def get_axes_scales(type_):
 
 #%% Functions - plot_time_history
 def plot_time_history(time, data, description='', type_='unity', opts=None, *, plot_indiv=True, \
-    truth_time=None, truth_data=None, plot_as_diffs=False, colormap=None, second_y_scale=None, \
-    rms_in_legend=True):
+    truth=None, plot_as_diffs=False, colormap=None, second_y_scale=None, rms_in_legend=True, \
+    truth_time=None, truth_data=None):
     r"""
     Plots the given data channel versus time, with a generic description argument.
 
@@ -378,10 +420,8 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         plotting options
     plot_indiv : bool, optional
         Plot the individual cycles, default is true
-    truth_time : array_like, optional
-        Truth time to plot
-    truth_data : array_like, optional
-        Truth data to plot
+    truth : TruthPlotter, optional
+        Truth instance for adding to the plot
     plot_as_diffs : bool, optional, default is False
         Plot each entry in results against the other ones
     second_y_scale : float, optional
@@ -398,6 +438,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     -----
     #.  Written by David C. Stauffer in March 2015.
     #.  Updated by David C. Stauffer in December 2015 to include an optional secondary Y axis.
+    #.  Updated by David C. Stauffer in October 2016 to use the new TruthPlotter class.
     #.  If ndim == 2, then dimension 0 is time and dimension 1 is the number of runs.
 
     Examples
@@ -428,6 +469,14 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         opts = Opts()
     if colormap is None:
         colormap = DEFAULT_COLORMAP
+
+    # maintain older API
+    if truth_data is not None:
+        if truth is not None:
+            raise ValueError('Attempting to use both APIs, please only use new truth input.')
+        else:
+            raise DeprecationWarning('This API will be removed in the future, please use the new truth input.')
+            truth = TruthPlotter(truth_time, truth_data)
 
     # override the RMS option from opts (both must be true to plot the RMS in the legend)
     rms_in_legend &= opts.show_rms
@@ -488,18 +537,8 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
             for ix in range(num_series):
                 ax.plot(time, scale*data[:, ix], color='0.75', zorder=1)
     # optionally plot truth (without changing the axis limits)
-    if truth_data is not None:
-        limits = plt.axis()
-        if truth_data.ndim == 1:
-            ax.plot(truth_time, scale*truth_data, 'k.-', linewidth=2, zorder=8, label='Truth')
-        elif truth_data.shape[1] == 3:
-            ax.plot(truth_time, scale*truth_data[:, 1], 'k.-', linewidth=2, zorder=8, label='Truth')
-            ax.plot(truth_time, scale*truth_data[:, 0], '.-', color='0.5', linewidth=2, zorder=6)
-            ax.plot(truth_time, scale*truth_data[:, 2], '.-', color='0.5', linewidth=2, zorder=6)
-        else:
-            plt.close(fig)
-            raise ValueError('Unexpected size for truth_data.')
-        plt.axis(limits)
+    if truth is not None:
+        truth.plot_truth(ax, scale)
     # add labels and legends
     plt.xlabel('Time [' + time_units + ']')
     plt.ylabel(description + ' [' + units + ']')

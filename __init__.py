@@ -17,10 +17,11 @@ from .classes   import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter
 from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, spyder_custom_colors
 from .enums     import IntEnumPlus, consecutive, dist_enum_and_mons
 from .linalg    import orth, subspace
-from .plotting  import Plotter, Opts, MyCustomToolbar, ColorMap, close_all, get_axes_scales, \
-                           plot_time_history, plot_correlation_matrix, plot_multiline_history, \
-                           plot_bar_breakdown, plot_bpe_convergence, storefig, titleprefix, \
-                           disp_xlimits, setup_plots, figmenu, rgb_ints_to_hex
+from .plotting  import Plotter, Opts, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
+                           get_axes_scales, plot_time_history, plot_correlation_matrix, \
+                           plot_multiline_history, plot_bar_breakdown, plot_bpe_convergence, \
+                           storefig, titleprefix, disp_xlimits, setup_plots, figmenu, \
+                           rgb_ints_to_hex
 from .quat      import qrot, quat_angle_diff, quat_from_euler, quat_interp, quat_inv, quat_mult, \
                        quat_norm, quat_prop, quat_times_vector, quat_to_dcm, quat_to_euler
 from .stats     import convert_annual_to_monthly_probability, \

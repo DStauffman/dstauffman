@@ -108,6 +108,7 @@ if __name__=='__main__':
     # Truth data
     truth_time = np.arange(-10, 201)
     truth_data = truth(truth_time)
+    truth = dcs.TruthPlotter(truth_time, truth_data)
 
     # Logger
     dcs.Logger().set_level(10)
@@ -158,8 +159,7 @@ if __name__=='__main__':
         opts.save_plot = True
 
         # make model plots
-        dcs.plot_time_history(time, results, description='Output vs. Time', opts=opts, \
-            truth_time=truth_time, truth_data=truth_data)
+        dcs.plot_time_history(time, results, description='Output vs. Time', opts=opts, truth=truth)
 
         # make BPE plots
         bpe_plots = {'innovs': True, 'convergence': False, 'correlation': True, 'info_svd': True, \

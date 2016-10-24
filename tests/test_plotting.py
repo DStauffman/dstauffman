@@ -284,10 +284,8 @@ class Test_plot_time_history(unittest.TestCase):
         self.type_ = 'population'
         self.opts = dcs.Opts()
         self.opts.names = ['Name 1']
-        self.truth_time = self.time
-        self.truth_data = np.cos(self.time)
-        self.truth_matrix = np.column_stack((self.truth_data-0.1, self.truth_data, self.truth_data+0.1))
-        self.data_matrix = np.column_stack((self.data, self.truth_data))
+        self.truth = dcs.TruthPlotter(self.time, np.cos(self.time))
+        self.data_matrix = np.column_stack((self.data, self.truth.data))
         self.second_y_scale = 1000000
 
     def test_normal(self):
@@ -295,16 +293,19 @@ class Test_plot_time_history(unittest.TestCase):
 
     def test_truth1(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
-            truth_time=self.truth_time, truth_data=self.truth_data)
+            truth=self.truth)
 
     def test_truth2(self):
+        self.truth.data_lo = self.truth.data - 0.1
+        self.truth.data_hi = self.truth.data + 0.1
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
-            truth_time=self.truth_time, truth_data=self.truth_matrix)
+            truth=self.truth)
 
     def test_bad_truth_size(self):
+        self.truth.data = self.truth.data[:-1]
         with self.assertRaises(ValueError):
             dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
-                truth_time=self.truth_time, truth_data=self.truth_matrix[:, :-1])
+                truth=self.truth)
 
     def test_opts(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, opts=self.opts)
