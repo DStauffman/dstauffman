@@ -16,6 +16,7 @@ import numpy as np
 import os
 import sys
 import unittest
+import warnings
 # plotting imports
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -475,7 +476,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         if truth is not None:
             raise ValueError('Attempting to use both APIs, please only use new truth input.')
         else:
-            raise DeprecationWarning('This API will be removed in the future, please use the new truth input.')
+            warnings.warn('This API will be removed in the future, please use the new truth input.', DeprecationWarning)
             truth = TruthPlotter(truth_time, truth_data)
 
     # override the RMS option from opts (both must be true to plot the RMS in the legend)
