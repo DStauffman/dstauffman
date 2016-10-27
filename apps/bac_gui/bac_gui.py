@@ -19,12 +19,14 @@ import sys
 import unittest
 try: # pragma: no cover
     from PyQt5 import QtGui, QtCore
-    from PyQt5.QtWidgets import QApplication, QComboBox, QGroupBox, QLabel, QLineEdit, QMainWindow, \
-        QPushButton, QRadioButton, QToolTip, QWidget
+    from PyQt5.QtWidgets import QApplication, QComboBox, QFormLayout, QGridLayout, QGroupBox, \
+        QHBoxLayout, QLabel, QLineEdit, QMainWindow, QPushButton, QRadioButton, QToolTip, QWidget, \
+        QVBoxLayout
 except ImportError: # pragma: no cover
     from PyQt4 import QtGui, QtCore
-    from PyQt4.QtGui import QApplication, QComboBox, QGroupBox, QLabel, QLineEdit, QMainWindow, \
-        QPushButton, QRadioButton, QToolTip, QWidget
+    from PyQt4.QtGui import QApplication, QComboBox, QFormLayout, QGridLayout, QGroupBox, \
+        QHBoxLayout, QLabel, QLineEdit, QMainWindow, QPushButton, QRadioButton, QToolTip, QWidget, \
+        QVBoxLayout
 
 #%% Constants
 GUI_TOKEN   = -1
@@ -119,10 +121,10 @@ class BacGui(QMainWindow):
         self.grp_plotter = QWidget()
 
         # Layouts
-        layout_gui = QtGui.QHBoxLayout(self.gui_widget)
-        layout_profile = QtGui.QGridLayout(self.grp_profile)
-        layout_consump = QtGui.QFormLayout(self.grp_consump)
-        layout_plotter = QtGui.QVBoxLayout(self.grp_plotter)
+        layout_gui     = QHBoxLayout(self.gui_widget)
+        layout_profile = QGridLayout(self.grp_profile)
+        layout_consump = QFormLayout(self.grp_consump)
+        layout_plotter = QVBoxLayout(self.grp_plotter)
 
         # Labels
         lbl_profile  = QLabel('Profile:')
@@ -155,7 +157,7 @@ class BacGui(QMainWindow):
         self.lne_bmi    = QLineEdit('')
 
         self.radio_gender = QWidget()
-        layout_gender = QtGui.QHBoxLayout(self.radio_gender)
+        layout_gender   = QHBoxLayout(self.radio_gender)
         self.radio_fmal = QRadioButton('Female')
         self.radio_fmal.setChecked(True)
         self.radio_fmal.toggled.connect(self.radio_toggle)
