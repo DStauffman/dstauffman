@@ -142,6 +142,8 @@ def prob_to_rate(prob, time=1):
         raise ValueError('Probability must be <= 1')
     # calculate rate
     rate = -np.log(1 - prob) / time
+    # prevent code from returning a bunch of negative zeros when prob is exactly 0
+    rate += 0.
     return rate
 
 #%% Functions - rate_to_prob
