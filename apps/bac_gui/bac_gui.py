@@ -8,6 +8,7 @@ Notes
 """
 
 #%% Imports
+# normal imports
 import doctest
 from enum import Enum, unique
 import glob
@@ -17,16 +18,11 @@ import os
 import pickle
 import sys
 import unittest
-try: # pragma: no cover
-    from PyQt5 import QtGui, QtCore
-    from PyQt5.QtWidgets import QApplication, QComboBox, QFormLayout, QGridLayout, QGroupBox, \
-        QHBoxLayout, QLabel, QLineEdit, QMainWindow, QPushButton, QRadioButton, QToolTip, QWidget, \
-        QVBoxLayout
-except ImportError: # pragma: no cover
-    from PyQt4 import QtGui, QtCore
-    from PyQt4.QtGui import QApplication, QComboBox, QFormLayout, QGridLayout, QGroupBox, \
-        QHBoxLayout, QLabel, QLineEdit, QMainWindow, QPushButton, QRadioButton, QToolTip, QWidget, \
-        QVBoxLayout
+# Qt imports
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtWidgets import QApplication, QComboBox, QFormLayout, QGridLayout, QGroupBox, \
+    QHBoxLayout, QLabel, QLineEdit, QMainWindow, QPushButton, QRadioButton, QToolTip, QWidget, \
+    QVBoxLayout
 
 #%% Constants
 GUI_TOKEN   = -1

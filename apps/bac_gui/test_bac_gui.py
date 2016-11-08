@@ -9,6 +9,7 @@ Notes
 """
 
 #%% Imports
+# normal imports
 import copy
 import inspect
 import matplotlib.pyplot as plt
@@ -16,14 +17,11 @@ import numpy as np
 import os
 import sys
 import unittest
-try: # pragma: no cover
-    from PyQt5 import QtCore
-    from PyQt5.QtWidgets import QApplication
-    from PyQt5.QtTest import QTest
-except ImportError: # pragma: no cover
-    from PyQt4 import QtCore
-    from PyQt4.QtGui import QApplication
-    from PyQt4.QtTest import QTest
+# Qt imports
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtTest import QTest
+# model imports
 import dstauffman.apps.bac_gui as bac
 
 #%% Constants

@@ -9,18 +9,16 @@ Notes
 """
 
 #%% Imports
+# normal imports
 import copy
 import numpy as np
 import sys
 import unittest
-try:
-    from PyQt5 import QtCore
-    from PyQt5.QtWidgets import QApplication, QPushButton
-    from PyQt5.QtTest import QTest
-except ImportError:
-    from PyQt4 import QtCore
-    from PyQt4.QtGui import QApplication, QPushButton
-    from PyQt4.QtTest import QTest
+# Qt imports
+from PyQt5 import QtCore
+from PyQt5.QtWidgets import QApplication, QPushButton
+from PyQt5.QtTest import QTest
+# model imports
 from dstauffman import Counter
 import dstauffman.games.tictactoe as ttt
 

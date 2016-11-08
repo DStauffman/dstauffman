@@ -10,12 +10,10 @@ Notes
 #%% Imports
 import nose
 import sys
+from PyQt5.QtWidgets import QApplication
 import dstauffman.games.tictactoe as ttt
-try:
-    from PyQt5.QtWidgets import QApplication
-except ImportError:
-    from PyQt4.QtGui import QApplication
 
+#%% Script
 if __name__ == '__main__':
     # open a qapp
     if QApplication.instance() is None:

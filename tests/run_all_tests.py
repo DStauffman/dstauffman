@@ -10,10 +10,7 @@ Notes
 #%% Imports
 import sys
 import unittest
-try:
-    from PyQt5.QtWidgets import QApplication
-except ImportError:
-    from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 
 #%% Options
 test_everything = True

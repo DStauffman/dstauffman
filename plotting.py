@@ -24,28 +24,10 @@ import matplotlib.cm as cmx
 from matplotlib.patches import Rectangle
 # Qt imports
 try:
-    import PyQt5
-except ImportError:
-    has_pyqt5 = False
-else:
-    has_pyqt5 = True
-if not has_pyqt5:
-    try:
-        import PyQt4
-    except ImportError:
-        has_pyqt4 = False
-    else:
-        has_pyqt4 = True
-else:
-    has_pyqt4 = False
-if has_pyqt5:
     from PyQt5.QtWidgets import QApplication, QPushButton
     from PyQt5.QtGui import QIcon
     from PyQt5.QtCore import QSize
-elif has_pyqt4:
-    from PyQt4.QtGui import QApplication, QPushButton, QIcon
-    from PyQt4.QtCore import QSize
-else:
+except ImportError:
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object
 # model imports

@@ -132,7 +132,7 @@ def prob_to_rate(prob, time=1):
     >>> time = 3
     >>> rate = prob_to_rate(prob, time)
     >>> print(rate) # doctest: +NORMALIZE_WHITESPACE
-    [-0. 0.03512017 inf]
+    [ 0. 0.03512017 inf]
 
     """
     # check ranges
@@ -301,7 +301,7 @@ def monthly_probability_to_annual_rate(prob):
     >>> prob = np.array([0, 0.04081054, 0.07995559, 0.34075937, 1])
     >>> rate = monthly_probability_to_annual_rate(prob)
     >>> print(' '.join(('{:.2f}'.format(x) for x in rate))) # doctest: +NORMALIZE_WHITESPACE
-    -0.00 0.50 1.00 5.00 inf
+    0.00 0.50 1.00 5.00 inf
 
     """
     # divide rate and calculate probability

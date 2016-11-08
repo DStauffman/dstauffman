@@ -9,6 +9,7 @@ Notes
 # pylint: disable=E0611, E1101, C0103, C0326, C0411, C0412, W0108
 
 #%% Imports
+# normal imports
 import doctest
 import logging
 from matplotlib.pyplot import Axes
@@ -17,16 +18,12 @@ import numpy as np
 import os
 import sys
 import unittest
-try: # pragma: no cover
-    from PyQt5 import QtGui, QtCore
-    from PyQt5.QtWidgets import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox, \
-        QMainWindow, QAction
-    from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-except ImportError: # pragma: no cover
-    from PyQt4 import QtGui, QtCore
-    from PyQt4.QtGui import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox, \
-        QMainWindow, QAction
-    from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
+# Qt imports
+from PyQt5 import QtGui, QtCore
+from PyQt5.QtWidgets import QApplication, QWidget, QToolTip, QPushButton, QLabel, QMessageBox, \
+    QMainWindow, QAction
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+# model imports
 from dstauffman import get_images_dir, get_output_dir, Counter
 from dstauffman.games.tictactoe.classes   import GameStats, Options, State
 from dstauffman.games.tictactoe.constants import PLAYER, SIZES

@@ -10,10 +10,7 @@ Written by David C. Stauffer in March 2016.
 
 #%% Imports
 import sys
-try:
-    from PyQt5.QtWidgets import QApplication
-except ImportError:
-    from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 from dstauffman.games.tictactoe import TicTacToeGui
 
 #%% Execution

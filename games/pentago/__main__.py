@@ -14,10 +14,7 @@ import doctest
 import os
 import sys
 import unittest
-try:
-    from PyQt5.QtWidgets import QApplication
-except ImportError:
-    from PyQt4.QtGui import QApplication
+from PyQt5.QtWidgets import QApplication
 import dstauffman.games.pentago as pentago
 
 #%% Argument parsing

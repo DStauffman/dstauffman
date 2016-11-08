@@ -10,7 +10,7 @@ This code tends to push on the leading edge of the Python development cycle.  Fo
 
 The new f-strings in Python v3.6 look amazing, so I plan to upgrade to those shortly after the official release of v3.6.
 
-I do lots of plotting with matplotlib, and additionally use the PyQt5 library for GUIs and adding buttons (like next plot, previous plot and close all) to the standard MPL toolbar.  This code is backend specific, and Qt is much more powerful than Tk/Tcl, so I use PyQt5 instead of the core tkinter.  I currently maintain backwards compatibility with PyQt4 using the newer signal and slots methods, but plan on dropping that when PyQt5 is more stable in WinPython or Anaconda.  I'm satisfied with PyQt5 on Ubuntu 16.04, even though it's still more difficult to install (as of September 2016).
+I do lots of plotting with matplotlib, and additionally use the PyQt5 library for GUIs and adding buttons (like next plot, previous plot and close all) to the standard MPL toolbar.  This code is backend specific, and Qt is much more powerful than Tk/Tcl, so I use PyQt5 instead of the core tkinter.
 
 ### Built-in libraries
 
@@ -49,7 +49,7 @@ The following non-standard, but for the most part very well known libraries, are
 * numpy
 * pandas
 * PIL<sup>[1](#myfootnote1)</sup>
-* PyQt5 (or PyQt4)
+* PyQt5
 * pprofile<sup>[1](#myfootnote1)</sup>
 * scipy.linalg
 
@@ -78,7 +78,7 @@ conda install pprofile
 
 TODO: finish writing this
 
-## Configuring matplotlib to use PyQt5 (or PyQt4)
+## Configuring matplotlib to use PyQt5
 
 When matplotlib is imported, it has to use a graphics backend, and once set, it usually is not possible to change on the fly.  So you have to either do `import matplotlib; matplotlib.use('Qt5Agg')` as the very first import every single time, or the much better solution is to configure the matplotlibrc file to use Qt.
 
@@ -93,10 +93,3 @@ Change the line with the backend option to:
 Add a line with:
 
 `backend.qt5: PyQt5`
-
-If you are using PyQt4 instead, then these lines should be:
-
-```
-backend      : Qt4Agg
-backend.qt4  : PyQt4
-```

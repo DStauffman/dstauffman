@@ -60,8 +60,8 @@ def orth(A):
     2
 
     >>> Q = orth(A)
-    >>> print(Q)
-    [[-0.70710678  0.        ]
+    >>> print(np.array2string(Q, suppress_small=True))
+    [[-0.70710678 -0.        ]
      [ 0.          1.        ]
      [-0.70710678  0.        ]]
 

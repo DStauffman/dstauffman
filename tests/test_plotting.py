@@ -15,12 +15,8 @@ import numpy as np
 import os
 import unittest
 import dstauffman as dcs
-try:
-    from PyQt5.QtTest import QTest
-    from PyQt5.QtCore import Qt
-except ImportError:
-    from PyQt4.QtTest import QTest
-    from PyQt4.QtCore import Qt
+from PyQt5.QtTest import QTest
+from PyQt5.QtCore import Qt
 
 #%% Plotter for testing
 plotter = dcs.Plotter(False)
