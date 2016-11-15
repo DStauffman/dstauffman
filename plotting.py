@@ -118,11 +118,37 @@ class Opts(Frozen):
 class TruthPlotter(Frozen):
     r"""
     Class wrapper for the different types of truth data to include on plots.
+
+    Examples
+    --------
+
+    >>> from dstauffman import TruthPlotter
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> plt.ioff()
+    >>> fig = plt.figure()
+    >>> fig.canvas.set_window_title('Figure Title')
+    >>> x = np.arange(0, 10, 0.1)
+    >>> y = np.sin(x)
+    >>> truth = TruthPlotter(x, y+0.01, lo=y, hi=y+0.03)
+    >>> ax = fig.add_subplot(111)
+    >>> ax.plot(x, y, label='data') # doctest: +ELLIPSIS
+    [<matplotlib.lines.Line2D object at 0x...>]
+    >>> truth.plot_truth(ax)
+
+    >>> plt.legend() # doctest: +ELLIPSIS
+    <matplotlib.legend.Legend object at 0x...>
+
+    >>> plt.show(block=False) # doctest: +SKIP
+
+    Close plot
+    >>> plt.close(fig)
+
     """
-    def __init__(self, time=None, data=None, lo=None, hi=None, type_='time', name='Truth'):
+    def __init__(self, time=None, data=None, lo=None, hi=None, type_='normal', name='Truth'):
         self.time    = time
         self.data    = None
-        self.type_   = type_ # from {'time', 'time_hilo', 'errorbars', 'series'} # TODO: implement this
+        self.type_   = type_ # from {'normal', 'errorbar'}
         self.data_lo = lo
         self.data_hi = hi
         self.name    = name
@@ -148,10 +174,18 @@ class TruthPlotter(Frozen):
         # plot the new data
         if self.data is not None:
             ax.plot(self.time, scale*self.data, 'k.-', linewidth=2, zorder=8, label=self.name)
-        if self.data_lo is not None:
-            ax.plot(self.time, scale*self.data_lo, '.-', color='0.5', linewidth=2, zorder=6)
-        if self.data_hi is not None:
-            ax.plot(self.time, scale*self.data_hi, '.-', color='0.5', linewidth=2, zorder=6)
+        if self.type_ == 'normal':
+            if self.data_lo is not None:
+                ax.plot(self.time, scale*self.data_lo, '.-', color='0.5', linewidth=2, zorder=6)
+            if self.data_hi is not None:
+                ax.plot(self.time, scale*self.data_hi, '.-', color='0.5', linewidth=2, zorder=6)
+        elif self.type_ == 'errorbar':
+            if self.data_lo is not None and self.data_hi is not None:
+                yerr = np.vstack((self.data-self.data_lo, self.data_hi-self.data))
+                ax.errorbar(self.time, scale*self.data, scale*yerr, linestyle='None', \
+                    marker='None', ecolor='c', zorder=6)
+        else:
+            raise ValueError('Unexpected value for type_ of "{}".'.format(self.type_))
         # restore the original limits, since they might have been changed by the truth data
         ax.set_xlim(x_lim)
         ax.set_ylim(y_lim)
