@@ -747,7 +747,7 @@ def apply_solution_to_combos(soln, combos):
     return valid
 
 #%% Functions - solve_puzzle
-def solve_puzzle(piece_combos, stop_at_first=True, check_seams=False):
+def solve_puzzle(piece_combos, stop_at_first=False, check_seams=True):
     r"""
     Solves the puzzle once all the possible piece combinations have been found.
 
@@ -755,9 +755,9 @@ def solve_puzzle(piece_combos, stop_at_first=True, check_seams=False):
     ----------
     piece_combos : list of (3,3,3) ndarray of int
         Piece combinations
-    stop_at_first : bool, optional (True)
+    stop_at_first : bool, optional (False)
         Stop at the first valid solution
-    check_seams : bool, optional (False)
+    check_seams : bool, optional (True)
         Check the physical seams to make sure the puzzle can be assembled
 
     Returns
@@ -779,7 +779,7 @@ def solve_puzzle(piece_combos, stop_at_first=True, check_seams=False):
     >>> piece_combos = [apply_solution_to_combos(soln, this_combo) for this_combo in combos]
     >>> soln_pieces = solve_puzzle(piece_combos)
     >>> print(soln_pieces[0])
-    [ 0  1  0  6  1 10  4  6 14]
+    [ 0  4 14  3  5 23  5  4  0]
 
     """
     def _get_solution_sum(level):
@@ -923,8 +923,8 @@ def test_docstrings():
 #%% Main script
 if __name__ == '__main__':
     # flags for running code
-    run_tests    = False
-    make_plots   = False
+    run_tests    = True
+    make_plots   = True
     make_soln    = True
 
     if run_tests:
@@ -936,9 +936,9 @@ if __name__ == '__main__':
         date = datetime.now()
         opts = Opts()
         opts.case_name = 'Brick'
-        opts.save_path = os.path.join(get_root_dir(), 'results', date.strftime('%Y-%m-%d'))
+        opts.save_path = os.path.join(get_root_dir(), 'results', date.strftime('%Y-%m-%d') + '_brick')
         opts.save_plot = True
-        opts.show_plot = True
+        opts.show_plot = False
         if make_plots:
             setup_dir(opts.save_path, rec=True)
 
@@ -977,7 +977,7 @@ if __name__ == '__main__':
         piece_combos = [piece_combos[x] for x in sort_ix]
 
         # solve puzzle
-        soln_pieces_all = solve_puzzle(piece_combos, stop_at_first=False, check_seams=True)
+        soln_pieces_all = solve_puzzle(piece_combos)
 
         # discard duplicates based on symmetry
         soln_pieces = discard_symmetric_duplicates(soln_pieces_all, piece_combos)

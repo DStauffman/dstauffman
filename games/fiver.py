@@ -694,7 +694,7 @@ def solve_puzzle(board, locations, find_all=False):
     return solutions
 
 #%% Functions - plot_board
-def plot_board(board, opts=None):
+def plot_board(board, title, opts=None):
     r"""
     Plots the board or the individual pieces.
     """
@@ -710,9 +710,8 @@ def plot_board(board, opts=None):
     # create the axis
     ax = fig.add_subplot(111)
     # set the title
-    if opts.case_name is not None:
-        fig.canvas.set_window_title(opts.case_name)
-        plt.title(opts.case_name)
+    fig.canvas.set_window_title(title)
+    plt.title(title)
     # draw each square
     for i in range(board.shape[0]):
         for j in range(board.shape[1]):
@@ -762,8 +761,7 @@ if __name__ == '__main__':
     # Create and set Opts
     date = datetime.now()
     opts = Opts()
-    opts.case_name = 'Board'
-    opts.save_path = os.path.join(get_root_dir(), 'results', date.strftime('%Y-%m-%d'))
+    opts.save_path = os.path.join(get_root_dir(), 'results', date.strftime('%Y-%m-%d') + '_fiver')
     opts.save_plot = True
     opts.show_plot = False
     # Save plots of the possible piece orientations
@@ -772,15 +770,12 @@ if __name__ == '__main__':
         for (ix, these_pieces) in enumerate(all_pieces):
             for ix2 in range(these_pieces.shape[0]):
                 this_title = 'Piece {}, Permutation {}'.format(ix+1, ix2+1)
-                opts.case_name = this_title
-                fig = plot_board(these_pieces[ix2], opts=opts)
+                fig = plot_board(these_pieces[ix2], this_title, opts=opts)
                 plt.close(fig)
         # print empty boards
-        opts.case_name = 'Empty Board 1'
-        fig = plot_board(BOARD1[3:-3,3:-3], opts=opts)
+        fig = plot_board(BOARD1[3:-3,3:-3], 'Empty Board 1', opts=opts)
         plt.close(fig)
-        opts.case_name = 'Empty Board 2'
-        fig = plot_board(BOARD2[3:-3,3:-3], opts=opts)
+        fig = plot_board(BOARD2[3:-3,3:-3], 'Empty Board 2', opts=opts)
         plt.close(fig)
 
     # solve the puzzle
@@ -804,8 +799,8 @@ if __name__ == '__main__':
         opts.show_plot = True
         figs1 = []
         for i in range(len(solutions1)):
-            opts.case_name = 'Puzzle 1, Solution {}'.format(i+1)
-            figs1.append(plot_board(solutions1[i][3:-3,3:-3], opts=opts))
+            this_title = 'Puzzle 1, Solution {}'.format(i+1)
+            figs1.append(plot_board(solutions1[i][3:-3,3:-3], this_title, opts=opts))
             if np.mod(i, 10) == 0:
                 while figs1:
                     plt.close(figs1.pop())
@@ -813,8 +808,8 @@ if __name__ == '__main__':
         opts.show_plot = True
         figs2 = []
         for i in range(len(solutions2)):
-            opts.case_name = 'Puzzle 2, Solution {}'.format(i+1)
-            figs2.append(plot_board(solutions2[i][3:-3,3:-3], opts=opts))
+            this_title = 'Puzzle 2, Solution {}'.format(i+1)
+            figs2.append(plot_board(solutions2[i][3:-3,3:-3], this_title, opts=opts))
             if np.mod(i, 10) == 0:
                 while figs2:
                     plt.close(figs2.pop())
