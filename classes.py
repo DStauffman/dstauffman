@@ -11,6 +11,7 @@ Notes
 
 #%% Imports
 import doctest
+import numpy as np
 import pickle
 import sys
 import unittest
@@ -19,6 +20,9 @@ try:
     import h5py
 except ImportError:
     warnings.warn('h5py was not imported, so some file save and load capabilities will be limited.')
+
+#%% Set error state for module
+np.seterr(invalid='ignore', divide='ignore')
 
 #%% Functions - _frozen
 def _frozen(set):
