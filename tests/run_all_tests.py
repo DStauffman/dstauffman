@@ -12,9 +12,6 @@ import sys
 import unittest
 from PyQt5.QtWidgets import QApplication
 
-#%% Options
-test_everything = True
-
 #%% Tests
 if __name__ == '__main__':
     # open a qapp
@@ -25,14 +22,7 @@ if __name__ == '__main__':
     # get a loader
     loader = unittest.TestLoader()
     # find all the test cases
-    if test_everything:
-        test_suite = loader.discover('dstauffman.apps')
-        test_suite.addTests(loader.discover('dstauffman.archery'))
-        test_suite.addTests(loader.discover('dstauffman.games'))
-        test_suite.addTests(loader.discover('dstauffman.imageproc'))
-        test_suite.addTests(loader.discover('dstauffman.tests'))
-    else:
-        test_suite = loader.discover('dstauffman.tests')
+    test_suite = loader.discover('dstauffman.tests')
     # run the tests
     unittest.TextTestRunner(verbosity=1).run(test_suite)
     # close the qapp

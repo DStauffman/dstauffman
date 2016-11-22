@@ -23,7 +23,6 @@ $RECYCLE.BIN/
 
 # OSX
 # =========================
-
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -50,28 +49,28 @@ Temporary Items
 # =========================
 # LaTeX Files #
 # =========================
-doc/tex/*/*.aux
-doc/tex/*/*.bbl
-doc/tex/*/*.bcf
-doc/tex/*/*.blg
-doc/tex/*/*.dvi
-doc/tex/*/*.gz
-doc/tex/*/*.hst
-doc/tex/*/*.lof
-doc/tex/*/*.log
-doc/tex/*/*.lot
-doc/tex/*/*.out
-doc/tex/*/*.pdf
-doc/tex/*/*.run.xml
-doc/tex/*/*.toc
-doc/tex/*/*.tcp
-doc/tex/*/*.tps
-doc/tex/*/*.ver
+doc/*/*.aux
+doc/*/*.bbl
+doc/*/*.bcf
+doc/*/*.blg
+doc/*/*.dvi
+doc/*/*.gz
+doc/*/*.hst
+doc/*/*.lof
+doc/*/*.log
+doc/*/*.lot
+doc/*/*.out
+doc/*/*.pdf
+doc/*/*.run.xml
+doc/*/*.toc
+doc/*/*.tcp
+doc/*/*.tps
+doc/*/*.ver
 
 # beamer files
-doc/tex/*/*.nav
-doc/tex/*/*.snm
-doc/tex/*/*.vrb
+doc/*/*.nav
+doc/*/*.snm
+doc/*/*.vrb
 
 # =========================
 # PyCharm Files #
@@ -85,9 +84,4 @@ coverage_html_report/
 .coverage
 output/*
 results/*
-scripts/case_*
-scripts/script_*
 temp/*
-apps/bac_gui/*.pkl
-apps/bac_gui/*.png
-!apps/bac_gui/bac_gui.png
