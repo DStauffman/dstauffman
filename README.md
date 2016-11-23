@@ -22,20 +22,13 @@ The following built-in Python libraries are used within the dstauffman library.
 * datetime
 * doctest
 * enum
-* getpass
-* glob
 * inspect
 * io
-* logging
-* math
-* nose
 * os
 * platform
 * pickle
-* random
 * shutil
 * sys
-* timeit
 * types
 * unittest
 
@@ -45,34 +38,13 @@ The following non-standard, but for the most part very well known libraries, are
 
 * h5py
 * matplotlib
-* mpl_toolkits<sup>[1](#myfootnote1)</sup>
 * numpy
 * pandas
-* PIL<sup>[1](#myfootnote1)</sup>
 * PyQt5
-* pprofile<sup>[1](#myfootnote1)</sup>
 * scipy.linalg
 
-<a name="myfootnote1">1</a>: Not required to do `import dstauffman`, but used by some of the optional submodules.
-
-### Additional libraries only used if trying to compile to C with Cython
-* pyximport
-* distutils.core
-* Cython.Build
-
-## Installing on Windows with WinPython
-WinPython comes with almost all the libraries you will need.  I believe the only one it doesn't currently include is pprofile.  This library is pure python and easily install with pip.
-
-```
-pip install pprofile
-```
-
-## Installing on Windows with Anaconda (Anaconda is also available on Unix/Mac)
-Ananconda also comes with almost all the libraries you need, plus it has virtual environment support built-in, so that's nice.  The only difference here is you need to use conda instead of pip for new libraries.
-
-```
-conda install pprofile
-```
+## Installing on Windows with WinPython or Anaconda.
+WinPython or Anaconda come with all the libraries you will need.  I highly recommend using one of them.
 
 ## Installing within a virtual environment in Ubuntu 16.04
 
@@ -84,7 +56,7 @@ When matplotlib is imported, it has to use a graphics backend, and once set, it 
 
 First, find the matplotlibrc file location, or if it doesn't exist, then create one from a template found online.  On a Windows installation of WinPython, this might be somewhere like:
 
-`C:\Programs\WinPython-64bit-3.4.2.4\python-3.4.2.amd64\Lib\site-packages\matplotlib\mpl-data\matplotlibrc`
+`C:\Programs\WinPython-64bit-3.5.2.3Qt5\python-3.5.2.amd64\Lib\site-packages\matplotlib\mpl-data\matplotlibrc`
 
 Change the line with the backend option to:
 
