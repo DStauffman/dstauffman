@@ -1225,7 +1225,7 @@ def full_print():
     >>> import numpy as np
     >>> a = np.zeros((10, 5))
     >>> a[3, :] = 1.23
-    >>> print(a)
+    >>> print(a) # doctest: +NORMALIZE_WHITESPACE
     [[ 0.  0.  0.  0.  0.]
      [ 0.  0.  0.  0.  0.]
      [ 0.  0.  0.  0.  0.]
