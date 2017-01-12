@@ -1135,6 +1135,51 @@ class Test_np_digitize(unittest.TestCase):
         with self.assertRaises(ValueError):
             dcs.np_digitize(np.array([1, 10, np.nan]), self.bins)
 
+#%% full_print
+class Test_full_print(unittest.TestCase):
+    r"""Tests the full_print function with the following cases:
+        Nominal
+        Small (x2)
+    """
+    def setUp(self):
+        self.x = np.zeros((10, 5))
+        self.x[3, :] = 1.23
+        self.x_print = ['[[ 0.  0.  0.  0.  0.]', ' [ 0.  0.  0.  0.  0.]', ' [ 0.  0.  0.  0.  0.]',
+            ' ..., ', ' [ 0.  0.  0.  0.  0.]', ' [ 0.  0.  0.  0.  0.]', ' [ 0.  0.  0.  0.  0.]]']
+        self.x_full  = ['[[ 0.    0.    0.    0.    0.  ]', ' [ 0.    0.    0.    0.    0.  ]',
+            ' [ 0.    0.    0.    0.    0.  ]', ' [ 1.23  1.23  1.23  1.23  1.23]', ' [ 0.    0.    0.    0.    0.  ]',
+            ' [ 0.    0.    0.    0.    0.  ]', ' [ 0.    0.    0.    0.    0.  ]', ' [ 0.    0.    0.    0.    0.  ]',
+            ' [ 0.    0.    0.    0.    0.  ]', ' [ 0.    0.    0.    0.    0.  ]]']
+
+    def test_nominal(self):
+        with dcs.capture_output() as out:
+            print(self.x)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertEqual(lines, self.x_print)
+        with dcs.capture_output() as out:
+            with dcs.full_print():
+                print(self.x)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertEqual(lines, self.x_full)
+
+    def test_small1(self):
+        with dcs.capture_output() as out:
+            with dcs.full_print():
+                print(np.array(0))
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '0')
+
+    def test_small2(self):
+        with dcs.capture_output() as out:
+            with dcs.full_print():
+                print(np.array([1.35, 1.58]))
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '[ 1.35  1.58]')
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

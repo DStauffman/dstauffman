@@ -1207,6 +1207,56 @@ def np_digitize(x, bins, right=False):
     out = np.digitize(x, bins, right) - 1
     return out
 
+#%% full_print
+@contextmanager
+def full_print():
+    r"""
+    Context manager for printing full numpy arrays.
+
+    Notes
+    -----
+    #.  Adapted by David C. Stauffer in January 2017 from a stackover flow answer by Paul Price,
+        given here: http://stackoverflow.com/questions/1987694/print-the-full-numpy-array
+
+    Examples
+    --------
+
+    >>> from dstauffman import full_print
+    >>> import numpy as np
+    >>> a = np.zeros((10, 5))
+    >>> a[3, :] = 1.23
+    >>> print(a)
+    [[ 0.  0.  0.  0.  0.]
+     [ 0.  0.  0.  0.  0.]
+     [ 0.  0.  0.  0.  0.]
+     ...,
+     [ 0.  0.  0.  0.  0.]
+     [ 0.  0.  0.  0.  0.]
+     [ 0.  0.  0.  0.  0.]]
+
+    >>> with full_print():
+    ...     print(a)
+    [[ 0.    0.    0.    0.    0.  ]
+     [ 0.    0.    0.    0.    0.  ]
+     [ 0.    0.    0.    0.    0.  ]
+     [ 1.23  1.23  1.23  1.23  1.23]
+     [ 0.    0.    0.    0.    0.  ]
+     [ 0.    0.    0.    0.    0.  ]
+     [ 0.    0.    0.    0.    0.  ]
+     [ 0.    0.    0.    0.    0.  ]
+     [ 0.    0.    0.    0.    0.  ]
+     [ 0.    0.    0.    0.    0.  ]]
+
+    """
+    # get current options
+    opt = np.get_printoptions()
+    # update to print all digits
+    np.set_printoptions(threshold=np.nan)
+    # yield options for the context manager to do it's thing
+    yield
+    # reset the options back to what they were originally
+    np.set_printoptions(**opt)
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_utils', exit=False)
