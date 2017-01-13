@@ -1164,31 +1164,42 @@ class Test_full_print(unittest.TestCase):
         Nominal
         Small (x2)
     """
+    @staticmethod
+    def _norm_output(lines):
+        out = []
+        for line in lines:
+            # normalize whitespace
+            temp = ' '.join(line.strip().split())
+            # get rid of spaces near brackets
+            temp = temp.replace('[ ', '[')
+            temp = temp.replace(' ]', ']')
+            out.append(temp)
+        return out
+
     def setUp(self):
         self.x = np.zeros((10, 5))
         self.x[3, :] = 1.23
-        self.x_print = ['[[ 0. 0. 0. 0. 0.]', '[ 0. 0. 0. 0. 0.]', '[ 0. 0. 0. 0. 0.]',
-            '...,', '[ 0. 0. 0. 0. 0.]', '[ 0. 0. 0. 0. 0.]', '[ 0. 0. 0. 0. 0.]]']
-        self.x_full  = ['[[ 0. 0. 0. 0. 0. ]', '[ 0. 0. 0. 0. 0. ]',
-            '[ 0. 0. 0. 0. 0. ]', '[ 1.23 1.23 1.23 1.23 1.23]', '[ 0. 0. 0. 0. 0. ]',
-            '[ 0. 0. 0. 0. 0. ]', '[ 0. 0. 0. 0. 0. ]', '[ 0. 0. 0. 0. 0. ]',
-            '[ 0. 0. 0. 0. 0. ]', '[ 0. 0. 0. 0. 0. ]]']
+        self.x_print = ['[[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]',
+            '...,', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]]']
+        self.x_full  = ['[[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]','[0. 0. 0. 0. 0.]',
+            '[1.23 1.23 1.23 1.23 1.23]', '[0. 0. 0. 0. 0.]','[0. 0. 0. 0. 0.]',
+            '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]]']
 
     def test_nominal(self):
         with dcs.capture_output() as out:
             print(self.x)
         lines = out.getvalue().strip().split('\n')
         out.close()
-        # normalize the whitespaces in the lines
-        lines = [' '.join(line.split()) for line in lines]
+        # normalize whitespace
+        lines = self._norm_output(lines)
         self.assertEqual(lines, self.x_print)
         with dcs.capture_output() as out:
             with dcs.full_print():
                 print(self.x)
         lines = out.getvalue().strip().split('\n')
+        # normalize whitespace
+        lines = self._norm_output(lines)
         out.close()
-        # normalize the whitespaces in the lines
-        lines = [' '.join(line.split()) for line in lines]
         self.assertEqual(lines, self.x_full)
 
     def test_small1(self):
