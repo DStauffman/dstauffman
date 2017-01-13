@@ -58,6 +58,10 @@ class Test_subspace(unittest.TestCase):
         theta = dcs.subspace(self.A, self.B)
         self.assertAlmostEqual(theta, self.theta)
 
+    def test_swapped_rank(self):
+        theta = dcs.subspace(self.B, self.A)
+        self.assertAlmostEqual(theta, self.theta)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

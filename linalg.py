@@ -66,11 +66,14 @@ def orth(A):
      [-0.70710678  0.        ]]
 
     """
+    # compute the SVD
     (Q, S, _) = svd(A, full_matrices=False)
-    if S.size > 0:
-        tol = np.max(A.shape) * S[0] * np.finfo(float).eps
-        r = np.sum(S > tol, axis=0)
-        Q = Q[:, np.arange(r)]
+    # calculate a tolerance based on the first eigenvalue (instead of just using a small number)
+    tol = np.max(A.shape) * S[0] * np.finfo(float).eps
+    # sum the number of eigenvalues that are greater than the calculated tolerance
+    r = np.sum(S > tol, axis=0)
+    # return the columns corresponding to the non-zero eigenvalues
+    Q = Q[:, np.arange(r)]
     return Q
 
 #%% subspace

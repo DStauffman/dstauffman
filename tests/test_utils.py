@@ -243,6 +243,7 @@ class Test_rss(unittest.TestCase):
 class Test_setup_dir(unittest.TestCase):
     r"""
     Tests the setup_dir function with these cases:
+        null case
         create a new folder
         create a new nested folder
         delete the contents of an existing folder
@@ -257,6 +258,13 @@ class Test_setup_dir(unittest.TestCase):
         self.filename = os.path.join(self.folder, 'temp_file.txt')
         self.subfile  = os.path.join(self.subdir, 'temp_file.txt')
         self.text     = 'Hello, World!\n'
+
+    def test_empty_string(self):
+        with dcs.capture_output() as out:
+            dcs.setup_dir('')
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '')
 
     def test_create_folder(self):
         with dcs.capture_output() as out:
@@ -343,8 +351,8 @@ class Test_compare_two_classes(unittest.TestCase):
         compare subclasses
     """
     def setUp(self):
-        self.c1 = type('Class1', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text'})
-        self.c2 = type('Class2', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text'})
+        self.c1 = type('Class1', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text', 'e': {'key1':1}})
+        self.c2 = type('Class2', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text', 'e': {'key1':1}})
         self.names = ['Class 1', 'Class 2']
         self.c3 = type('Class3', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text', 'e': self.c1})
         self.c4 = type('Class4', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text', 'e': self.c2})
@@ -475,8 +483,8 @@ class Test_compare_two_dicts(unittest.TestCase):
         compares with suppressed output
     """
     def setUp(self):
-        self.d1 = {'a': 1, 'b': 2, 'c': 3}
-        self.d2 = {'a': 1, 'b': 5, 'd': 6}
+        self.d1 = {'a': 1, 'b': 2, 'c': 3, 'e': {'key1':1}}
+        self.d2 = {'a': 1, 'b': 5, 'd': 6, 'e': {'key1':1}}
         self.names = ['Dict 1', 'Dict 2']
 
     def test_good_comparison(self):
@@ -729,6 +737,11 @@ class Test_capture_output(unittest.TestCase):
         err.close()
         self.assertEqual(output, 'Hello, World!')
         self.assertEqual(error, 'Error Raised.')
+
+    def test_bad_value(self):
+        with self.assertRaises(RuntimeError):
+            with dcs.capture_output('bad') as (out, err):
+                print('Lost values')
 
 #%% unit
 class Test_unit(unittest.TestCase):
@@ -1038,8 +1051,8 @@ class Test_find_tabs(unittest.TestCase):
         file2 = os.path.join(cls.folder, 'temp_code_02.py')
         file3 = os.path.join(cls.folder, 'temp_code_03.m')
         cont1 = 'Line 1\n\nAnother line\n    Line with leading spaces\n'
-        cont2 = '\n\n    Start line\n\tBad tab line\n    Start and end line    \nAnother line\n\n'
-        cont3 = cont2
+        cont2 = '\n\n    Start line\nNo Bad tab lines\n    Start and end line    \nAnother line\n\n'
+        cont3 = '\n\n    Start line\n\tBad tab line\n    Start and end line    \nAnother line\n\n'
         cls.files = [file1, file2, file3]
         dcs.write_text_file(file1, cont1)
         dcs.write_text_file(file2, cont2)
@@ -1078,12 +1091,22 @@ class Test_find_tabs(unittest.TestCase):
         lines = out.getvalue().strip().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
-        self.assertEqual(lines[1],self.bad1)
-        self.assertEqual(lines[2],self.bad2)
-        self.assertTrue(lines[3].startswith('Evaluating: "'))
-        self.assertEqual(lines[4],self.bad1)
-        self.assertEqual(lines[5],self.bad2)
-        self.assertEqual(len(lines), 6)
+        #self.assertEqual(lines[1],self.bad1)
+        self.assertEqual(lines[1],self.bad2)
+        self.assertTrue(lines[2].startswith('Evaluating: "'))
+        self.assertEqual(lines[3],self.bad1)
+        self.assertEqual(lines[4],self.bad2)
+        self.assertEqual(len(lines), 5)
+
+    def test_trailing_and_list_all(self):
+        with dcs.capture_output() as out:
+            dcs.find_tabs(self.folder, list_all=True, trailing=True)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertTrue(lines[0].startswith('Evaluating: "'))
+        self.assertTrue(self.bad1 in lines)
+        self.assertTrue(self.bad2 in lines)
+        self.assertTrue(len(lines) > 6)
 
     @classmethod
     def tearDownClass(cls):
@@ -1144,24 +1167,28 @@ class Test_full_print(unittest.TestCase):
     def setUp(self):
         self.x = np.zeros((10, 5))
         self.x[3, :] = 1.23
-        self.x_print = ['[[ 0.  0.  0.  0.  0.]', ' [ 0.  0.  0.  0.  0.]', ' [ 0.  0.  0.  0.  0.]',
-            ' ..., ', ' [ 0.  0.  0.  0.  0.]', ' [ 0.  0.  0.  0.  0.]', ' [ 0.  0.  0.  0.  0.]]']
-        self.x_full  = ['[[ 0.    0.    0.    0.    0.  ]', ' [ 0.    0.    0.    0.    0.  ]',
-            ' [ 0.    0.    0.    0.    0.  ]', ' [ 1.23  1.23  1.23  1.23  1.23]', ' [ 0.    0.    0.    0.    0.  ]',
-            ' [ 0.    0.    0.    0.    0.  ]', ' [ 0.    0.    0.    0.    0.  ]', ' [ 0.    0.    0.    0.    0.  ]',
-            ' [ 0.    0.    0.    0.    0.  ]', ' [ 0.    0.    0.    0.    0.  ]]']
+        self.x_print = ['[[ 0. 0. 0. 0. 0.]', '[ 0. 0. 0. 0. 0.]', '[ 0. 0. 0. 0. 0.]',
+            '...,', '[ 0. 0. 0. 0. 0.]', '[ 0. 0. 0. 0. 0.]', '[ 0. 0. 0. 0. 0.]]']
+        self.x_full  = ['[[ 0. 0. 0. 0. 0. ]', '[ 0. 0. 0. 0. 0. ]',
+            '[ 0. 0. 0. 0. 0. ]', '[ 1.23 1.23 1.23 1.23 1.23]', '[ 0. 0. 0. 0. 0. ]',
+            '[ 0. 0. 0. 0. 0. ]', '[ 0. 0. 0. 0. 0. ]', '[ 0. 0. 0. 0. 0. ]',
+            '[ 0. 0. 0. 0. 0. ]', '[ 0. 0. 0. 0. 0. ]]']
 
     def test_nominal(self):
         with dcs.capture_output() as out:
             print(self.x)
         lines = out.getvalue().strip().split('\n')
         out.close()
+        # normalize the whitespaces in the lines
+        lines = [' '.join(line.split()) for line in lines]
         self.assertEqual(lines, self.x_print)
         with dcs.capture_output() as out:
             with dcs.full_print():
                 print(self.x)
         lines = out.getvalue().strip().split('\n')
         out.close()
+        # normalize the whitespaces in the lines
+        lines = [' '.join(line.split()) for line in lines]
         self.assertEqual(lines, self.x_full)
 
     def test_small1(self):

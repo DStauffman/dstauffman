@@ -18,7 +18,7 @@ import unittest
 import warnings
 try:
     import h5py
-except ImportError:
+except ImportError: # pragma: no cover
     warnings.warn('h5py was not imported, so some file save and load capabilities will be limited.')
 
 #%% Set error state for module

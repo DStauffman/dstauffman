@@ -27,7 +27,7 @@ try:
     from PyQt5.QtWidgets import QApplication, QPushButton
     from PyQt5.QtGui import QIcon
     from PyQt5.QtCore import QSize
-except ImportError:
+except ImportError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object
 # model imports
@@ -1292,7 +1292,7 @@ def setup_plots(figs, opts, plot_type='time'):
         disp_xlimits(figs, opts.disp_xmin, opts.disp_xmax)
 
     # things to do if displaying the plots
-    if opts.show_plot and Plotter.show_plot:
+    if opts.show_plot and Plotter.show_plot: # pragma: no cover
         # add a custom toolbar
         figmenu(figs)
         # show the plot
