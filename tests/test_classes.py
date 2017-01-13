@@ -9,6 +9,8 @@ Notes
 """
 
 #%% Imports
+import numpy as np
+import os
 import unittest
 import dstauffman as dcs
 
@@ -21,6 +23,33 @@ class _Example_Frozen(dcs.Frozen):
         self.field_two = 2
         self.field_ten = 10
         self.dummy     = dummy
+
+class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
+    def __init__(self):
+        self.x = np.array([1, 3, 5])
+        self.y = np.array([2, 4, 6])
+        self.z = None
+
+class _Example_SaveAndLoadPickle(dcs.Frozen, metaclass=dcs.SaveAndLoadPickle):
+    def __init__(self):
+        self.a = np.array([1, 2, 3])
+        self.b = np.array([4, 5, 6])
+
+class _Example_No_Override(object, metaclass=dcs.SaveAndLoad):
+    @staticmethod
+    def save():
+        return 1
+    @staticmethod
+    def load():
+        return 2
+
+class _Example_No_Override2(object, metaclass=dcs.SaveAndLoadPickle):
+    @staticmethod
+    def save():
+        return 1
+    @staticmethod
+    def load():
+        return 2
 
 #%% Classes for testing
 # Frozen
@@ -50,6 +79,66 @@ class Test_Frozen(unittest.TestCase):
         temp = _Example_Frozen()
         with self.assertRaises(AttributeError):
             temp.new_field_that_does_not_exist = 1
+
+# SaveAndLoad
+class Test_SaveAndLoad(unittest.TestCase):
+    r"""
+    Tests SaveAndLoad metaclass.
+    """
+    def setUp(self):
+        folder          = dcs.get_tests_dir()
+        self.results1   = _Example_SaveAndLoad()
+        self.results2   = _Example_SaveAndLoadPickle()
+        self.save_path1 = os.path.join(folder, 'results_test_save.hdf5')
+        self.save_path2 = os.path.join(folder, 'results_test_save.pkl')
+
+    def test_save1(self):
+        self.assertTrue(hasattr(self.results1, 'save'))
+        self.assertTrue(hasattr(self.results1, 'load'))
+
+    def test_save2(self):
+        self.assertTrue(hasattr(self.results2, 'save'))
+        self.assertTrue(hasattr(self.results2, 'load'))
+
+    def test_save3(self):
+        temp = _Example_No_Override()
+        self.assertTrue(hasattr(temp, 'save'))
+        self.assertTrue(hasattr(temp, 'load'))
+        self.assertEqual(temp.save(), 1)
+        self.assertEqual(temp.load(), 2)
+
+    def test_save4(self):
+        temp = _Example_No_Override2()
+        self.assertTrue(hasattr(temp, 'save'))
+        self.assertTrue(hasattr(temp, 'load'))
+        self.assertEqual(temp.save(), 1)
+        self.assertEqual(temp.load(), 2)
+
+    def test_saving_hdf5(self):
+        self.results1.save(self.save_path1)
+        results = self.results1.load(self.save_path1)
+        self.assertTrue(dcs.compare_two_classes(results, self.results1, suppress_output=True, compare_recursively=True))
+
+    def test_saving_pickle1(self):
+        self.results1.save(self.save_path1, use_hdf5=False)
+        results = self.results1.load(self.save_path2, use_hdf5=False)
+        self.assertTrue(dcs.compare_two_classes(results, self.results1, suppress_output=True, compare_recursively=True))
+
+    def test_saving_pickle2(self):
+        self.results2.save(self.save_path2)
+        results = self.results2.load(self.save_path2)
+        self.assertTrue(dcs.compare_two_classes(results, self.results2, suppress_output=True, compare_recursively=True))
+
+    def test_no_filename(self):
+        self.results1.save('')
+        with self.assertRaises(ValueError):
+            self.results1.load('')
+
+    def tearDown(self):
+        if os.path.isfile(self.save_path1):
+            os.remove(self.save_path1)
+        if os.path.isfile(self.save_path2):
+            os.remove(self.save_path2)
 
 # Integer
 class Test_Counter(unittest.TestCase):

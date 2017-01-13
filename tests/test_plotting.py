@@ -53,6 +53,9 @@ class Test_Plotter(unittest.TestCase):
         out.close()
         self.assertEqual(output, self.print)
 
+    def test_no_show(self):
+        self.plotter = dcs.Plotter()
+
     def tearDown(self):
         self.plotter.set_plotter(False)
 
@@ -87,6 +90,73 @@ class Test_Opts(unittest.TestCase):
         opts.names = ['Name 1', 'Name 2']
         name = opts.get_names(2)
         self.assertEqual(name, '')
+
+# TruthPlotter
+class Test_TruthPlotter(unittest.TestCase):
+    r"""
+    Tests the TruthPlotter class with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.fig  = None
+        self.x    = np.arange(0, 10, 0.1)
+        self.y    = np.sin(self.x)
+        self.data = np.vstack((self.y, self.y+0.01, self.y+0.03)).T
+
+    def test_nominal(self):
+        truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03)
+        np.testing.assert_array_almost_equal(self.y+0.01, truth.data)
+        np.testing.assert_array_almost_equal(self.y, truth.data_lo)
+        np.testing.assert_array_almost_equal(self.y+0.03, truth.data_hi)
+
+    def test_matrix1(self):
+        truth = dcs.TruthPlotter(self.x, self.data[:, np.array([1])])
+        np.testing.assert_array_almost_equal(self.y+0.01, truth.data)
+        self.assertTrue(truth.data_lo is None)
+        self.assertTrue(truth.data_hi is None)
+
+    def test_matrix2(self):
+        truth = dcs.TruthPlotter(self.x, self.data)
+        np.testing.assert_array_almost_equal(self.y+0.01, truth.data)
+        np.testing.assert_array_almost_equal(self.y, truth.data_lo)
+        np.testing.assert_array_almost_equal(self.y+0.03, truth.data_hi)
+
+    def test_plotting0(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        ax = self.fig.add_subplot(111)
+        ax.plot(self.x, self.y, label='data')
+        truth = dcs.TruthPlotter()
+        truth.plot_truth(ax)
+
+    def test_plotting1(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        ax = self.fig.add_subplot(111)
+        ax.plot(self.x, self.y, label='data')
+        truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03)
+        truth.plot_truth(ax)
+
+    def test_plotting2(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        ax = self.fig.add_subplot(111)
+        ax.plot(self.x, self.y, label='data')
+        truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03, type_='errorbar')
+        truth.plot_truth(ax)
+
+    def test_bad_type(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        ax = self.fig.add_subplot(111)
+        ax.plot(self.x, self.y, label='data')
+        truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03, type_='bad type')
+        with self.assertRaises(ValueError):
+            truth.plot_truth(ax)
+
+    def tearDown(self):
+        if self.fig is not None:
+            plt.close(self.fig)
 
 # MyCustomToolbar
 class Test_MyCustomToolbar(unittest.TestCase):
@@ -272,6 +342,7 @@ class Test_plot_time_history(unittest.TestCase):
         plotting with second Y axis (x2)
         plotting single scalars
         plotting empty lists
+        no RMS in legend
     """
     def setUp(self):
         self.time = np.arange(0, 10, 0.1)
@@ -307,13 +378,16 @@ class Test_plot_time_history(unittest.TestCase):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, opts=self.opts)
 
     def test_diffs(self):
-        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.description, self.type_, plot_as_diffs=True)
+        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.description, self.type_, \
+            plot_as_diffs=True)
 
     def test_diffs_and_opts(self):
-        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.description, self.type_, opts=self.opts, plot_as_diffs=True)
+        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.description, self.type_, \
+            opts=self.opts, plot_as_diffs=True)
 
     def test_group(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, opts=self.opts, plot_indiv=False)
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+            opts=self.opts, plot_indiv=False)
 
     def test_colormap(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, colormap='Dark2')
@@ -342,6 +416,13 @@ class Test_plot_time_history(unittest.TestCase):
 
     def test_plot_all_nans(self):
         self.fig = dcs.plot_time_history(np.array([np.nan, np.nan]), np.array([np.nan, np.nan]))
+
+    def test_no_rms_in_legend1(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, rms_in_legend=False)
+
+    def test_no_rms_in_legend2(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+            rms_in_legend=False, plot_as_diffs=True)
 
     def tearDown(self):
         if hasattr(self,'fig'):

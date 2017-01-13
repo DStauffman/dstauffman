@@ -108,9 +108,9 @@ def _load_method(cls, filename='', use_hdf5=True):
     return out
 
 #%% Methods - _save_pickle
-def _save_pickle(results, filename):
+def _save_pickle(self, filename):
     r"""
-    Saves a list of class instances to a pickle file.
+    Saves a class instances to a pickle file.
 
     Parameters
     ----------
@@ -120,13 +120,13 @@ def _save_pickle(results, filename):
         Name of the file to load
     """
     with open(filename, 'wb') as file:
-        for this_result in results:
-            pickle.dump(this_result, file)
+        pickle.dump(self, file)
 
 #%% Methods - _load_pickle
-def _load_pickle(filename):
+@classmethod
+def _load_pickle(cls, filename):
     r"""
-    Loads a list of class instances from a pickle file.
+    Loads a class instance from a pickle file.
 
     Parameters
     ----------
@@ -138,14 +138,9 @@ def _load_pickle(filename):
     results : list
         List of the objects found within the file
     """
-    results = []
     with open(filename, 'rb') as file:
-        while True:
-            try:
-                results.append(pickle.load(file))
-            except EOFError:
-                break
-    return results
+        out = pickle.load(file)
+    return out
 
 #%% Classes - Frozen
 class Frozen(object):

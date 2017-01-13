@@ -448,6 +448,8 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
         order mapping to the original inputs, with NaNs for dominated strategies
     icer_data : (N) pandas dataframe
         ICER data as a pandas dataframe
+    fig       : (object) figure handle or None
+        Figure handle for any figure that was produced
 
     Notes
     -----
@@ -460,7 +462,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     >>> from dstauffman import icer
     >>> cost = [250e3, 750e3, 2.25e6, 3.75e6]
     >>> qaly = [20., 30, 40, 80]
-    >>> (inc_cost, inc_qaly, icer_out, order, icer_data) = icer(cost, qaly)
+    >>> (inc_cost, inc_qaly, icer_out, order, icer_data, fig) = icer(cost, qaly)
     >>> print(inc_cost) # doctest: +NORMALIZE_WHITESPACE
     [ 250000. 500000. 3000000.]
 
@@ -477,6 +479,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     # force inputs to be ndarrays
     cost = np.atleast_1d(np.asarray(cost))
     qaly = np.atleast_1d(np.asarray(qaly))
+    fig  = None
 
     # check inputs
     assert np.all(cost > 0), 'Costs must be positive.'
@@ -540,7 +543,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     # recalculate based on given baseline
     if baseline is not None:
         inc_cost = np.diff(np.hstack((cost[baseline], cost[ix])))
-        inc_qaly = np.diff(np.hstack((qaly[baseline], qaly(ix))))
+        inc_qaly = np.diff(np.hstack((qaly[baseline], qaly[ix])))
         icer_out = inc_cost / inc_qaly
 
     # output as dataframe
@@ -607,7 +610,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
         # add standard plotting features
         setup_plots(fig, opts, 'dist_no_yscale')
 
-    return (inc_cost, inc_qaly, icer_out, order, icer_data)
+    return (inc_cost, inc_qaly, icer_out, order, icer_data, fig)
 
 #%% Unit test
 if __name__ == '__main__':

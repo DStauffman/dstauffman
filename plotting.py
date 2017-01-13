@@ -157,7 +157,7 @@ class TruthPlotter(Frozen):
             if data.ndim == 1:
                 self.data = data
             elif data.shape[1] == 1:
-                self.data = data
+                self.data = data[:, 0]
             elif data.shape[1] == 3:
                 self.data    = data[:, 1]
                 self.data_lo = data[:, 0]
@@ -459,11 +459,11 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     truth : TruthPlotter, optional
         Truth instance for adding to the plot
     plot_as_diffs : bool, optional, default is False
-        Plot each entry in results against the other ones
+        Plot each entry in results against the other ones, default is False
     second_y_scale : float, optional
         Multiplication scale factor to use to display on a secondary Y axis
     rms_in_legend : bool, optional
-        Whether to show the RMS value numerically in the plotting legend
+        Whether to show the RMS value numerically in the plotting legend, default is True
 
     Returns
     -------
