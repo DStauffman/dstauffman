@@ -27,11 +27,19 @@ dstauffman.constants module
     :members:
     :undoc-members:
     :show-inheritance:
-    
+
 dstauffman.enums module
 ---------------------------
 
 .. automodule:: dstauffman.enums
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+dstauffman.latex module
+------------------------
+
+.. automodule:: dstauffman.latex
     :members:
     :undoc-members:
     :show-inheritance:
@@ -67,7 +75,7 @@ dstauffman.stats module
     :members:
     :undoc-members:
     :show-inheritance:
-    
+
 dstauffman.units module
 -----------------------
 
@@ -75,7 +83,7 @@ dstauffman.units module
     :members:
     :undoc-members:
     :show-inheritance:
-    
+
 dstauffman.utils module
 -----------------------
 
