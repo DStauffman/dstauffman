@@ -535,7 +535,7 @@ def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
         convergence = True
         if log_level >= 5:
             print('Declare convergence because abs(pred_func_change) of {} <= options.tol_delta_cost of {}'.format(\
-                pred_func_change, opti_opts.tol_delta_cost))
+                abs(pred_func_change), opti_opts.tol_delta_cost))
     return convergence
 
 #%% _double_dogleg
@@ -864,13 +864,24 @@ def validate_opti_opts(opti_opts):
     Examples
     --------
 
-    >>> from dstauffman import OptiOpts, OptiParam, validate_opti_opts
+    >>> from dstauffman import Logger, OptiOpts, validate_opti_opts
+    >>> logger = Logger(10)
     >>> opti_opts = OptiOpts()
-    >>> opti_opts.params = [OptiParam("param[:].tb.tb_new_inf['beta']")]
-    >>> #is_valid = validate_opti_opts(opti_opts) # TODO: fix this
+    >>> opti_opts.model_func     = str
+    >>> opti_opts.model_args     = {'a': 1}
+    >>> opti_opts.cost_func      = str
+    >>> opti_opts.cost_args      = {'b': 2}
+    >>> opti_opts.get_param_func = str
+    >>> opti_opts.set_param_func = repr
+    >>> opti_opts.output_folder  = ''
+    >>> opti_opts.output_results = ''
+    >>> opti_opts.params         = [1, 2]
+
+    >>> is_valid = validate_opti_opts(opti_opts)
+    ******************************
     Validating optimization options.
 
-    >>> #print(is_valid) # TODO: fix this
+    >>> print(is_valid)
     True
 
     """
@@ -1090,7 +1101,7 @@ def run_bpe(opti_opts):
     return (bpe_results, results)
 
 #%% plot_bpe_results
-def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
+def plot_bpe_results(bpe_results, opts=None, *, plots=None):
     r"""
     Plots the results of estimation.
     """
@@ -1101,7 +1112,10 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
     log_level = Logger.get_level()
 
     # alias the names
-    names = [name.decode('utf-8') for name in bpe_results.param_names]
+    if bpe_results.param_names is not None:
+        names = [name.decode('utf-8') for name in bpe_results.param_names]
+    else:
+        names = []
 
     # defaults for which plots to make
     default_plots = {'innovs': False, 'convergence': False, 'correlation': False, 'info_svd': False, \
@@ -1133,44 +1147,42 @@ def plot_bpe_results(bpe_results, opti_opts, opts=None, plots=None):
             fig = plot_multiline_history(time, data, label='Innovs Before and After', opts=opts, colormap='bwr_r', \
                 legend=['Before', 'After'])
             figs.append(fig)
-            # plot as distribution
-
         elif log_level >= 2:
             print("Data isn't available for Innovations plot.")
     if plots['convergence']:
-        if len(bpe_results.costs) == 0:
-            print("Data isn't available for convergence plot.")
-        else:
+        if len(bpe_results.costs) != 0:
             fig = plot_bpe_convergence(bpe_results.costs, opts=opts)
             figs.append(fig)
+        elif log_level >= 2:
+            print("Data isn't available for convergence plot.")
 
     if plots['correlation']:
-        if bpe_results.correlation is None:
-            print("Data isn't avaliable for correlation plot.")
-        else:
+        if bpe_results.correlation is not None:
             fig = plot_correlation_matrix(bpe_results.correlation, labels=names, opts=opts, \
                 matrix_name='Correlation Matrix', cmin=-1, colormap='bwr', plot_lower_only=True, \
                 label_values=label_values)
             figs.append(fig)
+        elif log_level >= 2:
+            print("Data isn't available for correlation plot.")
 
     if plots['info_svd']:
-        if bpe_results.info_svd is None:
-            print("Data isn't avaliable for infomation SVD plot.")
-        else:
+        if bpe_results.info_svd is not None:
             fig = plot_correlation_matrix(np.abs(bpe_results.info_svd), opts=opts, cmin=0, \
                 matrix_name='Information SVD Matrix', colormap='cool', label_values=label_values, \
                 labels=[['{}'.format(i+1) for i in range(len(names))], names])
             figs.append(fig)
+        elif log_level >= 2:
+            print("Data isn't available for information SVD plot.")
 
     if plots['covariance']:
-        if bpe_results.covariance is None:
-            print("Data isn't avaliable for covariance plot.")
-        else:
+        if bpe_results.covariance is not None:
             max_mag = np.nanmax(np.abs(bpe_results.covariance))
             fig = plot_correlation_matrix(bpe_results.covariance, labels=names, opts=opts, \
                 matrix_name='Covariance Matrix', cmin=-max_mag, cmax=max_mag, colormap='bwr', \
                 plot_lower_only=True, label_values=label_values)
             figs.append(fig)
+        elif log_level >= 2:
+            print("Data isn't available for covariance plot.")
     return figs
 
 #%% Unit test

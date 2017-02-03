@@ -14,6 +14,9 @@ import os
 import unittest
 import dstauffman as dcs
 
+#%% Hard-coded values
+plotter = dcs.Plotter(False)
+
 #%% Setup for testing
 # Classes - SimParams
 class SimParams(dcs.Frozen):
@@ -59,7 +62,7 @@ def truth(time, magnitude=5, frequency=10, phase=90):
     return magnitude * np.sin(2*np.pi*frequency*time/1000 + phase*np.pi/180)
 
 # Functions - cost_wrapper
-def cost_wrapper(results_data, *, results_time, truth_time, truth_data):
+def cost_wrapper(results_data, *, results_time, truth_time, truth_data, sim_params):
     r"""Example Cost wrapper for the model."""
     # Pull out overlapping time points and indices
     (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
@@ -167,7 +170,7 @@ class Test_OptiParam(unittest.TestCase):
         Initialization
         Equality
         Inequality
-        Get array
+        Get array (x5)
         Get names
     """
     def test_init(self):
@@ -195,6 +198,30 @@ class Test_OptiParam(unittest.TestCase):
         best = dcs.OptiParam.get_array(params)
         np.testing.assert_array_equal(best, np.array([np.nan, np.nan]))
 
+    def test_get_array2(self):
+        opti_param = dcs.OptiParam('test')
+        params = [opti_param, opti_param]
+        values = dcs.OptiParam.get_array(params, type_='min')
+        np.testing.assert_array_equal(values, np.array([-np.inf, -np.inf]))
+
+    def test_get_array3(self):
+        opti_param = dcs.OptiParam('test')
+        params = [opti_param, opti_param]
+        values = dcs.OptiParam.get_array(params, type_='max')
+        np.testing.assert_array_equal(values, np.array([np.inf, np.inf]))
+
+    def test_get_array4(self):
+        opti_param = dcs.OptiParam('test')
+        params = [opti_param, opti_param]
+        with self.assertRaises(ValueError):
+            dcs.OptiParam.get_array(params, type_='typical')
+
+    def test_get_array5(self):
+        opti_param = dcs.OptiParam('test')
+        params = [opti_param, opti_param]
+        with self.assertRaises(ValueError):
+            dcs.OptiParam.get_array(params, type_='bad_name')
+
     def test_get_names(self):
         opti_param1 = dcs.OptiParam('test1')
         opti_param2 = dcs.OptiParam('test2')
@@ -208,6 +235,8 @@ class Test_BpeResults(unittest.TestCase):
     Tests the BpeResults class with the following cases:
         Save (HDF5)
         Load (HDF5)
+        str method
+        pprint method
     """
     def setUp(self):
         self.bpe_results = dcs.BpeResults()
@@ -234,17 +263,76 @@ class Test_BpeResults(unittest.TestCase):
         bpe_results = dcs.BpeResults.load(self.filename, use_hdf5=False)
         self.assertTrue(dcs.compare_two_classes(bpe_results, self.bpe_results, suppress_output=True))
 
+    def test_str(self):
+        with dcs.capture_output() as out:
+            print(self.bpe_results)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertEqual(lines[0], 'BpeResults:')
+        self.assertTrue(lines[1].startswith('  begin_params: '))
+
+    def test_pprint(self):
+        self.bpe_results.param_names  = ['a'.encode('utf-8')]
+        self.bpe_results.begin_params = [1]
+        self.bpe_results.final_params = [2]
+        with dcs.capture_output() as out:
+            self.bpe_results.pprint()
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertEqual(lines[0], 'Initial parameters:')
+        self.assertEqual(lines[1].strip(), 'a = 1')
+        self.assertEqual(lines[2], 'Final parameters:')
+        self.assertEqual(lines[3].strip(), 'a = 2')
+
     def tearDown(self):
         if os.path.isfile(self.filename):
             os.remove(self.filename)
         if os.path.isfile(self.filename2):
             os.remove(self.filename2)
 
+#%% CurrentResults
+class Test_CurrentResults(unittest.TestCase):
+    r"""
+    Tests the CurrentResults class with the following cases:
+        Printing
+    """
+    def setUp(self):
+        self.current_results = dcs.CurrentResults()
+
+    def test_printing(self):
+        with dcs.capture_output() as out:
+            print(self.current_results)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertEqual(lines[0], 'Current Results:')
+        self.assertEqual(lines[1], '  Trust Radius: None')
+        self.assertEqual(lines[2], '  Best Cost: None')
+        self.assertEqual(lines[3], '  Best Params: None')
+
+#%% _pprint_args
+class Test__pprint_args(unittest.TestCase):
+    r"""
+    Tests the _pprint_args function with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.names  = ['Name 1', 'Longer name 2', 'Name 42']
+        self.values = [0.10000000002, 1999999999, 1e-14]
+        self.lines  = ['        Name 1        = 0.1', '        Longer name 2 = 2e+09', '        Name 42       = 1e-14', '']
+
+    def test_nominal(self):
+        with dcs.capture_output() as out:
+            dcs.bpe._pprint_args(self.names, self.values)
+        lines = out.getvalue().split('\n')
+        for i in range(len(self.lines)):
+            self.assertEqual(lines[i], self.lines[i])
+
 #%% _print_divider
 class Test__print_divider(unittest.TestCase):
     r"""
     Tests the _print_divider function with the following cases:
-        TBD
+        With new line
+        Without new line
     """
     def setUp(self):
         self.output = '******************************'
@@ -261,24 +349,6 @@ class Test__print_divider(unittest.TestCase):
             dcs.bpe._print_divider(new_line=False)
         lines = out.getvalue().split('\n')
         self.assertEqual(lines[0], self.output)
-
-#%% _pprint_args
-class Test__pprint_args(unittest.TestCase):
-    r"""
-    Tests the _pprint_args function with the following cases:
-        TBD
-    """
-    def setUp(self):
-        self.names  = ['Name 1', 'Longer name 2', 'Name 42']
-        self.values = [0.10000000002, 1999999999, 1e-14]
-        self.lines  = ['        Name 1        = 0.1', '        Longer name 2 = 2e+09', '        Name 42       = 1e-14', '']
-
-    def test_nominal(self):
-        with dcs.capture_output() as out:
-            dcs.bpe._pprint_args(self.names, self.values)
-        lines = out.getvalue().split('\n')
-        for i in range(len(self.lines)):
-            self.assertEqual(lines[i], self.lines[i])
 
 #%% _function_wrapper
 class Test__function_wrapper(unittest.TestCase):
@@ -336,10 +406,81 @@ class Test__levenberg_marquardt(unittest.TestCase):
         np.testing.assert_array_almost_equal(delta_param, b)
 
 #%% _predict_func_change
-pass
+class Test__predict_func_change(unittest.TestCase):
+    r"""
+    Tests the _predict_func_change function with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.delta_param = np.array([1, 2])
+        self.gradient    = np.array([[3], [4]])
+        self.hessian     = np.array([[5, 2], [2, 5]])
+        self.pred_change = 27.5
+
+    def test_nominal(self):
+        delta_func = dcs.bpe._predict_func_change(self.delta_param, self.gradient, self.hessian)
+        self.assertEqual(delta_func, self.pred_change)
 
 #%% _check_for_convergence
-pass
+class Test__check_for_convergence(unittest.TestCase):
+    r"""
+    Tests the _check_for_convergence function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.logger           = dcs.Logger(10)
+        self.opti_opts        = type('Class1', (object, ), {'tol_cosmax_grad': 1, 'tol_delta_step': 2, \
+            'tol_delta_cost': 3})
+        self.cosmax           = 10
+        self.delta_step_len   = 10
+        self.pred_func_change = 10
+
+    def test_not_converged(self):
+        convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, self.pred_func_change)
+        self.assertFalse(convergence)
+
+    def test_convergence1(self):
+        with dcs.capture_output() as out:
+            convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, self.delta_step_len, self.pred_func_change)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(convergence)
+        self.assertEqual(output, 'Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
+
+    def test_convergence2(self):
+        with dcs.capture_output() as out:
+            convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, 1.5, self.pred_func_change)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(convergence)
+        self.assertEqual(output, 'Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
+
+    def test_convergence3(self):
+        with dcs.capture_output() as out:
+            convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, -2.5)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(convergence)
+        self.assertEqual(output, 'Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
+
+    def test_convergence4(self):
+        with dcs.capture_output() as out:
+            convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertTrue(convergence)
+        self.assertEqual(lines[0], 'Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
+        self.assertEqual(lines[1], 'Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
+        self.assertEqual(lines[2], 'Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
+
+    def test_no_logging(self):
+        self.logger.set_level(0)
+        with dcs.capture_output() as out:
+            convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(convergence)
+        self.assertEqual(output, '')
 
 #%% _double_dogleg
 pass
@@ -351,26 +492,38 @@ pass
 pass
 
 #%% validate_opti_opts
-@unittest.skip('Code is still being actively developed.')
 class Test_validate_opti_opts(unittest.TestCase):
     r"""
     Tests the validate_opti_opts function with the following cases:
         TBD
     """
     def setUp(self):
-        self.opti_opts        = dcs.OptiOpts()
-        self.opti_opts.params = [dcs.OptiParam("param[:].tb.tb_new_inf['beta']", 0.1375, 0.1, 0.2, typical=0.14)]
+        self.logger = dcs.Logger(0)
+        self.opti_opts = dcs.OptiOpts()
+        self.opti_opts.model_func     = str
+        self.opti_opts.model_args     = {'a': 1}
+        self.opti_opts.cost_func      = str
+        self.opti_opts.cost_args      = {'b': 2}
+        self.opti_opts.get_param_func = str
+        self.opti_opts.set_param_func = repr
+        self.opti_opts.output_folder  = ''
+        self.opti_opts.output_results = ''
+        self.opti_opts.params         = [1, 2]
+
+    def support(self):
+        with self.assertRaises(AssertionError):
+            dcs.validate_opti_opts(self.opti_opts)
 
     def test_nominal(self):
+        self.logger.set_level(10)
         with dcs.capture_output() as out:
             is_valid = dcs.validate_opti_opts(self.opti_opts)
         output = out.getvalue().strip()
         out.close()
         self.assertTrue(is_valid)
-        self.assertEqual(output,'Validating optimization options.')
+        self.assertEqual(output,'******************************\nValidating optimization options.')
 
     def test_no_logging(self):
-        # TODO: set log level self.opti_opts.log_level = 0
         with dcs.capture_output() as out:
             is_valid = dcs.validate_opti_opts(self.opti_opts)
         output = out.getvalue().strip()
@@ -378,19 +531,200 @@ class Test_validate_opti_opts(unittest.TestCase):
         self.assertTrue(is_valid)
         self.assertEqual(output,'')
 
-    def test_not_valid(self):
-        with dcs.capture_output() as out:
-            with self.assertRaises(AssertionError):
-                dcs.validate_opti_opts(dcs.OptiOpts())
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output,'Validating optimization options.')
+    def test_not_valid1(self):
+        self.opti_opts.model_func = None
+        self.support()
+
+    def test_not_valid2(self):
+        self.opti_opts.model_args = None
+        self.support()
+
+    def test_not_valid3(self):
+        self.opti_opts.cost_func = None
+        self.support()
+
+    def test_not_valid4(self):
+        self.opti_opts.cost_args = None
+        self.support()
+
+    def test_not_valid5(self):
+        self.opti_opts.get_param_func = None
+        self.support()
+
+    def test_not_valid6(self):
+        self.opti_opts.set_param_func = None
+        self.support()
+
+    def test_not_valid7(self):
+        self.opti_opts.params = []
+        self.support()
+
+    def test_not_valid8(self):
+        self.opti_opts.params = None
+        self.support()
+
+    def test_not_valid9(self):
+        self.opti_opts.slope_method = 'bad_sided'
+        self.support()
+
+    def test_not_valid10(self):
+        self.opti_opts.search_method = 'wild_ass_guess'
+        self.support()
 
 #%% run_bpe
-pass
+class Test_run_bpe(unittest.TestCase):
+    r"""
+    Tests the run_bpe function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.logger = dcs.Logger(10)
+        time        = np.arange(251)
+        sim_params  = SimParams(time, magnitude=3.5, frequency=12, phase=180)
+        truth_time  = np.arange(-10, 201)
+        truth_data  = 5 * np.sin(2*np.pi*10*time/1000 + 90*np.pi/180)
+
+        self.opti_opts = dcs.OptiOpts()
+        self.opti_opts.model_func     = sim_model
+        self.opti_opts.model_args     = {'sim_params': sim_params}
+        self.opti_opts.cost_func      = cost_wrapper
+        self.opti_opts.cost_args      = {'results_time': time, 'truth_time': truth_time, 'truth_data': truth_data}
+        self.opti_opts.get_param_func = get_parameter
+        self.opti_opts.set_param_func = set_parameter
+        self.opti_opts.output_folder  = ''
+        self.opti_opts.output_results = ''
+        self.opti_opts.params         = []
+
+        # Parameters to estimate
+        self.opti_opts.params.append(dcs.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+        self.opti_opts.params.append(dcs.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+        self.opti_opts.params.append(dcs.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+
+    def test_nominal(self):
+        with dcs.capture_output() as out:
+            (bpe_results, results) = dcs.run_bpe(self.opti_opts)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(output.startswith('******************************\nValidating optimization options.'))
+        self.assertTrue(isinstance(bpe_results, dcs.BpeResults))
+        self.assertTrue(isinstance(results, np.ndarray))
+
+    def test_no_logging(self):
+        self.logger.set_level(0)
+        with dcs.capture_output() as out:
+            dcs.run_bpe(self.opti_opts)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '')
+
+    def test_max_likelihood(self):
+        self.logger.set_level(0)
+        self.opti_opts.is_max_like = True
+        dcs.run_bpe(self.opti_opts)
+
+    def test_normalized(self):
+        pass # TODO: method not yet coded all the way
+
+    def test_two_sided(self):
+        with dcs.capture_output() as out:
+            self.opti_opts.slope_method = 'two_sided'
+            dcs.run_bpe(self.opti_opts)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        for (ix, line) in enumerate(lines):
+            if line == 'Running iteration 1.':
+                self.assertTrue(lines[ix+1].startswith('  Running model with magnitude'))
+                self.assertTrue(lines[ix+2].startswith('  Running model with magnitude'))
+                break
+        else:
+            self.assertTrue(False, 'two sided had issues')
+        # rerun at log_level 0
+        self.logger.set_level(0)
+        dcs.run_bpe(self.opti_opts)
+
+    def test_to_convergence(self):
+        self.opti_opts.max_iters = 100
+        with dcs.capture_output() as out:
+            dcs.run_bpe(self.opti_opts)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        for line in lines:
+            if line.startswith('Declare convergence'):
+                break
+        else:
+            self.assertTrue(False, "Didn't converge")
+
+    def test_saving(self):
+        self.logger.set_level(0)
+        self.opti_opts.max_iters = 0
+        self.opti_opts.output_folder = dcs.get_tests_dir()
+        self.opti_opts.output_results = 'temp_results.hdf5'
+        dcs.run_bpe(self.opti_opts)
+        # TODO: test with more iterations and files?
+
+    def tearDown(self):
+        filename = os.path.join(self.opti_opts.output_folder, self.opti_opts.output_results)
+        if os.path.isfile(filename):
+            os.remove(filename)
 
 #%% plot_bpe_results
-pass
+class Test_plot_bpe_results(unittest.TestCase):
+    r"""
+    Tests the plot_bpe_results function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.figs = []
+        self.logger = dcs.Logger(10)
+        self.bpe_results = dcs.BpeResults()
+        self.opts = dcs.Opts()
+        self.plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, \
+        'covariance': True}
+
+    def test_nominal(self):
+        # add data
+        names = ['a', 'b', 'c', 'd']
+        matrix = np.random.rand(4, 4)
+        self.bpe_results.param_names  = [x.encode('utf-8') for x in names]
+        self.bpe_results.begin_innovs = np.array([1, 2, 3, 4], dtype=float)
+        self.bpe_results.final_innovs = np.array([0.5, 0.25, 0.1, 0.05])
+        self.bpe_results.costs        = np.array([1, 0.1, 0.05, 0.01])
+        self.bpe_results.correlation  = matrix.copy()
+        self.bpe_results.info_svd     = matrix.copy()
+        self.bpe_results.covariance   = matrix.copy()
+        self.figs = dcs.plot_bpe_results(self.bpe_results, plots=self.plots)
+
+    def test_nodata(self):
+        with dcs.capture_output() as out:
+            self.figs = dcs.plot_bpe_results(self.bpe_results, plots=self.plots)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertEqual(lines[0], "Data isn't available for Innovations plot.")
+        self.assertEqual(lines[1], "Data isn't available for convergence plot.")
+        self.assertEqual(lines[2], "Data isn't available for correlation plot.")
+        self.assertEqual(lines[3], "Data isn't available for information SVD plot.")
+        self.assertEqual(lines[4], "Data isn't available for covariance plot.")
+
+    def test_no_logging(self):
+        self.logger.set_level(0)
+        with dcs.capture_output() as out:
+            self.figs = dcs.plot_bpe_results(self.bpe_results, plots=self.plots)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '')
+
+    def test_no_plots(self):
+        dcs.plot_bpe_results(self.bpe_results, self.opts)
+
+    def test_bad_plot(self):
+        with self.assertRaises(ValueError):
+            dcs.plot_bpe_results(self.bpe_results, plots={'bad_key': False})
+
+    def test_only_one_key(self):
+        dcs.plot_bpe_results(self.bpe_results, plots={'innovs': False})
+
+    def tearDown(self):
+        dcs.close_all(self.figs)
 
 #%% Unit test execution
 if __name__ == '__main__':

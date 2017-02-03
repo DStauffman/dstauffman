@@ -164,4 +164,4 @@ if __name__=='__main__':
         # make BPE plots
         bpe_plots = {'innovs': True, 'convergence': False, 'correlation': True, 'info_svd': True, \
             'covariance': False}
-        dcs.plot_bpe_results(bpe_results, opti_opts, opts, plots=bpe_plots)
+        dcs.plot_bpe_results(bpe_results, opts, plots=bpe_plots)

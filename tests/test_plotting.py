@@ -145,6 +145,22 @@ class Test_TruthPlotter(unittest.TestCase):
         truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03, type_='errorbar')
         truth.plot_truth(ax)
 
+    def test_plotting3(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        ax = self.fig.add_subplot(111)
+        ax.plot(self.x, self.y, label='data')
+        truth = dcs.TruthPlotter(self.x, None, lo=self.y, hi=self.y+0.03)
+        truth.plot_truth(ax)
+
+    def test_plotting4(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        ax = self.fig.add_subplot(111)
+        ax.plot(self.x, self.y, label='data')
+        truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=None, hi=self.y+0.03, type_='errorbar')
+        truth.plot_truth(ax)
+
     def test_bad_type(self):
         self.fig = plt.figure()
         self.fig.canvas.set_window_title('Figure Title')
@@ -520,6 +536,10 @@ class Test_plot_correlation_matrix(unittest.TestCase):
     def test_x_label_rotation(self):
         self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, x_lab_rot=0))
 
+    def test_nans(self):
+        self.data[0, 0] = np.nan
+        self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels))
+
     def test_bad_labels(self):
         with self.assertRaises(ValueError):
             self.figs.append(dcs.plot_correlation_matrix(self.data, ['a']))
@@ -594,15 +614,14 @@ class Test_plot_multiline_history(unittest.TestCase):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, ignore_empties=True))
 
     def test_ignore_zeros2(self):
-        data = self.data.copy()
-        data[:,1] = 0
-        data[:,3] = 0
+        self.data[:,1] = 0
+        self.data[:,3] = 0
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, ignore_empties=True))
 
     def test_ignore_zeros3(self):
-        data = np.zeros(self.data.shape)
+        self.data = np.zeros(self.data.shape)
         with dcs.capture_output() as out:
-            not_a_fig = dcs.plot_multiline_history(self.time, data, label='All Zeros', ignore_empties=True)
+            not_a_fig = dcs.plot_multiline_history(self.time, self.data, label='All Zeros', ignore_empties=True)
         output = out.getvalue().strip()
         out.close()
         self.assertIs(not_a_fig, None)
@@ -669,6 +688,11 @@ class Test_plot_bar_breakdown(unittest.TestCase):
 
     def test_colormap(self):
         self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, colormap=self.colormap))
+
+    def test_ignore_zeros(self):
+        self.data[:, 1] = 0
+        self.data[:, 3] = np.nan
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, ignore_empties=True))
 
     def test_null_data(self):
         with dcs.capture_output() as out:

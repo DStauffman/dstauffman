@@ -14,6 +14,7 @@ import numpy as np
 import unittest
 import dstauffman as dcs
 
+#%% Support
 class _Example_Enum(dcs.IntEnumPlus):
     field_one = 1
     field_two = 2
