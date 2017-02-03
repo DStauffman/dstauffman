@@ -91,6 +91,17 @@ class Test_Opts(unittest.TestCase):
         name = opts.get_names(2)
         self.assertEqual(name, '')
 
+    def test_pprint(self):
+        opts = dcs.Opts()
+        with dcs.capture_output() as out:
+            opts.pprint(indent=2)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertEqual(lines[0], 'Opts')
+        self.assertEqual(lines[1], '  case_name = ')
+        self.assertEqual(lines[3], '  save_plot = False')
+        self.assertEqual(lines[-1], '  names     = []')
+
 # TruthPlotter
 class Test_TruthPlotter(unittest.TestCase):
     r"""

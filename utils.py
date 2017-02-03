@@ -1257,6 +1257,51 @@ def full_print():
     # reset the options back to what they were originally
     np.set_printoptions(**opt)
 
+#%% pprint_dict
+def pprint_dict(dct, *, name='', indent=1, align=True):
+    r"""
+    Prints all the fields and their values.
+
+    Parameters
+    ----------
+    dct : dict
+        Dictionary to print
+    name : str, optional, default is empty string
+        Name title to print first
+    indent : int, optional, default is 1
+        Number of characters to indent before all the fields
+    align : bool, optional, default is True
+        Whether to align all the equal signs
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in February 2017.
+
+    Examples
+    --------
+
+    >>> from dstauffman import pprint_dict
+    >>> dct = {'a': 1, 'bb': 2, 'ccc': 3}
+    >>> name = 'Example'
+    >>> pprint_dict(dct, name=name)
+    Example
+     a   = 1
+     bb  = 2
+     ccc = 3
+
+    """
+    # print the name of the class/dictionary
+    if name:
+        print(name)
+    # build indentation padding
+    this_indent = ' ' * indent
+    # find the length of the longest field name
+    pad_len = max(len(x) for x in dct.keys())
+    # loop through fields
+    for (this_key, this_value) in dct.items():
+        this_pad = ' ' * (pad_len - len(this_key)) if align else ''
+        print('{}{}{} = {}'.format(this_indent, this_key, this_pad, this_value))
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_utils', exit=False)

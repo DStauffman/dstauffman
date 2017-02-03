@@ -33,7 +33,7 @@ except ImportError: # pragma: no cover
 # model imports
 from dstauffman.classes   import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
-from dstauffman.utils     import get_images_dir, rms
+from dstauffman.utils     import get_images_dir, pprint_dict, rms
 
 #%% Private Classes - _HoverButton
 class _HoverButton(QPushButton):
@@ -113,6 +113,10 @@ class Opts(Frozen):
         else:
             name = ''
         return name
+
+    def pprint(self, indent=1, align=True):
+        r"""Displays a pretty print version of the class."""
+        pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
 #%% Classes - TruthPlotter
 class TruthPlotter(Frozen):

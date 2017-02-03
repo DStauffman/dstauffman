@@ -1218,6 +1218,54 @@ class Test_full_print(unittest.TestCase):
         out.close()
         self.assertEqual(output, '[ 1.35  1.58]')
 
+#%% pprint_dict
+class Test_pprint_dict(unittest.TestCase):
+    r"""
+    Tests the pprint_dict function with the following cases:
+        Nominal
+        No name
+        Different indentation
+        No alignment
+    """
+    def setUp(self):
+        self.name   = 'Example'
+        self.dct    = {'a': 1, 'bb': 2, 'ccc': 3}
+
+    def test_nominal(self):
+        with dcs.capture_output() as out:
+            dcs.pprint_dict(self.dct, name=self.name)
+        lines = out.getvalue().strip().split('\n')
+        self.assertEqual(lines[0], 'Example')
+        self.assertEqual(lines[1], ' a   = 1')
+        self.assertEqual(lines[2], ' bb  = 2')
+        self.assertEqual(lines[3], ' ccc = 3')
+
+    def test_no_name(self):
+        with dcs.capture_output() as out:
+            dcs.pprint_dict(self.dct)
+        lines = out.getvalue().strip().split('\n')
+        self.assertEqual(lines[0], 'a   = 1')
+        self.assertEqual(lines[1], ' bb  = 2')
+        self.assertEqual(lines[2], ' ccc = 3')
+
+    def test_indent(self):
+        with dcs.capture_output() as out:
+            dcs.pprint_dict(self.dct, name=self.name, indent=4)
+        lines = out.getvalue().strip().split('\n')
+        self.assertEqual(lines[0], 'Example')
+        self.assertEqual(lines[1], '    a   = 1')
+        self.assertEqual(lines[2], '    bb  = 2')
+        self.assertEqual(lines[3], '    ccc = 3')
+
+    def test_no_align(self):
+        with dcs.capture_output() as out:
+            dcs.pprint_dict(self.dct, name=self.name, align=False)
+        lines = out.getvalue().strip().split('\n')
+        self.assertEqual(lines[0], 'Example')
+        self.assertEqual(lines[1], ' a = 1')
+        self.assertEqual(lines[2], ' bb = 2')
+        self.assertEqual(lines[3], ' ccc = 3')
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)
