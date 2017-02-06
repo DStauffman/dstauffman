@@ -167,6 +167,10 @@ class TruthPlotter(Frozen):
                 self.data_lo = data[:, 0]
                 self.data_hi = data[:, 2]
 
+    def pprint(self, indent=1, align=True):
+        r"""Displays a pretty print version of the class."""
+        pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
+
     def plot_truth(self, ax, scale=1):
         r"""Adds the information in the TruthPlotter instance to the given axis, with the optional scale."""
         # check for null case

@@ -181,6 +181,16 @@ class Test_TruthPlotter(unittest.TestCase):
         with self.assertRaises(ValueError):
             truth.plot_truth(ax)
 
+    def test_pprint(self):
+        truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03)
+        with dcs.capture_output() as out:
+            truth.pprint()
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertEqual(lines[0], 'TruthPlotter')
+        self.assertTrue(lines[1].startswith(' time    = ['))
+        self.assertEqual(lines[-1], ' name    = Truth')
+
     def tearDown(self):
         if self.fig is not None:
             plt.close(self.fig)
