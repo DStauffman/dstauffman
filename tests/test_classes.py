@@ -140,7 +140,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         if os.path.isfile(self.save_path2):
             os.remove(self.save_path2)
 
-# Integer
+# Counter
 class Test_Counter(unittest.TestCase):
     r"""
     Tests Counter class with the following cases:
