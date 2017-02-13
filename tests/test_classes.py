@@ -9,6 +9,8 @@ Notes
 """
 
 #%% Imports
+import copy
+import collections
 import numpy as np
 import os
 import unittest
@@ -284,6 +286,73 @@ class Test_Counter(unittest.TestCase):
         self.assertEqual(output, '1')
         output = repr(c1)
         self.assertEqual(output, 'Counter(1)')
+
+# FixedDict
+class Test_FixedDict(unittest.TestCase):
+    r"""
+    Tests FixedDict class with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.keys = {'key1', 'key2'}
+        self.fixed = dcs.FixedDict({'key1': 1, 'key2': 2})
+
+    def test_nominal(self):
+        self.assertEqual(set(self.keys), set(self.fixed.keys()))
+
+    def test_key_creation_and_freeze(self):
+        self.fixed['new_key'] = 5
+        self.assertTrue('new_key' in self.fixed)
+        self.fixed.freeze()
+        with self.assertRaises(KeyError):
+            self.fixed['bad_key'] = 6
+
+    def test_change_value(self):
+        self.fixed.freeze()
+        self.assertEqual(self.fixed['key1'], 1)
+        self.fixed['key1'] = 5
+        self.assertEqual(self.fixed['key1'], 5)
+
+    def test_iteration(self):
+        c = 0
+        for (k, v) in self.fixed.items():
+            c += 1
+            self.assertIn(k, self.keys)
+            if k == 'key1':
+                self.assertEqual(v, 1)
+            elif k == 'key2':
+                self.assertEqual(v, 2)
+        self.assertEqual(c, 2)
+
+    def test_isinstance(self):
+        self.assertTrue(isinstance(self.fixed, collections.Mapping))
+        self.assertTrue(isinstance(self.fixed, dict))
+
+    def test_bad_delete(self):
+        with self.assertRaises(NotImplementedError):
+            del self.fixed['key1']
+
+    def test_bad_pop(self):
+        with self.assertRaises(NotImplementedError):
+            self.fixed.pop('key1')
+
+    def test_copy(self):
+        self.fixed['mutable'] = [1, 2, 3]
+        new = copy.copy(self.fixed)
+        self.assertEqual(set(self.keys) | {'mutable'}, set(new.keys()))
+        self.assertIs(new['mutable'], self.fixed['mutable'])
+        new['mutable'][1] = 5
+        self.assertEqual(new['mutable'][1], 5)
+        self.assertEqual(self.fixed['mutable'][1], 5)
+
+    def test_deepcopy(self):
+        self.fixed['mutable'] = [1, 2, 3]
+        new = copy.deepcopy(self.fixed)
+        self.assertEqual(set(self.keys) | {'mutable'}, set(new.keys()))
+        self.assertFalse(new['mutable'] is self.fixed['mutable'])
+        new['mutable'][1] = 5
+        self.assertEqual(new['mutable'][1], 5)
+        self.assertEqual(self.fixed['mutable'][1], 2)
 
 #%% Unit test execution
 if __name__ == '__main__':

@@ -10,6 +10,7 @@ Notes
 """
 
 #%% Imports
+import copy
 import doctest
 import numpy as np
 import pickle
@@ -301,6 +302,80 @@ class Counter(Frozen):
         return str(self._val)
     def __repr__(self):
         return 'Counter({})'.format(self._val)
+
+#%% FixedDict
+class FixedDict(dict):
+    r"""
+    A dictionary with immutable keys, but mutable values.
+
+    Notes
+    -----
+    #.  Taken from http://stackoverflow.com/questions/14816341/define-a-python-dictionary-
+        with-immutable-keys-but-mutable-values by bereal.
+    #.  Modified by David C. Stauffer in January 2017 to include alternative initializations
+        and freeze methods.
+
+    Examples
+    --------
+
+    >>> from dstauffman import FixedDict
+    >>> fixed = FixedDict({'key1': 1, 'key2': None})
+    >>> assert 'key1' in fixed
+
+    >>> fixed.freeze()
+    >>> fixed['new_key'] = 5 # doctest: +IGNORE_EXCEPTION_DETAIL
+    Traceback (most recent call last):
+    KeyError: 'new_key'
+
+    """
+    def __init__(self, *args, **kwargs):
+        super(FixedDict, self).__init__(*args, **kwargs)
+        self._frozen = False
+
+    def __getitem__(self, k):
+        return super(FixedDict, self).__getitem__(k)
+
+    def __setitem__(self, k, v):
+        if self._frozen:
+            if k not in self:
+                raise KeyError(k)
+        return super(FixedDict, self).__setitem__(k, v)
+
+    def __delitem__(self, k):
+        raise NotImplementedError
+
+    def __contains__(self, k):
+        return super(FixedDict, self).__contains__(k)
+
+    def __copy__(self):
+        new = type(self)(self.items())
+        new._frozen = self._frozen
+        return new
+
+    def __deepcopy__(self, memo):
+        new = type(self)((k, copy.deepcopy(v, memo)) for (k,v) in self.items())
+        new._frozen = self._frozen
+        return new
+
+    def get(self, k, default=None):
+        return super(FixedDict, self).get(k, default)
+
+    def setdefault(self, k, default=None):
+        return super(FixedDict, self).setdefault(k, default)
+
+    def pop(self, k):
+        raise NotImplementedError
+
+    def update(self, mapping=(), **kwargs):
+        super(FixedDict, self).update(mapping, **kwargs)
+
+    @classmethod
+    def fromkeys(cls, keys):
+        return super(FixedDict, cls).fromkeys(k for k in keys)
+
+    def freeze(self):
+        r"""Freeze the internal dictionary, such that no more keys may be added."""
+        self._frozen = True
 
 #%% Unit test
 if __name__ == '__main__':

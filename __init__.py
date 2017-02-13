@@ -13,7 +13,7 @@ Notes
 #%% Imports
 from .bpe        import Logger, OptiOpts, OptiParam, BpeResults, CurrentResults, \
                             validate_opti_opts, run_bpe, plot_bpe_results
-from .classes    import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter
+from .classes    import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
 from .constants  import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE
 from .enums      import IntEnumPlus, consecutive, dist_enum_and_mons
 from .latex      import make_preamble, make_conclusion, bins_to_str_ranges
