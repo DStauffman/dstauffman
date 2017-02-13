@@ -12,6 +12,7 @@ Notes
 # pylint: disable=E1101, C0301, C0103
 
 #%% Imports
+from collections import Mapping
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 import doctest
@@ -304,10 +305,14 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
             if _is_class_instance(attr1):
                 if _is_class_instance(attr2):
                     if compare_recursively:
+                        names = [name1 + '.' + this_attr, name2 + '.' + this_attr]
                         # Note: don't want the 'and' to short-circuit, so do the 'and is_same' last
-                        is_same = compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
-                            names= [name1 + '.' + this_attr, name2 + '.' + this_attr], \
-                            ignore_callables=ignore_callables, compare_recursively=compare_recursively) and is_same
+                        if isinstance(attr1, dict) and isinstance(attr2, dict):
+                            is_same = compare_two_dicts(attr1, attr2, suppress_output=suppress_output, names=names)
+                        else:
+                            is_same = compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
+                                names=names, ignore_callables=ignore_callables, \
+                                compare_recursively=compare_recursively) and is_same
                         continue
                     else:
                         continue # pragma: no cover (actually covered, optimization issue)
@@ -324,7 +329,7 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
                     is_same = _not_true_print()
                     continue
             # if any differences, then this test fails
-            if isinstance(attr1, dict) and isinstance(attr2, dict):
+            if isinstance(attr1, Mapping) and isinstance(attr2, Mapping):
                 is_same = compare_two_dicts(attr1, attr2, suppress_output=True) and is_same
             elif np.logical_not(_nan_equal(attr1, attr2)):
                 is_same = _not_true_print()
