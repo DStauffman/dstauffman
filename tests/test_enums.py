@@ -25,6 +25,11 @@ class _Example_non_unique(dcs.IntEnumPlus):
     two         = 2
     another_one = 1
 
+class _Example_Consecutive(dcs.IntEnumPlus):
+    zero  = 0
+    one   = 1
+    two   = 2
+
 #%% IntEnumPlus
 class Test_IntEnumPlus(unittest.TestCase):
     r"""
@@ -101,11 +106,15 @@ class Test_consecutive(unittest.TestCase):
         Not unique
     """
     def setUp(self):
-        self.enum1 = dcs.IntEnumPlus('Enum1', 'one two three')
+        self.enum = dcs.IntEnumPlus('Enum1', 'one two three')
 
     def test_consecutive(self):
-        enum1 = dcs.consecutive(self.enum1)
-        self.assertTrue(isinstance(enum1, dcs.enums._EnumMetaPlus))
+        enum = dcs.consecutive(_Example_Consecutive)
+        self.assertTrue(isinstance(enum, dcs.enums._EnumMetaPlus))
+
+    def test_consecutive_but_not_zero(self):
+        with self.assertRaises(ValueError):
+            dcs.consecutive(self.enum)
 
     def test_unique_but_non_consecutive(self):
         with self.assertRaises(ValueError):

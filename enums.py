@@ -83,6 +83,8 @@ def consecutive(enumeration):
     duplicates = []
     non_consecutive = []
     last_value = min(enumeration.__members__.values()) - 1
+    if last_value != -1:
+        raise ValueError('Bad starting value (should be zero): {}'.format(last_value+1))
     for name, member in enumeration.__members__.items():
         if name != member.name:
             duplicates.append((name, member.name))
