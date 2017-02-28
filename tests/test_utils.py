@@ -955,7 +955,13 @@ class Test_rename_module(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         lines = output.split('\n')
-        self.assertTrue(lines[0].startswith('Created directory: "'))
+        # check for dir creation, files copied, files skipped, files edited
+        # expect at least one of each
+        for this_line in lines:
+            if this_line.startswith('Created directory: "'):
+                break
+        else:
+            self.assertTrue(False, 'No directory was created')
         for this_line in lines:
             if this_line.startswith('Copying : '):
                 break
@@ -1184,6 +1190,9 @@ class Test_full_print(unittest.TestCase):
         self.x_full  = ['[[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]','[0. 0. 0. 0. 0.]',
             '[1.23 1.23 1.23 1.23 1.23]', '[0. 0. 0. 0. 0.]','[0. 0. 0. 0. 0.]',
             '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]]']
+        # explicitly set default threshold to 10 (since consoles sometimes use 1000 instead)
+        self.orig = np.get_printoptions()
+        np.set_printoptions(threshold=10)
 
     def test_nominal(self):
         with dcs.capture_output() as out:
@@ -1217,6 +1226,10 @@ class Test_full_print(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, '[ 1.35  1.58]')
+
+    def tearDown(self):
+        # restore the print_options
+        np.set_printoptions(**self.orig)
 
 #%% pprint_dict
 class Test_pprint_dict(unittest.TestCase):
