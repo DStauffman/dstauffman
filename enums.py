@@ -14,7 +14,7 @@ from enum import Enum, EnumMeta, _is_dunder
 import numpy as np
 import unittest
 
-#%% Private Classes - _EnumMetaPlus
+#%% Classes - _EnumMetaPlus
 class _EnumMetaPlus(EnumMeta):
     r"""
     Overrides the repr/str methods of the EnumMeta class to display all possible values.
@@ -67,7 +67,7 @@ class _EnumMetaPlus(EnumMeta):
         """
         return max(self.__members__.values())
 
-#%% Public Classes - IntEnumPlus
+#%% Classes - IntEnumPlus
 class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
     r"""
     Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str.
@@ -75,7 +75,7 @@ class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
     def __str__(self):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
-#%% Public Decorators - contiguous
+#%% Decorators - contiguous
 def consecutive(enumeration):
     r"""
     Class decorator for enumerations ensuring unique and consecutive member values.
@@ -101,7 +101,7 @@ def consecutive(enumeration):
         raise ValueError('non-consecutive values found in {}: {}'.format(enumeration.__name__, alias_details))
     return enumeration
 
-#%% Functions
+#%% Functions - dist_enum_and_mons
 def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
     r"""
     Creates a distribution for an enumerated state with a duration (such as a disease status).

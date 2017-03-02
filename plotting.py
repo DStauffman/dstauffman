@@ -35,7 +35,7 @@ from dstauffman.classes   import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
 from dstauffman.utils     import get_images_dir, pprint_dict, rms
 
-#%% Private Classes - _HoverButton
+#%% Classes - _HoverButton
 class _HoverButton(QPushButton):
     r"""Custom button that allows hovering and icons."""
     def __init__(self, *args, **kwargs):
