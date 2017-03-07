@@ -30,6 +30,16 @@ class _Example_Consecutive(dcs.IntEnumPlus):
     one   = 1
     two   = 2
 
+class _Example_Consecutive2(dcs.IntEnumPlus):
+    zero  = 0
+    one   = 1
+    skip  = 9
+
+class _Example_Consecutive3(dcs.IntEnumPlus):
+    zero = 0
+    one  = 1
+    dup  = 0
+
 #%% IntEnumPlus
 class Test_IntEnumPlus(unittest.TestCase):
     r"""
@@ -113,16 +123,19 @@ class Test_consecutive(unittest.TestCase):
         self.assertTrue(isinstance(enum, dcs.enums._EnumMetaPlus))
 
     def test_consecutive_but_not_zero(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as context:
             dcs.consecutive(self.enum)
+        self.assertEqual(str(context.exception), 'Bad starting value (should be zero): 1')
 
     def test_unique_but_non_consecutive(self):
-        with self.assertRaises(ValueError):
-            dcs.consecutive(_Example_Enum)
+        with self.assertRaises(ValueError) as context:
+            dcs.consecutive(_Example_Consecutive2)
+        self.assertEqual(str(context.exception), 'Non-consecutive values found in _Example_Consecutive2: skip:9')
 
     def test_not_unique(self):
-        with self.assertRaises(ValueError):
-            dcs.consecutive(_Example_non_unique)
+        with self.assertRaises(ValueError) as context:
+            dcs.consecutive(_Example_Consecutive3)
+        self.assertEqual(str(context.exception), 'Duplicate values found in _Example_Consecutive3: dup -> zero')
 
 #%% dist_enum_and_mons
 class Test_dist_enum_and_mons(unittest.TestCase):

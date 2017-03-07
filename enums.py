@@ -75,7 +75,7 @@ class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
     def __str__(self):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
-#%% Decorators - contiguous
+#%% Decorators - consecutive
 def consecutive(enumeration):
     r"""
     Class decorator for enumerations ensuring unique and consecutive member values.
@@ -93,12 +93,11 @@ def consecutive(enumeration):
         last_value = member
     if duplicates:
         alias_details = ', '.join(
-                ["%s -> %s" % (alias, name) for (alias, name) in duplicates])
-        raise ValueError('duplicate values found in %r: %s' %
-                (enumeration, alias_details))
+                ['{} -> {}'.format(alias, name) for (alias, name) in duplicates])
+        raise ValueError('Duplicate values found in {}: {}'.format(enumeration.__name__, alias_details))
     if non_consecutive:
         alias_details = ', '.join('{}:{}'.format(name, member) for (name, member) in non_consecutive)
-        raise ValueError('non-consecutive values found in {}: {}'.format(enumeration.__name__, alias_details))
+        raise ValueError('Non-consecutive values found in {}: {}'.format(enumeration.__name__, alias_details))
     return enumeration
 
 #%% Functions - dist_enum_and_mons
