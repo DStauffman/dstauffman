@@ -25,6 +25,9 @@ except ImportError: # pragma: no cover
 #%% Set error state for module
 np.seterr(invalid='ignore', divide='ignore')
 
+#%% Set NumPy printing options
+np.set_printoptions(threshold=1000) # TODO: make user configurable in constants or something?
+
 #%% Functions - _frozen
 def _frozen(set):
     r"""
