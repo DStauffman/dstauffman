@@ -756,7 +756,7 @@ class Test_unit(unittest.TestCase):
 
     def test_nominal(self):
         norm_data = dcs.unit(self.data, axis=0)
-        np.testing.assert_almost_equal(norm_data, self.norm_data)
+        np.testing.assert_array_almost_equal(norm_data, self.norm_data)
 
 #%% combine_sets
 class Test_combine_sets(unittest.TestCase):
@@ -1138,7 +1138,7 @@ class Test_np_digitize(unittest.TestCase):
 
     def test_nominal(self):
         out = dcs.np_digitize(self.x, self.bins)
-        np.testing.assert_equal(out, self.out)
+        np.testing.assert_array_equal(out, self.out)
 
     def test_bad_min(self):
         with self.assertRaises(ValueError):
@@ -1154,7 +1154,7 @@ class Test_np_digitize(unittest.TestCase):
 
     def test_right(self):
         out = dcs.np_digitize(self.x, self.bins, right=True)
-        np.testing.assert_equal(out, self.out)
+        np.testing.assert_array_equal(out, self.out)
 
     def test_bad_right(self):
         with self.assertRaises(ValueError):

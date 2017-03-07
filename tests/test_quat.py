@@ -104,30 +104,30 @@ class Test_qrot(unittest.TestCase):
         for i in range(len(self.axis)):
             quat = dcs.qrot(self.axis[i], self.angle)
             self.assertEqual(quat.ndim, 1)
-            np.testing.assert_almost_equal(quat, self.quat[i, :])
+            np.testing.assert_array_almost_equal(quat, self.quat[i, :])
 
     def test_single_axis(self):
         for i in range(len(self.axis)):
             quat = dcs.qrot(self.axis[i], np.array([self.angle, self.angle2]))
             self.assertEqual(quat.ndim, 2)
-            np.testing.assert_almost_equal(quat, np.column_stack((self.quat[i, :], self.quat2[i, :])))
+            np.testing.assert_array_almost_equal(quat, np.column_stack((self.quat[i, :], self.quat2[i, :])))
 
     def test_single_angle(self):
         quat = dcs.qrot(self.axis, self.angle)
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_almost_equal(quat, self.quat.T)
+        np.testing.assert_array_almost_equal(quat, self.quat.T)
 
     def test_all_vector_inputs(self):
         quat = dcs.qrot(self.axis, np.array([self.angle, self.angle, self.angle2]))
-        np.testing.assert_almost_equal(quat, np.column_stack((self.quat[0,:], self.quat[1,:], self.quat2[2,:])))
+        np.testing.assert_array_almost_equal(quat, np.column_stack((self.quat[0,:], self.quat[1,:], self.quat2[2,:])))
 
     def test_null1(self):
         quat = dcs.qrot(self.axis[0], self.null)
-        np.testing.assert_almost_equal(quat, self.null_quat)
+        np.testing.assert_array_almost_equal(quat, self.null_quat)
 
     def test_null2(self):
         quat = dcs.qrot(self.null, self.angle)
-        np.testing.assert_almost_equal(quat, self.null_quat)
+        np.testing.assert_array_almost_equal(quat, self.null_quat)
 
     def test_vector_mismatch(self):
         with self.assertRaises(AssertionError):
@@ -155,50 +155,50 @@ class test_quat_angle_diff(unittest.TestCase):
 
     def test_nominal1(self):
         (theta, comp) = dcs.quat_angle_diff(self.quat1, self.dqq1)
-        np.testing.assert_almost_equal(theta, self.theta[0])
-        np.testing.assert_almost_equal(comp, self.comp[:, 0])
+        np.testing.assert_array_almost_equal(theta, self.theta[0])
+        np.testing.assert_array_almost_equal(comp, self.comp[:, 0])
 
     def test_nominal2(self):
         (theta, comp) = dcs.quat_angle_diff(self.quat1, self.dqq2)
-        np.testing.assert_almost_equal(theta, self.theta[1])
-        np.testing.assert_almost_equal(comp, self.comp[:, 1])
+        np.testing.assert_array_almost_equal(theta, self.theta[1])
+        np.testing.assert_array_almost_equal(comp, self.comp[:, 1])
 
     def test_array1(self):
         (theta, comp) = dcs.quat_angle_diff(np.column_stack((self.dqq1, self.dqq2)), self.quat1)
-        np.testing.assert_almost_equal(theta, self.theta)
-        np.testing.assert_almost_equal(comp, -self.comp)
+        np.testing.assert_array_almost_equal(theta, self.theta)
+        np.testing.assert_array_almost_equal(comp, -self.comp)
 
     def test_array2(self):
         (theta, comp) = dcs.quat_angle_diff(self.quat1, np.column_stack((self.dqq1, self.dqq2)))
-        np.testing.assert_almost_equal(theta, self.theta)
-        np.testing.assert_almost_equal(comp, self.comp)
+        np.testing.assert_array_almost_equal(theta, self.theta)
+        np.testing.assert_array_almost_equal(comp, self.comp)
 
     def test_array3(self):
         (theta, comp) = dcs.quat_angle_diff(np.column_stack((self.quat1, self.quat1, self.dqq1, self.dqq2)), \
             np.column_stack((self.dqq1, self.dqq2, self.quat1, self.quat1)))
-        np.testing.assert_almost_equal(theta, self.theta[[0, 1, 0, 1]])
-        np.testing.assert_almost_equal(comp, self.comp[:,[0, 1, 0, 1]] * np.array([1, 1, -1, -1]))
+        np.testing.assert_array_almost_equal(theta, self.theta[[0, 1, 0, 1]])
+        np.testing.assert_array_almost_equal(comp, self.comp[:,[0, 1, 0, 1]] * np.array([1, 1, -1, -1]))
 
     def test_zero_diff1(self):
         (theta, comp) = dcs.quat_angle_diff(self.quat1, self.quat1)
-        np.testing.assert_almost_equal(theta, 0)
-        np.testing.assert_almost_equal(comp, 0)
+        np.testing.assert_array_almost_equal(theta, 0)
+        np.testing.assert_array_almost_equal(comp, 0)
 
     def test_zero_diff2(self):
         (theta, comp) = dcs.quat_angle_diff(self.quat1, np.column_stack((self.quat1, self.quat1)))
-        np.testing.assert_almost_equal(theta, 0)
-        np.testing.assert_almost_equal(comp, 0)
+        np.testing.assert_array_almost_equal(theta, 0)
+        np.testing.assert_array_almost_equal(comp, 0)
 
     def test_zero_diff3(self):
         (theta, comp) = dcs.quat_angle_diff(np.column_stack((self.quat1, self.quat1)), self.quat1)
-        np.testing.assert_almost_equal(theta, 0)
-        np.testing.assert_almost_equal(comp, 0)
+        np.testing.assert_array_almost_equal(theta, 0)
+        np.testing.assert_array_almost_equal(comp, 0)
 
     def test_zero_diff4(self):
         temp = np.column_stack((self.quat1, self.dq1, self.dq2, self.dqq1, self.dqq2))
         (theta, comp) = dcs.quat_angle_diff(temp, temp)
-        np.testing.assert_almost_equal(theta, 0)
-        np.testing.assert_almost_equal(comp, 0)
+        np.testing.assert_array_almost_equal(theta, 0)
+        np.testing.assert_array_almost_equal(comp, 0)
 
     def test_null1(self):
         (theta, comp) = dcs.quat_angle_diff(self.quat1, self.null)
@@ -249,58 +249,58 @@ class test_quat_from_euler(unittest.TestCase):
 
     def test_nominal1(self):
         quat = dcs.quat_from_euler(self.a, self.seq)
-        np.testing.assert_almost_equal(quat, self.quat[:,0])
+        np.testing.assert_array_almost_equal(quat, self.quat[:,0])
         self.assertEqual(quat.ndim, 1)
 
     def test_nominal2(self):
         quat = dcs.quat_from_euler(self.b, self.seq)
-        np.testing.assert_almost_equal(quat, self.quat[:,1])
+        np.testing.assert_array_almost_equal(quat, self.quat[:,1])
         self.assertEqual(quat.ndim, 1)
 
     def test_default_seq(self):
         quat = dcs.quat_from_euler(self.a)
         temp = dcs.quat_mult(dcs.quat_mult(dcs.qrot(3, self.a[0]), dcs.qrot(1, self.a[1])), dcs.qrot(2, self.a[2]))
-        np.testing.assert_almost_equal(quat, temp)
+        np.testing.assert_array_almost_equal(quat, temp)
         self.assertEqual(quat.ndim, 1)
 
     def test_repeated(self):
         quat1 = dcs.quat_from_euler(np.hstack((self.a, self.a)), seq=np.array([1, 1, 1, 1, 1, 1]))
         quat2 = dcs.qrot(1, 2*np.sum(self.a))
-        np.testing.assert_almost_equal(quat1, quat2)
+        np.testing.assert_array_almost_equal(quat1, quat2)
         self.assertEqual(quat1.ndim, 1)
 
     def test_short(self):
         quat1 = dcs.quat_from_euler(self.a[0:2], self.seq[0:2])
         quat2 = dcs.quat_mult(dcs.qrot(self.seq[0], self.a[0]), dcs.qrot(self.seq[1], self.a[1]))
-        np.testing.assert_almost_equal(quat1, quat2)
+        np.testing.assert_array_almost_equal(quat1, quat2)
         self.assertEqual(quat1.ndim, 1)
 
     def test_single1(self):
         quat1 = dcs.quat_from_euler(self.a[0], self.seq[0])
         quat2 = dcs.qrot(self.seq[0], self.a[0])
-        np.testing.assert_almost_equal(quat1, quat2)
+        np.testing.assert_array_almost_equal(quat1, quat2)
         self.assertEqual(quat1.ndim, 1)
 
     def test_single2(self):
         quat1 = dcs.quat_from_euler(0.01, 3)
         quat2 = dcs.qrot(3, 0.01)
-        np.testing.assert_almost_equal(quat1, quat2)
+        np.testing.assert_array_almost_equal(quat1, quat2)
         self.assertEqual(quat1.ndim, 1)
 
     def test_long(self):
         quat1 = dcs.quat_from_euler(np.hstack((self.a, self.b)), seq=np.hstack((self.seq, self.seq)))
         quat2 = dcs.quat_mult(self.quat[:,0], self.quat[:,1])
-        np.testing.assert_almost_equal(quat1, quat2)
+        np.testing.assert_array_almost_equal(quat1, quat2)
         self.assertEqual(quat1.ndim, 1)
 
     def test_array1(self):
         quat = dcs.quat_from_euler(self.angles, self.seq)
-        np.testing.assert_almost_equal(quat, self.quat)
+        np.testing.assert_array_almost_equal(quat, self.quat)
         self.assertEqual(quat.ndim, 2)
 
     def test_array2(self):
         quat = dcs.quat_from_euler(np.expand_dims(self.a, axis=1), self.seq)
-        np.testing.assert_almost_equal(quat, np.expand_dims(self.quat[:,0], axis=1))
+        np.testing.assert_array_almost_equal(quat, np.expand_dims(self.quat[:,0], axis=1))
         self.assertEqual(quat.ndim, 2)
 
     def test_array3(self):
@@ -322,7 +322,7 @@ class test_quat_interp(unittest.TestCase):
 
     def test_nominal(self):
         qout = dcs.quat_interp(self.time, self.quat, self.ti)
-        np.testing.assert_almost_equal(qout, self.qout)
+        np.testing.assert_array_almost_equal(qout, self.qout)
 
     def test_empty(self):
         qout = dcs.quat_interp(self.time, self.quat, np.array([]))
@@ -330,11 +330,11 @@ class test_quat_interp(unittest.TestCase):
 
     def test_scalar1(self):
         qout = dcs.quat_interp(self.time, self.quat, self.ti[0])
-        np.testing.assert_almost_equal(qout, np.expand_dims(self.qout[:,0],1))
+        np.testing.assert_array_almost_equal(qout, np.expand_dims(self.qout[:,0],1))
 
     def test_scalar2(self):
         qout = dcs.quat_interp(self.time, self.quat, self.ti[1])
-        np.testing.assert_almost_equal(qout, np.expand_dims(self.qout[:,1],1))
+        np.testing.assert_array_almost_equal(qout, np.expand_dims(self.qout[:,1],1))
 
     def test_extra1(self):
         with self.assertRaises(ValueError):
@@ -345,8 +345,8 @@ class test_quat_interp(unittest.TestCase):
             qout = dcs.quat_interp(self.time, self.quat, self.ti_extra, inclusive=False)
         output = out.getvalue().strip()
         out.close()
-        np.testing.assert_almost_equal(qout[:, 1:-1], self.qout)
-        np.testing.assert_equal(qout[:,[0, -1]], np.nan)
+        np.testing.assert_array_almost_equal(qout[:, 1:-1], self.qout)
+        np.testing.assert_array_equal(qout[:,[0, -1]], np.nan)
         self.assertEqual(output, 'Desired time not found within input time vector.')
 
 #%% quat_inv
@@ -369,31 +369,31 @@ class test_quat_inv(unittest.TestCase):
 
     def test_single_quat1(self):
         q1_inv = dcs.quat_inv(self.q1_inp)
-        np.testing.assert_almost_equal(q1_inv, self.q1_out)
+        np.testing.assert_array_almost_equal(q1_inv, self.q1_out)
         self.assertEqual(q1_inv.ndim, 1)
-        np.testing.assert_equal(q1_inv.shape, self.q1_out.shape)
+        np.testing.assert_array_equal(q1_inv.shape, self.q1_out.shape)
 
     def test_single_quat2(self):
         q2_inv = dcs.quat_inv(self.q2_inp)
-        np.testing.assert_almost_equal(q2_inv, self.q2_out)
+        np.testing.assert_array_almost_equal(q2_inv, self.q2_out)
         self.assertEqual(q2_inv.ndim, 1)
-        np.testing.assert_equal(q2_inv.shape, self.q2_out.shape)
+        np.testing.assert_array_equal(q2_inv.shape, self.q2_out.shape)
 
     def test_quat_array(self):
         q3_inv = dcs.quat_inv(self.q3_inp)
-        np.testing.assert_almost_equal(q3_inv, self.q3_out)
+        np.testing.assert_array_almost_equal(q3_inv, self.q3_out)
         self.assertEqual(q3_inv.ndim, 2)
-        np.testing.assert_equal(q3_inv.shape, self.q3_out.shape)
+        np.testing.assert_array_equal(q3_inv.shape, self.q3_out.shape)
 
     def test_null_input1(self):
         null_inv = dcs.quat_inv(self.null_quat)
-        np.testing.assert_equal(null_inv, self.null_quat)
-        np.testing.assert_equal(null_inv.shape, self.null_quat.shape)
+        np.testing.assert_array_equal(null_inv, self.null_quat)
+        np.testing.assert_array_equal(null_inv.shape, self.null_quat.shape)
 
     def test_null_input2(self):
         null_inv = dcs.quat_inv(self.null)
-        np.testing.assert_equal(null_inv, self.null)
-        np.testing.assert_equal(null_inv.shape, self.null.shape)
+        np.testing.assert_array_equal(null_inv, self.null)
+        np.testing.assert_array_equal(null_inv.shape, self.null.shape)
 
 #%% quat_mult
 class test_quat_mult(unittest.TestCase):
@@ -420,89 +420,89 @@ class test_quat_mult(unittest.TestCase):
     def test_nominal1(self):
         quat = dcs.quat_mult(self.q1, self.q2)
         self.assertEqual(quat.ndim, 1)
-        np.testing.assert_almost_equal(quat, self.q4)
-        np.testing.assert_equal(quat.shape, self.q4.shape)
+        np.testing.assert_array_almost_equal(quat, self.q4)
+        np.testing.assert_array_equal(quat.shape, self.q4.shape)
 
     def test_nominal2(self):
         quat = dcs.quat_mult(self.q2, self.q3)
         self.assertEqual(quat.ndim, 1)
-        np.testing.assert_almost_equal(quat, self.q5)
-        np.testing.assert_equal(quat.shape, self.q5.shape)
+        np.testing.assert_array_almost_equal(quat, self.q5)
+        np.testing.assert_array_equal(quat.shape, self.q5.shape)
 
     def test_nominal3(self):
         quat = dcs.quat_mult(self.q6, self.q6)
         self.assertEqual(quat.ndim, 1)
-        np.testing.assert_almost_equal(quat, dcs.quat_inv(self.q6))
-        np.testing.assert_equal(quat.shape, self.q6.shape)
+        np.testing.assert_array_almost_equal(quat, dcs.quat_inv(self.q6))
+        np.testing.assert_array_equal(quat.shape, self.q6.shape)
 
     def test_reverse(self):
         quat1 = dcs.quat_mult(self.q2, self.q1)
         quat2 = dcs.quat_inv(dcs.quat_mult(dcs.quat_inv(self.q1), dcs.quat_inv(self.q2)))
-        np.testing.assert_almost_equal(quat1, quat2)
+        np.testing.assert_array_almost_equal(quat1, quat2)
 
     def test_array_scalar1(self):
         quat = dcs.quat_mult(self.q_array_in1, self.q2)
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_almost_equal(quat[:,0], self.q4)
-        np.testing.assert_equal(quat.shape, self.q_array_out.shape)
+        np.testing.assert_array_almost_equal(quat[:,0], self.q4)
+        np.testing.assert_array_equal(quat.shape, self.q_array_out.shape)
 
     def test_array_scalar2(self):
         quat = dcs.quat_mult(self.q1, self.q_array_in2)
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_almost_equal(quat[:,0], self.q4)
-        np.testing.assert_equal(quat.shape, self.q_array_out.shape)
+        np.testing.assert_array_almost_equal(quat[:,0], self.q4)
+        np.testing.assert_array_equal(quat.shape, self.q_array_out.shape)
 
     def test_array_scalar3(self):
         quat = dcs.quat_mult(self.q6, np.column_stack((self.q6, self.q6)))
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_almost_equal(quat, np.column_stack((dcs.quat_inv(self.q6), dcs.quat_inv(self.q6))))
-        np.testing.assert_equal(quat.shape, (4, 2))
+        np.testing.assert_array_almost_equal(quat, np.column_stack((dcs.quat_inv(self.q6), dcs.quat_inv(self.q6))))
+        np.testing.assert_array_equal(quat.shape, (4, 2))
 
     def test_array(self):
         quat = dcs.quat_mult(self.q_array_in1, self.q_array_in2)
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_almost_equal(quat, self.q_array_out)
-        np.testing.assert_equal(quat.shape, self.q_array_out.shape)
+        np.testing.assert_array_almost_equal(quat, self.q_array_out)
+        np.testing.assert_array_equal(quat.shape, self.q_array_out.shape)
 
     def test_null_input1(self):
         quat = dcs.quat_mult(self.null_quat, self.q2)
-        np.testing.assert_equal(quat, self.null_quat)
-        np.testing.assert_equal(quat.shape, self.null_quat.shape)
+        np.testing.assert_array_equal(quat, self.null_quat)
+        np.testing.assert_array_equal(quat.shape, self.null_quat.shape)
 
     def test_null_input2(self):
         quat = dcs.quat_mult(self.null, self.q2)
-        np.testing.assert_equal(quat, self.null)
-        np.testing.assert_equal(quat.shape, self.null.shape)
+        np.testing.assert_array_equal(quat, self.null)
+        np.testing.assert_array_equal(quat.shape, self.null.shape)
 
     def test_null_input3(self):
         quat = dcs.quat_mult(self.q1, self.null_quat)
-        np.testing.assert_equal(quat, self.null_quat)
-        np.testing.assert_equal(quat.shape, self.null_quat.shape)
+        np.testing.assert_array_equal(quat, self.null_quat)
+        np.testing.assert_array_equal(quat.shape, self.null_quat.shape)
 
     def test_null_input4(self):
         quat = dcs.quat_mult(self.q2, self.null)
-        np.testing.assert_equal(quat, self.null)
-        np.testing.assert_equal(quat.shape, self.null.shape)
+        np.testing.assert_array_equal(quat, self.null)
+        np.testing.assert_array_equal(quat.shape, self.null.shape)
 
     def test_null_input5(self):
         quat = dcs.quat_mult(self.null_quat, self.null_quat)
-        np.testing.assert_equal(quat, self.null_quat)
-        np.testing.assert_equal(quat.shape, self.null_quat.shape)
+        np.testing.assert_array_equal(quat, self.null_quat)
+        np.testing.assert_array_equal(quat.shape, self.null_quat.shape)
 
     def test_null_input6(self):
         quat = dcs.quat_mult(self.null, self.null)
-        np.testing.assert_equal(quat, self.null)
-        np.testing.assert_equal(quat.shape, self.null.shape)
+        np.testing.assert_array_equal(quat, self.null)
+        np.testing.assert_array_equal(quat.shape, self.null.shape)
 
     def test_null_input7(self):
         quat = dcs.quat_mult(self.null_quat, self.null)
-        np.testing.assert_equal(quat, self.null)
-        np.testing.assert_equal(quat.shape, self.null.shape)
+        np.testing.assert_array_equal(quat, self.null)
+        np.testing.assert_array_equal(quat.shape, self.null.shape)
 
     def test_null_input8(self):
         quat = dcs.quat_mult(self.null, self.null_quat)
-        np.testing.assert_equal(quat, self.null)
-        np.testing.assert_equal(quat.shape, self.null.shape)
+        np.testing.assert_array_equal(quat, self.null)
+        np.testing.assert_array_equal(quat.shape, self.null.shape)
 
 #%% quat_norm
 class test_quat_norm(unittest.TestCase):
@@ -526,37 +526,37 @@ class test_quat_norm(unittest.TestCase):
 
     def test_nominal1(self):
         quat_norm = dcs.quat_norm(self.q1_inp)
-        np.testing.assert_almost_equal(quat_norm, self.q1_out)
+        np.testing.assert_array_almost_equal(quat_norm, self.q1_out)
         self.assertEqual(quat_norm.ndim, 1)
-        np.testing.assert_equal(quat_norm.shape, self.q1_out.shape)
+        np.testing.assert_array_equal(quat_norm.shape, self.q1_out.shape)
 
     def test_nominal2(self):
         quat_norm = dcs.quat_norm(self.q2_inp)
-        np.testing.assert_almost_equal(quat_norm, self.q2_out)
+        np.testing.assert_array_almost_equal(quat_norm, self.q2_out)
         self.assertEqual(quat_norm.ndim, 1)
-        np.testing.assert_equal(quat_norm.shape, self.q2_out.shape)
+        np.testing.assert_array_equal(quat_norm.shape, self.q2_out.shape)
 
     def test_nominal3(self):
         quat_norm = dcs.quat_norm(self.q3_inp)
-        np.testing.assert_almost_equal(quat_norm, self.q3_out)
+        np.testing.assert_array_almost_equal(quat_norm, self.q3_out)
         self.assertEqual(quat_norm.ndim, 1)
-        np.testing.assert_equal(quat_norm.shape, self.q3_out.shape)
+        np.testing.assert_array_equal(quat_norm.shape, self.q3_out.shape)
 
     def test_array(self):
         quat_norm = dcs.quat_norm(self.q4_inp)
-        np.testing.assert_almost_equal(quat_norm, self.q4_out)
+        np.testing.assert_array_almost_equal(quat_norm, self.q4_out)
         self.assertEqual(quat_norm.ndim, 2)
-        np.testing.assert_equal(quat_norm.shape, self.q4_out.shape)
+        np.testing.assert_array_equal(quat_norm.shape, self.q4_out.shape)
 
     def test_null_input1(self):
         quat_norm = dcs.quat_norm(self.null_quat)
-        np.testing.assert_equal(quat_norm, self.null_quat)
-        np.testing.assert_equal(quat_norm.shape, self.null_quat.shape)
+        np.testing.assert_array_equal(quat_norm, self.null_quat)
+        np.testing.assert_array_equal(quat_norm.shape, self.null_quat.shape)
 
     def test_null_input2(self):
         quat_norm = dcs.quat_norm(self.null)
-        np.testing.assert_equal(quat_norm, self.null)
-        np.testing.assert_equal(quat_norm.shape, self.null.shape)
+        np.testing.assert_array_equal(quat_norm, self.null)
+        np.testing.assert_array_equal(quat_norm.shape, self.null.shape)
 
 #%% quat_prop
 class test_quat_prop(unittest.TestCase):
@@ -572,7 +572,7 @@ class test_quat_prop(unittest.TestCase):
 
     def test_nominal(self):
         quat = dcs.quat_prop(self.quat, self.delta_ang)
-        np.testing.assert_almost_equal(quat, self.quat_new)
+        np.testing.assert_array_almost_equal(quat, self.quat_new)
 
     def test_no_renorm(self):
         with self.assertRaises(AssertionError):
@@ -594,11 +594,11 @@ class test_quat_times_vector(unittest.TestCase):
     def test_nominal(self):
         for i in range(2):
             vec = dcs.quat_times_vector(self.quat[:, i], self.vec[:, i])
-            np.testing.assert_almost_equal(vec, self.out[:, i])
+            np.testing.assert_array_almost_equal(vec, self.out[:, i])
 
     def test_array(self):
         vec = dcs.quat_times_vector(self.quat, self.vec)
-        np.testing.assert_almost_equal(vec, self.out)
+        np.testing.assert_array_almost_equal(vec, self.out)
 
 #%% quat_to_dcm
 class test_quat_to_dcm(unittest.TestCase):
@@ -615,7 +615,7 @@ class test_quat_to_dcm(unittest.TestCase):
 
     def test_nominal(self):
         dcm = dcs.quat_to_dcm(self.quat)
-        np.testing.assert_almost_equal(dcm, self.dcm)
+        np.testing.assert_array_almost_equal(dcm, self.dcm)
 
 #%% quat_to_euler
 class test_quat_to_euler(unittest.TestCase):
@@ -644,17 +644,17 @@ class test_quat_to_euler(unittest.TestCase):
 
     def test_nominal(self):
         euler = dcs.quat_to_euler(self.quat, self.seq)
-        np.testing.assert_almost_equal(euler, self.euler)
+        np.testing.assert_array_almost_equal(euler, self.euler)
 
     def test_zero_quat(self):
         euler = dcs.quat_to_euler(self.zero_quat)
-        np.testing.assert_equal(euler, np.zeros(3))
+        np.testing.assert_array_equal(euler, np.zeros(3))
 
     def test_all_valid(self):
         # TODO: this doesn't confirm that all of these give the correct answer, but just don't crash
         for this_seq in self.valid_sequences:
             euler = dcs.quat_to_euler(self.zero_quat, np.array(this_seq))
-            np.testing.assert_equal(euler, np.zeros(3))
+            np.testing.assert_array_equal(euler, np.zeros(3))
 
     def test_all_invalid(self):
         for this_seq in self.bad_sequences:
