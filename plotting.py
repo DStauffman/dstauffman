@@ -927,7 +927,6 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
         description = label + ' ' + description
     scale    = 100
     units    = '%'
-    width    = time[1] - time[0]
     num_bins = data.shape[1]
     if legend is not None:
         assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
@@ -949,7 +948,9 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
     ax = fig.add_subplot(111)
     for i in range(num_bins):
         if not ignore_empties or (not np.all(data[:, i] == 0) and not np.all(np.isnan(data[:, i]))):
-            ax.bar(time-width/2, scale*data[:, i], width=width.astype(float), bottom=scale*bottoms[:, i], \
+            # Note: The performance of ax.bar is really slow with large numbers of bars (>20), so
+            # fill_between is a better alternative
+            ax.fill_between(time, scale*bottoms[:, i], scale*bottoms[:, i+1], step='mid', \
                 label=legend[i], color=cm.get_color(i), edgecolor='none')
     plt.ylabel(label + ' [' + units + ']')
     plt.ylim(0, 100)
