@@ -173,7 +173,7 @@ class SaveAndLoad(type):
             setattr(cls, 'save', _save_method)
         if not hasattr(cls, 'load'):
             setattr(cls, 'load', _load_method)
-        super(SaveAndLoad, cls).__init__(name, bases, dct)
+        super().__init__(name, bases, dct)
 
 #%% MetaClasses - SaveAndLoadPickle
 class SaveAndLoadPickle(type):
@@ -188,7 +188,7 @@ class SaveAndLoadPickle(type):
             setattr(cls, 'save', _save_pickle)
         if not hasattr(cls, 'load'):
             setattr(cls, 'load', _load_pickle)
-        super(SaveAndLoadPickle, cls).__init__(name, bases, dct)
+        super().__init__(name, bases, dct)
 
 #%% Classes - Counter
 class Counter(Frozen):
@@ -332,23 +332,23 @@ class FixedDict(dict):
 
     """
     def __init__(self, *args, **kwargs):
-        super(FixedDict, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self._frozen = False
 
     def __getitem__(self, k):
-        return super(FixedDict, self).__getitem__(k)
+        return super().__getitem__(k)
 
     def __setitem__(self, k, v):
         if self._frozen:
             if k not in self:
                 raise KeyError(k)
-        return super(FixedDict, self).__setitem__(k, v)
+        return super().__setitem__(k, v)
 
     def __delitem__(self, k):
         raise NotImplementedError
 
     def __contains__(self, k):
-        return super(FixedDict, self).__contains__(k)
+        return super().__contains__(k)
 
     def __copy__(self):
         new = type(self)(self.items())
@@ -361,20 +361,23 @@ class FixedDict(dict):
         return new
 
     def get(self, k, default=None):
-        return super(FixedDict, self).get(k, default)
+        return super().get(k, default)
 
     def setdefault(self, k, default=None):
-        return super(FixedDict, self).setdefault(k, default)
+        if self._frozen:
+            if k not in self:
+                raise KeyError(k)
+        return super().setdefault(k, default)
 
     def pop(self, k):
         raise NotImplementedError
 
     def update(self, mapping=(), **kwargs):
-        super(FixedDict, self).update(mapping, **kwargs)
+        super().update(mapping, **kwargs)
 
     @classmethod
     def fromkeys(cls, keys):
-        return super(FixedDict, cls).fromkeys(k for k in keys)
+        return super().fromkeys(k for k in keys)
 
     def freeze(self):
         r"""Freeze the internal dictionary, such that no more keys may be added."""

@@ -40,7 +40,7 @@ class _HoverButton(QPushButton):
     r"""Custom button that allows hovering and icons."""
     def __init__(self, *args, **kwargs):
         # initialize
-        super(_HoverButton, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # Enable mouse hover event tracking
         self.setMouseTracking(True)
         self.setStyleSheet('border: 0px;')
