@@ -544,9 +544,11 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         if rms_in_legend:
             rms_data = np.atleast_1d(rms(scale*data, axis=0, ignore_nans=True))
     else:
-        # calculate the mean and std of data
-        mean = np.mean(data, axis=1)
-        std  = np.std(data, axis=1)
+        # calculate the mean and std of data, while disabling warnings for time points that are all NaNs
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', message='Mean of empty slice')
+            mean = np.nanmean(data, axis=1)
+            std  = np.nanstd(data, axis=1)
 
         # calculate an RMS
         if rms_in_legend:
