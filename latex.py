@@ -137,7 +137,9 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
         value1 = bins[r]
         value2 = bins[r+1]-dt
         # check for large values, and replace appropriately
-        if value2 < cutoff:
+        if value1 == value2:
+            this_str = '{}'.format(value1)
+        elif value2 < cutoff:
             this_str = '{}-{}'.format(value1, value2)
         else:
             this_str = '{}+'.format(value1)
