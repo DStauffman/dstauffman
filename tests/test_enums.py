@@ -191,6 +191,18 @@ class Test_dist_enum_and_mons(unittest.TestCase):
         np.testing.assert_array_equal(set(state), {1, 2, 3, 4})
         self.assertTrue(mons is None)
 
+    def test_single_num(self):
+        self.num = 1
+        (state, mons) = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
+        self.assertIn(state[0], {1, 2, 3, 4})
+        self.assertTrue(mons[0] <= max(self.max_months))
+
+    def test_zero_num(self):
+        self.num = 0
+        (state, mons) = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
+        self.assertTrue(len(state) == 0)
+        self.assertTrue(len(mons) == 0)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)
