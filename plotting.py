@@ -547,6 +547,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         # calculate the mean and std of data, while disabling warnings for time points that are all NaNs
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', message='Mean of empty slice')
+            warnings.filterwarnings('ignore', message='Degrees of freedom <= 0 for slice.')
             mean = np.nanmean(data, axis=1)
             std  = np.nanstd(data, axis=1)
 
