@@ -548,12 +548,14 @@ class Test_make_python_init(unittest.TestCase):
     def setUp(self):
         self.folder   = dcs.get_root_dir()
         self.text     = 'from .bpe import'
+        self.text2    = 'from .bpe      import'
         self.folder2  = dcs.get_tests_dir()
         self.filepath = os.path.join(self.folder2, 'temp_file.py')
+        self.filename = os.path.join(self.folder2, '__init__2.py')
 
     def test_nominal_use(self):
         text = dcs.make_python_init(self.folder)
-        self.assertEqual(text[0:len(self.text)], self.text)
+        self.assertEqual(text[0:len(self.text2)], self.text2)
 
     def test_duplicated_funcs(self):
         with open(self.filepath, 'wt') as file:
@@ -562,12 +564,35 @@ class Test_make_python_init(unittest.TestCase):
             text = dcs.make_python_init(self.folder2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(text[0:34], 'from .temp_file import Test_Frozen')
+        self.assertEqual(text[0:39], 'from .temp_file      import Test_Frozen')
         self.assertTrue(output.startswith('Uniqueness Problem'))
+
+    def test_no_lineup(self):
+        text = dcs.make_python_init(self.folder, lineup=False)
+        self.assertEqual(text[0:len(self.text)], self.text)
+
+    def test_big_wrap(self):
+        text = dcs.make_python_init(self.folder, wrap=1000)
+        self.assertEqual(text[0:len(self.text2)], self.text2)
+
+    def test_small_wrap(self):
+        with self.assertRaises(ValueError):
+            dcs.make_python_init(self.folder, wrap=30)
+
+    def test_really_small_wrap(self):
+        with self.assertRaises(ValueError):
+            dcs.make_python_init(self.folder, wrap=10)
+
+    def test_saving(self):
+        text = dcs.make_python_init(self.folder, filename=self.filename)
+        self.assertEqual(text[0:len(self.text2)], self.text2)
+        self.assertTrue(os.path.isfile(self.filename))
 
     def tearDown(self):
         if os.path.isfile(self.filepath):
             os.remove(self.filepath)
+        if os.path.isfile(self.filename):
+            os.remove(self.filename)
 
 #%% get_python_definitions
 class Test_get_python_definitions(unittest.TestCase):

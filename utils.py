@@ -463,7 +463,7 @@ def round_time(dt=None, round_to_sec=60):
     return dt + timedelta(0, rounding-seconds, -dt.microsecond)
 
 #%% Functions - make_python_init
-def make_python_init(folder):
+def make_python_init(folder, lineup=True, wrap=100, filename=''):
     r"""
     Makes the Python __init__.py file based on the files/definitions found within the specified folder.
 
@@ -520,14 +520,30 @@ def make_python_init(folder):
     if dups:
         print('Duplicated functions:')
         print(dups)
+    # get information about padding
+    max_len   = max(len(x) for x in results.keys())
+    line_wrap = ' ' * (len('from . import ') + max_len + 4)
     # start building text output
     text = []
     # loop through results and build text output
-    for k in sorted(results):
-        temp = ', '.join(results[k])
-        text.append('from .' + k + ' import ' + temp)
-    # pass back the combined output text
+    for key in sorted(results):
+        pad = ' ' * (max_len - len(key)) if lineup else ''
+        temp = ', '.join(results[key])
+        header = 'from .' + key + pad + ' import '
+        min_wrap = len(header)
+        this_line = header + temp
+        while len(this_line) > wrap:
+            space_break = this_line.rfind(' ', min_wrap, wrap-1)
+            if space_break == -1:
+                raise ValueError('The specified wrap of "{}" was too small.'.format(wrap))
+            text.append(this_line[:space_break] + ' \\')
+            this_line = line_wrap + this_line[space_break+1:]
+        text.append(this_line)
+    # combined the text into a single string with newline characters
     output = '\n'.join(text)
+    # optionally write the results to a file
+    if filename:
+        write_text_file(filename, output)
     return output
 
 #%% Functions - get_python_definitions
