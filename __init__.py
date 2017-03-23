@@ -26,9 +26,10 @@ from .plotting  import Plotter, Opts, TruthPlotter, MyCustomToolbar, ColorMap, c
 from .quat      import qrot, quat_angle_diff, quat_from_euler, quat_interp, quat_inv, quat_mult, \
                            quat_norm, quat_prop, quat_times_vector, quat_to_dcm, quat_to_euler
 from .stats     import convert_annual_to_monthly_probability, \
-                           convert_monthly_to_annual_probability, prob_to_rate, rate_to_prob, \
-                           month_prob_mult_ratio, annual_rate_to_monthly_probability, \
-                           monthly_probability_to_annual_rate, combine_sets, icer
+                           convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
+                           rate_to_prob, month_prob_mult_ratio, \
+                           annual_rate_to_monthly_probability, monthly_probability_to_annual_rate, \
+                           ar2mp, mp2ar, combine_sets, icer
 from .units     import Units, get_factors
 from .utils     import rms, rss, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
                            make_python_init, get_python_definitions, read_text_file, \

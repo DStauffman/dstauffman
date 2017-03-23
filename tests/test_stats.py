@@ -230,6 +230,10 @@ class Test_annual_rate_to_monthly_probability(unittest.TestCase):
         rate = dcs.monthly_probability_to_annual_rate(prob)
         np.testing.assert_array_almost_equal(rate, self.rate)
 
+    def test_alias(self):
+        prob = dcs.ar2mp(self.rate)
+        np.testing.assert_array_almost_equal(prob, self.prob)
+
 #%% monthly_probability_to_annual_rate
 class Test_monthly_probability_to_annual_rate(unittest.TestCase):
     r"""
@@ -261,6 +265,10 @@ class Test_monthly_probability_to_annual_rate(unittest.TestCase):
         np.testing.assert_array_almost_equal(rate, self.rate)
         prob = dcs.rate_to_prob(rate)
         np.testing.assert_array_almost_equal(prob, self.prob)
+
+    def test_alias(self):
+        rate = dcs.ar2mp(self.prob)
+        np.testing.assert_array_almost_equal(rate, self.rate)
 
 #%% combine_sets
 class Test_combine_sets(unittest.TestCase):
