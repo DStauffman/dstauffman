@@ -1125,23 +1125,27 @@ def find_tabs(folder, extensions=None, list_all=False, trailing=False):
         for name in sorted(files):
             fileparts = name.split('.')
             if fileparts[-1] in extensions:
+                this_file = os.path.join(root, name)
                 already_listed = list_all
                 if already_listed:
-                    print('Evaluating: "' + os.path.join(root, name) + '"')
-                with open(os.path.join(root, name)) as fid:
+                    print('Evaluating: "{}"'.format(this_file))
+                with open(this_file, encoding='utf8') as file:
                     c = 0
-                    for line in fid:
-                        c += 1
-                        if line.count('\t') > 0:
-                            if not already_listed:
-                                print('Evaluating: "' + os.path.join(root, name) + '"')
-                                already_listed = True
-                            print('    Line {:03}: '.format(c) + repr(line))
-                        elif trailing and len(line) >= 2 and line[-2] == ' ' and sum(1 for x in line if not x in ' \n')>0:
-                            if not already_listed:
-                                print('Evaluating: "' + os.path.join(root, name) + '"')
-                                already_listed = True
-                            print('    Line {:03}: '.format(c) + repr(line))
+                    try:
+                        for line in file:
+                            c += 1
+                            if line.count('\t') > 0:
+                                if not already_listed:
+                                    print('Evaluating: "{}"'.format(this_file))
+                                    already_listed = True
+                                print('    Line {:03}: '.format(c) + repr(line))
+                            elif trailing and len(line) >= 2 and line[-2] == ' ' and sum(1 for x in line if not x in ' \n')>0:
+                                if not already_listed:
+                                    print('Evaluating: "{}"'.format(this_file))
+                                    already_listed = True
+                                print('    Line {:03}: '.format(c) + repr(line))
+                    except UnicodeDecodeError:
+                        print('File: "{}" was not a valid utf-8 file.'.format(this_file))
 
 #%% np_digitize
 def np_digitize(x, bins, right=False):
