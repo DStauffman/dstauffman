@@ -612,6 +612,45 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
 
     return (inc_cost, inc_qaly, icer_out, order, icer_data, fig)
 
+#%% Functions - bounded_normal_draw
+def bounded_normal_draw(num_infected, state, field, prng):
+    r"""
+    Returns normalized random numbers with optional min and max values based on dictionary field
+    names.
+
+    Examples
+    --------
+
+    >>> from dstauffman import bounded_normal_draw
+    >>> import numpy as np
+    >>> num_infected = 10
+    >>> state = {'last_mean': 2, 'last_std': 0.5, 'last_min': 1, 'last_max': 3}
+    >>> field = 'last'
+    >>> prng = np.random.RandomState()
+    >>> out = bounded_normal_draw(num_infected, state, field, prng)
+
+    """
+    try:
+        this_mean = state[field + '_mean']
+    except KeyError:
+        this_mean = 0
+    try:
+        this_std = state[field + '_std']
+    except KeyError:
+        this_std = 1
+    try:
+        this_min = state[field + '_min']
+    except KeyError:
+        this_min = -np.inf
+    try:
+        this_max = state[field + '_max']
+    except KeyError:
+        this_max = np.inf
+    out = prng.normal(this_mean, this_std, size=num_infected)
+    np.minimum(out, this_max, out)
+    np.maximum(out, this_min, out)
+    return out
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='tests.test_stats', exit=False)
