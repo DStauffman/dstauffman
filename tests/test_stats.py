@@ -508,6 +508,43 @@ class Test_icer(unittest.TestCase):
         if self.fig is not None:
             plt.close(self.fig)
 
+#%% bounded_normal_draw
+class Test_bounded_normal_draw(unittest.TestCase):
+    r"""
+    Tests the bounded_normal_draw function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.num    = 10000
+        self.mean   = 100
+        self.std    = 50
+        self.min    = 20
+        self.max    = 200
+        self.values = {'test_mean': self.mean, 'test_std': self.std, 'test_min': self.min, 'test_max': self.max}
+        self.field  = 'test'
+        self.prng   = np.random.RandomState()
+
+    def test_nominal(self):
+        out = dcs.bounded_normal_draw(self.num, self.values, self.field, self.prng)
+        self.assertTrue(np.min(out) >= self.min)
+        self.assertTrue(np.max(out) <= self.max)
+
+    def test_bounds(self):
+        self.values['no_bounds_mean'] = self.mean
+        self.values['no_bounds_std']  = self.std
+        out = dcs.bounded_normal_draw(self.num, self.values, 'no_bounds', self.prng)
+        self.assertTrue(np.min(out) < self.min)
+        self.assertTrue(np.max(out) > self.max)
+
+    def test_mean(self):
+        self.values['no_bounds_mean'] = self.mean
+        self.values['no_bounds_std']  = self.std
+        out = dcs.bounded_normal_draw(self.num, self.values, 'no_bounds', self.prng)
+        mean = np.mean(out)
+        std  = np.std(out)
+        self.assertTrue(self.mean - 1 < mean < self.mean + 1)
+        self.assertTrue(self.std - 1 < std < self.std + 1)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

@@ -613,40 +613,66 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     return (inc_cost, inc_qaly, icer_out, order, icer_data, fig)
 
 #%% Functions - bounded_normal_draw
-def bounded_normal_draw(num_infected, state, field, prng):
+def bounded_normal_draw(num, values, field, prng):
     r"""
-    Returns normalized random numbers with optional min and max values based on dictionary field
-    names.
+    Creates a normalized distribution with the given mean and standard deviations, plus optional
+    bounds, all taken from a dictionary with the specified `field` name.
+
+    Parameters
+    ----------
+    num : int
+        Number of random draws to make
+    values : dict
+        Dictionary of mean, std, min and max values
+    field : str
+        Name of field that is prepended to the values
+    prng : class numpy.random.RandomState
+        Pseudo-random number generator
+
+    Returns
+    -------
+    out : ndarray (N,)
+        Normalized random numbers
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2017.
 
     Examples
     --------
 
     >>> from dstauffman import bounded_normal_draw
     >>> import numpy as np
-    >>> num_infected = 10
-    >>> state = {'last_mean': 2, 'last_std': 0.5, 'last_min': 1, 'last_max': 3}
-    >>> field = 'last'
-    >>> prng = np.random.RandomState()
-    >>> out = bounded_normal_draw(num_infected, state, field, prng)
+    >>> num   = 10
+    >>> values = {'last_mean': 2, 'last_std': 0.5, 'last_min': 1, 'last_max': 3}
+    >>> field  = 'last'
+    >>> prng   = np.random.RandomState()
+    >>> out    = bounded_normal_draw(num, values, field, prng)
 
     """
+    # get values from the dictionary
     try:
-        this_mean = state[field + '_mean']
+        this_mean = values[field + '_mean']
     except KeyError:
         this_mean = 0
     try:
-        this_std = state[field + '_std']
+        this_std  = values[field + '_std']
     except KeyError:
-        this_std = 1
+        this_std  = 1
     try:
-        this_min = state[field + '_min']
+        this_min  = values[field + '_min']
     except KeyError:
-        this_min = -np.inf
+        this_min  = -np.inf
     try:
-        this_max = state[field + '_max']
+        this_max  = values[field + '_max']
     except KeyError:
-        this_max = np.inf
-    out = prng.normal(this_mean, this_std, size=num_infected)
+        this_max  = np.inf
+    # calculate the normal distribution
+    if this_std == 0:
+        out = this_mean * np.ones(num)
+    else:
+        out = prng.normal(this_mean, this_std, size=num)
+    # enforce the min and maxes
     np.minimum(out, this_max, out)
     np.maximum(out, this_min, out)
     return out
