@@ -149,7 +149,7 @@ class TruthPlotter(Frozen):
     >>> plt.close(fig)
 
     """
-    def __init__(self, time=None, data=None, lo=None, hi=None, type_='normal', name='Truth'):
+    def __init__(self, time=None, data=None, lo=None, hi=None, type_='normal', name='Observed'):
         self.time    = time
         self.data    = None
         self.type_   = type_ # from {'normal', 'errorbar'}
@@ -171,10 +171,15 @@ class TruthPlotter(Frozen):
         r"""Displays a pretty print version of the class."""
         pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
+    @property
+    def is_null(self):
+        r"""Determines if there is no truth to plot, and thus nothing is done."""
+        return self.data is None and self.data_lo is None and self.data_hi is None
+
     def plot_truth(self, ax, scale=1):
         r"""Adds the information in the TruthPlotter instance to the given axis, with the optional scale."""
         # check for null case
-        if self.data is None and self.data_lo is None and self.data_hi is None:
+        if self.is_null:
             return
         # get original limits
         x_lim = ax.get_xlim()
@@ -444,11 +449,11 @@ def get_axes_scales(type_):
     return (scale, units)
 
 #%% Functions - plot_time_history
-def plot_time_history(time, data, description='', type_='unity', opts=None, *, plot_indiv=True, \
+def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, colormap=None, second_y_scale=None, rms_in_legend=True, \
     truth_time=None, truth_data=None):
     r"""
-    Plots the given data channel versus time, with a generic description argument.
+    Plots the given data channel versus time, with a generic label argument.
 
     Parameters
     ----------
@@ -456,8 +461,8 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         time history
     data : array_like
         data for corresponding time history
-    description : str, optional
-        generic text to put on the plot title and figure name, default is empty
+    label : str
+        generic text to put on the plot title and figure name
     type_ : str, optional, from {'unity', 'population', 'percentage', 'per 100K', 'cost'}
         description of the type of data that is being plotted, default is 'unity'
     opts : class Opts, optional
@@ -491,11 +496,11 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     >>> from dstauffman import plot_time_history
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> time = np.arange(0, 10, 0.1)
-    >>> data = np.sin(time)
-    >>> description = 'Sin'
+    >>> time  = np.arange(0, 10, 0.1)
+    >>> data  = np.sin(time)
+    >>> label = 'Sin'
     >>> type_ = 'population'
-    >>> fig = plot_time_history(time, data, description, type_) # doctest: +ELLIPSIS
+    >>> fig   = plot_time_history(time, data, label, type_) # doctest: +ELLIPSIS
 
     Close plot
     >>> plt.close()
@@ -524,6 +529,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
 
     # override the RMS option from opts (both must be true to plot the RMS in the legend)
     rms_in_legend &= opts.show_rms
+    show_legend = rms_in_legend or (truth is not None and not truth.is_null)
 
     # ensure that data is at least 2D
     if data.ndim == 0:
@@ -536,6 +542,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
 
     # determine which type of data to plot
     (scale, units) = get_axes_scales(type_)
+    unit_text = ' [' + units + ']' if units else ''
 
     if plot_as_diffs:
         # build colormap
@@ -558,7 +565,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
     # turn interaction off to make the plots draw all at once on a show() command
     plt.ioff()
     # alias the title
-    this_title = description + ' vs. Time'
+    this_title = label + ' vs. Time'
     # create the figure and set the title
     fig = plt.figure()
     fig.canvas.set_window_title(this_title)
@@ -574,7 +581,7 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
                 this_label += ' (RMS: {:.2f})'.format(rms_data[ix])
             ax.plot(time, scale*data[:, ix], '.-', linewidth=2, zorder=10, label=this_label)
     else:
-        this_label = opts.get_names(0) + description
+        this_label = opts.get_names(0) + label
         if rms_in_legend:
              this_label += ' (RMS: {:.2f})'.format(rms_data)
         ax.plot(time, scale*mean, 'b.-', linewidth=2, zorder=10, label=this_label)
@@ -588,9 +595,10 @@ def plot_time_history(time, data, description='', type_='unity', opts=None, *, p
         truth.plot_truth(ax, scale)
     # add labels and legends
     plt.xlabel('Time [' + time_units + ']')
-    plt.ylabel(description + ' [' + units + ']')
+    plt.ylabel(label + unit_text)
     plt.title(this_title)
-    plt.legend()
+    if show_legend:
+        plt.legend()
     # show a grid
     plt.grid(True)
     # set the colormap (only applies to lines that don't specify a default color)
@@ -760,7 +768,7 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
     return fig
 
 #%% Functions - plot_multiline_history
-def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, legend=None, \
+def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legend=None, \
         colormap=None, second_y_scale=None, ignore_empties=False):
     r"""
     Plots multiple metrics over time.
@@ -771,10 +779,10 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
         time history
     data : 2D or 3D ndarray
         data for corresponding time history, 2D: time by value in each category
+    label : str
+        Name to label on the plots
     type_ : str, optional, from {'unity', 'population', 'percentage', 'per 100K', 'cost'}
         description of the type of data that is being plotted, default is 'unity'
-    label : str, optional
-        Disease name to label on the plots
     opts : class Opts, optional
         plotting options
     legend : list of str, optional
@@ -805,12 +813,16 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
     >>> data  = np.random.rand(len(time), 5)
     >>> mag   = data.cumsum(axis=1)[:,-1]
     >>> data  = 10 * data / np.expand_dims(mag, axis=1)
-    >>> fig   = plot_multiline_history(time, data)
+    >>> label = 'Random Data'
+    >>> fig   = plot_multiline_history(time, data, label)
 
     Close plot
     >>> plt.close(fig)
 
     """
+    # hard-coded values
+    time_units = 'year' # TODO: make an input
+
     # check optional inputs
     if opts is None:
         opts = Opts()
@@ -823,7 +835,7 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
         return None
 
     # process other inputs
-    description = label if label else 'Values over time'
+    this_title = label + ' vs. Time'
     (scale, units) = get_axes_scales(type_)
     unit_text = ' [' + units + ']' if units else ''
     num_bins = data.shape[1]
@@ -840,7 +852,7 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
 
     # plot data
     fig = plt.figure()
-    fig.canvas.set_window_title(description + unit_text)
+    fig.canvas.set_window_title(this_title)
     ax = fig.add_subplot(111)
     cm.set_colors(ax)
     for i in range(num_bins):
@@ -848,9 +860,9 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
             ax.plot(time, scale*data[:, i], '.-', label=legend[i])
 
     # add labels and legends
-    plt.xlabel('Time [year]')
-    plt.ylabel(fig.canvas.get_window_title())
-    plt.title(description + ' vs. Time')
+    plt.xlabel('Time [' + time_units + ']')
+    plt.ylabel(label + unit_text)
+    plt.title(this_title)
     plt.legend()
     plt.grid(True)
 
@@ -866,7 +878,7 @@ def plot_multiline_history(time, data, type_='unity', label='', opts=None, *, le
     return fig
 
 #%% Functions - plot_bar_breakdown
-def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=None, \
+def plot_bar_breakdown(time, data, label, opts=None, legend=None, colormap=None, \
         ignore_empties=False):
     r"""
     Plots the pie chart like breakdown by percentage in each category over time.
@@ -877,8 +889,8 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
         time history
     data : array_like
         data for corresponding time history, 2D: time by ratio in each category
-    label : str, optional
-        Disease name to label on the plots
+    label : str
+        Name to label on the plots
     opts : class Opts, optional
         plotting options
     legend : list of str, optional
@@ -903,11 +915,12 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
     >>> from dstauffman import plot_bar_breakdown
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> time = np.arange(0, 5, 1./12) + 2000
-    >>> data = np.random.rand(len(time), 5)
-    >>> mag  = data.cumsum(axis=1)[:,-1]
-    >>> data = data / np.expand_dims(mag, axis=1)
-    >>> fig  = plot_bar_breakdown(time, data)
+    >>> time  = np.arange(0, 5, 1./12) + 2000
+    >>> data  = np.random.rand(len(time), 5)
+    >>> mag   = data.cumsum(axis=1)[:,-1]
+    >>> data  = data / np.expand_dims(mag, axis=1)
+    >>> label = 'Test'
+    >>> fig   = plot_bar_breakdown(time, data, label)
 
     Close plots
     >>> plt.close(fig)
@@ -925,12 +938,13 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
         return
 
     # hard-coded values
-    description = 'Ratios over time'
-    if label:
-        description = label + ' ' + description
-    scale    = 100
-    units    = '%'
-    num_bins = data.shape[1]
+    this_title = label + ' vs. Time'
+    scale      = 100
+    units      = '%'
+    unit_text  = ' [' + units + ']'
+
+    # data checks
+    num_bins   = data.shape[1]
     if legend is not None:
         assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
     else:
@@ -947,7 +961,7 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
 
     # plot breakdown
     fig = plt.figure()
-    fig.canvas.set_window_title(description + ' [' + units + ']')
+    fig.canvas.set_window_title(this_title)
     ax = fig.add_subplot(111)
     for i in range(num_bins):
         if not ignore_empties or (not np.all(data[:, i] == 0) and not np.all(np.isnan(data[:, i]))):
@@ -955,11 +969,12 @@ def plot_bar_breakdown(time, data, label='', opts=None, legend=None, colormap=No
             # fill_between is a better alternative
             ax.fill_between(time, scale*bottoms[:, i], scale*bottoms[:, i+1], step='mid', \
                 label=legend[i], color=cm.get_color(i), edgecolor='none')
-    plt.ylabel(label + ' [' + units + ']')
+    plt.xlabel('Time [year]')
+    plt.ylabel(label + unit_text)
     plt.ylim(0, 100)
     plt.grid(True)
     plt.legend()
-    plt.title(fig.canvas.get_window_title())
+    plt.title(this_title)
 
     # Setup plots
     setup_plots(fig, opts, 'time')

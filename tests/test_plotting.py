@@ -189,7 +189,7 @@ class Test_TruthPlotter(unittest.TestCase):
         out.close()
         self.assertEqual(lines[0], 'TruthPlotter')
         self.assertTrue(lines[1].startswith(' time    = ['))
-        self.assertEqual(lines[-1], ' name    = Truth')
+        self.assertEqual(lines[-1], ' name    = Observed')
 
     def tearDown(self):
         if self.fig is not None:
@@ -384,7 +384,7 @@ class Test_plot_time_history(unittest.TestCase):
     def setUp(self):
         self.time = np.arange(0, 10, 0.1)
         self.data = np.sin(self.time)
-        self.description = 'Sin'
+        self.label = 'Sin'
         self.type_ = 'population'
         self.opts = dcs.Opts()
         self.opts.names = ['Name 1']
@@ -393,72 +393,72 @@ class Test_plot_time_history(unittest.TestCase):
         self.second_y_scale = 1000000
 
     def test_normal(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_)
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_)
 
     def test_truth1(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, \
             truth=self.truth)
 
     def test_truth2(self):
         self.truth.data_lo = self.truth.data - 0.1
         self.truth.data_hi = self.truth.data + 0.1
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, \
             truth=self.truth)
 
     def test_bad_truth_size(self):
         self.truth.data = self.truth.data[:-1]
         with self.assertRaises(ValueError):
-            dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+            dcs.plot_time_history(self.time, self.data, self.label, self.type_, \
                 truth=self.truth)
 
     def test_opts(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, opts=self.opts)
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, opts=self.opts)
 
     def test_diffs(self):
-        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.description, self.type_, \
+        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.label, self.type_, \
             plot_as_diffs=True)
 
     def test_diffs_and_opts(self):
-        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.description, self.type_, \
+        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.label, self.type_, \
             opts=self.opts, plot_as_diffs=True)
 
     def test_group(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, \
             opts=self.opts, plot_indiv=False)
 
     def test_colormap(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, colormap='Dark2')
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, colormap='Dark2')
 
     def test_array_data1(self):
         data = np.column_stack((self.data, self.data))
-        self.fig = dcs.plot_time_history(self.time, data, self.description, self.type_)
+        self.fig = dcs.plot_time_history(self.time, data, self.label, self.type_)
 
     def test_array_data2(self):
         data = np.column_stack((self.data, self.data))
-        self.fig = dcs.plot_time_history(self.time, data, self.description, self.type_, plot_as_diffs=True)
+        self.fig = dcs.plot_time_history(self.time, data, self.label, self.type_, plot_as_diffs=True)
 
     def test_second_y_scale1(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, \
             second_y_scale=self.second_y_scale)
 
     def test_second_y_scale2(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, type_='percentage', \
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, type_='percentage', \
             second_y_scale=self.second_y_scale)
 
     def test_simple(self):
-        self.fig = dcs.plot_time_history(0, 0)
+        self.fig = dcs.plot_time_history(0, 0, 'Text')
 
     def test_plot_empty(self):
-        self.fig = dcs.plot_time_history([], [])
+        self.fig = dcs.plot_time_history([], [], '')
 
     def test_plot_all_nans(self):
-        self.fig = dcs.plot_time_history(np.array([np.nan, np.nan]), np.array([np.nan, np.nan]))
+        self.fig = dcs.plot_time_history(np.array([np.nan, np.nan]), np.array([np.nan, np.nan]), self.label)
 
     def test_no_rms_in_legend1(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, rms_in_legend=False)
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, rms_in_legend=False)
 
     def test_no_rms_in_legend2(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.description, self.type_, \
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, \
             rms_in_legend=False, plot_as_diffs=True)
 
     def tearDown(self):
@@ -593,8 +593,8 @@ class Test_plot_multiline_history(unittest.TestCase):
         self.data     = np.random.rand(len(self.time), num_channels)
         mag           = self.data.cumsum(axis=1)[:,-1]
         self.data     = 10 * self.data / np.expand_dims(mag, axis=1)
-        self.type_    = 'percentage'
         self.label    = 'Plot description'
+        self.type_    = 'percentage'
         self.opts     = dcs.Opts()
         self.opts.show_plot = False
         self.legend   = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
@@ -603,41 +603,38 @@ class Test_plot_multiline_history(unittest.TestCase):
         self.second_y_scale = 1000000
 
     def test_nominal(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, type_=self.type_, \
-            label = self.label, opts=self.opts, legend=self.legend, colormap=self.colormap))
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, label=self.label, \
+            type_=self.type_, opts=self.opts, legend=self.legend, colormap=self.colormap))
 
     def test_defaults(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data))
-
-    def test_with_label(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, label=self.label))
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label))
 
     def test_with_type_(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.type_))
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, self.type_))
 
     def test_with_opts(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, opts=self.opts))
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, opts=self.opts))
 
     def test_with_legend(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, legend=self.legend))
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, legend=self.legend))
 
     def test_with_colormap(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, colormap=self.colormap))
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, colormap=self.colormap))
 
     def test_no_data(self):
         with dcs.capture_output() as out:
-            dcs.plot_multiline_history(self.time, None)
+            dcs.plot_multiline_history(self.time, None, '')
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, 'plot skipped due to missing data.')
 
     def test_ignore_zeros(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, ignore_empties=True))
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, ignore_empties=True))
 
     def test_ignore_zeros2(self):
         self.data[:,1] = 0
         self.data[:,3] = 0
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, ignore_empties=True))
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, ignore_empties=True))
 
     def test_ignore_zeros3(self):
         self.data = np.zeros(self.data.shape)
@@ -650,14 +647,14 @@ class Test_plot_multiline_history(unittest.TestCase):
 
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):
-            self.figs.append(dcs.plot_multiline_history(self.time, self.data, legend=self.legend[:-1]))
+            self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, legend=self.legend[:-1]))
 
     def test_second_y_scale1(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, type_='population', \
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, type_='population', \
             second_y_scale=self.second_y_scale))
 
     def test_second_y_scale2(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, \
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, \
             second_y_scale=self.second_y_scale))
 
     def tearDown(self):
@@ -696,35 +693,32 @@ class Test_plot_bar_breakdown(unittest.TestCase):
             legend=self.legend, colormap=self.colormap))
 
     def test_defaults(self):
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data))
-
-    def test_label(self):
         self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label))
 
     def test_opts(self):
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, opts=self.opts))
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
 
     def test_legend(self):
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, legend=self.legend))
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend))
 
     def test_colormap(self):
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, colormap=self.colormap))
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, colormap=self.colormap))
 
     def test_ignore_zeros(self):
         self.data[:, 1] = 0
         self.data[:, 3] = np.nan
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, ignore_empties=True))
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, ignore_empties=True))
 
     def test_null_data(self):
         with dcs.capture_output() as out:
-            dcs.plot_bar_breakdown(self.time, None)
+            dcs.plot_bar_breakdown(self.time, None, '')
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, 'plot skipped due to missing data.')
 
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):
-            dcs.plot_bar_breakdown(self.time, self.data, legend=self.legend[:-1])
+            dcs.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend[:-1])
 
     def tearDown(self):
         if self.figs:
