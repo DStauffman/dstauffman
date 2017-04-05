@@ -40,7 +40,7 @@ class _EnumMetaPlus(EnumMeta):
         Returns a list of all the names within the enumerator.
         """
         # look for class.name: pattern, ignore class, return names only
-        names = list(self.__members__.keys())
+        names = list(self.__members__)
         return names
     def list_of_values(self):
         r"""

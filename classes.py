@@ -105,9 +105,9 @@ def _load_method(cls, filename='', use_hdf5=True):
         # Version 2 (HDF5):
         out = cls()
         with h5py.File(filename, 'r') as file:
-            for key in file.keys():
+            for key in file:
                 grp = file[key]
-                for field in grp.keys():
+                for field in grp:
                     setattr(out, field, grp[field].value)
     return out
 

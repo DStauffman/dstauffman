@@ -298,7 +298,7 @@ class Test_FixedDict(unittest.TestCase):
         self.fixed = dcs.FixedDict({'key1': 1, 'key2': 2})
 
     def test_nominal(self):
-        self.assertEqual(set(self.keys), set(self.fixed.keys()))
+        self.assertEqual(self.keys, set(self.fixed))
 
     def test_key_creation_and_freeze(self):
         self.fixed['new_key'] = 5
@@ -326,7 +326,7 @@ class Test_FixedDict(unittest.TestCase):
 
     def test_fromkeys(self):
         fixed = dcs.FixedDict.fromkeys(self.keys)
-        self.assertEqual(set(self.keys), set(fixed.keys()))
+        self.assertEqual(self.keys, set(fixed))
 
     def test_setdefault(self):
         self.fixed.setdefault('new_key', 1)
@@ -350,7 +350,7 @@ class Test_FixedDict(unittest.TestCase):
     def test_copy(self):
         self.fixed['mutable'] = [1, 2, 3]
         new = copy.copy(self.fixed)
-        self.assertEqual(set(self.keys) | {'mutable'}, set(new.keys()))
+        self.assertEqual(self.keys | {'mutable'}, set(new))
         self.assertIs(new['mutable'], self.fixed['mutable'])
         new['mutable'][1] = 5
         self.assertEqual(new['mutable'][1], 5)
@@ -359,7 +359,7 @@ class Test_FixedDict(unittest.TestCase):
     def test_deepcopy(self):
         self.fixed['mutable'] = [1, 2, 3]
         new = copy.deepcopy(self.fixed)
-        self.assertEqual(set(self.keys) | {'mutable'}, set(new.keys()))
+        self.assertEqual(self.keys | {'mutable'}, set(new))
         self.assertFalse(new['mutable'] is self.fixed['mutable'])
         new['mutable'][1] = 5
         self.assertEqual(new['mutable'][1], 5)

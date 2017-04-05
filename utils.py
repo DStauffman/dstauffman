@@ -396,7 +396,7 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
     # simple test
     if d1 is not d2:
         # compare the keys that are in both
-        same = set(d1.keys()) & set(d2.keys())
+        same = set(d1) & set(d2)
         for key in sorted(same):
             # if any differences, then this test fails
             if np.logical_not(_nan_equal(d1[key], d2[key])):
@@ -404,7 +404,7 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
                 if not suppress_output:
                     print(key + ' is different.')
         # find keys in one but not the other, if any, then this test fails
-        diff = set(d1.keys()) ^ set(d2.keys())
+        diff = set(d1) ^ set(d2)
         for key in sorted(diff):
             is_same = False
             if not suppress_output:
@@ -521,7 +521,7 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
         print('Duplicated functions:')
         print(dups)
     # get information about padding
-    max_len   = max(len(x) for x in results.keys())
+    max_len   = max(len(x) for x in results)
     line_wrap = ' ' * (len('from . import ') + max_len + 4)
     # start building text output
     text = []
@@ -1322,7 +1322,7 @@ def pprint_dict(dct, *, name='', indent=1, align=True):
     # build indentation padding
     this_indent = ' ' * indent
     # find the length of the longest field name
-    pad_len = max(len(x) for x in dct.keys())
+    pad_len = max(len(x) for x in dct)
     # loop through fields
     for (this_key, this_value) in dct.items():
         this_pad = ' ' * (pad_len - len(this_key)) if align else ''
