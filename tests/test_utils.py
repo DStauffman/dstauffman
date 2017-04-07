@@ -1304,6 +1304,41 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(lines[2], ' bb = 2')
         self.assertEqual(lines[3], ' ccc = 3')
 
+#%% line_wrap
+class Test_line_wrap(unittest.TestCase):
+    r"""
+    Tests the line_wrap function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.text     = ('lots of repeated words ' * 4).strip()
+        self.wrap     = 40
+        self.min_wrap = 0
+        self.indent   = 4
+        self.out      = ['lots of repeated words lots of \\', '    repeated words lots of repeated \\', \
+            '    words lots of repeated words']
+
+    def test_str(self):
+        out = dcs.line_wrap(self.text, self.wrap, self.min_wrap, self.indent)
+        self.assertEqual(out, '\n'.join(self.out))
+
+    def test_list(self):
+        out = dcs.line_wrap([self.text], self.wrap, self.min_wrap, self.indent)
+        self.assertEqual(out, self.out)
+
+    def test_list2(self):
+        out = dcs.line_wrap(3*['aaaaaaaaaa bbbbbbbbbb cccccccccc'], wrap=25, min_wrap=15, indent=2)
+        self.assertEqual(out, 3*['aaaaaaaaaa bbbbbbbbbb \\', '  cccccccccc'])
+
+    def test_min_wrap(self):
+        out = dcs.line_wrap('aaaaaaaaaaaaaaaaaaaa bbbbbbbbbb', 25, 18, 0)
+        self.assertEqual(out, 'aaaaaaaaaaaaaaaaaaaa \\\nbbbbbbbbbb')
+
+    def test_min_wrap2(self):
+        with self.assertRaises(ValueError) as context:
+            dcs.line_wrap('aaaaaaaaaaaaaaaaaaaa bbbbbbbbbb', 25, 22, 0)
+        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "22:25" was too small.')
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

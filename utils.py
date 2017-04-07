@@ -483,8 +483,8 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     >>> from dstauffman import make_python_init, get_root_dir
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
-    >>> print(text[0:16])
-    from .bpe import
+    >>> print(text[0:21])
+    from .bpe      import
 
     """
     # exclusions
@@ -522,7 +522,7 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
         print(dups)
     # get information about padding
     max_len   = max(len(x) for x in results)
-    line_wrap = ' ' * (len('from . import ') + max_len + 4)
+    indent = len('from . import ') + max_len + 4
     # start building text output
     text = []
     # loop through results and build text output
@@ -531,14 +531,9 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
         temp = ', '.join(results[key])
         header = 'from .' + key + pad + ' import '
         min_wrap = len(header)
-        this_line = header + temp
-        while len(this_line) > wrap:
-            space_break = this_line.rfind(' ', min_wrap, wrap-1)
-            if space_break == -1:
-                raise ValueError('The specified wrap of "{}" was too small.'.format(wrap))
-            text.append(this_line[:space_break] + ' \\')
-            this_line = line_wrap + this_line[space_break+1:]
-        text.append(this_line)
+        this_line = [header + temp]
+        wrapped_lines = line_wrap(this_line, wrap=wrap, min_wrap=min_wrap, indent=indent)
+        text += wrapped_lines
     # combined the text into a single string with newline characters
     output = '\n'.join(text)
     # optionally write the results to a file
@@ -1249,6 +1244,8 @@ def full_print():
 
     >>> from dstauffman import full_print
     >>> import numpy as np
+    >>> temp_options = np.get_printoptions()
+    >>> np.set_printoptions(threshold=10)
     >>> a = np.zeros((10, 5))
     >>> a[3, :] = 1.23
     >>> print(a) # doctest: +NORMALIZE_WHITESPACE
@@ -1272,6 +1269,8 @@ def full_print():
      [ 0.    0.    0.    0.    0.  ]
      [ 0.    0.    0.    0.    0.  ]
      [ 0.    0.    0.    0.    0.  ]]
+
+    >>> np.set_printoptions(**temp_options)
 
     """
     # get current options
@@ -1327,6 +1326,66 @@ def pprint_dict(dct, *, name='', indent=1, align=True):
     for (this_key, this_value) in dct.items():
         this_pad = ' ' * (pad_len - len(this_key)) if align else ''
         print('{}{}{} = {}'.format(this_indent, this_key, this_pad, this_value))
+
+#%% line_wrap
+def line_wrap(text, wrap=80, min_wrap=0, indent=4):
+    r"""
+    Wraps lines of text to the specified length, breaking at any whitespace characters.
+
+    Parameters
+    ----------
+    text : str or list of str
+        Text to be wrapped
+    wrap : int, optional
+        Number of characters to wrap text at, default is 80
+    min_wrap : int, optional
+        Minimum number of characters to wrap at, default is 0
+    indent : int, optional
+        Number of characters to indent the next line with, default is 4
+
+    Returns
+    -------
+    out : str or list of str
+        wrapped form of text
+
+    Examples
+    --------
+
+    >>> from dstauffman import line_wrap
+    >>> text = ('lots of repeated words ' * 4).strip()
+    >>> wrap = 40
+    >>> out = line_wrap(text, wrap)
+    >>> print(out)
+    lots of repeated words lots of \
+        repeated words lots of repeated \
+        words lots of repeated words
+
+    """
+    # check if single str
+    is_single = isinstance(text, str)
+    if is_single:
+        text = [text]
+    # create the pad for any newline
+    pad = ' ' * indent
+    # initialize output
+    out = []
+    # loop through text lines
+    for this_line in text:
+        # determine if too long
+        while len(this_line) > wrap:
+            # find the last whitespace to break on, possibly with a minimum start
+            space_break = this_line.rfind(' ', min_wrap, wrap-1)
+            if space_break == -1:
+                raise ValueError('The specified min_wrap:wrap of "{}:{}" was too small.'.format(min_wrap, wrap))
+            # add the shorter line
+            out.append(this_line[:space_break] + ' \\')
+            # reduce and repeat
+            this_line = pad + this_line[space_break+1:]
+        # add the final shorter line
+        out.append(this_line)
+    if is_single:
+        out = '\n'.join(out)
+    return out
 
 #%% Unit test
 if __name__ == '__main__':
