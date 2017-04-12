@@ -377,6 +377,55 @@ class ColorMap(Frozen):
             # for older matplotlib versions, use deprecated set_color_cycle
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
 
+#%% Functions - _ignore_data
+def _ignore_data(data, ignore_empties, col=None):
+    r"""
+    Determines whether to ignore this data or not.
+
+    Parameters
+    ----------
+    data : (N, M) ndarray
+        Data to plot or ignore
+    ignore_empties : bool
+        Whether to potentially ignore empties or not
+    col : int, optional
+        Column number to look at to determine if ignoring, if not present, look at entire matrix
+
+    Returns
+    -------
+    ignore : bool
+        Whether data is null (all zeros/nans) and should be ignored.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2017.
+
+    Examples
+    --------
+
+    >>> from dstauffman.plotting import _ignore_data
+    >>> import numpy as np
+    >>> data = np.zeros((3, 10), dtype=float)
+    >>> ignore_empties = True
+    >>> col = 2
+    >>> ignore = _ignore_data(data, ignore_empties, col)
+    >>> print(ignore)
+    True
+
+    """
+    # if data is None, then always ignore it
+    if data is None:
+        return True
+    # if we are not ignoring empties and data is not None, then never ignore
+    if not ignore_empties:
+        return False
+    # otherwise determine if ignoring by seeing if data is all zeros or nans
+    if col is None:
+        ignore = np.all((data == 0) | np.isnan(data))
+    else:
+        ignore = np.all((data[:, col] == 0) | np.isnan(data[:, col]))
+    return ignore
+
 #%% Functions - close_all
 def close_all(figs=None):
     r"""
@@ -830,7 +879,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
         colormap = DEFAULT_COLORMAP
 
     # check for valid data
-    if data is None or (ignore_empties and (np.all(data == 0) or np.all(np.isnan(data)))):
+    if _ignore_data(data, ignore_empties):
         print(' ' + label + ' plot skipped due to missing data.')
         return None
 
@@ -856,7 +905,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     ax = fig.add_subplot(111)
     cm.set_colors(ax)
     for i in range(num_bins):
-        if not ignore_empties or (not np.all(data[:, i] == 0) and not np.all(np.isnan(data[:, i]))):
+        if not _ignore_data(data, ignore_empties, col=i):
             ax.plot(time, scale*data[:, i], '.-', label=legend[i])
 
     # add labels and legends
@@ -933,7 +982,7 @@ def plot_bar_breakdown(time, data, label, opts=None, legend=None, colormap=None,
         colormap = DEFAULT_COLORMAP
 
     # check for valid data
-    if data is None or (ignore_empties and (np.all(data == 0) or np.all(np.isnan(data)))):
+    if _ignore_data(data, ignore_empties):
         print(' ' + label + ' plot skipped due to missing data.')
         return
 
@@ -964,7 +1013,7 @@ def plot_bar_breakdown(time, data, label, opts=None, legend=None, colormap=None,
     fig.canvas.set_window_title(this_title)
     ax = fig.add_subplot(111)
     for i in range(num_bins):
-        if not ignore_empties or (not np.all(data[:, i] == 0) and not np.all(np.isnan(data[:, i]))):
+        if not _ignore_data(data, ignore_empties, col=i):
             # Note: The performance of ax.bar is really slow with large numbers of bars (>20), so
             # fill_between is a better alternative
             ax.fill_between(time, scale*bottoms[:, i], scale*bottoms[:, i+1], step='mid', \
