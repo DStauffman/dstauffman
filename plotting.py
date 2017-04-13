@@ -12,6 +12,7 @@ Notes
 #%% Imports
 # normal imports
 import doctest
+import gc
 import numpy as np
 import os
 import sys
@@ -129,19 +130,15 @@ class TruthPlotter(Frozen):
     >>> from dstauffman import TruthPlotter
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
     >>> truth = TruthPlotter(x, y+0.01, lo=y, hi=y+0.03)
     >>> ax = fig.add_subplot(111)
-    >>> ax.plot(x, y, label='data') # doctest: +ELLIPSIS
-    [<matplotlib.lines.Line2D object at 0x...>]
+    >>> _ = ax.plot(x, y, label='data')
     >>> truth.plot_truth(ax)
-
-    >>> plt.legend() # doctest: +ELLIPSIS
-    <matplotlib.legend.Legend object at 0x...>
+    >>> _ = ax.legend()
 
     >>> plt.show(block=False) # doctest: +SKIP
 
@@ -214,13 +211,12 @@ class MyCustomToolbar():
     >>> from dstauffman import MyCustomToolbar
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
+    >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
-    >>> plt.plot(x, y) # doctest: +ELLIPSIS
-    [<matplotlib.lines.Line2D object at 0x...>]
+    >>> _ = ax.plot(x, y)
     >>> fig.toolbar_custom_ = MyCustomToolbar(fig)
 
     Close plot
@@ -326,20 +322,13 @@ class ColorMap(Frozen):
     >>> from dstauffman import ColorMap
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> plt.ioff()
     >>> cm = ColorMap('Paired', 1, 2)
     >>> time = np.arange(0, 10, 0.1)
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
-    >>> ax.plot(time, np.sin(time), color=cm.get_color(1)) # doctest: +ELLIPSIS
-    [<matplotlib.lines.Line2D object at 0x...>]
-
-    >>> ax.plot(time, np.cos(time), color=cm.get_color(2)) # doctest: +ELLIPSIS
-    [<matplotlib.lines.Line2D object at 0x...>]
-
-    >>> plt.legend(['Sin', 'Cos']) # doctest: +ELLIPSIS
-    <matplotlib.legend.Legend object at 0x...>
-
+    >>> _ = ax.plot(time, np.sin(time), color=cm.get_color(1))
+    >>> _ = ax.plot(time, np.cos(time), color=cm.get_color(2))
+    >>> _ = ax.legend(['Sin', 'Cos'])
     >>> plt.show(block=False) # doctest: +SKIP
 
     Close plot
@@ -439,6 +428,7 @@ def close_all(figs=None):
     else:
         for this_fig in figs:
             plt.close(this_fig)
+    gc.collect()
 
 #%% Functions - get_axes_scales
 def get_axes_scales(type_):
@@ -549,10 +539,10 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     >>> data  = np.sin(time)
     >>> label = 'Sin'
     >>> type_ = 'population'
-    >>> fig   = plot_time_history(time, data, label, type_) # doctest: +ELLIPSIS
+    >>> fig   = plot_time_history(time, data, label, type_)
 
     Close plot
-    >>> plt.close()
+    >>> plt.close(fig)
 
     """
     # hard-coded values
@@ -611,8 +601,6 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
         if rms_in_legend:
             rms_data = rms(scale*mean, axis=0, ignore_nans=True)
 
-    # turn interaction off to make the plots draw all at once on a show() command
-    plt.ioff()
     # alias the title
     this_title = label + ' vs. Time'
     # create the figure and set the title
@@ -643,15 +631,13 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     if truth is not None:
         truth.plot_truth(ax, scale)
     # add labels and legends
-    plt.xlabel('Time [' + time_units + ']')
-    plt.ylabel(label + unit_text)
-    plt.title(this_title)
+    ax.set_xlabel('Time [' + time_units + ']')
+    ax.set_ylabel(label + unit_text)
+    ax.set_title(this_title)
     if show_legend:
-        plt.legend()
+        ax.legend()
     # show a grid
-    plt.grid(True)
-    # set the colormap (only applies to lines that don't specify a default color)
-    plt.set_cmap(colormap)
+    ax.grid(True)
     # optionally add second Y axis
     if second_y_scale is not None:
         ax2 = ax.twinx()
@@ -772,8 +758,6 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
     this_title = matrix_name # + (' [' + units + ']' if units else '')
 
     # Create plots
-    # turn interaction off
-    plt.ioff()
     # create figure
     fig = plt.figure()
     # set figure title
@@ -783,7 +767,7 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
     # set axis color to none
     ax.patch.set_facecolor('none')
     # set title
-    plt.title(this_title)
+    ax.set_title(this_title)
     # get colormap based on high and low limits
     cm = ColorMap(colormap, low=scale*cmin, high=scale*cmax)
     # loop through and plot each element with a corresponding color
@@ -798,17 +782,18 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
                         xycoords='data', horizontalalignment='center', \
                         verticalalignment='center', fontsize=15)
     # show colorbar
-    plt.colorbar(cm.get_smap())
+    fig.colorbar(cm.get_smap())
     # make square
-    plt.axis('equal')
+    ax.set_aspect('equal')
     # set limits and tick labels
-    plt.xlim(0, m)
-    plt.ylim(0, n)
-    plt.xticks(np.arange(0, m)+box_size/2, xlab, rotation=x_lab_rot)
-    plt.yticks(np.arange(0, n)+box_size/2, ylab)
+    ax.set_xlim(0, m)
+    ax.set_ylim(0, n)
+    ax.set_xticks(np.arange(0, m)+box_size/2, xlab)
+    ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=x_lab_rot)
+    ax.set_yticks(np.arange(0, n)+box_size/2, ylab)
     # label axes
-    plt.xlabel(xlabel)
-    plt.ylabel(ylabel)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
     # reverse the y axis
     ax.invert_yaxis()
 
@@ -893,9 +878,6 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     else:
         legend = ['Channel {}'.format(i+1) for i in range(num_bins)]
 
-    # turn interactive plotting off
-    plt.ioff()
-
     # get colormap based on high and low limits
     cm = ColorMap(colormap, num_colors=num_bins)
 
@@ -909,11 +891,11 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
             ax.plot(time, scale*data[:, i], '.-', label=legend[i])
 
     # add labels and legends
-    plt.xlabel('Time [' + time_units + ']')
-    plt.ylabel(label + unit_text)
-    plt.title(this_title)
-    plt.legend()
-    plt.grid(True)
+    ax.set_xlabel('Time [' + time_units + ']')
+    ax.set_ylabel(label + unit_text)
+    ax.set_title(this_title)
+    ax.legend()
+    ax.grid(True)
 
     # optionally add second Y axis
     if second_y_scale is not None:
@@ -999,9 +981,6 @@ def plot_bar_breakdown(time, data, label, opts=None, legend=None, colormap=None,
     else:
         legend = ['Series {}'.format(i+1) for i in range(num_bins)]
 
-    # turn interactive plotting off
-    plt.ioff()
-
     # get colormap based on high and low limits
     cm = ColorMap(colormap, 0, num_bins-1)
 
@@ -1018,12 +997,12 @@ def plot_bar_breakdown(time, data, label, opts=None, legend=None, colormap=None,
             # fill_between is a better alternative
             ax.fill_between(time, scale*bottoms[:, i], scale*bottoms[:, i+1], step='mid', \
                 label=legend[i], color=cm.get_color(i), edgecolor='none')
-    plt.xlabel('Time [year]')
-    plt.ylabel(label + unit_text)
-    plt.ylim(0, 100)
-    plt.grid(True)
-    plt.legend()
-    plt.title(this_title)
+    ax.set_xlabel('Time [year]')
+    ax.set_ylabel(label + unit_text)
+    ax.set_ylim(0, 100)
+    ax.grid(True)
+    ax.legend()
+    ax.set_title(this_title)
 
     # Setup plots
     setup_plots(fig, opts, 'time')
@@ -1072,8 +1051,6 @@ def plot_bpe_convergence(costs, opts=None):
     time      = np.arange(len(costs))
     labels    = ['Begin'] + [str(x+1) for x in range(num_iters)] + ['Final']
 
-    # turn interaction off to make the plots draw all at once on a show() command
-    plt.ioff()
     # alias the title
     this_title = 'Convergence by Iteration'
     # create the figure and set the title
@@ -1083,12 +1060,12 @@ def plot_bpe_convergence(costs, opts=None):
     ax = fig.add_subplot(111)
     ax.semilogy(time, costs, 'b.-', linewidth=2)
     # add labels
-    plt.xlabel('Iteration')
-    plt.ylabel('Cost')
-    plt.title(this_title)
-    plt.xticks(time, labels)
+    ax.set_xlabel('Iteration')
+    ax.set_ylabel('Cost')
+    ax.set_title(this_title)
+    ax.set_xticks(time, labels)
     # show a grid
-    plt.grid(True)
+    ax.grid(True)
     # Setup plots
     setup_plots(fig, opts, 'time')
     return fig
@@ -1128,22 +1105,20 @@ def storefig(fig, folder=None, plot_type='png'):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> import os
-    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
+    >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
-    >>> plt.plot(x, y) # doctest: +ELLIPSIS
-    [<matplotlib.lines.Line2D object at 0x...>]
-    >>> plt.title('X vs Y') # doctest: +ELLIPSIS
-    <matplotlib.text.Text object at 0x...>
+    >>> _ = ax.plot(x, y)
+    >>> _ = ax.set_title('X vs Y')
     >>> plt.show(block=False) # doctest: +SKIP
     >>> folder = os.getcwd()
     >>> plot_type = 'png'
     >>> storefig(fig, folder, plot_type)
 
     Close plot
-    >>> plt.close()
+    >>> plt.close(fig)
 
     Delete file
     >>> os.remove(os.path.join(folder, 'Figure Title.png'))
@@ -1204,22 +1179,20 @@ def titleprefix(fig, prefix=''):
     >>> from dstauffman import titleprefix
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
+    >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
-    >>> plt.plot(x, y) # doctest: +ELLIPSIS
-    [<matplotlib.lines.Line2D object at 0x...>]
-    >>> plt.title('X vs Y') # doctest: +ELLIPSIS
-    <matplotlib.text.Text object at 0x...>
+    >>> _ = ax.plot(x, y)
+    >>> _ = ax.set_title('X vs Y')
     >>> plt.show(block=False) # doctest: +SKIP
     >>> prefix = 'Baseline'
     >>> titleprefix(fig, prefix)
     >>> plt.draw() # doctest: +SKIP
 
     Close plot
-    >>> plt.close()
+    >>> plt.close(fig)
 
     """
     # check for non-empty prefix
@@ -1270,15 +1243,13 @@ def disp_xlimits(figs, xmin=None, xmax=None):
     >>> from dstauffman import disp_xlimits
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
+    >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
-    >>> plt.plot(x, y) # doctest: +ELLIPSIS
-    [<matplotlib.lines.Line2D object at 0x...>]
-    >>> plt.title('X vs Y') # doctest: +ELLIPSIS
-    <matplotlib.text.Text object at 0x...>
+    >>> _ = ax.plot(x, y)
+    >>> _ = ax.set_title('X vs Y')
     >>> plt.show(block=False) # doctest: +SKIP
     >>> xmin = 2
     >>> xmax = 5
@@ -1286,7 +1257,7 @@ def disp_xlimits(figs, xmin=None, xmax=None):
     >>> plt.draw() # doctest: +SKIP
 
     Close plot
-    >>> plt.close()
+    >>> plt.close(fig)
 
     """
     # check for single figure
@@ -1333,17 +1304,15 @@ def setup_plots(figs, opts, plot_type='time'):
     >>> from dstauffman import setup_plots, Opts
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
+    >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
-    >>> plt.plot(x, y) # doctest: +ELLIPSIS
-    [<matplotlib.lines.Line2D object at 0x...>]
-    >>> plt.title('X vs Y') # doctest: +ELLIPSIS
-    <matplotlib.text.Text object at 0x...>
-    >>> plt.xlabel('time [years]') # doctest: +SKIP
-    >>> plt.ylabel('value [radians]') # doctest: +SKIP
+    >>> _ = ax.plot(x, y)
+    >>> _ = ax.set_title('X vs Y')
+    >>> _ = ax.set_xlabel('time [years]')
+    >>> _ = ax.set_ylabel('value [radians]')
     >>> plt.show(block=False) # doctest: +SKIP
     >>> opts = Opts()
     >>> opts.case_name = 'Testing'
@@ -1396,17 +1365,15 @@ def figmenu(figs):
     >>> from dstauffman import figmenu
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> plt.ioff()
     >>> fig = plt.figure()
     >>> fig.canvas.set_window_title('Figure Title')
+    >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
-    >>> plt.plot(x, y) # doctest: +ELLIPSIS
-    [<matplotlib.lines.Line2D object at 0x...>]
-    >>> plt.title('X vs Y') # doctest: +ELLIPSIS
-    <matplotlib.text.Text object at 0x...>
-    >>> plt.xlabel('time [years]') # doctest: +SKIP
-    >>> plt.ylabel('value [radians]') # doctest: +SKIP
+    >>> _ = ax.plot(x, y)
+    >>> _ = ax.set_title('X vs Y')
+    >>> _ = ax.set_xlabel('time [years]')
+    >>> _ = ax.set_ylabel('value [radians]')
     >>> plt.show(block=False) # doctest: +SKIP
     >>> figmenu(fig)
 
@@ -1454,5 +1421,6 @@ def rgb_ints_to_hex(int_tuple):
 
 #%% Unit test
 if __name__ == '__main__':
+    plt.ioff()
     unittest.main(module='tests.test_plotting', exit=False)
     doctest.testmod(verbose=False)

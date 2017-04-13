@@ -207,7 +207,6 @@ class Test_MyCustomToolbar(unittest.TestCase):
         Multiple prevs
     """
     def setUp(self):
-        plt.ioff()
         self.fig1 = plt.figure()
         self.fig2 = plt.figure()
         self.fig1.toolbar_custom_ = dcs.MyCustomToolbar(self.fig1)
@@ -268,6 +267,7 @@ class Test_ColorMap(unittest.TestCase):
         self.low        = 0
         self.high       = 1
         self.num_colors = 5
+        self.fig        = None
 
     def test_nominal(self):
         cm = dcs.ColorMap(self.colormap, self.low, self.high)
@@ -293,23 +293,23 @@ class Test_ColorMap(unittest.TestCase):
 
     def test_set_colors(self):
         cm = dcs.ColorMap(num_colors=5)
-        plt.ioff()
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+        self.fig = plt.figure()
+        ax = self.fig.add_subplot(111)
         cm.set_colors(ax)
         ax.plot(0, 0)
-        plt.close()
         self.assertTrue(True)
 
     def test_set_color_failure(self):
         cm = dcs.ColorMap()
-        plt.ioff()
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
+        self.fig = plt.figure()
+        ax = self.fig.add_subplot(111)
         ax.plot(0, 0)
         with self.assertRaises(ValueError):
             cm.set_colors(ax)
-        plt.close()
+
+    def tearDown(self):
+        if self.fig is not None:
+            plt.close(self.fig)
 
 #%% Functions for testing
 # _ignore_data
@@ -446,6 +446,7 @@ class Test_plot_time_history(unittest.TestCase):
         self.truth = dcs.TruthPlotter(self.time, np.cos(self.time))
         self.data_matrix = np.column_stack((self.data, self.truth.data))
         self.second_y_scale = 1000000
+        self.fig = None
 
     def test_normal(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_)
@@ -465,6 +466,8 @@ class Test_plot_time_history(unittest.TestCase):
         with self.assertRaises(ValueError):
             dcs.plot_time_history(self.time, self.data, self.label, self.type_, \
                 truth=self.truth)
+        # close uncompleted plot window
+        plt.close(plt.gcf())
 
     def test_opts(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, opts=self.opts)
@@ -517,7 +520,7 @@ class Test_plot_time_history(unittest.TestCase):
             rms_in_legend=False, plot_as_diffs=True)
 
     def tearDown(self):
-        if hasattr(self,'fig'):
+        if self.fig is not None:
             plt.close(self.fig)
 
 # plot_correlation_matrix
@@ -830,8 +833,6 @@ class Test_storefig(unittest.TestCase):
         cls.title = 'Test Plot'
         cls.folder = dcs.get_tests_dir()
         cls.plot_type = ['png', 'jpg']
-        # turn interaction off to make the plots draw all at once on a show() command
-        plt.ioff()
         # create the figure and set the title
         cls.fig = plt.figure()
         cls.fig.canvas.set_window_title(cls.title)
@@ -839,11 +840,11 @@ class Test_storefig(unittest.TestCase):
         ax = cls.fig.add_subplot(111)
         ax.plot(cls.time, cls.data)
         # add labels and legends
-        plt.xlabel('Time [year]')
-        plt.ylabel('Value [units]')
-        plt.title(cls.title)
+        ax.set_xlabel('Time [year]')
+        ax.set_ylabel('Value [units]')
+        ax.set_title(cls.title)
         # show a grid
-        plt.grid(True)
+        ax.grid(True)
 
     def test_saving(self):
         dcs.storefig(self.fig, self.folder, self.plot_type[0])
@@ -893,15 +894,15 @@ class Test_titleprefix(unittest.TestCase):
         multiple figures
     """
     def setUp(self):
-        plt.ioff()
         self.fig = plt.figure()
         self.title = 'Figure Title'
         self.prefix = 'Prefix'
         self.fig.canvas.set_window_title(self.title)
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)
-        plt.plot(x, y)
-        plt.title('X vs Y')
+        ax = self.fig.add_subplot(111)
+        ax.plot(x, y)
+        ax.set_title('X vs Y')
 
     def test_normal(self):
         dcs.titleprefix(self.fig, self.prefix)
@@ -911,10 +912,9 @@ class Test_titleprefix(unittest.TestCase):
 
     def test_multiple_figs(self):
         dcs.titleprefix([self.fig, self.fig], self.prefix)
-        plt.close()
 
     def tearDown(self):
-        plt.close()
+        plt.close(self.fig)
 
 # disp_xlimits
 class Test_disp_xlimits(unittest.TestCase):
@@ -927,13 +927,13 @@ class Test_disp_xlimits(unittest.TestCase):
         Multiple figures
     """
     def setUp(self):
-        plt.ioff()
         self.fig = plt.figure()
         self.xmin = 2
         self.xmax = 5
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)
-        plt.plot(x, y)
+        ax = self.fig.add_subplot(111)
+        ax.plot(x, y)
 
     def test_normal(self):
         dcs.disp_xlimits(self.fig, self.xmin, self.xmax)
@@ -951,7 +951,7 @@ class Test_disp_xlimits(unittest.TestCase):
         dcs.disp_xlimits([self.fig, self.fig], self.xmin, self.xmax)
 
     def tearDown(self):
-        plt.close()
+        plt.close(self.fig)
 
 # setup_plots
 class Test_setup_plots(unittest.TestCase):
@@ -965,15 +965,15 @@ class Test_setup_plots(unittest.TestCase):
         Show the plot link
     """
     def setUp(self):
-        plt.ioff()
         self.fig = plt.figure()
         self.fig.canvas.set_window_title('Figure Title')
+        ax = self.fig.add_subplot(111)
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)
-        plt.plot(x, y)
-        plt.title('X vs Y')
-        plt.xlabel('time [years]')
-        plt.ylabel('value [radians]')
+        ax.plot(x, y)
+        ax.set_title('X vs Y')
+        ax.set_xlabel('time [years]')
+        ax.set_ylabel('value [radians]')
         self.opts = dcs.Opts()
         self.opts.case_name = 'Testing'
         self.opts.show_plot = True
@@ -992,12 +992,12 @@ class Test_setup_plots(unittest.TestCase):
         dcs.setup_plots(self.fig, self.opts)
 
     def test_multiple_figs(self):
-        self.fig = [self.fig]
-        plt.ioff()
-        new_fig = plt.figure()
-        plt.plot(0, 0)
-        self.fig.append(new_fig)
-        dcs.setup_plots(self.fig, self.opts)
+        fig_list = [self.fig]
+        (new_fig, ax) = plt.subplots()
+        ax.plot(0, 0)
+        fig_list.append(new_fig)
+        dcs.setup_plots(fig_list, self.opts)
+        plt.close(new_fig)
 
     def test_saving_plot(self):
         this_filename = os.path.join(dcs.get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
@@ -1019,7 +1019,7 @@ class Test_setup_plots(unittest.TestCase):
         self.assertTrue(output.startswith('Plots saved to <a href="'))
 
     def tearDown(self):
-        plt.close()
+        plt.close(self.fig)
 
 # figmenu
 class Test_figmenu(unittest.TestCase):
@@ -1029,7 +1029,6 @@ class Test_figmenu(unittest.TestCase):
         List input
     """
     def setUp(self):
-        plt.ioff()
         self.fig1 = plt.figure()
         self.fig2 = plt.figure()
 
@@ -1065,4 +1064,5 @@ class Test_rgb_ints_to_hex(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
+    plt.ioff()
     unittest.main(exit=False)

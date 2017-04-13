@@ -547,4 +547,5 @@ class Test_bounded_normal_draw(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
+    plt.ioff()
     unittest.main(exit=False)

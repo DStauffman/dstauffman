@@ -8,12 +8,15 @@ Notes
 """
 
 #%% Imports
+import matplotlib.pyplot as plt
 import sys
 import unittest
 from PyQt5.QtWidgets import QApplication
 
 #%% Tests
 if __name__ == '__main__':
+    # turn interactive plotting off
+    plt.ioff()
     # open a qapp
     if QApplication.instance() is None:
         qapp = QApplication(sys.argv)

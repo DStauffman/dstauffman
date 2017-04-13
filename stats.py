@@ -577,8 +577,6 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
         # check optional inputs
         if opts is None:
             opts = Opts()
-        # turn interactive plotting off
-        plt.ioff()
         # create a figure and axis
         fig = plt.figure()
         fig.canvas.set_window_title('Cost Benefit Frontier')
@@ -600,11 +598,11 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
             ax.annotate(names[i], xy=(qaly[i], cost[i]+dy), xycoords='data', horizontalalignment='center', \
                 verticalalignment='bottom', fontsize=12)
         # add some labels and such
-        plt.title(fig.canvas.get_window_title())
-        plt.xlabel('Benefits')
-        plt.ylabel('Costs')
-        plt.legend(loc='upper left')
-        plt.grid(True)
+        ax.set_title(fig.canvas.get_window_title())
+        ax.set_xlabel('Benefits')
+        ax.set_ylabel('Costs')
+        ax.legend(loc='upper left')
+        ax.grid(True)
         # reset limits with including (0,0) point in case it skews everything too much
         ax.axis(lim)
         # add standard plotting features
@@ -679,5 +677,6 @@ def bounded_normal_draw(num, values, field, prng):
 
 #%% Unit test
 if __name__ == '__main__':
+    plt.ioff()
     unittest.main(module='tests.test_stats', exit=False)
     doctest.testmod(verbose=False)
