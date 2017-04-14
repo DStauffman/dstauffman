@@ -832,7 +832,7 @@ class Test_storefig(unittest.TestCase):
         cls.data = np.sin(cls.time)
         cls.title = 'Test Plot'
         cls.folder = dcs.get_tests_dir()
-        cls.plot_type = ['png', 'jpg']
+        cls.plot_type = 'png'
         # create the figure and set the title
         cls.fig = plt.figure()
         cls.fig.canvas.set_window_title(cls.title)
@@ -847,26 +847,35 @@ class Test_storefig(unittest.TestCase):
         ax.grid(True)
 
     def test_saving(self):
-        dcs.storefig(self.fig, self.folder, self.plot_type[0])
+        dcs.storefig(self.fig, self.folder, self.plot_type)
         # assert that file exists
-        this_filename = os.path.join(self.folder, self.title + '.' + self.plot_type[0])
+        this_filename = os.path.join(self.folder, self.title + '.' + self.plot_type)
         self.assertTrue(os.path.isfile(this_filename))
         # remove file
         os.remove(this_filename)
 
     def test_multiple_plot_types(self):
-        dcs.storefig(self.fig, self.folder, self.plot_type)
+        plot_types = ['png', 'svg']
+        dcs.storefig(self.fig, self.folder, plot_types)
         # assert that files exist
-        for this_type in self.plot_type:
+        for this_type in plot_types:
             this_filename = os.path.join(self.folder, self.title + '.' + this_type)
             self.assertTrue(os.path.isfile(this_filename))
             # remove file
             os.remove(this_filename)
 
+    def test_save_as_jpg(self):
+        dcs.storefig(self.fig, self.folder, 'jpg')
+        # assert that files exist
+        this_filename = os.path.join(self.folder, self.title + '.jpg')
+        self.assertTrue(os.path.isfile(this_filename))
+        # remove file
+        os.remove(this_filename)
+
     def test_multiple_figures(self):
-        dcs.storefig([self.fig, self.fig], self.folder, self.plot_type[0])
+        dcs.storefig([self.fig, self.fig], self.folder, self.plot_type)
         # assert that file exists
-        this_filename = os.path.join(self.folder, self.title + '.' + self.plot_type[0])
+        this_filename = os.path.join(self.folder, self.title + '.' + self.plot_type)
         self.assertTrue(os.path.isfile(this_filename))
         # remove file
         os.remove(this_filename)
