@@ -568,7 +568,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
 
     # override the RMS option from opts (both must be true to plot the RMS in the legend)
     rms_in_legend &= opts.show_rms
-    show_legend = rms_in_legend or (truth is not None and not truth.is_null)
+    show_legend = rms_in_legend or plot_as_diffs or (truth is not None and not truth.is_null)
 
     # ensure that data is at least 2D
     if data.ndim == 0:
