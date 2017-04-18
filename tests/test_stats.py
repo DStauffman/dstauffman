@@ -515,7 +515,7 @@ class Test_bounded_normal_draw(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        self.num    = 10000
+        self.num    = 50000
         self.mean   = 100
         self.std    = 50
         self.min    = 20
