@@ -815,6 +815,30 @@ class Test_plot_bpe_convergence(unittest.TestCase):
             for this_fig in self.figs:
                 plt.close(this_fig)
 
+# plot_population_pyramid
+class Test_plot_population_pyramid(unittest.TestCase):
+    r"""
+    Tests the plot_population_pyramid function with the following cases:
+        Nominal
+        with Opts
+    """
+    def setUp(self):
+        self.age_bins   = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
+        self.male_pop   = np.array([100, 200, 300, 400, 500], dtype=int)
+        self.female_pop = np.array([125, 225, 325, 375, 450], dtype=int)
+        self.opts       = dcs.Opts()
+        self.fig        = None
+
+    def test_nominal(self):
+        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_pop, self.female_pop)
+
+    def test_with_opts(self):
+        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_pop, self.female_pop, self.opts)
+
+    def tearDown(self):
+        if self.fig is not None:
+            plt.close(self.fig)
+
 # storefig
 class Test_storefig(unittest.TestCase):
     r"""

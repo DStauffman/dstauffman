@@ -1070,6 +1070,58 @@ def plot_bpe_convergence(costs, opts=None):
     setup_plots(fig, opts, 'time')
     return fig
 
+#%% Functions - plot_population_pyramid
+def plot_population_pyramid(age_bins, male_pop, female_pop, opts=None):
+    r"""
+    Plots the standard population pyramid
+
+    Parameters
+    ----------
+    age_bins : (N+1,) array_like of float/ints
+        Age boundaries to plot
+    male_pop : (N,) array_like of int
+        Male population in each bin
+    female_pop : (N,) array_like of int
+        Female population in each bin
+    opts : class Opts, optional
+        Plotting options
+
+    Returns
+    -------
+    fig : object
+        figure handle
+
+    References
+    ----------
+    #.  https://en.wikipedia.org/wiki/Population_pyramid
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2017.
+
+    Examples
+    --------
+
+    >>> from dstauffman import plot_population_pyramid
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> age_bins   = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
+    >>> male_pop   = np.array([100, 200, 300, 400, 500], dtype=int)
+    >>> female_pop = np.array([125, 225, 325, 375, 450], dtype=int)
+    >>> fig = plot_population_pyramid(age_bins, male_pop, female_pop)
+
+    Close figure
+    >>> plt.close(fig)
+
+    """
+    # check optional inputs
+    if opts is None:
+        opts = Opts()
+
+    # create a figure
+    fig = plt.figure()
+    return fig
+
 #%% Functions - storefig
 def storefig(fig, folder=None, plot_type='png'):
     r"""
