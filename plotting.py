@@ -34,6 +34,7 @@ except ImportError: # pragma: no cover
 # model imports
 from dstauffman.classes   import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
+from dstauffman.latex     import bins_to_str_ranges
 from dstauffman.utils     import get_images_dir, pprint_dict, rms
 
 #%% Classes - _HoverButton
@@ -1071,7 +1072,7 @@ def plot_bpe_convergence(costs, opts=None):
     return fig
 
 #%% Functions - plot_population_pyramid
-def plot_population_pyramid(age_bins, male_pop, female_pop, opts=None):
+def plot_population_pyramid(age_bins, male_pop, female_pop, title='Population Pyramid', opts=None):
     r"""
     Plots the standard population pyramid
 
@@ -1106,20 +1107,50 @@ def plot_population_pyramid(age_bins, male_pop, female_pop, opts=None):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> age_bins   = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
-    >>> male_pop   = np.array([100, 200, 300, 400, 500], dtype=int)
-    >>> female_pop = np.array([125, 225, 325, 375, 450], dtype=int)
+    >>> male_pop   = np.array([500, 400, 300, 200, 100], dtype=int)
+    >>> female_pop = np.array([450, 375, 325, 225, 125], dtype=int)
     >>> fig = plot_population_pyramid(age_bins, male_pop, female_pop)
 
     Close figure
     >>> plt.close(fig)
 
     """
+    # hard-coded values
+    scale = 100
+
     # check optional inputs
     if opts is None:
         opts = Opts()
 
-    # create a figure
+    # convert data to percentages
+    num_pts   = age_bins.size - 1
+    total_pop = np.sum(male_pop) + np.sum(female_pop)
+    male_per  = male_pop / total_pop
+    fmal_per  = female_pop / total_pop
+    y_values  = np.arange(num_pts)
+    y_labels  = bins_to_str_ranges(age_bins, dt=1, cutoff=200)
+
+    # create the figure and axis and set the title
     fig = plt.figure()
+    fig.canvas.set_window_title(title)
+    ax = fig.add_subplot(111)
+
+    # plot bars
+    ax.barh(y_values, -scale*male_per, 0.95, color='b', label='Male')
+    ax.barh(y_values,  scale*fmal_per, 0.95, color='r', label='Female')
+
+    # add labels
+    ax.set_xlabel('Population [%]')
+    ax.set_ylabel('Age [years]')
+    ax.set_title(title)
+    ax.set_yticks(y_values)
+    ax.set_yticklabels(y_labels)
+    ax.set_xticklabels(np.abs(ax.get_xticks()))
+    ax.legend()
+
+    # Setup plots
+    setup_plots(fig, opts, 'dist_no_yscale')
+
     return fig
 
 #%% Functions - storefig

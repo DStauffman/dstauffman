@@ -826,14 +826,18 @@ class Test_plot_population_pyramid(unittest.TestCase):
         self.age_bins   = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
         self.male_pop   = np.array([100, 200, 300, 400, 500], dtype=int)
         self.female_pop = np.array([125, 225, 325, 375, 450], dtype=int)
+        self.title      = 'Test Title'
         self.opts       = dcs.Opts()
         self.fig        = None
 
     def test_nominal(self):
         self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_pop, self.female_pop)
 
+    def test_title(self):
+        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_pop, self.female_pop, self.title)
+
     def test_with_opts(self):
-        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_pop, self.female_pop, self.opts)
+        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_pop, self.female_pop, opts=self.opts)
 
     def tearDown(self):
         if self.fig is not None:
