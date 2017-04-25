@@ -820,24 +820,23 @@ class Test_plot_population_pyramid(unittest.TestCase):
     r"""
     Tests the plot_population_pyramid function with the following cases:
         Nominal
-        with Opts
     """
     def setUp(self):
-        self.age_bins   = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
-        self.male_pop   = np.array([100, 200, 300, 400, 500], dtype=int)
-        self.female_pop = np.array([125, 225, 325, 375, 450], dtype=int)
-        self.title      = 'Test Title'
-        self.opts       = dcs.Opts()
-        self.fig        = None
+        self.age_bins = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
+        self.male_per = np.array([100, 200, 300, 400, 500], dtype=int)
+        self.fmal_per = np.array([125, 225, 325, 375, 450], dtype=int)
+        self.title    = 'Test Title'
+        self.opts     = dcs.Opts()
+        self.name1    = 'M'
+        self.name2    = 'W'
+        self.color1   = 'k'
+        self.color2   = 'w'
+        self.fig      = None
 
     def test_nominal(self):
-        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_pop, self.female_pop)
-
-    def test_title(self):
-        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_pop, self.female_pop, self.title)
-
-    def test_with_opts(self):
-        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_pop, self.female_pop, opts=self.opts)
+        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_per, self.fmal_per, \
+            self.title, opts=self.opts, name1=self.name1, name2=self.name2, color1=self.color1, \
+            color2=self.color2)
 
     def tearDown(self):
         if self.fig is not None:
