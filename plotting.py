@@ -1072,7 +1072,8 @@ def plot_bpe_convergence(costs, opts=None):
     return fig
 
 #%% Functions - plot_population_pyramid
-def plot_population_pyramid(age_bins, male_pop, female_pop, title='Population Pyramid', opts=None):
+def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyramid', *, opts=None, \
+        name1='Male', name2='Female', color1='b', color2='r'):
     r"""
     Plots the standard population pyramid
 
@@ -1080,12 +1081,22 @@ def plot_population_pyramid(age_bins, male_pop, female_pop, title='Population Py
     ----------
     age_bins : (N+1,) array_like of float/ints
         Age boundaries to plot
-    male_pop : (N,) array_like of int
-        Male population in each bin
-    female_pop : (N,) array_like of int
-        Female population in each bin
+    male_per : (N,) array_like of int
+        Male population percentage in each bin
+    fmal_per : (N,) array_like of int
+        Female population percentage in each bin
+    title : str, optional, default is 'Population Pyramid'
+        Title for the plot
     opts : class Opts, optional
         Plotting options
+    name1 : str, optional
+        Name for data source 1
+    name2 : str, optional
+        Name for data source 2
+    color1 : str or valid color tuple, optional
+        Color for data source 1
+    color2 : str or valid color tuple, optional
+        Color for data source 2
 
     Returns
     -------
@@ -1106,10 +1117,10 @@ def plot_population_pyramid(age_bins, male_pop, female_pop, title='Population Py
     >>> from dstauffman import plot_population_pyramid
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> age_bins   = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
-    >>> male_pop   = np.array([500, 400, 300, 200, 100], dtype=int)
-    >>> female_pop = np.array([450, 375, 325, 225, 125], dtype=int)
-    >>> fig = plot_population_pyramid(age_bins, male_pop, female_pop)
+    >>> age_bins = np.array([  0,   5,  10,  15,  20, 1000], dtype=int)
+    >>> male_per = np.array([500, 400, 300, 200, 100]) / 3000
+    >>> fmal_per = np.array([450, 375, 325, 225, 125]) / 3000
+    >>> fig      = plot_population_pyramid(age_bins, male_per, fmal_per)
 
     Close figure
     >>> plt.close(fig)
@@ -1124,9 +1135,6 @@ def plot_population_pyramid(age_bins, male_pop, female_pop, title='Population Py
 
     # convert data to percentages
     num_pts   = age_bins.size - 1
-    total_pop = np.sum(male_pop) + np.sum(female_pop)
-    male_per  = male_pop / total_pop
-    fmal_per  = female_pop / total_pop
     y_values  = np.arange(num_pts)
     y_labels  = bins_to_str_ranges(age_bins, dt=1, cutoff=200)
 
@@ -1136,8 +1144,8 @@ def plot_population_pyramid(age_bins, male_pop, female_pop, title='Population Py
     ax = fig.add_subplot(111)
 
     # plot bars
-    ax.barh(y_values, -scale*male_per, 0.95, color='b', label='Male')
-    ax.barh(y_values,  scale*fmal_per, 0.95, color='r', label='Female')
+    ax.barh(y_values, -scale*male_per, 0.95, color=color1, label=name1)
+    ax.barh(y_values,  scale*fmal_per, 0.95, color=color2, label=name2)
 
     # add labels
     ax.set_xlabel('Population [%]')
