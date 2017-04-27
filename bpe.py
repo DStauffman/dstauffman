@@ -829,7 +829,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     except MemoryError:
         if log_level >= 6:
             print('Singular value decomposition of Jacobian failed.')
-        V_jacobian = np.nan * np.ones((num_params, num_params))
+        V_jacobian = np.full((num_params, num_params), np.nan, dtype=float)
         covariance = np.inv(jacobian.T @ jacobian)
 
     param_one_sigmas = np.sqrt(np.diag(covariance))

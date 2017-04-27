@@ -76,7 +76,7 @@ def cost_wrapper(results_data, *, results_time, truth_time, truth_data, sim_para
 def get_parameter(sim_params, *, names):
     r"""Simple example parameter getter."""
     num = len(names)
-    values = np.nan * np.ones(num)
+    values = np.full(num, np.nan, dtype=float)
     for (ix, name) in enumerate(names):
         if hasattr(sim_params, name):
             values[ix] = getattr(sim_params, name)

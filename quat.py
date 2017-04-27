@@ -392,7 +392,7 @@ def quat_interp(time, quat, ti, inclusive=True):
             raise
 
     # initialize output
-    qout  = np.nan * np.ones((QUAT_SIZE, num))
+    qout  = np.full((QUAT_SIZE, num), np.nan, dtype=float)
 
     # Simple cases
     if num == 0:
