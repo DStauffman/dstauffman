@@ -163,7 +163,7 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
         return state
     else:
         if np.isscalar(max_months):
-            max_months = max_months * np.ones(len(distribution))
+            max_months = np.full(len(distribution), max_months)
         mons = np.ceil(max_months[state-start_num] * prng.beta(alpha, beta, num)).astype(int)
         return (state, mons)
 

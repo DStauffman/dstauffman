@@ -667,7 +667,7 @@ def bounded_normal_draw(num, values, field, prng):
         this_max  = np.inf
     # calculate the normal distribution
     if this_std == 0:
-        out = this_mean * np.ones(num)
+        out = np.full(num, this_mean)
     else:
         out = prng.normal(this_mean, this_std, size=num)
     # enforce the min and maxes

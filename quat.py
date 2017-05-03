@@ -127,7 +127,7 @@ def qrot(axis, angle):
         quat[axis-1, :] = np.sin(angle/2)
     elif np.isscalar(angle):
         # single angle, multiple axis case
-        quat = np.array([[0], [0], [0], [np.cos(angle/2)]]) * np.ones((1, len(axis)))
+        quat = np.array([[0], [0], [0], [np.cos(angle/2)]]) * np.ones((1, len(axis))) # TODO: formulate better
         for (i, this_axis) in enumerate(axis): # TODO: eliminate this for loop somehow?
             quat[this_axis-1, i] = np.sin(angle/2)
     else:
@@ -428,7 +428,7 @@ def quat_interp(time, quat, ti, inclusive=True):
 
     # Calculations
     # find index within time to surround ti, accounting for the end of the vector
-    index = INT_TOKEN * np.ones(num, dtype=int)
+    index = np.full(num, INT_TOKEN, dtype=int)
     for i in np.nonzero(ix_calc)[0]:
         temp = np.nonzero(ti[i] <= time)[0]
         if temp[0] != len(time)-1:
