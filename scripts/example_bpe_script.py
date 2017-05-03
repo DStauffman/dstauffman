@@ -42,10 +42,10 @@ def _get_truth_index(results_time, truth_time):
     # Hard-coded values
     precision    = 1e-7
     # find the indices to truth
-    ix_truth     = np.nonzero((truth_time >= results_time[0] - precision) & (truth_time <= \
-        results_time[-1] + precision))[0]
+    ix_truth     = np.flatnonzero((truth_time >= results_time[0] - precision) & (truth_time <= \
+        results_time[-1] + precision))
     # find the indices to results (in case truth isn't long enough)
-    ix_results   = np.nonzero(results_time <= truth_time[-1] + precision)[0]
+    ix_results   = np.flatnonzero(results_time <= truth_time[-1] + precision)
     # return the indices
     return (ix_truth, ix_results)
 

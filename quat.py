@@ -429,8 +429,8 @@ def quat_interp(time, quat, ti, inclusive=True):
     # Calculations
     # find index within time to surround ti, accounting for the end of the vector
     index = np.full(num, INT_TOKEN, dtype=int)
-    for i in np.nonzero(ix_calc)[0]:
-        temp = np.nonzero(ti[i] <= time)[0]
+    for i in np.flatnonzero(ix_calc):
+        temp = np.flatnonzero(ti[i] <= time)
         if temp[0] != len(time)-1:
             index[i] = temp[0] + 1
         else:

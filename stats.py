@@ -507,7 +507,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
         # check for strongly dominated strategies
         if not np.all(np.diff(sorted_qaly) >= 0):
             # find the first occurence (increment by one to find the one less effective than the last)
-            bad = np.nonzero(np.diff(sorted_qaly) < 0)[0] + 1
+            bad = np.flatnonzero(np.diff(sorted_qaly) < 0) + 1
             if len(bad) == 0:
                 raise ValueError('Index should never be empty, something unexpected happended.') # pragma: no cover
             # update the mask and continue to next pass of while loop
@@ -522,7 +522,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
         # check for weakly dominated strategies
         if not np.all(np.diff(icer_out) >= 0):
             # find the first bad occurence
-            bad = np.nonzero(np.diff(icer_out) < 0)[0]
+            bad = np.flatnonzero(np.diff(icer_out) < 0)
             if len(bad) == 0:
                 raise ValueError('Index should never be empty, something unexpected happended.') # pragma: no cover
             # update mask and continue to next pass
@@ -537,7 +537,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     order[keep] = ix_sort
 
     # build an index to pull data out
-    temp = np.nonzero(~np.isnan(order))[0]
+    temp = np.flatnonzero(~np.isnan(order))
     ix   = temp[order[~np.isnan(order)].astype(int)]
 
     # recalculate based on given baseline
