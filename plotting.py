@@ -367,8 +367,8 @@ class ColorMap(Frozen):
             # for older matplotlib versions, use deprecated set_color_cycle
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
 
-#%% Functions - _ignore_data
-def _ignore_data(data, ignore_empties, col=None):
+#%% Functions - ignore_plot_data
+def ignore_plot_data(data, ignore_empties, col=None):
     r"""
     Determines whether to ignore this data or not.
 
@@ -393,12 +393,12 @@ def _ignore_data(data, ignore_empties, col=None):
     Examples
     --------
 
-    >>> from dstauffman.plotting import _ignore_data
+    >>> from dstauffman import ignore_plot_data
     >>> import numpy as np
     >>> data = np.zeros((3, 10), dtype=float)
     >>> ignore_empties = True
     >>> col = 2
-    >>> ignore = _ignore_data(data, ignore_empties, col)
+    >>> ignore = ignore_plot_data(data, ignore_empties, col)
     >>> print(ignore)
     True
 
@@ -865,7 +865,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
         colormap = DEFAULT_COLORMAP
 
     # check for valid data
-    if _ignore_data(data, ignore_empties):
+    if ignore_plot_data(data, ignore_empties):
         print(' ' + label + ' plot skipped due to missing data.')
         return None
 
@@ -888,7 +888,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     ax = fig.add_subplot(111)
     cm.set_colors(ax)
     for i in range(num_bins):
-        if not _ignore_data(data, ignore_empties, col=i):
+        if not ignore_plot_data(data, ignore_empties, col=i):
             ax.plot(time, scale*data[:, i], '.-', label=legend[i])
 
     # add labels and legends
@@ -965,7 +965,7 @@ def plot_bar_breakdown(time, data, label, opts=None, legend=None, colormap=None,
         colormap = DEFAULT_COLORMAP
 
     # check for valid data
-    if _ignore_data(data, ignore_empties):
+    if ignore_plot_data(data, ignore_empties):
         print(' ' + label + ' plot skipped due to missing data.')
         return
 
@@ -993,7 +993,7 @@ def plot_bar_breakdown(time, data, label, opts=None, legend=None, colormap=None,
     fig.canvas.set_window_title(this_title)
     ax = fig.add_subplot(111)
     for i in range(num_bins):
-        if not _ignore_data(data, ignore_empties, col=i):
+        if not ignore_plot_data(data, ignore_empties, col=i):
             # Note: The performance of ax.bar is really slow with large numbers of bars (>20), so
             # fill_between is a better alternative
             ax.fill_between(time, scale*bottoms[:, i], scale*bottoms[:, i+1], step='mid', \

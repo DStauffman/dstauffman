@@ -312,10 +312,10 @@ class Test_ColorMap(unittest.TestCase):
             plt.close(self.fig)
 
 #%% Functions for testing
-# _ignore_data
-class Test__ignore_data(unittest.TestCase):
+# ignore_plot_data
+class Test_ignore_plot_data(unittest.TestCase):
     r"""
-    Tests the _ignore_data function with the following cases:
+    Tests the ignore_plot_data function with the following cases:
         None
         Not ignoring
         Ignoring full data
@@ -326,45 +326,45 @@ class Test__ignore_data(unittest.TestCase):
         self.ignore_empties = True
 
     def test_none(self):
-        ignore = dcs.plotting._ignore_data(None, True)
+        ignore = dcs.ignore_plot_data(None, True)
         self.assertTrue(ignore)
-        ignore = dcs.plotting._ignore_data(None, False)
+        ignore = dcs.ignore_plot_data(None, False)
         self.assertTrue(ignore)
-        ignore = dcs.plotting._ignore_data(None, False, 0)
+        ignore = dcs.ignore_plot_data(None, False, 0)
         self.assertTrue(ignore)
-        ignore = dcs.plotting._ignore_data(None, True, 0)
+        ignore = dcs.ignore_plot_data(None, True, 0)
         self.assertTrue(ignore)
 
     def test_not_ignoring(self):
-        ignore = dcs.plotting._ignore_data(self.data, False)
+        ignore = dcs.ignore_plot_data(self.data, False)
         self.assertFalse(ignore)
-        ignore = dcs.plotting._ignore_data(self.data, False, 0)
+        ignore = dcs.ignore_plot_data(self.data, False, 0)
         self.assertFalse(ignore)
 
     def test_ignoring_no_col(self):
-        ignore = dcs.plotting._ignore_data(self.data, self.ignore_empties)
+        ignore = dcs.ignore_plot_data(self.data, self.ignore_empties)
         self.assertTrue(ignore)
         self.data[1, 2] = np.nan
-        ignore = dcs.plotting._ignore_data(self.data, self.ignore_empties)
+        ignore = dcs.ignore_plot_data(self.data, self.ignore_empties)
         self.assertTrue(ignore)
         self.data[2, 5] = 0.1
-        ignore = dcs.plotting._ignore_data(self.data, self.ignore_empties)
+        ignore = dcs.ignore_plot_data(self.data, self.ignore_empties)
         self.assertFalse(ignore)
 
     def test_ignoring_col(self):
-        ignore = dcs.plotting._ignore_data(self.data, self.ignore_empties, 1)
+        ignore = dcs.ignore_plot_data(self.data, self.ignore_empties, 1)
         self.assertTrue(ignore)
         self.data[1, 2] = np.nan
-        ignore = dcs.plotting._ignore_data(self.data, self.ignore_empties, 0)
+        ignore = dcs.ignore_plot_data(self.data, self.ignore_empties, 0)
         self.assertTrue(ignore)
-        ignore = dcs.plotting._ignore_data(self.data, self.ignore_empties, 1)
+        ignore = dcs.ignore_plot_data(self.data, self.ignore_empties, 1)
         self.assertTrue(ignore)
         self.data[2, 5] = 0.1
-        ignore = dcs.plotting._ignore_data(self.data, self.ignore_empties, 0)
+        ignore = dcs.ignore_plot_data(self.data, self.ignore_empties, 0)
         self.assertTrue(ignore)
-        ignore = dcs.plotting._ignore_data(self.data, self.ignore_empties, 1)
+        ignore = dcs.ignore_plot_data(self.data, self.ignore_empties, 1)
         self.assertTrue(ignore)
-        ignore = dcs.plotting._ignore_data(self.data, self.ignore_empties, 5)
+        ignore = dcs.ignore_plot_data(self.data, self.ignore_empties, 5)
         self.assertFalse(ignore)
 
 # close_all
