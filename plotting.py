@@ -1147,6 +1147,10 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     ax.barh(y_values, -scale*male_per, 0.95, color=color1, label=name1)
     ax.barh(y_values,  scale*fmal_per, 0.95, color=color2, label=name2)
 
+    # make sure plot is symmetric about zero
+    xlim = max(abs(x) for x in ax.get_xlim())
+    ax.set_xlim(-xlim, xlim)
+
     # add labels
     ax.set_xlabel('Population [%]')
     ax.set_ylabel('Age [years]')
