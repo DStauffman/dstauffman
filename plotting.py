@@ -174,7 +174,17 @@ class TruthPlotter(Frozen):
         r"""Determines if there is no truth to plot, and thus nothing is done."""
         return self.data is None and self.data_lo is None and self.data_hi is None
 
-    def plot_truth(self, ax, scale=1):
+    @staticmethod
+    def get_data(data, scale=1, ix=None):
+        r"""Scales and indexes the data, returning None if it is not there."""
+        if data is None:
+            return data
+        if ix is None:
+            return scale * data
+        else:
+            return scale * data[:, ix]
+
+    def plot_truth(self, ax, scale=1, ix=None):
         r"""Adds the information in the TruthPlotter instance to the given axis, with the optional scale."""
         # check for null case
         if self.is_null:
@@ -183,23 +193,33 @@ class TruthPlotter(Frozen):
         x_lim = ax.get_xlim()
         y_lim = ax.get_ylim()
         # plot the new data
-        if self.data is not None:
-            ax.plot(self.time, scale*self.data, 'k.-', linewidth=2, zorder=8, label=self.name)
+        this_data = self.get_data(self.data, scale, ix)
+        if this_data is not None and not np.all(np.isnan(this_data)):
+            ax.plot(self.time, this_data, 'k.-', linewidth=2, zorder=8, label=self.name)
         if self.type_ == 'normal':
-            if self.data_lo is not None:
-                ax.plot(self.time, scale*self.data_lo, '.-', color='0.5', linewidth=2, zorder=6)
-            if self.data_hi is not None:
-                ax.plot(self.time, scale*self.data_hi, '.-', color='0.5', linewidth=2, zorder=6)
+            this_data = self.get_data(self.data_lo, scale, ix)
+            if this_data is not None and not np.all(np.isnan(this_data)):
+                ax.plot(self.time, this_data, '.-', color='0.5', linewidth=2, zorder=6)
+            this_data = self.get_data(self.data_hi, scale, ix)
+            if self.data_hi is not None and not np.all(np.isnan(this_data)):
+                ax.plot(self.time, this_data, '.-', color='0.5', linewidth=2, zorder=6)
         elif self.type_ == 'errorbar':
             if self.data_lo is not None and self.data_hi is not None:
-                yerr = np.vstack((self.data-self.data_lo, self.data_hi-self.data))
-                ax.errorbar(self.time, scale*self.data, scale*yerr, linestyle='None', \
-                    marker='None', ecolor='c', zorder=6)
+                if ix is None:
+                    yerr = np.vstack((self.data-self.data_lo, self.data_hi-self.data))
+                    ax.errorbar(self.time, scale*self.data, scale*yerr, linestyle='None', \
+                        marker='None', ecolor='c', zorder=6)
+                else:
+                    yerr = np.vstack((self.data[:, ix]-self.data_lo[:,ix], self.data_hi[:,ix]-self.data[:,ix]))
+                    ax.errorbar(self.time, scale*self.data[:, ix], scale*yerr[:, ix], linestyle='None', \
+                        marker='None', ecolor='c', zorder=6)
         else:
             raise ValueError('Unexpected value for type_ of "{}".'.format(self.type_))
-        # restore the original limits, since they might have been changed by the truth data
-        ax.set_xlim(x_lim)
-        ax.set_ylim(y_lim)
+        # potentially restore the original limits, since they might have been changed by the truth data
+        if x_lim != ax.get_xlim():
+            ax.set_xlim(x_lim)
+        if y_lim != ax.get_ylim():
+            ax.set_ylim(y_lim)
 
 #%% Classes - MyCustomToolbar
 class MyCustomToolbar():

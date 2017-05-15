@@ -121,7 +121,7 @@ class Test_TruthPlotter(unittest.TestCase):
         np.testing.assert_array_almost_equal(self.y+0.03, truth.data_hi)
 
     def test_matrix1(self):
-        truth = dcs.TruthPlotter(self.x, self.data[:, np.array([1])])
+        truth = dcs.TruthPlotter(self.x, self.data[:, 1])
         np.testing.assert_array_almost_equal(self.y+0.01, truth.data)
         self.assertTrue(truth.data_lo is None)
         self.assertTrue(truth.data_hi is None)
