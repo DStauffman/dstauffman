@@ -190,8 +190,8 @@ class TruthPlotter(Frozen):
         if self.is_null:
             return
         # get original limits
-        x_lim = ax.get_xlim()
-        y_lim = ax.get_ylim()
+        x_lim = ax.get_xbound()
+        y_lim = ax.get_ybound()
         # plot the new data
         this_data = self.get_data(self.data, scale, ix)
         if this_data is not None and not np.all(np.isnan(this_data)):
@@ -216,10 +216,10 @@ class TruthPlotter(Frozen):
         else:
             raise ValueError('Unexpected value for type_ of "{}".'.format(self.type_))
         # potentially restore the original limits, since they might have been changed by the truth data
-        if x_lim != ax.get_xlim():
-            ax.set_xlim(x_lim)
-        if y_lim != ax.get_ylim():
-            ax.set_ylim(y_lim)
+        if x_lim != ax.get_xbound():
+            ax.set_xbound(*x_lim)
+        if y_lim != ax.get_ybound():
+            ax.set_ybound(*y_lim)
 
 #%% Classes - MyCustomToolbar
 class MyCustomToolbar():
