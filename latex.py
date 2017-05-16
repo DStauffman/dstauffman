@@ -133,16 +133,21 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
     out = []
     # loop through ages
     for r in range(len(bins)-1):
-        # alias the boundaries
-        value1 = bins[r]
-        value2 = bins[r+1]-dt
+        # alias the left boundary
+        left = bins[r]
+        # check for string values and just pass them through
+        if isinstance(left, str):
+            out.append(left)
+            continue
+        # alias the right boundary
+        right = bins[r+1]-dt
         # check for large values, and replace appropriately
-        if value1 == value2:
-            this_str = '{:g}'.format(value1)
-        elif value2 < cutoff:
-            this_str = '{:g}-{:g}'.format(value1, value2)
+        if left == right:
+            this_str = '{:g}'.format(left)
+        elif right < cutoff:
+            this_str = '{:g}-{:g}'.format(left, right)
         else:
-            this_str = '{:g}+'.format(value1)
+            this_str = '{:g}+'.format(left)
         # save this result
         out.append(this_str)
     # return everything combined as a list

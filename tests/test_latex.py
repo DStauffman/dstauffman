@@ -75,6 +75,7 @@ class Test_bins_to_str_ranges(unittest.TestCase):
         Low cut-off
         Bad cut-off
         Single value ranges
+        String passthrough
     """
     def setUp(self):
         self.bins = np.array([0, 20, 40, 60, 10000], dtype=int)
@@ -103,6 +104,10 @@ class Test_bins_to_str_ranges(unittest.TestCase):
     def test_single_ranges(self):
         out = dcs.bins_to_str_ranges(np.array([0, 1, 5, 6, 10000], dtype=int))
         self.assertEqual(out, ['0', '1-4', '5', '6+'])
+
+    def test_str_passthrough(self):
+        out = dcs.bins_to_str_ranges(['Urban', 'Rural', 'ignored'])
+        self.assertEqual(out, ['Urban', 'Rural'])
 
 #%% Unit test execution
 if __name__ == '__main__':
