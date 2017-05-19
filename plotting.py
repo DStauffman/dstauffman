@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as colors
 import matplotlib.cm as cmx
 from matplotlib.patches import Rectangle
+from matplotlib.ticker import StrMethodFormatter
 # Qt imports
 try:
     from PyQt5.QtWidgets import QApplication, QPushButton
@@ -659,6 +660,9 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
         ax.legend()
     # show a grid
     ax.grid(True)
+    # set years to always be whole numbers on the ticks
+    if time_units == 'year':
+        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
     # optionally add second Y axis
     if second_y_scale is not None:
         ax2 = ax.twinx()
@@ -917,6 +921,9 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     ax.set_title(this_title)
     ax.legend()
     ax.grid(True)
+    # set years to always be whole numbers on the ticks
+    if time_units == 'year':
+        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
 
     # optionally add second Y axis
     if second_y_scale is not None:
@@ -1022,6 +1029,8 @@ def plot_bar_breakdown(time, data, label, opts=None, legend=None, colormap=None,
     ax.set_ylabel(label + unit_text)
     ax.set_ylim(0, 100)
     ax.grid(True)
+    # set years to always be whole numbers on the ticks
+    ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
     ax.legend()
     ax.set_title(this_title)
 
