@@ -140,7 +140,7 @@ class TruthPlotter(Frozen):
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.plot(x, y, label='data')
     >>> truth.plot_truth(ax)
-    >>> _ = ax.legend()
+    >>> _ = ax.legend(loc='best')
 
     >>> plt.show(block=False) # doctest: +SKIP
 
@@ -512,7 +512,7 @@ def get_axes_scales(type_):
 #%% Functions - plot_time_history
 def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, colormap=None, second_y_scale=None, rms_in_legend=True, \
-    truth_time=None, truth_data=None):
+    truth_time=None, truth_data=None, legend_loc='best', show_zero=False):
     r"""
     Plots the given data channel versus time, with a generic label argument.
 
@@ -657,9 +657,12 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     ax.set_ylabel(label + unit_text)
     ax.set_title(this_title)
     if show_legend:
-        ax.legend()
+        ax.legend(loc=legend_loc)
     # show a grid
     ax.grid(True)
+    # optionally force zero to be plotted
+    if show_zero and min(ax.get_ylim()) > 0:
+        ax.set_ylim(bottom=0)
     # set years to always be whole numbers on the ticks
     if time_units == 'year':
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
@@ -828,7 +831,8 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
 
 #%% Functions - plot_multiline_history
 def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legend=None, \
-        colormap=None, second_y_scale=None, ignore_empties=False):
+        colormap=None, second_y_scale=None, ignore_empties=False, legend_loc='best', \
+        show_zero=False):
     r"""
     Plots multiple metrics over time.
 
@@ -919,8 +923,11 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     ax.set_xlabel('Time [' + time_units + ']')
     ax.set_ylabel(label + unit_text)
     ax.set_title(this_title)
-    ax.legend()
+    ax.legend(loc=legend_loc)
     ax.grid(True)
+    # optionally force zero to be plotted
+    if show_zero and min(ax.get_ylim()) > 0:
+        ax.set_ylim(bottom=0)
     # set years to always be whole numbers on the ticks
     if time_units == 'year':
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
@@ -937,8 +944,8 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     return fig
 
 #%% Functions - plot_bar_breakdown
-def plot_bar_breakdown(time, data, label, opts=None, legend=None, colormap=None, \
-        ignore_empties=False):
+def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, colormap=None, \
+        ignore_empties=False, legend_loc='best'):
     r"""
     Plots the pie chart like breakdown by percentage in each category over time.
 
@@ -1031,7 +1038,7 @@ def plot_bar_breakdown(time, data, label, opts=None, legend=None, colormap=None,
     ax.grid(True)
     # set years to always be whole numbers on the ticks
     ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
-    ax.legend()
+    ax.legend(loc=legend_loc)
     ax.set_title(this_title)
 
     # Setup plots
@@ -1102,7 +1109,7 @@ def plot_bpe_convergence(costs, opts=None):
 
 #%% Functions - plot_population_pyramid
 def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyramid', *, opts=None, \
-        name1='Male', name2='Female', color1='b', color2='r'):
+        name1='Male', name2='Female', color1='b', color2='r', legend_loc='best'):
     r"""
     Plots the standard population pyramid
 
@@ -1187,7 +1194,7 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     ax.set_yticks(y_values)
     ax.set_yticklabels(y_labels)
     ax.set_xticklabels(np.abs(ax.get_xticks()))
-    ax.legend()
+    ax.legend(loc=legend_loc)
 
     # Setup plots
     setup_plots(fig, opts, 'dist_no_yscale')
