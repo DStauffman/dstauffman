@@ -832,7 +832,7 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
 #%% Functions - plot_multiline_history
 def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legend=None, \
         colormap=None, second_y_scale=None, ignore_empties=False, legend_loc='best', \
-        show_zero=False):
+        show_zero=False, data_lo=None, data_hi=None):
     r"""
     Plots multiple metrics over time.
 
@@ -883,6 +883,14 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     >>> plt.close(fig)
 
     """
+    def whitten(color):
+        r"""Shifts an RGBA color towards white."""
+        # hard-coded values
+        white = (1, 1, 1, 1)
+        dt = 0.30
+        # apply the shift
+        return tuple((c*(1-dt) + w*dt for (c, w) in zip(color, white)))
+
     # hard-coded values
     time_units = 'year' # TODO: make an input
 
@@ -917,7 +925,11 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     cm.set_colors(ax)
     for i in range(num_bins):
         if not ignore_plot_data(data, ignore_empties, col=i):
-            ax.plot(time, scale*data[:, i], '.-', label=legend[i])
+            ax.plot(time, scale*data[:, i], '.-', label=legend[i], zorder=10)
+            if data_lo is not None:
+                ax.plot(time, scale*data_lo[:, i], 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
+            if data_hi is not None:
+                ax.plot(time, scale*data_hi[:, i], 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
 
     # add labels and legends
     ax.set_xlabel('Time [' + time_units + ']')
