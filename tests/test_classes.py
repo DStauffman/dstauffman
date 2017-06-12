@@ -328,12 +328,25 @@ class Test_FixedDict(unittest.TestCase):
         fixed = dcs.FixedDict.fromkeys(self.keys)
         self.assertEqual(self.keys, set(fixed))
 
+    def test_get(self):
+        value = self.fixed.get('key1')
+        self.assertEqual(value, 1)
+
     def test_setdefault(self):
         self.fixed.setdefault('new_key', 1)
         self.assertEqual(self.fixed['new_key'], 1)
         self.fixed.freeze()
         with self.assertRaises(KeyError):
             self.fixed.setdefault('newest_key', 5)
+
+    def test_update(self):
+        self.fixed.freeze()
+        dict2 = {'key1': 3}
+        self.fixed.update(dict2)
+        self.assertEqual(self.fixed['key1'], 3)
+        dict2['bad_key'] = 5
+        with self.assertRaises(KeyError):
+            self.fixed.update(dict2)
 
     def test_isinstance(self):
         self.assertTrue(isinstance(self.fixed, collections.Mapping))

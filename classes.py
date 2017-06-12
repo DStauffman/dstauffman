@@ -373,6 +373,15 @@ class FixedDict(dict):
         raise NotImplementedError
 
     def update(self, mapping=(), **kwargs):
+        # check if valid keys otherwise, raise error
+        if self._frozen:
+            for k in mapping:
+                if k not in self:
+                    raise KeyError(k)
+            for k in kwargs:
+                if k not in self:
+                    raise KeyError(k)
+        # otherwise keys are good, pass on to super
         super().update(mapping, **kwargs)
 
     @classmethod

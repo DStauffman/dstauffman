@@ -515,7 +515,7 @@ class Test_bounded_normal_draw(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        self.num    = 50000
+        self.num    = 100000
         self.mean   = 100
         self.std    = 50
         self.min    = 20
@@ -544,6 +544,19 @@ class Test_bounded_normal_draw(unittest.TestCase):
         std  = np.std(out)
         self.assertTrue(self.mean - 1 < mean < self.mean + 1)
         self.assertTrue(self.std - 1 < std < self.std + 1)
+
+    def test_optional_values(self):
+        values = {}
+        out = dcs.bounded_normal_draw(self.num, values, '', self.prng)
+        mean = np.mean(out)
+        std  = np.std(out)
+        self.assertTrue(np.abs(mean - 0) < 1e-2, 'Bad mean.')
+        self.assertTrue(np.abs(std - 1) < 1e-2, 'Bad Std.')
+
+    def test_no_std(self):
+        self.values['test_std'] = 0
+        out = dcs.bounded_normal_draw(self.num, self.values, self.field, self.prng)
+        self.assertTrue(np.all(np.abs(out - self.mean) < 1e-8))
 
 #%% Unit test execution
 if __name__ == '__main__':
