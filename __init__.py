@@ -19,7 +19,7 @@ from .enums     import IntEnumPlus, consecutive, dist_enum_and_mons
 from .latex     import make_preamble, make_conclusion, bins_to_str_ranges
 from .linalg    import orth, subspace
 from .plotting  import Plotter, Opts, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
-                           ignore_plot_data, get_axes_scales, plot_time_history, \
+                           ignore_plot_data, get_axes_scales, whitten, plot_time_history, \
                            plot_correlation_matrix, plot_multiline_history, plot_bar_breakdown, \
                            plot_bpe_convergence, plot_population_pyramid, storefig, titleprefix, \
                            disp_xlimits, setup_plots, figmenu, rgb_ints_to_hex

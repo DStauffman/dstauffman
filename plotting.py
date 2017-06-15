@@ -509,6 +509,14 @@ def get_axes_scales(type_):
         raise ValueError('Unexpected data type_ "{}" for plot.'.format(type_))
     return (scale, units)
 
+#%% Functions - whitten
+def whitten(color, white=(1, 1, 1, 1), dt=0.30):
+    r"""
+    Shifts an RGBA color towards white.
+    """
+    # apply the shift
+    return tuple((c*(1-dt) + w*dt for (c, w) in zip(color, white)))
+
 #%% Functions - plot_time_history
 def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, colormap=None, second_y_scale=None, rms_in_legend=True, \
@@ -644,7 +652,10 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
         if rms_in_legend:
              this_label += ' (RMS: {:.2f})'.format(rms_data)
         ax.plot(time, scale*mean, 'b.-', linewidth=2, zorder=10, label=this_label)
-        ax.errorbar(time, scale*mean, scale*std, linestyle='None', marker='None', ecolor='c', zorder=6)
+        # Old method:
+            # ax.errorbar(time, scale*mean, scale*std, linestyle='None', marker='None', ecolor='c', zorder=6)
+        ax.plot(time, scale*mean + scale*std, '.-', markersize=2, color='c', zorder=6)
+        ax.plot(time, scale*mean - scale*std, '.-', markersize=2, color='c', zorder=6)
         # inidividual line plots
         if plot_indiv and data.ndim > 1:
             for ix in range(num_series):
@@ -883,13 +894,6 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     >>> plt.close(fig)
 
     """
-    def whitten(color):
-        r"""Shifts an RGBA color towards white."""
-        # hard-coded values
-        white = (1, 1, 1, 1)
-        dt = 0.30
-        # apply the shift
-        return tuple((c*(1-dt) + w*dt for (c, w) in zip(color, white)))
 
     # hard-coded values
     time_units = 'year' # TODO: make an input
