@@ -95,19 +95,22 @@ class Opts(Frozen):
     Contains all the optional plotting configurations.
     """
     def __init__(self):
-        self.case_name = ''
-        self.save_path = os.getcwd()
-        self.save_plot = False
-        self.plot_type = 'png'
-        self.sub_plots = True
-        self.show_plot = True
-        self.show_link = False
-        self.disp_xmin = -np.inf
-        self.disp_xmax =  np.inf
-        self.rms_xmin  = -np.inf
-        self.rms_xmax  =  np.inf
-        self.show_rms  = True
-        self.names     = list()
+        self.case_name  = ''
+        self.save_path  = os.getcwd()
+        self.save_plot  = False
+        self.plot_type  = 'png'
+        self.sub_plots  = True
+        self.show_plot  = True
+        self.show_link  = False
+        self.disp_xmin  = -np.inf
+        self.disp_xmax  =  np.inf
+        self.rms_xmin   = -np.inf
+        self.rms_xmax   =  np.inf
+        self.colormap   = None
+        self.show_rms   = True
+        self.show_zero  = False
+        self.legend_loc = 'best'
+        self.names      = list()
 
     def get_names(self, ix):
         r"""Gets the specified name from the list."""
@@ -519,8 +522,8 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
 
 #%% Functions - plot_time_history
 def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
-    truth=None, plot_as_diffs=False, colormap=None, second_y_scale=None, rms_in_legend=True, \
-    truth_time=None, truth_data=None, legend_loc='best', show_zero=False):
+    truth=None, plot_as_diffs=False, second_y_scale=None, truth_time=None, \
+    truth_data=None):
     r"""
     Plots the given data channel versus time, with a generic label argument.
 
@@ -544,8 +547,6 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
         Plot each entry in results against the other ones, default is False
     second_y_scale : float, optional
         Multiplication scale factor to use to display on a secondary Y axis
-    rms_in_legend : bool, optional
-        Whether to show the RMS value numerically in the plotting legend, default is True
 
     Returns
     -------
@@ -557,6 +558,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     #.  Written by David C. Stauffer in March 2015.
     #.  Updated by David C. Stauffer in December 2015 to include an optional secondary Y axis.
     #.  Updated by David C. Stauffer in October 2016 to use the new TruthPlotter class.
+    #.  Updated by David C. Stauffer in June 2017 to put some basic stuff in Opts instead of kwargs.
     #.  If ndim == 2, then dimension 0 is time and dimension 1 is the number of runs.
 
     Examples
@@ -585,8 +587,13 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     # check optional inputs
     if opts is None:
         opts = Opts()
-    if colormap is None:
-        colormap = DEFAULT_COLORMAP
+    if opts.colormap is None:
+        colormap  = DEFAULT_COLORMAP
+    else:
+        colormap  = opts.colormap
+    rms_in_legend = opts.show_rms
+    legend_loc    = opts.legend_loc
+    show_zero     = opts.show_zero
 
     # maintain older API
     if truth_data is not None:
@@ -595,9 +602,6 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
         else:
             warnings.warn('This API will be removed in the future, please use the new truth input.', DeprecationWarning)
             truth = TruthPlotter(truth_time, truth_data)
-
-    # override the RMS option from opts (both must be true to plot the RMS in the legend)
-    rms_in_legend &= opts.show_rms
     show_legend = rms_in_legend or plot_as_diffs or (truth is not None and not truth.is_null)
 
     # ensure that data is at least 2D
@@ -689,8 +693,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
 
 #%% Functions - plot_correlation_matrix
 def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matrix_name='Correlation Matrix', \
-        cmin=0, cmax=1, colormap='cool', xlabel='', ylabel='', plot_lower_only=True, label_values=False, \
-        x_lab_rot=90):
+        cmin=0, cmax=1, xlabel='', ylabel='', plot_lower_only=True, label_values=False, x_lab_rot=90):
     r"""
     Visually plots a correlation matrix.
 
@@ -710,8 +713,6 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
         Minimum value for color range, default is zero
     cmax : float, optional
         Maximum value for color range, default is one
-    colormap : str, optional
-        Name of colormap to use for plot
     xlabel : str, optional
         X label to put on plot
     ylabel : str, optional
@@ -750,6 +751,10 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
     # check optional inputs
     if opts is None:
         opts = Opts()
+    if opts.colormap is None:
+        colormap = 'cool'
+    else:
+        colormap = opts.colormap
 
     # Hard-coded values
     box_size        = 1
@@ -842,8 +847,7 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
 
 #%% Functions - plot_multiline_history
 def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legend=None, \
-        colormap=None, second_y_scale=None, ignore_empties=False, legend_loc='best', \
-        show_zero=False, data_lo=None, data_hi=None):
+        second_y_scale=None, ignore_empties=False, data_lo=None, data_hi=None):
     r"""
     Plots multiple metrics over time.
 
@@ -861,12 +865,14 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
         plotting options
     legend : list of str, optional
         Names to use for each channel of data
-    colormap : str, optional
-        Name of colormap to use for plot
     second_y_scale : float, optional
         Multiplication scale factor to use to display on a secondary Y axis
     ignore_empties : bool, optional
         Removes any entries from the plot and legend that contain only zeros or only NaNs
+    data_lo : same as data
+        Lower confidence bound on data, plot if not None
+    data_hi : same as data
+        Upper confidence bound on data, plot if not None
 
     Returns
     -------
@@ -901,8 +907,13 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     # check optional inputs
     if opts is None:
         opts = Opts()
-    if colormap is None:
-        colormap = DEFAULT_COLORMAP
+    if opts.colormap is None:
+        colormap  = DEFAULT_COLORMAP
+    else:
+        colormap  = opts.colormap
+    legend_loc    = opts.legend_loc
+    show_zero     = opts.show_zero
+
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
@@ -960,8 +971,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     return fig
 
 #%% Functions - plot_bar_breakdown
-def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, colormap=None, \
-        ignore_empties=False, legend_loc='best'):
+def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empties=False):
     r"""
     Plots the pie chart like breakdown by percentage in each category over time.
 
@@ -977,8 +987,6 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, colormap=No
         plotting options
     legend : list of str, optional
         Names to use for each channel of data
-    colormap : str, optional
-        Name of colormap to use for plot
     ignore_empties : bool, optional
         Removes any entries from the plot and legend that contain only zeros or only NaNs
 
@@ -1011,8 +1019,11 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, colormap=No
     # check optional inputs
     if opts is None:
         opts = Opts()
-    if colormap is None:
+    if opts.colormap is None:
         colormap = DEFAULT_COLORMAP
+    else:
+        colormap = opts.colormap
+    legend_loc = opts.legend_loc
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
@@ -1125,7 +1136,7 @@ def plot_bpe_convergence(costs, opts=None):
 
 #%% Functions - plot_population_pyramid
 def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyramid', *, opts=None, \
-        name1='Male', name2='Female', color1='b', color2='r', legend_loc='best'):
+        name1='Male', name2='Female', color1='b', color2='r'):
     r"""
     Plots the standard population pyramid
 
@@ -1184,6 +1195,7 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     # check optional inputs
     if opts is None:
         opts = Opts()
+    legend_loc = opts.legend_loc
 
     # convert data to percentages
     num_pts   = age_bins.size - 1

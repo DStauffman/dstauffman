@@ -98,9 +98,9 @@ class Test_Opts(unittest.TestCase):
         lines = out.getvalue().strip().split('\n')
         out.close()
         self.assertEqual(lines[0], 'Opts')
-        self.assertEqual(lines[1], '  case_name = ')
-        self.assertEqual(lines[3], '  save_plot = False')
-        self.assertEqual(lines[-1], '  names     = []')
+        self.assertEqual(lines[1], '  case_name  = ')
+        self.assertEqual(lines[3], '  save_plot  = False')
+        self.assertEqual(lines[-1], '  names      = []')
 
 # TruthPlotter
 class Test_TruthPlotter(unittest.TestCase):
@@ -485,7 +485,8 @@ class Test_plot_time_history(unittest.TestCase):
             opts=self.opts, plot_indiv=False)
 
     def test_colormap(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, colormap='Dark2')
+        self.opts.colormap = 'Dark2'
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, self.opts)
 
     def test_array_data1(self):
         data = np.column_stack((self.data, self.data))
@@ -513,11 +514,13 @@ class Test_plot_time_history(unittest.TestCase):
         self.fig = dcs.plot_time_history(np.array([np.nan, np.nan]), np.array([np.nan, np.nan]), self.label)
 
     def test_no_rms_in_legend1(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, rms_in_legend=False)
+        self.opts.show_rms = False
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, self.opts)
 
     def test_no_rms_in_legend2(self):
-        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, \
-            rms_in_legend=False, plot_as_diffs=True)
+        self.opts.show_rms = False
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, self.opts, \
+            plot_as_diffs=True)
 
     def tearDown(self):
         if self.fig is not None:
@@ -570,7 +573,7 @@ class Test_plot_correlation_matrix(unittest.TestCase):
 
     def test_all_args(self):
         self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, self.type_, self.opts, \
-            matrix_name=self.matrix_name, cmin=0, cmax=1, colormap='viridis', xlabel='', ylabel='', \
+            matrix_name=self.matrix_name, cmin=0, cmax=1, xlabel='', ylabel='', \
             plot_lower_only=False, label_values=True, x_lab_rot=180))
 
     def test_symmetric(self):
@@ -602,9 +605,6 @@ class Test_plot_correlation_matrix(unittest.TestCase):
     def test_within_minus_one_part2(self):
         large_data = self.data - 0.5
         self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels, cmin=-1, cmax=1))
-
-    def test_colormap(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data, colormap='seismic_r'))
 
     def test_xlabel(self):
         self.figs.append(dcs.plot_correlation_matrix(self.data, xlabel='Testing Label'))
@@ -640,7 +640,6 @@ class Test_plot_multiline_history(unittest.TestCase):
         With type
         With Opts
         With legend
-        With Colormap
         No data
         Ignore all zeros
         Bad legend
@@ -656,13 +655,12 @@ class Test_plot_multiline_history(unittest.TestCase):
         self.opts     = dcs.Opts()
         self.opts.show_plot = False
         self.legend   = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
-        self.colormap = 'seismic'
         self.figs     = []
         self.second_y_scale = 1000000
 
     def test_nominal(self):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, label=self.label, \
-            type_=self.type_, opts=self.opts, legend=self.legend, colormap=self.colormap))
+            type_=self.type_, opts=self.opts, legend=self.legend))
 
     def test_defaults(self):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label))
@@ -675,9 +673,6 @@ class Test_plot_multiline_history(unittest.TestCase):
 
     def test_with_legend(self):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, legend=self.legend))
-
-    def test_with_colormap(self):
-        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, colormap=self.colormap))
 
     def test_no_data(self):
         with dcs.capture_output() as out:
@@ -729,7 +724,6 @@ class Test_plot_bar_breakdown(unittest.TestCase):
         With label
         With opts
         With legend
-        With colormap
         Null data
         Bad legend
     """
@@ -743,12 +737,11 @@ class Test_plot_bar_breakdown(unittest.TestCase):
         self.legend = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
         self.opts = dcs.Opts()
         self.opts.show_plot = False
-        self.colormap = 'seismic'
         self.figs = []
 
     def test_nominal(self):
         self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts, \
-            legend=self.legend, colormap=self.colormap))
+            legend=self.legend))
 
     def test_defaults(self):
         self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label))
@@ -758,9 +751,6 @@ class Test_plot_bar_breakdown(unittest.TestCase):
 
     def test_legend(self):
         self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend))
-
-    def test_colormap(self):
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, colormap=self.colormap))
 
     def test_ignore_zeros(self):
         self.data[:, 1] = 0

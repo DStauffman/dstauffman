@@ -1124,6 +1124,7 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
     # check for optional variables
     if opts is None:
         opts = Opts()
+    colormap_orig = opts.colormap
     if plots is None:
         plots = default_plots
     else:
@@ -1144,7 +1145,8 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
         if bpe_results.begin_innovs is not None and bpe_results.final_innovs is not None:
             time = np.arange(len(bpe_results.begin_innovs))
             data = np.vstack((bpe_results.begin_innovs, bpe_results.final_innovs)).T
-            fig = plot_multiline_history(time, data, label='Innovs Before and After', opts=opts, colormap='bwr_r', \
+            opts.colormap = 'bwr_r'
+            fig = plot_multiline_history(time, data, label='Innovs Before and After', opts=opts, \
                 legend=['Before', 'After'])
             figs.append(fig)
         elif log_level >= 2:
@@ -1158,8 +1160,9 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
 
     if plots['correlation']:
         if bpe_results.correlation is not None:
+            opts.colormap = 'bwr'
             fig = plot_correlation_matrix(bpe_results.correlation, labels=names, opts=opts, \
-                matrix_name='Correlation Matrix', cmin=-1, colormap='bwr', plot_lower_only=True, \
+                matrix_name='Correlation Matrix', cmin=-1, plot_lower_only=True, \
                 label_values=label_values)
             figs.append(fig)
         elif log_level >= 2:
@@ -1167,8 +1170,9 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
 
     if plots['info_svd']:
         if bpe_results.info_svd is not None:
+            opts.colormap = 'cool'
             fig = plot_correlation_matrix(np.abs(bpe_results.info_svd), opts=opts, cmin=0, \
-                matrix_name='Information SVD Matrix', colormap='cool', label_values=label_values, \
+                matrix_name='Information SVD Matrix', label_values=label_values, \
                 labels=[['{}'.format(i+1) for i in range(len(names))], names])
             figs.append(fig)
         elif log_level >= 2:
@@ -1177,12 +1181,15 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
     if plots['covariance']:
         if bpe_results.covariance is not None:
             max_mag = np.nanmax(np.abs(bpe_results.covariance))
+            opts.colormap = 'bwr'
             fig = plot_correlation_matrix(bpe_results.covariance, labels=names, opts=opts, \
-                matrix_name='Covariance Matrix', cmin=-max_mag, cmax=max_mag, colormap='bwr', \
+                matrix_name='Covariance Matrix', cmin=-max_mag, cmax=max_mag, \
                 plot_lower_only=True, label_values=label_values)
             figs.append(fig)
         elif log_level >= 2:
             print("Data isn't available for covariance plot.")
+    # restore the original colormap
+    opts.colormap = colormap_orig
     return figs
 
 #%% Unit test
