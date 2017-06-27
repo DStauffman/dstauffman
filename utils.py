@@ -1283,7 +1283,7 @@ def full_print():
     np.set_printoptions(**opt)
 
 #%% pprint_dict
-def pprint_dict(dct, *, name='', indent=1, align=True):
+def pprint_dict(dct, *, name='', indent=1, align=True, disp=True):
     r"""
     Prints all the fields and their values.
 
@@ -1308,7 +1308,7 @@ def pprint_dict(dct, *, name='', indent=1, align=True):
     >>> from dstauffman import pprint_dict
     >>> dct = {'a': 1, 'bb': 2, 'ccc': 3}
     >>> name = 'Example'
-    >>> pprint_dict(dct, name=name)
+    >>> text = pprint_dict(dct, name=name)
     Example
      a   = 1
      bb  = 2
@@ -1316,8 +1316,9 @@ def pprint_dict(dct, *, name='', indent=1, align=True):
 
     """
     # print the name of the class/dictionary
+    text = []
     if name:
-        print(name)
+        text.append(name)
     # build indentation padding
     this_indent = ' ' * indent
     # find the length of the longest field name
@@ -1325,7 +1326,12 @@ def pprint_dict(dct, *, name='', indent=1, align=True):
     # loop through fields
     for (this_key, this_value) in dct.items():
         this_pad = ' ' * (pad_len - len(this_key)) if align else ''
-        print('{}{}{} = {}'.format(this_indent, this_key, this_pad, this_value))
+        this_line = '{}{}{} = {}'.format(this_indent, this_key, this_pad, this_value)
+        text.append(this_line)
+    text = '\n'.join(text)
+    if disp:
+        print(text)
+    return text
 
 #%% line_wrap
 def line_wrap(text, wrap=80, min_wrap=0, indent=4):

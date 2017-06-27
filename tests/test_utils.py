@@ -1304,6 +1304,28 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(lines[2], ' bb = 2')
         self.assertEqual(lines[3], ' ccc = 3')
 
+    def test_printed(self):
+        with dcs.capture_output() as out:
+            text = dcs.pprint_dict(self.dct, name=self.name, disp=True)
+        output = out.getvalue().strip()
+        lines = output.split('\n')
+        self.assertEqual(lines[0], 'Example')
+        self.assertEqual(lines[1], ' a   = 1')
+        self.assertEqual(lines[2], ' bb  = 2')
+        self.assertEqual(lines[3], ' ccc = 3')
+        self.assertEqual(text, output)
+
+    def test_not_printed(self):
+        with dcs.capture_output() as out:
+            text = dcs.pprint_dict(self.dct, name=self.name, disp=False)
+        output = out.getvalue().strip()
+        self.assertEqual(output, '')
+        lines = text.split('\n')
+        self.assertEqual(lines[0], 'Example')
+        self.assertEqual(lines[1], ' a   = 1')
+        self.assertEqual(lines[2], ' bb  = 2')
+        self.assertEqual(lines[3], ' ccc = 3')
+
 #%% line_wrap
 class Test_line_wrap(unittest.TestCase):
     r"""
