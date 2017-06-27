@@ -23,7 +23,7 @@ import unittest
 from dstauffman.classes  import Frozen, SaveAndLoad
 from dstauffman.plotting import Opts, plot_correlation_matrix, plot_multiline_history, \
                                     plot_bpe_convergence
-from dstauffman.utils    import rss, setup_dir
+from dstauffman.utils    import pprint_dict, rss, setup_dir
 
 #%% Logger
 class Logger(Frozen):
@@ -174,6 +174,12 @@ class OptiParam(Frozen):
         names = [x.name for x in opti_param]
         return names
 
+    def pprint(self, indent=1, align=True):
+        r"""
+        Displays a pretty print version of the class.
+        """
+        pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
+
 #%% BpeResults
 class BpeResults(Frozen, metaclass=SaveAndLoad):
     r"""
@@ -201,20 +207,29 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         # fields to print
         keys = ['begin_params', 'begin_cost', 'num_evals', 'num_iters', 'final_params', \
             'final_cost', 'correlation', 'info_svd', 'covariance', 'costs']
-        # initialize output text
-        text = [' BpeResults:']
-        # loop through fields
-        for key in keys:
-            text.append('  {}: {}'.format(key, getattr(self, key)))
-        # return everything as a single string
-        return '\n'.join(text)
+        # dictionary of key/values to print
+        dct = {key: getattr(self, key) for key in keys}
+        # name of class to print
+        name = ' BpeResults'
+        text = pprint_dict(dct, name=name, indent=2, align=True, disp=False)
+        return text
 
     def pprint(self):
+        r"""
+        Prints summary results.
+        """
+        if self.param_names is None or self.begin_params is None or self.final_params is None:
+            return
+        # get the names of the parameters
         names = [name.decode('utf-8') for name in self.param_names]
-        print('Initial parameters:')
-        _pprint_args(names, self.begin_params)
-        print('Final parameters:')
-        _pprint_args(names, self.final_params)
+        dct1  = {name.replace('param.', 'param.ix(c).'): self.begin_params[i] for (i, name) in enumerate(names)}
+        dct2  = {name.replace('param.', 'param.ix(c).'): self.final_params[i] for (i, name) in enumerate(names)}
+        # print the initial cost/values
+        print('Initial cost: {}'.format(self.begin_cost))
+        pprint_dict(dct1, name='Initial parameters:', indent=8)
+        # print the final cost/values
+        print('Final cost: {}'.format(self.final_cost))
+        pprint_dict(dct2, name='Finial parameters:', indent=8)
 
 #%% CurrentResults
 class CurrentResults(Frozen, metaclass=SaveAndLoad):
@@ -239,31 +254,6 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
         text.append('  Best Cost: {}'.format(self.cost))
         text.append('  Best Params: {}'.format(self.params))
         return '\n'.join(text)
-
-#%% _pprint_args
-def _pprint_args(names, values):
-    r"""
-    Prints the current name and value pairs for all the estimated parameters.
-    """
-    # get the maximum length of any parameter name
-    max_len = max(len(x) for x in names)
-    # initialize the lines
-    lines = []
-    # loop through all the names
-    for (ix, this_name) in enumerate(names):
-        # add the .ix part into param
-        this_name = this_name.replace('param.','param.ix(c).')
-        # get this value
-        this_value = values[ix]
-        # find how much to pad this particular name
-        pad = max_len - len(this_name)
-        # append this line
-        lines.append('        ' + this_name + ' ' + ' '*pad + '= {:g}'.format(this_value))
-    # combine all the lines into one string
-    text = '\n'.join(lines)
-    # print the resulting string and return it
-    print(text)
-    return text
 
 #%% _print_divider
 def _print_divider(new_line=True):
@@ -1081,9 +1071,6 @@ def run_bpe(opti_opts):
     if log_level >= 6:
         print(' Final parameters: {}'.format(bpe_results.final_params))
         print(' Final cost: {}'.format(bpe_results.final_cost))
-    if log_level >= 8:
-        print(' Final individual parameters:')
-        _pprint_args(names, bpe_results.final_params)
 
     # analyze BPE results
     _analyze_results(opti_opts, bpe_results, jacobian)
