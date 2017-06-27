@@ -832,9 +832,10 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
     # set limits and tick labels
     ax.set_xlim(0, m)
     ax.set_ylim(0, n)
-    ax.set_xticks(np.arange(0, m)+box_size/2, xlab)
-    ax.set_xticklabels(ax.xaxis.get_majorticklabels(), rotation=x_lab_rot)
-    ax.set_yticks(np.arange(0, n)+box_size/2, ylab)
+    ax.set_xticks(np.arange(0, m)+box_size/2)
+    ax.set_xticklabels(xlab, rotation=x_lab_rot)
+    ax.set_yticks(np.arange(0, n)+box_size/2)
+    ax.set_yticklabels(ylab)
     # label axes
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
@@ -1127,7 +1128,8 @@ def plot_bpe_convergence(costs, opts=None):
     ax.set_xlabel('Iteration')
     ax.set_ylabel('Cost')
     ax.set_title(this_title)
-    ax.set_xticks(time, labels)
+    ax.set_xticks(time)
+    ax.set_xticklabels(labels)
     # show a grid
     ax.grid(True)
     # Setup plots
