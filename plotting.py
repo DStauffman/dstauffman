@@ -1008,7 +1008,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     >>> import numpy as np
     >>> time  = np.arange(0, 5, 1./12) + 2000
     >>> data  = np.random.rand(len(time), 5)
-    >>> mag   = data.cumsum(axis=1)[:,-1]
+    >>> mag   = np.sum(data, axis=1)
     >>> data  = data / np.expand_dims(mag, axis=1)
     >>> label = 'Test'
     >>> fig   = plot_bar_breakdown(time, data, label)
