@@ -229,7 +229,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         pprint_dict(dct1, name='Initial parameters:', indent=8)
         # print the final cost/values
         print('Final cost: {}'.format(self.final_cost))
-        pprint_dict(dct2, name='Finial parameters:', indent=8)
+        pprint_dict(dct2, name='Final parameters:', indent=8)
 
 #%% CurrentResults
 class CurrentResults(Frozen, metaclass=SaveAndLoad):

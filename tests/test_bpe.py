@@ -268,8 +268,8 @@ class Test_BpeResults(unittest.TestCase):
             print(self.bpe_results)
         lines = out.getvalue().strip().split('\n')
         out.close()
-        self.assertEqual(lines[0], 'BpeResults:')
-        self.assertTrue(lines[1].startswith('  begin_params: '))
+        self.assertEqual(lines[0], 'BpeResults')
+        self.assertTrue(lines[1].startswith('  begin_params = None'))
 
     def test_pprint(self):
         self.bpe_results.param_names  = ['a'.encode('utf-8')]
@@ -279,10 +279,12 @@ class Test_BpeResults(unittest.TestCase):
             self.bpe_results.pprint()
         lines = out.getvalue().strip().split('\n')
         out.close()
-        self.assertEqual(lines[0], 'Initial parameters:')
-        self.assertEqual(lines[1].strip(), 'a = 1')
-        self.assertEqual(lines[2], 'Final parameters:')
-        self.assertEqual(lines[3].strip(), 'a = 2')
+        self.assertEqual(lines[0], 'Initial cost: None')
+        self.assertEqual(lines[1], 'Initial parameters:')
+        self.assertEqual(lines[2].strip(), 'a = 1')
+        self.assertEqual(lines[3], 'Final cost: None')
+        self.assertEqual(lines[4], 'Final parameters:')
+        self.assertEqual(lines[5].strip(), 'a = 2')
 
     def tearDown(self):
         if os.path.isfile(self.filename):
@@ -308,24 +310,6 @@ class Test_CurrentResults(unittest.TestCase):
         self.assertEqual(lines[1], '  Trust Radius: None')
         self.assertEqual(lines[2], '  Best Cost: None')
         self.assertEqual(lines[3], '  Best Params: None')
-
-#%% _pprint_args
-class Test__pprint_args(unittest.TestCase):
-    r"""
-    Tests the _pprint_args function with the following cases:
-        Nominal
-    """
-    def setUp(self):
-        self.names  = ['Name 1', 'Longer name 2', 'Name 42']
-        self.values = [0.10000000002, 1999999999, 1e-14]
-        self.lines  = ['        Name 1        = 0.1', '        Longer name 2 = 2e+09', '        Name 42       = 1e-14', '']
-
-    def test_nominal(self):
-        with dcs.capture_output() as out:
-            dcs.bpe._pprint_args(self.names, self.values)
-        lines = out.getvalue().split('\n')
-        for i in range(len(self.lines)):
-            self.assertEqual(lines[i], self.lines[i])
 
 #%% _print_divider
 class Test__print_divider(unittest.TestCase):
