@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cmx
 import numpy as np
 import os
+import platform
 import unittest
 import dstauffman as dcs
 from PyQt5.QtTest import QTest
@@ -906,6 +907,22 @@ class Test_storefig(unittest.TestCase):
     def test_bad_plot_type(self):
         # TODO:
         pass
+
+    def test_bad_characters(self):
+        # change to bad name
+        self.fig.canvas.set_window_title('Bad < > / names')
+        # save file
+        dcs.storefig(self.fig, self.folder, self.plot_type)
+        # restore filename
+        self.fig.canvas.set_window_title(self.title)
+        # assert that file exists
+        if platform.system() == 'Windows':
+            this_filename = os.path.join(self.folder, 'Bad _ _ _ names' + '.' + self.plot_type)
+        else:
+            this_filename = os.path.join(self.folder, 'Bad < > _ names' + '.' + self.plot_type)
+        self.assertTrue(os.path.isfile(this_filename))
+        # remove file
+        os.remove(this_filename)
 
     @classmethod
     def tearDownClass(cls):

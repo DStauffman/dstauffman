@@ -15,6 +15,7 @@ import doctest
 import gc
 import numpy as np
 import os
+import platform
 import sys
 import unittest
 import warnings
@@ -1285,6 +1286,11 @@ def storefig(fig, folder=None, plot_type='png'):
     >>> os.remove(os.path.join(folder, 'Figure Title.png'))
 
     """
+    # hard-coded values
+    bad_chars_win  = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
+    bad_chars_unix = ['/']
+    is_windows     = platform.system() == 'Windows'
+    bad_chars      = bad_chars_win if is_windows else bad_chars_unix
     # make sure figs is a list
     if isinstance(fig, list):
         figs = fig
@@ -1306,6 +1312,10 @@ def storefig(fig, folder=None, plot_type='png'):
     for this_fig in figs:
         # get the title of the figure canvas
         this_title = this_fig.canvas.get_window_title()
+        # replace any bad characters with underscores
+        for ch in bad_chars:
+            if ch in this_title:
+                this_title = this_title.replace(ch, '_')
         # loop through the plot types
         for this_type in types:
             # save the figure to the specified plot type
