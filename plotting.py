@@ -189,7 +189,7 @@ class TruthPlotter(Frozen):
         else:
             return scale * data[:, ix]
 
-    def plot_truth(self, ax, scale=1, ix=None):
+    def plot_truth(self, ax, scale=1, ix=None, *, hold_xlim=True, hold_ylim=False):
         r"""Adds the information in the TruthPlotter instance to the given axis, with the optional scale."""
         # check for null case
         if self.is_null:
@@ -221,9 +221,9 @@ class TruthPlotter(Frozen):
         else:
             raise ValueError('Unexpected value for type_ of "{}".'.format(self.type_))
         # potentially restore the original limits, since they might have been changed by the truth data
-        if x_lim != ax.get_xbound():
+        if hold_xlim and x_lim != ax.get_xbound():
             ax.set_xbound(*x_lim)
-        if y_lim != ax.get_ybound():
+        if hold_ylim and y_lim != ax.get_ybound():
             ax.set_ybound(*y_lim)
 
 #%% Classes - MyCustomToolbar
