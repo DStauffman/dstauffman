@@ -680,7 +680,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     if show_zero and min(ax.get_ylim()) > 0:
         ax.set_ylim(bottom=0)
     # set years to always be whole numbers on the ticks
-    if time_units == 'year':
+    if time_units == 'year' and (time[-1] - time[0]) >= 4:
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
     # optionally add second Y axis
     if second_y_scale is not None:
@@ -958,7 +958,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     if show_zero and min(ax.get_ylim()) > 0:
         ax.set_ylim(bottom=0)
     # set years to always be whole numbers on the ticks
-    if time_units == 'year':
+    if time_units == 'year' and (time[-1] - time[0]) >= 4:
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
 
     # optionally add second Y axis
@@ -1066,7 +1066,8 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     ax.set_ylim(0, 100)
     ax.grid(True)
     # set years to always be whole numbers on the ticks
-    ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
+    if (time[-1] - time[0]) >= 4:
+        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
     ax.legend(loc=legend_loc)
     ax.set_title(this_title)
 
