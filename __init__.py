@@ -36,7 +36,7 @@ from .utils     import rms, rss, setup_dir, compare_two_classes, compare_two_dic
                            write_text_file, get_root_dir, get_tests_dir, get_data_dir, \
                            get_images_dir, get_output_dir, capture_output, unit, reload_package, \
                            delete_pyc, rename_module, modd, find_tabs, np_digitize, full_print, \
-                           pprint_dict, line_wrap
+                           pprint_dict, line_wrap, combine_per_year
 
 #%% Unit test
 if __name__ == '__main__':

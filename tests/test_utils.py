@@ -1361,6 +1361,65 @@ class Test_line_wrap(unittest.TestCase):
             dcs.line_wrap('aaaaaaaaaaaaaaaaaaaa bbbbbbbbbb', 25, 22, 0)
         self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "22:25" was too small.')
 
+#%% combine_per_year
+class Test_combine_per_year(unittest.TestCase):
+    r"""
+    Tests the Results.average_per_year function with the following cases:
+        1D
+        2D
+        Bad assertion
+    """
+    def setUp(self):
+        self.time  = np.arange(120)
+        self.data  = self.time // 12
+        self.data2 = np.arange(10)
+        self.data3 = np.column_stack((self.data, self.data))
+        self.data4 = np.column_stack((self.data2, self.data2))
+        self.data5 = np.full(120, np.nan, dtype=float)
+        self.func1 = np.nanmean
+        self.func2 = np.nansum
+
+    def test_1D(self):
+        data2 = dcs.combine_per_year(self.data, func=self.func1)
+        np.testing.assert_array_almost_equal(data2, self.data2)
+
+    def test_2D(self):
+        data2 = dcs.combine_per_year(self.data3, func=self.func1)
+        np.testing.assert_array_almost_equal(data2, self.data4)
+
+    def test_data_is_none(self):
+        data2 = dcs.combine_per_year(None, func=self.func1)
+        self.assertEqual(data2, None)
+
+    def test_data_is_all_nan(self):
+        data2 = dcs.combine_per_year(self.data5, func=self.func1)
+        self.assertTrue(len(data2) == 10)
+        self.assertTrue(np.all(np.isnan(data2)))
+
+    def test_non12_months1d(self):
+        data = np.arange(125) // 12
+        data2 = dcs.combine_per_year(data, func=self.func1)
+        np.testing.assert_array_almost_equal(data2, self.data2)
+
+    def test_non12_months2d(self):
+        data = np.arange(125) // 12
+        data3 = np.column_stack((data, data))
+        data2 = dcs.combine_per_year(data3, func=self.func1)
+        np.testing.assert_array_almost_equal(data2, self.data4)
+
+    def test_other_funcs(self):
+        data2a = dcs.combine_per_year(self.data, func=self.func1)
+        data2b = dcs.combine_per_year(self.data, func=self.func2)
+        np.testing.assert_array_almost_equal(12 * data2a, data2b)
+
+    def test_bad_func1(self):
+        with self.assertRaises(AssertionError):
+            dcs.combine_per_year(self.data)
+
+    def test_bad_func2(self):
+        with self.assertRaises(AssertionError):
+            dcs.combine_per_year(self.data, func=1.5)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

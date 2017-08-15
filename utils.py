@@ -24,6 +24,8 @@ import shutil
 import sys
 import types
 import unittest
+import warnings
+from dstauffman.constants import MONTHS_PER_YEAR
 
 #%% Functions - _nan_equal
 def _nan_equal(a, b):
@@ -1392,6 +1394,64 @@ def line_wrap(text, wrap=80, min_wrap=0, indent=4):
     if is_single:
         out = '\n'.join(out)
     return out
+
+#%% combine_per_year
+def combine_per_year(data, func=None):
+    r"""
+    Combine the time varying values over one year increments using a supplied function.
+
+    Parameters
+    ----------
+    data : ndarray, 1D or 2D
+        Data array
+
+    Returns
+    -------
+    data2 : ndarray, 1D or 2D
+        Data array combined as mean over 12 month periods
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2015.
+    #.  Made more generic by David C. Stauffer in August 2017.
+    #.  This function was designed with np.nanmean and np.nansum in mind.
+
+    Examples
+    --------
+
+    >>> from dstauffman import combine_per_year
+    >>> import numpy as np
+    >>> time = np.arange(120)
+    >>> data = np.sin(time)
+    >>> data2 = combine_per_year(data, func=np.mean)
+
+    """
+    # check that a function was provided
+    assert func is not None and callable(func), 'A callable function must be provided.'
+    # check for null case and exit
+    if data is None:
+        return None
+    # check dimensionality
+    is_1d = True if data.ndim == 1 else False
+    # get original sizes
+    if is_1d:
+        data = data[:, np.newaxis]
+    (num_time, num_chan) = data.shape
+    num_year = num_time // MONTHS_PER_YEAR
+    # check for case with all NaNs
+    if np.all(np.isnan(data)):
+        data2 = np.full((num_year, num_chan), np.nan, dtype=float)
+    else:
+        # disables warnings for time points that are all NaNs for nansum or nanmean
+        with warnings.catch_warnings():
+            warnings.filterwarnings('ignore', message='Mean of empty slice')
+            warnings.filterwarnings('ignore', message='Sum of empty slice')
+            # calculate sum or mean (or whatever)
+            data2 = func(np.reshape(data[:num_year*MONTHS_PER_YEAR, :], (num_year, MONTHS_PER_YEAR, num_chan)), axis=1)
+    # optionally squeeze the vector case back to 1D
+    if is_1d:
+        data2 = data2.squeeze(axis=1)
+    return data2
 
 #%% Unit test
 if __name__ == '__main__':
