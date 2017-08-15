@@ -1364,10 +1364,16 @@ class Test_line_wrap(unittest.TestCase):
 #%% combine_per_year
 class Test_combine_per_year(unittest.TestCase):
     r"""
-    Tests the Results.average_per_year function with the following cases:
+    Tests the combine_per_year function with the following cases:
         1D
         2D
-        Bad assertion
+        data is None
+        all nans
+        non-integer 12 month 1D
+        non-integer 12 month 2D
+        Different specified function
+        Bad function (not specified)
+        Bad function (not callable)
     """
     def setUp(self):
         self.time  = np.arange(120)
