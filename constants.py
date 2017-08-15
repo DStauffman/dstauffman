@@ -19,14 +19,15 @@ QUAT_SIZE        = 4
 #%% Functions
 # None
 
-#%% Unit Test
-def _main():
-    r"""Unit test function."""
-    print('MONTHS_PER_YEAR      = {}'.format(MONTHS_PER_YEAR))
-    print('INT_TOKEN            = {}'.format(INT_TOKEN))
-    print('DEFAULT_COLORMAP     = {}'.format(DEFAULT_COLORMAP))
-    print('QUAT_SIZE            = {}'.format(QUAT_SIZE))
-
+#%% Script
 if __name__ == '__main__':
+    # print all the constants (anything in ALL_CAPS)
+    fields = [k for k in sorted(dir()) if k.isupper()]
+    max_len = max(map(len, fields))
+    for field in fields:
+        pad = ' ' * (max_len - len(field))
+        value = locals()[field]
+        print('{}{} = {}'.format(field, pad, value))
+
+    # run unittests
     unittest.main(module='tests.test_constants', exit=False)
-    _main()
