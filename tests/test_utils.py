@@ -18,6 +18,7 @@ import platform
 import sys
 import time
 import unittest
+from unittest.mock import patch
 import dstauffman as dcs
 
 #%% _nan_equal
@@ -240,6 +241,7 @@ class Test_rss(unittest.TestCase):
         self.assertTrue(np.isnan(out))
 
 #%% setup_dir
+@patch('dstauffman.utils.logger')
 class Test_setup_dir(unittest.TestCase):
     r"""
     Tests the setup_dir function with these cases:
@@ -259,68 +261,57 @@ class Test_setup_dir(unittest.TestCase):
         self.subfile  = os.path.join(self.subdir, 'temp_file.txt')
         self.text     = 'Hello, World!\n'
 
-    def test_empty_string(self):
-        with dcs.capture_output() as out:
-            dcs.setup_dir('')
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, '')
+    def test_empty_string(self, mock_logger):
+        dcs.setup_dir('')
+        mock_logger.info.assert_not_called()
 
-    def test_create_folder(self):
-        with dcs.capture_output() as out:
-            dcs.setup_dir(self.folder)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, 'Created directory: "{}"'.format(self.folder))
+    def test_create_folder(self, mock_logger):
+        dcs.setup_dir(self.folder)
+        mock_logger.info.assert_called_once()
+        mock_logger.info.assert_called_with('Created directory: "{}"'.format(self.folder))
 
-    def test_nested_folder(self):
-        with dcs.capture_output() as out:
-            dcs.setup_dir(self.subdir)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, 'Created directory: "{}"'.format(self.subdir))
+    def test_nested_folder(self, mock_logger):
+        dcs.setup_dir(self.subdir)
+        mock_logger.info.assert_called_once()
+        mock_logger.info.assert_called_with('Created directory: "{}"'.format(self.subdir))
 
-    def test_clean_up_folder(self):
-        with dcs.capture_output():
+    def test_clean_up_folder(self, mock_logger):
+        dcs.setup_dir(self.folder)
+        dcs.write_text_file(self.filename, self.text)
+        with patch('dstauffman.utils.logger') as mock_logger2:
             dcs.setup_dir(self.folder)
-            dcs.write_text_file(self.filename, self.text)
-        with dcs.capture_output() as out:
-            dcs.setup_dir(self.folder)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, 'Files/Sub-folders were removed from: "{}"'.format(self.folder))
+            mock_logger2.info.assert_called_once()
+            mock_logger2.info.assert_called_with('Files/Sub-folders were removed from: "{}"'.format(self.folder))
+        mock_logger.info.assert_called_once()
 
-    def test_clean_up_partial(self):
-        with dcs.capture_output():
-            dcs.setup_dir(self.folder)
-            dcs.write_text_file(self.filename, '')
-            dcs.setup_dir(self.subdir)
-            dcs.write_text_file(self.subfile, '')
-        with dcs.capture_output() as out:
+    def test_clean_up_partial(self, mock_logger):
+        dcs.setup_dir(self.folder)
+        dcs.write_text_file(self.filename, '')
+        dcs.setup_dir(self.subdir)
+        dcs.write_text_file(self.subfile, '')
+        with patch('dstauffman.utils.logger') as mock_logger2:
             dcs.setup_dir(self.folder, rec=False)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, 'Files/Sub-folders were removed from: "{}"'.format(self.folder))
+            mock_logger2.info.assert_called_once()
+            mock_logger2.info.assert_called_with('Files/Sub-folders were removed from: "{}"'.format(self.folder))
+        self.assertEqual(mock_logger.info.call_count, 2)
 
-    def test_fail_to_create_folder(self):
+    def test_fail_to_create_folder(self, mock_logger):
         pass #TODO: write this test
 
-    def test_fail_to_clean_folder(self):
+    def test_fail_to_clean_folder(self, mock_logger):
         pass #TODO: write this test
 
-    def test_bad_name_file_ext(self):
+    def test_bad_name_file_ext(self, mock_logger):
         pass #TODO: write this test
 
-    def test_clean_up_recursively(self):
-        with dcs.capture_output():
-            dcs.setup_dir(self.subdir)
-            dcs.write_text_file(self.subfile, self.text)
-        with dcs.capture_output() as out:
+    def test_clean_up_recursively(self, mock_logger):
+        dcs.setup_dir(self.subdir)
+        dcs.write_text_file(self.subfile, self.text)
+        with patch('dstauffman.utils.logger') as mock_logger2:
             dcs.setup_dir(self.folder, rec=True)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, 'Files/Sub-folders were removed from: "{}"\n'.format(self.subdir) + \
-            'Files/Sub-folders were removed from: "{}"'.format(self.folder))
+            self.assertEqual(mock_logger2.info.call_count, 2)
+            mock_logger2.info.assert_any_call('Files/Sub-folders were removed from: "{}"'.format(self.subdir))
+            mock_logger2.info.assert_any_call('Files/Sub-folders were removed from: "{}"'.format(self.subdir))
 
     def tearDown(self):
         def _clean(self):
@@ -982,11 +973,7 @@ class Test_rename_module(unittest.TestCase):
         lines = output.split('\n')
         # check for dir creation, files copied, files skipped, files edited
         # expect at least one of each
-        for this_line in lines:
-            if this_line.startswith('Created directory: "'):
-                break
-        else:
-            self.assertTrue(False, 'No directory was created')
+        self.assertTrue(os.path.isdir(self.new_dir))
         for this_line in lines:
             if this_line.startswith('Copying : '):
                 break
@@ -1011,8 +998,7 @@ class Test_rename_module(unittest.TestCase):
             dcs.rename_module(self.folder, self.old_name, self.new_name, print_status=False)
         output = out.getvalue().strip()
         out.close()
-        self.assertTrue(output.startswith('Created directory: ')) # TODO: should be able to suppress this
-        #self.assertEqual(output, '') # finds bug with not being able to suppress setup dir command
+        self.assertEqual(output, '')
         self.assertTrue(os.path.isfile(os.path.join(self.new_dir, '__init__.py')))
         self.assertFalse(os.path.isfile(os.path.join(self.new_dir, '__init__.pyc')))
         self.assertTrue(os.path.isfile(os.path.join(self.new_dir, '__init__.misc')))

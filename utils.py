@@ -18,6 +18,7 @@ from datetime import datetime, timedelta
 import doctest
 import inspect
 from io import StringIO
+import logging
 import os
 import numpy as np
 import shutil
@@ -26,6 +27,9 @@ import types
 import unittest
 import warnings
 from dstauffman.constants import MONTHS_PER_YEAR
+
+#%% Globals
+logger = logging.getLogger(__name__)
 
 #%% Functions - _nan_equal
 def _nan_equal(a, b):
@@ -224,12 +228,12 @@ def setup_dir(folder, rec=False):
             else:
                 raise RuntimeError('Unexpected file type, neither file nor folder: "{}".'\
                     .format(this_full_elem)) # pragma: no cover
-        print('Files/Sub-folders were removed from: "' + folder + '"')
+        logger.info('Files/Sub-folders were removed from: "' + folder + '"')
     else:
         # create directory if it does not exist
         try:
             os.makedirs(folder)
-            print('Created directory: "' + folder + '"')
+            logger.info('Created directory: "' + folder + '"')
         except: # pragma: no cover
             # re-raise last exception, could try to handle differently in the future
             raise # pragma: no cover
