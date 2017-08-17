@@ -634,7 +634,7 @@ class Test_plot_correlation_matrix(unittest.TestCase):
 # plot_multiline_history
 class Test_plot_multiline_history(unittest.TestCase):
     r"""
-    Tests the plot_multipline_history function with the following cases:
+    Tests the plot_multiline_history function with the following cases:
         Nominal
         Defaults
         With label
@@ -711,6 +711,9 @@ class Test_plot_multiline_history(unittest.TestCase):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, \
             second_y_scale=self.second_y_scale))
 
+    def test_single_point(self):
+        self.figs.append(dcs.plot_multiline_history(self.time[1:], self.data[1:,:], self.label))
+
     def tearDown(self):
         if self.figs:
             for this_fig in self.figs:
@@ -768,6 +771,9 @@ class Test_plot_bar_breakdown(unittest.TestCase):
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):
             dcs.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend[:-1])
+
+    def test_single_point(self):
+        self.figs.append(dcs.plot_bar_breakdown(self.time[:1], self.data[:1,:], label=self.label))
 
     def tearDown(self):
         if self.figs:

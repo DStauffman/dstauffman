@@ -680,7 +680,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     if show_zero and min(ax.get_ylim()) > 0:
         ax.set_ylim(bottom=0)
     # set years to always be whole numbers on the ticks
-    if time_units == 'year' and (time[-1] - time[0]) >= 4:
+    if time_units == 'year' and np.any(time) and (np.max(time) - np.min(time)) >= 4:
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
     # optionally add second Y axis
     if second_y_scale is not None:
@@ -902,7 +902,6 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     >>> plt.close(fig)
 
     """
-
     # hard-coded values
     time_units = 'year' # TODO: make an input
 
@@ -916,21 +915,23 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     legend_loc    = opts.legend_loc
     show_zero     = opts.show_zero
 
-
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
         print(' ' + label + ' plot skipped due to missing data.')
         return None
-
-    # process other inputs
-    this_title = label + ' vs. Time'
-    (scale, units) = get_axes_scales(type_)
-    unit_text = ' [' + units + ']' if units else ''
+    assert time.ndim == 1, 'Time must be a 1D array'
+    assert data.ndim == 2, 'Data must be a 2D array'
+    assert time.shape[0] == data.shape[0], 'Time and data must be the same length'
     num_bins = data.shape[1]
     if legend is not None:
         assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
     else:
         legend = ['Channel {}'.format(i+1) for i in range(num_bins)]
+
+    # process other inputs
+    this_title = label + ' vs. Time'
+    (scale, units) = get_axes_scales(type_)
+    unit_text = ' [' + units + ']' if units else ''
 
     # get colormap based on high and low limits
     cm = ColorMap(colormap, num_colors=num_bins)
@@ -958,7 +959,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     if show_zero and min(ax.get_ylim()) > 0:
         ax.set_ylim(bottom=0)
     # set years to always be whole numbers on the ticks
-    if time_units == 'year' and (time[-1] - time[0]) >= 4:
+    if time_units == 'year' and (np.max(time) - np.min(time)) >= 4:
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
 
     # optionally add second Y axis
