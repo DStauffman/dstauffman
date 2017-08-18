@@ -13,7 +13,7 @@ import logging
 import numpy as np
 import os
 import unittest
-from unittest.mock import patch, call
+from unittest.mock import patch
 import dstauffman as dcs
 
 #%% Hard-coded values
@@ -205,8 +205,7 @@ class Test_BpeResults(unittest.TestCase):
         self.bpe_results.num_evals = 5
         self.filename    = os.path.join(dcs.get_tests_dir(), 'test_bpe_results.hdf5')
         self.filename2   = self.filename.replace('hdf5', 'pkl')
-        self.logger      = dcs.bpe.logger
-        self.logger.setLevel(logging.ERROR)
+        dcs.bpe.logger.setLevel(logging.ERROR)
 
     def test_save(self):
         self.bpe_results.save(self.filename)
@@ -297,13 +296,14 @@ class Test__print_divider(unittest.TestCase):
 
     def test_alternative_level(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.ERROR)
-        dcs.bpe._print_divider(level=logging.WARNING)
-        mock_logger.log.assert_called_with(logging.WARNING, '\n******************************')
+        dcs.bpe._print_divider(level=logging.CRITICAL)
+        mock_logger.log.assert_called_with(logging.CRITICAL, '\n******************************')
 
     def test_not_logging(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.ERROR)
         dcs.bpe._print_divider()
-        mock_logger.error.assert_not_called()
+        mock_logger.log.assert_called_with(logging.ERROR, '\n******************************')
+        # TODO: how to test that this wouldn't log anything?
 
 #%% _function_wrapper
 class Test__function_wrapper(unittest.TestCase):

@@ -109,7 +109,7 @@ if __name__=='__main__':
     # Truth data
     truth_time = np.arange(-10, 201)
     truth_data = truth(truth_time)
-    truth = dcs.TruthPlotter(truth_time, truth_data)
+    truth      = dcs.TruthPlotter(truth_time, truth_data)
 
     # Logger
     dcs.bpe.logger.setLevel(logging.DEBUG)
