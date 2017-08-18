@@ -13,7 +13,7 @@ import logging
 import numpy as np
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, call
 import dstauffman as dcs
 
 #%% Hard-coded values
@@ -99,7 +99,6 @@ def set_parameter(sim_params, *, names, values):
             raise ValueError('Bad parameter name: "{}".'.format(name))
 
 #%% OptiOpts
-@unittest.skip('Fix logging issues by using mock.')
 class Test_OptiOpts(unittest.TestCase):
     r"""
     Tests the OptiOpts class with the following cases:
@@ -127,7 +126,6 @@ class Test_OptiOpts(unittest.TestCase):
         self.assertNotEqual(opti_opts, 2)
 
 #%% OptiParam
-@unittest.skip('Fix logging issues by using mock.')
 class Test_OptiParam(unittest.TestCase):
     r"""
     Tests the OptiParam class with the following cases:
@@ -194,7 +192,6 @@ class Test_OptiParam(unittest.TestCase):
         self.assertEqual(names, ['test1', 'test2'])
 
 #%% BpeResults
-@unittest.skip('Fix logging issues by using mock.')
 class Test_BpeResults(unittest.TestCase):
     r"""
     Tests the BpeResults class with the following cases:
@@ -259,7 +256,6 @@ class Test_BpeResults(unittest.TestCase):
             os.remove(self.filename2)
 
 #%% CurrentResults
-@unittest.skip('Fix logging issues by using mock.')
 class Test_CurrentResults(unittest.TestCase):
     r"""
     Tests the CurrentResults class with the following cases:
@@ -279,6 +275,7 @@ class Test_CurrentResults(unittest.TestCase):
         self.assertEqual(lines[3], '  Best Params: None')
 
 #%% _print_divider
+@patch('dstauffman.bpe.logger')
 class Test__print_divider(unittest.TestCase):
     r"""
     Tests the _print_divider function with the following cases:
@@ -288,32 +285,27 @@ class Test__print_divider(unittest.TestCase):
     def setUp(self):
         self.output = '******************************'
 
-    def test_with_new_line(self):
+    def test_with_new_line(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.INFO)
-        with patch('dstauffman.bpe.logger') as mock_logger:
-            dcs.bpe._print_divider()
-            mock_logger.log.assert_called_with(logging.INFO, '\n******************************')
+        dcs.bpe._print_divider()
+        mock_logger.log.assert_called_with(logging.INFO, '\n******************************')
 
-    def test_no_new_line(self):
+    def test_no_new_line(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.DEBUG)
-        with patch('dstauffman.bpe.logger') as mock_logger:
-            dcs.bpe._print_divider(new_line=False)
-            mock_logger.log.assert_called_with(logging.INFO, '******************************')
+        dcs.bpe._print_divider(new_line=False)
+        mock_logger.log.assert_called_with(logging.INFO, '******************************')
 
-    def test_alternative_level(self):
+    def test_alternative_level(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.ERROR)
-        with patch('dstauffman.bpe.logger') as mock_logger:
-            dcs.bpe._print_divider(level=logging.WARNING)
-            mock_logger.log.assert_called_with(logging.WARNING, '\n******************************')
+        dcs.bpe._print_divider(level=logging.WARNING)
+        mock_logger.log.assert_called_with(logging.WARNING, '\n******************************')
 
-    def test_not_logging(self):
+    def test_not_logging(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.ERROR)
-        with patch('dstauffman.bpe.logger') as mock_logger:
-            dcs.bpe._print_divider()
-            mock_logger.error.assert_not_called()
+        dcs.bpe._print_divider()
+        mock_logger.error.assert_not_called()
 
 #%% _function_wrapper
-@unittest.skip('Fix logging issues by using mock.')
 class Test__function_wrapper(unittest.TestCase):
     r"""
     Tests the _function_wrapper function with the following cases:
@@ -347,7 +339,6 @@ class Test__function_wrapper(unittest.TestCase):
 pass
 
 #%% _levenberg_marquardt
-@unittest.skip('Fix logging issues by using mock.')
 class Test__levenberg_marquardt(unittest.TestCase):
     r"""
     Tests the _levenberg_marquardt function with the following cases:
@@ -370,7 +361,6 @@ class Test__levenberg_marquardt(unittest.TestCase):
         np.testing.assert_array_almost_equal(delta_param, b)
 
 #%% _predict_func_change
-@unittest.skip('Fix logging issues by using mock.')
 class Test__predict_func_change(unittest.TestCase):
     r"""
     Tests the _predict_func_change function with the following cases:
@@ -387,67 +377,58 @@ class Test__predict_func_change(unittest.TestCase):
         self.assertEqual(delta_func, self.pred_change)
 
 #%% _check_for_convergence
-@unittest.skip('Fix logging issues by using mock.')
+@patch('dstauffman.bpe.logger')
 class Test__check_for_convergence(unittest.TestCase):
     r"""
     Tests the _check_for_convergence function with the following cases:
         TBD
     """
     def setUp(self):
-        self.logger           = dcs.bpe.logger
-        self.logger.setLevel(logging.INFO)
+        dcs.bpe.logger.setLevel(logging.INFO)
         self.opti_opts        = type('Class1', (object, ), {'tol_cosmax_grad': 1, 'tol_delta_step': 2, \
             'tol_delta_cost': 3})
         self.cosmax           = 10
         self.delta_step_len   = 10
         self.pred_func_change = 10
 
-    def test_not_converged(self):
+    def test_not_converged(self, mock_logger):
         convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, self.pred_func_change)
         self.assertFalse(convergence)
 
-    def test_convergence1(self):
-        with dcs.capture_output() as out:
-            convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, self.delta_step_len, self.pred_func_change)
-        output = out.getvalue().strip()
-        out.close()
+    def test_convergence1(self, mock_logger):
+        convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, self.delta_step_len, self.pred_func_change)
         self.assertTrue(convergence)
-        self.assertEqual(output, 'Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
+        mock_logger.warning.assert_called_once()
+        mock_logger.warning.assert_called_with('Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
 
-    def test_convergence2(self):
-        with dcs.capture_output() as out:
-            convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, 1.5, self.pred_func_change)
-        output = out.getvalue().strip()
-        out.close()
+    def test_convergence2(self, mock_logger):
+        convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, 1.5, self.pred_func_change)
         self.assertTrue(convergence)
-        self.assertEqual(output, 'Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
+        mock_logger.warning.assert_called_once()
+        mock_logger.warning.assert_called_with('Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
 
-    def test_convergence3(self):
-        with dcs.capture_output() as out:
-            convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, -2.5)
-        output = out.getvalue().strip()
-        out.close()
+    def test_convergence3(self, mock_logger):
+        convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, -2.5)
         self.assertTrue(convergence)
-        self.assertEqual(output, 'Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
+        mock_logger.warning.assert_called_once()
+        mock_logger.warning.assert_called_with('Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
 
-    def test_convergence4(self):
-        with dcs.capture_output() as out:
+    def test_convergence4(self, mock_logger):
+        convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
+        self.assertTrue(convergence)
+        self.assertEqual(mock_logger.warning.call_count, 3)
+        mock_logger.warning.assert_any_call('Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
+        mock_logger.warning.assert_any_call('Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
+        mock_logger.warning.assert_any_call('Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
+
+    @unittest.skip('This test should fail until changed to CRITICAL')
+    def test_no_logging(self, mock_logger):
+        dcs.bpe.logger.setLevel(logging.NOTSET) # CRITICAL
+        with dcs.capture_output('err') as err:
             convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
-        lines = out.getvalue().strip().split('\n')
-        out.close()
         self.assertTrue(convergence)
-        self.assertEqual(lines[0], 'Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
-        self.assertEqual(lines[1], 'Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
-        self.assertEqual(lines[2], 'Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
-
-    def test_no_logging(self):
-        self.logger.setLevel(logging.CRITICAL)
-        with dcs.capture_output() as out:
-            convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertTrue(convergence)
-        self.assertEqual(output, '')
+        error = err.getvalue().strip()
+        self.assertEqual(error, '')
 
 #%% _double_dogleg
 pass
@@ -459,15 +440,14 @@ pass
 pass
 
 #%% validate_opti_opts
-@unittest.skip('Fix logging issues by using mock.')
+@patch('dstauffman.bpe.logger')
 class Test_validate_opti_opts(unittest.TestCase):
     r"""
     Tests the validate_opti_opts function with the following cases:
         TBD
     """
     def setUp(self):
-        self.logger = dcs.bpe.logger
-        self.logger.setLevel(logging.INFO)
+        dcs.bpe.logger.setLevel(logging.INFO)
         self.opti_opts = dcs.OptiOpts()
         self.opti_opts.model_func     = str
         self.opti_opts.model_args     = {'a': 1}
@@ -483,60 +463,56 @@ class Test_validate_opti_opts(unittest.TestCase):
         with self.assertRaises(AssertionError):
             dcs.validate_opti_opts(self.opti_opts)
 
-    def test_nominal(self):
-        self.logger.setLevel(logging.DEBUG)
-        with dcs.capture_output() as out:
-            is_valid = dcs.validate_opti_opts(self.opti_opts)
-        output = out.getvalue().strip()
-        out.close()
+    def test_nominal(self, mock_logger):
+        is_valid = dcs.validate_opti_opts(self.opti_opts)
         self.assertTrue(is_valid)
-        self.assertEqual(output,'******************************\nValidating optimization options.')
+        mock_logger.log.assert_called_with(logging.INFO, '******************************')
+        mock_logger.info.assert_called_with('Validating optimization options.')
 
-    def test_no_logging(self):
-        with dcs.capture_output() as out:
-            is_valid = dcs.validate_opti_opts(self.opti_opts)
-        output = out.getvalue().strip()
-        out.close()
+    def test_no_logging(self, mock_logger):
+        dcs.bpe.logger.setLevel(logging.WARNING)
+        is_valid = dcs.validate_opti_opts(self.opti_opts)
         self.assertTrue(is_valid)
-        self.assertEqual(output,'')
+        mock_logger.log.assert_called_with(logging.INFO, '******************************')
+        mock_logger.info.assert_called_with('Validating optimization options.')
 
-    def test_not_valid1(self):
+    def test_not_valid1(self, mock_logger):
         self.opti_opts.model_func = None
         self.support()
 
-    def test_not_valid2(self):
+    def test_not_valid2(self, mock_logger):
         self.opti_opts.model_args = None
         self.support()
 
-    def test_not_valid3(self):
+    def test_not_valid3(self, mock_logger):
         self.opti_opts.cost_func = None
         self.support()
 
-    def test_not_valid4(self):
+    def test_not_valid4(self, mock_logger):
         self.opti_opts.cost_args = None
         self.support()
 
-    def test_not_valid5(self):
+    def test_not_valid5(self, mock_logger):
         self.opti_opts.get_param_func = None
         self.support()
 
-    def test_not_valid6(self):
+    def test_not_valid6(self, mock_logger):
         self.opti_opts.set_param_func = None
         self.support()
 
-    def test_not_valid7(self):
+    def test_not_valid7(self, mock_logger):
         self.opti_opts.params = []
         self.support()
 
-    def test_not_valid8(self):
+    def test_not_valid8(self, mock_logger):
         self.opti_opts.params = None
         self.support()
 
-    def test_not_valid9(self):
+    def test_not_valid9(self, mock_logger):
         self.opti_opts.slope_method = 'bad_sided'
         self.support()
 
-    def test_not_valid10(self):
+    def test_not_valid10(self, mock_logger):
         self.opti_opts.search_method = 'wild_ass_guess'
         self.support()
 
