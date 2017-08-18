@@ -279,8 +279,6 @@ class Test_CurrentResults(unittest.TestCase):
         self.assertEqual(lines[3], '  Best Params: None')
 
 #%% _print_divider
-@unittest.skip('Fix logging issues by using mock.')
-@patch('dstauffman.bpe.logger')
 class Test__print_divider(unittest.TestCase):
     r"""
     Tests the _print_divider function with the following cases:
@@ -290,21 +288,29 @@ class Test__print_divider(unittest.TestCase):
     def setUp(self):
         self.output = '******************************'
 
-    def test_with_new_line(self, mock_logger):
-        mock_logger.setLevel(logging.info)
-        dcs.bpe._print_divider()
-        mock_logger.info.assert_called_with('\n******************************')
+    def test_with_new_line(self):
+        dcs.bpe.logger.setLevel(logging.INFO)
+        with patch('dstauffman.bpe.logger') as mock_logger:
+            dcs.bpe._print_divider()
+            mock_logger.log.assert_called_with(logging.INFO, '\n******************************')
 
-    def test_no_new_line(self, mock_logger):
-        mock_logger.setLevel(logging.CRITICAL)
-        dcs.bpe._print_divider(new_line=False)
-        mock_logger.info.assert_not_called()
-        mock_logger.critical.assert_called_with('******************************')
+    def test_no_new_line(self):
+        dcs.bpe.logger.setLevel(logging.DEBUG)
+        with patch('dstauffman.bpe.logger') as mock_logger:
+            dcs.bpe._print_divider(new_line=False)
+            mock_logger.log.assert_called_with(logging.INFO, '******************************')
 
-    def test_not_logging(self, mock_logger):
-        mock_logger.setLevel(logging.ERROR)
-        dcs.bpe._print_divider()
-        mock_logger.error.assert_not_called()
+    def test_alternative_level(self):
+        dcs.bpe.logger.setLevel(logging.ERROR)
+        with patch('dstauffman.bpe.logger') as mock_logger:
+            dcs.bpe._print_divider(level=logging.WARNING)
+            mock_logger.log.assert_called_with(logging.WARNING, '\n******************************')
+
+    def test_not_logging(self):
+        dcs.bpe.logger.setLevel(logging.ERROR)
+        with patch('dstauffman.bpe.logger') as mock_logger:
+            dcs.bpe._print_divider()
+            mock_logger.error.assert_not_called()
 
 #%% _function_wrapper
 @unittest.skip('Fix logging issues by using mock.')
