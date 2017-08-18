@@ -15,6 +15,7 @@ Notes
 #%% Imports
 from copy import deepcopy
 import doctest
+import logging
 import numpy as np
 import os
 from scipy.linalg import norm
@@ -25,52 +26,8 @@ from dstauffman.plotting import Opts, plot_correlation_matrix, plot_multiline_hi
                                     plot_bpe_convergence
 from dstauffman.utils    import pprint_dict, rss, setup_dir
 
-#%% Logger
-class Logger(Frozen):
-    r"""
-    Class that keeps track of the logger options.
-
-    Parameters
-    ----------
-    level : int
-        Level of logger
-
-    Examples
-    --------
-    >>> from dstauffman import Logger
-    >>> logger = Logger(5)
-    >>> print(logger)
-    Logger(5)
-
-    """
-    # class attribute for Logging level
-    level = 10
-
-    def __init__(self, level=None):
-        r"""Creates options instance with ability to override defaults."""
-        if level is not None:
-            type(self).level = self._check_level(level)
-
-    def __str__(self):
-        r"""Prints the current level."""
-        return '{}({})'.format(type(self).__name__, self.level)
-
-    @staticmethod
-    def _check_level(level):
-        r"""Checks for a valid logging level."""
-        if level < 0 or level > 10:
-            raise ValueError('Invalid logging level: "{}"'.format(level))
-        return level
-
-    @classmethod
-    def get_level(cls):
-        r"""Gets the logging level."""
-        return cls.level
-
-    @classmethod
-    def set_level(cls, level):
-        r"""Sets the logging level."""
-        cls.level = cls._check_level(level)
+#%% Globals
+logger = logging.getLogger(__name__)
 
 #%% OptiOpts
 class OptiOpts(Frozen):
@@ -256,7 +213,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
         return '\n'.join(text)
 
 #%% _print_divider
-def _print_divider(new_line=True):
+def _print_divider(new_line=True, level=logging.INFO):
     r"""
     Prints some characters to the std out to break apart the different stpes within the model.
 
@@ -277,7 +234,7 @@ def _print_divider(new_line=True):
     # hard-coded text
     text = '\n******************************'
     # print with or without newline
-    print(text) if new_line else print(text[1:])
+    logger.log(level, text) if new_line else logger.log(level, text[1:])
 
 #%% _function_wrapper
 def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
@@ -325,7 +282,6 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     step_sf  = 0.1
 
     # alias useful values
-    log_level     = Logger().get_level()
     names         = [name.decode('utf-8') for name in bpe_results.param_names]
     num_param     = cur_results.params.size
     num_innov     = cur_results.innovs.size
@@ -366,8 +322,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 
         # call model with new parameters
         opti_opts.set_param_func(names=names, values=temp_params, **model_args)
-        if log_level >= 8:
-            print('  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
+        logger.debug('  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
         (_, new_innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 
         if two_sided:
@@ -376,8 +331,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
             else:
                 temp_params = temp_params_minus.copy()
             opti_opts.set_param_func(names=names, values=temp_params, **model_args)
-            if log_level >= 8:
-                print('  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
+            logger.debug('  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
             (_, new_innovs_minus) = _function_wrapper(opti_opts, bpe_results, model_args)
 
         # compute the jacobian
@@ -504,27 +458,21 @@ def _predict_func_change(delta_param, gradient, hessian):
 #%% _check_for_convergence
 def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
     r"""Check for convergence."""
-    # alias the log level
-    log_level = Logger().get_level()
-
     # initialize the output and assume not converged
     convergence = False
 
     # check for and optionally display the reasons for convergence
     if cosmax <= opti_opts.tol_cosmax_grad:
         convergence = True
-        if log_level >= 5:
-            print('Declare convergence because cosmax of {} <= options.tol_cosmax_grad of {}'.format(\
+        logger.warning('Declare convergence because cosmax of {} <= options.tol_cosmax_grad of {}'.format(\
                 cosmax, opti_opts.tol_cosmax_grad))
     if delta_step_len <= opti_opts.tol_delta_step:
         convergence = True
-        if log_level >= 5:
-            print('Declare convergence because delta_step_len of {} <= options.tol_delta_step of {}'.format(\
+        logger.warning('Declare convergence because delta_step_len of {} <= options.tol_delta_step of {}'.format(\
                 delta_step_len, opti_opts.tol_delta_step))
     if abs(pred_func_change) <= opti_opts.tol_delta_cost:
         convergence = True
-        if log_level >= 5:
-            print('Declare convergence because abs(pred_func_change) of {} <= options.tol_delta_cost of {}'.format(\
+        logger.warning('Declare convergence because abs(pred_func_change) of {} <= options.tol_delta_cost of {}'.format(\
                 abs(pred_func_change), opti_opts.tol_delta_cost))
     return convergence
 
@@ -645,8 +593,7 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
     if normalized:
         param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
 
-    # alias the log level, trust radius, parameters names and bounds
-    log_level = Logger().get_level()
+    # alias the trust radius, parameters names and bounds
     trust_radius = cur_results.trust_rad
     names = [name.decode('utf-8') for name in bpe_results.param_names]
     params_min = OptiParam.get_array(opti_opts.params, type_='min')
@@ -704,8 +651,7 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
             params = np.maximum(params, params_min)
 
         # Run model
-        if log_level >= 8:
-            print('  Running model with new trial parameters.')
+        logger.debug('  Running model with new trial parameters.')
         opti_opts.set_param_func(names=names, values=params, **model_args)
         (_, innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 
@@ -763,21 +709,19 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
                 num_shrinks += 1
                 try_again = True
 
-        if log_level >= 8:
-            print(' Tried a {} step of length: {}, (with scale: {}).'.format(step_type, step_len, step_scale))
-            print(' New trial cost: {}'.format(trial_cost))
-            print(' With result: {}'.format(step_resolution))
-            if was_limited:
-                print(' Caution, the step length was limited by the given bounds.')
+        logger.debug(' Tried a {} step of length: {}, (with scale: {}).'.format(step_type, step_len, step_scale))
+        logger.debug(' New trial cost: {}'.format(trial_cost))
+        logger.debug(' With result: {}'.format(step_resolution))
+        if was_limited:
+            logger.debug(' Caution, the step length was limited by the given bounds.')
 
     # Display status message
-    if log_level >= 8 and num_shrinks >= opti_opts.step_limit:
-        print('Died on step cuts.')
-        print(' Failed to find any step on the dogleg path that was actually an improvement')
-        print(' before exceeding the step cut limit, which was {}  steps.'.format(opti_opts.step_limit))
+    if num_shrinks >= opti_opts.step_limit:
+        logger.debug('Died on step cuts.')
+        logger.debug(' Failed to find any step on the dogleg path that was actually an improvement')
+        logger.debug(' before exceeding the step cut limit, which was {}  steps.'.format(opti_opts.step_limit))
         failed = True
-    if log_level >= 5:
-        print(' New parameters are: {}'.format(cur_results.params))
+    logger.info(' New parameters are: {}'.format(cur_results.params))
     return failed
 
 #%% _analyze_results
@@ -786,17 +730,12 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     # hard-coded values
     min_eig = 1e-14 # minimum allowed eigenvalue
 
-    # alias the log level
-    log_level = Logger().get_level()
-
     # get the names and number of parameters
     num_params    = len(bpe_results.param_names)
 
     # update the status
-    if log_level >= 5:
-        print('Analyzing final results.')
-    if log_level >= 8:
-        print('There were a total of {} function model evaluations.'.format(bpe_results.num_evals))
+    logger.info('Analyzing final results.')
+    logger.debug('There were a total of {} function model evaluations.'.format(bpe_results.num_evals))
 
     # exit if nothing else to analyze
     if opti_opts.max_iters == 0:
@@ -817,8 +756,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
         temp = np.power(S_jacobian, -2, out=np.zeros(S_jacobian.shape), where=S_jacobian > min_eig)
         covariance = V_jacobian @ np.diag(temp) @ Vh_jacobian
     except MemoryError:
-        if log_level >= 6:
-            print('Singular value decomposition of Jacobian failed.')
+        logger.info('Singular value decomposition of Jacobian failed.')
         V_jacobian = np.full((num_params, num_params), np.nan, dtype=float)
         covariance = np.inv(jacobian.T @ jacobian)
 
@@ -875,12 +813,9 @@ def validate_opti_opts(opti_opts):
     True
 
     """
-    # get the logging level
-    log_level = Logger().get_level()
     # display some information
-    if log_level >= 5:
-        _print_divider(new_line=False)
-        print('Validating optimization options.')
+    _print_divider(new_line=False, level=logging.INFO)
+    logger.info('Validating optimization options.')
     # Must have specified all parameters
     assert callable(opti_opts.model_func)
     assert isinstance(opti_opts.model_args, dict)
@@ -932,7 +867,6 @@ def run_bpe(opti_opts):
     start_model = time.time()
 
     # alias some stuff
-    log_level = Logger().get_level()
     names     = OptiParam.get_names(opti_opts.params)
     two_sided = True if opti_opts.slope_method == 'two_sided' else False
 
@@ -962,10 +896,9 @@ def run_bpe(opti_opts):
     cosmax = 1 # TODO: calculate somewhere later
 
     # run the initial model
-    if log_level >= 2:
-        new_line = log_level > 5
-        _print_divider(new_line)
-        print('Running initial simulation.')
+    new_line = logger.level >= logging.INFO
+    _print_divider(new_line, level=logging.INFO)
+    logger.warning('Running initial simulation.')
     (_, cur_results.innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 
     # initialize loop variables
@@ -984,9 +917,8 @@ def run_bpe(opti_opts):
     bpe_results.costs.append(cur_results.cost)
 
     # display initial status
-    if log_level >= 6:
-        print(' Initial parameters: {}'.format(cur_results.params))
-        print(' Initial cost: {}'.format(cur_results.cost))
+    logger.info(' Initial parameters: {}'.format(cur_results.params))
+    logger.info(' Initial cost: {}'.format(cur_results.cost))
 
     # Set-up saving: check that the folder exists
     if is_saving:
@@ -996,12 +928,12 @@ def run_bpe(opti_opts):
 
     # Do some stuff
     convergence = False
-    jacobian = 0
+    failed      = False
+    jacobian    = 0
     while iter_count <= opti_opts.max_iters:
         # update status
-        if log_level >= 2:
-            _print_divider()
-            print('Running iteration {}.'.format(iter_count))
+        _print_divider(level=logging.WARNING)
+        logger.warning('Running iteration {}.'.format(iter_count))
 
         # run finite differences code to numerically approximate the Jacobian, gradient and Hessian
         (jacobian, gradient, hessian) = _finite_differences(opti_opts, model_args, bpe_results, \
@@ -1012,9 +944,8 @@ def run_bpe(opti_opts):
         grad_dot_step = gradient.T @ delta_param
         if grad_dot_step > 0 and iter_count > 1:
             cur_results.trust_rad += opti_opts.grow_radius
-            if log_level >= 8:
-                print('Old step still in descent direction, so expand current trust_radius to {}.'.format(\
-                    cur_results.trust_rad))
+            logger.debug('Old step still in descent direction, so expand current trust_radius to {}.'.format(\
+                cur_results.trust_rad))
 
         # calculate the delta parameter step to try on the next iteration
         if opti_opts.is_max_like:
@@ -1048,17 +979,16 @@ def run_bpe(opti_opts):
             break
 
     # display if this converged out timed out on iteration steps
-    if log_level >= 6 and not convergence and not failed:
-        print('Stopped iterating due to hitting the max number of iterations: {}.'.format(opti_opts.max_iters))
+    if not convergence and not failed:
+        logger.info('Stopped iterating due to hitting the max number of iterations: {}.'.format(opti_opts.max_iters))
 
     # run an optional final function before doing the final simulation
     if opti_opts.final_func is not None:
         opti_opts.final_func(**model_args, settings=init_saves)
 
     # Run for final time
-    if log_level >= 2:
-        _print_divider()
-        print('Running final simulation.')
+    _print_divider(level=logging.WARNING)
+    logger.warning('Running final simulation.')
     opti_opts.set_param_func(names=names, values=cur_results.params, **model_args)
     (results, cur_results.innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
     cur_results.cost = 0.5 * rss(cur_results.innovs, ignore_nans=True)
@@ -1068,22 +998,20 @@ def run_bpe(opti_opts):
     bpe_results.costs.append(cur_results.cost)
 
     # display final status
-    if log_level >= 6:
-        print(' Final parameters: {}'.format(bpe_results.final_params))
-        print(' Final cost: {}'.format(bpe_results.final_cost))
+    logger.info(' Final parameters: {}'.format(bpe_results.final_params))
+    logger.info(' Final cost: {}'.format(bpe_results.final_cost))
 
     # analyze BPE results
     _analyze_results(opti_opts, bpe_results, jacobian)
 
     # show status and save results
-    if log_level > 2 and is_saving:
-        print('Saving results to: "{}".'.format(filename))
+    if is_saving:
+        logger.warning('Saving results to: "{}".'.format(filename))
     if is_saving:
         bpe_results.save(filename)
 
     # display total elapsed time
-    if log_level >= 3:
-        print('BPE Model completed: ' + time.strftime('%H:%M:%S', time.gmtime(time.time()-start_model)))
+    logger.warning('BPE Model completed: ' + time.strftime('%H:%M:%S', time.gmtime(time.time()-start_model)))
 
     return (bpe_results, results)
 
@@ -1094,9 +1022,6 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
     """
     # hard-coded options
     label_values = False
-
-    # get the logging level
-    log_level = Logger.get_level()
 
     # alias the names
     if bpe_results.param_names is not None:
@@ -1136,13 +1061,13 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
             fig = plot_multiline_history(time, data, label='Innovs Before and After', opts=opts, \
                 legend=['Before', 'After'])
             figs.append(fig)
-        elif log_level >= 2:
+        else:
             print("Data isn't available for Innovations plot.")
     if plots['convergence']:
         if len(bpe_results.costs) != 0:
             fig = plot_bpe_convergence(bpe_results.costs, opts=opts)
             figs.append(fig)
-        elif log_level >= 2:
+        else:
             print("Data isn't available for convergence plot.")
 
     if plots['correlation']:
@@ -1152,7 +1077,7 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
                 matrix_name='Correlation Matrix', cmin=-1, plot_lower_only=True, \
                 label_values=label_values)
             figs.append(fig)
-        elif log_level >= 2:
+        else:
             print("Data isn't available for correlation plot.")
 
     if plots['info_svd']:
@@ -1162,7 +1087,7 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
                 matrix_name='Information SVD Matrix', label_values=label_values, \
                 labels=[['{}'.format(i+1) for i in range(len(names))], names])
             figs.append(fig)
-        elif log_level >= 2:
+        else:
             print("Data isn't available for information SVD plot.")
 
     if plots['covariance']:
@@ -1173,7 +1098,7 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
                 matrix_name='Covariance Matrix', cmin=-max_mag, cmax=max_mag, \
                 plot_lower_only=True, label_values=label_values)
             figs.append(fig)
-        elif log_level >= 2:
+        else:
             print("Data isn't available for covariance plot.")
     # restore the original colormap
     opts.colormap = colormap_orig

@@ -10,6 +10,7 @@ Notes
 
 #%% Imports
 from datetime import datetime
+import logging
 import numpy as np
 import os
 import dstauffman as dcs
@@ -111,7 +112,7 @@ if __name__=='__main__':
     truth = dcs.TruthPlotter(truth_time, truth_data)
 
     # Logger
-    dcs.Logger().set_level(10)
+    dcs.bpe.logger.setLevel(logging.DEBUG)
 
     # BPE Settings
     opti_opts = dcs.OptiOpts()
