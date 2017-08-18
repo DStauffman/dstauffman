@@ -146,7 +146,7 @@ if __name__=='__main__':
 
     # Run code
     if rerun:
-        (bpe_results, results) = dcs.run_bpe(opti_opts)
+        (bpe_results, results) = dcs.run_bpe(opti_opts, log_level=logging.DEBUG)
     else:
         bpe_results = dcs.BpeResults.load(os.path.join(opti_opts.output_folder, opti_opts.output_results))
         results     = sim_model(sim_params) # just re-run, nothing is actually saved by this model

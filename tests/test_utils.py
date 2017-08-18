@@ -12,6 +12,7 @@ Notes
 import copy
 from datetime import datetime
 import inspect
+import logging
 import numpy as np
 import os
 import platform
@@ -1411,6 +1412,36 @@ class Test_combine_per_year(unittest.TestCase):
     def test_bad_func2(self):
         with self.assertRaises(AssertionError):
             dcs.combine_per_year(self.data, func=1.5)
+
+#%% activate_logging and deactivate_logging
+class Test_act_deact_logging(unittest.TestCase):
+    r"""
+    Tests the activate_logging and deactivate_logging functions with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.level    = logging.DEBUG
+        self.filename = os.path.join(dcs.get_tests_dir(), 'testlog.txt')
+
+    def test_nominal(self):
+        self.assertFalse(dcs.utils.root_logger.handlers)
+        self.assertFalse(os.path.isfile(self.filename))
+        dcs.activate_logging(self.level, self.filename)
+        self.assertTrue(os.path.isfile(self.filename))
+        self.assertTrue(dcs.utils.root_logger.handlers)
+        with self.assertLogs(level='DEBUG') as cm:
+            logger = logging.getLogger('Test')
+            logger.debug('Test message')
+        lines = cm.output
+        self.assertEqual(len(lines), 1)
+        self.assertEqual(lines[0], 'DEBUG:Test:Test message')
+        dcs.deactivate_logging()
+        self.assertFalse(dcs.utils.root_logger.handlers)
+
+    def tearDown(self):
+        dcs.deactivate_logging()
+        if os.path.isfile(self.filename):
+            os.remove(self.filename)
 
 #%% Unit test execution
 if __name__ == '__main__':

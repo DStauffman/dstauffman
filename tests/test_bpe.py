@@ -287,7 +287,9 @@ class Test__print_divider(unittest.TestCase):
     def test_with_new_line(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.INFO)
         dcs.bpe._print_divider()
-        mock_logger.log.assert_called_with(logging.INFO, '\n******************************')
+        self.assertEqual(mock_logger.log.call_count, 2)
+        mock_logger.log.assert_any_call(logging.INFO, ' ')
+        mock_logger.log.assert_any_call(logging.INFO, '******************************')
 
     def test_no_new_line(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.DEBUG)
@@ -297,12 +299,16 @@ class Test__print_divider(unittest.TestCase):
     def test_alternative_level(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.ERROR)
         dcs.bpe._print_divider(level=logging.CRITICAL)
-        mock_logger.log.assert_called_with(logging.CRITICAL, '\n******************************')
+        self.assertEqual(mock_logger.log.call_count, 2)
+        mock_logger.log.assert_any_call(logging.CRITICAL, ' ')
+        mock_logger.log.assert_any_call(logging.CRITICAL, '******************************')
 
     def test_not_logging(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.ERROR)
         dcs.bpe._print_divider()
-        mock_logger.log.assert_called_with(logging.INFO, '\n******************************')
+        self.assertEqual(mock_logger.log.call_count, 2)
+        mock_logger.log.assert_any_call(logging.INFO, ' ')
+        mock_logger.log.assert_any_call(logging.INFO, '******************************')
         # TODO: how to test that this wouldn't log anything?
 
 #%% _function_wrapper

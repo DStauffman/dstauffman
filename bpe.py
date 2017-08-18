@@ -24,7 +24,7 @@ import unittest
 from dstauffman.classes  import Frozen, SaveAndLoad
 from dstauffman.plotting import Opts, plot_correlation_matrix, plot_multiline_history, \
                                     plot_bpe_convergence
-from dstauffman.utils    import pprint_dict, rss, setup_dir
+from dstauffman.utils    import activate_logging, deactivate_logging, pprint_dict, rss, setup_dir
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -226,15 +226,13 @@ def _print_divider(new_line=True, level=logging.INFO):
     --------
 
     >>> from dstauffman.bpe import _print_divider
-    >>> _print_divider()
-    <BLANKLINE>
-    ******************************
+    >>> _print_divider() # prints to logger
 
     """
-    # hard-coded text
-    text = '\n******************************'
-    # print with or without newline
-    logger.log(level, text) if new_line else logger.log(level, text[1:])
+    # log line separators
+    if new_line:
+        logger.log(level, ' ')
+    logger.log(level, '******************************')
 
 #%% _function_wrapper
 def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
@@ -792,8 +790,7 @@ def validate_opti_opts(opti_opts):
     Examples
     --------
 
-    >>> from dstauffman import Logger, OptiOpts, validate_opti_opts
-    >>> logger = Logger(10)
+    >>> from dstauffman import OptiOpts, validate_opti_opts
     >>> opti_opts = OptiOpts()
     >>> opti_opts.model_func     = str
     >>> opti_opts.model_args     = {'a': 1}
@@ -806,9 +803,6 @@ def validate_opti_opts(opti_opts):
     >>> opti_opts.params         = [1, 2]
 
     >>> is_valid = validate_opti_opts(opti_opts)
-    ******************************
-    Validating optimization options.
-
     >>> print(is_valid)
     True
 
@@ -833,7 +827,7 @@ def validate_opti_opts(opti_opts):
     return True
 
 #%% run_bpe
-def run_bpe(opti_opts):
+def run_bpe(opti_opts, log_level=logging.INFO):
     r"""
     Runs the batch parameter estimator with the given model optimization options.
 
@@ -860,6 +854,9 @@ def run_bpe(opti_opts):
     >>> from dstauffman import run_bpe, OptiOpts #TODO: finish this
 
     """
+    # activate logging
+    activate_logging(log_level)
+
     # check for valid parameters
     validate_opti_opts(opti_opts)
 
@@ -1012,6 +1009,7 @@ def run_bpe(opti_opts):
 
     # display total elapsed time
     logger.warning('BPE Model completed: ' + time.strftime('%H:%M:%S', time.gmtime(time.time()-start_model)))
+    deactivate_logging()
 
     return (bpe_results, results)
 
