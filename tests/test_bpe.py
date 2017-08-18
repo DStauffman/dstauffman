@@ -302,7 +302,7 @@ class Test__print_divider(unittest.TestCase):
     def test_not_logging(self, mock_logger):
         dcs.bpe.logger.setLevel(logging.ERROR)
         dcs.bpe._print_divider()
-        mock_logger.log.assert_called_with(logging.ERROR, '\n******************************')
+        mock_logger.log.assert_called_with(logging.INFO, '\n******************************')
         # TODO: how to test that this wouldn't log anything?
 
 #%% _function_wrapper
@@ -421,9 +421,8 @@ class Test__check_for_convergence(unittest.TestCase):
         mock_logger.warning.assert_any_call('Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
         mock_logger.warning.assert_any_call('Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
 
-    @unittest.skip('This test should fail until changed to CRITICAL')
     def test_no_logging(self, mock_logger):
-        dcs.bpe.logger.setLevel(logging.NOTSET) # CRITICAL
+        mock_logger.setLevel(logging.NOTSET) # CRITICAL
         with dcs.capture_output('err') as err:
             convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
         self.assertTrue(convergence)
@@ -517,21 +516,20 @@ class Test_validate_opti_opts(unittest.TestCase):
         self.support()
 
 #%% run_bpe
-@unittest.skip('Fix logging issues by using mock.')
+@patch('dstauffman.bpe.logger')
 class Test_run_bpe(unittest.TestCase):
     r"""
     Tests the run_bpe function with the following cases:
         TBD
     """
     def setUp(self):
-        self.logger = dcs.bpe.logger
-        self.logger.setLevel(logging.INFO)
+        dcs.bpe.logger.setLevel(logging.INFO)
         time        = np.arange(251)
         sim_params  = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time  = np.arange(-10, 201)
         truth_data  = 5 * np.sin(2*np.pi*10*time/1000 + 90*np.pi/180)
 
-        self.opti_opts = dcs.OptiOpts()
+        self.opti_opts                = dcs.OptiOpts()
         self.opti_opts.model_func     = sim_model
         self.opti_opts.model_args     = {'sim_params': sim_params}
         self.opti_opts.cost_func      = cost_wrapper
@@ -547,62 +545,56 @@ class Test_run_bpe(unittest.TestCase):
         self.opti_opts.params.append(dcs.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
         self.opti_opts.params.append(dcs.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
-    def test_nominal(self):
-        with dcs.capture_output() as out:
-            (bpe_results, results) = dcs.run_bpe(self.opti_opts)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertTrue(output.startswith('******************************\nValidating optimization options.'))
+    def test_nominal(self, mock_logger):
+        mock_logger.level = logging.INFO
+        (bpe_results, results) = dcs.run_bpe(self.opti_opts)
+        # TODO: check logging results?
         self.assertTrue(isinstance(bpe_results, dcs.BpeResults))
         self.assertTrue(isinstance(results, np.ndarray))
 
-    def test_no_logging(self):
-        self.logger.setLevel(logging.CRITICAL)
-        with dcs.capture_output() as out:
-            dcs.run_bpe(self.opti_opts)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, '')
+    def test_no_logging(self, mock_logger):
+        dcs.bpe.logger.setLevel(logging.CRITICAL)
+        mock_logger.level = logging.CRITICAL
+        dcs.run_bpe(self.opti_opts)
+        # TODO: check logging results
 
-    def test_max_likelihood(self):
-        self.logger.setLevel(logging.CRITICAL)
+    def test_max_likelihood(self, mock_logger):
+        dcs.bpe.logger.setLevel(logging.CRITICAL)
+        mock_logger.level = logging.CRITICAL
         self.opti_opts.is_max_like = True
         dcs.run_bpe(self.opti_opts)
 
-    def test_normalized(self):
+    def test_normalized(self, mock_logger):
         pass # TODO: method not yet coded all the way
 
-    def test_two_sided(self):
-        with dcs.capture_output() as out:
-            self.opti_opts.slope_method = 'two_sided'
-            dcs.run_bpe(self.opti_opts)
-        lines = out.getvalue().strip().split('\n')
-        out.close()
-        for (ix, line) in enumerate(lines):
-            if line == 'Running iteration 1.':
-                self.assertTrue(lines[ix+1].startswith('  Running model with magnitude'))
-                self.assertTrue(lines[ix+2].startswith('  Running model with magnitude'))
-                break
-        else:
-            self.assertTrue(False, 'two sided had issues')
+    def test_two_sided(self, mock_logger):
+        mock_logger.level = logging.INFO
+        self.opti_opts.slope_method = 'two_sided'
+        dcs.run_bpe(self.opti_opts)
+#        for (ix, line) in enumerate(lines):
+#            if line == 'Running iteration 1.':
+#                self.assertTrue(lines[ix+1].startswith('  Running model with magnitude'))
+#                self.assertTrue(lines[ix+2].startswith('  Running model with magnitude'))
+#                break
+#        else:
+#            self.assertTrue(False, 'two sided had issues')
         # rerun with no logging
-        self.logger.setLevel(logging.CRITICAL)
+        dcs.bpe.logger.setLevel(logging.CRITICAL)
         dcs.run_bpe(self.opti_opts)
 
-    def test_to_convergence(self):
+    def test_to_convergence(self, mock_logger):
         self.opti_opts.max_iters = 100
-        with dcs.capture_output() as out:
-            dcs.run_bpe(self.opti_opts)
-        lines = out.getvalue().strip().split('\n')
-        out.close()
-        for line in lines:
-            if line.startswith('Declare convergence'):
-                break
-        else:
-            self.assertTrue(False, "Didn't converge")
+        mock_logger.level = logging.INFO
+        dcs.run_bpe(self.opti_opts)
+#        for line in lines:
+#            if line.startswith('Declare convergence'):
+#                break
+#        else:
+#            self.assertTrue(False, "Didn't converge")
 
-    def test_saving(self):
-        self.logger.setLevel(logging.CRITICAL)
+    def test_saving(self, mock_logger):
+        mock_logger.setLevel(logging.CRITICAL)
+        mock_logger.level = logging.CRITICAL
         self.opti_opts.max_iters = 0
         self.opti_opts.output_folder = dcs.get_tests_dir()
         self.opti_opts.output_results = 'temp_results.hdf5'
