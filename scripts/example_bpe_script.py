@@ -6,7 +6,6 @@ Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
 """
-# pylint: disable=E1101, C0103, C0326
 
 #%% Imports
 from datetime import datetime

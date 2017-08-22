@@ -7,7 +7,6 @@ Notes
 -----
 #.  Written by David C. Stauffer in May 2016.  Mostly based on Matlab routines.
 """
-# pylint: disable=E1101, C0301, C0326
 
 #%% Imports
 import doctest

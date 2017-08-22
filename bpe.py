@@ -10,7 +10,6 @@ Notes
     numeric algorithms are re-coded from external sources to avoid any potential proprietary issues.
 #.  Uses the Python @ infix operator, so you must be on v3.5 or newer
 """
-# pylint: disable=E1101, C0301, C0326
 
 #%% Imports
 from copy import deepcopy

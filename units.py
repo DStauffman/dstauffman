@@ -9,7 +9,6 @@ Notes
         constants or enums to avoid circular references.
 #.  Written by David C. Stauffer in February 2016.
 """
-# pylint: disable=E1101, C0301, C0103
 
 #%% Imports
 import doctest

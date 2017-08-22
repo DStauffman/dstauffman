@@ -9,7 +9,6 @@ Notes
         constants or enums to avoid circular references.
 #.  Written by David C. Stauffer in March 2015.
 """
-# pylint: disable=E1101, C0301, C0103
 
 #%% Imports
 from collections import Mapping
@@ -460,7 +459,7 @@ def round_time(dt=None, round_to_sec=60):
 
     """
     # set default for dt
-    if dt == None:
+    if dt is None:
         dt = datetime.now()
     # get the current elasped time in seconds
     seconds = (dt - dt.min).seconds
@@ -625,7 +624,7 @@ def read_text_file(filename):
     """
     try:
         # open file for reading
-        with open(filename, 'rt') as file: # pylint: disable=W1501
+        with open(filename, 'rt') as file:
             # read file
             text = file.read() # pragma: no branch
         # return results
@@ -670,7 +669,7 @@ def write_text_file(filename, text):
     """
     try:
         # open file for writing
-        with open(filename, 'wt') as file: # pylint: disable=W1501
+        with open(filename, 'wt') as file:
             # write file
             file.write(text) # pragma: no branch
     except:
@@ -1042,7 +1041,7 @@ def rename_module(folder, old_name, new_name, print_status=True):
                 break
         else:
             for name in files:
-                (file_name, file_ext) = os.path.splitext(name)
+                (_, file_ext) = os.path.splitext(name)
                 this_old_file = os.path.join(root, name)
                 this_new_file = os.path.join(folder + root[root_ix:].replace(old_name, new_name), \
                     name.replace(old_name, new_name))

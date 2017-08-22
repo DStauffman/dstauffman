@@ -6,7 +6,6 @@ Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
 """
-# pylint: disable=E1101, C0103
 
 #%% Imports
 import numpy as np

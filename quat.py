@@ -8,8 +8,6 @@ Notes
 #.  Written by David C. Stauffer in April 2015.
 """
 
-# pylint: disable=E1101, C0326, C0103
-
 #%% Imports
 import doctest
 import numpy as np
