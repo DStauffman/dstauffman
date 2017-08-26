@@ -5,6 +5,7 @@ Support functions used to create LaTeX documentation.
 Notes
 -----
 #.  Written by David C. Stauffer in Jan 2015, moved to separate file in Jan 2017.
+
 """
 #%% Imports
 import doctest
@@ -13,7 +14,7 @@ import unittest
 #%% Functions - make_preamble
 def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short_cap=None):
     r"""
-    Writes the table header and preamble.
+    Write the table header and preamble.
 
     Parameters
     ----------
@@ -39,7 +40,6 @@ def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short
 
     Examples
     --------
-
     >>> from dstauffman import make_preamble
     >>> out = make_preamble('Table Caption', 'tab:this_label', 'lcc')
     >>> print(out) # doctest: +ELLIPSIS
@@ -67,7 +67,7 @@ def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short
 #%% Functions - make_conclusion
 def make_conclusion(*, use_mini=False):
     r"""
-    Writes closing tags at the end of the table.
+    Write closing tags at the end of the table.
 
     Parameters
     ----------
@@ -82,7 +82,6 @@ def make_conclusion(*, use_mini=False):
 
     Examples
     --------
-
     >>> from dstauffman import make_conclusion
     >>> out = make_conclusion()
     >>> print(out)
@@ -98,7 +97,7 @@ def make_conclusion(*, use_mini=False):
 #%% Functions - bins_to_str_ranges
 def bins_to_str_ranges(bins, dt=1, cutoff=1000):
     r"""
-    Takes a given bin vector, and returns a string representation with both boundaries.
+    Take a given bin vector, and returns a string representation with both boundaries.
 
     Parameters
     ----------
@@ -120,7 +119,6 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
 
     Examples
     --------
-
     >>> from dstauffman import bins_to_str_ranges
     >>> import numpy as np
     >>> age_bins = np.array([0, 20, 40, 60, 100000], dtype=int)

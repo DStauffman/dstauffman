@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 r"""
-Plotting module file for the "dstauffman" library.  It defines useful plotting utilities.
+Defines useful plotting utilities.
 
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
+
 """
 
 #%% Imports
@@ -63,36 +64,35 @@ class _HoverButton(QPushButton):
 #%% Classes - Plotter
 class Plotter(Frozen):
     r"""
-    Class that allows customization of when to show or not show plots (for use with testing plotting
-    functions)
+    Class that allows customization of when to show or not show plots.
+
+    For use with testing plotting functions.
     """
     # class attribute for plotting flag
     show_plot = True
 
     def __init__(self, show=None):
-        r"""Creates options instance with ability to override defaults."""
+        r"""Create options instance with ability to override defaults."""
         if show is not None:
             type(self).show_plot = bool(show)
 
     def __str__(self):
-        r"""Prints the current plotting flag."""
+        r"""Print the current plotting flag."""
         return '{}({})'.format(type(self).__name__, self.show_plot)
 
     @classmethod
     def get_plotter(cls):
-        r"""Gets the plotting flag."""
+        r"""Get the plotting flag."""
         return cls.show_plot
 
     @classmethod
     def set_plotter(cls, show):
-        r"""Sets the plotting flag."""
+        r"""Set the plotting flag."""
         cls.show_plot = bool(show)
 
 #%% Classes - Opts
 class Opts(Frozen):
-    r"""
-    Contains all the optional plotting configurations.
-    """
+    r"""Optional plotting configurations."""
     def __init__(self):
         self.case_name  = ''
         self.save_path  = os.getcwd()
@@ -112,7 +112,7 @@ class Opts(Frozen):
         self.names      = list()
 
     def get_names(self, ix):
-        r"""Gets the specified name from the list."""
+        r"""Get the specified name from the list."""
         if hasattr(self, 'names') and len(self.names) >= ix+1:
             name = self.names[ix]
         else:
@@ -120,7 +120,7 @@ class Opts(Frozen):
         return name
 
     def pprint(self, indent=1, align=True):
-        r"""Displays a pretty print version of the class."""
+        r"""Display a pretty print version of the class."""
         pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
 #%% Classes - TruthPlotter
@@ -130,7 +130,6 @@ class TruthPlotter(Frozen):
 
     Examples
     --------
-
     >>> from dstauffman import TruthPlotter
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -169,17 +168,17 @@ class TruthPlotter(Frozen):
                 self.data_hi = data[:, 2]
 
     def pprint(self, indent=1, align=True):
-        r"""Displays a pretty print version of the class."""
+        r"""Display a pretty print version of the class."""
         pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
     @property
     def is_null(self):
-        r"""Determines if there is no truth to plot, and thus nothing is done."""
+        r"""Determine if there is no truth to plot, and thus nothing is done."""
         return self.data is None and self.data_lo is None and self.data_hi is None
 
     @staticmethod
     def get_data(data, scale=1, ix=None):
-        r"""Scales and indexes the data, returning None if it is not there."""
+        r"""Scale and index the data, returning None if it is not there."""
         if data is None:
             return data
         if ix is None:
@@ -188,7 +187,7 @@ class TruthPlotter(Frozen):
             return scale * data[:, ix]
 
     def plot_truth(self, ax, scale=1, ix=None, *, hold_xlim=True, hold_ylim=False):
-        r"""Adds the information in the TruthPlotter instance to the given axis, with the optional scale."""
+        r"""Add the information in the TruthPlotter instance to the given axis, with the optional scale."""
         # check for null case
         if self.is_null:
             return
@@ -227,11 +226,10 @@ class TruthPlotter(Frozen):
 #%% Classes - MyCustomToolbar
 class MyCustomToolbar():
     r"""
-    Defines a custom toolbar to use in any matplotlib plots.
+    Define a custom toolbar to use in any matplotlib plots.
 
     Examples
     --------
-
     >>> from dstauffman import MyCustomToolbar
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -248,7 +246,7 @@ class MyCustomToolbar():
 
     """
     def __init__(self, fig):
-        r"""Initializes the custom toolbar."""
+        r"""Initialize the custom toolbar."""
         # check to see if a QApplication exists, and if not, make one
         if QApplication.instance() is None:
             self.qapp = QApplication(sys.argv) # pragma: no cover
@@ -277,11 +275,11 @@ class MyCustomToolbar():
         self.btn_close_all.clicked.connect(self._close_all)
 
     def _close_all(self, *args):
-        r"""Closes all the currently open plots."""
+        r"""Close all the currently open plots."""
         close_all()
 
     def next_plot(self, *args):
-        r"""Brings up the next plot in the series."""
+        r"""Bring up the next plot in the series."""
         # get all the figure numbers
         all_figs = plt.get_fignums()
         # get the active figure number
@@ -301,7 +299,7 @@ class MyCustomToolbar():
         fig.canvas.manager.window.raise_()
 
     def prev_plot(self, *args):
-        r"""Brings up the previous plot in the series."""
+        r"""Bring up the previous plot in the series."""
         # get all the figure numbers
         all_figs = plt.get_fignums()
         # get the active figure number
@@ -342,7 +340,6 @@ class ColorMap(Frozen):
 
     Examples
     --------
-
     >>> from dstauffman import ColorMap
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -377,7 +374,7 @@ class ColorMap(Frozen):
         return self.smap.to_rgba(value)
 
     def get_smap(self):
-        r"""Returns the smap being used."""
+        r"""Return the smap being used."""
         return self.smap
 
     def set_colors(self, ax):
@@ -393,7 +390,7 @@ class ColorMap(Frozen):
 #%% Functions - ignore_plot_data
 def ignore_plot_data(data, ignore_empties, col=None):
     r"""
-    Determines whether to ignore this data or not.
+    Determine whether to ignore this data or not.
 
     Parameters
     ----------
@@ -415,7 +412,6 @@ def ignore_plot_data(data, ignore_empties, col=None):
 
     Examples
     --------
-
     >>> from dstauffman import ignore_plot_data
     >>> import numpy as np
     >>> data = np.zeros((3, 10), dtype=float)
@@ -443,6 +439,21 @@ def ignore_plot_data(data, ignore_empties, col=None):
 def close_all(figs=None):
     r"""
     Close all the open figures, or if a list is specified, then close all of them.
+
+    Parameters
+    ----------
+    figs : list of Figure, optional
+        Specific figures to be closed.
+
+    Examples
+    --------
+    >>> from dstauffman import close_all
+    >>> import matplotlib.pyplot as plt
+    >>> fig = plt.figure()
+    >>> ax = fig.add_subplot(111)
+    >>> _ = ax.plot(0, 0)
+    >>> close_all([fig])
+
     """
     # Note that it's better to loop through and close the plots individually than to use
     # plt.close('all'), as that can sometimes cause the iPython kernel to quit #DCS: 2015-06-11
@@ -457,7 +468,7 @@ def close_all(figs=None):
 #%% Functions - get_axes_scales
 def get_axes_scales(type_):
     r"""
-    Determines the scale factor and units to apply to the plot based on the desired `type_`
+    Determine the scale factor and units to apply to the plot based on the desired `type_`.
 
     Parameters
     ----------
@@ -477,7 +488,6 @@ def get_axes_scales(type_):
 
     Examples
     --------
-
     >>> from dstauffman import get_axes_scales
     >>> type_ = 'percentage'
     >>> (scale, units) = get_axes_scales(type_)
@@ -514,17 +524,36 @@ def get_axes_scales(type_):
 #%% Functions - whitten
 def whitten(color, white=(1, 1, 1, 1), dt=0.30):
     r"""
-    Shifts an RGBA color towards white.
+    Shift an RGBA color towards white.
+
+    Parameters
+    ----------
+    color : tuple
+        Given color
+    white : tuple, optional
+        Color to *whitten* towards, usually assumed to be white
+    dt : float, optional
+        Amount to move towards white, from 0 (none) to 1 (all the way), default is 0.3
+
+    Examples
+    --------
+    >>> from dstauffman import whitten
+    >>> color = (1, 0.4, 0)
+    >>> new_color = whitten(color)
+    >>> print(new_color)
+    (1.0, 0.58, 0.3)
+
     """
     # apply the shift
-    return tuple((c*(1-dt) + w*dt for (c, w) in zip(color, white)))
+    new_color = tuple((c*(1-dt) + w*dt for (c, w) in zip(color, white)))
+    return new_color
 
 #%% Functions - plot_time_history
 def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, second_y_scale=None, truth_time=None, \
     truth_data=None):
     r"""
-    Plots the given data channel versus time, with a generic label argument.
+    Plot the given data channel versus time, with a generic label argument.
 
     Parameters
     ----------
@@ -562,7 +591,6 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
 
     Examples
     --------
-
     >>> from dstauffman import plot_time_history
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -694,7 +722,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
 def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matrix_name='Correlation Matrix', \
         cmin=0, cmax=1, xlabel='', ylabel='', plot_lower_only=True, label_values=False, x_lab_rot=90):
     r"""
-    Visually plots a correlation matrix.
+    Visually plot a correlation matrix.
 
     Parameters
     ----------
@@ -734,7 +762,6 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
 
     Examples
     --------
-
     >>> from dstauffman import plot_correlation_matrix, unit
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
@@ -849,7 +876,7 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
 def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legend=None, \
         second_y_scale=None, ignore_empties=False, data_lo=None, data_hi=None):
     r"""
-    Plots multiple metrics over time.
+    Plot multiple metrics over time.
 
     Parameters
     ----------
@@ -885,7 +912,6 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
 
     Examples
     --------
-
     >>> from dstauffman import plot_multiline_history
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -974,7 +1000,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
 #%% Functions - plot_bar_breakdown
 def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empties=False):
     r"""
-    Plots the pie chart like breakdown by percentage in each category over time.
+    Plot the pie chart like breakdown by percentage in each category over time.
 
     Parameters
     ----------
@@ -1002,7 +1028,6 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
 
     Examples
     --------
-
     >>> from dstauffman import plot_bar_breakdown
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -1077,7 +1102,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
 #%% Functions - plot_bpe_convergence
 def plot_bpe_convergence(costs, opts=None):
     r"""
-    Plots the BPE convergence rate by iteration on a log scale.
+    Plot the BPE convergence rate by iteration on a log scale.
 
     Parameters
     ----------
@@ -1097,7 +1122,6 @@ def plot_bpe_convergence(costs, opts=None):
 
     Examples
     --------
-
     >>> from dstauffman import plot_bpe_convergence
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -1141,7 +1165,7 @@ def plot_bpe_convergence(costs, opts=None):
 def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyramid', *, opts=None, \
         name1='Male', name2='Female', color1='b', color2='r'):
     r"""
-    Plots the standard population pyramid
+    Plot the standard population pyramid.
 
     Parameters
     ----------
@@ -1169,17 +1193,16 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     fig : object
         figure handle
 
-    References
-    ----------
-    #.  https://en.wikipedia.org/wiki/Population_pyramid
-
     Notes
     -----
     #.  Written by David C. Stauffer in April 2017.
 
+    References
+    ----------
+    .. [1]  https://en.wikipedia.org/wiki/Population_pyramid
+
     Examples
     --------
-
     >>> from dstauffman import plot_population_pyramid
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -1235,7 +1258,7 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
 #%% Functions - storefig
 def storefig(fig, folder=None, plot_type='png'):
     r"""
-    Stores the specified figures in the specified folder and with the specified plot type(s)
+    Store the specified figures in the specified folder and with the specified plot type(s).
 
     Parameters
     ----------
@@ -1324,7 +1347,7 @@ def storefig(fig, folder=None, plot_type='png'):
 #%% Functions - titleprefix
 def titleprefix(fig, prefix=''):
     r"""
-    Prepends a text string to all the titles on existing figures.
+    Prepend a text string to all the titles on existing figures.
 
     It also sets the canvas title used by storefig when saving to a file.
 
@@ -1393,7 +1416,7 @@ def titleprefix(fig, prefix=''):
 #%% Functions - disp_xlimits
 def disp_xlimits(figs, xmin=None, xmax=None):
     r"""
-    Sets the xlimits to the specified xmin and xmax.
+    Set the xlimits to the specified xmin and xmax.
 
     Parameters
     ----------
@@ -1410,7 +1433,6 @@ def disp_xlimits(figs, xmin=None, xmax=None):
 
     Examples
     --------
-
     >>> from dstauffman import disp_xlimits
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -1455,7 +1477,7 @@ def disp_xlimits(figs, xmin=None, xmax=None):
 #%% Functions - setup_plots
 def setup_plots(figs, opts, plot_type='time'):
     r"""
-    Combines common plot operations into one easy command.
+    Combine common plot operations into one easy command.
 
     Parameters
     ----------
@@ -1471,7 +1493,6 @@ def setup_plots(figs, opts, plot_type='time'):
 
     Examples
     --------
-
     >>> from dstauffman import setup_plots, Opts
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -1523,7 +1544,7 @@ def setup_plots(figs, opts, plot_type='time'):
 #%% Functions - figmenu
 def figmenu(figs):
     r"""
-    Adds a custom toolbar to the figures.
+    Add a custom toolbar to the figures.
 
     Parameters
     ----------
@@ -1532,7 +1553,6 @@ def figmenu(figs):
 
     Examples
     --------
-
     >>> from dstauffman import figmenu
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
@@ -1561,7 +1581,7 @@ def figmenu(figs):
 #%% rgb_ints_to_hex
 def rgb_ints_to_hex(int_tuple):
     r"""
-    Converts a tuple of ints with (0, 255) to the equivalent hex color code.
+    Convert a tuple of ints with (0, 255) to the equivalent hex color code.
 
     Parameters
     ----------
@@ -1575,7 +1595,6 @@ def rgb_ints_to_hex(int_tuple):
 
     Examples
     --------
-
     >>> from dstauffman import rgb_ints_to_hex
     >>> hex_code = rgb_ints_to_hex((79, 129, 189))
     >>> print(hex_code)

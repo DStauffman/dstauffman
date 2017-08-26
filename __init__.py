@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 r"""
-The "dstauffman" module is a generic Python code library of functions that I (David C. Stauffer)
-have found useful.
+The "dstauffman" module is a generic Python code library of useful functions.
+
+At least they are function that I (David C. Stauffer) have found useful.  Your results may vary!
 
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
 #.  Updated by David C. Stauffer in December 2015 to no longer support Python v2.7.  Too many of the
     newer language features were appealing and couldn't be used if compatibility was a concern.
+
 """
 
 #%% Imports

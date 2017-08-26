@@ -5,6 +5,7 @@ Example script for running the Batch Parameter Estimation (BPE) portion of the D
 Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
+
 """
 
 #%% Imports
@@ -36,9 +37,7 @@ class SimParams(dcs.Frozen):
 
 #%% Functions - _get_truth_index
 def _get_truth_index(results_time, truth_time):
-    r"""
-    Finds the indices to the truth data from the results time.
-    """
+    r"""Find the indices to the truth data from the results time."""
     # Hard-coded values
     precision    = 1e-7
     # find the indices to truth
@@ -51,18 +50,18 @@ def _get_truth_index(results_time, truth_time):
 
 #%% Functions - sim_model
 def sim_model(sim_params):
-    r"""Simple example simulation model."""
+    r"""Run the simple example simulation model."""
     return sim_params.magnitude * np.sin(2*np.pi*sim_params.frequency*sim_params.time/1000 + \
         sim_params.phase*np.pi/180)
 
 #%% Functions - truth
 def truth(time, magnitude=5, frequency=10, phase=90):
-    r"""Simple example truth data."""
+    r"""Return true values for simple example truth data."""
     return magnitude * np.sin(2*np.pi*frequency*time/1000 + phase*np.pi/180)
 
 #%% Functions - cost_wrapper
 def cost_wrapper(results_data, *, results_time, truth_time, truth_data, sim_params):
-    r"""Example Cost wrapper for the model."""
+    r"""Calculate innovations (cost) for the model."""
     # Pull out overlapping time points and indices
     (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
     sub_truth  = truth_data[ix_truth]
@@ -74,7 +73,7 @@ def cost_wrapper(results_data, *, results_time, truth_time, truth_data, sim_para
 
 #%% Functions - get_parameter
 def get_parameter(sim_params, *, names):
-    r"""Simple example parameter getter."""
+    r"""Get the model parameters."""
     num = len(names)
     values = np.full(num, np.nan, dtype=float)
     for (ix, name) in enumerate(names):
@@ -86,7 +85,7 @@ def get_parameter(sim_params, *, names):
 
 #%% Functions - set_parameter
 def set_parameter(sim_params, *, names, values):
-    r"""Simple example parameter setter."""
+    r"""Set the model parameters."""
     num = len(names)
     assert len(values) == num, 'Names and Values must have the same length.'
     for (ix, name) in enumerate(names):

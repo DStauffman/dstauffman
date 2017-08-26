@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 r"""
-Linalg module file for the dstauffman code.  It defines useful linear algebra methods that are not in
-NumPy or SciPy.
+Define useful linear algebra methods that are not in NumPy or SciPy.
 
 Notes
 -----
 #.  Written by David C. Stauffer in May 2016.  Mostly based on Matlab routines.
+
 """
 
 #%% Imports
@@ -17,8 +17,10 @@ import unittest
 #%% orth
 def orth(A):
     r"""
-    Orthogonalization basis for the range of A.  That is, Q'*Q = I, the columns of Q span the same
-    space as the columns of A, and the number of columns of Q is the rank of A.
+    Orthogonalization basis for the range of A.
+
+    That is, Q'*Q = I, the columns of Q span the same space as the columns of A, and the number of
+    columns of Q is the rank of A.
 
     Parameters
     ----------
@@ -36,7 +38,6 @@ def orth(A):
 
     Examples
     --------
-
     >>> from dstauffman import orth
     >>> import numpy as np
 
@@ -106,7 +107,6 @@ def subspace(A, B):
 
     Examples
     --------
-
     >>> from dstauffman import subspace
     >>> import numpy as np
     >>> A = np.array([[1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1], [1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1]])

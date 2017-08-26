@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 r"""
-Stats module file for the "dstauffman" library.  It contains generic statistics related routines
-that can be independently defined and used by other modules.
+Contains statistics related routines that can be independently defined and used by other modules.
 
 Notes
 -----
 #.  Written by David C. Stauffer in December 2015.
+
 """
 
 #%% Imports
@@ -21,7 +21,7 @@ from dstauffman.plotting import Opts, setup_plots
 #%% Functions - convert_annual_to_monthly_probability
 def convert_annual_to_monthly_probability(annual):
     r"""
-    Converts a given annual probabily into the equivalent monthly one.
+    Convert a given annual probabily into the equivalent monthly one.
 
     Parameters
     ----------
@@ -44,7 +44,6 @@ def convert_annual_to_monthly_probability(annual):
 
     Examples
     --------
-
     >>> from dstauffman import convert_annual_to_monthly_probability
     >>> import numpy as np
     >>> annual  = np.array([0, 0.1, 1])
@@ -65,7 +64,7 @@ def convert_annual_to_monthly_probability(annual):
 #%% Functions - convert_monthly_to_annual_probability
 def convert_monthly_to_annual_probability(monthly):
     r"""
-    Converts a given monthly probability into the equivalent annual one.
+    Convert a given monthly probability into the equivalent annual one.
 
     Parameters
     ----------
@@ -79,7 +78,6 @@ def convert_monthly_to_annual_probability(monthly):
 
     Examples
     --------
-
     >>> from dstauffman import convert_monthly_to_annual_probability
     >>> import numpy as np
     >>> monthly = np.array([0, 0.1, 1])
@@ -104,7 +102,7 @@ cm2ap = convert_monthly_to_annual_probability
 #%% Functions - prob_to_rate
 def prob_to_rate(prob, time=1):
     r"""
-    Converts a given probability and time to a rate.
+    Convert a given probability and time to a rate.
 
     Parameters
     ----------
@@ -124,7 +122,6 @@ def prob_to_rate(prob, time=1):
 
     Examples
     --------
-
     >>> from dstauffman import prob_to_rate
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
@@ -148,7 +145,7 @@ def prob_to_rate(prob, time=1):
 #%% Functions - rate_to_prob
 def rate_to_prob(rate, time=1):
     r"""
-    Converts a given rate and time to a probability.
+    Convert a given rate and time to a probability.
 
     Parameters
     ----------
@@ -168,7 +165,6 @@ def rate_to_prob(rate, time=1):
 
     Examples
     --------
-
     >>> from dstauffman import rate_to_prob
     >>> import numpy as np
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
@@ -188,7 +184,7 @@ def rate_to_prob(rate, time=1):
 #%% Functions - month_prob_mult_ratio
 def month_prob_mult_ratio(prob, ratio):
     r"""
-    Multiplies a monthly probability by a given risk or hazard ratio.
+    Multiply a monthly probability by a given risk or hazard ratio.
 
     Parameters
     ----------
@@ -208,7 +204,6 @@ def month_prob_mult_ratio(prob, ratio):
 
     Examples
     --------
-
     >>> from dstauffman import month_prob_mult_ratio
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
@@ -234,7 +229,7 @@ def month_prob_mult_ratio(prob, ratio):
 #%% Functions - annual_rate_to_monthly_probability
 def annual_rate_to_monthly_probability(rate):
     r"""
-    Converts a given annual rate to a monthly probability.
+    Convert a given annual rate to a monthly probability.
 
     Parameters
     ----------
@@ -256,7 +251,6 @@ def annual_rate_to_monthly_probability(rate):
 
     Examples
     --------
-
     >>> from dstauffman import annual_rate_to_monthly_probability
     >>> import numpy as np
     >>> rate = np.array([0, 0.5, 1, 5, np.inf])
@@ -272,7 +266,7 @@ def annual_rate_to_monthly_probability(rate):
 #%% Functions - monthly_probability_to_annual_rate
 def monthly_probability_to_annual_rate(prob):
     r"""
-    Converts a given monthly probability to an annual rate.
+    Convert a given monthly probability to an annual rate.
 
     Parameters
     ----------
@@ -294,7 +288,6 @@ def monthly_probability_to_annual_rate(prob):
 
     Examples
     --------
-
     >>> from dstauffman import monthly_probability_to_annual_rate
     >>> import numpy as np
     >>> prob = np.array([0, 0.04081054, 0.07995559, 0.34075937, 1])
@@ -314,7 +307,7 @@ mp2ar = monthly_probability_to_annual_rate
 #%% Functions - combine_sets
 def combine_sets(n1, u1, s1, n2, u2, s2):
     r"""
-    Combines the mean and standard deviations for two non-overlapping sets of data.
+    Combine the mean and standard deviations for two non-overlapping sets of data.
 
     This function combines two non-overlapping data sets, given a number of samples, mean
     and standard deviation for the two data sets.  It first calculates the total number of samples
@@ -362,7 +355,6 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
 
     Examples
     --------
-
     >>> from dstauffman import combine_sets
     >>> n1 = 5
     >>> u1 = 1
@@ -410,7 +402,7 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
 #%% Functions - icer
 def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     r"""
-    Calculates the incremental cost effectiveness ratios with steps to throw out dominated strategies.
+    Calculate the incremental cost effectiveness ratios with steps to throw out dominated strategies.
 
     Summary
     -------
@@ -457,7 +449,6 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
 
     Examples
     --------
-
     >>> from dstauffman import icer
     >>> cost = [250e3, 750e3, 2.25e6, 3.75e6]
     >>> qaly = [20., 30, 40, 80]
@@ -612,8 +603,10 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
 #%% Functions - bounded_normal_draw
 def bounded_normal_draw(num, values, field, prng):
     r"""
-    Creates a normalized distribution with the given mean and standard deviations, plus optional
-    bounds, all taken from a dictionary with the specified `field` name.
+    Create a normalized distribution with the given mean and standard deviations.
+
+    Includes options for min and max bounds, all taken from a dictionary with the specified `field`
+    name.
 
     Parameters
     ----------
@@ -637,7 +630,6 @@ def bounded_normal_draw(num, values, field, prng):
 
     Examples
     --------
-
     >>> from dstauffman import bounded_normal_draw
     >>> import numpy as np
     >>> num   = 10

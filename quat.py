@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 r"""
-Quat module file for the "dstauffman" library.  It contains generic quaternion
-utilities that can be independently defined and used by other modules.
+Contains generic quaternion utilities that can be independently defined and used by other modules.
 
 Notes
 -----
 #.  Written by David C. Stauffer in April 2015.
+
 """
 
 #%% Imports
@@ -20,12 +20,20 @@ use_assertions = True
 #%% Functions - _quat_assertions
 def _quat_assertions(quat):
     r"""
-    Checks assertions about valid quaternions.
+    Check assertions about valid quaternions.
 
     Parameters
     ----------
     quat : ndarray, (4,) or (4, N)
         Quaternion
+
+    Examples
+    --------
+    >>> from dstauffman.quat import _quat_assertions
+    >>> import numpy as np
+    >>> quat = np.array([0.5, 0.5, -0.5, 0.5])
+    >>> _quat_assertions(quat)
+
     """
     if not use_assertions:
         return # pragma: no cover
@@ -71,7 +79,7 @@ def _quat_assertions(quat):
 #%% Functions - qrot
 def qrot(axis, angle):
     r"""
-    Construct a quaternion expressing a rotation about a single axis
+    Construct a quaternion expressing a rotation about a single axis.
 
     Parameters
     ----------
@@ -88,19 +96,18 @@ def qrot(axis, angle):
     quat : ndarray, (4,) or (4, N)
         quaternion representing the given rotations
 
-    References
-    ----------
-    #.  Wertz, James R. (editor), Equations 12.11 in Parameterization of the Attitude,
-            Section 12.1, Spacecraft Attitude Determination and Control,
-            Kluwer Academic Publishers, 1978.
-
     Notes
     -----
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
 
+    References
+    ----------
+    .. [1]  Wertz, James R. (editor), Equations 12.11 in Parameterization of the Attitude,
+            Section 12.1, Spacecraft Attitude Determination and Control,
+            Kluwer Academic Publishers, 1978.
+
     Examples
     --------
-
     >>> from dstauffman import qrot
     >>> import numpy as np
     >>> quat = qrot(3, np.pi/2)
@@ -140,7 +147,7 @@ def qrot(axis, angle):
 #%% Functions - quat_angle_diff
 def quat_angle_diff(quat1, quat2):
     r"""
-    Calculates the angular difference between two quaternions
+    Calculate the angular difference between two quaternions.
 
     This function takes a two quaternions and calculates a delta quaternion between them.
     It then uses the delta quaternion to generate both a total angular difference, and an
@@ -178,7 +185,6 @@ def quat_angle_diff(quat1, quat2):
 
     Examples
     --------
-
     >>> from dstauffman import qrot, quat_mult, quat_angle_diff
     >>> import numpy as np
     >>> quat1 = np.array([0.5, 0.5, 0.5, 0.5])
@@ -273,7 +279,6 @@ def quat_from_euler(angles, seq=None):
 
     Examples
     --------
-
     >>> from dstauffman import quat_from_euler
     >>> import numpy as np
     >>> a   = np.array([0.01, 0.02, 0.03])
@@ -364,7 +369,6 @@ def quat_interp(time, quat, ti, inclusive=True):
 
     Examples
     --------
-
     >>> from dstauffman import quat_interp, qrot
     >>> import numpy as np
     >>> time  = np.array([1, 3, 5])
@@ -475,7 +479,7 @@ def quat_interp(time, quat, ti, inclusive=True):
 #%% Functions - quat_inv
 def quat_inv(q1):
     r"""
-    Returns the inverse of a normalized quaternions
+    Return the inverse of a normalized quaternions.
 
     Parameters
     ----------
@@ -498,7 +502,6 @@ def quat_inv(q1):
 
     Examples
     --------
-
     >>> from dstauffman import qrot, quat_inv
     >>> from numpy import pi
     >>> q1 = qrot(1, pi/2)
@@ -526,7 +529,7 @@ def quat_inv(q1):
 #%% Functions - quat_mult
 def quat_mult(a, b):
     r"""
-    Multiplies quaternions together.
+    Multiply quaternions together.
 
     Parameters
     ----------
@@ -561,7 +564,6 @@ def quat_mult(a, b):
 
     Examples
     --------
-
     >>> from dstauffman import qrot, quat_mult
     >>> from numpy import pi
     >>> a = qrot(1, pi/2)
@@ -628,7 +630,7 @@ def quat_mult(a, b):
 #%% Functions - quat_norm
 def quat_norm(x):
     r"""
-    Normalizes each column of the input matrix
+    Normalize each column of the input matrix.
 
     Parameters
     ----------
@@ -650,7 +652,6 @@ def quat_norm(x):
 
     Examples
     --------
-
     >>> from dstauffman import quat_norm
     >>> import numpy as np
     >>> x = np.array([0.1, 0, 0, 1])
@@ -692,7 +693,6 @@ def quat_prop(quat, delta_ang, renorm=True):
 
     Examples
     --------
-
     >>> from dstauffman import quat_prop
     >>> import numpy as np
     >>> quat      = np.array([0, 0, 0, 1])
@@ -721,7 +721,7 @@ def quat_prop(quat, delta_ang, renorm=True):
 #%% Functions - quat_times_vector
 def quat_times_vector(quat, v):
     r"""
-    Multiply quaternion(s) against vector(s)
+    Multiply quaternion(s) against vector(s).
 
     Parameters
     ----------
@@ -746,13 +746,12 @@ def quat_times_vector(quat, v):
 
     References
     ----------
-    Steps to algorithm
-    #.  qv = quat(1:3) x v
-    #.  vec = v + 2*[ -( quat(4) * qv ) + (quat(1:3) x qv) ]
+    Steps to algorithm:
+        1.  qv = quat(1:3) x v
+        2.  vec = v + 2*[ -( quat(4) * qv ) + (quat(1:3) x qv) ]
 
     Examples
     --------
-
     >>> from dstauffman import quat_times_vector
     >>> import numpy as np
     >>> quat = np.array([[0, 1, 0, 0], [1, 0, 0, 0]]).T
@@ -792,7 +791,7 @@ def quat_times_vector(quat, v):
 #%% Functions - quat_to_dcm
 def quat_to_dcm(quat):
     r"""
-    Converts quaternion to a direction cosine matrix
+    Convert quaternion to a direction cosine matrix.
 
     Parameters
     ----------
@@ -814,7 +813,6 @@ def quat_to_dcm(quat):
 
     Examples
     --------
-
     >>> from dstauffman import quat_to_dcm
     >>> import numpy as np
     >>> quat = np.array([0.5, -0.5, 0.5, 0.5])
@@ -841,7 +839,7 @@ def quat_to_dcm(quat):
 #%% Functions - quat_to_euler
 def quat_to_euler(quat, seq=None):
     r"""
-    Converts quaternion to Euler angles for one of 6 input angle sequences.
+    Convert quaternion to Euler angles for one of 6 input angle sequences.
 
     Parameters
     ----------
@@ -873,7 +871,6 @@ def quat_to_euler(quat, seq=None):
 
     Examples
     --------
-
     >>> from dstauffman import quat_to_euler
     >>> import numpy as np
     >>> quat = np.array([[0, 1, 0, 0], [0, 0, 1, 0]]).T

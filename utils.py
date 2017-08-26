@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 r"""
-Utils module file for the "dstauffman" library.  It contains generic utilities that can be
-independently defined and used by other modules.
+Generic utilities that can be independently defined and used by other modules.
 
 Notes
 -----
 #.  By design, this module does not reference any other piece of the dstauffman code base except
         constants or enums to avoid circular references.
 #.  Written by David C. Stauffer in March 2015.
+
 """
 
 #%% Imports
@@ -50,7 +50,6 @@ def _nan_equal(a, b):
 
     Examples
     --------
-
     >>> from dstauffman.utils import _nan_equal
     >>> import numpy as np
     >>> a = np.array([1, 2, np.nan])
@@ -77,7 +76,7 @@ def _nan_equal(a, b):
 #%% Functions - rms
 def rms(data, axis=None, keepdims=False, ignore_nans=False):
     r"""
-    Calculates the root mean square of a number series
+    Calculate the root mean square of a number series.
 
     Parameters
     ----------
@@ -104,7 +103,6 @@ def rms(data, axis=None, keepdims=False, ignore_nans=False):
 
     Examples
     --------
-
     >>> from dstauffman import rms
     >>> rms([0, 1, 0., -1])
     0.70710678118654757
@@ -128,7 +126,7 @@ def rms(data, axis=None, keepdims=False, ignore_nans=False):
 #%% Functions - rss
 def rss(data, axis=None, keepdims=False, ignore_nans=False):
     r"""
-    Calculates the root sum square of a number series
+    Calculate the root sum square of a number series.
 
     Parameters
     ----------
@@ -155,7 +153,6 @@ def rss(data, axis=None, keepdims=False, ignore_nans=False):
 
     Examples
     --------
-
     >>> from dstauffman import rss
     >>> rss([0, 1, 0., -1])
     2.0
@@ -179,7 +176,7 @@ def rss(data, axis=None, keepdims=False, ignore_nans=False):
 #%% Functions - setup_dir
 def setup_dir(folder, rec=False):
     r"""
-    Clears the contents for existing folders or instantiates the directory if it doesn't exist.
+    Clear the contents for existing folders or instantiates the directory if it doesn't exist.
 
     Parameters
     ----------
@@ -203,7 +200,6 @@ def setup_dir(folder, rec=False):
 
     Examples
     --------
-
     >>> from dstauffman import setup_dir
     >>> setup_dir(r'C:\Temp\test_folder') # doctest: +SKIP
 
@@ -241,7 +237,7 @@ def setup_dir(folder, rec=False):
 #%% Functions - compare_two_classes
 def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callables=True, compare_recursively=True):
     r"""
-    Compares two classes by going through all their public attributes and showing that they are equal.
+    Compare two classes by going through all their public attributes and showing that they are equal.
 
     Parameters
     ----------
@@ -263,7 +259,6 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
 
     Examples
     --------
-
     >>> from dstauffman import compare_two_classes
     >>> c1 = type('Class1', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text'})
     >>> c2 = type('Class2', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text'})
@@ -275,17 +270,17 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
 
     """
     def _not_true_print():
-        r"""Sets is_same to False and optionally prints information to the screen."""
+        r"""Set is_same to False and optionally prints information to the screen."""
         is_same = False
         if not suppress_output:
             print('{} is different from {} to {}.'.format(this_attr, name1, name2))
         return is_same
     def _is_function(obj):
-        r"""Determines whether the object is a function or not."""
+        r"""Determine whether the object is a function or not."""
         # need second part for Python compatibility for v2.7, which distinguishes unbound methods from functions.
         return inspect.isfunction(obj) or inspect.ismethod(obj) or inspect.isbuiltin(obj)
     def _is_class_instance(obj):
-        r"""Determines whether the object is an instance of a class or not."""
+        r"""Determine whether the object is an instance of a class or not."""
         return hasattr(obj, '__dict__') and not _is_function(obj) # and hasattr(obj, '__call__')
     # preallocate answer to True until proven otherwise
     is_same = True
@@ -359,7 +354,7 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
 #%% Functions - compare_two_dicts
 def compare_two_dicts(d1, d2, suppress_output=False, names=None):
     r"""
-    Compares two dictionaries for the same keys, and the same value of those keys.
+    Compare two dictionaries for the same keys, and the same value of those keys.
 
     Parameters
     ----------
@@ -379,7 +374,6 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
 
     Examples
     --------
-
     >>> from dstauffman import compare_two_dicts
     >>> d1 = {'a': 1, 'b': 2, 'c': 3}
     >>> d2 = {'a': 1, 'b': 5, 'd': 6}
@@ -443,13 +437,12 @@ def round_time(dt=None, round_to_sec=60):
     datetime.datetime
 
     Notes
-    ----------
+    -----
     #. Originally written by Thierry Husson 2012.  Freely distributed.
     #. Adapted by David C. Stauffer in Feb 2015.
 
     Examples
     --------
-
     >>> from dstauffman import round_time
     >>> from datetime import datetime
     >>> dt = datetime(2015, 3, 13, 8, 4, 10)
@@ -471,7 +464,7 @@ def round_time(dt=None, round_to_sec=60):
 #%% Functions - make_python_init
 def make_python_init(folder, lineup=True, wrap=100, filename=''):
     r"""
-    Makes the Python __init__.py file based on the files/definitions found within the specified folder.
+    Make the Python __init__.py file based on the files/definitions found within the specified folder.
 
     Parameters
     ----------
@@ -485,7 +478,6 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
 
     Examples
     --------
-
     >>> from dstauffman import make_python_init, get_root_dir
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
@@ -550,7 +542,7 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
 #%% Functions - get_python_definitions
 def get_python_definitions(text):
     r"""
-    Gets all public class and def names from the text of the file.
+    Get all public class and def names from the text of the file.
 
     Parameters
     ----------
@@ -564,7 +556,6 @@ def get_python_definitions(text):
 
     Examples
     --------
-
     >>> from dstauffman import get_python_definitions
     >>> text = 'def a():\n    pass\n'
     >>> funcs = get_python_definitions(text)
@@ -585,7 +576,7 @@ def get_python_definitions(text):
 #%% Functions - read_text_file
 def read_text_file(filename):
     r"""
-    Opens and reads a complete text file.
+    Open and read a complete text file.
 
     Parameters
     ----------
@@ -608,7 +599,6 @@ def read_text_file(filename):
 
     Examples
     --------
-
     >>> from dstauffman import read_text_file, write_text_file, get_tests_dir
     >>> import os
     >>> text = 'Hello, World\n'
@@ -637,7 +627,7 @@ def read_text_file(filename):
 #%% Functions - write_text_file
 def write_text_file(filename, text):
     r"""
-    Opens and writes the specified text to a file.
+    Open and write the specified text to a file.
 
     Parameters
     ----------
@@ -657,7 +647,6 @@ def write_text_file(filename, text):
 
     Examples
     --------
-
     >>> from dstauffman import write_text_file, get_tests_dir
     >>> import os
     >>> text = 'Hello, World\n'
@@ -680,7 +669,7 @@ def write_text_file(filename, text):
 #%% Functions - get_root_dir
 def get_root_dir():
     r"""
-    Returns the folder that contains this source file and thus the root folder for the whole code.
+    Return the folder that contains this source file and thus the root folder for the whole code.
 
     Returns
     -------
@@ -693,7 +682,6 @@ def get_root_dir():
 
     Examples
     --------
-
     >>> from dstauffman import get_root_dir
     >>> folder = get_root_dir()
 
@@ -705,7 +693,7 @@ def get_root_dir():
 #%% Functions - get_tests_dir
 def get_tests_dir():
     r"""
-    Returns the default test folder location.
+    Return the default test folder location.
 
     Returns
     -------
@@ -718,7 +706,6 @@ def get_tests_dir():
 
     Examples
     --------
-
     >>> from dstauffman import get_tests_dir
     >>> folder = get_tests_dir()
 
@@ -730,7 +717,7 @@ def get_tests_dir():
 #%% Functions - get_data_dir
 def get_data_dir():
     r"""
-    Returns the default data folder location.
+    Return the default data folder location.
 
     Returns
     -------
@@ -743,7 +730,6 @@ def get_data_dir():
 
     Examples
     --------
-
     >>> from dstauffman import get_data_dir
     >>> folder = get_data_dir()
 
@@ -755,7 +741,7 @@ def get_data_dir():
 #%% Functions - get_images_dir
 def get_images_dir():
     r"""
-    Returns the default data folder location.
+    Return the default data folder location.
 
     Returns
     -------
@@ -768,7 +754,6 @@ def get_images_dir():
 
     Examples
     --------
-
     >>> from dstauffman import get_images_dir
     >>> folder = get_images_dir()
 
@@ -780,7 +765,7 @@ def get_images_dir():
 #%% Functions - get_output_dir
 def get_output_dir():
     r"""
-    Returns the default output folder location.
+    Return the default output folder location.
 
     Returns
     -------
@@ -793,7 +778,6 @@ def get_output_dir():
 
     Examples
     --------
-
     >>> from dstauffman import get_output_dir
     >>> folder = get_output_dir()
 
@@ -806,7 +790,7 @@ def get_output_dir():
 @contextmanager
 def capture_output(mode='out'):
     r"""
-    Captures the stdout and stderr streams instead of displaying to the screen.
+    Capture the stdout and stderr streams instead of displaying to the screen.
 
     Parameters
     ----------
@@ -825,7 +809,6 @@ def capture_output(mode='out'):
 
     Examples
     --------
-
     >>> from dstauffman import capture_output
     >>> with capture_output() as out:
     ...     print('Hello, World!')
@@ -862,8 +845,9 @@ def capture_output(mode='out'):
 #%% Functions - unit
 def unit(data, axis=1):
     r"""
-    Normalizes a matrix into unit vectors along a specified dimension, default to column
-    normalization.
+    Normalize a matrix into unit vectors along a specified dimension.
+
+    Default to column normalization.
 
     Parameters
     ----------
@@ -887,7 +871,6 @@ def unit(data, axis=1):
 
     Examples
     --------
-
     >>> from dstauffman import unit
     >>> import numpy as np
     >>> data = np.array([[1, 0, -1], [0, 0, 0], [0, 0, 1]])
@@ -909,7 +892,7 @@ def unit(data, axis=1):
 #%% Functions - reload_package
 def reload_package(root_module, disp_reloads=True): # pragma: no cover
     r"""
-    Forces Python to reload all the items within a module.  Useful for interactive debugging in IPython.
+    Force Python to reload all the items within a module.  Useful for interactive debugging in IPython.
 
     Parameters
     ----------
@@ -957,7 +940,7 @@ def reload_package(root_module, disp_reloads=True): # pragma: no cover
 #%% Functions - delete_pyc
 def delete_pyc(folder, recursive=True, print_progress=True):
     r"""
-    Deletes all the *.pyc files (Python Byte Code) in the specified directory.
+    Delete all the *.pyc files (Python Byte Code) in the specified directory.
 
     Parameters
     ----------
@@ -974,7 +957,7 @@ def delete_pyc(folder, recursive=True, print_progress=True):
 
     """
     def _remove_pyc(root, name):
-        r"""Does the actual file removal"""
+        r"""Do the actual file removal."""
         # check for allowable extensions
         (_, file_ext) = os.path.splitext(name)
         if file_ext == '.pyc':
@@ -1001,7 +984,7 @@ def delete_pyc(folder, recursive=True, print_progress=True):
 #%% rename_module
 def rename_module(folder, old_name, new_name, print_status=True):
     r"""
-    Renames the given module from the old to new name.
+    Rename the given module from the old to new name.
 
     Parameters
     ----------
@@ -1019,7 +1002,6 @@ def rename_module(folder, old_name, new_name, print_status=True):
 
     Examples
     --------
-
     >>> from dstauffman import rename_module, get_root_dir
     >>> import os
     >>> folder = os.path.split(get_root_dir())[0]
@@ -1095,7 +1077,6 @@ def modd(x1, x2, out=None):
 
     Examples
     --------
-
     >>> from dstauffman import modd
     >>> import numpy as np
     >>> x1 = np.array([-4, -3, -2, -1, 0, 1, 2, 3, 4])
@@ -1116,7 +1097,7 @@ def modd(x1, x2, out=None):
 #%% find_tabs
 def find_tabs(folder, extensions=None, list_all=False, trailing=False):
     r"""
-    Finds all the tabs in source code that should be spaces instead
+    Find all the tabs in source code that should be spaces instead.
 
     Parameters
     ----------
@@ -1129,7 +1110,6 @@ def find_tabs(folder, extensions=None, list_all=False, trailing=False):
 
     Examples
     --------
-
     >>> from dstauffman import find_tabs, get_root_dir
     >>> folder = get_root_dir()
     >>> find_tabs(folder)
@@ -1167,8 +1147,9 @@ def find_tabs(folder, extensions=None, list_all=False, trailing=False):
 #%% np_digitize
 def np_digitize(x, bins, right=False):
     r"""
-    Acts as a wrapper to the numpy.digitize function, but with additional error checks, and bins
-    starting from 0 instead of 1.
+    Act as a wrapper to the numpy.digitize function with customizations.
+
+    The customizations include additional error checks, and bins starting from 0 instead of 1.
 
     Parameters
     ----------
@@ -1201,7 +1182,6 @@ def np_digitize(x, bins, right=False):
 
     Examples
     --------
-
     >>> from dstauffman import np_digitize
     >>> import numpy as np
     >>> x    = np.array([0.2, 6.4, 3.0, 1.6])
@@ -1247,7 +1227,6 @@ def full_print():
 
     Examples
     --------
-
     >>> from dstauffman import full_print
     >>> import numpy as np
     >>> temp_options = np.get_printoptions()
@@ -1291,7 +1270,7 @@ def full_print():
 #%% pprint_dict
 def pprint_dict(dct, *, name='', indent=1, align=True, disp=True):
     r"""
-    Prints all the fields and their values.
+    Print all the fields and their values.
 
     Parameters
     ----------
@@ -1310,7 +1289,6 @@ def pprint_dict(dct, *, name='', indent=1, align=True, disp=True):
 
     Examples
     --------
-
     >>> from dstauffman import pprint_dict
     >>> dct = {'a': 1, 'bb': 2, 'ccc': 3}
     >>> name = 'Example'
@@ -1342,7 +1320,7 @@ def pprint_dict(dct, *, name='', indent=1, align=True, disp=True):
 #%% line_wrap
 def line_wrap(text, wrap=80, min_wrap=0, indent=4):
     r"""
-    Wraps lines of text to the specified length, breaking at any whitespace characters.
+    Wrap lines of text to the specified length, breaking at any whitespace characters.
 
     Parameters
     ----------
@@ -1362,7 +1340,6 @@ def line_wrap(text, wrap=80, min_wrap=0, indent=4):
 
     Examples
     --------
-
     >>> from dstauffman import line_wrap
     >>> text = ('lots of repeated words ' * 4).strip()
     >>> wrap = 40
@@ -1422,7 +1399,6 @@ def combine_per_year(data, func=None):
 
     Examples
     --------
-
     >>> from dstauffman import combine_per_year
     >>> import numpy as np
     >>> time = np.arange(120)
@@ -1460,7 +1436,7 @@ def combine_per_year(data, func=None):
 #%% Functions - activate_logging
 def activate_logging(log_level=logging.INFO, filename=''):
     r"""
-    Sets up logging based on a user specified settings file.
+    Set up logging based on a user specified settings file.
 
     Parameters
     ----------
@@ -1475,7 +1451,6 @@ def activate_logging(log_level=logging.INFO, filename=''):
 
     Examples
     --------
-
     >>> from dstauffman import activate_logging, deactivate_logging, get_tests_dir
     >>> import logging
     >>> import os
@@ -1510,7 +1485,7 @@ def activate_logging(log_level=logging.INFO, filename=''):
 #%% Functions - deactivate_logging
 def deactivate_logging():
     r"""
-    Tears down logging.
+    Tear down logging.
 
     Notes
     -----
@@ -1518,7 +1493,6 @@ def deactivate_logging():
 
     Examples
     --------
-
     >>> from dstauffman import deactivate_logging
     >>> deactivate_logging()
 

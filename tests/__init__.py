@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-The "tests" submodule within the "dstauffman" library is a full test suite based on the Python
-`unittest` library.
+Full test suite of the "dstauffman" module based on the Python `unittest` library.
 
 Notes
 -----

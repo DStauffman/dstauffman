@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 r"""
-Classes module file for the "dstauffman" library.  It contains the high level classes used to
-subclass other classes.
+Contains the high level classes used to subclass other classes.
 
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
 #.  Added mutable integer Counter class in January 2016.
+
 """
 
 #%% Imports
@@ -31,9 +31,12 @@ np.set_printoptions(threshold=1000) # TODO: make user configurable in constants 
 #%% Functions - _frozen
 def _frozen(set):
     r"""
+    Support function for Frozen class.
+
     Raise an error when trying to set an undeclared name, or when calling
     from a method other than Frozen.__init__ or the __init__ method of
     a class derived from Frozen.
+
     """
     # define a custom set_attr function (instead of default setattr)
     def set_attr(self, name, value):
@@ -114,7 +117,7 @@ def _load_method(cls, filename='', use_hdf5=True):
 #%% Methods - _save_pickle
 def _save_pickle(self, filename):
     r"""
-    Saves a class instances to a pickle file.
+    Save a class instances to a pickle file.
 
     Parameters
     ----------
@@ -122,6 +125,7 @@ def _save_pickle(self, filename):
         List of the objects to save
     filename : str
         Name of the file to load
+
     """
     with open(filename, 'wb') as file:
         pickle.dump(self, file)
@@ -130,7 +134,7 @@ def _save_pickle(self, filename):
 @classmethod
 def _load_pickle(cls, filename):
     r"""
-    Loads a class instance from a pickle file.
+    Load a class instance from a pickle file.
 
     Parameters
     ----------
@@ -141,6 +145,7 @@ def _load_pickle(cls, filename):
     -------
     results : list
         List of the objects found within the file
+
     """
     with open(filename, 'rb') as file:
         out = pickle.load(file)
@@ -149,11 +154,11 @@ def _load_pickle(cls, filename):
 #%% Classes - Frozen
 class Frozen(object):
     r"""
-    Subclasses of Frozen are frozen, i.e. it is impossibile to add
-    new attributes to them and their instances.
+    Frozen class that doesn't allow new attributes.
 
-    Additionally a more pretty print and explicit form of __repr__ is
-    defined based on the `disp` function.
+    Subclasses of Frozen are frozen, i.e. it is impossibile to add new attributes to them or their
+    instances.
+
     """
     # freeze the set attributes function based on the above `frozen` funcion
     __setattr__ = _frozen(object.__setattr__)
@@ -162,13 +167,9 @@ class Frozen(object):
 
 #%% MetaClasses - SaveAndLoad
 class SaveAndLoad(type):
-    r"""
-    Metaclass to add 'save' and 'load' methods to the given class.
-    """
+    r"""Metaclass to add 'save' and 'load' methods to the given class."""
     def __init__(cls, name, bases, dct):
-        r"""
-        Adds the 'save' and 'load' classes if they are not already present.
-        """
+        r"""Add the 'save' and 'load' classes if they are not already present."""
         if not hasattr(cls, 'save'):
             setattr(cls, 'save', _save_method)
         if not hasattr(cls, 'load'):
@@ -177,13 +178,9 @@ class SaveAndLoad(type):
 
 #%% MetaClasses - SaveAndLoadPickle
 class SaveAndLoadPickle(type):
-    r"""
-    Metaclass to add 'save' and 'load' methods to the given class.
-    """
+    r"""Metaclass to add 'save' and 'load' methods to the given class."""
     def __init__(cls, name, bases, dct):
-        r"""
-        Adds the 'save' and 'load' classes if they are not already present.
-        """
+        r"""Add the 'save' and 'load' classes if they are not already present."""
         if not hasattr(cls, 'save'):
             setattr(cls, 'save', _save_pickle)
         if not hasattr(cls, 'load'):
@@ -208,7 +205,6 @@ class Counter(Frozen):
 
     Examples
     --------
-
     >>> from dstauffman import Counter
     >>> c = Counter(0)
     >>> c += 1
@@ -320,7 +316,6 @@ class FixedDict(dict):
 
     Examples
     --------
-
     >>> from dstauffman import FixedDict
     >>> fixed = FixedDict({'key1': 1, 'key2': None})
     >>> assert 'key1' in fixed

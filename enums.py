@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 r"""
-Enums module file for the dstauffman library.  It defines enumerator related functions for the rest
-of the code..
+Define enumerator related functions for the rest of the library.
 
 Notes
 -----
 #.  Written by David C. Stauffer in July 2015.
+
 """
 
 #%% Imports
@@ -18,6 +18,7 @@ import unittest
 class _EnumMetaPlus(EnumMeta):
     r"""
     Overrides the repr/str methods of the EnumMeta class to display all possible values.
+
     Also makes the __getattr__ attribute error more explicit.
     """
     def __repr__(cls):
@@ -25,9 +26,7 @@ class _EnumMetaPlus(EnumMeta):
     def __str__(cls):
         return '\n'.join((str(field) for field in cls))
     def __getattr__(cls, name):
-        r"""
-        Return the enum member matching `name`.
-        """
+        r"""Return the enum member matching `name`."""
         if _is_dunder(name):
             raise AttributeError(name)
         try:
@@ -36,50 +35,36 @@ class _EnumMetaPlus(EnumMeta):
             text = '"{}" does not have an attribute of "{}"'.format(cls.__name__,name)
             raise AttributeError(text) from None
     def list_of_names(self):
-        r"""
-        Returns a list of all the names within the enumerator.
-        """
+        r"""Return a list of all the names within the enumerator."""
         # look for class.name: pattern, ignore class, return names only
         names = list(self.__members__)
         return names
     def list_of_values(self):
-        r"""
-        Returns a list of all the values within the enumerator.
-        """
+        r"""Return a list of all the values within the enumerator."""
         values = list(self.__members__.values())
         return values
     @property
     def num_values(self):
-        r"""
-        Returns the number of values within the enumerator.
-        """
+        r"""Return the number of values within the enumerator."""
         return len(self)
     @property
     def min_value(self):
-        r"""
-        Returns the minimum value of the enumerator.
-        """
+        r"""Return the minimum value of the enumerator."""
         return min(self.__members__.values())
     @property
     def max_value(self):
-        r"""
-        Returns the maximum value of the enumerator.
-        """
+        r"""Return the maximum value of the enumerator."""
         return max(self.__members__.values())
 
 #%% Classes - IntEnumPlus
 class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
-    r"""
-    Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str.
-    """
+    r"""Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str."""
     def __str__(self):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
 #%% Decorators - consecutive
 def consecutive(enumeration):
-    r"""
-    Class decorator for enumerations ensuring unique and consecutive member values.
-    """
+    r"""Class decorator for enumerations ensuring unique and consecutive member values."""
     duplicates = []
     non_consecutive = []
     last_value = min(enumeration.__members__.values()) - 1
@@ -103,7 +88,7 @@ def consecutive(enumeration):
 #%% Functions - dist_enum_and_mons
 def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
     r"""
-    Creates a distribution for an enumerated state with a duration (such as a disease status).
+    Create a distribution for an enumerated state with a duration (such as a disease status).
 
     Parameters
     ----------
@@ -142,7 +127,6 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
 
     Examples
     --------
-
     >>> from dstauffman import dist_enum_and_mons
     >>> import numpy as np
     >>> num = 100

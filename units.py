@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 r"""
-Units module file for the "dstauffman" library.  It contains generic utilities that can be
-independently defined and used by other modules.
+Contains utilities and functions dealing with unit conversions.
 
 Notes
 -----
 #.  By design, this module does not reference any other piece of the dstauffman code base except
         constants or enums to avoid circular references.
 #.  Written by David C. Stauffer in February 2016.
+
 """
 
 #%% Imports
@@ -20,6 +20,7 @@ from dstauffman.stats     import annual_rate_to_monthly_probability, convert_ann
 
 #%% Units
 class Units(IntEnumPlus):
+    r"""Units class that can be used to keep track of the related units and convert when asked."""
     AR    = 1 # annual rate
     AP    = 2 # annual probability
     MP    = 3 # monthly probability
@@ -29,9 +30,7 @@ class Units(IntEnumPlus):
 
     @classmethod
     def convert(cls, value, base_unit, new_unit):
-        r"""
-        Converts a given value from a base_unit to a new_unit.
-        """
+        r"""Convert a given value from a base_unit to a new_unit."""
         # check for no conversion case
         if base_unit == new_unit:
             return value
@@ -75,7 +74,7 @@ class Units(IntEnumPlus):
 #%% get_factors
 def get_factors(prefix):
     r"""
-    Gets the multiplication factor and unit label for the desired units.
+    Get the multiplication factor and unit label for the desired units.
 
     Parameters
     ----------
@@ -98,7 +97,6 @@ def get_factors(prefix):
 
     Examples
     --------
-
     >>> from dstauffman import get_factors
     >>> (mult, label) = get_factors('micro')
     >>> print(mult)

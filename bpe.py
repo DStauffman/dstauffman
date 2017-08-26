@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 r"""
-BPE module file for the dstauffman code.  It defines the code necessary for doing batch parameter
-estimation analysis, and is arbitrary enough to be called with many different modules.
+Code necessary for doing batch parameter estimation analysis.
+
+This module is designed to be arbitrary enough to be called with many different models.
 
 Notes
 -----
 #.  Written by David C. Stauffer in May 2015 and continued in April 2016.  This work is based
     loosely on prior experience at Lockheed Martin using the GOLF/BPE code with GARSE, but all the
     numeric algorithms are re-coded from external sources to avoid any potential proprietary issues.
-#.  Uses the Python @ infix operator, so you must be on v3.5 or newer
+
 """
 
 #%% Imports
@@ -62,9 +63,7 @@ class OptiOpts(Frozen):
         self.trust_radius    = 1.0
 
     def __eq__(self, other):
-        r"""
-        Checks for equality based on the values of the fields.
-        """
+        r"""Check for equality based on the values of the fields."""
         # if not of the same type, then they are not equal
         if type(other) != type(self):
             return False
@@ -89,9 +88,7 @@ class OptiParam(Frozen):
         self.typical = typical
 
     def __eq__(self, other):
-        r"""
-        Checks for equality between two OptiParam instances.
-        """
+        r"""Check for equality between two OptiParam instances."""
         # if not of the same type, then they are not equal
         if type(other) != type(self):
             return False
@@ -107,7 +104,7 @@ class OptiParam(Frozen):
     @staticmethod
     def get_array(opti_param, type_='best'):
         r"""
-        Gets a numpy vector of all the optimization parameters for the desired type.
+        Get a numpy vector of all the optimization parameters for the desired type.
         """
         # check for valid types
         if type_ in {'best', 'min_', 'max_', 'minstep'}:
@@ -125,21 +122,21 @@ class OptiParam(Frozen):
     @staticmethod
     def get_names(opti_param):
         r"""
-        Gets the names of the optimization parameters as a list.
+        Get the names of the optimization parameters as a list.
         """
         names = [x.name for x in opti_param]
         return names
 
     def pprint(self, indent=1, align=True):
         r"""
-        Displays a pretty print version of the class.
+        Display a pretty print version of the class.
         """
         pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
 #%% BpeResults
 class BpeResults(Frozen, metaclass=SaveAndLoad):
     r"""
-    Results of the Batch Parameter Estimator.
+    Batch Parameter Estimator Results.
     """
     def __init__(self):
         self.param_names  = None
@@ -157,9 +154,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         self.final_cost   = None
 
     def __str__(self):
-        r"""
-        Print all the fields of the Results.
-        """
+        r"""Print all the fields of the Results."""
         # fields to print
         keys = ['begin_params', 'begin_cost', 'num_evals', 'num_iters', 'final_params', \
             'final_cost', 'correlation', 'info_svd', 'covariance', 'costs']
@@ -172,7 +167,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
 
     def pprint(self):
         r"""
-        Prints summary results.
+        Print summary results.
         """
         if self.param_names is None or self.begin_params is None or self.final_params is None:
             return
@@ -202,9 +197,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
         self.cost      = None
 
     def __str__(self):
-        r"""
-        Print a useful summary of results.
-        """
+        r"""Print a useful summary of results."""
         text = [' Current Results:']
         text.append('  Trust Radius: {}'.format(self.trust_rad))
         text.append('  Best Cost: {}'.format(self.cost))
@@ -214,7 +207,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
 #%% _print_divider
 def _print_divider(new_line=True, level=logging.INFO):
     r"""
-    Prints some characters to the std out to break apart the different stpes within the model.
+    Print some characters to the std out to break apart the different stpes within the model.
 
     Parameters
     ----------
@@ -223,7 +216,6 @@ def _print_divider(new_line=True, level=logging.INFO):
 
     Examples
     --------
-
     >>> from dstauffman.bpe import _print_divider
     >>> _print_divider() # prints to logger
 
@@ -236,8 +228,9 @@ def _print_divider(new_line=True, level=logging.INFO):
 #%% _function_wrapper
 def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
     r"""
-    Wraps the call to the model function, and returns the results from the model, plus the
-    innovations as defined by the given cost function.
+    Wrap the call to the model function.
+
+    Returns the results of the model, plus the innovations as defined by the given cost function.
     """
     # pull inputs from opti_opts if necessary
     if model_args is None:
@@ -260,7 +253,7 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
 #%% _finite_differences
 def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_sided=False, normalized=False):
     r"""
-    Perturbs the state by a litte bit and calculates the numerical slope (i.e. Jacobian approximation)
+    Perturb the state by a litte bit and calculate the numerical slope (Jacobian approximation).
 
     Has options for first or second order approximations.
 
@@ -355,7 +348,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 #%% _levenberg_marquardt
 def _levenberg_marquardt(jacobian, innovs, lambda_=0):
     r"""
-    Classical Levenberg-Marquardt parameter search step
+    Classical Levenberg-Marquardt parameter search step.
 
     Parameters
     ----------
@@ -374,7 +367,6 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
 
     Examples
     --------
-
     >>> from dstauffman.bpe import _levenberg_marquardt
     >>> import numpy as np
     >>> jacobian    = np.array([[1, 2], [3, 4], [5, 6]])
@@ -402,7 +394,7 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
 #%% _predict_func_change
 def _predict_func_change(delta_param, gradient, hessian):
     r"""
-    Predicts change in sum of squared errors function.
+    Predict change in sum of squared errors function.
 
     Parameters
     ----------
@@ -433,7 +425,6 @@ def _predict_func_change(delta_param, gradient, hessian):
 
     Examples
     --------
-
     >>> from dstauffman.bpe import _predict_func_change
     >>> import numpy as np
     >>> delta_param = np.array([1, 2])
@@ -504,7 +495,6 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
 
     Examples
     --------
-
     >>> from dstauffman.bpe import _double_dogleg
     >>> import numpy as np
     >>> delta_param = np.array([1, 2])
@@ -582,8 +572,9 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
 def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param, jacobian, gradient, \
         hessian, *, normalized=False):
     r"""
-    Searchs for improved parameters for nonlinear least square or maximum likelihood function, using
-    a trust radius search path.
+    Search for improved parameters for nonlinear least square or maximum likelihood function.
+
+    Uses a trust radius search path.
     """
     # process inputs
     search_method = opti_opts.search_method.lower().replace(' ', '_')
@@ -779,7 +770,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
 #%% validate_opti_opts
 def validate_opti_opts(opti_opts):
     r"""
-    Validates that the optimization options are valid.
+    Validate the optimization options.
 
     Parameters
     ----------
@@ -788,7 +779,6 @@ def validate_opti_opts(opti_opts):
 
     Examples
     --------
-
     >>> from dstauffman import OptiOpts, validate_opti_opts
     >>> opti_opts = OptiOpts()
     >>> opti_opts.model_func     = str
@@ -828,7 +818,7 @@ def validate_opti_opts(opti_opts):
 #%% run_bpe
 def run_bpe(opti_opts, log_level=logging.INFO):
     r"""
-    Runs the batch parameter estimator with the given model optimization options.
+    Run the batch parameter estimator with the given model optimization options.
 
     Parameters
     ----------
@@ -849,7 +839,6 @@ def run_bpe(opti_opts, log_level=logging.INFO):
 
     Examples
     --------
-
     >>> from dstauffman import run_bpe, OptiOpts #TODO: finish this
 
     """
@@ -1015,7 +1004,7 @@ def run_bpe(opti_opts, log_level=logging.INFO):
 #%% plot_bpe_results
 def plot_bpe_results(bpe_results, opts=None, *, plots=None):
     r"""
-    Plots the results of estimation.
+    Plot the results of estimation.
     """
     # hard-coded options
     label_values = False
