@@ -1,4 +1,0 @@
-[pydocstyle]
-inherit = false
-convention = numpy
-add-ignore = D102,D105,D204
