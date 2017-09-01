@@ -24,56 +24,70 @@ class Test_Units(unittest.TestCase):
         new = dcs.Units.convert(0.5, dcs.Units.MP, dcs.Units.MP)
         exp = 0.5
         self.assertEqual(new, exp)
+
     def test_prob_rate_conversions1b(self):
         new = dcs.Units.convert(0.5, dcs.Units.MP, dcs.Units.AP)
         exp = dcs.convert_monthly_to_annual_probability(0.5)
         self.assertEqual(new, exp)
+
     def test_prob_rate_conversions1c(self):
         new = dcs.Units.convert(0.5, dcs.Units.MP, dcs.Units.AR)
         exp = dcs.prob_to_rate(dcs.convert_monthly_to_annual_probability(0.5))
         self.assertEqual(new, exp)
+
     def test_prob_rate_conversions2a(self):
         new = dcs.Units.convert(0.5, dcs.Units.AP, dcs.Units.MP)
         exp = dcs.convert_annual_to_monthly_probability(0.5)
         self.assertEqual(new, exp)
+
     def test_prob_rate_conversions2b(self):
         new = dcs.Units.convert(0.5, dcs.Units.AP, dcs.Units.AP)
         exp = 0.5
         self.assertEqual(new, exp)
+
     def test_prob_rate_conversions2c(self):
         new = dcs.Units.convert(0.5, dcs.Units.AP, dcs.Units.AR)
         exp = dcs.prob_to_rate(0.5)
         self.assertEqual(new, exp)
+
     def test_prob_rate_conversions3a(self):
         new = dcs.Units.convert(0.5, dcs.Units.AR, dcs.Units.MP)
         exp = dcs.rate_to_prob(0.5/12)
         self.assertEqual(new, exp)
+
     def test_prob_rate_conversions3b(self):
         new = dcs.Units.convert(0.5, dcs.Units.AR, dcs.Units.AP)
         exp = dcs.rate_to_prob(0.5)
         self.assertEqual(new, exp)
+
     def test_prob_rate_conversions3c(self):
         new = dcs.Units.convert(0.5, dcs.Units.AR, dcs.Units.AR)
         exp = 0.5
         self.assertEqual(new, exp)
+
     def test_mult1(self):
         self.assertEqual(dcs.Units.convert(1., dcs.Units.ND, dcs.Units.ND), 1.)
         self.assertEqual(dcs.Units.convert(1., dcs.Units.ND, dcs.Units.PER), 100.)
         self.assertEqual(dcs.Units.convert(1., dcs.Units.ND, dcs.Units.P100K), 100000.)
+
     def test_mult2(self):
         self.assertEqual(dcs.Units.convert(1., dcs.Units.PER, dcs.Units.ND), 0.01)
         self.assertEqual(dcs.Units.convert(1., dcs.Units.PER, dcs.Units.PER), 1.)
         self.assertEqual(dcs.Units.convert(1., dcs.Units.PER, dcs.Units.P100K), 1000.)
+
     def test_mult3(self):
         self.assertEqual(dcs.Units.convert(1., dcs.Units.P100K, dcs.Units.ND), 0.00001)
         self.assertEqual(dcs.Units.convert(1., dcs.Units.P100K, dcs.Units.PER), 0.001)
         self.assertEqual(dcs.Units.convert(1., dcs.Units.P100K, dcs.Units.P100K), 1.)
+
     def test_prob_to_bad(self):
         with self.assertRaises(ValueError):
             dcs.Units.convert(1, dcs.Units.MP, dcs.Units.P100K)
+
     def test_bad_units1(self):
         with self.assertRaises(KeyError):
             dcs.Units.convert(1, dcs.Units.ND, 100)
+
     def test_bad_units2(self):
         with self.assertRaises(KeyError):
             dcs.Units.convert(1, 100, dcs.Units.PER)

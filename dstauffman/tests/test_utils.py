@@ -343,11 +343,11 @@ class Test_compare_two_classes(unittest.TestCase):
         compare subclasses
     """
     def setUp(self):
-        self.c1 = type('Class1', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text', 'e': {'key1':1}})
-        self.c2 = type('Class2', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text', 'e': {'key1':1}})
+        self.c1 = type('Class1', (object, ), {'a': 0, 'b': '[1, 2, 3]', 'c': 'text', 'e': {'key1': 1}})
+        self.c2 = type('Class2', (object, ), {'a': 0, 'b': '[1, 2, 4]', 'd': 'text', 'e': {'key1': 1}})
         self.names = ['Class 1', 'Class 2']
-        self.c3 = type('Class3', (object, ), {'a': 0, 'b' : '[1, 2, 3]', 'c': 'text', 'e': self.c1})
-        self.c4 = type('Class4', (object, ), {'a': 0, 'b' : '[1, 2, 4]', 'd': 'text', 'e': self.c2})
+        self.c3 = type('Class3', (object, ), {'a': 0, 'b': '[1, 2, 3]', 'c': 'text', 'e': self.c1})
+        self.c4 = type('Class4', (object, ), {'a': 0, 'b': '[1, 2, 4]', 'd': 'text', 'e': self.c2})
 
     def test_is_comparison(self):
         with dcs.capture_output() as out:
