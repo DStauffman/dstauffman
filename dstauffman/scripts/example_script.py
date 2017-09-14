@@ -13,7 +13,7 @@ import numpy as np
 import dstauffman as dcs
 
 #%% Main function
-if __name__=='__main__':
+if __name__ == '__main__':
 
     #%% Create some fake data
     # random data

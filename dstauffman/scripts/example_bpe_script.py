@@ -95,7 +95,7 @@ def set_parameter(sim_params, *, names, values):
             raise ValueError('Bad parameter name: "{}".'.format(name))
 
 #%% Script
-if __name__=='__main__':
+if __name__ == '__main__':
     # Constants
     rerun      = True
     make_plots = True
