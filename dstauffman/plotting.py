@@ -551,7 +551,7 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
 #%% Functions - plot_time_history
 def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, second_y_scale=None, truth_time=None, \
-    truth_data=None):
+    truth_data=None, plot_sigmas=1):
     r"""
     Plot the given data channel versus time, with a generic label argument.
 
@@ -681,12 +681,12 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     else:
         this_label = opts.get_names(0) + label
         if rms_in_legend:
-             this_label += ' (RMS: {:.2f})'.format(rms_data)
+            this_label += ' (RMS: {:.2f})'.format(rms_data)
         ax.plot(time, scale*mean, 'b.-', linewidth=2, zorder=10, label=this_label)
-        # Old method:
-            # ax.errorbar(time, scale*mean, scale*std, linestyle='None', marker='None', ecolor='c', zorder=6)
-        ax.plot(time, scale*mean + scale*std, '.-', markersize=2, color='c', zorder=6)
-        ax.plot(time, scale*mean - scale*std, '.-', markersize=2, color='c', zorder=6)
+        if plot_sigmas:
+            sigma_label = '$\pm {}\sigma$'.format(plot_sigmas)
+            ax.plot(time, scale*mean + plot_sigmas*scale*std, '.-', markersize=2, color='c', zorder=6, label=sigma_label)
+            ax.plot(time, scale*mean - plot_sigmas*scale*std, '.-', markersize=2, color='c', zorder=6)
         # inidividual line plots
         if plot_indiv and data.ndim > 1:
             for ix in range(num_series):
