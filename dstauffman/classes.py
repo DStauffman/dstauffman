@@ -44,13 +44,14 @@ def _frozen(set):
             # If attribute already exists, simply set it
             set(self, name, value)
             return
-        elif sys._getframe(1).f_code.co_name is '__init__':
+        elif sys._getframe(1).f_code.co_name == '__init__':
             # Allow __setattr__ calls in __init__ calls of proper object types
             for key, val in sys._getframe(1).f_locals.items(): # pragma: no branch
-                if key=='self' and isinstance(val, self.__class__): # pragma: no branch
+                if key == 'self' and isinstance(val, self.__class__): # pragma: no branch
                     set(self, name, value)
                     return
-        raise AttributeError('You cannot add attributes to {}'.format(self))
+        raise AttributeError('You cannot add attribute of {} to {} in {}.'.format(\
+            name, self, sys._getframe(1).f_code.co_name))
     # return the custom defined function
     return set_attr
 
