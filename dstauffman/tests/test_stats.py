@@ -558,6 +558,21 @@ class Test_bounded_normal_draw(unittest.TestCase):
         out = dcs.bounded_normal_draw(self.num, self.values, self.field, self.prng)
         self.assertTrue(np.all(np.abs(out - self.mean) < 1e-8))
 
+#%% z_from_ci
+class Test_z_from_ci(unittest.TestCase):
+    r"""
+    Tests the z_from_ci function with the following cases:
+        Nominal with 4 common values found online
+    """
+    def setUp(self):
+        self.cis = [0.90,  0.95,  0.98,  0.99]
+        self.zs  = [1.645, 1.96, 2.326, 2.576]
+
+    def test_nominal(self):
+        for (ci, exp_z) in zip(self.cis, self.zs):
+            z = dcs.z_from_ci(ci)
+            self.assertTrue(abs(z - exp_z) < 0.001, '{} and {} are more than 0.001 from each other.'.format(z, exp_z))
+
 #%% Unit test execution
 if __name__ == '__main__':
     plt.ioff()

@@ -14,6 +14,7 @@ import doctest
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import scipy.stats as st
 import unittest
 from dstauffman.constants import MONTHS_PER_YEAR
 from dstauffman.plotting import Opts, setup_plots
@@ -665,6 +666,38 @@ def bounded_normal_draw(num, values, field, prng):
     np.minimum(out, this_max, out)
     np.maximum(out, this_min, out)
     return out
+
+#%% Functions - z_from_ci
+def z_from_ci(ci):
+    r"""
+    Calculates the Z score that matches the desired confidence interval.
+
+    Parameters
+    ----------
+    ci : float
+        Desired confidence interval
+
+    Returns
+    -------
+    z : float
+        Desired z value
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2017 based on:
+        https://stackoverflow.com/questions/20864847/probability-to-z-score-and-vice-versa-in-python
+
+    Examples
+    --------
+    >>> from dstauffman import z_from_ci
+    >>> ci = 0.95
+    >>> z = z_from_ci(ci)
+    >>> print('{:.2f}'.format(z))
+    1.96
+
+    """
+    z = st.norm.ppf(1-(1-ci)/2)
+    return z
 
 #%% Unit test
 if __name__ == '__main__':
