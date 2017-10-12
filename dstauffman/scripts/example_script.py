@@ -10,6 +10,7 @@ Notes
 
 #%% Imports
 import numpy as np
+
 import dstauffman as dcs
 
 #%% Main function

@@ -9,10 +9,12 @@ Notes
 """
 
 #%% Imports
-from datetime import datetime
 import logging
-import numpy as np
 import os
+from datetime import datetime
+
+import numpy as np
+
 import dstauffman as dcs
 
 #%% Classes - SimParams
