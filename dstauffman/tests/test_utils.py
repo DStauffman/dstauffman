@@ -10,16 +10,18 @@ Notes
 
 #%% Imports
 import copy
-from datetime import datetime
 import inspect
 import logging
-import numpy as np
 import os
 import platform
 import sys
 import time
 import unittest
+from datetime import datetime
 from unittest.mock import patch
+
+import numpy as np
+
 import dstauffman as dcs
 
 #%% _nan_equal

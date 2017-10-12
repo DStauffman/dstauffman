@@ -9,15 +9,17 @@ Notes
 """
 
 #%% Imports
-import matplotlib.pyplot as plt
-import matplotlib.cm as cmx
-import numpy as np
 import os
 import platform
 import unittest
-import dstauffman as dcs
-from PyQt5.QtTest import QTest
+
+import matplotlib.cm as cmx
+import matplotlib.pyplot as plt
+import numpy as np
 from PyQt5.QtCore import Qt
+from PyQt5.QtTest import QTest
+
+import dstauffman as dcs
 
 #%% Plotter for testing
 plotter = dcs.Plotter(False)

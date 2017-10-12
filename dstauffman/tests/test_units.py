@@ -10,6 +10,7 @@ Notes
 
 #%% Imports
 import unittest
+
 import dstauffman as dcs
 
 #%% Units

@@ -10,6 +10,7 @@ Notes
 #%% Imports
 import doctest
 import os
+
 import dstauffman as dcs
 
 #%% Locals

@@ -9,9 +9,11 @@ Notes
 """
 
 #%% Imports
-from enum import unique
-import numpy as np
 import unittest
+from enum import unique
+
+import numpy as np
+
 import dstauffman as dcs
 
 #%% Support

@@ -9,10 +9,12 @@ Notes
 """
 
 #%% Imports
-import matplotlib.pyplot as plt
-import numpy as np
 import sys
 import unittest
+
+import matplotlib.pyplot as plt
+import numpy as np
+
 import dstauffman as dcs
 
 #%% Plotter for testing

@@ -10,10 +10,12 @@ Notes
 
 #%% Imports
 import logging
-import numpy as np
 import os
 import unittest
 from unittest.mock import patch
+
+import numpy as np
+
 import dstauffman as dcs
 
 #%% Hard-coded values

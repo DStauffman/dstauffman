@@ -9,11 +9,13 @@ Notes
 """
 
 #%% Imports
-import copy
 import collections
-import numpy as np
+import copy
 import os
 import unittest
+
+import numpy as np
+
 import dstauffman as dcs
 
 #%% Locals classes for testing
