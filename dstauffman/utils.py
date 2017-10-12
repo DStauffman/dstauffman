@@ -11,20 +11,22 @@ Notes
 """
 
 #%% Imports
-from collections import Mapping
-from contextlib import contextmanager
-from datetime import datetime, timedelta
 import doctest
 import inspect
-from io import StringIO
 import logging
 import os
-import numpy as np
 import shutil
 import sys
 import types
 import unittest
 import warnings
+from collections import Mapping
+from contextlib import contextmanager
+from datetime import datetime, timedelta
+from io import StringIO
+
+import numpy as np
+
 from dstauffman.constants import MONTHS_PER_YEAR
 
 #%% Globals

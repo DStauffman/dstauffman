@@ -10,6 +10,7 @@ Notes
 
 #%% Import
 import os
+
 from setuptools import setup
 
 #%% Support functions

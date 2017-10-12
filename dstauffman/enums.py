@@ -10,9 +10,10 @@ Notes
 
 #%% Imports
 import doctest
-from enum import Enum, EnumMeta, _is_dunder
-import numpy as np
 import unittest
+from enum import Enum, EnumMeta, _is_dunder
+
+import numpy as np
 
 #%% Classes - _EnumMetaPlus
 class _EnumMetaPlus(EnumMeta):

@@ -13,18 +13,20 @@ Notes
 """
 
 #%% Imports
-from copy import deepcopy
 import doctest
 import logging
-import numpy as np
 import os
-from scipy.linalg import norm
 import time
 import unittest
-from dstauffman.classes  import Frozen, SaveAndLoad
-from dstauffman.plotting import Opts, plot_correlation_matrix, plot_multiline_history, \
-                                    plot_bpe_convergence
-from dstauffman.utils    import activate_logging, deactivate_logging, pprint_dict, rss, setup_dir
+from copy import deepcopy
+
+import numpy as np
+from scipy.linalg import norm
+
+from dstauffman.classes import Frozen, SaveAndLoad
+from dstauffman.plotting import Opts, plot_bpe_convergence, plot_correlation_matrix, \
+    plot_multiline_history
+from dstauffman.utils import activate_logging, deactivate_logging, pprint_dict, rss, setup_dir
 
 #%% Globals
 logger = logging.getLogger(__name__)

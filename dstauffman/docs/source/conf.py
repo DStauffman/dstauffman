@@ -15,8 +15,9 @@ serve to show the default.
 
 """
 
-import sys
 import os
+import sys
+
 import dstauffman
 
 # If extensions (or modules to document with autodoc) are in another directory,

@@ -10,8 +10,10 @@ Notes
 
 #%% Imports
 import doctest
-import numpy as np
 import unittest
+
+import numpy as np
+
 from dstauffman.constants import INT_TOKEN, QUAT_SIZE
 
 #%% Master flags

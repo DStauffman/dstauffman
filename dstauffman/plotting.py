@@ -12,18 +12,20 @@ Notes
 # normal imports
 import doctest
 import gc
-import numpy as np
 import os
 import platform
 import sys
 import unittest
 import warnings
-# plotting imports
-import matplotlib.pyplot as plt
-import matplotlib.colors as colors
+
+# plotting/numpy imports
 import matplotlib.cm as cmx
+import matplotlib.colors as colors
+import matplotlib.pyplot as plt
+import numpy as np
 from matplotlib.patches import Rectangle
 from matplotlib.ticker import StrMethodFormatter
+
 # Qt imports
 try:
     from PyQt5.QtWidgets import QApplication, QPushButton
@@ -32,11 +34,12 @@ try:
 except ImportError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object
+
 # model imports
-from dstauffman.classes   import Frozen
+from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
-from dstauffman.latex     import bins_to_str_ranges
-from dstauffman.utils     import get_images_dir, pprint_dict, rms
+from dstauffman.latex import bins_to_str_ranges
+from dstauffman.utils import get_images_dir, pprint_dict, rms
 
 #%% Classes - _HoverButton
 class _HoverButton(QPushButton):

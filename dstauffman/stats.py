@@ -9,13 +9,15 @@ Notes
 """
 
 #%% Imports
-from collections import OrderedDict
 import doctest
+import unittest
+from collections import OrderedDict
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import scipy.stats as st
-import unittest
+
 from dstauffman.constants import MONTHS_PER_YEAR
 from dstauffman.plotting import Opts, setup_plots
 

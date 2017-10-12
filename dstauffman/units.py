@@ -13,10 +13,11 @@ Notes
 #%% Imports
 import doctest
 import unittest
+
 from dstauffman.constants import MONTHS_PER_YEAR
-from dstauffman.enums     import IntEnumPlus
-from dstauffman.stats     import annual_rate_to_monthly_probability, convert_annual_to_monthly_probability, \
-                                 prob_to_rate, rate_to_prob
+from dstauffman.enums import IntEnumPlus
+from dstauffman.stats import annual_rate_to_monthly_probability, \
+    convert_annual_to_monthly_probability, prob_to_rate, rate_to_prob
 
 #%% Units
 class Units(IntEnumPlus):

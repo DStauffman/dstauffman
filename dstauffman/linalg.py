@@ -10,9 +10,10 @@ Notes
 
 #%% Imports
 import doctest
+import unittest
+
 import numpy as np
 from scipy.linalg import norm, svd
-import unittest
 
 #%% orth
 def orth(A):

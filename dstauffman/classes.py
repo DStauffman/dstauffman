@@ -12,11 +12,13 @@ Notes
 #%% Imports
 import copy
 import doctest
-import numpy as np
 import pickle
 import sys
 import unittest
 import warnings
+
+import numpy as np
+
 try:
     import h5py
 except ImportError: # pragma: no cover
