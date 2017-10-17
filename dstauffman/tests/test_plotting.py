@@ -24,8 +24,7 @@ import dstauffman as dcs
 #%% Plotter for testing
 plotter = dcs.Plotter(False)
 
-#%% Classes for testing
-# Plotter
+#%% Classes - Plotter
 class Test_Plotter(unittest.TestCase):
     r"""
     Tests the Plotter class with the following cases:
@@ -62,7 +61,7 @@ class Test_Plotter(unittest.TestCase):
     def tearDown(self):
         self.plotter.set_plotter(False)
 
-# Opts
+#%% Classes - Opts
 class Test_Opts(unittest.TestCase):
     r"""
     Test Opts class, and by extension the frozen function and Frozen class using cases:
@@ -105,7 +104,7 @@ class Test_Opts(unittest.TestCase):
         self.assertEqual(lines[3], '  save_plot  = False')
         self.assertEqual(lines[-1], '  names      = []')
 
-# TruthPlotter
+#%% Classes - TruthPlotter
 class Test_TruthPlotter(unittest.TestCase):
     r"""
     Tests the TruthPlotter class with the following cases:
@@ -134,6 +133,16 @@ class Test_TruthPlotter(unittest.TestCase):
         np.testing.assert_array_almost_equal(self.y+0.01, truth.data)
         np.testing.assert_array_almost_equal(self.y, truth.data_lo)
         np.testing.assert_array_almost_equal(self.y+0.03, truth.data_hi)
+
+    def test_matrix3(self):
+        truth = dcs.TruthPlotter(self.x, self.data[:, np.array([1])])
+        np.testing.assert_array_almost_equal(self.y+0.01, truth.data)
+        self.assertTrue(truth.data_lo is None)
+        self.assertTrue(truth.data_hi is None)
+
+    def test_bad_matrix(self):
+        with self.assertRaises(ValueError):
+            dcs.TruthPlotter(self.x, np.random.rand(self.x.size, 4))
 
     def test_plotting0(self):
         self.fig = plt.figure()
@@ -175,6 +184,34 @@ class Test_TruthPlotter(unittest.TestCase):
         truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=None, hi=self.y+0.03, type_='errorbar')
         truth.plot_truth(ax)
 
+    def test_plotting5(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        ax = self.fig.add_subplot(111)
+        ax.plot(self.x, self.y, label='data')
+        truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03, type_='errorbar')
+        # fake out data (can't be done through __init__ right now, this might need work)
+        truth.data = self.data
+        truth.data_lo = self.data - 0.01
+        truth.data_hi = self.data + 0.01
+        truth.plot_truth(ax, ix=1)
+
+    def test_dont_hold_limits(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        ax = self.fig.add_subplot(111)
+        ax.plot(self.x, self.y, label='data')
+        truth = dcs.TruthPlotter(self.x-10, self.y, lo=self.y-1000, hi=self.y+1000, type_='errorbar')
+        truth.plot_truth(ax, hold_xlim=False, hold_ylim=False)
+
+    def test_hold_limits(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        ax = self.fig.add_subplot(111)
+        ax.plot(self.x, self.y, label='data')
+        truth = dcs.TruthPlotter(self.x-10, self.y, lo=self.y-1000, hi=self.y+1000, type_='errorbar')
+        truth.plot_truth(ax, hold_xlim=True, hold_ylim=True)
+
     def test_bad_type(self):
         self.fig = plt.figure()
         self.fig.canvas.set_window_title('Figure Title')
@@ -194,11 +231,25 @@ class Test_TruthPlotter(unittest.TestCase):
         self.assertTrue(lines[1].startswith(' time    = ['))
         self.assertEqual(lines[-1], ' name    = Observed')
 
+    def test_is_null(self):
+        truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03)
+        self.assertFalse(truth.is_null)
+
+    def test_get_data1(self):
+        truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03)
+        data = truth.get_data(self.data, scale=2)
+        np.testing.assert_array_almost_equal(data, 2*self.data)
+
+    def test_get_data2(self):
+        truth = dcs.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03)
+        data = truth.get_data(self.data, scale=3, ix=0)
+        np.testing.assert_array_almost_equal(data, 3*self.data[:, 0])
+
     def tearDown(self):
         if self.fig is not None:
             plt.close(self.fig)
 
-# MyCustomToolbar
+#%% Classes - MyCustomToolbar
 class Test_MyCustomToolbar(unittest.TestCase):
     r"""
     Tests the MyCustomToolbar class with the following cases:
@@ -254,7 +305,7 @@ class Test_MyCustomToolbar(unittest.TestCase):
         plt.close(self.fig1)
         plt.close(self.fig2)
 
-# ColorMap
+#%% Classes - ColorMap
 class Test_ColorMap(unittest.TestCase):
     r"""
     Tests ColorMap class with the following cases:
@@ -314,8 +365,7 @@ class Test_ColorMap(unittest.TestCase):
         if self.fig is not None:
             plt.close(self.fig)
 
-#%% Functions for testing
-# ignore_plot_data
+#%% Functions - ignore_plot_data
 class Test_ignore_plot_data(unittest.TestCase):
     r"""
     Tests the ignore_plot_data function with the following cases:
@@ -370,7 +420,7 @@ class Test_ignore_plot_data(unittest.TestCase):
         ignore = dcs.ignore_plot_data(self.data, self.ignore_empties, 5)
         self.assertFalse(ignore)
 
-# close_all
+#%% Functions - close_all
 class Test_close_all(unittest.TestCase):
     r"""
     Tests the close_all function with the following cases:
@@ -398,7 +448,7 @@ class Test_close_all(unittest.TestCase):
         self.assertFalse(plt.fignum_exists(fig1.number))
         self.assertFalse(plt.fignum_exists(fig2.number))
 
-# get_axes_scales
+#%% Functions - get_axes_scales
 class Test_get_axes_scales(unittest.TestCase):
     r"""
     Tests get_axes_scales function with the following cases:
@@ -421,7 +471,21 @@ class Test_get_axes_scales(unittest.TestCase):
         with self.assertRaises(ValueError):
             dcs.get_axes_scales(self.bad_type)
 
-# plot_time_history
+#%% Functions - whitten
+class Test_whitten(unittest.TestCase):
+    r"""
+    Tests the whitten function with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.color = (1, 0.4, 0)
+        self.whittened_color = (1.0, 0.58, 0.3)
+
+    def test_nominal(self):
+        new_color = dcs.whitten(self.color)
+        self.assertEqual(new_color, self.whittened_color)
+
+#%% Functions - plot_time_history
 class Test_plot_time_history(unittest.TestCase):
     r"""
     Tests plot_time_history function with the following cases:
@@ -438,6 +502,7 @@ class Test_plot_time_history(unittest.TestCase):
         plotting single scalars
         plotting empty lists
         no RMS in legend
+        Show zero
     """
     def setUp(self):
         self.time = np.arange(0, 10, 0.1)
@@ -525,11 +590,19 @@ class Test_plot_time_history(unittest.TestCase):
         self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, self.opts, \
             plot_as_diffs=True)
 
+    def test_show_zero(self):
+        self.data += 1000
+        self.opts.show_zero = True
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, opts=self.opts)
+
+    def test_skip_plot_sigmas(self):
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, plot_sigmas=0)
+
     def tearDown(self):
         if self.fig is not None:
             plt.close(self.fig)
 
-# plot_correlation_matrix
+#%% Functions - plot_correlation_matrix
 class Test_plot_correlation_matrix(unittest.TestCase):
     r"""
     Tests plot_correlation_matrix function with the following cases:
@@ -633,7 +706,7 @@ class Test_plot_correlation_matrix(unittest.TestCase):
         for i in range(len(self.figs)):
             plt.close(self.figs.pop())
 
-# plot_multiline_history
+#%% Functions - plot_multiline_history
 class Test_plot_multiline_history(unittest.TestCase):
     r"""
     Tests the plot_multiline_history function with the following cases:
@@ -646,6 +719,7 @@ class Test_plot_multiline_history(unittest.TestCase):
         No data
         Ignore all zeros
         Bad legend
+        Show zero
     """
     def setUp(self):
         self.time     = np.arange(0, 10, 0.1) + 2000
@@ -716,12 +790,21 @@ class Test_plot_multiline_history(unittest.TestCase):
     def test_single_point(self):
         self.figs.append(dcs.plot_multiline_history(self.time[1:], self.data[1:,:], self.label))
 
+    def test_show_zero(self):
+        self.data += 1000
+        self.opts.show_zero = True
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, opts=self.opts))
+
+    def test_data_lo_and_hi(self):
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, \
+            data_lo=self.data-1, data_hi=self.data+1))
+
     def tearDown(self):
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
 
-# plot_bar_breakdown
+#%% Functions - plot_bar_breakdown
 class Test_plot_bar_breakdown(unittest.TestCase):
     r"""
     Tests the plot_bar_breakdown function with the following cases:
@@ -732,6 +815,7 @@ class Test_plot_bar_breakdown(unittest.TestCase):
         With legend
         Null data
         Bad legend
+        With Colormap
     """
     def setUp(self):
         self.time = np.arange(0, 5, 1./12) + 2000
@@ -777,12 +861,16 @@ class Test_plot_bar_breakdown(unittest.TestCase):
     def test_single_point(self):
         self.figs.append(dcs.plot_bar_breakdown(self.time[:1], self.data[:1,:], label=self.label))
 
+    def test_new_colormap(self):
+        self.opts.colormap = 'seismic'
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
+
     def tearDown(self):
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
 
-# plot_bpe_convergence
+#%% Functions - plot_bpe_convergence
 class Test_plot_bpe_convergence(unittest.TestCase):
     r"""
     Tests the plot_bpe_convergence function with the following cases:
@@ -814,11 +902,12 @@ class Test_plot_bpe_convergence(unittest.TestCase):
             for this_fig in self.figs:
                 plt.close(this_fig)
 
-# plot_population_pyramid
+#%% Functions - plot_population_pyramid
 class Test_plot_population_pyramid(unittest.TestCase):
     r"""
     Tests the plot_population_pyramid function with the following cases:
         Nominal
+        Default arguments
     """
     def setUp(self):
         self.age_bins = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
@@ -837,11 +926,15 @@ class Test_plot_population_pyramid(unittest.TestCase):
             self.title, opts=self.opts, name1=self.name1, name2=self.name2, color1=self.color1, \
             color2=self.color2)
 
+    def test_defaults(self):
+        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_per, self.fmal_per, \
+            self.title)
+
     def tearDown(self):
         if self.fig is not None:
             plt.close(self.fig)
 
-# storefig
+#%% Functions - storefig
 class Test_storefig(unittest.TestCase):
     r"""
     Tests the storefig function with the following cases:
@@ -936,7 +1029,7 @@ class Test_storefig(unittest.TestCase):
     def tearDownClass(cls):
         plt.close(cls.fig)
 
-# titleprefix
+#%% Functions - titleprefix
 class Test_titleprefix(unittest.TestCase):
     r"""
     Tests the titleprefix function with the following cases:
@@ -967,7 +1060,7 @@ class Test_titleprefix(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-# disp_xlimits
+#%% Functions - disp_xlimits
 class Test_disp_xlimits(unittest.TestCase):
     r"""
     Tests the disp_xlimits function with the following cases:
@@ -1004,7 +1097,7 @@ class Test_disp_xlimits(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-# setup_plots
+#%% Functions - setup_plots
 class Test_setup_plots(unittest.TestCase):
     r"""
     Tests the setup_plots function with the following cases:
@@ -1072,7 +1165,7 @@ class Test_setup_plots(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-# figmenu
+#%% Functions - figmenu
 class Test_figmenu(unittest.TestCase):
     r"""
     Tests the figmenu function with the following cases:
@@ -1093,7 +1186,7 @@ class Test_figmenu(unittest.TestCase):
         plt.close(self.fig1)
         plt.close(self.fig2)
 
-# rgb_ints_to_hex
+#%% Functions - rgb_ints_to_hex
 class Test_rgb_ints_to_hex(unittest.TestCase):
     r"""
     Tests the rgb_ints_to_hex function with the following cases:

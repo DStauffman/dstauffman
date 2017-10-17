@@ -169,6 +169,8 @@ class TruthPlotter(Frozen):
                 self.data    = data[:, 1]
                 self.data_lo = data[:, 0]
                 self.data_hi = data[:, 2]
+            else:
+                raise ValueError('Bad shape for data of {}.'.format(data.shape))
 
     def pprint(self, indent=1, align=True):
         r"""Display a pretty print version of the class."""
@@ -215,7 +217,7 @@ class TruthPlotter(Frozen):
                     ax.errorbar(self.time, scale*self.data, scale*yerr, linestyle='None', \
                         marker='None', ecolor='c', zorder=6)
                 else:
-                    yerr = np.vstack((self.data[:, ix]-self.data_lo[:,ix], self.data_hi[:,ix]-self.data[:,ix]))
+                    yerr = np.vstack((self.data[:, ix]-self.data_lo[:, ix], self.data_hi[:, ix]-self.data[:, ix])).T
                     ax.errorbar(self.time, scale*self.data[:, ix], scale*yerr[:, ix], linestyle='None', \
                         marker='None', ecolor='c', zorder=6)
         else:
@@ -626,7 +628,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     show_zero     = opts.show_zero
 
     # maintain older API
-    if truth_data is not None:
+    if truth_data is not None: # pragma: no cover
         if truth is not None:
             raise ValueError('Attempting to use both APIs, please only use new truth input.')
         else:

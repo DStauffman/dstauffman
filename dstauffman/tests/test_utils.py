@@ -418,6 +418,49 @@ class Test_compare_two_classes(unittest.TestCase):
             'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 
+    def test_subdict_comparison(self):
+        delattr(self.c1, 'b')
+        delattr(self.c1, 'c')
+        delattr(self.c2, 'b')
+        delattr(self.c2, 'd')
+        with dcs.capture_output() as out:
+            is_same = dcs.compare_two_classes(self.c1, self.c2)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '"c1" and "c2" are the same.')
+        self.assertTrue(is_same)
+        self.c1.e['key1'] += 1
+        with dcs.capture_output() as out:
+            is_same = dcs.compare_two_classes(self.c1, self.c2)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '"c1" and "c2" are not the same.')
+        self.assertFalse(is_same)
+
+    def test_custom_dicts(self):
+        delattr(self.c1, 'b')
+        delattr(self.c1, 'c')
+        delattr(self.c2, 'b')
+        delattr(self.c2, 'd')
+        self.c1.e = dcs.FixedDict()
+        self.c1.e['key1'] = 1
+        self.c1.e.freeze()
+        self.c2.e = dcs.FixedDict()
+        self.c2.e['key1'] = 1
+        with dcs.capture_output() as out:
+            is_same = dcs.compare_two_classes(self.c1, self.c2)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '"c1.e" and "c2.e" are the same.\n"c1" and "c2" are the same.')
+        self.assertTrue(is_same)
+        self.c1.e['key1'] += 1
+        with dcs.capture_output() as out:
+            is_same = dcs.compare_two_classes(self.c1, self.c2)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'key1 is different.\n"c1.e" and "c2.e" are not the same.\n"c1" and "c2" are not the same.')
+        self.assertFalse(is_same)
+
     def test_mismatched_subclasses(self):
         self.c4.e = 5
         with dcs.capture_output() as out:

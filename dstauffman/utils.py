@@ -309,10 +309,10 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
                 if _is_class_instance(attr2):
                     if compare_recursively:
                         names = [name1 + '.' + this_attr, name2 + '.' + this_attr]
-                        # Note: don't want the 'and' to short-circuit, so do the 'and is_same' last
                         if isinstance(attr1, dict) and isinstance(attr2, dict):
                             is_same = compare_two_dicts(attr1, attr2, suppress_output=suppress_output, names=names)
                         else:
+                            # Note: don't want the 'and' to short-circuit, so do the 'and is_same' last
                             is_same = compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
                                 names=names, ignore_callables=ignore_callables, \
                                 compare_recursively=compare_recursively) and is_same
@@ -1143,7 +1143,7 @@ def find_tabs(folder, extensions=None, list_all=False, trailing=False):
                                     print('Evaluating: "{}"'.format(this_file))
                                     already_listed = True
                                 print('    Line {:03}: '.format(c) + repr(line))
-                    except UnicodeDecodeError:
+                    except UnicodeDecodeError: # pragma: no cover
                         print('File: "{}" was not a valid utf-8 file.'.format(this_file))
 
 #%% np_digitize
@@ -1513,7 +1513,7 @@ def deactivate_logging():
         i += 1
     # check for bad situations
     if i == max_handlers or bool(root_logger.handlers):
-        raise ValueError('Something bad happended when trying to close the logger.')
+        raise ValueError('Something bad happended when trying to close the logger.') # pragma: no cover
 
 #%% Unit test
 if __name__ == '__main__':

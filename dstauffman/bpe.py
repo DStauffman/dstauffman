@@ -35,6 +35,16 @@ logger = logging.getLogger(__name__)
 class OptiOpts(Frozen):
     r"""
     Optimization options for the batch parameter estimator.
+
+    Methods
+    -------
+    pprint : Displays a pretty print version of the class.
+
+    Examples
+    --------
+    >>> from dstauffman import OptiOpts
+    >>> opti_opts = OptiOpts()
+
     """
     def __init__(self):
         # specifically required settings
@@ -75,6 +85,22 @@ class OptiOpts(Frozen):
                 return False
         # if it made it all the way through the fields, then things must be equal
         return True
+
+    def pprint(self, indent=1, align=True):
+        r"""
+        Display a pretty print version of the class.
+
+        Examples
+        --------
+        >>> from dstauffman import OptiOpts
+        >>> opti_opts = OptiOpts()
+        >>> opti_opts.pprint() # doctest: +ELLIPSIS
+        OptiOpts
+         model_func      = None
+         ...
+         trust_radius    = 1.0
+        """
+        pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
 #%% OptiParam
 class OptiParam(Frozen):
@@ -745,7 +771,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
         V_jacobian = Vh_jacobian.T
         temp = np.power(S_jacobian, -2, out=np.zeros(S_jacobian.shape), where=S_jacobian > min_eig)
         covariance = V_jacobian @ np.diag(temp) @ Vh_jacobian
-    except MemoryError:
+    except MemoryError: # pragma: no cover
         logger.info('Singular value decomposition of Jacobian failed.')
         V_jacobian = np.full((num_params, num_params), np.nan, dtype=float)
         covariance = np.inv(jacobian.T @ jacobian)

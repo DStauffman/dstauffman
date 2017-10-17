@@ -127,6 +127,16 @@ class Test_OptiOpts(unittest.TestCase):
         opti_opts = dcs.OptiOpts()
         self.assertNotEqual(opti_opts, 2)
 
+    def test_pprint(self):
+        opti_opts = dcs.OptiOpts()
+        with dcs.capture_output() as out:
+            opti_opts.pprint()
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertEqual(lines[0], 'OptiOpts')
+        self.assertEqual(lines[1], ' model_func      = None')
+        self.assertEqual(lines[-1],' trust_radius    = 1.0')
+
 #%% OptiParam
 class Test_OptiParam(unittest.TestCase):
     r"""
@@ -193,6 +203,20 @@ class Test_OptiParam(unittest.TestCase):
         names = dcs.OptiParam.get_names(params)
         self.assertEqual(names, ['test1', 'test2'])
 
+    def test_pprint(self):
+        opti_param = dcs.OptiParam('test')
+        with dcs.capture_output() as out:
+            opti_param.pprint()
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertEqual(lines[0], 'OptiParam')
+        self.assertEqual(lines[1], ' name    = test')
+        self.assertEqual(lines[2], ' best    = nan')
+        self.assertEqual(lines[3], ' min_    = -inf')
+        self.assertEqual(lines[4], ' max_    = inf')
+        self.assertEqual(lines[5], ' minstep = 0.0001')
+        self.assertEqual(lines[6], ' typical = 1.0')
+
 #%% BpeResults
 class Test_BpeResults(unittest.TestCase):
     r"""
@@ -249,6 +273,13 @@ class Test_BpeResults(unittest.TestCase):
         self.assertEqual(lines[3], 'Final cost: None')
         self.assertEqual(lines[4], 'Final parameters:')
         self.assertEqual(lines[5].strip(), 'a = 2')
+
+    def test_pprint2(self):
+        with dcs.capture_output() as out:
+            self.bpe_results.pprint()
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '')
 
     def tearDown(self):
         if os.path.isfile(self.filename):

@@ -338,6 +338,8 @@ class Test_FixedDict(unittest.TestCase):
         self.fixed.setdefault('new_key', 1)
         self.assertEqual(self.fixed['new_key'], 1)
         self.fixed.freeze()
+        self.fixed.setdefault('key1', 5)
+        self.assertEqual(self.fixed['key1'], 1)
         with self.assertRaises(KeyError):
             self.fixed.setdefault('newest_key', 5)
 
@@ -349,6 +351,21 @@ class Test_FixedDict(unittest.TestCase):
         dict2['bad_key'] = 5
         with self.assertRaises(KeyError):
             self.fixed.update(dict2)
+
+    def test_update_not_frozen(self):
+        dict2 = {'key1': 3, 'new_key': 5}
+        self.fixed.update(dict2)
+        self.assertEqual(self.fixed['key1'], 3)
+        self.assertTrue('new_key' in self.fixed)
+
+    def test_update_kwargs(self):
+        self.fixed.freeze()
+        dict2 = {'key1': 3}
+        self.fixed.update(**dict2)
+        self.assertEqual(self.fixed['key1'], 3)
+        dict2['bad_key'] = 5
+        with self.assertRaises(KeyError):
+            self.fixed.update(**dict2)
 
     def test_isinstance(self):
         self.assertTrue(isinstance(self.fixed, collections.Mapping))
