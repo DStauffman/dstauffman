@@ -106,6 +106,42 @@ class OptiOpts(Frozen):
 class OptiParam(Frozen):
     r"""
     Optimization parameter to be estimated by the batch parameters estimator.
+
+    Parameters
+    ----------
+    name : str
+        Name of the parameter to be optimized
+    best : float, optional, default is NaN
+        Best initial guess of the value
+    min_ : float, optional, default is -Inf
+        Minimum parameter value allowed
+    max_ : float, optional, default is Inf
+        Maximum parameter value allowed
+    minstep : float, optional, default is 0.0001
+        Minimum parameter value step allow when calculating gradients
+    typical : float, optional, default is 1.
+        Typical value of the parameter, used when normalizing
+
+    Methods
+    -------
+    get_array : (static) Returns the values from a list of OptiParams
+    get_names : (static) Returns the names from a list of OptiParams
+    pprint : Prints a pretty summary version of the class
+
+    Examples
+    --------
+    >>> from dstauffman import OptiParam
+    >>> params = []
+    >>> params.append(OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+    >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+    >>> params.append(OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+
+    >>> print(OptiParam.get_array(params, 'best'))
+    [   2.5   20.   180. ]
+
+    >>> print(OptiParam.get_names(params))
+    ['magnitude', 'frequency', 'phase']
+
     """
     def __init__(self, name, *, best=np.nan, min_=-np.inf, max_=np.inf, minstep=1e-4, typical=1.):
         self.name = name
@@ -133,6 +169,25 @@ class OptiParam(Frozen):
     def get_array(opti_param, type_='best'):
         r"""
         Get a numpy vector of all the optimization parameters for the desired type.
+
+        Parameters
+        ----------
+        opti_param : list of class OptiParam
+            List of optimization parameters
+        type_ : str, optional, from {'best', 'min', 'min_', 'max', 'max_', 'minstep', 'typical'}
+            Array of values from the list of optimization parameters
+
+        Examples
+        --------
+        >>> from dstauffman import OptiParam
+        >>> params = []
+        >>> params.append(OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+        >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+        >>> params.append(OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+
+        >>> print(OptiParam.get_array(params, 'best'))
+        [   2.5   20.   180. ]
+
         """
         # check for valid types
         if type_ in {'best', 'min_', 'max_', 'minstep'}:
@@ -151,6 +206,18 @@ class OptiParam(Frozen):
     def get_names(opti_param):
         r"""
         Get the names of the optimization parameters as a list.
+
+        Examples
+        --------
+        >>> from dstauffman import OptiParam
+        >>> params = []
+        >>> params.append(OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+        >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+        >>> params.append(OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+
+        >>> print(OptiParam.get_names(params))
+        ['magnitude', 'frequency', 'phase']
+
         """
         names = [x.name for x in opti_param]
         return names
@@ -158,6 +225,20 @@ class OptiParam(Frozen):
     def pprint(self, indent=1, align=True):
         r"""
         Display a pretty print version of the class.
+
+        Examples
+        --------
+        >>> from dstauffman import OptiParam
+        >>> opti_param = OptiParam('test')
+        >>> opti_param.pprint()
+        OptiParam
+         name    = test
+         best    = nan
+         min_    = -inf
+         max_    = inf
+         minstep = 0.0001
+         typical = 1.0
+
         """
         pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
@@ -165,6 +246,12 @@ class OptiParam(Frozen):
 class BpeResults(Frozen, metaclass=SaveAndLoad):
     r"""
     Batch Parameter Estimator Results.
+
+    Examples
+    --------
+    >>> from dstauffman import BpeResults
+    >>> bpe_results = BpeResults()
+
     """
     def __init__(self):
         self.param_names  = None
@@ -182,7 +269,30 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         self.final_cost   = None
 
     def __str__(self):
-        r"""Print all the fields of the Results."""
+        r"""
+        Print all the fields of the Results.
+
+        Examples
+        --------
+        >>> from dstauffman import BpeResults
+        >>> bpe_results = BpeResults()
+        >>> bpe_results.param_names  = ['a'.encode('utf-8')]
+        >>> bpe_results.begin_params = [1]
+        >>> bpe_results.final_params = [2]
+        >>> print(bpe_results)
+         BpeResults
+          begin_params = [1]
+          begin_cost   = None
+          num_evals    = 0
+          num_iters    = 0
+          final_params = [2]
+          final_cost   = None
+          correlation  = None
+          info_svd     = None
+          covariance   = None
+          costs        = []
+
+        """
         # fields to print
         keys = ['begin_params', 'begin_cost', 'num_evals', 'num_iters', 'final_params', \
             'final_cost', 'correlation', 'info_svd', 'covariance', 'costs']
@@ -196,6 +306,22 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     def pprint(self):
         r"""
         Print summary results.
+
+        Examples
+        --------
+        >>> from dstauffman import BpeResults
+        >>> bpe_results = BpeResults()
+        >>> bpe_results.param_names  = ['a'.encode('utf-8')]
+        >>> bpe_results.begin_params = [1]
+        >>> bpe_results.final_params = [2]
+        >>> bpe_results.pprint()
+        Initial cost: None
+        Initial parameters:
+                a = 1
+        Final cost: None
+        Final parameters:
+                a = 2
+
         """
         if self.param_names is None or self.begin_params is None or self.final_params is None:
             return
@@ -214,11 +340,19 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
 class CurrentResults(Frozen, metaclass=SaveAndLoad):
     r"""
     Current results used as temporary values through the analysis.
+
+    Examples
+    --------
+    >>> from dstauffman import CurrentResults
+    >>> cur_results = CurrentResults()
+    >>> print(cur_results)
+     Current Results:
+      Trust Radius: None
+      Best Cost: None
+      Best Params: None
+
     """
     def __init__(self):
-        r"""
-        Initialize the fields.
-        """
         self.trust_rad = None
         self.params    = None
         self.innovs    = None
@@ -259,6 +393,42 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
     Wrap the call to the model function.
 
     Returns the results of the model, plus the innovations as defined by the given cost function.
+
+    Parameters
+    ----------
+    opti_opts : class OptiOpts
+        Optimization options
+    bpe_results : class BpeResults
+        Batch Parameter Estimator results
+    model_args : dict, optional
+        Arguments to pass to the model function, taken from opti_opts.model_args by default
+    cost_args : dict, optional
+        Cost arguments to pass to the cost function, taken from opti_opts.cost_args by default
+
+    Returns
+    -------
+    results : arbitrary return from model function
+        Results from running the model function with the given model arguments
+    innovs : arbitrary return from cost function, nominally ndarray
+        Innovations from running the cost function on the model results with the given cost arguments
+
+    Examples
+    --------
+    >>> from dstauffman.bpe import _function_wrapper
+    >>> from dstauffman import OptiOpts, BpeResults
+    >>> opti_opts = OptiOpts()
+    >>> opti_opts.model_func = lambda x: 2*x
+    >>> opti_opts.cost_func = lambda y, x: y / 10
+    >>> bpe_results = BpeResults()
+    >>> model_args = {'x': np.array([1, 2, 3], dtype=float)}
+    >>> cost_args = dict()
+    >>> (results, innovs) = _function_wrapper(opti_opts, bpe_results, model_args, cost_args)
+    >>> print(results)
+    [ 2.  4.  6.]
+
+    >>> print(innovs)
+    [ 0.2  0.4  0.6]
+
     """
     # pull inputs from opti_opts if necessary
     if model_args is None:
@@ -284,6 +454,30 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     Perturb the state by a litte bit and calculate the numerical slope (Jacobian approximation).
 
     Has options for first or second order approximations.
+
+    Parameters
+    ----------
+    opti_opts : class OptiOpts
+        Optimization options
+    model_args : dict, optional
+        Arguments to pass to the model function, taken from opti_opts.model_args by default
+    bpe_results : class BpeResults
+        Batch Parameter Estimator results
+    cur_results : class CurrentResults
+        Current results from this iteration or step
+    two_sided : bool, optional, default is False
+        Whether to evaluate the differences using both sides (more accurate, but twice as slow)
+    normalized : bool, optional, default is False
+        Whether to normalize the change in the parameter values
+
+    Returns
+    -------
+    jacobian :
+
+    gradient : ndarray (1, N)
+        gradient (1st derivatives) of the cost function
+    hessian : ndarray (N, N)
+        hessian (2nd derivatives) of the cost function
 
     Notes
     -----
