@@ -190,12 +190,10 @@ class OptiParam(Frozen):
 
         """
         # check for valid types
-        if type_ in {'best', 'min_', 'max_', 'minstep'}:
+        if type_ in {'best', 'min_', 'max_', 'minstep', 'typical'}:
             key = type_
         elif type_ in {'min', 'max'}:
             key = type_ + '_'
-        elif type_ in {'typical'}:
-            raise ValueError('"{}" is a placeholder for later on.'.format(type_))
         else:
             raise ValueError('Unexpected type of "{}"'.format(type_))
         # pull out the data

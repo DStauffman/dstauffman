@@ -187,8 +187,9 @@ class Test_OptiParam(unittest.TestCase):
     def test_get_array4(self):
         opti_param = dcs.OptiParam('test')
         params = [opti_param, opti_param]
-        with self.assertRaises(ValueError):
-            dcs.OptiParam.get_array(params, type_='typical')
+        for this_type in ['best', 'min', 'min_', 'max', 'max_', 'minstep', 'typical']:
+            # just test that these all execute, but don't worry about values
+            dcs.OptiParam.get_array(params, type_=this_type)
 
     def test_get_array5(self):
         opti_param = dcs.OptiParam('test')
@@ -375,7 +376,89 @@ class Test__function_wrapper(unittest.TestCase):
         np.testing.assert_array_equal(innovs, self.innovs)
 
 #%% _finite_differences
-pass
+@patch('dstauffman.bpe.logger')
+class Test__finite_differences(unittest.TestCase):
+    r"""
+    Tests the run_bpe function with the following cases:
+        Nominal
+        Normalized
+    """
+    def setUp(self):
+        dcs.bpe.logger.setLevel(logging.INFO)
+        time        = np.arange(251)
+        sim_params  = SimParams(time, magnitude=3.5, frequency=12, phase=180)
+        truth_time  = np.arange(-10, 201)
+        truth_data  = 5 * np.sin(2*np.pi*10*time/1000 + 90*np.pi/180)
+
+        self.opti_opts                = dcs.OptiOpts()
+        self.opti_opts.model_func     = sim_model
+        self.opti_opts.model_args     = {'sim_params': sim_params}
+        self.opti_opts.cost_func      = cost_wrapper
+        self.opti_opts.cost_args      = {'results_time': time, 'truth_time': truth_time, 'truth_data': truth_data}
+        self.opti_opts.get_param_func = get_parameter
+        self.opti_opts.set_param_func = set_parameter
+        self.opti_opts.output_folder  = ''
+        self.opti_opts.output_results = ''
+        self.opti_opts.params         = []
+
+        # Parameters to estimate
+        self.opti_opts.params.append(dcs.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+        self.opti_opts.params.append(dcs.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+        self.opti_opts.params.append(dcs.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+
+        self.model_args = self.opti_opts.model_args
+
+        self.bpe_results = dcs.BpeResults()
+        self.cur_results = dcs.CurrentResults()
+
+        # initialize current results
+        (_, self.cur_results.innovs) = dcs.bpe._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
+        self.cur_results.trust_rad = self.opti_opts.trust_radius
+        self.cur_results.cost      = 0.5 * dcs.rss(self.cur_results.innovs, ignore_nans=True)
+        names = dcs.OptiParam.get_names(self.opti_opts.params)
+        self.cur_results.params    = self.opti_opts.get_param_func(names=names, **self.model_args)
+
+        # set relevant results variables
+        self.bpe_results.param_names  = [name.encode('utf-8') for name in names]
+        self.bpe_results.begin_params = self.cur_results.params.copy()
+        self.bpe_results.begin_innovs = self.cur_results.innovs.copy()
+        self.bpe_results.begin_cost   = self.cur_results.cost
+        self.bpe_results.costs.append(self.cur_results.cost)
+
+        self.two_sided = False
+        self.normalized = False
+
+    def test_nominal(self, mock_logger):
+        (jacobian, gradient, hessian) = dcs.bpe._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
+            self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
+        self.assertEqual(jacobian.shape, (201, 3))
+        self.assertEqual(gradient.shape, (3, ))
+        self.assertEqual(hessian.shape, (3, 3))
+
+    def test_normalized(self, mock_logger):
+        self.normalized = True
+        (jacobian, gradient, hessian) = dcs.bpe._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
+            self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
+        self.assertEqual(jacobian.shape, (201, 3))
+        self.assertEqual(gradient.shape, (3, ))
+        self.assertEqual(hessian.shape, (3, 3))
+
+    def test_two_sided(self, mock_logger):
+        self.two_sided = True
+        (jacobian, gradient, hessian) = dcs.bpe._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
+            self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
+        self.assertEqual(jacobian.shape, (201, 3))
+        self.assertEqual(gradient.shape, (3, ))
+        self.assertEqual(hessian.shape, (3, 3))
+
+    def test_norm_and_two_sided(self, mock_logger):
+        self.normalized = True
+        self.two_sided = True
+        (jacobian, gradient, hessian) = dcs.bpe._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
+            self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
+        self.assertEqual(jacobian.shape, (201, 3))
+        self.assertEqual(gradient.shape, (3, ))
+        self.assertEqual(hessian.shape, (3, 3))
 
 #%% _levenberg_marquardt
 class Test__levenberg_marquardt(unittest.TestCase):
