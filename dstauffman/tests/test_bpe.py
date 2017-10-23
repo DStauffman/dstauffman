@@ -490,7 +490,7 @@ class Test__predict_func_change(unittest.TestCase):
     """
     def setUp(self):
         self.delta_param = np.array([1, 2])
-        self.gradient    = np.array([[3], [4]])
+        self.gradient    = np.array([3, 4])
         self.hessian     = np.array([[5, 2], [2, 5]])
         self.pred_change = 27.5
 
@@ -552,7 +552,50 @@ class Test__check_for_convergence(unittest.TestCase):
         self.assertEqual(error, '')
 
 #%% _double_dogleg
-pass
+class Test__double_dogleg(unittest.TestCase):
+    r"""
+    Tests the _double_dogleg function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.delta_param = np.array([1, 2])
+        self.gradient = np.array([3, 4])
+        self.grad_hessian_grad = 5
+        self.x_bias = 0.1
+        self.trust_radius = 2
+
+    def test_large_trust_radius(self):
+        # Newton step in trust radius
+        self.trust_radius = 10000
+        (new_delta_param, step_len, step_scale, step_type) = dcs.bpe._double_dogleg(self.delta_param, \
+             self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
+
+    def test_small_bias(self):
+        # Newton step outside trust_radius
+        self.x_bias = 0.01
+        (new_delta_param, step_len, step_scale, step_type) = dcs.bpe._double_dogleg(self.delta_param, \
+             self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
+
+    def test_gradient_step(self):
+        # Newton step outside trust_radius
+        self.x_bias = 0.001
+        (new_delta_param, step_len, step_scale, step_type) = dcs.bpe._double_dogleg(self.delta_param, \
+             self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
+
+    def test_dogleg1(self):
+        # Dogleg step 1
+        self.x_bias = 0.001
+        self.grad_hessian_grad = 75
+        (new_delta_param, step_len, step_scale, step_type) = dcs.bpe._double_dogleg(self.delta_param, \
+             self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
+
+    def test_dogleg2(self):
+        # Dogleg step 2
+        self.x_bias = 0.001
+        self.grad_hessian_grad = 75
+        self.delta_param = 0.001 * np.array([1, 2])
+        (new_delta_param, step_len, step_scale, step_type) = dcs.bpe._double_dogleg(self.delta_param, \
+             self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
 #%% _dogleg_search
 pass

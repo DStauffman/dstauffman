@@ -472,7 +472,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     -------
     jacobian :
 
-    gradient : ndarray (1, N)
+    gradient : ndarray (N, )
         gradient (1st derivatives) of the cost function
     hessian : ndarray (N, N)
         hessian (2nd derivatives) of the cost function
@@ -556,7 +556,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         temp_params_minus[i_param] = cur_results.params[i_param]
 
     # calculate the numerical gradient with respect to the estimated parameters
-    gradient = jacobian.T @ cur_results.innovs
+    gradient = np.squeeze(jacobian.T @ cur_results.innovs)
     if opti_opts.is_max_like:
         gradient += grad_log_det_B
 
@@ -620,7 +620,7 @@ def _predict_func_change(delta_param, gradient, hessian):
     ----------
     delta_param : ndarray (N,)
         Change in parameters
-    gradient : ndarray (1, N)
+    gradient : ndarray (N, )
         gradient (1st derivatives) of the cost function
     hessian : ndarray (N, N)
         hessian (2nd derivatives) of the cost function
@@ -648,7 +648,7 @@ def _predict_func_change(delta_param, gradient, hessian):
     >>> from dstauffman.bpe import _predict_func_change
     >>> import numpy as np
     >>> delta_param = np.array([1, 2])
-    >>> gradient = np.array([[3], [4]])
+    >>> gradient = np.array([3, 4])
     >>> hessian = np.array([[5, 2], [2, 5]])
     >>> delta_func = _predict_func_change(delta_param, gradient, hessian)
     >>> print(delta_func)
@@ -657,10 +657,6 @@ def _predict_func_change(delta_param, gradient, hessian):
     """
     # calculate and return the predicted change
     delta_func = gradient.T @ delta_param + 0.5*delta_param.T @ hessian @ delta_param
-    # check that this is a scalar result and return the result
-    assert delta_func.size == 1 and delta_func.ndim <= 1
-    if delta_func.ndim == 1:
-        delta_func = delta_func[0]
     return delta_func
 
 #%% _check_for_convergence
@@ -718,9 +714,9 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
     >>> from dstauffman.bpe import _double_dogleg
     >>> import numpy as np
     >>> delta_param = np.array([1, 2])
-    >>> gradient = np.array([[3], [4]])
-    >>> grad_hessian_grad = 5
-    >>> x_bias = 0.1
+    >>> gradient = np.array([3, 4])
+    >>> grad_hessian_grad = 75
+    >>> x_bias = 0.001
     >>> trust_radius = 2
     >>> (new_delta_param, step_len, step_scale, step_type) = _double_dogleg(delta_param, \
     ...     gradient, grad_hessian_grad, x_bias, trust_radius)
