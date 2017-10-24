@@ -156,7 +156,7 @@ class Test_dist_enum_and_mons(unittest.TestCase):
 
     def test_calling(self):
         (state, mons) = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
-        breakout = np.histogram(state, bins = [0.5, 1.5, 2.5, 3.5, 4.5])[0]
+        breakout = np.histogram(state, bins=[0.5, 1.5, 2.5, 3.5, 4.5])[0]
         breakout_per = breakout / self.num
         for ix in range(len(self.distribution)):
             self.assertTrue(np.abs(breakout_per[ix] - self.distribution[ix]) <= self.per_lim)

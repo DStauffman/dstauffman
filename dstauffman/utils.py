@@ -1138,7 +1138,7 @@ def find_tabs(folder, extensions=None, list_all=False, trailing=False):
                                     print('Evaluating: "{}"'.format(this_file))
                                     already_listed = True
                                 print('    Line {:03}: '.format(c) + repr(line))
-                            elif trailing and len(line) >= 2 and line[-2] == ' ' and sum(1 for x in line if not x in ' \n')>0:
+                            elif trailing and len(line) >= 2 and line[-2] == ' ' and sum(1 for x in line if x not in ' \n') > 0:
                                 if not already_listed:
                                     print('Evaluating: "{}"'.format(this_file))
                                     already_listed = True
