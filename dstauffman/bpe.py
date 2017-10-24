@@ -930,7 +930,38 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
 
 #%% _analyze_results
 def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
-    r"""Analyze the results."""
+    r"""
+    Analyze the results.
+
+    Parameters
+    ----------
+    opti_opts : class OptiOpts
+        Optimization options
+    bpe_results : class BpeResults
+        Batch Parameter Estimator results
+    jacobian :
+
+    normalized : bool, optional, default is False
+        Whether to normalize the change in the parameter values
+
+    Notes
+    -----
+    #.  Modifies `bpe_results` in-place.
+
+    Examples
+    --------
+    >>> from dstauffman.bpe import _analyze_results
+    >>> from dstauffman import OptiOpts, BpeResults, OptiParam
+    >>> import numpy as np
+    >>> opti_opts = OptiOpts()
+    >>> opti_opts.params = [OptiParam('a'), OptiParam('b')]
+    >>> bpe_results = BpeResults()
+    >>> bpe_results.param_names = [x.encode('utf-8') for x in ['a', 'b']]
+    >>> jacobian = np.array([[1, 2], [3, 4], [5, 6]])
+    >>> normalized = False
+    >>> _analyze_results(opti_opts, bpe_results, jacobian, normalized)
+
+    """
     # hard-coded values
     min_eig = 1e-14 # minimum allowed eigenvalue
 
@@ -948,7 +979,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     # Compute values of un-normalized parameters.
     if normalized:
         param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
-        normalize_matrix  = np.eye(num_params) @ (1 / param_typical)
+        normalize_matrix  = np.diag((1 / param_typical))
     else:
         normalize_matrix  = np.eye(num_params)
 
@@ -975,7 +1006,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
             (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian, full_matrices=False)
             V_jacobian = Vh_jacobian.T
             covariance = V_jacobian @ np.diag(S_jacobian**-2) @ Vh_jacobian
-        except MemoryError:
+        except MemoryError: # pragma: no cover
             pass # caught in earlier exception (hopefully?)
 
     # update the results
@@ -1090,7 +1121,7 @@ def run_bpe(opti_opts, log_level=logging.INFO):
     if opti_opts.start_func is not None:
         init_saves = opti_opts.start_func(**model_args)
     else:
-        init_saves = {}
+        init_saves = dict()
 
     # future calculations
     hessian_log_det_b = 0 # TODO: calculate somewhere later
