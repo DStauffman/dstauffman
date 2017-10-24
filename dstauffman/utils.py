@@ -484,7 +484,7 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
     >>> print(text[0:21])
-    from .bpe      import
+    from .analysis import
 
     """
     # exclusions
@@ -1366,7 +1366,7 @@ def line_wrap(text, wrap=80, min_wrap=0, indent=4):
         while len(this_line) > wrap:
             # find the last whitespace to break on, possibly with a minimum start
             space_break = this_line.rfind(' ', min_wrap, wrap-1)
-            if space_break == -1:
+            if space_break == -1 or space_break <= indent:
                 raise ValueError('The specified min_wrap:wrap of "{}:{}" was too small.'.format(min_wrap, wrap))
             # add the shorter line
             out.append(this_line[:space_break] + ' \\')

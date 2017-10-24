@@ -592,7 +592,8 @@ class Test_make_python_init(unittest.TestCase):
 
     def test_nominal_use(self):
         text = dcs.make_python_init(self.folder)
-        self.assertEqual(text[0:len(self.text2)], self.text2)
+        lines = text.split('\n')
+        self.assertEqual(lines[1][0:len(self.text2)], self.text2)
 
     def test_duplicated_funcs(self):
         with open(self.filepath, 'wt') as file:
@@ -606,23 +607,28 @@ class Test_make_python_init(unittest.TestCase):
 
     def test_no_lineup(self):
         text = dcs.make_python_init(self.folder, lineup=False)
-        self.assertEqual(text[0:len(self.text)], self.text)
+        lines = text.split('\n')
+        self.assertEqual(lines[1][0:len(self.text)], self.text)
 
     def test_big_wrap(self):
         text = dcs.make_python_init(self.folder, wrap=1000)
-        self.assertEqual(text[0:len(self.text2)], self.text2)
+        lines = text.split('\n')
+        self.assertEqual(lines[1][0:len(self.text2)], self.text2)
 
     def test_small_wrap(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as context:
             dcs.make_python_init(self.folder, wrap=30)
+        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "22:30" was too small.')
 
     def test_really_small_wrap(self):
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as context:
             dcs.make_python_init(self.folder, wrap=10)
+        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "22:10" was too small.')
 
     def test_saving(self):
         text = dcs.make_python_init(self.folder, filename=self.filename)
-        self.assertEqual(text[0:len(self.text2)], self.text2)
+        lines = text.split('\n')
+        self.assertEqual(lines[1][0:len(self.text2)], self.text2)
         self.assertTrue(os.path.isfile(self.filename))
 
     def tearDown(self):

@@ -1,4 +1,4 @@
-cd "C:\Users\%username%\Documents\GitHub\dstauffman\tests
+cd "C:\Users\%username%\Documents\GitHub\dstauffman\dstauffman\tests
 coverage run run_all_tests.py
 coverage html
 start coverage_html_report\index.html

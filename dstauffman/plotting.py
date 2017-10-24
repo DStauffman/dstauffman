@@ -39,6 +39,7 @@ except ImportError: # pragma: no cover
 from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
 from dstauffman.latex import bins_to_str_ranges
+from dstauffman.stats import z_from_ci
 from dstauffman.utils import get_images_dir, pprint_dict, rms
 
 #%% Classes - _HoverButton
@@ -556,7 +557,7 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
 #%% Functions - plot_time_history
 def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, second_y_scale=None, truth_time=None, \
-    truth_data=None, plot_sigmas=1):
+    truth_data=None, plot_sigmas=1, plot_confidence=0.95):
     r"""
     Plot the given data channel versus time, with a generic label argument.
 
@@ -592,6 +593,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     #.  Updated by David C. Stauffer in December 2015 to include an optional secondary Y axis.
     #.  Updated by David C. Stauffer in October 2016 to use the new TruthPlotter class.
     #.  Updated by David C. Stauffer in June 2017 to put some basic stuff in Opts instead of kwargs.
+    #.  Updated by David C. Stauffer in October 2017 to include one sigma and 95% confidence intervals.
     #.  If ndim == 2, then dimension 0 is time and dimension 1 is the number of runs.
 
     Examples
@@ -687,11 +689,17 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
         this_label = opts.get_names(0) + label
         if rms_in_legend:
             this_label += ' (RMS: {:.2f})'.format(rms_data)
-        ax.plot(time, scale*mean, 'b.-', linewidth=2, zorder=10, label=this_label)
-        if plot_sigmas:
+        ax.plot(time, scale*mean, '.-', linewidth=2, color='#0000cd', zorder=10, label=this_label)
+        if plot_sigmas and num_series > 1:
             sigma_label = '$\pm {}\sigma$'.format(plot_sigmas)
-            ax.plot(time, scale*mean + plot_sigmas*scale*std, '.-', markersize=2, color='c', zorder=6, label=sigma_label)
-            ax.plot(time, scale*mean - plot_sigmas*scale*std, '.-', markersize=2, color='c', zorder=6)
+            ax.plot(time, scale*mean + plot_sigmas*scale*std, '.-', markersize=2, color='#20b2aa', zorder=6, label=sigma_label)
+            ax.plot(time, scale*mean - plot_sigmas*scale*std, '.-', markersize=2, color='#20b2aa', zorder=6)
+        if plot_confidence and num_series > 1:
+            conf_label = '{}% C.I.'.format(100*plot_confidence)
+            conf_z = z_from_ci(plot_confidence)
+            conf_std = conf_z * std / np.sqrt(num_series)
+            ax.plot(time, scale*mean + scale*conf_std, '.-', markersize=2, color='#2e8b57', zorder=7, label=conf_label)
+            ax.plot(time, scale*mean - scale*conf_std, '.-', markersize=2, color='#2e8b57', zorder=7)
         # inidividual line plots
         if plot_indiv and data.ndim > 1:
             for ix in range(num_series):
