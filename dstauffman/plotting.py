@@ -896,7 +896,8 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     time : 1D ndarray
         time history
     data : 2D or 3D ndarray
-        data for corresponding time history, 2D: time by value in each category
+        data for corresponding time history, time is first dimension, last dimension is bin
+        middle dimension if 3D is the cycle
     label : str
         Name to label on the plots
     type_ : str, optional, from {'unity', 'population', 'percentage', 'per 100K', 'cost'}
@@ -922,6 +923,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     Notes
     -----
     #.  Written by David C. Stauffer in September 2015.
+    #.  Updated by David C. Stauffer in October 2017 to do comparsions of multiple runs.
 
     Examples
     --------
@@ -956,10 +958,21 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     if ignore_plot_data(data, ignore_empties):
         print(' ' + label + ' plot skipped due to missing data.')
         return None
-    assert time.ndim == 1, 'Time must be a 1D array'
-    assert data.ndim == 2, 'Data must be a 2D array'
-    assert time.shape[0] == data.shape[0], 'Time and data must be the same length'
-    num_bins = data.shape[1]
+    assert time.ndim == 1, 'Time must be a 1D array.'
+    if data.ndim == 2:
+        normal    = True
+        num_loops = 1
+        num_bins  = data.shape[1]
+        names     = ['']
+    elif data.ndim == 3:
+        assert len(opts.names) == data.shape[1], 'Names must match the number of channels is the 3rd axis of data.'
+        normal    = False
+        num_loops = data.shape[1]
+        num_bins  = data.shape[2]
+        names     = opts.names
+    else:
+        assert False, 'Data must be a 2D or 3D array.'
+    assert time.shape[0] == data.shape[0], 'Time and data must be the same length.'
     if legend is not None:
         assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
     else:
@@ -979,12 +992,27 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     ax = fig.add_subplot(111)
     cm.set_colors(ax)
     for i in range(num_bins):
-        if not ignore_plot_data(data, ignore_empties, col=i):
-            ax.plot(time, scale*data[:, i], '.-', label=legend[i], zorder=10)
-            if data_lo is not None:
-                ax.plot(time, scale*data_lo[:, i], 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
-            if data_hi is not None:
-                ax.plot(time, scale*data_hi[:, i], 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
+        for j in range(num_loops):
+            this_name = names[j] + ' - ' if names[j] else ''
+            if normal:
+                this_data    = data[:, i]
+                this_data_lo = data_lo[:, i] if data_lo is not None else None
+                this_data_hi = data_hi[:, i] if data_hi is not None else None
+            else:
+                this_data    = data[:, j, i]
+                this_data_lo = data_lo[:, j, i] if data_lo is not None else None
+                this_data_hi = data_hi[:, j, i] if data_hi is not None else None
+            if not ignore_plot_data(this_data, ignore_empties):
+                color_dt = j * 0.5 / num_loops
+                if j // 2:
+                    this_color = whitten(cm.get_color(i), white=(0, 0, 0, 1), dt=color_dt)
+                else:
+                    this_color = whitten(cm.get_color(i), white=(1, 1, 1, 1), dt=color_dt)
+                ax.plot(time, scale*this_data, '.-', label=this_name + legend[i], color=this_color, zorder=10)
+                if this_data_lo is not None:
+                    ax.plot(time, scale*this_data_lo, 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
+                if this_data_hi is not None:
+                    ax.plot(time, scale*this_data_hi, 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
 
     # add labels and legends
     ax.set_xlabel('Time [' + time_units + ']')

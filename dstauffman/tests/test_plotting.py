@@ -777,7 +777,7 @@ class Test_plot_multiline_history(unittest.TestCase):
 
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):
-            self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, legend=self.legend[:-1]))
+            dcs.plot_multiline_history(self.time, self.data, self.label, legend=self.legend[:-1])
 
     def test_second_y_scale1(self):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, type_='population', \
@@ -798,6 +798,19 @@ class Test_plot_multiline_history(unittest.TestCase):
     def test_data_lo_and_hi(self):
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, \
             data_lo=self.data-1, data_hi=self.data+1))
+
+    def test_3d(self):
+        data3 = np.empty((self.data.shape[0], 3, self.data.shape[1]), dtype=float)
+        data3[:,0,:] = self.data
+        data3[:,1,:] = self.data + 0.1
+        data3[:,2,:] = self.data + 0.2
+        self.opts.names = ['Run 1', 'Run 2', 'Run 3']
+        self.figs.append(dcs.plot_multiline_history(self.time, data3, self.label, opts=self.opts))
+
+    def test_bad_4d(self):
+        bad_data = np.random.rand(self.time.shape[0], 4, 5, 1)
+        with self.assertRaises(AssertionError):
+            dcs.plot_multiline_history(self.time, bad_data, self.label, opts=self.opts)
 
     def tearDown(self):
         if self.figs:
