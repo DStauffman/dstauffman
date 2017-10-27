@@ -557,7 +557,7 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
 #%% Functions - plot_time_history
 def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, second_y_scale=None, truth_time=None, \
-    truth_data=None, plot_sigmas=1, plot_confidence=0.95):
+    truth_data=None, plot_sigmas=1, plot_confidence=0):
     r"""
     Plot the given data channel versus time, with a generic label argument.
 
