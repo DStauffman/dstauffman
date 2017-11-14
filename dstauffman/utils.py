@@ -309,10 +309,10 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
                 if _is_class_instance(attr2):
                     if compare_recursively:
                         names = [name1 + '.' + this_attr, name2 + '.' + this_attr]
+                        # Note: don't want the 'and' to short-circuit, so do the 'and is_same' last
                         if isinstance(attr1, dict) and isinstance(attr2, dict):
-                            is_same = compare_two_dicts(attr1, attr2, suppress_output=suppress_output, names=names)
+                            is_same = compare_two_dicts(attr1, attr2, suppress_output=suppress_output, names=names) and is_same
                         else:
-                            # Note: don't want the 'and' to short-circuit, so do the 'and is_same' last
                             is_same = compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
                                 names=names, ignore_callables=ignore_callables, \
                                 compare_recursively=compare_recursively) and is_same
