@@ -316,6 +316,9 @@ class FixedDict(dict):
         with-immutable-keys-but-mutable-values by bereal.
     #.  Modified by David C. Stauffer in January 2017 to include alternative initializations
         and freeze methods.
+    #.  Updated by David C. Stauffer in November 2017 to include __new__ method. Otherwise instances
+        could be made that wouldn't have a self._frozen attribute.  Also added an empty
+        __getnewargs__ method to ensure that pickling calls the __new__ method.
 
     Examples
     --------
@@ -329,6 +332,11 @@ class FixedDict(dict):
     KeyError: 'new_key'
 
     """
+    def __new__(cls, *args, **kwargs):
+        instance = super().__new__(cls, *args, **kwargs)
+        instance._frozen = False
+        return instance
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._frozen = False
@@ -337,6 +345,10 @@ class FixedDict(dict):
         return super().__getitem__(k)
 
     def __setitem__(self, k, v):
+        try:
+            self._frozen
+        except AttributeError:
+            print(self, k, v)
         if self._frozen:
             if k not in self:
                 raise KeyError(k)
@@ -358,19 +370,32 @@ class FixedDict(dict):
         new._frozen = self._frozen
         return new
 
+    def __getnewargs__(self):
+        # Call __new__ (and thus __init__) on unpickling.
+        return ()
+
     def get(self, k, default=None):
+        r""".get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
         return super().get(k, default)
 
     def setdefault(self, k, default=None):
+        r"""D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D."""
         if self._frozen:
             if k not in self:
                 raise KeyError(k)
         return super().setdefault(k, default)
 
     def pop(self, k):
+        r"""D.pop(k[,d]) -> v, is not valid on a fixeddict, as it removes the key."""
         raise NotImplementedError
 
     def update(self, mapping=(), **kwargs):
+        r"""
+        D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+        If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
+        If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
+        In either case, this is followed by: for k in F:  D[k] = F[k]
+        """
         # check if valid keys otherwise, raise error
         if self._frozen:
             for k in mapping:
@@ -384,10 +409,11 @@ class FixedDict(dict):
 
     @classmethod
     def fromkeys(cls, keys):
+        """Returns a new dict with keys from iterable and values equal to value."""
         return super().fromkeys(k for k in keys)
 
     def freeze(self):
-        r"""Freeze the internal dictionary, such that no more keys may be added."""
+        """Freeze the internal dictionary, such that no more keys may be added."""
         self._frozen = True
 
 #%% Unit test
