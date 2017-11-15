@@ -12,6 +12,7 @@ Notes
 import collections
 import copy
 import os
+import pickle
 import unittest
 
 import numpy as np
@@ -396,6 +397,12 @@ class Test_FixedDict(unittest.TestCase):
         new['mutable'][1] = 5
         self.assertEqual(new['mutable'][1], 5)
         self.assertEqual(self.fixed['mutable'][1], 2)
+
+    def test_pickling(self):
+        data = pickle.dumps(self.fixed)
+        new = pickle.loads(data)
+        self.assertEqual(self.fixed, new)
+        self.assertEqual(self.fixed._frozen, new._frozen)
 
 #%% Unit test execution
 if __name__ == '__main__':

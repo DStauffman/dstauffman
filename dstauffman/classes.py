@@ -345,10 +345,6 @@ class FixedDict(dict):
         return super().__getitem__(k)
 
     def __setitem__(self, k, v):
-        try:
-            self._frozen
-        except AttributeError:
-            print(self, k, v)
         if self._frozen:
             if k not in self:
                 raise KeyError(k)
