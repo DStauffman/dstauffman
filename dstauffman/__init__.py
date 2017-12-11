@@ -19,7 +19,7 @@ from .bpe       import OptiOpts, OptiParam, BpeResults, CurrentResults, \
 from .classes   import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
 from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE
 from .enums     import IntEnumPlus, consecutive, dist_enum_and_mons
-from .latex     import make_preamble, make_conclusion, bins_to_str_ranges
+from .latex     import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
 from .linalg    import orth, subspace
 from .plotting  import Plotter, Opts, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
                            ignore_plot_data, get_axes_scales, whitten, plot_time_history, \

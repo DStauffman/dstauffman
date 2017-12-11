@@ -111,6 +111,100 @@ class Test_bins_to_str_ranges(unittest.TestCase):
         out = dcs.bins_to_str_ranges(['Urban', 'Rural', 'ignored'])
         self.assertEqual(out, ['Urban', 'Rural'])
 
+#%% latex_str
+class Test_latex_str(unittest.TestCase):
+    r"""
+    Tests the latex_str function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.value = 101.666666666666
+        self.value2 = dcs.ar2mp(0.2) #0.016528546178382508
+
+    def test_string1(self):
+        value_str = dcs.latex_str('test')
+        self.assertEqual(value_str, 'test')
+
+    def test_string2(self):
+        value_str = dcs.latex_str('N_O')
+        self.assertEqual(value_str, r'N\_O')
+
+    def test_int1(self):
+        value_str = dcs.latex_str(2015)
+        self.assertEqual(value_str, '2015')
+
+    def test_int2(self):
+        value_str = dcs.latex_str(2015, 0, fixed=True)
+        self.assertEqual(value_str, '2015')
+
+    def test_int3(self):
+        value_str = dcs.latex_str(2015, 1, fixed=True)
+        self.assertEqual(value_str, '2015.0')
+
+    def test_digits_all(self):
+        value_str = dcs.latex_str(self.value)
+        self.assertEqual(value_str, '101.666666666666')
+
+    def test_digits0(self):
+        value_str = dcs.latex_str(self.value, 0)
+        self.assertEqual(value_str, '1e+02')
+
+    def test_digits1(self):
+        value_str = dcs.latex_str(self.value, 1)
+        self.assertEqual(value_str, '1e+02')
+
+    def test_digits2(self):
+        value_str = dcs.latex_str(self.value, 2)
+        self.assertEqual(value_str, '1e+02')
+
+    def test_digits3(self):
+        value_str = dcs.latex_str(self.value, 3)
+        self.assertEqual(value_str, '102')
+
+    def test_digits4(self):
+        value_str = dcs.latex_str(self.value, 4)
+        self.assertEqual(value_str, '101.7')
+
+    def test_fixed_digits0(self):
+        value_str = dcs.latex_str(self.value, 0, fixed=True)
+        self.assertEqual(value_str, '102')
+
+    def test_fixed_digits1(self):
+        value_str = dcs.latex_str(self.value, 1, fixed=True)
+        self.assertEqual(value_str, '101.7')
+
+    def test_fixed_digits2(self):
+        value_str = dcs.latex_str(self.value, 2, fixed=True)
+        self.assertEqual(value_str, '101.67')
+
+    def test_fixed_digits3(self):
+        value_str = dcs.latex_str(self.value, 3, fixed=True)
+        self.assertEqual(value_str, '101.667')
+
+    def test_cmp2ar1(self):
+        value_str = dcs.latex_str(self.value2, 3, fixed=True)
+        self.assertEqual(value_str, '0.017')
+
+    def test_cmp2ar2(self):
+        value_str = dcs.latex_str(self.value2, 3, fixed=False)
+        self.assertEqual(value_str, '0.0165')
+
+    def test_cmp2ar3(self):
+        value_str = dcs.latex_str(self.value2, 3, fixed=True, cmp2ar=True)
+        self.assertEqual(value_str, '0.200')
+
+    def test_cmp2ar4(self):
+        value_str = dcs.latex_str(self.value2, 3, fixed=False, cmp2ar=True)
+        self.assertEqual(value_str, '0.2')
+
+    def test_nan(self):
+        value_str = dcs.latex_str(np.nan)
+        self.assertEqual(value_str, 'NaN')
+
+    def test_infinity(self):
+        value_str = dcs.latex_str(np.inf)
+        self.assertEqual(value_str, r'$\infty$')
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

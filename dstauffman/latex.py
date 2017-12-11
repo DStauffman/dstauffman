@@ -11,6 +11,10 @@ Notes
 import doctest
 import unittest
 
+import numpy as np
+
+from dstauffman.stats import mp2ar
+
 #%% Functions - make_preamble
 def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short_cap=None):
     r"""
@@ -150,6 +154,32 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
         out.append(this_str)
     # return everything combined as a list
     return out
+
+#%% Functions - latex_str
+def latex_str(value, digits=-1, fixed=False, cmp2ar=False):
+    r"""
+    Formats a given value for display in a LaTeX document.
+    """
+    # check for string case, and if so, just do replacements
+    if isinstance(value, str):
+        return value.replace('_', r'\_')
+    # determine digit method
+    letter = 'f' if fixed else 'g'
+    # build the formatter
+    formatter = '{:.' + str(digits) + letter + '}' if digits >= 0 else '{}'
+    # potentially convert units
+    if cmp2ar:
+        value = mp2ar(value)
+    if np.isnan(value):
+        value_str = 'NaN'
+    elif np.isinf(value):
+        value_str = r'$\infty$'
+    else:
+        # format the string
+        value_str = formatter.format(value)
+        # convert underscores
+        value_str.replace('_', r'\_')
+    return value_str
 
 #%% Unit test
 if __name__ == '__main__':
