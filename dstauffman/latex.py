@@ -16,7 +16,7 @@ import numpy as np
 from dstauffman.stats import mp2ar
 
 #%% Functions - make_preamble
-def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short_cap=None):
+def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short_cap=None, numbered=True):
     r"""
     Write the table header and preamble.
 
@@ -55,8 +55,12 @@ def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short
     r'\large', r'\Large', r'\LARGE', r'\huge', r'\Huge'}
     # create caption string
     if short_cap is None:
-        cap_str = r'    \caption{' + caption + r'}%'
+        if numbered:
+            cap_str = r'    \caption{' + caption + r'}%'
+        else:
+            cap_str = r'    \caption*{' + caption + r'}%'
     else:
+        assert numbered, 'Only numbered captions can have short versions.'
         cap_str = r'    \caption[' + short_cap + r']{' + caption + r'}%'
     # build table based on minipage or not
     if not use_mini:
@@ -156,7 +160,7 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
     return out
 
 #%% Functions - latex_str
-def latex_str(value, digits=-1, fixed=False, cmp2ar=False):
+def latex_str(value, digits=-1, fixed=False, cmp2ar=False, capped=1073741823): # 1073741823 = 2**30-1
     r"""
     Formats a given value for display in a LaTeX document.
     """
@@ -172,7 +176,7 @@ def latex_str(value, digits=-1, fixed=False, cmp2ar=False):
         value = mp2ar(value)
     if np.isnan(value):
         value_str = 'NaN'
-    elif np.isinf(value):
+    elif np.isinf(value) or value > capped:
         value_str = r'$\infty$'
     else:
         # format the string

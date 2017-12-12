@@ -51,6 +51,14 @@ class Test_make_preamble(unittest.TestCase):
         self.assertIn('    \caption[Short cap]{This caption}%', out)
         self.assertNotIn('    \caption{This caption}%', out)
 
+    def test_numbered_false1(self):
+        out = dcs.make_preamble(self.caption, self.label, self.cols, numbered=False)
+        self.assertIn('    \\caption*{This caption}%', out)
+
+    def test_numbered_false2(self):
+        with self.assertRaises(AssertionError):
+            dcs.make_preamble(self.caption, self.label, self.cols, short_cap='Short cap', numbered=False)
+
 #%% make_conclusion
 class Test_make_conclusion(unittest.TestCase):
     r"""
