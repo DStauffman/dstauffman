@@ -478,7 +478,7 @@ def get_axes_scales(type_):
 
     Parameters
     ----------
-    type_ : str {'unity', 'population', 'percentage', 'per 100K', 'cost'}
+    type_ : str {'unity', 'population', 'percentage', 'per 100K', 'cost', 'years'}
         description of the type of data that is being plotted
 
     Returns
@@ -523,6 +523,9 @@ def get_axes_scales(type_):
     elif type_ == 'cost':
         scale = 1e-3
         units = "$K's"
+    elif type_ == 'years':
+        scale = 1
+        units = 'years'
     else:
         raise ValueError('Unexpected data type_ "{}" for plot.'.format(type_))
     return (scale, units)
