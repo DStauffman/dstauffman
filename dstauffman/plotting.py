@@ -584,6 +584,14 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
         Plot each entry in results against the other ones, default is False
     second_y_scale : float, optional
         Multiplication scale factor to use to display on a secondary Y axis
+    truth_time : array_like, optional
+        Time for truth data
+    truth_data : array_line, optional
+        Date for corresponding truth history
+    plot_sigmas : numeric, optional
+        If value converts to true as bool, then plot the sigma values of the given value
+    plot_confidence : numeric, optional
+        If value converts to true as bool, then plot the confidence intervals of the given value
 
     Returns
     -------
