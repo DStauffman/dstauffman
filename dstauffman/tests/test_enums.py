@@ -212,6 +212,18 @@ class Test_dist_enum_and_mons(unittest.TestCase):
         self.assertEqual(state[1], 1)
         self.assertIn(state[2], {2, 3})
 
+    def test_bad_distribution1(self):
+        dist = np.array([0, 0.1, 0.2])
+        with self.assertRaises(AssertionError) as context:
+            dcs.dist_enum_and_mons(self.num, dist, self.prng)
+        self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
+
+    def test_bad_distribution2(self):
+        dist = np.array([0, 1.1, 0.2])
+        with self.assertRaises(AssertionError) as context:
+            dcs.dist_enum_and_mons(self.num, dist, self.prng)
+        self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

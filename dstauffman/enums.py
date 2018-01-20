@@ -138,8 +138,11 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
     >>> (state, mons) = dist_enum_and_mons(num, distribution, prng, max_months=max_months, start_num=start_num)
 
     """
+    # hard-coded values
+    precision = 1e-12
     # create the cumulative distribution (allows different distribution per person if desired)
     cum_dist = np.cumsum(np.atleast_2d(distribution), axis=1)
+    assert np.all(np.abs(cum_dist[:,-1] - 1) < precision), "Given distribution doesn't sum to 1."
     # do a random draw based on the cumulative distribution
     state = np.sum(prng.rand(num, 1) >= cum_dist, axis=1, dtype=int) + start_num
     # set the number of months in this state based on a beta distribution with the given
