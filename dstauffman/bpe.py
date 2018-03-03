@@ -599,7 +599,7 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
     """
     if lambda_ <= 0:
         # calculate this simplified version directly
-        delta_param = -np.linalg.lstsq(jacobian, innovs)[0] # in Matlab: -jacobian\innovs
+        delta_param = -np.linalg.lstsq(jacobian, innovs, rcond=None)[0] # in Matlab: -jacobian\innovs
     else:
         # get the number of parameters
         num_params = jacobian.shape[1]
@@ -608,7 +608,7 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
         # augment the innovations
         innovs_aug = np.hstack((innovs, np.zeros(num_params)))
         # calucalte based on augmented forms
-        delta_param = -np.linalg.lstsq(jacobian_aug, innovs_aug)[0]
+        delta_param = -np.linalg.lstsq(jacobian_aug, innovs_aug, rcond=None)[0]
     return delta_param
 
 #%% _predict_func_change
@@ -1181,7 +1181,7 @@ def run_bpe(opti_opts, log_level=logging.INFO):
 
         # calculate the delta parameter step to try on the next iteration
         if opti_opts.is_max_like:
-            delta_param = -np.linalg.lstsq(hessian + hessian_log_det_b, gradient)[0]
+            delta_param = -np.linalg.lstsq(hessian + hessian_log_det_b, gradient, rcond=None)[0]
         else:
             delta_param = _levenberg_marquardt(jacobian, cur_results.innovs, lambda_=0)
 
