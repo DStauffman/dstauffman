@@ -1249,7 +1249,7 @@ class Test_full_print(unittest.TestCase):
         self.x = np.zeros((10, 5))
         self.x[3, :] = 1.23
         self.x_print = ['[[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]',
-            '...,', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]]']
+            '...', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]]']
         self.x_full  = ['[[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]','[0. 0. 0. 0. 0.]',
             '[1.23 1.23 1.23 1.23 1.23]', '[0. 0. 0. 0. 0.]','[0. 0. 0. 0. 0.]',
             '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]', '[0. 0. 0. 0. 0.]]']
@@ -1288,7 +1288,7 @@ class Test_full_print(unittest.TestCase):
                 print(np.array([1.35, 1.58]))
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, '[ 1.35  1.58]')
+        self.assertEqual(output, '[1.35 1.58]')
 
     def tearDown(self):
         # restore the print_options
