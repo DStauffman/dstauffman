@@ -1475,11 +1475,10 @@ class Test_act_deact_logging(unittest.TestCase):
         self.filename = os.path.join(dcs.get_tests_dir(), 'testlog.txt')
 
     def test_nominal(self):
-        self.assertFalse(dcs.utils.root_logger.handlers)
         self.assertFalse(os.path.isfile(self.filename))
         dcs.activate_logging(self.level, self.filename)
         self.assertTrue(os.path.isfile(self.filename))
-        self.assertTrue(dcs.utils.root_logger.handlers)
+        self.assertTrue(dcs.utils.root_logger.hasHandlers())
         with self.assertLogs(level='DEBUG') as cm:
             logger = logging.getLogger('Test')
             logger.debug('Test message')
