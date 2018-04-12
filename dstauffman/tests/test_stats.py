@@ -416,6 +416,39 @@ class Test_z_from_ci(unittest.TestCase):
             z = dcs.z_from_ci(ci)
             self.assertTrue(abs(z - exp_z) < 0.001, '{} and {} are more than 0.001 from each other.'.format(z, exp_z))
 
+#%% rand_draw
+class Test_rand_draw(unittest.TestCase):
+    r"""
+    Tests the rand_draw function with the following cases:
+        Nominal
+        Negative values
+        Large values
+    """
+    def setUp(self):
+        self.chances = np.array([0.1, 0.2, 0.8, 0.9])
+        self.prng = np.random.RandomState()
+
+    def test_nominal(self):
+        is_set = dcs.rand_draw(self.chances, self.prng)
+        self.assertTrue(is_set.dtype == bool)
+
+    def test_zeros(self):
+        is_set = dcs.rand_draw(np.array([-5, 0, 0.5]), self.prng)
+        self.assertFalse(is_set[0])
+        self.assertFalse(is_set[1])
+
+    def test_ones(self):
+        is_set = dcs.rand_draw(np.array([5, 1, 0.5, 1000, np.inf]), self.prng)
+        self.assertTrue(is_set[0])
+        self.assertTrue(is_set[1])
+        self.assertTrue(is_set[3])
+        self.assertTrue(is_set[4])
+
+    def test_without_checks(self):
+        is_set = dcs.rand_draw(np.array([-5, 0.5, 5]), self.prng, check_bounds=False)
+        self.assertFalse(is_set[0])
+        self.assertTrue(is_set[2])
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

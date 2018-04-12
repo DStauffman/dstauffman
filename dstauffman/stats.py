@@ -497,6 +497,64 @@ def z_from_ci(ci):
     z = st.norm.ppf(1-(1-ci)/2)
     return z
 
+#%% Functions - rand_draw
+def rand_draw(chances, prng, *, check_bounds=True):
+    r"""
+    Draws psuedo-random numbers from the given generator to compare to given factors, with
+    optimizations to ignore factors less than or equal to zero.
+
+    Parameters
+    ----------
+    chances : ndarray of float
+        Probability that someone should be chosen
+    prng : class numpy.random.RandomState
+        Pseudo-random number generator
+    check_bounds : bool
+        Whether this function should check for known outcomes and not generate random numbers for
+        them, default is True
+
+    Returns
+    -------
+    is_set : ndarray of bool
+        True/False for whether the chance held out
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2018.
+
+    See Also
+    --------
+        numpy.random.rand
+
+    Examples
+    --------
+    >>> from dstauffman import rand_draw
+    >>> import numpy as np
+    >>> chances = np.array([-0.5, 0., 0.5, 1., 5, np.inf])
+    >>> prng = np.random.RandomState()
+    >>> is_set = rand_draw(chances, prng)
+    >>> print(is_set[0])
+    False
+
+    >>> print(is_set[5])
+    True
+
+    """
+    # simple version
+    if not check_bounds:
+        is_set = prng.rand(*chances.shape) < chances
+        return is_set
+
+    # find those who need a random number draw
+    eligible = (chances > 0) & (chances <= 1)
+    # initialize output assuming no one is selected
+    is_set = np.zeros(chances.shape, dtype=bool)
+    # determine who got picked
+    is_set[eligible] = prng.rand(np.count_nonzero(eligible)) < chances[eligible]
+    # set those who were always going to be chosen
+    is_set[chances >= 1] = True
+    return is_set
+
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
