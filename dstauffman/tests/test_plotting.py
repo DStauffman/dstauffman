@@ -456,9 +456,9 @@ class Test_get_axes_scales(unittest.TestCase):
         Bad type (should raise ValueError)
     """
     def setUp(self):
-        self.types  = ['unity', 'population', 'percentage', 'per 1K', 'per 100K', 'cost']
-        self.scales = [1, 1, 100, 1000, 100000, 1e-3]
-        self.units  = ['', '#', '%', 'per 1,000', 'per 100,000', "$K's"]
+        self.types  = ['unity', 'population', 'percentage', 'per 1K', 'per 100K', 'cost', 'years']
+        self.scales = [1, 1, 100, 1000, 100000, 1e-3, 1]
+        self.units  = ['', '#', '%', 'per 1,000', 'per 100,000', "$K's", 'years']
         self.bad_type = 'nonexistant'
 
     def test_nominal_usage(self):
@@ -597,6 +597,9 @@ class Test_plot_time_history(unittest.TestCase):
 
     def test_skip_plot_sigmas(self):
         self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, plot_sigmas=0)
+
+    def test_plot_confidence(self):
+        self.fig = dcs.plot_time_history(self.time, self.data_matrix, self.label, self.type_, plot_confidence=0.95)
 
     def tearDown(self):
         if self.fig is not None:
