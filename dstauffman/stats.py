@@ -181,51 +181,6 @@ def rate_to_prob(rate, time=1):
     prob = 1 - np.exp(-rate * time)
     return prob
 
-#%% Functions - month_prob_mult_ratio
-def month_prob_mult_ratio(prob, ratio):
-    r"""
-    Multiply a monthly probability by a given risk or hazard ratio.
-
-    Parameters
-    ----------
-    prob : numpy.ndarray
-        Probability of event happening over one month
-    ratio : float
-        Multiplication ratio to apply to probability
-
-    Returns
-    -------
-    mult_prob : numpy.ndarray
-        Equivalent multiplicative monthly probability
-
-    Notes
-    -----
-    #.  Written by David C. Staufer in January 2016.
-
-    Examples
-    --------
-    >>> from dstauffman import month_prob_mult_ratio
-    >>> import numpy as np
-    >>> prob = np.array([0, 0.1, 1])
-    >>> ratio = 2
-    >>> mult_prob = month_prob_mult_ratio(prob, ratio)
-    >>> print(mult_prob) # doctest: +NORMALIZE_WHITESPACE
-    [ 0. 0.19 1. ]
-
-    >>> ratio = 0.5
-    >>> mult_prob = month_prob_mult_ratio(prob, ratio)
-    >>> print(mult_prob) # doctest: +NORMALIZE_WHITESPACE
-    [ 0. 0.0513167 1. ]
-
-    """
-    # convert the probability to a rate
-    rate = prob_to_rate(prob, time=1./MONTHS_PER_YEAR)
-    # scale the rate
-    mult_rate = rate * ratio
-    # convert back to a probability
-    mult_prob = rate_to_prob(mult_rate, time=1./MONTHS_PER_YEAR)
-    return mult_prob
-
 #%% Functions - annual_rate_to_monthly_probability
 def annual_rate_to_monthly_probability(rate):
     r"""

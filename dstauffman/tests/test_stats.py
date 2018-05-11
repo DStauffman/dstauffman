@@ -166,36 +166,6 @@ class Test_rate_to_prob(unittest.TestCase):
         rate = dcs.prob_to_rate(prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
 
-#%% month_prob_mult_ratio
-class Test_month_prob_mult_ratio(unittest.TestCase):
-    r"""
-    Tests the month_prob_mult_ratio function with these cases:
-        TBD
-    """
-    def setUp(self):
-        self.prob = np.arange(0, 1.01, 0.01)
-        rate           = dcs.prob_to_rate(self.prob, time=1./12)
-        mult_rate_2    = rate * 2
-        mult_rate_half = rate * 0.5
-        self.mult_prob_2    = dcs.rate_to_prob(mult_rate_2, time=1./12)
-        self.mult_prob_half = dcs.rate_to_prob(mult_rate_half, time=1./12)
-
-    def test_no_mult(self):
-        mult_prob = dcs.month_prob_mult_ratio(self.prob, 1)
-        np.testing.assert_array_almost_equal(mult_prob, self.prob)
-
-    def test_gt_one_mult(self):
-        mult_prob = dcs.month_prob_mult_ratio(self.prob, 2)
-        np.testing.assert_array_almost_equal(mult_prob, self.mult_prob_2)
-
-    def test_lt_one_mult(self):
-        mult_prob = dcs.month_prob_mult_ratio(self.prob, 0.5)
-        np.testing.assert_array_almost_equal(mult_prob, self.mult_prob_half)
-
-    def test_zero_mult(self):
-        mult_prob = dcs.month_prob_mult_ratio(self.prob[:-1], 0)
-        np.testing.assert_array_almost_equal(mult_prob, np.zeros(len(self.prob)-1))
-
 #%% annual_rate_to_monthly_probability
 class Test_annual_rate_to_monthly_probability(unittest.TestCase):
     r"""
