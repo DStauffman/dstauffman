@@ -572,9 +572,11 @@ def get_python_definitions(text):
     for line in text.split('\n'):
         if line.startswith('class ') and not line.startswith('class _'):
             temp = line[len('class '):].split('(')
+            temp = temp[0].split(':')
             funcs.append(temp[0])
         if line.startswith('def ') and not line.startswith('def _'):
             temp = line[len('def '):].split('(')
+            temp = temp[0].split(':')
             funcs.append(temp[0])
     return funcs
 

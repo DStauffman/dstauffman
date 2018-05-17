@@ -641,15 +641,30 @@ class Test_make_python_init(unittest.TestCase):
 class Test_get_python_definitions(unittest.TestCase):
     r"""
     Tests the get_python_definitions function with these cases:
-        TBD
+        Functions
+        Classes
+        No arguments
+        Lots of arguments
     """
-    def setUp(self):
-        self.text = 'def a():\n    pass\ndef _b():\n    pass\n'
-        self.funcs = ['a']
+    def test_functions(self):
+        funcs = dcs.get_python_definitions('def a():\n    pass\ndef _b():\n    pass\n')
+        self.assertEqual(funcs, ['a'])
 
-    def nominal_usage(self):
-        funcs = dcs.get_python_definitions(self.text)
-        self.assertEqual(funcs, self.funcs)
+    def test_classes(self):
+        funcs = dcs.get_python_definitions('def a():\n    pass\nclass b():\n    pass\nclass _c():\n    pass\n')
+        self.assertEqual(funcs, ['a', 'b'])
+
+    def test_no_inputs(self):
+        funcs = dcs.get_python_definitions('def _a:\n    pass\ndef b:\n    pass\n')
+        self.assertEqual(funcs, ['b'])
+
+    def test_with_inputs(self):
+        funcs = dcs.get_python_definitions('def a(a, b=2):\n    pass\nclass bbb(c, d):\n    pass\nclass _c(e):\n    pass\n')
+        self.assertEqual(funcs, ['a', 'bbb'])
+
+    def test_nothing(self):
+        funcs = dcs.get_python_definitions('')
+        self.assertEqual(len(funcs), 0)
 
 #%% read_text_file
 class Test_read_text_file(unittest.TestCase):
