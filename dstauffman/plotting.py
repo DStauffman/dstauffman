@@ -1661,6 +1661,47 @@ def rgb_ints_to_hex(int_tuple):
     hex_code = "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
     return hex_code
 
+#%% Functions - get_screen_resolution
+def get_screen_resolution():
+    r"""
+    Gets the current monitor screen resolution.
+
+    Returns
+    -------
+    screen_width : int
+        Screen width in pixels
+    screen_heigh : int
+        Screen height in pixels
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2018.
+    #.  There are many ways to do this, but since I'm already using PyQt5, this one appears most
+        reliable, especially when run on high DPI screens with scaling turned on.  However, don't
+        call this function from within a GUI, as it will close everything.  Just query the desktop
+        directly within the GUI.
+
+    Examples
+    --------
+    >>> from dstauffman import get_screen_resolution
+    >>> (screen_width, screen_height) = get_screen_resolution()
+    >>> print('{}x{}'.format(screen_width, screen_height)) # doctest: +SKIP
+
+    """
+    # check to see if a QApplication exists, and if not, make one
+    if QApplication.instance() is None:
+        app = QApplication(sys.argv) # pragma: no cover
+    else:
+        app = QApplication.instance()
+    # query the resolution
+    screen_resolution = app.desktop().screenGeometry()
+    # pull out the desired information
+    screen_width = screen_resolution.width()
+    screen_height = screen_resolution.height()
+    # close the app
+    app.closeAllWindows()
+    return (screen_width, screen_height)
+
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()

@@ -1222,6 +1222,17 @@ class Test_rgb_ints_to_hex(unittest.TestCase):
         hex_code = dcs.rgb_ints_to_hex((-100, 500, 9))
         self.assertEqual(hex_code, '#00ff09')
 
+#%% Functions - get_screen_resolution
+class Test_get_screen_resolution(unittest.TestCase):
+    r"""
+    Tests the get_screen_resolution function with the following cases:
+        Nominal
+    """
+    def test_nominal(self):
+        (screen_width, screen_height) = dcs.get_screen_resolution()
+        self.assertGreater(screen_width, 0)
+        self.assertGreater(screen_height, 0)
+
 #%% Unit test execution
 if __name__ == '__main__':
     plt.ioff()
