@@ -572,11 +572,11 @@ def get_python_definitions(text):
     for line in text.split('\n'):
         if line.startswith('class ') and not line.startswith('class _'):
             temp = line[len('class '):].split('(')
-            temp = temp[0].split(':')
+            temp = temp[0].split(':') # for classes without arguments
             funcs.append(temp[0])
         if line.startswith('def ') and not line.startswith('def _'):
             temp = line[len('def '):].split('(')
-            temp = temp[0].split(':')
+            temp = temp[0].split(':') # for functions without arguments
             funcs.append(temp[0])
     return funcs
 
@@ -1102,7 +1102,7 @@ def modd(x1, x2, out=None):
         np.add(out, 1, out) # needed to force add to be inplace operation
 
 #%% find_tabs
-def find_tabs(folder, extensions=None, list_all=False, trailing=False):
+def find_tabs(folder, extensions=None, *, list_all=False, trailing=False, exclusions=None):
     r"""
     Find all the tabs in source code that should be spaces instead.
 
@@ -1122,6 +1122,14 @@ def find_tabs(folder, extensions=None, list_all=False, trailing=False):
     >>> find_tabs(folder)
 
     """
+    def _is_excluded(path, exclusions):
+        if exclusions is None:
+            return False
+        for this_exclusion in exclusions:
+            if path.startswith(this_exclusion):
+                return True
+        return False
+
     if extensions is None:
         extensions = frozenset(('m', 'py'))
     for (root, dirs, files) in os.walk(folder, topdown=True):
@@ -1129,6 +1137,8 @@ def find_tabs(folder, extensions=None, list_all=False, trailing=False):
         for name in sorted(files):
             fileparts = name.split('.')
             if fileparts[-1] in extensions:
+                if _is_excluded(root, exclusions):
+                    continue
                 this_file = os.path.join(root, name)
                 already_listed = list_all
                 if already_listed:
