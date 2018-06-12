@@ -77,10 +77,10 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     [ 250000. 500000. 3000000.]
 
     >>> print(inc_qaly) # doctest: +NORMALIZE_WHITESPACE
-    [ 20. 10. 50.]
+    [20. 10. 50.]
 
     >>> print(icer_out) # doctest: +NORMALIZE_WHITESPACE
-    [ 12500. 50000. 60000.]
+    [12500. 50000. 60000.]
 
     >>> print(order) # doctest: +NORMALIZE_WHITESPACE
     [ 0. 1. nan 2.]

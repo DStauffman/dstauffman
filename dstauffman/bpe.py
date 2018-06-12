@@ -136,8 +136,8 @@ class OptiParam(Frozen):
     >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
     >>> params.append(OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
-    >>> print(OptiParam.get_array(params, 'best'))
-    [   2.5   20.   180. ]
+    >>> print(OptiParam.get_array(params, 'best')) # doctest: +NORMALIZE_WHITESPACE
+    [ 2.5 20. 180. ]
 
     >>> print(OptiParam.get_names(params))
     ['magnitude', 'frequency', 'phase']
@@ -185,8 +185,8 @@ class OptiParam(Frozen):
         >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
         >>> params.append(OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
-        >>> print(OptiParam.get_array(params, 'best'))
-        [   2.5   20.   180. ]
+        >>> print(OptiParam.get_array(params, 'best')) # doctest: +NORMALIZE_WHITESPACE
+        [ 2.5 20. 180. ]
 
         """
         # check for valid types
@@ -414,6 +414,7 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
     --------
     >>> from dstauffman.bpe import _function_wrapper
     >>> from dstauffman import OptiOpts, BpeResults
+    >>> import numpy as np
     >>> opti_opts = OptiOpts()
     >>> opti_opts.model_func = lambda x: 2*x
     >>> opti_opts.cost_func = lambda y, x: y / 10
@@ -422,10 +423,10 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
     >>> cost_args = dict()
     >>> (results, innovs) = _function_wrapper(opti_opts, bpe_results, model_args, cost_args)
     >>> print(results)
-    [ 2.  4.  6.]
+    [2. 4. 6.]
 
     >>> print(innovs)
-    [ 0.2  0.4  0.6]
+    [0.2 0.4 0.6]
 
     """
     # pull inputs from opti_opts if necessary

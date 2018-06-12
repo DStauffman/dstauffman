@@ -49,7 +49,7 @@ def convert_annual_to_monthly_probability(annual):
     >>> annual  = np.array([0, 0.1, 1])
     >>> monthly = convert_annual_to_monthly_probability(annual)
     >>> print(monthly) # doctest: +NORMALIZE_WHITESPACE
-    [ 0. 0.00874161  1. ]
+    [0. 0.00874161  1. ]
 
     """
     # check ranges
@@ -83,7 +83,7 @@ def convert_monthly_to_annual_probability(monthly):
     >>> monthly = np.array([0, 0.1, 1])
     >>> annual = convert_monthly_to_annual_probability(monthly)
     >>> print(annual) # doctest: +NORMALIZE_WHITESPACE
-    [ 0. 0.71757046 1. ]
+    [0. 0.71757046 1. ]
 
     """
     # check ranges
@@ -128,7 +128,7 @@ def prob_to_rate(prob, time=1):
     >>> time = 3
     >>> rate = prob_to_rate(prob, time)
     >>> print(rate) # doctest: +NORMALIZE_WHITESPACE
-    [ 0. 0.03512017 inf]
+    [0. 0.03512017 inf]
 
     """
     # check ranges
@@ -171,7 +171,7 @@ def rate_to_prob(rate, time=1):
     >>> time = 1./12
     >>> prob = rate_to_prob(rate, time)
     >>> print(prob) # doctest: +NORMALIZE_WHITESPACE
-    [ 0. 0.00829871 0.07995559 0.99975963 1. ]
+    [0. 0.00829871 0.07995559 0.99975963 1. ]
 
     """
     # check ranges
@@ -211,7 +211,7 @@ def annual_rate_to_monthly_probability(rate):
     >>> rate = np.array([0, 0.5, 1, 5, np.inf])
     >>> prob = annual_rate_to_monthly_probability(rate)
     >>> print(prob) # doctest: +NORMALIZE_WHITESPACE
-    [ 0. 0.04081054 0.07995559 0.34075937 1. ]
+    [0. 0.04081054 0.07995559 0.34075937 1. ]
 
     """
     # divide rate and calculate probability
@@ -323,7 +323,7 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
     >>> print(u) # doctest: +ELLIPSIS
     1.666666...67
     >>> print(s)
-    0.59135639081
+    0.591356390810466
 
     """
     # assertions

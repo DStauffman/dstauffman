@@ -114,7 +114,7 @@ def qrot(axis, angle):
     >>> import numpy as np
     >>> quat = qrot(3, np.pi/2)
     >>> print(quat) # doctest: +NORMALIZE_WHITESPACE
-    [ 0. 0. 0.70710678  0.70710678]
+    [0. 0. 0.70710678  0.70710678]
 
     """
     # assertions
@@ -195,11 +195,11 @@ def quat_angle_diff(quat1, quat2):
     >>> quat2 = np.column_stack((quat_mult(dq1,quat1), quat_mult(dq2,quat1)))
     >>> (theta, comp) = quat_angle_diff(quat1, quat2)
     >>> print(theta) # doctest: +NORMALIZE_WHITESPACE
-    [ 0.001  0.05 ]
+    [0.001  0.05 ]
     >>> print(comp) # doctest: +NORMALIZE_WHITESPACE
-    [[ 0.001  0.   ]
-     [ 0.     0.05 ]
-     [ 0.     0.   ]]
+    [[0.001  0.   ]
+     [0.     0.05 ]
+     [0.     0.   ]]
 
     """
     # check assertions
@@ -289,10 +289,10 @@ def quat_from_euler(angles, seq=None):
     >>> seq = np.array([3, 2, 1])
     >>> quat = quat_from_euler(angles, seq)
     >>> print(quat) # doctest: +NORMALIZE_WHITESPACE
-    [[ 0.01504849  0.03047982]
-     [ 0.00992359  0.02438147]
-     [ 0.00514916  0.02073308]
-     [ 0.99982426  0.99902285]]
+    [[0.01504849  0.03047982]
+     [0.00992359  0.02438147]
+     [0.00514916  0.02073308]
+     [0.99982426  0.99902285]]
 
     """
     # check for optional inputs
@@ -378,10 +378,10 @@ def quat_interp(time, quat, ti, inclusive=True):
     >>> ti = np.array([1, 2, 4.5, 5])
     >>> qout = quat_interp(time, quat, ti)
     >>> print(np.array_str(qout, precision=8, suppress_small=True)) # doctest: +NORMALIZE_WHITESPACE
-    [[ 0. 0.38268343 0.98078528 1. ]
-     [ 0. 0.         0.         0. ]
-     [ 0. 0.         0.         0. ]
-     [ 1. 0.92387953 0.19509032 0. ]]
+    [[0. 0.38268343 0.98078528 1. ]
+     [0. 0.         0.         0. ]
+     [0. 0.         0.         0. ]
+     [1. 0.92387953 0.19509032 0. ]]
 
     """
     # Initializations
@@ -659,7 +659,7 @@ def quat_norm(x):
     >>> x = np.array([0.1, 0, 0, 1])
     >>> y = quat_norm(x)
     >>> print(y) # doctest: +NORMALIZE_WHITESPACE
-    [ 0.09950372 0. 0. 0.99503719]
+    [0.09950372 0. 0. 0.99503719]
 
     """
     # divide input by its column vector norm
@@ -701,7 +701,7 @@ def quat_prop(quat, delta_ang, renorm=True):
     >>> delta_ang = np.array([0.01, 0.02, 0.03])
     >>> quat_new  = quat_prop(quat, delta_ang)
     >>> print(quat_new) # doctest: +NORMALIZE_WHITESPACE
-    [ 0.00499913  0.00999825  0.01499738  0.99982505]
+    [0.00499913  0.00999825  0.01499738  0.99982505]
 
     """
     #compute angle rate matrix
