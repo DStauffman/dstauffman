@@ -31,4 +31,4 @@ if __name__ == '__main__':
         print('{}{} = {}'.format(field, pad, value))
 
     # run unittests
-    unittest.main(module='tests.test_constants', exit=False)
+    unittest.main(module='dstauffman.tests.test_constants', exit=False)
