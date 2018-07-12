@@ -7,6 +7,6 @@ coverage run run_all_tests.py
 # generate the coverage report
 coverage html
 # open the report
-open coverage_html_report/index.html
+xdg-open ./coverage_html_report/index.html
 # pause execution so the user can see the results
-read -n1 -r -p "Press any key to continue..."
+# read -n1 -r -p "Press any key to continue..."
