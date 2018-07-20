@@ -1102,7 +1102,7 @@ def modd(x1, x2, out=None):
         np.add(out, 1, out) # needed to force add to be inplace operation
 
 #%% find_tabs
-def find_tabs(folder, extensions=None, *, list_all=False, trailing=False, exclusions=None):
+def find_tabs(folder, extensions=None, *, list_all=False, trailing=False, exclusions=None, check_eol=None):
     r"""
     Find all the tabs in source code that should be spaces instead.
 
@@ -1110,10 +1110,16 @@ def find_tabs(folder, extensions=None, *, list_all=False, trailing=False, exclus
     ----------
     folder : str
         Folder path to search
+    extensions : tuple of str
+        File extensions to consider, default is ('m', 'py')
     list_all : bool, optional, default is False
         Whether to list all the files, or only those with tabs in them
     trailing : bool, optional, default is False
         Whether to consider trailing whitespace a problem, too
+    exclusions : tuple of str
+        Folders to ignore, default is empty
+    check_eol : str
+        If not None, then the line endings to check, such as '\r\n'
 
     Examples
     --------
@@ -1143,23 +1149,28 @@ def find_tabs(folder, extensions=None, *, list_all=False, trailing=False, exclus
                 already_listed = list_all
                 if already_listed:
                     print('Evaluating: "{}"'.format(this_file))
-                with open(this_file, encoding='utf8') as file:
-                    c = 0
+                with open(this_file, encoding='utf8', newline='') as file:
+                    bad_lines = False
                     try:
-                        for line in file:
-                            c += 1
-                            if line.count('\t') > 0:
-                                if not already_listed:
-                                    print('Evaluating: "{}"'.format(this_file))
-                                    already_listed = True
-                                print('    Line {:03}: '.format(c) + repr(line))
-                            elif trailing and len(line) >= 2 and line[-2] == ' ' and sum(1 for x in line if x not in ' \n') > 0:
-                                if not already_listed:
-                                    print('Evaluating: "{}"'.format(this_file))
-                                    already_listed = True
-                                print('    Line {:03}: '.format(c) + repr(line))
+                        lines = file.readlines()
                     except UnicodeDecodeError: # pragma: no cover
                         print('File: "{}" was not a valid utf-8 file.'.format(this_file))
+                    for (c, line) in enumerate(lines):
+                        sline = line.rstrip('\n').rstrip('\r').rstrip('\n') # for all possible orderings
+                        if line.count('\t') > 0:
+                            if not already_listed:
+                                print('Evaluating: "{}"'.format(this_file))
+                                already_listed = True
+                            print('    Line {:03}: '.format(c+1) + repr(line))
+                        elif trailing and len(sline) >= 1 and sline[-1] == ' ':
+                            if not already_listed:
+                                print('Evaluating: "{}"'.format(this_file))
+                                already_listed = True
+                            print('    Line {:03}: '.format(c+1) + repr(line))
+                        if check_eol is not None and c != len(lines)-1 and not line.endswith(check_eol) and not bad_lines:
+                            line_ending = line[-(len(line) - len(sline))]
+                            print('File: "{}" has bad line endings of "{}".'.format(this_file, repr(line_ending)))
+                            bad_lines = True
 
 #%% np_digitize
 def np_digitize(x, bins, right=False):
@@ -1532,5 +1543,5 @@ def deactivate_logging():
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='tests.test_utils', exit=False)
+    unittest.main(module='dstauffman.tests.test_utils', exit=False)
     doctest.testmod(verbose=False)
