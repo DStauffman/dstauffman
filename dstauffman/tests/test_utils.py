@@ -1131,6 +1131,7 @@ class Test_find_tabs(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.folder = dcs.get_tests_dir()
+        cls.linesep = os.linesep.replace('\n', '\\n').replace('\r', '\\r')
         file1 = os.path.join(cls.folder, 'temp_code_01.py')
         file2 = os.path.join(cls.folder, 'temp_code_02.py')
         file3 = os.path.join(cls.folder, 'temp_code_03.m')
@@ -1141,17 +1142,18 @@ class Test_find_tabs(unittest.TestCase):
         dcs.write_text_file(file1, cont1)
         dcs.write_text_file(file2, cont2)
         dcs.write_text_file(file3, cont3)
-        cls.bad1 = "    Line 004: '\\tBad tab line\\n'"
-        cls.bad2 = "    Line 005: '    Start and end line    \\n'"
+        cls.bad1 = "    Line 004: '\\tBad tab line" + cls.linesep + "'"
+        cls.bad2 = "    Line 005: '    Start and end line    " + cls.linesep + "'"
 
     def test_nominal(self):
         with dcs.capture_output() as out:
             dcs.find_tabs(self.folder, extensions='m', list_all=False, trailing=False)
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
-        self.assertEqual(lines[1],self.bad1)
-        self.assertEqual(len(lines), 2)
+        self.assertEqual(lines[1], self.bad1)
+        self.assertEqual(lines[2], '')
+        self.assertEqual(len(lines),  3)
 
     def test_different_extensions(self):
         with dcs.capture_output() as out:
@@ -1164,7 +1166,7 @@ class Test_find_tabs(unittest.TestCase):
     def test_list_all(self):
         with dcs.capture_output() as out:
             dcs.find_tabs(self.folder, list_all=True)
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(self.bad1 in lines)
         self.assertFalse(self.bad2 in lines)
@@ -1172,25 +1174,25 @@ class Test_find_tabs(unittest.TestCase):
     def test_trailing_spaces(self):
         with dcs.capture_output() as out:
             dcs.find_tabs(self.folder, trailing=True)
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
-        #self.assertEqual(lines[1],self.bad1)
-        self.assertEqual(lines[1],self.bad2)
+        self.assertEqual(lines[1], self.bad2)
         self.assertTrue(lines[2].startswith('Evaluating: "'))
-        self.assertEqual(lines[3],self.bad1)
-        self.assertEqual(lines[4],self.bad2)
-        self.assertEqual(len(lines), 5)
+        self.assertEqual(lines[3], self.bad1)
+        self.assertEqual(lines[4], self.bad2)
+        self.assertEqual(lines[5], '')
+        self.assertEqual(len(lines), 6)
 
     def test_trailing_and_list_all(self):
         with dcs.capture_output() as out:
             dcs.find_tabs(self.folder, list_all=True, trailing=True)
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
         self.assertTrue(self.bad1 in lines)
         self.assertTrue(self.bad2 in lines)
-        self.assertTrue(len(lines) > 6)
+        self.assertTrue(len(lines) > 7)
 
     @classmethod
     def tearDownClass(cls):
