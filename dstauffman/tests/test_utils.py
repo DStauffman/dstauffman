@@ -1126,6 +1126,8 @@ class Test_find_tabs(unittest.TestCase):
         Different Extensions
         List All
         Trailing Spaces
+        Exclusions x2
+        Bad New Lines
     """
 
     @classmethod
@@ -1157,7 +1159,7 @@ class Test_find_tabs(unittest.TestCase):
 
     def test_different_extensions(self):
         with dcs.capture_output() as out:
-            dcs.find_tabs(self.folder, extensions='txt')
+            dcs.find_tabs(self.folder, extensions=('txt',))
         lines = out.getvalue().strip().split('\n')
         out.close()
         self.assertEqual(lines[0], '')
@@ -1193,6 +1195,37 @@ class Test_find_tabs(unittest.TestCase):
         self.assertTrue(self.bad1 in lines)
         self.assertTrue(self.bad2 in lines)
         self.assertTrue(len(lines) > 7)
+
+    def test_exclusions_skip(self):
+        exclusions = (self.folder)
+        with dcs.capture_output() as out:
+            dcs.find_tabs(self.folder, exclusions=exclusions)
+        lines = out.getvalue().split('\n')
+        out.close()
+        self.assertEqual(lines, [''])
+
+    def test_exclusions_invalid(self):
+        exclusions = (r'C:\non_existant_path', )
+        with dcs.capture_output() as out:
+            dcs.find_tabs(self.folder, exclusions=exclusions)
+        lines = out.getvalue().split('\n')
+        out.close()
+        self.assertTrue(lines[0].startswith('Evaluating: "'))
+        self.assertEqual(lines[1], self.bad1)
+        self.assertEqual(lines[2], '')
+        self.assertEqual(len(lines),  3)
+
+    def test_bad_newlines(self):
+        with dcs.capture_output() as out:
+            dcs.find_tabs(self.folder, extensions='m', check_eol='0')
+        lines = out.getvalue().split('\n')
+        out.close()
+        self.assertTrue(lines[0].startswith('File: "'))
+        self.assertTrue(lines[0].endswith('" has bad line endings of "{}".'.format(self.linesep)))
+        self.assertTrue(lines[1].startswith('Evaluating: "'))
+        self.assertEqual(lines[2], self.bad1)
+        self.assertEqual(lines[3], '')
+        self.assertEqual(len(lines),  4)
 
     @classmethod
     def tearDownClass(cls):
@@ -1485,7 +1518,8 @@ class Test_combine_per_year(unittest.TestCase):
 class Test_act_deact_logging(unittest.TestCase):
     r"""
     Tests the activate_logging and deactivate_logging functions with the following cases:
-        TBD
+        Nominal
+        Default filename
     """
     def setUp(self):
         self.level    = logging.DEBUG
@@ -1504,6 +1538,17 @@ class Test_act_deact_logging(unittest.TestCase):
         self.assertEqual(lines[0], 'DEBUG:Test:Test message')
         dcs.deactivate_logging()
         self.assertFalse(dcs.utils.root_logger.handlers)
+
+    def test_default_filename(self):
+        default_filename = os.path.join(dcs.get_output_dir(), 'log_file_' + datetime.now().strftime('%Y-%m-%d') + '.txt')
+        was_there = os.path.isfile(default_filename)
+        dcs.activate_logging(self.level)
+        self.assertTrue(dcs.utils.root_logger.hasHandlers())
+        time.sleep(0.01)
+        dcs.deactivate_logging()
+        self.assertFalse(dcs.utils.root_logger.handlers)
+        if not was_there:
+            os.remove(default_filename)
 
     def tearDown(self):
         dcs.deactivate_logging()

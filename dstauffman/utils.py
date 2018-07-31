@@ -1121,6 +1121,12 @@ def find_tabs(folder, extensions=None, *, list_all=False, trailing=False, exclus
     check_eol : str
         If not None, then the line endings to check, such as '\r\n'
 
+    Notes
+    -----
+    #.  This function will iterate over extensions and exclusions, so extensions='txt' will look for
+        't' and 'x' instead of 'txt'.  Use extensions=('txt',) or ['txt'] instead.  Likewise for
+        exclusions.
+
     Examples
     --------
     >>> from dstauffman import find_tabs, get_root_dir
@@ -1168,8 +1174,8 @@ def find_tabs(folder, extensions=None, *, list_all=False, trailing=False, exclus
                                 already_listed = True
                             print('    Line {:03}: '.format(c+1) + repr(line))
                         if check_eol is not None and c != len(lines)-1 and not line.endswith(check_eol) and not bad_lines:
-                            line_ending = line[-(len(line) - len(sline))]
-                            print('File: "{}" has bad line endings of "{}".'.format(this_file, repr(line_ending)))
+                            line_ending = line[-(len(line) - len(sline)):]
+                            print('File: "{}" has bad line endings of "{}".'.format(this_file, repr(line_ending)[1:-1]))
                             bad_lines = True
 
 #%% np_digitize
