@@ -1,0 +1,19 @@
+# files to ignore when creating zip file for download
+/.gitattributes export-ignore
+/.gitignore export-ignore
+
+# for users who don't have core.autocrlf set
+* text=auto
+
+# known text extensions
+*.m diff=matlab merge
+*.py diff=python merge
+
+# known binary files to not modify
+*.mat binary
+*.xlsx binary
+*.docx binary
+*.pptx binary
+*.pdf binary
+*.jpg binary
+*.png binary
