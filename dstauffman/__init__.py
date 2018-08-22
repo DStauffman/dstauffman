@@ -14,21 +14,22 @@ Notes
 
 #%% Imports
 from .analysis  import icer, plot_icer
-from .bpe       import OptiOpts, OptiParam, BpeResults, CurrentResults, \
-                           validate_opti_opts, run_bpe, plot_bpe_results
+from .bpe       import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, \
+                           run_bpe, plot_bpe_results
 from .classes   import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
 from .constants import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE
 from .enums     import IntEnumPlus, consecutive, dist_enum_and_mons
 from .latex     import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
 from .linalg    import orth, subspace
-from .plotting  import Plotter, Opts, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
-                           ignore_plot_data, get_axes_scales, whitten, plot_time_history, \
+from .plotting  import Plotter, Opts, TruthPlotter, MyCustomToolbar, ColorMap, ignore_plot_data, \
+                           close_all, get_axes_scales, whitten, plot_time_history, \
                            plot_correlation_matrix, plot_multiline_history, plot_bar_breakdown, \
                            plot_bpe_convergence, plot_population_pyramid, storefig, titleprefix, \
                            disp_xlimits, setup_plots, figmenu, rgb_ints_to_hex, \
                            get_screen_resolution
-from .quat      import qrot, quat_angle_diff, quat_from_euler, quat_interp, quat_inv, quat_mult, \
-                           quat_norm, quat_prop, quat_times_vector, quat_to_dcm, quat_to_euler
+from .quat      import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
+                           quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
+                           quat_to_dcm, quat_to_euler
 from .stats     import convert_annual_to_monthly_probability, \
                            convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
                            rate_to_prob, annual_rate_to_monthly_probability, \

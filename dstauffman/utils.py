@@ -481,13 +481,19 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     output : str
         Resulting text for __init__.py file
 
+    Notes
+    -----
+    #.  This tool is written without using the dis library, such that the code does not have to be
+        valid or importable into Python.  It can thus be used very early on in the development
+        cycle. The files are read as text.
+
     Examples
     --------
     >>> from dstauffman import make_python_init, get_root_dir
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
-    >>> print(text[0:21])
-    from .analysis import
+    >>> print(text[0:22])
+    from .analysis  import
 
     """
     # exclusions
@@ -568,6 +574,9 @@ def get_python_definitions(text):
     ['a']
 
     """
+    cap_letters = frozenset('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    extended_letters = frozenset(cap_letters & {'_'})
+    assert len(cap_letters) == 26
     funcs = []
     for line in text.split('\n'):
         if line.startswith('class ') and not line.startswith('class _'):
@@ -578,6 +587,10 @@ def get_python_definitions(text):
             temp = line[len('def '):].split('(')
             temp = temp[0].split(':') # for functions without arguments
             funcs.append(temp[0])
+        if len(line) > 0 and line[0] in cap_letters and '=' in line and ' ' in line:
+            temp = line.split(' ')[0]
+            if len(extended_letters - set(temp)) == 0:
+                funcs.append(temp)
     return funcs
 
 #%% Functions - read_text_file

@@ -157,5 +157,5 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='tests.test_enums', exit=False)
+    unittest.main(module='dstauffman.tests.test_enums', exit=False)
     doctest.testmod(verbose=False)

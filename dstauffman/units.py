@@ -177,5 +177,5 @@ def get_factors(prefix):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='tests.test_units', exit=False)
+    unittest.main(module='dstauffman.tests.test_units', exit=False)
     doctest.testmod(verbose=False)

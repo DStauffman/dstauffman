@@ -1705,5 +1705,5 @@ def get_screen_resolution():
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='tests.test_plotting', exit=False)
+    unittest.main(module='dstauffman.tests.test_plotting', exit=False)
     doctest.testmod(verbose=False)

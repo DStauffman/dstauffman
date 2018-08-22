@@ -187,5 +187,5 @@ def latex_str(value, digits=-1, fixed=False, cmp2ar=False, capped=1073741823): #
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='tests.test_latex', exit=False)
+    unittest.main(module='dstauffman.tests.test_latex', exit=False)
     doctest.testmod(verbose=False)

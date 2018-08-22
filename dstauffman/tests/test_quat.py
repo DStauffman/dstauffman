@@ -99,7 +99,7 @@ class Test_qrot(unittest.TestCase):
         r3o2        = np.sqrt(3)/2
         self.quat   = np.array([[r2o2, 0, 0, r2o2], [0, r2o2, 0, r2o2], [0, 0, r2o2, r2o2]])
         self.quat2  = np.array([[ 0.5, 0, 0, r3o2], [0,  0.5, 0, r3o2], [0, 0,  0.5, r3o2]])
-        self.null   = np.array([])
+        self.null   = np.array([], dtype=int)
         self.null_quat = np.zeros((4, 0))
 
     def test_single_inputs(self):

@@ -17,7 +17,7 @@ import numpy as np
 from dstauffman.constants import INT_TOKEN, QUAT_SIZE
 
 #%% Master flags
-use_assertions = True
+USE_ASSERTIONS = True
 
 #%% Functions - _quat_assertions
 def _quat_assertions(quat):
@@ -37,7 +37,7 @@ def _quat_assertions(quat):
     >>> _quat_assertions(quat)
 
     """
-    if not use_assertions:
+    if not USE_ASSERTIONS:
         return # pragma: no cover
     # hard-coded values
     precision = 1e-12
@@ -134,15 +134,13 @@ def qrot(axis, angle):
         quat[axis-1, :] = np.sin(angle/2)
     elif np.isscalar(angle):
         # single angle, multiple axis case
-        quat = np.array([[0], [0], [0], [np.cos(angle/2)]]) * np.ones((1, len(axis))) # TODO: formulate better
-        for (i, this_axis) in enumerate(axis): # TODO: eliminate this for loop somehow?
-            quat[this_axis-1, i] = np.sin(angle/2)
+        quat = np.tile(np.array([[0], [0], [0], [np.cos(angle/2)]]), (1, len(axis)))
+        quat[axis-1, np.arange(len(axis))] = np.sin(angle/2)
     else:
         # multiple axis, multiple angle case
         assert len(axis) == len(angle)
         quat = np.vstack((np.zeros((3, len(angle))), np.expand_dims(np.cos(angle/2), axis=0)))
-        for i in range(len(axis)): # TODO: eliminate this for loop somehow?
-            quat[axis[i]-1, i] = np.sin(angle[i]/2)
+        quat[axis-1, np.arange(len(axis))] = np.sin(angle/2)
     _quat_assertions(quat)
     return quat
 
@@ -777,17 +775,11 @@ def quat_times_vector(quat, v):
     else:
         is_single = False
     # Multiple quaternions, multiple vectors
-    qv  = np.array([ \
-        quat[1, :]*v[2, :] - quat[2, :]*v[1, :], \
-        quat[2, :]*v[0, :] - quat[0, :]*v[2, :], \
-        quat[0, :]*v[1, :] - quat[1, :]*v[0, :]]) # TODO: use cross product?
-    vec = v + 2*(-(np.ones((3, 1)).dot(np.expand_dims(quat[3, :], 0))) * qv + \
-        np.array([ \
-            quat[1, :]*qv[2, :] - quat[2, :]*qv[1, :], \
-            quat[2, :]*qv[0, :] - quat[0, :]*qv[2, :], \
-            quat[0, :]*qv[1, :] - quat[1, :]*qv[0, :]])) # TODO: check this, and use cross product?
+    qv = np.cross(quat[:3, :], v, axis=0)
+    vec = v + 2*(-(np.ones((3, 1)) @ np.expand_dims(quat[3, :], 0)) * qv + \
+        np.cross(quat[:3, :], qv, axis=0))
     if is_single:
-        vec = vec.flatten()
+        vec = vec.flatten() # TODO: write optimized single quat and single vector version?
     return vec
 
 #%% Functions - quat_to_dcm
@@ -1007,5 +999,5 @@ def quat_to_euler(quat, seq=None):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='tests.test_quat', exit=False)
+    unittest.main(module='dstauffman.tests.test_quat', exit=False)
     doctest.testmod(verbose=False)

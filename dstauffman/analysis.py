@@ -228,5 +228,5 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='tests.test_analysis', exit=False)
+    unittest.main(module='dstauffman.tests.test_analysis', exit=False)
     doctest.testmod(verbose=False)

@@ -132,5 +132,5 @@ def subspace(A, B):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='tests.test_linalg', exit=False)
+    unittest.main(module='dstauffman.tests.test_linalg', exit=False)
     doctest.testmod(verbose=False)

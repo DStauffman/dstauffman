@@ -414,5 +414,5 @@ class FixedDict(dict):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='tests.test_classes', exit=False)
+    unittest.main(module='dstauffman.tests.test_classes', exit=False)
     doctest.testmod(verbose=False)

@@ -585,7 +585,7 @@ class Test_make_python_init(unittest.TestCase):
     def setUp(self):
         self.folder   = dcs.get_root_dir()
         self.text     = 'from .bpe import'
-        self.text2    = 'from .bpe      import'
+        self.text2    = 'from .bpe       import'
         self.folder2  = dcs.get_tests_dir()
         self.filepath = os.path.join(self.folder2, 'temp_file.py')
         self.filename = os.path.join(self.folder2, '__init__2.py')
@@ -618,12 +618,12 @@ class Test_make_python_init(unittest.TestCase):
     def test_small_wrap(self):
         with self.assertRaises(ValueError) as context:
             dcs.make_python_init(self.folder, wrap=30)
-        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "22:30" was too small.')
+        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "23:30" was too small.')
 
     def test_really_small_wrap(self):
         with self.assertRaises(ValueError) as context:
             dcs.make_python_init(self.folder, wrap=10)
-        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "22:10" was too small.')
+        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "23:10" was too small.')
 
     def test_saving(self):
         text = dcs.make_python_init(self.folder, filename=self.filename)
@@ -1155,7 +1155,7 @@ class Test_find_tabs(unittest.TestCase):
         self.assertTrue(lines[0].startswith('Evaluating: "'))
         self.assertEqual(lines[1], self.bad1)
         self.assertEqual(lines[2], '')
-        self.assertEqual(len(lines),  3)
+        self.assertEqual(len(lines), 3)
 
     def test_different_extensions(self):
         with dcs.capture_output() as out:

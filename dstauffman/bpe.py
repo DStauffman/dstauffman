@@ -1340,5 +1340,5 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='tests.test_bpe', exit=False)
+    unittest.main(module='dstauffman.tests.test_bpe', exit=False)
     doctest.testmod(verbose=False)

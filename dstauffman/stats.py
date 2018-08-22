@@ -513,5 +513,5 @@ def rand_draw(chances, prng, *, check_bounds=True):
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='tests.test_stats', exit=False)
+    unittest.main(module='dstauffman.tests.test_stats', exit=False)
     doctest.testmod(verbose=False)
