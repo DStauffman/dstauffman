@@ -20,7 +20,7 @@ import sys
 import types
 import unittest
 import warnings
-from collections import Mapping
+from collections.abc import Mapping
 from contextlib import contextmanager
 from datetime import datetime, timedelta
 from io import StringIO
@@ -968,6 +968,8 @@ def delete_pyc(folder, recursive=True, print_progress=True):
         Name of folder to delete the files from
     recursive : bool, optional
         Whether to delete files recursively
+    print_progress: bool, optional
+        Whether to display information about any deleted files
 
     Examples
     --------
@@ -980,7 +982,7 @@ def delete_pyc(folder, recursive=True, print_progress=True):
         r"""Do the actual file removal."""
         # check for allowable extensions
         (_, file_ext) = os.path.splitext(name)
-        if file_ext == '.pyc':
+        if file_ext == '.pyc': # TODO: or file_ext == 'pyo' ???  Add file extension list?
             # remove this file
             if print_progress:
                 print('Removing "{}"'.format(os.path.join(root, name)))

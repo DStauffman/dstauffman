@@ -9,11 +9,11 @@ Notes
 """
 
 #%% Imports
-import collections
 import copy
 import os
 import pickle
 import unittest
+from collections.abc import Mapping
 
 import numpy as np
 
@@ -369,7 +369,7 @@ class Test_FixedDict(unittest.TestCase):
             self.fixed.update(**dict2)
 
     def test_isinstance(self):
-        self.assertTrue(isinstance(self.fixed, collections.Mapping))
+        self.assertTrue(isinstance(self.fixed, Mapping))
         self.assertTrue(isinstance(self.fixed, dict))
 
     def test_bad_delete(self):
