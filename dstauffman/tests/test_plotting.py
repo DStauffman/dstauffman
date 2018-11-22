@@ -569,8 +569,9 @@ class Test_plot_time_history(unittest.TestCase):
             second_y_scale=self.second_y_scale)
 
     def test_second_y_scale2(self):
+        second_y_scale = {'New ylabel [units]': 100}
         self.fig = dcs.plot_time_history(self.time, self.data, self.label, type_='percentage', \
-            second_y_scale=self.second_y_scale)
+            second_y_scale=second_y_scale)
 
     def test_simple(self):
         self.fig = dcs.plot_time_history(0, 0, 'Text')
@@ -787,8 +788,9 @@ class Test_plot_multiline_history(unittest.TestCase):
             second_y_scale=self.second_y_scale))
 
     def test_second_y_scale2(self):
+        second_y_scale = {'New ylabel [units]': 100}
         self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, \
-            second_y_scale=self.second_y_scale))
+            second_y_scale=second_y_scale))
 
     def test_single_point(self):
         self.figs.append(dcs.plot_multiline_history(self.time[1:], self.data[1:,:], self.label))

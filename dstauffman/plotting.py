@@ -583,7 +583,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
         Truth instance for adding to the plot
     plot_as_diffs : bool, optional, default is False
         Plot each entry in results against the other ones, default is False
-    second_y_scale : float, optional
+    second_y_scale : float or dict, optional
         Multiplication scale factor to use to display on a secondary Y axis
     truth_time : array_like, optional
         Time for truth data
@@ -734,9 +734,12 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     # optionally add second Y axis
     if second_y_scale is not None:
         ax2 = ax.twinx()
-        ax2.set_ylim(np.multiply(second_y_scale, ax.get_ylim()))
-        if type_ == 'population':
-            ax2.set_ylabel('Actual Population [#]')
+        if isinstance(second_y_scale, (int, float)):
+            ax2.set_ylim(np.multiply(second_y_scale, ax.get_ylim()))
+        else:
+            for (key, value) in second_y_scale.items():
+                ax2.set_ylim(np.multiply(value, ax.get_ylim()))
+                ax2.set_ylabel(key)
     # Setup plots
     setup_plots(fig, opts, 'time')
     return fig
@@ -916,7 +919,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
         plotting options
     legend : list of str, optional
         Names to use for each channel of data
-    second_y_scale : float, optional
+    second_y_scale : float or dict, optional
         Multiplication scale factor to use to display on a secondary Y axis
     ignore_empties : bool, optional
         Removes any entries from the plot and legend that contain only zeros or only NaNs
@@ -1038,9 +1041,12 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     # optionally add second Y axis
     if second_y_scale is not None:
         ax2 = ax.twinx()
-        ax2.set_ylim(np.multiply(second_y_scale,ax.get_ylim()))
-        if type_ == 'population':
-            ax2.set_ylabel('Actual Population [#]')
+        if isinstance(second_y_scale, (int, float)):
+            ax2.set_ylim(np.multiply(second_y_scale, ax.get_ylim()))
+        else:
+            for (key, value) in second_y_scale.items():
+                ax2.set_ylim(np.multiply(value, ax.get_ylim()))
+                ax2.set_ylabel(key)
 
     # setup plots
     setup_plots(fig, opts, 'time')
