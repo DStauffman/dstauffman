@@ -112,6 +112,7 @@ class Opts(Frozen):
         self.colormap   = None
         self.show_rms   = True
         self.show_zero  = False
+        self.base_time  = 'year'
         self.legend_loc = 'best'
         self.names      = list()
 
@@ -622,9 +623,6 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     >>> plt.close(fig)
 
     """
-    # hard-coded values
-    time_units = 'year' # TODO: make an input
-
     # force inputs to be ndarrays
     time = np.asanyarray(time)
     data = np.asanyarray(data)
@@ -639,6 +637,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     rms_in_legend = opts.show_rms
     legend_loc    = opts.legend_loc
     show_zero     = opts.show_zero
+    time_units    = opts.base_time
 
     # maintain older API
     if truth_data is not None: # pragma: no cover
@@ -952,9 +951,6 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     >>> plt.close(fig)
 
     """
-    # hard-coded values
-    time_units = 'year' # TODO: make an input
-
     # check optional inputs
     if opts is None:
         opts = Opts()
@@ -964,6 +960,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
         colormap  = opts.colormap
     legend_loc    = opts.legend_loc
     show_zero     = opts.show_zero
+    time_units    = opts.base_time
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
@@ -1102,6 +1099,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     else:
         colormap = opts.colormap
     legend_loc = opts.legend_loc
+    time_units = opts.base_time
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
@@ -1137,7 +1135,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
             # fill_between is a better alternative
             ax.fill_between(time, scale*bottoms[:, i], scale*bottoms[:, i+1], step='mid', \
                 label=legend[i], color=cm.get_color(i), edgecolor='none')
-    ax.set_xlabel('Time [year]')
+    ax.set_xlabel('Time [' + time_units + ']')
     ax.set_ylabel(label + unit_text)
     ax.set_ylim(0, 100)
     ax.grid(True)
