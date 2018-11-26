@@ -149,9 +149,9 @@ def quat_angle_diff(quat1, quat2):
     r"""
     Calculate the angular difference between two quaternions.
 
-    This function takes a two quaternions and calculates a delta quaternion between them.
+    This function takes two quaternions and calculates a delta quaternion between them.
     It then uses the delta quaternion to generate both a total angular difference, and an
-    an angular difference expressed in X, Y, Z components based on the axis of rotation,
+    angular difference expressed in X, Y, Z components based on the axis of rotation,
     expressed in the original frame of the quat1 input quaternion.  This function uses full
     trignometric functions instead of any small angle approximations.
 
@@ -709,7 +709,7 @@ def quat_prop(quat, delta_ang, renorm=True):
         [ delta_ang[1],  -delta_ang[0],        0       ,   delta_ang[2]], \
         [-delta_ang[0],  -delta_ang[1],   -delta_ang[2],        0      ]])
     #compute delta quaternion
-    delta_quaternion = 0.5 * omega.dot(quat)
+    delta_quaternion = 0.5 * omega @ quat
     # propagate over delta
     quat_new = quat + delta_quaternion
     # renormalize and return
