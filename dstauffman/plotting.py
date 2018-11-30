@@ -506,7 +506,10 @@ def get_axes_scales(type_):
 
     """
     # determine results based on simple switch statement
-    if type_ == 'unity':
+    if type_.startswith('unit_'): # TODO: make more generic and allow vert_fact to work
+        scale = 1
+        units = type_[5:]
+    elif type_ == 'unity':
         scale = 1
         units = ''
     elif type_ == 'population':
