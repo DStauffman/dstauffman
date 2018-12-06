@@ -712,6 +712,9 @@ def quat_prop(quat, delta_ang, renorm=True):
     delta_quaternion = 0.5 * omega @ quat
     # propagate over delta
     quat_new = quat + delta_quaternion
+    # ensure positive scalar component
+    if quat_new[3] < 0:
+        quat_new *= -1
     # renormalize and return
     if renorm:
         quat_new = quat_norm(quat_new)
