@@ -370,7 +370,10 @@ class ColorMap(Frozen):
             low = 0
             high = num_colors-1
         # get colormap based on high and low limits
-        cmap  = plt.get_cmap(colormap)
+        if isinstance(colormap, colors.Colormap):
+            cmap = colormap
+        else:
+            cmap = plt.get_cmap(colormap)
         cnorm = colors.Normalize(vmin=low, vmax=high)
         self.smap = cmx.ScalarMappable(norm=cnorm, cmap=cmap)
         # must initialize the empty scalar mapplable to show the colorbar correctly
@@ -564,7 +567,7 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
 #%% Functions - plot_time_history
 def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, second_y_scale=None, truth_time=None, \
-    truth_data=None, plot_sigmas=1, plot_confidence=0):
+    truth_data=None, plot_sigmas=1, plot_confidence=0, colormap=None):
     r"""
     Plot the given data channel versus time, with a generic label argument.
 
@@ -596,6 +599,8 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
         If value converts to true as bool, then plot the sigma values of the given value
     plot_confidence : numeric, optional
         If value converts to true as bool, then plot the confidence intervals of the given value
+    colormap : str or matplotlib.colors.Colormap, optional
+        Name of colormap to use, if specified, overrides the opts.colormap
 
     Returns
     -------
@@ -633,10 +638,11 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
     # check optional inputs
     if opts is None:
         opts = Opts()
-    if opts.colormap is None:
-        colormap  = DEFAULT_COLORMAP
-    else:
-        colormap  = opts.colormap
+    if colormap is None:
+        if opts.colormap is None:
+            colormap = DEFAULT_COLORMAP
+        else:
+            colormap = opts.colormap
     rms_in_legend = opts.show_rms
     legend_loc    = opts.legend_loc
     show_zero     = opts.show_zero
@@ -749,7 +755,8 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
 
 #%% Functions - plot_correlation_matrix
 def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matrix_name='Correlation Matrix', \
-        cmin=0, cmax=1, xlabel='', ylabel='', plot_lower_only=True, label_values=False, x_lab_rot=90):
+        cmin=0, cmax=1, xlabel='', ylabel='', plot_lower_only=True, label_values=False, x_lab_rot=90, \
+        colormap=None):
     r"""
     Visually plot a correlation matrix.
 
@@ -779,6 +786,8 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
         Annotate the numerical values of each square in addition to the color code, default is False
     x_lab_rot : float, optional
         Amount in degrees to rotate the X labels, default is 90
+    colormap : str or matplotlib.colors.Colormap, optional
+        Name of colormap to use, if specified, overrides the opts.colormap
 
     Returns
     -------
@@ -806,10 +815,11 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
     # check optional inputs
     if opts is None:
         opts = Opts()
-    if opts.colormap is None:
-        colormap = 'cool'
-    else:
-        colormap = opts.colormap
+    if colormap is None:
+        if opts.colormap is None:
+            colormap = 'cool'
+        else:
+            colormap = opts.colormap
 
     # Hard-coded values
     box_size        = 1
@@ -903,7 +913,7 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
 
 #%% Functions - plot_multiline_history
 def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legend=None, \
-        second_y_scale=None, ignore_empties=False, data_lo=None, data_hi=None):
+        second_y_scale=None, ignore_empties=False, data_lo=None, data_hi=None, colormap=None):
     r"""
     Plot multiple metrics over time.
 
@@ -930,6 +940,8 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
         Lower confidence bound on data, plot if not None
     data_hi : same as data
         Upper confidence bound on data, plot if not None
+    colormap : str or matplotlib.colors.Colormap, optional
+        Name of colormap to use, if specified, overrides the opts.colormap
 
     Returns
     -------
@@ -960,13 +972,14 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     # check optional inputs
     if opts is None:
         opts = Opts()
-    if opts.colormap is None:
-        colormap  = DEFAULT_COLORMAP
-    else:
-        colormap  = opts.colormap
-    legend_loc    = opts.legend_loc
-    show_zero     = opts.show_zero
-    time_units    = opts.base_time
+    if colormap is None:
+        if opts.colormap is None:
+            colormap = DEFAULT_COLORMAP
+        else:
+            colormap = opts.colormap
+    legend_loc = opts.legend_loc
+    show_zero  = opts.show_zero
+    time_units = opts.base_time
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
@@ -1056,7 +1069,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     return fig
 
 #%% Functions - plot_bar_breakdown
-def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empties=False):
+def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empties=False, colormap=None):
     r"""
     Plot the pie chart like breakdown by percentage in each category over time.
 
@@ -1074,6 +1087,8 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
         Names to use for each channel of data
     ignore_empties : bool, optional
         Removes any entries from the plot and legend that contain only zeros or only NaNs
+    colormap : str or matplotlib.colors.Colormap, optional
+        Name of colormap to use, if specified, overrides the opts.colormap
 
     Returns
     -------
@@ -1103,10 +1118,11 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     # check optional inputs
     if opts is None:
         opts = Opts()
-    if opts.colormap is None:
-        colormap = DEFAULT_COLORMAP
-    else:
-        colormap = opts.colormap
+    if colormap is None:
+        if opts.colormap is None:
+            colormap = DEFAULT_COLORMAP
+        else:
+            colormap = opts.colormap
     legend_loc = opts.legend_loc
     time_units = opts.base_time
 
@@ -1222,7 +1238,7 @@ def plot_bpe_convergence(costs, opts=None):
 
 #%% Functions - plot_population_pyramid
 def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyramid', *, opts=None, \
-        name1='Male', name2='Female', color1='b', color2='r'):
+        name1='Male', name2='Female', color1='xkcd:blue', color2='xkcd:red'):
     r"""
     Plot the standard population pyramid.
 
