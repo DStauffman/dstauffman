@@ -756,7 +756,7 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
 #%% Functions - plot_correlation_matrix
 def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matrix_name='Correlation Matrix', \
         cmin=0, cmax=1, xlabel='', ylabel='', plot_lower_only=True, label_values=False, x_lab_rot=90, \
-        colormap=None):
+        colormap=None, plot_border=None):
     r"""
     Visually plot a correlation matrix.
 
@@ -788,6 +788,8 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
         Amount in degrees to rotate the X labels, default is 90
     colormap : str or matplotlib.colors.Colormap, optional
         Name of colormap to use, if specified, overrides the opts.colormap
+    plot_border : str, optional
+        Color of the border to plot
 
     Returns
     -------
@@ -885,7 +887,7 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
             if not plot_lower_only or (i <= j):
                 if not np.isnan(data[j, i]):
                     ax.add_patch(Rectangle((box_size*i,box_size*j),box_size, box_size, \
-                        color=cm.get_color(scale*data[j, i])))
+                        facecolor=cm.get_color(scale*data[j, i]), edgecolor=plot_border))
                 if label_values:
                     ax.annotate('{:.2g}'.format(scale*data[j,i]), xy=(box_size*i + box_size/2, box_size*j + box_size/2), \
                         xycoords='data', horizontalalignment='center', \
@@ -966,6 +968,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     >>> fig   = plot_multiline_history(time, data, label)
 
     Close plot
+
     >>> plt.close(fig)
 
     """
@@ -999,7 +1002,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
         names     = opts.names
     else:
         assert False, 'Data must be a 2D or 3D array.'
-    assert time.shape[0] == data.shape[0], 'Time and data must be the same length.'
+    assert time.shape[0] == data.shape[0], 'Time and data must be the same length. Current time.shape={} and data.shape={}'.format(time.shape, data.shape)
     if legend is not None:
         assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
     else:
