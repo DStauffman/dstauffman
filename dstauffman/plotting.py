@@ -39,6 +39,7 @@ except ImportError: # pragma: no cover
 from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
 from dstauffman.latex import bins_to_str_ranges
+from dstauffman.quat import quat_angle_diff
 from dstauffman.stats import z_from_ci
 from dstauffman.utils import get_images_dir, pprint_dict, rms
 
@@ -396,6 +397,24 @@ class ColorMap(Frozen):
         except AttributeError: # pragma: no cover
             # for older matplotlib versions, use deprecated set_color_cycle
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
+
+#%% Functions - get_color_lists
+def get_color_lists():
+    r"""
+    Gets different color lists to use for plotting
+    """
+    color_lists              = {}
+    color_lists['default']   = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
+    color_lists['single']    = colors.ListedColormap(('xkcd:red',))
+    color_lists['double']    = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
+    color_lists['vec']       = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
+    color_lists['quat']      = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
+    color_lists['dbl_diff']  = colors.ListedColormap(('xkcd:red', 'xkcd:blue', 'xkcd:fuchsia', 'xkcd:cyan'))
+    color_lists['vec_diff']  = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue',
+        'xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan'))
+    color_lists['quat_diff'] = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue',
+        'xkcd:chocolate', 'xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan', 'xkcd:brown'))
+    return color_lists
 
 #%% Functions - ignore_plot_data
 def ignore_plot_data(data, ignore_empties, col=None):
@@ -1727,6 +1746,174 @@ def get_screen_resolution():
     # close the app
     app.closeAllWindows()
     return (screen_width, screen_height)
+
+#%% Functions - general_quaternion_plot
+def general_quaternion_plot(description, time, quat_one, quat_two, name_one, name_two, *,
+        ix_rms_xmin, ix_rms_xmax, start_date='', fig_visible=True, make_subplots=True,
+        plot_components=True, legend_loc='best'):
+    r"""
+    Generic quaternion comparison plot for use in other wrapper functions.  This function plots two
+    quaternion histories over time, along with a difference from one another.
+
+    Input
+    -----
+    description : str
+        name of the data being plotted, used as title
+    time : array_like
+        time history [sec]
+    quat_one : (4, N) ndarray
+        quaternion one
+    quat_two : (4, N) ndarray
+        quaternion two
+    name_one : str
+        name of data source 1
+    name_two : str
+        name of data source 2
+    ix_rms_xmin : int
+        index to first point of RMS calculation
+    ix_rms_xmax : int
+        index to last point of RMS calculation
+    start_date : str
+        date of t(0), may be an empty string
+    fig_visible : bool
+        whether figure is visible
+    make_subplots : bool
+        flag to use subplots
+    plot_components : bool
+        flag to plot components as opposed to angular difference
+
+    Returns
+    -------
+    fig_hand : list of class matplotlib.Figure
+        list of figure handles
+    err : (3,N) ndarray
+        Quaternion differences expressed in Q1 frame
+
+    See Also
+    --------
+    TBD_wrapper
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
+    #.  Ported to Python by David C. Stauffer in December 2018.
+
+    Examples
+    --------
+    >>> from dstauffman import general_quaternion_plot, quat_norm
+    >>> import numpy as np
+    >>> from datetime import datetime
+    >>> description     = 'example'
+    >>> time            = np.arange(11)
+    >>> quat_one        = quat_norm(np.random.rand(4, 11))
+    >>> quat_two        = quat_norm(np.random.rand(4, 11))
+    >>> name_one        = 'test1'
+    >>> name_two        = 'test2'
+    >>> start_date      = str(datetime.now())
+    >>> ix_rms_xmin     = 0
+    >>> ix_rms_xmax     = 10
+    >>> fig_visible     = True
+    >>> make_subplots   = True
+    >>> plot_components = True
+    >>> (fig_hand, err) = general_quaternion_plot(description, time, quat_one, quat_two, name_one, \
+    ...     name_two, ix_rms_xmin=ix_rms_xmin, ix_rms_xmax=ix_rms_xmax, start_date=start_date, \
+    ...     fig_visible=fig_visible, make_subplots=make_subplots, plot_components=plot_components)
+
+    """
+#    # force inputs to be ndarrays
+#    time = np.asanyarray(time)
+#    quat_one = np.asanyarray(quat_one)
+#    quat_two = np.asanyarray(quat_two)
+
+    #%% calculations
+    q1_rms = rms(quat_one[:,ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
+    q2_rms = rms(quat_two[:,ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
+    (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one, quat_two)
+    nondeg_rms = rms(nondeg_error[:, ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
+    # output errors
+    if plot_components:
+        err = nondeg_rms
+    else:
+        err = np.array([nondeg_rms, np.nan, np.nan])
+    # get default plotting colors
+    color_lists = get_color_lists()
+    colororder3 = ColorMap(color_lists['vec'], num_colors=3)
+    colororder8 = ColorMap(color_lists['quat_diff'], num_colors=8)
+    # quaternion component names
+    names = ['X', 'Y', 'Z', 'S']
+    # names = ['qx', 'qy', 'qz', 'qs']
+    # TODO: make non-harded coded
+    # unit conversion value
+    rad2urad = 1e6
+    # determine if you have the quaternions
+    have_quat_one = np.any(~np.isnan(quat_one))
+    have_quat_two = np.any(~np.isnan(quat_one))
+
+    #%% Overlay plots
+    f1 = plt.figure()
+    # create axis
+    if make_subplots:
+        f1.canvas.set_window_title(description) # TODO: fig_visible (in wrapper)?
+        if have_quat_one and have_quat_two:
+            ax1 = f1.add_subplot(2,1,1)
+        else:
+            ax1 = f1.add_subplot(111)
+        colororder8.set_colors(ax1)
+    else:
+        f1.canvas.set_window_title(description + ' Quaternion Components')
+        ax1 = f1.add_subplot(111)
+    # plot data
+    if have_quat_one:
+        for i in range(4):
+            this_label = name_one + ' ' + names[i] + ' (RMS: {:1.3f})'.format(q1_rms[i])
+            ax1.plot(time, quat_one[i,:], '^-', markersize=4, label=this_label)
+    if have_quat_two:
+        for i in range(4):
+            this_label = name_two + ' ' + names[i] + ' (RMS: {:1.3f})'.format(q2_rms[i])
+            ax1.plot(time, quat_two[i,:], 'v:', markersize=4, label=this_label)
+    # format display of plot
+    ax1.legend(loc=legend_loc)
+    #plot_rms_lines(time([ix_rms_xmin,ix_rms_xmax]),ylim)
+    ax1.set_title(description + ' Quaternion Components')
+    ax1.set_xlabel('Time [sec]' + start_date)
+    ax1.set_ylabel(description + ' Quaternion Components [dimensionless]')
+    ax1.grid(True)
+
+    #%% Difference plot
+    if have_quat_one and have_quat_two:
+        # make axis
+        if make_subplots:
+            ax2 = f1.add_subplot(2,1,2)
+            f2 = None
+        else:
+            f2 = plt.figure()
+            f2.canvas.set_window_title(description + ' Difference')
+            ax2 = f1.add_subplot(111)
+        colororder3.set_colors(ax2)
+        # plot data
+        if plot_components:
+            ax2.plot(time, nondeg_error.T, '^-', markersize=4)
+            ax2.legend([ \
+                'X (RMS: {:1.3f} \murad)'.format(rad2urad*nondeg_rms[0]), \
+                'Y (RMS: {:1.3f} \murad)'.format(rad2urad*nondeg_rms[1]), \
+                'Z (RMS: {:1.3f} \murad)'.format(rad2urad*nondeg_rms[2])], loc=legend_loc)
+            #set z-axis data to be plotted underneath everything else
+            # TODO: use zorder, but need separate calls
+        else:
+            ax2.plot(time, nondeg_angle, '^-', markersize=4)
+            ax2.legend('Angle (RMS: {:1.3f} \murad)'.format(rad2urad*nondeg_rms[0]), loc=legend_loc)
+        # format display of plot
+        #plot_rms_lines(time([ix_rms_xmin,ix_rms_xmax]),ylim)
+        ax2.set_title(description + '  Difference')
+        ax2.set_xlabel('Time [sec]' + start_date)
+        ax2.set_ylabel(description + ' Difference [rad]')
+        plt.grid(True)
+        # link axes to zoom together
+        #linkaxes([ax1, ax2],'x')
+    else:
+        f2 = None
+    fig_hand = [x for x in (f1, f2) if x is not None]
+    return (fig_hand, err)
 
 #%% Unit test
 if __name__ == '__main__':
