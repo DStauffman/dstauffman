@@ -841,6 +841,26 @@ class Test_unit(unittest.TestCase):
         norm_data = dcs.unit(self.data, axis=0)
         np.testing.assert_array_almost_equal(norm_data, self.norm_data)
 
+    def test_bad_axis(self):
+        with self.assertRaises(ValueError) as context:
+            dcs.unit(self.data, axis=2)
+        self.assertEqual(str(context.exception), 'axis 2 is out of bounds for array of dimension 2')
+
+    def test_single_vector(self):
+        for i in range(3):
+            norm_data = dcs.unit(self.data[:, i])
+            np.testing.assert_array_almost_equal(norm_data, self.norm_data[:, i])
+
+    def test_single_vector_axis0(self):
+        for i in range(3):
+            norm_data = dcs.unit(self.data[:, i], axis=0)
+            np.testing.assert_array_almost_equal(norm_data, self.norm_data[:, i])
+
+    def test_single_vector_bad_axis(self):
+        with self.assertRaises(ValueError) as context:
+            dcs.unit(self.data[:, 0], axis=1)
+        self.assertEqual(str(context.exception), 'axis 1 is out of bounds for array of dimension 1')
+
 #%% combine_sets
 class Test_combine_sets(unittest.TestCase):
     r"""
