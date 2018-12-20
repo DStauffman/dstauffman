@@ -492,8 +492,8 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     >>> from dstauffman import make_python_init, get_root_dir
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
-    >>> print(text[0:22])
-    from .analysis  import
+    >>> print(text[0:25])
+    from .analysis     import
 
     """
     # exclusions
@@ -903,8 +903,8 @@ def unit(data, axis=None):
     """
     if axis is None:
         axis = data.ndim - 1
-    if axis > data.ndim:
-        raise ValueError('axis {} is out of bounds for array of dimenion {}'.format(axis, data.ndim))
+    if axis >= data.ndim:
+        raise ValueError('axis {} is out of bounds for array of dimension {}'.format(axis, data.ndim))
     # calculate the magnitude of each vector
     mag = np.atleast_1d(np.sqrt(np.sum(data * np.conj(data), axis=axis)))
     # check for zero vectors, and replace magnitude with 1 to make them unchanged

@@ -15,6 +15,7 @@ import platform
 import unittest
 
 import matplotlib.cm as cmx
+import matplotlib.colors as colors
 import matplotlib.pyplot as plt
 import numpy as np
 from PyQt5.QtCore import Qt
@@ -319,6 +320,16 @@ class Test_ColorMap(unittest.TestCase):
         with self.assertRaises(ValueError):
             cm.set_colors(ax)
 
+    def test_existing_colormap(self):
+        colormap = colors.ListedColormap(['r', 'g', 'b'])
+        cm = dcs.ColorMap(colormap, num_colors=3)
+        red = cm.get_color(0)
+        green = cm.get_color(1)
+        blue = cm.get_color(2)
+        self.assertEqual(red, (1., 0, 0, 1))
+        self.assertEqual(green, (0., 0.5, 0, 1))
+        self.assertEqual(blue, (0., 0, 1, 1))
+
     def tearDown(self):
         if self.fig is not None:
             plt.close(self.fig)
@@ -350,6 +361,24 @@ class Test_close_all(unittest.TestCase):
         plt.close(fig2)
         self.assertFalse(plt.fignum_exists(fig1.number))
         self.assertFalse(plt.fignum_exists(fig2.number))
+
+#%% Functions - get_color_lists
+class Test_get_color_lists(unittest.TestCase):
+    r"""
+    Tests the get_color_lists function with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.keys = ['default', 'single', 'double', 'vec', 'quat', 'dbl_diff', 'vec_diff', 'quat_diff']
+
+    def test_nominal(self):
+        color_lists = dcs.get_color_lists()
+        for key in self.keys:
+            self.assertIn(key, color_lists)
+        colormap = color_lists['quat_diff']
+        self.assertEqual(colormap.N, 8)
+        self.assertEqual(colormap.colors[0], 'xkcd:red')
+        self.assertEqual(colormap.colors[7], 'xkcd:brown')
 
 #%% Functions - ignore_plot_data
 class Test_ignore_plot_data(unittest.TestCase):
@@ -424,6 +453,11 @@ class Test_get_axes_scales(unittest.TestCase):
             (scale, units) = dcs.get_axes_scales(this_type)
             self.assertEqual(scale, self.scales[ix])
             self.assertEqual(units, self.units[ix])
+
+    def test_arbitrary_name(self):
+        (scale, units) = dcs.get_axes_scales('unit_rad')
+        self.assertEqual(scale, 1)
+        self.assertEqual(units, 'rad')
 
     def test_bad_type(self):
         with self.assertRaises(ValueError):

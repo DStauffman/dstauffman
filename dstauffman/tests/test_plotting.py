@@ -9,6 +9,7 @@ Notes
 """
 
 #%% Imports
+from datetime import datetime
 import unittest
 
 import matplotlib.pyplot as plt
@@ -133,6 +134,12 @@ class Test_plot_time_history(unittest.TestCase):
         self.opts.colormap = 'Dark2'
         self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, self.opts)
 
+    def test_colormap2(self):
+        self.opts.colormap = 'Dark2'
+        colormap = 'Paired'
+        self.fig = dcs.plot_time_history(self.time, self.data, self.label, self.type_, self.opts, \
+            colormap=colormap)
+
     def test_array_data1(self):
         data = np.column_stack((self.data, self.data))
         self.fig = dcs.plot_time_history(self.time, data, self.label, self.type_)
@@ -231,7 +238,7 @@ class Test_plot_correlation_matrix(unittest.TestCase):
     def test_all_args(self):
         self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, self.type_, self.opts, \
             matrix_name=self.matrix_name, cmin=0, cmax=1, xlabel='', ylabel='', \
-            plot_lower_only=False, label_values=True, x_lab_rot=180))
+            plot_lower_only=False, label_values=True, x_lab_rot=180, colormap='Paired'))
 
     def test_symmetric(self):
         self.figs.append(dcs.plot_correlation_matrix(self.sym))
@@ -356,6 +363,12 @@ class Test_plot_multiline_history(unittest.TestCase):
         self.assertIs(not_a_fig, None)
         self.assertEqual(output,'All Zeros plot skipped due to missing data.')
 
+    def test_colormap(self):
+        self.opts.colormap = 'Dark2'
+        colormap = 'Paired'
+        self.figs.append(dcs.plot_multiline_history(self.time, self.data, self.label, \
+            ignore_empties=True, colormap=colormap))
+
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):
             dcs.plot_multiline_history(self.time, self.data, self.label, legend=self.legend[:-1])
@@ -449,6 +462,12 @@ class Test_plot_bar_breakdown(unittest.TestCase):
         out.close()
         self.assertEqual(output, 'plot skipped due to missing data.')
 
+    def test_colormap(self):
+        self.opts.colormap = 'Dark2'
+        colormap = 'Paired'
+        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, \
+            opts=self.opts, colormap=colormap))
+
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):
             dcs.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend[:-1])
@@ -530,7 +549,97 @@ class Test_plot_population_pyramid(unittest.TestCase):
             plt.close(self.fig)
 
 #%% Functions - general_quaternion_plot
-pass # TODO: write this
+class Test_general_quaternion_plot(unittest.TestCase):
+    r"""
+    Tests the general_quaternion_plot function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.description     = 'example'
+        self.time            = np.arange(11)
+        self.quat_one        = dcs.quat_norm(np.random.rand(4, 11))
+        self.quat_two        = dcs.quat_norm(np.random.rand(4, 11))
+        self.name_one        = 'test1'
+        self.name_two        = 'test2'
+        self.start_date      = str(datetime.now())
+        self.ix_rms_xmin     = 0
+        self.ix_rms_xmax     = 10
+        self.fig_visible     = True
+        self.make_subplots   = True
+        self.plot_components = True
+
+    def test_nominal(self):
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
+             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
+             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+             make_subplots=self.make_subplots, plot_components=self.plot_components)
+        for i in range(3):
+            self.assertLess(abs(err[i]), 3.15)
+
+    def test_not_visible(self):
+        self.fig_visible = False
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
+             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
+             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+             make_subplots=self.make_subplots, plot_components=self.plot_components)
+        for i in range(3):
+            self.assertLess(abs(err[i]), 3.15)
+
+    def test_no_subplots(self):
+        self.make_subplots = False
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
+             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
+             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+             make_subplots=self.make_subplots, plot_components=self.plot_components)
+        for i in range(3):
+            self.assertLess(abs(err[i]), 3.15)
+
+    def test_no_components(self):
+        self.plot_components = False
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
+             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
+             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+             make_subplots=self.make_subplots, plot_components=self.plot_components)
+        self.assertLess(abs(err[0]), 3.15)
+        self.assertTrue(np.isnan(err[1]))
+        self.assertTrue(np.isnan(err[2]))
+
+    def test_no_start_date(self):
+        self.start_date = ''
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
+             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
+             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+             make_subplots=self.make_subplots, plot_components=self.plot_components)
+        for i in range(3):
+            self.assertLess(abs(err[i]), 3.15)
+
+    def test_only_quat_one(self):
+        self.quat_two.fill(np.nan)
+        self.name_two = ''
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
+             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
+             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+             make_subplots=self.make_subplots, plot_components=self.plot_components)
+        self.assertTrue(np.all(np.isnan(err)))
+
+    def test_only_quat_two(self):
+        self.quat_one = None
+        self.name_one = ''
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
+             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
+             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+             make_subplots=self.make_subplots, plot_components=self.plot_components)
+        self.assertTrue(np.all(np.isnan(err)))
+
+    def test_rms_bounds(self):
+        self.ix_rms_xmin = 5
+        self.ix_rms_xmax = 7
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
+             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
+             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+             make_subplots=self.make_subplots, plot_components=self.plot_components)
+        for i in range(3):
+            self.assertLess(abs(err[i]), 3.15)
 
 #%% Unit test execution
 if __name__ == '__main__':

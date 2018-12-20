@@ -576,6 +576,12 @@ class test_quat_prop(unittest.TestCase):
         quat = dcs.quat_prop(self.quat, self.delta_ang)
         np.testing.assert_array_almost_equal(quat, self.quat_new)
 
+    def test_negative_scalar(self):
+        quat = dcs.quat_prop(np.array([1, 0, 0, 0]), self.delta_ang)
+        self.assertGreater(quat[3], 0)
+        quat = dcs.quat_prop(np.array([1, 0, 0, 0]), -self.delta_ang)
+        self.assertGreater(quat[3], 0)
+
     def test_no_renorm(self):
         with self.assertRaises(AssertionError):
             dcs.quat_prop(self.quat, self.delta_ang, renorm=False)

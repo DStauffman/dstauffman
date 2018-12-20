@@ -912,16 +912,24 @@ def general_quaternion_plot(description, time, quat_one, quat_two, name_one, nam
 #    quat_one = np.asanyarray(quat_one)
 #    quat_two = np.asanyarray(quat_two)
 
+    # determine if you have the quaternions
+    have_quat_one = quat_one is not None and np.any(~np.isnan(quat_one))
+    have_quat_two = quat_two is not None and np.any(~np.isnan(quat_two))
     #% calculations
-    q1_rms = rms(quat_one[:,ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
-    q2_rms = rms(quat_two[:,ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
-    (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one, quat_two)
-    nondeg_rms = rms(nondeg_error[:, ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
+    if have_quat_one:
+        q1_rms = rms(quat_one[:,ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
+    if have_quat_two:
+        q2_rms = rms(quat_two[:,ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
     # output errors
-    if plot_components:
-        err = nondeg_rms
+    if have_quat_one and have_quat_two:
+        (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one, quat_two)
+        nondeg_rms = rms(nondeg_error[:, ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
+        if plot_components:
+            err = nondeg_rms
+        else:
+            err = np.array([rms(nondeg_angle[ix_rms_xmin:ix_rms_xmax], ignore_nans=True), np.nan, np.nan])
     else:
-        err = np.array([nondeg_rms, np.nan, np.nan])
+        err = np.full(3, np.nan, dtype=float)
     # get default plotting colors
     color_lists = get_color_lists()
     colororder3 = ColorMap(color_lists['vec'], num_colors=3)
@@ -932,9 +940,6 @@ def general_quaternion_plot(description, time, quat_one, quat_two, name_one, nam
     # TODO: make non-harded coded
     # unit conversion value
     rad2urad = 1e6
-    # determine if you have the quaternions
-    have_quat_one = np.any(~np.isnan(quat_one))
-    have_quat_two = np.any(~np.isnan(quat_one))
 
     #% Overlay plots
     f1 = plt.figure()
@@ -975,7 +980,7 @@ def general_quaternion_plot(description, time, quat_one, quat_two, name_one, nam
         else:
             f2 = plt.figure()
             f2.canvas.set_window_title(description + ' Difference')
-            ax2 = f1.add_subplot(111)
+            ax2 = f2.add_subplot(111)
         colororder3.set_colors(ax2)
         # plot data
         if plot_components:
