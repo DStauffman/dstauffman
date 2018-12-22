@@ -55,28 +55,28 @@ Temporary Items
 # =========================
 # LaTeX Files #
 # =========================
-*/docs/*/*.aux
-*/docs/*/*.bbl
-*/docs/*/*.bcf
-*/docs/*/*.blg
-*/docs/*/*.dvi
-*/docs/*/*.gz
-*/docs/*/*.hst
-*/docs/*/*.lof
-*/docs/*/*.log
-*/docs/*/*.lot
-*/docs/*/*.out
-*/docs/*/*.pdf
-*/docs/*/*.run.xml
-*/docs/*/*.toc
-*/docs/*/*.tcp
-*/docs/*/*.tps
-*/docs/*/*.ver
+**/docs/*/*.aux
+**/docs/*/*.bbl
+**/docs/*/*.bcf
+**/docs/*/*.blg
+**/docs/*/*.dvi
+**/docs/*/*.gz
+**/docs/*/*.hst
+**/docs/*/*.lof
+**/docs/*/*.log
+**/docs/*/*.lot
+**/docs/*/*.out
+**/docs/*/*.pdf
+**/docs/*/*.run.xml
+**/docs/*/*.toc
+**/docs/*/*.tcp
+**/docs/*/*.tps
+**/docs/*/*.ver
 
 # beamer files
-*/docs/*/*.nav
-*/docs/*/*.snm
-*/docs/*/*.vrb
+**/docs/*/*.nav
+**/docs/*/*.snm
+**/docs/*/*.vrb
 
 # =========================
 # PyCharm Files #

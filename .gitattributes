@@ -11,6 +11,7 @@
 
 # known binary files to not modify
 *.mat binary
+*.hdf5 binary
 *.xlsx binary
 *.docx binary
 *.pptx binary
