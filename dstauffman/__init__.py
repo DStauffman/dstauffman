@@ -21,9 +21,9 @@ from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZ
 from .enums        import IntEnumPlus, consecutive, dist_enum_and_mons
 from .latex        import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
 from .linalg       import orth, subspace
-from .plotting     import Opts, plot_time_history, plot_correlation_matrix, \
-                              plot_multiline_history, plot_bar_breakdown, plot_bpe_convergence, \
-                              plot_population_pyramid, general_quaternion_plot
+from .plotting     import Opts, plot_monte_carlo, plot_correlation_matrix, plot_time_history, \
+                              plot_bar_breakdown, plot_bpe_convergence, plot_population_pyramid, \
+                              general_quaternion_plot
 from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
                               get_color_lists, ignore_plot_data, get_axes_scales, whitten, \
                               storefig, titleprefix, disp_xlimits, setup_plots, figmenu, \

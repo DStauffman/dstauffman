@@ -160,7 +160,7 @@ if __name__ == '__main__':
         opts.save_plot = True
 
         # make model plots
-        dcs.plot_time_history(time, results, 'Output vs. Time', opts=opts, truth=truth)
+        dcs.plot_monte_carlo(time, results, 'Output vs. Time', opts=opts, truth=truth)
 
         # make BPE plots
         bpe_plots = {'innovs': True, 'convergence': False, 'correlation': True, 'info_svd': True, \

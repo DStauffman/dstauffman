@@ -25,7 +25,7 @@ from scipy.linalg import norm
 
 from dstauffman.classes import Frozen, SaveAndLoad
 from dstauffman.plotting import Opts, plot_bpe_convergence, plot_correlation_matrix, \
-    plot_multiline_history
+    plot_time_history
 from dstauffman.utils import activate_logging, deactivate_logging, pprint_dict, rss, setup_dir
 
 #%% Globals
@@ -1292,7 +1292,7 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
             time = np.arange(len(bpe_results.begin_innovs))
             data = np.vstack((bpe_results.begin_innovs, bpe_results.final_innovs)).T
             opts.colormap = 'bwr_r'
-            fig = plot_multiline_history(time, data, label='Innovs Before and After', opts=opts, \
+            fig = plot_time_history(time, data, label='Innovs Before and After', opts=opts, \
                 legend=['Before', 'After'])
             figs.append(fig)
         else:

@@ -65,8 +65,8 @@ class Opts(Frozen):
         r"""Display a pretty print version of the class."""
         pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
-#%% Functions - plot_time_history
-def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
+#%% Functions - plot_monte_carlo
+def plot_monte_carlo(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, second_y_scale=None, truth_time=None, \
     truth_data=None, plot_sigmas=1, plot_confidence=0, colormap=None):
     r"""
@@ -119,14 +119,14 @@ def plot_time_history(time, data, label, type_='unity', opts=None, *, plot_indiv
 
     Examples
     --------
-    >>> from dstauffman import plot_time_history
+    >>> from dstauffman import plot_monte_carlo
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> time  = np.arange(0, 10, 0.1)
     >>> data  = np.sin(time)
     >>> label = 'Sin'
     >>> type_ = 'population'
-    >>> fig   = plot_time_history(time, data, label, type_)
+    >>> fig   = plot_monte_carlo(time, data, label, type_)
 
     Close plot
     >>> plt.close(fig)
@@ -414,8 +414,8 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
     setup_plots(fig, opts, 'dist')
     return fig
 
-#%% Functions - plot_multiline_history
-def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legend=None, \
+#%% Functions - plot_time_history
+def plot_time_history(time, data, label, type_='unity', opts=None, *, legend=None, \
         second_y_scale=None, ignore_empties=False, data_lo=None, data_hi=None, colormap=None):
     r"""
     Plot multiple metrics over time.
@@ -458,7 +458,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
 
     Examples
     --------
-    >>> from dstauffman import plot_multiline_history
+    >>> from dstauffman import plot_time_history
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> time  = np.arange(0, 5, 1./12) + 2000
@@ -466,7 +466,7 @@ def plot_multiline_history(time, data, label, type_='unity', opts=None, *, legen
     >>> mag   = data.cumsum(axis=1)[:,-1]
     >>> data  = 10 * data / np.expand_dims(mag, axis=1)
     >>> label = 'Random Data'
-    >>> fig   = plot_multiline_history(time, data, label)
+    >>> fig   = plot_time_history(time, data, label)
 
     Close plot
 
