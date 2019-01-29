@@ -1233,6 +1233,10 @@ def np_digitize(x, bins, right=False):
     --------
     numpy.digitize
 
+    Notes
+    -----
+    #.  This function is equilavent to the MATLAB `discretize` function.
+
     Examples
     --------
     >>> from dstauffman import np_digitize
@@ -1245,7 +1249,7 @@ def np_digitize(x, bins, right=False):
 
     """
     # hard-coded values
-    precision = 1e-13
+    precision = 0 * 1e-13 # TODO: do I need a precision here (or only if bins are not ints?)
 
     # allow an empty x to pass through just fine
     if x.size == 0:
@@ -1266,6 +1270,54 @@ def np_digitize(x, bins, right=False):
     # do the calculations by calling the numpy command and shift results by one
     out = np.digitize(x, bins, right) - 1
     return out
+
+#%% histcounts
+def histcounts(x, bins, right=False):
+    r"""
+    Count the number of points in each of the given bins.
+
+    Parameters
+    ----------
+    x : array_like
+        Input array to be binned.
+    bins : array_like
+        Array of bins. It has to be 1-dimensional and monotonic.
+    right : bool, optional
+        Indicating whether the intervals include the right or the left bin
+        edge. Default behavior is (right==False) indicating that the interval
+        does not include the right edge. The left bin end is open in this
+        case, i.e., bins[i-1] <= x < bins[i] is the default behavior for
+        monotonically increasing bins.
+
+    Returns
+    -------
+    hist : ndarray of ints
+        Output array the number of points in each bin
+
+    See Also
+    --------
+    numpy.digitize, np_digitize
+
+    Notes
+    -----
+    #.  This function is equilavent to the MATLAB `histcounts` function.
+
+    Examples
+    --------
+    >>> from dstauffman import histcounts
+    >>> import numpy as np
+    >>> x    = np.array([0.2, 6.4, 3.0, 1.6, 0.5])
+    >>> bins = np.array([0.0, 1.0, 2.5, 4.0, 10.0])
+    >>> hist = histcounts(x, bins)
+    >>> print(hist)
+    [2 1 1 1]
+
+    """
+    # get the bin number that each point is in
+    ix_bin = np_digitize(x, bins, right=right)
+    # count the number in each bin
+    hist = np.bincount(ix_bin, minlength=len(bins)-1)
+    return hist
 
 #%% full_print
 @contextmanager

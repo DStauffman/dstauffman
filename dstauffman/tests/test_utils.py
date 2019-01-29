@@ -1297,6 +1297,32 @@ class Test_np_digitize(unittest.TestCase):
         with self.assertRaises(ValueError):
             dcs.np_digitize(np.array([1, 10, np.nan]), self.bins)
 
+#%% histcounts
+class Test_histcounts(unittest.TestCase):
+    r"""Tests the histcounts function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.x        = np.array([0.2, 6.4, 3.0, 1.6, 0.5])
+        self.bins     = np.array([0.0, 1.0, 2.5, 4.0, 10.0])
+        self.expected = np.array([2, 1, 1, 1])
+
+    def test_nominal(self):
+        hist = dcs.histcounts(self.x, self.bins)
+        np.testing.assert_array_equal(hist, self.expected)
+
+    def test_right(self):
+        x = np.array([1, 1, 2, 2, 2])
+        bins = np.array([0, 1, 2, 3])
+        hist = dcs.histcounts(x, bins, right=False)
+        np.testing.assert_array_equal(hist, np.array([0, 2, 3]))
+        hist2 = dcs.histcounts(x, bins, right=True)
+        np.testing.assert_array_equal(hist2, np.array([2, 3, 0]))
+
+    def test_out_of_bounds(self):
+        with self.assertRaises(ValueError):
+            dcs.histcounts(self.x, np.array([100, 1000]))
+
 #%% full_print
 class Test_full_print(unittest.TestCase):
     r"""Tests the full_print function with the following cases:
