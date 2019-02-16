@@ -107,6 +107,10 @@ def get_factors(prefix):
     μ
 
     """
+    if isinstance(prefix, (int,float)):
+        mult = prefix
+        label = '';
+        return (mult, label)
     # find the desired units and label prefix
     if prefix == 'yotta':
         mult  = 1e24

@@ -435,34 +435,6 @@ class Test_ignore_plot_data(unittest.TestCase):
         ignore = dcs.ignore_plot_data(self.data, self.ignore_empties, 5)
         self.assertFalse(ignore)
 
-#%% Functions - get_axes_scales
-class Test_get_axes_scales(unittest.TestCase):
-    r"""
-    Tests get_axes_scales function with the following cases:
-        Nominal usage
-        Bad type (should raise ValueError)
-    """
-    def setUp(self):
-        self.types  = ['unity', 'population', 'percentage', 'per 1K', 'per 100K', 'cost', 'years']
-        self.scales = [1, 1, 100, 1000, 100000, 1e-3, 1]
-        self.units  = ['', '#', '%', 'per 1,000', 'per 100,000', "$K's", 'years']
-        self.bad_type = 'nonexistant'
-
-    def test_nominal_usage(self):
-        for (ix, this_type) in enumerate(self.types):
-            (scale, units) = dcs.get_axes_scales(this_type)
-            self.assertEqual(scale, self.scales[ix])
-            self.assertEqual(units, self.units[ix])
-
-    def test_arbitrary_name(self):
-        (scale, units) = dcs.get_axes_scales('unit_rad')
-        self.assertEqual(scale, 1)
-        self.assertEqual(units, 'rad')
-
-    def test_bad_type(self):
-        with self.assertRaises(ValueError):
-            dcs.get_axes_scales(self.bad_type)
-
 #%% Functions - whitten
 class Test_whitten(unittest.TestCase):
     r"""

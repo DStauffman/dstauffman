@@ -455,68 +455,6 @@ def ignore_plot_data(data, ignore_empties, col=None):
         ignore = np.all((data[:, col] == 0) | np.isnan(data[:, col]))
     return ignore
 
-#%% Functions - get_axes_scales
-def get_axes_scales(type_):
-    r"""
-    Determine the scale factor and units to apply to the plot based on the desired `type_`.
-
-    Parameters
-    ----------
-    type_ : str {'unity', 'population', 'percentage', 'per 100K', 'cost', 'years'}
-        description of the type of data that is being plotted
-
-    Returns
-    -------
-    scale : int or float
-        Scale factor to multiply the raw values by
-    units : str
-        Units string to apply to the plot axis label
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in September 2015.
-
-    Examples
-    --------
-    >>> from dstauffman import get_axes_scales
-    >>> type_ = 'percentage'
-    >>> (scale, units) = get_axes_scales(type_)
-
-    >>> print(scale)
-    100
-    >>> print(units)
-    %
-
-    """
-    # determine results based on simple switch statement
-    if type_.startswith('unit_'): # TODO: make more generic and allow vert_fact to work
-        scale = 1
-        units = type_[5:]
-    elif type_ == 'unity':
-        scale = 1
-        units = ''
-    elif type_ == 'population':
-        scale = 1
-        units = '#'
-    elif type_ == 'percentage':
-        scale = 100
-        units = '%'
-    elif type_ == 'per 1K':
-        scale = 1000
-        units = 'per 1,000'
-    elif type_ == 'per 100K':
-        scale = 100000
-        units = 'per 100,000'
-    elif type_ == 'cost':
-        scale = 1e-3
-        units = "$K's"
-    elif type_ == 'years':
-        scale = 1
-        units = 'years'
-    else:
-        raise ValueError('Unexpected data type_ "{}" for plot.'.format(type_))
-    return (scale, units)
-
 #%% Functions - whitten
 def whitten(color, white=(1, 1, 1, 1), dt=0.30):
     r"""

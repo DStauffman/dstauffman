@@ -118,6 +118,16 @@ class Test_get_factors(unittest.TestCase):
         with self.assertRaises(ValueError):
             dcs.get_factors('bad_prefix_name')
 
+    def test_int(self):
+        (mult, label) = dcs.get_factors(10)
+        self.assertEqual(mult, 10)
+        self.assertEqual(label, '')
+
+    def test_float(self):
+        (mult, label) = dcs.get_factors(0.3)
+        self.assertEqual(mult, 0.3)
+        self.assertEqual(label, '')
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

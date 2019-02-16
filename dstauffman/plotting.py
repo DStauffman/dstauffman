@@ -25,10 +25,11 @@ from matplotlib.ticker import StrMethodFormatter
 from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
 from dstauffman.latex import bins_to_str_ranges
-from dstauffman.plot_support import ColorMap, get_axes_scales, get_color_lists, ignore_plot_data, \
+from dstauffman.plot_support import ColorMap, get_color_lists, ignore_plot_data, \
                                         setup_plots, TruthPlotter, whitten
 from dstauffman.quat import quat_angle_diff
 from dstauffman.stats import z_from_ci
+from dstauffman.units import get_factors
 from dstauffman.utils import pprint_dict, rms
 
 #%% Classes - Opts
@@ -46,6 +47,7 @@ class Opts(Frozen):
         self.disp_xmax  =  np.inf
         self.rms_xmin   = -np.inf
         self.rms_xmax   =  np.inf
+        self.vert_fact  = 'unity'
         self.colormap   = None
         self.show_rms   = True
         self.show_zero  = False
@@ -65,8 +67,166 @@ class Opts(Frozen):
         r"""Display a pretty print version of the class."""
         pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
+#%% Functions - plot_time_history
+def plot_time_history(time, data, label, units='unity', opts=None, *, legend=None, \
+        second_y_scale=None, ignore_empties=False, data_lo=None, data_hi=None, colormap=None):
+    r"""
+    Plot multiple metrics over time.
+
+    Parameters
+    ----------
+    time : 1D ndarray
+        time history
+    data : 2D or 3D ndarray
+        data for corresponding time history, time is first dimension, last dimension is bin
+        middle dimension if 3D is the cycle
+    label : str
+        Name to label on the plots
+    units : str, optional
+        units of the data to be displayed on the plot
+    opts : class Opts, optional
+        plotting options
+    legend : list of str, optional
+        Names to use for each channel of data
+    second_y_scale : float or dict, optional
+        Multiplication scale factor to use to display on a secondary Y axis
+    ignore_empties : bool, optional
+        Removes any entries from the plot and legend that contain only zeros or only NaNs
+    data_lo : same as data
+        Lower confidence bound on data, plot if not None
+    data_hi : same as data
+        Upper confidence bound on data, plot if not None
+    colormap : str or matplotlib.colors.Colormap, optional
+        Name of colormap to use, if specified, overrides the opts.colormap
+
+    Returns
+    -------
+    fig : object
+        figure handle, if None, no figure was created
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2015.
+    #.  Updated by David C. Stauffer in October 2017 to do comparsions of multiple runs.
+
+    Examples
+    --------
+    >>> from dstauffman import plot_time_history
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> time  = np.arange(0, 5, 1./12) + 2000
+    >>> data  = np.random.rand(len(time), 5)
+    >>> mag   = data.cumsum(axis=1)[:,-1]
+    >>> data  = 10 * data / np.expand_dims(mag, axis=1)
+    >>> label = 'Random Data'
+    >>> fig   = plot_time_history(time, data, label)
+
+    Close plot
+
+    >>> plt.close(fig)
+
+    """
+    # check optional inputs
+    if opts is None:
+        opts = Opts()
+    if colormap is None:
+        if opts.colormap is None:
+            colormap = DEFAULT_COLORMAP
+        else:
+            colormap = opts.colormap
+    legend_loc = opts.legend_loc
+    show_zero  = opts.show_zero
+    time_units = opts.base_time
+    unit_text = ' [' + units + ']' if units else ''
+    (scale, prefix) = get_factors(opts.vert_fact)
+
+    # check for valid data
+    if ignore_plot_data(data, ignore_empties):
+        print(' ' + label + ' plot skipped due to missing data.')
+        return None
+    assert time.ndim == 1, 'Time must be a 1D array.'
+    if data.ndim == 2:
+        normal    = True
+        num_loops = 1
+        num_bins  = data.shape[1]
+        names     = ['']
+    elif data.ndim == 3:
+        assert len(opts.names) == data.shape[1], 'Names must match the number of channels is the 3rd axis of data.'
+        normal    = False
+        num_loops = data.shape[1]
+        num_bins  = data.shape[2]
+        names     = opts.names
+    else:
+        assert False, 'Data must be a 2D or 3D array.'
+    assert time.shape[0] == data.shape[0], 'Time and data must be the same length. Current time.shape={} and data.shape={}'.format(time.shape, data.shape)
+    if legend is not None:
+        assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
+    else:
+        legend = ['Channel {}'.format(i+1) for i in range(num_bins)]
+
+    # process other inputs
+    this_title = label + ' vs. Time'
+
+    # get colormap based on high and low limits
+    cm = ColorMap(colormap, num_colors=num_bins)
+
+    # plot data
+    fig = plt.figure()
+    fig.canvas.set_window_title(this_title)
+    ax = fig.add_subplot(111)
+    cm.set_colors(ax)
+    for i in range(num_bins):
+        for j in range(num_loops):
+            this_name = names[j] + ' - ' if names[j] else ''
+            if normal:
+                this_data    = data[:, i]
+                this_data_lo = data_lo[:, i] if data_lo is not None else None
+                this_data_hi = data_hi[:, i] if data_hi is not None else None
+            else:
+                this_data    = data[:, j, i]
+                this_data_lo = data_lo[:, j, i] if data_lo is not None else None
+                this_data_hi = data_hi[:, j, i] if data_hi is not None else None
+            if not ignore_plot_data(this_data, ignore_empties):
+                color_dt = j * 0.5 / num_loops
+                if j // 2:
+                    this_color = whitten(cm.get_color(i), white=(0, 0, 0, 1), dt=color_dt)
+                else:
+                    this_color = whitten(cm.get_color(i), white=(1, 1, 1, 1), dt=color_dt)
+                ax.plot(time, scale*this_data, '.-', label=this_name + legend[i], color=this_color, zorder=10)
+                if this_data_lo is not None:
+                    ax.plot(time, scale*this_data_lo, 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
+                if this_data_hi is not None:
+                    ax.plot(time, scale*this_data_hi, 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
+
+    # add labels and legends
+    ax.set_xlabel('Time [' + time_units + ']')
+    ax.set_ylabel(label + unit_text)
+    ax.set_title(this_title)
+    ax.legend(loc=legend_loc)
+    ax.grid(True)
+    # optionally force zero to be plotted
+    if show_zero and min(ax.get_ylim()) > 0:
+        ax.set_ylim(bottom=0)
+    # set years to always be whole numbers on the ticks
+    if time_units == 'year' and (np.max(time) - np.min(time)) >= 4:
+        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
+
+    # optionally add second Y axis
+    if second_y_scale is not None:
+        ax2 = ax.twinx()
+        if isinstance(second_y_scale, (int, float)):
+            ax2.set_ylim(np.multiply(second_y_scale, ax.get_ylim()))
+        else:
+            for (key, value) in second_y_scale.items():
+                ax2.set_ylim(np.multiply(value, ax.get_ylim()))
+                ax2.set_ylabel(key)
+
+    # setup plots
+    setup_plots(fig, opts, 'time')
+    return fig
+
 #%% Functions - plot_monte_carlo
-def plot_monte_carlo(time, data, label, type_='unity', opts=None, *, plot_indiv=True, \
+def plot_monte_carlo(time, data, label, units='unity', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, second_y_scale=None, truth_time=None, \
     truth_data=None, plot_sigmas=1, plot_confidence=0, colormap=None):
     r"""
@@ -80,8 +240,8 @@ def plot_monte_carlo(time, data, label, type_='unity', opts=None, *, plot_indiv=
         data for corresponding time history
     label : str
         generic text to put on the plot title and figure name
-    type_ : str, optional, from {'unity', 'population', 'percentage', 'per 100K', 'cost'}
-        description of the type of data that is being plotted, default is 'unity'
+    units : str, optional
+        units of the data to be displayed on the plot
     opts : class Opts, optional
         plotting options
     plot_indiv : bool, optional
@@ -125,8 +285,8 @@ def plot_monte_carlo(time, data, label, type_='unity', opts=None, *, plot_indiv=
     >>> time  = np.arange(0, 10, 0.1)
     >>> data  = np.sin(time)
     >>> label = 'Sin'
-    >>> type_ = 'population'
-    >>> fig   = plot_monte_carlo(time, data, label, type_)
+    >>> units = 'population'
+    >>> fig   = plot_monte_carlo(time, data, label, units)
 
     Close plot
     >>> plt.close(fig)
@@ -148,6 +308,8 @@ def plot_monte_carlo(time, data, label, type_='unity', opts=None, *, plot_indiv=
     legend_loc    = opts.legend_loc
     show_zero     = opts.show_zero
     time_units    = opts.base_time
+    unit_text     = ' [' + units + ']' if units else ''
+    (scale, prefix) = get_factors(opts.vert_fact)
 
     # maintain older API
     if truth_data is not None: # pragma: no cover
@@ -166,10 +328,6 @@ def plot_monte_carlo(time, data, label, type_='unity', opts=None, *, plot_indiv=
 
     # get number of different series
     num_series = data.shape[1]
-
-    # determine which type of data to plot
-    (scale, units) = get_axes_scales(type_)
-    unit_text = ' [' + units + ']' if units else ''
 
     if plot_as_diffs:
         # build colormap
@@ -255,7 +413,7 @@ def plot_monte_carlo(time, data, label, type_='unity', opts=None, *, plot_indiv=
     return fig
 
 #%% Functions - plot_correlation_matrix
-def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matrix_name='Correlation Matrix', \
+def plot_correlation_matrix(data, labels=None, units='unity', opts=None, *, matrix_name='Correlation Matrix', \
         cmin=0, cmax=1, xlabel='', ylabel='', plot_lower_only=True, label_values=False, x_lab_rot=90, \
         colormap=None, plot_border=None):
     r"""
@@ -267,8 +425,8 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
         data for corresponding time history
     labels : list of str, optional
         Names to put on row and column headers
-    type_ : str, optional, from {'unity', 'population', 'percentage', 'per 100K', 'cost'}
-        description of the type of data that is being plotted, default is 'unity'
+    units : str, optional
+        units of the data to be displayed on the plot
     opts : class Opts, optional
         plotting options
     matrix_name : str, optional
@@ -323,6 +481,7 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
             colormap = 'cool'
         else:
             colormap = opts.colormap
+    (scale, prefix) = get_factors(opts.vert_fact)
 
     # Hard-coded values
     box_size        = 1
@@ -366,7 +525,6 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
         cmax = temp
 
     # determine which type of data to plot
-    (scale, units) = get_axes_scales(type_)
     this_title = matrix_name # + (' [' + units + ']' if units else '')
 
     # Create plots
@@ -412,164 +570,6 @@ def plot_correlation_matrix(data, labels=None, type_='unity', opts=None, *, matr
 
     # Setup plots
     setup_plots(fig, opts, 'dist')
-    return fig
-
-#%% Functions - plot_time_history
-def plot_time_history(time, data, label, type_='unity', opts=None, *, legend=None, \
-        second_y_scale=None, ignore_empties=False, data_lo=None, data_hi=None, colormap=None):
-    r"""
-    Plot multiple metrics over time.
-
-    Parameters
-    ----------
-    time : 1D ndarray
-        time history
-    data : 2D or 3D ndarray
-        data for corresponding time history, time is first dimension, last dimension is bin
-        middle dimension if 3D is the cycle
-    label : str
-        Name to label on the plots
-    type_ : str, optional, from {'unity', 'population', 'percentage', 'per 100K', 'cost'}
-        description of the type of data that is being plotted, default is 'unity'
-    opts : class Opts, optional
-        plotting options
-    legend : list of str, optional
-        Names to use for each channel of data
-    second_y_scale : float or dict, optional
-        Multiplication scale factor to use to display on a secondary Y axis
-    ignore_empties : bool, optional
-        Removes any entries from the plot and legend that contain only zeros or only NaNs
-    data_lo : same as data
-        Lower confidence bound on data, plot if not None
-    data_hi : same as data
-        Upper confidence bound on data, plot if not None
-    colormap : str or matplotlib.colors.Colormap, optional
-        Name of colormap to use, if specified, overrides the opts.colormap
-
-    Returns
-    -------
-    fig : object
-        figure handle, if None, no figure was created
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in September 2015.
-    #.  Updated by David C. Stauffer in October 2017 to do comparsions of multiple runs.
-
-    Examples
-    --------
-    >>> from dstauffman import plot_time_history
-    >>> import matplotlib.pyplot as plt
-    >>> import numpy as np
-    >>> time  = np.arange(0, 5, 1./12) + 2000
-    >>> data  = np.random.rand(len(time), 5)
-    >>> mag   = data.cumsum(axis=1)[:,-1]
-    >>> data  = 10 * data / np.expand_dims(mag, axis=1)
-    >>> label = 'Random Data'
-    >>> fig   = plot_time_history(time, data, label)
-
-    Close plot
-
-    >>> plt.close(fig)
-
-    """
-    # check optional inputs
-    if opts is None:
-        opts = Opts()
-    if colormap is None:
-        if opts.colormap is None:
-            colormap = DEFAULT_COLORMAP
-        else:
-            colormap = opts.colormap
-    legend_loc = opts.legend_loc
-    show_zero  = opts.show_zero
-    time_units = opts.base_time
-
-    # check for valid data
-    if ignore_plot_data(data, ignore_empties):
-        print(' ' + label + ' plot skipped due to missing data.')
-        return None
-    assert time.ndim == 1, 'Time must be a 1D array.'
-    if data.ndim == 2:
-        normal    = True
-        num_loops = 1
-        num_bins  = data.shape[1]
-        names     = ['']
-    elif data.ndim == 3:
-        assert len(opts.names) == data.shape[1], 'Names must match the number of channels is the 3rd axis of data.'
-        normal    = False
-        num_loops = data.shape[1]
-        num_bins  = data.shape[2]
-        names     = opts.names
-    else:
-        assert False, 'Data must be a 2D or 3D array.'
-    assert time.shape[0] == data.shape[0], 'Time and data must be the same length. Current time.shape={} and data.shape={}'.format(time.shape, data.shape)
-    if legend is not None:
-        assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
-    else:
-        legend = ['Channel {}'.format(i+1) for i in range(num_bins)]
-
-    # process other inputs
-    this_title = label + ' vs. Time'
-    (scale, units) = get_axes_scales(type_)
-    unit_text = ' [' + units + ']' if units else ''
-
-    # get colormap based on high and low limits
-    cm = ColorMap(colormap, num_colors=num_bins)
-
-    # plot data
-    fig = plt.figure()
-    fig.canvas.set_window_title(this_title)
-    ax = fig.add_subplot(111)
-    cm.set_colors(ax)
-    for i in range(num_bins):
-        for j in range(num_loops):
-            this_name = names[j] + ' - ' if names[j] else ''
-            if normal:
-                this_data    = data[:, i]
-                this_data_lo = data_lo[:, i] if data_lo is not None else None
-                this_data_hi = data_hi[:, i] if data_hi is not None else None
-            else:
-                this_data    = data[:, j, i]
-                this_data_lo = data_lo[:, j, i] if data_lo is not None else None
-                this_data_hi = data_hi[:, j, i] if data_hi is not None else None
-            if not ignore_plot_data(this_data, ignore_empties):
-                color_dt = j * 0.5 / num_loops
-                if j // 2:
-                    this_color = whitten(cm.get_color(i), white=(0, 0, 0, 1), dt=color_dt)
-                else:
-                    this_color = whitten(cm.get_color(i), white=(1, 1, 1, 1), dt=color_dt)
-                ax.plot(time, scale*this_data, '.-', label=this_name + legend[i], color=this_color, zorder=10)
-                if this_data_lo is not None:
-                    ax.plot(time, scale*this_data_lo, 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
-                if this_data_hi is not None:
-                    ax.plot(time, scale*this_data_hi, 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
-
-    # add labels and legends
-    ax.set_xlabel('Time [' + time_units + ']')
-    ax.set_ylabel(label + unit_text)
-    ax.set_title(this_title)
-    ax.legend(loc=legend_loc)
-    ax.grid(True)
-    # optionally force zero to be plotted
-    if show_zero and min(ax.get_ylim()) > 0:
-        ax.set_ylim(bottom=0)
-    # set years to always be whole numbers on the ticks
-    if time_units == 'year' and (np.max(time) - np.min(time)) >= 4:
-        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
-
-    # optionally add second Y axis
-    if second_y_scale is not None:
-        ax2 = ax.twinx()
-        if isinstance(second_y_scale, (int, float)):
-            ax2.set_ylim(np.multiply(second_y_scale, ax.get_ylim()))
-        else:
-            for (key, value) in second_y_scale.items():
-                ax2.set_ylim(np.multiply(value, ax.get_ylim()))
-                ax2.set_ylabel(key)
-
-    # setup plots
-    setup_plots(fig, opts, 'time')
     return fig
 
 #%% Functions - plot_bar_breakdown
