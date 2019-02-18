@@ -21,6 +21,7 @@ from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZ
 from .enums        import IntEnumPlus, consecutive, dist_enum_and_mons
 from .latex        import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
 from .linalg       import orth, subspace
+from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, get_output_dir
 from .plotting     import Opts, plot_monte_carlo, plot_correlation_matrix, plot_time_history, \
                               plot_bar_breakdown, plot_bpe_convergence, plot_population_pyramid, \
                               general_quaternion_plot
@@ -39,11 +40,10 @@ from .stats        import convert_annual_to_monthly_probability, \
 from .units        import Units, get_factors
 from .utils        import rms, rss, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
                               make_python_init, get_python_definitions, read_text_file, \
-                              write_text_file, get_root_dir, get_tests_dir, get_data_dir, \
-                              get_images_dir, get_output_dir, capture_output, unit, \
-                              reload_package, delete_pyc, rename_module, modd, find_tabs, \
-                              np_digitize, histcounts, full_print, pprint_dict, line_wrap, \
-                              combine_per_year, activate_logging, deactivate_logging
+                              write_text_file, capture_output, unit, reload_package, delete_pyc, \
+                              rename_module, modd, find_tabs, np_digitize, histcounts, full_print, \
+                              pprint_dict, line_wrap, combine_per_year, activate_logging, \
+                              deactivate_logging
 
 #%% Unit test
 if __name__ == '__main__':

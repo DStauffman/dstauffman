@@ -36,7 +36,8 @@ except ImportError: # pragma: no cover
 # model imports
 from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
-from dstauffman.utils import get_images_dir, pprint_dict
+from dstauffman.paths import get_images_dir
+from dstauffman.utils import pprint_dict
 
 #%% Classes - _HoverButton
 class _HoverButton(QPushButton):
