@@ -68,7 +68,7 @@ class Opts(Frozen):
         pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
 #%% Functions - plot_time_history
-def plot_time_history(time, data, label, units='unity', opts=None, *, legend=None, \
+def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
         second_y_scale=None, ignore_empties=False, data_lo=None, data_hi=None, colormap=None):
     r"""
     Plot multiple metrics over time.
@@ -77,7 +77,7 @@ def plot_time_history(time, data, label, units='unity', opts=None, *, legend=Non
     ----------
     time : 1D ndarray
         time history
-    data : 2D or 3D ndarray
+    data : 1D, 2D or 3D ndarray
         data for corresponding time history, time is first dimension, last dimension is bin
         middle dimension if 3D is the cycle
     label : str
@@ -126,6 +126,10 @@ def plot_time_history(time, data, label, units='unity', opts=None, *, legend=Non
     >>> plt.close(fig)
 
     """
+    # force inputs to be ndarrays
+    time = np.atleast_1d(np.asanyarray(time))
+    data = np.asanyarray(data)
+
     # check optional inputs
     if opts is None:
         opts = Opts()
@@ -137,7 +141,7 @@ def plot_time_history(time, data, label, units='unity', opts=None, *, legend=Non
     legend_loc = opts.legend_loc
     show_zero  = opts.show_zero
     time_units = opts.base_time
-    unit_text = ' [' + units + ']' if units else ''
+    unit_text  = ' [' + units + ']' if units else ''
     (scale, prefix) = get_factors(opts.vert_fact)
 
     # check for valid data
@@ -145,6 +149,14 @@ def plot_time_history(time, data, label, units='unity', opts=None, *, legend=Non
         print(' ' + label + ' plot skipped due to missing data.')
         return None
     assert time.ndim == 1, 'Time must be a 1D array.'
+
+    # ensure that data is at least 2D
+    if data.ndim == 0:
+        data = np.atleast_2d(data)
+    elif data.ndim == 1:
+        data = data[:, np.newaxis] # forces to grow in second dimension, instead of first
+
+    # get shape information
     if data.ndim == 2:
         normal    = True
         num_loops = 1
@@ -157,7 +169,7 @@ def plot_time_history(time, data, label, units='unity', opts=None, *, legend=Non
         num_bins  = data.shape[2]
         names     = opts.names
     else:
-        assert False, 'Data must be a 2D or 3D array.'
+        assert False, 'Data must be 0D to 3D array.'
     assert time.shape[0] == data.shape[0], 'Time and data must be the same length. Current time.shape={} and data.shape={}'.format(time.shape, data.shape)
     if legend is not None:
         assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
@@ -226,7 +238,7 @@ def plot_time_history(time, data, label, units='unity', opts=None, *, legend=Non
     return fig
 
 #%% Functions - plot_monte_carlo
-def plot_monte_carlo(time, data, label, units='unity', opts=None, *, plot_indiv=True, \
+def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True, \
     truth=None, plot_as_diffs=False, second_y_scale=None, truth_time=None, \
     truth_data=None, plot_sigmas=1, plot_confidence=0, colormap=None):
     r"""
@@ -325,6 +337,12 @@ def plot_monte_carlo(time, data, label, units='unity', opts=None, *, plot_indiv=
         data = np.atleast_2d(data)
     elif data.ndim == 1:
         data = data[:, np.newaxis] # forces to grow in second dimension, instead of first
+    elif data.ndim == 2:
+        pass
+    else:
+        raise ValueError('Unexpected number of dimensions in data. Monte carlo can currently only ' +
+                         'handle single channels with multiple runs. Split the channels apart into' +
+                         'separate plots if desired.')
 
     # get number of different series
     num_series = data.shape[1]
@@ -413,7 +431,7 @@ def plot_monte_carlo(time, data, label, units='unity', opts=None, *, plot_indiv=
     return fig
 
 #%% Functions - plot_correlation_matrix
-def plot_correlation_matrix(data, labels=None, units='unity', opts=None, *, matrix_name='Correlation Matrix', \
+def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_name='Correlation Matrix', \
         cmin=0, cmax=1, xlabel='', ylabel='', plot_lower_only=True, label_values=False, x_lab_rot=90, \
         colormap=None, plot_border=None):
     r"""
@@ -525,13 +543,13 @@ def plot_correlation_matrix(data, labels=None, units='unity', opts=None, *, matr
         cmax = temp
 
     # determine which type of data to plot
-    this_title = matrix_name # + (' [' + units + ']' if units else '')
+    this_title = matrix_name + (' [' + units + ']' if units else '')
 
     # Create plots
     # create figure
     fig = plt.figure()
     # set figure title
-    fig.canvas.set_window_title(this_title)
+    fig.canvas.set_window_title(matrix_name)
     # get handle to axes for use later
     ax = fig.add_subplot(111)
     # set axis color to none
