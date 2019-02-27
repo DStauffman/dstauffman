@@ -1017,7 +1017,7 @@ def general_quaternion_plot(description, time, quat_one, quat_two, name_one, nam
         ax2.set_title(description + '  Difference')
         ax2.set_xlabel('Time [sec]' + start_date)
         ax2.set_ylabel(description + ' Difference [rad]')
-        plt.grid(True)
+        ax2.grid(True)
         # link axes to zoom together
         #linkaxes([ax1, ax2],'x')
     else:
