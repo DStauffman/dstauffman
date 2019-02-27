@@ -59,13 +59,14 @@ class _EnumMetaPlus(EnumMeta):
 
 #%% Classes - IntEnumPlus
 class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
-    r"""Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str."""
+    r"""Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str
+    plus additional methods for convenient retrieval of number of values, their names, mins and maxes."""
     def __str__(self):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
 #%% Decorators - consecutive
 def consecutive(enumeration):
-    r"""Class decorator for enumerations ensuring unique and consecutive member values."""
+    r"""Class decorator for enumerations ensuring unique and consecutive member values that start from zero."""
     duplicates = []
     non_consecutive = []
     last_value = min(enumeration.__members__.values()) - 1
