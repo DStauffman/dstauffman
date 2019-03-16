@@ -39,7 +39,6 @@
 *.ppt binary
 *.pptx binary
 *.pyc binary
-*.pyx binary
 *.xlx binary
 *.xlsx binary
 
