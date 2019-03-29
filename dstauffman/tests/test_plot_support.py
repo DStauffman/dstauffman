@@ -733,6 +733,63 @@ class Test_get_screen_resolution(unittest.TestCase):
         self.assertGreater(screen_width, 0)
         self.assertGreater(screen_height, 0)
 
+#%% Functions - show_zero_ylim
+class Test_show_zero_ylim(unittest.TestCase):
+    r"""
+    Tests the show_zero_ylim function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(111)
+        self.ax.plot([1, 5, 10], [200, 250, 240], '.-')
+
+    def test_nominal(self):
+        dcs.show_zero_ylim(self.ax)
+
+    def tearDown(self):
+        plt.close(self.fig)
+
+#%% Functions - plot_second_yunits
+class Test_plot_second_yunits(unittest.TestCase):
+    r"""
+    Tests the plot_second_yunits function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(111)
+        self.ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
+        self.ax.set_ylabel('Value [rad]')
+        self.ylab = u'Value [µrad]'
+        self.multiplier = 1e6
+
+    def test_nominal(self):
+        dcs.plot_second_yunits(self.ax, self.ylab, self.multiplier)
+
+    def tearDown(self):
+        plt.close(self.fig)
+
+#%% Functions - plot_rms_lines
+class Test_plot_rms_lines(unittest.TestCase):
+    r"""
+    Tests the plot_rms_lines function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(111)
+        self.ax.plot(np.arange(10), np.arange(10), label='Data')
+        self.x = (2, 5)
+        self.y = (1, 10)
+
+    def test_nominal(self):
+        dcs.plot_rms_lines(self.ax, self.x, self.y, show_in_legend=False)
+        self.ax.legend()
+
+    def tearDown(self):
+        plt.close(self.fig)
+
 #%% Unit test execution
 if __name__ == '__main__':
     plt.ioff()

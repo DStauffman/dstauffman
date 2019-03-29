@@ -972,6 +972,8 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     # determine if you have the quaternions
     have_quat_one = quat_one is not None and np.any(~np.isnan(quat_one))
     have_quat_two = quat_two is not None and np.any(~np.isnan(quat_two))
+    have_both     = have_quat_one and have_quat_two
+
     #% calculations
     (time_overlap, q1_diff_ix, q2_diff_ix) = np.intersect1d(time_one, time_two, \
         assume_unique=True, return_indices=True) # TODO: add a tolerance?
@@ -981,26 +983,22 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     rms_pts1 = np.maximum(rms_xmin, np.minimum(np.min(time_one), np.min(time_two)))
     rms_pts2 = np.minimum(rms_xmax, np.maximum(np.max(time_one), np.max(time_two)))
     # calculate the difference
-    (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one[:, q1_diff_ix], quat_two[:, q2_diff_ix])
+    if have_both:
+        (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one[:, q1_diff_ix], quat_two[:, q2_diff_ix])
     # calculate the rms (or mean) values
+    nans = np.full(3, np.nan, dtype=float)
     if not use_mean:
         func_name   = 'RMS'
-        if have_quat_one:
-            q1_func     = rms(quat_one[:, rms_ix1], axis=1, ignore_nans=True)
-        if have_quat_two:
-            q2_func     = rms(quat_two[:, rms_ix2], axis=1, ignore_nans=True)
-        if have_quat_one and have_quat_two:
-            nondeg_func = rms(nondeg_error[:, rms_ix3], axis=1, ignore_nans=True)
-            mag_func    = rms(nondeg_angle[rms_ix3], axis=0, ignore_nans=True)
+        q1_func     = rms(quat_one[:, rms_ix1], axis=1, ignore_nans=True) if have_quat_one else nans
+        q2_func     = rms(quat_two[:, rms_ix2], axis=1, ignore_nans=True) if have_quat_two else nans
+        nondeg_func = rms(nondeg_error[:, rms_ix3], axis=1, ignore_nans=True) if have_both else nans
+        mag_func    = rms(nondeg_angle[rms_ix3], axis=0, ignore_nans=True) if have_both else nans[0:1]
     else:
         func_name   = 'Mean'
-        if have_quat_one:
-            q1_func     = np.nanmean(quat_one[:, rms_ix1], axis=1)
-        if have_quat_two:
-            q2_func     = np.nanmean(quat_two[:, rms_ix2], axis=1)
-        if have_quat_one and have_quat_two:
-            nondeg_func = np.nanmean(nondeg_error[:, rms_ix3], axis=1)
-            mag_func    = np.nanmean(nondeg_angle[rms_ix3], axis=0)
+        q1_func     = np.nanmean(quat_one[:, rms_ix1], axis=1) if have_quat_one else nans
+        q2_func     = np.nanmean(quat_two[:, rms_ix2], axis=1) if have_quat_two else nans
+        nondeg_func = np.nanmean(nondeg_error[:, rms_ix3], axis=1) if have_both else nans
+        mag_func    = np.nanmean(nondeg_angle[rms_ix3], axis=0) if have_both else nans[0:1]
     # output errors
     err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
     # get default plotting colors
@@ -1017,7 +1015,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     # create axis
     if make_subplots:
         f1.canvas.set_window_title(description) # TODO: fig_visible (in wrapper)?
-        if have_quat_one and have_quat_two:
+        if have_both:
             ax1 = f1.add_subplot(2, 1, 1)
         else:
             ax1 = f1.add_subplot(111)
@@ -1072,7 +1070,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
         plot_rms_lines(ax1, [rms_pts1, rms_pts2], ax1.get_ylim())
 
     #% Difference plot
-    if have_quat_one and have_quat_two:
+    if have_both:
         # make axis
         if make_subplots:
             ax2 = f1.add_subplot(2, 1, 2, sharex=ax1)
@@ -1227,7 +1225,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     >>> plot_zero       = False
     >>> show_rms        = True
     >>> legend_loc      = 'best'
-    >>> second_y_scale = {'µrad': 1e6}
+    >>> second_y_scale = {u'Âµrad': 1e6}
     >>> (fig_hand, err) = general_difference_plot(description, time_one, time_two, data_one, data_two,
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, leg_scale=leg_scale, \
     ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -1250,6 +1248,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     # determine if you have the histories
     have_data_one = data_one is not None and np.any(~np.isnan(data_one))
     have_data_two = data_two is not None and np.any(~np.isnan(data_two))
+    have_both     = have_data_one and have_data_two
 
     #% Calculations
     # find overlapping times
@@ -1271,22 +1270,17 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     # calculate the differences
     nondeg_error = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
     # calculate the rms (or mean) values
+    nans = np.full(3, np.nan, dtype=float)
     if not use_mean:
         func_name   = 'RMS'
-        if have_data_one:
-            data1_func  = rms(data_one[:, rms_ix1], axis=1, ignore_nans=True)
-        if have_data_two:
-            data2_func  = rms(data_two[:, rms_ix2], axis=1, ignore_nans=True)
-        if have_data_one and have_data_two:
-            nondeg_func = rms(nondeg_error[:, rms_ix3], axis=1, ignore_nans=True)
+        data1_func  = rms(data_one[:, rms_ix1], axis=1, ignore_nans=True) if have_data_one else nans
+        data2_func  = rms(data_two[:, rms_ix2], axis=1, ignore_nans=True) if have_data_two else nans
+        nondeg_func = rms(nondeg_error[:, rms_ix3], axis=1, ignore_nans=True) if have_both else nans
     else:
         func_name   = 'Mean'
-        if have_data_one:
-            data1_func  = np.nanmean(data_one[:, rms_ix1], axis=1)
-        if have_data_two:
-            data2_func  = np.nanmean(data_two[:, rms_ix2], axis=1)
-        if have_data_one and have_data_two:
-            nondeg_func = np.nanmean(nondeg_error[:, rms_ix3], axis=1)
+        data1_func  = np.nanmean(data_one[:, rms_ix1], axis=1) if have_data_one else nans
+        data2_func  = np.nanmean(data_two[:, rms_ix2], axis=1) if have_data_two else nans
+        nondeg_func = np.nanmean(nondeg_error[:, rms_ix3], axis=1) if have_both else nans
     # output errors
     err = {'one': data1_func, 'two': data2_func, 'diff': nondeg_func}
     # unit conversion value

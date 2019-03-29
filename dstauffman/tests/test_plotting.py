@@ -556,90 +556,137 @@ class Test_general_quaternion_plot(unittest.TestCase):
     """
     def setUp(self):
         self.description     = 'example'
-        self.time            = np.arange(11)
+        self.time_one        = np.arange(11)
+        self.time_two        = np.arange(2, 13)
         self.quat_one        = dcs.quat_norm(np.random.rand(4, 11))
         self.quat_two        = dcs.quat_norm(np.random.rand(4, 11))
         self.name_one        = 'test1'
         self.name_two        = 'test2'
         self.start_date      = str(datetime.now())
-        self.ix_rms_xmin     = 0
-        self.ix_rms_xmax     = 10
+        self.rms_xmin        = 0
+        self.rms_xmax        = 10
+        self.disp_xmin       = -2
+        self.disp_xmax       = np.inf
         self.fig_visible     = True
         self.make_subplots   = True
         self.plot_components = True
+        self.use_mean        = False
+        self.plot_zero       = False
+        self.show_rms        = True
 
     def test_nominal(self):
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
-             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
-             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
+             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
         for i in range(3):
-            self.assertLess(abs(err[i]), 3.15)
+            self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_not_visible(self):
         self.fig_visible = False
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
-             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
-             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
+             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
         for i in range(3):
-            self.assertLess(abs(err[i]), 3.15)
+            self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_no_subplots(self):
         self.make_subplots = False
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
-             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
-             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
+             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
         for i in range(3):
-            self.assertLess(abs(err[i]), 3.15)
+            self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_no_components(self):
         self.plot_components = False
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
-             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
-             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
+             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
-        self.assertLess(abs(err[0]), 3.15)
-        self.assertTrue(np.isnan(err[1]))
-        self.assertTrue(np.isnan(err[2]))
+        for i in range(3):
+            self.assertLess(abs(err['diff'][i]), 3.15)
+        self.assertLess(abs(err['mag']), 3.15)
 
     def test_no_start_date(self):
         self.start_date = ''
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
-             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
-             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
+             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
         for i in range(3):
-            self.assertLess(abs(err[i]), 3.15)
+            self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_only_quat_one(self):
         self.quat_two.fill(np.nan)
         self.name_two = ''
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
-             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
-             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
+             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
-        self.assertTrue(np.all(np.isnan(err)))
+        self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_only_quat_two(self):
         self.quat_one = None
         self.name_one = ''
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
-             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
-             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
+             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
-        self.assertTrue(np.all(np.isnan(err)))
+        self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_rms_bounds(self):
-        self.ix_rms_xmin = 5
-        self.ix_rms_xmax = 7
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time, self.quat_one, \
-             self.quat_two, self.name_one, self.name_two, ix_rms_xmin=self.ix_rms_xmin, \
-             ix_rms_xmax=self.ix_rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
+        self.rms_xmin = 5
+        self.rms_xmax = 7
+        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
+             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
         for i in range(3):
-            self.assertLess(abs(err[i]), 3.15)
+            self.assertLess(abs(err['diff'][i]), 3.15)
+
+#%% Functions - general_difference_plot
+class Test_general_difference_plot(unittest.TestCase):
+    r"""
+    Tests the general_defference_plot function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.description     = 'example'
+        self.time_one        = np.arange(11)
+        self.time_two        = np.arange(2, 13)
+        self.data_one        = 1e-6 * np.random.rand(4, 11)
+        self.data_two        = self.data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6
+        self.name_one        = 'test1'
+        self.name_two        = 'test2'
+        self.elements        = ['x', 'y']
+        self.units           = 'rad'
+        self.leg_scale       = 'micro'
+        self.start_date      = str(datetime.now())
+        self.rms_xmin        = 0
+        self.rms_xmax        = 10
+        self.disp_xmin       = -2
+        self.disp_xmax       = np.inf
+        self.fig_visible     = True
+        self.make_subplots   = True
+        color_lists          = dcs.get_color_lists()
+        self.colormap        = color_lists['dbl_diff'] # + color_lists['double']
+        self.use_mean        = False
+        self.plot_zero       = False
+        self.show_rms        = True
+        self.legend_loc      = 'best'
+        self.second_y_scale  = {u'µrad': 1e6}
+
+    def test_nominal(self):
+        (fig_hand, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
+            elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
+            fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_y_scale=self.second_y_scale)
 
 #%% Unit test execution
 if __name__ == '__main__':

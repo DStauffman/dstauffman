@@ -894,7 +894,7 @@ def show_zero_ylim(ax):
     >>> import matplotlib.pyplot as plt
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
-    >>> ax.plot([1, 5, 10], [200, 250, 240], '.-')
+    >>> _ = ax.plot([1, 5, 10], [200, 250, 240], '.-')
     >>> show_zero_ylim(ax)
 
     >>> plt.close(fig)
@@ -927,9 +927,9 @@ def plot_second_yunits(ax, ylab, multiplier):
     >>> import matplotlib.pyplot as plt
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
-    >>> ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
-    >>> ax.set_ylabel('Value [rad]')
-    >>> ylab = 'Value [µrad]'
+    >>> _ = ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
+    >>> _ = ax.set_ylabel('Value [rad]')
+    >>> ylab = u'Value [Âµrad]'
     >>> multiplier = 1e6
     >>> plot_second_yunits(ax, ylab, multiplier)
 
@@ -970,12 +970,12 @@ def plot_rms_lines(ax, x, y, show_in_legend=True):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> ax = fig.add_subplot(111)
-    >>> ax.plot(np.arange(10), np.arange(10), label='Data')
+    >>> _ = ax = fig.add_subplot(111)
+    >>> _ = ax.plot(np.arange(10), np.arange(10), label='Data')
     >>> x = (2, 5)
     >>> y = (1, 10)
     >>> plot_rms_lines(ax, x, y, show_in_legend=False)
-    >>> ax.legend()
+    >>> _ = ax.legend()
 
     >>> plt.close(fig)
 
