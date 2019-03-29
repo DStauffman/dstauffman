@@ -29,7 +29,7 @@ from dstauffman.plot_support import ColorMap, get_color_lists, ignore_plot_data,
                                         plot_rms_lines, plot_second_yunits, setup_plots, \
                                         show_zero_ylim, TruthPlotter, whitten
 from dstauffman.quat import quat_angle_diff
-from dstauffman.stats import z_from_ci
+from dstauffman.stats import intersect, z_from_ci
 from dstauffman.units import get_factors
 from dstauffman.utils import pprint_dict, rms
 
@@ -975,8 +975,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     have_both     = have_quat_one and have_quat_two
 
     #% calculations
-    (time_overlap, q1_diff_ix, q2_diff_ix) = np.intersect1d(time_one, time_two, \
-        assume_unique=True, return_indices=True) # TODO: add a tolerance?
+    (time_overlap, q1_diff_ix, q2_diff_ix) = intersect(time_one, time_two) # TODO: add a tolerance?
     rms_ix1  = (time_one >= rms_xmin) & (time_one <= rms_xmax)
     rms_ix2  = (time_two >= rms_xmin) & (time_two <= rms_xmax)
     rms_ix3  = (time_overlap >= rms_xmin) & (time_overlap <= rms_xmax)
@@ -1252,8 +1251,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
 
     #% Calculations
     # find overlapping times
-    (time_overlap, d1_diff_ix, d2_diff_ix) = np.intersect1d(time_one, time_two, \
-        assume_unique=True, return_indices=True) # TODO: add a tolerance?
+    (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two) # TODO: add a tolerance?
     # find differences
     d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)
     d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)

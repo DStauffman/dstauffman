@@ -510,6 +510,62 @@ def rand_draw(chances, prng, *, check_bounds=True):
     is_set[chances >= 1] = True
     return is_set
 
+#%% Functions - intersect
+def intersect(a, b, assume_unique=False):
+    r"""
+    Finds the intersect of a and b, but also returns the indices to the first occurence, like the
+    intersect command in MATLAB.
+
+    Parameters
+    ----------
+    a : ndarray
+        Input a
+    b : ndarray
+        Input b
+    assume_unique : bool, optional, default is False
+        Whether you can already assume a and b are unique
+
+    Returns
+    -------
+    c : ndarray
+        Set of values in both a and b
+    ia : ndarray
+        Indices within a that build c, such that c = a[ia]
+    ib : ndarray
+        Indices within b that build c, such that c = b[ib]
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2019.
+
+    Examples
+    --------
+    >>> from dstauffman import intersect
+    >>> import numpy as np
+    >>> a = np.array([1, 2, 4, 4, 6], dtype=int)
+    >>> b = np.array([0, 8, 2, 2, 5, 8, 6, 8, 8], dtype=int)
+    >>> (c, ia, ib) = intersect(a, b)
+    >>> print(c)
+    [2 6]
+
+    >>> print(ia)
+    [1 4]
+
+    >>> print(ib)
+    [2 6]
+
+    """
+    c = np.intersect1d(a, b, assume_unique=assume_unique)
+    if assume_unique:
+        ia = np.flatnonzero(np.isin(a, c, assume_unique=assume_unique))
+        ib = np.flatnonzero(np.isin(b, c, assume_unique=assume_unique))
+    else:
+        (a1, ia) = np.unique(a, return_index=True, axis=None)
+        (b1, ib) = np.unique(b, return_index=True, axis=None)
+        ia = ia[np.isin(a1, c, assume_unique=assume_unique)]
+        ib = ib[np.isin(b1, c, assume_unique=assume_unique)]
+    return (c, ia, ib)
+
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()

@@ -419,6 +419,38 @@ class Test_rand_draw(unittest.TestCase):
         self.assertFalse(is_set[0])
         self.assertTrue(is_set[2])
 
+#%% intersect
+class Test_intersect(unittest.TestCase):
+    r"""
+    Tests the intersect function with the following cases:
+        Nominal
+        Floats
+        Assume unique
+    """
+    def test_nominal(self):
+        a = np.array([1, 2, 4, 4, 6], dtype=int)
+        b = np.array([0, 8, 2, 2, 5, 8, 6, 8, 8], dtype=int)
+        (c, ia, ib) = dcs.intersect(a, b)
+        np.testing.assert_array_equal(c, np.array([2, 6], dtype=int))
+        np.testing.assert_array_equal(ia, np.array([1, 4], dtype=int))
+        np.testing.assert_array_equal(ib, np.array([2, 6], dtype=int))
+
+    def test_floats(self):
+        a = np.array([1, 2.5, 4, 6], dtype=float)
+        b = np.array([0, 8, 2.5, 4, 6], dtype=float)
+        (c, ia, ib) = dcs.intersect(a, b)
+        np.testing.assert_array_equal(c, np.array([2.5, 4, 6], dtype=float))
+        np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
+        np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
+
+    def test_unique(self):
+        a = np.array([1, 2.5, 4, 6], dtype=float)
+        b = np.array([0, 8, 2.5, 4, 6], dtype=float)
+        (c, ia, ib) = dcs.intersect(a, b, assume_unique=True)
+        np.testing.assert_array_equal(c, np.array([2.5, 4, 6], dtype=float))
+        np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
+        np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

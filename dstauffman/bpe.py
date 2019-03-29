@@ -99,6 +99,7 @@ class OptiOpts(Frozen):
          model_func      = None
          ...
          trust_radius    = 1.0
+
         """
         pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
