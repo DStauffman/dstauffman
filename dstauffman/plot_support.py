@@ -878,6 +878,117 @@ def get_screen_resolution():
     app.closeAllWindows()
     return (screen_width, screen_height)
 
+#%% Functions - show_zero_ylim
+def show_zero_ylim(ax):
+    r"""
+    Forces the given axes to always include the point zero.
+
+    Parameters
+    ----------
+    ax : class matplotlib.axis.Axis
+        Figure axis
+
+    Examples
+    --------
+    >>> from dstauffman import show_zero_ylim
+    >>> import matplotlib.pyplot as plt
+    >>> fig = plt.figure()
+    >>> ax = fig.add_subplot(111)
+    >>> ax.plot([1, 5, 10], [200, 250, 240], '.-')
+    >>> show_zero_ylim(ax)
+
+    >>> plt.close(fig)
+
+    """
+    # optionally force zero to be plotted
+    ylim = ax.get_ylim()
+    if min(ylim) > 0:
+        ax.set_ylim(bottom=0)
+    if max(ylim) < 0:
+        ax.set_ylim(top=0)
+
+#%% Functions - plot_second_yunits
+def plot_second_yunits(ax, ylab, multiplier):
+    r"""
+    Plots a second Y axis on the right side of the plot with a different scaling.
+
+    Parameters
+    ----------
+    ax : class matplotlib.axis.Axis
+        Figure axis
+    ylab : str
+        Label for new axis
+    multiplier : float
+        Multiplication factor
+
+    Examples
+    --------
+    >>> from dstauffman import plot_second_yunits
+    >>> import matplotlib.pyplot as plt
+    >>> fig = plt.figure()
+    >>> ax = fig.add_subplot(111)
+    >>> ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
+    >>> ax.set_ylabel('Value [rad]')
+    >>> ylab = 'Value [µrad]'
+    >>> multiplier = 1e6
+    >>> plot_second_yunits(ax, ylab, multiplier)
+
+    """
+    # plot second Y axis
+    ax2 = ax.twinx()
+    ax2.set_ylim(np.multiply(multiplier, ax.get_ylim()))
+    ax2.set_ylabel(ylab)
+
+#%% Functions - plot_rms_lines
+def plot_rms_lines(ax, x, y, show_in_legend=True):
+    r"""
+    Plots a vertical line at the RMS start and stop times.
+
+    Summary
+    -------
+    There are two vertical lines created.  The first at x(1) and the second at x(2).
+    The first line is orange, and the second is lavender.  Both have magenta crosses at
+    the top and bottom.  The lines are added to the plot regardless of the figure hold state.
+
+    Parameters
+    ----------
+    x : (2,) tuple
+        xmin and xmax values at which to draw the lines
+    y : (2,) tuple
+        ymin and ymax values at which to extend the lines vertically [num]
+    show_in_legend : bool, optional
+        show the lines when a legend is turned on
+
+    Notes
+    -----
+    #.  Added to DStauffman's MATLAB libary from GARSE in Sept 2013.
+    #.  Ported to Python by David C. Stauffer in March 2019.
+
+    Examples
+    --------
+    >>> from dstauffman import plot_rms_lines
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> fig = plt.figure()
+    >>> ax = fig.add_subplot(111)
+    >>> ax.plot(np.arange(10), np.arange(10), label='Data')
+    >>> x = (2, 5)
+    >>> y = (1, 10)
+    >>> plot_rms_lines(ax, x, y, show_in_legend=False)
+    >>> ax.legend()
+
+    >>> plt.close(fig)
+
+    """
+    if show_in_legend:
+        label_one = 'RMS Start Time'
+        label_two = 'RMS Stop Time'
+    else:
+        label_one = ''
+        label_two = ''
+    ax.plot([x[0], x[0]], y, linestyle='--', color=[   1, 0.75, 0], marker='+', markeredgecolor='m', markersize=10, label=label_one)
+    ax.plot([x[1], x[1]], y, linestyle='--', color=[0.75, 0.75, 1], marker='+', markeredgecolor='m', markersize=10, label=label_two)
+
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()

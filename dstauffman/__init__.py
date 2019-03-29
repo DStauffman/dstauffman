@@ -24,11 +24,12 @@ from .linalg       import orth, subspace
 from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, get_output_dir
 from .plotting     import Opts, plot_monte_carlo, plot_correlation_matrix, plot_time_history, \
                               plot_bar_breakdown, plot_bpe_convergence, plot_population_pyramid, \
-                              general_quaternion_plot
+                              general_quaternion_plot, general_difference_plot
 from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
                               get_color_lists, ignore_plot_data, whitten, \
                               storefig, titleprefix, disp_xlimits, setup_plots, figmenu, \
-                              rgb_ints_to_hex, get_screen_resolution
+                              rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
+                              plot_second_yunits, plot_rms_lines
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
                               quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
                               quat_to_dcm, quat_to_euler

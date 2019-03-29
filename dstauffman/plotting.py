@@ -26,7 +26,8 @@ from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
 from dstauffman.latex import bins_to_str_ranges
 from dstauffman.plot_support import ColorMap, get_color_lists, ignore_plot_data, \
-                                        setup_plots, TruthPlotter, whitten
+                                        plot_rms_lines, plot_second_yunits, setup_plots, \
+                                        show_zero_ylim, TruthPlotter, whitten
 from dstauffman.quat import quat_angle_diff
 from dstauffman.stats import z_from_ci
 from dstauffman.units import get_factors
@@ -36,24 +37,24 @@ from dstauffman.utils import pprint_dict, rms
 class Opts(Frozen):
     r"""Optional plotting configurations."""
     def __init__(self):
-        self.case_name  = ''
-        self.save_path  = os.getcwd()
-        self.save_plot  = False
-        self.plot_type  = 'png'
-        self.sub_plots  = True
-        self.show_plot  = True
-        self.show_link  = False
-        self.disp_xmin  = -np.inf
-        self.disp_xmax  =  np.inf
-        self.rms_xmin   = -np.inf
-        self.rms_xmax   =  np.inf
-        self.vert_fact  = 'unity'
-        self.colormap   = None
-        self.show_rms   = True
-        self.show_zero  = False
-        self.base_time  = 'year'
+        self.case_name = ''
+        self.save_path = os.getcwd()
+        self.save_plot = False
+        self.plot_type = 'png'
+        self.sub_plots = True
+        self.show_plot = True
+        self.show_link = False
+        self.disp_xmin = -np.inf
+        self.disp_xmax =  np.inf
+        self.rms_xmin  = -np.inf
+        self.rms_xmax  =  np.inf
+        self.vert_fact = 'unity'
+        self.colormap  = None
+        self.show_rms  = True
+        self.show_zero = False
+        self.base_time = 'year'
         self.legend_loc = 'best'
-        self.names      = list()
+        self.names     = list()
 
     def get_names(self, ix):
         r"""Get the specified name from the list."""
@@ -218,7 +219,7 @@ def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
     ax.grid(True)
     # optionally force zero to be plotted
     if show_zero and min(ax.get_ylim()) > 0:
-        ax.set_ylim(bottom=0)
+        ax.set_ylim(bottom=0) # TODO: use this to functionalize
     # set years to always be whole numbers on the ticks
     if time_units == 'year' and (np.max(time) - np.min(time)) >= 4:
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
@@ -387,7 +388,7 @@ def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True,
             this_label += ' (RMS: {:.2f})'.format(rms_data)
         ax.plot(time, scale*mean, '.-', linewidth=2, color='#0000cd', zorder=10, label=this_label)
         if plot_sigmas and num_series > 1:
-            sigma_label = '$\pm {}\sigma$'.format(plot_sigmas)
+            sigma_label = r'$\pm {}\sigma$'.format(plot_sigmas)
             ax.plot(time, scale*mean + plot_sigmas*scale*std, '.-', markersize=2, color='#20b2aa', zorder=6, label=sigma_label)
             ax.plot(time, scale*mean - plot_sigmas*scale*std, '.-', markersize=2, color='#20b2aa', zorder=6)
         if plot_confidence and num_series > 1:
@@ -563,10 +564,10 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
         for j in range(n):
             if not plot_lower_only or (i <= j):
                 if not np.isnan(data[j, i]):
-                    ax.add_patch(Rectangle((box_size*i,box_size*j),box_size, box_size, \
+                    ax.add_patch(Rectangle((box_size*i, box_size*j), box_size, box_size, \
                         facecolor=cm.get_color(scale*data[j, i]), edgecolor=plot_border))
                 if label_values:
-                    ax.annotate('{:.2g}'.format(scale*data[j,i]), xy=(box_size*i + box_size/2, box_size*j + box_size/2), \
+                    ax.annotate('{:.2g}'.format(scale*data[j, i]), xy=(box_size*i + box_size/2, box_size*j + box_size/2), \
                         xycoords='data', horizontalalignment='center', \
                         verticalalignment='center', fontsize=15)
     # show colorbar
@@ -670,7 +671,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     cm = ColorMap(colormap, 0, num_bins-1)
 
     # figure out where the bottoms should be to stack the data
-    bottoms = np.concatenate((np.zeros((len(time),1)), np.cumsum(data, axis=1)), axis=1)
+    bottoms = np.concatenate((np.zeros((len(time), 1)), np.cumsum(data, axis=1)), axis=1)
 
     # plot breakdown
     fig = plt.figure()
@@ -853,9 +854,11 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     return fig
 
 #%% Functions - general_quaternion_plot
-def general_quaternion_plot(description, time, quat_one, quat_two, name_one, name_two, *,
-        ix_rms_xmin, ix_rms_xmax, start_date='', fig_visible=True, make_subplots=True,
-        plot_components=True, legend_loc='best'):
+def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
+        name_one='', name_two='', time_units='sec', start_date='', plot_components=True,
+        rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf, fig_visible=True,
+        make_subplots=True, use_mean=False, plot_zero=False, show_rms=True, legend_loc='best',
+        truth_name='Truth', truth_time=None, truth_data=None):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.  This function plots two
     quaternion histories over time, along with a difference from one another.
@@ -864,28 +867,50 @@ def general_quaternion_plot(description, time, quat_one, quat_two, name_one, nam
     -----
     description : str
         name of the data being plotted, used as title
-    time : array_like
-        time history [sec]
+    time_one : array_like
+        time history one [sec]
+    time_two : array_like
+        time history two [sec]
     quat_one : (4, N) ndarray
         quaternion one
     quat_two : (4, N) ndarray
         quaternion two
-    name_one : str
+    name_one : str, optional
         name of data source 1
-    name_two : str
+    name_two : str, optional
         name of data source 2
-    ix_rms_xmin : int
-        index to first point of RMS calculation
-    ix_rms_xmax : int
-        index to last point of RMS calculation
-    start_date : str
+    time_units : str, optional
+        time units, defaults to 'sec'
+    start_date : str, optional
         date of t(0), may be an empty string
-    fig_visible : bool
+    plot_components : bool, optional
+        Whether to plot the quaternion components, or just the angular difference
+    rms_xmin : float, optional
+        time of first point of RMS calculation
+    rms_xmax : float, optional
+        time of last point of RMS calculation
+    disp_xmin : float, optional
+        lower time to limit the display of the plot
+    disp_xmax : float, optional
+        higher time to limit the display of the plot
+    fig_visible : bool, optional
         whether figure is visible
-    make_subplots : bool
-        flag to use subplots
-    plot_components : bool
-        flag to plot components as opposed to angular difference
+    make_subplots : bool, optional
+        flag to use subplots for differences
+    use_mean : bool, optional
+        whether to use mean instead of RMS in legend calculations
+    plot_zero : bool, optional
+        whether to force zero to always be plotted on the Y axis
+    show_rms : bool, optional
+        whether to show the RMS calculation in the legend
+    legend_loc : str, optional
+        location to put the legend, default is 'best'
+    truth_name : str, optional
+        name to associate with truth data, default is 'Truth'
+    truth_time : ndarray, optional
+        truth time history
+    truth_data : ndarray, optional
+        truth quaternion history
 
     Returns
     -------
@@ -902,6 +927,7 @@ def general_quaternion_plot(description, time, quat_one, quat_two, name_one, nam
     -----
     #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
     #.  Ported to Python by David C. Stauffer in December 2018.
+    #.  Made fully functional by David C. Stauffer in March 2019.
 
     Examples
     --------
@@ -909,24 +935,37 @@ def general_quaternion_plot(description, time, quat_one, quat_two, name_one, nam
     >>> import numpy as np
     >>> from datetime import datetime
     >>> description     = 'example'
-    >>> time            = np.arange(11)
+    >>> time_one        = np.arange(11)
+    >>> time_two        = np.arange(2, 13)
     >>> quat_one        = quat_norm(np.random.rand(4, 11))
     >>> quat_two        = quat_norm(np.random.rand(4, 11))
     >>> name_one        = 'test1'
     >>> name_two        = 'test2'
     >>> start_date      = str(datetime.now())
-    >>> ix_rms_xmin     = 0
-    >>> ix_rms_xmax     = 10
+    >>> rms_xmin        = 1
+    >>> rms_xmax        = 10
+    >>> disp_xmin       = -2
+    >>> disp_xmax       = np.inf
     >>> fig_visible     = True
     >>> make_subplots   = True
     >>> plot_components = True
-    >>> (fig_hand, err) = general_quaternion_plot(description, time, quat_one, quat_two, name_one, \
-    ...     name_two, ix_rms_xmin=ix_rms_xmin, ix_rms_xmax=ix_rms_xmax, start_date=start_date, \
-    ...     fig_visible=fig_visible, make_subplots=make_subplots, plot_components=plot_components)
+    >>> use_mean        = False
+    >>> plot_zero       = False
+    >>> show_rms        = True
+    >>> (fig_hand, err) = general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
+    ...     name_one=name_one, name_two=name_two, start_date=start_date, \
+    ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+    ...     fig_visible=fig_visible, make_subplots=make_subplots, plot_components=plot_components, \
+    ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms)
 
     """
+    # hard-coded values
+    leg_format = '{:1.3f}'
+    truth_color = 'k'
+
 #    # force inputs to be ndarrays
-#    time = np.asanyarray(time)
+#    time_one = np.asanyarray(time_one)
+#    time_two = np.asanyarray(time_two)
 #    quat_one = np.asanyarray(quat_one)
 #    quat_two = np.asanyarray(quat_two)
 
@@ -934,30 +973,44 @@ def general_quaternion_plot(description, time, quat_one, quat_two, name_one, nam
     have_quat_one = quat_one is not None and np.any(~np.isnan(quat_one))
     have_quat_two = quat_two is not None and np.any(~np.isnan(quat_two))
     #% calculations
-    if have_quat_one:
-        q1_rms = rms(quat_one[:,ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
-    if have_quat_two:
-        q2_rms = rms(quat_two[:,ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
-    # output errors
-    if have_quat_one and have_quat_two:
-        (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one, quat_two)
-        nondeg_rms = rms(nondeg_error[:, ix_rms_xmin:ix_rms_xmax], axis=1, ignore_nans=True)
-        if plot_components:
-            err = nondeg_rms
-        else:
-            err = np.array([rms(nondeg_angle[ix_rms_xmin:ix_rms_xmax], ignore_nans=True), np.nan, np.nan])
+    (time_overlap, q1_diff_ix, q2_diff_ix) = np.intersect1d(time_one, time_two, \
+        assume_unique=True, return_indices=True) # TODO: add a tolerance?
+    rms_ix1  = (time_one >= rms_xmin) & (time_one <= rms_xmax)
+    rms_ix2  = (time_two >= rms_xmin) & (time_two <= rms_xmax)
+    rms_ix3  = (time_overlap >= rms_xmin) & (time_overlap <= rms_xmax)
+    rms_pts1 = np.maximum(rms_xmin, np.minimum(np.min(time_one), np.min(time_two)))
+    rms_pts2 = np.minimum(rms_xmax, np.maximum(np.max(time_one), np.max(time_two)))
+    # calculate the difference
+    (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one[:, q1_diff_ix], quat_two[:, q2_diff_ix])
+    # calculate the rms (or mean) values
+    if not use_mean:
+        func_name   = 'RMS'
+        if have_quat_one:
+            q1_func     = rms(quat_one[:, rms_ix1], axis=1, ignore_nans=True)
+        if have_quat_two:
+            q2_func     = rms(quat_two[:, rms_ix2], axis=1, ignore_nans=True)
+        if have_quat_one and have_quat_two:
+            nondeg_func = rms(nondeg_error[:, rms_ix3], axis=1, ignore_nans=True)
+            mag_func    = rms(nondeg_angle[rms_ix3], axis=0, ignore_nans=True)
     else:
-        err = np.full(3, np.nan, dtype=float)
+        func_name   = 'Mean'
+        if have_quat_one:
+            q1_func     = np.nanmean(quat_one[:, rms_ix1], axis=1)
+        if have_quat_two:
+            q2_func     = np.nanmean(quat_two[:, rms_ix2], axis=1)
+        if have_quat_one and have_quat_two:
+            nondeg_func = np.nanmean(nondeg_error[:, rms_ix3], axis=1)
+            mag_func    = np.nanmean(nondeg_angle[rms_ix3], axis=0)
+    # output errors
+    err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
     # get default plotting colors
     color_lists = get_color_lists()
     colororder3 = ColorMap(color_lists['vec'], num_colors=3)
     colororder8 = ColorMap(color_lists['quat_diff'], num_colors=8)
     # quaternion component names
     names = ['X', 'Y', 'Z', 'S']
-    # names = ['qx', 'qy', 'qz', 'qs']
-    # TODO: make non-harded coded
     # unit conversion value
-    rad2urad = 1e6
+    (leg_scale, prefix) = get_factors('micro')
 
     #% Overlay plots
     f1 = plt.figure()
@@ -965,61 +1018,379 @@ def general_quaternion_plot(description, time, quat_one, quat_two, name_one, nam
     if make_subplots:
         f1.canvas.set_window_title(description) # TODO: fig_visible (in wrapper)?
         if have_quat_one and have_quat_two:
-            ax1 = f1.add_subplot(2,1,1)
+            ax1 = f1.add_subplot(2, 1, 1)
         else:
             ax1 = f1.add_subplot(111)
-        colororder8.set_colors(ax1)
+        colororder8.set_colors(ax1) # TODO: specify directly?
     else:
         f1.canvas.set_window_title(description + ' Quaternion Components')
         ax1 = f1.add_subplot(111)
     # plot data
     if have_quat_one:
         for i in range(4):
-            this_label = name_one + ' ' + names[i] + ' (RMS: {:1.3f})'.format(q1_rms[i])
-            ax1.plot(time, quat_one[i,:], '^-', markersize=4, label=this_label)
+            if show_rms:
+                value = leg_format.format(q1_func[i])
+                this_label = '{} {} ({}: {})'.format(name_one, names[i], func_name, value)
+            else:
+                this_label = name_one + ' ' + names[i]
+            ax1.plot(time_one, quat_one[i, :], '^-', markersize=4, label=this_label)
     if have_quat_two:
         for i in range(4):
-            this_label = name_two + ' ' + names[i] + ' (RMS: {:1.3f})'.format(q2_rms[i])
-            ax1.plot(time, quat_two[i,:], 'v:', markersize=4, label=this_label)
+            if show_rms:
+                value = leg_format.format(q2_func[i])
+                this_label = '{} {} ({}: {})'.format(name_two, names[i], func_name, value)
+            else:
+                this_label = name_two + ' ' + names[i]
+            ax1.plot(time_two, quat_two[i, :], 'v:', markersize=4, label=this_label)
+
+    # set X display limits
+    xlim = list(ax1.get_xlim())
+    if np.isfinite(disp_xmin):
+        xlim[0] = max([xlim[0], disp_xmin])
+    if np.isfinite(disp_xmax):
+        xlim[1] = min([xlim[1], disp_xmax])
+    ax1.set_xlim(xlim)
+    # set Y display limits
+    if plot_zero:
+        show_zero_ylim(ax1)
+    # optionally plot truth
+    if truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data)):
+        for i in range(4):
+            # TODO: add RMS to Truth data?
+            this_label = truth_name + ' ' + names[i]
+            ax1.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
+                linewidth=2, label=this_label)
+
     # format display of plot
     ax1.legend(loc=legend_loc)
-    #plot_rms_lines(time([ix_rms_xmin,ix_rms_xmax]),ylim)
     ax1.set_title(description + ' Quaternion Components')
-    ax1.set_xlabel('Time [sec]' + start_date)
+    ax1.set_xlabel('Time [' + time_units + ']' + start_date)
     ax1.set_ylabel(description + ' Quaternion Components [dimensionless]')
     ax1.grid(True)
+    # plot RMS lines
+    if show_rms:
+        plot_rms_lines(ax1, [rms_pts1, rms_pts2], ax1.get_ylim())
 
     #% Difference plot
     if have_quat_one and have_quat_two:
         # make axis
         if make_subplots:
-            ax2 = f1.add_subplot(2,1,2)
+            ax2 = f1.add_subplot(2, 1, 2, sharex=ax1)
             f2 = None
         else:
             f2 = plt.figure()
             f2.canvas.set_window_title(description + ' Difference')
-            ax2 = f2.add_subplot(111)
+            ax2 = f2.add_subplot(111, sharex=ax1)
         colororder3.set_colors(ax2)
         # plot data
         if plot_components:
-            ax2.plot(time, nondeg_error.T, '^-', markersize=4)
-            ax2.legend([ \
-                'X (RMS: {:1.3f} \murad)'.format(rad2urad*nondeg_rms[0]), \
-                'Y (RMS: {:1.3f} \murad)'.format(rad2urad*nondeg_rms[1]), \
-                'Z (RMS: {:1.3f} \murad)'.format(rad2urad*nondeg_rms[2])], loc=legend_loc)
-            #set z-axis data to be plotted underneath everything else
-            # TODO: use zorder, but need separate calls
+            zorders = [8, 6, 5]
+            for i in range(3):
+                if show_rms:
+                    value = leg_format.format(nondeg_func[i])
+                    this_label = '{} ({}: {}) {}rad)'.format(names[i], func_name, value, prefix)
+                else:
+                    this_label = names[i]
+                ax2.plot(time_overlap, nondeg_error[i, :], '^-', markersize=4, label=this_label, zorder=zorders[i])
+            ax2.legend(loc=legend_loc)
         else:
-            ax2.plot(time, nondeg_angle, '^-', markersize=4)
-            ax2.legend('Angle (RMS: {:1.3f} \murad)'.format(rad2urad*nondeg_rms[0]), loc=legend_loc)
+            if show_rms:
+                value = leg_format.format(1/leg_scale*mag_func)
+                this_label = 'Angle ({}: {} {}rad)'.format(func_name, value, prefix)
+            else:
+                this_label = 'Angle'
+            ax2.plot(time_overlap, nondeg_angle, '^-', markersize=4, label=this_label)
         # format display of plot
-        #plot_rms_lines(time([ix_rms_xmin,ix_rms_xmax]),ylim)
+        if plot_zero:
+            show_zero_ylim(ax2)
+        ax2.legend(loc=legend_loc)
         ax2.set_title(description + '  Difference')
-        ax2.set_xlabel('Time [sec]' + start_date)
+        ax2.set_xlabel('Time [' + time_units + ']' + start_date)
         ax2.set_ylabel(description + ' Difference [rad]')
         ax2.grid(True)
-        # link axes to zoom together
-        #linkaxes([ax1, ax2],'x')
+        if show_rms:
+            plot_rms_lines(ax2, [rms_pts1, rms_pts2], ax2.get_ylim())
+    else:
+        f2 = None
+    fig_hand = [x for x in (f1, f2) if x is not None]
+    return (fig_hand, err)
+
+#%% Functions - general_difference_plot
+def general_difference_plot(description, time_one, time_two, data_one, data_two, *,
+        name_one='', name_two='', elements=None, units=None, time_units='sec', leg_scale='unity',
+        start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
+        fig_visible=True, make_subplots=True, colormap=None, use_mean=False, plot_zero=False,
+        show_rms=True, legend_loc='best', second_y_scale=None,
+        truth_name='Truth', truth_time=None, truth_data=None):
+    r"""
+    Generic difference comparison plot for use in other wrapper functions.  This function plots two
+    vector histories over time, along with a difference from one another.
+
+    Input
+    -----
+    description : str
+        name of the data being plotted, used as title
+    time_one : array_like
+        time history one [sec]
+    time_two : array_like
+        time history two [sec]
+    data_one : (A, N) ndarray
+        vector one history
+    data_two : (A, N) ndarray
+        vector two history
+    name_one : str, optional
+        name of data source 1
+    name_two : str, optional
+        name of data source 2
+    elements : list
+        name of each element to plot within the vector
+    units : list
+        name of units for plot
+    time_units : str, optional
+        time units, defaults to 'sec'
+    leg_scale : str, optional
+        factor to use when scaling the value in the legend, default is 'unity'
+    start_date : str, optional
+        date of t(0), may be an empty string
+    rms_xmin : float, optional
+        time of first point of RMS calculation
+    rms_xmax : float, optional
+        time of last point of RMS calculation
+    disp_xmin : float, optional
+        lower time to limit the display of the plot
+    disp_xmax : float, optional
+        higher time to limit the display of the plot
+    fig_visible : bool, optional
+        whether figure is visible
+    make_subplots : bool, optional
+        flag to use subplots for differences
+    colormap : list or colormap
+        colors to use on the plot
+    use_mean : bool, optional
+        whether to use mean instead of RMS in legend calculations
+    plot_zero : bool, optional
+        whether to force zero to always be plotted on the Y axis
+    show_rms : bool, optional
+        whether to show the RMS calculation in the legend
+    legend_loc : str, optional
+        location to put the legend, default is 'best'
+    second_y_scale : dict, optional
+        single key and value pair to use for scaling data to a second Y axis
+    truth_name : str, optional
+        name to associate with truth data, default is 'Truth'
+    truth_time : ndarray, optional
+        truth time history
+    truth_data : ndarray, optional
+        truth quaternion history
+
+    Returns
+    -------
+    fig_hand : list of class matplotlib.Figure
+        list of figure handles
+    err : (A,N) ndarray
+        Differences
+
+    See Also
+    --------
+    TBD_wrapper
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
+    #.  Ported to Python by David C. Stauffer in March 2019.
+
+    Examples
+    --------
+    >>> from dstauffman import general_difference_plot, get_color_lists
+    >>> import numpy as np
+    >>> from datetime import datetime
+    >>> description     = 'example'
+    >>> time_one        = np.arange(11)
+    >>> time_two        = np.arange(2, 13)
+    >>> data_one        = 1e-6 * np.random.rand(4, 11)
+    >>> data_two        = data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6
+    >>> name_one        = 'test1'
+    >>> name_two        = 'test2'
+    >>> elements        = ['x', 'y']
+    >>> units           = 'rad'
+    >>> leg_scale       = 'micro'
+    >>> start_date      = str(datetime.now())
+    >>> rms_xmin        = 1
+    >>> rms_xmax        = 10
+    >>> disp_xmin       = -2
+    >>> disp_xmax       = np.inf
+    >>> fig_visible     = True
+    >>> make_subplots   = True
+    >>> color_lists     = get_color_lists()
+    >>> colormap        = color_lists['dbl_diff'] # + color_lists['double']
+    >>> use_mean        = False
+    >>> plot_zero       = False
+    >>> show_rms        = True
+    >>> legend_loc      = 'best'
+    >>> second_y_scale = {'µrad': 1e6}
+    >>> (fig_hand, err) = general_difference_plot(description, time_one, time_two, data_one, data_two,
+    ...     name_one=name_one, name_two=name_two, elements=elements, units=units, leg_scale=leg_scale, \
+    ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+    ...     fig_visible=fig_visible, make_subplots=make_subplots, colormap=colormap, \
+    ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
+    ...     second_y_scale=second_y_scale)
+
+    """
+
+    # Hard-coded values
+    leg_format  = '{:1.3f}'
+    truth_color = 'k'
+
+#    # force inputs to be ndarrays
+#    time_one = np.asanyarray(time_one)
+#    time_two = np.asanyarray(time_two)
+#    data_one = np.asanyarray(data_one)
+#    data_two = np.asanyarray(data_two)
+
+    # determine if you have the histories
+    have_data_one = data_one is not None and np.any(~np.isnan(data_one))
+    have_data_two = data_two is not None and np.any(~np.isnan(data_two))
+
+    #% Calculations
+    # find overlapping times
+    (time_overlap, d1_diff_ix, d2_diff_ix) = np.intersect1d(time_one, time_two, \
+        assume_unique=True, return_indices=True) # TODO: add a tolerance?
+    # find differences
+    d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)
+    d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)
+
+    rms_ix1  = (time_one >= rms_xmin) & (time_one <= rms_xmax)
+    rms_ix2  = (time_two >= rms_xmin) & (time_two <= rms_xmax)
+    rms_ix3  = (time_overlap >= rms_xmin) & (time_overlap <= rms_xmax)
+    rms_pts1 = np.maximum(rms_xmin, np.minimum(np.min(time_one), np.min(time_two)))
+    rms_pts2 = np.minimum(rms_xmax, np.maximum(np.max(time_one), np.max(time_two)))
+    # find number of elements being differenced
+    n = len(elements)
+    cm = ColorMap(colormap=colormap, num_colors=n)
+    assert cm.num_colors == n, 'The colormap must match the number of channels.' # TODO: enforce this?
+    # calculate the differences
+    nondeg_error = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
+    # calculate the rms (or mean) values
+    if not use_mean:
+        func_name   = 'RMS'
+        if have_data_one:
+            data1_func  = rms(data_one[:, rms_ix1], axis=1, ignore_nans=True)
+        if have_data_two:
+            data2_func  = rms(data_two[:, rms_ix2], axis=1, ignore_nans=True)
+        if have_data_one and have_data_two:
+            nondeg_func = rms(nondeg_error[:, rms_ix3], axis=1, ignore_nans=True)
+    else:
+        func_name   = 'Mean'
+        if have_data_one:
+            data1_func  = np.nanmean(data_one[:, rms_ix1], axis=1)
+        if have_data_two:
+            data2_func  = np.nanmean(data_two[:, rms_ix2], axis=1)
+        if have_data_one and have_data_two:
+            nondeg_func = np.nanmean(nondeg_error[:, rms_ix3], axis=1)
+    # output errors
+    err = {'one': data1_func, 'two': data2_func, 'diff': nondeg_func}
+    # unit conversion value
+    (temp, prefix) = get_factors(leg_scale)
+    leg_conv = 1/temp
+
+    #% Overlay plots
+    f1 = plt.figure()
+    # create axis
+    if make_subplots:
+        f1.canvas.set_window_title(description) # TODO: fig_visible
+        if have_data_one and have_data_two:
+            ax1 = f1.add_subplot(2, 1, 1)
+        else:
+            ax1 = f1.add_subplot(111)
+    else:
+        f1.canvas.set_window_title(description + 'Difference')
+    # plot data
+    if have_data_one:
+        for i in range(n):
+            if show_rms:
+                value = leg_format.format(leg_conv*data1_func[i])
+                this_label = '{} {} ({}: {} {}{})'.format(name_one, elements[i], func_name, value, prefix, units)
+            else:
+                this_label = name_one + ' ' + elements[i]
+            ax1.plot(time_one, data_one[i, :], '^-', markersize=4, color=cm.get_color(i), label=this_label)
+    if have_data_two:
+        for i in range(n):
+            if show_rms:
+                value = leg_format.format(leg_conv*data2_func[i])
+                this_label = '{} {} ({}: {} {}{})'.format(name_two, elements[i], func_name, value, prefix, units)
+            else:
+                this_label = name_two + ' ' + elements[i]
+            ax1.plot(time_two, data_two[i, :], 'v:', markersize=4, color=whitten(cm.get_color(i)), label=this_label)
+
+    # set X display limits
+    xlim = list(ax1.get_xlim())
+    if np.isfinite(disp_xmin):
+        xlim[0] = max([xlim[0], disp_xmin])
+    if np.isfinite(disp_xmax):
+        xlim[1] = min([xlim[1], disp_xmax])
+    ax1.set_xlim(xlim)
+    # set Y display limits
+    if plot_zero:
+        show_zero_ylim(ax1)
+    # optionally plot truth
+    if truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data)):
+        for i in range(4):
+            # TODO: add RMS to Truth data?
+            this_label = truth_name + ' ' + elements[i]
+            ax1.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
+                linewidth=2, label=this_label)
+
+    # format display of plot
+    ax1.legend(loc=legend_loc)
+    ax1.set_title(description)
+    ax1.set_xlabel('Time [' + time_units + ']' + start_date)
+    ax1.set_ylabel(description + ' [' + units + ']')
+    ax1.grid(True)
+    # plot RMS lines
+    if show_rms:
+        plot_rms_lines(ax1, [rms_pts1, rms_pts2], ax1.get_ylim())
+
+    #% Difference plot
+    if have_data_one and have_data_two:
+        # make axis
+        if make_subplots:
+            ax2 = f1.add_subplot(2, 1, 2, sharex=ax1)
+            f2  = None
+        else:
+            f2  = plt.figure()
+            f2.canvas.set_window_title(description + 'Difference')
+            ax2 = f2.add_subplot(111, sharex=ax1)
+        cm.set_colors(ax2)
+        # plot data
+        for i in range(n):
+            if show_rms:
+                value = leg_format.format(leg_conv*nondeg_func[i])
+                this_label = '{} ({}: {} {}{})'.format(elements[i], func_name, value, prefix, units)
+            else:
+                this_label = elements[i]
+            ax2.plot(time_overlap, nondeg_error[i, :], '.-', markersize=4, color=cm.get_color(i), label=this_label)
+        ax2.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, linewidth=2, label=name_one+' Extra')
+        ax2.plot(time_two[d2_miss_ix], np.zeros(len(d2_miss_ix)), 'go', markersize=6, linewidth=2, label=name_two+' Extra')
+        # format display of plot
+        if plot_zero:
+            show_zero_ylim(ax2)
+        ax2.legend(loc=legend_loc)
+        ax2.set_title(description + ' Difference')
+        ax2.set_xlabel('Time [' + time_units + ']' + start_date)
+        ax2.set_ylabel(description + ' Difference [' + units + ']')
+        ax2.grid(True)
+        # optionally add second Y axis
+        if second_y_scale is not None:
+            if isinstance(second_y_scale, (int, float)):
+                if not np.isnan(second_y_scale) and second_y_scale != 0:
+                    plot_second_yunits(ax2, '', second_y_scale)
+            else:
+                for (key, value) in second_y_scale.items():
+                    if not np.isnan(value) and value != 0:
+                        plot_second_yunits(ax2, description + ' Difference [' + key + ']', value)
+
+        if show_rms:
+            plot_rms_lines(ax2, [rms_pts1, rms_pts2], ax2.get_ylim())
     else:
         f2 = None
     fig_hand = [x for x in (f1, f2) if x is not None]
