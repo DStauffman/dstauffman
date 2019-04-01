@@ -584,7 +584,7 @@ class Test_make_python_init(unittest.TestCase):
     def setUp(self):
         self.folder   = dcs.get_root_dir()
         self.text     = 'from .bpe import'
-        self.text2    = 'from .bpe          import'
+        self.text2    = 'from .bpe           import'
         self.folder2  = dcs.get_tests_dir()
         self.filepath = os.path.join(self.folder2, 'temp_file.py')
         self.filename = os.path.join(self.folder2, '__init__2.py')
@@ -617,12 +617,12 @@ class Test_make_python_init(unittest.TestCase):
     def test_small_wrap(self):
         with self.assertRaises(ValueError) as context:
             dcs.make_python_init(self.folder, wrap=30)
-        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "26:30" was too small.')
+        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "27:30" was too small.')
 
     def test_really_small_wrap(self):
         with self.assertRaises(ValueError) as context:
             dcs.make_python_init(self.folder, wrap=10)
-        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "26:10" was too small.')
+        self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "27:10" was too small.')
 
     def test_saving(self):
         text = dcs.make_python_init(self.folder, filename=self.filename)
@@ -664,6 +664,10 @@ class Test_get_python_definitions(unittest.TestCase):
     def test_nothing(self):
         funcs = dcs.get_python_definitions('')
         self.assertEqual(len(funcs), 0)
+
+    def test_constant_values(self):
+        funcs = dcs.get_python_definitions('def a():\n    pass\nCONSTANT = 5\n')
+        self.assertEqual(funcs, ['a', 'CONSTANT'])
 
 #%% read_text_file
 class Test_read_text_file(unittest.TestCase):

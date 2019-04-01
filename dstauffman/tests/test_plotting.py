@@ -63,6 +63,133 @@ class Test_Opts(unittest.TestCase):
         self.assertEqual(lines[3], '  save_plot  = False')
         self.assertEqual(lines[-1], '  names      = []')
 
+#%% Functions - plot_time_history
+class Test_plot_time_history(unittest.TestCase):
+    r"""
+    Tests the plot_time_history function with the following cases:
+        Nominal
+        Defaults
+        With label
+        With type
+        With Opts
+        With legend
+        No data
+        Ignore all zeros
+        Bad legend
+        Show zero
+    """
+    def setUp(self):
+        self.time     = np.arange(0, 10, 0.1) + 2000
+        num_channels  = 5
+        self.data     = np.random.rand(len(self.time), num_channels)
+        mag           = self.data.cumsum(axis=1)[:,-1]
+        self.data     = 10 * self.data / np.expand_dims(mag, axis=1)
+        self.label    = 'Plot description'
+        self.units    = 'percentage'
+        self.opts     = dcs.Opts()
+        self.opts.show_plot = False
+        self.legend   = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
+        self.figs     = []
+        self.second_y_scale = 1000000
+
+    def test_nominal(self):
+        self.figs.append(dcs.plot_time_history(self.time, self.data, label=self.label, \
+            units=self.units, opts=self.opts, legend=self.legend))
+
+    def test_defaults(self):
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label))
+
+    def test_with_units(self):
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, self.units))
+
+    def test_with_opts(self):
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, opts=self.opts))
+
+    def test_with_legend(self):
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, legend=self.legend))
+
+    def test_no_data(self):
+        with dcs.capture_output() as out:
+            dcs.plot_time_history(self.time, None, '')
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'plot skipped due to missing data.')
+
+    def test_ignore_zeros(self):
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
+
+    def test_ignore_zeros2(self):
+        self.data[:,1] = 0
+        self.data[:,3] = 0
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
+
+    def test_ignore_zeros3(self):
+        self.data = np.zeros(self.data.shape)
+        with dcs.capture_output() as out:
+            not_a_fig = dcs.plot_time_history(self.time, self.data, label='All Zeros', ignore_empties=True)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertIs(not_a_fig, None)
+        self.assertEqual(output,'All Zeros plot skipped due to missing data.')
+
+    def test_colormap(self):
+        self.opts.colormap = 'Dark2'
+        colormap = 'Paired'
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, \
+            ignore_empties=True, colormap=colormap))
+
+    def test_bad_legend(self):
+        with self.assertRaises(AssertionError):
+            dcs.plot_time_history(self.time, self.data, self.label, legend=self.legend[:-1])
+
+    def test_second_y_scale1(self):
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, units='population', \
+            second_y_scale=self.second_y_scale))
+
+    def test_second_y_scale2(self):
+        second_y_scale = {'New ylabel [units]': 100}
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, \
+            second_y_scale=second_y_scale))
+
+    def test_single_point(self):
+        self.figs.append(dcs.plot_time_history(self.time[1:], self.data[1:,:], self.label))
+
+    def test_show_zero(self):
+        self.data += 1000
+        self.opts.show_zero = True
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, opts=self.opts))
+
+    def test_data_lo_and_hi(self):
+        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, \
+            data_lo=self.data-1, data_hi=self.data+1))
+
+    def test_not_ndarray(self):
+        self.figs.append(dcs.plot_time_history(0, 0, 'Zero'))
+
+    def test_0d(self):
+        self.figs.append(dcs.plot_time_history(np.array(0), np.array(0), 'Zero'))
+
+    def test_1d(self):
+        self.figs.append(dcs.plot_time_history(np.arange(5), np.arange(5), 'Line'))
+
+    def test_3d(self):
+        data3 = np.empty((self.data.shape[0], 3, self.data.shape[1]), dtype=float)
+        data3[:,0,:] = self.data
+        data3[:,1,:] = self.data + 0.1
+        data3[:,2,:] = self.data + 0.2
+        self.opts.names = ['Run 1', 'Run 2', 'Run 3']
+        self.figs.append(dcs.plot_time_history(self.time, data3, self.label, opts=self.opts))
+
+    def test_bad_4d(self):
+        bad_data = np.random.rand(self.time.shape[0], 4, 5, 1)
+        with self.assertRaises(AssertionError):
+            dcs.plot_time_history(self.time, bad_data, self.label, opts=self.opts)
+
+    def tearDown(self):
+        if self.figs:
+            for this_fig in self.figs:
+                plt.close(this_fig)
+
 #%% Functions - plot_monte_carlo
 class Test_plot_monte_carlo(unittest.TestCase):
     r"""
@@ -186,6 +313,20 @@ class Test_plot_monte_carlo(unittest.TestCase):
     def test_plot_confidence(self):
         self.fig = dcs.plot_monte_carlo(self.time, self.data_matrix, self.label, self.units, plot_confidence=0.95)
 
+    def test_not_ndarray(self):
+        self.fig = dcs.plot_monte_carlo(0, 0, 'Zero')
+
+    def test_0d(self):
+        self.fig = dcs.plot_monte_carlo(np.array(0), np.array(0), 'Zero')
+
+    def test_1d(self):
+        self.fig = dcs.plot_monte_carlo(np.arange(5), np.arange(5), 'Line')
+
+    def test_bad_3d(self):
+        bad_data = np.random.rand(self.time.shape[0], 4, 5)
+        with self.assertRaises(ValueError):
+            dcs.plot_monte_carlo(self.time, bad_data, self.label, opts=self.opts)
+
     def tearDown(self):
         if self.fig is not None:
             plt.close(self.fig)
@@ -293,124 +434,6 @@ class Test_plot_correlation_matrix(unittest.TestCase):
     def tearDown(self):
         for i in range(len(self.figs)):
             plt.close(self.figs.pop())
-
-#%% Functions - plot_time_history
-class Test_plot_time_history(unittest.TestCase):
-    r"""
-    Tests the plot_time_history function with the following cases:
-        Nominal
-        Defaults
-        With label
-        With type
-        With Opts
-        With legend
-        No data
-        Ignore all zeros
-        Bad legend
-        Show zero
-    """
-    def setUp(self):
-        self.time     = np.arange(0, 10, 0.1) + 2000
-        num_channels  = 5
-        self.data     = np.random.rand(len(self.time), num_channels)
-        mag           = self.data.cumsum(axis=1)[:,-1]
-        self.data     = 10 * self.data / np.expand_dims(mag, axis=1)
-        self.label    = 'Plot description'
-        self.units    = 'percentage'
-        self.opts     = dcs.Opts()
-        self.opts.show_plot = False
-        self.legend   = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
-        self.figs     = []
-        self.second_y_scale = 1000000
-
-    def test_nominal(self):
-        self.figs.append(dcs.plot_time_history(self.time, self.data, label=self.label, \
-            units=self.units, opts=self.opts, legend=self.legend))
-
-    def test_defaults(self):
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label))
-
-    def test_with_units(self):
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, self.units))
-
-    def test_with_opts(self):
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, opts=self.opts))
-
-    def test_with_legend(self):
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, legend=self.legend))
-
-    def test_no_data(self):
-        with dcs.capture_output() as out:
-            dcs.plot_time_history(self.time, None, '')
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, 'plot skipped due to missing data.')
-
-    def test_ignore_zeros(self):
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
-
-    def test_ignore_zeros2(self):
-        self.data[:,1] = 0
-        self.data[:,3] = 0
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
-
-    def test_ignore_zeros3(self):
-        self.data = np.zeros(self.data.shape)
-        with dcs.capture_output() as out:
-            not_a_fig = dcs.plot_time_history(self.time, self.data, label='All Zeros', ignore_empties=True)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertIs(not_a_fig, None)
-        self.assertEqual(output,'All Zeros plot skipped due to missing data.')
-
-    def test_colormap(self):
-        self.opts.colormap = 'Dark2'
-        colormap = 'Paired'
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, \
-            ignore_empties=True, colormap=colormap))
-
-    def test_bad_legend(self):
-        with self.assertRaises(AssertionError):
-            dcs.plot_time_history(self.time, self.data, self.label, legend=self.legend[:-1])
-
-    def test_second_y_scale1(self):
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, units='population', \
-            second_y_scale=self.second_y_scale))
-
-    def test_second_y_scale2(self):
-        second_y_scale = {'New ylabel [units]': 100}
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, \
-            second_y_scale=second_y_scale))
-
-    def test_single_point(self):
-        self.figs.append(dcs.plot_time_history(self.time[1:], self.data[1:,:], self.label))
-
-    def test_show_zero(self):
-        self.data += 1000
-        self.opts.show_zero = True
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, opts=self.opts))
-
-    def test_data_lo_and_hi(self):
-        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, \
-            data_lo=self.data-1, data_hi=self.data+1))
-
-    def test_3d(self):
-        data3 = np.empty((self.data.shape[0], 3, self.data.shape[1]), dtype=float)
-        data3[:,0,:] = self.data
-        data3[:,1,:] = self.data + 0.1
-        data3[:,2,:] = self.data + 0.2
-        self.opts.names = ['Run 1', 'Run 2', 'Run 3']
-        self.figs.append(dcs.plot_time_history(self.time, data3, self.label, opts=self.opts))
-
-    def test_bad_4d(self):
-        bad_data = np.random.rand(self.time.shape[0], 4, 5, 1)
-        with self.assertRaises(AssertionError):
-            dcs.plot_time_history(self.time, bad_data, self.label, opts=self.opts)
-
-    def tearDown(self):
-        if self.figs:
-            for this_fig in self.figs:
-                plt.close(this_fig)
 
 #%% Functions - plot_bar_breakdown
 class Test_plot_bar_breakdown(unittest.TestCase):
@@ -573,9 +596,10 @@ class Test_general_quaternion_plot(unittest.TestCase):
         self.use_mean        = False
         self.plot_zero       = False
         self.show_rms        = True
+        self.figs            = None
 
     def test_nominal(self):
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
@@ -584,7 +608,7 @@ class Test_general_quaternion_plot(unittest.TestCase):
 
     def test_not_visible(self):
         self.fig_visible = False
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
@@ -593,7 +617,7 @@ class Test_general_quaternion_plot(unittest.TestCase):
 
     def test_no_subplots(self):
         self.make_subplots = False
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
@@ -602,7 +626,7 @@ class Test_general_quaternion_plot(unittest.TestCase):
 
     def test_no_components(self):
         self.plot_components = False
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
@@ -612,7 +636,7 @@ class Test_general_quaternion_plot(unittest.TestCase):
 
     def test_no_start_date(self):
         self.start_date = ''
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
@@ -622,7 +646,7 @@ class Test_general_quaternion_plot(unittest.TestCase):
     def test_only_quat_one(self):
         self.quat_two.fill(np.nan)
         self.name_two = ''
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
@@ -631,7 +655,7 @@ class Test_general_quaternion_plot(unittest.TestCase):
     def test_only_quat_two(self):
         self.quat_one = None
         self.name_one = ''
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
@@ -640,12 +664,47 @@ class Test_general_quaternion_plot(unittest.TestCase):
     def test_rms_bounds(self):
         self.rms_xmin = 5
         self.rms_xmax = 7
-        (fig_hand, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, fig_visible=self.fig_visible, \
              make_subplots=self.make_subplots, plot_components=self.plot_components)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
+
+    def test_use_mean(self):
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, use_mean=True)
+        for i in range(3):
+            self.assertLess(abs(err['diff'][i]), 3.15)
+
+    def test_no_rms_in_legend(self):
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, use_mean=True, show_rms=False)
+        for i in range(3):
+            self.assertLess(abs(err['diff'][i]), 3.15)
+
+    def test_plot_zero(self):
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, plot_zero=True)
+        for i in range(3):
+            self.assertLess(abs(err['diff'][i]), 3.15)
+
+    def test_plot_truth(self):
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, truth_time=self.time_one, truth_data=self.quat_two)
+        for i in range(3):
+            self.assertLess(abs(err['diff'][i]), 3.15)
+
+    def test_disp_bounds(self):
+        (self.figs, err) = dcs.general_quaternion_plot(self.description, self.time_one, self.time_two, \
+             self.quat_one, self.quat_two, disp_xmin=2, disp_xmax=5)
+        for i in range(3):
+            self.assertLess(abs(err['diff'][i]), 3.15)
+
+    def tearDown(self):
+        if self.figs:
+            for this_fig in self.figs:
+                plt.close(this_fig)
 
 #%% Functions - general_difference_plot
 class Test_general_difference_plot(unittest.TestCase):
@@ -678,15 +737,126 @@ class Test_general_difference_plot(unittest.TestCase):
         self.show_rms        = True
         self.legend_loc      = 'best'
         self.second_y_scale  = {u'µrad': 1e6}
+        self.figs            = None
 
     def test_nominal(self):
-        (fig_hand, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             second_y_scale=self.second_y_scale)
+
+    def test_not_visible(self):
+        self.fig_visible = False
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
+            elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
+            fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_y_scale=self.second_y_scale)
+
+    def test_no_subplots(self):
+        self.make_subplots = False
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
+            elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
+            fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_y_scale=self.second_y_scale)
+
+    def test_no_start_date(self):
+        self.start_date = ''
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
+            elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
+            fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_y_scale=self.second_y_scale)
+
+    def test_only_data_one(self):
+        self.data_two.fill(np.nan)
+        self.name_two = ''
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
+            elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
+            fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_y_scale=self.second_y_scale)
+        self.assertTrue(np.all(np.isnan(err['diff'])))
+
+    def test_only_data_two(self):
+        self.data_one = None
+        self.name_one = ''
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
+            elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
+            fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_y_scale=self.second_y_scale)
+        self.assertTrue(np.all(np.isnan(err['diff'])))
+
+    def test_rms_bounds(self):
+        self.rms_xmin = 5
+        self.rms_xmax = 7
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
+            elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
+            fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_y_scale=self.second_y_scale)
+
+    def test_use_mean(self):
+        self.use_mean = True
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
+            elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
+            fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_y_scale=self.second_y_scale)
+
+    def test_no_rms_in_legend(self):
+        self.show_rms = False
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
+            elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
+            fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_y_scale=self.second_y_scale)
+
+    def test_plot_zero(self):
+        self.plot_zero = True
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
+            elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
+            fig_visible=self.fig_visible, make_subplots=self.make_subplots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_y_scale=self.second_y_scale)
+
+    def test_plot_truth(self):
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+            self.data_one, self.data_two, elements=self.elements, units=self.units, \
+            truth_time=self.time_one, truth_data=self.data_two)
+
+    def test_disp_bounds(self):
+        (self.figs, err) = dcs.general_difference_plot(self.description, self.time_one, self.time_two, \
+             self.data_one, self.data_two, elements=self.elements, units=self.units, \
+             disp_xmin=2, disp_xmax=5)
+
+    def tearDown(self):
+        if self.figs:
+            for this_fig in self.figs:
+                plt.close(this_fig)
 
 #%% Unit test execution
 if __name__ == '__main__':

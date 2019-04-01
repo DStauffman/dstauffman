@@ -493,8 +493,8 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     >>> from dstauffman import make_python_init, get_root_dir
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
-    >>> print(text[0:25])
-    from .analysis     import
+    >>> print(text[0:26])
+    from .analysis      import
 
     """
     # exclusions

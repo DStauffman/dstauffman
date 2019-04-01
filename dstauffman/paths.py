@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 r"""
-Generic utilities that can be independently defined and used by other modules.
+Generic path functions that can be called independent of the current working directory.
 
 Notes
 -----
-#.  By design, this module does not reference any other piece of the dstauffman code base except
-        constants or enums to avoid circular references.
 #.  Written by David C. Stauffer in March 2015.
 #.  Moved out of utils and into paths.py file in February 2019 by David C. Stauffer.
 

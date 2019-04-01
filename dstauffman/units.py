@@ -4,8 +4,6 @@ Contains utilities and functions dealing with unit conversions.
 
 Notes
 -----
-#.  By design, this module does not reference any other piece of the dstauffman code base except
-        constants or enums to avoid circular references.
 #.  Written by David C. Stauffer in February 2016.
 
 """

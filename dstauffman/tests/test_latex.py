@@ -127,7 +127,7 @@ class Test_latex_str(unittest.TestCase):
     """
     def setUp(self):
         self.value = 101.666666666666
-        self.value2 = dcs.ar2mp(0.2) #0.016528546178382508
+        self.value2 = dcs.rate_to_prob(0.2/12) #0.016528546178382508
 
     def test_string1(self):
         value_str = dcs.latex_str('test')

@@ -13,7 +13,8 @@ import unittest
 
 import numpy as np
 
-from dstauffman.stats import mp2ar
+from dstauffman.constants import MONTHS_PER_YEAR
+from dstauffman.stats     import prob_to_rate
 
 #%% Functions - make_preamble
 def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short_cap=None, numbered=True):
@@ -173,7 +174,7 @@ def latex_str(value, digits=-1, fixed=False, cmp2ar=False, capped=1073741823): #
     formatter = '{:.' + str(digits) + letter + '}' if digits >= 0 else '{}'
     # potentially convert units
     if cmp2ar:
-        value = mp2ar(value)
+        value = prob_to_rate(value, time=1/MONTHS_PER_YEAR)
     if np.isnan(value):
         value_str = 'NaN'
     elif np.isinf(value) or value > capped:

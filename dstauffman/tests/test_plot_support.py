@@ -742,9 +742,17 @@ class Test_show_zero_ylim(unittest.TestCase):
     def setUp(self):
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
-        self.ax.plot([1, 5, 10], [200, 250, 240], '.-')
 
-    def test_nominal(self):
+    def test_no_change(self):
+        self.ax.plot([1, 5, 10], [200, -150, 240], '.-')
+        dcs.show_zero_ylim(self.ax)
+
+    def test_all_positive(self):
+        self.ax.plot([1, 5, 10], [200, 250, 240], '.-')
+        dcs.show_zero_ylim(self.ax)
+
+    def test_all_negative(self):
+        self.ax.plot([1, 5, 10], [-200, -250, -240], '.-')
         dcs.show_zero_ylim(self.ax)
 
     def tearDown(self):

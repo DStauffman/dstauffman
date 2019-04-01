@@ -62,7 +62,7 @@ def orth(A):
 
     >>> Q = orth(A)
     >>> print(np.array2string(Q, suppress_small=True))
-    [[-0.70710678  0.        ]
+    [[-0.70710678 -0.        ]
      [ 0.          1.        ]
      [-0.70710678  0.        ]]
 

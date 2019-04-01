@@ -933,6 +933,8 @@ def plot_second_yunits(ax, ylab, multiplier):
     >>> multiplier = 1e6
     >>> plot_second_yunits(ax, ylab, multiplier)
 
+    >>> plt.close(fig)
+
     """
     # plot second Y axis
     ax2 = ax.twinx()

@@ -1224,7 +1224,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     >>> plot_zero       = False
     >>> show_rms        = True
     >>> legend_loc      = 'best'
-    >>> second_y_scale = {u'µrad': 1e6}
+    >>> second_y_scale  = {u'µrad': 1e6}
     >>> (fig_hand, err) = general_difference_plot(description, time_one, time_two, data_one, data_two,
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, leg_scale=leg_scale, \
     ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -1266,7 +1266,8 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     cm = ColorMap(colormap=colormap, num_colors=n)
     assert cm.num_colors == n, 'The colormap must match the number of channels.' # TODO: enforce this?
     # calculate the differences
-    nondeg_error = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
+    if have_both:
+        nondeg_error = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
     # calculate the rms (or mean) values
     nans = np.full(3, np.nan, dtype=float)
     if not use_mean:
@@ -1296,6 +1297,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
             ax1 = f1.add_subplot(111)
     else:
         f1.canvas.set_window_title(description + 'Difference')
+        ax1 = f1.add_subplot(111)
     # plot data
     if have_data_one:
         for i in range(n):
@@ -1326,7 +1328,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
         show_zero_ylim(ax1)
     # optionally plot truth
     if truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data)):
-        for i in range(4):
+        for i in range(n):
             # TODO: add RMS to Truth data?
             this_label = truth_name + ' ' + elements[i]
             ax1.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
