@@ -38,22 +38,26 @@ class Opts(Frozen):
     r"""Optional plotting configurations."""
     def __init__(self):
         self.case_name = ''
-        self.save_path = os.getcwd()
+        self.date_zero = None
         self.save_plot = False
+        self.save_path = os.getcwd()
+        self.show_plot = True
         self.plot_type = 'png'
         self.sub_plots = True
-        self.show_plot = True
-        self.show_link = False
+        self.show_link = False # TODO: is this used?
         self.disp_xmin = -np.inf
         self.disp_xmax =  np.inf
         self.rms_xmin  = -np.inf
         self.rms_xmax  =  np.inf
+        self.show_rms  = True
+        self.use_mean  = False
+        self.show_zero = False
+        self.quat_comp = True
+        self.time_unit = 'sec'
         self.vert_fact = 'unity'
         self.colormap  = None
-        self.show_rms  = True
-        self.show_zero = False
-        self.base_time = 'year'
-        self.legend_loc = 'best'
+        self.base_time = 'sec'
+        self.leg_spot  = 'best'
         self.names     = list()
 
     def get_names(self, ix):
@@ -63,6 +67,29 @@ class Opts(Frozen):
         else:
             name = ''
         return name
+
+    def get_date_zero_str(self):
+        r"""
+        Gets a string representation of date_zero, typically used to print on an X axis.
+
+        Returns
+        -------
+        start_date : str
+            String representing the date of time zero.
+
+        Examples
+        --------
+        >>> from dstauffman import Opts
+        >>> from datetime import datetime
+        >>> opts = Opts()
+        >>> opts.date_zero = datetime(2019, 4, 1, 18, 0, 0)
+        >>> print(opts.get_date_zero_str())
+          t(0) = 01-Apr-2019 18:00:00 Z
+
+        """
+        TIMESTR_FORMAT = '%d-%b-%Y %H:%M:%S'
+        start_date = '  t(0) = ' + self.date_zero.strftime(TIMESTR_FORMAT) + ' Z' if self.date_zero is not None else ''
+        return start_date
 
     def pprint(self, indent=1, align=True):
         r"""Display a pretty print version of the class."""
@@ -139,7 +166,7 @@ def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
             colormap = DEFAULT_COLORMAP
         else:
             colormap = opts.colormap
-    legend_loc = opts.legend_loc
+    legend_loc = opts.leg_spot
     show_zero  = opts.show_zero
     time_units = opts.base_time
     unit_text  = ' [' + units + ']' if units else ''
@@ -318,7 +345,7 @@ def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True,
         else:
             colormap = opts.colormap
     rms_in_legend = opts.show_rms
-    legend_loc    = opts.legend_loc
+    legend_loc    = opts.leg_spot
     show_zero     = opts.show_zero
     time_units    = opts.base_time
     unit_text     = ' [' + units + ']' if units else ''
@@ -646,7 +673,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
             colormap = DEFAULT_COLORMAP
         else:
             colormap = opts.colormap
-    legend_loc = opts.legend_loc
+    legend_loc = opts.leg_spot
     time_units = opts.base_time
 
     # check for valid data
@@ -819,7 +846,7 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     # check optional inputs
     if opts is None:
         opts = Opts()
-    legend_loc = opts.legend_loc
+    legend_loc = opts.leg_spot
 
     # convert data to percentages
     num_pts   = age_bins.size - 1

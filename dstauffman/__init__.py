@@ -19,6 +19,8 @@ from .bpe          import OptiOpts, OptiParam, BpeResults, CurrentResults, valid
 from .classes      import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
 from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE
 from .enums        import IntEnumPlus, consecutive, dist_enum_and_mons
+from .kalman       import KfInnov, KfOut, plot_attitude, plot_position, plot_innovation, \
+                              plot_covariance, plot_states
 from .latex        import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
 from .linalg       import orth, subspace
 from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, get_output_dir

@@ -52,6 +52,14 @@ class Test_Opts(unittest.TestCase):
         name = opts.get_names(2)
         self.assertEqual(name, '')
 
+    def test_get_date_zero_str(self):
+        opts = dcs.Opts()
+        date_str = opts.get_date_zero_str()
+        self.assertEqual(date_str, '')
+        opts.date_zero = datetime(2019, 4, 1, 18, 0, 0)
+        date_str = opts.get_date_zero_str()
+        self.assertEqual(date_str,'  t(0) = 01-Apr-2019 18:00:00 Z')
+
     def test_pprint(self):
         opts = dcs.Opts()
         with dcs.capture_output() as out:
@@ -59,9 +67,9 @@ class Test_Opts(unittest.TestCase):
         lines = out.getvalue().strip().split('\n')
         out.close()
         self.assertEqual(lines[0], 'Opts')
-        self.assertEqual(lines[1], '  case_name  = ')
-        self.assertEqual(lines[3], '  save_plot  = False')
-        self.assertEqual(lines[-1], '  names      = []')
+        self.assertEqual(lines[1], '  case_name = ')
+        self.assertEqual(lines[3], '  save_plot = False')
+        self.assertEqual(lines[-1], '  names     = []')
 
 #%% Functions - plot_time_history
 class Test_plot_time_history(unittest.TestCase):
