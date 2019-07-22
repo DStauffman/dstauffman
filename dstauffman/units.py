@@ -12,64 +12,6 @@ Notes
 import doctest
 import unittest
 
-from dstauffman.constants import MONTHS_PER_YEAR
-from dstauffman.enums import IntEnumPlus
-from dstauffman.stats import annual_rate_to_monthly_probability, \
-    convert_annual_to_monthly_probability, prob_to_rate, rate_to_prob
-
-#%% Units
-class Units(IntEnumPlus):
-    r"""Units class that can be used to keep track of the related units and convert when asked."""
-    AR    = 1 # annual rate
-    AP    = 2 # annual probability
-    MP    = 3 # monthly probability
-    ND    = 4 # nondimensional
-    PER   = 5 # percentage
-    P100K = 6 # per 100,000
-
-    @classmethod
-    def convert(cls, value, base_unit, new_unit):
-        r"""Convert a given value from a base_unit to a new_unit."""
-        # check for no conversion case
-        if base_unit == new_unit:
-            return value
-        # hard-coded dictionary of factors
-        factors = {cls.ND: 1, cls.PER: 100, cls.P100K: 100000}
-        # check for rates and probabilities
-        rate_and_probs = {cls.AR, cls.AP, cls.MP}
-        if base_unit in rate_and_probs:
-            if new_unit not in rate_and_probs:
-                raise ValueError('Cannot convert a rate or probability into an inconsistent unit.')
-            if base_unit == cls.AR:
-                if new_unit == cls.MP:
-                    new_value = annual_rate_to_monthly_probability(value)
-                elif new_unit == cls.AP:
-                    new_value = rate_to_prob(value)
-                else:
-                    raise NotImplementedError('Shouldn''t be able to get to this line.')
-            elif base_unit == cls.AP:
-                if new_unit == cls.AR:
-                    new_value = prob_to_rate(value)
-                elif new_unit == cls.MP:
-                    new_value = convert_annual_to_monthly_probability(value)
-                else:
-                    raise NotImplementedError('Shouldn''t be able to get to this line.')
-            elif base_unit == cls.MP:
-                AR = MONTHS_PER_YEAR * prob_to_rate(value)
-                if new_unit == cls.AR:
-                    new_value = AR
-                elif new_unit == cls.AP:
-                    new_value = rate_to_prob(AR)
-                else:
-                    raise NotImplementedError('Shouldn''t be able to get to this line.')
-            else:
-                raise NotImplementedError('Shouldn''t be able to get to this line.')
-        else:
-            mult1 = factors[base_unit]
-            mult2 = factors[new_unit]
-            new_value = mult2 / mult1
-        return new_value
-
 #%% get_factors
 def get_factors(prefix):
     r"""

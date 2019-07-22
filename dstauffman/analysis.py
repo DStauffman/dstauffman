@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 r"""
-Contains more complex analysis related routines.
+Contains more complex analysis related routines mostly specific to health care modeling.
 
 Notes
 -----
@@ -17,7 +17,77 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from dstauffman.latex import bins_to_str_ranges
 from dstauffman.plotting import Opts, setup_plots
+
+#%% Functions - dist_enum_and_mons
+def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
+    r"""
+    Create a distribution for an enumerated state with a duration (such as a disease status).
+
+    Parameters
+    ----------
+    num : int
+        Number of people in the population
+    distribution : array_like
+        Likelihood of being in each state (should cumsum to 100%)
+    prng : class numpy.random.RandomState
+        Pseudo-random number generator
+    max_months : scalar or array_like, optional
+        Maximum number of months for being in each state
+    start_num : int, optional
+        Number to start counting from, default is 1
+    alpha : int, optional
+        The alpha parameter for the beta distribution
+    beta : int, optional
+        The beta parameter for the beta distribution
+
+    Returns
+    -------
+    state : ndarray
+        Enumerated status for this month for everyone in the population
+    mons : ndarray
+        Number of months in this state for anyone with an infection
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2015.
+    #.  Updated by David C. Stauffer in June 2015 to use a beta curve to distribute the number of
+        months spent in each state.
+    #.  Made into a generic function for the dstauffman library by David C. Stauffer in July 2015.
+    #.  Updated by David C. Stauffer in November 2015 to change the inputs to allow max_months and
+        mons output to be optional.
+    #.  Updated by David C. Stauffer in April 2017 to only return state if desired, and to allow
+        distribution to be a 2D matrix, so you can have age based distributions.
+
+    Examples
+    --------
+    >>> from dstauffman import dist_enum_and_mons
+    >>> import numpy as np
+    >>> num = 100
+    >>> distribution = np.array([0.10, 0.20, 0.30, 0.40])
+    >>> max_months = np.array([5, 100, 20, 1])
+    >>> start_num = 0
+    >>> prng = np.random.RandomState()
+    >>> (state, mons) = dist_enum_and_mons(num, distribution, prng, max_months=max_months, start_num=start_num)
+
+    """
+    # hard-coded values
+    precision = 1e-12
+    # create the cumulative distribution (allows different distribution per person if desired)
+    cum_dist = np.cumsum(np.atleast_2d(distribution), axis=1)
+    assert np.all(np.abs(cum_dist[:,-1] - 1) < precision), "Given distribution doesn't sum to 1."
+    # do a random draw based on the cumulative distribution
+    state = np.sum(prng.rand(num, 1) >= cum_dist, axis=1, dtype=int) + start_num
+    # set the number of months in this state based on a beta distribution with the given
+    # maximum number of months in each state
+    if max_months is None:
+        return state
+    else:
+        if np.isscalar(max_months):
+            max_months = np.full(len(distribution), max_months)
+        mons = np.ceil(max_months[state-start_num] * prng.beta(alpha, beta, num)).astype(int)
+        return (state, mons)
 
 #%% Functions - icer
 def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
@@ -223,6 +293,100 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
     ax.axis(lim)
     # add standard plotting features
     setup_plots(fig, opts, 'dist_no_yscale')
+    return fig
+
+#%% Functions - plot_population_pyramid
+def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyramid', *, opts=None, \
+        name1='Male', name2='Female', color1='xkcd:blue', color2='xkcd:red'):
+    r"""
+    Plot the standard population pyramid.
+
+    Parameters
+    ----------
+    age_bins : (N+1,) array_like of float/ints
+        Age boundaries to plot
+    male_per : (N,) array_like of int
+        Male population percentage in each bin
+    fmal_per : (N,) array_like of int
+        Female population percentage in each bin
+    title : str, optional, default is 'Population Pyramid'
+        Title for the plot
+    opts : class Opts, optional
+        Plotting options
+    name1 : str, optional
+        Name for data source 1
+    name2 : str, optional
+        Name for data source 2
+    color1 : str or valid color tuple, optional
+        Color for data source 1
+    color2 : str or valid color tuple, optional
+        Color for data source 2
+
+    Returns
+    -------
+    fig : object
+        figure handle
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2017.
+
+    References
+    ----------
+    .. [1]  https://en.wikipedia.org/wiki/Population_pyramid
+
+    Examples
+    --------
+    >>> from dstauffman import plot_population_pyramid
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> age_bins = np.array([  0,   5,  10,  15,  20, 1000], dtype=int)
+    >>> male_per = np.array([500, 400, 300, 200, 100]) / 3000
+    >>> fmal_per = np.array([450, 375, 325, 225, 125]) / 3000
+    >>> fig      = plot_population_pyramid(age_bins, male_per, fmal_per)
+
+    Close figure
+    >>> plt.close(fig)
+
+    """
+    # hard-coded values
+    scale = 100
+
+    # check optional inputs
+    if opts is None:
+        opts = Opts()
+    legend_loc = opts.leg_spot
+
+    # convert data to percentages
+    num_pts   = age_bins.size - 1
+    y_values  = np.arange(num_pts)
+    y_labels  = bins_to_str_ranges(age_bins, dt=1, cutoff=200)
+
+    # create the figure and axis and set the title
+    fig = plt.figure()
+    fig.canvas.set_window_title(title)
+    ax = fig.add_subplot(111)
+
+    # plot bars
+    ax.barh(y_values, -scale*male_per, 0.95, color=color1, label=name1)
+    ax.barh(y_values,  scale*fmal_per, 0.95, color=color2, label=name2)
+
+    # make sure plot is symmetric about zero
+    xlim = max(abs(x) for x in ax.get_xlim())
+    ax.set_xlim(-xlim, xlim)
+
+    # add labels
+    ax.set_xlabel('Population [%]')
+    ax.set_ylabel('Age [years]')
+    ax.set_title(title)
+    ax.set_yticks(y_values)
+    ax.set_yticklabels(y_labels)
+    ax.set_xticklabels(np.abs(ax.get_xticks()))
+    ax.legend(loc=legend_loc)
+
+    # Setup plots
+    setup_plots(fig, opts, 'dist_no_yscale')
+
     return fig
 
 #%% Unit test

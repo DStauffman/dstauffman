@@ -36,7 +36,7 @@ class KfInnov(Frozen):
 
     Examples
     --------
-    >>> from paplot import KfInnov
+    >>> from dstauffman import KfInnov
     >>> innov = KfInnov()
 
     """
@@ -78,7 +78,7 @@ class KfOut(Frozen):
 
     Examples
     --------
-    >>> from paplot import KfOut
+    >>> from dstauffman import KfOut
     >>> kf = KfOut()
 
     """
@@ -125,6 +125,7 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
     --------
     >>> from dstauffman import KfOut, plot_attitude, quat_norm
     >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
 
     >>> kf1      = KfOut()
     >>> kf1.name = 'KF1'
@@ -137,6 +138,10 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
     >>> kf2.att  = quat_norm(np.random.rand(4, 11))
 
     >>> (fig_hand, err) = plot_attitude(kf1, kf2)
+
+    Close plots
+    >>> for fig in fig_hand:
+    ...     plt.close(fig)
 
     """
     # check optional inputs
@@ -190,6 +195,7 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
     --------
     >>> from dstauffman import KfOut, plot_position
     >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
 
     >>> kf1      = KfOut()
     >>> kf1.name = 'KF1'
@@ -204,6 +210,10 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
     >>> kf2.vel  = None
 
     >>> (fig_hand, err) = plot_position(kf1, kf2)
+
+    Close plots
+    >>> for fig in fig_hand:
+    ...     plt.close(fig)
 
     """
     # check optional inputs

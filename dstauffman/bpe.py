@@ -20,13 +20,14 @@ import time
 import unittest
 from copy import deepcopy
 
+import matplotlib.pyplot as plt
 import numpy as np
 from scipy.linalg import norm
 
 from dstauffman.classes import Frozen, SaveAndLoad
-from dstauffman.plotting import Opts, plot_bpe_convergence, plot_correlation_matrix, \
-    plot_time_history
-from dstauffman.utils import activate_logging, deactivate_logging, pprint_dict, rss, setup_dir
+from dstauffman.logs import activate_logging, deactivate_logging
+from dstauffman.plotting import Opts, plot_correlation_matrix, plot_time_history, setup_plots
+from dstauffman.utils import pprint_dict, rss, setup_dir
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -1249,6 +1250,68 @@ def run_bpe(opti_opts, log_level=logging.INFO):
     deactivate_logging()
 
     return (bpe_results, results)
+
+#%% Functions - plot_bpe_convergence
+def plot_bpe_convergence(costs, opts=None):
+    r"""
+    Plot the BPE convergence rate by iteration on a log scale.
+
+    Parameters
+    ----------
+    costs : array_like
+        Costs for the beginning run, each iteration, and final run
+    opts : class Opts, optional
+        Plotting options
+
+    Returns
+    -------
+    fig : object
+        figure handle
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2016.
+
+    Examples
+    --------
+    >>> from dstauffman import plot_bpe_convergence
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> costs = np.array([1, 0.1, 0.05, 0.01])
+    >>> fig = plot_bpe_convergence(costs)
+
+    Close plot
+    >>> plt.close(fig)
+
+    """
+    # check optional inputs
+    if opts is None:
+        opts = Opts()
+
+    # get number of iterations
+    num_iters = len(costs) - 2
+    time      = np.arange(len(costs))
+    labels    = ['Begin'] + [str(x+1) for x in range(num_iters)] + ['Final']
+
+    # alias the title
+    this_title = 'Convergence by Iteration'
+    # create the figure and set the title
+    fig = plt.figure()
+    fig.canvas.set_window_title(this_title)
+    # add an axis and plot the data
+    ax = fig.add_subplot(111)
+    ax.semilogy(time, costs, 'b.-', linewidth=2)
+    # add labels
+    ax.set_xlabel('Iteration')
+    ax.set_ylabel('Cost')
+    ax.set_title(this_title)
+    ax.set_xticks(time)
+    ax.set_xticklabels(labels)
+    # show a grid
+    ax.grid(True)
+    # Setup plots
+    setup_plots(fig, opts, 'time')
+    return fig
 
 #%% plot_bpe_results
 def plot_bpe_results(bpe_results, opts=None, *, plots=None):

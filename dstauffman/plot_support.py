@@ -702,6 +702,24 @@ def disp_xlimits(figs, xmin=None, xmax=None):
             # modify xlimits
             this_axis.set_xlim((new_xmin, new_xmax))
 
+#%% Functions - zoom_ylim
+def zoom_ylim(ax, time, data, t_start=-np.inf, t_final=np.inf, axis=None, pad=1.1):
+    r"""
+    Zooms the Y-axis to the data for the given time bounds, with an optional pad.
+    """
+    ix_time = (time >= t_start) & (time <= t_final)
+    if axis is None:
+        this_ymin = pad * np.min(data[ix_time, :])
+        this_ymax = pad * np.max(data[ix_time, :])
+    else:
+        this_ymin = pad * np.min(data[ix_time, axis])
+        this_ymax = pad * np.max(data[ix_time, axis])
+    (old_ymax, old_ymin) = ax.get_ylim()
+    if this_ymin > old_ymin:
+        ax.set_ylim(bottom=this_ymin)
+    if this_ymax < old_ymax:
+        ax.set_ylim(top=this_ymax)
+
 #%% Functions - setup_plots
 def setup_plots(figs, opts, plot_type='time'):
     r"""
@@ -740,7 +758,7 @@ def setup_plots(figs, opts, plot_type='time'):
     >>> opts.save_plot = False
     >>> setup_plots(fig, opts)
 
-    Close plots
+    Close plot
     >>> plt.close(fig)
 
     """

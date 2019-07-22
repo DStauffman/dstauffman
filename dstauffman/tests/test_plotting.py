@@ -515,70 +515,6 @@ class Test_plot_bar_breakdown(unittest.TestCase):
             for this_fig in self.figs:
                 plt.close(this_fig)
 
-#%% Functions - plot_bpe_convergence
-class Test_plot_bpe_convergence(unittest.TestCase):
-    r"""
-    Tests the plot_bpe_convergence function with the following cases:
-        Nominal
-        Only two costs
-        No Opts
-        No Costs
-    """
-    def setUp(self):
-        self.costs = np.array([1, 0.1, 0.05, 0.01])
-        self.opts = dcs.Opts()
-        self.opts.show_plot = False
-        self.figs = []
-
-    def test_nominal(self):
-        self.figs.append(dcs.plot_bpe_convergence(self.costs, self.opts))
-
-    def test_only_two_costs(self):
-        self.figs.append(dcs.plot_bpe_convergence(self.costs[np.array([0, 3])], self.opts))
-
-    def test_no_opts(self):
-        self.figs.append(dcs.plot_bpe_convergence(self.costs))
-
-    def test_no_costs(self):
-        self.figs.append(dcs.plot_bpe_convergence([], self.opts))
-
-    def tearDown(self):
-        if self.figs:
-            for this_fig in self.figs:
-                plt.close(this_fig)
-
-#%% Functions - plot_population_pyramid
-class Test_plot_population_pyramid(unittest.TestCase):
-    r"""
-    Tests the plot_population_pyramid function with the following cases:
-        Nominal
-        Default arguments
-    """
-    def setUp(self):
-        self.age_bins = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
-        self.male_per = np.array([100, 200, 300, 400, 500], dtype=int)
-        self.fmal_per = np.array([125, 225, 325, 375, 450], dtype=int)
-        self.title    = 'Test Title'
-        self.opts     = dcs.Opts()
-        self.name1    = 'M'
-        self.name2    = 'W'
-        self.color1   = 'k'
-        self.color2   = 'w'
-        self.fig      = None
-
-    def test_nominal(self):
-        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_per, self.fmal_per, \
-            self.title, opts=self.opts, name1=self.name1, name2=self.name2, color1=self.color1, \
-            color2=self.color2)
-
-    def test_defaults(self):
-        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_per, self.fmal_per, \
-            self.title)
-
-    def tearDown(self):
-        if self.fig is not None:
-            plt.close(self.fig)
-
 #%% Functions - general_quaternion_plot
 class Test_general_quaternion_plot(unittest.TestCase):
     r"""
@@ -865,6 +801,42 @@ class Test_general_difference_plot(unittest.TestCase):
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
+
+#%% Functions - plot_phases
+class Test_plot_phases(unittest.TestCase):
+    r"""
+    Tests the plot_phases function with the following cases:
+        Single time
+        End times
+        No labels
+    """
+    def setUp(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Sine Wave')
+        self.ax = self.fig.add_subplot(111)
+        time = np.arange(101)
+        data = np.cos(time / 10)
+        self.times = np.array([5, 20, 60, 90])
+        self.times2 = np.array([[5, 20, 60, 90], [10, 60, 90, 95]])
+        self.ax.plot(time, data, '.-')
+        self.colormap = 'tab10'
+        self.labels = ['Part 1', 'Phase 2', 'Watch Out', 'Final']
+
+    def test_single_time(self):
+        dcs.plot_phases(self.ax, self.times, self.colormap, self.labels)
+
+    def test_with_end_times(self):
+        dcs.plot_phases(self.ax, self.times2, self.colormap, self.labels)
+
+    def test_no_labels(self):
+        dcs.plot_phases(self.ax, self.times, colormap=self.colormap)
+
+    def test_no_colormap(self):
+        dcs.plot_phases(self.ax, self.times, labels=self.labels)
+
+    def tearDown(self):
+        if self.fig:
+            plt.close(self.fig)
 
 #%% Unit test execution
 if __name__ == '__main__':

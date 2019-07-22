@@ -897,6 +897,36 @@ class Test_run_bpe(unittest.TestCase):
                 if os.path.isfile(filename):
                     os.remove(filename)
 
+#%% Functions - plot_bpe_convergence
+class Test_plot_bpe_convergence(unittest.TestCase):
+    r"""
+    Tests the plot_bpe_convergence function with the following cases:
+        Nominal
+        Only two costs
+        No Opts
+        No Costs
+    """
+    def setUp(self):
+        self.costs = np.array([1, 0.1, 0.05, 0.01])
+        self.opts = dcs.Opts()
+        self.opts.show_plot = False
+        self.figs = []
+
+    def test_nominal(self):
+        self.figs.append(dcs.plot_bpe_convergence(self.costs, self.opts))
+
+    def test_only_two_costs(self):
+        self.figs.append(dcs.plot_bpe_convergence(self.costs[np.array([0, 3])], self.opts))
+
+    def test_no_opts(self):
+        self.figs.append(dcs.plot_bpe_convergence(self.costs))
+
+    def test_no_costs(self):
+        self.figs.append(dcs.plot_bpe_convergence([], self.opts))
+
+    def tearDown(self):
+        dcs.close_all(self.figs)
+
 #%% plot_bpe_results
 class Test_plot_bpe_results(unittest.TestCase):
     r"""

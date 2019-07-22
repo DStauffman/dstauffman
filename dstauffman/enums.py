@@ -13,8 +13,6 @@ import doctest
 import unittest
 from enum import Enum, EnumMeta, _is_dunder
 
-import numpy as np
-
 #%% Classes - _EnumMetaPlus
 class _EnumMetaPlus(EnumMeta):
     r"""
@@ -86,75 +84,6 @@ def consecutive(enumeration):
         alias_details = ', '.join('{}:{}'.format(name, member) for (name, member) in non_consecutive)
         raise ValueError('Non-consecutive values found in {}: {}'.format(enumeration.__name__, alias_details))
     return enumeration
-
-#%% Functions - dist_enum_and_mons
-def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
-    r"""
-    Create a distribution for an enumerated state with a duration (such as a disease status).
-
-    Parameters
-    ----------
-    num : int
-        Number of people in the population
-    distribution : array_like
-        Likelihood of being in each state (should cumsum to 100%)
-    prng : class numpy.random.RandomState
-        Pseudo-random number generator
-    max_months : scalar or array_like, optional
-        Maximum number of months for being in each state
-    start_num : int, optional
-        Number to start counting from, default is 1
-    alpha : int, optional
-        The alpha parameter for the beta distribution
-    beta : int, optional
-        The beta parameter for the beta distribution
-
-    Returns
-    -------
-    state : ndarray
-        Enumerated status for this month for everyone in the population
-    mons : ndarray
-        Number of months in this state for anyone with an infection
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in April 2015.
-    #.  Updated by David C. Stauffer in June 2015 to use a beta curve to distribute the number of
-        months spent in each state.
-    #.  Made into a generic function for the dstauffman library by David C. Stauffer in July 2015.
-    #.  Updated by David C. Stauffer in November 2015 to change the inputs to allow max_months and
-        mons output to be optional.
-    #.  Updated by David C. Stauffer in April 2017 to only return state if desired, and to allow
-        distribution to be a 2D matrix, so you can have age based distributions.
-
-    Examples
-    --------
-    >>> from dstauffman import dist_enum_and_mons
-    >>> import numpy as np
-    >>> num = 100
-    >>> distribution = np.array([0.10, 0.20, 0.30, 0.40])
-    >>> max_months = np.array([5, 100, 20, 1])
-    >>> start_num = 0
-    >>> prng = np.random.RandomState()
-    >>> (state, mons) = dist_enum_and_mons(num, distribution, prng, max_months=max_months, start_num=start_num)
-
-    """
-    # hard-coded values
-    precision = 1e-12
-    # create the cumulative distribution (allows different distribution per person if desired)
-    cum_dist = np.cumsum(np.atleast_2d(distribution), axis=1)
-    assert np.all(np.abs(cum_dist[:,-1] - 1) < precision), "Given distribution doesn't sum to 1."
-    # do a random draw based on the cumulative distribution
-    state = np.sum(prng.rand(num, 1) >= cum_dist, axis=1, dtype=int) + start_num
-    # set the number of months in this state based on a beta distribution with the given
-    # maximum number of months in each state
-    if max_months is None:
-        return state
-    else:
-        if np.isscalar(max_months):
-            max_months = np.full(len(distribution), max_months)
-        mons = np.ceil(max_months[state-start_num] * prng.beta(alpha, beta, num)).astype(int)
-        return (state, mons)
 
 #%% Unit test
 if __name__ == '__main__':

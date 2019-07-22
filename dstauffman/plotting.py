@@ -24,10 +24,9 @@ from matplotlib.ticker import StrMethodFormatter
 # model imports
 from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
-from dstauffman.latex import bins_to_str_ranges
 from dstauffman.plot_support import ColorMap, get_color_lists, ignore_plot_data, \
                                         plot_rms_lines, plot_second_yunits, setup_plots, \
-                                        show_zero_ylim, TruthPlotter, whitten
+                                        show_zero_ylim, whitten
 from dstauffman.quat import quat_angle_diff
 from dstauffman.stats import intersect, z_from_ci
 from dstauffman.units import get_factors
@@ -150,7 +149,6 @@ def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
     >>> fig   = plot_time_history(time, data, label)
 
     Close plot
-
     >>> plt.close(fig)
 
     """
@@ -267,8 +265,8 @@ def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
 
 #%% Functions - plot_monte_carlo
 def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True, \
-    truth=None, plot_as_diffs=False, second_y_scale=None, truth_time=None, \
-    truth_data=None, plot_sigmas=1, plot_confidence=0, colormap=None):
+    truth=None, plot_as_diffs=False, second_y_scale=None, plot_sigmas=1, \
+    plot_confidence=0, colormap=None):
     r"""
     Plot the given data channel versus time, with a generic label argument.
 
@@ -292,10 +290,6 @@ def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True,
         Plot each entry in results against the other ones, default is False
     second_y_scale : float or dict, optional
         Multiplication scale factor to use to display on a secondary Y axis
-    truth_time : array_like, optional
-        Time for truth data
-    truth_data : array_line, optional
-        Date for corresponding truth history
     plot_sigmas : numeric, optional
         If value converts to true as bool, then plot the sigma values of the given value
     plot_confidence : numeric, optional
@@ -348,17 +342,9 @@ def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True,
     legend_loc    = opts.leg_spot
     show_zero     = opts.show_zero
     time_units    = opts.base_time
+    show_legend   = rms_in_legend or plot_as_diffs or (truth is not None and not truth.is_null)
     unit_text     = ' [' + units + ']' if units else ''
     (scale, prefix) = get_factors(opts.vert_fact)
-
-    # maintain older API
-    if truth_data is not None: # pragma: no cover
-        if truth is not None:
-            raise ValueError('Attempting to use both APIs, please only use new truth input.')
-        else:
-            warnings.warn('This API will be removed in the future, please use the new truth input.', DeprecationWarning)
-            truth = TruthPlotter(truth_time, truth_data)
-    show_legend = rms_in_legend or plot_as_diffs or (truth is not None and not truth.is_null)
 
     # ensure that data is at least 2D
     if data.ndim == 0:
@@ -515,7 +501,7 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
     >>> data = unit(data, axis=0)
     >>> fig = plot_correlation_matrix(data, labels)
 
-    Close plots
+    Close plot
     >>> plt.close(fig)
 
     """
@@ -661,7 +647,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     >>> label = 'Test'
     >>> fig   = plot_bar_breakdown(time, data, label)
 
-    Close plots
+    Close plot
     >>> plt.close(fig)
 
     """
@@ -722,162 +708,6 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
 
     # Setup plots
     setup_plots(fig, opts, 'time')
-    return fig
-
-#%% Functions - plot_bpe_convergence
-def plot_bpe_convergence(costs, opts=None):
-    r"""
-    Plot the BPE convergence rate by iteration on a log scale.
-
-    Parameters
-    ----------
-    costs : array_like
-        Costs for the beginning run, each iteration, and final run
-    opts : class Opts, optional
-        Plotting options
-
-    Returns
-    -------
-    fig : object
-        figure handle
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in July 2016.
-
-    Examples
-    --------
-    >>> from dstauffman import plot_bpe_convergence
-    >>> import matplotlib.pyplot as plt
-    >>> import numpy as np
-    >>> costs = np.array([1, 0.1, 0.05, 0.01])
-    >>> fig = plot_bpe_convergence(costs)
-
-    Close plots
-    >>> plt.close(fig)
-
-    """
-    # check optional inputs
-    if opts is None:
-        opts = Opts()
-
-    # get number of iterations
-    num_iters = len(costs) - 2
-    time      = np.arange(len(costs))
-    labels    = ['Begin'] + [str(x+1) for x in range(num_iters)] + ['Final']
-
-    # alias the title
-    this_title = 'Convergence by Iteration'
-    # create the figure and set the title
-    fig = plt.figure()
-    fig.canvas.set_window_title(this_title)
-    # add an axis and plot the data
-    ax = fig.add_subplot(111)
-    ax.semilogy(time, costs, 'b.-', linewidth=2)
-    # add labels
-    ax.set_xlabel('Iteration')
-    ax.set_ylabel('Cost')
-    ax.set_title(this_title)
-    ax.set_xticks(time)
-    ax.set_xticklabels(labels)
-    # show a grid
-    ax.grid(True)
-    # Setup plots
-    setup_plots(fig, opts, 'time')
-    return fig
-
-#%% Functions - plot_population_pyramid
-def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyramid', *, opts=None, \
-        name1='Male', name2='Female', color1='xkcd:blue', color2='xkcd:red'):
-    r"""
-    Plot the standard population pyramid.
-
-    Parameters
-    ----------
-    age_bins : (N+1,) array_like of float/ints
-        Age boundaries to plot
-    male_per : (N,) array_like of int
-        Male population percentage in each bin
-    fmal_per : (N,) array_like of int
-        Female population percentage in each bin
-    title : str, optional, default is 'Population Pyramid'
-        Title for the plot
-    opts : class Opts, optional
-        Plotting options
-    name1 : str, optional
-        Name for data source 1
-    name2 : str, optional
-        Name for data source 2
-    color1 : str or valid color tuple, optional
-        Color for data source 1
-    color2 : str or valid color tuple, optional
-        Color for data source 2
-
-    Returns
-    -------
-    fig : object
-        figure handle
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in April 2017.
-
-    References
-    ----------
-    .. [1]  https://en.wikipedia.org/wiki/Population_pyramid
-
-    Examples
-    --------
-    >>> from dstauffman import plot_population_pyramid
-    >>> import matplotlib.pyplot as plt
-    >>> import numpy as np
-    >>> age_bins = np.array([  0,   5,  10,  15,  20, 1000], dtype=int)
-    >>> male_per = np.array([500, 400, 300, 200, 100]) / 3000
-    >>> fmal_per = np.array([450, 375, 325, 225, 125]) / 3000
-    >>> fig      = plot_population_pyramid(age_bins, male_per, fmal_per)
-
-    Close figure
-    >>> plt.close(fig)
-
-    """
-    # hard-coded values
-    scale = 100
-
-    # check optional inputs
-    if opts is None:
-        opts = Opts()
-    legend_loc = opts.leg_spot
-
-    # convert data to percentages
-    num_pts   = age_bins.size - 1
-    y_values  = np.arange(num_pts)
-    y_labels  = bins_to_str_ranges(age_bins, dt=1, cutoff=200)
-
-    # create the figure and axis and set the title
-    fig = plt.figure()
-    fig.canvas.set_window_title(title)
-    ax = fig.add_subplot(111)
-
-    # plot bars
-    ax.barh(y_values, -scale*male_per, 0.95, color=color1, label=name1)
-    ax.barh(y_values,  scale*fmal_per, 0.95, color=color2, label=name2)
-
-    # make sure plot is symmetric about zero
-    xlim = max(abs(x) for x in ax.get_xlim())
-    ax.set_xlim(-xlim, xlim)
-
-    # add labels
-    ax.set_xlabel('Population [%]')
-    ax.set_ylabel('Age [years]')
-    ax.set_title(title)
-    ax.set_yticks(y_values)
-    ax.set_yticklabels(y_labels)
-    ax.set_xticklabels(np.abs(ax.get_xticks()))
-    ax.legend(loc=legend_loc)
-
-    # Setup plots
-    setup_plots(fig, opts, 'dist_no_yscale')
-
     return fig
 
 #%% Functions - general_quaternion_plot
@@ -960,6 +790,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     --------
     >>> from dstauffman import general_quaternion_plot, quat_norm
     >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
     >>> from datetime import datetime
     >>> description     = 'example'
     >>> time_one        = np.arange(11)
@@ -984,6 +815,10 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     fig_visible=fig_visible, make_subplots=make_subplots, plot_components=plot_components, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms)
+
+    Close plots
+    >>> for fig in fig_hand:
+    ...     plt.close(fig)
 
     """
     # hard-coded values
@@ -1227,6 +1062,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     --------
     >>> from dstauffman import general_difference_plot, get_color_lists
     >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
     >>> from datetime import datetime
     >>> description     = 'example'
     >>> time_one        = np.arange(11)
@@ -1258,6 +1094,10 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     ...     fig_visible=fig_visible, make_subplots=make_subplots, colormap=colormap, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     second_y_scale=second_y_scale)
+
+    Close plots
+    >>> for fig in fig_hand:
+    ...     plt.close(fig)
 
     """
 
@@ -1416,6 +1256,83 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
         f2 = None
     fig_hand = [x for x in (f1, f2) if x is not None]
     return (fig_hand, err)
+
+#%% plot_phases
+def plot_phases(ax, times, colormap='tab10', labels=None):
+    r"""
+    Plots some labeled phases as semi-transparent patchs on the given axis.
+
+    Parameters
+    ----------
+    ax : (Axes)
+        Figure axes
+    times : (1xN) or (2xN) list of times, if it has two rows, then the second are the end points
+         otherwise assume the sections are continuous.
+
+    Examples
+    --------
+    >>> from dstauffman import plot_phases, get_color_lists
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> fig = plt.figure()
+    >>> fig.canvas.set_window_title('Sine Wave')
+    >>> ax = fig.add_subplot(111)
+    >>> time = np.arange(101)
+    >>> data = np.cos(time / 10)
+    >>> _ = ax.plot(time, data, '.-')
+    >>> times = np.array([5, 20, 60, 90])
+    >>> # times = np.array([[5, 20, 60, 90], [10, 60, 90, 95]])
+    >>> labels = ['Part 1', 'Phase 2', 'Watch Out', 'Final']
+    >>> colorlists = get_color_lists()
+    >>> colors = colorlists['quat']
+    >>> plot_phases(ax, times, colors, labels)
+    >>> plt.show()
+
+    Close plot
+    >>> plt.close(fig)
+
+    """
+    # hard-coded values
+    transparency = 0.2 # 1 = opaque
+
+    # get number of segments
+    if times.ndim == 1:
+        num_segments = times.size
+    else:
+        num_segments = times.shape[1]
+
+    # check for optional arguments
+    cm = ColorMap(colormap=colormap, num_colors=num_segments)
+
+    # get the limits of the plot
+    xlims = ax.get_xlim()
+    ylims = ax.get_ylim()
+
+    # create second row of times if not specified (assumes each phase goes all the way to the next one)
+    if times.ndim == 1:
+        times = np.vstack((times, np.hstack((times[1:], max(times[-1], xlims[1])))))
+
+    # loop through all the phases
+    for i in range(num_segments):
+        # get the label and color for this phase
+        this_color = cm.get_color(i)
+        # get the locations for this phase
+        x1 = times[0, i]
+        x2 = times[1, i]
+        y1 = ylims[0]
+        y2 = ylims[1]
+        # create the shaded box
+        ax.add_patch(Rectangle((x1, y1), x2-x1, y2-y1, facecolor=this_color, edgecolor=this_color, \
+            alpha=transparency))
+        # create the label
+        if labels is not None:
+            ax.annotate(labels[i], xy=(x1, y2), \
+                xycoords='data', horizontalalignment='left', verticalalignment='top', \
+                fontsize=15, rotation=-90)
+
+    # reset any limits that might have changed due to the patches
+    ax.set_xlim(xlims)
+    ax.set_ylim(ylims)
 
 #%% Unit test
 if __name__ == '__main__':
