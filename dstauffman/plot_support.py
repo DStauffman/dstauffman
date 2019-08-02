@@ -22,6 +22,7 @@ import warnings
 import matplotlib.cm as cmx
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import numpy as np
 
 # Qt imports
@@ -774,6 +775,11 @@ def setup_plots(figs, opts, plot_type='time'):
     if plot_type in {'time', 'time_no_yscale'}:
         disp_xlimits(figs, opts.disp_xmin, opts.disp_xmax)
 
+    # label the classification
+    #for fig in figs:
+    #    ax = fig.gca()
+    #    plot_classification(ax, 'U', inside_axes=False)
+
     # things to do if displaying the plots
     if opts.show_plot and Plotter.show_plot: # pragma: no cover
         # add a custom toolbar
@@ -972,6 +978,8 @@ def plot_rms_lines(ax, x, y, show_in_legend=True):
 
     Parameters
     ----------
+    ax : class matplotlib.axis.Axis
+        Figure axis
     x : (2,) tuple
         xmin and xmax values at which to draw the lines
     y : (2,) tuple
@@ -1008,6 +1016,93 @@ def plot_rms_lines(ax, x, y, show_in_legend=True):
         label_two = ''
     ax.plot([x[0], x[0]], y, linestyle='--', color=[   1, 0.75, 0], marker='+', markeredgecolor='m', markersize=10, label=label_one)
     ax.plot([x[1], x[1]], y, linestyle='--', color=[0.75, 0.75, 1], marker='+', markeredgecolor='m', markersize=10, label=label_two)
+
+#%% Functions - plot_classification
+def plot_classification(ax, classification='U', test=False, inside_axes=True):
+    r"""
+    Displays the classification in a box on each figure, with the option of printing another box for
+    testing purposes.
+
+    Parameters
+    ----------
+    ax : class matplotlib.axis.Axis
+        Figure axis
+    classification : str
+        Level of classification, from {'U', 'C', 'S', 'T', 'F', 'FOUO', 'U//FOUO', 'NF', 'S//NF', 'TS'}
+    test : bool
+        Whether to print the testing box, default is true
+    inside_axes : bool
+        Whether to print the box inside the axis, or on the figure edge
+
+    See Also
+    --------
+    setup_plots
+
+    Change Log
+    ----------
+    #.  Written by David C. Stauffer in August 2019 based on Matlab version.
+
+    Examples
+    --------
+    >>> from dstauffman import plot_classification
+    >>> import matplotlib.pyplot as plt
+    >>> fig1 = plt.figure()
+    >>> ax1 = fig1.add_subplot(111)
+    >>> _ = ax1.plot([0, 10], [0, 10], '.-b')
+    >>> plot_classification(ax1, 'U', test=False, inside_axes=False)
+    >>> plt.show(block=False) # doctest: +SKIP
+
+    >>> fig2 = plt.figure()
+    >>> ax2 = fig2.add_subplot(111)
+    >>> _ = ax2.plot(0, 0)
+    >>> plot_classification(ax2, 'S', test=True, inside_axes=True)
+    >>> plt.show(block=False) # doctest: +SKIP
+
+    >>> plt.close(fig1)
+    >>> plt.close(fig2)
+
+    """
+    # plot warning before trying to draw the other box
+    if test:
+        ax.text(0.5, 0.97, 'This plot classification is labeled for test purposes only', \
+            color='r', horizontalalignment='center', verticalalignment='top', \
+            bbox=dict(facecolor='none', edgecolor='r'), transform=ax.transAxes)
+
+    # add classification box
+    if classification == 'U':
+        color    = (0, 0, 0)
+        text_str = 'UNCLASSIFIED'
+    elif classification in {'F', 'FOUO', 'U//FOUO'}:
+        color    = (0, 0, 0)
+        text_str = 'UNCLASSIFIED//FOR OFFICIAL USE ONLY'
+    elif classification == 'C':
+        color    = (0, 0, 1)
+        text_str = 'CONFIDENTIAL'
+    elif classification in 'S':
+        color    = (1, 0, 0)
+        text_str = 'SECRET'
+    elif classification in {'NF', 'SNF', 'S//NF'}:
+        color    = (1, 0, 0)
+        text_str = 'SECRET//NOFORN'
+    elif classification in {'TS','T'}:
+        color    = (1, 0.65, 0)
+        text_str = 'TOP SECRET'
+    else:
+        raise ValueError('Unexpected value for classification: "{}".'.format(classification))
+
+    if inside_axes:
+        ax.text(0.99, 0.01, text_str, color=color, horizontalalignment='right', verticalalignment='bottom', \
+            fontweight='bold', fontsize=12, bbox={'facecolor':'none', 'edgecolor':color, 'linewidth':2}, \
+            transform=ax.transAxes)
+    else:
+        r1 = Rectangle((-0.1, -0.1), 1.15, 1.15, facecolor='none', edgecolor=color, clip_on=False, \
+            linewidth=2, transform=ax.transAxes)
+        (rx, ry) = r1.get_xy()
+        ax.add_patch(r1)
+        ax.annotate('\n  ' + text_str + '  ', (rx + r1.get_width(), ry), xycoords='axes fraction', \
+            color=color, weight='bold', fontsize=12, horizontalalignment='right', verticalalignment='bottom', \
+            annotation_clip=False, bbox=dict(boxstyle='square', facecolor='none', edgecolor=color, \
+            pad=0, linewidth=2))
 
 #%% Unit test
 if __name__ == '__main__':

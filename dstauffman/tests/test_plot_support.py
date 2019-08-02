@@ -782,7 +782,7 @@ class Test_plot_second_yunits(unittest.TestCase):
 class Test_plot_rms_lines(unittest.TestCase):
     r"""
     Tests the plot_rms_lines function with the following cases:
-        TBD
+        Nominal
     """
     def setUp(self):
         self.fig = plt.figure()
@@ -794,6 +794,37 @@ class Test_plot_rms_lines(unittest.TestCase):
     def test_nominal(self):
         dcs.plot_rms_lines(self.ax, self.x, self.y, show_in_legend=False)
         self.ax.legend()
+
+    def tearDown(self):
+        plt.close(self.fig)
+
+#%% Functions - plot_classification
+class Test_plot_classification(unittest.TestCase):
+    r"""
+    Tests the plot_classification function with the following cases:
+        Inside axes
+        Outside axes
+        Classified options with test banner
+        Bad option (should error)
+    """
+    def setUp(self):
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(111)
+        self.ax.plot([0, 10], [0, 10], '.-b')
+
+    def test_inside(self):
+        dcs.plot_classification(self.ax, 'U', test=False, inside_axes=True)
+
+    def test_outside(self):
+        dcs.plot_classification(self.ax, 'U', test=False, inside_axes=False)
+
+    def test_options(self):
+        for opt in {'C', 'S', 'T', 'TS', 'F', 'FOUO', 'U//FOUO' ,'NF' ,'S//NF'}:
+            dcs.plot_classification(self.ax, opt, test=True, inside_axes=False)
+
+    def test_bad_option(self):
+        with self.assertRaises(ValueError):
+            dcs.plot_classification(self.ax, 'BadOption')
 
     def tearDown(self):
         plt.close(self.fig)
