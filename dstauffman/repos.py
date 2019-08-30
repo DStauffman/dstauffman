@@ -19,7 +19,8 @@ import unittest
 from dstauffman.utils import line_wrap, read_text_file, setup_dir, write_text_file
 
 #%% find_tabs
-def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trailing=False, exclusions=None, check_eol=None):
+def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trailing=False, \
+              exclusions=None, check_eol=None, show_execute=False):
     r"""
     Find all the tabs in source code that should be spaces instead.
 
@@ -70,6 +71,8 @@ def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trai
                 already_listed = list_all
                 if already_listed:
                     print('Evaluating: "{}"'.format(this_file))
+                if show_execute and os.access(this_file, os.X_OK):
+                    print('File: "{}" has execute privileges.'.format(this_file))
                 with open(this_file, encoding='utf8', newline='') as file:
                     bad_lines = False
                     try:
