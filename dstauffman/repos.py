@@ -19,7 +19,7 @@ import unittest
 from dstauffman.utils import line_wrap, read_text_file, setup_dir, write_text_file
 
 #%% find_tabs
-def find_tabs(folder, extensions=None, *, list_all=False, trailing=False, exclusions=None, check_eol=None):
+def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trailing=False, exclusions=None, check_eol=None):
     r"""
     Find all the tabs in source code that should be spaces instead.
 
@@ -59,13 +59,11 @@ def find_tabs(folder, extensions=None, *, list_all=False, trailing=False, exclus
                 return True
         return False
 
-    if extensions is None:
-        extensions = frozenset(('m', 'py'))
     for (root, dirs, files) in os.walk(folder, topdown=True):
         dirs.sort()
         for name in sorted(files):
             fileparts = name.split('.')
-            if fileparts[-1] in extensions:
+            if extensions is None or fileparts[-1] in extensions:
                 if _is_excluded(root, exclusions):
                     continue
                 this_file = os.path.join(root, name)

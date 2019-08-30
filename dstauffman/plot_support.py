@@ -704,18 +704,81 @@ def disp_xlimits(figs, xmin=None, xmax=None):
             this_axis.set_xlim((new_xmin, new_xmax))
 
 #%% Functions - zoom_ylim
-def zoom_ylim(ax, time, data, t_start=-np.inf, t_final=np.inf, axis=None, pad=1.1):
+def zoom_ylim(ax, time, data, t_start=-np.inf, t_final=np.inf, channel=None, pad=0.1):
     r"""
     Zooms the Y-axis to the data for the given time bounds, with an optional pad.
+
+    Parameters
+    ----------
+    ax : class matplotlib.axis.Axis
+        Figure axis
+    time : (N, ) ndarray
+        Time history
+    data : (N, ) or (N, M) ndarray
+        Data history
+    t_start : float
+        Starting time to zoom data to
+    t_final : float
+        Final time to zoom data to
+    channel : int, optional
+        Axis within 2D data to look at
+    pad : int
+        Amount of pad, as a percentage of delta range, to show around the plot bounds
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in August 2019.
+
+    Examples
+    --------
+    >>> from dstauffman import disp_xlimits, zoom_ylim
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> fig = plt.figure()
+    >>> fig.canvas.set_window_title('Figure Title')
+    >>> ax = fig.add_subplot(111)
+    >>> time = np.arange(1, 10, 0.1)
+    >>> data = time ** 2
+    >>> _ = ax.plot(time, data)
+    >>> _ = ax.set_title('X vs Y')
+    >>> plt.show(block=False) # doctest: +SKIP
+
+    Zoom X-axis and show how Y doesn't rescale
+    >>> t_start = 3
+    >>> t_final = 5.0001
+    >>> disp_xlimits(fig, t_start, t_final)
+    >>> plt.draw() # doctest: +SKIP
+
+    Force Y-axis to rescale to data
+    >>> zoom_ylim(ax, time, data, t_start, t_final, pad=0)
+    >>> plt.draw() # doctest: +SKIP
+
+    Close plot
+    >>> plt.close(fig)
     """
+    # find the relevant time indices
     ix_time = (time >= t_start) & (time <= t_final)
-    if axis is None:
-        this_ymin = pad * np.min(data[ix_time, :])
-        this_ymax = pad * np.max(data[ix_time, :])
+    # pull out the minimums/maximums from the data
+    if channel is None:
+        if data.ndim == 1:
+            this_ymin = np.min(data[ix_time])
+            this_ymax = np.max(data[ix_time])
+        else:
+            this_ymin = np.min(data[ix_time, :])
+            this_ymax = np.max(data[ix_time, :])
     else:
-        this_ymin = pad * np.min(data[ix_time, axis])
-        this_ymax = pad * np.max(data[ix_time, axis])
-    (old_ymax, old_ymin) = ax.get_ylim()
+        this_ymin = np.min(data[ix_time, channel])
+        this_ymax = np.max(data[ix_time, channel])
+    # optionally pad the bounds
+    if pad < 0:
+        raise ValueError('The pad cannot be negative.')
+    if pad > 0:
+        delta = this_ymax - this_ymin
+        this_ymax += pad*delta
+        this_ymin -= pad*delta
+    # get the current limits
+    (old_ymin, old_ymax) = ax.get_ylim()
+    # compare the new bounds to the old ones and update as appropriate
     if this_ymin > old_ymin:
         ax.set_ylim(bottom=this_ymin)
     if this_ymax < old_ymax:
