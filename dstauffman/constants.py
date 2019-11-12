@@ -9,6 +9,7 @@ Notes
 """
 
 #%% Imports
+import os
 import unittest
 
 #%% Constants
@@ -16,6 +17,7 @@ MONTHS_PER_YEAR  = 12
 INT_TOKEN        = -1
 DEFAULT_COLORMAP = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
 QUAT_SIZE        = 4
+IS_WINDOWS       = os.name == 'nt'
 
 #%% Functions
 # None

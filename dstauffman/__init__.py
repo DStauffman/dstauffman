@@ -17,7 +17,7 @@ from .analysis     import dist_enum_and_mons, icer, plot_icer, plot_population_p
 from .bpe          import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, \
                               run_bpe, plot_bpe_convergence, plot_bpe_results
 from .classes      import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
-from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE
+from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, IS_WINDOWS
 from .enums        import IntEnumPlus, consecutive
 from .kalman       import KfInnov, KfOut, plot_attitude, plot_position, plot_innovation, \
                               plot_covariance, plot_states
