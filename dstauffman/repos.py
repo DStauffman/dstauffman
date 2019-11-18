@@ -39,6 +39,11 @@ def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trai
     check_eol : str
         If not None, then the line endings to check, such as '\r\n'
 
+    Returns
+    -------
+    is_clean : bool
+        Whether the folder is clean, meaning nothing was found to report.
+
     Notes
     -----
     #.  This function will iterate over extensions and exclusions, so extensions='txt' will look for
@@ -50,6 +55,7 @@ def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trai
     >>> from dstauffman import find_tabs, get_root_dir
     >>> folder = get_root_dir()
     >>> find_tabs(folder)
+    True
 
     """
     def _is_excluded(path, exclusions):
@@ -60,6 +66,9 @@ def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trai
                 return True
         return False
 
+    # initialize output
+    is_clean = True
+
     for (root, dirs, files) in os.walk(folder, topdown=True):
         dirs.sort()
         for name in sorted(files):
@@ -68,33 +77,40 @@ def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trai
                 if _is_excluded(root, exclusions):
                     continue
                 this_file = os.path.join(root, name)
-                already_listed = list_all
-                if already_listed:
+                already_listed = not list_all
+                if not already_listed:
                     print('Evaluating: "{}"'.format(this_file))
                 if show_execute and os.access(this_file, os.X_OK):
                     print('File: "{}" has execute privileges.'.format(this_file))
+                    is_clean = False
                 with open(this_file, encoding='utf8', newline='') as file:
                     bad_lines = False
                     try:
                         lines = file.readlines()
                     except UnicodeDecodeError: # pragma: no cover
                         print('File: "{}" was not a valid utf-8 file.'.format(this_file))
+                        is_clean = False
                     for (c, line) in enumerate(lines):
                         sline = line.rstrip('\n').rstrip('\r').rstrip('\n') # for all possible orderings
                         if line.count('\t') > 0:
                             if not already_listed:
                                 print('Evaluating: "{}"'.format(this_file))
                                 already_listed = True
+                                is_clean = False
                             print('    Line {:03}: '.format(c+1) + repr(line))
                         elif trailing and len(sline) >= 1 and sline[-1] == ' ':
                             if not already_listed:
                                 print('Evaluating: "{}"'.format(this_file))
                                 already_listed = True
+                                is_clean = False
                             print('    Line {:03}: '.format(c+1) + repr(line))
                         if check_eol is not None and c != len(lines)-1 and not line.endswith(check_eol) and not bad_lines:
                             line_ending = line[-(len(line) - len(sline)):]
                             print('File: "{}" has bad line endings of "{}".'.format(this_file, repr(line_ending)[1:-1]))
                             bad_lines = True
+                            is_clean = False
+    # end checks, return overall result
+    return is_clean
 
 #%% Functions - delete_pyc
 def delete_pyc(folder, recursive=True, print_progress=True):
