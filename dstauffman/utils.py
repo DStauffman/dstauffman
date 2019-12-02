@@ -933,7 +933,7 @@ def pprint_dict(dct, *, name='', indent=1, align=True, disp=True):
     return text
 
 #%% line_wrap
-def line_wrap(text, wrap=80, min_wrap=0, indent=4):
+def line_wrap(text, wrap=80, min_wrap=0, indent=4, line_cont='\\'):
     r"""
     Wrap lines of text to the specified length, breaking at any whitespace characters.
 
@@ -982,7 +982,7 @@ def line_wrap(text, wrap=80, min_wrap=0, indent=4):
             if space_break == -1 or space_break <= indent:
                 raise ValueError('The specified min_wrap:wrap of "{}:{}" was too small.'.format(min_wrap, wrap))
             # add the shorter line
-            out.append(this_line[:space_break] + ' \\')
+            out.append(this_line[:space_break] + ' ' + line_cont)
             # reduce and repeat
             this_line = pad + this_line[space_break+1:]
         # add the final shorter line

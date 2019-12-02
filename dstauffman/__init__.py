@@ -19,6 +19,7 @@ from .bpe          import OptiOpts, OptiParam, BpeResults, CurrentResults, valid
 from .classes      import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
 from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, IS_WINDOWS
 from .enums        import IntEnumPlus, consecutive
+from .fortran      import create_fortran_unit_tests
 from .kalman       import KfInnov, KfOut, plot_attitude, plot_position, plot_innovation, \
                               plot_covariance, plot_states
 from .latex        import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
