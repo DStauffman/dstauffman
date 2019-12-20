@@ -40,7 +40,15 @@ class Test__parse_source(unittest.TestCase):
         dcs.write_text_file(self.filename, text)
 
     def test_function(self):
-        code = dcs.fortran._parse_source(self.filename)
+        this_code = dcs.fortran._parse_source(self.filename)
+        self.assertEqual(this_code.mod_name, 'test_mod')
+        self.assertEqual(this_code.uses, ['constants', 'utils'])
+        self.assertEqual(this_code.types, [])
+        self.assertEqual(this_code.functions, ['func', 'add'])
+        self.assertEqual(this_code.subroutines, ['sub_name'])
+
+    def test_not_single(self):
+        code = dcs.fortran._parse_source(self.filename, assert_single=False)
         self.assertEqual(len(code), 1)
         this_code = code[0]
         self.assertEqual(this_code.mod_name, 'test_mod')
