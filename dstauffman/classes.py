@@ -114,7 +114,8 @@ def _load_method(cls, filename='', use_hdf5=True):
             for key in file:
                 grp = file[key]
                 for field in grp:
-                    setattr(out, field, grp[field].value)
+                    # Note grp[field].value is now grp[field][()] because of updated HDF5 API
+                    setattr(out, field, grp[field][()])
     return out
 
 #%% Methods - _save_pickle

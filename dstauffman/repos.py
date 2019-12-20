@@ -77,9 +77,10 @@ def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trai
                 if _is_excluded(root, exclusions):
                     continue
                 this_file = os.path.join(root, name)
-                already_listed = not list_all
-                if not already_listed:
+                already_listed = False
+                if list_all:
                     print('Evaluating: "{}"'.format(this_file))
+                    already_listed = True
                 if show_execute and os.access(this_file, os.X_OK):
                     print('File: "{}" has execute privileges.'.format(this_file))
                     is_clean = False

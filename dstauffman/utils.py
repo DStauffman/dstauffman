@@ -876,7 +876,7 @@ def full_print():
     # get current options
     opt = np.get_printoptions()
     # update to print all digits
-    np.set_printoptions(threshold=np.nan)
+    np.set_printoptions(threshold=sys.maxsize)
     # yield options for the context manager to do it's thing
     yield
     # reset the options back to what they were originally
