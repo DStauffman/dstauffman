@@ -335,7 +335,7 @@ def _write_all_unit_test(filename, all_code):
     write_text_file(filename, text)
 
 #%% Functions - _write_makefile
-def _write_makefile(makefile, template, code):
+def _write_makefile(makefile, template, code, sources=None):
     r"""
     Reads the given makefile template and inserts the relevant rules based on the given source code.
 
@@ -344,9 +344,11 @@ def _write_makefile(makefile, template, code):
     makefile : str
         Name of the makefile to generate
     template : str
-        Location of the template for the makefile boilerplate
+        Contents of the template for the makefile boilerplate
     code : list of class _FortranSource
         Parsed source code objects for building the rules from
+    sources : list of str, optional
+        Names of the dependent source files that are already built
 
     Examples
     --------
@@ -361,15 +363,17 @@ def _write_makefile(makefile, template, code):
 
     """
     # hard-coded values
+    token_src = 'OBJS   = \\'
     token_run = '# main executable'
     token_obj = '# object file dependencies'
     len_line  = 200
 
-    # read the template
-    orig_text = read_text_file(template)
+    # optional inputs
+    if sources is None:
+        sources = {}
 
-    # break into lines
-    orig_lines = orig_text.split('\n')
+    # read the template into lines
+    orig_lines = template.split('\n')
 
     # build the program rules
     run_rules = []
@@ -381,7 +385,7 @@ def _write_makefile(makefile, template, code):
             runners.append(this_name)
             this_rule = this_name + '.exe : ' + this_name + '.f90 $(B)' + this_name + '.obj'
             run_rules.append(this_rule)
-            this_depd = ['$(B)' + x + '.obj' for x in this_code.uses]
+            this_depd = ['$(OBJLOC)/' + x + '.obj' if x in sources else '$(B)' + x + '.obj' for x in this_code.uses]
             this_rule = '\t$(FC) $(FCFLAGS) -o ' + this_name + '.exe ' + this_name + \
                 '.f90 -I$(OBJDIR) -I$(OBJLOC) ' + ' '.join(this_depd) + ' $(addprefix $(OBJLOC)/,$(OBJS))'
             if this_name == 'run_all_tests':
@@ -394,14 +398,18 @@ def _write_makefile(makefile, template, code):
     for this_code in code:
         obj_rules.append('')
         this_name = this_code.name
-        this_depd = ['$(B)' + x + '.obj' for x in this_code.uses]
+        this_depd = ['$(OBJLOC)/' + x + '.obj' if x in sources else '$(B)' + x + '.obj' for x in this_code.uses]
         this_rule = '$(B)' + this_name + '.obj : ' + this_name + '.f90 ' + ' '.join(this_depd)
+        if this_name == 'run_all_tests':
+            this_rule = line_wrap(this_rule, wrap=len_line, indent=8, line_cont='\\')
         obj_rules.append(this_rule)
 
     # Update the relevant sections of text
     new_lines = []
     for line in orig_lines:
         new_lines.append(line)
+        if line == token_src and sources is not None:
+            new_lines.extend(sorted(['       ' + x + '.obj \\' for x in sources]))
         if line == token_run:
             new_lines.append(all_rule)
             new_lines.extend(run_rules)
@@ -414,7 +422,7 @@ def _write_makefile(makefile, template, code):
     write_text_file(makefile, text)
 
 #%% Functions - create_fortran_unit_tests
-def create_fortran_unit_tests(folder):
+def create_fortran_unit_tests(folder, sources=None, template=None):
     r"""
     Parses the given folder for Fortran unit test files to build programs that will execute them.
 
@@ -463,9 +471,9 @@ def create_fortran_unit_tests(folder):
     all_code.sort(key=lambda x: x.name)
 
     # write the master Makefile
-    makefile = os.path.join(folder, 'unit_tests.make')
-    template = os.path.join(folder, 'unit_tests_template.txt')
-    _write_makefile(makefile, template, all_code)
+    if template is not None:
+        makefile = os.path.join(folder, 'unit_tests.make')
+        _write_makefile(makefile, template, all_code, sources=sources)
 
 #%% Unit test
 if __name__ == '__main__':
