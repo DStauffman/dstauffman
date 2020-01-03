@@ -524,7 +524,8 @@ def create_fortran_unit_tests(folder, *, template=None, external_sources=None):
         _write_makefile(makefile, template, all_code, external_sources=external_sources)
 
 #%% create_fortran_makefile
-def create_fortran_makefile(folder, makefile, template, program, sources, compiler='gfortran', is_debug=True):
+def create_fortran_makefile(folder, makefile, template, program, sources, *, compiler='gfortran', \
+        is_debug=True, replacements=None):
     r"""
     Parses the given folder for Fortran source files to build a makefile.
 
@@ -569,7 +570,6 @@ def create_fortran_makefile(folder, makefile, template, program, sources, compil
         all_code.append(code)
 
     # write makefile
-    replacements = {program + '.exe': program + '_' + compiler + '_' + ('debug' if is_debug else 'release') + '.exe'}
     _write_makefile(makefile, template, all_code, program=program, sources=sources, replacements=replacements)
 
 #%% Unit test
