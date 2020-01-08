@@ -21,6 +21,8 @@ from dstauffman.utils import line_wrap, read_text_file, write_text_file, pprint_
 _MAX_LINE_LENGTH = 132
 # Intrinsic modules
 _INTRINSIC_MODS = {'ieee_arithmetic', 'iso_c_binding', 'iso_fortran_env'}
+# Object file extension
+_OBJ_EXT = '.obj'
 
 #%% Classes - _FortranSource
 class _FortranSource():
@@ -374,11 +376,11 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
         # build the normal dependencies
         dependencies = []
         for x in sorted_uses:
-            dependencies.append(prefix_bld + x + '.obj')
+            dependencies.append(prefix_bld + x + _OBJ_EXT)
         # append any external dependencies at the end, but still in sorted order
         for x in sorted(external_sources):
             if x in uses:
-                dependencies.append(prefix_ext + x + '.obj')
+                dependencies.append(prefix_ext + x + _OBJ_EXT)
         return dependencies
 
     # hard-coded values
@@ -411,7 +413,7 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
             if this_name.startswith('run_'):
                 run_rules.append('')
                 runners.append(this_name)
-                this_rule = this_name + '.exe : ' + this_name + '.f90 $(B)' + this_name + '.obj'
+                this_rule = this_name + '.exe : ' + this_name + '.f90 $(B)' + this_name + _OBJ_EXT
                 run_rules.append(this_rule)
                 this_depd = _build_dependencies(this_code.uses)
                 this_rule = '\t$(FC) $(FCFLAGS) -o ' + this_name + '.exe ' + this_name + \
@@ -421,7 +423,7 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
                 run_rules.append(this_rule)
     else:
         run_rules = ['']
-        run_rules.append(program + ' : ' + prefix_src + program + '.f90 ' + prefix_bld + program + '.obj')
+        run_rules.append(program + ' : ' + prefix_src + program + '.f90 ' + prefix_bld + program + _OBJ_EXT)
         run_rules.append('\t$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -o ' + program + \
             '.exe ' + prefix_src + program + '.f90 -I$(OBJDIR) $(addprefix ' + prefix_bld + ',$(OBJS))')
     if is_unit_test:
@@ -430,11 +432,11 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
         all_rule = 'all : ' + program
 
     # build the object file rules
-    obj_rules = [prefix_bld + 'fruit.obj : fruit.f90', ''] if is_unit_test else []
+    obj_rules = [prefix_bld + 'fruit' + _OBJ_EXT + ' : fruit.f90', ''] if is_unit_test else []
     for this_code in code:
         this_name = this_code.name
         this_depd = _build_dependencies(this_code.uses)
-        this_rule = prefix_bld + this_name + '.obj : ' + prefix_src + this_name + '.f90'
+        this_rule = prefix_bld + this_name + _OBJ_EXT + ' : ' + prefix_src + this_name + '.f90'
         if this_depd:
             this_rule += ' ' + ' '.join(this_depd)
         if this_name == 'run_all_tests':
@@ -450,10 +452,10 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
         new_lines.append(line)
         if line == token_src:
             if is_unit_test:
-                new_lines.extend(sorted(['       ' + x + '.obj \\' for x in external_sources]))
+                new_lines.extend(sorted(['       ' + x + _OBJ_EXT + ' \\' for x in external_sources]))
             else:
                 sources.remove(program)
-                new_lines.extend(sorted(['       ' + x + '.obj \\' for x in sources]))
+                new_lines.extend(sorted(['       ' + x + _OBJ_EXT + ' \\' for x in sources]))
         if line == token_run:
             new_lines.append(all_rule)
             new_lines.extend(run_rules)
