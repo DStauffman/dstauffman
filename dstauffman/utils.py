@@ -15,6 +15,8 @@ import doctest
 import inspect
 import logging
 import os
+import shlex
+import subprocess
 import sys
 import unittest
 import warnings
@@ -29,6 +31,7 @@ from dstauffman.constants import MONTHS_PER_YEAR
 
 #%% Globals
 logger = logging.getLogger(__name__)
+_ALLOWED_ENVS = None
 
 #%% Functions - _nan_equal
 def _nan_equal(a, b):
@@ -1047,6 +1050,165 @@ def combine_per_year(data, func=None):
     if is_1d:
         data2 = data2.squeeze(axis=1)
     return data2
+
+#%% Functions - execute
+def execute(command, folder, *, ignored_codes=None, env=None):
+    r"""
+    Wrapper to subprocess that allows the screen to be updated for long running commands.
+
+    Parameters
+    ----------
+    command : str or list of str
+        Command to execute
+    folder : str
+        Path to execute the command in
+    ignored_codes : int or iterable of int, optional
+        If given, a list of non-zero error codes to ignore
+    env : dict
+        Dictionary of environment variables to update for the call
+
+    Returns
+    -------
+    rc : ReturnCodes enum
+        return code from running the command
+
+    Examples
+    --------
+    >>> from dstauffman import execute
+    >>> import os
+    >>> command = 'ls'
+    >>> folder  = os.getcwd()
+    >>> # Note that this command may not work right within the IPython console, it's intended for command windows.
+    >>> execute(command, folder) # doctest: +SKIP
+
+    """
+    # overlay environment variables
+    if env is not None:
+        env = os.environ.copy().update(env)
+
+    # create a process to spawn the thread
+    popen = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, \
+                             cwd=folder, shell=False, universal_newlines=True, env=env)
+    # intermittenly read output lines
+    for stdout_line in iter(popen.stdout.readline, ''):
+        yield stdout_line
+    # once done, close and get return codes
+    popen.stdout.close()
+    return_code = popen.wait()
+
+    # method 2
+#    while True:
+#        output = process.stdout.readline()
+#        if output == '' and process.poll() is not None:
+#            break
+#        if output:
+#            yield output
+#    process.stdout.close()
+#    return_code = process.poll()
+
+    # determine if command exited cleanly or not and return appropriate code
+    if return_code:
+        if ignored_codes is None or return_code not in ignored_codes:
+            #raise subprocess.CalledProcessError(return_code, command)
+            return 1
+    return 0
+
+#%% Functions - execute_wrapper
+def execute_wrapper(command, folder, dry_run=False, *, ignored_codes=None, filename='', env=None):
+    r"""
+    Wrapper to the wrapper to subprocess with options to print the command do dry-runs.
+
+    Parameters
+    ----------
+    command : str or list of str
+        Command to execute
+    folder : str
+        Path to execute the command in
+    dry_run : bool, optional, default is False
+        Whether the command should be displayed or actually run
+    ignored_codes : int or iterable of int, optional, default is None
+        If given, a list of non-zero error codes to ignore
+    filename : str, optional, default is to not write
+        Name of the file to write the output to, ignore if empty string
+
+    Examples
+    --------
+    >>> from dstauffman import execute_wrapper
+    >>> import os
+    >>> command = 'ls'
+    >>> folder  = os.getcwd()
+    >>> dry_run = True
+    >>> execute_wrapper(command, folder, dry_run) # doctest: +ELLIPSIS
+    Would execute "ls" in "..."
+
+    """
+    # simple dry run case, just display what would happen
+    if dry_run:
+        if isinstance(command, list):
+            command = ' '.join(command)
+            # TODO: available in Python v3.8:
+            #command = shlex.join(command)
+        print('Would execute "{}" in "{}"'.format(command, folder))
+        return
+    # clean up command
+    if isinstance(command, str):
+        command_list = shlex.split(command)
+    elif isinstance(command, list):
+        command_list = command
+    else:
+        raise TypeError('Unexpected type for the command list.')
+    # check that the folder exists
+    if not os.path.isdir(folder):
+        print('Warning: folder "{}" doesn\'t exist, so command "{}" was not executed.'.format(folder, command))
+        return 2
+    # execute command and print status
+    lines = []
+    for line in execute(command_list, folder, ignored_codes=ignored_codes, env=env):
+        print(line, end='')
+        lines.append(line)
+    # optionally write to text file if a filename is given
+    if filename:
+        write_text_file(filename, ''.join(lines))
+    return lines
+
+#%% Functions - get_env_var
+def get_env_var(env_key, default=None):
+    r"""
+    Return an environment variable assuming is has been set.
+
+    Parameters
+    ----------
+    env_key : str
+        Environment variable to try and retrieve.
+    default : str, optional
+        Default value to use if the variable doesn't exist, if None, an error is raised
+
+    Returns
+    -------
+    value : str
+        Location of the folder that contains the main REDY repository.
+
+    Notes
+    -----
+    #.  Written by Alex Kershetsky in November 2019.
+    #.  Incorporated into DStauffman tools by David C. Stauffer in January 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import get_env_var
+    >>> value = get_env_var('HOME')
+
+    """
+    if _ALLOWED_ENVS is not None:
+        if env_key not in _ALLOWED_ENVS:
+            raise KeyError('The environment variable of "{}" is not on the allowed list.'.format(env_key))
+    try:
+        value = os.environ[env_key]
+    except KeyError:
+        if default is None:
+            raise KeyError('The appropriate environment variable "{}" has not been set.'.format(env_key))
+        value = default
+    return value
 
 #%% Unit test
 if __name__ == '__main__':

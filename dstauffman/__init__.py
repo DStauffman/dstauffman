@@ -48,7 +48,7 @@ from .units        import get_factors
 from .utils        import rms, rss, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
                               read_text_file, write_text_file, capture_output, unit, modd, \
                               np_digitize, histcounts, full_print, pprint_dict, line_wrap, \
-                              combine_per_year
+                              combine_per_year, execute, execute_wrapper, get_env_var
 
 #%% Unit test
 if __name__ == '__main__':

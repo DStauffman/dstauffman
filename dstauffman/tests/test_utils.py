@@ -1058,6 +1058,41 @@ class Test_combine_per_year(unittest.TestCase):
         with self.assertRaises(AssertionError):
             dcs.combine_per_year(self.data, func=1.5)
 
+#%% execute
+pass # TODO: write this
+
+#%% execute_wrapper
+pass # TODO: write this
+
+#%% get_env_var
+class Test_get_env_var(unittest.TestCase):
+    r"""
+    Tests the get_env_var function with the following cases:
+        Valid key
+        Unknown key
+        Default key
+        Not allowed
+    """
+    def test_valid(self):
+        home = dcs.get_env_var('HOME')
+        self.assertTrue(bool(home))
+
+    def test_bad_key(self):
+        with self.assertRaises(KeyError):
+            dcs.get_env_var('Nonexisting_environment_key_name')
+
+    def test_default_key(self):
+        key = dcs.get_env_var('Nonexisting_environment_key_name', default='test')
+        self.assertEqual(key, 'test')
+
+    @unittest.SkipTest
+    def test_not_allowed(self):
+        # TODO: fix this test case
+        dcs._ALLOWED_ENVS = {'user', 'username'}
+        with self.assertRaises(KeyError):
+            dcs.get_env_var('HOME')
+        dcs._ALLOWED_ENVS = None
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)
