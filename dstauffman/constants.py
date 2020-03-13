@@ -13,11 +13,12 @@ import os
 import unittest
 
 #%% Constants
-MONTHS_PER_YEAR  = 12
-INT_TOKEN        = -1
-DEFAULT_COLORMAP = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
-QUAT_SIZE        = 4
-IS_WINDOWS       = os.name == 'nt'
+DEFAULT_COLORMAP    = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
+INT_TOKEN           = -1
+IS_WINDOWS          = os.name == 'nt'
+MONTHS_PER_YEAR     = 12
+PLOT_CLASSIFICATION = False
+QUAT_SIZE           = 4
 
 #%% Functions
 # None

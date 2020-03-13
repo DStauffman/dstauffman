@@ -48,7 +48,7 @@ def get_factors(prefix):
 
     """
     if isinstance(prefix, (int,float)):
-        mult = prefix
+        mult  = prefix
         label = '';
         return (mult, label)
     # find the desired units and label prefix

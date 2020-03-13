@@ -230,20 +230,26 @@ def _parse_source(filename, assert_single=True):
     return code
 
 #%% Functions - _write_unit_test
-def _write_unit_test(filename, code):
+def _write_unit_test(filename, code, header=None):
     r"""
     Writes a unit test for the given module.
 
     Parameters
     ----------
+    filename : str
+        Name of the test file to write
     code : class _FortranSource
         Code breakdown
+    header : str, optional
+        If specified, write this additional header information
 
     """
     # build headers
     lines = []
     lines.append('! Builds the unit test into a program and runs it')
-    lines.append('! Autobuilt by dstauffman Fortran code')
+    lines.append('! Autobuilt by dstauffman Fortran tools')
+    if header:
+        lines.append(header)
     lines.append('')
     lines.append('program run_' + code.mod_name)
     lines.append('    use fruit')
@@ -275,7 +281,7 @@ def _write_unit_test(filename, code):
     write_text_file(filename, text)
 
 #%% Functions - _write_all_unit_test
-def _write_all_unit_test(filename, all_code):
+def _write_all_unit_test(filename, all_code, header=None):
     r"""
     Writes a wrapper run_all_tests program to run all the unit tests.
 
@@ -285,6 +291,8 @@ def _write_all_unit_test(filename, all_code):
         Name of the file to write
     all_code : dict
         Contents for the unit tests
+    header : str, optional
+        If specified, write this additional header information
 
     Examples
     --------
@@ -299,12 +307,15 @@ def _write_all_unit_test(filename, all_code):
     # build headers
     lines = []
     lines.append('! Builds all the unit tests into a single program and runs it')
-    lines.append('! Autobuilt by dstauffman Fortran code')
+    lines.append('! Autobuilt by dstauffman Fortran tools')
+    if header:
+        lines.append(header)
     lines.append('')
     lines.append('program run_all_tests')
     lines.append('    !! imports')
     lines.append('    use fruit')
     lines.append('')
+    lines.append('    ! Note that these renames need to happen to avoid potential name conflicts between different test files.')
     for code in all_code:
         subs = ', '.join((code.prefix + x + '=>' + x for x in code.subroutines))
         this_line = '    use ' + code.mod_name + ', only: ' + subs
@@ -472,7 +483,7 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
     write_text_file(makefile, text)
 
 #%% Functions - create_fortran_unit_tests
-def create_fortran_unit_tests(folder, *, template=None, external_sources=None):
+def create_fortran_unit_tests(folder, *, template=None, external_sources=None, header=None):
     r"""
     Parses the given folder for Fortran unit test files to build programs that will execute them.
 
@@ -480,6 +491,12 @@ def create_fortran_unit_tests(folder, *, template=None, external_sources=None):
     ----------
     folder : str
         Folder location to look for unit tests
+    template : str, optional
+        Template to use for the makefile
+    external_sources : set of str, optional
+        Files that are assumed to already exist and don't need to be built by the makefile
+    header : str, optional
+        If specified, write this additional header information
 
     Returns
     -------
@@ -504,12 +521,12 @@ def create_fortran_unit_tests(folder, *, template=None, external_sources=None):
         newfile = os.path.join(folder, 'run_' + os.path.split(file)[1])
 
         # build the individual unit test
-        _write_unit_test(newfile, code)
+        _write_unit_test(newfile, code, header)
         # save this code for information for the makefile
         all_code.append(code)
 
     # write run_all_tests file
-    _write_all_unit_test(os.path.join(folder, 'run_all_tests.f90'), all_code)
+    _write_all_unit_test(os.path.join(folder, 'run_all_tests.f90'), all_code, header)
 
     # Re-parse the source code once all the new files have been written
     files = glob.glob(os.path.join(folder, 'run_*.f90'))

@@ -19,7 +19,7 @@ class Test_all_values(unittest.TestCase):
     def setUp(self):
         self.ints = ['MONTHS_PER_YEAR', 'INT_TOKEN', 'QUAT_SIZE']
         self.strs = ['DEFAULT_COLORMAP']
-        self.bool = ['IS_WINDOWS']
+        self.bool = ['IS_WINDOWS', 'PLOT_CLASSIFICATION']
         self.master = set(self.ints) | set(self.strs) | set(self.bool)
 
     def test_values(self):

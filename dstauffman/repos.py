@@ -11,12 +11,9 @@ Notes
 #%% Imports
 import doctest
 import os
-import shutil
-import sys
-import types
 import unittest
 
-from dstauffman.utils import line_wrap, read_text_file, setup_dir, write_text_file
+from dstauffman.utils import line_wrap, read_text_file, write_text_file
 
 #%% find_tabs
 def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trailing=False, \
@@ -285,123 +282,6 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     if filename:
         write_text_file(filename, output)
     return output
-
-#%% Functions - reload_package
-def reload_package(root_module, disp_reloads=True): # pragma: no cover
-    r"""
-    Force Python to reload all the items within a module.  Useful for interactive debugging in IPython.
-
-    Parameters
-    ----------
-    root_module : module
-        The module to force python to reload
-    disp_reloads : bool
-        Whether to display the modules that are reloaded
-
-    Notes
-    -----
-    #.  Added to the library in June 2015 from:
-        http://stackoverflow.com/questions/2918898/prevent-python-from-caching-the-imported-modules/2918951#2918951
-    #.  Restarting the IPython kernel is by far a safer option, but for some debugging cases this is useful,
-        however unit tests on this function will fail, because it reloads too many dependencies.
-
-    Examples
-    --------
-    >>> from dstauffman import reload_package
-    >>> import dstauffman as dcs
-    >>> reload_package(dcs) # doctest: +ELLIPSIS
-    loading dstauffman...
-
-    """
-    package_name = root_module.__name__
-
-    # get a reference to each loaded module
-    loaded_package_modules = dict([
-        (key, value) for key, value in sys.modules.items()
-        if key.startswith(package_name) and isinstance(value, types.ModuleType)])
-
-    # delete references to these loaded modules from sys.modules
-    for key in loaded_package_modules:
-        del sys.modules[key]
-
-    # load each of the modules again
-    # make old modules share state with new modules
-    for key in loaded_package_modules:
-        if disp_reloads:
-            print('loading {}'.format(key))
-        newmodule = __import__(key)
-        oldmodule = loaded_package_modules[key]
-        oldmodule.__dict__.clear()
-        oldmodule.__dict__.update(newmodule.__dict__)
-
-#%% rename_module
-def rename_module(folder, old_name, new_name, print_status=True):
-    r"""
-    Rename the given module from the old to new name.
-
-    Parameters
-    ----------
-    folder : str
-        Name of folder to operate within
-    old_name : str
-        The original name of the module
-    new_name : str
-        The new name of the module
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in October 2015 mostly for Matt Beck, because he doesn't
-        like the name of my library.
-
-    Examples
-    --------
-    >>> from dstauffman import rename_module, get_root_dir
-    >>> import os
-    >>> folder = os.path.split(get_root_dir())[0]
-    >>> old_name = 'dstauffman'
-    >>> new_name = 'dcs_tools'
-    >>> rename_module(folder, old_name, new_name) # doctest: +SKIP
-
-    """
-    # hard-coded values
-    folder_exclusions = {'.git'}
-    file_exclusions = {'.pyc'}
-    files_to_edit = {'.py', '.rst', '.bat', '.txt'}
-    root_ix = len(folder)
-    for (root, _, files) in os.walk(os.path.join(folder, old_name)):
-        for skip in folder_exclusions:
-            if root.endswith(skip) or root.find(skip + os.path.sep) >= 0:
-                if print_status:
-                    print('Skipping: {}'.format(root))
-                break
-        else:
-            for name in files:
-                (_, file_ext) = os.path.splitext(name)
-                this_old_file = os.path.join(root, name)
-                this_new_file = os.path.join(folder + root[root_ix:].replace(old_name, new_name), \
-                    name.replace(old_name, new_name))
-                if file_ext in file_exclusions:
-                    if print_status:
-                        print('Skipping: {}'.format(this_old_file))
-                    continue # pragma: no cover (actually covered, optimization issue)
-                # only create the new folder if not all files skipped
-                new_folder = os.path.split(this_new_file)[0]
-                if not os.path.isdir(new_folder):
-                    setup_dir(new_folder)
-                if file_ext in files_to_edit:
-                    # edit files
-                    if print_status:
-                        print('Editing : {}'.format(this_old_file))
-                        print('     To : {}'.format(this_new_file))
-                    text = read_text_file(this_old_file)
-                    text = text.replace(old_name, new_name)
-                    write_text_file(this_new_file, text)
-                else:
-                    # copy file as-is
-                    if print_status:
-                        print('Copying : {}'.format(this_old_file))
-                        print('     To : {}'.format(this_new_file))
-                    shutil.copyfile(this_old_file, this_new_file)
 
 #%% Unit test
 if __name__ == '__main__':

@@ -36,7 +36,7 @@ except ImportError: # pragma: no cover
 
 # model imports
 from dstauffman.classes import Frozen
-from dstauffman.constants import DEFAULT_COLORMAP
+from dstauffman.constants import DEFAULT_COLORMAP, PLOT_CLASSIFICATION
 from dstauffman.paths import get_images_dir
 from dstauffman.utils import pprint_dict
 
@@ -755,6 +755,7 @@ def zoom_ylim(ax, time, data, t_start=-np.inf, t_final=np.inf, channel=None, pad
 
     Close plot
     >>> plt.close(fig)
+
     """
     # find the relevant time indices
     ix_time = (time >= t_start) & (time <= t_final)
@@ -839,9 +840,10 @@ def setup_plots(figs, opts, plot_type='time'):
         disp_xlimits(figs, opts.disp_xmin, opts.disp_xmax)
 
     # label the classification
-    #for fig in figs:
-    #    ax = fig.gca()
-    #    plot_classification(ax, 'U', inside_axes=False)
+    if PLOT_CLASSIFICATION:
+        for fig in figs:
+            ax = fig.gca()
+            plot_classification(ax, 'U', inside_axes=False)
 
     # things to do if displaying the plots
     if opts.show_plot and Plotter.show_plot: # pragma: no cover
@@ -1052,7 +1054,7 @@ def plot_rms_lines(ax, x, y, show_in_legend=True):
 
     Notes
     -----
-    #.  Added to DStauffman's MATLAB libary from GARSE in Sept 2013.
+    #.  Added to Stauffer's MATLAB libary from GARSE in Sept 2013.
     #.  Ported to Python by David C. Stauffer in March 2019.
 
     Examples

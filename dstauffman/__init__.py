@@ -17,7 +17,8 @@ from .analysis     import dist_enum_and_mons, icer, plot_icer, plot_population_p
 from .bpe          import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, \
                               run_bpe, plot_bpe_convergence, plot_bpe_results
 from .classes      import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
-from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, IS_WINDOWS
+from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, IS_WINDOWS, \
+                              PLOT_CLASSIFICATION
 from .enums        import IntEnumPlus, consecutive
 from .fortran      import create_fortran_makefile, create_fortran_unit_tests
 from .kalman       import KfInnov, KfOut, plot_attitude, plot_position, plot_innovation, \
@@ -37,8 +38,7 @@ from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, clos
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
                               quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
                               quat_to_dcm, quat_to_euler
-from .repos        import find_tabs, delete_pyc, get_python_definitions, make_python_init, \
-                              reload_package, rename_module
+from .repos        import find_tabs, delete_pyc, get_python_definitions, make_python_init
 from .stats        import convert_annual_to_monthly_probability, \
                               convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
                               rate_to_prob, annual_rate_to_monthly_probability, \

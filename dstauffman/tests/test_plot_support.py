@@ -613,6 +613,55 @@ class Test_disp_xlimits(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
+#%% Functions - zoom_ylim
+class Test_zoom_ylim(unittest.TestCase):
+    r"""
+    Tests the zoom_ylim function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Figure Title')
+        self.ax = self.fig.add_subplot(111)
+        self.time = np.arange(1, 10, 0.1)
+        self.data = self.time ** 2
+        self.ax.plot(self.time, self.data)
+        self.ax.set_title('X vs Y')
+        self.t_start = 3
+        self.t_final = 5.0000001
+
+    def test_nominal(self):
+        dcs.disp_xlimits(self.fig, self.t_start, self.t_final)
+        (old_ymin, old_ymax) = self.ax.get_ylim()
+        dcs.zoom_ylim(self.ax, self.time, self.data, t_start=self.t_start, t_final=self.t_final)
+        (new_ymin, new_ymax) = self.ax.get_ylim()
+        self.assertGreater(old_ymax, new_ymax)
+        self.assertLess(old_ymin, new_ymin)
+
+    def test_no_zoom(self):
+        (old_ymin, old_ymax) = self.ax.get_ylim()
+        dcs.zoom_ylim(self.ax, self.time, self.data, pad=2.0)
+        (new_ymin, new_ymax) = self.ax.get_ylim()
+        self.assertEqual(old_ymax, new_ymax)
+        self.assertEqual(old_ymin, new_ymin)
+
+    def test_bad_pad(self):
+        with self.assertRaises(ValueError):
+            dcs.zoom_ylim(self.ax, self.time, self.data, pad=-10)
+
+    def test_no_pad(self):
+        dcs.disp_xlimits(self.fig, self.t_start, self.t_final)
+        (old_ymin, old_ymax) = self.ax.get_ylim()
+        dcs.zoom_ylim(self.ax, self.time, self.data, t_start=self.t_start, t_final=self.t_final, pad=0)
+        (new_ymin, new_ymax) = self.ax.get_ylim()
+        self.assertGreater(old_ymax, new_ymax)
+        self.assertLess(old_ymin, new_ymin)
+        self.assertAlmostEqual(new_ymin, self.t_start**2)
+        self.assertAlmostEqual(new_ymax, self.t_final**2, places=4)
+
+    def tearDown(self):
+        plt.close(self.fig)
+
 #%% Functions - setup_plots
 class Test_setup_plots(unittest.TestCase):
     r"""
@@ -793,6 +842,10 @@ class Test_plot_rms_lines(unittest.TestCase):
 
     def test_nominal(self):
         dcs.plot_rms_lines(self.ax, self.x, self.y, show_in_legend=False)
+        self.ax.legend()
+
+    def test_no_legend(self):
+        dcs.plot_rms_lines(self.ax, self.x, self.y, show_in_legend=True)
         self.ax.legend()
 
     def tearDown(self):
