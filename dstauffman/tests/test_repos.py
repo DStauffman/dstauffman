@@ -14,16 +14,17 @@ import unittest
 
 import dstauffman as dcs
 
-#%% find_tabs
-class Test_find_tabs(unittest.TestCase):
+#%% find_repo_issues
+class Test_find_repo_issues(unittest.TestCase):
     r"""
-    Tests the find_tabs function with the following cases:
+    Tests the find_repo_issues function with the following cases:
         Nominal
         Different Extensions
         List All
         Trailing Spaces
         Exclusions x2
         Bad New Lines
+        Ignore tabs
     """
     @classmethod
     def setUpClass(cls):
@@ -44,7 +45,7 @@ class Test_find_tabs(unittest.TestCase):
 
     def test_nominal(self):
         with dcs.capture_output() as out:
-            dcs.find_tabs(self.folder, extensions='m', list_all=False, trailing=False)
+            dcs.find_repo_issues(self.folder, extensions='m', list_all=False, trailing=False)
         lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
@@ -54,7 +55,7 @@ class Test_find_tabs(unittest.TestCase):
 
     def test_different_extensions(self):
         with dcs.capture_output() as out:
-            dcs.find_tabs(self.folder, extensions=('txt',))
+            dcs.find_repo_issues(self.folder, extensions=('txt',))
         lines = out.getvalue().strip().split('\n')
         out.close()
         self.assertEqual(lines[0], '')
@@ -62,7 +63,7 @@ class Test_find_tabs(unittest.TestCase):
 
     def test_list_all(self):
         with dcs.capture_output() as out:
-            dcs.find_tabs(self.folder, list_all=True)
+            dcs.find_repo_issues(self.folder, list_all=True)
         lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(self.bad1 in lines)
@@ -70,7 +71,7 @@ class Test_find_tabs(unittest.TestCase):
 
     def test_trailing_spaces(self):
         with dcs.capture_output() as out:
-            dcs.find_tabs(self.folder, trailing=True)
+            dcs.find_repo_issues(self.folder, trailing=True)
         lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
@@ -83,7 +84,7 @@ class Test_find_tabs(unittest.TestCase):
 
     def test_trailing_and_list_all(self):
         with dcs.capture_output() as out:
-            dcs.find_tabs(self.folder, list_all=True, trailing=True)
+            dcs.find_repo_issues(self.folder, list_all=True, trailing=True)
         lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
@@ -94,7 +95,7 @@ class Test_find_tabs(unittest.TestCase):
     def test_exclusions_skip(self):
         exclusions = (self.folder)
         with dcs.capture_output() as out:
-            dcs.find_tabs(self.folder, exclusions=exclusions)
+            dcs.find_repo_issues(self.folder, exclusions=exclusions)
         lines = out.getvalue().split('\n')
         out.close()
         self.assertEqual(lines, [''])
@@ -102,7 +103,7 @@ class Test_find_tabs(unittest.TestCase):
     def test_exclusions_invalid(self):
         exclusions = (r'C:\non_existant_path', )
         with dcs.capture_output() as out:
-            dcs.find_tabs(self.folder, exclusions=exclusions)
+            dcs.find_repo_issues(self.folder, exclusions=exclusions)
         lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
@@ -112,7 +113,7 @@ class Test_find_tabs(unittest.TestCase):
 
     def test_bad_newlines(self):
         with dcs.capture_output() as out:
-            dcs.find_tabs(self.folder, extensions='m', check_eol='0')
+            dcs.find_repo_issues(self.folder, extensions='m', check_eol='0')
         lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('File: "'))
@@ -121,6 +122,13 @@ class Test_find_tabs(unittest.TestCase):
         self.assertEqual(lines[2], self.bad1)
         self.assertEqual(lines[3], '')
         self.assertEqual(len(lines),  4)
+
+    def test_ignore_tabs(self):
+        with dcs.capture_output() as out:
+            dcs.find_repo_issues(self.folder, extensions='m', check_tabs=False)
+        output = out.getvalue()
+        out.close()
+        self.assertEqual(output, '')
 
     @classmethod
     def tearDownClass(cls):

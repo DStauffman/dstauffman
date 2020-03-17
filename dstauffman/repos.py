@@ -15,9 +15,9 @@ import unittest
 
 from dstauffman.utils import line_wrap, read_text_file, write_text_file
 
-#%% find_tabs
-def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trailing=False, \
-              exclusions=None, check_eol=None, show_execute=False):
+#%% find_repo_issues
+def find_repo_issues(folder, extensions=frozenset(('m', 'py')), *, list_all=False, check_tabs=True, \
+              trailing=False, exclusions=None, check_eol=None, show_execute=False):
     r"""
     Find all the tabs in source code that should be spaces instead.
 
@@ -28,7 +28,9 @@ def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trai
     extensions : tuple of str
         File extensions to consider, default is ('m', 'py')
     list_all : bool, optional, default is False
-        Whether to list all the files, or only those with tabs in them
+        Whether to list all the files, or only those with problems in them
+    check_tabs : bool, optional, default is True
+        Whether to include tabs as an issue to check
     trailing : bool, optional, default is False
         Whether to consider trailing whitespace a problem, too
     exclusions : tuple of str
@@ -49,9 +51,9 @@ def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trai
 
     Examples
     --------
-    >>> from dstauffman import find_tabs, get_root_dir
+    >>> from dstauffman import find_repo_issues, get_root_dir
     >>> folder = get_root_dir()
-    >>> find_tabs(folder)
+    >>> find_repo_issues(folder)
     True
 
     """
@@ -90,7 +92,7 @@ def find_tabs(folder, extensions=frozenset(('m', 'py')), *, list_all=False, trai
                         is_clean = False
                     for (c, line) in enumerate(lines):
                         sline = line.rstrip('\n').rstrip('\r').rstrip('\n') # for all possible orderings
-                        if line.count('\t') > 0:
+                        if check_tabs and line.count('\t') > 0:
                             if not already_listed:
                                 print('Evaluating: "{}"'.format(this_file))
                                 already_listed = True

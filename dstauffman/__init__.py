@@ -38,7 +38,7 @@ from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, clos
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
                               quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
                               quat_to_dcm, quat_to_euler
-from .repos        import find_tabs, delete_pyc, get_python_definitions, make_python_init
+from .repos        import find_repo_issues, delete_pyc, get_python_definitions, make_python_init
 from .stats        import convert_annual_to_monthly_probability, \
                               convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
                               rate_to_prob, annual_rate_to_monthly_probability, \
