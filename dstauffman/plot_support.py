@@ -1083,7 +1083,7 @@ def plot_rms_lines(ax, x, y, show_in_legend=True):
     ax.plot([x[1], x[1]], y, linestyle='--', color=[0.75, 0.75, 1], marker='+', markeredgecolor='m', markersize=10, label=label_two)
 
 #%% Functions - plot_classification
-def plot_classification(ax, classification='U', test=False, inside_axes=True):
+def plot_classification(ax, classification='U', *, caveat='', test=False, inside_axes=True):
     r"""
     Displays the classification in a box on each figure, with the option of printing another box for
     testing purposes.
@@ -1093,10 +1093,12 @@ def plot_classification(ax, classification='U', test=False, inside_axes=True):
     ax : class matplotlib.axis.Axis
         Figure axis
     classification : str
-        Level of classification, from {'U', 'C', 'S', 'T', 'F', 'FOUO', 'U//FOUO', 'NF', 'S//NF', 'TS'}
-    test : bool
+        Level of classification, from {'U', 'C', 'S', 'T', 'TS'}
+    caveat : str, optional
+        Any additional caveats beyone the classification level
+    test : bool, optional
         Whether to print the testing box, default is true
-    inside_axes : bool
+    inside_axes : bool, optional
         Whether to print the box inside the axis, or on the figure edge
 
     See Also
@@ -1106,6 +1108,7 @@ def plot_classification(ax, classification='U', test=False, inside_axes=True):
     Change Log
     ----------
     #.  Written by David C. Stauffer in August 2019 based on Matlab version.
+    #.  Updated by David C. Stauffer in March 2020 to support caveats.
 
     Examples
     --------
@@ -1137,23 +1140,21 @@ def plot_classification(ax, classification='U', test=False, inside_axes=True):
     if classification == 'U':
         color    = (0, 0, 0)
         text_str = 'UNCLASSIFIED'
-    elif classification in {'F', 'FOUO', 'U//FOUO'}:
-        color    = (0, 0, 0)
-        text_str = 'UNCLASSIFIED//FOR OFFICIAL USE ONLY'
     elif classification == 'C':
         color    = (0, 0, 1)
         text_str = 'CONFIDENTIAL'
     elif classification in 'S':
         color    = (1, 0, 0)
         text_str = 'SECRET'
-    elif classification in {'NF', 'SNF', 'S//NF'}:
-        color    = (1, 0, 0)
-        text_str = 'SECRET//NOFORN'
     elif classification in {'TS','T'}:
         color    = (1, 0.65, 0)
         text_str = 'TOP SECRET'
     else:
         raise ValueError('Unexpected value for classification: "{}".'.format(classification))
+
+    # add optional caveats
+    if caveat:
+        text_str += caveat
 
     if inside_axes:
         ax.text(0.99, 0.01, text_str, color=color, horizontalalignment='right', verticalalignment='bottom', \

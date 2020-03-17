@@ -871,8 +871,11 @@ class Test_plot_classification(unittest.TestCase):
     def test_outside(self):
         dcs.plot_classification(self.ax, 'U', test=False, inside_axes=False)
 
+    def test_caveat(self):
+        dcs.plot_classification(self.ax, 'U', caveat='//TEXT STR')
+
     def test_options(self):
-        for opt in {'C', 'S', 'T', 'TS', 'F', 'FOUO', 'U//FOUO' ,'NF' ,'S//NF'}:
+        for opt in {'C', 'S', 'T', 'TS'}:
             dcs.plot_classification(self.ax, opt, test=True, inside_axes=False)
 
     def test_bad_option(self):
