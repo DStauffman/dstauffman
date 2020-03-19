@@ -139,6 +139,27 @@ class Test_consecutive(unittest.TestCase):
             dcs.consecutive(_Example_Consecutive3)
         self.assertEqual(str(context.exception), 'Duplicate values found in _Example_Consecutive3: dup -> zero')
 
+#%% ReturnCodes
+class Test_ReturnCodes(unittest.TestCase):
+    r"""
+    Tests the ReturnCodes enumerator with the following cases:
+        Clean code
+        Not clean codes
+    """
+    def test_clean(self):
+        # A clean exit should return zero
+        self.assertEqual(dcs.ReturnCodes.clean, 0)
+
+    def test_not_clean(self):
+        # All non-clean exists should return an integer greater than 0
+        rc = dcs.ReturnCodes
+        for key in rc.__members__:
+            if key == 'clean':
+                continue
+            value = getattr(rc, key)
+            self.assertGreater(value, 0)
+            self.assertIsInstance(value, int)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

@@ -3,7 +3,7 @@ dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 # change to the script directory
 cd $dir
 # run the coverage tests
-coverage run run_all_tests.py
+coverage run -m dstauffman tests
 # generate the coverage report
 coverage html
 # open the report

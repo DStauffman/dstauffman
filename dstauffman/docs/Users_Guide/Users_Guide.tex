@@ -398,7 +398,7 @@ class Test_rms(unittest.TestCase):
 One of the most key aspects of good unit testing is that it covers all possible lines of the code.  If there is an if/else block, then you need a test that covers the if condition, and another test that covers the else condition.  Determining this manually can be very difficult, so Python has the ``coverage`` library that allows us to do it automatically.  Running the coverage report tool will generate a table like the one shown in Figure~\ref{fig:code_coverage}.  This is an HTML report, so each file can be clicked, and then it will shown a line by line breakdown, with color codes to show which lines were executed, which were ignored, and which ones were never executed.  This report can be generated via a couple commands.  One to run the analysis, one to generate the report, and then for convenience, one to open the report:
 \begin{PlainText}
 cd C:\Users\%username%\Documents\GitHub\dstauffman\tests
-coverage run run_all_tests.py
+coverage run -m dstauffman tests
 coverage html
 start C:\Users\%username%\Documents\GitHub\dstauffman\tests\coverage_html_report\index.html
 \end{PlainText}
@@ -575,7 +575,7 @@ For auto-documentation:
 *****************************
 For code coverage:
 >>> cd "C:\Users\%username%\Documents\GitHub\dstauffman\tests"
->>> coverage run run_all_tests.py
+>>> coverage run -m dstauffman tests
 >>> coverage html
 >>> open coverage_html_report/index.html
 *****************************

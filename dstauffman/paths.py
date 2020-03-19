@@ -134,6 +134,38 @@ def get_output_dir():
     folder = os.path.join(get_root_dir(), 'results')
     return folder
 
+#%% Functions - list_python_files
+def list_python_files(folder):
+    r"""
+    Returns a list of all non dunder python files in the folder.
+
+    Parameters
+    ----------
+    folder : str
+        Folder location
+
+    Returns
+    -------
+    files : list
+        All *.py files that don't start with __
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2020.
+    #.  TODO: could add options for recursive and to include dunders.
+
+    Examples
+    --------
+    >>> from dstauffman import list_python_files, get_root_dir
+    >>> folder = get_root_dir()
+    >>> files = list_python_files(folder)
+
+    """
+    # find all the files that end in .py and are not dunder (__name__) files
+    files = [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.py') and
+             not file.startswith('__')]
+    return files
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='dstauffman.tests.test_paths', exit=False)

@@ -261,7 +261,7 @@ class Test_make_python_init(unittest.TestCase):
             text = dcs.make_python_init(self.folder2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(text[0:42], 'from .temp_file         import Test_Frozen')
+        self.assertEqual(text[0:43], 'from .temp_file          import Test_Frozen')
         self.assertTrue(output.startswith('Uniqueness Problem'))
 
     def test_no_lineup(self):

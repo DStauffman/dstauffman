@@ -11,9 +11,124 @@ Notes
 #%% Imports
 import doctest
 import os
+import pytest
+import sys
 import unittest
 
+import matplotlib.pyplot as plt
+from PyQt5.QtWidgets import QApplication
+
+from dstauffman.enums import ReturnCodes
 from dstauffman.utils import line_wrap, read_text_file, write_text_file
+
+#%% run_docstrings
+def run_docstrings(files, verbose=False):
+    r"""
+    Runs all the docstrings in the given files.
+
+    Parameters
+    ----------
+    files : list of str
+        Files(s) to run tests from
+    verbose : bool, optional, default is False
+        Whether to print verbose information
+
+    Returns
+    -------
+    return_code : class ReturnCodes
+        Return code enum, 0 means clean
+
+    Examples
+    --------
+    >>> from dstauffman import get_root_dir, list_python_files, run_docstrings
+    >>> files = list_python_files(get_root_dir())
+    >>> return_code = run_docstrings(files) # doctest: +SKIP
+
+    """
+    # initialize failure status
+    had_failure = False
+    # loop through and test each file
+    for file in files:
+        if verbose:
+            print('')
+            print('******************************')
+            print('******************************')
+            print('Testing "{}":'.format(file))
+        (failure_count, test_count) = doctest.testfile(file, report=True, verbose=verbose, module_relative=False)
+        if failure_count > 0:
+            had_failure = True
+    return_code = ReturnCodes.test_failures if had_failure else ReturnCodes.clean
+    return return_code
+
+#%% run_unittests
+def run_unittests(names, verbose=False):
+    r"""
+    Runs all the unittests with the given names using unittest.
+
+    Parameters
+    ----------
+    names : str
+        Names of the unit tests to run (discover through unittest library)
+    verbose : bool, optional, default is False
+        Whether to show verbose output to the screen
+
+    Returns
+    -------
+    return_code : class ReturnCodes
+        Return code enum, 0 means clean
+
+    Examples
+    --------
+    >>> from dstauffman import run_unittests
+    >>> names = 'dstauffman.tests'
+    >>> return_code = run_unittests(names) # doctest: +SKIP
+
+    """
+    # find the test cases
+    test_suite = unittest.TestLoader().discover(names)
+    # set the verbosity
+    verbosity = 10 if verbose else 1
+    # run the tests
+    result = unittest.TextTestRunner(verbosity=verbosity).run(test_suite)
+    return_code = ReturnCodes.clean if result.wasSuccessful() else ReturnCodes.test_failures
+    return return_code
+
+#%% run_pytests
+def run_pytests(folder, names='tests'):
+    r"""
+    Runs all the unittests using pytest as the runner instead of unittest.
+
+    Parameters
+    ----------
+    names : str
+        Names of the unit tests to run (discover through unittest library)
+    verbose : bool, optional, default is False
+        Whether to show verbose output to the screen
+
+    Returns
+    -------
+    return_code : class ReturnCodes
+        Return code enum, 0 means clean
+
+    Examples
+    --------
+    >>> from dstauffman import run_pytests, get_root_dir
+    >>> folder = get_root_dir()
+    >>> return_code = run_pytests(folder) # doctest: +SKIP
+
+    """
+    # turn interactive plotting off
+    plt.ioff()
+    # open a qapp
+    if QApplication.instance() is None:
+        qapp = QApplication(sys.argv)
+    else:
+        qapp = QApplication.instance()
+    exit_code = pytest.main(['-k', names, '-x', folder])
+    # close the qapp
+    qapp.closeAllWindows()
+    return_code = ReturnCodes.clean if exit_code == 0 else ReturnCodes.test_failures
+    return return_code
 
 #%% find_repo_issues
 def find_repo_issues(folder, extensions=frozenset(('m', 'py')), *, list_all=False, check_tabs=True, \

@@ -28,6 +28,7 @@ from io import StringIO
 import numpy as np
 
 from dstauffman.constants import MONTHS_PER_YEAR
+from dstauffman.enums     import ReturnCodes
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -580,6 +581,10 @@ def capture_output(mode='out'):
     err : class StringIO
         stderr stream output
 
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2015.
+
     Examples
     --------
     >>> from dstauffman import capture_output
@@ -1072,6 +1077,10 @@ def execute(command, folder, *, ignored_codes=None, env=None):
     rc : ReturnCodes enum
         return code from running the command
 
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2019.
+
     Examples
     --------
     >>> from dstauffman import execute
@@ -1110,8 +1119,8 @@ def execute(command, folder, *, ignored_codes=None, env=None):
     if return_code:
         if ignored_codes is None or return_code not in ignored_codes:
             #raise subprocess.CalledProcessError(return_code, command)
-            return 1
-    return 0
+            return ReturnCodes.bad_command
+    return ReturnCodes.clean
 
 #%% Functions - execute_wrapper
 def execute_wrapper(command, folder, dry_run=False, *, ignored_codes=None, filename='', env=None):
@@ -1130,6 +1139,10 @@ def execute_wrapper(command, folder, dry_run=False, *, ignored_codes=None, filen
         If given, a list of non-zero error codes to ignore
     filename : str, optional, default is to not write
         Name of the file to write the output to, ignore if empty string
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in November 2019.
 
     Examples
     --------
@@ -1160,7 +1173,7 @@ def execute_wrapper(command, folder, dry_run=False, *, ignored_codes=None, filen
     # check that the folder exists
     if not os.path.isdir(folder):
         print('Warning: folder "{}" doesn\'t exist, so command "{}" was not executed.'.format(folder, command))
-        return 2
+        return ReturnCodes.bad_folder
     # execute command and print status
     lines = []
     for line in execute(command_list, folder, ignored_codes=ignored_codes, env=env):
@@ -1191,7 +1204,7 @@ def get_env_var(env_key, default=None):
     Notes
     -----
     #.  Written by Alex Kershetsky in November 2019.
-    #.  Incorporated into DStauffman tools by David C. Stauffer in January 2020.
+    #.  Incorporated into dstauffman tools by David C. Stauffer in January 2020.
 
     Examples
     --------

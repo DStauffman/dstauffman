@@ -8,21 +8,8 @@ Notes
 """
 
 #%% Imports
-import pytest
-import sys
-
-import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import QApplication
+import dstauffman as dcs
 
 #%% Tests
 if __name__ == '__main__':
-    # turn interactive plotting off
-    plt.ioff()
-    # open a qapp
-    if QApplication.instance() is None:
-        qapp = QApplication(sys.argv)
-    else:
-        qapp = QApplication.instance()
-    pytest.main(['-k', 'tests'])
-    # close the qapp
-    qapp.closeAllWindows()
+    dcs.run_pytests()

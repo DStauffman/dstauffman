@@ -19,14 +19,16 @@ from .bpe          import OptiOpts, OptiParam, BpeResults, CurrentResults, valid
 from .classes      import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
 from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, IS_WINDOWS, \
                               PLOT_CLASSIFICATION
-from .enums        import IntEnumPlus, consecutive
+from .enums        import IntEnumPlus, consecutive, ReturnCodes
 from .fortran      import create_fortran_makefile, create_fortran_unit_tests
 from .kalman       import KfInnov, KfOut, plot_attitude, plot_position, plot_innovation, \
                               plot_covariance, plot_states
 from .latex        import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
 from .linalg       import orth, subspace
 from .logs         import activate_logging, deactivate_logging
-from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, get_output_dir
+from .parser       import main, parse_wrapper, parse_commands, execute_command
+from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
+                              get_output_dir, list_python_files
 from .plotting     import Opts, plot_monte_carlo, plot_correlation_matrix, plot_time_history, \
                               plot_bar_breakdown, general_quaternion_plot, \
                               general_difference_plot, plot_phases
@@ -38,7 +40,8 @@ from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, clos
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
                               quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
                               quat_to_dcm, quat_to_euler
-from .repos        import find_repo_issues, delete_pyc, get_python_definitions, make_python_init
+from .repos        import run_docstrings, run_unittests, run_pytests, find_repo_issues, \
+                              delete_pyc, get_python_definitions, make_python_init
 from .stats        import convert_annual_to_monthly_probability, \
                               convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
                               rate_to_prob, annual_rate_to_monthly_probability, \

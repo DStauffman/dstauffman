@@ -13,17 +13,7 @@ import os
 
 import dstauffman as dcs
 
-#%% Locals
-verbose = False
-
 #%% Execution
 if __name__ == '__main__':
-    folder = dcs.get_root_dir()
-    files  = [f for f in os.listdir(folder) if f.endswith('.py') and not f.startswith('__')]
-    for file in files:
-        if verbose:
-            print('')
-            print('******************************')
-            print('******************************')
-            print('Testing "{}":'.format(file))
-        doctest.testfile(os.path.join(folder, file), report=True, verbose=verbose, module_relative=True)
+    folders = [dcs.get_root_dir(), os.path.join(dcs.get_root_dir(), 'commands')]
+    dcs.run_doctests(folders, verbose=False)

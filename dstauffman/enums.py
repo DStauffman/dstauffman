@@ -5,6 +5,8 @@ Define enumerator related functions for the rest of the library.
 Notes
 -----
 #.  Written by David C. Stauffer in July 2015.
+#.  Modified by David C. Stauffer in March 2020 to add ReturnCode class for use in commands, and as
+    a great example use case.
 
 """
 
@@ -31,29 +33,29 @@ class _EnumMetaPlus(EnumMeta):
         try:
             return cls._member_map_[name]
         except KeyError:
-            text = '"{}" does not have an attribute of "{}"'.format(cls.__name__,name)
+            text = '"{}" does not have an attribute of "{}"'.format(cls.__name__, name)
             raise AttributeError(text) from None
-    def list_of_names(self):
+    def list_of_names(cls):
         r"""Return a list of all the names within the enumerator."""
         # look for class.name: pattern, ignore class, return names only
-        names = list(self.__members__)
+        names = list(cls.__members__)
         return names
-    def list_of_values(self):
+    def list_of_values(cls):
         r"""Return a list of all the values within the enumerator."""
-        values = list(self.__members__.values())
+        values = list(cls.__members__.values())
         return values
     @property
-    def num_values(self):
+    def num_values(cls):
         r"""Return the number of values within the enumerator."""
-        return len(self)
+        return len(cls)
     @property
-    def min_value(self):
+    def min_value(cls):
         r"""Return the minimum value of the enumerator."""
-        return min(self.__members__.values())
+        return min(cls.__members__.values())
     @property
-    def max_value(self):
+    def max_value(cls):
         r"""Return the maximum value of the enumerator."""
-        return max(self.__members__.values())
+        return max(cls.__members__.values())
 
 #%% Classes - IntEnumPlus
 class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
@@ -77,13 +79,37 @@ def consecutive(enumeration):
             non_consecutive.append((name, member))
         last_value = member
     if duplicates:
-        alias_details = ', '.join(
-                ['{} -> {}'.format(alias, name) for (alias, name) in duplicates])
+        alias_details = ', '.join(['{} -> {}'.format(alias, name) for (alias, name) in duplicates])
         raise ValueError('Duplicate values found in {}: {}'.format(enumeration.__name__, alias_details))
     if non_consecutive:
         alias_details = ', '.join('{}:{}'.format(name, member) for (name, member) in non_consecutive)
         raise ValueError('Non-consecutive values found in {}: {}'.format(enumeration.__name__, alias_details))
     return enumeration
+
+#%% Enums - ReturnCodes
+@consecutive
+class ReturnCodes(IntEnumPlus):
+    r"""
+    Return codes for use as outputs in the command line API.
+
+    Examples
+    --------
+    >>> from dstauffman import ReturnCodes
+    >>> rc = ReturnCodes.clean
+    >>> print(rc)
+    ReturnCodes.clean: 0
+
+    """
+    clean            = 0 # Clean exit
+    bad_command      = 1 # Unexpected command
+    invalid_casename = 2 # Case name is invalid
+    exe_not_found    = 3 # Can't find the executable
+    invalid_module   = 4 # Can't find the code module
+    invalid_win_cmd  = 5 # Command is not valid to run on Windows OS
+    bad_build_code   = 6 # Build command errored out
+    invalid_target   = 7 # Build command invalid target
+    bad_folder       = 8 # Folder to execute a command in doesn't exist
+    test_failures    = 9 # A test ran to completion, but failed its criteria
 
 #%% Unit test
 if __name__ == '__main__':

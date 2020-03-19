@@ -1286,7 +1286,7 @@ def plot_phases(ax, times, colormap='tab10', labels=None):
     >>> colorlists = get_color_lists()
     >>> colors = colorlists['quat']
     >>> plot_phases(ax, times, colors, labels)
-    >>> plt.show()
+    >>> plt.show(block=False) # doctest: +SKIP
 
     Close plot
     >>> plt.close(fig)
