@@ -32,7 +32,7 @@ from dstauffman.enums     import ReturnCodes
 
 #%% Globals
 logger = logging.getLogger(__name__)
-_ALLOWED_ENVS = None
+_ALLOWED_ENVS = None # allows any environment variables to be invoked
 
 #%% Functions - _nan_equal
 def _nan_equal(a, b):
