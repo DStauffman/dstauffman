@@ -33,7 +33,7 @@ def print_help():
 
     """
     help_file = os.path.join(get_root_dir(), '..', 'README.rst')
-    if not os.path.isfile(help_file):
+    if not os.path.isfile(help_file): # pragma: no cover
         print('Warning: help file at "{}" was not found.'.format(help_file))
         return ReturnCodes.bad_help_file
     with open(help_file) as file:
@@ -65,7 +65,7 @@ def parse_help(input_args):
     Namespace()
 
     """
-    parser = argparse.ArgumentParser(prog='redy help')
+    parser = argparse.ArgumentParser(prog='dcs help')
 
     args = parser.parse_args(input_args)
     return args

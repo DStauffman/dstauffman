@@ -15,10 +15,12 @@ import pytest
 import sys
 import unittest
 
+from coverage import Coverage
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QApplication
 
 from dstauffman.enums import ReturnCodes
+from dstauffman.paths import get_tests_dir
 from dstauffman.utils import line_wrap, read_text_file, write_text_file
 
 #%% run_docstrings
@@ -94,7 +96,7 @@ def run_unittests(names, verbose=False):
     return return_code
 
 #%% run_pytests
-def run_pytests(folder, names='tests'):
+def run_pytests(folder, *, names='tests'):
     r"""
     Runs all the unittests using pytest as the runner instead of unittest.
 
@@ -102,11 +104,11 @@ def run_pytests(folder, names='tests'):
     ----------
     names : str
         Names of the unit tests to run (discover through unittest library)
-    verbose : bool, optional, default is False
-        Whether to show verbose output to the screen
 
     Returns
     -------
+    folder : str
+        Folder to process for test cases
     return_code : class ReturnCodes
         Return code enum, 0 means clean
 
@@ -128,6 +130,54 @@ def run_pytests(folder, names='tests'):
     # close the qapp
     qapp.closeAllWindows()
     return_code = ReturnCodes.clean if exit_code == 0 else ReturnCodes.test_failures
+    return return_code
+
+#%% run_coverage
+def run_coverage(folder, *, names='tests', report=True):
+    r"""
+    Wraps the pytests with a Code Coverage report.
+
+    Parameters
+    ----------
+    folder : str
+        Folder to process for test cases
+    names : str, optional
+        Names of the unit tests to run (discover through unittest library)
+    report : bool, optional, default is True
+        Whether to generate the HTML report
+
+    Returns
+    -------
+    return_code : class ReturnCodes
+        Return code enum, 0 means clean
+
+    Examples
+    --------
+    >>> from dstauffman import run_coverage, get_root_dir
+    >>> folder = get_root_dir()
+    >>> return_code = run_coverage(folder) # doctest: +SKIP
+
+    """
+    # Get information on the test folder
+    test_folder = get_tests_dir()
+    data_file   = os.path.join(test_folder, '.coverage')
+    config_file = os.path.join(test_folder, '.coveragerc')
+    cov_folder  = os.path.join(test_folder, 'coverage_html_report')
+
+    # Instantiate the coverage tool and start tracking
+    cov = Coverage(data_file=data_file, config_file=config_file)
+    cov.start()
+
+    # Call test code
+    return_code = run_pytests(folder, names=names)
+
+    # Stop coverage tool and save results
+    cov.stop()
+    cov.save()
+
+    # Generate the HTML report
+    cov.html_report(directory=cov_folder)
+
     return return_code
 
 #%% find_repo_issues

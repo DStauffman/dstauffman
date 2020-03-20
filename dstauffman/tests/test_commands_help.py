@@ -9,18 +9,30 @@ Notes
 """
 
 #%% Imports
+import argparse
 import unittest
 
+import dstauffman as dcs
 import dstauffman.commands as commands
 
 #%% commands.print_help
-pass
+class Test_commands_print_help(unittest.TestCase):
+    r"""
+    Tests the commands.print_help function with the following cases:
+        Nominal
+    """
+    def test_nominal(self):
+        with dcs.capture_output() as out:
+            commands.print_help()
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(output.startswith('##########\ndstauffman\n##########\n'))
 
 #%% commands.parse_help
 class Test_commands_parse_help(unittest.TestCase):
     r"""
     Tests the commands.parse_help function with the following cases:
-        TBD
+        Nominal
     """
     def setUp(self):
         self.args = []
@@ -29,7 +41,20 @@ class Test_commands_parse_help(unittest.TestCase):
         commands.parse_help(self.args)
 
 #%% commands.execute_help
-pass
+class Test_commands_execute_help(unittest.TestCase):
+    r"""
+    Tests the commands.execute_help function with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.args = argparse.Namespace()
+
+    def test_nominal(self):
+        with dcs.capture_output() as out:
+            commands.execute_help(self.args)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(output.startswith('##########\ndstauffman\n##########\n'))
 
 #%% Unit test execution
 if __name__ == '__main__':

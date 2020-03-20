@@ -16,7 +16,7 @@ from dstauffman.enums import ReturnCodes
 import dstauffman.commands as commands
 
 #%% Command map
-_VALID_COMMANDS = frozenset({'enforce', 'help', 'tests'})
+_VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'tests'})
 
 #%% Functions - _print_bad_command
 def _print_bad_command(command):
@@ -42,7 +42,7 @@ def parse_wrapper(args):
         command = args[0]
     else:
         command = 'help'
-    # check for alternative forms of help with the base redy command
+    # check for alternative forms of help with the base dcs command
     if command in {'--help', '-h'}:
         command = 'help'
     # pass the command and remaining arguments to the command parser

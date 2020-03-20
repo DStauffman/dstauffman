@@ -14,6 +14,18 @@ import unittest
 
 import dstauffman as dcs
 
+#%% run_docstrings
+pass
+
+#%% run_unittests
+pass
+
+#%% run_pytests
+pass
+
+#%% run_coverage
+pass
+
 #%% find_repo_issues
 class Test_find_repo_issues(unittest.TestCase):
     r"""
@@ -295,6 +307,7 @@ class Test_make_python_init(unittest.TestCase):
             os.remove(self.filepath)
         if os.path.isfile(self.filename):
             os.remove(self.filename)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)
