@@ -102,13 +102,13 @@ def run_pytests(folder, *, names='tests'):
 
     Parameters
     ----------
+    folder : str
+        Folder to process for test cases
     names : str
         Names of the unit tests to run (discover through unittest library)
 
     Returns
     -------
-    folder : str
-        Folder to process for test cases
     return_code : class ReturnCodes
         Return code enum, 0 means clean
 
