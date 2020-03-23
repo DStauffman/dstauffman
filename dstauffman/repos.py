@@ -15,7 +15,6 @@ import pytest
 import sys
 import unittest
 
-from coverage import Coverage
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QApplication
 
@@ -158,6 +157,9 @@ def run_coverage(folder, *, names='tests', report=True):
     >>> return_code = run_coverage(folder) # doctest: +SKIP
 
     """
+    # import on demand so that coverage doesn't not count the import step
+    from coverage import Coverage
+
     # Get information on the test folder
     test_folder = get_tests_dir()
     data_file   = os.path.join(test_folder, '.coverage')
@@ -176,7 +178,8 @@ def run_coverage(folder, *, names='tests', report=True):
     cov.save()
 
     # Generate the HTML report
-    cov.html_report(directory=cov_folder)
+    if report:
+        cov.html_report(directory=cov_folder)
 
     return return_code
 

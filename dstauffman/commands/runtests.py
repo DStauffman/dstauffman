@@ -166,7 +166,7 @@ def execute_coverage(args):
     report = not args.no_report
 
     # get test location information
-    folder     = get_root_dir()
+    folder = get_root_dir()
 
     # run coverage
     return_code = run_coverage(folder, report=report)
