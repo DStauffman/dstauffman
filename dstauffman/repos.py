@@ -125,7 +125,7 @@ def run_pytests(folder, *, names='tests'):
         qapp = QApplication(sys.argv)
     else:
         qapp = QApplication.instance()
-    exit_code = pytest.main(['-k', names, '-x', folder])
+    exit_code = pytest.main(['-k', names, folder])
     # close the qapp
     qapp.closeAllWindows()
     return_code = ReturnCodes.clean if exit_code == 0 else ReturnCodes.test_failures

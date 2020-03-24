@@ -12,4 +12,4 @@ import dstauffman as dcs
 
 #%% Tests
 if __name__ == '__main__':
-    dcs.run_pytests()
+    dcs.run_pytests(dcs.get_root_dir())

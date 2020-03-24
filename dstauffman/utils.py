@@ -1199,7 +1199,7 @@ def get_env_var(env_key, default=None):
     Returns
     -------
     value : str
-        Location of the folder that contains the main REDY repository.
+        Value of the given environment variable
 
     Notes
     -----
