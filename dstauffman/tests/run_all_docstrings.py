@@ -14,5 +14,6 @@ import dstauffman as dcs
 
 #%% Execution
 if __name__ == '__main__':
-    folders = [dcs.get_root_dir(), os.path.join(dcs.get_root_dir(), 'commands')]
-    dcs.run_docstrings(folders, verbose=False)
+    files = dcs.list_python_files(dcs.get_root_dir())
+    files.extend(dcs.list_python_files(os.path.join(dcs.get_root_dir(), 'commands')))
+    dcs.run_docstrings(files, verbose=False)

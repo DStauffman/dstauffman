@@ -156,7 +156,7 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
 
     # call wrapper function for most of the details
     (figs, err) = general_quaternion_plot('Attitude Quaternion', kf1.time, kf2.time, kf1.att, kf2.att,
-        name_one=kf1.name, name_two=kf2.name, time_units=opts.base_time, start_date=opts.get_date_zero_str(), \
+        name_one=kf1.name, name_two=kf2.name, time_units=opts.time_base, start_date=opts.get_date_zero_str(), \
         rms_xmin=opts.rms_xmin, rms_xmax=opts.rms_xmax, disp_xmin=opts.disp_xmin, disp_xmax=opts.disp_xmax, \
         fig_visible=opts.show_plot, make_subplots=opts.sub_plots, plot_components=opts.quat_comp, \
         use_mean=opts.use_mean, plot_zero=opts.show_zero, show_rms=opts.show_rms, legend_loc=opts.leg_spot, \

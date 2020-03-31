@@ -17,8 +17,8 @@ from .analysis     import dist_enum_and_mons, icer, plot_icer, plot_population_p
 from .bpe          import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, \
                               run_bpe, plot_bpe_convergence, plot_bpe_results
 from .classes      import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
-from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_COLORMAP, QUAT_SIZE, IS_WINDOWS, \
-                              PLOT_CLASSIFICATION
+from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_CLASSIFICATION, DEFAULT_COLORMAP, \
+                              QUAT_SIZE, IS_WINDOWS
 from .enums        import IntEnumPlus, consecutive, ReturnCodes
 from .fortran      import create_fortran_makefile, create_fortran_unit_tests
 from .kalman       import KfInnov, KfOut, plot_attitude, plot_position, plot_innovation, \
@@ -36,7 +36,7 @@ from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, clos
                               get_color_lists, ignore_plot_data, whitten, storefig, titleprefix, \
                               disp_xlimits, zoom_ylim, setup_plots, figmenu, rgb_ints_to_hex, \
                               get_screen_resolution, show_zero_ylim, plot_second_yunits, \
-                              plot_rms_lines, plot_classification
+                              plot_rms_lines, get_classification, plot_classification
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
                               quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
                               quat_to_dcm, quat_to_euler
@@ -52,6 +52,7 @@ from .utils        import rms, rss, setup_dir, compare_two_classes, compare_two_
                               read_text_file, write_text_file, capture_output, unit, modd, \
                               np_digitize, histcounts, full_print, pprint_dict, line_wrap, \
                               combine_per_year, execute, execute_wrapper, get_env_var
+from .vectors      import rot
 
 #%% Unit test
 if __name__ == '__main__':

@@ -36,7 +36,7 @@ except ImportError: # pragma: no cover
 
 # model imports
 from dstauffman.classes import Frozen
-from dstauffman.constants import DEFAULT_COLORMAP, PLOT_CLASSIFICATION
+from dstauffman.constants import DEFAULT_CLASSIFICATION, DEFAULT_COLORMAP
 from dstauffman.paths import get_images_dir
 from dstauffman.utils import pprint_dict
 
@@ -839,11 +839,12 @@ def setup_plots(figs, opts, plot_type='time'):
     if plot_type in {'time', 'time_no_yscale'}:
         disp_xlimits(figs, opts.disp_xmin, opts.disp_xmax)
 
-    # label the classification
-    if PLOT_CLASSIFICATION:
+    # label plot classification
+    (classification, caveat) = get_classification(opts.classify)
+    if classification:
         for fig in figs:
             ax = fig.gca()
-            plot_classification(ax, 'U', inside_axes=False)
+            plot_classification(ax, classification, caveat=caveat, inside_axes=False);
 
     # things to do if displaying the plots
     if opts.show_plot and Plotter.show_plot: # pragma: no cover
@@ -1082,6 +1083,64 @@ def plot_rms_lines(ax, x, y, show_in_legend=True):
     ax.plot([x[0], x[0]], y, linestyle='--', color=[   1, 0.75, 0], marker='+', markeredgecolor='m', markersize=10, label=label_one)
     ax.plot([x[1], x[1]], y, linestyle='--', color=[0.75, 0.75, 1], marker='+', markeredgecolor='m', markersize=10, label=label_two)
 
+#%% Functions - get_classification
+def get_classification(classify):
+    r"""
+    Gets the classification and any caveats from the text in OPTS.
+
+    Parameters
+    ----------
+    classify : (str)
+        Text to put on plots for classification purposes
+
+    Returns
+    -------
+    classification : str)
+        Classification to use, from {'U', 'C', 'S', 'TS'}
+    caveat : str
+        The extra caveats beyond the main classification
+
+    See Also
+    --------
+    plot_classification
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import get_classification
+    >>> classify = 'UNCLASSIFIED//MADE UP CAVEAT'
+    >>> (classification, caveat) = get_classification(classify)
+    >>> print(classification)
+    U
+
+    >>> print(caveat)
+    //MADE UP CAVEAT
+
+    """
+
+    # check for empty case, default to unclassified
+    if not classify:
+        # DCS: modify this section if you want a different default on your system (potentially put into a file instead?)
+        classification = DEFAULT_CLASSIFICATION
+        caveat         = ''
+        return (classification, caveat)
+
+    # get the classification based solely on the first letter and check that it is valid
+    classification = classify[0]
+    assert classification in {'U', 'C', 'S', 'T'}, 'Unexpected classification of "{}" found'.format(classification)
+
+    # pull out anything past the first // as the caveat(s)
+    slashes = classify.find('//')
+    if slashes == -1:
+        caveat = ''
+    else:
+        caveat = classify[slashes:]
+
+    return (classification, caveat)
+
 #%% Functions - plot_classification
 def plot_classification(ax, classification='U', *, caveat='', test=False, inside_axes=True):
     r"""
@@ -1123,13 +1182,24 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, inside
     >>> fig2 = plt.figure()
     >>> ax2 = fig2.add_subplot(111)
     >>> _ = ax2.plot(0, 0)
-    >>> plot_classification(ax2, 'S', test=True, inside_axes=True)
+    >>> plot_classification(ax2, 'S', caveat='//MADE UP CAVEAT', test=True, inside_axes=False)
+    >>> plt.show(block=False) # doctest: +SKIP
+
+    >>> fig3 = plt.figure()
+    >>> ax3 = fig3.add_subplot(111)
+    >>> _ = ax3.plot(1, 1)
+    >>> plot_classification(ax3, 'C', test=True, inside_axes=True)
     >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close(fig1)
     >>> plt.close(fig2)
+    >>> plt.close(fig3)
 
     """
+    # simple check to exit if not using
+    if not classification:
+        return
+
     # plot warning before trying to draw the other box
     if test:
         ax.text(0.5, 0.97, 'This plot classification is labeled for test purposes only', \
@@ -1151,13 +1221,20 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, inside
         text_str = 'TOP SECRET'
     else:
         raise ValueError('Unexpected value for classification: "{}".'.format(classification))
+    text_color = color
 
     # add optional caveats
     if caveat:
         text_str += caveat
 
+    # allow other color options for certain caveats
+    if '//FAKE COLOR' in caveat:
+        color      = (0.0, 0.8, 0.0)
+        text_color = (0.2, 0.2, 0.2)
+
+    # add classification box
     if inside_axes:
-        ax.text(0.99, 0.01, text_str, color=color, horizontalalignment='right', verticalalignment='bottom', \
+        ax.text(0.99, 0.01, text_str, color=text_color, horizontalalignment='right', verticalalignment='bottom', \
             fontweight='bold', fontsize=12, bbox={'facecolor':'none', 'edgecolor':color, 'linewidth':2}, \
             transform=ax.transAxes)
     else:
@@ -1166,7 +1243,7 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, inside
         (rx, ry) = r1.get_xy()
         ax.add_patch(r1)
         ax.annotate('\n  ' + text_str + '  ', (rx + r1.get_width(), ry), xycoords='axes fraction', \
-            color=color, weight='bold', fontsize=12, horizontalalignment='right', verticalalignment='bottom', \
+            color=text_color, weight='bold', fontsize=12, horizontalalignment='right', verticalalignment='bottom', \
             annotation_clip=False, bbox=dict(boxstyle='square', facecolor='none', edgecolor=color, \
             pad=0, linewidth=2))
 

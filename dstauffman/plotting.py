@@ -36,14 +36,63 @@ from dstauffman.utils import pprint_dict, rms
 class Opts(Frozen):
     r"""Optional plotting configurations."""
     def __init__(self):
+        r"""
+        Default configuration with:
+            .case_name : str
+                Name of the case to be plotted
+            .date_zero : (1x6) datevec (or datetime)
+                Date of t = 0 time [year month day hour minute second]
+            .save_plot : bool
+                Flag for whether to save the plots
+            .save_path : str
+                Location for the plots to be saved
+            .show_plot : bool
+                Flag to show the plots or only save to disk
+            .show_link : bool
+                Flag to show a link to the folder where the plots were saved
+            .plot_type : str
+                Type of plot to save to disk, from {'png','jpg','fig','emf'}
+            .sub_plots : bool
+                Flag specifying whether to plot as subplots or separate figures
+            .disp_xmin : float
+                Minimum time to display on plot [sec]
+            .disp_xmax : float
+                Maximum time to display on plot [sec]
+            .rms_xmin  : float
+                Minimum time from which to begin RMS calculations [sec]
+            .rms_xmax  : float
+                Maximum time from which to end RMS calculations [sec]
+            .show_rms  : bool
+                Flag for whether to show the RMS in the legend
+            .use_mean  : bool
+                Flag for using mean instead of RMS for legend calculations
+            .show_zero : bool
+                Flag for whether to show Y=0 on the plot axis
+            .quat_comp : bool
+                Flag to plot quaternion component differences or just the angle
+            .time_base : str
+                Base units of time, typically from {'sec', 'months'}
+            .time_unit : str
+                Time unit for the x axis, from {'', 'sec', 'min', 'hr', 'day', 'month', 'year'}
+            .vert_fact : str
+                Vertical factor to apply to the Y axis,
+                from: {'yotta','zetta','exa','peta','tera','giga','mega','kilo','hecto','deca',
+                'unity','deci','centi','milli', 'micro','nano','pico','femto','atto','zepto','yocto'}
+            .colormap  : str
+                Name of the colormap to use
+            .classify  : str
+                Classification level to put on plots
+            .names     : list of str
+                Names of the data structures to be plotted
+        """
         self.case_name = ''
         self.date_zero = None
         self.save_plot = False
         self.save_path = os.getcwd()
         self.show_plot = True
+        self.show_link = False # TODO: is this used?
         self.plot_type = 'png'
         self.sub_plots = True
-        self.show_link = False # TODO: is this used?
         self.disp_xmin = -np.inf
         self.disp_xmax =  np.inf
         self.rms_xmin  = -np.inf
@@ -52,11 +101,12 @@ class Opts(Frozen):
         self.use_mean  = False
         self.show_zero = False
         self.quat_comp = True
+        self.time_base = 'sec'
         self.time_unit = 'sec'
         self.vert_fact = 'unity'
         self.colormap  = None
-        self.base_time = 'sec'
         self.leg_spot  = 'best'
+        self.classify  = ''
         self.names     = list()
 
     def get_names(self, ix):
@@ -166,7 +216,7 @@ def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
             colormap = opts.colormap
     legend_loc = opts.leg_spot
     show_zero  = opts.show_zero
-    time_units = opts.base_time
+    time_units = opts.time_base
     unit_text  = ' [' + units + ']' if units else ''
     (scale, prefix) = get_factors(opts.vert_fact)
 
@@ -341,7 +391,7 @@ def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True,
     rms_in_legend = opts.show_rms
     legend_loc    = opts.leg_spot
     show_zero     = opts.show_zero
-    time_units    = opts.base_time
+    time_units    = opts.time_base
     show_legend   = rms_in_legend or plot_as_diffs or (truth is not None and not truth.is_null)
     unit_text     = ' [' + units + ']' if units else ''
     (scale, prefix) = get_factors(opts.vert_fact)
@@ -660,7 +710,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
         else:
             colormap = opts.colormap
     legend_loc = opts.leg_spot
-    time_units = opts.base_time
+    time_units = opts.time_base
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
