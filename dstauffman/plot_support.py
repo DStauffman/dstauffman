@@ -1124,9 +1124,7 @@ def get_classification(classify):
     # check for empty case, default to unclassified
     if not classify:
         # DCS: modify this section if you want a different default on your system (potentially put into a file instead?)
-        classification = DEFAULT_CLASSIFICATION
-        caveat         = ''
-        return (classification, caveat)
+        classify = DEFAULT_CLASSIFICATION
 
     # get the classification based solely on the first letter and check that it is valid
     classification = classify[0]

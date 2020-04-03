@@ -15,6 +15,12 @@ import pytest
 import sys
 import unittest
 
+try:
+    # TODO: this sometimes messes up the coverage tool, as the imports are done before it starts counting.
+    # May have to move this function to an external tool to fix it.
+    from coverage import Coverage
+except ImportError:
+    Coverage = None
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QApplication
 
@@ -118,6 +124,12 @@ def run_pytests(folder, *, names='tests'):
     >>> return_code = run_pytests(folder) # doctest: +SKIP
 
     """
+    # check that coverage tool was imported
+    if Coverage is None:
+        print('coverage tool is not available,  no report was generated.')
+        return_code = ReturnCodes.no_coverage_tool
+        return return_code
+
     # turn interactive plotting off
     plt.ioff()
     # open a qapp
@@ -157,9 +169,6 @@ def run_coverage(folder, *, names='tests', report=True):
     >>> return_code = run_coverage(folder) # doctest: +SKIP
 
     """
-    # import on demand so that coverage doesn't not count the import step
-    from coverage import Coverage
-
     # Get information on the test folder
     test_folder = get_tests_dir()
     data_file   = os.path.join(test_folder, '.coverage')

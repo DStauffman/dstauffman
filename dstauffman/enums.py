@@ -102,14 +102,10 @@ class ReturnCodes(IntEnumPlus):
     """
     clean            = 0 # Clean exit
     bad_command      = 1 # Unexpected command
-    invalid_casename = 2 # Case name is invalid
-    exe_not_found    = 3 # Can't find the executable
-    invalid_module   = 4 # Can't find the code module
-    invalid_win_cmd  = 5 # Command is not valid to run on Windows OS
-    bad_build_code   = 6 # Build command errored out
-    invalid_target   = 7 # Build command invalid target
-    bad_folder       = 8 # Folder to execute a command in doesn't exist
-    test_failures    = 9 # A test ran to completion, but failed its criteria
+    bad_folder       = 2 # Folder to execute a command in doesn't exist
+    bad_help_file    = 3 # help file doesn't exist
+    test_failures    = 4 # A test ran to completion, but failed its criteria
+    no_coverage_tool = 5 # Coverage tool is not installed
 
 #%% Unit test
 if __name__ == '__main__':
