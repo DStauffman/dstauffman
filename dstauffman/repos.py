@@ -124,12 +124,6 @@ def run_pytests(folder, *, names='tests'):
     >>> return_code = run_pytests(folder) # doctest: +SKIP
 
     """
-    # check that coverage tool was imported
-    if Coverage is None:
-        print('coverage tool is not available,  no report was generated.')
-        return_code = ReturnCodes.no_coverage_tool
-        return return_code
-
     # turn interactive plotting off
     plt.ioff()
     # open a qapp
@@ -169,6 +163,12 @@ def run_coverage(folder, *, names='tests', report=True):
     >>> return_code = run_coverage(folder) # doctest: +SKIP
 
     """
+    # check that coverage tool was imported
+    if Coverage is None:
+        print('coverage tool is not available,  no report was generated.')
+        return_code = ReturnCodes.no_coverage_tool
+        return return_code
+
     # Get information on the test folder
     test_folder = get_tests_dir()
     data_file   = os.path.join(test_folder, '.coverage')
@@ -214,6 +214,8 @@ def find_repo_issues(folder, extensions=frozenset(('m', 'py')), *, list_all=Fals
         Folders to ignore, default is empty
     check_eol : str
         If not None, then the line endings to check, such as '\r\n'
+    show_execute : bool
+        Whether to show files that have execute permissions, default is False
 
     Returns
     -------
