@@ -54,6 +54,8 @@ class Opts(Frozen):
                 Type of plot to save to disk, from {'png','jpg','fig','emf'}
             .sub_plots : bool
                 Flag specifying whether to plot as subplots or separate figures
+            .sing_line : bool
+                Flag specifying whether to plot only one line per axes, using subplots as necessary
             .disp_xmin : float
                 Minimum time to display on plot [sec]
             .disp_xmax : float
@@ -70,6 +72,8 @@ class Opts(Frozen):
                 Flag for whether to show Y=0 on the plot axis
             .quat_comp : bool
                 Flag to plot quaternion component differences or just the angle
+            .show_xtra : bool
+                Flag to show extra points in one vector or the other when plotting differences
             .time_base : str
                 Base units of time, typically from {'sec', 'months'}
             .time_unit : str
@@ -80,6 +84,10 @@ class Opts(Frozen):
                 'unity','deci','centi','milli', 'micro','nano','pico','femto','atto','zepto','yocto'}
             .colormap  : str
                 Name of the colormap to use
+            .leg_spot  : str
+                Location to place the legend, from {'best', 'upper right', 'upper left',
+                'lower left', 'lower right', 'right', 'center left', 'center right', 'lower center',
+                'upper center', 'center' or tuple of position}
             .classify  : str
                 Classification level to put on plots
             .names     : list of str
@@ -93,6 +101,7 @@ class Opts(Frozen):
         self.show_link = False # TODO: is this used?
         self.plot_type = 'png'
         self.sub_plots = True
+        self.sing_line = False
         self.disp_xmin = -np.inf
         self.disp_xmax =  np.inf
         self.rms_xmin  = -np.inf
@@ -101,6 +110,7 @@ class Opts(Frozen):
         self.use_mean  = False
         self.show_zero = False
         self.quat_comp = True
+        self.show_xtra = True
         self.time_base = 'sec'
         self.time_unit = 'sec'
         self.vert_fact = 'unity'

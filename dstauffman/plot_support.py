@@ -1123,6 +1123,9 @@ def get_classification(classify):
 
     # check for empty case, default to unclassified
     if not classify:
+        # check if not using any classification and if so return empties
+        if not DEFAULT_CLASSIFICATION:
+            return ('', '')
         # DCS: modify this section if you want a different default on your system (potentially put into a file instead?)
         classify = DEFAULT_CLASSIFICATION
 
