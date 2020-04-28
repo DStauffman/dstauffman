@@ -10,6 +10,7 @@ Notes
 
 #%% Imports
 # normal imports
+import datetime
 import doctest
 import gc
 import os
@@ -22,6 +23,7 @@ import warnings
 import matplotlib.cm as cmx
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
+from matplotlib.dates import date2num
 from matplotlib.patches import Rectangle
 import numpy as np
 
@@ -643,7 +645,7 @@ def titleprefix(fig, prefix=''):
         this_fig.canvas.set_window_title(prefix + ' - ' + this_canvas_title)
 
 #%% Functions - disp_xlimits
-def disp_xlimits(figs, xmin=None, xmax=None):
+def disp_xlimits(figs, xmin=None, xmax=None, *, ax=None):
     r"""
     Set the xlimits to the specified xmin and xmax.
 
@@ -655,6 +657,8 @@ def disp_xlimits(figs, xmin=None, xmax=None):
         Minimum X value
     xmax : scalar
         Maximum X value
+    ax : array_like, optional
+        List of axes, which is specified, use the instead of processing figures
 
     Notes
     -----
@@ -682,26 +686,45 @@ def disp_xlimits(figs, xmin=None, xmax=None):
     >>> plt.close(fig)
 
     """
-    # check for single figure
-    if not isinstance(figs, list):
-        figs = [figs]
-    # loop through figures
-    for this_fig in figs:
-        # get axis list and loop through them
-        for this_axis in this_fig.axes:
-            # get xlimits for this axis
-            (old_xmin, old_xmax) = this_axis.get_xlim()
-            # set the new limits
-            if xmin is not None:
+    if ax is None:
+        # check for single figure
+        if not isinstance(figs, list):
+            figs = [figs]
+        # loop through figures
+        ax = []
+        for this_fig in figs:
+            # get axis list
+            ax.extend(this_fig.axes)
+    else:
+        # check for single axis
+        if not isinstance(ax, list):
+            ax = [ax]
+    # loop through axes
+    for this_axis in this_fig.axes:
+        # get xlimits for this axis
+        (old_xmin, old_xmax) = this_axis.get_xlim()
+        # set the new limits
+        if xmin is not None:
+            if isinstance(xmin, datetime.datetime) or isinstance(xmin, np.datetime64):
+                new_xmin = np.maximum(date2num(xmin), old_xmin)
+            else:
                 new_xmin = np.max([xmin, old_xmin])
+        else:
+            new_xmin = old_xmin
+        if xmax is not None:
+            if isinstance(xmax, datetime.datetime) or isinstance(xmax, np.datetime64):
+                new_xmax = np.minimum(date2num(xmax), old_xmax)
             else:
-                new_xmin = old_xmin
-            if xmax is not None:
                 new_xmax = np.min([xmax, old_xmax])
-            else:
-                new_xmax = old_xmax
-            # modify xlimits
-            this_axis.set_xlim((new_xmin, new_xmax))
+        else:
+            new_xmax = old_xmax
+        # check for bad conditions
+        if np.isinf(new_xmin) or np.isnan(new_xmin):
+            new_xmin = old_xmin
+        if np.isinf(new_xmax) or np.isnan(new_xmax):
+            new_xmax = old_xmax
+        # modify xlimits
+        this_axis.set_xlim((new_xmin, new_xmax))
 
 #%% Functions - zoom_ylim
 def zoom_ylim(ax, time, data, t_start=-np.inf, t_final=np.inf, channel=None, pad=0.1):
