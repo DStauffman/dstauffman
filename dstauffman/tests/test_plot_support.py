@@ -10,6 +10,7 @@ Notes
 """
 
 #%% Imports
+import datetime
 import os
 import platform
 import unittest
@@ -449,6 +450,49 @@ class Test_whitten(unittest.TestCase):
         new_color = dcs.whitten(self.color)
         self.assertEqual(new_color, self.whittened_color)
 
+#%% Functions - resolve_name
+class Test_resolve_name(unittest.TestCase):
+    r"""
+    Tests the resolve_name function with the following cases:
+        Nominal (Windows)
+        Nominal (Unix)
+        No bad chars
+        Different replacements (x3)
+    """
+    def setUp(self):
+        self.bad_name = 'Bad name /\ <>!.png'
+        self.exp_win  = 'Bad name __ __!.png'
+        self.exp_unix = 'Bad name _\ <>!.png'
+
+    def test_nominal(self):
+        new_name = dcs.resolve_name(self.bad_name)
+        if lms.IS_WINDOWS:
+            self.assertEqual(new_name, self.exp_win)
+        else:
+            self.assertEqual(new_name, self.exp_unix)
+
+    def test_nominal_win(self):
+        new_name = dcs.resolve_name(self.bad_name, force_win=True)
+        self.assertEqual(new_name, self.exp_win)
+
+    def test_nominal_unix(self):
+        new_name = dcs.resolve_name(self.bad_name, force_win=False)
+        self.assertEqual(new_name, self.exp_unix)
+
+    def test_no_bad_chars(self):
+        good_name = 'Good name - Nice job.txt'
+        new_name  = dcs.resolve_name(good_name)
+        self.assertEqual(new_name, good_name)
+
+    def test_different_replacements(self):
+        bad_name = 'new <>:"/\\|?*text'
+        new_name = dcs.resolve_name(bad_name, force_win=True, rep_token='X')
+        self.assertEqual(new_name, 'new XXXXXXXXXtext')
+        new_name = dcs.resolve_name(bad_name, force_win=True, rep_token='')
+        self.assertEqual(new_name, 'new text')
+        new_name = dcs.resolve_name(bad_name, force_win=True, rep_token='YY')
+        self.assertEqual(new_name, 'new YYYYYYYYYYYYYYYYYYtext')
+
 #%% Functions - storefig
 class Test_storefig(unittest.TestCase):
     r"""
@@ -609,6 +653,17 @@ class Test_disp_xlimits(unittest.TestCase):
 
     def test_multiple_figs(self):
         dcs.disp_xlimits([self.fig, self.fig], self.xmin, self.xmax)
+
+    def test_inf(self):
+        dcs.disp_xlimits(self.fig, xmin=-np.inf)
+        dcs.disp_xlimits(self.fig, xmax=np.inf)
+
+    def test_nat(self):
+        dcs.disp_xlimits(self.fig, xmin=np.datetime64('nat'), xmax=self.xmax)
+        dcs.disp_xlimits(self.fig, xmax=np.datetime64('nat'), xmin=self.xmin)
+
+    def test_datetime(self):
+        dcs.disp_xlimits(self.fig, xmin=np.inf, xmax=datetime.datetime(2020, 4, 15, 0, 0, 0))
 
     def tearDown(self):
         plt.close(self.fig)

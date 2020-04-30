@@ -486,6 +486,51 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
     new_color = tuple((c*(1-dt) + w*dt for (c, w) in zip(color, white)))
     return new_color
 
+#%% Functions - resolve_name
+def resolve_name(name, force_win=None, rep_token='_'):
+    r"""
+    Resolves the given name to something that can be saved on the current OS.
+
+    Parameters
+    ----------
+    name : str
+        Name of the file
+    force_win : bool, optional
+        Flag to it to Windows or Unix methods, mostly for testing
+    rep_token : str, optional
+        Character to use to replace the bad ones with, default is underscore
+
+    Returns
+    -------
+    new_name : str
+        Name of the file with any invalid characters replaced
+
+    Examples
+    --------
+    >>> from dstauffman import resolve_name
+    >>> name = 'Bad name /\ <>!'
+    >>> force_win = True
+    >>> new_name = resolve_name(name, force_win=force_win)
+    >>> print(new_name)
+    Bad name __ __ !
+
+    """
+    # hard-coded values
+    bad_chars_win  = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
+    bad_chars_unix = ['/']
+    # determine OS
+    if force_win is None:
+        is_windows = platform.system() == 'Windows'
+    else:
+        is_windows = force_win
+    bad_chars      = bad_chars_win if is_windows else bad_chars_unix
+    # replace any bad characters with underscores
+    new_name = name
+    for ch in bad_chars:
+        if ch in new_name:
+            new_name = new_name.replace(ch, rep_token)
+    return new_name
+
 #%% Functions - storefig
 def storefig(fig, folder=None, plot_type='png'):
     r"""
@@ -540,11 +585,6 @@ def storefig(fig, folder=None, plot_type='png'):
     >>> os.remove(os.path.join(folder, 'Figure Title.png'))
 
     """
-    # hard-coded values
-    bad_chars_win  = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
-    bad_chars_unix = ['/']
-    is_windows     = platform.system() == 'Windows'
-    bad_chars      = bad_chars_win if is_windows else bad_chars_unix
     # make sure figs is a list
     if isinstance(fig, list):
         figs = fig
@@ -565,11 +605,7 @@ def storefig(fig, folder=None, plot_type='png'):
     # loop through the figures
     for this_fig in figs:
         # get the title of the figure canvas
-        this_title = this_fig.canvas.get_window_title()
-        # replace any bad characters with underscores
-        for ch in bad_chars:
-            if ch in this_title:
-                this_title = this_title.replace(ch, '_')
+        this_title = resolve_name(this_fig.canvas.get_window_title())
         # loop through the plot types
         for this_type in types:
             # save the figure to the specified plot type
@@ -1262,11 +1298,11 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, inside
             fontweight='bold', fontsize=12, bbox={'facecolor':'none', 'edgecolor':color, 'linewidth':2}, \
             transform=ax.transAxes)
     else:
-        r1 = Rectangle((-0.1, -0.1), 1.15, 1.15, facecolor='none', edgecolor=color, clip_on=False, \
-            linewidth=2, transform=ax.transAxes)
-        (rx, ry) = r1.get_xy()
-        ax.add_patch(r1)
-        ax.annotate('\n  ' + text_str + '  ', (rx + r1.get_width(), ry), xycoords='axes fraction', \
+        fig = ax.figure
+        r1 = Rectangle((0., 0.), 1., 1., facecolor='none', edgecolor=color, clip_on=False, \
+            linewidth=2, transform=fig.transFigure)
+        fig.patches.extend([r1])
+        ax.annotate('\n  ' + text_str + '  ', (1., 0.), xycoords='figure fraction', \
             color=text_color, weight='bold', fontsize=12, horizontalalignment='right', verticalalignment='bottom', \
             annotation_clip=False, bbox=dict(boxstyle='square', facecolor='none', edgecolor=color, \
             pad=0, linewidth=2))
