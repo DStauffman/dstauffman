@@ -1005,12 +1005,13 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
         fig_hand = [f1]
     # create axes
     ax = []
-    indices = np.arange(num_rows*num_cols).reshape(num_cols, num_rows).T
+    ax_prim = None
     for i in range(num_figs):
         for j in range(num_cols):
             for k in range(num_rows):
-                this_pos = indices[k, j] + 1
-                temp_axes = fig_hand[i].add_subplot(num_rows, num_cols, this_pos)
+                temp_axes = fig_hand[i].add_subplot(num_rows, num_cols, k*num_cols + j + 1, sharex=ax_prim)
+                if ax_prim is None:
+                    ax_prim = temp_axes
                 ax.append(temp_axes)
     # plot data
     for i in range(num_axes):
@@ -1044,7 +1045,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
                     this_axes.plot(time_two, quat_two[j, :], symbol_two, markersize=4, label=this_label, \
                         color=colororder8.get_color(j+num_channels), zorder=5)
         else:
-            # difference plot
+            #% Difference plot
             zorders = [8, 6, 5]
             for j in range(3):
                 if not plot_components or (single_lines and i % num_channels != j):
@@ -1054,7 +1055,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
                     this_label = '{} ({}: {}) {}rad)'.format(elements[j], func_name, value, prefix)
                 else:
                     this_label = elements[j]
-                this_axes.plot(time_overlap, nondeg_error[j, :], '^-', markersize=4, label=this_label, zorder=zorders[j], \
+                this_axes.plot(time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, zorder=zorders[j], \
                     color=colororder3.get_color(j))
             if not plot_components or (single_lines and (i + 1) % num_channels == 0):
                 if show_rms:
@@ -1085,7 +1086,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
                     linewidth=2, label=truth_name + ' ' + elements[i])
             else:
                 if i == 0:
-                # TODO: add RMS to Truth data?
+                    # TODO: add RMS to Truth data?
                     this_axes.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
                         linewidth=2, label=truth_name)
         # format display of plot
@@ -1107,17 +1108,15 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
         if show_rms:
             plot_rms_lines(this_axes, [rms_pts1, rms_pts2], this_axes.get_ylim())
 
-    # link axes to zoom together
-    #ax2 = f2.add_subplot(111, sharex=ax1) # TODO: solve this
     return (fig_hand, err)
 
 #%% Functions - general_difference_plot
 def general_difference_plot(description, time_one, time_two, data_one, data_two, *,
         name_one='', name_two='', elements=None, units=None, time_units='sec', leg_scale='unity',
         start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
-        fig_visible=True, make_subplots=True, colormap=None, use_mean=False, plot_zero=False,
-        show_rms=True, legend_loc='best', second_y_scale=None,
-        truth_name='Truth', truth_time=None, truth_data=None):
+        fig_visible=True, make_subplots=True, single_lines=False, colormap=None, use_mean=False,
+        plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_y_scale=None,
+        y_label=None, truth_name='Truth', truth_time=None, truth_data=None):
     r"""
     Generic difference comparison plot for use in other wrapper functions.  This function plots two
     vector histories over time, along with a difference from one another.
@@ -1160,6 +1159,8 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
         whether figure is visible
     make_subplots : bool, optional
         flag to use subplots for differences
+    single_lines : bool, optional
+        flag meaning to plot subplots by channel instead of together
     colormap : list or colormap
         colors to use on the plot
     use_mean : bool, optional
@@ -1170,8 +1171,12 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
         whether to show the RMS calculation in the legend
     legend_loc : str, optional
         location to put the legend, default is 'best'
+    show_extra : bool, optional
+        whether to show missing data on difference plots
     second_y_scale : dict, optional
         single key and value pair to use for scaling data to a second Y axis
+    y_label : str, optional
+        Labels to put on the Y axes, potentially by element
     truth_name : str, optional
         name to associate with truth data, default is 'Truth'
     truth_time : ndarray, optional
@@ -1194,22 +1199,25 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     -----
     #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
     #.  Ported to Python by David C. Stauffer in March 2019.
+    #.  Made fully function by David C. Stauffer in April 2020.
 
     Examples
     --------
     >>> from dstauffman import general_difference_plot, get_color_lists
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
+    >>> from matplotlib.colors import ListedColormap
     >>> from datetime import datetime
     >>> description     = 'example'
     >>> time_one        = np.arange(11)
     >>> time_two        = np.arange(2, 13)
-    >>> data_one        = 1e-6 * np.random.rand(4, 11)
-    >>> data_two        = data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6
+    >>> data_one        = 50e-6 * np.random.rand(2, 11)
+    >>> data_two        = data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6 * np.random.rand(2, 11)
     >>> name_one        = 'test1'
     >>> name_two        = 'test2'
     >>> elements        = ['x', 'y']
     >>> units           = 'rad'
+    >>> time_units      = 'sec'
     >>> leg_scale       = 'micro'
     >>> start_date      = str(datetime.now())
     >>> rms_xmin        = 1
@@ -1218,26 +1226,32 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     >>> disp_xmax       = np.inf
     >>> fig_visible     = True
     >>> make_subplots   = True
+    >>> single_lines    = False
     >>> color_lists     = get_color_lists()
-    >>> colormap        = color_lists['dbl_diff'] # + color_lists['double']
+    >>> colormap        = ListedColormap(color_lists['dbl_diff'].colors + color_lists['double'].colors)
     >>> use_mean        = False
     >>> plot_zero       = False
     >>> show_rms        = True
     >>> legend_loc      = 'best'
+    >>> show_extra      = True
     >>> second_y_scale  = {u'µrad': 1e6}
+    >>> y_label         = None
+    >>> truth_name      = 'Truth'
+    >>> truth_time      = None
+    >>> truth_data      = None
     >>> (fig_hand, err) = general_difference_plot(description, time_one, time_two, data_one, data_two,
-    ...     name_one=name_one, name_two=name_two, elements=elements, units=units, leg_scale=leg_scale, \
-    ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-    ...     fig_visible=fig_visible, make_subplots=make_subplots, colormap=colormap, \
-    ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-    ...     second_y_scale=second_y_scale)
+    ...     name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
+    ...     leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
+    ...     disp_xmax=disp_xmax, fig_visible=fig_visible, make_subplots=make_subplots, single_lines=single_lines, \
+    ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
+    ...     show_extra=show_extra, second_y_scale=second_y_scale, y_label=y_label, truth_name=truth_name, \
+    ...     truth_time=truth_time, truth_data=truth_data)
 
     Close plots
     >>> for fig in fig_hand:
     ...     plt.close(fig)
 
     """
-
     # Hard-coded values
     leg_format  = '{:1.3f}'
     truth_color = 'k'
@@ -1252,6 +1266,8 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     have_data_one = data_one is not None and np.any(~np.isnan(data_one))
     have_data_two = data_two is not None and np.any(~np.isnan(data_two))
     have_both     = have_data_one and have_data_two
+    # determine if using datetimes
+    use_datetime = False # TODO: test with these
 
     #% Calculations
     # find overlapping times
@@ -1259,16 +1275,15 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     # find differences
     d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)
     d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)
-
+    # build RMS indices
     rms_ix1  = (time_one >= rms_xmin) & (time_one <= rms_xmax)
     rms_ix2  = (time_two >= rms_xmin) & (time_two <= rms_xmax)
     rms_ix3  = (time_overlap >= rms_xmin) & (time_overlap <= rms_xmax)
     rms_pts1 = np.maximum(rms_xmin, np.minimum(np.min(time_one), np.min(time_two)))
     rms_pts2 = np.minimum(rms_xmax, np.maximum(np.max(time_one), np.max(time_two)))
     # find number of elements being differenced
-    n = len(elements)
-    cm = ColorMap(colormap=colormap, num_colors=n)
-    assert cm.num_colors == n, 'The colormap must match the number of channels.' # TODO: enforce this?
+    num_channels = len(elements)
+    cm = ColorMap(colormap=colormap, num_colors=3*num_channels)
     # calculate the differences
     if have_both:
         nondeg_error = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
@@ -1289,109 +1304,170 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
-
-    #% Overlay plots
-    f1 = plt.figure()
-    # create axis
-    if make_subplots:
-        f1.canvas.set_window_title(description) # TODO: fig_visible
-        if have_data_one and have_data_two:
-            ax1 = f1.add_subplot(2, 1, 1)
-        else:
-            ax1 = f1.add_subplot(111)
+    # determine which symbols to plot with
+    if have_both:
+        symbol_one = '^-'
+        symbol_two = 'v:'
+    elif have_data_one:
+        symbol_one = '.-'
+        symbol_two = '' # not-used
+    elif have_data_two:
+        symbol_one = '' # not-used
+        symbol_two = '.-'
     else:
-        f1.canvas.set_window_title(description + 'Difference')
-        ax1 = f1.add_subplot(111)
-    # plot data
-    if have_data_one:
-        for i in range(n):
-            if show_rms:
-                value = leg_format.format(leg_conv*data1_func[i])
-                this_label = '{} {} ({}: {} {}{})'.format(name_one, elements[i], func_name, value, prefix, units)
-            else:
-                this_label = name_one + ' ' + elements[i]
-            ax1.plot(time_one, data_one[i, :], '^-', markersize=4, color=cm.get_color(i), label=this_label)
-    if have_data_two:
-        for i in range(n):
-            if show_rms:
-                value = leg_format.format(leg_conv*data2_func[i])
-                this_label = '{} {} ({}: {} {}{})'.format(name_two, elements[i], func_name, value, prefix, units)
-            else:
-                this_label = name_two + ' ' + elements[i]
-            ax1.plot(time_two, data_two[i, :], 'v:', markersize=4, color=whitten(cm.get_color(i)), label=this_label)
-
-    # set X display limits
-    xlim = list(ax1.get_xlim())
-    if np.isfinite(disp_xmin):
-        xlim[0] = max([xlim[0], disp_xmin])
-    if np.isfinite(disp_xmax):
-        xlim[1] = min([xlim[1], disp_xmax])
-    ax1.set_xlim(xlim)
-    # set Y display limits
-    if plot_zero:
-        show_zero_ylim(ax1)
-    # optionally plot truth
-    if truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data)):
-        for i in range(n):
-            # TODO: add RMS to Truth data?
-            this_label = truth_name + ' ' + elements[i]
-            ax1.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
-                linewidth=2, label=this_label)
-
-    # format display of plot
-    ax1.legend(loc=legend_loc)
-    ax1.set_title(description)
-    ax1.set_xlabel('Time [' + time_units + ']' + start_date)
-    ax1.set_ylabel(description + ' [' + units + ']')
-    ax1.grid(True)
-    # plot RMS lines
-    if show_rms:
-        plot_rms_lines(ax1, [rms_pts1, rms_pts2], ax1.get_ylim())
-
-    #% Difference plot
-    if have_data_one and have_data_two:
-        # make axis
+        symbol_one = '' # invalid case
+        symbol_two = '' # invalid case
+    # pre-plan plot layout
+    if have_both:
         if make_subplots:
-            ax2 = f1.add_subplot(2, 1, 2, sharex=ax1)
-            f2  = None
-        else:
-            f2  = plt.figure()
-            f2.canvas.set_window_title(description + 'Difference')
-            ax2 = f2.add_subplot(111, sharex=ax1)
-        cm.set_colors(ax2)
-        # plot data
-        for i in range(n):
-            if show_rms:
-                value = leg_format.format(leg_conv*nondeg_func[i])
-                this_label = '{} ({}: {} {}{})'.format(elements[i], func_name, value, prefix, units)
+            num_figs = 1
+            if single_lines:
+                num_rows = num_channels
+                num_cols = 2
             else:
-                this_label = elements[i]
-            ax2.plot(time_overlap, nondeg_error[i, :], '.-', markersize=4, color=cm.get_color(i), label=this_label)
-        ax2.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, linewidth=2, label=name_one+' Extra')
-        ax2.plot(time_two[d2_miss_ix], np.zeros(len(d2_miss_ix)), 'go', markersize=6, linewidth=2, label=name_two+' Extra')
-        # format display of plot
+                num_rows = 2
+                num_cols = 1
+        else:
+            num_figs = 2
+            num_cols = 1
+            if single_lines:
+                num_rows = num_channels
+            else:
+                num_rows = 1
+    else:
+        num_figs = 1
+        if single_lines:
+            num_rows = num_channels
+            num_cols = 1
+        else:
+            num_rows = 1
+            num_cols = 1
+    num_axes = num_figs*num_rows*num_cols
+
+    #% Create plots
+    # create figures
+    f1 = plt.figure()
+    f1.canvas.set_window_title(description) # TODO: fig_visible (in wrapper)?
+    if have_both and not make_subplots:
+        f2 = plt.figure()
+        f2.canvas.set_window_title(description + 'Difference')
+        fig_hand = [f1, f2]
+    else:
+        fig_hand = [f1]
+    # create axes
+    ax = []
+    ax_prim = None
+    for i in range(num_figs):
+        for j in range(num_cols):
+            for k in range(num_rows):
+                temp_axes = fig_hand[i].add_subplot(num_rows, num_cols, k*num_cols + j + 1, sharex=ax_prim)
+                if ax_prim is None:
+                    ax_prim = temp_axes
+                ax.append(temp_axes)
+    assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
+    # plot data
+    for (i, this_axes) in enumerate(ax):
+        is_diff_plot = i > num_rows-1 or (not single_lines and make_subplots and i == 1)
+        if single_lines:
+            if is_diff_plot:
+                loop_counter = [i - num_rows]
+            else:
+                loop_counter = [i]
+        else:
+            loop_counter = range(num_channels)
+        if not is_diff_plot:
+            # standard plot
+            if have_data_one:
+                for j in loop_counter:
+                    if show_rms:
+                        value = leg_format.format(leg_conv*data1_func[j])
+                        this_label = '{} {} ({}: {} {}{})'.format(name_one, elements[j], func_name, value, prefix, units)
+                    else:
+                        this_label = name_one + ' ' + elements[j]
+                    this_axes.plot(time_one, data_one[j, :], symbol_one, markersize=4, label=this_label, \
+                        color=cm.get_color(j), zorder=3)
+            if have_data_two:
+                for j in loop_counter:
+                    if show_rms:
+                        value = leg_format.format(leg_conv*data2_func[j])
+                        this_label = '{} {} ({}: {} {}{})'.format(name_two, elements[j], func_name, value, prefix, units)
+                    else:
+                        this_label = name_two + ' ' + elements[j]
+                    this_axes.plot(time_two, data_two[j, :], symbol_two, markersize=4, label=this_label, \
+                        color=cm.get_color(j+num_channels), zorder=5)
+        else:
+            #% Difference plot
+            for j in loop_counter:
+                if single_lines and i % num_channels != j:
+                    continue
+                if show_rms:
+                    value = leg_format.format(leg_conv*nondeg_func[j])
+                    this_label = '{} ({}: {}) {}{})'.format(elements[j], func_name, value, prefix, units)
+                else:
+                    this_label = elements[j]
+                this_axes.plot(time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, \
+                    color=cm.get_color(j+2*num_channels))
+            if show_extra:
+                this_axes.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
+                this_axes.plot(time_one[d2_miss_ix], np.zeros(len(d2_miss_ix)), 'go', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
+
+        # set X display limits
+        if i == 0:
+            xlim = list(this_axes.get_xlim())
+            if np.isfinite(disp_xmin):
+                xlim[0] = max([xlim[0], disp_xmin])
+            if np.isfinite(disp_xmax):
+                xlim[1] = min([xlim[1], disp_xmax])
+        this_axes.set_xlim(xlim)
+        # set Y display limits
         if plot_zero:
-            show_zero_ylim(ax2)
-        ax2.legend(loc=legend_loc)
-        ax2.set_title(description + ' Difference')
-        ax2.set_xlabel('Time [' + time_units + ']' + start_date)
-        ax2.set_ylabel(description + ' Difference [' + units + ']')
-        ax2.grid(True)
+            show_zero_ylim(this_axes)
+        # optionally plot truth (after having set axes limits)
+        if i < num_rows and truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data)):
+            if single_lines:
+                this_axes.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
+                    linewidth=2, label=truth_name + ' ' + elements[i])
+            else:
+                if i == 0:
+                    # TODO: add RMS to Truth data?
+                    this_axes.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
+                        linewidth=2, label=truth_name)
+        # format display of plot
+        this_axes.legend(loc=legend_loc)
+        if i == 0:
+            this_axes.set_title(description)
+        elif (single_lines and i == num_rows) or (not single_lines and i == 1):
+            this_axes.set_title(description + ' Difference')
+        if use_datetime:
+            this_axes.set_xlabel('Date')
+        else:
+            this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
+        if y_label is None:
+            if is_diff_plot:
+                this_axes.set_ylabel(description + ' Difference [' + units + ']')
+            else:
+                this_axes.set_ylabel(description + ' [' + units + ']')
+        else:
+            # TODO: handle single_lines case by allowing list for y_label
+            ix = y_label.find('[')
+            if is_diff_plot and ix > 0:
+                this_axes.set_ylabel(y_label[:ix-1] + 'Difference ' + y_label[ix:])
+            else:
+                this_axes.set_ylabel(y_label)
+        this_axes.grid(True)
         # optionally add second Y axis
         if second_y_scale is not None:
             if isinstance(second_y_scale, (int, float)):
                 if not np.isnan(second_y_scale) and second_y_scale != 0:
-                    plot_second_yunits(ax2, '', second_y_scale)
+                    plot_second_yunits(this_axes, '', second_y_scale)
             else:
                 for (key, value) in second_y_scale.items():
                     if not np.isnan(value) and value != 0:
-                        plot_second_yunits(ax2, description + ' Difference [' + key + ']', value)
-
+                        plot_second_yunits(this_axes, description + ' Difference [' + key + ']', value)
+        # plot RMS lines
         if show_rms:
-            plot_rms_lines(ax2, [rms_pts1, rms_pts2], ax2.get_ylim())
-    else:
-        f2 = None
-    fig_hand = [x for x in (f1, f2) if x is not None]
+            plot_rms_lines(this_axes, [rms_pts1, rms_pts2], this_axes.get_ylim())
+
     return (fig_hand, err)
 
 #%% plot_phases
