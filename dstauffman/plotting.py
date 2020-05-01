@@ -770,6 +770,244 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     setup_plots(fig, opts, 'time')
     return fig
 
+#%% Functions - plot_error_bars
+def plot_error_bars(description, time, data, mins, maxs, elements=None, units='', time_units='sec', \
+        leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
+        disp_xmax=np.inf, fig_visible=True, single_lines=False, colormap=None, use_mean=False, \
+        plot_zero=False, show_rms=True, legend_loc='best', second_y_scale=None, y_label=None):
+    r"""
+    Generic plotting routine to make error bars.
+
+    Parameters
+    ----------
+    description : str
+        name of the data being plotted, used as title
+    time : array_like
+        time history [sec]
+    data : (A, N) ndarray
+        data history
+    mins : (A, N) ndarray
+        data minimum bound history
+    maxs : (A, N) ndarray
+        data maximum bound history
+    elements : list
+        name of each element to plot within the vector
+    units : list
+        name of units for plot
+    time_units : str, optional
+        time units, defaults to 'sec'
+    leg_scale : str, optional
+        factor to use when scaling the value in the legend, default is 'unity'
+    start_date : str, optional
+        date of t(0), may be an empty string
+    rms_xmin : float, optional
+        time of first point of RMS calculation
+    rms_xmax : float, optional
+        time of last point of RMS calculation
+    disp_xmin : float, optional
+        lower time to limit the display of the plot
+    disp_xmax : float, optional
+        higher time to limit the display of the plot
+    fig_visible : bool, optional
+        whether figure is visible
+    single_lines : bool, optional
+        flag meaning to plot subplots by channel instead of together
+    colormap : list or colormap
+        colors to use on the plot
+    use_mean : bool, optional
+        whether to use mean instead of RMS in legend calculations
+    plot_zero : bool, optional
+        whether to force zero to always be plotted on the Y axis
+    show_rms : bool, optional
+        whether to show the RMS calculation in the legend
+    legend_loc : str, optional
+        location to put the legend, default is 'best'
+    second_y_scale : dict, optional
+        single key and value pair to use for scaling data to a second Y axis
+    y_label : str, optional
+        Labels to put on the Y axes, potentially by element
+
+    Returns
+    -------
+    fig_hand : list of class matplotlib.Figure
+        list of figure handles
+    err : (A,N) ndarray
+        Differences
+
+    See Also
+    --------
+    TBD_wrapper
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
+    #.  Ported to Python by David C. Stauffer in March 2019.
+    #.  Made fully function by David C. Stauffer in April 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import plot_error_bars
+    >>> import numpy as np
+    >>> import matplotlib.pyplot as plt
+    >>> from datetime import datetime
+    >>> description     = 'Random Data Error Bars'
+    >>> time            = np.arange(11)
+    >>> data            = np.array([[3.], [-2.], [5]]) + np.random.rand(3, 11)
+    >>> mins            = data - 0.5 * np.random.rand(3, 11)
+    >>> maxs            = data + 1.5 * np.random.rand(3, 11)
+    >>> elements        = ['x', 'y', 'z']
+    >>> units           = 'rad'
+    >>> time_units      = 'sec'
+    >>> leg_scale       = 'milli'
+    >>> start_date      = str(datetime.now())
+    >>> rms_xmin        = 1
+    >>> rms_xmax        = 10
+    >>> disp_xmin       = -2
+    >>> disp_xmax       = np.inf
+    >>> fig_visible     = True
+    >>> single_lines    = False
+    >>> colormap        = 'tab10'
+    >>> use_mean        = False
+    >>> plot_zero       = False
+    >>> show_rms        = True
+    >>> legend_loc      = 'best'
+    >>> second_y_scale  = {'mrad': 1e3}
+    >>> y_label         = None
+    >>> fig             = plot_error_bars(description, time, data, mins, maxs, elements=elements, \
+    ...     units=units, time_units=time_units, leg_scale=leg_scale, start_date=start_date, \
+    ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+    ...     fig_visible=fig_visible, single_lines=single_lines, colormap=colormap, use_mean=use_mean, \
+    ...     plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
+    ...     second_y_scale=second_y_scale, y_label=y_label)
+
+    Close plots
+    >>> plt.close(fig)
+
+    Returns
+    -------
+    fig : list of matplotlib.pyplot.Figure
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import plot_error_bars
+
+    """
+    # Hard-coded values
+    leg_format  = '{:1.3f}'
+
+#    # force inputs to be ndarrays
+#    time = np.asanyarray(time)
+#    data = np.asanyarray(data)
+#    mins = np.asanyarray(mins)
+#    maxs = np.asanyarray(maxs)
+
+    # determine if using datetimes
+    use_datetime = False # TODO: test with these
+
+    #% Calculations
+    # build RMS indices
+    rms_ix   = (time >= rms_xmin) & (time <= rms_xmax)
+    rms_pts1 = np.maximum(rms_xmin, np.min(time))
+    rms_pts2 = np.minimum(rms_xmax, np.max(time))
+    # find number of elements being differenced
+    num_channels = len(elements)
+    cm = ColorMap(colormap=colormap, num_colors=num_channels)
+    # calculate the rms (or mean) values
+    if not use_mean:
+        func_name = 'RMS'
+        data_func = rms(data[:, rms_ix], axis=1, ignore_nans=True)
+    else:
+        func_name = 'Mean'
+        data_func = np.nanmean(data[:, rms_ix], axis=1, ignore_nans=True)
+    # unit conversion value
+    (temp, prefix) = get_factors(leg_scale)
+    leg_conv = 1/temp
+    # error calculation
+    err_neg = data - mins
+    err_pos = maxs - data
+    # get the number of axes to make
+    if single_lines:
+        num_axes = num_channels
+    else:
+        num_axes = 1
+
+    #% Create plots
+    # create figures
+    fig = plt.figure()
+    fig.canvas.set_window_title(description) # TODO: fig_visible (in wrapper)?
+    # create axes
+    ax = []
+    ax_prim = None
+    for i in range(num_axes):
+        temp_axes = fig.add_subplot(num_axes, 1, i+1, sharex=ax_prim)
+        if ax_prim is None:
+            ax_prim = temp_axes
+        ax.append(temp_axes)
+    assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
+    # plot data
+    for (i, this_axes) in enumerate(ax):
+        if single_lines:
+            loop_counter = [i]
+        else:
+            loop_counter = range(num_channels)
+        # standard plot
+        for j in loop_counter:
+            if show_rms:
+                value = leg_format.format(leg_conv*data_func[j])
+                this_label = '{} ({}: {} {}{})'.format(elements[j], func_name, value, prefix, units)
+            else:
+                this_label = elements[j]
+            this_axes.plot(time, data[j, :], '.-', markersize=4, label=this_label, \
+                color=cm.get_color(j), zorder=3)
+            # plot error bars
+            this_axes.errorbar(time, data[j, :], yerr=np.vstack((err_neg[j, :], err_pos[j, :])), \
+                color='None', ecolor=cm.get_color(j), zorder=5, capsize=2)
+
+        # set X display limits
+        if i == 0:
+            xlim = list(this_axes.get_xlim())
+            if np.isfinite(disp_xmin):
+                xlim[0] = max([xlim[0], disp_xmin])
+            if np.isfinite(disp_xmax):
+                xlim[1] = min([xlim[1], disp_xmax])
+        this_axes.set_xlim(xlim)
+        # set Y display limits
+        if plot_zero:
+            show_zero_ylim(this_axes)
+        # format display of plot
+        this_axes.legend(loc=legend_loc)
+        this_axes.set_title(description)
+        if use_datetime:
+            this_axes.set_xlabel('Date')
+        else:
+            this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
+        if y_label is None:
+            this_axes.set_ylabel(description + ' [' + units + ']')
+        else:
+            if isinstance(y_label, list):
+                this_axes.set_ylabel(y_label[i])
+            else:
+                this_axes.set_ylabel(y_label)
+        this_axes.grid(True)
+        # optionally add second Y axis
+        if second_y_scale is not None:
+            if isinstance(second_y_scale, (int, float)):
+                if not np.isnan(second_y_scale) and second_y_scale != 0:
+                    plot_second_yunits(this_axes, '', second_y_scale)
+            else:
+                for (key, value) in second_y_scale.items():
+                    if not np.isnan(value) and value != 0:
+                        plot_second_yunits(this_axes, description + ' [' + key + ']', value)
+        # plot RMS lines
+        if show_rms:
+            plot_rms_lines(this_axes, [rms_pts1, rms_pts2], this_axes.get_ylim())
+
+    return fig
+
 #%% Functions - general_quaternion_plot
 def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         name_one='', name_two='', time_units='sec', start_date='', plot_components=True,
@@ -780,8 +1018,8 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     Generic quaternion comparison plot for use in other wrapper functions.  This function plots two
     quaternion histories over time, along with a difference from one another.
 
-    Input
-    -----
+    Parameters
+    ----------
     description : str
         name of the data being plotted, used as title
     time_one : array_like
@@ -1121,8 +1359,8 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     Generic difference comparison plot for use in other wrapper functions.  This function plots two
     vector histories over time, along with a difference from one another.
 
-    Input
-    -----
+    Parameters
+    ----------
     description : str
         name of the data being plotted, used as title
     time_one : array_like

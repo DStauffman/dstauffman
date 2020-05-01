@@ -466,7 +466,7 @@ class Test_resolve_name(unittest.TestCase):
 
     def test_nominal(self):
         new_name = dcs.resolve_name(self.bad_name)
-        if lms.IS_WINDOWS:
+        if dcs.IS_WINDOWS:
             self.assertEqual(new_name, self.exp_win)
         else:
             self.assertEqual(new_name, self.exp_unix)
@@ -921,17 +921,17 @@ class Test_plot_classification(unittest.TestCase):
         self.ax.plot([0, 10], [0, 10], '.-b')
 
     def test_inside(self):
-        dcs.plot_classification(self.ax, 'U', test=False, inside_axes=True)
+        dcs.plot_classification(self.ax, 'U', test=False, location='axis')
 
     def test_outside(self):
-        dcs.plot_classification(self.ax, 'U', test=False, inside_axes=False)
+        dcs.plot_classification(self.ax, 'U', test=False, location='figure')
 
     def test_caveat(self):
         dcs.plot_classification(self.ax, 'U', caveat='//TEXT STR')
 
     def test_options(self):
         for opt in {'C', 'S', 'T', 'TS'}:
-            dcs.plot_classification(self.ax, opt, test=True, inside_axes=False)
+            dcs.plot_classification(self.ax, opt, test=True, location='figure')
 
     def test_bad_option(self):
         with self.assertRaises(ValueError):

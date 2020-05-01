@@ -30,7 +30,7 @@ from .parser       import main, parse_wrapper, parse_commands, execute_command
 from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
                               get_output_dir, list_python_files
 from .plotting     import Opts, plot_monte_carlo, plot_correlation_matrix, plot_time_history, \
-                              plot_bar_breakdown, general_quaternion_plot, \
+                              plot_bar_breakdown, plot_error_bars, general_quaternion_plot, \
                               general_difference_plot, plot_phases
 from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
                               get_color_lists, ignore_plot_data, whitten, resolve_name, storefig, \

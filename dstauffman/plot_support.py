@@ -512,7 +512,7 @@ def resolve_name(name, force_win=None, rep_token='_'):
     >>> force_win = True
     >>> new_name = resolve_name(name, force_win=force_win)
     >>> print(new_name)
-    Bad name __ __ !
+    Bad name __ __!
 
     """
     # hard-coded values
@@ -903,7 +903,7 @@ def setup_plots(figs, opts, plot_type='time'):
     if classification:
         for fig in figs:
             ax = fig.gca()
-            plot_classification(ax, classification, caveat=caveat, inside_axes=False);
+            plot_classification(ax, classification, caveat=caveat, location='figure');
 
     # things to do if displaying the plots
     if opts.show_plot and Plotter.show_plot: # pragma: no cover
@@ -1202,7 +1202,7 @@ def get_classification(classify):
     return (classification, caveat)
 
 #%% Functions - plot_classification
-def plot_classification(ax, classification='U', *, caveat='', test=False, inside_axes=True):
+def plot_classification(ax, classification='U', *, caveat='', test=False, location='figure'):
     r"""
     Displays the classification in a box on each figure, with the option of printing another box for
     testing purposes.
@@ -1216,9 +1216,9 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, inside
     caveat : str, optional
         Any additional caveats beyone the classification level
     test : bool, optional
-        Whether to print the testing box, default is true
-    inside_axes : bool, optional
-        Whether to print the box inside the axis, or on the figure edge
+        Whether to print the testing box, default is false
+    location : str, optional
+        Where to put the label, from {'axis', 'figure', 'left', 'top'}
 
     See Also
     --------
@@ -1228,6 +1228,7 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, inside
     ----------
     #.  Written by David C. Stauffer in August 2019 based on Matlab version.
     #.  Updated by David C. Stauffer in March 2020 to support caveats.
+    #.  Updated by David C. Stauffer in May 2020 to give more placement options.
 
     Examples
     --------
@@ -1236,19 +1237,19 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, inside
     >>> fig1 = plt.figure()
     >>> ax1 = fig1.add_subplot(111)
     >>> _ = ax1.plot([0, 10], [0, 10], '.-b')
-    >>> plot_classification(ax1, 'U', test=False, inside_axes=False)
+    >>> plot_classification(ax1, 'U', test=False, location='figure')
     >>> plt.show(block=False) # doctest: +SKIP
 
     >>> fig2 = plt.figure()
     >>> ax2 = fig2.add_subplot(111)
     >>> _ = ax2.plot(0, 0)
-    >>> plot_classification(ax2, 'S', caveat='//MADE UP CAVEAT', test=True, inside_axes=False)
+    >>> plot_classification(ax2, 'S', caveat='//MADE UP CAVEAT', test=True, location='figure')
     >>> plt.show(block=False) # doctest: +SKIP
 
     >>> fig3 = plt.figure()
     >>> ax3 = fig3.add_subplot(111)
     >>> _ = ax3.plot(1, 1)
-    >>> plot_classification(ax3, 'C', test=True, inside_axes=True)
+    >>> plot_classification(ax3, 'C', test=True, location='axis')
     >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close(fig1)
@@ -1293,19 +1294,36 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, inside
         text_color = (0.2, 0.2, 0.2)
 
     # add classification box
-    if inside_axes:
-        ax.text(0.99, 0.01, text_str, color=text_color, horizontalalignment='right', verticalalignment='bottom', \
-            fontweight='bold', fontsize=12, bbox={'facecolor':'none', 'edgecolor':color, 'linewidth':2}, \
-            transform=ax.transAxes)
+    if location == 'axis':
+        # inside the axes
+        ax.text(0.99, 0.01, text_str, color=text_color, horizontalalignment='right', \
+            verticalalignment='bottom', fontweight='bold', fontsize=12, \
+            bbox={'facecolor':'none', 'edgecolor':color, 'linewidth':2}, transform=ax.transAxes)
+        return
+    # other locations within the figure
+    vert_align = 'bottom'
+    if location == 'figure':
+        text_pos   = (1., 0.)
+        horz_align = 'right'
+    elif location == 'left':
+        text_pos   = (0., 0.)
+        horz_align = 'left'
+    elif location == 'top':
+        text_pos   = (0., 1.)
+        horz_align = 'left'
+        vert_align = 'top'
     else:
-        fig = ax.figure
-        r1 = Rectangle((0., 0.), 1., 1., facecolor='none', edgecolor=color, clip_on=False, \
-            linewidth=2, transform=fig.transFigure)
-        fig.patches.extend([r1])
-        ax.annotate('\n  ' + text_str + '  ', (1., 0.), xycoords='figure fraction', \
-            color=text_color, weight='bold', fontsize=12, horizontalalignment='right', verticalalignment='bottom', \
-            annotation_clip=False, bbox=dict(boxstyle='square', facecolor='none', edgecolor=color, \
-            pad=0, linewidth=2))
+        raise ValueError(f'Unexpected location given: "{location}"')
+    # create the label
+    ax.annotate('\n  ' + text_str + '  ', text_pos, xycoords='figure fraction', \
+        color=text_color, weight='bold', fontsize=12, horizontalalignment=horz_align, \
+        verticalalignment=vert_align, annotation_clip=False, bbox=dict(boxstyle='square', \
+        facecolor='none', edgecolor=color, pad=0, linewidth=2))
+    # add border
+    fig = ax.figure
+    r1 = Rectangle((0., 0.), 1., 1., facecolor='none', edgecolor=color, clip_on=False, \
+        linewidth=2, transform=fig.transFigure)
+    fig.patches.extend([r1])
 
 #%% Unit test
 if __name__ == '__main__':
