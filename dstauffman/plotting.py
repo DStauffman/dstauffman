@@ -25,8 +25,8 @@ from matplotlib.ticker import StrMethodFormatter
 from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
 from dstauffman.plot_support import ColorMap, get_color_lists, ignore_plot_data, \
-                                        plot_rms_lines, plot_second_yunits, setup_plots, \
-                                        show_zero_ylim, whitten
+                                        plot_rms_lines, plot_second_yunits, disp_xlimits, \
+                                        setup_plots, show_zero_ylim, whitten
 from dstauffman.quat import quat_angle_diff
 from dstauffman.stats import intersect, z_from_ci
 from dstauffman.units import get_factors
@@ -969,11 +969,8 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
 
         # set X display limits
         if i == 0:
-            xlim = list(this_axes.get_xlim())
-            if np.isfinite(disp_xmin):
-                xlim[0] = max([xlim[0], disp_xmin])
-            if np.isfinite(disp_xmax):
-                xlim[1] = min([xlim[1], disp_xmax])
+            disp_xlimits(None, xmin=disp_xmin, xmax=disp_xmax, ax=this_axes)
+            xlim = this_axes.get_xlim()
         this_axes.set_xlim(xlim)
         # set Y display limits
         if plot_zero:
@@ -1308,11 +1305,8 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
 
         # set X display limits
         if i == 0:
-            xlim = list(this_axes.get_xlim())
-            if np.isfinite(disp_xmin):
-                xlim[0] = max([xlim[0], disp_xmin])
-            if np.isfinite(disp_xmax):
-                xlim[1] = min([xlim[1], disp_xmax])
+            disp_xlimits(None, xmin=disp_xmin, xmax=disp_xmax, ax=this_axes)
+            xlim = this_axes.get_xlim()
         this_axes.set_xlim(xlim)
         # set Y display limits
         if plot_zero:
@@ -1651,11 +1645,8 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
 
         # set X display limits
         if i == 0:
-            xlim = list(this_axes.get_xlim())
-            if np.isfinite(disp_xmin):
-                xlim[0] = max([xlim[0], disp_xmin])
-            if np.isfinite(disp_xmax):
-                xlim[1] = min([xlim[1], disp_xmax])
+            disp_xlimits(None, xmin=disp_xmin, xmax=disp_xmax, ax=this_axes)
+            xlim = this_axes.get_xlim()
         this_axes.set_xlim(xlim)
         # set Y display limits
         if plot_zero:

@@ -165,7 +165,7 @@ def run_coverage(folder, *, names='tests', report=True):
     """
     # check that coverage tool was imported
     if Coverage is None:
-        print('coverage tool is not available,  no report was generated.')
+        print('coverage tool is not available, no report was generated.')
         return_code = ReturnCodes.no_coverage_tool
         return return_code
 

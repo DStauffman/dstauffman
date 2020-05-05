@@ -736,7 +736,7 @@ def disp_xlimits(figs, xmin=None, xmax=None, *, ax=None):
         if not isinstance(ax, list):
             ax = [ax]
     # loop through axes
-    for this_axis in this_fig.axes:
+    for this_axis in ax:
         # get xlimits for this axis
         (old_xmin, old_xmax) = this_axis.get_xlim()
         # set the new limits
