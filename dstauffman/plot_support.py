@@ -903,7 +903,7 @@ def setup_plots(figs, opts, plot_type='time'):
     if classification:
         for fig in figs:
             ax = fig.gca()
-            plot_classification(ax, classification, caveat=caveat, location='figure');
+            plot_classification(ax, classification, caveat=caveat, location='figure')
 
     # things to do if displaying the plots
     if opts.show_plot and Plotter.show_plot: # pragma: no cover
@@ -1089,6 +1089,127 @@ def plot_second_yunits(ax, ylab, multiplier):
     ax2 = ax.twinx()
     ax2.set_ylim(np.multiply(multiplier, ax.get_ylim()))
     ax2.set_ylabel(ylab)
+
+#%% Functions - get_rms_indices
+def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np.inf, xmax=np.inf):
+    r"""
+    Gets the indices and time points for doing RMS calculations and plotting RMS lines.
+
+    Parameters
+    ----------
+    time_one : array_like
+        Time vector one
+    time_two : array_like
+        Time vector two
+    time_overlap : array_like
+        Time vector of points in both arrays
+    xmin : float
+        Minimum time to include in calculation
+    xmax : float
+        Maximum time to include in calculation
+
+    Returns
+    -------
+    rms_ix1 : (A, ) ndarray of bool
+        Array of indices into time_one between the rms bounds
+    rms_ix2 : (B, ) ndarray of bool
+        Array of indices into time_two between the rms bounds
+    rms_ix3 : (C, ) ndarray of bool
+        Array of indices into time_overlap between the rms bounds
+    rms_pts1 : float
+        Time to start the RMS calculations from
+    rms_pts2 : float
+        Time to end the RMS calculations at
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2020 when it needed to handle datetime64 objects.
+
+    Examples
+    --------
+    >>> from dstauffman import get_rms_indices
+    >>> import numpy as np
+    >>> time_one     = np.arange(11)
+    >>> time_two     = np.arange(2, 13)
+    >>> time_overlap = np.arange(2, 11)
+    >>> xmin         = 1
+    >>> xmax         = 8
+    >>> (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = get_rms_indices(time_one, time_two, \
+    ...     time_overlap, xmin=xmin, xmax=xmax)
+    >>> print(rms_pts1, rms_pts2)
+    1 8
+
+    """
+    # alias some flags
+    have1 = time_one is not None
+    have2 = time_two is not None
+    have3 = time_overlap is not None
+    # get the min/max times
+    if have1:
+        if have2:
+            # have both
+            t_min = np.minimum(np.min(time_one), np.min(time_two))
+            t_max = np.maximum(np.max(time_one), np.max(time_two))
+        else:
+            # have only time 1
+            t_min = np.min(time_one)
+            t_max = np.max(time_one)
+    else:
+        if have2:
+            # have only time 2
+            t_min = np.min(time_two)
+            t_max = np.max(time_two)
+        else:
+            # have neither time 1 nor time 2
+            raise AssertionError('At least one time vector must be given.')
+    # TODO: this is a hack for older versions of numpy (v1.15), remove it eventually
+    #import pandas as pd
+    #if isinstance(t_min, pd.Timestamp):
+    #    t_min = t_min.to_datetime64()
+    #if isinstance(t_max, pd.Timestamp):
+    #    t_max = t_max.to_datetime64()
+    if hasattr(xmin, 'dtype') and np.issubdtype(xmin.dtype, np.datetime64):
+        process = not np.isnat(xmin)
+    elif isinstance(xmin, datetime.datetime):
+        process = True
+    else:
+        process = not np.isnan(xmin) and not np.isinf(xmin)
+    if process:
+        if have1:
+            p1_min = time_one >= xmin
+        if have2:
+            p2_min = time_two >= xmin
+        if have3:
+            p3_min = time_overlap >= xmin
+        rms_pts1 = np.maximum(xmin, t_min)
+    else:
+        p1_min = np.ones(time_one.shape,     dtype=bool)
+        p2_min = np.ones(time_two.shape,     dtype=bool)
+        p3_min = np.ones(time_overlap.shape, dtype=bool)
+        rms_pts1 = t_min
+    if hasattr(xmax, 'dtype') and np.issubdtype(xmax.dtype, np.datetime64):
+        process = not np.isnat(xmax)
+    elif isinstance(xmax, datetime.datetime):
+        process = True
+    else:
+        process = not np.isnan(xmax) and not np.isinf(xmax)
+    if process:
+        if have1:
+            p1_max = time_one <= xmax
+        if have2:
+            p2_max = time_two <= xmax
+        if have3:
+            p3_max = time_overlap <= xmax
+        rms_pts2 = np.minimum(xmax, t_max)
+    else:
+        p1_max = np.ones(time_one.shape,     dtype=bool)
+        p2_max = np.ones(time_two.shape,     dtype=bool)
+        p3_max = np.ones(time_overlap.shape, dtype=bool)
+        rms_pts2 = t_max
+    rms_ix1 = p1_min & p1_max if have1 else np.array([], dtype=bool)
+    rms_ix2 = p2_min & p2_max if have2 else np.array([], dtype=bool)
+    rms_ix3 = p3_min & p3_max if have3 else np.array([], dtype=bool)
+    return (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2)
 
 #%% Functions - plot_rms_lines
 def plot_rms_lines(ax, x, y, show_in_legend=True):

@@ -24,7 +24,7 @@ from matplotlib.ticker import StrMethodFormatter
 # model imports
 from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
-from dstauffman.plot_support import ColorMap, get_color_lists, ignore_plot_data, \
+from dstauffman.plot_support import ColorMap, get_color_lists, get_rms_indices, ignore_plot_data, \
                                         plot_rms_lines, plot_second_yunits, disp_xlimits, \
                                         setup_plots, show_zero_ylim, whitten
 from dstauffman.quat import quat_angle_diff
@@ -35,7 +35,7 @@ from dstauffman.utils import pprint_dict, rms
 #%% Classes - Opts
 class Opts(Frozen):
     r"""Optional plotting configurations."""
-    def __init__(self):
+    def __init__(self, **kwargs):
         r"""
         Default configuration with:
             .case_name : str
@@ -118,6 +118,11 @@ class Opts(Frozen):
         self.leg_spot  = 'best'
         self.classify  = ''
         self.names     = list()
+        for (key, value) in kwargs.items():
+            if hasattr(self, key):
+                setattr(self, key, value)
+            else:
+                raise ValueError(f'Unexpected option of "{key}" passed to Opts initializer."')
 
     def get_names(self, ix):
         r"""Get the specified name from the list."""
@@ -910,9 +915,7 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
 
     #% Calculations
     # build RMS indices
-    rms_ix   = (time >= rms_xmin) & (time <= rms_xmax)
-    rms_pts1 = np.maximum(rms_xmin, np.min(time))
-    rms_pts2 = np.minimum(rms_xmax, np.max(time))
+    (rms_ix, _, _, rms_pts1, rms_pts2) = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
     # find number of elements being differenced
     num_channels = len(elements)
     cm = ColorMap(colormap=colormap, num_colors=num_channels)
@@ -1151,11 +1154,8 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     q1_miss_ix = np.setxor1d(np.arange(len(time_one)), q1_diff_ix)
     q2_miss_ix = np.setxor1d(np.arange(len(time_two)), q2_diff_ix)
     # build RMS indices
-    rms_ix1  = (time_one >= rms_xmin) & (time_one <= rms_xmax)
-    rms_ix2  = (time_two >= rms_xmin) & (time_two <= rms_xmax)
-    rms_ix3  = (time_overlap >= rms_xmin) & (time_overlap <= rms_xmax)
-    rms_pts1 = np.maximum(rms_xmin, np.minimum(np.min(time_one), np.min(time_two)))
-    rms_pts2 = np.minimum(rms_xmax, np.maximum(np.max(time_one), np.max(time_two)))
+    (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = get_rms_indices(time_one, time_two, \
+        time_overlap, xmin=rms_xmin, xmax=rms_xmax)
     # get default plotting colors
     color_lists = get_color_lists()
     colororder3 = ColorMap(color_lists['vec'], num_colors=3)
@@ -1508,11 +1508,8 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)
     d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)
     # build RMS indices
-    rms_ix1  = (time_one >= rms_xmin) & (time_one <= rms_xmax)
-    rms_ix2  = (time_two >= rms_xmin) & (time_two <= rms_xmax)
-    rms_ix3  = (time_overlap >= rms_xmin) & (time_overlap <= rms_xmax)
-    rms_pts1 = np.maximum(rms_xmin, np.minimum(np.min(time_one), np.min(time_two)))
-    rms_pts2 = np.minimum(rms_xmax, np.maximum(np.max(time_one), np.max(time_two)))
+    (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = get_rms_indices(time_one, time_two, \
+        time_overlap, xmin=rms_xmin, xmax=rms_xmax)
     # find number of elements being differenced
     num_channels = len(elements)
     cm = ColorMap(colormap=colormap, num_colors=3*num_channels)

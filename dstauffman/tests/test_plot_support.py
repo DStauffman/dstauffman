@@ -882,6 +882,58 @@ class Test_plot_second_yunits(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
+#%% Functions - get_rms_indices
+class Test_get_rms_indices(unittest.TestCase):
+    r"""
+    Tests the get_rms_indices function with the following cases:
+        Nominal
+        TBD
+    """
+    def setUp(self):
+        self.time_one     = np.arange(11)
+        self.time_two     = np.arange(2, 13)
+        self.time_overlap = np.arange(2, 11)
+        self.xmin         = 1
+        self.xmax         = 8
+        self.rms_ix1      = np.array([False,  True,  True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
+        self.rms_ix2      = np.array([ True,  True,  True,  True,  True,  True,  True, False, False, False, False], dtype=bool)
+        self.rms_ix3      = np.array([ True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
+        self.rms_pts1     = 1
+        self.rms_pts2     = 8
+
+    def test_nominal(self):
+        (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = dcs.get_rms_indices(self.time_one, self.time_two, \
+            self.time_overlap, xmin=self.xmin, xmax=self.xmax)
+        np.testing.assert_array_equal(rms_ix1, self.rms_ix1)
+        np.testing.assert_array_equal(rms_ix2, self.rms_ix2)
+        np.testing.assert_array_equal(rms_ix3, self.rms_ix3)
+        self.assertEqual(rms_pts1, self.rms_pts1)
+        self.assertEqual(rms_pts2, self.rms_pts2)
+
+    def test_only_time_one(self):
+        (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = dcs.get_rms_indices(self.time_one, None, \
+            None, xmin=self.xmin, xmax=self.xmax)
+        np.testing.assert_array_equal(rms_ix1, self.rms_ix1)
+        self.assertEqual(rms_ix2.size, 0)
+        self.assertEqual(rms_ix3.size, 0)
+        self.assertEqual(rms_pts1, self.rms_pts1)
+        self.assertEqual(rms_pts2, self.rms_pts2)
+
+    def test_no_bounds(self):
+        (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = dcs.get_rms_indices(self.time_one, self.time_two, \
+            self.time_overlap)
+        np.testing.assert_array_equal(rms_ix1, np.ones(self.rms_ix1.shape, dtype=bool))
+        np.testing.assert_array_equal(rms_ix2, np.ones(self.rms_ix2.shape, dtype=bool))
+        np.testing.assert_array_equal(rms_ix3, np.ones(self.rms_ix3.shape, dtype=bool))
+        self.assertEqual(rms_pts1, 0)
+        self.assertEqual(rms_pts2, 12)
+
+    def test_datetime64(self):
+        pass # TODO: write this
+
+    def test_datetime(self):
+        pass # TODO: write this
+
 #%% Functions - plot_rms_lines
 class Test_plot_rms_lines(unittest.TestCase):
     r"""
