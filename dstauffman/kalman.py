@@ -13,8 +13,9 @@ import doctest
 import unittest
 
 from dstauffman.classes import Frozen
+from dstauffman.plot_generic import general_difference_plot, general_quaternion_plot
 from dstauffman.plot_support import get_color_lists, setup_plots
-from dstauffman.plotting import general_difference_plot, general_quaternion_plot, Opts
+from dstauffman.plotting import Opts
 
 #%% KfInnov
 class KfInnov(Frozen):

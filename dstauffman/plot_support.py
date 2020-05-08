@@ -1298,6 +1298,83 @@ def plot_rms_lines(ax, x, y, show_in_legend=True):
     ax.plot([x[0], x[0]], y, linestyle='--', color=[   1, 0.75, 0], marker='+', markeredgecolor='m', markersize=10, label=label_one)
     ax.plot([x[1], x[1]], y, linestyle='--', color=[0.75, 0.75, 1], marker='+', markeredgecolor='m', markersize=10, label=label_two)
 
+#%% plot_phases
+def plot_phases(ax, times, colormap='tab10', labels=None):
+    r"""
+    Plots some labeled phases as semi-transparent patchs on the given axis.
+
+    Parameters
+    ----------
+    ax : (Axes)
+        Figure axes
+    times : (1xN) or (2xN) list of times, if it has two rows, then the second are the end points
+         otherwise assume the sections are continuous.
+
+    Examples
+    --------
+    >>> from dstauffman import plot_phases, get_color_lists
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> fig = plt.figure()
+    >>> fig.canvas.set_window_title('Sine Wave')
+    >>> ax = fig.add_subplot(111)
+    >>> time = np.arange(101)
+    >>> data = np.cos(time / 10)
+    >>> _ = ax.plot(time, data, '.-')
+    >>> times = np.array([5, 20, 60, 90])
+    >>> # times = np.array([[5, 20, 60, 90], [10, 60, 90, 95]])
+    >>> labels = ['Part 1', 'Phase 2', 'Watch Out', 'Final']
+    >>> colorlists = get_color_lists()
+    >>> colors = colorlists['quat']
+    >>> plot_phases(ax, times, colors, labels)
+    >>> plt.show(block=False) # doctest: +SKIP
+
+    Close plot
+    >>> plt.close(fig)
+
+    """
+    # hard-coded values
+    transparency = 0.2 # 1 = opaque
+
+    # get number of segments
+    if times.ndim == 1:
+        num_segments = times.size
+    else:
+        num_segments = times.shape[1]
+
+    # check for optional arguments
+    cm = ColorMap(colormap=colormap, num_colors=num_segments)
+
+    # get the limits of the plot
+    xlims = ax.get_xlim()
+    ylims = ax.get_ylim()
+
+    # create second row of times if not specified (assumes each phase goes all the way to the next one)
+    if times.ndim == 1:
+        times = np.vstack((times, np.hstack((times[1:], max(times[-1], xlims[1])))))
+
+    # loop through all the phases
+    for i in range(num_segments):
+        # get the label and color for this phase
+        this_color = cm.get_color(i)
+        # get the locations for this phase
+        x1 = times[0, i]
+        x2 = times[1, i]
+        y1 = ylims[0]
+        y2 = ylims[1]
+        # create the shaded box
+        ax.add_patch(Rectangle((x1, y1), x2-x1, y2-y1, facecolor=this_color, edgecolor=this_color, \
+            alpha=transparency))
+        # create the label
+        if labels is not None:
+            ax.annotate(labels[i], xy=(x1, y2), \
+                xycoords='data', horizontalalignment='left', verticalalignment='top', \
+                fontsize=15, rotation=-90)
+
+    # reset any limits that might have changed due to the patches
+    ax.set_xlim(xlims)
+    ax.set_ylim(ylims)
+
 #%% Functions - get_classification
 def get_classification(classify):
     r"""

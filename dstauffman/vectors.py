@@ -48,7 +48,7 @@ def rot(axis, angle):
     >>> import numpy as np
     >>> axis = 3
     >>> angle = np.pi/2
-    >>> dcs = rot(axis, angle)
+    >>> dcm = rot(axis, angle)
 
     """
     # sines of angle

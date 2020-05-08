@@ -958,6 +958,42 @@ class Test_plot_rms_lines(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
+#%% Functions - plot_phases
+class Test_plot_phases(unittest.TestCase):
+    r"""
+    Tests the plot_phases function with the following cases:
+        Single time
+        End times
+        No labels
+    """
+    def setUp(self):
+        self.fig = plt.figure()
+        self.fig.canvas.set_window_title('Sine Wave')
+        self.ax = self.fig.add_subplot(111)
+        time = np.arange(101)
+        data = np.cos(time / 10)
+        self.times = np.array([5, 20, 60, 90])
+        self.times2 = np.array([[5, 20, 60, 90], [10, 60, 90, 95]])
+        self.ax.plot(time, data, '.-')
+        self.colormap = 'tab10'
+        self.labels = ['Part 1', 'Phase 2', 'Watch Out', 'Final']
+
+    def test_single_time(self):
+        dcs.plot_phases(self.ax, self.times, self.colormap, self.labels)
+
+    def test_with_end_times(self):
+        dcs.plot_phases(self.ax, self.times2, self.colormap, self.labels)
+
+    def test_no_labels(self):
+        dcs.plot_phases(self.ax, self.times, colormap=self.colormap)
+
+    def test_no_colormap(self):
+        dcs.plot_phases(self.ax, self.times, labels=self.labels)
+
+    def tearDown(self):
+        if self.fig:
+            plt.close(self.fig)
+
 #%% Functions - plot_classification
 class Test_plot_classification(unittest.TestCase):
     r"""
