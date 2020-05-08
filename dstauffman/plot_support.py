@@ -15,6 +15,7 @@ import doctest
 import gc
 import os
 import platform
+import re
 import sys
 import unittest
 import warnings
@@ -404,11 +405,11 @@ def get_color_lists():
     color_lists['double']    = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
     color_lists['vec']       = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
     color_lists['quat']      = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
-    color_lists['dbl_diff']  = colors.ListedColormap(('xkcd:red', 'xkcd:blue', 'xkcd:fuchsia', 'xkcd:cyan'))
-    color_lists['vec_diff']  = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue',
-        'xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan'))
-    color_lists['quat_diff'] = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue',
-        'xkcd:chocolate', 'xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan', 'xkcd:brown'))
+    color_lists['dbl_diff']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:cyan', 'xkcd:red', 'xkcd:blue'))
+    color_lists['vec_diff']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan',
+        'xkcd:red', 'xkcd:green', 'xkcd:blue'))
+    color_lists['quat_diff'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan',
+        'xkcd:brown', 'xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
     return color_lists
 
 #%% Functions - ignore_plot_data
@@ -487,7 +488,7 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
     return new_color
 
 #%% Functions - resolve_name
-def resolve_name(name, force_win=None, rep_token='_'):
+def resolve_name(name, force_win=None, rep_token='_', strip_classification=True):
     r"""
     Resolves the given name to something that can be saved on the current OS.
 
@@ -508,7 +509,7 @@ def resolve_name(name, force_win=None, rep_token='_'):
     Examples
     --------
     >>> from dstauffman import resolve_name
-    >>> name = 'Bad name /\ <>!'
+    >>> name = '(U//FOUO) Bad name /\ <>!'
     >>> force_win = True
     >>> new_name = resolve_name(name, force_win=force_win)
     >>> print(new_name)
@@ -518,14 +519,22 @@ def resolve_name(name, force_win=None, rep_token='_'):
     # hard-coded values
     bad_chars_win  = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
     bad_chars_unix = ['/']
-    # determine OS
+
+    # determine OS and thus which characters are bad
     if force_win is None:
         is_windows = platform.system() == 'Windows'
     else:
         is_windows = force_win
     bad_chars      = bad_chars_win if is_windows else bad_chars_unix
-    # replace any bad characters with underscores
+
+    # initialize output
     new_name = name
+
+    # strip any leading classification text
+    if strip_classification:
+        new_name = re.sub(r'^\(\S*\)\s', '', new_name, count=1)
+
+    # replace any bad characters with underscores
     for ch in bad_chars:
         if ch in new_name:
             new_name = new_name.replace(ch, rep_token)
@@ -609,7 +618,8 @@ def storefig(fig, folder=None, plot_type='png'):
         # loop through the plot types
         for this_type in types:
             # save the figure to the specified plot type
-            this_fig.savefig(os.path.join(folder, this_title + '.' + this_type), dpi=160, bbox_inches='tight')
+            this_fig.savefig(os.path.join(folder, this_title + '.' + this_type), dpi=160, \
+                             bbox_inches='tight', pad_inches=0.01)
 
 #%% Functions - titleprefix
 def titleprefix(fig, prefix=''):
@@ -681,24 +691,24 @@ def titleprefix(fig, prefix=''):
         this_fig.canvas.set_window_title(prefix + ' - ' + this_canvas_title)
 
 #%% Functions - disp_xlimits
-def disp_xlimits(figs, xmin=None, xmax=None, *, ax=None):
+def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
     r"""
     Set the xlimits to the specified xmin and xmax.
 
     Parameters
     ----------
-    figs : array_like
-        List of figures
+    fig_or_axis : matlpotlib.pyplot.Axes or matplotlib.pyplot.Figure or list of them
+        List of figures/axes to process
     xmin : scalar
         Minimum X value
     xmax : scalar
         Maximum X value
-    ax : array_like, optional
-        List of axes, which is specified, use the instead of processing figures
 
     Notes
     -----
     #.  Written by David C. Stauffer in August 2015.
+    #.  Modified by David C. Stauffer in May 2020 to come out of setup_plots and into lower level
+        routines.
 
     Examples
     --------
@@ -722,19 +732,18 @@ def disp_xlimits(figs, xmin=None, xmax=None, *, ax=None):
     >>> plt.close(fig)
 
     """
-    if ax is None:
-        # check for single figure
-        if not isinstance(figs, list):
-            figs = [figs]
-        # loop through figures
-        ax = []
-        for this_fig in figs:
-            # get axis list
-            ax.extend(this_fig.axes)
-    else:
-        # check for single axis
-        if not isinstance(ax, list):
-            ax = [ax]
+    # check for single item
+    if not isinstance(fig_or_axis, list):
+        fig_or_axis = [fig_or_axis]
+    # loop through items and collect axes
+    ax = []
+    for this in fig_or_axis:
+        if isinstance(this, plt.Figure):
+            ax.extend(this.axes)
+        elif isinstance(this, plt.Axes):
+            ax.append(this)
+        else:
+            raise ValueError('Unexpected item that is neither a figure nor axes.')
     # loop through axes
     for this_axis in ax:
         # get xlimits for this axis
@@ -845,7 +854,7 @@ def zoom_ylim(ax, time, data, t_start=-np.inf, t_final=np.inf, channel=None, pad
         ax.set_ylim(top=this_ymax)
 
 #%% Functions - setup_plots
-def setup_plots(figs, opts, plot_type='time'):
+def setup_plots(figs, opts, yscale=True):
     r"""
     Combine common plot operations into one easy command.
 
@@ -886,6 +895,9 @@ def setup_plots(figs, opts, plot_type='time'):
     >>> plt.close(fig)
 
     """
+    # check for old api
+    if not isinstance(yscale, bool):
+        raise ValueError('Using deprecated API, change call to boolean for x or y scale.')
     # check for single figure
     if not isinstance(figs, list):
         figs = [figs]
@@ -894,16 +906,17 @@ def setup_plots(figs, opts, plot_type='time'):
     if opts.case_name:
         titleprefix(figs, opts.case_name)
 
-    # change the display range
-    if plot_type in {'time', 'time_no_yscale'}:
-        disp_xlimits(figs, opts.disp_xmin, opts.disp_xmax)
-
     # label plot classification
     (classification, caveat) = get_classification(opts.classify)
     if classification:
         for fig in figs:
             ax = fig.gca()
             plot_classification(ax, classification, caveat=caveat, location='figure')
+
+    # pack the figures
+    bottom = 0.03 if classification else 0.0
+    for fig in figs:
+        fig.tight_layout(rect=(0., bottom, 1., 0.97), h_pad=1.5, w_pad=1.5)
 
     # things to do if displaying the plots
     if opts.show_plot and Plotter.show_plot: # pragma: no cover
@@ -1056,6 +1069,22 @@ def show_zero_ylim(ax):
     if max(ylim) < 0:
         ax.set_ylim(top=0)
 
+#%% Functions - plot_second_units_wrapper
+def plot_second_units_wrapper(ax, second_y_scale, description, y_label=None):
+    r"""
+    Wrapper to plot_second_yunits that allows numeric or dict options
+    """
+    if second_y_scale is not None:
+        if isinstance(second_y_scale, (int, float)):
+            if not np.isnan(second_y_scale) and second_y_scale != 0:
+                this_label = y_label if y_label is not None else ''
+                plot_second_yunits(ax, this_label, second_y_scale)
+        else:
+            for (key, value) in second_y_scale.items():
+                if not np.isnan(value) and value != 0:
+                    this_label = y_label if y_label is not None else description
+                    plot_second_yunits(ax, this_label + ' [' + key + ']', value)
+
 #%% Functions - plot_second_yunits
 def plot_second_yunits(ax, ylab, multiplier):
     r"""
@@ -1183,9 +1212,12 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
             p3_min = time_overlap >= xmin
         rms_pts1 = np.maximum(xmin, t_min)
     else:
-        p1_min = np.ones(time_one.shape,     dtype=bool)
-        p2_min = np.ones(time_two.shape,     dtype=bool)
-        p3_min = np.ones(time_overlap.shape, dtype=bool)
+        if have1:
+            p1_min = np.ones(time_one.shape,     dtype=bool)
+        if have2:
+            p2_min = np.ones(time_two.shape,     dtype=bool)
+        if have3:
+            p3_min = np.ones(time_overlap.shape, dtype=bool)
         rms_pts1 = t_min
     if hasattr(xmax, 'dtype') and np.issubdtype(xmax.dtype, np.datetime64):
         process = not np.isnat(xmax)
@@ -1202,9 +1234,12 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
             p3_max = time_overlap <= xmax
         rms_pts2 = np.minimum(xmax, t_max)
     else:
-        p1_max = np.ones(time_one.shape,     dtype=bool)
-        p2_max = np.ones(time_two.shape,     dtype=bool)
-        p3_max = np.ones(time_overlap.shape, dtype=bool)
+        if have1:
+            p1_max = np.ones(time_one.shape,     dtype=bool)
+        if have2:
+            p2_max = np.ones(time_two.shape,     dtype=bool)
+        if have3:
+            p3_max = np.ones(time_overlap.shape, dtype=bool)
         rms_pts2 = t_max
     rms_ix1 = p1_min & p1_max if have1 else np.array([], dtype=bool)
     rms_ix2 = p2_min & p2_max if have2 else np.array([], dtype=bool)
@@ -1424,13 +1459,13 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, locati
     # other locations within the figure
     vert_align = 'bottom'
     if location == 'figure':
-        text_pos   = (1., 0.)
+        text_pos   = (1., 0.005)
         horz_align = 'right'
     elif location == 'left':
-        text_pos   = (0., 0.)
+        text_pos   = (0., 0.005)
         horz_align = 'left'
     elif location == 'top':
-        text_pos   = (0., 1.)
+        text_pos   = (0., 0.995)
         horz_align = 'left'
         vert_align = 'top'
     else:
@@ -1438,12 +1473,12 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, locati
     # create the label
     ax.annotate('\n  ' + text_str + '  ', text_pos, xycoords='figure fraction', \
         color=text_color, weight='bold', fontsize=12, horizontalalignment=horz_align, \
-        verticalalignment=vert_align, annotation_clip=False, bbox=dict(boxstyle='square', \
-        facecolor='none', edgecolor=color, pad=0, linewidth=2))
+        verticalalignment=vert_align, linespacing=0, annotation_clip=False, \
+        bbox=dict(boxstyle='square', facecolor='none', edgecolor=color, linewidth=2))
     # add border
     fig = ax.figure
     r1 = Rectangle((0., 0.), 1., 1., facecolor='none', edgecolor=color, clip_on=False, \
-        linewidth=2, transform=fig.transFigure)
+        linewidth=3, transform=fig.transFigure)
     fig.patches.extend([r1])
 
 #%% Unit test

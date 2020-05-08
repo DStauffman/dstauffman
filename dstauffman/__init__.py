@@ -36,8 +36,8 @@ from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, clos
                               get_color_lists, ignore_plot_data, whitten, resolve_name, storefig, \
                               titleprefix, disp_xlimits, zoom_ylim, setup_plots, figmenu, \
                               rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
-                              plot_second_yunits, get_rms_indices, plot_rms_lines, \
-                              get_classification, plot_classification
+                              plot_second_units_wrapper, plot_second_yunits, get_rms_indices, \
+                              plot_rms_lines, get_classification, plot_classification
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
                               quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
                               quat_to_dcm, quat_to_euler

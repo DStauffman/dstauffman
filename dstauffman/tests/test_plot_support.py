@@ -378,8 +378,8 @@ class Test_get_color_lists(unittest.TestCase):
             self.assertIn(key, color_lists)
         colormap = color_lists['quat_diff']
         self.assertEqual(colormap.N, 8)
-        self.assertEqual(colormap.colors[0], 'xkcd:red')
-        self.assertEqual(colormap.colors[7], 'xkcd:brown')
+        self.assertEqual(colormap.colors[0], 'xkcd:fuchsia')
+        self.assertEqual(colormap.colors[7], 'xkcd:chocolate')
 
 #%% Functions - ignore_plot_data
 class Test_ignore_plot_data(unittest.TestCase):

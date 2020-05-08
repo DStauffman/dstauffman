@@ -17,18 +17,10 @@ import sys
 import unittest
 import warnings
 
-import numpy as np
-
 try:
     import h5py
 except ImportError: # pragma: no cover
     warnings.warn('h5py was not imported, so some file save and load capabilities will be limited.')
-
-#%% Set error state for module
-np.seterr(invalid='ignore', divide='ignore')
-
-#%% Set NumPy printing options
-np.set_printoptions(threshold=1000) # TODO: make user configurable in constants or something?
 
 #%% Functions - _frozen
 def _frozen(set):

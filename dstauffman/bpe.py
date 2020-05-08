@@ -1310,7 +1310,7 @@ def plot_bpe_convergence(costs, opts=None):
     # show a grid
     ax.grid(True)
     # Setup plots
-    setup_plots(fig, opts, 'time')
+    setup_plots(fig, opts)
     return fig
 
 #%% plot_bpe_results

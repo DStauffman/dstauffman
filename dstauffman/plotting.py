@@ -25,7 +25,7 @@ from matplotlib.ticker import StrMethodFormatter
 from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_COLORMAP
 from dstauffman.plot_support import ColorMap, get_color_lists, get_rms_indices, ignore_plot_data, \
-                                        plot_rms_lines, plot_second_yunits, disp_xlimits, \
+                                        plot_rms_lines, plot_second_units_wrapper, disp_xlimits, \
                                         setup_plots, show_zero_ylim, whitten
 from dstauffman.quat import quat_angle_diff
 from dstauffman.stats import intersect, z_from_ci
@@ -308,24 +308,19 @@ def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
     ax.legend(loc=legend_loc)
     ax.grid(True)
     # optionally force zero to be plotted
-    if show_zero and min(ax.get_ylim()) > 0:
-        ax.set_ylim(bottom=0) # TODO: use this to functionalize
+    if show_zero:
+        show_zero_ylim(ax)
+    # set the display period
+    disp_xlimits(ax, xmin=opts.disp_xmin, xmax=opts.disp_xmax)
     # set years to always be whole numbers on the ticks
     if time_units == 'year' and (np.max(time) - np.min(time)) >= 4:
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
 
     # optionally add second Y axis
-    if second_y_scale is not None:
-        ax2 = ax.twinx()
-        if isinstance(second_y_scale, (int, float)):
-            ax2.set_ylim(np.multiply(second_y_scale, ax.get_ylim()))
-        else:
-            for (key, value) in second_y_scale.items():
-                ax2.set_ylim(np.multiply(value, ax.get_ylim()))
-                ax2.set_ylabel(key)
+    plot_second_units_wrapper(ax, second_y_scale, label)
 
     # setup plots
-    setup_plots(fig, opts, 'time')
+    setup_plots(fig, opts)
     return fig
 
 #%% Functions - plot_monte_carlo
@@ -497,16 +492,9 @@ def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True,
     if time_units == 'year' and np.any(time) and (np.max(time) - np.min(time)) >= 4:
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
     # optionally add second Y axis
-    if second_y_scale is not None:
-        ax2 = ax.twinx()
-        if isinstance(second_y_scale, (int, float)):
-            ax2.set_ylim(np.multiply(second_y_scale, ax.get_ylim()))
-        else:
-            for (key, value) in second_y_scale.items():
-                ax2.set_ylim(np.multiply(value, ax.get_ylim()))
-                ax2.set_ylabel(key)
+    plot_second_units_wrapper(ax, second_y_scale, label)
     # Setup plots
-    setup_plots(fig, opts, 'time')
+    setup_plots(fig, opts)
     return fig
 
 #%% Functions - plot_correlation_matrix
@@ -666,7 +654,7 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
     ax.invert_yaxis()
 
     # Setup plots
-    setup_plots(fig, opts, 'dist')
+    setup_plots(fig, opts, yscale=False)
     return fig
 
 #%% Functions - plot_bar_breakdown
@@ -772,13 +760,13 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     ax.set_title(this_title)
 
     # Setup plots
-    setup_plots(fig, opts, 'time')
+    setup_plots(fig, opts)
     return fig
 
 #%% Functions - plot_error_bars
 def plot_error_bars(description, time, data, mins, maxs, elements=None, units='', time_units='sec', \
         leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
-        disp_xmax=np.inf, fig_visible=True, single_lines=False, colormap=None, use_mean=False, \
+        disp_xmax=np.inf, single_lines=False, colormap=None, use_mean=False, \
         plot_zero=False, show_rms=True, legend_loc='best', second_y_scale=None, y_label=None):
     r"""
     Generic plotting routine to make error bars.
@@ -813,8 +801,6 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
         lower time to limit the display of the plot
     disp_xmax : float, optional
         higher time to limit the display of the plot
-    fig_visible : bool, optional
-        whether figure is visible
     single_lines : bool, optional
         flag meaning to plot subplots by channel instead of together
     colormap : list or colormap
@@ -869,7 +855,6 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
     >>> rms_xmax        = 10
     >>> disp_xmin       = -2
     >>> disp_xmax       = np.inf
-    >>> fig_visible     = True
     >>> single_lines    = False
     >>> colormap        = 'tab10'
     >>> use_mean        = False
@@ -881,9 +866,8 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
     >>> fig             = plot_error_bars(description, time, data, mins, maxs, elements=elements, \
     ...     units=units, time_units=time_units, leg_scale=leg_scale, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-    ...     fig_visible=fig_visible, single_lines=single_lines, colormap=colormap, use_mean=use_mean, \
-    ...     plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-    ...     second_y_scale=second_y_scale, y_label=y_label)
+    ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
+    ...     show_rms=show_rms, legend_loc=legend_loc, second_y_scale=second_y_scale, y_label=y_label)
 
     Close plots
     >>> plt.close(fig)
@@ -903,12 +887,6 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
     """
     # Hard-coded values
     leg_format  = '{:1.3f}'
-
-#    # force inputs to be ndarrays
-#    time = np.asanyarray(time)
-#    data = np.asanyarray(data)
-#    mins = np.asanyarray(mins)
-#    maxs = np.asanyarray(maxs)
 
     # determine if using datetimes
     use_datetime = False # TODO: test with these
@@ -941,7 +919,7 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
     #% Create plots
     # create figures
     fig = plt.figure()
-    fig.canvas.set_window_title(description) # TODO: fig_visible (in wrapper)?
+    fig.canvas.set_window_title(description)
     # create axes
     ax = []
     ax_prim = None
@@ -972,7 +950,7 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
 
         # set X display limits
         if i == 0:
-            disp_xlimits(None, xmin=disp_xmin, xmax=disp_xmax, ax=this_axes)
+            disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
             xlim = this_axes.get_xlim()
         this_axes.set_xlim(xlim)
         # set Y display limits
@@ -985,23 +963,17 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
             this_axes.set_xlabel('Date')
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
-        if y_label is None:
+        if isinstance(y_label, list):
+            this_ylabel = y_label[i]
+        else:
+            this_ylabel = y_label
+        if this_ylabel is None:
             this_axes.set_ylabel(description + ' [' + units + ']')
         else:
-            if isinstance(y_label, list):
-                this_axes.set_ylabel(y_label[i])
-            else:
-                this_axes.set_ylabel(y_label)
+            this_axes.set_ylabel(this_ylabel + ' [' + units + ']')
         this_axes.grid(True)
         # optionally add second Y axis
-        if second_y_scale is not None:
-            if isinstance(second_y_scale, (int, float)):
-                if not np.isnan(second_y_scale) and second_y_scale != 0:
-                    plot_second_yunits(this_axes, '', second_y_scale)
-            else:
-                for (key, value) in second_y_scale.items():
-                    if not np.isnan(value) and value != 0:
-                        plot_second_yunits(this_axes, description + ' [' + key + ']', value)
+        plot_second_units_wrapper(this_axes, second_y_scale, description, this_ylabel)
         # plot RMS lines
         if show_rms:
             plot_rms_lines(this_axes, [rms_pts1, rms_pts2], this_axes.get_ylim())
@@ -1011,7 +983,7 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
 #%% Functions - general_quaternion_plot
 def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         name_one='', name_two='', time_units='sec', start_date='', plot_components=True,
-        rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf, fig_visible=True,
+        rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True,
         legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None):
     r"""
@@ -1048,8 +1020,6 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
         lower time to limit the display of the plot
     disp_xmax : float, optional
         higher time to limit the display of the plot
-    fig_visible : bool, optional
-        whether figure is visible
     make_subplots : bool, optional
         flag to use subplots for differences
     single_lines : bool, optional
@@ -1108,7 +1078,6 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     >>> rms_xmax        = 10
     >>> disp_xmin       = -2
     >>> disp_xmax       = np.inf
-    >>> fig_visible     = True
     >>> make_subplots   = True
     >>> single_lines    = False
     >>> use_mean        = False
@@ -1122,7 +1091,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     >>> (fig_hand, err) = general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
     ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-    ...     disp_xmax=disp_xmax, fig_visible=fig_visible, make_subplots=make_subplots, single_lines=single_lines, \
+    ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, truth_data=truth_data)
 
@@ -1131,15 +1100,9 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     plt.close(fig)
 
     """
-    # hard-coded values
-    leg_format = '{:1.3f}'
+    # Hard-coded values
+    leg_format  = '{:1.3f}'
     truth_color = 'k'
-
-#    # force inputs to be ndarrays
-#    time_one = np.asanyarray(time_one)
-#    time_two = np.asanyarray(time_two)
-#    quat_one = np.asanyarray(quat_one)
-#    quat_two = np.asanyarray(quat_two)
 
     # determine if you have the quaternions
     have_quat_one = quat_one is not None and np.any(~np.isnan(quat_one))
@@ -1148,7 +1111,8 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     # determine if using datetimes
     use_datetime = False # TODO: test with these
 
-    #% calculations
+    #% Calculations
+    # find overlapping times
     (time_overlap, q1_diff_ix, q2_diff_ix) = intersect(time_one, time_two) # TODO: add a tolerance?
     # find differences
     q1_miss_ix = np.setxor1d(np.arange(len(time_one)), q1_diff_ix)
@@ -1229,7 +1193,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     # create figures
     f1 = plt.figure()
     if make_subplots:
-        f1.canvas.set_window_title(description) # TODO: fig_visible (in wrapper)?
+        f1.canvas.set_window_title(description)
     else:
         f1.canvas.set_window_title(description + ' Quaternion Components')
     if have_both and not make_subplots:
@@ -1305,7 +1269,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
 
         # set X display limits
         if i == 0:
-            disp_xlimits(None, xmin=disp_xmin, xmax=disp_xmax, ax=this_axes)
+            disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
             xlim = this_axes.get_xlim()
         this_axes.set_xlim(xlim)
         # set Y display limits
@@ -1346,7 +1310,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
 def general_difference_plot(description, time_one, time_two, data_one, data_two, *,
         name_one='', name_two='', elements=None, units=None, time_units='sec', leg_scale='unity',
         start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
-        fig_visible=True, make_subplots=True, single_lines=False, colormap=None, use_mean=False,
+        make_subplots=True, single_lines=False, colormap=None, use_mean=False,
         plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_y_scale=None,
         y_label=None, truth_name='Truth', truth_time=None, truth_data=None):
     r"""
@@ -1387,8 +1351,6 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
         lower time to limit the display of the plot
     disp_xmax : float, optional
         higher time to limit the display of the plot
-    fig_visible : bool, optional
-        whether figure is visible
     make_subplots : bool, optional
         flag to use subplots for differences
     single_lines : bool, optional
@@ -1456,7 +1418,6 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     >>> rms_xmax        = 10
     >>> disp_xmin       = -2
     >>> disp_xmax       = np.inf
-    >>> fig_visible     = True
     >>> make_subplots   = True
     >>> single_lines    = False
     >>> color_lists     = get_color_lists()
@@ -1474,7 +1435,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     >>> (fig_hand, err) = general_difference_plot(description, time_one, time_two, data_one, data_two,
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
     ...     leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-    ...     disp_xmax=disp_xmax, fig_visible=fig_visible, make_subplots=make_subplots, single_lines=single_lines, \
+    ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, second_y_scale=second_y_scale, y_label=y_label, truth_name=truth_name, \
     ...     truth_time=truth_time, truth_data=truth_data)
@@ -1488,18 +1449,18 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     leg_format  = '{:1.3f}'
     truth_color = 'k'
 
-#    # force inputs to be ndarrays
-#    time_one = np.asanyarray(time_one)
-#    time_two = np.asanyarray(time_two)
-#    data_one = np.asanyarray(data_one)
-#    data_two = np.asanyarray(data_two)
-
     # determine if you have the histories
     have_data_one = data_one is not None and np.any(~np.isnan(data_one))
     have_data_two = data_two is not None and np.any(~np.isnan(data_two))
     have_both     = have_data_one and have_data_two
     # determine if using datetimes
     use_datetime = False # TODO: test with these
+    # calculate sizes
+    s1 = data_one.shape[0] if data_one is not None else 0
+    s2 = data_two.shape[0] if data_two is not None else 0
+    assert s1 == 0 or s2 == 0 or s1 == s2, f'Sizes of data channels must be consistent, got {s1} and {s2}.'
+    num_channels = len(elements)
+    assert num_channels == np.maximum(s1, s2), 'The given elements need to match the data sizes, got {} and {}.'.format(num_channels, np.maximum(s1, s2))
 
     #% Calculations
     # find overlapping times
@@ -1517,17 +1478,17 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     if have_both:
         nondeg_error = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
     # calculate the rms (or mean) values
-    nans = np.full(3, np.nan, dtype=float)
+    nans = np.full(num_channels, np.nan, dtype=float)
     if not use_mean:
         func_name   = 'RMS'
-        data1_func  = rms(data_one[:, rms_ix1], axis=1, ignore_nans=True) if have_data_one else nans
-        data2_func  = rms(data_two[:, rms_ix2], axis=1, ignore_nans=True) if have_data_two else nans
-        nondeg_func = rms(nondeg_error[:, rms_ix3], axis=1, ignore_nans=True) if have_both else nans
+        data1_func  = rms(data_one[:, rms_ix1], axis=1, ignore_nans=True) if have_data_one and np.any(rms_ix1) else nans
+        data2_func  = rms(data_two[:, rms_ix2], axis=1, ignore_nans=True) if have_data_two and np.any(rms_ix2) else nans
+        nondeg_func = rms(nondeg_error[:, rms_ix3], axis=1, ignore_nans=True) if have_both and np.any(rms_ix3) else nans
     else:
         func_name   = 'Mean'
-        data1_func  = np.nanmean(data_one[:, rms_ix1], axis=1) if have_data_one else nans
-        data2_func  = np.nanmean(data_two[:, rms_ix2], axis=1) if have_data_two else nans
-        nondeg_func = np.nanmean(nondeg_error[:, rms_ix3], axis=1) if have_both else nans
+        data1_func  = np.nanmean(data_one[:, rms_ix1], axis=1) if have_data_one and np.any(rms_ix1) else nans
+        data2_func  = np.nanmean(data_two[:, rms_ix2], axis=1) if have_data_two and np.any(rms_ix2) else nans
+        nondeg_func = np.nanmean(nondeg_error[:, rms_ix3], axis=1) if have_both and np.any(rms_ix3) else nans
     # output errors
     err = {'one': data1_func, 'two': data2_func, 'diff': nondeg_func}
     # unit conversion value
@@ -1576,7 +1537,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     #% Create plots
     # create figures
     f1 = plt.figure()
-    f1.canvas.set_window_title(description) # TODO: fig_visible (in wrapper)?
+    f1.canvas.set_window_title(description)
     if have_both and not make_subplots:
         f2 = plt.figure()
         f2.canvas.set_window_title(description + 'Difference')
@@ -1642,7 +1603,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
 
         # set X display limits
         if i == 0:
-            disp_xlimits(None, xmin=disp_xmin, xmax=disp_xmax, ax=this_axes)
+            disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
             xlim = this_axes.get_xlim()
         this_axes.set_xlim(xlim)
         # set Y display limits
@@ -1682,14 +1643,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
                 this_axes.set_ylabel(y_label)
         this_axes.grid(True)
         # optionally add second Y axis
-        if second_y_scale is not None:
-            if isinstance(second_y_scale, (int, float)):
-                if not np.isnan(second_y_scale) and second_y_scale != 0:
-                    plot_second_yunits(this_axes, '', second_y_scale)
-            else:
-                for (key, value) in second_y_scale.items():
-                    if not np.isnan(value) and value != 0:
-                        plot_second_yunits(this_axes, description + ' Difference [' + key + ']', value)
+        plot_second_units_wrapper(this_axes, second_y_scale, description, y_label) # TODO: + Difference part
         # plot RMS lines
         if show_rms:
             plot_rms_lines(this_axes, [rms_pts1, rms_pts2], this_axes.get_ylim())

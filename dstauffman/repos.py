@@ -24,9 +24,10 @@ except ImportError:
 import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QApplication
 
-from dstauffman.enums import ReturnCodes
-from dstauffman.paths import get_tests_dir
-from dstauffman.utils import line_wrap, read_text_file, write_text_file
+from dstauffman.enums        import ReturnCodes
+from dstauffman.paths        import get_tests_dir
+from dstauffman.plot_support import Plotter
+from dstauffman.utils        import line_wrap, read_text_file, write_text_file
 
 #%% run_docstrings
 def run_docstrings(files, verbose=False):
@@ -52,6 +53,10 @@ def run_docstrings(files, verbose=False):
     >>> return_code = run_docstrings(files) # doctest: +SKIP
 
     """
+    # turn interactive plotting off
+    plt.ioff()
+    plotter = Plotter()
+    plotter.set_plotter(False)
     # initialize failure status
     had_failure = False
     # loop through and test each file
@@ -91,6 +96,10 @@ def run_unittests(names, verbose=False):
     >>> return_code = run_unittests(names) # doctest: +SKIP
 
     """
+    # turn interactive plotting off
+    plt.ioff()
+    plotter = Plotter()
+    plotter.set_plotter(False)
     # find the test cases
     test_suite = unittest.TestLoader().discover(names)
     # set the verbosity
@@ -126,6 +135,8 @@ def run_pytests(folder, *, names='tests'):
     """
     # turn interactive plotting off
     plt.ioff()
+    plotter = Plotter()
+    plotter.set_plotter(False)
     # open a qapp
     if QApplication.instance() is None:
         qapp = QApplication(sys.argv)

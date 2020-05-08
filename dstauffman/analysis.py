@@ -292,7 +292,7 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
     # reset limits with including (0,0) point in case it skews everything too much
     ax.axis(lim)
     # add standard plotting features
-    setup_plots(fig, opts, 'dist_no_yscale')
+    setup_plots(fig, opts, yscale=False)
     return fig
 
 #%% Functions - plot_population_pyramid
@@ -385,7 +385,7 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     ax.legend(loc=legend_loc)
 
     # Setup plots
-    setup_plots(fig, opts, 'dist_no_yscale')
+    setup_plots(fig, opts, yscale=False)
 
     return fig
 
