@@ -10,6 +10,7 @@ Notes
 
 #%% Imports
 import argparse
+import os
 import unittest
 from unittest.mock import patch
 
@@ -46,7 +47,7 @@ class Test_parse_enforce(unittest.TestCase):
 
 #%% commands.execute_enforce
 @patch('dstauffman.commands.repos.find_repo_issues')
-class Test_execute_enfore(unittest.TestCase):
+class Test_execute_enforce(unittest.TestCase):
     r"""
     Tests the execute_enforce function with the following cases:
         Nominal
@@ -87,6 +88,90 @@ class Test_execute_enfore(unittest.TestCase):
         self.patch_args['extensions'] = ['f90']
         commands.execute_enforce(self.args)
         mocker.assert_called_once_with(**self.patch_args)
+
+#%% commands.parse_make_init
+class Test_parse_make_init(unittest.TestCase):
+    r"""
+    Tests the parse_make_init function with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.folder           = dcs.get_root_dir()
+        self.expected         = argparse.Namespace()
+        self.expected.dry_run = False
+        self.expected.folder  = self.folder
+        self.expected.lineup  = False
+        self.expected.outfile = '__init__.py'
+        self.expected.wrap    = 100
+
+    def test_nominal(self):
+        args = commands.parse_make_init([self.folder])
+        self.assertEqual(args, self.expected)
+
+    def test_dry_num(self):
+        self.expected.dry_run = True
+        args = commands.parse_make_init([self.folder, '-n'])
+        self.assertEqual(args, self.expected)
+
+    def test_lineup(self):
+        self.expected.lineup = True
+        args = commands.parse_make_init([self.folder, '-l'])
+        self.assertEqual(args, self.expected)
+
+    def test_outfile(self):
+        self.expected.outfile = 'init_file.py'
+        args = commands.parse_make_init([self.folder, '-o', 'init_file.py'])
+        self.assertEqual(args, self.expected)
+
+    def test_wrap(self):
+        self.expected.wrap = 50
+        args = commands.parse_make_init([self.folder, '-w', '50'])
+        self.assertEqual(args, self.expected)
+
+#%% commands.execute_make_init
+@patch('dstauffman.commands.repos.make_python_init')
+class Test_execute_make_init(unittest.TestCase):
+    r"""
+    Tests the execute_make_init function with the following cases:
+        Nominal
+        TBD
+    """
+    def setUp(self):
+        self.folder = dcs.get_tests_dir()
+        self.init_file = os.path.join(self.folder, 'temp_init.py')
+        self.args = argparse.Namespace(dry_run=False, folder=self.folder, lineup=False, outfile=self.init_file, wrap=100)
+        self.patch_args = {'lineup': False, 'wrap': 100, 'filename': os.path.join(self.folder, 'temp_init.py')}
+
+    def test_nominal(self, mocker):
+        commands.execute_make_init(self.args)
+        mocker.assert_called_once_with(self.folder, **self.patch_args)
+
+    def test_dry_num(self, mocker):
+        self.args.dry_run = True
+        with dcs.capture_output() as out:
+            commands.execute_make_init(self.args)
+        output = out.getvalue().strip()
+        out.close()
+        mocker.assert_not_called()
+        self.assertTrue(output.startswith('Would execute "make_python_init('))
+
+    def test_lineup(self, mocker):
+        self.args.lineup = True
+        self.patch_args['lineup'] = True
+        commands.execute_make_init(self.args)
+        mocker.assert_called_once_with(self.folder, **self.patch_args)
+
+    def test_outfile(self, mocker):
+        self.args.outfile = os.path.join(self.folder, 'init_file.py')
+        self.patch_args['filename'] = self.args.outfile
+        commands.execute_make_init(self.args)
+        mocker.assert_called_once_with(self.folder, **self.patch_args)
+
+    def test_wrap(self, mocker):
+        self.args.wrap = 500
+        self.patch_args['wrap'] = 500
+        commands.execute_make_init(self.args)
+        mocker.assert_called_once_with(self.folder, **self.patch_args)
 
 #%% Unit test execution
 if __name__ == '__main__':

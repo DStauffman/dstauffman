@@ -13,14 +13,14 @@ Notes
 """
 
 #%% Imports
-from .analysis     import dist_enum_and_mons, icer, plot_icer, plot_population_pyramid
-from .bpe          import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, \
-                              run_bpe, plot_bpe_convergence, plot_bpe_results
 from .classes      import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
-from .constants    import MONTHS_PER_YEAR, INT_TOKEN, DEFAULT_CLASSIFICATION, DEFAULT_COLORMAP, \
-                              QUAT_SIZE, IS_WINDOWS
+from .constants    import DEFAULT_COLORMAP, INT_TOKEN, IS_WINDOWS, MONTHS_PER_YEAR, QUAT_SIZE, \
+                              DEFAULT_CLASSIFICATION
 from .enums        import IntEnumPlus, consecutive, ReturnCodes
-from .fortran      import create_fortran_makefile, create_fortran_unit_tests
+from .estimation   import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, \
+                              run_bpe, plot_bpe_convergence, plot_bpe_results
+from .fortran      import create_fortran_unit_tests, create_fortran_makefile
+from .health       import dist_enum_and_mons, icer, plot_icer, plot_population_pyramid
 from .kalman       import KfInnov, KfOut, plot_attitude, plot_position, plot_innovation, \
                               plot_covariance, plot_states
 from .latex        import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
@@ -29,15 +29,15 @@ from .logs         import activate_logging, deactivate_logging
 from .parser       import main, parse_wrapper, parse_commands, execute_command
 from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
                               get_output_dir, list_python_files
-from .plotting     import Opts, plot_monte_carlo, plot_correlation_matrix, plot_time_history, \
-                              plot_bar_breakdown, plot_error_bars, general_quaternion_plot, \
-                              general_difference_plot, plot_phases
 from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
                               get_color_lists, ignore_plot_data, whitten, resolve_name, storefig, \
                               titleprefix, disp_xlimits, zoom_ylim, setup_plots, figmenu, \
                               rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
                               plot_second_units_wrapper, plot_second_yunits, get_rms_indices, \
                               plot_rms_lines, get_classification, plot_classification
+from .plotting     import Opts, plot_time_history, plot_monte_carlo, plot_correlation_matrix, \
+                              plot_bar_breakdown, plot_error_bars, general_quaternion_plot, \
+                              general_difference_plot, plot_phases
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
                               quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
                               quat_to_dcm, quat_to_euler

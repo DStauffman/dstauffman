@@ -392,5 +392,5 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_analysis', exit=False)
+    unittest.main(module='dstauffman.tests.test_health', exit=False)
     doctest.testmod(verbose=False)

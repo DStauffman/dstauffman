@@ -16,7 +16,7 @@ from dstauffman.enums import ReturnCodes
 import dstauffman.commands as commands
 
 #%% Command map
-_VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'tests'})
+_VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'make_init', 'tests'})
 
 #%% Functions - _print_bad_command
 def _print_bad_command(command):

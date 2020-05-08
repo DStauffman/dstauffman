@@ -9,8 +9,9 @@ Notes
 
 #%% Imports
 from dstauffman.commands.help     import print_help, parse_help, execute_help
-from dstauffman.commands.repos    import parse_enforce, execute_enforce
-from dstauffman.commands.runtests import parse_tests, parse_coverage, execute_tests, \
+from dstauffman.commands.repos    import parse_enforce, execute_enforce, parse_make_init, \
+                                             execute_make_init
+from dstauffman.commands.runtests import parse_tests, execute_tests, parse_coverage, \
                                              execute_coverage
 
 #%% Unittest

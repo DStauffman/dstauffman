@@ -255,8 +255,8 @@ class Test_make_python_init(unittest.TestCase):
     """
     def setUp(self):
         self.folder   = dcs.get_root_dir()
-        self.text     = 'from .bpe import'
-        self.text2    = 'from .bpe          import'
+        self.text     = 'from .constants import'
+        self.text2    = 'from .constants    import'
         self.folder2  = dcs.get_tests_dir()
         self.filepath = os.path.join(self.folder2, 'temp_file.py')
         self.filename = os.path.join(self.folder2, '__init__2.py')
@@ -273,7 +273,7 @@ class Test_make_python_init(unittest.TestCase):
             text = dcs.make_python_init(self.folder2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(text[0:44], 'from .temp_file           import Test_Frozen')
+        self.assertEqual(text[0:47], 'from .temp_file              import Test_Frozen')
         self.assertTrue(output.startswith('Uniqueness Problem'))
 
     def test_no_lineup(self):

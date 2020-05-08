@@ -55,41 +55,6 @@ def parse_tests(input_args):
     args = parser.parse_args(input_args)
     return args
 
-#%% Functions - parse_coverage
-def parse_coverage(input_args):
-    r"""
-    Parser for the coverage command.
-
-    Parameters
-    ----------
-    input_args : list of str
-        Input arguments as passed to sys.argv for this command
-
-    Returns
-    -------
-    args : class Namespace
-        Arguments as parsed by argparse.parse_args
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in March 2020.
-
-    Examples
-    --------
-    >>> from dstauffman.commands import parse_coverage
-    >>> input_args = []
-    >>> args = parse_coverage(input_args)
-    >>> print(args)
-    Namespace(no_report=False)
-
-    """
-    parser = argparse.ArgumentParser(prog='dcs coverage', description='Runs all the built-in unit tests and produces a coverage report.')
-
-    parser.add_argument('-n', '--no-report', help='Suppresses the generation of the HTML report.', action='store_true')
-
-    args = parser.parse_args(input_args)
-    return args
-
 #%% Functions - execute_tests
 def execute_tests(args):
     r"""
@@ -134,6 +99,41 @@ def execute_tests(args):
         # run the unittests using pytest
         return_code = run_pytests(folder)
     return return_code
+
+#%% Functions - parse_coverage
+def parse_coverage(input_args):
+    r"""
+    Parser for the coverage command.
+
+    Parameters
+    ----------
+    input_args : list of str
+        Input arguments as passed to sys.argv for this command
+
+    Returns
+    -------
+    args : class Namespace
+        Arguments as parsed by argparse.parse_args
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.commands import parse_coverage
+    >>> input_args = []
+    >>> args = parse_coverage(input_args)
+    >>> print(args)
+    Namespace(no_report=False)
+
+    """
+    parser = argparse.ArgumentParser(prog='dcs coverage', description='Runs all the built-in unit tests and produces a coverage report.')
+
+    parser.add_argument('-n', '--no-report', help='Suppresses the generation of the HTML report.', action='store_true')
+
+    args = parser.parse_args(input_args)
+    return args
 
 #%% Functions - execute_coverage
 def execute_coverage(args):

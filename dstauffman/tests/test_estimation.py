@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file for the `bpe` module of the dstauffman code.  It is intented to contain test cases to
+Test file for the `estimation` module of the dstauffman code.  It is intented to contain test cases to
 demonstrate functionaliy and correct outcomes for all the functions within the module.
 
 Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
+#.  Renamed from bpe.py to estimation.py by David C. Stauffer in May 2020.
 """
 
 #%% Imports
@@ -230,9 +231,9 @@ class Test_BpeResults(unittest.TestCase):
     def setUp(self):
         self.bpe_results = dcs.BpeResults()
         self.bpe_results.num_evals = 5
-        self.filename    = os.path.join(dcs.get_tests_dir(), 'test_bpe_results.hdf5')
+        self.filename    = os.path.join(dcs.get_tests_dir(), 'test_estimation_results.hdf5')
         self.filename2   = self.filename.replace('hdf5', 'pkl')
-        dcs.bpe.logger.setLevel(logging.ERROR)
+        dcs.estimation.logger.setLevel(logging.ERROR)
 
     def test_save(self):
         self.bpe_results.save(self.filename)
@@ -308,7 +309,7 @@ class Test_CurrentResults(unittest.TestCase):
         self.assertEqual(lines[3], '  Best Params: None')
 
 #%% _print_divider
-@patch('dstauffman.bpe.logger')
+@patch('dstauffman.estimation.logger')
 class Test__print_divider(unittest.TestCase):
     r"""
     Tests the _print_divider function with the following cases:
@@ -319,27 +320,27 @@ class Test__print_divider(unittest.TestCase):
         self.output = '******************************'
 
     def test_with_new_line(self, mock_logger):
-        dcs.bpe.logger.setLevel(logging.INFO)
-        dcs.bpe._print_divider()
+        dcs.estimation.logger.setLevel(logging.INFO)
+        dcs.estimation._print_divider()
         self.assertEqual(mock_logger.log.call_count, 2)
         mock_logger.log.assert_any_call(logging.INFO, ' ')
         mock_logger.log.assert_any_call(logging.INFO, '******************************')
 
     def test_no_new_line(self, mock_logger):
-        dcs.bpe.logger.setLevel(logging.DEBUG)
-        dcs.bpe._print_divider(new_line=False)
+        dcs.estimation.logger.setLevel(logging.DEBUG)
+        dcs.estimation._print_divider(new_line=False)
         mock_logger.log.assert_called_with(logging.INFO, '******************************')
 
     def test_alternative_level(self, mock_logger):
-        dcs.bpe.logger.setLevel(logging.ERROR)
-        dcs.bpe._print_divider(level=logging.CRITICAL)
+        dcs.estimation.logger.setLevel(logging.ERROR)
+        dcs.estimation._print_divider(level=logging.CRITICAL)
         self.assertEqual(mock_logger.log.call_count, 2)
         mock_logger.log.assert_any_call(logging.CRITICAL, ' ')
         mock_logger.log.assert_any_call(logging.CRITICAL, '******************************')
 
     def test_not_logging(self, mock_logger):
-        dcs.bpe.logger.setLevel(logging.ERROR)
-        dcs.bpe._print_divider()
+        dcs.estimation.logger.setLevel(logging.ERROR)
+        dcs.estimation._print_divider()
         self.assertEqual(mock_logger.log.call_count, 2)
         mock_logger.log.assert_any_call(logging.INFO, ' ')
         mock_logger.log.assert_any_call(logging.INFO, '******************************')
@@ -361,22 +362,22 @@ class Test__function_wrapper(unittest.TestCase):
         self.bpe_results = type('Class2', (object, ), {'num_evals': 0})
 
     def test_nominal(self):
-        (results, innovs) = dcs.bpe._function_wrapper(self.opti_opts, self.bpe_results)
+        (results, innovs) = dcs.estimation._function_wrapper(self.opti_opts, self.bpe_results)
         np.testing.assert_array_equal(results, self.results)
         np.testing.assert_array_equal(innovs, self.innovs)
 
     def test_model_args(self):
-        (results, innovs) = dcs.bpe._function_wrapper(self.opti_opts, self.bpe_results, model_args={'a': 5})
+        (results, innovs) = dcs.estimation._function_wrapper(self.opti_opts, self.bpe_results, model_args={'a': 5})
         np.testing.assert_array_equal(results, self.results)
         np.testing.assert_array_equal(innovs, self.innovs)
 
     def test_cost_args(self):
-        (results, innovs) = dcs.bpe._function_wrapper(self.opti_opts, self.bpe_results, cost_args={'a': 5})
+        (results, innovs) = dcs.estimation._function_wrapper(self.opti_opts, self.bpe_results, cost_args={'a': 5})
         np.testing.assert_array_equal(results, self.results)
         np.testing.assert_array_equal(innovs, self.innovs)
 
 #%% _finite_differences
-@patch('dstauffman.bpe.logger')
+@patch('dstauffman.estimation.logger')
 class Test__finite_differences(unittest.TestCase):
     r"""
     Tests the run_bpe function with the following cases:
@@ -384,7 +385,7 @@ class Test__finite_differences(unittest.TestCase):
         Normalized
     """
     def setUp(self):
-        dcs.bpe.logger.setLevel(logging.INFO)
+        dcs.estimation.logger.setLevel(logging.INFO)
         time        = np.arange(251)
         sim_params  = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time  = np.arange(-10, 201)
@@ -412,7 +413,7 @@ class Test__finite_differences(unittest.TestCase):
         self.cur_results = dcs.CurrentResults()
 
         # initialize current results
-        (_, self.cur_results.innovs) = dcs.bpe._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
+        (_, self.cur_results.innovs) = dcs.estimation._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
         self.cur_results.trust_rad = self.opti_opts.trust_radius
         self.cur_results.cost      = 0.5 * dcs.rss(self.cur_results.innovs, ignore_nans=True)
         names = dcs.OptiParam.get_names(self.opti_opts.params)
@@ -429,7 +430,7 @@ class Test__finite_differences(unittest.TestCase):
         self.normalized = False
 
     def test_nominal(self, mock_logger):
-        (jacobian, gradient, hessian) = dcs.bpe._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
+        (jacobian, gradient, hessian) = dcs.estimation._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
             self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
         self.assertEqual(jacobian.shape, (201, 3))
         self.assertEqual(gradient.shape, (3, ))
@@ -437,7 +438,7 @@ class Test__finite_differences(unittest.TestCase):
 
     def test_normalized(self, mock_logger):
         self.normalized = True
-        (jacobian, gradient, hessian) = dcs.bpe._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
+        (jacobian, gradient, hessian) = dcs.estimation._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
             self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
         self.assertEqual(jacobian.shape, (201, 3))
         self.assertEqual(gradient.shape, (3, ))
@@ -445,7 +446,7 @@ class Test__finite_differences(unittest.TestCase):
 
     def test_two_sided(self, mock_logger):
         self.two_sided = True
-        (jacobian, gradient, hessian) = dcs.bpe._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
+        (jacobian, gradient, hessian) = dcs.estimation._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
             self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
         self.assertEqual(jacobian.shape, (201, 3))
         self.assertEqual(gradient.shape, (3, ))
@@ -454,7 +455,7 @@ class Test__finite_differences(unittest.TestCase):
     def test_norm_and_two_sided(self, mock_logger):
         self.normalized = True
         self.two_sided = True
-        (jacobian, gradient, hessian) = dcs.bpe._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
+        (jacobian, gradient, hessian) = dcs.estimation._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
             self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
         self.assertEqual(jacobian.shape, (201, 3))
         self.assertEqual(gradient.shape, (3, ))
@@ -474,12 +475,12 @@ class Test__levenberg_marquardt(unittest.TestCase):
         self.delta_param = np.array([-0.46825397, -1.3015873])
 
     def test_nominal(self):
-        delta_param = dcs.bpe._levenberg_marquardt(self.jacobian, self.innovs, self.lambda_)
+        delta_param = dcs.estimation._levenberg_marquardt(self.jacobian, self.innovs, self.lambda_)
         np.testing.assert_array_almost_equal(delta_param, self.delta_param)
 
     def test_lambda_zero(self):
         b = -np.linalg.pinv(self.jacobian).dot(self.innovs)
-        delta_param = dcs.bpe._levenberg_marquardt(self.jacobian, self.innovs, 0)
+        delta_param = dcs.estimation._levenberg_marquardt(self.jacobian, self.innovs, 0)
         np.testing.assert_array_almost_equal(delta_param, b)
 
 #%% _predict_func_change
@@ -495,18 +496,18 @@ class Test__predict_func_change(unittest.TestCase):
         self.pred_change = 27.5
 
     def test_nominal(self):
-        delta_func = dcs.bpe._predict_func_change(self.delta_param, self.gradient, self.hessian)
+        delta_func = dcs.estimation._predict_func_change(self.delta_param, self.gradient, self.hessian)
         self.assertEqual(delta_func, self.pred_change)
 
 #%% _check_for_convergence
-@patch('dstauffman.bpe.logger')
+@patch('dstauffman.estimation.logger')
 class Test__check_for_convergence(unittest.TestCase):
     r"""
     Tests the _check_for_convergence function with the following cases:
         TBD
     """
     def setUp(self):
-        dcs.bpe.logger.setLevel(logging.INFO)
+        dcs.estimation.logger.setLevel(logging.INFO)
         self.opti_opts        = type('Class1', (object, ), {'tol_cosmax_grad': 1, 'tol_delta_step': 2, \
             'tol_delta_cost': 3})
         self.cosmax           = 10
@@ -514,29 +515,29 @@ class Test__check_for_convergence(unittest.TestCase):
         self.pred_func_change = 10
 
     def test_not_converged(self, mock_logger):
-        convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, self.pred_func_change)
+        convergence = dcs.estimation._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, self.pred_func_change)
         self.assertFalse(convergence)
 
     def test_convergence1(self, mock_logger):
-        convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, self.delta_step_len, self.pred_func_change)
+        convergence = dcs.estimation._check_for_convergence(self.opti_opts, 0.5, self.delta_step_len, self.pred_func_change)
         self.assertTrue(convergence)
         mock_logger.warning.assert_called_once()
         mock_logger.warning.assert_called_with('Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
 
     def test_convergence2(self, mock_logger):
-        convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, 1.5, self.pred_func_change)
+        convergence = dcs.estimation._check_for_convergence(self.opti_opts, self.cosmax, 1.5, self.pred_func_change)
         self.assertTrue(convergence)
         mock_logger.warning.assert_called_once()
         mock_logger.warning.assert_called_with('Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
 
     def test_convergence3(self, mock_logger):
-        convergence = dcs.bpe._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, -2.5)
+        convergence = dcs.estimation._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, -2.5)
         self.assertTrue(convergence)
         mock_logger.warning.assert_called_once()
         mock_logger.warning.assert_called_with('Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
 
     def test_convergence4(self, mock_logger):
-        convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
+        convergence = dcs.estimation._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
         self.assertTrue(convergence)
         self.assertEqual(mock_logger.warning.call_count, 3)
         mock_logger.warning.assert_any_call('Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
@@ -546,7 +547,7 @@ class Test__check_for_convergence(unittest.TestCase):
     def test_no_logging(self, mock_logger):
         mock_logger.setLevel(logging.NOTSET) # CRITICAL
         with dcs.capture_output('err') as err:
-            convergence = dcs.bpe._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
+            convergence = dcs.estimation._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
         self.assertTrue(convergence)
         error = err.getvalue().strip()
         self.assertEqual(error, '')
@@ -567,26 +568,26 @@ class Test__double_dogleg(unittest.TestCase):
     def test_large_trust_radius(self):
         # Newton step in trust radius
         self.trust_radius = 10000
-        (new_delta_param, step_len, step_scale, step_type) = dcs.bpe._double_dogleg(self.delta_param, \
+        (new_delta_param, step_len, step_scale, step_type) = dcs.estimation._double_dogleg(self.delta_param, \
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
     def test_small_bias(self):
         # Newton step outside trust_radius
         self.x_bias = 0.01
-        (new_delta_param, step_len, step_scale, step_type) = dcs.bpe._double_dogleg(self.delta_param, \
+        (new_delta_param, step_len, step_scale, step_type) = dcs.estimation._double_dogleg(self.delta_param, \
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
     def test_gradient_step(self):
         # Newton step outside trust_radius
         self.x_bias = 0.001
-        (new_delta_param, step_len, step_scale, step_type) = dcs.bpe._double_dogleg(self.delta_param, \
+        (new_delta_param, step_len, step_scale, step_type) = dcs.estimation._double_dogleg(self.delta_param, \
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
     def test_dogleg1(self):
         # Dogleg step 1
         self.x_bias = 0.001
         self.grad_hessian_grad = 75
-        (new_delta_param, step_len, step_scale, step_type) = dcs.bpe._double_dogleg(self.delta_param, \
+        (new_delta_param, step_len, step_scale, step_type) = dcs.estimation._double_dogleg(self.delta_param, \
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
     def test_dogleg2(self):
@@ -594,18 +595,18 @@ class Test__double_dogleg(unittest.TestCase):
         self.x_bias = 0.001
         self.grad_hessian_grad = 75
         self.delta_param = 0.001 * np.array([1, 2])
-        (new_delta_param, step_len, step_scale, step_type) = dcs.bpe._double_dogleg(self.delta_param, \
+        (new_delta_param, step_len, step_scale, step_type) = dcs.estimation._double_dogleg(self.delta_param, \
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
 #%% _dogleg_search
-@patch('dstauffman.bpe.logger')
+@patch('dstauffman.estimation.logger')
 class Test__dogleg_search(unittest.TestCase):
     r"""
     Tests the _dogleg_search function with the following cases:
         TBD
     """
     def setUp(self):
-        dcs.bpe.logger.setLevel(logging.INFO)
+        dcs.estimation.logger.setLevel(logging.INFO)
         time        = np.arange(251)
         sim_params  = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time  = np.arange(-10, 201)
@@ -633,7 +634,7 @@ class Test__dogleg_search(unittest.TestCase):
         self.cur_results = dcs.CurrentResults()
 
         # initialize current results
-        (_, self.cur_results.innovs) = dcs.bpe._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
+        (_, self.cur_results.innovs) = dcs.estimation._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
         self.cur_results.trust_rad = self.opti_opts.trust_radius
         self.cur_results.cost      = 0.5 * dcs.rss(self.cur_results.innovs, ignore_nans=True)
         names = dcs.OptiParam.get_names(self.opti_opts.params)
@@ -653,38 +654,38 @@ class Test__dogleg_search(unittest.TestCase):
         self.normalized  = False
 
     def test_nominal(self, mock_logger):
-        dcs.bpe._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
+        dcs.estimation._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
     def test_normalized(self, mock_logger):
         self.normalized = True
-        dcs.bpe._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
+        dcs.estimation._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
     def test_levenberg_marquardt(self, mock_logger):
         self.opti_opts.search_method = 'levenberg_marquardt'
-        dcs.bpe._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
+        dcs.estimation._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
     def test_bad_method(self, mock_logger):
         self.opti_opts.search_method = 'bad_method'
         with self.assertRaises(ValueError):
-            dcs.bpe._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
+            dcs.estimation._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
                 self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
     def test_minimums(self, mock_logger):
         self.opti_opts.params[0].min_ = 10
-        dcs.bpe._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
+        dcs.estimation._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
     def test_huge_trust_radius(self, mock_logger):
         # TODO: figure out how to get this to shrink a Newton step.
         self.opti_opts.trust_radius = 1000000
-        dcs.bpe._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
+        dcs.estimation._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
 #%% _analyze_results
-@patch('dstauffman.bpe.logger')
+@patch('dstauffman.estimation.logger')
 class Test__analyze_results(unittest.TestCase):
     r"""
     Tests the _analyze_results function with the following cases:
@@ -700,25 +701,25 @@ class Test__analyze_results(unittest.TestCase):
         self.normalized = False
 
     def test_nominal(self, mock_logger):
-        dcs.bpe._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
+        dcs.estimation._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
 
     def test_normalized(self, mock_logger):
         self.normalized = True
-        dcs.bpe._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
+        dcs.estimation._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
 
     def test_no_iters(self, mock_logger):
         self.opti_opts.max_iters = 0
-        dcs.bpe._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
+        dcs.estimation._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
 
 #%% validate_opti_opts
-@patch('dstauffman.bpe.logger')
+@patch('dstauffman.estimation.logger')
 class Test_validate_opti_opts(unittest.TestCase):
     r"""
     Tests the validate_opti_opts function with the following cases:
         TBD
     """
     def setUp(self):
-        dcs.bpe.logger.setLevel(logging.INFO)
+        dcs.estimation.logger.setLevel(logging.INFO)
         self.opti_opts = dcs.OptiOpts()
         self.opti_opts.model_func     = str
         self.opti_opts.model_args     = {'a': 1}
@@ -741,7 +742,7 @@ class Test_validate_opti_opts(unittest.TestCase):
         mock_logger.info.assert_called_with('Validating optimization options.')
 
     def test_no_logging(self, mock_logger):
-        dcs.bpe.logger.setLevel(logging.WARNING)
+        dcs.estimation.logger.setLevel(logging.WARNING)
         is_valid = dcs.validate_opti_opts(self.opti_opts)
         self.assertTrue(is_valid)
         mock_logger.log.assert_called_with(logging.INFO, '******************************')
@@ -788,14 +789,14 @@ class Test_validate_opti_opts(unittest.TestCase):
         self.support()
 
 #%% run_bpe
-@patch('dstauffman.bpe.logger')
+@patch('dstauffman.estimation.logger')
 class Test_run_bpe(unittest.TestCase):
     r"""
     Tests the run_bpe function with the following cases:
         TBD
     """
     def setUp(self):
-        dcs.bpe.logger.setLevel(logging.INFO)
+        dcs.estimation.logger.setLevel(logging.INFO)
         time        = np.arange(251)
         sim_params  = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time  = np.arange(-10, 201)
@@ -825,13 +826,13 @@ class Test_run_bpe(unittest.TestCase):
         self.assertTrue(isinstance(results, np.ndarray))
 
     def test_no_logging(self, mock_logger):
-        dcs.bpe.logger.setLevel(logging.CRITICAL)
+        dcs.estimation.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         dcs.run_bpe(self.opti_opts)
         # TODO: check logging results
 
     def test_max_likelihood(self, mock_logger):
-        dcs.bpe.logger.setLevel(logging.CRITICAL)
+        dcs.estimation.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         self.opti_opts.is_max_like = True
         dcs.run_bpe(self.opti_opts)
@@ -851,7 +852,7 @@ class Test_run_bpe(unittest.TestCase):
 #        else:
 #            self.assertTrue(False, 'two sided had issues')
         # rerun with no logging
-        dcs.bpe.logger.setLevel(logging.CRITICAL)
+        dcs.estimation.logger.setLevel(logging.CRITICAL)
         dcs.run_bpe(self.opti_opts)
 
     def test_to_convergence(self, mock_logger):
@@ -876,7 +877,7 @@ class Test_run_bpe(unittest.TestCase):
     def test_startup_finish_funcs(self, mock_logger):
         self.opti_opts.start_func = lambda sim_params: dict()
         self.opti_opts.final_func = lambda sim_params, settings: None
-        dcs.bpe.logger.setLevel(logging.CRITICAL)
+        dcs.estimation.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         dcs.run_bpe(self.opti_opts)
 
@@ -885,7 +886,7 @@ class Test_run_bpe(unittest.TestCase):
         self.opti_opts.max_iters = 1
         self.opti_opts.tol_delta_step = 100
         self.opti_opts.step_limit = 1
-        dcs.bpe.logger.setLevel(logging.CRITICAL)
+        dcs.estimation.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         dcs.run_bpe(self.opti_opts)
 

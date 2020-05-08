@@ -378,7 +378,7 @@ def _print_divider(new_line=True, level=logging.INFO):
 
     Examples
     --------
-    >>> from dstauffman.bpe import _print_divider
+    >>> from dstauffman.estimation import _print_divider
     >>> _print_divider() # prints to logger
 
     """
@@ -414,7 +414,7 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
 
     Examples
     --------
-    >>> from dstauffman.bpe import _function_wrapper
+    >>> from dstauffman.estimation import _function_wrapper
     >>> from dstauffman import OptiOpts, BpeResults
     >>> import numpy as np
     >>> opti_opts = OptiOpts()
@@ -590,7 +590,7 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
 
     Examples
     --------
-    >>> from dstauffman.bpe import _levenberg_marquardt
+    >>> from dstauffman.estimation import _levenberg_marquardt
     >>> import numpy as np
     >>> jacobian    = np.array([[1, 2], [3, 4], [5, 6]])
     >>> innovs      = np.array([7, 8, 9])
@@ -648,7 +648,7 @@ def _predict_func_change(delta_param, gradient, hessian):
 
     Examples
     --------
-    >>> from dstauffman.bpe import _predict_func_change
+    >>> from dstauffman.estimation import _predict_func_change
     >>> import numpy as np
     >>> delta_param = np.array([1, 2])
     >>> gradient = np.array([3, 4])
@@ -714,7 +714,7 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
 
     Examples
     --------
-    >>> from dstauffman.bpe import _double_dogleg
+    >>> from dstauffman.estimation import _double_dogleg
     >>> import numpy as np
     >>> delta_param = np.array([1, 2])
     >>> gradient = np.array([3, 4])
@@ -953,7 +953,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
 
     Examples
     --------
-    >>> from dstauffman.bpe import _analyze_results
+    >>> from dstauffman.estimation import _analyze_results
     >>> from dstauffman import OptiOpts, BpeResults, OptiParam
     >>> import numpy as np
     >>> opti_opts = OptiOpts()
@@ -1404,5 +1404,5 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_bpe', exit=False)
+    unittest.main(module='dstauffman.tests.test_estimation', exit=False)
     doctest.testmod(verbose=False)

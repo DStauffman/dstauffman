@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 r"""
-Test file for the `analysis` module of the "dstauffman" library.  It is intented to contain test
+Test file for the `health` module of the "dstauffman" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
 
 Notes
 -----
 #.  Written by David C. Stauffer in October 2017.
+#.  Renamed from analysis.py to health.py by David C. Stauffer in May 2020.
 """
 
 #%% Imports

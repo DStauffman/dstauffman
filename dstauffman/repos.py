@@ -418,7 +418,7 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
     >>> print(text[0:25])
-    from .analysis     import
+    from .classes      import
 
     """
     # exclusions

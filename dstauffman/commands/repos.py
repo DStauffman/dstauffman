@@ -14,7 +14,7 @@ import os
 import unittest
 
 from dstauffman.enums import ReturnCodes
-from dstauffman.repos import find_repo_issues
+from dstauffman.repos import find_repo_issues, make_python_init
 
 #%% Functions - parse_enforce
 def parse_enforce(input_args):
@@ -113,6 +113,82 @@ def execute_enforce(args):
             show_execute=show_execute)
     # return a status based on whether anything was found
     return_code = ReturnCodes.clean if is_clean else ReturnCodes.test_failures
+    return return_code
+
+#%% Functions - parse_make_init
+def parse_make_init(input_args):
+    r"""
+    Parser for make_init command.
+
+    Parameters
+    ----------
+    input_args : list of str
+        Input arguments as passed to sys.argv for this command
+
+    Returns
+    -------
+    args : class Namespace
+        Arguments as parsed by argparse.parse_args
+
+    Examples
+    --------
+    >>> from dstauffman import get_root_dir
+    >>> from dstauffman.commands import parse_make_init
+    >>> input_args = [get_root_dir(), '-l']
+    >>> args = parse_make_init(input_args)
+    >>> print(args) # doctest: +ELLIPSIS
+    Namespace(dry_run=False, folder='...', lineup=True, outfile='__init__.py', wrap=100)
+
+    """
+    parser = argparse.ArgumentParser(prog='dcs make_init', description='Make a python __init__.py' + \
+            'file for the given folder.')
+
+    parser.add_argument('folder', help='Folder to search for source files')
+    parser.add_argument('-l', '--lineup', help='Lines up the imports between files.', action='store_true')
+    parser.add_argument('-w', '--wrap', nargs='?', default=100, type=int, help='Number of lines to wrap at.')
+    parser.add_argument('-n', '--dry-run', help='Show what would be copied without doing it', action='store_true')
+    parser.add_argument('-o', '--outfile', nargs='?', default='__init__.py', help='Output file to produce, default is __init__.py')
+
+    args = parser.parse_args(input_args)
+    return args
+
+#%% Functions - execute_make_init
+def execute_make_init(args):
+    r"""
+    Executes the make_init command.
+
+    Parameters
+    ----------
+    args : class Namespace
+        Arguments as parsed by argparse.parse_args, in this case they can be empty or ommitted
+
+    Returns
+    -------
+    return_code : int
+        Return code for whether the command completed successfully
+
+    Examples
+    --------
+    >>> from dstauffman import get_root_dir
+    >>> from dstauffman.commands import execute_make_init
+    >>> from argparse import Namespace
+    >>> args = Namespace(dry_run=False, folder=get_root_dir(), outfile='__init__.py', lineup=True, wrap=100)
+    >>> return_code = execute_make_init(args) # doctest: +SKIP
+
+    """
+    folder   = os.path.abspath(args.folder)
+    lineup   = args.lineup
+    wrap     = args.wrap
+    filename = os.path.abspath(args.outfile)
+    dry_run  = args.dry_run
+
+    if dry_run:
+        cmd = f'make_python_init(r"{folder}", lineup={lineup}, wrap={wrap}, filename=r"{filename}")'
+        print(f'Would execute "{cmd}"')
+        return
+
+    output      = make_python_init(folder, lineup=lineup, wrap=wrap, filename=filename)
+    return_code = ReturnCodes.clean if output else ReturnCodes.bad_command
     return return_code
 
 #%% Unit test

@@ -26,7 +26,9 @@ class Test_commands_print_help(unittest.TestCase):
             commands.print_help()
         output = out.getvalue().strip()
         out.close()
-        self.assertTrue(output.startswith('##########\ndstauffman\n##########\n'))
+        expected_header = output.startswith('#######\nlmspace\n#######\n') or \
+                          output.startswith('##########\ndstauffman\n##########\n')
+        self.assertTrue(expected_header)
 
 #%% commands.parse_help
 class Test_commands_parse_help(unittest.TestCase):
@@ -54,7 +56,9 @@ class Test_commands_execute_help(unittest.TestCase):
             commands.execute_help(self.args)
         output = out.getvalue().strip()
         out.close()
-        self.assertTrue(output.startswith('##########\ndstauffman\n##########\n'))
+        expected_header = output.startswith('#######\nlmspace\n#######\n') or \
+                          output.startswith('##########\ndstauffman\n##########\n')
+        self.assertTrue(expected_header)
 
 #%% Unit test execution
 if __name__ == '__main__':
