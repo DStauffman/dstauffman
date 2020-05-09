@@ -26,8 +26,8 @@ from dstauffman.stats import intersect
 from dstauffman.units import get_factors
 from dstauffman.utils import rms
 
-#%% Functions - plot_error_bars
-def plot_error_bars(description, time, data, mins, maxs, elements=None, units='', time_units='sec', \
+#%% Functions - make_error_bar_plot
+def make_error_bar_plot(description, time, data, mins, maxs, elements=None, units='', time_units='sec', \
         leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
         disp_xmax=np.inf, single_lines=False, colormap=None, use_mean=False, \
         plot_zero=False, show_rms=True, legend_loc='best', second_y_scale=None, y_label=None):
@@ -100,7 +100,7 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
 
     Examples
     --------
-    >>> from dstauffman import plot_error_bars
+    >>> from dstauffman import make_error_bar_plot
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> from datetime import datetime
@@ -126,7 +126,7 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
     >>> legend_loc      = 'best'
     >>> second_y_scale  = {'mrad': 1e3}
     >>> y_label         = None
-    >>> fig             = plot_error_bars(description, time, data, mins, maxs, elements=elements, \
+    >>> fig             = make_error_bar_plot(description, time, data, mins, maxs, elements=elements, \
     ...     units=units, time_units=time_units, leg_scale=leg_scale, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
@@ -145,7 +145,7 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
 
     Examples
     --------
-    >>> from dstauffman import plot_error_bars
+    >>> from dstauffman import make_error_bar_plot
 
     """
     # Hard-coded values
@@ -243,8 +243,8 @@ def plot_error_bars(description, time, data, mins, maxs, elements=None, units=''
 
     return fig
 
-#%% Functions - general_quaternion_plot
-def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
+#%% Functions - make_quaternion_plot
+def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         name_one='', name_two='', time_units='sec', start_date='', plot_components=True,
         rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True,
@@ -323,7 +323,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
 
     Examples
     --------
-    >>> from dstauffman import general_quaternion_plot, quat_norm
+    >>> from dstauffman import make_quaternion_plot, quat_norm
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> from datetime import datetime
@@ -351,7 +351,7 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     >>> truth_name      = 'Truth'
     >>> truth_time      = None
     >>> truth_data      = None
-    >>> (fig_hand, err) = general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
+    >>> (fig_hand, err) = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
     ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
@@ -569,8 +569,8 @@ def general_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
 
     return (fig_hand, err)
 
-#%% Functions - general_difference_plot
-def general_difference_plot(description, time_one, time_two, data_one, data_two, *,
+#%% Functions - make_difference_plot
+def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         name_one='', name_two='', elements=None, units=None, time_units='sec', leg_scale='unity',
         start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
         make_subplots=True, single_lines=False, colormap=None, use_mean=False,
@@ -660,7 +660,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
 
     Examples
     --------
-    >>> from dstauffman import general_difference_plot, get_color_lists
+    >>> from dstauffman import make_difference_plot, get_color_lists
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> from matplotlib.colors import ListedColormap
@@ -695,7 +695,7 @@ def general_difference_plot(description, time_one, time_two, data_one, data_two,
     >>> truth_name      = 'Truth'
     >>> truth_time      = None
     >>> truth_data      = None
-    >>> (fig_hand, err) = general_difference_plot(description, time_one, time_two, data_one, data_two,
+    >>> (fig_hand, err) = make_difference_plot(description, time_one, time_two, data_one, data_two,
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
     ...     leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \

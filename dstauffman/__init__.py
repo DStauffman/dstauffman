@@ -29,7 +29,7 @@ from .logs         import activate_logging, deactivate_logging
 from .parser       import main, parse_wrapper, parse_commands, execute_command
 from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
                               get_output_dir, list_python_files
-from .plot_generic import plot_error_bars, general_quaternion_plot, general_difference_plot
+from .plot_generic import make_error_bar_plot, make_quaternion_plot, make_difference_plot
 from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
                               get_color_lists, ignore_plot_data, whitten, resolve_name, storefig, \
                               titleprefix, disp_xlimits, zoom_ylim, setup_plots, figmenu, \

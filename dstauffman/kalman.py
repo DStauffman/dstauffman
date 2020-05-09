@@ -13,7 +13,7 @@ import doctest
 import unittest
 
 from dstauffman.classes import Frozen
-from dstauffman.plot_generic import general_difference_plot, general_quaternion_plot
+from dstauffman.plot_generic import make_difference_plot, make_quaternion_plot
 from dstauffman.plot_support import get_color_lists, setup_plots
 from dstauffman.plotting import Opts
 
@@ -156,7 +156,7 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
         opts = Opts()
 
     # call wrapper function for most of the details
-    (figs, err) = general_quaternion_plot('Attitude Quaternion', kf1.time, kf2.time, kf1.att, kf2.att,
+    (figs, err) = make_quaternion_plot('Attitude Quaternion', kf1.time, kf2.time, kf1.att, kf2.att,
         name_one=kf1.name, name_two=kf2.name, time_units=opts.time_base, start_date=opts.get_date_zero_str(), \
         rms_xmin=opts.rms_xmin, rms_xmax=opts.rms_xmax, disp_xmin=opts.disp_xmin, disp_xmax=opts.disp_xmax, \
         make_subplots=opts.sub_plots, plot_components=opts.quat_comp, \
@@ -236,7 +236,7 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
     colormap        = color_lists['vec']
 
     # call wrapper function for most of the details
-    (figs, err) = general_difference_plot('Position', kf1.time, kf2.time, kf1.pos, kf2.pos,
+    (figs, err) = make_difference_plot('Position', kf1.time, kf2.time, kf1.pos, kf2.pos,
         name_one=kf1.name, name_two=kf2.name, elements=elements, units=units, leg_scale=leg_scale, \
         start_date=opts.get_date_zero_str(), rms_xmin=opts.rms_xmin, rms_xmax=opts.rms_xmax, \
         disp_xmin=opts.disp_xmin, disp_xmax=opts.disp_xmax, make_subplots=opts.sub_plots, \

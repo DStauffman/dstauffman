@@ -22,7 +22,7 @@ np.seterr(invalid='ignore', divide='ignore')
 np.set_printoptions(threshold=1000)
 
 #%% Set Matplotlib global settings
-plt.rcParams['figure.dpi']     = 100 # 160 for 4K monitors, 100 otherwise
+plt.rcParams['figure.dpi']     = 160 # 160 for 4K monitors, 100 otherwise
 plt.rcParams['figure.figsize'] = [11., 8.5] # makes figures the same size as the paper, keeping aspect ratios even
 
 #%% Constants
