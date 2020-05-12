@@ -38,9 +38,11 @@ class Test_commands_parse_help(unittest.TestCase):
     """
     def setUp(self):
         self.args = []
+        self.expected = argparse.Namespace()
 
     def test_nominal(self):
-        commands.parse_help(self.args)
+        args = commands.parse_help(self.args)
+        self.assertEqual(args, self.expected)
 
 #%% commands.execute_help
 class Test_commands_execute_help(unittest.TestCase):

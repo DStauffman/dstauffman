@@ -1070,20 +1070,73 @@ def show_zero_ylim(ax):
         ax.set_ylim(top=0)
 
 #%% Functions - plot_second_units_wrapper
-def plot_second_units_wrapper(ax, second_y_scale, description, y_label=None):
+def plot_second_units_wrapper(ax, second_yscale):
     r"""
     Wrapper to plot_second_yunits that allows numeric or dict options
+
+    Parameters
+    ----------
+    ax : class matplotlib.axis.Axis
+        Figure axis
+    second_yscale : dict or int or float
+        Scale factor to apply, or dict with key for label and value for factor
+
+    Returns
+    -------
+    ax2 : class matplotlib.axis.Axis
+        New Figure axis with the second label
+
+    Notes
+    -----
+    #.  If second_yscale is just a number, then no units are displayed, but if a key and value,
+        then if it has brakets, replace the entire label, otherwise only replace what is in the
+        old label within the brackets
+
+    Examples
+    --------
+    >>> from dstauffman import plot_second_units_wrapper
+    >>> import matplotlib.pyplot as plt
+    >>> description = 'Values over time'
+    >>> ylabel = 'Value [rad]'
+    >>> second_yscale = {u'Better Units [µrad]': 1e6}
+    >>> fig = plt.figure()
+    >>> ax = fig.add_subplot(111)
+    >>> _ = ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
+    >>> _ = ax.set_ylabel(ylabel)
+    >>> _ = ax.set_title(description)
+    >>> _ = plot_second_units_wrapper(ax, second_yscale)
+
+    >>> plt.close(fig)
+
     """
-    if second_y_scale is not None:
-        if isinstance(second_y_scale, (int, float)):
-            if not np.isnan(second_y_scale) and second_y_scale != 0:
-                this_label = y_label if y_label is not None else ''
-                plot_second_yunits(ax, this_label, second_y_scale)
+    # initialize output
+    ax2 = None
+    # check if processing anything
+    if second_yscale is not None:
+        # determine what type of input was given
+        if isinstance(second_yscale, (int, float)):
+            key = ''
+            value = second_yscale
         else:
-            for (key, value) in second_y_scale.items():
-                if not np.isnan(value) and value != 0:
-                    this_label = y_label if y_label is not None else description
-                    plot_second_yunits(ax, this_label + ' [' + key + ']', value)
+            key = list(second_yscale.keys())[0]
+            value = second_yscale[key]
+        # check if we got a no-op value
+        if not np.isnan(value) and value != 0:
+            # if all is good, build the new label and call the lower level function
+            old_label = ax.get_ylabel()
+            ix1       = old_label.find('[')
+            ix2       = key.find('[')
+            if ix2 >= 0:
+                # new label has units, so use them
+                new_label = key
+            elif ix1 >= 0 and key:
+                # new label is only units, replace them in the old label
+                new_label = old_label[:ix1] + '[' + key + ']'
+            else:
+                # neither label has units, just label them
+                new_label = key
+            ax2 = plot_second_yunits(ax, new_label, value)
+    return ax2
 
 #%% Functions - plot_second_yunits
 def plot_second_yunits(ax, ylab, multiplier):
@@ -1099,6 +1152,11 @@ def plot_second_yunits(ax, ylab, multiplier):
     multiplier : float
         Multiplication factor
 
+    Returns
+    -------
+    ax2 : class matplotlib.axis.Axis
+        New Figure axis with the second label
+
     Examples
     --------
     >>> from dstauffman import plot_second_yunits
@@ -1109,7 +1167,7 @@ def plot_second_yunits(ax, ylab, multiplier):
     >>> _ = ax.set_ylabel('Value [rad]')
     >>> ylab = u'Value [µrad]'
     >>> multiplier = 1e6
-    >>> plot_second_yunits(ax, ylab, multiplier)
+    >>> _ = plot_second_yunits(ax, ylab, multiplier)
 
     >>> plt.close(fig)
 
@@ -1118,6 +1176,7 @@ def plot_second_yunits(ax, ylab, multiplier):
     ax2 = ax.twinx()
     ax2.set_ylim(np.multiply(multiplier, ax.get_ylim()))
     ax2.set_ylabel(ylab)
+    return ax2
 
 #%% Functions - get_rms_indices
 def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np.inf, xmax=np.inf):
@@ -1169,6 +1228,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
     1 8
 
     """
+    # TODO: functionalize this more so there is less repeated code
     # alias some flags
     have1 = time_one is not None
     have2 = time_two is not None

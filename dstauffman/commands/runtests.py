@@ -43,7 +43,7 @@ def parse_tests(input_args):
     >>> input_args = []
     >>> args = parse_tests(input_args)
     >>> print(args)
-    Namespace(docstrings=False, verbose=False)
+    Namespace(docstrings=False, library=None, verbose=False)
 
     """
     parser = argparse.ArgumentParser(prog='dcs tests', description='Runs all the built-in unit tests.')
@@ -51,6 +51,8 @@ def parse_tests(input_args):
     parser.add_argument('-v', '--verbose', help='Run tests in verbose mode.', action='store_true')
 
     parser.add_argument('-d', '--docstrings', help='Run the docstrings instead of the unittests.', action='store_true')
+
+    parser.add_argument('-l', '--library', type=str, nargs='?', help='Library to run the unit tests from, default is yourself.')
 
     args = parser.parse_args(input_args)
     return args
@@ -85,10 +87,14 @@ def execute_tests(args):
     """
     # alias options
     docstrings = args.docstrings
+    library    = args.library
     verbose    = args.verbose
 
     # get test location information
-    folder     = get_root_dir()
+    if library is None:
+        folder = get_root_dir()
+    else:
+        folder = os.path.abspath(library)
 
     if docstrings:
         # run the docstring tests

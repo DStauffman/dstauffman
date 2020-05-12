@@ -40,9 +40,54 @@ class Test_parse_enforce(unittest.TestCase):
         args = commands.parse_enforce([self.folder])
         self.assertEqual(args, self.expected)
 
+    def test_extensions(self):
+        self.expected.extensions = ['f', 'f90']
+        args = commands.parse_enforce([self.folder, '-e', 'f', '-e', 'f90'])
+        self.assertEqual(args, self.expected)
+
     def test_list_all(self):
         self.expected.list_all = True
         args = commands.parse_enforce([self.folder, '-l'])
+        self.assertEqual(args, self.expected)
+
+    def test_ignore_tabs(self):
+        self.expected.ignore_tabs = True
+        args = commands.parse_enforce([self.folder, '-i'])
+        self.assertEqual(args, self.expected)
+
+    def test_trailing(self):
+        self.expected.trailing = True
+        args = commands.parse_enforce([self.folder, '-t'])
+        self.assertEqual(args, self.expected)
+
+    def test_skip(self):
+        self.expected.skip = ['m']
+        args = commands.parse_enforce([self.folder, '-s', 'm'])
+        self.assertEqual(args, self.expected)
+
+    def test_windows(self):
+        self.expected.windows = True
+        self.expected.unix    = False
+        args = commands.parse_enforce([self.folder, '-w'])
+        self.assertEqual(args, self.expected)
+
+    def test_unix(self):
+        self.expected.windows = False
+        self.expected.unix    = True
+        args = commands.parse_enforce([self.folder, '-u'])
+        self.assertEqual(args, self.expected)
+
+    def test_bad_os_combination(self):
+        with dcs.capture_output('err') as err:
+            with self.assertRaises(SystemExit):
+                commands.parse_enforce([self.folder, '-w', '-u'])
+        stderr = err.getvalue().strip()
+        err.close()
+        self.assertTrue(stderr.startswith('usage: dcs enforce'))
+
+    def test_execute(self):
+        self.expected.execute = True
+        args = commands.parse_enforce([self.folder, '-x'])
         self.assertEqual(args, self.expected)
 
 #%% commands.execute_enforce

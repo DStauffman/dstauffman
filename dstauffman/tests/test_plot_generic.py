@@ -175,7 +175,7 @@ class Test_make_difference_plot(unittest.TestCase):
         self.plot_zero       = False
         self.show_rms        = True
         self.legend_loc      = 'best'
-        self.second_y_scale  = {u'µrad': 1e6}
+        self.second_yscale  = {u'µrad': 1e6}
         self.figs            = None
 
     def test_nominal(self):
@@ -185,7 +185,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_y_scale=self.second_y_scale)
+            second_yscale=self.second_yscale)
 
     def test_no_subplots(self):
         self.make_subplots = False
@@ -195,7 +195,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_y_scale=self.second_y_scale)
+            second_yscale=self.second_yscale)
 
     def test_no_start_date(self):
         self.start_date = ''
@@ -205,7 +205,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_y_scale=self.second_y_scale)
+            second_yscale=self.second_yscale)
 
     def test_only_data_one(self):
         self.data_two.fill(np.nan)
@@ -216,7 +216,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_y_scale=self.second_y_scale)
+            second_yscale=self.second_yscale)
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_only_data_two(self):
@@ -228,7 +228,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_y_scale=self.second_y_scale)
+            second_yscale=self.second_yscale)
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_rms_bounds(self):
@@ -240,7 +240,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_y_scale=self.second_y_scale)
+            second_yscale=self.second_yscale)
 
     def test_use_mean(self):
         self.use_mean = True
@@ -250,7 +250,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_y_scale=self.second_y_scale)
+            second_yscale=self.second_yscale)
 
     def test_no_rms_in_legend(self):
         self.show_rms = False
@@ -260,7 +260,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_y_scale=self.second_y_scale)
+            second_yscale=self.second_yscale)
 
     def test_plot_zero(self):
         self.plot_zero = True
@@ -270,7 +270,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_y_scale=self.second_y_scale)
+            second_yscale=self.second_yscale)
 
     def test_plot_truth(self):
         (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \

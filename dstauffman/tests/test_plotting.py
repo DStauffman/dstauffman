@@ -99,7 +99,7 @@ class Test_plot_time_history(unittest.TestCase):
         self.opts.show_plot = False
         self.legend   = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
         self.figs     = []
-        self.second_y_scale = 1000000
+        self.second_yscale = 1000000
 
     def test_nominal(self):
         self.figs.append(dcs.plot_time_history(self.time, self.data, label=self.label, \
@@ -151,14 +151,14 @@ class Test_plot_time_history(unittest.TestCase):
         with self.assertRaises(AssertionError):
             dcs.plot_time_history(self.time, self.data, self.label, legend=self.legend[:-1])
 
-    def test_second_y_scale1(self):
+    def test_second_yscale1(self):
         self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, units='population', \
-            second_y_scale=self.second_y_scale))
+            second_yscale=self.second_yscale))
 
-    def test_second_y_scale2(self):
-        second_y_scale = {'New ylabel [units]': 100}
+    def test_second_yscale2(self):
+        second_yscale = {'New ylabel [units]': 100}
         self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, \
-            second_y_scale=second_y_scale))
+            second_yscale=second_yscale))
 
     def test_single_point(self):
         self.figs.append(dcs.plot_time_history(self.time[1:], self.data[1:,:], self.label))
@@ -227,7 +227,7 @@ class Test_plot_monte_carlo(unittest.TestCase):
         self.opts.names = ['Name 1']
         self.truth = dcs.TruthPlotter(self.time, np.cos(self.time))
         self.data_matrix = np.column_stack((self.data, self.truth.data))
-        self.second_y_scale = 1000000
+        self.second_yscale = 1000000
         self.fig = None
 
     def test_normal(self):
@@ -284,14 +284,14 @@ class Test_plot_monte_carlo(unittest.TestCase):
         data = np.column_stack((self.data, self.data))
         self.fig = dcs.plot_monte_carlo(self.time, data, self.label, self.units, plot_as_diffs=True)
 
-    def test_second_y_scale1(self):
+    def test_second_yscale1(self):
         self.fig = dcs.plot_monte_carlo(self.time, self.data, self.label, self.units, \
-            second_y_scale=self.second_y_scale)
+            second_yscale=self.second_yscale)
 
-    def test_second_y_scale2(self):
-        second_y_scale = {'New ylabel [units]': 100}
+    def test_second_yscale2(self):
+        second_yscale = {'New ylabel [units]': 100}
         self.fig = dcs.plot_monte_carlo(self.time, self.data, self.label, units='percentage', \
-            second_y_scale=second_y_scale)
+            second_yscale=second_yscale)
 
     def test_simple(self):
         self.fig = dcs.plot_monte_carlo(0, 0, 'Text')

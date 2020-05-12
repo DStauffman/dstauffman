@@ -30,7 +30,7 @@ from dstauffman.utils import rms
 def make_error_bar_plot(description, time, data, mins, maxs, elements=None, units='', time_units='sec', \
         leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
         disp_xmax=np.inf, single_lines=False, colormap=None, use_mean=False, \
-        plot_zero=False, show_rms=True, legend_loc='best', second_y_scale=None, y_label=None):
+        plot_zero=False, show_rms=True, legend_loc='best', second_yscale=None, ylabel=None):
     r"""
     Generic plotting routine to make error bars.
 
@@ -76,9 +76,9 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
         whether to show the RMS calculation in the legend
     legend_loc : str, optional
         location to put the legend, default is 'best'
-    second_y_scale : dict, optional
+    second_yscale : dict, optional
         single key and value pair to use for scaling data to a second Y axis
-    y_label : str, optional
+    ylabel : str, optional
         Labels to put on the Y axes, potentially by element
 
     Returns
@@ -113,7 +113,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
     >>> units           = 'rad'
     >>> time_units      = 'sec'
     >>> leg_scale       = 'milli'
-    >>> start_date      = str(datetime.now())
+    >>> start_date      = '  t0 = ' + str(datetime.now())
     >>> rms_xmin        = 1
     >>> rms_xmax        = 10
     >>> disp_xmin       = -2
@@ -124,13 +124,13 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
     >>> plot_zero       = False
     >>> show_rms        = True
     >>> legend_loc      = 'best'
-    >>> second_y_scale  = {'mrad': 1e3}
-    >>> y_label         = None
+    >>> second_yscale   = {'mrad': 1e3}
+    >>> ylabel          = None
     >>> fig             = make_error_bar_plot(description, time, data, mins, maxs, elements=elements, \
     ...     units=units, time_units=time_units, leg_scale=leg_scale, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
-    ...     show_rms=show_rms, legend_loc=legend_loc, second_y_scale=second_y_scale, y_label=y_label)
+    ...     show_rms=show_rms, legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel)
 
     Close plots
     >>> plt.close(fig)
@@ -226,17 +226,17 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
             this_axes.set_xlabel('Date')
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
-        if isinstance(y_label, list):
-            this_ylabel = y_label[i]
+        if isinstance(ylabel, list):
+            this_ylabel = ylabel[i]
         else:
-            this_ylabel = y_label
+            this_ylabel = ylabel
         if this_ylabel is None:
             this_axes.set_ylabel(description + ' [' + units + ']')
         else:
             this_axes.set_ylabel(this_ylabel + ' [' + units + ']')
         this_axes.grid(True)
         # optionally add second Y axis
-        plot_second_units_wrapper(this_axes, second_y_scale, description, this_ylabel)
+        plot_second_units_wrapper(this_axes, second_yscale)
         # plot RMS lines
         if show_rms:
             plot_rms_lines(this_axes, [rms_pts1, rms_pts2], this_axes.get_ylim())
@@ -560,8 +560,10 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if is_diff_plot:
             this_axes.set_ylabel(description + ' Difference [rad]')
+            plot_second_units_wrapper(this_axes, {prefix+'rad': leg_conv})
         else:
             this_axes.set_ylabel(description + ' Quaternion Components [dimensionless]')
+        # optionally add second Y axis to difference plot
         this_axes.grid(True)
         # plot RMS lines
         if show_rms:
@@ -574,8 +576,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         name_one='', name_two='', elements=None, units=None, time_units='sec', leg_scale='unity',
         start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
         make_subplots=True, single_lines=False, colormap=None, use_mean=False,
-        plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_y_scale=None,
-        y_label=None, truth_name='Truth', truth_time=None, truth_data=None):
+        plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None,
+        ylabel=None, truth_name='Truth', truth_time=None, truth_data=None):
     r"""
     Generic difference comparison plot for use in other wrapper functions.  This function plots two
     vector histories over time, along with a difference from one another.
@@ -630,9 +632,9 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         location to put the legend, default is 'best'
     show_extra : bool, optional
         whether to show missing data on difference plots
-    second_y_scale : dict, optional
+    second_yscale : dict, optional
         single key and value pair to use for scaling data to a second Y axis
-    y_label : str, optional
+    ylabel : str, optional
         Labels to put on the Y axes, potentially by element
     truth_name : str, optional
         name to associate with truth data, default is 'Truth'
@@ -690,8 +692,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> show_rms        = True
     >>> legend_loc      = 'best'
     >>> show_extra      = True
-    >>> second_y_scale  = {u'µrad': 1e6}
-    >>> y_label         = None
+    >>> second_yscale   = {u'µrad': 1e6}
+    >>> ylabel          = None
     >>> truth_name      = 'Truth'
     >>> truth_time      = None
     >>> truth_data      = None
@@ -700,7 +702,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     ...     leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-    ...     show_extra=show_extra, second_y_scale=second_y_scale, y_label=y_label, truth_name=truth_name, \
+    ...     show_extra=show_extra, second_yscale=second_yscale, ylabel=ylabel, truth_name=truth_name, \
     ...     truth_time=truth_time, truth_data=truth_data)
 
     Close plots
@@ -892,21 +894,21 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             this_axes.set_xlabel('Date')
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
-        if y_label is None:
+        if ylabel is None:
             if is_diff_plot:
                 this_axes.set_ylabel(description + ' Difference [' + units + ']')
             else:
                 this_axes.set_ylabel(description + ' [' + units + ']')
         else:
-            # TODO: handle single_lines case by allowing list for y_label
-            ix = y_label.find('[')
+            # TODO: handle single_lines case by allowing list for ylabel
+            ix = ylabel.find('[')
             if is_diff_plot and ix > 0:
-                this_axes.set_ylabel(y_label[:ix-1] + 'Difference ' + y_label[ix:])
+                this_axes.set_ylabel(ylabel[:ix-1] + ' Difference ' + ylabel[ix:])
             else:
-                this_axes.set_ylabel(y_label)
+                this_axes.set_ylabel(ylabel)
         this_axes.grid(True)
         # optionally add second Y axis
-        plot_second_units_wrapper(this_axes, second_y_scale, description, y_label) # TODO: + Difference part
+        plot_second_units_wrapper(this_axes, second_yscale)
         # plot RMS lines
         if show_rms:
             plot_rms_lines(this_axes, [rms_pts1, rms_pts2], this_axes.get_ylim())
@@ -916,5 +918,5 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='lmspace.tests.test_plot_generic', exit=False)
+    unittest.main(module='dstauffman.tests.test_plot_generic', exit=False)
     doctest.testmod(verbose=False)

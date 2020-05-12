@@ -159,7 +159,7 @@ class Opts(Frozen):
 
 #%% Functions - plot_time_history
 def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
-        second_y_scale=None, ignore_empties=False, data_lo=None, data_hi=None, colormap=None):
+        second_yscale=None, ignore_empties=False, data_lo=None, data_hi=None, colormap=None):
     r"""
     Plot multiple metrics over time.
 
@@ -178,7 +178,7 @@ def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
         plotting options
     legend : list of str, optional
         Names to use for each channel of data
-    second_y_scale : float or dict, optional
+    second_yscale : float or dict, optional
         Multiplication scale factor to use to display on a secondary Y axis
     ignore_empties : bool, optional
         Removes any entries from the plot and legend that contain only zeros or only NaNs
@@ -315,7 +315,7 @@ def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
 
     # optionally add second Y axis
-    plot_second_units_wrapper(ax, second_y_scale, label)
+    plot_second_units_wrapper(ax, second_yscale)
 
     # setup plots
     setup_plots(fig, opts)
@@ -323,7 +323,7 @@ def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
 
 #%% Functions - plot_monte_carlo
 def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True, \
-    truth=None, plot_as_diffs=False, second_y_scale=None, plot_sigmas=1, \
+    truth=None, plot_as_diffs=False, second_yscale=None, plot_sigmas=1, \
     plot_confidence=0, colormap=None):
     r"""
     Plot the given data channel versus time, with a generic label argument.
@@ -346,7 +346,7 @@ def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True,
         Truth instance for adding to the plot
     plot_as_diffs : bool, optional, default is False
         Plot each entry in results against the other ones, default is False
-    second_y_scale : float or dict, optional
+    second_yscale : float or dict, optional
         Multiplication scale factor to use to display on a secondary Y axis
     plot_sigmas : numeric, optional
         If value converts to true as bool, then plot the sigma values of the given value
@@ -490,7 +490,7 @@ def plot_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True,
     if time_units == 'year' and np.any(time) and (np.max(time) - np.min(time)) >= 4:
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
     # optionally add second Y axis
-    plot_second_units_wrapper(ax, second_y_scale, label)
+    plot_second_units_wrapper(ax, second_yscale)
     # Setup plots
     setup_plots(fig, opts)
     return fig

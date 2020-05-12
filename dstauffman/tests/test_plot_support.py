@@ -862,6 +862,81 @@ class Test_show_zero_ylim(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
+#%% Functions - plot_second_units_wrapper
+class Test_plot_second_units_wrapper(unittest.TestCase):
+    r"""
+    Tests the plot_second_units_wrapper with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.description = 'Values over time'
+        self.ylabel = 'Value [rad]'
+        self.second_yscale = None
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(111)
+        self.ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
+        self.ax.set_ylabel(self.ylabel)
+        self.ax.set_title(self.description)
+
+    def test_none(self):
+        ax2 = dcs.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.assertEqual(self.ax.get_ylabel(), self.ylabel)
+        self.assertIsNone(ax2)
+
+    def test_int(self):
+        self.second_yscale = 100
+        ax2 = dcs.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.assertEqual(self.ax.get_ylabel(), self.ylabel)
+        self.assertEqual(ax2.get_ylabel(), '')
+
+    def test_float(self):
+        self.second_yscale = 100.
+        ax2 = dcs.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.assertEqual(self.ax.get_ylabel(), self.ylabel)
+        self.assertEqual(ax2.get_ylabel(), '')
+
+    def test_zero(self):
+        self.second_yscale = 0.
+        ax2 = dcs.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.assertEqual(self.ax.get_ylabel(), self.ylabel)
+        self.assertIsNone(ax2)
+        self.second_yscale = {'new': 0}
+        ax2 = dcs.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.assertEqual(self.ax.get_ylabel(), self.ylabel)
+        self.assertIsNone(ax2)
+
+    def test_nan(self):
+        self.second_yscale = np.nan
+        ax2 = dcs.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.assertEqual(self.ax.get_ylabel(), self.ylabel)
+        self.assertIsNone(ax2)
+        self.second_yscale = {'new': np.nan}
+        ax2 = dcs.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.assertEqual(self.ax.get_ylabel(), self.ylabel)
+        self.assertIsNone(ax2)
+
+    def test_full_replace(self):
+        self.second_yscale = {u'Better Units [µrad]': 1e6}
+        ax2 = dcs.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.assertEqual(self.ax.get_ylabel(), self.ylabel)
+        self.assertEqual(ax2.get_ylabel(), u'Better Units [µrad]')
+
+    def test_units_only(self):
+        self.second_yscale = {'mrad': 1e3}
+        ax2 = dcs.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.assertEqual(self.ax.get_ylabel(), self.ylabel)
+        self.assertEqual(ax2.get_ylabel(), 'Value [mrad]')
+
+    def test_no_units(self):
+        self.ax.set_ylabel('Value')
+        self.second_yscale = {'New Value': 1e3}
+        ax2 = dcs.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.assertEqual(self.ax.get_ylabel(), 'Value')
+        self.assertEqual(ax2.get_ylabel(), 'New Value')
+
+    def tearDown(self):
+        plt.close(self.fig)
+
 #%% Functions - plot_second_yunits
 class Test_plot_second_yunits(unittest.TestCase):
     r"""
@@ -877,7 +952,9 @@ class Test_plot_second_yunits(unittest.TestCase):
         self.multiplier = 1e6
 
     def test_nominal(self):
-        dcs.plot_second_yunits(self.ax, self.ylab, self.multiplier)
+        ax2 = dcs.plot_second_yunits(self.ax, self.ylab, self.multiplier)
+        self.assertEqual(self.ax.get_ylabel(), 'Value [rad]')
+        self.assertEqual(ax2.get_ylabel(), self.ylab)
 
     def tearDown(self):
         plt.close(self.fig)
