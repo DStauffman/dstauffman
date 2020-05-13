@@ -563,7 +563,6 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             plot_second_units_wrapper(this_axes, {prefix+'rad': leg_conv})
         else:
             this_axes.set_ylabel(description + ' Quaternion Components [dimensionless]')
-        # optionally add second Y axis to difference plot
         this_axes.grid(True)
         # plot RMS lines
         if show_rms:
