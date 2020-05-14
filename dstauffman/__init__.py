@@ -35,7 +35,7 @@ from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, clos
                               titleprefix, disp_xlimits, zoom_ylim, setup_plots, figmenu, \
                               rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
                               plot_second_units_wrapper, plot_second_yunits, get_rms_indices, \
-                              plot_rms_lines, plot_phases, get_classification, plot_classification
+                              plot_vert_lines, plot_phases, get_classification, plot_classification
 from .plotting     import Opts, plot_time_history, plot_monte_carlo, plot_correlation_matrix, \
                               plot_bar_breakdown
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \

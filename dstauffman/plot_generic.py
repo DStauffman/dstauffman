@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 # model imports
-from dstauffman.plot_support import ColorMap, get_color_lists, get_rms_indices, plot_rms_lines, \
+from dstauffman.plot_support import ColorMap, get_color_lists, get_rms_indices, plot_vert_lines, \
                                         plot_second_units_wrapper, disp_xlimits, \
                                         show_zero_ylim
 from dstauffman.quat  import quat_angle_diff
@@ -239,7 +239,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
         plot_second_units_wrapper(this_axes, second_yscale)
         # plot RMS lines
         if show_rms:
-            plot_rms_lines(this_axes, [rms_pts1, rms_pts2], this_axes.get_ylim())
+            plot_vert_lines(this_axes, [rms_pts1, rms_pts2])
 
     return fig
 
@@ -566,7 +566,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         this_axes.grid(True)
         # plot RMS lines
         if show_rms:
-            plot_rms_lines(this_axes, [rms_pts1, rms_pts2], this_axes.get_ylim())
+            plot_vert_lines(this_axes, [rms_pts1, rms_pts2])
 
     return (fig_hand, err)
 
@@ -910,7 +910,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         plot_second_units_wrapper(this_axes, second_yscale)
         # plot RMS lines
         if show_rms:
-            plot_rms_lines(this_axes, [rms_pts1, rms_pts2], this_axes.get_ylim())
+            plot_vert_lines(this_axes, [rms_pts1, rms_pts2])
 
     return (fig_hand, err)
 

@@ -1011,10 +1011,10 @@ class Test_get_rms_indices(unittest.TestCase):
     def test_datetime(self):
         pass # TODO: write this
 
-#%% Functions - plot_rms_lines
-class Test_plot_rms_lines(unittest.TestCase):
+#%% Functions - plot_vert_lines
+class Test_plot_vert_lines(unittest.TestCase):
     r"""
-    Tests the plot_rms_lines function with the following cases:
+    Tests the plot_vert_lines function with the following cases:
         Nominal
     """
     def setUp(self):
@@ -1022,14 +1022,23 @@ class Test_plot_rms_lines(unittest.TestCase):
         self.ax = self.fig.add_subplot(111)
         self.ax.plot(np.arange(10), np.arange(10), label='Data')
         self.x = (2, 5)
-        self.y = (1, 10)
 
     def test_nominal(self):
-        dcs.plot_rms_lines(self.ax, self.x, self.y, show_in_legend=False)
+        dcs.plot_vert_lines(self.ax, self.x, show_in_legend=False)
         self.ax.legend()
 
     def test_no_legend(self):
-        dcs.plot_rms_lines(self.ax, self.x, self.y, show_in_legend=True)
+        dcs.plot_vert_lines(self.ax, self.x, show_in_legend=True)
+        self.ax.legend()
+
+    def test_multiple_lines(self):
+        labels = ['Line 1', 'Line 2', 'Line 3', 'Line 4']
+        colormap = colors.ListedColormap(['r', 'g', 'b', 'k'])
+        dcs.plot_vert_lines(self.ax, [1, 2.5, 3.5, 8], show_in_legend=True, labels=labels, colormap=colormap)
+        self.ax.legend()
+
+    def test_multiple_unlabeled(self):
+        dcs.plot_vert_lines(self.ax, np.arange(0.5, 7.5, 1.), show_in_legend=False)
         self.ax.legend()
 
     def tearDown(self):

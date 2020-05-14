@@ -1306,8 +1306,8 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
     rms_ix3 = p3_min & p3_max if have3 else np.array([], dtype=bool)
     return (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2)
 
-#%% Functions - plot_rms_lines
-def plot_rms_lines(ax, x, y, show_in_legend=True):
+#%% Functions - plot_vert_lines
+def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
     r"""
     Plots a vertical line at the RMS start and stop times.
 
@@ -1321,42 +1321,47 @@ def plot_rms_lines(ax, x, y, show_in_legend=True):
     ----------
     ax : class matplotlib.axis.Axis
         Figure axis
-    x : (2,) tuple
-        xmin and xmax values at which to draw the lines
-    y : (2,) tuple
-        ymin and ymax values at which to extend the lines vertically [num]
+    x : (N,) tuple (nominally N=2)
+        X values at which to draw the vertical lines
     show_in_legend : bool, optional
         show the lines when a legend is turned on
+    colormap : matplotlib.colors.Colormap, optional
+        Colormap to use, default has two colors
+    labels : list of str, optional
+        Labels to use when other than two lines
 
     Notes
     -----
     #.  Added to Stauffer's MATLAB libary from GARSE in Sept 2013.
     #.  Ported to Python by David C. Stauffer in March 2019.
+    #.  Updated by David C. Stauffer in May 2020 to be more generic.
 
     Examples
     --------
-    >>> from dstauffman import plot_rms_lines
+    >>> from dstauffman import plot_vert_lines
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> _ = ax = fig.add_subplot(111)
+    >>> ax = fig.add_subplot(111)
     >>> _ = ax.plot(np.arange(10), np.arange(10), label='Data')
     >>> x = (2, 5)
-    >>> y = (1, 10)
-    >>> plot_rms_lines(ax, x, y, show_in_legend=False)
+    >>> plot_vert_lines(ax, x, show_in_legend=False)
     >>> _ = ax.legend()
 
     >>> plt.close(fig)
 
     """
-    if show_in_legend:
-        label_one = 'RMS Start Time'
-        label_two = 'RMS Stop Time'
-    else:
-        label_one = ''
-        label_two = ''
-    ax.plot([x[0], x[0]], y, linestyle='--', color=[   1, 0.75, 0], marker='+', markeredgecolor='m', markersize=10, label=label_one)
-    ax.plot([x[1], x[1]], y, linestyle='--', color=[0.75, 0.75, 1], marker='+', markeredgecolor='m', markersize=10, label=label_two)
+    # optional inputs
+    if colormap is None:
+        colormap = colors.ListedColormap([(1., 0.75, 0.), (0.75, 0.75, 1.)])
+    cm = ColorMap(colormap, num_colors=len(x))
+    if labels is None:
+        labels = ['RMS Start Time', 'RMS Stop Time']
+    # plot vertical lines
+    for (i, this_x) in enumerate(x):
+        this_color = cm.get_color(i)
+        this_label = labels[i] if show_in_legend else ''
+        ax.axvline(this_x, linestyle='--', color=this_color, marker='+', markeredgecolor='m', markersize=10, label=this_label)
 
 #%% plot_phases
 def plot_phases(ax, times, colormap='tab10', labels=None):
