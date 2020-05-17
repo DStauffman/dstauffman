@@ -20,7 +20,7 @@ import numpy as np
 # model imports
 from dstauffman.plot_support import ColorMap, get_color_lists, get_rms_indices, plot_vert_lines, \
                                         plot_second_units_wrapper, disp_xlimits, \
-                                        show_zero_ylim
+                                        show_zero_ylim, zoom_ylim
 from dstauffman.quat  import quat_angle_diff
 from dstauffman.stats import intersect
 from dstauffman.units import get_factors
@@ -38,7 +38,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
     ----------
     description : str
         name of the data being plotted, used as title
-    time : array_like
+    time : (N, ) array_like
         time history [sec]
     data : (A, N) ndarray
         data history
@@ -216,6 +216,8 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
             disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
             xlim = this_axes.get_xlim()
         this_axes.set_xlim(xlim)
+        channel = i if single_lines else None
+        zoom_ylim(this_axes, time, data.T, t_start=xlim[0], t_final=xlim[1], channel=channel)
         # set Y display limits
         if plot_zero:
             show_zero_ylim(this_axes)
@@ -257,13 +259,13 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     ----------
     description : str
         name of the data being plotted, used as title
-    time_one : array_like
+    time_one : (N, ) array_like
         time history one [sec]
-    time_two : array_like
+    time_two : (M, ) array_like
         time history two [sec]
     quat_one : (4, N) ndarray
         quaternion one
-    quat_two : (4, N) ndarray
+    quat_two : (4, M) ndarray
         quaternion two
     name_one : str, optional
         name of data source 1
@@ -535,6 +537,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
             xlim = this_axes.get_xlim()
         this_axes.set_xlim(xlim)
+        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         # set Y display limits
         if plot_zero:
             show_zero_ylim(this_axes)
@@ -585,13 +588,13 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     ----------
     description : str
         name of the data being plotted, used as title
-    time_one : array_like
+    time_one : (A, ) array_like
         time history one [sec]
-    time_two : array_like
+    time_two : (B, ) array_like
         time history two [sec]
     data_one : (A, N) ndarray
         vector one history
-    data_two : (A, N) ndarray
+    data_two : (B, N) ndarray
         vector two history
     name_one : str, optional
         name of data source 1
@@ -735,8 +738,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     # build RMS indices
     (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = get_rms_indices(time_one, time_two, \
         time_overlap, xmin=rms_xmin, xmax=rms_xmax)
-    # find number of elements being differenced
-    num_channels = len(elements)
+    # create a colormap
     cm = ColorMap(colormap=colormap, num_colors=3*num_channels)
     # calculate the differences
     if have_both:
@@ -870,6 +872,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
             xlim = this_axes.get_xlim()
         this_axes.set_xlim(xlim)
+        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         # set Y display limits
         if plot_zero:
             show_zero_ylim(this_axes)

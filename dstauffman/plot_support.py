@@ -772,7 +772,7 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
         this_axis.set_xlim((new_xmin, new_xmax))
 
 #%% Functions - zoom_ylim
-def zoom_ylim(ax, time, data, t_start=-np.inf, t_final=np.inf, channel=None, pad=0.1):
+def zoom_ylim(ax, time=None, data=None, *, t_start=-np.inf, t_final=np.inf, channel=None, pad=0.1):
     r"""
     Zooms the Y-axis to the data for the given time bounds, with an optional pad.
 
@@ -818,13 +818,18 @@ def zoom_ylim(ax, time, data, t_start=-np.inf, t_final=np.inf, channel=None, pad
     >>> plt.draw() # doctest: +SKIP
 
     Force Y-axis to rescale to data
-    >>> zoom_ylim(ax, time, data, t_start, t_final, pad=0)
+    >>> zoom_ylim(ax, time, data, t_start=t_start, t_final=t_final, pad=0)
     >>> plt.draw() # doctest: +SKIP
 
     Close plot
     >>> plt.close(fig)
 
     """
+    # If not given, find time/data from the plot itself
+    if time is None:
+        time = np.hstack([artist.get_xdata() for artist in ax.lines])
+    if data is None:
+        data = np.hstack([artist.get_ydata() for artist in ax.lines])
     # find the relevant time indices
     ix_time = (time >= t_start) & (time <= t_final)
     # pull out the minimums/maximums from the data
@@ -845,6 +850,17 @@ def zoom_ylim(ax, time, data, t_start=-np.inf, t_final=np.inf, channel=None, pad
         delta = this_ymax - this_ymin
         this_ymax += pad*delta
         this_ymin -= pad*delta
+    # check for the case where the data is constant and the limits are the same
+    if this_ymin == this_ymax:
+        if this_ymin == 0:
+            # data is exactly zero, show from -1 to 1
+            this_ymin = -1
+            this_ymax = 1
+        else:
+            # data is constant, pad by given amount or 10% if pad is zero
+            pad = pad if pad > 0 else 0.1
+            this_ymin = (1-pad) * this_ymin
+            this_ymax = (1+pad) * this_ymax
     # get the current limits
     (old_ymin, old_ymax) = ax.get_ylim()
     # compare the new bounds to the old ones and update as appropriate
