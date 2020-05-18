@@ -30,7 +30,8 @@ from dstauffman.utils import rms
 def make_error_bar_plot(description, time, data, mins, maxs, elements=None, units='', time_units='sec', \
         leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
         disp_xmax=np.inf, single_lines=False, colormap=None, use_mean=False, \
-        plot_zero=False, show_rms=True, legend_loc='best', second_yscale=None, ylabel=None):
+        plot_zero=False, show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, \
+        data_as_rows=True):
     r"""
     Generic plotting routine to make error bars.
 
@@ -80,6 +81,8 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
         single key and value pair to use for scaling data to a second Y axis
     ylabel : str, optional
         Labels to put on the Y axes, potentially by element
+    data_as_rows : bool, optional, default is True
+        Whether the data has each channel as a row vector when 2D, vs a column vector
 
     Returns
     -------
@@ -126,11 +129,13 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
     >>> legend_loc      = 'best'
     >>> second_yscale   = {'mrad': 1e3}
     >>> ylabel          = None
+    >>> data_as_rows    = True
     >>> fig             = make_error_bar_plot(description, time, data, mins, maxs, elements=elements, \
     ...     units=units, time_units=time_units, leg_scale=leg_scale, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
-    ...     show_rms=show_rms, legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel)
+    ...     show_rms=show_rms, legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel, \
+    ...     data_as_rows=data_as_rows)
 
     Close plots
     >>> plt.close(fig)
@@ -153,6 +158,13 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
 
     # determine if using datetimes
     use_datetime = False # TODO: test with these
+
+    # convert rows/cols as necessary
+    if not data_as_rows:
+        # TODO: is this the best way or make branches lower?
+        data = data.T
+        mins = mins.T
+        maxs = maxs.T
 
     #% Calculations
     # build RMS indices
@@ -250,7 +262,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         name_one='', name_two='', time_units='sec', start_date='', plot_components=True,
         rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True,
-        legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None):
+        legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None,
+        data_as_rows=True):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.  This function plots two
     quaternion histories over time, along with a difference from one another.
@@ -305,6 +318,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         truth time history
     truth_data : ndarray, optional
         truth quaternion history
+    data_as_rows : bool, optional, default is True
+        Whether the data has each channel as a row vector when 2D, vs a column vector
 
     Returns
     -------
@@ -353,12 +368,14 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> truth_name      = 'Truth'
     >>> truth_time      = None
     >>> truth_data      = None
+    >>> data_as_rows    = True
     >>> (fig_hand, err) = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
     ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-    ...     show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, truth_data=truth_data)
+    ...     show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, truth_data=truth_data, \
+    ...     data_as_rows=data_as_rows)
 
     Close plots
     >>> for fig in fig_hand:
@@ -373,8 +390,19 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     have_quat_one = quat_one is not None and np.any(~np.isnan(quat_one))
     have_quat_two = quat_two is not None and np.any(~np.isnan(quat_two))
     have_both     = have_quat_one and have_quat_two
+    have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
     # determine if using datetimes
     use_datetime = False # TODO: test with these
+
+    # convert rows/cols as necessary
+    if not data_as_rows:
+        # TODO: is this the best way or make branches lower?
+        if have_quat_one:
+            quat_one = quat_one.T
+        if have_quat_two:
+            quat_two = quat_two.T
+        if have_truth:
+            truth_data = truth_data.T
 
     #% Calculations
     # find overlapping times
@@ -542,7 +570,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         if plot_zero:
             show_zero_ylim(this_axes)
         # optionally plot truth (after having set axes limits)
-        if i < num_rows and truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data)):
+        if i < num_rows and have_truth:
             if single_lines:
                 this_axes.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
                     linewidth=2, label=truth_name + ' ' + elements[i])
@@ -579,7 +607,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
         make_subplots=True, single_lines=False, colormap=None, use_mean=False,
         plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None,
-        ylabel=None, truth_name='Truth', truth_time=None, truth_data=None):
+        ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True):
     r"""
     Generic difference comparison plot for use in other wrapper functions.  This function plots two
     vector histories over time, along with a difference from one another.
@@ -592,9 +620,9 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         time history one [sec]
     time_two : (B, ) array_like
         time history two [sec]
-    data_one : (A, N) ndarray
+    data_one : (N, A) ndarray
         vector one history
-    data_two : (B, N) ndarray
+    data_two : (M, B) ndarray
         vector two history
     name_one : str, optional
         name of data source 1
@@ -644,6 +672,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         truth time history
     truth_data : ndarray, optional
         truth quaternion history
+    data_as_rows : bool, optional, default is True
+        Whether the data has each channel as a row vector when 2D, vs a column vector
 
     Returns
     -------
@@ -699,13 +729,14 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> truth_name      = 'Truth'
     >>> truth_time      = None
     >>> truth_data      = None
+    >>> data_as_rows    = True
     >>> (fig_hand, err) = make_difference_plot(description, time_one, time_two, data_one, data_two,
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
     ...     leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, second_yscale=second_yscale, ylabel=ylabel, truth_name=truth_name, \
-    ...     truth_time=truth_time, truth_data=truth_data)
+    ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows)
 
     Close plots
     >>> for fig in fig_hand:
@@ -720,6 +751,18 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     have_data_one = data_one is not None and np.any(~np.isnan(data_one))
     have_data_two = data_two is not None and np.any(~np.isnan(data_two))
     have_both     = have_data_one and have_data_two
+    have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
+
+    # convert rows/cols as necessary
+    if not data_as_rows:
+        # TODO: is this the best way or make branches lower?
+        if have_data_one:
+            data_one = data_one.T
+        if have_data_two:
+            data_two = data_two.T
+        if have_truth:
+            truth_data = truth_data.T
+
     # determine if using datetimes
     use_datetime = False # TODO: test with these
     # calculate sizes
@@ -877,7 +920,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         if plot_zero:
             show_zero_ylim(this_axes)
         # optionally plot truth (after having set axes limits)
-        if i < num_rows and truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data)):
+        if i < num_rows and have_truth:
             if single_lines:
                 this_axes.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
                     linewidth=2, label=truth_name + ' ' + elements[i])
