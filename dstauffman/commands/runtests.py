@@ -190,5 +190,5 @@ def execute_coverage(args):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_commands_tests', exit=False)
+    unittest.main(module='dstauffman.tests.test_commands_runtests', exit=False)
     doctest.testmod(verbose=False)

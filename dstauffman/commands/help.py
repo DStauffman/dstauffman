@@ -19,7 +19,7 @@ from dstauffman.paths import get_root_dir
 #%% Functions - print_help
 def print_help():
     r"""
-    Prints the contents of the readme.md file.
+    Prints the contents of the README.rst file.
 
     Returns
     -------
