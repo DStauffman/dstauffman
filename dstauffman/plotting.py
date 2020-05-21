@@ -305,11 +305,11 @@ def plot_time_history(time, data, label, units='', opts=None, *, legend=None, \
     ax.set_title(this_title)
     ax.legend(loc=legend_loc)
     ax.grid(True)
+    # set the display period
+    disp_xlimits(ax, xmin=opts.disp_xmin, xmax=opts.disp_xmax)
     # optionally force zero to be plotted
     if show_zero:
         show_zero_ylim(ax)
-    # set the display period
-    disp_xlimits(ax, xmin=opts.disp_xmin, xmax=opts.disp_xmax)
     # set years to always be whole numbers on the ticks
     if time_units == 'year' and (np.max(time) - np.min(time)) >= 4:
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))

@@ -750,14 +750,14 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
         (old_xmin, old_xmax) = this_axis.get_xlim()
         # set the new limits
         if xmin is not None:
-            if isinstance(xmin, datetime.datetime) or isinstance(xmin, np.datetime64):
+            if is_datetime(xmin):
                 new_xmin = np.maximum(date2num(xmin), old_xmin)
             else:
                 new_xmin = np.max([xmin, old_xmin])
         else:
             new_xmin = old_xmin
         if xmax is not None:
-            if isinstance(xmax, datetime.datetime) or isinstance(xmax, np.datetime64):
+            if is_datetime(xmax):
                 new_xmax = np.minimum(date2num(xmax), old_xmax)
             else:
                 new_xmax = np.min([xmax, old_xmax])
@@ -830,6 +830,9 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-np.inf, t_final=np.inf, chan
         time = np.hstack([artist.get_xdata() for artist in ax.lines])
     if data is None:
         data = np.hstack([artist.get_ydata() for artist in ax.lines])
+    # convert datetimes as appropriate for comparisons
+    if is_datetime(time):
+        time = date2num(time)
     # find the relevant time indices
     ix_time = (time >= t_start) & (time <= t_final)
     # pull out the minimums/maximums from the data
@@ -1273,10 +1276,12 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
     #    t_min = t_min.to_datetime64()
     #if isinstance(t_max, pd.Timestamp):
     #    t_max = t_max.to_datetime64()
-    if hasattr(xmin, 'dtype') and np.issubdtype(xmin.dtype, np.datetime64):
-        process = not np.isnat(xmin)
-    elif isinstance(xmin, datetime.datetime):
-        process = True
+    if is_datetime(xmin):
+        # if datetime, it's either the datetime.datetime version, or np.datetime64 version
+        if isinstance(xmin, datetime.datetime):
+            process = True
+        else:
+            process = not np.isnat(xmin)
     else:
         process = not np.isnan(xmin) and not np.isinf(xmin)
     if process:
@@ -1295,10 +1300,11 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
         if have3:
             p3_min = np.ones(time_overlap.shape, dtype=bool)
         rms_pts1 = t_min
-    if hasattr(xmax, 'dtype') and np.issubdtype(xmax.dtype, np.datetime64):
-        process = not np.isnat(xmax)
-    elif isinstance(xmax, datetime.datetime):
-        process = True
+    if is_datetime(xmax):
+        if isinstance(xmax, datetime.datetime):
+            process = True
+        else:
+            process = not np.isnat(xmax)
     else:
         process = not np.isnan(xmax) and not np.isinf(xmax)
     if process:
@@ -1638,6 +1644,48 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, locati
     r1 = Rectangle((0., 0.), 1., 1., facecolor='none', edgecolor=color, clip_on=False, \
         linewidth=3, transform=fig.transFigure)
     fig.patches.extend([r1])
+
+#%% Functions - is_datetime
+def is_datetime(time):
+    r"""
+    Determines if the given time is either a datetime.datetime or np.datetime64 or just a regular number.
+
+    Parameters
+    ----------
+    time : float
+        Time
+
+    Returns
+    -------
+    out : bool
+        Whether this is a datetime
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import is_datetime
+    >>> import datetime
+    >>> import numpy as np
+    >>> time1 = 0.5
+    >>> time2 = np.datetime64('now')
+    >>> time3 = datetime.datetime.now()
+    >>> print(is_datetime(time1))
+    False
+
+    >>> print(is_datetime(time2))
+    True
+
+    >>> print(is_datetime(time3))
+    True
+
+    """
+    out = False
+    if isinstance(time, datetime.datetime) or (hasattr(time, 'dtype') and np.issubdtype(time.dtype, np.datetime64)):
+        out = True
+    return out
 
 #%% Unit test
 if __name__ == '__main__':

@@ -29,13 +29,15 @@ from .logs         import activate_logging, deactivate_logging
 from .parser       import main, parse_wrapper, parse_commands, execute_command
 from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
                               get_output_dir, list_python_files
-from .plot_generic import make_error_bar_plot, make_quaternion_plot, make_difference_plot
+from .plot_generic import make_time_plot, make_error_bar_plot, make_quaternion_plot, \
+                              make_difference_plot
 from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
                               get_color_lists, ignore_plot_data, whitten, resolve_name, storefig, \
                               titleprefix, disp_xlimits, zoom_ylim, setup_plots, figmenu, \
                               rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
                               plot_second_units_wrapper, plot_second_yunits, get_rms_indices, \
-                              plot_vert_lines, plot_phases, get_classification, plot_classification
+                              plot_vert_lines, plot_phases, get_classification, \
+                              plot_classification, is_datetime
 from .plotting     import Opts, plot_time_history, plot_monte_carlo, plot_correlation_matrix, \
                               plot_bar_breakdown
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \

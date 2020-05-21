@@ -15,16 +15,225 @@ import unittest
 
 # plotting/numpy imports
 import matplotlib.pyplot as plt
+from matplotlib.ticker import StrMethodFormatter
 import numpy as np
 
 # model imports
-from dstauffman.plot_support import ColorMap, get_color_lists, get_rms_indices, plot_vert_lines, \
-                                        plot_second_units_wrapper, disp_xlimits, \
+from dstauffman.plot_support import ColorMap, disp_xlimits, get_color_lists, get_rms_indices, \
+                                        is_datetime, plot_second_units_wrapper, plot_vert_lines, \
                                         show_zero_ylim, zoom_ylim
 from dstauffman.quat  import quat_angle_diff
 from dstauffman.stats import intersect
 from dstauffman.units import get_factors
 from dstauffman.utils import rms
+
+#%% Constants
+# hard-coded values
+_LEG_FORMAT  = '{:1.3f}'
+_TRUTH_COLOR = 'k'
+
+#%% Functions - make_time_plot
+def make_time_plot(description, time, data, name='', elements=None, units='', time_units='sec',
+        leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf,
+        disp_xmax=np.inf, single_lines=False, colormap=None, use_mean=False, plot_zero=False,
+        show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True,
+        x_formatter=None):
+    r"""
+    Generic data versus time plotting routine.
+
+    Parameters
+    ----------
+    description : str
+        name of the data being plotted, used as title, must be given
+    time : (A, ) array_like
+        time history [sec] or datetime64
+    data : (N, ) or (N, A) ndarray
+        vector history
+    name : str, optional
+        name of data
+    elements : list
+        name of each element to plot within the vector
+    units : list
+        name of units for plot
+    time_units : str, optional
+        time units, defaults to 'sec', use 'datetime' for datetime histories
+    leg_scale : str, optional
+        factor to use when scaling the value in the legend, default is 'unity'
+    start_date : str, optional
+        date of t(0), may be an empty string
+    rms_xmin : float, optional
+        time of first point of RMS calculation
+    rms_xmax : float, optional
+        time of last point of RMS calculation
+    disp_xmin : float, optional
+        lower time to limit the display of the plot
+    disp_xmax : float, optional
+        higher time to limit the display of the plot
+    single_lines : bool, optional
+        flag meaning to plot subplots by channel instead of together
+    colormap : list or colormap
+        colors to use on the plot
+    use_mean : bool, optional
+        whether to use mean instead of RMS in legend calculations
+    plot_zero : bool, optional
+        whether to force zero to always be plotted on the Y axis
+    show_rms : bool, optional
+        whether to show the RMS calculation in the legend
+    legend_loc : str, optional
+        location to put the legend, default is 'best', use 'none' to suppress legend
+    second_yscale : dict, optional
+        single key and value pair to use for scaling data to a second Y axis
+    ylabel : str, optional
+        Labels to put on the Y axes, potentially by element
+    data_as_rows : bool, optional, default is True
+        Whether the data has each channel as a row vector when 2D, vs a column vector
+
+    Returns
+    -------
+    fig : class matplotlib.Figure
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import make_time_plot
+    >>> import numpy as np
+    >>> description = 'Values vs Time'
+    >>> time = np.arange(-10., 10.1, 0.1)
+    >>> data = time + np.cos(time)
+    >>> name = ''
+    >>> elements = None
+    >>> units = ''
+    >>> time_units = 'sec'
+    >>> leg_scale = 'unity'
+    >>> start_date = ''
+    >>> rms_xmin = -np.inf
+    >>> rms_xmax = np.inf
+    >>> disp_xmin = -np.inf
+    >>> disp_xmax = np.inf
+    >>> single_lines = False
+    >>> colormap = None
+    >>> use_mean = False
+    >>> plot_zero = False
+    >>> show_rms = True
+    >>> legend_loc = 'best'
+    >>> second_yscale = None
+    >>> ylabel = None
+    >>> data_as_rows = True
+    >>> x_formatter = None
+    >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
+    ...     time_units=time_units, leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, \
+    ...     rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
+    ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
+    ...     legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel, \
+    ...     data_as_rows=data_as_rows, x_formatter=x_formatter)
+
+    """
+    # data checks
+    assert description, 'You must give the plot a description.'
+    data = np.atleast_2d(data)
+
+    # convert rows/cols as necessary
+    if not data_as_rows:
+        # TODO: is this the best way or make branches lower?
+        data = data.T
+
+    # calculate sizes
+    s1 = data.shape[0] if data is not None else 0
+    if elements is None:
+        elements = [f'Channel {i+1}' for i in range(s1)]
+    num_channels = len(elements)
+    assert s1 == num_channels or s1 == 0, "The data doesn't match the number of elements."
+
+    #% Calculations
+    # build RMS indices
+    (rms_ix1, _, _, rms_pts1, rms_pts2) = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
+    # create a colormap
+    cm = ColorMap(colormap=colormap, num_colors=num_channels)
+    # calculate the rms (or mean) values
+    if not use_mean:
+        func_name  = 'RMS'
+        data_func  = rms(data[:, rms_ix1], axis=1, ignore_nans=True)
+    else:
+        func_name  = 'Mean'
+        data_func  = np.nanmean(data[:, rms_ix1], axis=1)
+    # unit conversion value
+    (temp, prefix) = get_factors(leg_scale)
+    leg_conv = 1/temp
+    if prefix:
+        assert units, 'You must give units if using a non-unity scale factor.'
+
+    #% Create plots
+    # create figures
+    fig = plt.figure()
+    fig.canvas.set_window_title(description)
+
+    # create axes
+    if single_lines:
+        ax = []
+        ax_prim = None
+        for i in range(num_channels):
+            temp_axes = fig.add_subplot(num_channels, 1, i+1, sharex=ax_prim)
+            if ax_prim is None:
+                ax_prim = temp_axes
+            ax.append(temp_axes)
+    else:
+        ax = [fig.add_subplot(1, 1, 1)]
+
+    # plot data
+    for (i, this_axes) in enumerate(ax):
+        if single_lines:
+            loop_counter = [i]
+        else:
+            loop_counter = range(num_channels)
+        # standard plot
+        for j in loop_counter:
+            this_label = f'{name} {elements[j]}' if name else str(elements[j])
+            if show_rms:
+                value = _LEG_FORMAT.format(leg_conv*data_func[j])
+                if units:
+                    this_label += f' ({func_name}: {value} {prefix}{units})'
+                else:
+                    this_label += f' ({func_name}: {value})'
+            this_axes.plot(time, data[j, :], '.-', markersize=4, label=this_label, \
+                color=cm.get_color(j), zorder=3)
+
+        # set X display limits
+        if i == 0:
+            disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
+            xlim = this_axes.get_xlim()
+        this_axes.set_xlim(xlim)
+        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
+        # set Y display limits
+        if plot_zero:
+            show_zero_ylim(this_axes)
+        # format display of plot
+        if legend_loc.lower() != 'none':
+            this_axes.legend(loc=legend_loc)
+        if i == 0:
+            this_axes.set_title(description)
+        if is_datetime(time):
+            this_axes.set_xlabel('Date')
+            assert time_units == 'datetime', 'Mismatch in the expected time units.'
+        else:
+            this_axes.set_xlabel(f'Time [{time_units}]{start_date}')
+        if x_formatter is not None:
+            this_axes.xaxis.set_major_formatter(StrMethodFormatter(x_formatter))
+        if ylabel is None:
+            this_axes.set_ylabel(f'{description} [{units}]')
+        else:
+            this_ylabel = ylabel[i] if isinstance(ylabel, list) else ylabel
+            this_axes.set_ylabel(this_ylabel)
+        this_axes.grid(True)
+        # optionally add second Y axis
+        plot_second_units_wrapper(this_axes, second_yscale)
+        # plot RMS lines
+        if show_rms:
+            plot_vert_lines(this_axes, [rms_pts1, rms_pts2])
+
+    return fig
 
 #%% Functions - make_error_bar_plot
 def make_error_bar_plot(description, time, data, mins, maxs, elements=None, units='', time_units='sec', \
@@ -153,11 +362,8 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
     >>> from dstauffman import make_error_bar_plot
 
     """
-    # Hard-coded values
-    leg_format  = '{:1.3f}'
-
-    # determine if using datetimes
-    use_datetime = False # TODO: test with these
+    # data checks
+    assert description, 'You must give the plot a description.'
 
     # convert rows/cols as necessary
     if not data_as_rows:
@@ -213,7 +419,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
         # standard plot
         for j in loop_counter:
             if show_rms:
-                value = leg_format.format(leg_conv*data_func[j])
+                value = _LEG_FORMAT.format(leg_conv*data_func[j])
                 this_label = '{} ({}: {} {}{})'.format(elements[j], func_name, value, prefix, units)
             else:
                 this_label = elements[j]
@@ -234,10 +440,12 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
         if plot_zero:
             show_zero_ylim(this_axes)
         # format display of plot
-        this_axes.legend(loc=legend_loc)
+        if legend_loc.lower() != 'none':
+            this_axes.legend(loc=legend_loc)
         this_axes.set_title(description)
-        if use_datetime:
+        if is_datetime(time):
             this_axes.set_xlabel('Date')
+            assert time_units == 'datetime', 'Mismatch in the expected time units.'
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if isinstance(ylabel, list):
@@ -382,17 +590,14 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     ...     plt.close(fig)
 
     """
-    # Hard-coded values
-    leg_format  = '{:1.3f}'
-    truth_color = 'k'
+    # data checks
+    assert description, 'You must give the plot a description.'
 
     # determine if you have the quaternions
     have_quat_one = quat_one is not None and np.any(~np.isnan(quat_one))
     have_quat_two = quat_two is not None and np.any(~np.isnan(quat_two))
     have_both     = have_quat_one and have_quat_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
-    # determine if using datetimes
-    use_datetime = False # TODO: test with these
 
     # convert rows/cols as necessary
     if not data_as_rows:
@@ -521,7 +726,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             if have_quat_one:
                 for j in loop_counter:
                     if show_rms:
-                        value = leg_format.format(q1_func[j])
+                        value = _LEG_FORMAT.format(q1_func[j])
                         this_label = '{} {} ({}: {})'.format(name_one, elements[j], func_name, value)
                     else:
                         this_label = name_one + ' ' + elements[j]
@@ -530,7 +735,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             if have_quat_two:
                 for j in loop_counter:
                     if show_rms:
-                        value = leg_format.format(q2_func[j])
+                        value = _LEG_FORMAT.format(q2_func[j])
                         this_label = '{} {} ({}: {})'.format(name_two, elements[j], func_name, value)
                     else:
                         this_label = name_two + ' ' + elements[j]
@@ -543,7 +748,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
                 if not plot_components or (single_lines and i % num_channels != j):
                     continue
                 if show_rms:
-                    value = leg_format.format(leg_conv*nondeg_func[j])
+                    value = _LEG_FORMAT.format(leg_conv*nondeg_func[j])
                     this_label = '{} ({}: {}) {}rad)'.format(elements[j], func_name, value, prefix)
                 else:
                     this_label = elements[j]
@@ -551,7 +756,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
                     color=colororder3.get_color(j))
             if not plot_components or (single_lines and (i + 1) % num_channels == 0):
                 if show_rms:
-                    value = leg_format.format(leg_conv*mag_func)
+                    value = _LEG_FORMAT.format(leg_conv*mag_func)
                     this_label = 'Angle ({}: {} {}rad)'.format(func_name, value, prefix)
                 else:
                     this_label = 'Angle'
@@ -572,21 +777,23 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         # optionally plot truth (after having set axes limits)
         if i < num_rows and have_truth:
             if single_lines:
-                this_axes.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
+                this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
                     linewidth=2, label=truth_name + ' ' + elements[i])
             else:
                 if i == 0:
                     # TODO: add RMS to Truth data?
-                    this_axes.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
+                    this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
                         linewidth=2, label=truth_name)
         # format display of plot
-        this_axes.legend(loc=legend_loc)
+        if legend_loc.lower() != 'none':
+            this_axes.legend(loc=legend_loc)
         if i == 0:
             this_axes.set_title(description + ' Quaternion Components')
         elif (single_lines and i == num_rows) or (not single_lines and i == 1):
             this_axes.set_title(description + ' Difference')
-        if use_datetime:
+        if is_datetime(time_one) or is_datetime(time_two):
             this_axes.set_xlabel('Date')
+            assert time_units == 'datetime', 'Mismatch in the expected time units.'
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if is_diff_plot:
@@ -743,9 +950,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     ...     plt.close(fig)
 
     """
-    # Hard-coded values
-    leg_format  = '{:1.3f}'
-    truth_color = 'k'
+    # data checks
+    assert description, 'You must give the plot a description.'
 
     # determine if you have the histories
     have_data_one = data_one is not None and np.any(~np.isnan(data_one))
@@ -763,8 +969,6 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         if have_truth:
             truth_data = truth_data.T
 
-    # determine if using datetimes
-    use_datetime = False # TODO: test with these
     # calculate sizes
     s1 = data_one.shape[0] if data_one is not None else 0
     s2 = data_two.shape[0] if data_two is not None else 0
@@ -879,7 +1083,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             if have_data_one:
                 for j in loop_counter:
                     if show_rms:
-                        value = leg_format.format(leg_conv*data1_func[j])
+                        value = _LEG_FORMAT.format(leg_conv*data1_func[j])
                         this_label = '{} {} ({}: {} {}{})'.format(name_one, elements[j], func_name, value, prefix, units)
                     else:
                         this_label = name_one + ' ' + elements[j]
@@ -888,7 +1092,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             if have_data_two:
                 for j in loop_counter:
                     if show_rms:
-                        value = leg_format.format(leg_conv*data2_func[j])
+                        value = _LEG_FORMAT.format(leg_conv*data2_func[j])
                         this_label = '{} {} ({}: {} {}{})'.format(name_two, elements[j], func_name, value, prefix, units)
                     else:
                         this_label = name_two + ' ' + elements[j]
@@ -900,7 +1104,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                 if single_lines and i % num_channels != j:
                     continue
                 if show_rms:
-                    value = leg_format.format(leg_conv*nondeg_func[j])
+                    value = _LEG_FORMAT.format(leg_conv*nondeg_func[j])
                     this_label = '{} ({}: {}) {}{})'.format(elements[j], func_name, value, prefix, units)
                 else:
                     this_label = elements[j]
@@ -922,21 +1126,23 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         # optionally plot truth (after having set axes limits)
         if i < num_rows and have_truth:
             if single_lines:
-                this_axes.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
+                this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
                     linewidth=2, label=truth_name + ' ' + elements[i])
             else:
                 if i == 0:
                     # TODO: add RMS to Truth data?
-                    this_axes.plot(truth_time, truth_data[i, :], '.-', color=truth_color, markerfacecolor=truth_color, \
+                    this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
                         linewidth=2, label=truth_name)
         # format display of plot
-        this_axes.legend(loc=legend_loc)
+        if legend_loc.lower() != 'none':
+            this_axes.legend(loc=legend_loc)
         if i == 0:
             this_axes.set_title(description)
         elif (single_lines and i == num_rows) or (not single_lines and i == 1):
             this_axes.set_title(description + ' Difference')
-        if use_datetime:
+        if is_datetime(time_one) or is_datetime(time_two):
             this_axes.set_xlabel('Date')
+            assert time_units == 'datetime', 'Mismatch in the expected time units.'
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if ylabel is None:
