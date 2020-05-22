@@ -31,7 +31,7 @@ from dstauffman.utils import pprint_dict
 #%% Classes - Opts
 class Opts(Frozen):
     r"""Optional plotting configurations."""
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         r"""
         Default configuration with:
             .case_name : str
@@ -114,11 +114,26 @@ class Opts(Frozen):
         self.leg_spot  = 'best'
         self.classify  = ''
         self.names     = list()
+        for arg in args:
+            if arg is None:
+                continue
+            if isinstance(arg, self.__class__):
+                for (key, value) in vars(arg).items():
+                    if hasattr(self, key):
+                        setattr(self, key, value)
+                    else:
+                        raise ValueError(f'Unexpected option of "{key}" passed to Opts initializer."')
+            else:
+                raise ValueError('Unexpected input argument receieved.')
         for (key, value) in kwargs.items():
             if hasattr(self, key):
                 setattr(self, key, value)
             else:
                 raise ValueError(f'Unexpected option of "{key}" passed to Opts initializer."')
+
+    def __copy__(self):
+        new = type(self)(self)
+        return new
 
     def get_names(self, ix):
         r"""Get the specified name from the list."""
@@ -156,7 +171,7 @@ class Opts(Frozen):
         pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
 
 #%% Functions - plot_time_history
-def plot_time_history(description, time, data, opts=None, *, ignore_empties=False, save_plot=None, **kwargs):
+def plot_time_history(description, time, data, opts=None, *, ignore_empties=False, **kwargs):
     r"""
     Plot multiple metrics over time.
 
@@ -211,18 +226,16 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     time = np.atleast_1d(np.asanyarray(time))
     data = np.asanyarray(data)
 
-    # check optional inputs
-    if opts is None:
-        opts = Opts()
-
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
         print(f' {description} plot skipped due to missing data.')
         return None
     assert time.ndim == 1, 'Time must be a 1D array.'
 
+    # make local copy of opts that can be modified without changing the original
+    this_opts = Opts(opts)
     # opts overrides
-    opts.save_plot = kwargs.pop('save_plot', opts.save_plot) # TODO: does this modify the base version?
+    this_opts.save_plot = kwargs.pop('save_plot', opts.save_plot) # TODO: does this modify the base version?
 
     # alias opts
     time_units   = kwargs.pop('time_units', opts.time_base)
@@ -245,7 +258,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
         use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, **kwargs)
 
     # setup plots
-    setup_plots(fig, opts)
+    setup_plots(fig, this_opts)
     return fig
 
 #%% Functions - plot_correlation_matrix
