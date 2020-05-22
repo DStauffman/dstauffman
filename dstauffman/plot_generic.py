@@ -19,6 +19,7 @@ from matplotlib.ticker import StrMethodFormatter
 import numpy as np
 
 # model imports
+from dstauffman.constants    import DEFAULT_COLORMAP
 from dstauffman.plot_support import ColorMap, disp_xlimits, get_color_lists, get_rms_indices, \
                                         is_datetime, plot_second_units_wrapper, plot_vert_lines, \
                                         show_zero_ylim, zoom_ylim
@@ -35,7 +36,7 @@ _TRUTH_COLOR = 'k'
 #%% Functions - make_time_plot
 def make_time_plot(description, time, data, name='', elements=None, units='', time_units='sec',
         leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf,
-        disp_xmax=np.inf, single_lines=False, colormap=None, use_mean=False, plot_zero=False,
+        disp_xmax=np.inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False,
         show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True,
         x_formatter=None):
     r"""
@@ -114,7 +115,7 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
     >>> disp_xmin = -np.inf
     >>> disp_xmax = np.inf
     >>> single_lines = False
-    >>> colormap = None
+    >>> colormap = 'Paired'
     >>> use_mean = False
     >>> plot_zero = False
     >>> show_rms = True
@@ -238,7 +239,7 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
 #%% Functions - make_error_bar_plot
 def make_error_bar_plot(description, time, data, mins, maxs, elements=None, units='', time_units='sec', \
         leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
-        disp_xmax=np.inf, single_lines=False, colormap=None, use_mean=False, \
+        disp_xmax=np.inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
         plot_zero=False, show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, \
         data_as_rows=True):
     r"""
@@ -812,7 +813,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
 def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         name_one='', name_two='', elements=None, units=None, time_units='sec', leg_scale='unity',
         start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
-        make_subplots=True, single_lines=False, colormap=None, use_mean=False,
+        make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False,
         plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None,
         ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True):
     r"""

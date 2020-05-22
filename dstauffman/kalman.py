@@ -12,6 +12,8 @@ Notes
 import doctest
 import unittest
 
+from matplotlib.colors import ListedColormap
+
 from dstauffman.classes import Frozen
 from dstauffman.plot_generic import make_difference_plot, make_quaternion_plot
 from dstauffman.plot_support import get_color_lists, setup_plots
@@ -228,12 +230,12 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
         opts = Opts()
 
     # hard-coded values
-    elements       = ['x', 'y', 'z']
-    units          = 'm'
-    leg_scale      = 'kilo'
-    second_y_scale = {'m': 1e3}
-    color_lists     = get_color_lists()
-    colormap        = color_lists['vec']
+    elements      = ['x', 'y', 'z']
+    units         = 'm'
+    leg_scale     = 'kilo'
+    second_yscale = {'km': 1e-3}
+    color_lists   = get_color_lists()
+    colormap      = ListedColormap(color_lists['vec_diff'].colors + color_lists['vec'].colors)
 
     # call wrapper function for most of the details
     (figs, err) = make_difference_plot('Position', kf1.time, kf2.time, kf1.pos, kf2.pos,
@@ -241,7 +243,7 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
         start_date=opts.get_date_zero_str(), rms_xmin=opts.rms_xmin, rms_xmax=opts.rms_xmax, \
         disp_xmin=opts.disp_xmin, disp_xmax=opts.disp_xmax, make_subplots=opts.sub_plots, \
         colormap=colormap, use_mean=opts.use_mean, plot_zero=opts.show_zero, \
-        show_rms=opts.show_rms, legend_loc=opts.leg_spot, second_y_scale=second_y_scale)
+        show_rms=opts.show_rms, legend_loc=opts.leg_spot, second_yscale=second_yscale)
     # Setup plots
     setup_plots(figs, opts)
     return (figs, err)

@@ -1354,10 +1354,10 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
     if plots['innovs']:
         if bpe_results.begin_innovs is not None and bpe_results.final_innovs is not None:
             time = np.arange(len(bpe_results.begin_innovs))
-            data = np.vstack((bpe_results.begin_innovs, bpe_results.final_innovs)).T
+            data = np.vstack((bpe_results.begin_innovs, bpe_results.final_innovs))
             opts.colormap = 'bwr_r'
-            fig = plot_time_history(time, data, label='Innovs Before and After', opts=opts, \
-                legend=['Before', 'After'])
+            fig = plot_time_history('Innovs Before and After', time, data, opts=opts, \
+                elements=['Before', 'After'])
             figs.append(fig)
         else:
             print("Data isn't available for Innovations plot.")

@@ -112,7 +112,7 @@ if __name__ == '__main__':
     truth      = dcs.TruthPlotter(truth_time, truth_data)
 
     # Logger
-    dcs.bpe.logger.setLevel(logging.DEBUG)
+    dcs.estimation.logger.setLevel(logging.DEBUG)
 
     # BPE Settings
     opti_opts = dcs.OptiOpts()
@@ -160,7 +160,7 @@ if __name__ == '__main__':
         opts.save_plot = True
 
         # make model plots
-        dcs.plot_monte_carlo(time, results, 'Output vs. Time', opts=opts, truth=truth)
+        dcs.plot_health_monte_carlo(time, results, 'Output vs. Time', opts=opts, truth=truth)
 
         # make BPE plots
         bpe_plots = {'innovs': True, 'convergence': False, 'correlation': True, 'info_svd': True, \

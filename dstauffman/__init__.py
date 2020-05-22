@@ -31,6 +31,7 @@ from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_
                               get_output_dir, list_python_files
 from .plot_generic import make_time_plot, make_error_bar_plot, make_quaternion_plot, \
                               make_difference_plot
+from .plot_health  import plot_health_time_history, plot_health_monte_carlo
 from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
                               get_color_lists, ignore_plot_data, whitten, resolve_name, storefig, \
                               titleprefix, disp_xlimits, zoom_ylim, setup_plots, figmenu, \
@@ -38,8 +39,7 @@ from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, clos
                               plot_second_units_wrapper, plot_second_yunits, get_rms_indices, \
                               plot_vert_lines, plot_phases, get_classification, \
                               plot_classification, is_datetime
-from .plotting     import Opts, plot_time_history, plot_monte_carlo, plot_correlation_matrix, \
-                              plot_bar_breakdown
+from .plotting     import Opts, plot_time_history, plot_correlation_matrix, plot_bar_breakdown
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
                               quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
                               quat_to_dcm, quat_to_euler
