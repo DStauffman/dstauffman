@@ -235,21 +235,21 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts(opts)
     # opts overrides
-    this_opts.save_plot = kwargs.pop('save_plot', opts.save_plot) # TODO: does this modify the base version?
+    this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
 
     # alias opts
-    time_units   = kwargs.pop('time_units', opts.time_base)
-    start_date   = kwargs.pop('start_date', opts.get_date_zero_str())
-    rms_xmin     = kwargs.pop('rms_xmin', opts.rms_xmin)
-    rms_xmax     = kwargs.pop('rms_xmax', opts.rms_xmax)
-    disp_xmin    = kwargs.pop('disp_xmin', opts.disp_xmin)
-    disp_xmax    = kwargs.pop('disp_xmax', opts.disp_xmax)
-    single_lines = kwargs.pop('single_lines', opts.sing_line)
-    colormap     = kwargs.pop('colormap', opts.colormap)
-    use_mean     = kwargs.pop('use_mean', opts.use_mean)
-    plot_zero    = kwargs.pop('plot_zero', opts.show_zero)
-    show_rms     = kwargs.pop('show_rms', opts.show_rms)
-    legend_loc   = kwargs.pop('legend_loc', opts.leg_spot)
+    time_units   = kwargs.pop('time_units', this_opts.time_base)
+    start_date   = kwargs.pop('start_date', this_opts.get_date_zero_str())
+    rms_xmin     = kwargs.pop('rms_xmin', this_opts.rms_xmin)
+    rms_xmax     = kwargs.pop('rms_xmax', this_opts.rms_xmax)
+    disp_xmin    = kwargs.pop('disp_xmin', this_opts.disp_xmin)
+    disp_xmax    = kwargs.pop('disp_xmax', this_opts.disp_xmax)
+    single_lines = kwargs.pop('single_lines', this_opts.sing_line)
+    colormap     = kwargs.pop('colormap', this_opts.colormap)
+    use_mean     = kwargs.pop('use_mean', this_opts.use_mean)
+    plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
+    show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
+    legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
     # call wrapper function for most of the details
     fig = make_time_plot(description, time, data, \

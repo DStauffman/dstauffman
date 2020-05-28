@@ -967,43 +967,37 @@ class Test_get_rms_indices(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        self.time_one     = np.arange(11)
-        self.time_two     = np.arange(2, 13)
-        self.time_overlap = np.arange(2, 11)
-        self.xmin         = 1
-        self.xmax         = 8
-        self.rms_ix1      = np.array([False,  True,  True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
-        self.rms_ix2      = np.array([ True,  True,  True,  True,  True,  True,  True, False, False, False, False], dtype=bool)
-        self.rms_ix3      = np.array([ True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
-        self.rms_pts1     = 1
-        self.rms_pts2     = 8
+        self.time_one       = np.arange(11)
+        self.time_two       = np.arange(2, 13)
+        self.time_overlap   = np.arange(2, 11)
+        self.xmin           = 1
+        self.xmax           = 8
+        self.exp            = dict()
+        self.exp['one']     = np.array([False,  True,  True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
+        self.exp['two']     = np.array([ True,  True,  True,  True,  True,  True,  True, False, False, False, False], dtype=bool)
+        self.exp['overlap'] = np.array([ True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
+        self.exp['pts']     = [1, 8]
 
     def test_nominal(self):
-        (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = dcs.get_rms_indices(self.time_one, self.time_two, \
-            self.time_overlap, xmin=self.xmin, xmax=self.xmax)
-        np.testing.assert_array_equal(rms_ix1, self.rms_ix1)
-        np.testing.assert_array_equal(rms_ix2, self.rms_ix2)
-        np.testing.assert_array_equal(rms_ix3, self.rms_ix3)
-        self.assertEqual(rms_pts1, self.rms_pts1)
-        self.assertEqual(rms_pts2, self.rms_pts2)
+        ix = dcs.get_rms_indices(self.time_one, self.time_two, self.time_overlap, xmin=self.xmin, xmax=self.xmax)
+        for key in ix.keys():
+            np.testing.assert_array_equal(ix[key], self.exp[key])
 
     def test_only_time_one(self):
-        (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = dcs.get_rms_indices(self.time_one, None, \
-            None, xmin=self.xmin, xmax=self.xmax)
-        np.testing.assert_array_equal(rms_ix1, self.rms_ix1)
-        self.assertEqual(rms_ix2.size, 0)
-        self.assertEqual(rms_ix3.size, 0)
-        self.assertEqual(rms_pts1, self.rms_pts1)
-        self.assertEqual(rms_pts2, self.rms_pts2)
+        self.exp['two'] = np.array([])
+        self.exp['overlap'] = np.array([])
+        ix = dcs.get_rms_indices(self.time_one, None, None, xmin=self.xmin, xmax=self.xmax)
+        for key in ix.keys():
+            np.testing.assert_array_equal(ix[key], self.exp[key])
 
     def test_no_bounds(self):
-        (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = dcs.get_rms_indices(self.time_one, self.time_two, \
-            self.time_overlap)
-        np.testing.assert_array_equal(rms_ix1, np.ones(self.rms_ix1.shape, dtype=bool))
-        np.testing.assert_array_equal(rms_ix2, np.ones(self.rms_ix2.shape, dtype=bool))
-        np.testing.assert_array_equal(rms_ix3, np.ones(self.rms_ix3.shape, dtype=bool))
-        self.assertEqual(rms_pts1, 0)
-        self.assertEqual(rms_pts2, 12)
+        self.exp['one'].fill(True)
+        self.exp['two'].fill(True)
+        self.exp['overlap'].fill(True)
+        self.exp['pts'] = [0, 12]
+        ix = dcs.get_rms_indices(self.time_one, self.time_two, self.time_overlap)
+        for key in ix.keys():
+            np.testing.assert_array_equal(ix[key], self.exp[key])
 
     def test_datetime64(self):
         pass # TODO: write this

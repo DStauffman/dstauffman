@@ -398,10 +398,37 @@ def close_all(figs=None):
 def get_color_lists():
     r"""
     Gets different color lists to use for plotting
+
+    Returns
+    -------
+    color_lists : dict
+        Lists of colors, either as str or matplotlib.colors.ListedColormap
+        includes:
+            default   : Default scheme to use when plotting
+            same      : Each color will be the same, and match the first color from default
+            same_old  : Each color will be the same, with the matplotlib default medium bluish color (#1f77b4)
+            single    : When you only want one color
+            double    : For two colors
+            vec       : For three colors
+            quat      : For four colors
+            dbl_diff  : For 2x2 related colors, giving four total
+            vec_diff  : For 3x2 related colors, giving six total
+            quat_diff : For 4x2 related colors, giving eight total
+
+    Examples
+    --------
+    >>> from dstauffman import get_color_lists
+    >>> colors = get_color_lists()
+    >>> print(color_lists['default'])
+    Paired
+
     """
     color_lists              = {}
     color_lists['default']   = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
-    color_lists['single']    = colors.ListedColormap(('xkcd:red',))
+    first_color              = ColorMap(color_lists['default'], num_colors=1).get_color(0)
+    color_lists['same']      = colors.ListedColormap([first_color for _ in range(8)])
+    color_lists['same_old']  = colors.ListedColormap(['#1f77b4' for _ in range(8)])
+    color_lists['single']    = colors.ListedColormap(('xkcd:red', ))
     color_lists['double']    = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
     color_lists['vec']       = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
     color_lists['quat']      = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
@@ -1217,16 +1244,16 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
 
     Returns
     -------
-    rms_ix1 : (A, ) ndarray of bool
-        Array of indices into time_one between the rms bounds
-    rms_ix2 : (B, ) ndarray of bool
-        Array of indices into time_two between the rms bounds
-    rms_ix3 : (C, ) ndarray of bool
-        Array of indices into time_overlap between the rms bounds
-    rms_pts1 : float
-        Time to start the RMS calculations from
-    rms_pts2 : float
-        Time to end the RMS calculations at
+    ix : dict
+        Dictionary of indices, with fields:
+        pts : [2, ] float
+            Time to start and end the RMS calculations from
+        one : (A, ) ndarray of bool
+            Array of indices into time_one between the rms bounds
+        two : (B, ) ndarray of bool
+            Array of indices into time_two between the rms bounds
+        overlap : (C, ) ndarray of bool
+            Array of indices into time_overlap between the rms bounds
 
     Notes
     -----
@@ -1241,13 +1268,26 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
     >>> time_overlap = np.arange(2, 11)
     >>> xmin         = 1
     >>> xmax         = 8
-    >>> (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = get_rms_indices(time_one, time_two, \
-    ...     time_overlap, xmin=xmin, xmax=xmax)
-    >>> print(rms_pts1, rms_pts2)
-    1 8
+    >>> ix = get_rms_indices(time_one, time_two, time_overlap, xmin=xmin, xmax=xmax)
+    >>> print(ix['pts'])
+    [1, 8]
 
     """
+    def _process(time):
+        r"""Determines if the given time should be processed."""
+        if is_datetime(time):
+            # if datetime, it's either the datetime.datetime version, or np.datetime64 version
+            if isinstance(time, datetime.datetime):
+                process = True
+            else:
+                process = not np.isnat(time)
+        else:
+            process = not np.isnan(time) and not np.isinf(time)
+        return process
+
     # TODO: functionalize this more so there is less repeated code
+    # initialize output
+    ix = {'pts': [], 'one': np.array([], dtype=bool), 'two': np.array([], dtype=bool), 'overlap': np.array([], dtype=bool)}
     # alias some flags
     have1 = time_one is not None
     have2 = time_two is not None
@@ -1276,57 +1316,32 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
     #    t_min = t_min.to_datetime64()
     #if isinstance(t_max, pd.Timestamp):
     #    t_max = t_max.to_datetime64()
-    if is_datetime(xmin):
-        # if datetime, it's either the datetime.datetime version, or np.datetime64 version
-        if isinstance(xmin, datetime.datetime):
-            process = True
-        else:
-            process = not np.isnat(xmin)
+    if _process(xmin):
+        if have1: p1_min = time_one >= xmin
+        if have2: p2_min = time_two >= xmin
+        if have3: p3_min = time_overlap >= xmin
+        ix['pts'].append(np.maximum(xmin, t_min))
     else:
-        process = not np.isnan(xmin) and not np.isinf(xmin)
-    if process:
-        if have1:
-            p1_min = time_one >= xmin
-        if have2:
-            p2_min = time_two >= xmin
-        if have3:
-            p3_min = time_overlap >= xmin
-        rms_pts1 = np.maximum(xmin, t_min)
+        if have1: p1_min = np.ones(time_one.shape,     dtype=bool)
+        if have2: p2_min = np.ones(time_two.shape,     dtype=bool)
+        if have3: p3_min = np.ones(time_overlap.shape, dtype=bool)
+        ix['pts'].append(t_min)
+    if _process(xmax):
+        if have1: p1_max = time_one <= xmax
+        if have2: p2_max = time_two <= xmax
+        if have3: p3_max = time_overlap <= xmax
+        ix['pts'].append(np.minimum(xmax, t_max))
     else:
-        if have1:
-            p1_min = np.ones(time_one.shape,     dtype=bool)
-        if have2:
-            p2_min = np.ones(time_two.shape,     dtype=bool)
-        if have3:
-            p3_min = np.ones(time_overlap.shape, dtype=bool)
-        rms_pts1 = t_min
-    if is_datetime(xmax):
-        if isinstance(xmax, datetime.datetime):
-            process = True
-        else:
-            process = not np.isnat(xmax)
-    else:
-        process = not np.isnan(xmax) and not np.isinf(xmax)
-    if process:
-        if have1:
-            p1_max = time_one <= xmax
-        if have2:
-            p2_max = time_two <= xmax
-        if have3:
-            p3_max = time_overlap <= xmax
-        rms_pts2 = np.minimum(xmax, t_max)
-    else:
-        if have1:
-            p1_max = np.ones(time_one.shape,     dtype=bool)
-        if have2:
-            p2_max = np.ones(time_two.shape,     dtype=bool)
-        if have3:
-            p3_max = np.ones(time_overlap.shape, dtype=bool)
-        rms_pts2 = t_max
-    rms_ix1 = p1_min & p1_max if have1 else np.array([], dtype=bool)
-    rms_ix2 = p2_min & p2_max if have2 else np.array([], dtype=bool)
-    rms_ix3 = p3_min & p3_max if have3 else np.array([], dtype=bool)
-    return (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2)
+        if have1: p1_max = np.ones(time_one.shape,     dtype=bool)
+        if have2: p2_max = np.ones(time_two.shape,     dtype=bool)
+        if have3: p3_max = np.ones(time_overlap.shape, dtype=bool)
+        ix['pts'].append(t_max)
+    assert len(ix['pts']) == 2 and ix['pts'][0] <= ix['pts'][1], 'Time points aren\'t as expected: "{}"'.format(ix['pts'])
+    # calculate indices
+    if have1: ix['one']     = p1_min & p1_max
+    if have2: ix['two']     = p2_min & p2_max
+    if have3: ix['overlap'] = p3_min & p3_max
+    return ix
 
 #%% Functions - plot_vert_lines
 def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):

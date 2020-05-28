@@ -15,7 +15,6 @@ import platform
 import sys
 import time
 import unittest
-from datetime import datetime
 from unittest.mock import patch
 
 import numpy as np
@@ -554,26 +553,6 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertEqual(output, '')
         self.assertFalse(is_same)
 
-#%% round_time
-class Test_round_time(unittest.TestCase):
-    r"""
-    Tests the round_time function with these cases:
-        normal use (round to one minute)
-        extended use (round to a different specified time)
-        get current time
-    """
-    def test_normal_use(self):
-        rounded_time = dcs.round_time(datetime(2015, 3, 13, 8, 4, 10))
-        self.assertEqual(rounded_time, datetime(2015, 3, 13, 8, 4, 0))
-
-    def test_extended_use(self):
-        rounded_time = dcs.round_time(datetime(2015, 3, 13, 8, 4, 10), round_to_sec=300)
-        self.assertEqual(rounded_time, datetime(2015, 3, 13, 8, 5, 0))
-
-    def test_current_time(self):
-        dcs.round_time()
-        self.assertTrue(True)
-
 #%% read_text_file
 class Test_read_text_file(unittest.TestCase):
     r"""
@@ -1092,6 +1071,69 @@ class Test_get_env_var(unittest.TestCase):
         with self.assertRaises(KeyError):
             dcs.get_env_var('HOME')
         dcs._ALLOWED_ENVS = None
+
+#%% fix_rollover
+@patch('dstauffman.utils.logger')
+class Test_fix_rollover(unittest.TestCase):
+    r"""
+    Tests the fix_rollover function with the following cases:
+        Nominal
+        Matrix dim 1
+        Matrix dim 2
+        Log level 1
+        Optional inputs
+    """
+    def setUp(self):
+        self.data  = np.array([1, 2, 3, 4, 5, 6, 0, 1,  3,  6,  0,  6,  5, 2])
+        self.data2 = np.array([])
+        self.exp   = np.array([1, 2, 3, 4, 5, 6, 7, 8, 10, 13, 14, 13, 12, 9])
+        self.roll  = 7
+        self.axis  = None
+
+
+    def test_nominal(self, mock_logger):
+        unrolled = dcs.fix_rollover(self.data, self.roll)
+        np.testing.assert_array_equal(unrolled, self.exp)
+        mock_logger.info.assert_any_call('corrected 1 bottom to top rollover(s)')
+        mock_logger.info.assert_called_with('corrected 2 top to bottom rollover(s)')
+        self.assertEqual(mock_logger.info.call_count, 2)
+
+    def test_matrix_dim1(self, mock_logger):
+        self.axis = 0
+        data      = np.vstack((self.data, self.data))
+        exp       = np.vstack((self.data, self.data))
+        unrolled  = dcs.fix_rollover(data, self.roll, axis=self.axis)
+        np.testing.assert_array_equal(unrolled, exp)
+        mock_logger.info.assert_not_called()
+
+    def test_matrix_dim2(self, mock_logger):
+        self.axis  = 1
+        self.data2 = np.vstack((self.data, self.data))
+        exp        = np.vstack((self.exp, self.exp))
+        unrolled   = dcs.fix_rollover(self.data2, self.roll, axis=self.axis)
+        np.testing.assert_array_equal(unrolled, exp)
+        mock_logger.info.assert_any_call('corrected 1 bottom to top rollover(s)')
+        mock_logger.info.assert_called_with('corrected 2 top to bottom rollover(s)')
+        self.assertEqual(mock_logger.info.call_count, 4)
+
+    def test_non_integer_roll(self, mock_logger):
+        exp      = np.arange(0., 10.1, 0.1)
+        roll     = 3.35
+        data     = roll * ((exp / roll) % 1)
+        unrolled = dcs.fix_rollover(data, roll)
+        np.testing.assert_array_almost_equal(unrolled, exp, decimal=12)
+        mock_logger.info.assert_called_once_with('corrected 2 top to bottom rollover(s)')
+
+    def test_signed_rollover(self, mock_logger):
+        exp  = np.arange(21)
+        data = np.array([0, 1, 2, 3, -4, -3, -2, -1, 0, 1, 2, 3, -4, -3, -2, -1, 0, 1, 2, 3, -4])
+        roll = 8
+        unrolled = dcs.fix_rollover(data, roll)
+        np.testing.assert_array_equal(unrolled, exp)
+        mock_logger.info.assert_called_with('corrected 3 top to bottom rollover(s)')
+
+    def test_recursive(self, mock_logger):
+        pass # TODO: figure out a test case where this actually happens.  I think the code was there for a reason?
 
 #%% Unit test execution
 if __name__ == '__main__':

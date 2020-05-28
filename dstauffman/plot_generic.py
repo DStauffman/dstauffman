@@ -132,34 +132,55 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
     ...     data_as_rows=data_as_rows, x_formatter=x_formatter)
 
     """
+    # some basic flags
+    time_is_list = isinstance(time, list)
+    data_is_list = isinstance(data, list)
+
     # data checks
     assert description, 'You must give the plot a description.'
-    data = np.atleast_2d(data)
 
     # convert rows/cols as necessary
-    if not data_as_rows:
-        # TODO: is this the best way or make branches lower?
-        data = data.T
+    if data is not list:
+        data = np.atleast_2d(data)
+        if not data_as_rows:
+            # TODO: is this the best way or make branches lower?
+            data = data.T
 
     # calculate sizes
-    s1 = data.shape[0] if data is not None else 0
+    temp1 = len(time) if time_is_list else 1
+    temp2 = len(data) if data_is_list else data.shape[0] if data is not None else 0
     if elements is None:
-        elements = [f'Channel {i+1}' for i in range(s1)]
+        elements = [f'Channel {i+1}' for i in range(temp2)]
     num_channels = len(elements)
-    assert s1 == num_channels or s1 == 0, "The data doesn't match the number of elements."
+    assert temp2 == 0 or temp2 == num_channels, "The data doesn't match the number of elements."
+    assert temp1 == 1 or temp2 == 0 or temp1 == temp2, "The time doesn't match the size of the data."
 
     #% Calculations
     # build RMS indices
-    (rms_ix1, _, _, rms_pts1, rms_pts2) = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
+    if data_is_list:
+        ix = {'one': [], 't_min': None, 't_max': None}
+        for j in range(num_channels):
+            temp_ix = get_rms_indices(time[j], xmin=rms_xmin, xmax=rms_xmax)
+            ix['one'].append(temp_ix['one'])
+            if j == 0:
+                ix['pts'] = temp_ix['pts']
+            else:
+                ix['pts'] = [min((ix['pts'][0], temp_ix['pts'][0])), max((ix['pts'][1], temp_ix['pts'][1]))]
+    else:
+        ix = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
     # create a colormap
     cm = ColorMap(colormap=colormap, num_colors=num_channels)
     # calculate the rms (or mean) values
     if not use_mean:
-        func_name  = 'RMS'
-        data_func  = rms(data[:, rms_ix1], axis=1, ignore_nans=True)
+        func_name = 'RMS'
+        func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
     else:
-        func_name  = 'Mean'
-        data_func  = np.nanmean(data[:, rms_ix1], axis=1)
+        func_name = 'Mean'
+        func_lamb = lambda x, y: np.nanmean(x, axis=y)
+    if data_is_list:
+        data_func = func_lamb(data[j][ix['one']], None)
+    else:
+        data_func = func_lamb(data[:, ix['one']], 1)
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
@@ -198,7 +219,9 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
                     this_label += f' ({func_name}: {value} {prefix}{units})'
                 else:
                     this_label += f' ({func_name}: {value})'
-            this_axes.plot(time, data[j, :], '.-', markersize=4, label=this_label, \
+            this_time = time[j] if time_is_list else time
+            this_data = data[j] if data_is_list else data[j, :]
+            this_axes.plot(this_time, this_data, '.-', markersize=4, label=this_label, \
                 color=cm.get_color(j), zorder=3)
 
         # set X display limits
@@ -232,7 +255,7 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
         plot_second_units_wrapper(this_axes, second_yscale)
         # plot RMS lines
         if show_rms:
-            plot_vert_lines(this_axes, [rms_pts1, rms_pts2])
+            plot_vert_lines(this_axes, ix['pts'])
 
     return fig
 
@@ -375,17 +398,18 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
 
     #% Calculations
     # build RMS indices
-    (rms_ix, _, _, rms_pts1, rms_pts2) = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
+    ix = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
     # find number of elements being differenced
     num_channels = len(elements)
     cm = ColorMap(colormap=colormap, num_colors=num_channels)
     # calculate the rms (or mean) values
     if not use_mean:
         func_name = 'RMS'
-        data_func = rms(data[:, rms_ix], axis=1, ignore_nans=True)
+        func_lamb = lambda x: rms(x, axis=1, ignore_nans=True)
     else:
         func_name = 'Mean'
-        data_func = np.nanmean(data[:, rms_ix], axis=1, ignore_nans=True)
+        func_lamb = lambda x: np.nanmean(x, axis=1)
+    data_func = func_lamb(data[:, ix['one']])
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
@@ -462,7 +486,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
         plot_second_units_wrapper(this_axes, second_yscale)
         # plot RMS lines
         if show_rms:
-            plot_vert_lines(this_axes, [rms_pts1, rms_pts2])
+            plot_vert_lines(this_axes, ix['pts'])
 
     return fig
 
@@ -617,8 +641,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     q1_miss_ix = np.setxor1d(np.arange(len(time_one)), q1_diff_ix)
     q2_miss_ix = np.setxor1d(np.arange(len(time_two)), q2_diff_ix)
     # build RMS indices
-    (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = get_rms_indices(time_one, time_two, \
-        time_overlap, xmin=rms_xmin, xmax=rms_xmax)
+    ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)
     # get default plotting colors
     color_lists = get_color_lists()
     colororder3 = ColorMap(color_lists['vec'], num_colors=3)
@@ -632,17 +655,15 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     # calculate the rms (or mean) values
     nans = np.full(3, np.nan, dtype=float)
     if not use_mean:
-        func_name   = 'RMS'
-        q1_func     = rms(quat_one[:, rms_ix1], axis=1, ignore_nans=True) if have_quat_one else nans
-        q2_func     = rms(quat_two[:, rms_ix2], axis=1, ignore_nans=True) if have_quat_two else nans
-        nondeg_func = rms(nondeg_error[:, rms_ix3], axis=1, ignore_nans=True) if have_both else nans
-        mag_func    = rms(nondeg_angle[rms_ix3], axis=0, ignore_nans=True) if have_both else nans[0:1]
+        func_name = 'RMS'
+        func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
     else:
-        func_name   = 'Mean'
-        q1_func     = np.nanmean(quat_one[:, rms_ix1], axis=1) if have_quat_one else nans
-        q2_func     = np.nanmean(quat_two[:, rms_ix2], axis=1) if have_quat_two else nans
-        nondeg_func = np.nanmean(nondeg_error[:, rms_ix3], axis=1) if have_both else nans
-        mag_func    = np.nanmean(nondeg_angle[rms_ix3], axis=0) if have_both else nans[0:1]
+        func_name = 'Mean'
+        func_lamb = lambda x, y: np.nanmean(x, axis=y)
+    q1_func     = func_lamb(quat_one[:, ix['one']], 1) if have_quat_one else nans
+    q2_func     = func_lamb(quat_two[:, ix['two']], 1) if have_quat_two else nans
+    nondeg_func = func_lamb(nondeg_error[:, ix['overlap']], 1) if have_both else nans
+    mag_func    = func_lamb(nondeg_angle[ix['overlap']], 0) if have_both else nans[0:1]
     # output errors
     err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
     # unit conversion value
@@ -805,7 +826,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         this_axes.grid(True)
         # plot RMS lines
         if show_rms:
-            plot_vert_lines(this_axes, [rms_pts1, rms_pts2])
+            plot_vert_lines(this_axes, ix['pts'])
 
     return (fig_hand, err)
 
@@ -984,8 +1005,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)
     d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)
     # build RMS indices
-    (rms_ix1, rms_ix2, rms_ix3, rms_pts1, rms_pts2) = get_rms_indices(time_one, time_two, \
-        time_overlap, xmin=rms_xmin, xmax=rms_xmax)
+    ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)
     # create a colormap
     cm = ColorMap(colormap=colormap, num_colors=3*num_channels)
     # calculate the differences
@@ -994,15 +1014,14 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     # calculate the rms (or mean) values
     nans = np.full(num_channels, np.nan, dtype=float)
     if not use_mean:
-        func_name   = 'RMS'
-        data1_func  = rms(data_one[:, rms_ix1], axis=1, ignore_nans=True) if have_data_one and np.any(rms_ix1) else nans
-        data2_func  = rms(data_two[:, rms_ix2], axis=1, ignore_nans=True) if have_data_two and np.any(rms_ix2) else nans
-        nondeg_func = rms(nondeg_error[:, rms_ix3], axis=1, ignore_nans=True) if have_both and np.any(rms_ix3) else nans
+        func_name = 'RMS'
+        func_lamb = lambda x: rms(x, axis=1, ignore_nans=True)
     else:
-        func_name   = 'Mean'
-        data1_func  = np.nanmean(data_one[:, rms_ix1], axis=1) if have_data_one and np.any(rms_ix1) else nans
-        data2_func  = np.nanmean(data_two[:, rms_ix2], axis=1) if have_data_two and np.any(rms_ix2) else nans
-        nondeg_func = np.nanmean(nondeg_error[:, rms_ix3], axis=1) if have_both and np.any(rms_ix3) else nans
+        func_name = 'Mean'
+        func_lamb = lambda x: np.nanmean(x, axis=1)
+    data1_func    = func_lamb(data_one[:, ix['one']]) if have_data_one and np.any(ix['one']) else nans
+    data2_func    = func_lamb(data_two[:, ix['two']]) if have_data_two and np.any(ix['two']) else nans
+    nondeg_func   = func_lamb(nondeg_error[:, ix['overlap']]) if have_both and np.any(ix['overlap']) else nans
     # output errors
     err = {'one': data1_func, 'two': data2_func, 'diff': nondeg_func}
     # unit conversion value
@@ -1143,7 +1162,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             this_axes.set_title(description + ' Difference')
         if is_datetime(time_one) or is_datetime(time_two):
             this_axes.set_xlabel('Date')
-            assert time_units == 'datetime', 'Mismatch in the expected time units.'
+            assert time_units == 'datetime', f'Expected time units of "datetime", not "{time_units}".'
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if ylabel is None:
@@ -1163,7 +1182,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         plot_second_units_wrapper(this_axes, second_yscale)
         # plot RMS lines
         if show_rms:
-            plot_vert_lines(this_axes, [rms_pts1, rms_pts2])
+            plot_vert_lines(this_axes, ix['pts'])
 
     return (fig_hand, err)
 

@@ -50,11 +50,12 @@ from .stats        import convert_annual_to_monthly_probability, \
                               rate_to_prob, annual_rate_to_monthly_probability, \
                               monthly_probability_to_annual_rate, ar2mp, mp2ar, combine_sets, \
                               bounded_normal_draw, z_from_ci, rand_draw, intersect
+from .time         import get_np_time_units, round_datetime, round_np_datetime
 from .units        import get_factors
-from .utils        import rms, rss, setup_dir, compare_two_classes, compare_two_dicts, round_time, \
+from .utils        import rms, rss, setup_dir, compare_two_classes, compare_two_dicts, \
                               read_text_file, write_text_file, capture_output, unit, modd, \
                               np_digitize, histcounts, full_print, pprint_dict, line_wrap, \
-                              combine_per_year, execute, execute_wrapper, get_env_var
+                              combine_per_year, execute, execute_wrapper, get_env_var, fix_rollover
 from .vectors      import rot
 
 #%% Unit test
