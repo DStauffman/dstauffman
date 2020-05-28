@@ -59,9 +59,13 @@ class _EnumMetaPlus(EnumMeta):
 
 #%% Classes - IntEnumPlus
 class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
-    r"""Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str
-    plus additional methods for convenient retrieval of number of values, their names, mins and maxes."""
+    r"""
+    Custom IntEnum class based on _EnumMetaPlus metaclass to get more details from repr/str.
+    Plus it includes additional methods for convenient retrieval of number of values, their names,
+    mins and maxes.
+    """
     def __str__(self):
+        r"""Return string representation."""
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
 #%% Decorators - consecutive

@@ -426,47 +426,6 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
             print('"' + name1 + '" and "' + name2 + '" are not the same.')
     return is_same
 
-#%% Functions - round_time
-def round_time(dt=None, round_to_sec=60):
-    r"""
-    Round a datetime object to any time lapse in seconds.
-
-    Parameters
-    ----------
-    dt           : datetime.datetime
-        time to round, default now.
-    round_to_sec : int
-        Closest number of seconds to round to, default 60 seconds (i.e. rounds to nearest minute)
-
-    See Also
-    --------
-    datetime.datetime
-
-    Notes
-    -----
-    #. Originally written by Thierry Husson 2012.  Freely distributed.
-    #. Adapted by David C. Stauffer in Feb 2015.
-
-    Examples
-    --------
-    >>> from dstauffman import round_time
-    >>> from datetime import datetime
-    >>> dt = datetime(2015, 3, 13, 8, 4, 10)
-    >>> rounded_time = round_time(dt)
-    >>> print(rounded_time)
-    2015-03-13 08:04:00
-
-    """
-    # set default for dt
-    if dt is None:
-        dt = datetime.now()
-    # get the current elasped time in seconds
-    seconds = (dt - dt.min).seconds
-    # round to the nearest whole second
-    rounding = (seconds+round_to_sec/2) // round_to_sec * round_to_sec
-    # return the rounded result
-    return dt + timedelta(0, rounding-seconds, -dt.microsecond)
-
 #%% Functions - read_text_file
 def read_text_file(filename):
     r"""

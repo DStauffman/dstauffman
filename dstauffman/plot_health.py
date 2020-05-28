@@ -78,9 +78,9 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
     >>> import numpy as np
     >>> description = 'Random Data'
     >>> time  = np.arange(0, 5, 1./12) + 2000
-    >>> data  = np.random.rand(5, len(time)).cumsum(axis=1)
+    >>> data  = np.random.rand(len(time), 5).cumsum(axis=1)
     >>> data  = 10 * data / np.expand_dims(data[:, -1], axis=1)
-    >>> fig   = plot_health_time_history(description, time, data)
+    >>> fig   = plot_health_time_history(time, data, description)
 
     Close plot
     >>> plt.close(fig)

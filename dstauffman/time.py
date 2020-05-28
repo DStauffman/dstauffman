@@ -19,7 +19,7 @@ import numpy as np
 #%% Functions - get_np_time_units
 def get_np_time_units(date):
     r"""
-    Gets the units for a given datetime64 or timedelta64
+    Gets the units for a given datetime64 or timedelta64.
 
     Parameters
     ----------
@@ -110,7 +110,7 @@ def round_datetime(dt=None, round_to_sec=60, floor=False):
 #%% Functions - round_np_datetime
 def round_np_datetime(date_in, time_delta, floor=False):
     r"""
-    Rounds a numpy datetime64 time to the specified delta
+    Rounds a numpy datetime64 time to the specified delta.
 
     Parameters
     ----------

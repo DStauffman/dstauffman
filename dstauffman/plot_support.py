@@ -397,7 +397,7 @@ def close_all(figs=None):
 #%% Functions - get_color_lists
 def get_color_lists():
     r"""
-    Gets different color lists to use for plotting
+    Gets different color lists to use for plotting.
 
     Returns
     -------
@@ -418,7 +418,7 @@ def get_color_lists():
     Examples
     --------
     >>> from dstauffman import get_color_lists
-    >>> colors = get_color_lists()
+    >>> color_lists = get_color_lists()
     >>> print(color_lists['default'])
     Paired
 

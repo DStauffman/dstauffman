@@ -41,9 +41,7 @@ class _FortranSource():
 
     """
     def __init__(self, mod_name='', prog_name=''):
-        r"""
-        Creates the instance of the class.
-        """
+        r"""Creates the instance of the class."""
         self.prog_name   = prog_name
         self.mod_name    = mod_name
         self.uses        = []
@@ -53,9 +51,7 @@ class _FortranSource():
         self.prefix      = ''
 
     def validate(self):
-        r"""
-        Validates that the resulting parse is good.
-        """
+        r"""Validates that the resulting parse is good."""
         if self.prog_name:
             # If a program, then it should only have uses
             assert not self.mod_name, 'Programs should not define modules.'

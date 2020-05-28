@@ -33,7 +33,7 @@ class Opts(Frozen):
     r"""Optional plotting configurations."""
     def __init__(self, *args, **kwargs):
         r"""
-        Default configuration with:
+        Default configuration for plots.
             .case_name : str
                 Name of the case to be plotted
             .date_zero : (1x6) datevec (or datetime)
@@ -132,6 +132,7 @@ class Opts(Frozen):
                 raise ValueError(f'Unexpected option of "{key}" passed to Opts initializer."')
 
     def __copy__(self):
+        r"""Allows a new copy to be generated with data from the original."""
         new = type(self)(self)
         return new
 

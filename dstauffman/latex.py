@@ -164,6 +164,38 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
 def latex_str(value, digits=-1, fixed=False, cmp2ar=False, capped=1073741823): # 1073741823 = 2**30-1
     r"""
     Formats a given value for display in a LaTeX document.
+
+    Parameters
+    ----------
+    value : int or float
+        Value
+    digits : int, optional
+        Number of digits to use in string
+    fixed : bool, optional, default is False
+        Whether to alway return exactly the given number of digits, or truncate if possible
+    cmp2ar : bool, optional, default is False
+        Whether to convert a monthly probability into an annual rate
+    capped : int, optional
+        Number at which anything larger is considered infinity
+
+    Returns
+    -------
+    value_str : str
+        String used to represent the value in LaTeX
+
+    Notes
+    -----
+    #.  The capped value of 1073741823 = 2**30-1
+
+    Examples
+    --------
+    >>> from dstauffman import latex_str
+    >>> value = 3.14159
+    >>> digits = 3
+    >>> value_str = latex_str(value, digits)
+    >>> print(value_str)
+    3.14
+
     """
     # check for string case, and if so, just do replacements
     if isinstance(value, str):

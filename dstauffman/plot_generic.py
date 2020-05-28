@@ -498,8 +498,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None,
         data_as_rows=True):
     r"""
-    Generic quaternion comparison plot for use in other wrapper functions.  This function plots two
-    quaternion histories over time, along with a difference from one another.
+    Generic quaternion comparison plot for use in other wrapper functions.
+    Plots two quaternion histories over time, along with a difference from one another.
 
     Parameters
     ----------
@@ -838,8 +838,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None,
         ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True):
     r"""
-    Generic difference comparison plot for use in other wrapper functions.  This function plots two
-    vector histories over time, along with a difference from one another.
+    Generic difference comparison plot for use in other wrapper functions.
+    Plots two vector histories over time, along with a difference from one another.
 
     Parameters
     ----------

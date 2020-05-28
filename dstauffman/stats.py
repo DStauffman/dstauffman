@@ -455,8 +455,8 @@ def z_from_ci(ci):
 #%% Functions - rand_draw
 def rand_draw(chances, prng, *, check_bounds=True):
     r"""
-    Draws psuedo-random numbers from the given generator to compare to given factors, with
-    optimizations to ignore factors less than or equal to zero.
+    Draws psuedo-random numbers from the given generator to compare to given factors.
+    Has optimizations to ignore factors less than or equal to zero.
 
     Parameters
     ----------
@@ -513,8 +513,8 @@ def rand_draw(chances, prng, *, check_bounds=True):
 #%% Functions - intersect
 def intersect(a, b, assume_unique=False):
     r"""
-    Finds the intersect of a and b, but also returns the indices to the first occurence, like the
-    intersect command in MATLAB.
+    Finds the intersect of a and b, but also returns the indices to the first occurence.
+    Based on the intersect command in MATLAB.
 
     Parameters
     ----------
