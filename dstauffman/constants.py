@@ -24,6 +24,7 @@ np.set_printoptions(threshold=1000)
 #%% Set Matplotlib global settings
 plt.rcParams['figure.dpi']     = 160 # 160 for 4K monitors, 100 otherwise
 plt.rcParams['figure.figsize'] = [11., 8.5] # makes figures the same size as the paper, keeping aspect ratios even
+plt.rcParams['figure.max_open_warning'] = 80 # Max number of figures to open before through a warning, 0 means unlimited
 plt.rcParams['date.autoformatter.minute'] = '%H:%M:%S' # makes seconds show, and not day, default is '%d %H:%M'
 
 #%% Constants

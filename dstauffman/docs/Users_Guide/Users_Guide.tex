@@ -117,18 +117,23 @@ The repository is public, so anyone can access it through github.com even withou
 \newline\url{https://github.com/join}
 
 \subsection{Installing Python}\label{h2:Installing Python}
-The dstauffman library is written in Python 3.4.  It relies heavily on the numpy and matplotlib libraries along with Sphinx for auto-documentation generation using the numpydoc standard.  The code is developed on Windows 7 using WinPython (currently v3.4.3.3).  It is intended to be platform independent with Unix/Mac (but is rarely tested on those platforms), and also backwards compatible with Python 2.7 (tested with WinPython v2.7.9.3).
+The dstauffman library is written in Python 3.7.  It relies heavily on the numpy and matplotlib libraries with documentation written in the numpydoc standard.  The code is developed on Windows 10 using Anaconda (currently v2020.02).  It is intended to be platform independent with Unix/Mac and is regularly tested on Unix, but not Mac.  It is only intended to be backwards compatible to Python v3.6 and will likely transition to v3.8 when it is more generally available.
 
-In order to run the code, you'll need an appropriate version of Python installed along with numpy and matplotlib.  If you are on Unix, you probably have this already.  If you are on Windows, then I highly recommend the WinPython distribution available at:
-\newline\url{http://winpython.sourceforge.net/}
+In order to run the code, you'll need an appropriate version of Python installed along with numpy and matplotlib.  If you are on Unix, you probably have this already.  If you are on Windows, then I highly recommend either the WinPython or Anaconda distributions available at:
+\newline\url{https://sourceforge.net/projects/winpython/}
+\newline\url{https://www.anaconda.com/products/individual}
 
-The WinPython distribution automatically includes all the libraries you'll use, plus the Spyder IDE and/or IPython, which can give you a very MATLAB-like interface.  It can be installed to any folder location without admin rights, and you can simultaneously install multiple versions and easily run them without conflicts.  More details on some of my favorite Spyder and Python tweaks are include in Section~\ref{h3:Spyder_install}.
+Either distribution automatically includes all the libraries you'll use, plus the Spyder IDE and/or IPython, which can give you a very MATLAB-like interface.  It can be installed to any folder location without admin rights, and you can simultaneously install multiple versions and easily run them without conflicts.  More details on some of my favorite Spyder and Python tweaks are include in Section~\ref{h3:Spyder_install}.
 
 \subsection{Preparing Python}\label{h2:Preparing_python}
-The code is designed to be imported as a library.  In order for that to happen, the ``dstauffman'' folder must be on your python path.  The easiest way (but not the recommended way) to do this is to copy the folder into the existing Python library location.  If you install WinPython to the root C: drive within a ``Programs'' folder, then this might be somewhere like:
-\newline\url{C:/Programs/WinPython-64bit-3.4.3.3/python-3.4.3.amd64/Lib}
+The code is designed to be imported as a library.  In order for that to happen, the ``dstauffman'' folder must be on your python search path.  The easiest way (but not the recommended way) to do this is to copy the folder into the existing Python library location.  For Anaconda, then this might be somewhere like:
+\newline\url{C:\\Users\\\%username\%\\Anaconda3\\Lib\\site-packages}
 
-The recommended method is to modify your user ``PYTHONPATH'' variable.  On Windows 7, you can do this by hitting start, and then starting to type ``environment'' and choosing the ``Edit environment variables for your account'' within the control panel.
+Another method is to install with the \texttt{pip install -e .} option.  I don't use that, so you are on your own to figure it out.
+
+Yet another method is to modify your user ``PYTHONPATH'' variable.  I like doing this one, but it is considered bad practice for reasons I don't understand.  Since we also want to run some of the scripts, I use the next option instead of this one.
+
+The recommended method is to modify your user ``PATH'' variable to include the root folder.  On Windows 10, you can do this by hitting start, and then starting to type ``environment'' and choosing the ``Edit environment variables for your account'' within the control panel.
 
 \begin{figure}[H]
     \centering
@@ -137,7 +142,7 @@ The recommended method is to modify your user ``PYTHONPATH'' variable.  On Windo
     \label{fig:environment1}
 \end{figure}
 
-Then if the user variable for ``PYTHONPATH'' (one word, all caps) doesn't exist, create a new one. If it does, append to it.  On Windows use a semi-colon (;) to separate folders, and on Unix, use a colon (:) and don't put any spaces between folders.  Add the folder location that contains the ``dstauffman'' folder.  In my case, that's the GitHub folder where I keep my local copy of the repository.
+Then if the user variable for ``PATH'' (one word, all caps) doesn't exist, create a new one. If it does, append to it.  On Windows use a semi-colon (;) to separate folders, and on Unix, use a colon (:) and don't put any spaces between folders.  Add the folder location that contains the ``dstauffman'' folder.  In my case, that's the GitHub folder where I keep my local copy of the repository.
 
 \begin{figure}[H]
     \centering
@@ -148,16 +153,12 @@ Then if the user variable for ``PYTHONPATH'' (one word, all caps) doesn't exist,
 
 
 \subsection{Running the Code}\label{h2:Running_the_code}
-At least one example script should be available in the /dstauffman/scripts folder.  This script can be run via a command prompt:
+At least one example script should be available in the \texttt{./dstauffman/scripts} folder.  This script can be run via a command prompt:
 \begin{PlainText}
 python script_name.py
 \end{PlainText}
 
-If you are on Windows and installed WinPython as described earlier, then python may not be on your system path, and you'll likely need to fully qualify the names:
-\begin{PlainText}
-"C:\Programs\WinPython-64bit-3.4.3.3\python-3.4.3.amd64\python.exe" 
-  "C:\Users\dcstauff\Documents\GitHub\dstauffman\scripts\example_script.py"
-\end{PlainText}
+Depending on how you configured your system, then the python command may not be available.  You can either use the fully qualified name, use the Ananconda/WinPython prompt that is configured for you, or register the python installation on your path.  Using the prompt that comes with the distributions is the easiest way.  You are on your own to google other options.
 
 \begin{figure}[H]
     \centering
@@ -166,7 +167,7 @@ If you are on Windows and installed WinPython as described earlier, then python 
     \label{fig:running_via_cmd}
 \end{figure}
 
-If you want to be able to interact with the results or the plots, then the better way to run the script is by opening it within Spyder and running it in that application.  Spyder can run a normal console or IPython console.  The IPython one has a lot of advantages, but I've found that it also causes some weird bugs and instabilities, so if you are just getting up and running, then I recommend a normal console window.
+If you want to be able to interact with the results or the plots, then the better way to run the script is by opening it within Spyder and running it in that application.  Spyder can run an IPython console within the IDE.  The IPython console has a lot of advantages over a standard console, such as magic methods and debugging options.  However, if you are trying to debug a GUI, then you will likely want to stick with the normal console.
 
 \begin{figure}[H]
     \centering
@@ -181,10 +182,17 @@ The first key part of the script are the import statements, namely the one where
     import dstauffman as dcs
 \end{Python}
 
-\textcolor{red}{TODO.}
+This script is a pretty simple one, so there are no custom functions or classes defined.  The \texttt{example\_bpe\_script.py} has more to it and shows how you can define your own classes and functions using the \texttt{class} and \texttt{def} keywords, respectively.
+
+The then section in the ``main'' part is the actual script.
+\begin{Python}
+if __name__ == '__main__':
+\end{Python}
+
+This script creates some data using numpy, then creates an opts class using \texttt{opts = dcs.Opts()} and finally calls the dstauffman function \texttt{plot\_correlation\_matrix}.
 
 \subsection{Further Code Documentation}\label{h2:Further_code_documentation}
-The specific functions and classes within the code are intended to be self-documented within the source.  This is the best way to ensure that the documentation stays current with the code.  For easier distribution purposes, this in-source documentation (the so-called Python docstrings) can be automatically compiled into an html guide.  The current version of this documentation is available at ./dstauffman/doc/build/dstauffman.html.  See Section~\ref{h2:autodoc} for more details.
+The specific functions and classes within the code are intended to be self-documented within the source.  This is the best way to ensure that the documentation stays current with the code.  This documentation can be viewed within Spyder in the help pane by typing the name of the function, or using the Ctrl+I key.  See Section~\ref{h2:autodoc} for more details.
 
 \pagebreak
 \section{Developer's Guide to the Code}\label{h1:Developers_guide}
@@ -197,13 +205,30 @@ The code is intended to be imported as a single module, but for organization and
     \setlength{\parskip}{0pt}
     \setlength{\parsep}{0pt}
     \item \_\_init\_\_.py - Does relative imports so that the entire module can be imported with just one ``import dstauffman'' command.
+    \item \_\_main\_\_.py - Uses for command line parsing to the library.
     \item classes.py - Contains the high level classes used throughout the rest of the library.
     \item constants.py - Defines constants used throughout the rest of the library.
     \item enums.py - Defines enumerators used by the rest of the library.
-    \item photos.py - Contains routines for managing pictures and images.
+    \item estimation.py - Contains routines for doing batch parameter estimation.
+    \item fortran.py - Defines functions to help interface to Fortran code.
+    \item health.py - Defines functions specific to modeling health policy simulations.
+    \item kalman.py - Defines functions to write Kalman filters and plot there resulting data.
+    \item latex.py - Defines functions to convert data to strings that can be parsed into \LaTeX documents.
+    \item linalg.py - Defines some linear algebra routines that are not in scipy.
+    \item logs.py - Defines functions and classes for logging data both to the console and to output files simultaneously.
+    \item parser.py - Defines functions to wrap the command line parser and pass to the commands submodule.
+    \item paths.py - Defines functions related to determining path information.
+    \item plot\_generic.py - Defines low level plotting functions that are typically wrapped by higher level calls.
+    \item plot\_hearth.py - Defines plots specific to doing health policy simulations
+    \item plot\_support.py - Defines supporting functions for making plots that typically won't be called by a user directly.
     \item plotting.py - Defines plotting functions to display the results from the rest of the model.
-    \item quat.py - Contains quaternion (and some vector) related math routines.
+    \item quat.py - Contains quaternion related math routines.
+    \item repos.py - Contain functions to help automate repositories, creating init files and maintaining standands.
+    \item stats.py - Contains statistics related math routines.
+    \item time.py - Contains routines related to manipulating dates and times.
+    \item units.py - Contains routines and classes for doing unit conversions.
     \item utils.py - Contains generic utilities that can be independently defined and used throughout the rest of the library.
+    \item vector.py - Contains vector related math routines.
 \end{itemize}
 
 In addition, there are a couple other files at the root level.  These are used as follows:
@@ -213,8 +238,15 @@ In addition, there are a couple other files at the root level.  These are used a
     \setlength{\parsep}{0pt}
     \item .gitattributes - Used to config things about the Git repository.  Currently it doesn't do much.
     \item .gitignore - Used to control what items are ignored by the change tracking.  There are a lot of lines in here to ignore temp windows and/or Python files, along with \LaTeX build files and also temporary and results output folders.
+    \item dcs - Shell wrapper script to call the code from the command line on Unix systems.
+    \item dcs.bat - Shell wrapper script to call the code from the command line on Windows systems.
+    \item dcspython.bat - Windows wrapper script to allow you to specify which Python to use or any folders to add to your path.
+    \item dcspython.sh - Unix wrapper script to allow you to specify which Python to use or any folders to add to your path.
     \item LICENSE.txt - Defines the license to be used by anyone who wants to take the source code and use or modify it for their own purposes.  I chose the LGPL v3 license because the code is being developed as a software library package and this is otherwise an extension of the popular GPL license.  It allows commercial usage, but requires anyone who modifies the code to share their source under the same license.  If they use the code without modification, then they don't have this restriction.  (See \href{http://choosealicense.com/}{choosealicense.com} for details)
-    \item README.txt - Read me file for use on GitHub, it generally contains the same high level information that is at the top of the \_\_init\_\_.py file.
+    \item MANIFEST.in - Controls what gets included when downloading a zip file of the repo from GitHub.
+    \item README.rst - Read me file for use on GitHub, it generally contains the same high level information that is at the top of the \_\_init\_\_.py file.
+    \item setup.cfg - Controls some of the default error and lint checking options.
+    \item setup.py - Configures the options to host on PyPi or other distribution systems.  Given for reference, but it is not current hosted anywhere besides GitHub.
 \end{itemize}
 
 In addition to all the files, there are subfolders within the repository.  These are used as follows:
@@ -223,16 +255,14 @@ In addition to all the files, there are subfolders within the repository.  These
     \setlength{\parskip}{0pt}
     \setlength{\parsep}{0pt}
     \item .git - Hidden folder used by Git for all the change tracking.
+    \item dstauffman - Root folder for the library that will be imported.
     \item \_\_pycache\_\_ - Folder used by Python v3+ for object/byte code.  (In Python v2.7, this code goes into the same folder as the source. I prefer the breakout that Python v3 does much better)
-    \item archery - Folder that contains archery related submodules, meant to be imported separately
-    \item data - Folder that contains data files, mostly just a place holder for now.
-    \item doc - Folder for code documentation.  The main documents are in there at the root doc level, along with further subfolders for other documents.  The build and source subfolders are used by Sphinx for autodocumentation, and the tex folder for organizing the code to generate the \LaTeX\ pdf documents.
-    \item games - Folder that contains gaming related submodules, meant to be imported separately.  Currently it has one game, brick.
+    \item commands - Submodule that contains the available commands when calling from the command line.
+    \item docs - Folder for code documentation.  The main documents are in there at the root doc level, along with further subfolders for other documents.
     \item images - Folder that contains image files (*.jpg, *.png, etc.) for use in the rest of the library.
     \item output - Folder used to store output files.  It is ignored by the Git repository.
     \item results - Another Folder used to store output files.  It is ignored by the Git repository.
     \item scripts - Folder used to contain scripts.  Some are tracked as example templates, but anything that starts with ``script\_'' or ``case\_'' is currently ignored by Git.
-    \item support - Folder of Python code that is used in a supporting sense.  So code that generates other code, or looks for things to be merged within other code libraries back into this library.
     \item temp - Convenient folder to dump temporary files into.  Everything in here is ignored by Git.
     \item tests - Folder containing the unit test cases and the .coveragerc configuration file.  When the code coverage test is run, the results also go here into a ``coverage\_html\_report'' subfolder.
 \end{itemize}
@@ -242,14 +272,14 @@ The code is as much as possible self-documented.  This is achieved through the u
 
 Including the documentation as part of the source code is the best way to try and enforce that they stay consistent with one another.  It still requires an author to check the comments when they are making changes to the code, but it's much easier for them to do that right there on the same screen than trying to remember to go to some other file and see if it needs to be updated.
 
-\subsubsection{Sphinx and numpydoc}
-One problem that occurs with in-source documentation, is that some users of the model may not care about the source code details, but still want to read the documentation.  This is where Sphinx comes in.  Sphinx allows you to automatically generate HTML documentation directly from the docstring comments.  This documentation is hyperlinked to all the different module functions and includes input and output parameter descriptions (as listed in the source code).  The Sphinx autogenerated documentation is available in the repository at: ./dstauffman/doc/build/dstauffman.html
+Note, that the docstrings were once compiled to a standalone html file within the repo via Sphinx, but this was hard to maintain, and Spyder provides a much easier direct interface to the information that updates itself automatically.
 
-The built-in Python standard for these are somewhat limited, so I use the much more robust numpydoc standard that was developed and used within the numpy library.  numpy is \emph{the} numerical analysis library that does almost all of the computation within the model, so I like following their standard.  It is documented here: \url{https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt} with a good example file here: \url{https://github.com/numpy/numpy/blob/master/doc/example.py}
+\subsubsection{numpydoc Standard}
+The built-in Python standard for docstrings are somewhat limited, so I use the much more robust numpydoc standard that was developed and used within the numpy library.  numpy is \emph{the} numerical analysis library that does almost all of the computation within the model, so I like following their standard.  It is documented here: \url{https://github.com/numpy/numpy/blob/master/doc/HOWTO_DOCUMENT.rst.txt} with a good example file here: \url{https://github.com/numpy/numpy/blob/master/doc/example.py}
 
-In general, the more information you put into the docstrings, the better.  At a minimum, it should have a one line summary of the function.  A list of all the inputs in a ``Parameters'' section.  Any specific outputs in a ``Results'' section.  A ``Notes'' section with the change history plus any other useful information, such as any variables modified in place, plus an ``Examples'' section with at least one complete example for how to execute the function.  This example is written in the ``doctest'' format that allows it to be automatically executed as an additional unit test.  This extra test is redundant with the more complete unittests, but ensures that the example given will actually execute.  The doctest library is described more here: \url{https://docs.python.org/3.4/library/doctest.html}
+In general, the more information you put into the docstrings, the better.  At a minimum, it should have a one line summary of the function.  A list of all the inputs in a ``Parameters'' section.  Any specific outputs in a ``Results'' section.  A ``Notes'' section with the change history plus any other useful information, such as any variables modified in place, plus an ``Examples'' section with at least one complete example for how to execute the function.  This example is written in the ``doctest'' format that allows it to be automatically executed as an additional unit test.  This extra test is redundant with the more complete unittests, but ensures that the example given will actually execute.  The doctest library is described more here: \url{https://docs.python.org/3/library/doctest.html}
 
-Running the ./dstauffman/tests/run\_all\_docstrings.py script will execute all the doctests within the code.  An example function header is shown below:
+Running the \texttt{./dstauffman/tests/run\_all\_docstrings.py} script will execute all the doctests within the code.  An example function header is shown below:
 
 \begin{Python}
 def rms(data, axis=None, keepdims=False):
@@ -300,25 +330,12 @@ One exception to this more complex docstring header would be a very simple class
         return output
 \end{Python}
 
-\subsubsection{Bulding Sphinx documentation}
-To generate the documentation, use the ``sphinx-build'' command.  If Sphinx is not automatically a part of your Python installation, then you can install it through ``pip``. See \url{http://sphinx-doc.org/latest/install.html} for more information.
-\begin{PlainText}
-pip install sphinx
-\end{PlainText}
-
-Once Sphinx is installed, then it's a one line build command.  This command tells Sphinx to build the HTML documentation using the specified source folder into the specified build folder.
-\begin{PlainText}
-sphinx-build -b html source_folder build_folder
-\end{PlainText}
-
-The details controlling what gets documented are in the ./dstauffman/doc/source subfolder.  The ``conf.py'' file controls the Python side of things, and the 3 *.rst files (dstauffman.rst, index.rst, and modules.rst) build the tree layout to traverse.  If you add a new function or class definition to an existing submodule file, then nothing special needs to be done to include it in the next Sphinx build.  If you create a brand new submodule, then you'll need to modify the ``dstauffman.rst'' file.  Using the existing lines as a template and it should be pretty clear what to add.  If you want to update the version number within the documentation, then that gets changed within the ``conf.py'' file (or as an optional additional parameter to the build command).
-
 \subsection{Unit Tests}\label{h2:Unit_tests}
 One of the major efforts for this code has been developing comprehensive unit test cases for all the functions.  This takes extra time and work up front, but in my mind pays back tremendously in the long run.  It helps flush out bugs much earlier in the design cycle, prevents you from getting to more complicated bugs, and signficantly increases my confidence that the code does what it was designed to do.  It will likely never flush out all the bugs, but hopefully goes a long way towards that goal.
 
 The unit tests are defined and executed using the Python ``unittest'' library.  You can get more information about it here: \url{https://docs.python.org/3/library/unittest.html}
 
-In general, there is a Test\_xxxx class defined as a subclass of unittest.TestCase, with optional setUp and tearDown methods to create variables and do initializations, and then any test\_yyyy method is a specific unit test.  Each unittest should be targeted towards one specific variation of the code.  They should be simplified test cases such that the answer can be known or intuited beforehand.  For example, the rms function is basically implemented in a single line of Python code, but covers a lot of different use cases with different complications.
+In general, there is a \texttt{Test\_xxxx} class defined as a subclass of \texttt{unittest.TestCase}, with optional \texttt{setUp} and \texttt{tearDown} methods to create variables and do initializations, and then any \texttt{test\_yyyy} method is a specific unit test.  Each unittest should be targeted towards one specific variation of the code.  They should be simplified test cases such that the answer can be known or intuited beforehand.  For example, the \texttt{rms} function is basically implemented in a single line of Python code, but covers a lot of different use cases with different complications.
 
 To test this function, all the different inputs are used one at a time, a scalar, a vector and a matrix with numbers such that the RMS can be calculated manually and known beforehand.  Additionally, each optional parameter is testing with their different values, so in this case with axis not specified, or specified as the first or last dimension, and then with the keepDims variable true or false.  The rms function is also defined for complex numbers, so those are tested.
 
@@ -395,15 +412,15 @@ class Test_rms(unittest.TestCase):
 \end{Python}
 
 \subsection{Code Coverage}\label{h2:Code_coverage}
-One of the most key aspects of good unit testing is that it covers all possible lines of the code.  If there is an if/else block, then you need a test that covers the if condition, and another test that covers the else condition.  Determining this manually can be very difficult, so Python has the ``coverage`` library that allows us to do it automatically.  Running the coverage report tool will generate a table like the one shown in Figure~\ref{fig:code_coverage}.  This is an HTML report, so each file can be clicked, and then it will shown a line by line breakdown, with color codes to show which lines were executed, which were ignored, and which ones were never executed.  This report can be generated via a couple commands.  One to run the analysis, one to generate the report, and then for convenience, one to open the report:
+One of the most key aspects of good unit testing is that it covers all possible lines of the code.  If there is an if/else block, then you need a test that covers the if condition, and another test that covers the else condition.  Determining this manually can be very difficult, so Python has the ``coverage'' library that allows us to do it automatically.  Running the coverage report tool will generate a table like the one shown in Figure~\ref{fig:code_coverage}.  This is an HTML report, so each file can be clicked, and then it will shown a line by line breakdown, with color codes to show which lines were executed, which were ignored, and which ones were never executed.  This report can be generated via a couple commands.  One to run the analysis, one to generate the report, and then for convenience, one to open the report.  These commands are available in the \texttt{Run\_Coverage.bat} and \texttt{Run\_Coverage.sh} files.
 \begin{PlainText}
-cd C:\Users\%username%\Documents\GitHub\dstauffman\tests
+cd C:\Users\%username%\Documents\GitHub\dstauffman\dstauffman\tests
 coverage run -m dstauffman tests
 coverage html
-start C:\Users\%username%\Documents\GitHub\dstauffman\tests\coverage_html_report\index.html
+start tests\coverage_html_report\index.html
 \end{PlainText}
 
-The report results themselves are not saved within the repository, so you will need to re-run the test to view them.  There is one configuration file at ./dstauffman/tests/.coveragerc that is part of the repository that controls which files are ignored.  For instance, you don't want the test report to show you the coverage results on the tests, but only on the functions they are testing.
+The report results themselves are not saved within the repository, so you will need to re-run the test to view them.  There is one configuration file at \texttt{./dstauffman/tests/.coveragerc} that is part of the repository that controls which files are ignored.  For instance, you don't want the test report to show you the coverage results on the tests, but only on the functions they are testing.
 
 \begin{figure}[H]
     \centering
@@ -417,10 +434,10 @@ As stated in the very beginning of this document, the source code is hosted in a
 \url{https://github.com/DStauffman/dstauffman}
 
 \subsubsection{Branches}
-My goal is to always have the ``master'' branch within Git be a working, stable version of code.  However, developers need a playground to make changes that might not be complete, so there are development branches.  Currently I'm developing on the ``0.x\_dev'' branch.  Once I release a v1.0 code base, then I'll migrate to a ``1.x\_dev'' branch and so on.  I do the work on the development branch, and when it gets far enough to be a substantial improvement, then I go through a whole round of testing, update the Sphinx documentation, make a tag, and then merge the branch into ``master''.
+I used to maintain separate development branches, but it adds a lot of hassle that is not necessary unless you have a team with at least a couple people on it.  I've instead gone back to pushing directly to \texttt{master}.  However, with the included test suite, my goal is to try and maintain that one as cleanly as possible.  When enough work has happened, and it gets far enough to be a substantial improvement, then I go through a whole round of testing and make a release tag.  If you want the API to not change on you as frequently, then stick to one of the formal releases.
 
 \subsubsection{Tags}
-Tags allow you to quickly pull up the specific version of code that was tagged.  These are useful checkpoints to make every 2-3 weeks.  I try to always do a good round of testing, such that the tags will fully execute without bugs.  Sometimes the tags are on the development branch, and sometimes on the master, depending on need.  To make a tag, use this command with the appropriate version number.
+Tags allow you to quickly pull up the specific version of code that was tagged.  These are useful checkpoints to make over time.  I try to always do a good round of testing, such that the tags will fully execute without bugs.  To make a tag, use this command with the appropriate version number.
 
 \begin{PlainText}
 git tag -a v1.0.0 -m 'Tag comments'
@@ -431,12 +448,12 @@ Release tags also allow users to go on github.com and download a zip file with j
 Additionally, you can create a branch using the ``git branch'' command or switch to a branch using the ``git checkout'' command.  Both of these steps can also easily be done through the GitHub for Windows application.
 
 \subsubsection{Merging}
-Merging a branch is slightly more difficult.  There are also multiple ways to merge a branch, depending if you want all the sub-commits preserved or if you want it done in one large piece.  I've been doing sub-commits, but will likely switch to large single commits on the master branch in the future, and then always keep the development branches around for the details.
+Merging a branch is slightly more difficult.  There are also multiple ways to merge a branch, depending if you want all the sub-commits preserved or if you want it done in one large piece.  These get further complicated if you have multiple branches going at once.  I use a rebasing workflow so that any merges to master will be fast-forward only.
 
 Basically to do a merge you need to commit things on the development branch, switch to the master, merge stuff in, commit (or push) the merged changes on the master branch, and then if applicable, switch back to the development branch.  Via command prompt, it's something like this:
 \begin{PlainText}
 git checkout master
-git merge branchname
+git merge --ff-only branchname
 git push
 git checkout branchname
 \end{PlainText}

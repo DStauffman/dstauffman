@@ -27,6 +27,7 @@ class SimParams(dcs.Frozen):
         self.phase     = phase
 
     def __eq__(self, other):
+        r"""Allows classes to compare contents to determine if equal."""
         if type(other) != type(self):
             return False
         for key in vars(self):
@@ -35,6 +36,7 @@ class SimParams(dcs.Frozen):
         return True
 
     def __repr__(self):
+        r"""Detailed string representation."""
         return 'mag={}, freq={}, phs={}'.format(self.magnitude, self.frequency, self.phase)
 
 #%% Functions - _get_truth_index

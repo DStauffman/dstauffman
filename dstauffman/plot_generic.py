@@ -235,7 +235,7 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
             this_axes.legend(loc=legend_loc)
         if i == 0:
             this_axes.set_title(description)
-        if is_datetime(time):
+        if (time_is_list and is_datetime(time[0])) or is_datetime(time):
             this_axes.set_xlabel('Date')
             assert time_units == 'datetime', 'Mismatch in the expected time units.'
         else:
@@ -1068,7 +1068,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     f1.canvas.set_window_title(description)
     if have_both and not make_subplots:
         f2 = plt.figure()
-        f2.canvas.set_window_title(description + 'Difference')
+        f2.canvas.set_window_title(description + ' Difference')
         fig_hand = [f1, f2]
     else:
         fig_hand = [f1]
