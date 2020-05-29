@@ -15,7 +15,6 @@ import unittest
 
 # plotting/numpy imports
 import matplotlib.pyplot as plt
-from matplotlib.ticker import StrMethodFormatter
 import numpy as np
 
 # model imports
@@ -37,8 +36,7 @@ _TRUTH_COLOR = 'k'
 def make_time_plot(description, time, data, name='', elements=None, units='', time_units='sec',
         leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf,
         disp_xmax=np.inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False,
-        show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True,
-        x_formatter=None):
+        show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True):
     r"""
     Generic data versus time plotting routine.
 
@@ -123,13 +121,12 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
     >>> second_yscale = None
     >>> ylabel = None
     >>> data_as_rows = True
-    >>> x_formatter = None
     >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
     ...     time_units=time_units, leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, \
     ...     rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
     ...     legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel, \
-    ...     data_as_rows=data_as_rows, x_formatter=x_formatter)
+    ...     data_as_rows=data_as_rows)
 
     """
     # some basic flags
@@ -140,7 +137,7 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
     assert description, 'You must give the plot a description.'
 
     # convert rows/cols as necessary
-    if data is not list:
+    if not data_is_list:
         data = np.atleast_2d(data)
         if not data_as_rows:
             # TODO: is this the best way or make branches lower?
@@ -178,7 +175,7 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
         func_name = 'Mean'
         func_lamb = lambda x, y: np.nanmean(x, axis=y)
     if data_is_list:
-        data_func = func_lamb(data[j][ix['one']], None)
+        data_func = func_lamb(data[j][ix['one'][j]], None)
     else:
         data_func = func_lamb(data[:, ix['one']], 1)
     # unit conversion value
@@ -243,8 +240,6 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
             assert time_units == 'datetime', 'Mismatch in the expected time units.'
         else:
             this_axes.set_xlabel(f'Time [{time_units}]{start_date}')
-        if x_formatter is not None:
-            this_axes.xaxis.set_major_formatter(StrMethodFormatter(x_formatter))
         if ylabel is None:
             this_axes.set_ylabel(f'{description} [{units}]')
         else:
@@ -1172,9 +1167,9 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                 this_axes.set_ylabel(description + ' [' + units + ']')
         else:
             # TODO: handle single_lines case by allowing list for ylabel
-            ix = ylabel.find('[')
-            if is_diff_plot and ix > 0:
-                this_axes.set_ylabel(ylabel[:ix-1] + ' Difference ' + ylabel[ix:])
+            bracket = ylabel.find('[')
+            if is_diff_plot and bracket > 0:
+                this_axes.set_ylabel(ylabel[:bracket-1] + ' Difference ' + ylabel[bracket:])
             else:
                 this_axes.set_ylabel(ylabel)
         this_axes.grid(True)

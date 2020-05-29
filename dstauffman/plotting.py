@@ -219,8 +219,13 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     >>> data = 10 * data / np.expand_dims(data[:, -1], axis=1)
     >>> fig  = plot_time_history(description, time, data)
 
-    Close plot
+    Date based version
+    >>> time2 = np.datetime64('2020-05-01 00:00:00', 'ns') + 10**9*np.arange(0, 5*60, 5, dtype=np.int64)
+    >>> fig2 = plot_time_history(description, time2, data, time_units='datetime')
+
+    Close plots
     >>> plt.close(fig)
+    >>> plt.close(fig2)
 
     """
     # force inputs to be ndarrays
