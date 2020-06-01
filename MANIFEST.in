@@ -8,4 +8,4 @@ include LICENSE.txt
 include README.rst
 
 # Include supporting files
-recursive-include dstauffman *.png *.pdf *.rst *.tex *.coveragerc *.bat
+recursive-include dstauffman *.png *.pdf *.rst *.tex *.coveragerc *.bat *.sh

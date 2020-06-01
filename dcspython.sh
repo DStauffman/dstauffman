@@ -10,22 +10,23 @@ if grep -i -q windows <<< "$OS"; then
     $THISDIR/dcspython.bat ${@}
 else
     # Presumably Linux
-    # Setup PYTHONPATH
-    # Remember the original python path
+    # Setup PYTHONPATH, first remember the original python path
     PYTHONPATH_ORIG=$PYTHONPATH
 
-    # Prepend THISDIR to PYTHONPATH
-    export PYTHONPATH="$THISDIR:$PYTHONPATH"
-    
+    # clear the PYTHONPATH
+    unset PYTHONPATH
+
+    # Add this location
+    export PYTHONPATH="$THISDIR"
+
     if command -v python3 &>/dev/null; then
         # Try using python3
         exec python3 ${@}
     else
-        # If that didn't work, then throw error (as Python v2 is not supported?)
-        echo "ERROR: dstauffman requires python3"
+        # If that didn't work, then try just python
         # exec python ${@}
     fi
-    
+
     # CLEANUP
     export PYTHONPATH=$PYTHONPATH_ORIG
 fi

@@ -11,8 +11,8 @@ REM Save the original paths
 SET PATH_ORIG=%PATH%
 SET PYTHONPATH_ORIG=%PYTHONPATH%
 
-REM Modify as needed, currently only modifying the python path
-SET PYTHONPATH=%scripts_home%;%PYTHONPATH%
+REM Modify as needed, currently only modifying the python path, note replacing the whole contents, not appending
+SET PYTHONPATH=%scripts_home%
 REM TODO: if you wanted to add a custom python path or include one within dcs, then do it here, otherwise assume it exists
 
 "python.exe" %*
