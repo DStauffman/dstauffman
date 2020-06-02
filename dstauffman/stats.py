@@ -10,7 +10,9 @@ Notes
 
 #%% Imports
 import doctest
+from functools import reduce
 import unittest
+import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -511,32 +513,45 @@ def rand_draw(chances, prng, *, check_bounds=True):
     return is_set
 
 #%% Functions - intersect
-def intersect(a, b, assume_unique=False):
+def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
     r"""
-    Finds the intersect of a and b, but also returns the indices to the first occurence.
-    Based on the intersect command in MATLAB.
+    Finds the intersect of two arrays given a numerical tolerance.
+
+    Return the sorted, unique values that are in both of the input arrays.
 
     Parameters
     ----------
-    a : ndarray
-        Input a
-    b : ndarray
-        Input b
-    assume_unique : bool, optional, default is False
-        Whether you can already assume a and b are unique
+    a, b : array_like
+        Input arrays. Will be flattened if not already 1D.
+    tolerance : float or int
+        Tolerance for which something is considered unique
+    assume_unique : bool
+        If True, the input arrays are both assumed to be unique, which
+        can speed up the calculation.  Default is False.
+    return_indices : bool
+        If True, the indices which correspond to the intersection of the two
+        arrays are returned. The first instance of a value is used if there are
+        multiple. Default is False.
 
     Returns
     -------
     c : ndarray
-        Set of values in both a and b
+        Sorted 1D array of common and unique elements.
     ia : ndarray
-        Indices within a that build c, such that c = a[ia]
+        The indices of the first occurrences of the common values in `ar1`.
+        Only provided if `return_indices` is True.
     ib : ndarray
-        Indices within b that build c, such that c = b[ib]
+        The indices of the first occurrences of the common values in `ar2`.
+        Only provided if `return_indices` is True.
+
+    See Also
+    --------
+    numpy.intersect1d : Function used to do comparsion with sets of quantized inputs.
 
     Notes
     -----
     #.  Written by David C. Stauffer in March 2019.
+    #.  Updated by David C. Stauffer in June 2020 to allow for a numeric tolerance.
 
     Examples
     --------
@@ -544,7 +559,7 @@ def intersect(a, b, assume_unique=False):
     >>> import numpy as np
     >>> a = np.array([1, 2, 4, 4, 6], dtype=int)
     >>> b = np.array([0, 8, 2, 2, 5, 8, 6, 8, 8], dtype=int)
-    >>> (c, ia, ib) = intersect(a, b)
+    >>> (c, ia, ib) = intersect(a, b, return_indices=True)
     >>> print(c)
     [2 6]
 
@@ -555,16 +570,60 @@ def intersect(a, b, assume_unique=False):
     [2 6]
 
     """
-    c = np.intersect1d(a, b, assume_unique=assume_unique)
-    if assume_unique:
-        ia = np.flatnonzero(np.isin(a, c, assume_unique=assume_unique))
-        ib = np.flatnonzero(np.isin(b, c, assume_unique=assume_unique))
+    # allow a zero tolerance to be passed in and behave like the normal intersect command
+    if tolerance == 0:
+        return np.intersect1d(a, b, assume_unique=assume_unique, return_indices=return_indices)
+
+    # hard-coded values
+    int_type = np.int64
+
+    # allow list and other array_like inputs
+    a = np.asanyarray(a)
+    b = np.asanyarray(b)
+
+    # check if largest component of a and b is too close to the tolerance floor (for floats)
+    all_int = np.issubdtype(a.dtype, np.signedinteger) and np.issubdtype(b.dtype, np.signedinteger) and isinstance(tolerance, int)
+    max_a_or_b = np.max((np.max(a), np.max(b)))
+    if not all_int and ((max_a_or_b / tolerance) > (0.01/ np.finfo(float).eps)):
+        warnings.warn('This function may have problems if tolerance gets too small.')
+
+    # due to the splitting of the quanta, two very close numbers could still fail the quantized intersect
+    # fix this by repeating the comparison when shifted by half a quanta in either direction
+    half_tolerance  = tolerance / 2
+    if all_int:
+        # allow for integer versions of half a quanta in either direction
+        lo_tol = np.floor(half_tolerance).astype(int_type)
+        hi_tol = np.ceil(half_tolerance).astype(int_type)
     else:
-        (a1, ia) = np.unique(a, return_index=True, axis=None)
-        (b1, ib) = np.unique(b, return_index=True, axis=None)
-        ia = ia[np.isin(a1, c, assume_unique=assume_unique)]
-        ib = ib[np.isin(b1, c, assume_unique=assume_unique)]
-    return (c, ia, ib)
+        lo_tol = half_tolerance
+        hi_tol = half_tolerance
+
+    # create quantized version of a & b, plus each one shifted by half a quanta
+    a1 = np.floor_divide(a, tolerance).astype(int_type)
+    b1 = np.floor_divide(b, tolerance).astype(int_type)
+    a2 = np.floor_divide(a - lo_tol, tolerance).astype(int_type)
+    b2 = np.floor_divide(b - lo_tol, tolerance).astype(int_type)
+    a3 = np.floor_divide(a + hi_tol, tolerance).astype(int_type)
+    b3 = np.floor_divide(b + hi_tol, tolerance).astype(int_type)
+
+    # do a normal intersect on the quantized data for different comparisons
+    (_, ia1, ib1) = np.intersect1d(a1, b1, assume_unique=assume_unique, return_indices=True)
+    (_, ia2, ib2) = np.intersect1d(a1, b2, assume_unique=assume_unique, return_indices=True)
+    (_, ia3, ib3) = np.intersect1d(a1, b3, assume_unique=assume_unique, return_indices=True)
+    (_, ia4, ib4) = np.intersect1d(a2, b1, assume_unique=assume_unique, return_indices=True)
+    (_, ia5, ib5) = np.intersect1d(a3, b1, assume_unique=assume_unique, return_indices=True)
+
+    # combine the results
+    ia = reduce(np.union1d, [ia1, ia2, ia3, ia4, ia5])
+    ib = reduce(np.union1d, [ib1, ib2, ib3, ib4, ib5])
+
+    # calculate output
+    # Note that a[ia] and b[ib] should be the same with a tolerance of 0, but not necessarily otherwise
+    # This function returns the values from the first vector a
+    c = np.sort(a[ia])
+    if return_indices:
+        return (c, ia, ib)
+    return c
 
 #%% Unit test
 if __name__ == '__main__':

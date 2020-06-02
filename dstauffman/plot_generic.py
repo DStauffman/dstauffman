@@ -491,7 +491,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True,
         legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None,
-        data_as_rows=True):
+        data_as_rows=True, tolerance=0):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
@@ -548,6 +548,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         truth quaternion history
     data_as_rows : bool, optional, default is True
         Whether the data has each channel as a row vector when 2D, vs a column vector
+    tolerance : float, optional, default is zero
+        Numerical tolerance on what should be considered a match between quat_one and quat_two
 
     Returns
     -------
@@ -597,13 +599,14 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> truth_time      = None
     >>> truth_data      = None
     >>> data_as_rows    = True
+    >>> tolerance       = 0
     >>> (fig_hand, err) = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
     ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, truth_data=truth_data, \
-    ...     data_as_rows=data_as_rows)
+    ...     data_as_rows=data_as_rows, tolerance=tolerance)
 
     Close plots
     >>> for fig in fig_hand:
@@ -631,7 +634,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
 
     #% Calculations
     # find overlapping times
-    (time_overlap, q1_diff_ix, q2_diff_ix) = intersect(time_one, time_two) # TODO: add a tolerance?
+    (time_overlap, q1_diff_ix, q2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)
     # find differences
     q1_miss_ix = np.setxor1d(np.arange(len(time_one)), q1_diff_ix)
     q2_miss_ix = np.setxor1d(np.arange(len(time_two)), q2_diff_ix)
@@ -831,7 +834,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
         make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False,
         plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None,
-        ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True):
+        ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True,
+        tolerance=0):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
     Plots two vector histories over time, along with a difference from one another.
@@ -898,6 +902,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         truth quaternion history
     data_as_rows : bool, optional, default is True
         Whether the data has each channel as a row vector when 2D, vs a column vector
+    tolerance : float, optional, default is zero
+        Numerical tolerance on what should be considered a match between data_one and data_two
 
     Returns
     -------
@@ -954,13 +960,14 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> truth_time      = None
     >>> truth_data      = None
     >>> data_as_rows    = True
+    >>> tolerance       = 0
     >>> (fig_hand, err) = make_difference_plot(description, time_one, time_two, data_one, data_two,
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
     ...     leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, second_yscale=second_yscale, ylabel=ylabel, truth_name=truth_name, \
-    ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows)
+    ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows, tolerance=tolerance)
 
     Close plots
     >>> for fig in fig_hand:
@@ -995,7 +1002,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
 
     #% Calculations
     # find overlapping times
-    (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two) # TODO: add a tolerance?
+    (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)
     # find differences
     d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)
     d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)
