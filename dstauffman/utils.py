@@ -22,7 +22,6 @@ import unittest
 import warnings
 from collections.abc import Mapping
 from contextlib import contextmanager
-from datetime import datetime, timedelta
 from io import StringIO
 
 import numpy as np
@@ -674,6 +673,45 @@ def modd(x1, x2, out=None):
         np.mod(x1 - 1, x2, out)
         np.add(out, 1, out) # needed to force add to be inplace operation
 
+#%% is_np_int
+def is_np_int(x):
+    r"""
+    Returns True if the input is an int or any from of an np.integer type.
+
+    Parameters
+    ----------
+    x : int, float or ndarray
+        Input value
+
+    Returns
+    -------
+    bool
+        Whether input is an integer type
+
+    Examples
+    --------
+    >>> from dstauffman import is_np_int
+    >>> import numpy as np
+    >>> print(is_np_int(1))
+    True
+
+    >>> print(is_np_int(1.))
+    False
+
+    >>> print(is_np_int(np.array([1, 2])))
+    True
+
+    >>> print(is_np_int(np.array([1., 2.])))
+    False
+
+    >>> print(is_np_int(np.array(2**62)))
+    True
+
+    """
+    if isinstance(x, int) or (hasattr(x, 'dtype') and np.issubdtype(x.dtype, np.integer)):
+        return True
+    return False
+
 #%% np_digitize
 def np_digitize(x, bins, right=False):
     r"""
@@ -873,9 +911,9 @@ def pprint_dict(dct, *, name='', indent=1, align=True, disp=True):
     --------
     >>> from dstauffman import pprint_dict
     >>> dct = {'a': 1, 'bb': 2, 'ccc': 3}
-    >>> name = 'Example'
+    >>> name = 'Demonstration'
     >>> text = pprint_dict(dct, name=name)
-    Example
+    Demonstration
      a   = 1
      bb  = 2
      ccc = 3

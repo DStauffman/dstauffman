@@ -477,6 +477,12 @@ class Test_intersect(unittest.TestCase):
         c2 = dcs.intersect(b, a, tolerance=0.055, return_indices=False)
         np.testing.assert_array_equal(c2, np.array([1.01, 3.03, 5.05], dtype=float))
 
+    def test_scalars(self):
+        a = 5
+        b = 4.9
+        c = dcs.intersect(a, b, tolerance=0.5)
+        self.assertEqual(c, 5)
+
     def test_int(self):
         a = np.array([0, 4, 10, 20, 30, -40, 30])
         b = np.array([1, 5, 7, 31, -10, -40])
@@ -524,6 +530,15 @@ class Test_intersect(unittest.TestCase):
         a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
         b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
         (c, ia, ib) = dcs.intersect(a, b, tolerance=3, return_indices=True)
+        np.testing.assert_array_equal(ia, np.array([0, 1, 2, 4, 5]))
+        np.testing.assert_array_equal(ib, np.array([0, 1, 2, 3, 5]))
+        np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30], dtype=np.int64) + t_offset)
+
+    def test_npint64_tol(self):
+        t_offset = 2**62
+        a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
+        b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=np.array(3), return_indices=True)
         np.testing.assert_array_equal(ia, np.array([0, 1, 2, 4, 5]))
         np.testing.assert_array_equal(ib, np.array([0, 1, 2, 3, 5]))
         np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30], dtype=np.int64) + t_offset)

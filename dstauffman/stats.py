@@ -19,6 +19,7 @@ import numpy as np
 import scipy.stats as st
 
 from dstauffman.constants import MONTHS_PER_YEAR
+from dstauffman.utils import is_np_int
 
 #%% Functions - convert_annual_to_monthly_probability
 def convert_annual_to_monthly_probability(annual):
@@ -574,37 +575,35 @@ def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
     if tolerance == 0:
         return np.intersect1d(a, b, assume_unique=assume_unique, return_indices=return_indices)
 
-    # hard-coded values
-    int_type = np.int64
-
-    # allow list and other array_like inputs
-    a = np.asanyarray(a)
-    b = np.asanyarray(b)
+    # allow list and other array_like inputs (or just scalar floats)
+    a = np.atleast_1d(np.asanyarray(a))
+    b = np.atleast_1d(np.asanyarray(b))
+    tolerance = np.asanyarray(tolerance)
 
     # check if largest component of a and b is too close to the tolerance floor (for floats)
-    all_int = np.issubdtype(a.dtype, np.signedinteger) and np.issubdtype(b.dtype, np.signedinteger) and isinstance(tolerance, int)
+    all_int = is_np_int(a) and is_np_int(b) and is_np_int(tolerance)
     max_a_or_b = np.max((np.max(a), np.max(b)))
     if not all_int and ((max_a_or_b / tolerance) > (0.01/ np.finfo(float).eps)):
         warnings.warn('This function may have problems if tolerance gets too small.')
 
     # due to the splitting of the quanta, two very close numbers could still fail the quantized intersect
     # fix this by repeating the comparison when shifted by half a quanta in either direction
-    half_tolerance  = tolerance / 2
+    half_tolerance = tolerance / 2
     if all_int:
         # allow for integer versions of half a quanta in either direction
-        lo_tol = np.floor(half_tolerance).astype(int_type)
-        hi_tol = np.ceil(half_tolerance).astype(int_type)
+        lo_tol = np.floor(half_tolerance).astype(tolerance.dtype)
+        hi_tol = np.ceil(half_tolerance).astype(tolerance.dtype)
     else:
         lo_tol = half_tolerance
         hi_tol = half_tolerance
 
     # create quantized version of a & b, plus each one shifted by half a quanta
-    a1 = np.floor_divide(a, tolerance).astype(int_type)
-    b1 = np.floor_divide(b, tolerance).astype(int_type)
-    a2 = np.floor_divide(a - lo_tol, tolerance).astype(int_type)
-    b2 = np.floor_divide(b - lo_tol, tolerance).astype(int_type)
-    a3 = np.floor_divide(a + hi_tol, tolerance).astype(int_type)
-    b3 = np.floor_divide(b + hi_tol, tolerance).astype(int_type)
+    a1 = np.floor_divide(a, tolerance)
+    b1 = np.floor_divide(b, tolerance)
+    a2 = np.floor_divide(a - lo_tol, tolerance)
+    b2 = np.floor_divide(b - lo_tol, tolerance)
+    a3 = np.floor_divide(a + hi_tol, tolerance)
+    b3 = np.floor_divide(b + hi_tol, tolerance)
 
     # do a normal intersect on the quantized data for different comparisons
     (_, ia1, ib1) = np.intersect1d(a1, b1, assume_unique=assume_unique, return_indices=True)
