@@ -470,7 +470,7 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(ib, np.array([0, 1, 2], dtype=int))
 
     def test_tolerance_no_ix(self):
-        a = np.array([1., 3., 5., 7., .9])
+        a = np.array([1., 3., 5., 7., 9.])
         b = np.array([1.01, 2.02, 3.03, 4.04, 5.05, 6.06, 7.07, 8.08, 9.09])
         c = dcs.intersect(a, b, tolerance=0.055, return_indices=False)
         np.testing.assert_array_equal(c, np.array([1., 3., 5.], dtype=float))
