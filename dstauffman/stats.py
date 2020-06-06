@@ -19,6 +19,7 @@ import numpy as np
 import scipy.stats as st
 
 from dstauffman.constants import MONTHS_PER_YEAR
+from dstauffman.plot_support import is_datetime
 from dstauffman.utils import is_np_int
 
 #%% Functions - convert_annual_to_monthly_probability
@@ -580,9 +581,18 @@ def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
     b = np.atleast_1d(np.asanyarray(b))
     tolerance = np.asanyarray(tolerance)
 
+    # check for datetimes and convert to integers
+    is_dates = np.array([is_datetime(a), is_datetime(b)], dtype=bool)
+    assert np.count_nonzero(is_dates) != 1, 'Both arrays must be datetimes if either is.'
+    if np.any(is_dates):
+        orig_datetime = a.dtype
+        a = a.astype(np.int64)
+        b = b.astype(np.int64)
+        tolerance = tolerance.astype(np.int64)
+
     # check if largest component of a and b is too close to the tolerance floor (for floats)
     all_int = is_np_int(a) and is_np_int(b) and is_np_int(tolerance)
-    max_a_or_b = np.max((np.max(a), np.max(b)))
+    max_a_or_b = np.max((np.max(np.abs(a), initial=0), np.max(np.abs(b), initial=0)))
     if not all_int and ((max_a_or_b / tolerance) > (0.01/ np.finfo(float).eps)):
         warnings.warn('This function may have problems if tolerance gets too small.')
 
@@ -620,6 +630,8 @@ def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
     # Note that a[ia] and b[ib] should be the same with a tolerance of 0, but not necessarily otherwise
     # This function returns the values from the first vector a
     c = np.sort(a[ia])
+    if np.any(is_dates):
+        c = c.astype(orig_datetime)
     if return_indices:
         return (c, ia, ib)
     return c

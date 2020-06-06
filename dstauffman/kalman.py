@@ -44,9 +44,7 @@ class KfInnov(Frozen):
 
     """
     def __init__(self):
-        r"""
-        Initializes a new KfInnov instance.
-        """
+        r"""Initializes a new KfInnov instance."""
         self.name  = ''
         self.chan  = None
         self.time  = None
@@ -86,9 +84,7 @@ class KfOut(Frozen):
 
     """
     def __init__(self):
-        r"""
-        Initializes a new KfOut instance.
-        """
+        r"""Initializes a new KfOut instance."""
         self.name  = ''
         self.chan  = None
         self.time  = None
@@ -100,7 +96,7 @@ class KfOut(Frozen):
         self.covar = None
 
 #%% plot_attitude
-def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
+def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), return_err=False):
     r"""
     Plots the attitude quaternion history.
 
@@ -116,6 +112,8 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
         Configuration information
     opts : class Opts, optional
         Plotting options
+    return_err : bool, optional, default is False
+        Whether the function should return the error differences in addition to the figure handles
 
     Returns
     -------
@@ -140,7 +138,7 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
     >>> kf2.time = np.arange(2, 13)
     >>> kf2.att  = quat_norm(np.random.rand(4, 11))
 
-    >>> (fig_hand, err) = plot_attitude(kf1, kf2)
+    >>> fig_hand = plot_attitude(kf1, kf2)
 
     Close plots
     >>> for fig in fig_hand:
@@ -163,14 +161,16 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
         rms_xmin=opts.rms_xmin, rms_xmax=opts.rms_xmax, disp_xmin=opts.disp_xmin, disp_xmax=opts.disp_xmax, \
         make_subplots=opts.sub_plots, plot_components=opts.quat_comp, \
         use_mean=opts.use_mean, plot_zero=opts.show_zero, show_rms=opts.show_rms, legend_loc=opts.leg_spot, \
-        truth_name=truth.name, truth_time=truth.time, truth_data=truth.att)
+        truth_name=truth.name, truth_time=truth.time, truth_data=truth.att, return_err=return_err)
 
     # Setup plots
     setup_plots(figs, opts)
-    return (figs, err)
+    if return_err:
+        return (figs, err)
+    return figs
 
 #%% plot_position
-def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
+def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), return_err=False):
     r"""
     Plots the position and velocity history.
 
@@ -186,6 +186,8 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
         Configuration information
     opts : class Opts, optional
         Plotting options
+    return_err : bool, optional, default is False
+        Whether the function should return the error differences in addition to the figure handles
 
     Returns
     -------
@@ -212,7 +214,7 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
     >>> kf2.pos  = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5
     >>> kf2.vel  = None
 
-    >>> (fig_hand, err) = plot_position(kf1, kf2)
+    >>> fig_hand = plot_position(kf1, kf2)
 
     Close plots
     >>> for fig in fig_hand:
@@ -246,18 +248,20 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts()):
         show_rms=opts.show_rms, legend_loc=opts.leg_spot, second_yscale=second_yscale)
     # Setup plots
     setup_plots(figs, opts)
-    return (figs, err)
+    if return_err:
+        return (figs, err)
+    return figs
 
 #%% plot_innovation
-def plot_innovation(kf1=None, kf2=None, opts=Opts()):
+def plot_innovation(kf1=None, kf2=None, opts=Opts(), return_err=False):
     pass # TODO: write this
 
 #%% plot_covariance
-def plot_covariance(kf1=None, kf2=None, opts=Opts()):
+def plot_covariance(kf1=None, kf2=None, opts=Opts(), return_err=False):
     pass # TODO: write this
 
 #%% plot_states
-def plot_states(kf1=None, kf2=None, opts=Opts()):
+def plot_states(kf1=None, kf2=None, opts=Opts(), return_err=False):
     pass # TODO: write this
 
 #%% Unit Test

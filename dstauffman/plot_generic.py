@@ -491,7 +491,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True,
         legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None,
-        data_as_rows=True, tolerance=0):
+        data_as_rows=True, tolerance=0, return_err=False):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
@@ -550,6 +550,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         Whether the data has each channel as a row vector when 2D, vs a column vector
     tolerance : float, optional, default is zero
         Numerical tolerance on what should be considered a match between quat_one and quat_two
+    return_err : bool, optional, default is False
+        Whether the function should return the error differences in addition to the figure handles
 
     Returns
     -------
@@ -600,13 +602,14 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> truth_data      = None
     >>> data_as_rows    = True
     >>> tolerance       = 0
-    >>> (fig_hand, err) = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
+    >>> return_err      = False
+    >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
     ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, truth_data=truth_data, \
-    ...     data_as_rows=data_as_rows, tolerance=tolerance)
+    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err)
 
     Close plots
     >>> for fig in fig_hand:
@@ -826,7 +829,9 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'])
 
-    return (fig_hand, err)
+    if return_err:
+        return (fig_hand, err)
+    return fig_hand
 
 #%% Functions - make_difference_plot
 def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
@@ -835,7 +840,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False,
         plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None,
         ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True,
-        tolerance=0):
+        tolerance=0, return_err=False):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
     Plots two vector histories over time, along with a difference from one another.
@@ -904,6 +909,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         Whether the data has each channel as a row vector when 2D, vs a column vector
     tolerance : float, optional, default is zero
         Numerical tolerance on what should be considered a match between data_one and data_two
+    return_err : bool, optional, default is False
+        Whether the function should return the error differences in addition to the figure handles
 
     Returns
     -------
@@ -929,45 +936,47 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> import matplotlib.pyplot as plt
     >>> from matplotlib.colors import ListedColormap
     >>> from datetime import datetime
-    >>> description     = 'example'
-    >>> time_one        = np.arange(11)
-    >>> time_two        = np.arange(2, 13)
-    >>> data_one        = 50e-6 * np.random.rand(2, 11)
-    >>> data_two        = data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6 * np.random.rand(2, 11)
-    >>> name_one        = 'test1'
-    >>> name_two        = 'test2'
-    >>> elements        = ['x', 'y']
-    >>> units           = 'rad'
-    >>> time_units      = 'sec'
-    >>> leg_scale       = 'micro'
-    >>> start_date      = str(datetime.now())
-    >>> rms_xmin        = 1
-    >>> rms_xmax        = 10
-    >>> disp_xmin       = -2
-    >>> disp_xmax       = np.inf
-    >>> make_subplots   = True
-    >>> single_lines    = False
-    >>> color_lists     = get_color_lists()
-    >>> colormap        = ListedColormap(color_lists['dbl_diff'].colors + color_lists['double'].colors)
-    >>> use_mean        = False
-    >>> plot_zero       = False
-    >>> show_rms        = True
-    >>> legend_loc      = 'best'
-    >>> show_extra      = True
-    >>> second_yscale   = {u'µrad': 1e6}
-    >>> ylabel          = None
-    >>> truth_name      = 'Truth'
-    >>> truth_time      = None
-    >>> truth_data      = None
-    >>> data_as_rows    = True
-    >>> tolerance       = 0
-    >>> (fig_hand, err) = make_difference_plot(description, time_one, time_two, data_one, data_two,
+    >>> description   = 'example'
+    >>> time_one      = np.arange(11)
+    >>> time_two      = np.arange(2, 13)
+    >>> data_one      = 50e-6 * np.random.rand(2, 11)
+    >>> data_two      = data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6 * np.random.rand(2, 11)
+    >>> name_one      = 'test1'
+    >>> name_two      = 'test2'
+    >>> elements      = ['x', 'y']
+    >>> units         = 'rad'
+    >>> time_units    = 'sec'
+    >>> leg_scale     = 'micro'
+    >>> start_date    = str(datetime.now())
+    >>> rms_xmin      = 1
+    >>> rms_xmax      = 10
+    >>> disp_xmin     = -2
+    >>> disp_xmax     = np.inf
+    >>> make_subplots = True
+    >>> single_lines  = False
+    >>> color_lists   = get_color_lists()
+    >>> colormap      = ListedColormap(color_lists['dbl_diff'].colors + color_lists['double'].colors)
+    >>> use_mean      = False
+    >>> plot_zero     = False
+    >>> show_rms      = True
+    >>> legend_loc    = 'best'
+    >>> show_extra    = True
+    >>> second_yscale = {u'µrad': 1e6}
+    >>> ylabel        = None
+    >>> truth_name    = 'Truth'
+    >>> truth_time    = None
+    >>> truth_data    = None
+    >>> data_as_rows  = True
+    >>> tolerance     = 0
+    >>> return_err    = False
+    >>> fig_hand = make_difference_plot(description, time_one, time_two, data_one, data_two,
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
     ...     leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, second_yscale=second_yscale, ylabel=ylabel, truth_name=truth_name, \
-    ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows, tolerance=tolerance)
+    ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows, tolerance=tolerance \
+    ...     return_err=return_err)
 
     Close plots
     >>> for fig in fig_hand:
@@ -1186,7 +1195,9 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'])
 
-    return (fig_hand, err)
+    if return_err:
+        return (fig_hand, err)
+    return fig_hand
 
 #%% Unit test
 if __name__ == '__main__':

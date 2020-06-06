@@ -543,6 +543,32 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(ib, np.array([0, 1, 2, 3, 5]))
         np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30], dtype=np.int64) + t_offset)
 
+    def test_empty(self):
+        a = np.array([])
+        b = np.array([1, 2, 3, 4])
+        c = dcs.intersect(a, b, tolerance=0.1)
+        self.assertEqual(len(c), 0)
+
+    def test_datetimes(self):
+        date_zero = np.datetime64('2020-06-01 00:00:00', 'ms')
+        dt = np.arange(0, 11000, 1000).astype('timedelta64[ms]')
+        a = date_zero + dt
+        dt[3] += 5
+        dt[5] -= 30
+        b = date_zero + dt
+        # no tolerance
+        exp = np.array([0, 1, 2, 4, 6, 7, 8, 9, 10])
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)
+        np.testing.assert_array_equal(c, a[exp])
+        np.testing.assert_array_equal(ia, exp)
+        np.testing.assert_array_equal(ib, exp)
+        # with tolerance
+        exp = np.array([0, 1, 2, 3, 4, 6, 7, 8, 9, 10])
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=np.timedelta64(10, 'ms'), return_indices=True)
+        np.testing.assert_array_equal(c, a[exp])
+        np.testing.assert_array_equal(ia, exp)
+        np.testing.assert_array_equal(ib, exp)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

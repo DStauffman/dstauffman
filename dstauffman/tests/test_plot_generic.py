@@ -45,13 +45,15 @@ class Test_make_quaternion_plot(unittest.TestCase):
         self.use_mean        = False
         self.plot_zero       = False
         self.show_rms        = True
+        self.return_err      = True
         self.figs            = None
 
     def test_nominal(self):
         (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, \
-             make_subplots=self.make_subplots, plot_components=self.plot_components)
+             make_subplots=self.make_subplots, plot_components=self.plot_components, \
+             return_err=self.return_err)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
@@ -60,7 +62,8 @@ class Test_make_quaternion_plot(unittest.TestCase):
         (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, \
-             make_subplots=self.make_subplots, plot_components=self.plot_components)
+             make_subplots=self.make_subplots, plot_components=self.plot_components, \
+             return_err=self.return_err)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
@@ -69,7 +72,8 @@ class Test_make_quaternion_plot(unittest.TestCase):
         (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, \
-             make_subplots=self.make_subplots, plot_components=self.plot_components)
+             make_subplots=self.make_subplots, plot_components=self.plot_components, \
+             return_err=self.return_err)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
         self.assertLess(abs(err['mag']), 3.15)
@@ -79,7 +83,8 @@ class Test_make_quaternion_plot(unittest.TestCase):
         (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, \
-             make_subplots=self.make_subplots, plot_components=self.plot_components)
+             make_subplots=self.make_subplots, plot_components=self.plot_components, \
+             return_err=self.return_err)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
@@ -89,7 +94,8 @@ class Test_make_quaternion_plot(unittest.TestCase):
         (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, \
-             make_subplots=self.make_subplots, plot_components=self.plot_components)
+             make_subplots=self.make_subplots, plot_components=self.plot_components, \
+             return_err=self.return_err)
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_only_quat_two(self):
@@ -98,7 +104,8 @@ class Test_make_quaternion_plot(unittest.TestCase):
         (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, \
-             make_subplots=self.make_subplots, plot_components=self.plot_components)
+             make_subplots=self.make_subplots, plot_components=self.plot_components, \
+             return_err=self.return_err)
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_rms_bounds(self):
@@ -107,39 +114,30 @@ class Test_make_quaternion_plot(unittest.TestCase):
         (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, \
-             make_subplots=self.make_subplots, plot_components=self.plot_components)
+             make_subplots=self.make_subplots, plot_components=self.plot_components, \
+             return_err=self.return_err)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_use_mean(self):
-        (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
+        self.figs = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, use_mean=True)
-        for i in range(3):
-            self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_no_rms_in_legend(self):
-        (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
+        self.figs = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, use_mean=True, show_rms=False)
-        for i in range(3):
-            self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_plot_zero(self):
-        (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
+        self.figs = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, plot_zero=True)
-        for i in range(3):
-            self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_plot_truth(self):
-        (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
+        self.figs = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, truth_time=self.time_one, truth_data=self.quat_two)
-        for i in range(3):
-            self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_disp_bounds(self):
-        (self.figs, err) = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
+        self.figs = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, disp_xmin=2, disp_xmax=5)
-        for i in range(3):
-            self.assertLess(abs(err['diff'][i]), 3.15)
 
     def tearDown(self):
         if self.figs:
@@ -153,39 +151,41 @@ class Test_make_difference_plot(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        self.description     = 'example'
-        self.time_one        = np.arange(11)
-        self.time_two        = np.arange(2, 13)
-        self.data_one        = 1e-6 * np.random.rand(2, 11)
-        self.data_two        = self.data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6
-        self.name_one        = 'test1'
-        self.name_two        = 'test2'
-        self.elements        = ['x', 'y']
-        self.units           = 'rad'
-        self.leg_scale       = 'micro'
-        self.start_date      = str(datetime.now())
-        self.rms_xmin        = 0
-        self.rms_xmax        = 10
-        self.disp_xmin       = -2
-        self.disp_xmax       = np.inf
-        self.make_subplots   = True
-        color_lists          = dcs.get_color_lists()
-        self.colormap        = ListedColormap(color_lists['dbl_diff'].colors + color_lists['double'].colors)
-        self.use_mean        = False
-        self.plot_zero       = False
-        self.show_rms        = True
-        self.legend_loc      = 'best'
-        self.second_yscale  = {u'µrad': 1e6}
-        self.figs            = None
+        self.description   = 'example'
+        self.time_one      = np.arange(11)
+        self.time_two      = np.arange(2, 13)
+        self.data_one      = 1e-6 * np.random.rand(2, 11)
+        self.data_two      = self.data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6
+        self.name_one      = 'test1'
+        self.name_two      = 'test2'
+        self.elements      = ['x', 'y']
+        self.units         = 'rad'
+        self.leg_scale     = 'micro'
+        self.start_date    = str(datetime.now())
+        self.rms_xmin      = 0
+        self.rms_xmax      = 10
+        self.disp_xmin     = -2
+        self.disp_xmax     = np.inf
+        self.make_subplots = True
+        color_lists        = dcs.get_color_lists()
+        self.colormap      = ListedColormap(color_lists['dbl_diff'].colors + color_lists['double'].colors)
+        self.use_mean      = False
+        self.plot_zero     = False
+        self.show_rms      = True
+        self.legend_loc    = 'best'
+        self.second_yscale = {u'µrad': 1e6}
+        self.return_err    = True
+        self.figs          = None
 
     def test_nominal(self):
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        self.return_err = False
+        self.figs = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_yscale=self.second_yscale)
+            second_yscale=self.second_yscale, return_err=self.return_err)
 
     def test_no_subplots(self):
         self.make_subplots = False
@@ -195,7 +195,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_yscale=self.second_yscale)
+            second_yscale=self.second_yscale, return_err=self.return_err)
 
     def test_no_start_date(self):
         self.start_date = ''
@@ -205,7 +205,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_yscale=self.second_yscale)
+            second_yscale=self.second_yscale, return_err=self.return_err)
 
     def test_only_data_one(self):
         self.data_two.fill(np.nan)
@@ -216,7 +216,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_yscale=self.second_yscale)
+            second_yscale=self.second_yscale, return_err=self.return_err)
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_only_data_two(self):
@@ -228,7 +228,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_yscale=self.second_yscale)
+            second_yscale=self.second_yscale, return_err=self.return_err)
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_rms_bounds(self):
@@ -240,7 +240,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_yscale=self.second_yscale)
+            second_yscale=self.second_yscale, return_err=self.return_err)
 
     def test_use_mean(self):
         self.use_mean = True
@@ -250,7 +250,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_yscale=self.second_yscale)
+            second_yscale=self.second_yscale, return_err=self.return_err)
 
     def test_no_rms_in_legend(self):
         self.show_rms = False
@@ -260,7 +260,7 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_yscale=self.second_yscale)
+            second_yscale=self.second_yscale, return_err=self.return_err)
 
     def test_plot_zero(self):
         self.plot_zero = True
@@ -270,15 +270,15 @@ class Test_make_difference_plot(unittest.TestCase):
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_yscale=self.second_yscale)
+            second_yscale=self.second_yscale, return_err=self.return_err)
 
     def test_plot_truth(self):
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        self.figs = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, elements=self.elements, units=self.units, \
             truth_time=self.time_one, truth_data=self.data_two)
 
     def test_disp_bounds(self):
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        self.figs = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
              self.data_one, self.data_two, elements=self.elements, units=self.units, \
              disp_xmin=2, disp_xmax=5)
 
