@@ -1702,6 +1702,47 @@ def is_datetime(time):
         out = True
     return out
 
+#%% Functions - align_plots
+def align_plots(figs, pos=None):
+    """
+    Aligns all the figures in one location.
+
+    Parameters
+    ----------
+    figs : list of matplotlib.Figure
+        List of figures to align together
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in June 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import align_plots, make_time_plot
+    >>> #fig1 = make_time_plot('Plot 1', 0, 0) # TODO: get this working
+    >>> #fig2 = make_time_plot('Plot 2', 1, 1)
+    >>> #figs = [fig1, fig2]
+    >>> #align_plots(figs)
+
+    Close plots
+    >>> #plt.close(fig1)
+    >>> #plt.close(fig2)
+
+    """
+    # initialize position if given
+    if pos is not None:
+        (x_pos, y_pos) = pos
+    else:
+        x_pos = None
+        y_pos = None
+    # loop through figures
+    for fig in figs:
+        # use position from first plot if you don't already have it
+        if x_pos is None or y_pos is None:
+            (x_pos, y_pos, _, _) = fig.canvas.manager.window.geometry().getRect()
+        # move the plot
+        fig.canvas.manager.window.move(x_pos, y_pos)
+
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()

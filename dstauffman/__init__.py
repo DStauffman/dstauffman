@@ -38,7 +38,7 @@ from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, clos
                               rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
                               plot_second_units_wrapper, plot_second_yunits, get_rms_indices, \
                               plot_vert_lines, plot_phases, get_classification, \
-                              plot_classification, is_datetime
+                              plot_classification, is_datetime, align_plots
 from .plotting     import Opts, plot_time_history, plot_correlation_matrix, plot_bar_breakdown
 from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
                               quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
