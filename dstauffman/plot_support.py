@@ -1118,7 +1118,7 @@ def show_zero_ylim(ax):
 #%% Functions - plot_second_units_wrapper
 def plot_second_units_wrapper(ax, second_yscale):
     r"""
-    Wrapper to plot_second_yunits that allows numeric or dict options
+    Wrapper to plot_second_yunits that allows numeric or dict options.
 
     Parameters
     ----------
@@ -1539,8 +1539,8 @@ def get_classification(classify):
 #%% Functions - plot_classification
 def plot_classification(ax, classification='U', *, caveat='', test=False, location='figure'):
     r"""
-    Displays the classification in a box on each figure, with the option of printing another box for
-    testing purposes.
+    Displays the classification in a box on each figure.
+    Includes the option of printing another box for testing purposes.
 
     Parameters
     ----------

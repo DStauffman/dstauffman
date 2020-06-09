@@ -204,27 +204,31 @@ class test_quat_angle_diff(unittest.TestCase):
 
     def test_null1(self):
         (theta, comp) = dcs.quat_angle_diff(self.quat1, self.null)
-        self.assertEqual(theta, None)
-        for i in range(3):
-            self.assertEqual(comp[i], None)
+        self.assertEqual(theta.size, 0)
+        self.assertEqual(theta.shape, (0, ))
+        self.assertEqual(comp.size, 0)
+        self.assertEqual(comp.shape, (3, 0))
 
     def test_null2(self):
         (theta, comp) = dcs.quat_angle_diff(self.quat1, self.null_quat)
-        self.assertEqual(theta, None)
-        for i in range(3):
-            self.assertEqual(comp[i], None)
+        self.assertEqual(theta.size, 0)
+        self.assertEqual(theta.shape, (0, ))
+        self.assertEqual(comp.size, 0)
+        self.assertEqual(comp.shape, (3, 0))
 
     def test_null3(self):
         (theta, comp) = dcs.quat_angle_diff(self.null, self.quat1)
-        self.assertEqual(theta, None)
-        for i in range(3):
-            self.assertEqual(comp[i], None)
+        self.assertEqual(theta.size, 0)
+        self.assertEqual(theta.shape, (0, ))
+        self.assertEqual(comp.size, 0)
+        self.assertEqual(comp.shape, (3, 0))
 
     def test_null4(self):
         (theta, comp) = dcs.quat_angle_diff(self.null_quat, self.quat1)
-        self.assertEqual(theta, None)
-        for i in range(3):
-            self.assertEqual(comp[i], None)
+        self.assertEqual(theta.size, 0)
+        self.assertEqual(theta.shape, (0, ))
+        self.assertEqual(comp.size, 0)
+        self.assertEqual(comp.shape, (3, 0))
 
 #%% quat_from_euler
 class test_quat_from_euler(unittest.TestCase):

@@ -206,7 +206,7 @@ def quat_angle_diff(quat1, quat2):
 
     # check for null quaternions
     if quat1.size == 0 or quat2.size == 0:
-        return (None, np.array([None, None, None]))
+        return (np.array([]), np.empty((3, 0)))
 
     # calculate delta quaternion
     dq = quat_mult(quat2, quat_inv(quat1))

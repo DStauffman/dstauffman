@@ -33,9 +33,9 @@ _LEG_FORMAT  = '{:1.3f}'
 _TRUTH_COLOR = 'k'
 
 #%% Functions - make_time_plot
-def make_time_plot(description, time, data, name='', elements=None, units='', time_units='sec',
-        leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf,
-        disp_xmax=np.inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False,
+def make_time_plot(description, time, data, name='', elements=None, units='', time_units='sec', \
+        leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
+        disp_xmax=np.inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
         show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True):
     r"""
     Generic data versus time plotting routine.
@@ -175,9 +175,9 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
         func_name = 'Mean'
         func_lamb = lambda x, y: np.nanmean(x, axis=y)
     if data_is_list:
-        data_func = func_lamb(data[j][ix['one'][j]], None)
+        data_func = [func_lamb(data[j][ix['one'][j]], None) for j in range(num_channels)]
     else:
-        data_func = func_lamb(data[:, ix['one']], 1)
+        data_func = func_lamb(data[:, ix['one']], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
@@ -404,7 +404,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
     else:
         func_name = 'Mean'
         func_lamb = lambda x: np.nanmean(x, axis=1)
-    data_func = func_lamb(data[:, ix['one']])
+    data_func = func_lamb(data[:, ix['one']]) if np.any(ix['one']) else np.full(num_channels, np.nan)
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
@@ -486,11 +486,11 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
     return fig
 
 #%% Functions - make_quaternion_plot
-def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
-        name_one='', name_two='', time_units='sec', start_date='', plot_components=True,
-        rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
-        make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True,
-        legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None,
+def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *, \
+        name_one='', name_two='', time_units='sec', start_date='', plot_components=True, \
+        rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf, \
+        make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True, \
+        legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None, \
         data_as_rows=True, tolerance=0, return_err=False):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
@@ -661,10 +661,10 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     else:
         func_name = 'Mean'
         func_lamb = lambda x, y: np.nanmean(x, axis=y)
-    q1_func     = func_lamb(quat_one[:, ix['one']], 1) if have_quat_one else nans
-    q2_func     = func_lamb(quat_two[:, ix['two']], 1) if have_quat_two else nans
-    nondeg_func = func_lamb(nondeg_error[:, ix['overlap']], 1) if have_both else nans
-    mag_func    = func_lamb(nondeg_angle[ix['overlap']], 0) if have_both else nans[0:1]
+    q1_func     = func_lamb(quat_one[:, ix['one']], 1) if have_quat_one and np.any(ix['one']) else nans
+    q2_func     = func_lamb(quat_two[:, ix['two']], 1) if have_quat_two and np.any(ix['two']) else nans
+    nondeg_func = func_lamb(nondeg_error[:, ix['overlap']], 1) if have_both and np.any(ix['overlap']) else nans
+    mag_func    = func_lamb(nondeg_angle[ix['overlap']], 0) if have_both and np.any(ix['overlap']) else nans[0:1]
     # output errors
     err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
     # unit conversion value
@@ -834,12 +834,12 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     return fig_hand
 
 #%% Functions - make_difference_plot
-def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
-        name_one='', name_two='', elements=None, units=None, time_units='sec', leg_scale='unity',
-        start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf,
-        make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False,
-        plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None,
-        ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True,
+def make_difference_plot(description, time_one, time_two, data_one, data_two, *, \
+        name_one='', name_two='', elements=None, units=None, time_units='sec', leg_scale='unity', \
+        start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf, \
+        make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
+        plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None, \
+        ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True, \
         tolerance=0, return_err=False):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
@@ -969,13 +969,13 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> data_as_rows  = True
     >>> tolerance     = 0
     >>> return_err    = False
-    >>> fig_hand = make_difference_plot(description, time_one, time_two, data_one, data_two,
+    >>> fig_hand = make_difference_plot(description, time_one, time_two, data_one, data_two, \
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
     ...     leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, second_yscale=second_yscale, ylabel=ylabel, truth_name=truth_name, \
-    ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows, tolerance=tolerance \
+    ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows, tolerance=tolerance, \
     ...     return_err=return_err)
 
     Close plots

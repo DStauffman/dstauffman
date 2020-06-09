@@ -161,7 +161,7 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), r
         rms_xmin=opts.rms_xmin, rms_xmax=opts.rms_xmax, disp_xmin=opts.disp_xmin, disp_xmax=opts.disp_xmax, \
         make_subplots=opts.sub_plots, plot_components=opts.quat_comp, \
         use_mean=opts.use_mean, plot_zero=opts.show_zero, show_rms=opts.show_rms, legend_loc=opts.leg_spot, \
-        truth_name=truth.name, truth_time=truth.time, truth_data=truth.att, return_err=return_err)
+        truth_name=truth.name, truth_time=truth.time, truth_data=truth.att, return_err=True)
 
     # Setup plots
     setup_plots(figs, opts)
@@ -245,7 +245,7 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), r
         start_date=opts.get_date_zero_str(), rms_xmin=opts.rms_xmin, rms_xmax=opts.rms_xmax, \
         disp_xmin=opts.disp_xmin, disp_xmax=opts.disp_xmax, make_subplots=opts.sub_plots, \
         colormap=colormap, use_mean=opts.use_mean, plot_zero=opts.show_zero, \
-        show_rms=opts.show_rms, legend_loc=opts.leg_spot, second_yscale=second_yscale)
+        show_rms=opts.show_rms, legend_loc=opts.leg_spot, second_yscale=second_yscale, return_err=True)
     # Setup plots
     setup_plots(figs, opts)
     if return_err:

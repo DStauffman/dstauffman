@@ -1108,6 +1108,12 @@ class Test_plot_classification(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
+#%% Functions - is_datetime
+pass # TODO: write this
+
+#%% Functions - align_plots
+pass # TODO: write this
+
 #%% Unit test execution
 if __name__ == '__main__':
     plt.ioff()
