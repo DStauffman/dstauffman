@@ -94,7 +94,7 @@ class Opts(Frozen):
         self.save_plot = False
         self.save_path = os.getcwd()
         self.show_plot = True
-        self.show_link = False # TODO: is this used?
+        self.show_link = False
         self.plot_type = 'png'
         self.sub_plots = True
         self.sing_line = False
@@ -424,7 +424,7 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
     ax.invert_yaxis()
 
     # Setup plots
-    setup_plots(fig, opts, yscale=False)
+    setup_plots(fig, opts)
     return fig
 
 #%% Functions - plot_bar_breakdown

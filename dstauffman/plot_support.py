@@ -900,7 +900,7 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-np.inf, t_final=np.inf, chan
         ax.set_ylim(top=this_ymax)
 
 #%% Functions - setup_plots
-def setup_plots(figs, opts, yscale=True):
+def setup_plots(figs, opts):
     r"""
     Combine common plot operations into one easy command.
 
@@ -941,13 +941,6 @@ def setup_plots(figs, opts, yscale=True):
     >>> plt.close(fig)
 
     """
-    # check for old api
-    if not isinstance(yscale, bool):
-        raise ValueError('Using deprecated API, change call to boolean for x or y scale.')
-    # check for single figure
-    if not isinstance(figs, list):
-        figs = [figs]
-
     # prepend a title
     if opts.case_name:
         titleprefix(figs, opts.case_name)
