@@ -786,7 +786,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
                 this_axes.plot(time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=colororder3.get_color(0))
             if show_extra:
                 this_axes.plot(time_one[q1_miss_ix], np.zeros(len(q1_miss_ix)), 'kx', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
-                this_axes.plot(time_one[q2_miss_ix], np.zeros(len(q2_miss_ix)), 'go', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
+                this_axes.plot(time_two[q2_miss_ix], np.zeros(len(q2_miss_ix)), 'go', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
 
         # set X display limits
         if i == 0:
@@ -983,14 +983,18 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     ...     plt.close(fig)
 
     """
-    # data checks
-    assert description, 'You must give the plot a description.'
-
     # determine if you have the histories
     have_data_one = data_one is not None and np.any(~np.isnan(data_one))
     have_data_two = data_two is not None and np.any(~np.isnan(data_two))
     have_both     = have_data_one and have_data_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
+
+    # data checks
+    assert description, 'You must give the plot a description.'
+    if have_data_one:
+        assert data_one.ndim == 2, f'Data must be 2D, not {data_one.ndim}' # TODO: change this restriction
+    if have_data_two:
+        assert data_two.ndim == 2, f'Data must be 2D, not {data_two.ndim}' # TODO: change this restriction
 
     # convert rows/cols as necessary
     if not data_as_rows:
@@ -1143,7 +1147,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                     color=cm.get_color(j+2*num_channels))
             if show_extra:
                 this_axes.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
-                this_axes.plot(time_one[d2_miss_ix], np.zeros(len(d2_miss_ix)), 'go', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
+                this_axes.plot(time_two[d2_miss_ix], np.zeros(len(d2_miss_ix)), 'go', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
 
         # set X display limits
         if i == 0:
