@@ -941,6 +941,10 @@ def setup_plots(figs, opts):
     >>> plt.close(fig)
 
     """
+    # ensure figs is a list
+    if not isinstance(figs, list):
+        figs = [figs]
+
     # prepend a title
     if opts.case_name:
         titleprefix(figs, opts.case_name)

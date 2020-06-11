@@ -6,6 +6,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
 #.  Added mutable integer Counter class in January 2016.
+#.  Updated by David C. Stauffer in June 2020 to make MetaClass methods public for direct use if desired.
 
 """
 
@@ -49,39 +50,30 @@ def _frozen(set):
     # return the custom defined function
     return set_attr
 
-#%% Methods - _save_method
-def _save_method(self, filename='', use_hdf5=True):
+#%% Methods - save_hdf5
+def save_hdf5(self, filename=''):
     r"""
-    Save the object to disk.
+    Save the object to disk as an HDF5 file.
 
     Parameters
     ----------
     filename : str
         Name of the file to save
-    use_hdf5 : bool, optional, defaults to False
-        Write as *.hdf5 instead of *.pkl
 
     """
     # exit if no filename is given
     if not filename:
         return
-    # potentially convert the filename
-    if not use_hdf5:
-        # Version 1 (Pickle):
-        with open(filename.replace('hdf5', 'pkl'), 'wb') as file:
-            pickle.dump(self, file)
-    else:
-        # Version 2 (HDF5):
-        with h5py.File(filename, 'w') as file:
-            grp = file.create_group('self')
-            for key in vars(self):
-                value = getattr(self, key)
-                if value is not None:
-                    grp.create_dataset(key, data=value)
+    # Save data
+    with h5py.File(filename, 'w') as file:
+        grp = file.create_group('self')
+        for key in vars(self):
+            value = getattr(self, key)
+            if value is not None:
+                grp.create_dataset(key, data=value)
 
-#%% Methods - _load_method
-@classmethod
-def _load_method(cls, filename='', use_hdf5=True):
+#%% Methods - load_hdf5
+def load_hdf5(cls, filename=''):
     r"""
     Load the object from disk.
 
@@ -89,29 +81,22 @@ def _load_method(cls, filename='', use_hdf5=True):
     ----------
     filename : str
         Name of the file to load
-    use_hdf5 : bool, optional, defaults to False
-        Write as *.hdf5 instead of *.pkl
 
     """
     if not filename:
         raise ValueError('No file specified to load.')
-    if not use_hdf5:
-        # Version 1 (Pickle):
-        with open(filename.replace('hdf5', 'pkl'), 'rb') as file:
-            out = pickle.load(file)
-    else:
-        # Version 2 (HDF5):
-        out = cls()
-        with h5py.File(filename, 'r') as file:
-            for key in file:
-                grp = file[key]
-                for field in grp:
-                    # Note grp[field].value is now grp[field][()] because of updated HDF5 API
-                    setattr(out, field, grp[field][()])
+    # Load data
+    out = cls()
+    with h5py.File(filename, 'r') as file:
+        for key in file:
+            grp = file[key]
+            for field in grp:
+                # Note grp[field].value is now grp[field][()] because of updated HDF5 API
+                setattr(out, field, grp[field][()])
     return out
 
-#%% Methods - _save_pickle
-def _save_pickle(self, filename):
+#%% Methods - save_pickle
+def save_pickle(self, filename):
     r"""
     Save a class instances to a pickle file.
 
@@ -126,9 +111,8 @@ def _save_pickle(self, filename):
     with open(filename, 'wb') as file:
         pickle.dump(self, file)
 
-#%% Methods - _load_pickle
-@classmethod
-def _load_pickle(cls, filename):
+#%% Methods - load_pickle
+def load_pickle(cls, filename):
     r"""
     Load a class instance from a pickle file.
 
@@ -145,6 +129,52 @@ def _load_pickle(cls, filename):
     """
     with open(filename, 'rb') as file:
         out = pickle.load(file)
+    return out
+
+#%% Methods - save_method
+def save_method(self, filename='', use_hdf5=True):
+    r"""
+    Save the object to disk.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to save
+    use_hdf5 : bool, optional, defaults to False
+        Write as *.hdf5 instead of *.pkl
+
+    """
+    # exit if no filename is given
+    if not filename:
+        return
+    if not use_hdf5:
+        # Version 1 (Pickle):
+        save_pickle(self, filename.replace('hdf5', 'pkl'))
+    else:
+        # Version 2 (HDF5):
+        save_hdf5(self, filename)
+
+#%% Methods - load_method
+def load_method(cls, filename='', use_hdf5=True):
+    r"""
+    Load the object from disk.
+
+    Parameters
+    ----------
+    filename : str
+        Name of the file to load
+    use_hdf5 : bool, optional, defaults to False
+        Write as *.hdf5 instead of *.pkl
+
+    """
+    if not filename:
+        raise ValueError('No file specified to load.')
+    if not use_hdf5:
+        # Version 1 (Pickle):
+        out = load_pickle(cls, filename.replace('hdf5', 'pkl'))
+    else:
+        # Version 2 (HDF5):
+        out = load_hdf5(cls, filename)
     return out
 
 #%% Classes - Frozen
@@ -167,9 +197,9 @@ class SaveAndLoad(type):
     def __init__(cls, name, bases, dct):
         r"""Add the 'save' and 'load' classes if they are not already present."""
         if not hasattr(cls, 'save'):
-            setattr(cls, 'save', _save_method)
+            setattr(cls, 'save', save_method)
         if not hasattr(cls, 'load'):
-            setattr(cls, 'load', _load_method)
+            setattr(cls, 'load', classmethod(load_method))
         super().__init__(name, bases, dct)
 
 #%% MetaClasses - SaveAndLoadPickle
@@ -178,9 +208,9 @@ class SaveAndLoadPickle(type):
     def __init__(cls, name, bases, dct):
         r"""Add the 'save' and 'load' classes if they are not already present."""
         if not hasattr(cls, 'save'):
-            setattr(cls, 'save', _save_pickle)
+            setattr(cls, 'save', save_pickle)
         if not hasattr(cls, 'load'):
-            setattr(cls, 'load', _load_pickle)
+            setattr(cls, 'load', classmethod(load_pickle))
         super().__init__(name, bases, dct)
 
 #%% Classes - Counter

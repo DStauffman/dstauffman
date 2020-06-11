@@ -204,6 +204,19 @@ class Test_make_quaternion_plot(unittest.TestCase):
         self.figs = dcs.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two)
 
+    def test_none1(self):
+        self.figs = dcs.make_quaternion_plot(self.description, self.time_one, None, self.quat_one, None)
+
+    def test_none2(self):
+        self.figs = dcs.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)
+
+    def test_none3(self):
+        with dcs.capture_output() as out:
+            self.figs = dcs.make_quaternion_plot('', None, None, None, None)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'No quaternion data was provided, so no plot was generated.')
+
     def tearDown(self):
         if self.figs:
             for this_fig in self.figs:
@@ -358,6 +371,19 @@ class Test_make_difference_plot(unittest.TestCase):
             make_subplots=self.make_subplots, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             second_yscale=self.second_yscale, return_err=self.return_err)
+
+    def test_none1(self):
+        self.figs = dcs.make_difference_plot(self.description, self.time_one, None, self.data_one, None)
+
+    def test_none2(self):
+        self.figs = dcs.make_difference_plot(self.description, None, self.time_two, None, self.data_two)
+
+    def test_none3(self):
+        with dcs.capture_output() as out:
+            self.figs = dcs.make_difference_plot('', None, None, None, None)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, 'No difference data was provided, so no plot was generated.')
 
     def tearDown(self):
         if self.figs:

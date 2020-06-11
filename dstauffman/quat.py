@@ -17,10 +17,11 @@ import numpy as np
 from dstauffman.constants import INT_TOKEN, QUAT_SIZE
 
 #%% Master flags
+# Flag controls whether any quaternion solutions are run
 USE_ASSERTIONS = True
 
-#%% Functions - _quat_assertions
-def _quat_assertions(quat):
+#%% Functions - quat_assertions
+def quat_assertions(quat, precision=1e-12, *, skip_assertions=False):
     r"""
     Check assertions about valid quaternions.
 
@@ -31,16 +32,14 @@ def _quat_assertions(quat):
 
     Examples
     --------
-    >>> from dstauffman.quat import _quat_assertions
+    >>> from dstauffman import quat_assertions
     >>> import numpy as np
     >>> quat = np.array([0.5, 0.5, -0.5, 0.5])
-    >>> _quat_assertions(quat)
+    >>> quat_assertions(quat)
 
     """
-    if not USE_ASSERTIONS:
+    if not USE_ASSERTIONS or skip_assertions:
         return # pragma: no cover
-    # hard-coded values
-    precision = 1e-12
     # get sizes
     qsize = quat.size
     qndim = quat.ndim
@@ -79,7 +78,7 @@ def _quat_assertions(quat):
         'error "{}".'.format(np.max(q_norm_err))
 
 #%% Functions - qrot
-def qrot(axis, angle):
+def qrot(axis, angle, *, skip_assertions=False):
     r"""
     Construct a quaternion expressing a rotation about a single axis.
 
@@ -92,6 +91,8 @@ def qrot(axis, angle):
             (3) for z-axis
     angle : array_like
         angle of rotation in radians
+    skip_assertions : bool, optional, default is False
+        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -141,11 +142,11 @@ def qrot(axis, angle):
         assert len(axis) == len(angle)
         quat = np.vstack((np.zeros((3, len(angle))), np.expand_dims(np.cos(angle/2), axis=0)))
         quat[axis-1, np.arange(len(axis))] = np.sin(angle/2)
-    _quat_assertions(quat)
+    quat_assertions(quat, skip_assertions=skip_assertions)
     return quat
 
 #%% Functions - quat_angle_diff
-def quat_angle_diff(quat1, quat2):
+def quat_angle_diff(quat1, quat2, *, skip_assertions=False):
     r"""
     Calculate the angular difference between two quaternions.
 
@@ -161,6 +162,8 @@ def quat_angle_diff(quat1, quat2):
         quaternion one
     quat2 : ndarray (4,) or (4, N)
         quaternion two
+    skip_assertions : bool, optional, default is False
+        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -201,15 +204,15 @@ def quat_angle_diff(quat1, quat2):
 
     """
     # check assertions
-    _quat_assertions(quat1)
-    _quat_assertions(quat2)
+    quat_assertions(quat1, skip_assertions=skip_assertions)
+    quat_assertions(quat2, skip_assertions=skip_assertions)
 
     # check for null quaternions
     if quat1.size == 0 or quat2.size == 0:
         return (np.array([]), np.empty((3, 0)))
 
     # calculate delta quaternion
-    dq = quat_mult(quat2, quat_inv(quat1))
+    dq = quat_mult(quat2, quat_inv(quat1, skip_assertions=skip_assertions), skip_assertions=skip_assertions)
 
     # pull vector components out of delta quaternion
     if dq.ndim == 1:
@@ -477,7 +480,7 @@ def quat_interp(time, quat, ti, inclusive=True):
     return qout
 
 #%% Functions - quat_inv
-def quat_inv(q1):
+def quat_inv(q1, *, skip_assertions=False):
     r"""
     Return the inverse of a normalized quaternions.
 
@@ -485,6 +488,8 @@ def quat_inv(q1):
     ----------
     q1 : ndarray, (4,) or (4, N)
         input quaternion
+    skip_assertions : bool, optional, default is False
+        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -515,7 +520,7 @@ def quat_inv(q1):
         q2 = np.zeros(q1.shape)
         return q2
     # size check
-    _quat_assertions(q1)
+    quat_assertions(q1, skip_assertions=skip_assertions)
     # invert the quaternions
     if q1.ndim == 1:
         # optimized single quaternion case
@@ -523,11 +528,11 @@ def quat_inv(q1):
     else:
         # general case
         q2 = np.concatenate((-q1[0, :], -q1[1, :], -q1[2, :], q1[3, :]), axis=0).reshape(QUAT_SIZE, q1.shape[1])
-    _quat_assertions(q2)
+    quat_assertions(q2, skip_assertions=skip_assertions)
     return q2
 
 #%% Functions - quat_mult
-def quat_mult(a, b):
+def quat_mult(a, b, *, skip_assertions=False):
     r"""
     Multiply quaternions together.
 
@@ -585,7 +590,7 @@ def quat_mult(a, b):
                 c = np.zeros(a.shape)
             else:
                 c = np.zeros(b.shape)
-        _quat_assertions(c)
+        quat_assertions(c, skip_assertions=skip_assertions)
         return c
     # single quaternion inputs case
     if is_single_a and is_single_b:
@@ -623,12 +628,12 @@ def quat_mult(a, b):
             -b1*a1 - b2*a2 - b3*a3 + b4*a4])
         # enforce positive scalar component
         c[:, c[3, :]<0] = -c[:, c[3, :]<0]
-    c = quat_norm(c)
-    _quat_assertions(c)
+    c = quat_norm(c, skip_assertions=skip_assertions)
+    quat_assertions(c, skip_assertions=skip_assertions)
     return c
 
 #%% Functions - quat_norm
-def quat_norm(x):
+def quat_norm(x, *, skip_assertions=False):
     r"""
     Normalize each column of the input matrix.
 
@@ -636,6 +641,8 @@ def quat_norm(x):
     ----------
     x : ndarray
         input quaternion
+    skip_assertions : bool, optional, default is False
+        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -662,11 +669,11 @@ def quat_norm(x):
     """
     # divide input by its column vector norm
     y = x / np.sqrt(np.sum(x*x, axis=0))
-    _quat_assertions(y)
+    quat_assertions(y, skip_assertions=skip_assertions)
     return y
 
 #%% Functions - quat_prop
-def quat_prop(quat, delta_ang, renorm=True):
+def quat_prop(quat, delta_ang, *, renorm=True, skip_assertions=False):
     r"""
     Approximate propagation of a quaternion using a small delta angle.
 
@@ -677,6 +684,9 @@ def quat_prop(quat, delta_ang, renorm=True):
     delta_ang : ndarray, (3, 1)
         delta angles in x, y, z order [rad]
     renorm : bool {True, False}, optional
+        Whether to renormalize the propagated quaternion
+    skip_assertions : bool, optional, default is False
+        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -717,8 +727,8 @@ def quat_prop(quat, delta_ang, renorm=True):
         quat_new *= -1
     # renormalize and return
     if renorm:
-        quat_new = quat_norm(quat_new)
-    _quat_assertions(quat_new)
+        quat_new = quat_norm(quat_new, skip_assertions=skip_assertions)
+    quat_assertions(quat_new, skip_assertions=skip_assertions)
     return quat_new
 
 #%% Functions - quat_times_vector
@@ -834,7 +844,7 @@ def quat_to_dcm(quat):
     return dcm
 
 #%% Functions - quat_to_euler
-def quat_to_euler(quat, seq=None):
+def quat_to_euler(quat, seq=None, *, skip_assertions=False):
     r"""
     Convert quaternion to Euler angles for one of 6 input angle sequences.
 
@@ -847,6 +857,8 @@ def quat_to_euler(quat, seq=None):
             1 = X axis, or roll
             2 = Y axis, or pitch
             3 = Z axis, or yaw
+    skip_assertions : bool, optional, default is False
+        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -883,7 +895,7 @@ def quat_to_euler(quat, seq=None):
     if seq is None:
         seq = np.array([3, 1, 2])
     # assert quaternion checks
-    _quat_assertions(quat)
+    quat_assertions(quat, skip_assertions=skip_assertions)
     assert len(seq) == 3, 'Sequence must have len of 3, not "{}"'.format(len(seq))
     if quat.ndim == 1:
         # quat is a 1D

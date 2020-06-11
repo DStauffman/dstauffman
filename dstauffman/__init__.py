@@ -13,7 +13,8 @@ Notes
 """
 
 #%% Imports
-from .classes      import Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
+from .classes      import Frozen, save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, \
+                              load_method, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
 from .constants    import DEFAULT_COLORMAP, INT_TOKEN, IS_WINDOWS, MONTHS_PER_YEAR, QUAT_SIZE, \
                               DEFAULT_CLASSIFICATION
 from .enums        import IntEnumPlus, consecutive, ReturnCodes
@@ -40,9 +41,9 @@ from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, clos
                               plot_vert_lines, plot_phases, get_classification, \
                               plot_classification, is_datetime, align_plots
 from .plotting     import Opts, plot_time_history, plot_correlation_matrix, plot_bar_breakdown
-from .quat         import USE_ASSERTIONS, qrot, quat_angle_diff, quat_from_euler, quat_interp, \
-                              quat_inv, quat_mult, quat_norm, quat_prop, quat_times_vector, \
-                              quat_to_dcm, quat_to_euler
+from .quat         import USE_ASSERTIONS, quat_assertions, qrot, quat_angle_diff, quat_from_euler, \
+                              quat_interp, quat_inv, quat_mult, quat_norm, quat_prop, \
+                              quat_times_vector, quat_to_dcm, quat_to_euler
 from .repos        import run_docstrings, run_unittests, run_pytests, run_coverage, \
                               find_repo_issues, delete_pyc, get_python_definitions, make_python_init
 from .stats        import convert_annual_to_monthly_probability, \

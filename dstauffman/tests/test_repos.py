@@ -264,7 +264,7 @@ class Test_make_python_init(unittest.TestCase):
     def test_nominal_use(self):
         text = dcs.make_python_init(self.folder)
         lines = text.split('\n')
-        self.assertEqual(lines[1][0:len(self.text2)], self.text2)
+        self.assertEqual(lines[3][0:len(self.text2)], self.text2)
 
     def test_duplicated_funcs(self):
         with open(self.filepath, 'wt') as file:
@@ -279,7 +279,7 @@ class Test_make_python_init(unittest.TestCase):
     def test_no_lineup(self):
         text = dcs.make_python_init(self.folder, lineup=False)
         lines = text.split('\n')
-        self.assertEqual(lines[1][0:len(self.text)], self.text)
+        self.assertEqual(lines[2][0:len(self.text)], self.text)
 
     def test_big_wrap(self):
         text = dcs.make_python_init(self.folder, wrap=1000)
@@ -299,7 +299,7 @@ class Test_make_python_init(unittest.TestCase):
     def test_saving(self):
         text = dcs.make_python_init(self.folder, filename=self.filename)
         lines = text.split('\n')
-        self.assertEqual(lines[1][0:len(self.text2)], self.text2)
+        self.assertEqual(lines[3][0:len(self.text2)], self.text2)
         self.assertTrue(os.path.isfile(self.filename))
 
     def tearDown(self):

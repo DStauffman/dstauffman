@@ -730,6 +730,39 @@ class Test_modd(unittest.TestCase):
         dcs.modd(self.x, self.mod, out)
         np.testing.assert_array_equal(out, self.y)
 
+#%% is_np_int
+class Test_is_np_int(unittest.TestCase):
+    r"""
+    Tests the is_np_int function with the following cases:
+        int
+        float
+        large int
+        ndarray of int
+        ndarray of float
+        ndarray of large int
+        ndarray of unsigned int
+    """
+    def test_int(self):
+        self.assertTrue(dcs.is_np_int(10))
+
+    def test_float(self):
+        self.assertFalse(dcs.is_np_int(10.))
+
+    def test_large_int(self):
+        self.assertTrue(dcs.is_np_int(2**62))
+
+    def test_np_int(self):
+        self.assertTrue(dcs.is_np_int(np.array([1, 2, 3])))
+
+    def test_np_float(self):
+        self.assertFalse(dcs.is_np_int(np.array([2., np.pi])))
+
+    def test_np_large_int(self):
+        self.assertTrue(dcs.is_np_int(np.array(2**62)))
+
+    def test_np_uint(self):
+        self.assertTrue(dcs.is_np_int(np.array([1, 2, 3], dtype=np.uint32)))
+
 #%% np_digitize
 class Test_np_digitize(unittest.TestCase):
     r"""

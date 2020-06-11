@@ -385,17 +385,22 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
     assert description, 'You must give the plot a description.'
 
     # convert rows/cols as necessary
+    data = np.atleast_2d(data)
     if not data_as_rows:
         # TODO: is this the best way or make branches lower?
         data = data.T
         mins = mins.T
         maxs = maxs.T
 
+    # optional inputs
+    if elements is None:
+        elements = [f'Channel {i+1}' for i in range(data.shape[0])]
+    # find number of elements being differenced
+    num_channels = len(elements)
+
     #% Calculations
     # build RMS indices
     ix = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
-    # find number of elements being differenced
-    num_channels = len(elements)
     cm = ColorMap(colormap=colormap, num_colors=num_channels)
     # calculate the rms (or mean) values
     if not use_mean:
@@ -616,14 +621,19 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     ...     plt.close(fig)
 
     """
-    # data checks
-    assert description, 'You must give the plot a description.'
-
     # determine if you have the quaternions
     have_quat_one = quat_one is not None and np.any(~np.isnan(quat_one))
     have_quat_two = quat_two is not None and np.any(~np.isnan(quat_two))
     have_both     = have_quat_one and have_quat_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
+    if not have_quat_one and not have_quat_two:
+        print('No quaternion data was provided, so no plot was generated.')
+        # TODO: return NaNs instead of None for this case?
+        out = {[], {'one': None, 'two': None, 'diff': None, 'mag': None}} if return_err else []
+        return out
+
+    # data checks
+    assert description, 'You must give the plot a description.' # TODO: remove this restriction?
 
     # convert rows/cols as necessary
     if not data_as_rows:
@@ -636,11 +646,14 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             truth_data = truth_data.T
 
     #% Calculations
-    # find overlapping times
-    (time_overlap, q1_diff_ix, q2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)
-    # find differences
-    q1_miss_ix = np.setxor1d(np.arange(len(time_one)), q1_diff_ix)
-    q2_miss_ix = np.setxor1d(np.arange(len(time_two)), q2_diff_ix)
+    if have_both:
+        # find overlapping times
+        (time_overlap, q1_diff_ix, q2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)
+        # find differences
+        q1_miss_ix = np.setxor1d(np.arange(len(time_one)), q1_diff_ix)
+        q2_miss_ix = np.setxor1d(np.arange(len(time_two)), q2_diff_ix)
+    else:
+        time_overlap = None
     # build RMS indices
     ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)
     # get default plotting colors
@@ -835,7 +848,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
 
 #%% Functions - make_difference_plot
 def make_difference_plot(description, time_one, time_two, data_one, data_two, *, \
-        name_one='', name_two='', elements=None, units=None, time_units='sec', leg_scale='unity', \
+        name_one='', name_two='', elements=None, units='', time_units='sec', leg_scale='unity', \
         start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf, \
         make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
         plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None, \
@@ -988,6 +1001,11 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     have_data_two = data_two is not None and np.any(~np.isnan(data_two))
     have_both     = have_data_one and have_data_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
+    if not have_data_one and not have_data_two:
+        print('No difference data was provided, so no plot was generated.')
+        # TODO: return NaNs instead of None for this case?
+        out = {[], {'one': None, 'two': None, 'diff': None}} if return_err else []
+        return out
 
     # data checks
     assert description, 'You must give the plot a description.'
@@ -1010,15 +1028,20 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     s1 = data_one.shape[0] if data_one is not None else 0
     s2 = data_two.shape[0] if data_two is not None else 0
     assert s1 == 0 or s2 == 0 or s1 == s2, f'Sizes of data channels must be consistent, got {s1} and {s2}.'
+    if elements is None:
+        elements = [f'Channel {i+1}' for i in range(np.max((s1, s2)))]
     num_channels = len(elements)
     assert num_channels == np.maximum(s1, s2), 'The given elements need to match the data sizes, got {} and {}.'.format(num_channels, np.maximum(s1, s2))
 
     #% Calculations
-    # find overlapping times
-    (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)
-    # find differences
-    d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)
-    d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)
+    if have_both:
+        # find overlapping times
+        (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)
+        # find differences
+        d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)
+        d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)
+    else:
+        time_overlap = None
     # build RMS indices
     ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)
     # create a colormap

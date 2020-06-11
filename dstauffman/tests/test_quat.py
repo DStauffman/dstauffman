@@ -15,10 +15,10 @@ import numpy as np
 
 import dstauffman as dcs
 
-#%% _quat_assertions
-class Test__quat_assertions(unittest.TestCase):
+#%% quat_assertions
+class Test_quat_assertions(unittest.TestCase):
     r"""
-    Tests the _quat_assertions function with the following cases:
+    Tests the quat_assertions function with the following cases:
         Nominal (x2)
         Array (x2)
         Bad (x7)
@@ -38,47 +38,50 @@ class Test__quat_assertions(unittest.TestCase):
         self.q12 = np.column_stack((self.q1, self.q6, self.q7)) # good and bad combined
 
     def test_nominal1(self):
-        dcs.quat._quat_assertions(self.q1)
+        dcs.quat_assertions(self.q1)
 
     def test_nominal2(self):
-        dcs.quat._quat_assertions(self.q2)
+        dcs.quat_assertions(self.q2)
 
     def test_nominal3(self):
-        dcs.quat._quat_assertions(self.q3)
+        dcs.quat_assertions(self.q3)
 
     def test_array1(self):
-        dcs.quat._quat_assertions(self.q4)
+        dcs.quat_assertions(self.q4)
 
     def test_array2(self):
-        dcs.quat._quat_assertions(self.q5)
+        dcs.quat_assertions(self.q5)
 
     def test_bad1(self):
         with self.assertRaises(AssertionError):
-            dcs.quat._quat_assertions(self.q6)
+            dcs.quat_assertions(self.q6)
 
     def test_bad2(self):
         with self.assertRaises(AssertionError):
-            dcs.quat._quat_assertions(self.q7)
+            dcs.quat_assertions(self.q7)
 
     def test_bad3(self):
         with self.assertRaises(AssertionError):
-            dcs.quat._quat_assertions(self.q8)
+            dcs.quat_assertions(self.q8)
 
     def test_bad4(self):
         with self.assertRaises(AssertionError):
-            dcs.quat._quat_assertions(self.q9)
+            dcs.quat_assertions(self.q9)
 
     def test_bad5(self):
         with self.assertRaises(AssertionError):
-            dcs.quat._quat_assertions(self.q10)
+            dcs.quat_assertions(self.q10)
 
     def test_bad6(self):
         with self.assertRaises(AssertionError):
-            dcs.quat._quat_assertions(self.q11)
+            dcs.quat_assertions(self.q11)
 
     def test_bad7(self):
         with self.assertRaises(AssertionError):
-            dcs.quat._quat_assertions(self.q12)
+            dcs.quat_assertions(self.q12)
+
+    def test_skip_assertions(self):
+        dcs.quat_assertions(self.q6, skip_assertions=True)
 
 #%% qrot
 class Test_qrot(unittest.TestCase):
