@@ -629,7 +629,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     if not have_quat_one and not have_quat_two:
         print('No quaternion data was provided, so no plot was generated.')
         # TODO: return NaNs instead of None for this case?
-        out = {[], {'one': None, 'two': None, 'diff': None, 'mag': None}} if return_err else []
+        out = ([], {'one': None, 'two': None, 'diff': None, 'mag': None}) if return_err else []
         return out
 
     # data checks
