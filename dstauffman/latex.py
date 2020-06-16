@@ -13,8 +13,8 @@ import unittest
 
 import numpy as np
 
-from dstauffman.constants import MONTHS_PER_YEAR
-from dstauffman.stats     import prob_to_rate
+from dstauffman.stats import prob_to_rate
+from dstauffman.units import MONTHS_PER_YEAR
 
 #%% Functions - make_preamble
 def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short_cap=None, numbered=True):

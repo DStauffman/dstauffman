@@ -15,7 +15,7 @@ Notes
 #%% Imports
 from .classes      import Frozen, save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, \
                               load_method, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
-from .constants    import DEFAULT_COLORMAP, INT_TOKEN, IS_WINDOWS, MONTHS_PER_YEAR, QUAT_SIZE, \
+from .constants    import DEFAULT_COLORMAP, INT_TOKEN, IS_WINDOWS, QUAT_SIZE, \
                               DEFAULT_CLASSIFICATION
 from .enums        import IntEnumPlus, consecutive, ReturnCodes
 from .estimation   import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, \
@@ -52,7 +52,8 @@ from .stats        import convert_annual_to_monthly_probability, \
                               monthly_probability_to_annual_rate, ar2mp, mp2ar, combine_sets, \
                               bounded_normal_draw, z_from_ci, rand_draw, intersect
 from .time         import get_np_time_units, round_datetime, round_np_datetime
-from .units        import get_factors
+from .units        import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \
+                              ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, get_factors
 from .utils        import rms, rss, setup_dir, compare_two_classes, compare_two_dicts, \
                               read_text_file, write_text_file, capture_output, unit, modd, \
                               is_np_int, np_digitize, histcounts, full_print, pprint_dict, \

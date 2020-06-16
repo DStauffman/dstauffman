@@ -11,7 +11,39 @@ Notes
 #%% Imports
 import unittest
 
+from numpy import isnan
+
 import dstauffman as dcs
+
+#%% Unit Conversions
+class Test_Constants(unittest.TestCase):
+    r"""
+    Tests the UnitConversions class with the following methods:
+        Nominal definitions
+    """
+    def setUp(self):
+        self.ints = ['ONE_MINUTE', 'ONE_HOUR', 'ONE_DAY', 'MONTHS_PER_YEAR']
+        self.flts = ['RAD2DEG', 'DEG2RAD', 'ARCSEC2RAD', 'RAD2ARCSEC', 'FT2M', 'M2FT', 'IN2CM', 'CM2IN']
+        self.master = set(self.ints) | set(self.flts)
+
+    def test_values(self):
+        # confirm that all the expected values exist and have the correct type
+        for key in self.ints:
+            self.assertTrue(isinstance(getattr(dcs, key), int))
+        for key in self.flts:
+            self.assertTrue(isinstance(getattr(dcs, key), float))
+
+    def test_pairs(self):
+        self.assertEqual(60 * 60 * 24, dcs.ONE_DAY)
+        self.assertAlmostEqual(dcs.DEG2RAD * dcs.RAD2DEG, 1, 14)
+        self.assertAlmostEqual(dcs.ARCSEC2RAD * dcs.RAD2ARCSEC, 1, 14)
+        self.assertAlmostEqual(dcs.FT2M * dcs.M2FT, 1, 14)
+        self.assertAlmostEqual(dcs.IN2CM * dcs.CM2IN, 1, 14)
+
+    def test_missing(self):
+        for field in vars(dcs.units):
+            if field.isupper():
+                self.assertTrue(field in self.master, 'Test is missing: {}'.format(field))
 
 #%% get_factors
 class Test_get_factors(unittest.TestCase):

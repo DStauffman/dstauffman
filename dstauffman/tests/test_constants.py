@@ -17,7 +17,7 @@ import dstauffman as dcs
 class Test_all_values(unittest.TestCase):
 
     def setUp(self):
-        self.ints = ['MONTHS_PER_YEAR', 'INT_TOKEN', 'QUAT_SIZE']
+        self.ints = ['INT_TOKEN', 'QUAT_SIZE']
         self.strs = ['DEFAULT_CLASSIFICATION', 'DEFAULT_COLORMAP']
         self.bool = ['IS_WINDOWS']
         self.master = set(self.ints) | set(self.strs) | set(self.bool)

@@ -12,6 +12,28 @@ Notes
 import doctest
 import unittest
 
+from numpy import pi
+
+#%% Constants - Unit Conversions
+# Time
+ONE_MINUTE = 60
+ONE_HOUR = 3600
+ONE_DAY = 86400
+MONTHS_PER_YEAR = 12
+
+# Angle
+RAD2DEG = 180/pi
+DEG2RAD = pi/180
+
+ARCSEC2RAD = 1/ONE_HOUR * DEG2RAD
+RAD2ARCSEC = ONE_HOUR * RAD2DEG
+
+# Length
+FT2M  = 0.3048
+M2FT  = 1/0.3048
+IN2CM = 2.54
+CM2IN = 1/2.54
+
 #%% get_factors
 def get_factors(prefix):
     r"""
@@ -49,7 +71,7 @@ def get_factors(prefix):
     """
     if isinstance(prefix, (int,float)):
         mult  = prefix
-        label = '';
+        label = ''
         return (mult, label)
     # find the desired units and label prefix
     if prefix == 'yotta':

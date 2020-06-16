@@ -26,8 +26,8 @@ from io import StringIO
 
 import numpy as np
 
-from dstauffman.constants import MONTHS_PER_YEAR
-from dstauffman.enums     import ReturnCodes
+from dstauffman.enums import ReturnCodes
+from dstauffman.units import MONTHS_PER_YEAR
 
 #%% Globals
 logger = logging.getLogger(__name__)

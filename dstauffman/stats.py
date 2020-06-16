@@ -18,8 +18,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as st
 
-from dstauffman.constants import MONTHS_PER_YEAR
 from dstauffman.plot_support import is_datetime
+from dstauffman.units import MONTHS_PER_YEAR
 from dstauffman.utils import is_np_int
 
 #%% Functions - convert_annual_to_monthly_probability

@@ -37,9 +37,6 @@ INT_TOKEN = -1
 # Whether we are currently on Windows or not
 IS_WINDOWS = os.name == 'nt'
 
-# Number of months in a year
-MONTHS_PER_YEAR = 12
-
 # Number of elements that should be in a quaternion
 QUAT_SIZE = 4
 
