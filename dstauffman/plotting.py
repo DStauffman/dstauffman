@@ -167,9 +167,11 @@ class Opts(Frozen):
         start_date = '  t(0) = ' + self.date_zero.strftime(TIMESTR_FORMAT) + ' Z' if self.date_zero is not None else ''
         return start_date
 
-    def pprint(self, indent=1, align=True):
-        r"""Display a pretty print version of the class."""
-        pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
+    def pprint(self, return_text=False, **kwargs):
+        r"""Displays a pretty print version of the class."""
+        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
+        text = pprint_dict(self.__dict__, name=name, **kwargs)
+        return text if return_text else None
 
 #%% Functions - plot_time_history
 def plot_time_history(description, time, data, opts=None, *, ignore_empties=False, **kwargs):

@@ -141,9 +141,11 @@ class TruthPlotter(Frozen):
             else:
                 raise ValueError('Bad shape for data of {}.'.format(data.shape))
 
-    def pprint(self, indent=1, align=True):
-        r"""Display a pretty print version of the class."""
-        pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
+    def pprint(self, return_text=False, **kwargs):
+        r"""Displays a pretty print version of the class."""
+        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
+        text = pprint_dict(self.__dict__, name=name, **kwargs)
+        return text if return_text else None
 
     @property
     def is_null(self):
@@ -1307,12 +1309,6 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
         else:
             # have neither time 1 nor time 2
             raise AssertionError('At least one time vector must be given.')
-    # TODO: this is a hack for older versions of numpy (v1.15), remove it eventually
-    #import pandas as pd
-    #if isinstance(t_min, pd.Timestamp):
-    #    t_min = t_min.to_datetime64()
-    #if isinstance(t_max, pd.Timestamp):
-    #    t_max = t_max.to_datetime64()
     if _process(xmin):
         if have1: p1_min = time_one >= xmin
         if have2: p2_min = time_two >= xmin

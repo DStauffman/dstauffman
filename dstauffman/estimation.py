@@ -87,7 +87,7 @@ class OptiOpts(Frozen):
         # if it made it all the way through the fields, then things must be equal
         return True
 
-    def pprint(self, indent=1, align=True):
+    def pprint(self, return_text=False, **kwargs):
         r"""
         Display a pretty print version of the class.
 
@@ -102,7 +102,9 @@ class OptiOpts(Frozen):
          trust_radius    = 1.0
 
         """
-        pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
+        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
+        text = pprint_dict(self.__dict__, name=name, **kwargs)
+        return text if return_text else None
 
 #%% OptiParam
 class OptiParam(Frozen):
@@ -222,7 +224,7 @@ class OptiParam(Frozen):
         names = [x.name for x in opti_param]
         return names
 
-    def pprint(self, indent=1, align=True):
+    def pprint(self, return_text=False, **kwargs):
         r"""
         Display a pretty print version of the class.
 
@@ -240,7 +242,9 @@ class OptiParam(Frozen):
          typical = 1.0
 
         """
-        pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
+        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
+        text = pprint_dict(self.__dict__, name=name, **kwargs)
+        return text if return_text else None
 
 #%% BpeResults
 class BpeResults(Frozen, metaclass=SaveAndLoad):

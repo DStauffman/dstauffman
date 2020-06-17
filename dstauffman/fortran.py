@@ -63,16 +63,25 @@ class _FortranSource():
         else:
             assert False, 'Either a module or program unit should be defined.'
 
-    def pprint(self, indent=1, align=True):
+    def pprint(self, return_text=False, **kwargs):
         r"""
         Displays a pretty print version of the class.
 
         Parameters
         ----------
-        indent : int, optional, default is 1
-            Number of characters to indent before all the fields
-        align : bool, optional, default is True
-            Whether to align all the equal signs
+        return_text : bool, optional, default is False
+            Whether to return the text that would be printed to the screen
+        kwargs : dict, optional
+            Other arguments are passed to pprint_dict
+
+        Returns
+        -------
+        text : str
+            Resulting text that gets displayed to the screen
+
+        See Also
+        --------
+        pprint_dict
 
         Examples
         --------
@@ -89,7 +98,9 @@ class _FortranSource():
          prefix      =
 
         """
-        pprint_dict(self.__dict__, name=self.__class__.__name__, indent=indent, align=align)
+        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
+        text = pprint_dict(self.__dict__, name=name, **kwargs)
+        return text if return_text else None
 
     @property
     def name(self):

@@ -888,7 +888,7 @@ def full_print():
     np.set_printoptions(**opt)
 
 #%% pprint_dict
-def pprint_dict(dct, *, name='', indent=1, align=True, disp=True):
+def pprint_dict(dct, *, name='', indent=1, align=True, disp=True, offset=0):
     r"""
     Print all the fields and their values.
 
@@ -902,10 +902,15 @@ def pprint_dict(dct, *, name='', indent=1, align=True, disp=True):
         Number of characters to indent before all the fields
     align : bool, optional, default is True
         Whether to align all the equal signs
+    disp : bool, optional, default is True
+        Whether to display the text to the screen
+    offset : int, optional, default is 0
+        Additional offset for recursive calls
 
     Notes
     -----
     #.  Written by David C. Stauffer in February 2017.
+    #.  Updated by David C. Stauffer in June 2020 for better recursive support.
 
     Examples
     --------
@@ -922,15 +927,26 @@ def pprint_dict(dct, *, name='', indent=1, align=True, disp=True):
     # print the name of the class/dictionary
     text = []
     if name:
-        text.append(name)
+        text.append(' ' * offset + name)
     # build indentation padding
-    this_indent = ' ' * indent
+    this_indent = ' ' * (indent + offset)
     # find the length of the longest field name
     pad_len = max(len(x) for x in dct)
     # loop through fields
     for (this_key, this_value) in dct.items():
-        this_pad = ' ' * (pad_len - len(this_key)) if align else ''
-        this_line = '{}{}{} = {}'.format(this_indent, this_key, this_pad, this_value)
+        if hasattr(this_value, 'pprint'):
+            this_name = f'{this_key} (class {this_value.__class__.__name__})'
+            try:
+                this_line = this_value.pprint(name=this_name, indent=indent, align=align, \
+                    disp=False, return_text=True, offset=offset+indent)
+            except:
+                # TODO: do I need this check or just let it fail?
+                warnings.warn('pprint recursive call failed, reverting to default.')
+                this_pad = ' ' * (pad_len - len(this_key)) if align else ''
+                this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
+        else:
+            this_pad = ' ' * (pad_len - len(this_key)) if align else ''
+            this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
         text.append(this_line)
     text = '\n'.join(text)
     if disp:
