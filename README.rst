@@ -103,9 +103,9 @@ Running the Code
 
 At least one example script should be available in the ./dstauffman/scripts folder. This script can be run via a command prompt:
 
-```
-python script_name.py
-```
+.. code-block:: python
+
+    python script_name.py
 
 If you are on Windows and installed Anaconda as described earlier, then python may not be on your system path, and you'll likely need to launch the Anaconda Prompt instead.
 
