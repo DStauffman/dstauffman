@@ -2,8 +2,15 @@
 dir=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
 # change to the script directory
 cd $dir
+# save the original paths
+PYTHONPATH_ORIG=$PYTHONPATH
+# modify as needed
+PYTHONPATH=$dir/../..
 # run the coverage tests
-coverage run -m dstauffman tests
+#coverage run -m dstauffman tests
+coverage run $dir/run_all_tests.py
+# restore the paths
+PYTHONPATH=$PYTHONPATH_ORIG
 # generate the coverage report
 coverage html
 # open the report
