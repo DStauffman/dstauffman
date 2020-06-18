@@ -9,7 +9,7 @@ Notes
 """
 
 #%% Imports
-from datetime import datetime
+import datetime
 import unittest
 
 import matplotlib.pyplot as plt
@@ -56,7 +56,7 @@ class Test_Opts(unittest.TestCase):
         opts = dcs.Opts()
         date_str = opts.get_date_zero_str()
         self.assertEqual(date_str, '')
-        opts.date_zero = datetime(2019, 4, 1, 18, 0, 0)
+        opts.date_zero = datetime.datetime(2019, 4, 1, 18, 0, 0)
         date_str = opts.get_date_zero_str()
         self.assertEqual(date_str,'  t(0) = 01-Apr-2019 18:00:00 Z')
 
@@ -70,6 +70,14 @@ class Test_Opts(unittest.TestCase):
         self.assertEqual(lines[1], '  case_name = ')
         self.assertEqual(lines[3], '  save_plot = False')
         self.assertEqual(lines[-1], '  names     = []')
+
+    def test_convert_dates(self):
+        opts = dcs.Opts(date_zero=datetime.datetime(2020, 6, 1))
+        self.assertEqual(opts.disp_xmin, -np.inf)
+        self.assertEqual(opts.time_base, 'sec')
+        opts.convert_dates('datetime')
+        self.assertIsNone(opts.disp_xmin)
+        self.assertEqual(opts.time_base, 'datetime')
 
 #%% Functions - plot_time_history
 class Test_plot_time_history(unittest.TestCase):

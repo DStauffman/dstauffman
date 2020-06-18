@@ -643,7 +643,14 @@ def storefig(fig, folder=None, plot_type='png'):
     # loop through the figures
     for this_fig in figs:
         # get the title of the figure canvas
-        this_title = resolve_name(this_fig.canvas.get_window_title())
+        raw_title = this_fig.canvas.get_window_title()
+        if raw_title is None or raw_title == 'image':
+            # special case when you have a displayless backend
+            try:
+                raw_title = this_fig.axes[0].get_title()
+            except:
+                pass
+        this_title = resolve_name(raw_title)
         # loop through the plot types
         for this_type in types:
             # save the figure to the specified plot type

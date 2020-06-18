@@ -21,12 +21,13 @@ from matplotlib.patches import Rectangle
 from matplotlib.ticker import StrMethodFormatter
 
 # model imports
-from dstauffman.classes import Frozen
-from dstauffman.constants import DEFAULT_COLORMAP
+from dstauffman.classes      import Frozen
+from dstauffman.constants    import DEFAULT_COLORMAP
 from dstauffman.plot_generic import make_time_plot
 from dstauffman.plot_support import ColorMap, ignore_plot_data, setup_plots
-from dstauffman.units import get_factors
-from dstauffman.utils import pprint_dict
+from dstauffman.time         import convert_date
+from dstauffman.units        import get_factors
+from dstauffman.utils        import pprint_dict
 
 #%% Classes - Opts
 class Opts(Frozen):
@@ -172,6 +173,15 @@ class Opts(Frozen):
         name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
         text = pprint_dict(self.__dict__, name=name, **kwargs)
         return text if return_text else None
+
+    def convert_dates(self, form, numpy_form='datetime64[ns]'):
+        r"""Converts between double and datetime representations."""
+        assert form in {'datetime', 'sec'}, f'Unexpected form of "{form}".'
+        self.time_base = form
+        self.disp_xmin = convert_date(self.disp_xmin, form=form, date_zero=self.date_zero)
+        self.disp_xmax = convert_date(self.disp_xmax, form=form, date_zero=self.date_zero)
+        self.rms_xmin  = convert_date(self.rms_xmin,  form=form, date_zero=self.date_zero)
+        self.rms_xmax  = convert_date(self.rms_xmax,  form=form, date_zero=self.date_zero)
 
 #%% Functions - plot_time_history
 def plot_time_history(description, time, data, opts=None, *, ignore_empties=False, **kwargs):
