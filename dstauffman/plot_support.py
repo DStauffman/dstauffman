@@ -641,11 +641,13 @@ def storefig(fig, folder=None, plot_type='png'):
     if not os.path.isdir(folder):
         raise ValueError('The specfied folder "{}" does not exist.'.format(folder))
     # loop through the figures
+    throw_warning = False
     for this_fig in figs:
         # get the title of the figure canvas
         raw_title = this_fig.canvas.get_window_title()
         if raw_title is None or raw_title == 'image':
             # special case when you have a displayless backend
+            throw_warning = True
             try:
                 raw_title = this_fig.axes[0].get_title()
             except:
@@ -656,6 +658,8 @@ def storefig(fig, folder=None, plot_type='png'):
             # save the figure to the specified plot type
             this_fig.savefig(os.path.join(folder, this_title + '.' + this_type), dpi=160, \
                              bbox_inches='tight', pad_inches=0.01)
+    if throw_warning:
+        warnings.warn('No window titles found, using the plot title instead (usually because there is no display).')
 
 #%% Functions - titleprefix
 def titleprefix(fig, prefix=''):
