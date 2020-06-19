@@ -27,7 +27,8 @@ from scipy.linalg import norm
 from dstauffman.classes import Frozen, SaveAndLoad
 from dstauffman.logs import activate_logging, deactivate_logging
 from dstauffman.plotting import Opts, plot_correlation_matrix, plot_time_history, setup_plots
-from dstauffman.utils import pprint_dict, rss, setup_dir
+from dstauffman.utils import pprint_dict, rss
+from dstauffman.utils_log import setup_dir
 
 #%% Globals
 logger = logging.getLogger(__name__)
