@@ -72,12 +72,25 @@ class Test_Opts(unittest.TestCase):
         self.assertEqual(lines[-1], '  names     = []')
 
     def test_convert_dates(self):
-        opts = dcs.Opts(date_zero=datetime.datetime(2020, 6, 1))
+        opts = dcs.Opts()
         self.assertEqual(opts.disp_xmin, -np.inf)
         self.assertEqual(opts.time_base, 'sec')
         opts.convert_dates('datetime')
         self.assertIsNone(opts.disp_xmin)
         self.assertEqual(opts.time_base, 'datetime')
+
+    def test_convert_dates2(self):
+        opts = dcs.Opts(date_zero=datetime.datetime(2020, 6, 1))
+        opts.rms_xmin = -10
+        opts.rms_xmax = 10
+        opts.disp_xmin = 5
+        opts.disp_xmax = 150
+        opts.convert_dates('datetime')
+        self.assertEqual(opts.time_base, 'datetime')
+        self.assertEqual(opts.rms_xmin,  datetime.datetime(2020, 5, 31, 23, 59, 50))
+        self.assertEqual(opts.rms_xmax,  datetime.datetime(2020, 6, 1, 0, 0, 10))
+        self.assertEqual(opts.disp_xmin, datetime.datetime(2020, 6, 1, 0, 0, 5))
+        self.assertEqual(opts.disp_xmax, datetime.datetime(2020, 6, 1, 0, 2, 30))
 
 #%% Functions - plot_time_history
 class Test_plot_time_history(unittest.TestCase):

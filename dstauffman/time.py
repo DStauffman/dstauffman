@@ -212,8 +212,11 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     all_forms = date_forms | time_forms
     # data checks
     assert form in all_forms, f'Unexpected form of "{form}".'
-    assert old_form in all_forms, f'Unexpected form of "{old_form}".'
-    if form in time_forms or old_form in time_forms:
+    assert old_form in all_forms, f'Unexpected old_form of "{old_form}".'
+    # exit if not changing anything
+    if form == old_form:
+        return date
+    if form in time_forms or (old_form in time_forms and np.isfinite(date)):
         assert date_zero is not None, 'You must specify a date_zero.'
         assert isinstance(date_zero, datetime.datetime), 'The date_zero is expected to be a datetime object.'
     # do all possible conversions
@@ -221,22 +224,18 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     if old_form in time_forms:
         is_num = np.isfinite(date)
         if form == 'datetime':
-            out = date_zero + datetime.timedelta(seconds=date) if is_num else None # TODO: or numpy.datetime64('nat')
+            out = date_zero + datetime.timedelta(seconds=date) if is_num else None # TODO: or np.datetime64('nat')
         elif form == 'numpy':
             if is_num:
                 out = (np.datetime64(date_zero, dtype=numpy_form) + np.timedelta64(np.round(date* 10**9).astype(np.int64), 'ns')).astype(numpy_form)
             else:
                 out = np.datetime64('nat', dtype=numpy_form)
         elif form == 'matplotlib':
-            out = dates.date2num(date_zero) + date / ONE_DAY
-        elif form in time_forms:
-            out = date
+            out = dates.date2num(date_zero) + date / ONE_DAY if is_num else date
     # from datetime
     elif old_form == 'datetime':
         is_num = date is not None
-        if form == 'datetime':
-            out = date
-        elif form == 'numpy':
+        if form == 'numpy':
             out = np.array(date, dtype=numpy_form)
         elif form == 'matplotlib':
             out = dates.date2num(date) if is_num else np.nan
@@ -251,8 +250,6 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
         is_num = ~np.isnat(date)
         if form == 'datetime':
             out = datetime.datetime.utcfromtimestamp(date.astype('datetime64[ns]').astype(np.int64) / 10**9) if is_num else None
-        elif form == 'numpy':
-            out = date
         elif form == 'matplotlib':
             out = dates.date2num(date)
         elif form in time_forms:
@@ -260,15 +257,13 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
                 out = (date - np.array(date_zero, dtype='datetime64[ns]')).astype('timedelta64[ns]').astype(np.int64) / 10**9
             else:
                 out = np.nan
-    # form matplotlib
+    # from matplotlib
     elif old_form == 'matplotlib':
         is_num = np.isfinite(date)
         if form == 'datetime':
             out = dates.num2date(date) if is_num else None
         elif form == 'numpy':
             out = np.array(dates.num2date(date), dtype=numpy_form) if is_num else np.datetime64('nat')
-        elif form == 'matplotlib':
-            out = date
         elif form in time_forms:
             out = ONE_DAY * (date - dates.date2num(date_zero))
     # convert from seconds to other time forms if necessary
