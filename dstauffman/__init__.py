@@ -51,7 +51,8 @@ from .stats        import convert_annual_to_monthly_probability, \
                               rate_to_prob, annual_rate_to_monthly_probability, \
                               monthly_probability_to_annual_rate, ar2mp, mp2ar, combine_sets, \
                               bounded_normal_draw, z_from_ci, rand_draw, intersect
-from .time         import get_np_time_units, round_datetime, round_np_datetime, convert_date
+from .time         import get_np_time_units, round_datetime, round_np_datetime, \
+                              round_num_datetime, convert_date
 from .units        import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \
                               ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, get_factors
 from .utils        import rms, rss, compare_two_classes, compare_two_dicts, read_text_file, \

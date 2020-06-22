@@ -13,6 +13,7 @@ import datetime
 import doctest
 import re
 import unittest
+import warnings
 
 import matplotlib.dates as dates
 import numpy as np
@@ -165,6 +166,54 @@ def round_np_datetime(date_in, time_delta, floor=False):
     # scale and convert back to datetime outputs
     date_out    = (dt_int*quants).astype(date_in.dtype)
     return date_out
+
+#%% Functions - round_num_datetime
+def round_num_datetime(date_in, time_delta, floor=False):
+    r"""
+    Rounds a numerica datetime to the given value.
+
+    Parameters
+    ----------
+    date_in : float
+        Date to round
+    time_delta : float
+        Delta time to round the date to
+    floor : bool
+        Whether to round or floor the result, default is False, meaning round
+
+    Returns
+    -------
+    float
+        Rounded date
+
+    Notes
+    -----
+    #.  The date_in and time_delta values need to be in the same time units, typically could be
+        seconds or days.
+    #.  Written by David C. Stauffer in June 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import round_num_datetime
+    >>> import numpy as np
+    >>> date_exact = np.arange(0, 10.1, 0.1)
+    >>> date_in    = date_exact + 0.001 * np.random.rand(101)
+    >>> time_delta = 0.1
+    >>> date_out   = round_num_datetime(date_in, time_delta)
+    >>> print(np.all(np.abs(date_out - date_exact) < 1e-12))
+    True
+
+    """
+    # check if date value is too close to the tolerance floor
+    max_date = np.max(np.abs(date_in), initial=0)
+    if (max_date / time_delta) > (0.01/ np.finfo(float).eps):
+        warnings.warn('This function may have problems if time_delta gets too small.')
+    quants = date_in / time_delta
+    if floor:
+        rounded = np.floor(quants)
+    else:
+        rounded = np.round(quants)
+    return rounded * time_delta
 
 #%% Functions - convert_date
 def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='datetime64[ns]'):

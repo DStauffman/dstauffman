@@ -182,6 +182,7 @@ class Opts(Frozen):
         self.disp_xmax = convert_date(self.disp_xmax, form=form, date_zero=self.date_zero)
         self.rms_xmin  = convert_date(self.rms_xmin,  form=form, date_zero=self.date_zero)
         self.rms_xmax  = convert_date(self.rms_xmax,  form=form, date_zero=self.date_zero)
+        return self
 
 #%% Functions - plot_time_history
 def plot_time_history(description, time, data, opts=None, *, ignore_empties=False, **kwargs):

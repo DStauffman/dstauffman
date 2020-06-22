@@ -74,6 +74,29 @@ class Test_round_np_datetime(unittest.TestCase):
         date_out   = dcs.round_np_datetime(self.date_in, self.time_delta)
         np.testing.assert_array_equal(date_out, self.expected)
 
+#%% Functions - round_num_datetime
+class Test_round_num_datetime(unittest.TestCase):
+    r"""
+    Tests the round_num_datetime function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.date_exact = np.arange(0, 10.1, 0.1)
+        self.date_in    = self.date_exact + 0.001 * np.random.rand(101)
+        self.time_delta = 0.1
+
+    def test_nominal(self):
+        date_out   = dcs.round_num_datetime(self.date_in, self.time_delta)
+        np.testing.assert_array_almost_equal(date_out, self.date_exact, 12)
+
+    def test_small(self):
+        with self.assertWarns(Warning):
+            dcs.round_num_datetime(1e6 * self.date_in, 1e-12)
+
+    def test_floor(self):
+        date_out = dcs.round_num_datetime(np.array([0., 1.1, 1.9, 3.05, 4.9]), 1., floor=True)
+        np.testing.assert_array_almost_equal(date_out, np.array([0., 1., 1., 3., 4.]), 12)
+
 #%% Functions - convert_date
 class Test_convert_date(unittest.TestCase):
     r"""

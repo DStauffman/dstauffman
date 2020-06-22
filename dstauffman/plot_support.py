@@ -1292,7 +1292,10 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
             else:
                 process = not np.isnat(time)
         else:
-            process = not np.isnan(time) and not np.isinf(time)
+            if time is None:
+                process = False
+            else:
+                process = not np.isnan(time) and not np.isinf(time)
         return process
 
     # TODO: functionalize this more so there is less repeated code
