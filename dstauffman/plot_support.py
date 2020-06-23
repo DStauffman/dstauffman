@@ -875,6 +875,10 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-np.inf, t_final=np.inf, chan
         time = date2num(time)
     # find the relevant time indices
     ix_time = (time >= t_start) & (time <= t_final)
+    # exit if no data is in this time window
+    if ~np.any(ix_time):
+        warnings.warn('No data matched the given time interval.')
+        return
     # pull out the minimums/maximums from the data
     if channel is None:
         if data.ndim == 1:

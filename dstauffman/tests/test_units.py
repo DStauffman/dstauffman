@@ -11,8 +11,6 @@ Notes
 #%% Imports
 import unittest
 
-from numpy import isnan
-
 import dstauffman as dcs
 
 #%% Unit Conversions
@@ -79,6 +77,25 @@ class Test_get_factors(unittest.TestCase):
         (mult, label) = dcs.get_factors(0.3)
         self.assertEqual(mult, 0.3)
         self.assertEqual(label, '')
+
+#%% get_time_factor
+class Test_get_time_factor(unittest.TestCase):
+    r"""
+    Tests the get_time_factor function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.units = ['sec', 'min', 'hr', 'day']
+        self.mults = [1, 60, 3600, 86400]
+
+    def test_nominal(self):
+        for (unit, mult) in zip(self.units, self.mults):
+            out = dcs.get_time_factor(unit)
+            self.assertEqual(out, mult)
+
+    def test_bad(self):
+        with self.assertRaises(ValueError):
+            dcs.get_time_factor('bad')
 
 #%% Unit test execution
 if __name__ == '__main__':

@@ -60,6 +60,30 @@ class Test_Opts(unittest.TestCase):
         date_str = opts.get_date_zero_str()
         self.assertEqual(date_str,'  t(0) = 01-Apr-2019 18:00:00 Z')
 
+    def get_time_limits(self):
+        opts = dcs.Opts()
+        opts.disp_xmin = 60
+        opts.disp_xmax = np.inf
+        opts.rms_xmin = -np.inf
+        opts.rms_xmax = None
+        opts.time_base = 'sec'
+        opts.time_unit = 'min'
+        (d1, d2, r1, r2) = opts.get_time_limits()
+        self.assertEqual(d1, 1)
+        self.assertEqual(d2, np.inf)
+        self.assertEqual(r1, -np.inf)
+        self.assertIsNone(r2)
+
+    def get_time_limits2(self):
+        opts = dcs.Opts().convert_dates('datetime')
+        opts.disp_xmin = datetime.datetime(2020, 6, 1, 0, 0, 0)
+        opts.disp_xmax = datetime.datetime(2020, 6, 1, 12, 0, 0)
+        (d1, d2, r1, r2) = opts.get_time_limits()
+        self.assertEqual(d1, datetime.datetime(2020, 6, 1, 0, 0, 0))
+        self.assertEqual(d2, datetime.datetime(2020, 6, 1, 12, 0, 0))
+        self.assertIsNone(r1)
+        self.assertIsNone(r2)
+
     def test_pprint(self):
         opts = dcs.Opts()
         with dcs.capture_output() as out:

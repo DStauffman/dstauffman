@@ -25,7 +25,7 @@ from dstauffman.classes      import Frozen
 from dstauffman.constants    import DEFAULT_COLORMAP
 from dstauffman.plot_generic import make_time_plot
 from dstauffman.plot_support import ColorMap, ignore_plot_data, setup_plots
-from dstauffman.time         import convert_date
+from dstauffman.time         import convert_date, convert_time_units
 from dstauffman.units        import get_factors
 from dstauffman.utils        import pprint_dict
 
@@ -168,6 +168,22 @@ class Opts(Frozen):
         start_date = '  t(0) = ' + self.date_zero.strftime(TIMESTR_FORMAT) + ' Z' if self.date_zero is not None else ''
         return start_date
 
+    def get_time_limits(self):
+        r"""Returns the display and RMS limits in the current time units."""
+        def _convert(value):
+            if value is not None and np.isfinite(value):
+                return convert_time_units(value, self.time_base, self.time_unit)
+            return value
+
+        if self.time_base == 'datetime':
+            return (self.disp_xmin, self.disp_xmax, self.rms_xmin, self.rms_xmax)
+
+        disp_xmin = _convert(self.disp_xmin)
+        disp_xmax = _convert(self.disp_xmax)
+        rms_xmin  = _convert(self.rms_xmin)
+        rms_xmax  = _convert(self.rms_xmax)
+        return (disp_xmin, disp_xmax, rms_xmin, rms_xmax)
+
     def pprint(self, return_text=False, **kwargs):
         r"""Displays a pretty print version of the class."""
         name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
@@ -178,6 +194,7 @@ class Opts(Frozen):
         r"""Converts between double and datetime representations."""
         assert form in {'datetime', 'sec'}, f'Unexpected form of "{form}".'
         self.time_base = form
+        self.time_unit = form
         self.disp_xmin = convert_date(self.disp_xmin, form=form, date_zero=self.date_zero)
         self.disp_xmax = convert_date(self.disp_xmax, form=form, date_zero=self.date_zero)
         self.rms_xmin  = convert_date(self.rms_xmin,  form=form, date_zero=self.date_zero)

@@ -162,9 +162,10 @@ def list_python_files(folder):
 
     """
     # find all the files that end in .py and are not dunder (__name__) files
-    files = [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.py') and
-             not file.startswith('__')]
-    return files
+    if os.path.isdir(folder):
+        return [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.py')
+            and not file.startswith('__')]
+    return []
 
 #%% Unit test
 if __name__ == '__main__':

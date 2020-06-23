@@ -116,6 +116,7 @@ class Test_convert_date(unittest.TestCase):
         self.datetime   = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000)
         self.numpy      = np.datetime64('2020-06-01 01:02:05.500000', 'ns')
         self.matplotlib = dates.date2num(self.datetime)
+        self.nat        = np.datetime64('nat')
 
     def test_secs(self):
         out = dcs.convert_date(self.seconds, 'datetime', self.date_zero)
@@ -193,13 +194,13 @@ class Test_convert_date(unittest.TestCase):
         self.assertTrue(np.isnan(out))
         out = dcs.convert_date(None, 'sec', self.date_zero, old_form='datetime')
         self.assertTrue(np.isnan(out))
-        out = dcs.convert_date(np.datetime64('nat'), 'datetime', old_form='numpy')
+        out = dcs.convert_date(self.nat, 'datetime', old_form='numpy')
         self.assertIsNone(out)
-        out = dcs.convert_date(np.datetime64('nat'), 'numpy', old_form='numpy')
+        out = dcs.convert_date(self.nat, 'numpy', old_form='numpy')
         self.assertTrue(np.isnat(out))
-        out = dcs.convert_date(np.datetime64('nat'), 'matplotlib', old_form='numpy')
+        out = dcs.convert_date(self.nat, 'matplotlib', old_form='numpy')
         self.assertTrue(np.isnan(out))
-        out = dcs.convert_date(np.datetime64('nat'), 'sec', self.date_zero, old_form='numpy')
+        out = dcs.convert_date(self.nat, 'sec', self.date_zero, old_form='numpy')
         self.assertTrue(np.isnan(out))
         out = dcs.convert_date(np.inf, 'datetime', old_form='matplotlib')
         self.assertIsNone(out)
@@ -225,6 +226,77 @@ class Test_convert_date(unittest.TestCase):
     def test_numpy_form(self):
         out = dcs.convert_date(self.seconds, 'numpy', self.date_zero, numpy_form='datetime64[ms]')
         self.assertEqual(dcs.get_np_time_units(out), 'ms')
+
+    def test_numpy_vectors(self):
+        dates = np.array([self.numpy, self.nat], dtype='datetime64[ns]')
+        out = dcs.convert_date(dates, 'sec', self.date_zero, old_form='numpy', numpy_form='datetime64[ms]')
+        np.testing.assert_array_equal(out, np.array([self.seconds, np.nan]))
+        out = dcs.convert_date(dates, 'matplotlib', self.date_zero, old_form='numpy', numpy_form='datetime64[ms]')
+        np.testing.assert_array_equal(out, np.array([self.matplotlib, np.nan]))
+
+    def test_seconds_vectors(self):
+        dates = np.array([self.seconds, -np.inf, np.inf, np.nan], dtype=float)
+        out = dcs.convert_date(dates, 'matplotlib', self.date_zero, old_form='sec')
+        np.testing.assert_array_equal(out, np.array([self.matplotlib, -np.inf, np.inf, np.nan]))
+        out = dcs.convert_date(dates, 'numpy', self.date_zero, old_form='sec')
+        np.testing.assert_array_equal(out, np.array([self.numpy, self.nat, self.nat, self.nat], dtype='datetime64[ns]'))
+
+    def test_mpl_vectors(self):
+        dates = np.array([self.matplotlib, -np.inf, np.inf, np.nan], dtype=float)
+        out = dcs.convert_date(dates, 'sec', self.date_zero, old_form='matplotlib')
+        np.testing.assert_array_almost_equal(out, np.array([self.seconds, -np.inf, np.inf, np.nan]))
+        out = dcs.convert_date(dates, 'numpy', self.date_zero, old_form='matplotlib')
+        np.testing.assert_array_equal(out, np.array([self.numpy, self.nat, self.nat, self.nat], dtype='datetime64[ns]'))
+
+#%% convert_time_units
+class Test_convert_time_units(unittest.TestCase):
+    r"""Tests the convert_time_units function with the following cases:
+        Conversions
+        Bad values
+    """
+    def test_sec(self):
+        out = dcs.convert_time_units(3600, 'sec', 'sec')
+        self.assertEqual(out, 3600.)
+        out = dcs.convert_time_units(3600, 'sec', 'min')
+        self.assertEqual(out, 60.)
+        out = dcs.convert_time_units(3600, 'sec', 'hr')
+        self.assertEqual(out, 1.)
+        out = dcs.convert_time_units(3600, 'sec', 'day')
+        self.assertEqual(out, 1/24)
+
+    def test_min(self):
+        out = dcs.convert_time_units(100, 'min', 'sec')
+        self.assertEqual(out, 6000.)
+        out = dcs.convert_time_units(100, 'min', 'min')
+        self.assertEqual(out, 100.)
+        out = dcs.convert_time_units(100, 'min', 'hr')
+        self.assertEqual(out, 5/3)
+        out = dcs.convert_time_units(100, 'min', 'day')
+        self.assertEqual(out, 5/3/24)
+
+    def test_hr(self):
+        out = dcs.convert_time_units(2.5, 'hr', 'sec')
+        self.assertEqual(out, 2.5*3600)
+        out = dcs.convert_time_units(2.5, 'hr', 'min')
+        self.assertEqual(out, 2.5*60)
+        out = dcs.convert_time_units(2.5, 'hr', 'hr')
+        self.assertEqual(out, 2.5)
+        out = dcs.convert_time_units(2.5, 'hr', 'day')
+        self.assertAlmostEqual(out, 2.5/24, 12)
+
+    def test_day(self):
+        out = dcs.convert_time_units(1.5, 'day', 'sec')
+        self.assertEqual(out, 1.5*86400)
+        out = dcs.convert_time_units(1.5, 'day', 'min')
+        self.assertEqual(out, 2160.)
+        out = dcs.convert_time_units(1.5, 'day', 'hr')
+        self.assertEqual(out, 36)
+        out = dcs.convert_time_units(1.5, 'day', 'day')
+        self.assertEqual(out, 1.5)
+
+    def test_bad(self):
+        with self.assertRaises(ValueError):
+            dcs.convert_time_units(1, 'sec', 'bad')
 
 #%% Unit test execution
 if __name__ == '__main__':

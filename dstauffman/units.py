@@ -141,6 +141,45 @@ def get_factors(prefix):
         raise ValueError('Unexpected value for units prefix.')
     return (mult, label)
 
+#%% Functions - get_time_factor
+def get_time_factor(unit):
+    r"""
+    Gets the time factor for the given unit relative to the base SI unit of 'sec'.
+
+    Parameters
+    ----------
+    unit : str
+        Units to get the multiplying for
+
+    Returns
+    -------
+    mult : int
+        Multiplication factor
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in June 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import get_time_factor
+    >>> mult = get_time_factor('hr')
+    >>> print(mult)
+    3600
+
+    """
+    if unit == 'sec':
+        mult = 1
+    elif unit == 'min':
+        mult = ONE_MINUTE
+    elif unit == 'hr':
+        mult = ONE_HOUR
+    elif unit == 'day':
+        mult = ONE_DAY
+    else:
+        raise ValueError(f'Unexpected value for "{unit}".')
+    return mult
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='dstauffman.tests.test_units', exit=False)
