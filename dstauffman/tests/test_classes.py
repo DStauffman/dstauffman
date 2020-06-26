@@ -56,8 +56,7 @@ class _Example_No_Override2(object, metaclass=dcs.SaveAndLoadPickle):
     def load():
         return 2
 
-#%% Classes for testing
-# Frozen
+#%% Frozen
 class Test_Frozen(unittest.TestCase):
     r"""
     Test Opts class, and by extension the frozen function and Frozen class using cases:
@@ -85,7 +84,77 @@ class Test_Frozen(unittest.TestCase):
         with self.assertRaises(AttributeError):
             temp.new_field_that_does_not_exist = 1
 
-# SaveAndLoad
+#%% pprint_dict
+class Test_pprint_dict(unittest.TestCase):
+    r"""
+    Tests the pprint_dict function with the following cases:
+        Nominal
+        No name
+        Different indentation
+        No alignment
+    """
+    def setUp(self):
+        self.name   = 'Example'
+        self.dct    = {'a': 1, 'bb': 2, 'ccc': 3}
+
+    def test_nominal(self):
+        with dcs.capture_output() as out:
+            dcs.pprint_dict(self.dct, name=self.name)
+        lines = out.getvalue().strip().split('\n')
+        self.assertEqual(lines[0], 'Example')
+        self.assertEqual(lines[1], ' a   = 1')
+        self.assertEqual(lines[2], ' bb  = 2')
+        self.assertEqual(lines[3], ' ccc = 3')
+
+    def test_no_name(self):
+        with dcs.capture_output() as out:
+            dcs.pprint_dict(self.dct)
+        lines = out.getvalue().strip().split('\n')
+        self.assertEqual(lines[0], 'a   = 1')
+        self.assertEqual(lines[1], ' bb  = 2')
+        self.assertEqual(lines[2], ' ccc = 3')
+
+    def test_indent(self):
+        with dcs.capture_output() as out:
+            dcs.pprint_dict(self.dct, name=self.name, indent=4)
+        lines = out.getvalue().strip().split('\n')
+        self.assertEqual(lines[0], 'Example')
+        self.assertEqual(lines[1], '    a   = 1')
+        self.assertEqual(lines[2], '    bb  = 2')
+        self.assertEqual(lines[3], '    ccc = 3')
+
+    def test_no_align(self):
+        with dcs.capture_output() as out:
+            dcs.pprint_dict(self.dct, name=self.name, align=False)
+        lines = out.getvalue().strip().split('\n')
+        self.assertEqual(lines[0], 'Example')
+        self.assertEqual(lines[1], ' a = 1')
+        self.assertEqual(lines[2], ' bb = 2')
+        self.assertEqual(lines[3], ' ccc = 3')
+
+    def test_printed(self):
+        with dcs.capture_output() as out:
+            text = dcs.pprint_dict(self.dct, name=self.name, disp=True)
+        output = out.getvalue().strip()
+        lines = output.split('\n')
+        self.assertEqual(lines[0], 'Example')
+        self.assertEqual(lines[1], ' a   = 1')
+        self.assertEqual(lines[2], ' bb  = 2')
+        self.assertEqual(lines[3], ' ccc = 3')
+        self.assertEqual(text, output)
+
+    def test_not_printed(self):
+        with dcs.capture_output() as out:
+            text = dcs.pprint_dict(self.dct, name=self.name, disp=False)
+        output = out.getvalue().strip()
+        self.assertEqual(output, '')
+        lines = text.split('\n')
+        self.assertEqual(lines[0], 'Example')
+        self.assertEqual(lines[1], ' a   = 1')
+        self.assertEqual(lines[2], ' bb  = 2')
+        self.assertEqual(lines[3], ' ccc = 3')
+
+#%% SaveAndLoad
 class Test_SaveAndLoad(unittest.TestCase):
     r"""
     Tests SaveAndLoad metaclass.
@@ -145,7 +214,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         if os.path.isfile(self.save_path2):
             os.remove(self.save_path2)
 
-# Counter
+#%% Counter
 class Test_Counter(unittest.TestCase):
     r"""
     Tests Counter class with the following cases:
@@ -290,7 +359,7 @@ class Test_Counter(unittest.TestCase):
         output = repr(c1)
         self.assertEqual(output, 'Counter(1)')
 
-# FixedDict
+#%% FixedDict
 class Test_FixedDict(unittest.TestCase):
     r"""
     Tests FixedDict class with the following cases:

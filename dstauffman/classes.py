@@ -177,6 +177,72 @@ def load_method(cls, filename='', use_hdf5=True):
         out = load_hdf5(cls, filename)
     return out
 
+#%% pprint_dict
+def pprint_dict(dct, *, name='', indent=1, align=True, disp=True, offset=0):
+    r"""
+    Print all the fields and their values.
+
+    Parameters
+    ----------
+    dct : dict
+        Dictionary to print
+    name : str, optional, default is empty string
+        Name title to print first
+    indent : int, optional, default is 1
+        Number of characters to indent before all the fields
+    align : bool, optional, default is True
+        Whether to align all the equal signs
+    disp : bool, optional, default is True
+        Whether to display the text to the screen
+    offset : int, optional, default is 0
+        Additional offset for recursive calls
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in February 2017.
+    #.  Updated by David C. Stauffer in June 2020 for better recursive support.
+
+    Examples
+    --------
+    >>> from dstauffman import pprint_dict
+    >>> dct = {'a': 1, 'bb': 2, 'ccc': 3}
+    >>> name = 'Demonstration'
+    >>> text = pprint_dict(dct, name=name)
+    Demonstration
+     a   = 1
+     bb  = 2
+     ccc = 3
+
+    """
+    # print the name of the class/dictionary
+    text = []
+    if name:
+        text.append(' ' * offset + name)
+    # build indentation padding
+    this_indent = ' ' * (indent + offset)
+    # find the length of the longest field name
+    pad_len = max(len(x) for x in dct)
+    # loop through fields
+    for (this_key, this_value) in dct.items():
+        if hasattr(this_value, 'pprint'):
+            this_name = f'{this_key} (class {this_value.__class__.__name__})'
+            try:
+                this_line = this_value.pprint(name=this_name, indent=indent, align=align, \
+                    disp=False, return_text=True, offset=offset+indent)
+            except:
+                # TODO: do I need this check or just let it fail?
+                warnings.warn('pprint recursive call failed, reverting to default.')
+                this_pad = ' ' * (pad_len - len(this_key)) if align else ''
+                this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
+        else:
+            this_pad = ' ' * (pad_len - len(this_key)) if align else ''
+            this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
+        text.append(this_line)
+    text = '\n'.join(text)
+    if disp:
+        print(text)
+    return text
+
 #%% Classes - Frozen
 class Frozen(object):
     r"""
@@ -190,6 +256,12 @@ class Frozen(object):
     __setattr__ = _frozen(object.__setattr__)
     class __metaclass__(type):
         __setattr__ = _frozen(type.__setattr__)
+
+    def pprint(self, return_text=False, **kwargs):
+        r"""Displays a pretty print version of the class."""
+        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
+        text = pprint_dict(self.__dict__, name=name, **kwargs)
+        return text if return_text else None
 
 #%% MetaClasses - SaveAndLoad
 class SaveAndLoad(type):

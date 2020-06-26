@@ -13,8 +13,8 @@ Notes
 """
 
 #%% Imports
-from .classes      import Frozen, save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, \
-                              load_method, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
+from .classes      import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, \
+                              load_method, pprint_dict, Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
 from .constants    import DEFAULT_COLORMAP, INT_TOKEN, IS_WINDOWS, QUAT_SIZE, \
                               DEFAULT_CLASSIFICATION
 from .enums        import IntEnumPlus, consecutive, ReturnCodes
@@ -58,7 +58,7 @@ from .units        import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DE
                               get_time_factor
 from .utils        import rms, rss, compare_two_classes, compare_two_dicts, read_text_file, \
                               write_text_file, capture_output, unit, modd, is_np_int, np_digitize, \
-                              histcounts, full_print, pprint_dict, line_wrap, combine_per_year, \
+                              histcounts, full_print, line_wrap, combine_per_year, \
                               execute, execute_wrapper, get_env_var
 from .utils_log    import setup_dir, fix_rollover
 from .vectors      import rot

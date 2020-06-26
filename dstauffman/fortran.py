@@ -14,7 +14,8 @@ import glob
 import os
 import unittest
 
-from dstauffman.utils import line_wrap, read_text_file, write_text_file, pprint_dict
+from dstauffman.classes import Frozen
+from dstauffman.utils import line_wrap, read_text_file, write_text_file
 
 #%% Constants
 # Maximum line length to use in any Fortran file
@@ -25,7 +26,7 @@ _INTRINSIC_MODS = {'ieee_arithmetic', 'iso_c_binding', 'iso_fortran_env'}
 _OBJ_EXT = '.obj'
 
 #%% Classes - _FortranSource
-class _FortranSource():
+class _FortranSource(Frozen):
     r"""
     Class to contain information about the Fortran source code.
 
@@ -62,45 +63,6 @@ class _FortranSource():
             assert not self.prog_name, 'Modules should not also define programs.'
         else:
             assert False, 'Either a module or program unit should be defined.'
-
-    def pprint(self, return_text=False, **kwargs):
-        r"""
-        Displays a pretty print version of the class.
-
-        Parameters
-        ----------
-        return_text : bool, optional, default is False
-            Whether to return the text that would be printed to the screen
-        kwargs : dict, optional
-            Other arguments are passed to pprint_dict
-
-        Returns
-        -------
-        text : str
-            Resulting text that gets displayed to the screen
-
-        See Also
-        --------
-        pprint_dict
-
-        Examples
-        --------
-        >>> from dstauffman.fortran import _FortranSource
-        >>> code = _FortranSource('test_mod')
-        >>> code.pprint() # doctest: +NORMALIZE_WHITESPACE
-        _FortranSource
-         prog_name   =
-         mod_name    = test_mod
-         uses        = []
-         types       = []
-         functions   = []
-         subroutines = []
-         prefix      =
-
-        """
-        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
-        text = pprint_dict(self.__dict__, name=name, **kwargs)
-        return text if return_text else None
 
     @property
     def name(self):

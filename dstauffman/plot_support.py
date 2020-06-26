@@ -41,7 +41,6 @@ except ImportError: # pragma: no cover
 from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_CLASSIFICATION, DEFAULT_COLORMAP
 from dstauffman.paths import get_images_dir
-from dstauffman.utils import pprint_dict
 
 #%% Classes - _HoverButton
 class _HoverButton(QPushButton):
@@ -140,12 +139,6 @@ class TruthPlotter(Frozen):
                 self.data_hi = data[:, 2]
             else:
                 raise ValueError('Bad shape for data of {}.'.format(data.shape))
-
-    def pprint(self, return_text=False, **kwargs):
-        r"""Displays a pretty print version of the class."""
-        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
-        text = pprint_dict(self.__dict__, name=name, **kwargs)
-        return text if return_text else None
 
     @property
     def is_null(self):

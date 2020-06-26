@@ -24,10 +24,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.linalg import norm
 
-from dstauffman.classes import Frozen, SaveAndLoad
+from dstauffman.classes import Frozen, pprint_dict, SaveAndLoad
 from dstauffman.logs import activate_logging, deactivate_logging
 from dstauffman.plotting import Opts, plot_correlation_matrix, plot_time_history, setup_plots
-from dstauffman.utils import pprint_dict, rss
+from dstauffman.utils import rss
 from dstauffman.utils_log import setup_dir
 
 #%% Globals
@@ -87,25 +87,6 @@ class OptiOpts(Frozen):
                 return False
         # if it made it all the way through the fields, then things must be equal
         return True
-
-    def pprint(self, return_text=False, **kwargs):
-        r"""
-        Display a pretty print version of the class.
-
-        Examples
-        --------
-        >>> from dstauffman import OptiOpts
-        >>> opti_opts = OptiOpts()
-        >>> opti_opts.pprint() # doctest: +ELLIPSIS
-        OptiOpts
-         model_func      = None
-         ...
-         trust_radius    = 1.0
-
-        """
-        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
-        text = pprint_dict(self.__dict__, name=name, **kwargs)
-        return text if return_text else None
 
 #%% OptiParam
 class OptiParam(Frozen):
@@ -224,28 +205,6 @@ class OptiParam(Frozen):
         """
         names = [x.name for x in opti_param]
         return names
-
-    def pprint(self, return_text=False, **kwargs):
-        r"""
-        Display a pretty print version of the class.
-
-        Examples
-        --------
-        >>> from dstauffman import OptiParam
-        >>> opti_param = OptiParam('test')
-        >>> opti_param.pprint()
-        OptiParam
-         name    = test
-         best    = nan
-         min_    = -inf
-         max_    = inf
-         minstep = 0.0001
-         typical = 1.0
-
-        """
-        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
-        text = pprint_dict(self.__dict__, name=name, **kwargs)
-        return text if return_text else None
 
 #%% BpeResults
 class BpeResults(Frozen, metaclass=SaveAndLoad):

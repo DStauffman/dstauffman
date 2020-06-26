@@ -27,7 +27,6 @@ from dstauffman.plot_generic import make_time_plot
 from dstauffman.plot_support import ColorMap, ignore_plot_data, setup_plots
 from dstauffman.time         import convert_date, convert_time_units
 from dstauffman.units        import get_factors
-from dstauffman.utils        import pprint_dict
 
 #%% Classes - Opts
 class Opts(Frozen):
@@ -183,12 +182,6 @@ class Opts(Frozen):
         rms_xmin  = _convert(self.rms_xmin)
         rms_xmax  = _convert(self.rms_xmax)
         return (disp_xmin, disp_xmax, rms_xmin, rms_xmax)
-
-    def pprint(self, return_text=False, **kwargs):
-        r"""Displays a pretty print version of the class."""
-        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
-        text = pprint_dict(self.__dict__, name=name, **kwargs)
-        return text if return_text else None
 
     def convert_dates(self, form, numpy_form='datetime64[ns]'):
         r"""Converts between double and datetime representations."""
