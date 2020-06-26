@@ -30,8 +30,8 @@ class Test_KfOut(unittest.TestCase):
         TBD
     """
     def test_nominal(self):
-        kf = dcs.KfOut()
-        self.assertTrue(isinstance(kf, dcs.KfOut)) # TODO: test better
+        kf = dcs.Kf()
+        self.assertTrue(isinstance(kf, dcs.Kf)) # TODO: test better
 
 #%% plot_attitude
 

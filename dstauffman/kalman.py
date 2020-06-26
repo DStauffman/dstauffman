@@ -13,6 +13,7 @@ import doctest
 import unittest
 
 from matplotlib.colors import ListedColormap
+import numpy as np
 
 from dstauffman.classes import Frozen
 from dstauffman.plot_generic import make_difference_plot, make_quaternion_plot
@@ -45,14 +46,15 @@ class KfInnov(Frozen):
     """
     def __init__(self):
         r"""Initializes a new KfInnov instance."""
-        self.name  = ''
-        self.chan  = None
-        self.time  = None
-        self.innov = None
-        self.norm  = None
+        self.name   = ''
+        self.chan   = None
+        self.time   = None
+        self.innov  = None
+        self.norm   = None
+        self.status = None
 
-#%% KfOut
-class KfOut(Frozen):
+#%% Kf
+class Kf(Frozen):
     r"""
     A class for doing Kalman Filter analysis.
 
@@ -79,12 +81,12 @@ class KfOut(Frozen):
 
     Examples
     --------
-    >>> from dstauffman import KfOut
-    >>> kf = KfOut()
+    >>> from dstauffman import Kf
+    >>> kf = Kf()
 
     """
     def __init__(self):
-        r"""Initializes a new KfOut instance."""
+        r"""Initializes a new Kf instance."""
         self.name  = ''
         self.chan  = None
         self.time  = None
@@ -95,6 +97,126 @@ class KfOut(Frozen):
         self.state = None
         self.covar = None
 
+#%% Functions - calc_kalman_gain
+def calc_kalman_gain(P, H, R, use_inverse=False):
+    r"""
+    Calculates K, the Kalman Gain matrix.
+
+    Parameters
+    ----------
+    P : (N, N) ndarray
+        Covariance Matrix
+    H : (A, B) ndarray
+        Measurement Update Matrix
+    R : () ndarray
+        Measurement Noise Matrix
+    use_inverse : bool, optional
+        Whether to explicitly calculate the inverse or not, default is False
+
+    Returns
+    -------
+    K : (N, ) ndarray
+        Kalman Gain Matrix
+
+    Notes
+    -----
+    #.  Written by David C Stauffer in December 2018.
+
+    Examples
+    --------
+    >>> from dstauffman import calc_kalman_gain
+    >>> import numpy as np
+    >>> P = 1e-3 * np.eye(5)
+    >>> H = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0.5, 0.5, 0.5], [0, 0, 0.1]]).T
+    >>> R = 0.5 * np.eye(3)
+    >>> K = calc_kalman_gain(P, H, R)
+
+    """
+    if use_inverse:
+        # explicit version with inverse
+        K = (P @ H.T) @ np.linalg.inv(H @ P @ H.T + R)
+    else:
+        # implicit solver
+        K = np.linalg.lstsq((H @ P @ H.T + R).T, (P @ H.T).T, rcond=None)[0].T
+    return K
+
+#%% Functions - propagate_covariance
+def propagate_covariance(phi, P, Q, gamma=None):
+    r"""
+    Propagates the covariance forward in time.
+
+    Parameters
+    ----------
+    phi :
+        State transition matrix
+    P :
+        Covariance matrix
+    Q :
+        Process noise matrix
+    gamma :
+        Shaping matrix?
+
+    Returns
+    -------
+    (N, N) ndarray
+        Updated covariance matrix
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2018.
+
+    Examples
+    --------
+    >>> from dstauffman import propagate_covariance
+    >>> import numpy as np
+    >>> phi = np.diag([1., 1, 1, -1, -1, -1])
+    >>> P = 1e-3 * np.eye(6)
+    >>> Q = np.diag([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7])
+    >>> cov_out = propagate_covariance(phi, P, Q)
+    >>> print(cov_out[0, 0])
+    0.002
+
+    """
+    if gamma is None:
+        return phi @ P @ phi.T + Q
+    return phi @ P @ phi.T + gamma @ Q @ gamma.T
+
+#%% Functions - update_covariance
+def update_covariance(P, K, H):
+    r"""
+    Updates the covariance for a given measurement.
+
+    Parameters
+    ----------
+    P : (N, N) ndarray
+        Covariance Matrix
+    K : (N, ) ndarray
+        Kalman Gain Matrix
+    H : (A, N) Measurement Update Matrix
+
+    Returns
+    -------
+    P_out : (N, N) ndarray
+        Updated Covariance Matrix
+
+    Notes
+    -----
+    #.  Written by David C Stauffer in December 2018.
+
+    Examples
+    --------
+    >>> from dstauffman import update_covariance
+    >>> import numpy as np
+    >>> P = 1e-3 * np.eye(6)
+    >>> K = np.array([])
+    >>> H = np.array([])
+    >>> P_out = update_covariance(P, K, H)
+    >>> print(P_out[0, 0])
+    0.001
+
+    """
+    return (np.eye(*P.shape) - K @ H) @ P
+
 #%% plot_attitude
 def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), return_err=False):
     r"""
@@ -102,11 +224,11 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), r
 
     Parameters
     ----------
-    kf1 : class KfOut
+    kf1 : class Kf
         Kalman filter output
-    kf2 : class KfOut, optional
+    kf2 : class Kf, optional
         Second filter output for potential comparison
-    truth : class KfOut, optional
+    truth : class Kf, optional
         Third filter output that is considered truth
     config : dict, optional
         Configuration information
@@ -124,16 +246,16 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), r
 
     Examples
     --------
-    >>> from dstauffman import KfOut, plot_attitude, quat_norm
+    >>> from dstauffman import Kf, plot_attitude, quat_norm
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
-    >>> kf1      = KfOut()
+    >>> kf1      = Kf()
     >>> kf1.name = 'KF1'
     >>> kf1.time = np.arange(11)
     >>> kf1.att  = quat_norm(np.random.rand(4, 11))
 
-    >>> kf2      = KfOut()
+    >>> kf2      = Kf()
     >>> kf2.name = 'KF2'
     >>> kf2.time = np.arange(2, 13)
     >>> kf2.att  = quat_norm(np.random.rand(4, 11))
@@ -147,11 +269,11 @@ def plot_attitude(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), r
     """
     # check optional inputs
     if kf1 is None:
-        kf1 = KfOut()
+        kf1 = Kf()
     if kf2 is None:
-        kf2 = KfOut()
+        kf2 = Kf()
     if truth is None:
-        truth = KfOut()
+        truth = Kf()
     if opts is None:
         opts = Opts()
 
@@ -176,11 +298,11 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), r
 
     Parameters
     ----------
-    kf1 : class KfOut
+    kf1 : class Kf
         Kalman filter output
-    kf2 : class KfOut, optional
+    kf2 : class Kf, optional
         Second filter output for potential comparison
-    truth : class KfOut, optional
+    truth : class Kf, optional
         Third filter output that is considered truth
     config : dict, optional
         Configuration information
@@ -198,17 +320,17 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), r
 
     Examples
     --------
-    >>> from dstauffman import KfOut, plot_position
+    >>> from dstauffman import Kf, plot_position
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
-    >>> kf1      = KfOut()
+    >>> kf1      = Kf()
     >>> kf1.name = 'KF1'
     >>> kf1.time = np.arange(11)
     >>> kf1.pos  = 1e6 * np.random.rand(3, 11)
     >>> kf1.vel  = None
 
-    >>> kf2      = KfOut()
+    >>> kf2      = Kf()
     >>> kf2.name = 'KF2'
     >>> kf2.time = np.arange(2, 13)
     >>> kf2.pos  = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5
@@ -223,11 +345,11 @@ def plot_position(kf1=None, kf2=None, truth=None, *, config=None, opts=Opts(), r
     """
     # check optional inputs
     if kf1 is None:
-        kf1 = KfOut()
+        kf1 = Kf()
     if kf2 is None:
-        kf2 = KfOut()
+        kf2 = Kf()
     if truth is None:
-        truth = KfOut()
+        truth = Kf()
     if opts is None:
         opts = Opts()
 
