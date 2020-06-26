@@ -34,8 +34,12 @@ def load_matlab(filename):
 
     Examples
     --------
-    >>> filename = r'truth_data.mat'
+    >>> from dstauffman import load_matlab, get_tests_dir
+    >>> import os
+    >>> filename = os.path.join(get_tests_dir(), 'test_numbers.mat')
     >>> out = load_matlab(filename)
+    >>> print(out['row_nums'][1]) # TODO: should be row vector, not column
+    [2.2]
 
     """
     out = {}
@@ -46,7 +50,7 @@ def load_matlab(filename):
             grp = file[key]
             # check if this is a dataset, meaning its just an array and not a structure
             if isinstance(grp, h5py.Dataset):
-                out[key] = grp.value
+                out[key] = grp[()]
             else:
                 pass # placeholder for complex version of this function that handles structures
     return out

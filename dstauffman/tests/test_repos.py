@@ -279,7 +279,7 @@ class Test_make_python_init(unittest.TestCase):
     def test_no_lineup(self):
         text = dcs.make_python_init(self.folder, lineup=False)
         lines = text.split('\n')
-        self.assertEqual(lines[2][0:len(self.text)], self.text)
+        self.assertEqual(lines[3][0:len(self.text)], self.text)
 
     def test_big_wrap(self):
         text = dcs.make_python_init(self.folder, wrap=1000)

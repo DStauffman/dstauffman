@@ -33,6 +33,12 @@ class Test_KfOut(unittest.TestCase):
         kf = dcs.Kf()
         self.assertTrue(isinstance(kf, dcs.Kf)) # TODO: test better
 
+#%% calc_kalman_gain
+
+#%% propagate_covariance
+
+#%% update_covariance
+
 #%% plot_attitude
 
 #%% plot_position
