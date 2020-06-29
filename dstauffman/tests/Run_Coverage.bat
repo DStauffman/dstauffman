@@ -15,7 +15,7 @@ SET PYTHONPATH=%tests_home%\..\..
 
 REM Run the coverage tool and generate the report
 REM TODO: this first option doesn't collect the statistics correctly
-REM coverage run -m dstauffman tests
+REM call coverage run -m dstauffman tests
 call coverage run %tests_home%\run_all_tests.py
 call coverage html
 

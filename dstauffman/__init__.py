@@ -14,7 +14,8 @@ Notes
 
 #%% Imports
 from .classes      import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, \
-                              load_method, pprint_dict, Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
+                              load_method, pprint_dict, Frozen, SaveAndLoad, SaveAndLoadPickle, \
+                              Counter, FixedDict
 from .constants    import DEFAULT_COLORMAP, INT_TOKEN, IS_WINDOWS, QUAT_SIZE, \
                               DEFAULT_CLASSIFICATION
 from .enums        import IntEnumPlus, consecutive, ReturnCodes
@@ -63,7 +64,7 @@ from .utils        import rms, rss, compare_two_classes, compare_two_dicts, read
                               histcounts, full_print, line_wrap, combine_per_year, \
                               execute, execute_wrapper, get_env_var
 from .utils_log    import setup_dir, fix_rollover
-from .vectors      import rot
+from .vectors      import rot, vec_cross
 
 #%% Unit test
 if __name__ == '__main__':

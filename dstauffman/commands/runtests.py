@@ -98,8 +98,7 @@ def execute_tests(args):
 
     if docstrings:
         # run the docstring tests
-        files = list_python_files(folder)
-        files.extend(list_python_files(os.path.join(folder, 'commands')))
+        files = list_python_files(folder, recursive=True)
         return_code = run_docstrings(files, verbose=verbose)
     else:
         # run the unittests using pytest

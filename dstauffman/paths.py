@@ -135,7 +135,7 @@ def get_output_dir():
     return folder
 
 #%% Functions - list_python_files
-def list_python_files(folder):
+def list_python_files(folder, recursive=False, include_all=False):
     r"""
     Returns a list of all non dunder python files in the folder.
 
@@ -143,6 +143,10 @@ def list_python_files(folder):
     ----------
     folder : str
         Folder location
+    recursive : bool, optional
+        Whether to search recursively, default is False
+    include_all : bool, optional
+        Whether to include all files, even the __dunder__ ones
 
     Returns
     -------
@@ -152,7 +156,6 @@ def list_python_files(folder):
     Notes
     -----
     #.  Written by David C. Stauffer in March 2020.
-    #.  TODO: could add options for recursive and to include dunders.
 
     Examples
     --------
@@ -162,10 +165,19 @@ def list_python_files(folder):
 
     """
     # find all the files that end in .py and are not dunder (__name__) files
-    if os.path.isdir(folder):
-        return [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.py')
-            and not file.startswith('__')]
-    return []
+    if not os.path.isdir(folder):
+        return []
+    if include_all:
+        files = [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.py')]
+    else:
+        files = [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.py')
+        and not file.startswith('__')]
+    if recursive:
+        for (root, dirs, _) in os.walk(folder, topdown=True):
+            for sub_folder in sorted(dirs):
+                this_folder = os.path.join(root, sub_folder)
+                files.extend(list_python_files(this_folder, recursive=recursive, include_all=include_all))
+    return files
 
 #%% Unit test
 if __name__ == '__main__':

@@ -41,20 +41,43 @@ class Test_rot(unittest.TestCase):
         self.tolerance = 1e-12
 
     def test_ref1(self):
-            out1 = dcs.rot(1, self.angle)
-            out2 = dcs.rot(2, self.angle)
-            out3 = dcs.rot(3, self.angle)
-            np.testing.assert_allclose(out1, self.r1x, atol=self.tolerance)
-            np.testing.assert_allclose(out2, self.r1y, atol=self.tolerance)
-            np.testing.assert_allclose(out3, self.r1z, atol=self.tolerance)
+        out1 = dcs.rot(1, self.angle)
+        out2 = dcs.rot(2, self.angle)
+        out3 = dcs.rot(3, self.angle)
+        np.testing.assert_allclose(out1, self.r1x, atol=self.tolerance)
+        np.testing.assert_allclose(out2, self.r1y, atol=self.tolerance)
+        np.testing.assert_allclose(out3, self.r1z, atol=self.tolerance)
 
     def test_ref2(self):
-            out1 = dcs.rot(1, self.angle2)
-            out2 = dcs.rot(2, self.angle2)
-            out3 = dcs.rot(3, self.angle2)
-            np.testing.assert_allclose(out1, self.r2x, atol=self.tolerance)
-            np.testing.assert_allclose(out2, self.r2y, atol=self.tolerance)
-            np.testing.assert_allclose(out3, self.r2z, atol=self.tolerance)
+        out1 = dcs.rot(1, self.angle2)
+        out2 = dcs.rot(2, self.angle2)
+        out3 = dcs.rot(3, self.angle2)
+        np.testing.assert_allclose(out1, self.r2x, atol=self.tolerance)
+        np.testing.assert_allclose(out2, self.r2y, atol=self.tolerance)
+        np.testing.assert_allclose(out3, self.r2z, atol=self.tolerance)
+
+    def test_bad_axis(self):
+        with self.assertRaises(ValueError) as context:
+            dcs.rot(4, self.angle)
+            self.assertEqual(str(context.exception), 'Unexpected value for axis of: "4".')
+        with self.assertRaises(ValueError):
+            dcs.rot(np.pi/2, 2)
+
+#%% vec_cross
+class Test_vec_cross(unittest.TestCase):
+    r"""
+    Tests the vec_cross function with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.a = np.array([1, 2, 3])
+        self.b = np.array([-2, -3, -4])
+        self.c = np.cross(self.a, self.b)
+
+    def test_nominal(self):
+        mat = dcs.vec_cross(self.a)
+        c = mat @ self.b
+        np.testing.assert_array_equal(c, self.c)
 
 #%% Unit test execution
 if __name__ == '__main__':

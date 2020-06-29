@@ -49,6 +49,10 @@ def rot(axis, angle):
     >>> axis = 3
     >>> angle = np.pi/2
     >>> dcm = rot(axis, angle)
+    >>> print(np.array_str(dcm, precision=4, suppress_small=True))
+    [[ 0.  1.  0.]
+     [-1.  0.  0.]
+     [ 0.  0.  1.]]
 
     """
     # sines of angle
@@ -66,7 +70,41 @@ def rot(axis, angle):
         raise ValueError('Unexpected value for axis of: "{}".'.format(axis))
     return dcm
 
+#%% Functions - vec_cross
+def vec_cross(vec):
+    r"""
+    Returns the equivalent 3x3 matrix that would perform a cross product when multiplied.
+
+    Parameters
+    ----------
+    vec : (3, ) ndarray
+        3 element vector
+
+    Returns
+    -------
+    (3, 3) ndarray
+        3x3 matrix representation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2018.
+
+    Examples
+    --------
+    >>> from dstauffman import vec_cross
+    >>> import numpy as np
+    >>> a = np.array([1, 2, 3])
+    >>> b = np.array([-2, -3, -4])
+    >>> mat = vec_cross(a)
+    >>> print(mat)
+    [[ 0 -3  2]
+     [ 3  0 -1]
+     [-2  1  0]]
+
+    """
+    return np.array([[0, -vec[2], vec[1]], [vec[2], 0, -vec[0]], [-vec[1], vec[0], 0]])
+
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_vector', exit=False)
+    unittest.main(module='dstauffman.tests.test_vectors', exit=False)
     doctest.testmod(verbose=False)
