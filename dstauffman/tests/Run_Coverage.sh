@@ -5,7 +5,7 @@ cd $dir
 # save the original paths
 PYTHONPATH_ORIG=$PYTHONPATH
 # modify as needed
-PYTHONPATH=$dir/../..
+PYTHONPATH=$dir/../..:$PYTHONPATH
 # run the coverage tests
 #coverage run -m dstauffman tests
 coverage run $dir/run_all_tests.py

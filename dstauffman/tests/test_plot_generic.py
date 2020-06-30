@@ -215,7 +215,7 @@ class Test_make_quaternion_plot(unittest.TestCase):
             self.figs = dcs.make_quaternion_plot('', None, None, None, None)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'No quaternion data was provided, so no plot was generated.')
+        self.assertEqual(output, 'No quaternion data was provided, so no plot was generated for "".')
 
     def tearDown(self):
         if self.figs:
@@ -383,7 +383,7 @@ class Test_make_difference_plot(unittest.TestCase):
             self.figs = dcs.make_difference_plot('', None, None, None, None)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'No difference data was provided, so no plot was generated.')
+        self.assertEqual(output, 'No difference data was provided, so no plot was generated for "".')
 
     def tearDown(self):
         if self.figs:

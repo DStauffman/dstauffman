@@ -627,7 +627,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     have_both     = have_quat_one and have_quat_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
     if not have_quat_one and not have_quat_two:
-        print('No quaternion data was provided, so no plot was generated.')
+        print(f'No quaternion data was provided, so no plot was generated for "{description}".')
         # TODO: return NaNs instead of None for this case?
         out = ([], {'one': None, 'two': None, 'diff': None, 'mag': None}) if return_err else []
         return out
@@ -1002,9 +1002,9 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     have_both     = have_data_one and have_data_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
     if not have_data_one and not have_data_two:
-        print('No difference data was provided, so no plot was generated.')
+        print(f'No difference data was provided, so no plot was generated for "{description}".')
         # TODO: return NaNs instead of None for this case?
-        out = {[], {'one': None, 'two': None, 'diff': None}} if return_err else []
+        out = ([], {'one': None, 'two': None, 'diff': None}) if return_err else []
         return out
 
     # data checks

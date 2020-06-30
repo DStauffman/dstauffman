@@ -24,8 +24,8 @@ from .estimation   import OptiOpts, OptiParam, BpeResults, CurrentResults, valid
 from .fortran      import create_fortran_unit_tests, create_fortran_makefile
 from .health       import dist_enum_and_mons, icer, plot_icer, plot_population_pyramid
 from .kalman       import KfInnov, Kf, calc_kalman_gain, propagate_covariance, update_covariance, \
-                              plot_attitude, plot_position, plot_innovation, plot_covariance, \
-                              plot_states
+                              plot_attitude, plot_position, plot_innovations, plot_gains, \
+                              plot_covariance, plot_states
 from .latex        import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
 from .linalg       import orth, subspace
 from .logs         import activate_logging, deactivate_logging

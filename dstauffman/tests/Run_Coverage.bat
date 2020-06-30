@@ -10,8 +10,8 @@ IF #%tests_home1:~-1%# == #\# SET tests_home=%tests_home1:~0,-1%
 REM Save the original paths
 SET PYTHONPATH_ORIG=%PYTHONPATH%
 
-REM Modify as needed, currently only modifying the python path, note replacing the whole contents, not appending
-SET PYTHONPATH=%tests_home%\..\..
+REM Modify as needed, currently only modifying the python path
+SET PYTHONPATH=%tests_home%\..\..;%PYTHONPATH%
 
 REM Run the coverage tool and generate the report
 REM TODO: this first option doesn't collect the statistics correctly
