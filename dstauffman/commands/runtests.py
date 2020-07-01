@@ -13,6 +13,7 @@ import doctest
 import os
 import platform
 import subprocess
+import sys
 import unittest
 
 from dstauffman.paths import get_root_dir, get_tests_dir, list_python_files
@@ -95,6 +96,8 @@ def execute_tests(args):
         folder = get_root_dir()
     else:
         folder = os.path.abspath(library)
+        if folder not in sys.path:
+            sys.path.append(folder)
 
     if docstrings:
         # run the docstring tests

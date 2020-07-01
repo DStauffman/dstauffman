@@ -62,7 +62,7 @@ class KfInnov(Frozen):
             self.innov  = np.full(innov_shape, np.nan, dtype=float)
             self.norm   = np.full(innov_shape, np.nan, dtype=float)
             self.gain   = np.empty(innov_shape, dtype=float)
-            self.status = np.empty(innov_shape, dtype=int)
+            self.status = np.empty(num_innovs, dtype=int)
         else:
             self.time   = None
             self.innov  = None
@@ -624,7 +624,7 @@ def plot_gains(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, g
     return out
 
 #%% plot_covariance
-def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, groups=None, **kwargs):
+def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, groups=None, covar_fields=None, **kwargs):
     r"""
     Plots the Kalman Filter square root diagonal variance value.
 
@@ -681,18 +681,22 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     """
     # check optional inputs
     if kf1 is None:
-        kf1 = KfInnov()
+        kf1 = Kf()
     if kf2 is None:
-        kf2 = KfInnov()
+        kf2 = Kf()
     if truth is None:
         pass # Note: truth is not used within this function, but kept for argument consistency
     if opts is None:
         opts = Opts()
+    if covar_fields is None:
+        covar_fields = {'covar': 'Covariance'}
 
     # TODO: allow different sets of states in the different structures
 
     # aliases and defaults
-    num_chan      = kf1.covar.shape[0] if kf1.covar is not None else kf2.covar.shape[0] if kf2.covar is not None else 0
+    num_chan = 0
+    for key in covar_fields.keys():
+        num_chan = max(num_chan, getattr(kf1, key).shape[0] if getattr(kf1, key) is not None else getattr(kf2, key).shape[0] if getattr(kf2, key) is not None else 0)
     elements      = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
     elements      = kwargs.pop('elements', elements)
     units         = kwargs.pop('units', 'mixed')
@@ -726,21 +730,23 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     err  = dict()
 
     #% call wrapper functions for most of the details
-    for (ix, states) in enumerate(groups):
-        states     = np.atleast_1d(states)
-        data_one   = np.atleast_2d(kf1.covar[states, :]) if kf1.covar is not None else None
-        data_two   = np.atleast_2d(kf2.covar[states, :]) if kf2.covar is not None else None
-        have_data1 = data_one is not None and np.any(~np.isnan(data_one))
-        have_data2 = data_two is not None and np.any(~np.isnan(data_two))
-        if have_data1 or have_data2:
-            this_elements = [elements[state] for state in states]
-            (this_figs, this_err) = make_difference_plot('Covariance', kf1.time, kf2.time, data_one, data_two, \
-                name_one=kf1.name, name_two=kf2.name, elements=this_elements, units=units, time_units=time_units, \
-                start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-                make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
-                legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=True, **kwargs)
-            figs += this_figs
-            err[f'Group {ix}'] = this_err
+    for (field, description) in covar_fields.items():
+        err[field] = {}
+        for (ix, states) in enumerate(groups):
+            states     = np.atleast_1d(states)
+            data_one   = np.atleast_2d(getattr(kf1, field)[states, :]) if getattr(kf1, field) is not None else None
+            data_two   = np.atleast_2d(getattr(kf2, field)[states, :]) if getattr(kf2, field) is not None else None
+            have_data1 = data_one is not None and np.any(~np.isnan(data_one))
+            have_data2 = data_two is not None and np.any(~np.isnan(data_two))
+            if have_data1 or have_data2:
+                this_elements = [elements[state] for state in states]
+                (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, data_one, data_two, \
+                    name_one=kf1.name, name_two=kf2.name, elements=this_elements, units=units, time_units=time_units, \
+                    start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+                    make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
+                    legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=True, **kwargs)
+                figs += this_figs
+                err[field][f'Group {ix}'] = this_err
     # Setup plots
     setup_plots(figs, opts)
     if not figs:
@@ -754,7 +760,7 @@ def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, 
     r"""Plots the Kalman Filter gain histories."""
     if state_fields is None:
         state_fields = {'state': 'State Estimates'}
-    out = plot_covariance(kf1, kf2, truth=truth, opts=opts, return_err=return_err, innov_fields=state_fields, **kwargs)
+    out = plot_covariance(kf1, kf2, truth=truth, opts=opts, return_err=return_err, covar_fields=state_fields, **kwargs)
     return out
 
 #%% Unit Test
