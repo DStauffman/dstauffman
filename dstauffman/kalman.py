@@ -40,8 +40,6 @@ class KfInnov(Frozen):
         Time history of the raw innovations
     norm : (N, M) ndarray
         Time history of the normalized innovations
-    gain : (N, M) ndarray
-        Gain history applied to come up with this innovation
     status : (N,)
         Status of the innovation, such as applied, or reason for rejection
 
@@ -61,13 +59,11 @@ class KfInnov(Frozen):
             innov_shape = (num_axes, num_innovs) if num_axes > 1 else (num_innovs, )
             self.innov  = np.full(innov_shape, np.nan, dtype=float)
             self.norm   = np.full(innov_shape, np.nan, dtype=float)
-            self.gain   = np.empty(innov_shape, dtype=float)
             self.status = np.empty(num_innovs, dtype=int)
         else:
             self.time   = None
             self.innov  = None
             self.norm   = None
-            self.gain   = None
             self.status = None
 
 #%% Kf
@@ -173,20 +169,22 @@ def calc_kalman_gain(P, H, R, use_inverse=False):
     return K
 
 #%% Functions - propagate_covariance
-def propagate_covariance(phi, P, Q, gamma=None):
+def propagate_covariance(P, phi, Q, *, gamma=None, inplace=True):
     r"""
     Propagates the covariance forward in time.
 
     Parameters
     ----------
-    phi :
-        State transition matrix
     P :
         Covariance matrix
+    phi :
+        State transition matrix
     Q :
         Process noise matrix
     gamma :
         Shaping matrix?
+    inplace : bool, optional, default is True
+        Whether to update the value inplace or as a new output
 
     Returns
     -------
@@ -196,25 +194,31 @@ def propagate_covariance(phi, P, Q, gamma=None):
     Notes
     -----
     #.  Written by David C. Stauffer in December 2018.
+    #.  Updated by David C. Stauffer in July 2020 to have inplace option.
 
     Examples
     --------
     >>> from dstauffman import propagate_covariance
     >>> import numpy as np
-    >>> phi = np.diag([1., 1, 1, -1, -1, -1])
     >>> P = 1e-3 * np.eye(6)
+    >>> phi = np.diag([1., 1, 1, -1, -1, -1])
     >>> Q = np.diag([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7])
-    >>> cov_out = propagate_covariance(phi, P, Q)
-    >>> print(cov_out[0, 0])
+    >>> propagate_covariance(P, phi, Q)
+    >>> print(P[0, 0])
     0.002
 
     """
     if gamma is None:
-        return phi @ P @ phi.T + Q
-    return phi @ P @ phi.T + gamma @ Q @ gamma.T
+        out = phi @ P @ phi.T + Q
+    else:
+        out = phi @ P @ phi.T + gamma @ Q @ gamma.T
+    if inplace:
+        P[:] = out
+    else:
+        return out
 
 #%% Functions - update_covariance
-def update_covariance(P, K, H):
+def update_covariance(P, K, H, inplace=True):
     r"""
     Updates the covariance for a given measurement.
 
@@ -224,7 +228,10 @@ def update_covariance(P, K, H):
         Covariance Matrix
     K : (N, ) ndarray
         Kalman Gain Matrix
-    H : (A, N) Measurement Update Matrix
+    H : (A, N) ndarray
+        Measurement Update Matrix
+    inplace : bool, optional, default is True
+        Whether to update the value inplace or as a new output
 
     Returns
     -------
@@ -234,23 +241,29 @@ def update_covariance(P, K, H):
     Notes
     -----
     #.  Written by David C Stauffer in December 2018.
+    #.  Updated by David C. Stauffer in July 2020 to have inplace option.
 
     Examples
     --------
     >>> from dstauffman import update_covariance
     >>> import numpy as np
     >>> P = 1e-3 * np.eye(6)
-    >>> K = np.array([])
-    >>> H = np.array([])
-    >>> P_out = update_covariance(P, K, H)
-    >>> print(P_out[0, 0])
-    0.001
+    >>> P[0, -1] = 5e-2
+    >>> K = np.ones((6, 3))
+    >>> H = np.hstack((np.eye(3), np.eye(3)))
+    >>> update_covariance(P, K, H)
+    >>> print(P[-1, -1])
+    -0.05
 
     """
-    return (np.eye(*P.shape) - K @ H) @ P
+    out = (np.eye(*P.shape) - K @ H) @ P
+    if inplace:
+        P[:] = out
+    else:
+        return out
 
 #%% plot_attitude
-def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, att_fields=None, **kwargs):
+def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""
     Plots the attitude quaternion history.
 
@@ -318,8 +331,8 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         truth = Kf()
     if opts is None:
         opts = Opts()
-    if att_fields is None:
-        att_fields = {'att': 'Attitude Quaternion'}
+    if fields is None:
+        fields = {'att': 'Attitude Quaternion'}
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts(opts)
@@ -346,7 +359,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     err  = dict()
 
     # call wrapper function for most of the details
-    for (field, description) in att_fields.items():
+    for (field, description) in fields.items():
         (this_figs, this_err) = make_quaternion_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
             name_one=kf1.name, name_two=kf2.name, time_units=time_units, start_date=start_date, \
             rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -362,8 +375,16 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         return (figs, err)
     return figs
 
+#%% plot_los
+def plot_los(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
+    r"""Plots the Line of Sight histories."""
+    if fields is None:
+        fields = {'los': 'LOS'}
+    out = plot_attitude(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)
+    return out
+
 #%% plot_position
-def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, pos_fields=None, vel_fields=None, **kwargs):
+def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""
     Plots the position and velocity history.
 
@@ -421,10 +442,8 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         truth = Kf()
     if opts is None:
         opts = Opts()
-    if pos_fields is None:
-        pos_fields = {'pos': 'Position'}
-    if vel_fields is None:
-        vel_fields = {'vel': 'Velocity'}
+    if fields is None:
+        fields = {'pos': 'Position'}
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts(opts)
@@ -447,12 +466,11 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     # hard-coded defaults
     elements       = kwargs.pop('elements', ['x', 'y', 'z'])
-    pos_units      = kwargs.pop('pos_units', 'm')
-    vel_units      = kwargs.pop('vel_units', 'm/s')
+    default_units  = 'm' if 'pos' in fields else 'm/s' if 'vel' in fields else ''
+    units          = kwargs.pop('units', default_units)
     leg_scale      = kwargs.pop('leg_scale', 'kilo')
     (fact, name)   = get_factors(leg_scale)
-    pos_2nd_yscale = {name + pos_units: 1/fact}
-    vel_2nd_yscale = {name + vel_units: 1/fact}
+    second_yscale  = kwargs.pop('second_yscale', {name + units: 1/fact})
     color_lists    = get_color_lists()
     colormap       = ListedColormap(color_lists['vec_diff'].colors + color_lists['vec'].colors)
 
@@ -461,21 +479,12 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     err  = dict()
 
     # call wrapper function for most of the details
-    for (field, description) in pos_fields.items():
+    for (field, description) in fields.items():
         (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
-            name_one=kf1.name, name_two=kf2.name, elements=elements, time_units=time_units, units=pos_units, \
+            name_one=kf1.name, name_two=kf2.name, elements=elements, time_units=time_units, units=units, \
             start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, single_lines=single_lines, \
-            show_rms=show_rms, leg_scale=leg_scale, legend_loc=legend_loc, second_yscale=pos_2nd_yscale, \
-            return_err=True, **kwargs)
-        figs += this_figs
-        err[field] = this_err
-    for (field, description) in vel_fields.items():
-        (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
-            name_one=kf1.name, name_two=kf2.name, elements=elements, time_units=time_units, units=vel_units, \
-            start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-            make_subplots=sub_plots, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, single_lines=single_lines, \
-            show_rms=show_rms, leg_scale=leg_scale, legend_loc=legend_loc, second_yscale=vel_2nd_yscale, \
+            show_rms=show_rms, leg_scale=leg_scale, legend_loc=legend_loc, second_yscale=second_yscale, \
             return_err=True, **kwargs)
         figs += this_figs
         err[field] = this_err
@@ -486,8 +495,16 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         return (figs, err)
     return figs
 
+#%% plot_velocity
+def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
+    r"""Plots the Line of Sight histories."""
+    if fields is None:
+        fields = {'vel': 'Velocity'}
+    out = plot_position(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)
+    return out
+
 #%% plot_innovations
-def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, innov_fields=None, **kwargs):
+def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""
     Plots the Kalman Filter innovation histories.
 
@@ -553,8 +570,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         pass # Note: truth is not used within this function, but kept for argument consistency
     if opts is None:
         opts = Opts()
-    if innov_fields is None:
-        innov_fields = {'innov': 'Innovations', 'norm': 'Normalized Innovations'}
+    if fields is None:
+        fields = {'innov': 'Innovations', 'norm': 'Normalized Innovations'}
 
     # aliases and defaults
     description   = kf1.name + ' ' if kf1.name else kf2.name + ' ' if kf2.name else ''
@@ -565,9 +582,6 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     leg_scale     = kwargs.pop('leg_scale', 'micro')
     (fact, name)  = get_factors(leg_scale)
     second_yscale = kwargs.pop('second_yscale', {name + units: 1/fact})
-    norm_units      = u'σ'
-    gain_units      = 'mixed'
-    gain_2nd_yscale = kwargs.pop('gain_2nd_yscale', {name + gain_units: 1/fact}) # TODO: keep this?
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts(opts)
@@ -595,13 +609,10 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     err  = dict()
 
     #% call wrapper functions for most of the details
-    for (field, sub_description) in innov_fields.items():
+    for (field, sub_description) in fields.items():
         if 'Normalized' in sub_description:
-            units = norm_units
+            units = u'σ'
             second_yscale=None
-        if 'Gain' in sub_description:
-            units = gain_units
-            second_yscale=gain_2nd_yscale
         (this_figs, this_err) = make_difference_plot(description+sub_description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
             name_one=kf1.name, name_two=kf2.name, elements=elements, units=units, time_units=time_units, \
             start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -615,16 +626,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         return (figs, err)
     return figs
 
-#%% plot_gains
-def plot_gains(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, gain_fields=None, **kwargs):
-    r"""Plots the Kalman Filter gain histories."""
-    if gain_fields is None:
-        gain_fields = {'gain': 'Kalman Gains'}
-    out = plot_innovations(kf1, kf2, truth=truth, opts=opts, return_err=return_err, innov_fields=gain_fields, **kwargs)
-    return out
-
 #%% plot_covariance
-def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, groups=None, covar_fields=None, **kwargs):
+def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, groups=None, fields=None, **kwargs):
     r"""
     Plots the Kalman Filter square root diagonal variance value.
 
@@ -688,14 +691,14 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
         pass # Note: truth is not used within this function, but kept for argument consistency
     if opts is None:
         opts = Opts()
-    if covar_fields is None:
-        covar_fields = {'covar': 'Covariance'}
+    if fields is None:
+        fields = {'covar': 'Covariance'}
 
     # TODO: allow different sets of states in the different structures
 
     # aliases and defaults
     num_chan = 0
-    for key in covar_fields.keys():
+    for key in fields.keys():
         num_chan = max(num_chan, getattr(kf1, key).shape[0] if getattr(kf1, key) is not None else getattr(kf2, key).shape[0] if getattr(kf2, key) is not None else 0)
     elements      = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
     elements      = kwargs.pop('elements', elements)
@@ -730,7 +733,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     err  = dict()
 
     #% call wrapper functions for most of the details
-    for (field, description) in covar_fields.items():
+    for (field, description) in fields.items():
         err[field] = {}
         for (ix, states) in enumerate(groups):
             states     = np.atleast_1d(states)
@@ -756,11 +759,11 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     return figs
 
 #%% plot_states
-def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, state_fields=None, **kwargs):
-    r"""Plots the Kalman Filter gain histories."""
-    if state_fields is None:
-        state_fields = {'state': 'State Estimates'}
-    out = plot_covariance(kf1, kf2, truth=truth, opts=opts, return_err=return_err, covar_fields=state_fields, **kwargs)
+def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
+    r"""Plots the Kalman Filter state histories."""
+    if fields is None:
+        fields = {'state': 'State Estimates'}
+    out = plot_covariance(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)
     return out
 
 #%% Unit Test
