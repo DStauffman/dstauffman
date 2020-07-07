@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Test file for the `plot_support` module module of the "dstauffman" library.  It is intented to
 contain test cases to demonstrate functionaliy and correct outcomes for all the functions within the
@@ -1107,9 +1106,6 @@ class Test_plot_classification(unittest.TestCase):
 
     def tearDown(self):
         plt.close(self.fig)
-
-#%% Functions - is_datetime
-pass # TODO: write this
 
 #%% Functions - align_plots
 pass # TODO: write this

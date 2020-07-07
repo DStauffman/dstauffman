@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Test file for the `linalg` module of the dstauffman code.  It is intented to contain test cases to
 demonstrate functionaliy and correct outcomes for all the functions within the module.
@@ -13,7 +12,7 @@ import pytest
 
 import numpy as np
 
-import dstauffman as dcs
+import dstauffman.estimation as estm
 
 #%% orth
 class Test_orth():
@@ -34,13 +33,13 @@ class Test_orth():
     def test_rank3(self):
         r = np.linalg.matrix_rank(self.A1)
         assert r == self.r1
-        Q = dcs.orth(self.A1)
+        Q = estm.orth(self.A1)
         assert Q == pytest.approx(self.Q1)
 
     def test_rank2(self):
         r = np.linalg.matrix_rank(self.A2)
         assert r == self.r2
-        Q = dcs.orth(self.A2)
+        Q = estm.orth(self.A2)
         assert Q == pytest.approx(self.Q2)
 
 #%% subspace
@@ -57,13 +56,13 @@ class Test_subspace():
         self.theta = np.pi / 2
 
     def test_nominal(self):
-        theta = dcs.subspace(self.A, self.B)
+        theta = estm.subspace(self.A, self.B)
         assert theta == pytest.approx(self.theta)
 
     def test_swapped_rank(self):
-        theta = dcs.subspace(self.B, self.A)
+        theta = estm.subspace(self.B, self.A)
         assert theta == pytest.approx(self.theta)
 
 #%% Unit test execution
 if __name__ == '__main__':
-    pytest.main(['-k','test_linalg.py'])
+    pytest.main(['-k','test_estimation_linalg.py'])

@@ -1,26 +1,20 @@
-# -*- coding: utf-8 -*-
 r"""
 Contains statistics related routines that can be independently defined and used by other modules.
 
 Notes
 -----
 #.  Written by David C. Stauffer in December 2015.
-
 """
 
 #%% Imports
 import doctest
-from functools import reduce
 import unittest
-import warnings
 
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as st
 
-from dstauffman.plot_support import is_datetime
-from dstauffman.units import MONTHS_PER_YEAR
-from dstauffman.utils import is_np_int
+from dstauffman import MONTHS_PER_YEAR
 
 #%% Functions - convert_annual_to_monthly_probability
 def convert_annual_to_monthly_probability(annual):
@@ -48,7 +42,7 @@ def convert_annual_to_monthly_probability(annual):
 
     Examples
     --------
-    >>> from dstauffman import convert_annual_to_monthly_probability
+    >>> from dstauffman.health import convert_annual_to_monthly_probability
     >>> import numpy as np
     >>> annual  = np.array([0, 0.1, 1])
     >>> monthly = convert_annual_to_monthly_probability(annual)
@@ -82,7 +76,7 @@ def convert_monthly_to_annual_probability(monthly):
 
     Examples
     --------
-    >>> from dstauffman import convert_monthly_to_annual_probability
+    >>> from dstauffman.health import convert_monthly_to_annual_probability
     >>> import numpy as np
     >>> monthly = np.array([0, 0.1, 1])
     >>> annual = convert_monthly_to_annual_probability(monthly)
@@ -126,7 +120,7 @@ def prob_to_rate(prob, time=1):
 
     Examples
     --------
-    >>> from dstauffman import prob_to_rate
+    >>> from dstauffman.health import prob_to_rate
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
     >>> time = 3
@@ -169,7 +163,7 @@ def rate_to_prob(rate, time=1):
 
     Examples
     --------
-    >>> from dstauffman import rate_to_prob
+    >>> from dstauffman.health import rate_to_prob
     >>> import numpy as np
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
     >>> time = 1./12
@@ -210,7 +204,7 @@ def annual_rate_to_monthly_probability(rate):
 
     Examples
     --------
-    >>> from dstauffman import annual_rate_to_monthly_probability
+    >>> from dstauffman.health import annual_rate_to_monthly_probability
     >>> import numpy as np
     >>> rate = np.array([0, 0.5, 1, 5, np.inf])
     >>> prob = annual_rate_to_monthly_probability(rate)
@@ -247,7 +241,7 @@ def monthly_probability_to_annual_rate(prob):
 
     Examples
     --------
-    >>> from dstauffman import monthly_probability_to_annual_rate
+    >>> from dstauffman.health import monthly_probability_to_annual_rate
     >>> import numpy as np
     >>> prob = np.array([0, 0.04081054, 0.07995559, 0.34075937, 1])
     >>> rate = monthly_probability_to_annual_rate(prob)
@@ -314,7 +308,7 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
 
     Examples
     --------
-    >>> from dstauffman import combine_sets
+    >>> from dstauffman.health import combine_sets
     >>> n1 = 5
     >>> u1 = 1
     >>> s1 = 0.5
@@ -388,7 +382,7 @@ def bounded_normal_draw(num, values, field, prng):
 
     Examples
     --------
-    >>> from dstauffman import bounded_normal_draw
+    >>> from dstauffman.health import bounded_normal_draw
     >>> import numpy as np
     >>> num   = 10
     >>> values = {'last_mean': 2, 'last_std': 0.5, 'last_min': 1, 'last_max': 3}
@@ -446,7 +440,7 @@ def z_from_ci(ci):
 
     Examples
     --------
-    >>> from dstauffman import z_from_ci
+    >>> from dstauffman.health import z_from_ci
     >>> ci = 0.95
     >>> z = z_from_ci(ci)
     >>> print('{:.2f}'.format(z))
@@ -487,7 +481,7 @@ def rand_draw(chances, prng, *, check_bounds=True):
 
     Examples
     --------
-    >>> from dstauffman import rand_draw
+    >>> from dstauffman.health import rand_draw
     >>> import numpy as np
     >>> chances = np.array([-0.5, 0., 0.5, 1., 5, np.inf])
     >>> prng = np.random.RandomState()
@@ -514,130 +508,8 @@ def rand_draw(chances, prng, *, check_bounds=True):
     is_set[chances >= 1] = True
     return is_set
 
-#%% Functions - intersect
-def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
-    r"""
-    Finds the intersect of two arrays given a numerical tolerance.
-
-    Return the sorted, unique values that are in both of the input arrays.
-
-    Parameters
-    ----------
-    a, b : array_like
-        Input arrays. Will be flattened if not already 1D.
-    tolerance : float or int
-        Tolerance for which something is considered unique
-    assume_unique : bool
-        If True, the input arrays are both assumed to be unique, which
-        can speed up the calculation.  Default is False.
-    return_indices : bool
-        If True, the indices which correspond to the intersection of the two
-        arrays are returned. The first instance of a value is used if there are
-        multiple. Default is False.
-
-    Returns
-    -------
-    c : ndarray
-        Sorted 1D array of common and unique elements.
-    ia : ndarray
-        The indices of the first occurrences of the common values in `ar1`.
-        Only provided if `return_indices` is True.
-    ib : ndarray
-        The indices of the first occurrences of the common values in `ar2`.
-        Only provided if `return_indices` is True.
-
-    See Also
-    --------
-    numpy.intersect1d : Function used to do comparsion with sets of quantized inputs.
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in March 2019.
-    #.  Updated by David C. Stauffer in June 2020 to allow for a numeric tolerance.
-
-    Examples
-    --------
-    >>> from dstauffman import intersect
-    >>> import numpy as np
-    >>> a = np.array([1, 2, 4, 4, 6], dtype=int)
-    >>> b = np.array([0, 8, 2, 2, 5, 8, 6, 8, 8], dtype=int)
-    >>> (c, ia, ib) = intersect(a, b, return_indices=True)
-    >>> print(c)
-    [2 6]
-
-    >>> print(ia)
-    [1 4]
-
-    >>> print(ib)
-    [2 6]
-
-    """
-    # allow a zero tolerance to be passed in and behave like the normal intersect command
-    if tolerance == 0:
-        return np.intersect1d(a, b, assume_unique=assume_unique, return_indices=return_indices)
-
-    # allow list and other array_like inputs (or just scalar floats)
-    a = np.atleast_1d(np.asanyarray(a))
-    b = np.atleast_1d(np.asanyarray(b))
-    tolerance = np.asanyarray(tolerance)
-
-    # check for datetimes and convert to integers
-    is_dates = np.array([is_datetime(a), is_datetime(b)], dtype=bool)
-    assert np.count_nonzero(is_dates) != 1, 'Both arrays must be datetimes if either is.'
-    if np.any(is_dates):
-        orig_datetime = a.dtype
-        a = a.astype(np.int64)
-        b = b.astype(np.int64)
-        tolerance = tolerance.astype(np.int64)
-
-    # check if largest component of a and b is too close to the tolerance floor (for floats)
-    all_int = is_np_int(a) and is_np_int(b) and is_np_int(tolerance)
-    max_a_or_b = np.max((np.max(np.abs(a), initial=0), np.max(np.abs(b), initial=0)))
-    if not all_int and ((max_a_or_b / tolerance) > (0.01/ np.finfo(float).eps)):
-        warnings.warn('This function may have problems if tolerance gets too small.')
-
-    # due to the splitting of the quanta, two very close numbers could still fail the quantized intersect
-    # fix this by repeating the comparison when shifted by half a quanta in either direction
-    half_tolerance = tolerance / 2
-    if all_int:
-        # allow for integer versions of half a quanta in either direction
-        lo_tol = np.floor(half_tolerance).astype(tolerance.dtype)
-        hi_tol = np.ceil(half_tolerance).astype(tolerance.dtype)
-    else:
-        lo_tol = half_tolerance
-        hi_tol = half_tolerance
-
-    # create quantized version of a & b, plus each one shifted by half a quanta
-    a1 = np.floor_divide(a, tolerance)
-    b1 = np.floor_divide(b, tolerance)
-    a2 = np.floor_divide(a - lo_tol, tolerance)
-    b2 = np.floor_divide(b - lo_tol, tolerance)
-    a3 = np.floor_divide(a + hi_tol, tolerance)
-    b3 = np.floor_divide(b + hi_tol, tolerance)
-
-    # do a normal intersect on the quantized data for different comparisons
-    (_, ia1, ib1) = np.intersect1d(a1, b1, assume_unique=assume_unique, return_indices=True)
-    (_, ia2, ib2) = np.intersect1d(a1, b2, assume_unique=assume_unique, return_indices=True)
-    (_, ia3, ib3) = np.intersect1d(a1, b3, assume_unique=assume_unique, return_indices=True)
-    (_, ia4, ib4) = np.intersect1d(a2, b1, assume_unique=assume_unique, return_indices=True)
-    (_, ia5, ib5) = np.intersect1d(a3, b1, assume_unique=assume_unique, return_indices=True)
-
-    # combine the results
-    ia = reduce(np.union1d, [ia1, ia2, ia3, ia4, ia5])
-    ib = reduce(np.union1d, [ib1, ib2, ib3, ib4, ib5])
-
-    # calculate output
-    # Note that a[ia] and b[ib] should be the same with a tolerance of 0, but not necessarily otherwise
-    # This function returns the values from the first vector a
-    c = np.sort(a[ia])
-    if np.any(is_dates):
-        c = c.astype(orig_datetime)
-    if return_indices:
-        return (c, ia, ib)
-    return c
-
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_stats', exit=False)
+    unittest.main(module='dstauffman.tests.test_health_stats', exit=False)
     doctest.testmod(verbose=False)

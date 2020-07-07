@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Parser used to parse all commands from the terminal and pass to the revelant command functions.
 
@@ -13,7 +12,6 @@ import sys
 import unittest
 
 from dstauffman.enums import ReturnCodes
-import dstauffman.commands as commands
 
 #%% Command map
 _VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'make_init', 'tests'})
@@ -74,6 +72,8 @@ def parse_commands(command, args):
     >>> parsed_args = parse_commands(command, args)
 
     """
+    # delayed import of commands
+    import dstauffman.commands as commands
     # check for valid commands
     if command in _VALID_COMMANDS:
         # If valid, then parse the arguments with the appropiate method, so help calls parse_help etc.
@@ -86,6 +86,8 @@ def parse_commands(command, args):
 #%% Functions - execute_command
 def execute_command(command, args):
     r"""Executes the given command."""
+    # delayed import of commands
+    import dstauffman.commands as commands
     # check for valid commands
     if command in _VALID_COMMANDS:
         # If valid, then call the appropriate method, so help calls execute_help etc.

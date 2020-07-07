@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Full test suite of the "dstauffman" module based on the Python `unittest` library.
 

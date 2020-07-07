@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Test file for the `commands.runtests` module of the "dstauffman" library.  It is intented to contain
 test cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
@@ -100,10 +99,10 @@ class Test_execute_tests(unittest.TestCase):
         self.assertTrue(pos_args[0].endswith('other_folder'))
 
 #%% commands.parse_coverage
-pass #TODO: write thisS
+pass # TODO: write this
 
 #%% commands.execute_coverage
-pass #TODO: write thisS
+pass # TODO: write this
 
 #%% Unit test execution
 if __name__ == '__main__':

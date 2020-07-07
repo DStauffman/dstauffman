@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Python script wrapper to execute commands related to dstauffman library.
 

@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Example script for running the Batch Parameter Estimation (BPE) portion of the DStauffman code.
 
 Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
-
 """
 
 #%% Imports

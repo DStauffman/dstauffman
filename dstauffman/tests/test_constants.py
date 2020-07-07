@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Test file for the `constants` module of the "dstauffman" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
@@ -17,7 +16,7 @@ import dstauffman as dcs
 class Test_all_values(unittest.TestCase):
 
     def setUp(self):
-        self.ints = ['INT_TOKEN', 'QUAT_SIZE']
+        self.ints = ['INT_TOKEN']
         self.strs = ['DEFAULT_CLASSIFICATION', 'DEFAULT_COLORMAP']
         self.bool = ['IS_WINDOWS']
         self.master = set(self.ints) | set(self.strs) | set(self.bool)

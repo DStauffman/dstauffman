@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Test file for the `repos` module of the "dstauffman" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
@@ -273,7 +272,7 @@ class Test_make_python_init(unittest.TestCase):
             text = dcs.make_python_init(self.folder2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(text[0:47], 'from .temp_file              import Test_Frozen')
+        self.assertEqual(text[0:49], 'from .temp_file                import Test_Frozen')
         self.assertTrue(output.startswith('Uniqueness Problem'))
 
     def test_no_lineup(self):

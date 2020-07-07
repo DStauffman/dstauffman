@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Logging utilities that make it easier to simultaneously log to a file and standard output.
 
 Notes
 -----
 #.  Split out of utils by David C. Stauffer in July 2019.
-
 """
 
 #%% Imports

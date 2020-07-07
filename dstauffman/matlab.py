@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Functions that make it easier to deal with Matlab data.
 
 Notes
 -----
 #.  Written by David C. Stauffer in December 2018.
-
 """
 
 #%% Imports

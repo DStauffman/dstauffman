@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Generic utilities that print or log information.
 
@@ -6,7 +5,6 @@ Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
 #.  Split by logging options by David C. Stauffer in June 2020.
-
 """
 
 #%% Imports

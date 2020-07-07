@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Define useful linear algebra methods that are not in NumPy or SciPy.
 
 Notes
 -----
 #.  Written by David C. Stauffer in May 2016.  Mostly based on Matlab routines.
-
 """
 
 #%% Imports
@@ -39,7 +37,7 @@ def orth(A):
 
     Examples
     --------
-    >>> from dstauffman import orth
+    >>> from dstauffman.estimation import orth
     >>> import numpy as np
 
     Full rank matrix
@@ -108,7 +106,7 @@ def subspace(A, B):
 
     Examples
     --------
-    >>> from dstauffman import subspace
+    >>> from dstauffman.estimation import subspace
     >>> import numpy as np
     >>> A = np.array([[1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1], [1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1]])
     >>> B = np.array([[1, 1, 1, 1], [1, -1, 1, -1],[1, 1, -1, -1], [1, -1, -1, 1], [-1, -1, -1, -1], \
@@ -132,5 +130,5 @@ def subspace(A, B):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_linalg', exit=False)
+    unittest.main(module='dstauffman.tests.test_estimation_linalg', exit=False)
     doctest.testmod(verbose=False)

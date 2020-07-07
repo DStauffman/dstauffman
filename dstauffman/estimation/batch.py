@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Code necessary for doing batch parameter estimation analysis.
 
@@ -9,7 +8,6 @@ Notes
 #.  Written by David C. Stauffer in May 2015 and continued in April 2016.  This work is based
     loosely on prior experience at Lockheed Martin using the GOLF/BPE code with GARSE, but all the
     numeric algorithms are re-coded from external sources to avoid any potential proprietary issues.
-
 """
 
 #%% Imports
@@ -24,11 +22,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.linalg import norm
 
-from dstauffman.classes import Frozen, pprint_dict, SaveAndLoad
-from dstauffman.logs import activate_logging, deactivate_logging
-from dstauffman.plotting import Opts, plot_correlation_matrix, plot_time_history, setup_plots
-from dstauffman.utils import rss
-from dstauffman.utils_log import setup_dir
+from dstauffman import activate_logging, deactivate_logging, Frozen, Opts, \
+                       plot_correlation_matrix, plot_time_history, pprint_dict, rss, SaveAndLoad, \
+                       setup_dir, setup_plots
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -44,7 +40,7 @@ class OptiOpts(Frozen):
 
     Examples
     --------
-    >>> from dstauffman import OptiOpts
+    >>> from dstauffman.estimation import OptiOpts
     >>> opti_opts = OptiOpts()
 
     """
@@ -116,7 +112,7 @@ class OptiParam(Frozen):
 
     Examples
     --------
-    >>> from dstauffman import OptiParam
+    >>> from dstauffman.estimation import OptiParam
     >>> params = []
     >>> params.append(OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
     >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
@@ -165,7 +161,7 @@ class OptiParam(Frozen):
 
         Examples
         --------
-        >>> from dstauffman import OptiParam
+        >>> from dstauffman.estimation import OptiParam
         >>> params = []
         >>> params.append(OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
         >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
@@ -193,7 +189,7 @@ class OptiParam(Frozen):
 
         Examples
         --------
-        >>> from dstauffman import OptiParam
+        >>> from dstauffman.estimation import OptiParam
         >>> params = []
         >>> params.append(OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
         >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
@@ -213,7 +209,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
 
     Examples
     --------
-    >>> from dstauffman import BpeResults
+    >>> from dstauffman.estimation import BpeResults
     >>> bpe_results = BpeResults()
 
     """
@@ -238,7 +234,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
 
         Examples
         --------
-        >>> from dstauffman import BpeResults
+        >>> from dstauffman.estimation import BpeResults
         >>> bpe_results = BpeResults()
         >>> bpe_results.param_names  = ['a'.encode('utf-8')]
         >>> bpe_results.begin_params = [1]
@@ -273,7 +269,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
 
         Examples
         --------
-        >>> from dstauffman import BpeResults
+        >>> from dstauffman.estimation import BpeResults
         >>> bpe_results = BpeResults()
         >>> bpe_results.param_names  = ['a'.encode('utf-8')]
         >>> bpe_results.begin_params = [1]
@@ -307,7 +303,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
 
     Examples
     --------
-    >>> from dstauffman import CurrentResults
+    >>> from dstauffman.estimation import CurrentResults
     >>> cur_results = CurrentResults()
     >>> print(cur_results)
      Current Results:
@@ -342,7 +338,7 @@ def _print_divider(new_line=True, level=logging.INFO):
 
     Examples
     --------
-    >>> from dstauffman.estimation import _print_divider
+    >>> from dstauffman.estimation.batch import _print_divider
     >>> _print_divider() # prints to logger
 
     """
@@ -378,8 +374,8 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
 
     Examples
     --------
-    >>> from dstauffman.estimation import _function_wrapper
-    >>> from dstauffman import OptiOpts, BpeResults
+    >>> from dstauffman.estimation.batch import _function_wrapper
+    >>> from dstauffman.estimation import OptiOpts, BpeResults
     >>> import numpy as np
     >>> opti_opts = OptiOpts()
     >>> opti_opts.model_func = lambda x: 2*x
@@ -554,7 +550,7 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
 
     Examples
     --------
-    >>> from dstauffman.estimation import _levenberg_marquardt
+    >>> from dstauffman.estimation.batch import _levenberg_marquardt
     >>> import numpy as np
     >>> jacobian    = np.array([[1, 2], [3, 4], [5, 6]])
     >>> innovs      = np.array([7, 8, 9])
@@ -612,7 +608,7 @@ def _predict_func_change(delta_param, gradient, hessian):
 
     Examples
     --------
-    >>> from dstauffman.estimation import _predict_func_change
+    >>> from dstauffman.estimation.batch import _predict_func_change
     >>> import numpy as np
     >>> delta_param = np.array([1, 2])
     >>> gradient = np.array([3, 4])
@@ -678,7 +674,7 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
 
     Examples
     --------
-    >>> from dstauffman.estimation import _double_dogleg
+    >>> from dstauffman.estimation.batch import _double_dogleg
     >>> import numpy as np
     >>> delta_param = np.array([1, 2])
     >>> gradient = np.array([3, 4])
@@ -917,8 +913,8 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
 
     Examples
     --------
-    >>> from dstauffman.estimation import _analyze_results
-    >>> from dstauffman import OptiOpts, BpeResults, OptiParam
+    >>> from dstauffman.estimation.batch import _analyze_results
+    >>> from dstauffman.estimation import OptiOpts, BpeResults, OptiParam
     >>> import numpy as np
     >>> opti_opts = OptiOpts()
     >>> opti_opts.params = [OptiParam('a'), OptiParam('b')]
@@ -993,7 +989,7 @@ def validate_opti_opts(opti_opts):
 
     Examples
     --------
-    >>> from dstauffman import OptiOpts, validate_opti_opts
+    >>> from dstauffman.estimation import OptiOpts, validate_opti_opts
     >>> opti_opts = OptiOpts()
     >>> opti_opts.model_func     = str
     >>> opti_opts.model_args     = {'a': 1}
@@ -1053,7 +1049,7 @@ def run_bpe(opti_opts, log_level=logging.INFO):
 
     Examples
     --------
-    >>> from dstauffman import run_bpe, OptiOpts #TODO: finish this
+    >>> from dstauffman.estimation import run_bpe, OptiOpts #TODO: finish this
 
     """
     # activate logging
@@ -1238,7 +1234,7 @@ def plot_bpe_convergence(costs, opts=None):
 
     Examples
     --------
-    >>> from dstauffman import plot_bpe_convergence
+    >>> from dstauffman.estimation import plot_bpe_convergence
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> costs = np.array([1, 0.1, 0.05, 0.01])
@@ -1279,9 +1275,7 @@ def plot_bpe_convergence(costs, opts=None):
 
 #%% plot_bpe_results
 def plot_bpe_results(bpe_results, opts=None, *, plots=None):
-    r"""
-    Plot the results of estimation.
-    """
+    r"""Plot the results of estimation."""
     # hard-coded options
     label_values = False
 
@@ -1368,5 +1362,5 @@ def plot_bpe_results(bpe_results, opts=None, *, plots=None):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_estimation', exit=False)
+    unittest.main(module='dstauffman.tests.test_estimation_batch', exit=False)
     doctest.testmod(verbose=False)

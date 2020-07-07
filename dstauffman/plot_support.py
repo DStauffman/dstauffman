@@ -1,15 +1,12 @@
-# -*- coding: utf-8 -*-
 r"""
 Defines useful plotting utilities.
 
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
-
 """
 
 #%% Imports
-# normal imports
 import datetime
 import doctest
 import gc
@@ -20,7 +17,6 @@ import sys
 import unittest
 import warnings
 
-# plotting/numpy imports
 import matplotlib.cm as cmx
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
@@ -28,7 +24,6 @@ from matplotlib.dates import date2num
 from matplotlib.patches import Rectangle
 import numpy as np
 
-# Qt imports
 try:
     from PyQt5.QtWidgets import QApplication, QPushButton
     from PyQt5.QtGui import QIcon
@@ -37,10 +32,10 @@ except ImportError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object
 
-# model imports
 from dstauffman.classes import Frozen
 from dstauffman.constants import DEFAULT_CLASSIFICATION, DEFAULT_COLORMAP
 from dstauffman.paths import get_images_dir
+from dstauffman.utils import is_datetime
 
 #%% Classes - _HoverButton
 class _HoverButton(QPushButton):
@@ -1518,7 +1513,6 @@ def get_classification(classify):
     //MADE UP CAVEAT
 
     """
-
     # check for empty case, default to unclassified
     if not classify:
         # check if not using any classification and if so return empties
@@ -1663,48 +1657,6 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, locati
     r1 = Rectangle((0., 0.), 1., 1., facecolor='none', edgecolor=color, clip_on=False, \
         linewidth=3, transform=fig.transFigure)
     fig.patches.extend([r1])
-
-#%% Functions - is_datetime
-def is_datetime(time):
-    r"""
-    Determines if the given time is either a datetime.datetime or np.datetime64 or just a regular number.
-
-    Parameters
-    ----------
-    time : float
-        Time
-
-    Returns
-    -------
-    out : bool
-        Whether this is a datetime
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in May 2020.
-
-    Examples
-    --------
-    >>> from dstauffman import is_datetime
-    >>> import datetime
-    >>> import numpy as np
-    >>> time1 = 0.5
-    >>> time2 = np.datetime64('now')
-    >>> time3 = datetime.datetime.now()
-    >>> print(is_datetime(time1))
-    False
-
-    >>> print(is_datetime(time2))
-    True
-
-    >>> print(is_datetime(time3))
-    True
-
-    """
-    out = False
-    if isinstance(time, datetime.datetime) or (hasattr(time, 'dtype') and np.issubdtype(time.dtype, np.datetime64)):
-        out = True
-    return out
 
 #%% Functions - align_plots
 def align_plots(figs, pos=None):

@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Define constants for use in the rest of the "dstauffman" library.
 
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
-
 """
 
 #%% Imports
@@ -36,9 +34,6 @@ INT_TOKEN = -1
 
 # Whether we are currently on Windows or not
 IS_WINDOWS = os.name == 'nt'
-
-# Number of elements that should be in a quaternion
-QUAT_SIZE = 4
 
 # Whether to include a classification on any generated plots
 DEFAULT_CLASSIFICATION = ''

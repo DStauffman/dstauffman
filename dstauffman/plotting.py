@@ -1,26 +1,21 @@
-# -*- coding: utf-8 -*-
 r"""
 Defines useful plotting utilities.
 
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
-
 """
 
 #%% Imports
-# normal imports
 import doctest
 import os
 import unittest
 
-# plotting/numpy imports
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Rectangle
 from matplotlib.ticker import StrMethodFormatter
 
-# model imports
 from dstauffman.classes      import Frozen
 from dstauffman.constants    import DEFAULT_COLORMAP
 from dstauffman.plot_generic import make_time_plot

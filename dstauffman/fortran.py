@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Functions that make it easier to deal with Fortran code, specifically creating unit tests.
 
 Notes
 -----
 #.  Written by David C. Stauffer in December 2019.
-
 """
 
 #%% Imports

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 The "dstauffman" module is a generic Python code library of useful functions.
 
@@ -9,51 +8,33 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 #.  Updated by David C. Stauffer in December 2015 to no longer support Python v2.7.  Too many of the
     newer language features were appealing and couldn't be used if compatibility was a concern.
-
+#.  Updated by David C. Stauffer in July 2020 to put estimation, health, and spacecraft into
+    submodules.
 """
 
 #%% Imports
 from .classes      import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, \
                               load_method, pprint_dict, Frozen, SaveAndLoad, SaveAndLoadPickle, \
                               Counter, FixedDict
-from .constants    import DEFAULT_COLORMAP, INT_TOKEN, IS_WINDOWS, QUAT_SIZE, \
-                              DEFAULT_CLASSIFICATION
+from .constants    import DEFAULT_COLORMAP, INT_TOKEN, IS_WINDOWS, DEFAULT_CLASSIFICATION
 from .enums        import IntEnumPlus, consecutive, ReturnCodes
-from .estimation   import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, \
-                              run_bpe, plot_bpe_convergence, plot_bpe_results
 from .fortran      import create_fortran_unit_tests, create_fortran_makefile
-from .health       import dist_enum_and_mons, icer, plot_icer, plot_population_pyramid
-from .kalman       import KfInnov, Kf, calc_kalman_gain, propagate_covariance, update_covariance, \
-                              plot_attitude, plot_los, plot_position, plot_velocity, \
-                              plot_innovations, plot_covariance, plot_states
-from .latex        import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
-from .linalg       import orth, subspace
 from .logs         import activate_logging, deactivate_logging
 from .matlab       import load_matlab
 from .parser       import main, parse_wrapper, parse_commands, execute_command
 from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
                               get_output_dir, list_python_files
-from .plot_generic import make_time_plot, make_error_bar_plot, make_quaternion_plot, \
-                              make_difference_plot
-from .plot_health  import plot_health_time_history, plot_health_monte_carlo
+from .plot_generic import make_time_plot, make_error_bar_plot, make_difference_plot
 from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
                               get_color_lists, ignore_plot_data, whitten, resolve_name, storefig, \
                               titleprefix, disp_xlimits, zoom_ylim, setup_plots, figmenu, \
                               rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
                               plot_second_units_wrapper, plot_second_yunits, get_rms_indices, \
                               plot_vert_lines, plot_phases, get_classification, \
-                              plot_classification, is_datetime, align_plots
+                              plot_classification, align_plots
 from .plotting     import Opts, plot_time_history, plot_correlation_matrix, plot_bar_breakdown
-from .quat         import USE_ASSERTIONS, quat_assertions, qrot, quat_angle_diff, quat_from_euler, \
-                              quat_interp, quat_inv, quat_mult, quat_norm, quat_prop, \
-                              quat_times_vector, quat_to_dcm, quat_to_euler
 from .repos        import run_docstrings, run_unittests, run_pytests, run_coverage, \
                               find_repo_issues, delete_pyc, get_python_definitions, make_python_init
-from .stats        import convert_annual_to_monthly_probability, \
-                              convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
-                              rate_to_prob, annual_rate_to_monthly_probability, \
-                              monthly_probability_to_annual_rate, ar2mp, mp2ar, combine_sets, \
-                              bounded_normal_draw, z_from_ci, rand_draw, intersect
 from .time         import convert_time_units, get_np_time_units, round_datetime, \
                               round_np_datetime, round_num_datetime, convert_date
 from .units        import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \
@@ -62,9 +43,8 @@ from .units        import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DE
 from .utils        import rms, rss, compare_two_classes, compare_two_dicts, read_text_file, \
                               write_text_file, capture_output, unit, modd, is_np_int, np_digitize, \
                               histcounts, full_print, line_wrap, combine_per_year, \
-                              execute, execute_wrapper, get_env_var
+                              execute, execute_wrapper, get_env_var, is_datetime, intersect
 from .utils_log    import setup_dir, fix_rollover
-from .vectors      import rot, vec_cross
 
 #%% Unit test
 if __name__ == '__main__':

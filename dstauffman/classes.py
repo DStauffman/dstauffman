@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Contains the high level classes used to subclass other classes.
 
@@ -7,7 +6,6 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 #.  Added mutable integer Counter class in January 2016.
 #.  Updated by David C. Stauffer in June 2020 to make MetaClass methods public for direct use if desired.
-
 """
 
 #%% Imports

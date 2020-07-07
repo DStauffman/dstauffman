@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Test file for the `paths` module of the "dstauffman" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
@@ -46,7 +45,7 @@ class Test_get_data_dir(unittest.TestCase):
     """
     def test_function(self):
         folder = dcs.get_data_dir()
-        self.assertEqual(folder, os.path.join(dcs.get_root_dir(), 'data'))
+        self.assertEqual(folder, os.path.abspath(os.path.join(dcs.get_root_dir(), '..', 'data')))
 
 #%% get_images_dir
 class Test_get_images_dir(unittest.TestCase):
@@ -56,7 +55,7 @@ class Test_get_images_dir(unittest.TestCase):
     """
     def test_function(self):
         folder = dcs.get_images_dir()
-        self.assertEqual(folder, os.path.join(dcs.get_root_dir(), 'images'))
+        self.assertEqual(folder, os.path.abspath(os.path.join(dcs.get_root_dir(), '..', 'images')))
 
 #%% get_output_dir
 class Test_get_output_dir(unittest.TestCase):
@@ -66,7 +65,7 @@ class Test_get_output_dir(unittest.TestCase):
     """
     def test_function(self):
         folder = dcs.get_output_dir()
-        self.assertEqual(folder, os.path.join(dcs.get_root_dir(), 'results'))
+        self.assertEqual(folder, os.path.abspath(os.path.join(dcs.get_root_dir(), '..', 'results')))
 
 #%% Unit test execution
 if __name__ == '__main__':

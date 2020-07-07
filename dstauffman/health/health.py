@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Contains more complex analysis related routines mostly specific to health care modeling.
 
 Notes
 -----
 #.  Written by David C. Stauffer in October 2017.
-
 """
 
 #%% Imports
@@ -17,8 +15,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from dstauffman.latex import bins_to_str_ranges
-from dstauffman.plotting import Opts, setup_plots
+from dstauffman import Opts, setup_plots
+
+from dstauffman.health.latex import bins_to_str_ranges
 
 #%% Functions - dist_enum_and_mons
 def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
@@ -62,7 +61,7 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
 
     Examples
     --------
-    >>> from dstauffman import dist_enum_and_mons
+    >>> from dstauffman.health import dist_enum_and_mons
     >>> import numpy as np
     >>> num = 100
     >>> distribution = np.array([0.10, 0.20, 0.30, 0.40])
@@ -139,7 +138,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
 
     Examples
     --------
-    >>> from dstauffman import icer
+    >>> from dstauffman.health import icer
     >>> cost = [250e3, 750e3, 2.25e6, 3.75e6]
     >>> qaly = [20., 30, 40, 80]
     >>> (inc_cost, inc_qaly, icer_out, order, icer_data, fig) = icer(cost, qaly)
@@ -260,6 +259,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
 
 #%% Functions - plot_icer
 def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
+    r"""Plot the icer results."""
     # check optional inputs
     if opts is None:
         opts = Opts()
@@ -337,7 +337,7 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
 
     Examples
     --------
-    >>> from dstauffman import plot_population_pyramid
+    >>> from dstauffman.health import plot_population_pyramid
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> age_bins = np.array([  0,   5,  10,  15,  20, 1000], dtype=int)
@@ -392,5 +392,5 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_health', exit=False)
+    unittest.main(module='dstauffman.tests.test_health_health', exit=False)
     doctest.testmod(verbose=False)

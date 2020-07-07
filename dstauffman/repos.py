@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Generic functions related to managing repositories.
 
 Notes
 -----
 #.  Split out of utils by David C. Stauffer in July 2019.
-
 """
 
 #%% Imports

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Test file for the `commands.help` module of the "dstauffman" library.  It is intented to contain
 test cases to demonstrate functionaliy and correct outcomes for all the functions within the module.

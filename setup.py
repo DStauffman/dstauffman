@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Packaging setup file for Pypi and installation via pip.
 
@@ -7,7 +6,6 @@ Notes
 #.  Written by David C. Stauffer in August 2017.
 #.  Currently this package is not available on pip, but it is designed such that it could be if it
     is ever so desired.
-
 """
 
 #%% Import
@@ -25,7 +23,7 @@ def readme():
 #%% Setup
 setup(
     name='dstauffman',
-    version='1.0',
+    version='2.0',
     description='Generic python utilities for aerospace and health policy applications',
     long_description=readme(),
     keywords='dstauffman numerical analysis plotting quaternions statistics batch estimation',
@@ -38,10 +36,9 @@ setup(
         'h5py',
         'matplotlib',
         'numpy',
-        'pandas',
         'PyQt5',
         'scipy',
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.7',
     include_package_data=True,
     zip_safe=False)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Generic path functions that can be called independent of the current working directory.
 
@@ -6,7 +5,6 @@ Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
 #.  Moved out of utils and into paths.py file in February 2019 by David C. Stauffer.
-
 """
 
 #%% Imports
@@ -83,7 +81,7 @@ def get_data_dir():
 
     """
     # this folder is the 'data' subfolder
-    folder = os.path.join(get_root_dir(), 'data')
+    folder = os.path.abspath(os.path.join(get_root_dir(), '..', 'data'))
     return folder
 
 #%% Functions - get_images_dir
@@ -107,7 +105,7 @@ def get_images_dir():
 
     """
     # this folder is the 'images' subfolder
-    folder = os.path.join(get_root_dir(), 'images')
+    folder = os.path.abspath(os.path.join(get_root_dir(), '..', 'images'))
     return folder
 
 #%% Functions - get_output_dir
@@ -131,7 +129,7 @@ def get_output_dir():
 
     """
     # this folder is the 'images' subfolder
-    folder = os.path.join(get_root_dir(), 'results')
+    folder = os.path.abspath(os.path.join(get_root_dir(), '..', 'results'))
     return folder
 
 #%% Functions - list_python_files

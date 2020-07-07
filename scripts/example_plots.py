@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Example script for generating plots using the dstauffman library.
 
 Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
-
 """
 
 #%% Imports

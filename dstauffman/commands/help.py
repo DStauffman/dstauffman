@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Functions related to `help` command.
 
@@ -13,8 +12,7 @@ import doctest
 import os
 import unittest
 
-from dstauffman.enums import ReturnCodes
-from dstauffman.paths import get_root_dir
+from dstauffman import get_root_dir, ReturnCodes
 
 #%% Functions - print_help
 def print_help():

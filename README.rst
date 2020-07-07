@@ -53,7 +53,6 @@ The following non-standard, but for the most part very well known libraries, are
 * h5py
 * matplotlib
 * numpy
-* pandas
 * PyQt5
 * pytest
 * requests

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Define enumerator related functions for the rest of the library.
 
@@ -7,7 +6,6 @@ Notes
 #.  Written by David C. Stauffer in July 2015.
 #.  Modified by David C. Stauffer in March 2020 to add ReturnCode class for use in commands, and as
     a great example use case.
-
 """
 
 #%% Imports

@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Contains generic vector utilities that can be independently defined and used by other modules.
 
 Notes
 -----
 #.  Written by David C. Stauffer in March 2020.
-
 """
 
 #%% Imports
@@ -44,7 +42,7 @@ def rot(axis, angle):
     Examples
     --------
     Simple 90deg z-rotation
-    >>> from dstauffman import rot
+    >>> from dstauffman.spacecraft import rot
     >>> import numpy as np
     >>> axis = 3
     >>> angle = np.pi/2
@@ -91,7 +89,7 @@ def vec_cross(vec):
 
     Examples
     --------
-    >>> from dstauffman import vec_cross
+    >>> from dstauffman.spacecraft import vec_cross
     >>> import numpy as np
     >>> a = np.array([1, 2, 3])
     >>> b = np.array([-2, -3, -4])
@@ -106,5 +104,5 @@ def vec_cross(vec):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_vectors', exit=False)
+    unittest.main(module='dstauffman.tests.test_spacecraft_vectors', exit=False)
     doctest.testmod(verbose=False)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Test file for the `utils_log` module of the "dstauffman" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
@@ -171,6 +170,23 @@ class Test_fix_rollover(unittest.TestCase):
 
     def test_recursive(self, mock_logger):
         pass # TODO: figure out a test case where this actually happens.  I think the code was there for a reason?
+
+    def test_empty(self, mock_logger):
+        data = dcs.fix_rollover(np.array([]), self.roll)
+        self.assertEqual(data.ndim, 1)
+        self.assertEqual(data.size, 0)
+
+    def test_bad_ndims(self, mock_logger):
+        with self.assertRaises(ValueError) as context:
+            dcs.fix_rollover(np.zeros((2, 5), dtype=float), self.roll)
+        self.assertEqual(str(context.exception), 'Input argument "data" must be a vector.')
+
+    def test_bad_axis(self, mock_logger):
+        with self.assertRaises(AssertionError):
+            dcs.fix_rollover(np.zeros((2, 3, 4), dtype=float), self.roll, axis=2)
+        with self.assertRaises(ValueError) as context:
+            dcs.fix_rollover(np.zeros((2, 5), dtype=float), self.roll, axis=2)
+        self.assertEqual(str(context.exception), 'Unexpected axis: "2".')
 
 #%% Unit test execution
 if __name__ == '__main__':

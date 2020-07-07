@@ -1,266 +1,387 @@
-# -*- coding: utf-8 -*-
 r"""
 Classes related to Kalman Filter analysis.
 
 Notes
 -----
 #.  Written by David C. Stauffer in April 2019.
-
 """
 
 #%% Imports
 import doctest
 import unittest
 
+import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
 
-from dstauffman.classes import Frozen
-from dstauffman.plot_generic import make_difference_plot, make_quaternion_plot
-from dstauffman.plot_support import get_color_lists, setup_plots
-from dstauffman.plotting import Opts
-from dstauffman.units import get_factors
+from dstauffman import ColorMap, disp_xlimits, get_color_lists, get_factors, get_rms_indices, \
+                       intersect, is_datetime, make_difference_plot, Opts, \
+                       plot_second_units_wrapper, plot_vert_lines, rms, setup_plots, \
+                       show_zero_ylim, zoom_ylim
 
-#%% KfInnov
-class KfInnov(Frozen):
+from dstauffman.spacecraft.classes import Kf, KfInnov
+from dstauffman.spacecraft.quat import quat_angle_diff
+
+#%% Constants
+# hard-coded values
+_LEG_FORMAT  = '{:1.3f}'
+_TRUTH_COLOR = 'k'
+
+#%% Functions - make_quaternion_plot
+def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *, \
+        name_one='', name_two='', time_units='sec', start_date='', plot_components=True, \
+        rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf, \
+        make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True, \
+        legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None, \
+        data_as_rows=True, tolerance=0, return_err=False):
     r"""
-    A class for Kalman Filter innovations outputs.
-
-    Attributes
-    ----------
-    name : str
-        Name of the innovation structure, often specifying which sensor it comes from, like GPS
-    chan : [M, ] list of str
-        Names of the different axes found within the innovations
-    units : str
-        Units for the innovations
-    time : (N, ) ndarray
-        Time vector
-    innov : (N, M) ndarray
-        Time history of the raw innovations
-    norm : (N, M) ndarray
-        Time history of the normalized innovations
-    status : (N,)
-        Status of the innovation, such as applied, or reason for rejection
-
-    Examples
-    --------
-    >>> from dstauffman import KfInnov
-    >>> innov = KfInnov()
-
-    """
-    def __init__(self, *, name='', units='', num_innovs=0, num_axes=0, time_dtype=float):
-        r"""Initializes a new KfInnov instance."""
-        self.name   = name
-        self.chan   = ['' for i in range(num_axes)] if num_axes > 0 else None
-        self.units  = units
-        if num_innovs > 0:
-            self.time   = np.empty(num_innovs, dtype=time_dtype)
-            innov_shape = (num_axes, num_innovs) if num_axes > 1 else (num_innovs, )
-            self.innov  = np.full(innov_shape, np.nan, dtype=float)
-            self.norm   = np.full(innov_shape, np.nan, dtype=float)
-            self.status = np.empty(num_innovs, dtype=int)
-        else:
-            self.time   = None
-            self.innov  = None
-            self.norm   = None
-            self.status = None
-
-#%% Kf
-class Kf(Frozen):
-    r"""
-    A class for doing Kalman Filter analysis.
-
-    Attributes
-    ----------
-    name : str
-        Name of the structure, used when comparing multiple sources or runs
-    chan : list of str
-        Name of the states in the state and covar fields
-    time : (N, ) ndarray
-        Time vector
-    att : (4, N) ndarray
-        Attitude quaternion history
-    pos : (3, N) ndarray
-        Position history
-    vel : (3, N) ndarray
-        Velocity history
-    innov : class KfInnov
-        Innovation history for GPS measurements
-    state : (N, M) ndarray
-        State history
-    covar : (N, M) ndarray
-        Covariance history
-
-    Examples
-    --------
-    >>> from dstauffman import Kf
-    >>> kf = Kf()
-
-    """
-    def __init__(self, *, name='', num_points=0, num_states=0, time_dtype=float, active_states=None, **kwargs):
-        r"""Initializes a new Kf instance."""
-        self.name = name
-        self.chan = ['' for i in range(num_states)] if num_states > 0 else None
-        if num_points > 0:
-            num_active  = num_states if active_states is None else len(active_states)
-            state_shape = (num_active, num_points) if num_active > 1 else (num_points, )
-            self.time   = np.empty(num_points, dtype=time_dtype)
-            self.att    = np.empty((4, num_points), dtype=float)
-            self.pos    = None # TODO: flag to enable?
-            self.vel    = None # TODO: flag to enable?
-            self.active = active_states if active_states is not None else np.arange(num_states)
-            self.state  = np.empty(state_shape, dtype=float)
-            self.istate = np.empty(num_states, dtype=float)
-            self.covar  = np.empty(state_shape, dtype=float)
-            self.innov  = KfInnov(time_dtype=time_dtype, **kwargs)
-        else:
-            self.time   = None
-            self.att    = None
-            self.pos    = None
-            self.vel    = None
-            self.active = None
-            self.state  = None
-            self.istate = None
-            self.covar  = None
-            self.innov  = KfInnov(time_dtype=time_dtype, **kwargs)
-
-#%% Functions - calc_kalman_gain
-def calc_kalman_gain(P, H, R, use_inverse=False):
-    r"""
-    Calculates K, the Kalman Gain matrix.
+    Generic quaternion comparison plot for use in other wrapper functions.
+    Plots two quaternion histories over time, along with a difference from one another.
 
     Parameters
     ----------
-    P : (N, N) ndarray
-        Covariance Matrix
-    H : (A, B) ndarray
-        Measurement Update Matrix
-    R : () ndarray
-        Measurement Noise Matrix
-    use_inverse : bool, optional
-        Whether to explicitly calculate the inverse or not, default is False
+    description : str
+        name of the data being plotted, used as title
+    time_one : (N, ) array_like
+        time history one [sec]
+    time_two : (M, ) array_like
+        time history two [sec]
+    quat_one : (4, N) ndarray
+        quaternion one
+    quat_two : (4, M) ndarray
+        quaternion two
+    name_one : str, optional
+        name of data source 1
+    name_two : str, optional
+        name of data source 2
+    time_units : str, optional
+        time units, defaults to 'sec'
+    start_date : str, optional
+        date of t(0), may be an empty string
+    plot_components : bool, optional
+        Whether to plot the quaternion components, or just the angular difference
+    rms_xmin : float, optional
+        time of first point of RMS calculation
+    rms_xmax : float, optional
+        time of last point of RMS calculation
+    disp_xmin : float, optional
+        lower time to limit the display of the plot
+    disp_xmax : float, optional
+        higher time to limit the display of the plot
+    make_subplots : bool, optional
+        flag to use subplots for differences
+    single_lines : bool, optional
+        flag meaning to plot subplots by channel instead of together
+    use_mean : bool, optional
+        whether to use mean instead of RMS in legend calculations
+    plot_zero : bool, optional
+        whether to force zero to always be plotted on the Y axis
+    show_rms : bool, optional
+        whether to show the RMS calculation in the legend
+    legend_loc : str, optional
+        location to put the legend, default is 'best'
+    show_extra : bool, optional
+        whether to show missing data on difference plots
+    truth_name : str, optional
+        name to associate with truth data, default is 'Truth'
+    truth_time : ndarray, optional
+        truth time history
+    truth_data : ndarray, optional
+        truth quaternion history
+    data_as_rows : bool, optional, default is True
+        Whether the data has each channel as a row vector when 2D, vs a column vector
+    tolerance : float, optional, default is zero
+        Numerical tolerance on what should be considered a match between quat_one and quat_two
+    return_err : bool, optional, default is False
+        Whether the function should return the error differences in addition to the figure handles
 
     Returns
     -------
-    K : (N, ) ndarray
-        Kalman Gain Matrix
+    fig_hand : list of class matplotlib.Figure
+        list of figure handles
+    err : (3,N) ndarray
+        Quaternion differences expressed in Q1 frame
+
+    See Also
+    --------
+    TBD_wrapper
 
     Notes
     -----
-    #.  Written by David C Stauffer in December 2018.
+    #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
+    #.  Ported to Python by David C. Stauffer in December 2018.
+    #.  Made fully functional by David C. Stauffer in March 2019.
 
     Examples
     --------
-    >>> from dstauffman import calc_kalman_gain
+    >>> from dstauffman.spacecraft import make_quaternion_plot, quat_norm
     >>> import numpy as np
-    >>> P = 1e-3 * np.eye(5)
-    >>> H = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0.5, 0.5, 0.5], [0, 0, 0.1]]).T
-    >>> R = 0.5 * np.eye(3)
-    >>> K = calc_kalman_gain(P, H, R)
+    >>> import matplotlib.pyplot as plt
+    >>> from datetime import datetime
+    >>> description     = 'example'
+    >>> time_one        = np.arange(11)
+    >>> time_two        = np.arange(2, 13)
+    >>> quat_one        = quat_norm(np.random.rand(4, 11))
+    >>> quat_two        = quat_norm(quat_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] + 1e-5 * np.random.rand(4, 11))
+    >>> name_one        = 'test1'
+    >>> name_two        = 'test2'
+    >>> time_units      = 'sec'
+    >>> start_date      = str(datetime.now())
+    >>> plot_components = True
+    >>> rms_xmin        = 1
+    >>> rms_xmax        = 10
+    >>> disp_xmin       = -2
+    >>> disp_xmax       = np.inf
+    >>> make_subplots   = True
+    >>> single_lines    = False
+    >>> use_mean        = False
+    >>> plot_zero       = False
+    >>> show_rms        = True
+    >>> legend_loc      = 'best'
+    >>> show_extra      = True
+    >>> truth_name      = 'Truth'
+    >>> truth_time      = None
+    >>> truth_data      = None
+    >>> data_as_rows    = True
+    >>> tolerance       = 0
+    >>> return_err      = False
+    >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
+    ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
+    ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
+    ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
+    ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
+    ...     show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, truth_data=truth_data, \
+    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err)
+
+    Close plots
+    >>> for fig in fig_hand:
+    ...     plt.close(fig)
 
     """
-    if use_inverse:
-        # explicit version with inverse
-        K = (P @ H.T) @ np.linalg.inv(H @ P @ H.T + R)
-    else:
-        # implicit solver
-        K = np.linalg.lstsq((H @ P @ H.T + R).T, (P @ H.T).T, rcond=None)[0].T
-    return K
-
-#%% Functions - propagate_covariance
-def propagate_covariance(P, phi, Q, *, gamma=None, inplace=True):
-    r"""
-    Propagates the covariance forward in time.
-
-    Parameters
-    ----------
-    P :
-        Covariance matrix
-    phi :
-        State transition matrix
-    Q :
-        Process noise matrix
-    gamma :
-        Shaping matrix?
-    inplace : bool, optional, default is True
-        Whether to update the value inplace or as a new output
-
-    Returns
-    -------
-    (N, N) ndarray
-        Updated covariance matrix
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in December 2018.
-    #.  Updated by David C. Stauffer in July 2020 to have inplace option.
-
-    Examples
-    --------
-    >>> from dstauffman import propagate_covariance
-    >>> import numpy as np
-    >>> P = 1e-3 * np.eye(6)
-    >>> phi = np.diag([1., 1, 1, -1, -1, -1])
-    >>> Q = np.diag([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7])
-    >>> propagate_covariance(P, phi, Q)
-    >>> print(P[0, 0])
-    0.002
-
-    """
-    if gamma is None:
-        out = phi @ P @ phi.T + Q
-    else:
-        out = phi @ P @ phi.T + gamma @ Q @ gamma.T
-    if inplace:
-        P[:] = out
-    else:
+    # determine if you have the quaternions
+    have_quat_one = quat_one is not None and np.any(~np.isnan(quat_one))
+    have_quat_two = quat_two is not None and np.any(~np.isnan(quat_two))
+    have_both     = have_quat_one and have_quat_two
+    have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
+    if not have_quat_one and not have_quat_two:
+        print(f'No quaternion data was provided, so no plot was generated for "{description}".')
+        # TODO: return NaNs instead of None for this case?
+        out = ([], {'one': None, 'two': None, 'diff': None, 'mag': None}) if return_err else []
         return out
 
-#%% Functions - update_covariance
-def update_covariance(P, K, H, inplace=True):
-    r"""
-    Updates the covariance for a given measurement.
+    # data checks
+    assert description, 'You must give the plot a description.' # TODO: remove this restriction?
 
-    Parameters
-    ----------
-    P : (N, N) ndarray
-        Covariance Matrix
-    K : (N, ) ndarray
-        Kalman Gain Matrix
-    H : (A, N) ndarray
-        Measurement Update Matrix
-    inplace : bool, optional, default is True
-        Whether to update the value inplace or as a new output
+    # convert rows/cols as necessary
+    if not data_as_rows:
+        # TODO: is this the best way or make branches lower?
+        if have_quat_one:
+            quat_one = quat_one.T
+        if have_quat_two:
+            quat_two = quat_two.T
+        if have_truth:
+            truth_data = truth_data.T
 
-    Returns
-    -------
-    P_out : (N, N) ndarray
-        Updated Covariance Matrix
-
-    Notes
-    -----
-    #.  Written by David C Stauffer in December 2018.
-    #.  Updated by David C. Stauffer in July 2020 to have inplace option.
-
-    Examples
-    --------
-    >>> from dstauffman import update_covariance
-    >>> import numpy as np
-    >>> P = 1e-3 * np.eye(6)
-    >>> P[0, -1] = 5e-2
-    >>> K = np.ones((6, 3))
-    >>> H = np.hstack((np.eye(3), np.eye(3)))
-    >>> update_covariance(P, K, H)
-    >>> print(P[-1, -1])
-    -0.05
-
-    """
-    out = (np.eye(*P.shape) - K @ H) @ P
-    if inplace:
-        P[:] = out
+    #% Calculations
+    if have_both:
+        # find overlapping times
+        (time_overlap, q1_diff_ix, q2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)
+        # find differences
+        q1_miss_ix = np.setxor1d(np.arange(len(time_one)), q1_diff_ix)
+        q2_miss_ix = np.setxor1d(np.arange(len(time_two)), q2_diff_ix)
     else:
-        return out
+        time_overlap = None
+    # build RMS indices
+    ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)
+    # get default plotting colors
+    color_lists = get_color_lists()
+    colororder3 = ColorMap(color_lists['vec'], num_colors=3)
+    colororder8 = ColorMap(color_lists['quat_diff'], num_colors=8)
+    # quaternion component names
+    elements = ['X', 'Y', 'Z', 'S']
+    num_channels = len(elements)
+    # calculate the difference
+    if have_both:
+        (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one[:, q1_diff_ix], quat_two[:, q2_diff_ix])
+    # calculate the rms (or mean) values
+    nans = np.full(3, np.nan, dtype=float)
+    if not use_mean:
+        func_name = 'RMS'
+        func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
+    else:
+        func_name = 'Mean'
+        func_lamb = lambda x, y: np.nanmean(x, axis=y)
+    q1_func     = func_lamb(quat_one[:, ix['one']], 1) if have_quat_one and np.any(ix['one']) else nans
+    q2_func     = func_lamb(quat_two[:, ix['two']], 1) if have_quat_two and np.any(ix['two']) else nans
+    nondeg_func = func_lamb(nondeg_error[:, ix['overlap']], 1) if have_both and np.any(ix['overlap']) else nans
+    mag_func    = func_lamb(nondeg_angle[ix['overlap']], 0) if have_both and np.any(ix['overlap']) else nans[0:1]
+    # output errors
+    err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
+    # unit conversion value
+    (temp, prefix) = get_factors('micro')
+    leg_conv = 1/temp
+    # determine which symbols to plot with
+    if have_both:
+        symbol_one = '^-'
+        symbol_two = 'v:'
+    elif have_quat_one:
+        symbol_one = '.-'
+        symbol_two = '' # not-used
+    elif have_quat_two:
+        symbol_one = '' # not-used
+        symbol_two = '.-'
+    else:
+        symbol_one = '' # invalid case
+        symbol_two = '' # invalid case
+    # pre-plan plot layout
+    if have_both:
+        if make_subplots:
+            num_figs = 1
+            if single_lines:
+                num_rows = num_channels
+                num_cols = 2
+            else:
+                num_rows = 2
+                num_cols = 1
+        else:
+            num_figs = 2
+            num_cols = 1
+            if single_lines:
+                num_rows = num_channels
+            else:
+                num_rows = 1
+    else:
+        num_figs = 1
+        if single_lines:
+            num_rows = num_channels
+            num_cols = 1
+        else:
+            num_rows = 1
+            num_cols = 1
+    num_axes = num_figs*num_rows*num_cols
+
+    #% Create plots
+    # create figures
+    f1 = plt.figure()
+    if make_subplots:
+        f1.canvas.set_window_title(description)
+    else:
+        f1.canvas.set_window_title(description + ' Quaternion Components')
+    if have_both and not make_subplots:
+        f2 = plt.figure()
+        f2.canvas.set_window_title(description + 'Difference')
+        fig_hand = [f1, f2]
+    else:
+        fig_hand = [f1]
+    # create axes
+    ax = []
+    ax_prim = None
+    for i in range(num_figs):
+        for j in range(num_cols):
+            for k in range(num_rows):
+                temp_axes = fig_hand[i].add_subplot(num_rows, num_cols, k*num_cols + j + 1, sharex=ax_prim)
+                if ax_prim is None:
+                    ax_prim = temp_axes
+                ax.append(temp_axes)
+    # plot data
+    for i in range(num_axes):
+        this_axes = ax[i]
+        is_diff_plot = i > num_rows-1 or (not single_lines and make_subplots and i == 1)
+        if single_lines:
+            if is_diff_plot:
+                loop_counter = [i - num_rows]
+            else:
+                loop_counter = [i]
+        else:
+            loop_counter = range(num_channels)
+        if not is_diff_plot:
+            # standard plot
+            if have_quat_one:
+                for j in loop_counter:
+                    if show_rms:
+                        value = _LEG_FORMAT.format(q1_func[j])
+                        this_label = '{} {} ({}: {})'.format(name_one, elements[j], func_name, value)
+                    else:
+                        this_label = name_one + ' ' + elements[j]
+                    this_axes.plot(time_one, quat_one[j, :], symbol_one, markersize=4, label=this_label, \
+                        color=colororder8.get_color(j+(0 if have_quat_two else num_channels)), zorder=3)
+            if have_quat_two:
+                for j in loop_counter:
+                    if show_rms:
+                        value = _LEG_FORMAT.format(q2_func[j])
+                        this_label = '{} {} ({}: {})'.format(name_two, elements[j], func_name, value)
+                    else:
+                        this_label = name_two + ' ' + elements[j]
+                    this_axes.plot(time_two, quat_two[j, :], symbol_two, markersize=4, label=this_label, \
+                        color=colororder8.get_color(j+num_channels), zorder=5)
+        else:
+            #% Difference plot
+            zorders = [8, 6, 5]
+            for j in range(3):
+                if not plot_components or (single_lines and i % num_channels != j):
+                    continue
+                if show_rms:
+                    value = _LEG_FORMAT.format(leg_conv*nondeg_func[j])
+                    this_label = '{} ({}: {}) {}rad)'.format(elements[j], func_name, value, prefix)
+                else:
+                    this_label = elements[j]
+                this_axes.plot(time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, zorder=zorders[j], \
+                    color=colororder3.get_color(j))
+            if not plot_components or (single_lines and (i + 1) % num_channels == 0):
+                if show_rms:
+                    value = _LEG_FORMAT.format(leg_conv*mag_func)
+                    this_label = 'Angle ({}: {} {}rad)'.format(func_name, value, prefix)
+                else:
+                    this_label = 'Angle'
+                this_axes.plot(time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=colororder3.get_color(0))
+            if show_extra:
+                this_axes.plot(time_one[q1_miss_ix], np.zeros(len(q1_miss_ix)), 'kx', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
+                this_axes.plot(time_two[q2_miss_ix], np.zeros(len(q2_miss_ix)), 'go', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
+
+        # set X display limits
+        if i == 0:
+            disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
+            xlim = this_axes.get_xlim()
+        this_axes.set_xlim(xlim)
+        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
+        # set Y display limits
+        if plot_zero:
+            show_zero_ylim(this_axes)
+        # optionally plot truth (after having set axes limits)
+        if i < num_rows and have_truth:
+            if single_lines:
+                this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
+                    linewidth=2, label=truth_name + ' ' + elements[i])
+            else:
+                if i == 0:
+                    # TODO: add RMS to Truth data?
+                    this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
+                        linewidth=2, label=truth_name)
+        # format display of plot
+        if legend_loc.lower() != 'none':
+            this_axes.legend(loc=legend_loc)
+        if i == 0:
+            this_axes.set_title(description + ' Quaternion Components')
+        elif (single_lines and i == num_rows) or (not single_lines and i == 1):
+            this_axes.set_title(description + ' Difference')
+        if is_datetime(time_one) or is_datetime(time_two):
+            this_axes.set_xlabel('Date')
+            assert time_units == 'datetime', 'Mismatch in the expected time units.'
+        else:
+            this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
+        if is_diff_plot:
+            this_axes.set_ylabel(description + ' Difference [rad]')
+            plot_second_units_wrapper(this_axes, {prefix+'rad': leg_conv})
+        else:
+            this_axes.set_ylabel(description + ' Quaternion Components [dimensionless]')
+        this_axes.grid(True)
+        # plot RMS lines
+        if show_rms:
+            plot_vert_lines(this_axes, ix['pts'])
+
+    if return_err:
+        return (fig_hand, err)
+    return fig_hand
 
 #%% plot_attitude
 def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
@@ -289,7 +410,8 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     Examples
     --------
-    >>> from dstauffman import Kf, Opts, plot_attitude, quat_from_euler, quat_mult, quat_norm
+    >>> from dstauffman.spacecraft import Kf, plot_attitude, quat_from_euler, quat_mult, quat_norm
+    >>> from dstauffman import Opts
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
@@ -410,7 +532,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     Examples
     --------
-    >>> from dstauffman import Kf, plot_position
+    >>> from dstauffman.spacecraft import Kf, plot_position
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
@@ -530,7 +652,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
 
     Examples
     --------
-    >>> from dstauffman import KfInnov, Opts, plot_innovations
+    >>> from dstauffman.spacecraft import KfInnov, plot_innovations
+    >>> from dstauffman import Opts
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
@@ -653,7 +776,8 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
 
     Examples
     --------
-    >>> from dstauffman import Kf, Opts, plot_covariance
+    >>> from dstauffman.spacecraft import Kf, plot_covariance
+    >>> from dstauffman import Opts
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
@@ -768,5 +892,6 @@ def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, 
 
 #%% Unit Test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_kalman', exit=False)
+    plt.ioff()
+    unittest.main(module='dstauffman.tests.test_spacecraft_plotting', exit=False)
     doctest.testmod(verbose=False)

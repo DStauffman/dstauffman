@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Functions related to `repos` command.
 
@@ -13,8 +12,7 @@ import doctest
 import os
 import unittest
 
-from dstauffman.enums import ReturnCodes
-from dstauffman.repos import find_repo_issues, make_python_init
+from dstauffman import find_repo_issues, make_python_init, ReturnCodes
 
 #%% Functions - parse_enforce
 def parse_enforce(input_args):

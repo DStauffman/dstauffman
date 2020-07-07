@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Test file for the `utils` module of the "dstauffman" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
@@ -941,6 +940,159 @@ class Test_get_env_var(unittest.TestCase):
         with self.assertRaises(KeyError):
             dcs.get_env_var('HOME')
         dcs._ALLOWED_ENVS = None
+
+#%% Functions - is_datetime
+pass # TODO: write this
+
+#%% intersect
+class Test_intersect(unittest.TestCase):
+    r"""
+    Tests the intersect function with the following cases:
+        Nominal
+        Floats
+        Assume unique
+    """
+    def test_nominal(self):
+        a = np.array([1, 2, 4, 4, 6], dtype=int)
+        b = np.array([0, 8, 2, 2, 5, 8, 6, 8, 8], dtype=int)
+        (c, ia, ib) = dcs.intersect(a, b, return_indices=True)
+        np.testing.assert_array_equal(c, np.array([2, 6], dtype=int))
+        np.testing.assert_array_equal(ia, np.array([1, 4], dtype=int))
+        np.testing.assert_array_equal(ib, np.array([2, 6], dtype=int))
+
+    def test_floats(self):
+        a = np.array([1, 2.5, 4, 6], dtype=float)
+        b = np.array([0, 8, 2.5, 4, 6], dtype=float)
+        (c, ia, ib) = dcs.intersect(a, b, return_indices=True)
+        np.testing.assert_array_equal(c, np.array([2.5, 4, 6], dtype=float))
+        np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
+        np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
+
+    def test_unique(self):
+        a = np.array([1, 2.5, 4, 6], dtype=float)
+        b = np.array([0, 8, 2.5, 4, 6], dtype=float)
+        (c, ia, ib) = dcs.intersect(a, b, assume_unique=True, return_indices=True)
+        np.testing.assert_array_equal(c, np.array([2.5, 4, 6], dtype=float))
+        np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
+        np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=1e-7, assume_unique=True, return_indices=True)
+        np.testing.assert_array_equal(c, np.array([2.5, 4, 6], dtype=float))
+        np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
+        np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
+
+    def test_no_indices(self):
+        a = np.array([1, 2, 4, 4, 6], dtype=int)
+        b = np.array([0, 8, 2, 2, 5, 8, 6, 8, 8], dtype=int)
+        c = dcs.intersect(a, b)
+        np.testing.assert_array_equal(c, np.array([2, 6], dtype=int))
+
+    def test_tolerance(self):
+        a = np.array([1., 2., 3.1, 3.9, 4.0, 6.0])
+        b = np.array([2., 3., 4., 5.])
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=0.12, return_indices=True)
+        np.testing.assert_array_equal(c, np.array([2., 3.1, 3.9, 4.0], dtype=float))
+        np.testing.assert_array_equal(ia, np.array([1, 2, 3, 4], dtype=int))
+        np.testing.assert_array_equal(ib, np.array([0, 1, 2], dtype=int))
+
+    def test_tolerance_no_ix(self):
+        a = np.array([1., 3., 5., 7., 9.])
+        b = np.array([1.01, 2.02, 3.03, 4.04, 5.05, 6.06, 7.07, 8.08, 9.09])
+        c = dcs.intersect(a, b, tolerance=0.055, return_indices=False)
+        np.testing.assert_array_equal(c, np.array([1., 3., 5.], dtype=float))
+        c2 = dcs.intersect(b, a, tolerance=0.055, return_indices=False)
+        np.testing.assert_array_equal(c2, np.array([1.01, 3.03, 5.05], dtype=float))
+
+    def test_scalars(self):
+        a = 5
+        b = 4.9
+        c = dcs.intersect(a, b, tolerance=0.5)
+        self.assertEqual(c, 5)
+
+    def test_int(self):
+        a = np.array([0, 4, 10, 20, 30, -40, 30])
+        b = np.array([1, 5, 7, 31, -10, -40])
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)
+        np.testing.assert_array_equal(c, np.array([-40]))
+        np.testing.assert_array_equal(ia, np.array([5]))
+        np.testing.assert_array_equal(ib, np.array([5]))
+
+    def test_int_even_tol(self):
+        a = np.array([0, 4, 10, 20, 30, -40, 30])
+        b = np.array([1, 5, 7, 31, -10, -40])
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=2, return_indices=True)
+        np.testing.assert_array_equal(c, np.array([-40, 0, 4, 30]))
+        np.testing.assert_array_equal(ia, np.array([0, 1, 4, 5]))
+        np.testing.assert_array_equal(ib, np.array([0, 1, 3, 5]))
+
+    def test_int_odd_tol(self):
+        a = np.array([0, 4, 10, 20, 30, -40, 30])
+        b = np.array([1, 5, 7, 31, -10, -40])
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=3, return_indices=True)
+        np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30]))
+        np.testing.assert_array_equal(ia, np.array([0, 1, 2, 4, 5]))
+        np.testing.assert_array_equal(ib, np.array([0, 1, 2, 3, 5]))
+
+    def test_int64(self):
+        t_offset = 2**62
+        a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
+        b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)
+        np.testing.assert_array_equal(c, np.array([-40], dtype=np.int64) + t_offset)
+        np.testing.assert_array_equal(ia, np.array([5]))
+        np.testing.assert_array_equal(ib, np.array([5]))
+
+    def test_int64_even_tol(self):
+        t_offset = 2**62
+        a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
+        b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=2, return_indices=True)
+        np.testing.assert_array_equal(c, np.array([-40, 0, 4, 30], dtype=np.int64) + t_offset)
+        np.testing.assert_array_equal(ia, np.array([0, 1, 4, 5]))
+        np.testing.assert_array_equal(ib, np.array([0, 1, 3, 5]))
+
+    def test_int64_odd_tol(self):
+        t_offset = 2**62
+        a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
+        b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=3, return_indices=True)
+        np.testing.assert_array_equal(ia, np.array([0, 1, 2, 4, 5]))
+        np.testing.assert_array_equal(ib, np.array([0, 1, 2, 3, 5]))
+        np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30], dtype=np.int64) + t_offset)
+
+    def test_npint64_tol(self):
+        t_offset = 2**62
+        a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
+        b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=np.array(3), return_indices=True)
+        np.testing.assert_array_equal(ia, np.array([0, 1, 2, 4, 5]))
+        np.testing.assert_array_equal(ib, np.array([0, 1, 2, 3, 5]))
+        np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30], dtype=np.int64) + t_offset)
+
+    def test_empty(self):
+        a = np.array([])
+        b = np.array([1, 2, 3, 4])
+        c = dcs.intersect(a, b, tolerance=0.1)
+        self.assertEqual(len(c), 0)
+
+    def test_datetimes(self):
+        date_zero = np.datetime64('2020-06-01 00:00:00', 'ms')
+        dt = np.arange(0, 11000, 1000).astype('timedelta64[ms]')
+        a = date_zero + dt
+        dt[3] += 5
+        dt[5] -= 30
+        b = date_zero + dt
+        # no tolerance
+        exp = np.array([0, 1, 2, 4, 6, 7, 8, 9, 10])
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)
+        np.testing.assert_array_equal(c, a[exp])
+        np.testing.assert_array_equal(ia, exp)
+        np.testing.assert_array_equal(ib, exp)
+        # with tolerance
+        exp = np.array([0, 1, 2, 3, 4, 6, 7, 8, 9, 10])
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=np.timedelta64(10, 'ms'), return_indices=True)
+        np.testing.assert_array_equal(c, a[exp])
+        np.testing.assert_array_equal(ia, exp)
+        np.testing.assert_array_equal(ib, exp)
 
 #%% Unit test execution
 if __name__ == '__main__':

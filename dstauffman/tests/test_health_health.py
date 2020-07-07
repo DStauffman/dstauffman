@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Test file for the `health` module of the "dstauffman" library.  It is intented to contain test
 cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
@@ -15,10 +14,11 @@ import unittest
 import matplotlib.pyplot as plt
 import numpy as np
 
-import dstauffman as dcs
+from dstauffman import Opts, Plotter
+import dstauffman.health as health
 
 #%% Plotter for testing
-plotter = dcs.Plotter(False)
+plotter = Plotter(False)
 
 #%% dist_enum_and_mons
 class Test_dist_enum_and_mons(unittest.TestCase):
@@ -36,7 +36,7 @@ class Test_dist_enum_and_mons(unittest.TestCase):
         self.per_lim = 0.01
 
     def test_calling(self):
-        (state, mons) = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
+        (state, mons) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
         breakout = np.histogram(state, bins=[0.5, 1.5, 2.5, 3.5, 4.5])[0]
         breakout_per = breakout / self.num
         for ix in range(len(self.distribution)):
@@ -47,48 +47,48 @@ class Test_dist_enum_and_mons(unittest.TestCase):
         for i in range(4):
             temp = np.zeros(4)
             temp[i] = 1
-            (tb_state, _) = dcs.dist_enum_and_mons(self.num, temp, self.prng, max_months=self.max_months)
+            (tb_state, _) = health.dist_enum_and_mons(self.num, temp, self.prng, max_months=self.max_months)
             self.assertTrue(np.all(tb_state == i+1))
 
     def test_alpha_and_beta(self):
         pass #TODO: write this
 
     def test_different_start_num(self):
-        (state1, mons1) = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
-        (state2, mons2) = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months, start_num=101)
+        (state1, mons1) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
+        (state2, mons2) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months, start_num=101)
         np.testing.assert_array_equal(set(state1), {1, 2, 3, 4})
         np.testing.assert_array_equal(set(state2), {101, 102, 103, 104})
         np.testing.assert_array_equal(set(mons1), {1})
         np.testing.assert_array_equal(set(mons2), {1})
 
     def test_scalar_max_months(self):
-        (state1, mons1) = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=1)
-        (state2, mons2) = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=3)
+        (state1, mons1) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=1)
+        (state2, mons2) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=3)
         np.testing.assert_array_equal(set(state1), {1, 2, 3, 4})
         np.testing.assert_array_equal(set(state2), {1, 2, 3, 4})
         np.testing.assert_array_equal(set(mons1), {1})
         np.testing.assert_array_equal(set(mons2), {1, 2, 3})
 
     def test_max_months_is_none(self):
-        state = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng)
+        state = health.dist_enum_and_mons(self.num, self.distribution, self.prng)
         np.testing.assert_array_equal(set(state), {1, 2, 3, 4})
 
     def test_single_num(self):
         self.num = 1
-        (state, mons) = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
+        (state, mons) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
         self.assertIn(state[0], {1, 2, 3, 4})
         self.assertTrue(mons[0] <= max(self.max_months))
 
     def test_zero_num(self):
         self.num = 0
-        (state, mons) = dcs.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
+        (state, mons) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
         self.assertTrue(len(state) == 0)
         self.assertTrue(len(mons) == 0)
 
     def test_unique_dists(self):
         num = 3
         dist = np.array([[0, 0, 0, 1], [1, 0, 0, 0],[0, 0.5, 0.5, 0]])
-        state = dcs.dist_enum_and_mons(num, dist, self.prng, start_num=1)
+        state = health.dist_enum_and_mons(num, dist, self.prng, start_num=1)
         self.assertEqual(state[0], 4)
         self.assertEqual(state[1], 1)
         self.assertIn(state[2], {2, 3})
@@ -96,13 +96,13 @@ class Test_dist_enum_and_mons(unittest.TestCase):
     def test_bad_distribution1(self):
         dist = np.array([0, 0.1, 0.2])
         with self.assertRaises(AssertionError) as context:
-            dcs.dist_enum_and_mons(self.num, dist, self.prng)
+            health.dist_enum_and_mons(self.num, dist, self.prng)
         self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
 
     def test_bad_distribution2(self):
         dist = np.array([0, 1.1, 0.2])
         with self.assertRaises(AssertionError) as context:
-            dcs.dist_enum_and_mons(self.num, dist, self.prng)
+            health.dist_enum_and_mons(self.num, dist, self.prng)
         self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
 
 #%% icer
@@ -128,7 +128,7 @@ class Test_icer(unittest.TestCase):
         self.fig      = None
 
     def test_slide_example(self):
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(self.cost, self.qaly)
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly)
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
         np.testing.assert_array_equal(icer_out, self.icer_out, 'ICER mismatch.')
@@ -137,7 +137,7 @@ class Test_icer(unittest.TestCase):
 
     def test_no_domination(self):
         ix = [0, 1, 3]
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(self.cost[ix], self.qaly[ix])
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost[ix], self.qaly[ix])
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
         np.testing.assert_array_equal(icer_out, self.icer_out, 'ICER mismatch.')
@@ -146,7 +146,7 @@ class Test_icer(unittest.TestCase):
 
     def test_reverse_order(self):
         ix = [3, 2, 1, 0]
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(self.cost[ix], self.qaly[ix])
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost[ix], self.qaly[ix])
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
         np.testing.assert_array_equal(icer_out, self.icer_out, 'ICER mismatch.')
@@ -155,7 +155,7 @@ class Test_icer(unittest.TestCase):
 
     def test_single_input(self):
         ix = 0
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(self.cost[ix], self.qaly[ix])
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost[ix], self.qaly[ix])
         np.testing.assert_array_equal(inc_cost, self.inc_cost[ix], 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly[ix], 'Incremental QALY mismatch.')
         np.testing.assert_array_equal(icer_out, self.icer_out[ix], 'ICER mismatch.')
@@ -165,7 +165,7 @@ class Test_icer(unittest.TestCase):
     def test_list_inputs(self):
         cost = [this_cost for this_cost in self.cost]
         qaly = [this_cost for this_cost in self.qaly]
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(cost, qaly)
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(cost, qaly)
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
         np.testing.assert_array_equal(icer_out, self.icer_out, 'ICER mismatch.')
@@ -173,7 +173,7 @@ class Test_icer(unittest.TestCase):
         self.assertTrue(self.fig is None)
 
     def test_baseline1(self):
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(self.cost, self.qaly, baseline=0)
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly, baseline=0)
         temp = self.inc_cost
         temp[0] = 0
         np.testing.assert_array_equal(inc_cost, temp, 'Incremental cost mismatch.')
@@ -188,7 +188,7 @@ class Test_icer(unittest.TestCase):
 
     def test_baseline2(self):
         # TODO: need to verify this case independently
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(self.cost, self.qaly, baseline=1)
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly, baseline=1)
         temp = self.inc_cost
         temp[0] = -self.inc_cost[1]
         np.testing.assert_array_equal(inc_cost, temp, 'Incremental cost mismatch.')
@@ -202,7 +202,7 @@ class Test_icer(unittest.TestCase):
         self.assertTrue(self.fig is None)
 
     def test_names(self):
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(self.cost, self.qaly, \
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly, \
             names=['Name 1', 'Name 2', 'Another name', 'Final Name'])
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
@@ -212,20 +212,20 @@ class Test_icer(unittest.TestCase):
 
     def test_bad_values(self):
         with self.assertRaises(AssertionError):
-            dcs.icer([1, -2, 3], [4, 5, 6])
+            health.icer([1, -2, 3], [4, 5, 6])
         with self.assertRaises(AssertionError):
-            dcs.icer([1, 2, 3], [4, -5, 6])
+            health.icer([1, 2, 3], [4, -5, 6])
 
     def test_bad_input_sizes(self):
         with self.assertRaises(AssertionError):
-            dcs.icer([], [])
+            health.icer([], [])
         with self.assertRaises(AssertionError):
-            dcs.icer([1, 2, 3], [4, 5])
+            health.icer([1, 2, 3], [4, 5])
 
     def test_all_dominated_by_last(self):
         cost = np.array([10, 20, 30, 1])
         qaly = np.array([1, 2, 3, 100])
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(cost, qaly)
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(cost, qaly)
         np.testing.assert_array_equal(inc_cost, 1, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, 100, 'Incremental QALY mismatch.')
         np.testing.assert_array_equal(icer_out, 0.01, 'ICER mismatch.')
@@ -233,7 +233,7 @@ class Test_icer(unittest.TestCase):
         self.assertTrue(self.fig is None)
 
     def test_plot1(self):
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(self.cost, self.qaly, make_plot=True)
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly, make_plot=True)
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
         np.testing.assert_array_equal(icer_out, self.icer_out, 'ICER mismatch.')
@@ -241,8 +241,8 @@ class Test_icer(unittest.TestCase):
         self.assertTrue(isinstance(self.fig, plt.Figure))
 
     def test_plot2(self):
-        opts = dcs.Opts()
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = dcs.icer(self.cost, self.qaly, \
+        opts = Opts()
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly, \
             make_plot=True, opts=opts, baseline=0)
         temp = self.inc_cost
         temp[0] = 0
@@ -275,7 +275,7 @@ class Test_plot_population_pyramid(unittest.TestCase):
         self.male_per = np.array([100, 200, 300, 400, 500], dtype=int)
         self.fmal_per = np.array([125, 225, 325, 375, 450], dtype=int)
         self.title    = 'Test Title'
-        self.opts     = dcs.Opts()
+        self.opts     = Opts()
         self.name1    = 'M'
         self.name2    = 'W'
         self.color1   = 'k'
@@ -283,12 +283,12 @@ class Test_plot_population_pyramid(unittest.TestCase):
         self.fig      = None
 
     def test_nominal(self):
-        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_per, self.fmal_per, \
+        self.fig = health.plot_population_pyramid(self.age_bins, self.male_per, self.fmal_per, \
             self.title, opts=self.opts, name1=self.name1, name2=self.name2, color1=self.color1, \
             color2=self.color2)
 
     def test_defaults(self):
-        self.fig = dcs.plot_population_pyramid(self.age_bins, self.male_per, self.fmal_per, \
+        self.fig = health.plot_population_pyramid(self.age_bins, self.male_per, self.fmal_per, \
             self.title)
 
     def tearDown(self):

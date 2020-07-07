@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Functions related to running all the included tests.
 
@@ -16,8 +15,8 @@ import subprocess
 import sys
 import unittest
 
-from dstauffman.paths import get_root_dir, get_tests_dir, list_python_files
-from dstauffman.repos import run_docstrings, run_pytests, run_coverage
+from dstauffman import get_root_dir, get_tests_dir, list_python_files, run_docstrings, \
+                       run_pytests, run_coverage
 
 #%% Functions - parse_tests
 def parse_tests(input_args):

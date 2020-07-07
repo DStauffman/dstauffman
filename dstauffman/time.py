@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 r"""
 Generic time based utilities.
 
 Notes
 -----
 #.  Written by David C. Stauffer in May 2020.
-
 """
 
 #%% Imports

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 r"""
 Defines useful plotting utilities related to health policy.
 
@@ -6,28 +5,21 @@ Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
 #.  Separated into plot_health.py from plotting.py by David C. Stauffer in May 2020.
-
 """
 
 #%% Imports
-# normal imports
 import doctest
 import unittest
 import warnings
 
-# plotting/numpy imports
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.ticker import StrMethodFormatter
 
-# model imports
-from dstauffman.constants import DEFAULT_COLORMAP
-from dstauffman.plot_support import ColorMap, ignore_plot_data, plot_second_units_wrapper, \
-                                        disp_xlimits, setup_plots, show_zero_ylim, whitten
-from dstauffman.plotting import Opts
-from dstauffman.stats import z_from_ci
-from dstauffman.units import get_factors
-from dstauffman.utils import rms
+from dstauffman import ColorMap, DEFAULT_COLORMAP, get_factors, ignore_plot_data, Opts, \
+                       plot_second_units_wrapper, disp_xlimits, rms, setup_plots, show_zero_ylim, \
+                       whitten
+from dstauffman.health.stats import z_from_ci
 
 #%% Functions - plot_health_time_history
 def plot_health_time_history(time, data, label, units='', opts=None, *, legend=None, \
@@ -73,7 +65,7 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
 
     Examples
     --------
-    >>> from dstauffman import plot_health_time_history
+    >>> from dstauffman.health import plot_health_time_history
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> description = 'Random Data'
@@ -242,7 +234,7 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
 
     Examples
     --------
-    >>> from dstauffman import plot_health_monte_carlo
+    >>> from dstauffman.health import plot_health_monte_carlo
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> time  = np.arange(0, 10, 0.1)
@@ -369,5 +361,5 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_plot_health', exit=False)
+    unittest.main(module='dstauffman.tests.test_health_plot_health', exit=False)
     doctest.testmod(verbose=False)
