@@ -21,7 +21,7 @@ from dstauffman.constants import INT_TOKEN, QUAT_SIZE
 USE_ASSERTIONS = True
 
 #%% Functions - quat_assertions
-def quat_assertions(quat, precision=1e-12, *, skip_assertions=False):
+def quat_assertions(quat, *, precision=1e-12, skip_assertions=False):
     r"""
     Check assertions about valid quaternions.
 
@@ -29,6 +29,10 @@ def quat_assertions(quat, precision=1e-12, *, skip_assertions=False):
     ----------
     quat : ndarray, (4,) or (4, N)
         Quaternion
+    precision : float
+        Limit for how close to normalized the quaternion needs to be
+    skip_assertions : bool
+        Flag to override all the checks
 
     Examples
     --------
@@ -78,7 +82,7 @@ def quat_assertions(quat, precision=1e-12, *, skip_assertions=False):
         'error "{}".'.format(np.max(q_norm_err))
 
 #%% Functions - qrot
-def qrot(axis, angle, *, skip_assertions=False):
+def qrot(axis, angle, **kwargs):
     r"""
     Construct a quaternion expressing a rotation about a single axis.
 
@@ -91,8 +95,6 @@ def qrot(axis, angle, *, skip_assertions=False):
             (3) for z-axis
     angle : array_like
         angle of rotation in radians
-    skip_assertions : bool, optional, default is False
-        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -101,6 +103,7 @@ def qrot(axis, angle, *, skip_assertions=False):
 
     Notes
     -----
+    #.  Additional keyword arguments are passed on to quat_assertions function.
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
 
     References
@@ -142,11 +145,11 @@ def qrot(axis, angle, *, skip_assertions=False):
         assert len(axis) == len(angle)
         quat = np.vstack((np.zeros((3, len(angle))), np.expand_dims(np.cos(angle/2), axis=0)))
         quat[axis-1, np.arange(len(axis))] = np.sin(angle/2)
-    quat_assertions(quat, skip_assertions=skip_assertions)
+    quat_assertions(quat, **kwargs)
     return quat
 
 #%% Functions - quat_angle_diff
-def quat_angle_diff(quat1, quat2, *, skip_assertions=False):
+def quat_angle_diff(quat1, quat2, **kwargs):
     r"""
     Calculate the angular difference between two quaternions.
 
@@ -162,8 +165,6 @@ def quat_angle_diff(quat1, quat2, *, skip_assertions=False):
         quaternion one
     quat2 : ndarray (4,) or (4, N)
         quaternion two
-    skip_assertions : bool, optional, default is False
-        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -184,6 +185,7 @@ def quat_angle_diff(quat1, quat2, *, skip_assertions=False):
 
     Notes
     -----
+    #.  Additional keyword arguments are passed on to quat_assertions function.
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
 
     Examples
@@ -204,15 +206,15 @@ def quat_angle_diff(quat1, quat2, *, skip_assertions=False):
 
     """
     # check assertions
-    quat_assertions(quat1, skip_assertions=skip_assertions)
-    quat_assertions(quat2, skip_assertions=skip_assertions)
+    quat_assertions(quat1, **kwargs)
+    quat_assertions(quat2, **kwargs)
 
     # check for null quaternions
     if quat1.size == 0 or quat2.size == 0:
         return (np.array([]), np.empty((3, 0)))
 
     # calculate delta quaternion
-    dq = quat_mult(quat2, quat_inv(quat1, skip_assertions=skip_assertions), skip_assertions=skip_assertions)
+    dq = quat_mult(quat2, quat_inv(quat1, **kwargs), **kwargs)
 
     # pull vector components out of delta quaternion
     if dq.ndim == 1:
@@ -249,7 +251,7 @@ def quat_angle_diff(quat1, quat2, *, skip_assertions=False):
     return (theta, comp)
 
 #%% Functions - quat_from_euler
-def quat_from_euler(angles, seq=None):
+def quat_from_euler(angles, seq=None, **kwargs):
     r"""
     Convert set(s) of euler angles to quaternion(s).
 
@@ -279,6 +281,7 @@ def quat_from_euler(angles, seq=None):
     #.  Enumerated values are some selective permutation of (1, 2, 3) without successive
             repetition such as (3, 1, 2) or (3, 1, 3) but not (3, 1, 1) wherein 1, 1 is a successive
             repetition.  By default, it expects (3, 1, 2).
+    #.  Additional keyword arguments are passed on to quat_assertions function.
 
     Examples
     --------
@@ -336,8 +339,8 @@ def quat_from_euler(angles, seq=None):
         q_temp = np.array([0, 0, 0, 1])
         # apply each rotation
         for j in range(len(seq)):
-            q_single = qrot(seq[j], angles[j, i])
-            q_temp = quat_mult(q_temp, q_single)
+            q_single = qrot(seq[j], angles[j, i], **kwargs)
+            q_temp = quat_mult(q_temp, q_single, **kwargs)
         # save output
         quat[:, i] = q_temp
     # optionally flatten result
@@ -346,7 +349,7 @@ def quat_from_euler(angles, seq=None):
     return quat
 
 #%% Functions - quat_interp
-def quat_interp(time, quat, ti, inclusive=True):
+def quat_interp(time, quat, ti, inclusive=True, **kwargs):
     r"""
     Interpolate quaternions from a monotonic time series of quaternions.
 
@@ -368,6 +371,7 @@ def quat_interp(time, quat, ti, inclusive=True):
 
     Notes
     -----
+    #.  Additional keyword arguments are passed on to quat_assertions function.
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
 
     Examples
@@ -450,7 +454,7 @@ def quat_interp(time, quat, ti, inclusive=True):
     q1 = quat[:, index-1]
     q2 = quat[:, index]
     # calculate delta quaternion
-    dq12       = quat_norm(quat_mult(q2, quat_inv(q1)))
+    dq12       = quat_norm(quat_mult(q2, quat_inv(q1, **kwargs), **kwargs), **kwargs)
     # find delta quaternion axis of rotation
     vec        = dq12[0:3, :]
     norm_vec   = np.sqrt(np.sum(vec**2, axis=0))
@@ -465,7 +469,7 @@ def quat_interp(time, quat, ti, inclusive=True):
     # find scaled delta quaternion
     dq         = np.concatenate((ax*np.sin(scaled_ang/2), np.expand_dims(np.cos(scaled_ang/2),0)), axis=0)
     # calculate desired quaternion
-    qout_temp  = quat_norm(quat_mult(dq,q1))
+    qout_temp  = quat_norm(quat_mult(dq, q1, **kwargs))
     # store into output structure
     qout[:, ix_calc] = qout_temp
 
@@ -480,7 +484,7 @@ def quat_interp(time, quat, ti, inclusive=True):
     return qout
 
 #%% Functions - quat_inv
-def quat_inv(q1, *, skip_assertions=False):
+def quat_inv(q1, **kwargs):
     r"""
     Return the inverse of a normalized quaternions.
 
@@ -488,8 +492,6 @@ def quat_inv(q1, *, skip_assertions=False):
     ----------
     q1 : ndarray, (4,) or (4, N)
         input quaternion
-    skip_assertions : bool, optional, default is False
-        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -503,6 +505,7 @@ def quat_inv(q1, *, skip_assertions=False):
 
     Notes
     -----
+    #.  Additional keyword arguments are passed on to quat_assertions function.
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
 
     Examples
@@ -520,7 +523,7 @@ def quat_inv(q1, *, skip_assertions=False):
         q2 = np.zeros(q1.shape)
         return q2
     # size check
-    quat_assertions(q1, skip_assertions=skip_assertions)
+    quat_assertions(q1, **kwargs)
     # invert the quaternions
     if q1.ndim == 1:
         # optimized single quaternion case
@@ -528,11 +531,11 @@ def quat_inv(q1, *, skip_assertions=False):
     else:
         # general case
         q2 = np.concatenate((-q1[0, :], -q1[1, :], -q1[2, :], q1[3, :]), axis=0).reshape(QUAT_SIZE, q1.shape[1])
-    quat_assertions(q2, skip_assertions=skip_assertions)
+    quat_assertions(q2, **kwargs)
     return q2
 
 #%% Functions - quat_mult
-def quat_mult(a, b, *, skip_assertions=False):
+def quat_mult(a, b, **kwargs):
     r"""
     Multiply quaternions together.
 
@@ -555,14 +558,13 @@ def quat_mult(a, b, *, skip_assertions=False):
 
     Notes
     -----
+    #.  Additional keyword arguments are passed on to quat_assertions function.
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
-
     #.  Each of (a, b) may be either a single quaternion (4,) or an array of quaternions (4, N).
         If `a` and `b` are both single quaternions, then return b*a. If either (but not both) is
         an array of quaternions, then return the product of the single quaternion times each element
         of the array. If both are rows of quaternions, multiply corresponding columns.
         `c` will have size (4,) in the first case, and (4, N) in the other cases.
-
     #.  The quaternions `a` and `b` describe successive reference frame changes, i.e., a is
         expressed in the coordinate system resulting from b, not in the original coordinate system.
         In Don Reid's tutorial, this is called the R- version.
@@ -590,7 +592,7 @@ def quat_mult(a, b, *, skip_assertions=False):
                 c = np.zeros(a.shape)
             else:
                 c = np.zeros(b.shape)
-        quat_assertions(c, skip_assertions=skip_assertions)
+        quat_assertions(c, **kwargs)
         return c
     # single quaternion inputs case
     if is_single_a and is_single_b:
@@ -628,12 +630,12 @@ def quat_mult(a, b, *, skip_assertions=False):
             -b1*a1 - b2*a2 - b3*a3 + b4*a4])
         # enforce positive scalar component
         c[:, c[3, :]<0] = -c[:, c[3, :]<0]
-    c = quat_norm(c, skip_assertions=skip_assertions)
-    quat_assertions(c, skip_assertions=skip_assertions)
+    c = quat_norm(c, **kwargs)
+    quat_assertions(c, **kwargs)
     return c
 
 #%% Functions - quat_norm
-def quat_norm(x, *, skip_assertions=False):
+def quat_norm(x, **kwargs):
     r"""
     Normalize each column of the input matrix.
 
@@ -641,8 +643,6 @@ def quat_norm(x, *, skip_assertions=False):
     ----------
     x : ndarray
         input quaternion
-    skip_assertions : bool, optional, default is False
-        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -655,6 +655,7 @@ def quat_norm(x, *, skip_assertions=False):
 
     Notes
     -----
+    #.  Additional keyword arguments are passed on to quat_assertions function.
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
 
     Examples
@@ -669,11 +670,11 @@ def quat_norm(x, *, skip_assertions=False):
     """
     # divide input by its column vector norm
     y = x / np.sqrt(np.sum(x*x, axis=0))
-    quat_assertions(y, skip_assertions=skip_assertions)
+    quat_assertions(y, **kwargs)
     return y
 
 #%% Functions - quat_prop
-def quat_prop(quat, delta_ang, *, renorm=True, skip_assertions=False):
+def quat_prop(quat, delta_ang, *, renorm=True, **kwargs):
     r"""
     Approximate propagation of a quaternion using a small delta angle.
 
@@ -685,8 +686,6 @@ def quat_prop(quat, delta_ang, *, renorm=True, skip_assertions=False):
         delta angles in x, y, z order [rad]
     renorm : bool {True, False}, optional
         Whether to renormalize the propagated quaternion
-    skip_assertions : bool, optional, default is False
-        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -699,6 +698,7 @@ def quat_prop(quat, delta_ang, *, renorm=True, skip_assertions=False):
 
     Notes
     -----
+    #.  Additional keyword arguments are passed on to quat_assertions function.
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
 
     Examples
@@ -727,8 +727,8 @@ def quat_prop(quat, delta_ang, *, renorm=True, skip_assertions=False):
         quat_new *= -1
     # renormalize and return
     if renorm:
-        quat_new = quat_norm(quat_new, skip_assertions=skip_assertions)
-    quat_assertions(quat_new, skip_assertions=skip_assertions)
+        quat_new = quat_norm(quat_new, **kwargs)
+    quat_assertions(quat_new, **kwargs)
     return quat_new
 
 #%% Functions - quat_times_vector
@@ -844,7 +844,7 @@ def quat_to_dcm(quat):
     return dcm
 
 #%% Functions - quat_to_euler
-def quat_to_euler(quat, seq=None, *, skip_assertions=False):
+def quat_to_euler(quat, seq=None, **kwargs):
     r"""
     Convert quaternion to Euler angles for one of 6 input angle sequences.
 
@@ -857,8 +857,6 @@ def quat_to_euler(quat, seq=None, *, skip_assertions=False):
             1 = X axis, or roll
             2 = Y axis, or pitch
             3 = Z axis, or yaw
-    skip_assertions : bool, optional, default is False
-        Whether to skip the built-in quaternion assertions check
 
     Returns
     -------
@@ -871,6 +869,7 @@ def quat_to_euler(quat, seq=None, *, skip_assertions=False):
 
     Notes
     -----
+    #.  Additional keyword arguments are passed on to quat_assertions function.
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
 
     References
@@ -895,7 +894,7 @@ def quat_to_euler(quat, seq=None, *, skip_assertions=False):
     if seq is None:
         seq = np.array([3, 1, 2])
     # assert quaternion checks
-    quat_assertions(quat, skip_assertions=skip_assertions)
+    quat_assertions(quat, **kwargs)
     assert len(seq) == 3, 'Sequence must have len of 3, not "{}"'.format(len(seq))
     if quat.ndim == 1:
         # quat is a 1D
