@@ -96,6 +96,7 @@ def execute_tests(args):
     else:
         folder = os.path.abspath(library)
         if folder not in sys.path:
+            # Note: pytest seems to work without this step?
             sys.path.append(folder)
 
     if docstrings:

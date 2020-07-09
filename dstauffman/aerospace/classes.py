@@ -91,7 +91,7 @@ class Kf(Frozen):
     >>> kf = Kf()
 
     """
-    def __init__(self, *, name='', num_points=0, num_states=0, time_dtype=float, active_states=None, **kwargs):
+    def __init__(self, *, name='', num_points=0, num_states=0, time_dtype=float, active_states=None, innov_class=None, **kwargs):
         r"""Initializes a new Kf instance."""
         self.name = name
         self.chan = ['' for i in range(num_states)] if num_states > 0 else None
@@ -106,7 +106,6 @@ class Kf(Frozen):
             self.state  = np.empty(state_shape, dtype=float)
             self.istate = np.empty(num_states, dtype=float)
             self.covar  = np.empty(state_shape, dtype=float)
-            self.innov  = KfInnov(time_dtype=time_dtype, **kwargs)
         else:
             self.time   = None
             self.att    = None
@@ -116,7 +115,10 @@ class Kf(Frozen):
             self.state  = None
             self.istate = None
             self.covar  = None
+        if innov_class is None:
             self.innov  = KfInnov(time_dtype=time_dtype, **kwargs)
+        else:
+            self.innov  = innov_class(time_dtype=time_dtype, **kwargs)
 
 #%% Unit Test
 if __name__ == '__main__':
