@@ -1,5 +1,5 @@
 r"""
-Test file for the `classes` module module of the "dstauffman.spacecraft" library.  It is intented
+Test file for the `classes` module module of the "dstauffman.aerospace" library.  It is intented
 to contain test cases to demonstrate functionaliy and correct outcomes for all the functions within
 the module.
 
@@ -11,7 +11,7 @@ Notes
 #%% Imports
 import unittest
 
-import dstauffman.spacecraft as space
+import dstauffman.aerospace as space
 
 #%% KfInnov
 class Test_KfInnov(unittest.TestCase):

@@ -19,8 +19,8 @@ from dstauffman import ColorMap, disp_xlimits, get_color_lists, get_factors, get
                        plot_second_units_wrapper, plot_vert_lines, rms, setup_plots, \
                        show_zero_ylim, zoom_ylim
 
-from dstauffman.spacecraft.classes import Kf, KfInnov
-from dstauffman.spacecraft.quat import quat_angle_diff
+from dstauffman.aerospace.classes import Kf, KfInnov
+from dstauffman.aerospace.quat import quat_angle_diff
 
 #%% Constants
 # hard-coded values
@@ -114,7 +114,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import make_quaternion_plot, quat_norm
+    >>> from dstauffman.aerospace import make_quaternion_plot, quat_norm
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> from datetime import datetime
@@ -410,7 +410,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import Kf, plot_attitude, quat_from_euler, quat_mult, quat_norm
+    >>> from dstauffman.aerospace import Kf, plot_attitude, quat_from_euler, quat_mult, quat_norm
     >>> from dstauffman import Opts
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
@@ -532,7 +532,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import Kf, plot_position
+    >>> from dstauffman.aerospace import Kf, plot_position
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
@@ -652,7 +652,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import KfInnov, plot_innovations
+    >>> from dstauffman.aerospace import KfInnov, plot_innovations
     >>> from dstauffman import Opts
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
@@ -776,7 +776,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import Kf, plot_covariance
+    >>> from dstauffman.aerospace import Kf, plot_covariance
     >>> from dstauffman import Opts
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
@@ -893,5 +893,5 @@ def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, 
 #%% Unit Test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_spacecraft_plotting', exit=False)
+    unittest.main(module='dstauffman.tests.test_aerospace_plotting', exit=False)
     doctest.testmod(verbose=False)

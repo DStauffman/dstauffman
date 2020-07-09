@@ -12,7 +12,7 @@ import unittest
 
 import numpy as np
 
-import dstauffman.spacecraft as space
+import dstauffman.aerospace as space
 
 #%% rot
 class Test_rot(unittest.TestCase):

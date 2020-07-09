@@ -38,7 +38,7 @@ class KfInnov(Frozen):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import KfInnov
+    >>> from dstauffman.aerospace import KfInnov
     >>> innov = KfInnov()
 
     """
@@ -87,7 +87,7 @@ class Kf(Frozen):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import Kf
+    >>> from dstauffman.aerospace import Kf
     >>> kf = Kf()
 
     """
@@ -120,5 +120,5 @@ class Kf(Frozen):
 
 #%% Unit Test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_spacecraft_classes', exit=False)
+    unittest.main(module='dstauffman.tests.test_aerospace_classes', exit=False)
     doctest.testmod(verbose=False)

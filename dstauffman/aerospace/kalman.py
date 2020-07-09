@@ -39,7 +39,7 @@ def calc_kalman_gain(P, H, R, use_inverse=False):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import calc_kalman_gain
+    >>> from dstauffman.aerospace import calc_kalman_gain
     >>> import numpy as np
     >>> P = 1e-3 * np.eye(5)
     >>> H = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0.5, 0.5, 0.5], [0, 0, 0.1]]).T
@@ -85,7 +85,7 @@ def propagate_covariance(P, phi, Q, *, gamma=None, inplace=True):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import propagate_covariance
+    >>> from dstauffman.aerospace import propagate_covariance
     >>> import numpy as np
     >>> P = 1e-3 * np.eye(6)
     >>> phi = np.diag([1., 1, 1, -1, -1, -1])
@@ -132,7 +132,7 @@ def update_covariance(P, K, H, inplace=True):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import update_covariance
+    >>> from dstauffman.aerospace import update_covariance
     >>> import numpy as np
     >>> P = 1e-3 * np.eye(6)
     >>> P[0, -1] = 5e-2
@@ -151,5 +151,5 @@ def update_covariance(P, K, H, inplace=True):
 
 #%% Unit Test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_spacecraft_kalman', exit=False)
+    unittest.main(module='dstauffman.tests.test_aerospace_kalman', exit=False)
     doctest.testmod(verbose=False)

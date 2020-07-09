@@ -1,5 +1,5 @@
 r"""
-Test file for the `kalman` module module of the "dstauffman.spacecraft" library.  It is intented
+Test file for the `kalman` module module of the "dstauffman.aerospace" library.  It is intented
 to contain test cases to demonstrate functionaliy and correct outcomes for all the functions within
 the module.
 
@@ -13,7 +13,7 @@ import unittest
 
 import numpy as np
 
-import dstauffman.spacecraft as space
+import dstauffman.aerospace as space
 
 #%% calc_kalman_gain
 class Test_kalman_gain(unittest.TestCase):

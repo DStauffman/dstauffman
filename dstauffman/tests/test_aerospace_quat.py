@@ -1,5 +1,5 @@
 r"""
-Test file for the `quat` module module of the "dstauffman.spacecraft" library.  It is intented to
+Test file for the `quat` module module of the "dstauffman.aerospace" library.  It is intented to
 contain test cases to demonstrate functionaliy and correct outcomes for all the functions within
 the module.
 
@@ -14,7 +14,7 @@ import unittest
 import numpy as np
 
 from dstauffman import capture_output
-import dstauffman.spacecraft as space
+import dstauffman.aerospace as space
 
 #%% quat_assertions
 class Test_quat_assertions(unittest.TestCase):

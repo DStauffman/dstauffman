@@ -38,7 +38,7 @@ def quat_assertions(quat, *, precision=1e-12, skip_assertions=False):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import quat_assertions
+    >>> from dstauffman.aerospace import quat_assertions
     >>> import numpy as np
     >>> quat = np.array([0.5, 0.5, -0.5, 0.5])
     >>> quat_assertions(quat)
@@ -116,7 +116,7 @@ def qrot(axis, angle, **kwargs):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import qrot
+    >>> from dstauffman.aerospace import qrot
     >>> import numpy as np
     >>> quat = qrot(3, np.pi/2)
     >>> print(quat) # doctest: +NORMALIZE_WHITESPACE
@@ -192,7 +192,7 @@ def quat_angle_diff(quat1, quat2, **kwargs):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import qrot, quat_mult, quat_angle_diff
+    >>> from dstauffman.aerospace import qrot, quat_mult, quat_angle_diff
     >>> import numpy as np
     >>> quat1 = np.array([0.5, 0.5, 0.5, 0.5])
     >>> dq1 = qrot(1, 0.001)
@@ -287,7 +287,7 @@ def quat_from_euler(angles, seq=None, **kwargs):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import quat_from_euler
+    >>> from dstauffman.aerospace import quat_from_euler
     >>> import numpy as np
     >>> a   = np.array([0.01, 0.02, 0.03])
     >>> b   = np.array([0.04, 0.05, 0.06])
@@ -378,7 +378,7 @@ def quat_interp(time, quat, ti, inclusive=True, **kwargs):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import quat_interp, qrot
+    >>> from dstauffman.aerospace import quat_interp, qrot
     >>> import numpy as np
     >>> time  = np.array([1, 3, 5])
     >>> quat = np.column_stack((qrot(1, 0), qrot(1, np.pi/2), qrot(1, np.pi)))
@@ -512,7 +512,7 @@ def quat_inv(q1, **kwargs):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import qrot, quat_inv
+    >>> from dstauffman.aerospace import qrot, quat_inv
     >>> from numpy import pi
     >>> q1 = qrot(1, pi/2)
     >>> q2 = quat_inv(q1)
@@ -573,7 +573,7 @@ def quat_mult(a, b, **kwargs):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import qrot, quat_mult
+    >>> from dstauffman.aerospace import qrot, quat_mult
     >>> from numpy import pi
     >>> a = qrot(1, pi/2)
     >>> b = qrot(2, pi)
@@ -662,7 +662,7 @@ def quat_norm(x, **kwargs):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import quat_norm
+    >>> from dstauffman.aerospace import quat_norm
     >>> import numpy as np
     >>> x = np.array([0.1, 0, 0, 1])
     >>> y = quat_norm(x)
@@ -705,7 +705,7 @@ def quat_prop(quat, delta_ang, *, renorm=True, **kwargs):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import quat_prop
+    >>> from dstauffman.aerospace import quat_prop
     >>> import numpy as np
     >>> quat      = np.array([0, 0, 0, 1])
     >>> delta_ang = np.array([0.01, 0.02, 0.03])
@@ -767,7 +767,7 @@ def quat_times_vector(quat, v):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import quat_times_vector
+    >>> from dstauffman.aerospace import quat_times_vector
     >>> import numpy as np
     >>> quat = np.array([[0, 1, 0, 0], [1, 0, 0, 0]]).T
     >>> v = np.array([[1, 0, 0], [2, 0, 0]]).T
@@ -822,7 +822,7 @@ def quat_to_dcm(quat):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import quat_to_dcm
+    >>> from dstauffman.aerospace import quat_to_dcm
     >>> import numpy as np
     >>> quat = np.array([0.5, -0.5, 0.5, 0.5])
     >>> dcm = quat_to_dcm(quat)
@@ -881,7 +881,7 @@ def quat_to_euler(quat, seq=None, **kwargs):
 
     Examples
     --------
-    >>> from dstauffman.spacecraft import quat_to_euler
+    >>> from dstauffman.aerospace import quat_to_euler
     >>> import numpy as np
     >>> quat = np.array([[0, 1, 0, 0], [0, 0, 1, 0]]).T
     >>> seq = [3, 1, 2]
@@ -1015,5 +1015,5 @@ def quat_to_euler(quat, seq=None, **kwargs):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_spacecraft_quat', exit=False)
+    unittest.main(module='dstauffman.tests.test_aerospace_quat', exit=False)
     doctest.testmod(verbose=False)

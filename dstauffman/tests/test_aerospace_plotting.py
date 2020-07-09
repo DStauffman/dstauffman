@@ -1,5 +1,5 @@
 r"""
-Test file for the `plotting` module module of the "dstauffman.spacecraft" library.  It is intented
+Test file for the `plotting` module module of the "dstauffman.aerospace" library.  It is intented
 to contain test cases to demonstrate functionaliy and correct outcomes for all the functions within
 the module.
 
@@ -15,7 +15,7 @@ import unittest
 import numpy as np
 
 from dstauffman import capture_output, close_all
-import dstauffman.spacecraft as space
+import dstauffman.aerospace as space
 
 #%% Functions - make_quaternion_plot
 class Test_make_quaternion_plot(unittest.TestCase):
