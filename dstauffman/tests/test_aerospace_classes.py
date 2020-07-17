@@ -12,6 +12,8 @@ Notes
 import os
 import unittest
 
+import numpy as np
+
 from dstauffman import get_tests_dir
 import dstauffman.aerospace as space
 
@@ -43,7 +45,8 @@ class Test_KfOut(unittest.TestCase):
         kf.chan = ['a', 'b', 'c']
         kf.save(self.filename)
         kf2 = space.Kf.load(self.filename)
-        # TODO: test that these are equivalent
+        self.assertEqual(kf.chan, kf2.chan)
+        np.testing.assert_array_equal(kf.time, kf2.time)
 
     def tearDown(self):
         if os.path.isfile(self.filename):

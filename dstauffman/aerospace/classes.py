@@ -123,7 +123,7 @@ class Kf(Frozen):
 
     def save(self, filename='', subclasses=frozenset({'innov'})):
         r"""Save the object to disk as an HDF5 file."""
-        # exit if not filename is given
+        # exit if no filename is given
         if not filename:
             return
         # Save data
@@ -171,11 +171,36 @@ class Kf(Frozen):
                         if field in {'chan'}:
                             value = [x.decode('ascii') for x in value]
                         setattr(out, field, value)
-
+        return out
 
 #%% Classes - KfRecord
 class KfRecord():
-    r"""Full records of the Kalman Filter for use in a backards information smoother."""
+    r"""
+    Full records of the Kalman Filter for use in a backards information smoother.
+
+    Attributes
+    ----------
+    time : ndarray
+        time points for all subfields
+    stm : (n_state, n_state) ndarray
+        State transition matrix data
+    P : (n_state, n_state) ndarray
+        Filter error covariance matrix
+    H : (n_meas, n_state) ndarray
+        Measurement distribution matrix
+    Pz : (n_meas, n_meas) ndarray
+        Innovation covariance matrix
+    K : (n_state, n_meas) ndarray
+        Kalman gain matrix
+    z : (n_meas, ) ndarray
+        innovation vector
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import KfRecord
+    >>> kf_record = KfRecord()
+
+    """
     def __init__(self, num_points=0, num_states=0, num_axes=0, time_dtype=float):
         if num_points > 0:
             self.time = np.empty(num_points, dtype=time_dtype)
