@@ -8,7 +8,7 @@ Notes
 """
 
 #%% Imports
-from .classes  import KfInnov, Kf
+from .classes  import KfInnov, Kf, KfRecord
 from .kalman   import calc_kalman_gain, propagate_covariance, update_covariance
 from .plotting import make_quaternion_plot, plot_attitude, plot_los, plot_position, plot_velocity, \
                           plot_innovations, plot_covariance, plot_states

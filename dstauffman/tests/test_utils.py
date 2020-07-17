@@ -15,6 +15,7 @@ import sys
 import unittest
 
 import numpy as np
+from scipy.interpolate import interp1d
 
 import dstauffman as dcs
 
@@ -1093,6 +1094,102 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(c, a[exp])
         np.testing.assert_array_equal(ia, exp)
         np.testing.assert_array_equal(ib, exp)
+
+#%% issorted
+class Test_issorted(unittest.TestCase):
+    r"""
+    Tests the issorted function with the following cases:
+        Sorted
+        Not sorted
+        Reverse sorted (x2)
+        Lists
+    """
+    def test_sorted(self):
+        x = np.array([1, 3, 3, 5, 7])
+        self.assertTrue(dcs.issorted(x))
+
+    def test_not_sorted(self):
+        x = np.array([1, 4, 3, 5, 7])
+        self.assertFalse(dcs.issorted(x))
+
+    def test_reverse_sorted(self):
+        x = np.array([4, np.pi, 1., -1.])
+        self.assertFalse(dcs.issorted(x))
+        self.assertTrue(dcs.issorted(x, descend=True))
+
+    def test_lists(self):
+        x = [-np.inf, 0, 1, np.pi, 5, np.inf]
+        self.assertTrue(dcs.issorted(x))
+        self.assertFalse(dcs.issorted(x, descend=True))
+
+#%% zero_order_hold
+class Test_zero_order_hold(unittest.TestCase):
+    r"""
+    Tests the zero_order_hold function with the following cases:
+        Subsample high rate
+        Supersample low rate
+        xp Not sorted
+        x not sorted
+        Left extrapolation
+        Lists instead of arrays
+
+    Notes
+    -----
+    #.  Uses scipy.interpolate.interp1d as the gold standard (but it's slower)
+    """
+    def test_subsample(self):
+        xp = np.linspace(0., 100*np.pi, 500000)
+        yp = np.sin(2 * np.pi * xp)
+        x  = np.arange(0., 350., 0.1)
+        func = interp1d(xp, yp, kind='zero', fill_value='extrapolate', assume_sorted=True)
+        y_exp = func(x)
+        y = dcs.zero_order_hold(x, xp, yp)
+        np.testing.assert_array_equal(y, y_exp)
+        y = dcs.zero_order_hold(x, xp, yp, assume_sorted=True)
+        np.testing.assert_array_equal(y, y_exp)
+
+    def test_supersample(self):
+        xp = np.array([0., 5000., 10000., 86400.])
+        yp = np.array([0, 1, -2, 0])
+        x  = np.arange(0., 86400.,)
+        func = interp1d(xp, yp, kind='zero', fill_value='extrapolate', assume_sorted=True)
+        y_exp = func(x)
+        y = dcs.zero_order_hold(x, xp, yp)
+        np.testing.assert_array_equal(y, y_exp)
+        y = dcs.zero_order_hold(x, xp, yp, assume_sorted=True)
+        np.testing.assert_array_equal(y, y_exp)
+
+    def test_xp_not_sorted(self):
+        xp    = np.array([0, 10, 5, 15])
+        yp    = np.array([0, 1, -2, 3])
+        x     = np.array([10, 2, 14,  6,  8, 10, 4, 14, 0, 16])
+        y_exp = np.array([ 1, 0,  1, -2, -2,  1, 0,  1, 0,  3])
+        y     = dcs.zero_order_hold(x, xp, yp)
+        np.testing.assert_array_equal(y, y_exp)
+
+    def test_x_not_sorted(self):
+        xp    = np.array([0, 5, 10, 15])
+        yp    = np.array([0, -2, 1, 3])
+        x     = np.array([10, 2, 14,  6,  8, 10, 4, 14, 0, 16])
+        y_exp = np.array([ 1, 0,  1, -2, -2,  1, 0,  1, 0,  3])
+        y     = dcs.zero_order_hold(x, xp, yp)
+        np.testing.assert_array_equal(y, y_exp)
+
+    def test_left_end(self):
+        xp    = np.array([0, 5, 10, 15, 4])
+        yp    = np.array([0, 1, -2, 3, 0])
+        x     = np.array([-4, -2, 0, 2, 4, 6])
+        y_exp = np.array([-5, -5, 0, 0, 0, 1])
+        y     = dcs.zero_order_hold(x, xp, yp, left=-5)
+        np.testing.assert_array_equal(y, y_exp)
+
+    def test_lists(self):
+        xp    = [0, 5, 10, 15]
+        yp    = [0, 1, 2, 3]
+        x     = [-4, -2, 0, 2, 4, 6, 20]
+        y_exp = [-1, -1, 0, 0, 0, 1, 3]
+        y     = dcs.zero_order_hold(x, xp, yp, left=-1)
+        np.testing.assert_array_equal(y, y_exp)
 
 #%% Unit test execution
 if __name__ == '__main__':

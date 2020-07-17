@@ -7,8 +7,6 @@ Notes
 """
 
 #%% Imports
-import os
-
 from dstauffman import get_root_dir, list_python_files, run_docstrings
 
 #%% Execution

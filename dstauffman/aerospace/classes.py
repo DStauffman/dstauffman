@@ -10,6 +10,7 @@ Notes
 import doctest
 import unittest
 
+import h5py
 import numpy as np
 
 from dstauffman import Frozen
@@ -119,6 +120,79 @@ class Kf(Frozen):
             self.innov  = KfInnov(time_dtype=time_dtype, **kwargs)
         else:
             self.innov  = innov_class(time_dtype=time_dtype, **kwargs)
+
+    def save(self, filename='', subclasses=frozenset({'innov'})):
+        r"""Save the object to disk as an HDF5 file."""
+        # exit if not filename is given
+        if not filename:
+            return
+        # Save data
+        with h5py.File(filename, 'w') as file:
+            grp = file.create_group('self')
+            for key in vars(self):
+                if key in subclasses:
+                    # handle substructures
+                    sub = getattr(self, key)
+                    inner_grp = grp.create_group(key)
+                    for subkey in vars(sub):
+                        value = getattr(sub, subkey)
+                        if value is not None:
+                            if subkey in {'chan'}:
+                                value = [x.encode('ascii') for x in value]
+                            inner_grp.create_dataset(subkey, data=value)
+                else:
+                    # normal values
+                    value = getattr(self, key)
+                    if value is not None:
+                        # special case to handle lists of strings
+                        if key in {'chan'}:
+                            value = [x.encode('ascii') for x in value]
+                        grp.create_dataset(key, data=value)
+
+    @classmethod
+    def load(cls, filename='', subclasses=frozenset({'innov'})):
+        r"""Load the object from disk."""
+        if not filename:
+            raise ValueError('No file specified to load.')
+        # Load data
+        out = cls()
+        with h5py.File(filename, 'r') as file:
+            for (key, grp) in file.items():
+                for field in grp:
+                    if field in subclasses:
+                        inner_grp = grp[field]
+                        for subfield in inner_grp:
+                            value = inner_grp[subfield][()]
+                            if subfield in {'chan'}:
+                                value = [x.decode('ascii') for x in value]
+                            setattr(getattr(out, field), subfield, value)
+                    else:
+                        value = grp[field][()]
+                        if field in {'chan'}:
+                            value = [x.decode('ascii') for x in value]
+                        setattr(out, field, value)
+
+
+#%% Classes - KfRecord
+class KfRecord():
+    r"""Full records of the Kalman Filter for use in a backards information smoother."""
+    def __init__(self, num_points=0, num_states=0, num_axes=0, time_dtype=float):
+        if num_points > 0:
+            self.time = np.empty(num_points, dtype=time_dtype)
+            self.P    = np.empty((num_states, num_states, num_points))
+            self.stm  = np.empty((num_states, num_states, num_points))
+            self.H    = np.empty((num_axes, num_states, num_points))
+            self.Pz   = np.empty((num_axes, num_axes, num_points))
+            self.K    = np.empty((num_states, num_axes, num_points))
+            self.z    = np.empty((num_axes, num_points))
+        else:
+            self.time = None
+            self.P    = None
+            self.stm  = None
+            self.H    = None
+            self.Pz   = None
+            self.K    = None
+            self.z    = None
 
 #%% Unit Test
 if __name__ == '__main__':

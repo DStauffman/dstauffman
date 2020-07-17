@@ -1,5 +1,5 @@
 r"""
-Classes related to Kalman Filter analysis.
+Functions related to Kalman Filter analysis.
 
 Notes
 -----

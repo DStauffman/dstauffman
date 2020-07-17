@@ -456,8 +456,12 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     if fields is None:
         fields = {'att': 'Attitude Quaternion'}
 
+    # alias keywords
+    name_one = kwargs.pop('name_one', kf1.name)
+    name_two = kwargs.pop('name_two', kf2.name)
+
     # make local copy of opts that can be modified without changing the original
-    this_opts = Opts(opts)
+    this_opts = opts.__class__(opts)
     # opts overrides
     this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
 
@@ -483,7 +487,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # call wrapper function for most of the details
     for (field, description) in fields.items():
         (this_figs, this_err) = make_quaternion_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
-            name_one=kf1.name, name_two=kf2.name, time_units=time_units, start_date=start_date, \
+            name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
             rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, plot_components=plot_comps, single_lines=single_lines, \
             use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
@@ -568,7 +572,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         fields = {'pos': 'Position'}
 
     # make local copy of opts that can be modified without changing the original
-    this_opts = Opts(opts)
+    this_opts = opts.__class__(opts)
     # opts overrides
     this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
 
@@ -595,6 +599,8 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     second_yscale  = kwargs.pop('second_yscale', {name + units: 1/fact})
     color_lists    = get_color_lists()
     colormap       = ListedColormap(color_lists['vec_diff'].colors + color_lists['vec'].colors)
+    name_one       = kwargs.pop('name_one', kf1.name)
+    name_two       = kwargs.pop('name_two', kf2.name)
 
     # initialize outputs
     figs = []
@@ -603,7 +609,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # call wrapper function for most of the details
     for (field, description) in fields.items():
         (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
-            name_one=kf1.name, name_two=kf2.name, elements=elements, time_units=time_units, units=units, \
+            name_one=name_one, name_two=name_two, elements=elements, time_units=time_units, units=units, \
             start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, single_lines=single_lines, \
             show_rms=show_rms, leg_scale=leg_scale, legend_loc=legend_loc, second_yscale=second_yscale, \
@@ -697,7 +703,9 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         fields = {'innov': 'Innovations', 'norm': 'Normalized Innovations'}
 
     # aliases and defaults
-    description   = kf1.name + ' ' if kf1.name else kf2.name + ' ' if kf2.name else ''
+    name_one      = kwargs.pop('name_one', kf1.name)
+    name_two      = kwargs.pop('name_two', kf2.name)
+    description   = name_one + ' ' if name_one else name_two + ' ' if name_two else ''
     num_chan      = kf1.innov.shape[0] if kf1.innov is not None else kf2.innov.shape[0] if kf2.innov is not None else 0
     elements      = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
     elements      = kwargs.pop('elements', elements)
@@ -707,7 +715,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     second_yscale = kwargs.pop('second_yscale', {name + units: 1/fact})
 
     # make local copy of opts that can be modified without changing the original
-    this_opts = Opts(opts)
+    this_opts = opts.__class__(opts)
     # opts overrides
     this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
 
@@ -737,7 +745,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
             units = u'σ'
             second_yscale=None
         (this_figs, this_err) = make_difference_plot(description+sub_description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
-            name_one=kf1.name, name_two=kf2.name, elements=elements, units=units, time_units=time_units, \
+            name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
             start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
             legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=True, **kwargs)
@@ -830,11 +838,13 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     leg_scale     = kwargs.pop('leg_scale', 'micro')
     (fact, name)  = get_factors(leg_scale)
     second_yscale = kwargs.pop('second_yscale', {name + units: 1/fact})
+    name_one      = kwargs.pop('name_one', kf1.name)
+    name_two      = kwargs.pop('name_two', kf2.name)
     if groups is None:
         groups = [i for i in range(num_chan)]
 
     # make local copy of opts that can be modified without changing the original
-    this_opts = Opts(opts)
+    this_opts = opts.__class__(opts)
     # opts overrides
     this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
 
@@ -868,7 +878,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
             if have_data1 or have_data2:
                 this_elements = [elements[state] for state in states]
                 (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, data_one, data_two, \
-                    name_one=kf1.name, name_two=kf2.name, elements=this_elements, units=units, time_units=time_units, \
+                    name_one=name_one, name_two=name_two, elements=this_elements, units=units, time_units=time_units, \
                     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                     make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
                     legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=True, **kwargs)

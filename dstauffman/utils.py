@@ -24,6 +24,7 @@ from contextlib import contextmanager
 from io import StringIO
 
 import numpy as np
+from scipy.interpolate import interp1d
 
 from dstauffman.enums import ReturnCodes
 from dstauffman.units import MONTHS_PER_YEAR
@@ -1270,6 +1271,103 @@ def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
     if return_indices:
         return (c, ia, ib)
     return c
+
+#%% issorted
+def issorted(x, descend=False):
+    r"""
+    Tells whether the given array is sorted or not.
+
+    Parameters
+    ----------
+    x : array_like
+        Input array
+    descend : bool, optional, default is False
+        Whether to check that the array is sorted in descending order
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2020
+
+    Examples
+    --------
+    >>> from dstauffman import issorted
+    >>> x = [1, 3, 3, 5, 7]
+    >>> print(issorted(x))
+    True
+
+    >>> y = [3, 5, 1, 7]
+    >>> print(issorted(y))
+    False
+
+    """
+    x = np.asanyarray(x)
+    if descend:
+        return np.all(x[1:] <= x[:-1])
+    return np.all(x[:-1] <= x[1:])
+
+# Alternative for faster speed?
+# import numba
+# @numba.jit
+# def issorted(x, descend=False):
+#     if descend:
+#         for i in range(len(x)-1):
+#             if x[i+1] > x[i]:
+#                 return False
+#     else:
+#         for i in range(len(x)-1):
+#             if x[i+1] < x[i] :
+#                    return False
+#     return True
+
+#%% zero_order_hold
+def zero_order_hold(x, xp, yp, left=np.nan, assume_sorted=False):
+    r"""
+    Interpolates a function by holding at the most recent value.
+
+    Parameters
+    ----------
+    x : array_like
+        The x-coordinates at which to evaluate the interpolated values.
+    xp: 1-D sequence of floats
+        The x-coordinates of the data points, must be increasing if argument period is not specified. Otherwise, xp is internally sorted after normalizing the periodic boundaries with xp = xp % period.
+    yp: 1-D sequence of float or complex
+        The y-coordinates of the data points, same length as xp.
+    left: int or float, optional, default is np.nan
+        Value to use for any value less that all points in xp
+    assume_sorted : bool, optional, default is False
+        Whether you can assume the data is sorted and do simpler (i.e. faster) calculations
+
+    Returns
+    -------
+    y : float or complex (corresponding to fp) or ndarray
+        The interpolated values, same shape as x.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import zero_order_hold
+    >>> import numpy as np
+    >>> xp = np.array([0., 111., 2000., 5000.])
+    >>> yp = np.array([0, 1, -2, 3])
+    >>> x = np.arange(0, 6001, dtype=float)
+    >>> y = zero_order_hold(x, xp, yp)
+
+    """
+    # force arrays
+    x  = np.asanyarray(x)
+    xp = np.asanyarray(xp)
+    yp = np.asanyarray(yp)
+    # find the minimum value, as anything left of this is considered extrapolated
+    xmin = xp[0] if assume_sorted else np.min(xp)
+    # check that xp data is sorted, if not, use slower scipy version
+    if assume_sorted or issorted(xp):
+        ix = np.searchsorted(xp, x, side='right') - 1
+        return np.where(np.asanyarray(x) < xmin, left, yp[ix])
+    func = interp1d(xp, yp, kind='zero', fill_value='extrapolate', assume_sorted=False)
+    return np.where(np.asanyarray(x) < xmin, left, func(x))
 
 #%% Unit test
 if __name__ == '__main__':

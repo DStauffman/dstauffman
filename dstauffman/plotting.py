@@ -257,7 +257,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     assert time.ndim == 1, 'Time must be a 1D array.'
 
     # make local copy of opts that can be modified without changing the original
-    this_opts = Opts(opts)
+    this_opts = opts.__class__(opts)
     # opts overrides
     this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
 

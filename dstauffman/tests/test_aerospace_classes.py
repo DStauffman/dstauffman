@@ -9,8 +9,10 @@ Notes
 """
 
 #%% Imports
+import os
 import unittest
 
+from dstauffman import get_tests_dir
 import dstauffman.aerospace as space
 
 #%% KfInnov
@@ -29,9 +31,23 @@ class Test_KfOut(unittest.TestCase):
     Tests the KfOut class with the following cases:
         TBD
     """
+    def setUp(self):
+        self.filename = os.path.join(get_tests_dir(), 'test_kf.hdf5')
+
     def test_nominal(self):
         kf = space.Kf()
         self.assertTrue(isinstance(kf, space.Kf)) # TODO: test better
+
+    def test_save_and_load(self):
+        kf = space.Kf(num_points=2, num_states=6, num_axes=3, num_innovs=4)
+        kf.chan = ['a', 'b', 'c']
+        kf.save(self.filename)
+        kf2 = space.Kf.load(self.filename)
+        # TODO: test that these are equivalent
+
+    def tearDown(self):
+        if os.path.isfile(self.filename):
+            os.remove(self.filename)
 
 #%% Unit test execution
 if __name__ == '__main__':
