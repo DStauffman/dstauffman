@@ -13,7 +13,7 @@ import unittest
 import numpy as np
 
 #%% Functions - calc_kalman_gain
-def calc_kalman_gain(P, H, R, use_inverse=False):
+def calc_kalman_gain(P, H, R, use_inverse=False, return_innov_cov=False):
     r"""
     Calculates K, the Kalman Gain matrix.
 
@@ -32,6 +32,8 @@ def calc_kalman_gain(P, H, R, use_inverse=False):
     -------
     K : (N, ) ndarray
         Kalman Gain Matrix
+    Pz : (N, N) ndarray
+        Innovation Covariance Matrix
 
     Notes
     -----
@@ -47,12 +49,17 @@ def calc_kalman_gain(P, H, R, use_inverse=False):
     >>> K = calc_kalman_gain(P, H, R)
 
     """
+    # calculate the innovation covariance
+    Pz = H @ P @ H.T + R
     if use_inverse:
         # explicit version with inverse
-        K = (P @ H.T) @ np.linalg.inv(H @ P @ H.T + R)
+        K = (P @ H.T) @ np.linalg.inv(Pz)
     else:
         # implicit solver
-        K = np.linalg.lstsq((H @ P @ H.T + R).T, (P @ H.T).T, rcond=None)[0].T
+        K = np.linalg.lstsq(Pz.T, (P @ H.T).T, rcond=None)[0].T
+    # return desired results
+    if return_innov_cov:
+        return (K, Pz)
     return K
 
 #%% Functions - propagate_covariance

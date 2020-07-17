@@ -437,7 +437,8 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     >>> opts.quat_comp = True
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_attitude(kf1, kf2, opts=opts)
+    >>> fig_hand = plot_attitude(kf1, kf2, opts=opts) # doctest: +ELLIPSIS
+    Plotting Attitude Quaternion ...
 
     Close plots
     >>> for fig in fig_hand:
@@ -483,9 +484,15 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # initialize outputs
     figs = []
     err  = dict()
+    printed = False
 
     # call wrapper function for most of the details
     for (field, description) in fields.items():
+        # print status
+        if not printed:
+            print(f'Plotting {description} plots = ...', flush=True, end='')
+            printed = True
+        # make plots
         (this_figs, this_err) = make_quaternion_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
             name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
             rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -497,6 +504,8 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     # Setup plots
     setup_plots(figs, opts)
+    if printed:
+        print(' done')
     if return_err:
         return (figs, err)
     return figs
@@ -552,7 +561,8 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     >>> kf2.pos  = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5
     >>> kf2.vel  = kf1.vel[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 100
 
-    >>> fig_hand = plot_position(kf1, kf2)
+    >>> fig_hand = plot_position(kf1, kf2) # doctest: +ELLIPSIS
+    Plotting Position ...
 
     Close plots
     >>> for fig in fig_hand:
@@ -605,9 +615,15 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # initialize outputs
     figs = []
     err  = dict()
+    printed = False
 
     # call wrapper function for most of the details
     for (field, description) in fields.items():
+        # print status
+        if not printed:
+            print(f'Plotting {description} plots = ...', flush=True, end='')
+            printed = True
+        # make plots
         (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
             name_one=name_one, name_two=name_two, elements=elements, time_units=time_units, units=units, \
             start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -619,6 +635,8 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     # Setup plots
     setup_plots(figs, opts)
+    if printed:
+        print(' done')
     if return_err:
         return (figs, err)
     return figs
@@ -683,7 +701,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     >>> opts.vert_fact = 'micro'
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_innovations(kf1, kf2, opts=opts)
+    >>> fig_hand = plot_innovations(kf1, kf2, opts=opts) # doctest: +ELLIPSIS
+    Plotting Innovations ...
 
     Close plots
     >>> for fig in fig_hand:
@@ -738,9 +757,15 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     # Initialize outputs
     figs = []
     err  = dict()
+    printed = False
 
     #% call wrapper functions for most of the details
     for (field, sub_description) in fields.items():
+        # print status
+        if not printed:
+            print(f'Plotting {sub_description} plots = ...', flush=True, end='')
+            printed = True
+        # make plots
         if 'Normalized' in sub_description:
             units = u'σ'
             second_yscale=None
@@ -753,6 +778,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         err[field] = this_err
     # Setup plots
     setup_plots(figs, opts)
+    if printed:
+        print(' done')
     if return_err:
         return (figs, err)
     return figs
@@ -807,7 +834,8 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     >>> opts.case_name = 'test_plot'
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_covariance(kf1, kf2, opts=opts)
+    >>> fig_hand = plot_covariance(kf1, kf2, opts=opts) # doctest: +ELLIPSIS
+    Plotting Covariance ...
 
     Close plots
     >>> for fig in fig_hand:
@@ -837,7 +865,11 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     units         = kwargs.pop('units', 'mixed')
     leg_scale     = kwargs.pop('leg_scale', 'micro')
     (fact, name)  = get_factors(leg_scale)
-    second_yscale = kwargs.pop('second_yscale', {name + units: 1/fact})
+    if fact != 1:
+        temp = {name + units: 1/fact} if isinstance(units, str) else [{name + unit: 1/fact} for unit in units]
+    else:
+        temp = None
+    second_yscale = kwargs.pop('second_yscale', temp)
     name_one      = kwargs.pop('name_one', kf1.name)
     name_two      = kwargs.pop('name_two', kf2.name)
     if groups is None:
@@ -865,11 +897,18 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     # initialize output
     figs = []
     err  = dict()
+    printed = False
 
     #% call wrapper functions for most of the details
     for (field, description) in fields.items():
+        # print status
+        if not printed:
+            print(f'Plotting {description} plots = ...', flush=True, end='')
+            printed = True
+        # make plots
         err[field] = {}
         for (ix, states) in enumerate(groups):
+            this_units = units if isinstance(units, str) else units[ix]
             states     = np.atleast_1d(states)
             data_one   = np.atleast_2d(getattr(kf1, field)[states, :]) if getattr(kf1, field) is not None else None
             data_two   = np.atleast_2d(getattr(kf2, field)[states, :]) if getattr(kf2, field) is not None else None
@@ -878,7 +917,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
             if have_data1 or have_data2:
                 this_elements = [elements[state] for state in states]
                 (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, data_one, data_two, \
-                    name_one=name_one, name_two=name_two, elements=this_elements, units=units, time_units=time_units, \
+                    name_one=name_one, name_two=name_two, elements=this_elements, units=this_units, time_units=time_units, \
                     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                     make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
                     legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=True, **kwargs)
@@ -886,6 +925,8 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
                 err[field][f'Group {ix}'] = this_err
     # Setup plots
     setup_plots(figs, opts)
+    if printed:
+        print(' done')
     if not figs:
         print('No covariance data was provided, so no plots were generated.')
     if return_err:

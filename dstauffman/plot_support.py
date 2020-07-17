@@ -970,6 +970,10 @@ def setup_plots(figs, opts):
     if opts.show_plot and Plotter.show_plot: # pragma: no cover
         # add a custom toolbar
         figmenu(figs)
+        # force drawing right away
+        for fig in figs:
+            fig.canvas.draw()
+            fig.canvas.flush_events()
         # show the plot
         plt.show(block=False)
 

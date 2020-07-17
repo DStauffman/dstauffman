@@ -13,7 +13,7 @@ import unittest
 import h5py
 import numpy as np
 
-from dstauffman import Frozen
+from dstauffman import Frozen, SaveAndLoad
 
 #%% KfInnov
 class KfInnov(Frozen):
@@ -174,7 +174,7 @@ class Kf(Frozen):
         return out
 
 #%% Classes - KfRecord
-class KfRecord():
+class KfRecord(Frozen, metaclass=SaveAndLoad):
     r"""
     Full records of the Kalman Filter for use in a backards information smoother.
 
@@ -218,6 +218,16 @@ class KfRecord():
             self.Pz   = None
             self.K    = None
             self.z    = None
+
+    def keep_subset(self, ix_keep):
+        r"""Returns only the specified indices (likely only accepted measurements)."""
+        self.time = self.time[ix_keep]
+        self.P    = self.P[:, :, ix_keep]
+        self.stm  = self.stm[:, :, ix_keep]
+        self.H    = self.H[:, :, ix_keep]
+        self.Pz   = self.Pz[:, :, ix_keep]
+        self.K    = self.K[:, :, ix_keep]
+        self.z    = self.z[:, ix_keep]
 
 #%% Unit Test
 if __name__ == '__main__':
