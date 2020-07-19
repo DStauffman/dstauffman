@@ -23,6 +23,7 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from io import StringIO
 
+import numba
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -1273,6 +1274,7 @@ def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
     return c
 
 #%% issorted
+@numba.njit
 def issorted(x, descend=False):
     r"""
     Tells whether the given array is sorted or not.
@@ -1300,24 +1302,20 @@ def issorted(x, descend=False):
     False
 
     """
-    x = np.asanyarray(x)
     if descend:
-        return np.all(x[1:] <= x[:-1])
-    return np.all(x[:-1] <= x[1:])
-
-# Alternative for faster speed?
-# import numba
-# @numba.jit
-# def issorted(x, descend=False):
-#     if descend:
-#         for i in range(len(x)-1):
-#             if x[i+1] > x[i]:
-#                 return False
-#     else:
-#         for i in range(len(x)-1):
-#             if x[i+1] < x[i] :
-#                    return False
-#     return True
+        for i in range(len(x)-1):
+            if x[i+1] > x[i]:
+                return False
+    else:
+        for i in range(len(x)-1):
+            if x[i+1] < x[i] :
+                    return False
+    return True
+    # Alternative numpy version:
+    #x = np.asanyarray(x)
+    #if descend:
+    #    return np.all(x[1:] <= x[:-1])
+    #return np.all(x[:-1] <= x[1:])
 
 #%% zero_order_hold
 def zero_order_hold(x, xp, yp, left=np.nan, assume_sorted=False):
