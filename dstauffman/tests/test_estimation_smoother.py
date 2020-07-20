@@ -13,7 +13,7 @@ import unittest
 
 import numpy as np
 
-import dstauffman.aerospace as space
+import dstauffman.estimation as estm
 
 #%% _update_information
 class Test__update_information(unittest.TestCase):

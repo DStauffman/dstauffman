@@ -12,6 +12,8 @@ import unittest
 
 import numpy as np
 
+from dstauffman.estimation.linalg import mat_divide
+
 #%% _update_information
 def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
     r"""
@@ -47,17 +49,14 @@ def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
 
     Examples
     --------
-    >>> from dstauffman.aerospace.smoother import _update_information
+    >>> from dstauffman.estimation.smoother import _update_information
     >>> # TODO: write the rest
 
     """
-    # In Matlab: A\b = inv(A)*b
-    # np.linalg.lstsq(a, b)[0] Computes the vector x that approximatively solves the equation a @ x = b ( or x = inv(a) * b)
-    n_state      = H.shape[1]
-    delta_lambda = -H.T @ (np.linalg.lstsq(Pz, z, rcond=None)[0] + K.T @ lambda_bar)
-    I_minus_KH   = np.eye(n_state) - K @ H
+    delta_lambda = -H.T @ (mat_divide(Pz, z) + K.T @ lambda_bar)
+    I_minus_KH   = np.eye(H.shape[1]) - K @ H
     lambda_hat   = lambda_bar + delta_lambda
-    LAMBDA_hat   = I_minus_KH.T @ LAMBDA_bar @ I_minus_KH + H.T @ np.linalg.lstsq(Pz, H, rcond=None)[0]
+    LAMBDA_hat   = I_minus_KH.T @ LAMBDA_bar @ I_minus_KH + H.T @ mat_divide(Pz, H)
     return (lambda_hat, LAMBDA_hat)
 
 #%% bf_smoother
@@ -67,7 +66,7 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
 
     Parameters
     ----------
-    kf_record : class dstauffman.aerospace.KfRecord
+    kf_record : class dstauffman.estimation.KfRecord
         Record of all the interval Kalman Filter calculations
     lambda_bar : (n_state, 1) ndarray, optional
         final boundary condition on information vector
@@ -98,7 +97,8 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
 
     Examples
     --------
-    >>> from dstauffman.aerospace import bf_smoother, KfRecord
+    >>> from dstauffman.aerospace import KfRecord
+    >>> from dstauffman.estimation import bf_smoother
     >>> import numpy as np
     >>> num_points = 5
     >>> num_states = 6
@@ -178,5 +178,5 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_aerospace_smoother', exit=False)
+    unittest.main(module='dstauffman.tests.test_estimation_smoother', exit=False)
     doctest.testmod(verbose=False)

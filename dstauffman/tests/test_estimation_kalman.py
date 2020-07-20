@@ -13,7 +13,7 @@ import unittest
 
 import numpy as np
 
-import dstauffman.aerospace as space
+import dstauffman.estimation as estm
 
 #%% calc_kalman_gain
 class Test_kalman_gain(unittest.TestCase):
@@ -29,11 +29,11 @@ class Test_kalman_gain(unittest.TestCase):
         self.exp = 0.0019950134608610927 # TODO: come up with something that can be known better
 
     def test_nominal(self):
-        K = space.calc_kalman_gain(self.P, self.H, self.R)
+        K = estm.calc_kalman_gain(self.P, self.H, self.R)
         self.assertAlmostEqual(K[0, 0], self.exp, 14)
 
     def test_inverse(self):
-        K = space.calc_kalman_gain(self.P, self.H, self.R, use_inverse=True)
+        K = estm.calc_kalman_gain(self.P, self.H, self.R, use_inverse=True)
         self.assertAlmostEqual(K[0, 0], self.exp, 12)
 
 #%% propagate_covariance
@@ -53,22 +53,22 @@ class Test_propagate_covariance(unittest.TestCase):
         self.orig  = 0.001
 
     def test_nominal(self):
-        out = space.propagate_covariance(self.P, self.phi, self.Q)
+        out = estm.propagate_covariance(self.P, self.phi, self.Q)
         self.assertIsNone(out)
         self.assertEqual(self.P[0, 0], self.exp)
 
     def test_gamma(self):
-        out = space.propagate_covariance(self.P, self.phi, self.Q, gamma=self.gamma)
+        out = estm.propagate_covariance(self.P, self.phi, self.Q, gamma=self.gamma)
         self.assertIsNone(out)
         self.assertEqual(self.P[0, 0], self.exp)
 
     def test_nominal_out(self):
-        out = space.propagate_covariance(self.P, self.phi, self.Q, inplace=False)
+        out = estm.propagate_covariance(self.P, self.phi, self.Q, inplace=False)
         self.assertEqual(out[0, 0], self.exp)
         self.assertEqual(self.P[0, 0], self.orig)
 
     def test_gamma_out(self):
-        out = space.propagate_covariance(self.P, self.phi, self.Q, gamma=self.gamma, inplace=False)
+        out = estm.propagate_covariance(self.P, self.phi, self.Q, gamma=self.gamma, inplace=False)
         self.assertEqual(out[0, 0], self.exp)
         self.assertEqual(self.P[0, 0], self.orig)
 
@@ -88,12 +88,12 @@ class Test_update_covariance(unittest.TestCase):
         self.orig = 0.001
 
     def test_nominal(self):
-        out = space.update_covariance(self.P, self.K, self.H, inplace=True)
+        out = estm.update_covariance(self.P, self.K, self.H, inplace=True)
         self.assertIsNone(out)
         self.assertEqual(self.P[-1, -1], self.exp)
 
     def test_out(self):
-        out = space.update_covariance(self.P, self.K, self.H, inplace=False)
+        out = estm.update_covariance(self.P, self.K, self.H, inplace=False)
         self.assertEqual(self.P[-1, -1], self.orig)
         self.assertEqual(out[-1, -1], self.exp)
 

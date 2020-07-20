@@ -8,20 +8,20 @@ Notes
 """
 
 #%% Imports
-import pytest
+import unittest
 
 import numpy as np
 
 import dstauffman.estimation as estm
 
 #%% orth
-class Test_orth():
+class Test_orth(unittest.TestCase):
     r"""
     Tests the orth function with the following cases:
         Rank 3 matrix
         Rank 2 matrix
     """
-    def setup(self):
+    def setUp(self):
         self.A1 = np.array([[1, 0, 1], [-1, -2, 0], [0, 1, -1]])
         self.r1 = 3
         self.Q1 = np.array([[-0.12000026, -0.80971228, 0.57442663], [ 0.90175265, 0.15312282, \
@@ -32,23 +32,23 @@ class Test_orth():
 
     def test_rank3(self):
         r = np.linalg.matrix_rank(self.A1)
-        assert r == self.r1
+        self.assertEqual(r, self.r1)
         Q = estm.orth(self.A1)
-        assert Q == pytest.approx(self.Q1)
+        np.testing.assert_array_almost_equal(Q, self.Q1)
 
     def test_rank2(self):
         r = np.linalg.matrix_rank(self.A2)
-        assert r == self.r2
+        self.assertEqual(r, self.r2)
         Q = estm.orth(self.A2)
-        assert Q == pytest.approx(self.Q2)
+        np.testing.assert_array_almost_equal(Q, self.Q2)
 
 #%% subspace
-class Test_subspace():
+class Test_subspace(unittest.TestCase):
     r"""
     Tests the subspace function with the followinc cases:
         Nominal
     """
-    def setup(self):
+    def setUp(self):
         self.A = np.array([[1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1], [1, 1, 1], [-1, 1, -1], \
             [1, -1, -1], [-1, -1, 1]])
         self.B = np.array([[1, 1, 1, 1], [1, -1, 1, -1],[1, 1, -1, -1], [1, -1, -1, 1], [-1, -1, -1, -1], \
@@ -57,12 +57,32 @@ class Test_subspace():
 
     def test_nominal(self):
         theta = estm.subspace(self.A, self.B)
-        assert theta == pytest.approx(self.theta)
+        self.assertAlmostEqual(theta, self.theta)
 
     def test_swapped_rank(self):
         theta = estm.subspace(self.B, self.A)
-        assert theta == pytest.approx(self.theta)
+        self.assertAlmostEqual(theta, self.theta)
+
+#%% mat_divide
+class Test_mat_divide(unittest.TestCase):
+    r"""Tests the mat_divide function with the following cases:
+        Nominal
+        Poorly-conditioned
+    """
+    def test_nominal(self):
+        a = np.array([[1, 2], [3, 4]], dtype=float)
+        exp = np.array([1, -1], dtype=float)
+        b = a @ exp
+        x = estm.mat_divide(a, b)
+        np.testing.assert_array_almost_equal(x, exp, 14)
+
+    def test_rcond(self):
+        a = np.array([[1e6, 1e6], [1e6, 1e6 + 1e-8]], dtype=float)
+        exp = np.array([1, -1], dtype=float)
+        b = a @ exp
+        x = estm.mat_divide(a, b, rcond=1e-6)
+        np.testing.assert_array_almost_equal(x, exp, 2)
 
 #%% Unit test execution
 if __name__ == '__main__':
-    pytest.main(['-k','test_estimation_linalg.py'])
+    unittest.main(module='dstauffman.tests.test_estimation_linalg', exit=False)

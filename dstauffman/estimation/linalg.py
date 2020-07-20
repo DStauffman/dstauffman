@@ -128,6 +128,53 @@ def subspace(A, B):
     theta = np.arcsin(np.minimum(1, norm(B)))
     return theta
 
+#%% mat_divide
+def mat_divide(a, b, rcond=None):
+    r"""
+    Solves the least square solution for x in A*x = b.
+
+    In Matlab, this is: A\b = inv(A)*b
+    np.linalg.lstsq(a, b)[0] Computes the vector x that approximatively solves the equation a @ x = b ( or x = inv(a) * b)
+    However, you have to remember the rcond=None to avoid warnings, and the [0] to get the actual solution part you want,
+    thus the benefit of having this function.
+
+    Parameters
+    ----------
+    a : (M, N) array_like
+        Coefficient matrix
+    b : {(M, ), (M, K)} array_like
+        Ordinate or dependent variable values. If b is two-dimensional, the least-squares solution
+        is calculated for each of the K columns of b.
+    rcond : float, optional
+        Cut-off ratio for small singular values of a.
+
+    Returns
+    -------
+    x {(N, ), (N, K)} ndarray
+        Least-squares solution
+
+    See Also
+    --------
+    numpy.linalg.lstsq
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.estimation import mat_divide
+    >>> import numpy as np
+    >>> a = np.array([[1, 2], [3, 4]], dtype=float)
+    >>> x = np.array([1, -1], dtype=float)
+    >>> b = a @ x
+    >>> out = mat_divide(a, b)
+    >>> print(out)
+    [ 1. -1.]
+
+    """
+    return np.linalg.lstsq(a, b, rcond=None)[0]
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='dstauffman.tests.test_estimation_linalg', exit=False)

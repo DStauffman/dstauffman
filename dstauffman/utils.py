@@ -1293,11 +1293,11 @@ def issorted(x, descend=False):
     Examples
     --------
     >>> from dstauffman import issorted
-    >>> x = [1, 3, 3, 5, 7]
+    >>> x = np.array([1, 3, 3, 5, 7])
     >>> print(issorted(x))
     True
 
-    >>> y = [3, 5, 1, 7]
+    >>> y = np.array([3, 5, 1, 7])
     >>> print(issorted(y))
     False
 
