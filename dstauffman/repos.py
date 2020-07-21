@@ -63,7 +63,7 @@ def run_docstrings(files, verbose=False):
             print('')
             print('******************************')
             print('******************************')
-            print('Testing "{}":'.format(file))
+            print(f'Testing "{file}":')
         (failure_count, test_count) = doctest.testfile(file, report=True, verbose=verbose, module_relative=False)
         if failure_count > 0:
             had_failure = True
@@ -266,29 +266,29 @@ def find_repo_issues(folder, extensions=frozenset(('m', 'py')), *, list_all=Fals
                 this_file = os.path.join(root, name)
                 already_listed = False
                 if list_all:
-                    print('Evaluating: "{}"'.format(this_file))
+                    print(f'Evaluating: "{this_file}"')
                     already_listed = True
                 if show_execute and os.access(this_file, os.X_OK):
-                    print('File: "{}" has execute privileges.'.format(this_file))
+                    print(f'File: "{this_file}" has execute privileges.')
                     is_clean = False
                 with open(this_file, encoding='utf8', newline='') as file:
                     bad_lines = False
                     try:
                         lines = file.readlines()
                     except UnicodeDecodeError: # pragma: no cover
-                        print('File: "{}" was not a valid utf-8 file.'.format(this_file))
+                        print(f'File: "{this_file}" was not a valid utf-8 file.')
                         is_clean = False
                     for (c, line) in enumerate(lines):
                         sline = line.rstrip('\n').rstrip('\r').rstrip('\n') # for all possible orderings
                         if check_tabs and line.count('\t') > 0:
                             if not already_listed:
-                                print('Evaluating: "{}"'.format(this_file))
+                                print(f'Evaluating: "{this_file}"')
                                 already_listed = True
                                 is_clean = False
                             print('    Line {:03}: '.format(c+1) + repr(line))
                         elif trailing and len(sline) >= 1 and sline[-1] == ' ':
                             if not already_listed:
-                                print('Evaluating: "{}"'.format(this_file))
+                                print(f'Evaluating: "{this_file}"')
                                 already_listed = True
                                 is_clean = False
                             print('    Line {:03}: '.format(c+1) + repr(line))

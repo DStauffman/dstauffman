@@ -244,7 +244,7 @@ def _write_unit_test(filename, code, header=None):
     lines.append('')
     text = '\n'.join(lines)
     # write out to disk and print updates
-    print('Writing "{}".'.format(filename))
+    print(f'Writing "{filename}".')
     write_text_file(filename, text)
 
 #%% Functions - _write_all_unit_test
@@ -316,7 +316,7 @@ def _write_all_unit_test(filename, all_code, header=None):
     lines.append('')
     text = '\n'.join(lines)
     # write out to disk and print updates
-    print('Writing "{}".'.format(filename))
+    print(f'Writing "{filename}".')
     write_text_file(filename, text)
 
 #%% Functions - _write_makefile
@@ -446,7 +446,7 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
     if replacements is not None:
         for (key, value) in replacements.items():
             text = text.replace(key, value)
-    print('Writing "{}".'.format(makefile))
+    print(f'Writing "{makefile}".')
     write_text_file(makefile, text)
 
 #%% Functions - create_fortran_unit_tests

@@ -214,7 +214,7 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
         r"""Set is_same to False and optionally prints information to the screen."""
         is_same = False
         if not suppress_output:
-            print('{} is different from {} to {}.'.format(this_attr, name1, name2))
+            print(f'{this_attr} is different from {name1} to {name2}.')
         return is_same
 
     def _is_function(obj):
@@ -284,15 +284,15 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
             is_same = False
             if not suppress_output:
                 if this_attr in attrs1:
-                    print(this_attr + ' is only in ' + name1 + '.')
+                    print(f'{this_attr} is only in {name1}.')
                 else:
-                    print(this_attr + ' is only in ' + name2 + '.')
+                    print(f'{this_attr} is only in {name2}.')
     # display results
     if not suppress_output:
         if is_same:
-            print('"' + name1 + '" and "' + name2 + '" are the same.')
+            print(f'"{name1}" and "{name2}" are the same.')
         else:
-            print('"' + name1 + '" and "' + name2 + '" are not the same.')
+            print(f'"{name1}" and "{name2}" are not the same.')
     return is_same
 
 #%% Functions - compare_two_dicts
@@ -346,22 +346,22 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
             if np.logical_not(_nan_equal(d1[key], d2[key])):
                 is_same = False
                 if not suppress_output:
-                    print(key + ' is different.')
+                    print(f'{key} is different.')
         # find keys in one but not the other, if any, then this test fails
         diff = set(d1) ^ set(d2)
         for key in sorted(diff):
             is_same = False
             if not suppress_output:
                 if key in d1:
-                    print(key + ' is only in ' + name1 + '.')
+                    print(f'{key} is only in {name1}.')
                 else:
-                    print(key + ' is only in ' + name2 + '.')
+                    print(f'{key} is only in {name2}.')
     # display results
     if not suppress_output:
         if is_same:
-            print('"' + name1 + '" and "' + name2 + '" are the same.')
+            print(f'"{name1}" and "{name2}" are the same.')
         else:
-            print('"' + name1 + '" and "' + name2 + '" are not the same.')
+            print(f'"{name1}" and "{name2}" are not the same.')
     return is_same
 
 #%% Functions - read_text_file
@@ -412,7 +412,7 @@ def read_text_file(filename):
         return text
     except:
         # on any exceptions, print a message and re-raise the error
-        print('Unable to open file "{}" for reading.'.format(filename))
+        print(f'Unable to open file "{filename}" for reading.')
         raise
 
 #%% Functions - write_text_file
@@ -454,7 +454,7 @@ def write_text_file(filename, text):
             file.write(text) # pragma: no branch
     except:
         # on any exceptions, print a message and re-raise the error
-        print('Unable to open file "{}" for writing.'.format(filename))
+        print(f'Unable to open file "{filename}" for writing.')
         raise
 
 #%% Functions - capture_output

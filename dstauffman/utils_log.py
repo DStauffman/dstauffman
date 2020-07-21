@@ -69,12 +69,12 @@ def setup_dir(folder, rec=False):
             else:
                 raise RuntimeError('Unexpected file type, neither file nor folder: "{}".'\
                     .format(this_full_elem)) # pragma: no cover
-        logger.info('Files/Sub-folders were removed from: "' + folder + '"')
+        logger.warning('Files/Sub-folders were removed from: "' + folder + '"')
     else:
         # create directory if it does not exist
         try:
             os.makedirs(folder)
-            logger.info('Created directory: "' + folder + '"')
+            logger.warning('Created directory: "' + folder + '"')
         except: # pragma: no cover
             # re-raise last exception, could try to handle differently in the future
             raise # pragma: no cover

@@ -10,6 +10,7 @@ Notes
 #%% Imports
 import datetime
 import unittest
+from unittest.mock import patch
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -160,12 +161,11 @@ class Test_plot_time_history(unittest.TestCase):
 #    def test_with_legend(self):
 #        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, legend=self.legend))
 #
-#    def test_no_data(self):
-#        with dcs.capture_output() as out:
-#            dcs.plot_time_history(self.time, None, '')
-#        output = out.getvalue().strip()
-#        out.close()
-#        self.assertEqual(output, 'plot skipped due to missing data.')
+#    @patch('dstauffman.plotting.logger')
+#    def test_no_data(self, mock_logger):
+#        dcs.plot_time_history(self.time, None, '')
+#        self.assertEqual(mock_logger.info.call_count, 1)
+#        mock_logger.info.assert_called_with('  plot skipped due to missing data.')
 #
 #    def test_ignore_zeros(self):
 #        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
@@ -175,14 +175,13 @@ class Test_plot_time_history(unittest.TestCase):
 #        self.data[:,3] = 0
 #        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
 #
-#    def test_ignore_zeros3(self):
+#    @patch('dstauffman.plotting.logger')
+#    def test_ignore_zeros3(self, mock_logger):
 #        self.data = np.zeros(self.data.shape)
-#        with dcs.capture_output() as out:
-#            not_a_fig = dcs.plot_time_history(self.time, self.data, label='All Zeros', ignore_empties=True)
-#        output = out.getvalue().strip()
-#        out.close()
+#        not_a_fig = dcs.plot_time_history(self.time, self.data, label='All Zeros', ignore_empties=True)
 #        self.assertIs(not_a_fig, None)
-#        self.assertEqual(output,'All Zeros plot skipped due to missing data.')
+#        self.assertEqual(mock_logger.info.call_count, 1)
+#        mock_logger.info.assert_called_with('All Zeros plot skipped due to missing data.')
 #
 #    def test_colormap(self):
 #        self.opts.colormap = 'Dark2'
@@ -389,12 +388,11 @@ class Test_plot_bar_breakdown(unittest.TestCase):
         self.data[:, 3] = np.nan
         self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, ignore_empties=True))
 
-    def test_null_data(self):
-        with dcs.capture_output() as out:
-            dcs.plot_bar_breakdown(self.time, None, '')
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, 'plot skipped due to missing data.')
+    @patch('dstauffman.plotting.logger')
+    def test_null_data(self, mock_logger):
+        dcs.plot_bar_breakdown(self.time, None, '')
+        self.assertEqual(mock_logger.info.call_count, 1)
+        mock_logger.info.assert_called_with('  plot skipped due to missing data.')
 
     def test_colormap(self):
         self.opts.colormap = 'Dark2'

@@ -10,6 +10,7 @@ Notes
 #%% Imports
 from datetime import datetime
 import unittest
+from unittest.mock import patch
 
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
@@ -235,12 +236,11 @@ class Test_make_difference_plot(unittest.TestCase):
     def test_none2(self):
         self.figs = dcs.make_difference_plot(self.description, None, self.time_two, None, self.data_two)
 
-    def test_none3(self):
-        with dcs.capture_output() as out:
-            self.figs = dcs.make_difference_plot('', None, None, None, None)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, 'No difference data was provided, so no plot was generated for "".')
+    @patch('dstauffman.plot_generic.logger')
+    def test_none3(self, mock_logger):
+        self.figs = dcs.make_difference_plot('', None, None, None, None)
+        self.assertEqual(mock_logger.info.call_count, 1)
+        mock_logger.info.assert_called_with('No difference data was provided, so no plot was generated for "".')
 
     def tearDown(self):
         if self.figs:

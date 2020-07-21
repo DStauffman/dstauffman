@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 import doctest
+import logging
 import unittest
 
 import matplotlib.pyplot as plt
@@ -21,6 +22,9 @@ from dstauffman import ColorMap, disp_xlimits, get_color_lists, get_factors, get
 
 from dstauffman.aerospace.classes import Kf, KfInnov
 from dstauffman.aerospace.quat import quat_angle_diff
+
+#%% Globals
+logger = logging.getLogger(__name__)
 
 #%% Constants
 # hard-coded values
@@ -164,7 +168,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     have_both     = have_quat_one and have_quat_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
     if not have_quat_one and not have_quat_two:
-        print(f'No quaternion data was provided, so no plot was generated for "{description}".')
+        logger.info(f'No quaternion data was provided, so no plot was generated for "{description}".')
         # TODO: return NaNs instead of None for this case?
         out = ([], {'one': None, 'two': None, 'diff': None, 'mag': None}) if return_err else []
         return out
@@ -437,8 +441,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     >>> opts.quat_comp = True
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_attitude(kf1, kf2, opts=opts) # doctest: +ELLIPSIS
-    Plotting Attitude Quaternion ...
+    >>> fig_hand = plot_attitude(kf1, kf2, opts=opts)
 
     Close plots
     >>> for fig in fig_hand:
@@ -490,7 +493,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     for (field, description) in fields.items():
         # print status
         if not printed:
-            print(f'Plotting {description} plots ', flush=True, end='')
+            logger.info(f'Plotting {description} plots ...')
             printed = True
         # make plots
         (this_figs, this_err) = make_quaternion_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
@@ -505,7 +508,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        print(' done')
+        logger.info('... done')
     if return_err:
         return (figs, err)
     return figs
@@ -561,8 +564,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     >>> kf2.pos  = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5
     >>> kf2.vel  = kf1.vel[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 100
 
-    >>> fig_hand = plot_position(kf1, kf2) # doctest: +ELLIPSIS
-    Plotting Position ...
+    >>> fig_hand = plot_position(kf1, kf2)
 
     Close plots
     >>> for fig in fig_hand:
@@ -621,7 +623,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     for (field, description) in fields.items():
         # print status
         if not printed:
-            print(f'Plotting {description} plots ', flush=True, end='')
+            logger.info(f'Plotting {description} plots ...')
             printed = True
         # make plots
         (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
@@ -636,7 +638,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        print(' done')
+        logger.info('... done')
     if return_err:
         return (figs, err)
     return figs
@@ -701,8 +703,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     >>> opts.vert_fact = 'micro'
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_innovations(kf1, kf2, opts=opts) # doctest: +ELLIPSIS
-    Plotting Innovations ...
+    >>> fig_hand = plot_innovations(kf1, kf2, opts=opts)
 
     Close plots
     >>> for fig in fig_hand:
@@ -763,7 +764,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     for (field, sub_description) in fields.items():
         # print status
         if not printed:
-            print(f'Plotting {sub_description} plots ', flush=True, end='')
+            logger.info(f'Plotting {sub_description} plots ...')
             printed = True
         # make plots
         if 'Normalized' in sub_description:
@@ -779,7 +780,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        print(' done')
+        logger.info('... done')
     if return_err:
         return (figs, err)
     return figs
@@ -834,8 +835,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     >>> opts.case_name = 'test_plot'
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_covariance(kf1, kf2, opts=opts) # doctest: +ELLIPSIS
-    Plotting Covariance ...
+    >>> fig_hand = plot_covariance(kf1, kf2, opts=opts)
 
     Close plots
     >>> for fig in fig_hand:
@@ -903,7 +903,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     for (field, description) in fields.items():
         # print status
         if not printed:
-            print(f'Plotting {description} plots ', flush=True, end='')
+            logger.info(f'Plotting {description} plots ...')
             printed = True
         # make plots
         err[field] = {}
@@ -926,9 +926,9 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        print(' done')
+        logger.info('... done')
     if not figs:
-        print('No covariance data was provided, so no plots were generated.')
+        logger.info('No covariance data was provided, so no plots were generated.')
     if return_err:
         return (figs, err)
     return figs

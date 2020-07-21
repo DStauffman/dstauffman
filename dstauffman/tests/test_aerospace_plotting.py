@@ -11,10 +11,11 @@ Notes
 #%% Imports
 from datetime import datetime
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 
-from dstauffman import capture_output, close_all
+from dstauffman import close_all
 import dstauffman.aerospace as space
 
 #%% Functions - make_quaternion_plot
@@ -147,12 +148,11 @@ class Test_make_quaternion_plot(unittest.TestCase):
     def test_none2(self):
         self.figs = space.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)
 
-    def test_none3(self):
-        with capture_output() as out:
-            self.figs = space.make_quaternion_plot('', None, None, None, None)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, 'No quaternion data was provided, so no plot was generated for "".')
+    @patch('dstauffman.aerospace.plotting.logger')
+    def test_none3(self, mock_logger):
+        self.figs = space.make_quaternion_plot('', None, None, None, None)
+        mock_logger.info.assert_called_once()
+        mock_logger.info.assert_called_with('No quaternion data was provided, so no plot was generated for "".')
 
     def tearDown(self):
         if self.figs:

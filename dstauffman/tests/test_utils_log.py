@@ -40,26 +40,26 @@ class Test_setup_dir(unittest.TestCase):
 
     def test_empty_string(self, mock_logger):
         dcs.setup_dir('')
-        mock_logger.info.assert_not_called()
+        mock_logger.warning.assert_not_called()
 
     def test_create_folder(self, mock_logger):
         dcs.setup_dir(self.folder)
-        mock_logger.info.assert_called_once()
-        mock_logger.info.assert_called_with('Created directory: "{}"'.format(self.folder))
+        mock_logger.warning.assert_called_once()
+        mock_logger.warning.assert_called_with('Created directory: "{}"'.format(self.folder))
 
     def test_nested_folder(self, mock_logger):
         dcs.setup_dir(self.subdir)
-        mock_logger.info.assert_called_once()
-        mock_logger.info.assert_called_with('Created directory: "{}"'.format(self.subdir))
+        mock_logger.warning.assert_called_once()
+        mock_logger.warning.assert_called_with('Created directory: "{}"'.format(self.subdir))
 
     def test_clean_up_folder(self, mock_logger):
         dcs.setup_dir(self.folder)
         dcs.write_text_file(self.filename, self.text)
         with patch('dstauffman.utils_log.logger') as mock_logger2:
             dcs.setup_dir(self.folder)
-            mock_logger2.info.assert_called_once()
-            mock_logger2.info.assert_called_with('Files/Sub-folders were removed from: "{}"'.format(self.folder))
-        mock_logger.info.assert_called_once()
+            mock_logger2.warning.assert_called_once()
+            mock_logger2.warning.assert_called_with('Files/Sub-folders were removed from: "{}"'.format(self.folder))
+        mock_logger.warning.assert_called_once()
 
     def test_clean_up_partial(self, mock_logger):
         dcs.setup_dir(self.folder)
@@ -68,9 +68,9 @@ class Test_setup_dir(unittest.TestCase):
         dcs.write_text_file(self.subfile, '')
         with patch('dstauffman.utils_log.logger') as mock_logger2:
             dcs.setup_dir(self.folder, rec=False)
-            mock_logger2.info.assert_called_once()
-            mock_logger2.info.assert_called_with('Files/Sub-folders were removed from: "{}"'.format(self.folder))
-        self.assertEqual(mock_logger.info.call_count, 2)
+            mock_logger2.warning.assert_called_once()
+            mock_logger2.warning.assert_called_with('Files/Sub-folders were removed from: "{}"'.format(self.folder))
+        self.assertEqual(mock_logger.warning.call_count, 2)
 
     def test_fail_to_create_folder(self, mock_logger):
         pass #TODO: write this test
@@ -86,9 +86,9 @@ class Test_setup_dir(unittest.TestCase):
         dcs.write_text_file(self.subfile, self.text)
         with patch('dstauffman.utils_log.logger') as mock_logger2:
             dcs.setup_dir(self.folder, rec=True)
-            self.assertEqual(mock_logger2.info.call_count, 2)
-            mock_logger2.info.assert_any_call('Files/Sub-folders were removed from: "{}"'.format(self.subdir))
-            mock_logger2.info.assert_any_call('Files/Sub-folders were removed from: "{}"'.format(self.subdir))
+            self.assertEqual(mock_logger2.warning.call_count, 2)
+            mock_logger2.warning.assert_any_call('Files/Sub-folders were removed from: "{}"'.format(self.subdir))
+            mock_logger2.warning.assert_any_call('Files/Sub-folders were removed from: "{}"'.format(self.subdir))
 
     def tearDown(self):
         def _clean(self):
@@ -125,7 +125,6 @@ class Test_fix_rollover(unittest.TestCase):
         self.exp   = np.array([1, 2, 3, 4, 5, 6, 7, 8, 10, 13, 14, 13, 12, 9])
         self.roll  = 7
         self.axis  = None
-
 
     def test_nominal(self, mock_logger):
         unrolled = dcs.fix_rollover(self.data, self.roll)

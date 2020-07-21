@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 import doctest
+import logging
 import unittest
 
 import matplotlib.pyplot as plt
@@ -24,6 +25,9 @@ from dstauffman.utils import intersect, is_datetime, rms
 # hard-coded values
 _LEG_FORMAT  = '{:1.3f}'
 _TRUTH_COLOR = 'k'
+
+#%% Globals
+logger = logging.getLogger(__name__)
 
 #%% Functions - make_time_plot
 def make_time_plot(description, time, data, name='', elements=None, units='', time_units='sec', \
@@ -639,7 +643,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     have_both     = have_data_one and have_data_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
     if not have_data_one and not have_data_two:
-        print(f'No difference data was provided, so no plot was generated for "{description}".')
+        logger.info(f'No difference data was provided, so no plot was generated for "{description}".')
         # TODO: return NaNs instead of None for this case?
         out = ([], {'one': None, 'two': None, 'diff': None}) if return_err else []
         return out

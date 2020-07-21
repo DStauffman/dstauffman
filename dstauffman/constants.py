@@ -7,11 +7,15 @@ Notes
 """
 
 #%% Imports
+import logging
 import os
 import unittest
 
 import matplotlib.pyplot as plt
 import numpy as np
+
+#%% Configure default logging if not already set
+logging.basicConfig(level=logging.WARNING)
 
 #%% Set error state for module
 np.seterr(invalid='ignore', divide='ignore')
