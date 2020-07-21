@@ -273,7 +273,7 @@ class Test_make_python_init(unittest.TestCase):
             text = dcs.make_python_init(self.folder2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(text[:len(self.text3)], self.text3)
+        self.assertEqual(text[0:len(self.text3)], self.text3)
         self.assertTrue(output.startswith('Uniqueness Problem'))
 
     def test_no_lineup(self):

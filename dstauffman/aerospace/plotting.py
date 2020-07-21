@@ -490,7 +490,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     for (field, description) in fields.items():
         # print status
         if not printed:
-            print(f'Plotting {description} plots = ...', flush=True, end='')
+            print(f'Plotting {description} plots ', flush=True, end='')
             printed = True
         # make plots
         (this_figs, this_err) = make_quaternion_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
@@ -621,7 +621,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     for (field, description) in fields.items():
         # print status
         if not printed:
-            print(f'Plotting {description} plots = ...', flush=True, end='')
+            print(f'Plotting {description} plots ', flush=True, end='')
             printed = True
         # make plots
         (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
@@ -763,7 +763,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     for (field, sub_description) in fields.items():
         # print status
         if not printed:
-            print(f'Plotting {sub_description} plots = ...', flush=True, end='')
+            print(f'Plotting {sub_description} plots ', flush=True, end='')
             printed = True
         # make plots
         if 'Normalized' in sub_description:
@@ -903,7 +903,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     for (field, description) in fields.items():
         # print status
         if not printed:
-            print(f'Plotting {description} plots = ...', flush=True, end='')
+            print(f'Plotting {description} plots ', flush=True, end='')
             printed = True
         # make plots
         err[field] = {}
