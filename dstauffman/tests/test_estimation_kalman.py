@@ -45,9 +45,9 @@ class Test_propagate_covariance(unittest.TestCase):
         Not inplace (x2)
     """
     def setUp(self):
-        self.phi   = np.diag([1., 1, 1, -1, -1, -1])
+        self.phi   = np.diag(np.array([1., 1, 1, -1, -1, -1]))
         self.P     = 1e-3 * np.eye(6)
-        self.Q     = np.diag([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7])
+        self.Q     = np.diag(np.array([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7]))
         self.gamma = -1 * self.phi
         self.exp   = 0.002
         self.orig  = 0.001

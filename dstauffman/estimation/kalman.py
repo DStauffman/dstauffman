@@ -15,7 +15,7 @@ import numpy as np
 from dstauffman.estimation.linalg import mat_divide
 
 #%% Functions - calc_kalman_gain
-def calc_kalman_gain(P, H, R, use_inverse=False, return_innov_cov=False):
+def calc_kalman_gain(P, H, R, *, use_inverse=False, return_innov_cov=False):
     r"""
     Calculates K, the Kalman Gain matrix.
 
@@ -114,7 +114,7 @@ def propagate_covariance(P, phi, Q, *, gamma=None, inplace=True):
         return out
 
 #%% Functions - update_covariance
-def update_covariance(P, K, H, inplace=True):
+def update_covariance(P, K, H, *, inplace=True):
     r"""
     Updates the covariance for a given measurement.
 

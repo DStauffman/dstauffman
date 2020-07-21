@@ -45,6 +45,8 @@ Temporary Items
 # Compiled source #
 # =========================
 *.pyc
+*.nbc
+*.nbi
 
 # =========================
 # Pytest logs #

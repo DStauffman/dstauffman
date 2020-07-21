@@ -1274,7 +1274,7 @@ def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
     return c
 
 #%% issorted
-@numba.njit
+@numba.njit(cache=True)
 def issorted(x, descend=False):
     r"""
     Tells whether the given array is sorted or not.
