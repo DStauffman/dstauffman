@@ -13,6 +13,7 @@ from .batch    import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_
 from .kalman   import calc_kalman_gain, propagate_covariance, update_covariance
 from .linalg   import orth, subspace, mat_divide
 from .smoother import bf_smoother
+from .support  import get_parameter, set_parameter
 
 #%% Unittest
 if __name__ == '__main__':
