@@ -21,6 +21,7 @@ from .enums        import IntEnumPlus, consecutive, ReturnCodes
 from .fortran      import create_fortran_unit_tests, create_fortran_makefile
 from .logs         import activate_logging, deactivate_logging
 from .matlab       import load_matlab
+from .optimized    import np_any, np_all
 from .parser       import main, parse_wrapper, parse_commands, execute_command
 from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
                               get_output_dir, list_python_files

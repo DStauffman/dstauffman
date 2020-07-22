@@ -915,8 +915,9 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
             have_data1 = data_one is not None and np.any(~np.isnan(data_one))
             have_data2 = data_two is not None and np.any(~np.isnan(data_two))
             if have_data1 or have_data2:
+                this_description = description + ' for State ' + ','.join(str(x) for x in states)
                 this_elements = [elements[state] for state in states]
-                (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, data_one, data_two, \
+                (this_figs, this_err) = make_difference_plot(this_description, kf1.time, kf2.time, data_one, data_two, \
                     name_one=name_one, name_two=name_two, elements=this_elements, units=this_units, time_units=time_units, \
                     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                     make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
