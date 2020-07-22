@@ -858,7 +858,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                 this_axes.set_ylabel(ylabel)
         this_axes.grid(True)
         # optionally add second Y axis
-        plot_second_units_wrapper(this_axes, second_yscale)
+        this_second_yscale = second_yscale[i] if isinstance(second_yscale, list) else second_yscale
+        plot_second_units_wrapper(this_axes, this_second_yscale)
         # plot RMS lines
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'])

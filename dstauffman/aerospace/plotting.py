@@ -910,13 +910,22 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
         for (ix, states) in enumerate(groups):
             this_units = units if isinstance(units, str) else units[ix]
             states     = np.atleast_1d(states)
-            data_one   = np.atleast_2d(getattr(kf1, field)[states, :]) if getattr(kf1, field) is not None else None
-            data_two   = np.atleast_2d(getattr(kf2, field)[states, :]) if getattr(kf2, field) is not None else None
+            if hasattr(kf1, 'active') and kf1.active is not None:
+                (this_state_nums1, this_state_rows1, _) = intersect(kf1.active, states, return_indices=True)
+            else:
+                this_state_nums1 = np.array([], dtype=int)
+            if hasattr(kf2, 'active') and kf2.active is not None:
+                (this_state_nums2, this_state_rows2, _) = intersect(kf2.active, states, return_indices=True)
+            else:
+                this_state_nums2 = np.array([], dtype=int)
+            this_state_nums = np.union1d(this_state_nums1, this_state_nums2)
+            data_one   = np.atleast_2d(getattr(kf1, field)[this_state_rows1, :]) if getattr(kf1, field) is not None else None
+            data_two   = np.atleast_2d(getattr(kf2, field)[this_state_rows2, :]) if getattr(kf2, field) is not None else None
             have_data1 = data_one is not None and np.any(~np.isnan(data_one))
             have_data2 = data_two is not None and np.any(~np.isnan(data_two))
             if have_data1 or have_data2:
-                this_description = description + ' for State ' + ','.join(str(x) for x in states)
-                this_elements = [elements[state] for state in states]
+                this_description = description + ' for State ' + ','.join(str(x) for x in this_state_nums)
+                this_elements = [elements[state] for state in this_state_nums]
                 (this_figs, this_err) = make_difference_plot(this_description, kf1.time, kf2.time, data_one, data_two, \
                     name_one=name_one, name_two=name_two, elements=this_elements, units=this_units, time_units=time_units, \
                     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
