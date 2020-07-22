@@ -14,6 +14,8 @@ from datetime import datetime
 import numpy as np
 
 import dstauffman as dcs
+import dstauffman.estimation as estm
+import dstauffman.health as health
 
 #%% Classes - SimParams
 class SimParams(dcs.Frozen):
@@ -112,10 +114,10 @@ if __name__ == '__main__':
     truth      = dcs.TruthPlotter(truth_time, truth_data)
 
     # Logger
-    dcs.estimation.logger.setLevel(logging.DEBUG)
+    dcs.activate_logging(logging.DEBUG)
 
     # BPE Settings
-    opti_opts = dcs.OptiOpts()
+    opti_opts = estm.OptiOpts()
     opti_opts.model_func     = sim_model
     opti_opts.model_args     = {'sim_params': sim_params}
     opti_opts.cost_func      = cost_wrapper
@@ -140,15 +142,15 @@ if __name__ == '__main__':
     opti_opts.trust_radius    = 1.0
 
     # Parameters to estimate
-    opti_opts.params.append(dcs.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
-    opti_opts.params.append(dcs.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
-    opti_opts.params.append(dcs.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+    opti_opts.params.append(estm.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+    opti_opts.params.append(estm.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+    opti_opts.params.append(estm.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
     # Run code
     if rerun:
-        (bpe_results, results) = dcs.run_bpe(opti_opts, log_level=logging.DEBUG)
+        (bpe_results, results) = estm.run_bpe(opti_opts, log_level=logging.DEBUG)
     else:
-        bpe_results = dcs.BpeResults.load(os.path.join(opti_opts.output_folder, opti_opts.output_results))
+        bpe_results = estm.BpeResults.load(os.path.join(opti_opts.output_folder, opti_opts.output_results))
         results     = sim_model(sim_params) # just re-run, nothing is actually saved by this model
 
     # Plot results
@@ -160,9 +162,13 @@ if __name__ == '__main__':
         opts.save_plot = True
 
         # make model plots
-        dcs.plot_health_monte_carlo(time, results, 'Output vs. Time', opts=opts, truth=truth)
+        health.plot_health_monte_carlo(time, results, 'Output vs. Time', opts=opts, truth=truth)
+        #dcs.plot_time_history('Output vs. Time', time, results, opts=opts, truth=truth) # TODO: make this one work?
+        f1 = dcs.make_difference_plot('Output vs. Time', time, None, np.atleast_2d(results), None, \
+            name_one='Results', truth_time=truth.time, truth_data=np.atleast_2d(truth.data))
+        dcs.setup_plots(f1, opts)
 
         # make BPE plots
         bpe_plots = {'innovs': True, 'convergence': False, 'correlation': True, 'info_svd': True, \
             'covariance': False}
-        dcs.plot_bpe_results(bpe_results, opts, plots=bpe_plots)
+        estm.plot_bpe_results(bpe_results, opts, plots=bpe_plots)

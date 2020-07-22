@@ -49,6 +49,9 @@ def activate_logging(log_level=logging.INFO, filename=''):
     >>> os.remove(filename)
 
     """
+    # deactivate any current loggers
+    deactivate_logging()
+
     # update the log level
     root_logger.setLevel(log_level)
 
