@@ -456,7 +456,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 
     # alias useful values
     names         = [name.decode('utf-8') for name in bpe_results.param_names]
-    num_param     = cur_results.params.size
+    num_param     = len(cur_results.params)
     num_innov     = cur_results.innovs.size
     param_signs   = np.sign(cur_results.params)
     param_signs[param_signs == 0] = 1
@@ -1053,7 +1053,8 @@ def run_bpe(opti_opts, log_level=logging.INFO):
 
     """
     # activate logging
-    activate_logging(log_level)
+    if log_level is not None:
+        activate_logging(log_level)
 
     # check for valid parameters
     validate_opti_opts(opti_opts)
@@ -1207,12 +1208,13 @@ def run_bpe(opti_opts, log_level=logging.INFO):
 
     # display total elapsed time
     logger.warning('BPE Model completed: ' + time.strftime('%H:%M:%S', time.gmtime(time.time()-start_model)))
-    deactivate_logging()
+    if log_level is not None:
+        deactivate_logging()
 
     return (bpe_results, results)
 
 #%% Functions - plot_bpe_convergence
-def plot_bpe_convergence(costs, opts=None):
+def plot_bpe_convergence(costs, *, opts=None):
     r"""
     Plot the BPE convergence rate by iteration on a log scale.
 
@@ -1274,7 +1276,7 @@ def plot_bpe_convergence(costs, opts=None):
     return fig
 
 #%% plot_bpe_results
-def plot_bpe_results(bpe_results, opts=None, *, plots=None):
+def plot_bpe_results(bpe_results, *, opts=None, plots=None):
     r"""Plot the results of estimation."""
     # hard-coded options
     label_values = False
