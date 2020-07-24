@@ -16,7 +16,7 @@ from matplotlib.colors import ListedColormap
 import numpy as np
 
 from dstauffman import ColorMap, disp_xlimits, get_color_lists, get_factors, get_rms_indices, \
-                       intersect, is_datetime, make_difference_plot, Opts, \
+                       intersect, is_datetime, LogLevel, make_difference_plot, Opts, \
                        plot_second_units_wrapper, plot_vert_lines, rms, setup_plots, \
                        show_zero_ylim, zoom_ylim
 
@@ -168,7 +168,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     have_both     = have_quat_one and have_quat_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
     if not have_quat_one and not have_quat_two:
-        logger.info(f'No quaternion data was provided, so no plot was generated for "{description}".')
+        logger.log(LogLevel.L5, f'No quaternion data was provided, so no plot was generated for "{description}".')
         # TODO: return NaNs instead of None for this case?
         out = ([], {'one': None, 'two': None, 'diff': None, 'mag': None}) if return_err else []
         return out
@@ -493,7 +493,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     for (field, description) in fields.items():
         # print status
         if not printed:
-            logger.info(f'Plotting {description} plots ...')
+            logger.log(LogLevel.L4, f'Plotting {description} plots ...')
             printed = True
         # make plots
         (this_figs, this_err) = make_quaternion_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
@@ -508,7 +508,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        logger.info('... done')
+        logger.log(LogLevel.L4, '... done.')
     if return_err:
         return (figs, err)
     return figs
@@ -623,7 +623,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     for (field, description) in fields.items():
         # print status
         if not printed:
-            logger.info(f'Plotting {description} plots ...')
+            logger.log(LogLevel.L4, f'Plotting {description} plots ...')
             printed = True
         # make plots
         (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
@@ -638,7 +638,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        logger.info('... done')
+        logger.log(LogLevel.L4, '... done.')
     if return_err:
         return (figs, err)
     return figs
@@ -764,7 +764,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     for (field, sub_description) in fields.items():
         # print status
         if not printed:
-            logger.info(f'Plotting {sub_description} plots ...')
+            logger.log(LogLevel.L4, f'Plotting {sub_description} plots ...')
             printed = True
         # make plots
         if 'Normalized' in sub_description:
@@ -780,7 +780,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        logger.info('... done')
+        logger.log(LogLevel.L4, '... done.')
     if return_err:
         return (figs, err)
     return figs
@@ -903,7 +903,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     for (field, description) in fields.items():
         # print status
         if not printed:
-            logger.info(f'Plotting {description} plots ...')
+            logger.log(LogLevel.L4, f'Plotting {description} plots ...')
             printed = True
         # make plots
         err[field] = {}
@@ -936,9 +936,9 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        logger.info('... done')
+        logger.log(LogLevel.L4, '... done.')
     if not figs:
-        logger.info('No covariance data was provided, so no plots were generated.')
+        logger.log(LogLevel.L5, 'No covariance data was provided, so no plots were generated.')
     if return_err:
         return (figs, err)
     return figs

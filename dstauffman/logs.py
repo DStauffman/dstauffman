@@ -68,7 +68,7 @@ def activate_logging(log_level=logging.INFO, filename=''):
     # create the log stream handler
     ch = logging.StreamHandler()
     ch.setLevel(log_level)
-    ch.setFormatter(logging.Formatter('Log: %(message)s'))
+    ch.setFormatter(logging.Formatter('Log:%(levelname)s: %(message)s'))
     root_logger.addHandler(ch)
 
 #%% Functions - deactivate_logging

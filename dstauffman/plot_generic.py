@@ -15,6 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from dstauffman.constants    import DEFAULT_COLORMAP
+from dstauffman.enums        import LogLevel
 from dstauffman.plot_support import ColorMap, disp_xlimits, get_rms_indices, \
                                     plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, \
                                     zoom_ylim
@@ -643,7 +644,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     have_both     = have_data_one and have_data_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
     if not have_data_one and not have_data_two:
-        logger.info(f'No difference data was provided, so no plot was generated for "{description}".')
+        logger.log(LogLevel.L5, f'No difference data was provided, so no plot was generated for "{description}".')
         # TODO: return NaNs instead of None for this case?
         out = ([], {'one': None, 'two': None, 'diff': None}) if return_err else []
         return out

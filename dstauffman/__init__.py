@@ -17,7 +17,7 @@ from .classes      import save_hdf5, load_hdf5, save_pickle, load_pickle, save_m
                               load_method, pprint_dict, Frozen, SaveAndLoad, SaveAndLoadPickle, \
                               Counter, FixedDict
 from .constants    import DEFAULT_COLORMAP, INT_TOKEN, IS_WINDOWS, DEFAULT_CLASSIFICATION
-from .enums        import IntEnumPlus, consecutive, ReturnCodes
+from .enums        import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran      import create_fortran_unit_tests, create_fortran_makefile
 from .logs         import activate_logging, deactivate_logging
 from .matlab       import load_matlab

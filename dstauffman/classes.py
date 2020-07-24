@@ -426,6 +426,7 @@ class FixedDict(dict):
 
     """
     def __new__(cls, *args, **kwargs):
+        r"""Creats a new instance of the class."""
         instance = super().__new__(cls, *args, **kwargs)
         instance._frozen = False
         return instance

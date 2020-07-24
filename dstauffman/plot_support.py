@@ -10,6 +10,7 @@ Notes
 import datetime
 import doctest
 import gc
+import operator
 import os
 import platform
 import re
@@ -1279,19 +1280,20 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
     [1, 8]
 
     """
-    def _process(time):
+    def _process(time, t_bound, func):
         r"""Determines if the given time should be processed."""
         if is_datetime(time):
             # if datetime, it's either the datetime.datetime version, or np.datetime64 version
             if isinstance(time, datetime.datetime):
-                process = True
+                # process if any of the data is in the bound
+                process = func(time, t_bound)
             else:
                 process = not np.isnat(time)
         else:
             if time is None:
                 process = False
             else:
-                process = not np.isnan(time) and not np.isinf(time)
+                process = not np.isnan(time) and not np.isinf(time) and func(time, t_bound)
         return process
 
     # TODO: functionalize this more so there is less repeated code
@@ -1319,7 +1321,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
         else:
             # have neither time 1 nor time 2
             raise AssertionError('At least one time vector must be given.')
-    if _process(xmin):
+    if _process(xmin, t_max, operator.lt):
         if have1: p1_min = time_one >= xmin
         if have2: p2_min = time_two >= xmin
         if have3: p3_min = time_overlap >= xmin
@@ -1329,7 +1331,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
         if have2: p2_min = np.ones(time_two.shape,     dtype=bool)
         if have3: p3_min = np.ones(time_overlap.shape, dtype=bool)
         ix['pts'].append(t_min)
-    if _process(xmax):
+    if _process(xmax, t_min, operator.gt):
         if have1: p1_max = time_one <= xmax
         if have2: p2_max = time_two <= xmax
         if have3: p3_max = time_overlap <= xmax

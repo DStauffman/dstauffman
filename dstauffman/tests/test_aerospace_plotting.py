@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from dstauffman import close_all
+from dstauffman import close_all, LogLevel
 import dstauffman.aerospace as space
 
 #%% Functions - make_quaternion_plot
@@ -151,8 +151,8 @@ class Test_make_quaternion_plot(unittest.TestCase):
     @patch('dstauffman.aerospace.plotting.logger')
     def test_none3(self, mock_logger):
         self.figs = space.make_quaternion_plot('', None, None, None, None)
-        mock_logger.info.assert_called_once()
-        mock_logger.info.assert_called_with('No quaternion data was provided, so no plot was generated for "".')
+        mock_logger.log.assert_called_once()
+        mock_logger.log.assert_called_with(LogLevel.L5, 'No quaternion data was provided, so no plot was generated for "".')
 
     def tearDown(self):
         if self.figs:

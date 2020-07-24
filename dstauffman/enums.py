@@ -109,6 +109,49 @@ class ReturnCodes(IntEnumPlus):
     test_failures    = 4 # A test ran to completion, but failed its criteria
     no_coverage_tool = 5 # Coverage tool is not installed
 
+#%% Enums - LogLevel
+class LogLevel(IntEnumPlus):
+    r"""
+    Add 10-ish custom levels that give more degradation beween WARNING, INFO and DEBUG.
+        50 (CRITICAL, FATAL)
+        40 (ERROR)
+    L0  35
+    L1  30 (WARNING, WARN)
+    L2  28
+    L3  26
+    L4  24
+    L5  20 (INFO)
+    L6  18
+    L7  16
+    L8  14
+    L9  12
+    L10 10 (DEBUG)
+    L11  9
+    L12  8
+    L20  0  (NOTSET)
+
+    Examples
+    --------
+    >>> from dstauffman import LogLevel
+    >>> print(LogLevel.L5)
+    LogLevel.L5: 20
+
+    """
+    L0  = 35
+    L1  = 30
+    L2  = 28
+    L3  = 26
+    L4  = 24
+    L5  = 20
+    L6  = 18
+    L7  = 16
+    L8  = 14
+    L9  = 12
+    L10 = 10
+    L11 =  9
+    L12 =  8
+    L20 =  0
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='dstauffman.tests.test_enums', exit=False)

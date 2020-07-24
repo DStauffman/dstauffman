@@ -37,7 +37,7 @@ class Test_act_deact_logging(unittest.TestCase):
             logger.debug('Test message')
         lines = cm.output
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0], 'DEBUG:Test:Test message')
+        self.assertEqual(lines[0], 'L10:Test:Test message')
         dcs.deactivate_logging()
         self.assertFalse(dcs.logs.root_logger.handlers)
 

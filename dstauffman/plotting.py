@@ -19,6 +19,7 @@ from matplotlib.ticker import StrMethodFormatter
 
 from dstauffman.classes      import Frozen
 from dstauffman.constants    import DEFAULT_COLORMAP
+from dstauffman.enums        import LogLevel
 from dstauffman.plot_generic import make_time_plot
 from dstauffman.plot_support import ColorMap, ignore_plot_data, setup_plots
 from dstauffman.time         import convert_date, convert_time_units
@@ -256,7 +257,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
-        logger.info(f' {description} plot skipped due to missing data.')
+        logger.log(LogLevel.L5, f' {description} plot skipped due to missing data.')
         return None
     assert time.ndim == 1, 'Time must be a 1D array.'
 
@@ -509,7 +510,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
-        logger.info(f' {label} plot skipped due to missing data.')
+        logger.log(LogLevel.L5, f' {label} plot skipped due to missing data.')
         return
 
     # hard-coded values

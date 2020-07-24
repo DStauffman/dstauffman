@@ -239,8 +239,8 @@ class Test_make_difference_plot(unittest.TestCase):
     @patch('dstauffman.plot_generic.logger')
     def test_none3(self, mock_logger):
         self.figs = dcs.make_difference_plot('', None, None, None, None)
-        self.assertEqual(mock_logger.info.call_count, 1)
-        mock_logger.info.assert_called_with('No difference data was provided, so no plot was generated for "".')
+        self.assertEqual(mock_logger.log.call_count, 1)
+        mock_logger.log.assert_called_with(dcs.LogLevel.L5, 'No difference data was provided, so no plot was generated for "".')
 
     def tearDown(self):
         if self.figs:

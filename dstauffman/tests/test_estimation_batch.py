@@ -915,16 +915,16 @@ class Test_plot_bpe_convergence(unittest.TestCase):
         self.figs = []
 
     def test_nominal(self):
-        self.figs.append(estm.plot_bpe_convergence(self.costs, self.opts))
+        self.figs.append(estm.plot_bpe_convergence(self.costs, opts=self.opts))
 
     def test_only_two_costs(self):
-        self.figs.append(estm.plot_bpe_convergence(self.costs[np.array([0, 3])], self.opts))
+        self.figs.append(estm.plot_bpe_convergence(self.costs[np.array([0, 3])], opts=self.opts))
 
     def test_no_opts(self):
         self.figs.append(estm.plot_bpe_convergence(self.costs))
 
     def test_no_costs(self):
-        self.figs.append(estm.plot_bpe_convergence([], self.opts))
+        self.figs.append(estm.plot_bpe_convergence([], opts=self.opts))
 
     def tearDown(self):
         close_all(self.figs)
@@ -967,7 +967,7 @@ class Test_plot_bpe_results(unittest.TestCase):
         self.assertEqual(lines[4], "Data isn't available for covariance plot.")
 
     def test_no_plots(self):
-        estm.plot_bpe_results(self.bpe_results, self.opts)
+        estm.plot_bpe_results(self.bpe_results, opts=self.opts)
 
     def test_bad_plot(self):
         with self.assertRaises(ValueError):

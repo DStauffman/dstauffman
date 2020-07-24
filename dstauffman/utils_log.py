@@ -15,6 +15,8 @@ import unittest
 
 import numpy as np
 
+from dstauffman.enums import LogLevel
+
 #%% Globals
 logger = logging.getLogger(__name__)
 
@@ -69,12 +71,12 @@ def setup_dir(folder, rec=False):
             else:
                 raise RuntimeError('Unexpected file type, neither file nor folder: "{}".'\
                     .format(this_full_elem)) # pragma: no cover
-        logger.warning('Files/Sub-folders were removed from: "' + folder + '"')
+        logger.log(LogLevel.L1, 'Files/Sub-folders were removed from: "' + folder + '"')
     else:
         # create directory if it does not exist
         try:
             os.makedirs(folder)
-            logger.warning('Created directory: "' + folder + '"')
+            logger.log(LogLevel.L1, 'Created directory: "' + folder + '"')
         except: # pragma: no cover
             # re-raise last exception, could try to handle differently in the future
             raise # pragma: no cover
@@ -154,7 +156,7 @@ def fix_rollover(data, roll, axis=None):
             # step down occurs after a top to bottom roll over.
             compensation_t2b[roll_ix[i] + 1:roll_ix[i+1] + 1] = -roll * (i+1)
         # display a warning based on the log level
-        logger.info('corrected {} bottom to top rollover(s)'.format(roll_ix.size-1))
+        logger.log(LogLevel.L6, 'corrected {} bottom to top rollover(s)'.format(roll_ix.size-1))
 
     # find indices for top to bottom rollover, these indices act as partition boundaries
     roll_ix = np.flatnonzero(np.diff(data) < -(roll/2))
@@ -167,14 +169,14 @@ def fix_rollover(data, roll, axis=None):
             # step up occurs after a bottom to top roll over.
             compensation_b2t[roll_ix[i] + 1:roll_ix[i+1] + 1] = roll * (i+1)
         # display a warning based on the log level
-        logger.info('corrected {} top to bottom rollover(s)'.format(roll_ix.size-1))
+        logger.log(LogLevel.L6, 'corrected {} top to bottom rollover(s)'.format(roll_ix.size-1))
 
     # create output
     out = data + compensation_b2t + compensation_t2b
 
     # double check for remaining rollovers
     if np.any(np.diff(out) > (roll/2)) | np.any(np.diff(out) < -(roll/2)):
-        logger.info('A rollover was fixed recursively')
+        logger.log(LogLevel.L6, 'A rollover was fixed recursively')
         out = fix_rollover(out, roll)
     return out
 
