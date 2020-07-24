@@ -114,7 +114,7 @@ if __name__ == '__main__':
     truth      = dcs.TruthPlotter(truth_time, truth_data)
 
     # Logger
-    dcs.activate_logging(logging.DEBUG)
+    dcs.activate_logging(dcs.LogLevel.L5)
 
     # BPE Settings
     opti_opts = estm.OptiOpts()
@@ -148,7 +148,7 @@ if __name__ == '__main__':
 
     # Run code
     if rerun:
-        (bpe_results, results) = estm.run_bpe(opti_opts, log_level=logging.DEBUG)
+        (bpe_results, results) = estm.run_bpe(opti_opts, log_level=None)
     else:
         bpe_results = estm.BpeResults.load(os.path.join(opti_opts.output_folder, opti_opts.output_results))
         results     = sim_model(sim_params) # just re-run, nothing is actually saved by this model
@@ -169,6 +169,6 @@ if __name__ == '__main__':
         dcs.setup_plots(f1, opts)
 
         # make BPE plots
-        bpe_plots = {'innovs': True, 'convergence': False, 'correlation': True, 'info_svd': True, \
-            'covariance': False}
-        estm.plot_bpe_results(bpe_results, opts, plots=bpe_plots)
+        bpe_plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, \
+            'covariance': True}
+        estm.plot_bpe_results(bpe_results, opts=opts, plots=bpe_plots)

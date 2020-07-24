@@ -17,7 +17,7 @@ from unittest.mock import patch
 import numpy as np
 
 from dstauffman import capture_output, close_all, compare_two_classes, get_tests_dir, Frozen, \
-                       Opts, Plotter, rss
+                       LogLevel, Opts, Plotter, rss
 import dstauffman.estimation as estm
 
 #%% Hard-coded values
@@ -234,7 +234,7 @@ class Test_BpeResults(unittest.TestCase):
         self.bpe_results.num_evals = 5
         self.filename    = os.path.join(get_tests_dir(), 'test_estimation_results.hdf5')
         self.filename2   = self.filename.replace('hdf5', 'pkl')
-        estm.batch.logger.setLevel(logging.ERROR)
+        estm.batch.logger.setLevel(LogLevel.L0)
 
     def test_save(self):
         self.bpe_results.save(self.filename)
@@ -321,30 +321,30 @@ class Test__print_divider(unittest.TestCase):
         self.output = '******************************'
 
     def test_with_new_line(self, mock_logger):
-        estm.batch.logger.setLevel(logging.INFO)
+        estm.batch.logger.setLevel(LogLevel.L5)
         estm.batch._print_divider()
         self.assertEqual(mock_logger.log.call_count, 2)
-        mock_logger.log.assert_any_call(logging.INFO, ' ')
-        mock_logger.log.assert_any_call(logging.INFO, '******************************')
+        mock_logger.log.assert_any_call(LogLevel.L5, ' ')
+        mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
 
     def test_no_new_line(self, mock_logger):
-        estm.batch.logger.setLevel(logging.DEBUG)
+        estm.batch.logger.setLevel(LogLevel.L8)
         estm.batch._print_divider(new_line=False)
-        mock_logger.log.assert_called_with(logging.INFO, '******************************')
+        mock_logger.log.assert_called_with(LogLevel.L5, '******************************')
 
     def test_alternative_level(self, mock_logger):
-        estm.batch.logger.setLevel(logging.ERROR)
-        estm.batch._print_divider(level=logging.CRITICAL)
+        estm.batch.logger.setLevel(LogLevel.L2)
+        estm.batch._print_divider(level=LogLevel.L0)
         self.assertEqual(mock_logger.log.call_count, 2)
-        mock_logger.log.assert_any_call(logging.CRITICAL, ' ')
-        mock_logger.log.assert_any_call(logging.CRITICAL, '******************************')
+        mock_logger.log.assert_any_call(LogLevel.L0, ' ')
+        mock_logger.log.assert_any_call(LogLevel.L0, '******************************')
 
     def test_not_logging(self, mock_logger):
-        estm.batch.logger.setLevel(logging.ERROR)
+        estm.batch.logger.setLevel(LogLevel.L2)
         estm.batch._print_divider()
         self.assertEqual(mock_logger.log.call_count, 2)
-        mock_logger.log.assert_any_call(logging.INFO, ' ')
-        mock_logger.log.assert_any_call(logging.INFO, '******************************')
+        mock_logger.log.assert_any_call(LogLevel.L5, ' ')
+        mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
         # TODO: how to test that this wouldn't log anything?
 
 #%% _function_wrapper
@@ -386,7 +386,7 @@ class Test__finite_differences(unittest.TestCase):
         Normalized
     """
     def setUp(self):
-        estm.batch.logger.setLevel(logging.INFO)
+        estm.batch.logger.setLevel(LogLevel.L5)
         time        = np.arange(251)
         sim_params  = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time  = np.arange(-10, 201)
@@ -508,7 +508,7 @@ class Test__check_for_convergence(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        estm.batch.logger.setLevel(logging.INFO)
+        estm.batch.logger.setLevel(LogLevel.L5)
         self.opti_opts        = type('Class1', (object, ), {'tol_cosmax_grad': 1, 'tol_delta_step': 2, \
             'tol_delta_cost': 3})
         self.cosmax           = 10
@@ -522,28 +522,28 @@ class Test__check_for_convergence(unittest.TestCase):
     def test_convergence1(self, mock_logger):
         convergence = estm.batch._check_for_convergence(self.opti_opts, 0.5, self.delta_step_len, self.pred_func_change)
         self.assertTrue(convergence)
-        mock_logger.warning.assert_called_once()
-        mock_logger.warning.assert_called_with('Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
+        mock_logger.log.assert_called_once()
+        mock_logger.log.assert_called_with(LogLevel.L3, 'Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
 
     def test_convergence2(self, mock_logger):
         convergence = estm.batch._check_for_convergence(self.opti_opts, self.cosmax, 1.5, self.pred_func_change)
         self.assertTrue(convergence)
-        mock_logger.warning.assert_called_once()
-        mock_logger.warning.assert_called_with('Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
+        mock_logger.log.assert_called_once()
+        mock_logger.log.assert_called_with(LogLevel.L3, 'Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
 
     def test_convergence3(self, mock_logger):
         convergence = estm.batch._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, -2.5)
         self.assertTrue(convergence)
-        mock_logger.warning.assert_called_once()
-        mock_logger.warning.assert_called_with('Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
+        mock_logger.log.assert_called_once()
+        mock_logger.log.assert_called_with(LogLevel.L3, 'Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
 
     def test_convergence4(self, mock_logger):
         convergence = estm.batch._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
         self.assertTrue(convergence)
-        self.assertEqual(mock_logger.warning.call_count, 3)
-        mock_logger.warning.assert_any_call('Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
-        mock_logger.warning.assert_any_call('Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
-        mock_logger.warning.assert_any_call('Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
+        self.assertEqual(mock_logger.log.call_count, 3)
+        mock_logger.log.assert_any_call(LogLevel.L3, 'Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
+        mock_logger.log.assert_any_call(LogLevel.L3, 'Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
+        mock_logger.log.assert_any_call(LogLevel.L3, 'Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
 
     def test_no_logging(self, mock_logger):
         mock_logger.setLevel(logging.NOTSET) # CRITICAL
@@ -607,7 +607,7 @@ class Test__dogleg_search(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        estm.batch.logger.setLevel(logging.INFO)
+        estm.batch.logger.setLevel(LogLevel.L5)
         time        = np.arange(251)
         sim_params  = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time  = np.arange(-10, 201)
@@ -720,7 +720,7 @@ class Test_validate_opti_opts(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        estm.batch.logger.setLevel(logging.INFO)
+        estm.batch.logger.setLevel(LogLevel.L5)
         self.opti_opts = estm.OptiOpts()
         self.opti_opts.model_func     = str
         self.opti_opts.model_args     = {'a': 1}
@@ -739,15 +739,15 @@ class Test_validate_opti_opts(unittest.TestCase):
     def test_nominal(self, mock_logger):
         is_valid = estm.validate_opti_opts(self.opti_opts)
         self.assertTrue(is_valid)
-        mock_logger.log.assert_called_with(logging.INFO, '******************************')
-        mock_logger.info.assert_called_with('Validating optimization options.')
+        mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
+        mock_logger.log.assert_any_call(LogLevel.L5, 'Validating optimization options.')
 
     def test_no_logging(self, mock_logger):
-        estm.batch.logger.setLevel(logging.WARNING)
+        estm.batch.logger.setLevel(LogLevel.L3)
         is_valid = estm.validate_opti_opts(self.opti_opts)
         self.assertTrue(is_valid)
-        mock_logger.log.assert_called_with(logging.INFO, '******************************')
-        mock_logger.info.assert_called_with('Validating optimization options.')
+        mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
+        mock_logger.log.assert_any_call(LogLevel.L5, 'Validating optimization options.')
 
     def test_not_valid1(self, mock_logger):
         self.opti_opts.model_func = None
@@ -797,7 +797,7 @@ class Test_run_bpe(unittest.TestCase):
         TBD
     """
     def setUp(self):
-        estm.batch.logger.setLevel(logging.INFO)
+        estm.batch.logger.setLevel(LogLevel.L5)
         time        = np.arange(251)
         sim_params  = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time  = np.arange(-10, 201)
@@ -820,7 +820,7 @@ class Test_run_bpe(unittest.TestCase):
         self.opti_opts.params.append(estm.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
     def test_nominal(self, mock_logger):
-        mock_logger.level = logging.INFO
+        mock_logger.level = LogLevel.L5
         (bpe_results, results) = estm.run_bpe(self.opti_opts)
         # TODO: check logging results?
         self.assertTrue(isinstance(bpe_results, estm.BpeResults))
@@ -842,7 +842,7 @@ class Test_run_bpe(unittest.TestCase):
         pass # TODO: method not yet coded all the way
 
     def test_two_sided(self, mock_logger):
-        mock_logger.level = logging.INFO
+        mock_logger.level = LogLevel.L5
         self.opti_opts.slope_method = 'two_sided'
         estm.run_bpe(self.opti_opts)
 #        for (ix, line) in enumerate(lines):
@@ -858,7 +858,7 @@ class Test_run_bpe(unittest.TestCase):
 
     def test_to_convergence(self, mock_logger):
         self.opti_opts.max_iters = 100
-        mock_logger.level = logging.INFO
+        mock_logger.level = LogLevel.L5
         estm.run_bpe(self.opti_opts)
 #        for line in lines:
 #            if line.startswith('Declare convergence'):

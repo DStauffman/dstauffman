@@ -22,7 +22,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy.linalg import norm
 
-from dstauffman import activate_logging, deactivate_logging, Frozen, Opts, \
+from dstauffman import activate_logging, deactivate_logging, Frozen, LogLevel, Opts, \
                        plot_correlation_matrix, plot_time_history, pprint_dict, rss, SaveAndLoad, \
                        setup_dir, setup_plots
 
@@ -327,7 +327,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
         return '\n'.join(text)
 
 #%% _print_divider
-def _print_divider(new_line=True, level=logging.INFO):
+def _print_divider(new_line=True, level=LogLevel.L5):
     r"""
     Print some characters to the std out to break apart the different stpes within the model.
 
@@ -495,7 +495,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 
         # call model with new parameters
         opti_opts.set_param_func(names=names, values=temp_params, **model_args)
-        logger.debug('  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
+        logger.log(LogLevel.L8, '  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
         (_, new_innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 
         if two_sided:
@@ -504,7 +504,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
             else:
                 temp_params = temp_params_minus.copy()
             opti_opts.set_param_func(names=names, values=temp_params, **model_args)
-            logger.debug('  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
+            logger.log(LogLevel.L8, '  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
             (_, new_innovs_minus) = _function_wrapper(opti_opts, bpe_results, model_args)
 
         # compute the jacobian
@@ -631,15 +631,15 @@ def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
     # check for and optionally display the reasons for convergence
     if cosmax <= opti_opts.tol_cosmax_grad:
         convergence = True
-        logger.warning('Declare convergence because cosmax of {} <= options.tol_cosmax_grad of {}'.format(\
+        logger.log(LogLevel.L3, 'Declare convergence because cosmax of {} <= options.tol_cosmax_grad of {}'.format(\
                 cosmax, opti_opts.tol_cosmax_grad))
     if delta_step_len <= opti_opts.tol_delta_step:
         convergence = True
-        logger.warning('Declare convergence because delta_step_len of {} <= options.tol_delta_step of {}'.format(\
+        logger.log(LogLevel.L3, 'Declare convergence because delta_step_len of {} <= options.tol_delta_step of {}'.format(\
                 delta_step_len, opti_opts.tol_delta_step))
     if abs(pred_func_change) <= opti_opts.tol_delta_cost:
         convergence = True
-        logger.warning('Declare convergence because abs(pred_func_change) of {} <= options.tol_delta_cost of {}'.format(\
+        logger.log(LogLevel.L3, 'Declare convergence because abs(pred_func_change) of {} <= options.tol_delta_cost of {}'.format(\
                 abs(pred_func_change), opti_opts.tol_delta_cost))
     return convergence
 
@@ -818,7 +818,7 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
             params = np.maximum(params, params_min)
 
         # Run model
-        logger.debug('  Running model with new trial parameters.')
+        logger.log(LogLevel.L8, '  Running model with new trial parameters.')
         opti_opts.set_param_func(names=names, values=params, **model_args)
         (_, innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 
@@ -876,19 +876,19 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
                 num_shrinks += 1
                 try_again = True
 
-        logger.debug(' Tried a {} step of length: {}, (with scale: {}).'.format(step_type, step_len, step_scale))
-        logger.debug(' New trial cost: {}'.format(trial_cost))
-        logger.debug(' With result: {}'.format(step_resolution))
+        logger.log(LogLevel.L8, ' Tried a {} step of length: {}, (with scale: {}).'.format(step_type, step_len, step_scale))
+        logger.log(LogLevel.L8, ' New trial cost: {}'.format(trial_cost))
+        logger.log(LogLevel.L8, ' With result: {}'.format(step_resolution))
         if was_limited:
-            logger.debug(' Caution, the step length was limited by the given bounds.')
+            logger.log(LogLevel.L8, ' Caution, the step length was limited by the given bounds.')
 
     # Display status message
     if num_shrinks >= opti_opts.step_limit:
-        logger.debug('Died on step cuts.')
-        logger.debug(' Failed to find any step on the dogleg path that was actually an improvement')
-        logger.debug(' before exceeding the step cut limit, which was {}  steps.'.format(opti_opts.step_limit))
+        logger.log(LogLevel.L8, 'Died on step cuts.')
+        logger.log(LogLevel.L8, ' Failed to find any step on the dogleg path that was actually an improvement')
+        logger.log(LogLevel.L8, ' before exceeding the step cut limit, which was {}  steps.'.format(opti_opts.step_limit))
         failed = True
-    logger.info(' New parameters are: {}'.format(cur_results.params))
+    logger.log(LogLevel.L5, ' New parameters are: {}'.format(cur_results.params))
     return failed
 
 #%% _analyze_results
@@ -932,8 +932,8 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     num_params    = len(bpe_results.param_names)
 
     # update the status
-    logger.info('Analyzing final results.')
-    logger.debug('There were a total of {} function model evaluations.'.format(bpe_results.num_evals))
+    logger.log(LogLevel.L5, 'Analyzing final results.')
+    logger.log(LogLevel.L8, 'There were a total of {} function model evaluations.'.format(bpe_results.num_evals))
 
     # exit if nothing else to analyze
     if opti_opts.max_iters == 0:
@@ -954,7 +954,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
         temp = np.power(S_jacobian, -2, out=np.zeros(S_jacobian.shape), where=S_jacobian > min_eig)
         covariance = V_jacobian @ np.diag(temp) @ Vh_jacobian
     except MemoryError: # pragma: no cover
-        logger.info('Singular value decomposition of Jacobian failed.')
+        logger.log(LogLevel.L5, 'Singular value decomposition of Jacobian failed.')
         V_jacobian = np.full((num_params, num_params), np.nan, dtype=float)
         covariance = np.inv(jacobian.T @ jacobian)
 
@@ -1007,8 +1007,8 @@ def validate_opti_opts(opti_opts):
 
     """
     # display some information
-    _print_divider(new_line=False, level=logging.INFO)
-    logger.info('Validating optimization options.')
+    _print_divider(new_line=False, level=LogLevel.L5)
+    logger.log(LogLevel.L5, 'Validating optimization options.')
     # Must have specified all parameters
     assert callable(opti_opts.model_func)
     assert isinstance(opti_opts.model_args, dict)
@@ -1026,7 +1026,7 @@ def validate_opti_opts(opti_opts):
     return True
 
 #%% run_bpe
-def run_bpe(opti_opts, log_level=logging.INFO):
+def run_bpe(opti_opts, log_level=LogLevel.L5):
     r"""
     Run the batch parameter estimator with the given model optimization options.
 
@@ -1092,9 +1092,9 @@ def run_bpe(opti_opts, log_level=logging.INFO):
     cosmax = 1 # TODO: calculate somewhere later
 
     # run the initial model
-    new_line = logger.level >= logging.INFO
-    _print_divider(new_line, level=logging.INFO)
-    logger.warning('Running initial simulation.')
+    new_line = logger.level >= LogLevel.L5
+    _print_divider(new_line, level=LogLevel.L5)
+    logger.log(LogLevel.L3, 'Running initial simulation.')
     (_, cur_results.innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 
     # initialize loop variables
@@ -1113,8 +1113,8 @@ def run_bpe(opti_opts, log_level=logging.INFO):
     bpe_results.costs.append(cur_results.cost)
 
     # display initial status
-    logger.info(' Initial parameters: {}'.format(cur_results.params))
-    logger.info(' Initial cost: {}'.format(cur_results.cost))
+    logger.log(LogLevel.L5, ' Initial parameters: {}'.format(cur_results.params))
+    logger.log(LogLevel.L5, ' Initial cost: {}'.format(cur_results.cost))
 
     # Set-up saving: check that the folder exists
     if is_saving:
@@ -1128,8 +1128,8 @@ def run_bpe(opti_opts, log_level=logging.INFO):
     jacobian    = 0
     while iter_count <= opti_opts.max_iters:
         # update status
-        _print_divider(level=logging.WARNING)
-        logger.warning('Running iteration {}.'.format(iter_count))
+        _print_divider(level=LogLevel.L3)
+        logger.log(LogLevel.L3, 'Running iteration {}.'.format(iter_count))
 
         # run finite differences code to numerically approximate the Jacobian, gradient and Hessian
         (jacobian, gradient, hessian) = _finite_differences(opti_opts, model_args, bpe_results, \
@@ -1140,7 +1140,7 @@ def run_bpe(opti_opts, log_level=logging.INFO):
         grad_dot_step = gradient.T @ delta_param
         if grad_dot_step > 0 and iter_count > 1:
             cur_results.trust_rad += opti_opts.grow_radius
-            logger.debug('Old step still in descent direction, so expand current trust_radius to {}.'.format(\
+            logger.log(LogLevel.L8, 'Old step still in descent direction, so expand current trust_radius to {}.'.format(\
                 cur_results.trust_rad))
 
         # calculate the delta parameter step to try on the next iteration
@@ -1176,15 +1176,15 @@ def run_bpe(opti_opts, log_level=logging.INFO):
 
     # display if this converged out timed out on iteration steps
     if not convergence and not failed:
-        logger.info('Stopped iterating due to hitting the max number of iterations: {}.'.format(opti_opts.max_iters))
+        logger.log(LogLevel.L5, 'Stopped iterating due to hitting the max number of iterations: {}.'.format(opti_opts.max_iters))
 
     # run an optional final function before doing the final simulation
     if opti_opts.final_func is not None:
         opti_opts.final_func(**model_args, settings=init_saves)
 
     # Run for final time
-    _print_divider(level=logging.WARNING)
-    logger.warning('Running final simulation.')
+    _print_divider(level=LogLevel.L3)
+    logger.log(LogLevel.L3, 'Running final simulation.')
     opti_opts.set_param_func(names=names, values=cur_results.params, **model_args)
     (results, cur_results.innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
     cur_results.cost = 0.5 * rss(cur_results.innovs, ignore_nans=True)
@@ -1194,20 +1194,20 @@ def run_bpe(opti_opts, log_level=logging.INFO):
     bpe_results.costs.append(cur_results.cost)
 
     # display final status
-    logger.info(' Final parameters: {}'.format(bpe_results.final_params))
-    logger.info(' Final cost: {}'.format(bpe_results.final_cost))
+    logger.log(LogLevel.L5, ' Final parameters: {}'.format(bpe_results.final_params))
+    logger.log(LogLevel.L5, ' Final cost: {}'.format(bpe_results.final_cost))
 
     # analyze BPE results
     _analyze_results(opti_opts, bpe_results, jacobian)
 
     # show status and save results
     if is_saving:
-        logger.warning('Saving results to: "{}".'.format(filename))
+        logger.log(LogLevel.L2, 'Saving results to: "{}".'.format(filename))
     if is_saving:
         bpe_results.save(filename)
 
     # display total elapsed time
-    logger.warning('BPE Model completed: ' + time.strftime('%H:%M:%S', time.gmtime(time.time()-start_model)))
+    logger.log(LogLevel.L1, 'BPE Model completed: ' + time.strftime('%H:%M:%S', time.gmtime(time.time()-start_model)))
     if log_level is not None:
         deactivate_logging()
 
