@@ -1,7 +1,5 @@
 r"""
-Test file for the `quat` module module of the "dstauffman.aerospace" library.  It is intented to
-contain test cases to demonstrate functionaliy and correct outcomes for all the functions within
-the module.
+Test file for the `quat` module of the "dstauffman.aerospace" library.
 
 Notes
 -----
@@ -16,10 +14,28 @@ import numpy as np
 from dstauffman import capture_output
 import dstauffman.aerospace as space
 
-#%% quat_assertions
-class Test_quat_assertions(unittest.TestCase):
+#%% aerospace.QUAT_SIZE
+class Test_aerospace_QUAT_SIZE(unittest.TestCase):
     r"""
-    Tests the quat_assertions function with the following cases:
+    Tests the aerospace.QUAT_SIZE function with the following cases:
+        Exists and is 4
+    """
+    def test_exists(self):
+        self.assertEqual(space.QUAT_SIZE, 4)
+
+#%% aerospace.USE_ASSERTIONS
+class Test_aerospace_USE_ASSERTIONS(unittest.TestCase):
+    r"""
+    Tests the aerospace.USE_ASSERTIONS function with the following cases:
+        Exists and is boolean
+    """
+    def test_exists(self):
+        self.assertTrue(isinstance(space.USE_ASSERTIONS, bool))
+
+#%% aerospace.quat_assertions
+class Test_aerospace_quat_assertions(unittest.TestCase):
+    r"""
+    Tests the aerospace.quat_assertions function with the following cases:
         Nominal (x2)
         Array (x2)
         Bad (x7)
@@ -84,10 +100,10 @@ class Test_quat_assertions(unittest.TestCase):
     def test_skip_assertions(self):
         space.quat_assertions(self.q6, skip_assertions=True)
 
-#%% qrot
-class Test_qrot(unittest.TestCase):
+#%% aerospace.qrot
+class Test_aerospace_qrot(unittest.TestCase):
     r"""
-    Tests the qrot function with the following cases:
+    Tests the aerospace.qrot function with the following cases:
         Single input case
         Single axis, multiple angles
         Multiple axes, single angle
@@ -139,10 +155,10 @@ class Test_qrot(unittest.TestCase):
         with self.assertRaises(AssertionError):
             space.qrot(self.axis, np.array([self.angle, self.angle2]))
 
-#%% quat_angle_diff
-class test_quat_angle_diff(unittest.TestCase):
+#%% aerospace.quat_angle_diff
+class Test_aerospace_quat_angle_diff(unittest.TestCase):
     r"""
-    Tests the quat_angle_diff function with the following cases:
+    Tests the aerospace.quat_angle_diff function with the following cases:
         Nominal (x2)
         Array (x3)
         Zero diff (x4)
@@ -234,10 +250,10 @@ class test_quat_angle_diff(unittest.TestCase):
         self.assertEqual(comp.size, 0)
         self.assertEqual(comp.shape, (3, 0))
 
-#%% quat_from_euler
-class test_quat_from_euler(unittest.TestCase):
+#%% aerospace.quat_from_euler
+class Test_aerospace_quat_from_euler(unittest.TestCase):
     r"""
-    Tests the quat_from_euler function with the following cases:
+    Tests the aerospace.quat_from_euler function with the following cases:
         Nominal (x2 different values)
         Default sequence
         Repeated axis
@@ -317,10 +333,10 @@ class test_quat_from_euler(unittest.TestCase):
         with self.assertRaises(ValueError):
             space.quat_from_euler(np.zeros((3,3,1)))
 
-#%% quat_interp
-class test_quat_interp(unittest.TestCase):
+#%% aerospace.quat_interp
+class Test_aerospace_quat_interp(unittest.TestCase):
     r"""
-    Tests the quat_interp function with the following cases:
+    Tests the aerospace.quat_interp function with the following cases:
         TBD
     """
     def setUp(self):
@@ -359,10 +375,10 @@ class test_quat_interp(unittest.TestCase):
         np.testing.assert_array_equal(qout[:,[0, -1]], np.nan)
         self.assertEqual(output, 'Desired time not found within input time vector.')
 
-#%% quat_inv
-class test_quat_inv(unittest.TestCase):
+#%% aerospace.quat_inv
+class Test_aerospace_quat_inv(unittest.TestCase):
     r"""
-    Tests the quat_inv function with the following cases:
+    Tests the aerospace.quat_inv function with the following cases:
         Single quat (x2 different quats)
         Quat array
         Null (x2 different null sizes)
@@ -405,10 +421,10 @@ class test_quat_inv(unittest.TestCase):
         np.testing.assert_array_equal(null_inv, self.null)
         np.testing.assert_array_equal(null_inv.shape, self.null.shape)
 
-#%% quat_mult
-class test_quat_mult(unittest.TestCase):
+#%% aerospace.quat_mult
+class Test_aerospace_quat_mult(unittest.TestCase):
     r"""
-    Tests the quat_mult function with the following cases:
+    Tests the aerospace.quat_mult function with the following cases:
         Single quat (x2 different quats)
         Reverse order
         Quat array times scalar (x2 orders + x1 array-array)
@@ -514,10 +530,10 @@ class test_quat_mult(unittest.TestCase):
         np.testing.assert_array_equal(quat, self.null)
         np.testing.assert_array_equal(quat.shape, self.null.shape)
 
-#%% quat_norm
-class test_quat_norm(unittest.TestCase):
+#%% aerospace.quat_norm
+class Test_aerospace_quat_norm(unittest.TestCase):
     r"""
-    Tests the quat_norm function with the following cases:
+    Tests the aerospace.quat_norm function with the following cases:
         Single quat (x3 different quats)
         Quat array
         Null (x2 different null sizes)
@@ -568,10 +584,10 @@ class test_quat_norm(unittest.TestCase):
         np.testing.assert_array_equal(quat_norm, self.null)
         np.testing.assert_array_equal(quat_norm.shape, self.null.shape)
 
-#%% quat_prop
-class test_quat_prop(unittest.TestCase):
+#%% aerospace.quat_prop
+class Test_aerospace_quat_prop(unittest.TestCase):
     r"""
-    Tests the quat_prop function with the following cases:
+    Tests the aerospace.quat_prop function with the following cases:
         Nominal case
         No renormalization case (Raises norm AttributeError)
     """
@@ -594,10 +610,10 @@ class test_quat_prop(unittest.TestCase):
         with self.assertRaises(AssertionError):
             space.quat_prop(self.quat, self.delta_ang, renorm=False)
 
-#%% quat_times_vector
-class test_quat_times_vector(unittest.TestCase):
+#%% aerospace.quat_times_vector
+class Test_aerospace_quat_times_vector(unittest.TestCase):
     r"""
-    Tests the quat_times_vector function with the following cases:
+    Tests the aerospace.quat_times_vector function with the following cases:
         Nominal
         Array inputs
     """
@@ -616,10 +632,10 @@ class test_quat_times_vector(unittest.TestCase):
         vec = space.quat_times_vector(self.quat, self.vec)
         np.testing.assert_array_almost_equal(vec, self.out)
 
-#%% quat_to_dcm
-class test_quat_to_dcm(unittest.TestCase):
+#%% aerospace.quat_to_dcm
+class Test_aerospace_quat_to_dcm(unittest.TestCase):
     r"""
-    Tests the quat_to_dcm function with the following cases:
+    Tests the aerospace.quat_to_dcm function with the following cases:
         Nominal case
     """
     def setUp(self):
@@ -633,10 +649,10 @@ class test_quat_to_dcm(unittest.TestCase):
         dcm = space.quat_to_dcm(self.quat)
         np.testing.assert_array_almost_equal(dcm, self.dcm)
 
-#%% quat_to_euler
-class test_quat_to_euler(unittest.TestCase):
+#%% aerospace.quat_to_euler
+class Test_aerospace_quat_to_euler(unittest.TestCase):
     r"""
-    Tests the quat_to_euler function with the following cases:
+    Tests the aerospace.quat_to_euler function with the following cases:
         Nominal
         Zero quat
         All valid sequences

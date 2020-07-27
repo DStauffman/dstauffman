@@ -1,7 +1,5 @@
 r"""
-Test file for the `classes` module module of the "dstauffman.aerospace" library.  It is intented
-to contain test cases to demonstrate functionaliy and correct outcomes for all the functions within
-the module.
+Test file for the `classes` module of the "dstauffman.aerospace" library.
 
 Notes
 -----
@@ -17,20 +15,20 @@ import numpy as np
 from dstauffman import get_tests_dir
 import dstauffman.aerospace as space
 
-#%% KfInnov
-class Test_KfInnov(unittest.TestCase):
+#%% aerospace.KfInnov
+class Test_aerospace_KfInnov(unittest.TestCase):
     r"""
-    Tests the KfInnov class with the following cases:
-        TBD
+    Tests the aerospace.KfInnov class with the following cases:
+        Nominal
     """
     def test_nominal(self):
         innov = space.KfInnov()
         self.assertTrue(isinstance(innov, space.KfInnov)) # TODO: test better
 
-#%% KfOut
-class Test_KfOut(unittest.TestCase):
+#%% aerospace.Kf
+class Test_aerospace_Kf(unittest.TestCase):
     r"""
-    Tests the KfOut class with the following cases:
+    Tests the aerospace.Kf class with the following cases:
         TBD
     """
     def setUp(self):
@@ -51,6 +49,14 @@ class Test_KfOut(unittest.TestCase):
     def tearDown(self):
         if os.path.isfile(self.filename):
             os.remove(self.filename)
+
+#%% aerospace.KfRecord
+class Test_aerospace_KfRecord(unittest.TestCase):
+    r"""
+    Tests the aerospace.KfRecord class with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% Unit test execution
 if __name__ == '__main__':

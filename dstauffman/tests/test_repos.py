@@ -1,6 +1,5 @@
 r"""
-Test file for the `repos` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `repos` module of the "dstauffman" library.
 
 Notes
 -----
@@ -10,20 +9,41 @@ Notes
 #%% Imports
 import os
 import unittest
+from unittest.mock import patch
 
 import dstauffman as dcs
 
 #%% run_docstrings
-pass
+class Test_run_docstrings(unittest.TestCase):
+    r"""
+    Tests the run_docstrings function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% run_unittests
-pass
+class Test_run_unittests(unittest.TestCase):
+    r"""
+    Tests the run_unittests function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% run_pytests
-pass
+class Test_run_pytests(unittest.TestCase):
+    r"""
+    Tests the run_pytests function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% run_coverage
-pass
+class Test_run_coverage(unittest.TestCase):
+    r"""
+    Tests the run_coverage function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% find_repo_issues
 class Test_find_repo_issues(unittest.TestCase):
@@ -216,7 +236,7 @@ class Test_delete_pyc(unittest.TestCase):
 #%% get_python_definitions
 class Test_get_python_definitions(unittest.TestCase):
     r"""
-    Tests the get_python_definitions function with these cases:
+    Tests the get_python_definitions function with the following cases:
         Functions
         Classes
         No arguments
@@ -246,10 +266,14 @@ class Test_get_python_definitions(unittest.TestCase):
         funcs = dcs.get_python_definitions('def a():\n    pass\nCONSTANT = 5\n')
         self.assertEqual(funcs, ['a', 'CONSTANT'])
 
+    def test_include_private(self):
+        funcs = dcs.get_python_definitions('def a():\n    pass\ndef _b():\n    pass\nclass _c():\n    pass\n', include_private=True)
+        self.assertEqual(funcs, ['a', '_b', '_c'])
+
 #%% make_python_init
 class Test_make_python_init(unittest.TestCase):
     r"""
-    Tests the make_python_init function with these cases:
+    Tests the make_python_init function with the following cases:
         TBD
     """
     def setUp(self):
@@ -307,6 +331,30 @@ class Test_make_python_init(unittest.TestCase):
             os.remove(self.filepath)
         if os.path.isfile(self.filename):
             os.remove(self.filename)
+
+#%% write_unit_test_templates
+@patch('dstauffman.repos.write_text_file')
+class Test_write_unit_test_templates(unittest.TestCase):
+    r"""
+    Tests the write_unit_test_templates function with the following cases:
+        TBD
+    """
+    def setUp(self):
+        self.folder = dcs.get_root_dir()
+        self.output = dcs.get_tests_dir() + '_template'
+        self.author = 'David C. Stauffer'
+        self.exclude = dcs.get_tests_dir()
+
+    def test_nominal(self, mock_writer):
+        with patch('dstauffman.repos.setup_dir') as mock_dir:
+            with dcs.capture_output() as out:
+                dcs.write_unit_test_templates(self.folder, self.output, author=self.author, exclude=self.exclude)
+            lines = out.getvalue().strip().split('\n')
+            out.close()
+            #self.assertEqual(mock_dir.setup_dir.call_count, 1) # TODO: figure out why this fails
+        self.assertGreater(len(lines), 5)
+        self.assertTrue(lines[0].startswith('Writing: '))
+        #self.assertGreater(mock_writer.write_text_file.call_count, 5) # TODO: figure out why this fails
 
 #%% Unit test execution
 if __name__ == '__main__':

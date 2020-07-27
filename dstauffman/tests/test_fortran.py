@@ -1,6 +1,5 @@
 r"""
-Test file for the `fortran` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `fortran` module of the "dstauffman" library.
 
 Notes
 -----
@@ -13,10 +12,18 @@ import unittest
 
 import dstauffman as dcs
 
+#%% _FortranSource
+class Test__FortranSource(unittest.TestCase):
+    r"""
+    Tests the _FortranSource class with the following cases:
+        TBD
+    """
+    pass # TODO: write this
+
 #%% _parse_source
 class Test__parse_source(unittest.TestCase):
     r"""
-    Tests the _parse_source function with these cases:
+    Tests the _parse_source function with the following cases:
         call the function
     """
     def setUp(self):
@@ -61,13 +68,44 @@ class Test__parse_source(unittest.TestCase):
             os.remove(self.filename)
 
 #%% _write_unit_test
-pass # TODO
+class Test__write_unit_test(unittest.TestCase):
+    r"""
+    Tests the _write_unit_test function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
+
+#%% _write_all_unit_test
+class Test__write_all_unit_test(unittest.TestCase):
+    r"""
+    Tests the _write_all_unit_test function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% _write_makefile
-pass # TODO
+class Test__write_makefile(unittest.TestCase):
+    r"""
+    Tests the _write_makefile function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% create_fortran_unit_tests
-pass # TODO
+class Test_create_fortran_unit_tests(unittest.TestCase):
+    r"""
+    Tests the create_fortran_unit_tests function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
+
+#%% create_fortran_makefile
+class Test_create_fortran_makefile(unittest.TestCase):
+    r"""
+    Tests the create_fortran_makefile function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% Unit test execution
 if __name__ == '__main__':

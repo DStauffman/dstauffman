@@ -1,6 +1,5 @@
 r"""
-Test file for the `support` module of the dstauffman.estimation code.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `support` module of the "dstauffman.estimation" library.
 
 Notes
 -----
@@ -92,10 +91,10 @@ class _Parameters(Frozen):
         self.models[1].field3['a'] = 500.
         self.models[1].field4['new'][1] = 444
 
-#%% _check_valid_param_name
-class Test__check_valid_param_name(unittest.TestCase):
+#%% estimation._check_valid_param_name
+class Test_estimation__check_valid_param_name(unittest.TestCase):
     r"""
-    Tests the _check_valid_param_name function with the following cases:
+    Tests the estimation._check_valid_param_name function with the following cases:
         Nominal
         Dictionary parameter
         Bad param name
@@ -142,10 +141,10 @@ class Test__check_valid_param_name(unittest.TestCase):
         is_valid = estm.support._check_valid_param_name(self.param, "param.models[1].field4['new'][0]")
         self.assertTrue(is_valid)
 
-#%% get_parameter
-class Test_get_parameter(unittest.TestCase):
+#%% estimation.get_parameter
+class Test_estimation_get_parameter(unittest.TestCase):
     r"""
-    Tests the get_parameter function with the following cases:
+    Tests the estimation.get_parameter function with the following cases:
         Nominal (covers four cases in one)
     """
     def setUp(self):
@@ -161,10 +160,10 @@ class Test_get_parameter(unittest.TestCase):
         values = estm.get_parameter(self.param, self.names)
         np.testing.assert_array_almost_equal(values, self.values)
 
-#%% set_parameter
-class Test_set_parameters(unittest.TestCase):
+#%% estimation.set_parameter
+class Test_estimation_set_parameter(unittest.TestCase):
     r"""
-    Tests the set_parameter function with the following cases:
+    Tests the estimation.set_parameter function with the following cases:
         Nominal (covers four cases in one)
     """
     def setUp(self):

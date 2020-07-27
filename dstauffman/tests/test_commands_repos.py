@@ -1,6 +1,5 @@
 r"""
-Test file for the `commands.repos` module of the "dstauffman" library.  It is intented to contain
-test cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `repos` module of the "dstauffman.commands" library.
 
 Notes
 -----
@@ -17,9 +16,9 @@ import dstauffman as dcs
 import dstauffman.commands as commands
 
 #%% commands.parse_enforce
-class Test_parse_enforce(unittest.TestCase):
+class Test_commands_parse_enforce(unittest.TestCase):
     r"""
-    Tests the parse_enforce function with the following cases:
+    Tests the commands.parse_enforce function with the following cases:
         Nominal
     """
     def setUp(self):
@@ -91,9 +90,9 @@ class Test_parse_enforce(unittest.TestCase):
 
 #%% commands.execute_enforce
 @patch('dstauffman.commands.repos.find_repo_issues')
-class Test_execute_enforce(unittest.TestCase):
+class Test_commands_execute_enforce(unittest.TestCase):
     r"""
-    Tests the execute_enforce function with the following cases:
+    Tests the commands.execute_enforce function with the following cases:
         Nominal
         TBD
     """
@@ -134,9 +133,9 @@ class Test_execute_enforce(unittest.TestCase):
         mocker.assert_called_once_with(**self.patch_args)
 
 #%% commands.parse_make_init
-class Test_parse_make_init(unittest.TestCase):
+class Test_commands_parse_make_init(unittest.TestCase):
     r"""
-    Tests the parse_make_init function with the following cases:
+    Tests the commands.parse_make_init function with the following cases:
         Nominal
     """
     def setUp(self):
@@ -174,9 +173,9 @@ class Test_parse_make_init(unittest.TestCase):
 
 #%% commands.execute_make_init
 @patch('dstauffman.commands.repos.make_python_init')
-class Test_execute_make_init(unittest.TestCase):
+class Test_commands_execute_make_init(unittest.TestCase):
     r"""
-    Tests the execute_make_init function with the following cases:
+    Tests the commands.execute_make_init function with the following cases:
         Nominal
         TBD
     """

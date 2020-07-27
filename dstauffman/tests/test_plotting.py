@@ -1,6 +1,5 @@
 r"""
-Test file for the `plotting` module module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `plotting` module of the "dstauffman" library.
 
 Notes
 -----
@@ -20,10 +19,10 @@ import dstauffman as dcs
 #%% Plotter for testing
 plotter = dcs.Plotter(False)
 
-#%% Classes - Opts
+#%% Opts
 class Test_Opts(unittest.TestCase):
     r"""
-    Test Opts class, and by extension the frozen function and Frozen class using cases:
+    Test Opts class with the following cases:
         normal mode
         add new attribute to existing instance
     """
@@ -116,7 +115,7 @@ class Test_Opts(unittest.TestCase):
         self.assertEqual(opts.disp_xmin, datetime.datetime(2020, 6, 1, 0, 0, 5))
         self.assertEqual(opts.disp_xmax, datetime.datetime(2020, 6, 1, 0, 2, 30))
 
-#%% Functions - plot_time_history
+#%% plot_time_history
 class Test_plot_time_history(unittest.TestCase):
     r"""
     Tests the plot_time_history function with the following cases:
@@ -241,10 +240,10 @@ class Test_plot_time_history(unittest.TestCase):
             for this_fig in self.figs:
                 plt.close(this_fig)
 
-#%% Functions - plot_correlation_matrix
+#%% plot_correlation_matrix
 class Test_plot_correlation_matrix(unittest.TestCase):
     r"""
-    Tests plot_correlation_matrix function with the following cases:
+    Tests the plot_correlation_matrix function with the following cases:
         normal mode
         non-square inputs
         default labels
@@ -345,7 +344,7 @@ class Test_plot_correlation_matrix(unittest.TestCase):
         for i in range(len(self.figs)):
             plt.close(self.figs.pop())
 
-#%% Functions - plot_bar_breakdown
+#%% plot_bar_breakdown
 class Test_plot_bar_breakdown(unittest.TestCase):
     r"""
     Tests the plot_bar_breakdown function with the following cases:

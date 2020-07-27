@@ -1,6 +1,5 @@
 r"""
-Test file for the `health` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `health` module of the "dstauffman.health" library.
 
 Notes
 -----
@@ -20,10 +19,10 @@ import dstauffman.health as health
 #%% Plotter for testing
 plotter = Plotter(False)
 
-#%% dist_enum_and_mons
-class Test_dist_enum_and_mons(unittest.TestCase):
+#%% health.dist_enum_and_mons
+class Test_health_dist_enum_and_mons(unittest.TestCase):
     r"""
-    Tests the dist_enum_and_mons function with the following cases:
+    Tests the health.dist_enum_and_mons function with the following cases:
         Nominal usage
         All in one bin
     """
@@ -105,10 +104,10 @@ class Test_dist_enum_and_mons(unittest.TestCase):
             health.dist_enum_and_mons(self.num, dist, self.prng)
         self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
 
-#%% icer
-class Test_icer(unittest.TestCase):
+#%% health.icer
+class Test_health_icer(unittest.TestCase):
     r"""
-    Tests the icer function with the following cases:
+    Tests the health.icer function with the following cases:
         nominal
         no domination
         reverse order
@@ -260,13 +259,18 @@ class Test_icer(unittest.TestCase):
         if self.fig is not None:
             plt.close(self.fig)
 
-#%% plot_icer
-pass # TODO: write this
-
-#%% Functions - plot_population_pyramid
-class Test_plot_population_pyramid(unittest.TestCase):
+#%% health.plot_icer
+class Test_health_plot_icer(unittest.TestCase):
     r"""
-    Tests the plot_population_pyramid function with the following cases:
+    Tests the health.plot_icer function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
+
+#%% health.plot_population_pyramid
+class Test_health_plot_population_pyramid(unittest.TestCase):
+    r"""
+    Tests the health.plot_population_pyramid function with the following cases:
         Nominal
         Default arguments
     """

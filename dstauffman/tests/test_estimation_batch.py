@@ -1,6 +1,5 @@
 r"""
-Test file for the `estimation` module of the dstauffman code.  It is intented to contain test cases to
-demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `batch` module of the "dstauffman.estimation" library.
 
 Notes
 -----
@@ -102,10 +101,10 @@ def set_parameter(sim_params, *, names, values):
         else:
             raise ValueError('Bad parameter name: "{}".'.format(name))
 
-#%% OptiOpts
-class Test_OptiOpts(unittest.TestCase):
+#%% estimation.OptiOpts
+class Test_estimation_OptiOpts(unittest.TestCase):
     r"""
-    Tests the OptiOpts class with the following cases:
+    Tests the estimation.OptiOpts class with the following cases:
         Initialization
         Equality
         Inequality
@@ -139,10 +138,10 @@ class Test_OptiOpts(unittest.TestCase):
         self.assertEqual(lines[1], ' model_func      = None')
         self.assertEqual(lines[-1],' trust_radius    = 1.0')
 
-#%% OptiParam
-class Test_OptiParam(unittest.TestCase):
+#%% estimation.OptiParam
+class Test_estimation_OptiParam(unittest.TestCase):
     r"""
-    Tests the OptiParam class with the following cases:
+    Tests the estimation.OptiParam class with the following cases:
         Initialization
         Equality
         Inequality
@@ -220,10 +219,10 @@ class Test_OptiParam(unittest.TestCase):
         self.assertEqual(lines[5], ' minstep = 0.0001')
         self.assertEqual(lines[6], ' typical = 1.0')
 
-#%% BpeResults
-class Test_BpeResults(unittest.TestCase):
+#%% estimation.BpeResults
+class Test_estimation_BpeResults(unittest.TestCase):
     r"""
-    Tests the BpeResults class with the following cases:
+    Tests the estimation.BpeResults class with the following cases:
         Save (HDF5)
         Load (HDF5)
         str method
@@ -290,10 +289,10 @@ class Test_BpeResults(unittest.TestCase):
         if os.path.isfile(self.filename2):
             os.remove(self.filename2)
 
-#%% CurrentResults
-class Test_CurrentResults(unittest.TestCase):
+#%% estimation.CurrentResults
+class Test_estimation_CurrentResults(unittest.TestCase):
     r"""
-    Tests the CurrentResults class with the following cases:
+    Tests the estimation.CurrentResults class with the following cases:
         Printing
     """
     def setUp(self):
@@ -309,11 +308,11 @@ class Test_CurrentResults(unittest.TestCase):
         self.assertEqual(lines[2], '  Best Cost: None')
         self.assertEqual(lines[3], '  Best Params: None')
 
-#%% _print_divider
+#%% estimation._print_divider
 @patch('dstauffman.estimation.batch.logger')
-class Test__print_divider(unittest.TestCase):
+class Test_estimation__print_divider(unittest.TestCase):
     r"""
-    Tests the _print_divider function with the following cases:
+    Tests the estimation._print_divider function with the following cases:
         With new line
         Without new line
     """
@@ -347,10 +346,10 @@ class Test__print_divider(unittest.TestCase):
         mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
         # TODO: how to test that this wouldn't log anything?
 
-#%% _function_wrapper
-class Test__function_wrapper(unittest.TestCase):
+#%% estimation._function_wrapper
+class Test_estimation__function_wrapper(unittest.TestCase):
     r"""
-    Tests the _function_wrapper function with the following cases:
+    Tests the estimation._function_wrapper function with the following cases:
         Nominal
         Model args
         Cost args
@@ -377,11 +376,11 @@ class Test__function_wrapper(unittest.TestCase):
         np.testing.assert_array_equal(results, self.results)
         np.testing.assert_array_equal(innovs, self.innovs)
 
-#%% _finite_differences
+#%% estimation._finite_differences
 @patch('dstauffman.estimation.batch.logger')
-class Test__finite_differences(unittest.TestCase):
+class Test_estimation__finite_differences(unittest.TestCase):
     r"""
-    Tests the run_bpe function with the following cases:
+    Tests the estimation._finite_differences function with the following cases:
         Nominal
         Normalized
     """
@@ -462,10 +461,10 @@ class Test__finite_differences(unittest.TestCase):
         self.assertEqual(gradient.shape, (3, ))
         self.assertEqual(hessian.shape, (3, 3))
 
-#%% _levenberg_marquardt
-class Test__levenberg_marquardt(unittest.TestCase):
+#%% estimation._levenberg_marquardt
+class Test_estimation__levenberg_marquardt(unittest.TestCase):
     r"""
-    Tests the _levenberg_marquardt function with the following cases:
+    Tests the estimation._levenberg_marquardt function with the following cases:
         with lambda_
         without lambda_
     """
@@ -484,10 +483,10 @@ class Test__levenberg_marquardt(unittest.TestCase):
         delta_param = estm.batch._levenberg_marquardt(self.jacobian, self.innovs, 0)
         np.testing.assert_array_almost_equal(delta_param, b)
 
-#%% _predict_func_change
-class Test__predict_func_change(unittest.TestCase):
+#%% estimation._predict_func_change
+class Test_estimation__predict_func_change(unittest.TestCase):
     r"""
-    Tests the _predict_func_change function with the following cases:
+    Tests the estimation._predict_func_change function with the following cases:
         Nominal
     """
     def setUp(self):
@@ -500,11 +499,11 @@ class Test__predict_func_change(unittest.TestCase):
         delta_func = estm.batch._predict_func_change(self.delta_param, self.gradient, self.hessian)
         self.assertEqual(delta_func, self.pred_change)
 
-#%% _check_for_convergence
+#%% estimation._check_for_convergence
 @patch('dstauffman.estimation.batch.logger')
-class Test__check_for_convergence(unittest.TestCase):
+class Test_estimation__check_for_convergence(unittest.TestCase):
     r"""
-    Tests the _check_for_convergence function with the following cases:
+    Tests the estimation._check_for_convergence function with the following cases:
         TBD
     """
     def setUp(self):
@@ -553,10 +552,10 @@ class Test__check_for_convergence(unittest.TestCase):
         error = err.getvalue().strip()
         self.assertEqual(error, '')
 
-#%% _double_dogleg
-class Test__double_dogleg(unittest.TestCase):
+#%% estimation._double_dogleg
+class Test_estimation__double_dogleg(unittest.TestCase):
     r"""
-    Tests the _double_dogleg function with the following cases:
+    Tests the estimation._double_dogleg function with the following cases:
         TBD
     """
     def setUp(self):
@@ -599,11 +598,11 @@ class Test__double_dogleg(unittest.TestCase):
         (new_delta_param, step_len, step_scale, step_type) = estm.batch._double_dogleg(self.delta_param, \
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
-#%% _dogleg_search
+#%% estimation._dogleg_search
 @patch('dstauffman.estimation.batch.logger')
-class Test__dogleg_search(unittest.TestCase):
+class Test_estimation__dogleg_search(unittest.TestCase):
     r"""
-    Tests the _dogleg_search function with the following cases:
+    Tests the estimation._dogleg_search function with the following cases:
         TBD
     """
     def setUp(self):
@@ -685,11 +684,11 @@ class Test__dogleg_search(unittest.TestCase):
         estm.batch._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
-#%% _analyze_results
+#%% estimation._analyze_results
 @patch('dstauffman.estimation.batch.logger')
-class Test__analyze_results(unittest.TestCase):
+class Test_estimation__analyze_results(unittest.TestCase):
     r"""
-    Tests the _analyze_results function with the following cases:
+    Tests the estimation._analyze_results function with the following cases:
         Nominal
         Normalized
     """
@@ -712,11 +711,11 @@ class Test__analyze_results(unittest.TestCase):
         self.opti_opts.max_iters = 0
         estm.batch._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
 
-#%% validate_opti_opts
+#%% estimation.validate_opti_opts
 @patch('dstauffman.estimation.batch.logger')
-class Test_validate_opti_opts(unittest.TestCase):
+class Test_estimation_validate_opti_opts(unittest.TestCase):
     r"""
-    Tests the validate_opti_opts function with the following cases:
+    Tests the estimation.validate_opti_opts function with the following cases:
         TBD
     """
     def setUp(self):
@@ -789,11 +788,11 @@ class Test_validate_opti_opts(unittest.TestCase):
         self.opti_opts.search_method = 'wild_ass_guess'
         self.support()
 
-#%% run_bpe
+#%% estimation.run_bpe
 @patch('dstauffman.estimation.batch.logger')
-class Test_run_bpe(unittest.TestCase):
+class Test_estimation_run_bpe(unittest.TestCase):
     r"""
-    Tests the run_bpe function with the following cases:
+    Tests the estimation.run_bpe function with the following cases:
         TBD
     """
     def setUp(self):
@@ -899,10 +898,10 @@ class Test_run_bpe(unittest.TestCase):
                 if os.path.isfile(filename):
                     os.remove(filename)
 
-#%% Functions - plot_bpe_convergence
-class Test_plot_bpe_convergence(unittest.TestCase):
+#%% estimation.plot_bpe_convergence
+class Test_estimation_plot_bpe_convergence(unittest.TestCase):
     r"""
-    Tests the plot_bpe_convergence function with the following cases:
+    Tests the estimation.plot_bpe_convergence function with the following cases:
         Nominal
         Only two costs
         No Opts
@@ -929,10 +928,10 @@ class Test_plot_bpe_convergence(unittest.TestCase):
     def tearDown(self):
         close_all(self.figs)
 
-#%% plot_bpe_results
-class Test_plot_bpe_results(unittest.TestCase):
+#%% estimation.plot_bpe_results
+class Test_estimation_plot_bpe_results(unittest.TestCase):
     r"""
-    Tests the plot_bpe_results function with the following cases:
+    Tests the estimation.plot_bpe_results function with the following cases:
         TBD
     """
     def setUp(self):

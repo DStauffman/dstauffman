@@ -1,7 +1,5 @@
 r"""
-Test file for the `kalman` module module of the "dstauffman.aerospace" library.  It is intented
-to contain test cases to demonstrate functionaliy and correct outcomes for all the functions within
-the module.
+Test file for the `kalman` module of the "dstauffman.estimation" library.
 
 Notes
 -----
@@ -15,10 +13,10 @@ import numpy as np
 
 import dstauffman.estimation as estm
 
-#%% calc_kalman_gain
-class Test_kalman_gain(unittest.TestCase):
+#%% estimation.calc_kalman_gain
+class Test_estimation_calc_kalman_gain(unittest.TestCase):
     r"""
-    Tests the kalman_gain function with the following cases:
+    Tests the estimation.calc_kalman_gain function with the following cases:
         Nominal
         With inverse
     """
@@ -36,10 +34,10 @@ class Test_kalman_gain(unittest.TestCase):
         K = estm.calc_kalman_gain(self.P, self.H, self.R, use_inverse=True)
         self.assertAlmostEqual(K[0, 0], self.exp, 12)
 
-#%% propagate_covariance
-class Test_propagate_covariance(unittest.TestCase):
+#%% estimation.propagate_covariance
+class Test_estimation_propagate_covariance(unittest.TestCase):
     r"""
-    Tests the propagate_covariance function with the following cases:
+    Tests the estimation.propagate_covariance function with the following cases:
         Nominal
         With gamma
         Not inplace (x2)
@@ -72,10 +70,10 @@ class Test_propagate_covariance(unittest.TestCase):
         self.assertEqual(out[0, 0], self.exp)
         self.assertEqual(self.P[0, 0], self.orig)
 
-#%% update_covariance
-class Test_update_covariance(unittest.TestCase):
+#%% estimation.update_covariance
+class Test_estimation_update_covariance(unittest.TestCase):
     r"""
-    Tests the update_covariance function with the following cases:
+    Tests the estimation.update_covariance function with the following cases:
         Nominal inplace
         Nominal not inplace
     """

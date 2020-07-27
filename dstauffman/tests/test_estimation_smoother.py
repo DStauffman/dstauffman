@@ -1,7 +1,5 @@
 r"""
-Test file for the `smoother` module module of the "dstauffman.aerospace" library.  It is intented
-to contain test cases to demonstrate functionaliy and correct outcomes for all the functions within
-the module.
+Test file for the `smoother` module of the "dstauffman.estimation" library.
 
 Notes
 -----
@@ -15,21 +13,21 @@ import numpy as np
 
 import dstauffman.estimation as estm
 
-#%% _update_information
-class Test__update_information(unittest.TestCase):
+#%% estimation._update_information
+class Test_estimation__update_information(unittest.TestCase):
     r"""
-    Tests the _update_information function with the following cases:
+    Tests the estimation._update_information function with the following cases:
         TBD
     """
     pass # TODO: write this
 
-#%% bf_smoother
-class Test_bf_smoother(unittest.TestCase):
+#%% estimation.bf_smoother
+class Test_estimation_bf_smoother(unittest.TestCase):
     r"""
-    Tests the bf_smoother function with the following cases:
+    Tests the estimation.bf_smoother function with the following cases:
         TBD
     """
-    pass
+    pass # TODO: write this
 
 #%% Unit test execution
 if __name__ == '__main__':

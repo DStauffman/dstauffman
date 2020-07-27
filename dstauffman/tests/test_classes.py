@@ -1,6 +1,5 @@
 r"""
-Test file for the `classes` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `classes` module of the "dstauffman" library.
 
 Notes
 -----
@@ -55,33 +54,12 @@ class _Example_No_Override2(object, metaclass=dcs.SaveAndLoadPickle):
     def load():
         return 2
 
-#%% Frozen
-class Test_Frozen(unittest.TestCase):
-    r"""
-    Test Opts class, and by extension the frozen function and Frozen class using cases:
-        normal mode
-        add new attribute to existing instance
-    """
-    def setUp(self):
-        self.fields = ['field_one', 'field_two', 'field_ten']
-
-    def test_calling(self):
-        temp = _Example_Frozen()
-        for field in self.fields:
-            self.assertTrue(hasattr(temp, field))
-            setattr(temp, field, getattr(temp, field))
-
-    def test_override_existing(self):
-        temp = _Example_Frozen(dummy=5)
-        temp.field_one = 'not one'
-        temp.dummy = 10
-        setattr(temp, 'dummy', 15)
-        self.assertTrue(True)
-
-    def test_new_attr(self):
-        temp = _Example_Frozen()
-        with self.assertRaises(AttributeError):
-            temp.new_field_that_does_not_exist = 1
+#%% save_hdf5 - covered by SaveAndLoad
+#%% load_hdf5 - covered by SaveAndLoad
+#%% save_pickle - covered by SaveAndLoad
+#%% load_pickle - covered by SaveAndLoad
+#%% save_method - covered by SaveAndLoad
+#%% load_method - covered by SaveAndLoad
 
 #%% pprint_dict
 class Test_pprint_dict(unittest.TestCase):
@@ -153,10 +131,41 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(lines[2], ' bb  = 2')
         self.assertEqual(lines[3], ' ccc = 3')
 
+#%% Frozen
+class Test_Frozen(unittest.TestCase):
+    r"""
+    Test the Frozen class with the following cases:
+        normal mode
+        add new attribute to existing instance
+    """
+    def setUp(self):
+        self.fields = ['field_one', 'field_two', 'field_ten']
+
+    def test_calling(self):
+        temp = _Example_Frozen()
+        for field in self.fields:
+            self.assertTrue(hasattr(temp, field))
+            setattr(temp, field, getattr(temp, field))
+
+    def test_override_existing(self):
+        temp = _Example_Frozen(dummy=5)
+        temp.field_one = 'not one'
+        temp.dummy = 10
+        setattr(temp, 'dummy', 15)
+        self.assertTrue(True)
+
+    def test_new_attr(self):
+        temp = _Example_Frozen()
+        with self.assertRaises(AttributeError):
+            temp.new_field_that_does_not_exist = 1
+
 #%% SaveAndLoad
 class Test_SaveAndLoad(unittest.TestCase):
     r"""
-    Tests SaveAndLoad metaclass.
+    Tests SaveAndLoad metaclass with the following cases:
+        has methods (x4)
+        save/load hdf5
+        savel/oad pickle (x2)
     """
     def setUp(self):
         folder          = dcs.get_tests_dir()
@@ -213,10 +222,18 @@ class Test_SaveAndLoad(unittest.TestCase):
         if os.path.isfile(self.save_path2):
             os.remove(self.save_path2)
 
+#%% SaveAndLoadPickle
+class Test_SaveAndLoadPickle(unittest.TestCase):
+    r"""
+    Tests the SaveAndLoadPickle class with the following cases:
+        TBD
+    """
+    pass # TODO: write this
+
 #%% Counter
 class Test_Counter(unittest.TestCase):
     r"""
-    Tests Counter class with the following cases:
+    Tests the Counter class with the following cases:
         TBD
     """
     def test_math_int(self):
@@ -361,7 +378,7 @@ class Test_Counter(unittest.TestCase):
 #%% FixedDict
 class Test_FixedDict(unittest.TestCase):
     r"""
-    Tests FixedDict class with the following cases:
+    Tests the FixedDict class with the following cases:
         TBD
     """
     def setUp(self):

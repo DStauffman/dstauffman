@@ -1,6 +1,5 @@
 r"""
-Test file for the `vectors` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `vectors` module of the "dstauffman.aerospace" library.
 
 Notes
 -----
@@ -14,10 +13,10 @@ import numpy as np
 
 import dstauffman.aerospace as space
 
-#%% rot
-class Test_rot(unittest.TestCase):
+#%% aerospace.rot
+class Test_aerospace_rot(unittest.TestCase):
     r"""
-    Tests the rot function with the following cases:
+    Tests the aerospace.rot function with the following cases:
         Reference 1, single axis
         Reference 2, single axis
     """
@@ -62,10 +61,10 @@ class Test_rot(unittest.TestCase):
         with self.assertRaises(ValueError):
             space.rot(np.pi/2, 2)
 
-#%% vec_cross
-class Test_vec_cross(unittest.TestCase):
+#%% aerospace.vec_cross
+class Test_aerospace_vec_cross(unittest.TestCase):
     r"""
-    Tests the vec_cross function with the following cases:
+    Tests the aerospace.vec_cross function with the following cases:
         Nominal
     """
     def setUp(self):

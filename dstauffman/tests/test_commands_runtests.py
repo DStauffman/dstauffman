@@ -1,6 +1,5 @@
 r"""
-Test file for the `commands.runtests` module of the "dstauffman" library.  It is intented to contain
-test cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `runtests` module of the "dstauffman.commands" library.
 
 Notes
 -----
@@ -16,9 +15,9 @@ import dstauffman as dcs
 import dstauffman.commands as commands
 
 #%% commands.parse_tests
-class Test_parse_tests(unittest.TestCase):
+class Test_commands_parse_tests(unittest.TestCase):
     r"""
-    Tests the parse_tests function with the following cases:
+    Tests the commands.parse_tests function with the following cases:
         Nominal
     """
     def setUp(self):
@@ -48,9 +47,9 @@ class Test_parse_tests(unittest.TestCase):
         self.assertEqual(args, self.expected)
 
 #%% commands.execute_tests
-class Test_execute_tests(unittest.TestCase):
+class Test_commands_execute_tests(unittest.TestCase):
     r"""
-    Tests the execute_tests function with the following cases:
+    Tests the commands.execute_tests function with the following cases:
         Nominal
         TBD
     """
@@ -99,10 +98,20 @@ class Test_execute_tests(unittest.TestCase):
         self.assertTrue(pos_args[0].endswith('other_folder'))
 
 #%% commands.parse_coverage
-pass # TODO: write this
+class Test_commands_parse_coverage(unittest.TestCase):
+    r"""
+    Tests the commands.parse_coverage function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% commands.execute_coverage
-pass # TODO: write this
+class Test_commands_execute_coverage(unittest.TestCase):
+    r"""
+    Tests the commands.execute_coverage function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% Unit test execution
 if __name__ == '__main__':

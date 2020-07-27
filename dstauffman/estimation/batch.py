@@ -1093,7 +1093,7 @@ def run_bpe(opti_opts, log_level=LogLevel.L5):
 
     # run the initial model
     new_line = logger.level >= LogLevel.L5
-    _print_divider(new_line, level=LogLevel.L5)
+    _print_divider(new_line, level=LogLevel.L3)
     logger.log(LogLevel.L3, 'Running initial simulation.')
     (_, cur_results.innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
 

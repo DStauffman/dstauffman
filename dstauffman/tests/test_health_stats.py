@@ -1,6 +1,5 @@
 r"""
-Test file for the `stats` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `stats` module of the "dstauffman.health" library.
 
 Notes
 -----
@@ -15,10 +14,10 @@ import numpy as np
 
 import dstauffman.health as health
 
-#%% convert_annual_to_monthly_probability
-class Test_convert_annual_to_monthly_probability(unittest.TestCase):
+#%% health.convert_annual_to_monthly_probability
+class Test_health_convert_annual_to_monthly_probability(unittest.TestCase):
     r"""
-    Tests the convert_annual_to_monthly_probability function with these cases:
+    Tests the health.convert_annual_to_monthly_probability function with the following cases:
         convert a vector from annual to monthly
         convert a scalar
         convert a number less than zero (raise error)
@@ -57,8 +56,8 @@ class Test_convert_annual_to_monthly_probability(unittest.TestCase):
         monthly = health.ca2mp(self.annuals)
         np.testing.assert_array_almost_equal(monthly, self.monthly)
 
-#%% convert_monthly_to_annual_probability
-class Test_convert_monthly_to_annual_probability(unittest.TestCase):
+#%% health.convert_monthly_to_annual_probability
+class Test_health_convert_monthly_to_annual_probability(unittest.TestCase):
     r"""
     Tests the convert_annual_to_monthly_probability function with these cases:
         convert a vector from monthly to annual
@@ -99,10 +98,10 @@ class Test_convert_monthly_to_annual_probability(unittest.TestCase):
         annual = health.cm2ap(self.monthly)
         np.testing.assert_array_almost_equal(annual, self.annuals)
 
-#%% prob_to_rate
-class Test_prob_to_rate(unittest.TestCase):
+#%% health.prob_to_rate
+class Test_health_prob_to_rate(unittest.TestCase):
     r"""
-    Tests the prob_to_rate function with these cases:
+    Tests the health.prob_to_rate function with the following cases:
         TBD
     """
     def setUp(self):
@@ -132,10 +131,10 @@ class Test_prob_to_rate(unittest.TestCase):
         prob = health.rate_to_prob(rate, self.time)
         np.testing.assert_array_almost_equal(prob, self.prob)
 
-#%% rate_to_prob
-class Test_rate_to_prob(unittest.TestCase):
+#%% health.rate_to_prob
+class Test_health_rate_to_prob(unittest.TestCase):
     r"""
-    Tests the rate_to_prob function with these cases:
+    Tests the health.rate_to_prob function with the following cases:
         TBD
     """
     def setUp(self):
@@ -165,10 +164,10 @@ class Test_rate_to_prob(unittest.TestCase):
         rate = health.prob_to_rate(prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
 
-#%% annual_rate_to_monthly_probability
-class Test_annual_rate_to_monthly_probability(unittest.TestCase):
+#%% health.annual_rate_to_monthly_probability
+class Test_health_annual_rate_to_monthly_probability(unittest.TestCase):
     r"""
-    Tests the annual_rate_to_monthly_probability function with these cases:
+    Tests the health.annual_rate_to_monthly_probability function with the following cases:
         TBD
     """
     def setUp(self):
@@ -201,10 +200,10 @@ class Test_annual_rate_to_monthly_probability(unittest.TestCase):
         prob = health.ar2mp(self.rate)
         np.testing.assert_array_almost_equal(prob, self.prob)
 
-#%% monthly_probability_to_annual_rate
-class Test_monthly_probability_to_annual_rate(unittest.TestCase):
+#%% health.monthly_probability_to_annual_rate
+class Test_health_monthly_probability_to_annual_rate(unittest.TestCase):
     r"""
-    Tests the monthly_probability_to_annual_rate function with these cases:
+    Tests the health.monthly_probability_to_annual_rate function with the following cases:
         TBD
     """
     def setUp(self):
@@ -237,10 +236,10 @@ class Test_monthly_probability_to_annual_rate(unittest.TestCase):
         rate = health.ar2mp(self.prob)
         np.testing.assert_array_almost_equal(rate, self.rate)
 
-#%% combine_sets
-class Test_combine_sets(unittest.TestCase):
+#%% health.combine_sets
+class Test_health_combine_sets(unittest.TestCase):
     r"""
-    Tests the combine_sets function with the following cases:
+    Tests the health.combine_sets function with the following cases:
         Normal use
         No deviation
         Empty set 1
@@ -320,10 +319,10 @@ class Test_combine_sets(unittest.TestCase):
         with self.assertRaises(ValueError):
             (n, u, s) = health.combine_sets(np.array([self.n1, self.n1]), self.u1, self.s1, self.n2, self.u2, self.s2)
 
-#%% bounded_normal_draw
-class Test_bounded_normal_draw(unittest.TestCase):
+#%% health.bounded_normal_draw
+class Test_health_bounded_normal_draw(unittest.TestCase):
     r"""
-    Tests the bounded_normal_draw function with the following cases:
+    Tests the health.bounded_normal_draw function with the following cases:
         TBD
     """
     def setUp(self):
@@ -370,10 +369,10 @@ class Test_bounded_normal_draw(unittest.TestCase):
         out = health.bounded_normal_draw(self.num, self.values, self.field, self.prng)
         self.assertTrue(np.all(np.abs(out - self.mean) < 1e-8))
 
-#%% z_from_ci
-class Test_z_from_ci(unittest.TestCase):
+#%% health.z_from_ci
+class Test_health_z_from_ci(unittest.TestCase):
     r"""
-    Tests the z_from_ci function with the following cases:
+    Tests the health.z_from_ci function with the following cases:
         Nominal with 4 common values found online
     """
     def setUp(self):
@@ -385,10 +384,10 @@ class Test_z_from_ci(unittest.TestCase):
             z = health.z_from_ci(ci)
             self.assertTrue(abs(z - exp_z) < 0.001, '{} and {} are more than 0.001 from each other.'.format(z, exp_z))
 
-#%% rand_draw
-class Test_rand_draw(unittest.TestCase):
+#%% health.rand_draw
+class Test_health_rand_draw(unittest.TestCase):
     r"""
-    Tests the rand_draw function with the following cases:
+    Tests the health.rand_draw function with the following cases:
         Nominal
         Negative values
         Large values

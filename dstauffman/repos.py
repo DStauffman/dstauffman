@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import datetime
 import doctest
 import os
 import pytest
@@ -23,9 +24,10 @@ import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QApplication
 
 from dstauffman.enums        import ReturnCodes
-from dstauffman.paths        import get_tests_dir
+from dstauffman.paths        import get_tests_dir, list_python_files
 from dstauffman.plot_support import Plotter
 from dstauffman.utils        import line_wrap, read_text_file, write_text_file
+from dstauffman.utils_log    import setup_dir
 
 #%% run_docstrings
 def run_docstrings(files, verbose=False):
@@ -347,7 +349,7 @@ def delete_pyc(folder, recursive=True, print_progress=True):
                 _remove_pyc(folder, name)
 
 #%% Functions - get_python_definitions
-def get_python_definitions(text):
+def get_python_definitions(text, *, include_private=False):
     r"""
     Get all public class and def names from the text of the file.
 
@@ -375,11 +377,11 @@ def get_python_definitions(text):
     assert len(cap_letters) == 26
     funcs = []
     for line in text.split('\n'):
-        if line.startswith('class ') and not line.startswith('class _'):
+        if line.startswith('class ') and (include_private or not line.startswith('class _')):
             temp = line[len('class '):].split('(')
             temp = temp[0].split(':') # for classes without arguments
             funcs.append(temp[0])
-        if line.startswith('def ') and not line.startswith('def _'):
+        if line.startswith('def ') and (include_private or not line.startswith('def _')):
             temp = line[len('def '):].split('(')
             temp = temp[0].split(':') # for functions without arguments
             funcs.append(temp[0])
@@ -472,6 +474,79 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     if filename:
         write_text_file(filename, output)
     return output
+
+#%% write_unit_test_templates
+def write_unit_test_templates(folder, output, *, author='unknown', exclude=None, recursive=True, repo_subs=None):
+    r"""
+    Writes template files for unit tests.  These can then be used with a diff tool to find what is missing.
+
+    Parameters
+    ----------
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import write_unit_test_templates, get_root_dir, get_tests_dir
+    >>> folder = get_root_dir()
+    >>> output = get_tests_dir() + '_template'
+    >>> author = 'David C. Stauffer'
+    >>> exclude = get_tests_dir() # can also be tuple of exclusions
+    >>> write_unit_test_templates(folder, output, author=author, exclude=exclude) # doctest: +SKIP
+
+    """
+    # hard-coded substitutions for imports
+    _subs = {'dstauffman': 'dcs', 'dstauffman.aerospace': 'space', 'dstauffman.commands': 'commands', \
+              'dstauffman.estimation': 'estm', 'dstauffman.health': 'health'}
+    if repo_subs is not None:
+        _subs.update(repo_subs)
+    # create the output location
+    setup_dir(output)
+    # get all the files
+    files = list_python_files(folder, recursive=recursive)
+    # save the starting point in the name
+    num = len(folder) + 1
+    # get the name of the repository
+    repo_name = files[0][:num-1].replace('\\','/').split('/')[-1]
+    # get date information
+    now = datetime.datetime.now()
+    month = now.strftime('%B')
+    year = now.strftime('%Y')
+    for file in files:
+        # check for exclusions
+        if file.startswith(exclude) or file.startswith(output):
+            continue
+        # read the contents of the file
+        text = read_text_file(file)
+        # get a list of definitions from the text file
+        funcs = get_python_definitions(text, include_private=True)
+        # get the name of the test file
+        names = file[num:].replace('\\','/').split('/')
+        # get the name of the repo or sub-repo
+        sub_repo = '.'.join(names[:-1])
+        this_repo = repo_name + ('.' + sub_repo if sub_repo else '')
+        # create the text to write to the file
+        text = ['r"""']
+        text += [f'Test file for the `{names[-1][:-3]}` module of the "{this_repo}" library.']
+        text += ['', 'Notes', '-----', f'#.  Written by {author} in {month} {year}.', '"""']
+        text += ['', '#%% Imports', 'import unittest', '']
+        import_text = 'import ' + this_repo
+        if this_repo in _subs:
+            import_text += ' as ' + _subs[this_repo]
+        text += [import_text, '']
+        for func in funcs:
+            func_name = sub_repo + '.' + func if sub_repo else func
+            temp_name = func_name.replace('.', '_')
+            text += [f'#%% {func_name}', f'class Test_{temp_name}(unittest.TestCase):', '    r"""']
+            text += [f'    Tests the {func_name} function with the following cases:','        TBD']
+            text += ['    """', '    pass # TODO: write this', '']
+
+        text += ['#%% Unit test execution', "if __name__ == '__main__':", '    unittest.main(exit=False)', '']
+        new_file = os.path.join(output, 'test_' + '_'.join(names))
+        print(f'Writing: "{new_file}".')
+        write_text_file(new_file, '\n'.join(text))
 
 #%% Unit test
 if __name__ == '__main__':

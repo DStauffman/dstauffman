@@ -1,6 +1,5 @@
 r"""
-Test file for the `optimized` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `optimized` module of the "dstauffman" library.
 
 Notes
 -----
@@ -17,7 +16,7 @@ import dstauffman as dcs
 #%% np_any
 class Test_np_any(unittest.TestCase):
     r"""
-    Tests the np_any function with these cases:
+    Tests the np_any function with the following cases:
         All false
         Some true
     """
@@ -33,7 +32,7 @@ class Test_np_any(unittest.TestCase):
 #%% np_all
 class Test_np_all(unittest.TestCase):
     r"""
-    Tests the np_all function with these cases:
+    Tests the np_all function with the following cases:
         All true
         Some false
     """

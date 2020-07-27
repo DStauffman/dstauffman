@@ -1,6 +1,5 @@
 r"""
-Test file for the `units` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `units` module of the "dstauffman" library.
 
 Notes
 -----
@@ -45,7 +44,7 @@ class Test_Constants(unittest.TestCase):
 #%% get_factors
 class Test_get_factors(unittest.TestCase):
     r"""
-    Tests the modd function with the following cases:
+    Tests the get_factors function with the following cases:
         Nominal
         Bad prefix
     """

@@ -1,6 +1,5 @@
 r"""
-Test file for the `constants` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `constants` module of the "dstauffman" library.
 
 Notes
 -----

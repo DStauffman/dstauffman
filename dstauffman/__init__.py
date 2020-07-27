@@ -35,7 +35,8 @@ from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, clos
                               plot_classification, align_plots
 from .plotting     import Opts, plot_time_history, plot_correlation_matrix, plot_bar_breakdown
 from .repos        import run_docstrings, run_unittests, run_pytests, run_coverage, \
-                              find_repo_issues, delete_pyc, get_python_definitions, make_python_init
+                              find_repo_issues, delete_pyc, get_python_definitions, \
+                              make_python_init, write_unit_test_templates
 from .time         import convert_time_units, get_np_time_units, round_datetime, \
                               round_np_datetime, round_num_datetime, convert_date
 from .units        import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \

@@ -1,6 +1,5 @@
 r"""
-Test file for the `utils_log` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `utils_log` module of the "dstauffman" library.
 
 Notes
 -----
@@ -21,7 +20,7 @@ import dstauffman as dcs
 @patch('dstauffman.utils_log.logger')
 class Test_setup_dir(unittest.TestCase):
     r"""
-    Tests the setup_dir function with these cases:
+    Tests the setup_dir function with the following cases:
         null case
         create a new folder
         create a new nested folder

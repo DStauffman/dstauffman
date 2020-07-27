@@ -1,6 +1,5 @@
 r"""
-Test file for the `bpe` module of the dstauffman code.  It is intented to contain test cases to
-demonstrate functionality and correct outcomes for all the functions within the module.
+Test file for the `latex` module of the "dstauffman.health" library.
 
 Notes
 -----
@@ -14,10 +13,10 @@ import numpy as np
 
 import dstauffman.health as health
 
-#%% make_preamble
-class Test_make_preamble(unittest.TestCase):
+#%% health.make_preamble
+class Test_health_make_preamble(unittest.TestCase):
     r"""
-    Tests the make_preamble function with the following cases:
+    Tests the health.make_preamble function with the following cases:
         Nominal
         Different size
         Minipage
@@ -58,10 +57,10 @@ class Test_make_preamble(unittest.TestCase):
         with self.assertRaises(AssertionError):
             health.make_preamble(self.caption, self.label, self.cols, short_cap='Short cap', numbered=False)
 
-#%% make_conclusion
-class Test_make_conclusion(unittest.TestCase):
+#%% health.make_conclusion
+class Test_health_make_conclusion(unittest.TestCase):
     r"""
-    Tests the make_conclusion function with the following cases:
+    Tests the health.make_conclusion function with the following cases:
         Nominal
         Minipage
     """
@@ -74,10 +73,10 @@ class Test_make_conclusion(unittest.TestCase):
         self.assertEqual(out, ['            \\bottomrule', '        \\end{tabular}', \
             '    \\end{minipage}', '\\end{table}', ''])
 
-#%% bins_to_str_ranges
-class Test_bins_to_str_ranges(unittest.TestCase):
+#%% health.bins_to_str_ranges
+class Test_health_bins_to_str_ranges(unittest.TestCase):
     r"""
-    Tests the bins_to_str_ranges function with the following cases:
+    Tests the health.bins_to_str_ranges function with the following cases:
         Nominal
         Different dt
         High cut-off
@@ -118,10 +117,10 @@ class Test_bins_to_str_ranges(unittest.TestCase):
         out = health.bins_to_str_ranges(['Urban', 'Rural', 'ignored'])
         self.assertEqual(out, ['Urban', 'Rural'])
 
-#%% latex_str
-class Test_latex_str(unittest.TestCase):
+#%% health.latex_str
+class Test_health_latex_str(unittest.TestCase):
     r"""
-    Tests the latex_str function with the following cases:
+    Tests the health.latex_str function with the following cases:
         TBD
     """
     def setUp(self):

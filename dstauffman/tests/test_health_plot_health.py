@@ -1,6 +1,5 @@
 r"""
-Test file for the `plot_health` module module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `plot_health` module of the "dstauffman.health" library.
 
 Notes
 -----
@@ -20,10 +19,10 @@ import dstauffman.health as health
 #%% Plotter for testing
 plotter = Plotter(False)
 
-#%% Functions - plot_health_time_history
-class Test_plot_health_time_history(unittest.TestCase):
+#%% health.plot_health_time_history
+class Test_health_plot_health_time_history(unittest.TestCase):
     r"""
-    Tests the plot_health_time_history function with the following cases:
+    Tests the health.plot_health_time_history function with the following cases:
         Nominal
         Defaults
         With label
@@ -147,10 +146,10 @@ class Test_plot_health_time_history(unittest.TestCase):
             for this_fig in self.figs:
                 plt.close(this_fig)
 
-#%% Functions - plot_health_monte_carlo
-class Test_plot_health_monte_carlo(unittest.TestCase):
+#%% health.plot_health_monte_carlo
+class Test_health_plot_health_monte_carlo(unittest.TestCase):
     r"""
-    Tests plot_health_monte_carlo function with the following cases:
+    Tests the health.plot_health_monte_carlo function with the following cases:
         Nominal usage
         Truth data
         Opts

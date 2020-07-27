@@ -1,6 +1,5 @@
 r"""
-Test file for the `utils` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `utils` module of the "dstauffman" library.
 
 Notes
 -----
@@ -23,7 +22,7 @@ import dstauffman as dcs
 #%% _nan_equal
 class Test__nan_equal(unittest.TestCase):
     r"""
-    Tests the local _nan_equal function with these cases:
+    Tests the _nan_equal function with the following cases:
         TBD
     """
     def setUp(self):
@@ -40,7 +39,7 @@ class Test__nan_equal(unittest.TestCase):
 #%% rms
 class Test_rms(unittest.TestCase):
     r"""
-    Tests the rms function with these cases:
+    Tests the rms function with the following cases:
         rms on just a scalar input
         normal rms on vector input
         rms on vector with axis specified
@@ -141,7 +140,7 @@ class Test_rms(unittest.TestCase):
 #%% rss
 class Test_rss(unittest.TestCase):
     r"""
-    Tests the rss function with these cases:
+    Tests the rss function with the following cases:
         rss on just a scalar input
         normal rss on vector input
         rss on vector with axis specified
@@ -242,7 +241,7 @@ class Test_rss(unittest.TestCase):
 #%% compare_two_classes
 class Test_compare_two_classes(unittest.TestCase):
     r"""
-    Tests the compare_two_classes function with these cases:
+    Tests the compare_two_classes function with the following cases:
         compares the same classes
         compares different classes
         compares same with names passed in
@@ -418,7 +417,7 @@ class Test_compare_two_classes(unittest.TestCase):
 #%% compare_two_dicts
 class Test_compare_two_dicts(unittest.TestCase):
     r"""
-    Tests the compare_two_dicts function with these cases:
+    Tests the compare_two_dicts function with the following cases:
         compares the same dicts
         compares different dicts
         compares same with names passed in
@@ -464,7 +463,7 @@ class Test_compare_two_dicts(unittest.TestCase):
 #%% read_text_file
 class Test_read_text_file(unittest.TestCase):
     r"""
-    Tests the reat_text_file function with these cases:
+    Tests the read_text_file function with the following cases:
         read a file that exists
         read a file that does not exist (raise error)
     """
@@ -498,7 +497,7 @@ class Test_read_text_file(unittest.TestCase):
 #%% write_text_file
 class Test_write_text_file(unittest.TestCase):
     r"""
-    Tests the write_text_file function with these cases:
+    Tests the write_text_file function with the following cases:
         write a file
         write a bad file location (raise error)
     """
@@ -534,7 +533,7 @@ class Test_write_text_file(unittest.TestCase):
 #%% capture_output
 class Test_capture_output(unittest.TestCase):
     r"""
-    Tests the capture_output function with these cases:
+    Tests the capture_output function with the following cases:
         capture standard output
         capture standard error
     """
@@ -571,7 +570,7 @@ class Test_capture_output(unittest.TestCase):
 #%% unit
 class Test_unit(unittest.TestCase):
     r"""
-    Tests the unit function with these cases:
+    Tests the unit function with the following cases:
         Nominal case
     """
     def setUp(self):
@@ -717,7 +716,8 @@ class Test_np_digitize(unittest.TestCase):
 
 #%% histcounts
 class Test_histcounts(unittest.TestCase):
-    r"""Tests the histcounts function with the following cases:
+    r"""
+    Tests the histcounts function with the following cases:
         TBD
     """
     def setUp(self):
@@ -743,7 +743,8 @@ class Test_histcounts(unittest.TestCase):
 
 #%% full_print
 class Test_full_print(unittest.TestCase):
-    r"""Tests the full_print function with the following cases:
+    r"""
+    Tests the full_print function with the following cases:
         Nominal
         Small (x2)
     """
@@ -909,10 +910,20 @@ class Test_combine_per_year(unittest.TestCase):
             dcs.combine_per_year(self.data, func=1.5)
 
 #%% execute
-pass # TODO: write this
+class Test_execute(unittest.TestCase):
+    r"""
+    Tests the execute function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% execute_wrapper
-pass # TODO: write this
+class Test_execute_wrapper(unittest.TestCase):
+    r"""
+    Tests the execute_wrapper function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% get_env_var
 class Test_get_env_var(unittest.TestCase):
@@ -943,8 +954,13 @@ class Test_get_env_var(unittest.TestCase):
             dcs.get_env_var('HOME')
         dcs._ALLOWED_ENVS = None
 
-#%% Functions - is_datetime
-pass # TODO: write this
+#%% is_datetime
+class Test_is_datetime(unittest.TestCase):
+    r"""
+    Tests the is_datetime function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% intersect
 class Test_intersect(unittest.TestCase):

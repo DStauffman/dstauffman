@@ -1,7 +1,5 @@
 r"""
-Test file for the `plot_support` module module of the "dstauffman" library.  It is intented to
-contain test cases to demonstrate functionaliy and correct outcomes for all the functions within the
-module.
+Test file for the `plot_support` module of the "dstauffman" library.
 
 Notes
 -----
@@ -26,7 +24,7 @@ import dstauffman as dcs
 #%% Plotter for testing
 plotter = dcs.Plotter(False)
 
-#%% Classes - Plotter
+#%% Plotter
 class Test_Plotter(unittest.TestCase):
     r"""
     Tests the Plotter class with the following cases:
@@ -63,7 +61,7 @@ class Test_Plotter(unittest.TestCase):
     def tearDown(self):
         self.plotter.set_plotter(False)
 
-#%% Classes - TruthPlotter
+#%% TruthPlotter
 class Test_TruthPlotter(unittest.TestCase):
     r"""
     Tests the TruthPlotter class with the following cases:
@@ -208,7 +206,7 @@ class Test_TruthPlotter(unittest.TestCase):
         if self.fig is not None:
             plt.close(self.fig)
 
-#%% Classes - MyCustomToolbar
+#%% MyCustomToolbar
 class Test_MyCustomToolbar(unittest.TestCase):
     r"""
     Tests the MyCustomToolbar class with the following cases:
@@ -264,10 +262,10 @@ class Test_MyCustomToolbar(unittest.TestCase):
         plt.close(self.fig1)
         plt.close(self.fig2)
 
-#%% Classes - ColorMap
+#%% ColorMap
 class Test_ColorMap(unittest.TestCase):
     r"""
-    Tests ColorMap class with the following cases:
+    Tests the ColorMap class with the following cases:
         Nominal mode
         Using num_colors specifier
         No inputs
@@ -334,7 +332,7 @@ class Test_ColorMap(unittest.TestCase):
         if self.fig is not None:
             plt.close(self.fig)
 
-#%% Functions - close_all
+#%% close_all
 class Test_close_all(unittest.TestCase):
     r"""
     Tests the close_all function with the following cases:
@@ -362,7 +360,7 @@ class Test_close_all(unittest.TestCase):
         self.assertFalse(plt.fignum_exists(fig1.number))
         self.assertFalse(plt.fignum_exists(fig2.number))
 
-#%% Functions - get_color_lists
+#%% get_color_lists
 class Test_get_color_lists(unittest.TestCase):
     r"""
     Tests the get_color_lists function with the following cases:
@@ -380,7 +378,7 @@ class Test_get_color_lists(unittest.TestCase):
         self.assertEqual(colormap.colors[0], 'xkcd:fuchsia')
         self.assertEqual(colormap.colors[7], 'xkcd:chocolate')
 
-#%% Functions - ignore_plot_data
+#%% ignore_plot_data
 class Test_ignore_plot_data(unittest.TestCase):
     r"""
     Tests the ignore_plot_data function with the following cases:
@@ -435,7 +433,7 @@ class Test_ignore_plot_data(unittest.TestCase):
         ignore = dcs.ignore_plot_data(self.data, self.ignore_empties, 5)
         self.assertFalse(ignore)
 
-#%% Functions - whitten
+#%% whitten
 class Test_whitten(unittest.TestCase):
     r"""
     Tests the whitten function with the following cases:
@@ -449,7 +447,7 @@ class Test_whitten(unittest.TestCase):
         new_color = dcs.whitten(self.color)
         self.assertEqual(new_color, self.whittened_color)
 
-#%% Functions - resolve_name
+#%% resolve_name
 class Test_resolve_name(unittest.TestCase):
     r"""
     Tests the resolve_name function with the following cases:
@@ -492,7 +490,7 @@ class Test_resolve_name(unittest.TestCase):
         new_name = dcs.resolve_name(bad_name, force_win=True, rep_token='YY')
         self.assertEqual(new_name, 'new YYYYYYYYYYYYYYYYYYtext')
 
-#%% Functions - storefig
+#%% storefig
 class Test_storefig(unittest.TestCase):
     r"""
     Tests the storefig function with the following cases:
@@ -588,7 +586,7 @@ class Test_storefig(unittest.TestCase):
     def tearDownClass(cls):
         plt.close(cls.fig)
 
-#%% Functions - titleprefix
+#%% titleprefix
 class Test_titleprefix(unittest.TestCase):
     r"""
     Tests the titleprefix function with the following cases:
@@ -619,7 +617,7 @@ class Test_titleprefix(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-#%% Functions - disp_xlimits
+#%% disp_xlimits
 class Test_disp_xlimits(unittest.TestCase):
     r"""
     Tests the disp_xlimits function with the following cases:
@@ -667,7 +665,7 @@ class Test_disp_xlimits(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-#%% Functions - zoom_ylim
+#%% zoom_ylim
 class Test_zoom_ylim(unittest.TestCase):
     r"""
     Tests the zoom_ylim function with the following cases:
@@ -716,7 +714,7 @@ class Test_zoom_ylim(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-#%% Functions - setup_plots
+#%% setup_plots
 class Test_setup_plots(unittest.TestCase):
     r"""
     Tests the setup_plots function with the following cases:
@@ -784,7 +782,7 @@ class Test_setup_plots(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-#%% Functions - figmenu
+#%% figmenu
 class Test_figmenu(unittest.TestCase):
     r"""
     Tests the figmenu function with the following cases:
@@ -805,7 +803,7 @@ class Test_figmenu(unittest.TestCase):
         plt.close(self.fig1)
         plt.close(self.fig2)
 
-#%% Functions - rgb_ints_to_hex
+#%% rgb_ints_to_hex
 class Test_rgb_ints_to_hex(unittest.TestCase):
     r"""
     Tests the rgb_ints_to_hex function with the following cases:
@@ -825,7 +823,7 @@ class Test_rgb_ints_to_hex(unittest.TestCase):
         hex_code = dcs.rgb_ints_to_hex((-100, 500, 9))
         self.assertEqual(hex_code, '#00ff09')
 
-#%% Functions - get_screen_resolution
+#%% get_screen_resolution
 class Test_get_screen_resolution(unittest.TestCase):
     r"""
     Tests the get_screen_resolution function with the following cases:
@@ -836,7 +834,7 @@ class Test_get_screen_resolution(unittest.TestCase):
         self.assertGreater(screen_width, 0)
         self.assertGreater(screen_height, 0)
 
-#%% Functions - show_zero_ylim
+#%% show_zero_ylim
 class Test_show_zero_ylim(unittest.TestCase):
     r"""
     Tests the show_zero_ylim function with the following cases:
@@ -861,10 +859,10 @@ class Test_show_zero_ylim(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-#%% Functions - plot_second_units_wrapper
+#%% plot_second_units_wrapper
 class Test_plot_second_units_wrapper(unittest.TestCase):
     r"""
-    Tests the plot_second_units_wrapper with the following cases:
+    Tests the plot_second_units_wrapper function with the following cases:
         TBD
     """
     def setUp(self):
@@ -936,7 +934,7 @@ class Test_plot_second_units_wrapper(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-#%% Functions - plot_second_yunits
+#%% plot_second_yunits
 class Test_plot_second_yunits(unittest.TestCase):
     r"""
     Tests the plot_second_yunits function with the following cases:
@@ -958,7 +956,7 @@ class Test_plot_second_yunits(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-#%% Functions - get_rms_indices
+#%% get_rms_indices
 class Test_get_rms_indices(unittest.TestCase):
     r"""
     Tests the get_rms_indices function with the following cases:
@@ -1004,7 +1002,7 @@ class Test_get_rms_indices(unittest.TestCase):
     def test_datetime(self):
         pass # TODO: write this
 
-#%% Functions - plot_vert_lines
+#%% plot_vert_lines
 class Test_plot_vert_lines(unittest.TestCase):
     r"""
     Tests the plot_vert_lines function with the following cases:
@@ -1037,7 +1035,7 @@ class Test_plot_vert_lines(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-#%% Functions - plot_phases
+#%% plot_phases
 class Test_plot_phases(unittest.TestCase):
     r"""
     Tests the plot_phases function with the following cases:
@@ -1073,7 +1071,7 @@ class Test_plot_phases(unittest.TestCase):
         if self.fig:
             plt.close(self.fig)
 
-#%% Functions - plot_classification
+#%% plot_classification
 class Test_plot_classification(unittest.TestCase):
     r"""
     Tests the plot_classification function with the following cases:
@@ -1107,8 +1105,13 @@ class Test_plot_classification(unittest.TestCase):
     def tearDown(self):
         plt.close(self.fig)
 
-#%% Functions - align_plots
-pass # TODO: write this
+#%% align_plots
+class Test_align_plots(unittest.TestCase):
+    r"""
+    Tests the align_plots function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% Unit test execution
 if __name__ == '__main__':

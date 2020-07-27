@@ -1,6 +1,5 @@
 r"""
-Test file for the `plot_generic` module module of the "dstauffman" library.  It is intented to contain
-test cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `plot_generic` module of the "dstauffman" library.
 
 Notes
 -----
@@ -18,7 +17,7 @@ import numpy as np
 
 import dstauffman as dcs
 
-#%% Functions - make_time_plot
+#%% make_time_plot
 class Test_make_time_plot(unittest.TestCase):
     r"""
     Tests the make_time_plot function with the following cases:
@@ -77,10 +76,15 @@ class Test_make_time_plot(unittest.TestCase):
         if self.fig:
             plt.close(self.fig)
 
-#%% Functions - make_error_bar_plot
-pass # TODO: write this
+#%% make_error_bar_plot
+class Test_make_error_bar_plot(unittest.TestCase):
+    r"""
+    Tests the make_error_bar_plot function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
-#%% Functions - make_difference_plot
+#%% make_difference_plot
 class Test_make_difference_plot(unittest.TestCase):
     r"""
     Tests the make_difference_plot function with the following cases:

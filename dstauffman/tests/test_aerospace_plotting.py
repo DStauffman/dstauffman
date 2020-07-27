@@ -1,7 +1,5 @@
 r"""
-Test file for the `plotting` module module of the "dstauffman.aerospace" library.  It is intented
-to contain test cases to demonstrate functionaliy and correct outcomes for all the functions within
-the module.
+Test file for the `plotting` module of the "dstauffman.aerospace" library.
 
 Notes
 -----
@@ -18,10 +16,10 @@ import numpy as np
 from dstauffman import close_all, LogLevel
 import dstauffman.aerospace as space
 
-#%% Functions - make_quaternion_plot
-class Test_make_quaternion_plot(unittest.TestCase):
+#%% aerospace.make_quaternion_plot
+class Test_aerospace_make_quaternion_plot(unittest.TestCase):
     r"""
-    Tests the make_quaternion_plot function with the following cases:
+    Tests the aerospace.make_quaternion_plot function with the following cases:
         TBD
     """
     def setUp(self):
@@ -158,26 +156,61 @@ class Test_make_quaternion_plot(unittest.TestCase):
         if self.figs:
             close_all(self.figs)
 
-#%% plot_attitude
-pass # TODO: write this
+#%% aerospace.plot_attitude
+class Test_aerospace_plot_attitude(unittest.TestCase):
+    r"""
+    Tests the aerospace.plot_attitude function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
-#%% plot_los
-pass # TODO: write this
+#%% aerospace.plot_los
+class Test_aerospace_plot_los(unittest.TestCase):
+    r"""
+    Tests the aerospace.plot_los function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
-#%% plot_position
-pass # TODO: write this
+#%% aerospace.plot_position
+class Test_aerospace_plot_position(unittest.TestCase):
+    r"""
+    Tests the aerospace.plot_position function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
-#%% plot_velocity
-pass # TODO: write this
+#%% aerospace.plot_velocity
+class Test_aerospace_plot_velocity(unittest.TestCase):
+    r"""
+    Tests the aerospace.plot_velocity function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
-#%% plot_innovations
-pass # TODO: write this
+#%% aerospace.plot_innovations
+class Test_aerospace_plot_innovations(unittest.TestCase):
+    r"""
+    Tests the aerospace.plot_innovations function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
-#%% plot_covariance
-pass # TODO: write this
+#%% aerospace.plot_covariance
+class Test_aerospace_plot_covariance(unittest.TestCase):
+    r"""
+    Tests the aerospace.plot_covariance function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
-#%% plot_states
-pass # TODO: write this
+#%% aerospace.plot_states
+class Test_aerospace_plot_states(unittest.TestCase):
+    r"""
+    Tests the aerospace.plot_states function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% Unit test execution
 if __name__ == '__main__':

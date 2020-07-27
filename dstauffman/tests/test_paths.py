@@ -1,6 +1,5 @@
 r"""
-Test file for the `paths` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `paths` module of the "dstauffman" library.
 
 Notes
 -----
@@ -17,7 +16,7 @@ import dstauffman as dcs
 #%% get_root_dir
 class Test_get_root_dir(unittest.TestCase):
     r"""
-    Tests the get_root_dir function with these cases:
+    Tests the get_root_dir function with the following cases:
         call the function
     """
     def test_function(self):
@@ -30,7 +29,7 @@ class Test_get_root_dir(unittest.TestCase):
 #%% get_tests_dir
 class Test_get_tests_dir(unittest.TestCase):
     r"""
-    Tests the get_tests_dir function with these cases:
+    Tests the get_tests_dir function with the following cases:
         call the function
     """
     def test_function(self):
@@ -40,7 +39,7 @@ class Test_get_tests_dir(unittest.TestCase):
 #%% get_data_dir
 class Test_get_data_dir(unittest.TestCase):
     r"""
-    Tests the get_data_dir function with these cases:
+    Tests the get_data_dir function with the following cases:
         call the function
     """
     def test_function(self):
@@ -50,7 +49,7 @@ class Test_get_data_dir(unittest.TestCase):
 #%% get_images_dir
 class Test_get_images_dir(unittest.TestCase):
     r"""
-    Tests the get_images_dir function with these cases:
+    Tests the get_images_dir function with the following cases:
         call the function
     """
     def test_function(self):
@@ -60,7 +59,7 @@ class Test_get_images_dir(unittest.TestCase):
 #%% get_output_dir
 class Test_get_output_dir(unittest.TestCase):
     r"""
-    Tests the get_output_dir function with these cases:
+    Tests the get_output_dir function with the following cases:
         call the function
     """
     def test_function(self):

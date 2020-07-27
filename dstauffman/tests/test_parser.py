@@ -1,6 +1,5 @@
 r"""
-Test file for the `parser` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `parser` module of the "dstauffman" library.
 
 Notes
 -----
@@ -76,7 +75,7 @@ class Test_parse_commands(unittest.TestCase):
             dcs.parse_commands('bad', [])
         self.assertEqual(str(context.exception), 'Unexpected command "bad".')
 
-#%% parse_wrapper
+#%% execute_command
 class Test_execute_command(unittest.TestCase):
     r"""
     Tests the execute_command function with the following cases:

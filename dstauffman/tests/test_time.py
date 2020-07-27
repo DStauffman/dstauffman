@@ -1,6 +1,5 @@
 r"""
-Test file for the `time` module of the "dstauffman" library.  It is intented to contain test
-cases to demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `time` module of the "dstauffman" library.
 
 Notes
 -----
@@ -19,7 +18,7 @@ import dstauffman as dcs
 #%% get_np_time_units
 class Test_get_np_time_units(unittest.TestCase):
     r"""
-    Tests the get_np_time_units with the following cases
+    Tests the get_np_time_units function with the following cases:
         Default
         nanosecond
     """
@@ -34,7 +33,7 @@ class Test_get_np_time_units(unittest.TestCase):
 #%% round_datetime
 class Test_round_datetime(unittest.TestCase):
     r"""
-    Tests the round_datetime function with these cases:
+    Tests the round_datetime function with the following cases:
         normal use (round to one minute)
         extended use (round to a different specified time)
         get current time
@@ -55,10 +54,10 @@ class Test_round_datetime(unittest.TestCase):
         rounded_time = dcs.round_datetime(datetime.datetime(2015, 3, 13, 8, 4, 45), round_to_sec=60, floor=True)
         self.assertEqual(rounded_time, datetime.datetime(2015, 3, 13, 8, 4, 0))
 
-#%% Functions - round_np_datetime
+#%% round_np_datetime
 class Test_round_np_datetime(unittest.TestCase):
     r"""
-    Tests the round_np_datetime function with these cases:
+    Tests the round_np_datetime function with the following cases:
         Nominal
         Flooring
     """
@@ -73,7 +72,7 @@ class Test_round_np_datetime(unittest.TestCase):
         date_out   = dcs.round_np_datetime(self.date_in, self.time_delta)
         np.testing.assert_array_equal(date_out, self.expected)
 
-#%% Functions - round_num_datetime
+#%% round_num_datetime
 class Test_round_num_datetime(unittest.TestCase):
     r"""
     Tests the round_num_datetime function with the following cases:
@@ -96,7 +95,7 @@ class Test_round_num_datetime(unittest.TestCase):
         date_out = dcs.round_num_datetime(np.array([0., 1.1, 1.9, 3.05, 4.9]), 1., floor=True)
         np.testing.assert_array_almost_equal(date_out, np.array([0., 1., 1., 3., 4.]), 12)
 
-#%% Functions - convert_date
+#%% convert_date
 class Test_convert_date(unittest.TestCase):
     r"""
     Tests the convert_date function with the following cases:
@@ -249,7 +248,8 @@ class Test_convert_date(unittest.TestCase):
 
 #%% convert_time_units
 class Test_convert_time_units(unittest.TestCase):
-    r"""Tests the convert_time_units function with the following cases:
+    r"""
+    Tests the convert_time_units function with the following cases:
         Conversions
         Bad values
     """

@@ -1,6 +1,5 @@
 r"""
-Test file for the `linalg` module of the dstauffman code.  It is intented to contain test cases to
-demonstrate functionaliy and correct outcomes for all the functions within the module.
+Test file for the `linalg` module of the "dstauffman.estimation" library.
 
 Notes
 -----
@@ -14,10 +13,10 @@ import numpy as np
 
 import dstauffman.estimation as estm
 
-#%% orth
-class Test_orth(unittest.TestCase):
+#%% estimation.orth
+class Test_estimation_orth(unittest.TestCase):
     r"""
-    Tests the orth function with the following cases:
+    Tests the estimation.orth function with the following cases:
         Rank 3 matrix
         Rank 2 matrix
     """
@@ -42,10 +41,10 @@ class Test_orth(unittest.TestCase):
         Q = estm.orth(self.A2)
         np.testing.assert_array_almost_equal(Q, self.Q2)
 
-#%% subspace
-class Test_subspace(unittest.TestCase):
+#%% estimation.subspace
+class Test_estimation_subspace(unittest.TestCase):
     r"""
-    Tests the subspace function with the followinc cases:
+    Tests the estimation.subspace function with the following cases:
         Nominal
     """
     def setUp(self):
@@ -63,9 +62,10 @@ class Test_subspace(unittest.TestCase):
         theta = estm.subspace(self.B, self.A)
         self.assertAlmostEqual(theta, self.theta)
 
-#%% mat_divide
-class Test_mat_divide(unittest.TestCase):
-    r"""Tests the mat_divide function with the following cases:
+#%% estimation.mat_divide
+class Test_estimation_mat_divide(unittest.TestCase):
+    r"""
+    Tests the estimation.mat_divide function with the following cases:
         Nominal
         Poorly-conditioned
     """
@@ -85,4 +85,4 @@ class Test_mat_divide(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_estimation_linalg', exit=False)
+    unittest.main(exit=False)
