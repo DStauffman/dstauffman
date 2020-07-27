@@ -21,7 +21,7 @@ from dstauffman.enums import LogLevel
 logger = logging.getLogger(__name__)
 
 #%% Functions - setup_dir
-def setup_dir(folder, rec=False):
+def setup_dir(folder, recursive=False):
     r"""
     Clear the contents for existing folders or instantiates the directory if it doesn't exist.
 
@@ -29,7 +29,7 @@ def setup_dir(folder, rec=False):
     ----------
     folder : str
         Location of the folder to empty or instantiate.
-    rec : bool, optional
+    recursive : bool, optional
         Whether to recursively delete contents.
 
     See Also
@@ -61,9 +61,9 @@ def setup_dir(folder, rec=False):
             this_full_elem = os.path.join(folder, this_elem)
             # check if a folder or file
             if os.path.isdir(this_full_elem):
-                # if a folder, then delete recursively if rec is True
-                if rec:
-                    setup_dir(this_full_elem)
+                # if a folder, then delete recursively if recursive is True
+                if recursive:
+                    setup_dir(this_full_elem, recursive=recursive)
                     os.rmdir(this_full_elem)
             elif os.path.isfile(this_full_elem):
                 # if a file, then remove it

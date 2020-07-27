@@ -66,7 +66,7 @@ class Test_setup_dir(unittest.TestCase):
         dcs.setup_dir(self.subdir)
         dcs.write_text_file(self.subfile, '')
         with patch('dstauffman.utils_log.logger') as mock_logger2:
-            dcs.setup_dir(self.folder, rec=False)
+            dcs.setup_dir(self.folder, recursive=False)
             mock_logger2.log.assert_called_once()
             mock_logger2.log.assert_called_with(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "{}"'.format(self.folder))
         self.assertEqual(mock_logger.log.call_count, 2)
@@ -84,7 +84,7 @@ class Test_setup_dir(unittest.TestCase):
         dcs.setup_dir(self.subdir)
         dcs.write_text_file(self.subfile, self.text)
         with patch('dstauffman.utils_log.logger') as mock_logger2:
-            dcs.setup_dir(self.folder, rec=True)
+            dcs.setup_dir(self.folder, recursive=True)
             self.assertEqual(mock_logger2.log.call_count, 2)
             mock_logger2.log.assert_any_call(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "{}"'.format(self.subdir))
             mock_logger2.log.assert_any_call(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "{}"'.format(self.subdir))
