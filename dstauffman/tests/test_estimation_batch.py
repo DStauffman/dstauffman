@@ -362,18 +362,22 @@ class Test_estimation__function_wrapper(unittest.TestCase):
         self.bpe_results = type('Class2', (object, ), {'num_evals': 0})
 
     def test_nominal(self):
-        (results, innovs) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results)
+        (innovs, results) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, return_results=True)
         np.testing.assert_array_equal(results, self.results)
         np.testing.assert_array_equal(innovs, self.innovs)
 
     def test_model_args(self):
-        (results, innovs) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, model_args={'a': 5})
+        (innovs, results) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, model_args={'a': 5}, return_results=True)
         np.testing.assert_array_equal(results, self.results)
         np.testing.assert_array_equal(innovs, self.innovs)
 
     def test_cost_args(self):
-        (results, innovs) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, cost_args={'a': 5})
+        (innovs, results) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, cost_args={'a': 5}, return_results=True)
         np.testing.assert_array_equal(results, self.results)
+        np.testing.assert_array_equal(innovs, self.innovs)
+
+    def test_innov_only(self):
+        innovs = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, cost_args={'a': 5})
         np.testing.assert_array_equal(innovs, self.innovs)
 
 #%% estimation._finite_differences
@@ -413,7 +417,7 @@ class Test_estimation__finite_differences(unittest.TestCase):
         self.cur_results = estm.CurrentResults()
 
         # initialize current results
-        (_, self.cur_results.innovs) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
+        self.cur_results.innovs    = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
         self.cur_results.trust_rad = self.opti_opts.trust_radius
         self.cur_results.cost      = 0.5 * rss(self.cur_results.innovs, ignore_nans=True)
         names = estm.OptiParam.get_names(self.opti_opts.params)
@@ -634,7 +638,7 @@ class Test_estimation__dogleg_search(unittest.TestCase):
         self.cur_results = estm.CurrentResults()
 
         # initialize current results
-        (_, self.cur_results.innovs) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
+        self.cur_results.innovs    = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
         self.cur_results.trust_rad = self.opti_opts.trust_radius
         self.cur_results.cost      = 0.5 * rss(self.cur_results.innovs, ignore_nans=True)
         names = estm.OptiParam.get_names(self.opti_opts.params)

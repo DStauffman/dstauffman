@@ -348,7 +348,7 @@ def _print_divider(new_line=True, level=LogLevel.L5):
     logger.log(level, '******************************')
 
 #%% _function_wrapper
-def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
+def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None, return_results=False):
     r"""
     Wrap the call to the model function.
 
@@ -364,6 +364,8 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
         Arguments to pass to the model function, taken from opti_opts.model_args by default
     cost_args : dict, optional
         Cost arguments to pass to the cost function, taken from opti_opts.cost_args by default
+    return_results : bool, optional
+        Whether to return the full filter results in addition to just the innovations
 
     Returns
     -------
@@ -383,12 +385,12 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
     >>> bpe_results = BpeResults()
     >>> model_args = {'x': np.array([1, 2, 3], dtype=float)}
     >>> cost_args = dict()
-    >>> (results, innovs) = _function_wrapper(opti_opts, bpe_results, model_args, cost_args)
-    >>> print(results)
-    [2. 4. 6.]
-
+    >>> (innovs, results) = _function_wrapper(opti_opts, bpe_results, model_args, cost_args, return_results=True)
     >>> print(innovs)
     [0.2 0.4 0.6]
+
+    >>> print(results)
+    [2. 4. 6.]
 
     """
     # pull inputs from opti_opts if necessary
@@ -407,7 +409,9 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None):
     # Set any NaNs to zero so that they are ignored
     innovs[np.isnan(innovs)] = 0
 
-    return (results, innovs)
+    if return_results:
+        return (innovs, results)
+    return innovs
 
 #%% _finite_differences
 def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_sided=False, normalized=False):
@@ -496,7 +500,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         # call model with new parameters
         opti_opts.set_param_func(names=names, values=temp_params, **model_args)
         logger.log(LogLevel.L8, '  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
-        (_, new_innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
+        new_innovs = _function_wrapper(opti_opts, bpe_results, model_args)
 
         if two_sided:
             if normalized:
@@ -505,7 +509,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
                 temp_params = temp_params_minus.copy()
             opti_opts.set_param_func(names=names, values=temp_params, **model_args)
             logger.log(LogLevel.L8, '  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
-            (_, new_innovs_minus) = _function_wrapper(opti_opts, bpe_results, model_args)
+            new_innovs_minus = _function_wrapper(opti_opts, bpe_results, model_args)
 
         # compute the jacobian
         if two_sided:
@@ -820,7 +824,7 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
         # Run model
         logger.log(LogLevel.L8, '  Running model with new trial parameters.')
         opti_opts.set_param_func(names=names, values=params, **model_args)
-        (_, innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
+        innovs = _function_wrapper(opti_opts, bpe_results, model_args)
 
         # evaluate the cost function at the new parameter values
         sum_sq_innov = rss(innovs, ignore_nans=True)
@@ -1095,7 +1099,7 @@ def run_bpe(opti_opts, log_level=LogLevel.L5):
     new_line = logger.level >= LogLevel.L5
     _print_divider(new_line, level=LogLevel.L3)
     logger.log(LogLevel.L3, 'Running initial simulation.')
-    (_, cur_results.innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
+    cur_results.innovs = _function_wrapper(opti_opts, bpe_results, model_args)
 
     # initialize loop variables
     iter_count   = 1
@@ -1186,7 +1190,7 @@ def run_bpe(opti_opts, log_level=LogLevel.L5):
     _print_divider(level=LogLevel.L3)
     logger.log(LogLevel.L3, 'Running final simulation.')
     opti_opts.set_param_func(names=names, values=cur_results.params, **model_args)
-    (results, cur_results.innovs) = _function_wrapper(opti_opts, bpe_results, model_args)
+    (cur_results.innovs, results) = _function_wrapper(opti_opts, bpe_results, model_args, return_results=True)
     cur_results.cost = 0.5 * rss(cur_results.innovs, ignore_nans=True)
     bpe_results.final_innovs = cur_results.innovs.copy()
     bpe_results.final_params = cur_results.params.copy()
