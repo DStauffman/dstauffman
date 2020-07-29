@@ -58,6 +58,7 @@ The following non-standard, but for the most part very well known libraries, are
 * pytest
 * scipy.interpolate (minimal usage)
 * scipy.stats (minimal usage)
+* tblib (minimal usage)
 
 
 ************

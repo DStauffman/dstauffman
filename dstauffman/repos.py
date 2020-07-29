@@ -10,12 +10,10 @@ Notes
 import datetime
 import doctest
 import os
+import sys
 import unittest
 
-try:
-    import pytest
-except ImportError:
-    pytest = None
+import pytest
 try:
     # TODO: this sometimes messes up the coverage tool, as the imports are done before it starts counting.
     # May have to move this function to an external tool to fix it.
@@ -52,6 +50,10 @@ def run_docstrings(files, verbose=False):
     >>> return_code = run_docstrings(files) # doctest: +SKIP
 
     """
+    # disable plots from showing up
+    from dstauffman.plotting import Plotter
+    plotter = Plotter()
+    plotter.set_plotter(False)
     # initialize failure status
     had_failure = False
     # loop through and test each file
@@ -91,6 +93,10 @@ def run_unittests(names, verbose=False):
     >>> return_code = run_unittests(names) # doctest: +SKIP
 
     """
+    # disable plots from showing up
+    from dstauffman.plotting import Plotter
+    plotter = Plotter()
+    plotter.set_plotter(False)
     # find the test cases
     test_suite = unittest.TestLoader().discover(names)
     # set the verbosity
@@ -124,9 +130,21 @@ def run_pytests(folder):
     >>> return_code = run_pytests(folder) # doctest: +SKIP
 
     """
-    if pytest is None:
-        raise RuntimeError('You must have pytest installed to run this')
+    # disable plots from showing up
+    from dstauffman.plotting import Plotter
+    plotter = Plotter()
+    plotter.set_plotter(False)
+    # Note: need to do this next part to keep GUI testing from closing the instance with sys.exit
+    # open a qapp
+    from PyQt5.QtWidgets import QApplication
+    if QApplication.instance() is None:
+        qapp = QApplication(sys.argv)
+    else:
+        qapp = QApplication.instance()
+    # run tests using pytest
     exit_code = pytest.main([folder])
+    # close the qapp
+    qapp.closeAllWindows()
     return_code = ReturnCodes.clean if exit_code == 0 else ReturnCodes.test_failures
     return return_code
 

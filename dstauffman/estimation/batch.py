@@ -13,10 +13,14 @@ Notes
 #%% Imports
 import doctest
 import logging
+import multiprocessing
 import os
+import sys
 import time
 import unittest
 from copy import deepcopy
+
+import tblib.pickling_support
 
 import numpy as np
 from numpy.linalg import norm
@@ -24,8 +28,24 @@ from numpy.linalg import norm
 from dstauffman import activate_logging, deactivate_logging, Frozen, LogLevel, pprint_dict, rss, \
                        SaveAndLoad, setup_dir
 
+#%% Activate Exception support for parallel code
+tblib.pickling_support.install()
+
 #%% Globals
 logger = logging.getLogger(__name__)
+
+#%% Classes - _ExceptionWrapper
+class _ExceptionWrapper(object):
+    r"""Exception wrapper that can pass through multiprocessing calls and back to main."""
+    def __init__(self, ee):
+        # save exception
+        self.ee = ee
+        # save traceback
+        __,  __, self.tb = sys.exc_info()
+
+    def re_raise(self):
+        r"""Re-raise a previously saved expection and traceback."""
+        raise self.ee.with_traceback(self.tb)
 
 #%% OptiOpts
 class OptiOpts(Frozen):
