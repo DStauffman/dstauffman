@@ -368,7 +368,7 @@ def _print_divider(new_line=True, level=LogLevel.L5):
     logger.log(level, '******************************')
 
 #%% _function_wrapper
-def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None, return_results=False):
+def _function_wrapper(*, model_func, cost_func, model_args, cost_args, return_results=False):
     r"""
     Wrap the call to the model function.
 
@@ -376,10 +376,10 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None, r
 
     Parameters
     ----------
-    opti_opts : class OptiOpts
-        Optimization options
-    bpe_results : class BpeResults
-        Batch Parameter Estimator results
+    model_func : callabale
+        Function to run the model
+    cost_func : callable
+        Function to evaluate the performance (i.e. cost) of the model
     model_args : dict, optional
         Arguments to pass to the model function, taken from opti_opts.model_args by default
     cost_args : dict, optional
@@ -389,23 +389,21 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None, r
 
     Returns
     -------
-    results : arbitrary return from model function
-        Results from running the model function with the given model arguments
     innovs : arbitrary return from cost function, nominally ndarray
         Innovations from running the cost function on the model results with the given cost arguments
+    results : arbitrary return from model function
+        Results from running the model function with the given model arguments
 
     Examples
     --------
     >>> from dstauffman.estimation.batch import _function_wrapper
-    >>> from dstauffman.estimation import OptiOpts, BpeResults
     >>> import numpy as np
-    >>> opti_opts = OptiOpts()
-    >>> opti_opts.model_func = lambda x: 2*x
-    >>> opti_opts.cost_func = lambda y, x: y / 10
-    >>> bpe_results = BpeResults()
+    >>> model_func = lambda x: 2*x
+    >>> cost_func = lambda y, x: y / 10
     >>> model_args = {'x': np.array([1, 2, 3], dtype=float)}
     >>> cost_args = dict()
-    >>> (innovs, results) = _function_wrapper(opti_opts, bpe_results, model_args, cost_args, return_results=True)
+    >>> (innovs, results) = _function_wrapper(model_func=model_func, cost_func=cost_func, \
+    ...     model_args=model_args, cost_args=cost_args, return_results=True)
     >>> print(innovs)
     [0.2 0.4 0.6]
 
@@ -413,27 +411,50 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None, r
     [2. 4. 6.]
 
     """
-    # pull inputs from opti_opts if necessary
-    if model_args is None:
-        model_args = opti_opts.model_args
-    if cost_args is None:
-        cost_args = opti_opts.cost_args
+    # Run the model to get the results
+    results = model_func(**model_args)
 
-    try:
-        # Run the model to get the results
-        results = opti_opts.model_func(**model_args)
-        bpe_results.num_evals += 1
+    # Run the cost function to get the innovations
+    innovs = cost_func(results, **model_args, **cost_args)
 
-        # Run the cost function to get the innovations
-        innovs = opti_opts.cost_func(results, **model_args, **cost_args)
-
-        # Set any NaNs to zero so that they are ignored
-        innovs[np.isnan(innovs)] = 0
-    except Exception as e:
-        return _ExceptionWrapper(e)
+    # Set any NaNs to zero so that they are ignored
+    innovs[np.isnan(innovs)] = 0
 
     if return_results:
         return (innovs, results)
+    return innovs
+
+#%% _parfor_function_wrapper
+def _parfor_function_wrapper(opti_opts, msg, model_args):
+    r"""
+    Wrapper to _function_wrapper specifically for the purposes of parallelizing the inner loop evaluations.
+
+    Parameters
+    ----------
+    TBD
+
+    Returns
+    -------
+    innovs : arbitrary return from cost function, nominally ndarray
+        Innovations from running the cost function on the model results with the given cost arguments
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.estimation.batch import _parfor_function_wrapper, OptiOpts
+    >>> pass # TODO: write this
+
+    """
+    try:
+        if msg or False: # TODO: skip logging for now until I can figure out how to configure it appropriately
+            logger.log(LogLevel.L8, msg)
+        innovs = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
+            cost_args=opti_opts.cost_args, model_args=model_args)
+    except Exception as e:
+        return _ExceptionWrapper(e)
     return innovs
 
 #%% _finite_differences
@@ -507,40 +528,57 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         param_perturb = param_signs * np.maximum(temp_step, param_minstep)
 
     # build parameters for each upcoming model execution
-    temp_params = []
+    loop_params = []
     for i_param in range(num_param):
         # first evaluation
         temp = cur_results.params.copy()
         temp[i_param] = np.minimum(cur_results.params[i_param] + param_perturb[i_param], params_max[i_param])
         if normalized:
             temp *= param_typical
-        temp_params.append(temp)
+        loop_params.append(temp)
     for i_param in range(num_param):
         if not two_sided:
             break
-        # second evaluation
+        # second evaluation (only done in two-sided mode)
         temp = cur_results.params.copy()
         temp[i_param] = np.maximum(cur_results.params[i_param] - param_perturb[i_param], params_min[i_param])
         if normalized:
             temp *= param_typical
-        temp_params.append(temp)
+        loop_params.append(temp)
 
     # run model (possibly parallelized)
     if opti_opts.max_cores is not None and opti_opts.max_cores != 1:
         # parallel version
-        raise NotImplementedError('This has not been written yet.') # TODO: write this version
+        # setup
+        messages = ['  Running model with {} = {}'.format(names[ix % num_param], values) for (ix, values) in enumerate(loop_params)]
+        num_evals = len(loop_params)
+        num_cores = multiprocessing.cpu_count()
+        num_cores = num_cores if opti_opts.max_cores == -1 else min((num_cores, opti_opts.max_cores))
+        each_model_args = []
+        for values in loop_params:
+            opti_opts.set_param_func(names=names, values=values, **model_args)
+            each_model_args.append(deepcopy(model_args))
+        # build arguments
+        args = zip(repeat(opti_opts, num_evals), messages, each_model_args)
+        # run code
+        with multiprocessing.get_context('spawn').Pool(num_cores) as pool:
+            innovs = list(pool.starmap(_parfor_function_wrapper, args))
+        for new_innovs in innovs:
+            if isinstance(new_innovs, _ExceptionWrapper):
+                new_innovs.re_raise()
+        bpe_results.num_evals += num_evals
     else:
         # linear version
         innovs = []
-        for (ix, values) in enumerate(temp_params):
+        for (ix, values) in enumerate(loop_params):
             i_param = ix % num_param
             # call model with new parameters
             opti_opts.set_param_func(names=names, values=values, **model_args)
             logger.log(LogLevel.L8, '  Running model with {} = {}'.format(names[i_param], values))
-            new_innovs = _function_wrapper(opti_opts, bpe_results, model_args)
-            if isinstance(new_innovs, _ExceptionWrapper):
-                new_innovs.re_raise()
+            new_innovs = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
+                model_args=model_args, cost_args=opti_opts.cost_args)
             innovs.append(new_innovs)
+            bpe_results.num_evals += 1
 
     # compute the jacobian
     for i_param in range(num_param):
@@ -852,7 +890,9 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
         # Run model
         logger.log(LogLevel.L8, '  Running model with new trial parameters.')
         opti_opts.set_param_func(names=names, values=params, **model_args)
-        innovs = _function_wrapper(opti_opts, bpe_results, model_args)
+        innovs = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
+            model_args=model_args, cost_args=opti_opts.cost_args)
+        bpe_results.num_evals += 1
 
         # evaluate the cost function at the new parameter values
         sum_sq_innov = rss(innovs, ignore_nans=True)
@@ -1127,7 +1167,9 @@ def run_bpe(opti_opts, log_level=LogLevel.L5):
     new_line = logger.level >= LogLevel.L5
     _print_divider(new_line, level=LogLevel.L3)
     logger.log(LogLevel.L3, 'Running initial simulation.')
-    cur_results.innovs = _function_wrapper(opti_opts, bpe_results, model_args)
+    cur_results.innovs = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
+        model_args=model_args, cost_args=opti_opts.cost_args)
+    bpe_results.num_evals += 1
 
     # initialize loop variables
     iter_count   = 1
@@ -1218,7 +1260,9 @@ def run_bpe(opti_opts, log_level=LogLevel.L5):
     _print_divider(level=LogLevel.L3)
     logger.log(LogLevel.L3, 'Running final simulation.')
     opti_opts.set_param_func(names=names, values=cur_results.params, **model_args)
-    (cur_results.innovs, results) = _function_wrapper(opti_opts, bpe_results, model_args, return_results=True)
+    (cur_results.innovs, results) = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
+        model_args=model_args, cost_args=opti_opts.cost_args, return_results=True)
+    bpe_results.num_evals += 1
     cur_results.cost = 0.5 * rss(cur_results.innovs, ignore_nans=True)
     bpe_results.final_innovs = cur_results.innovs.copy()
     bpe_results.final_params = cur_results.params.copy()

@@ -39,9 +39,7 @@ class SimParams(Frozen):
 
 # Functions - _get_truth_index
 def _get_truth_index(results_time, truth_time):
-    r"""
-    Finds the indices to the truth data from the results time.
-    """
+    r"""Finds the indices to the truth data from the results time."""
     # Hard-coded values
     precision    = 1e-7
     # find the indices to truth
@@ -307,9 +305,9 @@ class Test_estimation_CurrentResults(unittest.TestCase):
 
 #%% estimation._print_divider
 @patch('dstauffman.estimation.batch.logger')
-class Test_estimation__print_divider(unittest.TestCase):
+class Test_estimation_batch__print_divider(unittest.TestCase):
     r"""
-    Tests the estimation._print_divider function with the following cases:
+    Tests the estimation.batch._print_divider function with the following cases:
         With new line
         Without new line
     """
@@ -343,10 +341,10 @@ class Test_estimation__print_divider(unittest.TestCase):
         mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
         # TODO: how to test that this wouldn't log anything?
 
-#%% estimation._function_wrapper
-class Test_estimation__function_wrapper(unittest.TestCase):
+#%% estimation.batch._function_wrapper
+class Test_estimation_batch__function_wrapper(unittest.TestCase):
     r"""
-    Tests the estimation._function_wrapper function with the following cases:
+    Tests the estimation.batch._function_wrapper function with the following cases:
         Nominal
         Model args
         Cost args
@@ -354,34 +352,47 @@ class Test_estimation__function_wrapper(unittest.TestCase):
     def setUp(self):
         self.results = np.array([1, 2, np.nan])
         self.innovs  = np.array([1, 2, 0])
-        func = lambda *args, **kwargs: np.array([1, 2, np.nan])
-        self.opti_opts = type('Class1', (object, ), {'model_args': {}, 'cost_args': {}, 'model_func': func, 'cost_func': func})
-        self.bpe_results = type('Class2', (object, ), {'num_evals': 0})
+        self.model_args = {}
+        self.cost_args = {}
+        self.model_func = lambda *args, **kwargs: np.array([1, 2, np.nan])
+        self.cost_func = lambda *args, **kwargs: np.array([1, 2, np.nan])
 
     def test_nominal(self):
-        (innovs, results) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, return_results=True)
+        (innovs, results) = estm.batch._function_wrapper(model_func=self.model_func, model_args=self.model_args, \
+            cost_func=self.cost_func, cost_args=self.cost_args, return_results=True)
         np.testing.assert_array_equal(results, self.results)
         np.testing.assert_array_equal(innovs, self.innovs)
 
     def test_model_args(self):
-        (innovs, results) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, model_args={'a': 5}, return_results=True)
+        (innovs, results) = estm.batch._function_wrapper(model_func=self.model_func, model_args={'a': 5}, \
+            cost_func=self.cost_func, cost_args=self.cost_args, return_results=True)
         np.testing.assert_array_equal(results, self.results)
         np.testing.assert_array_equal(innovs, self.innovs)
 
     def test_cost_args(self):
-        (innovs, results) = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, cost_args={'a': 5}, return_results=True)
+        (innovs, results) = estm.batch._function_wrapper(model_func=self.model_func, model_args=self.model_args, \
+            cost_func=self.cost_func, cost_args={'a': 5}, return_results=True)
         np.testing.assert_array_equal(results, self.results)
         np.testing.assert_array_equal(innovs, self.innovs)
 
     def test_innov_only(self):
-        innovs = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, cost_args={'a': 5})
+        innovs = estm.batch._function_wrapper(model_func=self.model_func, model_args=self.model_args, \
+            cost_func=self.cost_func, cost_args={'a': 5})
         np.testing.assert_array_equal(innovs, self.innovs)
 
-#%% estimation._finite_differences
-@patch('dstauffman.estimation.batch.logger')
-class Test_estimation__finite_differences(unittest.TestCase):
+#%% estimation.batch._parfor_function_wrapper
+class Test_estimation_batch__parfor_function_wrapper(unittest.TestCase):
     r"""
-    Tests the estimation._finite_differences function with the following cases:
+    Tests the estimation.batch._parfor_function_wrapper function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
+
+#%% estimation.batch._finite_differences
+@patch('dstauffman.estimation.batch.logger')
+class Test_estimation_batch__finite_differences(unittest.TestCase):
+    r"""
+    Tests the estimation.batch._finite_differences function with the following cases:
         Nominal
         Normalized
     """
@@ -414,7 +425,9 @@ class Test_estimation__finite_differences(unittest.TestCase):
         self.cur_results = estm.CurrentResults()
 
         # initialize current results
-        self.cur_results.innovs    = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
+        self.cur_results.innovs    = estm.batch._function_wrapper(model_func=self.opti_opts.model_func,
+            cost_func=self.opti_opts.cost_func, model_args=self.model_args, cost_args=self.opti_opts.cost_args)
+        self.bpe_results.num_evals += 1
         self.cur_results.trust_rad = self.opti_opts.trust_radius
         self.cur_results.cost      = 0.5 * rss(self.cur_results.innovs, ignore_nans=True)
         names = estm.OptiParam.get_names(self.opti_opts.params)
@@ -462,10 +475,10 @@ class Test_estimation__finite_differences(unittest.TestCase):
         self.assertEqual(gradient.shape, (3, ))
         self.assertEqual(hessian.shape, (3, 3))
 
-#%% estimation._levenberg_marquardt
-class Test_estimation__levenberg_marquardt(unittest.TestCase):
+#%% estimation.batch._levenberg_marquardt
+class Test_estimation_batch__levenberg_marquardt(unittest.TestCase):
     r"""
-    Tests the estimation._levenberg_marquardt function with the following cases:
+    Tests the estimation.batch._levenberg_marquardt function with the following cases:
         with lambda_
         without lambda_
     """
@@ -484,10 +497,10 @@ class Test_estimation__levenberg_marquardt(unittest.TestCase):
         delta_param = estm.batch._levenberg_marquardt(self.jacobian, self.innovs, 0)
         np.testing.assert_array_almost_equal(delta_param, b)
 
-#%% estimation._predict_func_change
-class Test_estimation__predict_func_change(unittest.TestCase):
+#%% estimation.batch._predict_func_change
+class Test_estimation_batch__predict_func_change(unittest.TestCase):
     r"""
-    Tests the estimation._predict_func_change function with the following cases:
+    Tests the estimation.batch._predict_func_change function with the following cases:
         Nominal
     """
     def setUp(self):
@@ -500,11 +513,11 @@ class Test_estimation__predict_func_change(unittest.TestCase):
         delta_func = estm.batch._predict_func_change(self.delta_param, self.gradient, self.hessian)
         self.assertEqual(delta_func, self.pred_change)
 
-#%% estimation._check_for_convergence
+#%% estimation.batch._check_for_convergence
 @patch('dstauffman.estimation.batch.logger')
-class Test_estimation__check_for_convergence(unittest.TestCase):
+class Test_estimation_batch__check_for_convergence(unittest.TestCase):
     r"""
-    Tests the estimation._check_for_convergence function with the following cases:
+    Tests the estimation.batch._check_for_convergence function with the following cases:
         TBD
     """
     def setUp(self):
@@ -553,10 +566,10 @@ class Test_estimation__check_for_convergence(unittest.TestCase):
         error = err.getvalue().strip()
         self.assertEqual(error, '')
 
-#%% estimation._double_dogleg
-class Test_estimation__double_dogleg(unittest.TestCase):
+#%% estimation.batch._double_dogleg
+class Test_estimation_batch__double_dogleg(unittest.TestCase):
     r"""
-    Tests the estimation._double_dogleg function with the following cases:
+    Tests the estimation.batch._double_dogleg function with the following cases:
         TBD
     """
     def setUp(self):
@@ -599,11 +612,11 @@ class Test_estimation__double_dogleg(unittest.TestCase):
         (new_delta_param, step_len, step_scale, step_type) = estm.batch._double_dogleg(self.delta_param, \
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
-#%% estimation._dogleg_search
+#%% estimation.batch._dogleg_search
 @patch('dstauffman.estimation.batch.logger')
-class Test_estimation__dogleg_search(unittest.TestCase):
+class Test_estimation_batch__dogleg_search(unittest.TestCase):
     r"""
-    Tests the estimation._dogleg_search function with the following cases:
+    Tests the estimation.batch._dogleg_search function with the following cases:
         TBD
     """
     def setUp(self):
@@ -635,7 +648,9 @@ class Test_estimation__dogleg_search(unittest.TestCase):
         self.cur_results = estm.CurrentResults()
 
         # initialize current results
-        self.cur_results.innovs    = estm.batch._function_wrapper(self.opti_opts, self.bpe_results, self.model_args)
+        self.cur_results.innovs    = estm.batch._function_wrapper(model_func=self.opti_opts.model_func, \
+            cost_func=self.opti_opts.cost_func, cost_args=self.opti_opts.cost_args, model_args=self.model_args)
+        self.bpe_results.num_evals += 1
         self.cur_results.trust_rad = self.opti_opts.trust_radius
         self.cur_results.cost      = 0.5 * rss(self.cur_results.innovs, ignore_nans=True)
         names = estm.OptiParam.get_names(self.opti_opts.params)
@@ -685,11 +700,11 @@ class Test_estimation__dogleg_search(unittest.TestCase):
         estm.batch._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
-#%% estimation._analyze_results
+#%% estimation.batch._analyze_results
 @patch('dstauffman.estimation.batch.logger')
-class Test_estimation__analyze_results(unittest.TestCase):
+class Test_estimation_batch__analyze_results(unittest.TestCase):
     r"""
-    Tests the estimation._analyze_results function with the following cases:
+    Tests the estimation.batch._analyze_results function with the following cases:
         Nominal
         Normalized
     """
