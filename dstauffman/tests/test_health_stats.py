@@ -59,7 +59,7 @@ class Test_health_convert_annual_to_monthly_probability(unittest.TestCase):
 #%% health.convert_monthly_to_annual_probability
 class Test_health_convert_monthly_to_annual_probability(unittest.TestCase):
     r"""
-    Tests the convert_annual_to_monthly_probability function with these cases:
+    Tests the health.convert_monthly_to_annual_probability function with the following cases:
         convert a vector from monthly to annual
         convert a scalar
         convert a number less than zero (raise error)
@@ -368,21 +368,6 @@ class Test_health_bounded_normal_draw(unittest.TestCase):
         self.values['test_std'] = 0
         out = health.bounded_normal_draw(self.num, self.values, self.field, self.prng)
         self.assertTrue(np.all(np.abs(out - self.mean) < 1e-8))
-
-#%% health.z_from_ci
-class Test_health_z_from_ci(unittest.TestCase):
-    r"""
-    Tests the health.z_from_ci function with the following cases:
-        Nominal with 4 common values found online
-    """
-    def setUp(self):
-        self.cis = [0.90,  0.95,  0.98,  0.99]
-        self.zs  = [1.645, 1.96, 2.326, 2.576]
-
-    def test_nominal(self):
-        for (ci, exp_z) in zip(self.cis, self.zs):
-            z = health.z_from_ci(ci)
-            self.assertTrue(abs(z - exp_z) < 0.001, '{} and {} are more than 0.001 from each other.'.format(z, exp_z))
 
 #%% health.rand_draw
 class Test_health_rand_draw(unittest.TestCase):

@@ -1,5 +1,5 @@
 r"""
-Test file for the `plot_generic` module of the "dstauffman" library.
+Test file for the `generic` module of the "dstauffman.plotting" library.
 
 Notes
 -----
@@ -15,12 +15,14 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
 
-import dstauffman as dcs
+from dstauffman import LogLevel
 
-#%% make_time_plot
-class Test_make_time_plot(unittest.TestCase):
+import dstauffman.plotting as plot
+
+#%% plotting.make_time_plot
+class Test_plotting_make_time_plot(unittest.TestCase):
     r"""
-    Tests the make_time_plot function with the following cases:
+    Tests the plotting.make_time_plot function with the following cases:
         TBD
     """
     def setUp(self):
@@ -49,10 +51,10 @@ class Test_make_time_plot(unittest.TestCase):
         self.fig           = None
 
     def test_simple(self):
-        self.fig = dcs.make_time_plot(self.description, self.time, self.data)
+        self.fig = plot.make_time_plot(self.description, self.time, self.data)
 
     def test_nominal(self):
-        self.fig = dcs.make_time_plot(self.description, self.time, self.data, name=self.name, elements=self.elements, \
+        self.fig = plot.make_time_plot(self.description, self.time, self.data, name=self.name, elements=self.elements, \
             units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
@@ -61,33 +63,33 @@ class Test_make_time_plot(unittest.TestCase):
 
     def test_list1(self):
         data = [self.data, self.data+0.5, self.data + 1.0]
-        self.fig = dcs.make_time_plot(self.description, self.time, data)
+        self.fig = plot.make_time_plot(self.description, self.time, data)
 
     def test_list2(self):
         time = [self.time, self.time[:-1]]
         data = [self.data, 2*self.data[:-1]]
-        self.fig = dcs.make_time_plot(self.description, time, data)
+        self.fig = plot.make_time_plot(self.description, time, data)
 
     def test_vectors(self):
         data = np.vstack((self.data, np.sin(self.time)))
-        self.fig = dcs.make_time_plot(self.description, self.time, data)
+        self.fig = plot.make_time_plot(self.description, self.time, data)
 
     def tearDown(self):
         if self.fig:
             plt.close(self.fig)
 
-#%% make_error_bar_plot
-class Test_make_error_bar_plot(unittest.TestCase):
+#%% plotting.make_error_bar_plot
+class Test_plotting_make_error_bar_plot(unittest.TestCase):
     r"""
-    Tests the make_error_bar_plot function with the following cases:
+    Tests the plotting.make_error_bar_plot function with the following cases:
         TBD
     """
     pass # TODO: write this
 
-#%% make_difference_plot
-class Test_make_difference_plot(unittest.TestCase):
+#%% plotting.make_difference_plot
+class Test_plotting_make_difference_plot(unittest.TestCase):
     r"""
-    Tests the make_difference_plot function with the following cases:
+    Tests the plotting.make_difference_plot function with the following cases:
         TBD
     """
     def setUp(self):
@@ -107,7 +109,7 @@ class Test_make_difference_plot(unittest.TestCase):
         self.disp_xmin     = -2
         self.disp_xmax     = np.inf
         self.make_subplots = True
-        color_lists        = dcs.get_color_lists()
+        color_lists        = plot.get_color_lists()
         self.colormap      = ListedColormap(color_lists['dbl_diff'].colors + color_lists['double'].colors)
         self.use_mean      = False
         self.plot_zero     = False
@@ -119,7 +121,7 @@ class Test_make_difference_plot(unittest.TestCase):
 
     def test_nominal(self):
         self.return_err = False
-        self.figs = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        self.figs = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
@@ -129,7 +131,7 @@ class Test_make_difference_plot(unittest.TestCase):
 
     def test_no_subplots(self):
         self.make_subplots = False
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
@@ -139,7 +141,7 @@ class Test_make_difference_plot(unittest.TestCase):
 
     def test_no_start_date(self):
         self.start_date = ''
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
@@ -150,7 +152,7 @@ class Test_make_difference_plot(unittest.TestCase):
     def test_only_data_one(self):
         self.data_two.fill(np.nan)
         self.name_two = ''
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
@@ -162,7 +164,7 @@ class Test_make_difference_plot(unittest.TestCase):
     def test_only_data_two(self):
         self.data_one = None
         self.name_one = ''
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
@@ -174,7 +176,7 @@ class Test_make_difference_plot(unittest.TestCase):
     def test_rms_bounds(self):
         self.rms_xmin = 5
         self.rms_xmax = 7
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
@@ -184,7 +186,7 @@ class Test_make_difference_plot(unittest.TestCase):
 
     def test_use_mean(self):
         self.use_mean = True
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
@@ -194,7 +196,7 @@ class Test_make_difference_plot(unittest.TestCase):
 
     def test_no_rms_in_legend(self):
         self.show_rms = False
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
@@ -204,7 +206,7 @@ class Test_make_difference_plot(unittest.TestCase):
 
     def test_plot_zero(self):
         self.plot_zero = True
-        (self.figs, err) = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
@@ -213,12 +215,12 @@ class Test_make_difference_plot(unittest.TestCase):
             second_yscale=self.second_yscale, return_err=self.return_err)
 
     def test_plot_truth(self):
-        self.figs = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        self.figs = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, elements=self.elements, units=self.units, \
             truth_time=self.time_one, truth_data=self.data_two)
 
     def test_disp_bounds(self):
-        self.figs = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        self.figs = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
              self.data_one, self.data_two, elements=self.elements, units=self.units, \
              disp_xmin=2, disp_xmax=5)
 
@@ -226,7 +228,7 @@ class Test_make_difference_plot(unittest.TestCase):
         self.time_one = np.arange(11).astype(float)
         self.time_two = np.arange(2, 13) + 0.5
         self.return_err = False
-        self.figs = dcs.make_difference_plot(self.description, self.time_one, self.time_two, \
+        self.figs = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
             elements=self.elements, units=self.units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
@@ -235,16 +237,16 @@ class Test_make_difference_plot(unittest.TestCase):
             second_yscale=self.second_yscale, return_err=self.return_err)
 
     def test_none1(self):
-        self.figs = dcs.make_difference_plot(self.description, self.time_one, None, self.data_one, None)
+        self.figs = plot.make_difference_plot(self.description, self.time_one, None, self.data_one, None)
 
     def test_none2(self):
-        self.figs = dcs.make_difference_plot(self.description, None, self.time_two, None, self.data_two)
+        self.figs = plot.make_difference_plot(self.description, None, self.time_two, None, self.data_two)
 
-    @patch('dstauffman.plot_generic.logger')
+    @patch('dstauffman.plotting.generic.logger')
     def test_none3(self, mock_logger):
-        self.figs = dcs.make_difference_plot('', None, None, None, None)
+        self.figs = plot.make_difference_plot('', None, None, None, None)
         self.assertEqual(mock_logger.log.call_count, 1)
-        mock_logger.log.assert_called_with(dcs.LogLevel.L5, 'No difference data was provided, so no plot was generated for "".')
+        mock_logger.log.assert_called_with(LogLevel.L5, 'No difference data was provided, so no plot was generated for "".')
 
     def tearDown(self):
         if self.figs:

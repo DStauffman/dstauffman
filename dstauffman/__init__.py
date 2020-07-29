@@ -16,24 +16,15 @@ Notes
 from .classes      import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, \
                               load_method, pprint_dict, Frozen, SaveAndLoad, SaveAndLoadPickle, \
                               Counter, FixedDict
-from .constants    import DEFAULT_COLORMAP, INT_TOKEN, IS_WINDOWS, DEFAULT_CLASSIFICATION
+from .constants    import INT_TOKEN, IS_WINDOWS
 from .enums        import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran      import create_fortran_unit_tests, create_fortran_makefile
 from .logs         import activate_logging, deactivate_logging
 from .matlab       import load_matlab
-from .optimized    import np_any, np_all
+from .optimized    import np_any, np_all, issorted_opt
 from .parser       import main, parse_wrapper, parse_commands, execute_command
 from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
                               get_output_dir, list_python_files
-from .plot_generic import make_time_plot, make_error_bar_plot, make_difference_plot
-from .plot_support import Plotter, TruthPlotter, MyCustomToolbar, ColorMap, close_all, \
-                              get_color_lists, ignore_plot_data, whitten, resolve_name, storefig, \
-                              titleprefix, disp_xlimits, zoom_ylim, setup_plots, figmenu, \
-                              rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
-                              plot_second_units_wrapper, plot_second_yunits, get_rms_indices, \
-                              plot_vert_lines, plot_phases, get_classification, \
-                              plot_classification, align_plots
-from .plotting     import Opts, plot_time_history, plot_correlation_matrix, plot_bar_breakdown
 from .repos        import run_docstrings, run_unittests, run_pytests, run_coverage, \
                               find_repo_issues, delete_pyc, get_python_definitions, \
                               make_python_init, write_unit_test_templates

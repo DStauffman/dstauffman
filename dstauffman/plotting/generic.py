@@ -14,13 +14,10 @@ import unittest
 import matplotlib.pyplot as plt
 import numpy as np
 
-from dstauffman.constants    import DEFAULT_COLORMAP
-from dstauffman.enums        import LogLevel
-from dstauffman.plot_support import ColorMap, disp_xlimits, get_rms_indices, \
-                                    plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, \
-                                    zoom_ylim
-from dstauffman.units import get_factors
-from dstauffman.utils import intersect, is_datetime, rms
+from dstauffman import get_factors, intersect, is_datetime, LogLevel, rms
+
+from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits, get_rms_indices, \
+    plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
 
 #%% Constants
 # hard-coded values
@@ -95,7 +92,7 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
 
     Examples
     --------
-    >>> from dstauffman import make_time_plot
+    >>> from dstauffman.plotting import make_time_plot
     >>> import numpy as np
     >>> description = 'Values vs Time'
     >>> time = np.arange(-10., 10.1, 0.1)
@@ -329,7 +326,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
 
     Examples
     --------
-    >>> from dstauffman import make_error_bar_plot
+    >>> from dstauffman.plotting import make_error_bar_plot
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> from datetime import datetime
@@ -365,18 +362,6 @@ def make_error_bar_plot(description, time, data, mins, maxs, elements=None, unit
 
     Close plots
     >>> plt.close(fig)
-
-    Returns
-    -------
-    fig : list of matplotlib.pyplot.Figure
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in May 2020.
-
-    Examples
-    --------
-    >>> from dstauffman import make_error_bar_plot
 
     """
     # data checks
@@ -586,7 +571,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
 
     Examples
     --------
-    >>> from dstauffman import make_difference_plot, get_color_lists
+    >>> from dstauffman.plotting import make_difference_plot, get_color_lists
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> from matplotlib.colors import ListedColormap
@@ -872,5 +857,5 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_plot_generic', exit=False)
+    unittest.main(module='dstauffman.tests.test_plotting_generic', exit=False)
     doctest.testmod(verbose=False)

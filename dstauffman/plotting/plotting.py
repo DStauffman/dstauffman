@@ -17,13 +17,10 @@ import numpy as np
 from matplotlib.patches import Rectangle
 from matplotlib.ticker import StrMethodFormatter
 
-from dstauffman.classes      import Frozen
-from dstauffman.constants    import DEFAULT_COLORMAP
-from dstauffman.enums        import LogLevel
-from dstauffman.plot_generic import make_time_plot
-from dstauffman.plot_support import ColorMap, ignore_plot_data, setup_plots
-from dstauffman.time         import convert_date, convert_time_units
-from dstauffman.units        import get_factors
+from dstauffman import convert_date, convert_time_units, Frozen, get_factors, LogLevel
+
+from dstauffman.plotting.generic import make_time_plot
+from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, ignore_plot_data, setup_plots
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -155,7 +152,7 @@ class Opts(Frozen):
 
         Examples
         --------
-        >>> from dstauffman import Opts
+        >>> from dstauffman.plotting import Opts
         >>> from datetime import datetime
         >>> opts = Opts()
         >>> opts.date_zero = datetime(2019, 4, 1, 18, 0, 0)
@@ -233,7 +230,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
 
     Examples
     --------
-    >>> from dstauffman import plot_time_history
+    >>> from dstauffman.plotting import plot_time_history
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> description = 'Random Data'
@@ -339,7 +336,8 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
 
     Examples
     --------
-    >>> from dstauffman import plot_correlation_matrix, unit
+    >>> from dstauffman.plotting import plot_correlation_matrix
+    >>> from dstauffman import unit
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> data = np.random.rand(10, 10)
@@ -483,7 +481,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
 
     Examples
     --------
-    >>> from dstauffman import plot_bar_breakdown
+    >>> from dstauffman.plotting import plot_bar_breakdown
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> time  = np.arange(0, 5, 1./12) + 2000
@@ -559,5 +557,5 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_plotting', exit=False)
+    unittest.main(module='dstauffman.tests.test_plotting_plotting', exit=False)
     doctest.testmod(verbose=False)

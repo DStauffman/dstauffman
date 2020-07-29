@@ -24,6 +24,7 @@ import matplotlib.pyplot as plt
 from matplotlib.dates import date2num
 from matplotlib.patches import Rectangle
 import numpy as np
+import scipy.stats as st
 
 try:
     from PyQt5.QtWidgets import QApplication, QPushButton
@@ -33,10 +34,20 @@ except ImportError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object
 
-from dstauffman.classes import Frozen
-from dstauffman.constants import DEFAULT_CLASSIFICATION, DEFAULT_COLORMAP
-from dstauffman.paths import get_images_dir
-from dstauffman.utils import is_datetime
+from dstauffman import Frozen, get_images_dir, is_datetime
+
+#%% Constants
+# Default colormap to use on certain plots
+DEFAULT_COLORMAP = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
+
+# Whether to include a classification on any generated plots
+DEFAULT_CLASSIFICATION = ''
+
+#%% Set Matplotlib global settings
+plt.rcParams['figure.dpi']     = 160 # 160 for 4K monitors, 100 otherwise
+plt.rcParams['figure.figsize'] = [11., 8.5] # makes figures the same size as the paper, keeping aspect ratios even
+plt.rcParams['figure.max_open_warning'] = 80 # Max number of figures to open before through a warning, 0 means unlimited
+plt.rcParams['date.autoformatter.minute'] = '%H:%M:%S' # makes seconds show, and not day, default is '%d %H:%M'
 
 #%% Classes - _HoverButton
 class _HoverButton(QPushButton):
@@ -97,7 +108,7 @@ class TruthPlotter(Frozen):
 
     Examples
     --------
-    >>> from dstauffman import TruthPlotter
+    >>> from dstauffman.plotting import TruthPlotter
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -195,7 +206,7 @@ class MyCustomToolbar():
 
     Examples
     --------
-    >>> from dstauffman import MyCustomToolbar
+    >>> from dstauffman.plotting import MyCustomToolbar
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -305,7 +316,7 @@ class ColorMap(Frozen):
 
     Examples
     --------
-    >>> from dstauffman import ColorMap
+    >>> from dstauffman.plotting import ColorMap
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> cm = ColorMap('Paired', 1, 2)
@@ -367,7 +378,7 @@ def close_all(figs=None):
 
     Examples
     --------
-    >>> from dstauffman import close_all
+    >>> from dstauffman.plotting import close_all
     >>> import matplotlib.pyplot as plt
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
@@ -408,7 +419,7 @@ def get_color_lists():
 
     Examples
     --------
-    >>> from dstauffman import get_color_lists
+    >>> from dstauffman.plotting import get_color_lists
     >>> color_lists = get_color_lists()
     >>> print(color_lists['default'])
     Paired
@@ -455,7 +466,7 @@ def ignore_plot_data(data, ignore_empties, col=None):
 
     Examples
     --------
-    >>> from dstauffman import ignore_plot_data
+    >>> from dstauffman.plotting import ignore_plot_data
     >>> import numpy as np
     >>> data = np.zeros((3, 10), dtype=float)
     >>> ignore_empties = True
@@ -494,7 +505,7 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
 
     Examples
     --------
-    >>> from dstauffman import whitten
+    >>> from dstauffman.plotting import whitten
     >>> color = (1, 0.4, 0)
     >>> new_color = whitten(color)
     >>> print(new_color)
@@ -526,7 +537,7 @@ def resolve_name(name, force_win=None, rep_token='_', strip_classification=True)
 
     Examples
     --------
-    >>> from dstauffman import resolve_name
+    >>> from dstauffman.plotting import resolve_name
     >>> name = '(U//FOUO) Bad name /\ <>!'
     >>> force_win = True
     >>> new_name = resolve_name(name, force_win=force_win)
@@ -588,8 +599,7 @@ def storefig(fig, folder=None, plot_type='png'):
     Examples
     --------
     Create figure and then save to disk
-
-    >>> from dstauffman import storefig
+    >>> from dstauffman.plotting import storefig
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> import os
@@ -676,7 +686,7 @@ def titleprefix(fig, prefix=''):
     Examples
     --------
     Create figure and then change the title
-    >>> from dstauffman import titleprefix
+    >>> from dstauffman.plotting import titleprefix
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -741,7 +751,7 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
 
     Examples
     --------
-    >>> from dstauffman import disp_xlimits
+    >>> from dstauffman.plotting import disp_xlimits
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -828,7 +838,7 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-np.inf, t_final=np.inf, chan
 
     Examples
     --------
-    >>> from dstauffman import disp_xlimits, zoom_ylim
+    >>> from dstauffman.plotting import disp_xlimits, zoom_ylim
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -924,7 +934,7 @@ def setup_plots(figs, opts):
 
     Examples
     --------
-    >>> from dstauffman import setup_plots, Opts
+    >>> from dstauffman.plotting import setup_plots, Opts
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -996,7 +1006,7 @@ def figmenu(figs):
 
     Examples
     --------
-    >>> from dstauffman import figmenu
+    >>> from dstauffman.plotting import figmenu
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -1038,7 +1048,7 @@ def rgb_ints_to_hex(int_tuple):
 
     Examples
     --------
-    >>> from dstauffman import rgb_ints_to_hex
+    >>> from dstauffman.plotting import rgb_ints_to_hex
     >>> hex_code = rgb_ints_to_hex((79, 129, 189))
     >>> print(hex_code)
     #4f81bd
@@ -1074,7 +1084,7 @@ def get_screen_resolution():
 
     Examples
     --------
-    >>> from dstauffman import get_screen_resolution
+    >>> from dstauffman.plotting import get_screen_resolution
     >>> (screen_width, screen_height) = get_screen_resolution()
     >>> print('{}x{}'.format(screen_width, screen_height)) # doctest: +SKIP
 
@@ -1105,7 +1115,7 @@ def show_zero_ylim(ax):
 
     Examples
     --------
-    >>> from dstauffman import show_zero_ylim
+    >>> from dstauffman.plotting import show_zero_ylim
     >>> import matplotlib.pyplot as plt
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
@@ -1147,7 +1157,7 @@ def plot_second_units_wrapper(ax, second_yscale):
 
     Examples
     --------
-    >>> from dstauffman import plot_second_units_wrapper
+    >>> from dstauffman.plotting import plot_second_units_wrapper
     >>> import matplotlib.pyplot as plt
     >>> description = 'Values over time'
     >>> ylabel = 'Value [rad]'
@@ -1212,7 +1222,7 @@ def plot_second_yunits(ax, ylab, multiplier):
 
     Examples
     --------
-    >>> from dstauffman import plot_second_yunits
+    >>> from dstauffman.plotting import plot_second_yunits
     >>> import matplotlib.pyplot as plt
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
@@ -1268,7 +1278,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
 
     Examples
     --------
-    >>> from dstauffman import get_rms_indices
+    >>> from dstauffman.plotting import get_rms_indices
     >>> import numpy as np
     >>> time_one     = np.arange(11)
     >>> time_two     = np.arange(2, 13)
@@ -1380,7 +1390,7 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
 
     Examples
     --------
-    >>> from dstauffman import plot_vert_lines
+    >>> from dstauffman.plotting import plot_vert_lines
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -1419,7 +1429,7 @@ def plot_phases(ax, times, colormap='tab10', labels=None):
 
     Examples
     --------
-    >>> from dstauffman import plot_phases, get_color_lists
+    >>> from dstauffman.plotting import plot_phases, get_color_lists
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -1509,7 +1519,7 @@ def get_classification(classify):
 
     Examples
     --------
-    >>> from dstauffman import get_classification
+    >>> from dstauffman.plotting import get_classification
     >>> classify = 'UNCLASSIFIED//MADE UP CAVEAT'
     >>> (classification, caveat) = get_classification(classify)
     >>> print(classification)
@@ -1571,7 +1581,7 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, locati
 
     Examples
     --------
-    >>> from dstauffman import plot_classification
+    >>> from dstauffman.plotting import plot_classification
     >>> import matplotlib.pyplot as plt
     >>> fig1 = plt.figure()
     >>> ax1 = fig1.add_subplot(111)
@@ -1680,7 +1690,7 @@ def align_plots(figs, pos=None):
 
     Examples
     --------
-    >>> from dstauffman import align_plots, make_time_plot
+    >>> from dstauffman.plotting import align_plots, make_time_plot
     >>> #fig1 = make_time_plot('Plot 1', 0, 0) # TODO: get this working
     >>> #fig2 = make_time_plot('Plot 2', 1, 1)
     >>> #figs = [fig1, fig2]
@@ -1705,8 +1715,40 @@ def align_plots(figs, pos=None):
         # move the plot
         fig.canvas.manager.window.move(x_pos, y_pos)
 
+#%% Functions - z_from_ci
+def z_from_ci(ci):
+    r"""
+    Calculates the Z score that matches the desired confidence interval.
+
+    Parameters
+    ----------
+    ci : float
+        Desired confidence interval
+
+    Returns
+    -------
+    z : float
+        Desired z value
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2017 based on:
+        https://stackoverflow.com/questions/20864847/probability-to-z-score-and-vice-versa-in-python
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import z_from_ci
+    >>> ci = 0.95
+    >>> z = z_from_ci(ci)
+    >>> print('{:.2f}'.format(z))
+    1.96
+
+    """
+    z = st.norm.ppf(1-(1-ci)/2)
+    return z
+
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_plot_support', exit=False)
+    unittest.main(module='dstauffman.tests.test_plotting_support', exit=False)
     doctest.testmod(verbose=False)

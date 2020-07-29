@@ -16,7 +16,7 @@ class Test_all_values(unittest.TestCase):
 
     def setUp(self):
         self.ints = ['INT_TOKEN']
-        self.strs = ['DEFAULT_CLASSIFICATION', 'DEFAULT_COLORMAP']
+        self.strs = []
         self.bool = ['IS_WINDOWS']
         self.master = set(self.ints) | set(self.strs) | set(self.bool)
 

@@ -10,7 +10,10 @@ Notes
 import doctest
 import unittest
 
-import h5py
+try:
+    import h5py
+except ImportError: # pragma: no cover
+    pass
 import numpy as np
 
 from dstauffman import Frozen, SaveAndLoad

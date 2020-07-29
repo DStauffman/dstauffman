@@ -1,5 +1,5 @@
 r"""
-Classes related to Kalman Filter analysis.
+Plots related to Kalman Filter analysis.
 
 Notes
 -----
@@ -15,13 +15,14 @@ import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
 import numpy as np
 
-from dstauffman import ColorMap, disp_xlimits, get_color_lists, get_factors, get_rms_indices, \
-                       intersect, is_datetime, LogLevel, make_difference_plot, Opts, \
-                       plot_second_units_wrapper, plot_vert_lines, rms, setup_plots, \
-                       show_zero_ylim, zoom_ylim
+from dstauffman import get_factors, intersect, is_datetime, LogLevel, rms
+from dstauffman.aerospace import Kf, KfInnov, quat_angle_diff
 
-from dstauffman.aerospace.classes import Kf, KfInnov
-from dstauffman.aerospace.quat import quat_angle_diff
+from dstauffman.plotting.generic  import make_difference_plot
+from dstauffman.plotting.plotting import Opts
+from dstauffman.plotting.support  import ColorMap, disp_xlimits, get_color_lists, get_rms_indices, \
+    plot_second_units_wrapper, plot_vert_lines, setup_plots, \
+    show_zero_ylim, zoom_ylim
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -118,7 +119,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
 
     Examples
     --------
-    >>> from dstauffman.aerospace import make_quaternion_plot, quat_norm
+    >>> from dstauffman.plotting import make_quaternion_plot
+    >>> from dstauffman.aerospace import quat_norm
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> from datetime import datetime
@@ -414,8 +416,8 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     Examples
     --------
-    >>> from dstauffman.aerospace import Kf, plot_attitude, quat_from_euler, quat_mult, quat_norm
-    >>> from dstauffman import Opts
+    >>> from dstauffman.plotting import Opts, plot_attitude
+    >>> from dstauffman.aerospace import Kf, quat_from_euler, quat_mult, quat_norm
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
@@ -548,7 +550,8 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     Examples
     --------
-    >>> from dstauffman.aerospace import Kf, plot_position
+    >>> from dstauffman.plotting import plot_position
+    >>> from dstauffman.aerospace import Kf
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
@@ -678,8 +681,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
 
     Examples
     --------
-    >>> from dstauffman.aerospace import KfInnov, plot_innovations
-    >>> from dstauffman import Opts
+    >>> from dstauffman.plotting import Opts, plot_innovations
+    >>> from dstauffman.aerospace import KfInnov
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
@@ -812,8 +815,8 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
 
     Examples
     --------
-    >>> from dstauffman.aerospace import Kf, plot_covariance
-    >>> from dstauffman import Opts
+    >>> from dstauffman.plotting import Opts, plot_covariance
+    >>> from dstauffman.aerospace import Kf
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
 
@@ -954,5 +957,5 @@ def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, 
 #%% Unit Test
 if __name__ == '__main__':
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_aerospace_plotting', exit=False)
+    unittest.main(module='dstauffman.tests.test_plotting_aerospace', exit=False)
     doctest.testmod(verbose=False)

@@ -13,7 +13,6 @@ import platform
 import sys
 import unittest
 
-from numba.typed import List
 import numpy as np
 from scipy.interpolate import interp1d
 
@@ -1135,7 +1134,7 @@ class Test_issorted(unittest.TestCase):
         self.assertTrue(dcs.issorted(x, descend=True))
 
     def test_lists(self):
-        x = List([-np.inf, 0, 1, np.pi, 5, np.inf])
+        x = [-np.inf, 0, 1, np.pi, 5, np.inf]
         self.assertTrue(dcs.issorted(x))
         self.assertFalse(dcs.issorted(x, descend=True))
 

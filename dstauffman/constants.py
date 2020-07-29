@@ -11,7 +11,6 @@ import logging
 import os
 import unittest
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from dstauffman.enums import LogLevel
@@ -41,24 +40,12 @@ np.seterr(invalid='ignore', divide='ignore')
 #%% Set NumPy printing options
 np.set_printoptions(threshold=1000)
 
-#%% Set Matplotlib global settings
-plt.rcParams['figure.dpi']     = 160 # 160 for 4K monitors, 100 otherwise
-plt.rcParams['figure.figsize'] = [11., 8.5] # makes figures the same size as the paper, keeping aspect ratios even
-plt.rcParams['figure.max_open_warning'] = 80 # Max number of figures to open before through a warning, 0 means unlimited
-plt.rcParams['date.autoformatter.minute'] = '%H:%M:%S' # makes seconds show, and not day, default is '%d %H:%M'
-
 #%% Constants
-# Default colormap to use on certain plots
-DEFAULT_COLORMAP = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
-
 # A specified integer token value to use when you need one
 INT_TOKEN = -1
 
 # Whether we are currently on Windows or not
 IS_WINDOWS = os.name == 'nt'
-
-# Whether to include a classification on any generated plots
-DEFAULT_CLASSIFICATION = ''
 
 #%% Functions
 # None

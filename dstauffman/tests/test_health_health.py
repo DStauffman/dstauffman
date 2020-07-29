@@ -13,7 +13,8 @@ import unittest
 import matplotlib.pyplot as plt
 import numpy as np
 
-from dstauffman import Opts, Plotter
+from dstauffman.plotting import Opts, Plotter
+
 import dstauffman.health as health
 
 #%% Plotter for testing
@@ -254,46 +255,6 @@ class Test_health_icer(unittest.TestCase):
         np.testing.assert_array_equal(icer_out, temp, 'ICER mismatch.')
         np.testing.assert_array_equal(order, self.order, 'Order mismatch.')
         self.assertTrue(isinstance(self.fig, plt.Figure))
-
-    def tearDown(self):
-        if self.fig is not None:
-            plt.close(self.fig)
-
-#%% health.plot_icer
-class Test_health_plot_icer(unittest.TestCase):
-    r"""
-    Tests the health.plot_icer function with the following cases:
-        TBD
-    """
-    pass # TODO: write this
-
-#%% health.plot_population_pyramid
-class Test_health_plot_population_pyramid(unittest.TestCase):
-    r"""
-    Tests the health.plot_population_pyramid function with the following cases:
-        Nominal
-        Default arguments
-    """
-    def setUp(self):
-        self.age_bins = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
-        self.male_per = np.array([100, 200, 300, 400, 500], dtype=int)
-        self.fmal_per = np.array([125, 225, 325, 375, 450], dtype=int)
-        self.title    = 'Test Title'
-        self.opts     = Opts()
-        self.name1    = 'M'
-        self.name2    = 'W'
-        self.color1   = 'k'
-        self.color2   = 'w'
-        self.fig      = None
-
-    def test_nominal(self):
-        self.fig = health.plot_population_pyramid(self.age_bins, self.male_per, self.fmal_per, \
-            self.title, opts=self.opts, name1=self.name1, name2=self.name2, color1=self.color1, \
-            color2=self.color2)
-
-    def test_defaults(self):
-        self.fig = health.plot_population_pyramid(self.age_bins, self.male_per, self.fmal_per, \
-            self.title)
 
     def tearDown(self):
         if self.fig is not None:

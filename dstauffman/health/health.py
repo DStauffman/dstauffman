@@ -11,11 +11,7 @@ import doctest
 import unittest
 from collections import OrderedDict
 
-import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
-
-from dstauffman import Opts, setup_plots
 
 from dstauffman.health.latex import bins_to_str_ranges
 
@@ -155,6 +151,9 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     [ 0. 1. nan 2.]
 
     """
+    # delayed imports, as this is currently the only dependency on pandas
+    import pandas as pd
+
     # force inputs to be ndarrays
     cost = np.atleast_1d(np.asarray(cost))
     qaly = np.atleast_1d(np.asarray(qaly))
@@ -253,144 +252,15 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
 
     # Make a plot
     if make_plot:
+        # delayed import to eliminate circular imports
+        from dstauffman.plotting import plot_icer
         fig = plot_icer(qaly, cost, ix, baseline=baseline, names=names, opts=opts)
 
     return (inc_cost, inc_qaly, icer_out, order, icer_data, fig)
 
-#%% Functions - plot_icer
-def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
-    r"""Plot the icer results."""
-    # check optional inputs
-    if opts is None:
-        opts = Opts()
-    # create a figure and axis
-    fig = plt.figure()
-    fig.canvas.set_window_title('Cost Benefit Frontier')
-    ax = fig.add_subplot(111)
-    # plot the data
-    ax.plot(qaly, cost, 'ko', label='strategies')
-    ax.plot(qaly[ix_front], cost[ix_front], 'r.', markersize=20, label='frontier')
-    # get axis limits before (0,0) point is added
-    lim = ax.axis()
-    # add ICER lines
-    if baseline is None:
-        ax.plot(np.hstack((0, qaly[ix_front])), np.hstack((0, cost[ix_front])), 'r-', label='ICERs')
-    else:
-        ax.plot(np.hstack((0, qaly[ix_front[0]])), np.hstack((0, cost[ix_front[0]])), 'r:')
-        ax.plot(np.hstack((qaly[baseline], qaly[ix_front])), np.hstack((cost[baseline], cost[ix_front])), 'r-', label='ICERs')
-    # Label each point
-    dy = (lim[3] - lim[2]) / 100
-    for i in range(cost.size):
-        ax.annotate(names[i], xy=(qaly[i], cost[i]+dy), xycoords='data', horizontalalignment='center', \
-            verticalalignment='bottom', fontsize=12)
-    # add some labels and such
-    ax.set_title(fig.canvas.get_window_title())
-    ax.set_xlabel('Benefits')
-    ax.set_ylabel('Costs')
-    ax.legend(loc='upper left')
-    ax.grid(True)
-    # reset limits with including (0,0) point in case it skews everything too much
-    ax.axis(lim)
-    # add standard plotting features
-    setup_plots(fig, opts)
-    return fig
-
-#%% Functions - plot_population_pyramid
-def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyramid', *, opts=None, \
-        name1='Male', name2='Female', color1='xkcd:blue', color2='xkcd:red'):
-    r"""
-    Plot the standard population pyramid.
-
-    Parameters
-    ----------
-    age_bins : (N+1,) array_like of float/ints
-        Age boundaries to plot
-    male_per : (N,) array_like of int
-        Male population percentage in each bin
-    fmal_per : (N,) array_like of int
-        Female population percentage in each bin
-    title : str, optional, default is 'Population Pyramid'
-        Title for the plot
-    opts : class Opts, optional
-        Plotting options
-    name1 : str, optional
-        Name for data source 1
-    name2 : str, optional
-        Name for data source 2
-    color1 : str or valid color tuple, optional
-        Color for data source 1
-    color2 : str or valid color tuple, optional
-        Color for data source 2
-
-    Returns
-    -------
-    fig : object
-        figure handle
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in April 2017.
-
-    References
-    ----------
-    .. [1]  https://en.wikipedia.org/wiki/Population_pyramid
-
-    Examples
-    --------
-    >>> from dstauffman.health import plot_population_pyramid
-    >>> import matplotlib.pyplot as plt
-    >>> import numpy as np
-    >>> age_bins = np.array([  0,   5,  10,  15,  20, 1000], dtype=int)
-    >>> male_per = np.array([500, 400, 300, 200, 100]) / 3000
-    >>> fmal_per = np.array([450, 375, 325, 225, 125]) / 3000
-    >>> fig      = plot_population_pyramid(age_bins, male_per, fmal_per)
-
-    Close figure
-    >>> plt.close(fig)
-
-    """
-    # hard-coded values
-    scale = 100
-
-    # check optional inputs
-    if opts is None:
-        opts = Opts()
-    legend_loc = opts.leg_spot
-
-    # convert data to percentages
-    num_pts   = age_bins.size - 1
-    y_values  = np.arange(num_pts)
-    y_labels  = bins_to_str_ranges(age_bins, dt=1, cutoff=200)
-
-    # create the figure and axis and set the title
-    fig = plt.figure()
-    fig.canvas.set_window_title(title)
-    ax = fig.add_subplot(111)
-
-    # plot bars
-    ax.barh(y_values, -scale*male_per, 0.95, color=color1, label=name1)
-    ax.barh(y_values,  scale*fmal_per, 0.95, color=color2, label=name2)
-
-    # make sure plot is symmetric about zero
-    xlim = max(abs(x) for x in ax.get_xlim())
-    ax.set_xlim(-xlim, xlim)
-
-    # add labels
-    ax.set_xlabel('Population [%]')
-    ax.set_ylabel('Age [years]')
-    ax.set_title(title)
-    ax.set_yticks(y_values)
-    ax.set_yticklabels(y_labels)
-    ax.set_xticklabels(np.abs(ax.get_xticks()))
-    ax.legend(loc=legend_loc)
-
-    # Setup plots
-    setup_plots(fig, opts)
-
-    return fig
-
 #%% Unit test
 if __name__ == '__main__':
+    import matplotlib.pyplot as plt
     plt.ioff()
     unittest.main(module='dstauffman.tests.test_health_health', exit=False)
     doctest.testmod(verbose=False)

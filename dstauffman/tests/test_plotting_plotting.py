@@ -1,5 +1,5 @@
 r"""
-Test file for the `plotting` module of the "dstauffman" library.
+Test file for the `plotting` module of the "dstauffman.plotting" library.
 
 Notes
 -----
@@ -14,15 +14,17 @@ from unittest.mock import patch
 import matplotlib.pyplot as plt
 import numpy as np
 
-import dstauffman as dcs
+from dstauffman import capture_output, LogLevel, unit
+
+import dstauffman.plotting as plot
 
 #%% Plotter for testing
-plotter = dcs.Plotter(False)
+plotter = plot.Plotter(False)
 
-#%% Opts
-class Test_Opts(unittest.TestCase):
+#%% plotting.Opts
+class Test_plotting_Opts(unittest.TestCase):
     r"""
-    Test Opts class with the following cases:
+    Tests the plotting.Opts class with the following cases:
         normal mode
         add new attribute to existing instance
     """
@@ -30,29 +32,29 @@ class Test_Opts(unittest.TestCase):
         self.opts_fields = ['case_name']
 
     def test_calling(self):
-        opts = dcs.Opts()
+        opts = plot.Opts()
         for field in self.opts_fields:
             self.assertTrue(hasattr(opts, field))
 
     def test_new_attr(self):
-        opts = dcs.Opts()
+        opts = plot.Opts()
         with self.assertRaises(AttributeError):
             opts.new_field_that_does_not_exist = 1
 
     def test_get_names_successful(self):
-        opts = dcs.Opts()
+        opts = plot.Opts()
         opts.names = ['Name 1', 'Name 2']
         name = opts.get_names(0)
         self.assertEqual(name, 'Name 1')
 
     def test_get_names_unsuccessful(self):
-        opts = dcs.Opts()
+        opts = plot.Opts()
         opts.names = ['Name 1', 'Name 2']
         name = opts.get_names(2)
         self.assertEqual(name, '')
 
     def test_get_date_zero_str(self):
-        opts = dcs.Opts()
+        opts = plot.Opts()
         date_str = opts.get_date_zero_str()
         self.assertEqual(date_str, '')
         opts.date_zero = datetime.datetime(2019, 4, 1, 18, 0, 0)
@@ -60,7 +62,7 @@ class Test_Opts(unittest.TestCase):
         self.assertEqual(date_str,'  t(0) = 01-Apr-2019 18:00:00 Z')
 
     def get_time_limits(self):
-        opts = dcs.Opts()
+        opts = plot.Opts()
         opts.disp_xmin = 60
         opts.disp_xmax = np.inf
         opts.rms_xmin = -np.inf
@@ -74,7 +76,7 @@ class Test_Opts(unittest.TestCase):
         self.assertIsNone(r2)
 
     def get_time_limits2(self):
-        opts = dcs.Opts().convert_dates('datetime')
+        opts = plot.Opts().convert_dates('datetime')
         opts.disp_xmin = datetime.datetime(2020, 6, 1, 0, 0, 0)
         opts.disp_xmax = datetime.datetime(2020, 6, 1, 12, 0, 0)
         (d1, d2, r1, r2) = opts.get_time_limits()
@@ -84,8 +86,8 @@ class Test_Opts(unittest.TestCase):
         self.assertIsNone(r2)
 
     def test_pprint(self):
-        opts = dcs.Opts()
-        with dcs.capture_output() as out:
+        opts = plot.Opts()
+        with capture_output() as out:
             opts.pprint(indent=2)
         lines = out.getvalue().strip().split('\n')
         out.close()
@@ -95,7 +97,7 @@ class Test_Opts(unittest.TestCase):
         self.assertEqual(lines[-1], '  names     = []')
 
     def test_convert_dates(self):
-        opts = dcs.Opts()
+        opts = plot.Opts()
         self.assertEqual(opts.disp_xmin, -np.inf)
         self.assertEqual(opts.time_base, 'sec')
         opts.convert_dates('datetime')
@@ -103,7 +105,7 @@ class Test_Opts(unittest.TestCase):
         self.assertEqual(opts.time_base, 'datetime')
 
     def test_convert_dates2(self):
-        opts = dcs.Opts(date_zero=datetime.datetime(2020, 6, 1))
+        opts = plot.Opts(date_zero=datetime.datetime(2020, 6, 1))
         opts.rms_xmin = -10
         opts.rms_xmax = 10
         opts.disp_xmin = 5
@@ -115,10 +117,10 @@ class Test_Opts(unittest.TestCase):
         self.assertEqual(opts.disp_xmin, datetime.datetime(2020, 6, 1, 0, 0, 5))
         self.assertEqual(opts.disp_xmax, datetime.datetime(2020, 6, 1, 0, 2, 30))
 
-#%% plot_time_history
-class Test_plot_time_history(unittest.TestCase):
+#%% plotting.plot_time_history
+class Test_plotting_plot_time_history(unittest.TestCase):
     r"""
-    Tests the plot_time_history function with the following cases:
+    Tests the plotting.plot_time_history function with the following cases:
         Nominal
         Defaults
         With label
@@ -138,89 +140,89 @@ class Test_plot_time_history(unittest.TestCase):
         mag              = np.sum(self.data, axis=1)
         self.data        = 10 * self.data / np.expand_dims(mag, axis=1)
         self.units       = 'percentage'
-        self.opts        = dcs.Opts()
+        self.opts        = plot.Opts()
         self.opts.show_plot = False
         self.elements    = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
         self.figs        = []
         self.second_yscale = 1000000
 
     def test_nominal(self):
-        self.figs.append(dcs.plot_time_history(self.description, self.time, self.data, \
+        self.figs.append(plot.plot_time_history(self.description, self.time, self.data, \
             opts=self.opts, data_as_rows=False))
 
 #    def test_defaults(self):
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label))
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label))
 #
 #    def test_with_units(self):
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, self.units))
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, self.units))
 #
 #    def test_with_opts(self):
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, opts=self.opts))
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, opts=self.opts))
 #
 #    def test_with_legend(self):
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, legend=self.legend))
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, legend=self.legend))
 #
-#    @patch('dstauffman.plotting.logger')
+#    @patch('dstauffman.plotting.plotting.logger')
 #    def test_no_data(self, mock_logger):
-#        dcs.plot_time_history(self.time, None, '')
+#        plot.plot_time_history(self.time, None, '')
 #        self.assertEqual(mock_logger.log.call_count, 1)
-#        mock_logger.log.assert_called_with(dcs.LogLevel.L5, '  plot skipped due to missing data.')
+#        mock_logger.log.assert_called_with(LogLevel.L5, '  plot skipped due to missing data.')
 #
 #    def test_ignore_zeros(self):
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
 #
 #    def test_ignore_zeros2(self):
 #        self.data[:,1] = 0
 #        self.data[:,3] = 0
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
 #
-#    @patch('dstauffman.plotting.logger')
+#    @patch('dstauffman.plotting.plotting.logger')
 #    def test_ignore_zeros3(self, mock_logger):
 #        self.data = np.zeros(self.data.shape)
-#        not_a_fig = dcs.plot_time_history(self.time, self.data, label='All Zeros', ignore_empties=True)
+#        not_a_fig = plot.plot_time_history(self.time, self.data, label='All Zeros', ignore_empties=True)
 #        self.assertIs(not_a_fig, None)
 #        self.assertEqual(mock_logger.log.call_count, 1)
-#        mock_logger.log.assert_called_with(dcs.LogLevel.L5, 'All Zeros plot skipped due to missing data.')
+#        mock_logger.log.assert_called_with(LogLevel.L5, 'All Zeros plot skipped due to missing data.')
 #
 #    def test_colormap(self):
 #        self.opts.colormap = 'Dark2'
 #        colormap = 'Paired'
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, \
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, \
 #            ignore_empties=True, colormap=colormap))
 #
 #    def test_bad_legend(self):
 #        with self.assertRaises(AssertionError):
-#            dcs.plot_time_history(self.time, self.data, self.label, legend=self.legend[:-1])
+#            plot.plot_time_history(self.time, self.data, self.label, legend=self.legend[:-1])
 #
 #    def test_second_yscale1(self):
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, units='population', \
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, units='population', \
 #            second_yscale=self.second_yscale))
 #
 #    def test_second_yscale2(self):
 #        second_yscale = {'New ylabel [units]': 100}
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, \
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, \
 #            second_yscale=second_yscale))
 #
 #    def test_single_point(self):
-#        self.figs.append(dcs.plot_time_history(self.time[1:], self.data[1:,:], self.label))
+#        self.figs.append(plot.plot_time_history(self.time[1:], self.data[1:,:], self.label))
 #
 #    def test_show_zero(self):
 #        self.data += 1000
 #        self.opts.show_zero = True
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, opts=self.opts))
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, opts=self.opts))
 #
 #    def test_data_lo_and_hi(self):
-#        self.figs.append(dcs.plot_time_history(self.time, self.data, self.label, \
+#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, \
 #            data_lo=self.data-1, data_hi=self.data+1))
 #
 #    def test_not_ndarray(self):
-#        self.figs.append(dcs.plot_time_history(0, 0, 'Zero'))
+#        self.figs.append(plot.plot_time_history(0, 0, 'Zero'))
 #
 #    def test_0d(self):
-#        self.figs.append(dcs.plot_time_history(np.array(0), np.array(0), 'Zero'))
+#        self.figs.append(plot.plot_time_history(np.array(0), np.array(0), 'Zero'))
 #
 #    def test_1d(self):
-#        self.figs.append(dcs.plot_time_history(np.arange(5), np.arange(5), 'Line'))
+#        self.figs.append(plot.plot_time_history(np.arange(5), np.arange(5), 'Line'))
 #
 #    def test_3d(self):
 #        data3 = np.empty((self.data.shape[0], 3, self.data.shape[1]), dtype=float)
@@ -228,22 +230,22 @@ class Test_plot_time_history(unittest.TestCase):
 #        data3[:,1,:] = self.data + 0.1
 #        data3[:,2,:] = self.data + 0.2
 #        self.opts.names = ['Run 1', 'Run 2', 'Run 3']
-#        self.figs.append(dcs.plot_time_history(self.time, data3, self.label, opts=self.opts))
+#        self.figs.append(plot.plot_time_history(self.time, data3, self.label, opts=self.opts))
 #
 #    def test_bad_4d(self):
 #        bad_data = np.random.rand(self.time.shape[0], 4, 5, 1)
 #        with self.assertRaises(AssertionError):
-#            dcs.plot_time_history(self.time, bad_data, self.label, opts=self.opts)
+#            plot.plot_time_history(self.time, bad_data, self.label, opts=self.opts)
 
     def tearDown(self):
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
 
-#%% plot_correlation_matrix
-class Test_plot_correlation_matrix(unittest.TestCase):
+#%% plotting.plot_correlation_matrix
+class Test_plotting_plot_correlation_matrix(unittest.TestCase):
     r"""
-    Tests the plot_correlation_matrix function with the following cases:
+    Tests the plotting.plot_correlation_matrix function with the following cases:
         normal mode
         non-square inputs
         default labels
@@ -258,10 +260,10 @@ class Test_plot_correlation_matrix(unittest.TestCase):
     def setUp(self):
         num = 10
         self.figs   = []
-        self.data   = dcs.unit(np.random.rand(num, num), axis=0)
+        self.data   = unit(np.random.rand(num, num), axis=0)
         self.labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
         self.units  = 'percentage'
-        self.opts   = dcs.Opts()
+        self.opts   = plot.Opts()
         self.opts.case_name = 'Testing Correlation'
         self.matrix_name    = 'Not a Correlation Matrix'
         self.sym = self.data.copy()
@@ -273,81 +275,81 @@ class Test_plot_correlation_matrix(unittest.TestCase):
                     self.sym[i, j] = self.data[j, i]
 
     def test_normal(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels))
+        self.figs.append(plot.plot_correlation_matrix(self.data, self.labels))
 
     def test_nonsquare(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data[:5, :3], [self.labels[:3], \
+        self.figs.append(plot.plot_correlation_matrix(self.data[:5, :3], [self.labels[:3], \
             self.labels[:5]]))
 
     def test_default_labels(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data[:5, :3]))
+        self.figs.append(plot.plot_correlation_matrix(self.data[:5, :3]))
 
     def test_type(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data, units=self.units))
+        self.figs.append(plot.plot_correlation_matrix(self.data, units=self.units))
 
     def test_all_args(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, self.units, self.opts, \
+        self.figs.append(plot.plot_correlation_matrix(self.data, self.labels, self.units, self.opts, \
             matrix_name=self.matrix_name, cmin=0, cmax=1, xlabel='', ylabel='', \
             plot_lower_only=False, label_values=True, x_lab_rot=180, colormap='Paired'))
 
     def test_symmetric(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.sym))
+        self.figs.append(plot.plot_correlation_matrix(self.sym))
 
     def test_symmetric_all(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.sym, plot_lower_only=False))
+        self.figs.append(plot.plot_correlation_matrix(self.sym, plot_lower_only=False))
 
     def test_above_one(self):
         large_data = self.data * 1000
-        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels))
+        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
 
     def test_above_one_part2(self):
         large_data = self.data * 1000
-        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels, cmax=2000))
+        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmax=2000))
 
     def test_below_one(self):
         large_data = 1000*(self.data - 0.5)
-        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels))
+        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
 
     def test_below_one_part2(self):
         large_data = 1000*(self.data - 0.5)
-        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels, cmin=-2))
+        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmin=-2))
 
     def test_within_minus_one(self):
         large_data = self.data - 0.5
-        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels))
+        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
 
     def test_within_minus_one_part2(self):
         large_data = self.data - 0.5
-        self.figs.append(dcs.plot_correlation_matrix(large_data, self.labels, cmin=-1, cmax=1))
+        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmin=-1, cmax=1))
 
     def test_xlabel(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data, xlabel='Testing Label'))
+        self.figs.append(plot.plot_correlation_matrix(self.data, xlabel='Testing Label'))
 
     def test_ylabel(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data, ylabel='Testing Label'))
+        self.figs.append(plot.plot_correlation_matrix(self.data, ylabel='Testing Label'))
 
     def test_x_label_rotation(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels, x_lab_rot=0))
+        self.figs.append(plot.plot_correlation_matrix(self.data, self.labels, x_lab_rot=0))
 
     def test_nans(self):
         self.data[0, 0] = np.nan
-        self.figs.append(dcs.plot_correlation_matrix(self.data, self.labels))
+        self.figs.append(plot.plot_correlation_matrix(self.data, self.labels))
 
     def test_bad_labels(self):
         with self.assertRaises(ValueError):
-            self.figs.append(dcs.plot_correlation_matrix(self.data, ['a']))
+            self.figs.append(plot.plot_correlation_matrix(self.data, ['a']))
 
     def test_label_values(self):
-        self.figs.append(dcs.plot_correlation_matrix(self.data, label_values=True))
+        self.figs.append(plot.plot_correlation_matrix(self.data, label_values=True))
 
     def tearDown(self):
         for i in range(len(self.figs)):
             plt.close(self.figs.pop())
 
-#%% plot_bar_breakdown
-class Test_plot_bar_breakdown(unittest.TestCase):
+#%% plotting.plot_bar_breakdown
+class Test_plotting_plot_bar_breakdown(unittest.TestCase):
     r"""
-    Tests the plot_bar_breakdown function with the following cases:
+    Tests the plotting.plot_bar_breakdown function with the following cases:
         Nominal
         Defaults
         With label
@@ -365,50 +367,50 @@ class Test_plot_bar_breakdown(unittest.TestCase):
         self.data = self.data / np.expand_dims(mag, axis=1)
         self.label = 'Plot bar testing'
         self.legend = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
-        self.opts = dcs.Opts()
+        self.opts = plot.Opts()
         self.opts.show_plot = False
         self.figs = []
 
     def test_nominal(self):
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts, \
+        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts, \
             legend=self.legend))
 
     def test_defaults(self):
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label))
+        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label))
 
     def test_opts(self):
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
+        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
 
     def test_legend(self):
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend))
+        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend))
 
     def test_ignore_zeros(self):
         self.data[:, 1] = 0
         self.data[:, 3] = np.nan
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, ignore_empties=True))
+        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, ignore_empties=True))
 
-    @patch('dstauffman.plotting.logger')
+    @patch('dstauffman.plotting.plotting.logger')
     def test_null_data(self, mock_logger):
-        dcs.plot_bar_breakdown(self.time, None, '')
+        plot.plot_bar_breakdown(self.time, None, '')
         self.assertEqual(mock_logger.log.call_count, 1)
-        mock_logger.log.assert_called_with(dcs.LogLevel.L5, '  plot skipped due to missing data.')
+        mock_logger.log.assert_called_with(LogLevel.L5, '  plot skipped due to missing data.')
 
     def test_colormap(self):
         self.opts.colormap = 'Dark2'
         colormap = 'Paired'
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, \
+        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, \
             opts=self.opts, colormap=colormap))
 
     def test_bad_legend(self):
         with self.assertRaises(AssertionError):
-            dcs.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend[:-1])
+            plot.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend[:-1])
 
     def test_single_point(self):
-        self.figs.append(dcs.plot_bar_breakdown(self.time[:1], self.data[:1,:], label=self.label))
+        self.figs.append(plot.plot_bar_breakdown(self.time[:1], self.data[:1,:], label=self.label))
 
     def test_new_colormap(self):
         self.opts.colormap = 'seismic'
-        self.figs.append(dcs.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
+        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
 
     def tearDown(self):
         if self.figs:

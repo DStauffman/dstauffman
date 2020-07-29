@@ -11,7 +11,7 @@ import doctest
 import unittest
 
 import numpy as np
-from scipy.linalg import norm, svd
+from numpy.linalg import norm, svd
 
 #%% orth
 def orth(A):

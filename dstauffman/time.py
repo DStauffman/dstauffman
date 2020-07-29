@@ -13,7 +13,10 @@ import re
 import unittest
 import warnings
 
-import matplotlib.dates as dates
+try:
+    import matplotlib.dates as dates
+except ImportError:
+    dates = None
 import numpy as np
 
 from dstauffman.units import get_time_factor, ONE_DAY
@@ -263,6 +266,9 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     # exit if not changing anything
     if form == old_form:
         return date
+    # check for bad conditions
+    if dates is None and (form == 'matplotlib' or old_form == 'matplotlib'):
+        raise RuntimeError('You must have matplotlib installed to do this conversion.')
     if form in time_forms or (old_form in time_forms and np.any(np.isfinite(date))):
         assert date_zero is not None, 'You must specify a date_zero.'
         assert isinstance(date_zero, datetime.datetime), 'The date_zero is expected to be a datetime object.'

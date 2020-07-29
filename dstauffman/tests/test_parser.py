@@ -37,7 +37,11 @@ class Test__print_bad_command(unittest.TestCase):
 
 #%% main
 class Test_main(unittest.TestCase):
-    pass
+    r"""
+    Tests the main function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
 
 #%% parse_wrapper
 class Test_parse_wrapper(unittest.TestCase):

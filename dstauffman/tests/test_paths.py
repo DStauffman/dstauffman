@@ -66,6 +66,14 @@ class Test_get_output_dir(unittest.TestCase):
         folder = dcs.get_output_dir()
         self.assertEqual(folder, os.path.abspath(os.path.join(dcs.get_root_dir(), '..', 'results')))
 
+#%% list_python_files
+class Test_list_python_files(unittest.TestCase):
+    r"""
+    Tests the list_python_files function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

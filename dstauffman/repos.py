@@ -10,22 +10,21 @@ Notes
 import datetime
 import doctest
 import os
-import pytest
-import sys
 import unittest
 
+try:
+    import pytest
+except ImportError:
+    pytest = None
 try:
     # TODO: this sometimes messes up the coverage tool, as the imports are done before it starts counting.
     # May have to move this function to an external tool to fix it.
     from coverage import Coverage
 except ImportError:
     Coverage = None
-import matplotlib.pyplot as plt
-from PyQt5.QtWidgets import QApplication
 
 from dstauffman.enums        import ReturnCodes
 from dstauffman.paths        import get_tests_dir, list_python_files
-from dstauffman.plot_support import Plotter
 from dstauffman.utils        import line_wrap, read_text_file, write_text_file
 from dstauffman.utils_log    import setup_dir
 
@@ -53,10 +52,6 @@ def run_docstrings(files, verbose=False):
     >>> return_code = run_docstrings(files) # doctest: +SKIP
 
     """
-    # turn interactive plotting off
-    plt.ioff()
-    plotter = Plotter()
-    plotter.set_plotter(False)
     # initialize failure status
     had_failure = False
     # loop through and test each file
@@ -96,10 +91,6 @@ def run_unittests(names, verbose=False):
     >>> return_code = run_unittests(names) # doctest: +SKIP
 
     """
-    # turn interactive plotting off
-    plt.ioff()
-    plotter = Plotter()
-    plotter.set_plotter(False)
     # find the test cases
     test_suite = unittest.TestLoader().discover(names)
     # set the verbosity
@@ -133,18 +124,9 @@ def run_pytests(folder):
     >>> return_code = run_pytests(folder) # doctest: +SKIP
 
     """
-    # turn interactive plotting off
-    plt.ioff()
-    plotter = Plotter()
-    plotter.set_plotter(False)
-    # open a qapp
-    if QApplication.instance() is None:
-        qapp = QApplication(sys.argv)
-    else:
-        qapp = QApplication.instance()
+    if pytest is None:
+        raise RuntimeError('You must have pytest installed to run this')
     exit_code = pytest.main([folder])
-    # close the qapp
-    qapp.closeAllWindows()
     return_code = ReturnCodes.clean if exit_code == 0 else ReturnCodes.test_failures
     return return_code
 
@@ -417,8 +399,8 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     >>> from dstauffman import make_python_init, get_root_dir
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
-    >>> print(text[0:25])
-    from .classes      import
+    >>> print(text[0:22])
+    from .classes   import
 
     """
     # exclusions
@@ -499,7 +481,7 @@ def write_unit_test_templates(folder, output, *, author='unknown', exclude=None,
     """
     # hard-coded substitutions for imports
     _subs = {'dstauffman': 'dcs', 'dstauffman.aerospace': 'space', 'dstauffman.commands': 'commands', \
-              'dstauffman.estimation': 'estm', 'dstauffman.health': 'health'}
+              'dstauffman.estimation': 'estm', 'dstauffman.health': 'health', 'dstauffman.plotting': 'plot'}
     if repo_subs is not None:
         _subs.update(repo_subs)
     # create the output location

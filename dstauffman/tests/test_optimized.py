@@ -9,6 +9,7 @@ Notes
 #%% Imports
 import unittest
 
+from numba.typed import List
 import numpy as np
 
 import dstauffman as dcs
@@ -44,6 +45,33 @@ class Test_np_all(unittest.TestCase):
         x = np.ones(1000, dtype=bool)
         x[333] = False
         self.assertFalse(dcs.np_all(x))
+
+#%% issorted_opt
+class Test_issorted_opt(unittest.TestCase):
+    r"""
+    Tests the issorted_opt function with the following cases:
+        Sorted
+        Not sorted
+        Reverse sorted (x2)
+        Lists
+    """
+    def test_sorted(self):
+        x = np.array([1, 3, 3, 5, 7])
+        self.assertTrue(dcs.issorted_opt(x))
+
+    def test_not_sorted(self):
+        x = np.array([1, 4, 3, 5, 7])
+        self.assertFalse(dcs.issorted_opt(x))
+
+    def test_reverse_sorted(self):
+        x = np.array([4, np.pi, 1., -1.])
+        self.assertFalse(dcs.issorted_opt(x))
+        self.assertTrue(dcs.issorted(x, descend=True))
+
+    def test_lists(self):
+        x = List([-np.inf, 0, 1, np.pi, 5, np.inf])
+        self.assertTrue(dcs.issorted_opt(x))
+        self.assertFalse(dcs.issorted(x, descend=True))
 
 #%% Unit test execution
 if __name__ == '__main__':

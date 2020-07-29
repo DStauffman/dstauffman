@@ -15,6 +15,7 @@ import numpy as np
 import dstauffman as dcs
 import dstauffman.estimation as estm
 import dstauffman.health as health
+import dstauffman.plotting as plot
 
 #%% Classes - SimParams
 class SimParams(dcs.Frozen):
@@ -110,7 +111,7 @@ if __name__ == '__main__':
     # Truth data
     truth_time = np.arange(-10, 201)
     truth_data = truth(truth_time)
-    truth      = dcs.TruthPlotter(truth_time, truth_data)
+    truth      = plot.TruthPlotter(truth_time, truth_data)
 
     # Logger
     dcs.activate_logging(dcs.LogLevel.L5)
@@ -155,17 +156,17 @@ if __name__ == '__main__':
     # Plot results
     if make_plots:
         # build opts
-        opts           = dcs.Opts()
+        opts           = plot.Opts()
         opts.case_name = 'Model Results'
         opts.save_path = dcs.get_output_dir()
         opts.save_plot = True
 
         # make model plots
         health.plot_health_monte_carlo(time, results, 'Output vs. Time', opts=opts, truth=truth)
-        #dcs.plot_time_history('Output vs. Time', time, results, opts=opts, truth=truth) # TODO: make this one work?
-        f1 = dcs.make_difference_plot('Output vs. Time', time, None, np.atleast_2d(results), None, \
+        #plot.plot_time_history('Output vs. Time', time, results, opts=opts, truth=truth) # TODO: make this one work?
+        f1 = plot.make_difference_plot('Output vs. Time', time, None, np.atleast_2d(results), None, \
             name_one='Results', truth_time=truth.time, truth_data=np.atleast_2d(truth.data))
-        dcs.setup_plots(f1, opts)
+        plot.setup_plots(f1, opts)
 
         # make BPE plots
         bpe_plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, \

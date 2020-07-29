@@ -53,11 +53,11 @@ The following non-standard, but for the most part very well known libraries, are
 * h5py
 * matplotlib
 * numpy
+* pandas (minimal usage)
 * PyQt5
 * pytest
-* requests
-* scipy.linalg
-* urllib3
+* scipy.interpolate (minimal usage)
+* scipy.stats (minimal usage)
 
 
 ************
