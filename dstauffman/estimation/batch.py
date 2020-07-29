@@ -11,14 +11,15 @@ Notes
 """
 
 #%% Imports
+from copy import deepcopy
 import doctest
+from itertools import repeat
 import logging
 import multiprocessing
 import os
 import sys
 import time
 import unittest
-from copy import deepcopy
 
 import tblib.pickling_support
 
@@ -41,10 +42,10 @@ class _ExceptionWrapper(object):
         # save exception
         self.ee = ee
         # save traceback
-        __,  __, self.tb = sys.exc_info()
+        __, __, self.tb = sys.exc_info()
 
     def re_raise(self):
-        r"""Re-raise a previously saved expection and traceback."""
+        r"""Re-raise a previously saved exception and traceback."""
         raise self.ee.with_traceback(self.tb)
 
 #%% OptiOpts
@@ -89,6 +90,7 @@ class OptiOpts(Frozen):
         self.grow_radius     = 2
         self.shrink_radius   = 0.5
         self.trust_radius    = 1.0
+        self.max_cores       = None # set to a number to parallelize, use -1 for all
 
     def __eq__(self, other):
         r"""Check for equality based on the values of the fields."""
@@ -417,15 +419,18 @@ def _function_wrapper(opti_opts, bpe_results, model_args=None, cost_args=None, r
     if cost_args is None:
         cost_args = opti_opts.cost_args
 
-    # Run the model to get the results
-    results = opti_opts.model_func(**model_args)
-    bpe_results.num_evals += 1
+    try:
+        # Run the model to get the results
+        results = opti_opts.model_func(**model_args)
+        bpe_results.num_evals += 1
 
-    # Run the cost function to get the innovations
-    innovs = opti_opts.cost_func(results, **model_args, **cost_args)
+        # Run the cost function to get the innovations
+        innovs = opti_opts.cost_func(results, **model_args, **cost_args)
 
-    # Set any NaNs to zero so that they are ignored
-    innovs[np.isnan(innovs)] = 0
+        # Set any NaNs to zero so that they are ignored
+        innovs[np.isnan(innovs)] = 0
+    except Exception as e:
+        return _ExceptionWrapper(e)
 
     if return_results:
         return (innovs, results)
@@ -501,44 +506,49 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         temp_step     = np.abs(cur_results.params)*step_sf * 1/cur_results.trust_rad
         param_perturb = param_signs * np.maximum(temp_step, param_minstep)
 
-    temp_params_plus  = cur_results.params.copy()
-    temp_params_minus = cur_results.params.copy()
-
+    # build parameters for each upcoming model execution
+    temp_params = []
     for i_param in range(num_param):
-        # update the parameters for this run
-        temp_params_plus[i_param]  = np.minimum(cur_results.params[i_param] + param_perturb[i_param], params_max[i_param])
-        temp_params_minus[i_param] = np.maximum(cur_results.params[i_param] - param_perturb[i_param], params_min[i_param])
-
-        # get the new parameters for this run
+        # first evaluation
+        temp = cur_results.params.copy()
+        temp[i_param] = np.minimum(cur_results.params[i_param] + param_perturb[i_param], params_max[i_param])
         if normalized:
-            temp_params = temp_params_plus * param_typical
-        else:
-            temp_params = temp_params_plus.copy()
+            temp *= param_typical
+        temp_params.append(temp)
+    for i_param in range(num_param):
+        if not two_sided:
+            break
+        # second evaluation
+        temp = cur_results.params.copy()
+        temp[i_param] = np.maximum(cur_results.params[i_param] - param_perturb[i_param], params_min[i_param])
+        if normalized:
+            temp *= param_typical
+        temp_params.append(temp)
 
-        # call model with new parameters
-        opti_opts.set_param_func(names=names, values=temp_params, **model_args)
-        logger.log(LogLevel.L8, '  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
-        new_innovs = _function_wrapper(opti_opts, bpe_results, model_args)
+    # run model (possibly parallelized)
+    if opti_opts.max_cores is not None and opti_opts.max_cores != 1:
+        # parallel version
+        raise NotImplementedError('This has not been written yet.') # TODO: write this version
+    else:
+        # linear version
+        innovs = []
+        for (ix, values) in enumerate(temp_params):
+            i_param = ix % num_param
+            # call model with new parameters
+            opti_opts.set_param_func(names=names, values=values, **model_args)
+            logger.log(LogLevel.L8, '  Running model with {} = {}'.format(names[i_param], values))
+            new_innovs = _function_wrapper(opti_opts, bpe_results, model_args)
+            if isinstance(new_innovs, _ExceptionWrapper):
+                new_innovs.re_raise()
+            innovs.append(new_innovs)
 
+    # compute the jacobian
+    for i_param in range(num_param):
         if two_sided:
-            if normalized:
-                temp_params = temp_params_minus * param_typical
-            else:
-                temp_params = temp_params_minus.copy()
-            opti_opts.set_param_func(names=names, values=temp_params, **model_args)
-            logger.log(LogLevel.L8, '  Running model with {} = {}'.format(names[i_param], temp_params[i_param]))
-            new_innovs_minus = _function_wrapper(opti_opts, bpe_results, model_args)
-
-        # compute the jacobian
-        if two_sided:
-            jacobian[:, i_param] = 0.5 * (new_innovs - new_innovs_minus) / param_perturb[i_param]
+            jacobian[:, i_param] = 0.5 * (innovs[i_param] - innovs[i_param + num_param]) / param_perturb[i_param]
             #grad_log_det_b[i_param] = 0.25 *
         else:
-            jacobian[:, i_param] = (new_innovs - cur_results.innovs) / param_perturb[i_param]
-
-        # reset the parameter to the original value for next loop
-        temp_params_plus[i_param]  = cur_results.params[i_param]
-        temp_params_minus[i_param] = cur_results.params[i_param]
+            jacobian[:, i_param] = (innovs[i_param] - cur_results.innovs) / param_perturb[i_param]
 
     # calculate the numerical gradient with respect to the estimated parameters
     gradient = np.squeeze(jacobian.T @ cur_results.innovs)
@@ -1202,7 +1212,7 @@ def run_bpe(opti_opts, log_level=LogLevel.L5):
 
     # run an optional final function before doing the final simulation
     if opti_opts.final_func is not None:
-        opti_opts.final_func(**model_args, settings=init_saves)
+        opti_opts.final_func(**model_args, **init_saves)
 
     # Run for final time
     _print_divider(level=LogLevel.L3)

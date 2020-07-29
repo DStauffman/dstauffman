@@ -14,7 +14,6 @@ import numpy as np
 
 import dstauffman as dcs
 import dstauffman.estimation as estm
-import dstauffman.health as health
 import dstauffman.plotting as plot
 
 #%% Classes - SimParams
@@ -140,6 +139,7 @@ if __name__ == '__main__':
     opti_opts.grow_radius     = 2
     opti_opts.shrink_radius   = 0.5
     opti_opts.trust_radius    = 1.0
+    opti_opts.max_cores       = None # TODO: test this
 
     # Parameters to estimate
     opti_opts.params.append(estm.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
@@ -162,7 +162,7 @@ if __name__ == '__main__':
         opts.save_plot = True
 
         # make model plots
-        health.plot_health_monte_carlo(time, results, 'Output vs. Time', opts=opts, truth=truth)
+        plot.plot_health_monte_carlo(time, results, 'Output vs. Time', opts=opts, truth=truth)
         #plot.plot_time_history('Output vs. Time', time, results, opts=opts, truth=truth) # TODO: make this one work?
         f1 = plot.make_difference_plot('Output vs. Time', time, None, np.atleast_2d(results), None, \
             name_one='Results', truth_time=truth.time, truth_data=np.atleast_2d(truth.data))
@@ -171,4 +171,4 @@ if __name__ == '__main__':
         # make BPE plots
         bpe_plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, \
             'covariance': True}
-        estm.plot_bpe_results(bpe_results, opts=opts, plots=bpe_plots)
+        plot.plot_bpe_results(bpe_results, opts=opts, plots=bpe_plots)

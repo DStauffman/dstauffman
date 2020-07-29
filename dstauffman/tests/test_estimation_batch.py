@@ -16,12 +16,8 @@ from unittest.mock import patch
 import numpy as np
 
 from dstauffman import capture_output, compare_two_classes, get_tests_dir, Frozen, LogLevel, rss
-from dstauffman.plotting import close_all, Opts, Plotter
 
 import dstauffman.estimation as estm
-
-#%% Hard-coded values
-plotter = Plotter(False)
 
 #%% Setup for testing
 # Classes - SimParams
@@ -137,7 +133,7 @@ class Test_estimation_OptiOpts(unittest.TestCase):
         out.close()
         self.assertEqual(lines[0], 'OptiOpts')
         self.assertEqual(lines[1], ' model_func      = None')
-        self.assertEqual(lines[-1],' trust_radius    = 1.0')
+        self.assertEqual(lines[-1],' max_cores       = None')
 
 #%% estimation.OptiParam
 class Test_estimation_OptiParam(unittest.TestCase):
@@ -880,8 +876,8 @@ class Test_estimation_run_bpe(unittest.TestCase):
         # TODO: test with more iterations and files?
 
     def test_startup_finish_funcs(self, mock_logger):
-        self.opti_opts.start_func = lambda sim_params: dict()
-        self.opti_opts.final_func = lambda sim_params, settings: None
+        self.opti_opts.start_func = lambda sim_params: {'settings': None, 'additional': None}
+        self.opti_opts.final_func = lambda sim_params, settings, additional: None
         estm.batch.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         estm.run_bpe(self.opti_opts)
