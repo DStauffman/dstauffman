@@ -20,7 +20,7 @@ root_logger = logging.getLogger('')
 logger      = logging.getLogger(__name__)
 
 #%% Functions - activate_logging
-def activate_logging(log_level=logging.INFO, filename=''):
+def activate_logging(log_level=logging.INFO, filename='', *, file_level=None, log_format=None, file_format=None):
     r"""
     Set up logging based on a user specified settings file.
 
@@ -30,6 +30,12 @@ def activate_logging(log_level=logging.INFO, filename=''):
         Level of logging
     filename : str
         File to log to, if empty, use default output folder with today's date
+    file_level : int, optional
+        Level of logging for the file, if not specified, use the same as the screen logger
+    log_format : str, optional
+        Format for the screen log level
+    file_format : str, optional
+        Format for the file log level
 
     Notes
     -----
@@ -49,6 +55,13 @@ def activate_logging(log_level=logging.INFO, filename=''):
     >>> os.remove(filename)
 
     """
+    # defaults
+    if log_format is None:
+        log_format = 'Log:%(levelname)s: %(message)s'
+    if file_format is None:
+        file_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    if file_level is None:
+        file_level = log_level
     # deactivate any current loggers
     deactivate_logging()
 
@@ -61,14 +74,14 @@ def activate_logging(log_level=logging.INFO, filename=''):
 
     # create the log file handler
     fh = logging.FileHandler(filename)
-    fh.setLevel(log_level)
-    fh.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+    fh.setLevel(file_level)
+    fh.setFormatter(logging.Formatter(file_format))
     root_logger.addHandler(fh)
 
     # create the log stream handler
     ch = logging.StreamHandler()
     ch.setLevel(log_level)
-    ch.setFormatter(logging.Formatter('Log:%(levelname)s: %(message)s'))
+    ch.setFormatter(logging.Formatter(log_format))
     root_logger.addHandler(ch)
 
 #%% Functions - deactivate_logging

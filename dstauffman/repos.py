@@ -476,7 +476,8 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     return output
 
 #%% write_unit_test_templates
-def write_unit_test_templates(folder, output, *, author='unknown', exclude=None, recursive=True, repo_subs=None):
+def write_unit_test_templates(folder, output, *, author='unknown', exclude=None, recursive=True, \
+        repo_subs=None, add_classification=False):
     r"""
     Writes template files for unit tests.  These can then be used with a diff tool to find what is missing.
 
@@ -530,13 +531,17 @@ def write_unit_test_templates(folder, output, *, author='unknown', exclude=None,
         # create the text to write to the file
         text = ['r"""']
         text += [f'Test file for the `{names[-1][:-3]}` module of the "{this_repo}" library.']
-        text += ['', 'Notes', '-----', f'#.  Written by {author} in {month} {year}.', '"""']
-        text += ['', '#%% Imports', 'import unittest', '']
+        text += ['', 'Notes', '-----', f'#.  Written by {author} in {month} {year}.']
+        if add_classification:
+            text += ['', 'Classification', '--------------', 'TBD']
+        text += ['"""', '', '#%% Imports', 'import unittest', '']
         import_text = 'import ' + this_repo
         if this_repo in _subs:
             import_text += ' as ' + _subs[this_repo]
         text += [import_text, '']
         for func in funcs:
+            if func.startswith('_'):
+                func = names[-1][:-3] + '.' + func
             func_name = sub_repo + '.' + func if sub_repo else func
             temp_name = func_name.replace('.', '_')
             text += [f'#%% {func_name}', f'class Test_{temp_name}(unittest.TestCase):', '    r"""']
