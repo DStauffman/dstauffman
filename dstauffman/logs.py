@@ -7,11 +7,11 @@ Notes
 """
 
 #%% Imports
+import datetime
 import doctest
 import logging
 import os
 import unittest
-from datetime import datetime
 
 from dstauffman.paths import get_output_dir
 
@@ -70,7 +70,7 @@ def activate_logging(log_level=logging.INFO, filename='', *, file_level=None, lo
 
     # optionally get the default filename
     if not filename:
-        filename = os.path.join(get_output_dir(), 'log_file_' + datetime.now().strftime('%Y-%m-%d') + '.txt')
+        filename = os.path.join(get_output_dir(), 'log_file_' + datetime.datetime.now().strftime('%Y-%m-%d') + '.txt')
 
     # create the log file handler
     fh = logging.FileHandler(filename)

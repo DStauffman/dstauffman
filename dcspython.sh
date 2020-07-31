@@ -13,18 +13,15 @@ else
     # Setup PYTHONPATH, first remember the original python path
     PYTHONPATH_ORIG=$PYTHONPATH
 
-    # clear the PYTHONPATH
-    unset PYTHONPATH
-
     # Add this location
-    export PYTHONPATH="$THISDIR"
+    export PYTHONPATH="$THISDIR:$THISDIR/../dstauffman2:$PYTHONPATH"
 
     if command -v python3 &>/dev/null; then
         # Try using python3
         exec python3 ${@}
     else
         # If that didn't work, then try just python
-        # exec python ${@}
+        exec python ${@}
     fi
 
     # CLEANUP

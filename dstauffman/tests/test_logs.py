@@ -11,7 +11,7 @@ import logging
 import os
 import time
 import unittest
-from datetime import datetime
+import datetime
 
 import dstauffman as dcs
 
@@ -41,7 +41,7 @@ class Test_act_deact_logging(unittest.TestCase):
         self.assertFalse(dcs.logs.root_logger.handlers)
 
     def test_default_filename(self):
-        default_filename = os.path.join(dcs.get_output_dir(), 'log_file_' + datetime.now().strftime('%Y-%m-%d') + '.txt')
+        default_filename = os.path.join(dcs.get_output_dir(), 'log_file_' + datetime.datetime.now().strftime('%Y-%m-%d') + '.txt')
         was_there = os.path.isfile(default_filename)
         dcs.activate_logging(self.level)
         self.assertTrue(dcs.logs.root_logger.hasHandlers())

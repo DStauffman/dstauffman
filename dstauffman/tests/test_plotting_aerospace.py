@@ -7,7 +7,7 @@ Notes
 """
 
 #%% Imports
-from datetime import datetime
+import datetime
 import unittest
 from unittest.mock import patch
 
@@ -32,7 +32,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.quat_two        = quat_norm(np.random.rand(4, 11))
         self.name_one        = 'test1'
         self.name_two        = 'test2'
-        self.start_date      = str(datetime.now())
+        self.start_date      = str(datetime.datetime.now())
         self.rms_xmin        = 0
         self.rms_xmax        = 10
         self.disp_xmin       = -2

@@ -7,7 +7,7 @@ Notes
 """
 
 #%% Imports
-from datetime import datetime
+import datetime
 import unittest
 from unittest.mock import patch
 
@@ -103,7 +103,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.elements      = ['x', 'y']
         self.units         = 'rad'
         self.leg_scale     = 'micro'
-        self.start_date    = str(datetime.now())
+        self.start_date    = str(datetime.datetime.now())
         self.rms_xmin      = 0
         self.rms_xmax      = 10
         self.disp_xmin     = -2
