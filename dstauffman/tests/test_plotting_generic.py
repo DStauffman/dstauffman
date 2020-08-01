@@ -253,6 +253,61 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             for this_fig in self.figs:
                 plt.close(this_fig)
 
+#%% plotting.make_categories_plot
+class Test_plotting_make_categories_plot(unittest.TestCase):
+    r"""
+    Tests the plotting.make_categories_plot with the following cases:
+        Nominal
+        Minimal
+        TBD
+    """
+    def setUp(self):
+        self.description = 'Values vs Time'
+        self.time = np.arange(-10., 10.1, 0.1)
+        self.data = self.time + np.cos(self.time)
+        MeasStatus = type('MeasStatus', (object,), {'rejected': 0, 'accepted': 1})
+        self.cats = np.full(self.time.shape, MeasStatus.accepted, dtype=int)
+        self.cats[50:100] = MeasStatus.rejected
+        self.cat_names = {0: 'rejected', 1: 'accepted'}
+        self.name = ''
+        self.elements = None
+        self.units = ''
+        self.time_units = 'sec'
+        self.leg_scale = 'unity'
+        self.start_date = ''
+        self.rms_xmin = -np.inf
+        self.rms_xmax = np.inf
+        self.disp_xmin = -np.inf
+        self.disp_xmax = np.inf
+        self.single_plots = False
+        self.colormap = 'Paired'
+        self.use_mean = False
+        self.plot_zero = False
+        self.show_rms = True
+        self.legend_loc = 'best'
+        self.second_yscale = None
+        self.ylabel = None
+        self.data_as_rows = True
+        self.figs = None
+
+    def test_nominal(self):
+        self.figs = plot.make_categories_plot(self.description, self.time, self.data, self.cats, \
+            cat_names=self.cat_names, name=self.name, elements=self.elements, units=self.units, \
+            time_units=self.time_units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, \
+            disp_xmax=self.disp_xmax, single_plots=self.single_plots, colormap=self.colormap, \
+            use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
+            legend_loc=self.legend_loc, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            data_as_rows=self.data_as_rows)
+
+    def test_minimal(self):
+        self.figs = plot.make_categories_plot(self.description, self.time, self.data, self.cats)
+
+    def tearDown(self):
+        if self.figs:
+            for this_fig in self.figs:
+                plt.close(this_fig)
+
 #%% Unit test execution
 if __name__ == '__main__':
     plt.ioff()

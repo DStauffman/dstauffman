@@ -28,7 +28,7 @@ _TRUTH_COLOR = 'k'
 logger = logging.getLogger(__name__)
 
 #%% Functions - make_time_plot
-def make_time_plot(description, time, data, name='', elements=None, units='', time_units='sec', \
+def make_time_plot(description, time, data, *, name='', elements=None, units='', time_units='sec', \
         leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
         disp_xmax=np.inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
         show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True):
@@ -250,7 +250,7 @@ def make_time_plot(description, time, data, name='', elements=None, units='', ti
     return fig
 
 #%% Functions - make_error_bar_plot
-def make_error_bar_plot(description, time, data, mins, maxs, elements=None, units='', time_units='sec', \
+def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, units='', time_units='sec', \
         leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
         disp_xmax=np.inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
         plot_zero=False, show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, \
@@ -853,6 +853,258 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     if return_err:
         return (fig_hand, err)
     return fig_hand
+
+#%% Functions - make_categories_plot
+def make_categories_plot(description, time, data, cats, *, cat_names=None, name='', elements=None, \
+        units='', time_units='sec', leg_scale='unity', start_date='', rms_xmin=-np.inf, \
+        rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf, single_plots=False, \
+        colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, show_rms=True, \
+        legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True):
+    r"""
+    Data versus time plotting routine when grouped into categories.
+
+    Parameters
+    ----------
+    description : str
+        name of the data being plotted, used as title, must be given
+    time : (A, ) array_like
+        time history [sec] or datetime64
+    data : (N, ) or (N, A) ndarray
+        vector history
+    name : str, optional
+        name of data
+    elements : list
+        name of each element to plot within the vector
+    units : list
+        name of units for plot
+    time_units : str, optional
+        time units, defaults to 'sec', use 'datetime' for datetime histories
+    leg_scale : str, optional
+        factor to use when scaling the value in the legend, default is 'unity'
+    start_date : str, optional
+        date of t(0), may be an empty string
+    rms_xmin : float, optional
+        time of first point of RMS calculation
+    rms_xmax : float, optional
+        time of last point of RMS calculation
+    disp_xmin : float, optional
+        lower time to limit the display of the plot
+    disp_xmax : float, optional
+        higher time to limit the display of the plot
+    single_plots : bool, optional
+        whether to plot each channel on a new figure instead of subplots
+    colormap : list or colormap
+        colors to use on the plot
+    use_mean : bool, optional
+        whether to use mean instead of RMS in legend calculations
+    plot_zero : bool, optional
+        whether to force zero to always be plotted on the Y axis
+    show_rms : bool, optional
+        whether to show the RMS calculation in the legend
+    legend_loc : str, optional
+        location to put the legend, default is 'best', use 'none' to suppress legend
+    second_yscale : dict, optional
+        single key and value pair to use for scaling data to a second Y axis
+    ylabel : str, optional
+        Labels to put on the Y axes, potentially by element
+    data_as_rows : bool, optional, default is True
+        Whether the data has each channel as a row vector when 2D, vs a column vector
+
+    Returns
+    -------
+    fig : class matplotlib.Figure
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import make_categories_plot
+    >>> import numpy as np
+    >>> description = 'Values vs Time'
+    >>> time = np.arange(-10., 10.1, 0.1)
+    >>> data = np.vstack((time + np.cos(time), np.ones(time.shape, dtype=float)))
+    >>> data[1, 60:85] = 2
+    >>> MeasStatus = type('MeasStatus', (object,), {'rejected': 0, 'accepted': 1})
+    >>> cats = np.full(time.shape, MeasStatus.accepted, dtype=int)
+    >>> cats[50:100] = MeasStatus.rejected
+    >>> cat_names = {0: 'rejected', 1: 'accepted'}
+    >>> name = ''
+    >>> elements = None
+    >>> units = ''
+    >>> time_units = 'sec'
+    >>> leg_scale = 'unity'
+    >>> start_date = ''
+    >>> rms_xmin = -np.inf
+    >>> rms_xmax = np.inf
+    >>> disp_xmin = -np.inf
+    >>> disp_xmax = np.inf
+    >>> single_plots = False
+    >>> colormap = 'Paired'
+    >>> use_mean = True
+    >>> plot_zero = False
+    >>> show_rms = True
+    >>> legend_loc = 'best'
+    >>> second_yscale = None
+    >>> ylabel = None
+    >>> data_as_rows = True
+    >>> fig = make_categories_plot(description, time, data, cats, cat_names=cat_names, name=name, \
+    ...     elements=elements, units=units, time_units=time_units, leg_scale=leg_scale, \
+    ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
+    ...     disp_xmax=disp_xmax, single_plots=single_plots, colormap=colormap, use_mean=use_mean, \
+    ...     plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
+    ...     second_yscale=second_yscale, ylabel=ylabel, data_as_rows=data_as_rows)
+
+    """
+    # some basic flags
+    time_is_list = isinstance(time, list)
+    data_is_list = isinstance(data, list)
+
+    # data checks
+    assert description, 'You must give the plot a description.'
+
+    # convert rows/cols as necessary
+    if not data_is_list:
+        data = np.atleast_2d(data)
+        if not data_as_rows:
+            # TODO: is this the best way or make branches lower?
+            data = data.T
+
+    # get the categories
+    unique_cats = set(cats)
+    num_cats = len(unique_cats)
+    if cat_names is None:
+        cat_names = {}
+    # Add any missing dictionary values
+    for x in unique_cats:
+        if x not in cat_names:
+            cat_names[x] = 'Status='+str(x)
+
+    # calculate sizes
+    temp1 = len(time) if time_is_list else 1
+    temp2 = len(data) if data_is_list else data.shape[0] if data is not None else 0
+    if elements is None:
+        elements = [f'Channel {i+1}' for i in range(temp2)]
+    num_channels = len(elements)
+    assert temp2 == 0 or temp2 == num_channels, "The data doesn't match the number of elements."
+    assert temp1 == 1 or temp2 == 0 or temp1 == temp2, "The time doesn't match the size of the data."
+
+    #% Calculations
+    # build RMS indices
+    if data_is_list:
+        ix = {'one': [], 't_min': None, 't_max': None}
+        for j in range(num_channels):
+            temp_ix = get_rms_indices(time[j], xmin=rms_xmin, xmax=rms_xmax)
+            ix['one'].append(temp_ix['one'])
+            if j == 0:
+                ix['pts'] = temp_ix['pts']
+            else:
+                ix['pts'] = [min((ix['pts'][0], temp_ix['pts'][0])), max((ix['pts'][1], temp_ix['pts'][1]))]
+    else:
+        ix = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
+    # create a colormap
+    cm = ColorMap(colormap=colormap, num_colors=num_cats)
+    # calculate the rms (or mean) values
+    if not use_mean:
+        func_name = 'RMS'
+        func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
+    else:
+        func_name = 'Mean'
+        func_lamb = lambda x, y: np.nanmean(x, axis=y)
+    data_func = {}
+    for cat in unique_cats:
+        if data_is_list:
+            this_ix = ix['one'][j] & (cats[j][ix['one'][j]] == cat)
+            data_func[cat] = [func_lamb(data[j][this_ix], None) for j in range(num_channels)]
+        else:
+            this_ix = ix['one'] & (cats[ix['one']] == cat)
+            data_func[cat] = func_lamb(data[:, this_ix], 1) if np.any(this_ix) else np.full(num_channels, np.nan)
+    # unit conversion value
+    (temp, prefix) = get_factors(leg_scale)
+    leg_conv = 1/temp
+    if prefix:
+        assert units, 'You must give units if using a non-unity scale factor.'
+
+    #% Create plots
+    # create figure(s)
+    if single_plots:
+        figs = []
+        for i in range(num_channels):
+            fig = plt.figure()
+            fig.canvas.set_window_title(description + ' ' + str(elements[i]))
+            figs.append(fig)
+    else:
+        fig = plt.figure()
+        fig.canvas.set_window_title(description)
+        figs = [fig]
+
+    # create axes
+    ax = []
+    ax_prim = None
+    for i in range(num_channels):
+        if single_plots:
+            temp_axes = figs[i].add_subplot(1, 1, 1, sharex=ax_prim)
+        else:
+            temp_axes = figs[0].add_subplot(num_channels, 1, i+1, sharex=ax_prim)
+        if ax_prim is None:
+            ax_prim = temp_axes
+        ax.append(temp_axes)
+
+    # plot data
+    for (i, this_axes) in enumerate(ax):
+        # pull out data for this channel
+        this_time = time[i] if time_is_list else time
+        this_data = data[i] if data_is_list else data[i, :]
+        root_label = f'{name} {elements[i]}' if name else str(elements[i])
+        # plot the underlying line once
+        this_axes.plot(this_time, this_data, '-', label='', color='k', zorder=2)
+        # loop through categories
+        for (j, cat) in enumerate(unique_cats):
+            this_cat_name = cat_names[cat]
+            if show_rms:
+                value = _LEG_FORMAT.format(leg_conv*data_func[cat][i])
+                if units:
+                    this_label = f'{root_label} {this_cat_name} ({func_name}: {value} {prefix}{units})'
+                else:
+                    this_label = f'{root_label} {this_cat_name} ({func_name}: {value})'
+            this_cats = cats == cat
+            this_axes.plot(this_time[this_cats], this_data[this_cats], '.', markersize=4, label=this_label, \
+                color=cm.get_color(j), zorder=3)
+
+        # set X display limits
+        if i == 0:
+            disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
+            xlim = this_axes.get_xlim()
+        this_axes.set_xlim(xlim)
+        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
+        # set Y display limits
+        if plot_zero:
+            show_zero_ylim(this_axes)
+        # format display of plot
+        if legend_loc.lower() != 'none':
+            this_axes.legend(loc=legend_loc)
+        if i == 0 or single_plots:
+            this_axes.set_title(this_axes.figure.canvas.get_window_title())
+        if (time_is_list and is_datetime(time[0])) or is_datetime(time):
+            this_axes.set_xlabel('Date')
+            assert time_units == 'datetime', 'Mismatch in the expected time units.'
+        else:
+            this_axes.set_xlabel(f'Time [{time_units}]{start_date}')
+        if ylabel is None:
+            this_description = this_axes.figure.canvas.get_window_title()
+            this_axes.set_ylabel(f'{this_description} [{units}]')
+        else:
+            this_ylabel = ylabel[i] if isinstance(ylabel, list) else ylabel
+            this_axes.set_ylabel(this_ylabel)
+        this_axes.grid(True)
+        # optionally add second Y axis
+        plot_second_units_wrapper(this_axes, second_yscale)
+        # plot RMS lines
+        if show_rms:
+            plot_vert_lines(this_axes, ix['pts'])
+
+    return figs
 
 #%% Unit test
 if __name__ == '__main__':

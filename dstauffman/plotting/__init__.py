@@ -12,7 +12,8 @@ Notes
 from .aerospace import make_quaternion_plot, plot_attitude, plot_los, plot_position, \
                            plot_velocity, plot_innovations, plot_covariance, plot_states
 from .batch     import plot_bpe_convergence, plot_bpe_results
-from .generic   import make_time_plot, make_error_bar_plot, make_difference_plot
+from .generic   import make_time_plot, make_error_bar_plot, make_difference_plot, \
+                           make_categories_plot
 from .health    import plot_health_time_history, plot_health_monte_carlo, plot_icer, \
                            plot_population_pyramid
 from .plotting  import Opts, plot_time_history, plot_correlation_matrix, plot_bar_breakdown
