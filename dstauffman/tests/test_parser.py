@@ -9,6 +9,7 @@ Notes
 #%% Imports
 import argparse
 import unittest
+from unittest.mock import patch
 
 import dstauffman as dcs
 
@@ -101,6 +102,60 @@ class Test_execute_command(unittest.TestCase):
         out.close()
         self.assertEqual(output, 'Command "bad" is not understood.')
         self.assertEqual(rc, dcs.ReturnCodes.bad_command)
+
+#%% process_command_line_options
+class Test_process_command_line_options(unittest.TestCase):
+    r"""
+    Tests the process_command_line_options function with the following cases:
+        Nominal
+        No display
+        No plotting
+        No HDF5
+    """
+    def test_nominal(self):
+        flags = dcs.process_command_line_options()
+        # check expected defaults
+        self.assertTrue(flags.use_display)
+        self.assertTrue(flags.use_plotting)
+        self.assertTrue(flags.use_hdf5)
+        # check that only the expected keys exist
+        keys = {x for x in vars(flags) if not x.startswith('_')}
+        self.assertEqual(keys, {'use_display', 'use_hdf5', 'use_plotting'})
+
+    def test_no_display(self):
+        with dcs.capture_output() as out:
+            with patch('sys.argv', ['name.py', '-nodisp']):
+                flags = dcs.process_command_line_options()
+        output = out.getvalue().strip()
+        out.close()
+        self.assertFalse(flags.use_display)
+        self.assertTrue(flags.use_plotting)
+        self.assertTrue(flags.use_hdf5)
+        self.assertEqual(output, 'Running without displaying any plots.')
+
+    def test_no_plotting(self):
+        with dcs.capture_output() as out:
+            with patch('sys.argv', ['name.py', '-noplot']):
+                flags = dcs.process_command_line_options()
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(flags.use_display)
+        self.assertFalse(flags.use_plotting)
+        self.assertTrue(flags.use_hdf5)
+        self.assertEqual(output, 'Running without making any plots.')
+
+
+    def test_no_hdf5(self):
+        with dcs.capture_output() as out:
+            with patch('sys.argv', ['name.py', '-nohdf5']):
+                flags = dcs.process_command_line_options()
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(flags.use_display)
+        self.assertTrue(flags.use_plotting)
+        self.assertFalse(flags.use_hdf5)
+        self.assertEqual(output, 'Running without saving to HDF5 files.')
+
 
 #%% Unit test execution
 if __name__ == '__main__':

@@ -53,6 +53,7 @@ Temporary Items
 # =========================
 .pytest_cache/*
 .cache/*
+**/.pylint.d/*
 
 # =========================
 # LaTeX Files #

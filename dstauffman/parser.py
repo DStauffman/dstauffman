@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+from collections import namedtuple
 import doctest
 import sys
 import unittest
@@ -99,6 +100,54 @@ def execute_command(command, args):
     if rc is None:
         rc = ReturnCodes.clean
     return rc
+
+#%% process_command_line_options
+def process_command_line_options():
+    r"""
+    Parses sys.argv to determine any command line options for use in scripts.
+
+    Returns
+    -------
+    flags : namedtuple ('use_display', 'use_plotting', 'use_hdf5')
+        Flags equivalent to the command line arguments
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import process_command_line_options
+    >>> flags = process_command_line_options()
+    >>> print(flags.use_display)
+    True
+
+    """
+    # get settings
+    use_display = '-nodisp' not in sys.argv
+    use_plotting = '-noplot' not in sys.argv
+    use_hdf5 = '-nohdf5' not in sys.argv
+
+    # log any non-defaults
+    # TODO: use logger instead?
+    if not use_display:
+        print('Running without displaying any plots.')
+    if not use_plotting:
+        print('Running without making any plots.')
+    if not use_hdf5:
+        print('Running without saving to HDF5 files.')
+
+    # do operations based on those settings
+    if use_plotting and not use_display:
+        from dstauffman.plotting import Plotter
+        plotter = Plotter(show=False)
+
+    # return the settings
+    flags = namedtuple('Flags', ['use_display', 'use_plotting', 'use_hdf5'])
+    flags.use_display = use_display
+    flags.use_plotting = use_plotting
+    flags.use_hdf5 = use_hdf5
+    return flags
 
 #%% Unit test
 if __name__ == '__main__':
