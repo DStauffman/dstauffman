@@ -80,7 +80,7 @@ def plot_bpe_convergence(costs, *, opts=None):
     return fig
 
 #%% plot_bpe_results
-def plot_bpe_results(bpe_results, *, opts=None, plots=None):
+def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
     r"""Plot the results of estimation."""
     # hard-coded options
     label_values = False
@@ -98,7 +98,6 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None):
     # check for optional variables
     if opts is None:
         opts = Opts()
-    colormap_orig = opts.colormap
     if plots is None:
         plots = default_plots
     else:
@@ -111,6 +110,9 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None):
             if key not in plots:
                 plots[key] = default_plots[key]
 
+    # colormap information
+    kw_colormap = kwargs.pop('colormap', None)
+
     # preallocate output
     figs = []
 
@@ -119,9 +121,9 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None):
         if bpe_results.begin_innovs is not None and bpe_results.final_innovs is not None:
             time = np.arange(len(bpe_results.begin_innovs))
             data = np.vstack((bpe_results.begin_innovs, bpe_results.final_innovs))
-            opts.colormap = 'bwr_r'
+            colormap = kw_colormap if kw_colormap is not None else 'bwr_r'
             fig = plot_time_history('Innovs Before and After', time, data, opts=opts, \
-                elements=['Before', 'After'])
+                elements=['Before', 'After'], colormap=colormap, **kwargs)
             figs.append(fig)
         else:
             print("Data isn't available for Innovations plot.")
@@ -134,20 +136,20 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None):
 
     if plots['correlation']:
         if bpe_results.correlation is not None:
-            opts.colormap = 'bwr'
+            colormap = kw_colormap if kw_colormap is not None else 'bwr'
             fig = plot_correlation_matrix(bpe_results.correlation, labels=names, opts=opts, \
                 matrix_name='Correlation Matrix', cmin=-1, plot_lower_only=True, \
-                label_values=label_values)
+                label_values=label_values, colormap=colormap)
             figs.append(fig)
         else:
             print("Data isn't available for correlation plot.")
 
     if plots['info_svd']:
         if bpe_results.info_svd is not None:
-            opts.colormap = 'cool'
+            colormap = kw_colormap if kw_colormap is not None else 'cool'
             fig = plot_correlation_matrix(np.abs(bpe_results.info_svd), opts=opts, cmin=0, \
                 matrix_name='Information SVD Matrix', label_values=label_values, \
-                labels=[['{}'.format(i+1) for i in range(len(names))], names])
+                labels=[['{}'.format(i+1) for i in range(len(names))], names], colormap=colormap)
             figs.append(fig)
         else:
             print("Data isn't available for information SVD plot.")
@@ -155,15 +157,13 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None):
     if plots['covariance']:
         if bpe_results.covariance is not None:
             max_mag = np.nanmax(np.abs(bpe_results.covariance))
-            opts.colormap = 'bwr'
+            colormap = kw_colormap if kw_colormap is not None else 'bwr'
             fig = plot_correlation_matrix(bpe_results.covariance, labels=names, opts=opts, \
                 matrix_name='Covariance Matrix', cmin=-max_mag, cmax=max_mag, \
-                plot_lower_only=True, label_values=label_values)
+                plot_lower_only=True, label_values=label_values, colormap=colormap)
             figs.append(fig)
         else:
             print("Data isn't available for covariance plot.")
-    # restore the original colormap
-    opts.colormap = colormap_orig
     return figs
 
 #%% Unit Test

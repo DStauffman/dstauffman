@@ -656,7 +656,7 @@ def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
 #%% plot_innovations
 def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, \
-        plot_by_status=False, **kwargs):
+        plot_by_status=False, show_one=None, show_two=None, **kwargs):
     r"""
     Plots the Kalman Filter innovation histories.
 
@@ -781,7 +781,19 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
             second_yscale=None
         field_one = getattr(kf1, field)
         field_two = getattr(kf2, field)
-        (this_figs, this_err) = make_difference_plot(description+sub_description, kf1.time, kf2.time, field_one, field_two, \
+        if field_one is not None and show_one is not None:
+            t1 = kf1.time[show_one]
+            f1 = field_one[:, show_one]
+        else:
+            t1 = kf1.time
+            f1 = field_one
+        if field_two is not None and show_two is not None:
+            t2 = kf2.time[show_two]
+            f2 = field_two[:, show_two]
+        else:
+            t2 = kf2.time
+            f2 = field_two
+        (this_figs, this_err) = make_difference_plot(description+sub_description, t1, t2, f1, f2, \
             name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
             start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \

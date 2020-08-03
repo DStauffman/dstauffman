@@ -1015,10 +1015,10 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     data_func = {}
     for cat in unique_cats:
         if data_is_list:
-            this_ix = ix['one'][j] & (cats[j][ix['one'][j]] == cat)
+            this_ix = ix['one'][j] & (cats[j] == cat)
             data_func[cat] = [func_lamb(data[j][this_ix], None) for j in range(num_channels)]
         else:
-            this_ix = ix['one'] & (cats[ix['one']] == cat)
+            this_ix = ix['one'] & (cats == cat)
             data_func[cat] = func_lamb(data[:, this_ix], 1) if np.any(this_ix) else np.full(num_channels, np.nan)
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)

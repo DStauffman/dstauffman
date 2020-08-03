@@ -130,11 +130,17 @@ def process_command_line_options():
     log_level = None
     for opt in sys.argv[1:]:
         if opt.startswith('-l'):
-            if hasattr(LogLevel, level := opt[1:].upper()): # TODO: walrus operator in the future
-                log_level = getattr(LogLevel, level)
-            elif hasattr(logging, level := opt[2:].upper()):
-                log_level = getattr(logging, level)
+            # TODO: python v3.8
+            #if hasattr(LogLevel, level := opt[1:].upper()):
+            #    log_level = getattr(LogLevel, level)
+            #elif hasattr(logging, level := opt[2:].upper()):
+            #    log_level = getattr(logging, level)
+            if hasattr(LogLevel, opt[1:].upper()):
+                log_level = getattr(LogLevel, opt[1:].upper())
+            elif hasattr(logging, opt[2:].upper()):
+                log_level = getattr(logging, opt[2:].upper())
             else:
+            # TODO: delete to here once v3.8
                 raise ValueError(f'Unexpected logging input of: "{opt}".')
             activate_logging(log_level)
             logger.log(log_level, 'Configuring Log Level at: ' + str(log_level))

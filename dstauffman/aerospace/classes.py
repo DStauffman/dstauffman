@@ -204,14 +204,14 @@ class KfRecord(Frozen, metaclass=SaveAndLoad):
     >>> kf_record = KfRecord()
 
     """
-    def __init__(self, num_points=0, num_states=0, num_axes=0, time_dtype=float):
+    def __init__(self, num_points=0, num_states=0, num_active=0, num_axes=0, time_dtype=float):
         if num_points > 0:
             self.time = np.empty(num_points, dtype=time_dtype)
-            self.P    = np.empty((num_states, num_states, num_points))
-            self.stm  = np.empty((num_states, num_states, num_points))
+            self.P    = np.empty((num_active, num_active, num_points))
+            self.stm  = np.empty((num_active, num_active, num_points))
             self.H    = np.empty((num_axes, num_states, num_points))
             self.Pz   = np.empty((num_axes, num_axes, num_points))
-            self.K    = np.empty((num_states, num_axes, num_points))
+            self.K    = np.empty((num_active, num_axes, num_points))
             self.z    = np.empty((num_axes, num_points))
         else:
             self.time = None

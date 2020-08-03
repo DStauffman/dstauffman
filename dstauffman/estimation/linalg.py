@@ -134,7 +134,7 @@ def mat_divide(a, b, rcond=None):
     Solves the least square solution for x in A*x = b.
 
     In Matlab, this is: A\b = inv(A)*b
-    np.linalg.lstsq(a, b)[0] Computes the vector x that approximatively solves the equation a @ x = b ( or x = inv(a) * b)
+    np.linalg.lstsq(a, b)[0] Computes the vector x that approximatively solves the equation a @ x = b ( or x = inv(a) @ b)
     However, you have to remember the rcond=None to avoid warnings, and the [0] to get the actual solution part you want,
     thus the benefit of having this function.
 
