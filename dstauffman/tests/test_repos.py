@@ -334,7 +334,6 @@ class Test_make_python_init(unittest.TestCase):
             os.remove(self.filename)
 
 #%% write_unit_test_templates
-@patch('dstauffman.repos.write_text_file')
 class Test_write_unit_test_templates(unittest.TestCase):
     r"""
     Tests the write_unit_test_templates function with the following cases:
@@ -346,16 +345,17 @@ class Test_write_unit_test_templates(unittest.TestCase):
         self.author = 'David C. Stauffer'
         self.exclude = dcs.get_tests_dir()
 
-    def test_nominal(self, mock_writer):
-        with patch('dstauffman.repos.setup_dir') as mock_dir:
-            with dcs.capture_output() as out:
-                dcs.write_unit_test_templates(self.folder, self.output, author=self.author, exclude=self.exclude)
-            lines = out.getvalue().strip().split('\n')
-            out.close()
-            #self.assertEqual(mock_dir.setup_dir.call_count, 1) # TODO: figure out why this fails
+    def test_nominal(self):
+        with patch('dstauffman.repos.write_text_file') as mock_writer:
+            with patch('dstauffman.repos.setup_dir') as mock_dir:
+                with dcs.capture_output() as out:
+                    dcs.write_unit_test_templates(self.folder, self.output, author=self.author, exclude=self.exclude)
+                lines = out.getvalue().strip().split('\n')
+                out.close()
+                self.assertEqual(mock_dir.call_count, 1)
         self.assertGreater(len(lines), 5)
         self.assertTrue(lines[0].startswith('Writing: '))
-        #self.assertGreater(mock_writer.write_text_file.call_count, 5) # TODO: figure out why this fails
+        self.assertGreater(mock_writer.call_count, 5)
 
 #%% Unit test execution
 if __name__ == '__main__':

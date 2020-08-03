@@ -9,12 +9,15 @@ Notes
 #%% Imports
 from collections import namedtuple
 import doctest
+import logging
 import sys
 import unittest
 
-from dstauffman.enums import ReturnCodes
+from dstauffman.enums import LogLevel, ReturnCodes
+from dstauffman.logs import activate_logging
 
-#%% Command map
+#%% Globals
+logger = logging.getLogger(__name__)
 _VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'make_init', 'tests'})
 
 #%% Functions - _print_bad_command
@@ -123,19 +126,32 @@ def process_command_line_options():
     True
 
     """
-    # get settings
+    # get logger settings
+    log_level = None
+    for opt in sys.argv[1:]:
+        if opt.startswith('-l'):
+            if hasattr(LogLevel, level := opt[1:].upper()): # TODO: walrus operator in the future
+                log_level = getattr(LogLevel, level)
+            elif hasattr(logging, level := opt[2:].upper()):
+                log_level = getattr(logging, level)
+            else:
+                raise ValueError(f'Unexpected logging input of: "{opt}".')
+            activate_logging(log_level)
+            logger.log(log_level, 'Configuring Log Level at: ' + str(log_level))
+
+    # get other settings
     use_display = '-nodisp' not in sys.argv
     use_plotting = '-noplot' not in sys.argv
     use_hdf5 = '-nohdf5' not in sys.argv
 
     # log any non-defaults
-    # TODO: use logger instead?
+    print_func = lambda x: print(x) if log_level is None else lambda x: logger.log(LogLevel.L3, x)
     if not use_display:
-        print('Running without displaying any plots.')
+        print_func('Running without displaying any plots.')
     if not use_plotting:
-        print('Running without making any plots.')
+        print_func('Running without making any plots.')
     if not use_hdf5:
-        print('Running without saving to HDF5 files.')
+        print_func('Running without saving to HDF5 files.')
 
     # do operations based on those settings
     if use_plotting and not use_display:
@@ -143,7 +159,8 @@ def process_command_line_options():
         plotter = Plotter(show=False)
 
     # return the settings
-    flags = namedtuple('Flags', ['use_display', 'use_plotting', 'use_hdf5'])
+    flags = namedtuple('Flags', ['log_level', 'use_display', 'use_plotting', 'use_hdf5'])
+    flags.log_level = log_level
     flags.use_display = use_display
     flags.use_plotting = use_plotting
     flags.use_hdf5 = use_hdf5
