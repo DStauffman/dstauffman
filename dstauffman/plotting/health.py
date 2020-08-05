@@ -369,7 +369,8 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
         opts = Opts()
     # create a figure and axis
     fig = plt.figure()
-    fig.canvas.set_window_title('Cost Benefit Frontier')
+    title = 'Cost Benefit Frontier'
+    fig.canvas.set_window_title(title)
     ax = fig.add_subplot(111)
     # plot the data
     ax.plot(qaly, cost, 'ko', label='strategies')
@@ -388,7 +389,7 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
         ax.annotate(names[i], xy=(qaly[i], cost[i]+dy), xycoords='data', horizontalalignment='center', \
             verticalalignment='bottom', fontsize=12)
     # add some labels and such
-    ax.set_title(fig.canvas.get_window_title())
+    ax.set_title(title)
     ax.set_xlabel('Benefits')
     ax.set_ylabel('Costs')
     ax.legend(loc='upper left')

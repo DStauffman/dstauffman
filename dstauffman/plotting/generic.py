@@ -1029,15 +1029,13 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     #% Create plots
     # create figure(s)
     if single_plots:
-        figs = []
-        for i in range(num_channels):
-            fig = plt.figure()
-            fig.canvas.set_window_title(description + ' ' + str(elements[i]))
-            figs.append(fig)
+        titles = [description + ' ' + str(e) for e in elements]
+        figs = [plt.figure() for _ in range(num_channels)]
     else:
-        fig = plt.figure()
-        fig.canvas.set_window_title(description)
-        figs = [fig]
+        titles = [description]
+        figs = [plt.figure()]
+    for (fig, title) in zip(figs, titles):
+        fig.canvas.set_window_title(title)
 
     # create axes
     ax = []
@@ -1085,14 +1083,14 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         if legend_loc.lower() != 'none':
             this_axes.legend(loc=legend_loc)
         if i == 0 or single_plots:
-            this_axes.set_title(this_axes.figure.canvas.get_window_title())
+            this_axes.set_title(titles[i])
         if (time_is_list and is_datetime(time[0])) or is_datetime(time):
             this_axes.set_xlabel('Date')
             assert time_units == 'datetime', 'Mismatch in the expected time units.'
         else:
             this_axes.set_xlabel(f'Time [{time_units}]{start_date}')
         if ylabel is None:
-            this_description = this_axes.figure.canvas.get_window_title()
+            this_description = titles[i] if single_plots else titles[0]
             this_axes.set_ylabel(f'{this_description} [{units}]')
         else:
             this_ylabel = ylabel[i] if isinstance(ylabel, list) else ylabel

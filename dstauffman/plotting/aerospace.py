@@ -656,7 +656,7 @@ def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
 #%% plot_innovations
 def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, \
-        plot_by_status=False, show_one=None, show_two=None, **kwargs):
+        plot_by_status=False, show_one=None, show_two=None, cat_names=None, **kwargs):
     r"""
     Plots the Kalman Filter innovation histories.
 
@@ -676,6 +676,12 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         Name of the innovation fields to plot
     plot_by_status : bool, optional, default is False
         Whether to make an additional plot of all innovations by status (including rejected ones)
+    show_one : ndarray of bool, optional
+        Index to the innovations to plot from kf1, shows all if not given
+    show_two : ndarray of bool, optional
+        Index to the innovations to plot from kf2, shows all if not given
+    cat_names : list of str, optional
+        Name of the different possible categories for innovation status, otherwise uses their numeric values
     kwargs : dict
         Additional arguments passed on to the lower level plotting functions
 
@@ -758,7 +764,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     disp_xmax    = kwargs.pop('disp_xmax', this_opts.disp_xmax)
     sub_plots    = kwargs.pop('make_subplots', this_opts.sub_plots)
     single_lines = kwargs.pop('single_lines', this_opts.sing_line)
-    single_plots = kwargs.pop('single_plots', False)
+    single_plots = kwargs.pop('single_plots', True)
     use_mean     = kwargs.pop('use_mean', this_opts.use_mean)
     plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
     show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
@@ -800,18 +806,19 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
             legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=True, **kwargs)
         figs += this_figs
         err[field] = this_err
+        this_ylabel = [e + ' Innovation [' + units + ']' for e in elements]
         if plot_by_status and field_one is not None and kf1.status is not None:
-            figs += make_categories_plot(description+sub_description, kf1.time, field_one, kf1.status, \
-                name=name_one, elements=elements, units=units, time_units=time_units, \
+            figs += make_categories_plot(description+sub_description+' by Category', kf1.time, field_one, kf1.status, \
+                name=name_one, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
                 start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                 use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_plots=single_plots, \
-                legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, **kwargs)
+                legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, ylabel=this_ylabel, **kwargs)
         if plot_by_status and field_two is not None and kf2.status is not None:
-            figs += make_categories_plot(description+sub_description, kf2.time, field_two, kf2.status, \
-                name=name_two, elements=elements, units=units, time_units=time_units, \
+            figs += make_categories_plot(description+sub_description+' by Category', kf2.time, field_two, kf2.status, \
+                name=name_two, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
                 start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                 use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_plots=single_plots, \
-                legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, **kwargs)
+                legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, ylabel=this_ylabel, **kwargs)
     # Setup plots
     setup_plots(figs, opts)
     if printed:
@@ -943,8 +950,9 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
         # make plots
         err[field] = {}
         for (ix, states) in enumerate(groups):
-            this_units = units if isinstance(units, str) else units[ix]
-            states     = np.atleast_1d(states)
+            this_units  = units if isinstance(units, str) else units[ix]
+            this_ylabel = description + f' [{this_units}]'
+            states      = np.atleast_1d(states)
             if hasattr(kf1, 'active') and kf1.active is not None:
                 (this_state_nums1, this_state_rows1, _) = intersect(kf1.active, states, return_indices=True)
             else:
@@ -965,7 +973,8 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
                     name_one=name_one, name_two=name_two, elements=this_elements, units=this_units, time_units=time_units, \
                     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                     make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
-                    legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=True, **kwargs)
+                    legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=True, \
+                    ylabel=this_ylabel, **kwargs)
                 figs += this_figs
                 err[field][f'Group {ix}'] = this_err
     # Setup plots

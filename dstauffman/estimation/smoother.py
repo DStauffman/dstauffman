@@ -110,7 +110,7 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
     >>> K = np.ones((num_states, num_axes))
     >>> z = np.ones(num_axes)
     >>> lambda_bar_final = np.ones(num_states)
-    >>> kf_record = KfRecord(num_points=num_points, num_states=num_states, num_axes=num_axes)
+    >>> kf_record = KfRecord(num_points=num_points, num_active=num_states, num_states=num_states, num_axes=num_axes)
     >>> for i in range(num_points):
     ...     kf_record.time[i] = float(num_points)
     ...     kf_record.stm[:, :, i] = stm
