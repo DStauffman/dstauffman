@@ -590,7 +590,8 @@ def storefig(fig, folder=None, plot_type='png'):
 
     Notes
     -----
-    #. Uses the figure.canvas.get_window_title property to determine the figure name.
+    #.  Uses the figure.canvas.get_window_title property to determine the figure name.  If that is
+        not set or default ('image'), then it tries the figure suptitle or fist axis title.
 
     See Also
     --------
@@ -645,12 +646,16 @@ def storefig(fig, folder=None, plot_type='png'):
         # get the title of the figure canvas
         raw_title = this_fig.canvas.get_window_title()
         if raw_title is None or raw_title == 'image':
-            # special case when you have a displayless backend
+            # special case when you have a displayless backend, check the suptitle, then the title
+            # from the first axes
             throw_warning = True
-            try:
-                raw_title = this_fig.axes[0].get_title()
-            except:
-                pass
+            if this_fig._suptitle is not None: # v3.8 sup :=
+                raw_title = this_fig._suptitle.get_text()
+            else:
+                try:
+                    raw_title = this_fig.axes[0].get_title()
+                except:
+                    pass
         this_title = resolve_name(raw_title)
         # loop through the plot types
         for this_type in types:
@@ -728,6 +733,9 @@ def titleprefix(fig, prefix=''):
         # update canvas name
         this_canvas_title = this_fig.canvas.get_window_title()
         this_fig.canvas.set_window_title(prefix + ' - ' + this_canvas_title)
+        # update the suptitle (if it exists)
+        if this_fig._suptitle is not None: # v3.8 sup :=
+            this_fig._suptitle.set_text(prefix + ' - ' + this_fig._suptitle.get_text())
 
 #%% Functions - disp_xlimits
 def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
