@@ -210,19 +210,20 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     if have_both:
         (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one[:, q1_diff_ix], quat_two[:, q2_diff_ix])
     # calculate the rms (or mean) values
-    nans = np.full(3, np.nan, dtype=float)
-    if not use_mean:
-        func_name = 'RMS'
-        func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
-    else:
-        func_name = 'Mean'
-        func_lamb = lambda x, y: np.nanmean(x, axis=y)
-    q1_func     = func_lamb(quat_one[:, ix['one']], 1) if have_quat_one and np.any(ix['one']) else nans
-    q2_func     = func_lamb(quat_two[:, ix['two']], 1) if have_quat_two and np.any(ix['two']) else nans
-    nondeg_func = func_lamb(nondeg_error[:, ix['overlap']], 1) if have_both and np.any(ix['overlap']) else nans
-    mag_func    = func_lamb(nondeg_angle[ix['overlap']], 0) if have_both and np.any(ix['overlap']) else nans[0:1]
-    # output errors
-    err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
+    if show_rms or return_err:
+        nans = np.full(3, np.nan, dtype=float)
+        if not use_mean:
+            func_name = 'RMS'
+            func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
+        else:
+            func_name = 'Mean'
+            func_lamb = lambda x, y: np.nanmean(x, axis=y)
+        q1_func     = func_lamb(quat_one[:, ix['one']], 1) if have_quat_one and np.any(ix['one']) else nans
+        q2_func     = func_lamb(quat_two[:, ix['two']], 1) if have_quat_two and np.any(ix['two']) else nans
+        nondeg_func = func_lamb(nondeg_error[:, ix['overlap']], 1) if have_both and np.any(ix['overlap']) else nans
+        mag_func    = func_lamb(nondeg_angle[ix['overlap']], 0) if have_both and np.any(ix['overlap']) else nans[0:1]
+        # output errors
+        err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
     # unit conversion value
     (temp, prefix) = get_factors('micro')
     leg_conv = 1/temp
@@ -487,8 +488,8 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
     # initialize outputs
-    figs = []
-    err  = dict()
+    figs    = []
+    err     = dict()
     printed = False
 
     # call wrapper function for most of the details
@@ -498,14 +499,17 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             logger.log(LogLevel.L4, f'Plotting {description} plots ...')
             printed = True
         # make plots
-        (this_figs, this_err) = make_quaternion_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
+        out = make_quaternion_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
             name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
             rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, plot_components=plot_comps, single_lines=single_lines, \
             use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-            truth_name=truth.name, truth_time=truth.time, truth_data=truth.att, return_err=True, **kwargs)
-        figs += this_figs
-        err[field] = this_err
+            truth_name=truth.name, truth_time=truth.time, truth_data=truth.att, return_err=return_err, **kwargs)
+        if return_err:
+            figs += out[0]
+            err[field] = out[1]
+        else:
+            figs += out
 
     # Setup plots
     setup_plots(figs, opts)
@@ -629,14 +633,17 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             logger.log(LogLevel.L4, f'Plotting {description} plots ...')
             printed = True
         # make plots
-        (this_figs, this_err) = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
+        out = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
             name_one=name_one, name_two=name_two, elements=elements, time_units=time_units, units=units, \
             start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, single_lines=single_lines, \
             show_rms=show_rms, leg_scale=leg_scale, legend_loc=legend_loc, second_yscale=second_yscale, \
-            return_err=True, **kwargs)
-        figs += this_figs
-        err[field] = this_err
+            return_err=return_err, **kwargs)
+        if return_err:
+            figs += out[0]
+            err[field] = out[1]
+        else:
+            figs += out
 
     # Setup plots
     setup_plots(figs, opts)
@@ -771,8 +778,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
     # Initialize outputs
-    figs = []
-    err  = dict()
+    figs    = []
+    err     = dict()
     printed = False
 
     #% call wrapper functions for most of the details
@@ -799,13 +806,16 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         else:
             t2 = kf2.time
             f2 = field_two
-        (this_figs, this_err) = make_difference_plot(description+sub_description, t1, t2, f1, f2, \
+        out = make_difference_plot(description+sub_description, t1, t2, f1, f2, \
             name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
             start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
-            legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=True, **kwargs)
-        figs += this_figs
-        err[field] = this_err
+            legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=return_err, **kwargs)
+        if return_err:
+            figs += out[0]
+            err[field] = out[1]
+        else:
+            figs += out
         this_ylabel = [e + ' Innovation [' + units + ']' for e in elements]
         if plot_by_status and field_one is not None and kf1.status is not None:
             figs += make_categories_plot(description+sub_description+' by Category', kf1.time, field_one, kf1.status, \
@@ -937,8 +947,8 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
     # initialize output
-    figs = []
-    err  = dict()
+    figs    = []
+    err     = dict()
     printed = False
 
     #% call wrapper functions for most of the details
@@ -969,14 +979,17 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
             if have_data1 or have_data2:
                 this_description = description + ' for State ' + ','.join(str(x) for x in this_state_nums)
                 this_elements = [elements[state] for state in this_state_nums]
-                (this_figs, this_err) = make_difference_plot(this_description, kf1.time, kf2.time, data_one, data_two, \
+                out = make_difference_plot(this_description, kf1.time, kf2.time, data_one, data_two, \
                     name_one=name_one, name_two=name_two, elements=this_elements, units=this_units, time_units=time_units, \
                     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                     make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
-                    legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=True, \
+                    legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=return_err, \
                     ylabel=this_ylabel, **kwargs)
-                figs += this_figs
-                err[field][f'Group {ix}'] = this_err
+                if return_err:
+                    figs += out[0]
+                    err[field][f'Group {ix}'] = out[1]
+                else:
+                    figs += out
     # Setup plots
     setup_plots(figs, opts)
     if printed:

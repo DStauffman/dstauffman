@@ -163,16 +163,17 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     # create a colormap
     cm = ColorMap(colormap=colormap, num_colors=num_channels)
     # calculate the rms (or mean) values
-    if not use_mean:
-        func_name = 'RMS'
-        func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
-    else:
-        func_name = 'Mean'
-        func_lamb = lambda x, y: np.nanmean(x, axis=y)
-    if data_is_list:
-        data_func = [func_lamb(data[j][ix['one'][j]], None) for j in range(num_channels)]
-    else:
-        data_func = func_lamb(data[:, ix['one']], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
+    if show_rms:
+        if not use_mean:
+            func_name = 'RMS'
+            func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
+        else:
+            func_name = 'Mean'
+            func_lamb = lambda x, y: np.nanmean(x, axis=y)
+        if data_is_list:
+            data_func = [func_lamb(data[j][ix['one'][j]], None) for j in range(num_channels)]
+        else:
+            data_func = func_lamb(data[:, ix['one']], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
@@ -386,13 +387,14 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
     ix = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
     cm = ColorMap(colormap=colormap, num_colors=num_channels)
     # calculate the rms (or mean) values
-    if not use_mean:
-        func_name = 'RMS'
-        func_lamb = lambda x: rms(x, axis=1, ignore_nans=True)
-    else:
-        func_name = 'Mean'
-        func_lamb = lambda x: np.nanmean(x, axis=1)
-    data_func = func_lamb(data[:, ix['one']]) if np.any(ix['one']) else np.full(num_channels, np.nan)
+    if show_rms:
+        if not use_mean:
+            func_name = 'RMS'
+            func_lamb = lambda x: rms(x, axis=1, ignore_nans=True)
+        else:
+            func_name = 'Mean'
+            func_lamb = lambda x: np.nanmean(x, axis=1)
+        data_func = func_lamb(data[:, ix['one']]) if np.any(ix['one']) else np.full(num_channels, np.nan)
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
@@ -677,18 +679,19 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     if have_both:
         nondeg_error = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
     # calculate the rms (or mean) values
-    nans = np.full(num_channels, np.nan, dtype=float)
-    if not use_mean:
-        func_name = 'RMS'
-        func_lamb = lambda x: rms(x, axis=1, ignore_nans=True)
-    else:
-        func_name = 'Mean'
-        func_lamb = lambda x: np.nanmean(x, axis=1)
-    data1_func    = func_lamb(data_one[:, ix['one']]) if have_data_one and np.any(ix['one']) else nans
-    data2_func    = func_lamb(data_two[:, ix['two']]) if have_data_two and np.any(ix['two']) else nans
-    nondeg_func   = func_lamb(nondeg_error[:, ix['overlap']]) if have_both and np.any(ix['overlap']) else nans
-    # output errors
-    err = {'one': data1_func, 'two': data2_func, 'diff': nondeg_func}
+    if show_rms or return_err:
+        nans = np.full(num_channels, np.nan, dtype=float)
+        if not use_mean:
+            func_name = 'RMS'
+            func_lamb = lambda x: rms(x, axis=1, ignore_nans=True)
+        else:
+            func_name = 'Mean'
+            func_lamb = lambda x: np.nanmean(x, axis=1)
+        data1_func    = func_lamb(data_one[:, ix['one']]) if have_data_one and np.any(ix['one']) else nans
+        data2_func    = func_lamb(data_two[:, ix['two']]) if have_data_two and np.any(ix['two']) else nans
+        nondeg_func   = func_lamb(nondeg_error[:, ix['overlap']]) if have_both and np.any(ix['overlap']) else nans
+        # output errors
+        err = {'one': data1_func, 'two': data2_func, 'diff': nondeg_func}
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
@@ -1006,20 +1009,21 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     # create a colormap
     cm = ColorMap(colormap=colormap, num_colors=num_cats)
     # calculate the rms (or mean) values
-    if not use_mean:
-        func_name = 'RMS'
-        func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
-    else:
-        func_name = 'Mean'
-        func_lamb = lambda x, y: np.nanmean(x, axis=y)
-    data_func = {}
-    for cat in unique_cats:
-        if data_is_list:
-            this_ix = ix['one'][j] & (cats[j] == cat)
-            data_func[cat] = [func_lamb(data[j][this_ix], None) for j in range(num_channels)]
+    if show_rms:
+        if not use_mean:
+            func_name = 'RMS'
+            func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
         else:
-            this_ix = ix['one'] & (cats == cat)
-            data_func[cat] = func_lamb(data[:, this_ix], 1) if np.any(this_ix) else np.full(num_channels, np.nan)
+            func_name = 'Mean'
+            func_lamb = lambda x, y: np.nanmean(x, axis=y)
+        data_func = {}
+        for cat in unique_cats:
+            if data_is_list:
+                this_ix = ix['one'][j] & (cats[j] == cat)
+                data_func[cat] = [func_lamb(data[j][this_ix], None) for j in range(num_channels)]
+            else:
+                this_ix = ix['one'] & (cats == cat)
+                data_func[cat] = func_lamb(data[:, this_ix], 1) if np.any(this_ix) else np.full(num_channels, np.nan)
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
