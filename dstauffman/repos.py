@@ -243,7 +243,8 @@ def find_repo_issues(folder, extensions=frozenset(('m', 'py')), *, list_all=Fals
     --------
     >>> from dstauffman import find_repo_issues, get_root_dir
     >>> folder = get_root_dir()
-    >>> find_repo_issues(folder)
+    >>> is_clean = find_repo_issues(folder)
+    >>> print(is_clean)
     True
 
     """

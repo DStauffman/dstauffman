@@ -1012,7 +1012,8 @@ def execute(command, folder, *, ignored_codes=None, env=None):
     return ReturnCodes.clean
 
 #%% Functions - execute_wrapper
-def execute_wrapper(command, folder, dry_run=False, *, ignored_codes=None, filename='', env=None):
+def execute_wrapper(command, folder, *, dry_run=False, ignored_codes=None, filename='', env=None, \
+                    print_status=True):
     r"""
     Wrapper to the wrapper to subprocess with options to print the command do dry-runs.
 
@@ -1028,6 +1029,10 @@ def execute_wrapper(command, folder, dry_run=False, *, ignored_codes=None, filen
         If given, a list of non-zero error codes to ignore
     filename : str, optional, default is to not write
         Name of the file to write the output to, ignore if empty string
+    env : dict, optional
+        Dictionary of environment variables to update for the call
+    print_status : bool, optional, default is True
+        Whether to print the status of the command to standard output
 
     Notes
     -----
@@ -1040,7 +1045,7 @@ def execute_wrapper(command, folder, dry_run=False, *, ignored_codes=None, filen
     >>> command = 'ls'
     >>> folder  = os.getcwd()
     >>> dry_run = True
-    >>> execute_wrapper(command, folder, dry_run) # doctest: +ELLIPSIS
+    >>> execute_wrapper(command, folder, dry_run=dry_run) # doctest: +ELLIPSIS
     Would execute "ls" in "..."
 
     """
@@ -1064,10 +1069,14 @@ def execute_wrapper(command, folder, dry_run=False, *, ignored_codes=None, filen
         print('Warning: folder "{}" doesn\'t exist, so command "{}" was not executed.'.format(folder, command))
         return ReturnCodes.bad_folder
     # execute command and print status
-    lines = []
-    for line in execute(command_list, folder, ignored_codes=ignored_codes, env=env):
-        print(line, end='')
-        lines.append(line)
+    assert print_status or bool(filename), 'You must either print the status or save results to a filename.'
+    if print_status:
+        lines = []
+        for line in execute(command_list, folder, ignored_codes=ignored_codes, env=env):
+            print(line, end='')
+            lines.append(line)
+    else:
+        lines = list(execute(command_list, folder, ignored_codes=ignored_codes, env=env))
     # optionally write to text file if a filename is given
     if filename:
         write_text_file(filename, ''.join(lines))

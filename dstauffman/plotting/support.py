@@ -591,7 +591,7 @@ def storefig(fig, folder=None, plot_type='png'):
     Notes
     -----
     #.  Uses the figure.canvas.get_window_title property to determine the figure name.  If that is
-        not set or default ('image'), then it tries the figure suptitle or fist axis title.
+        not set or default ('image'), then it tries the figure suptitle or first axis title.
 
     See Also
     --------

@@ -165,6 +165,7 @@ def _parse_source(filename, assert_single=True):
             this_code.uses.append(this_use)
         elif this_line.startswith('type ') and not this_line.startswith('type('):
             # type declaration
+            assert '::' in this_line, "Line is missing '::' characters: " + this_line + f' in "{filename}".'
             temp = this_line.split('::')[1].strip()
             this_type = temp.split(' ')[0]
             assert bool(this_type), 'Type statement should not be empty.'
@@ -174,14 +175,14 @@ def _parse_source(filename, assert_single=True):
             # function declaration
             temp = this_line.split(' ')[1].strip()
             this_function = temp.split('(')[0]
-            assert bool(this_function), 'Function name should not be empty.'
+            assert bool(this_function), 'Function name should not be empty for line: ' + this_line + f' in "{filename}".'
             assert this_name == this_code.name, 'Mismatch in module name "{}" vs "{}".'.format(this_name, this_code.name)
             this_code.functions.append(this_function)
         elif this_line.startswith('subroutine '):
             # subroutine declaration
             temp = this_line.split(' ')[1].strip()
             this_subroutine = temp.split('(')[0]
-            assert bool(this_subroutine), 'Subroutine name should not be empty.'
+            assert bool(this_subroutine), 'Subroutine name should not be empty for line: ' + this_line + f' in "{filename}".'
             assert this_name == this_code.name, 'Mismatch in module name "{}" vs "{}".'.format(this_name, this_code.name)
             this_code.subroutines.append(this_subroutine)
         else:
@@ -319,8 +320,133 @@ def _write_all_unit_test(filename, all_code, header=None):
     print(f'Writing "{filename}".')
     write_text_file(filename, text)
 
+#%% Functions - _makefile_template
+def _get_template(compiler='gfortran', program='prog', is_debug=False, build='', *, fcflags=None, dbflags=None):
+    r"""
+    Creates a template for the given compiler and debug settings.
+
+    Parameters
+    ----------
+    compiler
+    program
+    is_debug
+    build
+    fcflags
+    dbflags
+
+    Returns
+    -------
+    template : str
+        Makefile template text
+
+    Examples
+    --------
+    >>> from dstauffman.fortran import _get_template
+    >>> template = _get_template('gfortran')
+
+    """
+    # default compiler flags and build settings
+    if fcflags is None:
+        fcflags             = {}
+        fcflags['gfortran'] = '-O3 -ffree-form -ffree-line-length-none -fdefault-real-8 -std=f2018 -cpp -march=native'
+        fcflags['ifort']    = '-O3 -standard-semantics -fpp'
+        fcflags['win']      = '/O3 /free /extend-source:132 /real-size:64 /Qm64 /standard-semantics /fpp /define:SKIP_ASSERTS'
+    if dbflags is None:
+        dbflags             = {}
+        dbflags['gfortran'] = '-Og -g -Wall -fimplicit-none -fcheck=all -fbacktrace -Wno-maybe-uninitialized'
+        dbflags['ifort']    = '-traceback -check bounds -check uninit -standard-semantics'
+        dbflags['win']      = '/warn:all /traceback /check:bounds /check:uninit'
+    mods             = {}
+    mods['gfortran'] = r'-J$(OBJDIR) -I$(OBJDIR)'
+    mods['ifort']    = r'-module $(OBJDIR)'
+    mods['win']      = r'/module:$(B)'
+    if not build:
+        build = 'debug' if is_debug else 'release'
+    # build Unix template
+    if compiler != 'win':
+        template = \
+        '# compiler and flags\n' + \
+        'FC      = ' + (compiler if compiler != 'win' else 'ifort') + '\n' + \
+        'FCFLAGS = ' + fcflags[compiler] + '\n' + \
+        'DBFLAGS = ' + (dbflags[compiler] if is_debug else '') + '\n' + \
+        '\n' + \
+        '# configuration\n' + \
+        'SRCDIR = source\n' + \
+        'OBJDIR = ' + build + '/' + compiler + '\nOBJS   = \\\n' + r"""
+# no implicit rules
+.SUFFIXES:
+
+# auxiliary programs
+RM:=rm -f
+MKDIR:=mkdir -p
+TEST:=test -d
+
+# create the build directory; define slashed version for convenience with short names
+ifneq ($(OBJDIR),)
+  $(shell $(TEST) $(OBJDIR) || $(MKDIR) $(OBJDIR))
+  B:=$(OBJDIR)/
+else
+  B:=./
+endif
+ifneq ($(SRCDIR),)
+  S:=$(SRCDIR)/
+else
+  S:=./
+endif
+
+# main executable
+
+# object file implicit rules
+$(B)%.obj : $(S)%.f90
+""" + '\t$(FC) -c $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) ' + mods[compiler] + r""" -o $@ $<
+
+# object file dependencies
+
+# clean-up
+""" + '.PHONY : all clean ' + program + r"""
+clean :
+""" + '\t$(RM) $(B)*.obj $(B)*.mod $(B)*.smod ' + program + r""".exe
+#""" + '\t' + r"""$(TEST) -d $(OBJDIR) && $(RM) -r $(OBJDIR)
+
+"""
+    else:
+        template = \
+        '# compiler and flags\n' + \
+        'FC      = ifort\n' + \
+        'FCFLAGS = ' + fcflags[compiler] + '\n' + \
+        'DBFLAGS = ' + (dbflags[compiler] if is_debug else '') + '\n' + \
+        '\n' + \
+        '# configuration\n' + \
+        'S      = source\n' + \
+        'B      = ' + build + '\\' + compiler + '\nOBJS   = \\\n' + r"""
+# no implicit rules
+.SUFFIXES:
+
+# main executable
+
+# generic obj rule
+.SUFFIXES: .f90
+{$(S)}.f90{$(B)}.obj:
+""" + '\t$(FC) /c $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) ' + mods[compiler] + r""" /object:$@ $<
+
+create_dirs:
+""" + '\t@if not exist $(B) md $(B)' + r"""
+
+# object file dependencies
+
+# clean-up
+clean :
+""" + '\t' + r"""@del /f /q $(B)\*.obj $(B)\*.mod $(B)\*.smod """ + program + r""".exe
+""" + '\t' + r"""@if exist $(B) rmdir $(B)
+
+.PHONY : clean all create_dirs
+
+"""
+    return template
+
 #%% Functions - _write_makefile
-def _write_makefile(makefile, template, code, *, program=None, sources=None, external_sources=None, replacements=None):
+def _write_makefile(makefile, code, *, template=None, program=None, compiler='gfortran', \
+        is_debug=False, sources=None, external_sources=None, replacements=None):
     r"""
     Reads the given makefile template and inserts the relevant rules based on the given source code.
 
@@ -350,7 +476,7 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
     # subfunction to build dependencies with checks for external or intrinsics
     def _build_dependencies(uses):
         # create sorted list of uses that are not intrinsic or external
-        sorted_uses = sorted([x for x in uses if x not in _INTRINSIC_MODS and x not in external_sources])
+        sorted_uses = sorted(list({x for x in uses if x not in _INTRINSIC_MODS and x not in external_sources}))
         # build the normal dependencies
         dependencies = []
         for x in sorted_uses:
@@ -369,17 +495,25 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
 
     # optional inputs
     is_unit_test = program is None
+    is_win = compiler == 'win'
     if sources is None:
         sources = {}
     if external_sources is None:
         external_sources = {}
+    lowercase_map = {x.lower(): x for x in sources}
 
     # prefixes
     prefix_bld = '$(B)'
     prefix_src = '' if is_unit_test else '$(S)'
     prefix_ext = '$(OBJLOC)/'
+    prefix_obj = '$(B)\\' if is_win else ''
+    if is_win:
+        prefix_bld += '\\'
+        prefix_src += '\\'
 
     # read the template into lines
+    if template is None:
+        template = _get_template(compiler=compiler, program=program, is_debug=is_debug)
     orig_lines = template.split('\n')
 
     # build the program rules
@@ -394,26 +528,35 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
                 this_rule = this_name + '.exe : ' + this_name + '.f90 $(B)' + this_name + _OBJ_EXT
                 run_rules.append(this_rule)
                 this_depd = _build_dependencies(this_code.uses)
-                this_rule = '\t$(FC) $(FCFLAGS) -o ' + this_name + '.exe ' + this_name + \
-                    '.f90 -I$(OBJDIR) -I$(OBJLOC) ' + ' '.join(this_depd) + ' $(addprefix $(OBJLOC)/,$(OBJS))'
+                if is_win:
+                    this_rule = '\t$(FC) $(FCFLAGS) /exe:' + this_name + '.exe ' + this_name + \
+                        '.f90 /module:$(B) ' + ' '.join(this_depd) + ' /include:$(B) $(OBJS)'
+                else:
+                    this_rule = '\t$(FC) $(FCFLAGS) -o ' + this_name + '.exe ' + this_name + \
+                        '.f90 -I$(OBJDIR) -I$(OBJLOC) ' + ' '.join(this_depd) + ' $(addprefix $(OBJLOC)/,$(OBJS))'
                 if this_name == 'run_all_tests':
                     this_rule = line_wrap(this_rule, wrap=len_line, indent=8, line_cont='\\')
                 run_rules.append(this_rule)
     else:
         run_rules = ['']
         run_rules.append(program + ' : ' + prefix_src + program + '.f90 ' + prefix_bld + program + _OBJ_EXT)
-        run_rules.append('\t$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -o ' + program + \
-            '.exe ' + prefix_src + program + '.f90 -I$(OBJDIR) $(addprefix ' + prefix_bld + ',$(OBJS))')
+        if is_win:
+            run_rules.append('\t$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) /exe:' + program + \
+                '.exe ' + prefix_src + program + '.f90 /include:$(B) $(OBJS)')
+        else:
+            run_rules.append('\t$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -o ' + program + \
+                '.exe ' + prefix_src + program + '.f90 -I$(OBJDIR) $(addprefix ' + prefix_bld + ',$(OBJS))')
     if is_unit_test:
         all_rule = 'all : ' + ' '.join([x + '.exe' for x in runners])
     else:
-        all_rule = 'all : ' + program
+        all_rule = 'all : ' + ('create_dirs ' if is_win else '') + program
 
     # build the object file rules
     obj_rules = [prefix_bld + 'fruit' + _OBJ_EXT + ' : fruit.f90', ''] if is_unit_test else []
     for this_code in code:
-        this_name = this_code.name
-        this_depd = _build_dependencies(this_code.uses)
+        this_name = lowercase_map.get(this_code.name, this_code.name)
+        this_uses = sorted([lowercase_map.get(x, x) for x in this_code.uses], key=lambda x: x.lower())
+        this_depd = _build_dependencies(this_uses)
         this_rule = prefix_bld + this_name + _OBJ_EXT + ' : ' + prefix_src + this_name + '.f90'
         if this_depd:
             this_rule += ' ' + ' '.join(this_depd)
@@ -430,10 +573,9 @@ def _write_makefile(makefile, template, code, *, program=None, sources=None, ext
         new_lines.append(line)
         if line == token_src:
             if is_unit_test:
-                new_lines.extend(sorted(['       ' + x + _OBJ_EXT + ' \\' for x in external_sources]))
+                new_lines.extend(sorted(['       ' + x + _OBJ_EXT + ' \\' for x in external_sources], key=lambda x: x.lower()))
             else:
-                sources.remove(program)
-                new_lines.extend(sorted(['       ' + x + _OBJ_EXT + ' \\' for x in sources]))
+                new_lines.extend(sorted(['       ' + prefix_obj + x + _OBJ_EXT + ' \\' for x in sources if x != program], key=lambda x: x.lower()))
         if line == token_run:
             new_lines.append(all_rule)
             new_lines.extend(run_rules)
@@ -510,8 +652,8 @@ def create_fortran_unit_tests(folder, *, template=None, external_sources=None, h
         _write_makefile(makefile, template, all_code, external_sources=external_sources)
 
 #%% create_fortran_makefile
-def create_fortran_makefile(folder, makefile, template, program, sources, *, compiler='gfortran', \
-        is_debug=True, replacements=None):
+def create_fortran_makefile(folder, makefile, program, sources, *, compiler='gfortran', \
+        is_debug=True, template=None, replacements=None):
     r"""
     Parses the given folder for Fortran source files to build a makefile.
 
@@ -556,7 +698,8 @@ def create_fortran_makefile(folder, makefile, template, program, sources, *, com
         all_code.append(code)
 
     # write makefile
-    _write_makefile(makefile, template, all_code, program=program, sources=sources, replacements=replacements)
+    _write_makefile(makefile, all_code, program=program, compiler=compiler, is_debug=is_debug, \
+        template=template, sources=sources, replacements=replacements)
 
 #%% Unit test
 if __name__ == '__main__':
