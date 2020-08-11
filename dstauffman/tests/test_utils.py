@@ -275,7 +275,8 @@ class Test_compare_two_classes(unittest.TestCase):
             is_same = dcs.compare_two_classes(self.c1, self.c2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'b is different from c1 to c2.\nc is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.')
+        self.assertEqual(output, 'b is different from c1 to c2.\nc is only in c1.\n' + \
+            'd is only in c2.\n"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 
     def test_names(self):
@@ -361,7 +362,8 @@ class Test_compare_two_classes(unittest.TestCase):
             is_same = dcs.compare_two_classes(self.c1, self.c2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'key1 is different.\n"c1.e" and "c2.e" are not the same.\n"c1" and "c2" are not the same.')
+        self.assertEqual(output, 'key1 is different.\n"c1.e" and "c2.e" are not the same.\n' +
+            '"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 
     def test_mismatched_subclasses(self):
@@ -440,7 +442,8 @@ class Test_compare_two_dicts(unittest.TestCase):
             is_same = dcs.compare_two_dicts(self.d1, self.d2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'b is different.\nc is only in d1.\nd is only in d2.\n"d1" and "d2" are not the same.')
+        self.assertEqual(output, 'b is different.\n"d1[\'e\']" and "d2[\'e\']" are the same.\n' +
+            'c is only in d1.\nd is only in d2.\n"d1" and "d2" are not the same.')
         self.assertFalse(is_same)
 
     def test_names(self):

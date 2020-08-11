@@ -122,11 +122,16 @@ class Opts(Frozen):
                         raise ValueError(f'Unexpected option of "{key}" passed to Opts initializer."')
             else:
                 raise ValueError('Unexpected input argument receieved.')
+        use_datetime = False
         for (key, value) in kwargs.items():
-            if hasattr(self, key):
+            if key == 'use_datetime':
+                use_datetime = value
+            elif hasattr(self, key):
                 setattr(self, key, value)
             else:
                 raise ValueError(f'Unexpected option of "{key}" passed to Opts initializer."')
+        if use_datetime:
+            self.convert_dates('datetime')
 
     def __copy__(self):
         r"""Allows a new copy to be generated with data from the original."""
@@ -182,7 +187,7 @@ class Opts(Frozen):
 
     def convert_dates(self, form, old_form='sec', numpy_form='datetime64[ns]'):
         r"""Converts between double and datetime representations."""
-        assert form in {'datetime', 'sec'}, f'Unexpected form of "{form}".'
+        assert form in {'datetime', 'numpy', 'sec'}, f'Unexpected form of "{form}".'
         self.time_base = form
         self.time_unit = form
         self.disp_xmin = convert_date(self.disp_xmin, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form)

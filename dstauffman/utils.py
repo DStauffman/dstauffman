@@ -345,8 +345,13 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
         # compare the keys that are in both
         same = set(d1) & set(d2)
         for key in sorted(same):
+            s1 = d1[key]
+            s2 = d2[key]
+            if isinstance(s1, dict) and isinstance(s2, dict):
+                is_same = compare_two_dicts(s1, s2, suppress_output=suppress_output, \
+                    names=[f"{name1}['{key}']", f"{name2}['{key}']"])
             # if any differences, then this test fails
-            if np.logical_not(_nan_equal(d1[key], d2[key])):
+            elif np.logical_not(_nan_equal(s1, s2)):
                 is_same = False
                 if not suppress_output:
                     print(f'{key} is different.')
@@ -1073,6 +1078,7 @@ def execute_wrapper(command, folder, *, dry_run=False, ignored_codes=None, filen
     if print_status:
         lines = []
         for line in execute(command_list, folder, ignored_codes=ignored_codes, env=env):
+            # print each line as it comes so you can review long running commands as they execute
             print(line, end='')
             lines.append(line)
     else:

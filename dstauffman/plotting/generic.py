@@ -233,7 +233,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
             this_axes.set_title(description)
         if (time_is_list and is_datetime(time[0])) or is_datetime(time):
             this_axes.set_xlabel('Date')
-            assert time_units == 'datetime', 'Mismatch in the expected time units.'
+            assert time_units in {'datetime', 'numpy'}, 'Mismatch in the expected time units.'
         else:
             this_axes.set_xlabel(f'Time [{time_units}]{start_date}')
         if ylabel is None:
