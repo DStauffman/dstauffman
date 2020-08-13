@@ -321,7 +321,8 @@ def _write_all_unit_test(filename, all_code, header=None):
     write_text_file(filename, text)
 
 #%% Functions - _makefile_template
-def _get_template(compiler='gfortran', program='prog', is_debug=False, build='', *, fcflags=None, dbflags=None):
+def _get_template(compiler='gfortran', program='prog', is_debug=False, build='', *, fcflags=None, \
+                  dbflags=None, use_preprocessor=True):
     r"""
     Creates a template for the given compiler and debug settings.
 
@@ -348,27 +349,39 @@ def _get_template(compiler='gfortran', program='prog', is_debug=False, build='',
     # default compiler flags and build settings
     if fcflags is None:
         fcflags             = {}
-        fcflags['gfortran'] = '-O3 -ffree-form -ffree-line-length-none -fdefault-real-8 -std=f2018 -cpp -march=native'
-        fcflags['ifort']    = '-O3 -standard-semantics -fpp'
-        fcflags['win']      = '/O3 /free /extend-source:132 /real-size:64 /Qm64 /standard-semantics /fpp /define:SKIP_ASSERTS'
+        fcflags['gfortran'] = '-O3 -ffree-form -ffree-line-length-none -fdefault-real-8 -std=f2018 -march=native'
+        fcflags['ifort']    = '-O3 -standard-semantics'
+        fcflags['win']      = '/O3 /free /extend-source:132 /real-size:64 /Qm64 /standard-semantics /define:SKIP_ASSERTS'
     if dbflags is None:
         dbflags             = {}
         dbflags['gfortran'] = '-Og -g -Wall -fimplicit-none -fcheck=all -fbacktrace -Wno-maybe-uninitialized'
-        dbflags['ifort']    = '-traceback -check bounds -check uninit -standard-semantics'
-        dbflags['win']      = '/warn:all /traceback /check:bounds /check:uninit'
+        dbflags['ifort']    = '-O0 -g -traceback -check bounds -check uninit -standard-semantics'
+        dbflags['win']      = '/Od /warn:all /traceback /check:bounds /check:uninit'
+    preproc             = {}
+    preproc['gfortran'] = '-cpp'
+    preproc['ifort']    = '-fpp'
+    preproc['win']      = '/fpp'
     mods             = {}
     mods['gfortran'] = r'-J$(OBJDIR) -I$(OBJDIR)'
     mods['ifort']    = r'-module $(OBJDIR)'
     mods['win']      = r'/module:$(B)'
     if not build:
         build = 'debug' if is_debug else 'release'
+    this_fcflags = fcflags[compiler]
+    if is_debug:
+        this_dbflags = dbflags[compiler]
+        this_fcflags = ' '.join(this_fcflags.split(' ')[1:])
+    else:
+        this_dbflags = ''
+    if use_preprocessor:
+        this_fcflags += ' ' + preproc[compiler]
     # build Unix template
     if compiler != 'win':
         template = \
         '# compiler and flags\n' + \
         'FC      = ' + (compiler if compiler != 'win' else 'ifort') + '\n' + \
-        'FCFLAGS = ' + fcflags[compiler] + '\n' + \
-        'DBFLAGS = ' + (dbflags[compiler] if is_debug else '') + '\n' + \
+        'FCFLAGS = ' + this_fcflags + '\n' + \
+        'DBFLAGS = ' + this_dbflags + '\n' + \
         '\n' + \
         '# configuration\n' + \
         'SRCDIR = source\n' + \
@@ -413,8 +426,8 @@ clean :
         template = \
         '# compiler and flags\n' + \
         'FC      = ifort\n' + \
-        'FCFLAGS = ' + fcflags[compiler] + '\n' + \
-        'DBFLAGS = ' + (dbflags[compiler] if is_debug else '') + '\n' + \
+        'FCFLAGS = ' + this_fcflags + '\n' + \
+        'DBFLAGS = ' + this_dbflags + '\n' + \
         '\n' + \
         '# configuration\n' + \
         'S      = source\n' + \
