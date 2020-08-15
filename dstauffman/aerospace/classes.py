@@ -12,7 +12,7 @@ import unittest
 
 try:
     import h5py
-except ImportError: # pragma: no cover
+except ModuleNotFoundError: # pragma: no cover
     pass
 import numpy as np
 

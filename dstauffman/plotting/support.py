@@ -30,7 +30,7 @@ try:
     from PyQt5.QtWidgets import QApplication, QPushButton
     from PyQt5.QtGui import QIcon
     from PyQt5.QtCore import QSize
-except ImportError: # pragma: no cover
+except ModuleNotFoundError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object
 

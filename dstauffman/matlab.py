@@ -10,11 +10,13 @@ Notes
 import doctest
 import unittest
 
-import numpy as np
-
 try:
     import h5py
-except ImportError: # pragma: no cover
+except ModuleNotFoundError: # pragma: no cover
+    pass
+try:
+    import numpy as np
+except ModuleNotFoundError: # pragma: no cover
     pass
 
 #%% load_matlab

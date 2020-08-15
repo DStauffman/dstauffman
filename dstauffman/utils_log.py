@@ -13,7 +13,10 @@ import logging
 import os
 import unittest
 
-import numpy as np
+try:
+    import numpy as np
+except ModuleNotFoundError:
+    pass
 
 from dstauffman.enums import LogLevel
 

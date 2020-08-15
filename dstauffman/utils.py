@@ -23,10 +23,14 @@ from collections.abc import Mapping
 from contextlib import contextmanager
 from io import StringIO
 
-import numpy as np
+try:
+    import numpy as np
+    from numpy import nan
+except ModuleNotFoundError:
+    from math import nan
 try:
     from scipy.interpolate import interp1d
-except ImportError:
+except ModuleNotFoundError:
     # run without scipy for pypy support.  Only efforts non-sorted zero-order-hold lookups
     interp1d = None # pragma: no cover
 
@@ -1325,7 +1329,7 @@ def issorted(x, descend=False):
     return np.all(x[:-1] <= x[1:])
 
 #%% zero_order_hold
-def zero_order_hold(x, xp, yp, left=np.nan, assume_sorted=False):
+def zero_order_hold(x, xp, yp, left=nan, assume_sorted=False):
     r"""
     Interpolates a function by holding at the most recent value.
 

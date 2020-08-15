@@ -15,9 +15,12 @@ import warnings
 
 try:
     import matplotlib.dates as dates
-except ImportError:
+except ModuleNotFoundError:
     dates = None
-import numpy as np
+try:
+    import numpy as np
+except ModuleNotFoundError: # pragma: no cover
+    pass
 
 from dstauffman.units import get_time_factor, ONE_DAY
 

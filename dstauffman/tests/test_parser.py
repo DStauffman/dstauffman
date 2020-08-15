@@ -55,7 +55,7 @@ class Test_parse_wrapper(unittest.TestCase):
     def test_nominal(self):
         (command, parsed_args) = dcs.parse_wrapper(['tests', '-dv'])
         self.assertEqual(command, 'tests')
-        self.assertEqual(parsed_args, argparse.Namespace(docstrings=True, library=None, verbose=True))
+        self.assertEqual(parsed_args, argparse.Namespace(docstrings=True, library=None, unittest=False, verbose=True))
 
     def test_help1(self):
         (command, parsed_args) = dcs.parse_wrapper([])
@@ -74,7 +74,7 @@ class Test_parse_commands(unittest.TestCase):
     """
     def test_valid_command(self):
         parsed_args = dcs.parse_commands('tests', ['-dv'])
-        self.assertEqual(parsed_args, argparse.Namespace(docstrings=True, library=None, verbose=True))
+        self.assertEqual(parsed_args, argparse.Namespace(docstrings=True, library=None, unittest=False, verbose=True))
 
     def test_bad_command(self):
         with self.assertRaises(ValueError) as context:

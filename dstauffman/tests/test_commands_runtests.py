@@ -25,6 +25,7 @@ class Test_commands_parse_tests(unittest.TestCase):
         self.expected            = argparse.Namespace()
         self.expected.docstrings = False
         self.expected.library    = None
+        self.expected.unittest   = False
         self.expected.verbose    = False
 
     def test_nominal(self):
@@ -46,6 +47,11 @@ class Test_commands_parse_tests(unittest.TestCase):
         args = commands.parse_tests(['-l', 'other'])
         self.assertEqual(args, self.expected)
 
+    def test_unittest(self):
+        self.expected.unittest = True
+        args = commands.parse_tests(['-u'])
+        self.assertEqual(args, self.expected)
+
 #%% commands.execute_tests
 class Test_commands_execute_tests(unittest.TestCase):
     r"""
@@ -55,7 +61,7 @@ class Test_commands_execute_tests(unittest.TestCase):
     """
     def setUp(self):
         self.folder = dcs.get_root_dir()
-        self.args = argparse.Namespace(docstrings=False, library=None, verbose=False)
+        self.args = argparse.Namespace(docstrings=False, library=None, unittest=False, verbose=False)
         self.patch_args = {'folder': self.folder, 'extensions': frozenset({'m', 'py'}), 'list_all': False, \
                            'check_tabs': True, 'trailing': False, 'exclusions': None, 'check_eol': None, \
                            'show_execute': False}

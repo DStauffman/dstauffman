@@ -10,7 +10,10 @@ Notes
 import doctest
 import unittest
 
-from numpy import pi
+try:
+    from numpy import pi
+except ModuleNotFoundError: # pragma: no cover
+    from math import pi
 
 #%% Constants - Unit Conversions
 # Time

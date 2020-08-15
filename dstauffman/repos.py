@@ -13,12 +13,11 @@ import os
 import sys
 import unittest
 
-import pytest
 try:
     # TODO: this sometimes messes up the coverage tool, as the imports are done before it starts counting.
     # May have to move this function to an external tool to fix it.
     from coverage import Coverage
-except ImportError:
+except ModuleNotFoundError:
     Coverage = None
 
 from dstauffman.enums        import ReturnCodes
@@ -94,9 +93,12 @@ def run_unittests(names, verbose=False):
 
     """
     # disable plots from showing up
-    from dstauffman.plotting import Plotter
-    plotter = Plotter()
-    plotter.set_plotter(False)
+    try:
+        from dstauffman.plotting import Plotter
+        plotter = Plotter()
+        plotter.set_plotter(False)
+    except:
+        pass
     # find the test cases
     test_suite = unittest.TestLoader().discover(names)
     # set the verbosity
@@ -130,10 +132,15 @@ def run_pytests(folder):
     >>> return_code = run_pytests(folder) # doctest: +SKIP
 
     """
+    # delayed import to only use pytest if you are running the tests
+    import pytest
     # disable plots from showing up
-    from dstauffman.plotting import Plotter
-    plotter = Plotter()
-    plotter.set_plotter(False)
+    try:
+        from dstauffman.plotting import Plotter
+        plotter = Plotter()
+        plotter.set_plotter(False)
+    except:
+        pass
     # Note: need to do this next part to keep GUI testing from closing the instance with sys.exit
     # open a qapp
     from PyQt5.QtWidgets import QApplication

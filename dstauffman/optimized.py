@@ -13,7 +13,7 @@ import unittest
 
 try:
     from numba import njit
-except ImportError:
+except ModuleNotFoundError:
     # Support for when you don't have numba.  Presumably you either aren't using these functions,
     # as they will be slow, or you are using pypy instead and it will run the JIT
     # Go through a bunch of worthless closures to get the necessary stubs

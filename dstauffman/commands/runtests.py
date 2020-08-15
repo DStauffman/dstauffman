@@ -15,8 +15,8 @@ import subprocess
 import sys
 import unittest
 
-from dstauffman import get_root_dir, get_tests_dir, list_python_files, run_docstrings, \
-                       run_pytests, run_coverage
+from dstauffman import get_root_dir, get_tests_dir, list_python_files, run_coverage, \
+                       run_docstrings, run_pytests, run_unittests
 
 #%% Functions - parse_tests
 def parse_tests(input_args):
@@ -43,7 +43,7 @@ def parse_tests(input_args):
     >>> input_args = []
     >>> args = parse_tests(input_args)
     >>> print(args)
-    Namespace(docstrings=False, library=None, verbose=False)
+    Namespace(docstrings=False, library=None, unittest=False, verbose=False)
 
     """
     parser = argparse.ArgumentParser(prog='dcs tests', description='Runs all the built-in unit tests.')
@@ -51,6 +51,8 @@ def parse_tests(input_args):
     parser.add_argument('-v', '--verbose', help='Run tests in verbose mode.', action='store_true')
 
     parser.add_argument('-d', '--docstrings', help='Run the docstrings instead of the unittests.', action='store_true')
+
+    parser.add_argument('-u', '--unittest', help='Use unittest instead of pytest for the test runner.', action='store_true')
 
     parser.add_argument('-l', '--library', type=str, nargs='?', help='Library to run the unit tests from, default is yourself.')
 
@@ -81,7 +83,7 @@ def execute_tests(args):
     --------
     >>> from dstauffman.commands import execute_tests
     >>> from argparse import Namespace
-    >>> args = Namespace(docstrings=False, verbose=False)
+    >>> args = Namespace(docstrings=False, library=None, unittest=False, verbose=False)
     >>> execute_tests(args) # doctest: +SKIP
 
     """
@@ -89,6 +91,7 @@ def execute_tests(args):
     docstrings = args.docstrings
     library    = args.library
     verbose    = args.verbose
+    use_pytest = not args.unittest
 
     # get test location information
     if library is None:
@@ -104,8 +107,13 @@ def execute_tests(args):
         files = list_python_files(folder, recursive=True)
         return_code = run_docstrings(files, verbose=verbose)
     else:
-        # run the unittests using pytest
-        return_code = run_pytests(folder)
+        if use_pytest:
+            # run the unittests using pytest
+            return_code = run_pytests(folder)
+        else:
+            # run the unittests using unittest (which is core python)
+            test_names = library if library is not None else 'dstauffman.tests'
+            return_code = run_unittests(test_names)
     return return_code
 
 #%% Functions - parse_coverage

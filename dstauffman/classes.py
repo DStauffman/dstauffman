@@ -18,7 +18,7 @@ import warnings
 
 try:
     import h5py
-except ImportError: # pragma: no cover
+except ModuleNotFoundError: # pragma: no cover
     warnings.warn('h5py was not imported, so some file save and load capabilities will be limited.')
 
 #%% Functions - _frozen
