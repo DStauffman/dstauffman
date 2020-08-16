@@ -7,7 +7,6 @@ Notes
 """
 
 #%% Imports
-import sys
 import unittest
 
 import numpy as np
@@ -304,16 +303,12 @@ class Test_health_combine_sets(unittest.TestCase):
         self.assertAlmostEqual(s, self.s2)
 
     def test_negatives(self):
-        try:
+        with self.assertRaises((AssertionError, ValueError)):
             health.combine_sets(-self.n1, -self.u1, -self.s1, -self.n2, -self.u2, -self.s2)
-        except:
-            self.assertTrue(sys.exc_info()[0] in [AssertionError, ValueError])
 
     def test_negative_weird(self):
-        try:
+        with self.assertRaises((AssertionError, ValueError)):
             health.combine_sets(5, self.u1, self.s1, -4, self.u2, self.s2)
-        except:
-            self.assertTrue(sys.exc_info()[0] in [AssertionError, ValueError])
 
     def test_broadcasting(self):
         with self.assertRaises(ValueError):

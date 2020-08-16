@@ -12,13 +12,18 @@ import os
 import unittest
 import warnings
 
+#%% Numpy settings
 try:
-    from numpy import seterr, set_printoptions
+    import numpy as np
 except ModuleNotFoundError:
     warnings.warn('numpy was not imported, so a lot of capabilities will be limited.')
-    seterr = lambda invalid, divide: None
-    set_printoptions = lambda threshold: None
+else:
+    # Set NumPy error state for module
+    np.seterr(invalid='ignore', divide='ignore')
+    # Set NumPy printing options
+    np.set_printoptions(threshold=1000)
 
+#%% Logging configuration
 from dstauffman.enums import LogLevel
 
 #%% Register custom logging levels
@@ -39,12 +44,6 @@ logging.addLevelName(LogLevel.L20, 'L20')
 
 #%% Configure default logging if not already set
 logging.basicConfig(level=logging.WARNING)
-
-#%% Set NumPy error state for module
-seterr(invalid='ignore', divide='ignore')
-
-#%% Set NumPy printing options
-set_printoptions(threshold=1000)
 
 #%% Constants
 # A specified integer token value to use when you need one

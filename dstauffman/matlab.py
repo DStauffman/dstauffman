@@ -7,17 +7,14 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import doctest
 import unittest
 
-try:
+with contextlib.suppress(ModuleNotFoundError):
     import h5py
-except ModuleNotFoundError: # pragma: no cover
-    pass
-try:
+with contextlib.suppress(ModuleNotFoundError):
     import numpy as np
-except ModuleNotFoundError: # pragma: no cover
-    pass
 
 #%% load_matlab
 def load_matlab(filename, varlist=None, squeeze=True):

@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import datetime
 import doctest
 import re
@@ -16,11 +17,11 @@ import warnings
 try:
     import matplotlib.dates as dates
 except ModuleNotFoundError:
-    dates = None
-try:
+    _HAVE_MPL_DATES = False
+else:
+    _HAVE_MPL_DATES = True
+with contextlib.suppress(ModuleNotFoundError):
     import numpy as np
-except ModuleNotFoundError: # pragma: no cover
-    pass
 
 from dstauffman.units import get_time_factor, ONE_DAY
 
@@ -270,7 +271,7 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     if form == old_form:
         return date
     # check for bad conditions
-    if dates is None and (form == 'matplotlib' or old_form == 'matplotlib'):
+    if not _HAVE_MPL_DATES and (form == 'matplotlib' or old_form == 'matplotlib'):
         raise RuntimeError('You must have matplotlib installed to do this conversion.')
     if form in time_forms or (old_form in time_forms and np.any(np.isfinite(date))):
         assert date_zero is not None, 'You must specify a date_zero.'

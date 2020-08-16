@@ -7,13 +7,12 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import doctest
 import unittest
 
-try:
+with contextlib.suppress(ModuleNotFoundError):
     import h5py
-except ModuleNotFoundError: # pragma: no cover
-    pass
 import numpy as np
 
 from dstauffman import Frozen, SaveAndLoad

@@ -19,7 +19,9 @@ try:
     # May have to move this function to an external tool to fix it.
     from coverage import Coverage
 except ModuleNotFoundError:
-    Coverage = None
+    _HAVE_COVERAGE = False
+else:
+    _HAVE_COVERAGE = True
 
 from dstauffman.enums        import ReturnCodes
 from dstauffman.paths        import get_tests_dir, list_python_files
@@ -96,10 +98,11 @@ def run_unittests(names, verbose=False):
     # disable plots from showing up
     try:
         from dstauffman.plotting import Plotter
-        plotter = Plotter()
-        plotter.set_plotter(False)
     except:
         pass
+    else:
+        plotter = Plotter()
+        plotter.set_plotter(False)
     # find the test cases
     test_suite = unittest.TestLoader().discover(names)
     # set the verbosity
@@ -138,10 +141,11 @@ def run_pytests(folder):
     # disable plots from showing up
     try:
         from dstauffman.plotting import Plotter
-        plotter = Plotter()
-        plotter.set_plotter(False)
     except:
         pass
+    else:
+        plotter = Plotter()
+        plotter.set_plotter(False)
     # Note: need to do this next part to keep GUI testing from closing the instance with sys.exit
     # open a qapp
     from PyQt5.QtWidgets import QApplication
@@ -183,7 +187,7 @@ def run_coverage(folder, *, names='tests', report=True):
 
     """
     # check that coverage tool was imported
-    if Coverage is None:
+    if not _HAVE_COVERAGE:
         print('coverage tool is not available, no report was generated.')
         return_code = ReturnCodes.no_coverage_tool
         return return_code

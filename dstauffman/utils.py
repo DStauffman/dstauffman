@@ -32,7 +32,9 @@ try:
     from scipy.interpolate import interp1d
 except ModuleNotFoundError:
     # run without scipy for pypy support.  Only efforts non-sorted zero-order-hold lookups
-    interp1d = None # pragma: no cover
+    _HAVE_SCIPY = False
+else:
+    _HAVE_SCIPY = True
 
 from dstauffman.enums import ReturnCodes
 from dstauffman.units import MONTHS_PER_YEAR
@@ -1127,7 +1129,7 @@ def get_env_var(env_key, default=None):
         value = os.environ[env_key]
     except KeyError:
         if default is None:
-            raise KeyError('The appropriate environment variable "{}" has not been set.'.format(env_key))
+            raise KeyError('The appropriate environment variable "{}" has not been set.'.format(env_key)) from None
         value = default
     return value
 
@@ -1375,7 +1377,7 @@ def zero_order_hold(x, xp, yp, left=nan, assume_sorted=False):
     if assume_sorted or issorted(xp):
         ix = np.searchsorted(xp, x, side='right') - 1
         return np.where(np.asanyarray(x) < xmin, left, yp[ix])
-    if interp1d is None:
+    if not  _HAVE_SCIPY:
         raise RuntimeError('You must have scipy available to run this.') # pragma: no cover
     func = interp1d(xp, yp, kind='zero', fill_value='extrapolate', assume_sorted=False)
     return np.where(np.asanyarray(x) < xmin, left, func(x))

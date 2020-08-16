@@ -449,7 +449,7 @@ def _parfor_function_wrapper(opti_opts, msg, model_args):
 
     """
     try:
-        if msg or False: # TODO: skip logging for now until I can figure out how to configure it appropriately
+        if msg:
             logger.log(LogLevel.L8, msg)
         innovs = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
             cost_args=opti_opts.cost_args, model_args=model_args)

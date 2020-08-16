@@ -485,10 +485,8 @@ class Test_read_text_file(unittest.TestCase):
 
     def test_bad_reading(self):
         with dcs.capture_output() as out:
-            try:
+            with self.assertRaises((OSError, IOError, FileNotFoundError)):
                 dcs.read_text_file(self.badpath)
-            except:
-                self.assertTrue(sys.exc_info()[0] in [OSError, IOError, FileNotFoundError])
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for reading.')

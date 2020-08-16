@@ -14,10 +14,8 @@ import logging
 import os
 import unittest
 
-try:
+with contextlib.suppress(ModuleNotFoundError):
     import numpy as np
-except ModuleNotFoundError:
-    pass
 
 from dstauffman.enums import LogLevel
 
