@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import os
 import unittest
 
@@ -64,7 +65,7 @@ class Test__parse_source(unittest.TestCase):
         self.assertEqual(this_code.subroutines, ['sub_name'])
 
     def tearDown(self):
-        if os.path.isfile(self.filename):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.filename)
 
 #%% _write_unit_test

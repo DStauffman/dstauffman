@@ -8,6 +8,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import doctest
 import logging
 import os
@@ -67,10 +68,12 @@ def setup_dir(folder, recursive=False):
                 # if a folder, then delete recursively if recursive is True
                 if recursive:
                     setup_dir(this_full_elem, recursive=recursive)
-                    os.rmdir(this_full_elem)
+                    with contextlib.suppress(FileNotFoundError):
+                        os.rmdir(this_full_elem)
             elif os.path.isfile(this_full_elem):
                 # if a file, then remove it
-                os.remove(this_full_elem)
+                with contextlib.suppress(FileNotFoundError):
+                    os.remove(this_full_elem)
             else:
                 raise RuntimeError('Unexpected file type, neither file nor folder: "{}".'\
                     .format(this_full_elem)) # pragma: no cover

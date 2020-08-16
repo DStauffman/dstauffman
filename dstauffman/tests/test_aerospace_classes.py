@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import os
 import unittest
 
@@ -47,7 +48,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         np.testing.assert_array_equal(kf.time, kf2.time)
 
     def tearDown(self):
-        if os.path.isfile(self.filename):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.filename)
 
 #%% aerospace.KfRecord

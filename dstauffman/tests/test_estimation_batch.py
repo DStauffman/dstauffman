@@ -8,6 +8,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import logging
 import os
 import unittest
@@ -279,9 +280,9 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.assertEqual(output, '')
 
     def tearDown(self):
-        if os.path.isfile(self.filename):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.filename)
-        if os.path.isfile(self.filename2):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.filename2)
 
 #%% estimation.CurrentResults
@@ -911,7 +912,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
             files = [self.opti_opts.output_results, 'bpe_results_iter_1.hdf5', 'cur_results_iter_1.hdf5']
             for this_file in files:
                 filename = os.path.join(self.opti_opts.output_folder, this_file)
-                if os.path.isfile(filename):
+                with contextlib.suppress(FileNotFoundError):
                     os.remove(filename)
 
 #%% Unit test execution

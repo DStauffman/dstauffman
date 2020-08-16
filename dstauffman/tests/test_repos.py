@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import os
 import unittest
 from unittest.mock import patch
@@ -164,7 +165,7 @@ class Test_find_repo_issues(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         for this_file in cls.files:
-            if os.path.isfile(this_file):
+            with contextlib.suppress(FileNotFoundError):
                 os.remove(this_file)
 
 #%% delete_pyc
@@ -226,11 +227,11 @@ class Test_delete_pyc(unittest.TestCase):
         self.assertEqual(output, '')
 
     def tearDown(self):
-        if os.path.isfile(self.file1):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.file1)
-        if os.path.isfile(self.file2):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.file2)
-        if os.path.isdir(self.fold2):
+        with contextlib.suppress(FileNotFoundError):
             os.removedirs(self.fold2)
 
 #%% get_python_definitions
@@ -328,9 +329,9 @@ class Test_make_python_init(unittest.TestCase):
         self.assertTrue(os.path.isfile(self.filename))
 
     def tearDown(self):
-        if os.path.isfile(self.filepath):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.filepath)
-        if os.path.isfile(self.filename):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.filename)
 
 #%% write_unit_test_templates

@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import copy
 import os
 import pickle
@@ -217,9 +218,9 @@ class Test_SaveAndLoad(unittest.TestCase):
             self.results1.load('')
 
     def tearDown(self):
-        if os.path.isfile(self.save_path1):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.save_path1)
-        if os.path.isfile(self.save_path2):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.save_path2)
 
 #%% SaveAndLoadPickle

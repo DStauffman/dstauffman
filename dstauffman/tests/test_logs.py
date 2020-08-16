@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import logging
 import os
 import time
@@ -49,11 +50,12 @@ class Test_act_deact_logging(unittest.TestCase):
         dcs.deactivate_logging()
         self.assertFalse(dcs.logs.root_logger.handlers)
         if not was_there:
-            os.remove(default_filename)
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(default_filename)
 
     def tearDown(self):
         dcs.deactivate_logging()
-        if os.path.isfile(self.filename):
+        with contextlib.suppress(FileNotFoundError):
             os.remove(self.filename)
 
 #%% Unit test execution

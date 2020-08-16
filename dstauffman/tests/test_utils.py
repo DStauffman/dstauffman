@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import copy
 import os
 import platform
@@ -494,7 +495,8 @@ class Test_read_text_file(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        os.remove(cls.filepath)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(cls.filepath)
 
 #%% write_text_file
 class Test_write_text_file(unittest.TestCase):
@@ -530,7 +532,8 @@ class Test_write_text_file(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        os.remove(cls.filepath)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(cls.filepath)
 
 #%% capture_output
 class Test_capture_output(unittest.TestCase):

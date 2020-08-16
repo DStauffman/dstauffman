@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import os
 import time
 import unittest
@@ -91,13 +92,13 @@ class Test_setup_dir(unittest.TestCase):
 
     def tearDown(self):
         def _clean(self):
-            if os.path.isfile(self.filename):
+            with contextlib.suppress(FileNotFoundError):
                 os.remove(self.filename)
-            if os.path.isfile(self.subfile):
+            with contextlib.suppress(FileNotFoundError):
                 os.remove(self.subfile)
-            if os.path.isdir(self.subdir):
+            with contextlib.suppress(FileNotFoundError):
                 os.rmdir(self.subdir)
-            if os.path.isdir(self.folder):
+            with contextlib.suppress(FileNotFoundError):
                 os.rmdir(self.folder)
         try:
             _clean(self)

@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import datetime
 import os
 import platform
@@ -548,41 +549,34 @@ class Test_plotting_storefig(unittest.TestCase):
         ax.set_title(cls.title)
         # show a grid
         ax.grid(True)
+        cls.this_filename = ''
 
     def test_saving(self):
         plot.storefig(self.fig, self.folder, self.plot_type)
         # assert that file exists
-        this_filename = os.path.join(self.folder, self.title + '.' + self.plot_type)
-        self.assertTrue(os.path.isfile(this_filename))
-        # remove file
-        os.remove(this_filename)
+        self.this_filename = os.path.join(self.folder, self.title + '.' + self.plot_type)
+        self.assertTrue(os.path.isfile(self.this_filename))
 
     def test_multiple_plot_types(self):
         plot_types = ['png', 'svg']
         plot.storefig(self.fig, self.folder, plot_types)
         # assert that files exist
         for this_type in plot_types:
-            this_filename = os.path.join(self.folder, self.title + '.' + this_type)
-            self.assertTrue(os.path.isfile(this_filename))
-            # remove file
-            os.remove(this_filename)
+            self.this_filename = os.path.join(self.folder, self.title + '.' + this_type)
+            self.assertTrue(os.path.isfile(self.this_filename))
 
     def test_save_as_jpg(self):
         # Note: this test case can fail if PIL is not installed, try "pip install Pillow"
         plot.storefig(self.fig, self.folder, 'jpg')
         # assert that files exist
-        this_filename = os.path.join(self.folder, self.title + '.jpg')
-        self.assertTrue(os.path.isfile(this_filename))
-        # remove file
-        os.remove(this_filename)
+        self.this_filename = os.path.join(self.folder, self.title + '.jpg')
+        self.assertTrue(os.path.isfile(self.this_filename))
 
     def test_multiple_figures(self):
         plot.storefig([self.fig, self.fig], self.folder, self.plot_type)
         # assert that file exists
-        this_filename = os.path.join(self.folder, self.title + '.' + self.plot_type)
-        self.assertTrue(os.path.isfile(this_filename))
-        # remove file
-        os.remove(this_filename)
+        self.this_filename = os.path.join(self.folder, self.title + '.' + self.plot_type)
+        self.assertTrue(os.path.isfile(self.this_filename))
 
     def test_bad_folder(self):
         with self.assertRaises(ValueError):
@@ -603,12 +597,16 @@ class Test_plotting_storefig(unittest.TestCase):
         self.fig.canvas.set_window_title(self.title)
         # assert that file exists
         if platform.system() == 'Windows':
-            this_filename = os.path.join(self.folder, 'Bad _ _ _ names' + '.' + self.plot_type)
+            self.this_filename = os.path.join(self.folder, 'Bad _ _ _ names' + '.' + self.plot_type)
         else:
-            this_filename = os.path.join(self.folder, 'Bad < > _ names' + '.' + self.plot_type)
-        self.assertTrue(os.path.isfile(this_filename))
+            self.this_filename = os.path.join(self.folder, 'Bad < > _ names' + '.' + self.plot_type)
+        self.assertTrue(os.path.isfile(self.this_filename))
+
+    def tearDown(self):
         # remove file
-        os.remove(this_filename)
+        if self.this_filename:
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(self.this_filename)
 
     @classmethod
     def tearDownClass(cls):
@@ -793,7 +791,8 @@ class Test_plotting_setup_plots(unittest.TestCase):
         self.opts.save_plot = True
         plot.setup_plots(self.fig, self.opts)
         # remove file
-        os.remove(this_filename)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(this_filename)
 
     def test_show_link(self):
         this_filename = os.path.join(get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
@@ -804,7 +803,8 @@ class Test_plotting_setup_plots(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         # remove file
-        os.remove(this_filename)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(this_filename)
         self.assertTrue(output.startswith('Plots saved to <a href="'))
 
     def tearDown(self):

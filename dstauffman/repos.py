@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import datetime
 import doctest
 import os
@@ -339,7 +340,8 @@ def delete_pyc(folder, recursive=True, print_progress=True):
             # remove this file
             if print_progress:
                 print('Removing "{}"'.format(os.path.join(root, name)))
-            os.remove(os.path.join(root, name))
+            with contextlib.suppress(FileNotFoundError):
+                os.remove(os.path.join(root, name))
 
     if recursive:
         # walk through folder
