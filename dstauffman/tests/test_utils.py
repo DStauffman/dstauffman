@@ -13,6 +13,7 @@ import os
 import platform
 import sys
 import unittest
+from unittest.mock import patch
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -520,10 +521,8 @@ class Test_write_text_file(unittest.TestCase):
         if platform.system() != 'Windows':
             return
         with dcs.capture_output() as out:
-            try:
+            with self.assertRaises((OSError, IOError, FileNotFoundError)):
                 dcs.write_text_file(self.badpath, self.contents)
-            except:
-                self.assertTrue(sys.exc_info()[0] in [OSError, IOError, FileNotFoundError])
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for writing.')
@@ -956,6 +955,25 @@ class Test_get_env_var(unittest.TestCase):
         with self.assertRaises(KeyError):
             dcs.get_env_var('HOME')
         dcs._ALLOWED_ENVS = None
+
+#%% get_username
+class Test_get_username(unittest.TestCase):
+    r"""
+    Tests the function with the following cases:
+        Windows
+        Unix
+    """
+    def test_windows(self):
+        with patch('dstauffman.utils.IS_WINDOWS', True):
+            with patch.dict(os.environ, {'USER': 'name', 'USERNAME': 'name_two'}):
+                username = dcs.get_username()
+        self.assertEqual(username, 'name_two')
+
+    def test_unix(self):
+        with patch('dstauffman.utils.IS_WINDOWS', False):
+            with patch.dict(os.environ, {'USER': 'name', 'USERNAME': 'name_two'}):
+                username = dcs.get_username()
+        self.assertEqual(username, 'name')
 
 #%% is_datetime
 class Test_is_datetime(unittest.TestCase):

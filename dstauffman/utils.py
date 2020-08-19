@@ -32,12 +32,13 @@ try:
     from scipy.interpolate import interp1d
 except ModuleNotFoundError:
     # run without scipy for pypy support.  Only efforts non-sorted zero-order-hold lookups
-    _HAVE_SCIPY = False
+    _HAVE_SCIPY = False # pragma: no cover
 else:
     _HAVE_SCIPY = True
 
-from dstauffman.enums import ReturnCodes
-from dstauffman.units import MONTHS_PER_YEAR
+from dstauffman.constants import IS_WINDOWS
+from dstauffman.enums     import ReturnCodes
+from dstauffman.units     import MONTHS_PER_YEAR
 
 #%% Globals
 _ALLOWED_ENVS = None # allows any environment variables to be invoked
@@ -1132,6 +1133,30 @@ def get_env_var(env_key, default=None):
             raise KeyError('The appropriate environment variable "{}" has not been set.'.format(env_key)) from None
         value = default
     return value
+
+#%% Functions - get_username
+def get_username():
+    r"""
+    Gets the current username based on environment variables.
+
+    Returns
+    -------
+    username : str
+        Name of the username
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in August 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import get_username
+    >>> username = get_username()
+
+    """
+    if IS_WINDOWS:
+        return os.environ['USERNAME']
+    return os.environ['USER']
 
 #%% Functions - is_datetime
 def is_datetime(time):

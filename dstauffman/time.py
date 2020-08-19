@@ -17,7 +17,7 @@ import warnings
 try:
     import matplotlib.dates as dates
 except ModuleNotFoundError:
-    _HAVE_MPL_DATES = False
+    _HAVE_MPL_DATES = False # pragma: no cover
 else:
     _HAVE_MPL_DATES = True
 with contextlib.suppress(ModuleNotFoundError):

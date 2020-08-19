@@ -39,8 +39,8 @@ from .units        import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DE
 from .utils        import rms, rss, compare_two_classes, compare_two_dicts, read_text_file, \
                               write_text_file, capture_output, unit, modd, is_np_int, np_digitize, \
                               histcounts, full_print, line_wrap, combine_per_year, \
-                              execute, execute_wrapper, get_env_var, is_datetime, intersect, \
-                              issorted, zero_order_hold
+                              execute, execute_wrapper, get_env_var, get_username, is_datetime, \
+                              intersect, issorted, zero_order_hold
 from .utils_log    import setup_dir, fix_rollover
 
 #%% Unit test
