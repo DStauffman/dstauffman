@@ -1229,6 +1229,42 @@ class Test_zero_order_hold(unittest.TestCase):
         y     = dcs.zero_order_hold(x, xp, yp, left=-1)
         np.testing.assert_array_equal(y, y_exp)
 
+    def test_bools(self):
+        xp    = np.array([1, 3, 4, 6, 8, 12], dtype=int)
+        yp    = np.array([1, 0, 0, 1, 1, 0], dtype=bool)
+        x     = np.arange(15, dtype=int)
+        y_exp = np.array([0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], dtype=bool)
+        y     = dcs.zero_order_hold(x, xp, yp, left=False)
+        self.assertEqual(y.dtype, bool)
+        np.testing.assert_array_equal(y, y_exp)
+
+    def test_bools_unsorted(self):
+        xp    = np.array([1, 3, 6, 4, 8, 12], dtype=int)
+        yp    = np.array([1, 0, 1, 0, 1, 0], dtype=bool)
+        x     = np.arange(15, dtype=int)
+        y_exp = np.array([0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], dtype=bool)
+        y     = dcs.zero_order_hold(x, xp, yp, left=False)
+        self.assertEqual(y.dtype, bool)
+        np.testing.assert_array_equal(y, y_exp)
+
+#%% drop_following_time
+class Test_drop_following_time(unittest.TestCase):
+    r"""
+    Tests the drop_following_time function with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.times = np.arange(10, 60)
+        self.ix_drop_start = np.array([5, 15, 17, 25])
+        self.drop_starts = self.times[self.ix_drop_start]
+        self.dt_drop = 3
+        self.exp = np.zeros(self.times.shape, dtype=bool)
+        self.exp[np.array([5, 6, 7, 15, 16, 17, 18, 19, 25, 26, 27])] = True
+
+    def test_nominal(self):
+        drop_mask = dcs.drop_following_time(self.times, self.drop_starts, self.dt_drop)
+        np.testing.assert_array_equal(drop_mask, self.exp)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

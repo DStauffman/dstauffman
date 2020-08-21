@@ -1405,7 +1405,47 @@ def zero_order_hold(x, xp, yp, left=nan, assume_sorted=False):
     if not  _HAVE_SCIPY:
         raise RuntimeError('You must have scipy available to run this.') # pragma: no cover
     func = interp1d(xp, yp, kind='zero', fill_value='extrapolate', assume_sorted=False)
-    return np.where(np.asanyarray(x) < xmin, left, func(x))
+    return np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
+
+#%% drop_following_time
+def drop_following_time(times, drop_starts, dt_drop):
+    r"""
+    Drops the times within the dt_drop after drop_starts.
+
+    Parameters
+    ----------
+    times : (N, ) array_like
+        Times at which you want to know the drop status
+    drop_starts : (M, ) array_like
+        Times at which the drops start
+    dt_drop : float or int
+        Delta time for each drop window
+
+    Returns
+    -------
+    drop_make : (N, ) ndarray of bool
+        Mask where the data points should be dropped
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in August 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import drop_following_time
+    >>> import numpy as np
+    >>> times = np.arange(50)
+    >>> drop_starts = np.array([5, 15, 17, 25])
+    >>> dt_drop = 3
+    >>> drop_mask = drop_following_time(times, drop_starts, dt_drop)
+
+    """
+    # Version with for loop # TODO: would like to do this without the loop
+    drop_mask = np.zeros(times.size, dtype=bool)
+    for drop_time in drop_starts:
+        # drop the times within the specified window
+        drop_mask |= (times >= drop_time) & (times < drop_time + dt_drop)
+    return drop_mask
 
 #%% Unit test
 if __name__ == '__main__':

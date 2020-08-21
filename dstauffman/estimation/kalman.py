@@ -15,7 +15,7 @@ import numpy as np
 from dstauffman.estimation.linalg import mat_divide
 
 #%% Functions - calc_kalman_gain
-def calc_kalman_gain(P, H, R, *, use_inverse=False, return_innov_cov=False):
+def calculate_kalman_gain(P, H, R, *, use_inverse=False, return_innov_cov=False):
     r"""
     Calculates K, the Kalman Gain matrix.
 
@@ -43,12 +43,12 @@ def calc_kalman_gain(P, H, R, *, use_inverse=False, return_innov_cov=False):
 
     Examples
     --------
-    >>> from dstauffman.estimation import calc_kalman_gain
+    >>> from dstauffman.estimation import calculate_kalman_gain
     >>> import numpy as np
     >>> P = 1e-3 * np.eye(5)
     >>> H = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0.5, 0.5, 0.5], [0, 0, 0.1]]).T
     >>> R = 0.5 * np.eye(3)
-    >>> K = calc_kalman_gain(P, H, R)
+    >>> K = calculate_kalman_gain(P, H, R)
 
     """
     # calculate the innovation covariance
@@ -63,6 +63,38 @@ def calc_kalman_gain(P, H, R, *, use_inverse=False, return_innov_cov=False):
     if return_innov_cov:
         return (K, Pz)
     return K
+
+#%% Functions - calculate_prediction
+def calculate_prediction(H, state, const=None):
+    r"""
+    Calculates u, the measurement prediction.
+    """
+    if const is None:
+        return H @ state
+    return H @ (state + const)
+
+#%% Functions - calculate_innovation
+def calculate_innovation(u_meas, u_pred):
+    r"""
+    Calculates z, the Kalman Filter innovation.
+    """
+    return u_meas - u_pred
+
+#%% Functions - calculate_normalized_innovation
+def calculation_normalized_innovation(z, Pz, use_inverse=False):
+    r"""
+    Calculates nu, the Normalized Kalman Filter Innovation.
+    """
+    if use_inverse:
+        return np.linalg.inv(Pz) @ z
+    return mat_divide(Pz, z)
+
+#%% Functions - calculate_delta_state
+def calculate_delta_state(K, z):
+    r"""
+    Calculates dx, the delta state for a given measurement.
+    """
+    return K @ z
 
 #%% Functions - propagate_covariance
 def propagate_covariance(P, phi, Q, *, gamma=None, inplace=True):

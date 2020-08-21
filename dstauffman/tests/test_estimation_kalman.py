@@ -14,9 +14,9 @@ import numpy as np
 import dstauffman.estimation as estm
 
 #%% estimation.calc_kalman_gain
-class Test_estimation_calc_kalman_gain(unittest.TestCase):
+class Test_estimation_calculate_kalman_gain(unittest.TestCase):
     r"""
-    Tests the estimation.calc_kalman_gain function with the following cases:
+    Tests the estimation.calculate_kalman_gain function with the following cases:
         Nominal
         With inverse
     """
@@ -27,11 +27,11 @@ class Test_estimation_calc_kalman_gain(unittest.TestCase):
         self.exp = 0.0019950134608610927 # TODO: come up with something that can be known better
 
     def test_nominal(self):
-        K = estm.calc_kalman_gain(self.P, self.H, self.R)
+        K = estm.calculate_kalman_gain(self.P, self.H, self.R)
         self.assertAlmostEqual(K[0, 0], self.exp, 14)
 
     def test_inverse(self):
-        K = estm.calc_kalman_gain(self.P, self.H, self.R, use_inverse=True)
+        K = estm.calculate_kalman_gain(self.P, self.H, self.R, use_inverse=True)
         self.assertAlmostEqual(K[0, 0], self.exp, 12)
 
 #%% estimation.propagate_covariance
