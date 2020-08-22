@@ -13,7 +13,7 @@ import numpy as np
 
 import dstauffman.estimation as estm
 
-#%% estimation.calc_kalman_gain
+#%% estimation.calculate_kalman_gain
 class Test_estimation_calculate_kalman_gain(unittest.TestCase):
     r"""
     Tests the estimation.calculate_kalman_gain function with the following cases:

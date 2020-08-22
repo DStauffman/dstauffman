@@ -36,11 +36,12 @@ from .time         import convert_time_units, get_np_time_units, round_datetime,
 from .units        import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \
                               ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, get_factors, \
                               get_time_factor
-from .utils        import rms, rss, compare_two_classes, compare_two_dicts, read_text_file, \
-                              write_text_file, capture_output, unit, modd, is_np_int, np_digitize, \
-                              histcounts, full_print, line_wrap, combine_per_year, \
-                              execute, execute_wrapper, get_env_var, get_username, is_datetime, \
-                              intersect, issorted, zero_order_hold, drop_following_time
+from .utils        import find_in_range, rms, rss, compare_two_classes, compare_two_dicts, \
+                              read_text_file, write_text_file, capture_output, unit, modd, \
+                              is_np_int, np_digitize, histcounts, full_print, line_wrap, \
+                              combine_per_year, execute, execute_wrapper, get_env_var, \
+                              get_username, is_datetime, intersect, issorted, zero_order_hold, \
+                              drop_following_time
 from .utils_log    import setup_dir, fix_rollover
 
 #%% Unit test

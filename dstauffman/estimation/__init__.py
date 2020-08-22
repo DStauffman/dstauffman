@@ -10,7 +10,7 @@ Notes
 #%% Imports
 from .batch    import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, \
                           run_bpe
-from .kalman   import calc_kalman_gain, propagate_covariance, update_covariance
+from .kalman   import calculate_kalman_gain, propagate_covariance, update_covariance
 from .linalg   import orth, subspace, mat_divide
 from .smoother import bf_smoother
 from .support  import get_parameter, set_parameter

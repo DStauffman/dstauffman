@@ -85,6 +85,69 @@ def _nan_equal(a, b):
         is_same = False
     return is_same
 
+#%% Functions - find_in_range
+def find_in_range(value, min_=-np.inf, max_=np.inf, *, inclusive=False, mask=None, precision=0, left=False, right=False):
+    r"""
+    Finds values in the given range.
+
+    Parameters
+    ----------
+    value : (N,) ndarray of float
+        Value to compare against, which could be NaN
+
+    Returns
+    -------
+    valid : (N,) ndarray of bool
+        True or False flag for whether the person in the given range
+    min_ : int or float, optional
+        Minimum value to include in range
+    max_ : int or float, optional
+        Maximum value to include in range
+    inclusive : bool, optional, default is False
+        Whether to inclusively count bount endpoints (overrules left and right)
+    mask : (N,) ndarray of bool, optional
+        A mask to preapply to the results
+    precision : int or float, optional, default is zero
+        A precision to apply to the comparisons
+    left : bool, optional, default is False
+        Whether to include the left endpoint in the range
+    right : bool, optional, default is False
+        Whether to include the right endpoint in the range
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in August 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import find_in_range
+    >>> import numpy as np
+    >>> valid = find_in_range(np.array([-1, 15, 30.3, 40, 0, 0, 10, np.nan, 8000]), min_=12, max_=35)
+    >>> print(valid)
+    [False  True  True False False False False False False]
+
+    """
+    # ensure this is an ndarray
+    value = np.asanyarray(value)
+    # find the people with valid values to compare against
+    not_nan = ~np.isnan(value)
+    if mask is not None:
+        not_nan &= mask
+    # find those greater than the minimum bound
+    if np.isfinite(min_):
+        func = np.greater_equal if inclusive or left else np.greater
+        valid = func(value, min_-precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)
+    else:
+        assert ~np.isnan(min_) and np.sign(min_) < 0, 'The minimum should be -np.inf if not finite.'
+        valid = not_nan.copy()
+    # combine with those less than the maximum bound
+    if np.isfinite(max_):
+        func = np.less_equal if inclusive or right else np.less
+        valid &= func(value, max_+precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)
+    else:
+        assert ~np.isnan(max_) and np.sign(max_) > 0, 'The maximum should be np.inf if not finite.'
+    return valid
+
 #%% Functions - rms
 def rms(data, axis=None, keepdims=False, ignore_nans=False):
     r"""

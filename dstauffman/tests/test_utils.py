@@ -37,6 +37,68 @@ class Test__nan_equal(unittest.TestCase):
     def test_not_equal(self):
         self.assertFalse(dcs.utils._nan_equal(self.a, self.c))
 
+#%% find_in_range
+class Test_find_in_range(unittest.TestCase):
+    r"""
+    Tests the find_in_range function with the following cases:
+        normal use
+        age with NaNs included
+    """
+    def test_normal_use(self):
+        value = np.array([-1, -2, 0, np.nan, 15, 34.2, np.nan, 85])
+        exp   = np.array([ 1,  1, 1,      0,  1,    1,      0,  1], dtype=bool)
+        valid = dcs.find_in_range(value)
+        np.testing.assert_array_equal(valid, exp)
+
+    def test_min_max(self):
+        value = np.array([-1, -2, 0, np.nan, 15, 34.2, np.nan, 85])
+        exp   = np.array([ 0,  0, 0,      0,  1,    1,      0,  0], dtype=bool)
+        valid = dcs.find_in_range(value, min_=10, max_=40)
+        np.testing.assert_array_equal(valid, exp)
+
+    def test_mask(self):
+        value = np.array([-1, -2, 0, np.nan, 15, 34.2, np.nan, 85])
+        exp   = np.array([ 1,  0, 0,      0,  1,    0,      0,  0], dtype=bool)
+        mask  = np.array([ 1,  0, 0,      1,  1,    0,      0,  0], dtype=bool)
+        valid = dcs.find_in_range(value, mask=mask)
+        np.testing.assert_array_equal(valid, exp)
+
+    def test_bad_min(self):
+        with self.assertRaises(AssertionError):
+            dcs.find_in_range(np.array(0), min_=np.nan)
+
+    def test_bad_max(self):
+        with self.assertRaises(AssertionError):
+            dcs.find_in_range([0, 1], max_=-np.inf)
+
+    def test_inclusive(self):
+        value = np.array([1, 2, 3, 4, 5])
+        exp1  = np.array([0, 0, 1, 0, 0], dtype=bool)
+        exp2  = np.array([0, 1, 1, 1, 0], dtype=bool)
+        exp_l = np.array([0, 1, 1, 0, 0], dtype=bool)
+        exp_r = np.array([0, 0, 1, 1, 0], dtype=bool)
+        valid = dcs.find_in_range(value, min_=2, max_=4)
+        np.testing.assert_array_equal(valid, exp1)
+        valid = dcs.find_in_range(value, min_=2, max_=4, inclusive=True)
+        np.testing.assert_array_equal(valid, exp2)
+        valid = dcs.find_in_range(value, min_=2, max_=4, left=True)
+        np.testing.assert_array_equal(valid, exp_l)
+        valid = dcs.find_in_range(value, min_=2, max_=4, right=True)
+        np.testing.assert_array_equal(valid, exp_r)
+        valid = dcs.find_in_range(value, min_=2, max_=4, inclusive=True, left=True, right=False)
+        np.testing.assert_array_equal(valid, exp2)
+        valid = dcs.find_in_range(value, min_=2, max_=4, inclusive=True, left=False, right=True)
+        np.testing.assert_array_equal(valid, exp2)
+
+    def test_precision(self):
+        value = np.array([1, 1.999, 3.1, 4.005, 4.012, 5])
+        exp1  = np.array([0,     0,   1,     0,     0, 0], dtype=bool)
+        exp2  = np.array([0,     1,   1,     1,     0, 0], dtype=bool)
+        valid = dcs.find_in_range(value, min_=2., max_=4.)
+        np.testing.assert_array_equal(valid, exp1)
+        valid = dcs.find_in_range(value, min_=2., max_=4., precision=0.01)
+        np.testing.assert_array_equal(valid, exp2)
+
 #%% rms
 class Test_rms(unittest.TestCase):
     r"""

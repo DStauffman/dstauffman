@@ -14,7 +14,7 @@ import numpy as np
 
 from dstauffman.estimation.linalg import mat_divide
 
-#%% Functions - calc_kalman_gain
+#%% Functions - calculate_kalman_gain
 def calculate_kalman_gain(P, H, R, *, use_inverse=False, return_innov_cov=False):
     r"""
     Calculates K, the Kalman Gain matrix.

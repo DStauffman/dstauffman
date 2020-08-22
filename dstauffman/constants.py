@@ -19,7 +19,7 @@ except ModuleNotFoundError:
     warnings.warn('numpy was not imported, so a lot of capabilities will be limited.')
 else:
     # Set NumPy error state for module
-    np.seterr(invalid='ignore', divide='ignore')
+    np.seterr(invalid='warn', divide='warn')
     # Set NumPy printing options
     np.set_printoptions(threshold=1000)
 
