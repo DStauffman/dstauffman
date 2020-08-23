@@ -17,7 +17,7 @@ import numpy as np
 from matplotlib.patches import Rectangle
 from matplotlib.ticker import StrMethodFormatter
 
-from dstauffman import convert_date, convert_time_units, Frozen, get_factors, LogLevel
+from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_factors, LogLevel
 
 from dstauffman.plotting.generic import make_time_plot
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, ignore_plot_data, setup_plots
@@ -387,7 +387,7 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
         raise ValueError('Incorrectly sized labels.')
 
     # Determine if symmetric
-    if m == n and np.all((np.abs(data - np.transpose(data)) < precision) | np.isnan(data)):
+    if m == n and np.all(np.abs(np.subtract(data, np.transpose(data), out=np.zeros(data.shape, dtype=data.dtype), where=~np.isnan(data))) < precision):
         is_symmetric = True
     else:
         is_symmetric = False
@@ -395,7 +395,7 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
 
     # Override color ranges based on data
     # test if in -1 to 1 range instead of 0 to 1
-    if np.all(data >= -1 + precision) and np.any(data <= -precision) and cmin == 0 and cmax == 1:
+    if np.all(find_in_range(data, min_=-1, max_=0, inclusive=True, precision=precision)) and cmin == 0 and cmax == 1:
         cmin = -1
     # test if outside the cmin to cmax range, and if so, adjust range.
     temp = np.min(data)

@@ -222,7 +222,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     if baseline is not None:
         inc_cost = np.diff(np.hstack((cost[baseline], cost[ix])))
         inc_qaly = np.diff(np.hstack((qaly[baseline], qaly[ix])))
-        icer_out = inc_cost / inc_qaly
+        icer_out = np.divide(inc_cost, inc_qaly, out=np.full(inc_cost.shape, np.nan), where=inc_qaly!=0)
 
     # output as dataframe
     # build a name list if not given

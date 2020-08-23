@@ -127,15 +127,24 @@ def prob_to_rate(prob, time=1):
     [0. 0.03512017 inf]
 
     """
+    # check for scalar case
+    was_numpy = hasattr(prob, 'ndim')
+    prob = np.asanyarray(prob)
     # check ranges
     if np.any(prob < 0):
         raise ValueError('Probability must be >= 0')
     if np.any(prob > 1):
         raise ValueError('Probability must be <= 1')
     # calculate rate
-    rate = -np.log(1 - prob) / time
+    rate = -np.log(1 - prob, out=np.full(prob.shape, -np.inf), where=prob!=1) / time
     # prevent code from returning a bunch of negative zeros when prob is exactly 0
-    rate += 0.
+    if rate.size == 1:
+        if rate == 0.:
+            rate = abs(rate)
+    else:
+        rate = np.abs(rate, out=rate, where=rate == 0.)
+    if not was_numpy and rate.size == 1:
+        return float(rate)
     return rate
 
 #%% Functions - rate_to_prob

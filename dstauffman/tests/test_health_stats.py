@@ -22,6 +22,7 @@ class Test_health_convert_annual_to_monthly_probability(unittest.TestCase):
         convert a number less than zero (raise error)
         convert a number greater than one (raise error)
         convert a vector from annual to monthly and then back
+        check alias to other name
     """
     def setUp(self):
         self.monthly = np.arange(10)/1000.
@@ -34,8 +35,8 @@ class Test_health_convert_annual_to_monthly_probability(unittest.TestCase):
         np.testing.assert_array_almost_equal(monthly, self.monthly)
 
     def test_scalar(self):
-        monthly = health.convert_annual_to_monthly_probability(0)
-        self.assertIn(monthly, self.monthly)
+        monthly = health.convert_annual_to_monthly_probability(self.annuals[5])
+        self.assertAlmostEqual(monthly, self.monthly[5])
 
     def test_lt_zero(self):
         with self.assertRaises(ValueError):
@@ -64,6 +65,7 @@ class Test_health_convert_monthly_to_annual_probability(unittest.TestCase):
         convert a number less than zero (raise error)
         convert a number greater than one (raise error)
         convert a vector from monthly to annual and then back
+        check alias to other name
     """
     def setUp(self):
         self.monthly = np.arange(10)/1000.
@@ -76,8 +78,8 @@ class Test_health_convert_monthly_to_annual_probability(unittest.TestCase):
         np.testing.assert_array_almost_equal(annual, self.annuals)
 
     def test_scalar(self):
-        annual = health.convert_monthly_to_annual_probability(0)
-        self.assertIn(annual, self.annuals)
+        annual = health.convert_monthly_to_annual_probability(self.monthly[5])
+        self.assertAlmostEqual(annual, self.annuals[5])
 
     def test_lt_zero(self):
         with self.assertRaises(ValueError):
@@ -101,20 +103,30 @@ class Test_health_convert_monthly_to_annual_probability(unittest.TestCase):
 class Test_health_prob_to_rate(unittest.TestCase):
     r"""
     Tests the health.prob_to_rate function with the following cases:
-        TBD
+        convert a vector from monthly to annual
+        convert a scalar
+        convert a number less than zero (raise error)
+        convert a number greater than one (raise error)
+        convert a vector from monthly to annual and then back
     """
     def setUp(self):
         self.prob = np.arange(0, 1.01, 0.01)
         self.time = 5
-        self.rate = -np.log(1 - self.prob) / self.time
+        self.rate = np.hstack((0., -np.log(1 - self.prob[1:-1]) / self.time, np.inf))
 
     def test_conversion(self):
         rate = health.prob_to_rate(self.prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
 
     def test_scalar(self):
+        rate = health.prob_to_rate(self.prob[15], time=self.time)
+        self.assertAlmostEqual(rate, self.rate[15])
+        rate = health.prob_to_rate(float(self.prob[15]), time=self.time)
+        self.assertAlmostEqual(rate, float(self.rate[15]))
+        rate = health.prob_to_rate(1)
+        self.assertEqual(rate, np.inf)
         rate = health.prob_to_rate(0)
-        self.assertIn(rate, self.rate)
+        self.assertEqual(rate, 0.)
 
     def test_lt_zero(self):
         with self.assertRaises(ValueError):
@@ -134,20 +146,30 @@ class Test_health_prob_to_rate(unittest.TestCase):
 class Test_health_rate_to_prob(unittest.TestCase):
     r"""
     Tests the health.rate_to_prob function with the following cases:
-        TBD
+        convert a vector from monthly to annual
+        convert a scalar
+        convert a number less than zero (raise error)
+        convert a number greater than one (raise error)
+        convert a vector from monthly to annual and then back
     """
     def setUp(self):
         self.prob = np.arange(0, 1.01, 0.01)
         self.time = 5
-        self.rate = -np.log(1 - self.prob) / self.time
+        self.rate = np.hstack((0., -np.log(1 - self.prob[1:-1]) / self.time, np.inf))
 
     def test_conversion(self):
         prob = health.rate_to_prob(self.rate, self.time)
         np.testing.assert_array_almost_equal(prob, self.prob)
 
     def test_scalar(self):
+        prob = health.rate_to_prob(self.rate[20], time=self.time)
+        self.assertAlmostEqual(prob, self.prob[20])
+        prob = health.rate_to_prob(float(self.rate[20]), time=self.time)
+        self.assertAlmostEqual(prob, float(self.prob[20]))
         prob = health.rate_to_prob(0)
-        self.assertIn(prob, self.prob)
+        self.assertEqual(prob, 0.)
+        prob = health.rate_to_prob(np.inf)
+        self.assertEqual(prob, 1)
 
     def test_lt_zero(self):
         with self.assertRaises(ValueError):
@@ -167,7 +189,12 @@ class Test_health_rate_to_prob(unittest.TestCase):
 class Test_health_annual_rate_to_monthly_probability(unittest.TestCase):
     r"""
     Tests the health.annual_rate_to_monthly_probability function with the following cases:
-        TBD
+        convert a vector from annual to monthly
+        convert a scalar
+        convert a number less than zero (raise error)
+        convert a number greater than one (raise error)
+        convert a vector from annual to monthly and then back
+        check alias to other name
     """
     def setUp(self):
         self.prob = np.arange(0, 0.05, 1)
@@ -203,7 +230,12 @@ class Test_health_annual_rate_to_monthly_probability(unittest.TestCase):
 class Test_health_monthly_probability_to_annual_rate(unittest.TestCase):
     r"""
     Tests the health.monthly_probability_to_annual_rate function with the following cases:
-        TBD
+        convert a vector from annual to monthly
+        convert a scalar
+        convert a number less than zero (raise error)
+        convert a number greater than one (raise error)
+        convert a vector from annual to monthly and then back
+        check alias to other name
     """
     def setUp(self):
         self.prob = np.arange(0, 0.05, 1)
@@ -318,7 +350,10 @@ class Test_health_combine_sets(unittest.TestCase):
 class Test_health_bounded_normal_draw(unittest.TestCase):
     r"""
     Tests the health.bounded_normal_draw function with the following cases:
-        TBD
+        Nominal
+        No bounds
+        Optional values
+        Zero STD
     """
     def setUp(self):
         self.num    = 100000
@@ -341,11 +376,6 @@ class Test_health_bounded_normal_draw(unittest.TestCase):
         out = health.bounded_normal_draw(self.num, self.values, 'no_bounds', self.prng)
         self.assertTrue(np.min(out) < self.min)
         self.assertTrue(np.max(out) > self.max)
-
-    def test_mean(self):
-        self.values['no_bounds_mean'] = self.mean
-        self.values['no_bounds_std']  = self.std
-        out = health.bounded_normal_draw(self.num, self.values, 'no_bounds', self.prng)
         mean = np.mean(out)
         std  = np.std(out)
         self.assertTrue(self.mean - 1 < mean < self.mean + 1)
@@ -369,8 +399,9 @@ class Test_health_rand_draw(unittest.TestCase):
     r"""
     Tests the health.rand_draw function with the following cases:
         Nominal
-        Negative values
+        Negative and zero values
         Large values
+        No quality checks
     """
     def setUp(self):
         self.chances = np.array([0.1, 0.2, 0.8, 0.9])
@@ -385,7 +416,7 @@ class Test_health_rand_draw(unittest.TestCase):
         self.assertFalse(is_set[0])
         self.assertFalse(is_set[1])
 
-    def test_ones(self):
+    def test_large_values(self):
         is_set = health.rand_draw(np.array([5, 1, 0.5, 1000, np.inf]), self.prng)
         self.assertTrue(is_set[0])
         self.assertTrue(is_set[1])
