@@ -54,7 +54,7 @@ def convert_annual_to_monthly_probability(annual):
     if np.any(annual > 1):
         raise ValueError('annual must be <= 1')
     # convert to equivalent probability and return result
-    monthly = 1-np.exp(np.log(1-annual)/MONTHS_PER_YEAR)
+    monthly = 1-np.exp(np.log(1-annual, out=np.full(annual.shape, -np.inf), where=annual!=1)/MONTHS_PER_YEAR)
     return monthly
 
 #%% Functions - convert_monthly_to_annual_probability
