@@ -140,7 +140,7 @@ class Kf(Frozen):
                         value = getattr(sub, subkey)
                         if value is not None:
                             if subkey in {'chan'}:
-                                value = [x.encode('ascii') for x in value]
+                                value = [x.encode('utf-8') for x in value]
                             inner_grp.create_dataset(subkey, data=value)
                 else:
                     # normal values
@@ -148,7 +148,7 @@ class Kf(Frozen):
                     if value is not None:
                         # special case to handle lists of strings
                         if key in {'chan'}:
-                            value = [x.encode('ascii') for x in value]
+                            value = [x.encode('utf-8') for x in value]
                         grp.create_dataset(key, data=value)
 
     @classmethod
@@ -166,12 +166,12 @@ class Kf(Frozen):
                         for subfield in inner_grp:
                             value = inner_grp[subfield][()]
                             if subfield in {'chan'}:
-                                value = [x.decode('ascii') for x in value]
+                                value = [x.decode('utf-8') for x in value]
                             setattr(getattr(out, field), subfield, value)
                     else:
                         value = grp[field][()]
                         if field in {'chan'}:
-                            value = [x.decode('ascii') for x in value]
+                            value = [x.decode('utf-8') for x in value]
                         setattr(out, field, value)
         return out
 

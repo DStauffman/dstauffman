@@ -853,14 +853,20 @@ def histcounts(x, bins, right=False):
 
 #%% full_print
 @contextmanager
-def full_print():
+def full_print(**kwargs):
     r"""
     Context manager for printing full numpy arrays.
+
+    Parameters
+    ----------
+    kwargs : dict, optional
+        Arguments that will be passed through to the np.set_printoptions function
 
     Notes
     -----
     #.  Adapted by David C. Stauffer in January 2017 from a stackover flow answer by Paul Price,
         given here: http://stackoverflow.com/questions/1987694/print-the-full-numpy-array
+    #.  Updated by David C. Stauffer in August 2020 to allow arbitrary arguments to pass through.
 
     Examples
     --------
@@ -895,10 +901,12 @@ def full_print():
     >>> np.set_printoptions(**temp_options)
 
     """
+    # get the desired threshold, default is all elements
+    threshold = kwargs.pop('threshold', sys.maxsize)
     # get current options
     opt = np.get_printoptions()
-    # update to print all digits
-    np.set_printoptions(threshold=sys.maxsize)
+    # update to print all elements and any other criteria specified
+    np.set_printoptions(threshold=threshold, **kwargs)
     # yield options for the context manager to do it's thing
     yield
     # reset the options back to what they were originally

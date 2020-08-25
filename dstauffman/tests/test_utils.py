@@ -869,6 +869,14 @@ class Test_full_print(unittest.TestCase):
         out.close()
         self.assertEqual(output, '[1.35 1.58]')
 
+    def test_keyword_arguments(self):
+        with dcs.capture_output() as out:
+            with dcs.full_print(formatter={'float': lambda x: '{:.1f}'.format(x)}):
+                print(np.array([1.2345, 1001.555]))
+        output = out.getvalue().strip()
+        out.close()
+        self.assertEqual(output, '[1.2 1001.6]')
+
     def tearDown(self):
         # restore the print_options
         np.set_printoptions(**self.orig)

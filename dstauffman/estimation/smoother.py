@@ -54,7 +54,8 @@ def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
 
     """
     delta_lambda = -H.T @ (mat_divide(Pz, z) + K.T @ lambda_bar)
-    I_minus_KH   = np.eye(H.shape[1]) - K @ H
+    I            = np.hstack((np.eye(K.shape[0]), np.zeros((K.shape[0], H.shape[1]-K.shape[0]))))
+    I_minus_KH   = I - K @ H
     lambda_hat   = lambda_bar + delta_lambda
     LAMBDA_hat   = I_minus_KH.T @ LAMBDA_bar @ I_minus_KH + H.T @ mat_divide(Pz, H)
     return (lambda_hat, LAMBDA_hat)
@@ -124,10 +125,11 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
     """
     #% Initialization, set defaults
     n_state    = kf_record.H.shape[1]
+    n_active   = kf_record.K.shape[0]
     n_time     = kf_record.time.size
 
     # Storage for smoothed state updates
-    x_delta = np.zeros((n_state, n_time), dtype=float)
+    x_delta = np.zeros((n_active, n_time), dtype=float)
     if LAMBDA_bar is None:
         # If starting at the end of a datafile, set
         # Terminal boundary condition for
