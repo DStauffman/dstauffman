@@ -25,9 +25,9 @@ from io import StringIO
 
 try:
     import numpy as np
-    from numpy import nan
+    from numpy import nan, inf
 except ModuleNotFoundError:
-    from math import nan
+    from math import nan, inf
 try:
     from scipy.interpolate import interp1d
 except ModuleNotFoundError:
@@ -86,7 +86,7 @@ def _nan_equal(a, b):
     return is_same
 
 #%% Functions - find_in_range
-def find_in_range(value, min_=-np.inf, max_=np.inf, *, inclusive=False, mask=None, precision=0, left=False, right=False):
+def find_in_range(value, min_=-inf, max_=inf, *, inclusive=False, mask=None, precision=0, left=False, right=False):
     r"""
     Finds values in the given range.
 
