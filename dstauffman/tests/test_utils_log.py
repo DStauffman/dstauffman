@@ -187,6 +187,17 @@ class Test_fix_rollover(unittest.TestCase):
             dcs.fix_rollover(np.zeros((2, 5), dtype=float), self.roll, axis=2)
         self.assertEqual(str(context.exception), 'Unexpected axis: "2".')
 
+    def test_with_nans(self, mock_logger):
+        data = self.data.astype(float, copy=True)
+        exp = self.exp.astype(float, copy=True)
+        data[2] = np.nan
+        exp[2] = np.nan
+        unrolled = dcs.fix_rollover(data, self.roll)
+        np.testing.assert_array_equal(unrolled, exp)
+        mock_logger.log.assert_any_call(dcs.LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
+        mock_logger.log.assert_called_with(dcs.LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        self.assertEqual(mock_logger.log.call_count, 2)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

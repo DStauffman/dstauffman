@@ -18,6 +18,7 @@ with contextlib.suppress(ModuleNotFoundError):
     import numpy as np
 
 from dstauffman.enums import LogLevel
+from dstauffman.utils import find_in_range
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -150,7 +151,7 @@ def fix_rollover(data, roll, axis=None):
         raise ValueError('Input argument "data" must be a vector.')
 
     # find indices for top to bottom rollovers, these indices act as partition boundaries
-    roll_ix = np.flatnonzero(np.diff(data) > (roll/2))
+    roll_ix = np.flatnonzero(find_in_range(np.diff(data), min_=roll/2))
     if roll_ix.size > 0:
         # add final field to roll_ix so that final partition can be addressed
         roll_ix = np.hstack((roll_ix, num_el-1))
@@ -163,7 +164,7 @@ def fix_rollover(data, roll, axis=None):
         logger.log(LogLevel.L6, 'corrected {} bottom to top rollover(s)'.format(roll_ix.size-1))
 
     # find indices for top to bottom rollover, these indices act as partition boundaries
-    roll_ix = np.flatnonzero(np.diff(data) < -(roll/2))
+    roll_ix = np.flatnonzero(find_in_range(np.diff(data), max_=-roll/2))
     if roll_ix.size > 0:
         # add final field to roll_ix so that final partition can be addressed
         roll_ix = np.hstack((roll_ix, num_el-1))
@@ -179,7 +180,7 @@ def fix_rollover(data, roll, axis=None):
     out = data + compensation_b2t + compensation_t2b
 
     # double check for remaining rollovers
-    if np.any(np.diff(out) > (roll/2)) | np.any(np.diff(out) < -(roll/2)):
+    if np.any(find_in_range(np.diff(out), min_=roll/2, max_=-roll/2)):
         logger.log(LogLevel.L6, 'A rollover was fixed recursively')
         out = fix_rollover(out, roll)
     return out

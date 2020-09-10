@@ -45,9 +45,10 @@ def load_matlab(filename, varlist=None, squeeze=True):
     2.2
 
     """
-    # initialize output
-    out = {}
-    with h5py.File(filename, 'r') as file:
+    def _load(file, varlist, squeeze):
+        r"""Wrapped subfunction so it can be called recursively."""
+        # initialize output
+        out = {}
         # loop through keys, keys are the MATLAB variable names, like TELM
         for key in file:
             # skip keys that are not in the given varlist
@@ -63,24 +64,25 @@ def load_matlab(filename, varlist=None, squeeze=True):
                 # Note: data is transposed due to how Matlab stores columnwise
                 values = grp[()].T
                 out[key] = np.squeeze(values) if squeeze else values
+            elif 'EnumerationInstanceTag' in grp:
+                # likely a MATLAB enumerator???
+                enums    = grp['ValueNames'][()]
+                indices  = grp['ValueIndices'][()]
+                values   = enums.T[indices.T]
+                out[key] = np.squeeze(values) if squeeze else values
             else:
-                # initialize the structure for output and save the name
-                this_struct = {}
-                # loop through fields
-                # fields are the structure subfield names, like date, gyro_counts, etc.
-                for field in grp:
-                    # alias this dataset
-                    this_data = grp[field]
-                    if isinstance(this_data, h5py.Dataset):
-                        # normal method, just store
-                        values = this_data[()].T
-                    elif isinstance(this_data, h5py.Group):
-                        # likely a MATLAB enumerator???
-                        enums   = this_data['ValueNames'][()]
-                        indices = this_data['ValueIndices'][()]
-                        values  = enums.T[indices.T]
-                    this_struct[field] = np.squeeze(values) if squeeze else values
-                out[key] = this_struct
+                # call recursively
+                out[key] = load_matlab(grp, varlist=None, squeeze=squeeze)
+                        #if isinstance(this_data, dict) and 'ValueNames' in this_data:
+        return out
+
+    if not isinstance(filename, h5py.Group):
+        with h5py.File(filename, 'r') as file:
+            # normal method
+            out = _load(file=file, varlist=varlist, squeeze=squeeze)
+    else:
+        # recursive call method where the file is already opened to a given group
+        out = _load(file=filename, varlist=varlist, squeeze=squeeze)
     return out
 
 #%% Unit test

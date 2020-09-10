@@ -68,6 +68,35 @@ def calculate_kalman_gain(P, H, R, *, use_inverse=False, return_innov_cov=False)
 def calculate_prediction(H, state, const=None):
     r"""
     Calculates u, the measurement prediction.
+
+    Parameters
+    ----------
+    H : (A, B) ndarray
+        Measurement Update matrix
+    state : (A, ) ndarray
+        State vector
+    const : (A, ) ndarray, optional
+        Constant state vector offsets
+
+    Returns
+    -------
+    (A, ) ndarray
+        Delta state vector
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.estimation import calculate_prediction
+    >>> import numpy as np
+    >>> H = np.array([[1., 0.], [0., 1.], [0., 0.]])
+    >>> state = np.array([1e-3, 5e-3])
+    >>> u_pred = calculate_prediction(H, state)
+    >>> print(u_pred) # doctest: +NORMALIZE_WHITESPACE
+    [0.001 0.005 0. ]
+
     """
     if const is None:
         return H @ state
@@ -77,13 +106,69 @@ def calculate_prediction(H, state, const=None):
 def calculate_innovation(u_meas, u_pred):
     r"""
     Calculates z, the Kalman Filter innovation.
+
+    Parameters
+    ----------
+    u_meas : (A, ) ndarray
+        Measured state vector
+    u_pred : (A, ) ndarray
+        Predicted state vector
+
+    Returns
+    -------
+    (A, ) ndarray
+        Kalman Filter innovation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.estimation import calculate_innovation
+    >>> import numpy as np
+    >>> u_meas = np.array([1., 2.1, -3.])
+    >>> u_pred = np.array([1.1, 2.0, -3.1])
+    >>> z = calculate_innovation(u_meas, u_pred)
+    >>> print(z) # doctest: +NORMALIZE_WHITESPACE
+    [-0.1 0.1 0.1]
+
     """
     return u_meas - u_pred
 
 #%% Functions - calculate_normalized_innovation
-def calculation_normalized_innovation(z, Pz, use_inverse=False):
+def calculate_normalized_innovation(z, Pz, use_inverse=False):
     r"""
     Calculates nu, the Normalized Kalman Filter Innovation.
+
+    Parameters
+    ----------
+    z : (A, ) ndarray
+        Kalman Filter innovation
+    Pz : (A, A) ndarray
+        Kalman Filter innovation covariance
+    use_inverse : bool, optional
+        Whether to explicitly calculate the inverse or not, default is False
+
+    Returns
+    -------
+    (A, ) ndarray
+        Normalized innovation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.estimation import calculate_normalized_innovation
+    >>> import numpy as np
+    >>> z = np.array([0.1, 0.05, -0.2])
+    >>> Pz = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0., 0., 0.2]])
+    >>> nu = calculate_normalized_innovation(z, Pz)
+    >>> print(nu) # doctest: +NORMALIZE_WHITESPACE
+    [ 0.96868687 0.41313131 -1. ]
+
     """
     if use_inverse:
         return np.linalg.inv(Pz) @ z
@@ -93,6 +178,28 @@ def calculation_normalized_innovation(z, Pz, use_inverse=False):
 def calculate_delta_state(K, z):
     r"""
     Calculates dx, the delta state for a given measurement.
+
+    Parameters
+    ----------
+    K : (A, B) ndarray
+        Kalman Gain Matrix
+    z : (A, ) ndarray
+        Kalman Filter innovation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in September 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.estimation import calculate_delta_state
+    >>> import numpy as np
+    >>> K = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0., 0., 0.2]])
+    >>> z = np.array([0.1, 0.05, -0.2])
+    >>> dx = calculate_delta_state(K, z)
+    >>> print(dx) # doctest: +NORMALIZE_WHITESPACE
+    [ 0.0103 0.0058 -0.04 ]
+
     """
     return K @ z
 

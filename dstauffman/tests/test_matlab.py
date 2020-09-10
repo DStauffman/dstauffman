@@ -21,14 +21,18 @@ class Test_load_matlab(unittest.TestCase):
         Nominal
     """
     def setUp(self):
-        self.filename  = os.path.join(dcs.get_tests_dir(), 'test_numbers.mat')
+        self.filename1 = os.path.join(dcs.get_tests_dir(), 'test_numbers.mat')
         self.filename2 = os.path.join(dcs.get_tests_dir(), 'test_struct.mat')
+        self.filename3 = os.path.join(dcs.get_tests_dir(), 'test_enums.mat')
+        self.filename4 = os.path.join(dcs.get_tests_dir(), 'test_nested.mat')
         self.row_nums  = np.array([[1., 2.2, 3.]])
         self.col_nums  = np.array([[1.], [2.], [3.], [4.], [5.]])
         self.mat_nums  = np.array([[1, 2, 3], [4, 5, 6]])
+        self.enum      = np.array([2, 1, 1])
+        self.offsets   = {'r': 10, 'c': 20, 'm': 30}
 
     def test_nominal(self):
-        out = dcs.load_matlab(self.filename, squeeze=False)
+        out = dcs.load_matlab(self.filename1, squeeze=False)
         self.assertEqual(set(out.keys()), {'col_nums', 'row_nums', 'mat_nums'})
         np.testing.assert_array_equal(out['row_nums'], self.row_nums)
         np.testing.assert_array_equal(out['col_nums'], self.col_nums)
@@ -44,6 +48,29 @@ class Test_load_matlab(unittest.TestCase):
     def test_load_varlist(self):
         out = dcs.load_matlab(self.filename2, varlist=['y'])
         self.assertEqual(out.keys(), set())
+
+    @unittest.skip('Enum test case not working.')
+    def test_enum(self):
+        out = dcs.load_matlab(self.filename3)
+        self.assertEqual(set(out.keys()), {'enum'})
+        np.testing.assert_array_equal(out['enum'], self.enum)
+
+    def test_nested(self):
+        out = dcs.load_matlab(self.filename4)
+        self.assertEqual(set(out.keys()), {'col_nums', 'row_nums', 'mat_nums', 'x', 'enum', 'data'})
+        np.testing.assert_array_equal(out['row_nums'], np.squeeze(self.row_nums))
+        np.testing.assert_array_equal(out['col_nums'], np.squeeze(self.col_nums))
+        np.testing.assert_array_equal(out['mat_nums'], self.mat_nums)
+        np.testing.assert_array_equal(out['x']['r'], np.squeeze(self.row_nums))
+        np.testing.assert_array_equal(out['x']['c'], np.squeeze(self.col_nums))
+        np.testing.assert_array_equal(out['x']['m'], self.mat_nums)
+        np.testing.assert_array_equal(out['data']['x']['r'], np.squeeze(self.row_nums))
+        np.testing.assert_array_equal(out['data']['x']['c'], np.squeeze(self.col_nums))
+        np.testing.assert_array_equal(out['data']['x']['m'], self.mat_nums)
+        np.testing.assert_array_equal(out['data']['y']['r'], np.squeeze(self.row_nums) + self.offsets['r'])
+        np.testing.assert_array_equal(out['data']['y']['c'], np.squeeze(self.col_nums) + self.offsets['c'])
+        np.testing.assert_array_equal(out['data']['y']['m'], self.mat_nums + self.offsets['m'])
+        #np.testing.assert_array_equal(out['enum'], self.enum) # TODO: fix this one along with the other case
 
 #%% Unit test execution
 if __name__ == '__main__':

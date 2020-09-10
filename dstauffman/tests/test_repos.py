@@ -150,10 +150,10 @@ class Test_find_repo_issues(unittest.TestCase):
         out.close()
         self.assertTrue(lines[0].startswith('File: "'))
         self.assertTrue(lines[0].endswith('" has bad line endings of "{}".'.format(self.linesep)))
-        self.assertTrue(lines[1].startswith('Evaluating: "'))
-        self.assertEqual(lines[2], self.bad1)
-        self.assertEqual(lines[3], '')
-        self.assertEqual(len(lines),  4)
+        self.assertTrue(lines[3].startswith('Evaluating: "'))
+        self.assertEqual(lines[4], self.bad1)
+        self.assertEqual(lines[5], '')
+        self.assertEqual(len(lines),  6)
 
     def test_ignore_tabs(self):
         with dcs.capture_output() as out:
