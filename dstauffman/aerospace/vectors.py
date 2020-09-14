@@ -12,6 +12,8 @@ import unittest
 
 import numpy as np
 
+from dstauffman import unit
+
 #%% Functions - rot
 def rot(axis, angle):
     r"""
@@ -101,6 +103,57 @@ def vec_cross(vec):
 
     """
     return np.array([[0, -vec[2], vec[1]], [vec[2], 0, -vec[0]], [-vec[1], vec[0], 0]])
+
+#%% Functions - vec_angle
+def vec_angle(vec1, vec2, use_cross=True, normalized=True):
+    r"""
+    Calculates the angle between two unit vectors.
+
+    Parameters
+    ----------
+    vec1 : (3, ) or (3, N) ndarray
+        Vector 1
+    vec2 : (3, ) or (3, N) ndarray
+        Vector 2
+    use_cross : bool, optional, default is True
+        Use cross product in calculation
+    normalized : bool, optional, default is True
+        Whether vectors are normalized
+
+    Returns
+    -------
+    scalar or (N, ) ndarray
+        Angle between vectors
+
+    Notes
+    -----
+    #.  Note that the cross product method is more computationally expensive, but is more accurate
+        for vectors with small angular differences, as the arcsin is Taylor series is order 2
+        instead of order 1 error for the arcsin.
+    #.  Written by David C. Stauffer in September 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import rot, vec_angle
+    >>> import numpy as np
+    >>> vec1 = np.array([1., 0., 0.])
+    >>> vec2 = rot(2, 1e-5) @ vec1
+    >>> vec3 = np.array([0., 1., 0.])
+    >>> angle = vec_angle(vec1, vec2)
+    >>> print(angle)
+    1e-05
+
+    >>> angle2 = vec_angle(vec1, vec3, use_cross=False)
+    >>> print(f'{angle2:12.12f}')
+    1.570796326795
+
+    """
+    if not normalized:
+        vec1 = unit(vec1)
+        vec2 = unit(vec2)
+    if use_cross:
+        return np.arcsin(np.sqrt(np.sum(np.cross(vec1, vec2) ** 2, axis=-1)))
+    return np.arccos(np.sum(np.multiply(vec1, vec2), axis=-1)) # Note: using sum and multiply instead of dot for 2D case
 
 #%% Unit test
 if __name__ == '__main__':
