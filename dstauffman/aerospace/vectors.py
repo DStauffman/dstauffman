@@ -148,12 +148,17 @@ def vec_angle(vec1, vec2, use_cross=True, normalized=True):
     1.570796326795
 
     """
+    if isinstance(vec1, (list, tuple)):
+        vec1 = np.vstack(vec1).T
+    if isinstance(vec2, (list, tuple)):
+        vec2 = np.vstack(vec2).T
     if not normalized:
         vec1 = unit(vec1)
         vec2 = unit(vec2)
     if use_cross:
-        return np.arcsin(np.sqrt(np.sum(np.cross(vec1, vec2) ** 2, axis=-1)))
-    return np.arccos(np.sum(np.multiply(vec1, vec2), axis=-1)) # Note: using sum and multiply instead of dot for 2D case
+        cross_prod = np.cross(vec1.T, vec2.T).T
+        return np.arcsin(np.sqrt(np.sum(cross_prod ** 2, axis=0)))
+    return np.arccos(np.sum(np.multiply(vec1, np.conj(vec2)), axis=0)) # Note: using sum and multiply instead of dot for 2D case
 
 #%% Unit test
 if __name__ == '__main__':

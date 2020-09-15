@@ -596,18 +596,16 @@ def capture_output(mode='out'):
         sys.stdout, sys.stderr = old_out, old_err
 
 #%% Functions - unit
-def unit(data, axis=None):
+def unit(data, axis=0):
     r"""
     Normalize a matrix into unit vectors along a specified dimension.
-
-    Default to column normalization.
 
     Parameters
     ----------
     data : ndarray
         Data
     axis : int, optional
-        Axis upon which to normalize, defaults to last axis
+        Axis upon which to normalize, defaults to first axis (i.e. column normalization for 2D matrices)
 
     Returns
     -------
@@ -634,8 +632,8 @@ def unit(data, axis=None):
      [ 0. 0.  0.70710678]]
 
     """
-    if axis is None:
-        axis = data.ndim - 1
+    if isinstance(data, (list, tuple)):
+        data = np.vstack(data).T
     if axis >= data.ndim:
         raise ValueError('axis {} is out of bounds for array of dimension {}'.format(axis, data.ndim))
     # calculate the magnitude of each vector

@@ -666,6 +666,11 @@ class Test_unit(unittest.TestCase):
             dcs.unit(self.data[:, 0], axis=1)
         self.assertEqual(str(context.exception), 'axis 1 is out of bounds for array of dimension 1')
 
+    def test_list(self):
+        data = [self.data[:, i] for i in range(self.data.shape[1])]
+        norm_data = dcs.unit(data, axis=0)
+        np.testing.assert_array_almost_equal(norm_data, self.norm_data)
+
 #%% modd
 class Test_modd(unittest.TestCase):
     r"""
