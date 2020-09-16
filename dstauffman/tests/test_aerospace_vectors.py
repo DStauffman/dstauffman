@@ -92,6 +92,7 @@ class Test_aerospace_vec_angle(unittest.TestCase):
         self.vec3 = np.array([np.sqrt(2)/2, np.sqrt(2)/2, 0.])
         self.exp1 = 1e-5
         self.exp2 = np.pi/4
+        self.exp3 = 2*np.pi/3
 
     def test_small(self):
         angle = space.vec_angle(self.vec1, self.vec2)
@@ -135,15 +136,39 @@ class Test_aerospace_vec_angle(unittest.TestCase):
         angle = space.vec_angle(list1, list2, use_cross=False)
         np.testing.assert_almost_equal(angle, exp2, 12)
 
+    def test_tuple(self):
+        tuple1 = (self.vec1, self.vec2, self.vec3, self.vec1)
+        tuple2 = (self.vec2, self.vec1, self.vec1, self.vec1)
+        exp1  = np.array((0., self.exp1, self.exp2, 0.))
+        exp2  = np.array((self.exp1, self.exp1, self.exp2, 0.))
+        angle = space.vec_angle(tuple1, self.vec1)
+        np.testing.assert_almost_equal(angle, exp1, 14)
+        angle = space.vec_angle(self.vec1, tuple1)
+        np.testing.assert_almost_equal(angle, exp1, 14)
+        angle = space.vec_angle(tuple1, tuple2)
+        np.testing.assert_almost_equal(angle, exp2, 14)
+        angle = space.vec_angle(tuple1, tuple2, use_cross=False)
+        np.testing.assert_almost_equal(angle, exp2, 12)
+
     def test_not_normalized(self):
         angle = space.vec_angle(np.array([0, 2., 0]), np.array([0., -5., 5.]), normalized=False)
-        self.assertAlmostEqual(angle, self.exp2, 14)
+        self.assertAlmostEqual(angle, 3*np.pi/4, 14)
 
     def test_4d_vector(self):
         angle = space.vec_angle(np.array([1., 0., 0., 0.]), np.array([0., 1., 0., 0.]), use_cross=False)
         self.assertAlmostEqual(angle, np.pi/2)
         with self.assertRaises(ValueError):
             space.vec_angle(np.array([1., 0., 0., 0.]), np.array([0., 1., 0., 0.]), use_cross=True)
+
+    def test_2d_vector(self):
+        angle = space.vec_angle(np.array([1., 0.]), np.array([-0.5, np.sqrt(3)/2]), use_cross=False)
+        self.assertAlmostEqual(angle, self.exp3, 14)
+        angle = space.vec_angle(np.array([1., 0.]), np.array([-0.5, -np.sqrt(3)/2]), use_cross=False)
+        self.assertAlmostEqual(angle, self.exp3, 14)
+        angle = space.vec_angle(np.array([1., 0.]), np.array([-0.5, np.sqrt(3)/2]), use_cross=True)
+        self.assertAlmostEqual(angle, self.exp3, 14)
+        angle = space.vec_angle(np.array([1., 0.]), np.array([-0.5, -np.sqrt(3)/2]), use_cross=True)
+        self.assertAlmostEqual(angle, self.exp3, 14)
 
 #%% Unit test execution
 if __name__ == '__main__':

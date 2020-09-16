@@ -148,17 +148,24 @@ def vec_angle(vec1, vec2, use_cross=True, normalized=True):
     1.570796326795
 
     """
+    # process lists and tuples into numpy arrays
     if isinstance(vec1, (list, tuple)):
         vec1 = np.vstack(vec1).T
     if isinstance(vec2, (list, tuple)):
         vec2 = np.vstack(vec2).T
+    # normalize if desired, otherwise assume it already is
     if not normalized:
         vec1 = unit(vec1)
         vec2 = unit(vec2)
-    if use_cross:
-        cross_prod = np.cross(vec1.T, vec2.T).T
-        return np.arcsin(np.sqrt(np.sum(cross_prod ** 2, axis=0)))
-    return np.arccos(np.sum(np.multiply(vec1, np.conj(vec2)), axis=0)) # Note: using sum and multiply instead of dot for 2D case
+    # calcule the result using dot products
+    # Note: using sum and multiply instead of dot for 2D case
+    dot_prod = np.multiply(vec1.T, np.conj(vec2).T).T
+    dot_result = np.arccos(np.sum(dot_prod, axis=0))
+    if not use_cross:
+        return dot_result
+    cross_prod = np.cross(vec1.T, vec2.T).T
+    cross_result = np.arcsin(np.sqrt(np.sum(cross_prod ** 2, axis=0)))
+    return np.where(dot_result > np.pi/2, np.pi - cross_result, cross_result)
 
 #%% Unit test
 if __name__ == '__main__':
