@@ -10,10 +10,11 @@ Notes
 #%% Imports
 import doctest
 import os
+from typing import List
 import unittest
 
 #%% Functions - get_root_dir
-def get_root_dir():
+def get_root_dir() -> str:
     r"""
     Return the folder that contains this source file and thus the root folder for the whole code.
 
@@ -37,7 +38,7 @@ def get_root_dir():
     return folder
 
 #%% Functions - get_tests_dir
-def get_tests_dir():
+def get_tests_dir() -> str:
     r"""
     Return the default test folder location.
 
@@ -61,7 +62,7 @@ def get_tests_dir():
     return folder
 
 #%% Functions - get_data_dir
-def get_data_dir():
+def get_data_dir() -> str:
     r"""
     Return the default data folder location.
 
@@ -85,7 +86,7 @@ def get_data_dir():
     return folder
 
 #%% Functions - get_images_dir
-def get_images_dir():
+def get_images_dir() -> str:
     r"""
     Return the default data folder location.
 
@@ -109,7 +110,7 @@ def get_images_dir():
     return folder
 
 #%% Functions - get_output_dir
-def get_output_dir():
+def get_output_dir() -> str:
     r"""
     Return the default output folder location.
 
@@ -133,7 +134,7 @@ def get_output_dir():
     return folder
 
 #%% Functions - list_python_files
-def list_python_files(folder, recursive=False, include_all=False):
+def list_python_files(folder: str, recursive: bool = False, include_all: bool = False) -> List[str]:
     r"""
     Returns a list of all non dunder python files in the folder.
 

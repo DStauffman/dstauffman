@@ -11,7 +11,13 @@ Notes
 #%% Imports
 import doctest
 import unittest
-from enum import Enum, EnumMeta, _is_dunder
+from enum import Enum, EnumMeta
+
+#%% Support functions
+def _is_dunder(name):
+    """Returns True if a __dunder__ name, False otherwise."""
+    # Note that this is copied from the enum library, as it is not part of their public API.
+    return len(name) > 4 and name[:2] == name[-2:] == '__' and name[2] != '_' and name[-3] != '_'
 
 #%% Classes - _EnumMetaPlus
 class _EnumMetaPlus(EnumMeta):
