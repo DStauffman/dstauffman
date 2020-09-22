@@ -108,12 +108,12 @@ class ReturnCodes(IntEnumPlus):
     ReturnCodes.clean: 0
 
     """
-    clean            = 0 # Clean exit
-    bad_command      = 1 # Unexpected command
-    bad_folder       = 2 # Folder to execute a command in doesn't exist
-    bad_help_file    = 3 # help file doesn't exist
-    test_failures    = 4 # A test ran to completion, but failed its criteria
-    no_coverage_tool = 5 # Coverage tool is not installed
+    clean: int            = 0 # Clean exit
+    bad_command: int      = 1 # Unexpected command
+    bad_folder: int       = 2 # Folder to execute a command in doesn't exist
+    bad_help_file: int    = 3 # help file doesn't exist
+    test_failures: int    = 4 # A test ran to completion, but failed its criteria
+    no_coverage_tool: int = 5 # Coverage tool is not installed
 
 #%% Enums - LogLevel
 class LogLevel(IntEnumPlus):
@@ -143,20 +143,20 @@ class LogLevel(IntEnumPlus):
     LogLevel.L5: 20
 
     """
-    L0  = 35
-    L1  = 30
-    L2  = 28
-    L3  = 26
-    L4  = 24
-    L5  = 20
-    L6  = 18
-    L7  = 16
-    L8  = 14
-    L9  = 12
-    L10 = 10
-    L11 =  9
-    L12 =  8
-    L20 =  0
+    L0: int  = 35
+    L1: int  = 30
+    L2: int  = 28
+    L3: int  = 26
+    L4: int  = 24
+    L5: int  = 20
+    L6: int  = 18
+    L7: int  = 16
+    L8: int  = 14
+    L9: int  = 12
+    L10: int = 10
+    L11: int =  9
+    L12: int =  8
+    L20: int =  0
 
 #%% Unit test
 if __name__ == '__main__':

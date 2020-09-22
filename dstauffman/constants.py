@@ -47,10 +47,10 @@ logging.basicConfig(level=logging.WARNING)
 
 #%% Constants
 # A specified integer token value to use when you need one
-INT_TOKEN = -1
+INT_TOKEN: int = -1
 
 # Whether we are currently on Windows or not
-IS_WINDOWS = os.name == 'nt'
+IS_WINDOWS: bool = os.name == 'nt'
 
 #%% Functions
 # None

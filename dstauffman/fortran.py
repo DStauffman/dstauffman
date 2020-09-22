@@ -10,6 +10,8 @@ Notes
 import doctest
 import glob
 import os
+from typing import List, Optional, overload, Union
+from typing_extensions import Literal
 import unittest
 
 from dstauffman.classes import Frozen
@@ -93,7 +95,13 @@ class _FortranSource(Frozen):
         return 'teardownclass' in self.subroutines # TODO get real name from FRUIT
 
 #%% Functions - _parse_source
-def _parse_source(filename, assert_single=True):
+@overload
+def _parse_source(filename: str, assert_single: Literal[True] = ...) -> _FortranSource: ...
+
+@overload
+def _parse_source(filename: str, assert_single: Literal[False]) -> List[_FortranSource]: ...
+
+def _parse_source(filename: str, assert_single: bool = True) -> Union[_FortranSource, List[_FortranSource]]:
     r"""
     Parses the individual fortran source file into relevant information.
 
@@ -104,12 +112,8 @@ def _parse_source(filename, assert_single=True):
 
     Returns
     -------
-    code : dict
-        Parsing of source code with the following keys:
-            uses
-            types
-            functions
-            subroutines
+    code : list of _FortranSource class instances
+        Parsed code
 
     Examples
     --------
@@ -128,7 +132,7 @@ def _parse_source(filename, assert_single=True):
     # create the output dictionary
     code      = []
     this_name = ''
-    this_code  = None
+    this_code: Optional[_FortranSource] = None
     for line in lines:
         this_line = line.strip().lower()
         if not this_line:
@@ -148,10 +152,12 @@ def _parse_source(filename, assert_single=True):
         elif this_line.startswith('end program') or this_line.startswith('endprogram'):
             # program ending
             this_name = ''
+            assert this_code is not None, '_FortranSource class should already be instantiated.'
             code.append(this_code)
         elif this_line.startswith('end module') or this_line.startswith('endmodule'):
             # module ending
             this_name = ''
+            assert this_code is not None, '_FortranSource class should already be instantiated.'
             code.append(this_code)
         elif this_line.startswith('use '):
             # use statements
@@ -161,6 +167,7 @@ def _parse_source(filename, assert_single=True):
                 temp = this_line.split(' ')[1].strip()
             this_use = temp.split(',')[0]
             assert bool(this_use), 'Use statement should not be empty.'
+            assert this_code is not None, '_FortranSource class should already be instantiated.'
             assert this_name == this_code.name, 'Mismatch in module name "{}" vs "{}".'.format(this_name, this_code.name)
             this_code.uses.append(this_use)
         elif this_line.startswith('type ') and not this_line.startswith('type('):
@@ -169,6 +176,7 @@ def _parse_source(filename, assert_single=True):
             temp = this_line.split('::')[1].strip()
             this_type = temp.split(' ')[0]
             assert bool(this_type), 'Type statement should not be empty.'
+            assert this_code is not None, '_FortranSource class should already be instantiated.'
             assert this_name == this_code.name, 'Mismatch in module name "{}" vs "{}".'.format(this_name, this_code.name)
             this_code.types.append(this_type)
         elif this_line.startswith('function '):
@@ -176,6 +184,7 @@ def _parse_source(filename, assert_single=True):
             temp = this_line.split(' ')[1].strip()
             this_function = temp.split('(')[0]
             assert bool(this_function), 'Function name should not be empty for line: ' + this_line + f' in "{filename}".'
+            assert this_code is not None, '_FortranSource class should already be instantiated.'
             assert this_name == this_code.name, 'Mismatch in module name "{}" vs "{}".'.format(this_name, this_code.name)
             this_code.functions.append(this_function)
         elif this_line.startswith('subroutine '):
@@ -183,6 +192,7 @@ def _parse_source(filename, assert_single=True):
             temp = this_line.split(' ')[1].strip()
             this_subroutine = temp.split('(')[0]
             assert bool(this_subroutine), 'Subroutine name should not be empty for line: ' + this_line + f' in "{filename}".'
+            assert this_code is not None, '_FortranSource class should already be instantiated.'
             assert this_name == this_code.name, 'Mismatch in module name "{}" vs "{}".'.format(this_name, this_code.name)
             this_code.subroutines.append(this_subroutine)
         else:
@@ -198,7 +208,7 @@ def _parse_source(filename, assert_single=True):
     return code
 
 #%% Functions - _write_unit_test
-def _write_unit_test(filename, code, header=None):
+def _write_unit_test(filename: str, code: _FortranSource, header: str = None) -> None:
     r"""
     Writes a unit test for the given module.
 
@@ -249,7 +259,7 @@ def _write_unit_test(filename, code, header=None):
     write_text_file(filename, text)
 
 #%% Functions - _write_all_unit_test
-def _write_all_unit_test(filename, all_code, header=None):
+def _write_all_unit_test(filename: str, all_code: List[_FortranSource], header: str = None) -> None:
     r"""
     Writes a wrapper run_all_tests program to run all the unit tests.
 
@@ -257,7 +267,7 @@ def _write_all_unit_test(filename, all_code, header=None):
     ----------
     filename : str
         Name of the file to write
-    all_code : dict
+    all_code : list of _FortranSource instantes
         Contents for the unit tests
     header : str, optional
         If specified, write this additional header information

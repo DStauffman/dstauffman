@@ -24,7 +24,7 @@ from dstauffman.utils import find_in_range
 logger = logging.getLogger(__name__)
 
 #%% Functions - setup_dir
-def setup_dir(folder, recursive=False):
+def setup_dir(folder: str, recursive: bool = False) -> None:
     r"""
     Clear the contents for existing folders or instantiates the directory if it doesn't exist.
 

@@ -72,7 +72,8 @@ def plot_bpe_convergence(costs, *, opts=None):
     ax.set_ylabel('Cost')
     ax.set_title(this_title)
     ax.set_xticks(time)
-    ax.set_xticklabels(labels)
+    if len(costs) > 0:
+        ax.set_xticklabels(labels)
     # show a grid
     ax.grid(True)
     # Setup plots

@@ -49,7 +49,7 @@ def _frozen(set):
     return set_attr
 
 #%% Methods - save_hdf5
-def save_hdf5(self, filename=''):
+def save_hdf5(self, filename: str='') -> None:
     r"""
     Save the object to disk as an HDF5 file.
 
@@ -94,7 +94,7 @@ def load_hdf5(cls, filename=''):
     return out
 
 #%% Methods - save_pickle
-def save_pickle(self, filename):
+def save_pickle(self, filename: str) -> None:
     r"""
     Save a class instances to a pickle file.
 
@@ -130,7 +130,7 @@ def load_pickle(cls, filename):
     return out
 
 #%% Methods - save_method
-def save_method(self, filename='', use_hdf5=True):
+def save_method(self, filename: str = '', use_hdf5: bool = True) -> None:
     r"""
     Save the object to disk.
 

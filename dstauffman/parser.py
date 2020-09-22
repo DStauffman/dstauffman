@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 _VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'make_init', 'tests'})
 
 #%% Functions - _print_bad_command
-def _print_bad_command(command):
+def _print_bad_command(command: str) -> None:
     r"""Prints to the command line when a command name is not understood."""
     print('Command "{}" is not understood.'.format(command))
 

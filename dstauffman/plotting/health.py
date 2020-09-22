@@ -13,9 +13,11 @@ import doctest
 import unittest
 import warnings
 
+import matplotlib as mpl
 import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.ticker import StrMethodFormatter
+import numpy as np
+from packaging import version
 
 from dstauffman import get_factors, rms
 from dstauffman.health import bins_to_str_ranges
@@ -486,6 +488,9 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     ax.set_title(title)
     ax.set_yticks(y_values)
     ax.set_yticklabels(y_labels)
+    if version.parse(mpl.__version__) >= version.parse('3.3.1'):
+        # TODO: REMOVE IN THE FUTURE - PLACED TO AVOID WARNING - IT IS A BUG FROM MATPLOTLIB 3.3.1
+        ax.set_xticks(ax.get_xticks().tolist())
     ax.set_xticklabels(np.abs(ax.get_xticks()))
     ax.legend(loc=legend_loc)
 

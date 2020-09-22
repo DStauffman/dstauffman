@@ -9,19 +9,20 @@ Notes
 """
 
 #%% Imports
+from collections.abc import Mapping
+from contextlib import contextmanager
 import datetime
 import doctest
 from functools import reduce
 import inspect
+from io import StringIO
 import os
 import shlex
 import subprocess
 import sys
+from typing import Dict, List, Optional, TypeVar
 import unittest
 import warnings
-from collections.abc import Mapping
-from contextlib import contextmanager
-from io import StringIO
 
 try:
     import numpy as np
@@ -41,7 +42,9 @@ from dstauffman.enums     import ReturnCodes
 from dstauffman.units     import MONTHS_PER_YEAR
 
 #%% Globals
-_ALLOWED_ENVS = None # allows any environment variables to be invoked
+_ALLOWED_ENVS: Optional[Dict[str, str]] = None # allows any environment variables to be invoked
+
+_StrOrListStr = TypeVar('_StrOrListStr', str, List[str])
 
 #%% Functions - _nan_equal
 def _nan_equal(a, b):
@@ -443,7 +446,7 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
     return is_same
 
 #%% Functions - read_text_file
-def read_text_file(filename):
+def read_text_file(filename: str) -> str:
     r"""
     Open and read a complete text file.
 
@@ -494,7 +497,7 @@ def read_text_file(filename):
         raise
 
 #%% Functions - write_text_file
-def write_text_file(filename, text):
+def write_text_file(filename: str, text: str) -> None:
     r"""
     Open and write the specified text to a file.
 
@@ -691,7 +694,7 @@ def modd(x1, x2, out=None):
 #%% is_np_int
 def is_np_int(x):
     r"""
-    Returns True if the input is an int or any from of an np.integer type.
+    Returns True if the input is an int or any form of an np.integer type.
 
     Parameters
     ----------
@@ -911,7 +914,7 @@ def full_print(**kwargs):
     np.set_printoptions(**opt)
 
 #%% line_wrap
-def line_wrap(text, wrap=80, min_wrap=0, indent=4, line_cont='\\'):
+def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = '\\') -> _StrOrListStr:
     r"""
     Wrap lines of text to the specified length, breaking at any whitespace characters.
 
@@ -925,6 +928,8 @@ def line_wrap(text, wrap=80, min_wrap=0, indent=4, line_cont='\\'):
         Minimum number of characters to wrap at, default is 0
     indent : int, optional
         Number of characters to indent the next line with, default is 4
+    line_cont : str, optional
+        Line continuation character, default is '\'
 
     Returns
     -------
@@ -944,15 +949,16 @@ def line_wrap(text, wrap=80, min_wrap=0, indent=4, line_cont='\\'):
 
     """
     # check if single str
-    is_single = isinstance(text, str)
-    if is_single:
-        text = [text]
+    if isinstance(text, str):
+        text_list = [text]
+    else:
+        text_list = text
     # create the pad for any newline
     pad = ' ' * indent
     # initialize output
-    out = []
+    out: List[str] = []
     # loop through text lines
-    for this_line in text:
+    for this_line in text_list:
         # determine if too long
         while len(this_line) > wrap:
             # find the last whitespace to break on, possibly with a minimum start
@@ -965,8 +971,8 @@ def line_wrap(text, wrap=80, min_wrap=0, indent=4, line_cont='\\'):
             this_line = pad + this_line[space_break+1:]
         # add the final shorter line
         out.append(this_line)
-    if is_single:
-        out = '\n'.join(out)
+    if isinstance(text, str):
+        return '\n'.join(out)
     return out
 
 #%% combine_per_year
@@ -1165,7 +1171,7 @@ def execute_wrapper(command, folder, *, dry_run=False, ignored_codes=None, filen
     return lines
 
 #%% Functions - get_env_var
-def get_env_var(env_key, default=None):
+def get_env_var(env_key: str, default: str = None) -> str:
     r"""
     Return an environment variable assuming is has been set.
 
@@ -1204,7 +1210,7 @@ def get_env_var(env_key, default=None):
     return value
 
 #%% Functions - get_username
-def get_username():
+def get_username() -> str:
     r"""
     Gets the current username based on environment variables.
 

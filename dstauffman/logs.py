@@ -20,7 +20,8 @@ root_logger = logging.getLogger('')
 logger      = logging.getLogger(__name__)
 
 #%% Functions - activate_logging
-def activate_logging(log_level=logging.INFO, filename='', *, file_level=None, log_format=None, file_format=None):
+def activate_logging(log_level: int = logging.INFO, filename: str = '', *, file_level: int = None, \
+                     log_format: str = None, file_format: str = None) -> None:
     r"""
     Set up logging based on a user specified settings file.
 
@@ -85,7 +86,7 @@ def activate_logging(log_level=logging.INFO, filename='', *, file_level=None, lo
     root_logger.addHandler(ch)
 
 #%% Functions - deactivate_logging
-def deactivate_logging():
+def deactivate_logging() -> None:
     r"""
     Tear down logging.
 

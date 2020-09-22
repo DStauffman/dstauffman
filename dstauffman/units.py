@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 import doctest
+from typing import Tuple, Union
 import unittest
 
 try:
@@ -36,7 +37,7 @@ IN2CM = 2.54
 CM2IN = 1/2.54
 
 #%% get_factors
-def get_factors(prefix):
+def get_factors(prefix: Union[str, int, float]) -> Tuple[float, str]:
     r"""
     Get the multiplication factor and unit label for the desired units.
 
@@ -143,7 +144,7 @@ def get_factors(prefix):
     return (mult, label)
 
 #%% Functions - get_time_factor
-def get_time_factor(unit):
+def get_time_factor(unit: str) -> int:
     r"""
     Gets the time factor for the given unit relative to the base SI unit of 'sec'.
 

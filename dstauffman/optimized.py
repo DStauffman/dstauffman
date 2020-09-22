@@ -119,6 +119,7 @@ def issorted_opt(x, descend=False):
     Examples
     --------
     >>> from dstauffman import issorted_opt
+    >>> import numpy as np
     >>> x = np.array([1, 3, 3, 5, 7])
     >>> print(issorted_opt(x))
     True

@@ -59,13 +59,16 @@ def get_np_time_units(date):
 
     """
     # convert the type to a string
-    unit_str = str(date.dtype)
+    if isinstance(date, str):
+        unit_str = date
+    else:
+        unit_str = str(date.dtype)
     # parse for a name and units in brackets
     matches = re.split(r'\[(.*)\]$', unit_str)
     form    = matches[0]
     # do a sanity check and return the result
     assert form in {'datetime64', 'timedelta64'}, f'Only expecting datetime64 or timedelta64, not "{form}".'
-    return matches[1]
+    return None if len(matches) == 1 else matches[1]
 
 #%% Functions - round_datetime
 def round_datetime(dt=None, round_to_sec=60, floor=False):
@@ -286,9 +289,11 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
         if form == 'datetime':
             out = date_zero + datetime.timedelta(seconds=date) if is_num else None # TODO: or np.datetime64('nat')
         elif form == 'numpy':
-            out = np.full(date.shape, np.datetime64('nat', dtype=numpy_form), dtype=numpy_form)
+            out = np.full(date.shape, np.datetime64('nat'), dtype=numpy_form)
             if np.any(is_num):
-                out[is_num] = (np.datetime64(date_zero, dtype=numpy_form) + np.round(date[is_num] * 10**9).astype('timedelta64[ns]')).astype(numpy_form)
+                datetime_units = get_np_time_units(numpy_form)
+                date_zero_np = np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)
+                out[is_num] = (date_zero_np + np.round(date[is_num] * 10**9).astype('timedelta64[ns]')).astype(numpy_form)
         elif form == 'matplotlib':
             out = date.copy()
             if np.any(is_num):

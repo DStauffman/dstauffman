@@ -12,6 +12,7 @@ import datetime
 import doctest
 import os
 import sys
+from typing import List
 import unittest
 
 try:
@@ -29,7 +30,7 @@ from dstauffman.utils        import line_wrap, read_text_file, write_text_file
 from dstauffman.utils_log    import setup_dir
 
 #%% run_docstrings
-def run_docstrings(files, verbose=False):
+def run_docstrings(files: List[str], verbose: bool = False) -> int:
     r"""
     Runs all the docstrings in the given files.
 
@@ -72,7 +73,7 @@ def run_docstrings(files, verbose=False):
     return return_code
 
 #%% run_unittests
-def run_unittests(names, verbose=False):
+def run_unittests(names: str, verbose: bool = False) -> int:
     r"""
     Runs all the unittests with the given names using unittest.
 
@@ -109,11 +110,11 @@ def run_unittests(names, verbose=False):
     verbosity = 10 if verbose else 1
     # run the tests
     result = unittest.TextTestRunner(verbosity=verbosity).run(test_suite)
-    return_code = ReturnCodes.clean if result.wasSuccessful() else ReturnCodes.test_failures
+    return_code: int = ReturnCodes.clean if result.wasSuccessful() else ReturnCodes.test_failures
     return return_code
 
 #%% run_pytests
-def run_pytests(folder):
+def run_pytests(folder: str) -> int:
     r"""
     Runs all the unittests using pytest as the runner instead of unittest.
 
@@ -121,8 +122,6 @@ def run_pytests(folder):
     ----------
     folder : str
         Folder to process for test cases
-    names : str
-        Names of the unit tests to run (discover through unittest library)
 
     Returns
     -------
@@ -161,7 +160,7 @@ def run_pytests(folder):
     return return_code
 
 #%% run_coverage
-def run_coverage(folder, *, names='tests', report=True):
+def run_coverage(folder: str, *, report: bool = True) -> int:
     r"""
     Wraps the pytests with a Code Coverage report.
 
@@ -169,8 +168,6 @@ def run_coverage(folder, *, names='tests', report=True):
     ----------
     folder : str
         Folder to process for test cases
-    names : str, optional
-        Names of the unit tests to run (discover through unittest library)
     report : bool, optional, default is True
         Whether to generate the HTML report
 
@@ -189,7 +186,7 @@ def run_coverage(folder, *, names='tests', report=True):
     # check that coverage tool was imported
     if not _HAVE_COVERAGE:
         print('coverage tool is not available, no report was generated.')
-        return_code = ReturnCodes.no_coverage_tool
+        return_code: int = ReturnCodes.no_coverage_tool
         return return_code
 
     # Get information on the test folder
@@ -203,7 +200,7 @@ def run_coverage(folder, *, names='tests', report=True):
     cov.start()
 
     # Call test code
-    return_code = run_pytests(folder, names=names)
+    return_code = run_pytests(folder)
 
     # Stop coverage tool and save results
     cov.stop()
