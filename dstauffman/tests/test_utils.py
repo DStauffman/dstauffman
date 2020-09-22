@@ -99,6 +99,12 @@ class Test_find_in_range(unittest.TestCase):
         valid = dcs.find_in_range(value, min_=2., max_=4., precision=0.01)
         np.testing.assert_array_equal(valid, exp2)
 
+    def test_2d_array(self):
+        value = np.array([[-1, -2, 0, np.nan], [15, 34.2, np.nan, 85]])
+        exp   = np.array([[ 1,  1, 1,      0], [ 1,    1,      0,  1]], dtype=bool)
+        valid = dcs.find_in_range(value)
+        np.testing.assert_array_equal(valid, exp)
+
 #%% rms
 class Test_rms(unittest.TestCase):
     r"""
@@ -1023,13 +1029,10 @@ class Test_get_env_var(unittest.TestCase):
         key = dcs.get_env_var('Nonexisting_environment_key_name', default='test')
         self.assertEqual(key, 'test')
 
-    @unittest.SkipTest
     def test_not_allowed(self):
-        # TODO: fix this test case
-        dcs._ALLOWED_ENVS = {'user', 'username'}
-        with self.assertRaises(KeyError):
-            dcs.get_env_var('HOME')
-        dcs._ALLOWED_ENVS = None
+        with patch('dstauffman.utils._ALLOWED_ENVS', {'user', 'username'}):
+            with self.assertRaises(KeyError):
+                dcs.get_env_var('HOME')
 
 #%% get_username
 class Test_get_username(unittest.TestCase):
