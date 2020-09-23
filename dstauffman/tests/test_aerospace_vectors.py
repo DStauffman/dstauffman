@@ -139,9 +139,9 @@ class Test_aerospace_vec_angle(unittest.TestCase):
     def test_tuple(self):
         tuple1 = (self.vec1, self.vec2, self.vec3, self.vec1)
         tuple2 = (self.vec2, self.vec1, self.vec1, self.vec1)
-        exp1  = np.array((0., self.exp1, self.exp2, 0.))
-        exp2  = np.array((self.exp1, self.exp1, self.exp2, 0.))
-        angle = space.vec_angle(tuple1, self.vec1)
+        exp1   = np.array((0., self.exp1, self.exp2, 0.))
+        exp2   = np.array((self.exp1, self.exp1, self.exp2, 0.))
+        angle  = space.vec_angle(tuple1, self.vec1)
         np.testing.assert_almost_equal(angle, exp1, 14)
         angle = space.vec_angle(self.vec1, tuple1)
         np.testing.assert_almost_equal(angle, exp1, 14)
@@ -151,7 +151,9 @@ class Test_aerospace_vec_angle(unittest.TestCase):
         np.testing.assert_almost_equal(angle, exp2, 12)
 
     def test_not_normalized(self):
-        angle = space.vec_angle(np.array([0, 2., 0]), np.array([0., -5., 5.]), normalized=False)
+        angle = space.vec_angle(np.array([0, 2., 0]), np.array([0., -5., 5.]), normalized=False, use_cross=True)
+        self.assertAlmostEqual(angle, 3*np.pi/4, 14)
+        angle = space.vec_angle(np.array([0, 2., 0]), np.array([0., -5., 5.]), normalized=False, use_cross=False)
         self.assertAlmostEqual(angle, 3*np.pi/4, 14)
 
     def test_4d_vector(self):

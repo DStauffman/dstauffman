@@ -19,10 +19,10 @@ from dstauffman import get_factors, intersect, is_datetime, LogLevel, rms
 from dstauffman.aerospace import Kf, KfInnov, quat_angle_diff
 
 from dstauffman.plotting.generic  import make_difference_plot, make_categories_plot
-from dstauffman.plotting.plotting import Opts
+from dstauffman.plotting.plotting import Opts, setup_plots
 from dstauffman.plotting.support  import ColorMap, disp_xlimits, get_color_lists, get_rms_indices, \
-    plot_second_units_wrapper, plot_vert_lines, setup_plots, \
-    show_zero_ylim, zoom_ylim
+                                         plot_second_units_wrapper, plot_vert_lines, \
+                                         show_zero_ylim, zoom_ylim
 
 #%% Globals
 logger = logging.getLogger(__name__)

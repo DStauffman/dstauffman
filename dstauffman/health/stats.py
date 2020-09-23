@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 import doctest
+from typing import Dict, Tuple
 import unittest
 
 import numpy as np
@@ -265,7 +266,7 @@ ar2mp = annual_rate_to_monthly_probability
 mp2ar = monthly_probability_to_annual_rate
 
 #%% Functions - combine_sets
-def combine_sets(n1, u1, s1, n2, u2, s2):
+def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -> Tuple[int, float, float]:
     r"""
     Combine the mean and standard deviations for two non-overlapping sets of data.
 
@@ -277,13 +278,13 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
 
     Parameters
     ----------
-    n1 : float
+    n1 : int
         number of points in data set 1
     u1 : float
         mean of data set 1
     s1 : float
         standard deviation of data set 1
-    n2 : float
+    n2 : int
         number of points in data set 2
     u2 : float
         mean of data set 2
@@ -292,11 +293,11 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
 
     Returns
     -------
-    n  : float,
+    n  : int
         number of points in the combined data set
-    u  : float,
+    u  : float
         mean of the combined data set
-    s  : float,
+    s  : float
         standard deviation of the combined data set
 
     See Also
@@ -334,14 +335,14 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
     # assertions
     assert n1 >= 0
     assert n2 >= 0
-    assert s1 >= 0
-    assert s2 >= 0
+    assert s1 >= 0.
+    assert s2 >= 0.
     # combine total number of samples
     n = n1 + n2
     # check for zero case
     if n == 0:
-        u = 0
-        s = 0
+        u = 0.
+        s = 0.
         return (n, u, s)
     # calculate the combined mean
     u = 1/n * (n1*u1 + n2*u2)
@@ -360,7 +361,7 @@ def combine_sets(n1, u1, s1, n2, u2, s2):
     return (n, u, s)
 
 #%% Functions - bounded_normal_draw
-def bounded_normal_draw(num, values, field, prng):
+def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np.random.RandomState) -> np.ndarray:
     r"""
     Create a normalized distribution with the given mean and standard deviations.
 

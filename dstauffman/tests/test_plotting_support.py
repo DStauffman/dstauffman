@@ -53,43 +53,6 @@ class Test_plotting__HoverButton(unittest.TestCase):
     """
     pass # TODO: write this
 
-#%% plotting.Plotter
-class Test_plotting_Plotter(unittest.TestCase):
-    r"""
-    Tests the plotting.Plotter class with the following cases:
-        Get level
-        Set level
-        Bad level (raises ValueError)
-        printing
-    """
-    def setUp(self):
-        self.flag    = True
-        self.plotter = plot.Plotter(self.flag)
-        self.print   = 'Plotter(True)'
-
-    def test_get_plotter(self):
-        flag = self.plotter.get_plotter()
-        self.assertTrue(flag)
-
-    def test_set_plotter(self):
-        flag = self.plotter.get_plotter()
-        self.assertTrue(flag)
-        self.plotter.set_plotter(False)
-        self.assertFalse(plotter.get_plotter())
-
-    def test_printing(self):
-        with capture_output() as out:
-            print(self.plotter)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, self.print)
-
-    def test_no_show(self):
-        self.plotter = plot.Plotter()
-
-    def tearDown(self):
-        self.plotter.set_plotter(False)
-
 #%% plotting.TruthPlotter
 class Test_plotting_TruthPlotter(unittest.TestCase):
     r"""
@@ -736,76 +699,6 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
         self.assertLess(old_ymin, new_ymin)
         self.assertAlmostEqual(new_ymin, self.t_start**2)
         self.assertAlmostEqual(new_ymax, self.t_final**2, places=4)
-
-    def tearDown(self):
-        plt.close(self.fig)
-
-#%% plotting.setup_plots
-class Test_plotting_setup_plots(unittest.TestCase):
-    r"""
-    Tests the plotting.setup_plots function with the following cases:
-        Prepend a title
-        Don't prepend a title
-        Don't show the plot
-        Multiple figures
-        Save the plot
-        Show the plot link
-    """
-    def setUp(self):
-        self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
-        ax = self.fig.add_subplot(111)
-        x = np.arange(0, 10, 0.1)
-        y = np.sin(x)
-        ax.plot(x, y)
-        ax.set_title('X vs Y')
-        ax.set_xlabel('time [years]')
-        ax.set_ylabel('value [radians]')
-        self.opts = plot.Opts()
-        self.opts.case_name = 'Testing'
-        self.opts.show_plot = True
-        self.opts.save_plot = False
-        self.opts.save_path = get_tests_dir()
-
-    def test_title(self):
-        plot.setup_plots(self.fig, self.opts)
-
-    def test_no_title(self):
-        self.opts.case_name = ''
-        plot.setup_plots(self.fig, self.opts)
-
-    def test_not_showing_plot(self):
-        self.opts.show_plot = False
-        plot.setup_plots(self.fig, self.opts)
-
-    def test_multiple_figs(self):
-        fig_list = [self.fig]
-        (new_fig, ax) = plt.subplots()
-        ax.plot(0, 0)
-        fig_list.append(new_fig)
-        plot.setup_plots(fig_list, self.opts)
-        plt.close(new_fig)
-
-    def test_saving_plot(self):
-        this_filename = os.path.join(get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
-        self.opts.save_plot = True
-        plot.setup_plots(self.fig, self.opts)
-        # remove file
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(this_filename)
-
-    def test_show_link(self):
-        this_filename = os.path.join(get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
-        self.opts.save_plot = True
-        self.opts.show_link = True
-        with capture_output() as out:
-            plot.setup_plots(self.fig, self.opts)
-        output = out.getvalue().strip()
-        out.close()
-        # remove file
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(this_filename)
-        self.assertTrue(output.startswith('Plots saved to <a href="'))
 
     def tearDown(self):
         plt.close(self.fig)

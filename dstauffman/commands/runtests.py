@@ -12,6 +12,7 @@ import doctest
 import os
 import platform
 import subprocess
+from typing import List
 import sys
 import unittest
 
@@ -19,7 +20,7 @@ from dstauffman import get_root_dir, get_tests_dir, list_python_files, run_cover
                        run_docstrings, run_pytests, run_unittests
 
 #%% Functions - parse_tests
-def parse_tests(input_args):
+def parse_tests(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for the tests command.
 
@@ -60,7 +61,7 @@ def parse_tests(input_args):
     return args
 
 #%% Functions - execute_tests
-def execute_tests(args):
+def execute_tests(args: argparse.Namespace) -> int:
     r"""
     Executes the tests commands.
 
@@ -117,7 +118,7 @@ def execute_tests(args):
     return return_code
 
 #%% Functions - parse_coverage
-def parse_coverage(input_args):
+def parse_coverage(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for the coverage command.
 
@@ -152,7 +153,7 @@ def parse_coverage(input_args):
     return args
 
 #%% Functions - execute_coverage
-def execute_coverage(args):
+def execute_coverage(args: argparse.Namespace) -> int:
     r"""
     Executes the coverage commands.
 
@@ -191,11 +192,11 @@ def execute_coverage(args):
     if report:
         filename = os.path.join(get_tests_dir(), 'coverage_html_report', 'index.html')
         if platform.system() == 'Darwin':
-            subprocess.call('open', filename)
+            subprocess.call(['open', filename])
         elif platform.system() == 'Windows':
             os.startfile(filename)
         else:
-            subprocess.call('xdg-open', filename)
+            subprocess.call(['xdg-open', filename])
     return return_code
 
 #%% Unit test

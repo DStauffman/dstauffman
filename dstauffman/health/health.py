@@ -13,8 +13,6 @@ from collections import OrderedDict
 
 import numpy as np
 
-from dstauffman.health.latex import bins_to_str_ranges
-
 #%% Functions - dist_enum_and_mons
 def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
     r"""

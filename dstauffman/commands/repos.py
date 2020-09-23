@@ -10,12 +10,13 @@ Notes
 import argparse
 import doctest
 import os
+from typing import Iterable, List, Optional
 import unittest
 
 from dstauffman import find_repo_issues, make_python_init, ReturnCodes
 
 #%% Functions - parse_enforce
-def parse_enforce(input_args):
+def parse_enforce(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for enforce command.
 
@@ -59,7 +60,7 @@ def parse_enforce(input_args):
     return args
 
 #%% Functions - execute_enforce
-def execute_enforce(args):
+def execute_enforce(args: argparse.Namespace) -> int:
     r"""
     Executes the enforce command.
 
@@ -92,12 +93,14 @@ def execute_enforce(args):
     trailing   = args.trailing
     exclusions = args.skip
     show_execute = args.execute
+    check_eol: Optional[str]
     if args.windows:
         check_eol = '\r\n'
     elif args.unix:
         check_eol = '\n'
     else:
         check_eol = None
+    extensions: Optional[Iterable]
     if args.extensions is None:
         extensions = frozenset(def_extensions)
     elif len(args.extensions) == 1 and args.extensions[0] == '*':
@@ -114,7 +117,7 @@ def execute_enforce(args):
     return return_code
 
 #%% Functions - parse_make_init
-def parse_make_init(input_args):
+def parse_make_init(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for make_init command.
 
@@ -151,7 +154,7 @@ def parse_make_init(input_args):
     return args
 
 #%% Functions - execute_make_init
-def execute_make_init(args):
+def execute_make_init(args: argparse.Namespace) -> int:
     r"""
     Executes the make_init command.
 
@@ -183,7 +186,7 @@ def execute_make_init(args):
     if dry_run:
         cmd = f'make_python_init(r"{folder}", lineup={lineup}, wrap={wrap}, filename=r"{filename}")'
         print(f'Would execute "{cmd}"')
-        return
+        return ReturnCodes.clean
 
     output      = make_python_init(folder, lineup=lineup, wrap=wrap, filename=filename)
     return_code = ReturnCodes.clean if output else ReturnCodes.bad_command

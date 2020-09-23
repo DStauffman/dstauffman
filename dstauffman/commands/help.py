@@ -10,12 +10,13 @@ Notes
 import argparse
 import doctest
 import os
+from typing import List
 import unittest
 
 from dstauffman import get_root_dir, ReturnCodes
 
 #%% Functions - print_help
-def print_help():
+def print_help() -> int:
     r"""
     Prints the contents of the README.rst file.
 
@@ -40,7 +41,7 @@ def print_help():
     return ReturnCodes.clean
 
 #%% Functions - parse_help
-def parse_help(input_args):
+def parse_help(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for help command.
 
@@ -69,7 +70,7 @@ def parse_help(input_args):
     return args
 
 #%% Functions - execute_help
-def execute_help(args):
+def execute_help(args: argparse.Namespace) -> int:
     r"""
     Executes the help command.
 

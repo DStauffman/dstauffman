@@ -19,6 +19,7 @@ import multiprocessing
 import os
 import sys
 import time
+from typing import Any, ClassVar, Callable, List, Tuple
 import unittest
 
 import tblib.pickling_support
@@ -78,19 +79,19 @@ class OptiOpts(Frozen):
         self.final_func      = None
 
         # less common optimization settings
-        self.slope_method    = 'one_sided' # from {'one_sided', 'two_sided'}
-        self.is_max_like     = False
-        self.search_method   = 'trust_region' # from {'trust_region', 'levenberg_marquardt'}
-        self.max_iters       = 10
-        self.tol_cosmax_grad = 1e-4
-        self.tol_delta_step  = 1e-20
-        self.tol_delta_cost  = 1e-20
-        self.step_limit      = 5
-        self.x_bias          = 0.8
-        self.grow_radius     = 2
-        self.shrink_radius   = 0.5
-        self.trust_radius    = 1.0
-        self.max_cores       = None # set to a number to parallelize, use -1 for all
+        self.slope_method: str      = 'one_sided' # from {'one_sided', 'two_sided'}
+        self.is_max_like: bool      = False
+        self.search_method: str     = 'trust_region' # from {'trust_region', 'levenberg_marquardt'}
+        self.max_iters: int         = 10
+        self.tol_cosmax_grad: float = 1e-4
+        self.tol_delta_step: float  = 1e-20
+        self.tol_delta_cost: float  = 1e-20
+        self.step_limit: int        = 5
+        self.x_bias: float          = 0.8
+        self.grow_radius: float     = 2.
+        self.shrink_radius: float   = 0.5
+        self.trust_radius: float    = 1.0
+        self.max_cores: int         = None # set to a number to parallelize, use -1 for all
 
     def __eq__(self, other):
         r"""Check for equality based on the values of the fields."""
@@ -146,12 +147,12 @@ class OptiParam(Frozen):
 
     """
     def __init__(self, name, *, best=np.nan, min_=-np.inf, max_=np.inf, minstep=1e-4, typical=1.):
-        self.name = name
-        self.best = best
-        self.min_ = min_
-        self.max_ = max_
-        self.minstep = minstep
-        self.typical = typical
+        self.name: str = name
+        self.best: float = best
+        self.min_: float = min_
+        self.max_: float = max_
+        self.minstep: float = minstep
+        self.typical: float = typical
 
     def __eq__(self, other):
         r"""Check for equality between two OptiParam instances."""
@@ -168,7 +169,7 @@ class OptiParam(Frozen):
         return True
 
     @staticmethod
-    def get_array(opti_param, type_='best'):
+    def get_array(opti_param: List['OptiParam'], type_: str = 'best') -> np.ndarray:
         r"""
         Get a numpy vector of all the optimization parameters for the desired type.
 
@@ -203,7 +204,7 @@ class OptiParam(Frozen):
         return out
 
     @staticmethod
-    def get_names(opti_param):
+    def get_names(opti_param: List['OptiParam']) -> List[str]:
         r"""
         Get the names of the optimization parameters as a list.
 
@@ -233,6 +234,9 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     >>> bpe_results = BpeResults()
 
     """
+    load: ClassVar[Callable[[str], 'BpeResults']]
+    save: Callable[['BpeResults', str], None]
+
     def __init__(self):
         self.param_names  = None
         self.begin_params = None
@@ -332,13 +336,16 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
       Best Params: None
 
     """
+    load: ClassVar[Callable[[str], 'CurrentResults']]
+    save: Callable[['CurrentResults', str], None]
+
     def __init__(self):
         self.trust_rad = None
         self.params    = None
         self.innovs    = None
         self.cost      = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         r"""Print a useful summary of results."""
         text = [' Current Results:']
         text.append('  Trust Radius: {}'.format(self.trust_rad))
@@ -347,7 +354,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
         return '\n'.join(text)
 
 #%% _print_divider
-def _print_divider(new_line=True, level=LogLevel.L5):
+def _print_divider(new_line: bool = True, level: int = LogLevel.L5) -> None:
     r"""
     Print some characters to the std out to break apart the different stpes within the model.
 
@@ -1050,7 +1057,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     bpe_results.covariance   = covariance
 
 #%% validate_opti_opts
-def validate_opti_opts(opti_opts):
+def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     r"""
     Validate the optimization options.
 
@@ -1098,7 +1105,7 @@ def validate_opti_opts(opti_opts):
     return True
 
 #%% run_bpe
-def run_bpe(opti_opts, log_level=LogLevel.L5):
+def run_bpe(opti_opts: OptiOpts, log_level: int = LogLevel.L5) -> Tuple[BpeResults, Any]:
     r"""
     Run the batch parameter estimator with the given model optimization options.
 

@@ -10,8 +10,9 @@ Notes
 
 #%% Imports
 import doctest
-import unittest
 from enum import Enum, EnumMeta
+from typing import ClassVar
+import unittest
 
 #%% Support functions
 def _is_dunder(name):
@@ -108,12 +109,12 @@ class ReturnCodes(IntEnumPlus):
     ReturnCodes.clean: 0
 
     """
-    clean: int            = 0 # Clean exit
-    bad_command: int      = 1 # Unexpected command
-    bad_folder: int       = 2 # Folder to execute a command in doesn't exist
-    bad_help_file: int    = 3 # help file doesn't exist
-    test_failures: int    = 4 # A test ran to completion, but failed its criteria
-    no_coverage_tool: int = 5 # Coverage tool is not installed
+    clean: ClassVar[int]            = 0 # Clean exit
+    bad_command: ClassVar[int]      = 1 # Unexpected command
+    bad_folder: ClassVar[int]       = 2 # Folder to execute a command in doesn't exist
+    bad_help_file: ClassVar[int]    = 3 # help file doesn't exist
+    test_failures: ClassVar[int]    = 4 # A test ran to completion, but failed its criteria
+    no_coverage_tool: ClassVar[int] = 5 # Coverage tool is not installed
 
 #%% Enums - LogLevel
 class LogLevel(IntEnumPlus):
@@ -143,20 +144,20 @@ class LogLevel(IntEnumPlus):
     LogLevel.L5: 20
 
     """
-    L0: int  = 35
-    L1: int  = 30
-    L2: int  = 28
-    L3: int  = 26
-    L4: int  = 24
-    L5: int  = 20
-    L6: int  = 18
-    L7: int  = 16
-    L8: int  = 14
-    L9: int  = 12
-    L10: int = 10
-    L11: int =  9
-    L12: int =  8
-    L20: int =  0
+    L0: ClassVar[int]  = 35
+    L1: ClassVar[int]  = 30
+    L2: ClassVar[int]  = 28
+    L3: ClassVar[int]  = 26
+    L4: ClassVar[int]  = 24
+    L5: ClassVar[int]  = 20
+    L6: ClassVar[int]  = 18
+    L7: ClassVar[int]  = 16
+    L8: ClassVar[int]  = 14
+    L9: ClassVar[int]  = 12
+    L10: ClassVar[int] = 10
+    L11: ClassVar[int] =  9
+    L12: ClassVar[int] =  8
+    L20: ClassVar[int] =  0
 
 #%% Unit test
 if __name__ == '__main__':

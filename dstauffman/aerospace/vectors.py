@@ -157,12 +157,15 @@ def vec_angle(vec1, vec2, use_cross=True, normalized=True):
     if not normalized:
         vec1 = unit(vec1)
         vec2 = unit(vec2)
-    # calcule the result using dot products
+    # calculate the result using dot products
     # Note: using sum and multiply instead of dot for 2D case
     dot_prod = np.multiply(vec1.T, np.conj(vec2).T).T
     dot_result = np.arccos(np.sum(dot_prod, axis=0))
     if not use_cross:
         return dot_result
+    # if desired, use cross product result, which is more accurate for small differences, but has
+    # an ambiguity for angles greater than pi/2 (90 deg).  Use the dot product result to resolve
+    # the ambiguity.
     cross_prod = np.cross(vec1.T, vec2.T).T
     cross_result = np.arcsin(np.sqrt(np.sum(cross_prod ** 2, axis=0)))
     return np.where(dot_result > np.pi/2, np.pi - cross_result, cross_result)

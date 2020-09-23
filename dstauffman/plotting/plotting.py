@@ -10,6 +10,7 @@ Notes
 import doctest
 import logging
 import os
+from typing import ClassVar, List
 import unittest
 
 import matplotlib.pyplot as plt
@@ -20,7 +21,8 @@ from matplotlib.ticker import StrMethodFormatter
 from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_factors, LogLevel
 
 from dstauffman.plotting.generic import make_time_plot
-from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, ignore_plot_data, setup_plots
+from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, figmenu, get_classification, \
+                                        ignore_plot_data, plot_classification, storefig, titleprefix
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -86,31 +88,31 @@ class Opts(Frozen):
             .names     : list of str
                 Names of the data structures to be plotted
         """
-        self.case_name = ''
-        self.date_zero = None
-        self.save_plot = False
-        self.save_path = os.getcwd()
-        self.show_plot = True
-        self.show_link = False
-        self.plot_type = 'png'
-        self.sub_plots = True
-        self.sing_line = False
+        self.case_name: str   = ''
+        self.date_zero = None # TODO: type this as (6,) ndarray or datetime
+        self.save_plot: bool  = False
+        self.save_path: str   = os.getcwd()
+        self.show_plot: bool  = True
+        self.show_link: bool  = False
+        self.plot_type: str   = 'png'
+        self.sub_plots: bool  = True
+        self.sing_line: bool  = False
         self.disp_xmin = -np.inf
         self.disp_xmax =  np.inf
         self.rms_xmin  = -np.inf
         self.rms_xmax  =  np.inf
-        self.show_rms  = True
-        self.use_mean  = False
-        self.show_zero = False
-        self.quat_comp = True
-        self.show_xtra = True
-        self.time_base = 'sec'
-        self.time_unit = 'sec'
-        self.vert_fact = 'unity'
+        self.show_rms: bool   = True
+        self.use_mean: bool   = False
+        self.show_zero: bool  = False
+        self.quat_comp: bool  = True
+        self.show_xtra: bool  = True
+        self.time_base: str   = 'sec'
+        self.time_unit: str   = 'sec'
+        self.vert_fact: str   = 'unity'
         self.colormap  = None
-        self.leg_spot  = 'best'
-        self.classify  = ''
-        self.names     = list()
+        self.leg_spot: str    = 'best'
+        self.classify: str    = ''
+        self.names: List[str] = list()
         for arg in args:
             if arg is None:
                 continue
@@ -138,7 +140,7 @@ class Opts(Frozen):
         new = type(self)(self)
         return new
 
-    def get_names(self, ix):
+    def get_names(self, ix: int) -> str:
         r"""Get the specified name from the list."""
         if hasattr(self, 'names') and len(self.names) >= ix+1:
             name = self.names[ix]
@@ -146,7 +148,7 @@ class Opts(Frozen):
             name = ''
         return name
 
-    def get_date_zero_str(self):
+    def get_date_zero_str(self) -> str:
         r"""
         Gets a string representation of date_zero, typically used to print on an X axis.
 
@@ -166,7 +168,7 @@ class Opts(Frozen):
 
         """
         TIMESTR_FORMAT = '%d-%b-%Y %H:%M:%S'
-        start_date = '  t(0) = ' + self.date_zero.strftime(TIMESTR_FORMAT) + ' Z' if self.date_zero is not None else ''
+        start_date: str = '  t(0) = ' + self.date_zero.strftime(TIMESTR_FORMAT) + ' Z' if self.date_zero is not None else ''
         return start_date
 
     def get_time_limits(self):
@@ -195,6 +197,35 @@ class Opts(Frozen):
         self.rms_xmin  = convert_date(self.rms_xmin,  form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form)
         self.rms_xmax  = convert_date(self.rms_xmax,  form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form)
         return self
+
+#%% Classes - Plotter
+class Plotter(Frozen):
+    r"""
+    Class that allows customization of when to show or not show plots.
+
+    For use with testing plotting functions.
+    """
+    # class attribute for plotting flag
+    show_plot: ClassVar[bool] = True
+
+    def __init__(self, show: bool = None):
+        r"""Create options instance with ability to override defaults."""
+        if show is not None:
+            type(self).show_plot = bool(show)
+
+    def __str__(self) -> str:
+        r"""Print the current plotting flag."""
+        return '{}({})'.format(type(self).__name__, self.show_plot)
+
+    @classmethod
+    def get_plotter(cls) -> bool:
+        r"""Get the plotting flag."""
+        return cls.show_plot
+
+    @classmethod
+    def set_plotter(cls, show: bool) -> None:
+        r"""Set the plotting flag."""
+        cls.show_plot = bool(show)
 
 #%% Functions - plot_time_history
 def plot_time_history(description, time, data, opts=None, *, ignore_empties=False, **kwargs):
@@ -558,6 +589,85 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     # Setup plots
     setup_plots(fig, opts)
     return fig
+
+#%% Functions - setup_plots
+def setup_plots(figs, opts):
+    r"""
+    Combine common plot operations into one easy command.
+
+    Parameters
+    ----------
+    figs : array_like
+        List of figures
+    opts : class Opts
+        Optional plotting controls
+    plot_type : optional, {'time', 'time_no_yscale', 'dist', 'dist_no_yscale'}
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2015.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import setup_plots, Opts
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> fig = plt.figure()
+    >>> fig.canvas.set_window_title('Figure Title')
+    >>> ax = fig.add_subplot(111)
+    >>> x = np.arange(0, 10, 0.1)
+    >>> y = np.sin(x)
+    >>> _ = ax.plot(x, y)
+    >>> _ = ax.set_title('X vs Y')
+    >>> _ = ax.set_xlabel('time [years]')
+    >>> _ = ax.set_ylabel('value [radians]')
+    >>> plt.show(block=False) # doctest: +SKIP
+    >>> opts = Opts()
+    >>> opts.case_name = 'Testing'
+    >>> opts.show_plot = True
+    >>> opts.save_plot = False
+    >>> setup_plots(fig, opts)
+
+    Close plot
+    >>> plt.close(fig)
+
+    """
+    # ensure figs is a list
+    if not isinstance(figs, list):
+        figs = [figs]
+
+    # prepend a title
+    if opts.case_name:
+        titleprefix(figs, opts.case_name)
+
+    # label plot classification
+    (classification, caveat) = get_classification(opts.classify)
+    if classification:
+        for fig in figs:
+            ax = fig.gca()
+            plot_classification(ax, classification, caveat=caveat, location='figure')
+
+    # pack the figures
+    bottom = 0.03 if classification else 0.0
+    for fig in figs:
+        fig.tight_layout(rect=(0., bottom, 1., 0.97), h_pad=1.5, w_pad=1.5)
+
+    # things to do if displaying the plots
+    if opts.show_plot and Plotter.show_plot: # pragma: no cover
+        # add a custom toolbar
+        figmenu(figs)
+        # force drawing right away
+        for fig in figs:
+            fig.canvas.draw()
+            fig.canvas.flush_events()
+        # show the plot
+        plt.show(block=False)
+
+    # optionally save the plot
+    if opts.save_plot:
+        storefig(figs, opts.save_path, opts.plot_type)
+        if opts.show_link & len(figs) > 0:
+            print(r'Plots saved to <a href="{}">{}</a>'.format(opts.save_path, opts.save_path))
 
 #%% Unit test
 if __name__ == '__main__':

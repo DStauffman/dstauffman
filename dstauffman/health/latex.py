@@ -7,6 +7,7 @@ Notes
 """
 #%% Imports
 import doctest
+from typing import List, Union
 import unittest
 
 import numpy as np
@@ -15,7 +16,8 @@ from dstauffman import MONTHS_PER_YEAR
 from dstauffman.health.stats import prob_to_rate
 
 #%% Functions - make_preamble
-def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short_cap=None, numbered=True):
+def make_preamble(caption: str, label: str, cols: str, size: str = r'\small', *, \
+        use_mini: bool = False, short_cap: str = None, numbered: bool = True) -> List[str]:
     r"""
     Write the table header and preamble.
 
@@ -72,7 +74,7 @@ def make_preamble(caption, label, cols, size=r'\small', *, use_mini=False, short
     return out
 
 #%% Functions - make_conclusion
-def make_conclusion(*, use_mini=False):
+def make_conclusion(*, use_mini: bool = False) -> List[str]:
     r"""
     Write closing tags at the end of the table.
 
@@ -159,14 +161,15 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
     return out
 
 #%% Functions - latex_str
-def latex_str(value, digits=-1, fixed=False, cmp2ar=False, capped=1073741823): # 1073741823 = 2**30-1
+def latex_str(value: Union[int, float, str], digits: int = -1, fixed: bool = False, \
+              cmp2ar: bool = False, capped: int = 1073741823) -> str:  # 1073741823 = 2**30-1
     r"""
     Formats a given value for display in a LaTeX document.
 
     Parameters
     ----------
-    value : int or float
-        Value
+    value : int or float (or str)
+        Value, strings are passed through with underscores escaped
     digits : int, optional
         Number of digits to use in string
     fixed : bool, optional, default is False
@@ -198,6 +201,9 @@ def latex_str(value, digits=-1, fixed=False, cmp2ar=False, capped=1073741823): #
     # check for string case, and if so, just do replacements
     if isinstance(value, str):
         return value.replace('_', r'\_')
+    # Let mypy know that this can no longer be a string
+    # TODO: this should work, but it still needs the ignore statement below
+    assert isinstance(value, (int, float)), f'Unexpected type for value of "{type(value)}".'
     # determine digit method
     letter = 'f' if fixed else 'g'
     # build the formatter
@@ -207,7 +213,7 @@ def latex_str(value, digits=-1, fixed=False, cmp2ar=False, capped=1073741823): #
         value = prob_to_rate(value, time=1/MONTHS_PER_YEAR)
     if np.isnan(value):
         value_str = 'NaN'
-    elif np.isinf(value) or value > capped:
+    elif np.isinf(value) or value > capped:  # type: ignore
         value_str = r'$\infty$'
     else:
         # format the string

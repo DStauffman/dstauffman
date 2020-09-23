@@ -15,9 +15,12 @@ import os
 import platform
 import re
 import sys
+from typing import Dict, List, Optional, Tuple, Union
 import unittest
 import warnings
 
+from matplotlib.axes import Axes
+from matplotlib.figure import Figure
 import matplotlib.cm as cmx
 import matplotlib.colors as colors
 import matplotlib.pyplot as plt
@@ -38,10 +41,12 @@ from dstauffman import Frozen, get_images_dir, is_datetime
 
 #%% Constants
 # Default colormap to use on certain plots
-DEFAULT_COLORMAP = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
+DEFAULT_COLORMAP: str = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
 
 # Whether to include a classification on any generated plots
-DEFAULT_CLASSIFICATION = ''
+DEFAULT_CLASSIFICATION: str = ''
+
+_FigOrListFig = Union[Figure, List[Figure]]
 
 #%% Set Matplotlib global settings
 plt.rcParams['figure.dpi']     = 160 # 160 for 4K monitors, 100 otherwise
@@ -71,35 +76,6 @@ class _HoverButton(QPushButton):
     def leaveEvent(self, event):
         # Delete border after hover
         self.setStyleSheet('border: 0px;') # pragma: no cover
-
-#%% Classes - Plotter
-class Plotter(Frozen):
-    r"""
-    Class that allows customization of when to show or not show plots.
-
-    For use with testing plotting functions.
-    """
-    # class attribute for plotting flag
-    show_plot = True
-
-    def __init__(self, show=None):
-        r"""Create options instance with ability to override defaults."""
-        if show is not None:
-            type(self).show_plot = bool(show)
-
-    def __str__(self):
-        r"""Print the current plotting flag."""
-        return '{}({})'.format(type(self).__name__, self.show_plot)
-
-    @classmethod
-    def get_plotter(cls):
-        r"""Get the plotting flag."""
-        return cls.show_plot
-
-    @classmethod
-    def set_plotter(cls, show):
-        r"""Set the plotting flag."""
-        cls.show_plot = bool(show)
 
 #%% Classes - TruthPlotter
 class TruthPlotter(Frozen):
@@ -148,7 +124,7 @@ class TruthPlotter(Frozen):
                 raise ValueError('Bad shape for data of {}.'.format(data.shape))
 
     @property
-    def is_null(self):
+    def is_null(self) -> bool:
         r"""Determine if there is no truth to plot, and thus nothing is done."""
         return self.data is None and self.data_lo is None and self.data_hi is None
 
@@ -163,7 +139,7 @@ class TruthPlotter(Frozen):
             return scale * data[:, ix]
 
     def plot_truth(self, ax, scale=1, ix=None, *, hold_xlim=True, hold_ylim=False):
-        r"""Add the information in the TruthPlotter instance to the given axis, with the optional scale."""
+        r"""Add the information in the TruthPlotter instance to the given axes, with the optional scale."""
         # check for null case
         if self.is_null:
             return
@@ -357,7 +333,7 @@ class ColorMap(Frozen):
         return self.smap
 
     def set_colors(self, ax):
-        r"""Set the colors for the given axis based on internal instance information."""
+        r"""Set the colors for the given axes based on internal instance information."""
         if self.num_colors is None:
             raise ValueError("You can't call ColorMap.set_colors unless it was given a num_colors input.")
         try:
@@ -367,7 +343,7 @@ class ColorMap(Frozen):
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
 
 #%% Functions - close_all
-def close_all(figs=None):
+def close_all(figs: _FigOrListFig = None) -> None:
     r"""
     Close all the open figures, or if a list is specified, then close all of them.
 
@@ -397,7 +373,7 @@ def close_all(figs=None):
     gc.collect()
 
 #%% Functions - get_color_lists
-def get_color_lists():
+def get_color_lists() -> Dict[str, colors.ListedColormap]:
     r"""
     Gets different color lists to use for plotting.
 
@@ -517,7 +493,7 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
     return new_color
 
 #%% Functions - resolve_name
-def resolve_name(name, force_win=None, rep_token='_', strip_classification=True):
+def resolve_name(name: str, force_win: bool = None, rep_token: str = '_', strip_classification: bool = True) -> str:
     r"""
     Resolves the given name to something that can be saved on the current OS.
 
@@ -570,7 +546,7 @@ def resolve_name(name, force_win=None, rep_token='_', strip_classification=True)
     return new_name
 
 #%% Functions - storefig
-def storefig(fig, folder=None, plot_type='png'):
+def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[str]] = 'png') -> None:
     r"""
     Store the specified figures in the specified folder and with the specified plot type(s).
 
@@ -591,7 +567,7 @@ def storefig(fig, folder=None, plot_type='png'):
     Notes
     -----
     #.  Uses the figure.canvas.get_window_title property to determine the figure name.  If that is
-        not set or default ('image'), then it tries the figure suptitle or first axis title.
+        not set or default ('image'), then it tries the figure suptitle or first axes title.
 
     See Also
     --------
@@ -666,7 +642,7 @@ def storefig(fig, folder=None, plot_type='png'):
         warnings.warn('No window titles found, using the plot title instead (usually because there is no display).')
 
 #%% Functions - titleprefix
-def titleprefix(fig, prefix=''):
+def titleprefix(fig: _FigOrListFig, prefix: str = '') -> None:
     r"""
     Prepend a text string to all the titles on existing figures.
 
@@ -720,7 +696,7 @@ def titleprefix(fig, prefix=''):
         figs = [fig]
     # loop through figures
     for this_fig in figs:
-        # get axis list and loop through them
+        # get axes list and loop through them
         for this_axis in this_fig.axes:
             # get title for this axis
             this_title = this_axis.get_title()
@@ -785,9 +761,9 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
     # loop through items and collect axes
     ax = []
     for this in fig_or_axis:
-        if isinstance(this, plt.Figure):
+        if isinstance(this, Figure):
             ax.extend(this.axes)
-        elif isinstance(this, plt.Axes):
+        elif isinstance(this, Axes):
             ax.append(this)
         else:
             raise ValueError('Unexpected item that is neither a figure nor axes.')
@@ -825,8 +801,8 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-np.inf, t_final=np.inf, chan
 
     Parameters
     ----------
-    ax : class matplotlib.axis.Axis
-        Figure axis
+    ax : class matplotlib.axes.Axes
+        Figure axes
     time : (N, ) ndarray
         Time history
     data : (N, ) or (N, M) ndarray
@@ -836,7 +812,7 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-np.inf, t_final=np.inf, chan
     t_final : float
         Final time to zoom data to
     channel : int, optional
-        Axis within 2D data to look at
+        Column within 2D data to look at
     pad : int
         Amount of pad, as a percentage of delta range, to show around the plot bounds
 
@@ -923,87 +899,8 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-np.inf, t_final=np.inf, chan
     if this_ymax < old_ymax:
         ax.set_ylim(top=this_ymax)
 
-#%% Functions - setup_plots
-def setup_plots(figs, opts):
-    r"""
-    Combine common plot operations into one easy command.
-
-    Parameters
-    ----------
-    figs : array_like
-        List of figures
-    opts : class Opts
-        Optional plotting controls
-    plot_type : optional, {'time', 'time_no_yscale', 'dist', 'dist_no_yscale'}
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in May 2015.
-
-    Examples
-    --------
-    >>> from dstauffman.plotting import setup_plots, Opts
-    >>> import matplotlib.pyplot as plt
-    >>> import numpy as np
-    >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Figure Title')
-    >>> ax = fig.add_subplot(111)
-    >>> x = np.arange(0, 10, 0.1)
-    >>> y = np.sin(x)
-    >>> _ = ax.plot(x, y)
-    >>> _ = ax.set_title('X vs Y')
-    >>> _ = ax.set_xlabel('time [years]')
-    >>> _ = ax.set_ylabel('value [radians]')
-    >>> plt.show(block=False) # doctest: +SKIP
-    >>> opts = Opts()
-    >>> opts.case_name = 'Testing'
-    >>> opts.show_plot = True
-    >>> opts.save_plot = False
-    >>> setup_plots(fig, opts)
-
-    Close plot
-    >>> plt.close(fig)
-
-    """
-    # ensure figs is a list
-    if not isinstance(figs, list):
-        figs = [figs]
-
-    # prepend a title
-    if opts.case_name:
-        titleprefix(figs, opts.case_name)
-
-    # label plot classification
-    (classification, caveat) = get_classification(opts.classify)
-    if classification:
-        for fig in figs:
-            ax = fig.gca()
-            plot_classification(ax, classification, caveat=caveat, location='figure')
-
-    # pack the figures
-    bottom = 0.03 if classification else 0.0
-    for fig in figs:
-        fig.tight_layout(rect=(0., bottom, 1., 0.97), h_pad=1.5, w_pad=1.5)
-
-    # things to do if displaying the plots
-    if opts.show_plot and Plotter.show_plot: # pragma: no cover
-        # add a custom toolbar
-        figmenu(figs)
-        # force drawing right away
-        for fig in figs:
-            fig.canvas.draw()
-            fig.canvas.flush_events()
-        # show the plot
-        plt.show(block=False)
-
-    # optionally save the plot
-    if opts.save_plot:
-        storefig(figs, opts.save_path, opts.plot_type)
-        if opts.show_link & len(figs) > 0:
-            print(r'Plots saved to <a href="{}">{}</a>'.format(opts.save_path, opts.save_path))
-
 #%% Functions - figmenu
-def figmenu(figs):
+def figmenu(figs: _FigOrListFig) -> None:
     r"""
     Add a custom toolbar to the figures.
 
@@ -1040,7 +937,7 @@ def figmenu(figs):
             figs[i].toolbar_custom_ = MyCustomToolbar(figs[i])
 
 #%% rgb_ints_to_hex
-def rgb_ints_to_hex(int_tuple):
+def rgb_ints_to_hex(int_tuple: Tuple[int, int, int]) -> str:
     r"""
     Convert a tuple of ints with (0, 255) to the equivalent hex color code.
 
@@ -1071,7 +968,7 @@ def rgb_ints_to_hex(int_tuple):
     return hex_code
 
 #%% Functions - get_screen_resolution
-def get_screen_resolution():
+def get_screen_resolution() -> Tuple[int, int]:
     r"""
     Gets the current monitor screen resolution.
 
@@ -1112,14 +1009,14 @@ def get_screen_resolution():
     return (screen_width, screen_height)
 
 #%% Functions - show_zero_ylim
-def show_zero_ylim(ax):
+def show_zero_ylim(ax: Axes) -> None:
     r"""
     Forces the given axes to always include the point zero.
 
     Parameters
     ----------
-    ax : class matplotlib.axis.Axis
-        Figure axis
+    ax : class matplotlib.axes.Axes
+        Figure axes
 
     Examples
     --------
@@ -1141,21 +1038,21 @@ def show_zero_ylim(ax):
         ax.set_ylim(top=0)
 
 #%% Functions - plot_second_units_wrapper
-def plot_second_units_wrapper(ax, second_yscale):
+def plot_second_units_wrapper(ax: Axes, second_yscale: Union[int, float, Dict[str, float]]) -> Axes:
     r"""
     Wrapper to plot_second_yunits that allows numeric or dict options.
 
     Parameters
     ----------
-    ax : class matplotlib.axis.Axis
-        Figure axis
+    ax : class matplotlib.axes.Axes
+        Figure axes
     second_yscale : dict or int or float
         Scale factor to apply, or dict with key for label and value for factor
 
     Returns
     -------
-    ax2 : class matplotlib.axis.Axis
-        New Figure axis with the second label
+    ax2 : class matplotlib.axes.Axes
+        New Figure axes with the second label
 
     Notes
     -----
@@ -1210,23 +1107,23 @@ def plot_second_units_wrapper(ax, second_yscale):
     return ax2
 
 #%% Functions - plot_second_yunits
-def plot_second_yunits(ax, ylab, multiplier):
+def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
     r"""
     Plots a second Y axis on the right side of the plot with a different scaling.
 
     Parameters
     ----------
-    ax : class matplotlib.axis.Axis
-        Figure axis
+    ax : class matplotlib.axes.Axes
+        Figure axes
     ylab : str
-        Label for new axis
+        Label for new axes
     multiplier : float
         Multiplication factor
 
     Returns
     -------
-    ax2 : class matplotlib.axis.Axis
-        New Figure axis with the second label
+    ax2 : class matplotlib.axes.Axes
+        New Figure axes with the second label
 
     Examples
     --------
@@ -1379,8 +1276,8 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
 
     Parameters
     ----------
-    ax : class matplotlib.axis.Axis
-        Figure axis
+    ax : class matplotlib.axes.Axes
+        Figure axes
     x : (N,) tuple (nominally N=2)
         X values at which to draw the vertical lines
     show_in_legend : bool, optional
@@ -1426,7 +1323,7 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
 #%% plot_phases
 def plot_phases(ax, times, colormap='tab10', labels=None):
     r"""
-    Plots some labeled phases as semi-transparent patchs on the given axis.
+    Plots some labeled phases as semi-transparent patchs on the given axes.
 
     Parameters
     ----------
@@ -1501,7 +1398,7 @@ def plot_phases(ax, times, colormap='tab10', labels=None):
     ax.set_ylim(ylims)
 
 #%% Functions - get_classification
-def get_classification(classify):
+def get_classification(classify: str) -> Tuple[str, str]:
     r"""
     Gets the classification and any caveats from the text in OPTS.
 
@@ -1559,15 +1456,16 @@ def get_classification(classify):
     return (classification, caveat)
 
 #%% Functions - plot_classification
-def plot_classification(ax, classification='U', *, caveat='', test=False, location='figure'):
+def plot_classification(ax: Axes, classification: str = 'U', *, caveat: str = '', \
+                        test: bool = False, location: str = 'figure'):
     r"""
     Displays the classification in a box on each figure.
     Includes the option of printing another box for testing purposes.
 
     Parameters
     ----------
-    ax : class matplotlib.axis.Axis
-        Figure axis
+    ax : class matplotlib.axes.Axes
+        Figure axes
     classification : str
         Level of classification, from {'U', 'C', 'S', 'T', 'TS'}
     caveat : str, optional
@@ -1575,7 +1473,7 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, locati
     test : bool, optional
         Whether to print the testing box, default is false
     location : str, optional
-        Where to put the label, from {'axis', 'figure', 'left', 'top'}
+        Where to put the label, from {'axes', 'axis', 'figure', 'left', 'top'}
 
     See Also
     --------
@@ -1626,16 +1524,16 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, locati
 
     # add classification box
     if classification == 'U':
-        color    = (0, 0, 0)
+        color    = (0., 0., 0.)
         text_str = 'UNCLASSIFIED'
     elif classification == 'C':
-        color    = (0, 0, 1)
+        color    = (0., 0., 1.)
         text_str = 'CONFIDENTIAL'
     elif classification in 'S':
-        color    = (1, 0, 0)
+        color    = (1., 0., 0.)
         text_str = 'SECRET'
     elif classification in {'TS','T'}:
-        color    = (1, 0.65, 0)
+        color    = (1., 0.65, 0.)
         text_str = 'TOP SECRET'
     else:
         raise ValueError('Unexpected value for classification: "{}".'.format(classification))
@@ -1651,7 +1549,7 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, locati
         text_color = (0.2, 0.2, 0.2)
 
     # add classification box
-    if location == 'axis':
+    if location in {'axes', 'axis'}:
         # inside the axes
         ax.text(0.99, 0.01, text_str, color=text_color, horizontalalignment='right', \
             verticalalignment='bottom', fontweight='bold', fontsize=12, \
@@ -1683,7 +1581,7 @@ def plot_classification(ax, classification='U', *, caveat='', test=False, locati
     fig.patches.extend([r1])
 
 #%% Functions - align_plots
-def align_plots(figs, pos=None):
+def align_plots(figs: _FigOrListFig, pos: Tuple[int, int] = None) -> None:
     """
     Aligns all the figures in one location.
 
@@ -1710,11 +1608,10 @@ def align_plots(figs, pos=None):
 
     """
     # initialize position if given
+    x_pos: Optional[int] = None
+    y_pos: Optional[int] = None
     if pos is not None:
         (x_pos, y_pos) = pos
-    else:
-        x_pos = None
-        y_pos = None
     # loop through figures
     for fig in figs:
         # use position from first plot if you don't already have it
