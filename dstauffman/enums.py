@@ -14,11 +14,7 @@ from enum import Enum, EnumMeta
 from typing import ClassVar
 import unittest
 
-#%% Support functions
-def _is_dunder(name):
-    """Returns True if a __dunder__ name, False otherwise."""
-    # Note that this is copied from the enum library, as it is not part of their public API.
-    return len(name) > 4 and name[:2] == name[-2:] == '__' and name[2] != '_' and name[-3] != '_'
+from dstauffman.paths import is_dunder
 
 #%% Classes - _EnumMetaPlus
 class _EnumMetaPlus(EnumMeta):
@@ -33,7 +29,7 @@ class _EnumMetaPlus(EnumMeta):
         return '\n'.join((str(field) for field in cls))
     def __getattr__(cls, name):
         r"""Return the enum member matching `name`."""
-        if _is_dunder(name):
+        if is_dunder(name):
             raise AttributeError(name)
         try:
             return cls._member_map_[name]

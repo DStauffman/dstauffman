@@ -13,6 +13,25 @@ import unittest
 
 import dstauffman as dcs
 
+#%% is_dunder
+class Test_is_dunder(unittest.TestCase):
+    r"""
+    Tests the is_dunder function with the following cases:
+        True
+        False
+    """
+    def setUp(self):
+        self.true = ['__dunder__', '__init__', '__a__']
+        self.false = ['init', '__init__.py', '_private', '__private', 'private__', '____']
+
+    def test_trues(self):
+        for key in self.true:
+            self.assertTrue(dcs.is_dunder(key), key + ' Should be a __dunder__ method')
+
+    def test_falses(self):
+        for key in self.false:
+            self.assertFalse(dcs.is_dunder(key), key + ' Should not be considered dunder.')
+
 #%% get_root_dir
 class Test_get_root_dir(unittest.TestCase):
     r"""

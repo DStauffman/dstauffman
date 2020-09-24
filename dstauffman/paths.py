@@ -13,6 +13,39 @@ import os
 from typing import List
 import unittest
 
+#%% Functions - is_dunder
+def is_dunder(name: str) -> bool:
+    """
+    Returns True if a __dunder__ name, False otherwise.
+
+    Parameters
+    ----------
+    name : str
+        Name of the file or method to determine if __dunder__ (Double underscore)
+
+    Returns
+    -------
+    bool
+        Whether the name is a dunder method or not
+
+    Notes
+    -----
+    #.  Copied by David C. Stauffer in September 2020 from enum._is_dunder to allow it to be a
+        public method.
+
+    Examples
+    --------
+    >>> from dstauffman import is_dunder
+    >>> print(is_dunder('__init__'))
+    True
+
+    >>> print(is_dunder('_private'))
+    False
+
+    """
+    # Note that this is copied from the enum library, as it is not part of their public API.
+    return len(name) > 4 and name[:2] == name[-2:] == '__' and name[2] != '_' and name[-3] != '_'
+
 #%% Functions - get_root_dir
 def get_root_dir() -> str:
     r"""
@@ -170,7 +203,7 @@ def list_python_files(folder: str, recursive: bool = False, include_all: bool = 
         files = [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.py')]
     else:
         files = [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.py')
-        and not file.startswith('__')]
+            and not is_dunder(file[:-3])]
     if recursive:
         for (root, dirs, _) in os.walk(folder, topdown=True):
             for sub_folder in sorted(dirs):

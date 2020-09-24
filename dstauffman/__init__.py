@@ -26,7 +26,7 @@ from .matlab       import load_matlab
 from .optimized    import np_any, np_all, issorted_opt
 from .parser       import main, parse_wrapper, parse_commands, execute_command, \
                               process_command_line_options
-from .paths        import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
+from .paths        import is_dunder, get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
                               get_output_dir, list_python_files
 from .repos        import run_docstrings, run_unittests, run_pytests, run_coverage, \
                               find_repo_issues, delete_pyc, get_python_definitions, \

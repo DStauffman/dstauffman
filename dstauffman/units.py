@@ -18,23 +18,23 @@ except ModuleNotFoundError: # pragma: no cover
 
 #%% Constants - Unit Conversions
 # Time
-ONE_MINUTE = 60
-ONE_HOUR = 3600
-ONE_DAY = 86400
-MONTHS_PER_YEAR = 12
+ONE_MINUTE: int = 60
+ONE_HOUR:int = 3600
+ONE_DAY:int = 86400
+MONTHS_PER_YEAR: int = 12
 
 # Angle
-RAD2DEG = 180/pi
-DEG2RAD = pi/180
+RAD2DEG: float = 180./pi
+DEG2RAD: float = pi/180.
 
-ARCSEC2RAD = 1/ONE_HOUR * DEG2RAD
-RAD2ARCSEC = ONE_HOUR * RAD2DEG
+ARCSEC2RAD: float = 1./ONE_HOUR * DEG2RAD
+RAD2ARCSEC: float = ONE_HOUR * RAD2DEG
 
 # Length
-FT2M  = 0.3048
-M2FT  = 1/0.3048
-IN2CM = 2.54
-CM2IN = 1/2.54
+FT2M: float  = 0.3048
+M2FT: float  = 1/0.3048
+IN2CM: float = 2.54
+CM2IN: float = 1/2.54
 
 #%% get_factors
 def get_factors(prefix: Union[str, int, float]) -> Tuple[float, str]:
@@ -71,7 +71,7 @@ def get_factors(prefix: Union[str, int, float]) -> Tuple[float, str]:
     μ
 
     """
-    if isinstance(prefix, (int,float)):
+    if isinstance(prefix, (int, float)):
         mult  = prefix
         label = ''
         return (mult, label)

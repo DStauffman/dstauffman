@@ -7,10 +7,11 @@ Notes
 """
 
 #%% Imports
+import datetime
 import doctest
 import logging
 import os
-from typing import ClassVar, List
+from typing import ClassVar, List, Optional, Tuple, TypeVar
 import unittest
 
 import matplotlib.pyplot as plt
@@ -27,6 +28,8 @@ from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, figmenu, get
 #%% Globals
 logger = logging.getLogger(__name__)
 
+_Date = TypeVar('_Date', float, datetime.datetime)
+
 #%% Classes - Opts
 class Opts(Frozen):
     r"""Optional plotting configurations."""
@@ -35,7 +38,7 @@ class Opts(Frozen):
         Default configuration for plots.
             .case_name : str
                 Name of the case to be plotted
-            .date_zero : (1x6) datevec (or datetime)
+            .date_zero : datetime
                 Date of t = 0 time [year month day hour minute second]
             .save_plot : bool
                 Flag for whether to save the plots
@@ -89,7 +92,7 @@ class Opts(Frozen):
                 Names of the data structures to be plotted
         """
         self.case_name: str   = ''
-        self.date_zero = None # TODO: type this as (6,) ndarray or datetime
+        self.date_zero: Optional[datetime.datetime] = None
         self.save_plot: bool  = False
         self.save_path: str   = os.getcwd()
         self.show_plot: bool  = True
@@ -97,10 +100,10 @@ class Opts(Frozen):
         self.plot_type: str   = 'png'
         self.sub_plots: bool  = True
         self.sing_line: bool  = False
-        self.disp_xmin = -np.inf
-        self.disp_xmax =  np.inf
-        self.rms_xmin  = -np.inf
-        self.rms_xmax  =  np.inf
+        self.disp_xmin: _Date = -np.inf
+        self.disp_xmax: _Date =  np.inf
+        self.rms_xmin: _Date  = -np.inf
+        self.rms_xmax: _Date  =  np.inf
         self.show_rms: bool   = True
         self.use_mean: bool   = False
         self.show_zero: bool  = False
@@ -109,7 +112,7 @@ class Opts(Frozen):
         self.time_base: str   = 'sec'
         self.time_unit: str   = 'sec'
         self.vert_fact: str   = 'unity'
-        self.colormap  = None
+        self.colormap: str    = None
         self.leg_spot: str    = 'best'
         self.classify: str    = ''
         self.names: List[str] = list()
@@ -135,7 +138,7 @@ class Opts(Frozen):
         if use_datetime:
             self.convert_dates('datetime')
 
-    def __copy__(self):
+    def __copy__(self) -> 'Opts':
         r"""Allows a new copy to be generated with data from the original."""
         new = type(self)(self)
         return new
@@ -171,7 +174,7 @@ class Opts(Frozen):
         start_date: str = '  t(0) = ' + self.date_zero.strftime(TIMESTR_FORMAT) + ' Z' if self.date_zero is not None else ''
         return start_date
 
-    def get_time_limits(self):
+    def get_time_limits(self) -> Tuple[_Date, _Date, _Date, _Date]:
         r"""Returns the display and RMS limits in the current time units."""
         def _convert(value):
             if value is not None and np.isfinite(value):
@@ -187,7 +190,7 @@ class Opts(Frozen):
         rms_xmax  = _convert(self.rms_xmax)
         return (disp_xmin, disp_xmax, rms_xmin, rms_xmax)
 
-    def convert_dates(self, form, old_form='sec', numpy_form='datetime64[ns]'):
+    def convert_dates(self, form: str, old_form: str = 'sec', numpy_form: str = 'datetime64[ns]') -> 'Opts':
         r"""Converts between double and datetime representations."""
         assert form in {'datetime', 'numpy', 'sec'}, f'Unexpected form of "{form}".'
         self.time_base = form

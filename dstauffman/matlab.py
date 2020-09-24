@@ -17,7 +17,7 @@ with contextlib.suppress(ModuleNotFoundError):
     import numpy as np
 
 #%% load_matlab
-def load_matlab(filename, varlist=None, squeeze=True):
+def load_matlab(filename, varlist=None, squeeze=True, enums=None):
     r"""
     Load simple arrays from a MATLAB v7.3 HDF5 based *.mat file.
 
@@ -45,7 +45,7 @@ def load_matlab(filename, varlist=None, squeeze=True):
     2.2
 
     """
-    def _load(file, varlist, squeeze):
+    def _load(file, varlist, squeeze, enums):
         r"""Wrapped subfunction so it can be called recursively."""
         # initialize output
         out = {}
@@ -55,7 +55,7 @@ def load_matlab(filename, varlist=None, squeeze=True):
             if varlist is not None and key not in varlist:
                 continue
             # if no varlist (thus loading every key), still skip those that start with #
-            if varlist is None and key.startswith('#'):
+            if varlist is None and key in {'#refs#', '#subsystem#'}:
                 continue
             # alias this group
             grp = file[key]
@@ -66,23 +66,25 @@ def load_matlab(filename, varlist=None, squeeze=True):
                 out[key] = np.squeeze(values) if squeeze else values
             elif 'EnumerationInstanceTag' in grp:
                 # likely a MATLAB enumerator???
-                enums    = grp['ValueNames'][()]
-                indices  = grp['ValueIndices'][()]
-                values   = enums.T[indices.T]
+                class_name = grp.attrs['MATLAB_class'].decode()
+                if enums is None or class_name not in enums:
+                    raise ValueError('Tried to load a MATLAB enumeration class without a decoder ring, pass in via `enums`.')
+                ix       = grp['ValueIndices'][()].T
+                values   = np.array([enums[class_name][x] for x in ix.flatten()]).reshape(ix.shape)
                 out[key] = np.squeeze(values) if squeeze else values
             else:
                 # call recursively
-                out[key] = load_matlab(grp, varlist=None, squeeze=squeeze)
+                out[key] = load_matlab(grp, varlist=None, squeeze=squeeze, enums=enums)
                         #if isinstance(this_data, dict) and 'ValueNames' in this_data:
         return out
 
     if not isinstance(filename, h5py.Group):
         with h5py.File(filename, 'r') as file:
             # normal method
-            out = _load(file=file, varlist=varlist, squeeze=squeeze)
+            out = _load(file=file, varlist=varlist, squeeze=squeeze, enums=enums)
     else:
         # recursive call method where the file is already opened to a given group
-        out = _load(file=filename, varlist=varlist, squeeze=squeeze)
+        out = _load(file=filename, varlist=varlist, squeeze=squeeze, enums=enums)
     return out
 
 #%% Unit test
