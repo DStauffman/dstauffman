@@ -7,12 +7,15 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import doctest
 import glob
 import os
-from typing import List, Optional, overload, Union
-from typing_extensions import Literal
+from typing import List, Optional, overload, TYPE_CHECKING, Union
 import unittest
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 from dstauffman.classes import Frozen
 from dstauffman.utils import line_wrap, read_text_file, write_text_file

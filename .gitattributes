@@ -11,6 +11,7 @@
 *.gitignore text
 *.htm text
 *.html text
+*.ini text
 *.md text
 *.php text
 *.rst text
