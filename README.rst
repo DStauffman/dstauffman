@@ -37,7 +37,6 @@ The following built-in Python libraries are used within the dstauffman library.
 * pickle
 * re
 * shlex
-* shutil
 * subprocess
 * sys
 * time

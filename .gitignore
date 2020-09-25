@@ -49,6 +49,11 @@ Temporary Items
 *.nbi
 
 # =========================
+# Installation Artifacts #
+# =========================
+dstauffman.egg-info/*
+
+# =========================
 # Pytest logs #
 # =========================
 .pytest_cache/*
