@@ -14,16 +14,17 @@ import os
 from typing import ClassVar, List, Optional, Tuple, TypeVar
 import unittest
 
-import matplotlib.pyplot as plt
-import numpy as np
 from matplotlib.patches import Rectangle
+import matplotlib.pyplot as plt
 from matplotlib.ticker import StrMethodFormatter
+import numpy as np
 
-from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_factors, LogLevel
+from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_factors, \
+    LogLevel
 
 from dstauffman.plotting.generic import make_time_plot
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, figmenu, get_classification, \
-                                        ignore_plot_data, plot_classification, storefig, titleprefix
+    ignore_plot_data, plot_classification, storefig, titleprefix
 
 #%% Globals
 logger = logging.getLogger(__name__)

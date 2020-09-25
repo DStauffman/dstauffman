@@ -7,9 +7,9 @@ Notes
 """
 
 #%% Imports
+from collections import OrderedDict
 import doctest
 import unittest
-from collections import OrderedDict
 
 import numpy as np
 

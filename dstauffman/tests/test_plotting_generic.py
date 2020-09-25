@@ -11,12 +11,11 @@ import datetime
 import unittest
 from unittest.mock import patch
 
-import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
+import matplotlib.pyplot as plt
 import numpy as np
 
 from dstauffman import LogLevel
-
 import dstauffman.plotting as plot
 
 #%% plotting.make_time_plot

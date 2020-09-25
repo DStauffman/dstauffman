@@ -20,8 +20,8 @@ from .plotting  import Opts, Plotter, plot_time_history, plot_correlation_matrix
                            plot_bar_breakdown, setup_plots
 from .support   import DEFAULT_COLORMAP, DEFAULT_CLASSIFICATION, TruthPlotter, MyCustomToolbar, \
                            ColorMap, close_all, get_color_lists, ignore_plot_data, whitten, \
-                           resolve_name, storefig, titleprefix, disp_xlimits, zoom_ylim, \
-                           figmenu, rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
+                           resolve_name, storefig, titleprefix, disp_xlimits, zoom_ylim, figmenu, \
+                           rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
                            plot_second_units_wrapper, plot_second_yunits, get_rms_indices, \
                            plot_vert_lines, plot_phases, get_classification, plot_classification, \
                            align_plots, z_from_ci

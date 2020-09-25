@@ -16,8 +16,7 @@ from unittest.mock import patch
 
 import numpy as np
 
-from dstauffman import capture_output, compare_two_classes, get_tests_dir, Frozen, LogLevel, rss
-
+from dstauffman import capture_output, compare_two_classes, Frozen, get_tests_dir, LogLevel, rss
 import dstauffman.estimation as estm
 
 #%% Setup for testing

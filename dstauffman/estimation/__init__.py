@@ -8,8 +8,7 @@ Notes
 """
 
 #%% Imports
-from .batch    import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, \
-                          run_bpe
+from .batch    import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, run_bpe
 from .kalman   import calculate_kalman_gain, calculate_prediction, calculate_innovation, \
                           calculate_normalized_innovation, calculate_delta_state, \
                           propagate_covariance, update_covariance

@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from dstauffman.plotting.plotting import Opts, plot_correlation_matrix, plot_time_history, \
-                                         setup_plots
+    setup_plots
 
 #%% Functions - plot_bpe_convergence
 def plot_bpe_convergence(costs, *, opts=None):

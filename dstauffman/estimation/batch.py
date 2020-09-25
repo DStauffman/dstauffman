@@ -19,16 +19,15 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, ClassVar, Callable, List, Tuple
+from typing import Any, Callable, ClassVar, List, Tuple
 import unittest
-
-import tblib.pickling_support
 
 import numpy as np
 from numpy.linalg import norm
+import tblib.pickling_support
 
 from dstauffman import activate_logging, deactivate_logging, Frozen, LogLevel, pprint_dict, rss, \
-                       SaveAndLoad, setup_dir
+    SaveAndLoad, setup_dir
 
 #%% Activate Exception support for parallel code
 tblib.pickling_support.install()

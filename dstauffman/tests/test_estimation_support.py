@@ -13,7 +13,7 @@ import unittest
 
 import numpy as np
 
-from dstauffman import Frozen, FixedDict
+from dstauffman import FixedDict, Frozen
 import dstauffman.estimation as estm
 
 #%% Classes - _Config

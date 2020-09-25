@@ -20,19 +20,19 @@ import unittest
 import warnings
 
 from matplotlib.axes import Axes
-from matplotlib.figure import Figure
 import matplotlib.cm as cmx
 import matplotlib.colors as colors
-import matplotlib.pyplot as plt
 from matplotlib.dates import date2num
+from matplotlib.figure import Figure
 from matplotlib.patches import Rectangle
+import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats as st
 
 try:
-    from PyQt5.QtWidgets import QApplication, QPushButton
-    from PyQt5.QtGui import QIcon
     from PyQt5.QtCore import QSize
+    from PyQt5.QtGui import QIcon
+    from PyQt5.QtWidgets import QApplication, QPushButton
 except ModuleNotFoundError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object

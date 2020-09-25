@@ -12,6 +12,7 @@ Notes
 import numpy as np
 
 from dstauffman import process_command_line_options
+
 flags = process_command_line_options()
 
 if flags.use_plotting:

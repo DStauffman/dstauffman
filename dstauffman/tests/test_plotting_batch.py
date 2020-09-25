@@ -13,7 +13,6 @@ import numpy as np
 
 from dstauffman import capture_output
 from dstauffman.estimation import BpeResults
-
 import dstauffman.plotting as plot
 
 #%% Hard-coded values

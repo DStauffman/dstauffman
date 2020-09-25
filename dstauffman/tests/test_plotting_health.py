@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from dstauffman import capture_output
-
 import dstauffman.plotting as plot
 
 #%% Plotter for testing

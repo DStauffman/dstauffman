@@ -7,8 +7,8 @@ Notes
 """
 
 #%% Imports
-import unittest
 from enum import unique
+import unittest
 
 import numpy as np
 

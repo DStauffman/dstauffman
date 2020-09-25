@@ -24,10 +24,10 @@ except ModuleNotFoundError:
 else:
     _HAVE_COVERAGE = True
 
-from dstauffman.enums        import ReturnCodes
-from dstauffman.paths        import get_tests_dir, list_python_files
-from dstauffman.utils        import line_wrap, read_text_file, write_text_file
-from dstauffman.utils_log    import setup_dir
+from dstauffman.enums import ReturnCodes
+from dstauffman.paths import get_tests_dir, list_python_files
+from dstauffman.utils import line_wrap, read_text_file, write_text_file
+from dstauffman.utils_log import setup_dir
 
 #%% run_docstrings
 def run_docstrings(files: List[str], verbose: bool = False) -> int:
@@ -137,6 +137,7 @@ def run_pytests(folder: str) -> int:
     """
     # delayed import to only use pytest if you are running the tests
     import pytest
+
     # disable plots from showing up
     try:
         from dstauffman.plotting import Plotter

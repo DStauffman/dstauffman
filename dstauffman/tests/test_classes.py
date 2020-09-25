@@ -7,12 +7,12 @@ Notes
 """
 
 #%% Imports
+from collections.abc import Mapping
 import contextlib
 import copy
 import os
 import pickle
 import unittest
-from collections.abc import Mapping
 
 import numpy as np
 

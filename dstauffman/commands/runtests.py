@@ -12,12 +12,12 @@ import doctest
 import os
 import platform
 import subprocess
-from typing import List
 import sys
+from typing import List
 import unittest
 
 from dstauffman import get_root_dir, get_tests_dir, list_python_files, run_coverage, \
-                       run_docstrings, run_pytests, run_unittests
+    run_docstrings, run_pytests, run_unittests
 
 #%% Functions - parse_tests
 def parse_tests(input_args: List[str]) -> argparse.Namespace:

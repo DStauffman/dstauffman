@@ -78,6 +78,7 @@ def parse_commands(command, args):
     """
     # delayed import of commands
     import dstauffman.commands as commands
+
     # check for valid commands
     if command in _VALID_COMMANDS:
         # If valid, then parse the arguments with the appropiate method, so help calls parse_help etc.
@@ -92,6 +93,7 @@ def execute_command(command, args):
     r"""Executes the given command."""
     # delayed import of commands
     import dstauffman.commands as commands
+
     # check for valid commands
     if command in _VALID_COMMANDS:
         # If valid, then call the appropriate method, so help calls execute_help etc.

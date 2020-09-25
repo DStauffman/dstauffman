@@ -17,7 +17,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from dstauffman import capture_output, get_tests_dir, LogLevel, unit
-
 import dstauffman.plotting as plot
 
 #%% Plotter for testing

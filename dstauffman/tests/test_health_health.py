@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from dstauffman.plotting import Opts, Plotter
-
 import dstauffman.health as health
 
 #%% Plotter for testing

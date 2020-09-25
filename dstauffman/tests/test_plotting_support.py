@@ -21,7 +21,6 @@ from PyQt5.QtCore import Qt
 from PyQt5.QtTest import QTest
 
 from dstauffman import capture_output, get_tests_dir, IS_WINDOWS
-
 import dstauffman.plotting as plot
 
 #%% Plotter for testing

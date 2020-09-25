@@ -7,8 +7,8 @@ Notes
 """
 
 #%% Imports
-import unittest
 import datetime
+import unittest
 
 import matplotlib.dates as dates
 import numpy as np

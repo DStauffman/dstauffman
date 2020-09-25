@@ -23,9 +23,8 @@ from dstauffman import get_factors, rms
 from dstauffman.health import bins_to_str_ranges
 
 from dstauffman.plotting.plotting import Opts, setup_plots
-from dstauffman.plotting.support  import ColorMap, DEFAULT_COLORMAP, ignore_plot_data, \
-                                         plot_second_units_wrapper, disp_xlimits, show_zero_ylim, \
-                                         whitten, z_from_ci
+from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits, \
+    ignore_plot_data, plot_second_units_wrapper, show_zero_ylim, whitten, z_from_ci
 
 #%% Functions - plot_health_time_history
 def plot_health_time_history(time, data, label, units='', opts=None, *, legend=None, \

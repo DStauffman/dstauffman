@@ -8,11 +8,11 @@ Notes
 
 #%% Imports
 import contextlib
+import datetime
 import logging
 import os
 import time
 import unittest
-import datetime
 
 import dstauffman as dcs
 

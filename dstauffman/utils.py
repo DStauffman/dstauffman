@@ -26,9 +26,9 @@ import warnings
 
 try:
     import numpy as np
-    from numpy import nan, inf
+    from numpy import inf, nan
 except ModuleNotFoundError:
-    from math import nan, inf
+    from math import inf, nan
 try:
     from scipy.interpolate import interp1d
 except ModuleNotFoundError:
@@ -38,8 +38,8 @@ else:
     _HAVE_SCIPY = True
 
 from dstauffman.constants import IS_WINDOWS
-from dstauffman.enums     import ReturnCodes
-from dstauffman.units     import MONTHS_PER_YEAR
+from dstauffman.enums import ReturnCodes
+from dstauffman.units import MONTHS_PER_YEAR
 
 #%% Globals
 _ALLOWED_ENVS: Optional[Dict[str, str]] = None # allows any environment variables to be invoked

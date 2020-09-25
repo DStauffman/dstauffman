@@ -15,7 +15,6 @@ import numpy as np
 
 from dstauffman import LogLevel
 from dstauffman.aerospace import quat_norm
-
 import dstauffman.plotting as plot
 
 #%% plotting.make_quaternion_plot
