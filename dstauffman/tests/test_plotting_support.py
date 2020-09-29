@@ -448,9 +448,9 @@ class Test_plotting_resolve_name(unittest.TestCase):
         Different replacements (x3)
     """
     def setUp(self):
-        self.bad_name = 'Bad name /\ <>!.png'
+        self.bad_name = r'Bad name /\ <>!.png'
         self.exp_win  = 'Bad name __ __!.png'
-        self.exp_unix = 'Bad name _\ <>!.png'
+        self.exp_unix = r'Bad name _\ <>!.png'
 
     def test_nominal(self):
         new_name = plot.resolve_name(self.bad_name)
@@ -986,6 +986,12 @@ class Test_plotting_plot_phases(unittest.TestCase):
 
     def test_no_colormap(self):
         plot.plot_phases(self.ax, self.times, labels=self.labels)
+
+    def test_group_all_defaults(self):
+        plot.plot_phases(self.ax, self.times, group_all=True)
+
+    def test_group_all(self):
+        plot.plot_phases(self.ax, self.times, group_all=True, labels=self.labels[0], colormap='red')
 
     def tearDown(self):
         if self.fig:

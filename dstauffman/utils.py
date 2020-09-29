@@ -1334,7 +1334,11 @@ def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
 
     """
     # allow a zero tolerance to be passed in and behave like the normal intersect command
-    if tolerance == 0:
+    if hasattr(tolerance, 'dtype') and np.issubdtype(tolerance.dtype, np.timedelta64):
+        tol_is_zero = tolerance.astype(np.int64) == 0
+    else:
+        tol_is_zero = tolerance == 0
+    if tol_is_zero:
         return np.intersect1d(a, b, assume_unique=assume_unique, return_indices=return_indices)
 
     # allow list and other array_like inputs (or just scalar floats)
@@ -1431,7 +1435,7 @@ def issorted(x, descend=False):
     return np.all(x[:-1] <= x[1:])
 
 #%% zero_order_hold
-def zero_order_hold(x, xp, yp, left=nan, assume_sorted=False):
+def zero_order_hold(x, xp, yp, left=nan, assume_sorted=False, return_indices=False):
     r"""
     Interpolates a function by holding at the most recent value.
 
@@ -1476,9 +1480,15 @@ def zero_order_hold(x, xp, yp, left=nan, assume_sorted=False):
     # check that xp data is sorted, if not, use slower scipy version
     if assume_sorted or issorted(xp):
         ix = np.searchsorted(xp, x, side='right') - 1
-        return np.where(np.asanyarray(x) < xmin, left, yp[ix])
+        is_left = np.asanyarray(x) < xmin
+        out = np.where(is_left, left, yp[ix])
+        if return_indices:
+            return (out, np.where(is_left, None, ix))
+        return out
     if not  _HAVE_SCIPY:
         raise RuntimeError('You must have scipy available to run this.') # pragma: no cover
+    if return_indices:
+        raise RuntimeError('Data must be sorted in order to ask for indices.')
     func = interp1d(xp, yp, kind='zero', fill_value='extrapolate', assume_sorted=False)
     return np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
 

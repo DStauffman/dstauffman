@@ -68,7 +68,7 @@ def load_matlab(filename, varlist=None, squeeze=True, enums=None):
                 # likely a MATLAB enumerator???
                 class_name = grp.attrs['MATLAB_class'].decode()
                 if enums is None or class_name not in enums:
-                    raise ValueError('Tried to load a MATLAB enumeration class without a decoder ring, pass in via `enums`.')
+                    raise ValueError(f'Tried to load a MATLAB enumeration class called "{class_name}" without a decoder ring, pass in via `enums`.')
                 ix       = grp['ValueIndices'][()].T
                 values   = np.array([enums[class_name][x] for x in ix.flatten()]).reshape(ix.shape)
                 out[key] = np.squeeze(values) if squeeze else values

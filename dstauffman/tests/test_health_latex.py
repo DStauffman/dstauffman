@@ -46,8 +46,8 @@ class Test_health_make_preamble(unittest.TestCase):
 
     def test_short_cap(self):
         out = health.make_preamble(self.caption, self.label, self.cols, short_cap='Short cap')
-        self.assertIn('    \caption[Short cap]{This caption}%', out)
-        self.assertNotIn('    \caption{This caption}%', out)
+        self.assertIn('    \\caption[Short cap]{This caption}%', out)
+        self.assertNotIn('    \\caption{This caption}%', out)
 
     def test_numbered_false1(self):
         out = health.make_preamble(self.caption, self.label, self.cols, numbered=False)

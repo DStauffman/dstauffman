@@ -230,7 +230,7 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
 
     Parameters
     ----------
-    date : as `olf_form`
+    date : as `old_form`
         Date
     form : str
         Desired date output form, from {'datetime', 'numpy', 'matplotlib', 'sec', 'min', 'hr', 'day', 'month', 'year'}
@@ -330,7 +330,8 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
         elif form == 'numpy':
             out = np.full(date.shape, np.datetime64('nat'), dtype=numpy_form)
             if np.any(is_num):
-                out[is_num] = np.array(dates.num2date(date[is_num]), dtype=numpy_form)
+                # TODO: I don't like this method, but the dates.num2date always returns a timezone aware datetime
+                out[is_num] = np.array([x.replace(tzinfo=None) for x in dates.num2date(date[is_num])], dtype=numpy_form)
         elif form in time_forms:
             out = ONE_DAY * (date - dates.date2num(date_zero))
     # convert from seconds to other time forms if necessary

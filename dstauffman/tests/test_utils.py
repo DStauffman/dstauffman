@@ -14,6 +14,7 @@ import platform
 import sys
 import unittest
 from unittest.mock import patch
+import warnings
 
 import numpy as np
 from scipy.interpolate import interp1d
@@ -105,6 +106,16 @@ class Test_find_in_range(unittest.TestCase):
         valid = dcs.find_in_range(value)
         np.testing.assert_array_equal(valid, exp)
 
+    def test_dates(self):
+        value = np.datetime64('2020-09-01 00:00:00', 'ns') + 10**9*np.arange(0, 5*60, 30, dtype=np.int64)
+        value[2] = np.datetime64('nat')
+        value[7] = np.datetime64('nat')
+        tmin  = np.datetime64('2020-09-01 00:02:00', 'ns')
+        tmax  = np.datetime64('2020-09-01 00:04:00', 'ns')
+        exp   = np.array([0, 0, 0, 0, 1, 1, 1, 0, 1, 0], dtype=bool)
+        valid = dcs.find_in_range(value, min_=tmin, max_=tmax, inclusive=True)
+        np.testing.assert_array_equal(valid, exp)
+
 #%% rms
 class Test_rms(unittest.TestCase):
     r"""
@@ -127,7 +138,9 @@ class Test_rms(unittest.TestCase):
         self.outputs2a = np.sqrt(3)/2
         self.outputs2b = np.array([np.sqrt(2)/2, 1, np.sqrt(2)/2, 1])
         self.outputs2c = np.array([np.sqrt(2)/2, 1])
-        self.outputs2d = np.matrix([[np.sqrt(2)/2], [1]])
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PendingDeprecationWarning)
+            self.outputs2d = np.matrix([[np.sqrt(2)/2], [1]])
         self.inputs3   = np.hstack((self.inputs1, np.nan))
         self.inputs4   = [[0, 0., np.nan], [1., np.nan, 1]]
         self.outputs4a = np.sqrt(2)/2
@@ -228,7 +241,9 @@ class Test_rss(unittest.TestCase):
         self.outputs2a = 6
         self.outputs2b = np.array([1, 2, 1, 2])
         self.outputs2c = np.array([2, 4])
-        self.outputs2d = np.matrix([[2], [4]])
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', PendingDeprecationWarning)
+            self.outputs2d = np.matrix([[2], [4]])
         self.inputs3   = np.hstack((self.inputs1, np.nan))
         self.inputs4   = [[0, 0, np.nan], [1, np.nan, 1]]
         self.outputs4a = 2
@@ -1248,6 +1263,7 @@ class Test_zero_order_hold(unittest.TestCase):
         x not sorted
         Left extrapolation
         Lists instead of arrays
+        Return indices
 
     Notes
     -----
@@ -1324,6 +1340,23 @@ class Test_zero_order_hold(unittest.TestCase):
         y     = dcs.zero_order_hold(x, xp, yp, left=False)
         self.assertEqual(y.dtype, bool)
         np.testing.assert_array_equal(y, y_exp)
+
+    def test_indices(self):
+        xp      = np.array([0, 5, 10, 15])
+        yp      = np.array([0, 1, 2, 3])
+        x       = np.array([-4, -2, 0, 2, 4, 6, 20])
+        y_exp   = np.array([np.nan, np.nan, 0, 0, 0, 1, 3])
+        ix_exp  = np.array([None, None, 0, 0, 0, 1, 3])
+        (y, ix) = dcs.zero_order_hold(x, xp, yp, left=np.nan, return_indices=True)
+        np.testing.assert_array_equal(y, y_exp)
+        np.testing.assert_array_equal(ix, ix_exp)
+
+    def test_indices_not_sorted(self):
+        xp      = np.array([0, 10, 5, 15])
+        yp      = np.array([0, 1, 2, 3])
+        x       = np.array([-4, -2, 0, 2, 4, 6, 20])
+        with self.assertRaises(RuntimeError):
+            dcs.zero_order_hold(x, xp, yp, return_indices=True)
 
 #%% drop_following_time
 class Test_drop_following_time(unittest.TestCase):

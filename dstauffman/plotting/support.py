@@ -1321,7 +1321,7 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
         ax.axvline(this_x, linestyle='--', color=this_color, marker='+', markeredgecolor='m', markersize=10, label=this_label)
 
 #%% plot_phases
-def plot_phases(ax, times, colormap='tab10', labels=None):
+def plot_phases(ax, times, colormap='tab10', labels=None, *, group_all=False):
     r"""
     Plots some labeled phases as semi-transparent patchs on the given axes.
 
@@ -1365,7 +1365,11 @@ def plot_phases(ax, times, colormap='tab10', labels=None):
         num_segments = times.shape[1]
 
     # check for optional arguments
-    cm = ColorMap(colormap=colormap, num_colors=num_segments)
+    if not group_all:
+        cm = ColorMap(colormap=colormap, num_colors=num_segments)
+    elif colormap == 'tab10':
+        # change to responible default for group_all case
+        colormap = 'xkcd:black'
 
     # get the limits of the plot
     xlims = ax.get_xlim()
@@ -1378,7 +1382,7 @@ def plot_phases(ax, times, colormap='tab10', labels=None):
     # loop through all the phases
     for i in range(num_segments):
         # get the label and color for this phase
-        this_color = cm.get_color(i)
+        this_color = cm.get_color(i) if not group_all else colormap
         # get the locations for this phase
         x1 = times[0, i]
         x2 = times[1, i]
@@ -1389,9 +1393,9 @@ def plot_phases(ax, times, colormap='tab10', labels=None):
             alpha=transparency))
         # create the label
         if labels is not None:
-            ax.annotate(labels[i], xy=(x1, y2), \
-                xycoords='data', horizontalalignment='left', verticalalignment='top', \
-                fontsize=15, rotation=-90)
+            this_label = labels[i] if not group_all else labels
+            ax.annotate(this_label, xy=(x1, y2), xycoords='data', horizontalalignment='left', \
+                verticalalignment='top', fontsize=15, rotation=-90)
 
     # reset any limits that might have changed due to the patches
     ax.set_xlim(xlims)
