@@ -1335,7 +1335,7 @@ def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
     """
     # allow a zero tolerance to be passed in and behave like the normal intersect command
     if hasattr(tolerance, 'dtype') and np.issubdtype(tolerance.dtype, np.timedelta64):
-        tol_is_zero = tolerance.astype(np.int64) == 0
+        tol_is_zero = tolerance.astype(np.int64) == 0 # Note that this avoids a numpy bug, see issue 6784
     else:
         tol_is_zero = tolerance == 0
     if tol_is_zero:

@@ -841,8 +841,11 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         else:
             # TODO: handle single_lines case by allowing list for ylabel
             bracket = ylabel.find('[')
-            if is_diff_plot and bracket > 0:
-                this_axes.set_ylabel(ylabel[:bracket-1] + ' Difference ' + ylabel[bracket:])
+            if is_diff_plot:
+                if bracket > 0:
+                    this_axes.set_ylabel(ylabel[:bracket-1] + ' Difference ' + ylabel[bracket:])
+                else:
+                    this_axes.set_ylabel(ylabel + ' Difference')
             else:
                 this_axes.set_ylabel(ylabel)
         this_axes.grid(True)
