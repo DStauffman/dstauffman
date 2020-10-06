@@ -11,7 +11,7 @@ import datetime
 import doctest
 import logging
 import os
-from typing import ClassVar, List, Optional, Tuple, TypeVar
+from typing import ClassVar, List, Optional, Tuple, TypeVar, Union
 import unittest
 
 from matplotlib.patches import Rectangle
@@ -152,7 +152,7 @@ class Opts(Frozen):
             name = ''
         return name
 
-    def get_date_zero_str(self) -> str:
+    def get_date_zero_str(self, date: Union[datetime.datetime, np.ndarray] = None) -> str:
         r"""
         Gets a string representation of date_zero, typically used to print on an X axis.
 
@@ -172,7 +172,17 @@ class Opts(Frozen):
 
         """
         TIMESTR_FORMAT = '%d-%b-%Y %H:%M:%S'
-        start_date: str = '  t(0) = ' + self.date_zero.strftime(TIMESTR_FORMAT) + ' Z' if self.date_zero is not None else ''
+        if date is None:
+            if self.date_zero is None:
+                start_date: str = ''
+            else:
+                start_date = '  t(0) = ' + self.date_zero.strftime(TIMESTR_FORMAT) + ' Z'
+        else:
+            if isinstance(date, datetime.datetime):
+                start_date = '  t(0) = ' + date.strftime(TIMESTR_FORMAT) + ' Z'
+            else:
+                temp_date  = datetime.datetime(*date)
+                start_date = '  t(0) = ' + temp_date.strftime(TIMESTR_FORMAT) + ' Z'
         return start_date
 
     def get_time_limits(self) -> Tuple[_Date, _Date, _Date, _Date]:

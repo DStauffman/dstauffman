@@ -415,6 +415,9 @@ def get_color_lists() -> Dict[str, colors.ListedColormap]:
         'xkcd:red', 'xkcd:green', 'xkcd:blue'))
     color_lists['quat_diff'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan',
         'xkcd:brown', 'xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
+    color_lists['dbl_off']   = colors.ListedColormap(color_lists['dbl_diff'].colors[:2])
+    color_lists['vec_off']   = colors.ListedColormap(color_lists['vec_diff'].colors[:3])
+    color_lists['quat_off']  = colors.ListedColormap(color_lists['quat_diff'].colors[:4])
     return color_lists
 
 #%% Functions - ignore_plot_data
