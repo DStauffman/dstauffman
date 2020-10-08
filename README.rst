@@ -11,7 +11,7 @@ Written by David C. Stauffer in March 2015.
 Library dependencies
 ********************
 
-This code relies on newer features within the Python language.  These include enums from v3.4, the '@' operator for matrix multiplication from v3.5, ordered dictionaries and f-strings from v3.6, and will eventually assignment expressions ":=" from v3.8.  As such, it currently requires at least v3.6 of Python and will not run on v2.7.
+This code relies on newer features within the Python language.  These include enums from v3.4, the '@' operator for matrix multiplication from v3.5, ordered dictionaries and f-strings from v3.6, and assignment expressions ":=" from v3.8, and eventually newer typing methods from v3.9.  As such, it currently requires at least v3.8 of Python and will not run on v2.7.
 
 I do lots of plotting with matplotlib, and additionally use the PyQt5 library for GUIs and adding buttons (like next plot, previous plot and close all) to the standard MPL toolbar.  This code is backend specific, and Qt is much more powerful than Tk/Tcl, so I use PyQt5 instead of the core tkinter.
 
@@ -55,8 +55,7 @@ The following non-standard, but for the most part very well known libraries, are
 * pandas (minimal usage)
 * PyQt5
 * pytest
-* scipy.interpolate (minimal usage)
-* scipy.stats (minimal usage)
+* scipy (minimal usage)
 * tblib (minimal usage)
 
 

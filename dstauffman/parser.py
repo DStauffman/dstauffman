@@ -7,10 +7,13 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
+import argparse
 from collections import namedtuple
 import doctest
 import logging
 import sys
+from typing import List, NamedTuple, Tuple
 import unittest
 
 from dstauffman.enums import LogLevel, ReturnCodes
@@ -20,13 +23,19 @@ from dstauffman.logs import activate_logging
 logger = logging.getLogger(__name__)
 _VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'make_init', 'tests'})
 
+class _Flags(NamedTuple):
+    log_level: int
+    use_display: bool
+    use_plotting: bool
+    use_hdf5: bool
+
 #%% Functions - _print_bad_command
 def _print_bad_command(command: str) -> None:
     r"""Prints to the command line when a command name is not understood."""
     print('Command "{}" is not understood.'.format(command))
 
 #%% Functions - main
-def main():
+def main() -> int:
     r"""Main function called when executed using the command line api."""
     try:
         (command, args) = parse_wrapper(sys.argv[1:])
@@ -37,7 +46,7 @@ def main():
     return sys.exit(rc)
 
 #%% Functions - parse_wrapper
-def parse_wrapper(args):
+def parse_wrapper(args: List[str]) -> Tuple[str, argparse.Namespace]:
     r"""Wrapper function to parse out the command name from the rest of the arguments."""
     # check for no command option
     if len(args) >= 1:
@@ -52,7 +61,7 @@ def parse_wrapper(args):
     return (command, parsed_args)
 
 #%% Functions - parse_commands
-def parse_commands(command, args):
+def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
     r"""
     Splits the parsing based on the name of the command.
 
@@ -86,10 +95,10 @@ def parse_commands(command, args):
         parsed_args = func(args)
     else:
         raise ValueError('Unexpected command "{}".'.format(command))
-    return parsed_args
+    return parsed_args  # type: ignore
 
 #%% Functions - execute_command
-def execute_command(command, args):
+def execute_command(command: str, args: argparse.Namespace) -> int:
     r"""Executes the given command."""
     # delayed import of commands
     import dstauffman.commands as commands
@@ -104,10 +113,10 @@ def execute_command(command, args):
         rc = ReturnCodes.bad_command
     if rc is None:
         rc = ReturnCodes.clean
-    return rc
+    return rc  # type: ignore
 
 #%% process_command_line_options
-def process_command_line_options():
+def process_command_line_options() -> _Flags:
     r"""
     Parses sys.argv to determine any command line options for use in scripts.
 
@@ -132,17 +141,11 @@ def process_command_line_options():
     log_level = None
     for opt in sys.argv[1:]:
         if opt.startswith('-l'):
-            # TODO: python v3.8
-            #if hasattr(LogLevel, level := opt[1:].upper()):
-            #    log_level = getattr(LogLevel, level)
-            #elif hasattr(logging, level := opt[2:].upper()):
-            #    log_level = getattr(logging, level)
-            if hasattr(LogLevel, opt[1:].upper()):
-                log_level = getattr(LogLevel, opt[1:].upper())
-            elif hasattr(logging, opt[2:].upper()):
-                log_level = getattr(logging, opt[2:].upper())
+            if hasattr(LogLevel, level := opt[1:].upper()):
+                log_level = getattr(LogLevel, level)
+            elif hasattr(logging, level := opt[2:].upper()):
+                log_level = getattr(logging, level)
             else:
-            # TODO: delete to here once v3.8
                 raise ValueError(f'Unexpected logging input of: "{opt}".')
             activate_logging(log_level)
             logger.log(log_level, 'Configuring Log Level at: ' + str(log_level))
@@ -167,12 +170,12 @@ def process_command_line_options():
         plotter = Plotter(show=False)
 
     # return the settings
-    flags = namedtuple('Flags', ['log_level', 'use_display', 'use_plotting', 'use_hdf5'])
+    flags: _Flags = namedtuple('Flags', ['log_level', 'use_display', 'use_plotting', 'use_hdf5'])
     flags.log_level = log_level
     flags.use_display = use_display
     flags.use_plotting = use_plotting
     flags.use_hdf5 = use_hdf5
-    return flags
+    return flags  # type: ignore
 
 #%% Unit test
 if __name__ == '__main__':

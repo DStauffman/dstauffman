@@ -10,7 +10,7 @@ Notes
 import argparse
 import doctest
 import os
-from typing import Iterable, List, Optional
+from typing import FrozenSet, List, Optional, Set, Union
 import unittest
 
 from dstauffman import find_repo_issues, make_python_init, ReturnCodes
@@ -100,7 +100,7 @@ def execute_enforce(args: argparse.Namespace) -> int:
         check_eol = '\n'
     else:
         check_eol = None
-    extensions: Optional[Iterable]
+    extensions: Optional[Union[Set[str], FrozenSet[str]]]
     if args.extensions is None:
         extensions = frozenset(def_extensions)
     elif len(args.extensions) == 1 and args.extensions[0] == '*':

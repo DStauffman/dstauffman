@@ -373,7 +373,7 @@ def close_all(figs: _FigOrListFig = None) -> None:
     gc.collect()
 
 #%% Functions - get_color_lists
-def get_color_lists() -> Dict[str, colors.ListedColormap]:
+def get_color_lists() -> Dict[str, Union[colors.ListedColormap, str]]:
     r"""
     Gets different color lists to use for plotting.
 
@@ -415,9 +415,9 @@ def get_color_lists() -> Dict[str, colors.ListedColormap]:
         'xkcd:red', 'xkcd:green', 'xkcd:blue'))
     color_lists['quat_diff'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan',
         'xkcd:brown', 'xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
-    color_lists['dbl_off']   = colors.ListedColormap(color_lists['dbl_diff'].colors[:2])
-    color_lists['vec_off']   = colors.ListedColormap(color_lists['vec_diff'].colors[:3])
-    color_lists['quat_off']  = colors.ListedColormap(color_lists['quat_diff'].colors[:4])
+    color_lists['dbl_off']   = colors.ListedColormap(color_lists['dbl_diff'].colors[:2])  # type: ignore
+    color_lists['vec_off']   = colors.ListedColormap(color_lists['vec_diff'].colors[:3])  # type: ignore
+    color_lists['quat_off']  = colors.ListedColormap(color_lists['quat_diff'].colors[:4])  # type: ignore
     return color_lists
 
 #%% Functions - ignore_plot_data
@@ -628,8 +628,8 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
             # special case when you have a displayless backend, check the suptitle, then the title
             # from the first axes
             throw_warning = True
-            if this_fig._suptitle is not None: # v3.8 sup :=
-                raw_title = this_fig._suptitle.get_text()
+            if (sup := this_fig._suptitle) is not None:
+                raw_title = sup.get_text()
             else:
                 try:
                     raw_title = this_fig.axes[0].get_title()
@@ -713,8 +713,8 @@ def titleprefix(fig: _FigOrListFig, prefix: str = '') -> None:
         this_canvas_title = this_fig.canvas.get_window_title()
         this_fig.canvas.set_window_title(prefix + ' - ' + this_canvas_title)
         # update the suptitle (if it exists)
-        if this_fig._suptitle is not None: # v3.8 sup :=
-            this_fig._suptitle.set_text(prefix + ' - ' + this_fig._suptitle.get_text())
+        if (sup := this_fig._suptitle) is not None:
+            sup.set_text(prefix + ' - ' + sup.get_text())
 
 #%% Functions - disp_xlimits
 def disp_xlimits(fig_or_axis, xmin=None, xmax=None):

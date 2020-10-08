@@ -24,7 +24,7 @@ class Test_act_deact_logging(unittest.TestCase):
         Default filename
     """
     def setUp(self):
-        self.level    = logging.DEBUG
+        self.level    = dcs.LogLevel.L5
         self.filename = os.path.join(dcs.get_tests_dir(), 'testlog.txt')
 
     def test_nominal(self):
@@ -32,12 +32,12 @@ class Test_act_deact_logging(unittest.TestCase):
         dcs.activate_logging(self.level, self.filename)
         self.assertTrue(os.path.isfile(self.filename))
         self.assertTrue(dcs.logs.root_logger.hasHandlers())
-        with self.assertLogs(level='DEBUG') as cm:
+        with self.assertLogs(level='L5') as cm:
             logger = logging.getLogger('Test')
-            logger.debug('Test message')
+            logger.log(dcs.LogLevel.L5, 'Test message')
         lines = cm.output
         self.assertEqual(len(lines), 1)
-        self.assertEqual(lines[0], 'L10:Test:Test message')
+        self.assertEqual(lines[0], 'L5:Test:Test message')
         dcs.deactivate_logging()
         self.assertFalse(dcs.logs.root_logger.handlers)
 

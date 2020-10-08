@@ -43,6 +43,6 @@ setup(
         'scipy',
         'tblib',
     ],
-    python_requires='>=3.7',
+    python_requires='>=3.8',
     include_package_data=True,
     zip_safe=False)

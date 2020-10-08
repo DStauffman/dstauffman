@@ -18,6 +18,7 @@ except ModuleNotFoundError:
     # as they will be slow, or you are using pypy instead and it will run the JIT
     # Go through a bunch of worthless closures to get the necessary stubs
     def fake_decorator(func):
+        r"""Fake decorator for when numba isn't installed."""
         @functools.wraps(func)
         def wrapped_decorator(*args, **kwargs):
             def real_decorator(func2):
@@ -27,11 +28,12 @@ except ModuleNotFoundError:
 
     @fake_decorator
     def njit(func, *args, **kwargs):
+        r"""Fake njit decorator for when numba isn't installed."""
         return(func)
 
 #%% np_any
 @njit(cache=True)
-def np_any(x):
+def np_any(x, /):
     r"""
     Returns true if anything in the vector is true.
 
@@ -66,7 +68,7 @@ def np_any(x):
 
 #%% np_all
 @njit(cache=True)
-def np_all(x):
+def np_all(x, /):
     r"""
     Returns true if everything in the vector is true.
 
@@ -101,7 +103,7 @@ def np_all(x):
 
 #%% issorted_opt
 @njit(cache=True)
-def issorted_opt(x, descend=False):
+def issorted_opt(x, /, descend=False):
     r"""
     Tells whether the given array is sorted or not.
 

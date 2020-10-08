@@ -71,7 +71,7 @@ def get_np_time_units(date):
     return None if len(matches) == 1 else matches[1]
 
 #%% Functions - round_datetime
-def round_datetime(dt=None, round_to_sec=60, floor=False):
+def round_datetime(dt=None, /, round_to_sec=60, floor=False):
     r"""
     Round a datetime object to any time lapse in seconds.
 
@@ -120,7 +120,7 @@ def round_datetime(dt=None, round_to_sec=60, floor=False):
     return dt + datetime.timedelta(0, rounding-seconds, -dt.microsecond)
 
 #%% Functions - round_np_datetime
-def round_np_datetime(date_in, time_delta, floor=False):
+def round_np_datetime(date_in, /, time_delta, floor=False):
     r"""
     Rounds a numpy datetime64 time to the specified delta.
 
@@ -159,10 +159,8 @@ def round_np_datetime(date_in, time_delta, floor=False):
 
     """
     # check for consistent types
-    # For v3.8 in the future:
-    #assert t1 := get_np_time_units(date_in) == t2 := get_np_time_units(time_delta), \
-    assert get_np_time_units(date_in) == get_np_time_units(time_delta), 'The time refernce types ' + \
-    'must be the same, not {} and {}.'.format(str(date_in.dtype), str(time_delta.dtype)) # t1, t2
+    assert (t1 := get_np_time_units(date_in)) == (t2 := get_np_time_units(time_delta)), \
+        f'The time refernce types must be the same, not "{t1}" and "{t2}".'
     # check the 64 bit integer representations
     date_in_int = date_in.astype(np.int64)
     dt_int      = time_delta.astype(np.int64)
@@ -176,7 +174,7 @@ def round_np_datetime(date_in, time_delta, floor=False):
     return date_out
 
 #%% Functions - round_num_datetime
-def round_num_datetime(date_in, time_delta, floor=False):
+def round_num_datetime(date_in, /, time_delta, floor=False):
     r"""
     Rounds a numerica datetime to the given value.
 

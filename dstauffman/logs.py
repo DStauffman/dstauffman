@@ -44,12 +44,12 @@ def activate_logging(log_level: int = logging.INFO, filename: str = '', *, file_
 
     Examples
     --------
-    >>> from dstauffman import activate_logging, deactivate_logging, get_tests_dir
+    >>> from dstauffman import activate_logging, deactivate_logging, get_tests_dir, LogLevel
     >>> import logging
     >>> import os
     >>> filename = os.path.join(get_tests_dir(), 'testlog.txt')
-    >>> activate_logging(log_level=logging.DEBUG, filename=filename)
-    >>> logging.debug('Test message') # doctest: +SKIP
+    >>> activate_logging(log_level=LogLevel.L5, filename=filename)
+    >>> logging.log(LogLevel.L5, 'Test message') # doctest: +SKIP
     >>> deactivate_logging()
 
     Remove the log file

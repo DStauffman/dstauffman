@@ -12,7 +12,7 @@ from __future__ import annotations
 import doctest
 import glob
 import os
-from typing import List, Optional, overload, TYPE_CHECKING, Union
+from typing import Dict, Iterable, List, Optional, overload, TYPE_CHECKING, Union
 import unittest
 
 if TYPE_CHECKING:
@@ -45,15 +45,15 @@ class _FortranSource(Frozen):
     >>> code = _FortranSource('test_mod')
 
     """
-    def __init__(self, mod_name='', prog_name=''):
+    def __init__(self, mod_name: str = '', prog_name: str = ''):
         r"""Creates the instance of the class."""
-        self.prog_name   = prog_name
-        self.mod_name    = mod_name
-        self.uses        = []
-        self.types       = []
-        self.functions   = []
-        self.subroutines = []
-        self.prefix      = ''
+        self.prog_name: str         = prog_name
+        self.mod_name: str          = mod_name
+        self.uses: List[str]        = []
+        self.types: List[str]       = []
+        self.functions: List[str]   = []
+        self.subroutines: List[str] = []
+        self.prefix: str            = ''
 
     def validate(self):
         r"""Validates that the resulting parse is good."""
@@ -335,8 +335,9 @@ def _write_all_unit_test(filename: str, all_code: List[_FortranSource], header: 
     write_text_file(filename, text)
 
 #%% Functions - _makefile_template
-def _get_template(compiler='gfortran', program='prog', is_debug=False, build='', *, fcflags=None, \
-                  dbflags=None, use_preprocessor=True):
+def _get_template(compiler: str = 'gfortran', program: str = 'prog', is_debug: bool = False, \
+                  build: str = '', *, fcflags: Dict[str, str] = None, \
+                  dbflags: Dict[str, str] = None, use_preprocessor: bool = True) -> str:
     r"""
     Creates a template for the given compiler and debug settings.
 
@@ -472,8 +473,9 @@ clean :
     return template
 
 #%% Functions - _write_makefile
-def _write_makefile(makefile, code, *, template=None, program=None, compiler='gfortran', \
-        is_debug=False, sources=None, external_sources=None, replacements=None):
+def _write_makefile(makefile: str, code: List[_FortranSource], *, template: str = None, \
+        program: str = None, compiler: str = 'gfortran', is_debug: bool = False, sources: Iterable[str] = None, \
+        external_sources: Iterable[str] = None, replacements: Dict[str, str] = None) -> None:
     r"""
     Reads the given makefile template and inserts the relevant rules based on the given source code.
 
@@ -497,7 +499,7 @@ def _write_makefile(makefile, code, *, template=None, program=None, compiler='gf
     >>> makefile = os.path.join(folder, 'unit_tests.make')
     >>> template = os.path.join(folder, 'unit_tests_template.txt')
     >>> code = [] # TODO: write this line
-    >>> _write_makefile(makefile, template, code) # doctest: +SKIP
+    >>> _write_makefile(makefile, code=code, template=template) # doctest: +SKIP
 
     """
     # subfunction to build dependencies with checks for external or intrinsics
@@ -524,9 +526,9 @@ def _write_makefile(makefile, code, *, template=None, program=None, compiler='gf
     is_unit_test = program is None
     is_win = compiler == 'win'
     if sources is None:
-        sources = {}
+        sources = []
     if external_sources is None:
-        external_sources = {}
+        external_sources = []
     lowercase_map = {x.lower(): x for x in sources}
 
     # prefixes
@@ -540,6 +542,7 @@ def _write_makefile(makefile, code, *, template=None, program=None, compiler='gf
 
     # read the template into lines
     if template is None:
+        assert program is not None
         template = _get_template(compiler=compiler, program=program, is_debug=is_debug)
     orig_lines = template.split('\n')
 
@@ -565,6 +568,7 @@ def _write_makefile(makefile, code, *, template=None, program=None, compiler='gf
                     this_rule = line_wrap(this_rule, wrap=len_line, indent=8, line_cont='\\')
                 run_rules.append(this_rule)
     else:
+        assert isinstance(program, str)  # for mypy
         run_rules = ['']
         run_rules.append(program + ' : ' + prefix_src + program + '.f90 ' + prefix_bld + program + _OBJ_EXT)
         if is_win:
@@ -576,6 +580,7 @@ def _write_makefile(makefile, code, *, template=None, program=None, compiler='gf
     if is_unit_test:
         all_rule = 'all : ' + ' '.join([x + '.exe' for x in runners])
     else:
+        assert isinstance(program, str)  # for mypy
         all_rule = 'all : ' + ('create_dirs ' if is_win else '') + program
 
     # build the object file rules
@@ -619,7 +624,8 @@ def _write_makefile(makefile, code, *, template=None, program=None, compiler='gf
     write_text_file(makefile, text)
 
 #%% Functions - create_fortran_unit_tests
-def create_fortran_unit_tests(folder, *, template=None, external_sources=None, header=None):
+def create_fortran_unit_tests(folder: str, *, template: str = None, external_sources: Iterable[str] = None, \
+                              header: str = None) -> None:
     r"""
     Parses the given folder for Fortran unit test files to build programs that will execute them.
 
@@ -676,11 +682,11 @@ def create_fortran_unit_tests(folder, *, template=None, external_sources=None, h
     # write the master Makefile
     if template is not None:
         makefile = os.path.join(folder, 'unit_tests.make')
-        _write_makefile(makefile, template, all_code, external_sources=external_sources)
+        _write_makefile(makefile, code=all_code, template=template, external_sources=external_sources)
 
 #%% create_fortran_makefile
-def create_fortran_makefile(folder, makefile, program, sources, *, compiler='gfortran', \
-        is_debug=True, template=None, replacements=None):
+def create_fortran_makefile(folder: str, makefile: str, program: str, sources: List[str], *, \
+        compiler: str = 'gfortran', is_debug: bool = True, template: str = None, replacements: Dict[str, str] = None) -> None:
     r"""
     Parses the given folder for Fortran source files to build a makefile.
 

@@ -7,8 +7,10 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import contextlib
 import doctest
+from typing import Any, Dict, List, Optional, Union
 import unittest
 
 with contextlib.suppress(ModuleNotFoundError):
@@ -17,7 +19,7 @@ with contextlib.suppress(ModuleNotFoundError):
     import numpy as np
 
 #%% load_matlab
-def load_matlab(filename, varlist=None, squeeze=True, enums=None):
+def load_matlab(filename: str, varlist: List[str] = None, *, squeeze: bool = True, enums: List[Any] = None) -> Dict[str, Any]:
     r"""
     Load simple arrays from a MATLAB v7.3 HDF5 based *.mat file.
 
@@ -45,10 +47,10 @@ def load_matlab(filename, varlist=None, squeeze=True, enums=None):
     2.2
 
     """
-    def _load(file, varlist, squeeze, enums):
+    def _load(file: h5py.Group, varlist: Optional[List[str]], squeeze: bool, enums: Optional[List[Any]]) -> Dict[str, Any]:
         r"""Wrapped subfunction so it can be called recursively."""
         # initialize output
-        out = {}
+        out: Dict[str, Any] = {}
         # loop through keys, keys are the MATLAB variable names, like TELM
         for key in file:
             # skip keys that are not in the given varlist

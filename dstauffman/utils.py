@@ -20,7 +20,7 @@ import os
 import shlex
 import subprocess
 import sys
-from typing import Dict, List, Optional, TypeVar
+from typing import Dict, List, Optional, overload, TypeVar
 import unittest
 import warnings
 
@@ -47,7 +47,7 @@ _ALLOWED_ENVS: Optional[Dict[str, str]] = None # allows any environment variable
 _StrOrListStr = TypeVar('_StrOrListStr', str, List[str])
 
 #%% Functions - _nan_equal
-def _nan_equal(a, b):
+def _nan_equal(a, b, /) -> bool:
     r"""
     Test ndarrays for equality, but ignore NaNs.
 
@@ -60,7 +60,7 @@ def _nan_equal(a, b):
 
     Returns
     -------
-    is_same : bool
+    bool
         Flag for whether the inputs are the same or not
 
     Examples
@@ -79,14 +79,13 @@ def _nan_equal(a, b):
 
     """
     # preallocate to True
-    is_same = True
     try:
         # use numpy testing module to assert that they are equal (ignores NaNs)
         np.testing.assert_array_equal(a, b)
     except AssertionError:
         # if assertion fails, then they are not equal
-        is_same = False
-    return is_same
+        return False
+    return True
 
 #%% Functions - find_in_range
 def find_in_range(value, min_=-inf, max_=inf, *, inclusive=False, mask=None, precision=0, left=False, right=False):
@@ -540,7 +539,7 @@ def write_text_file(filename: str, text: str) -> None:
 
 #%% Functions - capture_output
 @contextmanager
-def capture_output(mode='out'):
+def capture_output(mode: str = 'out'):
     r"""
     Capture the stdout and stderr streams instead of displaying to the screen.
 
@@ -648,7 +647,7 @@ def unit(data, axis=0):
     return norm_data
 
 #%% modd
-def modd(x1, x2, out=None):
+def modd(x1, x2, /, out=None):
     r"""
     Return element-wise remainder of division, except that instead of zero it gives the divisor instead.
 
@@ -692,7 +691,7 @@ def modd(x1, x2, out=None):
         np.add(out, 1, out) # needed to force add to be inplace operation
 
 #%% is_np_int
-def is_np_int(x):
+def is_np_int(x, /):
     r"""
     Returns True if the input is an int or any form of an np.integer type.
 
@@ -731,7 +730,7 @@ def is_np_int(x):
     return False
 
 #%% np_digitize
-def np_digitize(x, bins, right=False):
+def np_digitize(x, /, bins, right=False):
     r"""
     Act as a wrapper to the numpy.digitize function with customizations.
 
@@ -805,7 +804,7 @@ def np_digitize(x, bins, right=False):
     return out
 
 #%% histcounts
-def histcounts(x, bins, right=False):
+def histcounts(x, /, bins, right=False):
     r"""
     Count the number of points in each of the given bins.
 
@@ -914,6 +913,12 @@ def full_print(**kwargs):
     np.set_printoptions(**opt)
 
 #%% line_wrap
+@overload
+def line_wrap(text: str, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = '\\') -> str: ...
+
+@overload
+def line_wrap(text: List[str], wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = '\\') -> List[str]: ...
+
 def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = '\\') -> _StrOrListStr:
     r"""
     Wrap lines of text to the specified length, breaking at any whitespace characters.
@@ -1139,9 +1144,7 @@ def execute_wrapper(command, folder, *, dry_run=False, ignored_codes=None, filen
     # simple dry run case, just display what would happen
     if dry_run:
         if isinstance(command, list):
-            command = ' '.join(command)
-            # TODO: available in Python v3.8:
-            #command = shlex.join(command)
+            command = shlex.join(command)
         print('Would execute "{}" in "{}"'.format(command, folder))
         return
     # clean up command
@@ -1276,7 +1279,7 @@ def is_datetime(time):
     return out
 
 #%% Functions - intersect
-def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
+def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False):
     r"""
     Finds the intersect of two arrays given a numerical tolerance.
 
@@ -1402,7 +1405,7 @@ def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
     return c
 
 #%% issorted
-def issorted(x, descend=False):
+def issorted(x, /, descend=False):
     r"""
     Tells whether the given array is sorted or not.
 
@@ -1435,7 +1438,7 @@ def issorted(x, descend=False):
     return np.all(x[:-1] <= x[1:])
 
 #%% zero_order_hold
-def zero_order_hold(x, xp, yp, left=nan, assume_sorted=False, return_indices=False):
+def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=False):
     r"""
     Interpolates a function by holding at the most recent value.
 

@@ -12,7 +12,7 @@ import datetime
 import doctest
 import os
 import sys
-from typing import List
+from typing import Dict, FrozenSet, List, Set, Tuple, Union
 import unittest
 
 try:
@@ -154,7 +154,7 @@ def run_pytests(folder: str) -> int:
     else:
         qapp = QApplication.instance()
     # run tests using pytest
-    exit_code = pytest.main([folder])
+    exit_code = pytest.main([folder, '-rfEsP'])
     # close the qapp
     qapp.closeAllWindows()
     return_code = ReturnCodes.clean if exit_code == 0 else ReturnCodes.test_failures
@@ -214,8 +214,9 @@ def run_coverage(folder: str, *, report: bool = True) -> int:
     return return_code
 
 #%% find_repo_issues
-def find_repo_issues(folder, extensions=frozenset(('m', 'py')), *, list_all=False, check_tabs=True, \
-              trailing=False, exclusions=None, check_eol=None, show_execute=False):
+def find_repo_issues(folder: str, extensions: Union[FrozenSet[str], Set[str], None] = frozenset(('m', 'py')), *, \
+              list_all: bool = False, check_tabs: bool = True, trailing: bool = False, \
+              exclusions: Tuple[str] = None, check_eol: str = None, show_execute: bool = False) -> bool:
     r"""
     Find all the tabs in source code that should be spaces instead.
 
@@ -314,7 +315,7 @@ def find_repo_issues(folder, extensions=frozenset(('m', 'py')), *, list_all=Fals
     return is_clean
 
 #%% Functions - delete_pyc
-def delete_pyc(folder, recursive=True, print_progress=True):
+def delete_pyc(folder: str, recursive: bool = True, *, print_progress: bool = True) -> None:
     r"""
     Delete all the *.pyc files (Python Byte Code) in the specified directory.
 
@@ -361,7 +362,7 @@ def delete_pyc(folder, recursive=True, print_progress=True):
                 _remove_pyc(folder, name)
 
 #%% Functions - get_python_definitions
-def get_python_definitions(text, *, include_private=False):
+def get_python_definitions(text: str, *, include_private: bool = False) -> List[str]:
     r"""
     Get all public class and def names from the text of the file.
 
@@ -387,8 +388,16 @@ def get_python_definitions(text, *, include_private=False):
     cap_letters = frozenset('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
     extended_letters = frozenset(cap_letters & {'_'})
     assert len(cap_letters) == 26
-    funcs = []
+    funcs: List[str] = []
+    skip_next = False
     for line in text.split('\n'):
+        # check for @overload function definitions and skip them
+        if skip_next:
+            skip_next = False
+            continue
+        if line == '@overload':
+            skip_next = True
+            continue
         if line.startswith('class ') and (include_private or not line.startswith('class _')):
             temp = line[len('class '):].split('(')
             temp = temp[0].split(':') # for classes without arguments
@@ -398,13 +407,13 @@ def get_python_definitions(text, *, include_private=False):
             temp = temp[0].split(':') # for functions without arguments
             funcs.append(temp[0])
         if len(line) > 0 and line[0] in cap_letters and '=' in line and ' ' in line:
-            temp = line.split(' ')[0]
-            if len(extended_letters - set(temp)) == 0:
-                funcs.append(temp)
+            temp2 = line.split(' ')[0]
+            if len(extended_letters - set(temp2)) == 0:
+                funcs.append(temp2)
     return funcs
 
 #%% Functions - make_python_init
-def make_python_init(folder, lineup=True, wrap=100, filename=''):
+def make_python_init(folder: str, *, lineup: bool = True, wrap: int = 100, filename: str = '') -> str:
     r"""
     Make the Python __init__.py file based on the files/definitions found within the specified folder.
 
@@ -451,9 +460,9 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
                 if any([this_elem.startswith(exc) for exc in exclusions]):
                     continue
                 # read the contents of the file
-                text = read_text_file(this_full_elem)
+                this_text = read_text_file(this_full_elem)
                 # get a list of definitions from the text file
-                funcs = get_python_definitions(text)
+                funcs = get_python_definitions(this_text)
                 # append these results (if not empty)
                 if len(funcs) > 0:
                     results[this_elem[:-3]] = funcs
@@ -470,7 +479,7 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     max_len   = max(len(x) for x in results)
     indent = len('from . import ') + max_len + 4
     # start building text output
-    text = []
+    text: List[str] = []
     # loop through results and build text output
     for key in sorted(results):
         pad = ' ' * (max_len - len(key)) if lineup else ''
@@ -488,13 +497,28 @@ def make_python_init(folder, lineup=True, wrap=100, filename=''):
     return output
 
 #%% write_unit_test_templates
-def write_unit_test_templates(folder, output, *, author='unknown', exclude=None, recursive=True, \
-        repo_subs=None, add_classification=False):
+def write_unit_test_templates(folder: str, output: str, *, author: str = 'unknown', \
+        exclude: Union[str, Tuple[str, ...]] = None, recursive: bool = True, repo_subs: Dict[str, str] = None, \
+        add_classification: bool = False) -> None:
     r"""
     Writes template files for unit tests.  These can then be used with a diff tool to find what is missing.
 
     Parameters
     ----------
+    folder : str
+        Folder location of files to write the unit tests for
+    output : str
+        Folder location of the output unit tests
+    author : str, optional
+        Name of the author
+    exclude : str or Tuple[str], optional
+        Names to exclude
+    recursive : bool, optional
+        Whether to process recursively
+    repo_subs : Dict[str, str], optional
+        Repository names to replace
+    add_classification : bool, optional
+        Whether to add a classification to the headers
 
     Notes
     -----
@@ -529,12 +553,12 @@ def write_unit_test_templates(folder, output, *, author='unknown', exclude=None,
     year = now.strftime('%Y')
     for file in files:
         # check for exclusions
-        if file.startswith(exclude) or file.startswith(output):
+        if (exclude is not None and file.startswith(exclude)) or file.startswith(output):
             continue
         # read the contents of the file
-        text = read_text_file(file)
+        this_text = read_text_file(file)
         # get a list of definitions from the text file
-        funcs = get_python_definitions(text, include_private=True)
+        funcs = get_python_definitions(this_text, include_private=True)
         # get the name of the test file
         names = file[num:].replace('\\','/').split('/')
         # get the name of the repo or sub-repo
