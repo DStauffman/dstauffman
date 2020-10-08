@@ -16,7 +16,8 @@ Notes
 
 #%% Imports
 from .classes   import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, load_method, \
-                           pprint_dict, Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, FixedDict
+                           pprint_dict, chop_time, subsample_class, Frozen, SaveAndLoad, \
+                           SaveAndLoadPickle, Counter, FixedDict
 from .constants import INT_TOKEN, IS_WINDOWS
 from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile

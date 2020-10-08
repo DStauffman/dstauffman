@@ -13,6 +13,7 @@ import copy
 import doctest
 import pickle
 import sys
+from typing import Any, Set
 import unittest
 import warnings
 
@@ -20,6 +21,14 @@ try:
     import h5py
 except ModuleNotFoundError: # pragma: no cover
     warnings.warn('h5py was not imported, so some file save and load capabilities will be limited.')
+
+try:
+    from numpy import all as np_all, inf
+except ModuleNotFoundError:
+    from dstauffman.optimized import np_all
+    from math import inf
+
+from dstauffman.utils import find_in_range
 
 #%% Functions - _frozen
 def _frozen(set):
@@ -240,6 +249,118 @@ def pprint_dict(dct, *, name='', indent=1, align=True, disp=True, offset=0):
     if disp:
         print(text)
     return text
+
+#%% Functions - chop_time
+def chop_time(self: Any, time_field: str, exclude: Set[str] = None, ti: float = -inf, tf: float = inf) -> None:
+    r"""
+    Chops the class to only include values within the given time span.
+
+    Parameters
+    ----------
+    self : class Any
+        Instance of the class that this method is operating on
+    time_field : str
+        The name of the time field to use for reference
+    ti : float, optional
+        Time to start from, inclusive
+    tf : float, optional
+        Time to end at, inclusize
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2020
+
+    Examples
+    --------
+    >>> from dstauffman import chop_time
+    >>> import numpy as np
+    >>> self = type('Temp', (object, ), {'time': np.array([1, 3, 4, 8]), 'data': np.array([7, 8, 9, 1])})
+    >>> time_field = 'time'
+    >>> ti = 2
+    >>> tf = 5
+    >>> print(self.time)
+    [1 3 4 8]
+
+    >>> print(self.data)
+    [7 8 9 1]
+
+    >>> chop_time(self, time_field=time_field, ti=ti, tf=tf)
+    >>> print(self.time)
+    [3 4]
+
+    >>> print(self.data)
+    [8 9]
+
+    """
+    # build the new index
+    ix = find_in_range(getattr(self, time_field), min_=ti, max_=tf, inclusive=True)
+    # exit early if no data is getting dropped
+    if np_all(ix):
+        return
+    # drop data
+    for key in vars(self):
+        if key.startswith('_'):
+            continue
+        if exclude is not None and key in exclude:
+            continue
+        old = getattr(self, key) # TODO: v3.8 walrus
+        if old is not None:
+            setattr(self, key, old[..., ix])
+
+#%% Functions - subsample_class
+def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Set[str] = None) -> None:
+    r"""
+    Subsamples the class instance to every `skip` data point.
+
+    Parameters
+    ----------
+    self : class Any
+        Instance of the class that this method is operating on
+    skip : int, optional
+        The number of points between data to ignore
+    start : int, optional
+        The point to start skipping from
+    skip_fields : set[str], optional
+        The name of any fields to ignore
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import subsample_class
+    >>> import numpy as np
+    >>> self = type('Temp', (object, ), {'time': np.array([1, 3, 4, 8]), \
+    ...     'data': np.array([7, 8, 9, 1]), 'name': 'name'})
+    >>> skip = 2
+    >>> start = 1
+    >>> skip_fields = {'name', }
+    >>> print(self.time)
+    [1 3 4 8]
+
+    >>> print(self.data)
+    [7 8 9 1]
+
+    >>> subsample_class(self, skip=skip, start=start, skip_fields=skip_fields)
+    >>> print(self.time)
+    [3 8]
+
+    >>> print(self.data)
+    [8 1]
+
+    >>> print(self.name)
+    name
+
+    """
+    for key in vars(self):
+        if key.startswith('_'):
+            continue
+        if skip_fields is not None and key in skip_fields:
+            continue
+        old = getattr(self, key) # TODO: v3.8 walrus
+        if old is not None:
+            setattr(self, key, old[..., start::skip])
 
 #%% Classes - Frozen
 class Frozen(object):

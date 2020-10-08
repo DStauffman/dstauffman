@@ -55,6 +55,16 @@ class _Example_No_Override2(object, metaclass=dcs.SaveAndLoadPickle):
     def load():
         return 2
 
+class _Example_Times(object):
+    def __init__(self, time, data, name='name'):
+        self.time = time
+        self.data = data
+        self.name = name
+    def chop(self, ti=-np.inf, tf=np.inf):
+        dcs.chop_time(self, ti=ti, tf=tf, time_field='time', exclude=frozenset({'name',}))
+    def subsample(self, skip=30, start=0):
+        dcs.subsample_class(self, skip=skip, start=start, skip_fields=frozenset({'name',}))
+
 #%% save_hdf5 - covered by SaveAndLoad
 #%% load_hdf5 - covered by SaveAndLoad
 #%% save_pickle - covered by SaveAndLoad
@@ -131,6 +141,50 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(lines[1], ' a   = 1')
         self.assertEqual(lines[2], ' bb  = 2')
         self.assertEqual(lines[3], ' ccc = 3')
+
+#%% chop_time
+class Test_chop_time(unittest.TestCase):
+    r"""
+    Tests the chop_time method with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.time = np.array([7, 1, 3, 5])
+        self.data = np.array([2, 4, 6, 8])
+        self.name = 'name'
+        self.telm = _Example_Times(self.time, self.data, name=self.name)
+        self.ti = 3
+        self.tf = 6
+        self.exp_time = np.array([3, 5])
+        self.exp_data = np.array([6, 8])
+
+    def test_nominal(self):
+        self.telm.chop(self.ti, self.tf)
+        np.testing.assert_array_equal(self.telm.time, self.exp_time)
+        np.testing.assert_array_equal(self.telm.data, self.exp_data)
+        self.assertEqual(self.telm.name, self.name)
+
+#%% subsample_class
+class Test_subsample_class(unittest.TestCase):
+    r"""
+    Tests the subsample_class method with the following cases:
+        Nominal
+    """
+    def setUp(self):
+        self.time = np.array([1, 7, 5, 3])
+        self.data = np.array([8, 6, 4, 2])
+        self.name = 'nombre'
+        self.telm = _Example_Times(self.time, self.data, name=self.name)
+        self.skip = 2
+        self.start = 1
+        self.exp_time = np.array([7, 3])
+        self.exp_data = np.array([6, 2])
+
+    def test_nominal(self):
+        self.telm.subsample(self.skip, start=self.start)
+        np.testing.assert_array_equal(self.telm.time, self.exp_time)
+        np.testing.assert_array_equal(self.telm.data, self.exp_data)
+        self.assertEqual(self.telm.name, self.name)
 
 #%% Frozen
 class Test_Frozen(unittest.TestCase):

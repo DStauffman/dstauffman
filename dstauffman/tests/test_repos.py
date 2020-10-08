@@ -282,7 +282,7 @@ class Test_make_python_init(unittest.TestCase):
         self.text     = 'from .enums import'
         self.text2    = 'from .enums     import IntEnumPlus'
         self.text3    = 'from .temp_file                import Test_Frozen'
-        self.line_num = 3
+        self.line_num = 4
         self.folder2  = dcs.get_tests_dir()
         self.filepath = os.path.join(self.folder2, 'temp_file.py')
         self.filename = os.path.join(self.folder2, '__init__2.py')
@@ -310,7 +310,7 @@ class Test_make_python_init(unittest.TestCase):
     def test_big_wrap(self):
         text = dcs.make_python_init(self.folder, wrap=1000)
         lines = text.split('\n')
-        self.assertEqual(lines[self.line_num-1][0:len(self.text2)], self.text2)
+        self.assertEqual(lines[self.line_num-2][0:len(self.text2)], self.text2)
 
     def test_small_wrap(self):
         with self.assertRaises(ValueError) as context:
