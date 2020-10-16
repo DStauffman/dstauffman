@@ -114,7 +114,7 @@ def run_unittests(names: str, verbose: bool = False) -> int:
     return return_code
 
 #%% run_pytests
-def run_pytests(folder: str) -> int:
+def run_pytests(folder: str, *args, **kwargs) -> int:
     r"""
     Runs all the unittests using pytest as the runner instead of unittest.
 
@@ -154,7 +154,7 @@ def run_pytests(folder: str) -> int:
     else:
         qapp = QApplication.instance()
     # run tests using pytest
-    exit_code = pytest.main([folder, '-rfEsP'])
+    exit_code = pytest.main([folder, '-rfEsP'] + list(*args), **kwargs)
     # close the qapp
     qapp.closeAllWindows()
     return_code = ReturnCodes.clean if exit_code == 0 else ReturnCodes.test_failures

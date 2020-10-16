@@ -201,9 +201,6 @@ def latex_str(value: Union[int, float, str], digits: int = -1, fixed: bool = Fal
     # check for string case, and if so, just do replacements
     if isinstance(value, str):
         return value.replace('_', r'\_')
-    # Let mypy know that this can no longer be a string
-    # TODO: this should work, but it still needs the ignore statement below
-    assert isinstance(value, (int, float)), f'Unexpected type for value of "{type(value)}".'
     # determine digit method
     letter = 'f' if fixed else 'g'
     # build the formatter
