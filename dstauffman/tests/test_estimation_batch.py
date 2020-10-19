@@ -811,7 +811,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
     Tests the estimation.run_bpe function with the following cases:
         TBD
     """
-    def setUp(self):
+    def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
         time        = np.arange(251)
         sim_params  = SimParams(time, magnitude=3.5, frequency=12, phase=180)
@@ -834,29 +834,29 @@ class Test_estimation_run_bpe(unittest.TestCase):
         self.opti_opts.params.append(estm.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
         self.opti_opts.params.append(estm.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
-    def test_nominal(self, mock_logger):
+    def test_nominal(self, mock_logger) -> None:
         mock_logger.level = LogLevel.L5
         (bpe_results, results) = estm.run_bpe(self.opti_opts)
         # TODO: check logging results?
         self.assertTrue(isinstance(bpe_results, estm.BpeResults))
         self.assertTrue(isinstance(results, np.ndarray))
 
-    def test_no_logging(self, mock_logger):
+    def test_no_logging(self, mock_logger) -> None:
         estm.batch.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         estm.run_bpe(self.opti_opts)
         # TODO: check logging results
 
-    def test_max_likelihood(self, mock_logger):
+    def test_max_likelihood(self, mock_logger) -> None:
         estm.batch.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         self.opti_opts.is_max_like = True
         estm.run_bpe(self.opti_opts)
 
-    def test_normalized(self, mock_logger):
+    def test_normalized(self, mock_logger) -> None:
         pass # TODO: method not yet coded all the way
 
-    def test_two_sided(self, mock_logger):
+    def test_two_sided(self, mock_logger) -> None:
         mock_logger.level = LogLevel.L5
         self.opti_opts.slope_method = 'two_sided'
         estm.run_bpe(self.opti_opts)
@@ -871,7 +871,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
         estm.batch.logger.setLevel(logging.CRITICAL)
         estm.run_bpe(self.opti_opts)
 
-    def test_to_convergence(self, mock_logger):
+    def test_to_convergence(self, mock_logger) -> None:
         self.opti_opts.max_iters = 100
         mock_logger.level = LogLevel.L5
         estm.run_bpe(self.opti_opts)
@@ -881,7 +881,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
 #        else:
 #            self.assertTrue(False, "Didn't converge")
 
-    def test_saving(self, mock_logger):
+    def test_saving(self, mock_logger) -> None:
         mock_logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         self.opti_opts.max_iters = 1
@@ -890,14 +890,14 @@ class Test_estimation_run_bpe(unittest.TestCase):
         estm.run_bpe(self.opti_opts)
         # TODO: test with more iterations and files?
 
-    def test_startup_finish_funcs(self, mock_logger):
+    def test_startup_finish_funcs(self, mock_logger) -> None:
         self.opti_opts.start_func = lambda sim_params: {'settings': None, 'additional': None}
         self.opti_opts.final_func = lambda sim_params, settings, additional: None
         estm.batch.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         estm.run_bpe(self.opti_opts)
 
-    def test_failed(self, mock_logger):
+    def test_failed(self, mock_logger) -> None:
         # TODO: this case doesn't fail yet.  Make it do so.
         self.opti_opts.max_iters = 1
         self.opti_opts.tol_delta_step = 100
@@ -906,7 +906,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
         mock_logger.level = logging.CRITICAL
         estm.run_bpe(self.opti_opts)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         if self.opti_opts.output_results:
             files = [self.opti_opts.output_results, 'bpe_results_iter_1.hdf5', 'cur_results_iter_1.hdf5']
             for this_file in files:
