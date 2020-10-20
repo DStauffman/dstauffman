@@ -9,11 +9,11 @@ Notes
 #%% Imports
 from __future__ import annotations
 import argparse
-from collections import namedtuple
+from dataclasses import dataclass
 import doctest
 import logging
 import sys
-from typing import List, NamedTuple, Tuple
+from typing import List, Optional, Tuple
 import unittest
 
 from dstauffman.enums import LogLevel, ReturnCodes
@@ -23,8 +23,9 @@ from dstauffman.logs import activate_logging
 logger = logging.getLogger(__name__)
 _VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'make_init', 'tests'})
 
-class _Flags(NamedTuple):
-    log_level: int
+@dataclass(frozen=True)
+class _Flags(object):
+    log_level: Optional[int]
     use_display: bool
     use_plotting: bool
     use_hdf5: bool
@@ -92,10 +93,10 @@ def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
     if command in _VALID_COMMANDS:
         # If valid, then parse the arguments with the appropiate method, so help calls parse_help etc.
         func = getattr(commands, 'parse_' + command)
-        parsed_args = func(args)
+        parsed_args: argparse.Namespace = func(args)
     else:
         raise ValueError('Unexpected command "{}".'.format(command))
-    return parsed_args  # type: ignore
+    return parsed_args
 
 #%% Functions - execute_command
 def execute_command(command: str, args: argparse.Namespace) -> int:
@@ -107,13 +108,13 @@ def execute_command(command: str, args: argparse.Namespace) -> int:
     if command in _VALID_COMMANDS:
         # If valid, then call the appropriate method, so help calls execute_help etc.
         func = getattr(commands, 'execute_' + command)
-        rc = func(args)
+        rc: Optional[int] = func(args)
     else:
         _print_bad_command(command)
         rc = ReturnCodes.bad_command
     if rc is None:
         rc = ReturnCodes.clean
-    return rc  # type: ignore
+    return rc
 
 #%% process_command_line_options
 def process_command_line_options() -> _Flags:
@@ -170,12 +171,9 @@ def process_command_line_options() -> _Flags:
         plotter = Plotter(show=False)
 
     # return the settings
-    flags: _Flags = namedtuple('Flags', ['log_level', 'use_display', 'use_plotting', 'use_hdf5'])
-    flags.log_level = log_level
-    flags.use_display = use_display
-    flags.use_plotting = use_plotting
-    flags.use_hdf5 = use_hdf5
-    return flags  # type: ignore
+    flags = _Flags(log_level=log_level, use_display=use_display, use_plotting=use_plotting, use_hdf5=use_hdf5)
+
+    return flags
 
 #%% Unit test
 if __name__ == '__main__':

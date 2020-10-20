@@ -20,7 +20,7 @@ class Test_estimation_orth(unittest.TestCase):
         Rank 3 matrix
         Rank 2 matrix
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.A1 = np.array([[1, 0, 1], [-1, -2, 0], [0, 1, -1]])
         self.r1 = 3
         self.Q1 = np.array([[-0.12000026, -0.80971228, 0.57442663], [ 0.90175265, 0.15312282, \
@@ -29,13 +29,13 @@ class Test_estimation_orth(unittest.TestCase):
         self.r2 = 2
         self.Q2 = np.array([[-0.70710678, 0.,], [0., 1.], [-0.70710678, 0.]])
 
-    def test_rank3(self):
+    def test_rank3(self) -> None:
         r = np.linalg.matrix_rank(self.A1)
         self.assertEqual(r, self.r1)
         Q = estm.orth(self.A1)
         np.testing.assert_array_almost_equal(Q, self.Q1)
 
-    def test_rank2(self):
+    def test_rank2(self) -> None:
         r = np.linalg.matrix_rank(self.A2)
         self.assertEqual(r, self.r2)
         Q = estm.orth(self.A2)
@@ -47,18 +47,18 @@ class Test_estimation_subspace(unittest.TestCase):
     Tests the estimation.subspace function with the following cases:
         Nominal
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.A = np.array([[1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1], [1, 1, 1], [-1, 1, -1], \
             [1, -1, -1], [-1, -1, 1]])
         self.B = np.array([[1, 1, 1, 1], [1, -1, 1, -1],[1, 1, -1, -1], [1, -1, -1, 1], [-1, -1, -1, -1], \
             [-1, 1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, -1]])
         self.theta = np.pi / 2
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         theta = estm.subspace(self.A, self.B)
         self.assertAlmostEqual(theta, self.theta)
 
-    def test_swapped_rank(self):
+    def test_swapped_rank(self) -> None:
         theta = estm.subspace(self.B, self.A)
         self.assertAlmostEqual(theta, self.theta)
 
@@ -69,14 +69,14 @@ class Test_estimation_mat_divide(unittest.TestCase):
         Nominal
         Poorly-conditioned
     """
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         a = np.array([[1, 2], [3, 4]], dtype=float)
         exp = np.array([1, -1], dtype=float)
         b = a @ exp
         x = estm.mat_divide(a, b)
         np.testing.assert_array_almost_equal(x, exp, 14)
 
-    def test_rcond(self):
+    def test_rcond(self) -> None:
         a = np.array([[1e6, 1e6], [1e6, 1e6 + 1e-8]], dtype=float)
         exp = np.array([1, -1], dtype=float)
         b = a @ exp

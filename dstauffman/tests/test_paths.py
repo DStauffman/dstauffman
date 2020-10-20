@@ -20,15 +20,15 @@ class Test_is_dunder(unittest.TestCase):
         True
         False
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.true = ['__dunder__', '__init__', '__a__']
         self.false = ['init', '__init__.py', '_private', '__private', 'private__', '____']
 
-    def test_trues(self):
+    def test_trues(self) -> None:
         for key in self.true:
             self.assertTrue(dcs.is_dunder(key), key + ' Should be a __dunder__ method')
 
-    def test_falses(self):
+    def test_falses(self) -> None:
         for key in self.false:
             self.assertFalse(dcs.is_dunder(key), key + ' Should not be considered dunder.')
 
@@ -38,7 +38,7 @@ class Test_get_root_dir(unittest.TestCase):
     Tests the get_root_dir function with the following cases:
         call the function
     """
-    def test_function(self):
+    def test_function(self) -> None:
         filepath      = inspect.getfile(dcs.get_root_dir)
         expected_root = os.path.split(filepath)[0]
         folder = dcs.get_root_dir()
@@ -51,7 +51,7 @@ class Test_get_tests_dir(unittest.TestCase):
     Tests the get_tests_dir function with the following cases:
         call the function
     """
-    def test_function(self):
+    def test_function(self) -> None:
         folder = dcs.get_tests_dir()
         self.assertEqual(folder, os.path.join(dcs.get_root_dir(), 'tests'))
 
@@ -61,7 +61,7 @@ class Test_get_data_dir(unittest.TestCase):
     Tests the get_data_dir function with the following cases:
         call the function
     """
-    def test_function(self):
+    def test_function(self) -> None:
         folder = dcs.get_data_dir()
         self.assertEqual(folder, os.path.abspath(os.path.join(dcs.get_root_dir(), '..', 'data')))
 
@@ -71,7 +71,7 @@ class Test_get_images_dir(unittest.TestCase):
     Tests the get_images_dir function with the following cases:
         call the function
     """
-    def test_function(self):
+    def test_function(self) -> None:
         folder = dcs.get_images_dir()
         self.assertEqual(folder, os.path.abspath(os.path.join(dcs.get_root_dir(), '..', 'images')))
 
@@ -81,7 +81,7 @@ class Test_get_output_dir(unittest.TestCase):
     Tests the get_output_dir function with the following cases:
         call the function
     """
-    def test_function(self):
+    def test_function(self) -> None:
         folder = dcs.get_output_dir()
         self.assertEqual(folder, os.path.abspath(os.path.join(dcs.get_root_dir(), '..', 'results')))
 

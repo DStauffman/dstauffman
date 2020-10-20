@@ -22,7 +22,7 @@ class Test_aerospace_KfInnov(unittest.TestCase):
     Tests the aerospace.KfInnov class with the following cases:
         Nominal
     """
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         innov = space.KfInnov()
         self.assertTrue(isinstance(innov, space.KfInnov)) # TODO: test better
 
@@ -32,14 +32,14 @@ class Test_aerospace_Kf(unittest.TestCase):
     Tests the aerospace.Kf class with the following cases:
         TBD
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.filename = os.path.join(get_tests_dir(), 'test_kf.hdf5')
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         kf = space.Kf()
         self.assertTrue(isinstance(kf, space.Kf)) # TODO: test better
 
-    def test_save_and_load(self):
+    def test_save_and_load(self) -> None:
         kf = space.Kf(num_points=2, num_states=6, num_axes=3, num_innovs=4)
         kf.chan = ['a', 'b', 'c']
         kf.save(self.filename)
@@ -47,7 +47,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         self.assertEqual(kf.chan, kf2.chan)
         np.testing.assert_array_equal(kf.time, kf2.time)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         with contextlib.suppress(FileNotFoundError):
             os.remove(self.filename)
 

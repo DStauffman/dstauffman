@@ -9,6 +9,7 @@ Notes
 
 #%% Imports
 import logging
+from typing import List
 import unittest
 
 import numpy as np
@@ -27,7 +28,7 @@ class _Config(Frozen):
     >>> config = _Config()
 
     """
-    def __init__(self):
+    def __init__(self) -> None:
         # log level for how much information to display while running
         self.log_level = logging.INFO
 
@@ -61,8 +62,8 @@ class _Model(Frozen):
     >>> model = _Model()
 
     """
-    def __init__(self):
-        self.field1 = 1
+    def __init__(self) -> None:
+        self.field1: int = 1
         self.field2 = np.array([1, 2, 3])
         self.field3 = {'a': 5, 'b': np.array([1.5, 2.5, 10.])}
         self.field4 = FixedDict()
@@ -84,7 +85,7 @@ class _Parameters(Frozen):
     def __init__(self):
         self.config = _Config()
         self.model = _Model()
-        self.models = [_Model(), _Model()]
+        self.models: List[_Model] = [_Model(), _Model()]
         self.models[0].field1 = 100
         self.models[1].field1 = 200
         self.models[1].field2[2] = 300
@@ -109,41 +110,43 @@ class Test_estimation__check_valid_param_name(unittest.TestCase):
         Bad attribute name
         Element of vector
     """
+    param: _Parameters
+
     @classmethod
-    def setUpClass(cls):
+    def setUpClass(cls) -> None:
         cls.param = _Parameters()
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         is_valid = estm.support._check_valid_param_name(self.param, 'param.config.log_level')
         self.assertTrue(is_valid)
 
-    def test_dictionary(self):
+    def test_dictionary(self) -> None:
         is_valid = estm.support._check_valid_param_name(self.param, "param.model.field3['a']")
         self.assertTrue(is_valid)
 
-    def test_bad_name1(self):
+    def test_bad_name1(self) -> None:
         is_valid = estm.support._check_valid_param_name(self.param, 'not_param.config.log_level')
         self.assertFalse(is_valid)
 
-    def test_bad_name2(self):
+    def test_bad_name2(self) -> None:
         is_valid = estm.support._check_valid_param_name(self.param, 'param.config.logless_level')
         self.assertFalse(is_valid)
 
-    def test_vector_element(self):
+    def test_vector_element(self) -> None:
         is_valid = estm.support._check_valid_param_name(self.param, "param.model.field2[1]")
         self.assertTrue(is_valid)
 
-    def test_array_in_dict_name(self):
+    def test_array_in_dict_name(self) -> None:
         is_valid = estm.support._check_valid_param_name(self.param, "param.model.field3['b'][2]")
         self.assertTrue(is_valid)
         is_valid = estm.support._check_valid_param_name(self.param, "param.model.field4['new'][0]")
         self.assertTrue(is_valid)
 
-    def test_list_vector_element(self):
+    def test_list_vector_element(self) -> None:
         is_valid = estm.support._check_valid_param_name(self.param, "param.models[0].field2[1]")
         self.assertTrue(is_valid)
 
-    def test_list_array_in_dict_name(self):
+    def test_list_array_in_dict_name(self) -> None:
         is_valid = estm.support._check_valid_param_name(self.param, "param.models[0].field3['b'][2]")
         self.assertTrue(is_valid)
         is_valid = estm.support._check_valid_param_name(self.param, "param.models[1].field4['new'][0]")
@@ -155,16 +158,16 @@ class Test_estimation_get_parameter(unittest.TestCase):
     Tests the estimation.get_parameter function with the following cases:
         Nominal (covers four cases in one)
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.values = [-100, -2, -3, 44.]
         self.names  = ['param.config.log_level', 'param.models[0].field1', "param.models[1].field2[2]", "param.models[1].field3['b'][1]"]
         self.param  = _Parameters()
         self.param.config.log_level = self.values[0]
-        self.param.models[0].field1 = self.values[1]
+        self.param.models[0].field1 = self.values[1]  # type: ignore[assignment]
         self.param.models[1].field2[2] = self.values[2]
         self.param.models[1].field3['b'][1] = self.values[3]
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         values = estm.get_parameter(self.param, self.names)
         np.testing.assert_array_almost_equal(values, self.values)
 
@@ -174,17 +177,17 @@ class Test_estimation_set_parameter(unittest.TestCase):
     Tests the estimation.set_parameter function with the following cases:
         Nominal (covers four cases in one)
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.orig   = [20, 100, 300, 2.5]
         self.values = [-100, -2, -3, 44.]
         self.names  = ['param.config.log_level', 'param.models[0].field1', "param.models[1].field2[2]", "param.models[1].field3['b'][1]"]
         self.param  = _Parameters()
         self.param.config.log_level = self.orig[0]
-        self.param.models[0].field1 = self.orig[1]
+        self.param.models[0].field1 = self.orig[1]  # type: ignore[assignment]
         self.param.models[1].field2[2] = self.orig[2]
         self.param.models[1].field3['b'][1] = self.orig[3]
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         values = estm.get_parameter(self.param, self.names)
         np.testing.assert_array_almost_equal(values, self.orig)
         estm.set_parameter(self.param, self.names, self.values)

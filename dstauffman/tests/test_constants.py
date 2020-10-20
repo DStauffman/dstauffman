@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+from typing import List
 import unittest
 
 import dstauffman as dcs
@@ -14,13 +15,13 @@ import dstauffman as dcs
 #%% Classes for testing
 class Test_all_values(unittest.TestCase):
 
-    def setUp(self):
-        self.ints = ['INT_TOKEN']
-        self.strs = []
-        self.bool = ['IS_WINDOWS']
+    def setUp(self) -> None:
+        self.ints: List[str] = ['INT_TOKEN']
+        self.strs: List[str] = []
+        self.bool: List[str] = ['IS_WINDOWS']
         self.master = set(self.ints) | set(self.strs) | set(self.bool)
 
-    def test_values(self):
+    def test_values(self) -> None:
         # confirm that all the expected values exist and have the correct type
         for key in self.ints:
             self.assertTrue(isinstance(getattr(dcs, key), int))
@@ -29,7 +30,7 @@ class Test_all_values(unittest.TestCase):
         for key in self.bool:
             self.assertTrue(isinstance(getattr(dcs, key), bool))
 
-    def test_missing(self):
+    def test_missing(self) -> None:
         for field in vars(dcs.constants):
             if field.isupper():
                 self.assertTrue(field in self.master, 'Test is missing: {}'.format(field))

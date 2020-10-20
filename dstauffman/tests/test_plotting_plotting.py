@@ -10,6 +10,7 @@ Notes
 import contextlib
 import datetime
 import os
+from typing import List
 import unittest
 from unittest.mock import patch
 
@@ -29,32 +30,32 @@ class Test_plotting_Opts(unittest.TestCase):
         normal mode
         add new attribute to existing instance
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.opts_fields = ['case_name']
 
-    def test_calling(self):
+    def test_calling(self) -> None:
         opts = plot.Opts()
         for field in self.opts_fields:
             self.assertTrue(hasattr(opts, field))
 
-    def test_new_attr(self):
+    def test_new_attr(self) -> None:
         opts = plot.Opts()
         with self.assertRaises(AttributeError):
-            opts.new_field_that_does_not_exist = 1
+            opts.new_field_that_does_not_exist = 1  # type: ignore[attr-defined]
 
-    def test_get_names_successful(self):
+    def test_get_names_successful(self) -> None:
         opts = plot.Opts()
         opts.names = ['Name 1', 'Name 2']
         name = opts.get_names(0)
         self.assertEqual(name, 'Name 1')
 
-    def test_get_names_unsuccessful(self):
+    def test_get_names_unsuccessful(self) -> None:
         opts = plot.Opts()
         opts.names = ['Name 1', 'Name 2']
         name = opts.get_names(2)
         self.assertEqual(name, '')
 
-    def test_get_date_zero_str(self):
+    def test_get_date_zero_str(self) -> None:
         opts = plot.Opts()
         date_str = opts.get_date_zero_str()
         self.assertEqual(date_str, '')
@@ -62,7 +63,7 @@ class Test_plotting_Opts(unittest.TestCase):
         date_str = opts.get_date_zero_str()
         self.assertEqual(date_str,'  t(0) = 01-Apr-2019 18:00:00 Z')
 
-    def get_time_limits(self):
+    def get_time_limits(self) -> None:
         opts = plot.Opts()
         opts.disp_xmin = 60
         opts.disp_xmax = np.inf
@@ -76,7 +77,7 @@ class Test_plotting_Opts(unittest.TestCase):
         self.assertEqual(r1, -np.inf)
         self.assertIsNone(r2)
 
-    def get_time_limits2(self):
+    def get_time_limits2(self) -> None:
         opts = plot.Opts().convert_dates('datetime')
         opts.disp_xmin = datetime.datetime(2020, 6, 1, 0, 0, 0)
         opts.disp_xmax = datetime.datetime(2020, 6, 1, 12, 0, 0)
@@ -86,7 +87,7 @@ class Test_plotting_Opts(unittest.TestCase):
         self.assertIsNone(r1)
         self.assertIsNone(r2)
 
-    def test_pprint(self):
+    def test_pprint(self) -> None:
         opts = plot.Opts()
         with capture_output() as out:
             opts.pprint(indent=2)
@@ -97,7 +98,7 @@ class Test_plotting_Opts(unittest.TestCase):
         self.assertEqual(lines[3], '  save_plot = False')
         self.assertEqual(lines[-1], '  names     = []')
 
-    def test_convert_dates(self):
+    def test_convert_dates(self) -> None:
         opts = plot.Opts()
         self.assertEqual(opts.disp_xmin, -np.inf)
         self.assertEqual(opts.time_base, 'sec')
@@ -105,7 +106,7 @@ class Test_plotting_Opts(unittest.TestCase):
         self.assertIsNone(opts.disp_xmin)
         self.assertEqual(opts.time_base, 'datetime')
 
-    def test_convert_dates2(self):
+    def test_convert_dates2(self) -> None:
         opts = plot.Opts(date_zero=datetime.datetime(2020, 6, 1))
         opts.rms_xmin = -10
         opts.rms_xmax = 10
@@ -127,32 +128,32 @@ class Test_plotting_Plotter(unittest.TestCase):
         Bad level (raises ValueError)
         printing
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.flag    = True
         self.plotter = plot.Plotter(self.flag)
         self.print   = 'Plotter(True)'
 
-    def test_get_plotter(self):
+    def test_get_plotter(self) -> None:
         flag = self.plotter.get_plotter()
         self.assertTrue(flag)
 
-    def test_set_plotter(self):
+    def test_set_plotter(self) -> None:
         flag = self.plotter.get_plotter()
         self.assertTrue(flag)
         self.plotter.set_plotter(False)
         self.assertFalse(plotter.get_plotter())
 
-    def test_printing(self):
+    def test_printing(self) -> None:
         with capture_output() as out:
             print(self.plotter)
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, self.print)
 
-    def test_no_show(self):
+    def test_no_show(self) -> None:
         self.plotter = plot.Plotter()
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         self.plotter.set_plotter(False)
 
 #%% plotting.plot_time_history
@@ -170,7 +171,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         Bad legend
         Show zero
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.description = 'Plot description'
         self.time        = np.arange(0, 10, 0.1) + 2000
         num_channels     = 5
@@ -181,23 +182,23 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.opts        = plot.Opts()
         self.opts.show_plot = False
         self.elements    = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
-        self.figs        = []
+        self.figs: List[plt.Figure] = []
         self.second_yscale = 1000000
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         self.figs.append(plot.plot_time_history(self.description, self.time, self.data, \
             opts=self.opts, data_as_rows=False))
 
-#    def test_defaults(self):
+#    def test_defaults(self) -> None:
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label))
 #
-#    def test_with_units(self):
+#    def test_with_units(self) -> None:
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, self.units))
 #
-#    def test_with_opts(self):
+#    def test_with_opts(self) -> None:
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, opts=self.opts))
 #
-#    def test_with_legend(self):
+#    def test_with_legend(self) -> None:
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, legend=self.legend))
 #
 #    @patch('dstauffman.plotting.plotting.logger')
@@ -206,10 +207,10 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 #        self.assertEqual(mock_logger.log.call_count, 1)
 #        mock_logger.log.assert_called_with(LogLevel.L5, '  plot skipped due to missing data.')
 #
-#    def test_ignore_zeros(self):
+#    def test_ignore_zeros(self) -> None:
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
 #
-#    def test_ignore_zeros2(self):
+#    def test_ignore_zeros2(self) -> None:
 #        self.data[:,1] = 0
 #        self.data[:,3] = 0
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
@@ -222,47 +223,47 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 #        self.assertEqual(mock_logger.log.call_count, 1)
 #        mock_logger.log.assert_called_with(LogLevel.L5, 'All Zeros plot skipped due to missing data.')
 #
-#    def test_colormap(self):
+#    def test_colormap(self) -> None:
 #        self.opts.colormap = 'Dark2'
 #        colormap = 'Paired'
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, \
 #            ignore_empties=True, colormap=colormap))
 #
-#    def test_bad_legend(self):
+#    def test_bad_legend(self) -> None:
 #        with self.assertRaises(AssertionError):
 #            plot.plot_time_history(self.time, self.data, self.label, legend=self.legend[:-1])
 #
-#    def test_second_yscale1(self):
+#    def test_second_yscale1(self) -> None:
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, units='population', \
 #            second_yscale=self.second_yscale))
 #
-#    def test_second_yscale2(self):
+#    def test_second_yscale2(self) -> None:
 #        second_yscale = {'New ylabel [units]': 100}
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, \
 #            second_yscale=second_yscale))
 #
-#    def test_single_point(self):
+#    def test_single_point(self) -> None:
 #        self.figs.append(plot.plot_time_history(self.time[1:], self.data[1:,:], self.label))
 #
-#    def test_show_zero(self):
+#    def test_show_zero(self) -> None:
 #        self.data += 1000
 #        self.opts.show_zero = True
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, opts=self.opts))
 #
-#    def test_data_lo_and_hi(self):
+#    def test_data_lo_and_hi(self) -> None:
 #        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, \
 #            data_lo=self.data-1, data_hi=self.data+1))
 #
-#    def test_not_ndarray(self):
+#    def test_not_ndarray(self) -> None:
 #        self.figs.append(plot.plot_time_history(0, 0, 'Zero'))
 #
-#    def test_0d(self):
+#    def test_0d(self) -> None:
 #        self.figs.append(plot.plot_time_history(np.array(0), np.array(0), 'Zero'))
 #
-#    def test_1d(self):
+#    def test_1d(self) -> None:
 #        self.figs.append(plot.plot_time_history(np.arange(5), np.arange(5), 'Line'))
 #
-#    def test_3d(self):
+#    def test_3d(self) -> None:
 #        data3 = np.empty((self.data.shape[0], 3, self.data.shape[1]), dtype=float)
 #        data3[:,0,:] = self.data
 #        data3[:,1,:] = self.data + 0.1
@@ -270,12 +271,12 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 #        self.opts.names = ['Run 1', 'Run 2', 'Run 3']
 #        self.figs.append(plot.plot_time_history(self.time, data3, self.label, opts=self.opts))
 #
-#    def test_bad_4d(self):
+#    def test_bad_4d(self) -> None:
 #        bad_data = np.random.rand(self.time.shape[0], 4, 5, 1)
 #        with self.assertRaises(AssertionError):
 #            plot.plot_time_history(self.time, bad_data, self.label, opts=self.opts)
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
@@ -295,9 +296,9 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
         x label rotation
         bad labels (should raise error)
     """
-    def setUp(self):
+    def setUp(self) -> None:
         num = 10
-        self.figs   = []
+        self.figs: List[plt.Figure] = []
         self.data   = unit(np.random.rand(num, num), axis=0)
         self.labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
         self.units  = 'percentage'
@@ -312,75 +313,75 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
                 elif i > j:
                     self.sym[i, j] = self.data[j, i]
 
-    def test_normal(self):
+    def test_normal(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.data, self.labels))
 
-    def test_nonsquare(self):
+    def test_nonsquare(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.data[:5, :3], [self.labels[:3], \
             self.labels[:5]]))
 
-    def test_default_labels(self):
+    def test_default_labels(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.data[:5, :3]))
 
-    def test_type(self):
+    def test_type(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.data, units=self.units))
 
-    def test_all_args(self):
+    def test_all_args(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.data, self.labels, self.units, self.opts, \
             matrix_name=self.matrix_name, cmin=0, cmax=1, xlabel='', ylabel='', \
             plot_lower_only=False, label_values=True, x_lab_rot=180, colormap='Paired'))
 
-    def test_symmetric(self):
+    def test_symmetric(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.sym))
 
-    def test_symmetric_all(self):
+    def test_symmetric_all(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.sym, plot_lower_only=False))
 
-    def test_above_one(self):
+    def test_above_one(self) -> None:
         large_data = self.data * 1000
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
 
-    def test_above_one_part2(self):
+    def test_above_one_part2(self) -> None:
         large_data = self.data * 1000
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmax=2000))
 
-    def test_below_one(self):
+    def test_below_one(self) -> None:
         large_data = 1000*(self.data - 0.5)
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
 
-    def test_below_one_part2(self):
+    def test_below_one_part2(self) -> None:
         large_data = 1000*(self.data - 0.5)
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmin=-2))
 
-    def test_within_minus_one(self):
+    def test_within_minus_one(self) -> None:
         large_data = self.data - 0.5
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
 
-    def test_within_minus_one_part2(self):
+    def test_within_minus_one_part2(self) -> None:
         large_data = self.data - 0.5
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmin=-1, cmax=1))
 
-    def test_xlabel(self):
+    def test_xlabel(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.data, xlabel='Testing Label'))
 
-    def test_ylabel(self):
+    def test_ylabel(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.data, ylabel='Testing Label'))
 
-    def test_x_label_rotation(self):
+    def test_x_label_rotation(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.data, self.labels, x_lab_rot=0))
 
-    def test_nans(self):
+    def test_nans(self) -> None:
         self.data[0, 0] = np.nan
         self.figs.append(plot.plot_correlation_matrix(self.data, self.labels))
 
-    def test_bad_labels(self):
+    def test_bad_labels(self) -> None:
         with self.assertRaises(ValueError):
             self.figs.append(plot.plot_correlation_matrix(self.data, ['a']))
 
-    def test_label_values(self):
+    def test_label_values(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.data, label_values=True))
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         for i in range(len(self.figs)):
             plt.close(self.figs.pop())
 
@@ -397,7 +398,7 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         Bad legend
         With Colormap
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.time = np.arange(0, 5, 1./12) + 2000
         num_bins = 5
         self.data = np.random.rand(len(self.time), num_bins)
@@ -407,22 +408,22 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         self.legend = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
         self.opts = plot.Opts()
         self.opts.show_plot = False
-        self.figs = []
+        self.figs: List[plt.Figure] = []
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts, \
             legend=self.legend))
 
-    def test_defaults(self):
+    def test_defaults(self) -> None:
         self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label))
 
-    def test_opts(self):
+    def test_opts(self) -> None:
         self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
 
-    def test_legend(self):
+    def test_legend(self) -> None:
         self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend))
 
-    def test_ignore_zeros(self):
+    def test_ignore_zeros(self) -> None:
         self.data[:, 1] = 0
         self.data[:, 3] = np.nan
         self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, ignore_empties=True))
@@ -433,24 +434,24 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(LogLevel.L5, '  plot skipped due to missing data.')
 
-    def test_colormap(self):
+    def test_colormap(self) -> None:
         self.opts.colormap = 'Dark2'
         colormap = 'Paired'
         self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, \
             opts=self.opts, colormap=colormap))
 
-    def test_bad_legend(self):
+    def test_bad_legend(self) -> None:
         with self.assertRaises(AssertionError):
             plot.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend[:-1])
 
-    def test_single_point(self):
+    def test_single_point(self) -> None:
         self.figs.append(plot.plot_bar_breakdown(self.time[:1], self.data[:1,:], label=self.label))
 
-    def test_new_colormap(self):
+    def test_new_colormap(self) -> None:
         self.opts.colormap = 'seismic'
         self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
@@ -466,7 +467,7 @@ class Test_plotting_setup_plots(unittest.TestCase):
         Save the plot
         Show the plot link
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.fig = plt.figure()
         self.fig.canvas.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
@@ -482,18 +483,18 @@ class Test_plotting_setup_plots(unittest.TestCase):
         self.opts.save_plot = False
         self.opts.save_path = get_tests_dir()
 
-    def test_title(self):
+    def test_title(self) -> None:
         plot.setup_plots(self.fig, self.opts)
 
-    def test_no_title(self):
+    def test_no_title(self) -> None:
         self.opts.case_name = ''
         plot.setup_plots(self.fig, self.opts)
 
-    def test_not_showing_plot(self):
+    def test_not_showing_plot(self) -> None:
         self.opts.show_plot = False
         plot.setup_plots(self.fig, self.opts)
 
-    def test_multiple_figs(self):
+    def test_multiple_figs(self) -> None:
         fig_list = [self.fig]
         (new_fig, ax) = plt.subplots()
         ax.plot(0, 0)
@@ -501,7 +502,7 @@ class Test_plotting_setup_plots(unittest.TestCase):
         plot.setup_plots(fig_list, self.opts)
         plt.close(new_fig)
 
-    def test_saving_plot(self):
+    def test_saving_plot(self) -> None:
         this_filename = os.path.join(get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
         self.opts.save_plot = True
         plot.setup_plots(self.fig, self.opts)
@@ -509,7 +510,7 @@ class Test_plotting_setup_plots(unittest.TestCase):
         with contextlib.suppress(FileNotFoundError):
             os.remove(this_filename)
 
-    def test_show_link(self):
+    def test_show_link(self) -> None:
         this_filename = os.path.join(get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
         self.opts.save_plot = True
         self.opts.show_link = True
@@ -522,7 +523,7 @@ class Test_plotting_setup_plots(unittest.TestCase):
             os.remove(this_filename)
         self.assertTrue(output.startswith('Plots saved to <a href="'))
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         plt.close(self.fig)
 
 #%% Unit test execution

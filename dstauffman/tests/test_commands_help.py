@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 import argparse
+from typing import List
 import unittest
 
 import dstauffman as dcs
@@ -19,7 +20,7 @@ class Test_commands_print_help(unittest.TestCase):
     Tests the commands.print_help function with the following cases:
         Nominal
     """
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         with dcs.capture_output() as out:
             commands.print_help()
         output = out.getvalue().strip()
@@ -34,11 +35,11 @@ class Test_commands_parse_help(unittest.TestCase):
     Tests the commands.parse_help function with the following cases:
         Nominal
     """
-    def setUp(self):
-        self.args = []
+    def setUp(self) -> None:
+        self.args: List[str] = []
         self.expected = argparse.Namespace()
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         args = commands.parse_help(self.args)
         self.assertEqual(args, self.expected)
 
@@ -48,10 +49,10 @@ class Test_commands_execute_help(unittest.TestCase):
     Tests the commands.execute_help function with the following cases:
         Nominal
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.args = argparse.Namespace()
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         with dcs.capture_output() as out:
             commands.execute_help(self.args)
         output = out.getvalue().strip()

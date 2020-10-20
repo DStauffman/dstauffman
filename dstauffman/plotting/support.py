@@ -415,9 +415,9 @@ def get_color_lists() -> Dict[str, Union[colors.ListedColormap, str]]:
         'xkcd:red', 'xkcd:green', 'xkcd:blue'))
     color_lists['quat_diff'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan',
         'xkcd:brown', 'xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
-    color_lists['dbl_off']   = colors.ListedColormap(color_lists['dbl_diff'].colors[:2])  # type: ignore
-    color_lists['vec_off']   = colors.ListedColormap(color_lists['vec_diff'].colors[:3])  # type: ignore
-    color_lists['quat_off']  = colors.ListedColormap(color_lists['quat_diff'].colors[:4])  # type: ignore
+    color_lists['dbl_off']   = colors.ListedColormap(color_lists['dbl_diff'].colors[:2])  # type: ignore[attr-defined]
+    color_lists['vec_off']   = colors.ListedColormap(color_lists['vec_diff'].colors[:3])  # type: ignore[attr-defined]
+    color_lists['quat_off']  = colors.ListedColormap(color_lists['quat_diff'].colors[:4])  # type: ignore[attr-defined]
     return color_lists
 
 #%% Functions - ignore_plot_data
@@ -609,7 +609,7 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
         figs = [fig]
     # make sure types is a list
     if not isinstance(plot_type, list):
-        types = []
+        types: List[str] = []
         types.append(plot_type)
     else:
         types = plot_type
@@ -1041,7 +1041,7 @@ def show_zero_ylim(ax: Axes) -> None:
         ax.set_ylim(top=0)
 
 #%% Functions - plot_second_units_wrapper
-def plot_second_units_wrapper(ax: Axes, second_yscale: Union[int, float, Dict[str, float]]) -> Axes:
+def plot_second_units_wrapper(ax: Axes, second_yscale: Union[None, int, float, Dict[str, float]]) -> Axes:
     r"""
     Wrapper to plot_second_yunits that allows numeric or dict options.
 

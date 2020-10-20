@@ -7,13 +7,18 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import contextlib
 import doctest
+from typing import Callable, ClassVar, TYPE_CHECKING
 import unittest
 
 with contextlib.suppress(ModuleNotFoundError):
     import h5py
 import numpy as np
+
+if TYPE_CHECKING:
+    from mypy_extensions import DefaultNamedArg
 
 from dstauffman import Frozen, SaveAndLoad
 
@@ -203,6 +208,9 @@ class KfRecord(Frozen, metaclass=SaveAndLoad):
     >>> kf_record = KfRecord()
 
     """
+    load: ClassVar[Callable[[str, DefaultNamedArg(bool, 'use_hdf5')], KfRecord]]
+    save: Callable[[KfRecord, str, DefaultNamedArg(bool, 'use_hdf5')], None]
+
     def __init__(self, num_points=0, num_states=0, num_active=0, num_axes=0, time_dtype=float):
         if num_points > 0:
             self.time = np.empty(num_points, dtype=time_dtype)

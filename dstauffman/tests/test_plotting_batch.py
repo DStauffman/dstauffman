@@ -7,8 +7,10 @@ Notes
 """
 
 #%% Imports
+from typing import List
 import unittest
 
+from matplotlib.figure import Figure
 import numpy as np
 
 from dstauffman import capture_output
@@ -27,25 +29,25 @@ class Test_plotting_plot_bpe_convergence(unittest.TestCase):
         No Opts
         No Costs
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.costs = np.array([1, 0.1, 0.05, 0.01])
         self.opts = plot.Opts()
         self.opts.show_plot = False
-        self.figs = []
+        self.figs: List[Figure] = []
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         self.figs.append(plot.plot_bpe_convergence(self.costs, opts=self.opts))
 
-    def test_only_two_costs(self):
+    def test_only_two_costs(self) -> None:
         self.figs.append(plot.plot_bpe_convergence(self.costs[np.array([0, 3])], opts=self.opts))
 
-    def test_no_opts(self):
+    def test_no_opts(self) -> None:
         self.figs.append(plot.plot_bpe_convergence(self.costs))
 
-    def test_no_costs(self):
+    def test_no_costs(self) -> None:
         self.figs.append(plot.plot_bpe_convergence([], opts=self.opts))
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         plot.close_all(self.figs)
 
 #%% plotting.plot_bpe_results
@@ -54,14 +56,14 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
     Tests the plotting.plot_bpe_results function with the following cases:
         TBD
     """
-    def setUp(self):
-        self.figs = []
+    def setUp(self) -> None:
+        self.figs: List[Figure] = []
         self.bpe_results = BpeResults()
         self.opts = plot.Opts()
         self.plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, \
         'covariance': True}
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         # add data
         names = ['a', 'b', 'c', 'd']
         matrix = np.random.rand(4, 4)
@@ -74,7 +76,7 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
         self.bpe_results.covariance   = matrix.copy()
         self.figs = plot.plot_bpe_results(self.bpe_results, plots=self.plots)
 
-    def test_nodata(self):
+    def test_nodata(self) -> None:
         with capture_output() as out:
             self.figs = plot.plot_bpe_results(self.bpe_results, plots=self.plots)
         lines = out.getvalue().strip().split('\n')
@@ -85,17 +87,17 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
         self.assertEqual(lines[3], "Data isn't available for information SVD plot.")
         self.assertEqual(lines[4], "Data isn't available for covariance plot.")
 
-    def test_no_plots(self):
+    def test_no_plots(self) -> None:
         plot.plot_bpe_results(self.bpe_results, opts=self.opts)
 
-    def test_bad_plot(self):
+    def test_bad_plot(self) -> None:
         with self.assertRaises(ValueError):
             plot.plot_bpe_results(self.bpe_results, plots={'bad_key': False})
 
-    def test_only_one_key(self):
+    def test_only_one_key(self) -> None:
         plot.plot_bpe_results(self.bpe_results, plots={'innovs': False})
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         plot.close_all(self.figs)
 
 #%% Unit test execution

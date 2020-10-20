@@ -12,11 +12,8 @@ from __future__ import annotations
 import doctest
 import glob
 import os
-from typing import Dict, Iterable, List, Optional, overload, TYPE_CHECKING, Union
+from typing import Dict, Iterable, List, Literal, Optional, overload, Union
 import unittest
-
-if TYPE_CHECKING:
-    from typing_extensions import Literal
 
 from dstauffman.classes import Frozen
 from dstauffman.utils import line_wrap, read_text_file, write_text_file
@@ -55,7 +52,7 @@ class _FortranSource(Frozen):
         self.subroutines: List[str] = []
         self.prefix: str            = ''
 
-    def validate(self):
+    def validate(self) -> None:
         r"""Validates that the resulting parse is good."""
         if self.prog_name:
             # If a program, then it should only have uses
@@ -69,7 +66,7 @@ class _FortranSource(Frozen):
             assert False, 'Either a module or program unit should be defined.'
 
     @property
-    def name(self):
+    def name(self) -> str:
         r"""Gets the name of the code, whether module or program."""
         if self.prog_name:
             if self.mod_name:
@@ -79,22 +76,22 @@ class _FortranSource(Frozen):
             return self.mod_name
 
     @property
-    def has_setup(self):
+    def has_setup(self) -> bool:
         r"""Whether the Module has a setup routine or not."""
         return 'setup' in self.subroutines
 
     @property
-    def has_setupclass(self):
+    def has_setupclass(self) -> bool:
         r"""Whether the Module has a setupclass routine or not."""
         return 'setupmethod' in self.subroutines # TODO get real name from FRUIT
 
     @property
-    def has_teardown(self):
+    def has_teardown(self) -> bool:
         r"""Whether the Module has a teardown routine or not."""
         return 'teardown' in self.subroutines # TODO get real name from FRUIT
 
     @property
-    def has_teardownclass(self):
+    def has_teardownclass(self) -> bool:
         r"""Whether the Module has a teardownclass routine or not."""
         return 'teardownclass' in self.subroutines # TODO get real name from FRUIT
 

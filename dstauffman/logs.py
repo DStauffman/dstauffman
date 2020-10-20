@@ -11,6 +11,7 @@ import datetime
 import doctest
 import logging
 import os
+from typing import Any, List
 import unittest
 
 from dstauffman.paths import get_output_dir
@@ -115,6 +116,54 @@ def deactivate_logging() -> None:
     # check for bad situations
     if i == max_handlers or bool(root_logger.handlers):
         raise ValueError('Something bad happended when trying to close the logger.') # pragma: no cover
+
+#%% Functions - log_multiline
+def log_multiline(logger: logging.Logger, log_level: int, message: str, *args: Any) -> None:
+    r"""
+    Passes messages through to the logger with options for multiline messages.
+
+    Parameters
+    ----------
+    logger : class logging.Logger
+        Logger
+    log_level : int
+        Log level
+    message : str or list[str] or numeric
+        Value to log
+    args : list of additional arguments to log
+        Additional options to log
+
+    Examples
+    --------
+    >>> from dstauffman import activate_logging, deactivate_logging, log_multiline, LogLevel
+    >>> import logging
+    >>> logger = logging.getLogger('Test')
+    >>> log_level = LogLevel.L5
+    >>> activate_logging(log_level)
+    >>> log_multiline(logger, log_level, 'Multi-line\nmessage') # doctest: +SKIP
+
+    >>> deactivate_logging()
+
+    """
+    def _get_message_list(message: Any) -> List[str]:
+        if isinstance(message, list):
+            # if message is already a list, then make sure everything is already a string
+            if all(isinstance(x, str) for x in message):
+                return message
+            return [str(message)]
+        if isinstance(message, str):
+            # if message is a string, then split it on every new line
+            return message.split('\n')
+        # otherwise, convert message to a string, and then split on every new line
+        return str(message).split('\n')
+    # if there are additional arguments, then append them with the same rules
+    all_msg = _get_message_list(message)
+    if args:
+        for x in args:
+            all_msg.extend(_get_message_list(x))
+    # log all the messages
+    for msg in all_msg:
+        logger.log(log_level, msg)
 
 #%% Unit test
 if __name__ == '__main__':

@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 from enum import unique
+from typing import ClassVar
 import unittest
 
 import numpy as np
@@ -16,36 +17,36 @@ import dstauffman as dcs
 
 #%% Support
 class _Example_Enum(dcs.IntEnumPlus):
-    field_one = 1
-    field_two = 2
-    field_ten = 10
+    field_one: ClassVar[int] = 1
+    field_two: ClassVar[int] = 2
+    field_ten: ClassVar[int] = 10
 
 class _Example_non_unique(dcs.IntEnumPlus):
-    one         = 1
-    two         = 2
-    another_one = 1
+    one: ClassVar[int]         = 1
+    two: ClassVar[int]         = 2
+    another_one: ClassVar[int] = 1
 
 class _Example_Consecutive(dcs.IntEnumPlus):
-    zero  = 0
-    one   = 1
-    two   = 2
+    zero: ClassVar[int]  = 0
+    one: ClassVar[int]   = 1
+    two: ClassVar[int]   = 2
 
 class _Example_Consecutive2(dcs.IntEnumPlus):
-    zero  = 0
-    one   = 1
-    skip  = 9
+    zero: ClassVar[int]  = 0
+    one: ClassVar[int]   = 1
+    skip: ClassVar[int]  = 9
 
 class _Example_Consecutive3(dcs.IntEnumPlus):
-    zero = 0
-    one  = 1
-    dup  = 0
+    zero: ClassVar[int] = 0
+    one: ClassVar[int]  = 1
+    dup: ClassVar[int]  = 0
 
 #%% IntEnumPlus
 class Test_IntEnumPlus(unittest.TestCase):
     r"""
     Tests the IntEnumPlus class by making a enum instance and testing all the methods.
     """
-    def test_printing_instance_str(self):
+    def test_printing_instance_str(self) -> None:
         with dcs.capture_output() as out:
             print(_Example_Enum.field_one)
             print(_Example_Enum.field_two)
@@ -53,7 +54,7 @@ class Test_IntEnumPlus(unittest.TestCase):
         out.close()
         self.assertEqual(output, '_Example_Enum.field_one: 1\n_Example_Enum.field_two: 2')
 
-    def test_printing_instance_repr(self):
+    def test_printing_instance_repr(self) -> None:
         with dcs.capture_output() as out:
             print(repr(_Example_Enum.field_one))
             print(repr(_Example_Enum.field_two))
@@ -61,45 +62,45 @@ class Test_IntEnumPlus(unittest.TestCase):
         out.close()
         self.assertEqual(output, '<_Example_Enum.field_one: 1>\n<_Example_Enum.field_two: 2>')
 
-    def test_printing_class_str(self):
+    def test_printing_class_str(self) -> None:
         with dcs.capture_output() as out:
             print(_Example_Enum)
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, '_Example_Enum.field_one: 1\n_Example_Enum.field_two: 2\n_Example_Enum.field_ten: 10')
 
-    def test_printing_class_repr(self):
+    def test_printing_class_repr(self) -> None:
         with dcs.capture_output() as out:
             print(repr(_Example_Enum))
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, '<_Example_Enum.field_one: 1>\n<_Example_Enum.field_two: 2>\n<_Example_Enum.field_ten: 10>')
 
-    def test_list_of_names(self):
+    def test_list_of_names(self) -> None:
         list_of_names = _Example_Enum.list_of_names()
         np.testing.assert_array_equal(list_of_names, ['field_one', 'field_two', 'field_ten'])
 
-    def test_list_of_values(self):
+    def test_list_of_values(self) -> None:
         list_of_values = _Example_Enum.list_of_values()
         np.testing.assert_array_equal(list_of_values, [1, 2, 10])
 
-    def test_num_values(self):
+    def test_num_values(self) -> None:
         num_values = _Example_Enum.num_values
         self.assertEqual(num_values, 3)
 
-    def test_min_value(self):
+    def test_min_value(self) -> None:
         min_value = _Example_Enum.min_value
         self.assertEqual(min_value, 1)
 
-    def test_max_value(self):
+    def test_max_value(self) -> None:
         max_value = _Example_Enum.max_value
         self.assertEqual(max_value, 10)
 
-    def test_bad_attribute(self):
+    def test_bad_attribute(self) -> None:
         with self.assertRaises(AttributeError):
             _Example_Enum.non_existant_field
 
-    def test_bad_uniqueness(self):
+    def test_bad_uniqueness(self) -> None:
         with self.assertRaises(ValueError):
             @unique
             class _BadUnique(dcs.IntEnumPlus):
@@ -115,24 +116,24 @@ class Test_consecutive(unittest.TestCase):
         Unique, but not consecutive
         Not unique
     """
-    def setUp(self):
-        self.enum = dcs.IntEnumPlus('Enum1', 'one two three')
+    def setUp(self) -> None:
+        self.enum = dcs.IntEnumPlus('Enum1', 'one two three')  # type: ignore[call-overload]
 
-    def test_consecutive(self):
+    def test_consecutive(self) -> None:
         enum = dcs.consecutive(_Example_Consecutive)
         self.assertTrue(isinstance(enum, dcs.enums._EnumMetaPlus))
 
-    def test_consecutive_but_not_zero(self):
+    def test_consecutive_but_not_zero(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.consecutive(self.enum)
         self.assertEqual(str(context.exception), 'Bad starting value (should be zero): 1')
 
-    def test_unique_but_non_consecutive(self):
+    def test_unique_but_non_consecutive(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.consecutive(_Example_Consecutive2)
         self.assertEqual(str(context.exception), 'Non-consecutive values found in _Example_Consecutive2: skip:9')
 
-    def test_not_unique(self):
+    def test_not_unique(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.consecutive(_Example_Consecutive3)
         self.assertEqual(str(context.exception), 'Duplicate values found in _Example_Consecutive3: dup -> zero')
@@ -144,11 +145,11 @@ class Test_ReturnCodes(unittest.TestCase):
         Clean code
         Not clean codes
     """
-    def test_clean(self):
+    def test_clean(self) -> None:
         # A clean exit should return zero
         self.assertEqual(dcs.ReturnCodes.clean, 0)
 
-    def test_not_clean(self):
+    def test_not_clean(self) -> None:
         # All non-clean exists should return an integer greater than 0
         rc = dcs.ReturnCodes
         for key in rc.__members__:

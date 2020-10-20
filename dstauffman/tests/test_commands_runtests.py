@@ -9,7 +9,7 @@ Notes
 #%% Imports
 import argparse
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import dstauffman as dcs
 import dstauffman.commands as commands
@@ -20,7 +20,7 @@ class Test_commands_parse_tests(unittest.TestCase):
     Tests the commands.parse_tests function with the following cases:
         Nominal
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.folder              = dcs.get_root_dir()
         self.expected            = argparse.Namespace()
         self.expected.docstrings = False
@@ -28,26 +28,26 @@ class Test_commands_parse_tests(unittest.TestCase):
         self.expected.unittest   = False
         self.expected.verbose    = False
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         args = commands.parse_tests([])
         self.assertEqual(args, self.expected)
 
-    def test_docstrings(self):
+    def test_docstrings(self) -> None:
         self.expected.docstrings = True
         args = commands.parse_tests(['-d'])
         self.assertEqual(args, self.expected)
 
-    def test_verbose(self):
+    def test_verbose(self) -> None:
         self.expected.verbose = True
         args = commands.parse_tests(['-v'])
         self.assertEqual(args, self.expected)
 
-    def test_library(self):
+    def test_library(self) -> None:
         self.expected.library = 'other'
         args = commands.parse_tests(['-l', 'other'])
         self.assertEqual(args, self.expected)
 
-    def test_unittest(self):
+    def test_unittest(self) -> None:
         self.expected.unittest = True
         args = commands.parse_tests(['-u'])
         self.assertEqual(args, self.expected)
@@ -59,7 +59,7 @@ class Test_commands_execute_tests(unittest.TestCase):
         Nominal
         TBD
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.folder = dcs.get_root_dir()
         self.args = argparse.Namespace(docstrings=False, library=None, unittest=False, verbose=False)
         self.patch_args = {'folder': self.folder, 'extensions': frozenset({'m', 'py'}), 'list_all': False, \
@@ -67,19 +67,19 @@ class Test_commands_execute_tests(unittest.TestCase):
                            'show_execute': False}
 
     @patch('dstauffman.commands.runtests.run_pytests')
-    def test_nominal(self, mocker):
+    def test_nominal(self, mocker: Mock) -> None:
         commands.execute_tests(self.args)
         mocker.assert_called_once_with(self.folder)
 
     @patch('dstauffman.commands.runtests.run_pytests')
-    def test_verbose(self, mocker):
+    def test_verbose(self, mocker: Mock) -> None:
         self.args.verbose = True
         commands.execute_tests(self.args)
         # Note: this doesn't add anything with pytest
         mocker.assert_called_once_with(self.folder)
 
     @patch('dstauffman.commands.runtests.run_docstrings')
-    def test_docstrings(self, mocker):
+    def test_docstrings(self, mocker: Mock) -> None:
         self.args.docstrings=True
         commands.execute_tests(self.args)
         (pos_args, kwargs) = mocker.call_args
@@ -87,7 +87,7 @@ class Test_commands_execute_tests(unittest.TestCase):
         self.assertTrue(len(pos_args) > 0)
 
     @patch('dstauffman.commands.runtests.run_docstrings')
-    def test_docstrings_verbose(self, mocker):
+    def test_docstrings_verbose(self, mocker: Mock) -> None:
         self.args.docstrings = True
         self.args.verbose = True
         commands.execute_tests(self.args)
@@ -96,7 +96,7 @@ class Test_commands_execute_tests(unittest.TestCase):
         self.assertTrue(len(pos_args) > 0)
 
     @patch('dstauffman.commands.runtests.run_pytests')
-    def test_library(self, mocker):
+    def test_library(self, mocker: Mock) -> None:
         self.args.library = 'other_folder'
         commands.execute_tests(self.args)
         (pos_args, kwargs) = mocker.call_args

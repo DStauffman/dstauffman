@@ -28,7 +28,7 @@ class Test_load_matlab(unittest.TestCase):
     Tests the load_matlab function with the following cases:
         Nominal
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.filename1 = os.path.join(dcs.get_tests_dir(), 'test_numbers.mat')
         self.filename2 = os.path.join(dcs.get_tests_dir(), 'test_struct.mat')
         self.filename3 = os.path.join(dcs.get_tests_dir(), 'test_enums.mat')
@@ -40,35 +40,35 @@ class Test_load_matlab(unittest.TestCase):
         self.offsets   = {'r': 10, 'c': 20, 'm': 30}
         self.enums     = {'Gender': [getattr(_Gender, x) for x in sorted(_Gender.list_of_names())]}
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         out = dcs.load_matlab(self.filename1, squeeze=False)
         self.assertEqual(set(out.keys()), {'col_nums', 'row_nums', 'mat_nums'})
         np.testing.assert_array_equal(out['row_nums'], self.row_nums)
         np.testing.assert_array_equal(out['col_nums'], self.col_nums)
         np.testing.assert_array_equal(out['mat_nums'], self.mat_nums)
 
-    def test_struct(self):
+    def test_struct(self) -> None:
         out = dcs.load_matlab(self.filename2, squeeze=True)
         self.assertEqual(set(out.keys()), {'x'})
         np.testing.assert_array_equal(out['x']['r'], np.squeeze(self.row_nums))
         np.testing.assert_array_equal(out['x']['c'], np.squeeze(self.col_nums))
         np.testing.assert_array_equal(out['x']['m'], self.mat_nums)
 
-    def test_load_varlist(self):
+    def test_load_varlist(self) -> None:
         out = dcs.load_matlab(self.filename2, varlist=['y'])
         self.assertEqual(out.keys(), set())
 
     @unittest.skip('Enum test case not working.')
-    def test_enum(self):
+    def test_enum(self) -> None:
         out = dcs.load_matlab(self.filename3, enums=self.enums)
         self.assertEqual(set(out.keys()), {'enum'})
         np.testing.assert_array_equal(out['enum'], self.exp_enum)
 
-    def test_unknown_enum(self):
+    def test_unknown_enum(self) -> None:
         with self.assertRaises(ValueError):
             dcs.load_matlab(self.filename3, enums={'Nope': [1, 2]})
 
-    def test_nested(self):
+    def test_nested(self) -> None:
         out = dcs.load_matlab(self.filename4, enums=self.enums)
         self.assertEqual(set(out.keys()), {'col_nums', 'row_nums', 'mat_nums', 'x', 'enum', 'data'})
         np.testing.assert_array_equal(out['row_nums'], np.squeeze(self.row_nums))

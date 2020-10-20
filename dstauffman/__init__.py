@@ -21,7 +21,7 @@ from .classes   import save_hdf5, load_hdf5, save_pickle, load_pickle, save_meth
 from .constants import INT_TOKEN, IS_WINDOWS
 from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
-from .logs      import activate_logging, deactivate_logging
+from .logs      import activate_logging, deactivate_logging, log_multiline
 from .matlab    import load_matlab
 from .optimized import np_any, np_all, issorted_opt
 from .parser    import main, parse_wrapper, parse_commands, execute_command, \

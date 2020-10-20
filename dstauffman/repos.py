@@ -214,9 +214,9 @@ def run_coverage(folder: str, *, report: bool = True) -> int:
     return return_code
 
 #%% find_repo_issues
-def find_repo_issues(folder: str, extensions: Union[FrozenSet[str], Set[str], None] = frozenset(('m', 'py')), *, \
+def find_repo_issues(folder: str, extensions: Union[FrozenSet[str], Set[str], Tuple[str], str, None] = frozenset(('m', 'py')), *, \
               list_all: bool = False, check_tabs: bool = True, trailing: bool = False, \
-              exclusions: Tuple[str] = None, check_eol: str = None, show_execute: bool = False) -> bool:
+              exclusions: Union[Tuple[str], str] = None, check_eol: str = None, show_execute: bool = False) -> bool:
     r"""
     Find all the tabs in source code that should be spaces instead.
 
@@ -407,7 +407,7 @@ def get_python_definitions(text: str, *, include_private: bool = False) -> List[
             temp = temp[0].split(':') # for functions without arguments
             funcs.append(temp[0])
         if len(line) > 0 and line[0] in cap_letters and '=' in line and ' ' in line:
-            temp2 = line.split(' ')[0]
+            temp2 = line.split(' ')[0].split(':')[0]
             if len(extended_letters - set(temp2)) == 0:
                 funcs.append(temp2)
     return funcs

@@ -10,12 +10,13 @@ Notes
 
 #%% Imports
 import doctest
+from typing import Any, List, Union
 import unittest
 
 import numpy as np
 
 #%% _get_sub_level
-def _get_sub_level(this_sub, part):
+def _get_sub_level(this_sub: Any, part: str) -> Any:
     r"""
     Gets the subfield level of parameters, with options to index by number into a list.
 
@@ -59,7 +60,7 @@ def _get_sub_level(this_sub, part):
     temp_sub  = getattr(this_sub, sub_parts[0])
     this_index = sub_parts[1].split(']')[0]
     try:
-        this_key = int(this_index)
+        this_key: Union[int, str] = int(this_index)
     except:
         this_key = this_index.replace('"','').replace("'",'')
     this_value = temp_sub[this_key]
@@ -69,7 +70,7 @@ def _get_sub_level(this_sub, part):
     return this_value
 
 #%% _check_valid_param_name
-def _check_valid_param_name(param, name):
+def _check_valid_param_name(param: Any, name: str) -> bool:
     r"""
     Checks whether the specified name actually exists.
 
@@ -114,7 +115,7 @@ def _check_valid_param_name(param, name):
     return True
 
 #%% get_parameter
-def get_parameter(param, names):
+def get_parameter(param: Any, names: List[str]) -> List[Any]:
     r"""
     Gets the desired parameter by name.
 
@@ -161,7 +162,7 @@ def get_parameter(param, names):
     return values
 
 #%% set_parameter
-def set_parameter(param, names, values):
+def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
     r"""
     Sets the desired parameter by a given name.
 
@@ -210,7 +211,7 @@ def set_parameter(param, names, values):
         sub_parts = parts[level].split('[')
         this_index = sub_parts[1].split(']')[0]
         try:
-            this_key = int(this_index)
+            this_key: Union[int, str] = int(this_index)
         except:
             this_key = this_index.replace('"','').replace("'",'')
         # set the value once on the last level

@@ -8,9 +8,11 @@ Notes
 
 #%% Imports
 import datetime
+from typing import List, Optional
 import unittest
 from unittest.mock import patch
 
+from matplotlib.figure import Figure
 import numpy as np
 
 from dstauffman import LogLevel
@@ -23,7 +25,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     Tests the plotting.make_quaternion_plot function with the following cases:
         TBD
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.description     = 'example'
         self.time_one        = np.arange(11)
         self.time_two        = np.arange(2, 13)
@@ -42,9 +44,9 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.plot_zero       = False
         self.show_rms        = True
         self.return_err      = True
-        self.figs            = None
+        self.figs: Optional[List[Figure]] = None
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
              rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, start_date=self.start_date, \
@@ -53,7 +55,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
-    def test_no_subplots(self):
+    def test_no_subplots(self) -> None:
         self.make_subplots = False
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
@@ -63,7 +65,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
-    def test_no_components(self):
+    def test_no_components(self) -> None:
         self.plot_components = False
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
@@ -74,7 +76,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             self.assertLess(abs(err['diff'][i]), 3.15)
         self.assertLess(abs(err['mag']), 3.15)
 
-    def test_no_start_date(self):
+    def test_no_start_date(self) -> None:
         self.start_date = ''
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, name_one=self.name_one, name_two=self.name_two, \
@@ -84,7 +86,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
-    def test_only_quat_one(self):
+    def test_only_quat_one(self) -> None:
         self.quat_two.fill(np.nan)
         self.name_two = ''
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
@@ -94,7 +96,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
              return_err=self.return_err)
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
-    def test_only_quat_two(self):
+    def test_only_quat_two(self) -> None:
         self.quat_one = None
         self.name_one = ''
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
@@ -104,7 +106,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
              return_err=self.return_err)
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
-    def test_rms_bounds(self):
+    def test_rms_bounds(self) -> None:
         self.rms_xmin = 5
         self.rms_xmax = 7
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
@@ -115,36 +117,36 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
-    def test_use_mean(self):
+    def test_use_mean(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, use_mean=True)
 
-    def test_no_rms_in_legend(self):
+    def test_no_rms_in_legend(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, use_mean=True, show_rms=False)
 
-    def test_plot_zero(self):
+    def test_plot_zero(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, plot_zero=True)
 
-    def test_plot_truth(self):
+    def test_plot_truth(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, truth_time=self.time_one, truth_data=self.quat_two)
 
-    def test_disp_bounds(self):
+    def test_disp_bounds(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two, disp_xmin=2, disp_xmax=5)
 
-    def test_no_overlap(self):
+    def test_no_overlap(self) -> None:
         self.time_one = np.arange(11).astype(float)
         self.time_two = np.arange(2, 13) + 0.5
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
              self.quat_one, self.quat_two)
 
-    def test_none1(self):
+    def test_none1(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, None, self.quat_one, None)
 
-    def test_none2(self):
+    def test_none2(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)
 
     @patch('dstauffman.plotting.aerospace.logger')
@@ -153,7 +155,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(LogLevel.L5, 'No quaternion data was provided, so no plot was generated for "".')
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         if self.figs:
             plot.close_all(self.figs)
 

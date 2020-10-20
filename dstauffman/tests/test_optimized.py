@@ -21,11 +21,11 @@ class Test_np_any(unittest.TestCase):
         All false
         Some true
     """
-    def test_false(self):
+    def test_false(self) -> None:
         x = np.zeros(1000, dtype=bool)
         self.assertFalse(dcs.np_any(x))
 
-    def test_true(self):
+    def test_true(self) -> None:
         x = np.zeros(1000, dtype=bool)
         x[333] = True
         self.assertTrue(dcs.np_any(x))
@@ -37,11 +37,11 @@ class Test_np_all(unittest.TestCase):
         All true
         Some false
     """
-    def test_true(self):
+    def test_true(self) -> None:
         x = np.ones(1000, dtype=bool)
         self.assertTrue(dcs.np_all(x))
 
-    def test_false(self):
+    def test_false(self) -> None:
         x = np.ones(1000, dtype=bool)
         x[333] = False
         self.assertFalse(dcs.np_all(x))
@@ -55,20 +55,20 @@ class Test_issorted_opt(unittest.TestCase):
         Reverse sorted (x2)
         Lists
     """
-    def test_sorted(self):
+    def test_sorted(self) -> None:
         x = np.array([1, 3, 3, 5, 7])
         self.assertTrue(dcs.issorted_opt(x))
 
-    def test_not_sorted(self):
+    def test_not_sorted(self) -> None:
         x = np.array([1, 4, 3, 5, 7])
         self.assertFalse(dcs.issorted_opt(x))
 
-    def test_reverse_sorted(self):
+    def test_reverse_sorted(self) -> None:
         x = np.array([4, np.pi, 1., -1.])
         self.assertFalse(dcs.issorted_opt(x))
         self.assertTrue(dcs.issorted(x, descend=True))
 
-    def test_lists(self):
+    def test_lists(self) -> None:
         x = List([-np.inf, 0, 1, np.pi, 5, np.inf])
         self.assertTrue(dcs.issorted_opt(x))
         self.assertFalse(dcs.issorted(x, descend=True))

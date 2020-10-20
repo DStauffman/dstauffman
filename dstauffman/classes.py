@@ -9,11 +9,12 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import copy
 import doctest
 import pickle
 import sys
-from typing import Any, Set
+from typing import Any, Callable, Dict, List, Literal, Optional, overload, Set, Type, TypeVar
 import unittest
 import warnings
 
@@ -30,8 +31,11 @@ except ModuleNotFoundError:
 
 from dstauffman.utils import find_in_range
 
+#%% Constants
+_T = TypeVar('_T')
+
 #%% Functions - _frozen
-def _frozen(set):
+def _frozen(set: Callable) -> Callable:
     r"""
     Support function for Frozen class.
 
@@ -80,7 +84,7 @@ def save_hdf5(self, filename: str='') -> None:
                 grp.create_dataset(key, data=value)
 
 #%% Methods - load_hdf5
-def load_hdf5(cls, filename=''):
+def load_hdf5(cls: Type[_T], filename: str='') -> _T:
     r"""
     Load the object from disk.
 
@@ -119,7 +123,7 @@ def save_pickle(self, filename: str) -> None:
         pickle.dump(self, file)
 
 #%% Methods - load_pickle
-def load_pickle(cls, filename):
+def load_pickle(cls: Type[_T], filename: str) -> _T:
     r"""
     Load a class instance from a pickle file.
 
@@ -135,7 +139,7 @@ def load_pickle(cls, filename):
 
     """
     with open(filename, 'rb') as file:
-        out = pickle.load(file)
+        out: _T = pickle.load(file)
     return out
 
 #%% Methods - save_method
@@ -162,7 +166,7 @@ def save_method(self, filename: str = '', use_hdf5: bool = True) -> None:
         save_hdf5(self, filename)
 
 #%% Methods - load_method
-def load_method(cls, filename='', use_hdf5=True):
+def load_method(cls: Type[_T], filename: str = '', use_hdf5: bool = True) -> _T:
     r"""
     Load the object from disk.
 
@@ -178,14 +182,15 @@ def load_method(cls, filename='', use_hdf5=True):
         raise ValueError('No file specified to load.')
     if not use_hdf5:
         # Version 1 (Pickle):
-        out = load_pickle(cls, filename.replace('hdf5', 'pkl'))
+        out: _T = load_pickle(cls, filename.replace('hdf5', 'pkl'))
     else:
         # Version 2 (HDF5):
         out = load_hdf5(cls, filename)
     return out
 
 #%% pprint_dict
-def pprint_dict(dct, *, name='', indent=1, align=True, disp=True, offset=0):
+def pprint_dict(dct: Dict[Any, Any], *, name: str='', indent: int = 1, align: bool = True, \
+        disp: bool = True, offset: int = 0) -> str:
     r"""
     Print all the fields and their values.
 
@@ -222,9 +227,9 @@ def pprint_dict(dct, *, name='', indent=1, align=True, disp=True, offset=0):
 
     """
     # print the name of the class/dictionary
-    text = []
+    lines: List[str] = []
     if name:
-        text.append(' ' * offset + name)
+        lines.append(' ' * offset + name)
     # build indentation padding
     this_indent = ' ' * (indent + offset)
     # find the length of the longest field name
@@ -244,8 +249,8 @@ def pprint_dict(dct, *, name='', indent=1, align=True, disp=True, offset=0):
         else:
             this_pad = ' ' * (pad_len - len(this_key)) if align else ''
             this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
-        text.append(this_line)
-    text = '\n'.join(text)
+        lines.append(this_line)
+    text = '\n'.join(lines)
     if disp:
         print(text)
     return text
@@ -376,7 +381,16 @@ class Frozen(object):
     class __metaclass__(type):
         __setattr__ = _frozen(type.__setattr__)
 
-    def pprint(self, return_text=False, **kwargs):
+    @overload
+    def pprint(self, return_text: Literal[True], **kwargs) -> str: ...
+
+    @overload
+    def pprint(self, return_text: Literal[False], **kwargs) -> None: ...
+
+    @overload
+    def pprint(self, **kwargs) -> Optional[str]: ...
+
+    def pprint(self, return_text: bool = False, **kwargs) -> Optional[str]:
         r"""Displays a pretty print version of the class."""
         name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
         text = pprint_dict(self.__dict__, name=name, **kwargs)

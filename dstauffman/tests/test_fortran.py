@@ -27,7 +27,7 @@ class Test__parse_source(unittest.TestCase):
     Tests the _parse_source function with the following cases:
         call the function
     """
-    def setUp(self):
+    def setUp(self) -> None:
         lines = ['module test_mod']
         lines.append('')
         lines.append('use constants, only: RK')
@@ -46,7 +46,7 @@ class Test__parse_source(unittest.TestCase):
         self.filename = os.path.join(dcs.get_tests_dir(), 'temp_code.f90')
         dcs.write_text_file(self.filename, text)
 
-    def test_function(self):
+    def test_function(self) -> None:
         this_code = dcs.fortran._parse_source(self.filename)
         self.assertEqual(this_code.mod_name, 'test_mod')
         self.assertEqual(this_code.uses, ['constants', 'utils'])
@@ -54,7 +54,7 @@ class Test__parse_source(unittest.TestCase):
         self.assertEqual(this_code.functions, ['func', 'add'])
         self.assertEqual(this_code.subroutines, ['sub_name'])
 
-    def test_not_single(self):
+    def test_not_single(self) -> None:
         code = dcs.fortran._parse_source(self.filename, assert_single=False)
         self.assertEqual(len(code), 1)
         this_code = code[0]
@@ -64,7 +64,7 @@ class Test__parse_source(unittest.TestCase):
         self.assertEqual(this_code.functions, ['func', 'add'])
         self.assertEqual(this_code.subroutines, ['sub_name'])
 
-    def tearDown(self):
+    def tearDown(self) -> None:
         with contextlib.suppress(FileNotFoundError):
             os.remove(self.filename)
 

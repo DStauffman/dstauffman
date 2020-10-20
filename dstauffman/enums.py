@@ -11,7 +11,7 @@ Notes
 #%% Imports
 import doctest
 from enum import Enum, EnumMeta
-from typing import ClassVar
+from typing import Callable, ClassVar, List
 import unittest
 
 from dstauffman.paths import is_dunder
@@ -23,38 +23,38 @@ class _EnumMetaPlus(EnumMeta):
 
     Also makes the __getattr__ attribute error more explicit.
     """
-    def __repr__(cls):
-        return '\n'.join((repr(field) for field in cls))
-    def __str__(cls):
-        return '\n'.join((str(field) for field in cls))
-    def __getattr__(cls, name):
+    def __repr__(cls) -> str:
+        return '\n'.join((repr(field) for field in cls))  # type: ignore[var-annotated]
+    def __str__(cls) -> str:
+        return '\n'.join((str(field) for field in cls))  # type: ignore[var-annotated]
+    def __getattr__(cls, name) -> int:
         r"""Return the enum member matching `name`."""
         if is_dunder(name):
             raise AttributeError(name)
         try:
-            return cls._member_map_[name]
+            return cls._member_map_[name]  # type: ignore[no-any-return, index]
         except KeyError:
             text = '"{}" does not have an attribute of "{}"'.format(cls.__name__, name)
             raise AttributeError(text) from None
-    def list_of_names(cls):
+    def list_of_names(cls) -> List[str]:
         r"""Return a list of all the names within the enumerator."""
         # look for class.name: pattern, ignore class, return names only
         names = list(cls.__members__)
         return names
-    def list_of_values(cls):
+    def list_of_values(cls) -> List[int]:
         r"""Return a list of all the values within the enumerator."""
-        values = list(cls.__members__.values())
+        values = list(cls.__members__.values())  # type: ignore[var-annotated]
         return values
     @property
-    def num_values(cls):
+    def num_values(cls) -> int:
         r"""Return the number of values within the enumerator."""
         return len(cls)
     @property
-    def min_value(cls):
+    def min_value(cls) -> int:
         r"""Return the minimum value of the enumerator."""
         return min(cls.__members__.values())
     @property
-    def max_value(cls):
+    def max_value(cls) -> int:
         r"""Return the maximum value of the enumerator."""
         return max(cls.__members__.values())
 
@@ -65,19 +65,19 @@ class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
     Plus it includes additional methods for convenient retrieval of number of values, their names,
     mins and maxes.
     """
-    def __str__(self):
+    def __str__(self) -> str:
         r"""Return string representation."""
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
 #%% Decorators - consecutive
-def consecutive(enumeration):
+def consecutive(enumeration: Callable) -> Callable:
     r"""Class decorator for enumerations ensuring unique and consecutive member values that start from zero."""
     duplicates = []
     non_consecutive = []
-    last_value = min(enumeration.__members__.values()) - 1
+    last_value = min(enumeration.__members__.values()) - 1  # type: ignore[attr-defined]
     if last_value != -1:
         raise ValueError('Bad starting value (should be zero): {}'.format(last_value+1))
-    for name, member in enumeration.__members__.items():
+    for name, member in enumeration.__members__.items():  # type: ignore[attr-defined]
         if name != member.name:
             duplicates.append((name, member.name))
         if member != last_value + 1:

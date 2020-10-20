@@ -11,6 +11,7 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 from copy import deepcopy
 import doctest
 from itertools import repeat
@@ -19,12 +20,16 @@ import multiprocessing
 import os
 import sys
 import time
-from typing import Any, Callable, ClassVar, List, Tuple
+from typing import Any, Callable, ClassVar, Dict, List, Optional, Tuple, Type, TYPE_CHECKING
 import unittest
 
 import numpy as np
 from numpy.linalg import norm
 import tblib.pickling_support
+
+if TYPE_CHECKING:
+    from types import TracebackType
+    from mypy_extensions import DefaultNamedArg
 
 from dstauffman import activate_logging, deactivate_logging, Frozen, LogLevel, pprint_dict, rss, \
     SaveAndLoad, setup_dir
@@ -38,15 +43,16 @@ logger = logging.getLogger(__name__)
 #%% Classes - _ExceptionWrapper
 class _ExceptionWrapper(object):
     r"""Exception wrapper that can pass through multiprocessing calls and back to main."""
-    def __init__(self, ee):
+    def __init__(self, ee: Type[BaseException]):
         # save exception
         self.ee = ee
         # save traceback
-        __, __, self.tb = sys.exc_info()
+        # Note: sys.exc_info: Union[Tuple[None, None, None], Tuple[Type[BaseException], Any, TracebackType]]
+        self.tb: Optional[TracebackType] = sys.exc_info()[2]
 
-    def re_raise(self):
+    def re_raise(self) -> None:
         r"""Re-raise a previously saved exception and traceback."""
-        raise self.ee.with_traceback(self.tb)
+        raise self.ee.with_traceback(self.tb)  # type: ignore[arg-type, call-arg]
 
 #%% OptiOpts
 class OptiOpts(Frozen):
@@ -65,17 +71,17 @@ class OptiOpts(Frozen):
     """
     def __init__(self):
         # specifically required settings
-        self.model_func      = None
-        self.model_args      = None # {}
-        self.cost_func       = None
-        self.cost_args       = None # {} # TODO: add note, these are additional cost args, plus model_args
-        self.get_param_func  = None
-        self.set_param_func  = None
-        self.output_folder   = ''
-        self.output_results  = 'bpe_results.hdf5'
-        self.params          = None # []
-        self.start_func      = None
-        self.final_func      = None
+        self.model_func: Callable           = None
+        self.model_args: Dict[str, Any]     = None # {}
+        self.cost_func: Callable            = None
+        self.cost_args: Dict[str, Any]      = None # {} # TODO: add note, these are additional cost args, plus model_args
+        self.get_param_func: Callable       = None
+        self.set_param_func: Callable       = None
+        self.output_folder: str             = ''
+        self.output_results: str            = 'bpe_results.hdf5'
+        self.params: List[Any]              = None # []
+        self.start_func: Optional[Callable] = None
+        self.final_func: Optional[Callable] = None
 
         # less common optimization settings
         self.slope_method: str      = 'one_sided' # from {'one_sided', 'two_sided'}
@@ -92,7 +98,7 @@ class OptiOpts(Frozen):
         self.trust_radius: float    = 1.0
         self.max_cores: int         = None # set to a number to parallelize, use -1 for all
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         r"""Check for equality based on the values of the fields."""
         # if not of the same type, then they are not equal
         if type(other) != type(self):
@@ -145,15 +151,16 @@ class OptiParam(Frozen):
     ['magnitude', 'frequency', 'phase']
 
     """
-    def __init__(self, name, *, best=np.nan, min_=-np.inf, max_=np.inf, minstep=1e-4, typical=1.):
-        self.name: str = name
-        self.best: float = best
-        self.min_: float = min_
-        self.max_: float = max_
-        self.minstep: float = minstep
-        self.typical: float = typical
+    def __init__(self, name: str, *, best: float=np.nan, min_: float=-np.inf, max_: float=np.inf, \
+        minstep: float = 1e-4, typical: float = 1.):
+        self.name = name
+        self.best = best
+        self.min_ = min_
+        self.max_ = max_
+        self.minstep = minstep
+        self.typical = typical
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         r"""Check for equality between two OptiParam instances."""
         # if not of the same type, then they are not equal
         if type(other) != type(self):
@@ -168,7 +175,7 @@ class OptiParam(Frozen):
         return True
 
     @staticmethod
-    def get_array(opti_param: List['OptiParam'], type_: str = 'best') -> np.ndarray:
+    def get_array(opti_param: List[OptiParam], type_: str = 'best') -> np.ndarray:
         r"""
         Get a numpy vector of all the optimization parameters for the desired type.
 
@@ -233,8 +240,8 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     >>> bpe_results = BpeResults()
 
     """
-    load: ClassVar[Callable[[str], 'BpeResults']]
-    save: Callable[['BpeResults', str], None]
+    load: ClassVar[Callable[[str, DefaultNamedArg(bool, 'use_hdf5')], BpeResults]]
+    save: Callable[[BpeResults, str, DefaultNamedArg(bool, 'use_hdf5')], None]
 
     def __init__(self):
         self.param_names  = None
@@ -251,7 +258,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         self.final_innovs = None
         self.final_cost   = None
 
-    def __str__(self):
+    def __str__(self) -> str:
         r"""
         Print all the fields of the Results.
 
@@ -286,7 +293,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         text = pprint_dict(dct, name=name, indent=2, align=True, disp=False)
         return text
 
-    def pprint(self):
+    def pprint(self) -> None:  # type: ignore[override]
         r"""
         Print summary results.
 
@@ -1088,14 +1095,14 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     _print_divider(new_line=False, level=LogLevel.L5)
     logger.log(LogLevel.L5, 'Validating optimization options.')
     # Must have specified all parameters
-    assert callable(opti_opts.model_func)
-    assert isinstance(opti_opts.model_args, dict)
-    assert callable(opti_opts.cost_func)
-    assert isinstance(opti_opts.cost_args, dict)
-    assert callable(opti_opts.get_param_func)
-    assert callable(opti_opts.set_param_func)
+    assert callable(opti_opts.model_func), 'Model function must be callable.'
+    assert isinstance(opti_opts.model_args, dict), 'Model args must be a dictionary.'
+    assert callable(opti_opts.cost_func), 'Cost function must be callable.'
+    assert isinstance(opti_opts.cost_args, dict), 'Cost args must be a dictionary.'
+    assert callable(opti_opts.get_param_func), 'Get parameters function must be callable.'
+    assert callable(opti_opts.set_param_func), 'Get paramaters function must be callable.'
     # Must estimate at least one parameter (TODO: make work with zero?)
-    assert isinstance(opti_opts.params, list) and len(opti_opts.params) > 0
+    assert isinstance(opti_opts.params, list) and len(opti_opts.params) > 0  # type: ignore[unreachable]
     # Must be one of these two slope methods
     assert opti_opts.slope_method in {'one_sided', 'two_sided'}
     # Must be one of these two seach methods
