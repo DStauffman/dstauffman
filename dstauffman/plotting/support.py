@@ -1218,8 +1218,8 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np
     # initialize output
     ix = {'pts': [], 'one': np.array([], dtype=bool), 'two': np.array([], dtype=bool), 'overlap': np.array([], dtype=bool)}
     # alias some flags
-    have1 = time_one is not None
-    have2 = time_two is not None
+    have1 = time_one is not None and np.size(time_one) > 0
+    have2 = time_two is not None and np.size(time_two) > 0
     have3 = time_overlap is not None
     # get the min/max times
     if have1:

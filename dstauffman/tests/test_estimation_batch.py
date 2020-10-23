@@ -14,7 +14,7 @@ import logging
 import os
 from typing import Any, Dict
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 
@@ -316,26 +316,26 @@ class Test_estimation_batch__print_divider(unittest.TestCase):
     def setUp(self) -> None:
         self.output = '******************************'
 
-    def test_with_new_line(self, mock_logger) -> None:
+    def test_with_new_line(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
         estm.batch._print_divider()
         self.assertEqual(mock_logger.log.call_count, 2)
         mock_logger.log.assert_any_call(LogLevel.L5, ' ')
         mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
 
-    def test_no_new_line(self, mock_logger) -> None:
+    def test_no_new_line(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(LogLevel.L8)
         estm.batch._print_divider(new_line=False)
         mock_logger.log.assert_called_with(LogLevel.L5, '******************************')
 
-    def test_alternative_level(self, mock_logger) -> None:
+    def test_alternative_level(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(LogLevel.L2)
         estm.batch._print_divider(level=LogLevel.L0)
         self.assertEqual(mock_logger.log.call_count, 2)
         mock_logger.log.assert_any_call(LogLevel.L0, ' ')
         mock_logger.log.assert_any_call(LogLevel.L0, '******************************')
 
-    def test_not_logging(self, mock_logger) -> None:
+    def test_not_logging(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(LogLevel.L2)
         estm.batch._print_divider()
         self.assertEqual(mock_logger.log.call_count, 2)
@@ -445,14 +445,14 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.two_sided = False
         self.normalized = False
 
-    def test_nominal(self, mock_logger) -> None:
+    def test_nominal(self, mock_logger: Mock) -> None:
         (jacobian, gradient, hessian) = estm.batch._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
             self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
         self.assertEqual(jacobian.shape, (201, 3))
         self.assertEqual(gradient.shape, (3, ))
         self.assertEqual(hessian.shape, (3, 3))
 
-    def test_normalized(self, mock_logger) -> None:
+    def test_normalized(self, mock_logger: Mock) -> None:
         self.normalized = True
         (jacobian, gradient, hessian) = estm.batch._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
             self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
@@ -460,7 +460,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.assertEqual(gradient.shape, (3, ))
         self.assertEqual(hessian.shape, (3, 3))
 
-    def test_two_sided(self, mock_logger) -> None:
+    def test_two_sided(self, mock_logger: Mock) -> None:
         self.two_sided = True
         (jacobian, gradient, hessian) = estm.batch._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
             self.cur_results, two_sided=self.two_sided, normalized=self.normalized)
@@ -468,7 +468,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.assertEqual(gradient.shape, (3, ))
         self.assertEqual(hessian.shape, (3, 3))
 
-    def test_norm_and_two_sided(self, mock_logger) -> None:
+    def test_norm_and_two_sided(self, mock_logger: Mock) -> None:
         self.normalized = True
         self.two_sided = True
         (jacobian, gradient, hessian) = estm.batch._finite_differences(self.opti_opts, self.model_args, self.bpe_results, \
@@ -530,29 +530,29 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.delta_step_len   = 10
         self.pred_func_change = 10
 
-    def test_not_converged(self, mock_logger) -> None:
+    def test_not_converged(self, mock_logger: Mock) -> None:
         convergence = estm.batch._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, self.pred_func_change)
         self.assertFalse(convergence)
 
-    def test_convergence1(self, mock_logger) -> None:
+    def test_convergence1(self, mock_logger: Mock) -> None:
         convergence = estm.batch._check_for_convergence(self.opti_opts, 0.5, self.delta_step_len, self.pred_func_change)
         self.assertTrue(convergence)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(LogLevel.L3, 'Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1')
 
-    def test_convergence2(self, mock_logger) -> None:
+    def test_convergence2(self, mock_logger: Mock) -> None:
         convergence = estm.batch._check_for_convergence(self.opti_opts, self.cosmax, 1.5, self.pred_func_change)
         self.assertTrue(convergence)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(LogLevel.L3, 'Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
 
-    def test_convergence3(self, mock_logger) -> None:
+    def test_convergence3(self, mock_logger: Mock) -> None:
         convergence = estm.batch._check_for_convergence(self.opti_opts, self.cosmax, self.delta_step_len, -2.5)
         self.assertTrue(convergence)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(LogLevel.L3, 'Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
 
-    def test_convergence4(self, mock_logger) -> None:
+    def test_convergence4(self, mock_logger: Mock) -> None:
         convergence = estm.batch._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
         self.assertTrue(convergence)
         self.assertEqual(mock_logger.log.call_count, 3)
@@ -560,7 +560,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         mock_logger.log.assert_any_call(LogLevel.L3, 'Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2')
         mock_logger.log.assert_any_call(LogLevel.L3, 'Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3')
 
-    def test_no_logging(self, mock_logger) -> None:
+    def test_no_logging(self, mock_logger: Mock) -> None:
         mock_logger.setLevel(logging.NOTSET) # CRITICAL
         with capture_output('err') as err:
             convergence = estm.batch._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
@@ -671,32 +671,32 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         self.jacobian    = np.random.rand(201, 3)
         self.normalized  = False
 
-    def test_nominal(self, mock_logger) -> None:
+    def test_nominal(self, mock_logger: Mock) -> None:
         estm.batch._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
-    def test_normalized(self, mock_logger) -> None:
+    def test_normalized(self, mock_logger: Mock) -> None:
         self.normalized = True
         estm.batch._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
-    def test_levenberg_marquardt(self, mock_logger) -> None:
+    def test_levenberg_marquardt(self, mock_logger: Mock) -> None:
         self.opti_opts.search_method = 'levenberg_marquardt'
         estm.batch._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
-    def test_bad_method(self, mock_logger) -> None:
+    def test_bad_method(self, mock_logger: Mock) -> None:
         self.opti_opts.search_method = 'bad_method'
         with self.assertRaises(ValueError):
             estm.batch._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
                 self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
-    def test_minimums(self, mock_logger) -> None:
+    def test_minimums(self, mock_logger: Mock) -> None:
         self.opti_opts.params[0].min_ = 10
         estm.batch._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
-    def test_huge_trust_radius(self, mock_logger) -> None:
+    def test_huge_trust_radius(self, mock_logger: Mock) -> None:
         # TODO: figure out how to get this to shrink a Newton step.
         self.opti_opts.trust_radius = 1000000
         estm.batch._dogleg_search(self.opti_opts, self.opti_opts.model_args, self.bpe_results, self.cur_results, \
@@ -718,14 +718,14 @@ class Test_estimation_batch__analyze_results(unittest.TestCase):
         self.jacobian = np.array([[1, 2], [3, 4], [5, 6]])
         self.normalized = False
 
-    def test_nominal(self, mock_logger) -> None:
+    def test_nominal(self, mock_logger: Mock) -> None:
         estm.batch._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
 
-    def test_normalized(self, mock_logger) -> None:
+    def test_normalized(self, mock_logger: Mock) -> None:
         self.normalized = True
         estm.batch._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
 
-    def test_no_iters(self, mock_logger) -> None:
+    def test_no_iters(self, mock_logger: Mock) -> None:
         self.opti_opts.max_iters = 0
         estm.batch._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
 
@@ -753,56 +753,56 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
         with self.assertRaises(AssertionError):
             estm.validate_opti_opts(self.opti_opts)
 
-    def test_nominal(self, mock_logger) -> None:
+    def test_nominal(self, mock_logger: Mock) -> None:
         is_valid = estm.validate_opti_opts(self.opti_opts)
         self.assertTrue(is_valid)
         mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
         mock_logger.log.assert_any_call(LogLevel.L5, 'Validating optimization options.')
 
-    def test_no_logging(self, mock_logger) -> None:
+    def test_no_logging(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(LogLevel.L3)
         is_valid = estm.validate_opti_opts(self.opti_opts)
         self.assertTrue(is_valid)
         mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
         mock_logger.log.assert_any_call(LogLevel.L5, 'Validating optimization options.')
 
-    def test_not_valid1(self, mock_logger) -> None:
+    def test_not_valid1(self, mock_logger: Mock) -> None:
         self.opti_opts.model_func = None  # type: ignore[assignment]
         self.support()
 
-    def test_not_valid2(self, mock_logger) -> None:
+    def test_not_valid2(self, mock_logger: Mock) -> None:
         self.opti_opts.model_args = None  # type: ignore[assignment]
         self.support()
 
-    def test_not_valid3(self, mock_logger) -> None:
+    def test_not_valid3(self, mock_logger: Mock) -> None:
         self.opti_opts.cost_func = None  # type: ignore[assignment]
         self.support()
 
-    def test_not_valid4(self, mock_logger) -> None:
+    def test_not_valid4(self, mock_logger: Mock) -> None:
         self.opti_opts.cost_args = None  # type: ignore[assignment]
         self.support()
 
-    def test_not_valid5(self, mock_logger) -> None:
+    def test_not_valid5(self, mock_logger: Mock) -> None:
         self.opti_opts.get_param_func = None  # type: ignore[assignment]
         self.support()
 
-    def test_not_valid6(self, mock_logger) -> None:
+    def test_not_valid6(self, mock_logger: Mock) -> None:
         self.opti_opts.set_param_func = None  # type: ignore[assignment]
         self.support()
 
-    def test_not_valid7(self, mock_logger) -> None:
+    def test_not_valid7(self, mock_logger: Mock) -> None:
         self.opti_opts.params = []
         self.support()
 
-    def test_not_valid8(self, mock_logger) -> None:
+    def test_not_valid8(self, mock_logger: Mock) -> None:
         self.opti_opts.params = None  # type: ignore[assignment]
         self.support()
 
-    def test_not_valid9(self, mock_logger) -> None:
+    def test_not_valid9(self, mock_logger: Mock) -> None:
         self.opti_opts.slope_method = 'bad_sided'
         self.support()
 
-    def test_not_valid10(self, mock_logger) -> None:
+    def test_not_valid10(self, mock_logger: Mock) -> None:
         self.opti_opts.search_method = 'wild_ass_guess'
         self.support()
 
@@ -836,29 +836,29 @@ class Test_estimation_run_bpe(unittest.TestCase):
         self.opti_opts.params.append(estm.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
         self.opti_opts.params.append(estm.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
-    def test_nominal(self, mock_logger) -> None:
+    def test_nominal(self, mock_logger: Mock) -> None:
         mock_logger.level = LogLevel.L5
         (bpe_results, results) = estm.run_bpe(self.opti_opts)
         # TODO: check logging results?
         self.assertTrue(isinstance(bpe_results, estm.BpeResults))
         self.assertTrue(isinstance(results, np.ndarray))
 
-    def test_no_logging(self, mock_logger) -> None:
+    def test_no_logging(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         estm.run_bpe(self.opti_opts)
         # TODO: check logging results
 
-    def test_max_likelihood(self, mock_logger) -> None:
+    def test_max_likelihood(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         self.opti_opts.is_max_like = True
         estm.run_bpe(self.opti_opts)
 
-    def test_normalized(self, mock_logger) -> None:
+    def test_normalized(self, mock_logger: Mock) -> None:
         pass # TODO: method not yet coded all the way
 
-    def test_two_sided(self, mock_logger) -> None:
+    def test_two_sided(self, mock_logger: Mock) -> None:
         mock_logger.level = LogLevel.L5
         self.opti_opts.slope_method = 'two_sided'
         estm.run_bpe(self.opti_opts)
@@ -873,7 +873,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
         estm.batch.logger.setLevel(logging.CRITICAL)
         estm.run_bpe(self.opti_opts)
 
-    def test_to_convergence(self, mock_logger) -> None:
+    def test_to_convergence(self, mock_logger: Mock) -> None:
         self.opti_opts.max_iters = 100
         mock_logger.level = LogLevel.L5
         estm.run_bpe(self.opti_opts)
@@ -883,7 +883,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
 #        else:
 #            self.assertTrue(False, "Didn't converge")
 
-    def test_saving(self, mock_logger) -> None:
+    def test_saving(self, mock_logger: Mock) -> None:
         mock_logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         self.opti_opts.max_iters = 1
@@ -892,14 +892,14 @@ class Test_estimation_run_bpe(unittest.TestCase):
         estm.run_bpe(self.opti_opts)
         # TODO: test with more iterations and files?
 
-    def test_startup_finish_funcs(self, mock_logger) -> None:
+    def test_startup_finish_funcs(self, mock_logger: Mock) -> None:
         self.opti_opts.start_func = lambda sim_params: {'settings': None, 'additional': None}
         self.opti_opts.final_func = lambda sim_params, settings, additional: None
         estm.batch.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         estm.run_bpe(self.opti_opts)
 
-    def test_failed(self, mock_logger) -> None:
+    def test_failed(self, mock_logger: Mock) -> None:
         # TODO: this case doesn't fail yet.  Make it do so.
         self.opti_opts.max_iters = 1
         self.opti_opts.tol_delta_step = 100
