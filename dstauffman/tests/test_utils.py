@@ -501,6 +501,20 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertEqual(output, '"c1" and "c2" are the same.')
         self.assertTrue(is_same)
 
+    def test_subset(self) -> None:
+        delattr(self.c1, 'b')
+        delattr(self.c1, 'c')
+        with dcs.capture_output() as out:
+            is_same1 = dcs.compare_two_classes(self.c1, self.c2, ignore_callables=True, is_subset=False, suppress_output=True)
+            is_same2 = dcs.compare_two_classes(self.c1, self.c2, ignore_callables=True, is_subset=True, suppress_output=False)
+            is_same3 = dcs.compare_two_classes(self.c2, self.c1, ignore_callables=True, is_subset=True, suppress_output=True)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertFalse(is_same1)
+        self.assertTrue(is_same2)
+        self.assertFalse(is_same3)
+        self.assertEqual(output, '"c1" and "c2" are the same (subset).')
+
 #%% compare_two_dicts
 class Test_compare_two_dicts(unittest.TestCase):
     r"""

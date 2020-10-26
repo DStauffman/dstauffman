@@ -20,7 +20,7 @@ import os
 import shlex
 import subprocess
 import sys
-from typing import Dict, List, Optional, overload, TypeVar
+from typing import Any, Dict, List, Optional, overload, Tuple, TypeVar, Union
 import unittest
 import warnings
 
@@ -251,7 +251,8 @@ def rss(data, axis=None, keepdims=False, ignore_nans=False):
     return out
 
 #%% Functions - compare_two_classes
-def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callables=True, compare_recursively=True):
+def compare_two_classes(c1: Any, c2: Any, suppress_output: bool = False, names: Union[Tuple[str, str], List[str]] = None, \
+        ignore_callables: bool = True, compare_recursively: bool = True, is_subset: bool = False) -> bool:
     r"""
     Compare two classes by going through all their public attributes and showing that they are equal.
 
@@ -267,6 +268,8 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
         List of the names to be printed to the screen for the two input classes.
     ignore_callables : bool, optional
         If True, ignore differences in callable attributes (i.e. methods), defaults to True.
+    is_subset : bool, optional
+        If True, only compares in c1 is a strict subset of c2, but c2 can have extra fields, defaults to False
 
     Returns
     -------
@@ -328,11 +331,12 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
                         names = [name1 + '.' + this_attr, name2 + '.' + this_attr]
                         # Note: don't want the 'and' to short-circuit, so do the 'and is_same' last
                         if isinstance(attr1, dict) and isinstance(attr2, dict):
-                            is_same = compare_two_dicts(attr1, attr2, suppress_output=suppress_output, names=names) and is_same
+                            is_same = compare_two_dicts(attr1, attr2, suppress_output=suppress_output, \
+                                names=names, is_subset=is_subset) and is_same
                         else:
                             is_same = compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
                                 names=names, ignore_callables=ignore_callables, \
-                                compare_recursively=compare_recursively) and is_same
+                                compare_recursively=compare_recursively, is_subset=is_subset) and is_same
                         continue
                     else:
                         continue # pragma: no cover (actually covered, optimization issue)
@@ -356,6 +360,9 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
         # find the attributes in one but not the other, if any, then this test fails
         diff = attrs1 ^ attrs2
         for this_attr in sorted(diff):
+            if is_subset and this_attr in attrs2:
+                # if only checking that c1 is a subset of c2, then skip this condition
+                continue
             is_same = False
             if not suppress_output:
                 if this_attr in attrs1:
@@ -365,13 +372,15 @@ def compare_two_classes(c1, c2, suppress_output=False, names=None, ignore_callab
     # display results
     if not suppress_output:
         if is_same:
-            print(f'"{name1}" and "{name2}" are the same.')
+            subset_text = ' (subset)' if is_subset else ''
+            print(f'"{name1}" and "{name2}" are the same{subset_text}.')
         else:
             print(f'"{name1}" and "{name2}" are not the same.')
     return is_same
 
 #%% Functions - compare_two_dicts
-def compare_two_dicts(d1, d2, suppress_output=False, names=None):
+def compare_two_dicts(d1: Dict[Any, Any], d2: Dict[Any, Any], suppress_output: bool = False, \
+        names: Union[Tuple[str, str], List[str]] = None, is_subset: bool = False) -> bool:
     r"""
     Compare two dictionaries for the same keys, and the same value of those keys.
 
@@ -385,6 +394,8 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
         If True, suppress the information printed to the screen, defaults to False.
     names : list of str, optional
         List of the names to be printed to the screen for the two input classes.
+    is_subset : bool, optional
+        If True, only compares in c1 is a strict subset of c2, but c2 can have extra fields, defaults to False
 
     Returns
     -------
@@ -430,6 +441,9 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
         # find keys in one but not the other, if any, then this test fails
         diff = set(d1) ^ set(d2)
         for key in sorted(diff):
+            if is_subset and key in d2:
+                # if only checking that d1 is a subset of d2, then skip this condition
+                continue
             is_same = False
             if not suppress_output:
                 if key in d1:
@@ -439,7 +453,8 @@ def compare_two_dicts(d1, d2, suppress_output=False, names=None):
     # display results
     if not suppress_output:
         if is_same:
-            print(f'"{name1}" and "{name2}" are the same.')
+            subset_text = ' (subset)' if is_subset else ''
+            print(f'"{name1}" and "{name2}" are the same{subset_text}.')
         else:
             print(f'"{name1}" and "{name2}" are not the same.')
     return is_same
