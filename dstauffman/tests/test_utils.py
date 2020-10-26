@@ -504,6 +504,7 @@ class Test_compare_two_classes(unittest.TestCase):
     def test_subset(self) -> None:
         delattr(self.c1, 'b')
         delattr(self.c1, 'c')
+        self.c2.e['key2'] = 2
         with dcs.capture_output() as out:
             is_same1 = dcs.compare_two_classes(self.c1, self.c2, ignore_callables=True, is_subset=False, suppress_output=True)
             is_same2 = dcs.compare_two_classes(self.c1, self.c2, ignore_callables=True, is_subset=True, suppress_output=False)
@@ -561,6 +562,20 @@ class Test_compare_two_dicts(unittest.TestCase):
         out.close()
         self.assertEqual(output, '')
         self.assertFalse(is_same)
+
+    def test_is_subset(self):
+        d1 = {'a': 1, 'b': [1, 2], 'e': {'key1': 1}}
+        d2 = {'a': 1, 'b': [1, 2], 'c': 'extra', 'e': {'key1': 1, 'key2': 2}}
+        with dcs.capture_output() as out:
+            is_same1 = dcs.compare_two_dicts(d1, d2, suppress_output=True)
+            is_same2 = dcs.compare_two_dicts(d1, d2, suppress_output=False, is_subset=True)
+        lines = out.getvalue().strip().split('\n')
+        out.close()
+        self.assertFalse(is_same1)
+        self.assertTrue(is_same2)
+        self.assertEqual(len(lines), 2)
+        self.assertEqual(lines[0], '"d1[\'e\']" and "d2[\'e\']" are the same (subset).')
+        self.assertEqual(lines[1], '"d1" and "d2" are the same (subset).')
 
 #%% read_text_file
 class Test_read_text_file(unittest.TestCase):

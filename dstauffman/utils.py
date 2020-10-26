@@ -251,7 +251,7 @@ def rss(data, axis=None, keepdims=False, ignore_nans=False):
     return out
 
 #%% Functions - compare_two_classes
-def compare_two_classes(c1: Any, c2: Any, suppress_output: bool = False, names: Union[Tuple[str, str], List[str]] = None, \
+def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, names: Union[Tuple[str, str], List[str]] = None, \
         ignore_callables: bool = True, compare_recursively: bool = True, is_subset: bool = False) -> bool:
     r"""
     Compare two classes by going through all their public attributes and showing that they are equal.
@@ -354,7 +354,7 @@ def compare_two_classes(c1: Any, c2: Any, suppress_output: bool = False, names: 
                     continue
             # if any differences, then this test fails
             if isinstance(attr1, Mapping) and isinstance(attr2, Mapping):
-                is_same = compare_two_dicts(attr1, attr2, suppress_output=True) and is_same
+                is_same = compare_two_dicts(attr1, attr2, suppress_output=True, is_subset=is_subset) and is_same
             elif np.logical_not(_nan_equal(attr1, attr2)):
                 is_same = _not_true_print()
         # find the attributes in one but not the other, if any, then this test fails
@@ -379,7 +379,7 @@ def compare_two_classes(c1: Any, c2: Any, suppress_output: bool = False, names: 
     return is_same
 
 #%% Functions - compare_two_dicts
-def compare_two_dicts(d1: Dict[Any, Any], d2: Dict[Any, Any], suppress_output: bool = False, \
+def compare_two_dicts(d1: Dict[Any, Any], d2: Dict[Any, Any], /, suppress_output: bool = False, \
         names: Union[Tuple[str, str], List[str]] = None, is_subset: bool = False) -> bool:
     r"""
     Compare two dictionaries for the same keys, and the same value of those keys.
@@ -432,7 +432,7 @@ def compare_two_dicts(d1: Dict[Any, Any], d2: Dict[Any, Any], suppress_output: b
             s2 = d2[key]
             if isinstance(s1, dict) and isinstance(s2, dict):
                 is_same = compare_two_dicts(s1, s2, suppress_output=suppress_output, \
-                    names=[f"{name1}['{key}']", f"{name2}['{key}']"])
+                    names=[f"{name1}['{key}']", f"{name2}['{key}']"], is_subset=is_subset)
             # if any differences, then this test fails
             elif np.logical_not(_nan_equal(s1, s2)):
                 is_same = False
