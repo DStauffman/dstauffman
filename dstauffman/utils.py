@@ -9,6 +9,7 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 from collections.abc import Mapping
 from contextlib import contextmanager
 import datetime
@@ -379,7 +380,7 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
     return is_same
 
 #%% Functions - compare_two_dicts
-def compare_two_dicts(d1: Dict[Any, Any], d2: Dict[Any, Any], /, suppress_output: bool = False, \
+def compare_two_dicts(d1: Mapping[Any, Any], d2: Mapping[Any, Any], suppress_output: bool = False, \
         names: Union[Tuple[str, str], List[str]] = None, is_subset: bool = False) -> bool:
     r"""
     Compare two dictionaries for the same keys, and the same value of those keys.

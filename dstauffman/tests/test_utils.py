@@ -504,7 +504,7 @@ class Test_compare_two_classes(unittest.TestCase):
     def test_subset(self) -> None:
         delattr(self.c1, 'b')
         delattr(self.c1, 'c')
-        self.c2.e['key2'] = 2
+        self.c2.e['key2'] = 2  # type: ignore[attr-defined]
         with dcs.capture_output() as out:
             is_same1 = dcs.compare_two_classes(self.c1, self.c2, ignore_callables=True, is_subset=False, suppress_output=True)
             is_same2 = dcs.compare_two_classes(self.c1, self.c2, ignore_callables=True, is_subset=True, suppress_output=False)

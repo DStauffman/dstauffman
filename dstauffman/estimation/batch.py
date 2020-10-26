@@ -52,7 +52,7 @@ class _ExceptionWrapper(object):
 
     def re_raise(self) -> None:
         r"""Re-raise a previously saved exception and traceback."""
-        raise self.ee.with_traceback(self.tb)  # type: ignore[arg-type, call-arg]
+        raise self.ee.with_traceback(self.tb)  # type: ignore[arg-type, call-arg, misc, type-var]
 
 #%% OptiOpts
 class OptiOpts(Frozen):
