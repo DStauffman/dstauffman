@@ -52,6 +52,18 @@ INT_TOKEN: int = -1
 # Whether we are currently on Windows or not
 IS_WINDOWS: bool = os.name == 'nt'
 
+# Interval units for numpy dates and times
+NP_DATETIME_UNITS: str = 'ns'
+
+# Interval form to use for storing data as np.datetime64's
+NP_DATETIME_FORM: str = 'datetime64[ns]'
+
+# Interval form to use for storing data as np.timedelta64's
+NP_TIMEDELTA_FORM: str = 'timedelta64[ns]'
+
+# Scale factor for converting numpy time forms to seconds (nanoseconds per second)
+NP_INT64_PER_SEC: int = 10**9
+
 #%% Functions
 # None
 

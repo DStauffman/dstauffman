@@ -16,8 +16,8 @@ import dstauffman as dcs
 class Test_all_values(unittest.TestCase):
 
     def setUp(self) -> None:
-        self.ints: List[str] = ['INT_TOKEN']
-        self.strs: List[str] = []
+        self.ints: List[str] = ['INT_TOKEN', 'NP_INT64_PER_SEC']
+        self.strs: List[str] = ['NP_DATETIME_FORM', 'NP_DATETIME_UNITS', 'NP_TIMEDELTA_FORM']
         self.bool: List[str] = ['IS_WINDOWS']
         self.master = set(self.ints) | set(self.strs) | set(self.bool)
 

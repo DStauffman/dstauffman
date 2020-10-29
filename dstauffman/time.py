@@ -7,10 +7,12 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import contextlib
 import datetime
 import doctest
 import re
+from typing import Union
 import unittest
 import warnings
 
@@ -23,7 +25,14 @@ else:
 with contextlib.suppress(ModuleNotFoundError):
     import numpy as np
 
+from dstauffman.constants import NP_DATETIME_UNITS, NP_INT64_PER_SEC, NP_TIMEDELTA_FORM
 from dstauffman.units import get_time_factor, ONE_DAY
+from dstauffman.utils import is_datetime
+
+#%% Constants
+# maps other names of units to the ones expected by numpy
+_NP_MAP = {'year': 'Y', 'month': 'M', 'week': 'W', 'day': 'D', 'hour': 'h', 'hr': 'h', \
+    'minute': 'm', 'min': 'm', 'second': 's', 'sec': 's'}
 
 #%% Functions - get_np_time_units
 def get_np_time_units(date):
@@ -221,6 +230,53 @@ def round_num_datetime(date_in, /, time_delta, floor=False):
         rounded = np.round(quants)
     return rounded * time_delta
 
+#%% Functions - round_time
+def round_time(x: Union[np.ndarray[float], np.ndarray[np.timedelta64]], /, t_round: np.timedelta64) -> \
+    Union[np.ndarray[float], np.ndarray[np.timedelta64]]:
+    r"""
+    Rounding function that handles either numpy datetimes or doubles (seconds).
+
+    Parameters
+    ----------
+    x : (N, ) ndarray of float or datetime64
+        Date to round
+    t_round : nd.timedelta64
+        Time to round to
+
+    Returns
+    -------
+    (N, ) ndarray of float or datetime64
+        Rounded time
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import NP_DATETIME_FORM, NP_INT64_PER_SEC, NP_TIMEDELTA_FORM, round_time
+    >>> import datetime
+    >>> import numpy as np
+    >>> date_zero = np.datetime64(datetime.date(2020, 1, 1)).astype(NP_DATETIME_FORM)
+    >>> x_sec     = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
+    >>> x_np      = date_zero + np.round(NP_INT64_PER_SEC * x_sec).astype(NP_TIMEDELTA_FORM)
+    >>> t_round   = np.timedelta64(200, 'ms').astype(NP_TIMEDELTA_FORM)
+
+    >>> date_out1 = round_time(x_sec, t_round)
+    >>> expected1 = np.array([0., 0.2, 0.4, 0.4, 0.6, 0.6])
+    >>> print(all(abs(date_out1 - expected1) < 1e-14))
+    True
+
+    >>> date_out2 = round_time(x_np, t_round)
+    >>> expected2 = date_zero + np.array([0, 200, 400, 400, 600, 600]).astype('timedelta64[ms]').astype(NP_TIMEDELTA_FORM)
+    >>> print(all(date_out2 == expected2))
+    True
+
+    """
+    if is_datetime(x):
+        return round_np_datetime(x, t_round)
+    return round_num_datetime(x, t_round.astype(np.int64) / NP_INT64_PER_SEC)
+
 #%% Functions - convert_date
 def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='datetime64[ns]'):
     r"""
@@ -377,6 +433,102 @@ def convert_time_units(time, old_unit, new_unit):
     mult_new = get_time_factor(new_unit)
     mult = mult_old / mult_new
     return time * mult
+
+#%% Functions - convert_datetime_to_np
+def convert_datetime_to_np(time, /, units=NP_DATETIME_UNITS):
+    r"""
+    Convenience wrapper to convert a datetime.datetime to a numpy.datetime64 with the desired units.
+
+    Parameters
+    ----------
+    time : datetime.datetime
+        Date/time
+    units : str, optional
+        Units to use within numpy.datetime64
+
+    Returns
+    -------
+    np.datetime64
+        Date/time as np.datetime64 equivalent
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import convert_datetime_to_np
+    >>> import datetime
+    >>> time = datetime.datetime(2020, 10, 1, 12, 34, 56, 789)
+    >>> print(convert_datetime_to_np(time))
+    2020-10-01T12:34:56.000789000
+
+    """
+    return np.datetime64(time, units)
+
+#%% Functions - convert_duration_to_np
+def convert_duration_to_np(dt, /, units=NP_DATETIME_UNITS):
+    r"""Convenience wrapper to convert a datetime.timedelta to a numpy.timedelta64 with the desired units.
+
+    Parameters
+    ----------
+    time : datetime.timedelta
+        time duration
+    units : str, optional
+        Units to use within numpy.datetime64
+
+    Returns
+    -------
+    np.timedelta64
+        Time duration as np.timedelta64 equivalent
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import convert_duration_to_np
+    >>> import datetime
+    >>> dt = datetime.timedelta(minutes=90)
+    >>> print(convert_duration_to_np(dt))
+    5400000000000 nanoseconds
+
+    """
+    return np.timedelta64(dt, units)
+
+#%% Functions - convert_num_dt_to_np
+def convert_num_dt_to_np(dt, /, units='sec', np_units=NP_TIMEDELTA_FORM):
+    r"""Convenience wrapper to convert a number of seconds to a numpy.timedelta64 with the desired units.
+
+    Parameters
+    ----------
+    dt: np.ndarray of float
+        time duration [sec]
+    units : str, optional
+        Units to use within numpy.datetime64
+
+    Returns
+    -------
+    np.timedelta64
+        Time duration as np.timedelta64 equivalent
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import convert_num_dt_to_np, ONE_MINUTE
+    >>> import datetime
+    >>> dt = 90 * ONE_MINUTE
+    >>> print(convert_num_dt_to_np(dt))
+    5400000000000 nanoseconds
+
+    """
+    if units in _NP_MAP:
+        units = _NP_MAP[units]
+    return np.timedelta64(dt, units).astype(np_units)
 
 #%% Unit test
 if __name__ == '__main__':

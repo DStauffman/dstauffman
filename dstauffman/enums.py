@@ -11,10 +11,13 @@ Notes
 #%% Imports
 import doctest
 from enum import Enum, EnumMeta
-from typing import Callable, ClassVar, List
+from typing import Any, Callable, ClassVar, List, TypeVar
 import unittest
 
 from dstauffman.paths import is_dunder
+
+#%% Constants
+_F = TypeVar('_F', bound=Callable[..., Any])
 
 #%% Classes - _EnumMetaPlus
 class _EnumMetaPlus(EnumMeta):
@@ -27,7 +30,7 @@ class _EnumMetaPlus(EnumMeta):
         return '\n'.join((repr(field) for field in cls))  # type: ignore[var-annotated]
     def __str__(cls) -> str:
         return '\n'.join((str(field) for field in cls))  # type: ignore[var-annotated]
-    def __getattr__(cls, name) -> int:
+    def __getattr__(cls, name: str) -> int:
         r"""Return the enum member matching `name`."""
         if is_dunder(name):
             raise AttributeError(name)
@@ -70,7 +73,7 @@ class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
 
 #%% Decorators - consecutive
-def consecutive(enumeration: Callable) -> Callable:
+def consecutive(enumeration: _F) -> _F:
     r"""Class decorator for enumerations ensuring unique and consecutive member values that start from zero."""
     duplicates = []
     non_consecutive = []

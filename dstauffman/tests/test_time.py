@@ -95,6 +95,28 @@ class Test_round_num_datetime(unittest.TestCase):
         date_out = dcs.round_num_datetime(np.array([0., 1.1, 1.9, 3.05, 4.9]), 1., floor=True)
         np.testing.assert_array_almost_equal(date_out, np.array([0., 1., 1., 3., 4.]), 12)
 
+#%% round_time
+class Test_round_time(unittest.TestCase):
+    r"""
+    Tests the round_time function with the following cases:
+        TBD
+    """
+    def setUp(self) -> None:
+        self.date_zero = np.datetime64(datetime.date(2020, 1, 1)).astype(dcs.NP_DATETIME_FORM)
+        self.x_sec     = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
+        self.x_np      = self.date_zero + np.round(dcs.NP_INT64_PER_SEC * self.x_sec).astype(dcs.NP_TIMEDELTA_FORM)
+        self.t_round   = np.timedelta64(200, 'ms').astype(dcs.NP_TIMEDELTA_FORM)
+
+    def test_seconds(self) -> None:
+        date_out = dcs.round_time(self.x_sec, self.t_round)
+        expected = np.array([0., 0.2, 0.4, 0.4, 0.6, 0.6])
+        np.testing.assert_array_almost_equal(date_out, expected, 14)
+
+    def test_numpy(self) -> None:
+        date_out = dcs.round_time(self.x_np, self.t_round)
+        expected = self.date_zero + np.array([0, 200, 400, 400, 600, 600]).astype('timedelta64[ms]').astype(dcs.NP_TIMEDELTA_FORM)
+        np.testing.assert_array_equal(date_out, expected)
+
 #%% convert_date
 class Test_convert_date(unittest.TestCase):
     r"""
@@ -296,6 +318,60 @@ class Test_convert_time_units(unittest.TestCase):
     def test_bad(self) -> None:
         with self.assertRaises(ValueError):
             dcs.convert_time_units(1, 'sec', 'bad')
+
+#%% convert_datetime_to_np
+class Test_convert_datetime_to_np(unittest.TestCase):
+    r"""
+    Tests the convert_datetime_to_np function with the following cases:
+        Nominal
+    """
+    def test_nominal(self) -> None:
+        time = datetime.datetime(2020, 10, 1, 12, 34, 56, 789)
+        out  = dcs.convert_datetime_to_np(time)
+        exp  = np.datetime64('2020-10-01T12:34:56.000789000').astype(dcs.NP_DATETIME_FORM)
+        self.assertEqual(out, exp)
+
+#%% convert_duration_to_np
+class Test_convert_duration_to_np(unittest.TestCase):
+    r"""
+    Tests the convert_duration_to_np function with the following cases:
+        Nominal
+    """
+    def test_nominal(self) -> None:
+        dt  = datetime.timedelta(minutes=90)
+        out = dcs.convert_duration_to_np(dt)
+        exp = np.timedelta64(90, 'm').astype(dcs.NP_TIMEDELTA_FORM)
+        self.assertEqual(out, exp)
+
+#%% convert_num_dt_to_np
+class Test_convert_num_dt_to_np(unittest.TestCase):
+    r"""
+    Tests the convert_datetime_to_np function with the following cases:
+        Nominal
+        Built-in numpy units
+        Map conversions
+    """
+    def test_nominal(self):
+        dt  = 90 * 60
+        out = dcs.convert_num_dt_to_np(dt)
+        exp = np.timedelta64(5400, 's').astype(dcs.NP_TIMEDELTA_FORM)
+        self.assertEqual(out, exp)
+
+    def test_numpy_units(self):
+        for key in ('Y', 'M', 'W', 'D', 'h', 'm', 's', 'ms', 'us', 'ns', 'ps', 'fs', 'as'):
+            dt  = 105
+            out = dcs.convert_num_dt_to_np(dt, units=key)
+            exp = np.timedelta64(105, key).astype(dcs.NP_TIMEDELTA_FORM)
+            self.assertEqual(out, exp)
+
+    def test_conversions(self):
+        map_ = {'year': 'Y', 'month': 'M', 'week': 'W', 'day': 'D', 'hour': 'h', 'hr': 'h', \
+            'minute': 'm', 'min': 'm', 'second': 's', 'sec': 's'}
+        for (key, value) in map_.items():
+            dt  = 90
+            out = dcs.convert_num_dt_to_np(dt, units=key)
+            exp = np.timedelta64(90, value).astype(dcs.NP_TIMEDELTA_FORM)
+            self.assertEqual(out, exp)
 
 #%% Unit test execution
 if __name__ == '__main__':

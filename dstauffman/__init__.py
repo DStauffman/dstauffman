@@ -18,7 +18,8 @@ Notes
 from .classes   import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, load_method, \
                            pprint_dict, chop_time, subsample_class, Frozen, SaveAndLoad, \
                            SaveAndLoadPickle, Counter, FixedDict
-from .constants import INT_TOKEN, IS_WINDOWS
+from .constants import INT_TOKEN, IS_WINDOWS, NP_DATETIME_UNITS, NP_DATETIME_FORM, \
+                           NP_TIMEDELTA_FORM, NP_INT64_PER_SEC
 from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
 from .logs      import activate_logging, deactivate_logging, log_multiline
@@ -32,7 +33,8 @@ from .repos     import run_docstrings, run_unittests, run_pytests, run_coverage,
                            delete_pyc, get_python_definitions, make_python_init, \
                            write_unit_test_templates
 from .time      import get_np_time_units, round_datetime, round_np_datetime, round_num_datetime, \
-                           convert_date, convert_time_units
+                           round_time, convert_date, convert_time_units, convert_datetime_to_np, \
+                           convert_duration_to_np, convert_num_dt_to_np
 from .units     import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \
                            ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, get_factors, \
                            get_time_factor

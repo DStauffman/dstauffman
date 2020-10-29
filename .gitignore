@@ -64,6 +64,7 @@ dstauffman.egg-info/*
 # MyPy #
 # =========================
 .mypy_cache/*
+.mypy_report/*
 
 # =========================
 # LaTeX Files #

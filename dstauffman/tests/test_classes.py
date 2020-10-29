@@ -302,41 +302,49 @@ class Test_Counter(unittest.TestCase):
     """
     def test_math_int(self) -> None:
         c = dcs.Counter()
-        c = c + 1
+        c = c + 1  # type: ignore[assignment]
         self.assertEqual(c, 1)
+        self.assertEqual(type(c), int)
 
     def test_math_int2(self) -> None:
         c = dcs.Counter()
         c += 1
         self.assertEqual(c, 1)
+        self.assertEqual(type(c), dcs.Counter)
 
     def test_math_int3(self) -> None:
         c = dcs.Counter()
-        c = c - 5
+        c = c - 5  # type: ignore[assignment]
         self.assertEqual(c, -5)
+        self.assertEqual(type(c), int)
 
     def test_math_int4(self) -> None:
         c = dcs.Counter()
         c -= 2
         self.assertEqual(c, -2)
+        self.assertEqual(type(c), dcs.Counter)
 
     def test_math_int5(self) -> None:
         c = dcs.Counter(10)
-        c = 0 + c
+        c = 0 + c  # type: ignore[assignment]
         self.assertEqual(c, 10)
+        self.assertEqual(type(c), int)
 
     def test_math_int6(self) -> None:
         c = 0 - dcs.Counter(10)
         self.assertEqual(c, -10)
+        self.assertEqual(type(c), int)
 
     def test_math_int7(self) -> None:
         c = dcs.Counter(10)
-        c = 0 +c
+        c = 0 +c  # type: ignore[assignment]
         self.assertEqual(c, 10)
+        self.assertEqual(type(c), int)
 
     def test_math_int8(self) -> None:
         c = 0 -dcs.Counter(10)
         self.assertEqual(c, -10)
+        self.assertEqual(type(c), int)
 
     def test_math_counter(self) -> None:
         c1 = dcs.Counter(10)
@@ -353,17 +361,20 @@ class Test_Counter(unittest.TestCase):
         self.assertEqual(c3, dcs.Counter(10))
         c1 -= c2
         self.assertEqual(c1, dcs.Counter(10))
+        self.assertEqual(type(c1), dcs.Counter)
+        self.assertEqual(type(c2), dcs.Counter)
+        self.assertEqual(type(c3), dcs.Counter)
 
     def test_math_float(self) -> None:
         c = dcs.Counter(0)
         with self.assertRaises(TypeError):
-            c = c + 1.5
+            c = c + 1.5  # type: ignore[operator]
         with self.assertRaises(TypeError):
-            c = c - 1.5
+            c = c - 1.5  # type: ignore[operator]
         with self.assertRaises(TypeError):
-            c += 1.5
+            c += 1.5  # type: ignore[type-var]
         with self.assertRaises(TypeError):
-            c -= 1.5
+            c -= 1.5  # type: ignore[type-var]
 
     def test_divide(self) -> None:
         c1 = dcs.Counter(2)
@@ -372,9 +383,9 @@ class Test_Counter(unittest.TestCase):
         self.assertEqual(c1 // c2, 0)
         self.assertAlmostEqual(c1 / 4, 0.5)
         with self.assertRaises(TypeError):
-            c1 / c2
+            c1 / c2  # type: ignore[operator]
         with self.assertRaises(TypeError):
-            c1 // 5.
+            c1 // 5.  # type: ignore[type-var]
 
     def test_comp_int(self) -> None:
         c = dcs.Counter(10)
@@ -427,7 +438,7 @@ class Test_Counter(unittest.TestCase):
         self.assertEqual(c1 % 4, 1)
         self.assertEqual(c1 % c2, 1)
         with self.assertRaises(TypeError):
-            c1 % 4.
+            c1 % 4.  # type: ignore[type-var]
 
     def test_print(self) -> None:
         c1 = dcs.Counter(1)

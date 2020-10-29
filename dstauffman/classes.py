@@ -14,7 +14,8 @@ import copy
 import doctest
 import pickle
 import sys
-from typing import Any, Callable, Dict, List, Literal, Optional, overload, Set, Type, TypeVar
+from typing import Any, Callable, Dict, Iterable, List, Literal, NoReturn, Optional, overload, \
+    Set, Tuple, Type, TypeVar, Union
 import unittest
 import warnings
 
@@ -33,6 +34,7 @@ from dstauffman.utils import find_in_range
 
 #%% Constants
 _T = TypeVar('_T')
+_C = TypeVar('_C', int, 'Counter')
 
 #%% Functions - _frozen
 def _frozen(set: Callable) -> Callable:
@@ -443,94 +445,122 @@ class Counter(Frozen):
     1
 
     """
-    def __init__(self, other=0):
+    def __init__(self, other: Any = 0):
         self._val = int(other)
-    def __eq__(self, other):
-        if type(other) == Counter:
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, Counter):
             return self._val == other._val
-        return self._val == other
-    def __lt__(self, other):
-        if type(other) == Counter:
+        return self._val == other  # type: ignore[no-any-return]
+
+    def __lt__(self, other: Any) -> bool:
+        if isinstance(other, Counter):
             return self._val < other._val
-        return self._val < other
-    def __le__(self, other):
-        if type(other) == Counter:
+        return self._val < other  # type: ignore[no-any-return]
+
+    def __le__(self, other: Any) -> bool:
+        if isinstance(other, Counter):
             return self._val <= other._val
-        return self._val <= other
-    def __gt__(self, other):
-        if type(other) == Counter:
+        return self._val <= other  # type: ignore[no-any-return]
+
+    def __gt__(self, other: Any) -> bool:
+        if isinstance(other, Counter):
             return self._val > other._val
-        return self._val > other
-    def __ge__(self, other):
-        if type(other) == Counter:
+        return self._val > other  # type: ignore[no-any-return]
+
+    def __ge__(self, other: Any) -> bool:
+        if isinstance(other, Counter):
             return self._val >= other._val
-        return self._val >= other
-    def __hash__(self):
+        return self._val >= other  # type: ignore[no-any-return]
+
+    def __hash__(self) -> int:
         return hash(self._val)
-    def __index__(self):
+
+    def __index__(self) -> int:
         return self._val
-    def __pos__(self):
+
+    def __pos__(self) -> Counter:
         return Counter(self._val)
-    def __neg__(self):
+
+    def __neg__(self) -> Counter:
         return Counter(-self._val)
-    def __abs__(self):
+
+    def __abs__(self) -> Counter:
         return Counter(abs(self._val))
-    def __add__(self, other):
-        if type(other) == Counter:
+
+    @overload
+    def __add__(self, other: int) -> int: ...
+
+    @overload
+    def __add__(self, other: Counter) -> Counter: ...
+
+    def __add__(self, other: _C) -> _C:
+        if isinstance(other, Counter):
             return Counter(self._val + other._val)
-        elif type(other) == int:
+        elif isinstance(other, int):
             return self._val + other
-        else:
-            return NotImplemented
-    def __iadd__(self, other):
-        if type(other) == Counter:
+        return NotImplemented
+
+    def __iadd__(self, other: _C) -> Counter:  # type: ignore[misc]
+        if isinstance(other, Counter):
             self._val += other._val
-        elif type(other) == int:
+        elif isinstance(other, int):
             self._val += other
         else:
             return NotImplemented
         return self
-    def __radd__(self, other):
+
+    def __radd__(self, other: _C) -> _C:
         return self.__add__(other)
-    def __sub__(self, other):
-        if type(other) == Counter:
+
+    @overload
+    def __sub__(self, other: int) -> int: ...
+
+    @overload
+    def __sub__(self, other: Counter) -> Counter: ...
+
+    def __sub__(self, other: _C) -> _C:
+        if isinstance(other, Counter):
             return Counter(self._val - other._val)
-        elif type(other) == int:
+        elif isinstance(other, int):
             return self._val - other
-        else:
-            return NotImplemented
-    def __isub__(self, other):
-        if type(other) == Counter:
+        return NotImplemented
+
+    def __isub__(self, other: _C) -> Counter:  # type: ignore[misc]
+        if isinstance(other, Counter):
             self._val -= other._val
-        elif type(other) == int:
+        elif isinstance(other, int):
             self._val -= other
         else:
             return NotImplemented
         return self
-    def __rsub__(self, other):
+
+    def __rsub__(self, other: _C) -> _C:
         return -self.__sub__(other)
-    def __truediv__(self, other):
-        if type(other) == int or type(other) == float:
+
+    def __truediv__(self, other: Union[int, float]) -> float:
+        if isinstance(other, int) or isinstance(other, float):
             return self._val / other
-        else:
-            return NotImplemented
-    def __floordiv__(self, other):
-        if type(other) == Counter:
+        return NotImplemented  # type: ignore[unreachable]
+
+    def __floordiv__(self, other: _C) -> _C:
+        if isinstance(other, Counter):
             return Counter(self._val // other._val)
-        elif type(other) == int:
+        elif isinstance(other, int):
             return self._val // other
-        else:
-            return NotImplemented
-    def __mod__(self, other):
-        if type(other) == Counter:
+        return NotImplemented
+
+    def __mod__(self, other: _C) -> _C:
+        if isinstance(other, Counter):
             return Counter(self._val % other._val)
-        elif type(other) == int:
+        elif isinstance(other, int):
             return self._val % other
-        else:
-            return NotImplemented
-    def __str__(self):
+        return NotImplemented
+
+    def __str__(self) -> str:
         return str(self._val)
-    def __repr__(self):
+
+    def __repr__(self) -> str:
         return 'Counter({})'.format(self._val)
 
 #%% FixedDict
@@ -560,7 +590,7 @@ class FixedDict(dict):
     KeyError: 'new_key'
 
     """
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, *args, **kwargs) -> FixedDict:
         r"""Creats a new instance of the class."""
         instance = super().__new__(cls, *args, **kwargs)
         instance._frozen = False
@@ -568,53 +598,53 @@ class FixedDict(dict):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self._frozen = False
+        self._frozen: bool = False
 
-    def __getitem__(self, k):
+    def __getitem__(self, k: Any) -> Any:
         return super().__getitem__(k)
 
-    def __setitem__(self, k, v):
+    def __setitem__(self, k: Any, v: Any) -> Any:
         if self._frozen:
             if k not in self:
                 raise KeyError(k)
         return super().__setitem__(k, v)
 
-    def __delitem__(self, k):
+    def __delitem__(self, k: Any) -> None:
         raise NotImplementedError
 
-    def __contains__(self, k):
+    def __contains__(self, k: Any) -> Any:
         return super().__contains__(k)
 
-    def __copy__(self):
+    def __copy__(self) -> FixedDict:
         new = type(self)(self.items())
         new._frozen = self._frozen
         return new
 
-    def __deepcopy__(self, memo):
+    def __deepcopy__(self, memo: Any) -> FixedDict:
         new = type(self)((k, copy.deepcopy(v, memo)) for (k,v) in self.items())
         new._frozen = self._frozen
         return new
 
-    def __getnewargs__(self):
+    def __getnewargs__(self) -> Tuple:
         # Call __new__ (and thus __init__) on unpickling.
         return ()
 
-    def get(self, k, default=None):
+    def get(self, k: Any, default: Any = None) -> Any:
         r""".get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
         return super().get(k, default)
 
-    def setdefault(self, k, default=None):
+    def setdefault(self, k: Any, default: Any = None) -> Any:
         r"""D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D."""
         if self._frozen:
             if k not in self:
                 raise KeyError(k)
         return super().setdefault(k, default)
 
-    def pop(self, k):
+    def pop(self, k: Any) -> NoReturn:  # type: ignore[override]
         r"""D.pop(k[,d]) -> v, is not valid on a fixeddict, as it removes the key."""
         raise NotImplementedError
 
-    def update(self, mapping=(), **kwargs):
+    def update(self, mapping=(), **kwargs) -> None:  # type: ignore[override]
         r"""
         D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
         If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
@@ -633,11 +663,11 @@ class FixedDict(dict):
         super().update(mapping, **kwargs)
 
     @classmethod
-    def fromkeys(cls, keys):
+    def fromkeys(cls, keys: Iterable) -> Any:  # type: ignore[override]
         """Returns a new dict with keys from iterable and values equal to value."""
         return super().fromkeys(k for k in keys)
 
-    def freeze(self):
+    def freeze(self) -> None:
         """Freeze the internal dictionary, such that no more keys may be added."""
         self._frozen = True
 
