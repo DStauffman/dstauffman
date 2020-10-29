@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+from typing import List
 import unittest
 
 import dstauffman as dcs
@@ -18,9 +19,10 @@ class Test_Constants(unittest.TestCase):
         Nominal definitions
     """
     def setUp(self) -> None:
-        self.ints = ['ONE_MINUTE', 'ONE_HOUR', 'ONE_DAY', 'MONTHS_PER_YEAR']
-        self.flts = ['RAD2DEG', 'DEG2RAD', 'ARCSEC2RAD', 'RAD2ARCSEC', 'FT2M', 'M2FT', 'IN2CM', 'CM2IN']
-        self.master = set(self.ints) | set(self.flts)
+        self.ints: List[str] = ['ONE_MINUTE', 'ONE_HOUR', 'ONE_DAY', 'MONTHS_PER_YEAR']
+        self.flts: List[str] = ['RAD2DEG', 'DEG2RAD', 'ARCSEC2RAD', 'RAD2ARCSEC', 'FT2M', 'M2FT', 'IN2CM', 'CM2IN']
+        self.strs: List[str] = ['DEGREE_SIGN', 'MICRO_SIGN']
+        self.master = set(self.ints) | set(self.flts) | set(self.strs)
 
     def test_values(self) -> None:
         # confirm that all the expected values exist and have the correct type
@@ -28,6 +30,8 @@ class Test_Constants(unittest.TestCase):
             self.assertTrue(isinstance(getattr(dcs, key), int))
         for key in self.flts:
             self.assertTrue(isinstance(getattr(dcs, key), float))
+        for key in self.strs:
+            self.assertTrue(isinstance(getattr(dcs, key), str))
 
     def test_pairs(self) -> None:
         self.assertEqual(60 * 60 * 24, dcs.ONE_DAY)
@@ -54,7 +58,7 @@ class Test_get_factors(unittest.TestCase):
         self.mult   = [1e24, 1e21, 1e18, 1e15, 1e12, 1e9, 1e6, 1e3, 1e2, 1e1, 1e0, \
             1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12, 1e-15, 1e-18, 1e-21, 1e-24]
         self.label  = ['Y', 'Z', 'E', 'P', 'T', 'G', 'M', 'k', 'h', 'da', '', \
-            'd', 'c', 'm', 'μ', 'n', 'p', 'f', 'a', 'z', 'y']
+            'd', 'c', 'm', 'µ', 'n', 'p', 'f', 'a', 'z', 'y']
 
     def test_nominal(self) -> None:
         for i in range(len(self.prefix)):

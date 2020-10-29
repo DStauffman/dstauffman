@@ -36,6 +36,10 @@ M2FT: float  = 1/0.3048
 IN2CM: float = 2.54
 CM2IN: float = 1/2.54
 
+# Symbols
+DEGREE_SIGN: str = u'\N{DEGREE SIGN}' # degree sign, also u'\u00b0' ° or chr(176)
+MICRO_SIGN: str = u'\N{MICRO SIGN}' # micro sign, also u'\u00b5' μ or chr(181), note this is different than chr(956)
+
 #%% get_factors
 def get_factors(prefix: Union[str, int, float]) -> Tuple[float, str]:
     r"""
@@ -68,7 +72,7 @@ def get_factors(prefix: Union[str, int, float]) -> Tuple[float, str]:
     1e-06
 
     >>> print(label)
-    μ
+    µ
 
     """
     if isinstance(prefix, (int, float)):
@@ -120,7 +124,7 @@ def get_factors(prefix: Union[str, int, float]) -> Tuple[float, str]:
         label = 'm'
     elif prefix == 'micro':
         mult  = 1e-6
-        label = '\u03bc' # μ # chr(956)
+        label = MICRO_SIGN
     elif prefix == 'nano':
         mult  = 1e-9
         label = 'n'

@@ -36,8 +36,8 @@ from .time      import get_np_time_units, round_datetime, round_np_datetime, rou
                            round_time, convert_date, convert_time_units, convert_datetime_to_np, \
                            convert_duration_to_np, convert_num_dt_to_np
 from .units     import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \
-                           ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, get_factors, \
-                           get_time_factor
+                           ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, DEGREE_SIGN, \
+                           MICRO_SIGN, get_factors, get_time_factor
 from .utils     import find_in_range, rms, rss, compare_two_classes, compare_two_dicts, \
                            read_text_file, write_text_file, capture_output, unit, modd, is_np_int, \
                            np_digitize, histcounts, full_print, line_wrap, combine_per_year, \
