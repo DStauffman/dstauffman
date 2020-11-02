@@ -131,7 +131,7 @@ class Test_consecutive(unittest.TestCase):
     def test_unique_but_non_consecutive(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.consecutive(_Example_Consecutive2)
-        self.assertEqual(str(context.exception), 'Non-consecutive values found in _Example_Consecutive2: skip:9')
+        self.assertEqual(str(context.exception), 'Non-consecutive values found in _Example_Consecutive2: skip: 9')
 
     def test_not_unique(self) -> None:
         with self.assertRaises(ValueError) as context:

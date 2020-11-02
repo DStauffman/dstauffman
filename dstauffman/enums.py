@@ -90,7 +90,7 @@ def consecutive(enumeration: _F) -> _F:
         alias_details = ', '.join(['{} -> {}'.format(alias, name) for (alias, name) in duplicates])
         raise ValueError('Duplicate values found in {}: {}'.format(enumeration.__name__, alias_details))
     if non_consecutive:
-        alias_details = ', '.join('{}:{}'.format(name, member) for (name, member) in non_consecutive)
+        alias_details = ', '.join('{}: {}'.format(name, int(member)) for (name, member) in non_consecutive)
         raise ValueError('Non-consecutive values found in {}: {}'.format(enumeration.__name__, alias_details))
     return enumeration
 
