@@ -23,7 +23,7 @@ def readme():
 #%% Setup
 setup(
     name='dstauffman',
-    version='2.0',
+    version='2.1',
     description='Generic python utilities for aerospace and health policy applications',
     long_description=readme(),
     keywords='dstauffman numerical analysis plotting quaternions statistics batch estimation',

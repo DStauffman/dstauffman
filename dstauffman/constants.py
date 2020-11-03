@@ -12,19 +12,34 @@ import os
 import unittest
 import warnings
 
-#%% Numpy settings
+HAVE_NUMPY: bool
+HAVE_H5PY: bool
+
+# optional dependencies
+try:
+    import h5py
+    assert h5py  # not really used, but it silences the warninngs
+    HAVE_H5PY = True
+except ModuleNotFoundError:
+    HAVE_H5PY = False
 try:
     import numpy as np
+    HAVE_NUMPY = True
 except ModuleNotFoundError:
-    warnings.warn('numpy was not imported, so a lot of capabilities will be limited.')
-else:
+    HAVE_NUMPY = False
+
+from dstauffman.enums import LogLevel
+
+#%% Optional settings
+if HAVE_NUMPY:
     # Set NumPy error state for module
-    np.seterr(invalid='warn', divide='warn')
+    np.seterr(invalid='raise', divide='raise')
     # Set NumPy printing options
     np.set_printoptions(threshold=1000)
-
-#%% Logging configuration
-from dstauffman.enums import LogLevel
+else:
+    warnings.warn('numpy was not imported, so a lot of capabilities will be limited.')
+if not HAVE_H5PY:
+    warnings.warn('h5py was not imported, so some file save and load capabilities will be limited.')
 
 #%% Register custom logging levels
 logging.addLevelName(LogLevel.L0, 'L0')

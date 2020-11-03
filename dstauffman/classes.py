@@ -19,18 +19,16 @@ from typing import Any, Callable, Dict, Iterable, List, Literal, NoReturn, Optio
 import unittest
 import warnings
 
-try:
-    import h5py
-except ModuleNotFoundError: # pragma: no cover
-    warnings.warn('h5py was not imported, so some file save and load capabilities will be limited.')
+from dstauffman.constants import HAVE_H5PY, HAVE_NUMPY
+from dstauffman.utils import find_in_range
 
-try:
+if HAVE_H5PY:
+    import h5py
+if HAVE_NUMPY:
     from numpy import all as np_all, inf
-except ModuleNotFoundError:
+else:
     from dstauffman.optimized import np_all
     from math import inf
-
-from dstauffman.utils import find_in_range
 
 #%% Constants
 _T = TypeVar('_T')
@@ -310,8 +308,7 @@ def chop_time(self: Any, time_field: str, exclude: Set[str] = None, ti: float = 
             continue
         if exclude is not None and key in exclude:
             continue
-        old = getattr(self, key) # TODO: v3.8 walrus
-        if old is not None:
+        if (old := getattr(self, key)) is not None:
             setattr(self, key, old[..., ix])
 
 #%% Functions - subsample_class
@@ -365,8 +362,7 @@ def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Set[str] 
             continue
         if skip_fields is not None and key in skip_fields:
             continue
-        old = getattr(self, key) # TODO: v3.8 walrus
-        if old is not None:
+        if (old := getattr(self, key)) is not None:
             setattr(self, key, old[..., start::skip])
 
 #%% Classes - Frozen
