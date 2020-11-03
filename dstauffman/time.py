@@ -8,7 +8,6 @@ Notes
 
 #%% Imports
 from __future__ import annotations
-import contextlib
 import datetime
 import doctest
 import re
@@ -16,18 +15,15 @@ from typing import Union
 import unittest
 import warnings
 
-try:
-    import matplotlib.dates as dates
-except ModuleNotFoundError:
-    _HAVE_MPL_DATES = False # pragma: no cover
-else:
-    _HAVE_MPL_DATES = True
-with contextlib.suppress(ModuleNotFoundError):
-    import numpy as np
-
-from dstauffman.constants import NP_DATETIME_UNITS, NP_INT64_PER_SEC, NP_TIMEDELTA_FORM
+from dstauffman.constants import HAVE_MPL, HAVE_NUMPY, NP_DATETIME_UNITS, NP_INT64_PER_SEC, \
+    NP_TIMEDELTA_FORM
 from dstauffman.units import get_time_factor, ONE_DAY
 from dstauffman.utils import is_datetime
+
+if HAVE_MPL:
+    import matplotlib.dates as dates
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% Constants
 # maps other names of units to the ones expected by numpy
@@ -328,7 +324,7 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     if form == old_form:
         return date
     # check for bad conditions
-    if not _HAVE_MPL_DATES and (form == 'matplotlib' or old_form == 'matplotlib'):
+    if not HAVE_MPL and (form == 'matplotlib' or old_form == 'matplotlib'):
         raise RuntimeError('You must have matplotlib installed to do this conversion.')
     if form in time_forms or (old_form in time_forms and np.any(np.isfinite(date))):
         assert date_zero is not None, 'You must specify a date_zero.'

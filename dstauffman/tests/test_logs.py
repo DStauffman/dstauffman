@@ -14,9 +14,10 @@ import os
 import time
 import unittest
 
-import numpy as np
-
 import dstauffman as dcs
+
+if dcs.HAVE_NUMPY:
+    import numpy as np
 
 #%% activate_logging and deactivate_logging
 class Test_act_deact_logging(unittest.TestCase):
@@ -106,6 +107,7 @@ class Test_log_multiline(unittest.TestCase):
         self.assertEqual(lines[0], 'L5:Test:List value:')
         self.assertEqual(lines[1], 'L5:Test:[1, 2, 3]')
 
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_numpy1(self) -> None:
         with self.assertLogs(logger=self.logger, level=self.level) as logs:
             dcs.log_multiline(self.logger, self.level, np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
@@ -115,6 +117,7 @@ class Test_log_multiline(unittest.TestCase):
         self.assertEqual(lines[1], 'L5:Test: [4 5 6]')
         self.assertEqual(lines[2], 'L5:Test: [7 8 9]]')
 
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_numpy2(self) -> None:
         with self.assertLogs(logger=self.logger, level=self.level) as logs:
             dcs.log_multiline(self.logger, self.level, 'Numpy solution:',  np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))

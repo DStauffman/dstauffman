@@ -24,7 +24,7 @@ if dcs.HAVE_NUMPY:
     nan = np.nan
 else:
     from math import nan
-with contextlib.suppress(ModuleNotFoundError):
+if dcs.HAVE_SCIPY:
     from scipy.interpolate import interp1d
 
 #%% _nan_equal

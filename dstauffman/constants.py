@@ -17,16 +17,46 @@ HAVE_H5PY: bool
 
 # optional dependencies
 try:
+    import coverage
+    assert coverage  # not really used, but it silences the warninngs
+    HAVE_COVERAGE = True
+except ModuleNotFoundError:
+    HAVE_COVERAGE = False
+try:
     import h5py
     assert h5py  # not really used, but it silences the warninngs
     HAVE_H5PY = True
 except ModuleNotFoundError:
     HAVE_H5PY = False
 try:
+    import matplotlib
+    assert matplotlib  # not really used, but it silences the warninngs
+    HAVE_MPL = True
+except ModuleNotFoundError:
+    HAVE_MPL = False
+try:
     import numpy as np
     HAVE_NUMPY = True
 except ModuleNotFoundError:
     HAVE_NUMPY = False
+try:
+    import pandas as pd
+    assert pd
+    HAVE_PANDAS = True
+except ModuleNotFoundError:
+    HAVE_PANDAS = False
+try:
+    import pytest
+    assert pytest
+    HAVE_PYTEST = True
+except ModuleNotFoundError:
+    HAVE_PYTEST = False
+try:
+    import scipy
+    assert scipy
+    HAVE_SCIPY = True
+except ModuleNotFoundError:
+    HAVE_SCIPY = False
 
 from dstauffman.enums import LogLevel
 

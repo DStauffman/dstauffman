@@ -19,9 +19,13 @@ import unittest
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
-import numpy as np
-
 import dstauffman as dcs
+
+if dcs.HAVE_NUMPY:
+    import numpy as np
+    inf = np.inf
+else:
+    from math import inf
 
 #%% Locals classes for testing
 class _Example_Frozen(dcs.Frozen):
@@ -35,16 +39,24 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     load: ClassVar[Callable[[str, DefaultNamedArg(bool, 'use_hdf5')], _Example_SaveAndLoad]]
     save: Callable[[_Example_SaveAndLoad, str, DefaultNamedArg(bool, 'use_hdf5')], None]
     def __init__(self):
-        self.x = np.array([1, 3, 5])
-        self.y = np.array([2, 4, 6])
+        if dcs.HAVE_NUMPY:
+            self.x = np.array([1, 3, 5])
+            self.y = np.array([2, 4, 6])
+        else:
+            self.x = [1, 3, 5]
+            self.y = [2, 4, 6]
         self.z = None
 
 class _Example_SaveAndLoadPickle(dcs.Frozen, metaclass=dcs.SaveAndLoadPickle):
     load: ClassVar[Callable[[str], _Example_SaveAndLoadPickle]]
     save: Callable[[_Example_SaveAndLoadPickle, str], None]
     def __init__(self):
-        self.a = np.array([1, 2, 3])
-        self.b = np.array([4, 5, 6])
+        if dcs.HAVE_NUMPY:
+            self.a = np.array([1, 2, 3])
+            self.b = np.array([4, 5, 6])
+        else:
+            self.a = [1, 2, 3]
+            self.b = [4, 5, 6]
 
 class _Example_No_Override(object, metaclass=dcs.SaveAndLoad):
     @staticmethod
@@ -67,7 +79,7 @@ class _Example_Times(object):
         self.time = time
         self.data = data
         self.name = name
-    def chop(self, ti=-np.inf, tf=np.inf):
+    def chop(self, ti=-inf, tf=inf):
         dcs.chop_time(self, ti=ti, tf=tf, time_field='time', exclude=frozenset({'name',}))
     def subsample(self, skip=30, start=0):
         dcs.subsample_class(self, skip=skip, start=start, skip_fields=frozenset({'name',}))
@@ -150,6 +162,7 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(lines[3], ' ccc = 3')
 
 #%% chop_time
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_chop_time(unittest.TestCase):
     r"""
     Tests the chop_time method with the following cases:
@@ -172,6 +185,7 @@ class Test_chop_time(unittest.TestCase):
         self.assertEqual(self.telm.name, self.name)
 
 #%% subsample_class
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_subsample_class(unittest.TestCase):
     r"""
     Tests the subsample_class method with the following cases:
@@ -260,6 +274,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.assertEqual(temp.save(), 1)
         self.assertEqual(temp.load(), 2)
 
+    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_saving_hdf5(self) -> None:
         self.results1.save(self.save_path1)
         results = self.results1_cls.load(self.save_path1)

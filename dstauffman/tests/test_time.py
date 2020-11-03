@@ -7,7 +7,6 @@ Notes
 """
 
 #%% Imports
-import contextlib
 import datetime
 import unittest
 
@@ -15,7 +14,7 @@ import dstauffman as dcs
 
 if dcs.HAVE_NUMPY:
     import numpy as np
-with contextlib.suppress(ModuleNotFoundError):
+if dcs.HAVE_MPL:
     import matplotlib.dates as dates
 
 #%% get_np_time_units

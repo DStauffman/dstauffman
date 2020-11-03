@@ -8,14 +8,15 @@ Notes
 
 #%% Imports
 from __future__ import annotations
-import contextlib
 import doctest
 from typing import Any, Dict, List, Optional
 import unittest
 
-with contextlib.suppress(ModuleNotFoundError):
+from dstauffman.constants import HAVE_H5PY, HAVE_NUMPY
+
+if HAVE_H5PY:
     import h5py
-with contextlib.suppress(ModuleNotFoundError):
+if HAVE_NUMPY:
     import numpy as np
 
 #%% load_matlab

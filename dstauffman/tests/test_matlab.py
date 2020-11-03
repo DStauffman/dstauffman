@@ -11,9 +11,10 @@ import os
 from typing import ClassVar
 import unittest
 
-import numpy as np
-
 import dstauffman as dcs
+
+if dcs.HAVE_NUMPY:
+    import numpy as np
 
 #%% Classes
 class _Gender(dcs.IntEnumPlus):
@@ -23,6 +24,7 @@ class _Gender(dcs.IntEnumPlus):
     male: ClassVar[int]   = 2
 
 #%% load_matlab
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_load_matlab(unittest.TestCase):
     r"""
     Tests the load_matlab function with the following cases:

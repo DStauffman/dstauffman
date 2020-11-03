@@ -11,10 +11,7 @@ import doctest
 from typing import Tuple, Union
 import unittest
 
-try:
-    from numpy import pi
-except ModuleNotFoundError: # pragma: no cover
-    from math import pi
+from math import pi
 
 #%% Constants - Unit Conversions
 # Time

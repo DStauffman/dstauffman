@@ -14,11 +14,12 @@ import logging
 import os
 import unittest
 
-with contextlib.suppress(ModuleNotFoundError):
-    import numpy as np
-
+from dstauffman.constants import HAVE_NUMPY
 from dstauffman.enums import LogLevel
 from dstauffman.utils import find_in_range
+
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% Globals
 logger = logging.getLogger(__name__)

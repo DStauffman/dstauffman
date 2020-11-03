@@ -9,9 +9,15 @@ Notes
 #%% Imports
 import unittest
 
-import numpy as np
-
+from dstauffman import HAVE_NUMPY
 import dstauffman.health as health
+
+if HAVE_NUMPY:
+    import numpy as np
+    nan = np.nan
+    inf = np.inf
+else:
+    from math import inf, nan
 
 #%% health.make_preamble
 class Test_health_make_preamble(unittest.TestCase):
@@ -86,7 +92,10 @@ class Test_health_bins_to_str_ranges(unittest.TestCase):
         String passthrough
     """
     def setUp(self) -> None:
-        self.bins = np.array([0, 20, 40, 60, 10000], dtype=int)
+        if HAVE_NUMPY:
+            self.bins = np.array([0, 20, 40, 60, 10000], dtype=int)
+        else:
+            self.bins = [0, 20, 40, 60, 10000]
         self.strs = ['0-19', '20-39', '40-59', '60+']
 
     def test_nominal(self) -> None:
@@ -110,7 +119,11 @@ class Test_health_bins_to_str_ranges(unittest.TestCase):
         self.assertEqual(out, ['0-19', '20+', '40+', '60+'])
 
     def test_single_ranges(self) -> None:
-        out = health.bins_to_str_ranges(np.array([0, 1, 5, 6, 10000], dtype=int))
+        if HAVE_NUMPY:
+            x = np.array([0, 1, 5, 6, 10000], dtype=int)
+        else:
+            x = [0, 1, 5, 6, 10000]
+        out = health.bins_to_str_ranges(x)
         self.assertEqual(out, ['0', '1-4', '5', '6+'])
 
     def test_str_passthrough(self) -> None:
@@ -204,11 +217,11 @@ class Test_health_latex_str(unittest.TestCase):
         self.assertEqual(value_str, '0.2')
 
     def test_nan(self) -> None:
-        value_str = health.latex_str(np.nan)
+        value_str = health.latex_str(nan)
         self.assertEqual(value_str, 'NaN')
 
     def test_infinity(self) -> None:
-        value_str = health.latex_str(np.inf)
+        value_str = health.latex_str(inf)
         self.assertEqual(value_str, r'$\infty$')
 
 #%% Unit test execution

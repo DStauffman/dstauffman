@@ -11,7 +11,12 @@ from collections import OrderedDict
 import doctest
 import unittest
 
-import numpy as np
+from dstauffman.constants import HAVE_NUMPY, HAVE_PANDAS
+
+if HAVE_NUMPY:
+    import numpy as np
+if HAVE_PANDAS:
+    import pandas as pd
 
 #%% Functions - dist_enum_and_mons
 def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
@@ -149,9 +154,6 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     [ 0. 1. nan 2.]
 
     """
-    # delayed imports, as this is currently the only dependency on pandas
-    import pandas as pd
-
     # force inputs to be ndarrays
     cost = np.atleast_1d(np.asarray(cost))
     qaly = np.atleast_1d(np.asarray(qaly))

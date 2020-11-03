@@ -25,23 +25,18 @@ from typing import Any, Dict, List, Optional, overload, Tuple, TypeVar, Union
 import unittest
 import warnings
 
-from dstauffman.constants import HAVE_NUMPY, IS_WINDOWS
+from dstauffman.constants import HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
 from dstauffman.enums import ReturnCodes
 from dstauffman.units import MONTHS_PER_YEAR
 
-try:
+if HAVE_NUMPY:
     import numpy as np
     from numpy import inf, nan, logical_not
-except ModuleNotFoundError:
+else:
     from math import inf, nan, isnan
     logical_not = lambda x: not x
-try:
+if HAVE_SCIPY:
     from scipy.interpolate import interp1d
-except ModuleNotFoundError:
-    # run without scipy for pypy support.  Only efforts non-sorted zero-order-hold lookups
-    _HAVE_SCIPY = False # pragma: no cover
-else:
-    _HAVE_SCIPY = True
 
 #%% Globals
 _ALLOWED_ENVS: Optional[Dict[str, str]] = None # allows any environment variables to be invoked
@@ -1525,7 +1520,7 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
         if return_indices:
             return (out, np.where(is_left, None, ix))
         return out
-    if not  _HAVE_SCIPY:
+    if not HAVE_SCIPY:
         raise RuntimeError('You must have scipy available to run this.') # pragma: no cover
     if return_indices:
         raise RuntimeError('Data must be sorted in order to ask for indices.')

@@ -15,19 +15,16 @@ import sys
 from typing import Dict, FrozenSet, List, Set, Tuple, Union
 import unittest
 
-try:
-    # TODO: this sometimes messes up the coverage tool, as the imports are done before it starts counting.
-    # May have to move this function to an external tool to fix it.
-    from coverage import Coverage
-except ModuleNotFoundError:
-    _HAVE_COVERAGE = False
-else:
-    _HAVE_COVERAGE = True
-
+from dstauffman.constants import HAVE_COVERAGE, HAVE_PYTEST
 from dstauffman.enums import ReturnCodes
 from dstauffman.paths import get_tests_dir, list_python_files
 from dstauffman.utils import line_wrap, read_text_file, write_text_file
 from dstauffman.utils_log import setup_dir
+
+if HAVE_COVERAGE:
+    from coverage import Coverage
+if HAVE_PYTEST:
+    import pytest
 
 #%% run_docstrings
 def run_docstrings(files: List[str], verbose: bool = False) -> int:
@@ -54,9 +51,13 @@ def run_docstrings(files: List[str], verbose: bool = False) -> int:
 
     """
     # disable plots from showing up
-    from dstauffman.plotting import Plotter
-    plotter = Plotter()
-    plotter.set_plotter(False)
+    try:
+        from dstauffman.plotting import Plotter
+    except:
+        pass
+    else:
+        plotter = Plotter()
+        plotter.set_plotter(False)
     # initialize failure status
     had_failure = False
     # loop through and test each file
@@ -135,9 +136,6 @@ def run_pytests(folder: str, *args, **kwargs) -> int:
     >>> return_code = run_pytests(folder) # doctest: +SKIP
 
     """
-    # delayed import to only use pytest if you are running the tests
-    import pytest
-
     # disable plots from showing up
     try:
         from dstauffman.plotting import Plotter
@@ -148,15 +146,20 @@ def run_pytests(folder: str, *args, **kwargs) -> int:
         plotter.set_plotter(False)
     # Note: need to do this next part to keep GUI testing from closing the instance with sys.exit
     # open a qapp
-    from PyQt5.QtWidgets import QApplication
-    if QApplication.instance() is None:
-        qapp = QApplication(sys.argv)
+    try:
+        from PyQt5.QtWidgets import QApplication
+    except ModuleNotFoundError:
+        qapp = None
     else:
-        qapp = QApplication.instance()
+        if QApplication.instance() is None:
+            qapp = QApplication(sys.argv)
+        else:
+            qapp = QApplication.instance()
     # run tests using pytest
     exit_code = pytest.main([folder, '-rfEsP'] + list(*args), **kwargs)
     # close the qapp
-    qapp.closeAllWindows()
+    if qapp is not None:
+        qapp.closeAllWindows()
     return_code = ReturnCodes.clean if exit_code == 0 else ReturnCodes.test_failures
     return return_code
 
@@ -185,7 +188,7 @@ def run_coverage(folder: str, *, report: bool = True) -> int:
 
     """
     # check that coverage tool was imported
-    if not _HAVE_COVERAGE:
+    if not HAVE_COVERAGE:
         print('coverage tool is not available, no report was generated.')
         return_code: int = ReturnCodes.no_coverage_tool
         return return_code

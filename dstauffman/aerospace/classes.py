@@ -8,19 +8,19 @@ Notes
 
 #%% Imports
 from __future__ import annotations
-import contextlib
 import doctest
 from typing import Callable, ClassVar, TYPE_CHECKING
 import unittest
 
-with contextlib.suppress(ModuleNotFoundError):
-    import h5py
 import numpy as np
 
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
-from dstauffman import Frozen, SaveAndLoad
+from dstauffman import Frozen, HAVE_H5PY, SaveAndLoad
+
+if HAVE_H5PY:
+    import h5py
 
 #%% KfInnov
 class KfInnov(Frozen):

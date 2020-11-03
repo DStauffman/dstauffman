@@ -7,10 +7,9 @@ Notes
 """
 #%% Imports
 import doctest
+from math import isinf, isnan
 from typing import List, Union
 import unittest
-
-import numpy as np
 
 from dstauffman import MONTHS_PER_YEAR
 from dstauffman.health.stats import prob_to_rate
@@ -208,9 +207,9 @@ def latex_str(value: Union[int, float, str], digits: int = -1, fixed: bool = Fal
     # potentially convert units
     if cmp2ar:
         value = prob_to_rate(value, time=1/MONTHS_PER_YEAR)
-    if np.isnan(value):
+    if isnan(value):
         value_str = 'NaN'
-    elif np.isinf(value) or value > capped:  # type: ignore
+    elif isinf(value) or value > capped:  # type: ignore
         value_str = r'$\infty$'
     else:
         # format the string
