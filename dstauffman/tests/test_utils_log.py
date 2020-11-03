@@ -14,9 +14,10 @@ from typing import Optional
 import unittest
 from unittest.mock import Mock, patch
 
-import numpy as np
-
 import dstauffman as dcs
+
+if dcs.HAVE_NUMPY:
+    import numpy as np
 
 #%% setup_dir
 @patch('dstauffman.utils_log.logger')
@@ -110,6 +111,7 @@ class Test_setup_dir(unittest.TestCase):
             _clean(self)
 
 #%% fix_rollover
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 @patch('dstauffman.utils_log.logger')
 class Test_fix_rollover(unittest.TestCase):
     r"""

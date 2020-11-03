@@ -7,15 +7,19 @@ Notes
 """
 
 #%% Imports
+import contextlib
 import datetime
 import unittest
 
-import matplotlib.dates as dates
-import numpy as np
-
 import dstauffman as dcs
 
+if dcs.HAVE_NUMPY:
+    import numpy as np
+with contextlib.suppress(ModuleNotFoundError):
+    import matplotlib.dates as dates
+
 #%% get_np_time_units
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_get_np_time_units(unittest.TestCase):
     r"""
     Tests the get_np_time_units function with the following cases:
@@ -55,6 +59,7 @@ class Test_round_datetime(unittest.TestCase):
         self.assertEqual(rounded_time, datetime.datetime(2015, 3, 13, 8, 4, 0))
 
 #%% round_np_datetime
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_round_np_datetime(unittest.TestCase):
     r"""
     Tests the round_np_datetime function with the following cases:
@@ -73,6 +78,7 @@ class Test_round_np_datetime(unittest.TestCase):
         np.testing.assert_array_equal(date_out, self.expected)
 
 #%% round_num_datetime
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_round_num_datetime(unittest.TestCase):
     r"""
     Tests the round_num_datetime function with the following cases:
@@ -96,6 +102,7 @@ class Test_round_num_datetime(unittest.TestCase):
         np.testing.assert_array_almost_equal(date_out, np.array([0., 1., 1., 3., 4.]), 12)
 
 #%% round_time
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_round_time(unittest.TestCase):
     r"""
     Tests the round_time function with the following cases:
@@ -118,6 +125,7 @@ class Test_round_time(unittest.TestCase):
         np.testing.assert_array_equal(date_out, expected)
 
 #%% convert_date
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_convert_date(unittest.TestCase):
     r"""
     Tests the convert_date function with the following cases:
@@ -320,6 +328,7 @@ class Test_convert_time_units(unittest.TestCase):
             dcs.convert_time_units(1, 'sec', 'bad')
 
 #%% convert_datetime_to_np
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_convert_datetime_to_np(unittest.TestCase):
     r"""
     Tests the convert_datetime_to_np function with the following cases:
@@ -332,6 +341,7 @@ class Test_convert_datetime_to_np(unittest.TestCase):
         self.assertEqual(out, exp)
 
 #%% convert_duration_to_np
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_convert_duration_to_np(unittest.TestCase):
     r"""
     Tests the convert_duration_to_np function with the following cases:
@@ -344,6 +354,7 @@ class Test_convert_duration_to_np(unittest.TestCase):
         self.assertEqual(out, exp)
 
 #%% convert_num_dt_to_np
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_convert_num_dt_to_np(unittest.TestCase):
     r"""
     Tests the convert_datetime_to_np function with the following cases:

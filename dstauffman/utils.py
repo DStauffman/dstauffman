@@ -25,11 +25,16 @@ from typing import Any, Dict, List, Optional, overload, Tuple, TypeVar, Union
 import unittest
 import warnings
 
+from dstauffman.constants import HAVE_NUMPY, IS_WINDOWS
+from dstauffman.enums import ReturnCodes
+from dstauffman.units import MONTHS_PER_YEAR
+
 try:
     import numpy as np
-    from numpy import inf, nan
+    from numpy import inf, nan, logical_not
 except ModuleNotFoundError:
-    from math import inf, nan
+    from math import inf, nan, isnan
+    logical_not = lambda x: not x
 try:
     from scipy.interpolate import interp1d
 except ModuleNotFoundError:
@@ -37,10 +42,6 @@ except ModuleNotFoundError:
     _HAVE_SCIPY = False # pragma: no cover
 else:
     _HAVE_SCIPY = True
-
-from dstauffman.constants import IS_WINDOWS
-from dstauffman.enums import ReturnCodes
-from dstauffman.units import MONTHS_PER_YEAR
 
 #%% Globals
 _ALLOWED_ENVS: Optional[Dict[str, str]] = None # allows any environment variables to be invoked
@@ -79,10 +80,30 @@ def _nan_equal(a, b, /) -> bool:
     False
 
     """
-    # preallocate to True
+    def _is_nan(x):
+        try:
+            out = isnan(x)
+        except:
+            return False
+        return out
     try:
-        # use numpy testing module to assert that they are equal (ignores NaNs)
-        np.testing.assert_array_equal(a, b)
+        if HAVE_NUMPY:
+            # use numpy testing module to assert that they are equal (ignores NaNs)
+            np.testing.assert_array_equal(a, b)
+        else:
+            if a != b:
+                return False
+            if hasattr(a, '__len__'):
+                if hasattr(b, '__len__'):
+                    if len(a) != len(b):
+                        return False
+                    return all(x == y or _is_nan(x) or _is_nan(y) for (x, y) in zip(a, b))
+                else:
+                    return False
+            else:
+                if hasattr(b, '__len__'):
+                    return False
+                return a == b or _is_nan(a) or _is_nan(b)
     except AssertionError:
         # if assertion fails, then they are not equal
         return False
@@ -356,7 +377,7 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
             # if any differences, then this test fails
             if isinstance(attr1, Mapping) and isinstance(attr2, Mapping):
                 is_same = compare_two_dicts(attr1, attr2, suppress_output=True, is_subset=is_subset) and is_same
-            elif np.logical_not(_nan_equal(attr1, attr2)):
+            elif logical_not(_nan_equal(attr1, attr2)):
                 is_same = _not_true_print()
         # find the attributes in one but not the other, if any, then this test fails
         diff = attrs1 ^ attrs2
@@ -435,7 +456,7 @@ def compare_two_dicts(d1: Mapping[Any, Any], d2: Mapping[Any, Any], suppress_out
                 is_same = compare_two_dicts(s1, s2, suppress_output=suppress_output, \
                     names=[f"{name1}['{key}']", f"{name2}['{key}']"], is_subset=is_subset)
             # if any differences, then this test fails
-            elif np.logical_not(_nan_equal(s1, s2)):
+            elif logical_not(_nan_equal(s1, s2)):
                 is_same = False
                 if not suppress_output:
                     print(f'{key} is different.')

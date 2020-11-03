@@ -17,29 +17,57 @@ import unittest
 from unittest.mock import patch
 import warnings
 
-import numpy as np
-from scipy.interpolate import interp1d
-
 import dstauffman as dcs
+
+if dcs.HAVE_NUMPY:
+    import numpy as np
+    nan = np.nan
+else:
+    from math import nan
+with contextlib.suppress(ModuleNotFoundError):
+    from scipy.interpolate import interp1d
 
 #%% _nan_equal
 class Test__nan_equal(unittest.TestCase):
     r"""
     Tests the _nan_equal function with the following cases:
-        TBD
+        Equal
+        Not equal
+        non-numpy good cases
+        non-numpy bad cases
     """
-    def setUp(self) -> None:
-        self.a = np.array([1, 2, np.nan])
-        self.b = np.array([1, 2, np.nan])
-        self.c = np.array([3, 2, np.nan])
-
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_equal(self) -> None:
-        self.assertTrue(dcs.utils._nan_equal(self.a, self.b))
+        a = np.array([1, 2, np.nan])
+        b = np.array([1, 2, np.nan])
+        self.assertTrue(dcs.utils._nan_equal(a, b))
 
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_not_equal(self) -> None:
-        self.assertFalse(dcs.utils._nan_equal(self.a, self.c))
+        a = np.array([1, 2, np.nan])
+        b = np.array([3, 2, np.nan])
+        self.assertFalse(dcs.utils._nan_equal(a, b))
+
+    def test_goods(self):
+        self.assertTrue(dcs.utils._nan_equal(1, 1))
+        self.assertTrue(dcs.utils._nan_equal(1, 1.))
+        self.assertTrue(dcs.utils._nan_equal(1., 1.))
+        self.assertTrue(dcs.utils._nan_equal([1., 2, nan], [1, 2, nan]))
+        self.assertTrue(dcs.utils._nan_equal((1., 2, nan), [1, 2, nan]))
+        self.assertTrue(dcs.utils._nan_equal({1., 2, nan}, {1, 2, nan}))
+        self.assertTrue(dcs.utils._nan_equal('text', 'text'))
+
+    def test_bads(self):
+        self.assertFalse(dcs.utils._nan_equal(1, 1.01))
+        self.assertFalse(dcs.utils._nan_equal(1, 2))
+        self.assertFalse(dcs.utils._nan_equal(1.1, 1.2))
+        self.assertFalse(dcs.utils._nan_equal([1, 2, 3], [3, 2, 1]))
+        self.assertFalse(dcs.utils._nan_equal([1, 2, 3, 4], [1, 2, 3]))
+        self.assertFalse(dcs.utils._nan_equal('text', 'good'))
+        self.assertFalse(dcs.utils._nan_equal('text', 'longer'))
 
 #%% find_in_range
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_find_in_range(unittest.TestCase):
     r"""
     Tests the find_in_range function with the following cases:
@@ -118,6 +146,7 @@ class Test_find_in_range(unittest.TestCase):
         np.testing.assert_array_equal(valid, exp)
 
 #%% rms
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_rms(unittest.TestCase):
     r"""
     Tests the rms function with the following cases:
@@ -221,6 +250,7 @@ class Test_rms(unittest.TestCase):
         self.assertTrue(np.isnan(out))
 
 #%% rss
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_rss(unittest.TestCase):
     r"""
     Tests the rss function with the following cases:
@@ -693,6 +723,7 @@ class Test_capture_output(unittest.TestCase):
                 print('Lost values')
 
 #%% unit
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_unit(unittest.TestCase):
     r"""
     Tests the unit function with the following cases:
@@ -733,6 +764,7 @@ class Test_unit(unittest.TestCase):
         np.testing.assert_array_almost_equal(norm_data, self.norm_data)
 
 #%% modd
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_modd(unittest.TestCase):
     r"""
     Tests the modd function with the following cases:
@@ -788,19 +820,24 @@ class Test_is_np_int(unittest.TestCase):
     def test_large_int(self) -> None:
         self.assertTrue(dcs.is_np_int(2**62))
 
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_np_int(self) -> None:
         self.assertTrue(dcs.is_np_int(np.array([1, 2, 3])))
 
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_np_float(self) -> None:
         self.assertFalse(dcs.is_np_int(np.array([2., np.pi])))
 
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_np_large_int(self) -> None:
         self.assertTrue(dcs.is_np_int(np.array(2**62)))
 
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_np_uint(self) -> None:
         self.assertTrue(dcs.is_np_int(np.array([1, 2, 3], dtype=np.uint32)))
 
 #%% np_digitize
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_np_digitize(unittest.TestCase):
     r"""
     Tests the np_digitize function with the following cases:
@@ -845,6 +882,7 @@ class Test_np_digitize(unittest.TestCase):
             dcs.np_digitize(np.array([1, 10, np.nan]), self.bins)
 
 #%% histcounts
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_histcounts(unittest.TestCase):
     r"""
     Tests the histcounts function with the following cases:
@@ -872,6 +910,7 @@ class Test_histcounts(unittest.TestCase):
             dcs.histcounts(self.x, np.array([100, 1000]))
 
 #%% full_print
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_full_print(unittest.TestCase):
     r"""
     Tests the full_print function with the following cases:
@@ -983,6 +1022,7 @@ class Test_line_wrap(unittest.TestCase):
         self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "22:25" was too small.')
 
 #%% combine_per_year
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_combine_per_year(unittest.TestCase):
     r"""
     Tests the combine_per_year function with the following cases:
@@ -1117,6 +1157,7 @@ class Test_is_datetime(unittest.TestCase):
     pass # TODO: write this
 
 #%% intersect
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_intersect(unittest.TestCase):
     r"""
     Tests the intersect function with the following cases:
@@ -1267,6 +1308,7 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(ib, exp)
 
 #%% issorted
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_issorted(unittest.TestCase):
     r"""
     Tests the issorted function with the following cases:
@@ -1294,6 +1336,7 @@ class Test_issorted(unittest.TestCase):
         self.assertFalse(dcs.issorted(x, descend=True))
 
 #%% zero_order_hold
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_zero_order_hold(unittest.TestCase):
     r"""
     Tests the zero_order_hold function with the following cases:
@@ -1399,6 +1442,7 @@ class Test_zero_order_hold(unittest.TestCase):
             dcs.zero_order_hold(x, xp, yp, return_indices=True)
 
 #%% drop_following_time
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_drop_following_time(unittest.TestCase):
     r"""
     Tests the drop_following_time function with the following cases:

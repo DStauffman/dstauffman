@@ -11,8 +11,6 @@ from enum import unique
 from typing import ClassVar
 import unittest
 
-import numpy as np
-
 import dstauffman as dcs
 
 #%% Support
@@ -78,11 +76,11 @@ class Test_IntEnumPlus(unittest.TestCase):
 
     def test_list_of_names(self) -> None:
         list_of_names = _Example_Enum.list_of_names()
-        np.testing.assert_array_equal(list_of_names, ['field_one', 'field_two', 'field_ten'])
+        self.assertEqual(list_of_names, ['field_one', 'field_two', 'field_ten'])
 
     def test_list_of_values(self) -> None:
         list_of_values = _Example_Enum.list_of_values()
-        np.testing.assert_array_equal(list_of_values, [1, 2, 10])
+        self.assertEqual(list_of_values, [1, 2, 10])
 
     def test_num_values(self) -> None:
         num_values = _Example_Enum.num_values
