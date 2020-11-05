@@ -15,15 +15,21 @@ import platform
 from typing import Dict, Optional, Union
 import unittest
 
-import matplotlib.cm as cmx
-import matplotlib.colors as colors
-import matplotlib.pyplot as plt
-import numpy as np
-from PyQt5.QtCore import Qt
-from PyQt5.QtTest import QTest
-
-from dstauffman import capture_output, get_tests_dir, IS_WINDOWS
+from dstauffman import capture_output, get_tests_dir, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
 import dstauffman.plotting as plot
+
+if HAVE_MPL:
+    import matplotlib.cm as cmx
+    import matplotlib.colors as colors
+    import matplotlib.pyplot as plt
+if HAVE_NUMPY:
+    import numpy as np
+try:
+    from PyQt5.QtCore import Qt
+    from PyQt5.QtTest import QTest
+    _HAVE_QT = True
+except ModuleNotFoundError:
+    _HAVE_QT = False
 
 #%% Plotter for testing
 plotter = plot.Plotter(False)
@@ -55,6 +61,7 @@ class Test_plotting__HoverButton(unittest.TestCase):
     pass # TODO: write this
 
 #%% plotting.TruthPlotter
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_plotting_TruthPlotter(unittest.TestCase):
     r"""
     Tests the plotting.TruthPlotter class with the following cases:
@@ -200,6 +207,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
             plt.close(self.fig)
 
 #%% plotting.MyCustomToolbar
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_MyCustomToolbar(unittest.TestCase):
     r"""
     Tests the plotting.MyCustomToolbar class with the following cases:
@@ -256,6 +264,7 @@ class Test_plotting_MyCustomToolbar(unittest.TestCase):
         plt.close(self.fig2)
 
 #%% plotting.ColorMap
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_ColorMap(unittest.TestCase):
     r"""
     Tests the plotting.ColorMap class with the following cases:
@@ -326,6 +335,7 @@ class Test_plotting_ColorMap(unittest.TestCase):
             plt.close(self.fig)
 
 #%% plotting.close_all
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_close_all(unittest.TestCase):
     r"""
     Tests the plotting.close_all function with the following cases:
@@ -354,6 +364,7 @@ class Test_plotting_close_all(unittest.TestCase):
         self.assertFalse(plt.fignum_exists(fig2.number))
 
 #%% plotting.get_color_lists
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_get_color_lists(unittest.TestCase):
     r"""
     Tests the plotting.get_color_lists function with the following cases:
@@ -372,6 +383,7 @@ class Test_plotting_get_color_lists(unittest.TestCase):
         self.assertEqual(colormap.colors[7], 'xkcd:chocolate')
 
 #%% plotting.ignore_plot_data
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_plotting_ignore_plot_data(unittest.TestCase):
     r"""
     Tests the plotting.ignore_plot_data function with the following cases:
@@ -484,6 +496,7 @@ class Test_plotting_resolve_name(unittest.TestCase):
         self.assertEqual(new_name, 'new YYYYYYYYYYYYYYYYYYtext')
 
 #%% plotting.storefig
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_storefig(unittest.TestCase):
     r"""
     Tests the plotting.storefig function with the following cases:
@@ -585,6 +598,7 @@ class Test_plotting_storefig(unittest.TestCase):
         plt.close(cls.fig)
 
 #%% plotting.titleprefix
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_titleprefix(unittest.TestCase):
     r"""
     Tests the plotting.titleprefix function with the following cases:
@@ -616,6 +630,7 @@ class Test_plotting_titleprefix(unittest.TestCase):
         plt.close(self.fig)
 
 #%% plotting.disp_xlimits
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_disp_xlimits(unittest.TestCase):
     r"""
     Tests the plotting.disp_xlimits function with the following cases:
@@ -664,6 +679,7 @@ class Test_plotting_disp_xlimits(unittest.TestCase):
         plt.close(self.fig)
 
 #%% plotting.zoom_ylim
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_zoom_ylim(unittest.TestCase):
     r"""
     Tests the plotting.zoom_ylim function with the following cases:
@@ -713,6 +729,7 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
         plt.close(self.fig)
 
 #%% plotting.figmenu
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_figmenu(unittest.TestCase):
     r"""
     Tests the plotting.figmenu function with the following cases:
@@ -754,6 +771,7 @@ class Test_plotting_rgb_ints_to_hex(unittest.TestCase):
         self.assertEqual(hex_code, '#00ff09')
 
 #%% plotting.get_screen_resolution
+@unittest.skipIf(not _HAVE_QT, 'Skipping due to missing PyQt5 dependency.')
 class Test_plotting_get_screen_resolution(unittest.TestCase):
     r"""
     Tests the plotting.get_screen_resolution function with the following cases:
@@ -765,6 +783,7 @@ class Test_plotting_get_screen_resolution(unittest.TestCase):
         self.assertGreater(screen_height, 0)
 
 #%% plotting.show_zero_ylim
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_show_zero_ylim(unittest.TestCase):
     r"""
     Tests the plotting.show_zero_ylim function with the following cases:
@@ -790,6 +809,7 @@ class Test_plotting_show_zero_ylim(unittest.TestCase):
         plt.close(self.fig)
 
 #%% plotting.plot_second_units_wrapper
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
     r"""
     Tests the plotting.plot_second_units_wrapper function with the following cases:
@@ -865,6 +885,7 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
         plt.close(self.fig)
 
 #%% plotting.plot_second_yunits
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_second_yunits(unittest.TestCase):
     r"""
     Tests the plotting.plot_second_yunits function with the following cases:
@@ -887,6 +908,7 @@ class Test_plotting_plot_second_yunits(unittest.TestCase):
         plt.close(self.fig)
 
 #%% plotting.get_rms_indices
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_plotting_get_rms_indices(unittest.TestCase):
     r"""
     Tests the plotting.get_rms_indices function with the following cases:
@@ -933,6 +955,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
         pass # TODO: write this
 
 #%% plotting.plot_vert_lines
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_vert_lines(unittest.TestCase):
     r"""
     Tests the plotting.plot_vert_lines function with the following cases:
@@ -966,6 +989,7 @@ class Test_plotting_plot_vert_lines(unittest.TestCase):
         plt.close(self.fig)
 
 #%% plotting.plot_phases
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_phases(unittest.TestCase):
     r"""
     Tests the plotting.plot_phases function with the following cases:
@@ -1008,6 +1032,7 @@ class Test_plotting_plot_phases(unittest.TestCase):
             plt.close(self.fig)
 
 #%% plotting.plot_classification
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_classification(unittest.TestCase):
     r"""
     Tests the plotting.plot_classification function with the following cases:
@@ -1050,6 +1075,7 @@ class Test_plotting_align_plots(unittest.TestCase):
     pass # TODO: write this
 
 #%% plotting.z_from_ci
+@unittest.skipIf(not HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
 class Test_plotting_z_from_ci(unittest.TestCase):
     r"""
     Tests the plotting.z_from_ci function with the following cases:
@@ -1066,5 +1092,6 @@ class Test_plotting_z_from_ci(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    plt.ioff()
+    if HAVE_MPL:
+        plt.ioff()
     unittest.main(exit=False)

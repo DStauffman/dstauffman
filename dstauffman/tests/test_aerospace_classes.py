@@ -11,10 +11,11 @@ import contextlib
 import os
 import unittest
 
-import numpy as np
-
-from dstauffman import get_tests_dir
+from dstauffman import get_tests_dir, HAVE_NUMPY
 import dstauffman.aerospace as space
+
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% aerospace.KfInnov
 class Test_aerospace_KfInnov(unittest.TestCase):
@@ -39,6 +40,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         kf = space.Kf()
         self.assertTrue(isinstance(kf, space.Kf)) # TODO: test better
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_save_and_load(self) -> None:
         kf = space.Kf(num_points=2, num_states=6, num_axes=3, num_innovs=4)
         kf.chan = ['a', 'b', 'c']

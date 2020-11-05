@@ -138,7 +138,7 @@ class Test_health_latex_str(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.value = 101.666666666666
-        self.value2 = health.rate_to_prob(0.2/12) #0.016528546178382508
+        self.value2 = 0.016528546178382508  # health.rate_to_prob(0.2/12)
 
     def test_string1(self) -> None:
         value_str = health.latex_str('test')

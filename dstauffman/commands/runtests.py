@@ -49,11 +49,11 @@ def parse_tests(input_args: List[str]) -> argparse.Namespace:
     """
     parser = argparse.ArgumentParser(prog='dcs tests', description='Runs all the built-in unit tests.')
 
-    parser.add_argument('-v', '--verbose', help='Run tests in verbose mode.', action='store_true')
-
     parser.add_argument('-d', '--docstrings', help='Run the docstrings instead of the unittests.', action='store_true')
 
     parser.add_argument('-u', '--unittest', help='Use unittest instead of pytest for the test runner.', action='store_true')
+
+    parser.add_argument('-v', '--verbose', help='Run tests in verbose mode.', action='store_true')
 
     parser.add_argument('-l', '--library', type=str, nargs='?', help='Library to run the unit tests from, default is yourself.')
 

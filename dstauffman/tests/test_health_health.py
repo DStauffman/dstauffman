@@ -11,16 +11,18 @@ Notes
 from typing import Optional
 import unittest
 
-import matplotlib.pyplot as plt
-import numpy as np
-
+from dstauffman import HAVE_MPL, HAVE_NUMPY
 from dstauffman.plotting import Opts, Plotter
 import dstauffman.health as health
 
-#%% Plotter for testing
-plotter = Plotter(False)
+if HAVE_MPL:
+    import matplotlib.pyplot as plt
+    plotter = Plotter(False)
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% health.dist_enum_and_mons
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_health_dist_enum_and_mons(unittest.TestCase):
     r"""
     Tests the health.dist_enum_and_mons function with the following cases:
@@ -106,6 +108,7 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
         self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
 
 #%% health.icer
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_health_icer(unittest.TestCase):
     r"""
     Tests the health.icer function with the following cases:
@@ -262,5 +265,6 @@ class Test_health_icer(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    plt.ioff()
+    if HAVE_MPL:
+        plt.ioff()
     unittest.main(exit=False)

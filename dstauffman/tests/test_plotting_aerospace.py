@@ -12,14 +12,17 @@ from typing import List, Optional
 import unittest
 from unittest.mock import patch
 
-from matplotlib.figure import Figure
-import numpy as np
-
-from dstauffman import LogLevel
+from dstauffman import HAVE_MPL, HAVE_NUMPY, LogLevel
 from dstauffman.aerospace import quat_norm
 import dstauffman.plotting as plot
 
+if HAVE_MPL:
+    from matplotlib.figure import Figure
+if HAVE_NUMPY:
+    import numpy as np
+
 #%% plotting.make_quaternion_plot
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_make_quaternion_plot(unittest.TestCase):
     r"""
     Tests the plotting.make_quaternion_plot function with the following cases:

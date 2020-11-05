@@ -11,11 +11,15 @@ Notes
 import doctest
 import unittest
 
-import matplotlib.pyplot as plt
-import numpy as np
+from dstauffman import HAVE_MPL, HAVE_NUMPY
 
 from dstauffman.plotting.plotting import Opts, plot_correlation_matrix, plot_time_history, \
     setup_plots
+
+if HAVE_MPL:
+    import matplotlib.pyplot as plt
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% Functions - plot_bpe_convergence
 def plot_bpe_convergence(costs, *, opts=None):
@@ -56,7 +60,7 @@ def plot_bpe_convergence(costs, *, opts=None):
 
     # get number of iterations
     num_iters = len(costs) - 2
-    time      = np.arange(len(costs))
+    time      = np.arange(len(costs)) if HAVE_NUMPY else list(range(len(costs)))
     labels    = ['Begin'] + [str(x+1) for x in range(num_iters)] + ['Final']
 
     # alias the title

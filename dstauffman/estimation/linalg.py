@@ -10,8 +10,11 @@ Notes
 import doctest
 import unittest
 
-import numpy as np
-from numpy.linalg import norm, svd
+from dstauffman import HAVE_NUMPY
+
+if HAVE_NUMPY:
+    import numpy as np
+    from numpy.linalg import norm, svd
 
 #%% orth
 def orth(A):

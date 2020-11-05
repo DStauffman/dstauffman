@@ -53,7 +53,8 @@ class Test__nan_equal(unittest.TestCase):
         self.assertTrue(dcs.utils._nan_equal(1, 1.))
         self.assertTrue(dcs.utils._nan_equal(1., 1.))
         self.assertTrue(dcs.utils._nan_equal([1., 2, nan], [1, 2, nan]))
-        self.assertTrue(dcs.utils._nan_equal((1., 2, nan), [1, 2, nan]))
+        if dcs.HAVE_NUMPY:
+            self.assertTrue(dcs.utils._nan_equal((1., 2, nan), [1, 2, nan]))
         self.assertTrue(dcs.utils._nan_equal({1., 2, nan}, {1, 2, nan}))
         self.assertTrue(dcs.utils._nan_equal('text', 'text'))
 

@@ -12,14 +12,17 @@ from typing import List, Optional
 import unittest
 from unittest.mock import patch
 
-from matplotlib.colors import ListedColormap
-import matplotlib.pyplot as plt
-import numpy as np
-
-from dstauffman import LogLevel
+from dstauffman import HAVE_MPL, HAVE_NUMPY, LogLevel
 import dstauffman.plotting as plot
 
+if HAVE_MPL:
+    from matplotlib.colors import ListedColormap
+    import matplotlib.pyplot as plt
+if HAVE_NUMPY:
+    import numpy as np
+
 #%% plotting.make_time_plot
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_make_time_plot(unittest.TestCase):
     r"""
     Tests the plotting.make_time_plot function with the following cases:
@@ -87,6 +90,7 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
     pass # TODO: write this
 
 #%% plotting.make_difference_plot
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_make_difference_plot(unittest.TestCase):
     r"""
     Tests the plotting.make_difference_plot function with the following cases:
@@ -254,6 +258,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
                 plt.close(this_fig)
 
 #%% plotting.make_categories_plot
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_make_categories_plot(unittest.TestCase):
     r"""
     Tests the plotting.make_categories_plot with the following cases:
@@ -310,5 +315,6 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    plt.ioff()
+    if HAVE_MPL:
+        plt.ioff()
     unittest.main(exit=False)

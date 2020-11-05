@@ -13,7 +13,10 @@ import doctest
 from typing import Any, List, Union
 import unittest
 
-import numpy as np
+from dstauffman import HAVE_NUMPY
+
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% _get_sub_level
 def _get_sub_level(this_sub: Any, part: str) -> Any:

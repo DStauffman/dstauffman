@@ -13,18 +13,21 @@ import doctest
 import unittest
 import warnings
 
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-from matplotlib.ticker import StrMethodFormatter
-import numpy as np
 from packaging import version
 
-from dstauffman import get_factors, rms
+from dstauffman import get_factors, HAVE_MPL, HAVE_NUMPY, rms
 from dstauffman.health import bins_to_str_ranges
 
 from dstauffman.plotting.plotting import Opts, setup_plots
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits, \
     ignore_plot_data, plot_second_units_wrapper, show_zero_ylim, whitten, z_from_ci
+
+if HAVE_MPL:
+    import matplotlib as mpl
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import StrMethodFormatter
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% Functions - plot_health_time_history
 def plot_health_time_history(time, data, label, units='', opts=None, *, legend=None, \
@@ -465,8 +468,8 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     legend_loc = opts.leg_spot
 
     # convert data to percentages
-    num_pts   = age_bins.size - 1
-    y_values  = np.arange(num_pts)
+    num_pts   = len(age_bins) - 1
+    y_values  = np.arange(num_pts) if HAVE_NUMPY else list(range(num_pts))
     y_labels  = bins_to_str_ranges(age_bins, dt=1, cutoff=200)
 
     # create the figure and axis and set the title

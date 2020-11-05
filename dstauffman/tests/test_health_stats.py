@@ -10,11 +10,15 @@ Notes
 from typing import Dict
 import unittest
 
-import numpy as np
+from dstauffman import HAVE_NUMPY
 
 import dstauffman.health as health
 
+if HAVE_NUMPY:
+    import numpy as np
+
 #%% health.convert_annual_to_monthly_probability
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_health_convert_annual_to_monthly_probability(unittest.TestCase):
     r"""
     Tests the health.convert_annual_to_monthly_probability function with the following cases:
@@ -58,6 +62,7 @@ class Test_health_convert_annual_to_monthly_probability(unittest.TestCase):
         np.testing.assert_array_almost_equal(monthly, self.monthly)
 
 #%% health.convert_monthly_to_annual_probability
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_health_convert_monthly_to_annual_probability(unittest.TestCase):
     r"""
     Tests the health.convert_monthly_to_annual_probability function with the following cases:
@@ -101,6 +106,7 @@ class Test_health_convert_monthly_to_annual_probability(unittest.TestCase):
         np.testing.assert_array_almost_equal(annual, self.annuals)
 
 #%% health.prob_to_rate
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_health_prob_to_rate(unittest.TestCase):
     r"""
     Tests the health.prob_to_rate function with the following cases:
@@ -144,6 +150,7 @@ class Test_health_prob_to_rate(unittest.TestCase):
         np.testing.assert_array_almost_equal(prob, self.prob)
 
 #%% health.rate_to_prob
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_health_rate_to_prob(unittest.TestCase):
     r"""
     Tests the health.rate_to_prob function with the following cases:
@@ -187,6 +194,7 @@ class Test_health_rate_to_prob(unittest.TestCase):
         np.testing.assert_array_almost_equal(rate, self.rate)
 
 #%% health.annual_rate_to_monthly_probability
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_health_annual_rate_to_monthly_probability(unittest.TestCase):
     r"""
     Tests the health.annual_rate_to_monthly_probability function with the following cases:
@@ -228,6 +236,7 @@ class Test_health_annual_rate_to_monthly_probability(unittest.TestCase):
         np.testing.assert_array_almost_equal(prob, self.prob)
 
 #%% health.monthly_probability_to_annual_rate
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_health_monthly_probability_to_annual_rate(unittest.TestCase):
     r"""
     Tests the health.monthly_probability_to_annual_rate function with the following cases:
@@ -343,11 +352,13 @@ class Test_health_combine_sets(unittest.TestCase):
         with self.assertRaises((AssertionError, ValueError)):
             health.combine_sets(5, self.u1, self.s1, -4, self.u2, self.s2)
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_broadcasting(self) -> None:
         with self.assertRaises(ValueError):
             (n, u, s) = health.combine_sets(np.array([self.n1, self.n1]), self.u1, self.s1, self.n2, self.u2, self.s2)
 
 #%% health.bounded_normal_draw
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_health_bounded_normal_draw(unittest.TestCase):
     r"""
     Tests the health.bounded_normal_draw function with the following cases:
@@ -396,6 +407,7 @@ class Test_health_bounded_normal_draw(unittest.TestCase):
         self.assertTrue(np.all(np.abs(out - self.mean) < 1e-8))
 
 #%% health.rand_draw
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_health_rand_draw(unittest.TestCase):
     r"""
     Tests the health.rand_draw function with the following cases:

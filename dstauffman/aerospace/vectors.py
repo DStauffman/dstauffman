@@ -10,9 +10,10 @@ Notes
 import doctest
 import unittest
 
-import numpy as np
+from dstauffman import HAVE_NUMPY, unit
 
-from dstauffman import unit
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% Functions - rot
 def rot(axis, angle):

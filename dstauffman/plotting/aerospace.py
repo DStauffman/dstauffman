@@ -11,16 +11,21 @@ import doctest
 import logging
 import unittest
 
-from matplotlib.colors import ListedColormap
-import matplotlib.pyplot as plt
-import numpy as np
-
-from dstauffman import get_factors, intersect, is_datetime, LogLevel, rms
+from dstauffman import get_factors, HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel, rms
 from dstauffman.aerospace import Kf, KfInnov, quat_angle_diff
 from dstauffman.plotting.generic import make_categories_plot, make_difference_plot
 from dstauffman.plotting.plotting import Opts, setup_plots
 from dstauffman.plotting.support import ColorMap, disp_xlimits, get_color_lists, get_rms_indices, \
     plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
+
+if HAVE_MPL:
+    from matplotlib.colors import ListedColormap
+    import matplotlib.pyplot as plt
+if HAVE_NUMPY:
+    import numpy as np
+    inf = np.inf
+else:
+    from math import inf
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -33,7 +38,7 @@ _TRUTH_COLOR = 'k'
 #%% Functions - make_quaternion_plot
 def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *, \
         name_one='', name_two='', time_units='sec', start_date='', plot_components=True, \
-        rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf, \
+        rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True, \
         legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None, \
         data_as_rows=True, tolerance=0, return_err=False):

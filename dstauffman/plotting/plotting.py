@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import datetime
 import doctest
 import logging
@@ -14,17 +15,22 @@ import os
 from typing import ClassVar, List, Optional, Tuple, TypeVar, Union
 import unittest
 
-from matplotlib.patches import Rectangle
-import matplotlib.pyplot as plt
-from matplotlib.ticker import StrMethodFormatter
-import numpy as np
-
 from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_factors, \
-    LogLevel
+    HAVE_MPL, HAVE_NUMPY, LogLevel
 
 from dstauffman.plotting.generic import make_time_plot
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, figmenu, get_classification, \
     ignore_plot_data, plot_classification, storefig, titleprefix
+
+if HAVE_MPL:
+    from matplotlib.patches import Rectangle
+    import matplotlib.pyplot as plt
+    from matplotlib.ticker import StrMethodFormatter
+if HAVE_NUMPY:
+    import numpy as np
+    inf = np.inf
+else:
+    from math import inf
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -101,10 +107,10 @@ class Opts(Frozen):
         self.plot_type: str   = 'png'
         self.sub_plots: bool  = True
         self.sing_line: bool  = False
-        self.disp_xmin: _Date = -np.inf
-        self.disp_xmax: _Date =  np.inf
-        self.rms_xmin: _Date  = -np.inf
-        self.rms_xmax: _Date  =  np.inf
+        self.disp_xmin: _Date = -inf
+        self.disp_xmax: _Date =  inf
+        self.rms_xmin: _Date  = -inf
+        self.rms_xmax: _Date  =  inf
         self.show_rms: bool   = True
         self.use_mean: bool   = False
         self.show_zero: bool  = False

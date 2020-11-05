@@ -93,13 +93,100 @@ class Test_issorted_opt(unittest.TestCase):
     def test_reverse_sorted(self) -> None:
         x = np.array([4, np.pi, 1., -1.])
         self.assertFalse(dcs.issorted_opt(x))
-        self.assertTrue(dcs.issorted(x, descend=True))
+        self.assertTrue(dcs.issorted_opt(x, descend=True))
 
     def test_lists(self) -> None:
         x = List([-inf, 0, 1, pi, 5, inf])
         self.assertTrue(dcs.issorted_opt(x))
-        if dcs.HAVE_NUMPY:
-            self.assertFalse(dcs.issorted(x, descend=True))
+        self.assertFalse(dcs.issorted_opt(x, descend=True))
+
+#%% prob_to_rate_opt
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+class Test_prob_to_rate_opt(unittest.TestCase):
+    r"""
+    Tests the prob_to_rate_opt function with the following cases:
+        convert a vector from monthly to annual
+        convert a scalar
+        convert a number less than zero (raise error)
+        convert a number greater than one (raise error)
+        convert a vector from monthly to annual and then back
+    """
+    def setUp(self) -> None:
+        self.prob = np.arange(0, 1.01, 0.01)
+        self.time = 5
+        self.rate = np.hstack((0., -np.log(1 - self.prob[1:-1]) / self.time, np.inf))
+
+    def test_conversion(self) -> None:
+        rate = dcs.prob_to_rate_opt(self.prob, self.time)
+        np.testing.assert_array_almost_equal(rate, self.rate)
+
+    def test_scalar(self) -> None:
+        rate = dcs.prob_to_rate_opt(self.prob[15], self.time)
+        self.assertAlmostEqual(rate, self.rate[15])
+        rate = dcs.prob_to_rate_opt(float(self.prob[15]), self.time)
+        self.assertAlmostEqual(rate, float(self.rate[15]))
+        rate = dcs.prob_to_rate_opt(1, 1)
+        self.assertEqual(rate, np.inf)
+        rate = dcs.prob_to_rate_opt(0, 1)
+        self.assertEqual(rate, 0.)
+
+    def test_lt_zero(self) -> None:
+        with self.assertRaises(ValueError):
+            dcs.prob_to_rate_opt(np.array([0., 0.5, -1.]))
+
+    def test_gt_one(self) -> None:
+        with self.assertRaises(ValueError):
+            dcs.prob_to_rate_opt(np.array([0., 0.5, 1.5]))
+
+    def test_circular(self) -> None:
+        rate = dcs.prob_to_rate_opt(self.prob, self.time)
+        np.testing.assert_array_almost_equal(rate, self.rate)
+        prob = dcs.rate_to_prob_opt(rate, self.time)
+        np.testing.assert_array_almost_equal(prob, self.prob)
+
+#%% rate_to_prob_opt
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+class Test_rate_to_prob_opt(unittest.TestCase):
+    r"""
+    Tests the rate_to_prob_opt function with the following cases:
+        convert a vector from monthly to annual
+        convert a scalar
+        convert a number less than zero (raise error)
+        convert a number greater than one (raise error)
+        convert a vector from monthly to annual and then back
+    """
+    def setUp(self) -> None:
+        self.prob = np.arange(0, 1.01, 0.01)
+        self.time = 5
+        self.rate = np.hstack((0., -np.log(1 - self.prob[1:-1]) / self.time, np.inf))
+
+    def test_conversion(self) -> None:
+        prob = dcs.rate_to_prob_opt(self.rate, self.time)
+        np.testing.assert_array_almost_equal(prob, self.prob)
+
+    def test_scalar(self) -> None:
+        prob = dcs.rate_to_prob_opt(self.rate[20], self.time)
+        self.assertAlmostEqual(prob, self.prob[20])
+        prob = dcs.rate_to_prob_opt(float(self.rate[20]), self.time)
+        self.assertAlmostEqual(prob, float(self.prob[20]))
+        prob = dcs.rate_to_prob_opt(0, 1)
+        self.assertEqual(prob, 0.)
+        prob = dcs.rate_to_prob_opt(np.inf, 1)
+        self.assertEqual(prob, 1)
+
+    def test_lt_zero(self) -> None:
+        with self.assertRaises(ValueError):
+            dcs.rate_to_prob_opt(np.array([0., 0.5, -1.]))
+
+    def test_infinity(self) -> None:
+        prob = dcs.rate_to_prob_opt(np.inf, 1)
+        self.assertAlmostEqual(prob, 1.)
+
+    def test_circular(self) -> None:
+        prob = dcs.rate_to_prob_opt(self.rate, self.time)
+        np.testing.assert_array_almost_equal(prob, self.prob)
+        rate = dcs.prob_to_rate_opt(prob, self.time)
+        np.testing.assert_array_almost_equal(rate, self.rate)
 
 #%% Unit test execution
 if __name__ == '__main__':

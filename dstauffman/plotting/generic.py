@@ -11,13 +11,18 @@ import doctest
 import logging
 import unittest
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-from dstauffman import get_factors, intersect, is_datetime, LogLevel, rms
+from dstauffman import get_factors, HAVE_MPL, HAVE_NUMPY, intersect, is_datetime, LogLevel, rms
 
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits, get_rms_indices, \
     plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
+
+if HAVE_MPL:
+    import matplotlib.pyplot as plt
+if HAVE_NUMPY:
+    import numpy as np
+    inf = np.inf
+else:
+    from math import inf
 
 #%% Constants
 # hard-coded values
@@ -29,8 +34,8 @@ logger = logging.getLogger(__name__)
 
 #%% Functions - make_time_plot
 def make_time_plot(description, time, data, *, name='', elements=None, units='', time_units='sec', \
-        leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
-        disp_xmax=np.inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
+        leg_scale='unity', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
+        disp_xmax=inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
         show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True):
     r"""
     Generic data versus time plotting routine.
@@ -252,8 +257,8 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
 
 #%% Functions - make_error_bar_plot
 def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, units='', time_units='sec', \
-        leg_scale='unity', start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, \
-        disp_xmax=np.inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
+        leg_scale='unity', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
+        disp_xmax=inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
         plot_zero=False, show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, \
         data_as_rows=True):
     r"""
@@ -478,7 +483,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
 #%% Functions - make_difference_plot
 def make_difference_plot(description, time_one, time_two, data_one, data_two, *, \
         name_one='', name_two='', elements=None, units='', time_units='sec', leg_scale='unity', \
-        start_date='', rms_xmin=-np.inf, rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf, \
+        start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
         plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None, \
         ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True, \
@@ -862,8 +867,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
 
 #%% Functions - make_categories_plot
 def make_categories_plot(description, time, data, cats, *, cat_names=None, name='', elements=None, \
-        units='', time_units='sec', leg_scale='unity', start_date='', rms_xmin=-np.inf, \
-        rms_xmax=np.inf, disp_xmin=-np.inf, disp_xmax=np.inf, single_plots=False, \
+        units='', time_units='sec', leg_scale='unity', start_date='', rms_xmin=-inf, \
+        rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, single_plots=False, \
         colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, show_rms=True, \
         legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True):
     r"""

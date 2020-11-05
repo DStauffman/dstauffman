@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import datetime
 import doctest
 import gc
@@ -15,19 +16,9 @@ import os
 import platform
 import re
 import sys
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, TYPE_CHECKING, Union
 import unittest
 import warnings
-
-from matplotlib.axes import Axes
-import matplotlib.cm as cmx
-import matplotlib.colors as colors
-from matplotlib.dates import date2num
-from matplotlib.figure import Figure
-from matplotlib.patches import Rectangle
-import matplotlib.pyplot as plt
-import numpy as np
-import scipy.stats as st
 
 try:
     from PyQt5.QtCore import QSize
@@ -37,7 +28,23 @@ except ModuleNotFoundError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object
 
-from dstauffman import Frozen, get_images_dir, is_datetime
+from dstauffman import Frozen, get_images_dir, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, is_datetime
+
+if HAVE_MPL:
+    from matplotlib.axes import Axes
+    import matplotlib.cm as cmx
+    import matplotlib.colors as colors
+    from matplotlib.dates import date2num
+    from matplotlib.figure import Figure
+    from matplotlib.patches import Rectangle
+    import matplotlib.pyplot as plt
+if HAVE_NUMPY:
+    import numpy as np
+    inf = np.inf
+else:
+    from math import inf
+if HAVE_SCIPY:
+    import scipy.stats as st
 
 #%% Constants
 # Default colormap to use on certain plots
@@ -46,13 +53,15 @@ DEFAULT_COLORMAP: str = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
 # Whether to include a classification on any generated plots
 DEFAULT_CLASSIFICATION: str = ''
 
-_FigOrListFig = Union[Figure, List[Figure]]
+if TYPE_CHECKING:
+    _FigOrListFig = Union[Figure, List[Figure]]
 
 #%% Set Matplotlib global settings
-plt.rcParams['figure.dpi']     = 160 # 160 for 4K monitors, 100 otherwise
-plt.rcParams['figure.figsize'] = [11., 8.5] # makes figures the same size as the paper, keeping aspect ratios even
-plt.rcParams['figure.max_open_warning'] = 80 # Max number of figures to open before through a warning, 0 means unlimited
-plt.rcParams['date.autoformatter.minute'] = '%H:%M:%S' # makes seconds show, and not day, default is '%d %H:%M'
+if HAVE_MPL:
+    plt.rcParams['figure.dpi']     = 160 # 160 for 4K monitors, 100 otherwise
+    plt.rcParams['figure.figsize'] = [11., 8.5] # makes figures the same size as the paper, keeping aspect ratios even
+    plt.rcParams['figure.max_open_warning'] = 80 # Max number of figures to open before through a warning, 0 means unlimited
+    plt.rcParams['date.autoformatter.minute'] = '%H:%M:%S' # makes seconds show, and not day, default is '%d %H:%M'
 
 #%% Classes - _HoverButton
 class _HoverButton(QPushButton):
@@ -798,7 +807,7 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
         this_axis.set_xlim((new_xmin, new_xmax))
 
 #%% Functions - zoom_ylim
-def zoom_ylim(ax, time=None, data=None, *, t_start=-np.inf, t_final=np.inf, channel=None, pad=0.1):
+def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=None, pad=0.1):
     r"""
     Zooms the Y-axis to the data for the given time bounds, with an optional pad.
 
@@ -1150,7 +1159,7 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
     return ax2
 
 #%% Functions - get_rms_indices
-def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-np.inf, xmax=np.inf):
+def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-inf, xmax=inf):
     r"""
     Gets the indices and time points for doing RMS calculations and plotting RMS lines.
 

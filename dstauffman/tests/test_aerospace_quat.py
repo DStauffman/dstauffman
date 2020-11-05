@@ -9,10 +9,11 @@ Notes
 #%% Imports
 import unittest
 
-import numpy as np
-
-from dstauffman import capture_output
+from dstauffman import capture_output, HAVE_NUMPY
 import dstauffman.aerospace as space
+
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% aerospace.QUAT_SIZE
 class Test_aerospace_QUAT_SIZE(unittest.TestCase):
@@ -33,6 +34,7 @@ class Test_aerospace_USE_ASSERTIONS(unittest.TestCase):
         self.assertTrue(isinstance(space.USE_ASSERTIONS, bool))
 
 #%% aerospace.quat_assertions
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_assertions(unittest.TestCase):
     r"""
     Tests the aerospace.quat_assertions function with the following cases:
@@ -101,6 +103,7 @@ class Test_aerospace_quat_assertions(unittest.TestCase):
         space.quat_assertions(self.q6, skip_assertions=True)
 
 #%% aerospace.qrot
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_qrot(unittest.TestCase):
     r"""
     Tests the aerospace.qrot function with the following cases:
@@ -156,6 +159,7 @@ class Test_aerospace_qrot(unittest.TestCase):
             space.qrot(self.axis, np.array([self.angle, self.angle2]))
 
 #%% aerospace.quat_angle_diff
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_angle_diff(unittest.TestCase):
     r"""
     Tests the aerospace.quat_angle_diff function with the following cases:
@@ -251,6 +255,7 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
         self.assertEqual(comp.shape, (3, 0))
 
 #%% aerospace.quat_from_euler
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_from_euler(unittest.TestCase):
     r"""
     Tests the aerospace.quat_from_euler function with the following cases:
@@ -334,6 +339,7 @@ class Test_aerospace_quat_from_euler(unittest.TestCase):
             space.quat_from_euler(np.zeros((3,3,1)))
 
 #%% aerospace.quat_interp
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_interp(unittest.TestCase):
     r"""
     Tests the aerospace.quat_interp function with the following cases:
@@ -376,6 +382,7 @@ class Test_aerospace_quat_interp(unittest.TestCase):
         self.assertEqual(output, 'Desired time not found within input time vector.')
 
 #%% aerospace.quat_inv
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_inv(unittest.TestCase):
     r"""
     Tests the aerospace.quat_inv function with the following cases:
@@ -422,6 +429,7 @@ class Test_aerospace_quat_inv(unittest.TestCase):
         np.testing.assert_array_equal(null_inv.shape, self.null.shape)
 
 #%% aerospace.quat_mult
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_mult(unittest.TestCase):
     r"""
     Tests the aerospace.quat_mult function with the following cases:
@@ -531,6 +539,7 @@ class Test_aerospace_quat_mult(unittest.TestCase):
         np.testing.assert_array_equal(quat.shape, self.null.shape)
 
 #%% aerospace.quat_norm
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_norm(unittest.TestCase):
     r"""
     Tests the aerospace.quat_norm function with the following cases:
@@ -585,6 +594,7 @@ class Test_aerospace_quat_norm(unittest.TestCase):
         np.testing.assert_array_equal(quat_norm.shape, self.null.shape)
 
 #%% aerospace.quat_prop
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_prop(unittest.TestCase):
     r"""
     Tests the aerospace.quat_prop function with the following cases:
@@ -611,6 +621,7 @@ class Test_aerospace_quat_prop(unittest.TestCase):
             space.quat_prop(self.quat, self.delta_ang, renorm=False)
 
 #%% aerospace.quat_times_vector
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_times_vector(unittest.TestCase):
     r"""
     Tests the aerospace.quat_times_vector function with the following cases:
@@ -633,6 +644,7 @@ class Test_aerospace_quat_times_vector(unittest.TestCase):
         np.testing.assert_array_almost_equal(vec, self.out)
 
 #%% aerospace.quat_to_dcm
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_to_dcm(unittest.TestCase):
     r"""
     Tests the aerospace.quat_to_dcm function with the following cases:
@@ -650,6 +662,7 @@ class Test_aerospace_quat_to_dcm(unittest.TestCase):
         np.testing.assert_array_almost_equal(dcm, self.dcm)
 
 #%% aerospace.quat_to_euler
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_to_euler(unittest.TestCase):
     r"""
     Tests the aerospace.quat_to_euler function with the following cases:

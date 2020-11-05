@@ -10,17 +10,21 @@ Notes
 from typing import List
 import unittest
 
-from matplotlib.figure import Figure
-import numpy as np
-
-from dstauffman import capture_output
+from dstauffman import capture_output, HAVE_MPL, HAVE_NUMPY
 from dstauffman.estimation import BpeResults
 import dstauffman.plotting as plot
 
+if HAVE_MPL:
+    from matplotlib.figure import Figure
+if HAVE_NUMPY:
+    import numpy as np
+
 #%% Hard-coded values
-plotter = plot.Plotter(False)
+if HAVE_MPL:
+    plotter = plot.Plotter(False)
 
 #%% plotting.plot_bpe_convergence
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_bpe_convergence(unittest.TestCase):
     r"""
     Tests the plotting.plot_bpe_convergence function with the following cases:
@@ -30,7 +34,7 @@ class Test_plotting_plot_bpe_convergence(unittest.TestCase):
         No Costs
     """
     def setUp(self) -> None:
-        self.costs = np.array([1, 0.1, 0.05, 0.01])
+        self.costs = np.array([1, 0.1, 0.05, 0.01]) if HAVE_NUMPY else [1., 0.1, 0.05, 0.01]
         self.opts = plot.Opts()
         self.opts.show_plot = False
         self.figs: List[Figure] = []
@@ -39,7 +43,8 @@ class Test_plotting_plot_bpe_convergence(unittest.TestCase):
         self.figs.append(plot.plot_bpe_convergence(self.costs, opts=self.opts))
 
     def test_only_two_costs(self) -> None:
-        self.figs.append(plot.plot_bpe_convergence(self.costs[np.array([0, 3])], opts=self.opts))
+        costs = [self.costs[i] for i in [0, 3]]
+        self.figs.append(plot.plot_bpe_convergence(costs, opts=self.opts))
 
     def test_no_opts(self) -> None:
         self.figs.append(plot.plot_bpe_convergence(self.costs))
@@ -63,6 +68,7 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
         self.plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, \
         'covariance': True}
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_nominal(self) -> None:
         # add data
         names = ['a', 'b', 'c', 'd']
@@ -94,6 +100,7 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
         with self.assertRaises(ValueError):
             plot.plot_bpe_results(self.bpe_results, plots={'bad_key': False})
 
+    @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
     def test_only_one_key(self) -> None:
         plot.plot_bpe_results(self.bpe_results, plots={'innovs': False})
 

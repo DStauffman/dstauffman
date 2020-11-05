@@ -11,16 +11,20 @@ Notes
 from typing import List, Optional
 import unittest
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-from dstauffman import capture_output
+from dstauffman import capture_output, HAVE_MPL, HAVE_NUMPY
 import dstauffman.plotting as plot
 
+if HAVE_MPL:
+    import matplotlib.pyplot as plt
+if HAVE_NUMPY:
+    import numpy as np
+
 #%% Plotter for testing
-plotter = plot.Plotter(False)
+if HAVE_MPL:
+    plotter = plot.Plotter(False)
 
 #%% plotting.plot_health_time_history
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_health_time_history(unittest.TestCase):
     r"""
     Tests the plotting.plot_health_time_history function with the following cases:
@@ -148,6 +152,7 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
                 plt.close(this_fig)
 
 #%% plotting.plot_health_monte_carlo
+@unittest.skipIf(not HAVE_MPL or not HAVE_NUMPY, 'Skipping due to missing matplotlib/numpy dependency.')
 class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
     r"""
     Tests the plotting.plot_health_monte_carlo function with the following cases:
@@ -167,8 +172,8 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         Show zero
     """
     def setUp(self) -> None:
-        self.time = np.arange(0, 10, 0.1)
-        self.data = np.sin(self.time)
+        self.time = np.arange(0, 10, 0.1) if HAVE_NUMPY else list(range(10))
+        self.data = np.sin(self.time) if HAVE_NUMPY else [x + 1. for x in self.time]
         self.label = 'Sin'
         self.units = 'population'
         self.opts = plot.Opts()
@@ -297,6 +302,7 @@ class Test_plotting_plot_icer(unittest.TestCase):
     pass # TODO: write this
 
 #%% plotting.plot_population_pyramid
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_population_pyramid(unittest.TestCase):
     r"""
     Tests the plotting.plot_population_pyramid function with the following cases:
@@ -304,9 +310,9 @@ class Test_plotting_plot_population_pyramid(unittest.TestCase):
         Default arguments
     """
     def setUp(self) -> None:
-        self.age_bins = np.array([0, 5, 10, 15, 20, 1000], dtype=int)
-        self.male_per = np.array([100, 200, 300, 400, 500], dtype=int)
-        self.fmal_per = np.array([125, 225, 325, 375, 450], dtype=int)
+        self.age_bins = np.array([0, 5, 10, 15, 20, 1000], dtype=int) if HAVE_NUMPY else [0, 5, 1000]
+        self.male_per = np.array([100, 200, 300, 400, 500], dtype=int) if HAVE_NUMPY else [100, 200, 500]
+        self.fmal_per = np.array([125, 225, 325, 375, 450], dtype=int) if HAVE_NUMPY else [125, 225, 450]
         self.title    = 'Test Title'
         self.opts     = plot.Opts()
         self.name1    = 'M'
@@ -330,5 +336,6 @@ class Test_plotting_plot_population_pyramid(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    plt.ioff()
+    if HAVE_MPL:
+        plt.ioff()
     unittest.main(exit=False)

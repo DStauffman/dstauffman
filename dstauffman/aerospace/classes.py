@@ -12,15 +12,15 @@ import doctest
 from typing import Callable, ClassVar, TYPE_CHECKING
 import unittest
 
-import numpy as np
-
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
-from dstauffman import Frozen, HAVE_H5PY, SaveAndLoad
+from dstauffman import Frozen, HAVE_H5PY, HAVE_NUMPY, SaveAndLoad
 
 if HAVE_H5PY:
     import h5py
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% KfInnov
 class KfInnov(Frozen):

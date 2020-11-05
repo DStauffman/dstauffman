@@ -7,13 +7,18 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import doctest
 from typing import Dict, Tuple
 import unittest
 
-import numpy as np
+from dstauffman import HAVE_NUMPY, MONTHS_PER_YEAR
 
-from dstauffman import MONTHS_PER_YEAR
+if HAVE_NUMPY:
+    import numpy as np
+    sqrt = np.sqrt
+else:
+    from math import sqrt
 
 #%% Functions - convert_annual_to_monthly_probability
 def convert_annual_to_monthly_probability(annual):
@@ -348,7 +353,7 @@ def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -
     u = 1/n * (n1*u1 + n2*u2)
     # calculate the combined standard deviation
     if n != 1:
-        s = np.sqrt(1/(n-1) * ( (n1-1)*s1**2 + n1*u1**2 + (n2-1)*s2**2 + n2*u2**2 - n*u**2))
+        s = sqrt(1/(n-1) * ( (n1-1)*s1**2 + n1*u1**2 + (n2-1)*s2**2 + n2*u2**2 - n*u**2))
     else:
         # special case where one of the data sets is empty
         if n1 == 1:

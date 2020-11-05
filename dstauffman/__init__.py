@@ -25,7 +25,7 @@ from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
 from .logs      import activate_logging, deactivate_logging, log_multiline
 from .matlab    import load_matlab
-from .optimized import np_any, np_all, issorted_opt
+from .optimized import np_any, np_all, issorted_opt, prob_to_rate_opt, rate_to_prob_opt
 from .parser    import main, parse_wrapper, parse_commands, execute_command, \
                            process_command_line_options
 from .paths     import is_dunder, get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \

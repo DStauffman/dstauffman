@@ -7,12 +7,14 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import doctest
 import functools
+import math
 import unittest
 
 try:
-    from numba import njit
+    from numba import float64, njit, vectorize
 except ModuleNotFoundError:
     # Support for when you don't have numba.  Presumably you either aren't using these functions,
     # as they will be slow, or you are using pypy instead and it will run the JIT
@@ -29,7 +31,14 @@ except ModuleNotFoundError:
     @fake_decorator
     def njit(func, *args, **kwargs):
         r"""Fake njit decorator for when numba isn't installed."""
-        return(func)
+        return func
+
+    @fake_decorator
+    def vectorize(func, *args, **kwargs):
+        r"""Fake vectorize decorator for when numba isn't installed."""
+        return func
+
+    float64 = lambda x, y: None
 
 #%% np_any
 @njit(cache=True)
@@ -140,6 +149,91 @@ def issorted_opt(x, /, descend=False):
             if x[i+1] < x[i] :
                     return False
     return True
+
+#%% Functions - prob_to_rate_opt
+@vectorize([float64(float64, float64)])  # TODO: can't use optional argument?
+def prob_to_rate_opt(prob, time):
+    r"""
+    Convert a given probability and time to a rate.
+
+    Parameters
+    ----------
+    prob : numpy.ndarray
+        Probability of event happening over the given time
+    time : float
+        Time for the given probability in years
+
+    Returns
+    -------
+    rate : numpy.ndarray
+        Equivalent annual rate for the given probability and time
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in January 2016.
+
+    Examples
+    --------
+    >>> from dstauffman import prob_to_rate_opt
+    >>> import numpy as np
+    >>> prob = np.array([0, 0.1, 1])
+    >>> time = 3
+    >>> rate = prob_to_rate_opt(prob, time)
+    >>> print(rate) # doctest: +NORMALIZE_WHITESPACE
+    [0. 0.03512017 inf]
+
+    """
+    # check ranges
+    if prob < 0:
+        raise ValueError('Probability must be >= 0')
+    if prob > 1:
+        raise ValueError('Probability must be <= 1')
+    # calculate rate
+    if prob == 1:
+        return math.inf
+    if prob == 0:
+        return prob
+    return -math.log(1 - prob) / time
+
+#%% Functions - rate_to_prob_opt
+@vectorize([float64(float64, float64)])  # TODO: can't use optional argument?
+def rate_to_prob_opt(rate, time):
+    r"""
+    Convert a given rate and time to a probability.
+
+    Parameters
+    ----------
+    rate : float
+        Annual rate for the given time
+    time : float
+        Time period for the desired probability to be calculated from, in years
+
+    Returns
+    -------
+    float
+        Equivalent probability of event happening over the given time
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in January 2016.
+    #.  Converted to numba version by David C. Stauffer in November 2020.
+
+    Examples
+    --------
+    >>> from dstauffman import rate_to_prob_opt
+    >>> import numpy as np
+    >>> rate = np.array([0, 0.1, 1, 100, np.inf])
+    >>> time = 1./12
+    >>> prob = rate_to_prob_opt(rate, time)
+    >>> print(prob) # doctest: +NORMALIZE_WHITESPACE
+    [0. 0.00829871 0.07995559 0.99975963 1. ]
+
+    """
+    # check ranges
+    if rate < 0:
+        raise ValueError('Rate must be >= 0')
+    # calculate probability
+    return 1 - math.exp(-rate * time)
 
 #%% Unit test
 if __name__ == '__main__':

@@ -16,10 +16,12 @@ from typing import Any, Dict
 import unittest
 from unittest.mock import Mock, patch
 
-import numpy as np
-
-from dstauffman import capture_output, compare_two_classes, Frozen, get_tests_dir, LogLevel, rss
+from dstauffman import capture_output, compare_two_classes, Frozen, get_tests_dir, HAVE_H5PY, \
+    HAVE_NUMPY, LogLevel, rss
 import dstauffman.estimation as estm
+
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% Setup for testing
 # Classes - SimParams
@@ -164,24 +166,28 @@ class Test_estimation_OptiParam(unittest.TestCase):
         opti_param = estm.OptiParam('test')
         self.assertNotEqual(opti_param, 2)
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_get_array(self) -> None:
         opti_param = estm.OptiParam('test')
         params = [opti_param, opti_param]
         best = estm.OptiParam.get_array(params)
         np.testing.assert_array_equal(best, np.array([np.nan, np.nan]))
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_get_array2(self) -> None:
         opti_param = estm.OptiParam('test')
         params = [opti_param, opti_param]
         values = estm.OptiParam.get_array(params, type_='min')
         np.testing.assert_array_equal(values, np.array([-np.inf, -np.inf]))
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_get_array3(self) -> None:
         opti_param = estm.OptiParam('test')
         params = [opti_param, opti_param]
         values = estm.OptiParam.get_array(params, type_='max')
         np.testing.assert_array_equal(values, np.array([np.inf, np.inf]))
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_get_array4(self) -> None:
         opti_param = estm.OptiParam('test')
         params = [opti_param, opti_param]
@@ -232,6 +238,7 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.filename2   = self.filename.replace('hdf5', 'pkl')
         estm.batch.logger.setLevel(LogLevel.L0)
 
+    @unittest.skipIf(not HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_save(self) -> None:
         self.bpe_results.save(self.filename)
         self.assertTrue(os.path.isfile(self.filename))
@@ -240,6 +247,7 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.bpe_results.save(self.filename, use_hdf5=False)
         self.assertTrue(os.path.isfile(self.filename2))
 
+    @unittest.skipIf(not HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_load(self) -> None:
         self.bpe_results.save(self.filename)
         bpe_results = estm.BpeResults.load(self.filename)
@@ -344,6 +352,7 @@ class Test_estimation_batch__print_divider(unittest.TestCase):
         # TODO: how to test that this wouldn't log anything?
 
 #%% estimation.batch._function_wrapper
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_batch__function_wrapper(unittest.TestCase):
     r"""
     Tests the estimation.batch._function_wrapper function with the following cases:
@@ -391,6 +400,7 @@ class Test_estimation_batch__parfor_function_wrapper(unittest.TestCase):
     pass # TODO: write this
 
 #%% estimation.batch._finite_differences
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 @patch('dstauffman.estimation.batch.logger')
 class Test_estimation_batch__finite_differences(unittest.TestCase):
     r"""
@@ -478,6 +488,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.assertEqual(hessian.shape, (3, 3))
 
 #%% estimation.batch._levenberg_marquardt
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_batch__levenberg_marquardt(unittest.TestCase):
     r"""
     Tests the estimation.batch._levenberg_marquardt function with the following cases:
@@ -500,6 +511,7 @@ class Test_estimation_batch__levenberg_marquardt(unittest.TestCase):
         np.testing.assert_array_almost_equal(delta_param, b)
 
 #%% estimation.batch._predict_func_change
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_batch__predict_func_change(unittest.TestCase):
     r"""
     Tests the estimation.batch._predict_func_change function with the following cases:
@@ -569,6 +581,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.assertEqual(error, '')
 
 #%% estimation.batch._double_dogleg
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_batch__double_dogleg(unittest.TestCase):
     r"""
     Tests the estimation.batch._double_dogleg function with the following cases:
@@ -615,6 +628,7 @@ class Test_estimation_batch__double_dogleg(unittest.TestCase):
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
 #%% estimation.batch._dogleg_search
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 @patch('dstauffman.estimation.batch.logger')
 class Test_estimation_batch__dogleg_search(unittest.TestCase):
     r"""
@@ -703,6 +717,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
             self.delta_param, self.jacobian, self.gradient, self.hessian, normalized=self.normalized)
 
 #%% estimation.batch._analyze_results
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 @patch('dstauffman.estimation.batch.logger')
 class Test_estimation_batch__analyze_results(unittest.TestCase):
     r"""
@@ -807,6 +822,7 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
         self.support()
 
 #%% estimation.run_bpe
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 @patch('dstauffman.estimation.batch.logger')
 class Test_estimation_run_bpe(unittest.TestCase):
     r"""

@@ -9,11 +9,14 @@ Notes
 #%% Imports
 import unittest
 
-import numpy as np
-
+from dstauffman import HAVE_NUMPY
 import dstauffman.estimation as estm
 
+if HAVE_NUMPY:
+    import numpy as np
+
 #%% estimation.orth
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_orth(unittest.TestCase):
     r"""
     Tests the estimation.orth function with the following cases:
@@ -42,6 +45,7 @@ class Test_estimation_orth(unittest.TestCase):
         np.testing.assert_array_almost_equal(Q, self.Q2)
 
 #%% estimation.subspace
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_subspace(unittest.TestCase):
     r"""
     Tests the estimation.subspace function with the following cases:
@@ -63,6 +67,7 @@ class Test_estimation_subspace(unittest.TestCase):
         self.assertAlmostEqual(theta, self.theta)
 
 #%% estimation.mat_divide
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_mat_divide(unittest.TestCase):
     r"""
     Tests the estimation.mat_divide function with the following cases:

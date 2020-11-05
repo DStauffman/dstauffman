@@ -9,11 +9,14 @@ Notes
 #%% Imports
 import unittest
 
-import numpy as np
-
+from dstauffman import HAVE_NUMPY
 import dstauffman.estimation as estm
 
+if HAVE_NUMPY:
+    import numpy as np
+
 #%% estimation.calculate_kalman_gain
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_calculate_kalman_gain(unittest.TestCase):
     r"""
     Tests the estimation.calculate_kalman_gain function with the following cases:
@@ -35,6 +38,7 @@ class Test_estimation_calculate_kalman_gain(unittest.TestCase):
         self.assertAlmostEqual(K[0, 0], self.exp, 12)
 
 #%% estimation.calculate_prediction
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_calculate_prediction(unittest.TestCase):
     r"""
     Tests the estimation.calculate_prediction function with the following cases:
@@ -56,6 +60,7 @@ class Test_estimation_calculate_prediction(unittest.TestCase):
         np.testing.assert_almost_equal(u_pred, self.exp + np.array([0.5, 0., 0.]))
 
 #%% estimation.calculate_innovation
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_calculate_innovation(unittest.TestCase):
     r"""
     Tests the estimation.calculate_innovation function with the following cases:
@@ -71,6 +76,7 @@ class Test_estimation_calculate_innovation(unittest.TestCase):
         np.testing.assert_array_almost_equal(z, self.exp)
 
 #%% estimation.calculate_normalized_innovation
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_calculate_normalized_innovation(unittest.TestCase):
     r"""
     Tests the estimation.calculate_normalized_innovation function with the following cases:
@@ -91,6 +97,7 @@ class Test_estimation_calculate_normalized_innovation(unittest.TestCase):
         np.testing.assert_array_almost_equal(nu, self.exp)
 
 #%% estimation.calculate_delta_state
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_calculate_delta_state(unittest.TestCase):
     r"""
     Tests the estimation.calculate_delta_state function with the following cases:
@@ -106,6 +113,7 @@ class Test_estimation_calculate_delta_state(unittest.TestCase):
         np.testing.assert_array_almost_equal(dx, self.exp)
 
 #%% estimation.propagate_covariance
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_propagate_covariance(unittest.TestCase):
     r"""
     Tests the estimation.propagate_covariance function with the following cases:
@@ -142,6 +150,7 @@ class Test_estimation_propagate_covariance(unittest.TestCase):
         self.assertEqual(self.P[0, 0], self.orig)
 
 #%% estimation.update_covariance
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_update_covariance(unittest.TestCase):
     r"""
     Tests the estimation.update_covariance function with the following cases:

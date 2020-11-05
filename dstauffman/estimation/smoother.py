@@ -10,9 +10,12 @@ Notes
 import doctest
 import unittest
 
-import numpy as np
+from dstauffman import HAVE_NUMPY
 
 from dstauffman.estimation.linalg import mat_divide
+
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% _update_information
 def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):

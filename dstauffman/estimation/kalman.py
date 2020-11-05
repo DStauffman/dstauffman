@@ -10,9 +10,12 @@ Notes
 import doctest
 import unittest
 
-import numpy as np
+from dstauffman import HAVE_NUMPY
 
 from dstauffman.estimation.linalg import mat_divide
+
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% Functions - calculate_kalman_gain
 def calculate_kalman_gain(P, H, R, *, use_inverse=False, return_innov_cov=False):

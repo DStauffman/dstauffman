@@ -14,14 +14,20 @@ from typing import List
 import unittest
 from unittest.mock import patch
 
-import matplotlib.pyplot as plt
-import numpy as np
-
-from dstauffman import capture_output, get_tests_dir, LogLevel, unit
+from dstauffman import capture_output, get_tests_dir, HAVE_MPL, HAVE_NUMPY, LogLevel, unit
 import dstauffman.plotting as plot
 
+if HAVE_MPL:
+    import matplotlib.pyplot as plt
+if HAVE_NUMPY:
+    import numpy as np
+    inf = np.inf
+else:
+    from math import inf
+
 #%% Plotter for testing
-plotter = plot.Plotter(False)
+if HAVE_MPL:
+    plotter = plot.Plotter(False)
 
 #%% plotting.Opts
 class Test_plotting_Opts(unittest.TestCase):
@@ -66,15 +72,15 @@ class Test_plotting_Opts(unittest.TestCase):
     def get_time_limits(self) -> None:
         opts = plot.Opts()
         opts.disp_xmin = 60
-        opts.disp_xmax = np.inf
-        opts.rms_xmin = -np.inf
+        opts.disp_xmax = inf
+        opts.rms_xmin = -inf
         opts.rms_xmax = None
         opts.time_base = 'sec'
         opts.time_unit = 'min'
         (d1, d2, r1, r2) = opts.get_time_limits()
         self.assertEqual(d1, 1)
-        self.assertEqual(d2, np.inf)
-        self.assertEqual(r1, -np.inf)
+        self.assertEqual(d2, inf)
+        self.assertEqual(r1, -inf)
         self.assertIsNone(r2)
 
     def get_time_limits2(self) -> None:
@@ -98,14 +104,16 @@ class Test_plotting_Opts(unittest.TestCase):
         self.assertEqual(lines[3], '  save_plot = False')
         self.assertEqual(lines[-1], '  names     = []')
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_convert_dates(self) -> None:
         opts = plot.Opts()
-        self.assertEqual(opts.disp_xmin, -np.inf)
+        self.assertEqual(opts.disp_xmin, -inf)
         self.assertEqual(opts.time_base, 'sec')
         opts.convert_dates('datetime')
         self.assertIsNone(opts.disp_xmin)
         self.assertEqual(opts.time_base, 'datetime')
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_convert_dates2(self) -> None:
         opts = plot.Opts(date_zero=datetime.datetime(2020, 6, 1))
         opts.rms_xmin = -10
@@ -141,7 +149,7 @@ class Test_plotting_Plotter(unittest.TestCase):
         flag = self.plotter.get_plotter()
         self.assertTrue(flag)
         self.plotter.set_plotter(False)
-        self.assertFalse(plotter.get_plotter())
+        self.assertFalse(self.plotter.get_plotter())
 
     def test_printing(self) -> None:
         with capture_output() as out:
@@ -157,6 +165,7 @@ class Test_plotting_Plotter(unittest.TestCase):
         self.plotter.set_plotter(False)
 
 #%% plotting.plot_time_history
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_time_history(unittest.TestCase):
     r"""
     Tests the plotting.plot_time_history function with the following cases:
@@ -282,6 +291,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
                 plt.close(this_fig)
 
 #%% plotting.plot_correlation_matrix
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_correlation_matrix(unittest.TestCase):
     r"""
     Tests the plotting.plot_correlation_matrix function with the following cases:
@@ -386,6 +396,7 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
             plt.close(self.figs.pop())
 
 #%% plotting.plot_bar_breakdown
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_bar_breakdown(unittest.TestCase):
     r"""
     Tests the plotting.plot_bar_breakdown function with the following cases:
@@ -457,6 +468,7 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
                 plt.close(this_fig)
 
 #%% plotting.setup_plots
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_setup_plots(unittest.TestCase):
     r"""
     Tests the plotting.setup_plots function with the following cases:
@@ -528,5 +540,6 @@ class Test_plotting_setup_plots(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    plt.ioff()
+    if HAVE_MPL:
+        plt.ioff()
     unittest.main(exit=False)

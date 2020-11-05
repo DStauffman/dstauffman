@@ -11,8 +11,7 @@ from math import isinf, isnan
 from typing import List, Union
 import unittest
 
-from dstauffman import MONTHS_PER_YEAR
-from dstauffman.health.stats import prob_to_rate
+from dstauffman import MONTHS_PER_YEAR, prob_to_rate_opt
 
 #%% Functions - make_preamble
 def make_preamble(caption: str, label: str, cols: str, size: str = r'\small', *, \
@@ -206,7 +205,7 @@ def latex_str(value: Union[int, float, str], digits: int = -1, fixed: bool = Fal
     formatter = '{:.' + str(digits) + letter + '}' if digits >= 0 else '{}'
     # potentially convert units
     if cmp2ar:
-        value = prob_to_rate(value, time=1/MONTHS_PER_YEAR)
+        value = prob_to_rate_opt(value, 1/MONTHS_PER_YEAR)
     if isnan(value):
         value_str = 'NaN'
     elif isinf(value) or value > capped:  # type: ignore

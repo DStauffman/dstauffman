@@ -23,19 +23,29 @@ import time
 from typing import Any, Callable, ClassVar, Dict, List, Optional, Tuple, Type, TYPE_CHECKING
 import unittest
 
-import numpy as np
-from numpy.linalg import norm
-import tblib.pickling_support
-
 if TYPE_CHECKING:
     from types import TracebackType
     from mypy_extensions import DefaultNamedArg
 
-from dstauffman import activate_logging, deactivate_logging, Frozen, LogLevel, pprint_dict, rss, \
-    SaveAndLoad, setup_dir
+from dstauffman import activate_logging, deactivate_logging, Frozen, HAVE_NUMPY, LogLevel, \
+    pprint_dict, rss, SaveAndLoad, setup_dir
+
+if HAVE_NUMPY:
+    import numpy as np
+    from numpy.linalg import norm
+    inf = np.inf
+    isnan = np.isnan
+    nan = np.nan
+else:
+    from math import inf, nan, isnan
 
 #%% Activate Exception support for parallel code
-tblib.pickling_support.install()
+try:
+    import tblib.pickling_support
+except ModuleNotFoundError:
+    pass
+else:
+    tblib.pickling_support.install()
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -151,7 +161,7 @@ class OptiParam(Frozen):
     ['magnitude', 'frequency', 'phase']
 
     """
-    def __init__(self, name: str, *, best: float=np.nan, min_: float=-np.inf, max_: float=np.inf, \
+    def __init__(self, name: str, *, best: float=nan, min_: float=-inf, max_: float=inf, \
         minstep: float = 1e-4, typical: float = 1.):
         self.name = name
         self.best = best
@@ -169,7 +179,7 @@ class OptiParam(Frozen):
         for key in vars(self):
             v1 = getattr(self, key)
             v2 = getattr(other, key)
-            if v1 != v2 and (not np.isnan(v1) or not np.isnan(v2)):
+            if v1 != v2 and (not isnan(v1) or not isnan(v2)):
                 return False
         # if it made it all the way through the fields, then things must be equal
         return True

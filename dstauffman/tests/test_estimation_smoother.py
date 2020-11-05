@@ -9,9 +9,11 @@ Notes
 #%% Imports
 import unittest
 
-import numpy as np
-
+from dstauffman import HAVE_NUMPY
 import dstauffman.estimation as estm
+
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% estimation._update_information
 class Test_estimation__update_information(unittest.TestCase):

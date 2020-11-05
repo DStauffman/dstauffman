@@ -12,10 +12,11 @@ import logging
 from typing import List
 import unittest
 
-import numpy as np
-
-from dstauffman import FixedDict, Frozen
+from dstauffman import FixedDict, Frozen, HAVE_NUMPY
 import dstauffman.estimation as estm
+
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% Classes - _Config
 class _Config(Frozen):
@@ -64,10 +65,10 @@ class _Model(Frozen):
     """
     def __init__(self) -> None:
         self.field1: int = 1
-        self.field2 = np.array([1, 2, 3])
-        self.field3 = {'a': 5, 'b': np.array([1.5, 2.5, 10.])}
+        self.field2 = np.array([1, 2, 3]) if HAVE_NUMPY else [1, 2, 3]
+        self.field3 = {'a': 5, 'b': np.array([1.5, 2.5, 10.])} if HAVE_NUMPY else {'a': 5, 'b': [1.5, 2.5, 10.]}
         self.field4 = FixedDict()
-        self.field4['new'] = np.array([3, 4, 5])
+        self.field4['new'] = np.array([3, 4, 5]) if HAVE_NUMPY else [3, 4, 5]
         self.field4['old'] = '4 - 6'
         self.field4.freeze()
 
@@ -153,6 +154,7 @@ class Test_estimation__check_valid_param_name(unittest.TestCase):
         self.assertTrue(is_valid)
 
 #%% estimation.get_parameter
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_get_parameter(unittest.TestCase):
     r"""
     Tests the estimation.get_parameter function with the following cases:
@@ -172,6 +174,7 @@ class Test_estimation_get_parameter(unittest.TestCase):
         np.testing.assert_array_almost_equal(values, self.values)
 
 #%% estimation.set_parameter
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_set_parameter(unittest.TestCase):
     r"""
     Tests the estimation.set_parameter function with the following cases:

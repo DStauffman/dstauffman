@@ -9,11 +9,14 @@ Notes
 #%% Imports
 import unittest
 
-import numpy as np
-
+from dstauffman import HAVE_NUMPY
 import dstauffman.aerospace as space
 
+if HAVE_NUMPY:
+    import numpy as np
+
 #%% aerospace.rot
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_rot(unittest.TestCase):
     r"""
     Tests the aerospace.rot function with the following cases:
@@ -62,6 +65,7 @@ class Test_aerospace_rot(unittest.TestCase):
             space.rot(np.pi/2, 2)
 
 #%% aerospace.vec_cross
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_vec_cross(unittest.TestCase):
     r"""
     Tests the aerospace.vec_cross function with the following cases:
@@ -78,6 +82,7 @@ class Test_aerospace_vec_cross(unittest.TestCase):
         np.testing.assert_array_equal(c, self.c)
 
 #%% aerospace.vec_angle
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_vec_angle(unittest.TestCase):
     r"""
     Tests the aerospace.vec_angle function with the following cases:

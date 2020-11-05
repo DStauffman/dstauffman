@@ -10,9 +10,10 @@ Notes
 import doctest
 import unittest
 
-import numpy as np
+from dstauffman import INT_TOKEN, HAVE_NUMPY
 
-from dstauffman import INT_TOKEN
+if HAVE_NUMPY:
+    import numpy as np
 
 #%% Constants
 # Number of elements that should be in a quaternion
