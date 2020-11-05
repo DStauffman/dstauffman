@@ -207,7 +207,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
             plt.close(self.fig)
 
 #%% plotting.MyCustomToolbar
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, 'Skipping due to missing matplotlib/PyQt5 dependency.')
 class Test_plotting_MyCustomToolbar(unittest.TestCase):
     r"""
     Tests the plotting.MyCustomToolbar class with the following cases:
@@ -729,7 +729,7 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
         plt.close(self.fig)
 
 #%% plotting.figmenu
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, 'Skipping due to missing matplotlib/PyQt5 dependency.')
 class Test_plotting_figmenu(unittest.TestCase):
     r"""
     Tests the plotting.figmenu function with the following cases:

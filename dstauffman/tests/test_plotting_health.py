@@ -11,7 +11,7 @@ Notes
 from typing import List, Optional
 import unittest
 
-from dstauffman import capture_output, HAVE_MPL, HAVE_NUMPY
+from dstauffman import capture_output, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -272,6 +272,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
     def test_skip_plot_sigmas(self) -> None:
         self.fig = plot.plot_health_monte_carlo(self.time, self.data, self.label, self.units, plot_sigmas=0)
 
+    @unittest.skipIf(not HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
     def test_plot_confidence(self) -> None:
         self.fig = plot.plot_health_monte_carlo(self.time, self.data_matrix, self.label, self.units, plot_confidence=0.95)
 
