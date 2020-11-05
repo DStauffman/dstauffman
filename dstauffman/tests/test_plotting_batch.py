@@ -68,7 +68,7 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
         self.plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, \
         'covariance': True}
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_MPL or not HAVE_NUMPY, 'Skipping due to missing matplotlib/numpy dependency.')
     def test_nominal(self) -> None:
         # add data
         names = ['a', 'b', 'c', 'd']

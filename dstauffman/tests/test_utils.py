@@ -1353,6 +1353,7 @@ class Test_zero_order_hold(unittest.TestCase):
     -----
     #.  Uses scipy.interpolate.interp1d as the gold standard (but it's slower)
     """
+    @unittest.skipIf(not dcs.HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
     def test_subsample(self) -> None:
         xp = np.linspace(0., 100*np.pi, 500000)
         yp = np.sin(2 * np.pi * xp)
@@ -1364,6 +1365,7 @@ class Test_zero_order_hold(unittest.TestCase):
         y = dcs.zero_order_hold(x, xp, yp, assume_sorted=True)
         np.testing.assert_array_equal(y, y_exp)
 
+    @unittest.skipIf(not dcs.HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
     def test_supersample(self) -> None:
         xp = np.array([0., 5000., 10000., 86400.])
         yp = np.array([0, 1, -2, 0])
@@ -1375,6 +1377,7 @@ class Test_zero_order_hold(unittest.TestCase):
         y = dcs.zero_order_hold(x, xp, yp, assume_sorted=True)
         np.testing.assert_array_equal(y, y_exp)
 
+    @unittest.skipIf(not dcs.HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
     def test_xp_not_sorted(self) -> None:
         xp    = np.array([0, 10, 5, 15])
         yp    = np.array([0, 1, -2, 3])
@@ -1391,6 +1394,7 @@ class Test_zero_order_hold(unittest.TestCase):
         y     = dcs.zero_order_hold(x, xp, yp)
         np.testing.assert_array_equal(y, y_exp)
 
+    @unittest.skipIf(not dcs.HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
     def test_left_end(self) -> None:
         xp    = np.array([0, 5, 10, 15, 4])
         yp    = np.array([0, 1, -2, 3, 0])
@@ -1416,6 +1420,7 @@ class Test_zero_order_hold(unittest.TestCase):
         self.assertEqual(y.dtype, bool)
         np.testing.assert_array_equal(y, y_exp)
 
+    @unittest.skipIf(not dcs.HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
     def test_bools_unsorted(self) -> None:
         xp    = np.array([1, 3, 6, 4, 8, 12], dtype=int)
         yp    = np.array([1, 0, 1, 0, 1, 0], dtype=bool)

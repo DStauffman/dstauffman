@@ -24,7 +24,7 @@ class _Gender(dcs.IntEnumPlus):
     male: ClassVar[int]   = 2
 
 #%% load_matlab
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_H5PY or not dcs.HAVE_NUMPY, 'Skipping due to missing h5py/numpy dependency.')
 class Test_load_matlab(unittest.TestCase):
     r"""
     Tests the load_matlab function with the following cases:

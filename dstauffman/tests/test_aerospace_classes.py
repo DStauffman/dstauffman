@@ -11,7 +11,7 @@ import contextlib
 import os
 import unittest
 
-from dstauffman import get_tests_dir, HAVE_NUMPY
+from dstauffman import get_tests_dir, HAVE_H5PY, HAVE_NUMPY
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -40,7 +40,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         kf = space.Kf()
         self.assertTrue(isinstance(kf, space.Kf)) # TODO: test better
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_H5PY or not HAVE_NUMPY, 'Skipping due to missing h5py/numpy dependency.')
     def test_save_and_load(self) -> None:
         kf = space.Kf(num_points=2, num_states=6, num_axes=3, num_innovs=4)
         kf.chan = ['a', 'b', 'c']

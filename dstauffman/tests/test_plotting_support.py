@@ -61,7 +61,7 @@ class Test_plotting__HoverButton(unittest.TestCase):
     pass # TODO: write this
 
 #%% plotting.TruthPlotter
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_MPL or not HAVE_NUMPY, 'Skipping due to missing matplotlib/numpy dependency.')
 class Test_plotting_TruthPlotter(unittest.TestCase):
     r"""
     Tests the plotting.TruthPlotter class with the following cases:

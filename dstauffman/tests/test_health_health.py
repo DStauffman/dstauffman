@@ -11,7 +11,7 @@ Notes
 from typing import Optional
 import unittest
 
-from dstauffman import HAVE_MPL, HAVE_NUMPY
+from dstauffman import HAVE_MPL, HAVE_NUMPY, HAVE_PANDAS
 from dstauffman.plotting import Opts, Plotter
 import dstauffman.health as health
 
@@ -108,7 +108,7 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
         self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
 
 #%% health.icer
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY or not HAVE_PANDAS, 'Skipping due to missing numpy/pandas dependency.')
 class Test_health_icer(unittest.TestCase):
     r"""
     Tests the health.icer function with the following cases:

@@ -899,6 +899,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
 #        else:
 #            self.assertTrue(False, "Didn't converge")
 
+    @unittest.skipIf(not HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_saving(self, mock_logger: Mock) -> None:
         mock_logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL

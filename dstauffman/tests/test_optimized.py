@@ -19,8 +19,10 @@ else:
     from math import inf, pi
 try:
     from numba.typed import List
+    _HAVE_NUMBA = True
 except ModuleNotFoundError:
     List = lambda x: x
+    _HAVE_NUMBA = False
 
 #%% np_any
 class Test_np_any(unittest.TestCase):
@@ -116,6 +118,7 @@ class Test_prob_to_rate_opt(unittest.TestCase):
         self.time = 5
         self.rate = np.hstack((0., -np.log(1 - self.prob[1:-1]) / self.time, np.inf))
 
+    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
     def test_conversion(self) -> None:
         rate = dcs.prob_to_rate_opt(self.prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
@@ -132,12 +135,13 @@ class Test_prob_to_rate_opt(unittest.TestCase):
 
     def test_lt_zero(self) -> None:
         with self.assertRaises(ValueError):
-            dcs.prob_to_rate_opt(np.array([0., 0.5, -1.]))
+            dcs.prob_to_rate_opt(np.array([0., 0.5, -1.]), 1.)
 
     def test_gt_one(self) -> None:
         with self.assertRaises(ValueError):
-            dcs.prob_to_rate_opt(np.array([0., 0.5, 1.5]))
+            dcs.prob_to_rate_opt(np.array([0., 0.5, 1.5]), 1.)
 
+    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
     def test_circular(self) -> None:
         rate = dcs.prob_to_rate_opt(self.prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
@@ -160,6 +164,7 @@ class Test_rate_to_prob_opt(unittest.TestCase):
         self.time = 5
         self.rate = np.hstack((0., -np.log(1 - self.prob[1:-1]) / self.time, np.inf))
 
+    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
     def test_conversion(self) -> None:
         prob = dcs.rate_to_prob_opt(self.rate, self.time)
         np.testing.assert_array_almost_equal(prob, self.prob)
@@ -176,12 +181,13 @@ class Test_rate_to_prob_opt(unittest.TestCase):
 
     def test_lt_zero(self) -> None:
         with self.assertRaises(ValueError):
-            dcs.rate_to_prob_opt(np.array([0., 0.5, -1.]))
+            dcs.rate_to_prob_opt(np.array([0., 0.5, -1.]), 1)
 
     def test_infinity(self) -> None:
         prob = dcs.rate_to_prob_opt(np.inf, 1)
         self.assertAlmostEqual(prob, 1.)
 
+    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
     def test_circular(self) -> None:
         prob = dcs.rate_to_prob_opt(self.rate, self.time)
         np.testing.assert_array_almost_equal(prob, self.prob)
