@@ -13,7 +13,12 @@ import doctest
 import unittest
 import warnings
 
-from packaging import version
+try:
+    from packaging import version
+    parse = version.parse
+except ModuleNotFoundError:
+    import setuptools
+    parse = setuptools.version.pkg_resources.packaging.version.parse
 
 from dstauffman import get_factors, HAVE_MPL, HAVE_NUMPY, rms
 from dstauffman.health import bins_to_str_ranges
@@ -491,7 +496,7 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     ax.set_title(title)
     ax.set_yticks(y_values)
     ax.set_yticklabels(y_labels)
-    if version.parse(mpl.__version__) >= version.parse('3.3.1'):
+    if parse(mpl.__version__) >= parse('3.3.1'):
         # TODO: REMOVE IN THE FUTURE - PLACED TO AVOID WARNING - IT IS A BUG FROM MATPLOTLIB 3.3.1
         ax.set_xticks(ax.get_xticks().tolist())
     ax.set_xticklabels(np.abs(ax.get_xticks()))

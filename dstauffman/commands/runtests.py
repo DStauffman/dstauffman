@@ -44,7 +44,7 @@ def parse_tests(input_args: List[str]) -> argparse.Namespace:
     >>> input_args = []
     >>> args = parse_tests(input_args)
     >>> print(args)
-    Namespace(docstrings=False, library=None, unittest=False, verbose=False)
+    Namespace(docstrings=False, unittest=False, verbose=False, library=None)
 
     """
     parser = argparse.ArgumentParser(prog='dcs tests', description='Runs all the built-in unit tests.')

@@ -37,7 +37,7 @@ def parse_enforce(input_args: List[str]) -> argparse.Namespace:
     >>> input_args = [get_root_dir()]
     >>> args = parse_enforce(input_args)
     >>> print(args) # doctest: +ELLIPSIS
-    Namespace(execute=False, extensions=None, folder='...', ignore_tabs=False, list_all=False, skip=None, trailing=False, unix=False, windows=False)
+    Namespace(folder='...', extensions=None, list_all=False, ignore_tabs=False, trailing=False, skip=None, windows=False, unix=False, execute=False)
 
     """
     parser = argparse.ArgumentParser(prog='dcs enforce', description='Enforce consistency in the repo ' + \
@@ -138,7 +138,7 @@ def parse_make_init(input_args: List[str]) -> argparse.Namespace:
     >>> input_args = [get_root_dir(), '-l']
     >>> args = parse_make_init(input_args)
     >>> print(args) # doctest: +ELLIPSIS
-    Namespace(dry_run=False, folder='...', lineup=True, outfile='__init__.py', wrap=100)
+    Namespace(folder='...', lineup=True, wrap=100, dry_run=False, outfile='__init__.py')
 
     """
     parser = argparse.ArgumentParser(prog='dcs make_init', description='Make a python __init__.py' + \
