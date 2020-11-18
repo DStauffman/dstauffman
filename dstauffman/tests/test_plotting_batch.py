@@ -19,10 +19,6 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
 
-#%% Hard-coded values
-if HAVE_MPL:
-    plotter = plot.Plotter(False)
-
 #%% plotting.plot_bpe_convergence
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_bpe_convergence(unittest.TestCase):
@@ -109,4 +105,5 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
+    plot.suppress_plots()
     unittest.main(exit=False)

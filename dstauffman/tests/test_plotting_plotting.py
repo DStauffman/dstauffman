@@ -25,10 +25,6 @@ if HAVE_NUMPY:
 else:
     from math import inf
 
-#%% Plotter for testing
-if HAVE_MPL:
-    plotter = plot.Plotter(False)
-
 #%% plotting.Opts
 class Test_plotting_Opts(unittest.TestCase):
     r"""
@@ -127,42 +123,27 @@ class Test_plotting_Opts(unittest.TestCase):
         self.assertEqual(opts.disp_xmin, datetime.datetime(2020, 6, 1, 0, 0, 5))
         self.assertEqual(opts.disp_xmax, datetime.datetime(2020, 6, 1, 0, 2, 30))
 
-#%% plotting.Plotter
+#%% plotting.suppress_plots and plotting.unsupress_plots
 class Test_plotting_Plotter(unittest.TestCase):
     r"""
     Tests the plotting.Plotter class with the following cases:
-        Get level
-        Set level
-        Bad level (raises ValueError)
-        printing
+        Suppress and Unsuppress
     """
-    def setUp(self) -> None:
-        self.flag    = True
-        self.plotter = plot.Plotter(self.flag)
-        self.print   = 'Plotter(True)'
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.orig_flag = plot.plotting._Plotter
 
-    def test_get_plotter(self) -> None:
-        flag = self.plotter.get_plotter()
-        self.assertTrue(flag)
-
-    def test_set_plotter(self) -> None:
-        flag = self.plotter.get_plotter()
-        self.assertTrue(flag)
-        self.plotter.set_plotter(False)
-        self.assertFalse(self.plotter.get_plotter())
-
-    def test_printing(self) -> None:
-        with capture_output() as out:
-            print(self.plotter)
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, self.print)
-
-    def test_no_show(self) -> None:
-        self.plotter = plot.Plotter()
+    def test_suppress_and_unsupress(self) -> None:
+        plot.suppress_plots()
+        self.assertFalse(plot.plotting._Plotter)
+        plot.unsuppress_plots()
+        self.assertTrue(plot.plotting._Plotter)
 
     def tearDown(self) -> None:
-        self.plotter.set_plotter(False)
+        if self.orig_flag:
+            plot.unsupress_plots()
+        else:
+            plot.suppress_plots()
 
 #%% plotting.plot_time_history
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
@@ -540,6 +521,5 @@ class Test_plotting_setup_plots(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    if HAVE_MPL:
-        plt.ioff()
+    plot.suppress_plots()
     unittest.main(exit=False)

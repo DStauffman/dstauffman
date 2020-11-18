@@ -31,9 +31,6 @@ try:
 except ModuleNotFoundError:
     _HAVE_QT = False
 
-#%% Plotter for testing
-plotter = plot.Plotter(False)
-
 #%% plotting.DEFAULT_COLORMAP
 class Test_plotting_DEFAULT_COLORMAP(unittest.TestCase):
     r"""
@@ -1092,6 +1089,5 @@ class Test_plotting_z_from_ci(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    if HAVE_MPL:
-        plt.ioff()
+    plot.suppress_plots()
     unittest.main(exit=False)

@@ -167,8 +167,8 @@ def process_command_line_options() -> _Flags:
 
     # do operations based on those settings
     if use_plotting and not use_display:
-        from dstauffman.plotting import Plotter
-        plotter = Plotter(show=False)
+        from dstauffman.plotting import suppress_plots
+        suppress_plots()
 
     # return the settings
     flags = _Flags(log_level=log_level, use_display=use_display, use_plotting=use_plotting, use_hdf5=use_hdf5)

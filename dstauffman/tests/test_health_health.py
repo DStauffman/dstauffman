@@ -12,12 +12,11 @@ from typing import Optional
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY, HAVE_PANDAS
-from dstauffman.plotting import Opts, Plotter
+from dstauffman.plotting import Opts, suppress_plots
 import dstauffman.health as health
 
 if HAVE_MPL:
     import matplotlib.pyplot as plt
-    plotter = Plotter(False)
 if HAVE_NUMPY:
     import numpy as np
 
@@ -265,6 +264,5 @@ class Test_health_icer(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    if HAVE_MPL:
-        plt.ioff()
+    suppress_plots
     unittest.main(exit=False)

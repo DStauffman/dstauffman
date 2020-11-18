@@ -19,10 +19,6 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
 
-#%% Plotter for testing
-if HAVE_MPL:
-    plotter = plot.Plotter(False)
-
 #%% plotting.plot_health_time_history
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_health_time_history(unittest.TestCase):
@@ -337,6 +333,5 @@ class Test_plotting_plot_population_pyramid(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    if HAVE_MPL:
-        plt.ioff()
+    plot.suppress_plots()
     unittest.main(exit=False)

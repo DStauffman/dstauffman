@@ -52,12 +52,11 @@ def run_docstrings(files: List[str], verbose: bool = False) -> int:
     """
     # disable plots from showing up
     try:
-        from dstauffman.plotting import Plotter
+        from dstauffman.plotting import suppress_plots
     except:
         pass
     else:
-        plotter = Plotter()
-        plotter.set_plotter(False)
+        suppress_plots()
     # initialize failure status
     had_failure = False
     # loop through and test each file
@@ -99,12 +98,11 @@ def run_unittests(names: str, verbose: bool = False) -> int:
     """
     # disable plots from showing up
     try:
-        from dstauffman.plotting import Plotter
+        from dstauffman.plotting import suppress_plots
     except:
         pass
     else:
-        plotter = Plotter()
-        plotter.set_plotter(False)
+        suppress_plots()
     # find the test cases
     test_suite = unittest.TestLoader().discover(names)
     # set the verbosity
@@ -138,12 +136,11 @@ def run_pytests(folder: str, *args, **kwargs) -> int:
     """
     # disable plots from showing up
     try:
-        from dstauffman.plotting import Plotter
+        from dstauffman.plotting import suppress_plots
     except:
         pass
     else:
-        plotter = Plotter()
-        plotter.set_plotter(False)
+        suppress_plots()
     # Note: need to do this next part to keep GUI testing from closing the instance with sys.exit
     # open a qapp
     try:
