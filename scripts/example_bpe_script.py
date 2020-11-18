@@ -162,11 +162,9 @@ if __name__ == '__main__':
         opts.save_plot = True
 
         # make model plots
-        plot.plot_health_monte_carlo(time, results, 'Output vs. Time', opts=opts, truth=truth)
-        #plot.plot_time_history('Output vs. Time', time, results, opts=opts, truth=truth) # TODO: make this one work?
-        f1 = plot.make_difference_plot('Output vs. Time', time, None, np.atleast_2d(results), None, \
-            name_one='Results', truth_time=truth.time, truth_data=np.atleast_2d(truth.data))
-        plot.setup_plots(f1, opts)
+        f0 = plot.plot_health_monte_carlo(time, results, 'Output', opts=opts, truth=truth)
+        extra_plotter = lambda fig, ax: truth.plot_truth(ax[0], scale=1)
+        f1 = plot.plot_time_history('Output vs. Time', time, results, opts=opts, extra_plotter=extra_plotter)
 
         # make BPE plots
         bpe_plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, \

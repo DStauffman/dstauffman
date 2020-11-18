@@ -86,104 +86,6 @@ class _HoverButton(QPushButton):
         # Delete border after hover
         self.setStyleSheet('border: 0px;') # pragma: no cover
 
-#%% Classes - TruthPlotter
-class TruthPlotter(Frozen):
-    r"""
-    Class wrapper for the different types of truth data to include on plots.
-
-    Examples
-    --------
-    >>> from dstauffman.plotting import TruthPlotter
-    >>> import matplotlib.pyplot as plt
-    >>> import numpy as np
-    >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Figure Title')
-    >>> x = np.arange(0, 10, 0.1)
-    >>> y = np.sin(x)
-    >>> truth = TruthPlotter(x, y+0.01, lo=y, hi=y+0.03)
-    >>> ax = fig.add_subplot(111)
-    >>> _ = ax.plot(x, y, label='data')
-    >>> truth.plot_truth(ax)
-    >>> _ = ax.legend(loc='best')
-
-    >>> plt.show(block=False) # doctest: +SKIP
-
-    Close plot
-    >>> plt.close(fig)
-
-    """
-    def __init__(self, time=None, data=None, lo=None, hi=None, type_='normal', name='Observed'):
-        self.time    = time
-        self.data    = None
-        self.type_   = type_ # from {'normal', 'errorbar'}
-        self.data_lo = lo
-        self.data_hi = hi
-        self.name    = name
-        # TODO: keep this old API? (otherwise just: self.data = data)
-        if data is not None:
-            if data.ndim == 1:
-                self.data = data
-            elif data.shape[1] == 1:
-                self.data = data[:, 0]
-            elif data.shape[1] == 3:
-                self.data    = data[:, 1]
-                self.data_lo = data[:, 0]
-                self.data_hi = data[:, 2]
-            else:
-                raise ValueError('Bad shape for data of {}.'.format(data.shape))
-
-    @property
-    def is_null(self) -> bool:
-        r"""Determine if there is no truth to plot, and thus nothing is done."""
-        return self.data is None and self.data_lo is None and self.data_hi is None
-
-    @staticmethod
-    def get_data(data, scale=1, ix=None):
-        r"""Scale and index the data, returning None if it is not there."""
-        if data is None:
-            return data
-        if ix is None:
-            return scale * data
-        else:
-            return scale * data[:, ix]
-
-    def plot_truth(self, ax, scale=1, ix=None, *, hold_xlim=True, hold_ylim=False):
-        r"""Add the information in the TruthPlotter instance to the given axes, with the optional scale."""
-        # check for null case
-        if self.is_null:
-            return
-        # get original limits
-        x_lim = ax.get_xbound()
-        y_lim = ax.get_ybound()
-        # plot the new data
-        this_data = self.get_data(self.data, scale, ix)
-        if this_data is not None and not np.all(np.isnan(this_data)):
-            ax.plot(self.time, this_data, 'k.-', linewidth=2, zorder=8, label=self.name)
-        if self.type_ == 'normal':
-            this_data = self.get_data(self.data_lo, scale, ix)
-            if this_data is not None and not np.all(np.isnan(this_data)):
-                ax.plot(self.time, this_data, '.-', color='0.5', linewidth=2, zorder=6)
-            this_data = self.get_data(self.data_hi, scale, ix)
-            if self.data_hi is not None and not np.all(np.isnan(this_data)):
-                ax.plot(self.time, this_data, '.-', color='0.5', linewidth=2, zorder=6)
-        elif self.type_ == 'errorbar':
-            if self.data_lo is not None and self.data_hi is not None:
-                if ix is None:
-                    yerr = np.vstack((self.data-self.data_lo, self.data_hi-self.data))
-                    ax.errorbar(self.time, scale*self.data, scale*yerr, linestyle='None', \
-                        marker='None', ecolor='c', zorder=6)
-                else:
-                    yerr = np.vstack((self.data[:, ix]-self.data_lo[:, ix], self.data_hi[:, ix]-self.data[:, ix])).T
-                    ax.errorbar(self.time, scale*self.data[:, ix], scale*yerr[:, ix], linestyle='None', \
-                        marker='None', ecolor='c', zorder=6)
-        else:
-            raise ValueError('Unexpected value for type_ of "{}".'.format(self.type_))
-        # potentially restore the original limits, since they might have been changed by the truth data
-        if hold_xlim and x_lim != ax.get_xbound():
-            ax.set_xbound(*x_lim)
-        if hold_ylim and y_lim != ax.get_ybound():
-            ax.set_ybound(*y_lim)
-
 #%% Classes - MyCustomToolbar
 class MyCustomToolbar():
     r"""
@@ -324,7 +226,9 @@ class ColorMap(Frozen):
             low = 0
             high = num_colors-1
         # get colormap based on high and low limits
-        if isinstance(colormap, colors.Colormap):
+        if colormap is None:
+            cmap = plt.get_cmap(DEFAULT_COLORMAP)
+        elif isinstance(colormap, colors.Colormap):
             cmap = colormap
         else:
             cmap = plt.get_cmap(colormap)

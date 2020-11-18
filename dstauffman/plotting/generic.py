@@ -36,7 +36,8 @@ logger = logging.getLogger(__name__)
 def make_time_plot(description, time, data, *, name='', elements=None, units='', time_units='sec', \
         leg_scale='unity', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
         disp_xmax=inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
-        show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True):
+        show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True, \
+        extra_plotter=None):
     r"""
     Generic data versus time plotting routine.
 
@@ -220,7 +221,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
             this_time = time[j] if time_is_list else time
             this_data = data[j] if data_is_list else data[j, :]
             this_axes.plot(this_time, this_data, '.-', markersize=4, label=this_label, \
-                color=cm.get_color(j), zorder=3)
+                color=cm.get_color(j), zorder=9)
 
         # set X display limits
         if i == 0:
@@ -232,8 +233,6 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         if plot_zero:
             show_zero_ylim(this_axes)
         # format display of plot
-        if legend_loc.lower() != 'none':
-            this_axes.legend(loc=legend_loc)
         if i == 0:
             this_axes.set_title(description)
         if (time_is_list and is_datetime(time[0])) or is_datetime(time):
@@ -252,6 +251,13 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         # plot RMS lines
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'])
+    # plot any extra information through a generic callable
+    if extra_plotter is not None:
+        extra_plotter(fig=fig, ax=ax)
+    # add legend at the very end once everything has been done
+    if legend_loc.lower() != 'none':
+        for this_axes in ax:
+            this_axes.legend(loc=legend_loc)
 
     return fig
 
