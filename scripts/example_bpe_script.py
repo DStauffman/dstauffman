@@ -113,7 +113,7 @@ if __name__ == '__main__':
     truth      = plot.TruthPlotter(truth_time, truth_data)
 
     # Logger
-    dcs.activate_logging(dcs.LogLevel.L5)
+    dcs.activate_logging(dcs.LogLevel.L8)
 
     # BPE Settings
     opti_opts = estm.OptiOpts()
@@ -139,7 +139,7 @@ if __name__ == '__main__':
     opti_opts.grow_radius     = 2
     opti_opts.shrink_radius   = 0.5
     opti_opts.trust_radius    = 1.0
-    opti_opts.max_cores       = None # TODO: test this
+    opti_opts.max_cores       = None # None means no parallelization, -1 means use all cores
 
     # Parameters to estimate
     opti_opts.params.append(estm.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))

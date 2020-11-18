@@ -16,19 +16,16 @@ from copy import deepcopy
 import doctest
 from itertools import repeat
 import logging
-import multiprocessing
 import os
-import sys
 import time
-from typing import Any, Callable, ClassVar, Dict, List, Optional, Tuple, Type, TYPE_CHECKING
+from typing import Any, Callable, ClassVar, Dict, List, Optional, Tuple, TYPE_CHECKING
 import unittest
 
 if TYPE_CHECKING:
-    from types import TracebackType
     from mypy_extensions import DefaultNamedArg
 
 from dstauffman import activate_logging, deactivate_logging, Frozen, HAVE_NUMPY, LogLevel, \
-    pprint_dict, rss, SaveAndLoad, setup_dir
+    MultipassExceptionWrapper, parfor_wrapper, pprint_dict, rss, SaveAndLoad, setup_dir
 
 if HAVE_NUMPY:
     import numpy as np
@@ -39,30 +36,8 @@ if HAVE_NUMPY:
 else:
     from math import inf, nan, isnan
 
-#%% Activate Exception support for parallel code
-try:
-    import tblib.pickling_support
-except ModuleNotFoundError:
-    pass
-else:
-    tblib.pickling_support.install()
-
 #%% Globals
 logger = logging.getLogger(__name__)
-
-#%% Classes - _ExceptionWrapper
-class _ExceptionWrapper(object):
-    r"""Exception wrapper that can pass through multiprocessing calls and back to main."""
-    def __init__(self, ee: Type[BaseException]):
-        # save exception
-        self.ee = ee
-        # save traceback
-        # Note: sys.exc_info: Union[Tuple[None, None, None], Tuple[Type[BaseException], Any, TracebackType]]
-        self.tb: Optional[TracebackType] = sys.exc_info()[2]
-
-    def re_raise(self) -> None:
-        r"""Re-raise a previously saved exception and traceback."""
-        raise self.ee.with_traceback(self.tb)  # type: ignore[arg-type, call-arg, misc, type-var]
 
 #%% OptiOpts
 class OptiOpts(Frozen):
@@ -477,7 +452,7 @@ def _parfor_function_wrapper(opti_opts, msg, model_args):
         innovs = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
             cost_args=opti_opts.cost_args, model_args=model_args)
     except Exception as e:
-        return _ExceptionWrapper(e)
+        return MultipassExceptionWrapper(e)
     return innovs
 
 #%% _finite_differences
@@ -569,39 +544,18 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
             temp *= param_typical
         loop_params.append(temp)
 
+    # setup model (for possible parallelization)
+    messages = ['  Running model with {} = {}'.format(names[ix % num_param], values) for (ix, values) in enumerate(loop_params)]
+    num_evals = len(loop_params)
+    each_model_args = []
+    for values in loop_params:
+        opti_opts.set_param_func(names=names, values=values, **model_args)
+        each_model_args.append(deepcopy(model_args))
+    # build arguments
+    args = zip(repeat(opti_opts, num_evals), messages, each_model_args)
     # run model (possibly parallelized)
-    if opti_opts.max_cores is not None and opti_opts.max_cores != 1:
-        # parallel version
-        # setup
-        messages = ['  Running model with {} = {}'.format(names[ix % num_param], values) for (ix, values) in enumerate(loop_params)]
-        num_evals = len(loop_params)
-        num_cores = multiprocessing.cpu_count()
-        num_cores = num_cores if opti_opts.max_cores == -1 else min((num_cores, opti_opts.max_cores))
-        each_model_args = []
-        for values in loop_params:
-            opti_opts.set_param_func(names=names, values=values, **model_args)
-            each_model_args.append(deepcopy(model_args))
-        # build arguments
-        args = zip(repeat(opti_opts, num_evals), messages, each_model_args)
-        # run code
-        with multiprocessing.get_context('spawn').Pool(num_cores) as pool:
-            innovs = list(pool.starmap(_parfor_function_wrapper, args))
-        for new_innovs in innovs:
-            if isinstance(new_innovs, _ExceptionWrapper):
-                new_innovs.re_raise()
-        bpe_results.num_evals += num_evals
-    else:
-        # linear version
-        innovs = []
-        for (ix, values) in enumerate(loop_params):
-            i_param = ix % num_param
-            # call model with new parameters
-            opti_opts.set_param_func(names=names, values=values, **model_args)
-            logger.log(LogLevel.L8, '  Running model with {} = {}'.format(names[i_param], values))
-            new_innovs = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
-                model_args=model_args, cost_args=opti_opts.cost_args)
-            innovs.append(new_innovs)
-            bpe_results.num_evals += 1
+    innovs = parfor_wrapper(_parfor_function_wrapper, args, max_cores=opti_opts.max_cores)
+    bpe_results.num_evals += num_evals
 
     # compute the jacobian
     for i_param in range(num_param):

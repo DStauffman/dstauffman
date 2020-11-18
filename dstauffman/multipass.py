@@ -11,8 +11,11 @@ from __future__ import annotations
 import doctest
 import multiprocessing
 import sys
-from typing import Any, Callable, Iterable, List
+from typing import Any, Callable, Iterable, Optional, Type, TYPE_CHECKING
 import unittest
+
+if TYPE_CHECKING:
+    from types import TracebackType
 
 #%% Activate exception support for parallel code
 #try:
@@ -23,22 +26,23 @@ import unittest
 #    # TODO: is there a downside to always doing this?  Should I rely on the scripts that call it instead?
 #    tblib.pickling_support.install()
 
-#%% Classes - _MultipassExceptionWrapper
-class _MultipassExceptionWrapper(object):
+#%% Classes - MultipassExceptionWrapper
+class MultipassExceptionWrapper(object):
     r"""Exception wrapper that can pass through multiprocessing calls and back to main."""
-    def __init__(self, ee):
+    def __init__(self, ee: Type[BaseException]):
         # save exception
         self.ee = ee
         # save traceback
-        self.tb = sys.exc_info()[2]
+        # Note: sys.exc_info: Union[Tuple[None, None, None], Tuple[Type[BaseException], Any, TracebackType]]
+        self.tb: Optional[TracebackType] = sys.exc_info()[2]
 
-    def re_raise(self):
+    def re_raise(self) -> None:
         r"""Re-raise a previously saved exception and traceback."""
-        raise self.ee.with_traceback(self.tb)
+        raise self.ee.with_traceback(self.tb)  # type: ignore[arg-type, call-arg, misc, type-var]
 
 #%% Functions - parfor_wrapper
-def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_parfor: bool = False, \
-        max_cores: int = 6) -> List[Any]:
+def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_parfor: bool = True, \
+        max_cores: int = -1) -> Any:
     r"""
     Wrapper function for the code that you want to run in a parallelized fashion.
 
@@ -68,28 +72,32 @@ def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_p
     --------
     >>> from dstauffman import parfor_wrapper
     >>> import numpy as np
-    >>> #import tblib.pickling_support
-    >>> #tblib.pickling_support.install()
     >>> def func(x, y):
     ...     return x + np.sin(x) + np.cos(y*2)
     >>> temp = np.linspace(0, 2*np.pi)
     >>> args = ((temp.copy(), temp.copy()), (temp + 2*np.pi, temp.copy()), (temp + 4*np.pi, temp.copy()))
-    >>> use_parfor = False  # Note: can't run parfor interactively from __main__
-    >>> max_cores = 3
-    >>> results = parfor_wrapper(func, args, use_parfor=use_parfor, max_cores=max_cores) # doctest: +SKIP
+    >>> max_cores = None
+    >>> results = parfor_wrapper(func, args, max_cores=max_cores)
+    >>> print(len(results))
+    3
 
     """
     # initialize results
     if results is None:
         results = []
     # calculate the number of cores to use
-    num_cores = min((multiprocessing.cpu_count(), max_cores))
+    if max_cores is None:
+        num_cores = 1
+    elif max_cores == -1:
+        num_cores = multiprocessing.cpu_count()
+    else:
+        num_cores = min((multiprocessing.cpu_count(), max_cores))
     if use_parfor and num_cores > 1:
         # parallel loop
         with multiprocessing.get_context('spawn').Pool(num_cores) as pool:
             temp_results = list(pool.starmap(func, args))
         for result in temp_results:
-            if isinstance(result, _MultipassExceptionWrapper):
+            if isinstance(result, MultipassExceptionWrapper):
                 result.re_raise()
             else:
                 results.append(result)
@@ -100,7 +108,7 @@ def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_p
             try:
                 this_args = next(it)
                 result = func(*this_args)
-                if isinstance(result, _MultipassExceptionWrapper):
+                if isinstance(result, MultipassExceptionWrapper):
                     result.re_raise()
                 else:
                     results.append(result)
