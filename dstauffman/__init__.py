@@ -12,6 +12,8 @@ Notes
     submodules.
 #.  Updated by David C. Stauffer in July 2020 to split the plotting portions into a separate
     submodule, which allows for delayed importing of matplotlib.
+#.  Updated by David C. Stauffer in November 2020 to work with just core Python, although with very
+    limited functionality.
 """
 
 #%% Imports
@@ -25,6 +27,7 @@ from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
 from .logs      import activate_logging, deactivate_logging, log_multiline
 from .matlab    import load_matlab
+from .multipass import parfor_wrapper
 from .optimized import np_any, np_all, issorted_opt, prob_to_rate_opt, rate_to_prob_opt
 from .parser    import main, parse_wrapper, parse_commands, execute_command, \
                            process_command_line_options
