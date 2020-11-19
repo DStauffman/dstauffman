@@ -20,6 +20,7 @@ import unittest
 import warnings
 
 from dstauffman.constants import HAVE_H5PY, HAVE_NUMPY
+from dstauffman.paths import is_dunder
 from dstauffman.utils import find_in_range
 
 if HAVE_H5PY:
@@ -79,6 +80,8 @@ def save_hdf5(self, filename: str='') -> None:
     with h5py.File(filename, 'w') as file:
         grp = file.create_group('self')
         for key in vars(self):
+            if is_dunder(key):
+                continue
             value = getattr(self, key)
             if value is not None:
                 grp.create_dataset(key, data=value)
