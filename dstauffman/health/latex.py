@@ -206,9 +206,9 @@ def latex_str(value: Union[int, float, str], digits: int = -1, fixed: bool = Fal
     # potentially convert units
     if cmp2ar:
         value = prob_to_rate_opt(value, 1/MONTHS_PER_YEAR)
-    if isnan(value):
+    if isnan(value):  # type: ignore[arg-type]
         value_str = 'NaN'
-    elif isinf(value) or value > capped:  # type: ignore
+    elif isinf(value) or value > capped:  # type: ignore[arg-type, operator]
         value_str = r'$\infty$'
     else:
         # format the string

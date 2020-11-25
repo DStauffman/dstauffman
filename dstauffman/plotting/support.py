@@ -16,7 +16,7 @@ import os
 import platform
 import re
 import sys
-from typing import Dict, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -206,12 +206,12 @@ class ColorMap(Frozen):
     >>> from dstauffman.plotting import ColorMap
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> cm = ColorMap('Paired', 1, 2)
+    >>> cm = ColorMap('Paired', num_colors=12)
     >>> time = np.arange(0, 10, 0.1)
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
-    >>> _ = ax.plot(time, np.sin(time), color=cm.get_color(1))
-    >>> _ = ax.plot(time, np.cos(time), color=cm.get_color(2))
+    >>> _ = ax.plot(time, np.sin(time), color=cm.get_color(0))
+    >>> _ = ax.plot(time, np.cos(time), color=cm.get_color(1))
     >>> _ = ax.legend(['Sin', 'Cos'])
     >>> plt.show(block=False) # doctest: +SKIP
 
@@ -230,10 +230,15 @@ class ColorMap(Frozen):
             cmap = plt.get_cmap(DEFAULT_COLORMAP)
         elif isinstance(colormap, colors.Colormap):
             cmap = colormap
+        elif isinstance(colormap, type(self)):
+            cmap = None
         else:
             cmap = plt.get_cmap(colormap)
-        cnorm = colors.Normalize(vmin=low, vmax=high)
-        self.smap = cmx.ScalarMappable(norm=cnorm, cmap=cmap)
+        if cmap is None:
+            self.smap = colormap.get_smap()
+        else:
+            cnorm = colors.Normalize(vmin=low, vmax=high)
+            self.smap = cmx.ScalarMappable(norm=cnorm, cmap=cmap)
         # must initialize the empty scalar mapplable to show the colorbar correctly
         self.smap.set_array([])
 
@@ -286,7 +291,13 @@ def close_all(figs: _FigOrListFig = None) -> None:
     gc.collect()
 
 #%% Functions - get_color_lists
-def get_color_lists() -> Dict[str, Union[colors.ListedColormap, str]]:
+@overload
+def get_color_lists(return_as_colormap: Literal[True] = ...) -> Dict[str, ColorMap]: ...
+
+@overload
+def get_color_lists(return_as_colormap: Literal[False]) -> Dict[str, Union[colors.ListedColormap, str]]: ...
+
+def get_color_lists(return_as_colormap: bool = False) -> Union[Dict[str, Union[colors.ListedColormap, str]], Dict[str, ColorMap]]:
     r"""
     Gets different color lists to use for plotting.
 
@@ -313,8 +324,12 @@ def get_color_lists() -> Dict[str, Union[colors.ListedColormap, str]]:
     >>> print(color_lists['default'])
     Paired
 
+    >>> color_lists_map = get_color_lists(return_as_colormap=True)
+    >>> print(color_lists_map['default'].get_color(0)) # doctest: +ELLIPSIS
+    (0.65098..., 0.80784..., 0.890196..., 1.0)
+
     """
-    color_lists              = {}
+    color_lists: Dict[str, Union[colors.ListedColormap, str]] = {}
     color_lists['default']   = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
     first_color              = ColorMap(color_lists['default'], num_colors=1).get_color(0)
     color_lists['same']      = colors.ListedColormap([first_color for _ in range(8)])
@@ -328,9 +343,27 @@ def get_color_lists() -> Dict[str, Union[colors.ListedColormap, str]]:
         'xkcd:red', 'xkcd:green', 'xkcd:blue'))
     color_lists['quat_diff'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan',
         'xkcd:brown', 'xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
-    color_lists['dbl_off']   = colors.ListedColormap(color_lists['dbl_diff'].colors[:2])  # type: ignore[attr-defined]
-    color_lists['vec_off']   = colors.ListedColormap(color_lists['vec_diff'].colors[:3])  # type: ignore[attr-defined]
-    color_lists['quat_off']  = colors.ListedColormap(color_lists['quat_diff'].colors[:4])  # type: ignore[attr-defined]
+    color_lists['dbl_off']   = colors.ListedColormap(color_lists['dbl_diff'].colors[:2])  # type: ignore[union-attr]
+    color_lists['vec_off']   = colors.ListedColormap(color_lists['vec_diff'].colors[:3])  # type: ignore[union-attr]
+    color_lists['quat_off']  = colors.ListedColormap(color_lists['quat_diff'].colors[:4])  # type: ignore[union-attr]
+    if return_as_colormap:
+        color_list_maps: Dict[str, ColorMap] = {}
+        for (key, value) in color_lists.items():
+            if key == 'default':
+                assert isinstance(value, str)
+                if value == 'Paired':
+                    num_colors = 12
+                elif value == 'tab10':
+                    num_colors = 10
+                elif value == 'tab20':
+                    num_colors = 20
+                else:
+                    num_colors = 1
+            else:
+                assert isinstance(value, colors.ListedColormap)
+                num_colors = value.N
+            color_list_maps[key] = ColorMap(value, num_colors=num_colors)
+        return color_list_maps
     return color_lists
 
 #%% Functions - ignore_plot_data

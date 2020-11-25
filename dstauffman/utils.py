@@ -75,7 +75,7 @@ def _nan_equal(a, b, /) -> bool:
     False
 
     """
-    def _is_nan(x):
+    def _is_nan(x) -> bool:
         try:
             out = isnan(x)
         except:

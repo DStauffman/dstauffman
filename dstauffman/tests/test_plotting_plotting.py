@@ -131,7 +131,7 @@ class Test_plotting_Plotter(unittest.TestCase):
     """
     @classmethod
     def setUpClass(cls) -> None:
-        cls.orig_flag = plot.plotting._Plotter
+        cls.orig_flag = plot.plotting._Plotter  # type: ignore[attr-defined]
 
     def test_suppress_and_unsupress(self) -> None:
         plot.suppress_plots()
@@ -140,8 +140,8 @@ class Test_plotting_Plotter(unittest.TestCase):
         self.assertTrue(plot.plotting._Plotter)
 
     def tearDown(self) -> None:
-        if self.orig_flag:
-            plot.unsupress_plots()
+        if self.orig_flag:  # type: ignore[attr-defined]
+            plot.unsuppress_plots()
         else:
             plot.suppress_plots()
 

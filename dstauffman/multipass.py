@@ -42,7 +42,7 @@ class MultipassExceptionWrapper(object):
 
 #%% Functions - parfor_wrapper
 def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_parfor: bool = True, \
-        max_cores: int = -1) -> Any:
+        max_cores: Optional[int] = -1) -> Any:
     r"""
     Wrapper function for the code that you want to run in a parallelized fashion.
 

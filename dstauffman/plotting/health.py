@@ -17,7 +17,7 @@ try:
     from packaging import version
     parse = version.parse
 except ModuleNotFoundError:
-    import setuptools
+    import setuptools  # type: ignore[import]
     parse = setuptools.version.pkg_resources.packaging.version.parse
 
 from dstauffman import Frozen, get_factors, HAVE_MPL, HAVE_NUMPY, rms
