@@ -13,18 +13,19 @@ import multiprocessing
 import sys
 from typing import Any, Callable, Iterable, Optional, Type, TYPE_CHECKING
 import unittest
+import warnings
 
 if TYPE_CHECKING:
     from types import TracebackType
 
 #%% Activate exception support for parallel code
-#try:
-#    import tblib.pickling_support
-#except ModuleNotFoundError:
-#    pass
-#else:
-#    # TODO: is there a downside to always doing this?  Should I rely on the scripts that call it instead?
-#    tblib.pickling_support.install()
+try:
+    import tblib.pickling_support
+except ModuleNotFoundError:
+    warnings.warn('tblib not found, so parallelized tracebacks will not work.')
+else:
+    # TODO: is there a downside to always doing this?  Should I rely on the scripts that call it instead?
+    tblib.pickling_support.install()
 
 #%% Classes - MultipassExceptionWrapper
 class MultipassExceptionWrapper(object):
