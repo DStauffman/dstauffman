@@ -71,6 +71,62 @@ def rot(axis, angle):
         raise ValueError('Unexpected value for axis of: "{}".'.format(axis))
     return dcm
 
+#%% Functions - drot
+def drot(axis, angle):
+    r"""
+    Derivative of transformation matrix for rotation about a single axis.
+
+    Parameters
+    ----------
+    axis : int
+        axis about which rotation is being made [enum]
+             enumerated choices are (1, 2, or 3)
+             corresponding to        x, y, or z axis
+    angle : float
+        angle of rotation [radians]
+
+    Returns
+    -------
+    trans : (3x3) ndarray
+        transformation matrix
+
+    See Also
+    --------
+    rot
+
+    Notes
+    -----
+    1.  Incorporated by David C. Stauffer into lmspace in December 2020 based on Matlab version.
+
+    Examples
+    --------
+    Simple 90deg z-rotation
+    >>> from dstauffman.aerospace import drot
+    >>> import numpy as np
+    >>> axis = 3
+    >>> angle = np.pi/2
+    >>> dcm = drot(axis, angle)
+    >>> print(np.array_str(dcm, precision=4, suppress_small=True))
+    [[-1.  0.  0.]
+     [-0. -1.  0.]
+     [ 0.  0.  0.]]
+
+    """
+    # sines of angle
+    ca = np.cos(angle)
+    sa = np.sin(angle)
+
+    # build direction cosine matrix
+    if axis == 1:
+        trans = np.array([[0., 0., 0.], [0., -sa, ca], [0., -ca, -sa]], dtype=float)
+    elif axis == 2:
+        trans = np.array([[-sa, 0., -ca], [0., 0., 0.], [ca, 0., -sa]], dtype=float)
+    elif axis == 3:
+        trans = np.array([[-sa, ca, 0.], [-ca, -sa, 0.], [0., 0., 0.]], dtype=float)
+    else:
+        raise ValueError('Unexpected value for axis of: "{}".'.format(axis))
+    return trans
+
 #%% Functions - vec_cross
 def vec_cross(vec):
     r"""

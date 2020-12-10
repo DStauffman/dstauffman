@@ -65,7 +65,7 @@ if HAVE_NUMPY:
     # Set NumPy error state for module
     np.seterr(invalid='raise', divide='raise')
     # Set NumPy printing options
-    np.set_printoptions(threshold=1000)
+    np.set_printoptions(threshold=20)
 else:
     warnings.warn('numpy was not imported, so a lot of capabilities will be limited.')
 if not HAVE_H5PY:

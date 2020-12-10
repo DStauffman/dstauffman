@@ -64,6 +64,15 @@ class Test_aerospace_rot(unittest.TestCase):
         with self.assertRaises(ValueError):
             space.rot(np.pi/2, 2)
 
+#%% aerospace.drot
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+class Test_aerospace_drot(unittest.TestCase):
+    r"""
+    Tests the aerospace.drot function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 #%% aerospace.vec_cross
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_vec_cross(unittest.TestCase):
