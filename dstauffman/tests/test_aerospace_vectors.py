@@ -186,6 +186,24 @@ class Test_aerospace_vec_angle(unittest.TestCase):
         angle = space.vec_angle(np.array([1., 0.]), np.array([-0.5, -np.sqrt(3)/2]), use_cross=True)
         self.assertAlmostEqual(angle, self.exp3, 14)
 
+#%% aerospace.cart2sph
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+class Test_aerospace_cart2sph(unittest.TestCase):
+    r"""
+    Tests the aerospace.cart2sph function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+#%% aerospace.shp2cart
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+class Test_aerospace_sph2cart(unittest.TestCase):
+    r"""
+    Tests the aerospace.sph2cart function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

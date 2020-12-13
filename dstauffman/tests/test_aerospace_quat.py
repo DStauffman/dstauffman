@@ -24,14 +24,27 @@ class Test_aerospace_QUAT_SIZE(unittest.TestCase):
     def test_exists(self) -> None:
         self.assertEqual(space.QUAT_SIZE, 4)
 
-#%% aerospace.USE_ASSERTIONS
-class Test_aerospace_USE_ASSERTIONS(unittest.TestCase):
+#%% aerospace.suppress_quat_checks and aerospace.unsupress_quat_checks
+class Test_plotting_Plotter(unittest.TestCase):
     r"""
-    Tests the aerospace.USE_ASSERTIONS function with the following cases:
-        Exists and is boolean
+    Tests the plotting.Plotter class with the following cases:
+        Suppress and Unsuppress
     """
-    def test_exists(self) -> None:
-        self.assertTrue(isinstance(space.USE_ASSERTIONS, bool))
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.orig_flag = space.quat._USE_ASSERTIONS  # type: ignore[attr-defined]
+
+    def test_suppress_and_unsupress(self) -> None:
+        space.suppress_quat_checks()
+        self.assertFalse(space.quat._USE_ASSERTIONS)
+        space.unsuppress_quat_checks()
+        self.assertTrue(space.quat._USE_ASSERTIONS)
+
+    def tearDown(self) -> None:
+        if self.orig_flag:  # type: ignore[attr-defined]
+            space.unsuppress_quat_checks()
+        else:
+            space.suppress_quat_checks()
 
 #%% aerospace.quat_assertions
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -362,11 +375,11 @@ class Test_aerospace_quat_interp(unittest.TestCase):
 
     def test_scalar1(self) -> None:
         qout = space.quat_interp(self.time, self.quat, self.ti[0])
-        np.testing.assert_array_almost_equal(qout, np.expand_dims(self.qout[:,0],1))
+        np.testing.assert_array_almost_equal(qout, np.expand_dims(self.qout[:, 0], 1))
 
     def test_scalar2(self) -> None:
         qout = space.quat_interp(self.time, self.quat, self.ti[1])
-        np.testing.assert_array_almost_equal(qout, np.expand_dims(self.qout[:,1],1))
+        np.testing.assert_array_almost_equal(qout, self.qout[:, 1])
 
     def test_extra1(self) -> None:
         with self.assertRaises(ValueError):

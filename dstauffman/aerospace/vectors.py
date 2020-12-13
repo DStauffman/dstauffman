@@ -227,6 +227,88 @@ def vec_angle(vec1, vec2, use_cross=True, normalized=True):
     cross_result = np.arcsin(np.sqrt(np.sum(cross_prod ** 2, axis=0)))
     return np.where(dot_result > np.pi/2, np.pi - cross_result, cross_result)
 
+#%% Functions - cart2shp
+def cart2sph(x, y, z):
+    r"""
+    Converts cartesian X, Y, Z components to spherical Az, El, Radius.
+
+    Parameters
+    ----------
+    x : ndarray of float
+        X coordinate
+    y : ndarray of float
+        Y coordinate
+    z : ndarray of float
+        Z coordinate
+
+    Returns
+    -------
+    az : ndarray of float
+        Azimuth angle [radians]
+    el : ndarray of float
+        Elevation angle [radians]
+    rad : ndarray of float
+        Radius [ndim]
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import cart2sph
+    >>> (az, el, rad) = cart2sph(3, 4, 5)
+
+    """
+    xy2 = x**2 + y**2
+    az  = np.arctan2(y, x)
+    el  = np.arctan2(z, np.sqrt(xy2))
+    rad = np.sqrt(xy2 + z**2)
+    return (az, el, rad)
+
+#%% Functions - sph2cart
+def sph2cart(az, el, rad):
+    r"""
+    Converts spherical Az, El and Radius to cartesian X, Y, Z components.
+
+    Parameters
+    ----------
+    az : ndarray of float
+        Azimuth angle [radians]
+    el : ndarray of float
+        Elevation angle [radians]
+    rad : ndarray of float
+        Radius [ndim]
+
+    Returns
+    -------
+    x : ndarray of float
+        X coordinate
+    y : ndarray of float
+        Y coordinate
+    z : ndarray of float
+        Z coordinate
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2020.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import sph2cart
+    >>> from numpy import pi
+    >>> az = pi/2
+    >>> el = -pi
+    >>> rad = 1
+    >>> (x, y, z) = sph2cart(az, el, rad)
+
+    """
+    rcos_el = np.cos(el)
+    x = rcos_el * np.cos(az)
+    y = rcos_el * np.sin(az)
+    z = rad * np.sin(el)
+    return (x, y, z)
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='dstauffman.tests.test_aerospace_vectors', exit=False)
