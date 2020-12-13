@@ -240,6 +240,7 @@ def suppress_plots() -> None:
     if HAVE_MPL:
         plt.ioff()
 
+#%% Functions - unsuppress_plots
 def unsuppress_plots() -> None:
     r"""
     Function that allows you to globally un-suppress the display of any plots so they will be shown again.

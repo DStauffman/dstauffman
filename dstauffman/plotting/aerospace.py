@@ -41,7 +41,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True, \
         legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None, \
-        data_as_rows=True, tolerance=0, return_err=False):
+        data_as_rows=True, tolerance=0, return_err=False, use_zoh=False):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
@@ -102,6 +102,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         Numerical tolerance on what should be considered a match between quat_one and quat_two
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
+    use_zoh : bool, optional, default is False
+        Whether to plot as a zero-order hold, instead of linear interpolation between data points
 
     Returns
     -------
@@ -154,13 +156,14 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> data_as_rows    = True
     >>> tolerance       = 0
     >>> return_err      = False
+    >>> use_zoh         = False
     >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
     ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, truth_data=truth_data, \
-    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err)
+    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, use_zoh=use_zoh)
 
     Close plots
     >>> for fig in fig_hand:
@@ -190,6 +193,12 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             quat_two = quat_two.T
         if have_truth:
             truth_data = truth_data.T
+
+    # determine which plotting function to use
+    if use_zoh:
+        plot_func = lambda ax, *args, **kwargs: ax.step(*args, **kwargs, where='post')
+    else:
+        plot_func = lambda ax, *args, **kwargs: ax.plot(*args, **kwargs)
 
     #% Calculations
     if have_both:
@@ -313,7 +322,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
                         this_label = '{} {} ({}: {})'.format(name_one, elements[j], func_name, value)
                     else:
                         this_label = name_one + ' ' + elements[j]
-                    this_axes.plot(time_one, quat_one[j, :], symbol_one, markersize=4, label=this_label, \
+                    plot_func(this_axes, time_one, quat_one[j, :], symbol_one, markersize=4, label=this_label, \
                         color=colororder8.get_color(j+(0 if have_quat_two else num_channels)), zorder=3)
             if have_quat_two:
                 for j in loop_counter:
@@ -322,7 +331,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
                         this_label = '{} {} ({}: {})'.format(name_two, elements[j], func_name, value)
                     else:
                         this_label = name_two + ' ' + elements[j]
-                    this_axes.plot(time_two, quat_two[j, :], symbol_two, markersize=4, label=this_label, \
+                    plot_func(this_axes, time_two, quat_two[j, :], symbol_two, markersize=4, label=this_label, \
                         color=colororder8.get_color(j+num_channels), zorder=5)
         else:
             #% Difference plot
@@ -335,7 +344,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
                     this_label = '{} ({}: {}) {}rad)'.format(elements[j], func_name, value, prefix)
                 else:
                     this_label = elements[j]
-                this_axes.plot(time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, zorder=zorders[j], \
+                plot_func(this_axes, time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, zorder=zorders[j], \
                     color=colororder3.get_color(j))
             if not plot_components or (single_lines and (i + 1) % num_channels == 0):
                 if show_rms:
@@ -343,7 +352,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
                     this_label = 'Angle ({}: {} {}rad)'.format(func_name, value, prefix)
                 else:
                     this_label = 'Angle'
-                this_axes.plot(time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=colororder3.get_color(0))
+                plot_func(this_axes, time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=colororder3.get_color(0))
             if show_extra:
                 this_axes.plot(time_one[q1_miss_ix], np.zeros(len(q1_miss_ix)), 'kx', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
                 this_axes.plot(time_two[q2_miss_ix], np.zeros(len(q2_miss_ix)), 'go', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')

@@ -37,7 +37,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         leg_scale='unity', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
         disp_xmax=inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
         show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True, \
-        extra_plotter=None):
+        extra_plotter=None, use_zoh=False):
     r"""
     Generic data versus time plotting routine.
 
@@ -87,6 +87,10 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         Labels to put on the Y axes, potentially by element
     data_as_rows : bool, optional, default is True
         Whether the data has each channel as a row vector when 2D, vs a column vector
+    extra_plotter : callable, optional
+        Extra callable plotting function to add more details to the plot
+    use_zoh : bool, optional, default is False
+        Whether to plot as a zero-order hold, instead of linear interpolation between data points
 
     Returns
     -------
@@ -122,12 +126,14 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     >>> second_yscale = None
     >>> ylabel = None
     >>> data_as_rows = True
+    >>> extra_plotter = None
+    >>> use_zoh = False
     >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
     ...     time_units=time_units, leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, \
     ...     rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
     ...     legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel, \
-    ...     data_as_rows=data_as_rows)
+    ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh)
 
     """
     # some basic flags
@@ -220,8 +226,12 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
                     this_label += f' ({func_name}: {value})'
             this_time = time[j] if time_is_list else time
             this_data = data[j] if data_is_list else data[j, :]
-            this_axes.plot(this_time, this_data, '.-', markersize=4, label=this_label, \
-                color=cm.get_color(j), zorder=9)
+            if use_zoh:
+                this_axes.step(this_time, this_data, '.-', where='post', markersize=4, label=this_label, \
+                    color=cm.get_color(j), zorder=9)
+            else:
+                this_axes.plot(this_time, this_data, '.-', markersize=4, label=this_label, \
+                    color=cm.get_color(j), zorder=9)
 
         # set X display limits
         if i == 0:
@@ -493,7 +503,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
         plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None, \
         ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True, \
-        tolerance=0, return_err=False):
+        tolerance=0, return_err=False, use_zoh=False):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
     Plots two vector histories over time, along with a difference from one another.
@@ -564,6 +574,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         Numerical tolerance on what should be considered a match between data_one and data_two
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
+    use_zoh : bool, optional, default is False
+        Whether to plot as a zero-order hold, instead of linear interpolation between data points
 
     Returns
     -------
@@ -622,6 +634,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> data_as_rows  = True
     >>> tolerance     = 0
     >>> return_err    = False
+    >>> use_zoh       = False
     >>> fig_hand = make_difference_plot(description, time_one, time_two, data_one, data_two, \
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
     ...     leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
@@ -629,7 +642,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, second_yscale=second_yscale, ylabel=ylabel, truth_name=truth_name, \
     ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows, tolerance=tolerance, \
-    ...     return_err=return_err)
+    ...     return_err=return_err, use_zoh=use_zoh)
 
     Close plots
     >>> for fig in fig_hand:
@@ -663,6 +676,12 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             data_two = data_two.T
         if have_truth:
             truth_data = truth_data.T
+
+    # determine which plotting function to use
+    if use_zoh:
+        plot_func = lambda ax, *args, **kwargs: ax.step(*args, **kwargs, where='post')
+    else:
+        plot_func = lambda ax, *args, **kwargs: ax.plot(*args, **kwargs)
 
     # calculate sizes
     s1 = data_one.shape[0] if data_one is not None else 0
@@ -786,7 +805,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                         this_label = '{} {} ({}: {} {}{})'.format(name_one, elements[j], func_name, value, prefix, units)
                     else:
                         this_label = name_one + ' ' + elements[j]
-                    this_axes.plot(time_one, data_one[j, :], symbol_one, markersize=4, label=this_label, \
+                    plot_func(this_axes, time_one, data_one[j, :], symbol_one, markersize=4, label=this_label, \
                         color=cm.get_color(j), zorder=3)
             if have_data_two:
                 for j in loop_counter:
@@ -795,7 +814,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                         this_label = '{} {} ({}: {} {}{})'.format(name_two, elements[j], func_name, value, prefix, units)
                     else:
                         this_label = name_two + ' ' + elements[j]
-                    this_axes.plot(time_two, data_two[j, :], symbol_two, markersize=4, label=this_label, \
+                    plot_func(this_axes, time_two, data_two[j, :], symbol_two, markersize=4, label=this_label, \
                         color=cm.get_color(j+num_channels), zorder=5)
         else:
             #% Difference plot
@@ -807,7 +826,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                     this_label = '{} ({}: {}) {}{})'.format(elements[j], func_name, value, prefix, units)
                 else:
                     this_label = elements[j]
-                this_axes.plot(time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, \
+                plot_func(this_axes, time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, \
                     color=cm.get_color(j+2*num_channels))
             if show_extra:
                 this_axes.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
@@ -824,6 +843,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             show_zero_ylim(this_axes)
         # optionally plot truth (after having set axes limits)
         if i < num_rows and have_truth:
+            # TODO: apply use_zoh logic to truth?
             if single_lines:
                 this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
                     linewidth=2, label=truth_name + ' ' + elements[i])
@@ -876,7 +896,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         units='', time_units='sec', leg_scale='unity', start_date='', rms_xmin=-inf, \
         rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, single_plots=False, \
         colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, show_rms=True, \
-        legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True):
+        legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True, use_zoh=False):
     r"""
     Data versus time plotting routine when grouped into categories.
 
@@ -926,6 +946,8 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         Labels to put on the Y axes, potentially by element
     data_as_rows : bool, optional, default is True
         Whether the data has each channel as a row vector when 2D, vs a column vector
+    use_zoh : bool, optional, default is False
+        Whether to plot as a zero-order hold, instead of linear interpolation between data points
 
     Returns
     -------
@@ -966,12 +988,16 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     >>> second_yscale = None
     >>> ylabel = None
     >>> data_as_rows = True
+    >>> use_zoh = False
     >>> fig = make_categories_plot(description, time, data, cats, cat_names=cat_names, name=name, \
     ...     elements=elements, units=units, time_units=time_units, leg_scale=leg_scale, \
     ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, single_plots=single_plots, colormap=colormap, use_mean=use_mean, \
     ...     plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-    ...     second_yscale=second_yscale, ylabel=ylabel, data_as_rows=data_as_rows)
+    ...     second_yscale=second_yscale, ylabel=ylabel, data_as_rows=data_as_rows, use_zoh=use_zoh)
+
+    Close plots
+    >>> plt.close(fig)
 
     """
     # some basic flags
@@ -1074,7 +1100,10 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         this_data = data[i] if data_is_list else data[i, :]
         root_label = f'{name} {elements[i]}' if name else str(elements[i])
         # plot the underlying line once
-        this_axes.plot(this_time, this_data, '-', label='', color='k', zorder=2)
+        if use_zoh:
+            this_axes.step(this_time, this_data, '-', where='post', label='', color='k', zorder=2)
+        else:
+            this_axes.plot(this_time, this_data, '-', label='', color='k', zorder=2)
         # loop through categories
         for (j, cat) in enumerate(unique_cats):
             this_cat_name = cat_names[cat]
