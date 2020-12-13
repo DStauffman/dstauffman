@@ -95,6 +95,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     Returns
     -------
     fig : class matplotlib.Figure
+        figure handle
 
     Notes
     -----
@@ -331,8 +332,8 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
 
     Returns
     -------
-    fig_hand : list of class matplotlib.Figure
-        list of figure handles
+    fig : class matplotlib.Figure
+        figure handle
     err : (A,N) ndarray
         Differences
 
@@ -344,7 +345,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
     -----
     #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
     #.  Ported to Python by David C. Stauffer in March 2019.
-    #.  Made fully function by David C. Stauffer in April 2020.
+    #.  Made fully functional by David C. Stauffer in April 2020.
 
     Examples
     --------
@@ -592,7 +593,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     -----
     #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
     #.  Ported to Python by David C. Stauffer in March 2019.
-    #.  Made fully function by David C. Stauffer in April 2020.
+    #.  Made fully functional by David C. Stauffer in April 2020.
 
     Examples
     --------
@@ -951,7 +952,8 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
 
     Returns
     -------
-    fig : class matplotlib.Figure
+    figs : list of class matplotlib.Figure
+        Figure handles
 
     Notes
     -----
@@ -989,7 +991,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     >>> ylabel = None
     >>> data_as_rows = True
     >>> use_zoh = False
-    >>> fig = make_categories_plot(description, time, data, cats, cat_names=cat_names, name=name, \
+    >>> figs = make_categories_plot(description, time, data, cats, cat_names=cat_names, name=name, \
     ...     elements=elements, units=units, time_units=time_units, leg_scale=leg_scale, \
     ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, single_plots=single_plots, colormap=colormap, use_mean=use_mean, \
@@ -997,7 +999,8 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     ...     second_yscale=second_yscale, ylabel=ylabel, data_as_rows=data_as_rows, use_zoh=use_zoh)
 
     Close plots
-    >>> plt.close(fig)
+    >>> for fig in figs:
+    ...     plt.close(fig)
 
     """
     # some basic flags
