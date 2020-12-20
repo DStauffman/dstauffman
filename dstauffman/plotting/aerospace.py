@@ -385,7 +385,6 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             this_axes.set_title(description + ' Difference')
         if is_datetime(time_one) or is_datetime(time_two):
             this_axes.set_xlabel('Date')
-            assert time_units == 'datetime', 'Mismatch in the expected time units.'
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if is_diff_plot:

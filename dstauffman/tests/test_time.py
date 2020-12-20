@@ -289,6 +289,15 @@ class Test_convert_date(unittest.TestCase):
         out = dcs.convert_date(dates, 'numpy', self.date_zero, old_form='matplotlib')
         np.testing.assert_array_equal(out, np.array([self.numpy, self.nat, self.nat, self.nat], dtype='datetime64[ns]'))
 
+    def test_numpy_floats_and_ints(self) -> None:
+        times1 = np.arange(10, dtype=float)
+        times2 = np.arange(10, dtype=int)
+        exp = self.numpy + 10**9 * np.arange(10).astype(np.int64)
+        out = dcs.convert_date(times1, 'numpy', self.datetime)
+        np.testing.assert_array_equal(out, exp)
+        out = dcs.convert_date(times2, 'numpy', self.datetime)
+        np.testing.assert_array_equal(out, exp)
+
 #%% convert_time_units
 class Test_convert_time_units(unittest.TestCase):
     r"""
