@@ -147,11 +147,11 @@ def issorted_opt(x, /, descend=False):
     else:
         for i in range(len(x)-1):
             if x[i+1] < x[i] :
-                    return False
+                return False
     return True
 
 #%% Functions - prob_to_rate_opt
-@vectorize([float64(float64, float64)])  # TODO: can't use optional argument?
+@vectorize([float64(float64, float64)], nopython=True, target='parallel', cache=True)  # TODO: can't use optional argument?
 def prob_to_rate_opt(prob, time):
     r"""
     Convert a given probability and time to a rate.
@@ -179,7 +179,8 @@ def prob_to_rate_opt(prob, time):
     >>> prob = np.array([0, 0.1, 1])
     >>> time = 3
     >>> rate = prob_to_rate_opt(prob, time)
-    >>> print(rate) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(rate) # doctest: +NORMALIZE_WHITESPACE
     [0. 0.03512017 inf]
 
     """
@@ -196,7 +197,7 @@ def prob_to_rate_opt(prob, time):
     return -math.log(1 - prob) / time
 
 #%% Functions - rate_to_prob_opt
-@vectorize([float64(float64, float64)])  # TODO: can't use optional argument?
+@vectorize([float64(float64, float64)], nopython=True, target='parallel', cache=True)  # TODO: can't use optional argument?
 def rate_to_prob_opt(rate, time):
     r"""
     Convert a given rate and time to a probability.
@@ -225,7 +226,8 @@ def rate_to_prob_opt(rate, time):
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
     >>> time = 1./12
     >>> prob = rate_to_prob_opt(rate, time)
-    >>> print(prob) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(prob) # doctest: +NORMALIZE_WHITESPACE
     [0. 0.00829871 0.07995559 0.99975963 1. ]
 
     """

@@ -44,7 +44,7 @@ _ALLOWED_ENVS: Optional[Dict[str, str]] = None # allows any environment variable
 _StrOrListStr = TypeVar('_StrOrListStr', str, List[str])
 
 #%% Functions - _nan_equal
-def _nan_equal(a, b, /) -> bool:
+def _nan_equal(a, b, /, tolerance: float = None) -> bool:
     r"""
     Test ndarrays for equality, but ignore NaNs.
 
@@ -54,6 +54,8 @@ def _nan_equal(a, b, /) -> bool:
         Array one
     b : ndarray
         Array two
+    tolerance : float, optional
+        Numerical tolerance used to compare two numbers that are close together to consider them equal
 
     Returns
     -------
@@ -84,8 +86,22 @@ def _nan_equal(a, b, /) -> bool:
     try:
         if HAVE_NUMPY:
             # use numpy testing module to assert that they are equal (ignores NaNs)
-            np.testing.assert_array_equal(a, b)
+            do_simple = tolerance is None or tolerance == 0 or a is None or b is None
+            if not do_simple:
+                # see if these can be cast to numeric values that can be compared
+                try:
+                    _ = np.isfinite(a) & np.isfinite(b)
+                except TypeError:
+                    do_simple = True
+                except:
+                    pass
+            if do_simple:
+                np.testing.assert_array_equal(a, b)
+            else:
+                np.testing.assert_allclose(a, b, atol=tolerance, equal_nan=True)
         else:
+            if tolerance is not None and tolerance != 0:
+                raise ValueError('You must have numpy installed to use a non-zero tolerance.')
             if a != b:
                 return False
             if hasattr(a, '__len__'):
@@ -269,7 +285,8 @@ def rss(data, axis=None, keepdims=False, ignore_nans=False):
 
 #%% Functions - compare_two_classes
 def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, names: Union[Tuple[str, str], List[str]] = None, \
-        ignore_callables: bool = True, compare_recursively: bool = True, is_subset: bool = False) -> bool:
+        ignore_callables: bool = True, compare_recursively: bool = True, is_subset: bool = False, \
+        tolerance: float = None) -> bool:
     r"""
     Compare two classes by going through all their public attributes and showing that they are equal.
 
@@ -287,6 +304,8 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
         If True, ignore differences in callable attributes (i.e. methods), defaults to True.
     is_subset : bool, optional
         If True, only compares in c1 is a strict subset of c2, but c2 can have extra fields, defaults to False
+    tolerance : float, optional
+        Numerical tolerance used to compare two numbers that are close together to consider them equal
 
     Returns
     -------
@@ -349,11 +368,12 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
                         # Note: don't want the 'and' to short-circuit, so do the 'and is_same' last
                         if isinstance(attr1, dict) and isinstance(attr2, dict):
                             is_same = compare_two_dicts(attr1, attr2, suppress_output=suppress_output, \
-                                names=names, is_subset=is_subset) and is_same
+                                names=names, is_subset=is_subset, tolerance=tolerance) and is_same
                         else:
                             is_same = compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
                                 names=names, ignore_callables=ignore_callables, \
-                                compare_recursively=compare_recursively, is_subset=is_subset) and is_same
+                                compare_recursively=compare_recursively, is_subset=is_subset, \
+                                tolerance=tolerance) and is_same
                         continue
                     else:
                         continue # pragma: no cover (actually covered, optimization issue)
@@ -371,8 +391,9 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
                     continue
             # if any differences, then this test fails
             if isinstance(attr1, Mapping) and isinstance(attr2, Mapping):
-                is_same = compare_two_dicts(attr1, attr2, suppress_output=True, is_subset=is_subset) and is_same
-            elif logical_not(_nan_equal(attr1, attr2)):
+                is_same = compare_two_dicts(attr1, attr2, suppress_output=True, is_subset=is_subset, \
+                    tolerance=tolerance) and is_same
+            elif logical_not(_nan_equal(attr1, attr2, tolerance=tolerance)):
                 is_same = _not_true_print()
         # find the attributes in one but not the other, if any, then this test fails
         diff = attrs1 ^ attrs2
@@ -396,8 +417,9 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
     return is_same
 
 #%% Functions - compare_two_dicts
-def compare_two_dicts(d1: Mapping[Any, Any], d2: Mapping[Any, Any], suppress_output: bool = False, \
-        names: Union[Tuple[str, str], List[str]] = None, is_subset: bool = False) -> bool:
+def compare_two_dicts(d1: Mapping[Any, Any], d2: Mapping[Any, Any], /, suppress_output: bool = False, \
+        names: Union[Tuple[str, str], List[str]] = None, is_subset: bool = False, \
+        tolerance: float = None) -> bool:
     r"""
     Compare two dictionaries for the same keys, and the same value of those keys.
 
@@ -413,6 +435,8 @@ def compare_two_dicts(d1: Mapping[Any, Any], d2: Mapping[Any, Any], suppress_out
         List of the names to be printed to the screen for the two input classes.
     is_subset : bool, optional
         If True, only compares in c1 is a strict subset of c2, but c2 can have extra fields, defaults to False
+    tolerance : float, optional
+        Numerical tolerance used to compare two numbers that are close together to consider them equal
 
     Returns
     -------
@@ -449,9 +473,9 @@ def compare_two_dicts(d1: Mapping[Any, Any], d2: Mapping[Any, Any], suppress_out
             s2 = d2[key]
             if isinstance(s1, dict) and isinstance(s2, dict):
                 is_same = compare_two_dicts(s1, s2, suppress_output=suppress_output, \
-                    names=[f"{name1}['{key}']", f"{name2}['{key}']"], is_subset=is_subset)
+                    names=[f"{name1}['{key}']", f"{name2}['{key}']"], is_subset=is_subset, tolerance=tolerance)
             # if any differences, then this test fails
-            elif logical_not(_nan_equal(s1, s2)):
+            elif logical_not(_nan_equal(s1, s2, tolerance=tolerance)):
                 is_same = False
                 if not suppress_output:
                     print(f'{key} is different.')
@@ -660,7 +684,8 @@ def unit(data, axis=0):
     >>> import numpy as np
     >>> data = np.array([[1, 0, -1], [0, 0, 0], [0, 0, 1]])
     >>> norm_data = unit(data, axis=0)
-    >>> print(norm_data) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(norm_data) # doctest: +NORMALIZE_WHITESPACE
     [[ 1. 0. -0.70710678]
      [ 0. 0.  0.        ]
      [ 0. 0.  0.70710678]]

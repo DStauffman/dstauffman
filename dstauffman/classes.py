@@ -51,7 +51,7 @@ def _frozen(set: Callable) -> Callable:
             # If attribute already exists, simply set it
             set(self, name, value)
             return
-        elif sys._getframe(1).f_code.co_name == '__init__':
+        if sys._getframe(1).f_code.co_name == '__init__':
             # Allow __setattr__ calls in __init__ calls of proper object types
             for key, val in sys._getframe(1).f_locals.items(): # pragma: no branch
                 if key == 'self' and isinstance(val, self.__class__): # pragma: no branch
@@ -496,14 +496,14 @@ class Counter(Frozen):
     def __add__(self, other: _C) -> _C:
         if isinstance(other, Counter):
             return Counter(self._val + other._val)
-        elif isinstance(other, int):
+        if isinstance(other, int):
             return self._val + other
         return NotImplemented
 
     def __iadd__(self, other: _C) -> Counter:  # type: ignore[misc]
         if isinstance(other, Counter):
             self._val += other._val
-        elif isinstance(other, int):
+        if isinstance(other, int):
             self._val += other
         else:
             return NotImplemented
@@ -521,7 +521,7 @@ class Counter(Frozen):
     def __sub__(self, other: _C) -> _C:
         if isinstance(other, Counter):
             return Counter(self._val - other._val)
-        elif isinstance(other, int):
+        if isinstance(other, int):
             return self._val - other
         return NotImplemented
 
@@ -538,21 +538,21 @@ class Counter(Frozen):
         return -self.__sub__(other)
 
     def __truediv__(self, other: Union[int, float]) -> float:
-        if isinstance(other, int) or isinstance(other, float):
+        if isinstance(other, (float, int)):
             return self._val / other
         return NotImplemented  # type: ignore[unreachable]
 
     def __floordiv__(self, other: _C) -> _C:
         if isinstance(other, Counter):
             return Counter(self._val // other._val)
-        elif isinstance(other, int):
+        if isinstance(other, int):
             return self._val // other
         return NotImplemented
 
     def __mod__(self, other: _C) -> _C:
         if isinstance(other, Counter):
             return Counter(self._val % other._val)
-        elif isinstance(other, int):
+        if isinstance(other, int):
             return self._val % other
         return NotImplemented
 

@@ -156,7 +156,8 @@ def qrot(axis, angle, **kwargs):
     >>> from dstauffman.aerospace import qrot
     >>> import numpy as np
     >>> quat = qrot(3, np.pi/2)
-    >>> print(quat) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
     [0. 0. 0.70710678  0.70710678]
 
     """
@@ -236,9 +237,11 @@ def quat_angle_diff(quat1, quat2, **kwargs):
     >>> dq2 = qrot(2, 0.05)
     >>> quat2 = np.column_stack((quat_mult(dq1,quat1), quat_mult(dq2,quat1)))
     >>> (theta, comp) = quat_angle_diff(quat1, quat2)
-    >>> print(theta) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(theta) # doctest: +NORMALIZE_WHITESPACE
     [0.001  0.05 ]
-    >>> print(comp) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(comp) # doctest: +NORMALIZE_WHITESPACE
     [[0.001  0.   ]
      [0.     0.05 ]
      [0.     0.   ]]
@@ -331,7 +334,8 @@ def quat_from_euler(angles, seq=None, **kwargs):
     >>> angles = np.column_stack((a, b))
     >>> seq = np.array([3, 2, 1])
     >>> quat = quat_from_euler(angles, seq)
-    >>> print(quat) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
     [[0.01504849  0.03047982]
      [0.00992359  0.02438147]
      [0.00514916  0.02073308]
@@ -557,7 +561,8 @@ def quat_inv(q1, **kwargs):
     >>> from numpy import pi
     >>> q1 = qrot(1, pi/2)
     >>> q2 = quat_inv(q1)
-    >>> print(q2) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(q2) # doctest: +NORMALIZE_WHITESPACE
     [-0.70710678 -0. -0. 0.70710678]
 
     """
@@ -619,8 +624,8 @@ def quat_mult(a, b, **kwargs):
     >>> a = qrot(1, pi/2)
     >>> b = qrot(2, pi)
     >>> c = quat_mult(a, b)
-    >>> print(c) # doctest: +NORMALIZE_WHITESPACE
-    [ 4.32978028e-17 7.07106781e-01 -7.07106781e-01 4.32978028e-17]
+    >>> print(np.array_str(c, precision=8, suppress_small=True)) # doctest: +NORMALIZE_WHITESPACE
+    [ 0. 0.70710678 -0.70710678 0. ]
 
     """
     # check for vectorized inputs
@@ -707,7 +712,8 @@ def quat_norm(x, **kwargs):
     >>> import numpy as np
     >>> x = np.array([0.1, 0, 0, 1])
     >>> y = quat_norm(x)
-    >>> print(y) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(y) # doctest: +NORMALIZE_WHITESPACE
     [0.09950372 0. 0. 0.99503719]
 
     """
@@ -751,7 +757,8 @@ def quat_prop(quat, delta_ang, *, renorm=True, **kwargs):
     >>> quat      = np.array([0, 0, 0, 1])
     >>> delta_ang = np.array([0.01, 0.02, 0.03])
     >>> quat_new  = quat_prop(quat, delta_ang)
-    >>> print(quat_new) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(quat_new) # doctest: +NORMALIZE_WHITESPACE
     [0.00499913  0.00999825  0.01499738  0.99982505]
 
     """
@@ -927,7 +934,8 @@ def quat_to_euler(quat, seq=None, **kwargs):
     >>> quat = np.array([[0, 1, 0, 0], [0, 0, 1, 0]]).T
     >>> seq = [3, 1, 2]
     >>> euler = quat_to_euler(quat, seq)
-    >>> print(euler) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(euler) # doctest: +NORMALIZE_WHITESPACE
     [[-0.         -3.14159265]
      [ 0.          0.        ]
      [ 3.14159265 -0.        ]]

@@ -50,7 +50,8 @@ def convert_annual_to_monthly_probability(annual):
     >>> import numpy as np
     >>> annual  = np.array([0, 0.1, 1])
     >>> monthly = convert_annual_to_monthly_probability(annual)
-    >>> print(monthly) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(monthly) # doctest: +NORMALIZE_WHITESPACE
     [0. 0.00874161  1. ]
 
     """
@@ -84,7 +85,8 @@ def convert_monthly_to_annual_probability(monthly):
     >>> import numpy as np
     >>> monthly = np.array([0, 0.1, 1])
     >>> annual = convert_monthly_to_annual_probability(monthly)
-    >>> print(annual) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(annual) # doctest: +NORMALIZE_WHITESPACE
     [0. 0.71757046 1. ]
 
     """
@@ -129,7 +131,8 @@ def prob_to_rate(prob, time=1):
     >>> prob = np.array([0, 0.1, 1])
     >>> time = 3
     >>> rate = prob_to_rate(prob, time)
-    >>> print(rate) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(rate) # doctest: +NORMALIZE_WHITESPACE
     [0. 0.03512017 inf]
 
     """
@@ -181,7 +184,8 @@ def rate_to_prob(rate, time=1):
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
     >>> time = 1./12
     >>> prob = rate_to_prob(rate, time)
-    >>> print(prob) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(prob) # doctest: +NORMALIZE_WHITESPACE
     [0. 0.00829871 0.07995559 0.99975963 1. ]
 
     """
@@ -221,7 +225,8 @@ def annual_rate_to_monthly_probability(rate):
     >>> import numpy as np
     >>> rate = np.array([0, 0.5, 1, 5, np.inf])
     >>> prob = annual_rate_to_monthly_probability(rate)
-    >>> print(prob) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(prob) # doctest: +NORMALIZE_WHITESPACE
     [0. 0.04081054 0.07995559 0.34075937 1. ]
 
     """

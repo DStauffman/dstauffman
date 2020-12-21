@@ -20,7 +20,8 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% load_matlab
-def load_matlab(filename: str, varlist: List[str] = None, *, squeeze: bool = True, enums: Dict[str, Any] = None) -> Dict[str, Any]:
+def load_matlab(filename: str, varlist: List[str] = None, *, squeeze: bool = True, \
+        enums: Dict[str, Any] = None) -> Dict[str, Any]:
     r"""
     Load simple arrays from a MATLAB v7.3 HDF5 based *.mat file.
 
@@ -48,7 +49,8 @@ def load_matlab(filename: str, varlist: List[str] = None, *, squeeze: bool = Tru
     2.2
 
     """
-    def _load(file: h5py.Group, varlist: Optional[List[str]], squeeze: bool, enums: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+    def _load(file: h5py.Group, varlist: Optional[List[str]], squeeze: bool, \
+             enums: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         r"""Wrapped subfunction so it can be called recursively."""
         # initialize output
         out: Dict[str, Any] = {}

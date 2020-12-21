@@ -50,7 +50,8 @@ def orth(A):
     3
 
     >>> Q = orth(A)
-    >>> print(Q)
+    >>> with np.printoptions(precision=8):
+    ...     print(Q)
     [[-0.12000026 -0.80971228  0.57442663]
      [ 0.90175265  0.15312282  0.40422217]
      [-0.41526149  0.5664975   0.71178541]]
@@ -62,8 +63,8 @@ def orth(A):
     2
 
     >>> Q = orth(A)
-    >>> print(np.array2string(Q, suppress_small=True))
-    [[-0.70710678 -0.        ]
+    >>> print(np.array2string(Q, precision=8, suppress_small=True))
+    [[-0.70710678  0.        ]
      [ 0.          1.        ]
      [-0.70710678  0.        ]]
 
@@ -172,7 +173,8 @@ def mat_divide(a, b, rcond=None):
     >>> x = np.array([1, -1], dtype=float)
     >>> b = a @ x
     >>> out = mat_divide(a, b)
-    >>> print(out)
+    >>> with np.printoptions(precision=8):
+    ...     print(out)
     [ 1. -1.]
 
     """

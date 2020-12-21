@@ -603,7 +603,8 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
     >>> innovs      = np.array([7, 8, 9])
     >>> lambda_     = 5
     >>> delta_param = _levenberg_marquardt(jacobian, innovs, lambda_)
-    >>> print(delta_param)
+    >>> with np.printoptions(precision=8):
+    ...     print(delta_param)
     [-0.46825397 -1.3015873 ]
 
     """

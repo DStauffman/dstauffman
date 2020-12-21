@@ -133,7 +133,8 @@ def calculate_innovation(u_meas, u_pred):
     >>> u_meas = np.array([1., 2.1, -3.])
     >>> u_pred = np.array([1.1, 2.0, -3.1])
     >>> z = calculate_innovation(u_meas, u_pred)
-    >>> print(z) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(z) # doctest: +NORMALIZE_WHITESPACE
     [-0.1 0.1 0.1]
 
     """
@@ -169,7 +170,8 @@ def calculate_normalized_innovation(z, Pz, use_inverse=False):
     >>> z = np.array([0.1, 0.05, -0.2])
     >>> Pz = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0., 0., 0.2]])
     >>> nu = calculate_normalized_innovation(z, Pz)
-    >>> print(nu) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(nu) # doctest: +NORMALIZE_WHITESPACE
     [ 0.96868687 0.41313131 -1. ]
 
     """
@@ -200,7 +202,8 @@ def calculate_delta_state(K, z):
     >>> K = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0., 0., 0.2]])
     >>> z = np.array([0.1, 0.05, -0.2])
     >>> dx = calculate_delta_state(K, z)
-    >>> print(dx) # doctest: +NORMALIZE_WHITESPACE
+    >>> with np.printoptions(precision=8):
+    ...     print(dx) # doctest: +NORMALIZE_WHITESPACE
     [ 0.0103 0.0058 -0.04 ]
 
     """

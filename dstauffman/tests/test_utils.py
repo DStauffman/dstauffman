@@ -48,7 +48,7 @@ class Test__nan_equal(unittest.TestCase):
         b = np.array([3, 2, np.nan])
         self.assertFalse(dcs.utils._nan_equal(a, b))
 
-    def test_goods(self):
+    def test_goods(self) -> None:
         self.assertTrue(dcs.utils._nan_equal(1, 1))
         self.assertTrue(dcs.utils._nan_equal(1, 1.))
         self.assertTrue(dcs.utils._nan_equal(1., 1.))
@@ -57,8 +57,21 @@ class Test__nan_equal(unittest.TestCase):
             self.assertTrue(dcs.utils._nan_equal((1., 2, nan), [1, 2, nan]))
         self.assertTrue(dcs.utils._nan_equal({1., 2, nan}, {1, 2, nan}))
         self.assertTrue(dcs.utils._nan_equal('text', 'text'))
+        self.assertTrue(dcs.utils._nan_equal(None, None))
 
-    def test_bads(self):
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    def test_goods_tol(self) -> None:
+        self.assertTrue(dcs.utils._nan_equal(1, 1, tolerance=1e-6))
+        self.assertTrue(dcs.utils._nan_equal(1, 1., tolerance=1e-6))
+        self.assertTrue(dcs.utils._nan_equal(1., 1., tolerance=1e-6))
+        self.assertTrue(dcs.utils._nan_equal([1., 2, nan], [1, 2, nan], tolerance=1e-6))
+        if dcs.HAVE_NUMPY:
+            self.assertTrue(dcs.utils._nan_equal((1., 2, nan), [1, 2, nan], tolerance=1e-6))
+        self.assertTrue(dcs.utils._nan_equal({1., 2, nan}, {1, 2, nan}, tolerance=1e-6))
+        self.assertTrue(dcs.utils._nan_equal('text', 'text', tolerance=1e-6))
+        self.assertTrue(dcs.utils._nan_equal(None, None, tolerance=1e-6))
+
+    def test_bads(self) -> None:
         self.assertFalse(dcs.utils._nan_equal(1, 1.01))
         self.assertFalse(dcs.utils._nan_equal(1, 2))
         self.assertFalse(dcs.utils._nan_equal(1.1, 1.2))
@@ -66,6 +79,20 @@ class Test__nan_equal(unittest.TestCase):
         self.assertFalse(dcs.utils._nan_equal([1, 2, 3, 4], [1, 2, 3]))
         self.assertFalse(dcs.utils._nan_equal('text', 'good'))
         self.assertFalse(dcs.utils._nan_equal('text', 'longer'))
+        self.assertFalse(dcs.utils._nan_equal(0, None))
+
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    def test_tolerance(self) -> None:
+        a = np.array([1, 2.0000, np.nan])
+        b = np.array([1, 2.0001, np.nan])
+        self.assertFalse(dcs.utils._nan_equal(a, b))
+        self.assertTrue(dcs.utils._nan_equal(a, b, tolerance=0.01))
+        self.assertFalse(dcs.utils._nan_equal(a, b, tolerance=1e-12))
+
+    def test_bad_tolerance(self) -> None:
+        with patch('dstauffman.utils.HAVE_NUMPY', False):
+            with self.assertRaises(ValueError):
+                dcs.utils._nan_equal(0.01, 0.01, 1e-6)
 
 #%% find_in_range
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -547,6 +574,19 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertFalse(is_same3)
         self.assertEqual(output, '"c1" and "c2" are the same (subset).')
 
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    def test_tolerance(self) -> None:
+        self.c1.a = 0.00000001  # type: ignore[attr-defined]
+        self.c2.e['key1'] = 1 + 1e-8  # type: ignore[attr-defined]
+        is_same = dcs.compare_two_classes(self.c1, self.c2, tolerance=1e-4, suppress_output=True)
+        self.assertFalse(is_same)
+        delattr(self.c1, 'b')
+        delattr(self.c1, 'c')
+        delattr(self.c2, 'b')
+        delattr(self.c2, 'd')
+        is_same = dcs.compare_two_classes(self.c1, self.c2, tolerance=1e-4, suppress_output=True)
+        self.assertTrue(is_same)
+
 #%% compare_two_dicts
 class Test_compare_two_dicts(unittest.TestCase):
     r"""
@@ -607,6 +647,15 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertEqual(len(lines), 2)
         self.assertEqual(lines[0], '"d1[\'e\']" and "d2[\'e\']" are the same (subset).')
         self.assertEqual(lines[1], '"d1" and "d2" are the same (subset).')
+
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    def test_tolerance(self):
+        self.d1['a'] = 1.00000000001
+        self.d1['d'] = self.d2['d']
+        self.d2['c'] = self.d1['c']
+        self.d2['e']['key1'] = 0.999999999998
+        is_same = dcs.compare_two_dicts(self.d1, self.d2, tolerance=0.0001, suppress_output=True)
+        self.assertTrue(is_same)
 
 #%% read_text_file
 class Test_read_text_file(unittest.TestCase):
