@@ -503,7 +503,7 @@ class Counter(Frozen):
     def __iadd__(self, other: _C) -> Counter:  # type: ignore[misc]
         if isinstance(other, Counter):
             self._val += other._val
-        if isinstance(other, int):
+        elif isinstance(other, int):
             self._val += other
         else:
             return NotImplemented
