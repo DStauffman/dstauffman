@@ -41,7 +41,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True, \
         legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None, \
-        data_as_rows=True, tolerance=0, return_err=False, use_zoh=False):
+        data_as_rows=True, tolerance=0, return_err=False, use_zoh=False, vert_fact='micro'):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
@@ -104,6 +104,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         Whether the function should return the error differences in addition to the figure handles
     use_zoh : bool, optional, default is False
         Whether to plot as a zero-order hold, instead of linear interpolation between data points
+    vert_fact : str, optional, default is micro
+        Second scaling to apply to the vertical axis
 
     Returns
     -------
@@ -157,13 +159,15 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> tolerance       = 0
     >>> return_err      = False
     >>> use_zoh         = False
+    >>> vert_fact       = 'micro'
     >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
     ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
     ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, truth_data=truth_data, \
-    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, use_zoh=use_zoh)
+    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
+    ...     vert_fact=vert_fact)
 
     Close plots
     >>> for fig in fig_hand:
@@ -237,7 +241,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         # output errors
         err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
     # unit conversion value
-    (temp, prefix) = get_factors('micro')
+    (temp, prefix) = get_factors(vert_fact)
     leg_conv = 1/temp
     # determine which symbols to plot with
     if have_both:
@@ -385,6 +389,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             this_axes.set_title(description + ' Difference')
         if is_datetime(time_one) or is_datetime(time_two):
             this_axes.set_xlabel('Date')
+            assert time_units in {'datetime', 'numpy'}, 'Mismatch in the expected time units.'
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if is_diff_plot:
@@ -451,7 +456,6 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     >>> opts = Opts()
     >>> opts.case_name = 'test_plot'
-    >>> opts.vert_fact = 'micro'
     >>> opts.quat_comp = True
     >>> opts.sub_plots = True
 
@@ -478,8 +482,18 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     name_one = kwargs.pop('name_one', kf1.name)
     name_two = kwargs.pop('name_two', kf2.name)
 
+    # determine if converting units
+    is_date_1 = is_datetime(kf1.time)
+    is_date_2 = is_datetime(kf2.time)
+    is_date_o = opts.time_unit in {'numpy', 'datetime'}
+
     # make local copy of opts that can be modified without changing the original
     this_opts = opts.__class__(opts)
+    # allow opts to convert as necessary
+    if is_date_1 or is_date_2 and not is_date_o:
+        this_opts.convert_dates('numpy', old_form=opts.time_base)
+    elif is_date_o and not is_date_1 and not is_date_2:
+        this_opts.convert_dates('sec', old_form=opts.time_base)
     # opts overrides
     this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
 
@@ -601,8 +615,18 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     if fields is None:
         fields = {'pos': 'Position'}
 
+    # determine if converting units
+    is_date_1 = is_datetime(kf1.time)
+    is_date_2 = is_datetime(kf2.time)
+    is_date_o = opts.time_unit in {'numpy', 'datetime'}
+
     # make local copy of opts that can be modified without changing the original
     this_opts = opts.__class__(opts)
+    # allow opts to convert as necessary
+    if is_date_1 or is_date_2 and not is_date_o:
+        this_opts.convert_dates('numpy', old_form=opts.time_base)
+    elif is_date_o and not is_date_1 and not is_date_2:
+        this_opts.convert_dates('sec', old_form=opts.time_base)
     # opts overrides
     this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
 
@@ -734,7 +758,6 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
 
     >>> opts = Opts()
     >>> opts.case_name = 'test_plot'
-    >>> opts.vert_fact = 'micro'
     >>> opts.sub_plots = True
 
     >>> fig_hand = plot_innovations(kf1, kf2, opts=opts)
@@ -768,8 +791,18 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     (fact, name)  = get_factors(leg_scale)
     second_yscale = kwargs.pop('second_yscale', {name + units: 1/fact})
 
+    # determine if converting units
+    is_date_1 = is_datetime(kf1.time)
+    is_date_2 = is_datetime(kf2.time)
+    is_date_o = opts.time_unit in {'numpy', 'datetime'}
+
     # make local copy of opts that can be modified without changing the original
     this_opts = opts.__class__(opts)
+    # allow opts to convert as necessary
+    if is_date_1 or is_date_2 and not is_date_o:
+        this_opts.convert_dates('numpy', old_form=opts.time_base)
+    elif is_date_o and not is_date_1 and not is_date_2:
+        this_opts.convert_dates('sec', old_form=opts.time_base)
     # opts overrides
     this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
 
@@ -938,8 +971,18 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     if groups is None:
         groups = [i for i in range(num_chan)]
 
+    # determine if converting units
+    is_date_1 = is_datetime(kf1.time)
+    is_date_2 = is_datetime(kf2.time)
+    is_date_o = opts.time_unit in {'numpy', 'datetime'}
+
     # make local copy of opts that can be modified without changing the original
     this_opts = opts.__class__(opts)
+    # allow opts to convert as necessary
+    if is_date_1 or is_date_2 and not is_date_o:
+        this_opts.convert_dates('numpy', old_form=opts.time_base)
+    elif is_date_o and not is_date_1 and not is_date_2:
+        this_opts.convert_dates('sec', old_form=opts.time_base)
     # opts overrides
     this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
 

@@ -862,7 +862,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             this_axes.set_title(description + ' Difference')
         if is_datetime(time_one) or is_datetime(time_two):
             this_axes.set_xlabel('Date')
-            assert time_units == 'datetime', f'Expected time units of "datetime", not "{time_units}".'
+            assert time_units in {'datetime', 'numpy'}, f'Expected time units of "datetime" on "numpy", not "{time_units}".'
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if ylabel is None:
