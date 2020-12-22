@@ -37,11 +37,12 @@ _TRUTH_COLOR = 'k'
 
 #%% Functions - make_quaternion_plot
 def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *, \
-        name_one='', name_two='', time_units='sec', start_date='', plot_components=True, \
-        rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
+        name_one='', name_two='', time_units='sec', leg_scale='micro', start_date='', \
+        plot_components=True, rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True, \
-        legend_loc='best', show_extra=True, truth_name='Truth', truth_time=None, truth_data=None, \
-        data_as_rows=True, tolerance=0, return_err=False, use_zoh=False, vert_fact='micro'):
+        legend_loc='best', show_extra=True, second_yscale=None, truth_name='Truth', \
+        truth_time=None, truth_data=None, data_as_rows=True, tolerance=0, return_err=False, \
+        use_zoh=False):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
@@ -64,6 +65,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         name of data source 2
     time_units : str, optional
         time units, defaults to 'sec'
+    leg_scale : str, optional
+        factor to use when scaling the value in the legend, default is 'unity'
     start_date : str, optional
         date of t(0), may be an empty string
     plot_components : bool, optional
@@ -90,6 +93,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         location to put the legend, default is 'best'
     show_extra : bool, optional
         whether to show missing data on difference plots
+    second_yscale : dict, optional
+        single key and value pair to use for scaling data to a second Y axis
     truth_name : str, optional
         name to associate with truth data, default is 'Truth'
     truth_time : ndarray, optional
@@ -104,8 +109,6 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         Whether the function should return the error differences in addition to the figure handles
     use_zoh : bool, optional, default is False
         Whether to plot as a zero-order hold, instead of linear interpolation between data points
-    vert_fact : str, optional, default is micro
-        Second scaling to apply to the vertical axis
 
     Returns
     -------
@@ -139,6 +142,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> name_one        = 'test1'
     >>> name_two        = 'test2'
     >>> time_units      = 'sec'
+    >>> leg_scale       = 'unity'
     >>> start_date      = str(datetime.now())
     >>> plot_components = True
     >>> rms_xmin        = 1
@@ -152,6 +156,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> show_rms        = True
     >>> legend_loc      = 'best'
     >>> show_extra      = True
+    >>> second_yscale   = {u'µrad': 1e6}
     >>> truth_name      = 'Truth'
     >>> truth_time      = None
     >>> truth_data      = None
@@ -159,15 +164,14 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> tolerance       = 0
     >>> return_err      = False
     >>> use_zoh         = False
-    >>> vert_fact       = 'micro'
     >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
-    ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
-    ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-    ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
-    ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-    ...     show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, truth_data=truth_data, \
-    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
-    ...     vert_fact=vert_fact)
+    ...     name_one=name_one, name_two=name_two, time_units=time_units, leg_scale=leg_scale, \
+    ...     start_date=start_date, plot_components=plot_components, rms_xmin=rms_xmin, \
+    ...     rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, make_subplots=make_subplots, \
+    ...     single_lines=single_lines, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
+    ...     legend_loc=legend_loc, show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, \
+    ...     truth_data=truth_data, data_as_rows=data_as_rows, tolerance=tolerance, \
+    ...     return_err=return_err, use_zoh=use_zoh)
 
     Close plots
     >>> for fig in fig_hand:
@@ -241,7 +245,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         # output errors
         err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
     # unit conversion value
-    (temp, prefix) = get_factors(vert_fact)
+    (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
     # determine which symbols to plot with
     if have_both:
@@ -394,7 +398,11 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if is_diff_plot:
             this_axes.set_ylabel('Difference [rad]')
-            plot_second_units_wrapper(this_axes, {prefix+'rad': leg_conv})
+            # optionally add second Y axis
+            if second_yscale is not None:
+                plot_second_units_wrapper(this_axes, second_yscale)
+            else:
+                plot_second_units_wrapper(this_axes, {prefix+'rad': leg_conv})
         else:
             this_axes.set_ylabel('Quaternion Components [dimensionless]')
         this_axes.grid(True)
@@ -512,6 +520,11 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
+    # hard-coded defaults
+    leg_scale      = kwargs.pop('leg_scale', 'micro')
+    (fact, prefix) = get_factors(leg_scale)
+    second_yscale  = kwargs.pop('second_yscale', {prefix + 'rad': 1/fact})
+
     # initialize outputs
     figs    = []
     err     = dict()
@@ -529,7 +542,8 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, plot_components=plot_comps, single_lines=single_lines, \
             use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-            truth_name=truth.name, truth_time=truth.time, truth_data=truth.att, return_err=return_err, **kwargs)
+            leg_scale=leg_scale, second_yscale=second_yscale, truth_name=truth.name, \
+            truth_time=truth.time, truth_data=truth.att, return_err=return_err, **kwargs)
         if return_err:
             figs += out[0]
             err[field] = out[1]
@@ -835,7 +849,11 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         # make plots
         if 'Normalized' in sub_description:
             units = u'σ'
-            second_yscale=None
+            this_leg_scale = 'unity'
+            this_second_yscale = None
+        else:
+            this_leg_scale = leg_scale
+            this_second_yscale = second_yscale
         field_one = getattr(kf1, field)
         field_two = getattr(kf2, field)
         if field_one is not None and show_one is not None:
@@ -854,7 +872,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
             name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
             start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
-            legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=return_err, **kwargs)
+            legend_loc=legend_loc, leg_scale=this_leg_scale, second_yscale=this_second_yscale, return_err=return_err, **kwargs)
         if return_err:
             figs += out[0]
             err[field] = out[1]
@@ -866,13 +884,13 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
                 name=name_one, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
                 start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                 use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_plots=single_plots, \
-                legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, ylabel=this_ylabel, **kwargs)
+                legend_loc=legend_loc, leg_scale=this_leg_scale, second_yscale=this_second_yscale, ylabel=this_ylabel, **kwargs)
         if plot_by_status and field_two is not None and kf2.status is not None:
             figs += make_categories_plot(description+sub_description+' by Category', kf2.time, field_two, kf2.status, \
                 name=name_two, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
                 start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                 use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_plots=single_plots, \
-                legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, ylabel=this_ylabel, **kwargs)
+                legend_loc=legend_loc, leg_scale=this_leg_scale, second_yscale=this_second_yscale, ylabel=this_ylabel, **kwargs)
     # Setup plots
     setup_plots(figs, opts)
     if printed:

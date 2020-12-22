@@ -7,8 +7,18 @@ import datetime
 import numpy as np
 
 from dstauffman import convert_date
-from dstauffman.plotting import Opts, plot_attitude, plot_position, plot_innovations, plot_covariance
+from dstauffman.plotting import Opts, plot_attitude, plot_position, plot_innovations, plot_covariance, \
+    plot_los, plot_states
 from dstauffman.aerospace import Kf, KfInnov, quat_from_euler, quat_mult, quat_norm
+
+#%% Flags
+plots = {}
+plots['att'] = True
+plots['pos'] = False
+plots['inn'] = False
+plots['cov'] = False
+plots['los'] = False
+plots['sts'] = False
 
 #%% Initializations
 q1 = quat_norm(np.array([0.1, -0.2, 0.3, 0.4]))
@@ -57,13 +67,22 @@ kf2.innov.innov = kf1.innov.innov[:, ix] + 1e-8 * np.random.rand(num_axes, ix.si
 kf2.innov.norm  = kf1.innov.norm[:, ix] + 0.1 * np.random.rand(num_axes, ix.size)
 
 #%% Opts
-opts = Opts()
-opts.case_name = 'test_plot'
-opts.quat_comp = True
-opts.sub_plots = True
-opts.date_zero = date_zero
-opts.rms_xmin  = 4
-opts.rms_xmax  = 20
+opts1 = Opts()
+opts1.case_name = 'Test 1: sec-sec'
+opts1.quat_comp = True
+opts1.sub_plots = True
+opts1.date_zero = date_zero
+opts1.rms_xmin  = 4
+opts1.rms_xmax  = 20
+
+opts2 = Opts(opts1).convert_dates('numpy')
+opts2.case_name = 'Test 2: dates-sec'
+
+opts3 = Opts(opts1)
+opts3.case_name = 'Test 3: sec-dates'
+
+opts4 = Opts(opts2)
+opts4.case_name = 'Test 4: dates-dates'
 
 #%% Copies
 kd1 = deepcopy(kf1)
@@ -72,28 +91,33 @@ kd1.innov.time = convert_date(kf1.innov.time, 'numpy', date_zero=date_zero)
 kd2 = deepcopy(kf2)
 kd2.time = convert_date(kf2.time, 'numpy', date_zero=date_zero)
 kd2.innov.time = convert_date(kf2.innov.time, 'numpy', date_zero=date_zero)
-opts2 = Opts(opts).convert_dates('numpy')
 
 #%% Plots
-f1 = plot_attitude(kf1, kf2, opts=opts)
-f2 = plot_attitude(kd1, kd2, opts=opts2)
-f3 = plot_attitude(kf1, kf2, opts=opts2, vert_fact='milli')
-f4 = plot_attitude(kd1, kd2, opts=opts, vert_fact='milli')
+if plots['att']:
+    f1 = plot_attitude(kf1, kf2, opts=opts1)
+    f2 = plot_attitude(kd1, kd2, opts=opts2, second_yscale={'mrad': 1e3})
+    f3 = plot_attitude(kf1, kf2, opts=opts3, leg_scale='milli')
+    f4 = plot_attitude(kd1, kd2, opts=opts4, leg_scale='milli', second_yscale={'nrad': 1e9})
 
-# f1 = plot_position(kf1, kf2, opts=opts)
-# f2 = plot_position(kd1, kd2, opts=opts2)
-# f3 = plot_position(kf1, kf2, opts=opts2, vert_fact='milli')
-# f4 = plot_position(kd1, kd2, opts=opts, vert_fact='milli')
+if plots['pos']:
+    f1 = plot_position(kf1, kf2, opts=opts1)
+    f2 = plot_position(kd1, kd2, opts=opts2, second_yscale={'Mm': 1e-6})
+    f3 = plot_position(kf1, kf2, opts=opts3, leg_scale='mega')
+    f4 = plot_position(kd1, kd2, opts=opts4, leg_scale='milli', second_yscale={'Mm': 1e-6})
 
-# f1 = plot_innovations(kf1.innov, kf2.innov, opts=opts)
-# f2 = plot_innovations(kd1.innov, kd2.innov, opts=opts2)
-# f3 = plot_innovations(kf1.innov, kf2.innov, opts=opts2, vert_fact='milli')
-# f4 = plot_innovations(kd1.innov, kd2.innov, opts=opts, vert_fact='milli')
+if plots['inn']:
+    f1 = plot_innovations(kf1.innov, kf2.innov, opts=opts1)
+    f2 = plot_innovations(kd1.innov, kd2.innov, opts=opts2, second_yscale={'mm': 1e3})
+    f3 = plot_innovations(kf1.innov, kf2.innov, opts=opts3, leg_scale='milli')
+    f4 = plot_innovations(kd1.innov, kd2.innov, opts=opts4, leg_scale='milli', second_yscale={'nm': 1e9})
 
-# f1 = plot_covariance(kf1, kf2, opts=opts)
-# f2 = plot_covariance(kd1, kd2, opts=opts2)
-# f3 = plot_covariance(kf1, kf2, opts=opts2, vert_fact='milli')
-# f4 = plot_covariance(kd1, kd2, opts=opts, vert_fact='milli')
+if plots['cov']:
+    f1 = plot_covariance(kf1, kf2, opts=opts1)
+    f2 = plot_covariance(kd1, kd2, opts=opts2, second_yscale={'mrad': 1e3})
+    f3 = plot_covariance(kf1, kf2, opts=opts3, leg_scale='milli')
+    f4 = plot_covariance(kd1, kd2, opts=opts4, leg_scale='milli', second_yscale={'nrad': 1e9})
 
-# f = plot_los(kf1, kf2, opts=opts2, vert_fact='milli')
-# f = plot_states(kd1, kd2, opts=opts, vert_fact='milli')
+if plots['los']:
+    f = plot_los(kf1, kf2, opts=opts2, leg_scale='milli', second_yscale={'nrad': 1e9})
+if plots['sts']:
+    f = plot_states(kd1, kd2, opts=opts1, leg_scale='milli', second_yscale={'nrad': 1e9})

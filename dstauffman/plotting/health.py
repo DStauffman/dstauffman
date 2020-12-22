@@ -134,7 +134,8 @@ class TruthPlotter(Frozen):
 
 #%% Functions - plot_health_time_history
 def plot_health_time_history(time, data, label, units='', opts=None, *, legend=None, \
-        second_yscale=None, ignore_empties=False, data_lo=None, data_hi=None, colormap=None):
+        leg_scale='unity', second_yscale=None, ignore_empties=False, data_lo=None, data_hi=None, \
+        colormap=None):
     r"""
     Plot multiple metrics over time.
 
@@ -153,6 +154,8 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
         plotting options
     legend : list of str, optional
         Names to use for each channel of data
+    leg_scale : str, optional
+        factor to use when scaling the value in the legend, default is 'unity'
     second_yscale : float or dict, optional
         Multiplication scale factor to use to display on a secondary Y axis
     ignore_empties : bool, optional
@@ -205,7 +208,7 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
     show_zero  = opts.show_zero
     time_units = opts.time_base
     unit_text  = ' [' + units + ']' if units else ''
-    (scale, prefix) = get_factors(opts.vert_fact)
+    (scale, prefix) = get_factors(leg_scale)
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
@@ -297,7 +300,7 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
 
 #%% Functions - plot_health_monte_carlo
 def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True, \
-    truth=None, plot_as_diffs=False, second_yscale=None, plot_sigmas=1, \
+    truth=None, plot_as_diffs=False, leg_scale='unity', second_yscale=None, plot_sigmas=1, \
     plot_confidence=0, colormap=None):
     r"""
     Plot the given data channel versus time, with a generic label argument.
@@ -320,6 +323,8 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
         Truth instance for adding to the plot
     plot_as_diffs : bool, optional, default is False
         Plot each entry in results against the other ones, default is False
+    leg_scale : str, optional
+        factor to use when scaling the value in the legend, default is 'unity'
     second_yscale : float or dict, optional
         Multiplication scale factor to use to display on a secondary Y axis
     plot_sigmas : numeric, optional
@@ -376,7 +381,7 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
     time_units    = opts.time_base
     show_legend   = rms_in_legend or plot_as_diffs or (truth is not None and not truth.is_null)
     unit_text     = ' [' + units + ']' if units else ''
-    (scale, prefix) = get_factors(opts.vert_fact)
+    (scale, prefix) = get_factors(leg_scale)
 
     # ensure that data is at least 2D
     if data.ndim == 0:

@@ -85,10 +85,6 @@ class Opts(Frozen):
                 Base units of time, typically from {'sec', 'months'}
             .time_unit : str
                 Time unit for the x axis, from {'', 'sec', 'min', 'hr', 'day', 'month', 'year'}
-            .vert_fact : str
-                Vertical factor to apply to the Y axis,
-                from: {'yotta','zetta','exa','peta','tera','giga','mega','kilo','hecto','deca',
-                'unity','deci','centi','milli', 'micro','nano','pico','femto','atto','zepto','yocto'}
             .colormap  : str
                 Name of the colormap to use
             .leg_spot  : str
@@ -120,7 +116,6 @@ class Opts(Frozen):
         self.show_xtra: bool  = True
         self.time_base: str   = 'sec'
         self.time_unit: str   = 'sec'
-        self.vert_fact: str   = 'unity'
         self.colormap: str    = None
         self.leg_spot: str    = 'best'
         self.classify: str    = ''
@@ -357,7 +352,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
 #%% Functions - plot_correlation_matrix
 def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_name='Correlation Matrix', \
         cmin=0, cmax=1, xlabel='', ylabel='', plot_lower_only=True, label_values=False, x_lab_rot=90, \
-        colormap=None, plot_border=None):
+        colormap=None, plot_border=None, leg_scale='unity'):
     r"""
     Visually plot a correlation matrix.
 
@@ -391,6 +386,8 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
         Name of colormap to use, if specified, overrides the opts.colormap
     plot_border : str, optional
         Color of the border to plot
+    leg_scale : str, optional
+        factor to use when scaling the value in the legend, default is 'unity'
 
     Returns
     -------
@@ -424,7 +421,7 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
             colormap = 'cool'
         else:
             colormap = opts.colormap
-    (scale, prefix) = get_factors(opts.vert_fact)
+    (scale, prefix) = get_factors(leg_scale)
 
     # Hard-coded values
     box_size        = 1
