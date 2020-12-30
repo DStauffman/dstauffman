@@ -11,6 +11,7 @@ from __future__ import annotations
 import doctest
 import functools
 import math
+import sys
 import unittest
 
 try:
@@ -39,6 +40,14 @@ except ModuleNotFoundError:
         return func
 
     float64 = lambda x, y: None
+
+#%% Constants
+assert sys.version_info.major == 3, 'Must be Python 3'
+assert sys.version_info.minor >= 8, 'Must be Python v3.8 or higher'
+if sys.version_info.minor > 8:
+    _TARGET = 'parallel'
+else:
+    _TARGET = 'cpu'
 
 #%% np_any
 @njit(cache=True)
@@ -151,7 +160,7 @@ def issorted_opt(x, /, descend=False):
     return True
 
 #%% Functions - prob_to_rate_opt
-@vectorize([float64(float64, float64)], nopython=True, target='parallel', cache=True)  # TODO: can't use optional argument?
+@vectorize([float64(float64, float64)], nopython=True, target=_TARGET, cache=True)  # TODO: can't use optional argument?
 def prob_to_rate_opt(prob, time):
     r"""
     Convert a given probability and time to a rate.
@@ -197,7 +206,7 @@ def prob_to_rate_opt(prob, time):
     return -math.log(1 - prob) / time
 
 #%% Functions - rate_to_prob_opt
-@vectorize([float64(float64, float64)], nopython=True, target='parallel', cache=True)  # TODO: can't use optional argument?
+@vectorize([float64(float64, float64)], nopython=True, target=_TARGET, cache=True)  # TODO: can't use optional argument?
 def rate_to_prob_opt(rate, time):
     r"""
     Convert a given rate and time to a probability.
