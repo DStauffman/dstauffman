@@ -21,7 +21,7 @@ from dstauffman.logs import activate_logging
 
 #%% Globals
 logger = logging.getLogger(__name__)
-_VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'make_init', 'tests'})
+_VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'make_init', 'tests', 'version'})
 
 @dataclass(frozen=True)
 class _Flags(object):
@@ -57,6 +57,8 @@ def parse_wrapper(args: List[str]) -> Tuple[str, argparse.Namespace]:
     # check for alternative forms of help with the base dcs command
     if command in {'--help', '-h'}:
         command = 'help'
+    elif command in {'--version', '-v'}:
+        command = 'version'
     # pass the command and remaining arguments to the command parser
     parsed_args = parse_commands(command, args[1:])
     return (command, parsed_args)

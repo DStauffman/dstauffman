@@ -1,5 +1,5 @@
 r"""
-Functions related to `help` command.
+Functions related to `help` and `version` commands.
 
 Notes
 -----
@@ -9,6 +9,7 @@ Notes
 #%% Imports
 import argparse
 import doctest
+from importlib import metadata
 import os
 from typing import List
 import unittest
@@ -40,6 +41,30 @@ def print_help() -> int:
     print(text)
     return ReturnCodes.clean
 
+#%% Functions - print_version
+def print_version() -> int:
+    r"""Prints the version of the library.
+
+    Returns
+    -------
+    return_code : int
+        Return code for whether the version was successfully read
+
+    Examples
+    --------
+    >>> from dstauffman.commands import print_version
+    >>> print_version()  # doctest: +SKIP
+
+    """
+    try:
+        version = metadata.version('dstauffman')
+        return_code = ReturnCodes.clean
+    except:
+        version = 'unknown'
+        return_code = ReturnCodes.bad_version
+    print(version)
+    return return_code
+
 #%% Functions - parse_help
 def parse_help(input_args: List[str]) -> argparse.Namespace:
     r"""
@@ -69,6 +94,35 @@ def parse_help(input_args: List[str]) -> argparse.Namespace:
     args = parser.parse_args(input_args)
     return args
 
+#%% Functions - parse_version
+def parse_version(input_args: List[str]) -> argparse.Namespace:
+    r"""
+    Parser for version command.
+
+    Parameters
+    ----------
+    input_args : list of str
+        Input arguments as passed to sys.argv for this command
+
+    Returns
+    -------
+    args : class Namespace
+        Arguments as parsed by argparse.parse_args
+
+    Examples
+    --------
+    >>> from dstauffman.commands import parse_version
+    >>> input_args = []
+    >>> args = parse_version(input_args)
+    >>> print(args)
+    Namespace()
+
+    """
+    parser = argparse.ArgumentParser(prog='dcs version')
+
+    args = parser.parse_args(input_args)
+    return args
+
 #%% Functions - execute_help
 def execute_help(args: argparse.Namespace) -> int:
     r"""
@@ -92,6 +146,31 @@ def execute_help(args: argparse.Namespace) -> int:
 
     """
     return_code = print_help()
+    return return_code
+
+#%% Functions - execute_version
+def execute_version(args: argparse.Namespace) -> int:
+    r"""
+    Executes the version command.
+
+    Parameters
+    ----------
+    args : class Namespace
+        Arguments as parsed by argparse.parse_args, in this case they can be empty or ommitted
+
+    Returns
+    -------
+    return_code : int
+        Return code for whether the command completed successfully
+
+    Examples
+    --------
+    >>> from dstauffman.commands import execute_version
+    >>> args = []
+    >>> execute_version(args) # doctest: +SKIP
+
+    """
+    return_code = print_version()
     return return_code
 
 #%% Unit test

@@ -13,17 +13,28 @@ import os
 
 from setuptools import setup
 
-#%% Support functions
+#%% Support functions - readme
 def readme():
     r"""Opens the README.rst file for additional descriptions."""
     filename = os.path.join(os.path.dirname(__file__), 'README.rst')
     with open(filename) as file:
         return file.read()
 
+#%% Support functions - get_version
+def get_version():
+    r"""Reads the version information from the library."""
+    filename = os.path.join(os.path.dirname(__file__), 'dstauffman', 'version.py')
+    with open(filename) as file:
+        text = file.read()
+    for line in text.splitlines():
+        if line.startswith('version_info = '):
+            return line.split('(')[1].split(')')[0].replace(', ', '.')
+    raise RuntimeError('Unable to load version information.')
+
 #%% Setup
 setup(
     name='dstauffman',
-    version='2.1',
+    version=get_version(),
     description='Generic python utilities for aerospace and health policy applications',
     long_description=readme(),
     keywords='dstauffman numerical analysis plotting quaternions statistics batch estimation',
