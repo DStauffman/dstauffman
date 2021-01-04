@@ -9,12 +9,11 @@ Notes
 #%% Imports
 import argparse
 import doctest
-from importlib import metadata
 import os
 from typing import List
 import unittest
 
-from dstauffman import get_root_dir, ReturnCodes
+from dstauffman import get_root_dir, ReturnCodes, version_info
 
 #%% Functions - print_help
 def print_help() -> int:
@@ -57,7 +56,7 @@ def print_version() -> int:
 
     """
     try:
-        version = metadata.version('dstauffman')
+        version = '.'.join(str(x) for x in version_info)
         return_code = ReturnCodes.clean
     except:
         version = 'unknown'

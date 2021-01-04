@@ -1,5 +1,5 @@
 r"""
-Functions related to processing photos from my digital camera.
+Functions related to version history.
 
 Notes
 -----

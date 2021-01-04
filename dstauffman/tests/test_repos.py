@@ -298,6 +298,7 @@ class Test_make_python_init(unittest.TestCase):
         self.text     = 'from .enums import'
         self.text2    = 'from .enums     import IntEnumPlus'
         self.text3    = 'from .temp_file                import Test_Frozen'
+        self.text4    = 'from .temp_file                 import Test_Frozen'
         self.line_num = 5
         self.folder2  = dcs.get_tests_dir()
         self.filepath = os.path.join(self.folder2, 'temp_file.py')
@@ -315,7 +316,7 @@ class Test_make_python_init(unittest.TestCase):
             text = dcs.make_python_init(self.folder2)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(text[0:len(self.text3)], self.text3)
+        self.assertTrue(text.startswith(self.text3) or text.startswith(self.text4))
         self.assertTrue(output.startswith('Uniqueness Problem'))
 
     def test_no_lineup(self) -> None:
