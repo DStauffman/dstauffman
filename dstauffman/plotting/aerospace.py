@@ -220,9 +220,9 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     # build RMS indices
     ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)
     # get default plotting colors
-    color_lists = get_color_lists()
-    colororder3 = ColorMap(color_lists['vec'], num_colors=3)
-    colororder8 = ColorMap(color_lists['quat_diff'], num_colors=8)
+    color_lists = get_color_lists(return_as_colormap=True)
+    colororder3 = color_lists['vec']
+    colororder8 = color_lists['quat_diff']
     # quaternion component names
     elements = ['X', 'Y', 'Z', 'S']
     num_channels = len(elements)

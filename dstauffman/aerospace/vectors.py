@@ -10,12 +10,23 @@ Notes
 import doctest
 import unittest
 
-from dstauffman import HAVE_NUMPY, unit
+from dstauffman import HAVE_NUMBA, HAVE_NUMPY, unit
+
+if HAVE_NUMBA:
+    from numba import njit
+else:
+    from dstauffman.numba import fake_decorator
+
+    @fake_decorator
+    def njit(func, *args, **kwargs):
+        r"""Fake njit decorator for when numba isn't installed."""
+        return func
 
 if HAVE_NUMPY:
     import numpy as np
 
 #%% Functions - rot
+@njit(cache=True)
 def rot(axis, angle):
     r"""
     Direction cosine matrix for rotation about a single axis.
@@ -62,16 +73,18 @@ def rot(axis, angle):
 
     # build direction cosine matrix
     if axis == 1:
-        dcm = np.array([[1., 0., 0.], [0., ca, sa], [0., -sa, ca]], dtype=float)
+        dcm = np.array([[1., 0., 0.], [0., ca, sa], [0., -sa, ca]])
     elif axis == 2:
-        dcm = np.array([[ca, 0., -sa], [0., 1., 0.], [sa, 0., ca]], dtype=float)
+        dcm = np.array([[ca, 0., -sa], [0., 1., 0.], [sa, 0., ca]])
     elif axis == 3:
-        dcm = np.array([[ca, sa, 0.], [-sa, ca, 0.], [0., 0., 1.]], dtype=float)
+        dcm = np.array([[ca, sa, 0.], [-sa, ca, 0.], [0., 0., 1.]])
     else:
-        raise ValueError('Unexpected value for axis of: "{}".'.format(axis))
+        # Axis value not listed, so it can compile in nopython mode
+        raise ValueError('Unexpected value for axis.')
     return dcm
 
 #%% Functions - drot
+@njit(cache=True)
 def drot(axis, angle):
     r"""
     Derivative of transformation matrix for rotation about a single axis.
@@ -96,7 +109,7 @@ def drot(axis, angle):
 
     Notes
     -----
-    1.  Incorporated by David C. Stauffer into lmspace in December 2020 based on Matlab version.
+    1.  Incorporated by David C. Stauffer into dstauffman in December 2020 based on Matlab version.
 
     Examples
     --------
@@ -118,16 +131,17 @@ def drot(axis, angle):
 
     # build direction cosine matrix
     if axis == 1:
-        trans = np.array([[0., 0., 0.], [0., -sa, ca], [0., -ca, -sa]], dtype=float)
+        trans = np.array([[0., 0., 0.], [0., -sa, ca], [0., -ca, -sa]])
     elif axis == 2:
-        trans = np.array([[-sa, 0., -ca], [0., 0., 0.], [ca, 0., -sa]], dtype=float)
+        trans = np.array([[-sa, 0., -ca], [0., 0., 0.], [ca, 0., -sa]])
     elif axis == 3:
-        trans = np.array([[-sa, ca, 0.], [-ca, -sa, 0.], [0., 0., 0.]], dtype=float)
+        trans = np.array([[-sa, ca, 0.], [-ca, -sa, 0.], [0., 0., 0.]])
     else:
-        raise ValueError('Unexpected value for axis of: "{}".'.format(axis))
+        raise ValueError('Unexpected value for axis.')
     return trans
 
 #%% Functions - vec_cross
+@njit(cache=True)
 def vec_cross(vec):
     r"""
     Returns the equivalent 3x3 matrix that would perform a cross product when multiplied.

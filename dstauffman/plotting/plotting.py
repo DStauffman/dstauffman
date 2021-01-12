@@ -16,7 +16,7 @@ from typing import List, Optional, Tuple, TypeVar, Union
 import unittest
 
 from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_factors, \
-    HAVE_MPL, HAVE_NUMPY, LogLevel
+    HAVE_MPL, HAVE_NUMPY, is_datetime, LogLevel
 
 from dstauffman.plotting.generic import make_time_plot
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, figmenu, get_classification, \
@@ -319,6 +319,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
         logger.log(LogLevel.L5, f' {description} plot skipped due to missing data.')
         return None
     assert time.ndim == 1, 'Time must be a 1D array.'
+    assert data.ndim < 3, 'Date must be 0D, 1D or 2D.'
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
@@ -513,7 +514,8 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
     return fig
 
 #%% Functions - plot_bar_breakdown
-def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empties=False, colormap=None):
+def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empties=False, \
+        colormap=None, time_units=None):
     r"""
     Plot the pie chart like breakdown by percentage in each category over time.
 
@@ -533,6 +535,9 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
         Removes any entries from the plot and legend that contain only zeros or only NaNs
     colormap : str or matplotlib.colors.Colormap, optional
         Name of colormap to use, if specified, overrides the opts.colormap
+    time_units : str, optional
+        If not none, specifies the time units for the time data, potentially different that what
+        is in opts
 
     Returns
     -------
@@ -568,7 +573,8 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
         else:
             colormap = opts.colormap
     legend_loc = opts.leg_spot
-    time_units = opts.time_base
+    if time_units is None:
+        time_units = opts.time_base
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
@@ -580,6 +586,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     scale      = 100
     units      = '%'
     unit_text  = ' [' + units + ']'
+    start_date = opts.get_date_zero_str()
 
     # data checks
     num_bins   = data.shape[1]
@@ -604,13 +611,17 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
             # fill_between is a better alternative
             ax.fill_between(time, scale*bottoms[:, i], scale*bottoms[:, i+1], step='mid', \
                 label=legend[i], color=cm.get_color(i), edgecolor='none')
-    ax.set_xlabel('Time [' + time_units + ']')
+    if is_datetime(time):
+        ax.set_xlabel('Date')
+        assert time_units in {'datetime', 'numpy'}, 'Mismatch in the expected time units of: "{}".'.format(time_units)
+    else:
+        ax.set_xlabel('Time [' + time_units + ']' + start_date)
+        # set years to always be whole numbers on the ticks
+        if (time[-1] - time[0]) >= 4:
+            ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
     ax.set_ylabel(label + unit_text)
     ax.set_ylim(0, 100)
     ax.grid(True)
-    # set years to always be whole numbers on the ticks
-    if (time[-1] - time[0]) >= 4:
-        ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
     ax.legend(loc=legend_loc)
     ax.set_title(this_title)
 

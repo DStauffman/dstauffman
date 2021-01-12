@@ -60,7 +60,7 @@ class Test_aerospace_rot(unittest.TestCase):
     def test_bad_axis(self) -> None:
         with self.assertRaises(ValueError) as context:
             space.rot(4, self.angle)
-        self.assertEqual(str(context.exception), 'Unexpected value for axis of: "4".')
+        self.assertEqual(str(context.exception), 'Unexpected value for axis.')
         with self.assertRaises(ValueError):
             space.rot(np.pi/2, 2)
 

@@ -343,7 +343,7 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
             if np.any(is_num):
                 datetime_units = get_np_time_units(numpy_form)
                 date_zero_np = np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)
-                if np.issubdtype(date.dtype, int):
+                if np.issubdtype(date.dtype, np.signedinteger):
                     out[is_num] = (date_zero_np + (date[is_num].astype(np.int64) * 10**9).astype('timedelta64[ns]')).astype(numpy_form)
                 else:
                     out[is_num] = (date_zero_np + np.round(date[is_num] * 1e9).astype('timedelta64[ns]')).astype(numpy_form)

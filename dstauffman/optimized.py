@@ -9,25 +9,17 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
-import functools
 import math
 import sys
+from typing import Sequence
 import unittest
 
-try:
+from dstauffman.constants import HAVE_NUMBA
+
+if HAVE_NUMBA:
     from numba import float64, njit, vectorize
-except ModuleNotFoundError:
-    # Support for when you don't have numba.  Presumably you either aren't using these functions,
-    # as they will be slow, or you are using pypy instead and it will run the JIT
-    # Go through a bunch of worthless closures to get the necessary stubs
-    def fake_decorator(func):
-        r"""Fake decorator for when numba isn't installed."""
-        @functools.wraps(func)
-        def wrapped_decorator(*args, **kwargs):
-            def real_decorator(func2):
-                return func(func2, *args, **kwargs)
-            return real_decorator
-        return wrapped_decorator
+else:
+    from dstauffman.constants import fake_decorator
 
     @fake_decorator
     def njit(func, *args, **kwargs):
@@ -51,7 +43,7 @@ else:
 
 #%% np_any
 @njit(cache=True)
-def np_any(x, /):
+def np_any(x: Sequence, /) -> bool:
     r"""
     Returns true if anything in the vector is true.
 
@@ -86,7 +78,7 @@ def np_any(x, /):
 
 #%% np_all
 @njit(cache=True)
-def np_all(x, /):
+def np_all(x: Sequence, /) -> bool:
     r"""
     Returns true if everything in the vector is true.
 
@@ -121,7 +113,7 @@ def np_all(x, /):
 
 #%% issorted_opt
 @njit(cache=True)
-def issorted_opt(x, /, descend=False):
+def issorted_opt(x: Sequence, /, descend: bool = False) -> bool:
     r"""
     Tells whether the given array is sorted or not.
 
@@ -161,7 +153,7 @@ def issorted_opt(x, /, descend=False):
 
 #%% Functions - prob_to_rate_opt
 @vectorize([float64(float64, float64)], nopython=True, target=_TARGET, cache=True)  # TODO: can't use optional argument?
-def prob_to_rate_opt(prob, time):
+def prob_to_rate_opt(prob: float, time: float) -> float:
     r"""
     Convert a given probability and time to a rate.
 
@@ -207,7 +199,7 @@ def prob_to_rate_opt(prob, time):
 
 #%% Functions - rate_to_prob_opt
 @vectorize([float64(float64, float64)], nopython=True, target=_TARGET, cache=True)  # TODO: can't use optional argument?
-def rate_to_prob_opt(rate, time):
+def rate_to_prob_opt(rate: float, time: float) -> float:
     r"""
     Convert a given rate and time to a probability.
 

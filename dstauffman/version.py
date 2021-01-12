@@ -7,4 +7,4 @@ Notes
 """
 
 #%% Constants
-version_info = (2, 1, 0)
+version_info = (2, 1, 1)

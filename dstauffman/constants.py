@@ -7,30 +7,50 @@ Notes
 """
 
 #%% Imports
+import functools
 import logging
 import os
 import unittest
 import warnings
 
-HAVE_NUMPY: bool
 HAVE_H5PY: bool
+HAVE_NUMPY: bool
 
-# optional dependencies
+#%% Numba decorators
+try:
+    from numba import njit
+    assert njit  # not really used, but it silences the warnings
+    HAVE_NUMBA = True
+except ModuleNotFoundError:
+    # Support for when you don't have numba.  Presumably you either aren't using these functions,
+    # as they will be slow, or you are using pypy instead and it will run the JIT
+    # Go through a bunch of worthless closures to get the necessary stubs
+    HAVE_NUMBA = False
+    def fake_decorator(func):
+        r"""Fake decorator for when numba isn't installed."""
+        @functools.wraps(func)
+        def wrapped_decorator(*args, **kwargs):
+            def real_decorator(func2):
+                return func(func2, *args, **kwargs)
+            return real_decorator
+        return wrapped_decorator
+
+#%% Set flags for optional dependencies
 try:
     import coverage
-    assert coverage  # not really used, but it silences the warninngs
+    assert coverage  # not really used, but it silences the warnings
     HAVE_COVERAGE = True
 except ModuleNotFoundError:
     HAVE_COVERAGE = False
 try:
     import h5py
-    assert h5py  # not really used, but it silences the warninngs
+    assert h5py  # not really used, but it silences the warnings
     HAVE_H5PY = True
 except ModuleNotFoundError:
     HAVE_H5PY = False
 try:
     import matplotlib
-    assert matplotlib  # not really used, but it silences the warninngs
+    assert matplotlib  # not really used, but it silences the warnings
     HAVE_MPL = True
 except ModuleNotFoundError:
     HAVE_MPL = False

@@ -20,14 +20,16 @@ Notes
 from .classes   import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, load_method, \
                            pprint_dict, chop_time, subsample_class, Frozen, SaveAndLoad, \
                            SaveAndLoadPickle, Counter, FixedDict
-from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_NUMPY, HAVE_PANDAS, HAVE_PYTEST, \
-                           HAVE_SCIPY, INT_TOKEN, IS_WINDOWS, NP_DATETIME_UNITS, NP_DATETIME_FORM, \
-                           NP_TIMEDELTA_FORM, NP_INT64_PER_SEC
+from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_NUMBA, HAVE_NUMPY, HAVE_PANDAS, \
+                           HAVE_PYTEST, HAVE_SCIPY, INT_TOKEN, IS_WINDOWS, NP_DATETIME_UNITS, \
+                           NP_DATETIME_FORM, NP_TIMEDELTA_FORM, NP_INT64_PER_SEC
 from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
 from .logs      import activate_logging, deactivate_logging, log_multiline
 from .matlab    import load_matlab
 from .multipass import MultipassExceptionWrapper, parfor_wrapper
+from .numba     import issorted_ascend, issorted_descend, np_all_axis0, np_all_axis1, \
+                           np_any_axis0, np_any_axis1
 from .optimized import np_any, np_all, issorted_opt, prob_to_rate_opt, rate_to_prob_opt
 from .parser    import main, parse_wrapper, parse_commands, execute_command, \
                            process_command_line_options

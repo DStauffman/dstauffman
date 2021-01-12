@@ -165,9 +165,10 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.description = 'Plot description'
         self.time        = np.arange(0, 10, 0.1) + 2000
         num_channels     = 5
-        self.data        = np.random.rand(len(self.time), num_channels)
-        mag              = np.sum(self.data, axis=1)
-        self.data        = 10 * self.data / np.expand_dims(mag, axis=1)
+        self.row_data    = np.random.rand(len(self.time), num_channels)
+        mag              = np.sum(self.row_data, axis=1)
+        self.row_data    = 10 * self.row_data / np.expand_dims(mag, axis=1)
+        self.col_data    = self.row_data.T.copy()
         self.units       = 'percentage'
         self.opts        = plot.Opts()
         self.opts.show_plot = False
@@ -176,95 +177,58 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.second_yscale = 1000000
 
     def test_nominal(self) -> None:
-        self.figs.append(plot.plot_time_history(self.description, self.time, self.data, \
+        self.figs.append(plot.plot_time_history(self.description, self.time, self.row_data, \
             opts=self.opts, data_as_rows=False))
 
-#    def test_defaults(self) -> None:
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label))
-#
-#    def test_with_units(self) -> None:
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, self.units))
-#
-#    def test_with_opts(self) -> None:
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, opts=self.opts))
-#
-#    def test_with_legend(self) -> None:
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, legend=self.legend))
-#
-#    @patch('dstauffman.plotting.plotting.logger')
-#    def test_no_data(self, mock_logger):
-#        plot.plot_time_history(self.time, None, '')
-#        self.assertEqual(mock_logger.log.call_count, 1)
-#        mock_logger.log.assert_called_with(LogLevel.L5, '  plot skipped due to missing data.')
-#
-#    def test_ignore_zeros(self) -> None:
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
-#
-#    def test_ignore_zeros2(self) -> None:
-#        self.data[:,1] = 0
-#        self.data[:,3] = 0
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, ignore_empties=True))
-#
-#    @patch('dstauffman.plotting.plotting.logger')
-#    def test_ignore_zeros3(self, mock_logger):
-#        self.data = np.zeros(self.data.shape)
-#        not_a_fig = plot.plot_time_history(self.time, self.data, label='All Zeros', ignore_empties=True)
-#        self.assertIs(not_a_fig, None)
-#        self.assertEqual(mock_logger.log.call_count, 1)
-#        mock_logger.log.assert_called_with(LogLevel.L5, 'All Zeros plot skipped due to missing data.')
-#
-#    def test_colormap(self) -> None:
-#        self.opts.colormap = 'Dark2'
-#        colormap = 'Paired'
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, \
-#            ignore_empties=True, colormap=colormap))
-#
-#    def test_bad_legend(self) -> None:
-#        with self.assertRaises(AssertionError):
-#            plot.plot_time_history(self.time, self.data, self.label, legend=self.legend[:-1])
-#
-#    def test_second_yscale1(self) -> None:
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, units='population', \
-#            second_yscale=self.second_yscale))
-#
-#    def test_second_yscale2(self) -> None:
-#        second_yscale = {'New ylabel [units]': 100}
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, \
-#            second_yscale=second_yscale))
-#
-#    def test_single_point(self) -> None:
-#        self.figs.append(plot.plot_time_history(self.time[1:], self.data[1:,:], self.label))
-#
-#    def test_show_zero(self) -> None:
-#        self.data += 1000
-#        self.opts.show_zero = True
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, opts=self.opts))
-#
-#    def test_data_lo_and_hi(self) -> None:
-#        self.figs.append(plot.plot_time_history(self.time, self.data, self.label, \
-#            data_lo=self.data-1, data_hi=self.data+1))
-#
-#    def test_not_ndarray(self) -> None:
-#        self.figs.append(plot.plot_time_history(0, 0, 'Zero'))
-#
-#    def test_0d(self) -> None:
-#        self.figs.append(plot.plot_time_history(np.array(0), np.array(0), 'Zero'))
-#
-#    def test_1d(self) -> None:
-#        self.figs.append(plot.plot_time_history(np.arange(5), np.arange(5), 'Line'))
-#
-#    def test_3d(self) -> None:
-#        data3 = np.empty((self.data.shape[0], 3, self.data.shape[1]), dtype=float)
-#        data3[:,0,:] = self.data
-#        data3[:,1,:] = self.data + 0.1
-#        data3[:,2,:] = self.data + 0.2
-#        self.opts.names = ['Run 1', 'Run 2', 'Run 3']
-#        self.figs.append(plot.plot_time_history(self.time, data3, self.label, opts=self.opts))
-#
-#    def test_bad_4d(self) -> None:
-#        bad_data = np.random.rand(self.time.shape[0], 4, 5, 1)
-#        with self.assertRaises(AssertionError):
-#            plot.plot_time_history(self.time, bad_data, self.label, opts=self.opts)
+    def test_defaults(self) -> None:
+        self.figs.append(plot.plot_time_history('', self.time, self.col_data))
+
+    def test_with_units(self) -> None:
+        self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, units=self.units))
+
+    def test_with_opts(self) -> None:
+        self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, opts=self.opts))
+
+    @patch('dstauffman.plotting.plotting.logger')
+    def test_no_data(self, mock_logger):
+        plot.plot_time_history('', self.time, None)
+        self.assertEqual(mock_logger.log.call_count, 1)
+        mock_logger.log.assert_called_with(LogLevel.L5, '  plot skipped due to missing data.')
+
+    def test_ignore_zeros(self) -> None:
+        self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True))
+
+    def test_ignore_zeros2(self) -> None:
+        self.col_data[1, :] = 0
+        self.col_data[3, :] = 0
+        self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True))
+
+    @patch('dstauffman.plotting.plotting.logger')
+    def test_ignore_zeros3(self, mock_logger):
+        self.col_data = np.zeros(self.col_data.shape)
+        not_a_fig = plot.plot_time_history('All Zeros', self.time, self.col_data, ignore_empties=True)
+        self.assertIs(not_a_fig, None)
+        self.assertEqual(mock_logger.log.call_count, 1)
+        mock_logger.log.assert_called_with(LogLevel.L5, ' All Zeros plot skipped due to missing data.')
+
+    def test_not_ndarray(self) -> None:
+        self.figs.append(plot.plot_time_history('Zero', 0, 0))
+
+    def test_0d(self) -> None:
+        self.figs.append(plot.plot_time_history('Zero', np.array(0), np.array(0)))
+
+    def test_1d(self) -> None:
+        self.figs.append(plot.plot_time_history('Line', np.arange(5), np.arange(5)))
+
+    def test_bad_3d(self) -> None:
+        bad_data = np.random.rand(self.time.shape[0], 4, 5)
+        with self.assertRaises(AssertionError):
+            plot.plot_time_history(self.description, self.time, bad_data, opts=self.opts)
+
+    def test_datetime(self) -> None:
+        dates = np.datetime64('2020-01-11 12:00:00') + np.arange(0, 1000, 10).astype('timedelta64[ms]')
+        self.figs.append(plot.plot_time_history(self.description, dates, self.col_data, opts=self.opts, \
+            time_units='numpy'))
 
     def tearDown(self) -> None:
         if self.figs:
@@ -442,6 +406,11 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
     def test_new_colormap(self) -> None:
         self.opts.colormap = 'seismic'
         self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
+
+    def test_datetime(self) -> None:
+        dates = np.datetime64('2020-01-11 12:00:00') + np.arange(0, 7200, 120).astype('timedelta64[s]')
+        self.figs.append(plot.plot_bar_breakdown(dates, self.data, label=self.label, opts=self.opts, \
+        time_units='numpy'))
 
     def tearDown(self) -> None:
         if self.figs:

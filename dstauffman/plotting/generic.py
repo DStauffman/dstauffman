@@ -141,9 +141,6 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     time_is_list = isinstance(time, list)
     data_is_list = isinstance(data, list)
 
-    # data checks
-    assert description, 'You must give the plot a description.'
-
     # convert rows/cols as necessary
     if not data_is_list:
         data = np.atleast_2d(data)
