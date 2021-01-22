@@ -156,7 +156,7 @@ class Test_find_repo_issues(unittest.TestCase):
         lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('File: "'))
-        self.assertTrue(lines[0].endswith('" has bad line endings of "{}".'.format(self.linesep)))
+        self.assertIn('" has bad line endings of "', lines[0])
         self.assertTrue(lines[3].startswith('Evaluating: "'))
         self.assertEqual(lines[4], self.bad1)
         self.assertEqual(lines[5], '')

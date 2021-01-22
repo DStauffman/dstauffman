@@ -8,6 +8,7 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 from typing import Optional
 import unittest
 
@@ -234,6 +235,7 @@ class Test_health_icer(unittest.TestCase):
         np.testing.assert_array_equal(order, np.array([np.nan, np.nan, np.nan, 0]), 'Order mismatch.')
         self.assertTrue(self.fig is None)
 
+    @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
     def test_plot1(self) -> None:
         (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly, make_plot=True)
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
@@ -242,6 +244,7 @@ class Test_health_icer(unittest.TestCase):
         np.testing.assert_array_equal(order, self.order, 'Order mismatch.')
         self.assertTrue(isinstance(self.fig, plt.Figure))
 
+    @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
     def test_plot2(self) -> None:
         opts = Opts()
         (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly, \

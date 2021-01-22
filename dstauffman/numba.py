@@ -23,6 +23,8 @@ if HAVE_NUMBA:
 else:
     from dstauffman.constants import fake_decorator
 
+    List = list
+
     @fake_decorator
     def njit(func, *args, **kwargs):
         r"""Fake njit decorator for when numba isn't installed."""
