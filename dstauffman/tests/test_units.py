@@ -80,6 +80,15 @@ class Test_get_factors(unittest.TestCase):
         self.assertEqual(mult, 0.3)
         self.assertEqual(label, '')
 
+    def test_english_units(self) -> None:
+        names  = ['arcminute', 'arcsecond', 'milliarcsecond', 'microarcsecond']
+        mults  = [dcs.DEG2RAD/60, dcs.DEG2RAD/3600, dcs.DEG2RAD/3.6, 1e3*dcs.DEG2RAD/3.6]
+        labels = ['amin', 'asec', 'mas', 'µas']
+        for (fact, exp_mult, exp_label) in zip(names, mults, labels):
+            (mult, label) = dcs.get_factors(fact)
+            self.assertAlmostEqual(mult, exp_mult, 14, 'Bad multiplication factor for {}'.format(fact))
+            self.assertAlmostEqual(label, exp_label, 14, 'Bad multiplication factor for {}'.format(fact))
+
 #%% get_time_factor
 class Test_get_time_factor(unittest.TestCase):
     r"""

@@ -11,11 +11,12 @@ import doctest
 import logging
 import unittest
 
-from dstauffman import get_factors, HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel, rms
+from dstauffman import get_legend_conversion, HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel, \
+    rms
 from dstauffman.aerospace import Kf, KfInnov, quat_angle_diff
 from dstauffman.plotting.generic import make_categories_plot, make_difference_plot
 from dstauffman.plotting.plotting import Opts, setup_plots
-from dstauffman.plotting.support import ColorMap, disp_xlimits, get_color_lists, get_rms_indices, \
+from dstauffman.plotting.support import disp_xlimits, get_color_lists, get_rms_indices, \
     plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
 
 if HAVE_MPL:
@@ -226,6 +227,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     # quaternion component names
     elements = ['X', 'Y', 'Z', 'S']
     num_channels = len(elements)
+    units = 'rad'
     # calculate the difference
     if have_both:
         (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one[:, q1_diff_ix], quat_two[:, q2_diff_ix])
@@ -245,8 +247,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         # output errors
         err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
     # unit conversion value
-    (temp, prefix) = get_factors(leg_scale)
-    leg_conv = 1/temp
+    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
     # determine which symbols to plot with
     if have_both:
         symbol_one = '^-'
@@ -349,7 +350,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
                     continue
                 if show_rms:
                     value = _LEG_FORMAT.format(leg_conv*nondeg_func[j])
-                    this_label = '{} ({}: {}) {}rad)'.format(elements[j], func_name, value, prefix)
+                    this_label = '{} ({}: {}) {})'.format(elements[j], func_name, value, new_units)
                 else:
                     this_label = elements[j]
                 plot_func(this_axes, time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, zorder=zorders[j], \
@@ -357,7 +358,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
             if not plot_components or (single_lines and (i + 1) % num_channels == 0):
                 if show_rms:
                     value = _LEG_FORMAT.format(leg_conv*mag_func)
-                    this_label = 'Angle ({}: {} {}rad)'.format(func_name, value, prefix)
+                    this_label = 'Angle ({}: {} {})'.format(func_name, value, new_units)
                 else:
                     this_label = 'Angle'
                 plot_func(this_axes, time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=colororder3.get_color(0))
@@ -397,12 +398,12 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if is_diff_plot:
-            this_axes.set_ylabel('Difference [rad]')
+            this_axes.set_ylabel('Difference [' + units + ']')
             # optionally add second Y axis
             if second_yscale is not None:
                 plot_second_units_wrapper(this_axes, second_yscale)
             else:
-                plot_second_units_wrapper(this_axes, {prefix+'rad': leg_conv})
+                plot_second_units_wrapper(this_axes, {new_units: leg_conv})
         else:
             this_axes.set_ylabel('Quaternion Components [dimensionless]')
         this_axes.grid(True)
@@ -521,9 +522,9 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
     # hard-coded defaults
-    leg_scale      = kwargs.pop('leg_scale', 'micro')
-    (fact, prefix) = get_factors(leg_scale)
-    second_yscale  = kwargs.pop('second_yscale', {prefix + 'rad': 1/fact})
+    leg_scale    = kwargs.pop('leg_scale', 'micro')
+    (leg_conv, new_units) = get_legend_conversion(leg_scale, 'rad')
+    second_yscale = kwargs.pop('second_yscale', {new_units: leg_conv})
 
     # initialize outputs
     figs    = []
@@ -659,16 +660,16 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
     # hard-coded defaults
-    elements       = kwargs.pop('elements', ['x', 'y', 'z'])
-    default_units  = 'm' if 'pos' in fields else 'm/s' if 'vel' in fields else ''
-    units          = kwargs.pop('units', default_units)
-    leg_scale      = kwargs.pop('leg_scale', 'kilo')
-    (fact, name)   = get_factors(leg_scale)
-    second_yscale  = kwargs.pop('second_yscale', {name + units: 1/fact})
-    color_lists    = get_color_lists()
-    colormap       = ListedColormap(color_lists['vec_diff'].colors + color_lists['vec'].colors)
-    name_one       = kwargs.pop('name_one', kf1.name)
-    name_two       = kwargs.pop('name_two', kf2.name)
+    elements      = kwargs.pop('elements', ['x', 'y', 'z'])
+    default_units = 'm' if 'pos' in fields else 'm/s' if 'vel' in fields else ''
+    units         = kwargs.pop('units', default_units)
+    leg_scale     = kwargs.pop('leg_scale', 'kilo')
+    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
+    second_yscale = kwargs.pop('second_yscale', {new_units: leg_conv})
+    color_lists   = get_color_lists()
+    colormap      = ListedColormap(color_lists['vec_diff'].colors + color_lists['vec'].colors)
+    name_one      = kwargs.pop('name_one', kf1.name)
+    name_two      = kwargs.pop('name_two', kf2.name)
 
     # initialize outputs
     figs = []
@@ -802,8 +803,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     elements      = kwargs.pop('elements', elements)
     units         = kwargs.pop('units', kf1.units)
     leg_scale     = kwargs.pop('leg_scale', 'micro')
-    (fact, name)  = get_factors(leg_scale)
-    second_yscale = kwargs.pop('second_yscale', {name + units: 1/fact})
+    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
+    second_yscale = kwargs.pop('second_yscale', {new_units: leg_conv})
 
     # determine if converting units
     is_date_1 = is_datetime(kf1.time)
@@ -978,11 +979,18 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     elements      = kwargs.pop('elements', elements)
     units         = kwargs.pop('units', 'mixed')
     leg_scale     = kwargs.pop('leg_scale', 'micro')
-    (fact, name)  = get_factors(leg_scale)
-    if fact != 1:
-        temp = {name + units: 1/fact} if isinstance(units, str) else [{name + unit: 1/fact} for unit in units]
-    else:
+    if leg_scale == 'unity':
         temp = None
+    elif isinstance(units, str):
+        (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
+        temp = {new_units: leg_conv}
+    else:
+        # TODO: allow legend conversion function to handle this case?
+        temp = []
+        for unit in units:
+            (leg_conv, new_units) = get_legend_conversion(leg_scale, unit)
+            temp.append({new_units: leg_conv})
+
     second_yscale = kwargs.pop('second_yscale', temp)
     name_one      = kwargs.pop('name_one', kf1.name)
     name_two      = kwargs.pop('name_two', kf2.name)

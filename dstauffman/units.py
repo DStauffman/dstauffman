@@ -46,9 +46,10 @@ def get_factors(prefix: Union[str, int, float]) -> Tuple[float, str]:
     ----------
     prefix : str
         Unit standard metric prefix, from:
-            {'yotta','zetta','exa','peta','tera','giga','mega',
-             'kilo','hecto','deca','unity','deci','centi','milli',
-             'micro','nano','pico','femto','atto','zepto','yocto'}
+            {'yotta', 'zetta', 'exa', 'peta', 'tera', 'giga', 'mega',
+             'kilo', 'hecto', 'deca', 'unity', 'deci', 'centi', 'milli',
+             'micro', 'nano', 'pico', 'femto', 'atto', 'zepto', 'yocto',
+             'arcminute', 'arcsecond', 'milliarcsecond', 'microarcsecond'}
 
     Returns
     -------
@@ -140,6 +141,19 @@ def get_factors(prefix: Union[str, int, float]) -> Tuple[float, str]:
     elif prefix == 'yocto':
         mult  = 1e-24
         label = 'y'
+    # below follow some stupid english units for rotation angles (try to never use them!)
+    elif prefix == 'arcminute':
+        mult  = 1. / ONE_MINUTE * DEG2RAD
+        label = 'amin'
+    elif prefix == 'arcsecond':
+        mult  = ARCSEC2RAD
+        label = 'asec'
+    elif prefix == 'milliarcsecond':
+        mult  = 1e3 * ARCSEC2RAD
+        label = 'mas'
+    elif prefix == 'microarcsecond':
+        mult  = 1e6 * ARCSEC2RAD
+        label = MICRO_SIGN + 'as'
     else:
         raise ValueError('Unexpected value for units prefix.')
     return (mult, label)
@@ -182,6 +196,56 @@ def get_time_factor(unit: str) -> int:
     else:
         raise ValueError(f'Unexpected value for "{unit}".')
     return mult
+
+#%% Functions - get_legend_conversion
+def get_legend_conversion(prefix: Union[str, int, float], units: str) -> Tuple[float, str]:
+    r"""
+    Acts as a wrapper to unit conversions for legends in plots and for scaling second axes.
+
+    Parameters
+    ----------
+    prefix : str
+        Unit standard metric prefix, from:
+            {'yotta', 'zetta', 'exa', 'peta', 'tera', 'giga', 'mega',
+             'kilo', 'hecto', 'deca', 'unity', 'deci', 'centi', 'milli',
+             'micro', 'nano', 'pico', 'femto', 'atto', 'zepto', 'yocto',
+             'arcminute', 'arcsecond', 'milliarcsecond', 'microarcsecond'}
+    units : str
+        label to apply the prefix to (sometimes replaced when dealing with radians and english units)
+
+    Returns
+    -------
+    mult : float
+        Multiplication factor
+    new_units : str
+        Units with the correctly prepended abbreviation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in February 2021 when he had to deal with arcseconds.
+
+    Examples
+    --------
+    >>> from dstauffman import get_legend_conversion
+    >>> prefix = 'micro'
+    >>> units = 'rad'
+    >>> (mult, new_units) = get_legend_conversion(prefix, units)
+    >>> print(mult)
+    1000000.0
+
+    >>> print(new_units)
+    µrad
+
+    """
+    (temp, label) = get_factors(prefix)
+    if (units == 'rad' or units == '') and 'arc' in prefix:
+        new_units = label
+    else:
+        if label:
+            assert units, 'You must give units if using a non-unity scale factor.'
+        new_units = label + units
+    mult = 1/temp
+    return (mult, new_units)
 
 #%% Unit test
 if __name__ == '__main__':

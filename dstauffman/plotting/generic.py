@@ -11,7 +11,8 @@ import doctest
 import logging
 import unittest
 
-from dstauffman import get_factors, HAVE_MPL, HAVE_NUMPY, intersect, is_datetime, LogLevel, rms
+from dstauffman import get_legend_conversion, HAVE_MPL, HAVE_NUMPY, intersect, is_datetime, LogLevel, \
+    rms
 
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits, get_rms_indices, \
     plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
@@ -192,10 +193,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         else:
             data_func = func_lamb(data[ix['one'], :], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
     # unit conversion value
-    (temp, prefix) = get_factors(leg_scale)
-    leg_conv = 1/temp
-    if prefix:
-        assert units, 'You must give units if using a non-unity scale factor.'
+    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
 
     #% Create plots
     # create figures
@@ -226,7 +224,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv*data_func[j])
                 if units:
-                    this_label += f' ({func_name}: {value} {prefix}{units})'
+                    this_label += f' ({func_name}: {value} {new_units})'
                 else:
                     this_label += f' ({func_name}: {value})'
             this_time = time[j] if time_is_list else time
@@ -422,8 +420,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
             func_lamb = lambda x: np.nanmean(x, axis=1)
         data_func = func_lamb(data[:, ix['one']]) if np.any(ix['one']) else np.full(num_channels, np.nan)
     # unit conversion value
-    (temp, prefix) = get_factors(leg_scale)
-    leg_conv = 1/temp
+    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
     # error calculation
     err_neg = data - mins
     err_pos = maxs - data
@@ -456,7 +453,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
         for j in loop_counter:
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv*data_func[j])
-                this_label = '{} ({}: {} {}{})'.format(elements[j], func_name, value, prefix, units)
+                this_label = '{} ({}: {} {})'.format(elements[j], func_name, value, new_units)
             else:
                 this_label = elements[j]
             this_axes.plot(time, data[j, :], '.-', markersize=4, label=this_label, \
@@ -728,8 +725,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         # output errors
         err = {'one': data1_func, 'two': data2_func, 'diff': nondeg_func}
     # unit conversion value
-    (temp, prefix) = get_factors(leg_scale)
-    leg_conv = 1/temp
+    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
     # determine which symbols to plot with
     if have_both:
         symbol_one = '^-'
@@ -807,7 +803,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                 for j in loop_counter:
                     if show_rms:
                         value = _LEG_FORMAT.format(leg_conv*data1_func[j])
-                        this_label = '{} {} ({}: {} {}{})'.format(name_one, elements[j], func_name, value, prefix, units)
+                        this_label = '{} {} ({}: {} {})'.format(name_one, elements[j], func_name, value, new_units)
                     else:
                         this_label = name_one + ' ' + elements[j]
                     plot_func(this_axes, time_one, data_one[j, :], symbol_one, markersize=4, label=this_label, \
@@ -816,7 +812,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                 for j in loop_counter:
                     if show_rms:
                         value = _LEG_FORMAT.format(leg_conv*data2_func[j])
-                        this_label = '{} {} ({}: {} {}{})'.format(name_two, elements[j], func_name, value, prefix, units)
+                        this_label = '{} {} ({}: {} {})'.format(name_two, elements[j], func_name, value, new_units)
                     else:
                         this_label = name_two + ' ' + elements[j]
                     plot_func(this_axes, time_two, data_two[j, :], symbol_two, markersize=4, label=this_label, \
@@ -828,7 +824,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                     continue
                 if show_rms:
                     value = _LEG_FORMAT.format(leg_conv*nondeg_func[j])
-                    this_label = '{} ({}: {}) {}{})'.format(elements[j], func_name, value, prefix, units)
+                    this_label = '{} ({}: {}) {})'.format(elements[j], func_name, value, new_units)
                 else:
                     this_label = elements[j]
                 plot_func(this_axes, time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, \
@@ -1072,10 +1068,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
                 this_ix = ix['one'] & (cats == cat)
                 data_func[cat] = func_lamb(data[:, this_ix], 1) if np.any(this_ix) else np.full(num_channels, np.nan)
     # unit conversion value
-    (temp, prefix) = get_factors(leg_scale)
-    leg_conv = 1/temp
-    if prefix:
-        assert units, 'You must give units if using a non-unity scale factor.'
+    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
 
     #% Create plots
     # create figure(s)
@@ -1117,7 +1110,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv*data_func[cat][i])
                 if units:
-                    this_label = f'{root_label} {this_cat_name} ({func_name}: {value} {prefix}{units})'
+                    this_label = f'{root_label} {this_cat_name} ({func_name}: {value} {new_units})'
                 else:
                     this_label = f'{root_label} {this_cat_name} ({func_name}: {value})'
             this_cats = cats == cat
