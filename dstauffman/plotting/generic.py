@@ -47,7 +47,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         name of the data being plotted, used as title, must be given
     time : (A, ) array_like
         time history [sec] or datetime64
-    data : (N, ) or (N, A) ndarray
+    data : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
         vector history
     name : str, optional
         name of data
@@ -137,20 +137,25 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh)
 
     """
-    # some basic flags
-    time_is_list = isinstance(time, list)
-    data_is_list = isinstance(data, list)
-
-    # convert rows/cols as necessary
+    # some basic flags and checks
+    time_is_list = isinstance(time, list) or isinstance(time, tuple)
+    data_is_list = isinstance(data, list) or isinstance(data, tuple)
+    if not time_is_list:
+        time = np.atleast_1d(time)
     if not data_is_list:
         data = np.atleast_2d(data)
-        if not data_as_rows:
-            # TODO: is this the best way or make branches lower?
-            data = data.T
+        assert data.ndim < 3, 'Data must be 0d, 1d or 2d.'
 
     # calculate sizes
     temp1 = len(time) if time_is_list else 1
-    temp2 = len(data) if data_is_list else data.shape[0] if data is not None else 0
+    if data is None:
+        temp2 = 0
+    elif data_is_list:
+        temp2 = len(data)
+    elif data_as_rows:
+        temp2 = data.shape[0]
+    else:
+        temp2 = data.shape[1]
     if elements is None:
         elements = [f'Channel {i+1}' for i in range(temp2)]
     num_channels = len(elements)
@@ -182,8 +187,10 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
             func_lamb = lambda x, y: np.nanmean(x, axis=y)
         if data_is_list:
             data_func = [func_lamb(data[j][ix['one'][j]], None) for j in range(num_channels)]
-        else:
+        elif data_as_rows:
             data_func = func_lamb(data[:, ix['one']], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
+        else:
+            data_func = func_lamb(data[ix['one'], :], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
     # unit conversion value
     (temp, prefix) = get_factors(leg_scale)
     leg_conv = 1/temp
@@ -223,7 +230,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
                 else:
                     this_label += f' ({func_name}: {value})'
             this_time = time[j] if time_is_list else time
-            this_data = data[j] if data_is_list else data[j, :]
+            this_data = data[j] if data_is_list else data[j, :] if data_as_rows else data[:, j]
             if use_zoh:
                 this_axes.step(this_time, this_data, '.-', where='post', markersize=4, label=this_label, \
                     color=cm.get_color(j), zorder=9)

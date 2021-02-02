@@ -264,9 +264,8 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
         Name to label on the plots
     time : 1D ndarray
         time history
-    data : 1D, 2D or 3D ndarray
-        data for corresponding time history, time is first dimension, last dimension is bin
-        middle dimension if 3D is the cycle
+    data : 0D, 1D, or 2D ndarray
+        data for corresponding time history, time is last dimension unless passing data_as_rows=False through
     opts : class Opts, optional
         plotting options
     ignore_empties : bool, optional
@@ -310,16 +309,10 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     >>> plt.close(fig2)
 
     """
-    # force inputs to be ndarrays
-    time = np.atleast_1d(np.asanyarray(time))
-    data = np.asanyarray(data)
-
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
         logger.log(LogLevel.L5, f' {description} plot skipped due to missing data.')
         return None
-    assert time.ndim == 1, 'Time must be a 1D array.'
-    assert data.ndim < 3, 'Date must be 0D, 1D or 2D.'
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)

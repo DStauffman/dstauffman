@@ -164,10 +164,9 @@ def vec_cross(vec):
     --------
     >>> from dstauffman.aerospace import vec_cross
     >>> import numpy as np
-    >>> a = np.array([1, 2, 3])
-    >>> b = np.array([-2, -3, -4])
-    >>> mat = vec_cross(a)
-    >>> print(mat)
+    >>> vec = np.array([1, 2, 3])
+    >>> skew = vec_cross(vec)
+    >>> print(skew)
     [[ 0 -3  2]
      [ 3  0 -1]
      [-2  1  0]]

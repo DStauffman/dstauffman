@@ -64,6 +64,12 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             second_yscale=self.second_yscale, ylabel=self.ylabel, data_as_rows=self.data_as_rows)
 
+    def test_scalars(self) -> None:
+        self.fig = plot.make_time_plot('', 0, 0)
+
+    def test_0d(self) -> None:
+        self.fig = plot.make_time_plot('', np.array(5), np.array(10.))
+
     def test_list1(self) -> None:
         data = [self.data, self.data+0.5, self.data + 1.0]
         self.fig = plot.make_time_plot(self.description, self.time, data)
@@ -73,9 +79,13 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         data = [self.data, 2*self.data[:-1]]
         self.fig = plot.make_time_plot(self.description, time, data)
 
-    def test_vectors(self) -> None:
+    def test_row_vectors(self) -> None:
         data = np.vstack((self.data, np.sin(self.time)))
         self.fig = plot.make_time_plot(self.description, self.time, data)
+
+    def test_col_vectors(self) -> None:
+        data = np.column_stack((self.data, np.sin(self.time)))
+        self.fig = plot.make_time_plot(self.description, self.time, data, data_as_rows=False)
 
     def tearDown(self) -> None:
         if self.fig:

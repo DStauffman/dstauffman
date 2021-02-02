@@ -230,6 +230,22 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.figs.append(plot.plot_time_history(self.description, dates, self.col_data, opts=self.opts, \
             time_units='numpy'))
 
+    def test_lists0(self) -> None:
+        time = np.arange(100, dtype=float)
+        data = [np.zeros(100), np.ones(100)]
+        self.figs.append(plot.plot_time_history('', time, data))
+
+    def test_lists1(self) -> None:
+        time = np.arange(10)
+        data = [np.random.rand(10), 5*np.random.rand(10)]
+        elements = ('Item 1', '5 Times')
+        self.figs.append(plot.plot_time_history(self.description, time, data, opts=self.opts, elements=elements))
+
+    def test_lists2(self) -> None:
+        time = [np.arange(5), np.arange(10, dtype=float)]
+        data = [np.array([0., 0.1, 0.2, 0.3, 0.5]), np.arange(10)]
+        self.figs.append(plot.plot_time_history(self.description, time, data, opts=self.opts))
+
     def tearDown(self) -> None:
         if self.figs:
             for this_fig in self.figs:

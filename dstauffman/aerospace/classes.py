@@ -99,36 +99,45 @@ class Kf(Frozen):
     >>> kf = Kf()
 
     """
-    def __init__(self, *, name='', num_points=0, num_states=0, time_dtype=float, active_states=None, innov_class=None, **kwargs):
+    def __init__(self, *, name='', num_points=0, num_states=0, time_dtype=float, active_states=None, \
+                 innov_class=None, use_pv=True, **kwargs):
         r"""Initializes a new Kf instance."""
         self.name = name
         self.chan = ['' for i in range(num_states)] if num_states > 0 else None
         if num_points > 0:
-            num_active  = num_states if active_states is None else len(active_states)
-            state_shape = (num_active, num_points) if num_active > 1 else (num_points, )
-            self.time   = np.empty(num_points, dtype=time_dtype)
-            self.att    = np.empty((4, num_points), dtype=float)
-            self.pos    = None # TODO: flag to enable?
-            self.vel    = None # TODO: flag to enable?
-            self.active = active_states if active_states is not None else np.arange(num_states)
-            self.state  = np.empty(state_shape, dtype=float)
-            self.istate = np.empty(num_states, dtype=float)
-            self.covar  = np.empty(state_shape, dtype=float)
+            num_active   = num_states if active_states is None else len(active_states)
+            state_shape  = (num_active, num_points) if num_active > 1 else (num_points, )
+            self.time    = np.empty(num_points, dtype=time_dtype)
+            self.att     = np.empty((4, num_points))
+            if use_pv:
+                self.pos = np.empty((3, num_points))
+                self.vel = np.empty((3, num_points))
+            self.active  = active_states if active_states is not None else np.arange(num_states)
+            self.state   = np.empty(state_shape)
+            self.istate  = np.empty(num_states)
+            self.covar   = np.empty(state_shape)
         else:
-            self.time   = None
-            self.att    = None
-            self.pos    = None
-            self.vel    = None
-            self.active = None
-            self.state  = None
-            self.istate = None
-            self.covar  = None
+            self.time    = None
+            self.att     = None
+            if use_pv:
+                self.pos = None
+                self.vel = None
+            self.active  = None
+            self.state   = None
+            self.istate  = None
+            self.covar   = None
         if innov_class is None:
-            self.innov  = KfInnov(time_dtype=time_dtype, **kwargs)
+            self.innov = KfInnov(time_dtype=time_dtype, **kwargs)
+            self._subclasses = frozenset({'innov', })
+        elif callable(innov_class):
+            self.innov = innov_class(time_dtype=time_dtype, **kwargs)
+            self._subclasses = frozenset({'innov', })
         else:
-            self.innov  = innov_class(time_dtype=time_dtype, **kwargs)
+            for (name, func) in innov_class:
+                setattr(self, name, func(time_dtype=time_dtype, **kwargs))
+            self._subclasses = frozenset(innov_class.keys())
 
-    def save(self, filename='', subclasses=frozenset({'innov'})):
+    def save(self, filename=''):
         r"""Save the object to disk as an HDF5 file."""
         # exit if no filename is given
         if not filename:
@@ -137,7 +146,11 @@ class Kf(Frozen):
         with h5py.File(filename, 'w') as file:
             grp = file.create_group('self')
             for key in vars(self):
-                if key in subclasses:
+                if key == '_subclasses':
+                    # TODO: update to always right this field first
+                    value = [x.encode('utf-8') for x in getattr(self, key)]
+                    grp.create_dataset(key, data=value)
+                elif key in self._subclasses:
                     # handle substructures
                     sub = getattr(self, key)
                     inner_grp = grp.create_group(key)
@@ -162,7 +175,7 @@ class Kf(Frozen):
         if not filename:
             raise ValueError('No file specified to load.')
         # Load data
-        out = cls()
+        out = cls()  # TODO: dynamically determine subclass field names and pv option?
         with h5py.File(filename, 'r') as file:
             for (key, grp) in file.items():
                 for field in grp:
