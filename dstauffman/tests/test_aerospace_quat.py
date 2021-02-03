@@ -656,24 +656,6 @@ class Test_aerospace_quat_times_vector(unittest.TestCase):
         vec = space.quat_times_vector(self.quat, self.vec)
         np.testing.assert_array_almost_equal(vec, self.out)
 
-#%% aerospace.quat_to_dcm
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
-class Test_aerospace_quat_to_dcm(unittest.TestCase):
-    r"""
-    Tests the aerospace.quat_to_dcm function with the following cases:
-        Nominal case
-    """
-    def setUp(self) -> None:
-        self.quat = np.array([0.5, -0.5, 0.5, 0.5])
-        self.dcm  = np.array([\
-            [ 0.,  0.,  1.],
-            [-1.,  0.,  0.],
-            [ 0., -1.,  0.]])
-
-    def test_nominal(self) -> None:
-        dcm = space.quat_to_dcm(self.quat)
-        np.testing.assert_array_almost_equal(dcm, self.dcm)
-
 #%% aerospace.quat_to_euler
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_to_euler(unittest.TestCase):

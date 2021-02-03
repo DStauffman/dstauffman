@@ -835,6 +835,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
     show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
+    tolerance    = kwargs.pop('tolerance', 0)
 
     # Initialize outputs
     figs    = []
@@ -869,11 +870,12 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         else:
             t2 = kf2.time
             f2 = field_two
-        out = make_difference_plot(description+sub_description, t1, t2, f1, f2, \
-            name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
-            start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-            make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
-            legend_loc=legend_loc, leg_scale=this_leg_scale, second_yscale=this_second_yscale, return_err=return_err, **kwargs)
+        out = make_difference_plot(description+sub_description, t1, t2, f1, f2, name_one=name_one, \
+            name_two=name_two, elements=elements, units=units, time_units=time_units, start_date=start_date, \
+            rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+            make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
+            single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
+            second_yscale=this_second_yscale, return_err=return_err, tolerance=tolerance, **kwargs)
         if return_err:
             figs += out[0]
             err[field] = out[1]

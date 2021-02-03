@@ -133,7 +133,7 @@ class Kf(Frozen):
             self.innov = innov_class(time_dtype=time_dtype, **kwargs)
             self._subclasses = frozenset({'innov', })
         else:
-            for (name, func) in innov_class:
+            for (name, func) in innov_class.items():
                 setattr(self, name, func(time_dtype=time_dtype, **kwargs))
             self._subclasses = frozenset(innov_class.keys())
 

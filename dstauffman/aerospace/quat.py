@@ -12,6 +12,8 @@ import unittest
 
 from dstauffman import INT_TOKEN, HAVE_NUMPY
 
+from dstauffman.aerospace.quat_opt import quat_to_dcm
+
 if HAVE_NUMPY:
     import numpy as np
 
@@ -259,10 +261,7 @@ def quat_angle_diff(quat1, quat2, **kwargs):
     dq = quat_mult(quat2, quat_inv(quat1, **kwargs), **kwargs)
 
     # pull vector components out of delta quaternion
-    if dq.ndim == 1:
-        dv = dq[0:3]
-    else:
-        dv = dq[0:3, :]
+    dv = dq[0:3, ...]
 
     # sum vector components to get sin(theta/2)^2
     mag2 = np.sum(dv**2, axis=0)
@@ -379,7 +378,7 @@ def quat_from_euler(angles, seq=None, **kwargs):
         seq = np.array([seq])
     # loop through quaternions
     for i in range(num):
-        q_temp = np.array([0, 0, 0, 1])
+        q_temp = np.array([0., 0., 0., 1.])
         # apply each rotation
         for j in range(len(seq)):
             q_single = qrot(seq[j], angles[j, i], **kwargs)
@@ -648,28 +647,21 @@ def quat_mult(a, b, **kwargs):
             [ a[3],  a[2], -a[1],  a[0]], \
             [-a[2],  a[3],  a[0],  a[1]], \
             [ a[1], -a[0],  a[3],  a[2]], \
-            [-a[0], -a[1], -a[2],  a[3]]]) @ b[:, np.newaxis]
-        # flatten back to a 1D vector
-        c = c.flatten()
+            [-a[0], -a[1], -a[2],  a[3]]]) @ b
         # enforce positive scalar component
         if c[3] < 0:
             c = -c
     # vectorized inputs
     else:
-        # make A and B both 2D arrays
-        if is_single_a:
-            a = a[:, np.newaxis]
-        if is_single_b:
-            b = b[:, np.newaxis]
         # alias the rows
-        a1 = a[0, :]
-        a2 = a[1, :]
-        a3 = a[2, :]
-        a4 = a[3, :]
-        b1 = b[0, :]
-        b2 = b[1, :]
-        b3 = b[2, :]
-        b4 = b[3, :]
+        a1 = a[0, ...]
+        a2 = a[1, ...]
+        a3 = a[2, ...]
+        a4 = a[3, ...]
+        b1 = b[0, ...]
+        b2 = b[1, ...]
+        b3 = b[2, ...]
+        b4 = b[3, ...]
         # compute the combine multiplication result
         c = np.array([ \
              b1*a4 + b2*a3 - b3*a2 + b4*a1, \
@@ -844,54 +836,6 @@ def quat_times_vector(quat, v):
     if is_single:
         vec = vec.flatten() # TODO: write optimized single quat and single vector version?
     return vec
-
-#%% Functions - quat_to_dcm
-def quat_to_dcm(quat):
-    r"""
-    Convert quaternion to a direction cosine matrix.
-
-    Parameters
-    ----------
-    quat : ndarray (4, 1)
-        quaternion
-
-    Returns
-    -------
-    dcm : ndarray (3, 3)
-        direction cosine matrix
-
-    See Also
-    --------
-    quat_mult, quat_inv, quat_norm, quat_prop, quat_times_vector, quat_to_euler, quat_from_euler
-
-    Notes
-    -----
-    #.  Adapted from GARSE by David C. Stauffer in April 2015.
-
-    Examples
-    --------
-    >>> from dstauffman.aerospace import quat_to_dcm
-    >>> import numpy as np
-    >>> quat = np.array([0.5, -0.5, 0.5, 0.5])
-    >>> dcm = quat_to_dcm(quat)
-    >>> print(dcm) # doctest: +NORMALIZE_WHITESPACE
-    [[ 0.  0.  1.]
-     [-1.  0.  0.]
-     [ 0. -1.  0.]]
-
-    """
-    #build dcm components
-    dcm = np.zeros((3, 3))
-    dcm[0, 0] = quat[3]**2 + quat[0]**2 - quat[1]**2 - quat[2]**2
-    dcm[0, 1] = 2*(quat[0]*quat[1] + quat[2]*quat[3])
-    dcm[0, 2] = 2*(quat[0]*quat[2] - quat[1]*quat[3])
-    dcm[1, 0] = 2*(quat[0]*quat[1] - quat[2]*quat[3])
-    dcm[1, 1] = quat[3]**2 - quat[0]**2 + quat[1]**2 - quat[2]**2
-    dcm[1, 2] = 2*(quat[1]*quat[2] + quat[0]*quat[3])
-    dcm[2, 0] = 2*(quat[0]*quat[2] + quat[1]*quat[3])
-    dcm[2, 1] = 2*(quat[1]*quat[2] - quat[0]*quat[3])
-    dcm[2, 2] = quat[3]**2 - quat[0]**2 - quat[1]**2 + quat[2]**2
-    return dcm
 
 #%% Functions - quat_to_euler
 def quat_to_euler(quat, seq=None, **kwargs):

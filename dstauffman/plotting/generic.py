@@ -1113,6 +1113,8 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
                     this_label = f'{root_label} {this_cat_name} ({func_name}: {value} {new_units})'
                 else:
                     this_label = f'{root_label} {this_cat_name} ({func_name}: {value})'
+            else:
+                this_label = f'{root_label} {this_cat_name}'
             this_cats = cats == cat
             this_axes.plot(this_time[this_cats], this_data[this_cats], '.', markersize=4, label=this_label, \
                 color=cm.get_color(j), zorder=3)

@@ -73,7 +73,7 @@ def issorted_ascend(x: Union[np.ndarray[int, 1], np.ndarray[float, 1]]) -> bool:
     return np.all(x[:-1] <= x[1:])  # type: ignore[no-any-return]
 
 #%% issorted_descend
-@njit(cache=False)
+@njit(cache=True)
 def issorted_descend(x):
     r"""
     Tells whether the given array is sorted in descending order or not.
