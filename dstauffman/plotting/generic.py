@@ -895,7 +895,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
 #%% Functions - make_categories_plot
 def make_categories_plot(description, time, data, cats, *, cat_names=None, name='', elements=None, \
         units='', time_units='sec', leg_scale='unity', start_date='', rms_xmin=-inf, \
-        rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, single_plots=False, \
+        rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, single_plots=False, \
         colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, show_rms=True, \
         legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True, use_zoh=False):
     r"""
@@ -929,6 +929,8 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         lower time to limit the display of the plot
     disp_xmax : float, optional
         higher time to limit the display of the plot
+    make_subplots : bool, optional
+        flag to use subplots for differences
     single_plots : bool, optional
         whether to plot each channel on a new figure instead of subplots
     colormap : list or colormap
@@ -981,6 +983,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     >>> rms_xmax = np.inf
     >>> disp_xmin = -np.inf
     >>> disp_xmax = np.inf
+    >>> make_subplots = True
     >>> single_plots = False
     >>> colormap = 'Paired'
     >>> use_mean = True
@@ -994,9 +997,10 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     >>> figs = make_categories_plot(description, time, data, cats, cat_names=cat_names, name=name, \
     ...     elements=elements, units=units, time_units=time_units, leg_scale=leg_scale, \
     ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-    ...     disp_xmax=disp_xmax, single_plots=single_plots, colormap=colormap, use_mean=use_mean, \
-    ...     plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-    ...     second_yscale=second_yscale, ylabel=ylabel, data_as_rows=data_as_rows, use_zoh=use_zoh)
+    ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_plots=single_plots, \
+    ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
+    ...     legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel, \
+    ...     data_as_rows=data_as_rows, use_zoh=use_zoh)
 
     Close plots
     >>> for fig in figs:
@@ -1026,6 +1030,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     for x in unique_cats:
         if x not in cat_names:
             cat_names[x] = 'Status='+str(x)
+    ordered_cats = [x for x in cat_names if x in unique_cats]
 
     # calculate sizes
     temp1 = len(time) if time_is_list else 1
@@ -1060,7 +1065,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
             func_name = 'Mean'
             func_lamb = lambda x, y: np.nanmean(x, axis=y)
         data_func = {}
-        for cat in unique_cats:
+        for cat in ordered_cats:
             if data_is_list:
                 this_ix = ix['one'][j] & (cats[j] == cat)
                 data_func[cat] = [func_lamb(data[j][this_ix], None) for j in range(num_channels)]
@@ -1101,11 +1106,11 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         root_label = f'{name} {elements[i]}' if name else str(elements[i])
         # plot the underlying line once
         if use_zoh:
-            this_axes.step(this_time, this_data, '-', where='post', label='', color='k', zorder=2)
+            this_axes.step(this_time, this_data, ':', where='post', label='', color='xkcd:slate', linewidth=1, zorder=2)
         else:
-            this_axes.plot(this_time, this_data, '-', label='', color='k', zorder=2)
+            this_axes.plot(this_time, this_data, ':', label='', color='xkcd:slate', linewidth=1, zorder=2)
         # loop through categories
-        for (j, cat) in enumerate(unique_cats):
+        for (j, cat) in enumerate(ordered_cats):
             this_cat_name = cat_names[cat]
             if show_rms:
                 value = _LEG_FORMAT.format(leg_conv*data_func[cat][i])
@@ -1116,7 +1121,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
             else:
                 this_label = f'{root_label} {this_cat_name}'
             this_cats = cats == cat
-            this_axes.plot(this_time[this_cats], this_data[this_cats], '.', markersize=4, label=this_label, \
+            this_axes.plot(this_time[this_cats], this_data[this_cats], '.', markersize=6, label=this_label, \
                 color=cm.get_color(j), zorder=3)
 
         # set X display limits

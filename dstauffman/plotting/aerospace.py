@@ -844,9 +844,10 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
 
     #% call wrapper functions for most of the details
     for (field, sub_description) in fields.items():
+        full_description = description + ' - ' + sub_description if description else sub_description
         # print status
         if not printed:
-            logger.log(LogLevel.L4, f'Plotting {sub_description} plots ...')
+            logger.log(LogLevel.L4, f'Plotting {full_description} plots ...')
             printed = True
         # make plots
         if 'Normalized' in sub_description:
@@ -870,7 +871,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         else:
             t2 = kf2.time
             f2 = field_two
-        out = make_difference_plot(description+sub_description, t1, t2, f1, f2, name_one=name_one, \
+        out = make_difference_plot(full_description, t1, t2, f1, f2, name_one=name_one, \
             name_two=name_two, elements=elements, units=units, time_units=time_units, start_date=start_date, \
             rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
@@ -883,13 +884,13 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
             figs += out
         this_ylabel = [e + ' Innovation [' + units + ']' for e in elements]
         if plot_by_status and field_one is not None and kf1.status is not None:
-            figs += make_categories_plot(description+sub_description+' by Category', kf1.time, field_one, kf1.status, \
+            figs += make_categories_plot(full_description+' by Category', kf1.time, field_one, kf1.status, \
                 name=name_one, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
                 start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                 use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_plots=single_plots, \
                 legend_loc=legend_loc, leg_scale=this_leg_scale, second_yscale=this_second_yscale, ylabel=this_ylabel, **kwargs)
         if plot_by_status and field_two is not None and kf2.status is not None:
-            figs += make_categories_plot(description+sub_description+' by Category', kf2.time, field_two, kf2.status, \
+            figs += make_categories_plot(full_description+' by Category', kf2.time, field_two, kf2.status, \
                 name=name_two, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
                 start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
                 use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_plots=single_plots, \
