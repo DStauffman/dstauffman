@@ -294,7 +294,7 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
         self.rms_xmax = np.inf
         self.disp_xmin = -np.inf
         self.disp_xmax = np.inf
-        self.single_plots = False
+        self.single_lines = False
         self.colormap = 'Paired'
         self.use_mean = False
         self.plot_zero = False
@@ -310,7 +310,7 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
             cat_names=self.cat_names, name=self.name, elements=self.elements, units=self.units, \
             time_units=self.time_units, leg_scale=self.leg_scale, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, \
-            disp_xmax=self.disp_xmax, single_plots=self.single_plots, colormap=self.colormap, \
+            disp_xmax=self.disp_xmax, single_lines=self.single_lines, colormap=self.colormap, \
             use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
             legend_loc=self.legend_loc, second_yscale=self.second_yscale, ylabel=self.ylabel, \
             data_as_rows=self.data_as_rows)

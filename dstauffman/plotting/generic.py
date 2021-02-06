@@ -692,12 +692,14 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     if elements is None:
         elements = [f'Channel {i+1}' for i in range(np.max((s1, s2)))]
     num_channels = len(elements)
-    assert num_channels == np.maximum(s1, s2), 'The given elements need to match the data sizes, got {} and {}.'.format(num_channels, np.maximum(s1, s2))
+    assert num_channels == np.maximum(s1, s2), 'The given elements need to match the data sizes, got ' + \
+        '{} and {}.'.format(num_channels, np.maximum(s1, s2))
 
     #% Calculations
     if have_both:
         # find overlapping times
-        (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)
+        (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, \
+            return_indices=True)
         # find differences
         d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)
         d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)
@@ -709,7 +711,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     cm = ColorMap(colormap=colormap, num_colors=3*num_channels)
     # calculate the differences
     if have_both:
-        nondeg_error = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
+        diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
     # calculate the rms (or mean) values
     if show_rms or return_err:
         nans = np.full(num_channels, np.nan, dtype=float)
@@ -721,7 +723,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             func_lamb = lambda x: np.nanmean(x, axis=1)
         data1_func    = func_lamb(data_one[:, ix['one']]) if have_data_one and np.any(ix['one']) else nans
         data2_func    = func_lamb(data_two[:, ix['two']]) if have_data_two and np.any(ix['two']) else nans
-        nondeg_func   = func_lamb(nondeg_error[:, ix['overlap']]) if have_both and np.any(ix['overlap']) else nans
+        nondeg_func   = func_lamb(diffs[:, ix['overlap']]) if have_both and np.any(ix['overlap']) else nans
         # output errors
         err = {'one': data1_func, 'two': data2_func, 'diff': nondeg_func}
     # unit conversion value
@@ -764,7 +766,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         else:
             num_rows = 1
             num_cols = 1
-    num_axes = num_figs*num_rows*num_cols
+    num_axes = num_figs * num_rows * num_cols
 
     #% Create plots
     # create figures
@@ -803,7 +805,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                 for j in loop_counter:
                     if show_rms:
                         value = _LEG_FORMAT.format(leg_conv*data1_func[j])
-                        this_label = '{} {} ({}: {} {})'.format(name_one, elements[j], func_name, value, new_units)
+                        this_label = '{} {} ({}: {} {})'.format(name_one, elements[j], func_name, \
+                            value, new_units)
                     else:
                         this_label = name_one + ' ' + elements[j]
                     plot_func(this_axes, time_one, data_one[j, :], symbol_one, markersize=4, label=this_label, \
@@ -812,7 +815,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                 for j in loop_counter:
                     if show_rms:
                         value = _LEG_FORMAT.format(leg_conv*data2_func[j])
-                        this_label = '{} {} ({}: {} {})'.format(name_two, elements[j], func_name, value, new_units)
+                        this_label = '{} {} ({}: {} {})'.format(name_two, elements[j], func_name, \
+                            value, new_units)
                     else:
                         this_label = name_two + ' ' + elements[j]
                     plot_func(this_axes, time_two, data_two[j, :], symbol_two, markersize=4, label=this_label, \
@@ -827,11 +831,13 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                     this_label = '{} ({}: {}) {})'.format(elements[j], func_name, value, new_units)
                 else:
                     this_label = elements[j]
-                plot_func(this_axes, time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, \
+                plot_func(this_axes, time_overlap, diffs[j, :], '.-', markersize=4, label=this_label, \
                     color=cm.get_color(j+2*num_channels))
             if show_extra:
-                this_axes.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
-                this_axes.plot(time_two[d2_miss_ix], np.zeros(len(d2_miss_ix)), 'go', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
+                this_axes.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, \
+                    markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
+                this_axes.plot(time_two[d2_miss_ix], np.zeros(len(d2_miss_ix)), 'go', markersize=8, \
+                    markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
 
         # set X display limits
         if i == 0:
@@ -846,13 +852,13 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         if i < num_rows and have_truth:
             # TODO: apply use_zoh logic to truth?
             if single_lines:
-                this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
-                    linewidth=2, label=truth_name + ' ' + elements[i])
+                this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, \
+                    markerfacecolor=_TRUTH_COLOR, linewidth=2, label=truth_name + ' ' + elements[i])
             else:
                 if i == 0:
                     # TODO: add RMS to Truth data?
-                    this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
-                        linewidth=2, label=truth_name)
+                    this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, \
+                        markerfacecolor=_TRUTH_COLOR, linewidth=2, label=truth_name)
         # format display of plot
         if legend_loc.lower() != 'none':
             this_axes.legend(loc=legend_loc)
@@ -862,7 +868,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             this_axes.set_title(description + ' Difference')
         if is_datetime(time_one) or is_datetime(time_two):
             this_axes.set_xlabel('Date')
-            assert time_units in {'datetime', 'numpy'}, f'Expected time units of "datetime" on "numpy", not "{time_units}".'
+            assert time_units in {'datetime', 'numpy'}, 'Expected time units of "datetime" on "numpy", ' + \
+                'not "{}".'.format(time_units)
         else:
             this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
         if ylabel is None:
@@ -895,7 +902,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
 #%% Functions - make_categories_plot
 def make_categories_plot(description, time, data, cats, *, cat_names=None, name='', elements=None, \
         units='', time_units='sec', leg_scale='unity', start_date='', rms_xmin=-inf, \
-        rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, single_plots=False, \
+        rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, single_lines=False, \
         colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, show_rms=True, \
         legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True, use_zoh=False):
     r"""
@@ -931,7 +938,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         higher time to limit the display of the plot
     make_subplots : bool, optional
         flag to use subplots for differences
-    single_plots : bool, optional
+    single_lines : bool, optional
         whether to plot each channel on a new figure instead of subplots
     colormap : list or colormap
         colors to use on the plot
@@ -984,7 +991,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     >>> disp_xmin = -np.inf
     >>> disp_xmax = np.inf
     >>> make_subplots = True
-    >>> single_plots = False
+    >>> single_lines = False
     >>> colormap = 'Paired'
     >>> use_mean = True
     >>> plot_zero = False
@@ -997,7 +1004,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     >>> figs = make_categories_plot(description, time, data, cats, cat_names=cat_names, name=name, \
     ...     elements=elements, units=units, time_units=time_units, leg_scale=leg_scale, \
     ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-    ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_plots=single_plots, \
+    ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
     ...     legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel, \
     ...     data_as_rows=data_as_rows, use_zoh=use_zoh)
@@ -1055,7 +1062,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     else:
         ix = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
     # create a colormap
-    cm = ColorMap(colormap=colormap, num_colors=num_cats)
+    cm = ColorMap(colormap=colormap, num_colors=num_cats*num_channels)
     # calculate the rms (or mean) values
     if show_rms:
         if not use_mean:
@@ -1074,46 +1081,64 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
                 data_func[cat] = func_lamb(data[:, this_ix], 1) if np.any(this_ix) else np.full(num_channels, np.nan)
     # unit conversion value
     (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
+    # pre-plan plot layout
+    if make_subplots:
+        num_figs = 1
+        num_rows = num_channels
+        num_cols = num_cats if single_lines else 1
+    else:
+        num_figs = num_channels * num_cats if single_lines else num_channels
+        num_cols = 1
+        num_rows = 1
+    if single_lines:
+        titles = [f'{str(e)} {cat_names[cat]} {description}' for cat in ordered_cats for e in elements]
+    else:
+        titles = [f'{str(e)} {description}' for e in elements]
+    num_axes = num_figs * num_rows * num_cols
 
     #% Create plots
-    # create figure(s)
-    if single_plots:
-        titles = [description + ' ' + str(e) for e in elements]
-        figs = [plt.figure() for _ in range(num_channels)]
-    else:
-        titles = [description]
-        figs = [plt.figure()]
-    for (fig, title) in zip(figs, titles):
-        fig.canvas.set_window_title(title)
-
-    # create axes
+    # create figure(s) and axes
+    figs = []
     ax = []
     ax_prim = None
-    for i in range(num_channels):
-        if single_plots:
-            temp_axes = figs[i].add_subplot(1, 1, 1, sharex=ax_prim)
-        else:
-            temp_axes = figs[0].add_subplot(num_channels, 1, i+1, sharex=ax_prim)
-        if ax_prim is None:
-            ax_prim = temp_axes
-        ax.append(temp_axes)
+    for i in range(num_figs):
+        fig = plt.figure()
+        fig.canvas.set_window_title(titles[i])
+        for j in range(num_cols):
+            for k in range(num_rows):
+                temp_axes = fig.add_subplot(num_rows, num_cols, k*num_cols + j + 1, sharex=ax_prim)
+                if ax_prim is None:
+                    ax_prim = temp_axes
+                ax.append(temp_axes)
+        figs.append(fig)
+    assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
 
     # plot data
     for (i, this_axes) in enumerate(ax):
-        # pull out data for this channel
-        this_time = time[i] if time_is_list else time
-        this_data = data[i] if data_is_list else data[i, :]
-        root_label = f'{name} {elements[i]}' if name else str(elements[i])
-        # plot the underlying line once
-        if use_zoh:
-            this_axes.step(this_time, this_data, ':', where='post', label='', color='xkcd:slate', linewidth=1, zorder=2)
+        if single_lines:
+            ix_data = i % num_cats
+            ix_cat  = [i // num_channels]
         else:
-            this_axes.plot(this_time, this_data, ':', label='', color='xkcd:slate', linewidth=1, zorder=2)
-        # loop through categories
-        for (j, cat) in enumerate(ordered_cats):
+            ix_data = i
+            ix_cat  = list(range(num_cats))
+        # pull out data for this channel
+        this_time = time[ix_data] if time_is_list else time
+        this_data = data[ix_data] if data_is_list else data[ix_data, :]
+        root_label = name + ' ' if name else '' + str(elements[ix_data])
+        # plot the full underlying line once
+        if not single_lines:
+            if use_zoh:
+                this_axes.step(this_time, this_data, ':', where='post', \
+                    label='', color='xkcd:slate', linewidth=1, zorder=2)
+            else:
+                this_axes.plot(this_time, this_data, ':', \
+                    label='', color='xkcd:slate', linewidth=1, zorder=2)
+        # plot the data with this category value
+        for j in ix_cat:
+            cat = ordered_cats[j]
             this_cat_name = cat_names[cat]
             if show_rms:
-                value = _LEG_FORMAT.format(leg_conv*data_func[cat][i])
+                value = _LEG_FORMAT.format(leg_conv*data_func[cat][ix_data])
                 if units:
                     this_label = f'{root_label} {this_cat_name} ({func_name}: {value} {new_units})'
                 else:
@@ -1121,8 +1146,10 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
             else:
                 this_label = f'{root_label} {this_cat_name}'
             this_cats = cats == cat
-            this_axes.plot(this_time[this_cats], this_data[this_cats], '.', markersize=6, label=this_label, \
-                color=cm.get_color(j), zorder=3)
+            this_linestyle = '-' if single_lines else 'none'
+            this_color = cm.get_color(ix_data + j*num_channels)
+            this_axes.plot(this_time[this_cats], this_data[this_cats], linestyle=this_linestyle, marker='.', \
+                markersize=6, label=this_label, color=this_color, zorder=3)
 
         # set X display limits
         if i == 0:
@@ -1136,16 +1163,14 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         # format display of plot
         if legend_loc.lower() != 'none':
             this_axes.legend(loc=legend_loc)
-        if i == 0 or single_plots:
-            this_axes.set_title(titles[i])
+        this_axes.set_title(titles[i])
         if (time_is_list and is_datetime(time[0])) or is_datetime(time):
             this_axes.set_xlabel('Date')
-            assert time_units == 'datetime', 'Mismatch in the expected time units.'
+            assert time_units in {'datetime', 'numpy'}, 'Mismatch in the expected time units.'
         else:
             this_axes.set_xlabel(f'Time [{time_units}]{start_date}')
         if ylabel is None:
-            this_description = titles[i] if single_plots else titles[0]
-            this_axes.set_ylabel(f'{this_description} [{units}]')
+            this_axes.set_ylabel(f'{titles[i]} [{units}]')
         else:
             this_ylabel = ylabel[i] if isinstance(ylabel, list) else ylabel
             this_axes.set_ylabel(this_ylabel)
