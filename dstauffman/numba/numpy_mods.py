@@ -12,30 +12,19 @@ import doctest
 from typing import Tuple, Union
 import unittest
 
-from dstauffman.constants import HAVE_NUMBA, HAVE_NUMPY
+from dstauffman import HAVE_NUMPY
+from dstauffman.numba.passthrough import ncjit, List
 
 if HAVE_NUMPY:
     import numpy as np
 
-if HAVE_NUMBA:
-    from numba import njit
-    from numba.typed import List
-else:
-    from dstauffman.constants import fake_decorator
-
-    List = list
-
-    @fake_decorator
-    def njit(func, *args, **kwargs):
-        r"""Fake njit decorator for when numba isn't installed."""
-        return func
-
 #%% _reduce_shape
-@njit(cache=True)
+@ncjit
 def _reduce_shape(shape: Tuple, axis: int) -> List[int]:
     r"""Gives what will be the reduced array shape after applying an operation to the given axis."""
     num = len(shape)
-    assert num > axis, 'The specified axis must be less than the number of dimensions.'
+    if num <= axis:
+        raise ValueError('The specified axis must be less than the number of dimensions.')
     out = List()
     for (i, s) in enumerate(shape):
         if i != axis:
@@ -43,7 +32,7 @@ def _reduce_shape(shape: Tuple, axis: int) -> List[int]:
     return out
 
 #%% issorted_ascend
-@njit(cache=True)
+@ncjit
 def issorted_ascend(x: Union[np.ndarray[int, 1], np.ndarray[float, 1]]) -> bool:
     r"""
     Tells whether the given array is sorted in ascending order or not.
@@ -59,7 +48,7 @@ def issorted_ascend(x: Union[np.ndarray[int, 1], np.ndarray[float, 1]]) -> bool:
 
     Examples
     --------
-    >>> from dstauffman import issorted_ascend
+    >>> from dstauffman.numba import issorted_ascend
     >>> import numpy as np
     >>> x = np.array([1, 3, 3, 5, 7])
     >>> print(issorted_ascend(x))
@@ -73,7 +62,7 @@ def issorted_ascend(x: Union[np.ndarray[int, 1], np.ndarray[float, 1]]) -> bool:
     return np.all(x[:-1] <= x[1:])  # type: ignore[no-any-return]
 
 #%% issorted_descend
-@njit(cache=True)
+@ncjit
 def issorted_descend(x):
     r"""
     Tells whether the given array is sorted in descending order or not.
@@ -89,7 +78,7 @@ def issorted_descend(x):
 
     Examples
     --------
-    >>> from dstauffman import issorted_descend
+    >>> from dstauffman.numba import issorted_descend
     >>> import numpy as np
     >>> x = np.array([1, 3, 3, 5, 7])
     >>> print(issorted_descend(x))
@@ -103,7 +92,7 @@ def issorted_descend(x):
     return np.all(x[1:] <= x[:-1])
 
 #%% Functions - np_all_axis0
-@njit(cache=True)
+@ncjit
 def np_all_axis0(x):
     r"""
     Numba compatible version of np.all(x, axis=0).
@@ -119,7 +108,7 @@ def np_all_axis0(x):
 
     Examples
     --------
-    >>> from dstauffman import np_all_axis0
+    >>> from dstauffman.numba import np_all_axis0
     >>> import numpy as np
     >>> x = np.array([[True, True, False, False], [True, False, True, False]], dtype=np.bool_)
     >>> print(np_all_axis0(x))
@@ -135,7 +124,7 @@ def np_all_axis0(x):
     return out
 
 #%% Functions - np_all_axis1
-@njit(cache=True)
+@ncjit
 def np_all_axis1(x):
     """Numba compatible version of np.all(x, axis=1).
 
@@ -150,7 +139,7 @@ def np_all_axis1(x):
 
     Examples
     --------
-    >>> from dstauffman import np_all_axis1
+    >>> from dstauffman.numba import np_all_axis1
     >>> import numpy as np
     >>> x = np.array([[True, True, False, False], [True, False, True, False]], dtype=np.bool_)
     >>> print(np_all_axis1(x))
@@ -163,7 +152,7 @@ def np_all_axis1(x):
     return out
 
 #%% Functions - np_any_axis0
-@njit(cache=True)
+@ncjit
 def np_any_axis0(x):
     """Numba compatible version of np.any(x, axis=0).
 
@@ -178,7 +167,7 @@ def np_any_axis0(x):
 
     Examples
     --------
-    >>> from dstauffman import np_any_axis0
+    >>> from dstauffman.numba import np_any_axis0
     >>> import numpy as np
     >>> x = np.array([[True, True, False, False], [True, False, True, False]], dtype=np.bool_)
     >>> print(np_any_axis0(x))
@@ -194,7 +183,7 @@ def np_any_axis0(x):
     return out
 
 #%% Functions - np_any_axis1
-@njit(cache=True)
+@ncjit
 def np_any_axis1(x):
     """Numba compatible version of np.any(x, axis=1).
 
@@ -209,7 +198,7 @@ def np_any_axis1(x):
 
     Examples
     --------
-    >>> from dstauffman import np_any_axis1
+    >>> from dstauffman.numba import np_any_axis1
     >>> import numpy as np
     >>> x = np.array([[True, True, False, False], [True, False, True, False]], dtype=np.bool_)
     >>> print(np_any_axis1(x))
@@ -223,5 +212,5 @@ def np_any_axis1(x):
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_numba', exit=False)
+    unittest.main(module='dstauffman.tests.test_numba_numpy_mods', exit=False)
     doctest.testmod(verbose=False)

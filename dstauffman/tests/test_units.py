@@ -87,7 +87,7 @@ class Test_get_factors(unittest.TestCase):
         for (fact, exp_mult, exp_label) in zip(names, mults, labels):
             (mult, label) = dcs.get_factors(fact)
             self.assertAlmostEqual(mult, exp_mult, 14, 'Bad multiplication factor for {}'.format(fact))
-            self.assertAlmostEqual(label, exp_label, 14, 'Bad multiplication factor for {}'.format(fact))
+            self.assertEqual(label, exp_label,'Bad label for {}'.format(fact))
 
 #%% get_time_factor
 class Test_get_time_factor(unittest.TestCase):

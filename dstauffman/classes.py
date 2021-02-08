@@ -28,7 +28,7 @@ if HAVE_H5PY:
 if HAVE_NUMPY:
     from numpy import all as np_all, inf
 else:
-    from dstauffman.optimized import np_all
+    from dstauffman.numba import np_all
     from math import inf
 
 #%% Constants

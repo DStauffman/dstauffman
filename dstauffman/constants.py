@@ -7,7 +7,6 @@ Notes
 """
 
 #%% Imports
-import functools
 import logging
 import os
 import unittest
@@ -15,25 +14,6 @@ import warnings
 
 HAVE_H5PY: bool
 HAVE_NUMPY: bool
-
-#%% Numba decorators
-try:
-    from numba import njit
-    assert njit  # not really used, but it silences the warnings
-    HAVE_NUMBA = True
-except ModuleNotFoundError:
-    # Support for when you don't have numba.  Presumably you either aren't using these functions,
-    # as they will be slow, or you are using pypy instead and it will run the JIT
-    # Go through a bunch of worthless closures to get the necessary stubs
-    HAVE_NUMBA = False
-    def fake_decorator(func):
-        r"""Fake decorator for when numba isn't installed."""
-        @functools.wraps(func)
-        def wrapped_decorator(*args, **kwargs):
-            def real_decorator(func2):
-                return func(func2, *args, **kwargs)
-            return real_decorator
-        return wrapped_decorator
 
 #%% Set flags for optional dependencies
 try:
@@ -54,6 +34,12 @@ try:
     HAVE_MPL = True
 except ModuleNotFoundError:
     HAVE_MPL = False
+try:
+    import numba
+    assert numba  # not really used, but it silences the warnings
+    HAVE_NUMBA = True
+except ModuleNotFoundError:
+    HAVE_NUMBA = False
 try:
     import numpy as np
     HAVE_NUMPY = True

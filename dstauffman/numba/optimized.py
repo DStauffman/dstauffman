@@ -1,48 +1,23 @@
 r"""
-Replacement utilities that are optimized for speed.
+Replacement utilities that are optimized for speed using numba but not numpy.
 
 Notes
 -----
 #.  Written by David C. Stauffer in July 2020.
+#.  Moved into a submodule by David C. Stauffer in February 2021.
 """
 
 #%% Imports
 from __future__ import annotations
 import doctest
 import math
-import sys
 from typing import Sequence
 import unittest
 
-from dstauffman.constants import HAVE_NUMBA
-
-if HAVE_NUMBA:
-    from numba import float64, njit, vectorize
-else:
-    from dstauffman.constants import fake_decorator
-
-    @fake_decorator
-    def njit(func, *args, **kwargs):
-        r"""Fake njit decorator for when numba isn't installed."""
-        return func
-
-    @fake_decorator
-    def vectorize(func, *args, **kwargs):
-        r"""Fake vectorize decorator for when numba isn't installed."""
-        return func
-
-    float64 = lambda x, y: None
-
-#%% Constants
-assert sys.version_info.major == 3, 'Must be Python 3'
-assert sys.version_info.minor >= 8, 'Must be Python v3.8 or higher'
-if sys.version_info.minor > 8:
-    _TARGET = 'parallel'
-else:
-    _TARGET = 'cpu'
+from dstauffman.numba.passthrough import float64, ncjit, vectorize, TARGET
 
 #%% np_any
-@njit(cache=True)
+@ncjit
 def np_any(x: Sequence, /) -> bool:
     r"""
     Returns true if anything in the vector is true.
@@ -60,7 +35,7 @@ def np_any(x: Sequence, /) -> bool:
 
     Examples
     --------
-    >>> from dstauffman import np_any
+    >>> from dstauffman.numba import np_any
     >>> import numpy as np
     >>> x = np.zeros(1000, dtype=bool)
     >>> print(np_any(x))
@@ -77,7 +52,7 @@ def np_any(x: Sequence, /) -> bool:
     return False
 
 #%% np_all
-@njit(cache=True)
+@ncjit
 def np_all(x: Sequence, /) -> bool:
     r"""
     Returns true if everything in the vector is true.
@@ -95,7 +70,7 @@ def np_all(x: Sequence, /) -> bool:
 
     Examples
     --------
-    >>> from dstauffman import np_all
+    >>> from dstauffman.numba import np_all
     >>> import numpy as np
     >>> x = np.ones(1000, dtype=bool)
     >>> print(np_all(x))
@@ -112,7 +87,7 @@ def np_all(x: Sequence, /) -> bool:
     return True
 
 #%% issorted_opt
-@njit(cache=True)
+@ncjit
 def issorted_opt(x: Sequence, /, descend: bool = False) -> bool:
     r"""
     Tells whether the given array is sorted or not.
@@ -130,7 +105,7 @@ def issorted_opt(x: Sequence, /, descend: bool = False) -> bool:
 
     Examples
     --------
-    >>> from dstauffman import issorted_opt
+    >>> from dstauffman.numba import issorted_opt
     >>> import numpy as np
     >>> x = np.array([1, 3, 3, 5, 7])
     >>> print(issorted_opt(x))
@@ -152,7 +127,7 @@ def issorted_opt(x: Sequence, /, descend: bool = False) -> bool:
     return True
 
 #%% Functions - prob_to_rate_opt
-@vectorize([float64(float64, float64)], nopython=True, target=_TARGET, cache=True)  # TODO: can't use optional argument?
+@vectorize([float64(float64, float64)], nopython=True, target=TARGET, cache=True)  # TODO: can't use optional argument?
 def prob_to_rate_opt(prob: float, time: float) -> float:
     r"""
     Convert a given probability and time to a rate.
@@ -175,7 +150,7 @@ def prob_to_rate_opt(prob: float, time: float) -> float:
 
     Examples
     --------
-    >>> from dstauffman import prob_to_rate_opt
+    >>> from dstauffman.numba import prob_to_rate_opt
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
     >>> time = 3
@@ -198,7 +173,7 @@ def prob_to_rate_opt(prob: float, time: float) -> float:
     return -math.log(1 - prob) / time
 
 #%% Functions - rate_to_prob_opt
-@vectorize([float64(float64, float64)], nopython=True, target=_TARGET, cache=True)  # TODO: can't use optional argument?
+@vectorize([float64(float64, float64)], nopython=True, target=TARGET, cache=True)  # TODO: can't use optional argument?
 def rate_to_prob_opt(rate: float, time: float) -> float:
     r"""
     Convert a given rate and time to a probability.
@@ -222,7 +197,7 @@ def rate_to_prob_opt(rate: float, time: float) -> float:
 
     Examples
     --------
-    >>> from dstauffman import rate_to_prob_opt
+    >>> from dstauffman.numba import rate_to_prob_opt
     >>> import numpy as np
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
     >>> time = 1./12
@@ -240,5 +215,5 @@ def rate_to_prob_opt(rate: float, time: float) -> float:
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_optimized', exit=False)
+    unittest.main(module='dstauffman.tests.test_numba_optimized', exit=False)
     doctest.testmod(verbose=False)

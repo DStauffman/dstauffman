@@ -10,23 +10,14 @@ Notes
 import doctest
 import unittest
 
-from dstauffman import HAVE_NUMBA, HAVE_NUMPY, unit
-
-if HAVE_NUMBA:
-    from numba import njit
-else:
-    from dstauffman.numba import fake_decorator
-
-    @fake_decorator
-    def njit(func, *args, **kwargs):
-        r"""Fake njit decorator for when numba isn't installed."""
-        return func
+from dstauffman import HAVE_NUMPY, unit
+from dstauffman.numba import ncjit
 
 if HAVE_NUMPY:
     import numpy as np
 
 #%% Functions - rot
-@njit(cache=True)
+@ncjit
 def rot(axis, angle):
     r"""
     Direction cosine matrix for rotation about a single axis.
@@ -84,7 +75,7 @@ def rot(axis, angle):
     return dcm
 
 #%% Functions - drot
-@njit(cache=True)
+@ncjit
 def drot(axis, angle):
     r"""
     Derivative of transformation matrix for rotation about a single axis.
@@ -141,7 +132,7 @@ def drot(axis, angle):
     return trans
 
 #%% Functions - vec_cross
-@njit(cache=True)
+@ncjit
 def vec_cross(vec):
     r"""
     Returns the equivalent 3x3 matrix that would perform a cross product when multiplied.

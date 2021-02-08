@@ -10,23 +10,14 @@ Notes
 import doctest
 import unittest
 
-from dstauffman import HAVE_NUMBA, HAVE_NUMPY
-
-if HAVE_NUMBA:
-    from numba import njit
-else:
-    from dstauffman.constants import fake_decorator
-
-    @fake_decorator
-    def njit(func, *args, **kwargs):
-        r"""Fake njit decorator for when numba isn't installed."""
-        return func
+from dstauffman import HAVE_NUMPY
+from dstauffman.numba import ncjit
 
 if HAVE_NUMPY:
     import numpy as np
 
 #%% Functions - qrot_single
-@njit(cache=True)
+@ncjit
 def qrot_single(axis, angle):
     r"""
     Construct a quaternion expressing a rotation about a single axis.
@@ -71,7 +62,7 @@ def qrot_single(axis, angle):
     return quat
 
 #%% Functions - quat_interp_single
-@njit(cache=True)
+@ncjit
 def quat_interp_single(time, quat, ti):
     r"""
     Interpolate quaternions from a monotonic time series of quaternions.
@@ -138,7 +129,7 @@ def quat_interp_single(time, quat, ti):
     return qout
 
 #%% Functions - quat_inv_single
-@njit(cache=True)
+@ncjit
 def quat_inv_single(q1):
     r"""
     Return the inverse of a normalized quaternions.
@@ -175,7 +166,7 @@ def quat_inv_single(q1):
     return q1 * np.array([-1., -1., -1., 1.])
 
 #%% Functions - quat_mult_single
-@njit(cache=True)
+@ncjit
 def quat_mult_single(a, b):
     r"""
     Multiply quaternions together.
@@ -234,7 +225,7 @@ def quat_mult_single(a, b):
     return c
 
 #%% Functions - quat_norm_single
-@njit(cache=True)
+@ncjit
 def quat_norm_single(x):
     r"""
     Normalize each column of the input matrix.
@@ -274,7 +265,7 @@ def quat_norm_single(x):
     return y
 
 #%% Functions - quat_times_vector_single
-@njit(cache=True)
+@ncjit
 def quat_times_vector_single(quat, v):
     r"""
     Multiply quaternion(s) against vector(s).
@@ -323,7 +314,7 @@ def quat_times_vector_single(quat, v):
     return vec
 
 #%% Functions - quat_to_dcm
-@njit(cache=True)
+@ncjit
 def quat_to_dcm(quat):
     r"""
     Convert quaternion to a direction cosine matrix.

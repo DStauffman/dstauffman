@@ -238,7 +238,7 @@ def get_legend_conversion(prefix: Union[str, int, float], units: str) -> Tuple[f
 
     """
     (temp, label) = get_factors(prefix)
-    if (units == 'rad' or units == '') and 'arc' in prefix:
+    if (units == 'rad' or units == '') and (isinstance(prefix, str) and 'arc' in prefix):
         new_units = label
     else:
         if label:

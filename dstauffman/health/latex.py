@@ -11,7 +11,8 @@ from math import isinf, isnan
 from typing import List, Union
 import unittest
 
-from dstauffman import MONTHS_PER_YEAR, prob_to_rate_opt
+from dstauffman.numba import prob_to_rate_opt
+from dstauffman import MONTHS_PER_YEAR
 
 #%% Functions - make_preamble
 def make_preamble(caption: str, label: str, cols: str, size: str = r'\small', *, \
