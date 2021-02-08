@@ -9,7 +9,7 @@ Notes
 #%% Imports
 import unittest
 
-import dstauffman.numba as dcsnb
+import dstauffman.numba as nub
 
 try:
     import numba
@@ -26,24 +26,24 @@ class Test_types(unittest.TestCase):
         float64, int32
     """
     def test_types(self):
-        self.assertIs(dcsnb.float64, numba.float64)
-        self.assertIs(dcsnb.int32, numba.int32)
+        self.assertIs(nub.float64, numba.float64)
+        self.assertIs(nub.int32, numba.int32)
 
     def test_decorators(self):
-        self.assertIs(dcsnb.jit, numba.jit)
-        self.assertIs(dcsnb.njit, numba.njit)
-        self.assertIs(dcsnb.vectorize, numba.vectorize)
+        self.assertIs(nub.jit, numba.jit)
+        self.assertIs(nub.njit, numba.njit)
+        self.assertIs(nub.vectorize, numba.vectorize)
 
     def test_lists(self):
         from numba.typed import List
-        self.assertIs(dcsnb.List, List)
+        self.assertIs(nub.List, List)
 
     def test_experimental(self):
         from numba.experimental import jitclass
-        self.assertIs(dcsnb.jitclass, jitclass)
+        self.assertIs(nub.jitclass, jitclass)
 
     def test_callables(self):
-        self.assertTrue(callable(dcsnb.ncjit))
+        self.assertTrue(callable(nub.ncjit))
 
 #%% Unit test execution
 if __name__ == '__main__':

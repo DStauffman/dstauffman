@@ -10,7 +10,7 @@ Notes
 import unittest
 
 from dstauffman import HAVE_NUMPY
-import dstauffman.numba as dcsnb
+import dstauffman.numba as nub
 
 if HAVE_NUMPY:
     import numpy as np
@@ -35,19 +35,19 @@ class Test_np_any(unittest.TestCase):
     @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_false(self) -> None:
         x = np.zeros(1000, dtype=bool)
-        self.assertFalse(dcsnb.np_any(x))
+        self.assertFalse(nub.np_any(x))
 
     @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_true(self) -> None:
         x = np.zeros(1000, dtype=bool)
         x[333] = True
-        self.assertTrue(dcsnb.np_any(x))
+        self.assertTrue(nub.np_any(x))
 
     def test_lists(self) -> None:
         x = List([False for i in range(1000)])
-        self.assertFalse(dcsnb.np_any(x))
+        self.assertFalse(nub.np_any(x))
         x[333] = True
-        self.assertTrue(dcsnb.np_any(x))
+        self.assertTrue(nub.np_any(x))
 
 #%% np_all
 class Test_np_all(unittest.TestCase):
@@ -59,19 +59,19 @@ class Test_np_all(unittest.TestCase):
     @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_true(self) -> None:
         x = np.ones(1000, dtype=bool)
-        self.assertTrue(dcsnb.np_all(x))
+        self.assertTrue(nub.np_all(x))
 
     @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_false(self) -> None:
         x = np.ones(1000, dtype=bool)
         x[333] = False
-        self.assertFalse(dcsnb.np_all(x))
+        self.assertFalse(nub.np_all(x))
 
     def test_lists(self) -> None:
         x = List([True for i in range(1000)])
-        self.assertTrue(dcsnb.np_all(x))
+        self.assertTrue(nub.np_all(x))
         x[333] = False
-        self.assertFalse(dcsnb.np_all(x))
+        self.assertFalse(nub.np_all(x))
 
 #%% issorted_opt
 class Test_issorted_opt(unittest.TestCase):
@@ -85,23 +85,23 @@ class Test_issorted_opt(unittest.TestCase):
     @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_sorted(self) -> None:
         x = np.array([1, 3, 3, 5, 7])
-        self.assertTrue(dcsnb.issorted_opt(x))
+        self.assertTrue(nub.issorted_opt(x))
 
     @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_not_sorted(self) -> None:
         x = np.array([1, 4, 3, 5, 7])
-        self.assertFalse(dcsnb.issorted_opt(x))
+        self.assertFalse(nub.issorted_opt(x))
 
     @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_reverse_sorted(self) -> None:
         x = np.array([4, np.pi, 1., -1.])
-        self.assertFalse(dcsnb.issorted_opt(x))
-        self.assertTrue(dcsnb.issorted_opt(x, descend=True))
+        self.assertFalse(nub.issorted_opt(x))
+        self.assertTrue(nub.issorted_opt(x, descend=True))
 
     def test_lists(self) -> None:
         x = List([-inf, 0, 1, pi, 5, inf])
-        self.assertTrue(dcsnb.issorted_opt(x))
-        self.assertFalse(dcsnb.issorted_opt(x, descend=True))
+        self.assertTrue(nub.issorted_opt(x))
+        self.assertFalse(nub.issorted_opt(x, descend=True))
 
 #%% prob_to_rate_opt
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -121,32 +121,32 @@ class Test_prob_to_rate_opt(unittest.TestCase):
 
     @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
     def test_conversion(self) -> None:
-        rate = dcsnb.prob_to_rate_opt(self.prob, self.time)
+        rate = nub.prob_to_rate_opt(self.prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
 
     def test_scalar(self) -> None:
-        rate = dcsnb.prob_to_rate_opt(self.prob[15], self.time)
+        rate = nub.prob_to_rate_opt(self.prob[15], self.time)
         self.assertAlmostEqual(rate, self.rate[15])
-        rate = dcsnb.prob_to_rate_opt(float(self.prob[15]), self.time)
+        rate = nub.prob_to_rate_opt(float(self.prob[15]), self.time)
         self.assertAlmostEqual(rate, float(self.rate[15]))
-        rate = dcsnb.prob_to_rate_opt(1, 1)
+        rate = nub.prob_to_rate_opt(1, 1)
         self.assertEqual(rate, np.inf)
-        rate = dcsnb.prob_to_rate_opt(0, 1)
+        rate = nub.prob_to_rate_opt(0, 1)
         self.assertEqual(rate, 0.)
 
     def test_lt_zero(self) -> None:
         with self.assertRaises(ValueError):
-            dcsnb.prob_to_rate_opt(np.array([0., 0.5, -1.]), 1.)
+            nub.prob_to_rate_opt(np.array([0., 0.5, -1.]), 1.)
 
     def test_gt_one(self) -> None:
         with self.assertRaises(ValueError):
-            dcsnb.prob_to_rate_opt(np.array([0., 0.5, 1.5]), 1.)
+            nub.prob_to_rate_opt(np.array([0., 0.5, 1.5]), 1.)
 
     @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
     def test_circular(self) -> None:
-        rate = dcsnb.prob_to_rate_opt(self.prob, self.time)
+        rate = nub.prob_to_rate_opt(self.prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
-        prob = dcsnb.rate_to_prob_opt(rate, self.time)
+        prob = nub.rate_to_prob_opt(rate, self.time)
         np.testing.assert_array_almost_equal(prob, self.prob)
 
 #%% rate_to_prob_opt
@@ -167,32 +167,32 @@ class Test_rate_to_prob_opt(unittest.TestCase):
 
     @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
     def test_conversion(self) -> None:
-        prob = dcsnb.rate_to_prob_opt(self.rate, self.time)
+        prob = nub.rate_to_prob_opt(self.rate, self.time)
         np.testing.assert_array_almost_equal(prob, self.prob)
 
     def test_scalar(self) -> None:
-        prob = dcsnb.rate_to_prob_opt(self.rate[20], self.time)
+        prob = nub.rate_to_prob_opt(self.rate[20], self.time)
         self.assertAlmostEqual(prob, self.prob[20])
-        prob = dcsnb.rate_to_prob_opt(float(self.rate[20]), self.time)
+        prob = nub.rate_to_prob_opt(float(self.rate[20]), self.time)
         self.assertAlmostEqual(prob, float(self.prob[20]))
-        prob = dcsnb.rate_to_prob_opt(0, 1)
+        prob = nub.rate_to_prob_opt(0, 1)
         self.assertEqual(prob, 0.)
-        prob = dcsnb.rate_to_prob_opt(np.inf, 1)
+        prob = nub.rate_to_prob_opt(np.inf, 1)
         self.assertEqual(prob, 1)
 
     def test_lt_zero(self) -> None:
         with self.assertRaises(ValueError):
-            dcsnb.rate_to_prob_opt(np.array([0., 0.5, -1.]), 1)
+            nub.rate_to_prob_opt(np.array([0., 0.5, -1.]), 1)
 
     def test_infinity(self) -> None:
-        prob = dcsnb.rate_to_prob_opt(np.inf, 1)
+        prob = nub.rate_to_prob_opt(np.inf, 1)
         self.assertAlmostEqual(prob, 1.)
 
     @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
     def test_circular(self) -> None:
-        prob = dcsnb.rate_to_prob_opt(self.rate, self.time)
+        prob = nub.rate_to_prob_opt(self.rate, self.time)
         np.testing.assert_array_almost_equal(prob, self.prob)
-        rate = dcsnb.prob_to_rate_opt(prob, self.time)
+        rate = nub.prob_to_rate_opt(prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
 
 #%% Unit test execution
