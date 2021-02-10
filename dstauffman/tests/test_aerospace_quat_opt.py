@@ -174,6 +174,32 @@ class Test_aerospace_quat_norm_single(unittest.TestCase):
         self.assertEqual(quat_norm.ndim, 1)
         np.testing.assert_array_equal(quat_norm.shape, self.q3_out.shape)
 
+#%% aerospace.quat_prop_single
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+class Test_aerospace_quat_prop_single(unittest.TestCase):
+    r"""
+    Tests the aerospace.quat_prop_single function with the following cases:
+        Nominal case
+        Negative scalar
+    """
+    def setUp(self) -> None:
+        self.quat      = np.array([0, 0, 0, 1])
+        self.delta_ang = np.array([0.01, 0.02, 0.03])
+        self.quat_new  = np.array([0.005, 0.01, 0.015, 1.0])
+        self.quat_new_norm = np.array([0.00499912522962, 0.00999825045924, 0.01499737568886, 0.99982504592411])
+
+    def test_nominal(self) -> None:
+        quat = space.quat_prop_single(self.quat, self.delta_ang)
+        np.testing.assert_array_almost_equal(quat, self.quat_new, 12)
+        quat_norm = space.quat_norm_single(quat)
+        np.testing.assert_array_almost_equal(quat_norm, self.quat_new_norm, 12)
+
+    def test_negative_scalar(self) -> None:
+        quat = space.quat_prop_single(np.array([1, 0, 0, 0]), self.delta_ang)
+        self.assertGreater(quat[3], 0)
+        quat = space.quat_prop_single(np.array([1, 0, 0, 0]), -self.delta_ang)
+        self.assertGreater(quat[3], 0)
+
 #%% aerospace.quat_times_vector_single
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_times_vector_single(unittest.TestCase):

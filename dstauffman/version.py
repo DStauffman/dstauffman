@@ -7,4 +7,17 @@ Notes
 """
 
 #%% Constants
-version_info = (2, 1, 2)
+version_info = (2, 2, 0)
+
+# Below is data about the minor release history for potential use in deprecating older support.
+# For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html
+
+data = """Nov 18, 2020: dstauffman 2.0
+Jan 11, 2021: dstauffman 2.1
+Feb 09, 2021: dstauffman 2.2
+"""
+
+# Historical notes:
+# v2.0 Supported running with only core python and started consistent versioning system.
+# v2.1 Improved support for plotting datetimes, tracking versions, and using numba.
+# v2.2 Split numba tools into a submodule allowing better support with and without numba.

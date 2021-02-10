@@ -264,6 +264,64 @@ def quat_norm_single(x):
     y = x / np.sqrt(np.sum(x*x, axis=0))
     return y
 
+#%% Functions - quat_prop_single
+def quat_prop_single(quat, delta_ang):
+    r"""
+    Approximate propagation of a quaternion using a small delta angle.
+
+    Parameters
+    ----------
+    quat : ndarray, (4, 1)
+        normalized input quaternion
+    delta_ang : ndarray, (3, 1)
+        delta angles in x, y, z order [rad]
+
+    Returns
+    -------
+    quat_new : ndarray, (4, 1)
+        propagated quaternion, optionally re-normalized
+
+    See Also
+    --------
+    quat_mult_single, quat_inv_single, quat_norm_single, quat_times_vector_single, quat_to_dcm
+
+    Notes
+    -----
+    #.  Adapted from GARSE by David C. Stauffer in April 2015.
+    #.  Optimized for numba by David C. Stauffer in February 2021.
+    #.  Note that this version does not renormalize the quaternion.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import quat_norm_single, quat_prop_single
+    >>> import numpy as np
+    >>> quat      = np.array([0, 0, 0, 1])
+    >>> delta_ang = np.array([0.01, 0.02, 0.03])
+    >>> quat_new  = quat_prop_single(quat, delta_ang)
+    >>> print(quat_new)  # doctest: +NORMALIZE_WHITESPACE
+    [0.005 0.01 0.015 1. ]
+
+    >>> quat_new_norm = quat_norm_single(quat_new)
+    >>> with np.printoptions(precision=8):
+    ...     print(quat_new_norm) # doctest: +NORMALIZE_WHITESPACE
+    [0.00499913  0.00999825  0.01499738  0.99982505]
+
+    """
+    #compute angle rate matrix
+    omega = np.array([ \
+        [      0      ,   delta_ang[2],   -delta_ang[1],   delta_ang[0]], \
+        [-delta_ang[2],        0      ,    delta_ang[0],   delta_ang[1]], \
+        [ delta_ang[1],  -delta_ang[0],        0       ,   delta_ang[2]], \
+        [-delta_ang[0],  -delta_ang[1],   -delta_ang[2],        0      ]])
+    #compute delta quaternion
+    delta_quaternion = 0.5 * omega @ quat
+    # propagate over delta
+    quat_new = quat + delta_quaternion
+    # ensure positive scalar component
+    if quat_new[3] < 0:
+        quat_new *= -1
+    return quat_new
+
 #%% Functions - quat_times_vector_single
 @ncjit
 def quat_times_vector_single(quat, v):

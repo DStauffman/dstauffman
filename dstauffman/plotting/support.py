@@ -330,22 +330,27 @@ def get_color_lists(return_as_colormap: bool = False) -> Union[Dict[str, Union[c
 
     """
     color_lists: Dict[str, Union[colors.ListedColormap, str]] = {}
-    color_lists['default']   = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
-    first_color              = ColorMap(color_lists['default'], num_colors=1).get_color(0)
-    color_lists['same']      = colors.ListedColormap([first_color for _ in range(8)])
-    color_lists['same_old']  = colors.ListedColormap(['#1f77b4' for _ in range(8)])
-    color_lists['single']    = colors.ListedColormap(('xkcd:red', ))
-    color_lists['double']    = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
-    color_lists['vec']       = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
-    color_lists['quat']      = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
-    color_lists['dbl_diff']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:cyan', 'xkcd:red', 'xkcd:blue'))
-    color_lists['vec_diff']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan',
-        'xkcd:red', 'xkcd:green', 'xkcd:blue'))
-    color_lists['quat_diff'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan',
-        'xkcd:brown', 'xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
-    color_lists['dbl_off']   = colors.ListedColormap(color_lists['dbl_diff'].colors[:2])  # type: ignore[union-attr]
-    color_lists['vec_off']   = colors.ListedColormap(color_lists['vec_diff'].colors[:3])  # type: ignore[union-attr]
-    color_lists['quat_off']  = colors.ListedColormap(color_lists['quat_diff'].colors[:4])  # type: ignore[union-attr]
+    color_lists['default']     = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
+    # single colors
+    first_color                = ColorMap(color_lists['default'], num_colors=1).get_color(0)
+    color_lists['same']        = colors.ListedColormap([first_color for _ in range(8)])
+    color_lists['same_old']    = colors.ListedColormap(['#1f77b4' for _ in range(8)])
+    color_lists['single']      = colors.ListedColormap(('xkcd:red', ))
+    # doubles
+    color_lists['double']      = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
+    color_lists['dbl_off']     = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:cyan'))
+    color_lists['dbl_diff']    = colors.ListedColormap(color_lists['dbl_off'].colors + color_lists['double'].colors)  # type: ignore[union-attr]
+    color_lists['dbl_diff_r']  = colors.ListedColormap(color_lists['double'].colors + color_lists['dbl_off'].colors)  # type: ignore[union-attr]
+    # triples
+    color_lists['vec']         = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
+    color_lists['vec_off']     = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan'))
+    color_lists['vec_diff']    = colors.ListedColormap(color_lists['vec_off'].colors + color_lists['vec'].colors)  # type: ignore[union-attr]
+    color_lists['vec_diff_r']  = colors.ListedColormap(color_lists['vec'].colors + color_lists['vec_off'].colors)  # type: ignore[union-attr]
+    # quads
+    color_lists['quat']        = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
+    color_lists['quat_off']    = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan', 'xkcd:brown'))
+    color_lists['quat_diff']   = colors.ListedColormap(color_lists['quat_off'].colors + color_lists['quat'].colors)  # type: ignore[union-attr]
+    color_lists['quat_diff_r'] = colors.ListedColormap(color_lists['quat'].colors + color_lists['quat_off'].colors)  # type: ignore[union-attr]
     if return_as_colormap:
         color_list_maps: Dict[str, ColorMap] = {}
         for (key, value) in color_lists.items():

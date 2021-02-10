@@ -1091,9 +1091,9 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         num_cols = 1
         num_rows = 1
     if single_lines:
-        titles = [f'{str(e)} {cat_names[cat]} {description}' for cat in ordered_cats for e in elements]
+        titles = [f'{description} {cat_names[cat]} {e}' for cat in ordered_cats for e in elements]
     else:
-        titles = [f'{str(e)} {description}' for e in elements]
+        titles = [f'{description} {e}' for e in elements]
     num_axes = num_figs * num_rows * num_cols
 
     #% Create plots
@@ -1116,7 +1116,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     # plot data
     for (i, this_axes) in enumerate(ax):
         if single_lines:
-            ix_data = i % num_cats
+            ix_data = i % num_channels
             ix_cat  = [i // num_channels]
         else:
             ix_data = i
@@ -1124,7 +1124,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         # pull out data for this channel
         this_time = time[ix_data] if time_is_list else time
         this_data = data[ix_data] if data_is_list else data[ix_data, :]
-        root_label = name + ' ' if name else '' + str(elements[ix_data])
+        root_label = name if name else '' + str(elements[ix_data])
         # plot the full underlying line once
         if not single_lines:
             if use_zoh:
@@ -1147,22 +1147,11 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
                 this_label = f'{root_label} {this_cat_name}'
             this_cats = cats == cat
             this_linestyle = '-' if single_lines else 'none'
-            this_color = cm.get_color(ix_data + j*num_channels)
+            this_color = cm.get_color(j + ix_data*num_cats)
             this_axes.plot(this_time[this_cats], this_data[this_cats], linestyle=this_linestyle, marker='.', \
                 markersize=6, label=this_label, color=this_color, zorder=3)
 
-        # set X display limits
-        if i == 0:
-            disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
-            xlim = this_axes.get_xlim()
-        this_axes.set_xlim(xlim)
-        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
-        # set Y display limits
-        if plot_zero:
-            show_zero_ylim(this_axes)
-        # format display of plot
-        if legend_loc.lower() != 'none':
-            this_axes.legend(loc=legend_loc)
+        # set title and axes labels
         this_axes.set_title(titles[i])
         if (time_is_list and is_datetime(time[0])) or is_datetime(time):
             this_axes.set_xlabel('Date')
@@ -1172,7 +1161,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         if ylabel is None:
             this_axes.set_ylabel(f'{titles[i]} [{units}]')
         else:
-            this_ylabel = ylabel[i] if isinstance(ylabel, list) else ylabel
+            this_ylabel = ylabel[ix_data] if isinstance(ylabel, list) else ylabel
             this_axes.set_ylabel(this_ylabel)
         this_axes.grid(True)
         # optionally add second Y axis
@@ -1180,6 +1169,19 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         # plot RMS lines
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'])
+
+    # set X display limits
+    disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
+    for this_axes in ax:
+        xlim = this_axes.get_xlim()
+        this_axes.set_xlim(xlim)
+        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
+        # set Y display limits
+        if plot_zero:
+            show_zero_ylim(this_axes)
+        # format display of plot
+        if legend_loc.lower() != 'none':
+            this_axes.legend(loc=legend_loc)
 
     return figs
 

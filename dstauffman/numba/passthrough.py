@@ -21,6 +21,7 @@ if HAVE_NUMBA:
 
     # always cached version of njit, which is also jit(cache=True, nopython=True)
     def ncjit(func, *args, **kwargs):
+        r"""Fake decorator for when numba isn't installed."""
         return njit(func, cache=True, *args, **kwargs)
 
     # target for vectorized functions
@@ -37,6 +38,9 @@ else:
         r"""Fake decorator for when numba isn't installed."""
         @functools.wraps(func)
         def wrapped_decorator(*args, **kwargs):
+            if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
+                # must treat this differently if no arguments were passed
+                return func(args[0])
             def real_decorator(func2):
                 return func(func2, *args, **kwargs)
             return real_decorator
@@ -45,16 +49,16 @@ else:
     # fake constants
     TARGET = ''
 
-    # fake types
-    List = list
-    int32 = int
-    float64 = float
-
     # fake decorators
     @_fake_decorator
     def jit(func, *args, **kwargs):
-        r"""Fake njit decorator for when numba isn't installed."""
+        r"""Fake jit decorator for when numba isn't installed."""
         return func
+
+    # fake types
+    List = list
+    int32 = jit  # int as a callable with multiple args?
+    float64 = jit  # float as a callable with multiple args?
 
     njit = jit
     ncjit = jit

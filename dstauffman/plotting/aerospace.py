@@ -713,7 +713,8 @@ def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
 #%% plot_innovations
 def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, \
-        plot_by_status=False, show_one=None, show_two=None, cat_names=None, **kwargs):
+        plot_by_status=False, plot_by_number=False, show_one=None, show_two=None, cat_names=None, \
+        cat_colors=None, number_field=None, number_colors=None, **kwargs):
     r"""
     Plots the Kalman Filter innovation histories.
 
@@ -733,12 +734,20 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         Name of the innovation fields to plot
     plot_by_status : bool, optional, default is False
         Whether to make an additional plot of all innovations by status (including rejected ones)
+    plot_by_number : bool, optional, default is False
+        Whether to plot innovations by number (qua/SCA etc.)
     show_one : ndarray of bool, optional
         Index to the innovations to plot from kf1, shows all if not given
     show_two : ndarray of bool, optional
         Index to the innovations to plot from kf2, shows all if not given
-    cat_names : list of str, optional
+    cat_names : dict[int, str], optional
         Name of the different possible categories for innovation status, otherwise uses their numeric values
+    cat_colors : list or colormap, optional
+        colors to use on the categories plot
+    number_field : dict[int, str], optional
+        Field name and label to use for plotting by number (quat/SCA etc.)
+    number_colors : list or colormap, optional
+        colors to use on the quad/SCA number plot
     kwargs : dict
         Additional arguments passed on to the lower level plotting functions
 
@@ -793,11 +802,13 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         opts = Opts()
     if fields is None:
         fields = {'innov': 'Innovations', 'norm': 'Normalized Innovations'}
+    if number_field is None:
+        number_field = {'quad': 'Quad', 'sca': 'SCA'}
 
     # aliases and defaults
     name_one      = kwargs.pop('name_one', kf1.name)
     name_two      = kwargs.pop('name_two', kf2.name)
-    description   = name_one + ' ' if name_one else name_two + ' ' if name_two else ''
+    description   = name_one if name_one else name_two if name_two else ''
     num_chan      = kf1.innov.shape[0] if kf1.innov is not None else kf2.innov.shape[0] if kf2.innov is not None else 0
     elements      = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
     elements      = kwargs.pop('elements', elements)
@@ -830,11 +841,11 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     disp_xmax    = kwargs.pop('disp_xmax', this_opts.disp_xmax)
     sub_plots    = kwargs.pop('make_subplots', this_opts.sub_plots)
     single_lines = kwargs.pop('single_lines', this_opts.sing_line)
-    single_plots = kwargs.pop('single_plots', True)
     use_mean     = kwargs.pop('use_mean', this_opts.use_mean)
     plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
     show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
+    colormap     = kwargs.pop('colormap', this_opts.colormap)
     tolerance    = kwargs.pop('tolerance', 0)
 
     # Initialize outputs
@@ -876,7 +887,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
             rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
             single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
-            second_yscale=this_second_yscale, return_err=return_err, tolerance=tolerance, **kwargs)
+            second_yscale=this_second_yscale, colormap=colormap, return_err=return_err, \
+            tolerance=tolerance, **kwargs)
         if return_err:
             figs += out[0]
             err[field] = out[1]
@@ -886,15 +898,44 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         if plot_by_status and field_one is not None and kf1.status is not None:
             figs += make_categories_plot(full_description+' by Category', kf1.time, field_one, kf1.status, \
                 name=name_one, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
-                start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-                use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_plots=single_plots, \
-                legend_loc=legend_loc, leg_scale=this_leg_scale, second_yscale=this_second_yscale, ylabel=this_ylabel, **kwargs)
+                start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
+                disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
+                show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
+                second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=cat_colors, **kwargs)
         if plot_by_status and field_two is not None and kf2.status is not None:
             figs += make_categories_plot(full_description+' by Category', kf2.time, field_two, kf2.status, \
                 name=name_two, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
-                start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-                use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_plots=single_plots, \
-                legend_loc=legend_loc, leg_scale=this_leg_scale, second_yscale=this_second_yscale, ylabel=this_ylabel, **kwargs)
+                start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
+                disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
+                show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
+                second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=cat_colors, **kwargs)
+        if plot_by_number and field_one is not None:
+            for (quad, quad_name) in number_field.items():
+                if hasattr(kf1, quad):
+                    this_number = getattr(kf1, quad)
+                    break
+            if this_number is not None:
+                num_names = {num: quad_name + ' ' + str(num) for num in np.unique(this_number)}
+                figs += make_categories_plot(full_description+' by '+quad_name, kf1.time, field_one, this_number, \
+                    name=name_one, cat_names=num_names, elements=elements, units=units, time_units=time_units, \
+                    start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
+                    disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
+                    show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
+                    second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=number_colors, **kwargs)
+        if plot_by_status and field_two is not None:
+            for (quad, quad_name) in number_field.items():
+                if hasattr(kf2, quad):
+                    this_number = getattr(kf2, quad)
+                    break
+            if this_number is not None:
+                num_names = {num: quad_name + ' ' + str(num) for num in np.unique(this_number)}
+                figs += make_categories_plot(full_description+' by '+quad_name, kf2.time, field_two, this_number, \
+                    name=name_two, cat_names=num_names, elements=elements, units=units, time_units=time_units, \
+                    start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
+                    disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
+                    show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
+                    second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=number_colors, **kwargs)
+
     # Setup plots
     setup_plots(figs, opts)
     if printed:

@@ -612,16 +612,19 @@ class Test_aerospace_quat_prop(unittest.TestCase):
     r"""
     Tests the aerospace.quat_prop function with the following cases:
         Nominal case
+        Negative scaler
         No renormalization case (Raises norm AttributeError)
+        No renormalization with suppressed warning
     """
     def setUp(self) -> None:
         self.quat      = np.array([0, 0, 0, 1])
         self.delta_ang = np.array([0.01, 0.02, 0.03])
-        self.quat_new  = np.array([0.00499913, 0.00999825, 0.01499738, 0.99982505])
+        self.quat_new  = np.array([0.00499912522962, 0.00999825045924, 0.01499737568886, 0.99982504592411])
+        self.quat_unnorm = np.array([0.005, 0.01, 0.015, 1.])
 
     def test_nominal(self) -> None:
         quat = space.quat_prop(self.quat, self.delta_ang)
-        np.testing.assert_array_almost_equal(quat, self.quat_new)
+        np.testing.assert_array_almost_equal(quat, self.quat_new, 12)
 
     def test_negative_scalar(self) -> None:
         quat = space.quat_prop(np.array([1, 0, 0, 0]), self.delta_ang)
@@ -632,6 +635,10 @@ class Test_aerospace_quat_prop(unittest.TestCase):
     def test_no_renorm(self) -> None:
         with self.assertRaises(AssertionError):
             space.quat_prop(self.quat, self.delta_ang, renorm=False)
+
+    def test_no_renorm_suppress(self) -> None:
+        quat = space.quat_prop(self.quat, self.delta_ang, renorm=False, skip_assertions=True)
+        np.testing.assert_array_almost_equal(quat, self.quat_unnorm, 12)
 
 #%% aerospace.quat_times_vector
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
