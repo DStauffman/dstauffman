@@ -240,13 +240,13 @@ def zero_divide(num: float, den: float) -> float:
     --------
     >>> from dstauffman.numba import zero_divide
     >>> print(zero_divide(1., .2))
-    0.5
+    5.0
 
     >>> print(zero_divide(3.14, 0.))
-    0.
+    0.0
 
     >>> print(zero_divide(0., 0.))
-    0.
+    0.0
 
     """
     if den == 0.:
