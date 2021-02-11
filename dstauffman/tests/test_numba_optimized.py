@@ -195,6 +195,49 @@ class Test_rate_to_prob_opt(unittest.TestCase):
         rate = nub.prob_to_rate_opt(prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
 
+#%% zero_divide
+class Test_zero_divide(unittest.TestCase):
+    r"""
+    Tests the zero_divide function with the following cases:
+        Scalars
+        Vectors
+        Broadcasting1
+        Broadcasting2
+    """
+    def test_scalars(self) -> None:
+        self.assertEqual(nub.zero_divide(1, 2), 0.5)
+        self.assertEqual(nub.zero_divide(5, 0), 0.)
+        self.assertEqual(nub.zero_divide(0, 0), 0.)
+        self.assertEqual(nub.zero_divide(1., 2.), 0.5)
+        self.assertEqual(nub.zero_divide(5., 0.), 0.)
+        self.assertEqual(nub.zero_divide(0., 0.), 0.)
+
+    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+    def test_vectors(self) -> None:
+        out = nub.zero_divide(np.array([4., 3.14, 0.]), np.array([2., 0., 0.]))
+        exp = np.array([2., 0., 0.])
+        np.testing.assert_array_equal(out, exp)
+        out = nub.zero_divide(np.array([0, -1, -2]), np.array([1, 0, 2]))
+        np.testing.assert_array_equal(out, np.array([0, 0, -1]))
+
+    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+    def test_broadcasting1(self) -> None:
+        out = nub.zero_divide(np.array([4., 3.14, 0.]), 2.)
+        exp = np.array([2., 1.57, 0.])
+        np.testing.assert_array_equal(out, exp)
+        out = nub.zero_divide(np.array([4., 3.14, 0.]), 0.)
+        exp = np.array([0., 0., 0.])
+        np.testing.assert_array_equal(out, exp)
+
+    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+    @unittest.skip('Numba broadcasting seems to fail here.')
+    def test_broadcasting2(self) -> None:
+        vec = np.array([[1., 0., 0.], [3., 4., 0.], [0., 0., 0.]]).T
+        mag = np.array([1., 5., 0.])
+        exp = np.array([[1., 0., 0.], [0.6, 0.8, 0.], [0., 0., 0.]]).T
+        out = nub.zero_divide(vec, mag)
+        np.testing.assert_array_equal(out, exp)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

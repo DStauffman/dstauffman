@@ -14,7 +14,7 @@ import math
 from typing import Sequence
 import unittest
 
-from dstauffman.numba.passthrough import float64, ncjit, vectorize, TARGET
+from dstauffman.numba.passthrough import float32, float64, int32, int64, ncjit, vectorize, TARGET
 
 #%% np_any
 @ncjit
@@ -127,7 +127,7 @@ def issorted_opt(x: Sequence, /, descend: bool = False) -> bool:
     return True
 
 #%% Functions - prob_to_rate_opt
-@vectorize([float64(float64, float64)], nopython=True, target=TARGET, cache=True)  # TODO: can't use optional argument?
+@vectorize([float64(float64, float64)], nopython=True, target=TARGET, cache=True)
 def prob_to_rate_opt(prob: float, time: float) -> float:
     r"""
     Convert a given probability and time to a rate.
@@ -173,7 +173,7 @@ def prob_to_rate_opt(prob: float, time: float) -> float:
     return -math.log(1 - prob) / time
 
 #%% Functions - rate_to_prob_opt
-@vectorize([float64(float64, float64)], nopython=True, target=TARGET, cache=True)  # TODO: can't use optional argument?
+@vectorize([float64(float64, float64)], nopython=True, target=TARGET, cache=True)
 def rate_to_prob_opt(rate: float, time: float) -> float:
     r"""
     Convert a given rate and time to a probability.
@@ -212,6 +212,46 @@ def rate_to_prob_opt(rate: float, time: float) -> float:
         raise ValueError('Rate must be >= 0')
     # calculate probability
     return 1 - math.exp(-rate * time)
+
+#%% Functions - zero_divide
+@vectorize([float64(float64, float64), float32(float32, float32), float32(int32, int32), \
+    float64(int64, int64)], nopython=True, target=TARGET, cache=True)
+def zero_divide(num: float, den: float) -> float:
+    r"""
+    Numba compatible version of np.divide(num, den, out=np.zeros_like(num), where=den!=0)
+
+    Parameters
+    ----------
+    num : float
+        Numerator
+    den : float
+        Denominator
+
+    Returns
+    -------
+    float
+        result of divison, except return zero for anything divided by zero, including 0/0
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in February 2021.
+
+    Examples
+    --------
+    >>> from dstauffman.numba import zero_divide
+    >>> print(zero_divide(1., .2))
+    0.5
+
+    >>> print(zero_divide(3.14, 0.))
+    0.
+
+    >>> print(zero_divide(0., 0.))
+    0.
+
+    """
+    if den == 0.:
+        return 0.
+    return num / den
 
 #%% Unit test
 if __name__ == '__main__':
