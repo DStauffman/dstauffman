@@ -14,7 +14,6 @@ from dstauffman import HAVE_NUMPY
 
 if HAVE_NUMPY:
     import numpy as np
-    from numpy.linalg import norm, svd
 
 #%% orth
 def orth(A):
@@ -70,7 +69,7 @@ def orth(A):
 
     """
     # compute the SVD
-    (Q, S, _) = svd(A, full_matrices=False)
+    (Q, S, _) = np.linalg.svd(A, full_matrices=False)
     # calculate a tolerance based on the first eigenvalue (instead of just using a small number)
     tol = np.max(A.shape) * S[0] * np.finfo(float).eps
     # sum the number of eigenvalues that are greater than the calculated tolerance
@@ -129,7 +128,7 @@ def subspace(A, B):
     # compute the projection according to Ref 1
     B = B - A @ (A.T @ B)
     # make sure it's magnitude is less than 1 and compute arcsin
-    theta = np.arcsin(np.minimum(1, norm(B)))
+    theta = np.arcsin(np.minimum(1, np.linalg.norm(B)))
     return theta
 
 #%% mat_divide

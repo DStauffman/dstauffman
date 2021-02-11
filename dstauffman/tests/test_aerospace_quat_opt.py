@@ -9,7 +9,7 @@ Notes
 #%% Imports
 import unittest
 
-from dstauffman import HAVE_NUMPY
+from dstauffman import HAVE_NUMBA, HAVE_NUMPY
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -183,7 +183,7 @@ class Test_aerospace_quat_prop_single(unittest.TestCase):
         Negative scalar
     """
     def setUp(self) -> None:
-        self.quat      = np.array([0, 0, 0, 1])
+        self.quat      = np.array([0., 0., 0., 1.])
         self.delta_ang = np.array([0.01, 0.02, 0.03])
         self.quat_new  = np.array([0.005, 0.01, 0.015, 1.0])
         self.quat_new_norm = np.array([0.00499912522962, 0.00999825045924, 0.01499737568886, 0.99982504592411])
@@ -195,9 +195,9 @@ class Test_aerospace_quat_prop_single(unittest.TestCase):
         np.testing.assert_array_almost_equal(quat_norm, self.quat_new_norm, 12)
 
     def test_negative_scalar(self) -> None:
-        quat = space.quat_prop_single(np.array([1, 0, 0, 0]), self.delta_ang)
+        quat = space.quat_prop_single(np.array([1., 0., 0., 0.]), self.delta_ang)
         self.assertGreater(quat[3], 0)
-        quat = space.quat_prop_single(np.array([1, 0, 0, 0]), -self.delta_ang)
+        quat = space.quat_prop_single(np.array([1., 0., 0., 0.]), -self.delta_ang)
         self.assertGreater(quat[3], 0)
 
 #%% aerospace.quat_times_vector_single
@@ -213,6 +213,7 @@ class Test_aerospace_quat_times_vector_single(unittest.TestCase):
         self.vec  = np.array([[1, 0, 0], [2, 0, 0]]).T
         self.out  = np.array([[-1, 2], [0, 0], [0, 0]])
 
+    @unittest.skipIf(HAVE_NUMBA, 'Skipping until numba supports @ for matrix multiplication for integers.')
     def test_integers(self) -> None:
         for i in range(2):
             vec = space.quat_times_vector_single(self.quat[:, i], self.vec[:, i])

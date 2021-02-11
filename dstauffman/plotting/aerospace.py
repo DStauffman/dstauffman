@@ -43,7 +43,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True, \
         legend_loc='best', show_extra=True, second_yscale=None, truth_name='Truth', \
         truth_time=None, truth_data=None, data_as_rows=True, tolerance=0, return_err=False, \
-        use_zoh=False):
+        use_zoh=False, label_vert_lines=True):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
@@ -110,6 +110,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         Whether the function should return the error differences in addition to the figure handles
     use_zoh : bool, optional, default is False
         Whether to plot as a zero-order hold, instead of linear interpolation between data points
+    label_vert_lines : bool, optional, default is True
+        Whether to label the RMS start/stop lines in the legend (if legend is shown)
 
     Returns
     -------
@@ -135,36 +137,37 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> from datetime import datetime
-    >>> description     = 'example'
-    >>> time_one        = np.arange(11)
-    >>> time_two        = np.arange(2, 13)
-    >>> quat_one        = quat_norm(np.random.rand(4, 11))
-    >>> quat_two        = quat_norm(quat_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] + 1e-5 * np.random.rand(4, 11))
-    >>> name_one        = 'test1'
-    >>> name_two        = 'test2'
-    >>> time_units      = 'sec'
-    >>> leg_scale       = 'unity'
-    >>> start_date      = str(datetime.now())
-    >>> plot_components = True
-    >>> rms_xmin        = 1
-    >>> rms_xmax        = 10
-    >>> disp_xmin       = -2
-    >>> disp_xmax       = np.inf
-    >>> make_subplots   = True
-    >>> single_lines    = False
-    >>> use_mean        = False
-    >>> plot_zero       = False
-    >>> show_rms        = True
-    >>> legend_loc      = 'best'
-    >>> show_extra      = True
-    >>> second_yscale   = {u'µrad': 1e6}
-    >>> truth_name      = 'Truth'
-    >>> truth_time      = None
-    >>> truth_data      = None
-    >>> data_as_rows    = True
-    >>> tolerance       = 0
-    >>> return_err      = False
-    >>> use_zoh         = False
+    >>> description      = 'example'
+    >>> time_one         = np.arange(11)
+    >>> time_two         = np.arange(2, 13)
+    >>> quat_one         = quat_norm(np.random.rand(4, 11))
+    >>> quat_two         = quat_norm(quat_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] + 1e-5 * np.random.rand(4, 11))
+    >>> name_one         = 'test1'
+    >>> name_two         = 'test2'
+    >>> time_units       = 'sec'
+    >>> leg_scale        = 'unity'
+    >>> start_date       = str(datetime.now())
+    >>> plot_components  = True
+    >>> rms_xmin         = 1
+    >>> rms_xmax         = 10
+    >>> disp_xmin        = -2
+    >>> disp_xmax        = np.inf
+    >>> make_subplots    = True
+    >>> single_lines     = False
+    >>> use_mean         = False
+    >>> plot_zero        = False
+    >>> show_rms         = True
+    >>> legend_loc       = 'best'
+    >>> show_extra       = True
+    >>> second_yscale    = {u'µrad': 1e6}
+    >>> truth_name       = 'Truth'
+    >>> truth_time       = None
+    >>> truth_data       = None
+    >>> data_as_rows     = True
+    >>> tolerance        = 0
+    >>> return_err       = False
+    >>> use_zoh          = False
+    >>> label_vert_lines = True
     >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     name_one=name_one, name_two=name_two, time_units=time_units, leg_scale=leg_scale, \
     ...     start_date=start_date, plot_components=plot_components, rms_xmin=rms_xmin, \
@@ -172,7 +175,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     ...     single_lines=single_lines, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
     ...     legend_loc=legend_loc, show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, \
     ...     truth_data=truth_data, data_as_rows=data_as_rows, tolerance=tolerance, \
-    ...     return_err=return_err, use_zoh=use_zoh)
+    ...     return_err=return_err, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
     Close plots
     >>> for fig in fig_hand:
@@ -409,7 +412,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         this_axes.grid(True)
         # plot RMS lines
         if show_rms:
-            plot_vert_lines(this_axes, ix['pts'])
+            plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
 
     if return_err:
         return (fig_hand, err)
@@ -735,7 +738,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     plot_by_status : bool, optional, default is False
         Whether to make an additional plot of all innovations by status (including rejected ones)
     plot_by_number : bool, optional, default is False
-        Whether to plot innovations by number (qua/SCA etc.)
+        Whether to plot innovations by number (quad/SCA etc.)
     show_one : ndarray of bool, optional
         Index to the innovations to plot from kf1, shows all if not given
     show_two : ndarray of bool, optional
@@ -745,7 +748,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     cat_colors : list or colormap, optional
         colors to use on the categories plot
     number_field : dict[int, str], optional
-        Field name and label to use for plotting by number (quat/SCA etc.)
+        Field name and label to use for plotting by number (quad/SCA etc.)
     number_colors : list or colormap, optional
         colors to use on the quad/SCA number plot
     kwargs : dict
@@ -922,7 +925,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
                     disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
                     show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
                     second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=number_colors, **kwargs)
-        if plot_by_status and field_two is not None:
+        if plot_by_number and field_two is not None:
             for (quad, quad_name) in number_field.items():
                 if hasattr(kf2, quad):
                     this_number = getattr(kf2, quad)

@@ -26,10 +26,11 @@ from dstauffman.utils import find_in_range
 if HAVE_H5PY:
     import h5py
 if HAVE_NUMPY:
-    from numpy import all as np_all, inf
+    from numpy import all as np_all, ndarray, inf, printoptions
 else:
     from dstauffman.numba import np_all
     from math import inf
+    from array import array as ndarray
 
 #%% Constants
 _T = TypeVar('_T')
@@ -193,7 +194,7 @@ def load_method(cls: Type[_T], filename: str = '', use_hdf5: bool = True) -> _T:
 
 #%% pprint_dict
 def pprint_dict(dct: Dict[Any, Any], *, name: str='', indent: int = 1, align: bool = True, \
-        disp: bool = True, offset: int = 0) -> str:
+        disp: bool = True, offset: int = 0, max_elements=None) -> str:
     r"""
     Print all the fields and their values.
 
@@ -211,6 +212,8 @@ def pprint_dict(dct: Dict[Any, Any], *, name: str='', indent: int = 1, align: bo
         Whether to display the text to the screen
     offset : int, optional, default is 0
         Additional offset for recursive calls
+    max_elements : int, optional, default is None meaning don't change
+        Maximum number of elements to show in array, if zero, then only show shape of array
 
     Notes
     -----
@@ -243,7 +246,7 @@ def pprint_dict(dct: Dict[Any, Any], *, name: str='', indent: int = 1, align: bo
             this_name = f'{this_key} (class {this_value.__class__.__name__})'
             try:
                 this_line = this_value.pprint(name=this_name, indent=indent, align=align, \
-                    disp=False, return_text=True, offset=offset+indent)
+                    disp=False, return_text=True, offset=offset+indent, max_elements=max_elements)
             except:
                 # TODO: do I need this check or just let it fail?
                 warnings.warn('pprint recursive call failed, reverting to default.')
@@ -251,7 +254,17 @@ def pprint_dict(dct: Dict[Any, Any], *, name: str='', indent: int = 1, align: bo
                 this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
         else:
             this_pad = ' ' * (pad_len - len(this_key)) if align else ''
-            this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
+            if max_elements is None or not HAVE_NUMPY:
+                this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
+            else:
+                if max_elements == 0:
+                    if isinstance(this_value, ndarray):
+                        this_line = f'{this_indent}{this_key}{this_pad} = <ndarray {this_value.dtype} {this_value.shape}>'
+                    else:
+                        this_line = f'{this_indent}{this_key}{this_pad} = {type(this_value)}'
+                else:
+                    with printoptions(threshold=max_elements):
+                        this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
         lines.append(this_line)
     text = '\n'.join(lines)
     if disp:

@@ -11,6 +11,7 @@ import doctest
 import unittest
 
 from dstauffman import HAVE_NUMPY
+from dstauffman.aerospace.vectors import vec_cross
 from dstauffman.numba import ncjit
 
 if HAVE_NUMPY:
@@ -265,6 +266,7 @@ def quat_norm_single(x):
     return y
 
 #%% Functions - quat_prop_single
+@ncjit
 def quat_prop_single(quat, delta_ang):
     r"""
     Approximate propagation of a quaternion using a small delta angle.
@@ -295,7 +297,7 @@ def quat_prop_single(quat, delta_ang):
     --------
     >>> from dstauffman.aerospace import quat_norm_single, quat_prop_single
     >>> import numpy as np
-    >>> quat      = np.array([0, 0, 0, 1])
+    >>> quat      = np.array([0., 0., 0., 1.])
     >>> delta_ang = np.array([0.01, 0.02, 0.03])
     >>> quat_new  = quat_prop_single(quat, delta_ang)
     >>> print(quat_new)  # doctest: +NORMALIZE_WHITESPACE
@@ -366,9 +368,9 @@ def quat_times_vector_single(quat, v):
     [-1. 0. 0.]
 
     """
-    qv = np.cross(quat[:3], v)
-    vec = v + 2*(np.full(3, -quat[3]) * qv + \
-        np.cross(quat[:3], qv))
+    skew = vec_cross(quat[:3])
+    qv = skew @ v
+    vec = v + 2*(-quat[3] * qv + (skew @ qv))
     return vec
 
 #%% Functions - quat_to_dcm

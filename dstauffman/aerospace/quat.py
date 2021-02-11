@@ -577,7 +577,7 @@ def quat_inv(q1, **kwargs):
         q2 = q1 * np.array([-1, -1, -1, 1])
     else:
         # general case
-        q2 = np.concatenate((-q1[0, :], -q1[1, :], -q1[2, :], q1[3, :]), axis=0).reshape(QUAT_SIZE, q1.shape[1])
+        q2 = np.vstack((-q1[0, :], -q1[1, :], -q1[2, :], q1[3, :]))
     quat_assertions(q2, **kwargs)
     return q2
 
@@ -650,7 +650,7 @@ def quat_mult(a, b, **kwargs):
             [-a[0], -a[1], -a[2],  a[3]]]) @ b
         # enforce positive scalar component
         if c[3] < 0:
-            c = -c
+            c = np.negative(c, out=c)
     # vectorized inputs
     else:
         # alias the rows

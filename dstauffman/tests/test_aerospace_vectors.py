@@ -90,6 +90,11 @@ class Test_aerospace_vec_cross(unittest.TestCase):
         c = mat @ self.b
         np.testing.assert_array_equal(c, self.c)
 
+    def test_floats(self) -> None:
+        mat = space.vec_cross(self.a.astype(float))
+        c = mat @ self.b.astype(float)
+        np.testing.assert_array_equal(c, self.c)
+
 #%% aerospace.vec_angle
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_vec_angle(unittest.TestCase):
