@@ -85,8 +85,10 @@ class Test_estimation_mat_divide(unittest.TestCase):
         a = np.array([[1e6, 1e6], [1e6, 1e6 + 1e-8]], dtype=float)
         exp = np.array([1, -1], dtype=float)
         b = a @ exp
-        x = estm.mat_divide(a, b, rcond=1e-6)
-        np.testing.assert_array_almost_equal(x, exp, 2)
+        x1 = estm.mat_divide(a, b, rcond=1e-16)
+        x2 = estm.mat_divide(a, b, rcond=1e-6)
+        np.testing.assert_array_almost_equal(x1, exp, 2)
+        np.testing.assert_array_almost_equal(x2, np.zeros(2), 2)
 
 #%% Unit test execution
 if __name__ == '__main__':
