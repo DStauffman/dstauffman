@@ -177,7 +177,7 @@ def mat_divide(a, b, rcond=None):
     [ 1. -1.]
 
     """
-    return np.linalg.lstsq(a, b, rcond=None)[0]
+    return np.linalg.lstsq(a, b, rcond=rcond)[0]
 
 #%% Unit test
 if __name__ == '__main__':

@@ -232,6 +232,7 @@ def vec_angle(vec1, vec2, use_cross=True, normalized=True):
     return np.where(dot_result > np.pi/2, np.pi - cross_result, cross_result)
 
 #%% Functions - cart2shp
+@ncjit
 def cart2sph(x, y, z):
     r"""
     Converts cartesian X, Y, Z components to spherical Az, El, Radius.
@@ -271,6 +272,7 @@ def cart2sph(x, y, z):
     return (az, el, rad)
 
 #%% Functions - sph2cart
+@ncjit
 def sph2cart(az, el, rad):
     r"""
     Converts spherical Az, El and Radius to cartesian X, Y, Z components.
