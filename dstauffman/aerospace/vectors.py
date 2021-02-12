@@ -231,7 +231,7 @@ def vec_angle(vec1, vec2, use_cross=True, normalized=True):
     cross_result = np.arcsin(np.sqrt(np.sum(cross_prod ** 2, axis=0)))
     return np.where(dot_result > np.pi/2, np.pi - cross_result, cross_result)
 
-#%% Functions - cart2shp
+#%% Functions - cart2sph
 @ncjit
 def cart2sph(x, y, z):
     r"""

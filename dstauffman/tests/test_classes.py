@@ -161,6 +161,21 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(lines[2], ' bb  = 2')
         self.assertEqual(lines[3], ' ccc = 3')
 
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    def test_max_elements(self) -> None:
+        self.dct['a'] = np.arange(10)
+        text1 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements = 2)
+        text2 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements = 20)
+        text3 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements = 0)
+        lines1 = text1.split('\n')
+        lines2 = text2.split('\n')
+        lines3 = text3.split('\n')
+        self.assertEqual(lines1[1], ' a   = [0 1 2 ... 7 8 9]')
+        self.assertEqual(lines2[1], ' a   = [0 1 2 3 4 5 6 7 8 9]')
+        self.assertEqual(lines3[1], ' a   = <ndarray int32 (10,)>')
+        self.assertEqual(lines3[2], " bb  = <class 'int'>")
+        self.assertEqual(lines3[3], " ccc = <class 'int'>")
+
 #%% chop_time
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_chop_time(unittest.TestCase):
