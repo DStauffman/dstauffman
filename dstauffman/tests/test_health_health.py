@@ -267,5 +267,5 @@ class Test_health_icer(unittest.TestCase):
 
 #%% Unit test execution
 if __name__ == '__main__':
-    suppress_plots
+    suppress_plots()
     unittest.main(exit=False)
