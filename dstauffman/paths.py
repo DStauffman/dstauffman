@@ -90,7 +90,7 @@ def get_tests_dir() -> str:
     >>> folder = get_tests_dir()
 
     """
-    # this  folder is the 'tests' subfolder
+    # this folder is the 'tests' subfolder
     folder = os.path.join(get_root_dir(), 'tests')
     return folder
 

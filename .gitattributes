@@ -5,6 +5,8 @@
 *.m text diff=matlab merge
 *.py text diff=python merge
 *.pyx text diff=python merge
+*.f text diff=fortran merge
+*.f90 text diff=fortran merge
 *.coveragerc text
 *.css text
 *.gitattributes text
@@ -13,10 +15,12 @@
 *.html text
 *.ini text
 *.md text
+*.prj text
 *.php text
 *.rst text
 *.tex text
 *.txt text
+*.make text
 
 # Windows specific files to always have CRLF
 *.bat text eol=crlf
