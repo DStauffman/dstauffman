@@ -274,8 +274,21 @@ class Test_rms(unittest.TestCase):
         np.testing.assert_array_almost_equal(out, self.outputs4c)
 
     def test_all_nans(self) -> None:
-        out = dcs.rms(np.array([np.nan, np.nan]), ignore_nans=True)
+        x = np.full((4, 3), np.nan)
+        out = dcs.rms(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
+        out = dcs.rms(x, axis=0, ignore_nans=True)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (3, ))
+        out = dcs.rms(x, axis=1, ignore_nans=True)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (4, ))
+        out = dcs.rms(x, axis=0, ignore_nans=True, keepdims=True)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (1, 3))
+        out = dcs.rms(x, axis=1, ignore_nans=True, keepdims=True)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (4, 1))
 
 #%% rss
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -378,8 +391,21 @@ class Test_rss(unittest.TestCase):
         np.testing.assert_array_almost_equal(out, self.outputs4c)
 
     def test_all_nans(self) -> None:
-        out = dcs.rss(np.array([np.nan, np.nan]), ignore_nans=True)
+        x = np.full((4, 3), np.nan)
+        out = dcs.rss(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
+        out = dcs.rss(x, axis=0, ignore_nans=True)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (3, ))
+        out = dcs.rss(x, axis=1, ignore_nans=True)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (4, ))
+        out = dcs.rss(x, axis=0, ignore_nans=True, keepdims=True)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (1, 3))
+        out = dcs.rss(x, axis=1, ignore_nans=True, keepdims=True)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (4, 1))
 
 #%% compare_two_classes
 class Test_compare_two_classes(unittest.TestCase):

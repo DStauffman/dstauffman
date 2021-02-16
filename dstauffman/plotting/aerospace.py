@@ -913,6 +913,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
                 show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
                 second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=cat_colors, **kwargs)
         if plot_by_number and field_one is not None:
+            this_number = None
             for (quad, quad_name) in number_field.items():
                 if hasattr(kf1, quad):
                     this_number = getattr(kf1, quad)
@@ -926,6 +927,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
                     show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
                     second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=number_colors, **kwargs)
         if plot_by_number and field_two is not None:
+            this_number = None
             for (quad, quad_name) in number_field.items():
                 if hasattr(kf2, quad):
                     this_number = getattr(kf2, quad)

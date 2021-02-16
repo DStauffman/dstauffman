@@ -227,7 +227,14 @@ def rms(data, axis=None, keepdims=False, ignore_nans=False):
     else:
         # check for all NaNs case
         if np.all(np.isnan(data)):
-            out = np.nan
+            if axis is None:
+                out = np.nan
+            else:
+                if keepdims:
+                    shape = (*data.shape[:axis], 1, *data.shape[axis+1:])
+                else:
+                    shape = (*data.shape[:axis], *data.shape[axis+1:])
+                out = np.full(shape, np.nan)
         else:
             out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))
     # return the result
@@ -277,7 +284,14 @@ def rss(data, axis=None, keepdims=False, ignore_nans=False):
     else:
         # check for all NaNs case
         if np.all(np.isnan(data)):
-            out = np.nan
+            if axis is None:
+                out = np.nan
+            else:
+                if keepdims:
+                    shape = (*data.shape[:axis], 1, *data.shape[axis+1:])
+                else:
+                    shape = (*data.shape[:axis], *data.shape[axis+1:])
+                out = np.full(shape, np.nan)
         else:
             out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
     # return the result
