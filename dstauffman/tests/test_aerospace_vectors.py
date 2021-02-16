@@ -200,7 +200,7 @@ class Test_aerospace_cart2sph(unittest.TestCase):
     """
     pass  # TODO: write this
 
-#%% aerospace.shp2cart
+#%% aerospace.sph2cart
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_sph2cart(unittest.TestCase):
     r"""
@@ -208,6 +208,31 @@ class Test_aerospace_sph2cart(unittest.TestCase):
         TBD
     """
     pass  # TODO: write this
+
+#%% aerospace.rv2dcm
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+class Test_aerospace_rv2dcm(unittest.TestCase):
+    r"""
+    Tests the aerospace.rv2dcm function with the following cases:
+        Each axis
+        Non-unity vector
+    """
+    def test_simple_rots(self) -> None:
+        for axis in range(1, 4):
+            for angle in [0., 1., -1., np.pi/6, np.pi/4, np.pi, 2*np.pi, -3*np.pi/2]:
+                vec = np.zeros(3)
+                vec[axis-1] = angle
+                dcm = space.rv2dcm(vec)
+                exp = space.rot(axis, angle)
+                np.testing.assert_array_almost_equal(dcm, exp, decimal=14)
+
+    def test_complex(self) -> None:
+        vec  = np.array([np.sqrt(2)/2, 0, np.sqrt(2)/2])
+        dcm  = space.rv2dcm(vec)
+        mag  = np.sqrt(np.sum(vec ** 2))
+        quat = space.quat_norm(np.hstack((vec/mag*np.sin(mag/2), np.cos(mag/2))))
+        exp  = space.quat_to_dcm(quat)
+        np.testing.assert_array_almost_equal(dcm, exp, decimal=14)
 
 #%% Unit test execution
 if __name__ == '__main__':

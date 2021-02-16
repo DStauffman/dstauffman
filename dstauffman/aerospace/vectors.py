@@ -315,6 +315,52 @@ def sph2cart(az, el, rad):
     z = rad * np.sin(el)
     return (x, y, z)
 
+#%% Funcctions - rv2dcm
+@ncjit
+def rv2dcm(vec):
+    r"""
+    Convert a rotation vector into a direction cosine matrix.
+
+    Parameters
+    ----------
+    vec : (3, ) ndarray
+        Rotation vector
+
+    Returns
+    -------
+    dcm : (3, 3) ndarray
+        Direction Cosine Matrix
+
+    Notes
+    -----
+    #.  Written by Jason Hull in July 2008.
+    #.  Translated from Matlab into Python by David C. Stauffer in January 2021.
+    #.  The rotation vector `vec` defines the Euler rotation axis, and its magnitude defines then
+        Euler rotation angle.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import rv2dcm
+    >>> import numpy as np
+    >>> vec = np.array([np.pi/2, 0., 0.])
+    >>> dcm = rv2dcm(vec)
+    >>> print(np.array_str(dcm, precision=4, suppress_small=True))
+    [[ 1.  0.  0.]
+     [ 0.  0.  1.]
+     [ 0. -1.  0.]]
+
+    """
+    dcm = np.eye(3)
+    # Use np.dot instead of np.inner here as they are the same for 1D arrays, and np.dot compiles with numba
+    mag = np.sqrt(np.dot(vec, vec))
+    if mag != 0:
+        v = vec / mag
+        c = np.cos(mag)
+        s = np.sin(mag)
+        dcm *= c
+        dcm += -s*vec_cross(v) + (1 - c) * np.outer(v, v)
+    return dcm
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='dstauffman.tests.test_aerospace_vectors', exit=False)

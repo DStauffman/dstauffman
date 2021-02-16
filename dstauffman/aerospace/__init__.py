@@ -17,7 +17,7 @@ from .quat       import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks,
 from .quat_opt   import qrot_single, quat_interp_single, quat_inv_single, quat_mult_single, \
                             quat_norm_single, quat_prop_single, quat_times_vector_single, \
                             quat_to_dcm
-from .vectors    import rot, drot, vec_cross, vec_angle, cart2sph, sph2cart
+from .vectors    import rot, drot, vec_cross, vec_angle, cart2sph, sph2cart, rv2dcm
 
 #%% Unittest
 if __name__ == '__main__':
