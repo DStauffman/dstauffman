@@ -441,6 +441,41 @@ class Test_health_rand_draw(unittest.TestCase):
         self.assertFalse(is_set[0])
         self.assertTrue(is_set[2])
 
+#%% health.ecdf
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+class Test_health_ecdf(unittest.TestCase):
+    r"""
+    Tests the health.ecdf function with the following cases:
+        Nominal
+        Integers
+        List
+        Not unique
+    """
+    def test_nominal(self):
+        y = np.random.rand(10000)
+        (x, f) = health.ecdf(y)
+        dt = x[1] - x[0]
+        exp = np.arange(x[0], x[-1]+dt, dt)
+        np.testing.assert_array_almost_equal(f, exp, 2)
+
+    def test_integers(self):
+        y = np.array([0, 0, 0, 1, 1])
+        (x, f) = health.ecdf(y)
+        np.testing.assert_array_almost_equal(x, np.array([0.6, 1.]), 14)
+        np.testing.assert_array_equal(f, np.array([0, 1]))
+
+    def test_list(self):
+        y = [0, 0.1, 0.2, 0.8, 0.9, 1.0]
+        (x, f) = health.ecdf(y)
+        np.testing.assert_array_almost_equal(x, np.arange(1, 7)/6, 14)
+        np.testing.assert_array_equal(f, y)
+
+    def test_unique(self):
+        y = np.array([0., 0., 0., 0.5, 0.5, 0.5, 1.])
+        (x, f) = health.ecdf(y)
+        np.testing.assert_array_almost_equal(x, np.array([3/7, 6/7, 1.]), 14)
+        np.testing.assert_array_equal(f, np.array([0., 0.5, 1.]))
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

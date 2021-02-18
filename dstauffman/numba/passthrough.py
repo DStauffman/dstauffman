@@ -15,9 +15,10 @@ import unittest
 from dstauffman import HAVE_NUMBA
 
 if HAVE_NUMBA:
-    from numba import float32, float64, int32, int64, jit, njit, vectorize
-    from numba.typed import List
+    from numba import boolean, deferred_type, float32, float64, int32, int64, jit, njit, \
+        optional, vectorize
     from numba.experimental import jitclass
+    from numba.typed import List
 
     # always cached version of njit, which is also jit(cache=True, nopython=True)
     def ncjit(func, *args, **kwargs):
@@ -56,16 +57,19 @@ else:
         return func
 
     # fake types
-    List = list
-    int32 = jit  # int as a callable with multiple args?
-    int64 = jit
+    List    = list
+    boolean = jit
     float32 = jit
     float64 = jit  # float as a callable with multiple args?
+    int32   = jit  # int as a callable with multiple args?
+    int64   = jit
 
-    njit = jit
-    ncjit = jit
-    jitclass = jit
-    vectorize = jit
+    deferred_type = jit
+    jitclass      = jit
+    njit          = jit
+    ncjit         = jit
+    optional      = jit
+    vectorize     = jit
 
 #%% Unit test
 if __name__ == '__main__':

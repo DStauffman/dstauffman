@@ -1052,6 +1052,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         if x not in cat_names:
             cat_names[x] = 'Status='+str(x)
     ordered_cats = [x for x in cat_names if x in unique_cats]
+    cat_keys = np.array(list(cat_names.keys()), dtype=int)
 
     # calculate sizes
     temp1 = len(time) if time_is_list else 1
@@ -1076,7 +1077,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     else:
         ix = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
     # create a colormap
-    cm = ColorMap(colormap=colormap, num_colors=num_cats*num_channels)
+    cm = ColorMap(colormap=colormap, num_colors=len(cat_keys)*num_channels)
     # calculate the rms (or mean) values
     if show_rms:
         if not use_mean:
@@ -1161,7 +1162,10 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
                 this_label = f'{root_label} {this_cat_name}'
             this_cats = cats == cat
             this_linestyle = '-' if single_lines else 'none'
-            this_color = cm.get_color(j + ix_data*num_cats)
+            # Note: Use len(cat_keys) here instead of num_cats so that potentially missing categories
+            # won't mess up th ecolor scheme by skipping colors
+            this_cat_ix = np.argmax(cat == cat_keys)
+            this_color = cm.get_color(this_cat_ix + ix_data*len(cat_keys))
             this_axes.plot(this_time[this_cats], this_data[this_cats], linestyle=this_linestyle, marker='.', \
                 markersize=6, label=this_label, color=this_color, zorder=3)
 

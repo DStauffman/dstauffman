@@ -494,6 +494,42 @@ def rand_draw(chances, prng, *, check_bounds=True):
     is_set[chances >= 1] = True
     return is_set
 
+#%% Functions - ecdf
+def ecdf(y, /):
+    r"""
+    Calculate the empirical cumulative distribution function, as in Matlab's ecdf function.
+
+    Parameters
+    ----------
+    array_like of float
+        Input samples
+
+    Returns
+    -------
+    x : ndarray of float
+        cumulative probability
+    f : ndarray of float
+        function values evaluated at the points returned in x
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in February 2021.
+
+    Examples
+    --------
+    >>> from dstauffman.health import ecdf
+    >>> import numpy as np
+    >>> y = np.random.rand(1000)
+    >>> (x, f) = ecdf(y)
+    >>> exp = np.arange(0.001, 1.001, 0.001)
+    >>> print(np.max(np.abs(f - exp)) < 0.05)
+    True
+
+    """
+    f, counts = np.unique(y, return_counts=True)
+    x = np.cumsum(counts) / np.size(y)
+    return (x, f)
+
 #%% Unit test
 if __name__ == '__main__':
     unittest.main(module='dstauffman.tests.test_health_stats', exit=False)

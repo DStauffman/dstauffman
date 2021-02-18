@@ -13,7 +13,7 @@ from .latex  import make_preamble, make_conclusion, bins_to_str_ranges, latex_st
 from .stats  import convert_annual_to_monthly_probability, convert_monthly_to_annual_probability, \
                         ca2mp, cm2ap, prob_to_rate, rate_to_prob, \
                         annual_rate_to_monthly_probability, monthly_probability_to_annual_rate, \
-                        ar2mp, mp2ar, combine_sets, bounded_normal_draw, rand_draw
+                        ar2mp, mp2ar, combine_sets, bounded_normal_draw, rand_draw, ecdf
 
 #%% Unittest
 if __name__ == '__main__':
