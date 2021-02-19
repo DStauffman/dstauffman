@@ -26,17 +26,22 @@ class Test_types(unittest.TestCase):
         float64, int32
     """
     def test_types(self):
-        self.assertIs(nub.float64, numba.float64)
+        self.assertIs(nub.boolean, numba.boolean)
         self.assertIs(nub.int32, numba.int32)
+        self.assertIs(nub.int64, numba.int64)
+        self.assertIs(nub.float32, numba.float32)
+        self.assertIs(nub.float64, numba.float64)
 
     def test_decorators(self):
         self.assertIs(nub.jit, numba.jit)
         self.assertIs(nub.njit, numba.njit)
         self.assertIs(nub.vectorize, numba.vectorize)
 
-    def test_lists(self):
+    def test_more_types(self):
         from numba.typed import List
         self.assertIs(nub.List, List)
+        self.assertIs(nub.deferred_type, numba.deferred_type)
+        self.assertIs(nub.optional, numba.optional)
 
     def test_experimental(self):
         from numba.experimental import jitclass
