@@ -18,6 +18,8 @@ from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits
     plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
 
 if HAVE_MPL:
+    from matplotlib.collections import LineCollection
+    from matplotlib.colors import to_rgba
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -667,7 +669,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     have_both     = have_data_one and have_data_two
     have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
     if not have_data_one and not have_data_two:
-        logger.log(LogLevel.L5, f'No difference data was provided, so no plot was generated for "{description}".')
+        logger.log(LogLevel.L5, 'No difference data was provided, so no plot was generated for "%s".', description)
         # TODO: return NaNs instead of None for this case?
         out = ([], {'one': None, 'two': None, 'diff': None}) if return_err else []
         return out
@@ -1202,6 +1204,97 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
             this_axes.legend(loc=legend_loc)
 
     return figs
+
+#%% make_connected_sets
+def make_connected_sets(description, points, innovs, *, color_by='none', center_origin=False, \
+        legend_loc='best', units=''):
+    r"""
+    Plots two sets of X-Y pairs, with lines drawn between them.
+
+    Parameters
+    ----------
+    #TODO
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        Figure handle
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import make_connected_sets
+    >>> import numpy as np
+    >>> description = 'Focal Plane Sightings'
+    >>> points = np.array([[0.1, 0.6, 0.7], [1.1, 1.6, 1.7]])
+    >>> innovs = 5*np.array([[0.01, 0.02, 0.03], [-0.01, -0.015, -0.01]])
+    >>> fig = make_connected_sets(description, points, innovs)
+
+    >>> points2 = 2 * np.random.rand(2, 100) - 1.
+    >>> innovs2 = 0.1 * np.random.randn(*points2.shape)
+    >>> fig2 = make_connected_sets(description, points2, innovs2, color_by='quad')
+
+    >>> fig3 = make_connected_sets(description, points2, innovs2, color_by='mag')
+
+    >>> import matplotlib.pyplot as plt
+    >>> plt.close(fig)
+    >>> plt.close(fig2)
+    >>> plt.close(fig3)
+
+    """
+    # hard-coded defaults
+    colors_meas = 'xkcd:black'
+    if color_by == 'none':
+        colors_line = 'xkcd:red'
+        colors_pred = 'xkcd:blue'
+        extra_text  = ''
+    elif color_by == 'quad':
+        temp_colors = tuple(to_rgba(x) for x in ('xkcd:red', 'xkcd:blue', 'xkcd:green', 'xkcd:orange'))
+        quad_ix     = np.where(innovs[0, :] >= 0, 0, 1) + np.where(innovs[1, :] >= 0, 0, 2)
+        colors_line = tuple(temp_colors[x] for x in quad_ix)
+        colors_pred = colors_line
+        extra_text  = ' (Colored by direction)'
+    elif color_by == 'mag':
+        innov_mags  = np.sqrt(np.sum(innovs**2, axis=0))
+        max_innov   = np.max(innov_mags)
+        innov_cmap  = ColorMap(colormap='autumn_r', low=0, high=max_innov)
+        colors_line = tuple(innov_cmap.get_color(x) for x in innov_mags)
+        colors_pred = colors_line
+        extra_text  = ' (Colored by magnitude)'
+    else:
+        raise ValueError(f'Unexpected value for color_by of "{color_by}"')
+
+    # calculations
+    predicts = points - innovs
+
+    # create figure
+    fig = plt.figure()
+    fig.canvas.set_window_title(description + extra_text)
+    ax = fig.add_subplot(1, 1, 1)
+    # plot endpoints
+    ax.plot(points[0, :], points[1, :], '.', color=colors_meas, label='Sighting', zorder=5)
+    ax.scatter(predicts[0, :], predicts[1, :], c=colors_pred, marker='.', label='Predicted', zorder=8)
+    # create fake line to add to legend
+    ax.plot(np.nan, np.nan, '-', color='xkcd:black', label='Innov')
+    if color_by == 'mag':
+        fig.colorbar(innov_cmap.get_smap())
+    # create segments
+    segments = np.zeros((points.shape[1], 2, 2))
+    segments[:, 0, :] = points.T
+    segments[:, 1, :] = predicts.T
+    lines = LineCollection(segments, colors=colors_line, zorder=3)
+    ax.add_collection(lines)
+    ax.set_title(description + extra_text)
+    ax.legend(loc=legend_loc)
+    ax.set_xlabel('FP X Loc [' + units + ']')  # TODO: pass in X,Y labels
+    ax.set_ylabel('FP Y Loc [' + units + ']')
+    ax.grid(True)
+    if center_origin:
+        xlims = np.max(np.abs(ax.get_xlim()))
+        ylims = np.max(np.abs(ax.get_ylim()))
+        ax.set_xlim(-xlims, xlims)
+        ax.set_ylim(-ylims, ylims)
+
+    return fig
 
 #%% Unit test
 if __name__ == '__main__':

@@ -353,7 +353,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     def test_none3(self, mock_logger):
         self.figs = plot.make_difference_plot('', None, None, None, None)
         self.assertEqual(mock_logger.log.call_count, 1)
-        mock_logger.log.assert_called_with(LogLevel.L5, 'No difference data was provided, so no plot was generated for "".')
+        mock_logger.log.assert_called_with(LogLevel.L5, 'No difference data was provided, so no plot was generated for "%s".', '')
 
     def tearDown(self) -> None:
         if self.figs:
@@ -418,6 +418,38 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
+
+#%% plotting.make_connected_sets
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+class Test_plotting_make_connected_plots(unittest.TestCase):
+    r"""
+    Tests the plotting.make_connected_plots with the following cases:
+        Nominal
+        Color by Quad
+        Color by Magnitude
+        Center Origin
+    """
+    def setUp(self) -> None:
+        self.description = 'Focal Plane Sightings'
+        self.points = 2 * np.random.rand(2, 100) - 1.
+        self.innovs = 0.1 * np.random.randn(*self.points.shape)
+        self.fig: Optional[plt.Figure] = None
+
+    def test_nominal(self) -> None:
+        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs)
+
+    def test_color_by_quad(self) -> None:
+        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='quad')
+
+    def test_color_by_mag(self) -> None:
+        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='mag')
+
+    def test_center_origin(self) -> None:
+        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, center_origin=True)
+
+    def tearDown(self) -> None:
+        if self.fig:
+            plt.close(self.fig)
 
 #%% Unit test execution
 if __name__ == '__main__':

@@ -52,9 +52,9 @@ class KfInnov(Frozen):
     """
     def __init__(self, *, name='', units='', num_innovs=0, num_axes=0, time_dtype=float):
         r"""Initializes a new KfInnov instance."""
-        self.name   = name
-        self.chan   = ['' for i in range(num_axes)] if num_axes > 0 else None
-        self.units  = units
+        self.name  = name
+        self.chan  = ['' for i in range(num_axes)] if num_axes > 0 else None
+        self.units = units
         if num_innovs > 0:
             self.time   = np.empty(num_innovs, dtype=time_dtype)
             innov_shape = (num_axes, num_innovs) if num_axes > 1 else (num_innovs, )
@@ -66,6 +66,8 @@ class KfInnov(Frozen):
             self.innov  = None
             self.norm   = None
             self.status = None
+        self.fploc = None
+        self.mag   = None
 
 #%% Kf
 class Kf(Frozen):

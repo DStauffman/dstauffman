@@ -244,6 +244,14 @@ class Test_plotting_plot_innovations(unittest.TestCase):
     """
     pass # TODO: write this
 
+#%% plotting.plot_innov_fplocs
+class Test_plotting_plot_innov_fplocs(unittest.TestCase):
+    r"""
+    Tests the plotting.plot_innov_fplocs function with the following cases:
+        TBD
+    """
+    pass # TODO: write this
+
 #%% plotting.plot_covariance
 class Test_plotting_plot_covariance(unittest.TestCase):
     r"""

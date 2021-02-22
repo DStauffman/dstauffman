@@ -14,7 +14,7 @@ import unittest
 from dstauffman import get_legend_conversion, HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel, \
     rms
 from dstauffman.aerospace import Kf, KfInnov, quat_angle_diff
-from dstauffman.plotting.generic import make_categories_plot, make_difference_plot
+from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, make_difference_plot
 from dstauffman.plotting.plotting import Opts, setup_plots
 from dstauffman.plotting.support import disp_xlimits, get_color_lists, get_rms_indices, \
     plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
@@ -812,7 +812,9 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     name_one      = kwargs.pop('name_one', kf1.name)
     name_two      = kwargs.pop('name_two', kf2.name)
     description   = name_one if name_one else name_two if name_two else ''
-    num_chan      = kf1.innov.shape[0] if kf1.innov is not None else kf2.innov.shape[0] if kf2.innov is not None else 0
+    num_chan = 0
+    for key in fields.keys():
+        num_chan = max(num_chan, getattr(kf1, key).shape[0] if getattr(kf1, key) is not None else getattr(kf2, key).shape[0] if getattr(kf2, key) is not None else 0)
     elements      = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
     elements      = kwargs.pop('elements', elements)
     units         = kwargs.pop('units', kf1.units)
@@ -949,6 +951,93 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         return (figs, err)
     return figs
 
+#%% plot_innov_fplocs
+def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
+    r"""
+    Plots the innovations on the focal plane, connecting the sighting and prediction with the innovation.
+
+    Parameters
+    ----------
+    kf1 : class Kf
+        Kalman filter output
+    opts : class Opts, optional
+        Plotting options
+    fields : dict, optional
+        Name of the innovation fields to plot
+    kwargs : dict
+        Additional arguments passed on to the lower level plotting functions
+
+    Returns
+    -------
+    fig_hand : list of class matplotlib.figure.Figure
+        Figure handles
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in February 2021.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import Opts, plot_innov_fplocs
+    >>> from dstauffman.aerospace import KfInnov
+    >>> import numpy as np
+
+    >>> num_axes   = 2
+    >>> num_innovs = 11
+
+    >>> kf1       = KfInnov()
+    >>> kf1.units = 'm'
+    >>> kf1.time  = np.arange(num_innovs, dtype=float)
+    >>> kf1.innov = np.full((num_axes, num_innovs), 5e-3) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
+    >>> kf1.innov[:, :5] *= 0.1
+    >>> kf1.fploc = np.full((num_axes, num_innovs), 0.05) + 0.2 * np.random.rand(num_axes, num_innovs) - 0.1
+
+    >>> opts = Opts()
+    >>> opts.case_name = 'test_plot'
+    >>> opts.sub_plots = True
+
+    >>> fig_hand = plot_innov_fplocs(kf1, opts=opts, color_by='mag')
+
+    Close plots
+    >>> import matplotlib.pyplot as plt
+    >>> for fig in fig_hand:
+    ...     plt.close(fig)
+
+    """
+    # check optional inputs
+    if kf1 is None:
+        kf1 = KfInnov()
+    if opts is None:
+        opts = Opts()
+
+    description = 'Focal Plane Sightings'
+    logger.log(LogLevel.L4, f'Plotting {description} plots ...')
+
+    # alias opts
+    legend_loc = kwargs.pop('legend_loc', opts.leg_spot)
+
+    # pull out time subset
+    if t_bounds is None:
+        fplocs = kf1.fploc
+        innovs = kf1.innov
+    else:
+        ix = get_rms_indices(kf1.time, xmin=t_bounds[0], xmax=t_bounds[1])
+        fplocs = kf1.fploc[:, ix['one']]
+        innovs = kf1.innov[:, ix['one']]
+
+    # call wrapper functions for most of the details
+    fig = make_connected_sets(description, fplocs, innovs, units=kf1.units, \
+        legend_loc=legend_loc, **kwargs)
+
+    # Setup plots
+    figs = [fig]
+    setup_plots(figs, opts)
+    if figs:
+        logger.log(LogLevel.L4, '... done.')
+    else:
+        logger.log(LogLevel.L5, 'No focal plane data was provided, so no plots were generated.')
+    return figs
+
 #%% plot_covariance
 def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, groups=None, fields=None, **kwargs):
     r"""
@@ -1059,7 +1148,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     elif is_date_o and not is_date_1 and not is_date_2:
         this_opts.convert_dates('sec', old_form=opts.time_base)
     # opts overrides
-    this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
+    this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)  # TODO: why do I have this line?  Need to use this_opts below?
 
     # alias opts
     time_units   = kwargs.pop('time_units', this_opts.time_base)

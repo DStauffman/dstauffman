@@ -247,7 +247,7 @@ class Test_rms(unittest.TestCase):
 
     def test_complex_rms(self) -> None:
         out = dcs.rms(1.5j)
-        self.assertEqual(out, np.complex(1.5, 0))
+        self.assertEqual(out, complex(1.5, 0))
 
     def test_complex_conj(self) -> None:
         out = dcs.rms(np.array([1+1j, 1-1j]))
