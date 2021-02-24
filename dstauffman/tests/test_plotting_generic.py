@@ -438,11 +438,11 @@ class Test_plotting_make_connected_plots(unittest.TestCase):
     def test_nominal(self) -> None:
         self.figs = plot.make_connected_sets(self.description, self.points, self.innovs)
 
-    def test_color_by_quad(self) -> None:
-        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='quad')
+    def test_color_by_direction(self) -> None:
+        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='direction')
 
-    def test_color_by_mag(self) -> None:
-        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='mag')
+    def test_color_by_magnitude(self) -> None:
+        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='magnitude')
 
     def test_center_origin(self) -> None:
         self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, center_origin=True)

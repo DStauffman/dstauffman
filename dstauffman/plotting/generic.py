@@ -11,15 +11,14 @@ import doctest
 import logging
 import unittest
 
-from dstauffman import get_legend_conversion, HAVE_MPL, HAVE_NUMPY, intersect, is_datetime, LogLevel, \
-    rms
+from dstauffman import DEGREE_SIGN, get_legend_conversion, HAVE_MPL, HAVE_NUMPY, intersect, \
+    is_datetime, LogLevel, RAD2DEG, rms
 
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits, get_rms_indices, \
     plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
 
 if HAVE_MPL:
     from matplotlib.collections import LineCollection
-    from matplotlib.colors import to_rgba
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -1165,7 +1164,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
             this_cats = cats == cat
             this_linestyle = '-' if single_lines else 'none'
             # Note: Use len(cat_keys) here instead of num_cats so that potentially missing categories
-            # won't mess up th ecolor scheme by skipping colors
+            # won't mess up the color scheme by skipping colors
             this_cat_ix = np.argmax(cat == cat_keys)
             this_color = cm.get_color(this_cat_ix + ix_data*len(cat_keys))
             this_axes.plot(this_time[this_cats], this_data[this_cats], linestyle=this_linestyle, marker='.', \
@@ -1207,13 +1206,34 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
 
 #%% make_connected_sets
 def make_connected_sets(description, points, innovs, *, color_by='none', center_origin=False, \
-        legend_loc='best', units=''):
+        legend_loc='best', units='', mag_ratio=None, leg_scale='unity', colormap=None):
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.
 
     Parameters
     ----------
-    #TODO
+    description : str
+        Plot description
+    points : (2, N) ndarray
+        Focal plane sightings
+    innovs : (2, N) ndarray
+        Innovations (implied to be in focal plane frame)
+    color_by : str
+        How to color the innovations, 'none' for same calor, 'magnitude' to color by innovation
+        magnitude, or 'direction' to color by polar direction
+    center_origin : bool, optional, default is False
+        Whether to center the origin in the plot
+    legend_loc : str, optional, default is 'best'
+        Location of the legend in the plot
+    units : str, optional
+        Units to label on the plot
+    mag_ratio : float, optional
+        Percentage highest innovation magnitude to use, typically 0.95-1.0, but lets you exclude
+        outliers that otherwise make the colorbar less useful
+    leg_scale : str, optional, default is 'micro'
+        Amount to scale the colorbar legend
+    colormap : str, optional
+        Name to use instead of the default colormaps, which depend on the mode
 
     Returns
     -------
@@ -1231,9 +1251,10 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
 
     >>> points2 = 2 * np.random.rand(2, 100) - 1.
     >>> innovs2 = 0.1 * np.random.randn(*points2.shape)
-    >>> fig2 = make_connected_sets(description, points2, innovs2, color_by='quad')
+    >>> fig2 = make_connected_sets(description, points2, innovs2, color_by='direction')
 
-    >>> fig3 = make_connected_sets(description, points2, innovs2, color_by='mag')
+    >>> fig3 = make_connected_sets(description, points2, innovs2, color_by='magnitude', \
+    ...     leg_scale='milli', units='m')
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
@@ -1245,21 +1266,26 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
     colors_meas = 'xkcd:black'
     if color_by == 'none':
         colors_line = 'xkcd:red'
-        colors_pred = 'xkcd:blue'
+        colors_pred = 'xkcd:blue' if colormap is None else colormap
         extra_text  = ''
-    elif color_by == 'quad':
-        temp_colors = tuple(to_rgba(x) for x in ('xkcd:red', 'xkcd:blue', 'xkcd:green', 'xkcd:orange'))
-        quad_ix     = np.where(innovs[0, :] >= 0, 0, 1) + np.where(innovs[1, :] >= 0, 0, 2)
-        colors_line = tuple(temp_colors[x] for x in quad_ix)
+    elif color_by == 'direction':
+        polar_ang   = RAD2DEG * np.arctan2(innovs[1, :], innovs[0, :])
+        innov_cmap  = ColorMap('hsv' if colormap is None else colormap, low=-180, high=180)  # hsv or twilight?
+        colors_line = tuple(innov_cmap.get_color(x) for x in polar_ang)
         colors_pred = colors_line
-        extra_text  = ' (Colored by direction)'
-    elif color_by == 'mag':
-        innov_mags  = np.sqrt(np.sum(innovs**2, axis=0))
-        max_innov   = np.max(innov_mags)
-        innov_cmap  = ColorMap(colormap='autumn_r', low=0, high=max_innov)
+        extra_text  = ' (Colored by Direction)'
+    elif color_by == 'magnitude':
+        (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
+        innov_mags  = leg_conv * np.sqrt(np.sum(innovs**2, axis=0))
+        if mag_ratio is None:
+            max_innov   = np.max(innov_mags)
+        else:
+            sorted_innovs = np.sort(innov_mags)
+            max_innov = sorted_innovs[int(np.ceil(mag_ratio * innov_mags.size)) - 1]
+        innov_cmap  = ColorMap(colormap='autumn_r' if colormap is None else colormap, low=0, high=max_innov)
         colors_line = tuple(innov_cmap.get_color(x) for x in innov_mags)
         colors_pred = colors_line
-        extra_text  = ' (Colored by magnitude)'
+        extra_text  = ' (Colored by Magnitude)'
     else:
         raise ValueError(f'Unexpected value for color_by of "{color_by}"')
 
@@ -1275,8 +1301,10 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
     ax.scatter(predicts[0, :], predicts[1, :], c=colors_pred, marker='.', label='Predicted', zorder=8)
     # create fake line to add to legend
     ax.plot(np.nan, np.nan, '-', color='xkcd:black', label='Innov')
-    if color_by == 'mag':
-        fig.colorbar(innov_cmap.get_smap())
+    if color_by != 'none':
+        cbar = fig.colorbar(innov_cmap.get_smap())
+        cbar_units = DEGREE_SIGN if color_by == 'direction' else new_units
+        cbar.ax.set_ylabel('Innovation ' + color_by.capitalize() + ' [' + cbar_units + ']')
     # create segments
     segments = np.zeros((points.shape[1], 2, 2))
     segments[:, 0, :] = points.T

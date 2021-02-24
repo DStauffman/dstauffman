@@ -456,7 +456,7 @@ class Test_health_ecdf(unittest.TestCase):
         (x, f) = health.ecdf(y)
         dt = x[1] - x[0]
         exp = np.arange(x[0], x[-1]+dt, dt)
-        np.testing.assert_array_almost_equal(f, exp, 2)
+        np.testing.assert_array_almost_equal(f, exp, 1)
 
     def test_integers(self):
         y = np.array([0, 0, 0, 1, 1])
