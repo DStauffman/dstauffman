@@ -16,11 +16,17 @@ x.m = mat_nums;
 save('test_struct.mat', 'x');
 
 %% File 3 - Enumerators
-enum = [Gender.male, Gender.female, Gender.female]; % [2 1 1]
+enum = [Gender.male, Gender.female, Gender.female, Gender.circ_male, Gender.circ_male, ...
+    Gender.circ_male]; % [2 1 1 4 4 4]
 
 save('test_enums.mat', 'enum');
 
-%% File 4 - nested data
+%% File 4 - Cell Array
+cdat = {row_nums, col_nums, mat_nums, 'text', 'longer text', '', []};
+
+save('test_cell_array.mat', 'cdat');
+
+%% File 5 - nested data
 data     = [];
 data.x   = x;
 data.y   = x;
@@ -30,5 +36,7 @@ data.y.m = data.y.m + 30;
 data.z   = [];
 data.z.a = [1 2 3];
 data.z.b = enum;
+data.c   = cdat;
+data.nc  = {row_nums, col_nums, x};
 
-save('test_nested.mat', 'col_nums', 'row_nums', 'mat_nums', 'x', 'enum', 'data');
+save('test_nested.mat', '-v7.3', 'col_nums', 'row_nums', 'mat_nums', 'x', 'enum', 'cdat', 'data');

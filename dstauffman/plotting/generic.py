@@ -1278,7 +1278,7 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
         (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
         innov_mags  = leg_conv * np.sqrt(np.sum(innovs**2, axis=0))
         if mag_ratio is None:
-            max_innov   = np.max(innov_mags)
+            max_innov = np.max(innov_mags)
         else:
             sorted_innovs = np.sort(innov_mags)
             max_innov = sorted_innovs[int(np.ceil(mag_ratio * innov_mags.size)) - 1]
@@ -1321,6 +1321,7 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
         ylims = np.max(np.abs(ax.get_ylim()))
         ax.set_xlim(-xlims, xlims)
         ax.set_ylim(-ylims, ylims)
+    ax.set_aspect('equal', 'box')
 
     return fig
 

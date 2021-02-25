@@ -68,7 +68,20 @@ def load_matlab(filename: str, varlist: List[str] = None, *, squeeze: bool = Tru
             if isinstance(grp, h5py.Dataset):
                 # Note: data is transposed due to how Matlab stores columnwise
                 values = grp[()].T
-                out[key] = np.squeeze(values) if squeeze else values
+                # check for cell array references
+                if isinstance(values.flat[0], h5py.Reference):
+                    # TODO: for now, always collapse to 1D cell array as a list
+                    temp = [file[item] for item in values.flat]
+                    temp2 = []
+                    for x in temp:
+                        if isinstance(x, h5py.Group):
+                            temp2.append(load_matlab(x, varlist=None, squeeze=squeeze, enums=enums))
+                        else:
+                            data = x[()].T
+                            temp2.append(np.squeeze(data) if squeeze else data)
+                    out[key] = temp2
+                else:
+                    out[key] = np.squeeze(values) if squeeze else values
             elif 'EnumerationInstanceTag' in grp:
                 # likely a MATLAB enumerator???
                 class_name = grp.attrs['MATLAB_class'].decode()

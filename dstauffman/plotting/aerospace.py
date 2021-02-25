@@ -996,7 +996,7 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
     >>> opts.case_name = 'test_plot'
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_innov_fplocs(kf1, opts=opts, color_by='mag')
+    >>> fig_hand = plot_innov_fplocs(kf1, opts=opts, color_by='magnitude')
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -1010,7 +1010,8 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
     if opts is None:
         opts = Opts()
 
-    description = 'Focal Plane Sightings'
+    name = kf1.name + ' - ' if kf1.name else ''
+    description = name + 'Focal Plane Sightings'
     logger.log(LogLevel.L4, f'Plotting {description} plots ...')
 
     # alias opts
