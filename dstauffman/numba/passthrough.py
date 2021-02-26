@@ -70,9 +70,10 @@ else:
 
     deferred_type = fake_jit
     from_dtype    = fake_jit
+    jit           = fake_jit
     jitclass      = fake_jit
-    njit          = fake_jit
     ncjit         = fake_jit
+    njit          = fake_jit
     optional      = fake_jit
     vectorize     = fake_jit
 

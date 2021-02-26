@@ -151,12 +151,12 @@ def prob_to_rate_opt(prob: float, time: float) -> float:
     Examples
     --------
     >>> from dstauffman.numba import prob_to_rate_opt
+    >>> from dstauffman import HAVE_NUMBA
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
     >>> time = 3
-    >>> rate = prob_to_rate_opt(prob, time)
-    >>> with np.printoptions(precision=8):
-    ...     print(rate) # doctest: +NORMALIZE_WHITESPACE
+    >>> rate = prob_to_rate_opt(prob, time) if HAVE_NUMBA else [prob_to_rate_opt(p, time) for p in prob]
+    >>> print(np.array_str(np.asanyarray(rate), precision=8))  # doctest: +NORMALIZE_WHITESPACE
     [0. 0.03512017 inf]
 
     """
@@ -198,12 +198,12 @@ def rate_to_prob_opt(rate: float, time: float) -> float:
     Examples
     --------
     >>> from dstauffman.numba import rate_to_prob_opt
+    >>> from dstauffman import HAVE_NUMBA
     >>> import numpy as np
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
     >>> time = 1./12
-    >>> prob = rate_to_prob_opt(rate, time)
-    >>> with np.printoptions(precision=8):
-    ...     print(prob) # doctest: +NORMALIZE_WHITESPACE
+    >>> prob = rate_to_prob_opt(rate, time) if HAVE_NUMBA else [rate_to_prob_opt(r, time) for r in rate]
+    >>> print(np.array_str(np.asanyarray(prob), precision=8))  # doctest: +NORMALIZE_WHITESPACE
     [0. 0.00829871 0.07995559 0.99975963 1. ]
 
     """
