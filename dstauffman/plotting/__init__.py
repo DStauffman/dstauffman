@@ -18,7 +18,7 @@ from .generic   import make_time_plot, make_error_bar_plot, make_difference_plot
 from .health    import TruthPlotter, plot_health_time_history, plot_health_monte_carlo, \
                            plot_icer, plot_population_pyramid
 from .plotting  import Opts, suppress_plots, unsuppress_plots, plot_time_history, \
-                           plot_correlation_matrix, plot_bar_breakdown, setup_plots
+                           plot_correlation_matrix, plot_bar_breakdown, plot_histogram, setup_plots
 from .support   import DEFAULT_COLORMAP, DEFAULT_CLASSIFICATION, MyCustomToolbar, \
                            ColorMap, close_all, get_color_lists, ignore_plot_data, whitten, \
                            resolve_name, storefig, titleprefix, disp_xlimits, zoom_ylim, figmenu, \

@@ -851,9 +851,6 @@ def np_digitize(x, /, bins, right=False):
     [0 3 2 1]
 
     """
-    # hard-coded values
-    precision = 0 * 1e-13 # TODO: do I need a precision here (or only if bins are not ints?)
-
     # allow an empty x to pass through just fine
     if x.size == 0:
         return np.array([], dtype=int)
@@ -863,11 +860,14 @@ def np_digitize(x, /, bins, right=False):
         raise ValueError('Some values were NaN.')
 
     # check the bounds
+    tolerance = None  # TODO: do I need a tolerance here?
+    bmin = bins[0]  if tolerance is None else bins[0]  - tolerance
+    bmax = bins[-1] if tolerance is None else bins[-1] + tolerance
     if right:
-        if np.any(x < bins[0]-precision) or np.any(x >= bins[-1]+precision):
+        if np.any(x < bmin) or np.any(x >= bmax):
             raise ValueError('Some values of x are outside the given bins.')
     else:
-        if np.any(x <= bins[0]-precision) or np.any(x > bins[-1]+precision):
+        if np.any(x <= bmin) or np.any(x > bmax):
             raise ValueError('Some values of x are outside the given bins.')
 
     # do the calculations by calling the numpy command and shift results by one

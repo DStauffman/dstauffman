@@ -14,7 +14,8 @@ from typing import List
 import unittest
 from unittest.mock import patch
 
-from dstauffman import capture_output, get_tests_dir, HAVE_MPL, HAVE_NUMPY, LogLevel, unit
+from dstauffman import capture_output, get_tests_dir, HAVE_MPL, HAVE_NUMPY, LogLevel, \
+    NP_DATETIME_FORM, NP_INT64_PER_SEC, NP_TIMEDELTA_FORM, unit
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -432,6 +433,36 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
+
+#%% plotting.plot_histogram
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+class Test_plotting_plot_histogram(unittest.TestCase):
+    r"""
+    Tests the plotting.setup_plots function with the following cases:
+        Nominal
+        All inputs
+        Datetimes
+    """
+    def setUp(self) -> None:
+        self.description = 'Histogram'
+        self.data = np.array([0.5, 3.3, 1., 1.5, 1.5, 1.75, 2.5, 2.5])
+        self.bins = np.array([0., 1., 2., 3., 5., 7.])
+        self.fig = None
+
+    def test_nominal(self):
+        self.fig = plot.plot_histogram(self.description, self.data, self.bins)
+
+    def test_with_opts(self):
+        opts = plot.Opts()
+        self.fig = plot.plot_histogram(self.description, self.data, self.bins, opts=opts, color='xkcd:black', \
+            xlabel='Text', ylabel='Dist')
+
+    def test_datetimes(self):
+        date_zero = np.datetime64(datetime.date(2021, 2, 1)).astype(NP_DATETIME_FORM)
+        data_np   = date_zero + np.round(NP_INT64_PER_SEC * self.data).astype(NP_TIMEDELTA_FORM)
+        bins_np   = date_zero + np.round(NP_INT64_PER_SEC * self.bins).astype(NP_TIMEDELTA_FORM)
+        # TODO: would prefer to handle this case better
+        self.fig  = plot.plot_histogram(self.description, data_np.astype(np.int64), bins_np.astype(np.int64))
 
 #%% plotting.setup_plots
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')

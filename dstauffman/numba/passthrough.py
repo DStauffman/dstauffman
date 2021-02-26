@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in January 2021.
 """
 
-#%% Imports
+#%% Normal Imports
 import doctest
 import functools
 import sys
@@ -14,11 +14,33 @@ import unittest
 
 from dstauffman import HAVE_NUMBA
 
+#%% Support Functions
+def _fake_decorator(func):
+    r"""Fake decorator for when numba isn't installed."""
+    @functools.wraps(func)
+    def wrapped_decorator(*args, **kwargs):
+        if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
+            # must treat this differently if no arguments were passed
+            return func(args[0])
+        def real_decorator(func2):
+            return func(func2, *args, **kwargs)
+        return real_decorator
+    return wrapped_decorator
+
+@_fake_decorator
+def fake_jit(func, *args, **kwargs):
+    r"""Fake jit decorator for when numba isn't installed."""
+    return func
+
+#%% Conditional imports
 if HAVE_NUMBA:
-    from numba import boolean, deferred_type, float32, float64, int32, int64, jit, njit, \
-        optional, vectorize
+    # Nominal case with numba installed
+    from numba import boolean, deferred_type, float32, float64, from_dtype, int32, int64, jit, \
+        njit, optional, vectorize
     from numba.experimental import jitclass
     from numba.typed import List
+    from numba.types import DictType, ListType, string
+    assert jit  # To suppress warnings
 
     # always cached version of njit, which is also jit(cache=True, nopython=True)
     def ncjit(func, *args, **kwargs):
@@ -34,42 +56,25 @@ if HAVE_NUMBA:
         TARGET = 'cpu'
 else:
     # Support for when you don't have numba.  Note, some functions won't work as expected
-    # Go through a bunch of worthless closures to get the necessary stubs
-    def _fake_decorator(func):
-        r"""Fake decorator for when numba isn't installed."""
-        @functools.wraps(func)
-        def wrapped_decorator(*args, **kwargs):
-            if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
-                # must treat this differently if no arguments were passed
-                return func(args[0])
-            def real_decorator(func2):
-                return func(func2, *args, **kwargs)
-            return real_decorator
-        return wrapped_decorator
-
-    # fake constants
     TARGET = ''
 
-    # fake decorators
-    @_fake_decorator
-    def jit(func, *args, **kwargs):
-        r"""Fake jit decorator for when numba isn't installed."""
-        return func
+    DictType = fake_jit
+    List     = list
+    ListType = fake_jit
+    string   = str
+    boolean  = fake_jit
+    float32  = fake_jit
+    float64  = fake_jit  # float as a callable with multiple args?
+    int32    = fake_jit  # int as a callable with multiple args?
+    int64    = fake_jit
 
-    # fake types
-    List    = list
-    boolean = jit
-    float32 = jit
-    float64 = jit  # float as a callable with multiple args?
-    int32   = jit  # int as a callable with multiple args?
-    int64   = jit
-
-    deferred_type = jit
-    jitclass      = jit
-    njit          = jit
-    ncjit         = jit
-    optional      = jit
-    vectorize     = jit
+    deferred_type = fake_jit
+    from_dtype    = fake_jit
+    jitclass      = fake_jit
+    njit          = fake_jit
+    ncjit         = fake_jit
+    optional      = fake_jit
+    vectorize     = fake_jit
 
 #%% Unit test
 if __name__ == '__main__':

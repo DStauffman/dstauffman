@@ -16,19 +16,29 @@ from typing import List, Optional, Tuple, TypeVar, Union
 import unittest
 
 from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_factors, \
-    HAVE_MPL, HAVE_NUMPY, is_datetime, LogLevel
+    histcounts, HAVE_MPL, HAVE_NUMPY, is_datetime, LogLevel
 
 from dstauffman.plotting.generic import make_time_plot
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, figmenu, get_classification, \
     ignore_plot_data, plot_classification, storefig, titleprefix
 
 if HAVE_MPL:
+    from matplotlib.collections import PatchCollection
     from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
     from matplotlib.ticker import StrMethodFormatter
+
+    # Newer date stamps on axes
+    from matplotlib.dates import ConciseDateConverter
+    import matplotlib.units as munits
+    converter = ConciseDateConverter()
+    munits.registry[datetime.date] = converter
+    munits.registry[datetime.datetime] = converter
 if HAVE_NUMPY:
     import numpy as np
     inf = np.inf
+    if HAVE_MPL:
+        munits.registry[np.datetime64] = converter
 else:
     from math import inf
 
@@ -620,6 +630,72 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
 
     # Setup plots
     setup_plots(fig, opts)
+    return fig
+
+#%% Functions - plot_histogram
+def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabel='Data', \
+        ylabel='Distribution [%]'):
+    r"""
+    Creates a histogram plot of the given data and bins.
+
+    Parameters
+    ----------
+    description : str
+        Name to label on the plots
+    time : 1D ndarray
+        time history
+    data : 0D, 1D, or 2D ndarray
+        data for corresponding time history, time is last dimension unless passing data_as_rows=False through
+    opts : class Opts, optional
+        plotting options
+    color : str or RGB or RGBA code, optional
+        Name of color to use
+
+    Returns
+    -------
+    fig : class matplotlib.figure.Figure
+        Figure handle
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in February 2021.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import plot_histogram
+    >>> import numpy as np
+    >>> description = 'Histogram'
+    >>> data = np.array([0.5, 3.3, 1., 1.5, 1.5, 1.75, 2.5, 2.5])
+    >>> bins = np.array([0., 1., 2., 3., 5., 7.])
+    >>> fig = plot_histogram(description, data, bins)
+
+    Close plot
+    >>> import matplotlib.pyplot as plt
+    >>> plt.close(fig)
+
+    """
+    # check optional inputs
+    if opts is None:
+        opts = Opts()
+    # create plot
+    fig = plt.figure()
+    fig.canvas.set_window_title(description)
+    ax = fig.add_subplot(1, 1, 1)
+    ax.set_title(description)
+    counts = histcounts(data, bins)
+    scaled_data = 100 * counts / np.sum(counts)
+    rects = []
+    for i in range(len(bins)-1):
+        rects.append(Rectangle((bins[i], 0), bins[i+1]-bins[i], scaled_data[i]))
+    coll = PatchCollection(rects, facecolor=color, edgecolor='k')
+    ax.add_collection(coll)
+    ax.grid(True)
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+    ax.set_xlim([bins[0], bins[-1]])
+    # round scale to next highest 5% bound
+    ax.set_ylim([0, min(100, 5 * (np.max(scaled_data) // 5 + 1))])
+    setup_plots(fig, opts=opts)
     return fig
 
 #%% Functions - setup_plots
