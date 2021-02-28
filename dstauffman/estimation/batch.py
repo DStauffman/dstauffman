@@ -1067,7 +1067,7 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     assert callable(opti_opts.get_param_func), 'Get parameters function must be callable.'
     assert callable(opti_opts.set_param_func), 'Get paramaters function must be callable.'
     # Must estimate at least one parameter (TODO: make work with zero?)
-    assert isinstance(opti_opts.params, list) and len(opti_opts.params) > 0  # type: ignore[unreachable]
+    assert isinstance(opti_opts.params, list) and len(opti_opts.params) > 0
     # Must be one of these two slope methods
     assert opti_opts.slope_method in {'one_sided', 'two_sided'}
     # Must be one of these two seach methods

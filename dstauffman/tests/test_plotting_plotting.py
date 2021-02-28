@@ -10,7 +10,7 @@ Notes
 import contextlib
 import datetime
 import os
-from typing import List
+from typing import List, Optional
 import unittest
 from unittest.mock import patch
 
@@ -447,22 +447,29 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         self.description = 'Histogram'
         self.data = np.array([0.5, 3.3, 1., 1.5, 1.5, 1.75, 2.5, 2.5])
         self.bins = np.array([0., 1., 2., 3., 5., 7.])
-        self.fig = None
+        self.fig: Optional[plt.Figure] = None
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         self.fig = plot.plot_histogram(self.description, self.data, self.bins)
 
-    def test_with_opts(self):
+    def test_with_opts(self) -> None:
         opts = plot.Opts()
         self.fig = plot.plot_histogram(self.description, self.data, self.bins, opts=opts, color='xkcd:black', \
-            xlabel='Text', ylabel='Dist')
+            xlabel='Text', ylabel='Num', second_ylabel='Dist')
 
-    def test_datetimes(self):
+    def test_datetimes(self) -> None:
         date_zero = np.datetime64(datetime.date(2021, 2, 1)).astype(NP_DATETIME_FORM)
         data_np   = date_zero + np.round(NP_INT64_PER_SEC * self.data).astype(NP_TIMEDELTA_FORM)
         bins_np   = date_zero + np.round(NP_INT64_PER_SEC * self.bins).astype(NP_TIMEDELTA_FORM)
         # TODO: would prefer to handle this case better
         self.fig  = plot.plot_histogram(self.description, data_np.astype(np.int64), bins_np.astype(np.int64))
+
+    def test_infs(self) -> None:
+        self.fig = plot.plot_histogram(self.description, self.data, np.array([-np.inf, -1., 0., 1., np.inf]))
+
+    def tearDown(self) -> None:
+        if self.fig:
+            plt.close(self.fig)
 
 #%% plotting.setup_plots
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')

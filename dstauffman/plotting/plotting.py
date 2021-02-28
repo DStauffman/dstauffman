@@ -20,7 +20,7 @@ from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, 
 
 from dstauffman.plotting.generic import make_time_plot
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, figmenu, get_classification, \
-    ignore_plot_data, plot_classification, storefig, titleprefix
+    ignore_plot_data, plot_classification, plot_second_yunits, storefig, titleprefix
 
 if HAVE_MPL:
     from matplotlib.collections import PatchCollection
@@ -634,7 +634,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
 
 #%% Functions - plot_histogram
 def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabel='Data', \
-        ylabel='Distribution [%]'):
+        ylabel='Number', second_ylabel='Distribution [%]'):
     r"""
     Creates a histogram plot of the given data and bins.
 
@@ -642,14 +642,20 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
     ----------
     description : str
         Name to label on the plots
-    time : 1D ndarray
-        time history
-    data : 0D, 1D, or 2D ndarray
-        data for corresponding time history, time is last dimension unless passing data_as_rows=False through
+    data : (N, ) ndarray
+        data to bin into buckets
+    bins : (A, ) ndarray
+        boundaries of the bins to use for the histogram
     opts : class Opts, optional
         plotting options
     color : str or RGB or RGBA code, optional
         Name of color to use
+    xlabel : str, optional
+        Name to put on x-axis
+    ylabel : str, optional
+        Name to put on y-axis
+    second_ylabel : str, optional
+        Name to put on second y-axis
 
     Returns
     -------
@@ -683,18 +689,22 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
     ax = fig.add_subplot(1, 1, 1)
     ax.set_title(description)
     counts = histcounts(data, bins)
-    scaled_data = 100 * counts / np.sum(counts)
+    plotting_bins = np.asanyarray(bins).copy()
+    ix_pinf = np.isinf(plotting_bins) & (np.sign(plotting_bins) > 0)
+    ix_ninf = np.isinf(plotting_bins) & (np.sign(plotting_bins) < 0)
+    plotting_bins[ix_pinf] = np.max(data)
+    plotting_bins[ix_ninf] = np.min(data)
     rects = []
     for i in range(len(bins)-1):
-        rects.append(Rectangle((bins[i], 0), bins[i+1]-bins[i], scaled_data[i]))
+        rects.append(Rectangle((plotting_bins[i], 0), plotting_bins[i+1]-plotting_bins[i], counts[i]))
     coll = PatchCollection(rects, facecolor=color, edgecolor='k')
     ax.add_collection(coll)
     ax.grid(True)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    ax.set_xlim([bins[0], bins[-1]])
-    # round scale to next highest 5% bound
-    ax.set_ylim([0, min(100, 5 * (np.max(scaled_data) // 5 + 1))])
+    ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins)])
+    ax.set_ylim([0, np.max(counts)])
+    plot_second_yunits(ax, ylab=second_ylabel, multiplier=100/np.sum(counts))
     setup_plots(fig, opts=opts)
     return fig
 
