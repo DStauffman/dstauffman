@@ -496,9 +496,9 @@ class Test_estimation_batch__levenberg_marquardt(unittest.TestCase):
         without lambda_
     """
     def setUp(self) -> None:
-        self.jacobian    = np.array([[1, 2], [3, 4], [5, 6]])
-        self.innovs      = np.array([7, 8, 9])
-        self.lambda_     = 5
+        self.jacobian    = np.array([[1., 2.], [3., 4.], [5., 6.]])
+        self.innovs      = np.array([7., 8., 9.])
+        self.lambda_     = 5.
         self.delta_param = np.array([-0.46825397, -1.3015873])
 
     def test_nominal(self) -> None:
@@ -518,9 +518,9 @@ class Test_estimation_batch__predict_func_change(unittest.TestCase):
         Nominal
     """
     def setUp(self) -> None:
-        self.delta_param = np.array([1, 2])
-        self.gradient    = np.array([3, 4])
-        self.hessian     = np.array([[5, 2], [2, 5]])
+        self.delta_param = np.array([1., 2.])
+        self.gradient    = np.array([3., 4.])
+        self.hessian     = np.array([[5., 2.], [2., 5.]])
         self.pred_change = 27.5
 
     def test_nominal(self) -> None:
@@ -588,15 +588,15 @@ class Test_estimation_batch__double_dogleg(unittest.TestCase):
         TBD
     """
     def setUp(self) -> None:
-        self.delta_param = np.array([1, 2])
-        self.gradient = np.array([3, 4])
-        self.grad_hessian_grad = 5
+        self.delta_param = np.array([1., 2.])
+        self.gradient = np.array([3., 4.])
+        self.grad_hessian_grad = 5.
         self.x_bias = 0.1
-        self.trust_radius = 2
+        self.trust_radius = 2.
 
     def test_large_trust_radius(self) -> None:
         # Newton step in trust radius
-        self.trust_radius = 10000
+        self.trust_radius = 10000.
         (new_delta_param, step_len, step_scale, step_type) = estm.batch._double_dogleg(self.delta_param, \
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
@@ -615,14 +615,14 @@ class Test_estimation_batch__double_dogleg(unittest.TestCase):
     def test_dogleg1(self) -> None:
         # Dogleg step 1
         self.x_bias = 0.001
-        self.grad_hessian_grad = 75
+        self.grad_hessian_grad = 75.
         (new_delta_param, step_len, step_scale, step_type) = estm.batch._double_dogleg(self.delta_param, \
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
 
     def test_dogleg2(self) -> None:
         # Dogleg step 2
         self.x_bias = 0.001
-        self.grad_hessian_grad = 75
+        self.grad_hessian_grad = 75.
         self.delta_param = 0.001 * np.array([1, 2])
         (new_delta_param, step_len, step_scale, step_type) = estm.batch._double_dogleg(self.delta_param, \
              self.gradient, self.grad_hessian_grad, self.x_bias, self.trust_radius)
@@ -679,9 +679,9 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         self.bpe_results.begin_cost   = self.cur_results.cost
         self.bpe_results.costs.append(self.cur_results.cost)
 
-        self.delta_param = np.array([1, 2, 3])
-        self.gradient    = np.array([4, 5, 6])
-        self.hessian     = np.array([[5, 2, 1], [1, 2, 5], [3, 3, 3]])
+        self.delta_param = np.array([1., 2., 3.])
+        self.gradient    = np.array([4., 5., 6.])
+        self.hessian     = np.array([[5., 2., 1.], [1., 2., 5.], [3., 3., 3.]])
         self.jacobian    = np.random.rand(201, 3)
         self.normalized  = False
 

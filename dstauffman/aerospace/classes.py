@@ -37,12 +37,22 @@ class KfInnov(Frozen):
         Units for the innovations
     time : (N, ) ndarray
         Time vector
-    innov : (N, M) ndarray
+    innov : (M, N) ndarray
         Time history of the raw innovations
-    norm : (N, M) ndarray
+    norm : (M, N) ndarray
         Time history of the normalized innovations
     status : (N,)
         Status of the innovation, such as applied, or reason for rejection
+    fploc : (2, N), optional
+        Focal plane location for sightings that are on a 2D focal plane
+    snr : (N, ), optional
+        Information about the signal to noise ratio (SNR) or about the magnitude or brightness
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2019.
+    #.  Uses Fortran (columnwise) ordering on matrices, as that is the way they will be sliced when
+        running within the Kalman filter
 
     Examples
     --------
@@ -58,8 +68,8 @@ class KfInnov(Frozen):
         if num_innovs > 0:
             self.time   = np.empty(num_innovs, dtype=time_dtype)
             innov_shape = (num_axes, num_innovs) if num_axes > 1 else (num_innovs, )
-            self.innov  = np.full(innov_shape, np.nan, dtype=float)
-            self.norm   = np.full(innov_shape, np.nan, dtype=float)
+            self.innov  = np.full(innov_shape, np.nan, dtype=float, order='F')
+            self.norm   = np.full(innov_shape, np.nan, dtype=float, order='F')
             self.status = np.empty(num_innovs, dtype=int)
         else:
             self.time   = None
@@ -67,7 +77,7 @@ class KfInnov(Frozen):
             self.norm   = None
             self.status = None
         self.fploc = None
-        self.mag   = None
+        self.snr   = None
 
 #%% Kf
 class Kf(Frozen):
@@ -110,14 +120,14 @@ class Kf(Frozen):
             num_active   = num_states if active_states is None else len(active_states)
             state_shape  = (num_active, num_points) if num_active > 1 else (num_points, )
             self.time    = np.empty(num_points, dtype=time_dtype)
-            self.att     = np.empty((4, num_points))
+            self.att     = np.empty((4, num_points), order='F')
             if use_pv:
-                self.pos = np.empty((3, num_points))
-                self.vel = np.empty((3, num_points))
+                self.pos = np.empty((3, num_points), order='F')
+                self.vel = np.empty((3, num_points), order='F')
             self.active  = active_states if active_states is not None else np.arange(num_states)
-            self.state   = np.empty(state_shape)
+            self.state   = np.empty(state_shape, order='F')
             self.istate  = np.empty(num_states)
-            self.covar   = np.empty(state_shape)
+            self.covar   = np.empty(state_shape, order='F')
         else:
             self.time    = None
             self.att     = None
@@ -229,12 +239,12 @@ class KfRecord(Frozen, metaclass=SaveAndLoad):
     def __init__(self, num_points=0, num_states=0, num_active=0, num_axes=0, time_dtype=float):
         if num_points > 0:
             self.time = np.empty(num_points, dtype=time_dtype)
-            self.P    = np.empty((num_active, num_active, num_points))
-            self.stm  = np.empty((num_active, num_active, num_points))
-            self.H    = np.empty((num_axes, num_states, num_points))
-            self.Pz   = np.empty((num_axes, num_axes, num_points))
-            self.K    = np.empty((num_active, num_axes, num_points))
-            self.z    = np.empty((num_axes, num_points))
+            self.P    = np.empty((num_active, num_active, num_points), order='F')
+            self.stm  = np.empty((num_active, num_active, num_points), order='F')
+            self.H    = np.empty((num_axes, num_states, num_points), order='F')
+            self.Pz   = np.empty((num_axes, num_axes, num_points), order='F')
+            self.K    = np.empty((num_active, num_axes, num_points), order='F')
+            self.z    = np.empty((num_axes, num_points), order='F')
         else:
             self.time = None
             self.P    = None
@@ -246,13 +256,13 @@ class KfRecord(Frozen, metaclass=SaveAndLoad):
 
     def keep_subset(self, ix_keep):
         r"""Returns only the specified indices (likely only accepted measurements)."""
-        self.time = self.time[ix_keep]
-        self.P    = self.P[:, :, ix_keep]
-        self.stm  = self.stm[:, :, ix_keep]
-        self.H    = self.H[:, :, ix_keep]
-        self.Pz   = self.Pz[:, :, ix_keep]
-        self.K    = self.K[:, :, ix_keep]
-        self.z    = self.z[:, ix_keep]
+        self.time = self.time[ix_keep].copy()
+        self.P    = self.P[:, :, ix_keep].copy()
+        self.stm  = self.stm[:, :, ix_keep].copy()
+        self.H    = self.H[:, :, ix_keep].copy()
+        self.Pz   = self.Pz[:, :, ix_keep].copy()
+        self.K    = self.K[:, :, ix_keep].copy()
+        self.z    = self.z[:, ix_keep].copy()
 
 #%% Unit Test
 if __name__ == '__main__':

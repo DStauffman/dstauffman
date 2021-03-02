@@ -27,7 +27,8 @@ class Test_estimation_calculate_kalman_gain(unittest.TestCase):
         self.P = 1e-3 * np.eye(5)
         self.H = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0.5, 0.5, 0.5], [0, 0, 0.1]]).T
         self.R = 0.5 * np.eye(3)
-        self.exp = 0.0019950134608610927 # TODO: come up with something that can be known better
+        self.exp = 0.0019950134608610927  # TODO: come up with something that can be known better
+        self.exp_pz = 5.0125e-01  # TODO: come up with something that can be known better
 
     def test_nominal(self) -> None:
         K = estm.calculate_kalman_gain(self.P, self.H, self.R)
@@ -36,6 +37,15 @@ class Test_estimation_calculate_kalman_gain(unittest.TestCase):
     def test_inverse(self) -> None:
         K = estm.calculate_kalman_gain(self.P, self.H, self.R, use_inverse=True)
         self.assertAlmostEqual(K[0, 0], self.exp, 12)
+
+    def test_innov_cov(self) -> None:
+        (K, Pz) = estm.calculate_kalman_gain(self.P, self.H, self.R, return_innov_cov=True)
+        self.assertAlmostEqual(K[0, 0], self.exp, 14)
+        self.assertAlmostEqual(Pz[0, 0], self.exp_pz, 14)
+
+    def test_numba(self) -> None:
+        (K, Pz) = estm.calculate_kalman_gain_opt(self.P, self.H, self.R)
+        self.assertAlmostEqual(K[0, 0], self.exp, 14)
 
 #%% estimation.calculate_prediction
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -149,6 +159,14 @@ class Test_estimation_propagate_covariance(unittest.TestCase):
         self.assertEqual(out[0, 0], self.exp)
         self.assertEqual(self.P[0, 0], self.orig)
 
+    def test_opt_nominal(self) -> None:
+        estm.propagate_covariance_opt(self.P, self.phi, self.Q)
+        self.assertEqual(self.P[0, 0], self.exp)
+
+    def test_opt_gamma(self) -> None:
+        estm.propagate_covariance_opt(self.P, self.phi, self.Q, gamma=self.gamma)
+        self.assertEqual(self.P[0, 0], self.exp)
+
 #%% estimation.update_covariance
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_update_covariance(unittest.TestCase):
@@ -174,6 +192,10 @@ class Test_estimation_update_covariance(unittest.TestCase):
         out = estm.update_covariance(self.P, self.K, self.H, inplace=False)
         self.assertEqual(self.P[-1, -1], self.orig)
         self.assertEqual(out[-1, -1], self.exp)
+
+    def test_opt(self) -> None:
+        estm.update_covariance_opt(self.P, self.K, self.H)
+        self.assertEqual(self.P[-1, -1], self.exp)
 
 #%% Unit test execution
 if __name__ == '__main__':

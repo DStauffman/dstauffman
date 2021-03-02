@@ -11,9 +11,13 @@ import doctest
 import unittest
 
 from dstauffman import HAVE_NUMPY
+from dstauffman.numba import ncjit
 
 if HAVE_NUMPY:
     import numpy as np
+
+#%% Constants
+_EPS = np.finfo(float).eps if HAVE_NUMPY else 2.220446049250313e-16
 
 #%% orth
 def orth(A):
@@ -71,9 +75,9 @@ def orth(A):
     # compute the SVD
     (Q, S, _) = np.linalg.svd(A, full_matrices=False)
     # calculate a tolerance based on the first eigenvalue (instead of just using a small number)
-    tol = np.max(A.shape) * S[0] * np.finfo(float).eps
+    tol = np.max(A.shape) * S[0] * _EPS
     # sum the number of eigenvalues that are greater than the calculated tolerance
-    r = np.sum(S > tol, axis=0)
+    r = np.count_nonzero(S > tol, axis=0)
     # return the columns corresponding to the non-zero eigenvalues
     Q = Q[:, np.arange(r)]
     return Q
@@ -132,7 +136,8 @@ def subspace(A, B):
     return theta
 
 #%% mat_divide
-def mat_divide(a, b, rcond=None):
+@ncjit
+def mat_divide(a, b, rcond=_EPS):
     r"""
     Solves the least square solution for x in A*x = b.
 

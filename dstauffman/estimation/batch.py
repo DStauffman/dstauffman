@@ -26,6 +26,9 @@ if TYPE_CHECKING:
 
 from dstauffman import activate_logging, deactivate_logging, Frozen, HAVE_NUMPY, LogLevel, \
     MultipassExceptionWrapper, parfor_wrapper, pprint_dict, rss, SaveAndLoad, setup_dir
+from dstauffman.numba import ncjit
+
+from dstauffman.estimation.linalg import mat_divide
 
 if HAVE_NUMPY:
     import numpy as np
@@ -576,6 +579,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     return (jacobian, gradient, hessian)
 
 #%% _levenberg_marquardt
+@ncjit
 def _levenberg_marquardt(jacobian, innovs, lambda_=0):
     r"""
     Classical Levenberg-Marquardt parameter search step.
@@ -599,9 +603,9 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
     --------
     >>> from dstauffman.estimation.batch import _levenberg_marquardt
     >>> import numpy as np
-    >>> jacobian    = np.array([[1, 2], [3, 4], [5, 6]])
-    >>> innovs      = np.array([7, 8, 9])
-    >>> lambda_     = 5
+    >>> jacobian    = np.array([[1., 2.], [3., 4.], [5., 6.]])
+    >>> innovs      = np.array([7., 8., 9.])
+    >>> lambda_     = 5.
     >>> delta_param = _levenberg_marquardt(jacobian, innovs, lambda_)
     >>> with np.printoptions(precision=8):
     ...     print(delta_param)
@@ -610,7 +614,7 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
     """
     if lambda_ <= 0:
         # calculate this simplified version directly
-        delta_param = -np.linalg.lstsq(jacobian, innovs, rcond=None)[0] # in Matlab: -jacobian\innovs
+        delta_param = -mat_divide(jacobian, innovs)
     else:
         # get the number of parameters
         num_params = jacobian.shape[1]
@@ -619,10 +623,11 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
         # augment the innovations
         innovs_aug = np.hstack((innovs, np.zeros(num_params)))
         # calucalte based on augmented forms
-        delta_param = -np.linalg.lstsq(jacobian_aug, innovs_aug, rcond=None)[0]
+        delta_param = -mat_divide(jacobian_aug, innovs_aug)
     return delta_param
 
 #%% _predict_func_change
+@ncjit
 def _predict_func_change(delta_param, gradient, hessian):
     r"""
     Predict change in sum of squared errors function.
@@ -658,9 +663,9 @@ def _predict_func_change(delta_param, gradient, hessian):
     --------
     >>> from dstauffman.estimation.batch import _predict_func_change
     >>> import numpy as np
-    >>> delta_param = np.array([1, 2])
-    >>> gradient = np.array([3, 4])
-    >>> hessian = np.array([[5, 2], [2, 5]])
+    >>> delta_param = np.array([1., 2.])
+    >>> gradient = np.array([3., 4.])
+    >>> hessian = np.array([[5., 2.], [2., 5.]])
     >>> delta_func = _predict_func_change(delta_param, gradient, hessian)
     >>> print(delta_func)
     27.5
@@ -692,6 +697,7 @@ def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
     return convergence
 
 #%% _double_dogleg
+@ncjit
 def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radius):
     r"""
     Compute a double dog-leg parameter search.
@@ -724,11 +730,11 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
     --------
     >>> from dstauffman.estimation.batch import _double_dogleg
     >>> import numpy as np
-    >>> delta_param = np.array([1, 2])
-    >>> gradient = np.array([3, 4])
-    >>> grad_hessian_grad = 75
+    >>> delta_param = np.array([1., 2.])
+    >>> gradient = np.array([3., 4.])
+    >>> grad_hessian_grad = 75.
     >>> x_bias = 0.001
-    >>> trust_radius = 2
+    >>> trust_radius = 2.
     >>> (new_delta_param, step_len, step_scale, step_type) = _double_dogleg(delta_param, \
     ...     gradient, grad_hessian_grad, x_bias, trust_radius)
 
@@ -1197,7 +1203,7 @@ def run_bpe(opti_opts: OptiOpts, log_level: int = LogLevel.L5) -> Tuple[BpeResul
 
         # calculate the delta parameter step to try on the next iteration
         if opti_opts.is_max_like:
-            delta_param = -np.linalg.lstsq(hessian + hessian_log_det_b, gradient, rcond=None)[0]
+            delta_param = -mat_divide(hessian + hessian_log_det_b, gradient)
         else:
             delta_param = _levenberg_marquardt(jacobian, cur_results.innovs, lambda_=0)
 
