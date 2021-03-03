@@ -95,7 +95,7 @@ class Test_estimation_calculate_normalized_innovation(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.z = np.array([0.1, 0.05, -0.2])
-        self.Pz = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0., 0., 0.2]])
+        self.Pz = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0., 0., 0.2]], order='F')
         self.exp = np.array([0.96868687, 0.41313131, -1.]) # TODO: come up with more independent solution
 
     def test_nominal(self) -> None:

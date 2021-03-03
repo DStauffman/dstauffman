@@ -27,18 +27,9 @@ if HAVE_MPL:
     from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
     from matplotlib.ticker import StrMethodFormatter
-
-    # Newer date stamps on axes
-    from matplotlib.dates import ConciseDateConverter
-    import matplotlib.units as munits
-    converter = ConciseDateConverter()
-    munits.registry[datetime.date] = converter
-    munits.registry[datetime.datetime] = converter
 if HAVE_NUMPY:
     import numpy as np
     inf = np.inf
-    if HAVE_MPL:
-        munits.registry[np.datetime64] = converter
 else:
     from math import inf
 

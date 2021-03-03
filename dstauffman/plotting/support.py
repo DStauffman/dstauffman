@@ -38,9 +38,18 @@ if HAVE_MPL:
     from matplotlib.figure import Figure
     from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
+
+    # Newer date stamps on axes, done here as this is the lowest level of the plotting submodule
+    from matplotlib.dates import ConciseDateConverter
+    import matplotlib.units as munits
+    converter = ConciseDateConverter()
+    munits.registry[datetime.date] = converter
+    munits.registry[datetime.datetime] = converter
 if HAVE_NUMPY:
     import numpy as np
     inf = np.inf
+    if HAVE_MPL:
+        munits.registry[np.datetime64] = converter
 else:
     from math import inf
 if HAVE_SCIPY:
