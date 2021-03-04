@@ -12,11 +12,13 @@ import doctest
 from typing import Tuple, Union
 import unittest
 
-from dstauffman import HAVE_NUMPY
 from dstauffman.numba.passthrough import ncjit, List
 
-if HAVE_NUMPY:
+try:
+    # Note: avoid using HAVE_NUMPY from dstauffman to avoid circular imports
     import numpy as np
+except ModuleNotFoundError:
+    pass
 
 #%% _reduce_shape
 @ncjit

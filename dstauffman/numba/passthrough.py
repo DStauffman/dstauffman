@@ -12,7 +12,14 @@ import functools
 import sys
 import unittest
 
-from dstauffman import HAVE_NUMBA
+try:
+    # Try importing numba to determine if it is there.  Use this instead of HAVE_NUMBA from dstauffman
+    # to avoid any circular dependencies
+    import numba
+    assert numba
+    HAVE_NUMBA = True
+except ModuleNotFoundError:
+    HAVE_NUMBA = False
 
 #%% Support Functions
 def _fake_decorator(func):
