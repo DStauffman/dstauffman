@@ -55,7 +55,16 @@ def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
     Examples
     --------
     >>> from dstauffman.estimation.smoother import _update_information
-    >>> # TODO: write the rest
+    >>> import numpy as np
+    >>> num_states = 6
+    >>> num_axes = 2
+    >>> H = np.ones((num_axes, num_states), order='F')
+    >>> Pz = np.eye(num_axes, num_axes, order='F')
+    >>> K = np.ones((num_states, num_axes), order='F')
+    >>> z = np.ones(num_axes)
+    >>> lambda_bar = np.ones(num_states)
+    >>> LAMBDA_bar = np.ones((num_states, num_states))
+    >>> (lambda_hat, LAMBDA_hat) = _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar)
 
     """
     delta_lambda = -H.T @ (mat_divide(Pz, z) + K.T @ lambda_bar)
@@ -66,6 +75,7 @@ def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
     return (lambda_hat, LAMBDA_hat)
 
 #%% bf_smoother
+@ncjit
 def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
     r"""
     Modified Bryson Frasier smoother.
@@ -103,20 +113,20 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
 
     Examples
     --------
-    >>> from dstauffman.aerospace import KfRecord
+    >>> from dstauffman.aerospace import KfRecord_opt
     >>> from dstauffman.estimation import bf_smoother
     >>> import numpy as np
     >>> num_points = 5
     >>> num_states = 6
     >>> num_axes = 2
-    >>> stm = np.eye(num_states)
-    >>> P = np.eye(num_states)
-    >>> H = np.ones((num_axes, num_states))
-    >>> Pz = np.eye(num_axes, num_axes)
-    >>> K = np.ones((num_states, num_axes))
+    >>> stm = np.eye(num_states, order='F')
+    >>> P = np.eye(num_states, order='F')
+    >>> H = np.ones((num_axes, num_states), order='F')
+    >>> Pz = np.eye(num_axes, num_axes, order='F')
+    >>> K = np.ones((num_states, num_axes), order='F')
     >>> z = np.ones(num_axes)
     >>> lambda_bar_final = np.ones(num_states)
-    >>> kf_record = KfRecord(num_points=num_points, num_active=num_states, num_states=num_states, num_axes=num_axes)
+    >>> kf_record = KfRecord_opt(num_points=num_points, num_active=num_states, num_states=num_states, num_axes=num_axes)
     >>> for i in range(num_points):
     ...     kf_record.time[i] = float(num_points)
     ...     kf_record.stm[:, :, i] = stm
@@ -134,17 +144,17 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
     n_time     = kf_record.time.size
 
     # Storage for smoothed state updates
-    x_delta = np.zeros((n_active, n_time), dtype=float)
+    x_delta = np.zeros((n_time, n_active)).T
     if LAMBDA_bar is None:
         # If starting at the end of a datafile, set
         # Terminal boundary condition for
         # backward information matrix. Otherwise, use input value
-        LAMBDA_bar = np.zeros((n_state, n_state), dtype=float)
+        LAMBDA_bar = np.zeros((n_state, n_state))
     if lambda_bar is None:
         # If starting at the end of a datafile, set
         # Terminal boundary condition for
         # backward information vector. Otherwise, use input value
-        lambda_bar = np.zeros(n_state, dtype=float)
+        lambda_bar = np.zeros(n_state)
     if kf_record.H.size == 0:
         # if all H matricies are empty, no stars were seen
         # compute all x_delta with same lambda_bar, then return
