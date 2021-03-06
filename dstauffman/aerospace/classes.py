@@ -16,7 +16,6 @@ if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
 from dstauffman import Frozen, HAVE_H5PY, HAVE_NUMPY, SaveAndLoad
-from dstauffman.numba import float64, jitclass
 
 if HAVE_H5PY:
     import h5py
@@ -206,28 +205,6 @@ class Kf(Frozen):
                         setattr(out, field, value)
         return out
 
-#%% Classes - KfRecord_opt
-kf_record_spec = {}
-kf_record_spec['time'] = float64[::1]  # TODO: np.datetime64 version?
-kf_record_spec['P']    = float64[::1, :, :]
-kf_record_spec['stm']  = float64[::1, :, :]
-kf_record_spec['H']    = float64[::1, :, :]
-kf_record_spec['Pz']   = float64[::1, :, :]
-kf_record_spec['K']    = float64[::1, :, :]
-kf_record_spec['z']    = float64[::1, :]
-
-@jitclass(kf_record_spec)
-class KfRecord_opt(object):
-    r"""Compilable version of KfRecord."""
-    def __init__(self, num_points=0, num_states=0, num_active=0, num_axes=0):
-        self.time = np.empty(num_points, dtype=np.float64)
-        self.P    = np.empty((num_points, num_active, num_active)).T
-        self.stm  = np.empty((num_points, num_active, num_active)).T
-        self.H    = np.empty((num_points, num_states, num_axes)).T
-        self.Pz   = np.empty((num_points, num_axes, num_axes)).T
-        self.K    = np.empty((num_points, num_axes, num_active)).T
-        self.z    = np.empty((num_points, num_axes)).T
-
 #%% Classes - KfRecord
 class KfRecord(Frozen, metaclass=SaveAndLoad):
     r"""
@@ -286,12 +263,6 @@ class KfRecord(Frozen, metaclass=SaveAndLoad):
         self.Pz   = self.Pz[:, :, ix_keep].copy()
         self.K    = self.K[:, :, ix_keep].copy()
         self.z    = self.z[:, ix_keep].copy()
-
-    def from_opt(self, opt) -> None:
-        r"""Passes the optimized version back into this full class version."""
-        for key in vars(self).keys():
-            setattr(self, key, getattr(opt, key))
-        return self
 
 #%% Unit Test
 if __name__ == '__main__':

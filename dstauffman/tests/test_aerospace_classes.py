@@ -53,34 +53,6 @@ class Test_aerospace_Kf(unittest.TestCase):
         with contextlib.suppress(FileNotFoundError):
             os.remove(self.filename)
 
-#%% aerospace.KfRecord_opt
-class Test_aerospace_KfRecord_opt(unittest.TestCase):
-    r"""
-    Tests the aerospace.KfRecord_opt class with the following cases:
-        Nominal
-        With sizes
-    """
-    def test_nominal(self) -> None:
-        kf_record = space.KfRecord_opt()
-        self.assertIsInstance(kf_record, space.KfRecord_opt)
-        self.assertEqual(kf_record.time.shape, (0, ))
-        self.assertEqual(kf_record.P.shape, (0, 0, 0))
-        self.assertEqual(kf_record.stm.shape, (0, 0, 0))
-        self.assertEqual(kf_record.H.shape, (0, 0, 0))
-        self.assertEqual(kf_record.Pz.shape, (0, 0, 0))
-        self.assertEqual(kf_record.K.shape, (0, 0, 0))
-        self.assertEqual(kf_record.z.shape, (0, 0))
-
-    def test_arguments(self) -> None:
-        kf_record = space.KfRecord_opt(num_points=30, num_states=6, num_active=3, num_axes=2)
-        self.assertEqual(kf_record.time.shape, (30, ), 'Time shape mismatch.')
-        self.assertEqual(kf_record.P.shape, (3, 3, 30), 'P shape mismatch.')
-        self.assertEqual(kf_record.stm.shape, (3, 3, 30), 'stm shape mismatch.')
-        self.assertEqual(kf_record.H.shape, (2, 6, 30), 'H shape mismatch.')
-        self.assertEqual(kf_record.Pz.shape, (2, 2, 30), 'Pz shape mismatch.')
-        self.assertEqual(kf_record.K.shape, (3, 2, 30), 'K shape mismatch.')
-        self.assertEqual(kf_record.z.shape, (2, 30), 'z shape mismatch.')
-
 #%% aerospace.KfRecord
 class Test_aerospace_KfRecord(unittest.TestCase):
     r"""
@@ -136,13 +108,6 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         lines = out.getvalue().strip().split('\n')
         self.assertEqual(lines[0], 'KfRecord')
         self.assertEqual(lines[1], ' time = <ndarray float64 (5,)>')
-
-    def test_from_opt(self) -> None:
-        kf_record_opt = space.KfRecord_opt(num_points=30, num_states=6, num_active=3, num_axes=2)
-        kf_record_opt.time[:] = np.arange(30)
-        kf_record = space.KfRecord().from_opt(kf_record_opt)
-        for key in self.fields:
-            np.testing.assert_array_almost_equal(getattr(kf_record, key), getattr(kf_record_opt, key), 14)
 
 #%% Unit test execution
 if __name__ == '__main__':

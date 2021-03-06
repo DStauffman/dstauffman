@@ -19,7 +19,6 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% _update_information
-@ncjit
 def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
     r"""
     Update information vector and matrix using innovation.
@@ -75,7 +74,6 @@ def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
     return (lambda_hat, LAMBDA_hat)
 
 #%% bf_smoother
-@ncjit
 def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
     r"""
     Modified Bryson Frasier smoother.
@@ -113,7 +111,7 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
 
     Examples
     --------
-    >>> from dstauffman.aerospace import KfRecord_opt
+    >>> from dstauffman.aerospace import KfRecord
     >>> from dstauffman.estimation import bf_smoother
     >>> import numpy as np
     >>> num_points = 5
@@ -126,7 +124,7 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
     >>> K = np.ones((num_states, num_axes), order='F')
     >>> z = np.ones(num_axes)
     >>> lambda_bar_final = np.ones(num_states)
-    >>> kf_record = KfRecord_opt(num_points=num_points, num_active=num_states, num_states=num_states, num_axes=num_axes)
+    >>> kf_record = KfRecord(num_points=num_points, num_active=num_states, num_states=num_states, num_axes=num_axes)
     >>> for i in range(num_points):
     ...     kf_record.time[i] = float(num_points)
     ...     kf_record.stm[:, :, i] = stm

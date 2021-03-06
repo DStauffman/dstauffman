@@ -10,7 +10,7 @@ Notes
 """
 
 #%% Imports
-from .classes    import KfInnov, Kf, KfRecord_opt, KfRecord
+from .classes    import KfInnov, Kf, KfRecord
 from .quat       import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks, quat_assertions, \
                             qrot, quat_angle_diff, quat_from_euler, quat_interp, quat_inv, \
                             quat_mult, quat_norm, quat_prop, quat_times_vector, quat_to_euler

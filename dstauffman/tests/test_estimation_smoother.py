@@ -10,7 +10,7 @@ Notes
 import unittest
 
 from dstauffman import HAVE_NUMPY
-from dstauffman.aerospace import KfRecord_opt
+from dstauffman.aerospace import KfRecord
 
 import dstauffman.estimation as estm
 
@@ -55,7 +55,7 @@ class Test_estimation_bf_smoother(unittest.TestCase):
         K = np.ones((num_states, num_axes), order='F')
         z = np.ones(num_axes)
         self.lambda_bar_final = np.ones(num_states)
-        self.kf_record = KfRecord_opt(num_points=num_points, num_active=num_states, num_states=num_states, num_axes=num_axes)
+        self.kf_record = KfRecord(num_points=num_points, num_active=num_states, num_states=num_states, num_axes=num_axes)
         for i in range(num_points):
             self.kf_record.time[i] = float(num_points)
             self.kf_record.stm[:, :, i] = stm
