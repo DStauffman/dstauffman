@@ -410,32 +410,6 @@ class Frozen(object):
         text = pprint_dict(self.__dict__, name=name, **kwargs)
         return text if return_text else None
 
-#%% Classes - PPrint
-class PPrint(object):
-    r"""
-    Substitute for Frozen class when using jitclass with numba.
-
-    This class avoids the use of metaclasses, as numba does not yet support them.
-
-    This class doesn't guarantee that new fields aren't added, but the jitclass compilation will
-    prevent that from happening.
-
-    """
-    @overload
-    def pprint(self, return_text: Literal[True], **kwargs) -> str: ...
-
-    @overload
-    def pprint(self, return_text: Literal[False], **kwargs) -> None: ...
-
-    @overload
-    def pprint(self, **kwargs) -> Optional[str]: ...
-
-    def pprint(self, return_text: bool = False, **kwargs) -> Optional[str]:
-        r"""Displays a pretty print version of the class."""
-        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
-        text = pprint_dict(self.__dict__, name=name, **kwargs)
-        return text if return_text else None
-
 #%% MetaClasses - SaveAndLoad
 class SaveAndLoad(type):
     r"""Metaclass to add 'save' and 'load' methods to the given class."""
