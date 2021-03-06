@@ -25,29 +25,29 @@ class Test_types(unittest.TestCase):
     Tests the following types:
         float64, int32
     """
-    def test_types(self):
+    def test_types(self) -> None:
         self.assertIs(nub.boolean, numba.boolean)
         self.assertIs(nub.int32, numba.int32)
         self.assertIs(nub.int64, numba.int64)
         self.assertIs(nub.float32, numba.float32)
         self.assertIs(nub.float64, numba.float64)
 
-    def test_decorators(self):
+    def test_decorators(self) -> None:
         self.assertIs(nub.jit, numba.jit)
         self.assertIs(nub.njit, numba.njit)
         self.assertIs(nub.vectorize, numba.vectorize)
 
-    def test_more_types(self):
+    def test_more_types(self) -> None:
         from numba.typed import List
         self.assertIs(nub.List, List)
         self.assertIs(nub.deferred_type, numba.deferred_type)
         self.assertIs(nub.optional, numba.optional)
 
-    def test_experimental(self):
+    def test_experimental(self) -> None:
         from numba.experimental import jitclass
         self.assertIs(nub.jitclass, jitclass)
 
-    def test_callables(self):
+    def test_callables(self) -> None:
         self.assertTrue(callable(nub.ncjit))
 
 #%% Unit test execution

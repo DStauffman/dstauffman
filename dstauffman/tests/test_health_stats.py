@@ -451,26 +451,26 @@ class Test_health_ecdf(unittest.TestCase):
         List
         Not unique
     """
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         y = np.random.rand(10000)
         (x, f) = health.ecdf(y)
         dt = x[1] - x[0]
         exp = np.arange(x[0], x[-1]+dt, dt)
         np.testing.assert_array_almost_equal(f, exp, 1)
 
-    def test_integers(self):
+    def test_integers(self) -> None:
         y = np.array([0, 0, 0, 1, 1])
         (x, f) = health.ecdf(y)
         np.testing.assert_array_almost_equal(x, np.array([0.6, 1.]), 14)
         np.testing.assert_array_equal(f, np.array([0, 1]))
 
-    def test_list(self):
+    def test_list(self) -> None:
         y = [0, 0.1, 0.2, 0.8, 0.9, 1.0]
         (x, f) = health.ecdf(y)
         np.testing.assert_array_almost_equal(x, np.arange(1, 7)/6, 14)
         np.testing.assert_array_equal(f, y)
 
-    def test_unique(self):
+    def test_unique(self) -> None:
         y = np.array([0., 0., 0., 0.5, 0.5, 0.5, 1.])
         (x, f) = health.ecdf(y)
         np.testing.assert_array_almost_equal(x, np.array([3/7, 6/7, 1.]), 14)

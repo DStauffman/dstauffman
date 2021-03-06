@@ -35,21 +35,21 @@ class Test_load_matlab(unittest.TestCase):
             (self.temp + 4*np.pi, self.temp.copy()))
         self.max_cores = 6
 
-    def test_not_parallel(self):
+    def test_not_parallel(self) -> None:
         results = dcs.parfor_wrapper(_model_wrapper, self.args, use_parfor=False, max_cores=self.max_cores)
         np.testing.assert_array_equal(results[0], _model_wrapper(self.temp, self.temp))
 
-    def test_parallel(self):
+    def test_parallel(self) -> None:
         # TODO: check if this works with numpy, but without tblib installed
         results = dcs.parfor_wrapper(_model_wrapper, self.args, use_parfor=True, max_cores=self.max_cores)
         np.testing.assert_array_equal(results[0], _model_wrapper(self.temp, self.temp))
 
-    def test_not_parallel_error(self):
+    def test_not_parallel_error(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.parfor_wrapper(_model_wrapper, ((self.temp, self.temp), (None, None)), use_parfor=False)
         self.assertEqual(str(context.exception), 'Bad value for x')
 
-    def test_parallel_error(self):
+    def test_parallel_error(self) -> None:
         with self.assertRaises(RuntimeError) as context:
             dcs.parfor_wrapper(_model_wrapper, ((self.temp, self.temp), (self.temp, None)), use_parfor=True)
         self.assertEqual(str(context.exception), 'Bad value for y')

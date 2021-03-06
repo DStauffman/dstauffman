@@ -660,7 +660,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertEqual(output, '')
         self.assertFalse(is_same)
 
-    def test_is_subset(self):
+    def test_is_subset(self) -> None:
         d1 = {'a': 1, 'b': [1, 2], 'e': {'key1': 1}}
         d2 = {'a': 1, 'b': [1, 2], 'c': 'extra', 'e': {'key1': 1, 'key2': 2}}
         with dcs.capture_output() as out:
@@ -675,11 +675,11 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertEqual(lines[1], '"d1" and "d2" are the same (subset).')
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
-    def test_tolerance(self):
+    def test_tolerance(self) -> None:
         self.d1['a'] = 1.00000000001
         self.d1['d'] = self.d2['d']
         self.d2['c'] = self.d1['c']
-        self.d2['e']['key1'] = 0.999999999998
+        self.d2['e']['key1'] = 0.999999999998  # type: ignore[index]
         is_same = dcs.compare_two_dicts(self.d1, self.d2, tolerance=0.0001, suppress_output=True)
         self.assertTrue(is_same)
 

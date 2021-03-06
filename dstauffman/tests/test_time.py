@@ -384,20 +384,20 @@ class Test_convert_num_dt_to_np(unittest.TestCase):
         Built-in numpy units
         Map conversions
     """
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         dt  = 90 * 60
         out = dcs.convert_num_dt_to_np(dt)
         exp = np.timedelta64(5400, 's').astype(dcs.NP_TIMEDELTA_FORM)
         self.assertEqual(out, exp)
 
-    def test_numpy_units(self):
+    def test_numpy_units(self) -> None:
         for key in ('Y', 'M', 'W', 'D', 'h', 'm', 's', 'ms', 'us', 'ns', 'ps', 'fs', 'as'):
             dt  = 105
             out = dcs.convert_num_dt_to_np(dt, units=key)
             exp = np.timedelta64(105, key).astype(dcs.NP_TIMEDELTA_FORM)
             self.assertEqual(out, exp)
 
-    def test_conversions(self):
+    def test_conversions(self) -> None:
         map_ = {'year': 'Y', 'month': 'M', 'week': 'W', 'day': 'D', 'hour': 'h', 'hr': 'h', \
             'minute': 'm', 'min': 'm', 'second': 's', 'sec': 's'}
         for (key, value) in map_.items():

@@ -61,7 +61,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         With sizes
         Different time type
     """
-    def setUp(self):
+    def setUp(self) -> None:
         self.fields = ('time', 'P', 'stm', 'H', 'Pz', 'K', 'z')
 
     def test_nominal(self) -> None:

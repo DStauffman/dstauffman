@@ -23,7 +23,7 @@ class Test_estimation__update_information(unittest.TestCase):
     Tests the estimation._update_information function with the following cases:
         TBD
     """
-    def setUp(self):
+    def setUp(self) -> None:
         num_states = 6
         num_axes = 2
         self.H = np.ones((num_axes, num_states), order='F')
@@ -33,7 +33,7 @@ class Test_estimation__update_information(unittest.TestCase):
         self.lambda_bar = np.ones(num_states)
         self.LAMBDA_bar = np.ones((num_states, num_states))
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         (lambda_hat, LAMBDA_hat) = estm.smoother._update_information(self.H, self.Pz, self.z, \
             self.K, self.lambda_bar, self.LAMBDA_bar)
         # TODO: assert something
@@ -44,7 +44,7 @@ class Test_estimation_bf_smoother(unittest.TestCase):
     Tests the estimation.bf_smoother function with the following cases:
         TBD
     """
-    def setUp(self):
+    def setUp(self) -> None:
         num_points = 5
         num_states = 6
         num_axes = 2
@@ -65,7 +65,7 @@ class Test_estimation_bf_smoother(unittest.TestCase):
             self.kf_record.K[:, :, i] = K
             self.kf_record.z[:, i] = z
 
-    def test_nominal(self):
+    def test_nominal(self) -> None:
         (x_delta, lambda_bar_initial, LAMBDA_bar_initial) = estm.bf_smoother(self.kf_record)
         # TODO: assert something
 
