@@ -12,10 +12,10 @@ import contextlib
 import datetime
 import os
 import platform
-from typing import Dict, Optional, Union
+from typing import Dict, Optional, Tuple, Union
 import unittest
 
-from dstauffman import capture_output, get_tests_dir, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
+from dstauffman import get_tests_dir, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -232,6 +232,68 @@ class Test_plotting_get_color_lists(unittest.TestCase):
         self.assertEqual(colormap.N, 8)
         self.assertEqual(colormap.colors[0], 'xkcd:fuchsia')
         self.assertEqual(colormap.colors[7], 'xkcd:chocolate')
+
+#%% plotting.get_nondeg_colorlists
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
+    r"""
+    Tests the plotting.get_nondeg_colorlists function with the following cases:
+        One
+        Two
+        Three
+        Four
+        5-10
+        More than 10
+    """
+    def test_one(self) -> None:
+        clist = plot.get_nondeg_colorlists(1)
+        self.assertEqual(clist.N, 3)
+        self.assertEqual(clist.colors[0], '#1f77b4')
+        self.assertEqual(clist.colors[1], 'xkcd:blue')
+        self.assertEqual(clist.colors[2], '#1f77b4')
+
+    def test_two(self) -> None:
+        clist = plot.get_nondeg_colorlists(2)
+        self.assertEqual(clist.N, 6)
+        self.assertEqual(clist.colors[0], 'xkcd:red')
+        self.assertEqual(clist.colors[2], 'xkcd:fuchsia')
+        self.assertEqual(clist.colors[4], 'xkcd:red')
+
+    def test_three(self) -> None:
+        clist = plot.get_nondeg_colorlists(3)
+        self.assertEqual(clist.N, 9)
+        self.assertEqual(clist.colors[0], 'xkcd:red')
+        self.assertEqual(clist.colors[3], 'xkcd:fuchsia')
+        self.assertEqual(clist.colors[6], 'xkcd:red')
+
+    def test_four(self) -> None:
+        clist = plot.get_nondeg_colorlists(4)
+        self.assertEqual(clist.N, 12)
+        self.assertEqual(clist.colors[0], 'xkcd:red')
+        self.assertEqual(clist.colors[4], 'xkcd:fuchsia')
+        self.assertEqual(clist.colors[8], 'xkcd:red')
+
+    def test_five_to_ten(self) -> None:
+        cmap = cmx.get_cmap('tab20')
+        exp1 = cmap.colors[0]
+        exp2 = cmap.colors[1]
+        for i in [5, 8, 10]:
+            clist = plot.get_nondeg_colorlists(i)
+            self.assertEqual(clist.N, 3*i)
+            self.assertEqual(clist.colors[0], exp1)
+            self.assertEqual(clist.colors[i], exp2)
+            self.assertEqual(clist.colors[2*i], exp1)
+
+    def test_lots(self) -> None:
+        cmap = cmx.get_cmap('tab20')
+        exp1 = cmap.colors[0]
+        exp2 = cmap.colors[1]
+        for i in [11, 15, 20, 50]:
+            clist = plot.get_nondeg_colorlists(i)
+            self.assertEqual(clist.N, 3*i)
+            self.assertEqual(clist.colors[0], exp1)
+            self.assertEqual(clist.colors[i], exp2)
+            self.assertEqual(clist.colors[2*i], exp1)
 
 #%% plotting.ignore_plot_data
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -669,7 +731,7 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
     def setUp(self) -> None:
         self.description = 'Values over time'
         self.ylabel = 'Value [rad]'
-        self.second_yscale: Union[None, int, float, Dict[str, float]] = None
+        self.second_units: Union[None, int, float, Tuple[str, float]] = None
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
         self.ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
@@ -677,58 +739,58 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
         self.ax.set_title(self.description)
 
     def test_none(self) -> None:
-        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_yscale)
+        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertIsNone(ax2)
 
     def test_int(self) -> None:
-        self.second_yscale = 100
-        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.second_units = 100
+        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertEqual(ax2.get_ylabel(), '')
 
     def test_float(self) -> None:
-        self.second_yscale = 100.
-        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.second_units = 100.
+        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertEqual(ax2.get_ylabel(), '')
 
     def test_zero(self) -> None:
-        self.second_yscale = 0.
-        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.second_units = 0.
+        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertIsNone(ax2)
-        self.second_yscale = {'new': 0}
-        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.second_units = ('new', 0)
+        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertIsNone(ax2)
 
     def test_nan(self) -> None:
-        self.second_yscale = np.nan
-        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.second_units = np.nan
+        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertIsNone(ax2)
-        self.second_yscale = {'new': np.nan}
-        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.second_units = ('new', np.nan)
+        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertIsNone(ax2)
 
     def test_full_replace(self) -> None:
-        self.second_yscale = {u'Better Units [µrad]': 1e6}
-        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.second_units = (u'Better Units [µrad]', 1e6)
+        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertEqual(ax2.get_ylabel(), u'Better Units [µrad]')
 
     def test_units_only(self) -> None:
-        self.second_yscale = {'mrad': 1e3}
-        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.second_units = ('mrad', 1e3)
+        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertEqual(ax2.get_ylabel(), 'Value [mrad]')
 
     def test_no_units(self) -> None:
         self.ax.set_ylabel('Value')
-        self.second_yscale = {'New Value': 1e3}
-        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_yscale)
+        self.second_units = ('New Value', 1e3)
+        ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), 'Value')
         self.assertEqual(ax2.get_ylabel(), 'New Value')
 

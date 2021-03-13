@@ -38,7 +38,6 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.name_one        = 'test1'
         self.name_two        = 'test2'
         self.time_units       = 'sec'
-        self.leg_scale        = 'unity'
         self.start_date      = str(datetime.datetime.now())
         self.plot_components  = True
         self.rms_xmin        = 0
@@ -52,7 +51,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.show_rms         = True
         self.legend_loc       = 'best'
         self.show_extra       = True
-        self.second_yscale    = {u'µrad': 1e6}
+        self.second_units     = (u'µrad', 1e6)
         self.truth_name       = 'Truth'
         self.truth_time       = None
         self.truth_data       = None
@@ -66,7 +65,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_nominal(self) -> None:
         self.return_err = True
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, leg_scale=self.leg_scale, \
+            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
@@ -80,7 +79,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.make_subplots = False
         self.return_err = True
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, leg_scale=self.leg_scale, \
+            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
@@ -94,7 +93,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.plot_components = False
         self.return_err = True
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, leg_scale=self.leg_scale, \
+            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
@@ -109,7 +108,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.start_date = ''
         self.return_err = True
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, leg_scale=self.leg_scale, \
+            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
@@ -124,7 +123,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.name_two = ''
         self.return_err = True
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, leg_scale=self.leg_scale, \
+            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
@@ -138,7 +137,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.name_one = ''
         self.return_err = True
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, leg_scale=self.leg_scale, \
+            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
@@ -152,7 +151,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.rms_xmax = 7
         self.return_err = True
         (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, leg_scale=self.leg_scale, \
+            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \

@@ -463,6 +463,11 @@ def convert_datetime_to_np(time, /, units=NP_DATETIME_UNITS):
     2020-10-01T12:34:56.000789000
 
     """
+    if isinstance(time, list):
+        out = np.empty(len(time), dtype='datetime64[' + units + ']')
+        for (ix, t) in enumerate(time):
+            out[ix] = np.datetime64(t, units)
+        return out
     return np.datetime64(time, units)
 
 #%% Functions - convert_duration_to_np

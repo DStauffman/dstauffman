@@ -20,7 +20,7 @@ except ModuleNotFoundError:
     import setuptools  # type: ignore[import]
     parse = setuptools.version.pkg_resources.packaging.version.parse
 
-from dstauffman import Frozen, get_factors, HAVE_MPL, HAVE_NUMPY, rms
+from dstauffman import Frozen, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, rms
 from dstauffman.health import bins_to_str_ranges
 
 from dstauffman.plotting.plotting import Opts, setup_plots
@@ -134,7 +134,7 @@ class TruthPlotter(Frozen):
 
 #%% Functions - plot_health_time_history
 def plot_health_time_history(time, data, label, units='', opts=None, *, legend=None, \
-        leg_scale='unity', second_yscale=None, ignore_empties=False, data_lo=None, data_hi=None, \
+        second_units=None, ignore_empties=False, data_lo=None, data_hi=None, \
         colormap=None):
     r"""
     Plot multiple metrics over time.
@@ -154,10 +154,8 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
         plotting options
     legend : list of str, optional
         Names to use for each channel of data
-    leg_scale : str, optional
-        factor to use when scaling the value in the legend, default is 'unity'
-    second_yscale : float or dict, optional
-        Multiplication scale factor to use to display on a secondary Y axis
+    second_units : str or tuple of (str, float), optional
+        Name and conversion factor to use for scaling data to a second Y axis and in legend
     ignore_empties : bool, optional
         Removes any entries from the plot and legend that contain only zeros or only NaNs
     data_lo : same as data
@@ -208,7 +206,7 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
     show_zero  = opts.show_zero
     time_units = opts.time_base
     unit_text  = ' [' + units + ']' if units else ''
-    (scale, prefix) = get_factors(leg_scale)
+    (new_units, unit_mult) = get_unit_conversion(second_units, units)
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
@@ -270,11 +268,11 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
                     this_color = whitten(cm.get_color(i), white=(0, 0, 0, 1), dt=color_dt)
                 else:
                     this_color = whitten(cm.get_color(i), white=(1, 1, 1, 1), dt=color_dt)
-                ax.plot(time, scale*this_data, '.-', label=this_name + legend[i], color=this_color, zorder=10)
+                ax.plot(time, this_data, '.-', label=this_name + legend[i], color=this_color, zorder=10)
                 if this_data_lo is not None:
-                    ax.plot(time, scale*this_data_lo, 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
+                    ax.plot(time, this_data_lo, 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
                 if this_data_hi is not None:
-                    ax.plot(time, scale*this_data_hi, 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
+                    ax.plot(time, this_data_hi, 'o:', markersize=2, label='', color=whitten(cm.get_color(i)), zorder=6)
 
     # add labels and legends
     ax.set_xlabel('Time [' + time_units + ']')
@@ -292,7 +290,7 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
 
     # optionally add second Y axis
-    plot_second_units_wrapper(ax, second_yscale)
+    plot_second_units_wrapper(ax, (new_units, unit_mult))
 
     # setup plots
     setup_plots(fig, opts)
@@ -300,7 +298,7 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
 
 #%% Functions - plot_health_monte_carlo
 def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True, \
-    truth=None, plot_as_diffs=False, leg_scale='unity', second_yscale=None, plot_sigmas=1, \
+    truth=None, plot_as_diffs=False, second_units=None, plot_sigmas=1, \
     plot_confidence=0, colormap=None):
     r"""
     Plot the given data channel versus time, with a generic label argument.
@@ -323,10 +321,8 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
         Truth instance for adding to the plot
     plot_as_diffs : bool, optional, default is False
         Plot each entry in results against the other ones, default is False
-    leg_scale : str, optional
-        factor to use when scaling the value in the legend, default is 'unity'
-    second_yscale : float or dict, optional
-        Multiplication scale factor to use to display on a secondary Y axis
+    second_units : str or tuple of (str, float), optional
+        Name and conversion factor to use for scaling data to a second Y axis and in legend
     plot_sigmas : numeric, optional
         If value converts to true as bool, then plot the sigma values of the given value
     plot_confidence : numeric, optional
@@ -381,7 +377,7 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
     time_units    = opts.time_base
     show_legend   = rms_in_legend or plot_as_diffs or (truth is not None and not truth.is_null)
     unit_text     = ' [' + units + ']' if units else ''
-    (scale, prefix) = get_factors(leg_scale)
+    (new_units, unit_mult) = get_unit_conversion(second_units, units)
 
     # ensure that data is at least 2D
     if data.ndim == 0:
@@ -403,7 +399,7 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
         cm = ColorMap(colormap, num_colors=data.shape[1])
         # calculate RMS
         if rms_in_legend:
-            rms_data = np.atleast_1d(rms(scale*data, axis=0, ignore_nans=True))
+            rms_data = np.atleast_1d(rms(unit_mult*data, axis=0, ignore_nans=True))
     else:
         # calculate the mean and std of data, while disabling warnings for time points that are all NaNs
         with warnings.catch_warnings():
@@ -414,7 +410,7 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
 
         # calculate an RMS
         if rms_in_legend:
-            rms_data = rms(scale*mean, axis=0, ignore_nans=True)
+            rms_data = rms(unit_mult*mean, axis=0, ignore_nans=True)
 
     # alias the title
     this_title = label + ' vs. Time'
@@ -431,29 +427,29 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
                 this_label = 'Series {}'.format(ix+1)
             if rms_in_legend:
                 this_label += ' (RMS: {:.2f})'.format(rms_data[ix])
-            ax.plot(time, scale*data[:, ix], '.-', linewidth=2, zorder=10, label=this_label)
+            ax.plot(time, data[:, ix], '.-', linewidth=2, zorder=10, label=this_label)
     else:
         this_label = opts.get_names(0) + label
         if rms_in_legend:
             this_label += ' (RMS: {:.2f})'.format(rms_data)
-        ax.plot(time, scale*mean, '.-', linewidth=2, color='#0000cd', zorder=10, label=this_label)
+        ax.plot(time, mean, '.-', linewidth=2, color='#0000cd', zorder=10, label=this_label)
         if plot_sigmas and num_series > 1:
             sigma_label = r'$\pm {}\sigma$'.format(plot_sigmas)
-            ax.plot(time, scale*mean + plot_sigmas*scale*std, '.-', markersize=2, color='#20b2aa', zorder=6, label=sigma_label)
-            ax.plot(time, scale*mean - plot_sigmas*scale*std, '.-', markersize=2, color='#20b2aa', zorder=6)
+            ax.plot(time, mean + plot_sigmas*std, '.-', markersize=2, color='#20b2aa', zorder=6, label=sigma_label)
+            ax.plot(time, mean - plot_sigmas*std, '.-', markersize=2, color='#20b2aa', zorder=6)
         if plot_confidence and num_series > 1:
             conf_label = '{}% C.I.'.format(100*plot_confidence)
             conf_z = z_from_ci(plot_confidence)
             conf_std = conf_z * std / np.sqrt(num_series)
-            ax.plot(time, scale*mean + scale*conf_std, '.-', markersize=2, color='#2e8b57', zorder=7, label=conf_label)
-            ax.plot(time, scale*mean - scale*conf_std, '.-', markersize=2, color='#2e8b57', zorder=7)
+            ax.plot(time, mean + conf_std, '.-', markersize=2, color='#2e8b57', zorder=7, label=conf_label)
+            ax.plot(time, mean - conf_std, '.-', markersize=2, color='#2e8b57', zorder=7)
         # inidividual line plots
         if plot_indiv and data.ndim > 1:
             for ix in range(num_series):
-                ax.plot(time, scale*data[:, ix], color='0.75', zorder=1)
+                ax.plot(time, data[:, ix], color='0.75', zorder=1)
     # optionally plot truth (without changing the axis limits)
     if truth is not None:
-        truth.plot_truth(ax, scale)
+        truth.plot_truth(ax)
     # add labels and legends
     ax.set_xlabel('Time [' + time_units + ']')
     ax.set_ylabel(label + unit_text)
@@ -469,7 +465,7 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
     if time_units == 'year' and np.any(time) and (np.max(time) - np.min(time)) >= 4:
         ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
     # optionally add second Y axis
-    plot_second_units_wrapper(ax, second_yscale)
+    plot_second_units_wrapper(ax, (new_units, unit_mult))
     # Setup plots
     setup_plots(fig, opts)
     return fig

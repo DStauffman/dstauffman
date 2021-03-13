@@ -36,7 +36,6 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         self.elements         = None
         self.units            = ''
         self.time_units       = 'sec'
-        self.leg_scale        = 'unity'
         self.start_date       = ''
         self.rms_xmin         = -np.inf
         self.rms_xmax         = np.inf
@@ -48,7 +47,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         self.plot_zero        = False
         self.show_rms         = True
         self.legend_loc       = 'best'
-        self.second_yscale    = None
+        self.second_units     = None
         self.ylabel           = None
         self.data_as_rows     = True
         self.extra_plotter    = None
@@ -61,11 +60,11 @@ class Test_plotting_make_time_plot(unittest.TestCase):
 
     def test_nominal(self) -> None:
         self.fig = plot.make_time_plot(self.description, self.time, self.data, name=self.name, elements=self.elements, \
-            units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            units=self.units, time_units=self.time_units, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            second_yscale=self.second_yscale, ylabel=self.ylabel, data_as_rows=self.data_as_rows, \
+            second_units=self.second_units, ylabel=self.ylabel, data_as_rows=self.data_as_rows, \
             extra_plotter=self.extra_plotter, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
 
     def test_scalars(self) -> None:
@@ -111,7 +110,6 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
         self.elements         = ['x', 'y', 'z']
         self.units            = 'rad'
         self.time_units       = 'sec'
-        self.leg_scale        = 'milli'
         self.start_date       = '  t0 = ' + str(datetime.datetime.now())
         self.rms_xmin         = 1
         self.rms_xmax         = 10
@@ -123,7 +121,7 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
         self.plot_zero        = False
         self.show_rms         = True
         self.legend_loc       = 'best'
-        self.second_yscale    = {'mrad': 1e3}
+        self.second_units     = 'milli'
         self.ylabel           = None
         self.data_as_rows     = True
         self.label_vert_lines = True
@@ -131,10 +129,10 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
 
     def test_nominal(self) -> None:
         self.fig = plot.make_error_bar_plot(self.description, self.time, self.data, self.mins, self.maxs, elements=self.elements, \
-        units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, start_date=self.start_date, \
+        units=self.units, time_units=self.time_units, start_date=self.start_date, \
         rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, \
         single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, plot_zero=self.plot_zero, \
-        show_rms=self.show_rms, legend_loc=self.legend_loc, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+        show_rms=self.show_rms, legend_loc=self.legend_loc, second_units=self.second_units, ylabel=self.ylabel, \
         data_as_rows=self.data_as_rows, label_vert_lines=self.label_vert_lines)
 
     def tearDown(self) -> None:
@@ -159,7 +157,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.elements         = ['x', 'y']
         self.units            = 'rad'
         self.time_units       = 'sec'
-        self.leg_scale        = 'micro'
         self.start_date       = str(datetime.datetime.now())
         self.rms_xmin         = 0
         self.rms_xmax         = 10
@@ -174,7 +171,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.show_rms         = True
         self.legend_loc       = 'best'
         self.show_extra       = True
-        self.second_yscale    = {u'µrad': 1e6}
+        self.second_units     = 'micro'
         self.ylabel           = None
         self.truth_name       = 'Truth'
         self.truth_time       = None
@@ -190,12 +187,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.return_err = False
         self.figs = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
-            elements=self.elements, units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, \
+            elements=self.elements, units=self.units, time_units=self.time_units, \
             start_date=self.start_date, rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, \
             disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            show_extra=self.show_extra, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
             truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
@@ -204,12 +201,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.make_subplots = False
         (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
-            elements=self.elements, units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, \
+            elements=self.elements, units=self.units, time_units=self.time_units, \
             start_date=self.start_date, rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, \
             disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            show_extra=self.show_extra, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
             truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
@@ -218,12 +215,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.start_date = ''
         (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
-            elements=self.elements, units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, \
+            elements=self.elements, units=self.units, time_units=self.time_units, \
             start_date=self.start_date, rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, \
             disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            show_extra=self.show_extra, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
             truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
@@ -233,12 +230,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.name_two = ''
         (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
-            elements=self.elements, units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, \
+            elements=self.elements, units=self.units, time_units=self.time_units, \
             start_date=self.start_date, rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, \
             disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            show_extra=self.show_extra, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
             truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
@@ -249,12 +246,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.name_one = ''
         (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
-            elements=self.elements, units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, \
+            elements=self.elements, units=self.units, time_units=self.time_units, \
             start_date=self.start_date, rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, \
             disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            show_extra=self.show_extra, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
             truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
@@ -265,12 +262,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.rms_xmax = 7
         (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
-            elements=self.elements, units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, \
+            elements=self.elements, units=self.units, time_units=self.time_units, \
             start_date=self.start_date, rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, \
             disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            show_extra=self.show_extra, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
             truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
@@ -279,12 +276,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.use_mean = True
         (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
-            elements=self.elements, units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, \
+            elements=self.elements, units=self.units, time_units=self.time_units, \
             start_date=self.start_date, rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, \
             disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            show_extra=self.show_extra, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
             truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
@@ -293,12 +290,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.show_rms = False
         (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
-            elements=self.elements, units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, \
+            elements=self.elements, units=self.units, time_units=self.time_units, \
             start_date=self.start_date, rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, \
             disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            show_extra=self.show_extra, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
             truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
@@ -307,12 +304,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.plot_zero = True
         (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
-            elements=self.elements, units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, \
+            elements=self.elements, units=self.units, time_units=self.time_units, \
             start_date=self.start_date, rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, \
             disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            show_extra=self.show_extra, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
             truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
@@ -333,12 +330,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.return_err = False
         self.figs = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \
-            elements=self.elements, units=self.units, time_units=self.time_units, leg_scale=self.leg_scale, \
+            elements=self.elements, units=self.units, time_units=self.time_units, \
             start_date=self.start_date, rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, \
             disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
-            show_extra=self.show_extra, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
             truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
@@ -381,7 +378,6 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
         self.elements         = None
         self.units            = ''
         self.time_units       = 'sec'
-        self.leg_scale        = 'unity'
         self.start_date       = ''
         self.rms_xmin         = -np.inf
         self.rms_xmax         = np.inf
@@ -394,7 +390,7 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
         self.plot_zero        = False
         self.show_rms         = True
         self.legend_loc       = 'best'
-        self.second_yscale    = None
+        self.second_units     = 'unity'
         self.ylabel           = None
         self.data_as_rows     = True
         self.use_zoh          = False
@@ -404,11 +400,11 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
     def test_nominal(self) -> None:
         self.figs = plot.make_categories_plot(self.description, self.time, self.data, self.cats, \
             cat_names=self.cat_names, name=self.name, elements=self.elements, units=self.units, \
-            time_units=self.time_units, leg_scale=self.leg_scale, start_date=self.start_date, \
+            time_units=self.time_units, start_date=self.start_date, \
             rms_xmin=self.rms_xmin, rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, \
             disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, single_lines=self.single_lines, \
             colormap=self.colormap, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, second_yscale=self.second_yscale, ylabel=self.ylabel, \
+            legend_loc=self.legend_loc, second_units=self.second_units, ylabel=self.ylabel, \
             data_as_rows=self.data_as_rows, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
 
     def test_minimal(self) -> None:

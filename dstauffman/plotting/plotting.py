@@ -15,7 +15,7 @@ import os
 from typing import List, Optional, Tuple, TypeVar, Union
 import unittest
 
-from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_factors, \
+from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_unit_conversion, \
     histcounts, HAVE_MPL, HAVE_NUMPY, is_datetime, LogLevel
 
 from dstauffman.plotting.generic import make_time_plot
@@ -345,7 +345,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     return fig
 
 #%% Functions - plot_correlation_matrix
-def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_name='Correlation Matrix', \
+def plot_correlation_matrix(data, labels=None, units='', *, opts=None, matrix_name='Correlation Matrix', \
         cmin=0, cmax=1, xlabel='', ylabel='', plot_lower_only=True, label_values=False, x_lab_rot=90, \
         colormap=None, plot_border=None, leg_scale='unity'):
     r"""
@@ -399,10 +399,25 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
     >>> from dstauffman import unit
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
-    >>> data = np.random.rand(10, 10)
+    >>> data = unit(np.random.rand(10, 10), axis=0)
     >>> labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
-    >>> data = unit(data, axis=0)
-    >>> fig = plot_correlation_matrix(data, labels)
+    >>> units = 'm'
+    >>> opts = None
+    >>> matrix_name = 'Correlation Matrix'
+    >>> cmin = 0
+    >>> cmax = 1
+    >>> xlabel = ''
+    >>> ylabel = ''
+    >>> plot_lower_only = True
+    >>> label_values = True
+    >>> x_lab_rot = 90
+    >>> colormap = None
+    >>> plot_border=None
+    >>> leg_scale = 'centi'
+    >>> fig = plot_correlation_matrix(data, labels, units=units, opts=opts, matrix_name=matrix_name, \
+    ...     cmin=cmin, cmax=cmax, xlabel=xlabel, ylabel=ylabel, plot_lower_only=plot_lower_only, \
+    ...     label_values=label_values, x_lab_rot=x_lab_rot, colormap=colormap, plot_border=plot_border, \
+    ...     leg_scale=leg_scale)
 
     Close plot
     >>> plt.close(fig)
@@ -416,7 +431,7 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
             colormap = 'cool'
         else:
             colormap = opts.colormap
-    (scale, prefix) = get_factors(leg_scale)
+    (new_units, scale) = get_unit_conversion(leg_scale, units)
 
     # Hard-coded values
     box_size        = 1
@@ -460,7 +475,7 @@ def plot_correlation_matrix(data, labels=None, units='', opts=None, *, matrix_na
         cmax = temp
 
     # determine which type of data to plot
-    this_title = matrix_name + (' [' + units + ']' if units else '')
+    this_title = matrix_name + (' [' + new_units + ']' if new_units else '')
 
     # Create plots
     # create figure

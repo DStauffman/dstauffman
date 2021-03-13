@@ -117,6 +117,25 @@ def deactivate_logging() -> None:
     if i == max_handlers or bool(root_logger.handlers):
         raise ValueError('Something bad happended when trying to close the logger.') # pragma: no cover
 
+#%% Functions - flush_logging
+def flush_logging() -> None:
+    r"""
+    Flush the loggers.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2021.
+
+    Examples
+    --------
+    >>> from dstauffman import flush_logging
+    >>> flush_logging()
+
+    """
+    # loop through and flush all the handlers
+    for handler in root_logger.handlers:
+        handler.flush()
+
 #%% Functions - log_multiline
 def log_multiline(logger: logging.Logger, log_level: int, message: str, *args: Any) -> None:
     r"""

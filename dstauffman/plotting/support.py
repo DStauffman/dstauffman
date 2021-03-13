@@ -11,6 +11,7 @@ from __future__ import annotations
 import datetime
 import doctest
 import gc
+from itertools import repeat
 import operator
 import os
 import platform
@@ -64,6 +65,21 @@ DEFAULT_CLASSIFICATION: str = ''
 
 if TYPE_CHECKING:
     _FigOrListFig = Union[Figure, List[Figure]]
+
+_COLOR_LISTS: Dict[str, Union[colors.ListedColormap, str]] = {}
+# single colors
+_COLOR_LISTS['same']     = colors.ListedColormap(tuple(repeat(cmx.get_cmap(DEFAULT_COLORMAP).colors[0], 8)))
+_COLOR_LISTS['same_old'] = colors.ListedColormap(tuple(repeat('#1f77b4', 8)))
+_COLOR_LISTS['single']   = colors.ListedColormap(('xkcd:red', ))
+# doubles
+_COLOR_LISTS['double']   = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
+_COLOR_LISTS['dbl_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:cyan'))
+# triples
+_COLOR_LISTS['vec']      = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
+_COLOR_LISTS['vec_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan'))
+# quads
+_COLOR_LISTS['quat']     = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
+_COLOR_LISTS['quat_off'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan', 'xkcd:brown'))
 
 #%% Set Matplotlib global settings
 if HAVE_MPL:
@@ -339,25 +355,15 @@ def get_color_lists(return_as_colormap: bool = False) -> Union[Dict[str, Union[c
 
     """
     color_lists: Dict[str, Union[colors.ListedColormap, str]] = {}
-    color_lists['default']     = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
-    # single colors
-    first_color                = ColorMap(color_lists['default'], num_colors=1).get_color(0)
-    color_lists['same']        = colors.ListedColormap([first_color for _ in range(8)])
-    color_lists['same_old']    = colors.ListedColormap(['#1f77b4' for _ in range(8)])
-    color_lists['single']      = colors.ListedColormap(('xkcd:red', ))
-    # doubles
-    color_lists['double']      = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
-    color_lists['dbl_off']     = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:cyan'))
+    color_lists['default'] = DEFAULT_COLORMAP
+    color_lists.update(_COLOR_LISTS)
+    # double combinations
     color_lists['dbl_diff']    = colors.ListedColormap(color_lists['dbl_off'].colors + color_lists['double'].colors)  # type: ignore[union-attr]
     color_lists['dbl_diff_r']  = colors.ListedColormap(color_lists['double'].colors + color_lists['dbl_off'].colors)  # type: ignore[union-attr]
-    # triples
-    color_lists['vec']         = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
-    color_lists['vec_off']     = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan'))
+    # triple combinations
     color_lists['vec_diff']    = colors.ListedColormap(color_lists['vec_off'].colors + color_lists['vec'].colors)  # type: ignore[union-attr]
     color_lists['vec_diff_r']  = colors.ListedColormap(color_lists['vec'].colors + color_lists['vec_off'].colors)  # type: ignore[union-attr]
-    # quads
-    color_lists['quat']        = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
-    color_lists['quat_off']    = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan', 'xkcd:brown'))
+    # quad combinations
     color_lists['quat_diff']   = colors.ListedColormap(color_lists['quat_off'].colors + color_lists['quat'].colors)  # type: ignore[union-attr]
     color_lists['quat_diff_r'] = colors.ListedColormap(color_lists['quat'].colors + color_lists['quat_off'].colors)  # type: ignore[union-attr]
     if return_as_colormap:
@@ -379,6 +385,51 @@ def get_color_lists(return_as_colormap: bool = False) -> Union[Dict[str, Union[c
             color_list_maps[key] = ColorMap(value, num_colors=num_colors)
         return color_list_maps
     return color_lists
+
+#%% Functions - get_nondeg_colorlists
+def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
+    r"""
+    Get a nice colormap for the given number of channels to plot and use for non-deg comparisons.
+
+    Parameters
+    ----------
+    num_channels : int
+        Number of channels to plot
+
+    Returns
+    -------
+    clist : matplotlib.colors.ListedColormap
+        Ordered colormap with the given list of colors (times three)
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2021.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import get_nondeg_colorlists
+    >>> num_channels = 2
+    >>> clist = get_nondeg_colorlists(num_channels)
+    >>> print(clist.colors)
+    ('xkcd:red', 'xkcd:blue', 'xkcd:fuchsia', 'xkcd:cyan', 'xkcd:red', 'xkcd:blue')
+
+    """
+    color_lists = get_color_lists()
+    if num_channels == 1:
+        clist = colors.ListedColormap(('#1f77b4', 'xkcd:blue', '#1f77b4'))
+    elif num_channels == 2:
+        clist = colors.ListedColormap(color_lists['dbl_diff_r'].colors + color_lists['double'].colors)  # type: ignore[attr-defined]
+    elif num_channels == 3:
+        clist = colors.ListedColormap(color_lists['vec_diff_r'].colors + color_lists['vec'].colors)  # type: ignore[attr-defined]
+    elif num_channels == 4:
+        clist = colors.ListedColormap(color_lists['quat_diff_r'].colors + color_lists['quat'].colors)  # type: ignore[attr-defined]
+    else:
+        ix    = [x % 10 for x in range(num_channels)]
+        cmap1 = cmx.get_cmap('tab10')
+        cmap2 = cmx.get_cmap('tab20')
+        temp  = tuple(cmap1.colors[x] for x in ix) + tuple(cmap2.colors[2*x+1] for x in ix) + tuple(cmap1.colors[x] for x in ix)
+        clist = colors.ListedColormap(temp)
+    return clist
 
 #%% Functions - ignore_plot_data
 def ignore_plot_data(data, ignore_empties, col=None):
@@ -1001,7 +1052,7 @@ def show_zero_ylim(ax: Axes) -> None:
         ax.set_ylim(top=0)
 
 #%% Functions - plot_second_units_wrapper
-def plot_second_units_wrapper(ax: Axes, second_yscale: Union[None, int, float, Dict[str, float]]) -> Axes:
+def plot_second_units_wrapper(ax: Axes, second_units: Union[None, int, float, Tuple[str, float]]) -> Axes:
     r"""
     Wrapper to plot_second_yunits that allows numeric or dict options.
 
@@ -1009,7 +1060,7 @@ def plot_second_units_wrapper(ax: Axes, second_yscale: Union[None, int, float, D
     ----------
     ax : class matplotlib.axes.Axes
         Figure axes
-    second_yscale : dict or int or float
+    second_units : dict or int or float
         Scale factor to apply, or dict with key for label and value for factor
 
     Returns
@@ -1019,7 +1070,7 @@ def plot_second_units_wrapper(ax: Axes, second_yscale: Union[None, int, float, D
 
     Notes
     -----
-    #.  If second_yscale is just a number, then no units are displayed, but if a key and value,
+    #.  If second_units is just a number, then no units are displayed, but if a key and value,
         then if it has brakets, replace the entire label, otherwise only replace what is in the
         old label within the brackets
 
@@ -1029,13 +1080,13 @@ def plot_second_units_wrapper(ax: Axes, second_yscale: Union[None, int, float, D
     >>> import matplotlib.pyplot as plt
     >>> description = 'Values over time'
     >>> ylabel = 'Value [rad]'
-    >>> second_yscale = {u'Better Units [µrad]': 1e6}
+    >>> second_units = (u'Better Units [µrad]', 1e6)
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
     >>> _ = ax.set_ylabel(ylabel)
     >>> _ = ax.set_title(description)
-    >>> _ = plot_second_units_wrapper(ax, second_yscale)
+    >>> _ = plot_second_units_wrapper(ax, second_units)
 
     >>> plt.close(fig)
 
@@ -1043,29 +1094,29 @@ def plot_second_units_wrapper(ax: Axes, second_yscale: Union[None, int, float, D
     # initialize output
     ax2 = None
     # check if processing anything
-    if second_yscale is not None:
+    if second_units is not None:
         # determine what type of input was given
-        if isinstance(second_yscale, (int, float)):
-            key = ''
-            value = second_yscale
+        if isinstance(second_units, (int, float)):
+            label = ''
+            value = second_units
         else:
-            key = list(second_yscale.keys())[0]
-            value = second_yscale[key]
+            label = second_units[0]
+            value = second_units[1]
         # check if we got a no-op value
-        if not np.isnan(value) and value != 0:
+        if not np.isnan(value) and value != 0 and value != 1:
             # if all is good, build the new label and call the lower level function
             old_label = ax.get_ylabel()
             ix1       = old_label.find('[')
-            ix2       = key.find('[')
+            ix2       = label.find('[')
             if ix2 >= 0:
                 # new label has units, so use them
-                new_label = key
-            elif ix1 >= 0 and key:
+                new_label = label
+            elif ix1 >= 0 and label:
                 # new label is only units, replace them in the old label
-                new_label = old_label[:ix1] + '[' + key + ']'
+                new_label = old_label[:ix1] + '[' + label + ']'
             else:
                 # neither label has units, just label them
-                new_label = key
+                new_label = label
             ax2 = plot_second_yunits(ax, new_label, value)
     return ax2
 
@@ -1349,16 +1400,18 @@ def plot_phases(ax, times, colormap='tab10', labels=None, *, group_all=False):
         # get the locations for this phase
         x1 = times[0, i]
         x2 = times[1, i]
-        y1 = ylims[0]
-        y2 = ylims[1]
+        if is_datetime(x1):
+            # convert to floats, as the annotate command can't handle this case
+            x1 = date2num(x1)
+            x2 = date2num(x2)
         # create the shaded box
-        ax.add_patch(Rectangle((x1, y1), x2-x1, y2-y1, facecolor=this_color, edgecolor=this_color, \
-            alpha=transparency))
+        ax.add_patch(Rectangle((x1, 0), x2-x1, 1, facecolor=this_color, edgecolor=this_color, \
+            alpha=transparency, transform=ax.get_xaxis_transform()))
         # create the label
         if labels is not None:
             this_label = labels[i] if not group_all else labels
-            ax.annotate(this_label, xy=(x1, y2), xycoords='data', horizontalalignment='left', \
-                verticalalignment='top', fontsize=15, rotation=-90)
+            ax.annotate(this_label, xy=(x1, 0.99), xycoords=ax.get_xaxis_transform(), \
+                horizontalalignment='left', verticalalignment='top', fontsize=15, rotation=-90)
 
     # reset any limits that might have changed due to the patches
     ax.set_xlim(xlims)

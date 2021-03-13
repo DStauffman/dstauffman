@@ -11,7 +11,7 @@ import doctest
 import logging
 import unittest
 
-from dstauffman import DEGREE_SIGN, get_legend_conversion, HAVE_MPL, HAVE_NUMPY, intersect, \
+from dstauffman import DEGREE_SIGN, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, intersect, \
     is_datetime, LogLevel, RAD2DEG, rms
 
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits, get_rms_indices, \
@@ -36,9 +36,9 @@ logger = logging.getLogger(__name__)
 
 #%% Functions - make_time_plot
 def make_time_plot(description, time, data, *, name='', elements=None, units='', time_units='sec', \
-        leg_scale='unity', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
-        disp_xmax=inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
-        show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True, \
+        start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
+        single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
+        show_rms=True, legend_loc='best', second_units=None, ylabel=None, data_as_rows=True, \
         extra_plotter=None, use_zoh=False, label_vert_lines=True):
     r"""
     Generic data versus time plotting routine.
@@ -59,8 +59,6 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         name of units for plot
     time_units : str, optional
         time units, defaults to 'sec', use 'datetime' for datetime histories
-    leg_scale : str, optional
-        factor to use when scaling the value in the legend, default is 'unity'
     start_date : str, optional
         date of t(0), may be an empty string
     rms_xmin : float, optional
@@ -83,8 +81,8 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         whether to show the RMS calculation in the legend
     legend_loc : str, optional
         location to put the legend, default is 'best', use 'none' to suppress legend
-    second_yscale : dict, optional
-        single key and value pair to use for scaling data to a second Y axis
+    second_units : str or tuple of (str, float), optional
+        Name and conversion factor to use for scaling data to a second Y axis and in legend
     ylabel : str, optional
         Labels to put on the Y axes, potentially by element
     data_as_rows : bool, optional, default is True
@@ -116,7 +114,6 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     >>> elements         = None
     >>> units            = ''
     >>> time_units       = 'sec'
-    >>> leg_scale        = 'unity'
     >>> start_date       = ''
     >>> rms_xmin         = -np.inf
     >>> rms_xmax         = np.inf
@@ -128,17 +125,17 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     >>> plot_zero        = False
     >>> show_rms         = True
     >>> legend_loc       = 'best'
-    >>> second_yscale    = None
+    >>> second_units     = None
     >>> ylabel           = None
     >>> data_as_rows     = True
     >>> extra_plotter    = None
     >>> use_zoh          = False
     >>> label_vert_lines = True
     >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
-    ...     time_units=time_units, leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, \
-    ...     rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
+    ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
+    ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-    ...     legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel, \
+    ...     legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
     ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
     ...     label_vert_lines=label_vert_lines)
 
@@ -198,7 +195,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         else:
             data_func = func_lamb(data[ix['one'], :], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
     # unit conversion value
-    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
+    (new_units, unit_conv) = get_unit_conversion(second_units, units)
 
     #% Create plots
     # create figures
@@ -227,8 +224,8 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         for j in loop_counter:
             this_label = f'{name} {elements[j]}' if name else str(elements[j])
             if show_rms:
-                value = _LEG_FORMAT.format(leg_conv*data_func[j])
-                if units:
+                value = _LEG_FORMAT.format(unit_conv*data_func[j])
+                if new_units:
                     this_label += f' ({func_name}: {value} {new_units})'
                 else:
                     this_label += f' ({func_name}: {value})'
@@ -265,7 +262,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
             this_axes.set_ylabel(this_ylabel)
         this_axes.grid(True)
         # optionally add second Y axis
-        plot_second_units_wrapper(this_axes, second_yscale)
+        plot_second_units_wrapper(this_axes, (new_units, unit_conv))
         # plot RMS lines
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
@@ -280,10 +277,10 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     return fig
 
 #%% Functions - make_error_bar_plot
-def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, units='', time_units='sec', \
-        leg_scale='unity', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
+def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, units='', \
+        time_units='sec', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
         disp_xmax=inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
-        plot_zero=False, show_rms=True, legend_loc='best', second_yscale=None, ylabel=None, \
+        plot_zero=False, show_rms=True, legend_loc='best', second_units=None, ylabel=None, \
         data_as_rows=True, label_vert_lines=True):
     r"""
     Generic plotting routine to make error bars.
@@ -306,8 +303,6 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
         name of units for plot
     time_units : str, optional
         time units, defaults to 'sec'
-    leg_scale : str, optional
-        factor to use when scaling the value in the legend, default is 'unity'
     start_date : str, optional
         date of t(0), may be an empty string
     rms_xmin : float, optional
@@ -330,8 +325,8 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
         whether to show the RMS calculation in the legend
     legend_loc : str, optional
         location to put the legend, default is 'best'
-    second_yscale : dict, optional
-        single key and value pair to use for scaling data to a second Y axis
+    second_units : str or tuple of (str, float), optional
+        Name and conversion factor to use for scaling data to a second Y axis and in legend
     ylabel : str, optional
         Labels to put on the Y axes, potentially by element
     data_as_rows : bool, optional, default is True
@@ -370,7 +365,6 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
     >>> elements         = ['x', 'y', 'z']
     >>> units            = 'rad'
     >>> time_units       = 'sec'
-    >>> leg_scale        = 'milli'
     >>> start_date       = '  t0 = ' + str(datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
@@ -382,15 +376,15 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
     >>> plot_zero        = False
     >>> show_rms         = True
     >>> legend_loc       = 'best'
-    >>> second_yscale    = {'mrad': 1e3}
+    >>> second_units     = 'milli'
     >>> ylabel           = None
     >>> data_as_rows     = True
     >>> label_vert_lines = True
-    >>> fig              = make_error_bar_plot(description, time, data, mins, maxs, elements=elements, \
-    ...     units=units, time_units=time_units, leg_scale=leg_scale, start_date=start_date, \
+    >>> fig              = make_error_bar_plot(description, time, data, mins, maxs, \
+    ...     elements=elements, units=units, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
-    ...     show_rms=show_rms, legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel, \
+    ...     show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
     ...     data_as_rows=data_as_rows, label_vert_lines=label_vert_lines)
 
     Close plots
@@ -428,7 +422,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
             func_lamb = lambda x: np.nanmean(x, axis=1)
         data_func = func_lamb(data[:, ix['one']]) if np.any(ix['one']) else np.full(num_channels, np.nan)
     # unit conversion value
-    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
+    (new_units, unit_conv) = get_unit_conversion(second_units, units)
     # error calculation
     err_neg = data - mins
     err_pos = maxs - data
@@ -460,7 +454,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
         # standard plot
         for j in loop_counter:
             if show_rms:
-                value = _LEG_FORMAT.format(leg_conv*data_func[j])
+                value = _LEG_FORMAT.format(unit_conv*data_func[j])
                 this_label = '{} ({}: {} {})'.format(elements[j], func_name, value, new_units)
             else:
                 this_label = elements[j]
@@ -499,7 +493,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
             this_axes.set_ylabel(this_ylabel + ' [' + units + ']')
         this_axes.grid(True)
         # optionally add second Y axis
-        plot_second_units_wrapper(this_axes, second_yscale)
+        plot_second_units_wrapper(this_axes, (new_units, unit_conv))
         # plot RMS lines
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
@@ -508,12 +502,12 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
 
 #%% Functions - make_difference_plot
 def make_difference_plot(description, time_one, time_two, data_one, data_two, *, \
-        name_one='', name_two='', elements=None, units='', time_units='sec', leg_scale='unity', \
-        start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
-        make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
-        plot_zero=False, show_rms=True, legend_loc='best', show_extra=True, second_yscale=None, \
-        ylabel=None, truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True, \
-        tolerance=0, return_err=False, use_zoh=False, label_vert_lines=True):
+        name_one='', name_two='', elements=None, units='', time_units='sec', start_date='', \
+        rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, \
+        single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
+        show_rms=True, legend_loc='best', show_extra=True, second_units=None, ylabel=None, \
+        truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True, tolerance=0, \
+        return_err=False, use_zoh=False, label_vert_lines=True, extra_plotter=None):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
     Plots two vector histories over time, along with a difference from one another.
@@ -540,8 +534,6 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         name of units for plot
     time_units : str, optional
         time units, defaults to 'sec'
-    leg_scale : str, optional
-        factor to use when scaling the value in the legend, default is 'unity'
     start_date : str, optional
         date of t(0), may be an empty string
     rms_xmin : float, optional
@@ -568,8 +560,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         location to put the legend, default is 'best'
     show_extra : bool, optional
         whether to show missing data on difference plots
-    second_yscale : dict, optional
-        single key and value pair to use for scaling data to a second Y axis
+    second_units : str or tuple of (str, float), optional
+        Name and conversion factor to use for scaling data to a second Y axis and in legend
     ylabel : str, optional
         Labels to put on the Y axes, potentially by element
     truth_name : str, optional
@@ -588,6 +580,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         Whether to plot as a zero-order hold, instead of linear interpolation between data points
     label_vert_lines : bool, optional, default is True
         Whether to label the RMS start/stop lines in the legend (if legend is shown)
+    extra_plotter : callable, optional
+        Extra callable plotting function to add more details to the plot
 
     Returns
     -------
@@ -608,7 +602,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
 
     Examples
     --------
-    >>> from dstauffman.plotting import make_difference_plot, get_color_lists
+    >>> from dstauffman.plotting import make_difference_plot, get_nondeg_colorlists
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> from matplotlib.colors import ListedColormap
@@ -623,7 +617,6 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> elements         = ['x', 'y']
     >>> units            = 'rad'
     >>> time_units       = 'sec'
-    >>> leg_scale        = 'micro'
     >>> start_date       = str(datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
@@ -631,14 +624,13 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> disp_xmax        = np.inf
     >>> make_subplots    = True
     >>> single_lines     = False
-    >>> color_lists      = get_color_lists()
-    >>> colormap         = ListedColormap(color_lists['dbl_diff'].colors + color_lists['double'].colors)
+    >>> colormap         = get_nondeg_colorlists(2)
     >>> use_mean         = False
     >>> plot_zero        = False
     >>> show_rms         = True
     >>> legend_loc       = 'best'
     >>> show_extra       = True
-    >>> second_yscale    = {u'µrad': 1e6}
+    >>> second_units     = (u'µrad', 1e6)
     >>> ylabel           = None
     >>> truth_name       = 'Truth'
     >>> truth_time       = None
@@ -648,14 +640,17 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> return_err       = False
     >>> use_zoh          = False
     >>> label_vert_lines = True
+    >>> extra_plotter    = None
     >>> fig_hand = make_difference_plot(description, time_one, time_two, data_one, data_two, \
-    ...     name_one=name_one, name_two=name_two, elements=elements, units=units, time_units=time_units, \
-    ...     leg_scale=leg_scale, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-    ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
-    ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-    ...     show_extra=show_extra, second_yscale=second_yscale, ylabel=ylabel, truth_name=truth_name, \
-    ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows, tolerance=tolerance, \
-    ...     return_err=return_err, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
+    ...     name_one=name_one, name_two=name_two, elements=elements, units=units, \
+    ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
+    ...     time_units=time_units, disp_xmax=disp_xmax, make_subplots=make_subplots, \
+    ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
+    ...     show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
+    ...     second_units=second_units, ylabel=ylabel, truth_name=truth_name, \
+    ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows, \
+    ...     tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
+    ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
 
     Close plots
     >>> for fig in fig_hand:
@@ -738,7 +733,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         # output errors
         err = {'one': data1_func, 'two': data2_func, 'diff': nondeg_func}
     # unit conversion value
-    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
+    (new_units, unit_conv) = get_unit_conversion(second_units, units)
     # determine which symbols to plot with
     if have_both:
         symbol_one = '^-'
@@ -815,7 +810,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             if have_data_one:
                 for j in loop_counter:
                     if show_rms:
-                        value = _LEG_FORMAT.format(leg_conv*data1_func[j])
+                        value = _LEG_FORMAT.format(unit_conv*data1_func[j])
                         this_label = '{} {} ({}: {} {})'.format(name_one, elements[j], func_name, \
                             value, new_units)
                     else:
@@ -825,7 +820,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
             if have_data_two:
                 for j in loop_counter:
                     if show_rms:
-                        value = _LEG_FORMAT.format(leg_conv*data2_func[j])
+                        value = _LEG_FORMAT.format(unit_conv*data2_func[j])
                         this_label = '{} {} ({}: {} {})'.format(name_two, elements[j], func_name, \
                             value, new_units)
                     else:
@@ -838,7 +833,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                 if single_lines and i % num_channels != j:
                     continue
                 if show_rms:
-                    value = _LEG_FORMAT.format(leg_conv*nondeg_func[j])
+                    value = _LEG_FORMAT.format(unit_conv*nondeg_func[j])
                     this_label = '{} ({}: {}) {})'.format(elements[j], func_name, value, new_units)
                 else:
                     this_label = elements[j]
@@ -900,11 +895,15 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
                 this_axes.set_ylabel(ylabel)
         this_axes.grid(True)
         # optionally add second Y axis
-        this_second_yscale = second_yscale[i] if isinstance(second_yscale, list) else second_yscale
-        plot_second_units_wrapper(this_axes, this_second_yscale)
+        plot_second_units_wrapper(this_axes, (new_units, unit_conv))
         # plot RMS lines
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
+
+    # plot any extra information through a generic callable
+    if extra_plotter is not None:
+        for fig in fig_hand:
+            extra_plotter(fig=fig, ax=fig.axes)
 
     if return_err:
         return (fig_hand, err)
@@ -912,11 +911,10 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
 
 #%% Functions - make_categories_plot
 def make_categories_plot(description, time, data, cats, *, cat_names=None, name='', elements=None, \
-        units='', time_units='sec', leg_scale='unity', start_date='', rms_xmin=-inf, \
-        rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, single_lines=False, \
-        colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, show_rms=True, \
-        legend_loc='best', second_yscale=None, ylabel=None, data_as_rows=True, use_zoh=False, \
-        label_vert_lines=True):
+        units='', time_units='sec', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
+        disp_xmax=inf, make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, \
+        use_mean=False, plot_zero=False, show_rms=True, legend_loc='best', second_units=None, \
+        ylabel=None, data_as_rows=True, use_zoh=False, label_vert_lines=True, extra_plotter=None):
     r"""
     Data versus time plotting routine when grouped into categories.
 
@@ -936,8 +934,6 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         name of units for plot
     time_units : str, optional
         time units, defaults to 'sec', use 'datetime' for datetime histories
-    leg_scale : str, optional
-        factor to use when scaling the value in the legend, default is 'unity'
     start_date : str, optional
         date of t(0), may be an empty string
     rms_xmin : float, optional
@@ -962,8 +958,8 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         whether to show the RMS calculation in the legend
     legend_loc : str, optional
         location to put the legend, default is 'best', use 'none' to suppress legend
-    second_yscale : dict, optional
-        single key and value pair to use for scaling data to a second Y axis
+    second_units : str or tuple of (str, float), optional
+        Name and conversion factor to use for scaling data to a second Y axis and in legend
     ylabel : str, optional
         Labels to put on the Y axes, potentially by element
     data_as_rows : bool, optional, default is True
@@ -972,6 +968,8 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         Whether to plot as a zero-order hold, instead of linear interpolation between data points
     label_vert_lines : bool, optional, default is True
         Whether to label the RMS start/stop lines in the legend (if legend is shown)
+    extra_plotter : callable, optional
+        Extra callable plotting function to add more details to the plot
 
     Returns
     -------
@@ -998,7 +996,6 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     >>> elements         = None
     >>> units            = ''
     >>> time_units       = 'sec'
-    >>> leg_scale        = 'unity'
     >>> start_date       = ''
     >>> rms_xmin         = -np.inf
     >>> rms_xmax         = np.inf
@@ -1011,18 +1008,19 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     >>> plot_zero        = False
     >>> show_rms         = True
     >>> legend_loc       = 'best'
-    >>> second_yscale    = None
+    >>> second_units     = None
     >>> ylabel           = None
     >>> data_as_rows     = True
     >>> use_zoh          = False
     >>> label_vert_lines = True
+    >>> extra_plotter    = None
     >>> figs = make_categories_plot(description, time, data, cats, cat_names=cat_names, name=name, \
-    ...     elements=elements, units=units, time_units=time_units, leg_scale=leg_scale, \
-    ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-    ...     disp_xmax=disp_xmax, make_subplots=make_subplots, single_lines=single_lines, \
-    ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-    ...     legend_loc=legend_loc, second_yscale=second_yscale, ylabel=ylabel, \
-    ...     data_as_rows=data_as_rows, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
+    ...     elements=elements, units=units, time_units=time_units, start_date=start_date, \
+    ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+    ...     make_subplots=make_subplots, single_lines=single_lines, colormap=colormap, \
+    ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
+    ...     second_units=second_units, ylabel=ylabel, data_as_rows=data_as_rows, \
+    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
 
     Close plots
     >>> for fig in figs:
@@ -1096,7 +1094,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
                 this_ix = ix['one'] & (cats == cat)
                 data_func[cat] = func_lamb(data[:, this_ix], 1) if np.any(this_ix) else np.full(num_channels, np.nan)
     # unit conversion value
-    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
+    (new_units, unit_conv) = get_unit_conversion(second_units, units)
     # pre-plan plot layout
     if make_subplots:
         num_figs = 1
@@ -1154,8 +1152,8 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
             cat = ordered_cats[j]
             this_cat_name = cat_names[cat]
             if show_rms:
-                value = _LEG_FORMAT.format(leg_conv*data_func[cat][ix_data])
-                if units:
+                value = _LEG_FORMAT.format(unit_conv*data_func[cat][ix_data])
+                if new_units:
                     this_label = f'{root_label} {this_cat_name} ({func_name}: {value} {new_units})'
                 else:
                     this_label = f'{root_label} {this_cat_name} ({func_name}: {value})'
@@ -1184,7 +1182,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
             this_axes.set_ylabel(this_ylabel)
         this_axes.grid(True)
         # optionally add second Y axis
-        plot_second_units_wrapper(this_axes, second_yscale)
+        plot_second_units_wrapper(this_axes, (new_units, unit_conv))
         # plot RMS lines
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
@@ -1201,6 +1199,11 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         # format display of plot
         if legend_loc.lower() != 'none':
             this_axes.legend(loc=legend_loc)
+
+    # plot any extra information through a generic callable
+    if extra_plotter is not None:
+        for fig in figs:
+            extra_plotter(fig=fig, ax=fig.axes)
 
     return figs
 
@@ -1275,8 +1278,8 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
         colors_pred = colors_line
         extra_text  = ' (Colored by Direction)'
     elif color_by == 'magnitude':
-        (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
-        innov_mags  = leg_conv * np.sqrt(np.sum(innovs**2, axis=0))
+        (new_units, unit_conv) = get_unit_conversion(leg_scale, units)
+        innov_mags  = unit_conv * np.sqrt(np.sum(innovs**2, axis=0))
         if mag_ratio is None:
             max_innov = np.max(innov_mags)
         else:
