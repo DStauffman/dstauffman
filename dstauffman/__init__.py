@@ -25,7 +25,7 @@ from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_NUMBA, HAVE_NUMP
                            NP_DATETIME_FORM, NP_TIMEDELTA_FORM, NP_INT64_PER_SEC
 from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
-from .logs      import activate_logging, deactivate_logging, log_multiline
+from .logs      import activate_logging, deactivate_logging, flush_logging, log_multiline
 from .matlab    import load_matlab
 from .multipass import MultipassExceptionWrapper, parfor_wrapper
 from .parser    import main, parse_wrapper, parse_commands, execute_command, \
@@ -41,7 +41,7 @@ from .time      import get_np_time_units, round_datetime, round_np_datetime, rou
 from .version   import version_info
 from .units     import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \
                            ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, DEGREE_SIGN, \
-                           MICRO_SIGN, get_factors, get_time_factor, get_legend_conversion
+                           MICRO_SIGN, get_factors, get_time_factor, get_unit_conversion
 from .utils     import find_in_range, rms, rss, compare_two_classes, compare_two_dicts, \
                            read_text_file, write_text_file, capture_output, unit, modd, is_np_int, \
                            np_digitize, histcounts, full_print, line_wrap, combine_per_year, \

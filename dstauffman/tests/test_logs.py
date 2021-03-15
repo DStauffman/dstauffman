@@ -56,6 +56,16 @@ class Test_act_deact_logging(unittest.TestCase):
             with contextlib.suppress(FileNotFoundError):
                 os.remove(default_filename)
 
+    def test_flushing(self) -> None:
+        dcs.activate_logging(self.level)
+        with self.assertLogs(level='L5') as logs:
+            logger = logging.getLogger('Test')
+            for i in range(10):
+                logger.log(dcs.LogLevel.L5, 'Message {}'.format(i))
+            dcs.flush_logging()
+        lines = logs.output
+        self.assertEqual(len(lines), 10)
+
     def tearDown(self) -> None:
         dcs.deactivate_logging()
         with contextlib.suppress(FileNotFoundError):

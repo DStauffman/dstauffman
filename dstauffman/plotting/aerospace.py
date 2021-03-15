@@ -11,16 +11,15 @@ import doctest
 import logging
 import unittest
 
-from dstauffman import get_legend_conversion, HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel, \
+from dstauffman import get_unit_conversion, HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel, \
     rms
 from dstauffman.aerospace import Kf, KfInnov, quat_angle_diff
 from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, make_difference_plot
 from dstauffman.plotting.plotting import Opts, setup_plots
-from dstauffman.plotting.support import disp_xlimits, get_color_lists, get_rms_indices, \
-    plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
+from dstauffman.plotting.support import disp_xlimits, get_color_lists, get_nondeg_colorlists, \
+    get_rms_indices, plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
 
 if HAVE_MPL:
-    from matplotlib.colors import ListedColormap
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -38,12 +37,12 @@ _TRUTH_COLOR = 'k'
 
 #%% Functions - make_quaternion_plot
 def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *, \
-        name_one='', name_two='', time_units='sec', leg_scale='micro', start_date='', \
-        plot_components=True, rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
+        name_one='', name_two='', time_units='sec', start_date='', plot_components=True, \
+        rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True, \
-        legend_loc='best', show_extra=True, second_yscale=None, truth_name='Truth', \
+        legend_loc='best', show_extra=True, second_units='micro', truth_name='Truth', \
         truth_time=None, truth_data=None, data_as_rows=True, tolerance=0, return_err=False, \
-        use_zoh=False, label_vert_lines=True):
+        use_zoh=False, label_vert_lines=True, extra_plotter=None):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
@@ -66,8 +65,6 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         name of data source 2
     time_units : str, optional
         time units, defaults to 'sec'
-    leg_scale : str, optional
-        factor to use when scaling the value in the legend, default is 'unity'
     start_date : str, optional
         date of t(0), may be an empty string
     plot_components : bool, optional
@@ -94,8 +91,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         location to put the legend, default is 'best'
     show_extra : bool, optional
         whether to show missing data on difference plots
-    second_yscale : dict, optional
-        single key and value pair to use for scaling data to a second Y axis
+    second_units : str or tuple[str, float], optional, default is 'micro'
+        single name and value pair to use for scaling data to a second Y axis and showing in legend
     truth_name : str, optional
         name to associate with truth data, default is 'Truth'
     truth_time : ndarray, optional
@@ -112,6 +109,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         Whether to plot as a zero-order hold, instead of linear interpolation between data points
     label_vert_lines : bool, optional, default is True
         Whether to label the RMS start/stop lines in the legend (if legend is shown)
+    extra_plotter : callable, optional
+        Extra callable plotting function to add more details to the plot
 
     Returns
     -------
@@ -145,7 +144,6 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> name_one         = 'test1'
     >>> name_two         = 'test2'
     >>> time_units       = 'sec'
-    >>> leg_scale        = 'unity'
     >>> start_date       = str(datetime.now())
     >>> plot_components  = True
     >>> rms_xmin         = 1
@@ -159,7 +157,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> show_rms         = True
     >>> legend_loc       = 'best'
     >>> show_extra       = True
-    >>> second_yscale    = {u'µrad': 1e6}
+    >>> second_units     = (u'µrad', 1e6)
     >>> truth_name       = 'Truth'
     >>> truth_time       = None
     >>> truth_data       = None
@@ -168,14 +166,16 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> return_err       = False
     >>> use_zoh          = False
     >>> label_vert_lines = True
+    >>> extra_plotter    = None
     >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
-    ...     name_one=name_one, name_two=name_two, time_units=time_units, leg_scale=leg_scale, \
-    ...     start_date=start_date, plot_components=plot_components, rms_xmin=rms_xmin, \
-    ...     rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, make_subplots=make_subplots, \
+    ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
+    ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
+    ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, make_subplots=make_subplots, \
     ...     single_lines=single_lines, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-    ...     legend_loc=legend_loc, show_extra=show_extra, truth_name=truth_name, truth_time=truth_time, \
-    ...     truth_data=truth_data, data_as_rows=data_as_rows, tolerance=tolerance, \
-    ...     return_err=return_err, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
+    ...     legend_loc=legend_loc, show_extra=show_extra, second_units=second_units, \
+    ...     truth_name=truth_name, truth_time=truth_time, truth_data=truth_data, \
+    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, \
+    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
 
     Close plots
     >>> for fig in fig_hand:
@@ -250,7 +250,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         # output errors
         err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
     # unit conversion value
-    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
+    (new_units, unit_conv) = get_unit_conversion(second_units, units)
     # determine which symbols to plot with
     if have_both:
         symbol_one = '^-'
@@ -352,7 +352,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
                 if not plot_components or (single_lines and i % num_channels != j):
                     continue
                 if show_rms:
-                    value = _LEG_FORMAT.format(leg_conv*nondeg_func[j])
+                    value = _LEG_FORMAT.format(unit_conv*nondeg_func[j])
                     this_label = '{} ({}: {}) {})'.format(elements[j], func_name, value, new_units)
                 else:
                     this_label = elements[j]
@@ -360,7 +360,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
                     color=colororder3.get_color(j))
             if not plot_components or (single_lines and (i + 1) % num_channels == 0):
                 if show_rms:
-                    value = _LEG_FORMAT.format(leg_conv*mag_func)
+                    value = _LEG_FORMAT.format(unit_conv*mag_func)
                     this_label = 'Angle ({}: {} {})'.format(func_name, value, new_units)
                 else:
                     this_label = 'Angle'
@@ -403,16 +403,18 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         if is_diff_plot:
             this_axes.set_ylabel('Difference [' + units + ']')
             # optionally add second Y axis
-            if second_yscale is not None:
-                plot_second_units_wrapper(this_axes, second_yscale)
-            else:
-                plot_second_units_wrapper(this_axes, {new_units: leg_conv})
+            plot_second_units_wrapper(this_axes, (new_units, unit_conv))
         else:
             this_axes.set_ylabel('Quaternion Components [dimensionless]')
         this_axes.grid(True)
         # plot RMS lines
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
+
+    # plot any extra information through a generic callable
+    if extra_plotter is not None:
+        for fig in fig_hand:
+            extra_plotter(fig=fig, ax=fig.axes)
 
     if return_err:
         return (fig_hand, err)
@@ -525,9 +527,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
     # hard-coded defaults
-    leg_scale    = kwargs.pop('leg_scale', 'micro')
-    (leg_conv, new_units) = get_legend_conversion(leg_scale, 'rad')
-    second_yscale = kwargs.pop('second_yscale', {new_units: leg_conv})
+    second_units = kwargs.pop('second_units', 'micro')
 
     # initialize outputs
     figs    = []
@@ -546,8 +546,8 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, plot_components=plot_comps, single_lines=single_lines, \
             use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-            leg_scale=leg_scale, second_yscale=second_yscale, truth_name=truth.name, \
-            truth_time=truth.time, truth_data=truth.att, return_err=return_err, **kwargs)
+            second_units=second_units, truth_name=truth.name, truth_time=truth.time, \
+            truth_data=truth.att, return_err=return_err, **kwargs)
         if return_err:
             figs += out[0]
             err[field] = out[1]
@@ -666,11 +666,8 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     elements      = kwargs.pop('elements', ['x', 'y', 'z'])
     default_units = 'm' if 'pos' in fields else 'm/s' if 'vel' in fields else ''
     units         = kwargs.pop('units', default_units)
-    leg_scale     = kwargs.pop('leg_scale', 'kilo')
-    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
-    second_yscale = kwargs.pop('second_yscale', {new_units: leg_conv})
-    color_lists   = get_color_lists()
-    colormap      = ListedColormap(color_lists['vec_diff'].colors + color_lists['vec'].colors)
+    second_units  = kwargs.pop('second_units', 'kilo')
+    colormap      = get_nondeg_colorlists(3)
     name_one      = kwargs.pop('name_one', kf1.name)
     name_two      = kwargs.pop('name_two', kf2.name)
 
@@ -689,8 +686,8 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         out = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
             name_one=name_one, name_two=name_two, elements=elements, time_units=time_units, units=units, \
             start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-            make_subplots=sub_plots, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, single_lines=single_lines, \
-            show_rms=show_rms, leg_scale=leg_scale, legend_loc=legend_loc, second_yscale=second_yscale, \
+            make_subplots=sub_plots, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
+            single_lines=single_lines, show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, \
             return_err=return_err, **kwargs)
         if return_err:
             figs += out[0]
@@ -809,18 +806,16 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         number_field = {'quad': 'Quad', 'sca': 'SCA'}
 
     # aliases and defaults
-    name_one      = kwargs.pop('name_one', kf1.name)
-    name_two      = kwargs.pop('name_two', kf2.name)
-    description   = name_one if name_one else name_two if name_two else ''
+    name_one     = kwargs.pop('name_one', kf1.name)
+    name_two     = kwargs.pop('name_two', kf2.name)
+    description  = name_one if name_one else name_two if name_two else ''
     num_chan = 0
     for key in fields.keys():
         num_chan = max(num_chan, getattr(kf1, key).shape[0] if getattr(kf1, key) is not None else getattr(kf2, key).shape[0] if getattr(kf2, key) is not None else 0)
-    elements      = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
-    elements      = kwargs.pop('elements', elements)
-    units         = kwargs.pop('units', kf1.units)
-    leg_scale     = kwargs.pop('leg_scale', 'micro')
-    (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
-    second_yscale = kwargs.pop('second_yscale', {new_units: leg_conv})
+    elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
+    elements     = kwargs.pop('elements', elements)
+    units        = kwargs.pop('units', kf1.units)
+    second_units = kwargs.pop('second_units', 'micro')
 
     # determine if converting units
     is_date_1 = is_datetime(kf1.time)
@@ -868,11 +863,9 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         # make plots
         if 'Normalized' in sub_description:
             units = u'σ'
-            this_leg_scale = 'unity'
-            this_second_yscale = None
+            this_second_units = 'unity'
         else:
-            this_leg_scale = leg_scale
-            this_second_yscale = second_yscale
+            this_second_units = second_units
         field_one = getattr(kf1, field)
         field_two = getattr(kf2, field)
         if field_one is not None and show_one is not None:
@@ -891,9 +884,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
             name_two=name_two, elements=elements, units=units, time_units=time_units, start_date=start_date, \
             rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-            single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
-            second_yscale=this_second_yscale, colormap=colormap, return_err=return_err, \
-            tolerance=tolerance, **kwargs)
+            single_lines=single_lines, legend_loc=legend_loc, second_units=this_second_units, \
+            colormap=colormap, return_err=return_err, tolerance=tolerance, **kwargs)
         if return_err:
             figs += out[0]
             err[field] = out[1]
@@ -905,15 +897,15 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
                 name=name_one, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
                 start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
                 disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
-                show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
-                second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=cat_colors, **kwargs)
+                show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, \
+                second_units=this_second_units, ylabel=this_ylabel, colormap=cat_colors, **kwargs)
         if plot_by_status and field_two is not None and kf2.status is not None:
             figs += make_categories_plot(full_description+' by Category', kf2.time, field_two, kf2.status, \
                 name=name_two, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
                 start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
                 disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
-                show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
-                second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=cat_colors, **kwargs)
+                show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, \
+                second_units=this_second_units, ylabel=this_ylabel, colormap=cat_colors, **kwargs)
         if plot_by_number and field_one is not None:
             this_number = None
             for (quad, quad_name) in number_field.items():
@@ -926,8 +918,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
                     name=name_one, cat_names=num_names, elements=elements, units=units, time_units=time_units, \
                     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
                     disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
-                    show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
-                    second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=number_colors, **kwargs)
+                    show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, \
+                    second_units=this_second_units, ylabel=this_ylabel, colormap=number_colors, **kwargs)
         if plot_by_number and field_two is not None:
             this_number = None
             for (quad, quad_name) in number_field.items():
@@ -940,8 +932,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
                     name=name_two, cat_names=num_names, elements=elements, units=units, time_units=time_units, \
                     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
                     disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
-                    show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, leg_scale=this_leg_scale, \
-                    second_yscale=this_second_yscale, ylabel=this_ylabel, colormap=number_colors, **kwargs)
+                    show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, \
+                    second_units=this_second_units, ylabel=this_ylabel, colormap=number_colors, **kwargs)
 
     # Setup plots
     setup_plots(figs, opts)
@@ -1114,25 +1106,12 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     num_chan = 0
     for key in fields.keys():
         num_chan = max(num_chan, getattr(kf1, key).shape[0] if getattr(kf1, key) is not None else getattr(kf2, key).shape[0] if getattr(kf2, key) is not None else 0)
-    elements      = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
-    elements      = kwargs.pop('elements', elements)
-    units         = kwargs.pop('units', 'mixed')
-    leg_scale     = kwargs.pop('leg_scale', 'micro')
-    if leg_scale == 'unity':
-        temp = None
-    elif isinstance(units, str):
-        (leg_conv, new_units) = get_legend_conversion(leg_scale, units)
-        temp = {new_units: leg_conv}
-    else:
-        # TODO: allow legend conversion function to handle this case?
-        temp = []
-        for unit in units:
-            (leg_conv, new_units) = get_legend_conversion(leg_scale, unit)
-            temp.append({new_units: leg_conv})
-
-    second_yscale = kwargs.pop('second_yscale', temp)
-    name_one      = kwargs.pop('name_one', kf1.name)
-    name_two      = kwargs.pop('name_two', kf2.name)
+    elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
+    elements     = kwargs.pop('elements', elements)
+    units        = kwargs.pop('units', 'mixed')
+    second_units = kwargs.pop('second_units', 'micro')
+    name_one     = kwargs.pop('name_one', kf1.name)
+    name_two     = kwargs.pop('name_two', kf2.name)
     if groups is None:
         groups = [i for i in range(num_chan)]
 
@@ -1180,6 +1159,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
         err[field] = {}
         for (ix, states) in enumerate(groups):
             this_units  = units if isinstance(units, str) else units[ix]
+            this_2units = second_units[ix] if isinstance(second_units, list) else second_units
             this_ylabel = description + f' [{this_units}]'
             states      = np.atleast_1d(states)
             if hasattr(kf1, 'active') and kf1.active is not None:
@@ -1198,12 +1178,13 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
             if have_data1 or have_data2:
                 this_description = description + ' for State ' + ','.join(str(x) for x in this_state_nums)
                 this_elements = [elements[state] for state in this_state_nums]
+                colormap = get_nondeg_colorlists(len(this_elements))
                 out = make_difference_plot(this_description, kf1.time, kf2.time, data_one, data_two, \
                     name_one=name_one, name_two=name_two, elements=this_elements, units=this_units, time_units=time_units, \
                     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-                    make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, single_lines=single_lines, \
-                    legend_loc=legend_loc, leg_scale=leg_scale, second_yscale=second_yscale, return_err=return_err, \
-                    ylabel=this_ylabel, **kwargs)
+                    make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
+                    single_lines=single_lines, legend_loc=legend_loc, second_units=this_2units, return_err=return_err, \
+                    ylabel=this_ylabel, colormap=colormap, **kwargs)
                 if return_err:
                     figs += out[0]
                     err[field][f'Group {ix}'] = out[1]

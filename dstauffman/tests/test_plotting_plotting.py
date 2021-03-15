@@ -175,7 +175,6 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.opts.show_plot = False
         self.elements    = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
         self.figs: List[plt.Figure] = []
-        self.second_yscale = 1000000
 
     def test_nominal(self) -> None:
         self.figs.append(plot.plot_time_history(self.description, self.time, self.row_data, \
@@ -299,7 +298,7 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
         self.figs.append(plot.plot_correlation_matrix(self.data, units=self.units))
 
     def test_all_args(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data, self.labels, self.units, self.opts, \
+        self.figs.append(plot.plot_correlation_matrix(self.data, self.labels, self.units, opts=self.opts, \
             matrix_name=self.matrix_name, cmin=0, cmax=1, xlabel='', ylabel='', \
             plot_lower_only=False, label_values=True, x_lab_rot=180, colormap='Paired'))
 

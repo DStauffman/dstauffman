@@ -9,7 +9,7 @@ import numpy as np
 from dstauffman import convert_date
 from dstauffman.plotting import Opts, plot_attitude, plot_position, plot_innovations, plot_covariance, \
     plot_los, plot_states
-from dstauffman.aerospace import Kf, KfInnov, quat_from_euler, quat_mult, quat_norm
+from dstauffman.aerospace import Kf,  quat_from_euler, quat_mult, quat_norm
 
 #%% Flags
 plots = {}
@@ -42,7 +42,7 @@ kf1.vel  = 1e3 * np.random.rand(3, 11)
 kf1.covar  = 1e-6 * np.tile(np.arange(1, num_states+1, dtype=float)[:, np.newaxis], (1, num_points))
 kf1.active = np.array([1, 2, 3, 4, 8, 12])
 
-kf1.innov       = KfInnov()
+kf1.innov.name  = 'Sensor 1'
 kf1.innov.units = 'm'
 kf1.innov.time  = np.arange(num_innovs, dtype=float)
 kf1.innov.innov = 1e-6 * np.ones((num_axes, num_innovs)) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
@@ -61,7 +61,7 @@ kf2.covar  = kf1.covar + 1e-9 * np.random.rand(*kf1.covar.shape)
 kf2.active = kf1.active
 
 ix              = np.hstack((np.arange(7), np.arange(8, num_innovs)))
-kf2.innov       = KfInnov()
+kf2.innov.name  = 'Sensor 1'
 kf2.innov.time  = kf1.innov.time[ix]
 kf2.innov.innov = kf1.innov.innov[:, ix] + 1e-8 * np.random.rand(num_axes, ix.size)
 kf2.innov.norm  = kf1.innov.norm[:, ix] + 0.1 * np.random.rand(num_axes, ix.size)
@@ -95,29 +95,29 @@ kd2.innov.time = convert_date(kf2.innov.time, 'numpy', date_zero=date_zero)
 #%% Plots
 if plots['att']:
     f1 = plot_attitude(kf1, kf2, opts=opts1)
-    f2 = plot_attitude(kd1, kd2, opts=opts2, second_yscale={'mrad': 1e3})
-    f3 = plot_attitude(kf1, kf2, opts=opts3, leg_scale='milli')
-    f4 = plot_attitude(kd1, kd2, opts=opts4, leg_scale='milli', second_yscale={'nrad': 1e9})
+    f2 = plot_attitude(kd1, kd2, opts=opts2, second_units=('mrad', 1e3))
+    f3 = plot_attitude(kf1, kf2, opts=opts3, second_units='milli')
+    f4 = plot_attitude(kd1, kd2, opts=opts4, second_units=('nrad', 1e9))
 
 if plots['pos']:
     f1 = plot_position(kf1, kf2, opts=opts1)
-    f2 = plot_position(kd1, kd2, opts=opts2, second_yscale={'Mm': 1e-6})
-    f3 = plot_position(kf1, kf2, opts=opts3, leg_scale='mega')
-    f4 = plot_position(kd1, kd2, opts=opts4, leg_scale='milli', second_yscale={'Mm': 1e-6})
+    f2 = plot_position(kd1, kd2, opts=opts2, second_units=('Mm', 1e-6))
+    f3 = plot_position(kf1, kf2, opts=opts3, second_units='mega')
+    f4 = plot_position(kd1, kd2, opts=opts4, second_units=('Mm', 1e-6))
 
 if plots['inn']:
     f1 = plot_innovations(kf1.innov, kf2.innov, opts=opts1)
-    f2 = plot_innovations(kd1.innov, kd2.innov, opts=opts2, second_yscale={'mm': 1e3})
-    f3 = plot_innovations(kf1.innov, kf2.innov, opts=opts3, leg_scale='milli')
-    f4 = plot_innovations(kd1.innov, kd2.innov, opts=opts4, leg_scale='milli', second_yscale={'nm': 1e9})
+    f2 = plot_innovations(kd1.innov, kd2.innov, opts=opts2, second_units=('mm', 1e3))
+    f3 = plot_innovations(kf1.innov, kf2.innov, opts=opts3, second_units='milli')
+    f4 = plot_innovations(kd1.innov, kd2.innov, opts=opts4, second_units=('nm', 1e9))
 
 if plots['cov']:
     f1 = plot_covariance(kf1, kf2, opts=opts1)
-    f2 = plot_covariance(kd1, kd2, opts=opts2, second_yscale={'mrad': 1e3})
-    f3 = plot_covariance(kf1, kf2, opts=opts3, leg_scale='milli')
-    f4 = plot_covariance(kd1, kd2, opts=opts4, leg_scale='milli', second_yscale={'nrad': 1e9})
+    f2 = plot_covariance(kd1, kd2, opts=opts2, second_units=('mrad', 1e3))
+    f3 = plot_covariance(kf1, kf2, opts=opts3, second_units='milli')
+    f4 = plot_covariance(kd1, kd2, opts=opts4, second_units=('nrad', 1e9))
 
 if plots['los']:
-    f = plot_los(kf1, kf2, opts=opts2, leg_scale='milli', second_yscale={'nrad': 1e9})
+    f = plot_los(kf1, kf2, opts=opts2, second_units='micro')
 if plots['sts']:
-    f = plot_states(kd1, kd2, opts=opts1, leg_scale='milli', second_yscale={'nrad': 1e9})
+    f = plot_states(kd1, kd2, opts=opts1, second_units=('nrad', 1e9))

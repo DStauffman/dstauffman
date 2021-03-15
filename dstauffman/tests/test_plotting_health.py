@@ -192,8 +192,8 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
         self.opts     = plot.Opts()
         self.opts.show_plot = False
         self.legend   = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
+        self.second_units = 1000000
         self.figs: List[plt.Figure] = []
-        self.second_yscale = 1000000
 
     def test_nominal(self) -> None:
         self.figs.append(plot.plot_health_time_history(self.time, self.data, label=self.label, \
@@ -245,14 +245,14 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
         with self.assertRaises(AssertionError):
             plot.plot_health_time_history(self.time, self.data, self.label, legend=self.legend[:-1])
 
-    def test_second_yscale1(self) -> None:
+    def test_second_units1(self) -> None:
         self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label, units='population', \
-            second_yscale=self.second_yscale))
+            second_units=self.second_units))
 
-    def test_second_yscale2(self) -> None:
-        second_yscale = {'New ylabel [units]': 100}
+    def test_second_units2(self) -> None:
+        second_units = ('New ylabel [units]', 100)
         self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label, \
-            second_yscale=second_yscale))
+            second_units=second_units))
 
     def test_single_point(self) -> None:
         self.figs.append(plot.plot_health_time_history(self.time[1:], self.data[1:,:], self.label))
@@ -322,7 +322,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         self.opts.names = ['Name 1']
         self.truth = plot.TruthPlotter(self.time, np.cos(self.time))
         self.data_matrix = np.column_stack((self.data, self.truth.data))
-        self.second_yscale = 1000000
+        self.second_units = 1000000
         self.fig: Optional[List[plt.Figure]] = None
 
     def test_normal(self) -> None:
@@ -379,14 +379,14 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         data = np.column_stack((self.data, self.data))
         self.fig = plot.plot_health_monte_carlo(self.time, data, self.label, self.units, plot_as_diffs=True)
 
-    def test_second_yscale1(self) -> None:
+    def test_second_units1(self) -> None:
         self.fig = plot.plot_health_monte_carlo(self.time, self.data, self.label, self.units, \
-            second_yscale=self.second_yscale)
+            second_units=self.second_units)
 
-    def test_second_yscale2(self) -> None:
-        second_yscale = {'New ylabel [units]': 100}
+    def test_second_units2(self) -> None:
+        second_units = ('New ylabel [units]', 100)
         self.fig = plot.plot_health_monte_carlo(self.time, self.data, self.label, units='percentage', \
-            second_yscale=second_yscale)
+            second_units=second_units)
 
     def test_simple(self) -> None:
         self.fig = plot.plot_health_monte_carlo(0, 0, 'Text')
