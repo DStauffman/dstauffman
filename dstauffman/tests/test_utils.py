@@ -623,8 +623,8 @@ class Test_compare_two_dicts(unittest.TestCase):
         compares with suppressed output
     """
     def setUp(self) -> None:
-        self.d1 = {'a': 1, 'b': 2, 'c': 3, 'e': {'key1':1}}
-        self.d2 = {'a': 1, 'b': 5, 'd': 6, 'e': {'key1':1}}
+        self.d1 = {'a': 1, 'b': 2, 'c': 3, 'e': {'key1': 1}}
+        self.d2 = {'a': 1, 'b': 5, 'd': 6, 'e': {'key1': 1}}
         self.names = ['Dict 1', 'Dict 2']
 
     def test_good_comparison(self) -> None:

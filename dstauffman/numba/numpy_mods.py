@@ -12,8 +12,13 @@ import doctest
 from typing import Tuple
 import unittest
 
-from dstauffman.numba.passthrough import boolean, ncjit, List
+from dstauffman.numba.passthrough import ncjit
 
+try:
+    from numba import boolean
+    from numba.typed import List
+except ModuleNotFoundError:
+    List = list
 try:
     # Note: avoid using HAVE_NUMPY from dstauffman to avoid circular imports
     import numpy as np

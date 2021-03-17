@@ -19,7 +19,7 @@ import dstauffman as dcs
 if dcs.HAVE_NUMPY:
     import numpy as np
 
-#%% activate_logging and deactivate_logging
+#%% activate_logging, deactivate_logging and flush_logging
 class Test_act_deact_logging(unittest.TestCase):
     r"""
     Tests the activate_logging and deactivate_logging functions with the following cases:

@@ -9,9 +9,7 @@ Notes
 #%% Imports
 from .numpy_mods  import issorted_ascend, issorted_descend, np_all_axis0, np_all_axis1, \
                              np_any_axis0, np_any_axis1
-from .passthrough import fake_jit, boolean, deferred_type, DictType, float32, float64, from_dtype, \
-                             int32, int64, jit, jitclass, List, ListType, ncjit, njit, optional, \
-                             string, TARGET, vectorize
+from .passthrough import fake_jit, ncjit, TARGET
 from .optimized   import np_any, np_all, issorted_opt, prob_to_rate_opt, rate_to_prob_opt, \
                              zero_divide
 
