@@ -40,11 +40,18 @@ def parse_tests(input_args: List[str]) -> argparse.Namespace:
 
     Examples
     --------
+    >>> from dstauffman import pprint_dict
     >>> from dstauffman.commands import parse_tests
     >>> input_args = []
     >>> args = parse_tests(input_args)
-    >>> print(args)
-    Namespace(docstrings=False, unittest=False, verbose=False, library=None)
+    >>> #print(args)  # TODO: use when Python v3.9 everywhere
+    >>> #Namespace(docstrings=False, unittest=False, verbose=False, library=None)
+    >>> _ = pprint_dict(vars(args), name='args')
+    args
+     docstrings = False
+     unittest   = False
+     verbose    = False
+     library    = None
 
     """
     parser = argparse.ArgumentParser(prog='dcs tests', description='Runs all the built-in unit tests.')
@@ -204,5 +211,5 @@ def execute_coverage(args: argparse.Namespace) -> int:
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='lmspace.tests.test_commands_runtests', exit=False)
+    unittest.main(module='dstauffman.tests.test_commands_runtests', exit=False)
     doctest.testmod(verbose=False)
