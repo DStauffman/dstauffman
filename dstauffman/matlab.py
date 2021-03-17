@@ -9,7 +9,7 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Set, Tuple, Union
 import unittest
 
 from dstauffman.constants import HAVE_H5PY, HAVE_NUMPY
@@ -20,7 +20,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% load_matlab
-def load_matlab(filename: str, varlist: Union[List[str], Tuple[str]] = None, *, squeeze: bool = True, \
+def load_matlab(filename: str, varlist: Union[List[str], Set[str], Tuple[str]] = None, *, squeeze: bool = True, \
         enums: Dict[str, Any] = None) -> Dict[str, Any]:
     r"""
     Load simple arrays from a MATLAB v7.3 HDF5 based *.mat file.
@@ -49,7 +49,7 @@ def load_matlab(filename: str, varlist: Union[List[str], Tuple[str]] = None, *, 
     2.2
 
     """
-    def _load(file: h5py.Group, varlist: Optional[Union[List[str], Tuple[str]]], squeeze: bool, \
+    def _load(file: h5py.Group, varlist: Optional[Union[List[str], Set[str], Tuple[str]]], squeeze: bool, \
              enums: Optional[Dict[str, Any]]) -> Dict[str, Any]:
         r"""Wrapped subfunction so it can be called recursively."""
         # initialize output

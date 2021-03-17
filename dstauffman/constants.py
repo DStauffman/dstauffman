@@ -126,7 +126,7 @@ if __name__ == '__main__':
     for field in fields:
         pad = ' ' * (max_len - len(field))
         value = locals()[field]
-        print('{}{} = {}'.format(field, pad, value))
+        print(f'{field}{pad} = {value}')
 
     # run unittests
     unittest.main(module='dstauffman.tests.test_constants', exit=False)

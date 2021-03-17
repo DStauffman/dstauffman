@@ -9,10 +9,10 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
-from typing import Tuple, Union
+from typing import Tuple
 import unittest
 
-from dstauffman.numba.passthrough import ncjit, List
+from dstauffman.numba.passthrough import boolean, ncjit, List
 
 try:
     # Note: avoid using HAVE_NUMPY from dstauffman to avoid circular imports
@@ -35,7 +35,7 @@ def _reduce_shape(shape: Tuple, axis: int) -> List[int]:
 
 #%% issorted_ascend
 @ncjit
-def issorted_ascend(x: Union[np.ndarray[int, 1], np.ndarray[float, 1]]) -> bool:
+def issorted_ascend(x: np.ndarray) -> boolean:
     r"""
     Tells whether the given array is sorted in ascending order or not.
 

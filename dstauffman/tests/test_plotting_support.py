@@ -419,8 +419,8 @@ class Test_plotting_storefig(unittest.TestCase):
         saving to a bad folder location (should raise error)
         specifying a bad plot type (should raise error)
     """
-    time: np.ndarray[float, 1]
-    data: np.ndarray[float, 1]
+    time: np.ndarray
+    data: np.ndarray
     title: str
     folder: str
     plot_type: str

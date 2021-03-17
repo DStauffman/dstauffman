@@ -16,7 +16,7 @@ import sys
 from typing import List
 import unittest
 
-from dstauffman import get_root_dir, get_tests_dir, list_python_files, run_coverage, \
+from dstauffman import get_root_dir, get_tests_dir, list_python_files, ReturnCodes, run_coverage, \
     run_docstrings, run_pytests, run_unittests
 
 #%% Functions - parse_tests
@@ -191,6 +191,9 @@ def execute_coverage(args: argparse.Namespace) -> int:
     # open the report
     if report:
         filename = os.path.join(get_tests_dir(), 'coverage_html_report', 'index.html')
+        if not os.path.isfile(filename):
+            print(f'Coverage report not found at: "{filename}".')
+            return ReturnCodes.bad_command
         if platform.system() == 'Darwin':
             subprocess.call(['open', filename])
         elif platform.system() == 'Windows':
@@ -201,5 +204,5 @@ def execute_coverage(args: argparse.Namespace) -> int:
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_commands_runtests', exit=False)
+    unittest.main(module='lmspace.tests.test_commands_runtests', exit=False)
     doctest.testmod(verbose=False)

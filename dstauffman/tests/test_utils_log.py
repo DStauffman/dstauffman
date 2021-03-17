@@ -201,6 +201,70 @@ class Test_fix_rollover(unittest.TestCase):
         mock_logger.log.assert_called_with(dcs.LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
         self.assertEqual(mock_logger.log.call_count, 2)
 
+#%% remove_outliers
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@patch('dstauffman.utils_log.logger')
+class Test_remove_outliers(unittest.TestCase):
+    r"""
+    Tests the remove_outliers function with the following cases:
+        Nominal
+        2D
+        Inplace
+        Stats
+    """
+    def setUp(self) -> None:
+        self.x = 0.6 * np.random.rand(1000)
+        self.x[5] = 1e5
+        self.x[15] = 1e24
+        self.x[100] = np.nan
+        self.x[200] = np.nan
+
+    def test_nominal(self, mock_logger: Mock) -> None:
+        y = dcs.remove_outliers(self.x)
+        self.assertEqual(self.x[0], y[0])
+        self.assertEqual(self.x[5], 1e5)
+        self.assertTrue(np.isnan(y[5]))
+        self.assertTrue(np.isnan(y[15]))
+        mock_logger.log.assert_any_call(dcs.LogLevel.L6, 'Number of NaNs = %s', 2)
+        mock_logger.log.assert_any_call(dcs.LogLevel.L6, 'Number of outliers = %s', 2)
+
+    def test_sigma(self, mock_logger: Mock) -> None:
+        x = np.random.rand(10000)
+        x[50] = 4.
+        y = dcs.remove_outliers(x, sigma=3.)
+        self.assertTrue(np.isnan(y[50]))
+        y = dcs.remove_outliers(x, sigma=10.)
+        self.assertFalse(np.any(np.isnan(y)))
+
+    def test_2d_axis(self, mock_logger: Mock) -> None:
+        x = 1e-3 * np.random.rand(3, 5000)
+        x[0, 10] = 1e5
+        x[1, 20] = 1e3
+        x[0, 30] = 1.4e-3
+        for axis in [0, 1, None]:
+            y = dcs.remove_outliers(x, axis=axis, sigma=3)
+            self.assertEqual(y.shape, (3, 5000))
+            if axis in {1, None}:
+                self.assertTrue(np.isnan(y[0, 10]))
+                self.assertTrue(np.isnan(y[1, 20]))
+            else:
+                self.assertFalse(np.isnan(y[0, 10]))
+                self.assertFalse(np.isnan(y[1, 20]))
+            self.assertFalse(np.isnan(y[0, 30]))
+
+    def test_inplace(self, mock_logger: Mock) -> None:
+        y = dcs.remove_outliers(self.x, inplace=True)
+        self.assertIs(y, self.x)
+
+    def test_stats(self, mock_logger: Mock) -> None:
+        (y, num_replaced, rms_initial, rms_removed) = dcs.remove_outliers(self.x, return_stats=True)
+        self.assertEqual(self.x[0], y[0])
+        self.assertEqual(self.x[5], 1e5)
+        self.assertTrue(np.isnan(y[5]))
+        self.assertTrue(np.isnan(y[15]))
+        self.assertEqual(num_replaced, 2)
+        self.assertGreater(rms_initial, rms_removed)
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

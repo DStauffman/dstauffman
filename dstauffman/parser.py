@@ -33,7 +33,7 @@ class _Flags(object):
 #%% Functions - _print_bad_command
 def _print_bad_command(command: str) -> None:
     r"""Prints to the command line when a command name is not understood."""
-    print('Command "{}" is not understood.'.format(command))
+    print(f'Command "{command}" is not understood.')
 
 #%% Functions - main
 def main() -> int:

@@ -16,7 +16,7 @@ import unittest
 
 from dstauffman.constants import HAVE_NUMPY
 from dstauffman.enums import LogLevel
-from dstauffman.utils import find_in_range
+from dstauffman.utils import find_in_range, rms
 
 if HAVE_NUMPY:
     import numpy as np
@@ -185,6 +185,96 @@ def fix_rollover(data, roll, axis=None):
         logger.log(LogLevel.L6, 'A rollover was fixed recursively')
         out = fix_rollover(out, roll)
     return out
+
+#%% remove_outliers
+def remove_outliers(x, /, sigma=3., axis=None, *, num_iters=3, return_stats=False, inplace=False, hardmax=None):
+    r"""
+    Removes the outliers from a data set based on the RMS of the points in the set.
+
+    Parameters
+    ----------
+    x : array_like
+        Input data
+    sigma : float, optional
+        Standard deviation over which to exclude the data
+    axis : int, optional
+        Axis to process along
+    num_iters : int, optional
+        Number of successive iterations to process
+    return_stats : bool, optional
+        Whether to return additional statistics
+    inplace : bool, optional
+        Whether to modify the input inplace
+    hardmax : float, optional
+        A hard absolute limit to exclude any data, meant for completely corrupted points
+
+    Returns
+    -------
+    y : ndarray of float
+        Modified data, with NaNs in-place of outliers
+    num_replaced : int
+        Number of points removed from the data and replaced with NaNs
+    rms_initial : float
+        Initial RMS
+    rms_removed : float
+        RMS after bad points were removed
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2021 loosely based on a Matlab version from Tom Trankle.
+
+    Examples
+    --------
+    >>> from dstauffman import remove_outliers
+    >>> import numpy as np
+    >>> x = 0.6 * np.random.rand(1000)
+    >>> x[5] = 1e5
+    >>> x[15] = 1e24
+    >>> x[100] = np.nan
+    >>> x[200] = np.nan
+    >>> (y, num_replaced, rms_initial, rms_removed) = remove_outliers(x, return_stats=True)
+    >>> print(y[15])
+    nan
+
+    >>> print(num_replaced)
+    2
+
+    >>> print(rms_initial > 1e22)
+    True
+
+    >>> print(rms_removed < 1)
+    True
+
+    """
+    x = np.asanyarray(x)
+    y = x if inplace else x.copy()
+    num_nans = np.count_nonzero(np.isnan(x))
+    if hardmax is None:
+        num_hard = 0
+    else:
+        ix_hard = np.greater(np.abs(y), hardmax, where=~np.isnan(y), out=np.zeros(y.shape, dtype=bool))
+        y[ix_hard] = np.nan
+        num_hard = np.count_nonzero(ix_hard)
+    for i in range(num_iters):
+        rms_all = rms(y, axis=axis, ignore_nans=True, keepdims=True)
+        if i == 0:
+            rms_initial = np.squeeze(rms_all)
+        ix_bad = np.greater(np.abs(y), rms_all*sigma, out=np.zeros(y.shape, dtype=bool), where=~np.isnan(y))
+        y[ix_bad] = np.nan
+    rms_removed = rms(y, axis=axis, ignore_nans=True)
+    num_replaced = np.count_nonzero(np.isnan(y)) - num_nans
+    num_removed = num_replaced - num_hard
+    logger.log(LogLevel.L6, 'Number of NaNs = %s', num_nans)
+    logger.log(LogLevel.L6, 'Number excedding hardmax = %s', num_hard)
+    logger.log(LogLevel.L6, 'Number of outliers = %s', num_removed)
+    if rms_initial.ndim == 0:
+        logger.log(LogLevel.L6, 'RMS before removal = {:.6g}, after = {:.6g}'.format(rms_initial, rms_removed))
+    else:
+        logger.log(LogLevel.L6, 'RMS before removal = {}, after = {}'.format(\
+            np.array_str(rms_initial, precision=6), np.array_str(rms_removed, precision=6)))
+    if return_stats:
+        return (y, num_replaced, rms_initial, rms_removed)
+    return y
 
 #%% Unit test
 if __name__ == '__main__':

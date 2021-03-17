@@ -181,7 +181,7 @@ def round_np_datetime(date_in, /, time_delta, floor=False):
 #%% Functions - round_num_datetime
 def round_num_datetime(date_in, /, time_delta, floor=False):
     r"""
-    Rounds a numerica datetime to the given value.
+    Rounds a numerical datetime to the given value.
 
     Parameters
     ----------
@@ -227,8 +227,8 @@ def round_num_datetime(date_in, /, time_delta, floor=False):
     return rounded * time_delta
 
 #%% Functions - round_time
-def round_time(x: Union[np.ndarray[float], np.ndarray[np.timedelta64]], /, t_round: np.timedelta64) -> \
-    Union[np.ndarray[float], np.ndarray[np.timedelta64]]:
+def round_time(x: Union[np.ndarray, np.datetime64], /, t_round: np.timedelta64) -> \
+    Union[np.ndarray, np.timedelta64]:
     r"""
     Rounding function that handles either numpy datetimes or doubles (seconds).
 

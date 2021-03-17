@@ -44,7 +44,7 @@ _ALLOWED_ENVS: Optional[Dict[str, str]] = None # allows any environment variable
 _StrOrListStr = TypeVar('_StrOrListStr', str, List[str])
 
 #%% Functions - _nan_equal
-def _nan_equal(a, b, /, tolerance: float = None) -> bool:
+def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:
     r"""
     Test ndarrays for equality, but ignore NaNs.
 
