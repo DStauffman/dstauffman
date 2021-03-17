@@ -61,11 +61,11 @@ def issorted_ascend(x: np.ndarray) -> boolean:
     False
 
     """
-    return np.all(x[:-1] <= x[1:])  # type: ignore[no-any-return]
+    return np.all(x[:-1] <= x[1:])
 
 #%% issorted_descend
 @ncjit
-def issorted_descend(x):
+def issorted_descend(x: np.ndarray) -> boolean:
     r"""
     Tells whether the given array is sorted in descending order or not.
 
