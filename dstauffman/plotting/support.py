@@ -346,7 +346,7 @@ def get_color_lists(return_as_colormap: bool = False) -> Union[Dict[str, Union[c
     --------
     >>> from dstauffman.plotting import get_color_lists
     >>> color_lists = get_color_lists()
-    >>> print(color_lists['default'])
+    >>> print(color_lists['default'].colors[0])
     Paired
 
     >>> color_lists_map = get_color_lists(return_as_colormap=True)
@@ -370,6 +370,7 @@ def get_color_lists(return_as_colormap: bool = False) -> Union[Dict[str, Union[c
         color_list_maps: Dict[str, ColorMap] = {}
         for (key, value) in color_lists.items():
             if key == 'default':
+                value = value.colors[0]
                 assert isinstance(value, str)
                 if value == 'Paired':
                     num_colors = 12

@@ -11,7 +11,8 @@ from __future__ import annotations
 import doctest
 import unittest
 
-from dstauffman import Frozen, HAVE_H5PY, HAVE_NUMPY, load_method, NP_DATETIME_FORM, save_method
+from dstauffman import Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, \
+    save_method
 
 if HAVE_H5PY:
     import h5py
@@ -167,10 +168,9 @@ class Kf(Frozen):
                         if value is not None:
                             if subkey in {'chan'}:
                                 value = [x.encode('utf-8') for x in value]
-                            elif subkey in {'time'}:
-                                inner_grp.create_dataset(subkey, data=value.astype(np.int64))
-                            else:
-                                inner_grp.create_dataset(subkey, data=value)
+                            elif subkey in {'time'} and is_datetime(value):
+                                value = value.copy().astype(np.int64)
+                            inner_grp.create_dataset(subkey, data=value)
                 else:
                     # normal values
                     value = getattr(self, key)
@@ -178,10 +178,9 @@ class Kf(Frozen):
                         # special case to handle lists of strings
                         if key in {'chan'}:
                             value = [x.encode('utf-8') for x in value]
-                        elif key in {'time'}:
-                            grp.create_dataset(key, data=value.astype(np.int64))
-                        else:
-                            grp.create_dataset(key, data=value)
+                        elif key in {'time'} and is_datetime(value):
+                            value = value.copy().astype(np.int64)
+                        grp.create_dataset(key, data=value)
 
     @classmethod
     def load(cls, filename='', subclasses=frozenset({'innov'})):
