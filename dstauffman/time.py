@@ -275,7 +275,7 @@ def round_time(x: Union[np.ndarray, np.datetime64], /, t_round: np.timedelta64) 
     """
     if is_datetime(x):
         assert np.issubdtype(x.dtype, np.datetime64)  # for typing
-        return round_np_datetime(x, t_round)
+        return round_np_datetime(x, t_round)  # type: ignore[arg-type]
     assert isinstance(x, np.ndarray)  # for typing
     return round_num_datetime(x, t_round.astype(np.int64) / NP_INT64_PER_SEC)  # type: ignore[arg-type]
 
