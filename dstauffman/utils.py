@@ -21,7 +21,7 @@ import os
 import shlex
 import subprocess
 import sys
-from typing import Any, Callable, Dict, List, Optional, overload, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, overload, Tuple, TYPE_CHECKING, TypeVar, Union
 import unittest
 import warnings
 
@@ -32,7 +32,8 @@ from dstauffman.units import MONTHS_PER_YEAR
 if HAVE_NUMPY:
     import numpy as np
     from numpy import inf, nan, logical_not
-    from numpy.typing import ArrayLike
+    if TYPE_CHECKING:
+        from numpy.typing import ArrayLike
 else:
     from math import inf, nan, isnan
     logical_not = lambda x: not x  # type: ignore[assignment]
