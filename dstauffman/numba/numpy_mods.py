@@ -18,7 +18,7 @@ try:
     from numba import boolean
     from numba.typed import List
 except ModuleNotFoundError:
-    List = list
+    List = list  # type: ignore[assignment, misc]
 try:
     # Note: avoid using HAVE_NUMPY from dstauffman to avoid circular imports
     import numpy as np
@@ -32,7 +32,7 @@ def _reduce_shape(shape: Tuple, axis: int) -> List[int]:
     num = len(shape)
     if num <= axis:
         raise ValueError('The specified axis must be less than the number of dimensions.')
-    out = List()
+    out: List[int] = List()
     for (i, s) in enumerate(shape):
         if i != axis:
             out.append(s)

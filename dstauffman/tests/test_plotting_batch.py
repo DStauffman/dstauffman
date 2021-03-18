@@ -7,7 +7,7 @@ Notes
 """
 
 #%% Imports
-from typing import List
+from typing import List, Union
 import unittest
 
 from dstauffman import capture_output, HAVE_MPL, HAVE_NUMPY
@@ -30,7 +30,7 @@ class Test_plotting_plot_bpe_convergence(unittest.TestCase):
         No Costs
     """
     def setUp(self) -> None:
-        self.costs = np.array([1, 0.1, 0.05, 0.01]) if HAVE_NUMPY else [1., 0.1, 0.05, 0.01]
+        self.costs: Union[np.ndarray, List[float]] = np.array([1, 0.1, 0.05, 0.01]) if HAVE_NUMPY else [1., 0.1, 0.05, 0.01]
         self.opts = plot.Opts()
         self.opts.show_plot = False
         self.figs: List[Figure] = []
@@ -39,7 +39,7 @@ class Test_plotting_plot_bpe_convergence(unittest.TestCase):
         self.figs.append(plot.plot_bpe_convergence(self.costs, opts=self.opts))
 
     def test_only_two_costs(self) -> None:
-        costs = [self.costs[i] for i in [0, 3]]
+        costs: List[float] = [self.costs[i] for i in [0, 3]]
         self.figs.append(plot.plot_bpe_convergence(costs, opts=self.opts))
 
     def test_no_opts(self) -> None:

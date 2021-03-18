@@ -166,8 +166,8 @@ class Test_estimation_get_parameter(unittest.TestCase):
         self.param  = _Parameters()
         self.param.config.log_level = self.values[0]
         self.param.models[0].field1 = self.values[1]  # type: ignore[assignment]
-        self.param.models[1].field2[2] = self.values[2]
-        self.param.models[1].field3['b'][1] = self.values[3]
+        self.param.models[1].field2[2] = self.values[2]  # type: ignore[index]
+        self.param.models[1].field3['b'][1] = self.values[3]  # type: ignore[index]
 
     def test_nominal(self) -> None:
         values = estm.get_parameter(self.param, self.names)
@@ -187,8 +187,8 @@ class Test_estimation_set_parameter(unittest.TestCase):
         self.param  = _Parameters()
         self.param.config.log_level = self.orig[0]
         self.param.models[0].field1 = self.orig[1]  # type: ignore[assignment]
-        self.param.models[1].field2[2] = self.orig[2]
-        self.param.models[1].field3['b'][1] = self.orig[3]
+        self.param.models[1].field2[2] = self.orig[2]  # type: ignore[index]
+        self.param.models[1].field3['b'][1] = self.orig[3]  # type: ignore[index]
 
     def test_nominal(self) -> None:
         values = estm.get_parameter(self.param, self.names)

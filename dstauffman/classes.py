@@ -28,9 +28,9 @@ if HAVE_H5PY:
 if HAVE_NUMPY:
     from numpy import all as np_all, ndarray, inf, printoptions
 else:
-    from dstauffman.numba import np_all
+    from dstauffman.numba import np_all  # type: ignore[no-redef]
     from math import inf
-    from array import array as ndarray
+    from array import array as ndarray  # type: ignore[misc]
 
 #%% Constants
 _T = TypeVar('_T')

@@ -34,7 +34,7 @@ if HAVE_NUMPY:
     from numpy import inf, nan, logical_not
 else:
     from math import inf, nan, isnan
-    logical_not = lambda x: not x
+    logical_not = lambda x: not x  # type: ignore[assignment]
 if HAVE_SCIPY:
     from scipy.interpolate import interp1d
 

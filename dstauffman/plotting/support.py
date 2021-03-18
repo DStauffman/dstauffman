@@ -27,7 +27,7 @@ try:
     from PyQt5.QtWidgets import QApplication, QPushButton
 except ModuleNotFoundError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
-    QPushButton = object
+    QPushButton = object  # type: ignore[assignment, misc]
 
 from dstauffman import Frozen, get_images_dir, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, is_datetime
 
@@ -1010,9 +1010,9 @@ def get_screen_resolution() -> Tuple[int, int]:
     """
     # check to see if a QApplication exists, and if not, make one
     if QApplication.instance() is None:
-        app = QApplication(sys.argv) # pragma: no cover
+        app = QApplication(sys.argv)  # pragma: no cover
     else:
-        app = QApplication.instance()
+        app = QApplication.instance()  # type: ignore[assignment]
     # query the resolution
     screen_resolution = app.desktop().screenGeometry()
     # pull out the desired information

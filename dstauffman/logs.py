@@ -137,7 +137,7 @@ def flush_logging() -> None:
         handler.flush()
 
 #%% Functions - log_multiline
-def log_multiline(logger: logging.Logger, log_level: int, message: str, *args: Any) -> None:
+def log_multiline(logger: logging.Logger, log_level: int, message: Any, *args: Any) -> None:
     r"""
     Passes messages through to the logger with options for multiline messages.
 

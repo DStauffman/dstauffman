@@ -152,7 +152,7 @@ def run_pytests(folder: str, *args, **kwargs) -> int:
         if QApplication.instance() is None:
             qapp = QApplication(sys.argv)
         else:
-            qapp = QApplication.instance()
+            qapp = QApplication.instance()  # type: ignore[assignment]
     # run tests using pytest
     exit_code = pytest.main([folder, '-rfEsP'] + list(*args), **kwargs)
     # close the qapp
