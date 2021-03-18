@@ -21,7 +21,7 @@ import os
 import shlex
 import subprocess
 import sys
-from typing import Any, Dict, List, Optional, overload, Tuple, TypeVar, Union
+from typing import Any, Callable, Dict, List, Optional, overload, Tuple, TypeVar, Union
 import unittest
 import warnings
 
@@ -32,6 +32,7 @@ from dstauffman.units import MONTHS_PER_YEAR
 if HAVE_NUMPY:
     import numpy as np
     from numpy import inf, nan, logical_not
+    from numpy.typing import ArrayLike
 else:
     from math import inf, nan, isnan
     logical_not = lambda x: not x  # type: ignore[assignment]
@@ -42,6 +43,8 @@ if HAVE_SCIPY:
 _ALLOWED_ENVS: Optional[Dict[str, str]] = None # allows any environment variables to be invoked
 
 _StrOrListStr = TypeVar('_StrOrListStr', str, List[str])
+
+_SingleNum = Union[int, float, np.ndarray, np.datetime64]
 
 #%% Functions - _nan_equal
 def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:
@@ -121,7 +124,9 @@ def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:
     return True
 
 #%% Functions - find_in_range
-def find_in_range(value, min_=-inf, max_=inf, *, inclusive=False, mask=None, precision=0, left=False, right=False):
+def find_in_range(value: ArrayLike, min_: _SingleNum = -inf, max_: _SingleNum = inf, *, \
+        inclusive: bool = False, mask: Union[bool, np.ndarray] = None, precision: _SingleNum = 0, \
+        left: bool = False, right: bool = False) -> np.ndarray:
     r"""
     Finds values in the given range.
 
@@ -171,17 +176,17 @@ def find_in_range(value, min_=-inf, max_=inf, *, inclusive=False, mask=None, pre
     # find those greater than the minimum bound
     if np.isfinite(min_):
         func = np.greater_equal if inclusive or left else np.greater
-        valid = func(value, min_-precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)
+        valid = func(value, min_-precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
     else:
         assert ~np.isnan(min_) and np.sign(min_) < 0, 'The minimum should be -np.inf if not finite.'
         valid = not_nan.copy()
     # combine with those less than the maximum bound
     if np.isfinite(max_):
         func = np.less_equal if inclusive or right else np.less
-        valid &= func(value, max_+precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)
+        valid &= func(value, max_+precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
     else:
         assert ~np.isnan(max_) and np.sign(max_) > 0, 'The maximum should be np.inf if not finite.'
-    return valid
+    return valid  # type: ignore[no-any-return]
 
 #%% Functions - rms
 def rms(data, axis=None, keepdims=False, ignore_nans=False):
@@ -1052,7 +1057,13 @@ def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: in
     return out
 
 #%% combine_per_year
-def combine_per_year(data, func=None):
+@overload
+def combine_per_year(data: None, func: Any) -> None: ...
+
+@overload
+def combine_per_year(data: np.ndarray, func: Any = ...) -> np.ndarray: ...
+
+def combine_per_year(data: Optional[np.ndarray], func: Callable[..., Any] = None) -> Optional[np.ndarray]:
     r"""
     Combine the time varying values over one year increments using a supplied function.
 
@@ -1091,6 +1102,7 @@ def combine_per_year(data, func=None):
     # get original sizes
     if is_1d:
         data = data[:, np.newaxis]
+    assert isinstance(data, np.ndarray)
     (num_time, num_chan) = data.shape
     num_year = num_time // MONTHS_PER_YEAR
     # check for case with all NaNs
