@@ -12,7 +12,7 @@ import contextlib
 import datetime
 import os
 import platform
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 import unittest
 
 from dstauffman import get_tests_dir, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
@@ -79,36 +79,36 @@ class Test_plotting_MyCustomToolbar(unittest.TestCase):
         self.assertEqual(plt.gcf().number, self.fig2.number)
 
     def test_next_plot(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
         self.assertEqual(plt.gcf().number, self.fig1.number)
 
     def test_prev_plot(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
         self.assertEqual(plt.gcf().number, self.fig1.number)
 
     def test_close_all(self) -> None:
         self.assertTrue(plt.fignum_exists(self.fig1.number))
         self.assertTrue(plt.fignum_exists(self.fig2.number))
-        QTest.mouseClick(self.fig1.toolbar_custom_.btn_close_all, Qt.LeftButton)
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_close_all, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
         self.assertFalse(plt.fignum_exists(self.fig1.number))
         self.assertFalse(plt.fignum_exists(self.fig2.number))
 
     def test_multiple_nexts(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
         self.assertEqual(plt.gcf().number, self.fig1.number)
-        QTest.mouseClick(self.fig1.toolbar_custom_.btn_next_plot, Qt.LeftButton)
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
         self.assertEqual(plt.gcf().number, self.fig2.number)
 
     def test_multiple_prevs(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
         self.assertEqual(plt.gcf().number, self.fig1.number)
-        QTest.mouseClick(self.fig1.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
         self.assertEqual(plt.gcf().number, self.fig2.number)
 
     def test_enter_and_exit_events(self) -> None:
         # TODO: this is not causing what I want to happen, the style changes aren't happening.
-        QTest.mouseMove(self.fig1.toolbar_custom_.btn_next_plot, delay=100)
-        QTest.mouseMove(self.fig1.toolbar_custom_.btn_prev_plot, delay=100)
+        QTest.mouseMove(self.fig1.toolbar_custom_.btn_next_plot, delay=100)  # type: ignore[call-overload, attr-defined]
+        QTest.mouseMove(self.fig1.toolbar_custom_.btn_prev_plot, delay=100)  # type: ignore[call-overload, attr-defined]
 
     def tearDown(self) -> None:
         plt.close(self.fig1)
@@ -419,8 +419,8 @@ class Test_plotting_storefig(unittest.TestCase):
         saving to a bad folder location (should raise error)
         specifying a bad plot type (should raise error)
     """
-    time: np.ndarray[float, 1]
-    data: np.ndarray[float, 1]
+    time: np.ndarray
+    data: np.ndarray
     title: str
     folder: str
     plot_type: str
@@ -834,7 +834,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
         self.time_overlap   = np.arange(2, 11)
         self.xmin           = 1
         self.xmax           = 8
-        self.exp            = dict()
+        self.exp: Dict[str, Union[np.ndarray, List[int]]] = dict()
         self.exp['one']     = np.array([False,  True,  True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
         self.exp['two']     = np.array([ True,  True,  True,  True,  True,  True,  True, False, False, False, False], dtype=bool)
         self.exp['overlap'] = np.array([ True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
@@ -853,9 +853,9 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
             np.testing.assert_array_equal(ix[key], self.exp[key])
 
     def test_no_bounds(self) -> None:
-        self.exp['one'].fill(True)
-        self.exp['two'].fill(True)
-        self.exp['overlap'].fill(True)
+        self.exp['one'].fill(True)  # type: ignore[union-attr]
+        self.exp['two'].fill(True)  # type: ignore[union-attr]
+        self.exp['overlap'].fill(True)  # type: ignore[union-attr]
         self.exp['pts'] = [0, 12]
         ix = plot.get_rms_indices(self.time_one, self.time_two, self.time_overlap)
         for key in ix.keys():

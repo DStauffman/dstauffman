@@ -15,8 +15,7 @@ import unittest
 try:
     # Try importing numba to determine if it is there.  Use this instead of HAVE_NUMBA from dstauffman
     # to avoid any circular dependencies
-    import numba
-    assert numba
+    from numba import njit
     HAVE_NUMBA = True
 except ModuleNotFoundError:
     HAVE_NUMBA = False
@@ -41,14 +40,6 @@ def fake_jit(func, *args, **kwargs):
 
 #%% Conditional imports
 if HAVE_NUMBA:
-    # Nominal case with numba installed
-    from numba import boolean, deferred_type, float32, float64, from_dtype, int32, int64, jit, \
-        njit, optional, vectorize
-    from numba.experimental import jitclass
-    from numba.typed import List
-    from numba.types import DictType, ListType, string
-    assert jit  # To suppress warnings
-
     # always cached version of njit, which is also jit(cache=True, nopython=True)
     def ncjit(func, *args, **kwargs):
         r"""Fake decorator for when numba isn't installed."""
@@ -64,25 +55,7 @@ if HAVE_NUMBA:
 else:
     # Support for when you don't have numba.  Note, some functions won't work as expected
     TARGET = ''
-
-    DictType = fake_jit
-    List     = list
-    ListType = fake_jit
-    string   = str
-    boolean  = fake_jit
-    float32  = fake_jit
-    float64  = fake_jit  # float as a callable with multiple args?
-    int32    = fake_jit  # int as a callable with multiple args?
-    int64    = fake_jit
-
-    deferred_type = fake_jit
-    from_dtype    = fake_jit
-    jit           = fake_jit
-    jitclass      = fake_jit
-    ncjit         = fake_jit
-    njit          = fake_jit
-    optional      = fake_jit
-    vectorize     = fake_jit
+    ncjit = fake_jit
 
 #%% Unit test
 if __name__ == '__main__':

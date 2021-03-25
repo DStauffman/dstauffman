@@ -9,11 +9,16 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
-from typing import Tuple, Union
+from typing import Tuple
 import unittest
 
-from dstauffman.numba.passthrough import ncjit, List
+from dstauffman.numba.passthrough import ncjit
 
+try:
+    from numba import boolean
+    from numba.typed import List
+except ModuleNotFoundError:
+    List = list  # type: ignore[assignment, misc]
 try:
     # Note: avoid using HAVE_NUMPY from dstauffman to avoid circular imports
     import numpy as np
@@ -27,7 +32,7 @@ def _reduce_shape(shape: Tuple, axis: int) -> List[int]:
     num = len(shape)
     if num <= axis:
         raise ValueError('The specified axis must be less than the number of dimensions.')
-    out = List()
+    out: List[int] = List()
     for (i, s) in enumerate(shape):
         if i != axis:
             out.append(s)
@@ -35,7 +40,7 @@ def _reduce_shape(shape: Tuple, axis: int) -> List[int]:
 
 #%% issorted_ascend
 @ncjit
-def issorted_ascend(x: Union[np.ndarray[int, 1], np.ndarray[float, 1]]) -> bool:
+def issorted_ascend(x: np.ndarray) -> boolean:
     r"""
     Tells whether the given array is sorted in ascending order or not.
 
@@ -61,11 +66,11 @@ def issorted_ascend(x: Union[np.ndarray[int, 1], np.ndarray[float, 1]]) -> bool:
     False
 
     """
-    return np.all(x[:-1] <= x[1:])  # type: ignore[no-any-return]
+    return np.all(x[:-1] <= x[1:])
 
 #%% issorted_descend
 @ncjit
-def issorted_descend(x):
+def issorted_descend(x: np.ndarray) -> boolean:
     r"""
     Tells whether the given array is sorted in descending order or not.
 

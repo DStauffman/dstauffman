@@ -11,7 +11,7 @@ from __future__ import annotations
 import datetime
 import doctest
 import re
-from typing import Union
+from typing import Optional, Union
 import unittest
 import warnings
 
@@ -31,7 +31,7 @@ _NP_MAP = {'year': 'Y', 'month': 'M', 'week': 'W', 'day': 'D', 'hour': 'h', 'hr'
     'minute': 'm', 'min': 'm', 'second': 's', 'sec': 's'}
 
 #%% Functions - get_np_time_units
-def get_np_time_units(date):
+def get_np_time_units(date: Union[np.datetime64, np.timedelta64, str]) -> Optional[str]:
     r"""
     Gets the units for a given datetime64 or timedelta64.
 
@@ -76,7 +76,8 @@ def get_np_time_units(date):
     return None if len(matches) == 1 else matches[1]
 
 #%% Functions - round_datetime
-def round_datetime(dt=None, /, round_to_sec=60, floor=False):
+def round_datetime(dt: datetime.datetime = None, /, round_to_sec: int = 60, \
+        floor: bool = False) -> datetime.datetime:
     r"""
     Round a datetime object to any time lapse in seconds.
 
@@ -117,6 +118,7 @@ def round_datetime(dt=None, /, round_to_sec=60, floor=False):
     # get the current elasped time in seconds
     seconds = (dt - dt.min).seconds
     # round to the nearest whole second
+    rounding: float
     if floor:
         rounding = seconds // round_to_sec * round_to_sec
     else:
@@ -125,7 +127,7 @@ def round_datetime(dt=None, /, round_to_sec=60, floor=False):
     return dt + datetime.timedelta(0, rounding-seconds, -dt.microsecond)
 
 #%% Functions - round_np_datetime
-def round_np_datetime(date_in, /, time_delta, floor=False):
+def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, floor: bool = False) -> np.datetime64:
     r"""
     Rounds a numpy datetime64 time to the specified delta.
 
@@ -171,17 +173,17 @@ def round_np_datetime(date_in, /, time_delta, floor=False):
     dt_int      = time_delta.astype(np.int64)
     # quantize to the desired unit
     if floor:
-        quants  = date_in_int // dt_int
+        quants  = date_in_int // dt_int  # type: ignore[operator]
     else:
-        quants  = date_in_int // dt_int + ((date_in_int % dt_int) // (dt_int // 2))
+        quants  = date_in_int // dt_int + ((date_in_int % dt_int) // (dt_int // 2))  # type: ignore[operator]
     # scale and convert back to datetime outputs
-    date_out    = (dt_int*quants).astype(date_in.dtype)
-    return date_out
+    date_out = (dt_int*quants).astype(date_in.dtype)
+    return date_out  # type: ignore[return-value]
 
 #%% Functions - round_num_datetime
-def round_num_datetime(date_in, /, time_delta, floor=False):
+def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = False) -> np.ndarray:
     r"""
-    Rounds a numerica datetime to the given value.
+    Rounds a numerical datetime to the given value.
 
     Parameters
     ----------
@@ -194,7 +196,7 @@ def round_num_datetime(date_in, /, time_delta, floor=False):
 
     Returns
     -------
-    float
+    date_out: float
         Rounded date
 
     Notes
@@ -224,11 +226,12 @@ def round_num_datetime(date_in, /, time_delta, floor=False):
         rounded = np.floor(quants)
     else:
         rounded = np.round(quants)
-    return rounded * time_delta
+    date_out: np.ndarray = rounded * time_delta
+    return date_out
 
 #%% Functions - round_time
-def round_time(x: Union[np.ndarray[float], np.ndarray[np.timedelta64]], /, t_round: np.timedelta64) -> \
-    Union[np.ndarray[float], np.ndarray[np.timedelta64]]:
+def round_time(x: Union[np.ndarray, np.datetime64], /, t_round: np.timedelta64) -> \
+    Union[np.ndarray, np.datetime64]:
     r"""
     Rounding function that handles either numpy datetimes or doubles (seconds).
 
@@ -264,14 +267,17 @@ def round_time(x: Union[np.ndarray[float], np.ndarray[np.timedelta64]], /, t_rou
     True
 
     >>> date_out2 = round_time(x_np, t_round)
-    >>> expected2 = date_zero + np.array([0, 200, 400, 400, 600, 600]).astype('timedelta64[ms]').astype(NP_TIMEDELTA_FORM)
+    >>> expected2 = date_zero + np.array([0, 200, 400, 400, 600, 600]).astype('timedelta64[ms]' \
+    ...     ).astype(NP_TIMEDELTA_FORM)
     >>> print(all(date_out2 == expected2))
     True
 
     """
     if is_datetime(x):
-        return round_np_datetime(x, t_round)
-    return round_num_datetime(x, t_round.astype(np.int64) / NP_INT64_PER_SEC)
+        assert np.issubdtype(x.dtype, np.datetime64)  # for typing
+        return round_np_datetime(x, t_round)  # type: ignore[arg-type]
+    assert isinstance(x, np.ndarray)  # for typing
+    return round_num_datetime(x, t_round.astype(np.int64) / NP_INT64_PER_SEC)  # type: ignore[arg-type]
 
 #%% Functions - convert_date
 def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='datetime64[ns]'):
@@ -283,7 +289,8 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     date : as `old_form`
         Date
     form : str
-        Desired date output form, from {'datetime', 'numpy', 'matplotlib', 'sec', 'min', 'hr', 'day', 'month', 'year'}
+        Desired date output form, from: {'datetime', 'numpy', 'matplotlib', 'sec', 'min', 'hr',
+            'day', 'month', 'year'}
     date_zero : class datetime.datetime
         Date represented by zero when using numeric forms
     old_form : str

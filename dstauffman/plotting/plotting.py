@@ -614,7 +614,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     fig = plt.figure()
     fig.canvas.set_window_title(this_title)
     ax = fig.add_subplot(111)
-    for i in range(num_bins):
+    for i in reversed(range(num_bins)):
         if not ignore_plot_data(data, ignore_empties, col=i):
             # Note: The performance of ax.bar is really slow with large numbers of bars (>20), so
             # fill_between is a better alternative

@@ -27,7 +27,7 @@ try:
     from PyQt5.QtWidgets import QApplication, QPushButton
 except ModuleNotFoundError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
-    QPushButton = object
+    QPushButton = object  # type: ignore[assignment, misc]
 
 from dstauffman import Frozen, get_images_dir, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, is_datetime
 
@@ -66,7 +66,7 @@ DEFAULT_CLASSIFICATION: str = ''
 if TYPE_CHECKING:
     _FigOrListFig = Union[Figure, List[Figure]]
 
-_COLOR_LISTS: Dict[str, Union[colors.ListedColormap, str]] = {}
+_COLOR_LISTS: Dict[str, colors.ListedColormap] = {}
 # single colors
 _COLOR_LISTS['same']     = colors.ListedColormap(tuple(repeat(cmx.get_cmap(DEFAULT_COLORMAP).colors[0], 8)))
 _COLOR_LISTS['same_old'] = colors.ListedColormap(tuple(repeat('#1f77b4', 8)))
@@ -346,7 +346,7 @@ def get_color_lists(return_as_colormap: bool = False) -> Union[Dict[str, Union[c
     --------
     >>> from dstauffman.plotting import get_color_lists
     >>> color_lists = get_color_lists()
-    >>> print(color_lists['default'])
+    >>> print(color_lists['default'].colors[0])
     Paired
 
     >>> color_lists_map = get_color_lists(return_as_colormap=True)
@@ -354,22 +354,23 @@ def get_color_lists(return_as_colormap: bool = False) -> Union[Dict[str, Union[c
     (0.65098..., 0.80784..., 0.890196..., 1.0)
 
     """
-    color_lists: Dict[str, Union[colors.ListedColormap, str]] = {}
-    color_lists['default'] = DEFAULT_COLORMAP
+    color_lists: Dict[str, colors.ListedColormap] = {}
+    color_lists['default'] = colors.ListedColormap((DEFAULT_COLORMAP, ))
     color_lists.update(_COLOR_LISTS)
     # double combinations
-    color_lists['dbl_diff']    = colors.ListedColormap(color_lists['dbl_off'].colors + color_lists['double'].colors)  # type: ignore[union-attr]
-    color_lists['dbl_diff_r']  = colors.ListedColormap(color_lists['double'].colors + color_lists['dbl_off'].colors)  # type: ignore[union-attr]
+    color_lists['dbl_diff']    = colors.ListedColormap(color_lists['dbl_off'].colors + color_lists['double'].colors)
+    color_lists['dbl_diff_r']  = colors.ListedColormap(color_lists['double'].colors + color_lists['dbl_off'].colors)
     # triple combinations
-    color_lists['vec_diff']    = colors.ListedColormap(color_lists['vec_off'].colors + color_lists['vec'].colors)  # type: ignore[union-attr]
-    color_lists['vec_diff_r']  = colors.ListedColormap(color_lists['vec'].colors + color_lists['vec_off'].colors)  # type: ignore[union-attr]
+    color_lists['vec_diff']    = colors.ListedColormap(color_lists['vec_off'].colors + color_lists['vec'].colors)
+    color_lists['vec_diff_r']  = colors.ListedColormap(color_lists['vec'].colors + color_lists['vec_off'].colors)
     # quad combinations
-    color_lists['quat_diff']   = colors.ListedColormap(color_lists['quat_off'].colors + color_lists['quat'].colors)  # type: ignore[union-attr]
-    color_lists['quat_diff_r'] = colors.ListedColormap(color_lists['quat'].colors + color_lists['quat_off'].colors)  # type: ignore[union-attr]
+    color_lists['quat_diff']   = colors.ListedColormap(color_lists['quat_off'].colors + color_lists['quat'].colors)
+    color_lists['quat_diff_r'] = colors.ListedColormap(color_lists['quat'].colors + color_lists['quat_off'].colors)
     if return_as_colormap:
         color_list_maps: Dict[str, ColorMap] = {}
         for (key, value) in color_lists.items():
             if key == 'default':
+                value = value.colors[0]
                 assert isinstance(value, str)
                 if value == 'Paired':
                     num_colors = 12
@@ -1010,9 +1011,9 @@ def get_screen_resolution() -> Tuple[int, int]:
     """
     # check to see if a QApplication exists, and if not, make one
     if QApplication.instance() is None:
-        app = QApplication(sys.argv) # pragma: no cover
+        app = QApplication(sys.argv)  # pragma: no cover
     else:
-        app = QApplication.instance()
+        app = QApplication.instance()  # type: ignore[assignment]
     # query the resolution
     screen_resolution = app.desktop().screenGeometry()
     # pull out the desired information

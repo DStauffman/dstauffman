@@ -18,7 +18,7 @@ if HAVE_NUMPY:
     import numpy as np
     sqrt = np.sqrt
 else:
-    from math import sqrt
+    from math import sqrt  # type: ignore[misc]
 
 #%% Functions - convert_annual_to_monthly_probability
 def convert_annual_to_monthly_probability(annual):

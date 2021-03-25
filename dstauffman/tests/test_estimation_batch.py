@@ -28,7 +28,7 @@ if HAVE_NUMPY:
 class SimParams(Frozen):
     r"""Simulation model parameters."""
     def __init__(self, time, *, magnitude, frequency, phase):
-        self.time: np.ndarray[float, 1]      = time
+        self.time: np.ndarray = time
         self.magnitude: float = magnitude
         self.frequency: float = frequency
         self.phase: float     = phase
@@ -42,7 +42,7 @@ class SimParams(Frozen):
         return True
 
 # Functions - _get_truth_index
-def _get_truth_index(results_time: np.ndarray[float, 1], truth_time: np.ndarray[float, 1]):
+def _get_truth_index(results_time: np.ndarray, truth_time: np.ndarray):
     r"""Finds the indices to the truth data from the results time."""
     # Hard-coded values
     precision    = 1e-7

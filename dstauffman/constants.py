@@ -118,7 +118,7 @@ NP_INT64_PER_SEC: int = 10**9
 #%% Functions
 # None
 
-#%% Script
+#%% Unit test
 if __name__ == '__main__':
     # print all the constants (anything in ALL_CAPS)
     fields = [k for k in sorted(dir()) if k.isupper()]
@@ -126,7 +126,7 @@ if __name__ == '__main__':
     for field in fields:
         pad = ' ' * (max_len - len(field))
         value = locals()[field]
-        print('{}{} = {}'.format(field, pad, value))
+        print(f'{field}{pad} = {value}')
 
     # run unittests
     unittest.main(module='dstauffman.tests.test_constants', exit=False)

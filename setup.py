@@ -47,9 +47,10 @@ setup(
     install_requires=[
         'h5py',
         'matplotlib',
+        'numba',
         'numpy',
         'pandas',
-        #'PyQt5',
+        'PyQt5',
         'pytest',
         'scipy',
         'tblib',

@@ -355,7 +355,7 @@ class Test_health_combine_sets(unittest.TestCase):
     @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_broadcasting(self) -> None:
         with self.assertRaises(ValueError):
-            (n, u, s) = health.combine_sets(np.array([self.n1, self.n1]), self.u1, self.s1, self.n2, self.u2, self.s2)
+            (n, u, s) = health.combine_sets(np.array([self.n1, self.n1]), self.u1, self.s1, self.n2, self.u2, self.s2)  # type: ignore[arg-type]
 
 #%% health.bounded_normal_draw
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')

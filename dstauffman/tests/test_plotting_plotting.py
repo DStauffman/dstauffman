@@ -457,7 +457,7 @@ class Test_plotting_plot_histogram(unittest.TestCase):
             xlabel='Text', ylabel='Num', second_ylabel='Dist')
 
     def test_datetimes(self) -> None:
-        date_zero = np.datetime64(datetime.date(2021, 2, 1)).astype(NP_DATETIME_FORM)
+        date_zero = np.datetime64(datetime.date(2021, 2, 1)).astype(NP_DATETIME_FORM)  # type: ignore[call-overload]
         data_np   = date_zero + np.round(NP_INT64_PER_SEC * self.data).astype(NP_TIMEDELTA_FORM)
         bins_np   = date_zero + np.round(NP_INT64_PER_SEC * self.bins).astype(NP_TIMEDELTA_FORM)
         # TODO: would prefer to handle this case better

@@ -20,14 +20,17 @@ class Test__VALID_COMMANDS(unittest.TestCase):
     Tests the _VALID_COMMANDS enumerator for expected values.
     """
     def test_nominal(self) -> None:
-        self.assertIn('enforce', dcs.parser._VALID_COMMANDS)
-        self.assertIn('help',    dcs.parser._VALID_COMMANDS)
-        self.assertIn('tests',   dcs.parser._VALID_COMMANDS)
+        self.assertIn('coverage',  dcs.parser._VALID_COMMANDS)
+        self.assertIn('enforce',   dcs.parser._VALID_COMMANDS)
+        self.assertIn('help',      dcs.parser._VALID_COMMANDS)
+        self.assertIn('make_init', dcs.parser._VALID_COMMANDS)
+        self.assertIn('tests',     dcs.parser._VALID_COMMANDS)
+        self.assertIn('version',   dcs.parser._VALID_COMMANDS)
 
-#%% _print_bad_command
-class Test__print_bad_command(unittest.TestCase):
+#%% parser._print_bad_command
+class Test_parser__print_bad_command(unittest.TestCase):
     r"""
-    Tests the _print_bad_command function with the following cases:
+    Tests the parser._print_bad_command function with the following cases:
         Nominal
     """
     def test_nominal(self) -> None:

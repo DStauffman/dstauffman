@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+from typing import Any, Callable, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY
@@ -22,7 +23,7 @@ try:
     from numba.typed import List
     _HAVE_NUMBA = True
 except ModuleNotFoundError:
-    List = lambda x: x
+    List: Callable[[Any], Any] = lambda x: x  # type: ignore[no-redef]
     _HAVE_NUMBA = False
 
 #%% np_any
@@ -44,7 +45,7 @@ class Test_np_any(unittest.TestCase):
         self.assertTrue(nub.np_any(x))
 
     def test_lists(self) -> None:
-        x = List([False for i in range(1000)])
+        x: List[bool] = List([False for i in range(1000)])
         self.assertFalse(nub.np_any(x))
         x[333] = True
         self.assertTrue(nub.np_any(x))
@@ -68,7 +69,7 @@ class Test_np_all(unittest.TestCase):
         self.assertFalse(nub.np_all(x))
 
     def test_lists(self) -> None:
-        x = List([True for i in range(1000)])
+        x: List[bool] = List([True for i in range(1000)])
         self.assertTrue(nub.np_all(x))
         x[333] = False
         self.assertFalse(nub.np_all(x))
@@ -99,7 +100,7 @@ class Test_issorted_opt(unittest.TestCase):
         self.assertTrue(nub.issorted_opt(x, descend=True))
 
     def test_lists(self) -> None:
-        x = List([-inf, 0, 1, pi, 5, inf])
+        x: List[Union[float, int]] = List([-inf, 0, 1, pi, 5, inf])
         self.assertTrue(nub.issorted_opt(x))
         self.assertFalse(nub.issorted_opt(x, descend=True))
 

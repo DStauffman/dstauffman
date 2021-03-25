@@ -9,13 +9,10 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
-from typing import Callable, ClassVar, TYPE_CHECKING
 import unittest
 
-if TYPE_CHECKING:
-    from mypy_extensions import DefaultNamedArg
-
-from dstauffman import Frozen, HAVE_H5PY, HAVE_NUMPY, SaveAndLoad
+from dstauffman import Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, \
+    save_method
 
 if HAVE_H5PY:
     import h5py
@@ -159,7 +156,7 @@ class Kf(Frozen):
             grp = file.create_group('self')
             for key in vars(self):
                 if key == '_subclasses':
-                    # TODO: update to always right this field first
+                    # TODO: update to always write this field first
                     value = [x.encode('utf-8') for x in getattr(self, key)]
                     grp.create_dataset(key, data=value)
                 elif key in self._subclasses:
@@ -171,6 +168,8 @@ class Kf(Frozen):
                         if value is not None:
                             if subkey in {'chan'}:
                                 value = [x.encode('utf-8') for x in value]
+                            elif subkey in {'time'} and is_datetime(value):
+                                value = value.copy().astype(np.int64)
                             inner_grp.create_dataset(subkey, data=value)
                 else:
                     # normal values
@@ -179,6 +178,8 @@ class Kf(Frozen):
                         # special case to handle lists of strings
                         if key in {'chan'}:
                             value = [x.encode('utf-8') for x in value]
+                        elif key in {'time'} and is_datetime(value):
+                            value = value.copy().astype(np.int64)
                         grp.create_dataset(key, data=value)
 
     @classmethod
@@ -197,16 +198,22 @@ class Kf(Frozen):
                             value = inner_grp[subfield][()]
                             if subfield in {'chan'}:
                                 value = [x.decode('utf-8') for x in value]
+                            elif subfield in {'time'}:
+                                if value.dtype == np.int64:
+                                    value.dtype = NP_DATETIME_FORM
                             setattr(getattr(out, field), subfield, value)
                     else:
                         value = grp[field][()]
                         if field in {'chan'}:
                             value = [x.decode('utf-8') for x in value]
+                        elif field in {'time'}:
+                            if value.dtype == np.int64:
+                                value.dtype = NP_DATETIME_FORM
                         setattr(out, field, value)
         return out
 
 #%% Classes - KfRecord
-class KfRecord(Frozen, metaclass=SaveAndLoad):
+class KfRecord(Frozen):
     r"""
     Full records of the Kalman Filter for use in a backards information smoother.
 
@@ -233,9 +240,6 @@ class KfRecord(Frozen, metaclass=SaveAndLoad):
     >>> kf_record = KfRecord()
 
     """
-    load: ClassVar[Callable[[str, DefaultNamedArg(bool, 'use_hdf5')], KfRecord]]
-    save: Callable[[KfRecord, str, DefaultNamedArg(bool, 'use_hdf5')], None]
-
     def __init__(self, num_points=0, num_states=0, num_active=0, num_axes=0, time_dtype=float):
         if num_points > 0:
             self.time = np.empty(num_points, dtype=time_dtype)
@@ -263,6 +267,44 @@ class KfRecord(Frozen, metaclass=SaveAndLoad):
         self.Pz   = self.Pz[:, :, ix_keep].copy()
         self.K    = self.K[:, :, ix_keep].copy()
         self.z    = self.z[:, ix_keep].copy()
+
+    def save(self, filename: str = '', use_hdf5: bool = True):
+        r"""
+        Save the object to disk.
+
+        Parameters
+        ----------
+        filename : str
+            Name of the file to save
+        use_hdf5 : bool, optional, defaults to False
+            Write as *.hdf5 instead of *.pkl
+
+        """
+        convert_times = hasattr(self.time, 'dtype') and np.issubdtype(self.time.dtype, np.datetime64)
+        if convert_times:
+            orig_type = self.time.dtype
+            self.time.dtype = np.int64
+        save_method(self, filename=filename, use_hdf5=use_hdf5)
+        if convert_times:
+            self.time.dtype = orig_type
+
+    @classmethod
+    def load(cls, filename: str = '', use_hdf5: bool = True) -> KfRecord:
+        r"""
+        Load the object from disk.
+
+        Parameters
+        ----------
+        filename : str
+            Name of the file to load
+        use_hdf5 : bool, optional, defaults to False
+            Write as *.hdf5 instead of *.pkl
+
+        """
+        out: KfRecord = load_method(cls, filename=filename, use_hdf5=use_hdf5)
+        if hasattr(out.time, 'dtype') and out.time.dtype == np.int64:
+            out.time.dtype = NP_DATETIME_FORM
+        return out
 
 #%% Unit Test
 if __name__ == '__main__':

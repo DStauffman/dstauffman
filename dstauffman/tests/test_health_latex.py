@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+from typing import List, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY
@@ -92,6 +93,7 @@ class Test_health_bins_to_str_ranges(unittest.TestCase):
         String passthrough
     """
     def setUp(self) -> None:
+        self.bins: Union[np.ndarray, List[int]]
         if HAVE_NUMPY:
             self.bins = np.array([0, 20, 40, 60, 10000], dtype=int)
         else:
@@ -119,6 +121,7 @@ class Test_health_bins_to_str_ranges(unittest.TestCase):
         self.assertEqual(out, ['0-19', '20+', '40+', '60+'])
 
     def test_single_ranges(self) -> None:
+        x: Union[np.ndarray, List[int]]
         if HAVE_NUMPY:
             x = np.array([0, 1, 5, 6, 10000], dtype=int)
         else:

@@ -14,8 +14,8 @@ import copy
 import doctest
 import pickle
 import sys
-from typing import Any, Callable, Dict, Iterable, List, Literal, NoReturn, Optional, overload, \
-    Set, Tuple, Type, TypeVar, Union
+from typing import Any, Callable, Dict, FrozenSet, Iterable, List, Literal, NoReturn, Optional, \
+    overload, Set, Tuple, Type, TypeVar, Union
 import unittest
 import warnings
 
@@ -28,9 +28,9 @@ if HAVE_H5PY:
 if HAVE_NUMPY:
     from numpy import all as np_all, ndarray, inf, printoptions
 else:
-    from dstauffman.numba import np_all
+    from dstauffman.numba import np_all  # type: ignore[no-redef]
     from math import inf
-    from array import array as ndarray
+    from array import array as ndarray  # type: ignore[misc]
 
 #%% Constants
 _T = TypeVar('_T')
@@ -328,7 +328,7 @@ def chop_time(self: Any, time_field: str, exclude: Set[str] = None, ti: float = 
             setattr(self, key, old[..., ix])
 
 #%% Functions - subsample_class
-def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Set[str] = None) -> None:
+def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Union[FrozenSet[str], Set[str]] = None) -> None:
     r"""
     Subsamples the class instance to every `skip` data point.
 

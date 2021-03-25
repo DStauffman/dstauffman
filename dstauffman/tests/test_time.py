@@ -66,7 +66,7 @@ class Test_round_np_datetime(unittest.TestCase):
         Flooring
     """
     def setUp(self) -> None:
-        date_zero       = np.datetime64(datetime.date(2020, 1, 1))
+        date_zero       = np.datetime64(datetime.date(2020, 1, 1))  # type: ignore[call-overload]
         dt_sec          = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
         self.date_in    = date_zero + np.round(1000*dt_sec).astype('timedelta64[ms]')
         self.time_delta = np.timedelta64(200, 'ms')
@@ -108,7 +108,7 @@ class Test_round_time(unittest.TestCase):
         TBD
     """
     def setUp(self) -> None:
-        self.date_zero = np.datetime64(datetime.date(2020, 1, 1)).astype(dcs.NP_DATETIME_FORM)
+        self.date_zero = np.datetime64(datetime.date(2020, 1, 1)).astype(dcs.NP_DATETIME_FORM)  # type: ignore[call-overload]
         self.x_sec     = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
         self.x_np      = self.date_zero + np.round(dcs.NP_INT64_PER_SEC * self.x_sec).astype(dcs.NP_TIMEDELTA_FORM)
         self.t_round   = np.timedelta64(200, 'ms').astype(dcs.NP_TIMEDELTA_FORM)

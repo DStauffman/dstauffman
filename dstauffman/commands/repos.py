@@ -32,12 +32,24 @@ def parse_enforce(input_args: List[str]) -> argparse.Namespace:
 
     Examples
     --------
-    >>> from dstauffman import get_root_dir
+    >>> from dstauffman import get_root_dir, pprint_dict
     >>> from dstauffman.commands import parse_enforce
     >>> input_args = [get_root_dir()]
     >>> args = parse_enforce(input_args)
-    >>> print(args) # doctest: +ELLIPSIS
-    Namespace(folder='...', extensions=None, list_all=False, ignore_tabs=False, trailing=False, skip=None, windows=False, unix=False, execute=False)
+    >>> # TODO: go back to this when v3.9 everywhere
+    >>> print(args) # doctest: +SKIP
+    >>> #Namespace(folder='...', extensions=None, list_all=False, ignore_tabs=False, trailing=False, skip=None, windows=False, unix=False, execute=False)
+    >>> _ = pprint_dict(vars(args), name='args', indent=1)  # doctest: +ELLIPSIS
+    args
+     folder      = ...
+     extensions  = None
+     list_all    = False
+     ignore_tabs = False
+     trailing    = False
+     skip        = None
+     windows     = False
+     unix        = False
+     execute     = False
 
     """
     parser = argparse.ArgumentParser(prog='dcs enforce', description='Enforce consistency in the repo ' + \
@@ -133,12 +145,20 @@ def parse_make_init(input_args: List[str]) -> argparse.Namespace:
 
     Examples
     --------
-    >>> from dstauffman import get_root_dir
+    >>> from dstauffman import get_root_dir, pprint_dict
     >>> from dstauffman.commands import parse_make_init
     >>> input_args = [get_root_dir(), '-l']
     >>> args = parse_make_init(input_args)
-    >>> print(args) # doctest: +ELLIPSIS
-    Namespace(folder='...', lineup=True, wrap=100, dry_run=False, outfile='__init__.py')
+    >>> # TODO: go back to this when Python v3.9 everywhere
+    >>> print(args) # doctest: +SKIP
+    >>> #Namespace(folder='...', lineup=True, wrap=100, dry_run=False, outfile='__init__.py')
+    >>> _ = pprint_dict(vars(args), name='args')  # doctest: +ELLIPSIS
+    args
+     folder  = ...
+     lineup  = True
+     wrap    = 100
+     dry_run = False
+     outfile = __init__.py
 
     """
     parser = argparse.ArgumentParser(prog='dcs make_init', description='Make a python __init__.py' + \

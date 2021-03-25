@@ -262,7 +262,7 @@ def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, floa
     if conversion == 'percentage':
         return ('%', 100)
     (unit_mult, label) = get_factors(conversion, inverse=True)
-    if units in {'', 'rad', 'rad^2'} and isinstance(conversion, str) and 'arc' in conversion:
+    if units in {'', 'rad', 'rad^2'} and 'arc' in conversion:
         new_units = label
     elif units == 'rad^2':
         new_units = '(' + label + 'rad)^2'

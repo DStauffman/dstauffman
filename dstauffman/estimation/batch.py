@@ -37,7 +37,7 @@ if HAVE_NUMPY:
     isnan = np.isnan
     nan = np.nan
 else:
-    from math import inf, nan, isnan
+    from math import inf, nan, isnan  # type: ignore[misc]
 
 #%% Globals
 logger = logging.getLogger(__name__)
