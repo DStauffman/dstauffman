@@ -164,8 +164,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.disp_xmax        = np.inf
         self.make_subplots    = True
         self.single_lines     = False
-        color_lists           = plot.get_color_lists()
-        self.colormap         = ListedColormap(color_lists['dbl_diff'].colors + color_lists['double'].colors)  # type: ignore[attr-defined]
+        self.colormap         = ListedColormap(plot.COLOR_LISTS['dbl_diff'].colors + plot.COLOR_LISTS['double'].colors)  # type: ignore[attr-defined]
         self.use_mean         = False
         self.plot_zero        = False
         self.show_rms         = True

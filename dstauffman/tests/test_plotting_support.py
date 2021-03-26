@@ -49,6 +49,24 @@ class Test_plotting_DEFAULT_CLASSIFICATION(unittest.TestCase):
     def test_exists(self) -> None:
         self.assertTrue(isinstance(plot.DEFAULT_CLASSIFICATION, str))
 
+#%% plotting.COLOR_LISTS
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+class Test_plotting_COLOR_LISTS(unittest.TestCase):
+    r"""
+    Tests the plotting.COLOR_LISTS dictionary with the following cases:
+        Nominal
+    """
+    def setUp(self) -> None:
+        self.keys = ['default', 'single', 'double', 'vec', 'quat', 'dbl_diff', 'vec_diff', 'quat_diff']
+
+    def test_nominal(self) -> None:
+        for key in self.keys:
+            self.assertIn(key, plot.COLOR_LISTS)
+        colormap = plot.COLOR_LISTS['quat_diff']
+        self.assertEqual(colormap.N, 8)
+        self.assertEqual(colormap.colors[0], 'xkcd:fuchsia')
+        self.assertEqual(colormap.colors[7], 'xkcd:chocolate')
+
 #%% plotting._HoverButton
 class Test_plotting__HoverButton(unittest.TestCase):
     r"""
@@ -213,25 +231,6 @@ class Test_plotting_close_all(unittest.TestCase):
         plt.close(fig2)
         self.assertFalse(plt.fignum_exists(fig1.number))
         self.assertFalse(plt.fignum_exists(fig2.number))
-
-#%% plotting.get_color_lists
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
-class Test_plotting_get_color_lists(unittest.TestCase):
-    r"""
-    Tests the plotting.get_color_lists function with the following cases:
-        Nominal
-    """
-    def setUp(self) -> None:
-        self.keys = ['default', 'single', 'double', 'vec', 'quat', 'dbl_diff', 'vec_diff', 'quat_diff']
-
-    def test_nominal(self) -> None:
-        color_lists: Dict[str, colors.ListedColormap] = plot.get_color_lists()
-        for key in self.keys:
-            self.assertIn(key, color_lists)
-        colormap = color_lists['quat_diff']
-        self.assertEqual(colormap.N, 8)
-        self.assertEqual(colormap.colors[0], 'xkcd:fuchsia')
-        self.assertEqual(colormap.colors[7], 'xkcd:chocolate')
 
 #%% plotting.get_nondeg_colorlists
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
@@ -1002,6 +1001,43 @@ class Test_plotting_z_from_ci(unittest.TestCase):
         for (ci, exp_z) in zip(self.cis, self.zs):
             z = plot.z_from_ci(ci)
             self.assertTrue(abs(z - exp_z) < 0.001, '{} and {} are more than 0.001 from each other.'.format(z, exp_z))
+
+#%% plotting.save_figs_to_pdf
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+class Test_plotting_save_figs_to_pdf(unittest.TestCase):
+    r"""
+    Tests the plotting.save_figs_to_pdf function with the following cases:
+        TBD
+    """
+    fig1: plt.Figure
+    fig2: plt.Figure
+    filename: str
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.fig1 = plt.figure()
+        ax1 = cls.fig1.add_subplot(1, 1, 1)
+        ax1.plot(0, 0)
+        cls.fig2 = plt.figure()
+        ax2 = cls.fig2.add_subplot(1, 1, 1)
+        ax2.plot([0, 1, 2], [2, 4, 6])
+        cls.filename = os.path.join(get_tests_dir(), 'pdf_figures.pdf')
+
+    def test_nominal(self) -> None:
+        plot.save_figs_to_pdf([self.fig1, self.fig2], self.filename)
+
+    def test_none(self) -> None:
+        plot.save_figs_to_pdf(None, self.filename)
+
+    def test_single(self) -> None:
+        plot.save_figs_to_pdf(self.fig1, self.filename)
+
+    @classmethod
+    def tearDownClass(cls) -> None:
+        plt.close(cls.fig1)
+        plt.close(cls.fig2)
+        with contextlib.suppress(FileNotFoundError):
+            os.remove(cls.filename)
 
 #%% Unit test execution
 if __name__ == '__main__':

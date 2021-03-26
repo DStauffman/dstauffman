@@ -30,20 +30,20 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         TBD
     """
     def setUp(self) -> None:
-        self.description     = 'example'
-        self.time_one        = np.arange(11)
-        self.time_two        = np.arange(2, 13)
-        self.quat_one        = quat_norm(np.random.rand(4, 11))
-        self.quat_two        = quat_norm(np.random.rand(4, 11))
-        self.name_one        = 'test1'
-        self.name_two        = 'test2'
+        self.description      = 'example'
+        self.time_one         = np.arange(11)
+        self.time_two         = np.arange(2, 13)
+        self.quat_one         = quat_norm(np.random.rand(4, 11))
+        self.quat_two         = quat_norm(np.random.rand(4, 11))
+        self.name_one         = 'test1'
+        self.name_two         = 'test2'
         self.time_units       = 'sec'
-        self.start_date      = str(datetime.datetime.now())
+        self.start_date       = str(datetime.datetime.now())
         self.plot_components  = True
-        self.rms_xmin        = 0
-        self.rms_xmax        = 10
-        self.disp_xmin       = -2
-        self.disp_xmax       = np.inf
+        self.rms_xmin         = 0
+        self.rms_xmax         = 10
+        self.disp_xmin        = -2
+        self.disp_xmax        = np.inf
         self.make_subplots    = True
         self.single_lines     = False
         self.use_mean         = False

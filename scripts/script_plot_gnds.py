@@ -3,12 +3,13 @@
 #%% Imports
 from copy import deepcopy
 import datetime
+import os
 
 import numpy as np
 
-from dstauffman import convert_date
+from dstauffman import convert_date, get_output_dir
 from dstauffman.plotting import Opts, plot_attitude, plot_position, plot_innovations, plot_covariance, \
-    plot_los, plot_states
+    plot_los, plot_states, save_figs_to_pdf
 from dstauffman.aerospace import Kf,  quat_from_euler, quat_mult, quat_norm
 
 #%% Flags
@@ -121,3 +122,6 @@ if plots['los']:
     f = plot_los(kf1, kf2, opts=opts2, second_units='micro')
 if plots['sts']:
     f = plot_states(kd1, kd2, opts=opts1, second_units=('nrad', 1e9))
+
+# Test PDF saving
+save_figs_to_pdf(f1 + f2 + f3 + f4, filename=os.path.join(get_output_dir(), 'GND_plots.pdf'))

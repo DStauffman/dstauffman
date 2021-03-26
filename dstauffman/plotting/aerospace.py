@@ -16,7 +16,7 @@ from dstauffman import get_unit_conversion, HAVE_NUMPY, HAVE_MPL, intersect, is_
 from dstauffman.aerospace import Kf, KfInnov, quat_angle_diff
 from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, make_difference_plot
 from dstauffman.plotting.plotting import Opts, setup_plots
-from dstauffman.plotting.support import disp_xlimits, get_color_lists, get_nondeg_colorlists, \
+from dstauffman.plotting.support import ColorMap, COLOR_LISTS, disp_xlimits, get_nondeg_colorlists, \
     get_rms_indices, plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
 
 if HAVE_MPL:
@@ -134,7 +134,6 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> from dstauffman.plotting import make_quaternion_plot
     >>> from dstauffman.aerospace import quat_norm
     >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
     >>> from datetime import datetime
     >>> description      = 'example'
     >>> time_one         = np.arange(11)
@@ -178,6 +177,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
 
     Close plots
+    >>> import matplotlib.pyplot as plt
     >>> for fig in fig_hand:
     ...     plt.close(fig)
 
@@ -224,9 +224,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     # build RMS indices
     ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)
     # get default plotting colors
-    color_lists = get_color_lists(return_as_colormap=True)
-    colororder3 = color_lists['vec']
-    colororder8 = color_lists['quat_diff']
+    colororder3 = ColorMap(COLOR_LISTS['vec'])
+    colororder8 = ColorMap(COLOR_LISTS['quat_diff'])
     # quaternion component names
     elements = ['X', 'Y', 'Z', 'S']
     num_channels = len(elements)
@@ -450,7 +449,6 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     >>> from dstauffman.plotting import Opts, plot_attitude
     >>> from dstauffman.aerospace import Kf, quat_from_euler, quat_mult, quat_norm
     >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
 
     >>> q1 = quat_norm(np.array([0.1, -0.2, 0.3, 0.4]))
     >>> dq = quat_from_euler(1e-6*np.array([-300, 100, 200]), [3, 1, 2])
@@ -476,6 +474,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     >>> fig_hand = plot_attitude(kf1, kf2, opts=opts)
 
     Close plots
+    >>> import matplotlib.pyplot as plt
     >>> for fig in fig_hand:
     ...     plt.close(fig)
 
@@ -600,7 +599,6 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     >>> from dstauffman.plotting import plot_position
     >>> from dstauffman.aerospace import Kf
     >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
 
     >>> kf1      = Kf()
     >>> kf1.name = 'KF1'
@@ -617,6 +615,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     >>> fig_hand = plot_position(kf1, kf2)
 
     Close plots
+    >>> import matplotlib.pyplot as plt
     >>> for fig in fig_hand:
     ...     plt.close(fig)
 
@@ -763,7 +762,6 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     >>> from dstauffman.plotting import Opts, plot_innovations
     >>> from dstauffman.aerospace import KfInnov
     >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
 
     >>> num_axes   = 2
     >>> num_innovs = 11
@@ -787,6 +785,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     >>> fig_hand = plot_innovations(kf1, kf2, opts=opts)
 
     Close plots
+    >>> import matplotlib.pyplot as plt
     >>> for fig in fig_hand:
     ...     plt.close(fig)
 
@@ -1061,7 +1060,6 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     >>> from dstauffman.plotting import Opts, plot_covariance
     >>> from dstauffman.aerospace import Kf
     >>> import numpy as np
-    >>> import matplotlib.pyplot as plt
 
     >>> num_points = 11
     >>> num_states = 6
@@ -1084,6 +1082,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     >>> fig_hand = plot_covariance(kf1, kf2, opts=opts)
 
     Close plots
+    >>> import matplotlib.pyplot as plt
     >>> for fig in fig_hand:
     ...     plt.close(fig)
 
