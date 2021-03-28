@@ -12,7 +12,7 @@ import copy
 import os
 import platform
 import sys
-from typing import List
+from typing import List, Union
 import unittest
 from unittest.mock import patch
 import warnings
@@ -219,6 +219,7 @@ class Test_rms(unittest.TestCase):
 
     def test_axis_drop1a(self) -> None:
         out = dcs.rms(self.inputs1, axis=0)
+        assert isinstance(out, float)
         self.assertAlmostEqual(out, self.outputs1)
 
     def test_axis_drop1b(self) -> None:
@@ -231,11 +232,13 @@ class Test_rms(unittest.TestCase):
 
     def test_axis_drop2b(self) -> None:
         out = dcs.rms(self.inputs2, axis=0, keepdims=False)
+        assert isinstance(out, np.ndarray)
         for (ix, val) in enumerate(out):
             self.assertAlmostEqual(val, self.outputs2b[ix])
 
     def test_axis_drop2c(self) -> None:
         out = dcs.rms(self.inputs2, axis=1, keepdims=False)
+        assert isinstance(out, np.ndarray)
         for (ix, val) in enumerate(out):
             self.assertAlmostEqual(val, self.outputs2c[ix])
 
@@ -251,6 +254,7 @@ class Test_rms(unittest.TestCase):
 
     def test_complex_conj(self) -> None:
         out = dcs.rms(np.array([1+1j, 1-1j]))
+        assert isinstance(out, complex)
         self.assertAlmostEqual(out, np.sqrt(2))
 
     def test_with_nans(self) -> None:
@@ -259,28 +263,34 @@ class Test_rms(unittest.TestCase):
 
     def test_ignore_nans1(self) -> None:
         out = dcs.rms(self.inputs3, ignore_nans=True)
+        assert isinstance(out, float)
         self.assertAlmostEqual(out, self.outputs1)
 
     def test_ignore_nans2(self) -> None:
         out = dcs.rms(self.inputs4, ignore_nans=True)
+        assert isinstance(out, float)
         self.assertAlmostEqual(out, self.outputs4a)
 
     def test_ignore_nans3(self) -> None:
         out = dcs.rms(self.inputs4, ignore_nans=True, axis=0)
+        assert isinstance(out, np.ndarray)
         np.testing.assert_array_almost_equal(out, self.outputs4b)
 
     def test_ignore_nans4(self) -> None:
         out = dcs.rms(self.inputs4, ignore_nans=True, axis=1)
+        assert isinstance(out, np.ndarray)
         np.testing.assert_array_almost_equal(out, self.outputs4c)
 
     def test_all_nans(self) -> None:
         x = np.full((4, 3), np.nan)
-        out = dcs.rms(x, ignore_nans=True)
+        out: Union[float, np.ndarray] = dcs.rms(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
         out = dcs.rms(x, axis=0, ignore_nans=True)
+        assert isinstance(out, np.ndarray)
         self.assertTrue(np.all(np.isnan(out)))
         self.assertEqual(out.shape, (3, ))
         out = dcs.rms(x, axis=1, ignore_nans=True)
+        assert isinstance(out, np.ndarray)
         self.assertTrue(np.all(np.isnan(out)))
         self.assertEqual(out.shape, (4, ))
         out = dcs.rms(x, axis=0, ignore_nans=True, keepdims=True)
@@ -336,6 +346,7 @@ class Test_rss(unittest.TestCase):
 
     def test_axis_drop1a(self) -> None:
         out = dcs.rss(self.inputs1, axis=0)
+        assert isinstance(out, np.int_)
         self.assertAlmostEqual(out, self.outputs1)
 
     def test_axis_drop1b(self) -> None:
@@ -348,11 +359,13 @@ class Test_rss(unittest.TestCase):
 
     def test_axis_drop2b(self) -> None:
         out = dcs.rss(self.inputs2, axis=0, keepdims=False)
+        assert isinstance(out, np.ndarray)
         for (ix, val) in enumerate(out):
             self.assertAlmostEqual(val, self.outputs2b[ix])
 
     def test_axis_drop2c(self) -> None:
         out = dcs.rss(self.inputs2, axis=1, keepdims=False)
+        assert isinstance(out, np.ndarray)
         for (ix, val) in enumerate(out):
             self.assertAlmostEqual(val, self.outputs2c[ix])
 
@@ -392,12 +405,14 @@ class Test_rss(unittest.TestCase):
 
     def test_all_nans(self) -> None:
         x = np.full((4, 3), np.nan)
-        out = dcs.rss(x, ignore_nans=True)
+        out: Union[float, np.ndarray] = dcs.rss(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
         out = dcs.rss(x, axis=0, ignore_nans=True)
+        assert isinstance(out, np.ndarray)
         self.assertTrue(np.all(np.isnan(out)))
         self.assertEqual(out.shape, (3, ))
         out = dcs.rss(x, axis=1, ignore_nans=True)
+        assert isinstance(out, np.ndarray)
         self.assertTrue(np.all(np.isnan(out)))
         self.assertEqual(out.shape, (4, ))
         out = dcs.rss(x, axis=0, ignore_nans=True, keepdims=True)

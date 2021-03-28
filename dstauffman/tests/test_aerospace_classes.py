@@ -72,6 +72,13 @@ class Test_aerospace_KfRecord(unittest.TestCase):
 
     def test_arguments(self) -> None:
         kf_record = space.KfRecord(num_points=30, num_states=6, num_active=3, num_axes=2)
+        assert kf_record.time is not None
+        assert kf_record.P is not None
+        assert kf_record.stm is not None
+        assert kf_record.H is not None
+        assert kf_record.Pz is not None
+        assert kf_record.K is not None
+        assert kf_record.z is not None
         self.assertEqual(kf_record.time.shape, (30, ), 'Time shape mismatch.')
         self.assertEqual(kf_record.P.shape, (3, 3, 30), 'P shape mismatch.')
         self.assertEqual(kf_record.stm.shape, (3, 3, 30), 'stm shape mismatch.')
@@ -82,6 +89,13 @@ class Test_aerospace_KfRecord(unittest.TestCase):
 
     def test_alternative_time(self) -> None:
         kf_record = space.KfRecord(num_points=60, num_states=9, num_active=6, num_axes=3, time_dtype=NP_DATETIME_FORM)
+        assert kf_record.time is not None
+        assert kf_record.P is not None
+        assert kf_record.stm is not None
+        assert kf_record.H is not None
+        assert kf_record.Pz is not None
+        assert kf_record.K is not None
+        assert kf_record.z is not None
         self.assertEqual(kf_record.time.dtype, '<M8[ns]')
         self.assertEqual(kf_record.time.shape, (60, ), 'Time shape mismatch.')
         self.assertEqual(kf_record.P.shape, (6, 6, 60), 'P shape mismatch.')
@@ -93,6 +107,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
 
     def test_pprint1(self) -> None:
         kf_record = space.KfRecord(num_points=5)
+        assert kf_record.time is not None
         kf_record.time[:] = np.arange(5)
         with capture_output() as out:
             kf_record.pprint()
@@ -102,6 +117,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
 
     def test_pprint2(self) -> None:
         kf_record = space.KfRecord(num_points=5)
+        assert kf_record.time is not None
         kf_record.time[:] = np.arange(5)
         with capture_output() as out:
             kf_record.pprint(max_elements=0)

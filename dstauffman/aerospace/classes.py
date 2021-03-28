@@ -9,6 +9,7 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
+from typing import Any, FrozenSet, List, Optional, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, \
@@ -18,6 +19,9 @@ if HAVE_H5PY:
     import h5py
 if HAVE_NUMPY:
     import numpy as np
+if TYPE_CHECKING:
+    from numpy.typing import DTypeLike
+    _Sets = Union[set, FrozenSet]
 
 #%% KfInnov
 class KfInnov(Frozen):
@@ -57,11 +61,15 @@ class KfInnov(Frozen):
     >>> innov = KfInnov()
 
     """
-    def __init__(self, *, name='', units='', num_innovs=0, num_axes=0, time_dtype=float):
+    def __init__(self, *, name: str = '', units: str = '', num_innovs: int = 0, num_axes: int = 0, time_dtype: DTypeLike = float):
         r"""Initializes a new KfInnov instance."""
         self.name  = name
-        self.chan  = ['' for i in range(num_axes)] if num_axes > 0 else None
+        self.chan: Optional[List[str]] = ['' for i in range(num_axes)] if num_axes > 0 else None
         self.units = units
+        self.time: Optional[np.ndarray]
+        self.innov: Optional[np.ndarray]
+        self.norm: Optional[np.ndarray]
+        self.status: Optional[np.ndarray]
         if num_innovs > 0:
             self.time   = np.empty(num_innovs, dtype=time_dtype)
             innov_shape = (num_axes, num_innovs) if num_axes > 1 else (num_innovs, )
@@ -73,8 +81,8 @@ class KfInnov(Frozen):
             self.innov  = None
             self.norm   = None
             self.status = None
-        self.fploc = None
-        self.snr   = None
+        self.fploc: Optional[np.ndarray] = None
+        self.snr: Optional[np.ndarray]   = None
 
 #%% Kf
 class Kf(Frozen):
@@ -108,11 +116,19 @@ class Kf(Frozen):
     >>> kf = Kf()
 
     """
-    def __init__(self, *, name='', num_points=0, num_states=0, time_dtype=float, active_states=None, \
-                 innov_class=None, use_pv=True, **kwargs):
+    def __init__(self, *, name: str = '', num_points: int = 0, num_states: int = 0, time_dtype: DTypeLike = float, \
+                 active_states: np.ndarray = None, innov_class: Any = None, use_pv: bool = True, **kwargs):
         r"""Initializes a new Kf instance."""
         self.name = name
-        self.chan = ['' for i in range(num_states)] if num_states > 0 else None
+        self.chan: Optional[List[str]] = ['' for i in range(num_states)] if num_states > 0 else None
+        self.time: Optional[np.ndarray]
+        self.att: Optional[np.ndarray]
+        self.pos: Optional[np.ndarray]
+        self.vel: Optional[np.ndarray]
+        self.active: Optional[np.ndarray]
+        self.state: Optional[np.ndarray]
+        self.istate: Optional[np.ndarray]
+        self.covar: Optional[np.ndarray]
         if num_points > 0:
             num_active   = num_states if active_states is None else len(active_states)
             state_shape  = (num_active, num_points) if num_active > 1 else (num_points, )
@@ -135,6 +151,7 @@ class Kf(Frozen):
             self.state   = None
             self.istate  = None
             self.covar   = None
+        self.innov: Any
         if innov_class is None:
             self.innov = KfInnov(time_dtype=time_dtype, **kwargs)
             self._subclasses = frozenset({'innov', })
@@ -146,12 +163,13 @@ class Kf(Frozen):
                 setattr(self, name, func(time_dtype=time_dtype, **kwargs))
             self._subclasses = frozenset(innov_class.keys())
 
-    def save(self, filename=''):
+    def save(self, filename: str = '') -> None:
         r"""Save the object to disk as an HDF5 file."""
         # exit if no filename is given
         if not filename:
             return
         # Save data
+        value: Any
         with h5py.File(filename, 'w') as file:
             grp = file.create_group('self')
             for key in vars(self):
@@ -183,7 +201,7 @@ class Kf(Frozen):
                         grp.create_dataset(key, data=value)
 
     @classmethod
-    def load(cls, filename='', subclasses=frozenset({'innov'})):
+    def load(cls, filename: str = '', subclasses: _Sets = frozenset({'innov'})) -> Kf:
         r"""Load the object from disk."""
         if not filename:
             raise ValueError('No file specified to load.')
@@ -240,7 +258,15 @@ class KfRecord(Frozen):
     >>> kf_record = KfRecord()
 
     """
-    def __init__(self, num_points=0, num_states=0, num_active=0, num_axes=0, time_dtype=float):
+    def __init__(self, num_points: int = 0, num_states: int = 0, num_active: int = 0, num_axes: int = 0, \
+            time_dtype: DTypeLike = float):
+        self.time: Optional[np.ndarray]
+        self.P: Optional[np.ndarray]
+        self.stm: Optional[np.ndarray]
+        self.H: Optional[np.ndarray]
+        self.Pz: Optional[np.ndarray]
+        self.K: Optional[np.ndarray]
+        self.z: Optional[np.ndarray]
         if num_points > 0:
             self.time = np.empty(num_points, dtype=time_dtype)
             self.P    = np.empty((num_active, num_active, num_points), order='F')
@@ -258,17 +284,17 @@ class KfRecord(Frozen):
             self.K    = None
             self.z    = None
 
-    def keep_subset(self, ix_keep) -> None:
+    def keep_subset(self, ix_keep: np.ndarray) -> None:
         r"""Returns only the specified indices (likely only accepted measurements)."""
-        self.time = self.time[ix_keep].copy()
-        self.P    = self.P[:, :, ix_keep].copy()
-        self.stm  = self.stm[:, :, ix_keep].copy()
-        self.H    = self.H[:, :, ix_keep].copy()
-        self.Pz   = self.Pz[:, :, ix_keep].copy()
-        self.K    = self.K[:, :, ix_keep].copy()
-        self.z    = self.z[:, ix_keep].copy()
+        self.time = self.time[ix_keep].copy() if self.time is not None else None
+        self.P    = self.P[:, :, ix_keep].copy() if self.P is not None else None
+        self.stm  = self.stm[:, :, ix_keep].copy() if self.stm is not None else None
+        self.H    = self.H[:, :, ix_keep].copy() if self.H is not None else None
+        self.Pz   = self.Pz[:, :, ix_keep].copy() if self.Pz is not None else None
+        self.K    = self.K[:, :, ix_keep].copy() if self.K  is not None else None
+        self.z    = self.z[:, ix_keep].copy() if self.z is not None else None
 
-    def save(self, filename: str = '', use_hdf5: bool = True):
+    def save(self, filename: str = '', use_hdf5: bool = True) -> None:
         r"""
         Save the object to disk.
 
@@ -280,13 +306,13 @@ class KfRecord(Frozen):
             Write as *.hdf5 instead of *.pkl
 
         """
-        convert_times = hasattr(self.time, 'dtype') and np.issubdtype(self.time.dtype, np.datetime64)
+        convert_times = hasattr(self.time, 'dtype') and np.issubdtype(self.time.dtype, np.datetime64)  # type: ignore[union-attr]
         if convert_times:
-            orig_type = self.time.dtype
-            self.time.dtype = np.int64
+            orig_type = self.time.dtype  # type: ignore[union-attr]
+            self.time.dtype = np.int64  # type: ignore[misc, union-attr]
         save_method(self, filename=filename, use_hdf5=use_hdf5)
         if convert_times:
-            self.time.dtype = orig_type
+            self.time.dtype = orig_type  # type: ignore[misc, union-attr]
 
     @classmethod
     def load(cls, filename: str = '', use_hdf5: bool = True) -> KfRecord:
@@ -302,8 +328,8 @@ class KfRecord(Frozen):
 
         """
         out: KfRecord = load_method(cls, filename=filename, use_hdf5=use_hdf5)
-        if hasattr(out.time, 'dtype') and out.time.dtype == np.int64:
-            out.time.dtype = NP_DATETIME_FORM
+        if hasattr(out.time, 'dtype') and out.time.dtype == np.int64:  # type: ignore[union-attr]
+            out.time.dtype = NP_DATETIME_FORM  # type: ignore[misc, union-attr]
         return out
 
 #%% Unit Test

@@ -98,7 +98,6 @@ class _FortranSource(Frozen):
 #%% Functions - _parse_source
 @overload
 def _parse_source(filename: str, assert_single: Literal[True] = ...) -> _FortranSource: ...
-
 @overload
 def _parse_source(filename: str, assert_single: Literal[False]) -> List[_FortranSource]: ...
 

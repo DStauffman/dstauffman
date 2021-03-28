@@ -196,18 +196,96 @@ class Test_aerospace_vec_angle(unittest.TestCase):
 class Test_aerospace_cart2sph(unittest.TestCase):
     r"""
     Tests the aerospace.cart2sph function with the following cases:
-        TBD
+        Single inputs
+        Vector inputs
+        Full loop
     """
-    pass  # TODO: write this
+    def setUp(self):
+        self.xyz1 = (1., 0., 0.)
+        self.aer1 = (0., 0., 1.)
+        self.xyz2 = (0., -1., 0.)
+        self.aer2 = (-np.pi/2, 0, 1)
+
+    def test_single(self) -> None:
+        (az, el, rad) = space.cart2sph(*self.xyz1)
+        self.assertAlmostEqual(az, self.aer1[0], 14)
+        self.assertAlmostEqual(el, self.aer1[1], 14)
+        self.assertAlmostEqual(rad, self.aer1[2], 14)
+        (az, el, rad) = space.cart2sph(*self.xyz2)
+        self.assertAlmostEqual(az, self.aer2[0], 14)
+        self.assertAlmostEqual(el, self.aer2[1], 14)
+        self.assertAlmostEqual(rad, self.aer2[2], 14)
+
+    def test_vectors(self) -> None:
+        x = np.array([self.xyz1[0], self.xyz2[0]])
+        y = np.array([self.xyz1[1], self.xyz2[1]])
+        z = np.array([self.xyz1[2], self.xyz2[2]])
+        exp_az = np.array([self.aer1[0], self.aer2[0]])
+        exp_el = np.array([self.aer1[1], self.aer2[1]])
+        exp_rad = np.array([self.aer1[2], self.aer2[2]])
+        (az, el, rad) = space.cart2sph(x, y, z)
+        np.testing.assert_array_almost_equal(az, exp_az, 14)
+        np.testing.assert_array_almost_equal(el, exp_el, 14)
+        np.testing.assert_array_almost_equal(rad, exp_rad, 14)
+
+    def test_loop(self) -> None:
+        num = 10
+        x = 3 * np.random.rand(num)
+        y = -4 * np.random.rand(num)
+        z = 10 * np.random.rand(num)
+        (az, el, rad) = space.cart2sph(x, y, z)
+        (x2, y2, z2) = space.sph2cart(az, el, rad)
+        np.testing.assert_array_almost_equal(x, x2, 14)
+        np.testing.assert_array_almost_equal(y, y2, 14)
+        np.testing.assert_array_almost_equal(z, z2, 14)
 
 #%% aerospace.sph2cart
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_sph2cart(unittest.TestCase):
     r"""
     Tests the aerospace.sph2cart function with the following cases:
-        TBD
+        Single inputs
+        Vector inputs
+        Full loop
     """
-    pass  # TODO: write this
+    def setUp(self):
+        self.xyz1 = (1., 0., 0.)
+        self.aer1 = (0., 0., 1.)
+        self.xyz2 = (0., -1., 0.)
+        self.aer2 = (-np.pi/2, 0, 1)
+
+    def test_single(self) -> None:
+        (x, y, z) = space.sph2cart(*self.aer1)
+        self.assertAlmostEqual(x, self.xyz1[0], 14)
+        self.assertAlmostEqual(y, self.xyz1[1], 14)
+        self.assertAlmostEqual(z, self.xyz1[2], 14)
+        (x, y, z) = space.sph2cart(*self.aer2)
+        self.assertAlmostEqual(x, self.xyz2[0], 14)
+        self.assertAlmostEqual(y, self.xyz2[1], 14)
+        self.assertAlmostEqual(z, self.xyz2[2], 14)
+
+    def test_vectors(self) -> None:
+        az = np.array([self.aer1[0], self.aer2[0]])
+        el = np.array([self.aer1[1], self.aer2[1]])
+        rad = np.array([self.aer1[2], self.aer2[2]])
+        exp_x = np.array([self.xyz1[0], self.xyz2[0]])
+        exp_y = np.array([self.xyz1[1], self.xyz2[1]])
+        exp_z = np.array([self.xyz1[2], self.xyz2[2]])
+        (x, y, z) = space.sph2cart(az, el, rad)
+        np.testing.assert_array_almost_equal(x, exp_x, 14)
+        np.testing.assert_array_almost_equal(y, exp_y, 14)
+        np.testing.assert_array_almost_equal(z, exp_z, 14)
+
+    def test_loop(self) -> None:
+        num = 10
+        az = 2 * np.pi * np.random.rand(num) - np.pi
+        el = np.pi / 2 * np.random.rand(num)
+        rad = 10 * np.random.rand(num)
+        (x, y, z) = space.sph2cart(az, el, rad)
+        (az2, el2, rad2) = space.cart2sph(x, y, z)
+        np.testing.assert_array_almost_equal(az, az2, 14)
+        np.testing.assert_array_almost_equal(el, el2, 14)
+        np.testing.assert_array_almost_equal(rad, rad2, 14)
 
 #%% aerospace.rv2dcm
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')

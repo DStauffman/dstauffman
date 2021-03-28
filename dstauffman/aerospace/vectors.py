@@ -7,7 +7,9 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import doctest
+from typing import List, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY, unit
@@ -16,9 +18,14 @@ from dstauffman.numba import ncjit
 if HAVE_NUMPY:
     import numpy as np
 
+#%% Constants
+if TYPE_CHECKING:
+    _Numbers = Union[float, np.ndarray]
+    _Lists = Union[List[np.ndarray], Tuple[np.ndarray, ...], np.ndarray]
+
 #%% Functions - rot
 @ncjit
-def rot(axis, angle):
+def rot(axis: int, angle: float) -> np.ndarray:
     r"""
     Direction cosine matrix for rotation about a single axis.
 
@@ -76,7 +83,7 @@ def rot(axis, angle):
 
 #%% Functions - drot
 @ncjit
-def drot(axis, angle):
+def drot(axis: int, angle: float) -> np.ndarray:
     r"""
     Derivative of transformation matrix for rotation about a single axis.
 
@@ -133,7 +140,7 @@ def drot(axis, angle):
 
 #%% Functions - vec_cross
 @ncjit
-def vec_cross(vec):
+def vec_cross(vec: np.ndarray) -> np.ndarray:
     r"""
     Returns the equivalent 3x3 matrix that would perform a cross product when multiplied.
 
@@ -166,7 +173,7 @@ def vec_cross(vec):
     return np.array([[0, -vec[2], vec[1]], [vec[2], 0, -vec[0]], [-vec[1], vec[0], 0]])
 
 #%% Functions - vec_angle
-def vec_angle(vec1, vec2, use_cross=True, normalized=True):
+def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bool = True):
     r"""
     Calculates the angle between two unit vectors.
 
@@ -215,6 +222,8 @@ def vec_angle(vec1, vec2, use_cross=True, normalized=True):
     if isinstance(vec2, (list, tuple)):
         vec2 = np.vstack(vec2).T
     # normalize if desired, otherwise assume it already is
+    assert isinstance(vec1, np.ndarray)
+    assert isinstance(vec2, np.ndarray)
     if not normalized:
         vec1 = unit(vec1)
         vec2 = unit(vec2)
@@ -232,8 +241,12 @@ def vec_angle(vec1, vec2, use_cross=True, normalized=True):
     return np.where(dot_result > np.pi/2, np.pi - cross_result, cross_result)
 
 #%% Functions - cart2sph
+@overload
+def cart2sph(x: float, y: float, z: float) -> Tuple[float, float, float]: ...
+@overload
+def cart2sph(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]: ...
 @ncjit
-def cart2sph(x, y, z):
+def cart2sph(x: _Numbers, y: _Numbers, z: _Numbers) -> Tuple[_Numbers, _Numbers, _Numbers]:
     r"""
     Converts cartesian X, Y, Z components to spherical Az, El, Radius.
 
@@ -272,8 +285,12 @@ def cart2sph(x, y, z):
     return (az, el, rad)
 
 #%% Functions - sph2cart
+@overload
+def sph2cart(az: float, el: float, rad: float) -> Tuple[float, float, float]: ...
+@overload
+def sph2cart(az: np.ndarray, el: np.ndarray, rad: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]: ...
 @ncjit
-def sph2cart(az, el, rad):
+def sph2cart(az: _Numbers, el: _Numbers, rad: _Numbers) -> Tuple[_Numbers, _Numbers, _Numbers]:
     r"""
     Converts spherical Az, El and Radius to cartesian X, Y, Z components.
 
@@ -309,7 +326,7 @@ def sph2cart(az, el, rad):
     >>> (x, y, z) = sph2cart(az, el, rad)
 
     """
-    rcos_el = np.cos(el)
+    rcos_el = rad * np.cos(el)
     x = rcos_el * np.cos(az)
     y = rcos_el * np.sin(az)
     z = rad * np.sin(el)
@@ -317,7 +334,7 @@ def sph2cart(az, el, rad):
 
 #%% Funcctions - rv2dcm
 @ncjit
-def rv2dcm(vec):
+def rv2dcm(vec: np.ndarray) -> np.ndarray:
     r"""
     Convert a rotation vector into a direction cosine matrix.
 
@@ -350,7 +367,7 @@ def rv2dcm(vec):
      [ 0. -1.  0.]]
 
     """
-    dcm = np.eye(3)
+    dcm: np.ndarray = np.eye(3)
     # Use np.dot instead of np.inner here as they are the same for 1D arrays, and np.dot compiles with numba
     mag = np.sqrt(np.dot(vec, vec))
     if mag != 0:
