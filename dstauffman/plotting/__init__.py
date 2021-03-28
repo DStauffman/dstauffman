@@ -13,8 +13,9 @@ from .aerospace import make_quaternion_plot, plot_attitude, plot_los, plot_posit
                            plot_velocity, plot_innovations, plot_innov_fplocs, plot_covariance, \
                            plot_states
 from .batch     import plot_bpe_convergence, plot_bpe_results
-from .generic   import make_time_plot, make_error_bar_plot, make_difference_plot, \
-                           make_categories_plot, make_connected_sets
+from .generic   import make_generic_plot, make_time_plot, make_error_bar_plot, \
+                           make_difference_plot, make_categories_plot, make_connected_sets, \
+                           make_bar_plot
 from .health    import TruthPlotter, plot_health_time_history, plot_health_monte_carlo, \
                            plot_icer, plot_population_pyramid
 from .plotting  import Opts, suppress_plots, unsuppress_plots, plot_time_history, \

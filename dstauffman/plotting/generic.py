@@ -15,7 +15,7 @@ from dstauffman import DEGREE_SIGN, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, i
     is_datetime, LogLevel, RAD2DEG, rms
 
 from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits, get_rms_indices, \
-    plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
+    ignore_plot_data, plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
 
 if HAVE_MPL:
     from matplotlib.collections import LineCollection
@@ -39,11 +39,9 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         mins=None, maxs=None, name_one='', name_two='', elements=None, units='', time_units='sec', \
         start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         single_lines=False, make_subplots=True, colormap=DEFAULT_COLORMAP, use_mean=False, \
-        plot_zero=False, show_rms=True, legend_loc='best', second_units=None, ylabel=None, \
-        tolerance=0, return_err=False, data_as_rows=True, extra_plotter=None, use_zoh=False, \
-        label_vert_lines=True):
-    assert plot_type in {'time', 'bar', 'errorbar', 'cats', 'categories', 'quat', 'quaternion'}, \
-        f'Unexpected plot type: {plot_type}.'
+        plot_zero=False, show_rms=True, ignore_empties=False, legend_loc='best', second_units=None, \
+        ylabel=None, tolerance=0, return_err=False, data_as_rows=True, extra_plotter=None, \
+        use_zoh=False, label_vert_lines=True):
     r"""
     Generic plotting function called by all the other low level plots.
 
@@ -51,14 +49,24 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
 
     Parameters
     ----------
+    plot_type : str
+        The time of plot to create, from {'time', 'bar', 'errorbar', 'cats', 'categories', 'quat', 'quaternion'}
     description : str
-        name of the data being plotted, used as title, must be given
-    time : (A, ) array_like
-        time history [sec] or datetime64
-    data : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
-        vector history
-    name : str, optional
-        name of data
+        name of the data being plotted, used as title
+    time_one : (A, ) array_like
+        time history for channel one, [sec] or datetime64
+    data_one : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
+        vector history for channel one
+    time_two : (A, ) array_like
+        time history for channel two, [sec] or datetime64
+    data_two : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
+        vector history for channel two
+    mins : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
+        vector history of minimums
+    maxs : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
+        vector history of maximums
+    name_one : str, optional
+        name of data one
     elements : list
         name of each element to plot within the vector
     units : list
@@ -77,6 +85,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         higher time to limit the display of the plot
     single_lines : bool, optional
         flag meaning to plot subplots by channel instead of together
+    make_subplots : bool, optional
+        flag to use subplots for differences
     colormap : list or colormap
         colors to use on the plot
     use_mean : bool, optional
@@ -85,12 +95,18 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         whether to force zero to always be plotted on the Y axis
     show_rms : bool, optional
         whether to show the RMS calculation in the legend
+    ignore_empties : bool, optional, default is False
+        Removes any entries from the plot and legend that contain only zeros or only NaNs
     legend_loc : str, optional
         location to put the legend, default is 'best', use 'none' to suppress legend
     second_units : str or tuple of (str, float), optional
         Name and conversion factor to use for scaling data to a second Y axis and in legend
-    ylabel : str, optional
+    ylabel : str or List[str], optional
         Labels to put on the Y axes, potentially by element
+    tolerance : float, optional
+        Tolerance for what is considered the same point in time for difference plots [sec] or [datetime64]
+    return_err : bool, optional, default is False
+        Whether to return the difference errors
     data_as_rows : bool, optional, default is True
         Whether the data has each channel as a row vector when 2D, vs a column vector
     extra_plotter : callable, optional
@@ -116,9 +132,9 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     >>> import numpy as np
     >>> plot_type        = 'time'
     >>> description      = 'Values vs Time'
-    >>> time             = np.arange(-10., 10.1, 0.1)
-    >>> data             = time + np.cos(time)
-    >>> name             = ''
+    >>> time_one         = np.arange(-10., 10.1, 0.1)
+    >>> data_one         = time_one + np.cos(time_one)
+    >>> name_one         = ''
     >>> elements         = None
     >>> units            = ''
     >>> time_units       = 'sec'
@@ -128,74 +144,39 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     >>> disp_xmin        = -np.inf
     >>> disp_xmax        = np.inf
     >>> single_lines     = False
+    >>> make_subplots    = False
     >>> colormap         = 'Paired'
     >>> use_mean         = False
     >>> plot_zero        = False
     >>> show_rms         = True
+    >>> ignore_empties   = False
     >>> legend_loc       = 'best'
     >>> second_units     = None
     >>> ylabel           = None
+    >>> tolerance        = 0
+    >>> return_err       = False
     >>> data_as_rows     = True
     >>> extra_plotter    = None
     >>> use_zoh          = False
     >>> label_vert_lines = True
-    >>> fig = make_generic_plot(description, time, data, name=name, elements=elements, units=units, \
-    ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
-    ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
-    ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-    ...     legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
-    ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-    ...     label_vert_lines=label_vert_lines)
+    >>> fig = make_generic_plot(plot_type, description, time_one, data_one, name_one=name_one, \
+    ...     elements=elements, units=units, time_units=time_units, start_date=start_date, \
+    ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+    ...     single_lines=single_lines, make_subplots=make_subplots, colormap=colormap, \
+    ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, ignore_empties=ignore_empties, \
+    ...     legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, tolerance=tolerance, \
+    ...     return_err=return_err, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
+    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
     Close the plot
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
 
-    Notes
-    -----
-    #.  Written by David C. Stauffer in May 2020.
-
-    Examples
-    --------
-    >>> from dstauffman.plotting import make_time_plot
-    >>> import numpy as np
-    >>> description      = 'Values vs Time'
-    >>> time             = np.arange(-10., 10.1, 0.1)
-    >>> data             = time + np.cos(time)
-    >>> name             = ''
-    >>> elements         = None
-    >>> units            = ''
-    >>> time_units       = 'sec'
-    >>> start_date       = ''
-    >>> rms_xmin         = -np.inf
-    >>> rms_xmax         = np.inf
-    >>> disp_xmin        = -np.inf
-    >>> disp_xmax        = np.inf
-    >>> single_lines     = False
-    >>> colormap         = 'Paired'
-    >>> use_mean         = False
-    >>> plot_zero        = False
-    >>> show_rms         = True
-    >>> legend_loc       = 'best'
-    >>> second_units     = None
-    >>> ylabel           = None
-    >>> data_as_rows     = True
-    >>> extra_plotter    = None
-    >>> use_zoh          = False
-    >>> label_vert_lines = True
-    >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
-    ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
-    ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
-    ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-    ...     legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
-    ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-    ...     label_vert_lines=label_vert_lines)
-
-    >>> import matplotlib.pyplot as plt
-    >>> plt.close(fig)
-
     """
     # some basic flags and checks
+    assert plot_type in {'time', 'bar', 'errorbar', 'cats', 'categories', 'quat', 'quaternion'}, \
+        f'Unexpected plot type: {plot_type}.'
+    assert isinstance(description, str), 'The description should be a string, check your argument order.'
     time_is_list = isinstance(time_one, list) or isinstance(time_one, tuple)
     data_is_list = isinstance(data_one, list) or isinstance(data_one, tuple)
     if not time_is_list:
@@ -203,6 +184,11 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     if not data_is_list:
         data_one = np.atleast_2d(data_one)
         assert data_one.ndim < 3, 'Data must be 0d, 1d or 2d.'
+
+    # check for valid data
+    # TODO: implement this
+    if ignore_plot_data(data_one, ignore_empties) and ignore_plot_data(data_two, ignore_empties):
+        raise NotImplementedError('Not yet implemented')
 
     # calculate sizes
     temp1 = len(time_one) if time_is_list else 1
@@ -214,8 +200,11 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         temp2 = data_one.shape[0]
     else:
         temp2 = data_one.shape[1]
+
+    # optional inputs
     if elements is None:
         elements = [f'Channel {i+1}' for i in range(temp2)]
+    # find number of elements being plotted
     num_channels = len(elements)
     assert temp2 == 0 or temp2 == num_channels, "The data doesn't match the number of elements."
     assert temp1 == 1 or temp2 == 0 or temp1 == temp2, "The time doesn't match the size of the data."
@@ -251,6 +240,24 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             data_func = func_lamb(data_one[ix['one'], :], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
     # unit conversion value
     (new_units, unit_conv) = get_unit_conversion(second_units, units)
+    if plot_type == 'errorbar':
+        # error calculation
+        # TODO: handle data_is_list and rows cases
+        err_neg = data_one - mins
+        err_pos = maxs - data_one
+    elif plot_type == 'bar':
+        # TODO: handle data_is_list and rows cases
+        if data_is_list:
+            bottoms = [np.cumsum(data_one[j]) for j in range(num_channels)]
+        elif data_as_rows:
+            bottoms = np.concatenate((np.zeros((1, len(time_one))), np.cumsum(data_one, axis=0)), axis=0)
+        else:
+            bottoms = np.concatenate((np.zeros((len(time_one), 1)), np.cumsum(data_one, axis=1)), axis=1)
+    # get the number of axes to make
+    if plot_type == 'bar':
+        num_axes = 1
+    else:
+        num_axes = num_channels if single_lines else 1
 
     #% Create plots
     # create figures
@@ -258,19 +265,18 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     fig.canvas.set_window_title(description)
 
     # create axes
-    if single_lines:
-        ax = []
-        ax_prim = None
-        for i in range(num_channels):
-            temp_axes = fig.add_subplot(num_channels, 1, i+1, sharex=ax_prim)
-            if ax_prim is None:
-                ax_prim = temp_axes
-            ax.append(temp_axes)
-    else:
-        ax = [fig.add_subplot(1, 1, 1)]
-
+    ax = []
+    ax_prim = None
+    for i in range(num_axes):
+        temp_axes = fig.add_subplot(num_axes, 1, i+1, sharex=ax_prim)
+        if ax_prim is None:
+            ax_prim = temp_axes
+        ax.append(temp_axes)
+    assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
     # plot data
     for (i, this_axes) in enumerate(ax):
+        if plot_type == 'bar':
+            loop_counter = reversed(range(num_channels))
         if single_lines:
             loop_counter = [i]
         else:
@@ -286,19 +292,37 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                     this_label += f' ({func_name}: {value})'
             this_time = time_one[j] if time_is_list else time_one
             this_data = data_one[j] if data_is_list else data_one[j, :] if data_as_rows else data_one[:, j]
-            if use_zoh:
-                this_axes.step(this_time, this_data, '.-', where='post', markersize=4, label=this_label, \
-                    color=cm.get_color(j), zorder=9)
+            this_zorder = 3 if plot_type == 'errorbar' else 9
+            if plot_type == 'bar':
+                this_bottom1 = bottoms[j] if data_is_list else bottoms[j, :] if data_as_rows else bottoms[:, j]
+                this_bottom2 = bottoms[j+1] if data_is_list else bottoms[j+1, :] if data_as_rows else bottoms[:, j+1]
+                if not ignore_plot_data(this_data, ignore_empties):
+                    # Note: The performance of ax.bar is really slow with large numbers of bars (>20), so
+                    # fill_between is a better alternative
+                    this_axes.fill_between(this_time, this_bottom1, this_bottom2, step='mid', \
+                        label=this_label, color=cm.get_color(j), edgecolor='none')
             else:
-                this_axes.plot(this_time, this_data, '.-', markersize=4, label=this_label, \
-                    color=cm.get_color(j), zorder=9)
+                if use_zoh:
+                    this_axes.step(this_time, this_data, '.-', where='post', markersize=4, label=this_label, \
+                        color=cm.get_color(j), zorder=this_zorder)
+                else:
+                    this_axes.plot(this_time, this_data, '.-', markersize=4, label=this_label, \
+                        color=cm.get_color(j), zorder=this_zorder)
+            if plot_type == 'errorbar':
+                # plot error bars
+                this_axes.errorbar(this_time, this_data, yerr=np.vstack((err_neg[j, :], err_pos[j, :])), \
+                    color='None', ecolor=cm.get_color(j), zorder=5, capsize=2)
 
         # set X display limits
         if i == 0:
             disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
             xlim = this_axes.get_xlim()
         this_axes.set_xlim(xlim)
-        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
+        if plot_type == 'bar':
+            # TODO: generalize this
+            this_axes.set_ylim(0, 100)
+        else:
+            zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         # set Y display limits
         if plot_zero:
             show_zero_ylim(this_axes)
@@ -321,6 +345,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         # plot RMS lines
         if show_rms:
             plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
+
     # plot any extra information through a generic callable
     if extra_plotter is not None:
         extra_plotter(fig=fig, ax=ax)
@@ -335,12 +360,17 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
 def make_time_plot(description, time, data, *, name='', elements=None, units='', time_units='sec', \
         start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
-        show_rms=True, legend_loc='best', second_units=None, ylabel=None, data_as_rows=True, \
-        extra_plotter=None, use_zoh=False, label_vert_lines=True):
+        show_rms=True, ignore_empties=False, legend_loc='best', second_units=None, ylabel=None, \
+        data_as_rows=True, extra_plotter=None, use_zoh=False, label_vert_lines=True):
     r"""
     Generic data versus time plotting routine.
 
     See make_generic_plot for input details.
+
+    Returns
+    -------
+    fig : class matplotlib.Figure
+        figure handle
 
     Examples
     --------
@@ -349,7 +379,35 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     >>> description      = 'Values vs Time'
     >>> time             = np.arange(-10., 10.1, 0.1)
     >>> data             = time + np.cos(time)
-    >>> fig = make_time_plot(description, time, data)
+    >>> name             = ''
+    >>> elements         = None
+    >>> units            = ''
+    >>> time_units       = 'sec'
+    >>> start_date       = ''
+    >>> rms_xmin         = -np.inf
+    >>> rms_xmax         = np.inf
+    >>> disp_xmin        = -np.inf
+    >>> disp_xmax        = np.inf
+    >>> single_lines     = False
+    >>> colormap         = 'Paired'
+    >>> use_mean         = False
+    >>> plot_zero        = False
+    >>> show_rms         = True
+    >>> ignore_empties   = False
+    >>> legend_loc       = 'best'
+    >>> second_units     = None
+    >>> ylabel           = None
+    >>> data_as_rows     = True
+    >>> extra_plotter    = None
+    >>> use_zoh          = False
+    >>> label_vert_lines = True
+    >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
+    ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
+    ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
+    ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
+    ...     ignore_empties=ignore_empties, legend_loc=legend_loc, second_units=second_units, \
+    ...     ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
+    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
@@ -372,71 +430,23 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
     r"""
     Generic plotting routine to make error bars.
 
-    Parameters
-    ----------
-    description : str
-        name of the data being plotted, used as title
-    time : (N, ) array_like
-        time history [sec]
-    data : (A, N) ndarray
-        data history
-    mins : (A, N) ndarray
-        data minimum bound history
-    maxs : (A, N) ndarray
-        data maximum bound history
-    elements : list
-        name of each element to plot within the vector
-    units : list
-        name of units for plot
-    time_units : str, optional
-        time units, defaults to 'sec'
-    start_date : str, optional
-        date of t(0), may be an empty string
-    rms_xmin : float, optional
-        time of first point of RMS calculation
-    rms_xmax : float, optional
-        time of last point of RMS calculation
-    disp_xmin : float, optional
-        lower time to limit the display of the plot
-    disp_xmax : float, optional
-        higher time to limit the display of the plot
-    single_lines : bool, optional
-        flag meaning to plot subplots by channel instead of together
-    colormap : list or colormap
-        colors to use on the plot
-    use_mean : bool, optional
-        whether to use mean instead of RMS in legend calculations
-    plot_zero : bool, optional
-        whether to force zero to always be plotted on the Y axis
-    show_rms : bool, optional
-        whether to show the RMS calculation in the legend
-    legend_loc : str, optional
-        location to put the legend, default is 'best'
-    second_units : str or tuple of (str, float), optional
-        Name and conversion factor to use for scaling data to a second Y axis and in legend
-    ylabel : str, optional
-        Labels to put on the Y axes, potentially by element
-    data_as_rows : bool, optional, default is True
-        Whether the data has each channel as a row vector when 2D, vs a column vector
-    label_vert_lines : bool, optional, default is True
-        Whether to label the RMS start/stop lines in the legend (if legend is shown)
+    See make_generic_plot for input details.
 
     Returns
     -------
     fig : class matplotlib.Figure
         figure handle
-    err : (A,N) ndarray
-        Differences
 
     See Also
     --------
-    TBD_wrapper
+    make_generic_plot
 
     Notes
     -----
     #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
     #.  Ported to Python by David C. Stauffer in March 2019.
     #.  Made fully functional by David C. Stauffer in April 2020.
+    #.  Wrapped to the generic do everything version by David C. Stauffer in March 2021
 
     Examples
     --------
@@ -481,124 +491,13 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
     >>> plt.close(fig)
 
     """
-    # data checks
-    assert description, 'You must give the plot a description.'
-
-    # convert rows/cols as necessary
-    data = np.atleast_2d(data)
-    if not data_as_rows:
-        # TODO: is this the best way or make branches lower?
-        data = data.T
-        mins = mins.T
-        maxs = maxs.T
-
-    # optional inputs
-    if elements is None:
-        elements = [f'Channel {i+1}' for i in range(data.shape[0])]
-    # find number of elements being differenced
-    num_channels = len(elements)
-
-    #% Calculations
-    # build RMS indices
-    ix = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
-    cm = ColorMap(colormap=colormap, num_colors=num_channels)
-    # calculate the rms (or mean) values
-    if show_rms:
-        if not use_mean:
-            func_name = 'RMS'
-            func_lamb = lambda x: rms(x, axis=1, ignore_nans=True)
-        else:
-            func_name = 'Mean'
-            func_lamb = lambda x: np.nanmean(x, axis=1)
-        data_func = func_lamb(data[:, ix['one']]) if np.any(ix['one']) else np.full(num_channels, np.nan)
-    # unit conversion value
-    (new_units, unit_conv) = get_unit_conversion(second_units, units)
-    # error calculation
-    err_neg = data - mins
-    err_pos = maxs - data
-    # get the number of axes to make
-    if single_lines:
-        num_axes = num_channels
-    else:
-        num_axes = 1
-
-    #% Create plots
-    # create figures
-    fig = plt.figure()
-    fig.canvas.set_window_title(description)
-    # create axes
-    ax = []
-    ax_prim = None
-    for i in range(num_axes):
-        temp_axes = fig.add_subplot(num_axes, 1, i+1, sharex=ax_prim)
-        if ax_prim is None:
-            ax_prim = temp_axes
-        ax.append(temp_axes)
-    assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
-    # plot data
-    for (i, this_axes) in enumerate(ax):
-        if single_lines:
-            loop_counter = [i]
-        else:
-            loop_counter = range(num_channels)
-        # standard plot
-        for j in loop_counter:
-            if show_rms:
-                value = _LEG_FORMAT.format(unit_conv*data_func[j])
-                this_label = '{} ({}: {} {})'.format(elements[j], func_name, value, new_units)
-            else:
-                this_label = elements[j]
-            if use_zoh:
-                this_axes.step(time, data[j, :], '.-', where='post', markersize=4, label=this_label, \
-                    color=cm.get_color(j), zorder=3)
-            else:
-                this_axes.plot(time, data[j, :], '.-', markersize=4, label=this_label, \
-                    color=cm.get_color(j), zorder=3)
-            # plot error bars
-            this_axes.errorbar(time, data[j, :], yerr=np.vstack((err_neg[j, :], err_pos[j, :])), \
-                color='None', ecolor=cm.get_color(j), zorder=5, capsize=2)
-
-        # set X display limits
-        if i == 0:
-            disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
-            xlim = this_axes.get_xlim()
-        this_axes.set_xlim(xlim)
-        channel = i if single_lines else None
-        zoom_ylim(this_axes, time, data.T, t_start=xlim[0], t_final=xlim[1], channel=channel)
-        # set Y display limits
-        if plot_zero:
-            show_zero_ylim(this_axes)
-        # format display of plot
-        this_axes.set_title(description)
-        if is_datetime(time):
-            this_axes.set_xlabel('Date')
-            assert time_units == 'datetime', 'Mismatch in the expected time units.'
-        else:
-            this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
-        if isinstance(ylabel, list):
-            this_ylabel = ylabel[i]
-        else:
-            this_ylabel = ylabel
-        if this_ylabel is None:
-            this_axes.set_ylabel(description + ' [' + units + ']')
-        else:
-            this_axes.set_ylabel(this_ylabel + ' [' + units + ']')
-        this_axes.grid(True)
-        # optionally add second Y axis
-        plot_second_units_wrapper(this_axes, (new_units, unit_conv))
-        # plot RMS lines
-        if show_rms:
-            plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
-
-    # plot any extra information through a generic callable
-    if extra_plotter is not None:
-        extra_plotter(fig=fig, ax=ax)
-    # add legend at the very end once everything has been done
-    if legend_loc.lower() != 'none':
-        for this_axes in ax:
-            this_axes.legend(loc=legend_loc)
-
-    return fig
+    return make_generic_plot('errorbar', description=description, time_one=time, data_one=data, \
+        mins=mins, maxs=maxs, elements=elements, units=units, time_units=time_units, \
+        start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
+        disp_xmax=disp_xmax, single_lines=single_lines, colormap=colormap, use_mean=use_mean, \
+        plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, \
+        ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
+        label_vert_lines=label_vert_lines)
 
 #%% Functions - make_difference_plot
 def make_difference_plot(description, time_one, time_two, data_one, data_two, *, \
@@ -1308,64 +1207,25 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
 
     return figs
 
+#%% Functions - make_bar_plot
 def make_bar_plot(description, time, data, *, name='', elements=None, units='', time_units='sec', \
         start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
-        single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
-        show_rms=True, legend_loc='best', second_units=None, ylabel=None, data_as_rows=True, \
-        extra_plotter=None, use_zoh=False, label_vert_lines=True):
+        single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=True, plot_zero=False, \
+        show_rms=True, ignore_empties=False, legend_loc='best', second_units=None, ylabel=None, \
+        data_as_rows=True, extra_plotter=None, use_zoh=False, label_vert_lines=True):
     r"""
     Plots a filled bar chart, using methods optimized for larger data sets.
 
-    Parameters
-    ----------
-    description : str
-        name of the data being plotted, used as title, must be given
-    time : (A, ) array_like
-        time history [sec] or datetime64
-    data : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
-        vector history
-    name : str, optional
-        name of data
-    elements : list
-        name of each element to plot within the vector
-    units : list
-        name of units for plot
-    time_units : str, optional
-        time units, defaults to 'sec', use 'datetime' for datetime histories
-    start_date : str, optional
-        date of t(0), may be an empty string
-    rms_xmin : float, optional
-        time of first point of RMS calculation
-    rms_xmax : float, optional
-        time of last point of RMS calculation
-    disp_xmin : float, optional
-        lower time to limit the display of the plot
-    disp_xmax : float, optional
-        higher time to limit the display of the plot
-    single_lines : bool, optional
-        flag meaning to plot subplots by channel instead of together
-    colormap : list or colormap
-        colors to use on the plot
-    use_mean : bool, optional
-        whether to use mean instead of RMS in legend calculations
-    plot_zero : bool, optional
-        whether to force zero to always be plotted on the Y axis
-    show_rms : bool, optional
-        whether to show the RMS calculation in the legend
-    legend_loc : str, optional
-        location to put the legend, default is 'best', use 'none' to suppress legend
-    second_units : str or tuple of (str, float), optional
-        Name and conversion factor to use for scaling data to a second Y axis and in legend
-    ylabel : str, optional
-        Labels to put on the Y axes, potentially by element
-    data_as_rows : bool, optional, default is True
-        Whether the data has each channel as a row vector when 2D, vs a column vector
-    extra_plotter : callable, optional
-        Extra callable plotting function to add more details to the plot
-    use_zoh : bool, optional, default is False
-        Whether to plot as a zero-order hold, instead of linear interpolation between data points
-    label_vert_lines : bool, optional, default is True
-        Whether to label the RMS start/stop lines in the legend (if legend is shown)
+    See make_generic_plot for input details.
+
+    Returns
+    -------
+    fig : class matplotlib.Figure
+        figure handle
+
+    See Also
+    --------
+    make_generic_plot
 
     Returns
     -------
@@ -1380,12 +1240,14 @@ def make_bar_plot(description, time, data, *, name='', elements=None, units='', 
     --------
     >>> from dstauffman.plotting import make_bar_plot
     >>> import numpy as np
-    >>> description      = 'Values vs Time'
-    >>> time             = np.arange(-10., 10.1, 0.1)
-    >>> data             = time + np.cos(time)
+    >>> description      = 'Test vs Time'
+    >>> time             = np.arange(0, 5, 1./12) + 2000
+    >>> data             = np.random.rand(5, len(time))
+    >>> mag              = np.sum(data, axis=0)
+    >>> data             = 100 * data / mag
     >>> name             = ''
     >>> elements         = None
-    >>> units            = ''
+    >>> units            = '%'
     >>> time_units       = 'sec'
     >>> start_date       = ''
     >>> rms_xmin         = -np.inf
@@ -1394,9 +1256,10 @@ def make_bar_plot(description, time, data, *, name='', elements=None, units='', 
     >>> disp_xmax        = np.inf
     >>> single_lines     = False
     >>> colormap         = 'Paired'
-    >>> use_mean         = False
+    >>> use_mean         = True
     >>> plot_zero        = False
     >>> show_rms         = True
+    >>> ignore_empties   = False
     >>> legend_loc       = 'best'
     >>> second_units     = None
     >>> ylabel           = None
@@ -1404,19 +1267,25 @@ def make_bar_plot(description, time, data, *, name='', elements=None, units='', 
     >>> extra_plotter    = None
     >>> use_zoh          = False
     >>> label_vert_lines = True
-    >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
+    >>> fig = make_bar_plot(description, time, data, name=name, elements=elements, units=units, \
     ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
     ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-    ...     legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
-    ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-    ...     label_vert_lines=label_vert_lines)
+    ...     ignore_empties=ignore_empties, legend_loc=legend_loc, second_units=second_units, \
+    ...     ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
+    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
 
     """
-    pass
+    return make_generic_plot('bar', description=description, time_one=time, data_one=data, \
+        name_one=name, elements=elements, units=units, time_units=time_units, start_date=start_date, \
+        rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+        single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
+        show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
+        data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
+        label_vert_lines=label_vert_lines)
 
 #%% make_connected_sets
 def make_connected_sets(description, points, innovs, *, color_by='none', center_origin=False, \

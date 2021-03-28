@@ -1243,7 +1243,7 @@ def execute_wrapper(command: Union[str, List[str]], folder: str, *, dry_run: boo
     >>> command = 'ls'
     >>> folder  = os.getcwd()
     >>> dry_run = True
-    >>> execute_wrapper(command, folder, dry_run=dry_run) # doctest: +ELLIPSIS
+    >>> rc = execute_wrapper(command, folder, dry_run=dry_run) # doctest: +ELLIPSIS
     Would execute "ls" in "..."
 
     """
