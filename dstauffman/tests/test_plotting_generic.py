@@ -349,7 +349,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     def test_none3(self, mock_logger):
         self.figs = plot.make_difference_plot('', None, None, None, None)
         self.assertEqual(mock_logger.log.call_count, 1)
-        mock_logger.log.assert_called_with(LogLevel.L5, 'No difference data was provided, so no plot was generated for "%s".', '')
+        mock_logger.log.assert_called_with(LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', 'diff', '')
 
     def tearDown(self) -> None:
         if self.figs:
