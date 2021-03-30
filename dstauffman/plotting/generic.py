@@ -38,12 +38,13 @@ logger = logging.getLogger(__name__)
 
 #%% Functions - make_generic_plot
 def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=None, data_two=None, \
-        mins=None, maxs=None, name_one='', name_two='', elements=None, units='', time_units='sec', \
-        start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
-        single_lines=False, make_subplots=True, colormap=DEFAULT_COLORMAP, use_mean=False, \
-        plot_zero=False, show_rms=True, ignore_empties=False, legend_loc='best', show_extra=True, \
-        plot_components=True, second_units=None, ylabel=None, tolerance=0, return_err=False, \
-        data_as_rows=True, extra_plotter=None, use_zoh=False, label_vert_lines=True):
+        mins=None, maxs=None, cats=None, cat_names=None, name_one='', name_two='', elements=None, \
+        units='', time_units='sec', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
+        disp_xmax=inf, single_lines=False, make_subplots=True, colormap=DEFAULT_COLORMAP, \
+        use_mean=False, plot_zero=False, show_rms=True, ignore_empties=False, legend_loc='best', \
+        show_extra=True, plot_components=True, second_units=None, leg_scale=None, ylabel=None, \
+        tolerance=0, return_err=False, data_as_rows=True, extra_plotter=None, use_zoh=False, \
+        label_vert_lines=True):
     r"""
     Generic plotting function called by all the other low level plots.
 
@@ -59,14 +60,18 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         time history for channel one, [sec] or datetime64
     data_one : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
         vector history for channel one
-    time_two : (A, ) array_like
+    time_two : (B, ) array_like
         time history for channel two, [sec] or datetime64
-    data_two : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
+    data_two : (B, ) or (N, B) ndarray, or (B, N) ndarray if data_as_rows is False
         vector history for channel two
     mins : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
         vector history of minimums
     maxs : (A, ) or (N, A) ndarray, or (A, N) ndarray if data_as_rows is False
         vector history of maximums
+    cats : (C, ) iterable
+        Category values
+    cat_names : (C, ) list of str
+        Category names
     name_one : str, optional
         name of data source one
     name_two : str, optional
@@ -161,6 +166,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     >>> legend_loc       = 'best'
     >>> show_extra       = True
     >>> second_units     = None
+    >>> leg_scale        = None
     >>> ylabel           = None
     >>> tolerance        = 0
     >>> return_err       = False
@@ -173,9 +179,10 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     single_lines=single_lines, make_subplots=make_subplots, colormap=colormap, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, ignore_empties=ignore_empties, \
-    ...     legend_loc=legend_loc, show_extra=show_extra, second_units=second_units, ylabel=ylabel, \
-    ...     tolerance=tolerance, return_err=return_err, data_as_rows=data_as_rows, \
-    ...     extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
+    ...     legend_loc=legend_loc, show_extra=show_extra, second_units=second_units, \
+    ...     leg_scale=leg_scale, ylabel=ylabel, tolerance=tolerance, return_err=return_err, \
+    ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
+    ...     label_vert_lines=label_vert_lines)
 
     Close the plot
     >>> import matplotlib.pyplot as plt
@@ -188,6 +195,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     assert isinstance(description, str), 'The description should be a string, check your argument order.'
     doing_diffs = plot_type in {'diff', 'differences', 'quat', 'quaternions'}
     is_quat_diff = plot_type in {'quat', 'quaternions'}
+    is_cat_plot = plot_type in {'cats', 'categorical'}
     fig_lists = plot_type in {'cats', 'categorical', 'diff', 'differences', 'quat', 'quaternions'}
     time_is_list = isinstance(time_one, list) or isinstance(time_one, tuple)
     if time_is_list:
@@ -195,6 +203,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             'Both times must be lists if one is.'
     data_is_list = isinstance(data_one, list) or isinstance(data_one, tuple)
     dat2_is_list = isinstance(data_two, list) or isinstance(data_two, tuple)
+    if is_cat_plot:
+        assert cats is not None, f'You must pass in the categories if doing a {plot_type} plot.'
     if doing_diffs:
         assert not data_is_list and not dat2_is_list, "Data can't be lists for diffs right now."  # TODO: remove this restriction
         have_data_one = data_one is not None and np.any(~np.isnan(data_one))
@@ -243,6 +253,19 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         plot_func = lambda ax, *args, **kwargs: ax.step(*args, **kwargs, where='post')
     else:
         plot_func = lambda ax, *args, **kwargs: ax.plot(*args, **kwargs)
+
+    # get the categories
+    if is_cat_plot:
+        unique_cats = set(cats)
+        num_cats = len(unique_cats)
+        if cat_names is None:
+            cat_names = {}
+        # Add any missing dictionary values
+        for x in unique_cats:
+            if x not in cat_names:
+                cat_names[x] = 'Status=' + str(x)
+        ordered_cats = [x for x in cat_names if x in unique_cats]
+        cat_keys = np.array(list(cat_names.keys()), dtype=int)
 
     # calculate sizes
     s0a = 0 if time_one is None else len(time_one) if time_is_list else 1
@@ -326,7 +349,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         else:
             func_name = 'Mean'
             func_lamb = lambda x, y: np.nanmean(x, axis=y)
-        if not doing_diffs:
+        if not doing_diffs and not is_cat_plot:
             if data_is_list:
                 data_func = [func_lamb(data_one[j][ix['one'][j]], None) for j in range(num_channels)]
             elif data_as_rows:
@@ -346,9 +369,27 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             err = {'one': data_func, 'two': data2_func, 'diff': nondeg_func}
             if is_quat_diff:
                 err['mag'] = mag_func
+        elif is_cat_plot:
+            data_func = {}
+            for cat in ordered_cats:
+                if data_is_list:
+                    this_ix = ix['one'][j] & (cats[j] == cat)
+                    data_func[cat] = [func_lamb(data_one[j][this_ix], None) for j in range(num_channels)]
+                else:
+                    this_ix = ix['one'] & (cats == cat)
+                    if np.any(this_ix):
+                        data_func[cat] = func_lamb(data_one[:, this_ix], 1) if data_as_rows else func_lamb(data_one[:, this_ix], 1)
+                    else:
+                        np.full(num_channels, np.nan)
+
 
     # unit conversion value
     (new_units, unit_conv) = get_unit_conversion(second_units, units)
+    if leg_scale is not None:
+        (leg_units, leg_conv) = get_unit_conversion(leg_scale, units)
+    else:
+        leg_units = new_units
+        leg_conv = unit_conv
     symbol_one = '.-'
     symbol_two = '.-'
     if plot_type == 'errorbar':
@@ -396,6 +437,19 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             else:
                 num_rows = 1
                 num_cols = 1
+    elif is_cat_plot:
+        if make_subplots:
+            num_figs = 1
+            num_rows = num_channels
+            num_cols = num_cats if single_lines else 1
+        else:
+            num_figs = num_channels * num_cats if single_lines else num_channels
+            num_cols = 1
+            num_rows = 1
+        if single_lines:
+            titles = [f'{description} {e} {cat_names[cat]}' for cat in ordered_cats for e in elements]
+        else:
+            titles = [f'{description} {e}' for e in elements]
     else:
         num_figs = 1
         num_rows = num_channels if single_lines else 1
@@ -416,22 +470,37 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             figs = [fig, f2]
         else:
             figs = [fig]
+    elif is_cat_plot:
+        figs = []
     # create axes
     ax = []
     ax_prim = None
     for i in range(num_figs):
+        if is_cat_plot:
+            if i > 0:
+                fig = plt.figure()
+            fig.canvas.set_window_title(titles[i])
         for j in range(num_cols):
             for k in range(num_rows):
                 temp_axes = fig.add_subplot(num_rows, num_cols, k*num_cols + j + 1, sharex=ax_prim)
                 if ax_prim is None:
                     ax_prim = temp_axes
                 ax.append(temp_axes)
+        if is_cat_plot:
+            figs.append(fig)
     assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
     # plot data
     for (i, this_axes) in enumerate(ax):
         is_diff_plot = doing_diffs and (i > num_rows-1 or (not single_lines and make_subplots and i == 1))
         if plot_type == 'bar':
             loop_counter = reversed(range(num_channels))
+        elif is_cat_plot:
+            if single_lines:
+                ix_data = i % num_channels
+                ix_cat  = [i // num_channels]
+            else:
+                ix_data = i
+                ix_cat  = list(range(num_cats))
         elif single_lines:
             if is_diff_plot:
                 if is_quat_diff:
@@ -447,12 +516,14 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             for j in loop_counter:
                 this_label = f'{name_one} {elements[j]}' if name_one else str(elements[j])
                 if show_rms:
-                    value = _LEG_FORMAT.format(unit_conv*data_func[j])
-                    if new_units:
-                        this_label += f' ({func_name}: {value} {new_units})'
+                    value = _LEG_FORMAT.format(leg_conv*data_func[j])
+                    if leg_units:
+                        this_label += f' ({func_name}: {value} {leg_units})'
                     else:
                         this_label += f' ({func_name}: {value})'
-                if not doing_diffs or (doing_diffs and have_data_one):
+                if is_cat_plot:
+                    pass # TODO: finish this
+                elif not doing_diffs or (doing_diffs and have_data_one):
                     this_time = time_one[j] if time_is_list else time_one
                     this_data = data_one[j] if data_is_list else data_one[j, :] if data_as_rows else data_one[:, j]
                 if plot_type == 'errorbar':
@@ -482,9 +553,9 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                         this_data2 = data_two[j] if data_is_list else data_two[j, :] if data_as_rows else data_two[:, j]
                         this_label2 = f'{name_two} {elements[j]}' if name_two else str(elements[j])
                         if show_rms:
-                            value = _LEG_FORMAT.format(unit_conv*data2_func[j])
-                            if new_units:
-                                this_label2 += f' ({func_name}: {value} {new_units})'
+                            value = _LEG_FORMAT.format(leg_conv*data2_func[j])
+                            if leg_units:
+                                this_label2 += f' ({func_name}: {value} {leg_units})'
                             else:
                                 this_label2 += f' ({func_name}: {value})'
                         plot_func(this_axes, time_two, this_data2, symbol_two, markersize=4, label=this_label2, \
@@ -499,8 +570,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                 if single_lines and i % num_channels != j and not is_quat_diff or (is_quat_diff and not plot_components):
                     continue
                 if show_rms:
-                    value = _LEG_FORMAT.format(unit_conv*nondeg_func[j])
-                    this_label = f'{elements[j]} ({func_name}: {value}) {new_units})'
+                    value = _LEG_FORMAT.format(leg_conv*nondeg_func[j])
+                    this_label = f'{elements[j]} ({func_name}: {value}) {leg_units})'
                 else:
                     this_label = elements[j]
                 this_data = nondeg_error[j, :] if is_quat_diff else diffs[j, :]
@@ -510,8 +581,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                     color=this_color)
             if is_quat_diff and not plot_components or (single_lines and (i + 1) % num_channels == 0):
                 if show_rms:
-                    value = _LEG_FORMAT.format(unit_conv*mag_func)
-                    this_label = f'Angle ({func_name}: {value} {new_units})'
+                    value = _LEG_FORMAT.format(leg_conv*mag_func)
+                    this_label = f'Angle ({func_name}: {value} {leg_units})'
                 else:
                     this_label = 'Angle'
                 plot_func(this_axes, time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=cm_vec.get_color(0))
@@ -598,8 +669,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
 def make_time_plot(description, time, data, *, name='', elements=None, units='', time_units='sec', \
         start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
-        show_rms=True, ignore_empties=False, legend_loc='best', second_units=None, ylabel=None, \
-        data_as_rows=True, extra_plotter=None, use_zoh=False, label_vert_lines=True):
+        show_rms=True, ignore_empties=False, legend_loc='best', second_units=None, leg_scale=None, \
+        ylabel=None, data_as_rows=True, extra_plotter=None, use_zoh=False, label_vert_lines=True):
     r"""
     Generic data versus time plotting routine.
 
@@ -634,6 +705,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     >>> ignore_empties   = False
     >>> legend_loc       = 'best'
     >>> second_units     = None
+    >>> leg_scale        = None
     >>> ylabel           = None
     >>> data_as_rows     = True
     >>> extra_plotter    = None
@@ -644,8 +716,8 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
     ...     ignore_empties=ignore_empties, legend_loc=legend_loc, second_units=second_units, \
-    ...     ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
-    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines)
+    ...     leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
+    ...     extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
@@ -655,16 +727,16 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         name_one=name, elements=elements, units=units, time_units=time_units, start_date=start_date, \
         rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
         single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
-        show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
-        data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
+        show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, leg_scale=leg_scale, \
+        ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
         label_vert_lines=label_vert_lines)
 
 #%% Functions - make_error_bar_plot
 def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, units='', \
         time_units='sec', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
         disp_xmax=inf, single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, \
-        plot_zero=False, show_rms=True, legend_loc='best', second_units=None, ylabel=None, \
-        data_as_rows=True, extra_plotter=None, use_zoh=False, label_vert_lines=True):
+        plot_zero=False, show_rms=True, legend_loc='best', second_units=None, leg_scale=None, \
+        ylabel=None, data_as_rows=True, extra_plotter=None, use_zoh=False, label_vert_lines=True):
     r"""
     Generic plotting routine to make error bars.
 
@@ -711,6 +783,7 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
     >>> show_rms         = True
     >>> legend_loc       = 'best'
     >>> second_units     = 'milli'
+    >>> leg_scale        = None
     >>> ylabel           = None
     >>> data_as_rows     = True
     >>> extra_plotter    = None
@@ -720,9 +793,9 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
     ...     elements=elements, units=units, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
-    ...     show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
-    ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-    ...     label_vert_lines=label_vert_lines)
+    ...     show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, \
+    ...     leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
+    ...     extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -734,17 +807,17 @@ def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, u
         start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
         disp_xmax=disp_xmax, single_lines=single_lines, colormap=colormap, use_mean=use_mean, \
         plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, \
-        ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-        label_vert_lines=label_vert_lines)
+        leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
+        extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
 #%% Functions - make_difference_plot
 def make_difference_plot(description, time_one, time_two, data_one, data_two, *, \
         name_one='', name_two='', elements=None, units='', time_units='sec', start_date='', \
         rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, \
         single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
-        show_rms=True, legend_loc='best', show_extra=True, second_units=None, ylabel=None, \
-        data_as_rows=True, tolerance=0, return_err=False, use_zoh=False, label_vert_lines=True, \
-        extra_plotter=None):
+        show_rms=True, legend_loc='best', show_extra=True, second_units=None, leg_scale=None, \
+        ylabel=None, data_as_rows=True, tolerance=0, return_err=False, use_zoh=False, \
+        label_vert_lines=True, extra_plotter=None):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
     Plots two vector histories over time, along with a difference from one another.
@@ -798,6 +871,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> legend_loc       = 'best'
     >>> show_extra       = True
     >>> second_units     = (u'µrad', 1e6)
+    >>> leg_scale        = None
     >>> ylabel           = None
     >>> data_as_rows     = True
     >>> tolerance        = 0
@@ -811,9 +885,9 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     ...     time_units=time_units, disp_xmax=disp_xmax, make_subplots=make_subplots, \
     ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
     ...     show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
-    ...     second_units=second_units, ylabel=ylabel, data_as_rows=data_as_rows, \
-    ...     tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
-    ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
+    ...     second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
+    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, \
+    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -825,18 +899,19 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         time_two=time_two, data_two=data_two, name_one=name_one, name_two=name_two, \
         elements=elements, units=units, time_units=time_units, start_date=start_date, \
         rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-        single_lines=single_lines, make_subplots=make_subplots, colormap=colormap, use_mean=use_mean, \
-        plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
-        second_units=second_units, ylabel=ylabel, tolerance=tolerance, return_err=return_err, \
-        data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-        label_vert_lines=label_vert_lines)
+        single_lines=single_lines, make_subplots=make_subplots, colormap=colormap, \
+        use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
+        show_extra=show_extra, second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
+        tolerance=tolerance, return_err=return_err, data_as_rows=data_as_rows, \
+        extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
 #%% Functions - make_categories_plot
 def make_categories_plot(description, time, data, cats, *, cat_names=None, name='', elements=None, \
         units='', time_units='sec', start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, \
         disp_xmax=inf, make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, \
         use_mean=False, plot_zero=False, show_rms=True, legend_loc='best', second_units=None, \
-        ylabel=None, data_as_rows=True, use_zoh=False, label_vert_lines=True, extra_plotter=None):
+        leg_scale=None, ylabel=None, data_as_rows=True, use_zoh=False, label_vert_lines=True, \
+        extra_plotter=None):
     r"""
     Data versus time plotting routine when grouped into categories.
 
@@ -931,6 +1006,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     >>> show_rms         = True
     >>> legend_loc       = 'best'
     >>> second_units     = None
+    >>> leg_scale        = None
     >>> ylabel           = None
     >>> data_as_rows     = True
     >>> use_zoh          = False
@@ -941,8 +1017,9 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     make_subplots=make_subplots, single_lines=single_lines, colormap=colormap, \
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-    ...     second_units=second_units, ylabel=ylabel, data_as_rows=data_as_rows, \
-    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
+    ...     second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
+    ...     data_as_rows=data_as_rows, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
+    ...     extra_plotter=extra_plotter)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -1318,7 +1395,8 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
     lines = LineCollection(segments, colors=colors_line, zorder=3)
     ax.add_collection(lines)
     ax.set_title(description + extra_text)
-    ax.legend(loc=legend_loc)
+    if legend_loc.lower() != 'none':
+        ax.legend(loc=legend_loc)
     ax.set_xlabel('FP X Loc [' + units + ']')  # TODO: pass in X,Y labels
     ax.set_ylabel('FP Y Loc [' + units + ']')
     ax.grid(True)

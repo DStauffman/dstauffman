@@ -40,8 +40,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         name_one='', name_two='', time_units='sec', start_date='', plot_components=True, \
         rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, \
         single_lines=False, use_mean=False, plot_zero=False, show_rms=True, legend_loc='best', \
-        show_extra=True, second_units='micro', data_as_rows=True, tolerance=0, return_err=False, \
-        use_zoh=False, label_vert_lines=True, extra_plotter=None):
+        show_extra=True, second_units='micro', leg_scale=None, data_as_rows=True, tolerance=0, \
+        return_err=False, use_zoh=False, label_vert_lines=True, extra_plotter=None):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
@@ -94,6 +94,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> show_extra       = True
     >>> plot_components  = True
     >>> second_units     = (u'µrad', 1e6)
+    >>> leg_scale        = None
     >>> data_as_rows     = True
     >>> tolerance        = 0
     >>> return_err       = False
@@ -105,8 +106,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
     ...     make_subplots=make_subplots, single_lines=single_lines, use_mean=use_mean, \
     ...     plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
-    ...     plot_components=plot_components, second_units=second_units, data_as_rows=data_as_rows, \
-    ...     tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
+    ...     plot_components=plot_components, second_units=second_units, leg_scale=leg_scale, \
+    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
     ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
 
     Close plots
@@ -122,9 +123,9 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
         single_lines=single_lines, make_subplots=make_subplots, colormap=colormap, use_mean=use_mean, \
         plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
-        plot_components=plot_components, second_units=second_units, tolerance=tolerance, \
-        return_err=return_err, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
-        use_zoh=use_zoh, label_vert_lines=label_vert_lines)
+        plot_components=plot_components, second_units=second_units, leg_scale=leg_scale, \
+        tolerance=tolerance, return_err=return_err, data_as_rows=data_as_rows, \
+        extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
 #%% plot_attitude
 def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
