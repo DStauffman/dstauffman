@@ -172,9 +172,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.show_extra       = True
         self.second_units     = 'micro'
         self.ylabel           = None
-        self.truth_name       = 'Truth'
-        self.truth_time       = None
-        self.truth_data       = None
         self.data_as_rows     = True
         self.tolerance        = 0
         self.return_err       = True
@@ -192,7 +189,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
-            truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
 
@@ -206,7 +202,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
-            truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
 
@@ -220,7 +215,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
-            truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
 
@@ -235,7 +229,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
-            truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
         self.assertTrue(np.all(np.isnan(err['diff'])))
@@ -251,7 +244,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
-            truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
         self.assertTrue(np.all(np.isnan(err['diff'])))
@@ -267,7 +259,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
-            truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
 
@@ -281,7 +272,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
-            truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
 
@@ -295,7 +285,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
-            truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
 
@@ -309,14 +298,8 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
-            truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
-
-    def test_plot_truth(self) -> None:
-        self.figs = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
-            self.data_one, self.data_two, elements=self.elements, units=self.units, \
-            truth_time=self.time_one, truth_data=self.data_two)
 
     def test_disp_bounds(self) -> None:
         self.figs = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
@@ -335,7 +318,6 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
             plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
             show_extra=self.show_extra, second_units=self.second_units, ylabel=self.ylabel, \
-            truth_name=self.truth_name, truth_time=self.truth_time, truth_data=self.truth_data, \
             data_as_rows=self.data_as_rows, tolerance=self.tolerance, return_err=self.return_err, \
             use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
 

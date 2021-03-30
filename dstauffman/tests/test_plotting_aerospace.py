@@ -52,9 +52,6 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.legend_loc       = 'best'
         self.show_extra       = True
         self.second_units     = (u'µrad', 1e6)
-        self.truth_name       = 'Truth'
-        self.truth_time       = None
-        self.truth_data       = None
         self.data_as_rows     = True
         self.tolerance        = 0
         self.return_err       = False
@@ -69,8 +66,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, truth_name=self.truth_name, truth_time=self.truth_time, \
-            truth_data=self.truth_data, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
+            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
             return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
@@ -83,8 +79,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, truth_name=self.truth_name, truth_time=self.truth_time, \
-            truth_data=self.truth_data, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
+            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
             return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
@@ -97,8 +92,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, truth_name=self.truth_name, truth_time=self.truth_time, \
-            truth_data=self.truth_data, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
+            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
             return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
@@ -112,8 +106,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, truth_name=self.truth_name, truth_time=self.truth_time, \
-            truth_data=self.truth_data, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
+            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
             return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
@@ -127,8 +120,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, truth_name=self.truth_name, truth_time=self.truth_time, \
-            truth_data=self.truth_data, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
+            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
             return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
@@ -141,8 +133,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, truth_name=self.truth_name, truth_time=self.truth_time, \
-            truth_data=self.truth_data, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
+            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
             return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
@@ -155,37 +146,32 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
             single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, truth_name=self.truth_name, truth_time=self.truth_time, \
-            truth_data=self.truth_data, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
+            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
             return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_use_mean(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-             self.quat_one, self.quat_two, use_mean=True)
+            self.quat_one, self.quat_two, use_mean=True)
 
     def test_no_rms_in_legend(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-             self.quat_one, self.quat_two, use_mean=True, show_rms=False)
+            self.quat_one, self.quat_two, use_mean=True, show_rms=False)
 
     def test_plot_zero(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-             self.quat_one, self.quat_two, plot_zero=True)
-
-    def test_plot_truth(self) -> None:
-        self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-             self.quat_one, self.quat_two, truth_time=self.time_one, truth_data=self.quat_two)
+            self.quat_one, self.quat_two, plot_zero=True)
 
     def test_disp_bounds(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-             self.quat_one, self.quat_two, disp_xmin=2, disp_xmax=5)
+            self.quat_one, self.quat_two, disp_xmin=2, disp_xmax=5)
 
     def test_no_overlap(self) -> None:
         self.time_one = np.arange(11).astype(float)
         self.time_two = np.arange(2, 13) + 0.5
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-             self.quat_one, self.quat_two)
+            self.quat_one, self.quat_two)
 
     def test_none1(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, None, self.quat_one, None)
@@ -193,11 +179,11 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_none2(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)
 
-    @patch('dstauffman.plotting.aerospace.logger')
+    @patch('dstauffman.plotting.generic.logger')
     def test_none3(self, mock_logger):
         self.figs = plot.make_quaternion_plot('', None, None, None, None)
         mock_logger.log.assert_called_once()
-        mock_logger.log.assert_called_with(LogLevel.L5, 'No quaternion data was provided, so no plot was generated for "".')
+        mock_logger.log.assert_called_with(LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', 'quat', '')
 
     def tearDown(self) -> None:
         if self.figs:

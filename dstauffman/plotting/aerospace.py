@@ -11,13 +11,13 @@ import doctest
 import logging
 import unittest
 
-from dstauffman import get_unit_conversion, HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel, \
-    rms
-from dstauffman.aerospace import Kf, KfInnov, quat_angle_diff
-from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, make_difference_plot
+from dstauffman import HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel
+from dstauffman.aerospace import Kf, KfInnov
+from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, \
+    make_difference_plot, make_generic_plot
 from dstauffman.plotting.plotting import Opts, setup_plots
-from dstauffman.plotting.support import ColorMap, COLOR_LISTS, disp_xlimits, get_nondeg_colorlists, \
-    get_rms_indices, plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
+from dstauffman.plotting.support import COLOR_LISTS, ColorMap, get_nondeg_colorlists, \
+    get_rms_indices
 
 if HAVE_MPL:
     import matplotlib.pyplot as plt
@@ -38,96 +38,33 @@ _TRUTH_COLOR = 'k'
 #%% Functions - make_quaternion_plot
 def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *, \
         name_one='', name_two='', time_units='sec', start_date='', plot_components=True, \
-        rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
-        make_subplots=True, single_lines=False, use_mean=False, plot_zero=False, show_rms=True, \
-        legend_loc='best', show_extra=True, second_units='micro', truth_name='Truth', \
-        truth_time=None, truth_data=None, data_as_rows=True, tolerance=0, return_err=False, \
+        rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, \
+        single_lines=False, use_mean=False, plot_zero=False, show_rms=True, legend_loc='best', \
+        show_extra=True, second_units='micro', data_as_rows=True, tolerance=0, return_err=False, \
         use_zoh=False, label_vert_lines=True, extra_plotter=None):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
 
-    Parameters
-    ----------
-    description : str
-        name of the data being plotted, used as title
-    time_one : (N, ) array_like
-        time history one [sec]
-    time_two : (M, ) array_like
-        time history two [sec]
-    quat_one : (4, N) ndarray
-        quaternion one
-    quat_two : (4, M) ndarray
-        quaternion two
-    name_one : str, optional
-        name of data source 1
-    name_two : str, optional
-        name of data source 2
-    time_units : str, optional
-        time units, defaults to 'sec'
-    start_date : str, optional
-        date of t(0), may be an empty string
-    plot_components : bool, optional
-        Whether to plot the quaternion components, or just the angular difference
-    rms_xmin : float, optional
-        time of first point of RMS calculation
-    rms_xmax : float, optional
-        time of last point of RMS calculation
-    disp_xmin : float, optional
-        lower time to limit the display of the plot
-    disp_xmax : float, optional
-        higher time to limit the display of the plot
-    make_subplots : bool, optional
-        flag to use subplots for differences
-    single_lines : bool, optional
-        flag meaning to plot subplots by channel instead of together
-    use_mean : bool, optional
-        whether to use mean instead of RMS in legend calculations
-    plot_zero : bool, optional
-        whether to force zero to always be plotted on the Y axis
-    show_rms : bool, optional
-        whether to show the RMS calculation in the legend
-    legend_loc : str, optional
-        location to put the legend, default is 'best'
-    show_extra : bool, optional
-        whether to show missing data on difference plots
-    second_units : str or tuple[str, float], optional, default is 'micro'
-        single name and value pair to use for scaling data to a second Y axis and showing in legend
-    truth_name : str, optional
-        name to associate with truth data, default is 'Truth'
-    truth_time : ndarray, optional
-        truth time history
-    truth_data : ndarray, optional
-        truth quaternion history
-    data_as_rows : bool, optional, default is True
-        Whether the data has each channel as a row vector when 2D, vs a column vector
-    tolerance : float, optional, default is zero
-        Numerical tolerance on what should be considered a match between quat_one and quat_two
-    return_err : bool, optional, default is False
-        Whether the function should return the error differences in addition to the figure handles
-    use_zoh : bool, optional, default is False
-        Whether to plot as a zero-order hold, instead of linear interpolation between data points
-    label_vert_lines : bool, optional, default is True
-        Whether to label the RMS start/stop lines in the legend (if legend is shown)
-    extra_plotter : callable, optional
-        Extra callable plotting function to add more details to the plot
+    See make_generic_plot for input details.
 
     Returns
     -------
-    fig_hand : list of class matplotlib.Figure
-        list of figure handles
-    err : (3,N) ndarray
-        Quaternion differences expressed in Q1 frame
+    fig : class matplotlib.Figure
+        figure handle
+    err : Dict
+        Differences
 
     See Also
     --------
-    TBD_wrapper
+    make_generic_plot
 
     Notes
     -----
     #.  Written by David C. Stauffer in MATLAB in October 2011, updated in 2018.
     #.  Ported to Python by David C. Stauffer in December 2018.
     #.  Made fully functional by David C. Stauffer in March 2019.
+    #.  Wrapped to the generic do everything version by David C. Stauffer in March 2021.
 
     Examples
     --------
@@ -144,7 +81,6 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> name_two         = 'test2'
     >>> time_units       = 'sec'
     >>> start_date       = str(datetime.now())
-    >>> plot_components  = True
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
     >>> disp_xmin        = -2
@@ -156,10 +92,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> show_rms         = True
     >>> legend_loc       = 'best'
     >>> show_extra       = True
+    >>> plot_components  = True
     >>> second_units     = (u'µrad', 1e6)
-    >>> truth_name       = 'Truth'
-    >>> truth_time       = None
-    >>> truth_data       = None
     >>> data_as_rows     = True
     >>> tolerance        = 0
     >>> return_err       = False
@@ -168,13 +102,12 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> extra_plotter    = None
     >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
-    ...     plot_components=plot_components, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
-    ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, make_subplots=make_subplots, \
-    ...     single_lines=single_lines, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-    ...     legend_loc=legend_loc, show_extra=show_extra, second_units=second_units, \
-    ...     truth_name=truth_name, truth_time=truth_time, truth_data=truth_data, \
-    ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, \
-    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
+    ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+    ...     make_subplots=make_subplots, single_lines=single_lines, use_mean=use_mean, \
+    ...     plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
+    ...     plot_components=plot_components, second_units=second_units, data_as_rows=data_as_rows, \
+    ...     tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
+    ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -182,242 +115,16 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     ...     plt.close(fig)
 
     """
-    # determine if you have the quaternions
-    have_quat_one = quat_one is not None and np.any(~np.isnan(quat_one))
-    have_quat_two = quat_two is not None and np.any(~np.isnan(quat_two))
-    have_both     = have_quat_one and have_quat_two
-    have_truth    = truth_time is not None and truth_data is not None and not np.all(np.isnan(truth_data))
-    if not have_quat_one and not have_quat_two:
-        logger.log(LogLevel.L5, f'No quaternion data was provided, so no plot was generated for "{description}".')
-        # TODO: return NaNs instead of None for this case?
-        out = ([], {'one': None, 'two': None, 'diff': None, 'mag': None}) if return_err else []
-        return out
-
-    # data checks
-    assert description, 'You must give the plot a description.' # TODO: remove this restriction?
-
-    # convert rows/cols as necessary
-    if not data_as_rows:
-        # TODO: is this the best way or make branches lower?
-        if have_quat_one:
-            quat_one = quat_one.T
-        if have_quat_two:
-            quat_two = quat_two.T
-        if have_truth:
-            truth_data = truth_data.T
-
-    # determine which plotting function to use
-    if use_zoh:
-        plot_func = lambda ax, *args, **kwargs: ax.step(*args, **kwargs, where='post')
-    else:
-        plot_func = lambda ax, *args, **kwargs: ax.plot(*args, **kwargs)
-
-    #% Calculations
-    if have_both:
-        # find overlapping times
-        (time_overlap, q1_diff_ix, q2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)
-        # find differences
-        q1_miss_ix = np.setxor1d(np.arange(len(time_one)), q1_diff_ix)
-        q2_miss_ix = np.setxor1d(np.arange(len(time_two)), q2_diff_ix)
-    else:
-        time_overlap = None
-    # build RMS indices
-    ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)
-    # get default plotting colors
-    colororder3 = ColorMap(COLOR_LISTS['vec'])
-    colororder8 = ColorMap(COLOR_LISTS['quat_diff'])
-    # quaternion component names
-    elements = ['X', 'Y', 'Z', 'S']
-    num_channels = len(elements)
-    units = 'rad'
-    # calculate the difference
-    if have_both:
-        (nondeg_angle, nondeg_error) = quat_angle_diff(quat_one[:, q1_diff_ix], quat_two[:, q2_diff_ix])
-    # calculate the rms (or mean) values
-    if show_rms or return_err:
-        nans = np.full(3, np.nan, dtype=float)
-        if not use_mean:
-            func_name = 'RMS'
-            func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
-        else:
-            func_name = 'Mean'
-            func_lamb = lambda x, y: np.nanmean(x, axis=y)
-        q1_func     = func_lamb(quat_one[:, ix['one']], 1) if have_quat_one and np.any(ix['one']) else nans
-        q2_func     = func_lamb(quat_two[:, ix['two']], 1) if have_quat_two and np.any(ix['two']) else nans
-        nondeg_func = func_lamb(nondeg_error[:, ix['overlap']], 1) if have_both and np.any(ix['overlap']) else nans
-        mag_func    = func_lamb(nondeg_angle[ix['overlap']], 0) if have_both and np.any(ix['overlap']) else nans[0:1]
-        # output errors
-        err = {'one': q1_func, 'two': q2_func, 'diff': nondeg_func, 'mag': mag_func}
-    # unit conversion value
-    (new_units, unit_conv) = get_unit_conversion(second_units, units)
-    # determine which symbols to plot with
-    if have_both:
-        symbol_one = '^-'
-        symbol_two = 'v:'
-    elif have_quat_one:
-        symbol_one = '.-'
-        symbol_two = '' # not-used
-    elif have_quat_two:
-        symbol_one = '' # not-used
-        symbol_two = '.-'
-    else:
-        symbol_one = '' # invalid case
-        symbol_two = '' # invalid case
-    # pre-plan plot layout
-    if have_both:
-        if make_subplots:
-            num_figs = 1
-            if single_lines:
-                num_rows = num_channels
-                num_cols = 2
-            else:
-                num_rows = 2
-                num_cols = 1
-        else:
-            num_figs = 2
-            num_cols = 1
-            if single_lines:
-                num_rows = num_channels
-            else:
-                num_rows = 1
-    else:
-        num_figs = 1
-        if single_lines:
-            num_rows = num_channels
-            num_cols = 1
-        else:
-            num_rows = 1
-            num_cols = 1
-    num_axes = num_figs*num_rows*num_cols
-
-    #% Create plots
-    # create figures
-    f1 = plt.figure()
-    if make_subplots:
-        f1.canvas.set_window_title(description)
-    else:
-        f1.canvas.set_window_title(description + ' Quaternion Components')
-    if have_both and not make_subplots:
-        f2 = plt.figure()
-        f2.canvas.set_window_title(description + 'Difference')
-        fig_hand = [f1, f2]
-    else:
-        fig_hand = [f1]
-    # create axes
-    ax = []
-    ax_prim = None
-    for i in range(num_figs):
-        for j in range(num_cols):
-            for k in range(num_rows):
-                temp_axes = fig_hand[i].add_subplot(num_rows, num_cols, k*num_cols + j + 1, sharex=ax_prim)
-                if ax_prim is None:
-                    ax_prim = temp_axes
-                ax.append(temp_axes)
-    # plot data
-    for i in range(num_axes):
-        this_axes = ax[i]
-        is_diff_plot = i > num_rows-1 or (not single_lines and make_subplots and i == 1)
-        if single_lines:
-            if is_diff_plot:
-                loop_counter = [i - num_rows]
-            else:
-                loop_counter = [i]
-        else:
-            loop_counter = range(num_channels)
-        if not is_diff_plot:
-            # standard plot
-            if have_quat_one:
-                for j in loop_counter:
-                    if show_rms:
-                        value = _LEG_FORMAT.format(q1_func[j])
-                        this_label = '{} {} ({}: {})'.format(name_one, elements[j], func_name, value)
-                    else:
-                        this_label = name_one + ' ' + elements[j]
-                    plot_func(this_axes, time_one, quat_one[j, :], symbol_one, markersize=4, label=this_label, \
-                        color=colororder8.get_color(j+(0 if have_quat_two else num_channels)), zorder=3)
-            if have_quat_two:
-                for j in loop_counter:
-                    if show_rms:
-                        value = _LEG_FORMAT.format(q2_func[j])
-                        this_label = '{} {} ({}: {})'.format(name_two, elements[j], func_name, value)
-                    else:
-                        this_label = name_two + ' ' + elements[j]
-                    plot_func(this_axes, time_two, quat_two[j, :], symbol_two, markersize=4, label=this_label, \
-                        color=colororder8.get_color(j+num_channels), zorder=5)
-        else:
-            #% Difference plot
-            zorders = [8, 6, 5]
-            for j in range(3):
-                if not plot_components or (single_lines and i % num_channels != j):
-                    continue
-                if show_rms:
-                    value = _LEG_FORMAT.format(unit_conv*nondeg_func[j])
-                    this_label = '{} ({}: {}) {})'.format(elements[j], func_name, value, new_units)
-                else:
-                    this_label = elements[j]
-                plot_func(this_axes, time_overlap, nondeg_error[j, :], '.-', markersize=4, label=this_label, zorder=zorders[j], \
-                    color=colororder3.get_color(j))
-            if not plot_components or (single_lines and (i + 1) % num_channels == 0):
-                if show_rms:
-                    value = _LEG_FORMAT.format(unit_conv*mag_func)
-                    this_label = 'Angle ({}: {} {})'.format(func_name, value, new_units)
-                else:
-                    this_label = 'Angle'
-                plot_func(this_axes, time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=colororder3.get_color(0))
-            if show_extra:
-                this_axes.plot(time_one[q1_miss_ix], np.zeros(len(q1_miss_ix)), 'kx', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
-                this_axes.plot(time_two[q2_miss_ix], np.zeros(len(q2_miss_ix)), 'go', markersize=8, markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
-
-        # set X display limits
-        if i == 0:
-            disp_xlimits(this_axes, xmin=disp_xmin, xmax=disp_xmax)
-            xlim = this_axes.get_xlim()
-        this_axes.set_xlim(xlim)
-        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
-        # set Y display limits
-        if plot_zero:
-            show_zero_ylim(this_axes)
-        # optionally plot truth (after having set axes limits)
-        if i < num_rows and have_truth:
-            if single_lines:
-                this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
-                    linewidth=2, label=truth_name + ' ' + elements[i])
-            else:
-                if i == 0:
-                    # TODO: add RMS to Truth data?
-                    this_axes.plot(truth_time, truth_data[i, :], '.-', color=_TRUTH_COLOR, markerfacecolor=_TRUTH_COLOR, \
-                        linewidth=2, label=truth_name)
-        # format display of plot
-        if legend_loc.lower() != 'none':
-            this_axes.legend(loc=legend_loc)
-        if i == 0:
-            this_axes.set_title(description + ' Quaternion Components')
-        elif (single_lines and i == num_rows) or (not single_lines and i == 1):
-            this_axes.set_title(description + ' Difference')
-        if is_datetime(time_one) or is_datetime(time_two):
-            this_axes.set_xlabel('Date')
-            assert time_units in {'datetime', 'numpy'}, 'Mismatch in the expected time units.'
-        else:
-            this_axes.set_xlabel('Time [' + time_units + ']' + start_date)
-        if is_diff_plot:
-            this_axes.set_ylabel('Difference [' + units + ']')
-            # optionally add second Y axis
-            plot_second_units_wrapper(this_axes, (new_units, unit_conv))
-        else:
-            this_axes.set_ylabel('Quaternion Components [dimensionless]')
-        this_axes.grid(True)
-        # plot RMS lines
-        if show_rms:
-            plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
-
-    # plot any extra information through a generic callable
-    if extra_plotter is not None:
-        for fig in fig_hand:
-            extra_plotter(fig=fig, ax=fig.axes)
-
-    if return_err:
-        return (fig_hand, err)
-    return fig_hand
+    colormap = ColorMap(COLOR_LISTS['quat_diff'])
+    return make_generic_plot('quat', description=description, time_one=time_one, data_one=quat_one, \
+        time_two=time_two, data_two=quat_two, name_one=name_one, name_two=name_two, \
+        elements=('X', 'Y', 'Z', 'S'), units='rad', time_units=time_units, start_date=start_date, \
+        rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+        single_lines=single_lines, make_subplots=make_subplots, colormap=colormap, use_mean=use_mean, \
+        plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
+        plot_components=plot_components, second_units=second_units, tolerance=tolerance, \
+        return_err=return_err, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
+        use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
 #%% plot_attitude
 def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
@@ -484,8 +191,6 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         kf1 = Kf()
     if kf2 is None:
         kf2 = Kf()
-    if truth is None:
-        truth = Kf()
     if opts is None:
         opts = Opts()
     if fields is None:
@@ -533,6 +238,9 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     err     = dict()
     printed = False
 
+    if truth is not None:
+        raise NotImplementedError('Truth manipulations are not yet implemented.')
+
     # call wrapper function for most of the details
     for (field, description) in fields.items():
         # print status
@@ -545,8 +253,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
             make_subplots=sub_plots, plot_components=plot_comps, single_lines=single_lines, \
             use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-            second_units=second_units, truth_name=truth.name, truth_time=truth.time, \
-            truth_data=truth.att, return_err=return_err, **kwargs)
+            second_units=second_units, return_err=return_err, **kwargs)
         if return_err:
             figs += out[0]
             err[field] = out[1]

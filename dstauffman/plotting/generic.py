@@ -13,9 +13,11 @@ import unittest
 
 from dstauffman import DEGREE_SIGN, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, intersect, \
     is_datetime, LogLevel, RAD2DEG, rms
+from dstauffman.aerospace import quat_angle_diff
 
-from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits, get_rms_indices, \
-    ignore_plot_data, plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, zoom_ylim
+from dstauffman.plotting.support import COLOR_LISTS, ColorMap, DEFAULT_COLORMAP, disp_xlimits, \
+    get_rms_indices, ignore_plot_data, plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, \
+    zoom_ylim
 
 if HAVE_MPL:
     from matplotlib.collections import LineCollection
@@ -40,8 +42,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         single_lines=False, make_subplots=True, colormap=DEFAULT_COLORMAP, use_mean=False, \
         plot_zero=False, show_rms=True, ignore_empties=False, legend_loc='best', show_extra=True, \
-        second_units=None, ylabel=None, tolerance=0, return_err=False, data_as_rows=True, \
-        extra_plotter=None, use_zoh=False, label_vert_lines=True):
+        plot_components=True, second_units=None, ylabel=None, tolerance=0, return_err=False, \
+        data_as_rows=True, extra_plotter=None, use_zoh=False, label_vert_lines=True):
     r"""
     Generic plotting function called by all the other low level plots.
 
@@ -103,6 +105,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         location to put the legend, default is 'best', use 'none' to suppress legend
     show_extra : bool, optional
         whether to show missing data on difference plots
+    plot_components : bool, optional, default is True
+        whether to plot the quaternion angular differences as components or magnitude
     second_units : str or tuple of (str, float), optional
         Name and conversion factor to use for scaling data to a second Y axis and in legend
     ylabel : str or List[str], optional
@@ -183,7 +187,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         'quat', 'quaternion'}, f'Unexpected plot type: {plot_type}.'
     assert isinstance(description, str), 'The description should be a string, check your argument order.'
     doing_diffs = plot_type in {'diff', 'differences', 'quat', 'quaternions'}
-    fig_lists = plot_type in {'diff', 'differences', 'quat', 'quaternions'}
+    is_quat_diff = plot_type in {'quat', 'quaternions'}
+    fig_lists = plot_type in {'cats', 'categorical', 'diff', 'differences', 'quat', 'quaternions'}
     time_is_list = isinstance(time_one, list) or isinstance(time_one, tuple)
     if time_is_list:
         assert time_two is None or isinstance(time_two, list) or isinstance(time_two, tuple), \
@@ -197,8 +202,12 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         have_both     = have_data_one and have_data_two
         if not have_data_one and not have_data_two:
             logger.log(LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', plot_type, description)
+            if not return_err:
+                return []
             # TODO: return NaNs instead of None for this case?
-            out = ([], {'one': None, 'two': None, 'diff': None}) if return_err else []
+            out = ([], {'one': None, 'two': None, 'diff': None})
+            if is_quat_diff:
+                out[1]['mag'] = None
             return out
         if have_data_one:
             assert not data_is_list
@@ -219,7 +228,10 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         time_one = np.atleast_1d(time_one)
     if not data_is_list and data_one is not None:
         data_one = np.atleast_2d(data_one)
-        assert data_one.ndim < 3, 'Data must be 0d, 1d or 2d.'
+        assert data_one.ndim < 3, 'data_one must be 0d, 1d or 2d.'
+    if not dat2_is_list and data_two is not None:
+        data_two = np.atleast_2d(data_two)
+        assert data_two.ndim < 3, 'data_two must be 0d, 1d or 2d.'
 
     # check for valid data
     # TODO: implement this
@@ -243,6 +255,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         s1 = data_one.shape[0]
     else:
         s1 = data_one.shape[1]
+        if is_quat_diff:
+            assert data_one.shape[0] == 4
     if data_two is None:
         s2 = 0
     elif dat2_is_list:
@@ -261,9 +275,10 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         '{} and {}.'.format(num_channels, np.maximum(s1, s2))
     assert s0a == 0 or s0a == 1 or s0a == num_channels, "The time doesn't match the number of elements."
     assert s0b == 0 or s0b == 1 or s0b == num_channels, "The time doesn't match the number of elements."
-    if not (s1 == 0 or s2 == 0 or s1 == s2):
-        breakpoint()
     assert s1 == 0 or s2 == 0 or s1 == s2, f'Sizes of data channels must be consistent, got {s1} and {s2}.'
+    if is_quat_diff:
+        assert s1 == 0 or s1 == 4, 'Must be a 4-element quaternion'
+        assert s2 == 0 or s2 == 4, 'Must be a 4-element quaternion'
 
     #% Calculations
     # build RMS indices
@@ -291,15 +306,20 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)
     # create a colormap
     if doing_diffs:
+        if is_quat_diff:
+            cm_vec = ColorMap(COLOR_LISTS['vec'])
         cm = ColorMap(colormap=colormap, num_colors=3*num_channels)
     else:
         cm = ColorMap(colormap=colormap, num_colors=num_channels)
     # calculate the differences
     if doing_diffs and have_both:
-        diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
+        if is_quat_diff:
+            (nondeg_angle, nondeg_error) = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix])
+        else:
+            diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
     # calculate the rms (or mean) values
     if show_rms or return_err:
-        nans = np.full(num_channels, np.nan, dtype=float)
+        nans = np.full(num_channels, np.nan, dtype=float)  # TODO: num_channels should be 3 for is_quat_diff
         if not use_mean:
             func_name = 'RMS'
             func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
@@ -315,11 +335,17 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                 data_func = func_lamb(data_one[ix['one'], :], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
         if doing_diffs:
             # TODO: combine with non diff version
-            data_func   = func_lamb(data_one[:, ix['one']], 1) if have_data_one and np.any(ix['one']) else nans
-            data2_func  = func_lamb(data_two[:, ix['two']], 1) if have_data_two and np.any(ix['two']) else nans
-            nondeg_func = func_lamb(diffs[:, ix['overlap']], 1) if have_both and np.any(ix['overlap']) else nans
+            data_func  = func_lamb(data_one[:, ix['one']], 1) if have_data_one and np.any(ix['one']) else nans
+            data2_func = func_lamb(data_two[:, ix['two']], 1) if have_data_two and np.any(ix['two']) else nans
+            if is_quat_diff:
+                nondeg_func = func_lamb(nondeg_error[:, ix['overlap']], 1) if have_both and np.any(ix['overlap']) else nans
+                mag_func    = func_lamb(nondeg_angle[ix['overlap']], 0) if have_both and np.any(ix['overlap']) else nans[0:1]
+            else:
+                nondeg_func = func_lamb(diffs[:, ix['overlap']], 1) if have_both and np.any(ix['overlap']) else nans
             # output errors
             err = {'one': data_func, 'two': data2_func, 'diff': nondeg_func}
+            if is_quat_diff:
+                err['mag'] = mag_func
 
     # unit conversion value
     (new_units, unit_conv) = get_unit_conversion(second_units, units)
@@ -379,7 +405,10 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     #% Create plots
     # create figures
     fig = plt.figure()
-    fig.canvas.set_window_title(description)
+    if is_quat_diff and not make_subplots:
+        fig.canvas.set_window_title(description + ' Quaternion Components')
+    else:
+        fig.canvas.set_window_title(description)
     if doing_diffs:
         if have_both and not make_subplots:
             f2 = plt.figure()
@@ -405,11 +434,14 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             loop_counter = reversed(range(num_channels))
         elif single_lines:
             if is_diff_plot:
-                loop_counter = [i - num_rows]
+                if is_quat_diff:
+                    loop_counter = range(3)
+                else:
+                    loop_counter = [i - num_rows]
             else:
                 loop_counter = [i]
         else:
-            loop_counter = range(num_channels)
+            loop_counter = range(num_channels) if not is_quat_diff else range(3)
         if not is_diff_plot:
             # standard plot
             for j in loop_counter:
@@ -426,7 +458,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                 if plot_type == 'errorbar':
                     this_zorder = 3
                 elif doing_diffs:
-                    this_zorder = 4
+                    this_zorder = 3 if is_quat_diff else 4
                 else:
                     this_zorder = 9
                 if plot_type == 'bar':
@@ -439,8 +471,13 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                             label=this_label, color=cm.get_color(j), edgecolor='none')
                 else:
                     if not doing_diffs or (doing_diffs and have_data_one):
+                        if is_quat_diff and not have_data_two:
+                            # TODO: get rid of this special case or rework into colormap?
+                            this_color = cm.get_color(j + num_channels)
+                        else:
+                            this_color = cm.get_color(j)
                         plot_func(this_axes, this_time, this_data, symbol_one, markersize=4, label=this_label, \
-                            color=cm.get_color(j), zorder=this_zorder)
+                            color=this_color, zorder=this_zorder)
                     if doing_diffs and have_data_two:
                         this_data2 = data_two[j] if data_is_list else data_two[j, :] if data_as_rows else data_two[:, j]
                         this_label2 = f'{name_two} {elements[j]}' if name_two else str(elements[j])
@@ -459,15 +496,25 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         else:
             #% Difference plot
             for j in loop_counter:
-                if single_lines and i % num_channels != j:
+                if single_lines and i % num_channels != j and not is_quat_diff or (is_quat_diff and not plot_components):
                     continue
                 if show_rms:
                     value = _LEG_FORMAT.format(unit_conv*nondeg_func[j])
                     this_label = f'{elements[j]} ({func_name}: {value}) {new_units})'
                 else:
                     this_label = elements[j]
-                plot_func(this_axes, time_overlap, diffs[j, :], '.-', markersize=4, label=this_label, \
-                    color=cm.get_color(j+2*num_channels))
+                this_data = nondeg_error[j, :] if is_quat_diff else diffs[j, :]
+                this_zorder = [8, 6, 5][j] if is_quat_diff else 5
+                this_color = cm_vec.get_color(j) if is_quat_diff else cm.get_color(j+2*num_channels)
+                plot_func(this_axes, time_overlap, this_data, '.-', markersize=4, label=this_label, \
+                    color=this_color)
+            if is_quat_diff and not plot_components or (single_lines and (i + 1) % num_channels == 0):
+                if show_rms:
+                    value = _LEG_FORMAT.format(unit_conv*mag_func)
+                    this_label = f'Angle ({func_name}: {value} {new_units})'
+                else:
+                    this_label = 'Angle'
+                plot_func(this_axes, time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=cm_vec.get_color(0))
             if show_extra:
                 this_axes.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, \
                     markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
@@ -489,7 +536,10 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             show_zero_ylim(this_axes)
         # format display of plot
         if i == 0:
-            this_axes.set_title(description)
+            if is_quat_diff:
+                this_axes.set_title(description + ' Quaternion Components')
+            else:
+                this_axes.set_title(description)
         elif doing_diffs and ((single_lines and i == num_rows) or (not single_lines and i == 1)):
             this_axes.set_title(description + ' Difference')
         if (time_is_list and is_datetime(time_one[0])) or is_datetime(time_one) or is_datetime(time_two):
@@ -500,7 +550,10 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             this_axes.set_xlabel(f'Time [{time_units}]{start_date}')
         if ylabel is None:
             if is_diff_plot:
-                this_axes.set_ylabel(f'{description} Difference [{units}]')
+                if is_quat_diff:
+                    this_axes.set_ylabel('Quaternion Components [dimensionless]')
+                else:
+                    this_axes.set_ylabel(f'{description} Difference [{units}]')
             else:
                 this_axes.set_ylabel(f'{description} [{units}]')
         else:
@@ -690,8 +743,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, \
         single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
         show_rms=True, legend_loc='best', show_extra=True, second_units=None, ylabel=None, \
-        truth_name='Truth', truth_time=None, truth_data=None, data_as_rows=True, tolerance=0, \
-        return_err=False, use_zoh=False, label_vert_lines=True, extra_plotter=None):
+        data_as_rows=True, tolerance=0, return_err=False, use_zoh=False, label_vert_lines=True, \
+        extra_plotter=None):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
     Plots two vector histories over time, along with a difference from one another.
@@ -746,9 +799,6 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> show_extra       = True
     >>> second_units     = (u'µrad', 1e6)
     >>> ylabel           = None
-    >>> truth_name       = 'Truth'
-    >>> truth_time       = None
-    >>> truth_data       = None
     >>> data_as_rows     = True
     >>> tolerance        = 0
     >>> return_err       = False
@@ -761,8 +811,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     ...     time_units=time_units, disp_xmax=disp_xmax, make_subplots=make_subplots, \
     ...     single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
     ...     show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
-    ...     second_units=second_units, ylabel=ylabel, truth_name=truth_name, \
-    ...     truth_time=truth_time, truth_data=truth_data, data_as_rows=data_as_rows, \
+    ...     second_units=second_units, ylabel=ylabel, data_as_rows=data_as_rows, \
     ...     tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
     ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
 
