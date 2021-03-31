@@ -172,7 +172,7 @@ class Test_pprint_dict(unittest.TestCase):
         lines3 = text3.split('\n')
         self.assertEqual(lines1[1], ' a   = [0 1 2 ... 7 8 9]')
         self.assertEqual(lines2[1], ' a   = [0 1 2 3 4 5 6 7 8 9]')
-        if lms.IS_WINDOWS:
+        if dcs.IS_WINDOWS:
             self.assertEqual(lines3[1], ' a   = <ndarray int32 (10,)>')
         else:
             self.assertEqual(lines3[1], ' a   = <ndarray int64 (10,)>')

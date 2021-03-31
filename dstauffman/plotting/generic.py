@@ -113,7 +113,9 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     plot_components : bool, optional, default is True
         whether to plot the quaternion angular differences as components or magnitude
     second_units : str or tuple of (str, float), optional
-        Name and conversion factor to use for scaling data to a second Y axis and in legend
+        Name and conversion factor to use for scaling data to a second Y axis and in legend if leg_scale=None
+    leg_scale : str or tuple of (str, float), optional
+        Name and conversion factor to use for scaling data in the legend differently
     ylabel : str or List[str], optional
         Labels to put on the Y axes, potentially by element
     tolerance : float, optional
@@ -332,6 +334,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         if is_quat_diff:
             cm_vec = ColorMap(COLOR_LISTS['vec'])
         cm = ColorMap(colormap=colormap, num_colors=3*num_channels)
+    elif is_cat_plot:
+        cm = ColorMap(colormap=colormap, num_colors=len(cat_keys)*num_channels)
     else:
         cm = ColorMap(colormap=colormap, num_colors=num_channels)
     # calculate the differences
@@ -382,7 +386,6 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                     else:
                         np.full(num_channels, np.nan)
 
-
     # unit conversion value
     (new_units, unit_conv) = get_unit_conversion(second_units, units)
     if leg_scale is not None:
@@ -405,13 +408,16 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             bottoms = np.concatenate((np.zeros((1, len(time_one))), np.cumsum(data_one, axis=0)), axis=0)
         else:
             bottoms = np.concatenate((np.zeros((len(time_one), 1)), np.cumsum(data_one, axis=1)), axis=1)
+    elif is_cat_plot:
+        symbol_one = ':'
+        symbol_two = '.'
     elif doing_diffs:
         if have_both:
             symbol_one = '^-'
             symbol_two = 'v:'
     # get the number of axes to make
     if plot_type == 'bar':
-        num_rows = num_cols = 1
+        num_figs = num_rows = num_cols = 1
     elif doing_diffs:
         if have_both:
             if make_subplots:
@@ -501,6 +507,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             else:
                 ix_data = i
                 ix_cat  = list(range(num_cats))
+            loop_counter = [i]  # TODO: can this take over the lower loop
         elif single_lines:
             if is_diff_plot:
                 if is_quat_diff:
@@ -512,17 +519,18 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         else:
             loop_counter = range(num_channels) if not is_quat_diff else range(3)
         if not is_diff_plot:
-            # standard plot
+            #% standard plot
             for j in loop_counter:
                 this_label = f'{name_one} {elements[j]}' if name_one else str(elements[j])
-                if show_rms:
+                if show_rms and not is_cat_plot:
                     value = _LEG_FORMAT.format(leg_conv*data_func[j])
                     if leg_units:
                         this_label += f' ({func_name}: {value} {leg_units})'
                     else:
                         this_label += f' ({func_name}: {value})'
                 if is_cat_plot:
-                    pass # TODO: finish this
+                    this_time = time_one[ix_data] if time_is_list else time_one
+                    this_data = data_one[ix_data] if data_is_list else data_one[ix_data, :] if data_as_rows else data_one[:, ix_data]
                 elif not doing_diffs or (doing_diffs and have_data_one):
                     this_time = time_one[j] if time_is_list else time_one
                     this_data = data_one[j] if data_is_list else data_one[j, :] if data_as_rows else data_one[:, j]
@@ -533,6 +541,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                 else:
                     this_zorder = 9
                 if plot_type == 'bar':
+                    #% bar plot
                     this_bottom1 = bottoms[j] if data_is_list else bottoms[j, :] if data_as_rows else bottoms[:, j]
                     this_bottom2 = bottoms[j+1] if data_is_list else bottoms[j+1, :] if data_as_rows else bottoms[:, j+1]
                     if not ignore_plot_data(this_data, ignore_empties):
@@ -540,7 +549,32 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                         # fill_between is a better alternative
                         this_axes.fill_between(this_time, this_bottom1, this_bottom2, step='mid', \
                             label=this_label, color=cm.get_color(j), edgecolor='none')
+                elif is_cat_plot:
+                    #% cat plot
+                    # plot the full underlying line once
+                    plot_func(this_axes, this_time, this_data, symbol_one, label='', color='xkcd:slate', linewidth=1, zorder=2)
+                    # plot the data with this category value
+                    for k in ix_cat:
+                        cat = ordered_cats[k]
+                        this_cat_name = cat_names[cat]
+                        if show_rms:
+                            value = _LEG_FORMAT.format(unit_conv*data_func[cat][ix_data])
+                            if new_units:
+                                cat_label = f'{this_label} {this_cat_name} ({func_name}: {value} {new_units})'
+                            else:
+                                cat_label = f'{this_label} {this_cat_name} ({func_name}: {value})'
+                        else:
+                            cat_label = f'{this_label} {this_cat_name}'
+                        this_cats = cats == cat
+                        this_linestyle = '-' if single_lines else 'none'
+                        # Note: Use len(cat_keys) here instead of num_cats so that potentially missing categories
+                        # won't mess up the color scheme by skipping colors
+                        this_cat_ix = np.argmax(cat == cat_keys)
+                        this_color = cm.get_color(this_cat_ix + ix_data*len(cat_keys))
+                        this_axes.plot(this_time[this_cats], this_data[this_cats], linestyle=this_linestyle, marker='.', \
+                            markersize=6, label=cat_label, color=this_color, zorder=3)
                 else:
+                    #% default plots
                     if not doing_diffs or (doing_diffs and have_data_one):
                         if is_quat_diff and not have_data_two:
                             # TODO: get rid of this special case or rework into colormap?
@@ -915,67 +949,21 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     r"""
     Data versus time plotting routine when grouped into categories.
 
-    Parameters
-    ----------
-    description : str
-        name of the data being plotted, used as title, must be given
-    time : (A, ) array_like
-        time history [sec] or datetime64
-    data : (N, ) or (N, A) ndarray
-        vector history
-    name : str, optional
-        name of data
-    elements : list
-        name of each element to plot within the vector
-    units : list
-        name of units for plot
-    time_units : str, optional
-        time units, defaults to 'sec', use 'datetime' for datetime histories
-    start_date : str, optional
-        date of t(0), may be an empty string
-    rms_xmin : float, optional
-        time of first point of RMS calculation
-    rms_xmax : float, optional
-        time of last point of RMS calculation
-    disp_xmin : float, optional
-        lower time to limit the display of the plot
-    disp_xmax : float, optional
-        higher time to limit the display of the plot
-    make_subplots : bool, optional
-        flag to use subplots for differences
-    single_lines : bool, optional
-        whether to plot each channel on a new figure instead of subplots
-    colormap : list or colormap
-        colors to use on the plot
-    use_mean : bool, optional
-        whether to use mean instead of RMS in legend calculations
-    plot_zero : bool, optional
-        whether to force zero to always be plotted on the Y axis
-    show_rms : bool, optional
-        whether to show the RMS calculation in the legend
-    legend_loc : str, optional
-        location to put the legend, default is 'best', use 'none' to suppress legend
-    second_units : str or tuple of (str, float), optional
-        Name and conversion factor to use for scaling data to a second Y axis and in legend
-    ylabel : str, optional
-        Labels to put on the Y axes, potentially by element
-    data_as_rows : bool, optional, default is True
-        Whether the data has each channel as a row vector when 2D, vs a column vector
-    use_zoh : bool, optional, default is False
-        Whether to plot as a zero-order hold, instead of linear interpolation between data points
-    label_vert_lines : bool, optional, default is True
-        Whether to label the RMS start/stop lines in the legend (if legend is shown)
-    extra_plotter : callable, optional
-        Extra callable plotting function to add more details to the plot
+    See make_generic_plot for input details.
 
     Returns
     -------
     figs : list of class matplotlib.Figure
         Figure handles
 
+    See Also
+    --------
+    make_generic_plot
+
     Notes
     -----
     #.  Written by David C. Stauffer in May 2020.
+    #.  Wrapped to the generic do everything version by David C. Stauffer in March 2021.
 
     Examples
     --------
@@ -1027,185 +1015,15 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     ...     plt.close(fig)
 
     """
-    # some basic flags
-    time_is_list = isinstance(time, list)
-    data_is_list = isinstance(data, list)
-
-    # data checks
-    assert description, 'You must give the plot a description.'
-
-    # convert rows/cols as necessary
-    if not data_is_list:
-        data = np.atleast_2d(data)
-        if not data_as_rows:
-            # TODO: is this the best way or make branches lower?
-            data = data.T
-
-    # get the categories
-    unique_cats = set(cats)
-    num_cats = len(unique_cats)
-    if cat_names is None:
-        cat_names = {}
-    # Add any missing dictionary values
-    for x in unique_cats:
-        if x not in cat_names:
-            cat_names[x] = 'Status='+str(x)
-    ordered_cats = [x for x in cat_names if x in unique_cats]
-    cat_keys = np.array(list(cat_names.keys()), dtype=int)
-
-    # calculate sizes
-    temp1 = len(time) if time_is_list else 1
-    temp2 = len(data) if data_is_list else data.shape[0] if data is not None else 0
-    if elements is None:
-        elements = [f'Channel {i+1}' for i in range(temp2)]
-    num_channels = len(elements)
-    assert temp2 == 0 or temp2 == num_channels, "The data doesn't match the number of elements."
-    assert temp1 == 1 or temp2 == 0 or temp1 == temp2, "The time doesn't match the size of the data."
-
-    #% Calculations
-    # build RMS indices
-    if data_is_list:
-        ix = {'one': [], 't_min': None, 't_max': None}
-        for j in range(num_channels):
-            temp_ix = get_rms_indices(time[j], xmin=rms_xmin, xmax=rms_xmax)
-            ix['one'].append(temp_ix['one'])
-            if j == 0:
-                ix['pts'] = temp_ix['pts']
-            else:
-                ix['pts'] = [min((ix['pts'][0], temp_ix['pts'][0])), max((ix['pts'][1], temp_ix['pts'][1]))]
-    else:
-        ix = get_rms_indices(time, xmin=rms_xmin, xmax=rms_xmax)
-    # create a colormap
-    cm = ColorMap(colormap=colormap, num_colors=len(cat_keys)*num_channels)
-    # calculate the rms (or mean) values
-    if show_rms:
-        if not use_mean:
-            func_name = 'RMS'
-            func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
-        else:
-            func_name = 'Mean'
-            func_lamb = lambda x, y: np.nanmean(x, axis=y)
-        data_func = {}
-        for cat in ordered_cats:
-            if data_is_list:
-                this_ix = ix['one'][j] & (cats[j] == cat)
-                data_func[cat] = [func_lamb(data[j][this_ix], None) for j in range(num_channels)]
-            else:
-                this_ix = ix['one'] & (cats == cat)
-                data_func[cat] = func_lamb(data[:, this_ix], 1) if np.any(this_ix) else np.full(num_channels, np.nan)
-    # unit conversion value
-    (new_units, unit_conv) = get_unit_conversion(second_units, units)
-    # pre-plan plot layout
-    if make_subplots:
-        num_figs = 1
-        num_rows = num_channels
-        num_cols = num_cats if single_lines else 1
-    else:
-        num_figs = num_channels * num_cats if single_lines else num_channels
-        num_cols = 1
-        num_rows = 1
-    if single_lines:
-        titles = [f'{description} {e} {cat_names[cat]}' for cat in ordered_cats for e in elements]
-    else:
-        titles = [f'{description} {e}' for e in elements]
-    num_axes = num_figs * num_rows * num_cols
-
-    #% Create plots
-    # create figure(s) and axes
-    figs = []
-    ax = []
-    ax_prim = None
-    for i in range(num_figs):
-        fig = plt.figure()
-        fig.canvas.set_window_title(titles[i])
-        for j in range(num_cols):
-            for k in range(num_rows):
-                temp_axes = fig.add_subplot(num_rows, num_cols, k*num_cols + j + 1, sharex=ax_prim)
-                if ax_prim is None:
-                    ax_prim = temp_axes
-                ax.append(temp_axes)
-        figs.append(fig)
-    assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
-
-    # plot data
-    for (i, this_axes) in enumerate(ax):
-        if single_lines:
-            ix_data = i % num_channels
-            ix_cat  = [i // num_channels]
-        else:
-            ix_data = i
-            ix_cat  = list(range(num_cats))
-        # pull out data for this channel
-        this_time = time[ix_data] if time_is_list else time
-        this_data = data[ix_data] if data_is_list else data[ix_data, :]
-        root_label = name if name else '' + str(elements[ix_data])
-        # plot the full underlying line once
-        if not single_lines:
-            if use_zoh:
-                this_axes.step(this_time, this_data, ':', where='post', \
-                    label='', color='xkcd:slate', linewidth=1, zorder=2)
-            else:
-                this_axes.plot(this_time, this_data, ':', \
-                    label='', color='xkcd:slate', linewidth=1, zorder=2)
-        # plot the data with this category value
-        for j in ix_cat:
-            cat = ordered_cats[j]
-            this_cat_name = cat_names[cat]
-            if show_rms:
-                value = _LEG_FORMAT.format(unit_conv*data_func[cat][ix_data])
-                if new_units:
-                    this_label = f'{root_label} {this_cat_name} ({func_name}: {value} {new_units})'
-                else:
-                    this_label = f'{root_label} {this_cat_name} ({func_name}: {value})'
-            else:
-                this_label = f'{root_label} {this_cat_name}'
-            this_cats = cats == cat
-            this_linestyle = '-' if single_lines else 'none'
-            # Note: Use len(cat_keys) here instead of num_cats so that potentially missing categories
-            # won't mess up the color scheme by skipping colors
-            this_cat_ix = np.argmax(cat == cat_keys)
-            this_color = cm.get_color(this_cat_ix + ix_data*len(cat_keys))
-            this_axes.plot(this_time[this_cats], this_data[this_cats], linestyle=this_linestyle, marker='.', \
-                markersize=6, label=this_label, color=this_color, zorder=3)
-
-        # set title and axes labels
-        this_axes.set_title(titles[i])
-        if (time_is_list and is_datetime(time[0])) or is_datetime(time):
-            this_axes.set_xlabel('Date')
-            assert time_units in {'datetime', 'numpy'}, 'Mismatch in the expected time units.'
-        else:
-            this_axes.set_xlabel(f'Time [{time_units}]{start_date}')
-        if ylabel is None:
-            this_axes.set_ylabel(f'{titles[i]} [{units}]')
-        else:
-            this_ylabel = ylabel[ix_data] if isinstance(ylabel, list) else ylabel
-            this_axes.set_ylabel(this_ylabel)
-        this_axes.grid(True)
-        # optionally add second Y axis
-        plot_second_units_wrapper(this_axes, (new_units, unit_conv))
-        # plot RMS lines
-        if show_rms:
-            plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
-
-    # Manipulate the axes limits at the end, so you have the total of all the data
-    # set X display limits
-    disp_xlimits(ax, xmin=disp_xmin, xmax=disp_xmax)
-    for this_axes in ax:
-        xlim = this_axes.get_xlim()
-        zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
-        # set Y display limits
-        if plot_zero:
-            show_zero_ylim(this_axes)
-        # format display of plot
-        if legend_loc.lower() != 'none':
-            this_axes.legend(loc=legend_loc)
-
-    # plot any extra information through a generic callable
-    if extra_plotter is not None:
-        for fig in figs:
-            extra_plotter(fig=fig, ax=fig.axes)
-
-    return figs
+    return make_generic_plot(plot_type='cats', description=description, time_one=time, \
+        data_one=data, cats=cats, cat_names=cat_names, name_one=name, elements=elements, \
+        units=units, time_units=time_units, start_date=start_date, \
+        rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
+        make_subplots=make_subplots, single_lines=single_lines, colormap=colormap, \
+        use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
+        second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
+        data_as_rows=data_as_rows, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
+        extra_plotter=extra_plotter)
 
 #%% Functions - make_bar_plot
 def make_bar_plot(description, time, data, *, name='', elements=None, units='', time_units='sec', \
