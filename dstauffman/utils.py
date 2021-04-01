@@ -21,7 +21,8 @@ import os
 import shlex
 import subprocess
 import sys
-from typing import Any, Callable, Dict, List, Optional, overload, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Tuple, \
+    TypeVar, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -43,9 +44,11 @@ if HAVE_SCIPY:
 #%% Globals
 _ALLOWED_ENVS: Optional[Dict[str, str]] = None # allows any environment variables to be invoked
 
-_StrOrListStr = TypeVar('_StrOrListStr', str, List[str])
-
-_SingleNum = Union[int, float, np.ndarray, np.datetime64]
+if TYPE_CHECKING:
+    _StrOrListStr = TypeVar('_StrOrListStr', str, List[str])
+    _SingleNum = Union[int, float, np.ndarray, np.datetime64]
+    _Lists = Union[np.ndarray, List[np.ndarray], Tuple[np.ndarray, ...]]
+    _Number = Union[float, np.ndarray]
 
 #%% Functions - _nan_equal
 def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:
@@ -190,7 +193,14 @@ def find_in_range(value: ArrayLike, min_: _SingleNum = -inf, max_: _SingleNum = 
     return valid  # type: ignore[no-any-return]
 
 #%% Functions - rms
-def rms(data, axis=None, keepdims=False, ignore_nans=False):
+@overload
+def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> float: ...
+@overload
+def rms(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _Number: ...
+@overload
+def rms(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> np.ndarray: ...
+
+def rms(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
     r"""
     Calculate the root mean square of a number series.
 
@@ -225,7 +235,7 @@ def rms(data, axis=None, keepdims=False, ignore_nans=False):
 
     """
     # check for empty data
-    if not np.isscalar(data) and len(data) == 0:
+    if not np.isscalar(data) and len(data) == 0:  # type: ignore[arg-type]
         return np.nan
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
@@ -236,6 +246,7 @@ def rms(data, axis=None, keepdims=False, ignore_nans=False):
             if axis is None:
                 out = np.nan
             else:
+                assert isinstance(data, np.ndarray)
                 if keepdims:
                     shape = (*data.shape[:axis], 1, *data.shape[axis+1:])
                 else:
@@ -244,10 +255,17 @@ def rms(data, axis=None, keepdims=False, ignore_nans=False):
         else:
             out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))
     # return the result
-    return out
+    return out  # type: ignore[no-any-return]
 
 #%% Functions - rss
-def rss(data, axis=None, keepdims=False, ignore_nans=False):
+@overload
+def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> float: ...
+@overload
+def rss(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _Number: ...
+@overload
+def rss(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> np.ndarray: ...
+
+def rss(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
     r"""
     Calculate the root sum square of a number series.
 
@@ -282,7 +300,7 @@ def rss(data, axis=None, keepdims=False, ignore_nans=False):
 
     """
     # check for empty data
-    if not np.isscalar(data) and len(data) == 0:
+    if not np.isscalar(data) and len(data) == 0:  # type: ignore[arg-type]
         return np.nan
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
@@ -293,6 +311,7 @@ def rss(data, axis=None, keepdims=False, ignore_nans=False):
             if axis is None:
                 out = np.nan
             else:
+                assert isinstance(data, np.ndarray)
                 if keepdims:
                     shape = (*data.shape[:axis], 1, *data.shape[axis+1:])
                 else:
@@ -301,7 +320,7 @@ def rss(data, axis=None, keepdims=False, ignore_nans=False):
         else:
             out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
     # return the result
-    return out
+    return out  # type: ignore[no-any-return]
 
 #%% Functions - compare_two_classes
 def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, names: Union[Tuple[str, str], List[str]] = None, \
@@ -674,7 +693,7 @@ def capture_output(mode: str = 'out'):
         sys.stdout, sys.stderr = old_out, old_err
 
 #%% Functions - unit
-def unit(data, axis=0):
+def unit(data: _Lists, axis: int = 0) -> np.ndarray:
     r"""
     Normalize a matrix into unit vectors along a specified dimension.
 
@@ -713,6 +732,7 @@ def unit(data, axis=0):
     """
     if isinstance(data, (list, tuple)):
         data = np.vstack(data).T
+    assert isinstance(data, np.ndarray)
     if axis >= data.ndim:
         raise ValueError('axis {} is out of bounds for array of dimension {}'.format(axis, data.ndim))
     # calculate the magnitude of each vector
@@ -720,7 +740,7 @@ def unit(data, axis=0):
     # check for zero vectors, and replace magnitude with 1 to make them unchanged
     mag[mag == 0] = 1
     # calculate the new normalized data
-    norm_data = data / mag
+    norm_data: np.ndarray = data / mag
     return norm_data
 
 #%% modd
@@ -1122,7 +1142,8 @@ def combine_per_year(data: Optional[np.ndarray], func: Callable[..., Any] = None
     return data2
 
 #%% Functions - execute
-def execute(command, folder, *, ignored_codes=None, env=None):
+def execute(command: Union[str, List[str]], folder: str, *, ignored_codes: Iterable[int] = None, \
+        env: Dict[str, str] = None):
     r"""
     Wrapper to subprocess that allows the screen to be updated for long running commands.
 
@@ -1132,7 +1153,7 @@ def execute(command, folder, *, ignored_codes=None, env=None):
         Command to execute
     folder : str
         Path to execute the command in
-    ignored_codes : int or iterable of int, optional
+    ignored_codes : iterable of int, optional
         If given, a list of non-zero error codes to ignore
     env : dict
         Dictionary of environment variables to update for the call
@@ -1164,11 +1185,11 @@ def execute(command, folder, *, ignored_codes=None, env=None):
     popen = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, \
                              cwd=folder, shell=False, universal_newlines=True, env=env)
     # intermittenly read output lines
-    for stdout_line in iter(popen.stdout.readline, ''):
+    for stdout_line in iter(popen.stdout.readline, ''):  # type: ignore[union-attr]
         yield stdout_line
     # once done, close and get return codes
-    popen.stdout.close()
-    return_code = popen.wait()
+    popen.stdout.close()  # type: ignore[union-attr]
+    return_code = popen.wait()  # type: ignore[union-attr]
 
     # method 2
 #    while True:
@@ -1182,14 +1203,15 @@ def execute(command, folder, *, ignored_codes=None, env=None):
 
     # determine if command exited cleanly or not and return appropriate code
     if return_code:
-        if ignored_codes is None or return_code not in ignored_codes:
+        if ignored_codes is None or return_code not in ignored_codes:  # type: ignore[operator]
             #raise subprocess.CalledProcessError(return_code, command)
             return ReturnCodes.bad_command
     return ReturnCodes.clean
 
 #%% Functions - execute_wrapper
-def execute_wrapper(command, folder, *, dry_run=False, ignored_codes=None, filename='', env=None, \
-                    print_status=True):
+def execute_wrapper(command: Union[str, List[str]], folder: str, *, dry_run: bool = False, \
+        ignored_codes: Iterable[int] = None, filename: str = '', env: Dict[str, str] = None, \
+        print_status: bool = True) -> Union[ReturnCodes, List[str]]:
     r"""
     Wrapper to the wrapper to subprocess with options to print the command do dry-runs.
 
@@ -1221,7 +1243,7 @@ def execute_wrapper(command, folder, *, dry_run=False, ignored_codes=None, filen
     >>> command = 'ls'
     >>> folder  = os.getcwd()
     >>> dry_run = True
-    >>> execute_wrapper(command, folder, dry_run=dry_run) # doctest: +ELLIPSIS
+    >>> rc = execute_wrapper(command, folder, dry_run=dry_run) # doctest: +ELLIPSIS
     Would execute "ls" in "..."
 
     """
@@ -1230,7 +1252,7 @@ def execute_wrapper(command, folder, *, dry_run=False, ignored_codes=None, filen
         if isinstance(command, list):
             command = shlex.join(command)
         print('Would execute "{}" in "{}"'.format(command, folder))
-        return
+        return ReturnCodes.clean
     # clean up command
     if isinstance(command, str):
         command_list = shlex.split(command)
@@ -1321,7 +1343,7 @@ def get_username() -> str:
     return os.environ['USER']
 
 #%% Functions - is_datetime
-def is_datetime(time):
+def is_datetime(time: ArrayLike) -> bool:
     r"""
     Determines if the given time is either a datetime.datetime or np.datetime64 or just a regular number.
 
@@ -1358,7 +1380,8 @@ def is_datetime(time):
 
     """
     out = False
-    if isinstance(time, datetime.datetime) or (hasattr(time, 'dtype') and np.issubdtype(time.dtype, np.datetime64)):
+    if isinstance(time, datetime.datetime) or (hasattr(time, 'dtype') and \
+            np.issubdtype(time.dtype, np.datetime64)):  # type: ignore[union-attr]
         out = True
     return out
 

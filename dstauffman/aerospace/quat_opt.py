@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import doctest
 import unittest
 
@@ -19,7 +20,7 @@ if HAVE_NUMPY:
 
 #%% Functions - qrot_single
 @ncjit
-def qrot_single(axis, angle):
+def qrot_single(axis: int, angle: float) -> np.ndarray:
     r"""
     Construct a quaternion expressing a rotation about a single axis.
 
@@ -64,7 +65,7 @@ def qrot_single(axis, angle):
 
 #%% Functions - quat_interp_single
 @ncjit
-def quat_interp_single(time, quat, ti):
+def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np.ndarray:
     r"""
     Interpolate quaternions from a monotonic time series of quaternions.
 
@@ -123,7 +124,7 @@ def quat_interp_single(time, quat, ti):
     sin        = np.sin(scaled_ang/2)
     dq         = np.array([ax[0]*sin, ax[1]*sin, ax[2]*sin, np.cos(scaled_ang/2)])
     # calculate desired quaternion
-    qout       = quat_norm_single(quat_mult_single(dq, q1))
+    qout: np.ndarray = quat_norm_single(quat_mult_single(dq, q1))
     # enforce positive scalar component
     if qout[3] < 0:
         qout = -qout
@@ -131,7 +132,7 @@ def quat_interp_single(time, quat, ti):
 
 #%% Functions - quat_inv_single
 @ncjit
-def quat_inv_single(q1):
+def quat_inv_single(q1: np.ndarray) -> np.ndarray:
     r"""
     Return the inverse of a normalized quaternions.
 
@@ -164,11 +165,12 @@ def quat_inv_single(q1):
     [-0.70710678 -0. -0. 0.70710678]
 
     """
-    return q1 * np.array([-1., -1., -1., 1.])
+    q2: np.ndarray = q1 * np.array([-1., -1., -1., 1.])
+    return q2
 
 #%% Functions - quat_mult_single
 @ncjit
-def quat_mult_single(a, b):
+def quat_mult_single(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     r"""
     Multiply quaternions together.
 
@@ -214,7 +216,7 @@ def quat_mult_single(a, b):
 
     """
     # single quaternion inputs case
-    c = np.array([ \
+    c: np.ndarray = np.array([ \
         [ a[3],  a[2], -a[1],  a[0]], \
         [-a[2],  a[3],  a[0],  a[1]], \
         [ a[1], -a[0],  a[3],  a[2]], \
@@ -227,7 +229,7 @@ def quat_mult_single(a, b):
 
 #%% Functions - quat_norm_single
 @ncjit
-def quat_norm_single(x):
+def quat_norm_single(x: np.ndarray) -> np.ndarray:
     r"""
     Normalize each column of the input matrix.
 
@@ -262,12 +264,12 @@ def quat_norm_single(x):
 
     """
     # divide input by its column vector norm
-    y = x / np.sqrt(np.sum(x*x, axis=0))
+    y: np.ndarray = x / np.sqrt(np.sum(x*x, axis=0))
     return y
 
 #%% Functions - quat_prop_single
 @ncjit
-def quat_prop_single(quat, delta_ang):
+def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray) -> np.ndarray:
     r"""
     Approximate propagation of a quaternion using a small delta angle.
 
@@ -318,7 +320,7 @@ def quat_prop_single(quat, delta_ang):
     #compute delta quaternion
     delta_quaternion = 0.5 * omega @ quat
     # propagate over delta
-    quat_new = quat + delta_quaternion
+    quat_new: np.ndarray = quat + delta_quaternion
     # ensure positive scalar component
     if quat_new[3] < 0:
         quat_new *= -1
@@ -326,7 +328,7 @@ def quat_prop_single(quat, delta_ang):
 
 #%% Functions - quat_times_vector_single
 @ncjit
-def quat_times_vector_single(quat, v):
+def quat_times_vector_single(quat: np.ndarray, v: np.ndarray) -> np.ndarray:
     r"""
     Multiply quaternion(s) against vector(s).
 
@@ -370,12 +372,12 @@ def quat_times_vector_single(quat, v):
     """
     skew = vec_cross(quat[:3])
     qv = skew @ v
-    vec = v + 2*(-quat[3] * qv + (skew @ qv))
+    vec: np.ndarray = v + 2*(-quat[3] * qv + (skew @ qv))
     return vec
 
 #%% Functions - quat_to_dcm
 @ncjit
-def quat_to_dcm(quat):
+def quat_to_dcm(quat: np.ndarray) -> np.ndarray:
     r"""
     Convert quaternion to a direction cosine matrix.
 

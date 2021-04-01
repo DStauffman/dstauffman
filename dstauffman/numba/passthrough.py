@@ -15,7 +15,7 @@ import unittest
 try:
     # Try importing numba to determine if it is there.  Use this instead of HAVE_NUMBA from dstauffman
     # to avoid any circular dependencies
-    from numba import njit
+    from numba import njit  # type: ignore[attr-defined]
     HAVE_NUMBA = True
 except ModuleNotFoundError:
     HAVE_NUMBA = False

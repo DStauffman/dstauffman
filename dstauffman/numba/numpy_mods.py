@@ -15,7 +15,7 @@ import unittest
 from dstauffman.numba.passthrough import ncjit
 
 try:
-    from numba import boolean
+    from numba import boolean  # type: ignore[attr-defined]
     from numba.typed import List
 except ModuleNotFoundError:
     List = list  # type: ignore[assignment, misc]

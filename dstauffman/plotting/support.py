@@ -17,7 +17,7 @@ import os
 import platform
 import re
 import sys
-from typing import Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Dict, List, Optional, Tuple, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -29,10 +29,12 @@ except ModuleNotFoundError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object  # type: ignore[assignment, misc]
 
-from dstauffman import Frozen, get_images_dir, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, is_datetime
+from dstauffman import Frozen, get_images_dir, get_username, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, \
+    is_datetime
 
 if HAVE_MPL:
     from matplotlib.axes import Axes
+    from matplotlib.backends.backend_pdf import PdfPages
     import matplotlib.cm as cmx
     import matplotlib.colors as colors
     from matplotlib.dates import date2num
@@ -58,7 +60,7 @@ if HAVE_SCIPY:
 
 #%% Constants
 # Default colormap to use on certain plots
-DEFAULT_COLORMAP: str = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
+DEFAULT_COLORMAP: str = 'Paired'  # 'Dark2', 'tab10', 'tab20'
 
 # Whether to include a classification on any generated plots
 DEFAULT_CLASSIFICATION: str = ''
@@ -66,20 +68,32 @@ DEFAULT_CLASSIFICATION: str = ''
 if TYPE_CHECKING:
     _FigOrListFig = Union[Figure, List[Figure]]
 
-_COLOR_LISTS: Dict[str, colors.ListedColormap] = {}
+COLOR_LISTS: Dict[str, colors.ListedColormap] = {}
+# default colormap
+COLOR_LISTS['default']  = cmx.get_cmap(DEFAULT_COLORMAP)
+assert isinstance(COLOR_LISTS['default'], colors.ListedColormap), 'Expecting a ListedColormap for the default.'
 # single colors
-_COLOR_LISTS['same']     = colors.ListedColormap(tuple(repeat(cmx.get_cmap(DEFAULT_COLORMAP).colors[0], 8)))
-_COLOR_LISTS['same_old'] = colors.ListedColormap(tuple(repeat('#1f77b4', 8)))
-_COLOR_LISTS['single']   = colors.ListedColormap(('xkcd:red', ))
+COLOR_LISTS['same']     = colors.ListedColormap(tuple(repeat(cmx.get_cmap(DEFAULT_COLORMAP).colors[0], 8)))
+COLOR_LISTS['same_old'] = colors.ListedColormap(tuple(repeat('#1f77b4', 8)))
+COLOR_LISTS['single']   = colors.ListedColormap(('xkcd:red', ))
 # doubles
-_COLOR_LISTS['double']   = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
-_COLOR_LISTS['dbl_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:cyan'))
+COLOR_LISTS['double']   = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
+COLOR_LISTS['dbl_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:cyan'))
 # triples
-_COLOR_LISTS['vec']      = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
-_COLOR_LISTS['vec_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan'))
+COLOR_LISTS['vec']      = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
+COLOR_LISTS['vec_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan'))
 # quads
-_COLOR_LISTS['quat']     = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
-_COLOR_LISTS['quat_off'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan', 'xkcd:brown'))
+COLOR_LISTS['quat']     = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
+COLOR_LISTS['quat_off'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan', 'xkcd:brown'))
+# double combinations
+COLOR_LISTS['dbl_diff']    = colors.ListedColormap(COLOR_LISTS['dbl_off'].colors + COLOR_LISTS['double'].colors)
+COLOR_LISTS['dbl_diff_r']  = colors.ListedColormap(COLOR_LISTS['double'].colors + COLOR_LISTS['dbl_off'].colors)
+# triple combinations
+COLOR_LISTS['vec_diff']    = colors.ListedColormap(COLOR_LISTS['vec_off'].colors + COLOR_LISTS['vec'].colors)
+COLOR_LISTS['vec_diff_r']  = colors.ListedColormap(COLOR_LISTS['vec'].colors + COLOR_LISTS['vec_off'].colors)
+# quad combinations
+COLOR_LISTS['quat_diff']   = colors.ListedColormap(COLOR_LISTS['quat_off'].colors + COLOR_LISTS['quat'].colors)
+COLOR_LISTS['quat_diff_r'] = colors.ListedColormap(COLOR_LISTS['quat'].colors + COLOR_LISTS['quat_off'].colors)
 
 #%% Set Matplotlib global settings
 if HAVE_MPL:
@@ -250,6 +264,9 @@ class ColorMap(Frozen):
         if self.num_colors is not None:
             low = 0
             high = num_colors-1
+        elif isinstance(colormap, colors.ListedColormap):
+            low = 0
+            high = colormap.N
         # get colormap based on high and low limits
         if colormap is None:
             cmap = plt.get_cmap(DEFAULT_COLORMAP)
@@ -315,78 +332,6 @@ def close_all(figs: _FigOrListFig = None) -> None:
             plt.close(this_fig)
     gc.collect()
 
-#%% Functions - get_color_lists
-@overload
-def get_color_lists(return_as_colormap: Literal[True] = ...) -> Dict[str, ColorMap]: ...
-
-@overload
-def get_color_lists(return_as_colormap: Literal[False]) -> Dict[str, Union[colors.ListedColormap, str]]: ...
-
-def get_color_lists(return_as_colormap: bool = False) -> Union[Dict[str, Union[colors.ListedColormap, str]], Dict[str, ColorMap]]:
-    r"""
-    Gets different color lists to use for plotting.
-
-    Returns
-    -------
-    color_lists : dict
-        Lists of colors, either as str or matplotlib.colors.ListedColormap
-        includes:
-            default   : Default scheme to use when plotting
-            same      : Each color will be the same, and match the first color from default
-            same_old  : Each color will be the same, with the matplotlib default medium bluish color (#1f77b4)
-            single    : When you only want one color
-            double    : For two colors
-            vec       : For three colors
-            quat      : For four colors
-            dbl_diff  : For 2x2 related colors, giving four total
-            vec_diff  : For 3x2 related colors, giving six total
-            quat_diff : For 4x2 related colors, giving eight total
-
-    Examples
-    --------
-    >>> from dstauffman.plotting import get_color_lists
-    >>> color_lists = get_color_lists()
-    >>> print(color_lists['default'].colors[0])
-    Paired
-
-    >>> color_lists_map = get_color_lists(return_as_colormap=True)
-    >>> print(color_lists_map['default'].get_color(0)) # doctest: +ELLIPSIS
-    (0.65098..., 0.80784..., 0.890196..., 1.0)
-
-    """
-    color_lists: Dict[str, colors.ListedColormap] = {}
-    color_lists['default'] = colors.ListedColormap((DEFAULT_COLORMAP, ))
-    color_lists.update(_COLOR_LISTS)
-    # double combinations
-    color_lists['dbl_diff']    = colors.ListedColormap(color_lists['dbl_off'].colors + color_lists['double'].colors)
-    color_lists['dbl_diff_r']  = colors.ListedColormap(color_lists['double'].colors + color_lists['dbl_off'].colors)
-    # triple combinations
-    color_lists['vec_diff']    = colors.ListedColormap(color_lists['vec_off'].colors + color_lists['vec'].colors)
-    color_lists['vec_diff_r']  = colors.ListedColormap(color_lists['vec'].colors + color_lists['vec_off'].colors)
-    # quad combinations
-    color_lists['quat_diff']   = colors.ListedColormap(color_lists['quat_off'].colors + color_lists['quat'].colors)
-    color_lists['quat_diff_r'] = colors.ListedColormap(color_lists['quat'].colors + color_lists['quat_off'].colors)
-    if return_as_colormap:
-        color_list_maps: Dict[str, ColorMap] = {}
-        for (key, value) in color_lists.items():
-            if key == 'default':
-                value = value.colors[0]
-                assert isinstance(value, str)
-                if value == 'Paired':
-                    num_colors = 12
-                elif value == 'tab10':
-                    num_colors = 10
-                elif value == 'tab20':
-                    num_colors = 20
-                else:
-                    num_colors = 1
-            else:
-                assert isinstance(value, colors.ListedColormap)
-                num_colors = value.N
-            color_list_maps[key] = ColorMap(value, num_colors=num_colors)
-        return color_list_maps
-    return color_lists
-
 #%% Functions - get_nondeg_colorlists
 def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
     r"""
@@ -404,6 +349,8 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
 
     Notes
     -----
+    #.  This function returns three times the number of colors you need, with the first two sets
+        visually related to each other, and the third as a repeat of the first.
     #.  Written by David C. Stauffer in March 2021.
 
     Examples
@@ -415,15 +362,14 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
     ('xkcd:red', 'xkcd:blue', 'xkcd:fuchsia', 'xkcd:cyan', 'xkcd:red', 'xkcd:blue')
 
     """
-    color_lists = get_color_lists()
     if num_channels == 1:
         clist = colors.ListedColormap(('#1f77b4', 'xkcd:blue', '#1f77b4'))
     elif num_channels == 2:
-        clist = colors.ListedColormap(color_lists['dbl_diff_r'].colors + color_lists['double'].colors)  # type: ignore[attr-defined]
+        clist = colors.ListedColormap(COLOR_LISTS['dbl_diff_r'].colors + COLOR_LISTS['double'].colors)  # type: ignore[attr-defined]
     elif num_channels == 3:
-        clist = colors.ListedColormap(color_lists['vec_diff_r'].colors + color_lists['vec'].colors)  # type: ignore[attr-defined]
+        clist = colors.ListedColormap(COLOR_LISTS['vec_diff_r'].colors + COLOR_LISTS['vec'].colors)  # type: ignore[attr-defined]
     elif num_channels == 4:
-        clist = colors.ListedColormap(color_lists['quat_diff_r'].colors + color_lists['quat'].colors)  # type: ignore[attr-defined]
+        clist = colors.ListedColormap(COLOR_LISTS['quat_diff_r'].colors + COLOR_LISTS['quat'].colors)  # type: ignore[attr-defined]
     else:
         ix    = [x % 10 for x in range(num_channels)]
         cmap1 = cmx.get_cmap('tab10')
@@ -1349,7 +1295,7 @@ def plot_phases(ax, times, colormap='tab10', labels=None, *, group_all=False):
 
     Examples
     --------
-    >>> from dstauffman.plotting import plot_phases, get_color_lists
+    >>> from dstauffman.plotting import plot_phases, COLOR_LISTS
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
@@ -1361,8 +1307,7 @@ def plot_phases(ax, times, colormap='tab10', labels=None, *, group_all=False):
     >>> times = np.array([5, 20, 60, 90])
     >>> # times = np.array([[5, 20, 60, 90], [10, 60, 90, 95]])
     >>> labels = ['Part 1', 'Phase 2', 'Watch Out', 'Final']
-    >>> colorlists = get_color_lists()
-    >>> colors = colorlists['quat']
+    >>> colors = COLOR_LISTS['quat']
     >>> plot_phases(ax, times, colors, labels)
     >>> plt.show(block=False) # doctest: +SKIP
 
@@ -1672,6 +1617,48 @@ def z_from_ci(ci):
     """
     z = st.norm.ppf(1-(1-ci)/2)
     return z
+
+#%% Functions - save_figs_to_pdf
+def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: str = 'figs.pdf') -> None:
+    r"""
+    Saves the given figures to a PDF file.
+
+    Parameters
+    ----------
+    figs : figure or List[figure] or None
+        Figures to save, None means save all open figures
+    filename : str, optional
+        Name of the file to save the figures to, defaults to 'figs.pdf' in the current folder
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in March 2021.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import plot_time_history, save_figs_to_pdf
+    >>> fig = plot_time_history('test', 0, 0)
+    >>> save_figs_to_pdf(fig)  # doctest: +SKIP
+
+    """
+    # Optional inputs
+    if figs is None:
+        figs = plt.get_fignums()
+    if isinstance(figs, Figure):
+        figs = [figs]
+    assert isinstance(figs, list)
+
+    # Create PDF
+    with PdfPages(filename) as pdf:
+        for fig in figs:
+            pdf.savefig(fig)
+
+        # Set metedata for PDF file
+        d = pdf.infodict()
+        d['Title'] = 'PDF Figures'
+        d['Author'] = get_username()
+        d['CreationDate'] = datetime.datetime.now()
+        d['ModDate'] = d['CreationDate']
 
 #%% Unit test
 if __name__ == '__main__':

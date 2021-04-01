@@ -56,6 +56,13 @@ class Test_estimation_bf_smoother(unittest.TestCase):
         z = np.ones(num_axes)
         self.lambda_bar_final = np.ones(num_states)
         self.kf_record = KfRecord(num_points=num_points, num_active=num_states, num_states=num_states, num_axes=num_axes)
+        assert self.kf_record.time is not None
+        assert self.kf_record.P is not None
+        assert self.kf_record.stm is not None
+        assert self.kf_record.H is not None
+        assert self.kf_record.Pz is not None
+        assert self.kf_record.K is not None
+        assert self.kf_record.z is not None
         for i in range(num_points):
             self.kf_record.time[i] = float(num_points)
             self.kf_record.stm[:, :, i] = stm

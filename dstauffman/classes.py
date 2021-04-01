@@ -397,10 +397,8 @@ class Frozen(object):
 
     @overload
     def pprint(self, return_text: Literal[True], **kwargs) -> str: ...
-
     @overload
     def pprint(self, return_text: Literal[False], **kwargs) -> None: ...
-
     @overload
     def pprint(self, **kwargs) -> Optional[str]: ...
 
@@ -502,7 +500,6 @@ class Counter(Frozen):
 
     @overload
     def __add__(self, other: int) -> int: ...
-
     @overload
     def __add__(self, other: Counter) -> Counter: ...
 
@@ -527,7 +524,6 @@ class Counter(Frozen):
 
     @overload
     def __sub__(self, other: int) -> int: ...
-
     @overload
     def __sub__(self, other: Counter) -> Counter: ...
 

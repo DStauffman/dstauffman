@@ -125,3 +125,4 @@ The following commands are available:
 * help
 * make_init
 * tests
+* version

@@ -3,12 +3,13 @@
 #%% Imports
 from copy import deepcopy
 import datetime
+import os
 
 import numpy as np
 
-from dstauffman import convert_date
+from dstauffman import convert_date, get_output_dir
 from dstauffman.plotting import Opts, plot_attitude, plot_position, plot_innovations, plot_covariance, \
-    plot_los, plot_states
+    plot_los, plot_states, save_figs_to_pdf
 from dstauffman.aerospace import Kf,  quat_from_euler, quat_mult, quat_norm
 
 #%% Flags
@@ -96,28 +97,31 @@ kd2.innov.time = convert_date(kf2.innov.time, 'numpy', date_zero=date_zero)
 if plots['att']:
     f1 = plot_attitude(kf1, kf2, opts=opts1)
     f2 = plot_attitude(kd1, kd2, opts=opts2, second_units=('mrad', 1e3))
-    f3 = plot_attitude(kf1, kf2, opts=opts3, second_units='milli')
-    f4 = plot_attitude(kd1, kd2, opts=opts4, second_units=('nrad', 1e9))
+    f3 = plot_attitude(kf1, kf2, opts=opts3, leg_scale='milli')
+    f4 = plot_attitude(kd1, kd2, opts=opts4, leg_scale='milli', second_units=('nrad', 1e9))
 
 if plots['pos']:
     f1 = plot_position(kf1, kf2, opts=opts1)
     f2 = plot_position(kd1, kd2, opts=opts2, second_units=('Mm', 1e-6))
-    f3 = plot_position(kf1, kf2, opts=opts3, second_units='mega')
-    f4 = plot_position(kd1, kd2, opts=opts4, second_units=('Mm', 1e-6))
+    f3 = plot_position(kf1, kf2, opts=opts3, leg_scale='mega')
+    f4 = plot_position(kd1, kd2, opts=opts4, leg_scale='milli', second_units=('Mm', 1e-6))
 
 if plots['inn']:
     f1 = plot_innovations(kf1.innov, kf2.innov, opts=opts1)
     f2 = plot_innovations(kd1.innov, kd2.innov, opts=opts2, second_units=('mm', 1e3))
-    f3 = plot_innovations(kf1.innov, kf2.innov, opts=opts3, second_units='milli')
-    f4 = plot_innovations(kd1.innov, kd2.innov, opts=opts4, second_units=('nm', 1e9))
+    f3 = plot_innovations(kf1.innov, kf2.innov, opts=opts3, leg_scale='milli')
+    f4 = plot_innovations(kd1.innov, kd2.innov, opts=opts4, leg_scale='milli', second_units=('nm', 1e9))
 
 if plots['cov']:
     f1 = plot_covariance(kf1, kf2, opts=opts1)
     f2 = plot_covariance(kd1, kd2, opts=opts2, second_units=('mrad', 1e3))
-    f3 = plot_covariance(kf1, kf2, opts=opts3, second_units='milli')
-    f4 = plot_covariance(kd1, kd2, opts=opts4, second_units=('nrad', 1e9))
+    f3 = plot_covariance(kf1, kf2, opts=opts3, leg_scale='milli')
+    f4 = plot_covariance(kd1, kd2, opts=opts4, leg_scale='milli', second_units=('nrad', 1e9))
 
 if plots['los']:
-    f = plot_los(kf1, kf2, opts=opts2, second_units='micro')
+    f = plot_los(kf1, kf2, opts=opts2, leg_scale='milli', second_units='micro')
 if plots['sts']:
-    f = plot_states(kd1, kd2, opts=opts1, second_units=('nrad', 1e9))
+    f = plot_states(kd1, kd2, opts=opts1, leg_scale='mill', second_units=('nrad', 1e9))
+
+# Test PDF saving
+save_figs_to_pdf(f1 + f2 + f3 + f4, filename=os.path.join(get_output_dir(), 'GND_plots.pdf'))
