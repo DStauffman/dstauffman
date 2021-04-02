@@ -13,7 +13,7 @@ import datetime
 import doctest
 import os
 import sys
-from typing import Dict, FrozenSet, List, Set, Tuple, Union
+from typing import Dict, FrozenSet, List, Set, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman.constants import HAVE_COVERAGE, HAVE_PYTEST
@@ -26,6 +26,10 @@ if HAVE_COVERAGE:
     from coverage import Coverage
 if HAVE_PYTEST:
     import pytest
+
+if TYPE_CHECKING:
+    from PyQt5.QtCore import QCoreApplication
+    from PyQt5.QtWidgets import QApplication
 
 #%% run_docstrings
 def run_docstrings(files: List[str], verbose: bool = False) -> int:
@@ -144,6 +148,7 @@ def run_pytests(folder: str, *args, **kwargs) -> int:
         suppress_plots()
     # Note: need to do this next part to keep GUI testing from closing the instance with sys.exit
     # open a qapp
+    qapp: Union[None, QApplication, QCoreApplication]
     try:
         from PyQt5.QtWidgets import QApplication
     except ModuleNotFoundError:
@@ -152,7 +157,7 @@ def run_pytests(folder: str, *args, **kwargs) -> int:
         if QApplication.instance() is None:
             qapp = QApplication(sys.argv)
         else:
-            qapp = QApplication.instance()  # type: ignore[assignment]
+            qapp = QApplication.instance()
     # run tests using pytest
     exit_code = pytest.main([folder, '-rfEsP'] + list(*args), **kwargs)
     # close the qapp

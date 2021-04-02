@@ -67,7 +67,7 @@ def plot_bpe_convergence(costs, *, opts=None):
     this_title = 'Convergence by Iteration'
     # create the figure and set the title
     fig = plt.figure()
-    fig.canvas.set_window_title(this_title)
+    fig.canvas.manager.set_window_title(this_title)
     # add an axis and plot the data
     ax = fig.add_subplot(111)
     ax.semilogy(time, costs, 'b.-', linewidth=2)

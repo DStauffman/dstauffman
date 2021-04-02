@@ -436,7 +436,7 @@ class Test_plotting_storefig(unittest.TestCase):
         cls.plot_type = 'png'
         # create the figure and set the title
         cls.fig = plt.figure()
-        cls.fig.canvas.set_window_title(cls.title)
+        cls.fig.canvas.manager.set_window_title(cls.title)
         # add an axis and plot the data
         ax = cls.fig.add_subplot(111)
         ax.plot(cls.time, cls.data)
@@ -487,11 +487,11 @@ class Test_plotting_storefig(unittest.TestCase):
 
     def test_bad_characters(self) -> None:
         # change to bad name
-        self.fig.canvas.set_window_title('Bad < > / names')
+        self.fig.canvas.manager.set_window_title('Bad < > / names')
         # save file
         plot.storefig(self.fig, self.folder, self.plot_type)
         # restore filename
-        self.fig.canvas.set_window_title(self.title)
+        self.fig.canvas.manager.set_window_title(self.title)
         # assert that file exists
         if platform.system() == 'Windows':
             self.this_filename = os.path.join(self.folder, 'Bad _ _ _ names' + '.' + self.plot_type)
@@ -522,7 +522,7 @@ class Test_plotting_titleprefix(unittest.TestCase):
         self.fig = plt.figure()
         self.title = 'Figure Title'
         self.prefix = 'Prefix'
-        self.fig.canvas.set_window_title(self.title)
+        self.fig.canvas.manager.set_window_title(self.title)
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)
         ax = self.fig.add_subplot(111)
@@ -599,7 +599,7 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         self.ax = self.fig.add_subplot(111)
         self.time = np.arange(1, 10, 0.1)
         self.data = self.time ** 2
@@ -911,7 +911,7 @@ class Test_plotting_plot_phases(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Sine Wave')
+        self.fig.canvas.manager.set_window_title('Sine Wave')
         self.ax = self.fig.add_subplot(111)
         time = np.arange(101)
         data = np.cos(time / 10)

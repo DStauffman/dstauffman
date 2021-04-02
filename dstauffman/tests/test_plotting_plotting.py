@@ -484,7 +484,7 @@ class Test_plotting_setup_plots(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)

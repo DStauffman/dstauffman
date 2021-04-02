@@ -466,13 +466,13 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     # create figures
     fig = plt.figure()
     if is_quat_diff and not make_subplots:
-        fig.canvas.set_window_title(description + ' Quaternion Components')
+        fig.canvas.manager.set_window_title(description + ' Quaternion Components')
     else:
-        fig.canvas.set_window_title(description)
+        fig.canvas.manager.set_window_title(description)
     if doing_diffs:
         if have_both and not make_subplots:
             f2 = plt.figure()
-            f2.canvas.set_window_title(description + ' Difference')
+            f2.canvas.manager.set_window_title(description + ' Difference')
             figs = [fig, f2]
         else:
             figs = [fig]
@@ -485,7 +485,9 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         if is_cat_plot:
             if i > 0:
                 fig = plt.figure()
-            fig.canvas.set_window_title(titles[i])
+            fig.canvas.manager.set_window_title(titles[i])
+        if doing_diffs and i == 1:
+            fig = f2
         for j in range(num_cols):
             for k in range(num_rows):
                 temp_axes = fig.add_subplot(num_rows, num_cols, k*num_cols + j + 1, sharex=ax_prim)
@@ -1195,7 +1197,7 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
 
     # create figure
     fig = plt.figure()
-    fig.canvas.set_window_title(description + extra_text)
+    fig.canvas.manager.set_window_title(description + extra_text)
     ax = fig.add_subplot(1, 1, 1)
     # plot endpoints
     ax.plot(points[0, :], points[1, :], '.', color=colors_meas, label='Sighting', zorder=5)

@@ -22,7 +22,7 @@ import unittest
 import warnings
 
 try:
-    from PyQt5.QtCore import QSize
+    from PyQt5.QtCore import QCoreApplication, QSize
     from PyQt5.QtGui import QIcon
     from PyQt5.QtWidgets import QApplication, QPushButton
 except ModuleNotFoundError: # pragma: no cover
@@ -136,7 +136,7 @@ class MyCustomToolbar():
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title('Figure Title')
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
@@ -365,11 +365,11 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
     if num_channels == 1:
         clist = colors.ListedColormap(('#1f77b4', 'xkcd:blue', '#1f77b4'))
     elif num_channels == 2:
-        clist = colors.ListedColormap(COLOR_LISTS['dbl_diff_r'].colors + COLOR_LISTS['double'].colors)  # type: ignore[attr-defined]
+        clist = colors.ListedColormap(COLOR_LISTS['dbl_diff_r'].colors + COLOR_LISTS['double'].colors)
     elif num_channels == 3:
-        clist = colors.ListedColormap(COLOR_LISTS['vec_diff_r'].colors + COLOR_LISTS['vec'].colors)  # type: ignore[attr-defined]
+        clist = colors.ListedColormap(COLOR_LISTS['vec_diff_r'].colors + COLOR_LISTS['vec'].colors)
     elif num_channels == 4:
-        clist = colors.ListedColormap(COLOR_LISTS['quat_diff_r'].colors + COLOR_LISTS['quat'].colors)  # type: ignore[attr-defined]
+        clist = colors.ListedColormap(COLOR_LISTS['quat_diff_r'].colors + COLOR_LISTS['quat'].colors)
     else:
         ix    = [x % 10 for x in range(num_channels)]
         cmap1 = cmx.get_cmap('tab10')
@@ -527,8 +527,8 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
 
     Notes
     -----
-    #.  Uses the figure.canvas.get_window_title property to determine the figure name.  If that is
-        not set or default ('image'), then it tries the figure suptitle or first axes title.
+    #.  Uses the figure.canvas.manager.get_window_title property to determine the figure name.  If
+        that is not set or default ('image'), then it tries the figure suptitle or first axes title.
 
     See Also
     --------
@@ -542,7 +542,7 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
     >>> import numpy as np
     >>> import os
     >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title('Figure Title')
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
@@ -581,7 +581,7 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
     throw_warning = False
     for this_fig in figs:
         # get the title of the figure canvas
-        raw_title = this_fig.canvas.get_window_title()
+        raw_title = this_fig.canvas.manager.get_window_title()
         if raw_title is None or raw_title == 'image':
             # special case when you have a displayless backend, check the suptitle, then the title
             # from the first axes
@@ -632,7 +632,7 @@ def titleprefix(fig: _FigOrListFig, prefix: str = '') -> None:
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title('Figure Title')
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
@@ -668,8 +668,8 @@ def titleprefix(fig: _FigOrListFig, prefix: str = '') -> None:
             new_title = prefix + ' - ' + this_title
             this_axis.set_title(new_title)
         # update canvas name
-        this_canvas_title = this_fig.canvas.get_window_title()
-        this_fig.canvas.set_window_title(prefix + ' - ' + this_canvas_title)
+        this_canvas_title = this_fig.canvas.manager.get_window_title()
+        this_fig.canvas.manager.set_window_title(prefix + ' - ' + this_canvas_title)
         # update the suptitle (if it exists)
         if (sup := this_fig._suptitle) is not None:
             sup.set_text(prefix + ' - ' + sup.get_text())
@@ -700,7 +700,7 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title('Figure Title')
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
@@ -787,7 +787,7 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title('Figure Title')
     >>> ax = fig.add_subplot(111)
     >>> time = np.arange(1, 10, 0.1)
     >>> data = time ** 2
@@ -876,7 +876,7 @@ def figmenu(figs: _FigOrListFig) -> None:
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title('Figure Title')
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
@@ -956,10 +956,11 @@ def get_screen_resolution() -> Tuple[int, int]:
 
     """
     # check to see if a QApplication exists, and if not, make one
+    app: Union[QApplication, QCoreApplication]
     if QApplication.instance() is None:
         app = QApplication(sys.argv)  # pragma: no cover
     else:
-        app = QApplication.instance()  # type: ignore[assignment]
+        app = QApplication.instance()
     # query the resolution
     screen_resolution = app.desktop().screenGeometry()
     # pull out the desired information
@@ -1299,7 +1300,7 @@ def plot_phases(ax, times, colormap='tab10', labels=None, *, group_all=False):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Sine Wave')
+    >>> fig.canvas.manager.set_window_title('Sine Wave')
     >>> ax = fig.add_subplot(111)
     >>> time = np.arange(101)
     >>> data = np.cos(time / 10)
@@ -1653,7 +1654,7 @@ def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: str = '
         for fig in figs:
             pdf.savefig(fig)
 
-        # Set metedata for PDF file
+        # Set metadata for PDF file
         d = pdf.infodict()
         d['Title'] = 'PDF Figures'
         d['Author'] = get_username()

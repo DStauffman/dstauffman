@@ -1189,7 +1189,7 @@ def execute(command: Union[str, List[str]], folder: str, *, ignored_codes: Itera
         yield stdout_line
     # once done, close and get return codes
     popen.stdout.close()  # type: ignore[union-attr]
-    return_code = popen.wait()  # type: ignore[union-attr]
+    return_code = popen.wait()
 
     # method 2
 #    while True:
@@ -1203,7 +1203,7 @@ def execute(command: Union[str, List[str]], folder: str, *, ignored_codes: Itera
 
     # determine if command exited cleanly or not and return appropriate code
     if return_code:
-        if ignored_codes is None or return_code not in ignored_codes:  # type: ignore[operator]
+        if ignored_codes is None or return_code not in ignored_codes:
             #raise subprocess.CalledProcessError(return_code, command)
             return ReturnCodes.bad_command
     return ReturnCodes.clean

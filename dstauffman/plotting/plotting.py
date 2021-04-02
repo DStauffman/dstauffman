@@ -481,7 +481,7 @@ def plot_correlation_matrix(data, labels=None, units='', *, opts=None, matrix_na
     # create figure
     fig = plt.figure()
     # set figure title
-    fig.canvas.set_window_title(matrix_name)
+    fig.canvas.manager.set_window_title(matrix_name)
     # get handle to axes for use later
     ax = fig.add_subplot(111)
     # set axis color to none
@@ -612,7 +612,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
 
     # plot breakdown
     fig = plt.figure()
-    fig.canvas.set_window_title(this_title)
+    fig.canvas.manager.set_window_title(this_title)
     ax = fig.add_subplot(111)
     for i in reversed(range(num_bins)):
         if not ignore_plot_data(data, ignore_empties, col=i):
@@ -691,7 +691,7 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
         opts = Opts()
     # create plot
     fig = plt.figure()
-    fig.canvas.set_window_title(description)
+    fig.canvas.manager.set_window_title(description)
     ax = fig.add_subplot(1, 1, 1)
     ax.set_title(description)
     counts = histcounts(data, bins)
@@ -737,7 +737,7 @@ def setup_plots(figs, opts):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title('Figure Title')
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
