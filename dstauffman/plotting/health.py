@@ -45,7 +45,7 @@ class TruthPlotter(Frozen):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title('Figure Title')
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
     >>> truth = TruthPlotter(x, y+0.01, lo=y, hi=y+0.03)
@@ -248,7 +248,7 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
 
     # plot data
     fig = plt.figure()
-    fig.canvas.set_window_title(this_title)
+    fig.canvas.manager.set_window_title(this_title)
     ax = fig.add_subplot(111)
     cm.set_colors(ax)
     for i in range(num_bins):
@@ -416,7 +416,7 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
     this_title = label + ' vs. Time'
     # create the figure and set the title
     fig = plt.figure()
-    fig.canvas.set_window_title(this_title)
+    fig.canvas.manager.set_window_title(this_title)
     # add an axis and plot the data
     ax = fig.add_subplot(111)
     if plot_as_diffs:
@@ -479,7 +479,7 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
     # create a figure and axis
     fig = plt.figure()
     title = 'Cost Benefit Frontier'
-    fig.canvas.set_window_title(title)
+    fig.canvas.manager.set_window_title(title)
     ax = fig.add_subplot(111)
     # plot the data
     ax.plot(qaly, cost, 'ko', label='strategies')
@@ -578,7 +578,7 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
 
     # create the figure and axis and set the title
     fig = plt.figure()
-    fig.canvas.set_window_title(title)
+    fig.canvas.manager.set_window_title(title)
     ax = fig.add_subplot(111)
 
     # plot bars

@@ -62,7 +62,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting0(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label='data')
         truth = plot.TruthPlotter()
@@ -70,7 +70,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting1(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label='data')
         truth = plot.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03)
@@ -78,7 +78,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting2(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label='data')
         truth = plot.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03, type_='errorbar')
@@ -86,7 +86,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting3(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label='data')
         truth = plot.TruthPlotter(self.x, None, lo=self.y, hi=self.y+0.03)
@@ -94,7 +94,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting4(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label='data')
         truth = plot.TruthPlotter(self.x, self.y+0.01, lo=None, hi=self.y+0.03, type_='errorbar')
@@ -102,7 +102,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting5(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label='data')
         truth = plot.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03, type_='errorbar')
@@ -114,7 +114,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_dont_hold_limits(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label='data')
         truth = plot.TruthPlotter(self.x-10, self.y, lo=self.y-1000, hi=self.y+1000, type_='errorbar')
@@ -122,7 +122,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_hold_limits(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label='data')
         truth = plot.TruthPlotter(self.x-10, self.y, lo=self.y-1000, hi=self.y+1000, type_='errorbar')
@@ -130,7 +130,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_bad_type(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title('Figure Title')
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label='data')
         truth = plot.TruthPlotter(self.x, self.y+0.01, lo=self.y, hi=self.y+0.03, type_='bad type')
