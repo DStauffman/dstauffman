@@ -213,8 +213,9 @@ class Test_aerospace_quat_times_vector_single(unittest.TestCase):
         self.vec  = np.array([[1, 0, 0], [2, 0, 0]]).T
         self.out  = np.array([[-1, 2], [0, 0], [0, 0]])
 
-    @unittest.skipIf(HAVE_NUMBA, 'Skipping until numba supports @ for matrix multiplication for integers.')
+    @unittest.expectedFailure
     def test_integers(self) -> None:
+        # Expected to fail until numba supports @ for matrix multiplication for integers.
         for i in range(2):
             vec = space.quat_times_vector_single(self.quat[:, i], self.vec[:, i])
             np.testing.assert_array_almost_equal(vec, self.out[:, i])

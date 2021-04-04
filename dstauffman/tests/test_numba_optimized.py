@@ -231,8 +231,9 @@ class Test_zero_divide(unittest.TestCase):
         np.testing.assert_array_equal(out, exp)
 
     @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
-    @unittest.skip('Numba broadcasting seems to fail here.')
+    @unittest.expectedFailure
     def test_broadcasting2(self) -> None:
+        # Numba broadcasting seems to fail here
         vec = np.array([[1., 0., 0.], [3., 4., 0.], [0., 0., 0.]]).T
         mag = np.array([1., 5., 0.])
         exp = np.array([[1., 0., 0.], [0.6, 0.8, 0.], [0., 0., 0.]]).T

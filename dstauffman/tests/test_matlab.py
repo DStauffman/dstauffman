@@ -67,8 +67,9 @@ class Test_load_matlab(unittest.TestCase):
         out = dcs.load_matlab(self.filename2, varlist=['y'])
         self.assertEqual(out.keys(), set())
 
-    @unittest.skip('Enum test case not working.')
+    @unittest.expectedFailure
     def test_enum(self) -> None:
+        # Enum test case not working.  Need to better understand how categorical arrays are stored.
         out = dcs.load_matlab(self.filename3, enums=self.enums)
         self.assertEqual(set(out.keys()), {'enum'})
         np.testing.assert_array_equal(out['enum'], self.exp_enum)
