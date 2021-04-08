@@ -12,6 +12,7 @@ Notes
 from __future__ import annotations
 import copy
 import doctest
+from pathlib import Path
 import pickle
 import sys
 from typing import Any, Callable, Dict, FrozenSet, Iterable, List, Literal, NoReturn, Optional, \
@@ -64,7 +65,7 @@ def _frozen(set: Callable) -> Callable:
     return set_attr
 
 #%% Methods - save_hdf5
-def save_hdf5(self, filename: str='') -> None:
+def save_hdf5(self, filename: Path=None) -> None:
     r"""
     Save the object to disk as an HDF5 file.
 
@@ -75,7 +76,7 @@ def save_hdf5(self, filename: str='') -> None:
 
     """
     # exit if no filename is given
-    if not filename:
+    if filename is None:
         return
     # Save data
     with h5py.File(filename, 'w') as file:
@@ -88,7 +89,7 @@ def save_hdf5(self, filename: str='') -> None:
                 grp.create_dataset(key, data=value)
 
 #%% Methods - load_hdf5
-def load_hdf5(cls: Type[_T], filename: str='') -> _T:
+def load_hdf5(cls: Type[_T], filename: Path=None) -> _T:
     r"""
     Load the object from disk.
 
@@ -98,7 +99,7 @@ def load_hdf5(cls: Type[_T], filename: str='') -> _T:
         Name of the file to load
 
     """
-    if not filename:
+    if filename is None:
         raise ValueError('No file specified to load.')
     # Load data
     out = cls()
@@ -111,7 +112,7 @@ def load_hdf5(cls: Type[_T], filename: str='') -> _T:
     return out
 
 #%% Methods - save_pickle
-def save_pickle(self, filename: str) -> None:
+def save_pickle(self, filename: Path = None) -> None:
     r"""
     Save a class instances to a pickle file.
 
@@ -123,11 +124,14 @@ def save_pickle(self, filename: str) -> None:
         Name of the file to load
 
     """
+    # exit if no filename is given
+    if filename is None:
+        return
     with open(filename, 'wb') as file:
         pickle.dump(self, file)
 
 #%% Methods - load_pickle
-def load_pickle(cls: Type[_T], filename: str) -> _T:
+def load_pickle(cls: Type[_T], filename: Path = None) -> _T:
     r"""
     Load a class instance from a pickle file.
 
@@ -142,51 +146,53 @@ def load_pickle(cls: Type[_T], filename: str) -> _T:
         List of the objects found within the file
 
     """
+    if filename is None:
+        raise ValueError('No file specified to load.')
     with open(filename, 'rb') as file:
         out: _T = pickle.load(file)
     return out
 
 #%% Methods - save_method
-def save_method(self, filename: str = '', use_hdf5: bool = True) -> None:
+def save_method(self, filename: Path = None, use_hdf5: bool = True) -> None:
     r"""
     Save the object to disk.
 
     Parameters
     ----------
-    filename : str
+    filename : class pathlib.Path
         Name of the file to save
     use_hdf5 : bool, optional, defaults to False
         Write as *.hdf5 instead of *.pkl
 
     """
     # exit if no filename is given
-    if not filename:
+    if filename is None:
         return
     if not use_hdf5:
         # Version 1 (Pickle):
-        save_pickle(self, filename.replace('hdf5', 'pkl'))
+        save_pickle(self, filename.with_suffix('.pkl'))
     else:
         # Version 2 (HDF5):
         save_hdf5(self, filename)
 
 #%% Methods - load_method
-def load_method(cls: Type[_T], filename: str = '', use_hdf5: bool = True) -> _T:
+def load_method(cls: Type[_T], filename: Path = None, use_hdf5: bool = True) -> _T:
     r"""
     Load the object from disk.
 
     Parameters
     ----------
-    filename : str
+    filename : class pathlib.Path
         Name of the file to load
     use_hdf5 : bool, optional, defaults to False
         Write as *.hdf5 instead of *.pkl
 
     """
-    if not filename:
+    if filename is None:
         raise ValueError('No file specified to load.')
     if not use_hdf5:
         # Version 1 (Pickle):
-        out: _T = load_pickle(cls, filename.replace('hdf5', 'pkl'))
+        out: _T = load_pickle(cls, filename.with_suffix('.pkl'))
     else:
         # Version 2 (HDF5):
         out = load_hdf5(cls, filename)

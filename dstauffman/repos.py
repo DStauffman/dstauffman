@@ -8,12 +8,12 @@ Notes
 
 #%% Imports
 from __future__ import annotations
-import contextlib
 import datetime
 import doctest
 import os
+from pathlib import Path
 import sys
-from typing import Dict, FrozenSet, List, Set, Tuple, TYPE_CHECKING, Union
+from typing import Dict, FrozenSet, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman.constants import HAVE_COVERAGE, HAVE_PYTEST
@@ -30,9 +30,10 @@ if HAVE_PYTEST:
 if TYPE_CHECKING:
     from PyQt5.QtCore import QCoreApplication
     from PyQt5.QtWidgets import QApplication
+    assert QApplication
 
 #%% run_docstrings
-def run_docstrings(files: List[str], verbose: bool = False) -> int:
+def run_docstrings(files: List[Path], verbose: bool = False) -> int:
     r"""
     Runs all the docstrings in the given files.
 
@@ -71,7 +72,7 @@ def run_docstrings(files: List[str], verbose: bool = False) -> int:
             print('******************************')
             print('******************************')
             print(f'Testing "{file}":')
-        (failure_count, test_count) = doctest.testfile(file, report=True, verbose=verbose, module_relative=False)
+        (failure_count, test_count) = doctest.testfile(file, report=True, verbose=verbose, module_relative=False)  # type: ignore[arg-type]
         if failure_count > 0:
             had_failure = True
     return_code = ReturnCodes.test_failures if had_failure else ReturnCodes.clean
@@ -118,13 +119,13 @@ def run_unittests(names: str, verbose: bool = False) -> int:
     return return_code
 
 #%% run_pytests
-def run_pytests(folder: str, *args, **kwargs) -> int:
+def run_pytests(folder: Path, *args, **kwargs) -> int:
     r"""
     Runs all the unittests using pytest as the runner instead of unittest.
 
     Parameters
     ----------
-    folder : str
+    folder : class pathlib.Path
         Folder to process for test cases
 
     Returns
@@ -159,7 +160,7 @@ def run_pytests(folder: str, *args, **kwargs) -> int:
         else:
             qapp = QApplication.instance()
     # run tests using pytest
-    exit_code = pytest.main([folder, '-rfEsP'] + list(*args), **kwargs)
+    exit_code = pytest.main([str(folder), '-rfEsP'] + list(*args), **kwargs)
     # close the qapp
     if qapp is not None:
         qapp.closeAllWindows()
@@ -167,13 +168,13 @@ def run_pytests(folder: str, *args, **kwargs) -> int:
     return return_code
 
 #%% run_coverage
-def run_coverage(folder: str, *, report: bool = True) -> int:
+def run_coverage(folder: Path, *, report: bool = True) -> int:
     r"""
     Wraps the pytests with a Code Coverage report.
 
     Parameters
     ----------
-    folder : str
+    folder : class Path or str
         Folder to process for test cases
     report : bool, optional, default is True
         Whether to generate the HTML report
@@ -198,9 +199,9 @@ def run_coverage(folder: str, *, report: bool = True) -> int:
 
     # Get information on the test folder
     test_folder = get_tests_dir()
-    data_file   = os.path.join(test_folder, '.coverage')
-    config_file = os.path.join(test_folder, '.coveragerc')
-    cov_folder  = os.path.join(test_folder, 'coverage_html_report')
+    data_file   = test_folder / '.coverage'
+    config_file = test_folder / '.coveragerc'
+    cov_folder  = test_folder / 'coverage_html_report'
 
     # Instantiate the coverage tool and start tracking
     cov = Coverage(data_file=data_file, config_file=config_file)
@@ -220,25 +221,25 @@ def run_coverage(folder: str, *, report: bool = True) -> int:
     return return_code
 
 #%% find_repo_issues
-def find_repo_issues(folder: str, extensions: Union[FrozenSet[str], Set[str], Tuple[str], str, None] = frozenset(('m', 'py')), *, \
+def find_repo_issues(folder: Path, extensions: Union[FrozenSet[str], Set[str], Tuple[str, ...], str, None] = frozenset(('.m', '.py')), *, \
               list_all: bool = False, check_tabs: bool = True, trailing: bool = False, \
-              exclusions: Union[Tuple[str], str] = None, check_eol: str = None, show_execute: bool = False) -> bool:
+              exclusions: Union[Tuple[Path, ...], Path] = None, check_eol: str = None, show_execute: bool = False) -> bool:
     r"""
     Find all the tabs in source code that should be spaces instead.
 
     Parameters
     ----------
-    folder : str
+    folder : class pathlib.Path
         Folder path to search
     extensions : tuple of str
-        File extensions to consider, default is ('m', 'py')
+        File extensions to consider, default is ('.m', '.py')
     list_all : bool, optional, default is False
         Whether to list all the files, or only those with problems in them
     check_tabs : bool, optional, default is True
         Whether to include tabs as an issue to check
     trailing : bool, optional, default is False
         Whether to consider trailing whitespace a problem, too
-    exclusions : tuple of str
+    exclusions : tuple of pathlib.Path
         Folders to ignore, default is empty
     check_eol : str
         If not None, then the line endings to check, such as '\r\n'
@@ -250,12 +251,6 @@ def find_repo_issues(folder: str, extensions: Union[FrozenSet[str], Set[str], Tu
     is_clean : bool
         Whether the folder is clean, meaning nothing was found to report.
 
-    Notes
-    -----
-    #.  This function will iterate over extensions and exclusions, so extensions='txt' will look for
-        't' and 'x' instead of 'txt'.  Use extensions=('txt',) or ['txt'] instead.  Likewise for
-        exclusions.
-
     Examples
     --------
     >>> from dstauffman import find_repo_issues, get_root_dir
@@ -265,69 +260,72 @@ def find_repo_issues(folder: str, extensions: Union[FrozenSet[str], Set[str], Tu
     True
 
     """
-    def _is_excluded(path, exclusions):
+    def _is_excluded(path: Path, exclusions: Optional[Tuple[Path, ...]]) -> bool:
         if exclusions is None:
             return False
         for this_exclusion in exclusions:
-            if path.startswith(this_exclusion):
+            if this_exclusion == path or this_exclusion in path.parents:
                 return True
         return False
 
     # initialize output
     is_clean = True
 
-    for (root, dirs, files) in os.walk(folder, topdown=True):
-        dirs.sort()
-        for name in sorted(files):
-            fileparts = name.split('.')
-            if extensions is None or fileparts[-1] in extensions:
-                if _is_excluded(root, exclusions):
-                    continue
-                this_file = os.path.join(root, name)
-                already_listed = False
-                if list_all:
-                    print(f'Evaluating: "{this_file}"')
-                    already_listed = True
-                if show_execute and os.access(this_file, os.X_OK):
-                    print(f'File: "{this_file}" has execute privileges.')
+    if isinstance(extensions, str):
+        extensions = {extensions, }
+    if isinstance(exclusions, Path):
+        exclusions = (exclusions, )
+
+    for this_file in folder.rglob('*'):
+        if not this_file.is_file():
+            continue
+        if extensions is None or this_file.suffix in extensions:
+            if _is_excluded(folder, exclusions):
+                continue
+            already_listed = False
+            if list_all:
+                print(f'Evaluating: "{this_file}"')
+                already_listed = True
+            if show_execute and os.access(this_file, os.X_OK):
+                print(f'File: "{this_file}" has execute privileges.')
+                is_clean = False
+            with open(this_file, encoding='utf8', newline='') as file:
+                bad_lines = False
+                try:
+                    lines = file.readlines()
+                except UnicodeDecodeError: # pragma: no cover
+                    print(f'File: "{this_file}" was not a valid utf-8 file.')
                     is_clean = False
-                with open(this_file, encoding='utf8', newline='') as file:
-                    bad_lines = False
-                    try:
-                        lines = file.readlines()
-                    except UnicodeDecodeError: # pragma: no cover
-                        print(f'File: "{this_file}" was not a valid utf-8 file.')
-                        is_clean = False
-                    for (c, line) in enumerate(lines):
-                        sline = line.rstrip('\n').rstrip('\r').rstrip('\n') # for all possible orderings
-                        if check_tabs and line.count('\t') > 0:
-                            if not already_listed:
-                                print(f'Evaluating: "{this_file}"')
-                                already_listed = True
-                                is_clean = False
-                            print('    Line {:03}: '.format(c+1) + repr(line))
-                        elif trailing and len(sline) >= 1 and sline[-1] == ' ':
-                            if not already_listed:
-                                print(f'Evaluating: "{this_file}"')
-                                already_listed = True
-                                is_clean = False
-                            print('    Line {:03}: '.format(c+1) + repr(line))
-                        if check_eol is not None and c != len(lines)-1 and not line.endswith(check_eol) and not bad_lines:
-                            line_ending = line[-(len(line) - len(sline)):]
-                            print('File: "{}" has bad line endings of "{}".'.format(this_file, repr(line_ending)[1:-1]))
-                            bad_lines = True
+                for (c, line) in enumerate(lines):
+                    sline = line.rstrip('\n').rstrip('\r').rstrip('\n') # for all possible orderings
+                    if check_tabs and line.count('\t') > 0:
+                        if not already_listed:
+                            print(f'Evaluating: "{this_file}"')
+                            already_listed = True
                             is_clean = False
+                        print('    Line {:03}: '.format(c+1) + repr(line))
+                    elif trailing and len(sline) >= 1 and sline[-1] == ' ':
+                        if not already_listed:
+                            print(f'Evaluating: "{this_file}"')
+                            already_listed = True
+                            is_clean = False
+                        print('    Line {:03}: '.format(c+1) + repr(line))
+                    if check_eol is not None and c != len(lines)-1 and not line.endswith(check_eol) and not bad_lines:
+                        line_ending = line[-(len(line) - len(sline)):]
+                        print('File: "{}" has bad line endings of "{}".'.format(this_file, repr(line_ending)[1:-1]))
+                        bad_lines = True
+                        is_clean = False
     # end checks, return overall result
     return is_clean
 
 #%% Functions - delete_pyc
-def delete_pyc(folder: str, recursive: bool = True, *, print_progress: bool = True) -> None:
+def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = True) -> None:
     r"""
     Delete all the *.pyc files (Python Byte Code) in the specified directory.
 
     Parameters
     ----------
-    folder : str
+    folder : class pathlib.Path
         Name of folder to delete the files from
     recursive : bool, optional
         Whether to delete files recursively
@@ -341,31 +339,26 @@ def delete_pyc(folder: str, recursive: bool = True, *, print_progress: bool = Tr
     >>> delete_pyc(folder, print_progress=False) # doctest: +SKIP
 
     """
-    def _remove_pyc(root, name):
+    def _remove_pyc(file):
         r"""Do the actual file removal."""
         # check for allowable extensions
-        (_, file_ext) = os.path.splitext(name)
-        if file_ext == '.pyc': # TODO: or file_ext == 'pyo' ???  Add file extension list?
-            # remove this file
-            if print_progress:
-                print('Removing "{}"'.format(os.path.join(root, name)))
-            with contextlib.suppress(FileNotFoundError):
-                os.remove(os.path.join(root, name))
+        assert file.suffix in {'.pyc', }
+        assert file.is_file()
+        # remove this file
+        if print_progress:
+            print(f'Removing "{file}"')
+        file.unlink(missing_ok=True)
 
     if recursive:
         # walk through folder
-        for (root, _, files) in os.walk(folder):
-            # go through files
-            for name in files:
-                # remove relevant files
-                _remove_pyc(root, name)
+        for file in folder.rglob('*.pyc'):
+            # remove relevant files
+            _remove_pyc(file)
     else:
         # list files in folder
-        for name in os.listdir(folder):
-            # check if it's a file
-            if os.path.isfile(os.path.join(folder, name)):
-                # remove relevant files
-                _remove_pyc(folder, name)
+        for file in folder.glob('*.pyc'):
+            # remove relevant files
+            _remove_pyc(file)
 
 #%% Functions - get_python_definitions
 def get_python_definitions(text: str, *, include_private: bool = False) -> List[str]:
@@ -419,7 +412,7 @@ def get_python_definitions(text: str, *, include_private: bool = False) -> List[
     return funcs
 
 #%% Functions - make_python_init
-def make_python_init(folder: str, *, lineup: bool = True, wrap: int = 100, filename: str = '') -> str:
+def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, filename: Path = None) -> str:
     r"""
     Make the Python __init__.py file based on the files/definitions found within the specified folder.
 
@@ -453,25 +446,21 @@ def make_python_init(folder: str, *, lineup: bool = True, wrap: int = 100, filen
     # initialize intermediate results
     results = {}
     # Loop through the contained files/folders
-    for this_elem in os.listdir(folder):
-        # alias the fullpath of this file element
-        this_full_elem = os.path.join(folder, this_elem)
+    for this_elem in folder.glob('*'):
         # check if a folder or file
-        if not os.path.isdir(this_full_elem):
-            # get the file extension
-            fileext = this_full_elem.split('.')
+        if not this_elem.is_dir():
             # only process source *.py files
-            if fileext[-1] == 'py':
+            if this_elem.suffix == '.py':
                 # exclude any existing '__init__.py' file
-                if any([this_elem.startswith(exc) for exc in exclusions]):
+                if any([exc in this_elem.parents for exc in exclusions]):
                     continue
                 # read the contents of the file
-                this_text = read_text_file(this_full_elem)
+                this_text = read_text_file(this_elem)
                 # get a list of definitions from the text file
                 funcs = get_python_definitions(this_text)
                 # append these results (if not empty)
                 if len(funcs) > 0:
-                    results[this_elem[:-3]] = funcs
+                    results[this_elem.stem] = funcs
     # check for duplicates
     all_funcs = [func for k in results for func in results[k]]
     if len(all_funcs) != len(set(all_funcs)):
@@ -482,7 +471,7 @@ def make_python_init(folder: str, *, lineup: bool = True, wrap: int = 100, filen
         print('Duplicated functions:')
         print(dups)
     # get information about padding
-    max_len   = max(len(x) for x in results)
+    max_len = max(len(x) for x in results)
     indent = len('from . import ') + max_len + 4
     # start building text output
     text: List[str] = []
@@ -498,22 +487,22 @@ def make_python_init(folder: str, *, lineup: bool = True, wrap: int = 100, filen
     # combined the text into a single string with newline characters
     output = '\n'.join(text)
     # optionally write the results to a file
-    if filename:
+    if filename is not None:
         write_text_file(filename, output)
     return output
 
 #%% write_unit_test_templates
-def write_unit_test_templates(folder: str, output: str, *, author: str = 'unknown', \
-        exclude: Union[str, Tuple[str, ...]] = None, recursive: bool = True, repo_subs: Dict[str, str] = None, \
+def write_unit_test_templates(folder: Path, output: Path, *, author: str = 'unknown', \
+        exclude: Union[Path, Tuple[Path, ...]] = None, recursive: bool = True, repo_subs: Dict[str, str] = None, \
         add_classification: bool = False) -> None:
     r"""
     Writes template files for unit tests.  These can then be used with a diff tool to find what is missing.
 
     Parameters
     ----------
-    folder : str
+    folder : class pathlib.Path
         Folder location of files to write the unit tests for
-    output : str
+    output : class pathlib.Path
         Folder location of the output unit tests
     author : str, optional
         Name of the author
@@ -533,8 +522,9 @@ def write_unit_test_templates(folder: str, output: str, *, author: str = 'unknow
     Examples
     --------
     >>> from dstauffman import write_unit_test_templates, get_root_dir, get_tests_dir
+    >>> from pathlib import Path
     >>> folder = get_root_dir()
-    >>> output = get_tests_dir() + '_template'
+    >>> output = Path(str(get_tests_dir()) + '_template')
     >>> author = 'David C. Stauffer'
     >>> exclude = get_tests_dir() # can also be tuple of exclusions
     >>> write_unit_test_templates(folder, output, author=author, exclude=exclude) # doctest: +SKIP
@@ -550,23 +540,23 @@ def write_unit_test_templates(folder: str, output: str, *, author: str = 'unknow
     # get all the files
     files = list_python_files(folder, recursive=recursive)
     # save the starting point in the name
-    num = len(folder) + 1
+    num = len(str(folder)) + 1
     # get the name of the repository
-    repo_name = files[0][:num-1].replace('\\','/').split('/')[-1]
+    repo_name = files[0].parent.name
     # get date information
     now = datetime.datetime.now()
     month = now.strftime('%B')
     year = now.strftime('%Y')
     for file in files:
         # check for exclusions
-        if (exclude is not None and file.startswith(exclude)) or file.startswith(output):
+        if exclude is not None and exclude in file.parents or output in file.parents:
             continue
         # read the contents of the file
         this_text = read_text_file(file)
         # get a list of definitions from the text file
         funcs = get_python_definitions(this_text, include_private=True)
         # get the name of the test file
-        names = file[num:].replace('\\','/').split('/')
+        names = str(file)[num:].replace('\\','/').split('/')
         # get the name of the repo or sub-repo
         sub_repo = '.'.join(names[:-1])
         this_repo = repo_name + ('.' + sub_repo if sub_repo else '')
@@ -591,7 +581,7 @@ def write_unit_test_templates(folder: str, output: str, *, author: str = 'unknow
             text += ['    """', '    pass # TODO: write this', '']
 
         text += ['#%% Unit test execution', "if __name__ == '__main__':", '    unittest.main(exit=False)', '']
-        new_file = os.path.join(output, 'test_' + '_'.join(names))
+        new_file = Path.joinpath(output, 'test_' + '_'.join(names))
         print(f'Writing: "{new_file}".')
         write_text_file(new_file, '\n'.join(text))
 

@@ -10,8 +10,8 @@ Notes
 import datetime
 import doctest
 import logging
-import os
-from typing import Any, List
+from pathlib import Path
+from typing import Any, List, Union
 import unittest
 
 from dstauffman.paths import get_output_dir
@@ -21,7 +21,7 @@ root_logger = logging.getLogger('')
 logger      = logging.getLogger(__name__)
 
 #%% Functions - activate_logging
-def activate_logging(log_level: int = logging.INFO, filename: str = '', *, file_level: int = None, \
+def activate_logging(log_level: int = logging.INFO, filename: Union[str, Path] = None, *, file_level: int = None, \
                      log_format: str = None, file_format: str = None) -> None:
     r"""
     Set up logging based on a user specified settings file.
@@ -30,7 +30,7 @@ def activate_logging(log_level: int = logging.INFO, filename: str = '', *, file_
     ----------
     log_level : int
         Level of logging
-    filename : str
+    filename : pathlib.Path
         File to log to, if empty, use default output folder with today's date
     file_level : int, optional
         Level of logging for the file, if not specified, use the same as the screen logger
@@ -47,14 +47,13 @@ def activate_logging(log_level: int = logging.INFO, filename: str = '', *, file_
     --------
     >>> from dstauffman import activate_logging, deactivate_logging, get_tests_dir, LogLevel
     >>> import logging
-    >>> import os
-    >>> filename = os.path.join(get_tests_dir(), 'testlog.txt')
+    >>> filename = get_tests_dir() / 'testlog.txt'
     >>> activate_logging(log_level=LogLevel.L5, filename=filename)
     >>> logging.log(LogLevel.L5, 'Test message') # doctest: +SKIP
     >>> deactivate_logging()
 
     Remove the log file
-    >>> os.remove(filename)
+    >>> filename.unlink()
 
     """
     # defaults
@@ -64,6 +63,7 @@ def activate_logging(log_level: int = logging.INFO, filename: str = '', *, file_
         file_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     if file_level is None:
         file_level = log_level
+    use_file = not isinstance(filename, str) or filename != 'none'
     # deactivate any current loggers
     deactivate_logging()
 
@@ -71,14 +71,17 @@ def activate_logging(log_level: int = logging.INFO, filename: str = '', *, file_
     root_logger.setLevel(log_level)
 
     # optionally get the default filename
-    if not filename:
-        filename = os.path.join(get_output_dir(), 'log_file_' + datetime.datetime.now().strftime('%Y-%m-%d') + '.txt')
+    if use_file:
+        if isinstance(filename, str):
+            filename = Path(filename) if filename != '' else None
+        if filename is None:
+            filename = get_output_dir().joinpath('log_file_' + datetime.datetime.now().strftime('%Y-%m-%d') + '.txt')
 
-    # create the log file handler
-    fh = logging.FileHandler(filename)
-    fh.setLevel(file_level)
-    fh.setFormatter(logging.Formatter(file_format))
-    root_logger.addHandler(fh)
+        # create the log file handler
+        fh = logging.FileHandler(filename)
+        fh.setLevel(file_level)
+        fh.setFormatter(logging.Formatter(file_format))
+        root_logger.addHandler(fh)
 
     # create the log stream handler
     ch = logging.StreamHandler()

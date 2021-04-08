@@ -9,7 +9,8 @@ Notes
 
 #%% Imports
 import doctest
-import os
+from functools import lru_cache
+from pathlib import Path
 from typing import List
 import unittest
 
@@ -47,13 +48,14 @@ def is_dunder(name: str) -> bool:
     return len(name) > 4 and name[:2] == name[-2:] == '__' and name[2] != '_' and name[-3] != '_'
 
 #%% Functions - get_root_dir
-def get_root_dir() -> str:
+@lru_cache
+def get_root_dir() -> Path:
     r"""
     Return the folder that contains this source file and thus the root folder for the whole code.
 
     Returns
     -------
-    folder : str
+    class pathlib.Path
         Location of the folder that contains all the source files for the code.
 
     Notes
@@ -63,21 +65,22 @@ def get_root_dir() -> str:
     Examples
     --------
     >>> from dstauffman import get_root_dir
-    >>> folder = get_root_dir()
+    >>> print('p = ', repr(get_root_dir()))  # doctest: +ELLIPSIS
+    p = .../dstauffman/dstauffman')
 
     """
     # this folder is the root directory based on the location of this file (utils.py)
-    folder = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
-    return folder
+    return Path(__file__).resolve().parent
 
 #%% Functions - get_tests_dir
-def get_tests_dir() -> str:
+@lru_cache
+def get_tests_dir() -> Path:
     r"""
     Return the default test folder location.
 
     Returns
     -------
-    folder : str
+    class pathlib.Path
         Location of the folder that contains all the test files for the code.
 
     Notes
@@ -87,21 +90,22 @@ def get_tests_dir() -> str:
     Examples
     --------
     >>> from dstauffman import get_tests_dir
-    >>> folder = get_tests_dir()
+    >>> print('p = ', repr(get_tests_dir()))  # doctest: +ELLIPSIS
+    p = .../dstauffman/tests')
 
     """
     # this folder is the 'tests' subfolder
-    folder = os.path.join(get_root_dir(), 'tests')
-    return folder
+    return get_root_dir() / 'tests'
 
 #%% Functions - get_data_dir
-def get_data_dir() -> str:
+@lru_cache
+def get_data_dir() -> Path:
     r"""
     Return the default data folder location.
 
     Returns
     -------
-    folder : str
+    class pathlib.Path
         Location of the default folder for storing the code data.
 
     Notes
@@ -111,21 +115,22 @@ def get_data_dir() -> str:
     Examples
     --------
     >>> from dstauffman import get_data_dir
-    >>> folder = get_data_dir()
+    >>> print('p = ', repr(get_data_dir()))  # doctest: +ELLIPSIS
+    p = .../dstauffman/data')
 
     """
     # this folder is the 'data' subfolder
-    folder = os.path.abspath(os.path.join(get_root_dir(), '..', 'data'))
-    return folder
+    return get_root_dir().parent / 'data'
 
 #%% Functions - get_images_dir
-def get_images_dir() -> str:
+@lru_cache
+def get_images_dir() -> Path:
     r"""
     Return the default data folder location.
 
     Returns
     -------
-    folder : str
+    class pathlib.Path
         Location of the default folder for storing the code data.
 
     Notes
@@ -135,21 +140,22 @@ def get_images_dir() -> str:
     Examples
     --------
     >>> from dstauffman import get_images_dir
-    >>> folder = get_images_dir()
+    >>> print('p = ', repr(get_images_dir()))  # doctest: +ELLIPSIS
+    p = .../dstauffman/images')
 
     """
     # this folder is the 'images' subfolder
-    folder = os.path.abspath(os.path.join(get_root_dir(), '..', 'images'))
-    return folder
+    return get_root_dir().parent / 'images'
 
 #%% Functions - get_output_dir
-def get_output_dir() -> str:
+@lru_cache
+def get_output_dir() -> Path:
     r"""
     Return the default output folder location.
 
     Returns
     -------
-    folder : str
+    class pathlib.Path
         Location of the default folder for storing the code data.
 
     Notes
@@ -159,21 +165,21 @@ def get_output_dir() -> str:
     Examples
     --------
     >>> from dstauffman import get_output_dir
-    >>> folder = get_output_dir()
+    >>> print('p = ', repr(get_output_dir()))  # doctest: +ELLIPSIS
+    p = .../dstauffman/results')
 
     """
     # this folder is the 'images' subfolder
-    folder = os.path.abspath(os.path.join(get_root_dir(), '..', 'results'))
-    return folder
+    return get_root_dir().parent / 'results'
 
 #%% Functions - list_python_files
-def list_python_files(folder: str, recursive: bool = False, include_all: bool = False) -> List[str]:
+def list_python_files(folder: Path, recursive: bool = False, include_all: bool = False) -> List[Path]:
     r"""
     Returns a list of all non dunder python files in the folder.
 
     Parameters
     ----------
-    folder : str
+    folder : class pathlib.Path
         Folder location
     recursive : bool, optional
         Whether to search recursively, default is False
@@ -197,18 +203,16 @@ def list_python_files(folder: str, recursive: bool = False, include_all: bool = 
 
     """
     # find all the files that end in .py and are not dunder (__name__) files
-    if not os.path.isdir(folder):
+    if not folder.is_dir():
         return []
     if include_all:
-        files = [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.py')]
+        files = list(folder.glob('*.py'))
     else:
-        files = [os.path.join(folder, file) for file in os.listdir(folder) if file.endswith('.py')
-            and not is_dunder(file[:-3])]
+        files = [file for file in folder.glob('*.py') if not is_dunder(file.stem)]
     if recursive:
-        for (root, dirs, _) in os.walk(folder, topdown=True):
-            for sub_folder in sorted(dirs):
-                this_folder = os.path.join(root, sub_folder)
-                files.extend(list_python_files(this_folder, recursive=recursive, include_all=include_all))
+        dirs = [x for x in folder.glob('*') if x.is_dir()]
+        for this_folder in sorted(dirs):
+            files.extend(list_python_files(this_folder, recursive=recursive, include_all=include_all))
     return files
 
 #%% Unit test

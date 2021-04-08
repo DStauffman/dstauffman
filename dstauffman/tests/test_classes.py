@@ -9,11 +9,10 @@ Notes
 #%% Imports
 from __future__ import annotations
 from collections.abc import Mapping
-import contextlib
 import copy
-import os
+import pathlib
 import pickle
-from typing import Callable, ClassVar, TYPE_CHECKING
+from typing import Callable, ClassVar, Optional, TYPE_CHECKING
 import unittest
 
 if TYPE_CHECKING:
@@ -36,8 +35,8 @@ class _Example_Frozen(dcs.Frozen):
         self.dummy     = dummy if dummy is not None else 0
 
 class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
-    load: ClassVar[Callable[[str, DefaultNamedArg(bool, 'use_hdf5')], _Example_SaveAndLoad]]
-    save: Callable[[_Example_SaveAndLoad, str, DefaultNamedArg(bool, 'use_hdf5')], None]
+    load: ClassVar[Callable[[Optional[pathlib.Path], DefaultNamedArg(bool, 'use_hdf5')], _Example_SaveAndLoad]]
+    save: Callable[[_Example_SaveAndLoad, Optional[pathlib.Path], DefaultNamedArg(bool, 'use_hdf5')], None]
     def __init__(self):
         if dcs.HAVE_NUMPY:
             self.x = np.array([1, 3, 5])
@@ -48,8 +47,8 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
         self.z = None
 
 class _Example_SaveAndLoadPickle(dcs.Frozen, metaclass=dcs.SaveAndLoadPickle):
-    load: ClassVar[Callable[[str], _Example_SaveAndLoadPickle]]
-    save: Callable[[_Example_SaveAndLoadPickle, str], None]
+    load: ClassVar[Callable[[Optional[pathlib.Path]], _Example_SaveAndLoadPickle]]
+    save: Callable[[_Example_SaveAndLoadPickle, Optional[pathlib.Path]], None]
     def __init__(self):
         if dcs.HAVE_NUMPY:
             self.a = np.array([1, 2, 3])
@@ -267,8 +266,8 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.results1     = self.results1_cls()
         self.results2_cls = _Example_SaveAndLoadPickle
         self.results2     = self.results2_cls()
-        self.save_path1   = os.path.join(folder, 'results_test_save.hdf5')
-        self.save_path2   = os.path.join(folder, 'results_test_save.pkl')
+        self.save_path1   = folder / 'results_test_save.hdf5'
+        self.save_path2   = folder / 'results_test_save.pkl'
 
     def test_save1(self) -> None:
         self.assertTrue(hasattr(self.results1, 'save'))
@@ -309,15 +308,13 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.assertTrue(dcs.compare_two_classes(results, self.results2, suppress_output=True, compare_recursively=True))
 
     def test_no_filename(self) -> None:
-        self.results1.save('')
+        self.results1.save(None)
         with self.assertRaises(ValueError):
-            self.results1_cls.load('')
+            self.results1_cls.load(None)
 
     def tearDown(self) -> None:
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.save_path1)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.save_path2)
+        self.save_path1.unlink(missing_ok=True)
+        self.save_path2.unlink(missing_ok=True)
 
 #%% SaveAndLoadPickle
 class Test_SaveAndLoadPickle(unittest.TestCase):

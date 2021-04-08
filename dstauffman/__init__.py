@@ -38,7 +38,6 @@ from .repos     import run_docstrings, run_unittests, run_pytests, run_coverage,
 from .time      import get_np_time_units, round_datetime, round_np_datetime, round_num_datetime, \
                            round_time, convert_date, convert_time_units, convert_datetime_to_np, \
                            convert_duration_to_np, convert_num_dt_to_np
-from .version   import version_info
 from .units     import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \
                            ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, DEGREE_SIGN, \
                            MICRO_SIGN, get_factors, get_time_factor, get_unit_conversion
@@ -48,6 +47,7 @@ from .utils     import find_in_range, rms, rss, compare_two_classes, compare_two
                            execute, execute_wrapper, get_env_var, get_username, is_datetime, \
                            intersect, issorted, zero_order_hold, drop_following_time
 from .utils_log import setup_dir, fix_rollover, remove_outliers
+from .version   import version_info
 
 #%% Constants
 __version__ = '.'.join(str(x) for x in version_info)

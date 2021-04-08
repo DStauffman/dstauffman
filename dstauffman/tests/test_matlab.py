@@ -7,7 +7,6 @@ Notes
 """
 
 #%% Imports
-import os
 from typing import ClassVar
 import unittest
 
@@ -34,11 +33,11 @@ class Test_load_matlab(unittest.TestCase):
         Nominal
     """
     def setUp(self) -> None:
-        self.filename1 = os.path.join(dcs.get_tests_dir(), 'test_numbers.mat')
-        self.filename2 = os.path.join(dcs.get_tests_dir(), 'test_struct.mat')
-        self.filename3 = os.path.join(dcs.get_tests_dir(), 'test_enums.mat')
-        self.filename4 = os.path.join(dcs.get_tests_dir(), 'test_cell_array.mat')
-        self.filename5 = os.path.join(dcs.get_tests_dir(), 'test_nested.mat')
+        self.filename1 = dcs.get_tests_dir() / 'test_numbers.mat'
+        self.filename2 = dcs.get_tests_dir() / 'test_struct.mat'
+        self.filename3 = dcs.get_tests_dir() / 'test_enums.mat'
+        self.filename4 = dcs.get_tests_dir() / 'test_cell_array.mat'
+        self.filename5 = dcs.get_tests_dir() / 'test_nested.mat'
         self.row_nums  = np.array([[1., 2.2, 3.]])
         self.col_nums  = np.array([[1.], [2.], [3.], [4.], [5.]])
         self.mat_nums  = np.array([[1, 2, 3], [4, 5, 6]])

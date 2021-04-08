@@ -7,10 +7,8 @@ Notes
 """
 
 #%% Imports
-import contextlib
 import datetime
 import logging
-import os
 import time
 import unittest
 
@@ -28,12 +26,12 @@ class Test_act_deact_logging(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.level    = dcs.LogLevel.L5
-        self.filename = os.path.join(dcs.get_tests_dir(), 'testlog.txt')
+        self.filename = dcs.get_tests_dir() / 'testlog.txt'
 
     def test_nominal(self) -> None:
-        self.assertFalse(os.path.isfile(self.filename))
+        self.assertFalse(self.filename.is_file())
         dcs.activate_logging(self.level, self.filename)
-        self.assertTrue(os.path.isfile(self.filename))
+        self.assertTrue(self.filename.is_file())
         self.assertTrue(dcs.logs.root_logger.hasHandlers())
         with self.assertLogs(level='L5') as logs:
             logger = logging.getLogger('Test')
@@ -45,16 +43,15 @@ class Test_act_deact_logging(unittest.TestCase):
         self.assertFalse(dcs.logs.root_logger.handlers)
 
     def test_default_filename(self) -> None:
-        default_filename = os.path.join(dcs.get_output_dir(), 'log_file_' + datetime.datetime.now().strftime('%Y-%m-%d') + '.txt')
-        was_there = os.path.isfile(default_filename)
+        default_filename = dcs.get_output_dir().joinpath('log_file_' + datetime.datetime.now().strftime('%Y-%m-%d') + '.txt')
+        was_there = default_filename.is_file()
         dcs.activate_logging(self.level)
         self.assertTrue(dcs.logs.root_logger.hasHandlers())
         time.sleep(0.01)
         dcs.deactivate_logging()
         self.assertFalse(dcs.logs.root_logger.handlers)
         if not was_there:
-            with contextlib.suppress(FileNotFoundError):
-                os.remove(default_filename)
+            default_filename.unlink(missing_ok=True)
 
     def test_flushing(self) -> None:
         dcs.activate_logging(self.level)
@@ -68,8 +65,7 @@ class Test_act_deact_logging(unittest.TestCase):
 
     def tearDown(self) -> None:
         dcs.deactivate_logging()
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.filename)
+        self.filename.unlink(missing_ok=True)
 
 #%% log_multiline
 class Test_log_multiline(unittest.TestCase):

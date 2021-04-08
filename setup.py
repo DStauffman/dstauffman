@@ -9,21 +9,21 @@ Notes
 """
 
 #%% Import
-import os
+from pathlib import Path
 
 from setuptools import setup
 
 #%% Support functions - readme
 def readme():
     r"""Opens the README.rst file for additional descriptions."""
-    filename = os.path.join(os.path.dirname(__file__), 'README.rst')
+    filename = Path(__file__).parent / 'README.rst'
     with open(filename) as file:
         return file.read()
 
 #%% Support functions - get_version
 def get_version():
     r"""Reads the version information from the library."""
-    filename = os.path.join(os.path.dirname(__file__), 'dstauffman', 'version.py')
+    filename = Path(__file__).parent.joinpath('dstauffman', 'version.py')
     with open(filename) as file:
         text = file.read()
     for line in text.splitlines():

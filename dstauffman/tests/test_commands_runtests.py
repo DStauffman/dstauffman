@@ -101,7 +101,7 @@ class Test_commands_execute_tests(unittest.TestCase):
         commands.execute_tests(self.args)
         (pos_args, kwargs) = mocker.call_args
         self.assertEqual(len(pos_args), 1)
-        self.assertTrue(pos_args[0].endswith('other_folder'))
+        self.assertTrue(str(pos_args[0]).endswith('other_folder'))
 
 #%% commands.parse_coverage
 class Test_commands_parse_coverage(unittest.TestCase):

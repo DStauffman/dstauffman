@@ -8,7 +8,6 @@ Notes
 
 #%% Imports
 import contextlib
-import os
 import time
 from typing import Optional
 import unittest
@@ -34,10 +33,10 @@ class Test_setup_dir(unittest.TestCase):
         delete the contents of an existing folder recursively
     """
     def setUp(self) -> None:
-        self.folder   = os.path.join(dcs.get_tests_dir(), 'temp_dir')
-        self.subdir   = os.path.join(dcs.get_tests_dir(), 'temp_dir', 'temp_dir2')
-        self.filename = os.path.join(self.folder, 'temp_file.txt')
-        self.subfile  = os.path.join(self.subdir, 'temp_file.txt')
+        self.folder   = dcs.get_tests_dir() / 'temp_dir'
+        self.subdir   = dcs.get_tests_dir().joinpath('temp_dir', 'temp_dir2')
+        self.filename = self.folder / 'temp_file.txt'
+        self.subfile  = self.subdir / 'temp_file.txt'
         self.text     = 'Hello, World!\n'
 
     def test_empty_string(self, mock_logger: Mock) -> None:
@@ -47,12 +46,12 @@ class Test_setup_dir(unittest.TestCase):
     def test_create_folder(self, mock_logger: Mock) -> None:
         dcs.setup_dir(self.folder)
         mock_logger.log.assert_called_once()
-        mock_logger.log.assert_called_with(dcs.LogLevel.L1, 'Created directory: "{}"'.format(self.folder))
+        mock_logger.log.assert_called_with(dcs.LogLevel.L1, 'Created directory: "%s"', self.folder)
 
     def test_nested_folder(self, mock_logger: Mock) -> None:
         dcs.setup_dir(self.subdir)
         mock_logger.log.assert_called_once()
-        mock_logger.log.assert_called_with(dcs.LogLevel.L1, 'Created directory: "{}"'.format(self.subdir))
+        mock_logger.log.assert_called_with(dcs.LogLevel.L1, 'Created directory: "%s"', self.subdir)
 
     def test_clean_up_folder(self, mock_logger: Mock) -> None:
         dcs.setup_dir(self.folder)
@@ -60,7 +59,7 @@ class Test_setup_dir(unittest.TestCase):
         with patch('dstauffman.utils_log.logger') as mock_logger2:
             dcs.setup_dir(self.folder)
             mock_logger2.log.assert_called_once()
-            mock_logger2.log.assert_called_with(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "{}"'.format(self.folder))
+            mock_logger2.log.assert_called_with(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.folder)
         mock_logger.log.assert_called_once()
 
     def test_clean_up_partial(self, mock_logger: Mock) -> None:
@@ -71,7 +70,7 @@ class Test_setup_dir(unittest.TestCase):
         with patch('dstauffman.utils_log.logger') as mock_logger2:
             dcs.setup_dir(self.folder, recursive=False)
             mock_logger2.log.assert_called_once()
-            mock_logger2.log.assert_called_with(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "{}"'.format(self.folder))
+            mock_logger2.log.assert_called_with(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.folder)
         self.assertEqual(mock_logger.log.call_count, 2)
 
     def test_fail_to_create_folder(self, mock_logger: Mock) -> None:
@@ -89,19 +88,17 @@ class Test_setup_dir(unittest.TestCase):
         with patch('dstauffman.utils_log.logger') as mock_logger2:
             dcs.setup_dir(self.folder, recursive=True)
             self.assertEqual(mock_logger2.log.call_count, 2)
-            mock_logger2.log.assert_any_call(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "{}"'.format(self.subdir))
-            mock_logger2.log.assert_any_call(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "{}"'.format(self.subdir))
+            mock_logger2.log.assert_any_call(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.subdir)
+            mock_logger2.log.assert_any_call(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.subdir)
 
     def tearDown(self) -> None:
         def _clean(self) -> None:
+            self.filename.unlink(missing_ok=True)
+            self.subfile.unlink(missing_ok=True)
             with contextlib.suppress(FileNotFoundError):
-                os.remove(self.filename)
+                self.subdir.rmdir()
             with contextlib.suppress(FileNotFoundError):
-                os.remove(self.subfile)
-            with contextlib.suppress(FileNotFoundError):
-                os.rmdir(self.subdir)
-            with contextlib.suppress(FileNotFoundError):
-                os.rmdir(self.folder)
+                self.folder.rmdir()
         try:
             _clean(self)
         except {PermissionError, OSError}:  # type: ignore[misc]

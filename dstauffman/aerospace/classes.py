@@ -9,6 +9,7 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
+from pathlib import Path
 from typing import Any, FrozenSet, List, Optional, TYPE_CHECKING, Union
 import unittest
 
@@ -163,10 +164,10 @@ class Kf(Frozen):
                 setattr(self, name, func(time_dtype=time_dtype, **kwargs))
             self._subclasses = frozenset(innov_class.keys())
 
-    def save(self, filename: str = '') -> None:
+    def save(self, filename: Path = None) -> None:
         r"""Save the object to disk as an HDF5 file."""
         # exit if no filename is given
-        if not filename:
+        if filename is None:
             return
         # Save data
         value: Any
@@ -201,9 +202,9 @@ class Kf(Frozen):
                         grp.create_dataset(key, data=value)
 
     @classmethod
-    def load(cls, filename: str = '', subclasses: _Sets = frozenset({'innov'})) -> Kf:
+    def load(cls, filename: Path = None, subclasses: _Sets = frozenset({'innov'})) -> Kf:
         r"""Load the object from disk."""
-        if not filename:
+        if filename is None:
             raise ValueError('No file specified to load.')
         # Load data
         out = cls()  # TODO: dynamically determine subclass field names and pv option?
@@ -294,13 +295,13 @@ class KfRecord(Frozen):
         self.K    = self.K[:, :, ix_keep].copy() if self.K  is not None else None
         self.z    = self.z[:, ix_keep].copy() if self.z is not None else None
 
-    def save(self, filename: str = '', use_hdf5: bool = True) -> None:
+    def save(self, filename: Path = None, use_hdf5: bool = True) -> None:
         r"""
         Save the object to disk.
 
         Parameters
         ----------
-        filename : str
+        filename : classs pathlib.Path
             Name of the file to save
         use_hdf5 : bool, optional, defaults to False
             Write as *.hdf5 instead of *.pkl
@@ -315,13 +316,13 @@ class KfRecord(Frozen):
             self.time.dtype = orig_type  # type: ignore[misc, union-attr]
 
     @classmethod
-    def load(cls, filename: str = '', use_hdf5: bool = True) -> KfRecord:
+    def load(cls, filename: Path = None, use_hdf5: bool = True) -> KfRecord:
         r"""
         Load the object from disk.
 
         Parameters
         ----------
-        filename : str
+        filename : classs pathlib.Path
             Name of the file to load
         use_hdf5 : bool, optional, defaults to False
             Write as *.hdf5 instead of *.pkl

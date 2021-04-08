@@ -8,9 +8,8 @@ Notes
 
 #%% Imports
 from __future__ import annotations
-import contextlib
 import datetime
-import os
+import pathlib
 import platform
 from typing import Dict, List, Optional, Tuple, Union
 import unittest
@@ -421,10 +420,10 @@ class Test_plotting_storefig(unittest.TestCase):
     time: np.ndarray
     data: np.ndarray
     title: str
-    folder: str
+    folder: pathlib.Path
     plot_type: str
     fig: plt.Figure
-    this_filename: str
+    this_filename: Optional[pathlib.Path]
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -446,38 +445,38 @@ class Test_plotting_storefig(unittest.TestCase):
         ax.set_title(cls.title)
         # show a grid
         ax.grid(True)
-        cls.this_filename = ''
+        cls.this_filename = None
 
     def test_saving(self) -> None:
         plot.storefig(self.fig, self.folder, self.plot_type)
         # assert that file exists
-        self.this_filename = os.path.join(self.folder, self.title + '.' + self.plot_type)
-        self.assertTrue(os.path.isfile(self.this_filename))
+        self.this_filename = self.folder.joinpath(self.title + '.' + self.plot_type)
+        self.assertTrue(self.this_filename.is_file())
 
     def test_multiple_plot_types(self) -> None:
         plot_types = ['png', 'svg']
         plot.storefig(self.fig, self.folder, plot_types)
         # assert that files exist
         for this_type in plot_types:
-            self.this_filename = os.path.join(self.folder, self.title + '.' + this_type)
-            self.assertTrue(os.path.isfile(self.this_filename))
+            self.this_filename = self.folder.joinpath(self.title + '.' + this_type)
+            self.assertTrue(self.this_filename.is_file())
 
     def test_save_as_jpg(self) -> None:
         # Note: this test case can fail if PIL is not installed, try "pip install Pillow"
         plot.storefig(self.fig, self.folder, 'jpg')
         # assert that files exist
-        self.this_filename = os.path.join(self.folder, self.title + '.jpg')
-        self.assertTrue(os.path.isfile(self.this_filename))
+        self.this_filename = self.folder.joinpath(self.title + '.jpg')
+        self.assertTrue(self.this_filename.is_file())
 
     def test_multiple_figures(self) -> None:
         plot.storefig([self.fig, self.fig], self.folder, self.plot_type)
         # assert that file exists
-        self.this_filename = os.path.join(self.folder, self.title + '.' + self.plot_type)
-        self.assertTrue(os.path.isfile(self.this_filename))
+        self.this_filename = self.folder.joinpath(self.title + '.' + self.plot_type)
+        self.assertTrue(self.this_filename.is_file())
 
     def test_bad_folder(self) -> None:
         with self.assertRaises(ValueError):
-            plot.storefig(self.fig, 'ZZ:\\non_existant_path')
+            plot.storefig(self.fig, 'X:\\non_existant_path')
         # TODO:
         pass
 
@@ -494,16 +493,15 @@ class Test_plotting_storefig(unittest.TestCase):
         self.fig.canvas.manager.set_window_title(self.title)
         # assert that file exists
         if platform.system() == 'Windows':
-            self.this_filename = os.path.join(self.folder, 'Bad _ _ _ names' + '.' + self.plot_type)
+            self.this_filename = self.folder.joinpath('Bad _ _ _ names' + '.' + self.plot_type)
         else:
-            self.this_filename = os.path.join(self.folder, 'Bad < > _ names' + '.' + self.plot_type)
-        self.assertTrue(os.path.isfile(self.this_filename))
+            self.this_filename = self.folder.joinpath('Bad < > _ names' + '.' + self.plot_type)
+        self.assertTrue(self.this_filename.is_file())
 
     def tearDown(self) -> None:
         # remove file
-        if self.this_filename:
-            with contextlib.suppress(FileNotFoundError):
-                os.remove(self.this_filename)
+        if self.this_filename is not None:
+            self.this_filename.unlink(missing_ok=True)
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -1011,7 +1009,7 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
     """
     fig1: plt.Figure
     fig2: plt.Figure
-    filename: str
+    filename: pathlib.Path
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -1021,7 +1019,7 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
         cls.fig2 = plt.figure()
         ax2 = cls.fig2.add_subplot(1, 1, 1)
         ax2.plot([0, 1, 2], [2, 4, 6])
-        cls.filename = os.path.join(get_tests_dir(), 'pdf_figures.pdf')
+        cls.filename = get_tests_dir() / 'pdf_figures.pdf'
 
     def test_nominal(self) -> None:
         plot.save_figs_to_pdf([self.fig1, self.fig2], self.filename)
@@ -1036,8 +1034,7 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
     def tearDownClass(cls) -> None:
         plt.close(cls.fig1)
         plt.close(cls.fig2)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(cls.filename)
+        cls.filename.unlink(missing_ok=True)
 
 #%% Unit test execution
 if __name__ == '__main__':

@@ -7,9 +7,9 @@ Notes
 """
 
 #%% Imports
-import contextlib
 import copy
 import os
+import pathlib
 import platform
 import sys
 from typing import List, Union
@@ -705,22 +705,26 @@ class Test_read_text_file(unittest.TestCase):
         read a file that exists
         read a file that does not exist (raise error)
     """
-    folder: str
+    folder: pathlib.Path
     contents: str
-    filepath: str
-    badpath: str
+    filepath: pathlib.Path
+    badpath: pathlib.Path
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.folder   = dcs.get_tests_dir()
         cls.contents = 'Hello, World!\n'
-        cls.filepath = os.path.join(cls.folder, 'temp_file.txt')
-        cls.badpath  = r'AA:\non_existent_path\bad_file.txt'
+        cls.filepath = cls.folder / 'temp_file.txt'
+        cls.badpath  = pathlib.Path(r'AA:\non_existent_path\bad_file.txt')
         with open(cls.filepath, 'wt') as file:
             file.write(cls.contents)
 
     def test_reading(self) -> None:
         text = dcs.read_text_file(self.filepath)
+        self.assertEqual(text, self.contents)
+
+    def test_string(self) -> None:
+        text = dcs.read_text_file(str(self.filepath))
         self.assertEqual(text, self.contents)
 
     def test_bad_reading(self) -> None:
@@ -733,8 +737,7 @@ class Test_read_text_file(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(cls.filepath)
+        cls.filepath.unlink(missing_ok=True)
 
 #%% write_text_file
 class Test_write_text_file(unittest.TestCase):
@@ -743,21 +746,27 @@ class Test_write_text_file(unittest.TestCase):
         write a file
         write a bad file location (raise error)
     """
-    folder: str
+    folder: pathlib.Path
     contents: str
-    filepath: str
-    badpath: str
+    filepath: pathlib.Path
+    badpath: pathlib.Path
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.folder   = dcs.get_tests_dir()
         cls.contents = 'Hello, World!\n'
-        cls.filepath = os.path.join(cls.folder, 'temp_file.txt')
-        cls.badpath  = r'AA:\non_existent_path\bad_file.txt'
+        cls.filepath = cls.folder / 'temp_file.txt'
+        cls.badpath  = pathlib.Path(r'AA:\non_existent_path\bad_file.txt')
 
     def test_writing(self) -> None:
         dcs.write_text_file(self.filepath, self.contents)
         with open(self.filepath, 'rt') as file:
+            text = file.read()
+        self.assertEqual(text, self.contents)
+
+    def test_str(self) -> None:
+        dcs.write_text_file(str(self.filepath), self.contents)
+        with open(str(self.filepath), 'rt') as file:
             text = file.read()
         self.assertEqual(text, self.contents)
 
@@ -773,8 +782,7 @@ class Test_write_text_file(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(cls.filepath)
+        cls.filepath.unlink(missing_ok=True)
 
 #%% capture_output
 class Test_capture_output(unittest.TestCase):

@@ -8,7 +8,6 @@ Notes
 
 #%% Imports
 import argparse
-import os
 import unittest
 from unittest.mock import Mock, patch
 
@@ -22,7 +21,7 @@ class Test_commands_parse_enforce(unittest.TestCase):
         Nominal
     """
     def setUp(self) -> None:
-        self.folder               = dcs.get_root_dir()
+        self.folder               = str(dcs.get_root_dir())
         self.expected             = argparse.Namespace()
         self.expected.execute     = False
         self.expected.extensions  = None
@@ -98,7 +97,7 @@ class Test_commands_execute_enforce(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.folder = dcs.get_tests_dir()
-        self.args = argparse.Namespace(execute=False, extensions=None, folder=self.folder, ignore_tabs=False, \
+        self.args = argparse.Namespace(execute=False, extensions=None, folder=str(self.folder), ignore_tabs=False, \
                                        list_all=False, skip=None, trailing=False, unix=False, windows=False)
         self.patch_args = {'folder': self.folder, 'extensions': frozenset({'m', 'py'}), 'list_all': False, \
                            'check_tabs': True, 'trailing': False, 'exclusions': None, 'check_eol': None, \
@@ -139,7 +138,7 @@ class Test_commands_parse_make_init(unittest.TestCase):
         Nominal
     """
     def setUp(self) -> None:
-        self.folder           = dcs.get_root_dir()
+        self.folder           = str(dcs.get_root_dir())
         self.expected         = argparse.Namespace()
         self.expected.dry_run = False
         self.expected.folder  = self.folder
@@ -181,9 +180,9 @@ class Test_commands_execute_make_init(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.folder = dcs.get_tests_dir()
-        self.init_file = os.path.join(self.folder, 'temp_init.py')
-        self.args = argparse.Namespace(dry_run=False, folder=self.folder, lineup=False, outfile=self.init_file, wrap=100)
-        self.patch_args = {'lineup': False, 'wrap': 100, 'filename': os.path.join(self.folder, 'temp_init.py')}
+        self.init_file = self.folder / 'temp_init.py'
+        self.args = argparse.Namespace(dry_run=False, folder=str(self.folder), lineup=False, outfile=str(self.init_file), wrap=100)
+        self.patch_args = {'lineup': False, 'wrap': 100, 'filename': self.init_file}
 
     def test_nominal(self, mocker: Mock) -> None:
         commands.execute_make_init(self.args)
@@ -205,7 +204,7 @@ class Test_commands_execute_make_init(unittest.TestCase):
         mocker.assert_called_once_with(self.folder, **self.patch_args)
 
     def test_outfile(self, mocker: Mock) -> None:
-        self.args.outfile = os.path.join(self.folder, 'init_file.py')
+        self.args.outfile = self.init_file
         self.patch_args['filename'] = self.args.outfile
         commands.execute_make_init(self.args)
         mocker.assert_called_once_with(self.folder, **self.patch_args)

@@ -11,7 +11,7 @@ from __future__ import annotations
 import datetime
 import doctest
 import logging
-import os
+from pathlib import Path
 from typing import List, Optional, Tuple, TypeVar, Union
 import unittest
 
@@ -100,7 +100,7 @@ class Opts(Frozen):
         self.case_name: str   = ''
         self.date_zero: Optional[datetime.datetime] = None
         self.save_plot: bool  = False
-        self.save_path: str   = os.getcwd()
+        self.save_path: Optional[Path] = None
         self.show_plot: bool  = True
         self.show_link: bool  = False
         self.plot_type: str   = 'png'
@@ -560,7 +560,6 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     Examples
     --------
     >>> from dstauffman.plotting import plot_bar_breakdown
-    >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> time  = np.arange(0, 5, 1./12) + 2000
     >>> data  = np.random.rand(len(time), 5)
@@ -570,6 +569,7 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     >>> fig   = plot_bar_breakdown(time, data, label)
 
     Close plot
+    >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
 
     """

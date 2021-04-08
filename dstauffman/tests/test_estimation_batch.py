@@ -9,9 +9,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
-import contextlib
 import logging
-import os
 from typing import Any, Dict
 import unittest
 from unittest.mock import Mock, patch
@@ -234,18 +232,18 @@ class Test_estimation_BpeResults(unittest.TestCase):
     def setUp(self) -> None:
         self.bpe_results = estm.BpeResults()
         self.bpe_results.num_evals = 5
-        self.filename    = os.path.join(get_tests_dir(), 'test_estimation_results.hdf5')
-        self.filename2   = self.filename.replace('hdf5', 'pkl')
+        self.filename    = get_tests_dir() / 'test_estimation_results.hdf5'
+        self.filename2   = self.filename.with_suffix('.pkl')
         estm.batch.logger.setLevel(LogLevel.L0)
 
     @unittest.skipIf(not HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_save(self) -> None:
         self.bpe_results.save(self.filename)
-        self.assertTrue(os.path.isfile(self.filename))
+        self.assertTrue(self.filename.is_file())
 
     def test_save2(self) -> None:
         self.bpe_results.save(self.filename, use_hdf5=False)
-        self.assertTrue(os.path.isfile(self.filename2))
+        self.assertTrue(self.filename2.is_file())
 
     @unittest.skipIf(not HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_load(self) -> None:
@@ -289,10 +287,8 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.assertEqual(output, '')
 
     def tearDown(self) -> None:
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.filename)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.filename2)
+        self.filename.unlink(missing_ok=True)
+        self.filename2.unlink(missing_ok=True)
 
 #%% estimation.CurrentResults
 class Test_estimation_CurrentResults(unittest.TestCase):
@@ -422,7 +418,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.opti_opts.cost_args      = {'results_time': time, 'truth_time': truth_time, 'truth_data': truth_data}
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
-        self.opti_opts.output_folder  = ''
+        self.opti_opts.output_folder  = None
         self.opti_opts.output_results = ''
         self.opti_opts.params         = []
 
@@ -649,7 +645,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         self.opti_opts.cost_args      = {'results_time': time, 'truth_time': truth_time, 'truth_data': truth_data}
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
-        self.opti_opts.output_folder  = ''
+        self.opti_opts.output_folder  = None
         self.opti_opts.output_results = ''
         self.opti_opts.params         = []
 
@@ -760,7 +756,7 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
         self.opti_opts.cost_args      = {'b': 2}
         self.opti_opts.get_param_func = str
         self.opti_opts.set_param_func = repr
-        self.opti_opts.output_folder  = ''
+        self.opti_opts.output_folder  = None
         self.opti_opts.output_results = ''
         self.opti_opts.params         = [1, 2]
 
@@ -843,7 +839,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
         self.opti_opts.cost_args      = {'results_time': time, 'truth_time': truth_time, 'truth_data': truth_data}
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
-        self.opti_opts.output_folder  = ''
+        self.opti_opts.output_folder  = None
         self.opti_opts.output_results = ''
         self.opti_opts.params         = []
 
@@ -926,12 +922,10 @@ class Test_estimation_run_bpe(unittest.TestCase):
         estm.run_bpe(self.opti_opts)
 
     def tearDown(self) -> None:
-        if self.opti_opts.output_results:
+        if self.opti_opts.output_results and self.opti_opts.output_folder is not None:
             files = [self.opti_opts.output_results, 'bpe_results_iter_1.hdf5', 'cur_results_iter_1.hdf5']
             for this_file in files:
-                filename = os.path.join(self.opti_opts.output_folder, this_file)
-                with contextlib.suppress(FileNotFoundError):
-                    os.remove(filename)
+                self.opti_opts.output_folder.joinpath(this_file).unlink(missing_ok=True)
 
 #%% Unit test execution
 if __name__ == '__main__':

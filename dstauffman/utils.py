@@ -18,6 +18,7 @@ from functools import reduce
 import inspect
 from io import StringIO
 import os
+from pathlib import Path
 import shlex
 import subprocess
 import sys
@@ -540,13 +541,13 @@ def compare_two_dicts(d1: Mapping[Any, Any], d2: Mapping[Any, Any], /, suppress_
     return is_same
 
 #%% Functions - read_text_file
-def read_text_file(filename: str) -> str:
+def read_text_file(filename: Union[str, Path]) -> str:
     r"""
     Open and read a complete text file.
 
     Parameters
     ----------
-    filename : str
+    filename : str or class pathlib.Path
         fullpath name of the file to read
 
     Returns
@@ -568,14 +569,14 @@ def read_text_file(filename: str) -> str:
     >>> from dstauffman import read_text_file, write_text_file, get_tests_dir
     >>> import os
     >>> text = 'Hello, World\n'
-    >>> filename = os.path.join(get_tests_dir(), 'temp_file.txt')
+    >>> filename = get_tests_dir() / 'temp_file.txt'
     >>> write_text_file(filename, text)
-    >>> text2 = read_text_file(os.path.join(get_tests_dir(), 'temp_file.txt'))
+    >>> text2 = read_text_file(get_tests_dir() / 'temp_file.txt')
     >>> print(text2)
     Hello, World
     <BLANKLINE>
 
-    >>> os.remove(filename)
+    >>> filename.unlink()
 
     """
     try:
@@ -591,7 +592,7 @@ def read_text_file(filename: str) -> str:
         raise
 
 #%% Functions - write_text_file
-def write_text_file(filename: str, text: str) -> None:
+def write_text_file(filename: Union[str, Path], text: str) -> None:
     r"""
     Open and write the specified text to a file.
 
@@ -616,10 +617,10 @@ def write_text_file(filename: str, text: str) -> None:
     >>> from dstauffman import write_text_file, get_tests_dir
     >>> import os
     >>> text = 'Hello, World\n'
-    >>> filename = os.path.join(get_tests_dir(), 'temp_file.txt')
+    >>> filename = get_tests_dir() / 'temp_file.txt'
     >>> write_text_file(filename, text)
 
-    >>> os.remove(filename)
+    >>> filename.unlink()
 
     """
     try:
@@ -1142,7 +1143,7 @@ def combine_per_year(data: Optional[np.ndarray], func: Callable[..., Any] = None
     return data2
 
 #%% Functions - execute
-def execute(command: Union[str, List[str]], folder: str, *, ignored_codes: Iterable[int] = None, \
+def execute(command: Union[str, List[str]], folder: Path, *, ignored_codes: Iterable[int] = None, \
         env: Dict[str, str] = None):
     r"""
     Wrapper to subprocess that allows the screen to be updated for long running commands.
@@ -1151,7 +1152,7 @@ def execute(command: Union[str, List[str]], folder: str, *, ignored_codes: Itera
     ----------
     command : str or list of str
         Command to execute
-    folder : str
+    folder : class pathlib.Path
         Path to execute the command in
     ignored_codes : iterable of int, optional
         If given, a list of non-zero error codes to ignore
@@ -1166,13 +1167,14 @@ def execute(command: Union[str, List[str]], folder: str, *, ignored_codes: Itera
     Notes
     -----
     #.  Written by David C. Stauffer in October 2019.
+    #.  Updated by David C. Stauffer in April 2021 to use pathlib.
 
     Examples
     --------
     >>> from dstauffman import execute
-    >>> import os
+    >>> import pathlib
     >>> command = 'ls'
-    >>> folder  = os.getcwd()
+    >>> folder  = pathlib.Path.cwd()
     >>> # Note that this command may not work right within the IPython console, it's intended for command windows.
     >>> execute(command, folder) # doctest: +SKIP
 
@@ -1209,7 +1211,7 @@ def execute(command: Union[str, List[str]], folder: str, *, ignored_codes: Itera
     return ReturnCodes.clean
 
 #%% Functions - execute_wrapper
-def execute_wrapper(command: Union[str, List[str]], folder: str, *, dry_run: bool = False, \
+def execute_wrapper(command: Union[str, List[str]], folder: Path, *, dry_run: bool = False, \
         ignored_codes: Iterable[int] = None, filename: str = '', env: Dict[str, str] = None, \
         print_status: bool = True) -> Union[ReturnCodes, List[str]]:
     r"""
@@ -1219,7 +1221,7 @@ def execute_wrapper(command: Union[str, List[str]], folder: str, *, dry_run: boo
     ----------
     command : str or list of str
         Command to execute
-    folder : str
+    folder : class pathlib.Path
         Path to execute the command in
     dry_run : bool, optional, default is False
         Whether the command should be displayed or actually run
@@ -1235,13 +1237,14 @@ def execute_wrapper(command: Union[str, List[str]], folder: str, *, dry_run: boo
     Notes
     -----
     #.  Written by David C. Stauffer in November 2019.
+    #.  Updated by David C. Stauffer in April 2021 to use pathlib.
 
     Examples
     --------
     >>> from dstauffman import execute_wrapper
-    >>> import os
+    >>> import pathlib
     >>> command = 'ls'
-    >>> folder  = os.getcwd()
+    >>> folder  = pathlib.Path.cwd()
     >>> dry_run = True
     >>> rc = execute_wrapper(command, folder, dry_run=dry_run) # doctest: +ELLIPSIS
     Would execute "ls" in "..."
@@ -1261,7 +1264,7 @@ def execute_wrapper(command: Union[str, List[str]], folder: str, *, dry_run: boo
     else:
         raise TypeError('Unexpected type for the command list.')
     # check that the folder exists
-    if not os.path.isdir(folder):
+    if not folder.is_dir():
         print('Warning: folder "{}" doesn\'t exist, so command "{}" was not executed.'.format(folder, command))
         return ReturnCodes.bad_folder
     # execute command and print status

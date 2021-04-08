@@ -7,9 +7,7 @@ Notes
 """
 
 #%% Imports
-import contextlib
 import datetime
-import os
 from typing import List, Optional
 import unittest
 from unittest.mock import patch
@@ -518,15 +516,14 @@ class Test_plotting_setup_plots(unittest.TestCase):
         plt.close(new_fig)
 
     def test_saving_plot(self) -> None:
-        this_filename = os.path.join(get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
+        this_filename = get_tests_dir().joinpath(self.opts.case_name + ' - Figure Title.png')
         self.opts.save_plot = True
         plot.setup_plots(self.fig, self.opts)
         # remove file
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(this_filename)
+        this_filename.unlink(missing_ok=True)
 
     def test_show_link(self) -> None:
-        this_filename = os.path.join(get_tests_dir(), self.opts.case_name + ' - Figure Title.png')
+        this_filename = get_tests_dir().joinpath(self.opts.case_name + ' - Figure Title.png')
         self.opts.save_plot = True
         self.opts.show_link = True
         with capture_output() as out:
@@ -534,8 +531,7 @@ class Test_plotting_setup_plots(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         # remove file
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(this_filename)
+        this_filename.unlink(missing_ok=True)
         self.assertTrue(output.startswith('Plots saved to <a href="'))
 
     def tearDown(self) -> None:
