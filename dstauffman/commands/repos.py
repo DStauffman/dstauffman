@@ -9,7 +9,7 @@ Notes
 #%% Imports
 import argparse
 import doctest
-import os
+from pathlib import Path
 from typing import FrozenSet, List, Optional, Set, Union
 import unittest
 
@@ -34,7 +34,7 @@ def parse_enforce(input_args: List[str]) -> argparse.Namespace:
     --------
     >>> from dstauffman import get_root_dir, pprint_dict
     >>> from dstauffman.commands import parse_enforce
-    >>> input_args = [get_root_dir()]
+    >>> input_args = [str(get_root_dir())]
     >>> args = parse_enforce(input_args)
     >>> # TODO: go back to this when v3.9 everywhere
     >>> print(args) # doctest: +SKIP
@@ -99,7 +99,7 @@ def execute_enforce(args: argparse.Namespace) -> int:
     # defaults
     def_extensions = {'m', 'py'}
     # get settings from input arguments
-    folder     = os.path.abspath(args.folder)
+    folder     = Path(args.folder).resolve()
     list_all   = args.list_all
     check_tabs = not args.ignore_tabs
     trailing   = args.trailing
@@ -147,7 +147,7 @@ def parse_make_init(input_args: List[str]) -> argparse.Namespace:
     --------
     >>> from dstauffman import get_root_dir, pprint_dict
     >>> from dstauffman.commands import parse_make_init
-    >>> input_args = [get_root_dir(), '-l']
+    >>> input_args = [str(get_root_dir()), '-l']
     >>> args = parse_make_init(input_args)
     >>> # TODO: go back to this when Python v3.9 everywhere
     >>> print(args) # doctest: +SKIP
@@ -193,14 +193,14 @@ def execute_make_init(args: argparse.Namespace) -> int:
     >>> from dstauffman import get_root_dir
     >>> from dstauffman.commands import execute_make_init
     >>> from argparse import Namespace
-    >>> args = Namespace(dry_run=False, folder=get_root_dir(), outfile='__init__.py', lineup=True, wrap=100)
+    >>> args = Namespace(dry_run=False, folder=str(get_root_dir()), outfile='__init__.py', lineup=True, wrap=100)
     >>> return_code = execute_make_init(args) # doctest: +SKIP
 
     """
-    folder   = os.path.abspath(args.folder)
+    folder   = Path(args.folder).resolve()
     lineup   = args.lineup
     wrap     = args.wrap
-    filename = os.path.abspath(args.outfile)
+    filename = Path(args.outfile).resolve()
     dry_run  = args.dry_run
 
     if dry_run:

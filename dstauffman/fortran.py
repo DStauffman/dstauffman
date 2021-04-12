@@ -10,8 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-import glob
-import os
+from pathlib import Path
 from typing import Dict, Iterable, List, Literal, Optional, overload, Union
 import unittest
 
@@ -97,17 +96,17 @@ class _FortranSource(Frozen):
 
 #%% Functions - _parse_source
 @overload
-def _parse_source(filename: str, assert_single: Literal[True] = ...) -> _FortranSource: ...
+def _parse_source(filename: Path, assert_single: Literal[True] = ...) -> _FortranSource: ...
 @overload
-def _parse_source(filename: str, assert_single: Literal[False]) -> List[_FortranSource]: ...
+def _parse_source(filename: Path, assert_single: Literal[False]) -> List[_FortranSource]: ...
 
-def _parse_source(filename: str, assert_single: bool = True) -> Union[_FortranSource, List[_FortranSource]]:
+def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranSource, List[_FortranSource]]:
     r"""
     Parses the individual fortran source file into relevant information.
 
     Parameters
     ----------
-    filename : str
+    filename : class pathlib.Path
         Name of file to parse
 
     Returns
@@ -119,9 +118,9 @@ def _parse_source(filename: str, assert_single: bool = True) -> Union[_FortranSo
     --------
     >>> from dstauffman.fortran import _parse_source
     >>> from dstauffman import get_root_dir
-    >>> import os
-    >>> filename = os.path.abspath(os.path.join(get_root_dir(), '..', '..', 'forsat', 'unit_tests', \
-    ...     'test_utils_unit_vec.f90'))
+    >>> from pathlib import Path
+    >>> filename = get_root_dir().parent.parent.joinpath('forsat', 'unit_tests', \
+    ...     'test_utils_unit_vec.f90')
     >>> code = _parse_source(filename) # doctest: +SKIP
 
     """
@@ -208,13 +207,13 @@ def _parse_source(filename: str, assert_single: bool = True) -> Union[_FortranSo
     return code
 
 #%% Functions - _write_unit_test
-def _write_unit_test(filename: str, code: _FortranSource, header: str = None) -> None:
+def _write_unit_test(filename: Path, code: _FortranSource, header: str = None) -> None:
     r"""
     Writes a unit test for the given module.
 
     Parameters
     ----------
-    filename : str
+    filename : class pathlib.Path
         Name of the test file to write
     code : class _FortranSource
         Code breakdown
@@ -259,13 +258,13 @@ def _write_unit_test(filename: str, code: _FortranSource, header: str = None) ->
     write_text_file(filename, text)
 
 #%% Functions - _write_all_unit_test
-def _write_all_unit_test(filename: str, all_code: List[_FortranSource], header: str = None) -> None:
+def _write_all_unit_test(filename: Path, all_code: List[_FortranSource], header: str = None) -> None:
     r"""
     Writes a wrapper run_all_tests program to run all the unit tests.
 
     Parameters
     ----------
-    filename : str
+    filename : class pathlib.Path
         Name of the file to write
     all_code : list of _FortranSource instantes
         Contents for the unit tests
@@ -469,7 +468,7 @@ clean :
     return template
 
 #%% Functions - _write_makefile
-def _write_makefile(makefile: str, code: List[_FortranSource], *, template: str = None, \
+def _write_makefile(makefile: Path, code: List[_FortranSource], *, template: str = None, \
         program: str = None, compiler: str = 'gfortran', is_debug: bool = False, sources: Iterable[str] = None, \
         external_sources: Iterable[str] = None, replacements: Dict[str, str] = None) -> None:
     r"""
@@ -477,7 +476,7 @@ def _write_makefile(makefile: str, code: List[_FortranSource], *, template: str 
 
     Parameters
     ----------
-    makefile : str
+    makefile : class pathlib.Path
         Name of the makefile to generate
     template : str
         Contents of the template for the makefile boilerplate
@@ -490,10 +489,9 @@ def _write_makefile(makefile: str, code: List[_FortranSource], *, template: str 
     --------
     >>> from dstauffman.fortran import _write_makefile
     >>> from dstauffman import get_root_dir
-    >>> import os
-    >>> folder = os.path.abspath(os.path.join(get_root_dir(), '..', '..', 'forsat', 'unit_tests'))
-    >>> makefile = os.path.join(folder, 'unit_tests.make')
-    >>> template = os.path.join(folder, 'unit_tests_template.txt')
+    >>> folder = get_root_dir().parent.parent.joinpath('forsat', 'unit_tests')
+    >>> makefile = folder / 'unit_tests.make'
+    >>> template = folder / 'unit_tests_template.txt'
     >>> code = [] # TODO: write this line
     >>> _write_makefile(makefile, code=code, template=template) # doctest: +SKIP
 
@@ -620,14 +618,14 @@ def _write_makefile(makefile: str, code: List[_FortranSource], *, template: str 
     write_text_file(makefile, text)
 
 #%% Functions - create_fortran_unit_tests
-def create_fortran_unit_tests(folder: str, *, template: str = None, external_sources: Iterable[str] = None, \
-                              header: str = None) -> None:
+def create_fortran_unit_tests(folder: Path, *, template: str = None, external_sources: Iterable[str] = None, \
+        header: str = None) -> None:
     r"""
     Parses the given folder for Fortran unit test files to build programs that will execute them.
 
     Parameters
     ----------
-    folder : str
+    folder : class pathlib.Path
         Folder location to look for unit tests
     template : str, optional
         Template to use for the makefile
@@ -643,20 +641,19 @@ def create_fortran_unit_tests(folder: str, *, template: str = None, external_sou
     Examples
     --------
     >>> from dstauffman import create_fortran_unit_tests, get_root_dir
-    >>> import os
-    >>> folder = os.path.abspath(os.path.join(get_root_dir(), '..', '..', 'forsat', 'unit_tests'))
+    >>> folder = get_root_dir().parent.parent.joinpath('forsat', 'unit_tests')
     >>> create_fortran_unit_tests(folder) # doctest: +SKIP
 
     """
     # find all the files to process
-    files = glob.glob(os.path.join(folder, 'test*.f90'))
+    files = folder.glob('test*.f90')
     # initialize code information
     all_code = []
     # process each file
     for file in files:
         # parse the source code
         code = _parse_source(file, assert_single=True)
-        newfile = os.path.join(folder, 'run_' + os.path.split(file)[1])
+        newfile = folder.joinpath('run_' + file.name)
 
         # build the individual unit test
         _write_unit_test(newfile, code, header)
@@ -664,10 +661,10 @@ def create_fortran_unit_tests(folder: str, *, template: str = None, external_sou
         all_code.append(code)
 
     # write run_all_tests file
-    _write_all_unit_test(os.path.join(folder, 'run_all_tests.f90'), all_code, header)
+    _write_all_unit_test(folder / 'run_all_tests.f90', all_code, header)
 
     # Re-parse the source code once all the new files have been written
-    files = glob.glob(os.path.join(folder, 'run_*.f90'))
+    files = folder.glob('run_*.f90')
     for file in files:
         code = _parse_source(file, assert_single=True)
         all_code.append(code)
@@ -677,20 +674,20 @@ def create_fortran_unit_tests(folder: str, *, template: str = None, external_sou
 
     # write the master Makefile
     if template is not None:
-        makefile = os.path.join(folder, 'unit_tests.make')
+        makefile = folder / 'unit_tests.make'
         _write_makefile(makefile, code=all_code, template=template, external_sources=external_sources)
 
 #%% create_fortran_makefile
-def create_fortran_makefile(folder: str, makefile: str, program: str, sources: List[str], *, \
+def create_fortran_makefile(folder: Path, makefile: Path, program: str, sources: List[str], *, \
         compiler: str = 'gfortran', is_debug: bool = True, template: str = None, replacements: Dict[str, str] = None) -> None:
     r"""
     Parses the given folder for Fortran source files to build a makefile.
 
     Parameters
     ----------
-    folder : str
+    folder : class pathlib.Path
         Folder location to look for unit tests
-    makefile : str
+    makefile : class pathlib.Path
         Location of the makefile to create
     template : str
         Template to use for the makefile
@@ -710,9 +707,8 @@ def create_fortran_makefile(folder: str, makefile: str, program: str, sources: L
     Examples
     --------
     >>> from dstauffman import create_fortran_makefile, get_root_dir
-    >>> import os
-    >>> folder = os.path.abspath(os.path.join(get_root_dir(), '..', '..', 'forsat', 'source'))
-    >>> makefile = os.path.abspath(os.path.join(folder, '..', 'Makefile'))
+    >>> folder = get_root_dir().parent.parent.joinpath('forsat', 'source')
+    >>> makefile = folder.parent.joinpath('Makefile')
     >>> template = '' # TODO: fill this in
     >>> program = 'forsat'
     >>> sources = [] # TODO: populate this
@@ -723,7 +719,7 @@ def create_fortran_makefile(folder: str, makefile: str, program: str, sources: L
     all_code = []
     # process each file
     for file in sources:
-        code = _parse_source(os.path.join(folder, file + '.f90'), assert_single=True)
+        code = _parse_source(folder.joinpath(file + '.f90'), assert_single=True)
         all_code.append(code)
 
     # write makefile

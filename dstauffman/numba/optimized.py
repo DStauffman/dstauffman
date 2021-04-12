@@ -19,8 +19,7 @@ from dstauffman.numba.passthrough import fake_jit, ncjit, TARGET
 try:
     from numba import float32, float64, int32, int64, vectorize  # type: ignore[attr-defined]
 except ModuleNotFoundError:
-    float64 = float
-    vectorize = fake_jit
+    int32 = int64 = float32 = float64 = fake_jit
 
 #%% np_any
 @ncjit

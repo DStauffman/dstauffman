@@ -11,7 +11,8 @@ Notes
 import contextlib
 import doctest
 import logging
-import os
+from pathlib import Path
+from typing import Union
 import unittest
 
 from dstauffman.constants import HAVE_NUMPY
@@ -25,7 +26,7 @@ if HAVE_NUMPY:
 logger = logging.getLogger(__name__)
 
 #%% Functions - setup_dir
-def setup_dir(folder: str, recursive: bool = False) -> None:
+def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
     r"""
     Clear the contents for existing folders or instantiates the directory if it doesn't exist.
 
@@ -38,7 +39,7 @@ def setup_dir(folder: str, recursive: bool = False) -> None:
 
     See Also
     --------
-    os.makedirs, os.rmdir, os.remove
+    os.makedirs, os.rmdir, os.remove, pathlib.Path.mkdir, pathlib.Path.rmdir
 
     Raises
     ------
@@ -55,34 +56,35 @@ def setup_dir(folder: str, recursive: bool = False) -> None:
     >>> setup_dir(r'C:\Temp\test_folder') # doctest: +SKIP
 
     """
-    # check for an empty string and exit
-    if not folder:
-        return
-    if os.path.isdir(folder):
+    # convert older string API to paths
+    if isinstance(folder, str):
+        # check for an empty string and exit
+        if not folder:
+            return
+        folder = Path(folder)
+    if folder.is_dir():
         # Loop through the contained files/folders
-        for this_elem in os.listdir(folder):
+        for this_elem in folder.glob('*'):
             # alias the fullpath of this file element
-            this_full_elem = os.path.join(folder, this_elem)
+            this_full_elem = this_elem.resolve()
             # check if a folder or file
-            if os.path.isdir(this_full_elem):
+            if this_full_elem.is_dir():
                 # if a folder, then delete recursively if recursive is True
                 if recursive:
                     setup_dir(this_full_elem, recursive=recursive)
                     with contextlib.suppress(FileNotFoundError):
-                        os.rmdir(this_full_elem)
-            elif os.path.isfile(this_full_elem):
+                        this_full_elem.rmdir()
+            elif this_full_elem.is_file():
                 # if a file, then remove it
-                with contextlib.suppress(FileNotFoundError):
-                    os.remove(this_full_elem)
+                this_full_elem.unlink(missing_ok=True)
             else:
-                raise RuntimeError('Unexpected file type, neither file nor folder: "{}".'\
-                    .format(this_full_elem)) # pragma: no cover
-        logger.log(LogLevel.L1, 'Files/Sub-folders were removed from: "' + folder + '"')
+                raise RuntimeError(f'Unexpected file type, neither file nor folder: "{this_full_elem}".')  # pragma: no cover
+        logger.log(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', folder)
     else:
         # create directory if it does not exist
         try:
-            os.makedirs(folder)
-            logger.log(LogLevel.L1, 'Created directory: "' + folder + '"')
+            folder.mkdir(parents=True)
+            logger.log(LogLevel.L1, 'Created directory: "%s"', folder)
         except: # pragma: no cover
             # re-raise last exception, could try to handle differently in the future
             raise # pragma: no cover

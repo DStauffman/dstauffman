@@ -9,6 +9,7 @@ Notes
 #%% Imports
 import contextlib
 import os
+import pathlib
 from typing import List
 import unittest
 from unittest.mock import patch
@@ -59,9 +60,9 @@ class Test_find_repo_issues(unittest.TestCase):
         Bad New Lines
         Ignore tabs
     """
-    folder: str
+    folder: pathlib.Path
     linesep: str
-    files: List[str]
+    files: List[pathlib.Path]
     bad1: str
     bad2: str
 
@@ -69,9 +70,9 @@ class Test_find_repo_issues(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.folder = dcs.get_tests_dir()
         cls.linesep = os.linesep.replace('\n', '\\n').replace('\r', '\\r')
-        file1 = os.path.join(cls.folder, 'temp_code_01.py')
-        file2 = os.path.join(cls.folder, 'temp_code_02.py')
-        file3 = os.path.join(cls.folder, 'temp_code_03.m')
+        file1 = cls.folder / 'temp_code_01.py'
+        file2 = cls.folder / 'temp_code_02.py'
+        file3 = cls.folder / 'temp_code_03.m'
         cont1 = 'Line 1\n\nAnother line\n    Line with leading spaces\n'
         cont2 = '\n\n    Start line\nNo Bad tab lines\n    Start and end line    \nAnother line\n\n'
         cont3 = '\n\n    Start line\n\tBad tab line\n    Start and end line    \nAnother line\n\n'
@@ -84,7 +85,7 @@ class Test_find_repo_issues(unittest.TestCase):
 
     def test_nominal(self) -> None:
         with dcs.capture_output() as out:
-            dcs.find_repo_issues(self.folder, extensions='m', list_all=False, trailing=False)
+            dcs.find_repo_issues(self.folder, extensions='.m', list_all=False, trailing=False)
         lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
@@ -94,7 +95,7 @@ class Test_find_repo_issues(unittest.TestCase):
 
     def test_different_extensions(self) -> None:
         with dcs.capture_output() as out:
-            dcs.find_repo_issues(self.folder, extensions=('txt',))
+            dcs.find_repo_issues(self.folder, extensions=('.txt',))
         lines = out.getvalue().strip().split('\n')
         out.close()
         self.assertEqual(lines[0], '')
@@ -132,7 +133,7 @@ class Test_find_repo_issues(unittest.TestCase):
         self.assertTrue(len(lines) > 7)
 
     def test_exclusions_skip(self) -> None:
-        exclusions = (self.folder)
+        exclusions = self.folder
         with dcs.capture_output() as out:
             dcs.find_repo_issues(self.folder, exclusions=exclusions)
         lines = out.getvalue().split('\n')
@@ -140,7 +141,7 @@ class Test_find_repo_issues(unittest.TestCase):
         self.assertEqual(lines, [''])
 
     def test_exclusions_invalid(self) -> None:
-        exclusions = (r'C:\non_existant_path', )
+        exclusions = (pathlib.Path(r'C:\non_existant_path'), )
         with dcs.capture_output() as out:
             dcs.find_repo_issues(self.folder, exclusions=exclusions)
         lines = out.getvalue().split('\n')
@@ -152,7 +153,7 @@ class Test_find_repo_issues(unittest.TestCase):
 
     def test_bad_newlines(self) -> None:
         with dcs.capture_output() as out:
-            dcs.find_repo_issues(self.folder, extensions='m', check_eol='0')
+            dcs.find_repo_issues(self.folder, extensions='.m', check_eol='0')
         lines = out.getvalue().split('\n')
         out.close()
         self.assertTrue(lines[0].startswith('File: "'))
@@ -164,7 +165,7 @@ class Test_find_repo_issues(unittest.TestCase):
 
     def test_ignore_tabs(self) -> None:
         with dcs.capture_output() as out:
-            dcs.find_repo_issues(self.folder, extensions='m', check_tabs=False)
+            dcs.find_repo_issues(self.folder, extensions='.m', check_tabs=False)
         output = out.getvalue()
         out.close()
         self.assertEqual(output, '')
@@ -172,8 +173,7 @@ class Test_find_repo_issues(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         for this_file in cls.files:
-            with contextlib.suppress(FileNotFoundError):
-                os.remove(this_file)
+            this_file.unlink(missing_ok=True)
 
 #%% delete_pyc
 class Test_delete_pyc(unittest.TestCase):
@@ -184,60 +184,58 @@ class Test_delete_pyc(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.fold1 = dcs.get_tests_dir()
-        self.file1 = os.path.join(self.fold1, 'temp_file.pyc')
-        self.fold2 = os.path.join(self.fold1, 'temp_sub_dir')
-        self.file2 = os.path.join(self.fold2, 'temp_file2.pyc')
+        self.file1 = self.fold1 / 'temp_file.pyc'
+        self.fold2 = self.fold1 / 'temp_sub_dir'
+        self.file2 = self.fold2 / 'temp_file2.pyc'
         dcs.write_text_file(self.file1, 'Text.')
-        os.makedirs(self.fold2)
+        self.fold2.mkdir(exist_ok=True)
         dcs.write_text_file(self.file2, 'More text.')
 
     def test_recursive(self) -> None:
-        self.assertTrue(os.path.isfile(self.file1))
-        self.assertTrue(os.path.isdir(self.fold2))
-        self.assertTrue(os.path.isfile(self.file2))
+        self.assertTrue(self.file1.is_file())
+        self.assertTrue(self.fold2.is_dir())
+        self.assertTrue(self.file2.is_file())
         with dcs.capture_output() as out:
             dcs.delete_pyc(self.fold1)
         output = out.getvalue().strip()
         out.close()
         lines = output.split('\n')
-        self.assertFalse(os.path.isfile(self.file1))
-        self.assertFalse(os.path.isfile(self.file2))
+        self.assertFalse(self.file1.is_file())
+        self.assertFalse(self.file2.is_file())
         for this_line in lines:
             self.assertTrue(this_line.startswith('Removing "'))
             self.assertTrue(this_line.endswith('temp_file.pyc"') or this_line.endswith('temp_file2.pyc"'))
 
     def test_not_recursive(self) -> None:
-        self.assertTrue(os.path.isfile(self.file1))
-        self.assertTrue(os.path.isdir(self.fold2))
-        self.assertTrue(os.path.isfile(self.file2))
+        self.assertTrue(self.file1.is_file())
+        self.assertTrue(self.fold2.is_dir())
+        self.assertTrue(self.file2.is_file())
         with dcs.capture_output() as out:
             dcs.delete_pyc(self.fold1, recursive=False)
         output = out.getvalue().strip()
         out.close()
         lines = output.split('\n')
-        self.assertFalse(os.path.isfile(self.file1))
-        self.assertTrue(os.path.isfile(self.file2))
+        self.assertFalse(self.file1.is_file())
+        self.assertTrue(self.file2.is_file())
         for this_line in lines:
             self.assertTrue(this_line.startswith('Removing "'))
             self.assertTrue(this_line.endswith('temp_file.pyc"'))
 
     def test_no_logging(self) -> None:
-        self.assertTrue(os.path.isfile(self.file1))
-        self.assertTrue(os.path.isdir(self.fold2))
-        self.assertTrue(os.path.isfile(self.file2))
+        self.assertTrue(self.file1.is_file())
+        self.assertTrue(self.fold2.is_dir())
+        self.assertTrue(self.file2.is_file())
         with dcs.capture_output() as out:
             dcs.delete_pyc(self.fold1, print_progress=False)
         output = out.getvalue().strip()
         out.close()
-        self.assertFalse(os.path.isfile(self.file1))
-        self.assertFalse(os.path.isfile(self.file2))
+        self.assertFalse(self.file1.is_file())
+        self.assertFalse(self.file2.is_file())
         self.assertEqual(output, '')
 
     def tearDown(self) -> None:
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.file1)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.file2)
+        self.file1.unlink(missing_ok=True)
+        self.file2.unlink(missing_ok=True)
         with contextlib.suppress(FileNotFoundError):
             os.removedirs(self.fold2)
 
@@ -301,8 +299,8 @@ class Test_make_python_init(unittest.TestCase):
         self.text4    = 'from .temp_file                 import Test_Frozen'
         self.line_num = 5
         self.folder2  = dcs.get_tests_dir()
-        self.filepath = os.path.join(self.folder2, 'temp_file.py')
-        self.filename = os.path.join(self.folder2, '__init__2.py')
+        self.filepath = self.folder2 / 'temp_file.py'
+        self.filename = self.folder2 / '__init__2.py'
 
     def test_nominal_use(self) -> None:
         text = dcs.make_python_init(self.folder)
@@ -343,13 +341,11 @@ class Test_make_python_init(unittest.TestCase):
         text = dcs.make_python_init(self.folder, filename=self.filename)
         lines = text.split('\n')
         self.assertEqual(lines[self.line_num][0:len(self.text2)], self.text2)
-        self.assertTrue(os.path.isfile(self.filename))
+        self.assertTrue(self.filename.is_file())
 
     def tearDown(self) -> None:
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.filepath)
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.filename)
+        self.filepath.unlink(missing_ok=True)
+        self.filename.unlink(missing_ok=True)
 
 #%% write_unit_test_templates
 class Test_write_unit_test_templates(unittest.TestCase):
@@ -359,7 +355,7 @@ class Test_write_unit_test_templates(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.folder = dcs.get_root_dir()
-        self.output = dcs.get_tests_dir() + '_template'
+        self.output = pathlib.Path(str(dcs.get_tests_dir()) + '_template')
         self.author = 'David C. Stauffer'
         self.exclude = dcs.get_tests_dir()
 

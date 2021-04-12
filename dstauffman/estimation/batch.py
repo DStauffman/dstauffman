@@ -16,7 +16,7 @@ from copy import deepcopy
 import doctest
 from itertools import repeat
 import logging
-import os
+from pathlib import Path
 import time
 from typing import Any, Callable, ClassVar, Dict, List, Optional, Tuple, TYPE_CHECKING
 import unittest
@@ -65,7 +65,7 @@ class OptiOpts(Frozen):
         self.cost_args: Dict[str, Any]      = None # {} # TODO: add note, these are additional cost args, plus model_args
         self.get_param_func: Callable       = None
         self.set_param_func: Callable       = None
-        self.output_folder: str             = ''
+        self.output_folder: Optional[Path]  = None
         self.output_results: str            = 'bpe_results.hdf5'
         self.params: List[Any]              = None # []
         self.start_func: Optional[Callable] = None
@@ -228,8 +228,8 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     >>> bpe_results = BpeResults()
 
     """
-    load: ClassVar[Callable[[str, DefaultNamedArg(bool, 'use_hdf5')], BpeResults]]
-    save: Callable[[BpeResults, str, DefaultNamedArg(bool, 'use_hdf5')], None]
+    load: ClassVar[Callable[[Optional[Path], DefaultNamedArg(bool, 'use_hdf5')], BpeResults]]
+    save: Callable[[BpeResults, Optional[Path], DefaultNamedArg(bool, 'use_hdf5')], None]
 
     def __init__(self):
         self.param_names  = None
@@ -330,8 +330,8 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
       Best Params: None
 
     """
-    load: ClassVar[Callable[[str], 'CurrentResults']]
-    save: Callable[['CurrentResults', str], None]
+    load: ClassVar[Callable[[Optional[Path]], 'CurrentResults']]
+    save: Callable[['CurrentResults', Optional[Path]], None]
 
     def __init__(self):
         self.trust_rad = None
@@ -1123,8 +1123,10 @@ def run_bpe(opti_opts: OptiOpts, log_level: int = LogLevel.L5) -> Tuple[BpeResul
     two_sided = True if opti_opts.slope_method == 'two_sided' else False
 
     # determine if saving data
-    filename  = os.path.join(opti_opts.output_folder, opti_opts.output_results)
-    is_saving = bool(opti_opts.output_folder) and bool(opti_opts.output_results)
+    is_saving = opti_opts.output_folder is not None and bool(opti_opts.output_results)
+    if is_saving:
+        assert opti_opts.output_folder is not None
+        filename = opti_opts.output_folder / opti_opts.output_results
 
     # TODO: write ability to resume from previously saved iteration results
     # initialize the output and current results instances
@@ -1176,7 +1178,7 @@ def run_bpe(opti_opts: OptiOpts, log_level: int = LogLevel.L5) -> Tuple[BpeResul
 
     # Set-up saving: check that the folder exists
     if is_saving:
-        if opti_opts.output_folder and not os.path.isdir(opti_opts.output_folder):
+        if opti_opts.output_folder is not None and not opti_opts.output_folder.is_dir():
             # if the folder doesn't exist, then create it
             setup_dir(opti_opts.output_folder) # pragma: no cover
 
@@ -1223,8 +1225,9 @@ def run_bpe(opti_opts: OptiOpts, log_level: int = LogLevel.L5) -> Tuple[BpeResul
 
         # save results from this iteration
         if is_saving:
-            bpe_results.save(os.path.join(opti_opts.output_folder, 'bpe_results_iter_{}.hdf5'.format(iter_count)))
-            cur_results.save(os.path.join(opti_opts.output_folder, 'cur_results_iter_{}.hdf5'.format(iter_count)))
+            assert opti_opts.output_folder is not None
+            bpe_results.save(opti_opts.output_folder / f'bpe_results_iter_{iter_count}.hdf5')
+            cur_results.save(opti_opts.output_folder / f'cur_results_iter_{iter_count}.hdf5')
 
         # increment counter
         iter_count += 1

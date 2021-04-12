@@ -9,7 +9,6 @@ Notes
 #%% Imports
 import argparse
 import doctest
-import os
 from typing import List
 import unittest
 
@@ -31,8 +30,8 @@ def print_help() -> int:
     >>> print_help() # doctest: +SKIP
 
     """
-    help_file = os.path.join(get_root_dir(), '..', 'README.rst')
-    if not os.path.isfile(help_file): # pragma: no cover
+    help_file = get_root_dir().parent / 'README.rst'
+    if not help_file.is_file():  # pragma: no cover
         print(f'Warning: help file at "{help_file}" was not found.')
         return ReturnCodes.bad_help_file
     with open(help_file) as file:

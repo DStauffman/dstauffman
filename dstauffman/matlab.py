@@ -9,6 +9,7 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 import unittest
 
@@ -20,14 +21,14 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% load_matlab
-def load_matlab(filename: str, varlist: Union[List[str], Set[str], Tuple[str]] = None, *, squeeze: bool = True, \
+def load_matlab(filename: Union[str, Path], varlist: Union[List[str], Set[str], Tuple[str]] = None, *, squeeze: bool = True, \
         enums: Dict[str, Any] = None) -> Dict[str, Any]:
     r"""
     Load simple arrays from a MATLAB v7.3 HDF5 based *.mat file.
 
     Parameters
     ----------
-    filename : str
+    filename : class pathlib.Path
         Name of the file to load
     varlist : list of str, optional
         Name of the variables to load
@@ -42,8 +43,7 @@ def load_matlab(filename: str, varlist: Union[List[str], Set[str], Tuple[str]] =
     Examples
     --------
     >>> from dstauffman import load_matlab, get_tests_dir
-    >>> import os
-    >>> filename = os.path.join(get_tests_dir(), 'test_numbers.mat')
+    >>> filename = get_tests_dir() / 'test_numbers.mat'
     >>> out = load_matlab(filename)
     >>> print(out['row_nums'][1])
     2.2

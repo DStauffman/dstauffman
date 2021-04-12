@@ -13,7 +13,7 @@ import doctest
 import gc
 from itertools import repeat
 import operator
-import os
+from pathlib import Path
 import platform
 import re
 import sys
@@ -158,19 +158,19 @@ class MyCustomToolbar():
         # to determine which figure actually triggered the button events.)
         self.fig_number = fig.number
         # create buttons - Prev Plot
-        icon = QIcon(os.path.join(get_images_dir(), 'prev_plot.png'))
+        icon = QIcon(str(get_images_dir() / 'prev_plot.png'))
         self.btn_prev_plot = _HoverButton(icon, '')
         self.btn_prev_plot.setToolTip('Show the previous plot')
         fig.canvas.toolbar.addWidget(self.btn_prev_plot)
         self.btn_prev_plot.clicked.connect(self.prev_plot)
         # create buttons - Next Plot
-        icon = QIcon(os.path.join(get_images_dir(), 'next_plot.png'))
+        icon = QIcon(str(get_images_dir() / 'next_plot.png'))
         self.btn_next_plot = _HoverButton(icon, '')
         self.btn_next_plot.setToolTip('Show the next plot')
         fig.canvas.toolbar.addWidget(self.btn_next_plot)
         self.btn_next_plot.clicked.connect(self.next_plot)
         # create buttons - Close all
-        icon = QIcon(os.path.join(get_images_dir(), 'close_all.png'))
+        icon = QIcon(str(get_images_dir() / 'close_all.png'))
         self.btn_close_all = _HoverButton(icon, '')
         self.btn_close_all.setToolTip('Close all the open plots')
         fig.canvas.toolbar.addWidget(self.btn_close_all)
@@ -507,7 +507,7 @@ def resolve_name(name: str, force_win: bool = None, rep_token: str = '_', strip_
     return new_name
 
 #%% Functions - storefig
-def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[str]] = 'png') -> None:
+def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Union[str, List[str]] = 'png') -> None:
     r"""
     Store the specified figures in the specified folder and with the specified plot type(s).
 
@@ -540,7 +540,7 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
     >>> from dstauffman.plotting import storefig
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> import os
+    >>> import pathlib
     >>> fig = plt.figure()
     >>> fig.canvas.manager.set_window_title('Figure Title')
     >>> ax = fig.add_subplot(111)
@@ -549,7 +549,7 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
     >>> _ = ax.plot(x, y)
     >>> _ = ax.set_title('X vs Y')
     >>> plt.show(block=False) # doctest: +SKIP
-    >>> folder = os.getcwd()
+    >>> folder = pathlib.Path.cwd()
     >>> plot_type = 'png'
     >>> storefig(fig, folder, plot_type)
 
@@ -557,7 +557,7 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
     >>> plt.close(fig)
 
     Delete file
-    >>> os.remove(os.path.join(folder, 'Figure Title.png'))
+    >>> folder.joinpath('Figure Title.png').unlink()
 
     """
     # make sure figs is a list
@@ -565,6 +565,9 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
         figs = fig
     else:
         figs = [fig]
+    # make sure folder is a Path
+    if isinstance(folder, str):
+        folder = Path(folder).resolve()
     # make sure types is a list
     if not isinstance(plot_type, list):
         types: List[str] = []
@@ -573,9 +576,9 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
         types = plot_type
     # if no folder was specified, then use the current working directory
     if folder is None:
-        folder = os.getcwd() # pragma: no cover
+        folder = Path.cwd() # pragma: no cover
     # confirm that the folder exists
-    if not os.path.isdir(folder):
+    if not folder.is_dir():
         raise ValueError('The specfied folder "{}" does not exist.'.format(folder))
     # loop through the figures
     throw_warning = False
@@ -597,7 +600,7 @@ def storefig(fig: _FigOrListFig, folder: str = None, plot_type: Union[str, List[
         # loop through the plot types
         for this_type in types:
             # save the figure to the specified plot type
-            this_fig.savefig(os.path.join(folder, this_title + '.' + this_type), dpi=160, \
+            this_fig.savefig(folder.joinpath(this_title + '.' + this_type), dpi=160, \
                              bbox_inches='tight', pad_inches=0.01)
     if throw_warning:
         warnings.warn('No window titles found, using the plot title instead (usually because there is no display).')
@@ -1620,7 +1623,7 @@ def z_from_ci(ci):
     return z
 
 #%% Functions - save_figs_to_pdf
-def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: str = 'figs.pdf') -> None:
+def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = Path('figs.pdf')) -> None:
     r"""
     Saves the given figures to a PDF file.
 

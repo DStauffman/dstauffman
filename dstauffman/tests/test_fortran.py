@@ -7,8 +7,6 @@ Notes
 """
 
 #%% Imports
-import contextlib
-import os
 import unittest
 
 import dstauffman as dcs
@@ -43,7 +41,7 @@ class Test__parse_source(unittest.TestCase):
         lines.append('    end function add')
         lines.append('end module test_mod')
         text = '\n'.join(lines)
-        self.filename = os.path.join(dcs.get_tests_dir(), 'temp_code.f90')
+        self.filename = dcs.get_tests_dir() / 'temp_code.f90'
         dcs.write_text_file(self.filename, text)
 
     def test_function(self) -> None:
@@ -65,8 +63,7 @@ class Test__parse_source(unittest.TestCase):
         self.assertEqual(this_code.subroutines, ['sub_name'])
 
     def tearDown(self) -> None:
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.filename)
+        self.filename.unlink(missing_ok=True)
 
 #%% _write_unit_test
 class Test__write_unit_test(unittest.TestCase):

@@ -7,8 +7,6 @@ Notes
 """
 
 #%% Imports
-import contextlib
-import os
 import unittest
 
 from dstauffman import capture_output, get_tests_dir, HAVE_H5PY, HAVE_NUMPY, NP_DATETIME_FORM
@@ -34,7 +32,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         TBD
     """
     def setUp(self) -> None:
-        self.filename = os.path.join(get_tests_dir(), 'test_kf.hdf5')
+        self.filename = get_tests_dir() / 'test_kf.hdf5'
 
     def test_nominal(self) -> None:
         kf = space.Kf()
@@ -50,8 +48,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         np.testing.assert_array_equal(kf.time, kf2.time)
 
     def tearDown(self) -> None:
-        with contextlib.suppress(FileNotFoundError):
-            os.remove(self.filename)
+        self.filename.unlink(missing_ok=True)
 
 #%% aerospace.KfRecord
 class Test_aerospace_KfRecord(unittest.TestCase):

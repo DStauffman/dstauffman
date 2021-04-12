@@ -10,6 +10,7 @@ Notes
 import argparse
 import doctest
 import os
+from pathlib import Path
 import platform
 import subprocess
 import sys
@@ -105,10 +106,10 @@ def execute_tests(args: argparse.Namespace) -> int:
     if library is None:
         folder = get_root_dir()
     else:
-        folder = os.path.abspath(library)
+        folder = Path(library).resolve()
         if folder not in sys.path:
             # Note: pytest seems to work without this step?
-            sys.path.append(folder)
+            sys.path.append(str(folder))
 
     if docstrings:
         # run the docstring tests
@@ -197,16 +198,16 @@ def execute_coverage(args: argparse.Namespace) -> int:
 
     # open the report
     if report:
-        filename = os.path.join(get_tests_dir(), 'coverage_html_report', 'index.html')
-        if not os.path.isfile(filename):
+        filename = get_tests_dir().joinpath('coverage_html_report', 'index.html')
+        if not filename.is_file():
             print(f'Coverage report not found at: "{filename}".')
             return ReturnCodes.bad_command
         if platform.system() == 'Darwin':
-            subprocess.call(['open', filename])
+            subprocess.call(['open', str(filename)])
         elif platform.system() == 'Windows':
             os.startfile(filename)
         else:
-            subprocess.call(['xdg-open', filename])
+            subprocess.call(['xdg-open', str(filename)])
     return return_code
 
 #%% Unit test
