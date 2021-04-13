@@ -1212,7 +1212,7 @@ def execute(command: Union[str, List[str]], folder: Path, *, ignored_codes: Iter
 
 #%% Functions - execute_wrapper
 def execute_wrapper(command: Union[str, List[str]], folder: Path, *, dry_run: bool = False, \
-        ignored_codes: Iterable[int] = None, filename: str = '', env: Dict[str, str] = None, \
+        ignored_codes: Iterable[int] = None, filename: Path = None, env: Dict[str, str] = None, \
         print_status: bool = True) -> Union[ReturnCodes, List[str]]:
     r"""
     Wrapper to the wrapper to subprocess with options to print the command do dry-runs.
@@ -1227,7 +1227,7 @@ def execute_wrapper(command: Union[str, List[str]], folder: Path, *, dry_run: bo
         Whether the command should be displayed or actually run
     ignored_codes : int or iterable of int, optional, default is None
         If given, a list of non-zero error codes to ignore
-    filename : str, optional, default is to not write
+    filename : class pathlib.Path, optional, default is to not write
         Name of the file to write the output to, ignore if empty string
     env : dict, optional
         Dictionary of environment variables to update for the call
@@ -1268,7 +1268,7 @@ def execute_wrapper(command: Union[str, List[str]], folder: Path, *, dry_run: bo
         print('Warning: folder "{}" doesn\'t exist, so command "{}" was not executed.'.format(folder, command))
         return ReturnCodes.bad_folder
     # execute command and print status
-    assert print_status or bool(filename), 'You must either print the status or save results to a filename.'
+    assert print_status or filename is not None, 'You must either print the status or save results to a filename.'
     if print_status:
         lines = []
         for line in execute(command_list, folder, ignored_codes=ignored_codes, env=env):
@@ -1278,7 +1278,7 @@ def execute_wrapper(command: Union[str, List[str]], folder: Path, *, dry_run: bo
     else:
         lines = list(execute(command_list, folder, ignored_codes=ignored_codes, env=env))
     # optionally write to text file if a filename is given
-    if filename:
+    if filename is not None:
         write_text_file(filename, ''.join(lines))
     return lines
 

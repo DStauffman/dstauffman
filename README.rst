@@ -27,12 +27,14 @@ The following built-in Python libraries are used within the dstauffman library.
 * datetime
 * doctest
 * enum
+* functools
 * gc
 * glob
 * inspect
 * io
 * logging
 * os
+* pathlib
 * platform
 * pickle
 * re

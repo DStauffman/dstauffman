@@ -1,11 +1,11 @@
 r"""Runs speed comparisons for the any and all commands."""
 
 #%% Imports
-from IPython import get_ipython
+from IPython import get_ipython  # type: ignore[import]
 import numpy as np
 import pandas as pd
 
-from dstauffman import np_any, np_all
+from dstauffman.numba import np_any, np_all
 
 #%% Results
 text = \

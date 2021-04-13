@@ -3,7 +3,6 @@
 #%% Imports
 from copy import deepcopy
 import datetime
-import os
 
 import numpy as np
 
@@ -37,7 +36,7 @@ num_innovs = 11
 kf1      = Kf()
 kf1.name = 'KF1'
 kf1.time = np.arange(11)
-kf1.att  = np.tile(q1[:, np.newaxis], (1, kf1.time.size))
+kf1.att  = np.tile(q1[:, np.newaxis], (1, kf1.time.size))  # type: ignore[union-attr]
 kf1.pos  = 1e6 * np.random.rand(3, 11)
 kf1.vel  = 1e3 * np.random.rand(3, 11)
 kf1.covar  = 1e-6 * np.tile(np.arange(1, num_states+1, dtype=float)[:, np.newaxis], (1, num_points))
@@ -53,12 +52,12 @@ kf1.innov.norm  = np.ones((num_axes, num_innovs)) * np.sign(np.random.rand(num_a
 kf2      = Kf()
 kf2.name = 'KF2'
 kf2.time = np.arange(2, 13)
-kf2.att  = np.tile(q2[:, np.newaxis], (1, kf2.time.size))
-kf2.att[3,4] += 50e-6
+kf2.att  = np.tile(q2[:, np.newaxis], (1, kf2.time.size))  # type: ignore[union-attr]
+kf2.att[3,4] += 50e-6  # type: ignore[index]
 kf2.att = quat_norm(kf2.att)
-kf2.pos  = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5
-kf2.vel  = kf1.vel[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 100
-kf2.covar  = kf1.covar + 1e-9 * np.random.rand(*kf1.covar.shape)
+kf2.pos  = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5  # type: ignore[index]
+kf2.vel  = kf1.vel[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 100  # type: ignore[index]
+kf2.covar  = kf1.covar + 1e-9 * np.random.rand(*kf1.covar.shape)  # type: ignore[union-attr]
 kf2.active = kf1.active
 
 ix              = np.hstack((np.arange(7), np.arange(8, num_innovs)))
@@ -124,4 +123,4 @@ if plots['sts']:
     f = plot_states(kd1, kd2, opts=opts1, leg_scale='mill', second_units=('nrad', 1e9))
 
 # Test PDF saving
-save_figs_to_pdf(f1 + f2 + f3 + f4, filename=os.path.join(get_output_dir(), 'GND_plots.pdf'))
+save_figs_to_pdf(f1 + f2 + f3 + f4, filename=get_output_dir() / 'GND_plots.pdf')

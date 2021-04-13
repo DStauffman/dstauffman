@@ -117,7 +117,7 @@ class Opts(Frozen):
         self.show_xtra: bool  = True
         self.time_base: str   = 'sec'
         self.time_unit: str   = 'sec'
-        self.colormap: str    = None
+        self.colormap: Union[str, ColorMap] = None
         self.leg_spot: str    = 'best'
         self.classify: str    = ''
         self.names: List[str] = list()

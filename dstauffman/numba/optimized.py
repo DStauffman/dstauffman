@@ -19,7 +19,7 @@ from dstauffman.numba.passthrough import fake_jit, ncjit, TARGET
 try:
     from numba import float32, float64, int32, int64, vectorize  # type: ignore[attr-defined]
 except ModuleNotFoundError:
-    int32 = int64 = float32 = float64 = fake_jit
+    float32 = float64 = int32 = int64 = vectorize = fake_jit
 
 #%% np_any
 @ncjit
@@ -223,7 +223,7 @@ def rate_to_prob_opt(rate: float, time: float) -> float:
     float64(int64, int64)], nopython=True, target=TARGET, cache=True)
 def zero_divide(num: float, den: float) -> float:
     r"""
-    Numba compatible version of np.divide(num, den, out=np.zeros_like(num), where=den!=0)
+    Numba compatible version of np.divide(num, den, out=np.zeros_like(num), where=den!=0).
 
     Parameters
     ----------

@@ -72,19 +72,19 @@ class OptiOpts(Frozen):
         self.final_func: Optional[Callable] = None
 
         # less common optimization settings
-        self.slope_method: str      = 'one_sided' # from {'one_sided', 'two_sided'}
-        self.is_max_like: bool      = False
-        self.search_method: str     = 'trust_region' # from {'trust_region', 'levenberg_marquardt'}
-        self.max_iters: int         = 10
-        self.tol_cosmax_grad: float = 1e-4
-        self.tol_delta_step: float  = 1e-20
-        self.tol_delta_cost: float  = 1e-20
-        self.step_limit: int        = 5
-        self.x_bias: float          = 0.8
-        self.grow_radius: float     = 2.
-        self.shrink_radius: float   = 0.5
-        self.trust_radius: float    = 1.0
-        self.max_cores: int         = None # set to a number to parallelize, use -1 for all
+        self.slope_method: str        = 'one_sided' # from {'one_sided', 'two_sided'}
+        self.is_max_like: bool        = False
+        self.search_method: str       = 'trust_region' # from {'trust_region', 'levenberg_marquardt'}
+        self.max_iters: int           = 10
+        self.tol_cosmax_grad: float   = 1e-4
+        self.tol_delta_step: float    = 1e-20
+        self.tol_delta_cost: float    = 1e-20
+        self.step_limit: int          = 5
+        self.x_bias: float            = 0.8
+        self.grow_radius: float       = 2.
+        self.shrink_radius: float     = 0.5
+        self.trust_radius: float      = 1.0
+        self.max_cores: Optional[int] = None # set to a number to parallelize, use -1 for all
 
     def __eq__(self, other: Any) -> bool:
         r"""Check for equality based on the values of the fields."""
