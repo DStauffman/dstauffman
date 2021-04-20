@@ -125,10 +125,9 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_only_quat_two(self) -> None:
-        self.quat_one = None
         self.name_one = ''
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
+        (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, None, self.quat_two,
             name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
             start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
             rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \

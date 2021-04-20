@@ -147,6 +147,13 @@ class Test_aerospace_quat_mult_single(unittest.TestCase):
         quat2 = space.quat_inv_single(space.quat_mult_single(space.quat_inv_single(self.q1), space.quat_inv_single(self.q2)))
         np.testing.assert_array_almost_equal(quat1, quat2)
 
+    def test_inplace(self) -> None:
+        quat = space.quat_mult_single(self.q1, self.q2)
+        self.assertGreater(np.max(np.abs(quat - self.q1)), 0.1)
+        quat = space.quat_mult_single(self.q1, self.q2, inplace=True)
+        self.assertIs(quat, self.q1)
+        self.assertLess(np.max(np.abs(quat - self.q4)), 1e-8)
+
 #%% aerospace.quat_norm_single
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_norm_single(unittest.TestCase):
@@ -184,6 +191,7 @@ class Test_aerospace_quat_norm_single(unittest.TestCase):
         quat_norm = space.quat_norm_single(self.q3_inp)
         self.assertGreater(np.max(np.abs(quat_norm - self.q3_inp)), 0.004)
         quat_norm = space.quat_norm_single(self.q3_inp, inplace=True)
+        self.assertIs(quat_norm, self.q3_inp)
         self.assertLess(np.max(np.abs(quat_norm - self.q3_inp)), 1e-8)
 
 #%% aerospace.quat_prop_single
@@ -212,6 +220,13 @@ class Test_aerospace_quat_prop_single(unittest.TestCase):
         quat = space.quat_prop_single(np.array([1., 0., 0., 0.]), -self.delta_ang)
         self.assertGreater(quat[3], 0)
 
+    def test_inplace(self) -> None:
+        quat = space.quat_prop_single(self.quat, self.delta_ang)
+        self.assertGreater(np.max(np.abs(quat - self.quat)), 0.004)
+        quat = space.quat_prop_single(self.quat, self.delta_ang, inplace=True)
+        self.assertIs(quat, self.quat)
+        self.assertLess(np.max(np.abs(quat - self.quat_new)), 1e-8)
+
 #%% aerospace.quat_times_vector_single
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_times_vector_single(unittest.TestCase):
@@ -236,6 +251,15 @@ class Test_aerospace_quat_times_vector_single(unittest.TestCase):
         for i in range(2):
             vec = space.quat_times_vector_single(self.quat[:, i].astype(float), self.vec[:, i].astype(float))
             np.testing.assert_array_almost_equal(vec, self.out[:, i].astype(float))
+
+    def test_inplace(self) -> None:
+        q = self.quat[:, 0].astype(float)
+        v = self.vec[:, 0].astype(float)
+        vec = space.quat_times_vector_single(q, v)
+        self.assertGreater(np.max(np.abs(vec - v)), 0.004)
+        vec = space.quat_times_vector_single(q, v, inplace=True)
+        self.assertIs(vec, v)
+        self.assertLess(np.max(np.abs(vec - self.out[:, 0])), 1e-8)
 
 #%% aerospace.quat_to_dcm
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')

@@ -106,8 +106,8 @@ def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np
     # pull out bounding times and quaternions
     t1 = time[0]
     t2 = time[1]
-    q1 = quat[:, 0]
-    q2 = quat[:, 1]
+    q1 = quat[:, 0].copy()
+    q2 = quat[:, 1].copy()
     # calculate delta quaternion
     dq12       = quat_norm_single(quat_mult_single(q2, quat_inv_single(q1)))
     # find delta quaternion axis of rotation
@@ -127,7 +127,7 @@ def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np
     qout: np.ndarray = quat_norm_single(quat_mult_single(dq, q1))
     # enforce positive scalar component
     if qout[3] < 0:
-        qout = -qout
+        qout[:] = -qout
     return qout
 
 #%% Functions - quat_inv_single
@@ -140,6 +140,8 @@ def quat_inv_single(q1: np.ndarray, inplace: bool = False) -> np.ndarray:
     ----------
     q1 : ndarray, (4, )
         input quaternion
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
 
     Returns
     -------
@@ -166,13 +168,13 @@ def quat_inv_single(q1: np.ndarray, inplace: bool = False) -> np.ndarray:
 
     """
     if inplace:
-        q1 += np.array([-1., -1., -1., 1.])
+        q1 *= np.array([-1., -1., -1., 1.])
         return q1
     return q1 * np.array([-1., -1., -1., 1.])  # type: ignore[no-any-return]
 
 #%% Functions - quat_mult_single
 @ncjit
-def quat_mult_single(a: np.ndarray, b: np.ndarray) -> np.ndarray:
+def quat_mult_single(a: np.ndarray, b: np.ndarray, inplace: bool = False) -> np.ndarray:
     r"""
     Multiply quaternions together.
 
@@ -182,6 +184,8 @@ def quat_mult_single(a: np.ndarray, b: np.ndarray) -> np.ndarray:
         input quaternion one
     b : ndarray, (4,) or (4, N)
         input quaternion two
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
 
     Returns
     -------
@@ -217,16 +221,17 @@ def quat_mult_single(a: np.ndarray, b: np.ndarray) -> np.ndarray:
     [ 0. 0.70710678 -0.70710678 0. ]
 
     """
-    # single quaternion inputs case
-    c: np.ndarray = np.array([ \
-        [ a[3],  a[2], -a[1],  a[0]], \
-        [-a[2],  a[3],  a[0],  a[1]], \
-        [ a[1], -a[0],  a[3],  a[2]], \
-        [-a[0], -a[1], -a[2],  a[3]]]) @ b
+    c = a if inplace else a.copy()
+    # single quaternion inputs case (note: transposed to make 'F' order)
+    c[:] = np.array([ \
+        [ a[3], -a[2],  a[1], -a[0]], \
+        [ a[2],  a[3], -a[0], -a[1]], \
+        [-a[1],  a[0],  a[3], -a[2]], \
+        [ a[0],  a[1],  a[2],  a[3]]]).T @ b
     # enforce positive scalar component
     if c[3] < 0:
-        c = -c
-    c = quat_norm_single(c)
+        c[:] = -c
+    quat_norm_single(c, inplace=True)
     return c
 
 #%% Functions - quat_norm_single
@@ -239,6 +244,8 @@ def quat_norm_single(x: np.ndarray, inplace: bool = False) -> np.ndarray:
     ----------
     x : ndarray
         input quaternion
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
 
     Returns
     -------
@@ -273,7 +280,7 @@ def quat_norm_single(x: np.ndarray, inplace: bool = False) -> np.ndarray:
 
 #%% Functions - quat_prop_single
 @ncjit
-def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray) -> np.ndarray:
+def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray, inplace: bool = False, renorm: bool = False) -> np.ndarray:
     r"""
     Approximate propagation of a quaternion using a small delta angle.
 
@@ -283,6 +290,8 @@ def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray) -> np.ndarray:
         normalized input quaternion
     delta_ang : ndarray, (3, 1)
         delta angles in x, y, z order [rad]
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
 
     Returns
     -------
@@ -315,24 +324,25 @@ def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray) -> np.ndarray:
     [0.00499913  0.00999825  0.01499738  0.99982505]
 
     """
-    #compute angle rate matrix
-    omega = np.array([ \
-        [      0      ,   delta_ang[2],   -delta_ang[1],   delta_ang[0]], \
-        [-delta_ang[2],        0      ,    delta_ang[0],   delta_ang[1]], \
-        [ delta_ang[1],  -delta_ang[0],        0       ,   delta_ang[2]], \
-        [-delta_ang[0],  -delta_ang[1],   -delta_ang[2],        0      ]])
-    #compute delta quaternion
-    delta_quaternion = 0.5 * omega @ quat
-    # propagate over delta
-    quat_new: np.ndarray = quat + delta_quaternion
+    quat_new = quat if inplace else quat.copy()
+    # compute angle rate matrix (note: transposed to make 'F' order), use it to compute a delta
+    # quaternion, and then propagate by adding the delta
+    quat_new += 0.5 * np.array([ \
+        [      0      ,  -delta_ang[2],    delta_ang[1],  -delta_ang[0]], \
+        [ delta_ang[2],        0      ,   -delta_ang[0],  -delta_ang[1]], \
+        [-delta_ang[1],   delta_ang[0],        0       ,  -delta_ang[2]], \
+        [ delta_ang[0],   delta_ang[1],    delta_ang[2],        0      ]]).T @ quat
     # ensure positive scalar component
     if quat_new[3] < 0:
-        quat_new *= -1
+        quat_new[:] = -quat_new
+    # renormalize and return
+    if renorm:
+        quat_norm_single(quat_new, inplace=True)
     return quat_new
 
 #%% Functions - quat_times_vector_single
 @ncjit
-def quat_times_vector_single(quat: np.ndarray, v: np.ndarray) -> np.ndarray:
+def quat_times_vector_single(quat: np.ndarray, v: np.ndarray, inplace: bool = False) -> np.ndarray:
     r"""
     Multiply quaternion(s) against vector(s).
 
@@ -342,6 +352,8 @@ def quat_times_vector_single(quat: np.ndarray, v: np.ndarray) -> np.ndarray:
         quaternion(s)
     v : ndarray, (3,) or (3, N)
         input vector(s)
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
 
     Returns
     -------
@@ -374,9 +386,10 @@ def quat_times_vector_single(quat: np.ndarray, v: np.ndarray) -> np.ndarray:
     [-1. 0. 0.]
 
     """
+    vec = v if inplace else v.copy()
     skew = vec_cross(quat[:3])
     qv = skew @ v
-    vec: np.ndarray = v + 2*(-quat[3] * qv + (skew @ qv))
+    vec += 2*(-quat[3] * qv + (skew @ qv))
     return vec
 
 #%% Functions - quat_to_dcm

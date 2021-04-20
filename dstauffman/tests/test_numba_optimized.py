@@ -21,7 +21,9 @@ else:
     from math import inf, pi
 try:
     from numba.typed import List
+    from numba import version_info
     _HAVE_NUMBA = True
+    _NEW_NUMBA = version_info > (0, 53)
 except ModuleNotFoundError:
     List: Callable[[Any], Any] = lambda x: x  # type: ignore[no-redef]
     _HAVE_NUMBA = False
@@ -231,14 +233,16 @@ class Test_zero_divide(unittest.TestCase):
         np.testing.assert_array_equal(out, exp)
 
     @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
-    @unittest.expectedFailure
     def test_broadcasting2(self) -> None:
-        # Numba broadcasting seems to fail here
+        # Numba broadcasting fails here prior to v0.53
         vec = np.array([[1., 0., 0.], [3., 4., 0.], [0., 0., 0.]]).T
         mag = np.array([1., 5., 0.])
         exp = np.array([[1., 0., 0.], [0.6, 0.8, 0.], [0., 0., 0.]]).T
         out = nub.zero_divide(vec, mag)
         np.testing.assert_array_equal(out, exp)
+
+    if not _NEW_NUMBA:
+        test_broadcasting2 = unittest.expectedFailure(test_broadcasting2)
 
 #%% Unit test execution
 if __name__ == '__main__':

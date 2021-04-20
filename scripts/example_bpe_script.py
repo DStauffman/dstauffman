@@ -109,7 +109,7 @@ if __name__ == '__main__':
     # Truth data
     truth_time = np.arange(-10, 201)
     truth_data = truth(truth_time)
-    truth      = plot.TruthPlotter(truth_time, truth_data)
+    truth      = plot.TruthPlotter(truth_time, truth_data)  # type: ignore[assignment]
 
     # Logger
     dcs.activate_logging(dcs.LogLevel.L8)
@@ -162,7 +162,7 @@ if __name__ == '__main__':
 
         # make model plots
         f0 = plot.plot_health_monte_carlo(time, results, 'Output', opts=opts, truth=truth)
-        extra_plotter = lambda fig, ax: truth.plot_truth(ax[0], scale=1)
+        extra_plotter = lambda fig, ax: truth.plot_truth(ax[0], scale=1)  # type: ignore[attr-defined]
         f1 = plot.plot_time_history('Output vs. Time', time, results, opts=opts, extra_plotter=extra_plotter)
 
         # make BPE plots
