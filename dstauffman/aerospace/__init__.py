@@ -12,8 +12,9 @@ Notes
 #%% Imports
 from .classes    import KfInnov, Kf, KfRecord
 from .quat       import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks, quat_assertions, \
-                            qrot, quat_angle_diff, quat_from_euler, quat_interp, quat_inv, \
-                            quat_mult, quat_norm, quat_prop, quat_times_vector, quat_to_euler
+                            enforce_pos_scalar, qrot, quat_angle_diff, quat_from_euler, \
+                            quat_interp, quat_inv, quat_mult, quat_norm, quat_prop, \
+                            quat_times_vector, quat_to_euler
 from .quat_opt   import qrot_single, quat_interp_single, quat_inv_single, quat_mult_single, \
                             quat_norm_single, quat_prop_single, quat_times_vector_single, \
                             quat_to_dcm

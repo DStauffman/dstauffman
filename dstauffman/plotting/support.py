@@ -817,6 +817,10 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
         time = np.hstack([artist.get_xdata() for artist in ax.lines])
     if data is None:
         data = np.hstack([artist.get_ydata() for artist in ax.lines])
+    # exit if the plotted data are not numeric
+    if not np.issubdtype(data.dtype, np.number):
+        warnings.warn('Data was not numeric, so Y limit was not zoomed.')
+        return
     # convert datetimes as appropriate for comparisons
     if is_datetime(time):
         time = date2num(time)

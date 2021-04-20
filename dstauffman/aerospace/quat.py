@@ -122,6 +122,47 @@ def quat_assertions(quat, *, precision=1e-12, skip_assertions=False):
     assert np.all(q_norm_err <= precision), 'Quaternion has invalid normalization ' + \
         'error "{}".'.format(np.max(q_norm_err))
 
+#%% Functions - enforce_pos_scalar
+def enforce_pos_scalar(quat, inplace=False):
+    r"""
+    Enforces the standard of a positive scalar component.
+
+    Parameters
+    ----------
+    quat : ndarray, (4,) or (4, N)
+        Quaternion
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
+
+    Returns
+    -------
+    qout: ndarray, (4, ) or (4, N)
+        Output quaternion with strictly non-negative scalar components
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2021.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import enforce_pos_scalar
+    >>> import numpy as np
+    >>> quat = np.array([0.5, -0.5, 0.5, -0.5])
+    >>> qout = enforce_pos_scalar(quat)
+    >>> print(qout)  # doctest: +NORMALIZE_WHITESPACE
+    [-0.5 0.5 -0.5 0.5]
+
+    """
+    qout = quat if inplace else quat.copy()
+    if qout.ndim == 1:
+        if ~np.isnan(qout[3]) and qout[3] < 0:
+            qout[:] = -qout
+        return qout
+    negs = np.zeros(qout.shape[1], dtype=bool)
+    negs = np.less(qout[3, :], 0, out=negs, where=~np.isnan(qout[3, :]))
+    qout[:, negs] = -qout[:, negs]
+    return qout
+
 #%% Functions - qrot
 def qrot(axis, angle, **kwargs):
     r"""
@@ -530,7 +571,7 @@ def quat_interp(time, quat, ti, inclusive=True, **kwargs):
     return qout
 
 #%% Functions - quat_inv
-def quat_inv(q1, **kwargs):
+def quat_inv(q1, inplace=False, **kwargs):
     r"""
     Return the inverse of a normalized quaternions.
 
@@ -538,6 +579,8 @@ def quat_inv(q1, **kwargs):
     ----------
     q1 : ndarray, (4,) or (4, N)
         input quaternion
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
 
     Returns
     -------
@@ -565,19 +608,19 @@ def quat_inv(q1, **kwargs):
     [-0.70710678 -0. -0. 0.70710678]
 
     """
+    q2 = q1 if inplace else q1.copy()
     # check for empty case
     if q1.size == 0:
-        q2 = np.zeros(q1.shape)
         return q2
     # size check
     quat_assertions(q1, **kwargs)
     # invert the quaternions
     if q1.ndim == 1:
         # optimized single quaternion case
-        q2 = q1 * np.array([-1, -1, -1, 1])
+        q2 *= np.array([-1, -1, -1, 1])
     else:
         # general case
-        q2 = np.vstack((-q1[0, :], -q1[1, :], -q1[2, :], q1[3, :]))
+        q2[:] = np.vstack((-q2[0, :], -q2[1, :], -q2[2, :], q2[3, :]))
     quat_assertions(q2, **kwargs)
     return q2
 
@@ -675,7 +718,7 @@ def quat_mult(a, b, **kwargs):
     return c
 
 #%% Functions - quat_norm
-def quat_norm(x, **kwargs):
+def quat_norm(x, inplace=False, **kwargs):
     r"""
     Normalize each column of the input matrix.
 
@@ -683,6 +726,8 @@ def quat_norm(x, **kwargs):
     ----------
     x : ndarray
         input quaternion
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
 
     Returns
     -------
@@ -709,8 +754,9 @@ def quat_norm(x, **kwargs):
     [0.09950372 0. 0. 0.99503719]
 
     """
+    y = x if inplace else x.copy()
     # divide input by its column vector norm
-    y = x / np.sqrt(np.sum(x*x, axis=0))
+    y /= np.sqrt(np.sum(x*x, axis=0))
     quat_assertions(y, **kwargs)
     return y
 

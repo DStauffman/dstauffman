@@ -115,6 +115,44 @@ class Test_aerospace_quat_assertions(unittest.TestCase):
     def test_skip_assertions(self) -> None:
         space.quat_assertions(self.q6, skip_assertions=True)
 
+#%% aerospace.enforce_pos_scalar
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+class Test_aerospace_enforce_pos_scalar(unittest.TestCase):
+    r"""
+    Tests the aerospace.enforce_pos_scalar function with the following cases:
+        Single quat
+        Multi quats
+        Inplace
+    """
+    def setUp(self) -> None:
+        self.q1_inp = np.array([-np.sqrt(2)/2, 0, 0, np.sqrt(2)/2])
+        self.q1_out = np.array([-np.sqrt(2)/2, 0, 0, np.sqrt(2)/2])
+        self.q2_inp = np.array([0, 0.5, 0, -np.sqrt(3)/2])
+        self.q2_out = np.array([0, -0.5, 0, np.sqrt(3)/2])
+
+    def test_nominal(self) -> None:
+        q1_out = space.enforce_pos_scalar(self.q1_inp)
+        np.testing.assert_array_almost_equal(q1_out, self.q1_out)
+        q2_out = space.enforce_pos_scalar(self.q2_inp)
+        np.testing.assert_array_almost_equal(q2_out, self.q2_out)
+
+    def test_quat_array(self) -> None:
+        quat = np.vstack((self.q1_inp, self.q2_inp)).T
+        qout = space.enforce_pos_scalar(quat)
+        exp = np.vstack((self.q1_out, self.q2_out)).T
+        np.testing.assert_array_almost_equal(qout, exp)
+
+    def test_inplace(self) -> None:
+        q2_out = space.enforce_pos_scalar(self.q2_inp)
+        self.assertGreater(np.max(np.abs(q2_out - self.q2_inp)), 0.1)
+        q2_out = space.enforce_pos_scalar(self.q2_inp, inplace=True)
+        self.assertLess(np.max(np.abs(q2_out - self.q2_inp)), 1e-8)
+        quat = np.vstack((self.q1_inp, self.q2_inp)).T
+        qout = space.enforce_pos_scalar(quat, inplace=True)
+        self.assertIs(qout, quat)
+        exp = np.vstack((self.q1_out, self.q2_out)).T
+        np.testing.assert_array_almost_equal(qout, exp)
+
 #%% aerospace.qrot
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_qrot(unittest.TestCase):
@@ -441,6 +479,22 @@ class Test_aerospace_quat_inv(unittest.TestCase):
         np.testing.assert_array_equal(null_inv, self.null)
         np.testing.assert_array_equal(null_inv.shape, self.null.shape)
 
+    def test_inplace_single(self) -> None:
+        q1_inv = space.quat_inv(self.q1_inp)
+        self.assertIsNot(q1_inv, self.q1_inp)
+        np.testing.assert_array_almost_equal(q1_inv, self.q1_out)
+        q1_inv = space.quat_inv(self.q1_inp, inplace=True)
+        self.assertIs(q1_inv, self.q1_inp)
+        np.testing.assert_array_almost_equal(q1_inv, self.q1_out)
+
+    def test_inplace_array(self) -> None:
+        q3_inv = space.quat_inv(self.q3_inp)
+        self.assertIsNot(q3_inv, self.q3_inp)
+        np.testing.assert_array_almost_equal(q3_inv, self.q3_out)
+        q3_inv = space.quat_inv(self.q3_inp, inplace=True)
+        self.assertIs(q3_inv, self.q3_inp)
+        np.testing.assert_array_almost_equal(q3_inv, self.q3_out)
+
 #%% aerospace.quat_mult
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_mult(unittest.TestCase):
@@ -605,6 +659,22 @@ class Test_aerospace_quat_norm(unittest.TestCase):
         quat_norm = space.quat_norm(self.null)
         np.testing.assert_array_equal(quat_norm, self.null)
         np.testing.assert_array_equal(quat_norm.shape, self.null.shape)
+
+    def test_inplace_single(self) -> None:
+        quat_norm = space.quat_norm(self.q1_inp)
+        self.assertIsNot(quat_norm, self.q1_inp)
+        np.testing.assert_array_almost_equal(quat_norm, self.q1_out)
+        quat_norm = space.quat_norm(self.q1_inp, inplace=True)
+        self.assertIs(quat_norm, self.q1_inp)
+        np.testing.assert_array_almost_equal(quat_norm, self.q1_out)
+
+    def test_inplace_array(self) -> None:
+        quat_norm = space.quat_norm(self.q4_inp)
+        self.assertIsNot(quat_norm, self.q4_inp)
+        np.testing.assert_array_almost_equal(quat_norm, self.q4_out)
+        quat_norm = space.quat_norm(self.q4_inp, inplace=True)
+        self.assertIs(quat_norm, self.q4_inp)
+        np.testing.assert_array_almost_equal(quat_norm, self.q4_out)
 
 #%% aerospace.quat_prop
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')

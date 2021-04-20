@@ -132,18 +132,18 @@ def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np
 
 #%% Functions - quat_inv_single
 @ncjit
-def quat_inv_single(q1: np.ndarray) -> np.ndarray:
+def quat_inv_single(q1: np.ndarray, inplace: bool = False) -> np.ndarray:
     r"""
     Return the inverse of a normalized quaternions.
 
     Parameters
     ----------
-    q1 : ndarray, (4,) or (4, N)
+    q1 : ndarray, (4, )
         input quaternion
 
     Returns
     -------
-    q2 : ndarray, (4,) or (4, N)
+    ndarray, (4, )
         inverse quaterion
 
     See Also
@@ -165,8 +165,10 @@ def quat_inv_single(q1: np.ndarray) -> np.ndarray:
     [-0.70710678 -0. -0. 0.70710678]
 
     """
-    q2: np.ndarray = q1 * np.array([-1., -1., -1., 1.])
-    return q2
+    if inplace:
+        q1 += np.array([-1., -1., -1., 1.])
+        return q1
+    return q1 * np.array([-1., -1., -1., 1.])  # type: ignore[no-any-return]
 
 #%% Functions - quat_mult_single
 @ncjit
@@ -229,7 +231,7 @@ def quat_mult_single(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 
 #%% Functions - quat_norm_single
 @ncjit
-def quat_norm_single(x: np.ndarray) -> np.ndarray:
+def quat_norm_single(x: np.ndarray, inplace: bool = False) -> np.ndarray:
     r"""
     Normalize each column of the input matrix.
 
@@ -240,7 +242,7 @@ def quat_norm_single(x: np.ndarray) -> np.ndarray:
 
     Returns
     -------
-    y : ndarray
+    ndarray
         normalized quaternion
 
     See Also
@@ -264,8 +266,10 @@ def quat_norm_single(x: np.ndarray) -> np.ndarray:
 
     """
     # divide input by its column vector norm
-    y: np.ndarray = x / np.sqrt(np.sum(x*x, axis=0))
-    return y
+    if inplace:
+        x /= np.sqrt(np.sum(x*x, axis=0))
+        return x
+    return x / np.sqrt(np.sum(x*x, axis=0))  # type: ignore[no-any-return]
 
 #%% Functions - quat_prop_single
 @ncjit

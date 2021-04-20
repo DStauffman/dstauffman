@@ -9,7 +9,7 @@ Notes
 #%% Imports
 import unittest
 
-from dstauffman import HAVE_NUMBA, HAVE_NUMPY
+from dstauffman import HAVE_NUMPY
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -101,6 +101,12 @@ class Test_aerospace_quat_inv_single(unittest.TestCase):
         self.assertEqual(q2_inv.ndim, 1)
         np.testing.assert_array_equal(q2_inv.shape, self.q2_out.shape)
 
+    def test_inplace(self) -> None:
+        q1_inv = space.quat_inv_single(self.q1_inp)
+        self.assertGreater(np.max(np.abs(q1_inv - self.q1_inp)), 0.1)
+        q1_inv = space.quat_inv_single(self.q1_inp, inplace=True)
+        self.assertLess(np.max(np.abs(q1_inv - self.q1_inp)), 1e-8)
+
 #%% aerospace.quat_mult_single
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_mult_single(unittest.TestCase):
@@ -173,6 +179,12 @@ class Test_aerospace_quat_norm_single(unittest.TestCase):
         np.testing.assert_array_almost_equal(quat_norm, self.q3_out)
         self.assertEqual(quat_norm.ndim, 1)
         np.testing.assert_array_equal(quat_norm.shape, self.q3_out.shape)
+
+    def test_inplace(self) -> None:
+        quat_norm = space.quat_norm_single(self.q3_inp)
+        self.assertGreater(np.max(np.abs(quat_norm - self.q3_inp)), 0.004)
+        quat_norm = space.quat_norm_single(self.q3_inp, inplace=True)
+        self.assertLess(np.max(np.abs(quat_norm - self.q3_inp)), 1e-8)
 
 #%% aerospace.quat_prop_single
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
