@@ -228,6 +228,8 @@ class Kf(Frozen):
                         elif field in {'time'}:
                             if value.dtype == np.int64:
                                 value.dtype = NP_DATETIME_FORM
+                        elif isinstance(value, bytes):
+                            value = value.decode('utf-8')
                         setattr(out, field, value)
         return out
 

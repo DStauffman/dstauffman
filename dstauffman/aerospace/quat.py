@@ -145,7 +145,7 @@ def enforce_pos_scalar(quat: np.ndarray, inplace: bool = False) -> np.ndarray:
 
     Notes
     -----
-    #.  Written by David C. Stauffer in April 2021.
+    #.  Separated into stand-alone function by David C. Stauffer in April 2021.
 
     Examples
     --------
@@ -157,6 +157,8 @@ def enforce_pos_scalar(quat: np.ndarray, inplace: bool = False) -> np.ndarray:
     [-0.5 0.5 -0.5 0.5]
 
     """
+    # Scalar element (fourth element) of quaternion must not be negative.
+    # So change sign on entire quaternion if quot[3] is less than zero.
     qout = quat if inplace else quat.copy()
     if qout.ndim == 1:
         if ~np.isnan(qout[3]) and qout[3] < 0:
@@ -481,7 +483,7 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
     # Initializations
     # number of data points to find
     try:
-        num   = len(ti)
+        num = len(ti)
     except TypeError:
         if np.isscalar(ti):
             ti = np.array([ti])
@@ -527,12 +529,25 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
     # Calculations
     # find index within time to surround ti, accounting for the end of the vector
     index = np.full(num, INT_TOKEN, dtype=int)
+    c = 0
+    last_pt = len(time) - 1
+    for i in range(num):
+        if ix_calc[i]:
+            while ti[i] > time[c]:
+                c += 1
+                if c == last_pt:
+                    break
+            index[i] = c
+    np.add(index, 1, out=index, where=(index > INT_TOKEN) & (index < last_pt))
+
+    index2 = np.full(num, INT_TOKEN, dtype=int)
     for i in np.flatnonzero(ix_calc):
         temp = np.flatnonzero(ti[i] <= time)
         if temp[0] != len(time)-1:
-            index[i] = temp[0] + 1
+            index2[i] = temp[0] + 1
         else:
-            index[i] = temp[0]
+            index2[i] = temp[0]
+    np.testing.assert_array_equal(index, index2)
 
     # remove points that are NaN, either they weren't in the time vector, or they were next to a
     # drop out and cannot be interpolated.

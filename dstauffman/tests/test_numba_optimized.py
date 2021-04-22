@@ -21,12 +21,19 @@ else:
     from math import inf, pi
 try:
     from numba.typed import List
-    from numba import version_info
     _HAVE_NUMBA = True
-    _NEW_NUMBA = version_info > (0, 53)
 except ModuleNotFoundError:
     List: Callable[[Any], Any] = lambda x: x  # type: ignore[no-redef]
     _HAVE_NUMBA = False
+if _HAVE_NUMBA:
+    try:
+        from numba import version_info
+    except ImportError:
+        _NEW_NUMBA = False
+    else:
+        _NEW_NUMBA = version_info > (0, 53)
+else:
+    _NEW_NUMBA = False
 
 #%% np_any
 class Test_np_any(unittest.TestCase):
