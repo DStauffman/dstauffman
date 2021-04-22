@@ -235,6 +235,65 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
         assert np.size(axis) == np.size(angle)  # type: ignore[arg-type]
         quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle/2), axis=0)))  # type: ignore[arg-type, operator]
         quat[axis-1, np.arange(np.size(axis))] = np.sin(angle/2)  # type: ignore[arg-type, operator]
+    enforce_pos_scalar(quat, inplace=True)
+    quat_assertions(quat, **kwargs)
+    return quat
+
+#%% Functions - quat_from_axis_angle
+def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
+    r"""
+    Construct a quaternion expressing the given rotations about the given axes.
+
+    Parameters
+    ----------
+    axis : (3, ) on (3, N) np.ndarray of float
+        Unit vector(s)
+    angle : float or (N, ) np.ndarray of float
+        angle of rotation(s) in radians
+
+    Returns
+    -------
+    quat : ndarray, (4, ) or (4, N)
+        quaternion representing the given rotation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2021.
+
+    References
+    ----------
+    #.  A quaternion is given by [x*s, y*s, z*s, c] where c = cos(theta/2) and sin=(theta/2)
+        See: https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import quat_from_axis_angle
+    >>> import numpy as np
+    >>> axis = np.sqrt([9/50, 16/50, 0.5])
+    >>> angle = 5/180*np.pi
+    >>> quat = quat_from_axis_angle(axis, angle)
+    >>> with np.printoptions(precision=8):
+    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    [0.01850614 0.02467485 0.03084356 0.99904822]
+
+    """
+    # ailas the cosine and sine terms
+    c = np.cos(angle/2)  # type: ignore[operator]
+    s = np.sin(angle/2)  # type: ignore[operator]
+    # scale the unit vector by the sine and concatenate the cosine term
+    if axis.ndim == 1 and c.size == 1:  # type: ignore[union-attr]
+        quat = np.hstack([axis * s, c])
+    elif axis.ndim == 1:  # type: ignore[union-attr]
+        quat = np.vstack([np.outer(axis, s), c])
+    elif c.size == 1:  # type: ignore[union-attr]
+        quat = np.vstack([axis * s, np.full(axis.shape[1], c)])  # type: ignore[misc, union-attr]
+    else:
+        assert axis.shape[1] == c.size  # type: ignore[misc, union-attr]
+        quat = np.vstack([axis * s, c])
+    # TODO: try to eliminate the four different cases:
+        #e = np.outer(axis, s) if axis.ndim == 1 else axis * s
+    # enforce positive scalar component convention and reduce dimensionality if necessary
+    enforce_pos_scalar(quat, inplace=True)
     quat_assertions(quat, **kwargs)
     return quat
 
@@ -571,7 +630,7 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
     # scale rotation angle based on time
     scaled_ang = ang*(ti[ix_calc]-t1) / (t2-t1)
     # find scaled delta quaternion
-    dq         = np.concatenate((ax*np.sin(scaled_ang/2), np.expand_dims(np.cos(scaled_ang/2),0)), axis=0)
+    dq         = quat_from_axis_angle(ax, scaled_ang, **kwargs)
     # calculate desired quaternion
     qout_temp  = quat_norm(quat_mult(dq, q1, **kwargs))
     # store into output structure

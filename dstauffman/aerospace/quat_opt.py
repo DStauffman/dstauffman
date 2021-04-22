@@ -63,6 +63,51 @@ def qrot_single(axis: int, angle: float) -> np.ndarray:
     quat[axis-1] = np.sin(angle/2)
     return quat
 
+#%% Functions - quat_from_axis_angle_single
+@ncjit
+def quat_from_axis_angle_single(axis: np.ndarray, angle: float) -> np.ndarray:
+    r"""
+    Construct a quaternion expressing the given rotation about the given axis.
+
+    Parameters
+    ----------
+    axis : (3, ) np.ndarray of float
+        Unit vector
+    angle : float
+        angle of rotation in radians
+
+    Returns
+    -------
+    quat : ndarray, (4,)
+        quaternion representing the given rotation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2021.
+
+    References
+    ----------
+    #.  A quaternion is given by [x*s, y*s, z*s, c] where c = cos(theta/2) and sin=(theta/2)
+        See: https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import quat_from_axis_angle_single
+    >>> import numpy as np
+    >>> axis = np.sqrt([9/50, 16/50, 0.5])
+    >>> angle = 5/180*np.pi
+    >>> quat = quat_from_axis_angle_single(axis, angle)
+    >>> with np.printoptions(precision=8):
+    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    [0.01850614 0.02467485 0.03084356 0.99904822]
+
+    """
+    c = np.cos(angle/2)
+    s = np.sin(angle/2)
+    if c < 0:
+        return np.array([-axis[0]*s, -axis[1]*s, -axis[2]*s, -c])
+    return np.array([axis[0]*s, axis[1]*s, axis[2]*s, c])
+
 #%% Functions - quat_interp_single
 @ncjit
 def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np.ndarray:
@@ -121,8 +166,7 @@ def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np
     # scale rotation angle based on time
     scaled_ang = ang*(ti-t1) / (t2-t1)
     # find scaled delta quaternion
-    sin        = np.sin(scaled_ang/2)
-    dq         = np.array([ax[0]*sin, ax[1]*sin, ax[2]*sin, np.cos(scaled_ang/2)])
+    dq         = quat_from_axis_angle_single(ax, scaled_ang)
     # calculate desired quaternion
     qout: np.ndarray = quat_norm_single(quat_mult_single(dq, q1))
     # enforce positive scalar component

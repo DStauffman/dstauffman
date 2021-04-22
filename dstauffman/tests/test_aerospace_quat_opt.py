@@ -40,6 +40,43 @@ class Test_aerospace_qrot_single(unittest.TestCase):
             self.assertEqual(quat.ndim, 1)
             np.testing.assert_array_almost_equal(quat, self.quat2[i, :])
 
+    def test_larger_angle(self) -> None:
+        quat = space.qrot_single(1, 5.1*np.pi)
+        self.assertGreater(quat[3], 0)
+
+#%% aerospace.quat_from_axis_angle_single
+class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
+    r"""
+    Tests the aerospace.quat_from_axis_angle_single function with the following cases:
+        Single axis (x3)
+        Multiple axis
+    """
+    def test_axis1(self) -> None:
+        angle = 5./180.*np.pi
+        quat = space.quat_from_axis_angle_single(np.array([1., 0., 0.]), angle)
+        exp = space.qrot_single(1, angle)
+        np.testing.assert_array_almost_equal(quat, exp, 14)
+
+    def test_axis2(self) -> None:
+        angle = 110./180.*np.pi
+        quat = space.quat_from_axis_angle_single(np.array([0., 1., 0.]), angle)
+        exp = space.qrot_single(2, angle)
+        np.testing.assert_array_almost_equal(quat, exp, 14)
+
+    def test_axis3(self) -> None:
+        angle = -45./180.*np.pi
+        quat = space.quat_from_axis_angle_single(np.array([0., 0., 1.]), angle)
+        exp = space.qrot_single(3, angle)
+        np.testing.assert_array_almost_equal(quat, exp, 14)
+
+    def test_multiple(self) -> None:
+        axis = np.sqrt([9/50, 16/50, 0.5])  # unit([3, 4, 5])
+        angle = 1e-6*np.sqrt(50)
+        quat = space.quat_from_axis_angle_single(axis, angle)
+        exp = space.quat_mult_single(space.quat_mult_single(space.qrot_single(1, 3e-6), \
+            space.qrot_single(2, 4e-6)), space.qrot_single(3, 5e-6))
+        np.testing.assert_array_almost_equal(quat, exp, 10)
+
 #%% aerospace.quat_interp_single
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_interp_single(unittest.TestCase):
