@@ -77,6 +77,10 @@ class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
             space.qrot_single(2, 4e-6)), space.qrot_single(3, 5e-6))
         np.testing.assert_array_almost_equal(quat, exp, 10)
 
+    def test_null_axis(self) -> None:
+        quat = space.quat_from_axis_angle_single(np.zeros(3), 0.1)
+        np.testing.assert_array_equal(quat, np.array([0., 0., 0., 1.]))
+
 #%% aerospace.quat_interp_single
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_interp_single(unittest.TestCase):

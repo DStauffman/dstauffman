@@ -59,8 +59,13 @@ def qrot_single(axis: int, angle: float) -> np.ndarray:
     [0. 0. 0.70710678  0.70710678]
 
     """
-    quat = np.array([0., 0., 0., np.cos(angle/2)])
-    quat[axis-1] = np.sin(angle/2)
+    c = np.cos(angle/2)
+    if c < 0:
+        quat = np.array([0., 0., 0., -c])
+        quat[axis-1] = -np.sin(angle/2)
+    else:
+        quat = np.array([0., 0., 0., c])
+        quat[axis-1] = np.sin(angle/2)
     return quat
 
 #%% Functions - quat_from_axis_angle_single
@@ -102,6 +107,8 @@ def quat_from_axis_angle_single(axis: np.ndarray, angle: float) -> np.ndarray:
     [0.01850614 0.02467485 0.03084356 0.99904822]
 
     """
+    if axis[0] == 0 and axis[1] == 0 and axis[2] == 0:
+        return np.array([0., 0., 0., 1.])
     c = np.cos(angle/2)
     s = np.sin(angle/2)
     if c < 0:

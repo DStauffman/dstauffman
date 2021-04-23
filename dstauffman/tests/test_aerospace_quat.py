@@ -261,6 +261,18 @@ class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
         exp = space.qrot(np.array([1, 2, 3, 1]), angle)
         np.testing.assert_array_almost_equal(quat, exp, 14)
 
+    def test_null_axis(self) -> None:
+        quat = space.quat_from_axis_angle(np.zeros(3), 0.1)
+        np.testing.assert_array_equal(quat, np.array([0., 0., 0., 1.]))
+
+    def test_null_axis_2d(self) -> None:
+        axis = np.zeros((3, 4))
+        axis[1, 1] = 1.
+        quat = space.quat_from_axis_angle(axis, np.array([0.1, 0.2, 5.3, 0.4]))
+        null = np.array([0., 0., 0., 1.])
+        exp = np.column_stack([null, space.qrot(2, 0.2), null, null])
+        np.testing.assert_array_equal(quat, exp)
+
 #%% aerospace.quat_angle_diff
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_angle_diff(unittest.TestCase):

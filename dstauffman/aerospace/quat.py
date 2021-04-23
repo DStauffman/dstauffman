@@ -145,7 +145,7 @@ def enforce_pos_scalar(quat: np.ndarray, inplace: bool = False) -> np.ndarray:
 
     Notes
     -----
-    #.  Separated into stand-alone function by David C. Stauffer in April 2021.
+    #.  Separated into a stand-alone function by David C. Stauffer in April 2021.
 
     Examples
     --------
@@ -158,7 +158,7 @@ def enforce_pos_scalar(quat: np.ndarray, inplace: bool = False) -> np.ndarray:
 
     """
     # Scalar element (fourth element) of quaternion must not be negative.
-    # So change sign on entire quaternion if quot[3] is less than zero.
+    # So change sign on entire quaternion if qout[3] is less than zero.
     qout = quat if inplace else quat.copy()
     if qout.ndim == 1:
         if ~np.isnan(qout[3]) and qout[3] < 0:
@@ -292,6 +292,13 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndar
         quat = np.vstack([axis * s, c])
     # TODO: try to eliminate the four different cases:
         #e = np.outer(axis, s) if axis.ndim == 1 else axis * s
+    # check for null quaternion and if found, then normalize it
+    if quat.ndim == 1:
+        if quat[0] == 0 and quat[1] == 0 and quat[2] == 0:
+            quat[3] = 1
+    else:
+        ix_zeros = np.all(quat[:3, :] == 0, axis=0)
+        quat[3, ix_zeros] = 1
     # enforce positive scalar component convention and reduce dimensionality if necessary
     enforce_pos_scalar(quat, inplace=True)
     quat_assertions(quat, **kwargs)
@@ -597,16 +604,6 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
                 if c == last_pt:
                     break
             index[i] = c
-    np.add(index, 1, out=index, where=(index > INT_TOKEN) & (index < last_pt))
-
-    index2 = np.full(num, INT_TOKEN, dtype=int)
-    for i in np.flatnonzero(ix_calc):
-        temp = np.flatnonzero(ti[i] <= time)
-        if temp[0] != len(time)-1:
-            index2[i] = temp[0] + 1
-        else:
-            index2[i] = temp[0]
-    np.testing.assert_array_equal(index, index2)
 
     # remove points that are NaN, either they weren't in the time vector, or they were next to a
     # drop out and cannot be interpolated.
@@ -618,31 +615,25 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
     q2 = quat[:, index]
     # calculate delta quaternion
     dq12       = quat_norm(quat_mult(q2, quat_inv(q1, **kwargs), **kwargs), **kwargs)
-    # find delta quaternion axis of rotation
+    # find delta quaternion axis of rotation and normalize
     vec        = dq12[0:3, :]
     norm_vec   = np.sqrt(np.sum(vec**2, axis=0))
-    # check for zero norm vectors
-    norm_fix   = norm_vec
-    norm_fix[norm_fix == 0] = 1
-    ax         = vec / norm_fix
+    vec        = np.divide(vec, norm_vec, out=vec, where=norm_vec!=0)
     # find delta quaternion rotation angle
     ang        = 2*np.arcsin(norm_vec)
     # scale rotation angle based on time
     scaled_ang = ang*(ti[ix_calc]-t1) / (t2-t1)
+    # set to no rotation for any null axis
+    scaled_ang[norm_vec == 0] = 0
     # find scaled delta quaternion
-    dq         = quat_from_axis_angle(ax, scaled_ang, **kwargs)
+    dq         = quat_from_axis_angle(vec, scaled_ang, **kwargs)
     # calculate desired quaternion
     qout_temp  = quat_norm(quat_mult(dq, q1, **kwargs))
     # store into output structure
     qout[:, ix_calc] = qout_temp
 
-    # Sign convention
     # Enforce sign convention on scalar quaternion element.
-    # Scalar element (fourth element) of quaternion must not be negative.
-    # So change sign on entire quaternion if qout(4) is less than zero.
-    negs = np.zeros(qout.shape[1], dtype=bool)
-    np.less(qout[3, :], 0, out=negs, where=~np.isnan(qout[3, :]))
-    qout[:, negs] = -qout[:, negs]
+    enforce_pos_scalar(qout, inplace=True)
 
     # Drop result for single time point to single dimension
     if num == 1:
