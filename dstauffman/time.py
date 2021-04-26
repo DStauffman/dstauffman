@@ -131,7 +131,7 @@ def get_ymd_from_np(date: _NPDates) -> Tuple[_NInt, _NInt, _NInt]:
 
 
 # %% Functions - round_datetime
-def round_datetime(dt: Optional[datetime.datetime] = None, /, round_to_sec: int = 60, floor: bool = False) -> datetime.datetime:
+def round_datetime(dt: Optional[datetime.datetime] = None, round_to_sec: int = 60, floor: bool = False) -> datetime.datetime:
     r"""
     Round a datetime object to any time lapse in seconds.
 
@@ -182,7 +182,7 @@ def round_datetime(dt: Optional[datetime.datetime] = None, /, round_to_sec: int 
 
 
 # %% Functions - round_np_datetime
-def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, floor: bool = False) -> np.datetime64:
+def round_np_datetime(date_in: np.datetime64, time_delta: np.timedelta64, floor: bool = False) -> np.datetime64:
     r"""
     Rounds a numpy datetime64 time to the specified delta.
 
@@ -221,9 +221,9 @@ def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, flo
 
     """
     # check for consistent types
-    assert (t1 := get_np_time_units(date_in)) == (
-        t2 := get_np_time_units(time_delta)
-    ), f'The time refernce types must be the same, not "{t1}" and "{t2}".'
+    assert get_np_time_units(date_in) == get_np_time_units(
+        time_delta
+    ), f'The time refernce types must be the same, not "{str(date_in.dtype)}" and "{str(time_delta.dtype)}".'
     # check the 64 bit integer representations
     date_in_int: np.ndarray = date_in.astype(np.int64)  # type: ignore[assignment]
     dt_int: np.ndarray = time_delta.astype(np.int64)  # type: ignore[assignment]
@@ -238,7 +238,7 @@ def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, flo
 
 
 # %% Functions - round_num_datetime
-def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = False) -> np.ndarray:
+def round_num_datetime(date_in: np.ndarray, time_delta: float, floor: bool = False) -> np.ndarray:
     r"""
     Rounds a numerical datetime to the given value.
 
@@ -289,16 +289,16 @@ def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = 
 
 # %% Functions - round_time
 @overload
-def round_time(x: np.datetime64, /, t_round: np.timedelta64) -> np.datetime64:
+def round_time(x: np.datetime64, t_round: np.timedelta64) -> np.datetime64:
     ...
 
 
 @overload
-def round_time(x: np.ndarray, /, t_round: np.timedelta64) -> np.ndarray:
+def round_time(x: np.ndarray, t_round: np.timedelta64) -> np.ndarray:
     ...
 
 
-def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
+def round_time(x: _NPDates, t_round: np.timedelta64) -> _NPDates:
     r"""
     Rounding function that handles either numpy datetimes or doubles (seconds).
 
@@ -540,7 +540,7 @@ def convert_time_units(time, old_unit, new_unit):
 
 
 # %% Functions - convert_datetime_to_np
-def convert_datetime_to_np(time, /, units=NP_DATETIME_UNITS):
+def convert_datetime_to_np(time, units=NP_DATETIME_UNITS):
     r"""
     Convenience wrapper to convert a datetime.datetime to a numpy.datetime64 with the desired units.
 
@@ -578,7 +578,7 @@ def convert_datetime_to_np(time, /, units=NP_DATETIME_UNITS):
 
 
 # %% Functions - convert_duration_to_np
-def convert_duration_to_np(dt, /, units=NP_DATETIME_UNITS):
+def convert_duration_to_np(dt, units=NP_DATETIME_UNITS):
     r"""Convenience wrapper to convert a datetime.timedelta to a numpy.timedelta64 with the desired units.
 
     Parameters
@@ -610,7 +610,7 @@ def convert_duration_to_np(dt, /, units=NP_DATETIME_UNITS):
 
 
 # %% Functions - convert_num_dt_to_np
-def convert_num_dt_to_np(dt, /, units="sec", np_units=NP_TIMEDELTA_FORM):
+def convert_num_dt_to_np(dt, units="sec", np_units=NP_TIMEDELTA_FORM):
     r"""Convenience wrapper to convert a number of seconds to a numpy.timedelta64 with the desired units.
 
     Parameters

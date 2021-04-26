@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import datetime
 import doctest
-from typing import Dict, List, Literal, NoReturn, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Dict, List, NoReturn, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY, NP_DATETIME_UNITS, NP_ONE_DAY, NP_ONE_SECOND
@@ -20,6 +20,8 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     _D = np.typing.NDArray[np.datetime64]
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]

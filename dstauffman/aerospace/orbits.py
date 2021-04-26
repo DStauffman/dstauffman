@@ -12,7 +12,7 @@ from __future__ import annotations
 import copy
 import datetime
 import doctest
-from typing import Any, ClassVar, Literal, Optional, overload, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Any, ClassVar, Optional, overload, Tuple, TYPE_CHECKING, TypeVar, Union
 import unittest
 
 from slog import IntEnumPlus, is_dunder
@@ -37,6 +37,8 @@ if HAVE_SCIPY:
     from scipy.optimize import root
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     _B = Union[None, bool, np.ndarray]
     _I = Union[None, int, np.ndarray]
     _V = Union[None, float, np.ndarray]
@@ -102,7 +104,7 @@ class Elements(Frozen):
      P          = None
      lo         = None
      T          = None
-     type       = OrbitType.uninitialized: 0
+     type       = 0
      equatorial = False
      circular   = False
      t          = NaT
@@ -177,7 +179,7 @@ class Elements(Frozen):
             setattr(elements, field, value[key])
         return elements
 
-    def combine(self, elements2: Elements, /, *, inplace: bool = False) -> Elements:
+    def combine(self, elements2: Elements, *, inplace: bool = False) -> Elements:
         r"""Combines two KfInnov structures together."""
         # allow an empty structure to be passed through
         if self.a is None:
@@ -276,7 +278,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:
      P          = 3.5080297660337587
      lo         = 9.101395513076895
      T          = 5484.96289455295
-     type       = OrbitType.elliptic: 1
+     type       = 1
      equatorial = False
      circular   = False
      t          = 2006-05-11T19:03:00.000016096
@@ -418,7 +420,7 @@ def rv_2_oe(
      P          = 0.0
      lo         = 0.0
      T          = 6.283185307179586
-     type       = OrbitType.elliptic: 1
+     type       = 1
      equatorial = True
      circular   = True
      t          = NaT
@@ -746,7 +748,7 @@ def advance_elements(elements, mu, time):
      P          = None
      lo         = None
      T          = None
-     type       = OrbitType.elliptic: 1
+     type       = 1
      equatorial = True
      circular   = True
      t          = 0.00694444444444...

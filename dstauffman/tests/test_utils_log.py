@@ -102,8 +102,10 @@ class Test_setup_dir(unittest.TestCase):
 
     def tearDown(self) -> None:
         def _clean(self: Test_setup_dir) -> None:
-            self.filename.unlink(missing_ok=True)
-            self.subfile.unlink(missing_ok=True)
+            with contextlib.suppress(FileNotFoundError):
+                self.filename.unlink()
+            with contextlib.suppress(FileNotFoundError):
+                self.subfile.unlink()
             with contextlib.suppress(FileNotFoundError):
                 self.subdir.rmdir()
             with contextlib.suppress(FileNotFoundError):

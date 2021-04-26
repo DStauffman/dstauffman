@@ -708,7 +708,8 @@ def plot_correlation_matrix(
     else:
         (fig, ax) = fig_ax
     # set figure title
-    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
+    sup = fig._suptitle  # pylint: disable=protected-access
+    if sup is None:
         fig.canvas.manager.set_window_title(matrix_name)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())
@@ -973,7 +974,8 @@ def plot_histogram(
         ax = fig.add_subplot(1, 1, 1)
     else:
         (fig, ax) = fig_ax
-    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
+    sup = fig._suptitle  # pylint: disable=protected-access
+    if sup is None:
         fig.canvas.manager.set_window_title(description)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())

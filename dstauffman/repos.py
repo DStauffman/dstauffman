@@ -9,6 +9,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+import contextlib
 import datetime
 import doctest
 import os
@@ -373,7 +374,8 @@ def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = T
         # remove this file
         if print_progress:
             print(f'Removing "{file}"')
-        file.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            file.unlink()
 
     if recursive:
         # walk through folder

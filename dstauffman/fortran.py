@@ -11,8 +11,11 @@ from __future__ import annotations
 
 import doctest
 from pathlib import Path
-from typing import Dict, Iterable, List, Literal, Optional, overload, Union
+from typing import Dict, Iterable, List, Optional, overload, TYPE_CHECKING, Union
 import unittest
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 from dstauffman.classes import Frozen
 from dstauffman.utils import line_wrap, read_text_file, write_text_file

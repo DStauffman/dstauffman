@@ -40,7 +40,7 @@ def parse_enforce(input_args: List[str]) -> argparse.Namespace:
     >>> input_args = [str(get_root_dir())]
     >>> args = parse_enforce(input_args)
     >>> print(args)  # doctest: +ELLIPSIS
-    Namespace(folder='...', extensions=None, list_all=False, ignore_tabs=False, trailing=False, skip=None, windows=False, unix=False, execute=False)
+    Namespace(execute=False, extensions=None, folder='...', ignore_tabs=False, list_all=False, skip=None, trailing=False, unix=False, windows=False)
 
     """
     parser = argparse.ArgumentParser(
@@ -153,7 +153,7 @@ def parse_make_init(input_args: List[str]) -> argparse.Namespace:
     >>> input_args = [str(get_root_dir()), "-l"]
     >>> args = parse_make_init(input_args)
     >>> print(args) # doctest: +ELLIPSIS
-    Namespace(folder='...', lineup=True, wrap=100, dry_run=False, outfile='__init__.py')
+    Namespace(dry_run=False, folder='...', lineup=True, outfile='__init__.py', wrap=100)
 
     """
     parser = argparse.ArgumentParser(

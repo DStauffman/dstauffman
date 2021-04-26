@@ -74,7 +74,8 @@ def plot_bpe_convergence(costs, *, opts=None, fig_ax=None, skip_setup_plots=Fals
         ax = fig.add_subplot(111)
     else:
         (fig, ax) = fig_ax
-    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
+    sup = fig._suptitle  # pylint: disable=protected-access
+    if sup is None:
         fig.canvas.manager.set_window_title(this_title)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())

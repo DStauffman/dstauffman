@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from nubs import ncjit
@@ -21,6 +21,8 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
 

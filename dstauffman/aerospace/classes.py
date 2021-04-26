@@ -12,7 +12,7 @@ from __future__ import annotations
 import copy
 import doctest
 from pathlib import Path
-from typing import Any, FrozenSet, List, Literal, Optional, overload, Set, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Any, FrozenSet, List, Optional, overload, Set, Tuple, TYPE_CHECKING, TypeVar, Union
 import unittest
 
 from dstauffman import chop_time, Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, save_method
@@ -23,6 +23,7 @@ if HAVE_NUMPY:
     import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
+    from typing_extensions import Literal
 
     _Chan = Union[List[str], Tuple[str, ...]]
     _Sets = Union[Set[str], FrozenSet[str]]
@@ -182,7 +183,7 @@ class KfInnov(Frozen):
         self.fploc: Optional[np.ndarray] = None
         self.snr: Optional[np.ndarray] = None
 
-    def combine(self, kfinnov2: KfInnov, /, *, inplace: bool = False) -> KfInnov:
+    def combine(self, kfinnov2: KfInnov, *, inplace: bool = False) -> KfInnov:
         r"""Combines two KfInnov structures together."""
         # allow an empty structure to be passed through
         if self.time is None:
@@ -420,7 +421,7 @@ class Kf(Frozen):
                         setattr(out, field, value)
         return out
 
-    def combine(self, kf2: Kf, /, *, inplace: bool = False) -> Kf:
+    def combine(self, kf2: Kf, *, inplace: bool = False) -> Kf:
         r"""Combines two Kf structures together."""
         # allow an empty structure to be passed through
         if self.time is None:
@@ -441,7 +442,9 @@ class Kf(Frozen):
         kf.istate = self.istate.copy() if self.istate is not None else None
         kf.active = self.active.copy() if self.active is not None else None  # TODO: assert that they are the same?
         for field in frozenset({"att", "pos", "vel", "state", "covar"}):
-            if (x := getattr(self, field)) is not None and (y := getattr(kf2, field)) is not None:
+            x = getattr(self, field)
+            y = getattr(kf2, field)
+            if x is not None and y is not None:
                 setattr(kf, field, np.column_stack((x, y)))
         for sub in self._subclasses:
             setattr(kf, sub, getattr(self, sub).combine(getattr(kf2, sub), inplace=inplace))
@@ -597,7 +600,7 @@ class KfRecord(Frozen):
             out.time.dtype = NP_DATETIME_FORM  # type: ignore[misc, union-attr]
         return out
 
-    def combine(self, kfrecord2: KfRecord, /, *, inplace: bool = False) -> KfRecord:
+    def combine(self, kfrecord2: KfRecord, *, inplace: bool = False) -> KfRecord:
         r"""Combines two KfRecord structures together."""
         # allow an empty structure to be passed through
         if self.time is None:
@@ -616,7 +619,9 @@ class KfRecord(Frozen):
         assert kfrecord2.time is not None
         kfrecord.time = np.hstack((self.time, kfrecord2.time))
         for field in frozenset({"P", "stm", "H", "Pz", "K", "z"}):
-            if (x := getattr(self, field)) is not None and (y := getattr(kfrecord2, field)) is not None:
+            x = getattr(self, field)
+            y = getattr(kfrecord2, field)
+            if x is not None and y is not None:
                 setattr(kfrecord, field, np.concatenate((x, y), axis=x.ndim - 1))
         return kfrecord
 

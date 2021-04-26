@@ -7,8 +7,10 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
 import datetime
-from typing import Final
+from typing import TYPE_CHECKING
 import unittest
 
 from dstauffman import HAVE_NUMPY
@@ -17,6 +19,8 @@ import dstauffman.aerospace as space
 if HAVE_NUMPY:
     import numpy as np
 
+if TYPE_CHECKING:
+    from typing_extensions import Final
 
 # %% aerospace.bsl
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")

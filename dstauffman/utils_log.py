@@ -14,7 +14,7 @@ import contextlib
 import doctest
 import logging
 from pathlib import Path
-from typing import Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
@@ -27,6 +27,7 @@ if HAVE_NUMPY:
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
+    from typing_extensions import Literal
 
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
@@ -87,7 +88,8 @@ def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
                         this_full_elem.rmdir()
             elif this_full_elem.is_file():
                 # if a file, then remove it
-                this_full_elem.unlink(missing_ok=True)
+                with contextlib.suppress(FileNotFoundError):
+                    this_full_elem.unlink()
             else:
                 raise RuntimeError(f'Unexpected file type, neither file nor folder: "{this_full_elem}".')  # pragma: no cover
         logger.log(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', folder)
@@ -251,19 +253,18 @@ def fix_rollover(
 
 # %% remove_outliers
 @overload
-def remove_outliers(x: ArrayLike, /) -> _N:
+def remove_outliers(x: ArrayLike) -> _N:
     ...
 
 
 @overload
-def remove_outliers(x: ArrayLike, /, sigma: float) -> _N:
+def remove_outliers(x: ArrayLike, sigma: float) -> _N:
     ...
 
 
 @overload
 def remove_outliers(
     x: ArrayLike,
-    /,
     sigma: float,
     axis: Optional[int],
     *,
@@ -278,7 +279,6 @@ def remove_outliers(
 @overload
 def remove_outliers(
     x: ArrayLike,
-    /,
     sigma: float,
     axis: Optional[int],
     *,
@@ -292,7 +292,6 @@ def remove_outliers(
 
 def remove_outliers(
     x: ArrayLike,
-    /,
     sigma: float = 3.0,
     axis: Optional[int] = None,
     *,

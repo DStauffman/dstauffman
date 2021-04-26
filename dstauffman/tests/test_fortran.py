@@ -7,6 +7,7 @@ Notes
 """
 
 # %% Imports
+import contextlib
 import unittest
 
 import dstauffman as dcs
@@ -66,7 +67,8 @@ class Test__parse_source(unittest.TestCase):
         self.assertEqual(this_code.subroutines, ["sub_name"])
 
     def tearDown(self) -> None:
-        self.filename.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            self.filename.unlink()
 
 
 # %% _write_unit_test

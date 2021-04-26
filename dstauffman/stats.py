@@ -515,7 +515,7 @@ def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = 
 
 
 # %% Functions - ecdf
-def ecdf(y: Union[float, List[float], _N], /) -> Tuple[_N, _N]:
+def ecdf(y: Union[float, List[float], _N]) -> Tuple[_N, _N]:
     r"""
     Calculate the empirical cumulative distribution function, as in Matlab's ecdf function.
 

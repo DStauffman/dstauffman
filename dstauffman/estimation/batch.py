@@ -19,7 +19,7 @@ from itertools import repeat
 import logging
 from pathlib import Path
 import time
-from typing import Any, Callable, ClassVar, Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, ClassVar, Dict, List, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from nubs import ncjit
@@ -50,6 +50,7 @@ else:
 
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
+    from typing_extensions import Literal
 
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D

@@ -133,7 +133,7 @@ def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.
 
 
 # %% Functions - d_2_dms
-def d_2_dms(x, /):
+def d_2_dms(x):
     r"""Converts an angle from degrees to degrees, minutes and seconds."""
     if np.ndim(x) > 1:
         raise ValueError("dms_2_d expects a vector as input.")
@@ -151,7 +151,7 @@ def d_2_dms(x, /):
 
 
 # %% Functions - dms_2_d
-def dms_2_d(x, /):
+def dms_2_d(x):
     r"""Converts an angle from degrees, minutes and seconds to degrees."""
     if x.shape[0] != 3:
         raise ValueError("d_2_dms expects a 3xN array as input.")
@@ -161,7 +161,7 @@ def dms_2_d(x, /):
 
 
 # %% Functions - hms_2_r
-def hms_2_r(x, /):
+def hms_2_r(x):
     r"""Converts a time from hours, minutes and seconds to radians."""
     if x.shape[0] != 3:
         raise ValueError("hms_2_r expects a 3xN array as input.")
@@ -172,7 +172,7 @@ def hms_2_r(x, /):
 
 
 # %% Functions - r_2_hms
-def r_2_hms(x, /):
+def r_2_hms(x):
     r"""Converts an angle from radians to hours, minutes and seconds."""
     if np.ndim(x) > 1:
         raise ValueError("r_2_hms expects a vector as input.")

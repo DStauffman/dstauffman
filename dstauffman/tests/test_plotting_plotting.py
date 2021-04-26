@@ -7,6 +7,7 @@ Notes
 """
 
 # %% Imports
+import contextlib
 import datetime
 from typing import List, Optional
 import unittest
@@ -586,7 +587,8 @@ class Test_plotting_setup_plots(unittest.TestCase):
         self.opts.save_plot = True
         plot.setup_plots(self.fig, self.opts)
         # remove file
-        this_filename.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            this_filename.unlink()
 
     def test_show_link(self) -> None:
         this_filename = get_tests_dir().joinpath(self.opts.case_name + " - Figure Title.png")
@@ -597,7 +599,8 @@ class Test_plotting_setup_plots(unittest.TestCase):
         output = ctx.get_output()
         ctx.close()
         # remove file
-        this_filename.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            this_filename.unlink()
         self.assertTrue(output.startswith('Plots saved to <a href="'))
 
     def tearDown(self) -> None:

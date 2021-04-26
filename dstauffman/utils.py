@@ -22,7 +22,7 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
-from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Set, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, overload, Set, Tuple, TYPE_CHECKING, TypeVar, Union
 import unittest
 import warnings
 
@@ -46,18 +46,19 @@ if HAVE_SCIPY:
     from scipy.interpolate import interp1d
     from scipy.signal import butter, sosfiltfilt
 
-# %% Globals
-_ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked
-
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     _StrOrListStr = TypeVar("_StrOrListStr", str, List[str])
     _SingleNum = Union[int, float, np.ndarray, np.datetime64]
     _Lists = Union[np.ndarray, List[np.ndarray], Tuple[np.ndarray, ...]]
     _Number = Union[float, int, np.ndarray]
 
+# %% Globals
+_ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked
 
 # %% Functions - _nan_equal
-def _nan_equal(a: Any, b: Any, /, tolerance: Optional[float] = None) -> bool:  # pylint: disable=too-many-return-statements
+def _nan_equal(a: Any, b: Any, tolerance: Optional[float] = None) -> bool:  # pylint: disable=too-many-return-statements
     r"""
     Test ndarrays for equality, but ignore NaNs.
 
@@ -361,7 +362,6 @@ def rss(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ign
 def compare_two_classes(
     c1: Any,
     c2: Any,
-    /,
     suppress_output: bool = False,
     names: Optional[Union[Tuple[str, str], List[str]]] = None,
     ignore_callables: bool = True,
@@ -531,7 +531,6 @@ def compare_two_classes(
 def compare_two_dicts(
     d1: Mapping[Any, Any],
     d2: Mapping[Any, Any],
-    /,
     suppress_output: bool = False,
     names: Optional[Union[Tuple[str, str], List[str]]] = None,
     is_subset: bool = False,
@@ -822,7 +821,7 @@ def unit(data: _Lists, axis: int = 0) -> np.ndarray:
 
 
 # %% modd
-def modd(x1, x2, /, out=None):
+def modd(x1, x2, out=None):
     r"""
     Return element-wise remainder of division, except that instead of zero it gives the divisor instead.
 
@@ -867,7 +866,7 @@ def modd(x1, x2, /, out=None):
 
 
 # %% is_np_int
-def is_np_int(x, /):
+def is_np_int(x):
     r"""
     Returns True if the input is an int or any form of an np.integer type.
 
@@ -907,7 +906,7 @@ def is_np_int(x, /):
 
 
 # %% np_digitize
-def np_digitize(x, /, bins, right=False):
+def np_digitize(x, bins, right=False):
     r"""
     Act as a wrapper to the numpy.digitize function with customizations.
 
@@ -982,7 +981,7 @@ def np_digitize(x, /, bins, right=False):
 
 
 # %% histcounts
-def histcounts(x, /, bins, right=False):
+def histcounts(x, bins, right=False):
     r"""
     Count the number of points in each of the given bins.
 
@@ -1366,7 +1365,7 @@ def execute_wrapper(
     # simple dry run case, just display what would happen
     if dry_run:
         if isinstance(command, list):
-            command = shlex.join(command)
+            command = " ".join(command)
         print(f'Would execute "{command}" in "{folder}"')
         return ReturnCodes.clean
     # clean up command
@@ -1508,7 +1507,7 @@ def is_datetime(time: ArrayLike) -> bool:
 
 
 # %% Functions - intersect
-def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False):
+def intersect(a, b, *, tolerance=0, assume_unique=False, return_indices=False):
     r"""
     Finds the intersect of two arrays given a numerical tolerance.
 
@@ -1635,7 +1634,7 @@ def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False
 
 
 # %% issorted
-def issorted(x, /, descend=False):
+def issorted(x, descend=False):
     r"""
     Tells whether the given array is sorted or not.
 

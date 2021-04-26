@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import doctest
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Protocol, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
@@ -64,6 +64,7 @@ _LEG_FORMAT = "{:1.3f}"
 _TRUTH_COLOR = "k"
 
 if TYPE_CHECKING:
+    from typing_extensions import Protocol
 
     class _ExtraPlotter(Protocol):
         def __call__(self, fig: Figure, ax: Axis) -> None:
@@ -1844,7 +1845,8 @@ def make_connected_sets(
         ax = fig.add_subplot(1, 1, 1)
     else:
         (fig, ax) = fig_ax
-    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
+    sup = fig._suptitle  # pylint: disable=protected-access
+    if sup is None:
         fig.canvas.manager.set_window_title(description + extra_text)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())

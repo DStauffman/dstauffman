@@ -10,6 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+import contextlib
 import logging
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 import unittest
@@ -309,8 +310,10 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.assertEqual(output, "")
 
     def tearDown(self) -> None:
-        self.filename.unlink(missing_ok=True)
-        self.filename2.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            self.filename.unlink()
+        with contextlib.suppress(FileNotFoundError):
+            self.filename2.unlink()
 
 
 # %% estimation.CurrentResults
@@ -1107,7 +1110,8 @@ class Test_estimation_run_bpe(unittest.TestCase):
         if self.opti_opts.output_results and self.opti_opts.output_folder is not None:
             files = [self.opti_opts.output_results, "bpe_results_iter_1.hdf5", "cur_results_iter_1.hdf5"]
             for this_file in files:
-                self.opti_opts.output_folder.joinpath(this_file).unlink(missing_ok=True)
+                with contextlib.suppress(FileNotFoundError):
+                    self.opti_opts.output_folder.joinpath(this_file).unlink()
 
 
 # %% Unit test execution

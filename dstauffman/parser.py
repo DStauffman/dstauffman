@@ -159,10 +159,10 @@ def process_command_line_options(log_start: Optional[Union[bool, str]] = None) -
     log_level = None
     for opt in sys.argv[1:]:
         if opt.startswith("-l"):
-            if hasattr(LogLevel, level := opt[1:].upper()):
-                log_level = getattr(LogLevel, level)
-            elif hasattr(logging, level := opt[2:].upper()):
-                log_level = getattr(logging, level)
+            if hasattr(LogLevel, opt[1:].upper()):
+                log_level = getattr(LogLevel, opt[1:].upper())
+            elif hasattr(logging, opt[2:].upper()):
+                log_level = getattr(logging, opt[2:].upper())
             else:
                 raise ValueError(f'Unexpected logging input of: "{opt}".')
             activate_logging(log_level, log_start=log_start)

@@ -176,7 +176,8 @@ class Test_find_repo_issues(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         for this_file in cls.files:
-            this_file.unlink(missing_ok=True)
+            with contextlib.suppress(FileNotFoundError):
+                this_file.unlink()
 
 
 # %% delete_pyc
@@ -239,8 +240,10 @@ class Test_delete_pyc(unittest.TestCase):
         self.assertEqual(output, "")
 
     def tearDown(self) -> None:
-        self.file1.unlink(missing_ok=True)
-        self.file2.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            self.file1.unlink()
+        with contextlib.suppress(FileNotFoundError):
+            self.file2.unlink()
         with contextlib.suppress(FileNotFoundError):
             os.removedirs(self.fold2)
 
@@ -357,8 +360,10 @@ class Test_make_python_init(unittest.TestCase):
         self.assertTrue(self.filename.is_file())
 
     def tearDown(self) -> None:
-        self.filepath.unlink(missing_ok=True)
-        self.filename.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            self.filepath.unlink()
+        with contextlib.suppress(FileNotFoundError):
+            self.filename.unlink()
 
 
 # %% write_unit_test_templates

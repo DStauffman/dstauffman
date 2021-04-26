@@ -69,7 +69,8 @@ def int2bin(num: int, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_char:
     bin_start = "0b"
     bin_str = bin(num)
     if pad != 0:
-        if (str_len := len(bin_str) - 2) < pad:
+        str_len = len(bin_str) - 2
+        if str_len < pad:
             bin_str = bin_start + pad_char * (pad - str_len) + bin_str[2:]
     if sep != 0:
         bin_str = bin_start + _pad_string(bin_str[2:], sep=sep, sep_char=sep_char)
@@ -109,7 +110,8 @@ def int2hex(num: int, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_char:
     if upper:
         hex_str = hex_start + hex_str[2:].upper()
     if pad != 0:
-        if (str_len := len(hex_str) - 2) < pad:
+        str_len = len(hex_str) - 2
+        if str_len < pad:
             hex_str = hex_start + pad_char * (pad - str_len) + hex_str[2:]
     if sep != 0:
         hex_str = hex_start + _pad_string(hex_str[2:], sep=sep, sep_char=sep_char)

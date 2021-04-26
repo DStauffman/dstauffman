@@ -9,6 +9,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+import contextlib
 import datetime
 import os
 import pathlib
@@ -556,7 +557,8 @@ class Test_plotting_storefig(unittest.TestCase):
     def tearDown(self) -> None:
         # remove file
         if self.this_filename is not None:
-            self.this_filename.unlink(missing_ok=True)
+            with contextlib.suppress(FileNotFoundError):
+                self.this_filename.unlink()
 
     @classmethod
     def tearDownClass(cls) -> None:
@@ -1122,7 +1124,8 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
     def tearDownClass(cls) -> None:
         plt.close(cls.fig1)
         plt.close(cls.fig2)
-        cls.filename.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            cls.filename.unlink()
 
 
 # %% plotting.add_datashaders

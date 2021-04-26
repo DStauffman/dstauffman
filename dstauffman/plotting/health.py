@@ -274,7 +274,7 @@ def plot_health_time_history(
         names = opts.names
     else:
         assert False, "Data must be 0D to 3D array."
-    assert time.shape[0] == data.shape[0], f"Time and data must be the same length. Current {time.shape=} and {data.shape=}"
+    assert time.shape[0] == data.shape[0], f"Time and data must be the same length. Current time.shape={time.shape} and data.shape={data.shape}"
     if legend is not None:
         assert len(legend) == num_bins, "Number of data channels does not match the legend."
     else:

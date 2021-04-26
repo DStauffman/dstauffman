@@ -18,7 +18,7 @@ from slog import is_dunder
 
 
 # %% Functions - get_root_dir
-@lru_cache
+@lru_cache(maxsize=128)
 def get_root_dir() -> Path:
     r"""
     Return the folder that contains this source file and thus the root folder for the whole code.
@@ -44,7 +44,7 @@ def get_root_dir() -> Path:
 
 
 # %% Functions - get_tests_dir
-@lru_cache
+@lru_cache(maxsize=128)
 def get_tests_dir() -> Path:
     r"""
     Return the default test folder location.
@@ -70,7 +70,7 @@ def get_tests_dir() -> Path:
 
 
 # %% Functions - get_data_dir
-@lru_cache
+@lru_cache(maxsize=128)
 def get_data_dir() -> Path:
     r"""
     Return the default data folder location.
@@ -96,7 +96,7 @@ def get_data_dir() -> Path:
 
 
 # %% Functions - get_images_dir
-@lru_cache
+@lru_cache(maxsize=128)
 def get_images_dir() -> Path:
     r"""
     Return the default data folder location.
@@ -122,7 +122,7 @@ def get_images_dir() -> Path:
 
 
 # %% Functions - get_output_dir
-@lru_cache
+@lru_cache(maxsize=128)
 def get_output_dir() -> Path:
     r"""
     Return the default output folder location.

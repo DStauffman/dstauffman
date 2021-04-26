@@ -121,7 +121,8 @@ def quat_assertions(quat: _Q, *, precision: float = 1e-12, skip_assertions: bool
     assert np.all(np.isreal(quat)), "Quaternion is not real"
     # check ranges
     if qndim == 1:
-        if np.any(nans := np.isnan(quat)):
+        nans = np.isnan(quat)
+        if np.any(nans):
             if allow_nans:
                 assert np.all(nans), "Quaternions with NaNs must have NaNs for every component."
             else:
@@ -132,7 +133,8 @@ def quat_assertions(quat: _Q, *, precision: float = 1e-12, skip_assertions: bool
             assert -1 <= quat[2] <= 1, f'Quaternion has bad range in z value: "{quat[2]}"'
             assert  0 <= quat[3] <= 1, f'Quaternion has bad range in s value: "{quat[3]}"'  # fmt: skip
     else:
-        if np.any(nans := np.isnan(quat)):
+        nans = np.isnan(quat)
+        if np.any(nans):
             if allow_nans:
                 # TODO: this is a hack for typing!  set command is valid
                 temp = "Quaternions with NaNs must have NaNs for every component."
@@ -840,7 +842,7 @@ def quat_mult(a: _Q, b: _Q, **kwargs) -> _Q:
 
 
 # %% Functions - quat_norm
-def quat_norm(x: _Q, /, inplace: bool = False, **kwargs) -> _Q:
+def quat_norm(x: _Q, inplace: bool = False, **kwargs) -> _Q:
     r"""
     Normalize each column of the input matrix.
 

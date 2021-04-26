@@ -10,6 +10,7 @@ Notes
 from __future__ import annotations
 
 from collections.abc import Mapping
+import contextlib
 import copy
 import pathlib
 import pickle
@@ -146,7 +147,8 @@ class Test_save_and_load_hdf5(unittest.TestCase):
             np.testing.assert_array_equal(data[key], getattr(data2, key))
 
     def tearDown(self) -> None:
-        self.filename.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            self.filename.unlink()
 
 
 # %% save_pickle - covered by SaveAndLoad
@@ -488,8 +490,10 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.assertEqual(str(err.exception), "exclusions cannot be used with pickle files.")
 
     def tearDown(self) -> None:
-        self.save_path1.unlink(missing_ok=True)
-        self.save_path2.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            self.save_path1.unlink()
+        with contextlib.suppress(FileNotFoundError):
+            self.save_path2.unlink()
 
 
 # %% SaveAndLoadPickle

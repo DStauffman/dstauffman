@@ -23,7 +23,6 @@ from typing import (
     FrozenSet,
     Iterable,
     List,
-    Literal,
     NoReturn,
     Optional,
     overload,
@@ -59,6 +58,8 @@ if HAVE_PANDAS:
 
 # %% Constants
 if TYPE_CHECKING:
+    from typing_extensions import Literal
+
     _T = TypeVar("_T")
     _C = TypeVar("_C", int, "Counter")
     _SingleNum = Union[int, float, ndarray, datetime64]
@@ -463,7 +464,8 @@ def save_convert_hdf5(self, **kwargs: Any) -> Dict[str, bool]:
     if convert_dates:
         assert HAVE_NUMPY, "Must have numpy to convert the dates."
         for key in datetime_fields:
-            if (value := getattr(self, key)) is not None:
+            value = getattr(self, key)
+            if value is not None:
                 setattr(self, key, value.astype(int64))
     return {"convert_dates": convert_dates}
 
@@ -481,7 +483,8 @@ def save_restore_hdf5(self, *, convert_dates: bool = False, **kwargs: Any) -> No
             except AttributeError:
                 datetime_fields = tuple()
         for key in datetime_fields:
-            if (value := getattr(self, key)) is not None:
+            value = getattr(self, key)
+            if value is not None:
                 setattr(self, key, value.astype(NP_DATETIME_FORM))
     if "string_fields" in kwargs:
         string_fields = kwargs["string_fields"]
@@ -679,7 +682,8 @@ def chop_time(
             continue
         if exclude is not None and key in exclude:
             continue
-        if (old := getattr(self, key)) is not None:
+        old = getattr(self, key)
+        if old is not None:
             setattr(self, key, old[..., ix])
 
 
@@ -736,7 +740,8 @@ def subsample_class(
             continue
         if skip_fields is not None and key in skip_fields:
             continue
-        if (old := getattr(self, key)) is not None:
+        old = getattr(self, key)
+        if old is not None:
             setattr(self, key, old[..., start::skip])
 
 

@@ -47,7 +47,7 @@ def parse_tests(input_args: List[str]) -> argparse.Namespace:
     >>> input_args = []
     >>> args = parse_tests(input_args)
     >>> print(args)
-    Namespace(docstrings=False, unittest=False, verbose=False, library=None, coverage=False, cov_file=None)
+    Namespace(cov_file=None, coverage=False, docstrings=False, library=None, unittest=False, verbose=False)
 
     """
     parser = argparse.ArgumentParser(prog="dcs tests", description="Runs all the built-in unit tests.")
@@ -161,7 +161,7 @@ def parse_coverage(input_args: List[str]) -> argparse.Namespace:
     >>> input_args = []
     >>> args = parse_coverage(input_args)
     >>> print(args)
-    Namespace(no_report=False, cov_file=None)
+    Namespace(cov_file=None, no_report=False)
 
     """
     parser = argparse.ArgumentParser(

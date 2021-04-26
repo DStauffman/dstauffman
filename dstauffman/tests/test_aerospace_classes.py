@@ -7,6 +7,7 @@ Notes
 """
 
 # %% Imports
+import contextlib
 import copy
 import unittest
 
@@ -510,7 +511,8 @@ class Test_aerospace_Kf(unittest.TestCase):
         self.assertEqual(kf4.innov.innov.shape, (2, 79))  # fix
 
     def tearDown(self) -> None:
-        self.filename.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            self.filename.unlink()
 
 
 # %% aerospace.KfRecord

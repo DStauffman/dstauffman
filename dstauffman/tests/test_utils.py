@@ -7,6 +7,7 @@ Notes
 """
 
 # %% Imports
+import contextlib
 import copy
 import os
 import pathlib
@@ -762,7 +763,8 @@ class Test_read_text_file(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        cls.filepath.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            cls.filepath.unlink()
 
 
 # %% write_text_file
@@ -808,7 +810,8 @@ class Test_write_text_file(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        cls.filepath.unlink(missing_ok=True)
+        with contextlib.suppress(FileNotFoundError):
+            cls.filepath.unlink()
 
 
 # %% magnitude

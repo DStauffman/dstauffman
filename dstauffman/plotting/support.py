@@ -20,7 +20,7 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Any, Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -90,6 +90,9 @@ try:
     from PIL import Image
 except ModuleNotFoundError:
     pass
+
+if TYPE_CHECKING:
+    from typing_extensions import Literal
 
 # %% Constants
 # Default colormap to use on certain plots
@@ -601,7 +604,8 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tup
         # special case when you have a displayless backend, check the suptitle, then the title
         # from the first axes
         throw_warning = True
-        if (sup := fig._suptitle) is not None:  # pylint: disable=protected-access
+        sup = fig._suptitle  # pylint: disable=protected-access
+        if sup is not None:
             raw_title = sup.get_text()
         else:
             try:
@@ -727,8 +731,10 @@ def storefig(
     >>> plt.close(fig)
 
     Delete potential file(s)
-    >>> folder.joinpath("Figure Title.png").unlink(missing_ok=True)
-    >>> folder.joinpath("X vs Y.png").unlink(missing_ok=True)
+    >>> if folder.joinpath("Figure Title.png").is_file():
+    ...     folder.joinpath("Figure Title.png").unlink()
+    >>> if folder.joinpath("X vs Y.png").is_file():
+    ...     folder.joinpath("X vs Y.png").unlink()
 
     """
     # make sure figs is a list
@@ -826,7 +832,8 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
         this_canvas_title = this_fig.canvas.manager.get_window_title()
         this_fig.canvas.manager.set_window_title(prefix + " - " + this_canvas_title)
         # update the suptitle (if it exists)
-        if (sup := this_fig._suptitle) is not None:  # pylint: disable=protected-access
+        sup = this_fig._suptitle  # pylint: disable=protected-access
+        if sup is not None:
             sup.set_text(prefix + " - " + sup.get_text())
         elif process_all or sup is None:
             # get axes list and loop through them
@@ -1950,7 +1957,8 @@ def save_figs_to_pdf(figs: Optional[Union[Figure, List[Figure]]] = None, filenam
     >>> save_figs_to_pdf(fig, filename)  # doctest: +SKIP
 
     Delete file and close figure
-    >>> filename.unlink(missing_ok=True)
+    >>> if filename.is_file():
+    ...     filename.unlink()
     >>> close_all([fig])
 
     """
@@ -2015,9 +2023,11 @@ def save_images_to_pdf(
     >>> save_images_to_pdf(fig, folder, plot_type, filename)
 
     Delete file and close figure
-    >>> filename.unlink(missing_ok=True)
+    >>> if filename.is_file():
+    ...     filename.unlink()
     >>> image_filename = folder / "test.png"
-    >>> image_filename.unlink(missing_ok=True)
+    >>> if image_filename.is_file():
+    ...     image_filename.unlink()
     >>> close_all([fig])
 
     """
