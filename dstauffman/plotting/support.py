@@ -69,31 +69,32 @@ if TYPE_CHECKING:
     _FigOrListFig = Union[Figure, List[Figure]]
 
 COLOR_LISTS: Dict[str, colors.ListedColormap] = {}
-# default colormap
-COLOR_LISTS['default']  = cmx.get_cmap(DEFAULT_COLORMAP)
-assert isinstance(COLOR_LISTS['default'], colors.ListedColormap), 'Expecting a ListedColormap for the default.'
-# single colors
-COLOR_LISTS['same']     = colors.ListedColormap(tuple(repeat(cmx.get_cmap(DEFAULT_COLORMAP).colors[0], 8)))
-COLOR_LISTS['same_old'] = colors.ListedColormap(tuple(repeat('#1f77b4', 8)))
-COLOR_LISTS['single']   = colors.ListedColormap(('xkcd:red', ))
-# doubles
-COLOR_LISTS['double']   = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
-COLOR_LISTS['dbl_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:cyan'))
-# triples
-COLOR_LISTS['vec']      = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
-COLOR_LISTS['vec_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan'))
-# quads
-COLOR_LISTS['quat']     = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
-COLOR_LISTS['quat_off'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan', 'xkcd:brown'))
-# double combinations
-COLOR_LISTS['dbl_diff']    = colors.ListedColormap(COLOR_LISTS['dbl_off'].colors + COLOR_LISTS['double'].colors)
-COLOR_LISTS['dbl_diff_r']  = colors.ListedColormap(COLOR_LISTS['double'].colors + COLOR_LISTS['dbl_off'].colors)
-# triple combinations
-COLOR_LISTS['vec_diff']    = colors.ListedColormap(COLOR_LISTS['vec_off'].colors + COLOR_LISTS['vec'].colors)
-COLOR_LISTS['vec_diff_r']  = colors.ListedColormap(COLOR_LISTS['vec'].colors + COLOR_LISTS['vec_off'].colors)
-# quad combinations
-COLOR_LISTS['quat_diff']   = colors.ListedColormap(COLOR_LISTS['quat_off'].colors + COLOR_LISTS['quat'].colors)
-COLOR_LISTS['quat_diff_r'] = colors.ListedColormap(COLOR_LISTS['quat'].colors + COLOR_LISTS['quat_off'].colors)
+if HAVE_MPL:
+    # default colormap
+    COLOR_LISTS['default']  = cmx.get_cmap(DEFAULT_COLORMAP)
+    assert isinstance(COLOR_LISTS['default'], colors.ListedColormap), 'Expecting a ListedColormap for the default.'
+    # single colors
+    COLOR_LISTS['same']     = colors.ListedColormap(tuple(repeat(cmx.get_cmap(DEFAULT_COLORMAP).colors[0], 8)))
+    COLOR_LISTS['same_old'] = colors.ListedColormap(tuple(repeat('#1f77b4', 8)))
+    COLOR_LISTS['single']   = colors.ListedColormap(('xkcd:red', ))
+    # doubles
+    COLOR_LISTS['double']   = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
+    COLOR_LISTS['dbl_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:cyan'))
+    # triples
+    COLOR_LISTS['vec']      = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
+    COLOR_LISTS['vec_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan'))
+    # quads
+    COLOR_LISTS['quat']     = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
+    COLOR_LISTS['quat_off'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan', 'xkcd:brown'))
+    # double combinations
+    COLOR_LISTS['dbl_diff']    = colors.ListedColormap(COLOR_LISTS['dbl_off'].colors + COLOR_LISTS['double'].colors)
+    COLOR_LISTS['dbl_diff_r']  = colors.ListedColormap(COLOR_LISTS['double'].colors + COLOR_LISTS['dbl_off'].colors)
+    # triple combinations
+    COLOR_LISTS['vec_diff']    = colors.ListedColormap(COLOR_LISTS['vec_off'].colors + COLOR_LISTS['vec'].colors)
+    COLOR_LISTS['vec_diff_r']  = colors.ListedColormap(COLOR_LISTS['vec'].colors + COLOR_LISTS['vec_off'].colors)
+    # quad combinations
+    COLOR_LISTS['quat_diff']   = colors.ListedColormap(COLOR_LISTS['quat_off'].colors + COLOR_LISTS['quat'].colors)
+    COLOR_LISTS['quat_diff_r'] = colors.ListedColormap(COLOR_LISTS['quat'].colors + COLOR_LISTS['quat_off'].colors)
 
 #%% Set Matplotlib global settings
 if HAVE_MPL:

@@ -214,6 +214,7 @@ class Test_aerospace_qrot(unittest.TestCase):
         self.assertGreater(quat[3], 0)
 
 #%% aerospace.quat_from_axis_angle_single
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_from_axis_angle_single function with the following cases:

@@ -18,6 +18,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% estimation._update_information
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation__update_information(unittest.TestCase):
     r"""
     Tests the estimation._update_information function with the following cases:
@@ -39,6 +40,7 @@ class Test_estimation__update_information(unittest.TestCase):
         # TODO: assert something
 
 #%% estimation.bf_smoother
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_bf_smoother(unittest.TestCase):
     r"""
     Tests the estimation.bf_smoother function with the following cases:

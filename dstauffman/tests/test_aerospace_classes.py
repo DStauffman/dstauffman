@@ -67,6 +67,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         for key in self.fields:
             self.assertIsNone(getattr(kf_record, key), f'Expected None for field {key}')
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_arguments(self) -> None:
         kf_record = space.KfRecord(num_points=30, num_states=6, num_active=3, num_axes=2)
         assert kf_record.time is not None
@@ -84,6 +85,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(kf_record.K.shape, (3, 2, 30), 'K shape mismatch.')
         self.assertEqual(kf_record.z.shape, (2, 30), 'z shape mismatch.')
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_alternative_time(self) -> None:
         kf_record = space.KfRecord(num_points=60, num_states=9, num_active=6, num_axes=3, time_dtype=NP_DATETIME_FORM)
         assert kf_record.time is not None
@@ -102,6 +104,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(kf_record.K.shape, (6, 3, 60), 'K shape mismatch.')
         self.assertEqual(kf_record.z.shape, (3, 60), 'z shape mismatch.')
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_pprint1(self) -> None:
         kf_record = space.KfRecord(num_points=5)
         assert kf_record.time is not None
@@ -112,6 +115,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(lines[0], 'KfRecord')
         self.assertEqual(lines[1], ' time = [0. 1. 2. 3. 4.]')
 
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_pprint2(self) -> None:
         kf_record = space.KfRecord(num_points=5)
         assert kf_record.time is not None
