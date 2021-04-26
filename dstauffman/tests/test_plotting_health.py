@@ -333,12 +333,14 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
             truth=self.truth)
 
     def test_truth2(self) -> None:
+        assert self.truth.data is not None
         self.truth.data_lo = self.truth.data - 0.1
         self.truth.data_hi = self.truth.data + 0.1
         self.fig = plot.plot_health_monte_carlo(self.time, self.data, self.label, self.units, \
             truth=self.truth)
 
     def test_bad_truth_size(self) -> None:
+        assert self.truth.data is not None
         self.truth.data = self.truth.data[:-1]
         with self.assertRaises(ValueError):
             plot.plot_health_monte_carlo(self.time, self.data, self.label, self.units, \

@@ -252,7 +252,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
 
     # determine which plotting function to use
     if use_zoh:
-        plot_func = lambda ax, *args, **kwargs: ax.step(*args, **kwargs, where='post')
+        plot_func = lambda ax, *args, **kwargs: ax.step(*args, where='post', **kwargs)
     else:
         plot_func = lambda ax, *args, **kwargs: ax.plot(*args, **kwargs)
 

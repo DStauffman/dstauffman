@@ -1082,7 +1082,7 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     return True
 
 #%% run_bpe
-def run_bpe(opti_opts: OptiOpts, log_level: int = LogLevel.L5) -> Tuple[BpeResults, Any]:
+def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tuple[BpeResults, Any]:
     r"""
     Run the batch parameter estimator with the given model optimization options.
 

@@ -267,7 +267,7 @@ def remove_outliers(x, /, sigma=3., axis=None, *, num_iters=3, return_stats=Fals
     num_replaced = np.count_nonzero(np.isnan(y)) - num_nans
     num_removed = num_replaced - num_hard
     logger.log(LogLevel.L6, 'Number of NaNs = %s', num_nans)
-    logger.log(LogLevel.L6, 'Number excedding hardmax = %s', num_hard)
+    logger.log(LogLevel.L6, 'Number exceeding hardmax = %s', num_hard)
     logger.log(LogLevel.L6, 'Number of outliers = %s', num_removed)
     if rms_initial.ndim == 0:
         logger.log(LogLevel.L6, 'RMS before removal = {:.6g}, after = {:.6g}'.format(rms_initial, rms_removed))

@@ -127,7 +127,9 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
             time = np.arange(len(bpe_results.begin_innovs))
             data = np.vstack((bpe_results.begin_innovs, bpe_results.final_innovs))
             colormap = kw_colormap if kw_colormap is not None else 'bwr_r'
-            fig = plot_time_history('Innovs Before and After', time, data, opts=opts, \
+            temp_opts = opts.__class__(opts)
+            temp_opts.disp_xmin = temp_opts.disp_xmax = temp_opts.rms_xmin = temp_opts.rms_xmax = None
+            fig = plot_time_history('Innovs Before and After', time, data, opts=temp_opts, \
                 elements=['Before', 'After'], colormap=colormap, **kwargs)
             figs.append(fig)
         else:

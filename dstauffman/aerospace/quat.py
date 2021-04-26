@@ -7,7 +7,9 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import doctest
+from typing import List, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import INT_TOKEN, HAVE_NUMPY
@@ -16,6 +18,8 @@ from dstauffman.aerospace.quat_opt import quat_to_dcm
 
 if HAVE_NUMPY:
     import numpy as np
+    if TYPE_CHECKING:
+        from numpy.typing import ArrayLike
 
 #%% Constants
 # Number of elements that should be in a quaternion
@@ -62,7 +66,7 @@ def unsuppress_quat_checks() -> None:
     _USE_ASSERTIONS = True
 
 #%% Functions - quat_assertions
-def quat_assertions(quat, *, precision=1e-12, skip_assertions=False):
+def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertions: bool = False) -> None:
     r"""
     Check assertions about valid quaternions.
 
@@ -122,8 +126,51 @@ def quat_assertions(quat, *, precision=1e-12, skip_assertions=False):
     assert np.all(q_norm_err <= precision), 'Quaternion has invalid normalization ' + \
         'error "{}".'.format(np.max(q_norm_err))
 
+#%% Functions - enforce_pos_scalar
+def enforce_pos_scalar(quat: np.ndarray, inplace: bool = False) -> np.ndarray:
+    r"""
+    Enforces the standard of a positive scalar component.
+
+    Parameters
+    ----------
+    quat : ndarray, (4,) or (4, N)
+        Quaternion
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
+
+    Returns
+    -------
+    qout: ndarray, (4, ) or (4, N)
+        Output quaternion with strictly non-negative scalar components
+
+    Notes
+    -----
+    #.  Separated into a stand-alone function by David C. Stauffer in April 2021.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import enforce_pos_scalar
+    >>> import numpy as np
+    >>> quat = np.array([0.5, -0.5, 0.5, -0.5])
+    >>> qout = enforce_pos_scalar(quat)
+    >>> print(qout)  # doctest: +NORMALIZE_WHITESPACE
+    [-0.5 0.5 -0.5 0.5]
+
+    """
+    # Scalar element (fourth element) of quaternion must not be negative.
+    # So change sign on entire quaternion if qout[3] is less than zero.
+    qout = quat if inplace else quat.copy()
+    if qout.ndim == 1:
+        if ~np.isnan(qout[3]) and qout[3] < 0:
+            qout[:] = -qout
+        return qout
+    negs = np.zeros(qout.shape[1], dtype=bool)
+    negs = np.less(qout[3, :], 0, out=negs, where=~np.isnan(qout[3, :]))
+    qout[:, negs] = -qout[:, negs]
+    return qout
+
 #%% Functions - qrot
-def qrot(axis, angle, **kwargs):
+def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
     r"""
     Construct a quaternion expressing a rotation about a single axis.
 
@@ -165,33 +212,100 @@ def qrot(axis, angle, **kwargs):
     """
     # assertions
     try:
-        axis_set = set(axis)
+        axis_set = set(axis)  # type: ignore[arg-type]
     except TypeError:
-        axis_set = {axis}
+        axis_set = {axis}  # type: ignore[arg-type]
     assert len(axis_set - {1, 2, 3}) == 0, 'axis_set = {}'.format(axis_set)
     # calculations
+    quat: np.ndarray
     if np.isscalar(angle) and np.isscalar(axis):
         # optimized scalar case
-        quat = np.array([0, 0, 0, np.cos(angle/2)])
-        quat[axis-1] = np.sin(angle/2)
+        quat = np.array([0, 0, 0, np.cos(angle/2)])  # type: ignore[operator]
+        quat[axis-1] = np.sin(angle/2)  # type: ignore[operator]
     elif np.isscalar(axis):
         # single axis, multiple angle case
-        quat = np.vstack((np.zeros((3, len(angle))), np.expand_dims(np.cos(angle/2), axis=0)))
-        quat[axis-1, :] = np.sin(angle/2)
+        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle/2), axis=0)))  # type: ignore[operator]
+        quat[axis-1, :] = np.sin(angle/2)  # type: ignore[operator]
     elif np.isscalar(angle):
         # single angle, multiple axis case
-        quat = np.tile(np.array([[0], [0], [0], [np.cos(angle/2)]]), (1, len(axis)))
-        quat[axis-1, np.arange(len(axis))] = np.sin(angle/2)
+        quat = np.tile(np.array([[0], [0], [0], [np.cos(angle/2)]]), (1, np.size(axis)))  # type: ignore[arg-type, operator]
+        quat[axis-1, np.arange(np.size(axis))] = np.sin(angle/2)  # type: ignore[arg-type, operator]
     else:
         # multiple axis, multiple angle case
-        assert len(axis) == len(angle)
-        quat = np.vstack((np.zeros((3, len(angle))), np.expand_dims(np.cos(angle/2), axis=0)))
-        quat[axis-1, np.arange(len(axis))] = np.sin(angle/2)
+        assert np.size(axis) == np.size(angle)  # type: ignore[arg-type]
+        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle/2), axis=0)))  # type: ignore[arg-type, operator]
+        quat[axis-1, np.arange(np.size(axis))] = np.sin(angle/2)  # type: ignore[arg-type, operator]
+    enforce_pos_scalar(quat, inplace=True)
+    quat_assertions(quat, **kwargs)
+    return quat
+
+#%% Functions - quat_from_axis_angle
+def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
+    r"""
+    Construct a quaternion expressing the given rotations about the given axes.
+
+    Parameters
+    ----------
+    axis : (3, ) on (3, N) np.ndarray of float
+        Unit vector(s)
+    angle : float or (N, ) np.ndarray of float
+        angle of rotation(s) in radians
+
+    Returns
+    -------
+    quat : ndarray, (4, ) or (4, N)
+        quaternion representing the given rotation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2021.
+
+    References
+    ----------
+    #.  A quaternion is given by [x*s, y*s, z*s, c] where c = cos(theta/2) and sin=(theta/2)
+        See: https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import quat_from_axis_angle
+    >>> import numpy as np
+    >>> axis = np.sqrt([9/50, 16/50, 0.5])
+    >>> angle = 5/180*np.pi
+    >>> quat = quat_from_axis_angle(axis, angle)
+    >>> with np.printoptions(precision=8):
+    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    [0.01850614 0.02467485 0.03084356 0.99904822]
+
+    """
+    # ailas the cosine and sine terms
+    c = np.cos(angle/2)  # type: ignore[operator]
+    s = np.sin(angle/2)  # type: ignore[operator]
+    # scale the unit vector by the sine and concatenate the cosine term
+    if axis.ndim == 1 and c.size == 1:  # type: ignore[union-attr]
+        quat = np.hstack([axis * s, c])
+    elif axis.ndim == 1:  # type: ignore[union-attr]
+        quat = np.vstack([np.outer(axis, s), c])
+    elif c.size == 1:  # type: ignore[union-attr]
+        quat = np.vstack([axis * s, np.full(axis.shape[1], c)])  # type: ignore[misc, union-attr]
+    else:
+        assert axis.shape[1] == c.size  # type: ignore[misc, union-attr]
+        quat = np.vstack([axis * s, c])
+    # TODO: try to eliminate the four different cases:
+        #e = np.outer(axis, s) if axis.ndim == 1 else axis * s
+    # check for null quaternion and if found, then normalize it
+    if quat.ndim == 1:
+        if quat[0] == 0 and quat[1] == 0 and quat[2] == 0:
+            quat[3] = 1
+    else:
+        ix_zeros = np.all(quat[:3, :] == 0, axis=0)
+        quat[3, ix_zeros] = 1
+    # enforce positive scalar component convention and reduce dimensionality if necessary
+    enforce_pos_scalar(quat, inplace=True)
     quat_assertions(quat, **kwargs)
     return quat
 
 #%% Functions - quat_angle_diff
-def quat_angle_diff(quat1, quat2, **kwargs):
+def quat_angle_diff(quat1: np.ndarray, quat2: np.ndarray, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
     r"""
     Calculate the angular difference between two quaternions.
 
@@ -292,7 +406,7 @@ def quat_angle_diff(quat1, quat2, **kwargs):
     return (theta, comp)
 
 #%% Functions - quat_from_euler
-def quat_from_euler(angles, seq=None, **kwargs):
+def quat_from_euler(angles: ArrayLike, seq: ArrayLike = None, **kwargs) -> np.ndarray:
     r"""
     Convert set(s) of euler angles to quaternion(s).
 
@@ -346,7 +460,7 @@ def quat_from_euler(angles, seq=None, **kwargs):
         seq = np.array([3, 1, 2])
     # check for different combinations of angles (scalar, 1D, 2D)
     try:
-        ndim = angles.ndim
+        ndim = angles.ndim  # type: ignore[union-attr]
     except AttributeError:
         if np.isscalar(angles):
             # assume this is an integer and turn into ndarray with one element
@@ -368,20 +482,21 @@ def quat_from_euler(angles, seq=None, **kwargs):
     else:
         raise ValueError('Unexpected number of dimensions in angle: "{}"'.format(ndim))
     # get the number of quaternions to end up making
+    assert isinstance(angles, np.ndarray)
     num = angles.shape[1]
     # initialize output
     quat = np.zeros((QUAT_SIZE, num))
     # check that seq is iterable
     try:
-        len(seq)
+        len(seq)  # type: ignore[arg-type]
     except TypeError:
         seq = np.array([seq])
     # loop through quaternions
     for i in range(num):
         q_temp = np.array([0., 0., 0., 1.])
         # apply each rotation
-        for j in range(len(seq)):
-            q_single = qrot(seq[j], angles[j, i], **kwargs)
+        for j in range(len(seq)):  # type: ignore[arg-type]
+            q_single = qrot(seq[j], angles[j, i], **kwargs)  # type: ignore[index]
             q_temp = quat_mult(q_temp, q_single, **kwargs)
         # save output
         quat[:, i] = q_temp
@@ -391,7 +506,7 @@ def quat_from_euler(angles, seq=None, **kwargs):
     return quat
 
 #%% Functions - quat_interp
-def quat_interp(time, quat, ti, inclusive=True, **kwargs):
+def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: bool = True, **kwargs) -> np.ndarray:
     r"""
     Interpolate quaternions from a monotonic time series of quaternions.
 
@@ -434,7 +549,7 @@ def quat_interp(time, quat, ti, inclusive=True, **kwargs):
     # Initializations
     # number of data points to find
     try:
-        num   = len(ti)
+        num = len(ti)
     except TypeError:
         if np.isscalar(ti):
             ti = np.array([ti])
@@ -443,7 +558,7 @@ def quat_interp(time, quat, ti, inclusive=True, **kwargs):
             raise
 
     # initialize output
-    qout  = np.full((QUAT_SIZE, num), np.nan, dtype=float)
+    qout = np.full((QUAT_SIZE, num), np.nan, dtype=float)
 
     # Simple cases
     if num == 0:
@@ -480,12 +595,15 @@ def quat_interp(time, quat, ti, inclusive=True, **kwargs):
     # Calculations
     # find index within time to surround ti, accounting for the end of the vector
     index = np.full(num, INT_TOKEN, dtype=int)
-    for i in np.flatnonzero(ix_calc):
-        temp = np.flatnonzero(ti[i] <= time)
-        if temp[0] != len(time)-1:
-            index[i] = temp[0] + 1
-        else:
-            index[i] = temp[0]
+    c = 0
+    last_pt = len(time) - 1
+    for i in range(num):
+        if ix_calc[i]:
+            while ti[i] > time[c]:
+                c += 1
+                if c == last_pt:
+                    break
+            index[i] = c
 
     # remove points that are NaN, either they weren't in the time vector, or they were next to a
     # drop out and cannot be interpolated.
@@ -497,31 +615,25 @@ def quat_interp(time, quat, ti, inclusive=True, **kwargs):
     q2 = quat[:, index]
     # calculate delta quaternion
     dq12       = quat_norm(quat_mult(q2, quat_inv(q1, **kwargs), **kwargs), **kwargs)
-    # find delta quaternion axis of rotation
+    # find delta quaternion axis of rotation and normalize
     vec        = dq12[0:3, :]
     norm_vec   = np.sqrt(np.sum(vec**2, axis=0))
-    # check for zero norm vectors
-    norm_fix   = norm_vec
-    norm_fix[norm_fix == 0] = 1
-    ax         = vec / norm_fix
+    vec        = np.divide(vec, norm_vec, out=vec, where=norm_vec!=0)
     # find delta quaternion rotation angle
     ang        = 2*np.arcsin(norm_vec)
     # scale rotation angle based on time
     scaled_ang = ang*(ti[ix_calc]-t1) / (t2-t1)
+    # set to no rotation for any null axis
+    scaled_ang[norm_vec == 0] = 0
     # find scaled delta quaternion
-    dq         = np.concatenate((ax*np.sin(scaled_ang/2), np.expand_dims(np.cos(scaled_ang/2),0)), axis=0)
+    dq         = quat_from_axis_angle(vec, scaled_ang, **kwargs)
     # calculate desired quaternion
     qout_temp  = quat_norm(quat_mult(dq, q1, **kwargs))
     # store into output structure
     qout[:, ix_calc] = qout_temp
 
-    # Sign convention
     # Enforce sign convention on scalar quaternion element.
-    # Scalar element (fourth element) of quaternion must not be negative.
-    # So change sign on entire quaternion if qout(4) is less than zero.
-    negs = np.zeros(qout.shape[1], dtype=bool)
-    np.less(qout[3, :], 0, out=negs, where=~np.isnan(qout[3, :]))
-    qout[:, negs] = -qout[:, negs]
+    enforce_pos_scalar(qout, inplace=True)
 
     # Drop result for single time point to single dimension
     if num == 1:
@@ -530,7 +642,7 @@ def quat_interp(time, quat, ti, inclusive=True, **kwargs):
     return qout
 
 #%% Functions - quat_inv
-def quat_inv(q1, **kwargs):
+def quat_inv(q1: np.ndarray, inplace: bool = False, **kwargs) -> np.ndarray:
     r"""
     Return the inverse of a normalized quaternions.
 
@@ -538,6 +650,8 @@ def quat_inv(q1, **kwargs):
     ----------
     q1 : ndarray, (4,) or (4, N)
         input quaternion
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
 
     Returns
     -------
@@ -565,24 +679,24 @@ def quat_inv(q1, **kwargs):
     [-0.70710678 -0. -0. 0.70710678]
 
     """
+    q2 = q1 if inplace else q1.copy()
     # check for empty case
     if q1.size == 0:
-        q2 = np.zeros(q1.shape)
         return q2
     # size check
     quat_assertions(q1, **kwargs)
     # invert the quaternions
     if q1.ndim == 1:
         # optimized single quaternion case
-        q2 = q1 * np.array([-1, -1, -1, 1])
+        q2 *= np.array([-1, -1, -1, 1])
     else:
         # general case
-        q2 = np.vstack((-q1[0, :], -q1[1, :], -q1[2, :], q1[3, :]))
+        q2[:] = np.vstack((-q2[0, :], -q2[1, :], -q2[2, :], q2[3, :]))
     quat_assertions(q2, **kwargs)
     return q2
 
 #%% Functions - quat_mult
-def quat_mult(a, b, **kwargs):
+def quat_mult(a: np.ndarray, b: np.ndarray, **kwargs) -> np.ndarray:
     r"""
     Multiply quaternions together.
 
@@ -670,12 +784,12 @@ def quat_mult(a, b, **kwargs):
             -b1*a1 - b2*a2 - b3*a3 + b4*a4])
         # enforce positive scalar component
         c[:, c[3, :]<0] = -c[:, c[3, :]<0]
-    c = quat_norm(c, **kwargs)
+    quat_norm(c, inplace=True, **kwargs)
     quat_assertions(c, **kwargs)
     return c
 
 #%% Functions - quat_norm
-def quat_norm(x, **kwargs):
+def quat_norm(x: np.ndarray, /, inplace: bool = False, **kwargs) -> np.ndarray:
     r"""
     Normalize each column of the input matrix.
 
@@ -683,6 +797,8 @@ def quat_norm(x, **kwargs):
     ----------
     x : ndarray
         input quaternion
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
 
     Returns
     -------
@@ -709,13 +825,15 @@ def quat_norm(x, **kwargs):
     [0.09950372 0. 0. 0.99503719]
 
     """
+    y = x if inplace else x.copy()
     # divide input by its column vector norm
-    y = x / np.sqrt(np.sum(x*x, axis=0))
+    y /= np.sqrt(np.sum(x*x, axis=0))
     quat_assertions(y, **kwargs)
     return y
 
 #%% Functions - quat_prop
-def quat_prop(quat, delta_ang, *, renorm=True, **kwargs):
+def quat_prop(quat: np.ndarray, delta_ang: np.ndarray, *, renorm: bool = True, \
+        **kwargs) -> np.ndarray:
     r"""
     Approximate propagation of a quaternion using a small delta angle.
 
@@ -725,6 +843,8 @@ def quat_prop(quat, delta_ang, *, renorm=True, **kwargs):
         normalized input quaternion
     delta_ang : ndarray, (3, 1)
         delta angles in x, y, z order [rad]
+    inplace : bool, optional, default is False
+        Whether to modify the input in-place
     renorm : bool {True, False}, optional
         Whether to renormalize the propagated quaternion
 
@@ -746,7 +866,7 @@ def quat_prop(quat, delta_ang, *, renorm=True, **kwargs):
     --------
     >>> from dstauffman.aerospace import quat_prop
     >>> import numpy as np
-    >>> quat      = np.array([0, 0, 0, 1])
+    >>> quat      = np.array([0., 0., 0., 1.])
     >>> delta_ang = np.array([0.01, 0.02, 0.03])
     >>> quat_new  = quat_prop(quat, delta_ang)
     >>> with np.printoptions(precision=8):
@@ -754,27 +874,25 @@ def quat_prop(quat, delta_ang, *, renorm=True, **kwargs):
     [0.00499913  0.00999825  0.01499738  0.99982505]
 
     """
-    #compute angle rate matrix
-    omega = np.array([ \
-        [      0      ,   delta_ang[2],   -delta_ang[1],   delta_ang[0]], \
-        [-delta_ang[2],        0      ,    delta_ang[0],   delta_ang[1]], \
-        [ delta_ang[1],  -delta_ang[0],        0       ,   delta_ang[2]], \
-        [-delta_ang[0],  -delta_ang[1],   -delta_ang[2],        0      ]])
-    #compute delta quaternion
-    delta_quaternion = 0.5 * omega @ quat
-    # propagate over delta
-    quat_new = quat + delta_quaternion
+    # TODO: expand to allow a time history of delta_ang
+    # compute angle rate matrix (note: transposed to make 'F' order), use it to compute a delta
+    # quaternion, and then propagate by adding the delta
+    quat_new: np.ndarray = quat + 0.5 * np.array([ \
+        [      0      ,  -delta_ang[2],    delta_ang[1],  -delta_ang[0]], \
+        [ delta_ang[2],        0      ,   -delta_ang[0],  -delta_ang[1]], \
+        [-delta_ang[1],   delta_ang[0],        0       ,  -delta_ang[2]], \
+        [ delta_ang[0],   delta_ang[1],    delta_ang[2],        0      ]]).T @ quat
     # ensure positive scalar component
     if quat_new[3] < 0:
-        quat_new *= -1
+        quat_new[:] = -quat_new
     # renormalize and return
     if renorm:
-        quat_new = quat_norm(quat_new, **kwargs)
+        quat_norm(quat_new, inplace=True, **kwargs)
     quat_assertions(quat_new, **kwargs)
     return quat_new
 
 #%% Functions - quat_times_vector
-def quat_times_vector(quat, v):
+def quat_times_vector(quat: np.ndarray, v: np.ndarray) -> np.ndarray:
     r"""
     Multiply quaternion(s) against vector(s).
 
@@ -813,32 +931,19 @@ def quat_times_vector(quat, v):
     >>> v = np.array([[1, 0, 0], [2, 0, 0]]).T
     >>> vec = quat_times_vector(quat, v)
     >>> print(vec) # doctest: +NORMALIZE_WHITESPACE
-    [[-1.  2.]
-     [ 0.  0.]
-     [ 0.  0.]]
+    [[-1  2]
+     [ 0  0]
+     [ 0  0]]
 
     """
-    # assume single inputs until proven otherwise
-    is_single = True
-    # determine input sizes
-    if quat.ndim == 1:
-        quat = quat[:, np.newaxis]
-    else:
-        is_single = False
-    if v.ndim == 1:
-        v = v[:, np.newaxis]
-    else:
-        is_single = False
     # Multiple quaternions, multiple vectors
-    qv = np.cross(quat[:3, :], v, axis=0)
-    vec = v + 2*(-(np.ones((3, 1)) @ np.expand_dims(quat[3, :], 0)) * qv + \
-        np.cross(quat[:3, :], qv, axis=0))
-    if is_single:
-        vec = vec.flatten() # TODO: write optimized single quat and single vector version?
+    qv = np.cross(quat[:3, ...], v, axis=0)
+    vec = np.transpose(v.T + 2*(-quat[3, ...] * qv + np.cross(quat[:3, ...], qv, axis=0)).T)
     return vec
 
 #%% Functions - quat_to_euler
-def quat_to_euler(quat, seq=None, **kwargs):
+def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], np.ndarray] = None, \
+        **kwargs) -> np.ndarray:
     r"""
     Convert quaternion to Euler angles for one of 6 input angle sequences.
 
@@ -887,7 +992,7 @@ def quat_to_euler(quat, seq=None, **kwargs):
     """
     # check for optional inputs
     if seq is None:
-        seq = np.array([3, 1, 2])
+        seq = (3, 1, 2)
     # assert quaternion checks
     quat_assertions(quat, **kwargs)
     assert len(seq) == 3, 'Sequence must have len of 3, not "{}"'.format(len(seq))

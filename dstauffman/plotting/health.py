@@ -60,7 +60,8 @@ class TruthPlotter(Frozen):
     >>> plt.close(fig)
 
     """
-    def __init__(self, time=None, data=None, lo=None, hi=None, type_='normal', name='Observed'):
+    def __init__(self, time: np.ndarray = None, data: np.ndarray = None, lo: np.ndarray = None, \
+            hi: np.ndarray = None, type_: str = 'normal', name: str = 'Observed'):
         self.time    = time
         self.data    = None
         self.type_   = type_ # from {'normal', 'errorbar'}

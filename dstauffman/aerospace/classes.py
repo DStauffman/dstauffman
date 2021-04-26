@@ -220,6 +220,8 @@ class Kf(Frozen):
                             elif subfield in {'time'}:
                                 if value.dtype == np.int64:
                                     value.dtype = NP_DATETIME_FORM
+                            elif isinstance(value, bytes):
+                                value = value.decode('utf-8')
                             setattr(getattr(out, field), subfield, value)
                     else:
                         value = grp[field][()]
@@ -228,6 +230,8 @@ class Kf(Frozen):
                         elif field in {'time'}:
                             if value.dtype == np.int64:
                                 value.dtype = NP_DATETIME_FORM
+                        elif isinstance(value, bytes):
+                            value = value.decode('utf-8')
                         setattr(out, field, value)
         return out
 
