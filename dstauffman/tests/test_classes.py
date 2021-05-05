@@ -312,6 +312,56 @@ class Test_SaveAndLoad(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.results1_cls.load(None)
 
+    def test_classes_none(self) -> None:
+        self.results1.z = 5
+        self.results1.save(self.save_path1)
+        results = dcs.load_hdf5(None, self.save_path1)
+        np.testing.assert_array_equal(results.x, self.results1.x)
+        np.testing.assert_array_equal(results.y, self.results1.y)
+        self.assertEqual(results.z, 5)
+
+    def test_classes_dict(self) -> None:
+        self.results1.z = 5
+        self.results1.save(self.save_path1)
+        results = dcs.load_hdf5({'y': None}, self.save_path1)
+        self.assertFalse(hasattr(results, 'x'))
+        np.testing.assert_array_equal(results.y, self.results1.y)
+        self.assertFalse(hasattr(results, 'z'))
+
+    def test_classless_list(self) -> None:
+        self.results1.z = 5
+        self.results1.save(self.save_path1)
+        results = dcs.load_hdf5(['x', 'y'], self.save_path1)
+        np.testing.assert_array_equal(results.x, self.results1.x)
+        np.testing.assert_array_equal(results.y, self.results1.y)
+        self.assertFalse(hasattr(results, 'z'))
+
+    def test_classless_set(self) -> None:
+        self.results1.z = 5
+        self.results1.save(self.save_path1)
+        results = dcs.load_hdf5({'x', 'z'}, self.save_path1)
+        np.testing.assert_array_equal(results.x, self.results1.x)
+        self.assertFalse(hasattr(results, 'y'))
+        self.assertEqual(results.z, 5)
+
+    def test_classless_tuple(self) -> None:
+        self.results1.z = 5
+        self.results1.save(self.save_path1)
+        results = dcs.load_hdf5(('x', 'y', 'z'), self.save_path1)
+        np.testing.assert_array_equal(results.x, self.results1.x)
+        np.testing.assert_array_equal(results.y, self.results1.y)
+        self.assertEqual(results.z, 5)
+
+    def test_bad_class_field(self) -> None:
+        dcs.save_hdf5({'x': self.results1.x, 'y': self.results1.y, 'z': self.results1.z, 'new': 5}, self.save_path1)
+        with self.assertRaises(AttributeError):
+            self.results1_cls.load(self.save_path1)
+        results = dcs.load_hdf5(None, self.save_path1)
+        np.testing.assert_array_equal(results.x, self.results1.x)
+        np.testing.assert_array_equal(results.y, self.results1.y)
+        self.assertFalse(hasattr(results, 'z'))
+        self.assertEqual(results.new, 5)
+
     def tearDown(self) -> None:
         self.save_path1.unlink(missing_ok=True)
         self.save_path2.unlink(missing_ok=True)
