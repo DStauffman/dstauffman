@@ -81,15 +81,24 @@ def save_hdf5(self, filename: Path=None) -> None:
     # Save data
     with h5py.File(filename, 'w') as file:
         grp = file.create_group('self')
-        for key in vars(self):
+        temp = vars(self) if not isinstance(self, dict) else self
+        for key in temp:
             if is_dunder(key):
                 continue
-            value = getattr(self, key)
+            value = temp[key]
             if value is not None:
                 grp.create_dataset(key, data=value)
 
 #%% Methods - load_hdf5
-def load_hdf5(cls: Type[_T], filename: Path=None) -> _T:
+@overload
+def load_hdf5(cls: Type[_T], filename: Optional[Path]) -> _T: ...
+@overload
+def load_hdf5(cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]], filename: Optional[Path]) -> Type[Any]: ...
+@overload
+def load_hdf5(cls: Literal[None], filename: Optional[Path]) -> Type[Any]: ...
+
+def load_hdf5(cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], Tuple[str, ...]], \
+        filename: Path=None) -> Union[_T, Type[Any]]:
     r"""
     Load the object from disk.
 
@@ -102,11 +111,26 @@ def load_hdf5(cls: Type[_T], filename: Path=None) -> _T:
     if filename is None:
         raise ValueError('No file specified to load.')
     # Load data
-    out = cls()
+    out: Union[_T, Type[Any]]
+    if cls is None:
+        out = type('Temp', (object, ), {})
+        limit_fields = False
+    elif isinstance(cls, dict):
+        out = type('Temp', (object, ), cls)
+        limit_fields = True
+    elif isinstance(cls, (list, set, tuple)):
+        out = type('Temp', (object, ), {k: None for k in cls})
+        limit_fields = True
+    else:
+        out = cls()
+        limit_fields = False  # TODO: set to True or have option to raise or not raise error?
     with h5py.File(filename, 'r') as file:
         for key in file:
             grp = file[key]
             for field in grp:
+                if limit_fields and not hasattr(out, field):
+                    continue
+                    #raise AttributeError(f"type object '{out.__name__}' has not attribute '{field}'")
                 # Note grp[field].value is now grp[field][()] because of updated HDF5 API
                 setattr(out, field, grp[field][()])
     return out
