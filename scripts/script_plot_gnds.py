@@ -7,9 +7,9 @@ import datetime
 import numpy as np
 
 from dstauffman import convert_date, get_output_dir
+from dstauffman.aerospace import Kf,  quat_from_euler, quat_mult, quat_norm
 from dstauffman.plotting import Opts, plot_attitude, plot_position, plot_innovations, plot_covariance, \
     plot_los, plot_states, save_figs_to_pdf
-from dstauffman.aerospace import Kf,  quat_from_euler, quat_mult, quat_norm
 
 #%% Flags
 plots = {}

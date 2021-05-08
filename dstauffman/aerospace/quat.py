@@ -66,7 +66,8 @@ def unsuppress_quat_checks() -> None:
     _USE_ASSERTIONS = True
 
 #%% Functions - quat_assertions
-def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertions: bool = False) -> None:
+def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertions: bool = False, \
+        allow_nans: bool = False) -> None:
     r"""
     Check assertions about valid quaternions.
 
@@ -78,6 +79,8 @@ def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertio
         Limit for how close to normalized the quaternion needs to be
     skip_assertions : bool
         Flag to override all the checks
+    allow_nans : bool, optional, default is False
+        Whether to allow quaternions of all NaNs
 
     Examples
     --------
@@ -107,24 +110,40 @@ def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertio
     assert np.all(np.isreal(quat)), 'Quaternion is not real'
     # check ranges
     if qndim == 1:
-        assert (-1 <= quat[0] <= 1), 'Quaternion has bad range in x value: "{}"'.format(quat[0])
-        assert (-1 <= quat[1] <= 1), 'Quaternion has bad range in y value: "{}"'.format(quat[1])
-        assert (-1 <= quat[2] <= 1), 'Quaternion has bad range in z value: "{}"'.format(quat[2])
-        assert ( 0 <= quat[3] <= 1), 'Quaternion has bad range in s value: "{}"'.format(quat[3])
+        if np.any(nans:= np.isnan(quat)):
+            if allow_nans:
+                assert np.all(nans), 'Quaternions with NaNs must have NaNs for every component.'
+            else:
+                assert False, 'NaNs are not allow in quaternion.'
+        else:
+            assert (-1 <= quat[0] <= 1), 'Quaternion has bad range in x value: "{}"'.format(quat[0])
+            assert (-1 <= quat[1] <= 1), 'Quaternion has bad range in y value: "{}"'.format(quat[1])
+            assert (-1 <= quat[2] <= 1), 'Quaternion has bad range in z value: "{}"'.format(quat[2])
+            assert ( 0 <= quat[3] <= 1), 'Quaternion has bad range in s value: "{}"'.format(quat[3])
     else:
-        assert np.all(-1 <= quat[0,:]) and np.all(quat[0,:] <= 1), 'Quaternion has bad range ' + \
-            'in x value, min: "{}", max:"{}"'.format(np.min(quat[0,:]), np.max(quat[0,:]))
-        assert np.all(-1 <= quat[1,:]) and np.all(quat[1,:] <= 1), 'Quaternion has bad range ' + \
-            'in y value, min: "{}", max:"{}"'.format(np.min(quat[1,:]), np.max(quat[1,:]))
-        assert np.all(-1 <= quat[2,:]) and np.all(quat[2,:] <= 1), 'Quaternion has bad range ' + \
-            'in z value, min: "{}", max:"{}"'.format(np.min(quat[2,:]), np.max(quat[2,:]))
-        assert np.all( 0 <= quat[3,:]) and np.all(quat[3,:] <= 1), 'Quaternion has bad range ' + \
-            'in s value, min: "{}", max:"{}"'.format(np.min(quat[3,:]), np.max(quat[3,:]))
+        if np.any(nans:= np.isnan(quat)):
+            if allow_nans:
+                assert set(np.count_nonzero(nans, axis=0)).issubset({0, 4}), 'Quaternions with NaNs ' + \
+                    'must have NaNs for every component.'
+            else:
+                assert False, 'NaNs are not allow in quaternion.'
+        ix = ~np.isnan(quat[0, :])
+        assert np.all(-1 <= quat[0, ix]) and np.all(quat[0, ix] <= 1), 'Quaternion has bad range ' + \
+            'in x value, min: "{}", max:"{}"'.format(np.min(quat[0, ix]), np.max(quat[0, ix]))
+        assert np.all(-1 <= quat[1, ix]) and np.all(quat[1, ix] <= 1), 'Quaternion has bad range ' + \
+            'in y value, min: "{}", max:"{}"'.format(np.min(quat[1, ix]), np.max(quat[1, ix]))
+        assert np.all(-1 <= quat[2, ix]) and np.all(quat[2, ix] <= 1), 'Quaternion has bad range ' + \
+            'in z value, min: "{}", max:"{}"'.format(np.min(quat[2, ix]), np.max(quat[2, ix]))
+        assert np.all( 0 <= quat[3, ix]) and np.all(quat[3, ix] <= 1), 'Quaternion has bad range ' + \
+            'in s value, min: "{}", max:"{}"'.format(np.min(quat[3, ix]), np.max(quat[3, ix]))
 
     # check normalization
     q_norm_err = np.abs(1 - np.sum(quat**2, axis=0))
-    assert np.all(q_norm_err <= precision), 'Quaternion has invalid normalization ' + \
-        'error "{}".'.format(np.max(q_norm_err))
+    norm_check = q_norm_err <= precision
+    if allow_nans:
+        norm_check |= np.isnan(q_norm_err)
+    assert np.all(norm_check), 'Quaternion has invalid normalization error "{}".'.format( \
+        np.max(q_norm_err))
 
 #%% Functions - enforce_pos_scalar
 def enforce_pos_scalar(quat: np.ndarray, inplace: bool = False) -> np.ndarray:
