@@ -1406,6 +1406,12 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(ia, exp)
         np.testing.assert_array_equal(ib, exp)
 
+    def test_quant_effects(self) -> None:
+        # Note: this is an example where something slightly outside of the tolerance can still be matched.
+        # TODO: is this really the expected answer or just a limit of this algorithm?
+        c = dcs.intersect(225409, 225449, tolerance=30)
+        self.assertEqual(c, 225409)
+
 #%% issorted
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_issorted(unittest.TestCase):

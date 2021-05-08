@@ -115,6 +115,35 @@ class Test_aerospace_quat_assertions(unittest.TestCase):
     def test_skip_assertions(self) -> None:
         space.quat_assertions(self.q6, skip_assertions=True)
 
+    def test_nans1d_1(self) -> None:
+        with self.assertRaises(AssertionError):
+            space.quat_assertions(np.full(4, np.nan))
+
+    def test_nans1d_2(self) -> None:
+        space.quat_assertions(np.full(4, np.nan), allow_nans=True)
+
+    def test_nans1d_3(self) -> None:
+        with self.assertRaises(AssertionError):
+            space.quat_assertions(np.array([0., 1., np.nan, 0.]), allow_nans=True)
+
+    def test_nans2d_1(self) -> None:
+        self.q4[0, 0] = np.nan
+        with self.assertRaises(AssertionError):
+            space.quat_assertions(self.q4)
+
+    def test_nans2d_2(self) -> None:
+        self.q4.fill(np.nan)
+        space.quat_assertions(self.q4, allow_nans=True)
+
+    def test_nans2d_3(self) -> None:
+        self.q4[:, 1] = np.nan
+        space.quat_assertions(self.q4, allow_nans=True)
+
+    def test_nans2d_4(self) -> None:
+        self.q4[0, 0] = np.nan
+        with self.assertRaises(AssertionError):
+            space.quat_assertions(self.q4, allow_nans=True)
+
 #%% aerospace.enforce_pos_scalar
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_enforce_pos_scalar(unittest.TestCase):
@@ -152,6 +181,12 @@ class Test_aerospace_enforce_pos_scalar(unittest.TestCase):
         self.assertIs(qout, quat)
         exp = np.vstack((self.q1_out, self.q2_out)).T
         np.testing.assert_array_almost_equal(qout, exp)
+
+    def test_all_nans(self) -> None:
+        q = space.enforce_pos_scalar(np.full(4, np.nan))
+        self.assertTrue(np.all(np.isnan(q)))
+        q = space.enforce_pos_scalar(np.full((4, 10), np.nan))
+        self.assertTrue(np.all(np.isnan(q)))
 
 #%% aerospace.qrot
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -560,6 +595,20 @@ class Test_aerospace_quat_inv(unittest.TestCase):
         self.assertIs(q3_inv, self.q3_inp)
         np.testing.assert_array_almost_equal(q3_inv, self.q3_out)
 
+    def test_all_nans(self) -> None:
+        with self.assertRaises(AssertionError):
+            space.quat_inv(np.full(4, np.nan))
+        q = space.quat_inv(np.full(4, np.nan), allow_nans=True)
+        self.assertTrue(np.all(np.isnan(q)))
+        with self.assertRaises(AssertionError):
+            space.quat_inv(np.full((4, 5), np.nan))
+        q = space.quat_inv(np.full((4, 5), np.nan), allow_nans=True)
+        self.assertTrue(np.all(np.isnan(q)))
+        self.q3_inp[:, 0] = np.nan
+        self.q3_out[:, 0] = np.nan
+        q3_inv = space.quat_inv(self.q3_inp, allow_nans=True)
+        np.testing.assert_array_almost_equal(q3_inv, self.q3_out)
+
 #%% aerospace.quat_mult
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_mult(unittest.TestCase):
@@ -740,6 +789,20 @@ class Test_aerospace_quat_norm(unittest.TestCase):
         quat_norm = space.quat_norm(self.q4_inp, inplace=True)
         self.assertIs(quat_norm, self.q4_inp)
         np.testing.assert_array_almost_equal(quat_norm, self.q4_out)
+
+    def test_all_nans(self) -> None:
+        with self.assertRaises(AssertionError):
+            space.quat_norm(np.full(4, np.nan))
+        q = space.quat_norm(np.full(4, np.nan), allow_nans=True)
+        self.assertTrue(np.all(np.isnan(q)))
+        with self.assertRaises(AssertionError):
+            space.quat_norm(np.full((4, 5), np.nan))
+        q = space.quat_norm(np.full((4, 5), np.nan), allow_nans=True)
+        self.assertTrue(np.all(np.isnan(q)))
+        self.q4_inp[:, 0] = np.nan
+        self.q4_out[:, 0] = np.nan
+        q4_inv = space.quat_norm(self.q4_inp, allow_nans=True)
+        np.testing.assert_array_almost_equal(q4_inv, self.q4_out)
 
 #%% aerospace.quat_prop
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
