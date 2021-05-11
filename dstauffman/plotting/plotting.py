@@ -16,17 +16,16 @@ from typing import List, Optional, Tuple, TypeVar, Union
 import unittest
 
 from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_unit_conversion, \
-    histcounts, HAVE_MPL, HAVE_NUMPY, is_datetime, LogLevel
+    histcounts, HAVE_MPL, HAVE_NUMPY, LogLevel
 
-from dstauffman.plotting.generic import make_time_plot
-from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, figmenu, get_classification, \
-    ignore_plot_data, plot_classification, plot_second_yunits, storefig, titleprefix
+from dstauffman.plotting.generic import make_bar_plot, make_time_plot
+from dstauffman.plotting.support import ColorMap, figmenu, get_classification, ignore_plot_data, \
+    plot_classification, plot_second_yunits, storefig, titleprefix
 
 if HAVE_MPL:
     from matplotlib.collections import PatchCollection
     from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
-    from matplotlib.ticker import StrMethodFormatter
 if HAVE_NUMPY:
     import numpy as np
     inf = np.inf
@@ -523,30 +522,22 @@ def plot_correlation_matrix(data, labels=None, units='', *, opts=None, matrix_na
     return fig
 
 #%% Functions - plot_bar_breakdown
-def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empties=False, \
-        colormap=None, time_units=None):
+def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=False, **kwargs):
     r"""
     Plot the pie chart like breakdown by percentage in each category over time.
 
     Parameters
     ----------
+    description : str
+        Name to label on the plots
     time : array_like
         time history
     data : array_like
         data for corresponding time history, 2D: time by ratio in each category
-    label : str
-        Name to label on the plots
     opts : class Opts, optional
         plotting options
-    legend : list of str, optional
-        Names to use for each channel of data
     ignore_empties : bool, optional
         Removes any entries from the plot and legend that contain only zeros or only NaNs
-    colormap : str or matplotlib.colors.Colormap, optional
-        Name of colormap to use, if specified, overrides the opts.colormap
-    time_units : str, optional
-        If not none, specifies the time units for the time data, potentially different that what
-        is in opts
 
     Returns
     -------
@@ -556,91 +547,65 @@ def plot_bar_breakdown(time, data, label, opts=None, *, legend=None, ignore_empt
     Notes
     -----
     #.  Written by David C. Stauffer in June 2015.
+    #.  Updated by David C. Stauffer in May 2021 to use wrap generic lower level function.
 
     Examples
     --------
     >>> from dstauffman.plotting import plot_bar_breakdown
     >>> import numpy as np
-    >>> time  = np.arange(0, 5, 1./12) + 2000
-    >>> data  = np.random.rand(len(time), 5)
-    >>> mag   = np.sum(data, axis=1)
-    >>> data  = data / np.expand_dims(mag, axis=1)
-    >>> label = 'Test'
-    >>> fig   = plot_bar_breakdown(time, data, label)
+    >>> description = 'Test'
+    >>> time = np.arange(0, 5, 1./12) + 2000
+    >>> data = np.random.rand(5, len(time))
+    >>> mag  = np.sum(data, axis=0)
+    >>> data = data / np.expand_dims(mag, axis=0)
+    >>> fig  = plot_bar_breakdown(description, time, data)
 
     Close plot
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
 
     """
-    # check optional inputs
-    if opts is None:
-        opts = Opts()
-    if colormap is None:
-        if opts.colormap is None:
-            colormap = DEFAULT_COLORMAP
-        else:
-            colormap = opts.colormap
-    legend_loc = opts.leg_spot
-    if time_units is None:
-        time_units = opts.time_base
-
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
-        logger.log(LogLevel.L5, f' {label} plot skipped due to missing data.')
+        logger.log(LogLevel.L5, f' {description} plot skipped due to missing data.')
         return
 
+    # make local copy of opts that can be modified without changing the original
+    this_opts = Opts() if opts is None else opts.__class__(opts)
+    # opts overrides
+    this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
+
+    # alias opts
+    time_units   = kwargs.pop('time_units', this_opts.time_base)
+    start_date   = kwargs.pop('start_date', this_opts.get_date_zero_str())
+    rms_xmin     = kwargs.pop('rms_xmin', this_opts.rms_xmin)
+    rms_xmax     = kwargs.pop('rms_xmax', this_opts.rms_xmax)
+    disp_xmin    = kwargs.pop('disp_xmin', this_opts.disp_xmin)
+    disp_xmax    = kwargs.pop('disp_xmax', this_opts.disp_xmax)
+    single_lines = kwargs.pop('single_lines', this_opts.sing_line)
+    colormap     = kwargs.pop('colormap', this_opts.colormap)
+    use_mean     = kwargs.pop('use_mean', this_opts.use_mean)
+    plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
+    show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
+    legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
+
     # hard-coded values
-    this_title = label + ' vs. Time'
-    scale      = 100
-    units      = '%'
-    unit_text  = ' [' + units + ']'
-    start_date = opts.get_date_zero_str()
+    scale        = 100
+    units        = '%'
 
-    # data checks
-    num_bins   = data.shape[1]
-    if legend is not None:
-        assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
-    else:
-        legend = ['Series {}'.format(i+1) for i in range(num_bins)]
-
-    # get colormap based on high and low limits
-    cm = ColorMap(colormap, 0, num_bins-1)
-
-    # figure out where the bottoms should be to stack the data
-    bottoms = np.concatenate((np.zeros((len(time), 1)), np.cumsum(data, axis=1)), axis=1)
-
-    # plot breakdown
-    fig = plt.figure()
-    fig.canvas.manager.set_window_title(this_title)
-    ax = fig.add_subplot(111)
-    for i in reversed(range(num_bins)):
-        if not ignore_plot_data(data, ignore_empties, col=i):
-            # Note: The performance of ax.bar is really slow with large numbers of bars (>20), so
-            # fill_between is a better alternative
-            ax.fill_between(time, scale*bottoms[:, i], scale*bottoms[:, i+1], step='mid', \
-                label=legend[i], color=cm.get_color(i), edgecolor='none')
-    if is_datetime(time):
-        ax.set_xlabel('Date')
-        assert time_units in {'datetime', 'numpy'}, 'Mismatch in the expected time units of: "{}".'.format(time_units)
-    else:
-        ax.set_xlabel('Time [' + time_units + ']' + start_date)
-        # set years to always be whole numbers on the ticks
-        if (time[-1] - time[0]) >= 4:
-            ax.xaxis.set_major_formatter(StrMethodFormatter('{x:.0f}'))
-    ax.set_ylabel(label + unit_text)
-    ax.set_ylim(0, 100)
-    ax.grid(True)
-    ax.legend(loc=legend_loc)
-    ax.set_title(this_title)
+    # call wrapper function for most of the details
+    fig = make_bar_plot(description, time, scale*data, units=units, \
+        time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
+        disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, colormap=colormap, \
+        use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, **kwargs)
 
     # Setup plots
-    setup_plots(fig, opts)
+    setup_plots(fig, this_opts)
     return fig
 
 #%% Functions - plot_histogram
 def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabel='Data', \
-        ylabel='Number', second_ylabel='Distribution [%]'):
+        ylabel='Number', second_ylabel='Distribution [%]', normalize_spacing=False):
     r"""
     Creates a histogram plot of the given data and bins.
 
@@ -662,6 +627,8 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
         Name to put on y-axis
     second_ylabel : str, optional
         Name to put on second y-axis
+    normalize_spacing : bool, optional, default is False
+        Whether to normalize all the bins to the same horizontal size
 
     Returns
     -------
@@ -695,11 +662,14 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
     ax = fig.add_subplot(1, 1, 1)
     ax.set_title(description)
     counts = histcounts(data, bins)
-    plotting_bins = np.asanyarray(bins).copy()
-    ix_pinf = np.isinf(plotting_bins) & (np.sign(plotting_bins) > 0)
-    ix_ninf = np.isinf(plotting_bins) & (np.sign(plotting_bins) < 0)
-    plotting_bins[ix_pinf] = np.max(data)
-    plotting_bins[ix_ninf] = np.min(data)
+    if normalize_spacing:
+        plotting_bins = np.arange(np.size(bins))
+    else:
+        plotting_bins = np.asanyarray(bins).copy()
+        ix_pinf = np.isinf(plotting_bins) & (np.sign(plotting_bins) > 0)
+        ix_ninf = np.isinf(plotting_bins) & (np.sign(plotting_bins) < 0)
+        plotting_bins[ix_pinf] = np.max(data)
+        plotting_bins[ix_ninf] = np.min(data)
     rects = []
     for i in range(len(bins)-1):
         rects.append(Rectangle((plotting_bins[i], 0), plotting_bins[i+1]-plotting_bins[i], counts[i]))
@@ -710,6 +680,11 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
     ax.set_ylabel(ylabel)
     ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins)])
     ax.set_ylim([0, np.max(counts)])
+    if normalize_spacing:
+        xlab = [str(i) for i in bins]
+        print(xlab)
+        ax.set_xticks(plotting_bins)
+        ax.set_xticklabels(xlab)
     plot_second_yunits(ax, ylab=second_ylabel, multiplier=100/np.sum(counts))
     setup_plots(fig, opts=opts)
     return fig
