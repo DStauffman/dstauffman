@@ -371,60 +371,64 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
     def setUp(self) -> None:
         self.time = np.arange(0, 5, 1./12) + 2000
         num_bins = 5
-        self.data = np.random.rand(len(self.time), num_bins)
-        mag = np.sum(self.data, axis=1)
-        self.data = self.data / np.expand_dims(mag, axis=1)
-        self.label = 'Plot bar testing'
-        self.legend = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
+        self.data = np.random.rand(num_bins, len(self.time))
+        mag = np.sum(self.data, axis=0)
+        self.data = self.data / np.expand_dims(mag, axis=0)
+        self.description = 'Plot bar testing'
+        self.elements = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
         self.opts = plot.Opts()
         self.opts.show_plot = False
         self.figs: List[plt.Figure] = []
 
     def test_nominal(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts, \
-            legend=self.legend))
+        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, \
+            elements=self.elements))
 
     def test_defaults(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label))
+        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data))
 
     def test_opts(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
+        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts))
 
-    def test_legend(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend))
+    def test_elements(self) -> None:
+        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, elements=self.elements))
 
     def test_ignore_zeros(self) -> None:
         self.data[:, 1] = 0
         self.data[:, 3] = np.nan
-        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, ignore_empties=True))
+        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, ignore_empties=True))
 
     @patch('dstauffman.plotting.plotting.logger')
     def test_null_data(self, mock_logger):
-        plot.plot_bar_breakdown(self.time, None, '')
+        plot.plot_bar_breakdown('', self.time, None)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(LogLevel.L5, '  plot skipped due to missing data.')
 
     def test_colormap(self) -> None:
         self.opts.colormap = 'Dark2'
         colormap = 'Paired'
-        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, \
+        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, \
             opts=self.opts, colormap=colormap))
 
-    def test_bad_legend(self) -> None:
+    def test_bad_elements(self) -> None:
         with self.assertRaises(AssertionError):
-            plot.plot_bar_breakdown(self.time, self.data, label=self.label, legend=self.legend[:-1])
+            plot.plot_bar_breakdown(self.description, self.time, self.data, elements=self.elements[:-1])
 
     def test_single_point(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.time[:1], self.data[:1,:], label=self.label))
+        self.figs.append(plot.plot_bar_breakdown(self.description, self.time[:1], self.data[:, :1]))
 
     def test_new_colormap(self) -> None:
         self.opts.colormap = 'seismic'
-        self.figs.append(plot.plot_bar_breakdown(self.time, self.data, label=self.label, opts=self.opts))
+        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts))
 
     def test_datetime(self) -> None:
         dates = np.datetime64('2020-01-11 12:00:00') + np.arange(0, 7200, 120).astype('timedelta64[s]')
-        self.figs.append(plot.plot_bar_breakdown(dates, self.data, label=self.label, opts=self.opts, \
+        self.figs.append(plot.plot_bar_breakdown(self.description, dates, self.data, opts=self.opts, \
         time_units='numpy'))
+
+    def test_data_as_rows(self) -> None:
+        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data.T.copy(), opts=self.opts, \
+            elements=self.elements, data_as_rows=False))
 
     def tearDown(self) -> None:
         if self.figs:

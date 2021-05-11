@@ -413,16 +413,16 @@ class Test_plotting_make_connected_plots(unittest.TestCase):
         self.fig: Optional[plt.Figure] = None
 
     def test_nominal(self) -> None:
-        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs)
+        self.fig = plot.make_connected_sets(self.description, self.points, self.innovs)
 
     def test_color_by_direction(self) -> None:
-        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='direction')
+        self.fig = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='direction')
 
     def test_color_by_magnitude(self) -> None:
-        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='magnitude')
+        self.fig = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='magnitude')
 
     def test_center_origin(self) -> None:
-        self.figs = plot.make_connected_sets(self.description, self.points, self.innovs, center_origin=True)
+        self.fig = plot.make_connected_sets(self.description, self.points, self.innovs, center_origin=True)
 
     def tearDown(self) -> None:
         if self.fig:
