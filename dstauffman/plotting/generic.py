@@ -44,7 +44,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         use_mean=False, plot_zero=False, show_rms=True, ignore_empties=False, legend_loc='best', \
         show_extra=True, plot_components=True, second_units=None, leg_scale=None, ylabel=None, \
         tolerance=0, return_err=False, data_as_rows=True, extra_plotter=None, use_zoh=False, \
-        label_vert_lines=True):
+        label_vert_lines=True, use_datashader=False):
     r"""
     Generic plotting function called by all the other low level plots.
 
@@ -130,6 +130,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         Whether to plot as a zero-order hold, instead of linear interpolation between data points
     label_vert_lines : bool, optional, default is True
         Whether to label the RMS start/stop lines in the legend (if legend is shown)
+    use_datashader : bool, optional, default is False
+        Whether to use datashader to shade and quickly plot large amounts of data
 
     Returns
     -------
@@ -139,7 +141,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     Notes
     -----
     #.  Written by David C. Stauffer in May 2020.
-    #.  Made into super complicated full-blown version in March 2021.
+    #.  Made into super complicated full-blown version in March 2021 by David C. Stauffer.
+    #.  Updated to optionally use datashader by David C. Stauffer in May 2021.
 
     Examples
     --------
@@ -176,6 +179,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     >>> extra_plotter    = None
     >>> use_zoh          = False
     >>> label_vert_lines = True
+    >>> use_datashader   = False
     >>> fig = make_generic_plot(plot_type, description, time_one, data_one, name_one=name_one, \
     ...     elements=elements, units=units, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -184,13 +188,15 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     ...     legend_loc=legend_loc, show_extra=show_extra, second_units=second_units, \
     ...     leg_scale=leg_scale, ylabel=ylabel, tolerance=tolerance, return_err=return_err, \
     ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-    ...     label_vert_lines=label_vert_lines)
+    ...     label_vert_lines=label_vert_lines, use_datashader=use_datashader)
 
     Close the plot
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
 
     """
+    # hard-coded values
+    datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
     # some basic flags and checks
     assert plot_type in {'time', 'bar', 'errorbar', 'cats', 'categories', 'diff', 'differencs', \
         'quat', 'quaternion'}, f'Unexpected plot type: {plot_type}.'
@@ -238,6 +244,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         have_data_one = have_data_two = have_both = False
     if not time_is_list and time_one is not None:
         time_one = np.atleast_1d(time_one)
+    if not time_is_list and time_two is not None:
+        time_two = np.atleast_1d(time_two)
     if not data_is_list and data_one is not None:
         data_one = np.atleast_2d(data_one)
         assert data_one.ndim < 3, 'data_one must be 0d, 1d or 2d.'
@@ -583,19 +591,35 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                             this_color = cm.get_color(j + num_channels)
                         else:
                             this_color = cm.get_color(j)
-                        plot_func(this_axes, this_time, this_data, symbol_one, markersize=4, label=this_label, \
-                            color=this_color, zorder=this_zorder)
+                        if use_datashader and this_time.size > datashader_pts:
+                            ix_spot = np.round(np.linspace(0, this_time.size-1, datashader_pts)).astype(int)
+                            plot_func(this_axes, this_time[ix_spot], this_data[ix_spot], symbol_one[0], markersize=4, \
+                                label=this_label, color=this_color, zorder=this_zorder, linestyle='none')
+                            #df = pd.DataFrame({'time': this_time, 'data': this_data})
+                            #dsshow(df, ds.Point('time', 'data'), norm='log', cmap=alpha_colormap(this_color, min_alpha=40, max_alpha=255), \
+                            #    ax=this_axes, shade_hook=partial(tf.dynspread, threshold=0.5, how='over'))
+                        else:
+                            plot_func(this_axes, this_time, this_data, symbol_one, markersize=4, label=this_label, \
+                                color=this_color, zorder=this_zorder)
                     if doing_diffs and have_data_two:
                         this_data2 = data_two[j] if data_is_list else data_two[j, :] if data_as_rows else data_two[:, j]
                         this_label2 = f'{name_two} {elements[j]}' if name_two else str(elements[j])
+                        this_color2 = cm.get_color(j+num_channels)
                         if show_rms:
                             value = _LEG_FORMAT.format(leg_conv*data2_func[j])
                             if leg_units:
                                 this_label2 += f' ({func_name}: {value} {leg_units})'
                             else:
                                 this_label2 += f' ({func_name}: {value})'
-                        plot_func(this_axes, time_two, this_data2, symbol_two, markersize=4, label=this_label2, \
-                            color=cm.get_color(j+num_channels), zorder=this_zorder+1)
+                        if use_datashader and time_two.size > datashader_pts:
+                            ix_spot = np.round(np.linspace(0, time_two.size-1, datashader_pts)).astype(int)
+                            plot_func(this_axes, time_two[ix_spot], this_data2[ix_spot], symbol_two[0], markersize=4, \
+                                label=this_label2, color=this_color2, zorder=this_zorder+1, linestyle='none')
+                            #df = pd.DataFrame({'time': time_two, 'data': this_data2})
+                            #dsshow(df, ds.Point('time', 'data'), norm='linear', cmap=alpha_colormap(this_color2), ax=this_axes)
+                        else:
+                            plot_func(this_axes, time_two, this_data2, symbol_two, markersize=4, label=this_label2, \
+                                color=this_color2, zorder=this_zorder+1)
                 if plot_type == 'errorbar':
                     # plot error bars
                     this_axes.errorbar(this_time, this_data, yerr=np.vstack((err_neg[j, :], err_pos[j, :])), \
@@ -706,7 +730,8 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         start_date='', rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, \
         single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
         show_rms=True, ignore_empties=False, legend_loc='best', second_units=None, leg_scale=None, \
-        ylabel=None, data_as_rows=True, extra_plotter=None, use_zoh=False, label_vert_lines=True):
+        ylabel=None, data_as_rows=True, extra_plotter=None, use_zoh=False, label_vert_lines=True, \
+        use_datashader=False):
     r"""
     Generic data versus time plotting routine.
 
@@ -747,13 +772,15 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
     >>> extra_plotter    = None
     >>> use_zoh          = False
     >>> label_vert_lines = True
+    >>> use_datashader   = False
     >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
     ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
     ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
     ...     ignore_empties=ignore_empties, legend_loc=legend_loc, second_units=second_units, \
     ...     leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
-    ...     extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
+    ...     extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
+    ...     use_datashader=use_datashader)
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
@@ -765,7 +792,7 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
         show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, leg_scale=leg_scale, \
         ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-        label_vert_lines=label_vert_lines)
+        label_vert_lines=label_vert_lines, use_datashader=use_datashader)
 
 #%% Functions - make_error_bar_plot
 def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, units='', \
@@ -853,7 +880,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         single_lines=False, colormap=DEFAULT_COLORMAP, use_mean=False, plot_zero=False, \
         show_rms=True, legend_loc='best', show_extra=True, second_units=None, leg_scale=None, \
         ylabel=None, data_as_rows=True, tolerance=0, return_err=False, use_zoh=False, \
-        label_vert_lines=True, extra_plotter=None):
+        label_vert_lines=True, extra_plotter=None, use_datashader=False):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
     Plots two vector histories over time, along with a difference from one another.
@@ -915,6 +942,7 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     >>> use_zoh          = False
     >>> label_vert_lines = True
     >>> extra_plotter    = None
+    >>> use_datashader   = False
     >>> fig_hand = make_difference_plot(description, time_one, time_two, data_one, data_two, \
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, \
     ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
@@ -923,7 +951,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
     ...     show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
     ...     second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
     ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, \
-    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
+    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, extra_plotter=extra_plotter, \
+    ...     use_datashader=use_datashader)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -939,7 +968,8 @@ def make_difference_plot(description, time_one, time_two, data_one, data_two, *,
         use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
         show_extra=show_extra, second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
         tolerance=tolerance, return_err=return_err, data_as_rows=data_as_rows, \
-        extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
+        extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
+        use_datashader=use_datashader)
 
 #%% Functions - make_categories_plot
 def make_categories_plot(description, time, data, cats, *, cat_names=None, name='', elements=None, \
@@ -947,7 +977,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         disp_xmax=inf, make_subplots=True, single_lines=False, colormap=DEFAULT_COLORMAP, \
         use_mean=False, plot_zero=False, show_rms=True, legend_loc='best', second_units=None, \
         leg_scale=None, ylabel=None, data_as_rows=True, use_zoh=False, label_vert_lines=True, \
-        extra_plotter=None):
+        extra_plotter=None, use_datashader=False):
     r"""
     Data versus time plotting routine when grouped into categories.
 
@@ -1002,6 +1032,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     >>> use_zoh          = False
     >>> label_vert_lines = True
     >>> extra_plotter    = None
+    >>> use_datashader   = False
     >>> figs = make_categories_plot(description, time, data, cats, cat_names=cat_names, name=name, \
     ...     elements=elements, units=units, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -1009,7 +1040,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
     ...     data_as_rows=data_as_rows, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
-    ...     extra_plotter=extra_plotter)
+    ...     extra_plotter=extra_plotter, use_datashader=False)
 
     Close plots
     >>> import matplotlib.pyplot as plt

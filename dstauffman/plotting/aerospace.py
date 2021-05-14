@@ -41,7 +41,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, \
         single_lines=False, use_mean=False, plot_zero=False, show_rms=True, legend_loc='best', \
         show_extra=True, second_units='micro', leg_scale=None, data_as_rows=True, tolerance=0, \
-        return_err=False, use_zoh=False, label_vert_lines=True, extra_plotter=None):
+        return_err=False, use_zoh=False, label_vert_lines=True, extra_plotter=None, \
+        use_datashader=False):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
@@ -101,6 +102,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     >>> use_zoh          = False
     >>> label_vert_lines = True
     >>> extra_plotter    = None
+    >>> use_datashader   = False
     >>> fig_hand = make_quaternion_plot(description, time_one, time_two, quat_one, quat_two,
     ...     name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -108,7 +110,7 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
     ...     plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
     ...     plot_components=plot_components, second_units=second_units, leg_scale=leg_scale, \
     ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, use_zoh=use_zoh, \
-    ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter)
+    ...     label_vert_lines=label_vert_lines, extra_plotter=extra_plotter, use_datashader=use_datashader)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -125,7 +127,8 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
         plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
         plot_components=plot_components, second_units=second_units, leg_scale=leg_scale, \
         tolerance=tolerance, return_err=return_err, data_as_rows=data_as_rows, \
-        extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
+        extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
+        use_datashader=use_datashader)
 
 #%% plot_attitude
 def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):

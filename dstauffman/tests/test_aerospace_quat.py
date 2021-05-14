@@ -8,8 +8,9 @@ Notes
 
 #%% Imports
 import unittest
+from unittest.mock import patch
 
-from dstauffman import capture_output, HAVE_NUMPY
+from dstauffman import HAVE_NUMPY, LogLevel
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -524,13 +525,11 @@ class Test_aerospace_quat_interp(unittest.TestCase):
             space.quat_interp(self.time, self.quat, self.ti_extra, inclusive=True)
 
     def test_extra2(self) -> None:
-        with capture_output() as out:
+        with patch('dstauffman.aerospace.quat.logger') as mock_logger:
             qout = space.quat_interp(self.time, self.quat, self.ti_extra, inclusive=False)
-        output = out.getvalue().strip()
-        out.close()
         np.testing.assert_array_almost_equal(qout[:, 1:-1], self.qout)
         np.testing.assert_array_equal(qout[:,[0, -1]], np.nan)
-        self.assertEqual(output, 'Desired time not found within input time vector.')
+        mock_logger.log.assert_called_with(LogLevel.L8, 'Desired time not found within input time vector.')
 
 #%% aerospace.quat_inv
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
