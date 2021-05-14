@@ -11,6 +11,7 @@ from __future__ import annotations
 import datetime
 import doctest
 import re
+from time import strftime, gmtime
 from typing import Optional, Union
 import unittest
 import warnings
@@ -540,6 +541,44 @@ def convert_num_dt_to_np(dt, /, units='sec', np_units=NP_TIMEDELTA_FORM):
     if units in _NP_MAP:
         units = _NP_MAP[units]
     return np.timedelta64(dt, units).astype(np_units)
+
+#%% Functions - get_delta_time_str
+def get_delta_time_str(start_time: Union[datetime.datetime, datetime.timedelta], \
+        final_time: datetime.datetime=None, *, format_: str = '%H:%M:%S') -> str:
+    r"""
+    Determine the elapsed time in a form useful for logging.
+
+    Parameters
+    ----------
+    start_time : class datetime.datetime or datetime.timedelta
+        Initial time, or a duration, in which case you don't need a final time
+    final_time : class datetime.datetime
+        Final time to be differenced with the start_time
+    format_ : str
+        Format used to display the results
+
+    Results
+    -------
+    str
+        Duration as a string
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2021.
+    #.  This function would be completely superfluous if datetime.timedelta had a strftime method.
+
+    Examples
+    --------
+    >>> from dstauffman import get_delta_time_str
+    >>> import datetime
+    >>> start_time = datetime.datetime.now()
+    >>> final_time = start_time + datetime.timedelta(seconds=5, microseconds=10000)
+    >>> print(get_delta_time_str(start_time, final_time))
+    00:00:05
+
+    """
+    delta_time = start_time if isinstance(start_time, datetime.timedelta) else final_time - start_time
+    return strftime(format_, gmtime(delta_time.total_seconds()))
 
 #%% Unit test
 if __name__ == '__main__':

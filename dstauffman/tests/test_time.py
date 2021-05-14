@@ -406,6 +406,28 @@ class Test_convert_num_dt_to_np(unittest.TestCase):
             exp = np.timedelta64(90, value).astype(dcs.NP_TIMEDELTA_FORM)
             self.assertEqual(out, exp)
 
+#%% get_delta_time_str
+class Test_get_delta_time_str(unittest.TestCase):
+    r"""
+    Tests the get_delta_time_str function with the following cases:
+        TBD
+    """
+    def setUp(self) -> None:
+        self.start_time = datetime.datetime.now()
+        self.final_time = self.start_time + datetime.timedelta(seconds=5, microseconds=10000)
+        self.exp_str1   = '00:00:05'
+        self.exp_str2   = '00:00'
+        self.format_    = '%H:%M'
+
+    def test_nominal(self) -> None:
+        self.assertEqual(dcs.get_delta_time_str(self.start_time, self.final_time), self.exp_str1)
+
+    def test_format(self) -> None:
+        self.assertEqual(dcs.get_delta_time_str(self.start_time, self.final_time, format_=self.format_), self.exp_str2)
+
+    def test_duration(self) -> None:
+        self.assertEqual(dcs.get_delta_time_str(datetime.timedelta(seconds=5402)), '01:30:02')
+
 #%% Unit test execution
 if __name__ == '__main__':
     unittest.main(exit=False)

@@ -9,10 +9,11 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
+import logging
 from typing import List, Tuple, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import INT_TOKEN, HAVE_NUMPY
+from dstauffman import INT_TOKEN, HAVE_NUMPY, LogLevel
 
 from dstauffman.aerospace.quat_opt import quat_to_dcm
 
@@ -20,6 +21,9 @@ if HAVE_NUMPY:
     import numpy as np
     if TYPE_CHECKING:
         from numpy.typing import ArrayLike
+
+#%% Loggers
+logger = logging.getLogger(__name__)
 
 #%% Constants
 # Number of elements that should be in a quaternion
@@ -593,12 +597,15 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
 
     # Check time bounds
     # check for desired times that are outside the time vector
-    ix_exclusive = (ti < time[0]) | (ti > time[-1])
+    if len(time) == 0:
+        ix_exclusive = np.ones(ti.shape, dtype=bool)
+    else:
+        ix_exclusive = (ti < time[0]) | (ti > time[-1])
     if np.any(ix_exclusive):
         if inclusive:
             raise ValueError('Desired time not found within input time vector.')
         else:
-            print('Desired time not found within input time vector.')
+            logger.log(LogLevel.L8, 'Desired time not found within input time vector.')
 
     # Given times
     # find desired points that are contained in input time vector
