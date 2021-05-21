@@ -312,6 +312,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.results1_cls.load(None)
 
+    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_classes_none(self) -> None:
         self.results1.z = 5
         self.results1.save(self.save_path1)
@@ -320,6 +321,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         np.testing.assert_array_equal(results.y, self.results1.y)
         self.assertEqual(results.z, 5)
 
+    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_classes_dict(self) -> None:
         self.results1.z = 5
         self.results1.save(self.save_path1)
@@ -328,6 +330,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         np.testing.assert_array_equal(results.y, self.results1.y)
         self.assertFalse(hasattr(results, 'z'))
 
+    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_classless_list(self) -> None:
         self.results1.z = 5
         self.results1.save(self.save_path1)
@@ -336,6 +339,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         np.testing.assert_array_equal(results.y, self.results1.y)
         self.assertFalse(hasattr(results, 'z'))
 
+    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_classless_set(self) -> None:
         self.results1.z = 5
         self.results1.save(self.save_path1)
@@ -344,6 +348,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.assertFalse(hasattr(results, 'y'))
         self.assertEqual(results.z, 5)
 
+    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_classless_tuple(self) -> None:
         self.results1.z = 5
         self.results1.save(self.save_path1)
@@ -352,6 +357,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         np.testing.assert_array_equal(results.y, self.results1.y)
         self.assertEqual(results.z, 5)
 
+    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
     def test_bad_class_field(self) -> None:
         dcs.save_hdf5({'x': self.results1.x, 'y': self.results1.y, 'z': self.results1.z, 'new': 5}, self.save_path1)
         with self.assertRaises(AttributeError):
