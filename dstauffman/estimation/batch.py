@@ -569,7 +569,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
             jacobian[:, i_param] = (innovs[i_param] - cur_results.innovs) / param_perturb[i_param]
 
     # calculate the numerical gradient with respect to the estimated parameters
-    gradient = np.squeeze(jacobian.T @ cur_results.innovs)
+    gradient = jacobian.T @ cur_results.innovs
     if opti_opts.is_max_like:
         gradient += grad_log_det_B
 
