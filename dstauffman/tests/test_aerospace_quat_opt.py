@@ -9,7 +9,7 @@ Notes
 #%% Imports
 import unittest
 
-from dstauffman import HAVE_NUMPY
+from dstauffman import HAVE_NUMBA, HAVE_NUMPY
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -282,12 +282,14 @@ class Test_aerospace_quat_times_vector_single(unittest.TestCase):
         self.vec  = np.array([[1, 0, 0], [2, 0, 0]]).T
         self.out  = np.array([[-1, 2], [0, 0], [0, 0]])
 
-    @unittest.expectedFailure
     def test_integers(self) -> None:
         # Expected to fail until numba supports @ for matrix multiplication for integers.
         for i in range(2):
             vec = space.quat_times_vector_single(self.quat[:, i], self.vec[:, i])
             np.testing.assert_array_almost_equal(vec, self.out[:, i])
+
+    if HAVE_NUMBA:
+        test_integers = unittest.expectedFailure(test_integers)
 
     def test_nominal(self) -> None:
         for i in range(2):
