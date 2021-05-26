@@ -577,7 +577,13 @@ def get_delta_time_str(start_time: Union[datetime.datetime, datetime.timedelta],
     00:00:05
 
     """
-    delta_time = start_time if isinstance(start_time, datetime.timedelta) else final_time - start_time
+    if isinstance(start_time, datetime.timedelta):
+        delta_time = start_time
+        assert final_time is None
+    elif final_time is None:
+        delta_time = datetime.datetime.now() - start_time
+    else:
+        delta_time = final_time - start_time
     return strftime(format_, gmtime(delta_time.total_seconds()))
 
 #%% Unit test
