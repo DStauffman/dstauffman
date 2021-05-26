@@ -8,11 +8,12 @@ Notes
 
 #%% Imports
 import doctest
+from functools import partial
 import logging
 import unittest
 
-from dstauffman import DEGREE_SIGN, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, intersect, \
-    is_datetime, LogLevel, RAD2DEG, rms
+from dstauffman import DEGREE_SIGN, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, HAVE_PANDAS, \
+    intersect, is_datetime, LogLevel, RAD2DEG, rms
 from dstauffman.aerospace import quat_angle_diff
 
 from dstauffman.plotting.support import COLOR_LISTS, ColorMap, DEFAULT_COLORMAP, disp_xlimits, \
@@ -22,11 +23,20 @@ from dstauffman.plotting.support import COLOR_LISTS, ColorMap, DEFAULT_COLORMAP,
 if HAVE_MPL:
     from matplotlib.collections import LineCollection
     import matplotlib.pyplot as plt
+    try:
+        import datashader as ds
+        import datashader.transfer_functions as tf
+        from datashader.mpl_ext import dsshow, alpha_colormap
+        HAVE_DS = True
+    except ImportError:
+        HAVE_DS = False
 if HAVE_NUMPY:
     import numpy as np
     inf = np.inf
 else:
     from math import inf
+if HAVE_PANDAS:
+    import pandas as pd
 
 #%% Constants
 # hard-coded values
@@ -201,6 +211,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     assert plot_type in {'time', 'bar', 'errorbar', 'cats', 'categories', 'diff', 'differencs', \
         'quat', 'quaternion'}, f'Unexpected plot type: {plot_type}.'
     assert isinstance(description, str), 'The description should be a string, check your argument order.'
+    if use_datashader:
+        assert HAVE_PANDAS and HAVE_DS, 'You must have pandas and datashader to run datashader plots.'
     doing_diffs = plot_type in {'diff', 'differences', 'quat', 'quaternions'}
     is_quat_diff = plot_type in {'quat', 'quaternions'}
     is_cat_plot = plot_type in {'cats', 'categorical'}
@@ -527,12 +539,12 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
             else:
                 loop_counter = [i]
         else:
-            loop_counter = range(num_channels) if not is_quat_diff else range(3)
+            loop_counter = range(num_channels) if not is_quat_diff or not is_diff_plot else range(3)
         if not is_diff_plot:
             #% standard plot
             for j in loop_counter:
                 this_label = f'{name_one} {elements[j]}' if name_one else str(elements[j])
-                if show_rms and not is_cat_plot:
+                if show_rms and not is_cat_plot and not is_quat_diff:
                     value = _LEG_FORMAT.format(leg_conv*data_func[j])
                     if leg_units:
                         this_label += f' ({func_name}: {value} {leg_units})'
@@ -605,7 +617,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                         this_data2 = data_two[j] if data_is_list else data_two[j, :] if data_as_rows else data_two[:, j]
                         this_label2 = f'{name_two} {elements[j]}' if name_two else str(elements[j])
                         this_color2 = cm.get_color(j+num_channels)
-                        if show_rms:
+                        if show_rms and not is_quat_diff:
                             value = _LEG_FORMAT.format(leg_conv*data2_func[j])
                             if leg_units:
                                 this_label2 += f' ({func_name}: {value} {leg_units})'
@@ -1130,12 +1142,13 @@ def make_bar_plot(description, time, data, *, name='', elements=None, units='', 
     >>> plt.close(fig)
 
     """
+    leg_scale = ('%', 1.)
     return make_generic_plot('bar', description=description, time_one=time, data_one=data, \
         name_one=name, elements=elements, units=units, time_units=time_units, start_date=start_date, \
         rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
         single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
-        show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, ylabel=ylabel, \
-        data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
+        show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, leg_scale=leg_scale, \
+        ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
         label_vert_lines=label_vert_lines)
 
 #%% make_connected_sets
@@ -1224,27 +1237,35 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
         raise ValueError(f'Unexpected value for color_by of "{color_by}"')
 
     # calculations
-    predicts = points - innovs
+    if innovs is None:
+        assert color_by == 'none', 'If no innovations are given, then you must color by "none".'
+        plot_innovs = False
+    else:
+        plot_innovs = True
+        predicts = points - innovs
 
     # create figure
     fig = plt.figure()
     fig.canvas.manager.set_window_title(description + extra_text)
     ax = fig.add_subplot(1, 1, 1)
     # plot endpoints
-    ax.plot(points[0, :], points[1, :], '.', color=colors_meas, label='Sighting', zorder=5)
-    ax.scatter(predicts[0, :], predicts[1, :], c=colors_pred, marker='.', label='Predicted', zorder=8)
-    # create fake line to add to legend
-    ax.plot(np.nan, np.nan, '-', color='xkcd:black', label='Innov')
-    if color_by != 'none':
-        cbar = fig.colorbar(innov_cmap.get_smap())
-        cbar_units = DEGREE_SIGN if color_by == 'direction' else new_units
-        cbar.ax.set_ylabel('Innovation ' + color_by.capitalize() + ' [' + cbar_units + ']')
-    # create segments
-    segments = np.zeros((points.shape[1], 2, 2))
-    segments[:, 0, :] = points.T
-    segments[:, 1, :] = predicts.T
-    lines = LineCollection(segments, colors=colors_line, zorder=3)
-    ax.add_collection(lines)
+    if not plot_innovs:
+        ax.plot(points[0, :], points[1, :], '.', color=colors_pred, label='Sighting', zorder=5)
+    else:
+        ax.plot(points[0, :], points[1, :], '.', color=colors_meas, label='Sighting', zorder=5)
+        ax.scatter(predicts[0, :], predicts[1, :], c=colors_pred, marker='.', label='Predicted', zorder=8)
+        # create fake line to add to legend
+        ax.plot(np.nan, np.nan, '-', color='xkcd:black', label='Innov')
+        if color_by != 'none':
+            cbar = fig.colorbar(innov_cmap.get_smap())
+            cbar_units = DEGREE_SIGN if color_by == 'direction' else new_units
+            cbar.ax.set_ylabel('Innovation ' + color_by.capitalize() + ' [' + cbar_units + ']')
+        # create segments
+        segments = np.zeros((points.shape[1], 2, 2))
+        segments[:, 0, :] = points.T
+        segments[:, 1, :] = predicts.T
+        lines = LineCollection(segments, colors=colors_line, zorder=3)
+        ax.add_collection(lines)
     ax.set_title(description + extra_text)
     if legend_loc.lower() != 'none':
         ax.legend(loc=legend_loc)

@@ -843,7 +843,7 @@ def np_digitize(x, /, bins, right=False):
     right : bool, optional
         Indicating whether the intervals include the right or the left bin
         edge. Default behavior is (right==False) indicating that the interval
-        does not include the right edge. The left bin end is open in this
+        does not include the right edge. The left bin end is closed in this
         case, i.e., bins[i-1] <= x < bins[i] is the default behavior for
         monotonically increasing bins.
 
@@ -891,10 +891,10 @@ def np_digitize(x, /, bins, right=False):
     bmin = bins[0]  if tolerance is None else bins[0]  - tolerance
     bmax = bins[-1] if tolerance is None else bins[-1] + tolerance
     if right:
-        if np.any(x < bmin) or np.any(x >= bmax):
+        if np.any(x <= bmin) or np.any(x > bmax):
             raise ValueError('Some values of x are outside the given bins.')
     else:
-        if np.any(x <= bmin) or np.any(x > bmax):
+        if np.any(x < bmin) or np.any(x >= bmax):
             raise ValueError('Some values of x are outside the given bins.')
 
     # do the calculations by calling the numpy command and shift results by one
