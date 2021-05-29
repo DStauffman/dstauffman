@@ -404,7 +404,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                     if np.any(this_ix):
                         data_func[cat] = func_lamb(data_one[:, this_ix], 1) if data_as_rows else func_lamb(data_one[:, this_ix], 1)
                     else:
-                        np.full(num_channels, np.nan)
+                        data_func[cat] = np.full(num_channels, np.nan)
 
     # unit conversion value
     (new_units, unit_conv) = get_unit_conversion(second_units, units)
@@ -576,7 +576,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                 elif is_cat_plot:
                     #% cat plot
                     # plot the full underlying line once
-                    plot_func(this_axes, this_time, this_data, symbol_one, label='', color='xkcd:slate', linewidth=1, zorder=2)
+                    if not use_datashader or this_time.size <= datashader_pts:
+                        plot_func(this_axes, this_time, this_data, symbol_one, label='', color='xkcd:slate', linewidth=1, zorder=2)
                     # plot the data with this category value
                     for k in ix_cat:
                         cat = ordered_cats[k]
@@ -595,8 +596,16 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                         # won't mess up the color scheme by skipping colors
                         this_cat_ix = np.argmax(cat == cat_keys)
                         this_color = cm.get_color(this_cat_ix + ix_data*len(cat_keys))
-                        this_axes.plot(this_time[this_cats], this_data[this_cats], linestyle=this_linestyle, marker='.', \
-                            markersize=6, label=cat_label, color=this_color, zorder=3)
+                        if use_datashader and np.count_nonzero(this_cats) > datashader_pts:
+                            temp = np.flatnonzero(this_cats)
+                            ix_spot = temp[np.round(np.linspace(0, temp.size-1, datashader_pts)).astype(int)]
+                            this_axes.plot(this_time[ix_spot], this_data[ix_spot], linestyle='none', marker='.', \
+                                markersize=6, label=cat_label, color=this_color, zorder=3)
+                            datashaders.append({'time': this_time[this_cats], 'data': this_data[this_cats], \
+                                'ax': this_axes, 'color': this_color})
+                        else:
+                            this_axes.plot(this_time[this_cats], this_data[this_cats], linestyle=this_linestyle, marker='.', \
+                                markersize=6, label=cat_label, color=this_color, zorder=3)
                 else:
                     #% default plots
                     if not doing_diffs or (doing_diffs and have_data_one):
