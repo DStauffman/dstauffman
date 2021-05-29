@@ -517,6 +517,8 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         if is_cat_plot:
             figs.append(fig)
     assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
+    # preallocate datashaders
+    datashaders = []
     # plot data
     for (i, this_axes) in enumerate(ax):
         is_diff_plot = doing_diffs and (i > num_rows-1 or (not single_lines and make_subplots and i == 1))
@@ -607,9 +609,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                             ix_spot = np.round(np.linspace(0, this_time.size-1, datashader_pts)).astype(int)
                             plot_func(this_axes, this_time[ix_spot], this_data[ix_spot], symbol_one[0], markersize=4, \
                                 label=this_label, color=this_color, zorder=this_zorder, linestyle='none')
-                            #df = pd.DataFrame({'time': this_time, 'data': this_data})
-                            #dsshow(df, ds.Point('time', 'data'), norm='log', cmap=alpha_colormap(this_color, min_alpha=40, max_alpha=255), \
-                            #    ax=this_axes, shade_hook=partial(tf.dynspread, threshold=0.5, how='over'))
+                            datashaders.append({'time': this_time, 'data': this_data, 'ax': this_axes, 'color': this_color})
                         else:
                             plot_func(this_axes, this_time, this_data, symbol_one, markersize=4, label=this_label, \
                                 color=this_color, zorder=this_zorder)
@@ -627,8 +627,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                             ix_spot = np.round(np.linspace(0, time_two.size-1, datashader_pts)).astype(int)
                             plot_func(this_axes, time_two[ix_spot], this_data2[ix_spot], symbol_two[0], markersize=4, \
                                 label=this_label2, color=this_color2, zorder=this_zorder+1, linestyle='none')
-                            #df = pd.DataFrame({'time': time_two, 'data': this_data2})
-                            #dsshow(df, ds.Point('time', 'data'), norm='linear', cmap=alpha_colormap(this_color2), ax=this_axes)
+                            datashaders.append({'time': time_two, 'data': this_data2, 'ax': this_axes, 'color': this_color2})
                         else:
                             plot_func(this_axes, time_two, this_data2, symbol_two, markersize=4, label=this_label2, \
                                 color=this_color2, zorder=this_zorder+1)
@@ -649,15 +648,27 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                 this_data = nondeg_error[j, :] if is_quat_diff else diffs[j, :]
                 this_zorder = [8, 6, 5][j] if is_quat_diff else 5
                 this_color = cm_vec.get_color(j) if is_quat_diff else cm.get_color(j+2*num_channels)
-                plot_func(this_axes, time_overlap, this_data, '.-', markersize=4, label=this_label, \
-                    color=this_color)
+                if use_datashader and time_overlap.size > datashader_pts:
+                    ix_spot = np.round(np.linspace(0, time_overlap.size-1, datashader_pts)).astype(int)
+                    plot_func(this_axes, time_overlap[ix_spot], this_data[ix_spot], '.', markersize=4, \
+                        label=this_label, color=this_color, linestyle='none')
+                    datashaders.append({'time': time_overlap, 'data': this_data, 'ax': this_axes, 'color': this_color})
+                else:
+                    plot_func(this_axes, time_overlap, this_data, '.-', markersize=4, label=this_label, \
+                        color=this_color)
             if is_quat_diff and not plot_components or (single_lines and (i + 1) % num_channels == 0):
                 if show_rms:
                     value = _LEG_FORMAT.format(leg_conv*mag_func)
                     this_label = f'Angle ({func_name}: {value} {leg_units})'
                 else:
                     this_label = 'Angle'
-                plot_func(this_axes, time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=cm_vec.get_color(0))
+                if use_datashader and time_overlap.size > datashader_pts:
+                    ix_spot = np.round(np.linspace(0, time_overlap.size-1, datashader_pts)).astype(int)
+                    plot_func(this_axes, time_overlap[ix_spot], this_data[ix_spot], '.', markersize=4, \
+                        label=this_label, color=cm_vec.get_color(0), linestyle='none')
+                    datashaders.append({'time': time_overlap, 'data': this_data, 'ax': this_axes, 'color': cm_vec.get_color(0)})
+                else:
+                    plot_func(this_axes, time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=cm_vec.get_color(0))
             if show_extra:
                 this_axes.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, \
                     markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
@@ -723,6 +734,15 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                 extra_plotter(fig=fig, ax=fig.axes)
         else:
             extra_plotter(fig=fig, ax=ax)
+
+    # overlay the datashaders
+    for this_ds in datashaders:
+        df = pd.DataFrame({'time': this_ds['time'], 'data': this_ds['data']})
+        this_axes = this_ds['ax']
+        dsshow(df, ds.Point('time', 'data'), norm='log', cmap=alpha_colormap(this_ds['color'], \
+            min_alpha=40, max_alpha=255), ax=this_axes, aspect='auto', \
+            x_range=this_axes.get_xlim(), y_range=this_axes.get_ylim(), \
+            shade_hook=partial(tf.dynspread, threshold=0.8, max_px=6, how='over'))
 
     # add legend at the very end once everything has been done
     if legend_loc.lower() != 'none':
