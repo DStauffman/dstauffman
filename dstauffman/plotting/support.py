@@ -60,7 +60,7 @@ if HAVE_SCIPY:
 
 #%% Constants
 # Default colormap to use on certain plots
-DEFAULT_COLORMAP: str = 'Paired'  # 'Dark2', 'tab10', 'tab20'
+DEFAULT_COLORMAP: str = 'Dark2'  # 'Paired', 'Dark2', 'tab10', 'tab20'
 
 # Whether to include a classification on any generated plots
 DEFAULT_CLASSIFICATION: str = ''
