@@ -682,7 +682,6 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
     ax.set_ylim([0, np.max(counts)])
     if normalize_spacing:
         xlab = [str(i) for i in bins]
-        print(xlab)
         ax.set_xticks(plotting_bins)
         ax.set_xticklabels(xlab)
     plot_second_yunits(ax, ylab=second_ylabel, multiplier=100/np.sum(counts))

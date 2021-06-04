@@ -12,8 +12,8 @@ from functools import partial
 import logging
 import unittest
 
-from dstauffman import DEGREE_SIGN, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, HAVE_PANDAS, \
-    intersect, is_datetime, LogLevel, RAD2DEG, rms
+from dstauffman import convert_date, DEGREE_SIGN, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, \
+    HAVE_PANDAS, intersect, is_datetime, LogLevel, RAD2DEG, rms
 from dstauffman.aerospace import quat_angle_diff
 
 from dstauffman.plotting.support import COLOR_LISTS, ColorMap, DEFAULT_COLORMAP, disp_xlimits, \
@@ -746,7 +746,13 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
 
     # overlay the datashaders
     for this_ds in datashaders:
-        df = pd.DataFrame({'time': this_ds['time'], 'data': this_ds['data']})
+        # check for dates and convert as appropriate
+        if is_datetime(this_ds['time']):
+            df = pd.DataFrame({'time': convert_date(this_ds['time'], 'matplotlib', old_form=time_units), \
+                'data': this_ds['data']})
+        else:
+            df = pd.DataFrame({'time': this_ds['time'], 'data': this_ds['data']})
+        # TODO: check for strings on Y axis and convert to values instead
         this_axes = this_ds['ax']
         dsshow(df, ds.Point('time', 'data'), norm='log', cmap=alpha_colormap(this_ds['color'], \
             min_alpha=40, max_alpha=255), ax=this_axes, aspect='auto', \
@@ -831,9 +837,10 @@ def make_time_plot(description, time, data, *, name='', elements=None, units='',
         name_one=name, elements=elements, units=units, time_units=time_units, start_date=start_date, \
         rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
         single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
-        show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, leg_scale=leg_scale, \
-        ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-        label_vert_lines=label_vert_lines, use_datashader=use_datashader)
+        show_rms=show_rms, ignore_empties=ignore_empties, legend_loc=legend_loc, \
+        second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
+        extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
+        use_datashader=use_datashader)
 
 #%% Functions - make_error_bar_plot
 def make_error_bar_plot(description, time, data, mins, maxs, *, elements=None, units='', \
@@ -1097,7 +1104,7 @@ def make_categories_plot(description, time, data, cats, *, cat_names=None, name=
         use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
         second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
         data_as_rows=data_as_rows, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
-        extra_plotter=extra_plotter)
+        extra_plotter=extra_plotter, use_datashader=use_datashader)
 
 #%% Functions - make_bar_plot
 def make_bar_plot(description, time, data, *, name='', elements=None, units='', time_units='sec', \
@@ -1176,9 +1183,9 @@ def make_bar_plot(description, time, data, *, name='', elements=None, units='', 
         name_one=name, elements=elements, units=units, time_units=time_units, start_date=start_date, \
         rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
         single_lines=single_lines, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
-        show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, leg_scale=leg_scale, \
-        ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-        label_vert_lines=label_vert_lines)
+        show_rms=show_rms, ignore_empties=ignore_empties, legend_loc=legend_loc, \
+        second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
+        extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
 #%% make_connected_sets
 def make_connected_sets(description, points, innovs, *, color_by='none', center_origin=False, \
