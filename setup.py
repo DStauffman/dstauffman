@@ -16,14 +16,14 @@ from setuptools import setup
 #%% Support functions - readme
 def readme():
     r"""Opens the README.rst file for additional descriptions."""
-    filename = Path(__file__).parent / 'README.rst'
+    filename = Path(__file__).resolve().parent / 'README.rst'
     with open(filename) as file:
         return file.read()
 
 #%% Support functions - get_version
 def get_version():
     r"""Reads the version information from the library."""
-    filename = Path(__file__).parent.joinpath('dstauffman', 'version.py')
+    filename = Path(__file__).resolve().parent.joinpath('dstauffman', 'version.py')
     with open(filename) as file:
         text = file.read()
     for line in text.splitlines():
@@ -47,14 +47,15 @@ setup(
     install_requires=[
         'h5py',
         'matplotlib',
-        'numba',
-        'numpy',
+        'numba>=0.52',
+        'numpy>=1.20',
         'pandas',
         'PyQt5',
         'pytest',
         'scipy',
         'tblib',
     ],
+    extra_require={'shading': ['datashader>=0.12']},
     python_requires='>=3.8',
     include_package_data=True,
     zip_safe=False)
