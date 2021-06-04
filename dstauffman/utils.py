@@ -305,7 +305,7 @@ def rss(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: 
         return np.nan
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
-        out = np.sum(data * np.conj(data), axis=axis, keepdims=keepdims)
+        out = np.sum(data * np.conj(data), axis=axis, keepdims=keepdims)  # type: ignore[arg-type]
     else:
         # check for all NaNs case
         if np.all(np.isnan(data)):
