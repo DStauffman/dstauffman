@@ -9,15 +9,19 @@ Notes
 #%% Normal Imports
 import doctest
 import functools
+import platform
 import sys
 import unittest
 
-try:
-    # Try importing numba to determine if it is there.  Use this instead of HAVE_NUMBA from dstauffman
-    # to avoid any circular dependencies
-    from numba import njit  # type: ignore[attr-defined]
-    HAVE_NUMBA = True
-except ModuleNotFoundError:
+if platform.python_implementation() == 'CPython':
+    try:
+        # Try importing numba to determine if it is there.  Use this instead of HAVE_NUMBA from dstauffman
+        # to avoid any circular dependencies
+        from numba import njit  # type: ignore[attr-defined]
+        HAVE_NUMBA = True
+    except ModuleNotFoundError:
+        HAVE_NUMBA = False
+else:
     HAVE_NUMBA = False
 
 #%% Support Functions
