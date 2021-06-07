@@ -19,6 +19,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% _update_information
+@ncjit
 def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
     r"""
     Update information vector and matrix using innovation.

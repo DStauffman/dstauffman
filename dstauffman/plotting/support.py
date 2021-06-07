@@ -25,9 +25,11 @@ try:
     from PyQt5.QtCore import QCoreApplication, QSize
     from PyQt5.QtGui import QIcon
     from PyQt5.QtWidgets import QApplication, QPushButton
+    _HAVE_QT = True
 except ModuleNotFoundError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object  # type: ignore[assignment, misc]
+    _HAVE_QT = False
 
 from dstauffman import Frozen, get_images_dir, get_username, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, \
     is_datetime
@@ -899,6 +901,8 @@ def figmenu(figs: _FigOrListFig) -> None:
     >>> plt.close(fig)
 
     """
+    if not _HAVE_QT:
+        return
     if not isinstance(figs, list):
         figs.toolbar_custom_ = MyCustomToolbar(figs)
     else:

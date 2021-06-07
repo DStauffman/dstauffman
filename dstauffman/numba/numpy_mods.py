@@ -12,12 +12,12 @@ import doctest
 from typing import Tuple
 import unittest
 
-from dstauffman.numba.passthrough import ncjit
+from dstauffman.numba.passthrough import HAVE_NUMBA, ncjit
 
-try:
+if HAVE_NUMBA:
     from numba import boolean  # type: ignore[attr-defined]
     from numba.typed import List
-except ModuleNotFoundError:
+else:
     List = list  # type: ignore[assignment, misc]
 try:
     # Note: avoid using HAVE_NUMPY from dstauffman to avoid circular imports

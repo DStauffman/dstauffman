@@ -14,11 +14,11 @@ import math
 from typing import Sequence
 import unittest
 
-from dstauffman.numba.passthrough import fake_jit, ncjit, TARGET
+from dstauffman.numba.passthrough import fake_jit, HAVE_NUMBA, ncjit, TARGET
 
-try:
+if HAVE_NUMBA:
     from numba import float32, float64, int32, int64, vectorize  # type: ignore[attr-defined]
-except ModuleNotFoundError:
+else:
     float32 = float64 = int32 = int64 = vectorize = fake_jit
 
 #%% np_any
