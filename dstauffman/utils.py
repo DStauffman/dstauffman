@@ -380,6 +380,10 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
         r"""Determine whether the object is an instance of a class or not."""
         return hasattr(obj, '__dict__') and not _is_function(obj) # and hasattr(obj, '__call__')
 
+    def _is_public(name):
+        r"""Returns True if the name is public, ie doesn't start with an underscore."""
+        return not name.startswith('_')
+
     # preallocate answer to True until proven otherwise
     is_same = True
     # get names if specified
@@ -392,14 +396,14 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
     # simple test
     if c1 is not c2:
         # get the list of public attributes
-        attrs1 = set((name for name in dir(c1) if not name.startswith('_')))
-        attrs2 = set((name for name in dir(c2) if not name.startswith('_')))
+        attrs1 = frozenset(filter(_is_public, dir(c1)))
+        attrs2 = frozenset(filter(_is_public, dir(c2)))
         # compare the attributes that are in both
         same = attrs1 & attrs2
         for this_attr in sorted(same):
             # alias the attributes
-            attr1 = getattr(c1, this_attr)
-            attr2 = getattr(c2, this_attr)
+            attr1 = inspect.getattr_static(c1, this_attr)
+            attr2 = inspect.getattr_static(c2, this_attr)
             # determine if this is a subclass
             if _is_class_instance(attr1):
                 if _is_class_instance(attr2):
