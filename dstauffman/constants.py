@@ -35,12 +35,6 @@ try:
 except ModuleNotFoundError:
     HAVE_MPL = False
 try:
-    import numba
-    assert numba  # not really used, but it silences the warnings
-    HAVE_NUMBA = True
-except ModuleNotFoundError:
-    HAVE_NUMBA = False
-try:
     import numpy as np
     HAVE_NUMPY = True
 except ModuleNotFoundError:

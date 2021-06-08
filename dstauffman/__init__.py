@@ -20,7 +20,7 @@ Notes
 from .classes   import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, load_method, \
                            pprint_dict, chop_time, subsample_class, Frozen, SaveAndLoad, \
                            SaveAndLoadPickle, Counter, FixedDict
-from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_NUMBA, HAVE_NUMPY, HAVE_PANDAS, \
+from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_NUMPY, HAVE_PANDAS, \
                            HAVE_PYTEST, HAVE_SCIPY, INT_TOKEN, IS_WINDOWS, NP_DATETIME_UNITS, \
                            NP_DATETIME_FORM, NP_TIMEDELTA_FORM, NP_INT64_PER_SEC
 from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel

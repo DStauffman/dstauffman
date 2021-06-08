@@ -27,7 +27,7 @@ except ModuleNotFoundError:
     _HAVE_NUMBA = False
 if _HAVE_NUMBA:
     try:
-        from numba import version_info
+        from numba import version_info  # type: ignore[attr-defined]
     except ImportError:
         _NEW_NUMBA = False
     else:
