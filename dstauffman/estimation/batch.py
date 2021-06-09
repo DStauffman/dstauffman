@@ -24,8 +24,8 @@ import unittest
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
-from dstauffman import activate_logging, deactivate_logging, Frozen, HAVE_NUMPY, LogLevel, \
-    MultipassExceptionWrapper, parfor_wrapper, pprint_dict, rss, SaveAndLoad, setup_dir
+from dstauffman import activate_logging, deactivate_logging, Frozen, HAVE_NUMPY, load_method, \
+    LogLevel, MultipassExceptionWrapper, parfor_wrapper, pprint_dict, rss, SaveAndLoad, setup_dir
 from dstauffman.numba import ncjit
 
 from dstauffman.estimation.linalg import mat_divide
@@ -228,7 +228,6 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     >>> bpe_results = BpeResults()
 
     """
-    load: ClassVar[Callable[[Optional[Path], DefaultNamedArg(bool, 'use_hdf5')], BpeResults]]
     save: Callable[[BpeResults, Optional[Path], DefaultNamedArg(bool, 'use_hdf5')], None]
 
     def __init__(self):
@@ -313,6 +312,25 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         # print the final cost/values
         print('Final cost: {}'.format(self.final_cost))
         pprint_dict(dct2, name='Final parameters:', indent=8)
+
+    @classmethod
+    def load(cls, filename: Path = None, use_hdf5: bool = True) -> BpeResults:
+        r"""
+        Load the object from disk.
+
+        Parameters
+        ----------
+        filename : classs pathlib.Path
+            Name of the file to load
+        use_hdf5 : bool, optional, defaults to False
+            Write as *.hdf5 instead of *.pkl
+
+        """
+        out: BpeResults = load_method(cls, filename=filename, use_hdf5=use_hdf5)
+        out.num_evals = int(out.num_evals)
+        out.num_iters = int(out.num_iters)
+        out.costs = [c for c in out.costs]
+        return out
 
 #%% CurrentResults
 class CurrentResults(Frozen, metaclass=SaveAndLoad):
