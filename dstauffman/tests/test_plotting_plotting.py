@@ -468,6 +468,19 @@ class Test_plotting_plot_histogram(unittest.TestCase):
     def test_infs(self) -> None:
         self.fig = plot.plot_histogram(self.description, self.data, np.array([-np.inf, -1., 0., 1., np.inf]))
 
+    def test_int_cats(self) -> None:
+        data = np.array([3, 3, 5, 8, 2, 2, 2])
+        bins = np.array([1, 2, 3, 4, 5])
+        self.fig = plot.plot_histogram(self.description, data, bins, use_exact_counts=True)
+
+    def test_string_cats(self) -> None:
+        data = np.full(10, 'yes', dtype='S8')
+        data[2] = 'no'
+        data[8] = 'no'
+        data[5] = 'unknown'
+        bins = ['yes', 'no']
+        self.fig = plot.plot_histogram(self.description, data, bins, use_exact_counts=True)
+
     def tearDown(self) -> None:
         if self.fig:
             plt.close(self.fig)

@@ -34,6 +34,15 @@ try:
     HAVE_MPL = True
 except ModuleNotFoundError:
     HAVE_MPL = False
+if HAVE_MPL:
+    try:
+        import datashader
+        assert datashader
+        HAVE_DS = True
+    except ImportError:
+        HAVE_DS = False
+else:
+    HAVE_DS = False
 try:
     import numpy as np
     HAVE_NUMPY = True

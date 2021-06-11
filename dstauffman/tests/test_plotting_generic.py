@@ -12,7 +12,8 @@ from typing import List, Optional
 import unittest
 from unittest.mock import patch
 
-from dstauffman import HAVE_MPL, HAVE_NUMPY, LogLevel
+from dstauffman import HAVE_DS, HAVE_MPL, HAVE_NUMPY, NP_DATETIME_UNITS, NP_INT64_PER_SEC, \
+    NP_TIMEDELTA_FORM, LogLevel
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -89,6 +90,44 @@ class Test_plotting_make_time_plot(unittest.TestCase):
     def test_col_vectors(self) -> None:
         data = np.column_stack((self.data, np.sin(self.time)))
         self.fig = plot.make_time_plot(self.description, self.time, data, data_as_rows=False)
+
+    def test_datetimes(self) -> None:
+        time = np.datetime64('2021-06-01T00:00:00', NP_DATETIME_UNITS) + \
+            np.round(self.time*NP_INT64_PER_SEC).astype(np.int64).astype(NP_TIMEDELTA_FORM)
+        self.fig = plot.make_time_plot(self.description, time, self.data, name=self.name, elements=self.elements, \
+            units = self.units, time_units='numpy', start_date=None, \
+            rms_xmin=time[5], rms_xmax=time[25], disp_xmin=time[1], disp_xmax=time[-2], \
+            single_lines=self.single_lines, colormap=self.colormap, use_mean=self.use_mean, \
+            plot_zero=self.plot_zero, show_rms=self.show_rms, legend_loc=self.legend_loc, \
+            second_units=self.second_units, ylabel=self.ylabel, data_as_rows=self.data_as_rows, \
+            extra_plotter=self.extra_plotter, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
+
+    def test_strings(self) -> None:
+        time = np.arange(100.)
+        data = np.full(100, 'open', dtype='S6')
+        data[10:20] = 'closed'
+        self.fig = plot.make_time_plot(self.description, time, data, show_rms=False)
+
+    @unittest.skipIf(not HAVE_DS, 'Skipping due to missing datashader dependency.')
+    def test_datashader(self) -> None:
+        time = np.linspace(0., 1000., 10**6)
+        data = np.random.rand(10**6)
+        self.fig = plot.make_time_plot(self.description, time, data, use_datashader=True)
+
+    @unittest.skipIf(not HAVE_DS, 'Skipping due to missing datashader dependency.')
+    def test_datashader_dates(self) -> None:
+        temp = np.linspace(0., 1000., 10**6)
+        time = np.datetime64('2021-06-01T00:00:00', NP_DATETIME_UNITS) + \
+            np.round(temp*NP_INT64_PER_SEC).astype(np.int64).astype(NP_TIMEDELTA_FORM)
+        data = np.random.rand(10**6)
+        self.fig = plot.make_time_plot(self.description, time, data, time_units='numpy', use_datashader=True)
+
+    @unittest.skipIf(not HAVE_DS, 'Skipping due to missing datashader dependency.')
+    def test_datashader_strings(self) -> None:
+        time = np.linspace(0., 1000., 10**4)
+        data = np.full(10**4, 'open', dtype='S6')
+        data[1000:2000] = 'closed'
+        self.fig = plot.make_time_plot(self.description, time, data, show_rms=False, use_datashader=True)
 
     def tearDown(self) -> None:
         if self.fig:
