@@ -11,8 +11,9 @@ import doctest
 from functools import partial
 import logging
 import unittest
+import warnings
 
-from dstauffman import convert_date, DEGREE_SIGN, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, \
+from dstauffman import convert_date, DEGREE_SIGN, get_unit_conversion, HAVE_DS, HAVE_MPL, HAVE_NUMPY, \
     HAVE_PANDAS, intersect, is_datetime, LogLevel, RAD2DEG, rms
 from dstauffman.aerospace import quat_angle_diff
 
@@ -23,13 +24,14 @@ from dstauffman.plotting.support import COLOR_LISTS, ColorMap, DEFAULT_COLORMAP,
 if HAVE_MPL:
     from matplotlib.collections import LineCollection
     import matplotlib.pyplot as plt
-    try:
-        import datashader as ds
-        import datashader.transfer_functions as tf
-        from datashader.mpl_ext import dsshow, alpha_colormap
-        HAVE_DS = True
-    except ImportError:
-        HAVE_DS = False
+    if HAVE_DS:
+        try:
+            import datashader as ds
+            import datashader.transfer_functions as tf
+            from datashader.mpl_ext import dsshow, alpha_colormap
+        except ImportError:
+            warnings.warn('Datashader version does not support matplotlib and will not be used.')
+            HAVE_DS = False
 if HAVE_NUMPY:
     import numpy as np
     inf = np.inf
