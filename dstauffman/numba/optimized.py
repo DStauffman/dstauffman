@@ -155,8 +155,7 @@ def prob_to_rate_opt(prob: float, time: float) -> float:
 
     Examples
     --------
-    >>> from dstauffman.numba import prob_to_rate_opt
-    >>> from dstauffman import HAVE_NUMBA
+    >>> from dstauffman.numba import HAVE_NUMBA, prob_to_rate_opt
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
     >>> time = 3
@@ -202,8 +201,7 @@ def rate_to_prob_opt(rate: float, time: float) -> float:
 
     Examples
     --------
-    >>> from dstauffman.numba import rate_to_prob_opt
-    >>> from dstauffman import HAVE_NUMBA
+    >>> from dstauffman.numba import HAVE_NUMBA, rate_to_prob_opt
     >>> import numpy as np
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
     >>> time = 1./12

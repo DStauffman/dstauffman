@@ -605,7 +605,8 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
 
 #%% Functions - plot_histogram
 def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabel='Data', \
-        ylabel='Number', second_ylabel='Distribution [%]', normalize_spacing=False):
+        ylabel='Number', second_ylabel='Distribution [%]', normalize_spacing=False, \
+        use_exact_counts=False):
     r"""
     Creates a histogram plot of the given data and bins.
 
@@ -629,6 +630,8 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
         Name to put on second y-axis
     normalize_spacing : bool, optional, default is False
         Whether to normalize all the bins to the same horizontal size
+    use_exact_counts : bool, optional, default is False
+        Whether to bin things based only on exactly equal values
 
     Returns
     -------
@@ -661,9 +664,21 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
     fig.canvas.manager.set_window_title(description)
     ax = fig.add_subplot(1, 1, 1)
     ax.set_title(description)
-    counts = histcounts(data, bins)
-    if normalize_spacing:
-        plotting_bins = np.arange(np.size(bins))
+    if use_exact_counts:
+        counts = np.array([np.count_nonzero(data == this_bin) for this_bin in bins], dtype=int)
+    else:
+        # TODO: optionally allow this to not include 100% of the data by disabling some error
+        # checks in np_digitize?
+        counts = histcounts(data, bins)
+    missing = data.size - np.sum(counts)
+    num = np.size(bins)
+    if normalize_spacing or use_exact_counts:
+        xlab = [str(i) for i in bins]
+        if use_exact_counts:
+            num += 1
+        if missing > 0:
+            xlab += ['Unbinned Data']
+        plotting_bins = np.arange(num)
     else:
         plotting_bins = np.asanyarray(bins).copy()
         ix_pinf = np.isinf(plotting_bins) & (np.sign(plotting_bins) > 0)
@@ -671,20 +686,27 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
         plotting_bins[ix_pinf] = np.max(data)
         plotting_bins[ix_ninf] = np.min(data)
     rects = []
-    for i in range(len(bins)-1):
+    for i in range(num - 1):
         rects.append(Rectangle((plotting_bins[i], 0), plotting_bins[i+1]-plotting_bins[i], counts[i]))
+    if missing > 0:
+        rects.append(Rectangle((plotting_bins[-1], 0), 1, missing))
     coll = PatchCollection(rects, facecolor=color, edgecolor='k')
     ax.add_collection(coll)
     ax.grid(True)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
-    ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins)])
+    if missing > 0:
+        ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins)+1])
+    else:
+        ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins)])
     ax.set_ylim([0, np.max(counts)])
     if normalize_spacing:
-        xlab = [str(i) for i in bins]
         ax.set_xticks(plotting_bins)
         ax.set_xticklabels(xlab)
-    plot_second_yunits(ax, ylab=second_ylabel, multiplier=100/np.sum(counts))
+    elif use_exact_counts:
+        ax.set_xticks(plotting_bins + 0.5)
+        ax.set_xticklabels(xlab)
+    plot_second_yunits(ax, ylab=second_ylabel, multiplier=100/data.size)
     setup_plots(fig, opts=opts)
     return fig
 
