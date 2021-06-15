@@ -106,7 +106,9 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         time = np.arange(100.)
         data = np.full(100, 'open', dtype='S6')
         data[10:20] = 'closed'
-        self.fig = plot.make_time_plot(self.description, time, data, show_rms=False)
+        with self.assertWarns(UserWarning) as w:
+            self.fig = plot.make_time_plot(self.description, time, data, show_rms=False)
+        self.assertEqual(('Data was not numeric, so Y limit was not zoomed.', ), w.warning.args)  # type: ignore[attr-defined]
 
     @unittest.skipIf(not HAVE_DS, 'Skipping due to missing datashader dependency.')
     def test_datashader(self) -> None:
@@ -127,7 +129,9 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         time = np.linspace(0., 1000., 10**4)
         data = np.full(10**4, 'open', dtype='S6')
         data[1000:2000] = 'closed'
-        self.fig = plot.make_time_plot(self.description, time, data, show_rms=False, use_datashader=True)
+        with self.assertWarns(UserWarning) as w:
+            self.fig = plot.make_time_plot(self.description, time, data, show_rms=False, use_datashader=True)
+        self.assertEqual(('Data was not numeric, so Y limit was not zoomed.', ), w.warning.args)  # type: ignore[attr-defined]
 
     def tearDown(self) -> None:
         if self.fig:
@@ -390,9 +394,9 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
         self.description      = 'Values vs Time'
         self.time             = np.arange(-10., 10.1, 0.1)
         self.data             = self.time + np.cos(self.time)
-        MeasStatus            = type('MeasStatus', (object,), {'rejected': 0, 'accepted': 1})
-        self.cats             = np.full(self.time.shape, MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined]
-        self.cats[50:100]     = MeasStatus.rejected  # type: ignore[attr-defined]
+        self.MeasStatus       = type('MeasStatus', (object,), {'rejected': 0, 'accepted': 1})
+        self.cats             = np.full(self.time.shape, self.MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined]
+        self.cats[50:100]     = self.MeasStatus.rejected  # type: ignore[attr-defined]
         self.cat_names        = {0: 'rejected', 1: 'accepted'}
         self.name             = ''
         self.elements         = None
@@ -429,6 +433,14 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
 
     def test_minimal(self) -> None:
         self.figs = plot.make_categories_plot(self.description, self.time, self.data, self.cats)
+
+    @unittest.skipIf(not HAVE_DS, 'Skipping due to missing datashader dependency.')
+    def test_datashader_cats(self) -> None:
+        time = np.arange(10000.)
+        data = time + np.sin(time / np.pi / 100.)
+        cats = np.full(time.shape, self.MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined]
+        cats[500:1000] = self.MeasStatus.rejected  # type: ignore[attr-defined]
+        self.figs = plot.make_categories_plot(self.description, time, data, cats, use_datashader=True)
 
     def tearDown(self) -> None:
         if self.figs:

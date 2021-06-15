@@ -478,8 +478,16 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         data[2] = 'no'
         data[8] = 'no'
         data[5] = 'unknown'
-        bins = ['yes', 'no']
+        bins = [b'yes', b'no']
         self.fig = plot.plot_histogram(self.description, data, bins, use_exact_counts=True)
+
+    def test_missing_data(self) -> None:
+        with self.assertRaises(ValueError):
+            plot.plot_histogram(self.description, self.data, np.array([3, 10, 15]))
+
+    def test_missing_exacts(self) -> None:
+        self.fig = plot.plot_histogram(self.description, np.array([1, 1, 1, 2, 3, 3, 3]), \
+            np.array([0, 3, 6]), use_exact_counts=True)
 
     def tearDown(self) -> None:
         if self.fig:

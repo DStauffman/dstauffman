@@ -488,7 +488,7 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     # create figures
     fig = plt.figure()
     if is_quat_diff and not make_subplots:
-        fig.canvas.manager.set_window_title(description + ' Quaternion Components')
+        fig.canvas.manager.set_window_title(description + ' Components')
     else:
         fig.canvas.manager.set_window_title(description)
     if doing_diffs:
@@ -618,9 +618,17 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                             this_color = cm.get_color(j)
                         if use_datashader and this_time.size > datashader_pts:
                             ix_spot = np.round(np.linspace(0, this_time.size-1, datashader_pts)).astype(int)
-                            plot_func(this_axes, this_time[ix_spot], this_data[ix_spot], symbol_one[0], markersize=4, \
-                                label=this_label, color=this_color, zorder=this_zorder, linestyle='none')
-                            datashaders.append({'time': this_time, 'data': this_data, 'ax': this_axes, 'color': this_color})
+                            if not np.issubdtype(this_data.dtype, np.number):
+                                (categories, ix_extras) = np.unique(this_data, return_index=True)
+                                temp_data = pd.Categorical(this_data, categories=categories[np.argsort(ix_extras)], ordered=True)
+                                ix_spot = np.union1d(ix_spot, ix_extras)
+                                plot_func(this_axes, this_time[ix_spot], temp_data[ix_spot], symbol_one[0], markersize=4, \
+                                    label=this_label, color=this_color, zorder=this_zorder, linestyle='none')
+                                datashaders.append({'time': this_time, 'data': temp_data.codes, 'ax': this_axes, 'color': this_color})
+                            else:
+                                plot_func(this_axes, this_time[ix_spot], this_data[ix_spot], symbol_one[0], markersize=4, \
+                                    label=this_label, color=this_color, zorder=this_zorder, linestyle='none')
+                                datashaders.append({'time': this_time, 'data': this_data, 'ax': this_axes, 'color': this_color})
                         else:
                             plot_func(this_axes, this_time, this_data, symbol_one, markersize=4, label=this_label, \
                                 color=this_color, zorder=this_zorder)
@@ -681,10 +689,12 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
                 else:
                     plot_func(this_axes, time_overlap, nondeg_angle, '.-', markersize=4, label=this_label, color=cm_vec.get_color(0))
             if show_extra:
-                this_axes.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, \
-                    markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
-                this_axes.plot(time_two[d2_miss_ix], np.zeros(len(d2_miss_ix)), 'go', markersize=8, \
-                    markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
+                if d1_miss_ix.size > 0:
+                    this_axes.plot(time_one[d1_miss_ix], np.zeros(len(d1_miss_ix)), 'kx', markersize=8, \
+                        markeredgewidth=2, markerfacecolor='None', label=name_one + ' Extra')
+                if d2_miss_ix.size > 0:
+                    this_axes.plot(time_two[d2_miss_ix], np.zeros(len(d2_miss_ix)), 'go', markersize=8, \
+                        markeredgewidth=2, markerfacecolor='None', label=name_two + ' Extra')
 
         # set X display limits
         if i == 0:

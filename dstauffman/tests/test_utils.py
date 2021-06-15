@@ -15,7 +15,6 @@ import sys
 from typing import List, Union
 import unittest
 from unittest.mock import patch
-import warnings
 
 import dstauffman as dcs
 
@@ -196,8 +195,7 @@ class Test_rms(unittest.TestCase):
         self.outputs2a = np.sqrt(3)/2
         self.outputs2b = np.array([np.sqrt(2)/2, 1, np.sqrt(2)/2, 1])
         self.outputs2c = np.array([np.sqrt(2)/2, 1])
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PendingDeprecationWarning)
+        with self.assertWarns(PendingDeprecationWarning):
             self.outputs2d = np.matrix([[np.sqrt(2)/2], [1]])
         self.inputs3   = np.hstack((self.inputs1, np.nan))
         self.inputs4   = [[0, 0., np.nan], [1., np.nan, 1]]
@@ -323,8 +321,7 @@ class Test_rss(unittest.TestCase):
         self.outputs2a = 6
         self.outputs2b = np.array([1, 2, 1, 2])
         self.outputs2c = np.array([2, 4])
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore', PendingDeprecationWarning)
+        with self.assertWarns(PendingDeprecationWarning):
             self.outputs2d = np.matrix([[2], [4]])
         self.inputs3   = np.hstack((self.inputs1, np.nan))
         self.inputs4   = [[0, 0, np.nan], [1, np.nan, 1]]
