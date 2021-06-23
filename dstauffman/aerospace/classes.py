@@ -8,9 +8,10 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+import copy
 import doctest
 from pathlib import Path
-from typing import Any, FrozenSet, List, Optional, TYPE_CHECKING, Union
+from typing import Any, FrozenSet, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, \
@@ -23,6 +24,7 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
     _Sets = Union[set, FrozenSet]
+    _Time = Union[float, np.datetime64]
 
 #%% KfInnov
 class KfInnov(Frozen):
@@ -84,6 +86,41 @@ class KfInnov(Frozen):
             self.status = None
         self.fploc: Optional[np.ndarray] = None
         self.snr: Optional[np.ndarray]   = None
+
+    def combine(self, kfinnov2: KfInnov, /, *, inplace: bool = False) -> KfInnov:
+        r"""Combines two KfInnov structures together."""
+        # allow an empty structure to be passed through
+        if self.time is None:
+            if inplace:
+                for (key, value) in vars(kfinnov2).items():
+                    setattr(self, key, value)
+            return kfinnov2  # TODO: make a copy?
+        # concatenate fields
+        if inplace:
+            kfinnov = self
+        else:
+            kfinnov       = KfInnov()
+            kfinnov.name  = self.name
+            kfinnov.chan  = copy.copy(self.chan)
+            kfinnov.units = self.units
+        kfinnov.time   = np.hstack((self.time, kfinnov2.time))
+        kfinnov.innov  = np.column_stack((self.time, kfinnov2.time))
+        kfinnov.norm   = np.column_stack((self.time, kfinnov2.time))
+        kfinnov.status = np.hstack((self.time, kfinnov2.time))
+        kfinnov.fploc  = np.column_stack((self.time, kfinnov2.time))
+        kfinnov.snr    = np.hstack((self.time, kfinnov2.time))
+        return kfinnov
+
+    @overload
+    def chop(self, ti: _Time = ..., tf: _Time = ..., *, is_last: bool = ..., \
+            inplace: bool = ..., return_ends: Literal[True]) -> Tuple[KfInnov, KfInnov, KfInnov]: ...
+    @overload
+    def chop(self, ti: _Time = ..., tf: _Time = ..., *, is_last: bool = ..., \
+            inplace: bool = ..., return_ends: Literal[False] = ...) -> KfInnov: ...
+
+    def chop(self, ti: _Time = None, tf: _Time = None, *, is_last: bool = False, \
+            inplace: bool = False, return_ends: bool = False) -> Union[KfInnov, Tuple[KfInnov, KfInnov, KfInnov]]:
+        pass
 
 #%% Kf
 class Kf(Frozen):

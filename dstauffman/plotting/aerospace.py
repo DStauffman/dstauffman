@@ -897,7 +897,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
                     ylabel=this_ylabel, colormap=colormap, **kwargs)
                 if return_err:
                     figs += out[0]
-                    err[field][f'Group {ix}'] = out[1]
+                    err[field][f'Group {ix+1}'] = out[1]
                 else:
                     figs += out
     # Setup plots

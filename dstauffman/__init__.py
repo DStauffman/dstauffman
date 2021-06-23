@@ -22,7 +22,8 @@ from .classes   import save_hdf5, load_hdf5, save_pickle, load_pickle, save_meth
                            SaveAndLoadPickle, Counter, FixedDict
 from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_DS, HAVE_NUMPY, HAVE_PANDAS, \
                            HAVE_PYTEST, HAVE_SCIPY, INT_TOKEN, IS_WINDOWS, NP_DATETIME_UNITS, \
-                           NP_DATETIME_FORM, NP_TIMEDELTA_FORM, NP_INT64_PER_SEC
+                           NP_DATETIME_FORM, NP_TIMEDELTA_FORM, NP_INT64_PER_SEC, NP_ONE_SECOND, \
+                           NP_ONE_MINUTE, NP_ONE_HOUR, NP_ONE_DAY
 from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
 from .logs      import activate_logging, deactivate_logging, flush_logging, log_multiline
