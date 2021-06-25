@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import Any, FrozenSet, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, \
-    save_method
+from dstauffman import chop_time, Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, \
+    NP_DATETIME_FORM, save_method
 
 if HAVE_H5PY:
     import h5py
@@ -120,7 +120,15 @@ class KfInnov(Frozen):
 
     def chop(self, ti: _Time = None, tf: _Time = None, *, is_last: bool = False, \
             inplace: bool = False, return_ends: bool = False) -> Union[KfInnov, Tuple[KfInnov, KfInnov, KfInnov]]:
-        pass
+        exclude = frozenset({'name', 'chan', 'units'})
+        use_dates = is_datetime(self.time)
+        if ti is None:
+            ti = np.datetime64('nat') if use_dates else -np.inf
+        if tf is None:
+            tf = np.datetime64('nat') if use_dates else np.inf
+        out = self if inplace else copy.deepcopy(self)
+        chop_time(out, time_field='time', exclude=exclude, ti=ti, tf=tf)
+        return out
 
 #%% Kf
 class Kf(Frozen):

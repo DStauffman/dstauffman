@@ -312,6 +312,8 @@ def chop_time(self: Any, time_field: str, exclude: Set[str] = None, ti: float = 
         Instance of the class that this method is operating on
     time_field : str
         The name of the time field to use for reference
+    exclude : List[str]
+        Names of any fields to exclude from chopping
     ti : float, optional
         Time to start from, inclusive
     tf : float, optional

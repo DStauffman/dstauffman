@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+import copy
 import unittest
 
 from dstauffman import capture_output, get_tests_dir, HAVE_H5PY, HAVE_NUMPY, NP_DATETIME_FORM
@@ -23,7 +24,70 @@ class Test_aerospace_KfInnov(unittest.TestCase):
     """
     def test_nominal(self) -> None:
         innov = space.KfInnov()
-        self.assertTrue(isinstance(innov, space.KfInnov)) # TODO: test better
+        self.assertTrue(isinstance(innov, space.KfInnov))
+        self.assertEqual(innov.name, '')
+        self.assertIsNone(innov.chan)
+        self.assertEqual(innov.units, '')
+        self.assertIsNone(innov.time)
+        self.assertIsNone(innov.innov)
+        self.assertIsNone(innov.norm)
+        self.assertIsNone(innov.status)
+        self.assertIsNone(innov.fploc)
+        self.assertIsNone(innov.snr)
+
+    def test_copy(self) -> None:
+        innov = space.KfInnov(name='Gnd', units='m', num_innovs=60, num_axes=2, time_dtype=float)
+        innov.chan = ['X', 'Y']
+        innov2 = copy.copy(innov)
+        self.assertEqual(innov.name, 'Gnd')
+        self.assertEqual(innov.units, 'm')
+        self.assertEqual(innov.time.shape, (60, ))
+        self.assertTrue(np.issubdtype(innov.time.dtype, np.floating))
+        self.assertEqual(innov.innov.shape, (2, 60))
+        self.assertEqual(innov.norm.shape, (2, 60))
+        self.assertEqual(innov.status.shape, (60, ))
+        self.assertIsNone(innov.fploc)
+        self.assertIsNone(innov.snr)
+        # copy artifacts
+        self.assertEqual(innov.name, innov2.name)
+        self.assertIs(innov.chan, innov2.chan)
+        self.assertEqual(innov.units, innov2.units)
+        self.assertIs(innov.time, innov2.time)
+        self.assertIs(innov.innov, innov2.innov)
+        self.assertIs(innov.norm, innov2.norm)
+        self.assertIs(innov.status, innov2.status)
+
+    def test_deepcopy(self) -> None:
+        innov = space.KfInnov(name='Gnd', units='m', num_innovs=60, num_axes=2, time_dtype=NP_DATETIME_FORM)
+        innov.chan = ['X', 'Y']
+        innov2 = copy.deepcopy(innov)
+        self.assertEqual(innov.name, 'Gnd')
+        self.assertEqual(innov.units, 'm')
+        self.assertEqual(innov.time.shape, (60, ))
+        self.assertTrue(np.issubdtype(innov.time.dtype, np.datetime64))
+        self.assertEqual(innov.innov.shape, (2, 60))
+        self.assertEqual(innov.norm.shape, (2, 60))
+        self.assertEqual(innov.status.shape, (60, ))
+        self.assertIsNone(innov.fploc)
+        self.assertIsNone(innov.snr)
+        # copy artifacts
+        self.assertEqual(innov.name, innov2.name)
+        self.assertIsNot(innov.chan, innov2.chan)
+        self.assertEqual(innov.units, innov2.units)
+        self.assertIsNot(innov.time, innov2.time)
+        self.assertIsNot(innov.innov, innov2.innov)
+        self.assertIsNot(innov.norm, innov2.norm)
+        self.assertIsNot(innov.status, innov2.status)
+        np.testing.assert_array_equal(innov.time, innov2.time)
+        np.testing.assert_array_equal(innov.innov, innov2.innov)
+        np.testing.assert_array_equal(innov.norm, innov2.norm)
+        np.testing.assert_array_equal(innov.status, innov2.status)
+
+    def test_combine(self) -> None:
+        pass  # TODO: write this
+
+    def test_chop(self) -> None:
+        pass  # TODO: write this
 
 #%% aerospace.Kf
 class Test_aerospace_Kf(unittest.TestCase):
