@@ -38,7 +38,7 @@ class Test_all_values(unittest.TestCase):
             if dcs.HAVE_NUMPY:
                 self.assertTrue(isinstance(getattr(dcs, key), np.timedelta64))
             else:
-                self.assertNone(getattr(dcs, key))
+                self.assertIsNone(getattr(dcs, key))
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_np_times(self) -> None:

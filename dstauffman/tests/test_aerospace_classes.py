@@ -39,6 +39,10 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         innov = space.KfInnov(name='Gnd', units='m', num_innovs=60, num_axes=2, time_dtype=float)
         innov.chan = ['X', 'Y']
         innov2 = copy.copy(innov)
+        assert innov.time is not None
+        assert innov.innov is not None
+        assert innov.norm is not None
+        assert innov.status is not None
         self.assertEqual(innov.name, 'Gnd')
         self.assertEqual(innov.units, 'm')
         self.assertEqual(innov.time.shape, (60, ))
@@ -61,6 +65,10 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         innov = space.KfInnov(name='Gnd', units='m', num_innovs=60, num_axes=2, time_dtype=NP_DATETIME_FORM)
         innov.chan = ['X', 'Y']
         innov2 = copy.deepcopy(innov)
+        assert innov.time is not None
+        assert innov.innov is not None
+        assert innov.norm is not None
+        assert innov.status is not None
         self.assertEqual(innov.name, 'Gnd')
         self.assertEqual(innov.units, 'm')
         self.assertEqual(innov.time.shape, (60, ))
@@ -83,11 +91,170 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         np.testing.assert_array_equal(innov.norm, innov2.norm)
         np.testing.assert_array_equal(innov.status, innov2.status)
 
-    def test_combine(self) -> None:
-        pass  # TODO: write this
+    def test_combine_nominal(self) -> None:
+        innov1 = space.KfInnov(name='Name 1', units='m', num_innovs=30, num_axes=2, time_dtype=float)
+        innov1.chan = ['X', 'Y']
+        innov2 = space.KfInnov(name='Name 2', units='m', num_innovs=60, num_axes=2, time_dtype=float)
+        innov2.chan = ['X', 'Y']
+        innov3 = innov1.combine(innov2)
+        assert innov3.time is not None
+        assert innov3.innov is not None
+        assert innov3.norm is not None
+        assert innov3.status is not None
+        self.assertEqual(innov3.name, 'Name 1')
+        self.assertEqual(innov3.units, 'm')
+        self.assertEqual(innov3.time.shape, (90, ))
+        self.assertTrue(np.issubdtype(innov3.time.dtype, np.floating))
+        self.assertEqual(innov3.innov.shape, (2, 90))
+        self.assertEqual(innov3.norm.shape, (2, 90))
+        self.assertEqual(innov3.status.shape, (90, ))
+        self.assertIsNone(innov3.fploc)
+        self.assertIsNone(innov3.snr)
+
+    def test_combine_to_empty(self) -> None:
+        innov1 = space.KfInnov()
+        innov1.name = 'Name 1'
+        innov1.units = 'm'
+        innov1.chan = ['X', 'Y']
+        innov2 = space.KfInnov(name='Name 2', units='m', num_innovs=60, num_axes=2, time_dtype=float)
+        innov2.chan = ['X', 'Y']
+        innov3 = innov1.combine(innov2)
+        self.assertEqual(innov3.name, 'Name 2')
+        self.assertEqual(innov3.units, 'm')
+        self.assertEqual(innov3.time.shape, (60, ))  # type: ignore[union-attr]
+        self.assertTrue(np.issubdtype(innov3.time.dtype, np.floating))  # type: ignore[union-attr]
+        self.assertEqual(innov3.innov.shape, (2, 60))  # type: ignore[union-attr]
+        self.assertEqual(innov3.norm.shape, (2, 60))  # type: ignore[union-attr]
+        self.assertEqual(innov3.status.shape, (60, ))  # type: ignore[union-attr]
+        self.assertIsNone(innov3.fploc)
+        self.assertIsNone(innov3.snr)
+
+    def test_combine_inplace(self) -> None:
+        innov1 = space.KfInnov(name='Gnd', units='m', num_innovs=60, num_axes=3, time_dtype=NP_DATETIME_FORM)
+        innov1.chan = ['X', 'Y', 'Z']
+        innov1.fploc = np.random.rand(2, 60)
+        innov1.snr = np.random.rand(60)
+        innov2 = space.KfInnov(name='Gnd', units='m', num_innovs=50, num_axes=3, time_dtype=NP_DATETIME_FORM)
+        innov2.chan = ['X', 'Y', 'Z']
+        innov2.fploc = np.random.rand(2, 50)
+        innov2.snr = np.random.rand(50)
+        innov3 = innov1.combine(innov2, inplace=True)
+        self.assertEqual(innov3.name, 'Gnd')
+        self.assertEqual(innov3.units, 'm')
+        self.assertEqual(innov3.time.shape, (110, ))  # type: ignore[union-attr]
+        self.assertTrue(np.issubdtype(innov3.time.dtype, np.datetime64))  # type: ignore[union-attr]
+        self.assertEqual(innov3.innov.shape, (3, 110))  # type: ignore[union-attr]
+        self.assertEqual(innov3.norm.shape, (3, 110))  # type: ignore[union-attr]
+        self.assertEqual(innov3.status.shape, (110, ))  # type: ignore[union-attr]
+        self.assertEqual(innov3.fploc.shape, (2, 110))  # type: ignore[union-attr]
+        self.assertEqual(innov3.snr.shape, (110, ))  # type: ignore[union-attr]
 
     def test_chop(self) -> None:
-        pass  # TODO: write this
+        innov = space.KfInnov(name='Gnd', units='m', num_innovs=60, num_axes=2, time_dtype=float)
+        assert innov.time is not None
+        assert innov.innov is not None
+        assert innov.norm is not None
+        assert innov.status is not None
+        innov.chan = ['X', 'Y']
+        innov.time[:] = np.arange(60.)
+        innov.innov[:] = np.random.rand(2, 60)
+        innov.norm[:] = 10 * innov.innov
+        innov.status[:] = np.ones(60, dtype=int)
+        innov2 = innov.chop(ti=10, tf=20, include_last=False)
+        assert innov2.time is not None
+        assert innov2.innov is not None
+        assert innov2.norm is not None
+        assert innov2.status is not None
+        innov3 = innov.chop(ti=20, tf=40, include_last=True)
+        assert innov3.time is not None
+        assert innov3.innov is not None
+        assert innov3.norm is not None
+        assert innov3.status is not None
+        self.assertIsNot(innov, innov2)
+        self.assertEqual(innov.name, 'Gnd')
+        self.assertEqual(innov.units, 'm')
+        self.assertEqual(innov2.name, 'Gnd')
+        self.assertEqual(innov2.units, 'm')
+        self.assertEqual(innov2.chan, ['X', 'Y'])
+        self.assertEqual(innov3.name, 'Gnd')
+        self.assertEqual(innov3.units, 'm')
+        self.assertEqual(innov3.chan, ['X', 'Y'])
+        np.testing.assert_array_equal(innov.time, np.arange(60.))
+        np.testing.assert_array_equal(innov2.time, np.arange(10., 20.))
+        np.testing.assert_array_equal(innov3.time, np.arange(20., 41.))
+        self.assertEqual(innov2.innov.shape, (2, 10))
+        self.assertEqual(innov2.norm.shape, (2, 10))
+        self.assertEqual(innov2.status.shape, (10, ))
+        self.assertEqual(innov3.innov.shape, (2, 21))
+        self.assertEqual(innov3.norm.shape, (2, 21))
+        self.assertEqual(innov3.status.shape, (21, ))
+
+    def test_chop_inplace(self) -> None:
+        innov = space.KfInnov(name='Gnd', units='m', num_innovs=60, num_axes=2, time_dtype=float)
+        assert innov.time is not None
+        assert innov.innov is not None
+        assert innov.norm is not None
+        assert innov.status is not None
+        innov.chan = ['X', 'Y']
+        innov.time[:] = np.arange(60.)
+        innov.innov[:] = np.random.rand(2, 60)
+        innov.norm[:] = 10 * innov.innov
+        innov.status[:] = np.ones(60, dtype=int)
+        innov2 = innov.chop(ti=10, tf=20, inplace=True)
+        assert innov2.time is not None
+        assert innov2.innov is not None
+        assert innov2.norm is not None
+        assert innov2.status is not None
+        self.assertIs(innov, innov2)
+        self.assertEqual(innov.name, 'Gnd')
+        self.assertEqual(innov.units, 'm')
+        self.assertEqual(innov.chan, ['X', 'Y'])
+        np.testing.assert_array_equal(innov2.time, np.arange(10., 21.))
+        self.assertEqual(innov2.innov.shape, (2, 11))
+        self.assertEqual(innov2.norm.shape, (2, 11))
+        self.assertEqual(innov2.status.shape, (11, ))
+
+    def test_chop_return_ends(self) -> None:
+        innov = space.KfInnov(name='Gnd', units='m', num_innovs=60, num_axes=2, time_dtype=float)
+        assert innov.time is not None
+        assert innov.innov is not None
+        assert innov.norm is not None
+        assert innov.status is not None
+        innov.chan = ['X', 'Y']
+        innov.time[:] = np.arange(60.)
+        innov.innov[:] = np.random.rand(2, 60)
+        innov.norm[:] = 10 * innov.innov
+        innov.status[:] = np.ones(60, dtype=int)
+        (innov3, innov2, innov4) = innov.chop(ti=10, tf=20, return_ends=True)
+        assert innov2.time is not None
+        assert innov2.innov is not None
+        assert innov2.norm is not None
+        assert innov2.status is not None
+        assert innov3.time is not None
+        assert innov3.innov is not None
+        assert innov3.norm is not None
+        assert innov3.status is not None
+        assert innov4.time is not None
+        assert innov4.innov is not None
+        assert innov4.norm is not None
+        assert innov4.status is not None
+        self.assertIsNot(innov, innov2)
+        for this_innov in [innov, innov2, innov3, innov4]:
+            self.assertEqual(this_innov.name, 'Gnd')
+            self.assertEqual(this_innov.units, 'm')
+            self.assertEqual(this_innov.chan, ['X', 'Y'])
+        np.testing.assert_array_equal(innov2.time, np.arange(10., 21.))
+        self.assertEqual(innov2.innov.shape, (2, 11))
+        self.assertEqual(innov2.norm.shape, (2, 11))
+        self.assertEqual(innov2.status.shape, (11, ))
+        np.testing.assert_array_equal(innov3.time, np.arange(0., 10.))
+        self.assertEqual(innov3.innov.shape, (2, 10))
+        self.assertEqual(innov3.norm.shape, (2, 10))
+        self.assertEqual(innov3.status.shape, (10, ))
+        np.testing.assert_array_equal(innov4.time, np.arange(21., 60.))
+        self.assertEqual(innov4.innov.shape, (2, 39))
+        self.assertEqual(innov4.norm.shape, (2, 39))
+        self.assertEqual(innov4.status.shape, (39, ))
 
 #%% aerospace.Kf
 class Test_aerospace_Kf(unittest.TestCase):

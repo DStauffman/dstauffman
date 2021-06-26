@@ -127,8 +127,9 @@ def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertio
     else:
         if np.any(nans:= np.isnan(quat)):
             if allow_nans:
-                assert set(np.count_nonzero(nans, axis=0)).issubset({0, 4}), 'Quaternions with NaNs ' + \
-                    'must have NaNs for every component.'
+                # TODO: this is a hack for typing!  set command is valid
+                temp = 'Quaternions with NaNs must have NaNs for every component.'
+                assert set(np.count_nonzero(nans, axis=0)).issubset({0, 4}), temp  # type: ignore[arg-type]
             else:
                 assert False, 'NaNs are not allow in quaternion.'
         ix = ~np.isnan(quat[0, :])

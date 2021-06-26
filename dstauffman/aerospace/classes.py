@@ -23,7 +23,7 @@ if HAVE_NUMPY:
     import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
-    _Sets = Union[set, FrozenSet]
+    _Sets = Union[set[str], FrozenSet[str]]
     _Time = Union[float, np.datetime64]
 
 #%% KfInnov
@@ -99,35 +99,51 @@ class KfInnov(Frozen):
         if inplace:
             kfinnov = self
         else:
-            kfinnov       = KfInnov()
-            kfinnov.name  = self.name
-            kfinnov.chan  = copy.copy(self.chan)
-            kfinnov.units = self.units
+            kfinnov = copy.deepcopy(self)
+        if kfinnov2.time is None:
+            return kfinnov
+        assert kfinnov.time is not None
+        assert kfinnov2.time is not None
         kfinnov.time   = np.hstack((self.time, kfinnov2.time))
-        kfinnov.innov  = np.column_stack((self.time, kfinnov2.time))
-        kfinnov.norm   = np.column_stack((self.time, kfinnov2.time))
-        kfinnov.status = np.hstack((self.time, kfinnov2.time))
-        kfinnov.fploc  = np.column_stack((self.time, kfinnov2.time))
-        kfinnov.snr    = np.hstack((self.time, kfinnov2.time))
+        # TODO: deal with Nones
+        kfinnov.innov  = np.column_stack((self.innov, kfinnov2.innov))
+        kfinnov.norm   = np.column_stack((self.norm, kfinnov2.norm))
+        kfinnov.status = np.hstack((self.status, kfinnov2.status))  # type: ignore[arg-type]
+        if self.fploc is not None and kfinnov2.fploc is not None:
+            kfinnov.fploc  = np.column_stack((self.fploc, kfinnov2.fploc))
+        if self.snr is not None and kfinnov2.snr is not None:
+            kfinnov.snr    = np.hstack((self.snr, kfinnov2.snr))
         return kfinnov
 
     @overload
-    def chop(self, ti: _Time = ..., tf: _Time = ..., *, is_last: bool = ..., \
+    def chop(self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
             inplace: bool = ..., return_ends: Literal[True]) -> Tuple[KfInnov, KfInnov, KfInnov]: ...
     @overload
-    def chop(self, ti: _Time = ..., tf: _Time = ..., *, is_last: bool = ..., \
+    def chop(self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
             inplace: bool = ..., return_ends: Literal[False] = ...) -> KfInnov: ...
 
-    def chop(self, ti: _Time = None, tf: _Time = None, *, is_last: bool = False, \
+    def chop(self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, \
             inplace: bool = False, return_ends: bool = False) -> Union[KfInnov, Tuple[KfInnov, KfInnov, KfInnov]]:
         exclude = frozenset({'name', 'chan', 'units'})
+        assert self.time is not None, "You can't chop an uninitialized time field."
         use_dates = is_datetime(self.time)
         if ti is None:
             ti = np.datetime64('nat') if use_dates else -np.inf
         if tf is None:
             tf = np.datetime64('nat') if use_dates else np.inf
+        assert ti is not None
+        assert tf is not None
+        if return_ends:
+            left = copy.deepcopy(self)
+            right = copy.deepcopy(self)
+            tl = np.datetime64('nat') if use_dates else -np.inf
+            tr = np.datetime64('nat') if use_dates else np.inf
+            chop_time(left, time_field='time', exclude=exclude, ti=tl, tf=ti, right=False)  # type: ignore[arg-type]
+            chop_time(right, time_field='time', exclude=exclude, ti=tf, tf=tr, left=False)  # type: ignore[arg-type]
         out = self if inplace else copy.deepcopy(self)
-        chop_time(out, time_field='time', exclude=exclude, ti=ti, tf=tf)
+        chop_time(out, time_field='time', exclude=exclude, ti=ti, tf=tf, right=include_last)
+        if return_ends:
+            return (left, out, right)
         return out
 
 #%% Kf

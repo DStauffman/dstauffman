@@ -125,7 +125,7 @@ if HAVE_NUMPY:
     NP_ONE_HOUR: np.timedelta64   = np.timedelta64(1, 'h').astype(NP_TIMEDELTA_FORM)
     NP_ONE_DAY: np.timedelta64    = np.timedelta64(1, 'D').astype(NP_TIMEDELTA_FORM)
 else:
-    NP_ONE_SECOND = NP_ONE_MINUTE = NP_ONE_HOUR = NP_ONE_DAY = None
+    NP_ONE_SECOND = NP_ONE_MINUTE = NP_ONE_HOUR = NP_ONE_DAY = None  # type: ignore[assignment]
 
 #%% Functions
 # None

@@ -149,7 +149,7 @@ def find_in_range(value: ArrayLike, min_: _SingleNum = -inf, max_: _SingleNum = 
     max_ : int or float, optional
         Maximum value to include in range
     inclusive : bool, optional, default is False
-        Whether to inclusively count bount endpoints (overrules left and right)
+        Whether to inclusively count both endpoints (overrules left and right)
     mask : (N,) ndarray of bool, optional
         A mask to preapply to the results
     precision : int or float, optional, default is zero
