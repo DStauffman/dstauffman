@@ -9,7 +9,7 @@ Notes
 #%% Imports
 import unittest
 
-import dstauffman.numba as nub
+import dstauffman.nubs as nubs
 
 try:
     import numba
@@ -27,10 +27,10 @@ class Test_types(unittest.TestCase):
         Constants
     """
     def test_callables(self) -> None:
-        self.assertTrue(callable(nub.ncjit))
+        self.assertTrue(callable(nubs.ncjit))
 
     def test_constants(self) -> None:
-        self.assertTrue(isinstance(nub.TARGET, str))
+        self.assertTrue(isinstance(nubs.TARGET, str))
 
 #%% Unit test execution
 if __name__ == '__main__':

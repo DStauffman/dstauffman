@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 
 from dstauffman import activate_logging, deactivate_logging, Frozen, HAVE_NUMPY, load_method, \
     LogLevel, MultipassExceptionWrapper, parfor_wrapper, pprint_dict, rss, SaveAndLoad, setup_dir
-from dstauffman.numba import ncjit
+from dstauffman.nubs import ncjit
 
 from dstauffman.estimation.linalg import mat_divide
 

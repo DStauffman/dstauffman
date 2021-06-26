@@ -11,7 +11,7 @@ import doctest
 import unittest
 
 from dstauffman import HAVE_NUMPY
-from dstauffman.numba import ncjit
+from dstauffman.nubs import ncjit
 
 from dstauffman.estimation.linalg import mat_divide
 
