@@ -704,7 +704,10 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
         ax.set_xticks(plotting_bins)
         ax.set_xticklabels(xlab)
     elif use_exact_counts:
-        ax.set_xticks(plotting_bins + 0.5)
+        if missing > 0:
+            ax.set_xticks(plotting_bins + 0.5)
+        else:
+            ax.set_xticks(plotting_bins[:-1] + 0.5)
         ax.set_xticklabels(xlab)
     plot_second_yunits(ax, ylab=second_ylabel, multiplier=100/data.size)
     setup_plots(fig, opts=opts)
