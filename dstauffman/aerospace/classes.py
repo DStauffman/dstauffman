@@ -165,12 +165,16 @@ class Kf(Frozen):
         Position history
     vel : (3, N) ndarray
         Velocity history
-    innov : class KfInnov
-        Innovation history for GPS measurements
-    state : (N, M) ndarray
-        State history
+    active : (M, ) ndarray
+        Active states
+    state : (M, N) ndarray
+        Active state history
+    istate : (M, ) ndarray
+        Initial state values
     covar : (N, M) ndarray
         Covariance history
+    innov : class KfInnov
+        Innovation history for GPS measurements
 
     Examples
     --------
@@ -296,6 +300,35 @@ class Kf(Frozen):
                         setattr(out, field, value)
         return out
 
+    def combine(self, kf2: Kf, /, *, inplace: bool = False) -> Kf:
+        r"""Combines two KfInnov structures together."""
+        # allow an empty structure to be passed through
+        if self.time is None:
+            if inplace:
+                for (key, value) in vars(kf2).items():
+                    setattr(self, key, value)
+            return kf2  # TODO: make a copy?
+        # concatenate fields
+        if inplace:
+            kf = self
+        else:
+            kf = copy.deepcopy(self)
+        if kf2.time is None:
+            return kf
+        assert kf.time is not None
+        assert kf2.time is not None
+        kf.time   = np.hstack((self.time, kf2.time))
+        kf.istate = self.istate.copy()
+        kf.active = self.active.copy()  # TODO: assert that they are the same?
+        for field in {'att', 'pos', 'vel', 'state', 'covar'}:
+            x = getattr(self, field)
+            y = getattr(kf2, field)
+            if x is not None and y is not None:
+                setattr(kf, field, np.column_stack((x, y)))
+        for sub in self._subclasses:
+            setattr(kf, sub, getattr(self, sub).combine(getattr(kf2, sub)))  # TODO: inplace?
+        return kf
+
 #%% Classes - KfRecord
 class KfRecord(Frozen):
     r"""
@@ -396,6 +429,60 @@ class KfRecord(Frozen):
         out: KfRecord = load_method(cls, filename=filename, use_hdf5=use_hdf5)
         if hasattr(out.time, 'dtype') and out.time.dtype == np.int64:  # type: ignore[union-attr]
             out.time.dtype = NP_DATETIME_FORM  # type: ignore[misc, union-attr]
+        return out
+
+    def combine(self, kfrecord2: KfRecord, /, *, inplace: bool = False) -> KfRecord:
+        r"""Combines two KfRecord structures together."""
+        # allow an empty structure to be passed through
+        if self.time is None:
+            if inplace:
+                for (key, value) in vars(kfrecord2).items():
+                    setattr(self, key, value)
+            return kfrecord2  # TODO: make a copy?
+        # concatenate fields
+        if inplace:
+            kfrecord = self
+        else:
+            kfrecord = copy.deepcopy(self)
+        if kfrecord2.time is None:
+            return kfrecord
+        assert kfrecord.time is not None
+        assert kfrecord2.time is not None
+        kfrecord.time   = np.hstack((self.time, kfrecord2.time))
+        for field in {'P', 'stm', 'H', 'Pz', 'K', 'z'}:
+            if (x := getattr(self, field)) is not None and (y := getattr(kfrecord2, field)) is not None:
+                setattr(kfrecord, field, np.concatenate((x, y), axis=x.ndim))
+        return kfrecord
+
+    @overload
+    def chop(self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
+            inplace: bool = ..., return_ends: Literal[True]) -> Tuple[KfRecord, KfRecord, KfRecord]: ...
+    @overload
+    def chop(self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
+            inplace: bool = ..., return_ends: Literal[False] = ...) -> KfRecord: ...
+
+    def chop(self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, \
+            inplace: bool = False, return_ends: bool = False) -> Union[KfRecord, Tuple[KfRecord, KfRecord, KfRecord]]:
+        exclude = frozenset({})
+        assert self.time is not None, "You can't chop an uninitialized time field."
+        use_dates = is_datetime(self.time)
+        if ti is None:
+            ti = np.datetime64('nat') if use_dates else -np.inf
+        if tf is None:
+            tf = np.datetime64('nat') if use_dates else np.inf
+        assert ti is not None
+        assert tf is not None
+        if return_ends:
+            left = copy.deepcopy(self)
+            right = copy.deepcopy(self)
+            tl = np.datetime64('nat') if use_dates else -np.inf
+            tr = np.datetime64('nat') if use_dates else np.inf
+            chop_time(left, time_field='time', exclude=exclude, ti=tl, tf=ti, right=False)  # type: ignore[arg-type]
+            chop_time(right, time_field='time', exclude=exclude, ti=tf, tf=tr, left=False)  # type: ignore[arg-type]
+        out = self if inplace else copy.deepcopy(self)
+        chop_time(out, time_field='time', exclude=exclude, ti=ti, tf=tf, right=include_last)
+        if return_ends:
+            return (left, out, right)
         return out
 
 #%% Unit Test
