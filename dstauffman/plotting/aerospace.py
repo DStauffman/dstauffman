@@ -15,7 +15,7 @@ from dstauffman import HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel
 from dstauffman.aerospace import Kf, KfInnov
 from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, \
     make_difference_plot, make_generic_plot
-from dstauffman.plotting.plotting import Opts, setup_plots
+from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
 from dstauffman.plotting.support import COLOR_LISTS, ColorMap, get_nondeg_colorlists, \
     get_rms_indices
 
@@ -716,6 +716,11 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
     description = name + 'Focal Plane Sightings'
     logger.log(LogLevel.L4, f'Plotting {description} plots ...')
 
+    # check for data
+    if kf1.fploc is None:
+        logger.log(LogLevel.L5, 'No focal plane data was provided, so no plots were generated.')
+        return []
+
     # alias opts
     legend_loc = kwargs.pop('legend_loc', opts.leg_spot)
 
@@ -735,10 +740,45 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
     # Setup plots
     figs = [fig]
     setup_plots(figs, opts)
-    if figs:
-        logger.log(LogLevel.L4, '... done.')
-    else:
-        logger.log(LogLevel.L5, 'No focal plane data was provided, so no plots were generated.')
+    logger.log(LogLevel.L4, '... done.')
+    return figs
+
+#%% plot_innov_hist
+def plot_innov_hist(kf1, bins, *, opts=None, fields=None, normalize_spacing=False, use_exact_counts=False, \
+        show_pdf=False, pdf_x=None, pdf_y=None):
+    # check optional inputs
+    if kf1 is None:
+        kf1 = KfInnov()
+    if opts is None:
+        opts = Opts()
+    if fields is None:
+        fields = {'innov': 'Innovations', 'norm': 'Normalized Innovations'}
+
+    description = kf1.name if kf1.name else ''
+    logger.log(LogLevel.L4, f'Plotting {description} plots ...')
+
+    # check for data
+    if kf1.innov is None:
+        logger.log(LogLevel.L5, 'No innovation data was provided, so no plots were generated.')
+        return []
+    data = kf1.innov[0, :]
+
+    figs = []
+    printed = False
+
+    #% call wrapper functions for most of the details
+    for (field, sub_description) in fields.items():
+        full_description = description + ' - ' + sub_description  + ' Histogram' if description else sub_description + ' Histogram'
+        # print status
+        if not printed:
+            logger.log(LogLevel.L4, f'Plotting {full_description} plots ...')
+            printed = True
+        data = getattr(kf1, field)
+        for i in range(data.shape[0]):
+            fig = plot_histogram(full_description, data[i, :], bins, opts=opts, color='#1f77b4', xlabel='Data', \
+                ylabel='Number', second_ylabel='Distribution [%]', normalize_spacing=normalize_spacing, \
+                use_exact_counts=use_exact_counts, show_pdf=show_pdf, pdf_x=pdf_x, pdf_y=pdf_y)
+            figs.append(fig)
     return figs
 
 #%% plot_covariance
@@ -897,7 +937,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
                     ylabel=this_ylabel, colormap=colormap, **kwargs)
                 if return_err:
                     figs += out[0]
-                    err[field][f'Group {ix}'] = out[1]
+                    err[field][f'Group {ix+1}'] = out[1]
                 else:
                     figs += out
     # Setup plots

@@ -22,7 +22,8 @@ from .classes   import save_hdf5, load_hdf5, save_pickle, load_pickle, save_meth
                            SaveAndLoadPickle, Counter, FixedDict
 from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_DS, HAVE_NUMPY, HAVE_PANDAS, \
                            HAVE_PYTEST, HAVE_SCIPY, INT_TOKEN, IS_WINDOWS, NP_DATETIME_UNITS, \
-                           NP_DATETIME_FORM, NP_TIMEDELTA_FORM, NP_INT64_PER_SEC
+                           NP_DATETIME_FORM, NP_TIMEDELTA_FORM, NP_INT64_PER_SEC, NP_ONE_SECOND, \
+                           NP_ONE_MINUTE, NP_ONE_HOUR, NP_ONE_DAY
 from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
 from .logs      import activate_logging, deactivate_logging, flush_logging, log_multiline
@@ -42,10 +43,10 @@ from .units     import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, 
                            ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, DEGREE_SIGN, \
                            MICRO_SIGN, get_factors, get_time_factor, get_unit_conversion
 from .utils     import find_in_range, rms, rss, compare_two_classes, compare_two_dicts, \
-                           read_text_file, write_text_file, capture_output, unit, modd, is_np_int, \
-                           np_digitize, histcounts, full_print, line_wrap, combine_per_year, \
-                           execute, execute_wrapper, get_env_var, get_username, is_datetime, \
-                           intersect, issorted, zero_order_hold, drop_following_time
+                           read_text_file, write_text_file, capture_output, magnitude, unit, \
+                           modd, is_np_int, np_digitize, histcounts, full_print, line_wrap, \
+                           combine_per_year, execute, execute_wrapper, get_env_var, get_username, \
+                           is_datetime, intersect, issorted, zero_order_hold, drop_following_time
 from .utils_log import setup_dir, fix_rollover, remove_outliers
 from .version   import version_info
 

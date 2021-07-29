@@ -26,9 +26,9 @@ class Test_aerospace_QUAT_SIZE(unittest.TestCase):
         self.assertEqual(space.QUAT_SIZE, 4)
 
 #%% aerospace.suppress_quat_checks and aerospace.unsupress_quat_checks
-class Test_plotting_Plotter(unittest.TestCase):
+class Test_aerospace_suppress_checks(unittest.TestCase):
     r"""
-    Tests the plotting.Plotter class with the following cases:
+    Tests the suppress_quat_checks and unsupress_quat_checks functions with the following cases:
         Suppress and Unsuppress
     """
     @classmethod
@@ -249,11 +249,11 @@ class Test_aerospace_qrot(unittest.TestCase):
         quat = space.qrot(1, 5.1*np.pi)
         self.assertGreater(quat[3], 0)
 
-#%% aerospace.quat_from_axis_angle_single
+#%% aerospace.quat_from_axis_angle
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
-class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
+class Test_aerospace_quat_from_axis_angle(unittest.TestCase):
     r"""
-    Tests the aerospace.quat_from_axis_angle_single function with the following cases:
+    Tests the aerospace.quat_from_axis_angle function with the following cases:
         Single axis (x3)
         Multiple axis
     """

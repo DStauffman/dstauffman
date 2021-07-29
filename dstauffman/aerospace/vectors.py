@@ -13,7 +13,7 @@ from typing import List, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY, unit
-from dstauffman.numba import ncjit
+from dstauffman.nubs import ncjit
 
 if HAVE_NUMPY:
     import numpy as np

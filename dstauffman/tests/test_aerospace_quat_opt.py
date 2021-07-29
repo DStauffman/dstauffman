@@ -11,7 +11,7 @@ import unittest
 
 from dstauffman import HAVE_NUMPY
 import dstauffman.aerospace as space
-from dstauffman.numba import HAVE_NUMBA
+from dstauffman.nubs import HAVE_NUMBA
 
 if HAVE_NUMPY:
     import numpy as np

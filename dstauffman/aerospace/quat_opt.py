@@ -13,7 +13,7 @@ import unittest
 
 from dstauffman import HAVE_NUMPY
 from dstauffman.aerospace.vectors import vec_cross
-from dstauffman.numba import ncjit
+from dstauffman.nubs import ncjit
 
 if HAVE_NUMPY:
     import numpy as np

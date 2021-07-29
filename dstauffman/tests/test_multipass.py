@@ -24,9 +24,9 @@ def _model_wrapper(x, y):
 
 #%% parfor_wrapper
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
-class Test_load_matlab(unittest.TestCase):
+class Test_parfor_wrapper(unittest.TestCase):
     r"""
-    Tests the load_matlab function with the following cases:
+    Tests the parfor_wrapper function with the following cases:
         Nominal
     """
     def setUp(self) -> None:

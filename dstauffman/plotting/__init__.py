@@ -10,8 +10,8 @@ Notes
 
 #%% Imports
 from .aerospace import make_quaternion_plot, plot_attitude, plot_los, plot_position, \
-                           plot_velocity, plot_innovations, plot_innov_fplocs, plot_covariance, \
-                           plot_states
+                           plot_velocity, plot_innovations, plot_innov_fplocs, plot_innov_hist, \
+                           plot_covariance, plot_states
 from .batch     import plot_bpe_convergence, plot_bpe_results
 from .generic   import make_generic_plot, make_time_plot, make_error_bar_plot, \
                            make_difference_plot, make_categories_plot, make_connected_sets, \

@@ -606,7 +606,7 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
 #%% Functions - plot_histogram
 def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabel='Data', \
         ylabel='Number', second_ylabel='Distribution [%]', normalize_spacing=False, \
-        use_exact_counts=False):
+        use_exact_counts=False, show_pdf=False, pdf_x=None, pdf_y=None):
     r"""
     Creates a histogram plot of the given data and bins.
 
@@ -632,6 +632,12 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
         Whether to normalize all the bins to the same horizontal size
     use_exact_counts : bool, optional, default is False
         Whether to bin things based only on exactly equal values
+    show_pdf : bool, optional, default is False
+        Whether to draw the PDF result
+    pdf_x : scalar or (B, ) ndarray
+        X values to draw lines at PDF
+    pdf_y : scalar or (C, ) ndarray
+        Y values to draw lines at PDF
 
     Returns
     -------
@@ -651,9 +657,13 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
     >>> bins = np.array([0., 1., 2., 3., 5., 7.])
     >>> fig = plot_histogram(description, data, bins)
 
+    With PDF
+    >>> fig2 = plot_histogram(description, data, bins, show_pdf=True, pdf_y=0.5)
+
     Close plot
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
+    >>> plt.close(fig2)
 
     """
     # check optional inputs
@@ -704,9 +714,15 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
         ax.set_xticks(plotting_bins)
         ax.set_xticklabels(xlab)
     elif use_exact_counts:
-        ax.set_xticks(plotting_bins + 0.5)
+        if missing > 0:
+            ax.set_xticks(plotting_bins + 0.5)
+        else:
+            ax.set_xticks(plotting_bins[:-1] + 0.5)
         ax.set_xticklabels(xlab)
     plot_second_yunits(ax, ylab=second_ylabel, multiplier=100/data.size)
+    # Optionally add PDF information
+    if show_pdf:
+        pass  # TODO: add this
     setup_plots(fig, opts=opts)
     return fig
 

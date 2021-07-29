@@ -14,7 +14,7 @@ import math
 from typing import Sequence
 import unittest
 
-from dstauffman.numba.passthrough import fake_jit, HAVE_NUMBA, ncjit, TARGET
+from dstauffman.nubs.passthrough import fake_jit, HAVE_NUMBA, ncjit, TARGET
 
 if HAVE_NUMBA:
     from numba import float32, float64, int32, int64, vectorize  # type: ignore[attr-defined]
@@ -40,7 +40,7 @@ def np_any(x: Sequence, /) -> bool:
 
     Examples
     --------
-    >>> from dstauffman.numba import np_any
+    >>> from dstauffman.nubs import np_any
     >>> import numpy as np
     >>> x = np.zeros(1000, dtype=bool)
     >>> print(np_any(x))
@@ -75,7 +75,7 @@ def np_all(x: Sequence, /) -> bool:
 
     Examples
     --------
-    >>> from dstauffman.numba import np_all
+    >>> from dstauffman.nubs import np_all
     >>> import numpy as np
     >>> x = np.ones(1000, dtype=bool)
     >>> print(np_all(x))
@@ -110,7 +110,7 @@ def issorted_opt(x: Sequence, /, descend: bool = False) -> bool:
 
     Examples
     --------
-    >>> from dstauffman.numba import issorted_opt
+    >>> from dstauffman.nubs import issorted_opt
     >>> import numpy as np
     >>> x = np.array([1, 3, 3, 5, 7])
     >>> print(issorted_opt(x))
@@ -155,7 +155,7 @@ def prob_to_rate_opt(prob: float, time: float) -> float:
 
     Examples
     --------
-    >>> from dstauffman.numba import HAVE_NUMBA, prob_to_rate_opt
+    >>> from dstauffman.nubs import HAVE_NUMBA, prob_to_rate_opt
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
     >>> time = 3
@@ -201,7 +201,7 @@ def rate_to_prob_opt(rate: float, time: float) -> float:
 
     Examples
     --------
-    >>> from dstauffman.numba import HAVE_NUMBA, rate_to_prob_opt
+    >>> from dstauffman.nubs import HAVE_NUMBA, rate_to_prob_opt
     >>> import numpy as np
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
     >>> time = 1./12
@@ -241,7 +241,7 @@ def zero_divide(num: float, den: float) -> float:
 
     Examples
     --------
-    >>> from dstauffman.numba import zero_divide
+    >>> from dstauffman.nubs import zero_divide
     >>> print(zero_divide(1., .2))
     5.0
 
@@ -258,5 +258,5 @@ def zero_divide(num: float, den: float) -> float:
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_numba_optimized', exit=False)
+    unittest.main(module='dstauffman.tests.test_nubs_optimized', exit=False)
     doctest.testmod(verbose=False)

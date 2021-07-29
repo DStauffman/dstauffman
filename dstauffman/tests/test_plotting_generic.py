@@ -106,9 +106,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         time = np.arange(100.)
         data = np.full(100, 'open', dtype='S6')
         data[10:20] = 'closed'
-        with self.assertWarns(UserWarning) as w:
-            self.fig = plot.make_time_plot(self.description, time, data, show_rms=False)
-        self.assertEqual(('Data was not numeric, so Y limit was not zoomed.', ), w.warning.args)  # type: ignore[attr-defined]
+        self.fig = plot.make_time_plot(self.description, time, data, show_rms=False)
 
     @unittest.skipIf(not HAVE_DS, 'Skipping due to missing datashader dependency.')
     def test_datashader(self) -> None:
@@ -129,9 +127,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         time = np.linspace(0., 1000., 10**4)
         data = np.full(10**4, 'open', dtype='S6')
         data[1000:2000] = 'closed'
-        with self.assertWarns(UserWarning) as w:
-            self.fig = plot.make_time_plot(self.description, time, data, show_rms=False, use_datashader=True)
-        self.assertEqual(('Data was not numeric, so Y limit was not zoomed.', ), w.warning.args)  # type: ignore[attr-defined]
+        self.fig = plot.make_time_plot(self.description, time, data, show_rms=False, use_datashader=True)
 
     def tearDown(self) -> None:
         if self.fig:

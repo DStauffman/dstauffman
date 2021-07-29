@@ -49,7 +49,7 @@ if TYPE_CHECKING:
     _StrOrListStr = TypeVar('_StrOrListStr', str, List[str])
     _SingleNum = Union[int, float, np.ndarray, np.datetime64]
     _Lists = Union[np.ndarray, List[np.ndarray], Tuple[np.ndarray, ...]]
-    _Number = Union[float, np.ndarray]
+    _Number = Union[float, int, np.ndarray]
 
 #%% Functions - _nan_equal
 def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:
@@ -149,7 +149,7 @@ def find_in_range(value: ArrayLike, min_: _SingleNum = -inf, max_: _SingleNum = 
     max_ : int or float, optional
         Maximum value to include in range
     inclusive : bool, optional, default is False
-        Whether to inclusively count bount endpoints (overrules left and right)
+        Whether to inclusively count both endpoints (overrules left and right)
     mask : (N,) ndarray of bool, optional
         A mask to preapply to the results
     precision : int or float, optional, default is zero
@@ -195,7 +195,7 @@ def find_in_range(value: ArrayLike, min_: _SingleNum = -inf, max_: _SingleNum = 
 
 #%% Functions - rms
 @overload
-def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> float: ...
+def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> Union[float, int]: ...
 @overload
 def rms(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _Number: ...
 @overload
@@ -260,7 +260,7 @@ def rms(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: 
 
 #%% Functions - rss
 @overload
-def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> float: ...
+def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> Union[float, int]: ...
 @overload
 def rss(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _Number: ...
 @overload
@@ -697,6 +697,49 @@ def capture_output(mode: str = 'out'):
         # restore the original buffers once all results are read
         sys.stdout, sys.stderr = old_out, old_err
 
+#%% Functions - magnitude
+def magnitude(data: _Lists, axis: int = 0) -> Union[float, np.ndarray]:
+    r"""
+    Return a vector of magnitudes for each subvector along a specified dimension.
+
+    Parameters
+    ----------
+    data : ndarray
+        Data
+    axis : int, optional
+        Axis upon which to normalize, defaults to first axis (i.e. column normalization for 2D matrices)
+
+    Returns
+    -------
+    norm_data : ndarray
+        Normalized data
+
+    See Also
+    --------
+    sklearn.preprocessing.normalize
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2021.
+
+    Examples
+    --------
+    >>> from dstauffman import magnitude
+    >>> import numpy as np
+    >>> data = np.array([[1, 0, -1], [0, 0, 0], [0, 0, 1]])
+    >>> mag = magnitude(data, axis=0)
+    >>> with np.printoptions(precision=8):
+    ...     print(mag) # doctest: +NORMALIZE_WHITESPACE
+    [1. 0. 1.41421356]
+
+    """
+    if isinstance(data, (list, tuple)):
+        data = np.vstack(data).T
+    assert isinstance(data, np.ndarray)
+    if axis >= data.ndim:
+        raise ValueError('axis {} is out of bounds for array of dimension {}'.format(axis, data.ndim))
+    return np.sqrt(np.sum(data * np.conj(data), axis=axis))  # type: ignore[no-any-return]
+
 #%% Functions - unit
 def unit(data: _Lists, axis: int = 0) -> np.ndarray:
     r"""
@@ -741,7 +784,7 @@ def unit(data: _Lists, axis: int = 0) -> np.ndarray:
     if axis >= data.ndim:
         raise ValueError('axis {} is out of bounds for array of dimension {}'.format(axis, data.ndim))
     # calculate the magnitude of each vector
-    mag = np.atleast_1d(np.sqrt(np.sum(data * np.conj(data), axis=axis)))
+    mag = np.asanyarray(magnitude(data, axis=axis))
     # check for zero vectors, and replace magnitude with 1 to make them unchanged
     mag[mag == 0] = 1
     # calculate the new normalized data

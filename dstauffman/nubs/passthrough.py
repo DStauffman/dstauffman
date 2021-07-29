@@ -63,5 +63,5 @@ else:
 
 #%% Unit test
 if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_numba_passthrough', exit=False)
+    unittest.main(module='dstauffman.tests.test_nubs_passthrough', exit=False)
     doctest.testmod(verbose=False)

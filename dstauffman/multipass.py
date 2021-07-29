@@ -9,11 +9,15 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
+import logging
 import multiprocessing
 import sys
-from typing import Any, Callable, Iterable, Optional, Type, TYPE_CHECKING
+import traceback
+from typing import Any, Callable, Iterable, List, Optional, Type, TYPE_CHECKING
 import unittest
 import warnings
+
+from dstauffman.enums import LogLevel
 
 if TYPE_CHECKING:
     from types import TracebackType
@@ -26,6 +30,9 @@ except ModuleNotFoundError:
 else:
     # TODO: is there a downside to always doing this?  Should I rely on the scripts that call it instead?
     tblib.pickling_support.install()
+
+#%% Globals
+logger = logging.getLogger(__name__)
 
 #%% Classes - MultipassExceptionWrapper
 class MultipassExceptionWrapper(object):
@@ -43,7 +50,7 @@ class MultipassExceptionWrapper(object):
 
 #%% Functions - parfor_wrapper
 def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_parfor: bool = True, \
-        max_cores: Optional[int] = -1) -> Any:
+        max_cores: Optional[int] = -1, ignore_errors: bool = False) -> Any:
     r"""
     Wrapper function for the code that you want to run in a parallelized fashion.
 
@@ -59,6 +66,8 @@ def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_p
         Whether to run parallelized or not
     max_cores : int, optional
         Maximum number of cores to use
+    ignore_errors : bool, optional, default is False
+        Flag to collect and log, but otherwise ignore errors and continue on where possible
 
     Returns
     -------
@@ -93,13 +102,17 @@ def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_p
         num_cores = multiprocessing.cpu_count()
     else:
         num_cores = min((multiprocessing.cpu_count(), max_cores))
+    errors: List[MultipassExceptionWrapper] = []
     if use_parfor and num_cores > 1:
         # parallel loop
         with multiprocessing.get_context('spawn').Pool(num_cores) as pool:
             temp_results = list(pool.starmap(func, args))
         for result in temp_results:
             if isinstance(result, MultipassExceptionWrapper):
-                result.re_raise()
+                if ignore_errors:
+                    errors.append(result)
+                else:
+                    result.re_raise()
             else:
                 results.append(result)
     else:
@@ -110,11 +123,19 @@ def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_p
                 this_args = next(it)
                 result = func(*this_args)
                 if isinstance(result, MultipassExceptionWrapper):
-                    result.re_raise()
+                    if ignore_errors:
+                        errors.append(result)
+                    else:
+                        result.re_raise()
                 else:
                     results.append(result)
             except StopIteration:
                 break
+    if ignore_errors and len(errors) > 0:
+        logger.log(LogLevel.L2, 'There were %i error(s) in the processing.', len(errors))
+        for (i, err) in enumerate(errors):
+            logger.log(LogLevel.L6, 'Error %i: %s\n%s', i+1, \
+                err.ee.with_traceback(err.tb), '\n'.join(traceback.format_tb(err.tb)))  # type: ignore[call-arg, type-var]
     return results
 
 #%% Unit test

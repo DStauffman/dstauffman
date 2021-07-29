@@ -16,7 +16,7 @@ from pathlib import Path
 import pickle
 import sys
 from typing import Any, Callable, Dict, FrozenSet, Iterable, List, Literal, NoReturn, Optional, \
-    overload, Set, Tuple, Type, TypeVar, Union
+    overload, Set, Tuple, Type, TYPE_CHECKING, TypeVar, Union
 import unittest
 import warnings
 
@@ -27,15 +27,20 @@ from dstauffman.utils import find_in_range
 if HAVE_H5PY:
     import h5py
 if HAVE_NUMPY:
-    from numpy import all as np_all, ndarray, inf, printoptions
+    from numpy import all as np_all, datetime64, ndarray, inf, printoptions
 else:
-    from dstauffman.numba import np_all  # type: ignore[no-redef]
+    from dstauffman.nubs import np_all  # type: ignore[no-redef]
     from math import inf
     from array import array as ndarray  # type: ignore[misc]
+    datetime64 = ndarray  # type: ignore[assignment, misc]
 
 #%% Constants
-_T = TypeVar('_T')
-_C = TypeVar('_C', int, 'Counter')
+if TYPE_CHECKING:
+    _T = TypeVar('_T')
+    _C = TypeVar('_C', int, 'Counter')
+    _SingleNum = Union[int, float, ndarray, datetime64]
+    _Sets = Union[Set[str], FrozenSet[str]]
+    _Time = Union[float, datetime64]
 
 #%% Functions - _frozen
 def _frozen(set: Callable) -> Callable:
@@ -302,7 +307,9 @@ def pprint_dict(dct: Dict[Any, Any], *, name: str='', indent: int = 1, align: bo
     return text
 
 #%% Functions - chop_time
-def chop_time(self: Any, time_field: str, exclude: Set[str] = None, ti: float = -inf, tf: float = inf) -> None:
+def chop_time(self: Any, time_field: str, exclude: _Sets = None, ti: _Time = -inf, tf: _Time = inf, \
+        inclusive: bool = False, mask: Union[bool, ndarray] = None, precision: _SingleNum = 0, \
+        left: bool = True, right: bool = True) -> None:
     r"""
     Chops the class to only include values within the given time span.
 
@@ -312,14 +319,27 @@ def chop_time(self: Any, time_field: str, exclude: Set[str] = None, ti: float = 
         Instance of the class that this method is operating on
     time_field : str
         The name of the time field to use for reference
+    exclude : List[str]
+        Names of any fields to exclude from chopping
     ti : float, optional
         Time to start from, inclusive
     tf : float, optional
         Time to end at, inclusize
+    inclusive : bool, optional, default is False
+        Whether to inclusively count both endpoints (overrules left and right)
+    mask : (N,) ndarray of bool, optional
+        A mask to preapply to the results
+    precision : int or float, optional, default is zero
+        A precision to apply to the comparisons
+    left : bool, optional, default is True
+        Whether to include the left endpoint in the range
+    right : bool, optional, default is True
+        Whether to include the right endpoint in the range
 
     Notes
     -----
-    #.  Written by David C. Stauffer in October 2020
+    #.  Written by David C. Stauffer in October 2020.
+    #.  Updated by David C. Stauffer in June 2021 to better wrap the find_in_range function.
 
     Examples
     --------
@@ -344,7 +364,8 @@ def chop_time(self: Any, time_field: str, exclude: Set[str] = None, ti: float = 
 
     """
     # build the new index
-    ix = find_in_range(getattr(self, time_field), min_=ti, max_=tf, inclusive=True)
+    ix = find_in_range(getattr(self, time_field), min_=ti, max_=tf, inclusive=inclusive, mask=mask, \
+        precision=precision, left=left, right=right)
     # exit early if no data is getting dropped
     if np_all(ix):
         return

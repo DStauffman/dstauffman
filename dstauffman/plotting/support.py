@@ -822,7 +822,6 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
         data = np.hstack([artist.get_ydata() for artist in ax.lines])
     # exit if the plotted data are not numeric
     if not np.issubdtype(data.dtype, np.number):
-        warnings.warn('Data was not numeric, so Y limit was not zoomed.')
         return
     # convert datetimes as appropriate for comparisons
     if is_datetime(time):
@@ -1365,12 +1364,14 @@ def plot_phases(ax, times, colormap='tab10', labels=None, *, group_all=False):
             x2 = date2num(x2)
         # create the shaded box
         ax.add_patch(Rectangle((x1, 0), x2-x1, 1, facecolor=this_color, edgecolor=this_color, \
-            alpha=transparency, transform=ax.get_xaxis_transform()))
+            alpha=transparency, transform=ax.get_xaxis_transform(), clip_on=True))
         # create the label
         if labels is not None:
             this_label = labels[i] if not group_all else labels
-            ax.annotate(this_label, xy=(x1, 0.99), xycoords=ax.get_xaxis_transform(), \
-                horizontalalignment='left', verticalalignment='top', fontsize=15, rotation=-90)
+            if bool(this_label):
+                ax.annotate(this_label, xy=(x1, 0.99), xycoords=ax.get_xaxis_transform(), \
+                    horizontalalignment='left', verticalalignment='top', fontsize=15, rotation=-90, \
+                    clip_on=True)
 
     # reset any limits that might have changed due to the patches
     ax.set_xlim(xlims)
