@@ -17,7 +17,9 @@ if dcs.HAVE_NUMPY:
 
 #%% Classes for testing
 class Test_all_values(unittest.TestCase):
-
+    r"""
+    Tests all the constant values in the module.
+    """
     def setUp(self) -> None:
         self.ints: List[str] = ['INT_TOKEN', 'NP_INT64_PER_SEC']
         self.strs: List[str] = ['NP_DATETIME_FORM', 'NP_DATETIME_UNITS', 'NP_TIMEDELTA_FORM']

@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     _T = TypeVar('_T')
     _C = TypeVar('_C', int, 'Counter')
     _SingleNum = Union[int, float, ndarray, datetime64]
-    _Sets = Union[set[str], FrozenSet[str]]
+    _Sets = Union[Set[str], FrozenSet[str]]
     _Time = Union[float, datetime64]
 
 #%% Functions - _frozen
@@ -338,8 +338,8 @@ def chop_time(self: Any, time_field: str, exclude: _Sets = None, ti: _Time = -in
 
     Notes
     -----
-    #.  Written by David C. Stauffer in October 2020
-    #.  Updated by David C. Stauffer in June 2021 to better wrap the find_in_range function
+    #.  Written by David C. Stauffer in October 2020.
+    #.  Updated by David C. Stauffer in June 2021 to better wrap the find_in_range function.
 
     Examples
     --------

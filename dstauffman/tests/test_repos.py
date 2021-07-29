@@ -295,8 +295,8 @@ class Test_make_python_init(unittest.TestCase):
         self.folder   = dcs.get_root_dir()
         self.text     = 'from .enums import'
         self.text2    = 'from .enums     import IntEnumPlus'
-        self.text3    = 'from .temp_file                import Test_Frozen'
-        self.text4    = 'from .temp_file                 import Test_Frozen'
+        self.text3    = 'from .temp_file                  import Test_Frozen'
+        self.text4    = 'from .temp_file                   import Test_Frozen'
         self.line_num = 5
         self.folder2  = dcs.get_tests_dir()
         self.filepath = self.folder2 / 'temp_file.py'

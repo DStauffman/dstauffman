@@ -332,7 +332,10 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
     if data_is_list:
         ix = {'one': [], 't_min': None, 't_max': None}
         for j in range(num_channels):
-            temp_ix = get_rms_indices(time_one[j], xmin=rms_xmin, xmax=rms_xmax)
+            if time_is_list:
+                temp_ix = get_rms_indices(time_one[j], xmin=rms_xmin, xmax=rms_xmax)
+            else:
+                temp_ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)
             ix['one'].append(temp_ix['one'])
             if j == 0:
                 ix['pts'] = temp_ix['pts']

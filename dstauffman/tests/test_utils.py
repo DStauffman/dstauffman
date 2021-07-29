@@ -195,8 +195,7 @@ class Test_rms(unittest.TestCase):
         self.outputs2a = np.sqrt(3)/2
         self.outputs2b = np.array([np.sqrt(2)/2, 1, np.sqrt(2)/2, 1])
         self.outputs2c = np.array([np.sqrt(2)/2, 1])
-        with self.assertWarns(PendingDeprecationWarning):
-            self.outputs2d = np.matrix([[np.sqrt(2)/2], [1]])
+        self.outputs2d = np.array([[np.sqrt(2)/2], [1]])
         self.inputs3   = np.hstack((self.inputs1, np.nan))
         self.inputs4   = [[0, 0., np.nan], [1., np.nan, 1]]
         self.outputs4a = np.sqrt(2)/2
@@ -230,21 +229,15 @@ class Test_rms(unittest.TestCase):
 
     def test_axis_drop2b(self) -> None:
         out = dcs.rms(self.inputs2, axis=0, keepdims=False)
-        assert isinstance(out, np.ndarray)
-        for (ix, val) in enumerate(out):
-            self.assertAlmostEqual(val, self.outputs2b[ix])
+        np.testing.assert_array_almost_equal(out, self.outputs2b)
 
     def test_axis_drop2c(self) -> None:
         out = dcs.rms(self.inputs2, axis=1, keepdims=False)
-        assert isinstance(out, np.ndarray)
-        for (ix, val) in enumerate(out):
-            self.assertAlmostEqual(val, self.outputs2c[ix])
+        np.testing.assert_array_almost_equal(out, self.outputs2c)
 
     def test_axis_keep(self) -> None:
         out = dcs.rms(self.inputs2, axis=1, keepdims=True)
-        for i in range(0, len(out)):
-            for j in range(0, len(out[i])):
-                self.assertAlmostEqual(out[i, j], self.outputs2d[i, j])
+        np.testing.assert_array_almost_equal(out, self.outputs2d)
 
     def test_complex_rms(self) -> None:
         out = dcs.rms(1.5j)
@@ -321,8 +314,7 @@ class Test_rss(unittest.TestCase):
         self.outputs2a = 6
         self.outputs2b = np.array([1, 2, 1, 2])
         self.outputs2c = np.array([2, 4])
-        with self.assertWarns(PendingDeprecationWarning):
-            self.outputs2d = np.matrix([[2], [4]])
+        self.outputs2d = np.array([[2], [4]])
         self.inputs3   = np.hstack((self.inputs1, np.nan))
         self.inputs4   = [[0, 0, np.nan], [1, np.nan, 1]]
         self.outputs4a = 2
@@ -356,21 +348,15 @@ class Test_rss(unittest.TestCase):
 
     def test_axis_drop2b(self) -> None:
         out = dcs.rss(self.inputs2, axis=0, keepdims=False)
-        assert isinstance(out, np.ndarray)
-        for (ix, val) in enumerate(out):
-            self.assertAlmostEqual(val, self.outputs2b[ix])
+        np.testing.assert_array_almost_equal(out, self.outputs2b)
 
     def test_axis_drop2c(self) -> None:
         out = dcs.rss(self.inputs2, axis=1, keepdims=False)
-        assert isinstance(out, np.ndarray)
-        for (ix, val) in enumerate(out):
-            self.assertAlmostEqual(val, self.outputs2c[ix])
+        np.testing.assert_array_almost_equal(out, self.outputs2c)
 
     def test_axis_keep(self) -> None:
         out = dcs.rss(self.inputs2, axis=1, keepdims=True)
-        for i in range(0, len(out)):
-            for j in range(0, len(out[i])):
-                self.assertAlmostEqual(out[i, j], self.outputs2d[i, j])
+        np.testing.assert_array_almost_equal(out, self.outputs2d)
 
     def test_complex_rss(self) -> None:
         out = dcs.rss(1.5j)
@@ -818,6 +804,48 @@ class Test_capture_output(unittest.TestCase):
             with dcs.capture_output('bad') as (out, err):
                 print('Lost values')
 
+#%% magnitude
+@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+class Test_magnitude(unittest.TestCase):
+    r"""
+    Tests the magnitude function with the following cases:
+        Nominal
+    """
+    def setUp(self) -> None:
+        self.data = np.array([[1., 0., -1.],[0., 0., 0.], [0., 0., 1.]])
+        self.mag = np.array([1., 0., np.sqrt(2)])
+
+    def test_nominal(self) -> None:
+        mag = dcs.magnitude(self.data, axis=0)
+        np.testing.assert_array_almost_equal(mag, self.mag)
+
+    def test_bad_axis(self) -> None:
+        with self.assertRaises(ValueError) as context:
+            dcs.magnitude(self.data, axis=2)
+        self.assertEqual(str(context.exception), 'axis 2 is out of bounds for array of dimension 2')
+
+    def test_single_vector(self) -> None:
+        for i in range(3):
+            mag = dcs.magnitude(self.data[:, i])
+            assert isinstance(mag, float)
+            self.assertAlmostEqual(mag, self.mag[i])
+
+    def test_single_vector_axis0(self) -> None:
+        for i in range(3):
+            mag = dcs.magnitude(self.data[:, i], axis=0)
+            assert isinstance(mag, float)
+            self.assertAlmostEqual(mag, self.mag[i])
+
+    def test_single_vector_bad_axis(self) -> None:
+        with self.assertRaises(ValueError) as context:
+            dcs.magnitude(self.data[:, 0], axis=1)
+        self.assertEqual(str(context.exception), 'axis 1 is out of bounds for array of dimension 1')
+
+    def test_list(self) -> None:
+        data = [self.data[:, i] for i in range(self.data.shape[1])]
+        mag = dcs.magnitude(data, axis=0)
+        np.testing.assert_array_almost_equal(mag, self.mag)
+
 #%% unit
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_unit(unittest.TestCase):
@@ -826,9 +854,9 @@ class Test_unit(unittest.TestCase):
         Nominal case
     """
     def setUp(self) -> None:
-        self.data = np.array([[1, 0, -1],[0, 0, 0], [0, 0, 1]])
+        self.data = np.array([[1., 0., -1.],[0., 0., 0.], [0., 0., 1.]])
         hr2 = np.sqrt(2)/2
-        self.norm_data = np.array([[1, 0, -hr2], [0, 0, 0], [0, 0, hr2]])
+        self.norm_data = np.array([[1., 0., -hr2], [0., 0., 0.], [0., 0., hr2]])
 
     def test_nominal(self) -> None:
         norm_data = dcs.unit(self.data, axis=0)
