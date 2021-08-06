@@ -23,14 +23,14 @@ else:
 # Written by David C. Stauffer for AA 279 on 28 Apr 2007, constants provided by Professor West.
 
 # Gravitational constant
-G = 6.67259e-11  # [m**3/(kg*s**2)] (+/- 0.00030)
+G = 6.67430e-11  # [m**3/(kg*s**2)] (+/- 22ppm) 2018 CODATA
 
 # Solar System Masses
 SS_MASSES: Dict[str, float] = {
     'sun': 1.9891e30,
     'mercury': 3.3022e23,
     'venus': 4.8690e24,
-    'earth': 5.9742e24,
+    'earth': 5.972168494074286e24,  # derived from MU_EARTH / G
     'mars': 6.4191e23,
     'jupiter': 1.8988e27,
     'saturn': 5.6850e26,

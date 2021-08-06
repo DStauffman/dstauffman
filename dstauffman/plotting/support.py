@@ -59,6 +59,10 @@ else:
     from math import inf
 if HAVE_SCIPY:
     import scipy.stats as st
+try:
+    from PIL import Image
+except ImportError:
+    pass
 
 #%% Constants
 # Default colormap to use on certain plots
@@ -541,9 +545,9 @@ def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Uni
     --------
     Create figure and then save to disk
     >>> from dstauffman.plotting import storefig
+    >>> from dstauffman import get_tests_dir
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> import pathlib
     >>> fig = plt.figure()
     >>> fig.canvas.manager.set_window_title('Figure Title')
     >>> ax = fig.add_subplot(111)
@@ -552,7 +556,7 @@ def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Uni
     >>> _ = ax.plot(x, y)
     >>> _ = ax.set_title('X vs Y')
     >>> plt.show(block=False) # doctest: +SKIP
-    >>> folder = pathlib.Path.cwd()
+    >>> folder = get_tests_dir()
     >>> plot_type = 'png'
     >>> storefig(fig, folder, plot_type)
 
@@ -1650,9 +1654,15 @@ def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = 
 
     Examples
     --------
-    >>> from dstauffman.plotting import plot_time_history, save_figs_to_pdf
+    >>> from dstauffman.plotting import close_all, plot_time_history, save_figs_to_pdf
+    >>> from dstauffman import get_tests_dir
     >>> fig = plot_time_history('test', 0, 0)
-    >>> save_figs_to_pdf(fig)  # doctest: +SKIP
+    >>> filename = get_tests_dir() / 'figs.pdf'
+    >>> save_figs_to_pdf(fig, filename)  # doctest: +SKIP
+
+    Delete file and close figure
+    >>> filename.unlink(missing_ok=True)
+    >>> close_all([fig])
 
     """
     # Optional inputs
@@ -1673,6 +1683,73 @@ def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = 
         d['Author'] = get_username()
         d['CreationDate'] = datetime.datetime.now()
         d['ModDate'] = d['CreationDate']
+
+#%% Functions - save_images_to_pdf
+def save_images_to_pdf(figs : Union[Figure, List[Figure]] = None, folder: Path = None, \
+        plot_type: Union[str, List[str]] = 'png', filename: Path = Path('figs.pdf')):
+    r"""
+    Uses figure names to find the already saved images and combine them into a PDF file.
+
+    Parameters
+    ----------
+    figs : figure or List[figure] or None
+        Figures to save, None means save all open figures
+    filename : str, optional
+        Name of the file to save the figures to, defaults to 'figs.pdf' in the current folder
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in August 2021.
+    #.  Note that save_figs_to_pdf saves vectorized images to PDF and is usually the better
+        solution. This function is intended to be called just after storefig, to use the PNG
+        versions as jpgs instead, which is better if there are several hundred thousand
+        points in the plots.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import close_all, plot_time_history, save_images_to_pdf, storefig
+    >>> from dstauffman import get_tests_dir
+    >>> fig = plot_time_history('test', 0, 0)
+    >>> folder = get_tests_dir()
+    >>> filename = get_tests_dir() / 'figs.pdf'
+    >>> plot_type = 'png'
+    >>> storefig(fig, folder, plot_type)
+    >>> save_images_to_pdf(fig, folder, plot_type, filename)
+
+    Delete file and close figure
+    >>> filename.unlink(missing_ok=True)
+    >>> image_filename = folder / 'test.png'
+    >>> image_filename.unlink(missing_ok=True)
+    >>> close_all([fig])
+
+    """
+    # Optional inputs
+    if figs is None:
+        figs = [plt.figure(i) for i in plt.get_fignums()]
+    if isinstance(figs, Figure):
+        figs = [figs]
+    assert isinstance(figs, list)
+    if folder is None:
+        folder = Path.pathlib.cwd()
+
+    # create the metadata
+    meta = {}
+    meta['Title'] = 'PDF Figures'
+    meta['Author'] = get_username()
+    meta['CreationDate'] = datetime.datetime.now()
+    meta['ModDate'] = meta['CreationDate']
+
+    # Create PDF of images
+    images = []
+    for (ix, fig) in enumerate(figs):
+        this_image = folder.joinpath(fig.canvas.manager.get_window_title() + '.' + plot_type)
+        image_rgba = Image.open(this_image)
+        image_jpg = image_rgba.convert('RGB')
+        if ix == 0:
+            im = image_jpg
+        else:
+            images.append(image_jpg)
+    im.save(filename, save_all=True, append_images=images, metadata=meta)  # TODO: metadata not saving?
 
 #%% Unit test
 if __name__ == '__main__':

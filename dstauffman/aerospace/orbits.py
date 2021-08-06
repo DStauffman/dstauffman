@@ -8,13 +8,14 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+import copy
 import datetime
 import doctest
 from typing import Any, ClassVar, Tuple, TypeVar, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import DEG2RAD, Frozen, HAVE_NUMPY, IntEnumPlus, magnitude, NP_DATETIME_FORM, \
-    NP_DATETIME_UNITS, NP_ONE_DAY, RAD2DEG
+from dstauffman import DEG2RAD, DEGREE_SIGN, Frozen, HAVE_NUMPY, IntEnumPlus, magnitude, \
+    NP_DATETIME_FORM, NP_DATETIME_UNITS, NP_ONE_DAY, RAD2DEG
 
 from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH
 from dstauffman.aerospace.orbit_conv import anomaly_eccentric_2_true, mean_motion_2_semimajor, \
@@ -136,22 +137,79 @@ class Elements(Frozen):
             x = getattr(self, key)
             y = getattr(other, key)
             if key in {'type', 'equatorial', 'circular'}:
-                if x != y:
+                if not np.all(x == y):
                     return False
             elif key in {'t'}:
-                if np.isnat(x) and np.isnat(y):
-                    pass
-                elif x != y:
+                if not np.all((np.isnat(x) & np.isnat(y)) | (x == y)):
                     return False
             else:
                 if x is None and y is None:
                     pass
                 elif x is None or y is None:
                     return False
-                elif not np.allclose(x, y, rtol=1e-6, atol=1e-8):
+                elif not np.allclose(x, y, rtol=1e-6, atol=1e-8, equal_nan=True):
                     return False
         # if it made it all the way through the fields, then things must be equal
         return True
+
+    def __getitem__(self, key):
+        if self.a is None or isinstance(self.a, float):
+            raise IndexError('Elements is only a single instance and can not be indexed')
+        elements = Elements()
+        for (field, value) in vars(self).items():
+            setattr(elements, field, value[key])
+        return elements
+
+    def combine(self, elements2: Elements, /, *, inplace: bool = False) -> Elements:
+        r"""Combines two KfInnov structures together."""
+        # allow an empty structure to be passed through
+        if self.a is None:
+            if inplace:
+                for (key, value) in vars(elements2).items():
+                    setattr(self, key, value)
+            return elements2  # TODO: make a copy?
+        # concatenate fields
+        if inplace:
+            elements = self
+        else:
+            elements = copy.deepcopy(self)
+        if elements2.a is None:
+            return elements
+        for (key, value) in vars(self).items():
+            setattr(elements, key, np.hstack((value, getattr(elements2, key))))
+        return elements
+
+    def print_orrery(self, index: int = None):
+        if index is None:
+            print(f'a = {self.a / 1000} km')
+            print(f'e = {self.e}')
+            print(f'i = {self.i * RAD2DEG} {DEGREE_SIGN}')
+            print(f'\N{GREEK CAPITAL LETTER OMEGA} = {self.W * RAD2DEG} {DEGREE_SIGN}')
+            print(f'\N{GREEK SMALL LETTER OMEGA} = {self.w * RAD2DEG} {DEGREE_SIGN}')
+            print(f'M = {self.vo * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)')
+        else:
+            print(f'a = {self.a[index] / 1000} km')
+            print(f'e = {self.e[index]}')
+            print(f'i = {self.i[index] * RAD2DEG} {DEGREE_SIGN}')
+            print(f'\N{GREEK CAPITAL LETTER OMEGA} = {self.W[index] * RAD2DEG} {DEGREE_SIGN}')
+            print(f'\N{GREEK SMALL LETTER OMEGA} = {self.w[index] * RAD2DEG} {DEGREE_SIGN}')
+            print(f'M = {self.vo[index] * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)')
+
+#%% Functions - _zero_divide
+def _zero_divide(x, y):
+    return np.divide(x, y, where=y!=0, out=np.zeros_like(y))
+
+#%% Functions - _inf_divide
+def _inf_divide(x, y):
+    return np.divide(x, y, where=y!=0, out=np.full(y.shape, np.inf))
+
+def _fix_instab(x, precision):
+    ix = (x > 1.) & (x < 1. + precision)
+    if np.any(ix):
+        x[ix] = 1.0
+    ix = (x < -1.) & (x > -1 - precision)
+    if np.any(ix):
+        x[ix] = -1.0
 
 #%% Functions - d_2_r
 def d_2_r(deg: _N) -> _N:
@@ -213,17 +271,17 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     >>> elements = two_line_elements(line1,line2)
     >>> elements.pprint()
     Elements
-     a          = 6722342.198683569
+     a          = 6722154.278502964
      e          = 0.0009556
      i          = 0.9012583551325879
      W          = 0.21395293168497687
      w          = 3.294076834348782
      vo         = 5.593365747043137
-     p          = None
+     p          = 6722148.1400242
      uo         = 8.88744258139192
      P          = 3.5080297660337587
      lo         = 9.101395513076895
-     T          = None
+     T          = 5484.96289455295
      type       = OrbitType.elliptic: 1
      equatorial = False
      circular   = False
@@ -287,6 +345,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     a = mean_motion_2_semimajor(n, MU_EARTH)
     E = anomaly_mean_2_eccentric(M, e)
     nu = anomaly_eccentric_2_true(E, e)
+    p = a * (1 - e**2)
 
     time = (datetime.datetime(2000 + year, 1, 1, 0, 0, 0) - datetime.datetime(2000, 1, 1, 0, 0, 0)).days \
         + JULIAN['jd_2000_01_01'] - 0.5 + day - 1
@@ -300,9 +359,11 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     elements.W          = Omega
     elements.w          = omega
     elements.vo         = nu
-    elements.P          = Omega + omega
+    elements.p          = p
     elements.uo         = omega + nu
+    elements.P          = Omega + omega
     elements.lo         = Omega + omega + nu
+    elements.T          = 2*np.pi*np.sqrt(a**3 / MU_EARTH)
     elements.t          = jd_to_numpy(time)
     elements.type       = OrbitType.elliptic
 
@@ -365,6 +426,9 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
     """
     # calculate angular momentum
     h = cross(r, v)
+    norm_r = norm(r)
+    norm_v = norm(v)
+    norm_h = norm(h)
 
     # calculations
     z = np.zeros(h.shape)
@@ -376,7 +440,7 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
         n[..., ix] = np.tile(np.array([[1.], [0.], [0.]]), (1, np.count_nonzero(ix)))
         n_mag[ix] = 1.
 
-    e = 1. / mu*((norm(v)**2 - mu/norm(r)) * r - dot(r,v) * v)
+    e = 1. / mu*((norm_v**2 - _zero_divide(mu, norm_r)) * r - dot(r,v) * v)
 
     # e
     e_mag = norm(e)
@@ -386,31 +450,33 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
     num = e_mag.size
 
     # p
-    p = norm(h)**2/mu
+    p = norm_h**2/mu
 
     # a
     # Note: a is infinite when eccentricity is exactly one
     a = np.divide(p, 1.0 - e_mag**2, where=e_mag!=1, out=np.full(num, np.inf))
 
     # i
-    i = np.arccos(h[2, ...] / norm(h))
+    i = np.arccos(_zero_divide(h[2, ...], norm_h), where=norm_h!=0, out=np.zeros_like(norm_h))
 
     # W
     W = np.asanyarray(np.arccos(n[0, ...] / n_mag))
-    W[n[1, ...] < -precision] += np.pi
+    W = np.subtract(2*np.pi, W, out=W, where=n[1, ...] < -precision)
 
     # w
     ix = np.abs(e_mag) >= precision
     w = np.divide(dot(n, e), n_mag*e_mag, where=ix, out=np.zeros(num))
+    _fix_instab(w, precision=precision)
     w = np.arccos(w, where=ix, out=w)
-    w[ix & (e[2, ...] < -precision)] += np.pi
-    # check for instabilities at acos(-1)  (TODO: need to check this before the arccos call)
+    w = np.subtract(2*np.pi, w, out=w, where=ix & (e[2, ...] < -precision))
     w[ix & ~np.isreal(w)] = np.pi
 
     # vo
-    vo = np.divide(dot(e, r), e_mag*norm(r), where=ix, out=np.zeros(num))
+    ix &= (norm_r > precision)
+    vo = np.divide(dot(e, r), e_mag*norm_r, where=ix, out=np.zeros(num))
+    _fix_instab(vo, precision=precision)
     vo = np.arccos(vo, where=ix, out=vo)
-    vo[ix & (dot(r, v) < -precision)] += np.pi
+    vo = np.subtract(2*np.pi, vo, out=vo, where=ix & (dot(r, v) < -precision))
 
     # uo
     uo = np.asanyarray(np.mod(w + vo, 2*np.pi))
@@ -440,17 +506,19 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
     # allocate stuff
     orbit_type = np.full(num, OrbitType.uninitialized, dtype=int)
     T = np.full(num, np.nan)
+    #dt = np.full(num, np.nan)
     circular = np.zeros(num, dtype=bool)
 
     # specific energy
-    E = norm(v)**2/2 - mu/norm(r)
+    E = norm_v**2/2 - _inf_divide(mu, norm_r)
     # test for type of orbit - elliptic
     ix = E < 0
     orbit_type[ix] = OrbitType.elliptic
     # T (only defined for elliptic, as parabolic and hyperbolic don't have a period)
     full_mu = mu if num == 1 or np.size(mu) == 1 else mu[ix]  # type: ignore[index]
-    T[ix] = 2*np.pi*np.sqrt(a[ix]**3/full_mu)  # TODO: broacast mu?
-    circular[ix & (np.abs(e_mag[ix]) < precision)] = True
+    T[ix] = 2*np.pi*np.sqrt(a[ix]**3/full_mu)
+    #dt[ix] = T[ix] / (2 * np.pi) * M
+    circular[ix & (np.abs(e_mag) < precision)] = True
     # parabolic
     ix = E == 0
     orbit_type[ix] = OrbitType.parabolic
@@ -463,7 +531,7 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
         elements = Elements()
         elements.a          = float(a)
         elements.e          = float(e_mag)
-        elements.i          = i
+        elements.i          = float(i)
         elements.W          = float(W)
         elements.w          = float(w)
         elements.vo         = float(vo)
@@ -541,6 +609,11 @@ def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = 1., unit: bool = 
     >>> elements.w  = 0
     >>> elements.vo = 0
     >>> (r, v) = oe_2_rv(elements)
+    >>> print(r)
+    [1. 0. 0.]
+
+    >>> print(v)
+    [0. 1. 0.]
 
     """
     # pull out short names from structure
