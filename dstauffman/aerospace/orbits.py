@@ -11,7 +11,7 @@ from __future__ import annotations
 import copy
 import datetime
 import doctest
-from typing import Any, ClassVar, Tuple, TypeVar, TYPE_CHECKING, Union
+from typing import Any, ClassVar, Literal, overload, Tuple, TypeVar, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import DEG2RAD, DEGREE_SIGN, Frozen, HAVE_NUMPY, IntEnumPlus, magnitude, \
@@ -181,19 +181,19 @@ class Elements(Frozen):
 
     def print_orrery(self, index: int = None):
         if index is None:
-            print(f'a = {self.a / 1000} km')
+            print(f'a = {self.a / 1000} km')  # type: ignore[operator]
             print(f'e = {self.e}')
-            print(f'i = {self.i * RAD2DEG} {DEGREE_SIGN}')
-            print(f'\N{GREEK CAPITAL LETTER OMEGA} = {self.W * RAD2DEG} {DEGREE_SIGN}')
-            print(f'\N{GREEK SMALL LETTER OMEGA} = {self.w * RAD2DEG} {DEGREE_SIGN}')
-            print(f'M = {self.vo * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)')
+            print(f'i = {self.i * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[operator]
+            print(f'\N{GREEK CAPITAL LETTER OMEGA} = {self.W * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[operator]
+            print(f'\N{GREEK SMALL LETTER OMEGA} = {self.w * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[operator]
+            print(f'M = {self.vo * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)')  # type: ignore[operator]
         else:
-            print(f'a = {self.a[index] / 1000} km')
-            print(f'e = {self.e[index]}')
-            print(f'i = {self.i[index] * RAD2DEG} {DEGREE_SIGN}')
-            print(f'\N{GREEK CAPITAL LETTER OMEGA} = {self.W[index] * RAD2DEG} {DEGREE_SIGN}')
-            print(f'\N{GREEK SMALL LETTER OMEGA} = {self.w[index] * RAD2DEG} {DEGREE_SIGN}')
-            print(f'M = {self.vo[index] * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)')
+            print(f'a = {self.a[index] / 1000} km')  # type: ignore[index]
+            print(f'e = {self.e[index]}')  # type: ignore[index]
+            print(f'i = {self.i[index] * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[index]
+            print(f'\N{GREEK CAPITAL LETTER OMEGA} = {self.W[index] * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[index]
+            print(f'\N{GREEK SMALL LETTER OMEGA} = {self.w[index] * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[index]
+            print(f'M = {self.vo[index] * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)')  # type: ignore[index]
 
 #%% Functions - _zero_divide
 def _zero_divide(x, y):
@@ -213,11 +213,11 @@ def _fix_instab(x, precision):
 
 #%% Functions - d_2_r
 def d_2_r(deg: _N) -> _N:
-    return DEG2RAD * deg
+    return DEG2RAD * deg  # type: ignore[no-any-return]
 
 #%% Functions r_2_d
 def r_2_d(rad: _N) -> _N:
-    return RAD2DEG * rad
+    return RAD2DEG * rad  # type: ignore[no-any-return]
 
 #%% Functions - norm
 def norm(x):
@@ -563,9 +563,15 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
     return elements
 
 #%% oe_2_rv
-# TODO: overload me
+@overload
+def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = ..., unit: bool = ..., \
+        *, return_PQW: Literal[False] = ..., ) -> Tuple[np.ndarray, np.ndarray]: ...
+@overload
+def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = ..., unit: bool = ..., \
+        *, return_PQW: Literal[True]) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]: ...
+
 def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = 1., unit: bool = False, \
-        return_PQW: bool = False) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, \
+        *, return_PQW: bool = False) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, \
         np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     r"""
     Orbital Elements to Position and Velocity.

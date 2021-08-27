@@ -84,7 +84,7 @@ def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
     else:
         assert isinstance(nu, np.ndarray)
         nu[index] = TWO_PI - nu[index]
-    return nu
+    return nu  # type: ignore[no-any-return]
 
 #%% Functions - anomaly_mean_2_eccentric
 def anomaly_mean_2_eccentric(M, e):

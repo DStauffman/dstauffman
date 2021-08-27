@@ -53,7 +53,7 @@ if HAVE_NUMBA:
     assert sys.version_info.major == 3, 'Must be Python 3'
     assert sys.version_info.minor >= 8, 'Must be Python v3.8 or higher'
     if sys.version_info.minor > 8:
-        TARGET = 'parallel'  # Python v3.9+
+        TARGET = 'cpu'  # Note: no longer using 'parallel' in Python v3.9+ as it breaks the vectorize error catching
     else:
         TARGET = 'cpu'
 else:

@@ -31,7 +31,7 @@ if _HAVE_NUMBA:
     except ImportError:
         _NEW_NUMBA = False
     else:
-        _NEW_NUMBA = version_info > (0, 53)
+        _NEW_NUMBA = version_info > (0, 53) and False  # Originally thought this was fixed, appears not
 else:
     _NEW_NUMBA = False
 

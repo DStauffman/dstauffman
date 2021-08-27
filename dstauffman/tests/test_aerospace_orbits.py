@@ -77,9 +77,9 @@ class Test_aerospace_Elements(unittest.TestCase):
             elements[0]
         self.assertEqual(str(err.exception), 'Elements is only a single instance and can not be indexed')
         elements_full = space.Elements(self.num)
-        elements_full.a[:] = np.arange(self.num, dtype=float)
+        elements_full.a[:] = np.arange(self.num, dtype=float)  # type: ignore[index]
         exp = space.Elements(1)
-        exp.a[:] = 3.
+        exp.a[:] = 3.  # type: ignore[index]
         elements3 = elements_full[3]
         self.assertEqual(elements3, exp)
 
@@ -323,12 +323,12 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
                                 oe.circular   = True if e == 0 else False
                                 (r, v) = space.oe_2_rv(oe)
                                 oe2 = space.rv_2_oe(r, v)
-                                self.assertAlmostEqual(oe.a, oe2.a, msg='a is different')
-                                self.assertAlmostEqual(oe.e, oe2.e, msg='e is different')
-                                self.assertAlmostEqual(oe.i, oe2.i, msg='i is different')
-                                self.assertAlmostEqual(oe.w, oe2.w, msg='w is different')
-                                self.assertAlmostEqual(oe.W, oe2.W, msg='W is different')
-                                self.assertAlmostEqual(oe.vo, oe2.vo, msg='nu is different')
+                                self.assertAlmostEqual(oe.a, oe2.a, msg='a is different')  # type: ignore[arg-type]
+                                self.assertAlmostEqual(oe.e, oe2.e, msg='e is different')  # type: ignore[arg-type]
+                                self.assertAlmostEqual(oe.i, oe2.i, msg='i is different')  # type: ignore[arg-type]
+                                self.assertAlmostEqual(oe.w, oe2.w, msg='w is different')  # type: ignore[arg-type]
+                                self.assertAlmostEqual(oe.W, oe2.W, msg='W is different')  # type: ignore[arg-type]
+                                self.assertAlmostEqual(oe.vo, oe2.vo, msg='nu is different')  # type: ignore[arg-type]
 
 #%% Unit test execution
 if __name__ == '__main__':

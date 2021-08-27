@@ -1730,10 +1730,10 @@ def save_images_to_pdf(figs : Union[Figure, List[Figure]] = None, folder: Path =
         figs = [figs]
     assert isinstance(figs, list)
     if folder is None:
-        folder = Path.pathlib.cwd()
+        folder = Path.cwd()
 
     # create the metadata
-    meta = {}
+    meta: Dict[str, Union[str, datetime.datetime]] = {}
     meta['Title'] = 'PDF Figures'
     meta['Author'] = get_username()
     meta['CreationDate'] = datetime.datetime.now()
