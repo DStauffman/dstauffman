@@ -86,6 +86,8 @@ def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
     >>> command = 'help'
     >>> args = []
     >>> parsed_args = parse_commands(command, args)
+    >>> print(parsed_args)
+    Namespace()
 
     """
     # delayed import of commands
