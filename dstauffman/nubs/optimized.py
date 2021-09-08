@@ -11,15 +11,24 @@ Notes
 from __future__ import annotations
 import doctest
 import math
-from typing import Sequence
+from typing import Sequence, TYPE_CHECKING, Union
 import unittest
 
+from dstauffman import HAVE_NUMPY
 from dstauffman.nubs.passthrough import fake_jit, HAVE_NUMBA, ncjit, TARGET
 
 if HAVE_NUMBA:
     from numba import float32, float64, int32, int64, vectorize  # type: ignore[attr-defined]
 else:
-    float32 = float64 = int32 = int64 = vectorize = fake_jit
+    float32 = float64 = int32 = int64 = fake_jit
+    if HAVE_NUMPY:
+        from numpy import vectorize
+    else:
+        vectorize_wrapper = fake_jit
+
+if TYPE_CHECKING:
+    from numpy import ndarray
+    _N = Union[float, ndarray]
 
 #%% np_any
 @ncjit
@@ -132,8 +141,8 @@ def issorted_opt(x: Sequence, /, descend: bool = False) -> bool:
     return True
 
 #%% Functions - prob_to_rate_opt
-@vectorize([float64(float64, float64)], nopython=True, target=TARGET, cache=True)
-def prob_to_rate_opt(prob: float, time: float) -> float:
+#@vectorize (done below)
+def prob_to_rate_opt(prob: _N, time: _N) -> _N:
     r"""
     Convert a given probability and time to a rate.
 
@@ -176,9 +185,15 @@ def prob_to_rate_opt(prob: float, time: float) -> float:
         return prob
     return -math.log(1 - prob) / time
 
+if HAVE_NUMBA:
+    prob_to_rate_opt = vectorize([float64(float64, float64)], nopython=True, target=TARGET, \
+        cache=True)(prob_to_rate_opt)
+elif HAVE_NUMPY:
+    prob_to_rate_opt = vectorize(prob_to_rate_opt, cache=True)
+
 #%% Functions - rate_to_prob_opt
-@vectorize([float64(float64, float64)], nopython=True, target=TARGET, cache=True)
-def rate_to_prob_opt(rate: float, time: float) -> float:
+#@vectorize (done below)
+def rate_to_prob_opt(rate: _N, time: _N) -> _N:
     r"""
     Convert a given rate and time to a probability.
 
@@ -216,10 +231,15 @@ def rate_to_prob_opt(rate: float, time: float) -> float:
     # calculate probability
     return 1 - math.exp(-rate * time)
 
+if HAVE_NUMBA:
+    rate_to_prob_opt = vectorize([float64(float64, float64)], nopython=True, target=TARGET, \
+        cache=True)(rate_to_prob_opt)
+elif HAVE_NUMPY:
+    rate_to_prob_opt = vectorize(rate_to_prob_opt, cache=True)
+
 #%% Functions - zero_divide
-@vectorize([float64(float64, float64), float32(float32, float32), float32(int32, int32), \
-    float64(int64, int64)], nopython=True, target=TARGET, cache=True)
-def zero_divide(num: float, den: float) -> float:
+#@vectorize (done below)
+def zero_divide(num: _N, den: _N) -> _N:
     r"""
     Numba compatible version of np.divide(num, den, out=np.zeros_like(num), where=den!=0).
 
@@ -255,6 +275,13 @@ def zero_divide(num: float, den: float) -> float:
     if den == 0.:
         return 0.
     return num / den
+
+if HAVE_NUMBA:
+    zero_divide = vectorize([float32(int32, int32), float64(int64, int64), \
+        float32(float32, float32), float64(float64, float64)], nopython=True, target=TARGET, \
+        cache=True)(zero_divide)
+elif HAVE_NUMPY:
+    zero_divide = vectorize(zero_divide, cache=True)
 
 #%% Unit test
 if __name__ == '__main__':

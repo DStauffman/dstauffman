@@ -28,7 +28,7 @@ try:
     _HAVE_QT = True
 except ModuleNotFoundError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
-    QPushButton = object  # type: ignore[assignment, misc]
+    QPushButton = object
     _HAVE_QT = False
 
 from dstauffman import Frozen, get_images_dir, get_username, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, \

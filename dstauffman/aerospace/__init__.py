@@ -16,7 +16,12 @@ from .gps         import bsl, bsr, prn_01_to_m11, get_prn_bits, correlate_prn, g
 from .orbit_const import G, SS_MASSES, SIDEREAL_DAY, SIDEREAL_YEAR, AU, MU_SUN, MU_EARTH, JULIAN, \
                              SPEED_OF_LIGHT, ECLIPTIC, EARTH, PALO_ALTO
 from .orbit_conv  import anomaly_eccentric_2_true, anomaly_mean_2_eccentric, mean_motion_2_semimajor
-from .orbits      import OrbitType, Elements, jd_to_numpy, two_line_elements, rv_2_oe, oe_2_rv
+from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to_jd, d_2_dms, \
+                             dms_2_d, hms_2_r, r_2_hms, aer_2_rdr, aer_2_sez, geo_loc_2_ijk, \
+                             ijk_2_rdr, ijk_2_sez, rdr_2_aer, rdr_2_ijk, sez_2_aer, sez_2_ijk, \
+                             rv_aer_2_ijk, rv_aer_2_sez, rv_ijk_2_aer, rv_ijk_2_sez, \
+                             rv_sez_2_aer, rv_sez_2_ijk
+from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv
 from .quat        import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks, quat_assertions, \
                              enforce_pos_scalar, qrot, quat_from_axis_angle, quat_angle_diff, \
                              quat_from_euler, quat_interp, quat_inv, quat_mult, quat_norm, \

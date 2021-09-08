@@ -18,7 +18,7 @@ if HAVE_NUMBA:
     from numba import boolean  # type: ignore[attr-defined]
     from numba.typed import List
 else:
-    List = list  # type: ignore[assignment, misc]
+    List = list
 try:
     # Note: avoid using HAVE_NUMPY from dstauffman to avoid circular imports
     import numpy as np

@@ -29,6 +29,14 @@ class Test_commands_print_help(unittest.TestCase):
                           output.startswith('##########\ndstauffman\n##########\n')
         self.assertTrue(expected_header)
 
+    def test_specify_file(self) -> None:
+        help_file = dcs.get_tests_dir() / 'test_commands_help.py'
+        with dcs.capture_output() as out:
+            commands.print_help(help_file)
+        output = out.getvalue().strip()
+        out.close()
+        self.assertTrue(output.startswith('r"""\nTest file for the `help` module'))
+
 #%% commands.print_version
 class Test_commands_print_version(unittest.TestCase):
     r"""

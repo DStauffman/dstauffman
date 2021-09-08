@@ -7,6 +7,7 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
 import contextlib
 import os
 import pathlib
@@ -295,8 +296,6 @@ class Test_make_python_init(unittest.TestCase):
         self.folder   = dcs.get_root_dir()
         self.text     = 'from .enums import'
         self.text2    = 'from .enums     import IntEnumPlus'
-        self.text3    = 'from .temp_file                  import Test_Frozen'
-        self.text4    = 'from .temp_file                   import Test_Frozen'
         self.line_num = 5
         self.folder2  = dcs.get_tests_dir()
         self.filepath = self.folder2 / 'temp_file.py'
@@ -314,7 +313,7 @@ class Test_make_python_init(unittest.TestCase):
             text = dcs.make_python_init(self.folder2)
         output = out.getvalue().strip()
         out.close()
-        self.assertTrue(text.startswith(self.text3) or text.startswith(self.text4))
+        self.assertRegex(text[0:100], r'from \.temp\_file(\s{2,})import Test_Frozen')
         self.assertTrue(output.startswith('Uniqueness Problem'))
 
     def test_no_lineup(self) -> None:

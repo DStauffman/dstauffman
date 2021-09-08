@@ -96,36 +96,36 @@ class Test_plotting_MyCustomToolbar(unittest.TestCase):
         self.assertEqual(plt.gcf().number, self.fig2.number)
 
     def test_next_plot(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)
         self.assertEqual(plt.gcf().number, self.fig1.number)
 
     def test_prev_plot(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
         self.assertEqual(plt.gcf().number, self.fig1.number)
 
     def test_close_all(self) -> None:
         self.assertTrue(plt.fignum_exists(self.fig1.number))
         self.assertTrue(plt.fignum_exists(self.fig2.number))
-        QTest.mouseClick(self.fig1.toolbar_custom_.btn_close_all, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_close_all, Qt.LeftButton)
         self.assertFalse(plt.fignum_exists(self.fig1.number))
         self.assertFalse(plt.fignum_exists(self.fig2.number))
 
     def test_multiple_nexts(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)
         self.assertEqual(plt.gcf().number, self.fig1.number)
-        QTest.mouseClick(self.fig1.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_next_plot, Qt.LeftButton)
         self.assertEqual(plt.gcf().number, self.fig2.number)
 
     def test_multiple_prevs(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
         self.assertEqual(plt.gcf().number, self.fig1.number)
-        QTest.mouseClick(self.fig1.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[call-overload, attr-defined]
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
         self.assertEqual(plt.gcf().number, self.fig2.number)
 
     def test_enter_and_exit_events(self) -> None:
         # TODO: this is not causing what I want to happen, the style changes aren't happening.
-        QTest.mouseMove(self.fig1.toolbar_custom_.btn_next_plot, delay=100)  # type: ignore[call-overload, attr-defined]
-        QTest.mouseMove(self.fig1.toolbar_custom_.btn_prev_plot, delay=100)  # type: ignore[call-overload, attr-defined]
+        QTest.mouseMove(self.fig1.toolbar_custom_.btn_next_plot, delay=100)
+        QTest.mouseMove(self.fig1.toolbar_custom_.btn_prev_plot, delay=100)
 
     def tearDown(self) -> None:
         plt.close(self.fig1)

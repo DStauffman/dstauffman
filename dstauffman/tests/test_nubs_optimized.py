@@ -7,7 +7,7 @@ Notes
 """
 
 #%% Imports
-from typing import Any, Callable, Union
+from typing import Any, Callable, List, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY
@@ -20,20 +20,11 @@ if HAVE_NUMPY:
 else:
     from math import inf, pi
 try:
-    from numba.typed import List
+    from numba.typed import List as nubList
     _HAVE_NUMBA = True
 except ModuleNotFoundError:
-    List: Callable[[Any], Any] = lambda x: x  # type: ignore[no-redef]
+    nubList: Callable[[Any], Any] = lambda x: x  # type: ignore[no-redef]
     _HAVE_NUMBA = False
-if _HAVE_NUMBA:
-    try:
-        from numba import version_info  # type: ignore[attr-defined]
-    except ImportError:
-        _NEW_NUMBA = False
-    else:
-        _NEW_NUMBA = version_info > (0, 53) and False  # Originally thought this was fixed, appears not
-else:
-    _NEW_NUMBA = False
 
 #%% np_any
 class Test_np_any(unittest.TestCase):
@@ -54,7 +45,7 @@ class Test_np_any(unittest.TestCase):
         self.assertTrue(nubs.np_any(x))
 
     def test_lists(self) -> None:
-        x: List[bool] = List([False for i in range(1000)])
+        x: List[bool] = nubList([False for i in range(1000)])
         self.assertFalse(nubs.np_any(x))
         x[333] = True
         self.assertTrue(nubs.np_any(x))
@@ -78,7 +69,7 @@ class Test_np_all(unittest.TestCase):
         self.assertFalse(nubs.np_all(x))
 
     def test_lists(self) -> None:
-        x: List[bool] = List([True for i in range(1000)])
+        x: List[bool] = nubList([True for i in range(1000)])
         self.assertTrue(nubs.np_all(x))
         x[333] = False
         self.assertFalse(nubs.np_all(x))
@@ -109,7 +100,7 @@ class Test_issorted_opt(unittest.TestCase):
         self.assertTrue(nubs.issorted_opt(x, descend=True))
 
     def test_lists(self) -> None:
-        x: List[Union[float, int]] = List([-inf, 0, 1, pi, 5, inf])
+        x: List[Union[float, int]] = nubList([-inf, 0, 1, pi, 5, inf])
         self.assertTrue(nubs.issorted_opt(x))
         self.assertFalse(nubs.issorted_opt(x, descend=True))
 
@@ -136,9 +127,9 @@ class Test_prob_to_rate_opt(unittest.TestCase):
 
     def test_scalar(self) -> None:
         rate = nubs.prob_to_rate_opt(self.prob[15], self.time)
-        self.assertAlmostEqual(rate, self.rate[15])
+        self.assertAlmostEqual(rate, self.rate[15])  # type: ignore[arg-type]
         rate = nubs.prob_to_rate_opt(float(self.prob[15]), self.time)
-        self.assertAlmostEqual(rate, float(self.rate[15]))
+        self.assertAlmostEqual(rate, float(self.rate[15]))  # type: ignore[arg-type]
         rate = nubs.prob_to_rate_opt(1, 1)
         self.assertEqual(rate, np.inf)
         rate = nubs.prob_to_rate_opt(0, 1)
@@ -182,9 +173,9 @@ class Test_rate_to_prob_opt(unittest.TestCase):
 
     def test_scalar(self) -> None:
         prob = nubs.rate_to_prob_opt(self.rate[20], self.time)
-        self.assertAlmostEqual(prob, self.prob[20])
+        self.assertAlmostEqual(prob, self.prob[20])  # type: ignore[arg-type]
         prob = nubs.rate_to_prob_opt(float(self.rate[20]), self.time)
-        self.assertAlmostEqual(prob, float(self.prob[20]))
+        self.assertAlmostEqual(prob, float(self.prob[20]))  # type: ignore[arg-type]
         prob = nubs.rate_to_prob_opt(0, 1)
         self.assertEqual(prob, 0.)
         prob = nubs.rate_to_prob_opt(np.inf, 1)
@@ -196,7 +187,7 @@ class Test_rate_to_prob_opt(unittest.TestCase):
 
     def test_infinity(self) -> None:
         prob = nubs.rate_to_prob_opt(np.inf, 1)
-        self.assertAlmostEqual(prob, 1.)
+        self.assertAlmostEqual(prob, 1.)  # type: ignore[arg-type]
 
     @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
     def test_circular(self) -> None:
@@ -222,7 +213,7 @@ class Test_zero_divide(unittest.TestCase):
         self.assertEqual(nubs.zero_divide(5., 0.), 0.)
         self.assertEqual(nubs.zero_divide(0., 0.), 0.)
 
-    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_vectors(self) -> None:
         out = nubs.zero_divide(np.array([4., 3.14, 0.]), np.array([2., 0., 0.]))
         exp = np.array([2., 0., 0.])
@@ -230,7 +221,7 @@ class Test_zero_divide(unittest.TestCase):
         out = nubs.zero_divide(np.array([0, -1, -2]), np.array([1, 0, 2]))
         np.testing.assert_array_equal(out, np.array([0, 0, -1]))
 
-    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_broadcasting1(self) -> None:
         out = nubs.zero_divide(np.array([4., 3.14, 0.]), 2.)
         exp = np.array([2., 1.57, 0.])
@@ -239,7 +230,7 @@ class Test_zero_divide(unittest.TestCase):
         exp = np.array([0., 0., 0.])
         np.testing.assert_array_equal(out, exp)
 
-    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_broadcasting2(self) -> None:
         # Numba broadcasting fails here prior to v0.53
         vec = np.array([[1., 0., 0.], [3., 4., 0.], [0., 0., 0.]]).T
@@ -248,7 +239,7 @@ class Test_zero_divide(unittest.TestCase):
         out = nubs.zero_divide(vec, mag)
         np.testing.assert_array_equal(out, exp)
 
-    if not _NEW_NUMBA:
+    if _HAVE_NUMBA:
         test_broadcasting2 = unittest.expectedFailure(test_broadcasting2)
 
 #%% Unit test execution

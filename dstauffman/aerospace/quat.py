@@ -129,7 +129,7 @@ def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertio
             if allow_nans:
                 # TODO: this is a hack for typing!  set command is valid
                 temp = 'Quaternions with NaNs must have NaNs for every component.'
-                assert set(np.count_nonzero(nans, axis=0)).issubset({0, 4}), temp  # type: ignore[arg-type]
+                assert set(np.count_nonzero(nans, axis=0)).issubset({0, 4}), temp
             else:
                 assert False, 'NaNs are not allow in quaternion.'
         ix = ~np.isnan(quat[0, :])
@@ -256,7 +256,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
         quat[axis-1, np.arange(np.size(axis))] = np.sin(angle/2)  # type: ignore[arg-type, operator]
     else:
         # multiple axis, multiple angle case
-        assert np.size(axis) == np.size(angle)  # type: ignore[arg-type]
+        assert np.size(axis) == np.size(angle)
         quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle/2), axis=0)))  # type: ignore[arg-type, operator]
         quat[axis-1, np.arange(np.size(axis))] = np.sin(angle/2)  # type: ignore[arg-type, operator]
     enforce_pos_scalar(quat, inplace=True)
@@ -309,7 +309,7 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndar
         quat = np.hstack([axis * s, c])
     elif axis.ndim == 1:  # type: ignore[union-attr]
         quat = np.vstack([np.outer(axis, s), c])
-    elif c.size == 1:  # type: ignore[union-attr]
+    elif c.size == 1:
         quat = np.vstack([axis * s, np.full(axis.shape[1], c)])  # type: ignore[misc, union-attr]
     else:
         assert axis.shape[1] == c.size  # type: ignore[misc, union-attr]

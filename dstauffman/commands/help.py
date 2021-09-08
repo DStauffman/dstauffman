@@ -9,13 +9,14 @@ Notes
 #%% Imports
 import argparse
 import doctest
+from pathlib import Path
 from typing import List
 import unittest
 
 from dstauffman import get_root_dir, ReturnCodes, version_info
 
 #%% Functions - print_help
-def print_help() -> int:
+def print_help(help_file: Path = None) -> int:
     r"""
     Prints the contents of the README.rst file.
 
@@ -30,7 +31,8 @@ def print_help() -> int:
     >>> print_help() # doctest: +SKIP
 
     """
-    help_file = get_root_dir().parent / 'README.rst'
+    if help_file is None:
+        help_file = get_root_dir().parent / 'README.rst'
     if not help_file.is_file():  # pragma: no cover
         print(f'Warning: help file at "{help_file}" was not found.')
         return ReturnCodes.bad_help_file

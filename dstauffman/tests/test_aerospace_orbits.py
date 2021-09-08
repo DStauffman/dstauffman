@@ -83,16 +83,6 @@ class Test_aerospace_Elements(unittest.TestCase):
         elements3 = elements_full[3]
         self.assertEqual(elements3, exp)
 
-#%% aerospace.jd_to_numpy
-class Test_aerospace_jd_to_numpy(unittest.TestCase):
-    r"""
-    Tests the aerospace.jd_to_numpy function with the following cases:
-        Nominal
-    """
-    def test_nominal(self) -> None:
-        date = space.jd_to_numpy(2451545.0)
-        self.assertEqual(date, np.datetime64('2000-01-01T00:00:00'))
-
 #%% aerospace.two_line_elements
 class Test_aerospace_two_line_elements(unittest.TestCase):
     r"""

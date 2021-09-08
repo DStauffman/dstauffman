@@ -411,18 +411,18 @@ def gps_to_datetime(week: Union[int, np.ndarray], time: Union[int, float, np.nda
         if np.size(week) == 1:
             start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK*week))
             whole_sec  = int(time)
-            micros     = round(1e6 * (time - whole_sec))  # type: ignore[call-overload]
+            micros     = round(1e6 * (time - whole_sec))
             date_gps   = start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros)
         else:
-            date_gps = []  # type: ignore[assignment]
+            date_gps = []
             for (w, t) in zip(week, time):
                 start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK*w))
                 whole_sec  = int(t)
                 micros     = round(1e6 * (t - whole_sec))
                 date_gps.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
     elif form == 'numpy':
-        start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY  # type: ignore[assignment]
-        date_gps   = start_week + time * NP_ONE_SECOND  # type: ignore[operator]
+        start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY
+        date_gps   = start_week + time * NP_ONE_SECOND
     else:
         raise ValueError(f'Unexpected value for form: "{form}".')
     return date_gps

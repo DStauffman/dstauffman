@@ -14,12 +14,13 @@ import doctest
 from typing import Any, ClassVar, Literal, overload, Tuple, TypeVar, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import DEG2RAD, DEGREE_SIGN, Frozen, HAVE_NUMPY, IntEnumPlus, magnitude, \
-    NP_DATETIME_FORM, NP_DATETIME_UNITS, NP_ONE_DAY, RAD2DEG
+from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, IntEnumPlus, NP_DATETIME_FORM, \
+    NP_DATETIME_UNITS, RAD2DEG
 
 from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH
 from dstauffman.aerospace.orbit_conv import anomaly_eccentric_2_true, mean_motion_2_semimajor, \
     anomaly_mean_2_eccentric
+from dstauffman.aerospace.orbit_support import cross, d_2_r, dot, jd_to_numpy, norm, r_2_d
 
 if HAVE_NUMPY:
     import numpy as np
@@ -210,33 +211,6 @@ def _fix_instab(x, precision):
     ix = (x < -1.) & (x > -1 - precision)
     if np.any(ix):
         x[ix] = -1.0
-
-#%% Functions - d_2_r
-def d_2_r(deg: _N) -> _N:
-    return DEG2RAD * deg  # type: ignore[no-any-return]
-
-#%% Functions r_2_d
-def r_2_d(rad: _N) -> _N:
-    return RAD2DEG * rad  # type: ignore[no-any-return]
-
-#%% Functions - norm
-def norm(x):
-    return np.asanyarray(magnitude(x))
-
-#%% Functions - dot
-def dot(x, y):
-    return np.sum(x * y, axis=0)
-
-#%% Functions - cross
-def cross(x, y):
-    return np.cross(x.T, y.T).T
-
-#%% Functions - jd_to_numpy
-def jd_to_numpy(jd: float) -> np.datetime64:
-    delta_days = jd - JULIAN['jd_2000_01_01']
-    out = np.datetime64('2000-01-01T00:00:00', NP_DATETIME_UNITS) + \
-        NP_ONE_DAY * delta_days
-    return out
 
 #%% Functions - two_line_elements
 def two_line_elements(line1: str, line2: str) -> Elements:
@@ -638,17 +612,17 @@ def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = 1., unit: bool = 
 
     # adjust if angles are in degrees
     if unit:
-        i  =  d_2_r(i)  # type: ignore[type-var]
-        W  =  d_2_r(W)  # type: ignore[type-var]
-        w  =  d_2_r(w)  # type: ignore[type-var]
-        nu =  d_2_r(nu)  # type: ignore[type-var]
+        i  =  d_2_r(i)
+        W  =  d_2_r(W)
+        w  =  d_2_r(w)
+        nu =  d_2_r(nu)
 
     #% calculations
     # parameter
     if elements.p is not None:
         p = elements.p
     else:
-        p = a * (1.0 - e**2)  # type: ignore[operator]
+        p = a * (1.0 - e**2)
     assert p is not None
 
     # magnitude of r in PQW frame
@@ -679,6 +653,10 @@ def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = 1., unit: bool = 
     if return_PQW:
         return (r, v, r_PQW, v_PQW, T)
     return (r, v)
+
+#%% Functions - advance_elements
+def advance_elements(elements, mu, time):
+    pass
 
 #%% Unit Test
 if __name__ == '__main__':
