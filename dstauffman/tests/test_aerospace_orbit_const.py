@@ -18,7 +18,7 @@ class Test_orbits_all_values(unittest.TestCase):
     Tests all the constant values in the module.
     """
     def setUp(self) -> None:
-        self.float: List[str] = ['G', 'SIDEREAL_DAY', 'SIDEREAL_YEAR', 'AU', 'MU_SUN', 'MU_EARTH', \
+        self.float: List[str] = ['PI', 'TAU', 'G', 'SIDEREAL_DAY', 'SIDEREAL_YEAR', 'AU', 'MU_SUN', 'MU_EARTH', \
             'SPEED_OF_LIGHT', 'ECLIPTIC']
         self.dicts: List[str] = ['SS_MASSES', 'JULIAN', 'EARTH', 'PALO_ALTO']
         self.extra: List[str] = ['DEG2RAD', 'HAVE_NUMPY']  # imported constants

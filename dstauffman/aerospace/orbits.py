@@ -17,7 +17,7 @@ import unittest
 from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, IntEnumPlus, NP_DATETIME_FORM, \
     NP_DATETIME_UNITS, RAD2DEG
 
-from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH
+from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH, PI, TAU
 from dstauffman.aerospace.orbit_conv import anomaly_eccentric_2_true, mean_motion_2_semimajor, \
     anomaly_mean_2_eccentric
 from dstauffman.aerospace.orbit_support import cross, d_2_r, dot, jd_to_numpy, norm, r_2_d
@@ -315,7 +315,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     except:
         raise ValueError(f'Error reading revolutions per day from line2: {line2}')
 
-    n = revs_per_day * 2. * np.pi / JULIAN['day']  # [rad/sec]
+    n = revs_per_day * TAU / JULIAN['day']  # [rad/sec]
     a = mean_motion_2_semimajor(n, MU_EARTH)
     E = anomaly_mean_2_eccentric(M, e)
     nu = anomaly_eccentric_2_true(E, e)
@@ -337,7 +337,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     elements.uo         = omega + nu
     elements.P          = Omega + omega
     elements.lo         = Omega + omega + nu
-    elements.T          = 2*np.pi*np.sqrt(a**3 / MU_EARTH)
+    elements.T          = TAU*np.sqrt(a**3 / MU_EARTH)
     elements.t          = jd_to_numpy(time)
     elements.type       = OrbitType.elliptic
 
@@ -435,37 +435,37 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
 
     # W
     W = np.asanyarray(np.arccos(n[0, ...] / n_mag))
-    W = np.subtract(2*np.pi, W, out=W, where=n[1, ...] < -precision)
+    W = np.subtract(TAU, W, out=W, where=n[1, ...] < -precision)
 
     # w
     ix = np.abs(e_mag) >= precision
     w = np.divide(dot(n, e), n_mag*e_mag, where=ix, out=np.zeros(num))
     _fix_instab(w, precision=precision)
     w = np.arccos(w, where=ix, out=w)
-    w = np.subtract(2*np.pi, w, out=w, where=ix & (e[2, ...] < -precision))
-    w[ix & ~np.isreal(w)] = np.pi
+    w = np.subtract(TAU, w, out=w, where=ix & (e[2, ...] < -precision))
+    w[ix & ~np.isreal(w)] = PI
 
     # vo
     ix &= (norm_r > precision)
     vo = np.divide(dot(e, r), e_mag*norm_r, where=ix, out=np.zeros(num))
     _fix_instab(vo, precision=precision)
     vo = np.arccos(vo, where=ix, out=vo)
-    vo = np.subtract(2*np.pi, vo, out=vo, where=ix & (dot(r, v) < -precision))
+    vo = np.subtract(TAU, vo, out=vo, where=ix & (dot(r, v) < -precision))
 
     # uo
-    uo = np.asanyarray(np.mod(w + vo, 2*np.pi))
-    uo[np.abs(uo - 2*np.pi) < precision] = 0.
+    uo = np.asanyarray(np.mod(w + vo, TAU))
+    uo[np.abs(uo - TAU) < precision] = 0.
 
     # P
-    P = np.asanyarray(np.mod(W + w, 2*np.pi))
-    P[np.abs(P - 2*np.pi) < precision] = 0.
+    P = np.asanyarray(np.mod(W + w, TAU))
+    P[np.abs(P - TAU) < precision] = 0.
 
     # lo
-    lo = np.asanyarray(np.mod(W + w + vo, 2*np.pi))
-    lo[np.abs(lo - 2*np.pi) < precision] = 0.
+    lo = np.asanyarray(np.mod(W + w + vo, TAU))
+    lo[np.abs(lo - TAU) < precision] = 0.
 
     # tell if equatorial
-    equatorial = (np.abs(i) < precision) | (np.abs(i-np.pi) < precision)
+    equatorial = (np.abs(i) < precision) | (np.abs(i-PI) < precision)
 
     # convert to degrees specified
     if unit:
@@ -490,8 +490,8 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
     orbit_type[ix] = OrbitType.elliptic
     # T (only defined for elliptic, as parabolic and hyperbolic don't have a period)
     full_mu = mu if num == 1 or np.size(mu) == 1 else mu[ix]  # type: ignore[index]
-    T[ix] = 2*np.pi*np.sqrt(a[ix]**3/full_mu)
-    #dt[ix] = T[ix] / (2 * np.pi) * M
+    T[ix] = TAU*np.sqrt(a[ix]**3/full_mu)
+    #dt[ix] = T[ix] / TAU * M
     circular[ix & (np.abs(e_mag) < precision)] = True
     # parabolic
     ix = E == 0

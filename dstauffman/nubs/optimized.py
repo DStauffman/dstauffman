@@ -14,17 +14,17 @@ import math
 from typing import Sequence, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import HAVE_NUMPY
 from dstauffman.nubs.passthrough import fake_jit, HAVE_NUMBA, ncjit, TARGET
 
 if HAVE_NUMBA:
     from numba import float32, float64, int32, int64, vectorize  # type: ignore[attr-defined]
 else:
     float32 = float64 = int32 = int64 = fake_jit
-    if HAVE_NUMPY:
+    try:
         from numpy import vectorize
-    else:
-        vectorize_wrapper = fake_jit
+        HAVE_NUMPY = True
+    except ImportError:
+        HAVE_NUMPY = False
 
 if TYPE_CHECKING:
     from numpy import ndarray

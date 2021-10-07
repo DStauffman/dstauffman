@@ -15,6 +15,40 @@ import dstauffman.aerospace as space
 if HAVE_NUMPY:
     import numpy as np
 
+#%% _any
+class Test_aerospace__any(unittest.TestCase):
+    r"""
+    Tests the aerospace._any function with the following cases:
+        Bool
+        Int
+        Float
+        ndarray
+        list of bools
+    """
+    def test_bool(self) -> None:
+        self.assertTrue(space.orbit_conv._any(True))
+        self.assertFalse(space.orbit_conv._any(False))
+
+    def test_int(self) -> None:
+        self.assertTrue(space.orbit_conv._any(2))
+        self.assertFalse(space.orbit_conv._any(0))
+
+    def test_float(self) -> None:
+        self.assertTrue(space.orbit_conv._any(1.5))
+        self.assertFalse(space.orbit_conv._any(0.0))
+
+    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    def test_ndarray(self) -> None:
+        self.assertTrue(space.orbit_conv._any(np.array([True, False, True], dtype=bool)))
+        self.assertFalse(space.orbit_conv._any(np.array([False, False, False], dtype=bool)))
+
+    def test_nubs(self) -> None:
+        self.assertTrue(space.orbit_conv._any([True, False, True]))
+        self.assertFalse(space.orbit_conv._any([False, False, False]))
+
+#%% anomaly_eccentric_2_mean
+pass  # TODO: write this
+
 #%% aerospace.anomaly_eccentric_2_true
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
@@ -60,6 +94,12 @@ class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
         self.assertEqual(nu.shape, (2, ))
         self.assertEqual(nu[0], self.exp1)
         self.assertEqual(nu[1], self.exp2)
+
+#%% aerospace.anomaly_hyperbolic_2_mean
+pass  # TODO: write this
+
+#%% aerospace.anomaly_hyperbolic_2_true
+pass  # TODO: write this
 
 #%% aerospace.anomaly_mean_2_eccentric
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -107,6 +147,21 @@ class Test_aerospace_anomaly_mean_2_eccentric(unittest.TestCase):
         self.assertEqual(E[0], self.exp1)
         self.assertEqual(E[1], self.exp2)
 
+#%% aerospace.anomaly_mean_2_true
+pass  # TODO: write this
+
+#%% aerospace.anomaly_true_2_eccentric
+pass  # TODO: write this
+
+#%% aerospace.anomaly_true_2_hyperbolic
+pass  # TODO: write this
+
+#%% aerospace.anomaly_true_2_mean
+pass  # TODO: write this
+
+#%% aerospace.long_2_sidereal
+pass  # TODO: write this
+
 #%% aerospace.mean_motion_2_semimajor
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_mean_motion_2_semimajor(unittest.TestCase):
@@ -152,6 +207,18 @@ class Test_aerospace_mean_motion_2_semimajor(unittest.TestCase):
         self.assertEqual(a.shape, (2, ))
         self.assertEqual(a[0], self.exp1)
         self.assertEqual(a[1], self.exp2)
+
+#%% aerospace.period_2_semimajor
+pass  # TODO: write this
+
+#%% aerospace.semimajor_2_mean_motion
+pass  # TODO: write this
+
+#%% aerospace.semimajor_2_period
+pass  # TODO: write this
+
+#%% aerospace.sidereal_2_long
+pass  # TODO: write this
 
 #%% Unit test execution
 if __name__ == '__main__':

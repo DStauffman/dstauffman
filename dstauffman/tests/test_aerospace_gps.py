@@ -157,6 +157,7 @@ class Test_aerospace_generate_prn(unittest.TestCase):
             # TODO: need external validation source
 
 #%% aerospace.gps_to_datetime
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_gps_to_datetime(unittest.TestCase):
     r"""
     Tests the aerospace.gps_to_datetime function with the following cases:
@@ -164,7 +165,6 @@ class Test_aerospace_gps_to_datetime(unittest.TestCase):
         Wrapped
         Alternate Form
     """
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_nominal(self) -> None:
         week     = np.array([1782, 1783])
         time     = np.array([425916, 4132])
@@ -187,6 +187,7 @@ class Test_aerospace_gps_to_datetime(unittest.TestCase):
         np.testing.assert_array_equal(date_gps, exp)
 
 #%% aerospace.gps_to_utc_datetime
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
     r"""
     Tests the aerospace.gps_to_utc_datetime function with the following cases:
@@ -195,7 +196,6 @@ class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
         Alternate Form
         Manual Leap Seconds
     """
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_nominal(self) -> None:
         week     = np.array([1782, 1783])
         time     = np.array([425916, 4132])

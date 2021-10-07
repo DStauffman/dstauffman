@@ -12,22 +12,16 @@ import doctest
 from typing import overload, TYPE_CHECKING, Union
 import unittest
 
-from lmspace import DEG2RAD, HAVE_NUMPY, magnitude, NP_DATETIME_UNITS, NP_ONE_DAY, ONE_MINUTE, \
+from dstauffman import DEG2RAD, HAVE_NUMPY, magnitude, NP_DATETIME_UNITS, NP_ONE_DAY, ONE_MINUTE, \
     ONE_HOUR, RAD2DEG
 
-from lmspace.aerospace.orbit_const import EARTH, JULIAN
+from dstauffman.aerospace.orbit_const import EARTH, JULIAN, TAU
 
 if HAVE_NUMPY:
     import numpy as np
-    from numpy import pi as PI
-else:
-    from math import pi as PI
 
 if TYPE_CHECKING:
     _N = Union[float, np.ndarray]
-
-#%% Constants
-TWO_PI = 2 * PI
 
 #%% Functions - d_2_r
 @overload
@@ -60,7 +54,12 @@ def cross(x, y):
     return np.cross(x.T, y.T).T
 
 #%% Functions - jd_to_numpy
-def jd_to_numpy(jd: float) -> np.datetime64:
+@overload
+def jd_to_numpy(jd: float) -> np.datetime64: ...
+@overload
+def jd_to_numpy(jd: np.ndarray) -> np.ndarray: ...
+
+def jd_to_numpy(jd: _N) -> Union[np.datetime64, np.ndarray]:
     r"""
     Converts a julian date to a numpy datetime64.
 
@@ -79,7 +78,12 @@ def jd_to_numpy(jd: float) -> np.datetime64:
     return out
 
 #%% Functions - numpy_to_jd
-def numpy_to_jd(date: np.datetime64) -> np.float64:
+@overload
+def numpy_to_jd(date: np.datetime64) -> np.float64: ...
+@overload
+def numpy_to_jd(date: np.ndarray) -> np.ndarray: ...
+
+def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.ndarray]:
     r"""
     Converts a numpy datetime64 into a julian date.
 
@@ -130,7 +134,7 @@ def hms_2_r(x, /):
         raise ValueError('hms_2_r expects a 3xN array as input.')
     # find fractional degrees by adding parts together
     hours = x[0, ...] + x[1, ...]/ONE_MINUTE + x[2, ...]/ONE_HOUR
-    out = hours/24 * TWO_PI
+    out = hours/24 * TAU
     return out
 
 #%% Functions - r_2_hms
@@ -143,7 +147,7 @@ def r_2_hms(x, /):
     # initialize output
     out = np.empty(3) if n == 1 else np.empty((3, n))
     # convert from angle to fractional hours
-    hours = 24 * (x/TWO_PI)
+    hours = 24 * (x/TAU)
     # find whole hours
     out[0, ...] = np.floor(hours)
     # find whole minutes
@@ -218,7 +222,7 @@ def ijk_2_rdr(ijk):
     # find azimuth
     ra = np.atan2(j, i)
     # change from [-pi pi] to [0 2*pi]
-    ra = np.mod(ra, TWO_PI)
+    ra = np.mod(ra, TAU)
     # find elevation
     de = np.atan2(k, np.sqrt(i**2 + j**2))
     # output array of values
@@ -282,7 +286,7 @@ def long_2_sidereal(lambda_, time_jd):
     # theta at epoch
     theta_go = JULIAN['tg0_2000']
     # find theta
-    theta = np.mod(theta_go + EARTH['omega']*JULIAN['day']*(time_jd - to) + lambda_, TWO_PI)
+    theta = np.mod(theta_go + EARTH['omega']*JULIAN['day']*(time_jd - to) + lambda_, TAU)
     return theta
 
 #%% Functions - rdr_2_aer
@@ -319,7 +323,7 @@ def sez_2_aer(sez):
     # find azimuth
     az = np.atan2(y, -x)
     # change range from (-pi,pi) to (0,2*pi)
-    az = np.mod(az, TWO_PI)
+    az = np.mod(az, TAU)
     # find elevation (note Elevation is in range (-pi/2:pi/2)
     el = np.atan(z/np.sqrt(x**2 + y**2))
     # output array of values

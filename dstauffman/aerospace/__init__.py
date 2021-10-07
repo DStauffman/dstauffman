@@ -13,9 +13,13 @@ Notes
 from .classes     import KfInnov, Kf, KfRecord
 from .gps         import bsl, bsr, prn_01_to_m11, get_prn_bits, correlate_prn, generate_prn, \
                              gps_to_datetime, gps_to_utc_datetime
-from .orbit_const import G, SS_MASSES, SIDEREAL_DAY, SIDEREAL_YEAR, AU, MU_SUN, MU_EARTH, JULIAN, \
-                             SPEED_OF_LIGHT, ECLIPTIC, EARTH, PALO_ALTO
-from .orbit_conv  import anomaly_eccentric_2_true, anomaly_mean_2_eccentric, mean_motion_2_semimajor
+from .orbit_const import PI, TAU, G, SS_MASSES, SIDEREAL_DAY, SIDEREAL_YEAR, AU, MU_SUN, \
+                             MU_EARTH, JULIAN, SPEED_OF_LIGHT, ECLIPTIC, EARTH, PALO_ALTO
+from .orbit_conv  import anomaly_eccentric_2_mean, anomaly_eccentric_2_true, \
+                             anomaly_hyperbolic_2_mean, anomaly_hyperbolic_2_true, \
+                             anomaly_mean_2_eccentric, long_2_sidereal, mean_motion_2_semimajor, \
+                             period_2_semimajor, semimajor_2_mean_motion, semimajor_2_period, \
+                             sidereal_2_long
 from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to_jd, d_2_dms, \
                              dms_2_d, hms_2_r, r_2_hms, aer_2_rdr, aer_2_sez, geo_loc_2_ijk, \
                              ijk_2_rdr, ijk_2_sez, rdr_2_aer, rdr_2_ijk, sez_2_aer, sez_2_ijk, \

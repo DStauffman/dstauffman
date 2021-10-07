@@ -15,12 +15,15 @@ import unittest
 from dstauffman import DEG2RAD, HAVE_NUMPY
 
 if HAVE_NUMPY:
-    from numpy import pi, sqrt
+    from numpy import pi as PI, sqrt
 else:
-    from math import pi, sqrt  # type: ignore[misc]
+    from math import pi as PI, sqrt  # type: ignore[misc]
 
 #%% Constants
 # Written by David C. Stauffer for AA 279 on 28 Apr 2007, constants provided by Professor West.
+
+# Convenient aliases
+TAU = 2 * PI
 
 # Gravitational constant
 G = 6.67430e-11  # [m**3/(kg*s**2)] (+/- 22ppm) 2018 CODATA
@@ -67,7 +70,7 @@ ECLIPTIC = 84381.412/3600 * DEG2RAD  # [rad] (+/- 0.005 arcsec)
 
 # Earth model constants
 EARTH: Dict[str, float] = {}
-EARTH['omega'] = 2 * pi / SIDEREAL_DAY  # [rad/s]
+EARTH['omega'] = TAU / SIDEREAL_DAY  # [rad/s]
 EARTH['a'] = 6378137.  # [m]
 EARTH['b'] = 6356752.3  # [m]
 EARTH['e'] = sqrt(1. - (EARTH['b'] / EARTH['a'])**2)

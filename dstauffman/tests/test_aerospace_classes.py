@@ -10,7 +10,7 @@ Notes
 import copy
 import unittest
 
-from dstauffman import capture_output, get_tests_dir, HAVE_H5PY, HAVE_NUMPY, NP_DATETIME_FORM, \
+from dstauffman import capture_output, get_tests_dir, HAVE_NUMPY, NP_DATETIME_FORM, \
     NP_DATETIME_UNITS, NP_TIMEDELTA_FORM
 import dstauffman.aerospace as space
 
@@ -18,6 +18,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% aerospace.KfInnov
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_KfInnov(unittest.TestCase):
     r"""
     Tests the aerospace.KfInnov class with the following cases:
@@ -260,6 +261,7 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         self.assertEqual(innov4.status.shape, (39, ))
 
 #%% aerospace.Kf
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_Kf(unittest.TestCase):
     r"""
     Tests the aerospace.Kf class with the following cases:
@@ -284,7 +286,6 @@ class Test_aerospace_Kf(unittest.TestCase):
         self.assertIsNone(kf.covar)
         self.assertTrue(isinstance(kf.innov, space.KfInnov))
 
-    @unittest.skipIf(not HAVE_H5PY or not HAVE_NUMPY, 'Skipping due to missing h5py/numpy dependency.')
     def test_save_and_load(self) -> None:
         kf = space.Kf(num_points=2, num_states=3, num_axes=2, num_innovs=4)
         kf.chan = ['a', 'b', 'c']
@@ -430,6 +431,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         self.filename.unlink(missing_ok=True)
 
 #%% aerospace.KfRecord
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_KfRecord(unittest.TestCase):
     r"""
     Tests the aerospace.KfRecord class with the following cases:
@@ -450,7 +452,6 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         for key in self.fields:
             self.assertIsNone(getattr(kf_record, key), f'Expected None for field {key}')
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_arguments(self) -> None:
         kf_record = space.KfRecord(num_points=30, num_states=6, num_active=3, num_axes=2)
         assert kf_record.time is not None
@@ -468,7 +469,6 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(kf_record.K.shape, (3, 2, 30), 'K shape mismatch.')
         self.assertEqual(kf_record.z.shape, (2, 30), 'z shape mismatch.')
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_alternative_time(self) -> None:
         kf_record = space.KfRecord(num_points=60, num_states=9, num_active=6, num_axes=3, time_dtype=NP_DATETIME_FORM)
         assert kf_record.time is not None
@@ -487,7 +487,6 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(kf_record.K.shape, (6, 3, 60), 'K shape mismatch.')
         self.assertEqual(kf_record.z.shape, (3, 60), 'z shape mismatch.')
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_pprint1(self) -> None:
         kf_record = space.KfRecord(num_points=5)
         assert kf_record.time is not None
@@ -498,7 +497,6 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(lines[0], 'KfRecord')
         self.assertEqual(lines[1], ' time = [0. 1. 2. 3. 4.]')
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_pprint2(self) -> None:
         kf_record = space.KfRecord(num_points=5)
         assert kf_record.time is not None
@@ -551,7 +549,6 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(kf_record3.K.shape, (6, 3, 90), 'K shape mismatch.')  # type: ignore[union-attr]
         self.assertEqual(kf_record3.z.shape, (3, 90), 'z shape mismatch.')  # type: ignore[union-attr]
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_chop(self) -> None:
         kf_record = space.KfRecord(num_points=60, num_states=9, num_active=6, num_axes=3, time_dtype=float)
         self.assertEqual(kf_record.stm.shape, (6, 6, 60), 'stm shape mismatch.')  # type: ignore[union-attr]
@@ -577,7 +574,6 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(kf_record3.K.shape, (6, 3, 21))  # type: ignore[union-attr]
         self.assertEqual(kf_record3.z.shape, (3, 21))  # type: ignore[union-attr]
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_chop_inplace(self) -> None:
         kf_record = space.KfRecord(num_points=30, num_states=6, num_active=3, num_axes=2, time_dtype=float)
         kf_record.time[:] = np.arange(30.)  # type: ignore[index, union-attr]
@@ -591,7 +587,6 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(kf_record2.K.shape, (3, 2, 11), 'K shape mismatch.')  # type: ignore[union-attr]
         self.assertEqual(kf_record2.z.shape, (2, 11), 'z shape mismatch.')  # type: ignore[union-attr]
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_chop_return_ends(self) -> None:
         kf_record = space.KfRecord(num_points=60, num_states=6, num_active=3, num_axes=2, time_dtype=float)
         (kf_record3, kf_record2, kf_record4) = kf_record.chop(ti=10, tf=20, return_ends=True)
@@ -617,6 +612,24 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(kf_record4.Pz.shape, (2, 2, 39), 'Pz shape mismatch.')  # type: ignore[union-attr]
         self.assertEqual(kf_record4.K.shape, (3, 2, 39), 'K shape mismatch.')  # type: ignore[union-attr]
         self.assertEqual(kf_record4.z.shape, (2, 39), 'z shape mismatch.')  # type: ignore[union-attr]
+
+#%% Simple instantiation tests without numpy
+class Test_classes_no_numpy(unittest.TestCase):
+    r"""
+    Tests instantiation of the following classes, whether numpy exists or not.
+        KfInnov
+    """
+    def test_kfinnov(self) -> None:
+        innov = space.KfInnov()
+        self.assertTrue(isinstance(innov, space.KfInnov))
+
+    def test_kf(self) -> None:
+        kf = space.Kf()
+        self.assertTrue(isinstance(kf, space.Kf))
+
+    def test_kfrecord(self) -> None:
+        kf_record = space.KfRecord()
+        self.assertIsInstance(kf_record, space.KfRecord)
 
 #%% Unit test execution
 if __name__ == '__main__':

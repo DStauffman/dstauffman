@@ -26,6 +26,7 @@ class Test_aerospace_OrbitType(unittest.TestCase):
         self.assertEqual(orbit_types.list_of_names(), ['uninitialized', 'elliptic', 'parabolic', 'hyperbolic'])
 
 #%% aerospace.Elements
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_Elements(unittest.TestCase):
     r"""
     Tests the aerospace.Elements class with the following cases:
@@ -84,6 +85,7 @@ class Test_aerospace_Elements(unittest.TestCase):
         self.assertEqual(elements3, exp)
 
 #%% aerospace.two_line_elements
+@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_two_line_elements(unittest.TestCase):
     r"""
     Tests the aerospace.two_line_elements function with the following cases:
