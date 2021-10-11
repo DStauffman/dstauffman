@@ -273,7 +273,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_only_data_two(self) -> None:
-        self.data_one = None
+        self.data_one = None  # type: ignore[assignment]
         self.name_one = ''
         (self.figs, err) = plot.make_difference_plot(self.description, self.time_one, self.time_two, \
             self.data_one, self.data_two, name_one=self.name_one, name_two=self.name_two, \

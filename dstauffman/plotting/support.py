@@ -28,7 +28,7 @@ try:
     _HAVE_QT = True
 except ModuleNotFoundError: # pragma: no cover
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
-    QPushButton = object
+    QPushButton = object  # type: ignore[misc, assignment]
     _HAVE_QT = False
 
 from dstauffman import Frozen, get_images_dir, get_username, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, \
@@ -975,7 +975,7 @@ def get_screen_resolution() -> Tuple[int, int]:
     if QApplication.instance() is None:
         app = QApplication(sys.argv)  # pragma: no cover
     else:
-        app = QApplication.instance()
+        app = QApplication.instance()  # type: ignore[assignment]
     # query the resolution
     screen_resolution = app.desktop().screenGeometry()
     # pull out the desired information

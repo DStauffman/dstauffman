@@ -335,8 +335,8 @@ class Test_rss(unittest.TestCase):
 
     def test_axis_drop1a(self) -> None:
         out = dcs.rss(self.inputs1, axis=0)
-        assert isinstance(out, np.int_)
-        self.assertAlmostEqual(out, self.outputs1)
+        assert isinstance(out, np.int_)  # type: ignore[unreachable]
+        self.assertAlmostEqual(out, self.outputs1)  # type: ignore[unreachable]
 
     def test_axis_drop1b(self) -> None:
         with self.assertRaises(ValueError):

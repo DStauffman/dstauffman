@@ -84,7 +84,7 @@ def anomaly_eccentric_2_mean(E: _N, e: _N) -> _N:
         E = np.mod(E, TAU)
     # calculate the mean anomaly
     M = E - e*np.sin(E)
-    return M  # type: ignore[no-any-return]
+    return M
 
 #%% Functions - anomaly_eccentric_2_true
 def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
@@ -137,7 +137,7 @@ def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
         else:
             assert isinstance(nu, np.ndarray)
             nu[ix] = TAU - nu[ix]
-    return nu  # type: ignore[no-any-return]
+    return nu
 
 #%% Functions - anomaly_hyperbolic_2_mean
 def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N:
@@ -177,7 +177,7 @@ def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N:
         raise ValueError('The hyperbolic anomaly is not defined when e < 1')
     # calculate the mean anomaly
     M = e*np.sinh(F) - F
-    return M  # type: ignore[no-any-return]
+    return M
 
 #%% Functions - anomaly_hyperbolic_2_true
 def anomaly_hyperbolic_2_true(F:_N, e: _N) -> _N:
@@ -338,7 +338,7 @@ def long_2_sidereal(lon: _N, jd: _N) -> _N:
     earth_rate = EARTH['omega']*JULIAN['day']
     # find theta
     theta = np.mod(theta_go + earth_rate*(jd - to) + lon, TAU)
-    return theta  # type: ignore[no-any-return]
+    return theta
 
 #%% Functions - mean_motion_2_semimajor
 def mean_motion_2_semimajor(n, mu):
@@ -456,7 +456,7 @@ def semimajor_2_mean_motion(a: _N, mu: _N) -> _N:
     if _any(a <= 0):
         raise ValueError('The period is not defined when a <= 0')
     n = sqrt(mu/a**3)
-    return n  # type: ignore[no-any-return]
+    return n
 
 #%% Functions - semimajor_2_period
 def semimajor_2_period(a: _N, mu: _N) -> _N:
@@ -496,7 +496,7 @@ def semimajor_2_period(a: _N, mu: _N) -> _N:
     if _any(a <= 0):
         raise ValueError('The period is not defined when a <= 0')
     p = TAU*sqrt(a**3/mu)
-    return p  # type: ignore[no-any-return]
+    return p
 
 #%% Functions - sidereal_2_long
 def sidereal_2_long(theta: _N, t: _N) -> _N:
@@ -545,7 +545,7 @@ def sidereal_2_long(theta: _N, t: _N) -> _N:
         else:
             assert isinstance(lon, np.ndarray)
             lon[ix] -= TAU
-    return lon  # type: ignore[no-any-return]
+    return lon
 
 #%% Unit Test
 if __name__ == '__main__':

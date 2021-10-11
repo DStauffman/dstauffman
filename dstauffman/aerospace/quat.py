@@ -238,7 +238,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
     try:
         axis_set = set(axis)  # type: ignore[arg-type]
     except TypeError:
-        axis_set = {axis}  # type: ignore[arg-type]
+        axis_set = {axis}
     assert len(axis_set - {1, 2, 3}) == 0, 'axis_set = {}'.format(axis_set)
     # calculations
     quat: np.ndarray

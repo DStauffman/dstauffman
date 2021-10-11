@@ -174,12 +174,12 @@ def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, flo
     dt_int      = time_delta.astype(np.int64)
     # quantize to the desired unit
     if floor:
-        quants  = date_in_int // dt_int  # type: ignore[operator]
+        quants  = date_in_int // dt_int
     else:
-        quants  = date_in_int // dt_int + ((date_in_int % dt_int) // (dt_int // 2))  # type: ignore[operator]
+        quants  = date_in_int // dt_int + ((date_in_int % dt_int) // (dt_int // 2))
     # scale and convert back to datetime outputs
     date_out = (dt_int*quants).astype(date_in.dtype)
-    return date_out  # type: ignore[return-value]
+    return date_out
 
 #%% Functions - round_num_datetime
 def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = False) -> np.ndarray:
