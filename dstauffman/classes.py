@@ -70,14 +70,34 @@ def _frozen(set: Callable) -> Callable:
     return set_attr
 
 #%% Methods - save_hdf5
-def save_hdf5(self, filename: Path=None) -> None:
+def save_hdf5(self, filename: Path=None, *, meta: Dict[str, Any] = None, **kwargs) -> None:
     r"""
     Save the object to disk as an HDF5 file.
 
     Parameters
     ----------
+    self : class instance or dict
+        Instance that this method is added to, otherwise, use a dictionary
     filename : str
         Name of the file to save
+    meta : dict, optional
+        Meta information to write to the file attributes
+    kwargs : dict, optional
+        Extra arguments to pass to the HDF5 dataset creation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2015.
+    #.  Updated by David C. Stauffer to include meta information and expose compression options in
+        October 2021.
+
+    Examples
+    --------
+    >>> from dstauffman import save_hdf5, get_tests_dir
+    >>> data = {'time': [1, 2, 3, 4, 5], 'data': [0, 0.5, 1.0, 1.5, 2]}
+    >>> filename = get_tests_dir() / 'test_file.hdf5'
+    >>> meta = {'num_pts': 5}
+    >>> save_hdf5(data, filename, meta=meta)  # doctest: +SKIP
 
     """
     # exit if no filename is given
@@ -86,24 +106,33 @@ def save_hdf5(self, filename: Path=None) -> None:
     # Save data
     with h5py.File(filename, 'w') as file:
         grp = file.create_group('self')
+        if meta is not None:
+            for (key, value) in meta.items():
+                grp.attrs[key] = value
         temp = vars(self) if not isinstance(self, dict) else self
         for key in temp:
             if is_dunder(key):
                 continue
             value = temp[key]
             if value is not None:
-                grp.create_dataset(key, data=value)
+                grp.create_dataset(key, data=value, **kwargs)
 
 #%% Methods - load_hdf5
 @overload
-def load_hdf5(cls: Type[_T], filename: Optional[Path]) -> _T: ...
+def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[False] = ...) -> _T: ...
 @overload
-def load_hdf5(cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]], filename: Optional[Path]) -> Type[Any]: ...
+def load_hdf5(cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]], filename: Optional[Path], return_meta: Literal[False] = ...) -> Type[Any]: ...
 @overload
-def load_hdf5(cls: Literal[None], filename: Optional[Path]) -> Type[Any]: ...
+def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[False] = ...) -> Type[Any]: ...
+@overload
+def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[_T, Dict[str, Any]]: ...
+@overload
+def load_hdf5(cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[Type[Any], Dict[str, Any]]: ...
+@overload
+def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[Type[Any], Dict[str, Any]]: ...
 
 def load_hdf5(cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], Tuple[str, ...]], \
-        filename: Path=None) -> Union[_T, Type[Any]]:
+        filename: Path=None, return_meta: bool = False) -> Union[_T, Type[Any], Tuple[_T, Dict[str, Any]], Tuple[Type[Any], Dict[str, Any]]]:
     r"""
     Load the object from disk.
 
@@ -112,9 +141,22 @@ def load_hdf5(cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], T
     filename : str
         Name of the file to load
 
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2015.
+    #.  Updated by David C. Stauffer to include meta information in October 2021.
+
+    Examples
+    --------
+    >>> from dstauffman import load_hdf5, get_tests_dir
+    >>> filename = get_tests_dir() / 'test_file.hdf5'
+    >>> (data, meta) = load_hdf5(None, filename, return_meta=True)  # doctest: +SKIP
+
     """
     if filename is None:
         raise ValueError('No file specified to load.')
+    if return_meta:
+        meta: Dict[str, Any] = {}
     # Load data
     out: Union[_T, Type[Any]]
     if cls is None:
@@ -132,12 +174,17 @@ def load_hdf5(cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], T
     with h5py.File(filename, 'r') as file:
         for key in file:
             grp = file[key]
+            if return_meta:
+                for (key, value) in grp.attrs.items():
+                    meta[key] = value
             for field in grp:
                 if limit_fields and not hasattr(out, field):
                     continue
                     #raise AttributeError(f"type object '{out.__name__}' has not attribute '{field}'")
                 # Note grp[field].value is now grp[field][()] because of updated HDF5 API
                 setattr(out, field, grp[field][()])
+    if return_meta:
+        return (out, meta)  # type: ignore[return-value]
     return out
 
 #%% Methods - save_pickle
