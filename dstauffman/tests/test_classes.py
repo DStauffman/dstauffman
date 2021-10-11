@@ -502,7 +502,7 @@ class Test_Counter(unittest.TestCase):
     def test_index_list(self) -> None:
         a_list = [0, 1, 2]
         c = dcs.Counter(1)
-        self.assertEqual(a_list[c], 1)  # type: ignore[call-overload]
+        self.assertEqual(a_list[c], 1)
 
     def test_sets(self) -> None:
         c1 = dcs.Counter(1)

@@ -170,15 +170,15 @@ def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, flo
     assert (t1 := get_np_time_units(date_in)) == (t2 := get_np_time_units(time_delta)), \
         f'The time refernce types must be the same, not "{t1}" and "{t2}".'
     # check the 64 bit integer representations
-    date_in_int = date_in.astype(np.int64)
-    dt_int      = time_delta.astype(np.int64)
+    date_in_int: np.ndarray = date_in.astype(np.int64)  # type: ignore[assignment]
+    dt_int: np.ndarray      = time_delta.astype(np.int64)  # type: ignore[assignment]
     # quantize to the desired unit
     if floor:
         quants  = date_in_int // dt_int
     else:
         quants  = date_in_int // dt_int + ((date_in_int % dt_int) // (dt_int // 2))
     # scale and convert back to datetime outputs
-    date_out = (dt_int*quants).astype(date_in.dtype)
+    date_out: np.datetime64 = (dt_int*quants).astype(date_in.dtype)
     return date_out
 
 #%% Functions - round_num_datetime

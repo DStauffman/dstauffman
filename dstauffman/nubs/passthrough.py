@@ -17,7 +17,7 @@ if platform.python_implementation() == 'CPython':
     try:
         # Try importing numba to determine if it is there.  Use this instead of HAVE_NUMBA from dstauffman
         # to avoid any circular dependencies
-        from numba import njit  # type: ignore[attr-defined]
+        from numba import njit
         HAVE_NUMBA = True
     except ModuleNotFoundError:
         HAVE_NUMBA = False

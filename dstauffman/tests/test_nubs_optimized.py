@@ -45,7 +45,7 @@ class Test_np_any(unittest.TestCase):
         self.assertTrue(nubs.np_any(x))
 
     def test_lists(self) -> None:
-        x: List[bool] = nubList([False for i in range(1000)])  # type: ignore[assignment]
+        x: List[bool] = nubList([False for i in range(1000)])
         self.assertFalse(nubs.np_any(x))
         x[333] = True
         self.assertTrue(nubs.np_any(x))
@@ -69,7 +69,7 @@ class Test_np_all(unittest.TestCase):
         self.assertFalse(nubs.np_all(x))
 
     def test_lists(self) -> None:
-        x: List[bool] = nubList([True for i in range(1000)])  # type: ignore[assignment]
+        x: List[bool] = nubList([True for i in range(1000)])
         self.assertTrue(nubs.np_all(x))
         x[333] = False
         self.assertFalse(nubs.np_all(x))
@@ -100,7 +100,7 @@ class Test_issorted_opt(unittest.TestCase):
         self.assertTrue(nubs.issorted_opt(x, descend=True))
 
     def test_lists(self) -> None:
-        x: List[Union[float, int]] = nubList([-inf, 0, 1, pi, 5, inf])  # type: ignore[assignment]
+        x: List[Union[float, int]] = nubList([-inf, 0, 1, pi, 5, inf])
         self.assertTrue(nubs.issorted_opt(x))
         self.assertFalse(nubs.issorted_opt(x, descend=True))
 

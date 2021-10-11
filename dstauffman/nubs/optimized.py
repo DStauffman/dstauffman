@@ -17,7 +17,7 @@ import unittest
 from dstauffman.nubs.passthrough import fake_jit, HAVE_NUMBA, ncjit, TARGET
 
 if HAVE_NUMBA:
-    from numba import float32, float64, int32, int64, vectorize  # type: ignore[attr-defined]
+    from numba import float32, float64, int32, int64, vectorize
 else:
     float32 = float64 = int32 = int64 = fake_jit
     try:
