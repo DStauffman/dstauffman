@@ -25,5 +25,6 @@ Jul 28, 2021: dstauffman 2.5
 # v2.1 Improved support for plotting datetimes, tracking versions, and using numba.
 # v2.2 Split numba tools into a submodule allowing better support with and without numba.
 # v2.3 Changed the way unit conversions were handled on all the plots, including some of the API.
+#      It also dropped support of Python 3.7 and now supports only 3.8+
 # v2.4 Used pathlib.Path instead of strings for files and folders.
 # v2.5 Added significant GPS and orbit ephemeris routines.

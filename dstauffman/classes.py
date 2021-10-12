@@ -70,7 +70,7 @@ def _frozen(set: Callable) -> Callable:
     return set_attr
 
 #%% Methods - save_hdf5
-def save_hdf5(self, filename: Path=None, *, meta: Dict[str, Any] = None, **kwargs) -> None:
+def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, **kwargs) -> None:
     r"""
     Save the object to disk as an HDF5 file.
 
@@ -103,6 +103,9 @@ def save_hdf5(self, filename: Path=None, *, meta: Dict[str, Any] = None, **kwarg
     # exit if no filename is given
     if filename is None:
         return
+    # alias keyword options
+    compression = kwargs.pop('compression', 'gzip')
+    shuffle = kwargs.pop('shuffle', True)
     # Save data
     with h5py.File(filename, 'w') as file:
         grp = file.create_group('self')
@@ -115,7 +118,12 @@ def save_hdf5(self, filename: Path=None, *, meta: Dict[str, Any] = None, **kwarg
                 continue
             value = temp[key]
             if value is not None:
-                grp.create_dataset(key, data=value, **kwargs)
+                try:
+                    iter(value)
+                except TypeError:
+                    grp.create_dataset(key, data=value, compression=None, shuffle=False, **kwargs)
+                else:
+                    grp.create_dataset(key, data=value, compression=compression, shuffle=shuffle, **kwargs)
 
 #%% Methods - load_hdf5
 @overload
@@ -132,7 +140,7 @@ def load_hdf5(cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]],
 def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[Type[Any], Dict[str, Any]]: ...
 
 def load_hdf5(cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], Tuple[str, ...]], \
-        filename: Path=None, return_meta: bool = False) -> Union[_T, Type[Any], Tuple[_T, Dict[str, Any]], Tuple[Type[Any], Dict[str, Any]]]:
+        filename: Path = None, return_meta: bool = False) -> Union[_T, Type[Any], Tuple[_T, Dict[str, Any]], Tuple[Type[Any], Dict[str, Any]]]:
     r"""
     Load the object from disk.
 
@@ -229,7 +237,7 @@ def load_pickle(cls: Type[_T], filename: Path = None) -> _T:
     return out
 
 #%% Methods - save_method
-def save_method(self, filename: Path = None, use_hdf5: bool = True) -> None:
+def save_method(self, filename: Path = None, use_hdf5: bool = True, *, meta: Dict[str, Any] = None, **kwargs) -> None:
     r"""
     Save the object to disk.
 
@@ -246,13 +254,20 @@ def save_method(self, filename: Path = None, use_hdf5: bool = True) -> None:
         return
     if not use_hdf5:
         # Version 1 (Pickle):
+        if meta is not None:
+            raise ValueError('meta information cannot be used with pickle files.')
         save_pickle(self, filename.with_suffix('.pkl'))
     else:
         # Version 2 (HDF5):
-        save_hdf5(self, filename)
+        save_hdf5(self, filename, meta=meta, **kwargs)
 
 #%% Methods - load_method
-def load_method(cls: Type[_T], filename: Path = None, use_hdf5: bool = True) -> _T:
+@overload
+def load_method(cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[False] = ...) -> _T: ...
+@overload
+def load_method(cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[True]) -> Tuple[_T, Dict[str, Any]]: ...
+
+def load_method(cls: Type[_T], filename: Path = None, use_hdf5: bool = True, return_meta: bool = False) -> Union[_T, Tuple[_T, Dict[str, Any]]]:
     r"""
     Load the object from disk.
 
@@ -268,10 +283,12 @@ def load_method(cls: Type[_T], filename: Path = None, use_hdf5: bool = True) -> 
         raise ValueError('No file specified to load.')
     if not use_hdf5:
         # Version 1 (Pickle):
-        out: _T = load_pickle(cls, filename.with_suffix('.pkl'))
+        if return_meta:
+            raise ValueError('meta information cannot be used with pickle files.')
+        out = load_pickle(cls, filename.with_suffix('.pkl'))
     else:
         # Version 2 (HDF5):
-        out = load_hdf5(cls, filename)
+        out = load_hdf5(cls, filename, return_meta=return_meta)  # type: ignore[call-overload]
     return out
 
 #%% pprint_dict
