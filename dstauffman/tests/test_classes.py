@@ -35,8 +35,10 @@ class _Example_Frozen(dcs.Frozen):
         self.dummy     = dummy if dummy is not None else 0
 
 class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
-    load: ClassVar[Callable[[Optional[pathlib.Path], DefaultNamedArg(bool, 'use_hdf5')], _Example_SaveAndLoad]]
-    save: Callable[[_Example_SaveAndLoad, Optional[pathlib.Path], DefaultNamedArg(bool, 'use_hdf5')], None]
+    load: ClassVar[Callable[[Optional[pathlib.Path], DefaultNamedArg(bool, 'use_hdf5'), \
+        DefaultNamedArg(bool, 'return_meta')], _Example_SaveAndLoad]]
+    save: Callable[[_Example_SaveAndLoad, Optional[pathlib.Path], \
+        DefaultNamedArg(bool, 'use_hdf5'), DefaultNamedArg(dict, 'meta')], None]
     def __init__(self):
         if dcs.HAVE_NUMPY:
             self.x = np.array([1, 3, 5])
@@ -367,6 +369,25 @@ class Test_SaveAndLoad(unittest.TestCase):
         np.testing.assert_array_equal(results.y, self.results1.y)
         self.assertFalse(hasattr(results, 'z'))
         self.assertEqual(results.new, 5)
+
+    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    def test_meta(self) -> None:
+        meta = {'num_pts': len(self.results1.x)}
+        self.results1.save(self.save_path1, meta=meta, compression=None, shuffle=False)  # type: ignore[call-arg]
+        results = self.results1_cls.load(self.save_path1)
+        self.assertTrue(dcs.compare_two_classes(results, self.results1, suppress_output=True, compare_recursively=True))
+        (results2, meta2) = self.results1_cls.load(self.save_path1, return_meta=True)  # type: ignore[misc]
+        self.assertTrue(dcs.compare_two_classes(results2, self.results1, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
+        self.assertEqual(meta2, meta)  # type: ignore[has-type]
+
+    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    def test_compression_and_shuffle(self) -> None:
+        self.results1.save(self.save_path1, compression=6, shuffle=True)  # type: ignore[call-arg]
+        results = self.results1_cls.load(self.save_path1)
+        self.assertTrue(dcs.compare_two_classes(results, self.results1, suppress_output=True, compare_recursively=True))
+        (results2, meta2) = self.results1_cls.load(self.save_path1, return_meta=True)  # type: ignore[misc]
+        self.assertTrue(dcs.compare_two_classes(results2, self.results1, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
+        self.assertEqual(meta2, {})  # type: ignore[has-type]
 
     def tearDown(self) -> None:
         self.save_path1.unlink(missing_ok=True)

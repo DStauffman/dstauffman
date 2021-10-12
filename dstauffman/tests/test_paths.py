@@ -40,7 +40,7 @@ class Test_get_root_dir(unittest.TestCase):
         call the function
     """
     def test_function(self) -> None:
-        filepath      = inspect.getfile(dcs.get_root_dir.__wrapped__)
+        filepath = inspect.getfile(dcs.get_root_dir.__wrapped__)
         expected_root = pathlib.Path(os.path.split(filepath)[0])
         folder = dcs.get_root_dir()
         self.assertEqual(folder, expected_root)
