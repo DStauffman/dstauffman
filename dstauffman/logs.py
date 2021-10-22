@@ -118,7 +118,7 @@ def deactivate_logging() -> None:
         i += 1
     # check for bad situations
     if i == max_handlers or bool(root_logger.handlers):
-        raise ValueError('Something bad happended when trying to close the logger.') # pragma: no cover
+        raise ValueError('Something bad happended when trying to close the logger.')  # pragma: no cover
 
 #%% Functions - flush_logging
 def flush_logging() -> None:

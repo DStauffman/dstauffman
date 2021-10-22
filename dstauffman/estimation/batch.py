@@ -1027,7 +1027,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
         V_jacobian = Vh_jacobian.T
         temp = np.power(S_jacobian, -2, out=np.zeros(S_jacobian.shape), where=S_jacobian > min_eig)
         covariance = V_jacobian @ np.diag(temp) @ Vh_jacobian
-    except MemoryError: # pragma: no cover
+    except MemoryError:  # pragma: no cover
         logger.log(LogLevel.L5, 'Singular value decomposition of Jacobian failed.')
         V_jacobian = np.full((num_params, num_params), np.nan, dtype=float)
         covariance = np.inv(jacobian.T @ jacobian)
@@ -1043,8 +1043,8 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
             (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian, full_matrices=False)
             V_jacobian = Vh_jacobian.T
             covariance = V_jacobian @ np.diag(S_jacobian**-2) @ Vh_jacobian
-        except MemoryError: # pragma: no cover
-            pass # caught in earlier exception (hopefully?)
+        except MemoryError:  # pragma: no cover
+            pass  # caught in earlier exception (hopefully?)
 
     # update the results
     bpe_results.correlation  = correlation

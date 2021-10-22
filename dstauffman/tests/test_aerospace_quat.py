@@ -43,9 +43,9 @@ class Test_aerospace_suppress_checks(unittest.TestCase):
 
     def tearDown(self) -> None:
         if self.orig_flag:  # type: ignore[attr-defined]
-            space.unsuppress_quat_checks()
+            space.unsuppress_quat_checks()  # pragma: no cover
         else:
-            space.suppress_quat_checks()
+            space.suppress_quat_checks()  # pragma: no cover
 
 #%% aerospace.quat_assertions
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')

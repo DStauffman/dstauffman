@@ -26,7 +26,7 @@ try:
     from PyQt5.QtGui import QIcon
     from PyQt5.QtWidgets import QApplication, QPushButton
     _HAVE_QT = True
-except ModuleNotFoundError: # pragma: no cover
+except ModuleNotFoundError:
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
     QPushButton = object  # type: ignore[misc, assignment]
     _HAVE_QT = False
@@ -126,11 +126,11 @@ class _HoverButton(QPushButton):
 
     def enterEvent(self, event):
         # Draw border on hover
-        self.setStyleSheet('border: 1px; border-style: solid;') # pragma: no cover
+        self.setStyleSheet('border: 1px; border-style: solid;')  # pragma: no cover
 
     def leaveEvent(self, event):
         # Delete border after hover
-        self.setStyleSheet('border: 0px;') # pragma: no cover
+        self.setStyleSheet('border: 0px;')  # pragma: no cover
 
 #%% Classes - MyCustomToolbar
 class MyCustomToolbar():
@@ -158,7 +158,7 @@ class MyCustomToolbar():
         r"""Initialize the custom toolbar."""
         # check to see if a QApplication exists, and if not, make one
         if QApplication.instance() is None:
-            self.qapp = QApplication(sys.argv) # pragma: no cover
+            self.qapp = QApplication(sys.argv)  # pragma: no cover
         else:
             self.qapp = QApplication.instance()
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
@@ -305,7 +305,7 @@ class ColorMap(Frozen):
             raise ValueError("You can't call ColorMap.set_colors unless it was given a num_colors input.")
         try:
             ax.set_prop_cycle('color', [self.get_color(i) for i in range(self.num_colors)])
-        except AttributeError: # pragma: no cover
+        except AttributeError:  # pragma: no cover
             # for older matplotlib versions, use deprecated set_color_cycle
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
 
@@ -583,7 +583,7 @@ def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Uni
         types = plot_type
     # if no folder was specified, then use the current working directory
     if folder is None:
-        folder = Path.cwd() # pragma: no cover
+        folder = Path.cwd()  # pragma: no cover
     # confirm that the folder exists
     if not folder.is_dir():
         raise ValueError('The specfied folder "{}" does not exist.'.format(folder))

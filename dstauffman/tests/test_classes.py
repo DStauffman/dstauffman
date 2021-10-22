@@ -38,7 +38,7 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     load: ClassVar[Callable[[Optional[pathlib.Path], DefaultNamedArg(bool, 'use_hdf5'), \
         DefaultNamedArg(bool, 'return_meta')], _Example_SaveAndLoad]]
     save: Callable[[_Example_SaveAndLoad, Optional[pathlib.Path], \
-        DefaultNamedArg(bool, 'use_hdf5'), DefaultNamedArg(dict, 'meta')], None]
+        DefaultNamedArg(bool, 'use_hdf5'), DefaultNamedArg(dict, 'meta'), DefaultNamedArg(set, 'exclusions')], None]
     def __init__(self):
         if dcs.HAVE_NUMPY:
             self.x = np.array([1, 3, 5])
@@ -388,6 +388,26 @@ class Test_SaveAndLoad(unittest.TestCase):
         (results2, meta2) = self.results1_cls.load(self.save_path1, return_meta=True)  # type: ignore[misc]
         self.assertTrue(dcs.compare_two_classes(results2, self.results1, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
         self.assertEqual(meta2, {})  # type: ignore[has-type]
+
+    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    def test_exclusions(self) -> None:
+        orig = self.results1.x.copy()
+        self.results1.save(self.save_path1, exclusions={'x', 'z'})
+        self.results1.x = 'Not original'
+        results = self.results1_cls.load(self.save_path1)
+        np.testing.assert_array_equal(results.y, self.results1.y)
+        np.testing.assert_array_equal(results.x, orig)
+        self.assertIsNone(results.z)
+
+    def test_bad_meta(self) -> None:
+        with self.assertRaises(ValueError) as err:
+            self.results1.save(self.save_path1, use_hdf5=False, meta={'num': 100})
+        self.assertEqual(str(err.exception), 'meta information cannot be used with pickle files.')
+
+    def test_bad_exclusions(self) -> None:
+        with self.assertRaises(ValueError) as err:
+            self.results1.save(self.save_path1, use_hdf5=False, exclusions={'y', })
+        self.assertEqual(str(err.exception), 'exclusions cannot be used with pickle files.')
 
     def tearDown(self) -> None:
         self.save_path1.unlink(missing_ok=True)

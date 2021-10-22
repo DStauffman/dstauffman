@@ -168,7 +168,7 @@ def run_pytests(folder: Path, *args, **kwargs) -> int:
     return return_code
 
 #%% run_coverage
-def run_coverage(folder: Path, *, report: bool = True) -> int:
+def run_coverage(folder: Path, *, report: bool = True, cov_file: Path = None) -> int:
     r"""
     Wraps the pytests with a Code Coverage report.
 
@@ -178,6 +178,8 @@ def run_coverage(folder: Path, *, report: bool = True) -> int:
         Folder to process for test cases
     report : bool, optional, default is True
         Whether to generate the HTML report
+    cov_file : class Path or str, optional
+        File to output the coverage results to
 
     Returns
     -------
@@ -199,7 +201,7 @@ def run_coverage(folder: Path, *, report: bool = True) -> int:
 
     # Get information on the test folder
     test_folder = get_tests_dir()
-    data_file   = test_folder / '.coverage'
+    data_file   = test_folder / '.coverage' if cov_file is None else Path(cov_file)
     config_file = test_folder / '.coveragerc'
     cov_folder  = test_folder / 'coverage_html_report'
 
@@ -293,7 +295,7 @@ def find_repo_issues(folder: Path, extensions: Union[FrozenSet[str], Set[str], T
                 bad_lines = False
                 try:
                     lines = file.readlines()
-                except UnicodeDecodeError: # pragma: no cover
+                except UnicodeDecodeError:  # pragma: no cover
                     print(f'File: "{this_file}" was not a valid utf-8 file.')
                     is_clean = False
                 for (c, line) in enumerate(lines):

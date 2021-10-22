@@ -24,9 +24,11 @@ class Test_commands_parse_tests(unittest.TestCase):
         self.folder              = dcs.get_root_dir()
         self.expected            = argparse.Namespace()
         self.expected.docstrings = False
-        self.expected.library    = None
         self.expected.unittest   = False
         self.expected.verbose    = False
+        self.expected.library    = None
+        self.expected.coverage   = False
+        self.expected.cov_file   = None
 
     def test_nominal(self) -> None:
         args = commands.parse_tests([])
@@ -52,6 +54,11 @@ class Test_commands_parse_tests(unittest.TestCase):
         args = commands.parse_tests(['-u'])
         self.assertEqual(args, self.expected)
 
+    def test_coverage(self) -> None:
+        self.expected.coverage = True
+        args = commands.parse_tests(['-c'])
+        self.assertEqual(args, self.expected)
+
 #%% commands.execute_tests
 class Test_commands_execute_tests(unittest.TestCase):
     r"""
@@ -61,7 +68,7 @@ class Test_commands_execute_tests(unittest.TestCase):
     """
     def setUp(self) -> None:
         self.folder = dcs.get_root_dir()
-        self.args = argparse.Namespace(docstrings=False, library=None, unittest=False, verbose=False)
+        self.args = argparse.Namespace(docstrings=False, unittest=False, verbose=False, library=None, coverage=False, cov_file=None, )
         self.patch_args = {'folder': self.folder, 'extensions': frozenset({'m', 'py'}), 'list_all': False, \
                            'check_tabs': True, 'trailing': False, 'exclusions': None, 'check_eol': None, \
                            'show_execute': False}
@@ -102,6 +109,13 @@ class Test_commands_execute_tests(unittest.TestCase):
         (pos_args, kwargs) = mocker.call_args
         self.assertEqual(len(pos_args), 1)
         self.assertTrue(str(pos_args[0]).endswith('other_folder'))
+        self.assertEqual(kwargs, {})
+
+    @patch('dstauffman.commands.runtests.run_coverage')
+    def test_coverage(self, mocker: Mock) -> None:
+        self.args.coverage = True
+        commands.execute_tests(self.args)
+        mocker.assert_called_once_with(self.folder, cov_file=None, report=False)
 
 #%% commands.parse_coverage
 class Test_commands_parse_coverage(unittest.TestCase):

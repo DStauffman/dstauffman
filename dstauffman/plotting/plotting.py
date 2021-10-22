@@ -789,7 +789,7 @@ def setup_plots(figs, opts):
         fig.tight_layout(rect=(0., bottom, 1., 0.97), h_pad=1.5, w_pad=1.5)
 
     # things to do if displaying the plots
-    if opts.show_plot and _Plotter: # pragma: no cover
+    if opts.show_plot and _Plotter:  # pragma: no cover
         # add a custom toolbar
         figmenu(figs)
         # force drawing right away

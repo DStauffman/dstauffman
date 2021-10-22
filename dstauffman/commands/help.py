@@ -33,7 +33,7 @@ def print_help(help_file: Path = None) -> int:
     """
     if help_file is None:
         help_file = get_root_dir().parent / 'README.rst'
-    if not help_file.is_file():  # pragma: no cover
+    if not help_file.is_file():
         print(f'Warning: help file at "{help_file}" was not found.')
         return ReturnCodes.bad_help_file
     with open(help_file) as file:

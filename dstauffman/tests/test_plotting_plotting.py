@@ -64,7 +64,7 @@ class Test_plotting_Opts(unittest.TestCase):
         date_str = opts.get_date_zero_str()
         self.assertEqual(date_str,'  t(0) = 01-Apr-2019 18:00:00 Z')
 
-    def get_time_limits(self) -> None:
+    def test_get_time_limits(self) -> None:
         opts = plot.Opts()
         opts.disp_xmin = 60
         opts.disp_xmax = inf
@@ -78,7 +78,7 @@ class Test_plotting_Opts(unittest.TestCase):
         self.assertEqual(r1, -inf)
         self.assertIsNone(r2)
 
-    def get_time_limits2(self) -> None:
+    def test_get_time_limits2(self) -> None:
         opts = plot.Opts().convert_dates('datetime')
         opts.disp_xmin = datetime.datetime(2020, 6, 1, 0, 0, 0)
         opts.disp_xmax = datetime.datetime(2020, 6, 1, 12, 0, 0)

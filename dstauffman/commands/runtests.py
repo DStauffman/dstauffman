@@ -53,6 +53,8 @@ def parse_tests(input_args: List[str]) -> argparse.Namespace:
      unittest   = False
      verbose    = False
      library    = None
+     coverage   = False
+     cov_file   = None
 
     """
     parser = argparse.ArgumentParser(prog='dcs tests', description='Runs all the built-in unit tests.')
@@ -64,6 +66,10 @@ def parse_tests(input_args: List[str]) -> argparse.Namespace:
     parser.add_argument('-v', '--verbose', help='Run tests in verbose mode.', action='store_true')
 
     parser.add_argument('-l', '--library', type=str, nargs='?', help='Library to run the unit tests from, default is yourself.')
+
+    parser.add_argument('-c', '--coverage', help='Run code coverage tool.', action='store_true')
+
+    parser.add_argument('--cov_file', type=str, nargs='?', help='File to output the coverage results to.')
 
     args = parser.parse_args(input_args)
     return args
@@ -92,11 +98,13 @@ def execute_tests(args: argparse.Namespace) -> int:
     --------
     >>> from dstauffman.commands import execute_tests
     >>> from argparse import Namespace
-    >>> args = Namespace(docstrings=False, library=None, unittest=False, verbose=False)
+    >>> args = Namespace(coverage=None, cov_file=None, docstrings=False, library=None, unittest=False, verbose=False)
     >>> execute_tests(args) # doctest: +SKIP
 
     """
     # alias options
+    coverage   = args.coverage
+    cov_file   = args.cov_file
     docstrings = args.docstrings
     library    = args.library
     verbose    = args.verbose
@@ -118,8 +126,14 @@ def execute_tests(args: argparse.Namespace) -> int:
     else:
         if use_pytest:
             # run the unittests using pytest
-            return_code = run_pytests(folder)
+            if coverage:
+                return_code = run_coverage(folder, cov_file=cov_file, report=False)
+            else:
+                return_code = run_pytests(folder)
         else:
+            if coverage:
+                print('Unable to run coverage with the unittest tool, please try pytest instead.')
+                return ReturnCodes.no_coverage_tool
             # run the unittests using unittest (which is core python)
             test_names = library if library is not None else 'dstauffman.tests'
             return_code = run_unittests(test_names)
@@ -150,12 +164,14 @@ def parse_coverage(input_args: List[str]) -> argparse.Namespace:
     >>> input_args = []
     >>> args = parse_coverage(input_args)
     >>> print(args)
-    Namespace(no_report=False)
+    Namespace(no_report=False, cov_file=None)
 
     """
     parser = argparse.ArgumentParser(prog='dcs coverage', description='Runs all the built-in unit tests and produces a coverage report.')
 
     parser.add_argument('-n', '--no-report', help='Suppresses the generation of the HTML report.', action='store_true')
+
+    parser.add_argument('--cov_file', type=str, nargs='?', help='File to output the coverage results to.')
 
     args = parser.parse_args(input_args)
     return args
@@ -189,12 +205,13 @@ def execute_coverage(args: argparse.Namespace) -> int:
     """
     #alias options
     report = not args.no_report
+    cov_file = args.cov_file
 
     # get test location information
     folder = get_root_dir()
 
     # run coverage
-    return_code = run_coverage(folder, report=report)
+    return_code = run_coverage(folder, report=report, cov_file=cov_file)
 
     # open the report
     if report:

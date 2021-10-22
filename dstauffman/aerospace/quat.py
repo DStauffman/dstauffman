@@ -95,7 +95,7 @@ def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertio
 
     """
     if not _USE_ASSERTIONS or skip_assertions:
-        return # pragma: no cover
+        return
     # get sizes
     qsize = quat.size
     qndim = quat.ndim
@@ -491,7 +491,7 @@ def quat_from_euler(angles: ArrayLike, seq: ArrayLike = None, **kwargs) -> np.nd
             angles = np.array([angles])
             ndim = 1
         else:
-            raise # pragma: no cover
+            raise  # pragma: no cover
     # need this check for scalar float64 objects (but not float objects, don't know why)
     if ndim == 0:
         angles = np.array([angles])
@@ -578,7 +578,7 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
         if np.isscalar(ti):
             ti = np.array([ti])
             num = len(ti)
-        else: # pragma: no cover
+        else:  # pragma: no cover
             raise
 
     # initialize output
@@ -592,7 +592,7 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
         # optimization for simple use case(s), where ti is a scalar and contained in time
         if ti in time:
             ix = np.where(ti == time)[0]
-            if not ix: # pragma: no branch
+            if not ix:  # pragma: no branch
                 qout = quat[:, ix]
                 return qout
 

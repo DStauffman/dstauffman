@@ -60,8 +60,8 @@ def _frozen(set: Callable) -> Callable:
             return
         if sys._getframe(1).f_code.co_name == '__init__':
             # Allow __setattr__ calls in __init__ calls of proper object types
-            for key, val in sys._getframe(1).f_locals.items(): # pragma: no branch
-                if key == 'self' and isinstance(val, self.__class__): # pragma: no branch
+            for key, val in sys._getframe(1).f_locals.items():  # pragma: no branch
+                if key == 'self' and isinstance(val, self.__class__):  # pragma: no branch
                     set(self, name, value)
                     return
         raise AttributeError('You cannot add attribute of {} to {} in {}.'.format(\
@@ -70,7 +70,7 @@ def _frozen(set: Callable) -> Callable:
     return set_attr
 
 #%% Methods - save_hdf5
-def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, **kwargs) -> None:
+def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclusions: _Sets = None, **kwargs) -> None:
     r"""
     Save the object to disk as an HDF5 file.
 
@@ -82,6 +82,8 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, **kwa
         Name of the file to save
     meta : dict, optional
         Meta information to write to the file attributes
+    exclusions : set, optional
+        Fieldnames to not write out to disk
     kwargs : dict, optional
         Extra arguments to pass to the HDF5 dataset creation
 
@@ -94,10 +96,11 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, **kwa
     Examples
     --------
     >>> from dstauffman import save_hdf5, get_tests_dir
-    >>> data = {'time': [1, 2, 3, 4, 5], 'data': [0, 0.5, 1.0, 1.5, 2]}
+    >>> data = {'time': [1, 2, 3, 4, 5], 'data': [0, 0.5, 1.0, 1.5, 2], 'ver': 1.0}
     >>> filename = get_tests_dir() / 'test_file.hdf5'
     >>> meta = {'num_pts': 5}
-    >>> save_hdf5(data, filename, meta=meta)  # doctest: +SKIP
+    >>> exclusions = {'ver', }
+    >>> save_hdf5(data, filename, meta=meta, exclusions=exclusions)  # doctest: +SKIP
 
     """
     # exit if no filename is given
@@ -115,6 +118,8 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, **kwa
         temp = vars(self) if not isinstance(self, dict) else self
         for key in temp:
             if is_dunder(key):
+                continue
+            if exclusions is not None and key in exclusions:
                 continue
             value = temp[key]
             if value is not None:
@@ -237,7 +242,8 @@ def load_pickle(cls: Type[_T], filename: Path = None) -> _T:
     return out
 
 #%% Methods - save_method
-def save_method(self, filename: Path = None, use_hdf5: bool = True, *, meta: Dict[str, Any] = None, **kwargs) -> None:
+def save_method(self, filename: Path = None, use_hdf5: bool = True, *, meta: Dict[str, Any] = None, \
+        exclusions: _Sets = None, **kwargs) -> None:
     r"""
     Save the object to disk.
 
@@ -256,10 +262,12 @@ def save_method(self, filename: Path = None, use_hdf5: bool = True, *, meta: Dic
         # Version 1 (Pickle):
         if meta is not None:
             raise ValueError('meta information cannot be used with pickle files.')
+        if exclusions is not None:
+            raise ValueError('exclusions cannot be used with pickle files.')
         save_pickle(self, filename.with_suffix('.pkl'))
     else:
         # Version 2 (HDF5):
-        save_hdf5(self, filename, meta=meta, **kwargs)
+        save_hdf5(self, filename, meta=meta, exclusions=exclusions, **kwargs)
 
 #%% Methods - load_method
 @overload

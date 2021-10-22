@@ -1573,8 +1573,18 @@ class Test_zero_order_hold(unittest.TestCase):
         xp      = np.array([0, 10, 5, 15])
         yp      = np.array([0, 1, 2, 3])
         x       = np.array([-4, -2, 0, 2, 4, 6, 20])
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(RuntimeError) as err:
             dcs.zero_order_hold(x, xp, yp, return_indices=True)
+        self.assertEqual(str(err.exception), 'Data must be sorted in order to ask for indices.')
+
+    def test_missing_scipy(self) -> None:
+        xp    = np.array([0, 5, 10, 15, 4])
+        yp    = np.array([0, 1, -2, 3, 0])
+        x     = np.array([-4, -2, 0, 2, 4, 6])
+        with self.assertRaises(RuntimeError) as err:
+            with patch('dstauffman.utils.HAVE_SCIPY', False):
+                dcs.zero_order_hold(x, xp, yp)
+        self.assertEqual(str(err.exception), 'You must have scipy available to run this.')
 
 #%% drop_following_time
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')

@@ -2,7 +2,7 @@
 [run]
 branch = True
 omit =
-    *tests/*
+    */site-packages/*,*/.eggs/*
 
 [report]
 # Regexes for lines to exclude from consideration
@@ -23,6 +23,10 @@ exclude_lines =
     if 0:
     if False:
     if __name__ == .__main__.:
+    if TYPE_CHECKING:
+
+    # Don't complain about typing overloads
+    @overload
 
 ignore_errors = True
 

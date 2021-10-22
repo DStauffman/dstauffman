@@ -367,7 +367,7 @@ def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -
             s = s2
         else:
             # shouldn't be able to ever reach this line with assertions on
-            raise ValueError('Total samples are 1, but neither data set has only one item.') # pragma: no cover
+            raise ValueError('Total samples are 1, but neither data set has only one item.')  # pragma: no cover
     return (n, u, s)
 
 #%% Functions - bounded_normal_draw
