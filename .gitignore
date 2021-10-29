@@ -109,6 +109,7 @@ dstauffman.egg-info/*
 # =========================
 coverage_html_report/
 .coverage
+.coverage.*
 output/*
 results/*
 temp/*

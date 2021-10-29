@@ -29,8 +29,9 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
     inf = np.inf
+    isfinite = np.isfinite
 else:
-    from math import inf
+    from math import inf, isfinite  # type: ignore[misc]
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -191,7 +192,7 @@ class Opts(Frozen):
     def get_time_limits(self) -> Tuple[_Date, _Date, _Date, _Date]:
         r"""Returns the display and RMS limits in the current time units."""
         def _convert(value):
-            if value is not None and np.isfinite(value):
+            if value is not None and isfinite(value):
                 return convert_time_units(value, self.time_base, self.time_unit)
             return value
 

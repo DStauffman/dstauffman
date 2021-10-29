@@ -14,7 +14,7 @@ import platform
 from typing import Dict, List, Optional, Tuple, Union
 import unittest
 
-from dstauffman import get_tests_dir, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
+from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -1035,6 +1035,42 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
         plt.close(cls.fig1)
         plt.close(cls.fig2)
         cls.filename.unlink(missing_ok=True)
+
+#%% plotting.add_datashaders
+@unittest.skipIf(not HAVE_DS or not HAVE_MPL, 'Skipping due to missing datashader dependency.')
+class Test_plotting_add_datashaders(unittest.TestCase):
+    r"""
+    Tests the plotting.add_datashaders function with the following cases:
+        TBD
+    """
+    def setUp(self) -> None:
+        self.fig = plt.figure()
+        self.ax = self.fig.add_subplot(1, 1, 1)
+        self.ax.plot([0, 0], [1, 1], '.-')
+        self.points = 0.5 + 0.25 * np.random.rand(2, 1000)
+        self.datashaders = [{'time': self.points[0, :], 'data': self.points[1, :], 'ax': self.ax}]
+
+    def test_nominal(self) -> None:
+        self.datashaders[0]['color'] = 'xkcd:black'
+        plot.add_datashaders(self.datashaders)
+
+    def test_datetime(self) -> None:
+        self.datashaders[0]['color'] = 'xkcd:black'
+        self.datashaders.append({'color': 'xkcd:blue', 'ax': self.ax})
+        self.datashaders[1]['time'] = np.arange(np.datetime64('now', 'ns'), np.timedelta64(1, 'm'), np.timedelta64(1, 's'))
+        self.datashaders[1]['data'] = np.random.rand(*self.datashaders[1]['time'].shape)
+        self.datashaders[1]['time_units'] = 'numpy'
+        plot.add_datashaders(self.datashaders)
+
+    def test_min_max(self) -> None:
+        self.datashaders[0]['colormap'] = 'autumn_r'
+        self.datashaders[0]['vmin'] = 0.2
+        self.datashaders[0]['vmax'] = 0.6
+        plot.add_datashaders(self.datashaders)
+
+    def test_colormap(self) -> None:
+        self.datashaders[0]['colormap'] = 'autumn_r'
+        plot.add_datashaders(self.datashaders)
 
 #%% Unit test execution
 if __name__ == '__main__':

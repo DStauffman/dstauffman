@@ -4,6 +4,7 @@ image: python:latest
 # only cache local items.
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
+  DCS_TESTS_DIR: "$CI_PROJECT_DIR/dstauffman/tests"
 
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/reference/pip_install/#caching
@@ -24,23 +25,28 @@ before_script:
   - virtualenv static
   - source static/bin/activate
   - python -m pip install wheel
-  - python -m pip install coverage flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5 pytest requests scipy tblib urllib3
+  - python -m pip install coverage flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5 PyQt5-stubs pytest requests types-requests scipy tblib urllib3
   - deactivate
   - virtualenv everything
   - source everything/bin/activate
   - python -m pip install wheel
   - python -m pip install coverage datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PyQt5 pytest requests scipy tblib urllib3
   - deactivate
+  - virtualenv core_only
+  - source everything/bin/core_only
+  - python -m pip install wheel
+  - python -m pip install coverage pytest
+  - deactivate
   #- virtualenv py37 --python=/usr/bin/python3.7  # TODO: just different docker image
   #- source py37/bin/activate
   #- python -m pip install wheel
   #- python -m pip install coverage flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5 pytest requests scipy tblib urllib3
   #- deactivate
-  - virtualenv core_only
 
 stages:
   - Static Analysis
   - Test
+  - Coverage
 
 mypy:
   stage: Static Analysis
@@ -69,7 +75,41 @@ unit_test:
   - pwd
   - ls -l
   - source everythin/bin/activate
-  - python -m dstauffman tests
+  - python -m dstauffman tests --coverage --cov_file $DCS_TESTS_DIR/.coverage.full
+
+core_test:
+  stage: Test
+  script:
+  - pwd
+  - ls l
+  - source core_only/bin/activate
+  - python -m dstauffman tests --coverage --cov_file $DCS_TESTS_DIR/.coverage.core
+
+no_numba_test:
+  stage: Test
+  script:
+  - pwd
+  - ls l
+  - source static/bin/activate
+  - python -m dstauffman tests --coverage --cov_file $DCS_TESTS_DIR/.coverage.no_numba
+
+command_test:
+  stage: Test
+  script:
+  - pwd
+  - ls l
+  - source core_only/bin/activate
+  - export COVERAGE_FILE=$DCS_TESTS_DIR/.coverage.commands
+  - export PYTHONPATH=$DCS_TESTS_DIR/../..;$PYTHONPATH
+  - coverage run $DCS_TESTS_DIR/test_commands_help.py
+
+basic_test:
+  stage: Test
+  script:
+  - pwd
+  - ls l
+  - source core_only/bin/activate
+  - python -m dstauffman tests -u
 
 doc_test:
   stage: Test
@@ -79,10 +119,15 @@ doc_test:
   - source everythin/bin/activate
   - python -m dstauffman tests -d
 
-core_test:
-  stage: Test
+coverage_report:
+  stage: Coverage
   script:
+  - cd $DCS_TESTS_DIR
   - pwd
   - ls l
-  - source core_only/bin/activate
-  - python -m dstauffman tests -u
+  - source static/bin/activate
+  - export COVERAGE_FILE=.coverage
+  - coverage --version
+  - coverage combine
+  - coverage html
+  # TODO: add to artifacts, and make it depend on earlier tests

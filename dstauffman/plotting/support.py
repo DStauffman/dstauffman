@@ -10,6 +10,7 @@ Notes
 from __future__ import annotations
 import datetime
 import doctest
+from functools import partial
 import gc
 from itertools import repeat
 import operator
@@ -31,8 +32,8 @@ except ModuleNotFoundError:
     QPushButton = object  # type: ignore[misc, assignment]
     _HAVE_QT = False
 
-from dstauffman import Frozen, get_images_dir, get_username, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, \
-    is_datetime
+from dstauffman import convert_date, Frozen, get_images_dir, get_username, HAVE_DS, HAVE_MPL, \
+    HAVE_NUMPY, HAVE_PANDAS, HAVE_SCIPY, is_datetime
 
 if HAVE_MPL:
     from matplotlib.axes import Axes
@@ -50,6 +51,14 @@ if HAVE_MPL:
     converter = ConciseDateConverter()
     munits.registry[datetime.date] = converter
     munits.registry[datetime.datetime] = converter
+    if HAVE_DS:
+        try:
+            import datashader as ds
+            import datashader.transfer_functions as tf
+            from datashader.mpl_ext import dsshow, alpha_colormap
+        except ImportError:
+            warnings.warn('Datashader version does not support matplotlib and will not be used.')
+            HAVE_DS = False
 if HAVE_NUMPY:
     import numpy as np
     inf = np.inf
@@ -57,6 +66,8 @@ if HAVE_NUMPY:
         munits.registry[np.datetime64] = converter
 else:
     from math import inf
+if HAVE_PANDAS:
+    import pandas as pd
 if HAVE_SCIPY:
     import scipy.stats as st
 try:
@@ -1750,6 +1761,35 @@ def save_images_to_pdf(figs : Union[Figure, List[Figure]] = None, folder: Path =
         else:
             images.append(image_jpg)
     im.save(filename, save_all=True, append_images=images, metadata=meta)  # TODO: metadata not saving?
+
+#%% add_datashaders
+def add_datashaders(datashaders):
+    r"""Adds the collection of datashaders to the axes."""
+    # overlay the datashaders
+    for this_ds in datashaders:
+        # check for dates and convert as appropriate
+        if is_datetime(this_ds['time']):
+            df = pd.DataFrame({'time': convert_date(this_ds['time'], 'matplotlib', \
+                old_form=this_ds['time_units']), 'data': this_ds['data']})
+        else:
+            df = pd.DataFrame({'time': this_ds['time'], 'data': this_ds['data']})
+        if 'value' in this_ds:
+            df['value'] = this_ds['value']
+        # TODO: check for strings on Y axis and convert to values instead
+        this_axes = this_ds['ax']
+        if 'color' in this_ds:
+            cmap = alpha_colormap(this_ds['color'], min_alpha=40, max_alpha=255)
+        elif 'colormap' in this_ds:
+            cmap = this_ds['colormap']
+        else:
+            raise ValueError(f'Color information was not in datashader with keys: {this_ds.keys()}')
+        vmin = this_ds.get('vmin', None)
+        vmax = this_ds.get('vmax', None)
+        agg = ds.mean('value') if 'value' in this_ds else ds.count()
+        norm = this_ds.get('norm', 'log')
+        dsshow(df, ds.Point('time', 'data'), agg, norm=norm, cmap=cmap, ax=this_axes, aspect='auto', \
+            vmin=vmin, vmax=vmax, x_range=this_axes.get_xlim(), y_range=this_axes.get_ylim(), \
+            shade_hook=partial(tf.dynspread, threshold=0.8, max_px=6, how='over'))
 
 #%% Unit test
 if __name__ == '__main__':

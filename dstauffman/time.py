@@ -12,7 +12,7 @@ import datetime
 import doctest
 import re
 from time import strftime, gmtime
-from typing import Optional, Union
+from typing import Optional, overload, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -25,6 +25,14 @@ if HAVE_MPL:
     import matplotlib.dates as dates
 if HAVE_NUMPY:
     import numpy as np
+    isfinite = np.isfinite
+    nan = np.nan
+else:
+    from math import isfinite, nan  # type: ignore[misc]
+
+if TYPE_CHECKING:
+    _AllDates = Union[None, int, float, datetime.datetime, datetime.date, np.ndarray, np.datetime64]
+    _NPDates = Union[np.datetime64, np.ndarray]
 
 #%% Constants
 # maps other names of units to the ones expected by numpy
@@ -231,8 +239,12 @@ def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = 
     return date_out
 
 #%% Functions - round_time
-def round_time(x: Union[np.ndarray, np.datetime64], /, t_round: np.timedelta64) -> \
-    Union[np.ndarray, np.datetime64]:
+@overload
+def round_time(x: np.datetime64, /, t_round: np.timedelta64) -> np.datetime64: ...
+@overload
+def round_time(x: np.ndarray, /, t_round: np.timedelta64) -> np.ndarray: ...
+
+def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
     r"""
     Rounding function that handles either numpy datetimes or doubles (seconds).
 
@@ -308,6 +320,8 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     -----
     #.  Can handle NaNs, NaTs, and Infs
     #.  Written by David C. Stauffer in June 2020.
+    #.  This function fails the do one thing principle and is impossible to statically type well.
+        Consider splitting into several smaller subfunctions with a wrapper.
 
     Examples
     --------
@@ -331,21 +345,34 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     # exit if not changing anything
     if form == old_form:
         return date
-    # check for bad conditions
+    # check MPL conditions
     if not HAVE_MPL and (form == 'matplotlib' or old_form == 'matplotlib'):
         raise RuntimeError('You must have matplotlib installed to do this conversion.')
-    if form in time_forms or (old_form in time_forms and np.any(np.isfinite(date))):
-        assert date_zero is not None, 'You must specify a date_zero.'
-        assert isinstance(date_zero, datetime.datetime), 'The date_zero is expected to be a datetime object.'
     # convert to array as necessary
+    is_actual_date: bool
     if form != 'datetime' and old_form != 'datetime':
         date = np.asanyarray(date)
+        is_actual_date = np.any(isfinite(date))
+    else:
+        # determine if you have real dates to process
+        if date is None:
+            is_actual_date = False
+        elif isinstance(date, (datetime.datetime, datetime.date)):
+            is_actual_date = True
+        elif isinstance(date, (int, float)):
+            is_actual_date = isfinite(date)
+        else:
+            is_actual_date = np.any(isfinite(date))
+    # check for bad date_zero
+    if form in time_forms or (old_form in time_forms and is_actual_date):
+        assert date_zero is not None, 'You must specify a date_zero.'
+        assert isinstance(date_zero, datetime.datetime), 'The date_zero is expected to be a datetime object.'
     # do all possible conversions
     # from seconds
     if old_form in time_forms:
-        is_num = np.isfinite(date)
+        is_num = isfinite(date) if is_actual_date else False
         if form == 'datetime':
-            out = date_zero + datetime.timedelta(seconds=date) if is_num else None # TODO: or np.datetime64('nat')
+            out = date_zero + datetime.timedelta(seconds=date) if is_num else None
         elif form == 'numpy':
             out = np.full(date.shape, np.datetime64('nat'), dtype=numpy_form)
             if np.any(is_num):
@@ -371,7 +398,7 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
                 dt = date - date_zero
                 out = ONE_DAY * dt.days + dt.seconds + dt.microseconds / 1000000
             else:
-                out = np.nan
+                out = nan
     # from numpy
     elif old_form == 'numpy':
         is_num = ~np.isnat(date)

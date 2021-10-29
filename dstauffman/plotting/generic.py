@@ -8,30 +8,20 @@ Notes
 
 #%% Imports
 import doctest
-from functools import partial
 import logging
 import unittest
-import warnings
 
-from dstauffman import convert_date, DEGREE_SIGN, get_unit_conversion, HAVE_DS, HAVE_MPL, HAVE_NUMPY, \
+from dstauffman import DEGREE_SIGN, get_unit_conversion, HAVE_DS, HAVE_MPL, HAVE_NUMPY, \
     HAVE_PANDAS, intersect, is_datetime, LogLevel, RAD2DEG, rms
 from dstauffman.aerospace import quat_angle_diff
 
-from dstauffman.plotting.support import COLOR_LISTS, ColorMap, DEFAULT_COLORMAP, disp_xlimits, \
-    get_rms_indices, ignore_plot_data, plot_second_units_wrapper, plot_vert_lines, show_zero_ylim, \
-    zoom_ylim
+from dstauffman.plotting.support import add_datashaders, COLOR_LISTS, ColorMap, DEFAULT_COLORMAP, \
+    disp_xlimits, get_rms_indices, ignore_plot_data, plot_second_units_wrapper, plot_vert_lines, \
+    show_zero_ylim, zoom_ylim
 
 if HAVE_MPL:
     from matplotlib.collections import LineCollection
     import matplotlib.pyplot as plt
-    if HAVE_DS:
-        try:
-            import datashader as ds
-            import datashader.transfer_functions as tf
-            from datashader.mpl_ext import dsshow, alpha_colormap
-        except ImportError:
-            warnings.warn('Datashader version does not support matplotlib and will not be used.')
-            HAVE_DS = False
 if HAVE_NUMPY:
     import numpy as np
     inf = np.inf
@@ -759,20 +749,10 @@ def make_generic_plot(plot_type, description, time_one, data_one, *, time_two=No
         else:
             extra_plotter(fig=fig, ax=ax)
 
-    # overlay the datashaders
+    # overlay the datashaders (with appropriate time units information)
     for this_ds in datashaders:
-        # check for dates and convert as appropriate
-        if is_datetime(this_ds['time']):
-            df = pd.DataFrame({'time': convert_date(this_ds['time'], 'matplotlib', old_form=time_units), \
-                'data': this_ds['data']})
-        else:
-            df = pd.DataFrame({'time': this_ds['time'], 'data': this_ds['data']})
-        # TODO: check for strings on Y axis and convert to values instead
-        this_axes = this_ds['ax']
-        dsshow(df, ds.Point('time', 'data'), norm='log', cmap=alpha_colormap(this_ds['color'], \
-            min_alpha=40, max_alpha=255), ax=this_axes, aspect='auto', \
-            x_range=this_axes.get_xlim(), y_range=this_axes.get_ylim(), \
-            shade_hook=partial(tf.dynspread, threshold=0.8, max_px=6, how='over'))
+        this_ds['time_units'] = time_units
+    add_datashaders(datashaders)
 
     # add legend at the very end once everything has been done
     if legend_loc.lower() != 'none':
@@ -1204,7 +1184,8 @@ def make_bar_plot(description, time, data, *, name='', elements=None, units='', 
 
 #%% make_connected_sets
 def make_connected_sets(description, points, innovs, *, color_by='none', center_origin=False, \
-        legend_loc='best', units='', mag_ratio=None, leg_scale='unity', colormap=None):
+        legend_loc='best', units='', mag_ratio=None, leg_scale='unity', colormap=None, \
+        use_datashader=False):
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.
 
@@ -1261,7 +1242,41 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
 
     """
     # hard-coded defaults
+    datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
     colors_meas = 'xkcd:black'
+
+    # calculations
+    if innovs is None:
+        assert color_by == 'none', 'If no innovations are given, then you must color by "none".'
+        plot_innovs = False
+    else:
+        plot_innovs = True
+        predicts = points - innovs
+    datashaders = []
+
+    # get index to subset of points for datashading
+    if use_datashader:
+        assert HAVE_PANDAS and HAVE_DS, 'You must have pandas and datashader to run datashader plots.'
+        if points.shape[1] < datashader_pts:
+            ix = np.arange(points.shape[1])
+        else:
+            ix = np.round(np.linspace(0, points.shape[1]-1, datashader_pts//10)).astype(int)
+            # include the mins and maxes in both axes
+            ix_xmin = np.argmin(points[0, :])
+            ix_xmax = np.argmax(points[0, :])
+            ix_ymin = np.argmin(points[1, :])
+            ix_ymax = np.argmax(points[1, :])
+            ix = np.union1d(ix, np.array([ix_xmin, ix_xmax, ix_ymin, ix_ymax]))
+            if plot_innovs:
+                ix_xmin = np.argmin(predicts[0, :])
+                ix_xmax = np.argmax(predicts[0, :])
+                ix_ymin = np.argmin(predicts[1, :])
+                ix_ymax = np.argmax(predicts[1, :])
+                ix = np.union1d(ix, np.array([ix_xmin, ix_xmax, ix_ymin, ix_ymax]))
+    else:
+        ix = np.arange(points.shape[1])
+
+    # color options
     if color_by == 'none':
         colors_line = 'xkcd:red'
         colors_pred = 'xkcd:blue' if colormap is None else colormap
@@ -1269,9 +1284,12 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
     elif color_by == 'direction':
         polar_ang   = RAD2DEG * np.arctan2(innovs[1, :], innovs[0, :])
         innov_cmap  = ColorMap('hsv' if colormap is None else colormap, low=-180, high=180)  # hsv or twilight?
-        colors_line = tuple(innov_cmap.get_color(x) for x in polar_ang)
+        colors_line = tuple(innov_cmap.get_color(x) for x in polar_ang[ix])
         colors_pred = colors_line
         extra_text  = ' (Colored by Direction)'
+        ds_value    = polar_ang
+        ds_low      = -180
+        ds_high     = 180
     elif color_by == 'magnitude':
         (new_units, unit_conv) = get_unit_conversion(leg_scale, units)
         innov_mags  = unit_conv * np.sqrt(np.sum(innovs**2, axis=0))
@@ -1281,19 +1299,14 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
             sorted_innovs = np.sort(innov_mags)
             max_innov = sorted_innovs[int(np.ceil(mag_ratio * innov_mags.size)) - 1]
         innov_cmap  = ColorMap(colormap='autumn_r' if colormap is None else colormap, low=0, high=max_innov)
-        colors_line = tuple(innov_cmap.get_color(x) for x in innov_mags)
+        colors_line = tuple(innov_cmap.get_color(x) for x in innov_mags[ix])
         colors_pred = colors_line
         extra_text  = ' (Colored by Magnitude)'
+        ds_value    = innov_mags
+        ds_low      = 0
+        ds_high     = max_innov
     else:
         raise ValueError(f'Unexpected value for color_by of "{color_by}"')
-
-    # calculations
-    if innovs is None:
-        assert color_by == 'none', 'If no innovations are given, then you must color by "none".'
-        plot_innovs = False
-    else:
-        plot_innovs = True
-        predicts = points - innovs
 
     # create figure
     fig = plt.figure()
@@ -1301,10 +1314,17 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
     ax = fig.add_subplot(1, 1, 1)
     # plot endpoints
     if not plot_innovs:
-        ax.plot(points[0, :], points[1, :], '.', color=colors_pred, label='Sighting', zorder=5)
+        ax.plot(points[0, ix], points[1, ix], '.', color=colors_pred, label='Sighting', zorder=5)
+        if use_datashader and points.shape[1] >= datashader_pts:
+            datashaders.append({'time': points[0, :], 'data': points[1, :], 'ax': ax, 'color': colors_pred})
     else:
-        ax.plot(points[0, :], points[1, :], '.', color=colors_meas, label='Sighting', zorder=5)
-        ax.scatter(predicts[0, :], predicts[1, :], c=colors_pred, marker='.', label='Predicted', zorder=8)
+        if use_datashader and points.shape[1] >= datashader_pts:
+            datashaders.append({'time': points[0, :], 'data': points[1, :], 'ax': ax, 'colormap': 'autumn_r', \
+                'vmin': ds_low, 'vmax': ds_high, 'value': ds_value, 'norm': 'eq_hist'})
+            datashaders.append({'time': predicts[0, :], 'data': predicts[1, :], 'ax': ax, 'color': 'xkcd:black'})
+
+        ax.plot(points[0, ix], points[1, ix], '.', color=colors_meas, label='Sighting', zorder=5)
+        ax.scatter(predicts[0, ix], predicts[1, ix], c=colors_pred, marker='.', label='Predicted', zorder=8)
         # create fake line to add to legend
         ax.plot(np.nan, np.nan, '-', color='xkcd:black', label='Innov')
         if color_by != 'none':
@@ -1312,14 +1332,12 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
             cbar_units = DEGREE_SIGN if color_by == 'direction' else new_units
             cbar.ax.set_ylabel('Innovation ' + color_by.capitalize() + ' [' + cbar_units + ']')
         # create segments
-        segments = np.zeros((points.shape[1], 2, 2))
-        segments[:, 0, :] = points.T
-        segments[:, 1, :] = predicts.T
+        segments = np.zeros((ix.size, 2, 2))
+        segments[:, 0, :] = points[:, ix].T
+        segments[:, 1, :] = predicts[:, ix].T
         lines = LineCollection(segments, colors=colors_line, zorder=3)
         ax.add_collection(lines)
     ax.set_title(description + extra_text)
-    if legend_loc.lower() != 'none':
-        ax.legend(loc=legend_loc)
     ax.set_xlabel('FP X Loc [' + units + ']')  # TODO: pass in X,Y labels
     ax.set_ylabel('FP Y Loc [' + units + ']')
     ax.grid(True)
@@ -1329,6 +1347,11 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
         ax.set_xlim(-xlims, xlims)
         ax.set_ylim(-ylims, ylims)
     ax.set_aspect('equal', 'box')
+
+    if bool(datashaders):
+        add_datashaders(datashaders)
+    if legend_loc.lower() != 'none':
+        ax.legend(loc=legend_loc)
 
     return fig
 
