@@ -1183,9 +1183,9 @@ def make_bar_plot(description, time, data, *, name='', elements=None, units='', 
         extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines)
 
 #%% make_connected_sets
-def make_connected_sets(description, points, innovs, *, color_by='none', center_origin=False, \
-        legend_loc='best', units='', mag_ratio=None, leg_scale='unity', colormap=None, \
-        use_datashader=False):
+def make_connected_sets(description, points, innovs, *, color_by='none', hide_innovs=False, \
+        center_origin=False, legend_loc='best', units='', mag_ratio=None, leg_scale='unity', \
+        colormap=None, use_datashader=False):
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.
 
@@ -1197,6 +1197,8 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
         Focal plane sightings
     innovs : (2, N) ndarray
         Innovations (implied to be in focal plane frame)
+    hide_innovs : bool, optional, default is False
+        Whether to hide the innovations and only show the sightings
     color_by : str
         How to color the innovations, 'none' for same calor, 'magnitude' to color by innovation
         magnitude, or 'direction' to color by polar direction
@@ -1249,6 +1251,8 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
     if innovs is None:
         assert color_by == 'none', 'If no innovations are given, then you must color by "none".'
         plot_innovs = False
+    elif hide_innovs:
+        plot_innovs = False
     else:
         plot_innovs = True
         predicts = points - innovs
@@ -1281,6 +1285,10 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
         colors_line = 'xkcd:red'
         colors_pred = 'xkcd:blue' if colormap is None else colormap
         extra_text  = ''
+        ds_value    = np.zeros(points.shape[1])
+        ds_low      = None
+        ds_high     = None
+        ds_color    = 'xkcd:blue'
     elif color_by == 'direction':
         polar_ang   = RAD2DEG * np.arctan2(innovs[1, :], innovs[0, :])
         innov_cmap  = ColorMap('hsv' if colormap is None else colormap, low=-180, high=180)  # hsv or twilight?
@@ -1290,6 +1298,7 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
         ds_value    = polar_ang
         ds_low      = -180
         ds_high     = 180
+        ds_color    = 'hsv' if not isinstance(colormap, str) else colormap
     elif color_by == 'magnitude':
         (new_units, unit_conv) = get_unit_conversion(leg_scale, units)
         innov_mags  = unit_conv * np.sqrt(np.sum(innovs**2, axis=0))
@@ -1305,38 +1314,47 @@ def make_connected_sets(description, points, innovs, *, color_by='none', center_
         ds_value    = innov_mags
         ds_low      = 0
         ds_high     = max_innov
+        ds_color    = 'autumn_r' if not isinstance(colormap, str) else colormap
     else:
         raise ValueError(f'Unexpected value for color_by of "{color_by}"')
 
-    # create figure
+    # create figure and axes (needs to be done before building datashader information)
     fig = plt.figure()
     fig.canvas.manager.set_window_title(description + extra_text)
     ax = fig.add_subplot(1, 1, 1)
-    # plot endpoints
-    if not plot_innovs:
-        ax.plot(points[0, ix], points[1, ix], '.', color=colors_pred, label='Sighting', zorder=5)
+
+    # build datashader information for use later
+    color_key = 'color' if ds_color.startswith('xkcd') else 'colormap'
+    if plot_innovs:
         if use_datashader and points.shape[1] >= datashader_pts:
-            datashaders.append({'time': points[0, :], 'data': points[1, :], 'ax': ax, 'color': colors_pred})
+            datashaders.append({'time': points[0, :], 'data': points[1, :], 'ax': ax, color_key: ds_color, \
+                'vmin': ds_low, 'vmax': ds_high, 'value': ds_value, 'norm': 'eq_hist', 'aspect': 'equal'})
+            datashaders.append({'time': predicts[0, :], 'data': predicts[1, :], 'ax': ax, 'color': 'xkcd:black', \
+                'aspect': 'equal'})
     else:
         if use_datashader and points.shape[1] >= datashader_pts:
-            datashaders.append({'time': points[0, :], 'data': points[1, :], 'ax': ax, 'colormap': 'autumn_r', \
-                'vmin': ds_low, 'vmax': ds_high, 'value': ds_value, 'norm': 'eq_hist'})
-            datashaders.append({'time': predicts[0, :], 'data': predicts[1, :], 'ax': ax, 'color': 'xkcd:black'})
+            datashaders.append({'time': points[0, :], 'data': points[1, :], 'ax': ax, color_key: ds_color, \
+                'aspect': 'equal'})
 
+    # populate the normal plot, potentially with a subset of points
+    if plot_innovs:
         ax.plot(points[0, ix], points[1, ix], '.', color=colors_meas, label='Sighting', zorder=5)
         ax.scatter(predicts[0, ix], predicts[1, ix], c=colors_pred, marker='.', label='Predicted', zorder=8)
         # create fake line to add to legend
-        ax.plot(np.nan, np.nan, '-', color='xkcd:black', label='Innov')
-        if color_by != 'none':
-            cbar = fig.colorbar(innov_cmap.get_smap())
-            cbar_units = DEGREE_SIGN if color_by == 'direction' else new_units
-            cbar.ax.set_ylabel('Innovation ' + color_by.capitalize() + ' [' + cbar_units + ']')
+        line_leg_color = colors_line if isinstance(colors_line, str) else 'xkcd:black'
+        ax.plot(np.nan, np.nan, '-', color=line_leg_color, label='Innov')
         # create segments
         segments = np.zeros((ix.size, 2, 2))
         segments[:, 0, :] = points[:, ix].T
         segments[:, 1, :] = predicts[:, ix].T
         lines = LineCollection(segments, colors=colors_line, zorder=3)
         ax.add_collection(lines)
+    else:
+        ax.scatter(points[0, ix], points[1, ix], c=colors_pred, marker='.', label='Sighting', zorder=5)
+    if color_by != 'none':
+        cbar = fig.colorbar(innov_cmap.get_smap())
+        cbar_units = DEGREE_SIGN if color_by == 'direction' else new_units
+        cbar.ax.set_ylabel('Innovation ' + color_by.capitalize() + ' [' + cbar_units + ']')
     ax.set_title(description + extra_text)
     ax.set_xlabel('FP X Loc [' + units + ']')  # TODO: pass in X,Y labels
     ax.set_ylabel('FP Y Loc [' + units + ']')

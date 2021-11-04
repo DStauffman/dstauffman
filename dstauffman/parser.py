@@ -127,7 +127,7 @@ def process_command_line_options() -> _Flags:
 
     Returns
     -------
-    flags : namedtuple ('use_display', 'use_plotting', 'use_hdf5')
+    flags : dataclass _Flags
         Flags equivalent to the command line arguments
 
     Notes

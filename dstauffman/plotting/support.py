@@ -29,7 +29,7 @@ try:
     _HAVE_QT = True
 except ModuleNotFoundError:
     warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
-    QPushButton = object  # type: ignore[misc, assignment]
+    QPushButton = object  # type: ignore[assignment, misc]
     _HAVE_QT = False
 
 from dstauffman import convert_date, Frozen, get_images_dir, get_username, HAVE_DS, HAVE_MPL, \
@@ -1785,9 +1785,10 @@ def add_datashaders(datashaders):
             raise ValueError(f'Color information was not in datashader with keys: {this_ds.keys()}')
         vmin = this_ds.get('vmin', None)
         vmax = this_ds.get('vmax', None)
+        aspect = this_ds.get('aspect', 'auto')
         agg = ds.mean('value') if 'value' in this_ds else ds.count()
         norm = this_ds.get('norm', 'log')
-        dsshow(df, ds.Point('time', 'data'), agg, norm=norm, cmap=cmap, ax=this_axes, aspect='auto', \
+        dsshow(df, ds.Point('time', 'data'), agg, norm=norm, cmap=cmap, ax=this_axes, aspect=aspect, \
             vmin=vmin, vmax=vmax, x_range=this_axes.get_xlim(), y_range=this_axes.get_ylim(), \
             shade_hook=partial(tf.dynspread, threshold=0.8, max_px=6, how='over'))
 
