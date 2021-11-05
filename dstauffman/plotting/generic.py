@@ -1325,15 +1325,11 @@ def make_connected_sets(description, points, innovs, *, color_by='none', hide_in
 
     # build datashader information for use later
     color_key = 'color' if ds_color.startswith('xkcd') else 'colormap'
-    if plot_innovs:
-        if use_datashader and points.shape[1] >= datashader_pts:
-            datashaders.append({'time': points[0, :], 'data': points[1, :], 'ax': ax, color_key: ds_color, \
-                'vmin': ds_low, 'vmax': ds_high, 'value': ds_value, 'norm': 'eq_hist', 'aspect': 'equal'})
+    if use_datashader and points.shape[1] >= datashader_pts:
+        datashaders.append({'time': points[0, :], 'data': points[1, :], 'ax': ax, color_key: ds_color, \
+            'vmin': ds_low, 'vmax': ds_high, 'value': ds_value, 'norm': 'eq_hist', 'aspect': 'equal'})
+        if plot_innovs:
             datashaders.append({'time': predicts[0, :], 'data': predicts[1, :], 'ax': ax, 'color': 'xkcd:black', \
-                'aspect': 'equal'})
-    else:
-        if use_datashader and points.shape[1] >= datashader_pts:
-            datashaders.append({'time': points[0, :], 'data': points[1, :], 'ax': ax, color_key: ds_color, \
                 'aspect': 'equal'})
 
     # populate the normal plot, potentially with a subset of points
