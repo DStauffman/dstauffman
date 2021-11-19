@@ -19,31 +19,37 @@ class _Example_Enum(dcs.IntEnumPlus):
     field_two: ClassVar[int] = 2
     field_ten: ClassVar[int] = 10
 
+
 class _Example_non_unique(dcs.IntEnumPlus):
-    one: ClassVar[int]         = 1
-    two: ClassVar[int]         = 2
+    one: ClassVar[int] = 1
+    two: ClassVar[int] = 2
     another_one: ClassVar[int] = 1
 
+
 class _Example_Consecutive(dcs.IntEnumPlus):
-    zero: ClassVar[int]  = 0
-    one: ClassVar[int]   = 1
-    two: ClassVar[int]   = 2
+    zero: ClassVar[int] = 0
+    one: ClassVar[int] = 1
+    two: ClassVar[int] = 2
+
 
 class _Example_Consecutive2(dcs.IntEnumPlus):
-    zero: ClassVar[int]  = 0
-    one: ClassVar[int]   = 1
-    skip: ClassVar[int]  = 9
+    zero: ClassVar[int] = 0
+    one: ClassVar[int] = 1
+    skip: ClassVar[int] = 9
+
 
 class _Example_Consecutive3(dcs.IntEnumPlus):
     zero: ClassVar[int] = 0
-    one: ClassVar[int]  = 1
-    dup: ClassVar[int]  = 0
+    one: ClassVar[int] = 1
+    dup: ClassVar[int] = 0
+
 
 #%% IntEnumPlus
 class Test_IntEnumPlus(unittest.TestCase):
     r"""
     Tests the IntEnumPlus class by making a enum instance and testing all the methods.
     """
+
     def test_printing_instance_str(self) -> None:
         with dcs.capture_output() as out:
             print(_Example_Enum.field_one)
@@ -100,11 +106,13 @@ class Test_IntEnumPlus(unittest.TestCase):
 
     def test_bad_uniqueness(self) -> None:
         with self.assertRaises(ValueError):
+
             @unique
             class _BadUnique(dcs.IntEnumPlus):
                 a = 1
                 b = 2
                 c = 2
+
 
 #%% consecutive
 class Test_consecutive(unittest.TestCase):
@@ -114,6 +122,7 @@ class Test_consecutive(unittest.TestCase):
         Unique, but not consecutive
         Not unique
     """
+
     def setUp(self) -> None:
         self.enum = dcs.IntEnumPlus('Enum1', 'one two three')  # type: ignore[call-overload]
 
@@ -136,6 +145,7 @@ class Test_consecutive(unittest.TestCase):
             dcs.consecutive(_Example_Consecutive3)
         self.assertEqual(str(context.exception), 'Duplicate values found in _Example_Consecutive3: dup -> zero')
 
+
 #%% ReturnCodes
 class Test_ReturnCodes(unittest.TestCase):
     r"""
@@ -143,6 +153,7 @@ class Test_ReturnCodes(unittest.TestCase):
         Clean code
         Not clean codes
     """
+
     def test_clean(self) -> None:
         # A clean exit should return zero
         self.assertEqual(dcs.ReturnCodes.clean, 0)
@@ -156,6 +167,7 @@ class Test_ReturnCodes(unittest.TestCase):
             value = getattr(rc, key)
             self.assertGreater(value, 0)
             self.assertIsInstance(value, int)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

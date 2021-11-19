@@ -17,7 +17,8 @@ class Test__FortranSource(unittest.TestCase):
     Tests the _FortranSource class with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% _parse_source
 class Test__parse_source(unittest.TestCase):
@@ -25,6 +26,7 @@ class Test__parse_source(unittest.TestCase):
     Tests the _parse_source function with the following cases:
         call the function
     """
+
     def setUp(self) -> None:
         lines = ['module test_mod']
         lines.append('')
@@ -65,13 +67,15 @@ class Test__parse_source(unittest.TestCase):
     def tearDown(self) -> None:
         self.filename.unlink(missing_ok=True)
 
+
 #%% _write_unit_test
 class Test__write_unit_test(unittest.TestCase):
     r"""
     Tests the _write_unit_test function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% _write_all_unit_test
 class Test__write_all_unit_test(unittest.TestCase):
@@ -79,7 +83,8 @@ class Test__write_all_unit_test(unittest.TestCase):
     Tests the _write_all_unit_test function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% _write_makefile
 class Test__write_makefile(unittest.TestCase):
@@ -87,7 +92,8 @@ class Test__write_makefile(unittest.TestCase):
     Tests the _write_makefile function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% create_fortran_unit_tests
 class Test_create_fortran_unit_tests(unittest.TestCase):
@@ -95,7 +101,8 @@ class Test_create_fortran_unit_tests(unittest.TestCase):
     Tests the create_fortran_unit_tests function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% create_fortran_makefile
 class Test_create_fortran_makefile(unittest.TestCase):
@@ -103,7 +110,8 @@ class Test_create_fortran_makefile(unittest.TestCase):
     Tests the create_fortran_makefile function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% Unit test execution
 if __name__ == '__main__':

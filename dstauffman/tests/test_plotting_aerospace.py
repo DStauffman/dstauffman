@@ -29,6 +29,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     Tests the plotting.make_quaternion_plot function with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
         self.description      = 'example'
         self.time_one         = np.arange(11)
@@ -61,39 +62,102 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
 
     def test_nominal(self) -> None:
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
-            start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
-            rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
-            single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
-            return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
+        (self.figs, err) = plot.make_quaternion_plot(
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_no_subplots(self) -> None:
         self.make_subplots = False
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
-            start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
-            rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
-            single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
-            return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
+        (self.figs, err) = plot.make_quaternion_plot(
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_no_components(self) -> None:
         self.plot_components = False
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
-            start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
-            rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
-            single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
-            return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
+        (self.figs, err) = plot.make_quaternion_plot(
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
         self.assertLess(abs(err['mag']), 3.15)
@@ -101,13 +165,34 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_no_start_date(self) -> None:
         self.start_date = ''
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
-            start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
-            rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
-            single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
-            return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
+        (self.figs, err) = plot.make_quaternion_plot(
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
@@ -115,62 +200,128 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.quat_two.fill(np.nan)
         self.name_two = ''
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
-            start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
-            rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
-            single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
-            return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
+        (self.figs, err) = plot.make_quaternion_plot(
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_only_quat_two(self) -> None:
         self.name_one = ''
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, None, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
-            start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
-            rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
-            single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
-            return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
+        (self.figs, err) = plot.make_quaternion_plot(
+            self.description,
+            self.time_one,
+            self.time_two,
+            None,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
         self.assertTrue(np.all(np.isnan(err['diff'])))
 
     def test_rms_bounds(self) -> None:
         self.rms_xmin = 5
         self.rms_xmax = 7
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two,
-            name_one=self.name_one, name_two=self.name_two, time_units=self.time_units, \
-            start_date=self.start_date, plot_components=self.plot_components, rms_xmin=self.rms_xmin, \
-            rms_xmax=self.rms_xmax, disp_xmin=self.disp_xmin, disp_xmax=self.disp_xmax, make_subplots=self.make_subplots, \
-            single_lines=self.single_lines, use_mean=self.use_mean, plot_zero=self.plot_zero, show_rms=self.show_rms, \
-            legend_loc=self.legend_loc, show_extra=self.show_extra, data_as_rows=self.data_as_rows, tolerance=self.tolerance, \
-            return_err=self.return_err, use_zoh=self.use_zoh, label_vert_lines=self.label_vert_lines)
+        (self.figs, err) = plot.make_quaternion_plot(
+            self.description,
+            self.time_one,
+            self.time_two,
+            self.quat_one,
+            self.quat_two,
+            name_one=self.name_one,
+            name_two=self.name_two,
+            time_units=self.time_units,
+            start_date=self.start_date,
+            plot_components=self.plot_components,
+            rms_xmin=self.rms_xmin,
+            rms_xmax=self.rms_xmax,
+            disp_xmin=self.disp_xmin,
+            disp_xmax=self.disp_xmax,
+            make_subplots=self.make_subplots,
+            single_lines=self.single_lines,
+            use_mean=self.use_mean,
+            plot_zero=self.plot_zero,
+            show_rms=self.show_rms,
+            legend_loc=self.legend_loc,
+            show_extra=self.show_extra,
+            data_as_rows=self.data_as_rows,
+            tolerance=self.tolerance,
+            return_err=self.return_err,
+            use_zoh=self.use_zoh,
+            label_vert_lines=self.label_vert_lines,
+        )
         for i in range(3):
             self.assertLess(abs(err['diff'][i]), 3.15)
 
     def test_use_mean(self) -> None:
-        self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-            self.quat_one, self.quat_two, use_mean=True)
+        self.figs = plot.make_quaternion_plot(
+            self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, use_mean=True
+        )
 
     def test_no_rms_in_legend(self) -> None:
-        self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-            self.quat_one, self.quat_two, use_mean=True, show_rms=False)
+        self.figs = plot.make_quaternion_plot(
+            self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, use_mean=True, show_rms=False
+        )
 
     def test_plot_zero(self) -> None:
-        self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-            self.quat_one, self.quat_two, plot_zero=True)
+        self.figs = plot.make_quaternion_plot(
+            self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, plot_zero=True
+        )
 
     def test_disp_bounds(self) -> None:
-        self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-            self.quat_one, self.quat_two, disp_xmin=2, disp_xmax=5)
+        self.figs = plot.make_quaternion_plot(
+            self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, disp_xmin=2, disp_xmax=5
+        )
 
     def test_no_overlap(self) -> None:
         self.time_one = np.arange(11).astype(float)
         self.time_two = np.arange(2, 13) + 0.5
-        self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, \
-            self.quat_one, self.quat_two)
+        self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two)
 
     def test_none1(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, None, self.quat_one, None)
@@ -182,11 +333,14 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_none3(self, mock_logger):
         self.figs = plot.make_quaternion_plot('', None, None, None, None)
         mock_logger.log.assert_called_once()
-        mock_logger.log.assert_called_with(LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', 'quat', '')
+        mock_logger.log.assert_called_with(
+            LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', 'quat', ''
+        )
 
     def tearDown(self) -> None:
         if self.figs:
             plot.close_all(self.figs)
+
 
 #%% plotting.plot_attitude
 class Test_plotting_plot_attitude(unittest.TestCase):
@@ -194,7 +348,8 @@ class Test_plotting_plot_attitude(unittest.TestCase):
     Tests the plotting.plot_attitude function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% plotting.plot_los
 class Test_plotting_plot_los(unittest.TestCase):
@@ -202,7 +357,8 @@ class Test_plotting_plot_los(unittest.TestCase):
     Tests the plotting.plot_los function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% plotting.plot_position
 class Test_plotting_plot_position(unittest.TestCase):
@@ -210,7 +366,8 @@ class Test_plotting_plot_position(unittest.TestCase):
     Tests the plotting.plot_position function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% plotting.plot_velocity
 class Test_plotting_plot_velocity(unittest.TestCase):
@@ -218,7 +375,8 @@ class Test_plotting_plot_velocity(unittest.TestCase):
     Tests the plotting.plot_velocity function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% plotting.plot_innovations
 class Test_plotting_plot_innovations(unittest.TestCase):
@@ -226,7 +384,8 @@ class Test_plotting_plot_innovations(unittest.TestCase):
     Tests the plotting.plot_innovations function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% plotting.plot_innov_fplocs
 class Test_plotting_plot_innov_fplocs(unittest.TestCase):
@@ -234,7 +393,8 @@ class Test_plotting_plot_innov_fplocs(unittest.TestCase):
     Tests the plotting.plot_innov_fplocs function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% plotting.plot_covariance
 class Test_plotting_plot_covariance(unittest.TestCase):
@@ -242,7 +402,8 @@ class Test_plotting_plot_covariance(unittest.TestCase):
     Tests the plotting.plot_covariance function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% plotting.plot_states
 class Test_plotting_plot_states(unittest.TestCase):
@@ -250,7 +411,8 @@ class Test_plotting_plot_states(unittest.TestCase):
     Tests the plotting.plot_states function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% Unit test execution
 if __name__ == '__main__':

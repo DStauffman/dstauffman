@@ -18,6 +18,7 @@ if platform.python_implementation() == 'CPython':
         # Try importing numba to determine if it is there.  Use this instead of HAVE_NUMBA from dstauffman
         # to avoid any circular dependencies
         from numba import njit
+
         HAVE_NUMBA = True
     except ModuleNotFoundError:
         HAVE_NUMBA = False
@@ -27,20 +28,26 @@ else:
 #%% Support Functions
 def _fake_decorator(func):
     r"""Fake decorator for when numba isn't installed."""
+
     @functools.wraps(func)
     def wrapped_decorator(*args, **kwargs):
         if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
             # must treat this differently if no arguments were passed
             return func(args[0])
+
         def real_decorator(func2):
             return func(func2, *args, **kwargs)
+
         return real_decorator
+
     return wrapped_decorator
+
 
 @_fake_decorator
 def fake_jit(func, *args, **kwargs):
     r"""Fake jit decorator for when numba isn't installed."""
     return func
+
 
 #%% Conditional imports
 if HAVE_NUMBA:

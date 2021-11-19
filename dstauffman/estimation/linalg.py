@@ -82,6 +82,7 @@ def orth(A):
     Q = Q[:, np.arange(r)]
     return Q
 
+
 #%% subspace
 def subspace(A, B):
     r"""
@@ -135,6 +136,7 @@ def subspace(A, B):
     theta = np.arcsin(np.minimum(1, np.linalg.norm(B)))
     return theta
 
+
 #%% mat_divide
 @ncjit
 def mat_divide(a, b, rcond=_EPS):
@@ -183,6 +185,7 @@ def mat_divide(a, b, rcond=_EPS):
 
     """
     return np.linalg.lstsq(a, b, rcond=rcond)[0]
+
 
 #%% Unit test
 if __name__ == '__main__':

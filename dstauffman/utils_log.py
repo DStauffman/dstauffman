@@ -85,9 +85,10 @@ def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
         try:
             folder.mkdir(parents=True)
             logger.log(LogLevel.L1, 'Created directory: "%s"', folder)
-        except: # pragma: no cover
+        except:  # pragma: no cover
             # re-raise last exception, could try to handle differently in the future
-            raise # pragma: no cover
+            raise  # pragma: no cover
+
 
 #%% Functions - fix_rollover
 def fix_rollover(data, roll, axis=None):
@@ -147,49 +148,50 @@ def fix_rollover(data, roll, axis=None):
         if data.size == 0:
             return np.array([])
         # t2b means top to bottom rollovers, while b2t means bottom to top rollovers
-        num_el           = data.size
+        num_el = data.size
         compensation_t2b = np.zeros_like(data)
         compensation_b2t = np.zeros_like(data)
     else:
         raise ValueError('Input argument "data" must be a vector.')
 
     # find indices for top to bottom rollovers, these indices act as partition boundaries
-    roll_ix = np.flatnonzero(find_in_range(np.diff(data), min_=roll/2))
+    roll_ix = np.flatnonzero(find_in_range(np.diff(data), min_=roll / 2))
     if roll_ix.size > 0:
         # add final field to roll_ix so that final partition can be addressed
-        roll_ix = np.hstack((roll_ix, num_el-1))
+        roll_ix = np.hstack((roll_ix, num_el - 1))
         # loop only on original length of roll_ix, which is now length - 1
         for i in range(roll_ix.size - 1):
             # creates a step function to be added to the input array where each
             # step down occurs after a top to bottom roll over.
-            compensation_t2b[roll_ix[i] + 1:roll_ix[i+1] + 1] = -roll * (i+1)
+            compensation_t2b[roll_ix[i] + 1 : roll_ix[i + 1] + 1] = -roll * (i + 1)
         # display a warning based on the log level
-        logger.log(LogLevel.L6, 'corrected {} bottom to top rollover(s)'.format(roll_ix.size-1))
+        logger.log(LogLevel.L6, 'corrected {} bottom to top rollover(s)'.format(roll_ix.size - 1))
 
     # find indices for top to bottom rollover, these indices act as partition boundaries
-    roll_ix = np.flatnonzero(find_in_range(np.diff(data), max_=-roll/2))
+    roll_ix = np.flatnonzero(find_in_range(np.diff(data), max_=-roll / 2))
     if roll_ix.size > 0:
         # add final field to roll_ix so that final partition can be addressed
-        roll_ix = np.hstack((roll_ix, num_el-1))
+        roll_ix = np.hstack((roll_ix, num_el - 1))
         # loop only on original length of roll_ix, which is now length - 1
-        for i in range(roll_ix.size-1):
+        for i in range(roll_ix.size - 1):
             # creates a step function to be added to the input array where each
             # step up occurs after a bottom to top roll over.
-            compensation_b2t[roll_ix[i] + 1:roll_ix[i+1] + 1] = roll * (i+1)
+            compensation_b2t[roll_ix[i] + 1 : roll_ix[i + 1] + 1] = roll * (i + 1)
         # display a warning based on the log level
-        logger.log(LogLevel.L6, 'corrected {} top to bottom rollover(s)'.format(roll_ix.size-1))
+        logger.log(LogLevel.L6, 'corrected {} top to bottom rollover(s)'.format(roll_ix.size - 1))
 
     # create output
     out = data + compensation_b2t + compensation_t2b
 
     # double check for remaining rollovers
-    if np.any(find_in_range(np.diff(out), min_=roll/2, max_=-roll/2)):
+    if np.any(find_in_range(np.diff(out), min_=roll / 2, max_=-roll / 2)):
         logger.log(LogLevel.L6, 'A rollover was fixed recursively')
         out = fix_rollover(out, roll)
     return out
 
+
 #%% remove_outliers
-def remove_outliers(x, /, sigma=3., axis=None, *, num_iters=3, return_stats=False, inplace=False, hardmax=None):
+def remove_outliers(x, /, sigma=3.0, axis=None, *, num_iters=3, return_stats=False, inplace=False, hardmax=None):
     r"""
     Removes the outliers from a data set based on the RMS of the points in the set.
 
@@ -261,7 +263,7 @@ def remove_outliers(x, /, sigma=3., axis=None, *, num_iters=3, return_stats=Fals
         rms_all = rms(y, axis=axis, ignore_nans=True, keepdims=True)
         if i == 0:
             rms_initial = np.squeeze(rms_all)
-        ix_bad = np.greater(np.abs(y), rms_all*sigma, out=np.zeros(y.shape, dtype=bool), where=~np.isnan(y))
+        ix_bad = np.greater(np.abs(y), rms_all * sigma, out=np.zeros(y.shape, dtype=bool), where=~np.isnan(y))
         y[ix_bad] = np.nan
     rms_removed = rms(y, axis=axis, ignore_nans=True)
     num_replaced = np.count_nonzero(np.isnan(y)) - num_nans
@@ -272,11 +274,16 @@ def remove_outliers(x, /, sigma=3., axis=None, *, num_iters=3, return_stats=Fals
     if rms_initial.ndim == 0:
         logger.log(LogLevel.L6, 'RMS before removal = {:.6g}, after = {:.6g}'.format(rms_initial, rms_removed))
     else:
-        logger.log(LogLevel.L6, 'RMS before removal = {}, after = {}'.format(\
-            np.array_str(rms_initial, precision=6), np.array_str(rms_removed, precision=6)))
+        logger.log(
+            LogLevel.L6,
+            'RMS before removal = {}, after = {}'.format(
+                np.array_str(rms_initial, precision=6), np.array_str(rms_removed, precision=6)
+            ),
+        )
     if return_stats:
         return (y, num_replaced, rms_initial, rms_removed)
     return y
+
 
 #%% Unit test
 if __name__ == '__main__':

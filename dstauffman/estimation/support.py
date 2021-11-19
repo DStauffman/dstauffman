@@ -60,17 +60,18 @@ def _get_sub_level(this_sub: Any, part: str) -> Any:
 
     # not so simple case
     sub_parts = part.split('[')
-    temp_sub  = getattr(this_sub, sub_parts[0])
+    temp_sub = getattr(this_sub, sub_parts[0])
     this_index = sub_parts[1].split(']')[0]
     try:
         this_key: Union[int, str] = int(this_index)
     except:
-        this_key = this_index.replace('"','').replace("'",'')
+        this_key = this_index.replace('"', '').replace("'", '')
     this_value = temp_sub[this_key]
     if len(sub_parts) > 2:
         ix = sub_parts[2].split(']')[0]
         this_value = this_value[int(ix)]
     return this_value
+
 
 #%% _check_valid_param_name
 def _check_valid_param_name(param: Any, name: str) -> bool:
@@ -116,6 +117,7 @@ def _check_valid_param_name(param: Any, name: str) -> bool:
         level += 1
     # if we got here, then all the subpieces exist
     return True
+
 
 #%% get_parameter
 def get_parameter(param: Any, names: List[str]) -> List[Any]:
@@ -163,6 +165,7 @@ def get_parameter(param: Any, names: List[str]) -> List[Any]:
             level += 1
         values[ix] = this_sub
     return values
+
 
 #%% set_parameter
 def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
@@ -216,13 +219,14 @@ def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
         try:
             this_key: Union[int, str] = int(this_index)
         except:
-            this_key = this_index.replace('"','').replace("'",'')
+            this_key = this_index.replace('"', '').replace("'", '')
         # set the value once on the last level
         if len(sub_parts) > 2:
             ix = sub_parts[2].split(']')[0]
             getattr(this_sub, sub_parts[0])[this_key][int(ix)] = value
         else:
             getattr(this_sub, sub_parts[0])[this_key] = value
+
 
 #%% Unit test
 if __name__ == '__main__':

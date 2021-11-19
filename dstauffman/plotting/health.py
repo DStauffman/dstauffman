@@ -16,17 +16,27 @@ import warnings
 
 try:
     from packaging import version
+
     parse = version.parse
 except ModuleNotFoundError:
     import setuptools  # type: ignore[import]
+
     parse = setuptools.version.pkg_resources.packaging.version.parse
 
 from dstauffman import Frozen, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, rms
 from dstauffman.health import bins_to_str_ranges
 
 from dstauffman.plotting.plotting import Opts, setup_plots
-from dstauffman.plotting.support import ColorMap, DEFAULT_COLORMAP, disp_xlimits, \
-    ignore_plot_data, plot_second_units_wrapper, show_zero_ylim, whitten, z_from_ci
+from dstauffman.plotting.support import (
+    ColorMap,
+    DEFAULT_COLORMAP,
+    disp_xlimits,
+    ignore_plot_data,
+    plot_second_units_wrapper,
+    show_zero_ylim,
+    whitten,
+    z_from_ci,
+)
 
 if HAVE_MPL:
     import matplotlib as mpl
@@ -61,14 +71,22 @@ class TruthPlotter(Frozen):
     >>> plt.close(fig)
 
     """
-    def __init__(self, time: np.ndarray = None, data: np.ndarray = None, lo: np.ndarray = None, \
-            hi: np.ndarray = None, type_: str = 'normal', name: str = 'Observed'):
-        self.time    = time
-        self.data    = None
-        self.type_   = type_ # from {'normal', 'errorbar'}
+
+    def __init__(
+        self,
+        time: np.ndarray = None,
+        data: np.ndarray = None,
+        lo: np.ndarray = None,
+        hi: np.ndarray = None,
+        type_: str = 'normal',
+        name: str = 'Observed',
+    ):
+        self.time = time
+        self.data = None
+        self.type_ = type_  # from {'normal', 'errorbar'}
         self.data_lo = lo
         self.data_hi = hi
-        self.name    = name
+        self.name = name
         # TODO: keep this old API? (otherwise just: self.data = data)
         if data is not None:
             if data.ndim == 1:
@@ -76,7 +94,7 @@ class TruthPlotter(Frozen):
             elif data.shape[1] == 1:
                 self.data = data[:, 0]
             elif data.shape[1] == 3:
-                self.data    = data[:, 1]
+                self.data = data[:, 1]
                 self.data_lo = data[:, 0]
                 self.data_hi = data[:, 2]
             else:
@@ -119,13 +137,21 @@ class TruthPlotter(Frozen):
         elif self.type_ == 'errorbar':
             if self.data_lo is not None and self.data_hi is not None:
                 if ix is None:
-                    yerr = np.vstack((self.data-self.data_lo, self.data_hi-self.data))
-                    ax.errorbar(self.time, scale*self.data, scale*yerr, linestyle='None', \
-                        marker='None', ecolor='c', zorder=6)
+                    yerr = np.vstack((self.data - self.data_lo, self.data_hi - self.data))
+                    ax.errorbar(
+                        self.time, scale * self.data, scale * yerr, linestyle='None', marker='None', ecolor='c', zorder=6
+                    )
                 else:
-                    yerr = np.vstack((self.data[:, ix]-self.data_lo[:, ix], self.data_hi[:, ix]-self.data[:, ix])).T
-                    ax.errorbar(self.time, scale*self.data[:, ix], scale*yerr[:, ix], linestyle='None', \
-                        marker='None', ecolor='c', zorder=6)
+                    yerr = np.vstack((self.data[:, ix] - self.data_lo[:, ix], self.data_hi[:, ix] - self.data[:, ix])).T
+                    ax.errorbar(
+                        self.time,
+                        scale * self.data[:, ix],
+                        scale * yerr[:, ix],
+                        linestyle='None',
+                        marker='None',
+                        ecolor='c',
+                        zorder=6,
+                    )
         else:
             raise ValueError('Unexpected value for type_ of "{}".'.format(self.type_))
         # potentially restore the original limits, since they might have been changed by the truth data
@@ -134,10 +160,22 @@ class TruthPlotter(Frozen):
         if hold_ylim and y_lim != ax.get_ybound():
             ax.set_ybound(*y_lim)
 
+
 #%% Functions - plot_health_time_history
-def plot_health_time_history(time, data, label, units='', opts=None, *, legend=None, \
-        second_units=None, ignore_empties=False, data_lo=None, data_hi=None, \
-        colormap=None):
+def plot_health_time_history(
+    time,
+    data,
+    label,
+    units='',
+    opts=None,
+    *,
+    legend=None,
+    second_units=None,
+    ignore_empties=False,
+    data_lo=None,
+    data_hi=None,
+    colormap=None
+):
     r"""
     Plot multiple metrics over time.
 
@@ -205,9 +243,9 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
         else:
             colormap = opts.colormap
     legend_loc = opts.leg_spot
-    show_zero  = opts.show_zero
+    show_zero = opts.show_zero
     time_units = opts.time_base
-    unit_text  = ' [' + units + ']' if units else ''
+    unit_text = ' [' + units + ']' if units else ''
     (new_units, unit_mult) = get_unit_conversion(second_units, units)
 
     # check for valid data
@@ -220,27 +258,29 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
     if data.ndim == 0:
         data = np.atleast_2d(data)
     elif data.ndim == 1:
-        data = data[:, np.newaxis] # forces to grow in second dimension, instead of first
+        data = data[:, np.newaxis]  # forces to grow in second dimension, instead of first
 
     # get shape information
     if data.ndim == 2:
-        normal    = True
+        normal = True
         num_loops = 1
-        num_bins  = data.shape[1]
-        names     = ['']
+        num_bins = data.shape[1]
+        names = ['']
     elif data.ndim == 3:
         assert len(opts.names) == data.shape[1], 'Names must match the number of channels is the 3rd axis of data.'
-        normal    = False
+        normal = False
         num_loops = data.shape[1]
-        num_bins  = data.shape[2]
-        names     = opts.names
+        num_bins = data.shape[2]
+        names = opts.names
     else:
         assert False, 'Data must be 0D to 3D array.'
-    assert time.shape[0] == data.shape[0], 'Time and data must be the same length. Current time.shape={} and data.shape={}'.format(time.shape, data.shape)
+    assert (
+        time.shape[0] == data.shape[0]
+    ), 'Time and data must be the same length. Current time.shape={} and data.shape={}'.format(time.shape, data.shape)
     if legend is not None:
         assert len(legend) == num_bins, 'Number of data channels does not match the legend.'
     else:
-        legend = ['Channel {}'.format(i+1) for i in range(num_bins)]
+        legend = ['Channel {}'.format(i + 1) for i in range(num_bins)]
 
     # process other inputs
     this_title = label + ' vs. Time'
@@ -257,11 +297,11 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
         for j in range(num_loops):
             this_name = names[j] + ' - ' if names[j] else ''
             if normal:
-                this_data    = data[:, i]
+                this_data = data[:, i]
                 this_data_lo = data_lo[:, i] if data_lo is not None else None
                 this_data_hi = data_hi[:, i] if data_hi is not None else None
             else:
-                this_data    = data[:, j, i]
+                this_data = data[:, j, i]
                 this_data_lo = data_lo[:, j, i] if data_lo is not None else None
                 this_data_hi = data_hi[:, j, i] if data_hi is not None else None
             if not ignore_plot_data(this_data, ignore_empties):
@@ -298,10 +338,23 @@ def plot_health_time_history(time, data, label, units='', opts=None, *, legend=N
     setup_plots(fig, opts)
     return fig
 
+
 #%% Functions - plot_health_monte_carlo
-def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indiv=True, \
-    truth=None, plot_as_diffs=False, second_units=None, plot_sigmas=1, \
-    plot_confidence=0, colormap=None):
+def plot_health_monte_carlo(
+    time,
+    data,
+    label,
+    units='',
+    opts=None,
+    *,
+    plot_indiv=True,
+    truth=None,
+    plot_as_diffs=False,
+    second_units=None,
+    plot_sigmas=1,
+    plot_confidence=0,
+    colormap=None
+):
     r"""
     Plot the given data channel versus time, with a generic label argument.
 
@@ -374,24 +427,26 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
         else:
             colormap = opts.colormap
     rms_in_legend = opts.show_rms
-    legend_loc    = opts.leg_spot
-    show_zero     = opts.show_zero
-    time_units    = opts.time_base
-    show_legend   = rms_in_legend or plot_as_diffs or (truth is not None and not truth.is_null)
-    unit_text     = ' [' + units + ']' if units else ''
+    legend_loc = opts.leg_spot
+    show_zero = opts.show_zero
+    time_units = opts.time_base
+    show_legend = rms_in_legend or plot_as_diffs or (truth is not None and not truth.is_null)
+    unit_text = ' [' + units + ']' if units else ''
     (new_units, unit_mult) = get_unit_conversion(second_units, units)
 
     # ensure that data is at least 2D
     if data.ndim == 0:
         data = np.atleast_2d(data)
     elif data.ndim == 1:
-        data = data[:, np.newaxis] # forces to grow in second dimension, instead of first
+        data = data[:, np.newaxis]  # forces to grow in second dimension, instead of first
     elif data.ndim == 2:
         pass
     else:
-        raise ValueError('Unexpected number of dimensions in data. Monte carlo can currently only ' +
-                         'handle single channels with multiple runs. Split the channels apart into' +
-                         'separate plots if desired.')
+        raise ValueError(
+            'Unexpected number of dimensions in data. Monte carlo can currently only '
+            + 'handle single channels with multiple runs. Split the channels apart into'
+            + 'separate plots if desired.'
+        )
 
     # get number of different series
     num_series = data.shape[1]
@@ -401,18 +456,18 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
         cm = ColorMap(colormap, num_colors=data.shape[1])
         # calculate RMS
         if rms_in_legend:
-            rms_data = np.atleast_1d(rms(unit_mult*data, axis=0, ignore_nans=True))
+            rms_data = np.atleast_1d(rms(unit_mult * data, axis=0, ignore_nans=True))
     else:
         # calculate the mean and std of data, while disabling warnings for time points that are all NaNs
         with warnings.catch_warnings():
             warnings.filterwarnings('ignore', message='Mean of empty slice')
             warnings.filterwarnings('ignore', message='Degrees of freedom <= 0 for slice.')
             mean = np.nanmean(data, axis=1)
-            std  = np.nanstd(data, axis=1)
+            std = np.nanstd(data, axis=1)
 
         # calculate an RMS
         if rms_in_legend:
-            rms_data = rms(unit_mult*mean, axis=0, ignore_nans=True)
+            rms_data = rms(unit_mult * mean, axis=0, ignore_nans=True)
 
     # alias the title
     this_title = label + ' vs. Time'
@@ -426,7 +481,7 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
         for ix in range(data.shape[1]):
             this_label = opts.get_names(ix)
             if not this_label:
-                this_label = 'Series {}'.format(ix+1)
+                this_label = 'Series {}'.format(ix + 1)
             if rms_in_legend:
                 this_label += ' (RMS: {:.2f})'.format(rms_data[ix])
             ax.plot(time, data[:, ix], '.-', linewidth=2, zorder=10, label=this_label)
@@ -437,10 +492,10 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
         ax.plot(time, mean, '.-', linewidth=2, color='#0000cd', zorder=10, label=this_label)
         if plot_sigmas and num_series > 1:
             sigma_label = r'$\pm {}\sigma$'.format(plot_sigmas)
-            ax.plot(time, mean + plot_sigmas*std, '.-', markersize=2, color='#20b2aa', zorder=6, label=sigma_label)
-            ax.plot(time, mean - plot_sigmas*std, '.-', markersize=2, color='#20b2aa', zorder=6)
+            ax.plot(time, mean + plot_sigmas * std, '.-', markersize=2, color='#20b2aa', zorder=6, label=sigma_label)
+            ax.plot(time, mean - plot_sigmas * std, '.-', markersize=2, color='#20b2aa', zorder=6)
         if plot_confidence and num_series > 1:
-            conf_label = '{}% C.I.'.format(100*plot_confidence)
+            conf_label = '{}% C.I.'.format(100 * plot_confidence)
             conf_z = z_from_ci(plot_confidence)
             conf_std = conf_z * std / np.sqrt(num_series)
             ax.plot(time, mean + conf_std, '.-', markersize=2, color='#2e8b57', zorder=7, label=conf_label)
@@ -472,6 +527,7 @@ def plot_health_monte_carlo(time, data, label, units='', opts=None, *, plot_indi
     setup_plots(fig, opts)
     return fig
 
+
 #%% Functions - plot_icer
 def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
     r"""Plot the icer results."""
@@ -497,8 +553,14 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
     # Label each point
     dy = (lim[3] - lim[2]) / 100
     for i in range(cost.size):
-        ax.annotate(names[i], xy=(qaly[i], cost[i]+dy), xycoords='data', horizontalalignment='center', \
-            verticalalignment='bottom', fontsize=12)
+        ax.annotate(
+            names[i],
+            xy=(qaly[i], cost[i] + dy),
+            xycoords='data',
+            horizontalalignment='center',
+            verticalalignment='bottom',
+            fontsize=12,
+        )
     # add some labels and such
     ax.set_title(title)
     ax.set_xlabel('Benefits')
@@ -511,9 +573,20 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
     setup_plots(fig, opts)
     return fig
 
+
 #%% Functions - plot_population_pyramid
-def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyramid', *, opts=None, \
-        name1='Male', name2='Female', color1='xkcd:blue', color2='xkcd:red'):
+def plot_population_pyramid(
+    age_bins,
+    male_per,
+    fmal_per,
+    title='Population Pyramid',
+    *,
+    opts=None,
+    name1='Male',
+    name2='Female',
+    color1='xkcd:blue',
+    color2='xkcd:red'
+):
     r"""
     Plot the standard population pyramid.
 
@@ -574,9 +647,9 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     legend_loc = opts.leg_spot
 
     # convert data to percentages
-    num_pts   = len(age_bins) - 1
-    y_values  = np.arange(num_pts) if HAVE_NUMPY else list(range(num_pts))
-    y_labels  = bins_to_str_ranges(age_bins, dt=1, cutoff=200)
+    num_pts = len(age_bins) - 1
+    y_values = np.arange(num_pts) if HAVE_NUMPY else list(range(num_pts))
+    y_labels = bins_to_str_ranges(age_bins, dt=1, cutoff=200)
 
     # create the figure and axis and set the title
     fig = plt.figure()
@@ -584,8 +657,8 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     ax = fig.add_subplot(111)
 
     # plot bars
-    ax.barh(y_values, -scale*male_per, 0.95, color=color1, label=name1)
-    ax.barh(y_values,  scale*fmal_per, 0.95, color=color2, label=name2)
+    ax.barh(y_values, -scale * male_per, 0.95, color=color1, label=name1)
+    ax.barh(y_values, +scale * fmal_per, 0.95, color=color2, label=name2)
 
     # make sure plot is symmetric about zero
     xlim = max(abs(x) for x in ax.get_xlim())
@@ -607,6 +680,7 @@ def plot_population_pyramid(age_bins, male_per, fmal_per, title='Population Pyra
     setup_plots(fig, opts)
 
     return fig
+
 
 #%% Unit test
 if __name__ == '__main__':

@@ -47,6 +47,7 @@ def is_dunder(name: str) -> bool:
     # Note that this is copied from the enum library, as it is not part of their public API.
     return len(name) > 4 and name[:2] == name[-2:] == '__' and name[2] != '_' and name[-3] != '_'
 
+
 #%% Functions - get_root_dir
 @lru_cache
 def get_root_dir() -> Path:
@@ -71,6 +72,7 @@ def get_root_dir() -> Path:
     """
     # this folder is the root directory based on the location of this file (utils.py)
     return Path(__file__).resolve().parent
+
 
 #%% Functions - get_tests_dir
 @lru_cache
@@ -97,6 +99,7 @@ def get_tests_dir() -> Path:
     # this folder is the 'tests' subfolder
     return get_root_dir() / 'tests'
 
+
 #%% Functions - get_data_dir
 @lru_cache
 def get_data_dir() -> Path:
@@ -121,6 +124,7 @@ def get_data_dir() -> Path:
     """
     # this folder is the 'data' subfolder
     return get_root_dir().parent / 'data'
+
 
 #%% Functions - get_images_dir
 @lru_cache
@@ -147,6 +151,7 @@ def get_images_dir() -> Path:
     # this folder is the 'images' subfolder
     return get_root_dir().parent / 'images'
 
+
 #%% Functions - get_output_dir
 @lru_cache
 def get_output_dir() -> Path:
@@ -171,6 +176,7 @@ def get_output_dir() -> Path:
     """
     # this folder is the 'images' subfolder
     return get_root_dir().parent / 'results'
+
 
 #%% Functions - list_python_files
 def list_python_files(folder: Path, recursive: bool = False, include_all: bool = False) -> List[Path]:
@@ -214,6 +220,7 @@ def list_python_files(folder: Path, recursive: bool = False, include_all: bool =
         for this_folder in sorted(dirs):
             files.extend(list_python_files(this_folder, recursive=recursive, include_all=include_all))
     return files
+
 
 #%% Unit test
 if __name__ == '__main__':

@@ -52,8 +52,11 @@ def parse_enforce(input_args: List[str]) -> argparse.Namespace:
      execute     = False
 
     """
-    parser = argparse.ArgumentParser(prog='dcs enforce', description='Enforce consistency in the repo ' + \
-            'for things like tabs, trailing whitespace, line endings and file execute permissions.')
+    parser = argparse.ArgumentParser(
+        prog='dcs enforce',
+        description='Enforce consistency in the repo '
+        + 'for things like tabs, trailing whitespace, line endings and file execute permissions.',
+    )
 
     parser.add_argument('folder', help='Folder to search for source files')
     parser.add_argument('-e', '--extensions', help='Extensions to search through.', action='append')
@@ -70,6 +73,7 @@ def parse_enforce(input_args: List[str]) -> argparse.Namespace:
 
     args = parser.parse_args(input_args)
     return args
+
 
 #%% Functions - execute_enforce
 def execute_enforce(args: argparse.Namespace) -> int:
@@ -99,10 +103,10 @@ def execute_enforce(args: argparse.Namespace) -> int:
     # defaults
     def_extensions = {'m', 'py'}
     # get settings from input arguments
-    folder     = Path(args.folder).resolve()
-    list_all   = args.list_all
+    folder = Path(args.folder).resolve()
+    list_all = args.list_all
     check_tabs = not args.ignore_tabs
-    trailing   = args.trailing
+    trailing = args.trailing
     exclusions = args.skip
     show_execute = args.execute
     check_eol: Optional[str]
@@ -121,12 +125,20 @@ def execute_enforce(args: argparse.Namespace) -> int:
         extensions = args.extensions
 
     # call the function to do the checks
-    is_clean = find_repo_issues(folder=folder, extensions=extensions, list_all=list_all, \
-            check_tabs=check_tabs, trailing=trailing, exclusions=exclusions, check_eol=check_eol, \
-            show_execute=show_execute)
+    is_clean = find_repo_issues(
+        folder=folder,
+        extensions=extensions,
+        list_all=list_all,
+        check_tabs=check_tabs,
+        trailing=trailing,
+        exclusions=exclusions,
+        check_eol=check_eol,
+        show_execute=show_execute,
+    )
     # return a status based on whether anything was found
     return_code = ReturnCodes.clean if is_clean else ReturnCodes.test_failures
     return return_code
+
 
 #%% Functions - parse_make_init
 def parse_make_init(input_args: List[str]) -> argparse.Namespace:
@@ -161,17 +173,21 @@ def parse_make_init(input_args: List[str]) -> argparse.Namespace:
      outfile = __init__.py
 
     """
-    parser = argparse.ArgumentParser(prog='dcs make_init', description='Make a python __init__.py' + \
-            'file for the given folder.')
+    parser = argparse.ArgumentParser(
+        prog='dcs make_init', description='Make a python __init__.py' + 'file for the given folder.'
+    )
 
     parser.add_argument('folder', help='Folder to search for source files')
     parser.add_argument('-l', '--lineup', help='Lines up the imports between files.', action='store_true')
     parser.add_argument('-w', '--wrap', nargs='?', default=100, type=int, help='Number of lines to wrap at.')
     parser.add_argument('-n', '--dry-run', help='Show what would be copied without doing it', action='store_true')
-    parser.add_argument('-o', '--outfile', nargs='?', default='__init__.py', help='Output file to produce, default is __init__.py')
+    parser.add_argument(
+        '-o', '--outfile', nargs='?', default='__init__.py', help='Output file to produce, default is __init__.py'
+    )
 
     args = parser.parse_args(input_args)
     return args
+
 
 #%% Functions - execute_make_init
 def execute_make_init(args: argparse.Namespace) -> int:
@@ -208,9 +224,10 @@ def execute_make_init(args: argparse.Namespace) -> int:
         print(f'Would execute "{cmd}"')
         return ReturnCodes.clean
 
-    output      = make_python_init(folder, lineup=lineup, wrap=wrap, filename=filename)
+    output = make_python_init(folder, lineup=lineup, wrap=wrap, filename=filename)
     return_code = ReturnCodes.clean if output else ReturnCodes.bad_command
     return return_code
+
 
 #%% Unit test
 if __name__ == '__main__':

@@ -18,18 +18,21 @@ HAVE_NUMPY: bool
 #%% Set flags for optional dependencies
 try:
     import coverage
+
     assert coverage  # not really used, but it silences the warnings
     HAVE_COVERAGE = True
 except ModuleNotFoundError:
     HAVE_COVERAGE = False
 try:
     import h5py
+
     assert h5py  # not really used, but it silences the warnings
     HAVE_H5PY = True
 except ModuleNotFoundError:
     HAVE_H5PY = False
 try:
     import matplotlib
+
     assert matplotlib  # not really used, but it silences the warnings
     HAVE_MPL = True
 except ModuleNotFoundError:
@@ -37,6 +40,7 @@ except ModuleNotFoundError:
 if HAVE_MPL:
     try:
         import datashader
+
         assert datashader
         HAVE_DS = True
     except ImportError:
@@ -45,23 +49,27 @@ else:
     HAVE_DS = False
 try:
     import numpy as np
+
     HAVE_NUMPY = True
 except ModuleNotFoundError:
     HAVE_NUMPY = False
 try:
     import pandas as pd
+
     assert pd
     HAVE_PANDAS = True
 except ModuleNotFoundError:
     HAVE_PANDAS = False
 try:
     import pytest
+
     assert pytest
     HAVE_PYTEST = True
 except ModuleNotFoundError:
     HAVE_PYTEST = False
 try:
     import scipy
+
     assert scipy
     HAVE_SCIPY = True
 except ModuleNotFoundError:
@@ -116,14 +124,14 @@ NP_DATETIME_FORM: str = 'datetime64[ns]'
 NP_TIMEDELTA_FORM: str = 'timedelta64[ns]'
 
 # Scale factor for converting numpy time forms to seconds (nanoseconds per second)
-NP_INT64_PER_SEC: int = 10**9
+NP_INT64_PER_SEC: int = 10 ** 9
 
 #% Numpy constants
 if HAVE_NUMPY:
     NP_ONE_SECOND: np.timedelta64 = np.timedelta64(1, 's').astype(NP_TIMEDELTA_FORM)
     NP_ONE_MINUTE: np.timedelta64 = np.timedelta64(1, 'm').astype(NP_TIMEDELTA_FORM)
-    NP_ONE_HOUR: np.timedelta64   = np.timedelta64(1, 'h').astype(NP_TIMEDELTA_FORM)
-    NP_ONE_DAY: np.timedelta64    = np.timedelta64(1, 'D').astype(NP_TIMEDELTA_FORM)
+    NP_ONE_HOUR: np.timedelta64 = np.timedelta64(1, 'h').astype(NP_TIMEDELTA_FORM)
+    NP_ONE_DAY: np.timedelta64 = np.timedelta64(1, 'D').astype(NP_TIMEDELTA_FORM)
 else:
     NP_ONE_SECOND = NP_ONE_MINUTE = NP_ONE_HOUR = NP_ONE_DAY = None  # type: ignore[assignment]
 

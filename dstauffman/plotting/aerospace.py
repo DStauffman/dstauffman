@@ -13,16 +13,15 @@ import unittest
 
 from dstauffman import HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel
 from dstauffman.aerospace import Kf, KfInnov
-from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, \
-    make_difference_plot, make_generic_plot
+from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, make_difference_plot, make_generic_plot
 from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
-from dstauffman.plotting.support import COLOR_LISTS, ColorMap, get_nondeg_colorlists, \
-    get_rms_indices
+from dstauffman.plotting.support import COLOR_LISTS, ColorMap, get_nondeg_colorlists, get_rms_indices
 
 if HAVE_MPL:
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
+
     inf = np.inf
 else:
     from math import inf
@@ -32,17 +31,43 @@ logger = logging.getLogger(__name__)
 
 #%% Constants
 # hard-coded values
-_LEG_FORMAT  = '{:1.3f}'
+_LEG_FORMAT = '{:1.3f}'
 _TRUTH_COLOR = 'k'
 
 #%% Functions - make_quaternion_plot
-def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *, \
-        name_one='', name_two='', time_units='sec', start_date='', plot_components=True, \
-        rms_xmin=-inf, rms_xmax=inf, disp_xmin=-inf, disp_xmax=inf, make_subplots=True, \
-        single_lines=False, use_mean=False, plot_zero=False, show_rms=True, legend_loc='best', \
-        show_extra=True, second_units='micro', leg_scale=None, data_as_rows=True, tolerance=0, \
-        return_err=False, use_zoh=False, label_vert_lines=True, extra_plotter=None, \
-        use_datashader=False):
+def make_quaternion_plot(
+    description,
+    time_one,
+    time_two,
+    quat_one,
+    quat_two,
+    *,
+    name_one='',
+    name_two='',
+    time_units='sec',
+    start_date='',
+    plot_components=True,
+    rms_xmin=-inf,
+    rms_xmax=inf,
+    disp_xmin=-inf,
+    disp_xmax=inf,
+    make_subplots=True,
+    single_lines=False,
+    use_mean=False,
+    plot_zero=False,
+    show_rms=True,
+    legend_loc='best',
+    show_extra=True,
+    second_units='micro',
+    leg_scale=None,
+    data_as_rows=True,
+    tolerance=0,
+    return_err=False,
+    use_zoh=False,
+    label_vert_lines=True,
+    extra_plotter=None,
+    use_datashader=False,
+):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
     Plots two quaternion histories over time, along with a difference from one another.
@@ -119,16 +144,43 @@ def make_quaternion_plot(description, time_one, time_two, quat_one, quat_two, *,
 
     """
     colormap = ColorMap(COLOR_LISTS['quat_diff'])
-    return make_generic_plot('quat', description=description, time_one=time_one, data_one=quat_one, \
-        time_two=time_two, data_two=quat_two, name_one=name_one, name_two=name_two, \
-        elements=('X', 'Y', 'Z', 'S'), units='rad', time_units=time_units, start_date=start_date, \
-        rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-        single_lines=single_lines, make_subplots=make_subplots, colormap=colormap, use_mean=use_mean, \
-        plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, show_extra=show_extra, \
-        plot_components=plot_components, second_units=second_units, leg_scale=leg_scale, \
-        tolerance=tolerance, return_err=return_err, data_as_rows=data_as_rows, \
-        extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
-        use_datashader=use_datashader)
+    return make_generic_plot(
+        'quat',
+        description=description,
+        time_one=time_one,
+        data_one=quat_one,
+        time_two=time_two,
+        data_two=quat_two,
+        name_one=name_one,
+        name_two=name_two,
+        elements=('X', 'Y', 'Z', 'S'),
+        units='rad',
+        time_units=time_units,
+        start_date=start_date,
+        rms_xmin=rms_xmin,
+        rms_xmax=rms_xmax,
+        disp_xmin=disp_xmin,
+        disp_xmax=disp_xmax,
+        single_lines=single_lines,
+        make_subplots=make_subplots,
+        colormap=colormap,
+        use_mean=use_mean,
+        plot_zero=plot_zero,
+        show_rms=show_rms,
+        legend_loc=legend_loc,
+        show_extra=show_extra,
+        plot_components=plot_components,
+        second_units=second_units,
+        leg_scale=leg_scale,
+        tolerance=tolerance,
+        return_err=return_err,
+        data_as_rows=data_as_rows,
+        extra_plotter=extra_plotter,
+        use_zoh=use_zoh,
+        label_vert_lines=label_vert_lines,
+        use_datashader=use_datashader,
+    )
+
 
 #%% plot_attitude
 def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
@@ -238,8 +290,8 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     second_units = kwargs.pop('second_units', 'micro')
 
     # initialize outputs
-    figs    = []
-    err     = dict()
+    figs = []
+    err = dict()
     printed = False
 
     if truth is not None:
@@ -252,12 +304,31 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             logger.log(LogLevel.L4, f'Plotting {description} plots ...')
             printed = True
         # make plots
-        out = make_quaternion_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
-            name_one=name_one, name_two=name_two, time_units=time_units, start_date=start_date, \
-            rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-            make_subplots=sub_plots, plot_components=plot_comps, single_lines=single_lines, \
-            use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
-            second_units=second_units, return_err=return_err, **kwargs)
+        out = make_quaternion_plot(
+            description,
+            kf1.time,
+            kf2.time,
+            getattr(kf1, field),
+            getattr(kf2, field),
+            name_one=name_one,
+            name_two=name_two,
+            time_units=time_units,
+            start_date=start_date,
+            rms_xmin=rms_xmin,
+            rms_xmax=rms_xmax,
+            disp_xmin=disp_xmin,
+            disp_xmax=disp_xmax,
+            make_subplots=sub_plots,
+            plot_components=plot_comps,
+            single_lines=single_lines,
+            use_mean=use_mean,
+            plot_zero=plot_zero,
+            show_rms=show_rms,
+            legend_loc=legend_loc,
+            second_units=second_units,
+            return_err=return_err,
+            **kwargs,
+        )
         if return_err:
             figs += out[0]
             err[field] = out[1]
@@ -272,6 +343,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         return (figs, err)
     return figs
 
+
 #%% plot_los
 def plot_los(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""Plots the Line of Sight histories."""
@@ -279,6 +351,7 @@ def plot_los(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fie
         fields = {'los': 'LOS'}
     out = plot_attitude(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)
     return out
+
 
 #%% plot_position
 def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
@@ -383,7 +456,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     # initialize outputs
     figs = []
-    err  = dict()
+    err = dict()
     printed = False
 
     # call wrapper function for most of the details
@@ -393,12 +466,33 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             logger.log(LogLevel.L4, f'Plotting {description} plots ...')
             printed = True
         # make plots
-        out = make_difference_plot(description, kf1.time, kf2.time, getattr(kf1, field), getattr(kf2, field), \
-            name_one=name_one, name_two=name_two, elements=elements, time_units=time_units, units=units, \
-            start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-            make_subplots=sub_plots, colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, \
-            single_lines=single_lines, show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, \
-            return_err=return_err, **kwargs)
+        out = make_difference_plot(
+            description,
+            kf1.time,
+            kf2.time,
+            getattr(kf1, field),
+            getattr(kf2, field),
+            name_one=name_one,
+            name_two=name_two,
+            elements=elements,
+            time_units=time_units,
+            units=units,
+            start_date=start_date,
+            rms_xmin=rms_xmin,
+            rms_xmax=rms_xmax,
+            disp_xmin=disp_xmin,
+            disp_xmax=disp_xmax,
+            make_subplots=sub_plots,
+            colormap=colormap,
+            use_mean=use_mean,
+            plot_zero=plot_zero,
+            single_lines=single_lines,
+            show_rms=show_rms,
+            legend_loc=legend_loc,
+            second_units=second_units,
+            return_err=return_err,
+            **kwargs,
+        )
         if return_err:
             figs += out[0]
             err[field] = out[1]
@@ -413,6 +507,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         return (figs, err)
     return figs
 
+
 #%% plot_velocity
 def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""Plots the Line of Sight histories."""
@@ -421,10 +516,26 @@ def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     out = plot_position(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)
     return out
 
+
 #%% plot_innovations
-def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, \
-        plot_by_status=False, plot_by_number=False, show_one=None, show_two=None, cat_names=None, \
-        cat_colors=None, number_field=None, number_colors=None, **kwargs):
+def plot_innovations(
+    kf1=None,
+    kf2=None,
+    *,
+    truth=None,
+    opts=None,
+    return_err=False,
+    fields=None,
+    plot_by_status=False,
+    plot_by_number=False,
+    show_one=None,
+    show_two=None,
+    cat_names=None,
+    cat_colors=None,
+    number_field=None,
+    number_colors=None,
+    **kwargs,
+):
     r"""
     Plots the Kalman Filter innovation histories.
 
@@ -507,7 +618,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     if kf2 is None:
         kf2 = KfInnov()
     if truth is None:
-        pass # Note: truth is not used within this function, but kept for argument consistency
+        pass  # Note: truth is not used within this function, but kept for argument consistency
     if opts is None:
         opts = Opts()
     if fields is None:
@@ -516,12 +627,18 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         number_field = {'quad': 'Quad', 'sca': 'SCA'}
 
     # aliases and defaults
-    name_one     = kwargs.pop('name_one', kf1.name)
-    name_two     = kwargs.pop('name_two', kf2.name)
-    description  = name_one if name_one else name_two if name_two else ''
+    name_one = kwargs.pop('name_one', kf1.name)
+    name_two = kwargs.pop('name_two', kf2.name)
+    description = name_one if name_one else name_two if name_two else ''
     num_chan = 0
     for key in fields.keys():
-        num_chan = max(num_chan, getattr(kf1, key).shape[0] if getattr(kf1, key) is not None else getattr(kf2, key).shape[0] if getattr(kf2, key) is not None else 0)
+        if getattr(kf1, key) is not None:
+            temp = getattr(kf1, key).shape[0]
+        elif getattr(kf2, key) is not None:
+            temp = getattr(kf2, key).shape[0]
+        else:
+            temp = 0
+        num_chan = max(num_chan, temp)
     elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
     elements     = kwargs.pop('elements', elements)
     units        = kwargs.pop('units', kf1.units)
@@ -559,8 +676,8 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     tolerance    = kwargs.pop('tolerance', 0)
 
     # Initialize outputs
-    figs    = []
-    err     = dict()
+    figs = []
+    err = dict()
     printed = False
 
     #% call wrapper functions for most of the details
@@ -590,12 +707,34 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
         else:
             t2 = kf2.time
             f2 = field_two
-        out = make_difference_plot(full_description, t1, t2, f1, f2, name_one=name_one, \
-            name_two=name_two, elements=elements, units=units, time_units=time_units, start_date=start_date, \
-            rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-            make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-            single_lines=single_lines, legend_loc=legend_loc, second_units=this_second_units, \
-            colormap=colormap, return_err=return_err, tolerance=tolerance, **kwargs)
+        out = make_difference_plot(
+            full_description,
+            t1,
+            t2,
+            f1,
+            f2,
+            name_one=name_one,
+            name_two=name_two,
+            elements=elements,
+            units=units,
+            time_units=time_units,
+            start_date=start_date,
+            rms_xmin=rms_xmin,
+            rms_xmax=rms_xmax,
+            disp_xmin=disp_xmin,
+            disp_xmax=disp_xmax,
+            make_subplots=sub_plots,
+            use_mean=use_mean,
+            plot_zero=plot_zero,
+            show_rms=show_rms,
+            single_lines=single_lines,
+            legend_loc=legend_loc,
+            second_units=this_second_units,
+            colormap=colormap,
+            return_err=return_err,
+            tolerance=tolerance,
+            **kwargs,
+        )
         if return_err:
             figs += out[0]
             err[field] = out[1]
@@ -603,19 +742,59 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
             figs += out
         this_ylabel = [e + ' Innovation [' + units + ']' for e in elements]
         if plot_by_status and field_one is not None and kf1.status is not None:
-            figs += make_categories_plot(full_description+' by Category', kf1.time, field_one, kf1.status, \
-                name=name_one, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
-                start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-                disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
-                show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, \
-                second_units=this_second_units, ylabel=this_ylabel, colormap=cat_colors, **kwargs)
+            figs += make_categories_plot(
+                full_description + ' by Category',
+                kf1.time,
+                field_one,
+                kf1.status,
+                name=name_one,
+                cat_names=cat_names,
+                elements=elements,
+                units=units,
+                time_units=time_units,
+                start_date=start_date,
+                rms_xmin=rms_xmin,
+                rms_xmax=rms_xmax,
+                disp_xmin=disp_xmin,
+                disp_xmax=disp_xmax,
+                make_subplots=sub_plots,
+                use_mean=use_mean,
+                plot_zero=plot_zero,
+                show_rms=show_rms,
+                single_lines=single_lines,
+                legend_loc=legend_loc,
+                second_units=this_second_units,
+                ylabel=this_ylabel,
+                colormap=cat_colors,
+                **kwargs,
+            )
         if plot_by_status and field_two is not None and kf2.status is not None:
-            figs += make_categories_plot(full_description+' by Category', kf2.time, field_two, kf2.status, \
-                name=name_two, cat_names=cat_names, elements=elements, units=units, time_units=time_units, \
-                start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-                disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
-                show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, \
-                second_units=this_second_units, ylabel=this_ylabel, colormap=cat_colors, **kwargs)
+            figs += make_categories_plot(
+                full_description + ' by Category',
+                kf2.time,
+                field_two,
+                kf2.status,
+                name=name_two,
+                cat_names=cat_names,
+                elements=elements,
+                units=units,
+                time_units=time_units,
+                start_date=start_date,
+                rms_xmin=rms_xmin,
+                rms_xmax=rms_xmax,
+                disp_xmin=disp_xmin,
+                disp_xmax=disp_xmax,
+                make_subplots=sub_plots,
+                use_mean=use_mean,
+                plot_zero=plot_zero,
+                show_rms=show_rms,
+                single_lines=single_lines,
+                legend_loc=legend_loc,
+                second_units=this_second_units,
+                ylabel=this_ylabel,
+                colormap=cat_colors,
+                **kwargs,
+            )
         if plot_by_number and field_one is not None:
             this_number = None
             for (quad, quad_name) in number_field.items():
@@ -624,12 +803,32 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
                     break
             if this_number is not None:
                 num_names = {num: quad_name + ' ' + str(num) for num in np.unique(this_number)}
-                figs += make_categories_plot(full_description+' by '+quad_name, kf1.time, field_one, this_number, \
-                    name=name_one, cat_names=num_names, elements=elements, units=units, time_units=time_units, \
-                    start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-                    disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
-                    show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, \
-                    second_units=this_second_units, ylabel=this_ylabel, colormap=number_colors, **kwargs)
+                figs += make_categories_plot(
+                    full_description + ' by ' + quad_name,
+                    kf1.time,
+                    field_one,
+                    this_number,
+                    name=name_one,
+                    cat_names=num_names,
+                    elements=elements,
+                    units=units,
+                    time_units=time_units,
+                    start_date=start_date,
+                    rms_xmin=rms_xmin,
+                    rms_xmax=rms_xmax,
+                    disp_xmin=disp_xmin,
+                    disp_xmax=disp_xmax,
+                    make_subplots=sub_plots,
+                    use_mean=use_mean,
+                    plot_zero=plot_zero,
+                    show_rms=show_rms,
+                    single_lines=single_lines,
+                    legend_loc=legend_loc,
+                    second_units=this_second_units,
+                    ylabel=this_ylabel,
+                    colormap=number_colors,
+                    **kwargs,
+                )
         if plot_by_number and field_two is not None:
             this_number = None
             for (quad, quad_name) in number_field.items():
@@ -638,12 +837,32 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
                     break
             if this_number is not None:
                 num_names = {num: quad_name + ' ' + str(num) for num in np.unique(this_number)}
-                figs += make_categories_plot(full_description+' by '+quad_name, kf2.time, field_two, this_number, \
-                    name=name_two, cat_names=num_names, elements=elements, units=units, time_units=time_units, \
-                    start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
-                    disp_xmax=disp_xmax, make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, \
-                    show_rms=show_rms, single_lines=single_lines, legend_loc=legend_loc, \
-                    second_units=this_second_units, ylabel=this_ylabel, colormap=number_colors, **kwargs)
+                figs += make_categories_plot(
+                    full_description + ' by ' + quad_name,
+                    kf2.time,
+                    field_two,
+                    this_number,
+                    name=name_two,
+                    cat_names=num_names,
+                    elements=elements,
+                    units=units,
+                    time_units=time_units,
+                    start_date=start_date,
+                    rms_xmin=rms_xmin,
+                    rms_xmax=rms_xmax,
+                    disp_xmin=disp_xmin,
+                    disp_xmax=disp_xmax,
+                    make_subplots=sub_plots,
+                    use_mean=use_mean,
+                    plot_zero=plot_zero,
+                    show_rms=show_rms,
+                    single_lines=single_lines,
+                    legend_loc=legend_loc,
+                    second_units=this_second_units,
+                    ylabel=this_ylabel,
+                    colormap=number_colors,
+                    **kwargs,
+                )
 
     # Setup plots
     setup_plots(figs, opts)
@@ -652,6 +871,7 @@ def plot_innovations(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fa
     if return_err:
         return (figs, err)
     return figs
+
 
 #%% plot_innov_fplocs
 def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
@@ -734,8 +954,7 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
         innovs = kf1.innov[:, ix['one']]
 
     # call wrapper functions for most of the details
-    fig = make_connected_sets(description, fplocs, innovs, units=kf1.units, \
-        legend_loc=legend_loc, **kwargs)
+    fig = make_connected_sets(description, fplocs, innovs, units=kf1.units, legend_loc=legend_loc, **kwargs)
 
     # Setup plots
     figs = [fig]
@@ -743,9 +962,20 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
     logger.log(LogLevel.L4, '... done.')
     return figs
 
+
 #%% plot_innov_hist
-def plot_innov_hist(kf1, bins, *, opts=None, fields=None, normalize_spacing=False, use_exact_counts=False, \
-        show_pdf=False, pdf_x=None, pdf_y=None):
+def plot_innov_hist(
+    kf1,
+    bins,
+    *,
+    opts=None,
+    fields=None,
+    normalize_spacing=False,
+    use_exact_counts=False,
+    show_pdf=False,
+    pdf_x=None,
+    pdf_y=None,
+):
     # check optional inputs
     if kf1 is None:
         kf1 = KfInnov()
@@ -768,18 +998,33 @@ def plot_innov_hist(kf1, bins, *, opts=None, fields=None, normalize_spacing=Fals
 
     #% call wrapper functions for most of the details
     for (field, sub_description) in fields.items():
-        full_description = description + ' - ' + sub_description  + ' Histogram' if description else sub_description + ' Histogram'
+        full_description = (
+            description + ' - ' + sub_description + ' Histogram' if description else sub_description + ' Histogram'
+        )
         # print status
         if not printed:
             logger.log(LogLevel.L4, f'Plotting {full_description} plots ...')
             printed = True
         data = getattr(kf1, field)
         for i in range(data.shape[0]):
-            fig = plot_histogram(full_description, data[i, :], bins, opts=opts, color='#1f77b4', xlabel='Data', \
-                ylabel='Number', second_ylabel='Distribution [%]', normalize_spacing=normalize_spacing, \
-                use_exact_counts=use_exact_counts, show_pdf=show_pdf, pdf_x=pdf_x, pdf_y=pdf_y)
+            fig = plot_histogram(
+                full_description,
+                data[i, :],
+                bins,
+                opts=opts,
+                color='#1f77b4',
+                xlabel='Data',
+                ylabel='Number',
+                second_ylabel='Distribution [%]',
+                normalize_spacing=normalize_spacing,
+                use_exact_counts=use_exact_counts,
+                show_pdf=show_pdf,
+                pdf_x=pdf_x,
+                pdf_y=pdf_y,
+            )
             figs.append(fig)
     return figs
+
 
 #%% plot_covariance
 def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, groups=None, fields=None, **kwargs):
@@ -844,7 +1089,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     if kf2 is None:
         kf2 = Kf()
     if truth is None:
-        pass # Note: truth is not used within this function, but kept for argument consistency
+        pass  # Note: truth is not used within this function, but kept for argument consistency
     if opts is None:
         opts = Opts()
     if fields is None:
@@ -855,7 +1100,13 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     # aliases and defaults
     num_chan = 0
     for key in fields.keys():
-        num_chan = max(num_chan, getattr(kf1, key).shape[0] if getattr(kf1, key) is not None else getattr(kf2, key).shape[0] if getattr(kf2, key) is not None else 0)
+        if getattr(kf1, key) is not None:
+            temp = getattr(kf1, key).shape[0]
+        elif getattr(kf2, key) is not None:
+            temp = getattr(kf2, key).shape[0]
+        else:
+            temp = 0
+        num_chan = max(num_chan, temp)
     elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
     elements     = kwargs.pop('elements', elements)
     units        = kwargs.pop('units', 'mixed')
@@ -895,8 +1146,8 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
     # initialize output
-    figs    = []
-    err     = dict()
+    figs = []
+    err = dict()
     printed = False
 
     #% call wrapper functions for most of the details
@@ -929,12 +1180,34 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
                 this_description = description + ' for State ' + ','.join(str(x) for x in this_state_nums)
                 this_elements = [elements[state] for state in this_state_nums]
                 colormap = get_nondeg_colorlists(len(this_elements))
-                out = make_difference_plot(this_description, kf1.time, kf2.time, data_one, data_two, \
-                    name_one=name_one, name_two=name_two, elements=this_elements, units=this_units, time_units=time_units, \
-                    start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
-                    make_subplots=sub_plots, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
-                    single_lines=single_lines, legend_loc=legend_loc, second_units=this_2units, return_err=return_err, \
-                    ylabel=this_ylabel, colormap=colormap, **kwargs)
+                out = make_difference_plot(
+                    this_description,
+                    kf1.time,
+                    kf2.time,
+                    data_one,
+                    data_two,
+                    name_one=name_one,
+                    name_two=name_two,
+                    elements=this_elements,
+                    units=this_units,
+                    time_units=time_units,
+                    start_date=start_date,
+                    rms_xmin=rms_xmin,
+                    rms_xmax=rms_xmax,
+                    disp_xmin=disp_xmin,
+                    disp_xmax=disp_xmax,
+                    make_subplots=sub_plots,
+                    use_mean=use_mean,
+                    plot_zero=plot_zero,
+                    show_rms=show_rms,
+                    single_lines=single_lines,
+                    legend_loc=legend_loc,
+                    second_units=this_2units,
+                    return_err=return_err,
+                    ylabel=this_ylabel,
+                    colormap=colormap,
+                    **kwargs,
+                )
                 if return_err:
                     figs += out[0]
                     err[field][f'Group {ix+1}'] = out[1]
@@ -950,6 +1223,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
         return (figs, err)
     return figs
 
+
 #%% plot_states
 def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""Plots the Kalman Filter state histories."""
@@ -957,6 +1231,7 @@ def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, 
         fields = {'state': 'State Estimates'}
     out = plot_covariance(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)
     return out
+
 
 #%% Unit Test
 if __name__ == '__main__':

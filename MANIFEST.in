@@ -7,5 +7,8 @@ include LICENSE.txt
 # Include the readme file
 include README.rst
 
+# Include the Change Log
+include CHANGELOG.md
+
 # Include supporting files
 recursive-include dstauffman *.png *.pdf *.rst *.tex *.coveragerc *.bat *.sh

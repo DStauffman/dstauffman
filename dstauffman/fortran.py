@@ -41,6 +41,7 @@ class _FortranSource(Frozen):
     >>> code = _FortranSource('test_mod')
 
     """
+
     def __init__(self, mod_name: str = '', prog_name: str = ''):
         r"""Creates the instance of the class."""
         self.prog_name: str         = prog_name
@@ -82,23 +83,26 @@ class _FortranSource(Frozen):
     @property
     def has_setupclass(self) -> bool:
         r"""Whether the Module has a setupclass routine or not."""
-        return 'setupmethod' in self.subroutines # TODO get real name from FRUIT
+        return 'setupmethod' in self.subroutines  # TODO get real name from FRUIT
 
     @property
     def has_teardown(self) -> bool:
         r"""Whether the Module has a teardown routine or not."""
-        return 'teardown' in self.subroutines # TODO get real name from FRUIT
+        return 'teardown' in self.subroutines  # TODO get real name from FRUIT
 
     @property
     def has_teardownclass(self) -> bool:
         r"""Whether the Module has a teardownclass routine or not."""
-        return 'teardownclass' in self.subroutines # TODO get real name from FRUIT
+        return 'teardownclass' in self.subroutines  # TODO get real name from FRUIT
+
 
 #%% Functions - _parse_source
 @overload
 def _parse_source(filename: Path, assert_single: Literal[True] = ...) -> _FortranSource: ...
+
 @overload
 def _parse_source(filename: Path, assert_single: Literal[False]) -> List[_FortranSource]: ...
+
 
 def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranSource, List[_FortranSource]]:
     r"""
@@ -129,7 +133,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
     # get the lines individually
     lines = text.split('\n')
     # create the output dictionary
-    code      = []
+    code = []
     this_name = ''
     this_code: Optional[_FortranSource] = None
     for line in lines:
@@ -206,6 +210,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
         return code[0]
     return code
 
+
 #%% Functions - _write_unit_test
 def _write_unit_test(filename: Path, code: _FortranSource, header: str = None) -> None:
     r"""
@@ -257,6 +262,7 @@ def _write_unit_test(filename: Path, code: _FortranSource, header: str = None) -
     print(f'Writing "{filename}".')
     write_text_file(filename, text)
 
+
 #%% Functions - _write_all_unit_test
 def _write_all_unit_test(filename: Path, all_code: List[_FortranSource], header: str = None) -> None:
     r"""
@@ -301,7 +307,7 @@ def _write_all_unit_test(filename: Path, all_code: List[_FortranSource], header:
             lines.append(this_line)
         else:
             start_ix = this_line.find('only: ')
-            new_lines = line_wrap([this_line], wrap=_MAX_LINE_LENGTH, indent=start_ix+len('only: '), line_cont='&')
+            new_lines = line_wrap([this_line], wrap=_MAX_LINE_LENGTH, indent=start_ix + len('only: '), line_cont='&')
             lines.extend(new_lines)
     # initializations
     lines.append('    !! fruit initialization')
@@ -329,10 +335,18 @@ def _write_all_unit_test(filename: Path, all_code: List[_FortranSource], header:
     print(f'Writing "{filename}".')
     write_text_file(filename, text)
 
+
 #%% Functions - _makefile_template
-def _get_template(compiler: str = 'gfortran', program: str = 'prog', is_debug: bool = False, \
-                  build: str = '', *, fcflags: Dict[str, str] = None, \
-                  dbflags: Dict[str, str] = None, use_preprocessor: bool = True) -> str:
+def _get_template(
+    compiler: str = 'gfortran',
+    program: str = 'prog',
+    is_debug: bool = False,
+    build: str = '',
+    *,
+    fcflags: Dict[str, str] = None,
+    dbflags: Dict[str, str] = None,
+    use_preprocessor: bool = False,
+) -> str:
     r"""
     Creates a template for the given compiler and debug settings.
 
@@ -387,15 +401,15 @@ def _get_template(compiler: str = 'gfortran', program: str = 'prog', is_debug: b
         this_fcflags += ' ' + preproc[compiler]
     # build Unix template
     if compiler != 'win':
-        template = \
-        '# compiler and flags\n' + \
-        'FC      = ' + (compiler if compiler != 'win' else 'ifort') + '\n' + \
-        'FCFLAGS = ' + this_fcflags + '\n' + \
-        'DBFLAGS = ' + this_dbflags + '\n' + \
-        '\n' + \
-        '# configuration\n' + \
-        'SRCDIR = source\n' + \
-        'OBJDIR = ' + build + '/' + compiler + '\nOBJS   = \\\n' + r"""
+        template = (
+            '# compiler and flags\n'
+            + 'FC      = ' + (compiler if compiler != 'win' else 'ifort') + '\n'
+            + 'FCFLAGS = ' + this_fcflags + '\n'
+            + 'DBFLAGS = ' + this_dbflags + '\n'
+            + '\n'
+            + '# configuration\n'
+            + 'SRCDIR = source\n'
+            + 'OBJDIR = ' + build + '/' + compiler + '\nOBJS   = \\\n' + r"""
 # no implicit rules
 .SUFFIXES:
 
@@ -432,16 +446,17 @@ clean :
 #""" + '\t' + r"""$(TEST) -d $(OBJDIR) && $(RM) -r $(OBJDIR)
 
 """
+        )
     else:
-        template = \
-        '# compiler and flags\n' + \
-        'FC      = ifort\n' + \
-        'FCFLAGS = ' + this_fcflags + '\n' + \
-        'DBFLAGS = ' + this_dbflags + '\n' + \
-        '\n' + \
-        '# configuration\n' + \
-        'S      = source\n' + \
-        'B      = ' + build + '\\' + compiler + '\nOBJS   = \\\n' + r"""
+        template = (
+            '# compiler and flags\n'
+            + 'FC      = ifort\n'
+            + 'FCFLAGS = ' + this_fcflags + '\n'
+            + 'DBFLAGS = ' + this_dbflags + '\n'
+            + '\n'
+            + '# configuration\n'
+            + 'S      = source\n'
+            + 'B      = ' + build + '\\' + compiler + '\nOBJS   = \\\n' + r"""
 # no implicit rules
 .SUFFIXES:
 
@@ -465,12 +480,23 @@ clean :
 .PHONY : clean all create_dirs
 
 """
+        )
     return template
 
+
 #%% Functions - _write_makefile
-def _write_makefile(makefile: Path, code: List[_FortranSource], *, template: str = None, \
-        program: str = None, compiler: str = 'gfortran', is_debug: bool = False, sources: Iterable[str] = None, \
-        external_sources: Iterable[str] = None, replacements: Dict[str, str] = None) -> None:
+def _write_makefile(
+    makefile: Path,
+    code: List[_FortranSource],
+    *,
+    template: str = None,
+    program: str = None,
+    compiler: str = 'gfortran',
+    is_debug: bool = False,
+    sources: Iterable[str] = None,
+    external_sources: Iterable[str] = None,
+    replacements: Dict[str, str] = None,
+) -> None:
     r"""
     Reads the given makefile template and inserts the relevant rules based on the given source code.
 
@@ -543,7 +569,7 @@ def _write_makefile(makefile: Path, code: List[_FortranSource], *, template: str
     # build the program rules
     if is_unit_test:
         run_rules = []
-        runners   = []
+        runners = []
         for this_code in code:
             this_name = this_code.name
             if this_name.startswith('run_'):
@@ -553,11 +579,15 @@ def _write_makefile(makefile: Path, code: List[_FortranSource], *, template: str
                 run_rules.append(this_rule)
                 this_depd = _build_dependencies(this_code.uses)
                 if is_win:
-                    this_rule = '\t$(FC) $(FCFLAGS) /exe:' + this_name + '.exe ' + this_name + \
-                        '.f90 /module:$(B) ' + ' '.join(this_depd) + ' /include:$(B) $(OBJS)'
+                    this_rule = (
+                        '\t$(FC) $(FCFLAGS) /exe:' + this_name + '.exe ' + this_name
+                        + '.f90 /module:$(B) ' + ' '.join(this_depd) + ' /include:$(B) $(OBJS)'
+                    )
                 else:
-                    this_rule = '\t$(FC) $(FCFLAGS) -o ' + this_name + '.exe ' + this_name + \
-                        '.f90 -I$(OBJDIR) -I$(OBJLOC) ' + ' '.join(this_depd) + ' $(addprefix $(OBJLOC)/,$(OBJS))'
+                    this_rule = (
+                        '\t$(FC) $(FCFLAGS) -o ' + this_name + '.exe ' + this_name
+                        + '.f90 -I$(OBJDIR) -I$(OBJLOC) ' + ' '.join(this_depd) + ' $(addprefix $(OBJLOC)/,$(OBJS))'
+                    )
                 if this_name == 'run_all_tests':
                     this_rule = line_wrap(this_rule, wrap=len_line, indent=8, line_cont='\\')
                 run_rules.append(this_rule)
@@ -566,11 +596,15 @@ def _write_makefile(makefile: Path, code: List[_FortranSource], *, template: str
         run_rules = ['']
         run_rules.append(program + ' : ' + prefix_src + program + '.f90 ' + prefix_bld + program + _OBJ_EXT)
         if is_win:
-            run_rules.append('\t$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) /exe:' + program + \
-                '.exe ' + prefix_src + program + '.f90 /include:$(B) $(OBJS)')
+            run_rules.append(
+                '\t$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) /exe:' + program
+                + '.exe ' + prefix_src + program + '.f90 /include:$(B) $(OBJS)'
+            )
         else:
-            run_rules.append('\t$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -o ' + program + \
-                '.exe ' + prefix_src + program + '.f90 -I$(OBJDIR) $(addprefix ' + prefix_bld + ',$(OBJS))')
+            run_rules.append(
+                '\t$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -o ' + program + '.exe ' + prefix_src
+                + program + '.f90 -I$(OBJDIR) $(addprefix ' + prefix_bld + ',$(OBJS))'
+            )
     if is_unit_test:
         all_rule = 'all : ' + ' '.join([x + '.exe' for x in runners])
     else:
@@ -601,7 +635,12 @@ def _write_makefile(makefile: Path, code: List[_FortranSource], *, template: str
             if is_unit_test:
                 new_lines.extend(sorted(['       ' + x + _OBJ_EXT + ' \\' for x in external_sources], key=lambda x: x.lower()))
             else:
-                new_lines.extend(sorted(['       ' + prefix_obj + x + _OBJ_EXT + ' \\' for x in sources if x != program], key=lambda x: x.lower()))
+                new_lines.extend(
+                    sorted(
+                        ['       ' + prefix_obj + x + _OBJ_EXT + ' \\' for x in sources if x != program],
+                        key=lambda x: x.lower(),
+                    )
+                )
         if line == token_run:
             new_lines.append(all_rule)
             new_lines.extend(run_rules)
@@ -617,9 +656,11 @@ def _write_makefile(makefile: Path, code: List[_FortranSource], *, template: str
     print(f'Writing "{makefile}".')
     write_text_file(makefile, text)
 
+
 #%% Functions - create_fortran_unit_tests
-def create_fortran_unit_tests(folder: Path, *, template: str = None, external_sources: Iterable[str] = None, \
-        header: str = None) -> None:
+def create_fortran_unit_tests(
+    folder: Path, *, template: str = None, external_sources: Iterable[str] = None, header: str = None
+) -> None:
     r"""
     Parses the given folder for Fortran unit test files to build programs that will execute them.
 
@@ -677,9 +718,19 @@ def create_fortran_unit_tests(folder: Path, *, template: str = None, external_so
         makefile = folder / 'unit_tests.make'
         _write_makefile(makefile, code=all_code, template=template, external_sources=external_sources)
 
+
 #%% create_fortran_makefile
-def create_fortran_makefile(folder: Path, makefile: Path, program: str, sources: List[str], *, \
-        compiler: str = 'gfortran', is_debug: bool = True, template: str = None, replacements: Dict[str, str] = None) -> None:
+def create_fortran_makefile(
+    folder: Path,
+    makefile: Path,
+    program: str,
+    sources: List[str],
+    *,
+    compiler: str = 'gfortran',
+    is_debug: bool = True,
+    template: str = None,
+    replacements: Dict[str, str] = None,
+) -> None:
     r"""
     Parses the given folder for Fortran source files to build a makefile.
 
@@ -723,8 +774,17 @@ def create_fortran_makefile(folder: Path, makefile: Path, program: str, sources:
         all_code.append(code)
 
     # write makefile
-    _write_makefile(makefile, all_code, program=program, compiler=compiler, is_debug=is_debug, \
-        template=template, sources=sources, replacements=replacements)
+    _write_makefile(
+        makefile,
+        all_code,
+        program=program,
+        compiler=compiler,
+        is_debug=is_debug,
+        template=template,
+        sources=sources,
+        replacements=replacements,
+    )
+
 
 #%% Unit test
 if __name__ == '__main__':

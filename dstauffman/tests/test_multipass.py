@@ -20,7 +20,8 @@ def _model_wrapper(x, y):
         raise ValueError('Bad value for x')
     if y is None:
         raise RuntimeError('Bad value for y')
-    return x + np.sin(x) + np.cos(y*2)
+    return x + np.sin(x) + np.cos(y * 2)
+
 
 #%% parfor_wrapper
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -29,10 +30,14 @@ class Test_parfor_wrapper(unittest.TestCase):
     Tests the parfor_wrapper function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
-        self.temp = np.linspace(0, 2*np.pi)
-        self.args = ((self.temp.copy(), self.temp.copy()), (self.temp + 2*np.pi, self.temp.copy()), \
-            (self.temp + 4*np.pi, self.temp.copy()))
+        self.temp = np.linspace(0, 2 * np.pi)
+        self.args = (
+            (self.temp.copy(), self.temp.copy()),
+            (self.temp + 2 * np.pi, self.temp.copy()),
+            (self.temp + 4 * np.pi, self.temp.copy()),
+        )
         self.max_cores = 6
 
     def test_not_parallel(self) -> None:
@@ -53,6 +58,7 @@ class Test_parfor_wrapper(unittest.TestCase):
         with self.assertRaises(RuntimeError) as context:
             dcs.parfor_wrapper(_model_wrapper, ((self.temp, self.temp), (self.temp, None)), use_parfor=True)
         self.assertEqual(str(context.exception), 'Bad value for y')
+
 
 #%% Unit test execution
 if __name__ == '__main__':

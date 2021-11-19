@@ -24,8 +24,20 @@ import unittest
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
-from dstauffman import activate_logging, deactivate_logging, Frozen, HAVE_NUMPY, load_method, \
-    LogLevel, MultipassExceptionWrapper, parfor_wrapper, pprint_dict, rss, SaveAndLoad, setup_dir
+from dstauffman import (
+    activate_logging,
+    deactivate_logging,
+    Frozen,
+    HAVE_NUMPY,
+    load_method,
+    LogLevel,
+    MultipassExceptionWrapper,
+    parfor_wrapper,
+    pprint_dict,
+    rss,
+    SaveAndLoad,
+    setup_dir,
+)
 from dstauffman.nubs import ncjit
 
 from dstauffman.estimation.linalg import mat_divide
@@ -33,6 +45,7 @@ from dstauffman.estimation.linalg import mat_divide
 if HAVE_NUMPY:
     import numpy as np
     from numpy.linalg import norm
+
     inf = np.inf
     isnan = np.isnan
     nan = np.nan
@@ -57,6 +70,7 @@ class OptiOpts(Frozen):
     >>> opti_opts = OptiOpts()
 
     """
+
     def __init__(self):
         # specifically required settings
         self.model_func: Callable           = None
@@ -72,19 +86,19 @@ class OptiOpts(Frozen):
         self.final_func: Optional[Callable] = None
 
         # less common optimization settings
-        self.slope_method: str        = 'one_sided' # from {'one_sided', 'two_sided'}
+        self.slope_method: str        = 'one_sided'  # from {'one_sided', 'two_sided'}
         self.is_max_like: bool        = False
-        self.search_method: str       = 'trust_region' # from {'trust_region', 'levenberg_marquardt'}
+        self.search_method: str       = 'trust_region'  # from {'trust_region', 'levenberg_marquardt'}
         self.max_iters: int           = 10
         self.tol_cosmax_grad: float   = 1e-4
         self.tol_delta_step: float    = 1e-20
         self.tol_delta_cost: float    = 1e-20
         self.step_limit: int          = 5
         self.x_bias: float            = 0.8
-        self.grow_radius: float       = 2.
+        self.grow_radius: float       = 2.0
         self.shrink_radius: float     = 0.5
         self.trust_radius: float      = 1.0
-        self.max_cores: Optional[int] = None # set to a number to parallelize, use -1 for all
+        self.max_cores: Optional[int] = None  # set to a number to parallelize, use -1 for all
 
     def __eq__(self, other: Any) -> bool:
         r"""Check for equality based on the values of the fields."""
@@ -97,6 +111,7 @@ class OptiOpts(Frozen):
                 return False
         # if it made it all the way through the fields, then things must be equal
         return True
+
 
 #%% OptiParam
 class OptiParam(Frozen):
@@ -139,8 +154,17 @@ class OptiParam(Frozen):
     ['magnitude', 'frequency', 'phase']
 
     """
-    def __init__(self, name: str, *, best: float=nan, min_: float=-inf, max_: float=inf, \
-        minstep: float = 1e-4, typical: float = 1.):
+
+    def __init__(
+        self,
+        name: str,
+        *,
+        best: float = nan,
+        min_: float = -inf,
+        max_: float = inf,
+        minstep: float = 1e-4,
+        typical: float = 1.0,
+    ):
         self.name = name
         self.best = best
         self.min_ = min_
@@ -217,6 +241,7 @@ class OptiParam(Frozen):
         names = [x.name for x in opti_param]
         return names
 
+
 #%% BpeResults
 class BpeResults(Frozen, metaclass=SaveAndLoad):
     r"""
@@ -271,8 +296,18 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
 
         """
         # fields to print
-        keys = ['begin_params', 'begin_cost', 'num_evals', 'num_iters', 'final_params', \
-            'final_cost', 'correlation', 'info_svd', 'covariance', 'costs']
+        keys = [
+            'begin_params',
+            'begin_cost',
+            'num_evals',
+            'num_iters',
+            'final_params',
+            'final_cost',
+            'correlation',
+            'info_svd',
+            'covariance',
+            'costs',
+        ]
         # dictionary of key/values to print
         dct = {key: getattr(self, key) for key in keys}
         # name of class to print
@@ -304,8 +339,8 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
             return
         # get the names of the parameters
         names = [name.decode('utf-8') for name in self.param_names]
-        dct1  = {name.replace('param.', 'param.ix(c).'): self.begin_params[i] for (i, name) in enumerate(names)}
-        dct2  = {name.replace('param.', 'param.ix(c).'): self.final_params[i] for (i, name) in enumerate(names)}
+        dct1 = {name.replace('param.', 'param.ix(c).'): self.begin_params[i] for (i, name) in enumerate(names)}
+        dct2 = {name.replace('param.', 'param.ix(c).'): self.final_params[i] for (i, name) in enumerate(names)}
         # print the initial cost/values
         print('Initial cost: {}'.format(self.begin_cost))
         pprint_dict(dct1, name='Initial parameters:', indent=8)
@@ -331,6 +366,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         out.num_iters = int(out.num_iters)
         out.costs = [c for c in out.costs]
         return out
+
 
 #%% CurrentResults
 class CurrentResults(Frozen, metaclass=SaveAndLoad):
@@ -365,6 +401,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
         text.append('  Best Params: {}'.format(self.params))
         return '\n'.join(text)
 
+
 #%% _print_divider
 def _print_divider(new_line: bool = True, level: int = LogLevel.L5) -> None:
     r"""
@@ -385,6 +422,7 @@ def _print_divider(new_line: bool = True, level: int = LogLevel.L5) -> None:
     if new_line:
         logger.log(level, ' ')
     logger.log(level, '******************************')
+
 
 #%% _function_wrapper
 def _function_wrapper(*, model_func, cost_func, model_args, cost_args, return_results=False):
@@ -443,6 +481,7 @@ def _function_wrapper(*, model_func, cost_func, model_args, cost_args, return_re
         return (innovs, results)
     return innovs
 
+
 #%% _parfor_function_wrapper
 def _parfor_function_wrapper(opti_opts, msg, model_args):
     r"""
@@ -470,11 +509,13 @@ def _parfor_function_wrapper(opti_opts, msg, model_args):
     try:
         if msg:
             logger.log(LogLevel.L8, msg)
-        innovs = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
-            cost_args=opti_opts.cost_args, model_args=model_args)
+        innovs = _function_wrapper(
+            model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, cost_args=opti_opts.cost_args, model_args=model_args
+        )
     except Exception as e:
         return MultipassExceptionWrapper(e)
     return innovs
+
 
 #%% _finite_differences
 def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_sided=False, normalized=False):
@@ -519,7 +560,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     """
     # hard-coded values
     sqrt_eps = np.sqrt(np.finfo(float).eps)
-    step_sf  = 0.1
+    step_sf = 0.1
 
     # alias useful values
     names         = [name.decode('utf-8') for name in bpe_results.param_names]
@@ -537,13 +578,13 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     jacobian = np.zeros((num_innov, num_param), dtype=float)
 
     # initialize loop variables
-    grad_log_det_B = 0 # TODO: calculate somewhere later
+    grad_log_det_B = 0  # TODO: calculate somewhere later
     # set parameter pertubation (Reference 1, section 8.4.3)
     if normalized:
-        perturb_fact  = 1 # TODO: how to get perturb_fact?
+        perturb_fact = 1  # TODO: how to get perturb_fact?
         param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
-        temp_step     = np.abs(cur_results.params)*step_sf * 1/cur_results.trust_rad
+        temp_step = np.abs(cur_results.params) * step_sf * 1 / cur_results.trust_rad
         param_perturb = param_signs * np.maximum(temp_step, param_minstep)
 
     # build parameters for each upcoming model execution
@@ -582,7 +623,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     for i_param in range(num_param):
         if two_sided:
             jacobian[:, i_param] = 0.5 * (innovs[i_param] - innovs[i_param + num_param]) / param_perturb[i_param]
-            #grad_log_det_b[i_param] = 0.25 *
+            # grad_log_det_b[i_param] = 0.25 *
         else:
             jacobian[:, i_param] = (innovs[i_param] - cur_results.innovs) / param_perturb[i_param]
 
@@ -595,6 +636,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     hessian = jacobian.T @ jacobian
 
     return (jacobian, gradient, hessian)
+
 
 #%% _levenberg_marquardt
 @ncjit
@@ -637,12 +679,13 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
         # get the number of parameters
         num_params = jacobian.shape[1]
         # augment the jacobian
-        jacobian_aug = np.vstack((jacobian, np.sqrt(lambda_)*np.eye(num_params)))
+        jacobian_aug = np.vstack((jacobian, np.sqrt(lambda_) * np.eye(num_params)))
         # augment the innovations
         innovs_aug = np.hstack((innovs, np.zeros(num_params)))
         # calucalte based on augmented forms
         delta_param = -mat_divide(jacobian_aug, innovs_aug)
     return delta_param
+
 
 #%% _predict_func_change
 @ncjit
@@ -690,8 +733,9 @@ def _predict_func_change(delta_param, gradient, hessian):
 
     """
     # calculate and return the predicted change
-    delta_func = gradient.T @ delta_param + 0.5*delta_param.T @ hessian @ delta_param
+    delta_func = gradient.T @ delta_param + 0.5 * delta_param.T @ hessian @ delta_param
     return delta_func
+
 
 #%% _check_for_convergence
 def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
@@ -702,17 +746,30 @@ def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
     # check for and optionally display the reasons for convergence
     if cosmax <= opti_opts.tol_cosmax_grad:
         convergence = True
-        logger.log(LogLevel.L3, 'Declare convergence because cosmax of {} <= options.tol_cosmax_grad of {}'.format(\
-                cosmax, opti_opts.tol_cosmax_grad))
+        logger.log(
+            LogLevel.L3,
+            'Declare convergence because cosmax of {} <= options.tol_cosmax_grad of {}'.format(
+                cosmax, opti_opts.tol_cosmax_grad
+            ),
+        )
     if delta_step_len <= opti_opts.tol_delta_step:
         convergence = True
-        logger.log(LogLevel.L3, 'Declare convergence because delta_step_len of {} <= options.tol_delta_step of {}'.format(\
-                delta_step_len, opti_opts.tol_delta_step))
+        logger.log(
+            LogLevel.L3,
+            'Declare convergence because delta_step_len of {} <= options.tol_delta_step of {}'.format(
+                delta_step_len, opti_opts.tol_delta_step
+            ),
+        )
     if abs(pred_func_change) <= opti_opts.tol_delta_cost:
         convergence = True
-        logger.log(LogLevel.L3, 'Declare convergence because abs(pred_func_change) of {} <= options.tol_delta_cost of {}'.format(\
-                abs(pred_func_change), opti_opts.tol_delta_cost))
+        logger.log(
+            LogLevel.L3,
+            'Declare convergence because abs(pred_func_change) of {} <= options.tol_delta_cost of {}'.format(
+                abs(pred_func_change), opti_opts.tol_delta_cost
+            ),
+        )
     return convergence
+
 
 #%% _double_dogleg
 @ncjit
@@ -758,32 +815,32 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
 
     """
     # Calculate some norms
-    newton_len   = norm(delta_param)
+    newton_len = norm(delta_param)
     gradient_len = norm(gradient)
-    cauchy_len   = gradient_len**3/grad_hessian_grad
+    cauchy_len = gradient_len ** 3 / grad_hessian_grad
     # relaxed_Newton_point is between the initial point and the Newton point
     # If x_bias = 0, the relaxed point is at the Newton point
-    relaxed_newton_len = 1 - x_bias*(1 + cauchy_len*gradient_len/(gradient.T @ delta_param))
+    relaxed_newton_len = 1 - x_bias * (1 + cauchy_len * gradient_len / (gradient.T @ delta_param))
 
     # Compute the minimizing point on the dogleg path
     # This point is inside the trust radius and minimizes the linearized least square function
     if newton_len <= trust_radius:
         # Newton step is inside the trust region so take it
         new_delta_param = delta_param.copy()
-        step_type       = 'Newton'
-        step_scale      = 1
+        step_type = 'Newton'
+        step_scale = 1
     else:
         # Compute a step somewhere on the dog leg
         if trust_radius / newton_len >= relaxed_newton_len:
             # Step is along the Newton direction and has length equal to trust radius
-            step_scale      = trust_radius / newton_len
-            step_type       = 'restrained Newton'
-            new_delta_param = step_scale*delta_param
+            step_scale = trust_radius / newton_len
+            step_type = 'restrained Newton'
+            new_delta_param = step_scale * delta_param
         elif cauchy_len > trust_radius:
             # Cauchy step is outside trust region so take gradient step
-            step_scale      = trust_radius / cauchy_len
-            step_type       = 'gradient'
-            new_delta_param = -(trust_radius / gradient_len)*gradient
+            step_scale = trust_radius / cauchy_len
+            step_type = 'gradient'
+            new_delta_param = -(trust_radius / gradient_len) * gradient
         else:
             # Take a dogleg step between relaxed Newton and Cauchy steps
             # This will be on a line between the Cauchy point and the relaxed
@@ -792,14 +849,13 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
 
             # Cauchy point is at the predicted minimum of the function along the
             # gradient search direction
-            cauchy_pt             = -cauchy_len / gradient_len * gradient
-            new_minus_cau         = relaxed_newton_len * delta_param - cauchy_pt
+            cauchy_pt = -cauchy_len / gradient_len * gradient
+            new_minus_cau = relaxed_newton_len * delta_param - cauchy_pt
             cau_dot_new_minus_cau = cauchy_pt.T @ new_minus_cau
-            cau_len_sq            = cauchy_pt.T @ cauchy_pt
-            new_minus_cau_len_sq  = new_minus_cau.T @ new_minus_cau
-            tr_sq_minus_cau_sq    = trust_radius**2 - cau_len_sq
-            discr                 = np.sqrt(cau_dot_new_minus_cau**2 + \
-                new_minus_cau_len_sq*tr_sq_minus_cau_sq)
+            cau_len_sq = cauchy_pt.T @ cauchy_pt
+            new_minus_cau_len_sq = new_minus_cau.T @ new_minus_cau
+            tr_sq_minus_cau_sq = trust_radius ** 2 - cau_len_sq
+            discr = np.sqrt(cau_dot_new_minus_cau ** 2 + new_minus_cau_len_sq * tr_sq_minus_cau_sq)
             # Compute weighting between Newton and Cauchy steps
             # Weighting = 1 gives Newton step
             # Weighting = 0 gives Cauchy step
@@ -810,18 +866,20 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
                 # angle between Cauchy and Newton-Cauchy is less than 90 deg
                 new_cau_weighting = tr_sq_minus_cau_sq / (cau_dot_new_minus_cau + discr)
             # save these results
-            step_scale      = new_cau_weighting
-            step_type       = 'Newton-Cauchy'
-            new_delta_param = cauchy_pt + new_cau_weighting*new_minus_cau
+            step_scale = new_cau_weighting
+            step_type = 'Newton-Cauchy'
+            new_delta_param = cauchy_pt + new_cau_weighting * new_minus_cau
 
     # calculate the new step length for output
     step_len = norm(new_delta_param)
 
     return (new_delta_param, step_len, step_scale, step_type)
 
+
 #%% _dogleg_search
-def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param, jacobian, gradient, \
-        hessian, *, normalized=False):
+def _dogleg_search(
+    opti_opts, model_args, bpe_results, cur_results, delta_param, jacobian, gradient, hessian, *, normalized=False
+):
     r"""
     Search for improved parameters for nonlinear least square or maximum likelihood function.
 
@@ -843,7 +901,7 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
 
     # do some calculations for things constant within the loop
     grad_hessian_grad = gradient.T @ hessian @ gradient
-    log_det_B = 0 # TODO: get this elsewhere for max_likelihood mode
+    log_det_B = 0  # TODO: get this elsewhere for max_likelihood mode
 
     # initialize status flags and counters
     try_again       = True
@@ -861,8 +919,9 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
 
         # compute restrained trial parameter step
         if search_method == 'trust_region':
-            (new_delta_param, step_len, step_scale, step_type) = _double_dogleg(delta_param, \
-                gradient, grad_hessian_grad, opti_opts.x_bias, trust_radius)
+            (new_delta_param, step_len, step_scale, step_type) = _double_dogleg(
+                delta_param, gradient, grad_hessian_grad, opti_opts.x_bias, trust_radius
+            )
 
         elif search_method == 'levenberg_marquardt':
             new_delta_param = _levenberg_marquardt(jacobian, cur_results.innovs, lambda_=1/trust_radius)
@@ -892,14 +951,15 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
         # Run model
         logger.log(LogLevel.L8, '  Running model with new trial parameters.')
         opti_opts.set_param_func(names=names, values=params, **model_args)
-        innovs = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
-            model_args=model_args, cost_args=opti_opts.cost_args)
+        innovs = _function_wrapper(
+            model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, model_args=model_args, cost_args=opti_opts.cost_args
+        )
         bpe_results.num_evals += 1
 
         # evaluate the cost function at the new parameter values
         sum_sq_innov = rss(innovs, ignore_nans=True)
         if opti_opts.is_max_like:
-            trial_cost = 0.5*(sum_sq_innov + log_det_B)
+            trial_cost = 0.5 * (sum_sq_innov + log_det_B)
         else:
             trial_cost = 0.5 * sum_sq_innov
 
@@ -917,10 +977,10 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
                 # this was a Newton step.
                 trust_radius = step_len
                 # No point in trying anything more. This is probably the best we can do.
-                try_again       = False
+                try_again = False
                 step_resolution = 'Accept the Newton step.'
             elif tried_shrinking:
-                try_again       = False
+                try_again = False
                 step_resolution = 'Improvement after shrinking, so accept this restrained step.'
             else:
                 # Constrained step yielded some improvement and there is a possibility that a still
@@ -934,15 +994,15 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
             # Candidate step yielded no improvement
             if tried_expanding:
                 # Give up the search
-                try_again       = False
-                trust_radius    /= opti_opts.grow_radius
+                try_again = False
+                trust_radius /= opti_opts.grow_radius
                 step_resolution = 'Worse result after expanding, so accept previous restrained step.'
             else:
                 # There is still hope. Reduce step size.
                 tried_shrinking = True
                 if step_type == 'Newton':
                     # A Newton step failed.
-                    trust_radius = opti_opts.shrink_radius*step_len
+                    trust_radius = opti_opts.shrink_radius * step_len
                 else:
                     # Some other type of step failed.
                     trust_radius *= opti_opts.shrink_radius
@@ -964,6 +1024,7 @@ def _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param,
         failed = True
     logger.log(LogLevel.L5, ' New parameters are: {}'.format(cur_results.params))
     return failed
+
 
 #%% _analyze_results
 def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
@@ -1000,10 +1061,10 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
 
     """
     # hard-coded values
-    min_eig = 1e-14 # minimum allowed eigenvalue
+    min_eig = 1e-14  # minimum allowed eigenvalue
 
     # get the names and number of parameters
-    num_params    = len(bpe_results.param_names)
+    num_params = len(bpe_results.param_names)
 
     # update the status
     logger.log(LogLevel.L5, 'Analyzing final results.')
@@ -1016,9 +1077,9 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     # Compute values of un-normalized parameters.
     if normalized:
         param_typical = OptiParam.get_array(opti_opts.params, type_='typical')
-        normalize_matrix  = np.diag((1 / param_typical))
+        normalize_matrix = np.diag((1 / param_typical))
     else:
-        normalize_matrix  = np.eye(num_params)
+        normalize_matrix = np.eye(num_params)
 
     # Make information, covariance matrix, compute Singular Value Decomposition (SVD).
     try:
@@ -1034,7 +1095,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
 
     param_one_sigmas = np.sqrt(np.diag(covariance))
     param_one_sigmas[param_one_sigmas < min_eig] = np.nan
-    correlation    = covariance / (param_one_sigmas[:, np.newaxis] @ param_one_sigmas[np.newaxis, :])
+    correlation = covariance / (param_one_sigmas[:, np.newaxis] @ param_one_sigmas[np.newaxis, :])
     covariance[np.isnan(correlation)] = np.nan
 
     # Update SVD and covariance for the normalized parameters (but correlation remains as calculated above)
@@ -1042,14 +1103,15 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
         try:
             (_, S_jacobian, Vh_jacobian) = np.linalg.svd(jacobian, full_matrices=False)
             V_jacobian = Vh_jacobian.T
-            covariance = V_jacobian @ np.diag(S_jacobian**-2) @ Vh_jacobian
+            covariance = V_jacobian @ np.diag(S_jacobian ** -2) @ Vh_jacobian
         except MemoryError:  # pragma: no cover
             pass  # caught in earlier exception (hopefully?)
 
     # update the results
-    bpe_results.correlation  = correlation
-    bpe_results.info_svd     = V_jacobian.T
-    bpe_results.covariance   = covariance
+    bpe_results.correlation = correlation
+    bpe_results.info_svd    = V_jacobian.T
+    bpe_results.covariance  = covariance
+
 
 #%% validate_opti_opts
 def validate_opti_opts(opti_opts: OptiOpts) -> bool:
@@ -1099,6 +1161,7 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     # Return True to signify that everything validated correctly
     return True
 
+
 #%% run_bpe
 def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tuple[BpeResults, Any]:
     r"""
@@ -1137,7 +1200,7 @@ def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tupl
     start_model = time.time()
 
     # alias some stuff
-    names     = OptiParam.get_names(opti_opts.params)
+    names = OptiParam.get_names(opti_opts.params)
     two_sided = True if opti_opts.slope_method == 'two_sided' else False
 
     # determine if saving data
@@ -1164,20 +1227,21 @@ def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tupl
         init_saves = dict()
 
     # future calculations
-    hessian_log_det_b = 0 # TODO: calculate somewhere later
-    cosmax = 1 # TODO: calculate somewhere later
+    hessian_log_det_b = 0  # TODO: calculate somewhere later
+    cosmax = 1  # TODO: calculate somewhere later
 
     # run the initial model
     new_line = logger.level >= LogLevel.L5
     _print_divider(new_line, level=LogLevel.L3)
     logger.log(LogLevel.L3, 'Running initial simulation.')
-    cur_results.innovs = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
-        model_args=model_args, cost_args=opti_opts.cost_args)
+    cur_results.innovs = _function_wrapper(
+        model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, model_args=model_args, cost_args=opti_opts.cost_args
+    )
     bpe_results.num_evals += 1
 
     # initialize loop variables
-    iter_count   = 1
-    delta_param  = np.zeros(len(names))
+    iter_count = 1
+    delta_param = np.zeros(len(names))
 
     # initialize current results
     cur_results.trust_rad = opti_opts.trust_radius
@@ -1198,7 +1262,7 @@ def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tupl
     if is_saving:
         if opti_opts.output_folder is not None and not opti_opts.output_folder.is_dir():
             # if the folder doesn't exist, then create it
-            setup_dir(opti_opts.output_folder) # pragma: no cover
+            setup_dir(opti_opts.output_folder)  # pragma: no cover
 
     # Do some stuff
     convergence = False
@@ -1210,16 +1274,19 @@ def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tupl
         logger.log(LogLevel.L3, 'Running iteration {}.'.format(iter_count))
 
         # run finite differences code to numerically approximate the Jacobian, gradient and Hessian
-        (jacobian, gradient, hessian) = _finite_differences(opti_opts, model_args, bpe_results, \
-            cur_results, two_sided=two_sided)
+        (jacobian, gradient, hessian) = _finite_differences(
+            opti_opts, model_args, bpe_results, cur_results, two_sided=two_sided
+        )
 
         # Check direction of the last step and the gradient. If the old step and the negative new
         # gradient are in the same general direction, then increase the trust radius.
         grad_dot_step = gradient.T @ delta_param
         if grad_dot_step > 0 and iter_count > 1:
             cur_results.trust_rad += opti_opts.grow_radius
-            logger.log(LogLevel.L8, 'Old step still in descent direction, so expand current trust_radius to {}.'.format(\
-                cur_results.trust_rad))
+            logger.log(
+                LogLevel.L8,
+                'Old step still in descent direction, so expand current trust_radius to {}.'.format(cur_results.trust_rad),
+            )
 
         # calculate the delta parameter step to try on the next iteration
         if opti_opts.is_max_like:
@@ -1237,8 +1304,7 @@ def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tupl
             break
 
         # search for parameter set that is better than the current set
-        failed = _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param, jacobian, \
-            gradient, hessian)
+        failed = _dogleg_search(opti_opts, model_args, bpe_results, cur_results, delta_param, jacobian, gradient, hessian)
         bpe_results.costs.append(cur_results.cost)
 
         # save results from this iteration
@@ -1255,7 +1321,9 @@ def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tupl
 
     # display if this converged out timed out on iteration steps
     if not convergence and not failed:
-        logger.log(LogLevel.L5, 'Stopped iterating due to hitting the max number of iterations: {}.'.format(opti_opts.max_iters))
+        logger.log(
+            LogLevel.L5, 'Stopped iterating due to hitting the max number of iterations: {}.'.format(opti_opts.max_iters)
+        )
 
     # run an optional final function before doing the final simulation
     if opti_opts.final_func is not None:
@@ -1265,8 +1333,13 @@ def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tupl
     _print_divider(level=LogLevel.L3)
     logger.log(LogLevel.L3, 'Running final simulation.')
     opti_opts.set_param_func(names=names, values=cur_results.params, **model_args)
-    (cur_results.innovs, results) = _function_wrapper(model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, \
-        model_args=model_args, cost_args=opti_opts.cost_args, return_results=True)
+    (cur_results.innovs, results) = _function_wrapper(
+        model_func=opti_opts.model_func,
+        cost_func=opti_opts.cost_func,
+        model_args=model_args,
+        cost_args=opti_opts.cost_args,
+        return_results=True,
+    )
     bpe_results.num_evals += 1
     cur_results.cost = 0.5 * rss(cur_results.innovs, ignore_nans=True)
     bpe_results.final_innovs = cur_results.innovs.copy()
@@ -1288,11 +1361,12 @@ def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tupl
         bpe_results.save(filename)
 
     # display total elapsed time
-    logger.log(LogLevel.L1, 'BPE Model completed: ' + time.strftime('%H:%M:%S', time.gmtime(time.time()-start_model)))
+    logger.log(LogLevel.L1, 'BPE Model completed: ' + time.strftime('%H:%M:%S', time.gmtime(time.time() - start_model)))
     if log_level is not None:
         deactivate_logging()
 
     return (bpe_results, results)
+
 
 #%% Unit test
 if __name__ == '__main__':

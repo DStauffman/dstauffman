@@ -22,6 +22,7 @@ import dstauffman as dcs
 
 if dcs.HAVE_NUMPY:
     import numpy as np
+
     inf = np.inf
 else:
     from math import inf
@@ -32,13 +33,27 @@ class _Example_Frozen(dcs.Frozen):
         self.field_one = 1
         self.field_two = 2
         self.field_ten = 10
-        self.dummy     = dummy if dummy is not None else 0
+        self.dummy = dummy if dummy is not None else 0
+
 
 class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
-    load: ClassVar[Callable[[Optional[pathlib.Path], DefaultNamedArg(bool, 'use_hdf5'), \
-        DefaultNamedArg(bool, 'return_meta')], _Example_SaveAndLoad]]
-    save: Callable[[_Example_SaveAndLoad, Optional[pathlib.Path], \
-        DefaultNamedArg(bool, 'use_hdf5'), DefaultNamedArg(dict, 'meta'), DefaultNamedArg(set, 'exclusions')], None]
+    load: ClassVar[
+        Callable[
+            [Optional[pathlib.Path], DefaultNamedArg(bool, 'use_hdf5'), DefaultNamedArg(bool, 'return_meta')],
+            _Example_SaveAndLoad,
+        ]
+    ]
+    save: Callable[
+        [
+            _Example_SaveAndLoad,
+            Optional[pathlib.Path],
+            DefaultNamedArg(bool, 'use_hdf5'),
+            DefaultNamedArg(dict, 'meta'),
+            DefaultNamedArg(set, 'exclusions'),
+        ],
+        None,
+    ]
+
     def __init__(self):
         if dcs.HAVE_NUMPY:
             self.x = np.array([1, 3, 5])
@@ -48,9 +63,11 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
             self.y = [2, 4, 6]
         self.z = None
 
+
 class _Example_SaveAndLoadPickle(dcs.Frozen, metaclass=dcs.SaveAndLoadPickle):
     load: ClassVar[Callable[[Optional[pathlib.Path]], _Example_SaveAndLoadPickle]]
     save: Callable[[_Example_SaveAndLoadPickle, Optional[pathlib.Path]], None]
+
     def __init__(self):
         if dcs.HAVE_NUMPY:
             self.a = np.array([1, 2, 3])
@@ -59,31 +76,50 @@ class _Example_SaveAndLoadPickle(dcs.Frozen, metaclass=dcs.SaveAndLoadPickle):
             self.a = [1, 2, 3]
             self.b = [4, 5, 6]
 
+
 class _Example_No_Override(object, metaclass=dcs.SaveAndLoad):
     @staticmethod
     def save():
         return 1
+
     @staticmethod
     def load():
         return 2
+
 
 class _Example_No_Override2(object, metaclass=dcs.SaveAndLoadPickle):
     @staticmethod
     def save():
         return 1
+
     @staticmethod
     def load():
         return 2
+
 
 class _Example_Times(object):
     def __init__(self, time, data, name='name'):
         self.time = time
         self.data = data
         self.name = name
+
     def chop(self, ti=-inf, tf=inf):
-        dcs.chop_time(self, ti=ti, tf=tf, time_field='time', exclude=frozenset({'name',}))
+        dcs.chop_time(
+            self,
+            ti=ti,
+            tf=tf,
+            time_field='time',
+            exclude=frozenset({'name',}),
+        )
+
     def subsample(self, skip=30, start=0):
-        dcs.subsample_class(self, skip=skip, start=start, skip_fields=frozenset({'name',}))
+        dcs.subsample_class(
+            self,
+            skip=skip,
+            start=start,
+            skip_fields=frozenset({'name',}),
+        )
+
 
 #%% save_hdf5 - covered by SaveAndLoad
 #%% load_hdf5 - covered by SaveAndLoad
@@ -101,9 +137,10 @@ class Test_pprint_dict(unittest.TestCase):
         Different indentation
         No alignment
     """
+
     def setUp(self) -> None:
-        self.name   = 'Example'
-        self.dct    = {'a': 1, 'bb': 2, 'ccc': 3}
+        self.name = 'Example'
+        self.dct = {'a': 1, 'bb': 2, 'ccc': 3}
 
     def test_nominal(self) -> None:
         with dcs.capture_output() as out:
@@ -165,9 +202,9 @@ class Test_pprint_dict(unittest.TestCase):
     @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_max_elements(self) -> None:
         self.dct['a'] = np.arange(10)
-        text1 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements = 2)
-        text2 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements = 20)
-        text3 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements = 0)
+        text1 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements=2)
+        text2 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements=20)
+        text3 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements=0)
         lines1 = text1.split('\n')
         lines2 = text2.split('\n')
         lines3 = text3.split('\n')
@@ -180,6 +217,7 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(lines3[2], " bb  = <class 'int'>")
         self.assertEqual(lines3[3], " ccc = <class 'int'>")
 
+
 #%% chop_time
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_chop_time(unittest.TestCase):
@@ -187,6 +225,7 @@ class Test_chop_time(unittest.TestCase):
     Tests the chop_time method with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.time = np.array([7, 1, 3, 5])
         self.data = np.array([2, 4, 6, 8])
@@ -203,6 +242,7 @@ class Test_chop_time(unittest.TestCase):
         np.testing.assert_array_equal(self.telm.data, self.exp_data)
         self.assertEqual(self.telm.name, self.name)
 
+
 #%% subsample_class
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_subsample_class(unittest.TestCase):
@@ -210,6 +250,7 @@ class Test_subsample_class(unittest.TestCase):
     Tests the subsample_class method with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.time = np.array([1, 7, 5, 3])
         self.data = np.array([8, 6, 4, 2])
@@ -226,6 +267,7 @@ class Test_subsample_class(unittest.TestCase):
         np.testing.assert_array_equal(self.telm.data, self.exp_data)
         self.assertEqual(self.telm.name, self.name)
 
+
 #%% Frozen
 class Test_Frozen(unittest.TestCase):
     r"""
@@ -233,6 +275,7 @@ class Test_Frozen(unittest.TestCase):
         normal mode
         add new attribute to existing instance
     """
+
     def setUp(self) -> None:
         self.fields = ['field_one', 'field_two', 'field_ten']
 
@@ -254,6 +297,7 @@ class Test_Frozen(unittest.TestCase):
         with self.assertRaises(AttributeError):
             temp.new_field_that_does_not_exist = 1  # type: ignore[attr-defined]
 
+
 #%% SaveAndLoad
 class Test_SaveAndLoad(unittest.TestCase):
     r"""
@@ -262,14 +306,15 @@ class Test_SaveAndLoad(unittest.TestCase):
         save/load hdf5
         savel/oad pickle (x2)
     """
+
     def setUp(self) -> None:
-        folder            = dcs.get_tests_dir()
+        folder = dcs.get_tests_dir()
         self.results1_cls = _Example_SaveAndLoad
-        self.results1     = self.results1_cls()
+        self.results1 = self.results1_cls()
         self.results2_cls = _Example_SaveAndLoadPickle
-        self.results2     = self.results2_cls()
-        self.save_path1   = folder / 'results_test_save.hdf5'
-        self.save_path2   = folder / 'results_test_save.pkl'
+        self.results2 = self.results2_cls()
+        self.save_path1 = folder / 'results_test_save.hdf5'
+        self.save_path2 = folder / 'results_test_save.pkl'
 
     def test_save1(self) -> None:
         self.assertTrue(hasattr(self.results1, 'save'))
@@ -413,13 +458,15 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.save_path1.unlink(missing_ok=True)
         self.save_path2.unlink(missing_ok=True)
 
+
 #%% SaveAndLoadPickle
 class Test_SaveAndLoadPickle(unittest.TestCase):
     r"""
     Tests the SaveAndLoadPickle class with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% Counter
 class Test_Counter(unittest.TestCase):
@@ -427,6 +474,7 @@ class Test_Counter(unittest.TestCase):
     Tests the Counter class with the following cases:
         TBD
     """
+
     def test_math_int(self) -> None:
         c = dcs.Counter()
         c = c + 1  # type: ignore[assignment]
@@ -512,7 +560,7 @@ class Test_Counter(unittest.TestCase):
         with self.assertRaises(TypeError):
             c1 / c2  # type: ignore[operator]
         with self.assertRaises(TypeError):
-            c1 // 5.  # type: ignore[type-var]
+            c1 // 5.0  # type: ignore[type-var]
 
     def test_comp_int(self) -> None:
         c = dcs.Counter(10)
@@ -565,7 +613,7 @@ class Test_Counter(unittest.TestCase):
         self.assertEqual(c1 % 4, 1)
         self.assertEqual(c1 % c2, 1)
         with self.assertRaises(TypeError):
-            c1 % 4.  # type: ignore[type-var]
+            c1 % 4.0  # type: ignore[type-var]
 
     def test_print(self) -> None:
         c1 = dcs.Counter(1)
@@ -577,12 +625,14 @@ class Test_Counter(unittest.TestCase):
         output = repr(c1)
         self.assertEqual(output, 'Counter(1)')
 
+
 #%% FixedDict
 class Test_FixedDict(unittest.TestCase):
     r"""
     Tests the FixedDict class with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
         self.keys = {'key1', 'key2'}
         self.fixed = dcs.FixedDict({'key1': 1, 'key2': 2})
@@ -690,6 +740,7 @@ class Test_FixedDict(unittest.TestCase):
         new = pickle.loads(data)
         self.assertEqual(self.fixed, new)
         self.assertEqual(self.fixed._frozen, new._frozen)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

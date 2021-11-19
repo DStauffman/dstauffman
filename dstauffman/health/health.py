@@ -74,7 +74,7 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
     precision = 1e-12
     # create the cumulative distribution (allows different distribution per person if desired)
     cum_dist = np.cumsum(np.atleast_2d(distribution), axis=1)
-    assert np.all(np.abs(cum_dist[:,-1] - 1) < precision), "Given distribution doesn't sum to 1."
+    assert np.all(np.abs(cum_dist[:, -1] - 1) < precision), "Given distribution doesn't sum to 1."
     # do a random draw based on the cumulative distribution
     state = np.sum(prng.rand(num, 1) >= cum_dist, axis=1, dtype=int) + start_num
     # set the number of months in this state based on a beta distribution with the given
@@ -84,8 +84,9 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
     else:
         if np.isscalar(max_months):
             max_months = np.full(len(distribution), max_months)
-        mons = np.ceil(max_months[state-start_num] * prng.beta(alpha, beta, num)).astype(int)
+        mons = np.ceil(max_months[state - start_num] * prng.beta(alpha, beta, num)).astype(int)
         return (state, mons)
+
 
 #%% Functions - icer
 def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
@@ -157,7 +158,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     # force inputs to be ndarrays
     cost = np.atleast_1d(np.asarray(cost))
     qaly = np.atleast_1d(np.asarray(qaly))
-    fig  = None
+    fig = None
 
     # check inputs
     assert np.all(cost > 0), 'Costs must be positive.'
@@ -178,7 +179,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
         this_qaly = qaly[keep]
 
         # sort by cost
-        ix_sort     = np.argsort(this_cost)
+        ix_sort = np.argsort(this_cost)
         sorted_cost = this_cost[ix_sort]
         sorted_qaly = this_qaly[ix_sort]
 
@@ -187,7 +188,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
             # find the first occurence (increment by one to find the one less effective than the last)
             bad = np.flatnonzero(np.diff(sorted_qaly) < 0) + 1
             if len(bad) == 0:
-                raise ValueError('Index should never be empty, something unexpected happended.') # pragma: no cover
+                raise ValueError('Index should never be empty, something unexpected happended.')  # pragma: no cover
             # update the mask and continue to next pass of while loop
             keep.pop(ix_sort[bad[0]])
             continue
@@ -202,7 +203,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
             # find the first bad occurence
             bad = np.flatnonzero(np.diff(icer_out) < 0)
             if len(bad) == 0:
-                raise ValueError('Index should never be empty, something unexpected happended.') # pragma: no cover
+                raise ValueError('Index should never be empty, something unexpected happended.')  # pragma: no cover
             # update mask and continue to next pass
             keep.pop(ix_sort[bad[0]])
             continue
@@ -216,26 +217,26 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
 
     # build an index to pull data out
     temp = np.flatnonzero(~np.isnan(order))
-    ix   = temp[order[~np.isnan(order)].astype(int)]
+    ix = temp[order[~np.isnan(order)].astype(int)]
 
     # recalculate based on given baseline
     if baseline is not None:
         inc_cost = np.diff(np.hstack((cost[baseline], cost[ix])))
         inc_qaly = np.diff(np.hstack((qaly[baseline], qaly[ix])))
-        icer_out = np.divide(inc_cost, inc_qaly, out=np.full(inc_cost.shape, np.nan), where=inc_qaly!=0)
+        icer_out = np.divide(inc_cost, inc_qaly, out=np.full(inc_cost.shape, np.nan), where=inc_qaly != 0)
 
     # output as dataframe
     # build a name list if not given
     if names is None:
-        names = ['Strategy {}'.format(i+1) for i in range(num)]
+        names = ['Strategy {}'.format(i + 1) for i in range(num)]
     # preallocate some variables
-    full_inc_costs     = np.full((num), np.nan, dtype=float)
-    full_inc_qalys     = np.full((num), np.nan, dtype=float)
-    full_icers         = np.full((num), np.nan, dtype=float)
+    full_inc_costs = np.full((num), np.nan, dtype=float)
+    full_inc_qalys = np.full((num), np.nan, dtype=float)
+    full_icers = np.full((num), np.nan, dtype=float)
     # fill the calculations in where applicable
     full_inc_costs[ix] = inc_cost
     full_inc_qalys[ix] = inc_qaly
-    full_icers[ix]     = icer_out
+    full_icers[ix] = icer_out
     # make into dictionary with more explicit column names
     data = OrderedDict()
     data['Strategy'] = names
@@ -254,13 +255,16 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     if make_plot:
         # delayed import to eliminate circular imports
         from dstauffman.plotting import plot_icer
+
         fig = plot_icer(qaly, cost, ix, baseline=baseline, names=names, opts=opts)
 
     return (inc_cost, inc_qaly, icer_out, order, icer_data, fig)
 
+
 #%% Unit test
 if __name__ == '__main__':
     import matplotlib.pyplot as plt
+
     plt.ioff()
     unittest.main(module='dstauffman.tests.test_health_health', exit=False)
     doctest.testmod(verbose=False)

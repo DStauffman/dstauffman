@@ -15,12 +15,29 @@ from pathlib import Path
 from typing import List, Optional, Tuple, TypeVar, Union
 import unittest
 
-from dstauffman import convert_date, convert_time_units, find_in_range, Frozen, get_unit_conversion, \
-    histcounts, HAVE_MPL, HAVE_NUMPY, LogLevel
+from dstauffman import (
+    convert_date,
+    convert_time_units,
+    find_in_range,
+    Frozen,
+    get_unit_conversion,
+    histcounts,
+    HAVE_MPL,
+    HAVE_NUMPY,
+    LogLevel,
+)
 
 from dstauffman.plotting.generic import make_bar_plot, make_time_plot
-from dstauffman.plotting.support import ColorMap, figmenu, get_classification, ignore_plot_data, \
-    plot_classification, plot_second_yunits, storefig, titleprefix
+from dstauffman.plotting.support import (
+    ColorMap,
+    figmenu,
+    get_classification,
+    ignore_plot_data,
+    plot_classification,
+    plot_second_yunits,
+    storefig,
+    titleprefix,
+)
 
 if HAVE_MPL:
     from matplotlib.collections import PatchCollection
@@ -28,6 +45,7 @@ if HAVE_MPL:
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
+
     inf = np.inf
     isfinite = np.isfinite
 else:
@@ -43,6 +61,7 @@ _Date = TypeVar('_Date', float, datetime.datetime)
 #%% Classes - Opts
 class Opts(Frozen):
     r"""Optional plotting configurations."""
+
     def __init__(self, *args, **kwargs):
         r"""
         Default configuration for plots.
@@ -150,7 +169,7 @@ class Opts(Frozen):
 
     def get_names(self, ix: int) -> str:
         r"""Get the specified name from the list."""
-        if hasattr(self, 'names') and len(self.names) >= ix+1:
+        if hasattr(self, 'names') and len(self.names) >= ix + 1:
             name = self.names[ix]
         else:
             name = ''
@@ -185,12 +204,13 @@ class Opts(Frozen):
             if isinstance(date, datetime.datetime):
                 start_date = '  t(0) = ' + date.strftime(TIMESTR_FORMAT) + ' Z'
             else:
-                temp_date  = datetime.datetime(*date)
+                temp_date = datetime.datetime(*date)
                 start_date = '  t(0) = ' + temp_date.strftime(TIMESTR_FORMAT) + ' Z'
         return start_date
 
     def get_time_limits(self) -> Tuple[_Date, _Date, _Date, _Date]:
         r"""Returns the display and RMS limits in the current time units."""
+
         def _convert(value):
             if value is not None and isfinite(value):
                 return convert_time_units(value, self.time_base, self.time_unit)
@@ -210,11 +230,20 @@ class Opts(Frozen):
         assert form in {'datetime', 'numpy', 'sec'}, f'Unexpected form of "{form}".'
         self.time_base = form
         self.time_unit = form
-        self.disp_xmin = convert_date(self.disp_xmin, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form)
-        self.disp_xmax = convert_date(self.disp_xmax, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form)
-        self.rms_xmin  = convert_date(self.rms_xmin,  form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form)
-        self.rms_xmax  = convert_date(self.rms_xmax,  form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form)
+        self.disp_xmin = convert_date(
+            self.disp_xmin, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
+        )
+        self.disp_xmax = convert_date(
+            self.disp_xmax, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
+        )
+        self.rms_xmin = convert_date(
+            self.rms_xmin, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
+        )
+        self.rms_xmax = convert_date(
+            self.rms_xmax, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
+        )
         return self
+
 
 #%% Functions - suppress_plots
 def suppress_plots() -> None:
@@ -236,6 +265,7 @@ def suppress_plots() -> None:
     if HAVE_MPL:
         plt.ioff()
 
+
 #%% Functions - unsuppress_plots
 def unsuppress_plots() -> None:
     r"""
@@ -253,6 +283,7 @@ def unsuppress_plots() -> None:
     """
     global _Plotter
     _Plotter = True
+
 
 #%% Functions - plot_time_history
 def plot_time_history(description, time, data, opts=None, *, ignore_empties=False, **kwargs):
@@ -335,19 +366,49 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
     # call wrapper function for most of the details
-    fig = make_time_plot(description, time, data, \
-        time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
-        disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, colormap=colormap, \
-        use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, **kwargs)
+    fig = make_time_plot(
+        description,
+        time,
+        data,
+        time_units=time_units,
+        start_date=start_date,
+        rms_xmin=rms_xmin,
+        rms_xmax=rms_xmax,
+        disp_xmin=disp_xmin,
+        disp_xmax=disp_xmax,
+        single_lines=single_lines,
+        colormap=colormap,
+        use_mean=use_mean,
+        plot_zero=plot_zero,
+        show_rms=show_rms,
+        legend_loc=legend_loc,
+        **kwargs,
+    )
 
     # setup plots
     setup_plots(fig, this_opts)
     return fig
 
+
 #%% Functions - plot_correlation_matrix
-def plot_correlation_matrix(data, labels=None, units='', *, opts=None, matrix_name='Correlation Matrix', \
-        cmin=0, cmax=1, xlabel='', ylabel='', plot_lower_only=True, label_values=False, x_lab_rot=90, \
-        colormap=None, plot_border=None, leg_scale='unity'):
+def plot_correlation_matrix(
+    data,
+    labels=None,
+    units='',
+    *,
+    opts=None,
+    matrix_name='Correlation Matrix',
+    cmin=0,
+    cmax=1,
+    xlabel='',
+    ylabel='',
+    plot_lower_only=True,
+    label_values=False,
+    x_lab_rot=90,
+    colormap=None,
+    plot_border=None,
+    leg_scale='unity',
+):
     r"""
     Visually plot a correlation matrix.
 
@@ -434,8 +495,8 @@ def plot_correlation_matrix(data, labels=None, units='', *, opts=None, matrix_na
     (new_units, scale) = get_unit_conversion(leg_scale, units)
 
     # Hard-coded values
-    box_size        = 1
-    precision       = 1e-12
+    box_size = 1
+    precision = 1e-12
 
     # get sizes
     (n, m) = data.shape
@@ -456,11 +517,14 @@ def plot_correlation_matrix(data, labels=None, units='', *, opts=None, matrix_na
         raise ValueError('Incorrectly sized labels.')
 
     # Determine if symmetric
-    if m == n and np.all(np.abs(np.subtract(data, np.transpose(data), out=np.zeros(data.shape, dtype=data.dtype), where=~np.isnan(data))) < precision):
+    if m == n and np.all(
+        np.abs(np.subtract(data, np.transpose(data), out=np.zeros(data.shape, dtype=data.dtype), where=~np.isnan(data)))
+        < precision
+    ):
         is_symmetric = True
     else:
         is_symmetric = False
-    plot_lower_only  = plot_lower_only and is_symmetric
+    plot_lower_only = plot_lower_only and is_symmetric
 
     # Override color ranges based on data
     # test if in -1 to 1 range instead of 0 to 1
@@ -489,18 +553,30 @@ def plot_correlation_matrix(data, labels=None, units='', *, opts=None, matrix_na
     # set title
     ax.set_title(this_title)
     # get colormap based on high and low limits
-    cm = ColorMap(colormap, low=scale*cmin, high=scale*cmax)
+    cm = ColorMap(colormap, low=scale * cmin, high=scale * cmax)
     # loop through and plot each element with a corresponding color
     for i in range(m):
         for j in range(n):
             if not plot_lower_only or (i <= j):
                 if not np.isnan(data[j, i]):
-                    ax.add_patch(Rectangle((box_size*i, box_size*j), box_size, box_size, \
-                        facecolor=cm.get_color(scale*data[j, i]), edgecolor=plot_border))
+                    ax.add_patch(
+                        Rectangle(
+                            (box_size * i, box_size * j),
+                            box_size,
+                            box_size,
+                            facecolor=cm.get_color(scale * data[j, i]),
+                            edgecolor=plot_border,
+                        )
+                    )
                 if label_values:
-                    ax.annotate('{:.2g}'.format(scale*data[j, i]), xy=(box_size*i + box_size/2, box_size*j + box_size/2), \
-                        xycoords='data', horizontalalignment='center', \
-                        verticalalignment='center', fontsize=15)
+                    ax.annotate(
+                        '{:.2g}'.format(scale * data[j, i]),
+                        xy=(box_size * i + box_size / 2, box_size * j + box_size / 2),
+                        xycoords='data',
+                        horizontalalignment='center',
+                        verticalalignment='center',
+                        fontsize=15,
+                    )
     # show colorbar
     fig.colorbar(cm.get_smap())
     # make square
@@ -508,9 +584,9 @@ def plot_correlation_matrix(data, labels=None, units='', *, opts=None, matrix_na
     # set limits and tick labels
     ax.set_xlim(0, m)
     ax.set_ylim(0, n)
-    ax.set_xticks(np.arange(0, m)+box_size/2)
+    ax.set_xticks(np.arange(0, m) + box_size / 2)
     ax.set_xticklabels(xlab, rotation=x_lab_rot)
-    ax.set_yticks(np.arange(0, n)+box_size/2)
+    ax.set_yticks(np.arange(0, n) + box_size / 2)
     ax.set_yticklabels(ylab)
     # label axes
     ax.set_xlabel(xlabel)
@@ -521,6 +597,7 @@ def plot_correlation_matrix(data, labels=None, units='', *, opts=None, matrix_na
     # Setup plots
     setup_plots(fig, opts)
     return fig
+
 
 #%% Functions - plot_bar_breakdown
 def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=False, **kwargs):
@@ -591,23 +668,52 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
 
     # hard-coded values
-    scale        = 100
-    units        = '%'
+    scale = 100
+    units = '%'
 
     # call wrapper function for most of the details
-    fig = make_bar_plot(description, time, scale*data, units=units, \
-        time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
-        disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, colormap=colormap, \
-        use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, **kwargs)
+    fig = make_bar_plot(
+        description,
+        time,
+        scale * data,
+        units=units,
+        time_units=time_units,
+        start_date=start_date,
+        rms_xmin=rms_xmin,
+        rms_xmax=rms_xmax,
+        disp_xmin=disp_xmin,
+        disp_xmax=disp_xmax,
+        single_lines=single_lines,
+        colormap=colormap,
+        use_mean=use_mean,
+        plot_zero=plot_zero,
+        show_rms=show_rms,
+        legend_loc=legend_loc,
+        **kwargs,
+    )
 
     # Setup plots
     setup_plots(fig, this_opts)
     return fig
 
+
 #%% Functions - plot_histogram
-def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabel='Data', \
-        ylabel='Number', second_ylabel='Distribution [%]', normalize_spacing=False, \
-        use_exact_counts=False, show_pdf=False, pdf_x=None, pdf_y=None):
+def plot_histogram(
+    description,
+    data,
+    bins,
+    *,
+    opts=None,
+    color='#1f77b4',
+    xlabel='Data',
+    ylabel='Number',
+    second_ylabel='Distribution [%]',
+    normalize_spacing=False,
+    use_exact_counts=False,
+    show_pdf=False,
+    pdf_x=None,
+    pdf_y=None,
+):
     r"""
     Creates a histogram plot of the given data and bins.
 
@@ -698,7 +804,7 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
         plotting_bins[ix_ninf] = np.min(data)
     rects = []
     for i in range(num - 1):
-        rects.append(Rectangle((plotting_bins[i], 0), plotting_bins[i+1]-plotting_bins[i], counts[i]))
+        rects.append(Rectangle((plotting_bins[i], 0), plotting_bins[i + 1] - plotting_bins[i], counts[i]))
     if missing > 0:
         rects.append(Rectangle((plotting_bins[-1], 0), 1, missing))
     coll = PatchCollection(rects, facecolor=color, edgecolor='k')
@@ -707,7 +813,7 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     if missing > 0:
-        ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins)+1])
+        ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins) + 1])
     else:
         ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins)])
     ax.set_ylim([0, np.max(counts)])
@@ -720,12 +826,13 @@ def plot_histogram(description, data, bins, *, opts=None, color='#1f77b4', xlabe
         else:
             ax.set_xticks(plotting_bins[:-1] + 0.5)
         ax.set_xticklabels(xlab)
-    plot_second_yunits(ax, ylab=second_ylabel, multiplier=100/data.size)
+    plot_second_yunits(ax, ylab=second_ylabel, multiplier=100 / data.size)
     # Optionally add PDF information
     if show_pdf:
         pass  # TODO: add this
     setup_plots(fig, opts=opts)
     return fig
+
 
 #%% Functions - setup_plots
 def setup_plots(figs, opts):
@@ -787,7 +894,7 @@ def setup_plots(figs, opts):
     # pack the figures
     bottom = 0.03 if classification else 0.0
     for fig in figs:
-        fig.tight_layout(rect=(0., bottom, 1., 0.97), h_pad=1.5, w_pad=1.5)
+        fig.tight_layout(rect=(0.0, bottom, 1.0, 0.97), h_pad=1.5, w_pad=1.5)
 
     # things to do if displaying the plots
     if opts.show_plot and _Plotter:  # pragma: no cover
@@ -805,6 +912,7 @@ def setup_plots(figs, opts):
         storefig(figs, opts.save_path, opts.plot_type)
         if opts.show_link & len(figs) > 0:
             print(r'Plots saved to <a href="{}">{}</a>'.format(opts.save_path, opts.save_path))
+
 
 #%% Unit test
 if __name__ == '__main__':

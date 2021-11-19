@@ -16,26 +16,26 @@ from math import pi
 #%% Constants - Unit Conversions
 # Time
 ONE_MINUTE: int = 60
-ONE_HOUR:int = 3600
-ONE_DAY:int = 86400
+ONE_HOUR: int = 3600
+ONE_DAY: int = 86400
 MONTHS_PER_YEAR: int = 12
 
 # Angle
-RAD2DEG: float = 180./pi
-DEG2RAD: float = pi/180.
+RAD2DEG: float = 180.0 / pi
+DEG2RAD: float = pi / 180.0
 
-ARCSEC2RAD: float = 1./ONE_HOUR * DEG2RAD
+ARCSEC2RAD: float = 1.0 / ONE_HOUR * DEG2RAD
 RAD2ARCSEC: float = ONE_HOUR * RAD2DEG
 
 # Length
-FT2M: float  = 0.3048
-M2FT: float  = 1/0.3048
+FT2M: float = 0.3048
+M2FT: float = 1 / 0.3048
 IN2CM: float = 2.54
-CM2IN: float = 1/2.54
+CM2IN: float = 1 / 2.54
 
 # Symbols
-DEGREE_SIGN: str = u'\N{DEGREE SIGN}' # degree sign, also u'\u00b0' ° or chr(176)
-MICRO_SIGN: str = u'\N{MICRO SIGN}' # micro sign, also u'\u00b5' μ or chr(181), note this is different than chr(956)
+DEGREE_SIGN: str = u'\N{DEGREE SIGN}'  # degree sign, also u'\u00b0' ° or chr(176)
+MICRO_SIGN: str = u'\N{MICRO SIGN}'  # micro sign, also u'\u00b5' μ or chr(181), note this is different than chr(956)
 
 #%% get_factors
 def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[float, str]:
@@ -114,7 +114,7 @@ def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[
         mult  = 1e1 if not inverse else 1e-1
         label = 'da'
     elif prefix == 'unity':
-        mult  = 1.
+        mult  = 1.0
         label = ''
     elif prefix == 'deci':
         mult  = 1e-1 if not inverse else 1e1
@@ -148,11 +148,11 @@ def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[
         label = 'y'
     # Special cases
     elif prefix == 'percentage':
-        mult  = 0.01 if not inverse else 100.
+        mult  = 0.01 if not inverse else 100.0
         label = '%'
     # below follow some stupid english units for rotation angles (try to never use them!)
     elif prefix == 'arcminute':
-        mult  = 1. / ONE_MINUTE * DEG2RAD if not inverse else ONE_MINUTE / DEG2RAD
+        mult  = 1.0 / ONE_MINUTE * DEG2RAD if not inverse else ONE_MINUTE / DEG2RAD
         label = 'amin'
     elif prefix == 'arcsecond':
         mult  = ARCSEC2RAD if not inverse else RAD2ARCSEC
@@ -169,6 +169,7 @@ def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[
     else:
         raise ValueError('Unexpected value for units prefix.')
     return (mult, label)
+
 
 #%% Functions - get_time_factor
 def get_time_factor(unit: str) -> int:
@@ -208,6 +209,7 @@ def get_time_factor(unit: str) -> int:
     else:
         raise ValueError(f'Unexpected value for "{unit}".')
     return mult
+
 
 #%% Functions - get_unit_conversion
 def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, float]], units: str = '') -> Tuple[str, float]:
@@ -284,6 +286,7 @@ def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, floa
     else:
         new_units = label + units
     return (new_units, unit_mult)
+
 
 #%% Unit test
 if __name__ == '__main__':

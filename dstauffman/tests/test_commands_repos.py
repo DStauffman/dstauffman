@@ -20,6 +20,7 @@ class Test_commands_parse_enforce(unittest.TestCase):
     Tests the commands.parse_enforce function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.folder               = str(dcs.get_root_dir())
         self.expected             = argparse.Namespace()
@@ -64,13 +65,13 @@ class Test_commands_parse_enforce(unittest.TestCase):
 
     def test_windows(self) -> None:
         self.expected.windows = True
-        self.expected.unix    = False
+        self.expected.unix = False
         args = commands.parse_enforce([self.folder, '-w'])
         self.assertEqual(args, self.expected)
 
     def test_unix(self) -> None:
         self.expected.windows = False
-        self.expected.unix    = True
+        self.expected.unix = True
         args = commands.parse_enforce([self.folder, '-u'])
         self.assertEqual(args, self.expected)
 
@@ -87,6 +88,7 @@ class Test_commands_parse_enforce(unittest.TestCase):
         args = commands.parse_enforce([self.folder, '-x'])
         self.assertEqual(args, self.expected)
 
+
 #%% commands.execute_enforce
 @patch('dstauffman.commands.repos.find_repo_issues')
 class Test_commands_execute_enforce(unittest.TestCase):
@@ -95,13 +97,30 @@ class Test_commands_execute_enforce(unittest.TestCase):
         Nominal
         TBD
     """
+
     def setUp(self) -> None:
         self.folder = dcs.get_tests_dir()
-        self.args = argparse.Namespace(execute=False, extensions=None, folder=str(self.folder), ignore_tabs=False, \
-                                       list_all=False, skip=None, trailing=False, unix=False, windows=False)
-        self.patch_args = {'folder': self.folder, 'extensions': frozenset({'m', 'py'}), 'list_all': False, \
-                           'check_tabs': True, 'trailing': False, 'exclusions': None, 'check_eol': None, \
-                           'show_execute': False}
+        self.args = argparse.Namespace(
+            execute=False,
+            extensions=None,
+            folder=str(self.folder),
+            ignore_tabs=False,
+            list_all=False,
+            skip=None,
+            trailing=False,
+            unix=False,
+            windows=False,
+        )
+        self.patch_args = {
+            'folder': self.folder,
+            'extensions': frozenset({'m', 'py'}),
+            'list_all': False,
+            'check_tabs': True,
+            'trailing': False,
+            'exclusions': None,
+            'check_eol': None,
+            'show_execute': False,
+        }
 
     def test_nominal(self, mocker: Mock) -> None:
         commands.execute_enforce(self.args)
@@ -131,12 +150,14 @@ class Test_commands_execute_enforce(unittest.TestCase):
         commands.execute_enforce(self.args)
         mocker.assert_called_once_with(**self.patch_args)
 
+
 #%% commands.parse_make_init
 class Test_commands_parse_make_init(unittest.TestCase):
     r"""
     Tests the commands.parse_make_init function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.folder           = str(dcs.get_root_dir())
         self.expected         = argparse.Namespace()
@@ -170,6 +191,7 @@ class Test_commands_parse_make_init(unittest.TestCase):
         args = commands.parse_make_init([self.folder, '-w', '50'])
         self.assertEqual(args, self.expected)
 
+
 #%% commands.execute_make_init
 @patch('dstauffman.commands.repos.make_python_init')
 class Test_commands_execute_make_init(unittest.TestCase):
@@ -178,10 +200,13 @@ class Test_commands_execute_make_init(unittest.TestCase):
         Nominal
         TBD
     """
+
     def setUp(self) -> None:
         self.folder = dcs.get_tests_dir()
         self.init_file = self.folder / 'temp_init.py'
-        self.args = argparse.Namespace(dry_run=False, folder=str(self.folder), lineup=False, outfile=str(self.init_file), wrap=100)
+        self.args = argparse.Namespace(
+            dry_run=False, folder=str(self.folder), lineup=False, outfile=str(self.init_file), wrap=100
+        )
         self.patch_args = {'lineup': False, 'wrap': 100, 'filename': self.init_file}
 
     def test_nominal(self, mocker: Mock) -> None:
@@ -214,6 +239,7 @@ class Test_commands_execute_make_init(unittest.TestCase):
         self.patch_args['wrap'] = 500
         commands.execute_make_init(self.args)
         mocker.assert_called_once_with(self.folder, **self.patch_args)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

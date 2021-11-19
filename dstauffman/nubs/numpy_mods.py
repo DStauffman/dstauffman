@@ -38,6 +38,7 @@ def _reduce_shape(shape: Tuple, axis: int) -> List[int]:
             out.append(s)
     return out
 
+
 #%% issorted_ascend
 @ncjit
 def issorted_ascend(x: np.ndarray) -> boolean:
@@ -68,6 +69,7 @@ def issorted_ascend(x: np.ndarray) -> boolean:
     """
     return np.all(x[:-1] <= x[1:])
 
+
 #%% issorted_descend
 @ncjit
 def issorted_descend(x: np.ndarray) -> boolean:
@@ -97,6 +99,7 @@ def issorted_descend(x: np.ndarray) -> boolean:
 
     """
     return np.all(x[1:] <= x[:-1])
+
 
 #%% Functions - np_all_axis0
 @ncjit
@@ -130,6 +133,7 @@ def np_all_axis0(x):
         out = np.all(x)
     return out
 
+
 #%% Functions - np_all_axis1
 @ncjit
 def np_all_axis1(x):
@@ -157,6 +161,7 @@ def np_all_axis1(x):
     for i in range(1, x.shape[1]):
         out = np.logical_and(out, x[:, i, ...])
     return out
+
 
 #%% Functions - np_any_axis0
 @ncjit
@@ -189,6 +194,7 @@ def np_any_axis0(x):
         out = np.any(x)
     return out
 
+
 #%% Functions - np_any_axis1
 @ncjit
 def np_any_axis1(x):
@@ -216,6 +222,7 @@ def np_any_axis1(x):
     for i in range(1, x.shape[1]):
         out = np.logical_or(out, x[:, i, ...])
     return out
+
 
 #%% Unit test
 if __name__ == '__main__':

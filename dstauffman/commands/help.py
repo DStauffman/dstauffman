@@ -41,6 +41,7 @@ def print_help(help_file: Path = None) -> int:
     print(text)
     return ReturnCodes.clean
 
+
 #%% Functions - print_version
 def print_version() -> int:
     r"""Prints the version of the library.
@@ -64,6 +65,7 @@ def print_version() -> int:
         return_code = ReturnCodes.bad_version
     print(version)
     return return_code
+
 
 #%% Functions - parse_help
 def parse_help(input_args: List[str]) -> argparse.Namespace:
@@ -94,6 +96,7 @@ def parse_help(input_args: List[str]) -> argparse.Namespace:
     args = parser.parse_args(input_args)
     return args
 
+
 #%% Functions - parse_version
 def parse_version(input_args: List[str]) -> argparse.Namespace:
     r"""
@@ -123,6 +126,7 @@ def parse_version(input_args: List[str]) -> argparse.Namespace:
     args = parser.parse_args(input_args)
     return args
 
+
 #%% Functions - execute_help
 def execute_help(args: argparse.Namespace) -> int:
     r"""
@@ -148,6 +152,7 @@ def execute_help(args: argparse.Namespace) -> int:
     return_code = print_help()
     return return_code
 
+
 #%% Functions - execute_version
 def execute_version(args: argparse.Namespace) -> int:
     r"""
@@ -172,6 +177,7 @@ def execute_version(args: argparse.Namespace) -> int:
     """
     return_code = print_version()
     return return_code
+
 
 #%% Unit test
 if __name__ == '__main__':

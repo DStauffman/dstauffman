@@ -23,7 +23,8 @@ class Test_run_docstrings(unittest.TestCase):
     Tests the run_docstrings function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% run_unittests
 class Test_run_unittests(unittest.TestCase):
@@ -31,7 +32,8 @@ class Test_run_unittests(unittest.TestCase):
     Tests the run_unittests function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% run_pytests
 class Test_run_pytests(unittest.TestCase):
@@ -39,7 +41,8 @@ class Test_run_pytests(unittest.TestCase):
     Tests the run_pytests function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% run_coverage
 class Test_run_coverage(unittest.TestCase):
@@ -47,7 +50,8 @@ class Test_run_coverage(unittest.TestCase):
     Tests the run_coverage function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% find_repo_issues
 class Test_find_repo_issues(unittest.TestCase):
@@ -142,7 +146,7 @@ class Test_find_repo_issues(unittest.TestCase):
         self.assertEqual(lines, [''])
 
     def test_exclusions_invalid(self) -> None:
-        exclusions = (pathlib.Path(r'C:\non_existant_path'), )
+        exclusions = (pathlib.Path(r'C:\non_existant_path'),)
         with dcs.capture_output() as out:
             dcs.find_repo_issues(self.folder, exclusions=exclusions)
         lines = out.getvalue().split('\n')
@@ -150,7 +154,7 @@ class Test_find_repo_issues(unittest.TestCase):
         self.assertTrue(lines[0].startswith('Evaluating: "'))
         self.assertEqual(lines[1], self.bad1)
         self.assertEqual(lines[2], '')
-        self.assertEqual(len(lines),  3)
+        self.assertEqual(len(lines), 3)
 
     def test_bad_newlines(self) -> None:
         with dcs.capture_output() as out:
@@ -162,7 +166,7 @@ class Test_find_repo_issues(unittest.TestCase):
         self.assertTrue(lines[3].startswith('Evaluating: "'))
         self.assertEqual(lines[4], self.bad1)
         self.assertEqual(lines[5], '')
-        self.assertEqual(len(lines),  6)
+        self.assertEqual(len(lines), 6)
 
     def test_ignore_tabs(self) -> None:
         with dcs.capture_output() as out:
@@ -176,6 +180,7 @@ class Test_find_repo_issues(unittest.TestCase):
         for this_file in cls.files:
             this_file.unlink(missing_ok=True)
 
+
 #%% delete_pyc
 class Test_delete_pyc(unittest.TestCase):
     r"""
@@ -183,6 +188,7 @@ class Test_delete_pyc(unittest.TestCase):
         Recursive
         Not recursive
     """
+
     def setUp(self) -> None:
         self.fold1 = dcs.get_tests_dir()
         self.file1 = self.fold1 / 'temp_file.pyc'
@@ -240,6 +246,7 @@ class Test_delete_pyc(unittest.TestCase):
         with contextlib.suppress(FileNotFoundError):
             os.removedirs(self.fold2)
 
+
 #%% get_python_definitions
 class Test_get_python_definitions(unittest.TestCase):
     r"""
@@ -249,6 +256,7 @@ class Test_get_python_definitions(unittest.TestCase):
         No arguments
         Lots of arguments
     """
+
     def test_functions(self) -> None:
         funcs = dcs.get_python_definitions('def a():\n    pass\ndef _b():\n    pass\n')
         self.assertEqual(funcs, ['a'])
@@ -274,17 +282,22 @@ class Test_get_python_definitions(unittest.TestCase):
         self.assertEqual(funcs, ['a', 'CONSTANT'])
 
     def test_include_private(self) -> None:
-        funcs = dcs.get_python_definitions('def a():\n    pass\ndef _b():\n    pass\nclass _c():\n    pass\n', include_private=True)
+        funcs = dcs.get_python_definitions(
+            'def a():\n    pass\ndef _b():\n    pass\nclass _c():\n    pass\n', include_private=True
+        )
         self.assertEqual(funcs, ['a', '_b', '_c'])
 
     def test_overload(self) -> None:
-        funcs = dcs.get_python_definitions('@overload\ndef fun(x: int, x: Literal[False]) -> int: ...\n\n@overload\ndef fun(x: int, x: Literal[True]) -> float: ...\n' +
-            '\ndef fun(x: int, x: bool = False) -> Union[int, float]:\n    pass\n\n')
+        funcs = dcs.get_python_definitions(
+            '@overload\ndef fun(x: int, x: Literal[False]) -> int: ...\n\n@overload\ndef fun(x: int, x: Literal[True]) -> float: ...\n'
+            + '\ndef fun(x: int, x: bool = False) -> Union[int, float]:\n    pass\n\n'
+        )
         self.assertEqual(funcs, ['fun'])
 
     def test_typed_constants(self) -> None:
         funcs = dcs.get_python_definitions('def fun(x: int, y: int):\n    pass\nCONSTANT: int = 5\n')
         self.assertEqual(funcs, ['fun', 'CONSTANT'])
+
 
 #%% make_python_init
 class Test_make_python_init(unittest.TestCase):
@@ -292,6 +305,7 @@ class Test_make_python_init(unittest.TestCase):
     Tests the make_python_init function with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
         self.folder   = dcs.get_root_dir()
         self.text     = 'from .enums import'
@@ -304,7 +318,7 @@ class Test_make_python_init(unittest.TestCase):
     def test_nominal_use(self) -> None:
         text = dcs.make_python_init(self.folder)
         lines = text.split('\n')
-        self.assertEqual(lines[self.line_num][0:len(self.text2)], self.text2)
+        self.assertEqual(lines[self.line_num][0 : len(self.text2)], self.text2)
 
     def test_duplicated_funcs(self) -> None:
         with open(self.filepath, 'wt') as file:
@@ -319,12 +333,12 @@ class Test_make_python_init(unittest.TestCase):
     def test_no_lineup(self) -> None:
         text = dcs.make_python_init(self.folder, lineup=False)
         lines = text.split('\n')
-        self.assertEqual(lines[self.line_num][0:len(self.text)], self.text)
+        self.assertEqual(lines[self.line_num][0 : len(self.text)], self.text)
 
     def test_big_wrap(self) -> None:
         text = dcs.make_python_init(self.folder, wrap=1000)
         lines = text.split('\n')
-        self.assertEqual(lines[self.line_num-3][0:len(self.text2)], self.text2)
+        self.assertEqual(lines[self.line_num - 3][0 : len(self.text2)], self.text2)
 
     def test_small_wrap(self) -> None:
         with self.assertRaises(ValueError) as context:
@@ -339,12 +353,13 @@ class Test_make_python_init(unittest.TestCase):
     def test_saving(self) -> None:
         text = dcs.make_python_init(self.folder, filename=self.filename)
         lines = text.split('\n')
-        self.assertEqual(lines[self.line_num][0:len(self.text2)], self.text2)
+        self.assertEqual(lines[self.line_num][0 : len(self.text2)], self.text2)
         self.assertTrue(self.filename.is_file())
 
     def tearDown(self) -> None:
         self.filepath.unlink(missing_ok=True)
         self.filename.unlink(missing_ok=True)
+
 
 #%% write_unit_test_templates
 class Test_write_unit_test_templates(unittest.TestCase):
@@ -352,6 +367,7 @@ class Test_write_unit_test_templates(unittest.TestCase):
     Tests the write_unit_test_templates function with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
         self.folder = dcs.get_root_dir()
         self.output = pathlib.Path(str(dcs.get_tests_dir()) + '_template')
@@ -369,6 +385,7 @@ class Test_write_unit_test_templates(unittest.TestCase):
         self.assertGreater(len(lines), 5)
         self.assertTrue(lines[0].startswith('Writing: '))
         self.assertGreater(mock_writer.call_count, 5)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

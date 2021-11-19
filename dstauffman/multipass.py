@@ -37,6 +37,7 @@ logger = logging.getLogger(__name__)
 #%% Classes - MultipassExceptionWrapper
 class MultipassExceptionWrapper(object):
     r"""Exception wrapper that can pass through multiprocessing calls and back to main."""
+
     def __init__(self, ee: Type[BaseException]):
         # save exception
         self.ee = ee
@@ -48,9 +49,17 @@ class MultipassExceptionWrapper(object):
         r"""Re-raise a previously saved exception and traceback."""
         raise self.ee.with_traceback(self.tb)  # type: ignore[arg-type, call-arg, misc, type-var]
 
+
 #%% Functions - parfor_wrapper
-def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_parfor: bool = True, \
-        max_cores: Optional[int] = -1, ignore_errors: bool = False) -> Any:
+def parfor_wrapper(
+    func: Callable,
+    args: Iterable,
+    *,
+    results: Any = None,
+    use_parfor: bool = True,
+    max_cores: Optional[int] = -1,
+    ignore_errors: bool = False
+) -> Any:
     r"""
     Wrapper function for the code that you want to run in a parallelized fashion.
 
@@ -134,9 +143,15 @@ def parfor_wrapper(func: Callable, args: Iterable, *, results: Any = None, use_p
     if ignore_errors and len(errors) > 0:
         logger.log(LogLevel.L2, 'There were %i error(s) in the processing.', len(errors))
         for (i, err) in enumerate(errors):
-            logger.log(LogLevel.L6, 'Error %i: %s\n%s', i+1, \
-                err.ee.with_traceback(err.tb), '\n'.join(traceback.format_tb(err.tb)))  # type: ignore[call-arg, type-var]
+            logger.log(
+                LogLevel.L6,
+                'Error %i: %s\n%s',
+                i + 1,
+                err.ee.with_traceback(err.tb),  # type: ignore[call-arg, type-var]
+                '\n'.join(traceback.format_tb(err.tb)),
+            )
     return results
+
 
 #%% Unit test
 if __name__ == '__main__':

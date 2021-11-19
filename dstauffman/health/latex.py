@@ -15,8 +15,16 @@ from dstauffman.nubs import prob_to_rate_opt
 from dstauffman import MONTHS_PER_YEAR
 
 #%% Functions - make_preamble
-def make_preamble(caption: str, label: str, cols: str, size: str = r'\small', *, \
-        use_mini: bool = False, short_cap: str = None, numbered: bool = True) -> List[str]:
+def make_preamble(
+    caption: str,
+    label: str,
+    cols: str,
+    size: str = r'\small',
+    *,
+    use_mini: bool = False,
+    short_cap: str = None,
+    numbered: bool = True
+) -> List[str]:
     r"""
     Write the table header and preamble.
 
@@ -51,8 +59,18 @@ def make_preamble(caption: str, label: str, cols: str, size: str = r'\small', *,
 
     """
     # check that size is valid
-    assert size in {r'\tiny', r'\scriptsize', r'\footnotesize', r'\small', r'\normalsize',
-    r'\large', r'\Large', r'\LARGE', r'\huge', r'\Huge'}
+    assert size in {
+        r'\tiny',
+        r'\scriptsize',
+        r'\footnotesize',
+        r'\small',
+        r'\normalsize',
+        r'\large',
+        r'\Large',
+        r'\LARGE',
+        r'\huge',
+        r'\Huge',
+    }
     # create caption string
     if short_cap is None:
         if numbered:
@@ -64,13 +82,29 @@ def make_preamble(caption: str, label: str, cols: str, size: str = r'\small', *,
         cap_str = r'    \caption[' + short_cap + r']{' + caption + r'}%'
     # build table based on minipage or not
     if not use_mini:
-        out = [r'\begin{table}[H]', '    '+size, r'    \centering', cap_str, \
-            r'    \label{' + label + r'}', r'    \begin{tabular}{' + cols + r'}', r'        \toprule']
+        out = [
+            r'\begin{table}[H]',
+            '    ' + size,
+            r'    \centering',
+            cap_str,
+            r'    \label{' + label + r'}',
+            r'    \begin{tabular}{' + cols + r'}',
+            r'        \toprule',
+        ]
     else:
-        out = [r'\begin{table}[H]', '    '+size, r'    \centering', cap_str, \
-            r'    \label{' + label + r'}', r'    \begin{minipage}{\linewidth}', r'        \centering', \
-            r'        \begin{tabular}{' + cols + r'}', r'            \toprule']
+        out = [
+            r'\begin{table}[H]',
+            '    ' + size,
+            r'    \centering',
+            cap_str,
+            r'    \label{' + label + r'}',
+            r'    \begin{minipage}{\linewidth}',
+            r'        \centering',
+            r'        \begin{tabular}{' + cols + r'}',
+            r'            \toprule',
+        ]
     return out
+
 
 #%% Functions - make_conclusion
 def make_conclusion(*, use_mini: bool = False) -> List[str]:
@@ -101,6 +135,7 @@ def make_conclusion(*, use_mini: bool = False) -> List[str]:
     else:
         out = [r'            \bottomrule', r'        \end{tabular}', r'    \end{minipage}', r'\end{table}', '']
     return out
+
 
 #%% Functions - bins_to_str_ranges
 def bins_to_str_ranges(bins, dt=1, cutoff=1000):
@@ -138,7 +173,7 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
     # preallocate output
     out = []
     # loop through ages
-    for r in range(len(bins)-1):
+    for r in range(len(bins) - 1):
         # alias the left boundary
         left = bins[r]
         # check for string values and just pass them through
@@ -146,7 +181,7 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
             out.append(left)
             continue
         # alias the right boundary
-        right = bins[r+1]-dt
+        right = bins[r + 1] - dt
         # check for large values, and replace appropriately
         if left == right:
             this_str = '{:g}'.format(left)
@@ -159,9 +194,11 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
     # return everything combined as a list
     return out
 
+
 #%% Functions - latex_str
-def latex_str(value: Union[int, float, str], digits: int = -1, fixed: bool = False, \
-              cmp2ar: bool = False, capped: int = 1073741823) -> str:  # 1073741823 = 2**30-1
+def latex_str(
+    value: Union[int, float, str], digits: int = -1, fixed: bool = False, cmp2ar: bool = False, capped: int = 1073741823
+) -> str:  # 1073741823 = 2**30-1
     r"""
     Formats a given value for display in a LaTeX document.
 
@@ -206,7 +243,7 @@ def latex_str(value: Union[int, float, str], digits: int = -1, fixed: bool = Fal
     formatter = '{:.' + str(digits) + letter + '}' if digits >= 0 else '{}'
     # potentially convert units
     if cmp2ar:
-        value = prob_to_rate_opt(value, 1/MONTHS_PER_YEAR)  # type: ignore[assignment]
+        value = prob_to_rate_opt(value, 1 / MONTHS_PER_YEAR)  # type: ignore[assignment]
     if isnan(value):
         value_str = 'NaN'
     elif isinf(value) or value > capped:
@@ -217,6 +254,7 @@ def latex_str(value: Union[int, float, str], digits: int = -1, fixed: bool = Fal
         # convert underscores
         value_str.replace('_', r'\_')
     return value_str
+
 
 #%% Unit test
 if __name__ == '__main__':

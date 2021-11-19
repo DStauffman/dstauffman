@@ -16,6 +16,7 @@ from dstauffman import HAVE_NUMPY, MONTHS_PER_YEAR
 
 if HAVE_NUMPY:
     import numpy as np
+
     sqrt = np.sqrt
 else:
     from math import sqrt  # type: ignore[misc]
@@ -61,8 +62,9 @@ def convert_annual_to_monthly_probability(annual):
     if np.any(annual > 1):
         raise ValueError('annual must be <= 1')
     # convert to equivalent probability and return result
-    monthly = 1-np.exp(np.log(1-annual, out=np.full(annual.shape, -np.inf), where=annual!=1)/MONTHS_PER_YEAR)
+    monthly = 1 - np.exp(np.log(1 - annual, out=np.full(annual.shape, -np.inf), where=annual != 1) / MONTHS_PER_YEAR)
     return monthly
+
 
 #%% Functions - convert_monthly_to_annual_probability
 def convert_monthly_to_annual_probability(monthly):
@@ -96,8 +98,9 @@ def convert_monthly_to_annual_probability(monthly):
     if np.any(monthly > 1):
         raise ValueError('annual must be <= 1')
     # convert to equivalent probability and return result
-    annual = 1 - (1 - monthly)**MONTHS_PER_YEAR
+    annual = 1 - (1 - monthly) ** MONTHS_PER_YEAR
     return annual
+
 
 #%% Functions - ca2mp & cm2ap aliases
 ca2mp = convert_annual_to_monthly_probability
@@ -145,16 +148,17 @@ def prob_to_rate(prob, time=1):
     if np.any(prob > 1):
         raise ValueError('Probability must be <= 1')
     # calculate rate
-    rate = -np.log(1 - prob, out=np.full(prob.shape, -np.inf), where=prob!=1) / time
+    rate = -np.log(1 - prob, out=np.full(prob.shape, -np.inf), where=prob != 1) / time
     # prevent code from returning a bunch of negative zeros when prob is exactly 0
     if rate.size == 1:
-        if rate == 0.:
+        if rate == 0.0:
             rate = abs(rate)
     else:
-        rate = np.abs(rate, out=rate, where=rate == 0.)
+        rate = np.abs(rate, out=rate, where=rate == 0.0)
     if not was_numpy and rate.size == 1:
         return float(rate)
     return rate
+
 
 #%% Functions - rate_to_prob
 def rate_to_prob(rate, time=1):
@@ -196,6 +200,7 @@ def rate_to_prob(rate, time=1):
     prob = 1 - np.exp(-rate * time)
     return prob
 
+
 #%% Functions - annual_rate_to_monthly_probability
 def annual_rate_to_monthly_probability(rate):
     r"""
@@ -231,8 +236,9 @@ def annual_rate_to_monthly_probability(rate):
 
     """
     # divide rate and calculate probability
-    prob = rate_to_prob(rate/MONTHS_PER_YEAR)
+    prob = rate_to_prob(rate / MONTHS_PER_YEAR)
     return prob
+
 
 #%% Functions - monthly_probability_to_annual_rate
 def monthly_probability_to_annual_rate(prob):
@@ -268,8 +274,9 @@ def monthly_probability_to_annual_rate(prob):
 
     """
     # divide rate and calculate probability
-    rate = prob_to_rate(prob, time=1/MONTHS_PER_YEAR)
+    rate = prob_to_rate(prob, time=1 / MONTHS_PER_YEAR)
     return rate
+
 
 #%% Functions - ar2mp
 ar2mp = annual_rate_to_monthly_probability
@@ -345,20 +352,20 @@ def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -
     # assertions
     assert n1 >= 0
     assert n2 >= 0
-    assert s1 >= 0.
-    assert s2 >= 0.
+    assert s1 >= 0.0
+    assert s2 >= 0.0
     # combine total number of samples
     n = n1 + n2
     # check for zero case
     if n == 0:
-        u = 0.
-        s = 0.
+        u = 0.0
+        s = 0.0
         return (n, u, s)
     # calculate the combined mean
-    u = 1/n * (n1*u1 + n2*u2)
+    u = 1 / n * (n1 * u1 + n2 * u2)
     # calculate the combined standard deviation
     if n != 1:
-        s = sqrt(1/(n-1) * ( (n1-1)*s1**2 + n1*u1**2 + (n2-1)*s2**2 + n2*u2**2 - n*u**2))
+        s = sqrt(1 / (n - 1) * ((n1 - 1) * s1 ** 2 + n1 * u1 ** 2 + (n2 - 1) * s2 ** 2 + n2 * u2 ** 2 - n * u ** 2))
     else:
         # special case where one of the data sets is empty
         if n1 == 1:
@@ -369,6 +376,7 @@ def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -
             # shouldn't be able to ever reach this line with assertions on
             raise ValueError('Total samples are 1, but neither data set has only one item.')  # pragma: no cover
     return (n, u, s)
+
 
 #%% Functions - bounded_normal_draw
 def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np.random.RandomState) -> np.ndarray:
@@ -415,17 +423,17 @@ def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np
     except KeyError:
         this_mean = 0
     try:
-        this_std  = values[field + '_std']
+        this_std = values[field + '_std']
     except KeyError:
-        this_std  = 1
+        this_std = 1
     try:
-        this_min  = values[field + '_min']
+        this_min = values[field + '_min']
     except KeyError:
-        this_min  = -np.inf
+        this_min = -np.inf
     try:
-        this_max  = values[field + '_max']
+        this_max = values[field + '_max']
     except KeyError:
-        this_max  = np.inf
+        this_max = np.inf
     # calculate the normal distribution
     if this_std == 0:
         out = np.full(num, this_mean)
@@ -435,6 +443,7 @@ def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np
     np.minimum(out, this_max, out)
     np.maximum(out, this_min, out)
     return out
+
 
 #%% Functions - rand_draw
 def rand_draw(chances, prng, *, check_bounds=True):
@@ -494,6 +503,7 @@ def rand_draw(chances, prng, *, check_bounds=True):
     is_set[chances >= 1] = True
     return is_set
 
+
 #%% Functions - ecdf
 def ecdf(y, /):
     r"""
@@ -529,6 +539,7 @@ def ecdf(y, /):
     f, counts = np.unique(y, return_counts=True)
     x = np.cumsum(counts) / np.size(y)
     return (x, f)
+
 
 #%% Unit test
 if __name__ == '__main__':

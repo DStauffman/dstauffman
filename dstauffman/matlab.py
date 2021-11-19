@@ -21,8 +21,13 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% load_matlab
-def load_matlab(filename: Union[str, Path], varlist: Union[List[str], Set[str], Tuple[str]] = None, *, squeeze: bool = True, \
-        enums: Dict[str, Any] = None) -> Dict[str, Any]:
+def load_matlab(
+    filename: Union[str, Path],
+    varlist: Union[List[str], Set[str], Tuple[str]] = None,
+    *,
+    squeeze: bool = True,
+    enums: Dict[str, Any] = None,
+) -> Dict[str, Any]:
     r"""
     Load simple arrays from a MATLAB v7.3 HDF5 based *.mat file.
 
@@ -49,8 +54,13 @@ def load_matlab(filename: Union[str, Path], varlist: Union[List[str], Set[str], 
     2.2
 
     """
-    def _load(file: h5py.Group, varlist: Optional[Union[List[str], Set[str], Tuple[str]]], squeeze: bool, \
-             enums: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+
+    def _load(
+        file: h5py.Group,
+        varlist: Optional[Union[List[str], Set[str], Tuple[str]]],
+        squeeze: bool,
+        enums: Optional[Dict[str, Any]],
+    ) -> Dict[str, Any]:
         r"""Wrapped subfunction so it can be called recursively."""
         # initialize output
         out: Dict[str, Any] = {}
@@ -86,14 +96,15 @@ def load_matlab(filename: Union[str, Path], varlist: Union[List[str], Set[str], 
                 # likely a MATLAB enumerator???
                 class_name = grp.attrs['MATLAB_class'].decode()
                 if enums is None or class_name not in enums:
-                    raise ValueError(f'Tried to load a MATLAB enumeration class called "{class_name}" without a decoder ring, pass in via `enums`.')
-                ix       = grp['ValueIndices'][()].T
-                values   = np.array([enums[class_name][x] for x in ix.flatten()]).reshape(ix.shape)
+                    raise ValueError(
+                        f'Tried to load a MATLAB enumeration class called "{class_name}" without a decoder ring, pass in via `enums`.'
+                    )
+                ix = grp['ValueIndices'][()].T
+                values = np.array([enums[class_name][x] for x in ix.flatten()]).reshape(ix.shape)
                 out[key] = np.squeeze(values) if squeeze else values
             else:
                 # call recursively
                 out[key] = load_matlab(grp, varlist=None, squeeze=squeeze, enums=enums)
-                        #if isinstance(this_data, dict) and 'ValueNames' in this_data:
         return out
 
     if not isinstance(filename, h5py.Group):
@@ -104,6 +115,7 @@ def load_matlab(filename: Union[str, Path], varlist: Union[List[str], Set[str], 
         # recursive call method where the file is already opened to a given group
         out = _load(file=filename, varlist=varlist, squeeze=squeeze, enums=enums)
     return out
+
 
 #%% Unit test
 if __name__ == '__main__':

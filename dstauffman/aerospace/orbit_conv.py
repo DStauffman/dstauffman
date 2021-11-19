@@ -42,6 +42,7 @@ def _any(x: Any) -> bool:
     else:
         return np_any(x)  # type: ignore[no-any-return]
 
+
 #%% Functions - anomaly_eccentric_2_mean
 def anomaly_eccentric_2_mean(E: _N, e: _N) -> _N:
     r"""
@@ -83,8 +84,9 @@ def anomaly_eccentric_2_mean(E: _N, e: _N) -> _N:
         logger.log(LogLevel.L6, 'The eccentric anomaly was outside the range of 0 to 2*pi')
         E = np.mod(E, TAU)
     # calculate the mean anomaly
-    M = E - e*np.sin(E)
+    M = E - e * np.sin(E)
     return M
+
 
 #%% Functions - anomaly_eccentric_2_true
 def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
@@ -127,7 +129,7 @@ def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
         logger.log(LogLevel.L6, 'The eccentric anomaly was outside the range of 0 to 2*pi')
         E = np.mod(E, TAU)
     # calculate nu
-    nu = np.arccos((np.cos(E) - e) / (1. - e*np.cos(E)))
+    nu = np.arccos((np.cos(E) - e) / (1.0 - e * np.cos(E)))
     # check half of unit circle for 0 to pi or pi to 2*pi range
     ix = E > PI
     # correct nu if it falls in lower half of unit circle (TODO: functionalize?)
@@ -138,6 +140,7 @@ def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
             assert isinstance(nu, np.ndarray)
             nu[ix] = TAU - nu[ix]
     return nu
+
 
 #%% Functions - anomaly_hyperbolic_2_mean
 def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N:
@@ -176,11 +179,12 @@ def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N:
     if np.any(e < 1):
         raise ValueError('The hyperbolic anomaly is not defined when e < 1')
     # calculate the mean anomaly
-    M = e*np.sinh(F) - F
+    M = e * np.sinh(F) - F
     return M
 
+
 #%% Functions - anomaly_hyperbolic_2_true
-def anomaly_hyperbolic_2_true(F:_N, e: _N) -> _N:
+def anomaly_hyperbolic_2_true(F: _N, e: _N) -> _N:
 
     r"""
     Finds the true anomaly from the hyperbolic anomaly.
@@ -217,7 +221,7 @@ def anomaly_hyperbolic_2_true(F:_N, e: _N) -> _N:
     if np.any(e < 1):
         raise ValueError('The hyperbolic anomaly is not defined when e < 1')
     # calculate nu
-    nu = 2*np.arctan(np.sqrt((e + 1)/(e - 1)) * np.tanh(F/2))  # TODO: use np.arctan2?
+    nu = 2 * np.arctan(np.sqrt((e + 1) / (e - 1)) * np.tanh(F / 2))  # TODO: use np.arctan2?
     # check half of unit circle for 0 to pi or pi to 2*pi range
     ix = F < 0
     # correct nu if it falls in lower half of unit circle
@@ -228,6 +232,7 @@ def anomaly_hyperbolic_2_true(F:_N, e: _N) -> _N:
             assert isinstance(nu, np.ndarray)
             nu[ix] += TAU
     return nu  # type: ignore[no-any-return]
+
 
 #%% Functions - anomaly_mean_2_eccentric
 def anomaly_mean_2_eccentric(M, e):
@@ -289,6 +294,7 @@ def anomaly_mean_2_eccentric(M, e):
     E = np.mod(E, TAU)
     return E
 
+
 #%% Functions - anomaly_mean_2_true
 
 #%% Functions - anomaly_true_2_eccentric
@@ -335,10 +341,11 @@ def long_2_sidereal(lon: _N, jd: _N) -> _N:
     # theta at epoch
     theta_go = JULIAN['tg0_2000']
     # earth rate per day
-    earth_rate = EARTH['omega']*JULIAN['day']
+    earth_rate = EARTH['omega'] * JULIAN['day']
     # find theta
-    theta = np.mod(theta_go + earth_rate*(jd - to) + lon, TAU)
+    theta = np.mod(theta_go + earth_rate * (jd - to) + lon, TAU)
     return theta
+
 
 #%% Functions - mean_motion_2_semimajor
 def mean_motion_2_semimajor(n, mu):
@@ -376,8 +383,9 @@ def mean_motion_2_semimajor(n, mu):
     """
     if _any(n <= 0):
         raise ValueError('The orbit is not defined when n <= 0')
-    a = (mu/n**2)**(1/3)
+    a = (mu / n ** 2) ** (1 / 3)
     return a
+
 
 #%% Functions - period_2_semimajor
 def period_2_semimajor(p: _N, mu: _N) -> _N:
@@ -415,8 +423,9 @@ def period_2_semimajor(p: _N, mu: _N) -> _N:
     """
     if _any(p <= 0):
         raise ValueError('The orbit is not defined when P <= 0')
-    a = (mu*p**2/(TAU**2))**(1/3)
+    a = (mu * p ** 2 / (TAU ** 2)) ** (1 / 3)
     return a
+
 
 #%% Functions - semimajor_2_mean_motion
 def semimajor_2_mean_motion(a: _N, mu: _N) -> _N:
@@ -455,8 +464,9 @@ def semimajor_2_mean_motion(a: _N, mu: _N) -> _N:
     """
     if _any(a <= 0):
         raise ValueError('The period is not defined when a <= 0')
-    n = sqrt(mu/a**3)
+    n = sqrt(mu / a ** 3)
     return n
+
 
 #%% Functions - semimajor_2_period
 def semimajor_2_period(a: _N, mu: _N) -> _N:
@@ -495,8 +505,9 @@ def semimajor_2_period(a: _N, mu: _N) -> _N:
     """
     if _any(a <= 0):
         raise ValueError('The period is not defined when a <= 0')
-    p = TAU*sqrt(a**3/mu)
+    p = TAU * sqrt(a ** 3 / mu)
     return p
+
 
 #%% Functions - sidereal_2_long
 def sidereal_2_long(theta: _N, t: _N) -> _N:
@@ -535,8 +546,8 @@ def sidereal_2_long(theta: _N, t: _N) -> _N:
     # theta at epoch
     theta_go = JULIAN['tg0_2000']
     # find theta
-    earth_rate = EARTH['omega']*JULIAN['day']
-    lon = np.mod(theta - theta_go - earth_rate*(t - to), TAU)
+    earth_rate = EARTH['omega'] * JULIAN['day']
+    lon = np.mod(theta - theta_go - earth_rate * (t - to), TAU)
     # change from (0:2*pi) range to (-pi:pi)
     ix = lon > PI
     if np.any(ix):
@@ -546,6 +557,7 @@ def sidereal_2_long(theta: _N, t: _N) -> _N:
             assert isinstance(lon, np.ndarray)
             lon[ix] -= TAU
     return lon
+
 
 #%% Unit Test
 if __name__ == '__main__':

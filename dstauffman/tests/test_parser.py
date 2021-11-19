@@ -19,6 +19,7 @@ class Test__VALID_COMMANDS(unittest.TestCase):
     r"""
     Tests the _VALID_COMMANDS enumerator for expected values.
     """
+
     def test_nominal(self) -> None:
         self.assertIn('coverage',  dcs.parser._VALID_COMMANDS)
         self.assertIn('enforce',   dcs.parser._VALID_COMMANDS)
@@ -27,12 +28,14 @@ class Test__VALID_COMMANDS(unittest.TestCase):
         self.assertIn('tests',     dcs.parser._VALID_COMMANDS)
         self.assertIn('version',   dcs.parser._VALID_COMMANDS)
 
+
 #%% parser._print_bad_command
 class Test_parser__print_bad_command(unittest.TestCase):
     r"""
     Tests the parser._print_bad_command function with the following cases:
         Nominal
     """
+
     def test_nominal(self) -> None:
         with dcs.capture_output() as out:
             dcs.parser._print_bad_command('garbage')
@@ -40,13 +43,15 @@ class Test_parser__print_bad_command(unittest.TestCase):
         out.close()
         self.assertEqual(output, 'Command "garbage" is not understood.')
 
+
 #%% main
 class Test_main(unittest.TestCase):
     r"""
     Tests the main function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% parse_wrapper
 class Test_parse_wrapper(unittest.TestCase):
@@ -55,11 +60,14 @@ class Test_parse_wrapper(unittest.TestCase):
         Nominal
         Help (x2)
     """
+
     def test_nominal(self) -> None:
         (command, parsed_args) = dcs.parse_wrapper(['tests', '-dv'])
         self.assertEqual(command, 'tests')
-        self.assertEqual(parsed_args, argparse.Namespace(docstrings=True, unittest=False, \
-            verbose=True, library=None, coverage=False, cov_file=None))
+        self.assertEqual(
+            parsed_args,
+            argparse.Namespace(docstrings=True, unittest=False, verbose=True, library=None, coverage=False, cov_file=None),
+        )
 
     def test_help1(self) -> None:
         (command, parsed_args) = dcs.parse_wrapper([])
@@ -69,6 +77,7 @@ class Test_parse_wrapper(unittest.TestCase):
         (command, parsed_args) = dcs.parse_wrapper(['-h'])
         self.assertEqual(command, 'help')
 
+
 #%% parse_commands
 class Test_parse_commands(unittest.TestCase):
     r"""
@@ -76,15 +85,19 @@ class Test_parse_commands(unittest.TestCase):
         Valid command
         Bad command
     """
+
     def test_valid_command(self) -> None:
         parsed_args = dcs.parse_commands('tests', ['-dv'])
-        self.assertEqual(parsed_args, argparse.Namespace(docstrings=True, unittest=False, \
-            verbose=True, library=None, coverage=False, cov_file=None))
+        self.assertEqual(
+            parsed_args,
+            argparse.Namespace(docstrings=True, unittest=False, verbose=True, library=None, coverage=False, cov_file=None),
+        )
 
     def test_bad_command(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.parse_commands('bad', [])
         self.assertEqual(str(context.exception), 'Unexpected command "bad".')
+
 
 #%% execute_command
 class Test_execute_command(unittest.TestCase):
@@ -93,6 +106,7 @@ class Test_execute_command(unittest.TestCase):
         Good command
         Bad command
     """
+
     def test_good_command(self) -> None:
         with dcs.capture_output() as out:
             rc = dcs.execute_command('help', argparse.Namespace())
@@ -109,6 +123,7 @@ class Test_execute_command(unittest.TestCase):
         self.assertEqual(output, 'Command "bad" is not understood.')
         self.assertEqual(rc, dcs.ReturnCodes.bad_command)
 
+
 #%% process_command_line_options
 class Test_process_command_line_options(unittest.TestCase):
     r"""
@@ -118,6 +133,7 @@ class Test_process_command_line_options(unittest.TestCase):
         No plotting
         No HDF5
     """
+
     def test_nominal(self) -> None:
         flags = dcs.process_command_line_options()
         # check expected defaults
@@ -153,7 +169,6 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertIsNone(flags.log_level)
         self.assertEqual(output, 'Running without making any plots.')
 
-
     def test_no_hdf5(self) -> None:
         with dcs.capture_output() as out:
             with patch('sys.argv', ['name.py', '-nohdf5']):
@@ -187,7 +202,7 @@ class Test_process_command_line_options(unittest.TestCase):
         mocker.log.assert_called_once_with(logging.INFO, 'Configuring Log Level at: 20')
 
     def test_everything(self) -> None:
-        logger = logging.getLogger('dstauffman.parser') # Note: alternative syntax for mocker
+        logger = logging.getLogger('dstauffman.parser')  # Note: alternative syntax for mocker
         with patch.object(logger, 'log') as mocker:
             with patch('sys.argv', ['name.py', '-l5', '-nodisp', '-noplot', '-nohdf5']):
                 flags = dcs.process_command_line_options()
@@ -196,6 +211,7 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertFalse(flags.use_hdf5)
         self.assertEqual(flags.log_level, dcs.LogLevel.L5)
         mocker.assert_called_once_with(dcs.parser.LogLevel.L5, 'Configuring Log Level at: LogLevel.L5: 20')
+
 
 #%% Unit test execution
 if __name__ == '__main__':

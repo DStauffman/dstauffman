@@ -12,14 +12,24 @@ from typing import List, Optional
 import unittest
 from unittest.mock import patch
 
-from dstauffman import capture_output, get_tests_dir, HAVE_MPL, HAVE_NUMPY, LogLevel, \
-    NP_DATETIME_FORM, NP_INT64_PER_SEC, NP_TIMEDELTA_FORM, unit
+from dstauffman import (
+    capture_output,
+    get_tests_dir,
+    HAVE_MPL,
+    HAVE_NUMPY,
+    LogLevel,
+    NP_DATETIME_FORM,
+    NP_INT64_PER_SEC,
+    NP_TIMEDELTA_FORM,
+    unit,
+)
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
+
     inf = np.inf
 else:
     from math import inf
@@ -31,6 +41,7 @@ class Test_plotting_Opts(unittest.TestCase):
         normal mode
         add new attribute to existing instance
     """
+
     def setUp(self) -> None:
         self.opts_fields = ['case_name']
 
@@ -62,7 +73,7 @@ class Test_plotting_Opts(unittest.TestCase):
         self.assertEqual(date_str, '')
         opts.date_zero = datetime.datetime(2019, 4, 1, 18, 0, 0)
         date_str = opts.get_date_zero_str()
-        self.assertEqual(date_str,'  t(0) = 01-Apr-2019 18:00:00 Z')
+        self.assertEqual(date_str, '  t(0) = 01-Apr-2019 18:00:00 Z')
 
     def test_get_time_limits(self) -> None:
         opts = plot.Opts()
@@ -117,10 +128,11 @@ class Test_plotting_Opts(unittest.TestCase):
         opts.disp_xmax = 150
         opts.convert_dates('datetime')
         self.assertEqual(opts.time_base, 'datetime')
-        self.assertEqual(opts.rms_xmin,  datetime.datetime(2020, 5, 31, 23, 59, 50))
-        self.assertEqual(opts.rms_xmax,  datetime.datetime(2020, 6, 1, 0, 0, 10))
+        self.assertEqual(opts.rms_xmin, datetime.datetime(2020, 5, 31, 23, 59, 50))
+        self.assertEqual(opts.rms_xmax, datetime.datetime(2020, 6, 1, 0, 0, 10))
         self.assertEqual(opts.disp_xmin, datetime.datetime(2020, 6, 1, 0, 0, 5))
         self.assertEqual(opts.disp_xmax, datetime.datetime(2020, 6, 1, 0, 2, 30))
+
 
 #%% plotting.suppress_plots and plotting.unsupress_plots
 class Test_plotting_Plotter(unittest.TestCase):
@@ -128,6 +140,7 @@ class Test_plotting_Plotter(unittest.TestCase):
     Tests the plotting.Plotter class with the following cases:
         Suppress and Unsuppress
     """
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.orig_flag = plot.plotting._Plotter  # type: ignore[attr-defined]
@@ -143,6 +156,7 @@ class Test_plotting_Plotter(unittest.TestCase):
             plot.unsuppress_plots()
         else:
             plot.suppress_plots()
+
 
 #%% plotting.plot_time_history
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
@@ -160,23 +174,23 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         Bad legend
         Show zero
     """
+
     def setUp(self) -> None:
         self.description = 'Plot description'
-        self.time        = np.arange(0, 10, 0.1) + 2000
-        num_channels     = 5
-        self.row_data    = np.random.rand(len(self.time), num_channels)
-        mag              = np.sum(self.row_data, axis=1)
-        self.row_data    = 10 * self.row_data / np.expand_dims(mag, axis=1)
-        self.col_data    = self.row_data.T.copy()
-        self.units       = 'percentage'
-        self.opts        = plot.Opts()
+        self.time           = np.arange(0, 10, 0.1) + 2000
+        num_channels        = 5
+        self.row_data       = np.random.rand(len(self.time), num_channels)
+        mag                 = np.sum(self.row_data, axis=1)
+        self.row_data       = 10 * self.row_data / np.expand_dims(mag, axis=1)
+        self.col_data       = self.row_data.T.copy()
+        self.units          = 'percentage'
+        self.opts           = plot.Opts()
         self.opts.show_plot = False
-        self.elements    = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
+        self.elements       = ['Value 1', 'Value 2', 'Value 3', 'Value 4', 'Value 5']
         self.figs: List[plt.Figure] = []
 
     def test_nominal(self) -> None:
-        self.figs.append(plot.plot_time_history(self.description, self.time, self.row_data, \
-            opts=self.opts, data_as_rows=False))
+        self.figs.append(plot.plot_time_history(self.description, self.time, self.row_data, opts=self.opts, data_as_rows=False))
 
     def test_defaults(self) -> None:
         self.figs.append(plot.plot_time_history('', self.time, self.col_data))
@@ -225,8 +239,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 
     def test_datetime(self) -> None:
         dates = np.datetime64('2020-01-11 12:00:00') + np.arange(0, 1000, 10).astype('timedelta64[ms]')
-        self.figs.append(plot.plot_time_history(self.description, dates, self.col_data, opts=self.opts, \
-            time_units='numpy'))
+        self.figs.append(plot.plot_time_history(self.description, dates, self.col_data, opts=self.opts, time_units='numpy'))
 
     def test_lists0(self) -> None:
         time = np.arange(100, dtype=float)
@@ -235,19 +248,20 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 
     def test_lists1(self) -> None:
         time = np.arange(10)
-        data = [np.random.rand(10), 5*np.random.rand(10)]
+        data = [np.random.rand(10), 5 * np.random.rand(10)]
         elements = ('Item 1', '5 Times')
         self.figs.append(plot.plot_time_history(self.description, time, data, opts=self.opts, elements=elements))
 
     def test_lists2(self) -> None:
         time = [np.arange(5), np.arange(10, dtype=float)]
-        data = [np.array([0., 0.1, 0.2, 0.3, 0.5]), np.arange(10)]
+        data = [np.array([0.0, 0.1, 0.2, 0.3, 0.5]), np.arange(10)]
         self.figs.append(plot.plot_time_history(self.description, time, data, opts=self.opts))
 
     def tearDown(self) -> None:
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
+
 
 #%% plotting.plot_correlation_matrix
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
@@ -265,15 +279,16 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
         x label rotation
         bad labels (should raise error)
     """
+
     def setUp(self) -> None:
         num = 10
         self.figs: List[plt.Figure] = []
-        self.data   = unit(np.random.rand(num, num), axis=0)
+        self.data = unit(np.random.rand(num, num), axis=0)
         self.labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
-        self.units  = 'percentage'
-        self.opts   = plot.Opts()
+        self.units = 'percentage'
+        self.opts = plot.Opts()
         self.opts.case_name = 'Testing Correlation'
-        self.matrix_name    = 'Not a Correlation Matrix'
+        self.matrix_name = 'Not a Correlation Matrix'
         self.sym = self.data.copy()
         for j in range(num):
             for i in range(num):
@@ -286,8 +301,7 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
         self.figs.append(plot.plot_correlation_matrix(self.data, self.labels))
 
     def test_nonsquare(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data[:5, :3], [self.labels[:3], \
-            self.labels[:5]]))
+        self.figs.append(plot.plot_correlation_matrix(self.data[:5, :3], [self.labels[:3], self.labels[:5]]))
 
     def test_default_labels(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.data[:5, :3]))
@@ -296,9 +310,23 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
         self.figs.append(plot.plot_correlation_matrix(self.data, units=self.units))
 
     def test_all_args(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data, self.labels, self.units, opts=self.opts, \
-            matrix_name=self.matrix_name, cmin=0, cmax=1, xlabel='', ylabel='', \
-            plot_lower_only=False, label_values=True, x_lab_rot=180, colormap='Paired'))
+        self.figs.append(
+            plot.plot_correlation_matrix(
+                self.data,
+                self.labels,
+                self.units,
+                opts=self.opts,
+                matrix_name=self.matrix_name,
+                cmin=0,
+                cmax=1,
+                xlabel='',
+                ylabel='',
+                plot_lower_only=False,
+                label_values=True,
+                x_lab_rot=180,
+                colormap='Paired',
+            )
+        )
 
     def test_symmetric(self) -> None:
         self.figs.append(plot.plot_correlation_matrix(self.sym))
@@ -315,11 +343,11 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmax=2000))
 
     def test_below_one(self) -> None:
-        large_data = 1000*(self.data - 0.5)
+        large_data = 1000 * (self.data - 0.5)
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
 
     def test_below_one_part2(self) -> None:
-        large_data = 1000*(self.data - 0.5)
+        large_data = 1000 * (self.data - 0.5)
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmin=-2))
 
     def test_within_minus_one(self) -> None:
@@ -354,6 +382,7 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
         for i in range(len(self.figs)):
             plt.close(self.figs.pop())
 
+
 #%% plotting.plot_bar_breakdown
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
 class Test_plotting_plot_bar_breakdown(unittest.TestCase):
@@ -368,8 +397,9 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         Bad legend
         With Colormap
     """
+
     def setUp(self) -> None:
-        self.time = np.arange(0, 5, 1./12) + 2000
+        self.time = np.arange(0, 5, 1.0 / 12) + 2000
         num_bins = 5
         self.data = np.random.rand(num_bins, len(self.time))
         mag = np.sum(self.data, axis=0)
@@ -381,8 +411,9 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         self.figs: List[plt.Figure] = []
 
     def test_nominal(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, \
-            elements=self.elements))
+        self.figs.append(
+            plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, elements=self.elements)
+        )
 
     def test_defaults(self) -> None:
         self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data))
@@ -407,8 +438,7 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
     def test_colormap(self) -> None:
         self.opts.colormap = 'Dark2'
         colormap = 'Paired'
-        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, \
-            opts=self.opts, colormap=colormap))
+        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, colormap=colormap))
 
     def test_bad_elements(self) -> None:
         with self.assertRaises(AssertionError):
@@ -423,17 +453,20 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
 
     def test_datetime(self) -> None:
         dates = np.datetime64('2020-01-11 12:00:00') + np.arange(0, 7200, 120).astype('timedelta64[s]')
-        self.figs.append(plot.plot_bar_breakdown(self.description, dates, self.data, opts=self.opts, \
-        time_units='numpy'))
+        self.figs.append(plot.plot_bar_breakdown(self.description, dates, self.data, opts=self.opts, time_units='numpy'))
 
     def test_data_as_rows(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data.T.copy(), opts=self.opts, \
-            elements=self.elements, data_as_rows=False))
+        self.figs.append(
+            plot.plot_bar_breakdown(
+                self.description, self.time, self.data.T.copy(), opts=self.opts, elements=self.elements, data_as_rows=False
+            )
+        )
 
     def tearDown(self) -> None:
         if self.figs:
             for this_fig in self.figs:
                 plt.close(this_fig)
+
 
 #%% plotting.plot_histogram
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
@@ -444,10 +477,11 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         All inputs
         Datetimes
     """
+
     def setUp(self) -> None:
         self.description = 'Histogram'
-        self.data = np.array([0.5, 3.3, 1., 1.5, 1.5, 1.75, 2.5, 2.5])
-        self.bins = np.array([0., 1., 2., 3., 5., 7.])
+        self.data = np.array([0.5, 3.3, 1.0, 1.5, 1.5, 1.75, 2.5, 2.5])
+        self.bins = np.array([0.0, 1.0, 2.0, 3.0, 5.0, 7.0])
         self.fig: Optional[plt.Figure] = None
 
     def test_nominal(self) -> None:
@@ -455,18 +489,26 @@ class Test_plotting_plot_histogram(unittest.TestCase):
 
     def test_with_opts(self) -> None:
         opts = plot.Opts()
-        self.fig = plot.plot_histogram(self.description, self.data, self.bins, opts=opts, color='xkcd:black', \
-            xlabel='Text', ylabel='Num', second_ylabel='Dist')
+        self.fig = plot.plot_histogram(
+            self.description,
+            self.data,
+            self.bins,
+            opts=opts,
+            color='xkcd:black',
+            xlabel='Text',
+            ylabel='Num',
+            second_ylabel='Dist',
+        )
 
     def test_datetimes(self) -> None:
         date_zero = np.datetime64(datetime.date(2021, 2, 1)).astype(NP_DATETIME_FORM)
-        data_np   = date_zero + np.round(NP_INT64_PER_SEC * self.data).astype(NP_TIMEDELTA_FORM)
-        bins_np   = date_zero + np.round(NP_INT64_PER_SEC * self.bins).astype(NP_TIMEDELTA_FORM)
+        data_np = date_zero + np.round(NP_INT64_PER_SEC * self.data).astype(NP_TIMEDELTA_FORM)
+        bins_np = date_zero + np.round(NP_INT64_PER_SEC * self.bins).astype(NP_TIMEDELTA_FORM)
         # TODO: would prefer to handle this case better
-        self.fig  = plot.plot_histogram(self.description, data_np.astype(np.int64), bins_np.astype(np.int64))
+        self.fig = plot.plot_histogram(self.description, data_np.astype(np.int64), bins_np.astype(np.int64))
 
     def test_infs(self) -> None:
-        self.fig = plot.plot_histogram(self.description, self.data, np.array([-np.inf, -1., 0., 1., np.inf]))
+        self.fig = plot.plot_histogram(self.description, self.data, np.array([-np.inf, -1.0, 0.0, 1.0, np.inf]))
 
     def test_int_cats(self) -> None:
         data = np.array([3, 3, 5, 8, 2, 2, 2])
@@ -486,12 +528,14 @@ class Test_plotting_plot_histogram(unittest.TestCase):
             plot.plot_histogram(self.description, self.data, np.array([3, 10, 15]))
 
     def test_missing_exacts(self) -> None:
-        self.fig = plot.plot_histogram(self.description, np.array([1, 1, 1, 2, 3, 3, 3]), \
-            np.array([0, 3, 6]), use_exact_counts=True)
+        self.fig = plot.plot_histogram(
+            self.description, np.array([1, 1, 1, 2, 3, 3, 3]), np.array([0, 3, 6]), use_exact_counts=True
+        )
 
     def tearDown(self) -> None:
         if self.fig:
             plt.close(self.fig)
+
 
 #%% plotting.setup_plots
 @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
@@ -505,6 +549,7 @@ class Test_plotting_setup_plots(unittest.TestCase):
         Save the plot
         Show the plot link
     """
+
     def setUp(self) -> None:
         self.fig = plt.figure()
         self.fig.canvas.manager.set_window_title('Figure Title')
@@ -561,6 +606,7 @@ class Test_plotting_setup_plots(unittest.TestCase):
 
     def tearDown(self) -> None:
         plt.close(self.fig)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

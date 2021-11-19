@@ -14,6 +14,7 @@ import dstauffman.nubs as nubs
 
 if HAVE_NUMPY:
     import numpy as np
+
     pi = np.pi
     inf = np.inf
 else:
@@ -26,16 +27,18 @@ class Test__reduce_shape(unittest.TestCase):
         Nominal
         Bad axis
     """
+
     def test_nominal(self) -> None:
         shape = (1, 2, 3, 4, 5)
         for axis in range(5):
             out = nubs.numpy_mods._reduce_shape(shape, axis)
-            expected = shape[:axis] + shape[axis+1:]
+            expected = shape[:axis] + shape[axis + 1 :]
             self.assertEqual(tuple(out), expected)
 
     def test_bad_axis(self) -> None:
         with self.assertRaises(ValueError):
             nubs.numpy_mods._reduce_shape((1, 2), 2)
+
 
 #%% issorted_ascend
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -46,6 +49,7 @@ class Test_issorted_ascend(unittest.TestCase):
         Not sorted
         Lists
     """
+
     def test_sorted(self) -> None:
         x = np.array([1, 3, 3, 5, 7])
         self.assertTrue(nubs.issorted_ascend(x))
@@ -57,8 +61,9 @@ class Test_issorted_ascend(unittest.TestCase):
         self.assertFalse(nubs.issorted_ascend(x))
 
     def test_reverse(self) -> None:
-        x = np.array([inf, 4, pi, 1., -1., -inf])
+        x = np.array([inf, 4, pi, 1.0, -1.0, -inf])
         self.assertFalse(nubs.issorted_ascend(x))
+
 
 #%% issorted_descend
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -69,10 +74,11 @@ class Test_issorted_descend(unittest.TestCase):
         Not sorted
         Lists
     """
+
     def test_sorted(self) -> None:
         x = np.array([7, 5, 3, 3, 1])
         self.assertTrue(nubs.issorted_descend(x))
-        x2 = np.array([inf, 4., pi, 1, -1, -inf])
+        x2 = np.array([inf, 4.0, pi, 1, -1, -inf])
         self.assertTrue(nubs.issorted_descend(x2))
 
     def test_not_sorted(self) -> None:
@@ -80,8 +86,9 @@ class Test_issorted_descend(unittest.TestCase):
         self.assertFalse(nubs.issorted_descend(x))
 
     def test_reverse(self) -> None:
-        x = np.array([-inf, -1, 1, pi, 4., inf])
+        x = np.array([-inf, -1, 1, pi, 4.0, inf])
         self.assertFalse(nubs.issorted_descend(x))
+
 
 #%% np_all_axis0, np_all_axis1, np_any_axis0, np_any_axis1
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -94,6 +101,7 @@ class Test_np_all_axis0(unittest.TestCase):
         0D
         3D
     """
+
     def test_nominal(self) -> None:
         x = np.array([[True, True, False, False], [True, False, True, False]], dtype=bool)
         np.testing.assert_array_equal(nubs.np_all_axis0(x), np.all(x, axis=0))
@@ -132,6 +140,7 @@ class Test_np_all_axis0(unittest.TestCase):
 
     def test_empty(self) -> None:
         pass
+
 
 #%% Unit test execution
 if __name__ == '__main__':

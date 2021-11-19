@@ -24,6 +24,7 @@ class Test_estimation__update_information(unittest.TestCase):
     Tests the estimation._update_information function with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
         num_states = 6
         num_axes = 2
@@ -35,9 +36,11 @@ class Test_estimation__update_information(unittest.TestCase):
         self.LAMBDA_bar = np.ones((num_states, num_states))
 
     def test_nominal(self) -> None:
-        (lambda_hat, LAMBDA_hat) = estm.smoother._update_information(self.H, self.Pz, self.z, \
-            self.K, self.lambda_bar, self.LAMBDA_bar)
+        (lambda_hat, LAMBDA_hat) = estm.smoother._update_information(
+            self.H, self.Pz, self.z, self.K, self.lambda_bar, self.LAMBDA_bar
+        )
         # TODO: assert something
+
 
 #%% estimation.bf_smoother
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -46,6 +49,7 @@ class Test_estimation_bf_smoother(unittest.TestCase):
     Tests the estimation.bf_smoother function with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
         num_points = 5
         num_states = 6
@@ -77,6 +81,7 @@ class Test_estimation_bf_smoother(unittest.TestCase):
     def test_nominal(self) -> None:
         (x_delta, lambda_bar_initial, LAMBDA_bar_initial) = estm.bf_smoother(self.kf_record)
         # TODO: assert something
+
 
 #%% Unit test execution
 if __name__ == '__main__':

@@ -15,6 +15,7 @@ import dstauffman.health as health
 
 if HAVE_NUMPY:
     import numpy as np
+
     nan = np.nan
     inf = np.inf
 else:
@@ -29,10 +30,11 @@ class Test_health_make_preamble(unittest.TestCase):
         Minipage
         Short caption
     """
+
     def setUp(self) -> None:
         self.caption = 'This caption'
-        self.label   = 'tab:this_label'
-        self.cols    = 'lcc'
+        self.label = 'tab:this_label'
+        self.cols = 'lcc'
 
     def test_nominal(self) -> None:
         out = health.make_preamble(self.caption, self.label, self.cols)
@@ -64,6 +66,7 @@ class Test_health_make_preamble(unittest.TestCase):
         with self.assertRaises(AssertionError):
             health.make_preamble(self.caption, self.label, self.cols, short_cap='Short cap', numbered=False)
 
+
 #%% health.make_conclusion
 class Test_health_make_conclusion(unittest.TestCase):
     r"""
@@ -71,14 +74,15 @@ class Test_health_make_conclusion(unittest.TestCase):
         Nominal
         Minipage
     """
+
     def test_nominal(self) -> None:
         out = health.make_conclusion()
         self.assertEqual(out, ['        \\bottomrule', '    \\end{tabular}', '\\end{table}', ''])
 
     def test_minipage(self) -> None:
         out = health.make_conclusion(use_mini=True)
-        self.assertEqual(out, ['            \\bottomrule', '        \\end{tabular}', \
-            '    \\end{minipage}', '\\end{table}', ''])
+        self.assertEqual(out, ['            \\bottomrule', '        \\end{tabular}', '    \\end{minipage}', '\\end{table}', ''])
+
 
 #%% health.bins_to_str_ranges
 class Test_health_bins_to_str_ranges(unittest.TestCase):
@@ -92,6 +96,7 @@ class Test_health_bins_to_str_ranges(unittest.TestCase):
         Single value ranges
         String passthrough
     """
+
     def setUp(self) -> None:
         self.bins: Union[np.ndarray, List[int]]
         if HAVE_NUMPY:
@@ -133,12 +138,14 @@ class Test_health_bins_to_str_ranges(unittest.TestCase):
         out = health.bins_to_str_ranges(['Urban', 'Rural', 'ignored'])
         self.assertEqual(out, ['Urban', 'Rural'])
 
+
 #%% health.latex_str
 class Test_health_latex_str(unittest.TestCase):
     r"""
     Tests the health.latex_str function with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
         self.value = 101.666666666666
         self.value2 = 0.016528546178382508  # health.rate_to_prob(0.2/12)
@@ -226,6 +233,7 @@ class Test_health_latex_str(unittest.TestCase):
     def test_infinity(self) -> None:
         value_str = health.latex_str(inf)
         self.assertEqual(value_str, r'$\infty$')
+
 
 #%% Unit test execution
 if __name__ == '__main__':

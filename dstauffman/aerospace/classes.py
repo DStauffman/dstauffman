@@ -11,12 +11,10 @@ from __future__ import annotations
 import copy
 import doctest
 from pathlib import Path
-from typing import Any, FrozenSet, List, Literal, Optional, overload, Set, Tuple, TYPE_CHECKING, \
-    TypeVar, Union
+from typing import Any, FrozenSet, List, Literal, Optional, overload, Set, Tuple, TYPE_CHECKING, TypeVar, Union
 import unittest
 
-from dstauffman import chop_time, Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, \
-    NP_DATETIME_FORM, save_method
+from dstauffman import chop_time, Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, save_method
 
 if HAVE_H5PY:
     import h5py
@@ -24,21 +22,50 @@ if HAVE_NUMPY:
     import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
-    _Chan = Union[List[str], Tuple[str,...]]
+
+    _Chan = Union[List[str], Tuple[str, ...]]
     _Sets = Union[Set[str], FrozenSet[str]]
     _Time = Union[float, np.datetime64]
     _T = TypeVar('_T')
 
 #%% Support Functions
 @overload
-def _chop_wrapper(orig: _T, exclude: _Sets, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
-        inplace: bool = ..., return_ends: Literal[True], subclasses: _Sets = ...) -> Tuple[_T, _T, _T]: ...
-@overload
-def _chop_wrapper(orig: _T, exclude: _Sets, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
-        inplace: bool = ..., return_ends: Literal[False] = ..., subclasses: _Sets = ...) -> _T: ...
+def _chop_wrapper(
+    orig: _T,
+    exclude: _Sets,
+    ti: _Time = ...,
+    tf: _Time = ...,
+    *,
+    include_last: bool = ...,
+    inplace: bool = ...,
+    return_ends: Literal[True],
+    subclasses: _Sets = ...,
+) -> Tuple[_T, _T, _T]: ...
 
-def _chop_wrapper(orig: _T, exclude: _Sets, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, \
-        inplace: bool = False, return_ends: bool = False, subclasses: _Sets = None) -> Union[_T, Tuple[_T, _T, _T]]:
+@overload
+def _chop_wrapper(
+    orig: _T,
+    exclude: _Sets,
+    ti: _Time = ...,
+    tf: _Time = ...,
+    *,
+    include_last: bool = ...,
+    inplace: bool = ...,
+    return_ends: Literal[False] = ...,
+    subclasses: _Sets = ...,
+) -> _T: ...
+
+def _chop_wrapper(
+    orig: _T,
+    exclude: _Sets,
+    ti: _Time = None,
+    tf: _Time = None,
+    *,
+    include_last: bool = True,
+    inplace: bool = False,
+    return_ends: bool = False,
+    subclasses: _Sets = None,
+) -> Union[_T, Tuple[_T, _T, _T]]:
     assert orig.time is not None, "You can't chop an uninitialized time field."  # type: ignore[attr-defined]
     use_dates = is_datetime(orig.time)  # type: ignore[attr-defined]
     if ti is None:
@@ -58,8 +85,7 @@ def _chop_wrapper(orig: _T, exclude: _Sets, ti: _Time = None, tf: _Time = None, 
     chop_time(out, time_field='time', exclude=exclude, ti=ti, tf=tf, right=include_last)
     if subclasses is not None:
         for sub in subclasses:
-            temp = getattr(out, sub).chop(ti=ti, tf=tf, include_last=include_last, inplace=inplace, \
-                    return_ends=return_ends)
+            temp = getattr(out, sub).chop(ti=ti, tf=tf, include_last=include_last, inplace=inplace, return_ends=return_ends)
             if return_ends:
                 setattr(left, sub, temp[0])
                 setattr(out, sub, temp[1])
@@ -69,6 +95,7 @@ def _chop_wrapper(orig: _T, exclude: _Sets, ti: _Time = None, tf: _Time = None, 
     if return_ends:
         return (left, out, right)
     return out
+
 
 #%% KfInnov
 class KfInnov(Frozen):
@@ -108,10 +135,19 @@ class KfInnov(Frozen):
     >>> innov = KfInnov()
 
     """
-    def __init__(self, *, name: str = '', units: str = '', chan: _Chan = None, num_innovs: int = 0, \
-            num_axes: int = 0, time_dtype: DTypeLike = float):
+
+    def __init__(
+        self,
+        *,
+        name: str = '',
+        units: str = '',
+        chan: _Chan = None,
+        num_innovs: int = 0,
+        num_axes: int = 0,
+        time_dtype: DTypeLike = float,
+    ):
         r"""Initializes a new KfInnov instance."""
-        self.name  = name
+        self.name = name
         self.chan: Optional[_Chan]
         if chan is not None:
             self.chan = chan
@@ -126,7 +162,7 @@ class KfInnov(Frozen):
         self.status: Optional[np.ndarray]
         if num_innovs > 0:
             self.time   = np.empty(num_innovs, dtype=time_dtype)
-            innov_shape = (num_axes, num_innovs) if num_axes > 1 else (num_innovs, )
+            innov_shape = (num_axes, num_innovs) if num_axes > 1 else (num_innovs,)
             self.innov  = np.full(innov_shape, np.nan, dtype=float, order='F')
             self.norm   = np.full(innov_shape, np.nan, dtype=float, order='F')
             self.status = np.empty(num_innovs, dtype=int)
@@ -136,7 +172,7 @@ class KfInnov(Frozen):
             self.norm   = None
             self.status = None
         self.fploc: Optional[np.ndarray] = None
-        self.snr: Optional[np.ndarray]   = None
+        self.snr: Optional[np.ndarray] = None
 
     def combine(self, kfinnov2: KfInnov, /, *, inplace: bool = False) -> KfInnov:
         r"""Combines two KfInnov structures together."""
@@ -155,30 +191,42 @@ class KfInnov(Frozen):
             return kfinnov
         assert kfinnov.time is not None
         assert kfinnov2.time is not None
-        kfinnov.time   = np.hstack((self.time, kfinnov2.time))
+        kfinnov.time = np.hstack((self.time, kfinnov2.time))
         # TODO: deal with Nones
-        kfinnov.innov  = np.column_stack((self.innov, kfinnov2.innov))
-        kfinnov.norm   = np.column_stack((self.norm, kfinnov2.norm))
+        kfinnov.innov = np.column_stack((self.innov, kfinnov2.innov))
+        kfinnov.norm = np.column_stack((self.norm, kfinnov2.norm))
         kfinnov.status = np.hstack((self.status, kfinnov2.status))  # type: ignore[arg-type]
         if self.fploc is not None and kfinnov2.fploc is not None:
-            kfinnov.fploc  = np.column_stack((self.fploc, kfinnov2.fploc))
+            kfinnov.fploc = np.column_stack((self.fploc, kfinnov2.fploc))
         if self.snr is not None and kfinnov2.snr is not None:
-            kfinnov.snr    = np.hstack((self.snr, kfinnov2.snr))
+            kfinnov.snr = np.hstack((self.snr, kfinnov2.snr))
         return kfinnov
 
     @overload
-    def chop(self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
-            inplace: bool = ..., return_ends: Literal[True]) -> Tuple[KfInnov, KfInnov, KfInnov]: ...
-    @overload
-    def chop(self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
-            inplace: bool = ..., return_ends: Literal[False] = ...) -> KfInnov: ...
+    def chop(
+        self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., inplace: bool = ..., return_ends: Literal[True]
+    ) -> Tuple[KfInnov, KfInnov, KfInnov]: ...
 
-    def chop(self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, \
-            inplace: bool = False, return_ends: bool = False) -> Union[KfInnov, Tuple[KfInnov, KfInnov, KfInnov]]:
+    @overload
+    def chop(
+        self,
+        ti: _Time = ...,
+        tf: _Time = ...,
+        *,
+        include_last: bool = ...,
+        inplace: bool = ...,
+        return_ends: Literal[False] = ...,
+    ) -> KfInnov: ...
+
+    def chop(
+        self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
+    ) -> Union[KfInnov, Tuple[KfInnov, KfInnov, KfInnov]]:
         exclude = frozenset({'name', 'chan', 'units'})
-        out = _chop_wrapper(self, exclude=exclude, ti=ti, tf=tf, include_last=include_last, \
-            inplace=inplace, return_ends=return_ends)  # type: ignore[call-overload]
+        out = _chop_wrapper(
+            self, exclude=exclude, ti=ti, tf=tf, include_last=include_last, inplace=inplace, return_ends=return_ends
+        )  # type: ignore[call-overload]
         return out  # type: ignore[no-any-return]
+
 
 #%% Kf
 class Kf(Frozen):
@@ -216,10 +264,21 @@ class Kf(Frozen):
     >>> kf = Kf()
 
     """
-    def __init__(self, *, name: str = '', chan: _Chan = None, \
-                 num_points: int = 0, num_states: int = 0, time_dtype: DTypeLike = float, \
-                 active_states: np.ndarray = None, innov_class: Any = None, use_pv: bool = True, \
-                 innov_chan: _Chan = None, **kwargs):
+
+    def __init__(
+        self,
+        *,
+        name: str = '',
+        chan: _Chan = None,
+        num_points: int = 0,
+        num_states: int = 0,
+        time_dtype: DTypeLike = float,
+        active_states: np.ndarray = None,
+        innov_class: Any = None,
+        use_pv: bool = True,
+        innov_chan: _Chan = None,
+        **kwargs,
+    ):
         r"""Initializes a new Kf instance."""
         self.name = name
         self.chan: Optional[Union[List[str], Tuple[str, ...]]]
@@ -239,7 +298,7 @@ class Kf(Frozen):
         self.covar: Optional[np.ndarray]
         if num_points > 0:
             num_active   = num_states if active_states is None else len(active_states)
-            state_shape  = (num_active, num_points) if num_active > 1 else (num_points, )
+            state_shape  = (num_active, num_points) if num_active > 1 else (num_points,)
             self.time    = np.empty(num_points, dtype=time_dtype)
             self.att     = np.empty((4, num_points), order='F')
             if use_pv:
@@ -262,10 +321,10 @@ class Kf(Frozen):
         self.innov: Any
         if innov_class is None:
             self.innov = KfInnov(time_dtype=time_dtype, chan=innov_chan, **kwargs)
-            self._subclasses = frozenset({'innov', })
+            self._subclasses = frozenset({'innov',})
         elif callable(innov_class):
             self.innov = innov_class(time_dtype=time_dtype, chan=innov_chan, **kwargs)
-            self._subclasses = frozenset({'innov', })
+            self._subclasses = frozenset({'innov',})
         else:
             for (name, func) in innov_class.items():
                 setattr(self, name, func(time_dtype=time_dtype, chan=innov_chan, **kwargs))
@@ -359,9 +418,9 @@ class Kf(Frozen):
             return kf
         assert kf.time is not None
         assert kf2.time is not None
-        kf.time   = np.hstack((self.time, kf2.time))
+        kf.time = np.hstack((self.time, kf2.time))
         kf.istate = self.istate.copy() if self.istate is not None else None
-        kf.active = self.active.copy()  if self.active is not None else None  # TODO: assert that they are the same?
+        kf.active = self.active.copy() if self.active is not None else None  # TODO: assert that they are the same?
         for field in {'att', 'pos', 'vel', 'state', 'covar'}:
             if (x := getattr(self, field)) is not None and (y := getattr(kf2, field)) is not None:
                 setattr(kf, field, np.column_stack((x, y)))
@@ -370,18 +429,37 @@ class Kf(Frozen):
         return kf
 
     @overload
-    def chop(self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
-            inplace: bool = ..., return_ends: Literal[True]) -> Tuple[Kf, Kf, Kf]: ...
-    @overload
-    def chop(self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
-            inplace: bool = ..., return_ends: Literal[False] = ...) -> Kf: ...
+    def chop(
+        self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., inplace: bool = ..., return_ends: Literal[True]
+    ) -> Tuple[Kf, Kf, Kf]: ...
 
-    def chop(self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, \
-            inplace: bool = False, return_ends: bool = False) -> Union[Kf, Tuple[Kf, Kf, Kf]]:
+    @overload
+    def chop(
+        self,
+        ti: _Time = ...,
+        tf: _Time = ...,
+        *,
+        include_last: bool = ...,
+        inplace: bool = ...,
+        return_ends: Literal[False] = ...,
+    ) -> Kf: ...
+
+    def chop(
+        self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
+    ) -> Union[Kf, Tuple[Kf, Kf, Kf]]:
         exclude = frozenset({'name', 'chan', 'active', 'istate'} | self._subclasses)
-        out = _chop_wrapper(self, exclude=exclude, ti=ti, tf=tf, include_last=include_last, \
-            inplace=inplace, return_ends=return_ends, subclasses=self._subclasses)  # type: ignore[call-overload]
+        out = _chop_wrapper(
+            self,
+            exclude=exclude,
+            ti=ti,
+            tf=tf,
+            include_last=include_last,
+            inplace=inplace,
+            return_ends=return_ends,
+            subclasses=self._subclasses,
+        )  # type: ignore[call-overload]
         return out  # type: ignore[no-any-return]
+
 
 #%% Classes - KfRecord
 class KfRecord(Frozen):
@@ -411,8 +489,10 @@ class KfRecord(Frozen):
     >>> kf_record = KfRecord()
 
     """
-    def __init__(self, num_points: int = 0, num_states: int = 0, num_active: int = 0, num_axes: int = 0, \
-            time_dtype: DTypeLike = float):
+
+    def __init__(
+        self, num_points: int = 0, num_states: int = 0, num_active: int = 0, num_axes: int = 0, time_dtype: DTypeLike = float
+    ):
         self.time: Optional[np.ndarray]
         self.P: Optional[np.ndarray]
         self.stm: Optional[np.ndarray]
@@ -444,7 +524,7 @@ class KfRecord(Frozen):
         self.stm  = self.stm[:, :, ix_keep].copy() if self.stm is not None else None
         self.H    = self.H[:, :, ix_keep].copy() if self.H is not None else None
         self.Pz   = self.Pz[:, :, ix_keep].copy() if self.Pz is not None else None
-        self.K    = self.K[:, :, ix_keep].copy() if self.K  is not None else None
+        self.K    = self.K[:, :, ix_keep].copy() if self.K is not None else None
         self.z    = self.z[:, ix_keep].copy() if self.z is not None else None
 
     def save(self, filename: Path = None, use_hdf5: bool = True) -> None:
@@ -502,25 +582,36 @@ class KfRecord(Frozen):
             return kfrecord
         assert kfrecord.time is not None
         assert kfrecord2.time is not None
-        kfrecord.time   = np.hstack((self.time, kfrecord2.time))
+        kfrecord.time = np.hstack((self.time, kfrecord2.time))
         for field in {'P', 'stm', 'H', 'Pz', 'K', 'z'}:
             if (x := getattr(self, field)) is not None and (y := getattr(kfrecord2, field)) is not None:
-                setattr(kfrecord, field, np.concatenate((x, y), axis=x.ndim-1))
+                setattr(kfrecord, field, np.concatenate((x, y), axis=x.ndim - 1))
         return kfrecord
 
     @overload
-    def chop(self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
-            inplace: bool = ..., return_ends: Literal[True]) -> Tuple[KfRecord, KfRecord, KfRecord]: ...
+    def chop(
+        self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., inplace: bool = ..., return_ends: Literal[True]
+    ) -> Tuple[KfRecord, KfRecord, KfRecord]: ...
     @overload
-    def chop(self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., \
-            inplace: bool = ..., return_ends: Literal[False] = ...) -> KfRecord: ...
+    def chop(
+        self,
+        ti: _Time = ...,
+        tf: _Time = ...,
+        *,
+        include_last: bool = ...,
+        inplace: bool = ...,
+        return_ends: Literal[False] = ...,
+    ) -> KfRecord: ...
 
-    def chop(self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, \
-            inplace: bool = False, return_ends: bool = False) -> Union[KfRecord, Tuple[KfRecord, KfRecord, KfRecord]]:
+    def chop(
+        self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
+    ) -> Union[KfRecord, Tuple[KfRecord, KfRecord, KfRecord]]:
         exclude: FrozenSet[str] = frozenset({})
-        out = _chop_wrapper(self, exclude=exclude, ti=ti, tf=tf, include_last=include_last, \
-            inplace=inplace, return_ends=return_ends)  # type: ignore[call-overload]
+        out = _chop_wrapper(
+            self, exclude=exclude, ti=ti, tf=tf, include_last=include_last, inplace=inplace, return_ends=return_ends
+        )  # type: ignore[call-overload]
         return out  # type: ignore[no-any-return]
+
 
 #%% Unit Test
 if __name__ == '__main__':

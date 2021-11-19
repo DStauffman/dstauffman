@@ -15,8 +15,24 @@ import doctest
 from pathlib import Path
 import pickle
 import sys
-from typing import Any, Callable, Dict, FrozenSet, Iterable, List, Literal, NoReturn, Optional, \
-    overload, Set, Tuple, Type, TYPE_CHECKING, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    FrozenSet,
+    Iterable,
+    List,
+    Literal,
+    NoReturn,
+    Optional,
+    overload,
+    Set,
+    Tuple,
+    Type,
+    TYPE_CHECKING,
+    TypeVar,
+    Union,
+)
 import unittest
 import warnings
 
@@ -32,6 +48,7 @@ else:
     from dstauffman.nubs import np_all  # type: ignore[no-redef]
     from math import inf
     from array import array as ndarray  # type: ignore[misc]
+
     datetime64 = ndarray  # type: ignore[assignment, misc]
 
 #%% Constants
@@ -64,10 +81,11 @@ def _frozen(set: Callable) -> Callable:
                 if key == 'self' and isinstance(val, self.__class__):  # pragma: no branch
                     set(self, name, value)
                     return
-        raise AttributeError('You cannot add attribute of {} to {} in {}.'.format(\
-            name, self, sys._getframe(1).f_code.co_name))
+        raise AttributeError('You cannot add attribute of {} to {} in {}.'.format(name, self, sys._getframe(1).f_code.co_name))
+
     # return the custom defined function
     return set_attr
+
 
 #%% Methods - save_hdf5
 def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclusions: _Sets = None, **kwargs) -> None:
@@ -130,22 +148,38 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclu
                 else:
                     grp.create_dataset(key, data=value, compression=compression, shuffle=shuffle, **kwargs)
 
+
 #%% Methods - load_hdf5
 @overload
 def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[False] = ...) -> _T: ...
+
 @overload
-def load_hdf5(cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]], filename: Optional[Path], return_meta: Literal[False] = ...) -> Type[Any]: ...
+def load_hdf5(
+    cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]],
+    filename: Optional[Path],
+    return_meta: Literal[False] = ...,
+) -> Type[Any]: ...
+
 @overload
 def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[False] = ...) -> Type[Any]: ...
+
 @overload
 def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[_T, Dict[str, Any]]: ...
+
 @overload
-def load_hdf5(cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[Type[Any], Dict[str, Any]]: ...
+def load_hdf5(
+    cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]], filename: Optional[Path], return_meta: Literal[True]
+) -> Tuple[Type[Any], Dict[str, Any]]: ...
+
 @overload
 def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[Type[Any], Dict[str, Any]]: ...
 
-def load_hdf5(cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], Tuple[str, ...]], \
-        filename: Path = None, return_meta: bool = False) -> Union[_T, Type[Any], Tuple[_T, Dict[str, Any]], Tuple[Type[Any], Dict[str, Any]]]:
+
+def load_hdf5(
+    cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], Tuple[str, ...]],
+    filename: Path = None,
+    return_meta: bool = False,
+) -> Union[_T, Type[Any], Tuple[_T, Dict[str, Any]], Tuple[Type[Any], Dict[str, Any]]]:
     r"""
     Load the object from disk.
 
@@ -173,13 +207,13 @@ def load_hdf5(cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], T
     # Load data
     out: Union[_T, Type[Any]]
     if cls is None:
-        out = type('Temp', (object, ), {})
+        out = type('Temp', (object,), {})
         limit_fields = False
     elif isinstance(cls, dict):
-        out = type('Temp', (object, ), cls)
+        out = type('Temp', (object,), cls)
         limit_fields = True
     elif isinstance(cls, (list, set, tuple)):
-        out = type('Temp', (object, ), {k: None for k in cls})
+        out = type('Temp', (object,), {k: None for k in cls})
         limit_fields = True
     else:
         out = cls()
@@ -193,12 +227,13 @@ def load_hdf5(cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], T
             for field in grp:
                 if limit_fields and not hasattr(out, field):
                     continue
-                    #raise AttributeError(f"type object '{out.__name__}' has not attribute '{field}'")
+                    # raise AttributeError(f"type object '{out.__name__}' has not attribute '{field}'")
                 # Note grp[field].value is now grp[field][()] because of updated HDF5 API
                 setattr(out, field, grp[field][()])
     if return_meta:
         return (out, meta)  # type: ignore[return-value]
     return out
+
 
 #%% Methods - save_pickle
 def save_pickle(self, filename: Path = None) -> None:
@@ -218,6 +253,7 @@ def save_pickle(self, filename: Path = None) -> None:
         return
     with open(filename, 'wb') as file:
         pickle.dump(self, file)
+
 
 #%% Methods - load_pickle
 def load_pickle(cls: Type[_T], filename: Path = None) -> _T:
@@ -241,9 +277,11 @@ def load_pickle(cls: Type[_T], filename: Path = None) -> _T:
         out: _T = pickle.load(file)
     return out
 
+
 #%% Methods - save_method
-def save_method(self, filename: Path = None, use_hdf5: bool = True, *, meta: Dict[str, Any] = None, \
-        exclusions: _Sets = None, **kwargs) -> None:
+def save_method(
+    self, filename: Path = None, use_hdf5: bool = True, *, meta: Dict[str, Any] = None, exclusions: _Sets = None, **kwargs
+) -> None:
     r"""
     Save the object to disk.
 
@@ -269,13 +307,20 @@ def save_method(self, filename: Path = None, use_hdf5: bool = True, *, meta: Dic
         # Version 2 (HDF5):
         save_hdf5(self, filename, meta=meta, exclusions=exclusions, **kwargs)
 
+
 #%% Methods - load_method
 @overload
 def load_method(cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[False] = ...) -> _T: ...
-@overload
-def load_method(cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[True]) -> Tuple[_T, Dict[str, Any]]: ...
 
-def load_method(cls: Type[_T], filename: Path = None, use_hdf5: bool = True, return_meta: bool = False) -> Union[_T, Tuple[_T, Dict[str, Any]]]:
+@overload
+def load_method(
+    cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[True]
+) -> Tuple[_T, Dict[str, Any]]: ...
+
+
+def load_method(
+    cls: Type[_T], filename: Path = None, use_hdf5: bool = True, return_meta: bool = False
+) -> Union[_T, Tuple[_T, Dict[str, Any]]]:
     r"""
     Load the object from disk.
 
@@ -299,9 +344,18 @@ def load_method(cls: Type[_T], filename: Path = None, use_hdf5: bool = True, ret
         out = load_hdf5(cls, filename, return_meta=return_meta)  # type: ignore[call-overload]
     return out
 
+
 #%% pprint_dict
-def pprint_dict(dct: Dict[Any, Any], *, name: str='', indent: int = 1, align: bool = True, \
-        disp: bool = True, offset: int = 0, max_elements=None) -> str:
+def pprint_dict(
+    dct: Dict[Any, Any],
+    *,
+    name: str = "",
+    indent: int = 1,
+    align: bool = True,
+    disp: bool = True,
+    offset: int = 0,
+    max_elements=None,
+) -> str:
     r"""
     Print all the fields and their values.
 
@@ -352,8 +406,15 @@ def pprint_dict(dct: Dict[Any, Any], *, name: str='', indent: int = 1, align: bo
         if hasattr(this_value, 'pprint'):
             this_name = f'{this_key} (class {this_value.__class__.__name__})'
             try:
-                this_line = this_value.pprint(name=this_name, indent=indent, align=align, \
-                    disp=False, return_text=True, offset=offset+indent, max_elements=max_elements)
+                this_line = this_value.pprint(
+                    name=this_name,
+                    indent=indent,
+                    align=align,
+                    disp=False,
+                    return_text=True,
+                    offset=offset + indent,
+                    max_elements=max_elements,
+                )
             except:
                 # TODO: do I need this check or just let it fail?
                 warnings.warn('pprint recursive call failed, reverting to default.')
@@ -378,10 +439,20 @@ def pprint_dict(dct: Dict[Any, Any], *, name: str='', indent: int = 1, align: bo
         print(text)
     return text
 
+
 #%% Functions - chop_time
-def chop_time(self: Any, time_field: str, exclude: _Sets = None, ti: _Time = -inf, tf: _Time = inf, \
-        inclusive: bool = False, mask: Union[bool, ndarray] = None, precision: _SingleNum = 0, \
-        left: bool = True, right: bool = True) -> None:
+def chop_time(
+    self: Any,
+    time_field: str,
+    exclude: _Sets = None,
+    ti: _Time = -inf,
+    tf: _Time = inf,
+    inclusive: bool = False,
+    mask: Union[bool, ndarray] = None,
+    precision: _SingleNum = 0,
+    left: bool = True,
+    right: bool = True,
+) -> None:
     r"""
     Chops the class to only include values within the given time span.
 
@@ -436,8 +507,9 @@ def chop_time(self: Any, time_field: str, exclude: _Sets = None, ti: _Time = -in
 
     """
     # build the new index
-    ix = find_in_range(getattr(self, time_field), min_=ti, max_=tf, inclusive=inclusive, mask=mask, \
-        precision=precision, left=left, right=right)
+    ix = find_in_range(
+        getattr(self, time_field), min_=ti, max_=tf, inclusive=inclusive, mask=mask, precision=precision, left=left, right=right
+    )
     # exit early if no data is getting dropped
     if np_all(ix):
         return
@@ -449,6 +521,7 @@ def chop_time(self: Any, time_field: str, exclude: _Sets = None, ti: _Time = -in
             continue
         if (old := getattr(self, key)) is not None:
             setattr(self, key, old[..., ix])
+
 
 #%% Functions - subsample_class
 def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Union[FrozenSet[str], Set[str]] = None) -> None:
@@ -504,6 +577,7 @@ def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Union[Fro
         if (old := getattr(self, key)) is not None:
             setattr(self, key, old[..., start::skip])
 
+
 #%% Classes - Frozen
 class Frozen(object):
     r"""
@@ -515,13 +589,16 @@ class Frozen(object):
     """
     # freeze the set attributes function based on the above `frozen` funcion
     __setattr__ = _frozen(object.__setattr__)
+
     class __metaclass__(type):
         __setattr__ = _frozen(type.__setattr__)
 
     @overload
     def pprint(self, return_text: Literal[True], **kwargs) -> str: ...
+
     @overload
     def pprint(self, return_text: Literal[False], **kwargs) -> None: ...
+
     @overload
     def pprint(self, **kwargs) -> Optional[str]: ...
 
@@ -531,9 +608,11 @@ class Frozen(object):
         text = pprint_dict(self.__dict__, name=name, **kwargs)
         return text if return_text else None
 
+
 #%% MetaClasses - SaveAndLoad
 class SaveAndLoad(type):
     r"""Metaclass to add 'save' and 'load' methods to the given class."""
+
     def __init__(cls, name, bases, dct):
         r"""Add the 'save' and 'load' classes if they are not already present."""
         if not hasattr(cls, 'save'):
@@ -542,9 +621,11 @@ class SaveAndLoad(type):
             setattr(cls, 'load', classmethod(load_method))
         super().__init__(name, bases, dct)
 
+
 #%% MetaClasses - SaveAndLoadPickle
 class SaveAndLoadPickle(type):
     r"""Metaclass to add 'save' and 'load' methods to the given class."""
+
     def __init__(cls, name, bases, dct):
         r"""Add the 'save' and 'load' classes if they are not already present."""
         if not hasattr(cls, 'save'):
@@ -552,6 +633,7 @@ class SaveAndLoadPickle(type):
         if not hasattr(cls, 'load'):
             setattr(cls, 'load', classmethod(load_pickle))
         super().__init__(name, bases, dct)
+
 
 #%% Classes - Counter
 class Counter(Frozen):
@@ -578,6 +660,7 @@ class Counter(Frozen):
     1
 
     """
+
     def __init__(self, other: Any = 0):
         self._val = int(other)
 
@@ -623,6 +706,7 @@ class Counter(Frozen):
 
     @overload
     def __add__(self, other: int) -> int: ...
+
     @overload
     def __add__(self, other: Counter) -> Counter: ...
 
@@ -647,8 +731,10 @@ class Counter(Frozen):
 
     @overload
     def __sub__(self, other: int) -> int: ...
+
     @overload
     def __sub__(self, other: Counter) -> Counter: ...
+
 
     def __sub__(self, other: _C) -> _C:
         if isinstance(other, Counter):
@@ -694,6 +780,7 @@ class Counter(Frozen):
     def __repr__(self) -> str:
         return 'Counter({})'.format(self._val)
 
+
 #%% FixedDict
 class FixedDict(dict):
     r"""
@@ -721,6 +808,7 @@ class FixedDict(dict):
     KeyError: 'new_key'
 
     """
+
     def __new__(cls, *args, **kwargs) -> FixedDict:
         r"""Creats a new instance of the class."""
         instance = super().__new__(cls, *args, **kwargs)
@@ -752,7 +840,7 @@ class FixedDict(dict):
         return new
 
     def __deepcopy__(self, memo: Any) -> FixedDict:
-        new = type(self)((k, copy.deepcopy(v, memo)) for (k,v) in self.items())
+        new = type(self)((k, copy.deepcopy(v, memo)) for (k, v) in self.items())
         new._frozen = self._frozen
         return new
 
@@ -801,6 +889,7 @@ class FixedDict(dict):
     def freeze(self) -> None:
         """Freeze the internal dictionary, such that no more keys may be added."""
         self._frozen = True
+
 
 #%% Unit test
 if __name__ == '__main__':

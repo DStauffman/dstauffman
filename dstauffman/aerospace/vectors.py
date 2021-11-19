@@ -71,15 +71,16 @@ def rot(axis: int, angle: float) -> np.ndarray:
 
     # build direction cosine matrix
     if axis == 1:
-        dcm = np.array([[1., 0., 0.], [0., ca, sa], [0., -sa, ca]])
+        dcm = np.array([[1.0, 0.0, 0.0], [0.0,  ca,  sa], [0.0, -sa,  ca]])
     elif axis == 2:
-        dcm = np.array([[ca, 0., -sa], [0., 1., 0.], [sa, 0., ca]])
+        dcm = np.array([[ca,  0.0, -sa], [0.0, 1.0, 0.0], [ sa, 0.0,  ca]])
     elif axis == 3:
-        dcm = np.array([[ca, sa, 0.], [-sa, ca, 0.], [0., 0., 1.]])
+        dcm = np.array([[ca,  sa,  0.0], [-sa,  ca, 0.0], [0.0, 0.0, 1.0]])
     else:
         # Axis value not listed, so it can compile in nopython mode
         raise ValueError('Unexpected value for axis.')
     return dcm
+
 
 #%% Functions - drot
 @ncjit
@@ -129,14 +130,15 @@ def drot(axis: int, angle: float) -> np.ndarray:
 
     # build direction cosine matrix
     if axis == 1:
-        trans = np.array([[0., 0., 0.], [0., -sa, ca], [0., -ca, -sa]])
+        trans = np.array([[0.0, 0.0, 0.0], [0.0, -sa,  ca], [0.0, -ca, -sa]])
     elif axis == 2:
-        trans = np.array([[-sa, 0., -ca], [0., 0., 0.], [ca, 0., -sa]])
+        trans = np.array([[-sa, 0.0, -ca], [0.0, 0.0, 0.0], [ ca, 0.0, -sa]])
     elif axis == 3:
-        trans = np.array([[-sa, ca, 0.], [-ca, -sa, 0.], [0., 0., 0.]])
+        trans = np.array([[-sa,  ca, 0.0], [-ca, -sa, 0.0], [0.0, 0.0, 0.0]])
     else:
         raise ValueError('Unexpected value for axis.')
     return trans
+
 
 #%% Functions - vec_cross
 @ncjit
@@ -171,6 +173,7 @@ def vec_cross(vec: np.ndarray) -> np.ndarray:
 
     """
     return np.array([[0, -vec[2], vec[1]], [vec[2], 0, -vec[0]], [-vec[1], vec[0], 0]])
+
 
 #%% Functions - vec_angle
 def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bool = True):
@@ -238,13 +241,17 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     # the ambiguity.
     cross_prod = np.cross(vec1.T, vec2.T).T
     cross_result = np.arcsin(np.sqrt(np.sum(cross_prod ** 2, axis=0)))
-    return np.where(dot_result > np.pi/2, np.pi - cross_result, cross_result)
+    return np.where(dot_result > np.pi / 2, np.pi - cross_result, cross_result)
+
 
 #%% Functions - cart2sph
 @overload
 def cart2sph(x: float, y: float, z: float) -> Tuple[float, float, float]: ...
+
 @overload
 def cart2sph(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]: ...
+
+
 @ncjit
 def cart2sph(x: _Numbers, y: _Numbers, z: _Numbers) -> Tuple[_Numbers, _Numbers, _Numbers]:
     r"""
@@ -278,17 +285,21 @@ def cart2sph(x: _Numbers, y: _Numbers, z: _Numbers) -> Tuple[_Numbers, _Numbers,
     >>> (az, el, rad) = cart2sph(3, 4, 5)
 
     """
-    xy2 = x**2 + y**2
+    xy2 = x ** 2 + y ** 2
     az  = np.arctan2(y, x)
     el  = np.arctan2(z, np.sqrt(xy2))
-    rad = np.sqrt(xy2 + z**2)
+    rad = np.sqrt(xy2 + z ** 2)
     return (az, el, rad)
+
 
 #%% Functions - sph2cart
 @overload
 def sph2cart(az: float, el: float, rad: float) -> Tuple[float, float, float]: ...
+
 @overload
 def sph2cart(az: np.ndarray, el: np.ndarray, rad: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]: ...
+
+
 @ncjit
 def sph2cart(az: _Numbers, el: _Numbers, rad: _Numbers) -> Tuple[_Numbers, _Numbers, _Numbers]:
     r"""
@@ -331,6 +342,7 @@ def sph2cart(az: _Numbers, el: _Numbers, rad: _Numbers) -> Tuple[_Numbers, _Numb
     y = rcos_el * np.sin(az)
     z = rad * np.sin(el)
     return (x, y, z)
+
 
 #%% Funcctions - rv2dcm
 @ncjit
@@ -375,8 +387,9 @@ def rv2dcm(vec: np.ndarray) -> np.ndarray:
         c = np.cos(mag)
         s = np.sin(mag)
         dcm *= c
-        dcm += -s*vec_cross(v) + (1 - c) * np.outer(v, v)
+        dcm += -s * vec_cross(v) + (1 - c) * np.outer(v, v)
     return dcm
+
 
 #%% Unit test
 if __name__ == '__main__':

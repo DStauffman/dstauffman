@@ -30,6 +30,7 @@ if HAVE_PYTEST:
 if TYPE_CHECKING:
     from PyQt5.QtCore import QCoreApplication
     from PyQt5.QtWidgets import QApplication
+
     assert QApplication
 
 #%% run_docstrings
@@ -78,6 +79,7 @@ def run_docstrings(files: List[Path], verbose: bool = False) -> int:
     return_code = ReturnCodes.test_failures if had_failure else ReturnCodes.clean
     return return_code
 
+
 #%% run_unittests
 def run_unittests(names: str, verbose: bool = False) -> int:
     r"""
@@ -117,6 +119,7 @@ def run_unittests(names: str, verbose: bool = False) -> int:
     result = unittest.TextTestRunner(verbosity=verbosity).run(test_suite)
     return_code: int = ReturnCodes.clean if result.wasSuccessful() else ReturnCodes.test_failures
     return return_code
+
 
 #%% run_pytests
 def run_pytests(folder: Path, *args, **kwargs) -> int:
@@ -166,6 +169,7 @@ def run_pytests(folder: Path, *args, **kwargs) -> int:
         qapp.closeAllWindows()
     return_code = ReturnCodes.clean if exit_code == 0 else ReturnCodes.test_failures
     return return_code
+
 
 #%% run_coverage
 def run_coverage(folder: Path, *, report: bool = True, cov_file: Path = None) -> int:
@@ -222,10 +226,19 @@ def run_coverage(folder: Path, *, report: bool = True, cov_file: Path = None) ->
 
     return return_code
 
+
 #%% find_repo_issues
-def find_repo_issues(folder: Path, extensions: Union[FrozenSet[str], Set[str], Tuple[str, ...], str, None] = frozenset(('.m', '.py')), *, \
-              list_all: bool = False, check_tabs: bool = True, trailing: bool = False, \
-              exclusions: Union[Tuple[Path, ...], Path] = None, check_eol: str = None, show_execute: bool = False) -> bool:
+def find_repo_issues(
+    folder: Path,
+    extensions: Union[FrozenSet[str], Set[str], Tuple[str, ...], str, None] = frozenset(('.m', '.py')),
+    *,
+    list_all: bool = False,
+    check_tabs: bool = True,
+    trailing: bool = False,
+    exclusions: Union[Tuple[Path, ...], Path] = None,
+    check_eol: str = None,
+    show_execute: bool = False,
+) -> bool:
     r"""
     Find all the tabs in source code that should be spaces instead.
 
@@ -262,6 +275,7 @@ def find_repo_issues(folder: Path, extensions: Union[FrozenSet[str], Set[str], T
     True
 
     """
+
     def _is_excluded(path: Path, exclusions: Optional[Tuple[Path, ...]]) -> bool:
         if exclusions is None:
             return False
@@ -274,9 +288,9 @@ def find_repo_issues(folder: Path, extensions: Union[FrozenSet[str], Set[str], T
     is_clean = True
 
     if isinstance(extensions, str):
-        extensions = {extensions, }
+        extensions = {extensions,}
     if isinstance(exclusions, Path):
-        exclusions = (exclusions, )
+        exclusions = (exclusions,)
 
     for this_file in folder.rglob('*'):
         if not this_file.is_file():
@@ -299,26 +313,27 @@ def find_repo_issues(folder: Path, extensions: Union[FrozenSet[str], Set[str], T
                     print(f'File: "{this_file}" was not a valid utf-8 file.')
                     is_clean = False
                 for (c, line) in enumerate(lines):
-                    sline = line.rstrip('\n').rstrip('\r').rstrip('\n') # for all possible orderings
+                    sline = line.rstrip('\n').rstrip('\r').rstrip('\n')  # for all possible orderings
                     if check_tabs and line.count('\t') > 0:
                         if not already_listed:
                             print(f'Evaluating: "{this_file}"')
                             already_listed = True
                             is_clean = False
-                        print('    Line {:03}: '.format(c+1) + repr(line))
+                        print('    Line {:03}: '.format(c + 1) + repr(line))
                     elif trailing and len(sline) >= 1 and sline[-1] == ' ':
                         if not already_listed:
                             print(f'Evaluating: "{this_file}"')
                             already_listed = True
                             is_clean = False
-                        print('    Line {:03}: '.format(c+1) + repr(line))
-                    if check_eol is not None and c != len(lines)-1 and not line.endswith(check_eol) and not bad_lines:
-                        line_ending = line[-(len(line) - len(sline)):]
+                        print('    Line {:03}: '.format(c + 1) + repr(line))
+                    if check_eol is not None and c != len(lines) - 1 and not line.endswith(check_eol) and not bad_lines:
+                        line_ending = line[-(len(line) - len(sline)) :]
                         print('File: "{}" has bad line endings of "{}".'.format(this_file, repr(line_ending)[1:-1]))
                         bad_lines = True
                         is_clean = False
     # end checks, return overall result
     return is_clean
+
 
 #%% Functions - delete_pyc
 def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = True) -> None:
@@ -341,10 +356,11 @@ def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = T
     >>> delete_pyc(folder, print_progress=False) # doctest: +SKIP
 
     """
+
     def _remove_pyc(file):
         r"""Do the actual file removal."""
         # check for allowable extensions
-        assert file.suffix in {'.pyc', }
+        assert file.suffix in {'.pyc',}
         assert file.is_file()
         # remove this file
         if print_progress:
@@ -361,6 +377,7 @@ def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = T
         for file in folder.glob('*.pyc'):
             # remove relevant files
             _remove_pyc(file)
+
 
 #%% Functions - get_python_definitions
 def get_python_definitions(text: str, *, include_private: bool = False) -> List[str]:
@@ -400,18 +417,19 @@ def get_python_definitions(text: str, *, include_private: bool = False) -> List[
             skip_next = True
             continue
         if line.startswith('class ') and (include_private or not line.startswith('class _')):
-            temp = line[len('class '):].split('(')
-            temp = temp[0].split(':') # for classes without arguments
+            temp = line[len('class ') :].split('(')
+            temp = temp[0].split(':')  # for classes without arguments
             funcs.append(temp[0])
         if line.startswith('def ') and (include_private or not line.startswith('def _')):
-            temp = line[len('def '):].split('(')
-            temp = temp[0].split(':') # for functions without arguments
+            temp = line[len('def ') :].split('(')
+            temp = temp[0].split(':')  # for functions without arguments
             funcs.append(temp[0])
         if len(line) > 0 and line[0] in cap_letters and '=' in line and ' ' in line:
             temp2 = line.split(' ')[0].split(':')[0]
             if len(extended_letters - set(temp2)) == 0:
                 funcs.append(temp2)
     return funcs
+
 
 #%% Functions - make_python_init
 def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, filename: Path = None) -> str:
@@ -466,8 +484,11 @@ def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, file
     # check for duplicates
     all_funcs = [func for k in results for func in results[k]]
     if len(all_funcs) != len(set(all_funcs)):
-        print('Uniqueness Problem: {funs} functions, but only {uni_funcs} unique functions'.format( \
-            funs=len(all_funcs), uni_funcs=len(set(all_funcs))))
+        print(
+            'Uniqueness Problem: {funs} functions, but only {uni_funcs} unique functions'.format(
+                funs=len(all_funcs), uni_funcs=len(set(all_funcs))
+            )
+        )
     dups = set([x for x in all_funcs if all_funcs.count(x) > 1])
     if dups:
         print('Duplicated functions:')
@@ -493,10 +514,18 @@ def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, file
         write_text_file(filename, output)
     return output
 
+
 #%% write_unit_test_templates
-def write_unit_test_templates(folder: Path, output: Path, *, author: str = 'unknown', \
-        exclude: Union[Path, Tuple[Path, ...]] = None, recursive: bool = True, repo_subs: Dict[str, str] = None, \
-        add_classification: bool = False) -> None:
+def write_unit_test_templates(
+    folder: Path,
+    output: Path,
+    *,
+    author: str = 'unknown',
+    exclude: Union[Path, Tuple[Path, ...]] = None,
+    recursive: bool = True,
+    repo_subs: Dict[str, str] = None,
+    add_classification: bool = False,
+) -> None:
     r"""
     Writes template files for unit tests.  These can then be used with a diff tool to find what is missing.
 
@@ -533,8 +562,14 @@ def write_unit_test_templates(folder: Path, output: Path, *, author: str = 'unkn
 
     """
     # hard-coded substitutions for imports
-    _subs = {'dstauffman': 'dcs', 'dstauffman.aerospace': 'space', 'dstauffman.commands': 'commands', \
-              'dstauffman.estimation': 'estm', 'dstauffman.health': 'health', 'dstauffman.plotting': 'plot'}
+    _subs = {
+        'dstauffman': 'dcs',
+        'dstauffman.aerospace': 'space',
+        'dstauffman.commands': 'commands',
+        'dstauffman.estimation': 'estm',
+        'dstauffman.health': 'health',
+        'dstauffman.plotting': 'plot',
+    }
     if repo_subs is not None:
         _subs.update(repo_subs)
     # create the output location
@@ -558,7 +593,7 @@ def write_unit_test_templates(folder: Path, output: Path, *, author: str = 'unkn
         # get a list of definitions from the text file
         funcs = get_python_definitions(this_text, include_private=True)
         # get the name of the test file
-        names = str(file)[num:].replace('\\','/').split('/')
+        names = str(file)[num:].replace('\\', '/').split('/')
         # get the name of the repo or sub-repo
         sub_repo = '.'.join(names[:-1])
         this_repo = repo_name + ('.' + sub_repo if sub_repo else '')
@@ -579,13 +614,14 @@ def write_unit_test_templates(folder: Path, output: Path, *, author: str = 'unkn
             func_name = sub_repo + '.' + func if sub_repo else func
             temp_name = func_name.replace('.', '_')
             text += [f'#%% {func_name}', f'class Test_{temp_name}(unittest.TestCase):', '    r"""']
-            text += [f'    Tests the {func_name} function with the following cases:','        TBD']
+            text += [f'    Tests the {func_name} function with the following cases:', '        TBD']
             text += ['    """', '    pass # TODO: write this', '']
 
         text += ['#%% Unit test execution', "if __name__ == '__main__':", '    unittest.main(exit=False)', '']
         new_file = Path.joinpath(output, 'test_' + '_'.join(names))
         print(f'Writing: "{new_file}".')
         write_text_file(new_file, '\n'.join(text))
+
 
 #%% Unit test
 if __name__ == '__main__':

@@ -23,6 +23,7 @@ from dstauffman.logs import activate_logging
 logger = logging.getLogger(__name__)
 _VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'make_init', 'tests', 'version'})
 
+
 @dataclass(frozen=True)
 class _Flags(object):
     log_level: Optional[int]
@@ -30,10 +31,12 @@ class _Flags(object):
     use_plotting: bool
     use_hdf5: bool
 
+
 #%% Functions - _print_bad_command
 def _print_bad_command(command: str) -> None:
     r"""Prints to the command line when a command name is not understood."""
     print(f'Command "{command}" is not understood.')
+
 
 #%% Functions - main
 def main() -> int:
@@ -45,6 +48,7 @@ def main() -> int:
         return ReturnCodes.bad_command
     rc = execute_command(command, args)
     return sys.exit(rc)
+
 
 #%% Functions - parse_wrapper
 def parse_wrapper(args: List[str]) -> Tuple[str, argparse.Namespace]:
@@ -62,6 +66,7 @@ def parse_wrapper(args: List[str]) -> Tuple[str, argparse.Namespace]:
     # pass the command and remaining arguments to the command parser
     parsed_args = parse_commands(command, args[1:])
     return (command, parsed_args)
+
 
 #%% Functions - parse_commands
 def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
@@ -102,6 +107,7 @@ def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
         raise ValueError('Unexpected command "{}".'.format(command))
     return parsed_args
 
+
 #%% Functions - execute_command
 def execute_command(command: str, args: argparse.Namespace) -> int:
     r"""Executes the given command."""
@@ -119,6 +125,7 @@ def execute_command(command: str, args: argparse.Namespace) -> int:
     if rc is None:
         rc = ReturnCodes.clean
     return rc
+
 
 #%% process_command_line_options
 def process_command_line_options() -> _Flags:
@@ -172,12 +179,14 @@ def process_command_line_options() -> _Flags:
     # do operations based on those settings
     if use_plotting and not use_display:
         from dstauffman.plotting import suppress_plots
+
         suppress_plots()
 
     # return the settings
     flags = _Flags(log_level=log_level, use_display=use_display, use_plotting=use_plotting, use_hdf5=use_hdf5)
 
     return flags
+
 
 #%% Unit test
 if __name__ == '__main__':

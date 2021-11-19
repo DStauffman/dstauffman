@@ -25,6 +25,7 @@ class _Gender(dcs.IntEnumPlus):
     circ_male: ClassVar[int]   = 4
     non_binary: ClassVar[int]  = 5
 
+
 #%% load_matlab
 @unittest.skipIf(not dcs.HAVE_H5PY or not dcs.HAVE_NUMPY, 'Skipping due to missing h5py/numpy dependency.')
 class Test_load_matlab(unittest.TestCase):
@@ -32,19 +33,21 @@ class Test_load_matlab(unittest.TestCase):
     Tests the load_matlab function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.filename1 = dcs.get_tests_dir() / 'test_numbers.mat'
         self.filename2 = dcs.get_tests_dir() / 'test_struct.mat'
         self.filename3 = dcs.get_tests_dir() / 'test_enums.mat'
         self.filename4 = dcs.get_tests_dir() / 'test_cell_array.mat'
         self.filename5 = dcs.get_tests_dir() / 'test_nested.mat'
-        self.row_nums  = np.array([[1., 2.2, 3.]])
-        self.col_nums  = np.array([[1.], [2.], [3.], [4.], [5.]])
-        self.mat_nums  = np.array([[1, 2, 3], [4, 5, 6]])
-        self.exp_enum  = np.array([_Gender.male, _Gender.female, _Gender.female, _Gender.circ_male, \
-            _Gender.circ_male, _Gender.circ_male], dtype=int)
-        self.offsets   = {'r': 10, 'c': 20, 'm': 30}
-        self.enums     = {'Gender': [getattr(_Gender, x) for x in _Gender.list_of_names()]}
+        self.row_nums = np.array([[1.0, 2.2, 3.0]])
+        self.col_nums = np.array([[1.0], [2.0], [3.0], [4.0], [5.0]])
+        self.mat_nums = np.array([[1, 2, 3], [4, 5, 6]])
+        self.exp_enum = np.array(
+            [_Gender.male, _Gender.female, _Gender.female, _Gender.circ_male, _Gender.circ_male, _Gender.circ_male], dtype=int
+        )
+        self.offsets = {'r': 10, 'c': 20, 'm': 30}
+        self.enums = {'Gender': [getattr(_Gender, x) for x in _Gender.list_of_names()]}
         self.row_nums_1d = np.squeeze(self.row_nums)
         self.col_nums_1d = np.squeeze(self.col_nums)
 
@@ -78,8 +81,8 @@ class Test_load_matlab(unittest.TestCase):
             dcs.load_matlab(self.filename3, enums={'Nope': [1, 2]})
 
     def test_cell_arrays(self) -> None:
-        out = dcs.load_matlab(self.filename4, varlist=('cdat', ))
-        self.assertEqual(out.keys(), {'cdat', })
+        out = dcs.load_matlab(self.filename4, varlist=('cdat',))
+        self.assertEqual(out.keys(), {'cdat',})
         np.testing.assert_array_equal(out['cdat'][0], self.row_nums_1d)
         np.testing.assert_array_equal(out['cdat'][1], self.col_nums_1d)
         np.testing.assert_array_equal(out['cdat'][2], self.mat_nums)
@@ -97,7 +100,7 @@ class Test_load_matlab(unittest.TestCase):
         np.testing.assert_array_equal(out['x']['r'], self.row_nums_1d)
         np.testing.assert_array_equal(out['x']['c'], self.col_nums_1d)
         np.testing.assert_array_equal(out['x']['m'], self.mat_nums)
-        #np.testing.assert_array_equal(out['enum'], self.exp_enum) # TODO: fix this one along with the other case
+        # np.testing.assert_array_equal(out['enum'], self.exp_enum) # TODO: fix this one along with the other case
         np.testing.assert_array_equal(out['cdat'][0], self.row_nums_1d)
         np.testing.assert_array_equal(out['cdat'][1], self.col_nums_1d)
         np.testing.assert_array_equal(out['cdat'][2], self.mat_nums)
@@ -107,8 +110,8 @@ class Test_load_matlab(unittest.TestCase):
         np.testing.assert_array_equal(out['data']['y']['r'], self.row_nums_1d + self.offsets['r'])
         np.testing.assert_array_equal(out['data']['y']['c'], self.col_nums_1d + self.offsets['c'])
         np.testing.assert_array_equal(out['data']['y']['m'], self.mat_nums + self.offsets['m'])
-        np.testing.assert_array_equal(out['data']['z']['a'], np.array([1., 2., 3.]))
-        #np.testing.assert_array_equal(out['data']['z']['b'], self.exp_enum) # TODO: fix this one along with the other case
+        np.testing.assert_array_equal(out['data']['z']['a'], np.array([1.0, 2.0, 3.0]))
+        # np.testing.assert_array_equal(out['data']['z']['b'], self.exp_enum) # TODO: fix this one along with the other case
         np.testing.assert_array_equal(out['data']['c'][0], self.row_nums_1d)
         np.testing.assert_array_equal(out['data']['c'][1], self.col_nums_1d)
         np.testing.assert_array_equal(out['data']['c'][2], self.mat_nums)
@@ -117,6 +120,7 @@ class Test_load_matlab(unittest.TestCase):
         np.testing.assert_array_equal(out['data']['nc'][2]['r'], self.row_nums_1d)
         np.testing.assert_array_equal(out['data']['nc'][2]['c'], self.col_nums_1d)
         np.testing.assert_array_equal(out['data']['nc'][2]['m'], self.mat_nums)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

@@ -20,13 +20,15 @@ class Test_commands_print_help(unittest.TestCase):
     Tests the commands.print_help function with the following cases:
         Nominal
     """
+
     def test_nominal(self) -> None:
         with dcs.capture_output() as out:
             commands.print_help()
         output = out.getvalue().strip()
         out.close()
-        expected_header = output.startswith('#######\nlmspace\n#######\n') or \
-                          output.startswith('##########\ndstauffman\n##########\n')
+        expected_header = output.startswith('#######\nlmspace\n#######\n') or output.startswith(
+            '##########\ndstauffman\n##########\n'
+        )
         self.assertTrue(expected_header)
 
     def test_specify_file(self) -> None:
@@ -37,12 +39,14 @@ class Test_commands_print_help(unittest.TestCase):
         out.close()
         self.assertTrue(output.startswith('r"""\nTest file for the `help` module'))
 
+
 #%% commands.print_version
 class Test_commands_print_version(unittest.TestCase):
     r"""
     Tests the commands.print_version function with the following cases:
         Nominal
     """
+
     def test_nominal(self) -> None:
         with dcs.capture_output() as out:
             commands.print_version()
@@ -50,12 +54,14 @@ class Test_commands_print_version(unittest.TestCase):
         out.close()
         self.assertIn('.', output)
 
+
 #%% commands.parse_help
 class Test_commands_parse_help(unittest.TestCase):
     r"""
     Tests the commands.parse_help function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.args: List[str] = []
         self.expected = argparse.Namespace()
@@ -64,12 +70,14 @@ class Test_commands_parse_help(unittest.TestCase):
         args = commands.parse_help(self.args)
         self.assertEqual(args, self.expected)
 
+
 #%% commands.parse_version
 class Test_commands_parse_version(unittest.TestCase):
     r"""
     Tests the commands.parse_version function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.args: List[str] = []
         self.expected = argparse.Namespace()
@@ -78,12 +86,14 @@ class Test_commands_parse_version(unittest.TestCase):
         args = commands.parse_version(self.args)
         self.assertEqual(args, self.expected)
 
+
 #%% commands.execute_help
 class Test_commands_execute_help(unittest.TestCase):
     r"""
     Tests the commands.execute_help function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.args = argparse.Namespace()
 
@@ -92,9 +102,11 @@ class Test_commands_execute_help(unittest.TestCase):
             commands.execute_help(self.args)
         output = out.getvalue().strip()
         out.close()
-        expected_header = output.startswith('#######\nlmspace\n#######\n') or \
-                          output.startswith('##########\ndstauffman\n##########\n')
+        expected_header = output.startswith('#######\nlmspace\n#######\n') or output.startswith(
+            '##########\ndstauffman\n##########\n'
+        )
         self.assertTrue(expected_header)
+
 
 #%% commands.execute_version
 class Test_commands_execute_version(unittest.TestCase):
@@ -102,6 +114,7 @@ class Test_commands_execute_version(unittest.TestCase):
     Tests the commands.execute_version function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.args = argparse.Namespace()
 
@@ -111,6 +124,7 @@ class Test_commands_execute_version(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         self.assertIn('.', output)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

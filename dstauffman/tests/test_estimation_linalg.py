@@ -23,14 +23,16 @@ class Test_estimation_orth(unittest.TestCase):
         Rank 3 matrix
         Rank 2 matrix
     """
+
     def setUp(self) -> None:
         self.A1 = np.array([[1, 0, 1], [-1, -2, 0], [0, 1, -1]])
         self.r1 = 3
-        self.Q1 = np.array([[-0.12000026, -0.80971228, 0.57442663], [ 0.90175265, 0.15312282, \
-            0.40422217], [-0.41526149, 0.5664975, 0.71178541]])
+        self.Q1 = np.array(
+            [[-0.12000026, -0.80971228, 0.57442663], [0.90175265, 0.15312282, 0.40422217], [-0.41526149, 0.5664975, 0.71178541]]
+        )
         self.A2 = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
         self.r2 = 2
-        self.Q2 = np.array([[-0.70710678, 0.,], [0., 1.], [-0.70710678, 0.]])
+        self.Q2 = np.array([[-0.70710678, 0.0,], [0.0, 1.0], [-0.70710678, 0.0]])
 
     def test_rank3(self) -> None:
         r = np.linalg.matrix_rank(self.A1)
@@ -44,6 +46,7 @@ class Test_estimation_orth(unittest.TestCase):
         Q = estm.orth(self.A2)
         np.testing.assert_array_almost_equal(Q, self.Q2)
 
+
 #%% estimation.subspace
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_subspace(unittest.TestCase):
@@ -51,11 +54,19 @@ class Test_estimation_subspace(unittest.TestCase):
     Tests the estimation.subspace function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
-        self.A = np.array([[1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1], [1, 1, 1], [-1, 1, -1], \
-            [1, -1, -1], [-1, -1, 1]])
-        self.B = np.array([[1, 1, 1, 1], [1, -1, 1, -1],[1, 1, -1, -1], [1, -1, -1, 1], [-1, -1, -1, -1], \
-            [-1, 1, -1, 1], [-1, -1, 1, 1], [-1, 1, 1, -1]])
+        self.A = np.array([[1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1], [1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1]])
+        self.B = np.array([
+            [ 1,  1,  1,  1],
+            [ 1, -1,  1, -1],
+            [ 1,  1, -1, -1],
+            [ 1, -1, -1,  1],
+            [-1, -1, -1, -1],
+            [-1,  1, -1,  1],
+            [-1, -1,  1,  1],
+            [-1,  1,  1, -1],
+        ])
         self.theta = np.pi / 2
 
     def test_nominal(self) -> None:
@@ -66,6 +77,7 @@ class Test_estimation_subspace(unittest.TestCase):
         theta = estm.subspace(self.B, self.A)
         self.assertAlmostEqual(theta, self.theta)
 
+
 #%% estimation.mat_divide
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_mat_divide(unittest.TestCase):
@@ -74,6 +86,7 @@ class Test_estimation_mat_divide(unittest.TestCase):
         Nominal
         Poorly-conditioned
     """
+
     def test_nominal(self) -> None:
         a = np.array([[1, 2], [3, 4]], dtype=float)
         exp = np.array([1, -1], dtype=float)
@@ -89,6 +102,7 @@ class Test_estimation_mat_divide(unittest.TestCase):
         x2 = estm.mat_divide(a, b, rcond=1e-6)
         np.testing.assert_array_almost_equal(x1, exp, 2)
         np.testing.assert_array_almost_equal(x2, np.zeros(2), 2)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

@@ -22,12 +22,14 @@ else:
     float32 = float64 = int32 = int64 = fake_jit
     try:
         from numpy import vectorize
+
         HAVE_NUMPY = True
     except ImportError:
         HAVE_NUMPY = False
 
 if TYPE_CHECKING:
     from numpy import ndarray
+
     _N = Union[float, ndarray]
 
 #%% np_any
@@ -65,6 +67,7 @@ def np_any(x: Sequence, /) -> bool:
             return True
     return False
 
+
 #%% np_all
 @ncjit
 def np_all(x: Sequence, /) -> bool:
@@ -100,6 +103,7 @@ def np_all(x: Sequence, /) -> bool:
             return False
     return True
 
+
 #%% issorted_opt
 @ncjit
 def issorted_opt(x: Sequence, /, descend: bool = False) -> bool:
@@ -131,17 +135,18 @@ def issorted_opt(x: Sequence, /, descend: bool = False) -> bool:
 
     """
     if descend:
-        for i in range(len(x)-1):
-            if x[i+1] > x[i]:
+        for i in range(len(x) - 1):
+            if x[i + 1] > x[i]:
                 return False
     else:
-        for i in range(len(x)-1):
-            if x[i+1] < x[i] :
+        for i in range(len(x) - 1):
+            if x[i + 1] < x[i]:
                 return False
     return True
 
+
 #%% Functions - prob_to_rate_opt
-#@vectorize (done below)
+# @vectorize (done below)
 def prob_to_rate_opt(prob: _N, time: _N) -> _N:
     r"""
     Convert a given probability and time to a rate.
@@ -185,14 +190,14 @@ def prob_to_rate_opt(prob: _N, time: _N) -> _N:
         return prob
     return -math.log(1 - prob) / time
 
+
 if HAVE_NUMBA:
-    prob_to_rate_opt = vectorize([float64(float64, float64)], nopython=True, target=TARGET, \
-        cache=True)(prob_to_rate_opt)
+    prob_to_rate_opt = vectorize([float64(float64, float64)], nopython=True, target=TARGET, cache=True)(prob_to_rate_opt)
 elif HAVE_NUMPY:
     prob_to_rate_opt = vectorize(prob_to_rate_opt, cache=True)
 
 #%% Functions - rate_to_prob_opt
-#@vectorize (done below)
+# @vectorize (done below)
 def rate_to_prob_opt(rate: _N, time: _N) -> _N:
     r"""
     Convert a given rate and time to a probability.
@@ -231,14 +236,14 @@ def rate_to_prob_opt(rate: _N, time: _N) -> _N:
     # calculate probability
     return 1 - math.exp(-rate * time)
 
+
 if HAVE_NUMBA:
-    rate_to_prob_opt = vectorize([float64(float64, float64)], nopython=True, target=TARGET, \
-        cache=True)(rate_to_prob_opt)
+    rate_to_prob_opt = vectorize([float64(float64, float64)], nopython=True, target=TARGET, cache=True)(rate_to_prob_opt)
 elif HAVE_NUMPY:
     rate_to_prob_opt = vectorize(rate_to_prob_opt, cache=True)
 
 #%% Functions - zero_divide
-#@vectorize (done below)
+# @vectorize (done below)
 def zero_divide(num: _N, den: _N) -> _N:
     r"""
     Numba compatible version of np.divide(num, den, out=np.zeros_like(num), where=den!=0).
@@ -272,14 +277,18 @@ def zero_divide(num: _N, den: _N) -> _N:
     0.0
 
     """
-    if den == 0.:
-        return 0.
+    if den == 0.0:
+        return 0.0
     return num / den
 
+
 if HAVE_NUMBA:
-    zero_divide = vectorize([float32(int32, int32), float64(int64, int64), \
-        float32(float32, float32), float64(float64, float64)], nopython=True, target=TARGET, \
-        cache=True)(zero_divide)
+    zero_divide = vectorize(
+        [float32(int32, int32), float64(int64, int64), float32(float32, float32), float64(float64, float64)],
+        nopython=True,
+        target=TARGET,
+        cache=True,
+    )(zero_divide)
 elif HAVE_NUMPY:
     zero_divide = vectorize(zero_divide, cache=True)
 

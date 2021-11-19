@@ -20,6 +20,7 @@ class Test_commands_parse_tests(unittest.TestCase):
     Tests the commands.parse_tests function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.folder              = dcs.get_root_dir()
         self.expected            = argparse.Namespace()
@@ -59,6 +60,7 @@ class Test_commands_parse_tests(unittest.TestCase):
         args = commands.parse_tests(['-c'])
         self.assertEqual(args, self.expected)
 
+
 #%% commands.execute_tests
 class Test_commands_execute_tests(unittest.TestCase):
     r"""
@@ -66,12 +68,27 @@ class Test_commands_execute_tests(unittest.TestCase):
         Nominal
         TBD
     """
+
     def setUp(self) -> None:
         self.folder = dcs.get_root_dir()
-        self.args = argparse.Namespace(docstrings=False, unittest=False, verbose=False, library=None, coverage=False, cov_file=None, )
-        self.patch_args = {'folder': self.folder, 'extensions': frozenset({'m', 'py'}), 'list_all': False, \
-                           'check_tabs': True, 'trailing': False, 'exclusions': None, 'check_eol': None, \
-                           'show_execute': False}
+        self.args = argparse.Namespace(
+            docstrings=False,
+            unittest=False,
+            verbose=False,
+            library=None,
+            coverage=False,
+            cov_file=None,
+        )
+        self.patch_args = {
+            'folder': self.folder,
+            'extensions': frozenset({'m', 'py'}),
+            'list_all': False,
+            'check_tabs': True,
+            'trailing': False,
+            'exclusions': None,
+            'check_eol': None,
+            'show_execute': False,
+        }
 
     @patch('dstauffman.commands.runtests.run_pytests')
     def test_nominal(self, mocker: Mock) -> None:
@@ -87,7 +104,7 @@ class Test_commands_execute_tests(unittest.TestCase):
 
     @patch('dstauffman.commands.runtests.run_docstrings')
     def test_docstrings(self, mocker: Mock) -> None:
-        self.args.docstrings=True
+        self.args.docstrings = True
         commands.execute_tests(self.args)
         (pos_args, kwargs) = mocker.call_args
         self.assertFalse(kwargs['verbose'])
@@ -117,13 +134,15 @@ class Test_commands_execute_tests(unittest.TestCase):
         commands.execute_tests(self.args)
         mocker.assert_called_once_with(self.folder, cov_file=None, report=False)
 
+
 #%% commands.parse_coverage
 class Test_commands_parse_coverage(unittest.TestCase):
     r"""
     Tests the commands.parse_coverage function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% commands.execute_coverage
 class Test_commands_execute_coverage(unittest.TestCase):
@@ -131,7 +150,8 @@ class Test_commands_execute_coverage(unittest.TestCase):
     Tests the commands.execute_coverage function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% Unit test execution
 if __name__ == '__main__':

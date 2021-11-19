@@ -32,12 +32,13 @@ class Test_setup_dir(unittest.TestCase):
         fail to create a folder due to a bad name
         delete the contents of an existing folder recursively
     """
+
     def setUp(self) -> None:
-        self.folder   = dcs.get_tests_dir() / 'temp_dir'
-        self.subdir   = dcs.get_tests_dir().joinpath('temp_dir', 'temp_dir2')
+        self.folder = dcs.get_tests_dir() / 'temp_dir'
+        self.subdir = dcs.get_tests_dir().joinpath('temp_dir', 'temp_dir2')
         self.filename = self.folder / 'temp_file.txt'
-        self.subfile  = self.subdir / 'temp_file.txt'
-        self.text     = 'Hello, World!\n'
+        self.subfile = self.subdir / 'temp_file.txt'
+        self.text = 'Hello, World!\n'
 
     def test_empty_string(self, mock_logger: Mock) -> None:
         dcs.setup_dir('')
@@ -74,13 +75,13 @@ class Test_setup_dir(unittest.TestCase):
         self.assertEqual(mock_logger.log.call_count, 2)
 
     def test_fail_to_create_folder(self, mock_logger: Mock) -> None:
-        pass #TODO: write this test
+        pass  # TODO: write this test
 
     def test_fail_to_clean_folder(self, mock_logger: Mock) -> None:
-        pass #TODO: write this test
+        pass  # TODO: write this test
 
     def test_bad_name_file_ext(self, mock_logger: Mock) -> None:
-        pass #TODO: write this test
+        pass  # TODO: write this test
 
     def test_clean_up_recursively(self, mock_logger: Mock) -> None:
         dcs.setup_dir(self.subdir)
@@ -99,6 +100,7 @@ class Test_setup_dir(unittest.TestCase):
                 self.subdir.rmdir()
             with contextlib.suppress(FileNotFoundError):
                 self.folder.rmdir()
+
         try:
             _clean(self)
         except {PermissionError, OSError}:  # type: ignore[misc]
@@ -106,6 +108,7 @@ class Test_setup_dir(unittest.TestCase):
             time.sleep(1)
             # retry
             _clean(self)
+
 
 #%% fix_rollover
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -119,6 +122,7 @@ class Test_fix_rollover(unittest.TestCase):
         Log level 1
         Optional inputs
     """
+
     def setUp(self) -> None:
         self.data  = np.array([1, 2, 3, 4, 5, 6, 0, 1,  3,  6,  0,  6,  5, 2])
         self.data2 = np.array([])
@@ -135,32 +139,32 @@ class Test_fix_rollover(unittest.TestCase):
 
     def test_matrix_dim1(self, mock_logger: Mock) -> None:
         self.axis = 0
-        data      = np.vstack((self.data, self.data))
-        exp       = np.vstack((self.data, self.data))
-        unrolled  = dcs.fix_rollover(data, self.roll, axis=self.axis)
+        data = np.vstack((self.data, self.data))
+        exp = np.vstack((self.data, self.data))
+        unrolled = dcs.fix_rollover(data, self.roll, axis=self.axis)
         np.testing.assert_array_equal(unrolled, exp)
         mock_logger.log.assert_not_called()
 
     def test_matrix_dim2(self, mock_logger: Mock) -> None:
-        self.axis  = 1
+        self.axis = 1
         self.data2 = np.vstack((self.data, self.data))
-        exp        = np.vstack((self.exp, self.exp))
-        unrolled   = dcs.fix_rollover(self.data2, self.roll, axis=self.axis)
+        exp = np.vstack((self.exp, self.exp))
+        unrolled = dcs.fix_rollover(self.data2, self.roll, axis=self.axis)
         np.testing.assert_array_equal(unrolled, exp)
         mock_logger.log.assert_any_call(dcs.LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
         mock_logger.log.assert_called_with(dcs.LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
         self.assertEqual(mock_logger.log.call_count, 4)
 
     def test_non_integer_roll(self, mock_logger: Mock) -> None:
-        exp      = np.arange(0., 10.1, 0.1)
-        roll     = 3.35
-        data     = roll * ((exp / roll) % 1)
+        exp = np.arange(0.0, 10.1, 0.1)
+        roll = 3.35
+        data = roll * ((exp / roll) % 1)
         unrolled = dcs.fix_rollover(data, roll)
         np.testing.assert_array_almost_equal(unrolled, exp, decimal=12)
         mock_logger.log.assert_called_once_with(dcs.LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
 
     def test_signed_rollover(self, mock_logger: Mock) -> None:
-        exp  = np.arange(21)
+        exp = np.arange(21)
         data = np.array([0, 1, 2, 3, -4, -3, -2, -1, 0, 1, 2, 3, -4, -3, -2, -1, 0, 1, 2, 3, -4])
         roll = 8
         unrolled = dcs.fix_rollover(data, roll)
@@ -168,7 +172,7 @@ class Test_fix_rollover(unittest.TestCase):
         mock_logger.log.assert_called_with(dcs.LogLevel.L6, 'corrected 3 top to bottom rollover(s)')
 
     def test_recursive(self, mock_logger: Mock) -> None:
-        pass # TODO: figure out a test case where this actually happens.  I think the code was there for a reason?
+        pass  # TODO: figure out a test case where this actually happens.  I think the code was there for a reason?
 
     def test_empty(self, mock_logger: Mock) -> None:
         data = dcs.fix_rollover(np.array([]), self.roll)
@@ -198,6 +202,7 @@ class Test_fix_rollover(unittest.TestCase):
         mock_logger.log.assert_called_with(dcs.LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
         self.assertEqual(mock_logger.log.call_count, 2)
 
+
 #%% remove_outliers
 @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 @patch('dstauffman.utils_log.logger')
@@ -209,6 +214,7 @@ class Test_remove_outliers(unittest.TestCase):
         Inplace
         Stats
     """
+
     def setUp(self) -> None:
         self.x = 0.6 * np.random.rand(1000)
         self.x[5] = 1e5
@@ -227,10 +233,10 @@ class Test_remove_outliers(unittest.TestCase):
 
     def test_sigma(self, mock_logger: Mock) -> None:
         x = np.random.rand(10000)
-        x[50] = 4.
-        y = dcs.remove_outliers(x, sigma=3.)
+        x[50] = 4.0
+        y = dcs.remove_outliers(x, sigma=3.0)
         self.assertTrue(np.isnan(y[50]))
-        y = dcs.remove_outliers(x, sigma=10.)
+        y = dcs.remove_outliers(x, sigma=10.0)
         self.assertFalse(np.any(np.isnan(y)))
 
     def test_2d_axis(self, mock_logger: Mock) -> None:
@@ -261,6 +267,7 @@ class Test_remove_outliers(unittest.TestCase):
         self.assertTrue(np.isnan(y[15]))
         self.assertEqual(num_replaced, 2)
         self.assertGreater(rms_initial, rms_removed)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

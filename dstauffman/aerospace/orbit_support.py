@@ -12,8 +12,7 @@ import doctest
 from typing import overload, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import DEG2RAD, HAVE_NUMPY, magnitude, NP_DATETIME_UNITS, NP_ONE_DAY, ONE_MINUTE, \
-    ONE_HOUR, RAD2DEG
+from dstauffman import DEG2RAD, HAVE_NUMPY, magnitude, NP_DATETIME_UNITS, NP_ONE_DAY, ONE_MINUTE, ONE_HOUR, RAD2DEG
 
 from dstauffman.aerospace.orbit_const import EARTH, JULIAN, TAU
 
@@ -26,38 +25,49 @@ if TYPE_CHECKING:
 #%% Functions - d_2_r
 @overload
 def d_2_r(deg: float) -> float: ...
+
 @overload
 def d_2_r(deg: np.ndarray) -> np.ndarray: ...
+
 
 def d_2_r(deg: _N) -> _N:
     return DEG2RAD * deg
 
+
 #%% Functions r_2_d
 @overload
 def r_2_d(rad: float) -> float: ...
+
 @overload
 def r_2_d(rad: np.ndarray) -> np.ndarray: ...
 
+
 def r_2_d(rad: _N) -> _N:
     return RAD2DEG * rad
+
 
 #%% Functions - norm
 def norm(x):
     return np.asanyarray(magnitude(x))
 
+
 #%% Functions - dot
 def dot(x, y):
     return np.sum(x * y, axis=0)
+
 
 #%% Functions - cross
 def cross(x, y):
     return np.cross(x.T, y.T).T
 
+
 #%% Functions - jd_to_numpy
 @overload
 def jd_to_numpy(jd: float) -> np.datetime64: ...
+
 @overload
 def jd_to_numpy(jd: np.ndarray) -> np.ndarray: ...
+
 
 def jd_to_numpy(jd: _N) -> Union[np.datetime64, np.ndarray]:
     r"""
@@ -73,15 +83,17 @@ def jd_to_numpy(jd: _N) -> Union[np.datetime64, np.ndarray]:
 
     """
     delta_days = jd - JULIAN['jd_2000_01_01']
-    out = np.datetime64('2000-01-01T00:00:00', NP_DATETIME_UNITS) + \
-        NP_ONE_DAY * delta_days
+    out = np.datetime64('2000-01-01T00:00:00', NP_DATETIME_UNITS) + NP_ONE_DAY * delta_days
     return out
+
 
 #%% Functions - numpy_to_jd
 @overload
 def numpy_to_jd(date: np.datetime64) -> np.float64: ...
+
 @overload
 def numpy_to_jd(date: np.ndarray) -> np.ndarray: ...
+
 
 def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.ndarray]:
     r"""
@@ -101,6 +113,7 @@ def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.
     out = delta_days + JULIAN['jd_2000_01_01']
     return out
 
+
 #%% Functions - d_2_dms
 def d_2_dms(x, /):
     r"""Converts an angle from degrees to degrees, minutes and seconds."""
@@ -113,10 +126,11 @@ def d_2_dms(x, /):
     # find whole degrees
     out[0, ...] = np.floor(x)
     # find whole minutes
-    out[1, ...] = np.floor(np.mod(x, 1)*ONE_MINUTE)
+    out[1, ...] = np.floor(np.mod(x, 1) * ONE_MINUTE)
     # find fractional seconds
-    out[2, ...] = (np.mod(x, 1) - out[1, ...]/ONE_MINUTE) * ONE_HOUR
+    out[2, ...] = (np.mod(x, 1) - out[1, ...] / ONE_MINUTE) * ONE_HOUR
     return out
+
 
 #%% Functions - dms_2_d
 def dms_2_d(x, /):
@@ -124,8 +138,9 @@ def dms_2_d(x, /):
     if x.shape[0] != 3:
         raise ValueError('d_2_dms expects a 3xN array as input.')
     # find fractional degrees by adding parts together
-    out = x[0, ...] + x[1, ...]/ONE_MINUTE + x[2, ...]/ONE_HOUR
+    out = x[0, ...] + x[1, ...] / ONE_MINUTE + x[2, ...] / ONE_HOUR
     return out
+
 
 #%% Functions - hms_2_r
 def hms_2_r(x, /):
@@ -133,9 +148,10 @@ def hms_2_r(x, /):
     if x.shape[0] != 3:
         raise ValueError('hms_2_r expects a 3xN array as input.')
     # find fractional degrees by adding parts together
-    hours = x[0, ...] + x[1, ...]/ONE_MINUTE + x[2, ...]/ONE_HOUR
-    out = hours/24 * TAU
+    hours = x[0, ...] + x[1, ...] / ONE_MINUTE + x[2, ...] / ONE_HOUR
+    out = hours / 24 * TAU
     return out
+
 
 #%% Functions - r_2_hms
 def r_2_hms(x, /):
@@ -147,14 +163,15 @@ def r_2_hms(x, /):
     # initialize output
     out = np.empty(3) if n == 1 else np.empty((3, n))
     # convert from angle to fractional hours
-    hours = 24 * (x/TAU)
+    hours = 24 * (x / TAU)
     # find whole hours
     out[0, ...] = np.floor(hours)
     # find whole minutes
-    out[1, ...] = np.floor(np.mod(hours, 1)*ONE_MINUTE)
+    out[1, ...] = np.floor(np.mod(hours, 1) * ONE_MINUTE)
     # find fractional seconds
-    out[2, ...] = (np.mod(hours, 1) - out[1, ...]/ONE_MINUTE) * ONE_HOUR
+    out[2, ...] = (np.mod(hours, 1) - out[1, ...] / ONE_MINUTE) * ONE_HOUR
     return out
+
 
 #%% Functions - aer_2_rdr
 def aer_2_rdr(aer, geo_loc, time):
@@ -164,6 +181,7 @@ def aer_2_rdr(aer, geo_loc, time):
     rdr = ijk_2_rdr(ijk)
     return rdr
 
+
 #%% Functions - aer_2_sez
 def aer_2_sez(aer):
     r"""Converts Az/El/range to SEZ cartesian."""
@@ -172,8 +190,9 @@ def aer_2_sez(aer):
     el = aer[1, ...]
     rho = aer[2, ...]
     # transform vector
-    sez = np.vstack((-rho*np.cos(el)*np.cos(az), rho*np.cos(el)*np.sin(az), rho*np.sin(el)))
+    sez = np.vstack((-rho * np.cos(el) * np.cos(az), rho * np.cos(el) * np.sin(az), rho * np.sin(el)))
     return sez
+
 
 #%% Functions - geo_loc_2_ijk
 def geo_loc_2_ijk(geo_loc, time_jd):
@@ -202,13 +221,14 @@ def geo_loc_2_ijk(geo_loc, time_jd):
     lambda_ = geo_loc[1, ...]
     H = geo_loc[2, ...]
     # find x & z
-    x = (EARTH['a'] / np.sqrt(1. - EARTH['e']**2 * np.sin(L)**2) + H) * np.cos(L)
-    z = (EARTH['a'] * (1. - EARTH['e']**2)/np.sqrt(1. - EARTH['e']**2 * np.sin(L)**2) + H) * np.sin(L)
+    x = (EARTH['a'] / np.sqrt(1.0 - EARTH['e'] ** 2 * np.sin(L) ** 2) + H) * np.cos(L)
+    z = (EARTH['a'] * (1.0 - EARTH['e'] ** 2) / np.sqrt(1.0 - EARTH['e'] ** 2 * np.sin(L) ** 2) + H) * np.sin(L)
     # find theta
     theta = long_2_sidereal(lambda_, time_jd)
     # create vector in IJK frame
-    R = np.vstack((x*np.cos(theta), x*np.sin(theta), z))
+    R = np.vstack((x * np.cos(theta), x * np.sin(theta), z))
     return R
+
 
 #%% Functions - ijk_2_rdr
 def ijk_2_rdr(ijk):
@@ -218,26 +238,29 @@ def ijk_2_rdr(ijk):
     j = ijk[1, ...]
     k = ijk[2, ...]
     # calculate magnitude of vectors
-    rang = np.sqrt(i**2 + j**2 + k**2)  # TODO: use magnitude
+    rang = np.sqrt(i ** 2 + j ** 2 + k ** 2)  # TODO: use magnitude
     # find azimuth
     ra = np.atan2(j, i)
     # change from [-pi pi] to [0 2*pi]
     ra = np.mod(ra, TAU)
     # find elevation
-    de = np.atan2(k, np.sqrt(i**2 + j**2))
+    de = np.atan2(k, np.sqrt(i ** 2 + j ** 2))
     # output array of values
     rdr = np.vstack((ra, de, rang))
     return rdr
+
 
 #%% Functions - ijk_2_sez
 def ijk_2_sez(ijk, geo_loc, time_jd):
     r"""Converts IJK coordinates to SEZ coordinates."""
     #% Subfunctions
-    def _find_D(L ,theta):
+    def _find_D(L, theta):
         r"""Calculate the IJK to SEZ transformation matrix from L and theta."""
-        return np.array([[ np.sin(L)*np.cos(theta), np.sin(L)*np.sin(theta), -np.cos(L)], \
-                         [-np.sin(theta)          , np.cos(theta)          ,  0.       ], \
-                         [+np.cos(L)*np.cos(theta), np.cos(L)*np.sin(theta),  np.sin(L)]])
+        return np.array([
+            [ np.sin(L) * np.cos(theta), np.sin(L) * np.sin(theta), -np.cos(L)],
+            [-np.sin(theta)            , np.cos(theta)            ,  0.0      ],
+            [+np.cos(L) * np.cos(theta), np.cos(L) * np.sin(theta),  np.sin(L)],
+        ])
 
     # find vector to observer in IJK frame
     R = geo_loc_2_ijk(geo_loc, time_jd)
@@ -261,7 +284,7 @@ def ijk_2_sez(ijk, geo_loc, time_jd):
     # then transform the SEZ vector from the IJK frame to the SEZ frame
     if n == 1 and length == 1:
         D = _find_D(L, theta)
-        sez = D*sez_in_ijk
+        sez = D * sez_in_ijk
     elif n == 1 and length != 1:
         for i in range(length):
             D = _find_D(L[i], theta[i])
@@ -278,6 +301,7 @@ def ijk_2_sez(ijk, geo_loc, time_jd):
         raise ValueError('ijk and geo_loc must be arrays of the same length')
     return sez
 
+
 #%% Functions - long_2_sidereal
 def long_2_sidereal(lambda_, time_jd):
     r"""Converts a geographic longitude to sidereal longitude."""
@@ -286,8 +310,9 @@ def long_2_sidereal(lambda_, time_jd):
     # theta at epoch
     theta_go = JULIAN['tg0_2000']
     # find theta
-    theta = np.mod(theta_go + EARTH['omega']*JULIAN['day']*(time_jd - to) + lambda_, TAU)
+    theta = np.mod(theta_go + EARTH['omega'] * JULIAN['day'] * (time_jd - to) + lambda_, TAU)
     return theta
+
 
 #%% Functions - rdr_2_aer
 def rdr_2_aer(rdr, geo_loc, time):
@@ -300,6 +325,7 @@ def rdr_2_aer(rdr, geo_loc, time):
     aer = sez_2_aer(sez)
     return aer
 
+
 #%% Functions - rdr_2_ijk
 def rdr_2_ijk(rdr):
     r"""Converts Ra/Dec/range to IJK cartesian."""
@@ -308,8 +334,9 @@ def rdr_2_ijk(rdr):
     de = rdr[1, ...]
     rang = rdr[2, ...]
     # calculate vector in IJK frame
-    ijk = np.vstack((rang*np.cos(de)*np.cos(ra), rang*np.cos(de)*np.sin(ra), rang*np.sin(de)))
+    ijk = np.vstack((rang * np.cos(de) * np.cos(ra), rang * np.cos(de) * np.sin(ra), rang * np.sin(de)))
     return ijk
+
 
 #%% Functions - sez_2_aer
 def sez_2_aer(sez):
@@ -319,26 +346,29 @@ def sez_2_aer(sez):
     y = sez[1, ...]
     z = sez[2, ...]
     # calculate magnitude of vectors
-    rho = np.sqrt(x**2 + y**2 + z**2)  # TODO: use magnitude
+    rho = np.sqrt(x ** 2 + y ** 2 + z ** 2)  # TODO: use magnitude
     # find azimuth
     az = np.atan2(y, -x)
     # change range from (-pi,pi) to (0,2*pi)
     az = np.mod(az, TAU)
     # find elevation (note Elevation is in range (-pi/2:pi/2)
-    el = np.atan(z/np.sqrt(x**2 + y**2))
+    el = np.atan(z / np.sqrt(x ** 2 + y ** 2))
     # output array of values
     aer = np.vstack((az, el, rho))
     return aer
+
 
 #%% Functions - sez_2_ijk
 def sez_2_ijk(sez, geo_loc, time_jd):
     r"""Converts SEZ coordinates to IJK coordinates."""
     #% Subfunctions
-    def _find_D(L ,theta):
+    def _find_D(L, theta):
         r"""Calculate the SEZ to IJK transformation matrix from L and theta."""
-        return np.array([[ np.sin(L)*np.cos(theta), -np.sin(theta), np.cos(L)*np.cos(theta)], \
-                         [+np.sin(L)*np.sin(theta),  np.cos(theta), np.cos(L)*np.sin(theta)], \
-                         [-np.cos(L)              ,  0.           , np.sin(L)]])
+        return np.array([
+            [ np.sin(L) * np.cos(theta), -np.sin(theta), np.cos(L) * np.cos(theta)],
+            [+np.sin(L) * np.sin(theta),  np.cos(theta), np.cos(L) * np.sin(theta)],
+            [-np.cos(L)                ,  0.0          , np.sin(L)                ],
+        ])
 
     # find the size of the input array
     (m, n) = sez.shape
@@ -379,6 +409,7 @@ def sez_2_ijk(sez, geo_loc, time_jd):
     ijk = sez_in_ijk + R
     return ijk
 
+
 #%% Functions - rv_aer_2_ijk
 def rv_aer_2_ijk(r_aer, v_aer, geo_loc, time_jd):
     # transform to SEZ frame
@@ -386,6 +417,7 @@ def rv_aer_2_ijk(r_aer, v_aer, geo_loc, time_jd):
     # transform to IJK frame
     (r_ijk, v_ijk) = rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd)
     return (r_ijk, v_ijk)
+
 
 #%% Functions - rv_aer_2_sez
 def rv_aer_2_sez(r_aer, v_aer):
@@ -401,10 +433,13 @@ def rv_aer_2_sez(r_aer, v_aer):
     rho_dot = v_aer[2, ...]
 
     # calculate velocity transform
-    v_sez = np.array([-rho_dot*np.cos(el)*np.cos(az) + rho*np.sin(el)*el_dot*np.cos(az) + rho*np.cos(el)*np.sin(az)*az_dot, \
-        rho_dot*np.cos(el)*np.sin(az) - rho*np.sin(el)*el_dot*np.sin(az) + rho*np.cos(el)*np.cos(az)*az_dot, \
-        rho_dot*np.sin(el) + rho*np.cos(el)*el_dot])
+    v_sez = np.array([
+        -rho_dot * np.cos(el) * np.cos(az) + rho * np.sin(el) * el_dot * np.cos(az) + rho * np.cos(el) * np.sin(az) * az_dot,
+         rho_dot * np.cos(el) * np.sin(az) - rho * np.sin(el) * el_dot * np.sin(az) + rho * np.cos(el) * np.cos(az) * az_dot,
+         rho_dot * np.sin(el) + rho * np.cos(el) * el_dot,
+    ])
     return (r_sez, v_sez)
+
 
 #%% Functions - rv_ijk_2_aer
 def rv_ijk_2_aer(r_ijk, v_ijk, geo_loc, time_jd):
@@ -414,6 +449,7 @@ def rv_ijk_2_aer(r_ijk, v_ijk, geo_loc, time_jd):
     (r_aer, v_aer) = rv_sez_2_aer(r_sez, v_sez)
     return (r_aer, v_aer)
 
+
 #%% Functions - rv_ijk_2_sez
 def rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd):
     # transform position from SEZ to IJK frame
@@ -421,6 +457,7 @@ def rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd):
     # TODO: is this really true?
     v_sez = v_ijk
     return (r_sez, v_sez)
+
 
 #%% Functions - rv_sez_2_aer
 def rv_sez_2_aer(r_sez, v_sez):
@@ -430,19 +467,21 @@ def rv_sez_2_aer(r_sez, v_sez):
     v_aer = sez_2_aer(v_sez)
     return (r_aer, v_aer)
 
+
 #%% Functions - rv_sez_2_ijk
 def rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd):
     # transform position from SEZ to IJK frame
     r_ijk = sez_2_ijk(r_sez, geo_loc, time_jd)
     # express SEZ velocity in IJK frame
-    v_sez_in_ijk = sez_2_ijk(v_sez, np.array([0., 0., -EARTH['a']]), time_jd)
+    v_sez_in_ijk = sez_2_ijk(v_sez, np.array([0.0, 0.0, -EARTH['a']]), time_jd)
     # number of vectors
     n = r_sez.shape[1]
     # calculate omega vector (Earth spins about k axis)
-    omega_vector = np.repeat(np.array([0., 0., EARTH['omega']]), (1, n))
+    omega_vector = np.repeat(np.array([0.0, 0.0, EARTH['omega']]), (1, n))
     # calculate velocity in IJK frame
     v_ijk = v_sez_in_ijk + cross(omega_vector, r_ijk)
     return (r_ijk, v_ijk)
+
 
 #%% Unit Test
 if __name__ == '__main__':

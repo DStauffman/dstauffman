@@ -22,8 +22,7 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
-from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Tuple, \
-    TypeVar, TYPE_CHECKING, Union
+from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Tuple, TypeVar, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -34,16 +33,18 @@ from dstauffman.units import MONTHS_PER_YEAR
 if HAVE_NUMPY:
     import numpy as np
     from numpy import inf, nan, logical_not
+
     if TYPE_CHECKING:
         from numpy.typing import ArrayLike
 else:
     from math import inf, nan, isnan
+
     logical_not = lambda x: not x  # type: ignore[assignment]
 if HAVE_SCIPY:
     from scipy.interpolate import interp1d
 
 #%% Globals
-_ALLOWED_ENVS: Optional[Dict[str, str]] = None # allows any environment variables to be invoked
+_ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked
 
 if TYPE_CHECKING:
     _StrOrListStr = TypeVar('_StrOrListStr', str, List[str])
@@ -85,12 +86,14 @@ def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:
     False
 
     """
+
     def _is_nan(x) -> bool:
         try:
             out = isnan(x)
         except:
             return False
         return out
+
     try:
         if HAVE_NUMPY:
             # use numpy testing module to assert that they are equal (ignores NaNs)
@@ -128,10 +131,19 @@ def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:
         return False
     return True
 
+
 #%% Functions - find_in_range
-def find_in_range(value: ArrayLike, min_: _SingleNum = -inf, max_: _SingleNum = inf, *, \
-        inclusive: bool = False, mask: Union[bool, np.ndarray] = None, precision: _SingleNum = 0, \
-        left: bool = False, right: bool = False) -> np.ndarray:
+def find_in_range(
+    value: ArrayLike,
+    min_: _SingleNum = -inf,
+    max_: _SingleNum = inf,
+    *,
+    inclusive: bool = False,
+    mask: Union[bool, np.ndarray] = None,
+    precision: _SingleNum = 0,
+    left: bool = False,
+    right: bool = False,
+) -> np.ndarray:
     r"""
     Finds values in the given range.
 
@@ -181,25 +193,29 @@ def find_in_range(value: ArrayLike, min_: _SingleNum = -inf, max_: _SingleNum = 
     # find those greater than the minimum bound
     if np.isfinite(min_):
         func = np.greater_equal if inclusive or left else np.greater
-        valid = func(value, min_-precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
+        valid = func(value, min_ - precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
     else:
         assert ~np.isnan(min_) and np.sign(min_) < 0, 'The minimum should be -np.inf if not finite.'
         valid = not_nan.copy()
     # combine with those less than the maximum bound
     if np.isfinite(max_):
         func = np.less_equal if inclusive or right else np.less
-        valid &= func(value, max_+precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
+        valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
     else:
         assert ~np.isnan(max_) and np.sign(max_) > 0, 'The maximum should be np.inf if not finite.'
     return valid  # type: ignore[no-any-return]
 
+
 #%% Functions - rms
 @overload
 def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> Union[float, int]: ...
+
 @overload
 def rms(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _Number: ...
+
 @overload
 def rms(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> np.ndarray: ...
+
 
 def rms(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
     r"""
@@ -249,22 +265,26 @@ def rms(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: 
             else:
                 assert isinstance(data, np.ndarray)
                 if keepdims:
-                    shape = (*data.shape[:axis], 1, *data.shape[axis+1:])
+                    shape = (*data.shape[:axis], 1, *data.shape[axis + 1 :])
                 else:
-                    shape = (*data.shape[:axis], *data.shape[axis+1:])
+                    shape = (*data.shape[:axis], *data.shape[axis + 1 :])
                 out = np.full(shape, np.nan)
         else:
             out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))
     # return the result
     return out  # type: ignore[no-any-return]
 
+
 #%% Functions - rss
 @overload
 def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> Union[float, int]: ...
+
 @overload
 def rss(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _Number: ...
+
 @overload
 def rss(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> np.ndarray: ...
+
 
 def rss(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
     r"""
@@ -314,19 +334,28 @@ def rss(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: 
             else:
                 assert isinstance(data, np.ndarray)
                 if keepdims:
-                    shape = (*data.shape[:axis], 1, *data.shape[axis+1:])
+                    shape = (*data.shape[:axis], 1, *data.shape[axis + 1 :])
                 else:
-                    shape = (*data.shape[:axis], *data.shape[axis+1:])
+                    shape = (*data.shape[:axis], *data.shape[axis + 1 :])
                 out = np.full(shape, np.nan)
         else:
             out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
     # return the result
     return out  # type: ignore[no-any-return]
 
+
 #%% Functions - compare_two_classes
-def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, names: Union[Tuple[str, str], List[str]] = None, \
-        ignore_callables: bool = True, compare_recursively: bool = True, is_subset: bool = False, \
-        tolerance: float = None) -> bool:
+def compare_two_classes(
+    c1: Any,
+    c2: Any,
+    /,
+    suppress_output: bool = False,
+    names: Union[Tuple[str, str], List[str]] = None,
+    ignore_callables: bool = True,
+    compare_recursively: bool = True,
+    is_subset: bool = False,
+    tolerance: float = None,
+) -> bool:
     r"""
     Compare two classes by going through all their public attributes and showing that they are equal.
 
@@ -364,6 +393,7 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
     "c1" and "c2" are not the same.
 
     """
+
     def _not_true_print():
         r"""Set is_same to False and optionally prints information to the screen."""
         is_same = False
@@ -378,7 +408,7 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
 
     def _is_class_instance(obj):
         r"""Determine whether the object is an instance of a class or not."""
-        return hasattr(obj, '__dict__') and not _is_function(obj) # and hasattr(obj, '__call__')
+        return hasattr(obj, '__dict__') and not _is_function(obj)  # and hasattr(obj, '__call__')
 
     def _is_public(name):
         r"""Returns True if the name is public, ie doesn't start with an underscore."""
@@ -411,16 +441,34 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
                         names = [name1 + '.' + this_attr, name2 + '.' + this_attr]
                         # Note: don't want the 'and' to short-circuit, so do the 'and is_same' last
                         if isinstance(attr1, dict) and isinstance(attr2, dict):
-                            is_same = compare_two_dicts(attr1, attr2, suppress_output=suppress_output, \
-                                names=names, is_subset=is_subset, tolerance=tolerance) and is_same
+                            is_same = (
+                                compare_two_dicts(
+                                    attr1,
+                                    attr2,
+                                    suppress_output=suppress_output,
+                                    names=names,
+                                    is_subset=is_subset,
+                                    tolerance=tolerance,
+                                )
+                                and is_same
+                            )
                         else:
-                            is_same = compare_two_classes(attr1, attr2, suppress_output=suppress_output, \
-                                names=names, ignore_callables=ignore_callables, \
-                                compare_recursively=compare_recursively, is_subset=is_subset, \
-                                tolerance=tolerance) and is_same
+                            is_same = (
+                                compare_two_classes(
+                                    attr1,
+                                    attr2,
+                                    suppress_output=suppress_output,
+                                    names=names,
+                                    ignore_callables=ignore_callables,
+                                    compare_recursively=compare_recursively,
+                                    is_subset=is_subset,
+                                    tolerance=tolerance,
+                                )
+                                and is_same
+                            )
                         continue
                     else:
-                        continue # pragma: no cover (actually covered, optimization issue)
+                        continue  # pragma: no cover (actually covered, optimization issue)
                 else:
                     is_same = _not_true_print()
                     continue
@@ -429,14 +477,15 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
                     is_same = _not_true_print()
             if _is_function(attr1) or _is_function(attr2):
                 if ignore_callables:
-                    continue # pragma: no cover (actually covered, optimization issue)
+                    continue  # pragma: no cover (actually covered, optimization issue)
                 else:
                     is_same = _not_true_print()
                     continue
             # if any differences, then this test fails
             if isinstance(attr1, Mapping) and isinstance(attr2, Mapping):
-                is_same = compare_two_dicts(attr1, attr2, suppress_output=True, is_subset=is_subset, \
-                    tolerance=tolerance) and is_same
+                is_same = (
+                    compare_two_dicts(attr1, attr2, suppress_output=True, is_subset=is_subset, tolerance=tolerance) and is_same
+                )
             elif logical_not(_nan_equal(attr1, attr2, tolerance=tolerance)):
                 is_same = _not_true_print()
         # find the attributes in one but not the other, if any, then this test fails
@@ -460,10 +509,17 @@ def compare_two_classes(c1: Any, c2: Any, /, suppress_output: bool = False, name
             print(f'"{name1}" and "{name2}" are not the same.')
     return is_same
 
+
 #%% Functions - compare_two_dicts
-def compare_two_dicts(d1: Mapping[Any, Any], d2: Mapping[Any, Any], /, suppress_output: bool = False, \
-        names: Union[Tuple[str, str], List[str]] = None, is_subset: bool = False, \
-        tolerance: float = None) -> bool:
+def compare_two_dicts(
+    d1: Mapping[Any, Any],
+    d2: Mapping[Any, Any],
+    /,
+    suppress_output: bool = False,
+    names: Union[Tuple[str, str], List[str]] = None,
+    is_subset: bool = False,
+    tolerance: float = None,
+) -> bool:
     r"""
     Compare two dictionaries for the same keys, and the same value of those keys.
 
@@ -516,8 +572,14 @@ def compare_two_dicts(d1: Mapping[Any, Any], d2: Mapping[Any, Any], /, suppress_
             s1 = d1[key]
             s2 = d2[key]
             if isinstance(s1, dict) and isinstance(s2, dict):
-                is_same = compare_two_dicts(s1, s2, suppress_output=suppress_output, \
-                    names=[f"{name1}['{key}']", f"{name2}['{key}']"], is_subset=is_subset, tolerance=tolerance)
+                is_same = compare_two_dicts(
+                    s1,
+                    s2,
+                    suppress_output=suppress_output,
+                    names=[f"{name1}['{key}']", f"{name2}['{key}']"],
+                    is_subset=is_subset,
+                    tolerance=tolerance,
+                )
             # if any differences, then this test fails
             elif logical_not(_nan_equal(s1, s2, tolerance=tolerance)):
                 is_same = False
@@ -543,6 +605,7 @@ def compare_two_dicts(d1: Mapping[Any, Any], d2: Mapping[Any, Any], /, suppress_
         else:
             print(f'"{name1}" and "{name2}" are not the same.')
     return is_same
+
 
 #%% Functions - read_text_file
 def read_text_file(filename: Union[str, Path]) -> str:
@@ -587,13 +650,14 @@ def read_text_file(filename: Union[str, Path]) -> str:
         # open file for reading
         with open(filename, 'rt') as file:
             # read file
-            text = file.read() # pragma: no branch
+            text = file.read()  # pragma: no branch
         # return results
         return text
     except:
         # on any exceptions, print a message and re-raise the error
         print(f'Unable to open file "{filename}" for reading.')
         raise
+
 
 #%% Functions - write_text_file
 def write_text_file(filename: Union[str, Path], text: str) -> None:
@@ -631,11 +695,12 @@ def write_text_file(filename: Union[str, Path], text: str) -> None:
         # open file for writing
         with open(filename, 'wt') as file:
             # write file
-            file.write(text) # pragma: no branch
+            file.write(text)  # pragma: no branch
     except:
         # on any exceptions, print a message and re-raise the error
         print(f'Unable to open file "{filename}" for writing.')
         raise
+
 
 #%% Functions - capture_output
 @contextmanager
@@ -697,6 +762,7 @@ def capture_output(mode: str = 'out'):
         # restore the original buffers once all results are read
         sys.stdout, sys.stderr = old_out, old_err
 
+
 #%% Functions - magnitude
 def magnitude(data: _Lists, axis: int = 0) -> Union[float, np.ndarray]:
     r"""
@@ -739,6 +805,7 @@ def magnitude(data: _Lists, axis: int = 0) -> Union[float, np.ndarray]:
     if axis >= data.ndim:
         raise ValueError('axis {} is out of bounds for array of dimension {}'.format(axis, data.ndim))
     return np.sqrt(np.sum(data * np.conj(data), axis=axis))  # type: ignore[no-any-return]
+
 
 #%% Functions - unit
 def unit(data: _Lists, axis: int = 0) -> np.ndarray:
@@ -791,6 +858,7 @@ def unit(data: _Lists, axis: int = 0) -> np.ndarray:
     norm_data: np.ndarray = data / mag
     return norm_data
 
+
 #%% modd
 def modd(x1, x2, /, out=None):
     r"""
@@ -833,7 +901,8 @@ def modd(x1, x2, /, out=None):
         return y
     else:
         np.mod(x1 - 1, x2, out)
-        np.add(out, 1, out) # needed to force add to be inplace operation
+        np.add(out, 1, out)  # needed to force add to be inplace operation
+
 
 #%% is_np_int
 def is_np_int(x, /):
@@ -873,6 +942,7 @@ def is_np_int(x, /):
     if isinstance(x, int) or (hasattr(x, 'dtype') and np.issubdtype(x.dtype, np.integer)):
         return True
     return False
+
 
 #%% np_digitize
 def np_digitize(x, /, bins, right=False):
@@ -935,7 +1005,7 @@ def np_digitize(x, /, bins, right=False):
 
     # check the bounds
     tolerance = None  # TODO: do I need a tolerance here?
-    bmin = bins[0]  if tolerance is None else bins[0]  - tolerance
+    bmin = bins[0] if tolerance is None else bins[0] - tolerance
     bmax = bins[-1] if tolerance is None else bins[-1] + tolerance
     if right:
         if np.any(x <= bmin) or np.any(x > bmax):
@@ -947,6 +1017,7 @@ def np_digitize(x, /, bins, right=False):
     # do the calculations by calling the numpy command and shift results by one
     out = np.digitize(x, bins, right) - 1
     return out
+
 
 #%% histcounts
 def histcounts(x, /, bins, right=False):
@@ -993,8 +1064,9 @@ def histcounts(x, /, bins, right=False):
     # get the bin number that each point is in
     ix_bin = np_digitize(x, bins, right=right)
     # count the number in each bin
-    hist = np.bincount(ix_bin, minlength=len(bins)-1)
+    hist = np.bincount(ix_bin, minlength=len(bins) - 1)
     return hist
+
 
 #%% full_print
 @contextmanager
@@ -1057,12 +1129,14 @@ def full_print(**kwargs):
     # reset the options back to what they were originally
     np.set_printoptions(**opt)
 
+
 #%% line_wrap
 @overload
 def line_wrap(text: str, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = '\\') -> str: ...
 
 @overload
 def line_wrap(text: List[str], wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = '\\') -> List[str]: ...
+
 
 def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = '\\') -> _StrOrListStr:
     r"""
@@ -1112,18 +1186,19 @@ def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: in
         # determine if too long
         while len(this_line) > wrap:
             # find the last whitespace to break on, possibly with a minimum start
-            space_break = this_line.rfind(' ', min_wrap, wrap-1)
+            space_break = this_line.rfind(' ', min_wrap, wrap - 1)
             if space_break == -1 or space_break <= indent:
                 raise ValueError('The specified min_wrap:wrap of "{}:{}" was too small.'.format(min_wrap, wrap))
             # add the shorter line
             out.append(this_line[:space_break] + ' ' + line_cont)
             # reduce and repeat
-            this_line = pad + this_line[space_break+1:]
+            this_line = pad + this_line[space_break + 1 :]
         # add the final shorter line
         out.append(this_line)
     if isinstance(text, str):
         return '\n'.join(out)
     return out
+
 
 #%% combine_per_year
 @overload
@@ -1131,6 +1206,7 @@ def combine_per_year(data: None, func: Any) -> None: ...
 
 @overload
 def combine_per_year(data: np.ndarray, func: Any = ...) -> np.ndarray: ...
+
 
 def combine_per_year(data: Optional[np.ndarray], func: Callable[..., Any] = None) -> Optional[np.ndarray]:
     r"""
@@ -1183,15 +1259,15 @@ def combine_per_year(data: Optional[np.ndarray], func: Callable[..., Any] = None
             warnings.filterwarnings('ignore', message='Mean of empty slice')
             warnings.filterwarnings('ignore', message='Sum of empty slice')
             # calculate sum or mean (or whatever)
-            data2 = func(np.reshape(data[:num_year*MONTHS_PER_YEAR, :], (num_year, MONTHS_PER_YEAR, num_chan)), axis=1)
+            data2 = func(np.reshape(data[: num_year * MONTHS_PER_YEAR, :], (num_year, MONTHS_PER_YEAR, num_chan)), axis=1)
     # optionally squeeze the vector case back to 1D
     if is_1d:
         data2 = data2.squeeze(axis=1)
     return data2
 
+
 #%% Functions - execute
-def execute(command: Union[str, List[str]], folder: Path, *, ignored_codes: Iterable[int] = None, \
-        env: Dict[str, str] = None):
+def execute(command: Union[str, List[str]], folder: Path, *, ignored_codes: Iterable[int] = None, env: Dict[str, str] = None):
     r"""
     Wrapper to subprocess that allows the screen to be updated for long running commands.
 
@@ -1231,8 +1307,16 @@ def execute(command: Union[str, List[str]], folder: Path, *, ignored_codes: Iter
         env = os.environ.copy().update(env)
 
     # create a process to spawn the thread
-    popen = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=None, \
-                             cwd=folder, shell=False, universal_newlines=True, env=env)
+    popen = subprocess.Popen(
+        command,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        stdin=None,
+        cwd=folder,
+        shell=False,
+        universal_newlines=True,
+        env=env,
+    )
     # intermittenly read output lines
     for stdout_line in iter(popen.stdout.readline, ''):  # type: ignore[union-attr]
         yield stdout_line
@@ -1241,26 +1325,34 @@ def execute(command: Union[str, List[str]], folder: Path, *, ignored_codes: Iter
     return_code = popen.wait()
 
     # method 2
-#    while True:
-#        output = process.stdout.readline()
-#        if output == '' and process.poll() is not None:
-#            break
-#        if output:
-#            yield output
-#    process.stdout.close()
-#    return_code = process.poll()
+    # while True:
+    #     output = process.stdout.readline()
+    #     if output == '' and process.poll() is not None:
+    #         break
+    #     if output:
+    #         yield output
+    # process.stdout.close()
+    # return_code = process.poll()
 
     # determine if command exited cleanly or not and return appropriate code
     if return_code:
         if ignored_codes is None or return_code not in ignored_codes:
-            #raise subprocess.CalledProcessError(return_code, command)
+            # raise subprocess.CalledProcessError(return_code, command)
             return ReturnCodes.bad_command
     return ReturnCodes.clean
 
+
 #%% Functions - execute_wrapper
-def execute_wrapper(command: Union[str, List[str]], folder: Path, *, dry_run: bool = False, \
-        ignored_codes: Iterable[int] = None, filename: Path = None, env: Dict[str, str] = None, \
-        print_status: bool = True) -> Union[ReturnCodes, List[str]]:
+def execute_wrapper(
+    command: Union[str, List[str]],
+    folder: Path,
+    *,
+    dry_run: bool = False,
+    ignored_codes: Iterable[int] = None,
+    filename: Path = None,
+    env: Dict[str, str] = None,
+    print_status: bool = True,
+) -> Union[ReturnCodes, List[str]]:
     r"""
     Wrapper to the wrapper to subprocess with options to print the command do dry-runs.
 
@@ -1329,6 +1421,7 @@ def execute_wrapper(command: Union[str, List[str]], folder: Path, *, dry_run: bo
         write_text_file(filename, ''.join(lines))
     return lines
 
+
 #%% Functions - get_env_var
 def get_env_var(env_key: str, default: str = None) -> str:
     r"""
@@ -1368,6 +1461,7 @@ def get_env_var(env_key: str, default: str = None) -> str:
         value = default
     return value
 
+
 #%% Functions - get_username
 def get_username() -> str:
     r"""
@@ -1391,6 +1485,7 @@ def get_username() -> str:
     if IS_WINDOWS:
         return os.environ['USERNAME']
     return os.environ['USER']
+
 
 #%% Functions - is_datetime
 def is_datetime(time: ArrayLike) -> bool:
@@ -1430,10 +1525,12 @@ def is_datetime(time: ArrayLike) -> bool:
 
     """
     out = False
-    if isinstance(time, datetime.datetime) or (hasattr(time, 'dtype') and \
-            np.issubdtype(time.dtype, np.datetime64)):  # type: ignore[union-attr]
+    if isinstance(time, datetime.datetime) or (
+        hasattr(time, 'dtype') and np.issubdtype(time.dtype, np.datetime64)  # type: ignore[union-attr]
+    ):
         out = True
     return out
+
 
 #%% Functions - intersect
 def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False):
@@ -1495,7 +1592,7 @@ def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False
     """
     # allow a zero tolerance to be passed in and behave like the normal intersect command
     if hasattr(tolerance, 'dtype') and np.issubdtype(tolerance.dtype, np.timedelta64):
-        tol_is_zero = tolerance.astype(np.int64) == 0 # Note that this avoids a numpy bug, see issue 6784
+        tol_is_zero = tolerance.astype(np.int64) == 0  # Note that this avoids a numpy bug, see issue 6784
     else:
         tol_is_zero = tolerance == 0
     if tol_is_zero:
@@ -1518,7 +1615,7 @@ def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False
     # check if largest component of a and b is too close to the tolerance floor (for floats)
     all_int = is_np_int(a) and is_np_int(b) and is_np_int(tolerance)
     max_a_or_b = np.max((np.max(np.abs(a), initial=0), np.max(np.abs(b), initial=0)))
-    if not all_int and ((max_a_or_b / tolerance) > (0.01/ np.finfo(float).eps)):
+    if not all_int and ((max_a_or_b / tolerance) > (0.01 / np.finfo(float).eps)):
         warnings.warn('This function may have problems if tolerance gets too small.')
 
     # due to the splitting of the quanta, two very close numbers could still fail the quantized intersect
@@ -1561,6 +1658,7 @@ def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False
         return (c, ia, ib)
     return c
 
+
 #%% issorted
 def issorted(x, /, descend=False):
     r"""
@@ -1593,6 +1691,7 @@ def issorted(x, /, descend=False):
     if descend:
         return np.all(x[1:] <= x[:-1])
     return np.all(x[:-1] <= x[1:])
+
 
 #%% zero_order_hold
 def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=False):
@@ -1632,7 +1731,7 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
 
     """
     # force arrays
-    x  = np.asanyarray(x)
+    x = np.asanyarray(x)
     xp = np.asanyarray(xp)
     yp = np.asanyarray(yp)
     # find the minimum value, as anything left of this is considered extrapolated
@@ -1646,11 +1745,12 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
             return (out, np.where(is_left, None, ix))
         return out
     if not HAVE_SCIPY:
-        raise RuntimeError('You must have scipy available to run this.') # pragma: no cover
+        raise RuntimeError('You must have scipy available to run this.')
     if return_indices:
         raise RuntimeError('Data must be sorted in order to ask for indices.')
     func = interp1d(xp, yp, kind='zero', fill_value='extrapolate', assume_sorted=False)
     return np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
+
 
 #%% drop_following_time
 def drop_following_time(times, drop_starts, dt_drop):
@@ -1691,6 +1791,7 @@ def drop_following_time(times, drop_starts, dt_drop):
         # drop the times within the specified window
         drop_mask |= (times >= drop_time) & (times < drop_time + dt_drop)
     return drop_mask
+
 
 #%% Unit test
 if __name__ == '__main__':

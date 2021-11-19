@@ -23,21 +23,22 @@ class Test_aerospace_rot(unittest.TestCase):
         Reference 1, single axis
         Reference 2, single axis
     """
+
     def setUp(self) -> None:
-        self.angle  = np.pi/6 # 30 deg
-        self.angle2 = 3*np.pi/4 # 135 deg
-        r2o2        = np.sqrt(2)/2
-        r3o2        = np.sqrt(3)/2
+        self.angle = np.pi / 6  # 30 deg
+        self.angle2 = 3 * np.pi / 4  # 135 deg
+        r2o2 = np.sqrt(2) / 2
+        r3o2 = np.sqrt(3) / 2
 
         # reference 1
-        self.r1x = np.array([[1., 0., 0.], [0., r3o2, 0.5], [0., -0.5, r3o2]], dtype=float)
-        self.r1y = np.array([[r3o2, 0., -0.5], [0., 1., 0.], [0.5, 0., r3o2]], dtype=float)
-        self.r1z = np.array([[r3o2, 0.5, 0.], [-0.5, r3o2, 0.], [0., 0., 1.]], dtype=float)
+        self.r1x = np.array([[1.0, 0.0, 0.0], [0.0, r3o2, 0.5], [0.0, -0.5, r3o2]], dtype=float)
+        self.r1y = np.array([[r3o2, 0.0, -0.5], [0.0, 1.0, 0.0], [0.5, 0.0, r3o2]], dtype=float)
+        self.r1z = np.array([[r3o2, 0.5, 0.0], [-0.5, r3o2, 0.0], [0.0, 0.0, 1.0]], dtype=float)
 
         # reference 2
-        self.r2x = np.array([[1., 0., 0.], [0., -r2o2, r2o2], [0., -r2o2, -r2o2]], dtype=float)
-        self.r2y = np.array([[-r2o2, 0., -r2o2], [0., 1., 0], [r2o2, 0., -r2o2]], dtype=float)
-        self.r2z = np.array([[-r2o2, r2o2, 0.], [-r2o2, -r2o2, 0.], [0., 0., 1.]], dtype=float)
+        self.r2x = np.array([[1.0, 0.0, 0.0], [0.0, -r2o2, r2o2], [0.0, -r2o2, -r2o2]], dtype=float)
+        self.r2y = np.array([[-r2o2, 0.0, -r2o2], [0.0, 1.0, 0], [r2o2, 0.0, -r2o2]], dtype=float)
+        self.r2z = np.array([[-r2o2, r2o2, 0.0], [-r2o2, -r2o2, 0.0], [0.0, 0.0, 1.0]], dtype=float)
 
         self.tolerance = 1e-12
 
@@ -62,7 +63,8 @@ class Test_aerospace_rot(unittest.TestCase):
             space.rot(4, self.angle)
         self.assertEqual(str(context.exception), 'Unexpected value for axis.')
         with self.assertRaises(ValueError):
-            space.rot(np.pi/2, 2)
+            space.rot(np.pi / 2, 2)
+
 
 #%% aerospace.drot
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -73,6 +75,7 @@ class Test_aerospace_drot(unittest.TestCase):
     """
     pass  # TODO: write this
 
+
 #%% aerospace.vec_cross
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_vec_cross(unittest.TestCase):
@@ -80,6 +83,7 @@ class Test_aerospace_vec_cross(unittest.TestCase):
     Tests the aerospace.vec_cross function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
         self.a = np.array([1, 2, 3])
         self.b = np.array([-2, -3, -4])
@@ -95,6 +99,7 @@ class Test_aerospace_vec_cross(unittest.TestCase):
         c = mat @ self.b.astype(float)
         np.testing.assert_array_equal(c, self.c)
 
+
 #%% aerospace.vec_angle
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_vec_angle(unittest.TestCase):
@@ -105,13 +110,14 @@ class Test_aerospace_vec_angle(unittest.TestCase):
         Nominal
         Vectorized (x3)
     """
+
     def setUp(self) -> None:
-        self.vec1 = np.array([1., 0., 0.])
+        self.vec1 = np.array([1.0, 0.0, 0.0])
         self.vec2 = space.rot(2, 1e-5) @ self.vec1
-        self.vec3 = np.array([np.sqrt(2)/2, np.sqrt(2)/2, 0.])
+        self.vec3 = np.array([np.sqrt(2) / 2, np.sqrt(2) / 2, 0.0])
         self.exp1 = 1e-5
-        self.exp2 = np.pi/4
-        self.exp3 = 2*np.pi/3
+        self.exp2 = np.pi / 4
+        self.exp3 = 2 * np.pi / 3
 
     def test_small(self) -> None:
         angle = space.vec_angle(self.vec1, self.vec2)
@@ -130,8 +136,8 @@ class Test_aerospace_vec_angle(unittest.TestCase):
     def test_vectorized(self) -> None:
         matrix1 = np.vstack((self.vec1, self.vec2, self.vec3, self.vec1)).T
         matrix2 = np.vstack((self.vec2, self.vec1, self.vec1, self.vec1)).T
-        exp1 = np.array([0., self.exp1, self.exp2, 0.])
-        exp2 = np.array([self.exp1, self.exp1, self.exp2, 0.])
+        exp1 = np.array([0.0, self.exp1, self.exp2, 0.0])
+        exp2 = np.array([self.exp1, self.exp1, self.exp2, 0.0])
         angle = space.vec_angle(matrix1, self.vec1)
         np.testing.assert_almost_equal(angle, exp1, 14)
         angle = space.vec_angle(self.vec1, matrix1)
@@ -144,8 +150,8 @@ class Test_aerospace_vec_angle(unittest.TestCase):
     def test_list(self) -> None:
         list1 = [self.vec1, self.vec2, self.vec3, self.vec1]
         list2 = [self.vec2, self.vec1, self.vec1, self.vec1]
-        exp1  = np.array([0., self.exp1, self.exp2, 0.])
-        exp2  = np.array([self.exp1, self.exp1, self.exp2, 0.])
+        exp1 = np.array([0.0, self.exp1, self.exp2, 0.0])
+        exp2 = np.array([self.exp1, self.exp1, self.exp2, 0.0])
         angle = space.vec_angle(list1, self.vec1)
         np.testing.assert_almost_equal(angle, exp1, 14)
         angle = space.vec_angle(self.vec1, list1)
@@ -158,9 +164,9 @@ class Test_aerospace_vec_angle(unittest.TestCase):
     def test_tuple(self) -> None:
         tuple1 = (self.vec1, self.vec2, self.vec3, self.vec1)
         tuple2 = (self.vec2, self.vec1, self.vec1, self.vec1)
-        exp1   = np.array((0., self.exp1, self.exp2, 0.))
-        exp2   = np.array((self.exp1, self.exp1, self.exp2, 0.))
-        angle  = space.vec_angle(tuple1, self.vec1)
+        exp1 = np.array((0.0, self.exp1, self.exp2, 0.0))
+        exp2 = np.array((self.exp1, self.exp1, self.exp2, 0.0))
+        angle = space.vec_angle(tuple1, self.vec1)
         np.testing.assert_almost_equal(angle, exp1, 14)
         angle = space.vec_angle(self.vec1, tuple1)
         np.testing.assert_almost_equal(angle, exp1, 14)
@@ -170,26 +176,27 @@ class Test_aerospace_vec_angle(unittest.TestCase):
         np.testing.assert_almost_equal(angle, exp2, 12)
 
     def test_not_normalized(self) -> None:
-        angle = space.vec_angle(np.array([0, 2., 0]), np.array([0., -5., 5.]), normalized=False, use_cross=True)
-        self.assertAlmostEqual(angle, 3*np.pi/4, 14)
-        angle = space.vec_angle(np.array([0, 2., 0]), np.array([0., -5., 5.]), normalized=False, use_cross=False)
-        self.assertAlmostEqual(angle, 3*np.pi/4, 14)
+        angle = space.vec_angle(np.array([0, 2.0, 0]), np.array([0.0, -5.0, 5.0]), normalized=False, use_cross=True)
+        self.assertAlmostEqual(angle, 3 * np.pi / 4, 14)
+        angle = space.vec_angle(np.array([0, 2.0, 0]), np.array([0.0, -5.0, 5.0]), normalized=False, use_cross=False)
+        self.assertAlmostEqual(angle, 3 * np.pi / 4, 14)
 
     def test_4d_vector(self) -> None:
-        angle = space.vec_angle(np.array([1., 0., 0., 0.]), np.array([0., 1., 0., 0.]), use_cross=False)
-        self.assertAlmostEqual(angle, np.pi/2)
+        angle = space.vec_angle(np.array([1.0, 0.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0, 0.0]), use_cross=False)
+        self.assertAlmostEqual(angle, np.pi / 2)
         with self.assertRaises(ValueError):
-            space.vec_angle(np.array([1., 0., 0., 0.]), np.array([0., 1., 0., 0.]), use_cross=True)
+            space.vec_angle(np.array([1.0, 0.0, 0.0, 0.0]), np.array([0.0, 1.0, 0.0, 0.0]), use_cross=True)
 
     def test_2d_vector(self) -> None:
-        angle = space.vec_angle(np.array([1., 0.]), np.array([-0.5, np.sqrt(3)/2]), use_cross=False)
+        angle = space.vec_angle(np.array([1.0, 0.0]), np.array([-0.5, np.sqrt(3) / 2]), use_cross=False)
         self.assertAlmostEqual(angle, self.exp3, 14)
-        angle = space.vec_angle(np.array([1., 0.]), np.array([-0.5, -np.sqrt(3)/2]), use_cross=False)
+        angle = space.vec_angle(np.array([1.0, 0.0]), np.array([-0.5, -np.sqrt(3) / 2]), use_cross=False)
         self.assertAlmostEqual(angle, self.exp3, 14)
-        angle = space.vec_angle(np.array([1., 0.]), np.array([-0.5, np.sqrt(3)/2]), use_cross=True)
+        angle = space.vec_angle(np.array([1.0, 0.0]), np.array([-0.5, np.sqrt(3) / 2]), use_cross=True)
         self.assertAlmostEqual(angle, self.exp3, 14)
-        angle = space.vec_angle(np.array([1., 0.]), np.array([-0.5, -np.sqrt(3)/2]), use_cross=True)
+        angle = space.vec_angle(np.array([1.0, 0.0]), np.array([-0.5, -np.sqrt(3) / 2]), use_cross=True)
         self.assertAlmostEqual(angle, self.exp3, 14)
+
 
 #%% aerospace.cart2sph
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -200,11 +207,12 @@ class Test_aerospace_cart2sph(unittest.TestCase):
         Vector inputs
         Full loop
     """
+
     def setUp(self):
-        self.xyz1 = (1., 0., 0.)
-        self.aer1 = (0., 0., 1.)
-        self.xyz2 = (0., -1., 0.)
-        self.aer2 = (-np.pi/2, 0, 1)
+        self.xyz1 = (1.0, 0.0, 0.0)
+        self.aer1 = (0.0, 0.0, 1.0)
+        self.xyz2 = (0.0, -1.0, 0.0)
+        self.aer2 = (-np.pi / 2, 0, 1)
 
     def test_single(self) -> None:
         (az, el, rad) = space.cart2sph(*self.xyz1)
@@ -239,6 +247,7 @@ class Test_aerospace_cart2sph(unittest.TestCase):
         np.testing.assert_array_almost_equal(y, y2, 14)
         np.testing.assert_array_almost_equal(z, z2, 14)
 
+
 #%% aerospace.sph2cart
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_sph2cart(unittest.TestCase):
@@ -248,11 +257,12 @@ class Test_aerospace_sph2cart(unittest.TestCase):
         Vector inputs
         Full loop
     """
+
     def setUp(self):
-        self.xyz1 = (1., 0., 0.)
-        self.aer1 = (0., 0., 1.)
-        self.xyz2 = (0., -1., 0.)
-        self.aer2 = (-np.pi/2, 0, 1)
+        self.xyz1 = (1.0, 0.0, 0.0)
+        self.aer1 = (0.0, 0.0, 1.0)
+        self.xyz2 = (0.0, -1.0, 0.0)
+        self.aer2 = (-np.pi / 2, 0, 1)
 
     def test_single(self) -> None:
         (x, y, z) = space.sph2cart(*self.aer1)
@@ -287,6 +297,7 @@ class Test_aerospace_sph2cart(unittest.TestCase):
         np.testing.assert_array_almost_equal(el, el2, 14)
         np.testing.assert_array_almost_equal(rad, rad2, 14)
 
+
 #%% aerospace.rv2dcm
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_rv2dcm(unittest.TestCase):
@@ -295,22 +306,24 @@ class Test_aerospace_rv2dcm(unittest.TestCase):
         Each axis
         Non-unity vector
     """
+
     def test_simple_rots(self) -> None:
         for axis in range(1, 4):
-            for angle in [0., 1., -1., np.pi/6, np.pi/4, np.pi, 2*np.pi, -3*np.pi/2]:
+            for angle in [0.0, 1.0, -1.0, np.pi / 6, np.pi / 4, np.pi, 2 * np.pi, -3 * np.pi / 2]:
                 vec = np.zeros(3)
-                vec[axis-1] = angle
+                vec[axis - 1] = angle
                 dcm = space.rv2dcm(vec)
                 exp = space.rot(axis, angle)
                 np.testing.assert_array_almost_equal(dcm, exp, decimal=14)
 
     def test_complex(self) -> None:
-        vec  = np.array([np.sqrt(2)/2, 0, np.sqrt(2)/2])
-        dcm  = space.rv2dcm(vec)
-        mag  = np.sqrt(np.sum(vec ** 2))
-        quat = space.quat_norm(np.hstack((vec/mag*np.sin(mag/2), np.cos(mag/2))))
-        exp  = space.quat_to_dcm(quat)
+        vec = np.array([np.sqrt(2) / 2, 0, np.sqrt(2) / 2])
+        dcm = space.rv2dcm(vec)
+        mag = np.sqrt(np.sum(vec ** 2))
+        quat = space.quat_norm(np.hstack((vec / mag * np.sin(mag / 2), np.cos(mag / 2))))
+        exp = space.quat_to_dcm(quat)
         np.testing.assert_array_almost_equal(dcm, exp, decimal=14)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

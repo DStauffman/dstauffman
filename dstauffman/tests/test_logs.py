@@ -24,8 +24,9 @@ class Test_act_deact_logging(unittest.TestCase):
         Nominal
         Default filename
     """
+
     def setUp(self) -> None:
-        self.level    = dcs.LogLevel.L5
+        self.level = dcs.LogLevel.L5
         self.filename = dcs.get_tests_dir() / 'testlog.txt'
 
     def test_nominal(self) -> None:
@@ -66,6 +67,7 @@ class Test_act_deact_logging(unittest.TestCase):
     def tearDown(self) -> None:
         dcs.deactivate_logging()
         self.filename.unlink(missing_ok=True)
+
 
 #%% log_multiline
 class Test_log_multiline(unittest.TestCase):
@@ -126,7 +128,7 @@ class Test_log_multiline(unittest.TestCase):
     @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_numpy2(self) -> None:
         with self.assertLogs(logger=self.logger, level=self.level) as logs:
-            dcs.log_multiline(self.logger, self.level, 'Numpy solution:',  np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
+            dcs.log_multiline(self.logger, self.level, 'Numpy solution:', np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]]))
         lines = logs.output
         self.assertEqual(len(lines), 4)
         self.assertEqual(lines[0], 'L5:Test:Numpy solution:')
@@ -137,6 +139,7 @@ class Test_log_multiline(unittest.TestCase):
     @classmethod
     def tearDownClass(cls) -> None:
         dcs.deactivate_logging()
+
 
 #%% Unit test execution
 if __name__ == '__main__':

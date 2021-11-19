@@ -29,9 +29,10 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
         Nominal usage
         All in one bin
     """
+
     def setUp(self) -> None:
         self.num = 100000
-        self.distribution = 1./100*np.array([10, 20, 30, 40])
+        self.distribution = 1.0 / 100 * np.array([10, 20, 30, 40])
         self.max_months = np.array([1, 10, 50, 5])
         self.max_months = np.array([1, 1, 1, 1])
         self.prng = np.random.RandomState()
@@ -43,21 +44,23 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
         breakout_per = breakout / self.num
         for ix in range(len(self.distribution)):
             self.assertTrue(np.abs(breakout_per[ix] - self.distribution[ix]) <= self.per_lim)
-        self.assertTrue(np.all(mons <= self.max_months[state-1]) and np.all(mons >= 1))
+        self.assertTrue(np.all(mons <= self.max_months[state - 1]) and np.all(mons >= 1))
 
     def test_all_in_one_bin(self) -> None:
         for i in range(4):
             temp = np.zeros(4)
             temp[i] = 1
             (tb_state, _) = health.dist_enum_and_mons(self.num, temp, self.prng, max_months=self.max_months)
-            self.assertTrue(np.all(tb_state == i+1))
+            self.assertTrue(np.all(tb_state == i + 1))
 
     def test_alpha_and_beta(self) -> None:
-        pass #TODO: write this
+        pass  # TODO: write this
 
     def test_different_start_num(self) -> None:
         (state1, mons1) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
-        (state2, mons2) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months, start_num=101)
+        (state2, mons2) = health.dist_enum_and_mons(
+            self.num, self.distribution, self.prng, max_months=self.max_months, start_num=101
+        )
         np.testing.assert_array_equal(set(state1), {1, 2, 3, 4})
         np.testing.assert_array_equal(set(state2), {101, 102, 103, 104})
         np.testing.assert_array_equal(set(mons1), {1})
@@ -89,7 +92,7 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
 
     def test_unique_dists(self) -> None:
         num = 3
-        dist = np.array([[0, 0, 0, 1], [1, 0, 0, 0],[0, 0.5, 0.5, 0]])
+        dist = np.array([[0, 0, 0, 1], [1, 0, 0, 0], [0, 0.5, 0.5, 0]])
         state = health.dist_enum_and_mons(num, dist, self.prng, start_num=1)
         self.assertEqual(state[0], 4)
         self.assertEqual(state[1], 1)
@@ -107,6 +110,7 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
             health.dist_enum_and_mons(self.num, dist, self.prng)
         self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
 
+
 #%% health.icer
 @unittest.skipIf(not HAVE_NUMPY or not HAVE_PANDAS, 'Skipping due to missing numpy/pandas dependency.')
 class Test_health_icer(unittest.TestCase):
@@ -122,12 +126,12 @@ class Test_health_icer(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.cost     = np.array([250e3, 750e3, 2.25e6, 3.75e6])
-        self.qaly     = np.array([20., 30, 40, 80])
+        self.cost = np.array([250e3, 750e3, 2.25e6, 3.75e6])
+        self.qaly = np.array([20.0, 30, 40, 80])
         self.inc_cost = np.array([250e3, 500e3, 3e6])
-        self.inc_qaly = np.array([20., 10, 50])
-        self.icer_out = np.array([12500., 50000, 60000])
-        self.order    = np.array([0., 1, np.nan, 2])
+        self.inc_qaly = np.array([20.0, 10, 50])
+        self.icer_out = np.array([12500.0, 50000, 60000])
+        self.order = np.array([0.0, 1, np.nan, 2])
         self.fig: Optional[plt.Figure] = None
 
     def test_slide_example(self) -> None:
@@ -205,8 +209,9 @@ class Test_health_icer(unittest.TestCase):
         self.assertTrue(self.fig is None)
 
     def test_names(self) -> None:
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly, \
-            names=['Name 1', 'Name 2', 'Another name', 'Final Name'])
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(
+            self.cost, self.qaly, names=['Name 1', 'Name 2', 'Another name', 'Final Name']
+        )
         np.testing.assert_array_equal(inc_cost, self.inc_cost, 'Incremental cost mismatch.')
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, 'Incremental QALY mismatch.')
         np.testing.assert_array_equal(icer_out, self.icer_out, 'ICER mismatch.')
@@ -247,8 +252,9 @@ class Test_health_icer(unittest.TestCase):
     @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
     def test_plot2(self) -> None:
         opts = Opts()
-        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly, \
-            make_plot=True, opts=opts, baseline=0)
+        (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(
+            self.cost, self.qaly, make_plot=True, opts=opts, baseline=0
+        )
         temp = self.inc_cost
         temp[0] = 0
         np.testing.assert_array_equal(inc_cost, temp, 'Incremental cost mismatch.')
@@ -264,6 +270,7 @@ class Test_health_icer(unittest.TestCase):
     def tearDown(self) -> None:
         if self.fig is not None:
             plt.close(self.fig)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

@@ -18,11 +18,17 @@ from dstauffman.paths import get_output_dir
 
 #%% Globals
 root_logger = logging.getLogger('')
-logger      = logging.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 #%% Functions - activate_logging
-def activate_logging(log_level: int = logging.INFO, filename: Union[str, Path] = None, *, file_level: int = None, \
-                     log_format: str = None, file_format: str = None) -> None:
+def activate_logging(
+    log_level: int = logging.INFO,
+    filename: Union[str, Path] = None,
+    *,
+    file_level: int = None,
+    log_format: str = None,
+    file_format: str = None
+) -> None:
     r"""
     Set up logging based on a user specified settings file.
 
@@ -89,6 +95,7 @@ def activate_logging(log_level: int = logging.INFO, filename: Union[str, Path] =
     ch.setFormatter(logging.Formatter(log_format))
     root_logger.addHandler(ch)
 
+
 #%% Functions - deactivate_logging
 def deactivate_logging() -> None:
     r"""
@@ -120,6 +127,7 @@ def deactivate_logging() -> None:
     if i == max_handlers or bool(root_logger.handlers):
         raise ValueError('Something bad happended when trying to close the logger.')  # pragma: no cover
 
+
 #%% Functions - flush_logging
 def flush_logging() -> None:
     r"""
@@ -138,6 +146,7 @@ def flush_logging() -> None:
     # loop through and flush all the handlers
     for handler in root_logger.handlers:
         handler.flush()
+
 
 #%% Functions - log_multiline
 def log_multiline(logger: logging.Logger, log_level: int, message: Any, *args: Any) -> None:
@@ -167,6 +176,7 @@ def log_multiline(logger: logging.Logger, log_level: int, message: Any, *args: A
     >>> deactivate_logging()
 
     """
+
     def _get_message_list(message: Any) -> List[str]:
         if isinstance(message, list):
             # if message is already a list, then make sure everything is already a string
@@ -178,6 +188,7 @@ def log_multiline(logger: logging.Logger, log_level: int, message: Any, *args: A
             return message.split('\n')
         # otherwise, convert message to a string, and then split on every new line
         return str(message).split('\n')
+
     # if there are additional arguments, then append them with the same rules
     all_msg = _get_message_list(message)
     if args:
@@ -186,6 +197,7 @@ def log_multiline(logger: logging.Logger, log_level: int, message: Any, *args: A
     # log all the messages
     for msg in all_msg:
         logger.log(log_level, msg)
+
 
 #%% Unit test
 if __name__ == '__main__':

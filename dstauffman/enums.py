@@ -26,10 +26,13 @@ class _EnumMetaPlus(EnumMeta):
 
     Also makes the __getattr__ attribute error more explicit.
     """
+
     def __repr__(cls) -> str:
         return '\n'.join((repr(field) for field in cls))  # type: ignore[var-annotated]
+
     def __str__(cls) -> str:
         return '\n'.join((str(field) for field in cls))  # type: ignore[var-annotated]
+
     def __getattr__(cls, name: str) -> int:
         r"""Return the enum member matching `name`."""
         if is_dunder(name):
@@ -39,27 +42,33 @@ class _EnumMetaPlus(EnumMeta):
         except KeyError:
             text = '"{}" does not have an attribute of "{}"'.format(cls.__name__, name)
             raise AttributeError(text) from None
+
     def list_of_names(cls) -> List[str]:
         r"""Return a list of all the names within the enumerator."""
         # look for class.name: pattern, ignore class, return names only
         names = list(cls.__members__)
         return names
+
     def list_of_values(cls) -> List[int]:
         r"""Return a list of all the values within the enumerator."""
         values = list(cls.__members__.values())  # type: ignore[var-annotated]
         return values
+
     @property
     def num_values(cls) -> int:
         r"""Return the number of values within the enumerator."""
         return len(cls)
+
     @property
     def min_value(cls) -> int:
         r"""Return the minimum value of the enumerator."""
         return min(cls.__members__.values())
+
     @property
     def max_value(cls) -> int:
         r"""Return the maximum value of the enumerator."""
         return max(cls.__members__.values())
+
 
 #%% Classes - IntEnumPlus
 class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
@@ -68,9 +77,11 @@ class IntEnumPlus(int, Enum, metaclass=_EnumMetaPlus):
     Plus it includes additional methods for convenient retrieval of number of values, their names,
     mins and maxes.
     """
+
     def __str__(self) -> str:
         r"""Return string representation."""
         return '{}.{}: {}'.format(self.__class__.__name__, self.name, self.value)
+
 
 #%% Decorators - consecutive
 def consecutive(enumeration: _F) -> _F:
@@ -79,7 +90,7 @@ def consecutive(enumeration: _F) -> _F:
     non_consecutive = []
     last_value = min(enumeration.__members__.values()) - 1  # type: ignore[attr-defined]
     if last_value != -1:
-        raise ValueError('Bad starting value (should be zero): {}'.format(last_value+1))
+        raise ValueError('Bad starting value (should be zero): {}'.format(last_value + 1))
     for name, member in enumeration.__members__.items():  # type: ignore[attr-defined]
         if name != member.name:
             duplicates.append((name, member.name))
@@ -93,6 +104,7 @@ def consecutive(enumeration: _F) -> _F:
         alias_details = ', '.join('{}: {}'.format(name, int(member)) for (name, member) in non_consecutive)
         raise ValueError('Non-consecutive values found in {}: {}'.format(enumeration.__name__, alias_details))
     return enumeration
+
 
 #%% Enums - ReturnCodes
 @consecutive
@@ -115,6 +127,7 @@ class ReturnCodes(IntEnumPlus):
     bad_version: ClassVar[int]      = 4  # version information cannot be determined
     test_failures: ClassVar[int]    = 5  # A test ran to completion, but failed its criteria
     no_coverage_tool: ClassVar[int] = 6  # Coverage tool is not installed
+
 
 #%% Enums - LogLevel
 class LogLevel(IntEnumPlus):
@@ -144,20 +157,21 @@ class LogLevel(IntEnumPlus):
     LogLevel.L5: 20
 
     """
-    L0: ClassVar[int]  = 35
-    L1: ClassVar[int]  = 30
-    L2: ClassVar[int]  = 28
-    L3: ClassVar[int]  = 26
-    L4: ClassVar[int]  = 24
-    L5: ClassVar[int]  = 20
-    L6: ClassVar[int]  = 18
-    L7: ClassVar[int]  = 16
-    L8: ClassVar[int]  = 14
-    L9: ClassVar[int]  = 12
+    L0: ClassVar[int] = 35
+    L1: ClassVar[int] = 30
+    L2: ClassVar[int] = 28
+    L3: ClassVar[int] = 26
+    L4: ClassVar[int] = 24
+    L5: ClassVar[int] = 20
+    L6: ClassVar[int] = 18
+    L7: ClassVar[int] = 16
+    L8: ClassVar[int] = 14
+    L9: ClassVar[int] = 12
     L10: ClassVar[int] = 10
-    L11: ClassVar[int] =  9
-    L12: ClassVar[int] =  8
-    L20: ClassVar[int] =  0
+    L11: ClassVar[int] = 9
+    L12: ClassVar[int] = 8
+    L20: ClassVar[int] = 0
+
 
 #%% Unit test
 if __name__ == '__main__':

@@ -18,6 +18,7 @@ class Test_Constants(unittest.TestCase):
     Tests the UnitConversions class with the following methods:
         Nominal definitions
     """
+
     def setUp(self) -> None:
         self.ints: List[str] = ['ONE_MINUTE', 'ONE_HOUR', 'ONE_DAY', 'MONTHS_PER_YEAR']
         self.flts: List[str] = ['RAD2DEG', 'DEG2RAD', 'ARCSEC2RAD', 'RAD2ARCSEC', 'FT2M', 'M2FT', 'IN2CM', 'CM2IN']
@@ -45,6 +46,7 @@ class Test_Constants(unittest.TestCase):
             if field.isupper():
                 self.assertTrue(field in self.master, 'Test is missing: {}'.format(field))
 
+
 #%% get_factors
 class Test_get_factors(unittest.TestCase):
     r"""
@@ -52,13 +54,55 @@ class Test_get_factors(unittest.TestCase):
         Nominal
         Bad prefix
     """
+
     def setUp(self) -> None:
-        self.prefix = ['yotta', 'zetta', 'exa', 'peta', 'tera', 'giga', 'mega', 'kilo', 'hecto', 'deca',\
-            'unity', 'deci', 'centi', 'milli', 'micro', 'nano', 'pico', 'femto', 'atto', 'zepto', 'yocto']
-        self.mult   = [1e24, 1e21, 1e18, 1e15, 1e12, 1e9, 1e6, 1e3, 1e2, 1e1, 1e0, \
-            1e-1, 1e-2, 1e-3, 1e-6, 1e-9, 1e-12, 1e-15, 1e-18, 1e-21, 1e-24]
-        self.label  = ['Y', 'Z', 'E', 'P', 'T', 'G', 'M', 'k', 'h', 'da', '', \
-            'd', 'c', 'm', 'µ', 'n', 'p', 'f', 'a', 'z', 'y']
+        self.prefix = [
+            'yotta',
+            'zetta',
+            'exa',
+            'peta',
+            'tera',
+            'giga',
+            'mega',
+            'kilo',
+            'hecto',
+            'deca',
+            'unity',
+            'deci',
+            'centi',
+            'milli',
+            'micro',
+            'nano',
+            'pico',
+            'femto',
+            'atto',
+            'zepto',
+            'yocto',
+        ]
+        self.mult = [
+            1e24,
+            1e21,
+            1e18,
+            1e15,
+            1e12,
+            1e9,
+            1e6,
+            1e3,
+            1e2,
+            1e1,
+            1e0,
+            1e-1,
+            1e-2,
+            1e-3,
+            1e-6,
+            1e-9,
+            1e-12,
+            1e-15,
+            1e-18,
+            1e-21,
+            1e-24,
+        ]
+        self.label = ['Y', 'Z', 'E', 'P', 'T', 'G', 'M', 'k', 'h', 'da', '', 'd', 'c', 'm', 'µ', 'n', 'p', 'f', 'a', 'z', 'y']
 
     def test_nominal(self) -> None:
         for i in range(len(self.prefix)):
@@ -69,7 +113,7 @@ class Test_get_factors(unittest.TestCase):
     def test_inverses(self) -> None:
         for i in range(len(self.prefix)):
             (mult, label) = dcs.get_factors(self.prefix[i], inverse=True)
-            self.assertLess(abs(mult - 1/self.mult[i]), 1e-14 * mult)
+            self.assertLess(abs(mult - 1 / self.mult[i]), 1e-14 * mult)
             self.assertEqual(label, self.label[i])
 
     def test_bad_prefix(self) -> None:
@@ -84,24 +128,25 @@ class Test_get_factors(unittest.TestCase):
             dcs.get_factors(0.3)
 
     def test_english_units(self) -> None:
-        names  = ['arcminute', 'arcsecond', 'milliarcsecond', 'microarcsecond', 'arcsecond^2']
-        mults  = [dcs.DEG2RAD/60, dcs.DEG2RAD/3600, dcs.DEG2RAD/3.6, 1e3*dcs.DEG2RAD/3.6, dcs.DEG2RAD**2/3600**2]
+        names = ['arcminute', 'arcsecond', 'milliarcsecond', 'microarcsecond', 'arcsecond^2']
+        mults = [dcs.DEG2RAD / 60, dcs.DEG2RAD / 3600, dcs.DEG2RAD / 3.6, 1e3 * dcs.DEG2RAD / 3.6, dcs.DEG2RAD ** 2 / 3600 ** 2]
         labels = ['amin', 'asec', 'mas', 'µas', 'asec^2']
         for (fact, exp_mult, exp_label) in zip(names, mults, labels):
             (mult, label) = dcs.get_factors(fact)
             self.assertAlmostEqual(mult, exp_mult, 14, 'Bad multiplication factor for {}'.format(fact))
-            self.assertEqual(label, exp_label,'Bad label for {}'.format(fact))
+            self.assertEqual(label, exp_label, 'Bad label for {}'.format(fact))
             (mult, label) = dcs.get_factors(fact, inverse=True)
-            self.assertAlmostEqual(mult, 1/exp_mult, 12, 'Bad inverse multiplication factor for {}'.format(fact))
-            self.assertEqual(label, exp_label,'Bad inverse label for {}'.format(fact))
+            self.assertAlmostEqual(mult, 1 / exp_mult, 12, 'Bad inverse multiplication factor for {}'.format(fact))
+            self.assertEqual(label, exp_label, 'Bad inverse label for {}'.format(fact))
 
     def test_percentage(self) -> None:
         (mult, label) = dcs.get_factors('percentage')
         self.assertEqual(mult, 0.01)
         self.assertEqual(label, '%')
         (mult, label) = dcs.get_factors('percentage', inverse=True)
-        self.assertEqual(mult, 100.)
+        self.assertEqual(mult, 100.0)
         self.assertEqual(label, '%')
+
 
 #%% get_time_factor
 class Test_get_time_factor(unittest.TestCase):
@@ -109,6 +154,7 @@ class Test_get_time_factor(unittest.TestCase):
     Tests the get_time_factor function with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
         self.units = ['sec', 'min', 'hr', 'day']
         self.mults = [1, 60, 3600, 86400]
@@ -121,6 +167,7 @@ class Test_get_time_factor(unittest.TestCase):
     def test_bad(self) -> None:
         with self.assertRaises(ValueError):
             dcs.get_time_factor('bad')
+
 
 #%% get_unit_conversion
 class Test_get_unit_conversion(unittest.TestCase):
@@ -135,6 +182,7 @@ class Test_get_unit_conversion(unittest.TestCase):
         None
         Tuples
     """
+
     def test_rads(self) -> None:
         (unit, mult) = dcs.get_unit_conversion('milli', 'rad')
         self.assertEqual(unit, 'mrad')
@@ -162,7 +210,7 @@ class Test_get_unit_conversion(unittest.TestCase):
 
     def test_unitless1(self) -> None:
         (unit, mult) = dcs.get_unit_conversion('milli', '')
-        #self.assertEqual(unit, 'ppk')
+        # self.assertEqual(unit, 'ppk')
         self.assertEqual(mult, 1000)
         (unit, mult) = dcs.get_unit_conversion('micro', '')
         self.assertEqual(unit, 'ppm')
@@ -197,10 +245,10 @@ class Test_get_unit_conversion(unittest.TestCase):
         self.assertEqual(mult, 1e12)
         (unit, mult) = dcs.get_unit_conversion('nano', 'rad^2')
         self.assertEqual(unit, '(nrad)^2')
-        self.assertLess(abs(mult-1e18), 1e4)
+        self.assertLess(abs(mult - 1e18), 1e4)
         (unit, mult) = dcs.get_unit_conversion('arcsecond^2', 'rad^2')
         self.assertEqual(unit, 'asec^2')
-        self.assertAlmostEqual(mult, dcs.RAD2ARCSEC**2)
+        self.assertAlmostEqual(mult, dcs.RAD2ARCSEC ** 2)
 
     def test_ints(self) -> None:
         (unit, mult) = dcs.get_unit_conversion(10)
@@ -221,6 +269,7 @@ class Test_get_unit_conversion(unittest.TestCase):
         (unit, mult) = dcs.get_unit_conversion(('nrad', 1e9))
         self.assertEqual(unit, 'nrad')
         self.assertEqual(mult, 1e9)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

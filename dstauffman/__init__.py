@@ -2,18 +2,6 @@ r"""
 The "dstauffman" module is a generic Python code library of useful functions.
 
 At least they are functions that I (David C. Stauffer) have found useful.  Your results may vary!
-
-Notes
------
-#.  Written by David C. Stauffer in March 2015.
-#.  Updated by David C. Stauffer in December 2015 to no longer support Python v2.7.  Too many of the
-    newer language features were appealing and couldn't be used if compatibility was a concern.
-#.  Updated by David C. Stauffer in July 2020 to put aerospace, estimation, and health into
-    submodules.
-#.  Updated by David C. Stauffer in July 2020 to split the plotting portions into a separate
-    submodule, which allows for delayed importing of matplotlib.
-#.  Updated by David C. Stauffer in November 2020 to work with just core Python, although with very
-    limited functionality.
 """
 
 #%% Imports

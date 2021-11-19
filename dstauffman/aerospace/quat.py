@@ -19,6 +19,7 @@ from dstauffman.aerospace.quat_opt import quat_to_dcm
 
 if HAVE_NUMPY:
     import numpy as np
+
     if TYPE_CHECKING:
         from numpy.typing import ArrayLike
 
@@ -51,6 +52,7 @@ def suppress_quat_checks() -> None:
     global _USE_ASSERTIONS
     _USE_ASSERTIONS = False
 
+
 #%% Functions - unsuppress_quat_checks
 def unsuppress_quat_checks() -> None:
     r"""
@@ -69,9 +71,11 @@ def unsuppress_quat_checks() -> None:
     global _USE_ASSERTIONS
     _USE_ASSERTIONS = True
 
+
 #%% Functions - quat_assertions
-def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertions: bool = False, \
-        allow_nans: bool = False) -> None:
+def quat_assertions(
+    quat: np.ndarray, *, precision: float = 1e-12, skip_assertions: bool = False, allow_nans: bool = False
+) -> None:
     r"""
     Check assertions about valid quaternions.
 
@@ -101,10 +105,9 @@ def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertio
     qndim = quat.ndim
     # check sizes and dimensions
     if qndim == 1:
-        assert (qsize == 0 or qsize == QUAT_SIZE), 'Quaternion has invalid size: "{}"'.format(qsize)
+        assert qsize == 0 or qsize == QUAT_SIZE, 'Quaternion has invalid size: "{}"'.format(qsize)
     elif qndim == 2:
-        assert (quat.shape[0] == QUAT_SIZE), 'Quaternion has invalid size for first ' + \
-            'dimension: "{}"'.format(quat.shape[0])
+        assert quat.shape[0] == QUAT_SIZE, 'Quaternion has invalid size for first ' + 'dimension: "{}"'.format(quat.shape[0])
     else:
         assert False, 'Quaternion has too many dimensions: "{}".'.format(qndim)
     # if a null quaternion, then checks are done
@@ -114,18 +117,18 @@ def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertio
     assert np.all(np.isreal(quat)), 'Quaternion is not real'
     # check ranges
     if qndim == 1:
-        if np.any(nans:= np.isnan(quat)):
+        if np.any(nans := np.isnan(quat)):
             if allow_nans:
                 assert np.all(nans), 'Quaternions with NaNs must have NaNs for every component.'
             else:
                 assert False, 'NaNs are not allow in quaternion.'
         else:
-            assert (-1 <= quat[0] <= 1), 'Quaternion has bad range in x value: "{}"'.format(quat[0])
-            assert (-1 <= quat[1] <= 1), 'Quaternion has bad range in y value: "{}"'.format(quat[1])
-            assert (-1 <= quat[2] <= 1), 'Quaternion has bad range in z value: "{}"'.format(quat[2])
-            assert ( 0 <= quat[3] <= 1), 'Quaternion has bad range in s value: "{}"'.format(quat[3])
+            assert -1 <= quat[0] <= 1, 'Quaternion has bad range in x value: "{}"'.format(quat[0])
+            assert -1 <= quat[1] <= 1, 'Quaternion has bad range in y value: "{}"'.format(quat[1])
+            assert -1 <= quat[2] <= 1, 'Quaternion has bad range in z value: "{}"'.format(quat[2])
+            assert  0 <= quat[3] <= 1, 'Quaternion has bad range in s value: "{}"'.format(quat[3])
     else:
-        if np.any(nans:= np.isnan(quat)):
+        if np.any(nans := np.isnan(quat)):
             if allow_nans:
                 # TODO: this is a hack for typing!  set command is valid
                 temp = 'Quaternions with NaNs must have NaNs for every component.'
@@ -133,22 +136,22 @@ def quat_assertions(quat: np.ndarray, *, precision: float = 1e-12, skip_assertio
             else:
                 assert False, 'NaNs are not allow in quaternion.'
         ix = ~np.isnan(quat[0, :])
-        assert np.all(-1 <= quat[0, ix]) and np.all(quat[0, ix] <= 1), 'Quaternion has bad range ' + \
-            'in x value, min: "{}", max:"{}"'.format(np.min(quat[0, ix]), np.max(quat[0, ix]))
-        assert np.all(-1 <= quat[1, ix]) and np.all(quat[1, ix] <= 1), 'Quaternion has bad range ' + \
-            'in y value, min: "{}", max:"{}"'.format(np.min(quat[1, ix]), np.max(quat[1, ix]))
-        assert np.all(-1 <= quat[2, ix]) and np.all(quat[2, ix] <= 1), 'Quaternion has bad range ' + \
-            'in z value, min: "{}", max:"{}"'.format(np.min(quat[2, ix]), np.max(quat[2, ix]))
-        assert np.all( 0 <= quat[3, ix]) and np.all(quat[3, ix] <= 1), 'Quaternion has bad range ' + \
-            'in s value, min: "{}", max:"{}"'.format(np.min(quat[3, ix]), np.max(quat[3, ix]))
+        assert np.all(-1 <= quat[0, ix]) and np.all(quat[0, ix] <= 1), (
+            'Quaternion has bad range in x value, min: "{}", max:"{}"'.format(np.min(quat[0, ix]), np.max(quat[0, ix])))
+        assert np.all(-1 <= quat[1, ix]) and np.all(quat[1, ix] <= 1), (
+            'Quaternion has bad range in y value, min: "{}", max:"{}"'.format(np.min(quat[1, ix]), np.max(quat[1, ix])))
+        assert np.all(-1 <= quat[2, ix]) and np.all(quat[2, ix] <= 1), (
+            'Quaternion has bad range in z value, min: "{}", max:"{}"'.format(np.min(quat[2, ix]), np.max(quat[2, ix])))
+        assert np.all( 0 <= quat[3, ix]) and np.all(quat[3, ix] <= 1), (
+            'Quaternion has bad range in s value, min: "{}", max:"{}"'.format(np.min(quat[3, ix]), np.max(quat[3, ix])))
 
     # check normalization
-    q_norm_err = np.abs(1 - np.sum(quat**2, axis=0))
+    q_norm_err = np.abs(1 - np.sum(quat ** 2, axis=0))
     norm_check = q_norm_err <= precision
     if allow_nans:
         norm_check |= np.isnan(q_norm_err)
-    assert np.all(norm_check), 'Quaternion has invalid normalization error "{}".'.format( \
-        np.max(q_norm_err))
+    assert np.all(norm_check), 'Quaternion has invalid normalization error "{}".'.format(np.max(q_norm_err))
+
 
 #%% Functions - enforce_pos_scalar
 def enforce_pos_scalar(quat: np.ndarray, inplace: bool = False) -> np.ndarray:
@@ -192,6 +195,7 @@ def enforce_pos_scalar(quat: np.ndarray, inplace: bool = False) -> np.ndarray:
     negs = np.less(qout[3, :], 0, out=negs, where=~np.isnan(qout[3, :]))
     qout[:, negs] = -qout[:, negs]
     return qout
+
 
 #%% Functions - qrot
 def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
@@ -244,24 +248,25 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
     quat: np.ndarray
     if np.isscalar(angle) and np.isscalar(axis):
         # optimized scalar case
-        quat = np.array([0, 0, 0, np.cos(angle/2)])  # type: ignore[operator]
-        quat[axis-1] = np.sin(angle/2)  # type: ignore[operator]
+        quat = np.array([0, 0, 0, np.cos(angle / 2)])  # type: ignore[operator]
+        quat[axis - 1] = np.sin(angle / 2)  # type: ignore[operator]
     elif np.isscalar(axis):
         # single axis, multiple angle case
-        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle/2), axis=0)))  # type: ignore[operator]
-        quat[axis-1, :] = np.sin(angle/2)  # type: ignore[operator]
+        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # type: ignore[operator]
+        quat[axis - 1, :] = np.sin(angle / 2)  # type: ignore[operator]
     elif np.isscalar(angle):
         # single angle, multiple axis case
-        quat = np.tile(np.array([[0], [0], [0], [np.cos(angle/2)]]), (1, np.size(axis)))  # type: ignore[arg-type, operator]
-        quat[axis-1, np.arange(np.size(axis))] = np.sin(angle/2)  # type: ignore[arg-type, operator]
+        quat = np.tile(np.array([[0], [0], [0], [np.cos(angle / 2)]]), (1, np.size(axis)))  # type: ignore[arg-type, operator]
+        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[arg-type, operator]
     else:
         # multiple axis, multiple angle case
         assert np.size(axis) == np.size(angle)
-        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle/2), axis=0)))  # type: ignore[arg-type, operator]
-        quat[axis-1, np.arange(np.size(axis))] = np.sin(angle/2)  # type: ignore[arg-type, operator]
+        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # type: ignore[arg-type, operator]
+        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[arg-type, operator]
     enforce_pos_scalar(quat, inplace=True)
     quat_assertions(quat, **kwargs)
     return quat
+
 
 #%% Functions - quat_from_axis_angle
 def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
@@ -302,8 +307,8 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndar
 
     """
     # ailas the cosine and sine terms
-    c = np.cos(angle/2)  # type: ignore[operator]
-    s = np.sin(angle/2)  # type: ignore[operator]
+    c = np.cos(angle / 2)  # type: ignore[operator]
+    s = np.sin(angle / 2)  # type: ignore[operator]
     # scale the unit vector by the sine and concatenate the cosine term
     if axis.ndim == 1 and c.size == 1:  # type: ignore[union-attr]
         quat = np.hstack([axis * s, c])
@@ -315,7 +320,7 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndar
         assert axis.shape[1] == c.size  # type: ignore[misc, union-attr]
         quat = np.vstack([axis * s, c])
     # TODO: try to eliminate the four different cases:
-        #e = np.outer(axis, s) if axis.ndim == 1 else axis * s
+    # e = np.outer(axis, s) if axis.ndim == 1 else axis * s
     # check for null quaternion and if found, then normalize it
     if quat.ndim == 1:
         if quat[0] == 0 and quat[1] == 0 and quat[2] == 0:
@@ -327,6 +332,7 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndar
     enforce_pos_scalar(quat, inplace=True)
     quat_assertions(quat, **kwargs)
     return quat
+
 
 #%% Functions - quat_angle_diff
 def quat_angle_diff(quat1: np.ndarray, quat2: np.ndarray, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
@@ -402,7 +408,7 @@ def quat_angle_diff(quat1: np.ndarray, quat2: np.ndarray, **kwargs) -> Tuple[np.
     dv = dq[0:3, ...]
 
     # sum vector components to get sin(theta/2)^2
-    mag2 = np.sum(dv**2, axis=0)
+    mag2 = np.sum(dv ** 2, axis=0)
 
     # take square root to get sin(theta/2)
     mag = np.sqrt(mag2)
@@ -411,7 +417,7 @@ def quat_angle_diff(quat1: np.ndarray, quat2: np.ndarray, **kwargs) -> Tuple[np.
     theta_over_2 = np.arcsin(mag)
 
     # multiply by 2 to get theta
-    theta = 2*theta_over_2
+    theta = 2 * theta_over_2
 
     # set any magnitude that is identically 0 to be 1 instead
     # to avoid a divide by zero warning.
@@ -428,6 +434,7 @@ def quat_angle_diff(quat1: np.ndarray, quat2: np.ndarray, **kwargs) -> Tuple[np.
     comp = nv * theta
 
     return (theta, comp)
+
 
 #%% Functions - quat_from_euler
 def quat_from_euler(angles: ArrayLike, seq: ArrayLike = None, **kwargs) -> np.ndarray:
@@ -517,7 +524,7 @@ def quat_from_euler(angles: ArrayLike, seq: ArrayLike = None, **kwargs) -> np.nd
         seq = np.array([seq])
     # loop through quaternions
     for i in range(num):
-        q_temp = np.array([0., 0., 0., 1.])
+        q_temp = np.array([0.0, 0.0, 0.0, 1.0])
         # apply each rotation
         for j in range(len(seq)):  # type: ignore[arg-type]
             q_single = qrot(seq[j], angles[j, i], **kwargs)  # type: ignore[index]
@@ -528,6 +535,7 @@ def quat_from_euler(angles: ArrayLike, seq: ArrayLike = None, **kwargs) -> np.nd
     if is_vector and num == 1:
         quat = quat.flatten()
     return quat
+
 
 #%% Functions - quat_interp
 def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: bool = True, **kwargs) -> np.ndarray:
@@ -636,26 +644,26 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
     # drop out and cannot be interpolated.
     index = index[index != INT_TOKEN]
     # pull out bounding times and quaternions
-    t1 = time[index-1]
+    t1 = time[index - 1]
     t2 = time[index]
-    q1 = quat[:, index-1]
+    q1 = quat[:, index - 1]
     q2 = quat[:, index]
     # calculate delta quaternion
-    dq12       = quat_norm(quat_mult(q2, quat_inv(q1, **kwargs), **kwargs), **kwargs)
+    dq12 = quat_norm(quat_mult(q2, quat_inv(q1, **kwargs), **kwargs), **kwargs)
     # find delta quaternion axis of rotation and normalize
-    vec        = dq12[0:3, :]
-    norm_vec   = np.sqrt(np.sum(vec**2, axis=0))
-    vec        = np.divide(vec, norm_vec, out=vec, where=norm_vec!=0)
+    vec = dq12[0:3, :]
+    norm_vec = np.sqrt(np.sum(vec ** 2, axis=0))
+    vec = np.divide(vec, norm_vec, out=vec, where=norm_vec != 0)
     # find delta quaternion rotation angle
-    ang        = 2*np.arcsin(norm_vec)
+    ang = 2 * np.arcsin(norm_vec)
     # scale rotation angle based on time
-    scaled_ang = ang*(ti[ix_calc]-t1) / (t2-t1)
+    scaled_ang = ang * (ti[ix_calc] - t1) / (t2 - t1)
     # set to no rotation for any null axis
     scaled_ang[norm_vec == 0] = 0
     # find scaled delta quaternion
-    dq         = quat_from_axis_angle(vec, scaled_ang, **kwargs)
+    dq = quat_from_axis_angle(vec, scaled_ang, **kwargs)
     # calculate desired quaternion
-    qout_temp  = quat_norm(quat_mult(dq, q1, **kwargs))
+    qout_temp = quat_norm(quat_mult(dq, q1, **kwargs))
     # store into output structure
     qout[:, ix_calc] = qout_temp
 
@@ -667,6 +675,7 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
         qout = qout[:, 0]
 
     return qout
+
 
 #%% Functions - quat_inv
 def quat_inv(q1: np.ndarray, inplace: bool = False, **kwargs) -> np.ndarray:
@@ -721,6 +730,7 @@ def quat_inv(q1: np.ndarray, inplace: bool = False, **kwargs) -> np.ndarray:
         q2[:] = np.vstack((-q2[0, :], -q2[1, :], -q2[2, :], q2[3, :]))
     quat_assertions(q2, **kwargs)
     return q2
+
 
 #%% Functions - quat_mult
 def quat_mult(a: np.ndarray, b: np.ndarray, **kwargs) -> np.ndarray:
@@ -784,11 +794,12 @@ def quat_mult(a: np.ndarray, b: np.ndarray, **kwargs) -> np.ndarray:
         return c
     # single quaternion inputs case
     if is_single_a and is_single_b:
-        c = np.array([ \
-            [ a[3],  a[2], -a[1],  a[0]], \
-            [-a[2],  a[3],  a[0],  a[1]], \
-            [ a[1], -a[0],  a[3],  a[2]], \
-            [-a[0], -a[1], -a[2],  a[3]]]) @ b
+        c = np.array([
+            [ a[3],  a[2], -a[1],  a[0]],
+            [-a[2],  a[3],  a[0],  a[1]],
+            [ a[1], -a[0],  a[3],  a[2]],
+            [-a[0], -a[1], -a[2],  a[3]],
+        ]) @ b
         # enforce positive scalar component
         if c[3] < 0:
             c = np.negative(c, out=c)
@@ -804,16 +815,18 @@ def quat_mult(a: np.ndarray, b: np.ndarray, **kwargs) -> np.ndarray:
         b3 = b[2, ...]
         b4 = b[3, ...]
         # compute the combine multiplication result
-        c = np.array([ \
-             b1*a4 + b2*a3 - b3*a2 + b4*a1, \
-            -b1*a3 + b2*a4 + b3*a1 + b4*a2, \
-             b1*a2 - b2*a1 + b3*a4 + b4*a3, \
-            -b1*a1 - b2*a2 - b3*a3 + b4*a4])
+        c = np.array([
+            +b1 * a4 + b2 * a3 - b3 * a2 + b4 * a1,
+            -b1 * a3 + b2 * a4 + b3 * a1 + b4 * a2,
+            +b1 * a2 - b2 * a1 + b3 * a4 + b4 * a3,
+            -b1 * a1 - b2 * a2 - b3 * a3 + b4 * a4,
+        ])
         # enforce positive scalar component
-        c[:, c[3, :]<0] = -c[:, c[3, :]<0]
+        c[:, c[3, :] < 0] = -c[:, c[3, :] < 0]
     quat_norm(c, inplace=True, **kwargs)
     quat_assertions(c, **kwargs)
     return c
+
 
 #%% Functions - quat_norm
 def quat_norm(x: np.ndarray, /, inplace: bool = False, **kwargs) -> np.ndarray:
@@ -854,13 +867,13 @@ def quat_norm(x: np.ndarray, /, inplace: bool = False, **kwargs) -> np.ndarray:
     """
     y = x if inplace else x.copy()
     # divide input by its column vector norm
-    y /= np.sqrt(np.sum(x*x, axis=0))
+    y /= np.sqrt(np.sum(x * x, axis=0))
     quat_assertions(y, **kwargs)
     return y
 
+
 #%% Functions - quat_prop
-def quat_prop(quat: np.ndarray, delta_ang: np.ndarray, *, renorm: bool = True, \
-        **kwargs) -> np.ndarray:
+def quat_prop(quat: np.ndarray, delta_ang: np.ndarray, *, renorm: bool = True, **kwargs) -> np.ndarray:
     r"""
     Approximate propagation of a quaternion using a small delta angle.
 
@@ -904,11 +917,12 @@ def quat_prop(quat: np.ndarray, delta_ang: np.ndarray, *, renorm: bool = True, \
     # TODO: expand to allow a time history of delta_ang
     # compute angle rate matrix (note: transposed to make 'F' order), use it to compute a delta
     # quaternion, and then propagate by adding the delta
-    quat_new: np.ndarray = quat + 0.5 * np.array([ \
-        [      0      ,  -delta_ang[2],    delta_ang[1],  -delta_ang[0]], \
-        [ delta_ang[2],        0      ,   -delta_ang[0],  -delta_ang[1]], \
-        [-delta_ang[1],   delta_ang[0],        0       ,  -delta_ang[2]], \
-        [ delta_ang[0],   delta_ang[1],    delta_ang[2],        0      ]]).T @ quat
+    quat_new: np.ndarray = quat + 0.5 * np.array([
+        [      0      , -delta_ang[2],   delta_ang[1], -delta_ang[0]],
+        [ delta_ang[2],       0      ,  -delta_ang[0], -delta_ang[1]],
+        [-delta_ang[1],  delta_ang[0],       0       , -delta_ang[2]],
+        [ delta_ang[0],  delta_ang[1],   delta_ang[2],       0      ],
+    ]).T @ quat
     # ensure positive scalar component
     if quat_new[3] < 0:
         quat_new[:] = -quat_new
@@ -917,6 +931,7 @@ def quat_prop(quat: np.ndarray, delta_ang: np.ndarray, *, renorm: bool = True, \
         quat_norm(quat_new, inplace=True, **kwargs)
     quat_assertions(quat_new, **kwargs)
     return quat_new
+
 
 #%% Functions - quat_times_vector
 def quat_times_vector(quat: np.ndarray, v: np.ndarray) -> np.ndarray:
@@ -965,12 +980,12 @@ def quat_times_vector(quat: np.ndarray, v: np.ndarray) -> np.ndarray:
     """
     # Multiple quaternions, multiple vectors
     qv = np.cross(quat[:3, ...], v, axis=0)
-    vec = np.transpose(v.T + 2*(-quat[3, ...] * qv + np.cross(quat[:3, ...], qv, axis=0)).T)
+    vec = np.transpose(v.T + 2 * (-quat[3, ...] * qv + np.cross(quat[:3, ...], qv, axis=0)).T)
     return vec
 
+
 #%% Functions - quat_to_euler
-def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], np.ndarray] = None, \
-        **kwargs) -> np.ndarray:
+def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], np.ndarray] = None, **kwargs) -> np.ndarray:
     r"""
     Convert quaternion to Euler angles for one of 6 input angle sequences.
 
@@ -1032,7 +1047,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
         is_vector = False
 
     # initialize output
-    num   = quat.shape[1]
+    num = quat.shape[1]
     euler = np.zeros((3, num))
 
     # Loop through quaternions
@@ -1043,71 +1058,71 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
         seq_str = str(int(seq[0])) + str(int(seq[1])) + str(int(seq[2]))
         # calculate terms based on sequence order
         if seq_str == '123':
-            #Identical to KLL pg 423
-            c2_c3                       =  dcm[0, 0]
-            s1_s2_c3_plus_s3_c1         =  dcm[1, 0]
-            minus_c1_s2_c3_plus_s3_s1   =  dcm[2, 0]
-            minus_c2_s3                 =  dcm[0, 1]
-            minus_s1_s2_s3_plus_c3_c1   =  dcm[1, 1]
-            c1_s2_s3_plus_c3_s1         =  dcm[2, 1]
-            s2                          =  dcm[0, 2]
-            s1_c2                       =  dcm[1, 2]
-            c1_c2                       =  dcm[2, 2]
+            # Identical to KLL pg 423
+            c2_c3                     =  dcm[0, 0]
+            s1_s2_c3_plus_s3_c1       =  dcm[1, 0]
+            minus_c1_s2_c3_plus_s3_s1 =  dcm[2, 0]
+            minus_c2_s3               =  dcm[0, 1]
+            minus_s1_s2_s3_plus_c3_c1 =  dcm[1, 1]
+            c1_s2_s3_plus_c3_s1       =  dcm[2, 1]
+            s2                        =  dcm[0, 2]
+            s1_c2                     =  dcm[1, 2]
+            c1_c2                     =  dcm[2, 2]
             group = 1
         elif seq_str == '231':
-            c1_c2                       =  dcm[0, 0]
-            minus_c1_s2_c3_plus_s3_s1   =  dcm[0, 1]
-            c1_s2_s3_plus_c3_s1         =  dcm[0, 2]
-            s2                          =  dcm[1, 0]
-            c2_c3                       =  dcm[1, 1]
-            minus_c2_s3                 =  dcm[1, 2]
-            s1_c2                       =  dcm[2, 0]
-            s1_s2_c3_plus_s3_c1         =  dcm[2, 1]
-            minus_s1_s2_s3_plus_c3_c1   =  dcm[2, 2]
+            c1_c2                     =  dcm[0, 0]
+            minus_c1_s2_c3_plus_s3_s1 =  dcm[0, 1]
+            c1_s2_s3_plus_c3_s1       =  dcm[0, 2]
+            s2                        =  dcm[1, 0]
+            c2_c3                     =  dcm[1, 1]
+            minus_c2_s3               =  dcm[1, 2]
+            s1_c2                     =  dcm[2, 0]
+            s1_s2_c3_plus_s3_c1       =  dcm[2, 1]
+            minus_s1_s2_s3_plus_c3_c1 =  dcm[2, 2]
             group = 1
         elif seq_str == '312':
-            s1_s2_c3_plus_s3_c1         =  dcm[0, 2]
-            minus_c1_s2_c3_plus_s3_s1   =  dcm[1, 2]
-            minus_c2_s3                 =  dcm[2, 0]
-            minus_s1_s2_s3_plus_c3_c1   =  dcm[0, 0]
-            c1_s2_s3_plus_c3_s1         =  dcm[1, 0]
-            s2                          =  dcm[2, 1]
-            s1_c2                       =  dcm[0, 1]
-            c1_c2                       =  dcm[1, 1]
-            c2_c3                       =  dcm[2, 2]
+            s1_s2_c3_plus_s3_c1       =  dcm[0, 2]
+            minus_c1_s2_c3_plus_s3_s1 =  dcm[1, 2]
+            minus_c2_s3               =  dcm[2, 0]
+            minus_s1_s2_s3_plus_c3_c1 =  dcm[0, 0]
+            c1_s2_s3_plus_c3_s1       =  dcm[1, 0]
+            s2                        =  dcm[2, 1]
+            s1_c2                     =  dcm[0, 1]
+            c1_c2                     =  dcm[1, 1]
+            c2_c3                     =  dcm[2, 2]
             group = 1
         elif seq_str == '132':
-            c2_c3                        =  dcm[0, 0]
-            minus_c1_s2_c3_plus_s3_s1    =  dcm[1, 0]
-            s1_s2_c3_plus_s3_c1          = -dcm[2, 0]
-            s2                           = -dcm[0, 1]
-            c1_c2                        =  dcm[1, 1]
-            s1_c2                        =  dcm[2, 1]
-            minus_c2_s3                  = -dcm[0, 2]
-            c1_s2_s3_plus_c3_s1          = -dcm[1, 2]
-            minus_s1_s2_s3_plus_c3_c1    =  dcm[2, 2]
+            c2_c3                     =  dcm[0, 0]
+            minus_c1_s2_c3_plus_s3_s1 =  dcm[1, 0]
+            s1_s2_c3_plus_s3_c1       = -dcm[2, 0]
+            s2                        = -dcm[0, 1]
+            c1_c2                     =  dcm[1, 1]
+            s1_c2                     =  dcm[2, 1]
+            minus_c2_s3               = -dcm[0, 2]
+            c1_s2_s3_plus_c3_s1       = -dcm[1, 2]
+            minus_s1_s2_s3_plus_c3_c1 =  dcm[2, 2]
             group = 2
         elif seq_str == '213':
-            s1_s2_c3_plus_s3_c1          = -dcm[0, 1]
-            minus_c1_s2_c3_plus_s3_s1    =  dcm[2, 1]
-            minus_c2_s3                  = -dcm[1, 0]
-            minus_s1_s2_s3_plus_c3_c1    =  dcm[0, 0]
-            c1_s2_s3_plus_c3_s1          = -dcm[2, 0]
-            s2                           = -dcm[1, 2]
-            s1_c2                        =  dcm[0, 2]
-            c1_c2                        =  dcm[2, 2]
-            c2_c3                        =  dcm[1, 1]
+            s1_s2_c3_plus_s3_c1       = -dcm[0, 1]
+            minus_c1_s2_c3_plus_s3_s1 =  dcm[2, 1]
+            minus_c2_s3               = -dcm[1, 0]
+            minus_s1_s2_s3_plus_c3_c1 =  dcm[0, 0]
+            c1_s2_s3_plus_c3_s1       = -dcm[2, 0]
+            s2                        = -dcm[1, 2]
+            s1_c2                     =  dcm[0, 2]
+            c1_c2                     =  dcm[2, 2]
+            c2_c3                     =  dcm[1, 1]
             group = 2
         elif seq_str == '321':
-            s1_s2_c3_plus_s3_c1          = -dcm[1, 2]
-            minus_c1_s2_c3_plus_s3_s1    =  dcm[0, 2]
-            minus_c2_s3                  = -dcm[2, 1]
-            minus_s1_s2_s3_plus_c3_c1    =  dcm[1, 1]
-            c1_s2_s3_plus_c3_s1          = -dcm[0, 1]
-            s2                           = -dcm[2, 0]
-            s1_c2                        =  dcm[1, 0]
-            c1_c2                        =  dcm[0, 0]
-            c2_c3                        =  dcm[2, 2]
+            s1_s2_c3_plus_s3_c1       = -dcm[1, 2]
+            minus_c1_s2_c3_plus_s3_s1 =  dcm[0, 2]
+            minus_c2_s3               = -dcm[2, 1]
+            minus_s1_s2_s3_plus_c3_c1 =  dcm[1, 1]
+            c1_s2_s3_plus_c3_s1       = -dcm[0, 1]
+            s2                        = -dcm[2, 0]
+            s1_c2                     =  dcm[1, 0]
+            c1_c2                     =  dcm[0, 0]
+            c2_c3                     =  dcm[2, 2]
             group = 2
         else:
             raise ValueError('Invalid axis rotation sequence: "{}"'.format(seq_str))
@@ -1124,19 +1139,20 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
         s1 = np.sin(theta1)
         c1 = np.cos(theta1)
         # build remaining thetas
-        s3     = s1_s2_c3_plus_s3_c1*c1       +  minus_c1_s2_c3_plus_s3_s1*s1
-        c3     = minus_s1_s2_s3_plus_c3_c1*c1 +        c1_s2_s3_plus_c3_s1*s1
+        s3     = s1_s2_c3_plus_s3_c1 * c1       +  minus_c1_s2_c3_plus_s3_s1 * s1
+        c3     = minus_s1_s2_s3_plus_c3_c1 * c1 +        c1_s2_s3_plus_c3_s1 * s1
         theta3 = np.arctan2(s3, c3)
-        c2     = c2_c3*c3 - minus_c2_s3*s3
+        c2     = c2_c3 * c3 - minus_c2_s3 * s3
         theta2 = np.arctan2(s2, c2)
 
         # Store output
-        euler[:,i] = np.array([theta1, theta2, theta3])
+        euler[:, i] = np.array([theta1, theta2, theta3])
 
     # optionally flatten result and then return answer
     if is_vector:
         euler = euler.flatten()
     return euler
+
 
 #%% Unit test
 if __name__ == '__main__':

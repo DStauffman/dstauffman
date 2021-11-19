@@ -29,8 +29,9 @@ class Test_plotting_plot_bpe_convergence(unittest.TestCase):
         No Opts
         No Costs
     """
+
     def setUp(self) -> None:
-        self.costs: Union[np.ndarray, List[float]] = np.array([1, 0.1, 0.05, 0.01]) if HAVE_NUMPY else [1., 0.1, 0.05, 0.01]
+        self.costs: Union[np.ndarray, List[float]] = np.array([1, 0.1, 0.05, 0.01]) if HAVE_NUMPY else [1.0, 0.1, 0.05, 0.01]
         self.opts = plot.Opts()
         self.opts.show_plot = False
         self.figs: List[Figure] = []
@@ -51,18 +52,19 @@ class Test_plotting_plot_bpe_convergence(unittest.TestCase):
     def tearDown(self) -> None:
         plot.close_all(self.figs)
 
+
 #%% plotting.plot_bpe_results
 class Test_plotting_plot_bpe_results(unittest.TestCase):
     r"""
     Tests the plotting.plot_bpe_results function with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
         self.figs: List[Figure] = []
         self.bpe_results = BpeResults()
         self.opts = plot.Opts()
-        self.plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, \
-        'covariance': True}
+        self.plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, 'covariance': True}
 
     @unittest.skipIf(not HAVE_MPL or not HAVE_NUMPY, 'Skipping due to missing matplotlib/numpy dependency.')
     def test_nominal(self) -> None:
@@ -102,6 +104,7 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
 
     def tearDown(self) -> None:
         plot.close_all(self.figs)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

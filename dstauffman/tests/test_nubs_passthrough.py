@@ -13,6 +13,7 @@ import dstauffman.nubs as nubs
 
 try:
     import numba
+
     assert numba
     _HAVE_NUMBA = True
 except ModuleNotFoundError:
@@ -26,11 +27,13 @@ class Test_types(unittest.TestCase):
         Callables
         Constants
     """
+
     def test_callables(self) -> None:
         self.assertTrue(callable(nubs.ncjit))
 
     def test_constants(self) -> None:
         self.assertTrue(isinstance(nubs.TARGET, str))
+
 
 #%% Unit test execution
 if __name__ == '__main__':

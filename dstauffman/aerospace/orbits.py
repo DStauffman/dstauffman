@@ -14,12 +14,10 @@ import doctest
 from typing import Any, ClassVar, Literal, overload, Tuple, TypeVar, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, IntEnumPlus, NP_DATETIME_FORM, \
-    NP_DATETIME_UNITS, RAD2DEG
+from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, IntEnumPlus, NP_DATETIME_FORM, NP_DATETIME_UNITS, RAD2DEG
 
 from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH, PI, TAU
-from dstauffman.aerospace.orbit_conv import anomaly_eccentric_2_true, mean_motion_2_semimajor, \
-    anomaly_mean_2_eccentric
+from dstauffman.aerospace.orbit_conv import anomaly_eccentric_2_true, mean_motion_2_semimajor, anomaly_mean_2_eccentric
 from dstauffman.aerospace.orbit_support import cross, d_2_r, dot, jd_to_numpy, norm, r_2_d
 
 if HAVE_NUMPY:
@@ -48,6 +46,7 @@ class OrbitType(IntEnumPlus):
     elliptic: ClassVar[int] = 1
     parabolic: ClassVar[int] = 2
     hyperbolic: ClassVar[int] = 3
+
 
 #%% Classes - Elements
 class Elements(Frozen):
@@ -95,6 +94,7 @@ class Elements(Frozen):
      t          = NaT
 
     """
+
     def __init__(self, num: int = None):
         if num is None:
             self.a: _V = None
@@ -196,21 +196,25 @@ class Elements(Frozen):
             print(f'\N{GREEK SMALL LETTER OMEGA} = {self.w[index] * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[index]
             print(f'M = {self.vo[index] * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)')  # type: ignore[index]
 
+
 #%% Functions - _zero_divide
 def _zero_divide(x, y):
-    return np.divide(x, y, where=y!=0, out=np.zeros_like(y))
+    return np.divide(x, y, where=y != 0, out=np.zeros_like(y))
+
 
 #%% Functions - _inf_divide
 def _inf_divide(x, y):
-    return np.divide(x, y, where=y!=0, out=np.full(y.shape, np.inf))
+    return np.divide(x, y, where=y != 0, out=np.full(y.shape, np.inf))
+
 
 def _fix_instab(x, precision):
-    ix = (x > 1.) & (x < 1. + precision)
+    ix = (x > 1.0) & (x < 1.0 + precision)
     if np.any(ix):
         x[ix] = 1.0
-    ix = (x < -1.) & (x > -1 - precision)
+    ix = (x < -1.0) & (x > -1 - precision)
     if np.any(ix):
         x[ix] = -1.0
+
 
 #%% Functions - two_line_elements
 def two_line_elements(line1: str, line2: str) -> Elements:
@@ -319,10 +323,12 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     a = mean_motion_2_semimajor(n, MU_EARTH)
     E = anomaly_mean_2_eccentric(M, e)
     nu = anomaly_eccentric_2_true(E, e)
-    p = a * (1 - e**2)
+    p = a * (1 - e ** 2)
 
-    time = (datetime.datetime(2000 + year, 1, 1, 0, 0, 0) - datetime.datetime(2000, 1, 1, 0, 0, 0)).days \
+    time = (
+        (datetime.datetime(2000 + year, 1, 1, 0, 0, 0) - datetime.datetime(2000, 1, 1, 0, 0, 0)).days
         + JULIAN['jd_2000_01_01'] - 0.5 + day - 1
+    )
 
     elements            = Elements()
     elements.equatorial = False
@@ -337,15 +343,17 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     elements.uo         = omega + nu
     elements.P          = Omega + omega
     elements.lo         = Omega + omega + nu
-    elements.T          = TAU*np.sqrt(a**3 / MU_EARTH)
+    elements.T          = TAU * np.sqrt(a ** 3 / MU_EARTH)
     elements.t          = jd_to_numpy(time)
     elements.type       = OrbitType.elliptic
 
     return elements
 
+
 #%% Functions - rv_2_oe
-def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., unit: bool = False, \
-        precision: float = 1e-12) -> Elements:
+def rv_2_oe(
+    r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1.0, unit: bool = False, precision: float = 1e-12
+) -> Elements:
     r"""
     Position and Velocity to Orbital Elements.
 
@@ -406,15 +414,15 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
 
     # calculations
     z = np.zeros(h.shape)
-    z[2, ...] = 1.
+    z[2, ...] = 1.0
     n = cross(z, h)
     n_mag = norm(n)
     ix = n_mag == 0
     if np.any(ix):
-        n[..., ix] = np.tile(np.array([[1.], [0.], [0.]]), (1, np.count_nonzero(ix)))
-        n_mag[ix] = 1.
+        n[..., ix] = np.tile(np.array([[1.0], [0.0], [0.0]]), (1, np.count_nonzero(ix)))
+        n_mag[ix] = 1.0
 
-    e = 1. / mu*((norm_v**2 - _zero_divide(mu, norm_r)) * r - dot(r,v) * v)
+    e = 1.0 / mu * ((norm_v ** 2 - _zero_divide(mu, norm_r)) * r - dot(r, v) * v)
 
     # e
     e_mag = norm(e)
@@ -424,14 +432,14 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
     num = e_mag.size
 
     # p
-    p = norm_h**2/mu
+    p = norm_h ** 2 / mu
 
     # a
     # Note: a is infinite when eccentricity is exactly one
-    a = np.divide(p, 1.0 - e_mag**2, where=e_mag!=1, out=np.full(num, np.inf))
+    a = np.divide(p, 1.0 - e_mag ** 2, where=e_mag != 1, out=np.full(num, np.inf))
 
     # i
-    i = np.arccos(_zero_divide(h[2, ...], norm_h), where=norm_h!=0, out=np.zeros_like(norm_h))
+    i = np.arccos(_zero_divide(h[2, ...], norm_h), where=norm_h != 0, out=np.zeros_like(norm_h))
 
     # W
     W = np.asanyarray(np.arccos(n[0, ...] / n_mag))
@@ -439,33 +447,33 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
 
     # w
     ix = np.abs(e_mag) >= precision
-    w = np.divide(dot(n, e), n_mag*e_mag, where=ix, out=np.zeros(num))
+    w = np.divide(dot(n, e), n_mag * e_mag, where=ix, out=np.zeros(num))
     _fix_instab(w, precision=precision)
     w = np.arccos(w, where=ix, out=w)
     w = np.subtract(TAU, w, out=w, where=ix & (e[2, ...] < -precision))
     w[ix & ~np.isreal(w)] = PI
 
     # vo
-    ix &= (norm_r > precision)
-    vo = np.divide(dot(e, r), e_mag*norm_r, where=ix, out=np.zeros(num))
+    ix &= norm_r > precision
+    vo = np.divide(dot(e, r), e_mag * norm_r, where=ix, out=np.zeros(num))
     _fix_instab(vo, precision=precision)
     vo = np.arccos(vo, where=ix, out=vo)
     vo = np.subtract(TAU, vo, out=vo, where=ix & (dot(r, v) < -precision))
 
     # uo
     uo = np.asanyarray(np.mod(w + vo, TAU))
-    uo[np.abs(uo - TAU) < precision] = 0.
+    uo[np.abs(uo - TAU) < precision] = 0.0
 
     # P
     P = np.asanyarray(np.mod(W + w, TAU))
-    P[np.abs(P - TAU) < precision] = 0.
+    P[np.abs(P - TAU) < precision] = 0.0
 
     # lo
     lo = np.asanyarray(np.mod(W + w + vo, TAU))
-    lo[np.abs(lo - TAU) < precision] = 0.
+    lo[np.abs(lo - TAU) < precision] = 0.0
 
     # tell if equatorial
-    equatorial = (np.abs(i) < precision) | (np.abs(i-PI) < precision)
+    equatorial = (np.abs(i) < precision) | (np.abs(i - PI) < precision)
 
     # convert to degrees specified
     if unit:
@@ -480,18 +488,18 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
     # allocate stuff
     orbit_type = np.full(num, OrbitType.uninitialized, dtype=int)
     T = np.full(num, np.nan)
-    #dt = np.full(num, np.nan)
+    # dt = np.full(num, np.nan)
     circular = np.zeros(num, dtype=bool)
 
     # specific energy
-    E = norm_v**2/2 - _inf_divide(mu, norm_r)
+    E = norm_v ** 2 / 2 - _inf_divide(mu, norm_r)
     # test for type of orbit - elliptic
     ix = E < 0
     orbit_type[ix] = OrbitType.elliptic
     # T (only defined for elliptic, as parabolic and hyperbolic don't have a period)
     full_mu = mu if num == 1 or np.size(mu) == 1 else mu[ix]  # type: ignore[index]
-    T[ix] = TAU*np.sqrt(a[ix]**3/full_mu)
-    #dt[ix] = T[ix] / TAU * M
+    T[ix] = TAU * np.sqrt(a[ix] ** 3 / full_mu)
+    # dt[ix] = T[ix] / TAU * M
     circular[ix & (np.abs(e_mag) < precision)] = True
     # parabolic
     ix = E == 0
@@ -536,17 +544,26 @@ def rv_2_oe(r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1., uni
 
     return elements
 
+
 #%% oe_2_rv
 @overload
-def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = ..., unit: bool = ..., \
-        *, return_PQW: Literal[False] = ..., ) -> Tuple[np.ndarray, np.ndarray]: ...
-@overload
-def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = ..., unit: bool = ..., \
-        *, return_PQW: Literal[True]) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]: ...
+def oe_2_rv(
+    elements: Elements,
+    mu: Union[float, np.ndarray] = ...,
+    unit: bool = ...,
+    *,
+    return_PQW: Literal[False] = ...,
+) -> Tuple[np.ndarray, np.ndarray]: ...
 
-def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = 1., unit: bool = False, \
-        *, return_PQW: bool = False) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, \
-        np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
+@overload
+def oe_2_rv(
+    elements: Elements, mu: Union[float, np.ndarray] = ..., unit: bool = ..., *, return_PQW: Literal[True]
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]: ...
+
+
+def oe_2_rv(
+    elements: Elements, mu: Union[float, np.ndarray] = 1.0, unit: bool = False, *, return_PQW: bool = False
+) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     r"""
     Orbital Elements to Position and Velocity.
 
@@ -612,39 +629,43 @@ def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = 1., unit: bool = 
 
     # adjust if angles are in degrees
     if unit:
-        i  =  d_2_r(i)
-        W  =  d_2_r(W)
-        w  =  d_2_r(w)
-        nu =  d_2_r(nu)
+        i  = d_2_r(i)
+        W  = d_2_r(W)
+        w  = d_2_r(w)
+        nu = d_2_r(nu)
 
     #% calculations
     # parameter
     if elements.p is not None:
         p = elements.p
     else:
-        p = a * (1.0 - e**2)
+        p = a * (1.0 - e ** 2)
     assert p is not None
 
     # magnitude of r in PQW frame
-    r_mag = p / (1 + e*np.cos(nu))
+    r_mag = p / (1 + e * np.cos(nu))
 
     # r in PQW frame
-    r_PQW = np.array([r_mag*np.cos(nu), r_mag*np.sin(nu), 0.])
+    r_PQW = np.array([r_mag * np.cos(nu), r_mag * np.sin(nu), 0.0])
 
     # v in PQW frame
-    v_PQW = np.sqrt(mu/p) * np.array([-np.sin(nu), e+np.cos(nu), 0.])
+    v_PQW = np.sqrt(mu / p) * np.array([-np.sin(nu), e + np.cos(nu), 0.0])
 
     # cosine and sine terms
-    cw = np.cos(w); sw = np.sin(w);
-    cW = np.cos(W); sW = np.sin(W);
-    ci = np.cos(i); si = np.sin(i);
+    cw = np.cos(w)
+    sw = np.sin(w)
+    cW = np.cos(W)
+    sW = np.sin(W)
+    ci = np.cos(i)
+    si = np.sin(i)
 
     # transformation matrix
     # TODO: create quaternion and use qrot instead
-    T = np.array([ \
-        [+cW*cw-sW*sw*ci, -cW*sw-sW*cw*ci, +sW*si], \
-        [+sW*cw+cW*sw*ci, -sW*sw+cW*cw*ci, -cW*si], \
-        [+sw*si,          +cw*si,          +ci   ]])
+    T = np.array([
+        [+cW * cw - sW * sw * ci, -cW * sw - sW * cw * ci, +sW * si],
+        [+sW * cw + cW * sw * ci, -sW * sw + cW * cw * ci, -cW * si],
+        [+sw * si,                +cw * si,                     +ci],
+    ])
 
     # translate r & v into IJK frame
     r = T @ r_PQW
@@ -654,9 +675,11 @@ def oe_2_rv(elements: Elements, mu: Union[float, np.ndarray] = 1., unit: bool = 
         return (r, v, r_PQW, v_PQW, T)
     return (r, v)
 
+
 #%% Functions - advance_elements
 def advance_elements(elements, mu, time):
     pass
+
 
 #%% Unit Test
 if __name__ == '__main__':

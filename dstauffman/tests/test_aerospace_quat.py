@@ -22,8 +22,10 @@ class Test_aerospace_QUAT_SIZE(unittest.TestCase):
     Tests the aerospace.QUAT_SIZE function with the following cases:
         Exists and is 4
     """
+
     def test_exists(self) -> None:
         self.assertEqual(space.QUAT_SIZE, 4)
+
 
 #%% aerospace.suppress_quat_checks and aerospace.unsupress_quat_checks
 class Test_aerospace_suppress_checks(unittest.TestCase):
@@ -31,6 +33,7 @@ class Test_aerospace_suppress_checks(unittest.TestCase):
     Tests the suppress_quat_checks and unsupress_quat_checks functions with the following cases:
         Suppress and Unsuppress
     """
+
     @classmethod
     def setUpClass(cls) -> None:
         cls.orig_flag = space.quat._USE_ASSERTIONS  # type: ignore[attr-defined]
@@ -47,6 +50,7 @@ class Test_aerospace_suppress_checks(unittest.TestCase):
         else:
             space.suppress_quat_checks()  # pragma: no cover
 
+
 #%% aerospace.quat_assertions
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_assertions(unittest.TestCase):
@@ -56,19 +60,20 @@ class Test_aerospace_quat_assertions(unittest.TestCase):
         Array (x2)
         Bad (x7)
     """
+
     def setUp(self) -> None:
-        self.q1 = np.array([0, 0, 0, 1]) # zero quaternion
-        self.q2 = np.array([0.5, 0.5, 0.5, 0.5]) # normal 1D quat
-        self.q3 = np.array([0.5, -0.5, -0.5, 0.5]) # normal 1D quat with some negative components
-        self.q4 = np.column_stack((self.q1, self.q2, self.q3)) # 2D array
-        self.q5 = np.array([[0.5],[0.5],[0.5],[0.5]]) # 2D, single quat
-        self.q6 = np.array([0, 0, 0, -1]) # zero quaternion with bad scalar
-        self.q7 = np.array([-5, -5, 5, 5]) # quat with bad ranges
+        self.q1 = np.array([0, 0, 0, 1])  # zero quaternion
+        self.q2 = np.array([0.5, 0.5, 0.5, 0.5])  # normal 1D quat
+        self.q3 = np.array([0.5, -0.5, -0.5, 0.5])  # normal 1D quat with some negative components
+        self.q4 = np.column_stack((self.q1, self.q2, self.q3))  # 2D array
+        self.q5 = np.array([[0.5], [0.5], [0.5], [0.5]])  # 2D, single quat
+        self.q6 = np.array([0, 0, 0, -1])  # zero quaternion with bad scalar
+        self.q7 = np.array([-5, -5, 5, 5])  # quat with bad ranges
         self.q8 = np.array([0.5, 0.5j, 0.5, 0.5], dtype=np.complex128)
-        self.q9 = np.array([0, 0, 1]) # only a 3 element vector
-        self.q10 = np.array([0, 0, 0]) # only a 3 element vector, but with zero magnitude
-        self.q11 = np.array([[[0.5],[0.5],[0.5],[0.5]]]) # valid, but 3D instead
-        self.q12 = np.column_stack((self.q1, self.q6, self.q7)) # good and bad combined
+        self.q9 = np.array([0, 0, 1])  # only a 3 element vector
+        self.q10 = np.array([0, 0, 0])  # only a 3 element vector, but with zero magnitude
+        self.q11 = np.array([[[0.5], [0.5], [0.5], [0.5]]])  # valid, but 3D instead
+        self.q12 = np.column_stack((self.q1, self.q6, self.q7))  # good and bad combined
 
     def test_nominal1(self) -> None:
         space.quat_assertions(self.q1)
@@ -125,7 +130,7 @@ class Test_aerospace_quat_assertions(unittest.TestCase):
 
     def test_nans1d_3(self) -> None:
         with self.assertRaises(AssertionError):
-            space.quat_assertions(np.array([0., 1., np.nan, 0.]), allow_nans=True)
+            space.quat_assertions(np.array([0.0, 1.0, np.nan, 0.0]), allow_nans=True)
 
     def test_nans2d_1(self) -> None:
         self.q4[0, 0] = np.nan
@@ -145,6 +150,7 @@ class Test_aerospace_quat_assertions(unittest.TestCase):
         with self.assertRaises(AssertionError):
             space.quat_assertions(self.q4, allow_nans=True)
 
+
 #%% aerospace.enforce_pos_scalar
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_enforce_pos_scalar(unittest.TestCase):
@@ -154,11 +160,12 @@ class Test_aerospace_enforce_pos_scalar(unittest.TestCase):
         Multi quats
         Inplace
     """
+
     def setUp(self) -> None:
-        self.q1_inp = np.array([-np.sqrt(2)/2, 0, 0, np.sqrt(2)/2])
-        self.q1_out = np.array([-np.sqrt(2)/2, 0, 0, np.sqrt(2)/2])
-        self.q2_inp = np.array([0, 0.5, 0, -np.sqrt(3)/2])
-        self.q2_out = np.array([0, -0.5, 0, np.sqrt(3)/2])
+        self.q1_inp = np.array([-np.sqrt(2) / 2, 0, 0, np.sqrt(2) / 2])
+        self.q1_out = np.array([-np.sqrt(2) / 2, 0, 0, np.sqrt(2) / 2])
+        self.q2_inp = np.array([0, 0.5, 0, -np.sqrt(3) / 2])
+        self.q2_out = np.array([0, -0.5, 0, np.sqrt(3) / 2])
 
     def test_nominal(self) -> None:
         q1_out = space.enforce_pos_scalar(self.q1_inp)
@@ -189,6 +196,7 @@ class Test_aerospace_enforce_pos_scalar(unittest.TestCase):
         q = space.enforce_pos_scalar(np.full((4, 10), np.nan))
         self.assertTrue(np.all(np.isnan(q)))
 
+
 #%% aerospace.qrot
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_qrot(unittest.TestCase):
@@ -201,14 +209,15 @@ class Test_aerospace_qrot(unittest.TestCase):
         Null (x2)
         Vector mismatch (causes AssertionError)
     """
+
     def setUp(self) -> None:
         self.axis   = np.array([1, 2, 3])
-        self.angle  = np.pi/2
-        self.angle2 = np.pi/3
-        r2o2        = np.sqrt(2)/2
-        r3o2        = np.sqrt(3)/2
+        self.angle  = np.pi / 2
+        self.angle2 = np.pi / 3
+        r2o2        = np.sqrt(2) / 2
+        r3o2        = np.sqrt(3) / 2
         self.quat   = np.array([[r2o2, 0, 0, r2o2], [0, r2o2, 0, r2o2], [0, 0, r2o2, r2o2]])
-        self.quat2  = np.array([[ 0.5, 0, 0, r3o2], [0,  0.5, 0, r3o2], [0, 0,  0.5, r3o2]])
+        self.quat2  = np.array([[0.5, 0, 0, r3o2], [0, 0.5, 0, r3o2], [0, 0, 0.5, r3o2]])
         self.null   = np.array([], dtype=int)
         self.null_quat = np.zeros((4, 0))
 
@@ -231,7 +240,7 @@ class Test_aerospace_qrot(unittest.TestCase):
 
     def test_all_vector_inputs(self) -> None:
         quat = space.qrot(self.axis, np.array([self.angle, self.angle, self.angle2]))
-        np.testing.assert_array_almost_equal(quat, np.column_stack((self.quat[0,:], self.quat[1,:], self.quat2[2,:])))
+        np.testing.assert_array_almost_equal(quat, np.column_stack((self.quat[0, :], self.quat[1, :], self.quat2[2, :])))
 
     def test_null1(self) -> None:
         quat = space.qrot(self.axis[0], self.null)
@@ -246,8 +255,9 @@ class Test_aerospace_qrot(unittest.TestCase):
             space.qrot(self.axis, np.array([self.angle, self.angle2]))
 
     def test_larger_angle(self) -> None:
-        quat = space.qrot(1, 5.1*np.pi)
+        quat = space.qrot(1, 5.1 * np.pi)
         self.assertGreater(quat[3], 0)
+
 
 #%% aerospace.quat_from_axis_angle
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -257,42 +267,46 @@ class Test_aerospace_quat_from_axis_angle(unittest.TestCase):
         Single axis (x3)
         Multiple axis
     """
+
     def test_axis1(self) -> None:
-        angle = np.arange(0, 2*np.pi, 0.01) - np.pi
-        quat = space.quat_from_axis_angle(np.array([1., 0., 0.]), angle)
+        angle = np.arange(0, 2 * np.pi, 0.01) - np.pi
+        quat = space.quat_from_axis_angle(np.array([1.0, 0.0, 0.0]), angle)
         exp = space.qrot(1, angle)
         np.testing.assert_array_almost_equal(quat, exp, 14)
 
     def test_axis2(self) -> None:
-        angle = np.arange(0, 2*np.pi, 0.01) - np.pi
-        quat = space.quat_from_axis_angle(np.array([0., 1., 0.]), angle)
+        angle = np.arange(0, 2 * np.pi, 0.01) - np.pi
+        quat = space.quat_from_axis_angle(np.array([0.0, 1.0, 0.0]), angle)
         exp = space.qrot(2, angle)
         np.testing.assert_array_almost_equal(quat, exp, 14)
 
     def test_axis3(self) -> None:
-        angle = np.arange(0, 2*np.pi, 0.01) - np.pi
-        quat = space.quat_from_axis_angle(np.array([0., 0., 1.]), angle)
+        angle = np.arange(0, 2 * np.pi, 0.01) - np.pi
+        quat = space.quat_from_axis_angle(np.array([0.0, 0.0, 1.0]), angle)
         exp = space.qrot(3, angle)
         np.testing.assert_array_almost_equal(quat, exp, 14)
 
     def test_single_inputs(self) -> None:
-        axis = np.sqrt([9/50, 16/50, 0.5])  # unit([3, 4, 5])
-        angle = 1e-6*np.sqrt(50)
+        axis = np.sqrt([9 / 50, 16 / 50, 0.5])  # unit([3, 4, 5])
+        angle = 1e-6 * np.sqrt(50)
         quat = space.quat_from_axis_angle(axis, angle)
-        exp = space.quat_mult(space.quat_mult(space.qrot(1, 3e-6), \
-            space.qrot(2, 4e-6)), space.qrot(3, 5e-6))
+        exp = space.quat_mult(space.quat_mult(space.qrot(1, 3e-6), space.qrot(2, 4e-6)), space.qrot(3, 5e-6))
         np.testing.assert_array_almost_equal(quat, exp, 10)
 
     def test_axes_single_angle(self) -> None:
-        axis = np.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.], [np.sqrt(9/50), np.sqrt(16/50), np.sqrt(0.5)]]).T
-        angle = 1e-6*np.sqrt(50)
+        axis = np.array(
+            [[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [np.sqrt(9 / 50), np.sqrt(16 / 50), np.sqrt(0.5)]]
+        ).T
+        angle = 1e-6 * np.sqrt(50)
         quat = space.quat_from_axis_angle(axis, angle)
-        exp = np.column_stack([space.qrot(np.array([1, 2, 3]), angle), space.quat_mult(space.quat_mult( \
-            space.qrot(1, 3e-6), space.qrot(2, 4e-6)), space.qrot(3, 5e-6))])
+        exp = np.column_stack([
+            space.qrot(np.array([1, 2, 3]), angle),
+            space.quat_mult(space.quat_mult(space.qrot(1, 3e-6), space.qrot(2, 4e-6)), space.qrot(3, 5e-6)),
+        ])
         np.testing.assert_array_almost_equal(quat, exp, 10)
 
     def test_multi_axis_angle(self) -> None:
-        axis = np.array([[1., 0., 0.], [0., 1., 0.], [0., 0., 1.], np.full(3, np.sqrt(3)/3)]).T
+        axis = np.array([[1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], np.full(3, np.sqrt(3) / 3)]).T
         angle = np.array([-0.5, 1.5, 5.5, 0.0])
         quat = space.quat_from_axis_angle(axis, angle)
         exp = space.qrot(np.array([1, 2, 3, 1]), angle)
@@ -300,15 +314,16 @@ class Test_aerospace_quat_from_axis_angle(unittest.TestCase):
 
     def test_null_axis(self) -> None:
         quat = space.quat_from_axis_angle(np.zeros(3), 0.1)
-        np.testing.assert_array_equal(quat, np.array([0., 0., 0., 1.]))
+        np.testing.assert_array_equal(quat, np.array([0.0, 0.0, 0.0, 1.0]))
 
     def test_null_axis_2d(self) -> None:
         axis = np.zeros((3, 4))
-        axis[1, 1] = 1.
+        axis[1, 1] = 1.0
         quat = space.quat_from_axis_angle(axis, np.array([0.1, 0.2, 5.3, 0.4]))
-        null = np.array([0., 0., 0., 1.])
+        null = np.array([0.0, 0.0, 0.0, 1.0])
         exp = np.column_stack([null, space.qrot(2, 0.2), null, null])
         np.testing.assert_array_equal(quat, exp)
+
 
 #%% aerospace.quat_angle_diff
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -320,6 +335,7 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
         Zero diff (x4)
         Null (x4)
     """
+
     def setUp(self) -> None:
         self.quat1 = np.array([0.5, 0.5, 0.5, 0.5])
         self.dq1   = space.qrot(1, 0.001)
@@ -328,7 +344,7 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
         self.dqq2  = space.quat_mult(self.dq2, self.quat1)
         self.theta = np.array([0.001, 0.05])
         self.comp  = np.array([[0.001, 0], [0, 0.05], [0, 0]])
-        self.null   = np.array([])
+        self.null  = np.array([])
         self.null_quat = np.zeros((4, 0))
 
     def test_nominal1(self) -> None:
@@ -352,10 +368,12 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
         np.testing.assert_array_almost_equal(comp, self.comp)
 
     def test_array3(self) -> None:
-        (theta, comp) = space.quat_angle_diff(np.column_stack((self.quat1, self.quat1, self.dqq1, self.dqq2)), \
-            np.column_stack((self.dqq1, self.dqq2, self.quat1, self.quat1)))
+        (theta, comp) = space.quat_angle_diff(
+            np.column_stack((self.quat1, self.quat1, self.dqq1, self.dqq2)),
+            np.column_stack((self.dqq1, self.dqq2, self.quat1, self.quat1)),
+        )
         np.testing.assert_array_almost_equal(theta, self.theta[[0, 1, 0, 1]])
-        np.testing.assert_array_almost_equal(comp, self.comp[:,[0, 1, 0, 1]] * np.array([1, 1, -1, -1]))
+        np.testing.assert_array_almost_equal(comp, self.comp[:, [0, 1, 0, 1]] * np.array([1, 1, -1, -1]))
 
     def test_zero_diff1(self) -> None:
         (theta, comp) = space.quat_angle_diff(self.quat1, self.quat1)
@@ -381,30 +399,31 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
     def test_null1(self) -> None:
         (theta, comp) = space.quat_angle_diff(self.quat1, self.null)
         self.assertEqual(theta.size, 0)
-        self.assertEqual(theta.shape, (0, ))
+        self.assertEqual(theta.shape, (0,))
         self.assertEqual(comp.size, 0)
         self.assertEqual(comp.shape, (3, 0))
 
     def test_null2(self) -> None:
         (theta, comp) = space.quat_angle_diff(self.quat1, self.null_quat)
         self.assertEqual(theta.size, 0)
-        self.assertEqual(theta.shape, (0, ))
+        self.assertEqual(theta.shape, (0,))
         self.assertEqual(comp.size, 0)
         self.assertEqual(comp.shape, (3, 0))
 
     def test_null3(self) -> None:
         (theta, comp) = space.quat_angle_diff(self.null, self.quat1)
         self.assertEqual(theta.size, 0)
-        self.assertEqual(theta.shape, (0, ))
+        self.assertEqual(theta.shape, (0,))
         self.assertEqual(comp.size, 0)
         self.assertEqual(comp.shape, (3, 0))
 
     def test_null4(self) -> None:
         (theta, comp) = space.quat_angle_diff(self.null_quat, self.quat1)
         self.assertEqual(theta.size, 0)
-        self.assertEqual(theta.shape, (0, ))
+        self.assertEqual(theta.shape, (0,))
         self.assertEqual(comp.size, 0)
         self.assertEqual(comp.shape, (3, 0))
+
 
 #%% aerospace.quat_from_euler
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -419,25 +438,27 @@ class Test_aerospace_quat_from_euler(unittest.TestCase):
         Longer than normal rotation sequence
         Array cases (x3 2D, 2D with unit len, and >2D for error)
     """
+
     def setUp(self) -> None:
         self.a      = np.array([0.01, 0.02, 0.03])
         self.b      = np.array([0.04, 0.05, 0.06])
         self.angles = np.column_stack((self.a, self.b))
         self.seq    = np.array([3, 2, 1])
-        self.quat   = np.array([\
+        self.quat   = np.array([
             [0.01504849, 0.03047982],
             [0.00992359, 0.02438147],
             [0.00514916, 0.02073308],
-            [0.99982426, 0.99902285]])
+            [0.99982426, 0.99902285],
+        ])
 
     def test_nominal1(self) -> None:
         quat = space.quat_from_euler(self.a, self.seq)
-        np.testing.assert_array_almost_equal(quat, self.quat[:,0])
+        np.testing.assert_array_almost_equal(quat, self.quat[:, 0])
         self.assertEqual(quat.ndim, 1)
 
     def test_nominal2(self) -> None:
         quat = space.quat_from_euler(self.b, self.seq)
-        np.testing.assert_array_almost_equal(quat, self.quat[:,1])
+        np.testing.assert_array_almost_equal(quat, self.quat[:, 1])
         self.assertEqual(quat.ndim, 1)
 
     def test_default_seq(self) -> None:
@@ -448,7 +469,7 @@ class Test_aerospace_quat_from_euler(unittest.TestCase):
 
     def test_repeated(self) -> None:
         quat1 = space.quat_from_euler(np.hstack((self.a, self.a)), seq=np.array([1, 1, 1, 1, 1, 1]))
-        quat2 = space.qrot(1, 2*np.sum(self.a))
+        quat2 = space.qrot(1, 2 * np.sum(self.a))
         np.testing.assert_array_almost_equal(quat1, quat2)
         self.assertEqual(quat1.ndim, 1)
 
@@ -472,7 +493,7 @@ class Test_aerospace_quat_from_euler(unittest.TestCase):
 
     def test_long(self) -> None:
         quat1 = space.quat_from_euler(np.hstack((self.a, self.b)), seq=np.hstack((self.seq, self.seq)))
-        quat2 = space.quat_mult(self.quat[:,0], self.quat[:,1])
+        quat2 = space.quat_mult(self.quat[:, 0], self.quat[:, 1])
         np.testing.assert_array_almost_equal(quat1, quat2)
         self.assertEqual(quat1.ndim, 1)
 
@@ -483,12 +504,13 @@ class Test_aerospace_quat_from_euler(unittest.TestCase):
 
     def test_array2(self) -> None:
         quat = space.quat_from_euler(np.expand_dims(self.a, axis=1), self.seq)
-        np.testing.assert_array_almost_equal(quat, np.expand_dims(self.quat[:,0], axis=1))
+        np.testing.assert_array_almost_equal(quat, np.expand_dims(self.quat[:, 0], axis=1))
         self.assertEqual(quat.ndim, 2)
 
     def test_array3(self) -> None:
         with self.assertRaises(ValueError):
-            space.quat_from_euler(np.zeros((3,3,1)))
+            space.quat_from_euler(np.zeros((3, 3, 1)))
+
 
 #%% aerospace.quat_interp
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -497,11 +519,14 @@ class Test_aerospace_quat_interp(unittest.TestCase):
     Tests the aerospace.quat_interp function with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
         self.time = np.array([1, 3, 5])
-        self.quat = np.column_stack((space.qrot(1, 0), space.qrot(1, np.pi/2), space.qrot(1, np.pi)))
+        self.quat = np.column_stack((space.qrot(1, 0), space.qrot(1, np.pi / 2), space.qrot(1, np.pi)))
         self.ti   = np.array([1, 2, 4.5, 5])
-        self.qout = np.column_stack((space.qrot(1, 0), space.qrot(1, np.pi/4), space.qrot(1, 3.5/4*np.pi), space.qrot(1, np.pi)))
+        self.qout = np.column_stack(
+            (space.qrot(1, 0), space.qrot(1, np.pi / 4), space.qrot(1, 3.5 / 4 * np.pi), space.qrot(1, np.pi))
+        )
         self.ti_extra = np.array([0, 1, 2, 4.5, 5, 10])
 
     def test_nominal(self) -> None:
@@ -528,8 +553,9 @@ class Test_aerospace_quat_interp(unittest.TestCase):
         with patch('dstauffman.aerospace.quat.logger') as mock_logger:
             qout = space.quat_interp(self.time, self.quat, self.ti_extra, inclusive=False)
         np.testing.assert_array_almost_equal(qout[:, 1:-1], self.qout)
-        np.testing.assert_array_equal(qout[:,[0, -1]], np.nan)
+        np.testing.assert_array_equal(qout[:, [0, -1]], np.nan)
         mock_logger.log.assert_called_with(LogLevel.L8, 'Desired time not found within input time vector.')
+
 
 #%% aerospace.quat_inv
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -540,11 +566,12 @@ class Test_aerospace_quat_inv(unittest.TestCase):
         Quat array
         Null (x2 different null sizes)
     """
+
     def setUp(self) -> None:
-        self.q1_inp = space.qrot(1, np.pi/2)
-        self.q1_out = np.array([-np.sqrt(2)/2, 0, 0, np.sqrt(2)/2])
-        self.q2_inp = space.qrot(2, np.pi/3)
-        self.q2_out = np.array([0, -0.5, 0, np.sqrt(3)/2])
+        self.q1_inp = space.qrot(1, np.pi / 2)
+        self.q1_out = np.array([-np.sqrt(2) / 2, 0, 0, np.sqrt(2) / 2])
+        self.q2_inp = space.qrot(2, np.pi / 3)
+        self.q2_out = np.array([0, -0.5, 0, np.sqrt(3) / 2])
         self.q3_inp = np.column_stack((self.q1_inp, self.q2_inp))
         self.q3_out = np.column_stack((self.q1_out, self.q2_out))
         self.null   = np.array([])
@@ -608,6 +635,7 @@ class Test_aerospace_quat_inv(unittest.TestCase):
         q3_inv = space.quat_inv(self.q3_inp, allow_nans=True)
         np.testing.assert_array_almost_equal(q3_inv, self.q3_out)
 
+
 #%% aerospace.quat_mult
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_mult(unittest.TestCase):
@@ -618,18 +646,19 @@ class Test_aerospace_quat_mult(unittest.TestCase):
         Quat array times scalar (x2 orders + x1 array-array)
         Null (x8 different null size and order permutations)
     """
+
     def setUp(self) -> None:
-        self.q1 = space.qrot(1, np.pi/2)
+        self.q1 = space.qrot(1, np.pi / 2)
         self.q2 = space.qrot(2, -np.pi)
-        self.q3 = space.qrot(3, np.pi/3)
-        self.q4 = np.array([ 0, -np.sqrt(2)/2, np.sqrt(2)/2, 0]) # q1*q2
-        self.q5 = np.array([0.5, -np.sqrt(3)/2, 0, 0]) # q2*q3
-        self.q6 = np.array([0.5, 0.5, 0.5, 0.5]) # q6 * q6 = q6**-1, and triggers negative scalar component
+        self.q3 = space.qrot(3, np.pi / 3)
+        self.q4 = np.array([0, -np.sqrt(2) / 2, np.sqrt(2) / 2, 0])  # q1*q2
+        self.q5 = np.array([0.5, -np.sqrt(3) / 2, 0, 0])  # q2*q3
+        self.q6 = np.array([0.5, 0.5, 0.5, 0.5])  # q6 * q6 = q6**-1, and triggers negative scalar component
         self.q_array_in1 = np.column_stack((self.q1, self.q2))
         self.q_array_in2 = np.column_stack((self.q2, self.q3))
         self.q_array_out = np.column_stack((self.q4, self.q5))
-        self.null        = np.array([])
-        self.null_quat   = np.ones((space.QUAT_SIZE, 0))
+        self.null = np.array([])
+        self.null_quat = np.ones((space.QUAT_SIZE, 0))
 
     def test_nominal1(self) -> None:
         quat = space.quat_mult(self.q1, self.q2)
@@ -657,13 +686,13 @@ class Test_aerospace_quat_mult(unittest.TestCase):
     def test_array_scalar1(self) -> None:
         quat = space.quat_mult(self.q_array_in1, self.q2)
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_array_almost_equal(quat[:,0], self.q4)
+        np.testing.assert_array_almost_equal(quat[:, 0], self.q4)
         np.testing.assert_array_equal(quat.shape, self.q_array_out.shape)
 
     def test_array_scalar2(self) -> None:
         quat = space.quat_mult(self.q1, self.q_array_in2)
         self.assertEqual(quat.ndim, 2)
-        np.testing.assert_array_almost_equal(quat[:,0], self.q4)
+        np.testing.assert_array_almost_equal(quat[:, 0], self.q4)
         np.testing.assert_array_equal(quat.shape, self.q_array_out.shape)
 
     def test_array_scalar3(self) -> None:
@@ -718,6 +747,7 @@ class Test_aerospace_quat_mult(unittest.TestCase):
         np.testing.assert_array_equal(quat, self.null)
         np.testing.assert_array_equal(quat.shape, self.null.shape)
 
+
 #%% aerospace.quat_norm
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_norm(unittest.TestCase):
@@ -727,16 +757,17 @@ class Test_aerospace_quat_norm(unittest.TestCase):
         Quat array
         Null (x2 different null sizes)
     """
+
     def setUp(self) -> None:
-        self.q1_inp = space.qrot(1, np.pi/2)
-        self.q1_out = np.array([np.sqrt(2)/2, 0, 0, np.sqrt(2)/2])
-        self.q2_inp = space.qrot(2, np.pi/3)
-        self.q2_out = np.array([0, 0.5, 0, np.sqrt(3)/2])
+        self.q1_inp = space.qrot(1, np.pi / 2)
+        self.q1_out = np.array([np.sqrt(2) / 2, 0, 0, np.sqrt(2) / 2])
+        self.q2_inp = space.qrot(2, np.pi / 3)
+        self.q2_out = np.array([0, 0.5, 0, np.sqrt(3) / 2])
         self.q3_inp = np.array([0.1, 0, 0, 1])
         self.q3_out = np.array([0.09950372, 0, 0, 0.99503719])
         self.q4_inp = np.column_stack((self.q1_inp, self.q2_inp, self.q3_inp))
         self.q4_out = np.column_stack((self.q1_out, self.q2_out, self.q3_out))
-        self.null   = np.array([])
+        self.null = np.array([])
         self.null_quat = np.ones((space.QUAT_SIZE, 0))
 
     def test_nominal1(self) -> None:
@@ -803,6 +834,7 @@ class Test_aerospace_quat_norm(unittest.TestCase):
         q4_inv = space.quat_norm(self.q4_inp, allow_nans=True)
         np.testing.assert_array_almost_equal(q4_inv, self.q4_out)
 
+
 #%% aerospace.quat_prop
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_prop(unittest.TestCase):
@@ -813,20 +845,21 @@ class Test_aerospace_quat_prop(unittest.TestCase):
         No renormalization case (Raises norm AttributeError)
         No renormalization with suppressed warning
     """
+
     def setUp(self) -> None:
-        self.quat      = np.array([0., 0., 0., 1.])
+        self.quat = np.array([0.0, 0.0, 0.0, 1.0])
         self.delta_ang = np.array([0.01, 0.02, 0.03])
-        self.quat_new  = np.array([0.00499912522962, 0.00999825045924, 0.01499737568886, 0.99982504592411])
-        self.quat_unnorm = np.array([0.005, 0.01, 0.015, 1.])
+        self.quat_new = np.array([0.00499912522962, 0.00999825045924, 0.01499737568886, 0.99982504592411])
+        self.quat_unnorm = np.array([0.005, 0.01, 0.015, 1.0])
 
     def test_nominal(self) -> None:
         quat = space.quat_prop(self.quat, self.delta_ang)
         np.testing.assert_array_almost_equal(quat, self.quat_new, 12)
 
     def test_negative_scalar(self) -> None:
-        quat = space.quat_prop(np.array([1., 0., 0., 0.]), self.delta_ang)
+        quat = space.quat_prop(np.array([1.0, 0.0, 0.0, 0.0]), self.delta_ang)
         self.assertGreater(quat[3], 0)
-        quat = space.quat_prop(np.array([1., 0., 0., 0.]), -self.delta_ang)
+        quat = space.quat_prop(np.array([1.0, 0.0, 0.0, 0.0]), -self.delta_ang)
         self.assertGreater(quat[3], 0)
 
     def test_no_renorm(self) -> None:
@@ -837,6 +870,7 @@ class Test_aerospace_quat_prop(unittest.TestCase):
         quat = space.quat_prop(self.quat, self.delta_ang, renorm=False, skip_assertions=True)
         np.testing.assert_array_almost_equal(quat, self.quat_unnorm, 12)
 
+
 #%% aerospace.quat_times_vector
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_times_vector(unittest.TestCase):
@@ -845,11 +879,12 @@ class Test_aerospace_quat_times_vector(unittest.TestCase):
         Nominal
         Array inputs
     """
+
     def setUp(self) -> None:
         # TODO: confirm that this is enough to test the correctness of the function
         self.quat = np.array([[0, 1, 0, 0], [1, 0, 0, 0]]).T
-        self.vec  = np.array([[1, 0, 0], [2, 0, 0]]).T
-        self.out  = np.array([[-1, 2], [0, 0], [0, 0]])
+        self.vec = np.array([[1, 0, 0], [2, 0, 0]]).T
+        self.out = np.array([[-1, 2], [0, 0], [0, 0]])
 
     def test_nominal(self) -> None:
         for i in range(2):
@@ -872,6 +907,7 @@ class Test_aerospace_quat_times_vector(unittest.TestCase):
         vec2 = space.quat_times_vector(self.quat, np.vstack((vec, vec)).T)
         np.testing.assert_array_almost_equal(vec1, vec2)
 
+
 #%% aerospace.quat_to_euler
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_aerospace_quat_to_euler(unittest.TestCase):
@@ -883,19 +919,42 @@ class Test_aerospace_quat_to_euler(unittest.TestCase):
         All invalid sequences
         Bad length sequence
     """
+
     def setUp(self) -> None:
-        self.quat  = np.array([[0, 1, 0, 0], [0, 0, 1, 0], [np.sqrt(2)/2, 0, 0, np.sqrt(2)/2]]).T
-        self.seq   = [3, 1, 2]
-        self.euler = np.array([\
-            [ 0.   , -np.pi, 0.       ],
-            [ 0.   ,  0.   , -np.pi/2 ],
-            [ np.pi, -0.   , 0.       ]])
+        self.quat = np.array([[0, 1, 0, 0], [0, 0, 1, 0], [np.sqrt(2) / 2, 0, 0, np.sqrt(2) / 2]]).T
+        self.seq = [3, 1, 2]
+        self.euler = np.array([[0.0, -np.pi, 0.0], [0.0, 0.0, -np.pi / 2], [np.pi, -0.0, 0.0]])
         self.zero_quat = np.array([0, 0, 0, 1])
-        self.all_sequences = {\
-            (1, 1, 1), (1, 1, 2), (1, 1, 3), (1, 2, 1), (1, 2, 2), (1, 2, 3), (1, 3, 1), (1, 3, 2), (1, 3, 3), \
-            (2, 1, 1), (2, 1, 2), (2, 1, 3), (2, 2, 1), (2, 2, 2), (2, 2, 3), (2, 3, 1), (2, 3, 2), (2, 3, 3), \
-            (3, 1, 1), (3, 1, 2), (3, 1, 3), (3, 2, 1), (3, 2, 2), (3, 2, 3), (3, 3, 1), (3, 3, 2), (3, 3, 3)}
-        self.valid_sequences = {(1,2,3), (2,3,1), (3,1,2), (1,3,2), (2,1,3), (3,2,1)}
+        self.all_sequences = {
+            (1, 1, 1),
+            (1, 1, 2),
+            (1, 1, 3),
+            (1, 2, 1),
+            (1, 2, 2),
+            (1, 2, 3),
+            (1, 3, 1),
+            (1, 3, 2),
+            (1, 3, 3),
+            (2, 1, 1),
+            (2, 1, 2),
+            (2, 1, 3),
+            (2, 2, 1),
+            (2, 2, 2),
+            (2, 2, 3),
+            (2, 3, 1),
+            (2, 3, 2),
+            (2, 3, 3),
+            (3, 1, 1),
+            (3, 1, 2),
+            (3, 1, 3),
+            (3, 2, 1),
+            (3, 2, 2),
+            (3, 2, 3),
+            (3, 3, 1),
+            (3, 3, 2),
+            (3, 3, 3),
+        }
+        self.valid_sequences = {(1, 2, 3), (2, 3, 1), (3, 1, 2), (1, 3, 2), (2, 1, 3), (3, 2, 1)}
         self.bad_sequences = self.all_sequences - self.valid_sequences
 
     def test_nominal(self) -> None:
@@ -920,6 +979,7 @@ class Test_aerospace_quat_to_euler(unittest.TestCase):
     def test_bad_sequence(self) -> None:
         with self.assertRaises(AssertionError):
             space.quat_to_euler(self.zero_quat, np.array([1, 2]))
+
 
 #%% Unit test execution
 if __name__ == '__main__':

@@ -59,14 +59,15 @@ def qrot_single(axis: int, angle: float) -> np.ndarray:
     [0. 0. 0.70710678  0.70710678]
 
     """
-    c = np.cos(angle/2)
+    c = np.cos(angle / 2)
     if c < 0:
-        quat = np.array([0., 0., 0., -c])
-        quat[axis-1] = -np.sin(angle/2)
+        quat = np.array([0.0, 0.0, 0.0, -c])
+        quat[axis - 1] = -np.sin(angle / 2)
     else:
-        quat = np.array([0., 0., 0., c])
-        quat[axis-1] = np.sin(angle/2)
+        quat = np.array([0.0, 0.0, 0.0, c])
+        quat[axis - 1] = np.sin(angle / 2)
     return quat
+
 
 #%% Functions - quat_from_axis_angle_single
 @ncjit
@@ -108,12 +109,13 @@ def quat_from_axis_angle_single(axis: np.ndarray, angle: float) -> np.ndarray:
 
     """
     if axis[0] == 0 and axis[1] == 0 and axis[2] == 0:
-        return np.array([0., 0., 0., 1.])
-    c = np.cos(angle/2)
-    s = np.sin(angle/2)
+        return np.array([0.0, 0.0, 0.0, 1.0])
+    c = np.cos(angle / 2)
+    s = np.sin(angle / 2)
     if c < 0:
-        return np.array([-axis[0]*s, -axis[1]*s, -axis[2]*s, -c])
-    return np.array([axis[0]*s, axis[1]*s, axis[2]*s, c])
+        return np.array([-axis[0] * s, -axis[1] * s, -axis[2] * s, -c])
+    return np.array([axis[0] * s, axis[1] * s, axis[2] * s, c])
+
 
 #%% Functions - quat_interp_single
 @ncjit
@@ -161,25 +163,26 @@ def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np
     q1 = quat[:, 0].copy()
     q2 = quat[:, 1].copy()
     # calculate delta quaternion
-    dq12       = quat_norm_single(quat_mult_single(q2, quat_inv_single(q1)))
+    dq12 = quat_norm_single(quat_mult_single(q2, quat_inv_single(q1)))
     # find delta quaternion axis of rotation
-    vec        = dq12[0:3]
-    norm_vec   = np.sqrt(np.sum(vec**2))
+    vec = dq12[0:3]
+    norm_vec = np.sqrt(np.sum(vec ** 2))
     # check for zero norm vectors
-    norm_fix   = norm_vec if norm_vec != 0. else 1.
-    ax         = vec / norm_fix
+    norm_fix = norm_vec if norm_vec != 0.0 else 1.0
+    ax = vec / norm_fix
     # find delta quaternion rotation angle
-    ang        = 2*np.arcsin(norm_vec)
+    ang = 2 * np.arcsin(norm_vec)
     # scale rotation angle based on time
-    scaled_ang = ang*(ti-t1) / (t2-t1)
+    scaled_ang = ang * (ti - t1) / (t2 - t1)
     # find scaled delta quaternion
-    dq         = quat_from_axis_angle_single(ax, scaled_ang)
+    dq = quat_from_axis_angle_single(ax, scaled_ang)
     # calculate desired quaternion
     qout: np.ndarray = quat_norm_single(quat_mult_single(dq, q1))
     # enforce positive scalar component
     if qout[3] < 0:
         qout[:] = -qout
     return qout
+
 
 #%% Functions - quat_inv_single
 @ncjit
@@ -219,9 +222,10 @@ def quat_inv_single(q1: np.ndarray, inplace: bool = False) -> np.ndarray:
 
     """
     if inplace:
-        q1 *= np.array([-1., -1., -1., 1.])
+        q1 *= np.array([-1.0, -1.0, -1.0, 1.0])
         return q1
-    return q1 * np.array([-1., -1., -1., 1.])  # type: ignore[no-any-return]
+    return q1 * np.array([-1.0, -1.0, -1.0, 1.0])  # type: ignore[no-any-return]
+
 
 #%% Functions - quat_mult_single
 @ncjit
@@ -274,16 +278,18 @@ def quat_mult_single(a: np.ndarray, b: np.ndarray, inplace: bool = False) -> np.
     """
     c = a if inplace else a.copy()
     # single quaternion inputs case (note: transposed to make 'F' order)
-    c[:] = np.array([ \
-        [ a[3], -a[2],  a[1], -a[0]], \
-        [ a[2],  a[3], -a[0], -a[1]], \
-        [-a[1],  a[0],  a[3], -a[2]], \
-        [ a[0],  a[1],  a[2],  a[3]]]).T @ b
+    c[:] = np.array([
+        [ a[3], -a[2],  a[1], -a[0]],
+        [ a[2],  a[3], -a[0], -a[1]],
+        [-a[1],  a[0],  a[3], -a[2]],
+        [ a[0],  a[1],  a[2],  a[3]],
+    ]).T @ b
     # enforce positive scalar component
     if c[3] < 0:
         c[:] = -c
     quat_norm_single(c, inplace=True)
     return c
+
 
 #%% Functions - quat_norm_single
 @ncjit
@@ -325,9 +331,10 @@ def quat_norm_single(x: np.ndarray, inplace: bool = False) -> np.ndarray:
     """
     # divide input by its column vector norm
     if inplace:
-        x /= np.sqrt(np.sum(x*x, axis=0))
+        x /= np.sqrt(np.sum(x * x, axis=0))
         return x
-    return x / np.sqrt(np.sum(x*x, axis=0))  # type: ignore[no-any-return]
+    return x / np.sqrt(np.sum(x * x, axis=0))  # type: ignore[no-any-return]
+
 
 #%% Functions - quat_prop_single
 @ncjit
@@ -378,11 +385,12 @@ def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray, inplace: bool = Fa
     quat_new = quat if inplace else quat.copy()
     # compute angle rate matrix (note: transposed to make 'F' order), use it to compute a delta
     # quaternion, and then propagate by adding the delta
-    quat_new += 0.5 * np.array([ \
-        [      0      ,  -delta_ang[2],    delta_ang[1],  -delta_ang[0]], \
-        [ delta_ang[2],        0      ,   -delta_ang[0],  -delta_ang[1]], \
-        [-delta_ang[1],   delta_ang[0],        0       ,  -delta_ang[2]], \
-        [ delta_ang[0],   delta_ang[1],    delta_ang[2],        0      ]]).T @ quat
+    quat_new += 0.5 * np.array([
+        [      0      , -delta_ang[2],  delta_ang[1], -delta_ang[0]],
+        [ delta_ang[2],       0      , -delta_ang[0], -delta_ang[1]],
+        [-delta_ang[1],  delta_ang[0],      0       , -delta_ang[2]],
+        [ delta_ang[0],  delta_ang[1],  delta_ang[2],       0      ],
+    ]).T @ quat
     # ensure positive scalar component
     if quat_new[3] < 0:
         quat_new[:] = -quat_new
@@ -390,6 +398,7 @@ def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray, inplace: bool = Fa
     if renorm:
         quat_norm_single(quat_new, inplace=True)
     return quat_new
+
 
 #%% Functions - quat_times_vector_single
 @ncjit
@@ -440,8 +449,9 @@ def quat_times_vector_single(quat: np.ndarray, v: np.ndarray, inplace: bool = Fa
     vec = v if inplace else v.copy()
     skew = vec_cross(quat[:3])
     qv = skew @ v
-    vec += 2*(-quat[3] * qv + (skew @ qv))
+    vec += 2 * (-quat[3] * qv + (skew @ qv))
     return vec
+
 
 #%% Functions - quat_to_dcm
 @ncjit
@@ -479,18 +489,19 @@ def quat_to_dcm(quat: np.ndarray) -> np.ndarray:
      [ 0. -1.  0.]]
 
     """
-    #build dcm components
+    # build dcm components
     dcm = np.zeros((3, 3))
-    dcm[0, 0] = quat[3]**2 + quat[0]**2 - quat[1]**2 - quat[2]**2
-    dcm[0, 1] = 2*(quat[0]*quat[1] + quat[2]*quat[3])
-    dcm[0, 2] = 2*(quat[0]*quat[2] - quat[1]*quat[3])
-    dcm[1, 0] = 2*(quat[0]*quat[1] - quat[2]*quat[3])
-    dcm[1, 1] = quat[3]**2 - quat[0]**2 + quat[1]**2 - quat[2]**2
-    dcm[1, 2] = 2*(quat[1]*quat[2] + quat[0]*quat[3])
-    dcm[2, 0] = 2*(quat[0]*quat[2] + quat[1]*quat[3])
-    dcm[2, 1] = 2*(quat[1]*quat[2] - quat[0]*quat[3])
-    dcm[2, 2] = quat[3]**2 - quat[0]**2 - quat[1]**2 + quat[2]**2
+    dcm[0, 0] = quat[3] ** 2 + quat[0] ** 2 - quat[1] ** 2 - quat[2] ** 2
+    dcm[0, 1] = 2 * (quat[0] * quat[1] + quat[2] * quat[3])
+    dcm[0, 2] = 2 * (quat[0] * quat[2] - quat[1] * quat[3])
+    dcm[1, 0] = 2 * (quat[0] * quat[1] - quat[2] * quat[3])
+    dcm[1, 1] = quat[3] ** 2 - quat[0] ** 2 + quat[1] ** 2 - quat[2] ** 2
+    dcm[1, 2] = 2 * (quat[1] * quat[2] + quat[0] * quat[3])
+    dcm[2, 0] = 2 * (quat[0] * quat[2] + quat[1] * quat[3])
+    dcm[2, 1] = 2 * (quat[1] * quat[2] - quat[0] * quat[3])
+    dcm[2, 2] = quat[3] ** 2 - quat[0] ** 2 - quat[1] ** 2 + quat[2] ** 2
     return dcm
+
 
 #%% Unit test
 if __name__ == '__main__':

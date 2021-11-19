@@ -17,8 +17,16 @@ import sys
 from typing import List
 import unittest
 
-from dstauffman import get_root_dir, get_tests_dir, list_python_files, ReturnCodes, run_coverage, \
-    run_docstrings, run_pytests, run_unittests
+from dstauffman import (
+    get_root_dir,
+    get_tests_dir,
+    list_python_files,
+    ReturnCodes,
+    run_coverage,
+    run_docstrings,
+    run_pytests,
+    run_unittests,
+)
 
 #%% Functions - parse_tests
 def parse_tests(input_args: List[str]) -> argparse.Namespace:
@@ -73,6 +81,7 @@ def parse_tests(input_args: List[str]) -> argparse.Namespace:
 
     args = parser.parse_args(input_args)
     return args
+
 
 #%% Functions - execute_tests
 def execute_tests(args: argparse.Namespace) -> int:
@@ -139,6 +148,7 @@ def execute_tests(args: argparse.Namespace) -> int:
             return_code = run_unittests(test_names)
     return return_code
 
+
 #%% Functions - parse_coverage
 def parse_coverage(input_args: List[str]) -> argparse.Namespace:
     r"""
@@ -160,6 +170,7 @@ def parse_coverage(input_args: List[str]) -> argparse.Namespace:
 
     Examples
     --------
+    >>> from dstauffman import pprint_dict
     >>> from dstauffman.commands import parse_coverage
     >>> input_args = []
     >>> args = parse_coverage(input_args)
@@ -167,7 +178,9 @@ def parse_coverage(input_args: List[str]) -> argparse.Namespace:
     Namespace(no_report=False, cov_file=None)
 
     """
-    parser = argparse.ArgumentParser(prog='dcs coverage', description='Runs all the built-in unit tests and produces a coverage report.')
+    parser = argparse.ArgumentParser(
+        prog='dcs coverage', description='Runs all the built-in unit tests and produces a coverage report.'
+    )
 
     parser.add_argument('-n', '--no-report', help='Suppresses the generation of the HTML report.', action='store_true')
 
@@ -175,6 +188,7 @@ def parse_coverage(input_args: List[str]) -> argparse.Namespace:
 
     args = parser.parse_args(input_args)
     return args
+
 
 #%% Functions - execute_coverage
 def execute_coverage(args: argparse.Namespace) -> int:
@@ -203,7 +217,7 @@ def execute_coverage(args: argparse.Namespace) -> int:
     >>> execute_coverage(args) # doctest: +SKIP
 
     """
-    #alias options
+    # alias options
     report = not args.no_report
     cov_file = args.cov_file
 
@@ -226,6 +240,7 @@ def execute_coverage(args: argparse.Namespace) -> int:
         else:
             subprocess.call(['xdg-open', str(filename)])
     return return_code
+
 
 #%% Unit test
 if __name__ == '__main__':

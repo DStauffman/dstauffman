@@ -29,29 +29,31 @@ class _Config(Frozen):
     >>> config = _Config()
 
     """
+
     def __init__(self) -> None:
         # log level for how much information to display while running
         self.log_level = logging.INFO
 
         # output folder/files
-        self.output_folder  = ''
+        self.output_folder = ''
         self.output_results = 'results_model.hdf5'
-        self.output_params  = 'results_param.pkl'
+        self.output_params = 'results_param.pkl'
 
         # Whether to save the final state information to disk
         self.save_final = False
 
         # randomness
         self.repeatable_randomness = False
-        self.repeatable_seed       = 1000
-        self.repeatable_offset     = 0
+        self.repeatable_seed = 1000
+        self.repeatable_offset = 0
 
         # parallelization
         self.use_parfor = False
-        self.max_cores  = 4
+        self.max_cores = 4
 
         # default colormap
-        self.colormap = 'Paired' #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
+        self.colormap = 'Paired'  #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
+
 
 class _Model(Frozen):
     r"""
@@ -63,14 +65,16 @@ class _Model(Frozen):
     >>> model = _Model()
 
     """
+
     def __init__(self) -> None:
         self.field1: int = 1
         self.field2 = np.array([1, 2, 3]) if HAVE_NUMPY else [1, 2, 3]
-        self.field3 = {'a': 5, 'b': np.array([1.5, 2.5, 10.])} if HAVE_NUMPY else {'a': 5, 'b': [1.5, 2.5, 10.]}
+        self.field3 = {'a': 5, 'b': np.array([1.5, 2.5, 10.0])} if HAVE_NUMPY else {'a': 5, 'b': [1.5, 2.5, 10.0]}
         self.field4 = FixedDict()
         self.field4['new'] = np.array([3, 4, 5]) if HAVE_NUMPY else [3, 4, 5]
         self.field4['old'] = '4 - 6'
         self.field4.freeze()
+
 
 #%% Classes - _Parameters
 class _Parameters(Frozen):
@@ -83,6 +87,7 @@ class _Parameters(Frozen):
     >>> param = _Parameters()
 
     """
+
     def __init__(self):
         self.config = _Config()
         self.model = _Model()
@@ -90,8 +95,9 @@ class _Parameters(Frozen):
         self.models[0].field1 = 100
         self.models[1].field1 = 200
         self.models[1].field2[2] = 300
-        self.models[1].field3['a'] = 500.
+        self.models[1].field3['a'] = 500.0
         self.models[1].field4['new'][1] = 444
+
 
 #%% estimation._get_sub_level
 class Test_estimation__get_sub_level(unittest.TestCase):
@@ -99,7 +105,8 @@ class Test_estimation__get_sub_level(unittest.TestCase):
     Tests the estimation._get_sub_level function with the following cases:
         TBD
     """
-    pass # TODO: write this
+    pass  # TODO: write this
+
 
 #%% estimation._check_valid_param_name
 class Test_estimation__check_valid_param_name(unittest.TestCase):
@@ -153,6 +160,7 @@ class Test_estimation__check_valid_param_name(unittest.TestCase):
         is_valid = estm.support._check_valid_param_name(self.param, "param.models[1].field4['new'][0]")
         self.assertTrue(is_valid)
 
+
 #%% estimation.get_parameter
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_get_parameter(unittest.TestCase):
@@ -160,10 +168,16 @@ class Test_estimation_get_parameter(unittest.TestCase):
     Tests the estimation.get_parameter function with the following cases:
         Nominal (covers four cases in one)
     """
+
     def setUp(self) -> None:
-        self.values = [-100, -2, -3, 44.]
-        self.names  = ['param.config.log_level', 'param.models[0].field1', "param.models[1].field2[2]", "param.models[1].field3['b'][1]"]
-        self.param  = _Parameters()
+        self.values = [-100, -2, -3, 44.0]
+        self.names = [
+            'param.config.log_level',
+            'param.models[0].field1',
+            "param.models[1].field2[2]",
+            "param.models[1].field3['b'][1]",
+        ]
+        self.param = _Parameters()
         self.param.config.log_level = self.values[0]
         self.param.models[0].field1 = self.values[1]  # type: ignore[assignment]
         self.param.models[1].field2[2] = self.values[2]  # type: ignore[index]
@@ -173,6 +187,7 @@ class Test_estimation_get_parameter(unittest.TestCase):
         values = estm.get_parameter(self.param, self.names)
         np.testing.assert_array_almost_equal(values, self.values)
 
+
 #%% estimation.set_parameter
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_set_parameter(unittest.TestCase):
@@ -180,11 +195,17 @@ class Test_estimation_set_parameter(unittest.TestCase):
     Tests the estimation.set_parameter function with the following cases:
         Nominal (covers four cases in one)
     """
+
     def setUp(self) -> None:
-        self.orig   = [20, 100, 300, 2.5]
-        self.values = [-100, -2, -3, 44.]
-        self.names  = ['param.config.log_level', 'param.models[0].field1', "param.models[1].field2[2]", "param.models[1].field3['b'][1]"]
-        self.param  = _Parameters()
+        self.orig = [20, 100, 300, 2.5]
+        self.values = [-100, -2, -3, 44.0]
+        self.names = [
+            'param.config.log_level',
+            'param.models[0].field1',
+            "param.models[1].field2[2]",
+            "param.models[1].field3['b'][1]",
+        ]
+        self.param = _Parameters()
         self.param.config.log_level = self.orig[0]
         self.param.models[0].field1 = self.orig[1]  # type: ignore[assignment]
         self.param.models[1].field2[2] = self.orig[2]  # type: ignore[index]
@@ -196,6 +217,7 @@ class Test_estimation_set_parameter(unittest.TestCase):
         estm.set_parameter(self.param, self.names, self.values)
         values = estm.get_parameter(self.param, self.names)
         np.testing.assert_array_almost_equal(values, self.values)
+
 
 #%% Unit test execution
 if __name__ == '__main__':

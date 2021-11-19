@@ -66,6 +66,7 @@ def bsl(bits: np.ndarray, shift: int = 1, *, inplace: bool = False) -> np.ndarra
     out[:] = np.roll(bits, shift=-shift)
     return out
 
+
 #%% Functions - bsr
 def bsr(bits: np.ndarray, shift: int = 1, *, inplace: bool = False) -> np.ndarray:
     r"""
@@ -107,6 +108,7 @@ def bsr(bits: np.ndarray, shift: int = 1, *, inplace: bool = False) -> np.ndarra
     out[:] = np.roll(bits, shift=shift)
     return out
 
+
 #%% Functions - prn_01_to_m11
 def prn_01_to_m11(bits: np.ndarray, *, inplace: bool = False) -> np.ndarray:
     r"""
@@ -140,6 +142,7 @@ def prn_01_to_m11(bits: np.ndarray, *, inplace: bool = False) -> np.ndarray:
     out = bits if inplace else np.empty_like(bits)
     out[:] = np.where(bits == 0, 1, -1)
     return out
+
 
 #%% Functions - get_prn_bits
 def get_prn_bits(sat: int) -> Tuple[int, int]:
@@ -220,6 +223,7 @@ def get_prn_bits(sat: int) -> Tuple[int, int]:
         raise ValueError(f'Unexpected satellite number: "{sat}"')
     return prn_bits[sat]
 
+
 #%% Functions - correlate_prn
 def correlate_prn(prn1, prn2, shift, form):
     r"""
@@ -261,8 +265,8 @@ def correlate_prn(prn1, prn2, shift, form):
     # process inputs based on form
     if form == 'zero-one':
         # change PRNs from (0,1) to (1,-1)
-        prn1 = 1*(prn1==0) + -1*(prn1==1);
-        prn2 = 1*(prn2==0) + -1*(prn2==1);
+        prn1 = 1 * (prn1 == 0) + -1 * (prn1 == 1)
+        prn2 = 1 * (prn2 == 0) + -1 * (prn2 == 1)
     elif form == 'one-one':
         pass
     else:
@@ -281,6 +285,7 @@ def correlate_prn(prn1, prn2, shift, form):
         # scale correlation by number of samples
         cor[i] = temp / 1023
     return cor
+
 
 #%% Functions - generate_prn
 def generate_prn(sat: int, length: int = 1023) -> np.ndarray:
@@ -315,6 +320,7 @@ def generate_prn(sat: int, length: int = 1023) -> np.ndarray:
     >>> assert(np.all((prn == 0) | (prn == 1)))
 
     """
+
     def bplus(x):
         r"""Does modulo 2 addition (exclusive or) on vector input."""
         return np.mod(np.sum(x), 2)
@@ -334,10 +340,10 @@ def generate_prn(sat: int, length: int = 1023) -> np.ndarray:
         # calculate new values for generators
         g1n = bplus(g1[np.array([2, 9])])
         g2n = bplus(g2[np.array([1, 2, 5, 7, 8, 9])])
-        g2i = bplus(g2[np.array([bit1-1, bit2-1])])
+        g2i = bplus(g2[np.array([bit1 - 1, bit2 - 1])])
 
         # calculate output bit and append to PRN
-        xgi = bplus(np.array([g1[9]-1, g2i-1]))
+        xgi = bplus(np.array([g1[9] - 1, g2i - 1]))
         prn[i] = xgi
 
         # shift generators
@@ -346,16 +352,22 @@ def generate_prn(sat: int, length: int = 1023) -> np.ndarray:
 
     return prn
 
+
 #%% Functions - gps_to_datetime
 @overload
-def gps_to_datetime(week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], \
-        form: Literal['datetime'] = ...) -> Union[datetime.datetime, List[datetime.datetime]]: ...
-@overload
-def gps_to_datetime(week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], \
-        form: Literal['numpy']) -> np.datetime64: ...
+def gps_to_datetime(
+    week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: Literal['datetime'] = ...
+) -> Union[datetime.datetime, List[datetime.datetime]]: ...
 
-def gps_to_datetime(week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], \
-        form: str = 'datetime') -> Union[datetime.datetime, List[datetime.datetime], np.datetime64]:
+@overload
+def gps_to_datetime(
+    week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: Literal['numpy']
+) -> np.datetime64: ...
+
+
+def gps_to_datetime(
+    week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: str = 'datetime'
+) -> Union[datetime.datetime, List[datetime.datetime], np.datetime64]:
     r"""
     Converts a GPS week and time to a Python datetime.
 
@@ -402,30 +414,31 @@ def gps_to_datetime(week: Union[int, np.ndarray], time: Union[int, float, np.nda
     # based on the date returned by the 'now' command.
     ix = week < WEEK_ROLLOVER
     if np.any(ix):
-        num_rollovers = np.floor((datetime.datetime.now() - GPS_DATE_ZERO).days / (DAYS_PER_WEEK*WEEK_ROLLOVER)).astype(int)
-        week[ix] += num_rollovers*WEEK_ROLLOVER
+        num_rollovers = np.floor((datetime.datetime.now() - GPS_DATE_ZERO).days / (DAYS_PER_WEEK * WEEK_ROLLOVER)).astype(int)
+        week[ix] += num_rollovers * WEEK_ROLLOVER
 
     # GPS start week
     date_gps: Union[datetime.datetime, List[datetime.datetime], np.datetime64]
     if form == 'datetime':
         if np.size(week) == 1:
-            start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK*week))
+            start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * week))
             whole_sec  = int(time)
             micros     = round(1e6 * (time - whole_sec))  # type: ignore[call-overload]
             date_gps   = start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros)
         else:
             date_gps = []
             for (w, t) in zip(week, time):
-                start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK*w))
+                start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * w))
                 whole_sec  = int(t)
                 micros     = round(1e6 * (t - whole_sec))
                 date_gps.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
     elif form == 'numpy':
         start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY  # type: ignore[assignment]
-        date_gps   = start_week + time * NP_ONE_SECOND  # type: ignore[operator]
+        date_gps = start_week + time * NP_ONE_SECOND  # type: ignore[operator]
     else:
         raise ValueError(f'Unexpected value for form: "{form}".')
     return date_gps
+
 
 #%% Functions - gps_to_utc_datetime
 def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = None, form='datetime'):
@@ -496,54 +509,55 @@ def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = 
     # based on the date returned by the 'now' command.
     ix = week < WEEK_ROLLOVER
     if np.any(ix):
-        num_rollovers = np.floor((datetime.datetime.now() - GPS_DATE_ZERO).days / (DAYS_PER_WEEK*WEEK_ROLLOVER)).astype(int)
-        week[ix] += num_rollovers*WEEK_ROLLOVER
+        num_rollovers = np.floor((datetime.datetime.now() - GPS_DATE_ZERO).days / (DAYS_PER_WEEK * WEEK_ROLLOVER)).astype(int)
+        week[ix] += num_rollovers * WEEK_ROLLOVER
 
     # check for optional inputs
     if gps_to_utc_offset is None:
         # offset starting from Jan 1, 2017
-        gps_to_utc_offset    = np.full(week.shape, -18)
-        days_since_date_zero = week*DAYS_PER_WEEK + time/ONE_DAY
+        gps_to_utc_offset = np.full(week.shape, -18)
+        days_since_date_zero = week * DAYS_PER_WEEK + time / ONE_DAY
         # GPS offset for 1 Jan 1999 to 1 Jan 2006
         # Note: 9492 = datenum([2006 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero <  9492 + 13/ONE_DAY] = -13
+        gps_to_utc_offset[days_since_date_zero <  9492 + 13 / ONE_DAY] = -13
         # GPS offset for 1 Jan 2006 to 1 Jan 2009
         # Note: 10588 = datenum([2009 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 10588 + 14/ONE_DAY] = -14
+        gps_to_utc_offset[days_since_date_zero < 10588 + 14 / ONE_DAY] = -14
         # GPS offset for 1 Jan 2009 to 1 Jul 2012
         # Note: 11865 = datenum([2012 7 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 11865 + 15/ONE_DAY] = -15
+        gps_to_utc_offset[days_since_date_zero < 11865 + 15 / ONE_DAY] = -15
         # GPS offset for 1 Jul 2012 to 1 Jul 2015
         # Note: 12960 = datenum([2015 7 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 12960 + 16/ONE_DAY] = -16
+        gps_to_utc_offset[days_since_date_zero < 12960 + 16 / ONE_DAY] = -16
         # GPS offset for 1 Jul 2015 to 1 Jan 2017
         # Note: 13510 = datenum([2017 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 13510 + 17/ONE_DAY] = -17
+        gps_to_utc_offset[days_since_date_zero < 13510 + 17 / ONE_DAY] = -17
     else:
         gps_to_utc_offset = np.asanyarray(gps_to_utc_offset)
 
     # GPS start week
     if form == 'datetime':
         if np.size(week) == 1:
-            start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK*week))
-            frac_sec   = time+gps_to_utc_offset
+            start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * week))
+            frac_sec   = time + gps_to_utc_offset
             whole_sec  = int(frac_sec)
             micros     = round(1e6 * (frac_sec - whole_sec))
             date_utc   = start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros)
         else:
             date_utc = []  # type: ignore[assignment]
             for (w, t, off) in zip(week, time, gps_to_utc_offset):
-                start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK*w))
+                start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * w))
                 frac_sec   = t + off
                 whole_sec  = int(frac_sec)
                 micros     = round(1e6 * (frac_sec - whole_sec))
                 date_utc.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))  # type: ignore[attr-defined]
     elif form == 'numpy':
         start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY
-        date_utc   = start_week + (time+gps_to_utc_offset) * NP_ONE_SECOND
+        date_utc = start_week + (time + gps_to_utc_offset) * NP_ONE_SECOND
     else:
         raise ValueError(f'Unexpected value for form: "{form}".')
     return date_utc
+
 
 #%% Unit Test
 if __name__ == '__main__':

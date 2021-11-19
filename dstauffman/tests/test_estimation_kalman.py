@@ -23,6 +23,7 @@ class Test_estimation_calculate_kalman_gain(unittest.TestCase):
         Nominal
         With inverse
     """
+
     def setUp(self) -> None:
         self.P = 1e-3 * np.eye(5)
         self.H = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1], [0.5, 0.5, 0.5], [0, 0, 0.1]]).T
@@ -47,6 +48,7 @@ class Test_estimation_calculate_kalman_gain(unittest.TestCase):
         (K, Pz) = estm.calculate_kalman_gain_opt(self.P, self.H, self.R)
         self.assertAlmostEqual(K[0, 0], self.exp, 14)
 
+
 #%% estimation.calculate_prediction
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_calculate_prediction(unittest.TestCase):
@@ -55,11 +57,12 @@ class Test_estimation_calculate_prediction(unittest.TestCase):
         Nominal
         Constant offset
     """
+
     def setUp(self) -> None:
-        self.H     = np.array([[1., 0.], [0., 1.], [0., 0.]])
+        self.H = np.array([[1.0, 0.0], [0.0, 1.0], [0.0, 0.0]])
         self.state = np.array([1e-3, 5e-3])
-        self.const = np.array([0.5, 0.])
-        self.exp   = np.array([0.001, 0.005, 0.])
+        self.const = np.array([0.5, 0.0])
+        self.exp = np.array([0.001, 0.005, 0.0])
 
     def test_nominal(self) -> None:
         u_pred = estm.calculate_prediction(self.H, self.state)
@@ -67,7 +70,8 @@ class Test_estimation_calculate_prediction(unittest.TestCase):
 
     def test_const(self) -> None:
         u_pred = estm.calculate_prediction(self.H, self.state, const=self.const)
-        np.testing.assert_almost_equal(u_pred, self.exp + np.array([0.5, 0., 0.]))
+        np.testing.assert_almost_equal(u_pred, self.exp + np.array([0.5, 0.0, 0.0]))
+
 
 #%% estimation.calculate_innovation
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -76,14 +80,16 @@ class Test_estimation_calculate_innovation(unittest.TestCase):
     Tests the estimation.calculate_innovation function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
-        self.u_meas = np.array([1., 2.1, -3.])
+        self.u_meas = np.array([1.0, 2.1, -3.0])
         self.u_pred = np.array([1.1, 2.0, -3.1])
         self.exp    = np.array([-0.1, 0.1, 0.1])
 
     def test_nominal(self) -> None:
         z = estm.calculate_innovation(self.u_meas, self.u_pred)
         np.testing.assert_array_almost_equal(z, self.exp)
+
 
 #%% estimation.calculate_normalized_innovation
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -93,10 +99,11 @@ class Test_estimation_calculate_normalized_innovation(unittest.TestCase):
         Nominal
         With explicit inverse
     """
+
     def setUp(self) -> None:
         self.z = np.array([0.1, 0.05, -0.2])
-        self.Pz = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0., 0., 0.2]], order='F')
-        self.exp = np.array([0.96868687, 0.41313131, -1.]) # TODO: come up with more independent solution
+        self.Pz = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0.0, 0.0, 0.2]], order='F')
+        self.exp = np.array([0.96868687, 0.41313131, -1.0])  # TODO: come up with more independent solution
 
     def test_nominal(self) -> None:
         nu = estm.calculate_normalized_innovation(self.z, self.Pz)
@@ -106,6 +113,7 @@ class Test_estimation_calculate_normalized_innovation(unittest.TestCase):
         nu = estm.calculate_normalized_innovation(self.z, self.Pz, use_inverse=True)
         np.testing.assert_array_almost_equal(nu, self.exp)
 
+
 #%% estimation.calculate_delta_state
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_calculate_delta_state(unittest.TestCase):
@@ -113,14 +121,16 @@ class Test_estimation_calculate_delta_state(unittest.TestCase):
     Tests the estimation.calculate_delta_state function with the following cases:
         Nominal
     """
+
     def setUp(self) -> None:
-        self.K = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0., 0., 0.2]])
+        self.K = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0.0, 0.0, 0.2]])
         self.z = np.array([0.1, 0.05, -0.2])
         self.exp = np.array([0.0103, 0.0058, -0.04])
 
     def test_nominal(self) -> None:
         dx = estm.calculate_delta_state(self.K, self.z)
         np.testing.assert_array_almost_equal(dx, self.exp)
+
 
 #%% estimation.propagate_covariance
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
@@ -131,8 +141,9 @@ class Test_estimation_propagate_covariance(unittest.TestCase):
         With gamma
         Not inplace (x2)
     """
+
     def setUp(self) -> None:
-        self.phi   = np.diag(np.array([1., 1, 1, -1, -1, -1]))
+        self.phi   = np.diag(np.array([1.0, 1, 1, -1, -1, -1]))
         self.P     = 1e-3 * np.eye(6)
         self.Q     = np.diag(np.array([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7]))
         self.gamma = -1 * self.phi
@@ -167,6 +178,7 @@ class Test_estimation_propagate_covariance(unittest.TestCase):
         estm.propagate_covariance_opt(self.P, self.phi, self.Q, gamma=self.gamma)
         self.assertEqual(self.P[0, 0], self.exp)
 
+
 #%% estimation.update_covariance
 @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
 class Test_estimation_update_covariance(unittest.TestCase):
@@ -175,6 +187,7 @@ class Test_estimation_update_covariance(unittest.TestCase):
         Nominal inplace
         Nominal not inplace
     """
+
     def setUp(self) -> None:
         self.P = 1e-3 * np.eye(6)
         self.P[0, -1] = 5e-2
@@ -196,6 +209,7 @@ class Test_estimation_update_covariance(unittest.TestCase):
     def test_opt(self) -> None:
         estm.update_covariance_opt(self.P, self.K, self.H)
         self.assertEqual(self.P[-1, -1], self.exp)
+
 
 #%% Unit test execution
 if __name__ == '__main__':
