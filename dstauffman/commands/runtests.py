@@ -174,8 +174,13 @@ def parse_coverage(input_args: List[str]) -> argparse.Namespace:
     >>> from dstauffman.commands import parse_coverage
     >>> input_args = []
     >>> args = parse_coverage(input_args)
-    >>> print(args)
-    Namespace(no_report=False, cov_file=None)
+    >>> # TODO: go back to this when v3.9 everywhere
+    >>> print(args)  # doctest: +SKIP
+    >>> #Namespace(no_report=False, cov_file=None)
+    >>> _ = pprint_dict(vars(args), name='args', indent=1)  # doctest: +ELLIPSIS
+    args
+     no_report = False
+     cov_file  = None
 
     """
     parser = argparse.ArgumentParser(
