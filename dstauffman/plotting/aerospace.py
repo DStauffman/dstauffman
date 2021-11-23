@@ -874,7 +874,7 @@ def plot_innovations(
 
 
 #%% plot_innov_fplocs
-def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
+def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
     r"""
     Plots the innovations on the focal plane, connecting the sighting and prediction with the innovation.
 
@@ -884,8 +884,10 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
         Kalman filter output
     opts : class Opts, optional
         Plotting options
-    fields : dict, optional
-        Name of the innovation fields to plot
+    t_bounds : (2,) ndarray, optional
+        Minimum and maximum time bounds to plot
+    mask : (N,) ndarray, optional
+        Mask array
     kwargs : dict
         Additional arguments passed on to the lower level plotting functions
 
@@ -934,7 +936,8 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
 
     name = kf1.name + ' - ' if kf1.name else ''
     description = name + 'Focal Plane Sightings'
-    logger.log(LogLevel.L4, f'Plotting {description} plots ...')
+    extra_text = f' (by {kwargs["color_by"]})' if 'color_by' in kwargs and kwargs['color_by'] != 'none' else ''
+    logger.log(LogLevel.L4, f'Plotting {description} plots {extra_text}...')
 
     # check for data
     if kf1.fploc is None:
@@ -946,12 +949,20 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, **kwargs):
 
     # pull out time subset
     if t_bounds is None:
-        fplocs = kf1.fploc
-        innovs = kf1.innov
+        if mask is None:
+            fplocs = kf1.fploc
+            innovs = kf1.innov
+        else:
+            fplocs = kf1.fploc[:, mask]
+            innovs = kf1.innov[:, mask]
     else:
         ix = get_rms_indices(kf1.time, xmin=t_bounds[0], xmax=t_bounds[1])
-        fplocs = kf1.fploc[:, ix['one']]
-        innovs = kf1.innov[:, ix['one']]
+        if mask is None:
+            this_mask = ix['one']
+        else:
+            this_mask = mask & ix['one']
+        fplocs = kf1.fploc[:, this_mask]
+        innovs = kf1.innov[:, this_mask]
 
     # call wrapper functions for most of the details
     fig = make_connected_sets(description, fplocs, innovs, units=kf1.units, legend_loc=legend_loc, **kwargs)
