@@ -191,6 +191,9 @@ class MyCustomToolbar:
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
         # to determine which figure actually triggered the button events.)
         self.fig_number = fig.number
+        # Check if you have a canvas to draw on, and if not, return without creating buttons
+        if fig.canvas.toolbar is None:
+            return
         # create buttons - Prev Plot
         icon = QIcon(str(get_images_dir() / 'prev_plot.png'))
         self.btn_prev_plot = _HoverButton(icon, '')
