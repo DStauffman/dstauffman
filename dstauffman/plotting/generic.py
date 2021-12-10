@@ -940,9 +940,10 @@ def make_generic_plot(
             extra_plotter(fig=fig, ax=ax)
 
     # overlay the datashaders (with appropriate time units information)
-    for this_ds in datashaders:
-        this_ds['time_units'] = time_units
-    add_datashaders(datashaders)
+    if bool(datashaders):
+        for this_ds in datashaders:
+            this_ds['time_units'] = time_units
+        add_datashaders(datashaders)
 
     # add legend at the very end once everything has been done
     if legend_loc.lower() != 'none':

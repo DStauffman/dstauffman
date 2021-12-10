@@ -141,9 +141,16 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclu
                 continue
             value = temp[key]
             if value is not None:
-                try:
-                    iter(value)
-                except TypeError:
+                if isinstance(value, (str, bytes)):
+                    force_no_compression = True
+                else:
+                    try:
+                        iter(value)
+                    except TypeError:
+                        force_no_compression = True
+                    else:
+                        force_no_compression = False
+                if force_no_compression:
                     grp.create_dataset(key, data=value, compression=None, shuffle=False, **kwargs)
                 else:
                     grp.create_dataset(key, data=value, compression=compression, shuffle=shuffle, **kwargs)

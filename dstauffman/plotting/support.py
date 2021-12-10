@@ -64,13 +64,9 @@ if HAVE_MPL:
     munits.registry[datetime.date] = converter
     munits.registry[datetime.datetime] = converter
     if HAVE_DS:
-        try:
-            import datashader as ds
-            import datashader.transfer_functions as tf
-            from datashader.mpl_ext import dsshow, alpha_colormap
-        except ImportError:
-            warnings.warn('Datashader version does not support matplotlib and will not be used.')
-            HAVE_DS = False
+        import datashader as ds
+        import datashader.transfer_functions as tf
+        from datashader.mpl_ext import dsshow, alpha_colormap
 if HAVE_NUMPY:
     import numpy as np
 
@@ -1875,6 +1871,8 @@ def save_images_to_pdf(
 #%% add_datashaders
 def add_datashaders(datashaders):
     r"""Adds the collection of datashaders to the axes."""
+    if not HAVE_DS:
+        raise RuntimeError('You must have datashader installed to execute this.')
     # overlay the datashaders
     for this_ds in datashaders:
         # check for dates and convert as appropriate
