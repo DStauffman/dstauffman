@@ -7,8 +7,11 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
+
 import doctest
 import logging
+from typing import Any, Callable, Dict, Iterable, List, Optional, Protocol, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import (
@@ -41,7 +44,9 @@ from dstauffman.plotting.support import (
 )
 
 if HAVE_MPL:
+    from matplotlib.axis import Axis
     from matplotlib.collections import LineCollection
+    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -57,13 +62,22 @@ if HAVE_PANDAS:
 _LEG_FORMAT = '{:1.3f}'
 _TRUTH_COLOR = 'k'
 
+if TYPE_CHECKING:
+    class _ExtraPlotter(Protocol):
+        def __call__(self, fig: Figure, ax: Axis) -> None: ...
+
+    _Times = Union[int, float, np.ndarray, np.datetime64, List[np.ndarray]]
+    _Dt = Union[int, float, np.ndarray, np.timedelta64]
+    _Figs = List[Figure]
+    _FuncLamb = Callable[[Any, Any], float]
+
 #%% Globals
 logger = logging.getLogger(__name__)
 
 #%% Functions - make_generic_plot
 def make_generic_plot(
-    plot_type,
-    description,
+    plot_type: str,
+    description: str,
     time_one,
     data_one,
     *,
@@ -73,36 +87,36 @@ def make_generic_plot(
     maxs=None,
     cats=None,
     cat_names=None,
-    name_one='',
-    name_two='',
+    name_one: str = '',
+    name_two: str = '',
     elements=None,
-    units='',
-    time_units='sec',
-    start_date='',
+    units: str = '',
+    time_units: str = 'sec',
+    start_date: str = '',
     rms_xmin=-inf,
     rms_xmax=inf,
     disp_xmin=-inf,
     disp_xmax=inf,
-    single_lines=False,
-    make_subplots=True,
+    single_lines: bool = False,
+    make_subplots: bool = True,
     colormap=DEFAULT_COLORMAP,
-    use_mean=False,
-    plot_zero=False,
-    show_rms=True,
-    ignore_empties=False,
-    legend_loc='best',
-    show_extra=True,
-    plot_components=True,
+    use_mean: bool = False,
+    plot_zero: bool = False,
+    show_rms: bool = True,
+    ignore_empties: bool = False,
+    legend_loc: str = 'best',
+    show_extra: bool = True,
+    plot_components: bool = True,
     second_units=None,
     leg_scale=None,
     ylabel=None,
     tolerance=0,
-    return_err=False,
-    data_as_rows=True,
-    extra_plotter=None,
-    use_zoh=False,
-    label_vert_lines=True,
-    use_datashader=False,
+    return_err: bool = False,
+    data_as_rows: bool = True,
+    extra_plotter: _ExtraPlotter = None,
+    use_zoh: bool = False,
+    label_vert_lines: bool = True,
+    use_datashader: bool = False,
 ):
     r"""
     Generic plotting function called by all the other low level plots.
@@ -296,7 +310,7 @@ def make_generic_plot(
             if not return_err:
                 return []
             # TODO: return NaNs instead of None for this case?
-            out = ([], {'one': None, 'two': None, 'diff': None})
+            out: Tuple[_Figs, Dict[str, Optional[float]]] = ([], {'one': None, 'two': None, 'diff': None})
             if is_quat_diff:
                 out[1]['mag'] = None
             return out
@@ -390,7 +404,7 @@ def make_generic_plot(
     #% Calculations
     # build RMS indices
     if data_is_list:
-        ix = {'one': [], 't_min': None, 't_max': None}
+        ix: Dict[str, Any] = {'one': [], 't_min': None, 't_max': None}
         for j in range(num_channels):
             if time_is_list:
                 temp_ix = get_rms_indices(time_one[j], xmin=rms_xmin, xmax=rms_xmax)
@@ -431,22 +445,24 @@ def make_generic_plot(
     # calculate the rms (or mean) values
     if show_rms or return_err:
         nans = np.full(num_channels, np.nan, dtype=float)  # TODO: num_channels should be 3 for is_quat_diff
+        func_lamb: _FuncLamb
+        data_func = Union[_FuncLamb, List[_FuncLamb], Dict[Any, np.ndarray]]
         if not use_mean:
             func_name = 'RMS'
             func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
         else:
             func_name = 'Mean'
-            func_lamb = lambda x, y: np.nanmean(x, axis=y)
+            func_lamb = lambda x, y: np.nanmean(x, axis=y)  # type: ignore[no-any-return]
         if not doing_diffs and not is_cat_plot:
             if data_is_list:
-                data_func = [func_lamb(data_one[j][ix['one'][j]], None) for j in range(num_channels)]
+                data_func = [func_lamb(data_one[j][ix['one'][j]], None) for j in range(num_channels)]  # type: ignore[misc]
             elif data_as_rows:
-                data_func = func_lamb(data_one[:, ix['one']], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
+                data_func = func_lamb(data_one[:, ix['one']], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)  # type: ignore[misc]
             else:
-                data_func = func_lamb(data_one[ix['one'], :], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)
+                data_func = func_lamb(data_one[ix['one'], :], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)  # type: ignore[misc]
         if doing_diffs:
             # TODO: combine with non diff version
-            data_func  = func_lamb(data_one[:, ix['one']], 1) if have_data_one and np.any(ix['one']) else nans
+            data_func  = func_lamb(data_one[:, ix['one']], 1) if have_data_one and np.any(ix['one']) else nans  # type: ignore[misc]
             data2_func = func_lamb(data_two[:, ix['two']], 1) if have_data_two and np.any(ix['two']) else nans
             if is_quat_diff:
                 nondeg_func = func_lamb(nondeg_error[:, ix['overlap']], 1) if have_both and np.any(ix['overlap']) else nans
@@ -458,19 +474,19 @@ def make_generic_plot(
             if is_quat_diff:
                 err['mag'] = mag_func
         elif is_cat_plot:
-            data_func = {}
+            data_func = {}  # type: ignore[misc]
             for cat in ordered_cats:
                 if data_is_list:
                     this_ix = ix['one'][j] & (cats[j] == cat)
-                    data_func[cat] = [func_lamb(data_one[j][this_ix], None) for j in range(num_channels)]
+                    data_func[cat] = [func_lamb(data_one[j][this_ix], None) for j in range(num_channels)]  # type: ignore[valid-type]
                 else:
                     this_ix = ix['one'] & (cats == cat)
                     if np.any(this_ix):
-                        data_func[cat] = (
+                        data_func[cat] = (  # type: ignore[valid-type]
                             func_lamb(data_one[:, this_ix], 1) if data_as_rows else func_lamb(data_one[:, this_ix], 1)
                         )
                     else:
-                        data_func[cat] = np.full(num_channels, np.nan)
+                        data_func[cat] = np.full(num_channels, np.nan)  # type: ignore[valid-type]
 
     # unit conversion value
     (new_units, unit_conv) = get_unit_conversion(second_units, units)
@@ -588,6 +604,7 @@ def make_generic_plot(
     # plot data
     for (i, this_axes) in enumerate(ax):
         is_diff_plot = doing_diffs and (i > num_rows - 1 or (not single_lines and make_subplots and i == 1))
+        loop_counter: Iterable[int]
         if plot_type == 'bar':
             loop_counter = reversed(range(num_channels))
         elif is_cat_plot:
@@ -613,7 +630,7 @@ def make_generic_plot(
             for j in loop_counter:
                 this_label = f'{name_one} {elements[j]}' if name_one else str(elements[j])
                 if show_rms and not is_cat_plot and not is_quat_diff:
-                    value = _LEG_FORMAT.format(leg_conv * data_func[j])
+                    value = _LEG_FORMAT.format(leg_conv * data_func[j])  # type: ignore[misc, valid-type]
                     if leg_units:
                         this_label += f' ({func_name}: {value} {leg_units})'
                     else:
@@ -634,8 +651,8 @@ def make_generic_plot(
                     this_zorder = 9
                 if plot_type == 'bar':
                     #% bar plot
-                    this_bottom1 = bottoms[j] if data_is_list else bottoms[j, :] if data_as_rows else bottoms[:, j]
-                    this_bottom2 = bottoms[j + 1] if data_is_list else bottoms[j + 1, :] if data_as_rows else bottoms[:, j + 1]
+                    this_bottom1 = bottoms[j] if data_is_list else bottoms[j, :] if data_as_rows else bottoms[:, j]  # type: ignore[call-overload]
+                    this_bottom2 = bottoms[j + 1] if data_is_list else bottoms[j + 1, :] if data_as_rows else bottoms[:, j + 1]  # type: ignore[call-overload]
                     if not ignore_plot_data(this_data, ignore_empties):
                         # Note: The performance of ax.bar is really slow with large numbers of bars (>20), so
                         # fill_between is a better alternative
@@ -660,7 +677,7 @@ def make_generic_plot(
                         cat = ordered_cats[k]
                         this_cat_name = cat_names[cat]
                         if show_rms:
-                            value = _LEG_FORMAT.format(unit_conv * data_func[cat][ix_data])
+                            value = _LEG_FORMAT.format(unit_conv * data_func[cat][ix_data])  # type: ignore[misc, valid-type]
                             if new_units:
                                 cat_label = f'{this_label} {this_cat_name} ({func_name}: {value} {new_units})'
                             else:
@@ -929,7 +946,8 @@ def make_generic_plot(
         plot_second_units_wrapper(this_axes, (new_units, unit_conv))
         # plot RMS lines
         if show_rms:
-            plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines)
+            vert_labels = None if not use_mean else ['Mean Start Time', 'Mean Stop Time']
+            plot_vert_lines(this_axes, ix['pts'], show_in_legend=label_vert_lines, labels=vert_labels)
 
     # plot any extra information through a generic callable
     if extra_plotter is not None:
@@ -965,30 +983,30 @@ def make_time_plot(
     time,
     data,
     *,
-    name='',
+    name: str = '',
     elements=None,
-    units='',
-    time_units='sec',
-    start_date='',
+    units: str = '',
+    time_units: str = 'sec',
+    start_date: str = '',
     rms_xmin=-inf,
     rms_xmax=inf,
     disp_xmin=-inf,
     disp_xmax=inf,
-    single_lines=False,
+    single_lines: bool = False,
     colormap=DEFAULT_COLORMAP,
-    use_mean=False,
-    plot_zero=False,
-    show_rms=True,
-    ignore_empties=False,
-    legend_loc='best',
+    use_mean: bool = False,
+    plot_zero: bool = False,
+    show_rms: bool = True,
+    ignore_empties: bool = False,
+    legend_loc: str = 'best',
     second_units=None,
     leg_scale=None,
     ylabel=None,
-    data_as_rows=True,
-    extra_plotter=None,
-    use_zoh=False,
-    label_vert_lines=True,
-    use_datashader=False,
+    data_as_rows: bool = True,
+    extra_plotter: _ExtraPlotter = None,
+    use_zoh: bool = False,
+    label_vert_lines: bool = True,
+    use_datashader: bool = False,
 ):
     r"""
     Generic data versus time plotting routine.
@@ -1085,26 +1103,26 @@ def make_error_bar_plot(
     maxs,
     *,
     elements=None,
-    units='',
-    time_units='sec',
-    start_date='',
+    units: str = '',
+    time_units: str = 'sec',
+    start_date: str = '',
     rms_xmin=-inf,
     rms_xmax=inf,
     disp_xmin=-inf,
     disp_xmax=inf,
-    single_lines=False,
+    single_lines: bool = False,
     colormap=DEFAULT_COLORMAP,
-    use_mean=False,
-    plot_zero=False,
-    show_rms=True,
-    legend_loc='best',
+    use_mean: bool = False,
+    plot_zero: bool = False,
+    show_rms: bool = True,
+    legend_loc: str = 'best',
     second_units=None,
     leg_scale=None,
     ylabel=None,
-    data_as_rows=True,
-    extra_plotter=None,
-    use_zoh=False,
-    label_vert_lines=True,
+    data_as_rows: bool = True,
+    extra_plotter: _ExtraPlotter = None,
+    use_zoh: bool = False,
+    label_vert_lines: bool = True,
 ):
     r"""
     Generic plotting routine to make error bars.
@@ -1210,34 +1228,34 @@ def make_difference_plot(
     data_one,
     data_two,
     *,
-    name_one='',
-    name_two='',
+    name_one: str = '',
+    name_two: str = '',
     elements=None,
-    units='',
-    time_units='sec',
-    start_date='',
+    units: str = '',
+    time_units: str = 'sec',
+    start_date: str = '',
     rms_xmin=-inf,
     rms_xmax=inf,
     disp_xmin=-inf,
     disp_xmax=inf,
-    make_subplots=True,
-    single_lines=False,
+    make_subplots: bool = True,
+    single_lines: bool = False,
     colormap=DEFAULT_COLORMAP,
-    use_mean=False,
-    plot_zero=False,
-    show_rms=True,
-    legend_loc='best',
-    show_extra=True,
+    use_mean: bool = False,
+    plot_zero: bool = False,
+    show_rms: bool = True,
+    legend_loc: str = 'best',
+    show_extra: bool = True,
     second_units=None,
     leg_scale=None,
     ylabel=None,
-    data_as_rows=True,
+    data_as_rows: bool = True,
     tolerance=0,
-    return_err=False,
-    use_zoh=False,
-    label_vert_lines=True,
-    extra_plotter=None,
-    use_datashader=False,
+    return_err: bool = False,
+    use_zoh: bool = False,
+    label_vert_lines: bool = True,
+    extra_plotter: _ExtraPlotter = None,
+    use_datashader: bool = False,
 ):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
@@ -1364,30 +1382,30 @@ def make_categories_plot(
     cats,
     *,
     cat_names=None,
-    name='',
+    name: str = '',
     elements=None,
-    units='',
-    time_units='sec',
-    start_date='',
+    units: str = '',
+    time_units: str = 'sec',
+    start_date: str = '',
     rms_xmin=-inf,
     rms_xmax=inf,
     disp_xmin=-inf,
     disp_xmax=inf,
-    make_subplots=True,
-    single_lines=False,
+    make_subplots: bool = True,
+    single_lines: bool = False,
     colormap=DEFAULT_COLORMAP,
-    use_mean=False,
-    plot_zero=False,
-    show_rms=True,
-    legend_loc='best',
+    use_mean: bool = False,
+    plot_zero: bool = False,
+    show_rms: bool = True,
+    legend_loc: str = 'best',
     second_units=None,
     leg_scale=None,
     ylabel=None,
-    data_as_rows=True,
-    use_zoh=False,
-    label_vert_lines=True,
-    extra_plotter=None,
-    use_datashader=False,
+    data_as_rows: bool = True,
+    use_zoh: bool = False,
+    label_vert_lines: bool = True,
+    extra_plotter: _ExtraPlotter = None,
+    use_datashader: bool = False,
 ):
     r"""
     Data versus time plotting routine when grouped into categories.
@@ -1499,28 +1517,28 @@ def make_bar_plot(
     time,
     data,
     *,
-    name='',
+    name: str = '',
     elements=None,
-    units='',
-    time_units='sec',
-    start_date='',
+    units: str = '',
+    time_units: str = 'sec',
+    start_date: str = '',
     rms_xmin=-inf,
     rms_xmax=inf,
     disp_xmin=-inf,
     disp_xmax=inf,
-    single_lines=False,
+    single_lines: bool = False,
     colormap=DEFAULT_COLORMAP,
-    use_mean=True,
-    plot_zero=False,
-    show_rms=True,
-    ignore_empties=False,
-    legend_loc='best',
+    use_mean: bool = True,
+    plot_zero: bool = False,
+    show_rms: bool = True,
+    ignore_empties: bool = False,
+    legend_loc: str = 'best',
     second_units=None,
     ylabel=None,
-    data_as_rows=True,
-    extra_plotter=None,
-    use_zoh=False,
-    label_vert_lines=True,
+    data_as_rows: bool = True,
+    extra_plotter: _ExtraPlotter = None,
+    use_zoh: bool = False,
+    label_vert_lines: bool = True,
 ):
     r"""
     Plots a filled bar chart, using methods optimized for larger data sets.
@@ -1626,15 +1644,17 @@ def make_connected_sets(
     points,
     innovs,
     *,
-    color_by='none',
-    hide_innovs=False,
-    center_origin=False,
-    legend_loc='best',
-    units='',
-    mag_ratio=None,
-    leg_scale='unity',
-    colormap=None,
-    use_datashader=False,
+    color_by: str = 'none',
+    hide_innovs: bool = False,
+    center_origin: bool = False,
+    legend_loc: str = 'best',
+    units: str = '',
+    mag_ratio: float = None,
+    leg_scale: str = 'unity',
+    colormap: Union[str, ColorMap] = None,
+    use_datashader: bool = False,
+    add_quiver: bool = False,
+    quiver_scale: float = None,
 ):
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.
@@ -1665,6 +1685,10 @@ def make_connected_sets(
         Amount to scale the colorbar legend
     colormap : str, optional
         Name to use instead of the default colormaps, which depend on the mode
+    add_quiver : bool, optional, default is False
+        Whether to add matplotlib quiver lines to the plot
+    quiver_scale : float, optional
+        quiver line scale factor
 
     Returns
     -------
@@ -1731,6 +1755,8 @@ def make_connected_sets(
         ix = np.arange(points.shape[1])
 
     # color options
+    colors_line: Union[str, ColorMap, Tuple[Any, ...]]
+    colors_pred: Union[str, ColorMap, Tuple[Any, ...]]
     if color_by == 'none':
         colors_line = 'xkcd:red'
         colors_pred = 'xkcd:blue' if colormap is None else colormap
@@ -1809,6 +1835,8 @@ def make_connected_sets(
         ax.add_collection(lines)
     else:
         ax.scatter(points[0, ix], points[1, ix], c=colors_pred, marker='.', label='Sighting', zorder=5)
+    if add_quiver:
+        ax.quiver(points[0, ix], points[1, ix], innovs[0, ix], innovs[1, ix], color='xkcd:black', units='x', scale=quiver_scale)
     if color_by != 'none':
         cbar = fig.colorbar(innov_cmap.get_smap())
         cbar_units = DEGREE_SIGN if color_by == 'direction' else new_units

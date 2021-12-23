@@ -122,7 +122,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             elements=self.elements,
             units=self.units,
             time_units='numpy',
-            start_date=None,
+            start_date='',
             rms_xmin=time[5],
             rms_xmax=time[25],
             disp_xmin=time[1],
