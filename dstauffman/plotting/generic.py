@@ -28,7 +28,6 @@ from dstauffman import (
     rms,
 )
 from dstauffman.aerospace import quat_angle_diff
-
 from dstauffman.plotting.support import (
     add_datashaders,
     COLOR_LISTS,

@@ -18,11 +18,12 @@ import dstauffman.plotting as plot
 #%% Classes - SimParams
 class SimParams(dcs.Frozen):
     r"""Simulation model parameters."""
+
     def __init__(self, time, *, magnitude, frequency, phase):
-        self.time      = time
+        self.time = time
         self.magnitude = magnitude
         self.frequency = frequency
-        self.phase     = phase
+        self.phase = phase
 
     def __eq__(self, other):
         r"""Allows classes to compare contents to determine if equal."""
@@ -37,41 +38,46 @@ class SimParams(dcs.Frozen):
         r"""Detailed string representation."""
         return 'mag={}, freq={}, phs={}'.format(self.magnitude, self.frequency, self.phase)
 
+
 #%% Functions - _get_truth_index
 def _get_truth_index(results_time, truth_time):
     r"""Find the indices to the truth data from the results time."""
     # Hard-coded values
-    precision    = 1e-7
+    precision = 1e-7
     # find the indices to truth
-    ix_truth     = np.flatnonzero((truth_time >= results_time[0] - precision) & (truth_time <= \
-        results_time[-1] + precision))
+    ix_truth = np.flatnonzero((truth_time >= results_time[0] - precision) & (truth_time <= results_time[-1] + precision))
     # find the indices to results (in case truth isn't long enough)
-    ix_results   = np.flatnonzero(results_time <= truth_time[-1] + precision)
+    ix_results = np.flatnonzero(results_time <= truth_time[-1] + precision)
     # return the indices
     return (ix_truth, ix_results)
+
 
 #%% Functions - sim_model
 def sim_model(sim_params):
     r"""Run the simple example simulation model."""
-    return sim_params.magnitude * np.sin(2*np.pi*sim_params.frequency*sim_params.time/1000 + \
-        sim_params.phase*np.pi/180)
+    return sim_params.magnitude * np.sin(
+        2 * np.pi * sim_params.frequency * sim_params.time / 1000 + sim_params.phase * np.pi / 180
+    )
+
 
 #%% Functions - truth
 def truth(time, magnitude=5, frequency=10, phase=90):
     r"""Return true values for simple example truth data."""
-    return magnitude * np.sin(2*np.pi*frequency*time/1000 + phase*np.pi/180)
+    return magnitude * np.sin(2 * np.pi * frequency * time / 1000 + phase * np.pi / 180)
+
 
 #%% Functions - cost_wrapper
 def cost_wrapper(results_data, *, results_time, truth_time, truth_data, sim_params):
     r"""Calculate innovations (cost) for the model."""
     # Pull out overlapping time points and indices
     (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
-    sub_truth  = truth_data[ix_truth]
+    sub_truth = truth_data[ix_truth]
     sub_result = results_data[ix_results]
 
     # calculate the innovations
     innovs = sub_result - sub_truth
     return innovs
+
 
 #%% Functions - get_parameter
 def get_parameter(sim_params, *, names):
@@ -85,6 +91,7 @@ def get_parameter(sim_params, *, names):
             raise ValueError('Bad parameter name: "{}".'.format(name))
     return values
 
+
 #%% Functions - set_parameter
 def set_parameter(sim_params, *, names, values):
     r"""Set the model parameters."""
@@ -95,6 +102,7 @@ def set_parameter(sim_params, *, names, values):
             setattr(sim_params, name, values[ix])
         else:
             raise ValueError('Bad parameter name: "{}".'.format(name))
+
 
 #%% Script
 if __name__ == '__main__':
@@ -115,7 +123,7 @@ if __name__ == '__main__':
     dcs.activate_logging(dcs.LogLevel.L8)
 
     # BPE Settings
-    opti_opts = estm.OptiOpts()
+    opti_opts                = estm.OptiOpts()
     opti_opts.model_func     = sim_model
     opti_opts.model_args     = {'sim_params': sim_params}
     opti_opts.cost_func      = cost_wrapper
@@ -127,7 +135,7 @@ if __name__ == '__main__':
     opti_opts.params         = []
 
     # less common optimization settings
-    opti_opts.slope_method    = 'one_sided' # or 'two_sided'
+    opti_opts.slope_method    = 'one_sided'  # or 'two_sided'
     opti_opts.is_max_like     = False
     opti_opts.max_iters       = 10
     opti_opts.tol_cosmax_grad = 1e-4
@@ -138,7 +146,7 @@ if __name__ == '__main__':
     opti_opts.grow_radius     = 2
     opti_opts.shrink_radius   = 0.5
     opti_opts.trust_radius    = 1.0
-    opti_opts.max_cores       = None # None means no parallelization, -1 means use all cores
+    opti_opts.max_cores       = None  # None means no parallelization, -1 means use all cores
 
     # Parameters to estimate
     opti_opts.params.append(estm.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
@@ -150,7 +158,7 @@ if __name__ == '__main__':
         (bpe_results, results) = estm.run_bpe(opti_opts, log_level=None)
     else:
         bpe_results = estm.BpeResults.load(opti_opts.output_folder / opti_opts.output_results)
-        results     = sim_model(sim_params) # just re-run, nothing is actually saved by this model
+        results = sim_model(sim_params)  # just re-run, nothing is actually saved by this model
 
     # Plot results
     if make_plots:
@@ -166,6 +174,5 @@ if __name__ == '__main__':
         f1 = plot.plot_time_history('Output vs. Time', time, results, opts=opts, extra_plotter=extra_plotter)
 
         # make BPE plots
-        bpe_plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, \
-            'covariance': True}
+        bpe_plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, 'covariance': True}
         plot.plot_bpe_results(bpe_results, opts=opts, plots=bpe_plots)

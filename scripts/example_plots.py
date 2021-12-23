@@ -9,8 +9,8 @@ Notes
 #%% Imports
 import numpy as np
 
-from dstauffman import unit
-from dstauffman.plotting import Opts, plot_correlation_matrix
+import dstauffman as dcs
+import dstauffman.plotting as plot
 
 #%% Main function
 if __name__ == '__main__':
@@ -19,7 +19,7 @@ if __name__ == '__main__':
     # random data
     data = np.random.rand(10, 10)
     # normalize the random data
-    data = unit(data, axis=0)
+    data = dcs.unit(data, axis=0)
     # labels for the plot
     labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
     # make some symmetric data
@@ -34,8 +34,8 @@ if __name__ == '__main__':
             else:
                 pass
     # create opts
-    opts = Opts()
+    opts = plot.Opts()
 
     #%% Create the plots
-    fig1 = plot_correlation_matrix(data, labels, opts=opts)
-    fig2 = plot_correlation_matrix(sym, labels, opts=opts)
+    fig1 = plot.plot_correlation_matrix(data, labels, opts=opts)
+    fig2 = plot.plot_correlation_matrix(sym, labels, opts=opts)

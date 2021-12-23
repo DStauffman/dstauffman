@@ -5,11 +5,10 @@ from IPython import get_ipython  # type: ignore[import]
 import numpy as np
 import pandas as pd
 
-from dstauffman.nubs import np_any, np_all
+import dstauffman.nubs as nubs
 
 #%% Results
-text = \
-r"""i = None, any(x)
+text = r"""i = None, any(x)
 111 ns ± 1.81 ns per loop (mean ± std. dev. of 7 runs, 10000000 loops each)
 i = None, np.any(x)
 3.74 µs ± 47.6 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
@@ -99,19 +98,22 @@ i = 50000, np_all(x)
 def parse_results(text):
     r"""Parses the output into a more succient table."""
     lines = text.split('\n')
-    table = pd.DataFrame(index=['None', '0', '10', '100', '1000', '10000', '50000'], \
-        columns=['any(x)', 'np.any(x)', 'np_any(x)', 'all(x)', 'np.all(x)', 'np_all(x)'])
+    table = pd.DataFrame(
+        index=['None', '0', '10', '100', '1000', '10000', '50000'],
+        columns=['any(x)', 'np.any(x)', 'np_any(x)', 'all(x)', 'np.all(x)', 'np_all(x)'],
+    )
     for (ix, line) in enumerate(lines):
         if line.startswith('i = '):
             parts = line.split(', ')
             value = parts[0].split(' = ')[1]
             func = parts[1]
-            next_line = lines[ix+1]
+            next_line = lines[ix + 1]
             speed = next_line.split(' ± ')[0]
             table.loc[value][func] = speed
         else:
             continue
     return table
+
 
 #%% Script
 if __name__ == '__main__':
@@ -125,7 +127,7 @@ if __name__ == '__main__':
         print(f'i = {i}, np.any(x)')
         ipython.magic('timeit np.any(x)')
         print(f'i = {i}, np_any(x)')
-        ipython.magic('timeit np_any(x)')
+        ipython.magic('timeit nubs.np_any(x)')
 
     for i in [None, 0, 10, 100, 1000, 10000, 50000]:
         x = np.ones(100000, dtype=bool)
@@ -136,10 +138,10 @@ if __name__ == '__main__':
         print(f'i = {i}, np.all(x)')
         ipython.magic('timeit np.all(x)')
         print(f'i = {i}, np_all(x)')
-        ipython.magic('timeit np_all(x)')
+        ipython.magic('timeit nubs.np_all(x)')
 
-    #table = parse_results(text)
-    #print(table)
+    # table = parse_results(text)
+    # print(table)
 
     # Gives:
     #         any(x) np.any(x) np_any(x)   all(x) np.all(x) np_all(x)
