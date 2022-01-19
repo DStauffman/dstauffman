@@ -409,6 +409,7 @@ def plot_correlation_matrix(
     plot_border=None,
     leg_scale='unity',
     fig_ax_iter=None,
+    skip_setup_plots=False,
 ):
     r"""
     Visually plot a correlation matrix.
@@ -448,6 +449,8 @@ def plot_correlation_matrix(
     fig_ax_iter : iterable, optional
         Object to produce figure and axes handles through a next call if you want to manipulate
         which data gets plotted where
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step, in case you are manually adding to an existing axis
 
     Returns
     -------
@@ -480,10 +483,11 @@ def plot_correlation_matrix(
     >>> plot_border=None
     >>> leg_scale = 'centi'
     >>> fig_ax_iter = None
+    >>> skip_setup_plots = False
     >>> fig = plot_correlation_matrix(data, labels, units=units, opts=opts, matrix_name=matrix_name, \
     ...     cmin=cmin, cmax=cmax, xlabel=xlabel, ylabel=ylabel, plot_lower_only=plot_lower_only, \
     ...     label_values=label_values, x_lab_rot=x_lab_rot, colormap=colormap, plot_border=plot_border, \
-    ...     leg_scale=leg_scale, fig_ax_iter=fig_ax_iter)
+    ...     leg_scale=leg_scale, fig_ax_iter=fig_ax_iter, skip_setup_plots=skip_setup_plots)
 
     Close plot
     >>> plt.close(fig)
@@ -603,7 +607,8 @@ def plot_correlation_matrix(
     ax.invert_yaxis()
 
     # Setup plots
-    setup_plots(fig, opts)
+    if not skip_setup_plots:
+        setup_plots(fig, opts)
     return fig
 
 
@@ -722,6 +727,7 @@ def plot_histogram(
     pdf_x=None,
     pdf_y=None,
     fig_ax_iter=None,
+    skip_setup_plots=False,
 ):
     r"""
     Creates a histogram plot of the given data and bins.
@@ -757,6 +763,8 @@ def plot_histogram(
     fig_ax_iter : iterable, optional
         Object to produce figure and axes handles through a next call if you want to manipulate
         which data gets plotted where
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step, in case you are manually adding to an existing axis
 
     Returns
     -------
@@ -845,7 +853,8 @@ def plot_histogram(
     # Optionally add PDF information
     if show_pdf:
         pass  # TODO: add this
-    setup_plots(fig, opts=opts)
+    if not skip_setup_plots:
+        setup_plots(fig, opts=opts)
     return fig
 
 
