@@ -27,7 +27,8 @@ def activate_logging(
     *,
     file_level: int = None,
     log_format: str = None,
-    file_format: str = None
+    file_format: str = None,
+    log_start: Union[bool, str] = None,
 ) -> None:
     r"""
     Set up logging based on a user specified settings file.
@@ -44,6 +45,8 @@ def activate_logging(
         Format for the screen log level
     file_format : str, optional
         Format for the file log level
+    log_start : bool or str, optional
+        Whether to log the time of the start, and if a string, then log the name that started it
 
     Notes
     -----
@@ -94,6 +97,13 @@ def activate_logging(
     ch.setLevel(log_level)
     ch.setFormatter(logging.Formatter(log_format))
     root_logger.addHandler(ch)
+
+    # log the starting conditions
+    if bool(log_start):
+        text = f'Logging configured to level {log_level} at {datetime.datetime.now()}'
+        if isinstance(log_start, str):
+            text += ' in ' + log_start
+        logger.log(logging.WARNING, text)
 
 
 #%% Functions - deactivate_logging

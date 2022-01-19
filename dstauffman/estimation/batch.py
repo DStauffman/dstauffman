@@ -25,8 +25,6 @@ if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
 from dstauffman import (
-    activate_logging,
-    deactivate_logging,
     Frozen,
     HAVE_NUMPY,
     load_method,
@@ -1163,7 +1161,7 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
 
 
 #%% run_bpe
-def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tuple[BpeResults, Any]:
+def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     r"""
     Run the batch parameter estimator with the given model optimization options.
 
@@ -1189,10 +1187,6 @@ def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tupl
     >>> from dstauffman.estimation import run_bpe, OptiOpts #TODO: finish this
 
     """
-    # activate logging
-    if log_level is not None:
-        activate_logging(log_level)
-
     # check for valid parameters
     validate_opti_opts(opti_opts)
 
@@ -1362,8 +1356,6 @@ def run_bpe(opti_opts: OptiOpts, log_level: Optional[int] = LogLevel.L5) -> Tupl
 
     # display total elapsed time
     logger.log(LogLevel.L1, 'BPE Model completed: ' + time.strftime('%H:%M:%S', time.gmtime(time.time() - start_model)))
-    if log_level is not None:
-        deactivate_logging()
 
     return (bpe_results, results)
 

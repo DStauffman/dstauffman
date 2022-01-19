@@ -159,11 +159,14 @@ class Test_convert_date(unittest.TestCase):
         self.seconds = 3725.5
         self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0)
         self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000)
+        self.date = datetime.date(2022, 1, 17)
         if dcs.HAVE_NUMPY:
             self.numpy = np.datetime64('2020-06-01 01:02:05.500000', 'ns')
             self.nat = np.datetime64('nat')
+            self.np2 = np.datetime64('2022-01-17 00:00:00', 'ns')
         if dcs.HAVE_MPL:
             self.matplotlib = dates.date2num(self.datetime)
+            self.mpl2 = dates.date2num(self.date)
 
     def test_secs(self) -> None:
         out = dcs.convert_date(self.seconds, 'datetime', self.date_zero)
@@ -183,9 +186,13 @@ class Test_convert_date(unittest.TestCase):
         if dcs.HAVE_NUMPY:
             out = dcs.convert_date(self.datetime, 'numpy', old_form='datetime')
             self.assertEqual(out, self.numpy)
+            out = dcs.convert_date(self.date, 'numpy', old_form='datetime')
+            self.assertEqual(out, self.np2)
         if dcs.HAVE_MPL:
             out = dcs.convert_date(self.datetime, 'matplotlib', old_form='datetime')
             self.assertEqual(out, self.matplotlib)
+            out = dcs.convert_date(self.date, 'matplotlib', old_form='datetime')
+            self.assertEqual(out, self.mpl2)
         out = dcs.convert_date(self.datetime, 'sec', self.date_zero, old_form='datetime')
         self.assertEqual(out, self.seconds)
 
@@ -302,6 +309,15 @@ class Test_convert_date(unittest.TestCase):
         np.testing.assert_array_equal(out, np.array([self.seconds, nan]))
         out = dcs.convert_date(dates, 'matplotlib', self.date_zero, old_form='numpy', numpy_form='datetime64[ms]')
         np.testing.assert_array_equal(out, np.array([self.matplotlib, nan]))
+
+    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    def test_datetime_lists(self) -> None:
+        dates = [self.datetime, self.date]
+        out = dcs.convert_date(dates, 'numpy', old_form='datetime')
+        np.testing.assert_array_equal(out, np.array([self.numpy, self.np2]))
+        if dcs.HAVE_MPL:
+            out = dcs.convert_date(dates, 'matplotlib', old_form='datetime')
+            np.testing.assert_array_equal(out, np.array([self.matplotlib, self.mpl2]))
 
     @unittest.skipIf(not dcs.HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
     def test_seconds_vectors(self) -> None:

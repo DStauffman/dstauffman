@@ -376,6 +376,12 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
             is_actual_date = False
         elif isinstance(date, (datetime.datetime, datetime.date)):
             is_actual_date = True
+        elif isinstance(date, list):
+            # Note: this assumes all entries of the list are the same
+            if len(date) > 0 and isinstance(date[0], (datetime.datetime, datetime.date)):
+                is_actual_date = True
+            else:
+                is_actual_date = False
         elif isinstance(date, (int, float)):
             is_actual_date = isfinite(date)
         else:

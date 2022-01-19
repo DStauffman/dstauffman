@@ -408,6 +408,7 @@ def plot_correlation_matrix(
     colormap=None,
     plot_border=None,
     leg_scale='unity',
+    fig_ax_iter=None,
 ):
     r"""
     Visually plot a correlation matrix.
@@ -444,6 +445,9 @@ def plot_correlation_matrix(
         Color of the border to plot
     leg_scale : str, optional
         factor to use when scaling the value in the legend, default is 'unity'
+    fig_ax_iter : iterable, optional
+        Object to produce figure and axes handles through a next call if you want to manipulate
+        which data gets plotted where
 
     Returns
     -------
@@ -475,10 +479,11 @@ def plot_correlation_matrix(
     >>> colormap = None
     >>> plot_border=None
     >>> leg_scale = 'centi'
+    >>> fig_ax_iter = None
     >>> fig = plot_correlation_matrix(data, labels, units=units, opts=opts, matrix_name=matrix_name, \
     ...     cmin=cmin, cmax=cmax, xlabel=xlabel, ylabel=ylabel, plot_lower_only=plot_lower_only, \
     ...     label_values=label_values, x_lab_rot=x_lab_rot, colormap=colormap, plot_border=plot_border, \
-    ...     leg_scale=leg_scale)
+    ...     leg_scale=leg_scale, fig_ax_iter=fig_ax_iter)
 
     Close plot
     >>> plt.close(fig)
@@ -542,12 +547,15 @@ def plot_correlation_matrix(
     this_title = matrix_name + (' [' + new_units + ']' if new_units else '')
 
     # Create plots
-    # create figure
-    fig = plt.figure()
+    if fig_ax_iter is None:
+        # create figure
+        fig = plt.figure()
+        # get handle to axes for use later
+        ax = fig.add_subplot(1, 1, 1)
+    else:
+        (fig, ax) = next(fig_ax_iter)
     # set figure title
     fig.canvas.manager.set_window_title(matrix_name)
-    # get handle to axes for use later
-    ax = fig.add_subplot(111)
     # set axis color to none
     ax.patch.set_facecolor('none')
     # set title
@@ -578,7 +586,7 @@ def plot_correlation_matrix(
                         fontsize=15,
                     )
     # show colorbar
-    fig.colorbar(cm.get_smap())
+    fig.colorbar(cm.get_smap(), ax=ax, shrink=0.9)
     # make square
     ax.set_aspect('equal')
     # set limits and tick labels
@@ -713,6 +721,7 @@ def plot_histogram(
     show_pdf=False,
     pdf_x=None,
     pdf_y=None,
+    fig_ax_iter=None,
 ):
     r"""
     Creates a histogram plot of the given data and bins.
@@ -745,6 +754,9 @@ def plot_histogram(
         X values to draw lines at PDF
     pdf_y : scalar or (C, ) ndarray
         Y values to draw lines at PDF
+    fig_ax_iter : iterable, optional
+        Object to produce figure and axes handles through a next call if you want to manipulate
+        which data gets plotted where
 
     Returns
     -------
@@ -777,9 +789,12 @@ def plot_histogram(
     if opts is None:
         opts = Opts()
     # create plot
-    fig = plt.figure()
+    if fig_ax_iter is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+    else:
+        (fig, ax) = next(fig_ax_iter)
     fig.canvas.manager.set_window_title(description)
-    ax = fig.add_subplot(1, 1, 1)
     ax.set_title(description)
     if use_exact_counts:
         counts = np.array([np.count_nonzero(data == this_bin) for this_bin in bins], dtype=int)

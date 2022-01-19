@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     # Run code
     if rerun:
-        (bpe_results, results) = estm.run_bpe(opti_opts, log_level=None)
+        (bpe_results, results) = estm.run_bpe(opti_opts)
     else:
         bpe_results = estm.BpeResults.load(opti_opts.output_folder / opti_opts.output_results)
         results = sim_model(sim_params)  # just re-run, nothing is actually saved by this model
