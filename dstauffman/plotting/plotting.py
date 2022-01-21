@@ -286,7 +286,7 @@ def unsuppress_plots() -> None:
 
 
 #%% Functions - plot_time_history
-def plot_time_history(description, time, data, opts=None, *, ignore_empties=False, **kwargs):
+def plot_time_history(description, time, data, opts=None, *, ignore_empties=False, skip_setup_plots=False, **kwargs):
     r"""
     Plot multiple metrics over time.
 
@@ -304,6 +304,8 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
         Removes any entries from the plot and legend that contain only zeros or only NaNs
     save_plot : bool, optional
         Ability to overide the option in opts
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step, in case you are manually adding to an existing axis
     kwargs : dict
         Remaining keyword arguments will be passed to make_time_plot
 
@@ -386,7 +388,8 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     )
 
     # setup plots
-    setup_plots(fig, this_opts)
+    if not skip_setup_plots:
+        setup_plots(fig, this_opts)
     return fig
 
 
@@ -559,7 +562,10 @@ def plot_correlation_matrix(
     else:
         (fig, ax) = next(fig_ax_iter)
     # set figure title
-    fig.canvas.manager.set_window_title(matrix_name)
+    if (sup := fig._suptitle) is None:
+        fig.canvas.manager.set_window_title(matrix_name)
+    else:
+        fig.canvas.manager.set_window_title(sup.get_text())
     # set axis color to none
     ax.patch.set_facecolor('none')
     # set title
@@ -613,7 +619,7 @@ def plot_correlation_matrix(
 
 
 #%% Functions - plot_bar_breakdown
-def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=False, **kwargs):
+def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=False, skip_setup_plots=False, **kwargs):
     r"""
     Plot the pie chart like breakdown by percentage in each category over time.
 
@@ -629,6 +635,8 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
         plotting options
     ignore_empties : bool, optional
         Removes any entries from the plot and legend that contain only zeros or only NaNs
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step, in case you are manually adding to an existing axis
 
     Returns
     -------
@@ -706,7 +714,8 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     )
 
     # Setup plots
-    setup_plots(fig, this_opts)
+    if not skip_setup_plots:
+        setup_plots(fig, this_opts)
     return fig
 
 
@@ -802,7 +811,10 @@ def plot_histogram(
         ax = fig.add_subplot(1, 1, 1)
     else:
         (fig, ax) = next(fig_ax_iter)
-    fig.canvas.manager.set_window_title(description)
+    if (sup := fig._suptitle) is None:
+        fig.canvas.manager.set_window_title(description)
+    else:
+        fig.canvas.manager.set_window_title(sup.get_text())
     ax.set_title(description)
     if use_exact_counts:
         counts = np.array([np.count_nonzero(data == this_bin) for this_bin in bins], dtype=int)
@@ -823,8 +835,10 @@ def plot_histogram(
         plotting_bins = np.asanyarray(bins).copy()
         ix_pinf = np.isinf(plotting_bins) & (np.sign(plotting_bins) > 0)
         ix_ninf = np.isinf(plotting_bins) & (np.sign(plotting_bins) < 0)
-        plotting_bins[ix_pinf] = np.max(data)
-        plotting_bins[ix_ninf] = np.min(data)
+        if np.any(ix_pinf):
+            plotting_bins[ix_pinf] = np.max(data)
+        if np.any(ix_ninf):
+            plotting_bins[ix_ninf] = np.min(data)
     rects = []
     for i in range(num - 1):
         rects.append(Rectangle((plotting_bins[i], 0), plotting_bins[i + 1] - plotting_bins[i], counts[i]))
@@ -839,7 +853,7 @@ def plot_histogram(
         ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins) + 1])
     else:
         ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins)])
-    ax.set_ylim([0, np.max(counts)])
+    ax.set_ylim([0, 1.05 * np.max(counts)])
     if normalize_spacing:
         ax.set_xticks(plotting_bins)
         ax.set_xticklabels(xlab)

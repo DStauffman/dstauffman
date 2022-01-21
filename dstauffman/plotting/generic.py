@@ -1677,7 +1677,7 @@ def make_connected_sets(
     use_datashader: bool = False,
     add_quiver: bool = False,
     quiver_scale: float = None,
-    fig_ax_iter: Iterable = None,
+    fig_ax_iter: Iterable[Tuple[Figure, Axis]] = None,
 ):
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.
@@ -1746,10 +1746,11 @@ def make_connected_sets(
     # hard-coded defaults
     datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
     colors_meas = 'xkcd:black'
+    null_options = {'none', 'density'}
 
     # calculations
     if innovs is None:
-        assert color_by == 'none', 'If no innovations are given, then you must color by "none".'
+        assert color_by in null_options, 'If no innovations are given, then you must color by "none" or "density".'
         plot_innovs = False
     elif hide_innovs:
         plot_innovs = False
@@ -1783,11 +1784,16 @@ def make_connected_sets(
     # color options
     colors_line: Union[str, ColorMap, Tuple[Any, ...]]
     colors_pred: Union[str, ColorMap, Tuple[Any, ...]]
-    if color_by == 'none':
+    ds_value: Optional[np.ndarray]
+    if color_by in null_options:
         colors_line = 'xkcd:red'
         colors_pred = 'xkcd:blue' if colormap is None else colormap
-        extra_text  = ''
-        ds_value    = np.zeros(points.shape[1])
+        if color_by == 'none':
+            extra_text = ''
+            ds_value   = np.zeros(points.shape[1])
+        else:
+            extra_text = ' (Colored by Density)'
+            ds_value   = None
         ds_low      = None
         ds_high     = None
         ds_color    = 'xkcd:blue'
@@ -1826,7 +1832,10 @@ def make_connected_sets(
         ax = fig.add_subplot(1, 1, 1)
     else:
         (fig, ax) = next(fig_ax_iter)
-    fig.canvas.manager.set_window_title(description + extra_text)
+    if (sup := fig._suptitle) is None:
+        fig.canvas.manager.set_window_title(description + extra_text)
+    else:
+        fig.canvas.manager.set_window_title(sup.get_text())
 
     # build datashader information for use later
     color_key = 'color' if ds_color.startswith('xkcd') else 'colormap'
@@ -1866,7 +1875,7 @@ def make_connected_sets(
         ax.scatter(points[0, ix], points[1, ix], c=colors_pred, marker='.', label='Sighting', zorder=5)
     if add_quiver:
         ax.quiver(points[0, ix], points[1, ix], innovs[0, ix], innovs[1, ix], color='xkcd:black', units='x', scale=quiver_scale)
-    if color_by != 'none':
+    if color_by not in null_options:
         cbar = fig.colorbar(innov_cmap.get_smap(), ax=ax, shrink=0.9)
         cbar_units = DEGREE_SIGN if color_by == 'direction' else new_units
         cbar.ax.set_ylabel('Innovation ' + color_by.capitalize() + ' [' + cbar_units + ']')

@@ -946,6 +946,7 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
 
     # alias opts
     legend_loc = kwargs.pop('legend_loc', opts.leg_spot)
+    skip_setup_plots = kwargs.pop('skip_setup_plots', False)
 
     # pull out time subset
     if t_bounds is None:
@@ -969,7 +970,8 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
 
     # Setup plots
     figs = [fig]
-    setup_plots(figs, opts)
+    if not skip_setup_plots:
+        setup_plots(figs, opts)
     logger.log(LogLevel.L4, '... done.')
     return figs
 

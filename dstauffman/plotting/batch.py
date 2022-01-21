@@ -21,7 +21,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% Functions - plot_bpe_convergence
-def plot_bpe_convergence(costs, *, opts=None):
+def plot_bpe_convergence(costs, *, opts=None, fig_ax_iter=None, skip_setup_plots=False):
     r"""
     Plot the BPE convergence rate by iteration on a log scale.
 
@@ -64,11 +64,17 @@ def plot_bpe_convergence(costs, *, opts=None):
 
     # alias the title
     this_title = 'Convergence by Iteration'
-    # create the figure and set the title
-    fig = plt.figure()
-    fig.canvas.manager.set_window_title(this_title)
+    if fig_ax_iter is None:
+        # create the figure and axis
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+    else:
+        (fig, ax) = next(fig_ax_iter)
+    if (sup := fig._suptitle) is None:
+        fig.canvas.manager.set_window_title(this_title)
+    else:
+        fig.canvas.manager.set_window_title(sup.get_text())
     # add an axis and plot the data
-    ax = fig.add_subplot(111)
     ax.semilogy(time, costs, 'b.-', linewidth=2)
     # add labels
     ax.set_xlabel('Iteration')
@@ -80,7 +86,8 @@ def plot_bpe_convergence(costs, *, opts=None):
     # show a grid
     ax.grid(True)
     # Setup plots
-    setup_plots(fig, opts)
+    if not skip_setup_plots:
+        setup_plots(fig, opts)
     return fig
 
 
@@ -129,8 +136,17 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
             temp_opts = opts.__class__(opts)
             temp_opts.disp_xmin = temp_opts.disp_xmax = temp_opts.rms_xmin = temp_opts.rms_xmax = None
             fig = plot_time_history(
-                'Innovs Before and After', time, data, opts=temp_opts, elements=['Before', 'After'], colormap=colormap, **kwargs
+                'Innovs Before and After',
+                time,
+                data,
+                opts=temp_opts,
+                elements=['Before', 'After'],
+                colormap=colormap,
+                skip_setup_plots=True,
+                **kwargs,
             )
+            fig.axes[0].set_xlabel('Innovation Number')
+            setup_plots(fig, opts=temp_opts)
             figs.append(fig)
         else:
             print("Data isn't available for Innovations plot.")

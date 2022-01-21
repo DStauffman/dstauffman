@@ -649,7 +649,7 @@ def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Uni
 
 
 #%% Functions - titleprefix
-def titleprefix(fig: _FigOrListFig, prefix: str = '') -> None:
+def titleprefix(fig: _FigOrListFig, prefix: str = '', process_all: bool = False) -> None:
     r"""
     Prepend a text string to all the titles on existing figures.
 
@@ -661,6 +661,8 @@ def titleprefix(fig: _FigOrListFig, prefix: str = '') -> None:
         Figure object(s) to save to disk
     prefix : str
         Text to be prepended to the title and figure name
+    process_all : bool, optional, default is False
+        Whether to process all the children axes even if a suptitle is found
 
     Notes
     -----
@@ -703,22 +705,23 @@ def titleprefix(fig: _FigOrListFig, prefix: str = '') -> None:
         figs = [fig]
     # loop through figures
     for this_fig in figs:
-        # get axes list and loop through them
-        for this_axis in this_fig.axes:
-            # get title for this axis
-            this_title = this_axis.get_title()
-            # if the title is empty, then don't do anything
-            if not this_title:
-                continue
-            # modify and set new title
-            new_title = prefix + ' - ' + this_title
-            this_axis.set_title(new_title)
         # update canvas name
         this_canvas_title = this_fig.canvas.manager.get_window_title()
         this_fig.canvas.manager.set_window_title(prefix + ' - ' + this_canvas_title)
         # update the suptitle (if it exists)
         if (sup := this_fig._suptitle) is not None:
             sup.set_text(prefix + ' - ' + sup.get_text())
+        elif process_all or sup is None:
+            # get axes list and loop through them
+            for this_axis in this_fig.axes:
+                # get title for this axis
+                this_title = this_axis.get_title()
+                # if the title is empty, then don't do anything
+                if not this_title:
+                    continue
+                # modify and set new title
+                new_title = prefix + ' - ' + this_title
+                this_axis.set_title(new_title)
 
 
 #%% Functions - disp_xlimits
@@ -1895,7 +1898,7 @@ def add_datashaders(datashaders):
         vmin = this_ds.get('vmin', None)
         vmax = this_ds.get('vmax', None)
         aspect = this_ds.get('aspect', 'auto')
-        agg = ds.mean('value') if 'value' in this_ds else ds.count()
+        agg = ds.mean('value') if 'value' in this_ds and this_ds['value'] is not None else ds.count()
         norm = this_ds.get('norm', 'log')
         dsshow(
             df,
