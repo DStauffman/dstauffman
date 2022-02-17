@@ -1916,6 +1916,75 @@ def add_datashaders(datashaders):
         )
 
 
+#%% fig_ax_factory
+def fig_ax_factory(
+    num_figs: int = None,
+    suptitle: str = '',
+    num_axes: Union[int, List[int]] = 1,
+    layout: str = 'rows',
+    sharex: bool = True,
+    return_figs: bool = False,
+) -> Tuple[Tuple[Figure, Axes], ...]:
+    r"""
+    Creates the figures and axes for use in a given plotting function.
+
+    Parameters
+    ----------
+    num_figs
+    suptitle
+    num_axes
+    layout
+    sharex
+    return_figs
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in February 2022.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import fig_ax_factory
+    >>> import matplotlib.pyplot as plt
+    >>> fig_ax = fig_ax_factory()
+    >>> (fig, ax) = fig_ax
+    >>> assert isinstance(fig, plt.Figure)
+    >>> assert isinstance(ax, plt.Axes)
+
+    """
+    if isinstance(num_axes, int):
+        is_1d = True
+        if layout == 'rows':
+            num_row = num_axes
+            num_col = 1
+        elif layout == 'cols':
+            num_row = 1
+            num_col = num_axes
+        else:
+            raise ValueError(f'Unexpected layout: "{layout}".')
+    else:
+        is_1d = False
+        num_row = num_axes[0]
+        num_col = num_axes[1]
+    if num_figs is None:
+        (fig, axes) = plt.subplots(num_row, num_col, sharex=sharex)
+        if bool(suptitle):
+            fig.suptitle(suptitle)
+    else:
+        raise NotImplementedError('The multi-figure option has not yet been implemented.')
+        # assert not bool(suptitle), 'Suptitle not supported for muilt-figure options.'
+    if is_1d:
+        assert isinstance(num_axes, int)
+        fig_ax = tuple((fig, axes[i]) for i in range(num_axes))
+    else:
+        if layout == 'rowwise':
+            fig_ax = tuple((fig, axes[i, j]) for i in range(num_row) for j in range(num_col))
+        elif layout == 'colwise':
+            fig_ax = tuple((fig, axes[i, j]) for j in range(num_col) for i in range(num_row))
+        else:
+            raise ValueError(f'Unexpected layout: "{layout}".')
+    return fig_ax
+
+
 #%% Unit test
 if __name__ == '__main__':
     plt.ioff()

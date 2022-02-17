@@ -411,7 +411,7 @@ def plot_correlation_matrix(
     colormap=None,
     plot_border=None,
     leg_scale='unity',
-    fig_ax_iter=None,
+    fig_ax=None,
     skip_setup_plots=False,
 ):
     r"""
@@ -449,9 +449,8 @@ def plot_correlation_matrix(
         Color of the border to plot
     leg_scale : str, optional
         factor to use when scaling the value in the legend, default is 'unity'
-    fig_ax_iter : iterable, optional
-        Object to produce figure and axes handles through a next call if you want to manipulate
-        which data gets plotted where
+    fig_ax : (fig, ax) tuple, optional
+        Figure and axis to use, otherwise create new ones
     skip_setup_plots : bool, optional, default is False
         Whether to skip the setup_plots step, in case you are manually adding to an existing axis
 
@@ -485,12 +484,12 @@ def plot_correlation_matrix(
     >>> colormap = None
     >>> plot_border=None
     >>> leg_scale = 'centi'
-    >>> fig_ax_iter = None
+    >>> fig_ax = None
     >>> skip_setup_plots = False
     >>> fig = plot_correlation_matrix(data, labels, units=units, opts=opts, matrix_name=matrix_name, \
     ...     cmin=cmin, cmax=cmax, xlabel=xlabel, ylabel=ylabel, plot_lower_only=plot_lower_only, \
     ...     label_values=label_values, x_lab_rot=x_lab_rot, colormap=colormap, plot_border=plot_border, \
-    ...     leg_scale=leg_scale, fig_ax_iter=fig_ax_iter, skip_setup_plots=skip_setup_plots)
+    ...     leg_scale=leg_scale, fig_ax=fig_ax, skip_setup_plots=skip_setup_plots)
 
     Close plot
     >>> plt.close(fig)
@@ -554,13 +553,13 @@ def plot_correlation_matrix(
     this_title = matrix_name + (' [' + new_units + ']' if new_units else '')
 
     # Create plots
-    if fig_ax_iter is None:
+    if fig_ax is None:
         # create figure
         fig = plt.figure()
         # get handle to axes for use later
         ax = fig.add_subplot(1, 1, 1)
     else:
-        (fig, ax) = next(fig_ax_iter)
+        (fig, ax) = fig_ax
     # set figure title
     if (sup := fig._suptitle) is None:
         fig.canvas.manager.set_window_title(matrix_name)
@@ -735,7 +734,7 @@ def plot_histogram(
     show_pdf=False,
     pdf_x=None,
     pdf_y=None,
-    fig_ax_iter=None,
+    fig_ax=None,
     skip_setup_plots=False,
 ):
     r"""
@@ -769,9 +768,8 @@ def plot_histogram(
         X values to draw lines at PDF
     pdf_y : scalar or (C, ) ndarray
         Y values to draw lines at PDF
-    fig_ax_iter : iterable, optional
-        Object to produce figure and axes handles through a next call if you want to manipulate
-        which data gets plotted where
+    fig_ax : (fig, ax) tuple, optional
+        Figure and axis to use, otherwise create new ones
     skip_setup_plots : bool, optional, default is False
         Whether to skip the setup_plots step, in case you are manually adding to an existing axis
 
@@ -806,11 +804,11 @@ def plot_histogram(
     if opts is None:
         opts = Opts()
     # create plot
-    if fig_ax_iter is None:
+    if fig_ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
     else:
-        (fig, ax) = next(fig_ax_iter)
+        (fig, ax) = fig_ax
     if (sup := fig._suptitle) is None:
         fig.canvas.manager.set_window_title(description)
     else:

@@ -116,7 +116,7 @@ def make_generic_plot(
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     use_datashader: bool = False,
-    fig_ax_iter: Iterable = None,
+    fig_ax: Tuple[Figure, Axis] = None,
 ):
     r"""
     Generic plotting function called by all the other low level plots.
@@ -205,9 +205,8 @@ def make_generic_plot(
         Whether to label the RMS start/stop lines in the legend (if legend is shown)
     use_datashader : bool, optional, default is False
         Whether to use datashader to shade and quickly plot large amounts of data
-    fig_ax_iter : iterable, optional
-        Object to produce figure and axes handles through a next call if you want to manipulate
-        which data gets plotted where
+    fig_ax : (fig, ax) tuple, optional
+        Figure and axis to use, otherwise create new ones
 
     Returns
     -------
@@ -256,7 +255,7 @@ def make_generic_plot(
     >>> use_zoh          = False
     >>> label_vert_lines = True
     >>> use_datashader   = False
-    >>> fig_ax_iter      = None
+    >>> fig_ax           = None
     >>> fig = make_generic_plot(plot_type, description, time_one, data_one, name_one=name_one, \
     ...     elements=elements, units=units, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -265,7 +264,7 @@ def make_generic_plot(
     ...     legend_loc=legend_loc, show_extra=show_extra, second_units=second_units, \
     ...     leg_scale=leg_scale, ylabel=ylabel, tolerance=tolerance, return_err=return_err, \
     ...     data_as_rows=data_as_rows, extra_plotter=extra_plotter, use_zoh=use_zoh, \
-    ...     label_vert_lines=label_vert_lines, use_datashader=use_datashader, fig_ax_iter=fig_ax_iter)
+    ...     label_vert_lines=label_vert_lines, use_datashader=use_datashader, fig_ax=fig_ax)
 
     Close the plot
     >>> import matplotlib.pyplot as plt
@@ -459,14 +458,14 @@ def make_generic_plot(
             func_lamb = lambda x, y: np.nanmean(x, axis=y)  # type: ignore[no-any-return]
         if not doing_diffs and not is_cat_plot:
             if data_is_list:
-                data_func = [func_lamb(data_one[j][ix['one'][j]], None) for j in range(num_channels)]  # type: ignore[misc]
+                data_func = [func_lamb(data_one[j][ix['one'][j]], None) for j in range(num_channels)]
             elif data_as_rows:
-                data_func = func_lamb(data_one[:, ix['one']], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)  # type: ignore[misc]
+                data_func = func_lamb(data_one[:, ix['one']], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)  # type: ignore[assignment]
             else:
-                data_func = func_lamb(data_one[ix['one'], :], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)  # type: ignore[misc]
+                data_func = func_lamb(data_one[ix['one'], :], 1) if np.any(ix['one']) else np.full(num_channels, np.nan)  # type: ignore[assignment]
         if doing_diffs:
             # TODO: combine with non diff version
-            data_func  = func_lamb(data_one[:, ix['one']], 1) if have_data_one and np.any(ix['one']) else nans  # type: ignore[misc]
+            data_func  = func_lamb(data_one[:, ix['one']], 1) if have_data_one and np.any(ix['one']) else nans  # type: ignore[assignment]
             data2_func = func_lamb(data_two[:, ix['two']], 1) if have_data_two and np.any(ix['two']) else nans
             if is_quat_diff:
                 nondeg_func = func_lamb(nondeg_error[:, ix['overlap']], 1) if have_both and np.any(ix['overlap']) else nans
@@ -478,19 +477,19 @@ def make_generic_plot(
             if is_quat_diff:
                 err['mag'] = mag_func
         elif is_cat_plot:
-            data_func = {}  # type: ignore[misc]
+            data_func = {}
             for cat in ordered_cats:
                 if data_is_list:
                     this_ix = ix['one'][j] & (cats[j] == cat)
-                    data_func[cat] = [func_lamb(data_one[j][this_ix], None) for j in range(num_channels)]  # type: ignore[valid-type]
+                    data_func[cat] = [func_lamb(data_one[j][this_ix], None) for j in range(num_channels)]  # type: ignore[assignment]
                 else:
                     this_ix = ix['one'] & (cats == cat)
                     if np.any(this_ix):
-                        data_func[cat] = (  # type: ignore[valid-type]
+                        data_func[cat] = (
                             func_lamb(data_one[:, this_ix], 1) if data_as_rows else func_lamb(data_one[:, this_ix], 1)
                         )
                     else:
-                        data_func[cat] = np.full(num_channels, np.nan)  # type: ignore[valid-type]
+                        data_func[cat] = np.full(num_channels, np.nan)
 
     # unit conversion value
     (new_units, unit_conv) = get_unit_conversion(second_units, units)
@@ -569,41 +568,45 @@ def make_generic_plot(
     num_axes = num_figs * num_rows * num_cols
 
     #% Create plots
-    if fig_ax_iter is not None:
-        raise NotImplementedError('This has not been coded yet.')  # TODO: write this
-    # create figures
-    fig = plt.figure()
-    if is_quat_diff and not make_subplots:
-        fig.canvas.manager.set_window_title(description + ' Components')
-    else:
-        fig.canvas.manager.set_window_title(description)
-    if doing_diffs:
-        if have_both and not make_subplots:
-            f2 = plt.figure()
-            f2.canvas.manager.set_window_title(description + ' Difference')
-            figs = [fig, f2]
+    if fig_ax is not None:
+        if fig_lists:
+            (figs, ax) = fig_ax
         else:
-            figs = [fig]
-    elif is_cat_plot:
-        figs = []
-    # create axes
-    ax = []
-    ax_prim = None
-    for i in range(num_figs):
-        if is_cat_plot:
-            if i > 0:
-                fig = plt.figure()
-            fig.canvas.manager.set_window_title(titles[i])
-        if doing_diffs and i == 1:
-            fig = f2
-        for j in range(num_cols):
-            for k in range(num_rows):
-                temp_axes = fig.add_subplot(num_rows, num_cols, k * num_cols + j + 1, sharex=ax_prim)
-                if ax_prim is None:
-                    ax_prim = temp_axes
-                ax.append(temp_axes)
-        if is_cat_plot:
-            figs.append(fig)
+            (fig, ax) = fig_ax
+    else:
+        # create figures
+        fig = plt.figure()
+        if is_quat_diff and not make_subplots:
+            fig.canvas.manager.set_window_title(description + ' Components')
+        else:
+            fig.canvas.manager.set_window_title(description)
+        if doing_diffs:
+            if have_both and not make_subplots:
+                f2 = plt.figure()
+                f2.canvas.manager.set_window_title(description + ' Difference')
+                figs = [fig, f2]
+            else:
+                figs = [fig]
+        elif is_cat_plot:
+            figs = []
+        # create axes
+        ax = []
+        ax_prim = None
+        for i in range(num_figs):
+            if is_cat_plot:
+                if i > 0:
+                    fig = plt.figure()
+                fig.canvas.manager.set_window_title(titles[i])
+            if doing_diffs and i == 1:
+                fig = f2
+            for j in range(num_cols):
+                for k in range(num_rows):
+                    temp_axes = fig.add_subplot(num_rows, num_cols, k * num_cols + j + 1, sharex=ax_prim)
+                    if ax_prim is None:
+                        ax_prim = temp_axes
+                    ax.append(temp_axes)
+            if is_cat_plot:
+                figs.append(fig)
     assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
     # preallocate datashaders
     datashaders = []
@@ -636,7 +639,7 @@ def make_generic_plot(
             for j in loop_counter:
                 this_label = f'{name_one} {elements[j]}' if name_one else str(elements[j])
                 if show_rms and not is_cat_plot and not is_quat_diff:
-                    value = _LEG_FORMAT.format(leg_conv * data_func[j])  # type: ignore[misc, valid-type]
+                    value = _LEG_FORMAT.format(leg_conv * data_func[j])  # type: ignore[index, operator]
                     if leg_units:
                         this_label += f' ({func_name}: {value} {leg_units})'
                     else:
@@ -683,7 +686,7 @@ def make_generic_plot(
                         cat = ordered_cats[k]
                         this_cat_name = cat_names[cat]
                         if show_rms:
-                            value = _LEG_FORMAT.format(unit_conv * data_func[cat][ix_data])  # type: ignore[misc, valid-type]
+                            value = _LEG_FORMAT.format(unit_conv * data_func[cat][ix_data])  # type: ignore[index]
                             if new_units:
                                 cat_label = f'{this_label} {this_cat_name} ({func_name}: {value} {new_units})'
                             else:
@@ -1013,7 +1016,7 @@ def make_time_plot(
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     use_datashader: bool = False,
-    fig_ax_iter: Iterable = None,
+    fig_ax: Tuple[Figure, Axis] = None,
 ):
     r"""
     Generic data versus time plotting routine.
@@ -1056,7 +1059,7 @@ def make_time_plot(
     >>> use_zoh          = False
     >>> label_vert_lines = True
     >>> use_datashader   = False
-    >>> fig_ax_iter      = None
+    >>> fig_ax           = None
     >>> fig = make_time_plot(description, time, data, name=name, elements=elements, units=units, \
     ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
     ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
@@ -1064,7 +1067,7 @@ def make_time_plot(
     ...     ignore_empties=ignore_empties, legend_loc=legend_loc, second_units=second_units, \
     ...     leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
     ...     extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
-    ...     use_datashader=use_datashader, fig_ax_iter=fig_ax_iter)
+    ...     use_datashader=use_datashader, fig_ax=fig_ax)
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
@@ -1099,7 +1102,7 @@ def make_time_plot(
         use_zoh=use_zoh,
         label_vert_lines=label_vert_lines,
         use_datashader=use_datashader,
-        fig_ax_iter=fig_ax_iter,
+        fig_ax=fig_ax,
     )
 
 
@@ -1132,7 +1135,7 @@ def make_error_bar_plot(
     extra_plotter: _ExtraPlotter = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    fig_ax_iter: Iterable = None,
+    fig_ax: Tuple[Figure, Axis] = None,
 ):
     r"""
     Generic plotting routine to make error bars.
@@ -1186,7 +1189,7 @@ def make_error_bar_plot(
     >>> extra_plotter    = None
     >>> use_zoh          = False
     >>> label_vert_lines = True
-    >>> fig_ax_iter      = None
+    >>> fig_ax           = None
     >>> fig              = make_error_bar_plot(description, time, data, mins, maxs, \
     ...     elements=elements, units=units, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -1194,7 +1197,7 @@ def make_error_bar_plot(
     ...     show_rms=show_rms, legend_loc=legend_loc, second_units=second_units, \
     ...     leg_scale=leg_scale, ylabel=ylabel, data_as_rows=data_as_rows, \
     ...     extra_plotter=extra_plotter, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
-    ...     fig_ax_iter=fig_ax_iter)
+    ...     fig_ax=fig_ax)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -1229,7 +1232,7 @@ def make_error_bar_plot(
         extra_plotter=extra_plotter,
         use_zoh=use_zoh,
         label_vert_lines=label_vert_lines,
-        fig_ax_iter=fig_ax_iter,
+        fig_ax=fig_ax,
     )
 
 
@@ -1269,7 +1272,7 @@ def make_difference_plot(
     label_vert_lines: bool = True,
     extra_plotter: _ExtraPlotter = None,
     use_datashader: bool = False,
-    fig_ax_iter: Iterable = None,
+    fig_ax: Tuple[Figure, Axis] = None,
 ):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
@@ -1333,7 +1336,7 @@ def make_difference_plot(
     >>> label_vert_lines = True
     >>> extra_plotter    = None
     >>> use_datashader   = False
-    >>> fig_ax_iter      = None
+    >>> fig_ax           = None
     >>> fig_hand = make_difference_plot(description, time_one, time_two, data_one, data_two, \
     ...     name_one=name_one, name_two=name_two, elements=elements, units=units, \
     ...     start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, \
@@ -1343,7 +1346,7 @@ def make_difference_plot(
     ...     second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
     ...     data_as_rows=data_as_rows, tolerance=tolerance, return_err=return_err, \
     ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, extra_plotter=extra_plotter, \
-    ...     use_datashader=use_datashader, fig_ax_iter=fig_ax_iter)
+    ...     use_datashader=use_datashader, fig_ax=fig_ax)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -1386,7 +1389,7 @@ def make_difference_plot(
         use_zoh=use_zoh,
         label_vert_lines=label_vert_lines,
         use_datashader=use_datashader,
-        fig_ax_iter=fig_ax_iter,
+        fig_ax=fig_ax,
     )
 
 
@@ -1422,7 +1425,7 @@ def make_categories_plot(
     label_vert_lines: bool = True,
     extra_plotter: _ExtraPlotter = None,
     use_datashader: bool = False,
-    fig_ax_iter: Iterable = None,
+    fig_ax: Tuple[Figure, Axis] = None,
 ):
     r"""
     Data versus time plotting routine when grouped into categories.
@@ -1479,7 +1482,7 @@ def make_categories_plot(
     >>> label_vert_lines = True
     >>> extra_plotter    = None
     >>> use_datashader   = False
-    >>> fig_ax_iter      = None
+    >>> fig_ax           = None
     >>> figs = make_categories_plot(description, time, data, cats, cat_names=cat_names, name=name, \
     ...     elements=elements, units=units, time_units=time_units, start_date=start_date, \
     ...     rms_xmin=rms_xmin, rms_xmax=rms_xmax, disp_xmin=disp_xmin, disp_xmax=disp_xmax, \
@@ -1487,7 +1490,7 @@ def make_categories_plot(
     ...     use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, legend_loc=legend_loc, \
     ...     second_units=second_units, leg_scale=leg_scale, ylabel=ylabel, \
     ...     data_as_rows=data_as_rows, use_zoh=use_zoh, label_vert_lines=label_vert_lines, \
-    ...     extra_plotter=extra_plotter, use_datashader=use_datashader, fig_ax_iter=fig_ax_iter)
+    ...     extra_plotter=extra_plotter, use_datashader=use_datashader, fig_ax=fig_ax)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -1526,7 +1529,7 @@ def make_categories_plot(
         label_vert_lines=label_vert_lines,
         extra_plotter=extra_plotter,
         use_datashader=use_datashader,
-        fig_ax_iter=fig_ax_iter,
+        fig_ax=fig_ax,
     )
 
 
@@ -1558,7 +1561,7 @@ def make_bar_plot(
     extra_plotter: _ExtraPlotter = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    fig_ax_iter: Iterable = None,
+    fig_ax: Tuple[Figure, Axis] = None,
 ):
     r"""
     Plots a filled bar chart, using methods optimized for larger data sets.
@@ -1614,14 +1617,14 @@ def make_bar_plot(
     >>> extra_plotter    = None
     >>> use_zoh          = False
     >>> label_vert_lines = True
-    >>> fig_ax_iter      = None
+    >>> fig_ax           = None
     >>> fig = make_bar_plot(description, time, data, name=name, elements=elements, units=units, \
     ...     time_units=time_units, start_date=start_date, rms_xmin=rms_xmin, rms_xmax=rms_xmax, \
     ...     disp_xmin=disp_xmin, disp_xmax=disp_xmax, single_lines=single_lines, \
     ...     colormap=colormap, use_mean=use_mean, plot_zero=plot_zero, show_rms=show_rms, \
     ...     ignore_empties=ignore_empties, legend_loc=legend_loc, second_units=second_units, \
     ...     ylabel=ylabel, data_as_rows=data_as_rows, extra_plotter=extra_plotter, \
-    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, fig_ax_iter=fig_ax_iter)
+    ...     use_zoh=use_zoh, label_vert_lines=label_vert_lines, fig_ax=fig_ax)
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)
@@ -1656,7 +1659,7 @@ def make_bar_plot(
         extra_plotter=extra_plotter,
         use_zoh=use_zoh,
         label_vert_lines=label_vert_lines,
-        fig_ax_iter=fig_ax_iter,
+        fig_ax=fig_ax,
     )
 
 
@@ -1677,7 +1680,7 @@ def make_connected_sets(
     use_datashader: bool = False,
     add_quiver: bool = False,
     quiver_scale: float = None,
-    fig_ax_iter: Iterable[Tuple[Figure, Axis]] = None,
+    fig_ax: Tuple[Figure, Axis] = None,
 ):
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.
@@ -1712,9 +1715,8 @@ def make_connected_sets(
         Whether to add matplotlib quiver lines to the plot
     quiver_scale : float, optional
         quiver line scale factor
-    fig_ax_iter : iterable, optional
-        Object to produce figure and axes handles through a next call if you want to manipulate
-        which data gets plotted where
+    fig_ax : (fig, ax) tuple, optional
+        Figure and axis to use, otherwise create new ones
 
     Returns
     -------
@@ -1827,11 +1829,11 @@ def make_connected_sets(
         raise ValueError(f'Unexpected value for color_by of "{color_by}"')
 
     # create figure and axes (needs to be done before building datashader information)
-    if fig_ax_iter is None:
+    if fig_ax is None:
         fig = plt.figure()
         ax = fig.add_subplot(1, 1, 1)
     else:
-        (fig, ax) = next(fig_ax_iter)
+        (fig, ax) = fig_ax
     if (sup := fig._suptitle) is None:
         fig.canvas.manager.set_window_title(description + extra_text)
     else:

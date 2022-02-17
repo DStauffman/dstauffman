@@ -21,7 +21,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% Functions - plot_bpe_convergence
-def plot_bpe_convergence(costs, *, opts=None, fig_ax_iter=None, skip_setup_plots=False):
+def plot_bpe_convergence(costs, *, opts=None, fig_ax=None, skip_setup_plots=False):
     r"""
     Plot the BPE convergence rate by iteration on a log scale.
 
@@ -31,6 +31,10 @@ def plot_bpe_convergence(costs, *, opts=None, fig_ax_iter=None, skip_setup_plots
         Costs for the beginning run, each iteration, and final run
     opts : class Opts, optional
         Plotting options
+    fig_ax : (fig, ax) tuple, optional
+        Figure and axis to use, otherwise create new ones
+    skip_setup_plots : bool, default is False
+        Whether to skip the setup_plots step within this function
 
     Returns
     -------
@@ -64,12 +68,12 @@ def plot_bpe_convergence(costs, *, opts=None, fig_ax_iter=None, skip_setup_plots
 
     # alias the title
     this_title = 'Convergence by Iteration'
-    if fig_ax_iter is None:
+    if fig_ax is None:
         # create the figure and axis
         fig = plt.figure()
         ax = fig.add_subplot(111)
     else:
-        (fig, ax) = next(fig_ax_iter)
+        (fig, ax) = fig_ax
     if (sup := fig._suptitle) is None:
         fig.canvas.manager.set_window_title(this_title)
     else:
