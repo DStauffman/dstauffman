@@ -23,13 +23,13 @@ import unittest
 import warnings
 
 try:
-    from PyQt5.QtCore import QCoreApplication, QSize
-    from PyQt5.QtGui import QIcon
-    from PyQt5.QtWidgets import QApplication, QPushButton
+    from qtpy.QtCore import QCoreApplication, QSize
+    from qtpy.QtGui import QIcon
+    from qtpy.QtWidgets import QApplication, QPushButton
 
     _HAVE_QT = True
 except ModuleNotFoundError:
-    warnings.warn('PyQt5 was not found. Some funtionality will be limited.')
+    warnings.warn('qtpy was not found. Some funtionality will be limited.')
     QPushButton = object  # type: ignore[assignment, misc]
     _HAVE_QT = False
 
@@ -1003,10 +1003,11 @@ def get_screen_resolution() -> Tuple[int, int]:
     Notes
     -----
     #.  Written by David C. Stauffer in May 2018.
-    #.  There are many ways to do this, but since I'm already using PyQt5, this one appears most
-        reliable, especially when run on high DPI screens with scaling turned on.  However, don't
-        call this function from within a GUI, as it will close everything.  Just query the desktop
-        directly within the GUI.
+    #.  There doesn't seem to be one standard way to do this, thus this function.  Changed in
+        February 2022 as .desktop became deprecated.  The .screens method will hopefully work
+        for a while instead.
+    #.  Don't call this function from within a GUI, as it will close everything.  Just
+        query the desktop directly within the GUI.
 
     Examples
     --------
@@ -1022,7 +1023,7 @@ def get_screen_resolution() -> Tuple[int, int]:
     else:
         app = QApplication.instance()  # type: ignore[assignment]
     # query the resolution
-    screen_resolution = app.desktop().screenGeometry()
+    screen_resolution = app.screens()[0].geometry()
     # pull out the desired information
     screen_width = screen_resolution.width()
     screen_height = screen_resolution.height()
@@ -1950,6 +1951,9 @@ def fig_ax_factory(
     >>> assert isinstance(fig, plt.Figure)
     >>> assert isinstance(ax, plt.Axes)
 
+    Close plot
+    >>> plt.close(fig)
+
     """
     if isinstance(num_axes, int):
         is_1d = True
@@ -1974,7 +1978,10 @@ def fig_ax_factory(
         # assert not bool(suptitle), 'Suptitle not supported for muilt-figure options.'
     if is_1d:
         assert isinstance(num_axes, int)
-        fig_ax = tuple((fig, axes[i]) for i in range(num_axes))
+        if num_axes == 1:
+            fig_ax = (fig, axes)
+        else:
+            fig_ax = tuple((fig, axes[i]) for i in range(num_axes))
     else:
         if layout == 'rowwise':
             fig_ax = tuple((fig, axes[i, j]) for i in range(num_row) for j in range(num_col))

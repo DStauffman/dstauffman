@@ -58,7 +58,7 @@ def activate_logging(
     >>> import logging
     >>> filename = get_tests_dir() / 'testlog.txt'
     >>> activate_logging(log_level=LogLevel.L5, filename=filename)
-    >>> logging.log(LogLevel.L5, 'Test message') # doctest: +SKIP
+    >>> logging.log(LogLevel.L5, 'Test message')  # doctest: +SKIP
     >>> deactivate_logging()
 
     Remove the log file

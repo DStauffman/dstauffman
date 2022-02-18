@@ -19,7 +19,7 @@ from dstauffman.paths import is_dunder
 #%% Constants
 _F = TypeVar('_F', bound=Callable[..., Any])
 
-#%% Classes - _EnumMetaPlus
+#%% MetaClasses - _EnumMetaPlus
 class _EnumMetaPlus(EnumMeta):
     r"""
     Overrides the repr/str methods of the EnumMeta class to display all possible values.

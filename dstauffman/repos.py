@@ -28,8 +28,8 @@ if HAVE_PYTEST:
     import pytest
 
 if TYPE_CHECKING:
-    from PyQt5.QtCore import QCoreApplication
-    from PyQt5.QtWidgets import QApplication
+    from qtpy.QtCore import QCoreApplication
+    from qtpy.QtWidgets import QApplication
 
     assert QApplication
 
@@ -154,7 +154,7 @@ def run_pytests(folder: Path, *args, **kwargs) -> int:
     # open a qapp
     qapp: Union[None, QApplication, QCoreApplication]
     try:
-        from PyQt5.QtWidgets import QApplication
+        from qtpy.QtWidgets import QApplication
     except ModuleNotFoundError:
         qapp = None
     else:

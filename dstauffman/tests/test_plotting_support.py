@@ -24,8 +24,8 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
 try:
-    from PyQt5.QtCore import Qt
-    from PyQt5.QtTest import QTest
+    from qtpy.QtCore import Qt
+    from qtpy.QtTest import QTest
 
     _HAVE_QT = True
 except ModuleNotFoundError:
@@ -83,7 +83,7 @@ class Test_plotting__HoverButton(unittest.TestCase):
 
 
 #%% plotting.MyCustomToolbar
-@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, 'Skipping due to missing matplotlib/PyQt5 dependency.')
+@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, 'Skipping due to missing matplotlib/Qt dependency.')
 class Test_plotting_MyCustomToolbar(unittest.TestCase):
     r"""
     Tests the plotting.MyCustomToolbar class with the following cases:
@@ -668,7 +668,7 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
 
 
 #%% plotting.figmenu
-@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, 'Skipping due to missing matplotlib/PyQt5 dependency.')
+@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, 'Skipping due to missing matplotlib/Qt dependency.')
 class Test_plotting_figmenu(unittest.TestCase):
     r"""
     Tests the plotting.figmenu function with the following cases:
@@ -714,7 +714,7 @@ class Test_plotting_rgb_ints_to_hex(unittest.TestCase):
 
 
 #%% plotting.get_screen_resolution
-@unittest.skipIf(not _HAVE_QT, 'Skipping due to missing PyQt5 dependency.')
+@unittest.skipIf(not _HAVE_QT, 'Skipping due to missing Qt dependency.')
 class Test_plotting_get_screen_resolution(unittest.TestCase):
     r"""
     Tests the plotting.get_screen_resolution function with the following cases:

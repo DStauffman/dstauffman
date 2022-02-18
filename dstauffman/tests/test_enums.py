@@ -168,6 +168,15 @@ class Test_ReturnCodes(unittest.TestCase):
             self.assertGreater(value, 0)
             self.assertIsInstance(value, int)
 
+#%% LogLevel
+class Test_LogLevel(unittest.TestCase):
+    r"""
+    Tests the LogLevel enumerator with the following cases:
+        TBD
+    """
+
+    pass
+
 
 #%% Unit test execution
 if __name__ == '__main__':
