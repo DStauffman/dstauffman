@@ -125,7 +125,7 @@ class Test_fix_rollover(unittest.TestCase):
 
     def setUp(self) -> None:
         self.data  = np.array([1, 2, 3, 4, 5, 6, 0, 1,  3,  6,  0,  6,  5, 2])
-        self.data2 = np.array([])
+        self.data2 = np.array([], dtype=int)
         self.exp   = np.array([1, 2, 3, 4, 5, 6, 7, 8, 10, 13, 14, 13, 12, 9])
         self.roll  = 7
         self.axis: Optional[int] = None

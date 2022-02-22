@@ -320,7 +320,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
 
     def test_no_overlap(self) -> None:
         self.time_one = np.arange(11).astype(float)
-        self.time_two = np.arange(2, 13) + 0.5
+        self.time_two = np.arange(2, 13) + 0.5  # type: ignore[assignment]
         self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two)
 
     def test_none1(self) -> None:

@@ -38,7 +38,7 @@ class _EnumMetaPlus(EnumMeta):
         if is_dunder(name):
             raise AttributeError(name)
         try:
-            return cls._member_map_[name]  # type: ignore[no-any-return, index]
+            return cls._member_map_[name]  # type: ignore[return-value]
         except KeyError:
             text = '"{}" does not have an attribute of "{}"'.format(cls.__name__, name)
             raise AttributeError(text) from None

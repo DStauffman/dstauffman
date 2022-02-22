@@ -35,25 +35,25 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_nominal(self) -> None:
         truth = plot.TruthPlotter(self.x, self.y + 0.01, lo=self.y, hi=self.y + 0.03)
-        np.testing.assert_array_almost_equal(self.y + 0.01, truth.data)
-        np.testing.assert_array_almost_equal(self.y, truth.data_lo)
-        np.testing.assert_array_almost_equal(self.y + 0.03, truth.data_hi)
+        np.testing.assert_array_almost_equal(self.y + 0.01, truth.data)  # type: ignore[arg-type]
+        np.testing.assert_array_almost_equal(self.y, truth.data_lo)  # type: ignore[arg-type]
+        np.testing.assert_array_almost_equal(self.y + 0.03, truth.data_hi)  # type: ignore[arg-type]
 
     def test_matrix1(self) -> None:
         truth = plot.TruthPlotter(self.x, self.data[:, 1])
-        np.testing.assert_array_almost_equal(self.y + 0.01, truth.data)
+        np.testing.assert_array_almost_equal(self.y + 0.01, truth.data)  # type: ignore[arg-type]
         self.assertTrue(truth.data_lo is None)
         self.assertTrue(truth.data_hi is None)
 
     def test_matrix2(self) -> None:
         truth = plot.TruthPlotter(self.x, self.data)
-        np.testing.assert_array_almost_equal(self.y + 0.01, truth.data)
-        np.testing.assert_array_almost_equal(self.y, truth.data_lo)
-        np.testing.assert_array_almost_equal(self.y + 0.03, truth.data_hi)
+        np.testing.assert_array_almost_equal(self.y + 0.01, truth.data)  # type: ignore[arg-type]
+        np.testing.assert_array_almost_equal(self.y, truth.data_lo)  # type: ignore[arg-type]
+        np.testing.assert_array_almost_equal(self.y + 0.03, truth.data_hi)  # type: ignore[arg-type]
 
     def test_matrix3(self) -> None:
         truth = plot.TruthPlotter(self.x, self.data[:, np.array([1])])
-        np.testing.assert_array_almost_equal(self.y + 0.01, truth.data)
+        np.testing.assert_array_almost_equal(self.y + 0.01, truth.data)  # type: ignore[arg-type]
         self.assertTrue(truth.data_lo is None)
         self.assertTrue(truth.data_hi is None)
 
@@ -325,13 +325,13 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
 
     def setUp(self) -> None:
         self.time = np.arange(0, 10, 0.1) if HAVE_NUMPY else list(range(10))
-        self.data = np.sin(self.time) if HAVE_NUMPY else [x + 1.0 for x in self.time]
+        self.data = np.sin(self.time) if HAVE_NUMPY else [x + 1.0 for x in self.time]  # type: ignore[attr-defined, call-overload]
         self.label = 'Sin'
         self.units = 'population'
         self.opts = plot.Opts()
         self.opts.names = ['Name 1']
-        self.truth = plot.TruthPlotter(self.time, np.cos(self.time))
-        self.data_matrix = np.column_stack((self.data, self.truth.data))
+        self.truth = plot.TruthPlotter(self.time, np.cos(self.time))  # type: ignore[arg-type, call-overload]
+        self.data_matrix = np.column_stack((self.data, self.truth.data))  # type: ignore[arg-type]
         self.second_units = 1000000
         self.fig: Optional[List[plt.Figure]] = None
 
@@ -432,7 +432,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         self.fig = plot.plot_health_monte_carlo(np.arange(5), np.arange(5), 'Line')
 
     def test_bad_3d(self) -> None:
-        bad_data = np.random.rand(self.time.shape[0], 4, 5)
+        bad_data = np.random.rand(self.time.shape[0], 4, 5)  # type: ignore[attr-defined]
         with self.assertRaises(ValueError):
             plot.plot_health_monte_carlo(self.time, bad_data, self.label, opts=self.opts)
 

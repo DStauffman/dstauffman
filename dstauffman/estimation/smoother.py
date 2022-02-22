@@ -68,10 +68,10 @@ def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
 
     """
     delta_lambda = -H.T @ (mat_divide(Pz, z) + K.T @ lambda_bar)
-    I            = np.hstack((np.eye(K.shape[0]), np.zeros((K.shape[0], H.shape[1] - K.shape[0]))))
-    I_minus_KH   = I - K @ H
-    lambda_hat   = lambda_bar + delta_lambda
-    LAMBDA_hat   = I_minus_KH.T @ LAMBDA_bar @ I_minus_KH + H.T @ mat_divide(Pz, H)
+    I          = np.hstack((np.eye(K.shape[0]), np.zeros((K.shape[0], H.shape[1] - K.shape[0]))))
+    I_minus_KH = I - K @ H
+    lambda_hat = lambda_bar + delta_lambda
+    LAMBDA_hat = I_minus_KH.T @ LAMBDA_bar @ I_minus_KH + H.T @ mat_divide(Pz, H)
     return (lambda_hat, LAMBDA_hat)
 
 

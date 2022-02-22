@@ -201,7 +201,7 @@ class Test_pprint_dict(unittest.TestCase):
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
     def test_max_elements(self) -> None:
-        self.dct['a'] = np.arange(10)
+        self.dct['a'] = np.arange(10)  # type: ignore[assignment]
         text1 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements=2)
         text2 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements=20)
         text3 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements=0)

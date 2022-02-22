@@ -344,7 +344,7 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
         self.dqq2  = space.quat_mult(self.dq2, self.quat1)
         self.theta = np.array([0.001, 0.05])
         self.comp  = np.array([[0.001, 0], [0, 0.05], [0, 0]])
-        self.null  = np.array([])
+        self.null: np.typing.NDArray[np.float64] = np.array([])
         self.null_quat = np.zeros((4, 0))
 
     def test_nominal1(self) -> None:
@@ -574,7 +574,7 @@ class Test_aerospace_quat_inv(unittest.TestCase):
         self.q2_out = np.array([0, -0.5, 0, np.sqrt(3) / 2])
         self.q3_inp = np.column_stack((self.q1_inp, self.q2_inp))
         self.q3_out = np.column_stack((self.q1_out, self.q2_out))
-        self.null   = np.array([])
+        self.null: np.typing.NDArray[np.float64] = np.array([])
         self.null_quat = np.ones((space.QUAT_SIZE, 0))
 
     def test_single_quat1(self) -> None:
@@ -657,7 +657,7 @@ class Test_aerospace_quat_mult(unittest.TestCase):
         self.q_array_in1 = np.column_stack((self.q1, self.q2))
         self.q_array_in2 = np.column_stack((self.q2, self.q3))
         self.q_array_out = np.column_stack((self.q4, self.q5))
-        self.null = np.array([])
+        self.null: np.typing.NDArray[np.float64] = np.array([])
         self.null_quat = np.ones((space.QUAT_SIZE, 0))
 
     def test_nominal1(self) -> None:
@@ -767,7 +767,7 @@ class Test_aerospace_quat_norm(unittest.TestCase):
         self.q3_out = np.array([0.09950372, 0, 0, 0.99503719])
         self.q4_inp = np.column_stack((self.q1_inp, self.q2_inp, self.q3_inp))
         self.q4_out = np.column_stack((self.q1_out, self.q2_out, self.q3_out))
-        self.null = np.array([])
+        self.null: np.typing.NDArray[np.float64] = np.array([])
         self.null_quat = np.ones((space.QUAT_SIZE, 0))
 
     def test_nominal1(self) -> None:

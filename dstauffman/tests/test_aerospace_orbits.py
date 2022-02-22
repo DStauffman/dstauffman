@@ -175,7 +175,7 @@ class Test_aerospace_rv_2_oe(unittest.TestCase):
         mu = np.array([1.0, space.MU_EARTH])
         elements = space.rv_2_oe(r, v, mu=mu)
         exp_a = np.array([self.a1, self.a2])
-        np.testing.assert_array_equal(elements.a, exp_a)
+        np.testing.assert_array_equal(elements.a, exp_a)  # type: ignore[arg-type]
 
     def test_zeros(self) -> None:
         r0 = np.zeros(3)

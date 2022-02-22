@@ -29,8 +29,8 @@ try:
 
     _HAVE_QT = True
 except ModuleNotFoundError:
-    warnings.warn('qtpy was not found. Some funtionality will be limited.')
-    QPushButton = object  # type: ignore[assignment, misc]
+    warnings.warn('Qt (PyQt5, PyQt6, PySide2, PySide6) was not found. Some funtionality will be limited.')
+    QPushButton = object
     _HAVE_QT = False
 
 from dstauffman import (
@@ -1021,7 +1021,7 @@ def get_screen_resolution() -> Tuple[int, int]:
     if QApplication.instance() is None:
         app = QApplication(sys.argv)  # pragma: no cover
     else:
-        app = QApplication.instance()  # type: ignore[assignment]
+        app = QApplication.instance()
     # query the resolution
     screen_resolution = app.screens()[0].geometry()
     # pull out the desired information
@@ -1976,10 +1976,11 @@ def fig_ax_factory(
     else:
         raise NotImplementedError('The multi-figure option has not yet been implemented.')
         # assert not bool(suptitle), 'Suptitle not supported for muilt-figure options.'
+    fig_ax: Tuple[Tuple[Figure, Axes], ...]
     if is_1d:
         assert isinstance(num_axes, int)
         if num_axes == 1:
-            fig_ax = (fig, axes)
+            fig_ax = ((fig, axes), )
         else:
             fig_ax = tuple((fig, axes[i]) for i in range(num_axes))
     else:

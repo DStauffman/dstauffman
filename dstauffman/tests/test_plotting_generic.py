@@ -616,7 +616,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_no_overlap(self) -> None:
         self.time_one = np.arange(11).astype(float)
-        self.time_two = np.arange(2, 13) + 0.5
+        self.time_two = np.arange(2, 13) + 0.5  # type: ignore[assignment]
         self.return_err = False
         self.figs = plot.make_difference_plot(
             self.description,
@@ -686,7 +686,7 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
         self.time             = np.arange(-10.0, 10.1, 0.1)
         self.data             = self.time + np.cos(self.time)
         self.MeasStatus       = type('MeasStatus', (object,), {'rejected': 0, 'accepted': 1})
-        self.cats             = np.full(self.time.shape, self.MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined]
+        self.cats             = np.full(self.time.shape, self.MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined, type-var]
         self.cats[50:100]     = self.MeasStatus.rejected  # type: ignore[attr-defined]
         self.cat_names        = {0: 'rejected', 1: 'accepted'}
         self.name             = ''
@@ -749,7 +749,7 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
     def test_datashader_cats(self) -> None:
         time = np.arange(10000.0)
         data = time + np.sin(time / np.pi / 100.0)
-        cats = np.full(time.shape, self.MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined]
+        cats = np.full(time.shape, self.MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined, type-var]
         cats[500:1000] = self.MeasStatus.rejected  # type: ignore[attr-defined]
         self.figs = plot.make_categories_plot(self.description, time, data, cats, use_datashader=True)
 

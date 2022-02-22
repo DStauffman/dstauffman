@@ -109,6 +109,7 @@ def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:
             if do_simple:
                 np.testing.assert_array_equal(a, b)
             else:
+                assert tolerance is not None
                 np.testing.assert_allclose(a, b, atol=tolerance, equal_nan=True)
         else:
             if tolerance is not None and tolerance != 0:
@@ -339,7 +340,7 @@ def rss(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: 
                     shape = (*data.shape[:axis], *data.shape[axis + 1 :])
                 out = np.full(shape, np.nan)
         else:
-            out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
+            out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)  # type: ignore[arg-type]
     # return the result
     return out  # type: ignore[no-any-return]
 
@@ -1525,7 +1526,7 @@ def is_datetime(time: ArrayLike) -> bool:
 
     """
     out = False
-    if isinstance(time, datetime.datetime) or (
+    if isinstance(time, datetime.datetime) or (  # type: ignore[unreachable]
         hasattr(time, 'dtype') and np.issubdtype(time.dtype, np.datetime64)  # type: ignore[union-attr]
     ):
         out = True

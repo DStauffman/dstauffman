@@ -35,7 +35,7 @@ num_axes   = 2
 num_innovs = 11
 
 t_bounds1 = np.arange(2, 8)
-t_bounds2 = lms.convert_date(date_zero, 'numpy', old_form='datetime') + lms.NP_ONE_SECOND * t_bounds1
+t_bounds2 = dcs.convert_date(date_zero, 'numpy', old_form='datetime') + dcs.NP_ONE_SECOND * t_bounds1
 
 bins = [-np.inf, -5e-6, -5e-7, 0.0, 5e-7, 5e-6, np.inf]
 
@@ -60,12 +60,12 @@ kf1.innov.fploc = np.random.rand(2, num_innovs)
 kf2        = space.Kf()
 kf2.name   = 'KF2'
 kf2.time   = np.arange(2, 13)
-kf2.att    = np.tile(q2[:, np.newaxis], (1, kf2.time.size))  # type: ignore[union-attr]
-kf2.att[3, 4] += 50e-6  # type: ignore[index]
-kf2.att    = space.quat_norm(kf2.att)  # type: ignore[arg-type]
+kf2.att    = np.tile(q2[:, np.newaxis], (1, kf2.time.size))
+kf2.att[3, 4] += 50e-6
+kf2.att    = space.quat_norm(kf2.att)
 kf2.pos    = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5
 kf2.vel    = kf1.vel[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 100
-kf2.covar  = kf1.covar + 1e-9 * np.random.rand(*kf1.covar.shape)  # type: ignore[operator, union-attr]
+kf2.covar  = kf1.covar + 1e-9 * np.random.rand(*kf1.covar.shape)
 kf2.active = kf1.active
 
 ix              = np.hstack((np.arange(7), np.arange(8, num_innovs)))
@@ -94,11 +94,11 @@ opts4.case_name = 'Test 4: dates-dates'
 
 #%% Copies
 kd1 = deepcopy(kf1)
-kd1.time = lms.convert_date(kf1.time, 'numpy', date_zero=date_zero)
-kd1.innov.time = lms.convert_date(kf1.innov.time, 'numpy', date_zero=date_zero)
+kd1.time = dcs.convert_date(kf1.time, 'numpy', date_zero=date_zero)
+kd1.innov.time = dcs.convert_date(kf1.innov.time, 'numpy', date_zero=date_zero)
 kd2 = deepcopy(kf2)
-kd2.time = lms.convert_date(kf2.time, 'numpy', date_zero=date_zero)
-kd2.innov.time = lms.convert_date(kf2.innov.time, 'numpy', date_zero=date_zero)
+kd2.time = dcs.convert_date(kf2.time, 'numpy', date_zero=date_zero)
+kd2.innov.time = dcs.convert_date(kf2.innov.time, 'numpy', date_zero=date_zero)
 
 #%% Plots
 if plots['att']:
@@ -143,4 +143,4 @@ if plots['sts']:
     f = plot.plot_states(kd1, kd2, opts=opts1, leg_scale='mill', second_units=('nrad', 1e9))
 
 # Test PDF saving
-# plot.save_figs_to_pdf(f1 + f2 + f3 + f4, filename=lms.get_output_dir() / 'GND_plots.pdf')
+# plot.save_figs_to_pdf(f1 + f2 + f3 + f4, filename=dcs.get_output_dir() / 'GND_plots.pdf')

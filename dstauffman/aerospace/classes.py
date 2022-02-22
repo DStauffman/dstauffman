@@ -193,8 +193,8 @@ class KfInnov(Frozen):
         assert kfinnov2.time is not None
         kfinnov.time = np.hstack((self.time, kfinnov2.time))
         # TODO: deal with Nones
-        kfinnov.innov = np.column_stack((self.innov, kfinnov2.innov))
-        kfinnov.norm = np.column_stack((self.norm, kfinnov2.norm))
+        kfinnov.innov = np.column_stack((self.innov, kfinnov2.innov))  # type: ignore[arg-type]
+        kfinnov.norm = np.column_stack((self.norm, kfinnov2.norm))  # type: ignore[arg-type]
         kfinnov.status = np.hstack((self.status, kfinnov2.status))  # type: ignore[arg-type]
         if self.fploc is not None and kfinnov2.fploc is not None:
             kfinnov.fploc = np.column_stack((self.fploc, kfinnov2.fploc))

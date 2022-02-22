@@ -256,13 +256,13 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
         quat[axis - 1, :] = np.sin(angle / 2)  # type: ignore[operator]
     elif np.isscalar(angle):
         # single angle, multiple axis case
-        quat = np.tile(np.array([[0], [0], [0], [np.cos(angle / 2)]]), (1, np.size(axis)))  # type: ignore[arg-type, operator]
-        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[arg-type, operator]
+        quat = np.tile(np.array([[0], [0], [0], [np.cos(angle / 2)]]), (1, np.size(axis)))  # type: ignore[operator]
+        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[operator]
     else:
         # multiple axis, multiple angle case
         assert np.size(axis) == np.size(angle)
-        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # type: ignore[arg-type, operator]
-        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[arg-type, operator]
+        quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # type: ignore[operator]
+        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[operator]
     enforce_pos_scalar(quat, inplace=True)
     quat_assertions(quat, **kwargs)
     return quat
@@ -313,11 +313,11 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndar
     if axis.ndim == 1 and c.size == 1:  # type: ignore[union-attr]
         quat = np.hstack([axis * s, c])
     elif axis.ndim == 1:  # type: ignore[union-attr]
-        quat = np.vstack([np.outer(axis, s), c])
+        quat = np.vstack([np.outer(axis, s), c])  # type: ignore[arg-type]
     elif c.size == 1:
-        quat = np.vstack([axis * s, np.full(axis.shape[1], c)])  # type: ignore[misc, union-attr]
+        quat = np.vstack([axis * s, np.full(axis.shape[1], c)])  # type: ignore[union-attr]
     else:
-        assert axis.shape[1] == c.size  # type: ignore[misc, union-attr]
+        assert axis.shape[1] == c.size  # type: ignore[union-attr]
         quat = np.vstack([axis * s, c])
     # TODO: try to eliminate the four different cases:
     # e = np.outer(axis, s) if axis.ndim == 1 else axis * s
@@ -784,7 +784,7 @@ def quat_mult(a: np.ndarray, b: np.ndarray, **kwargs) -> np.ndarray:
     # check for null case
     if a.size * b.size == 0:
         if min(a.shape[0], b.shape[0]) == 0:
-            c = np.array([])
+            c: np.typing.NDArray[np.float64] = np.array([])
         else:
             if a.size == 0:
                 c = np.zeros(a.shape)

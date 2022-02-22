@@ -1489,7 +1489,7 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30], dtype=np.int64) + t_offset)
 
     def test_empty(self) -> None:
-        a = np.array([])
+        a = np.array([], dtype=int)
         b = np.array([1, 2, 3, 4])
         c = dcs.intersect(a, b, tolerance=0.1)
         self.assertEqual(len(c), 0)

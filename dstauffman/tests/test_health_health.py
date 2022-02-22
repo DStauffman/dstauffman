@@ -61,22 +61,22 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
         (state2, mons2) = health.dist_enum_and_mons(
             self.num, self.distribution, self.prng, max_months=self.max_months, start_num=101
         )
-        np.testing.assert_array_equal(set(state1), {1, 2, 3, 4})
-        np.testing.assert_array_equal(set(state2), {101, 102, 103, 104})
-        np.testing.assert_array_equal(set(mons1), {1})
-        np.testing.assert_array_equal(set(mons2), {1})
+        np.testing.assert_array_equal(set(state1), {1, 2, 3, 4})  # type: ignore[arg-type]
+        np.testing.assert_array_equal(set(state2), {101, 102, 103, 104})  # type: ignore[arg-type]
+        np.testing.assert_array_equal(set(mons1), {1})  # type: ignore[arg-type]
+        np.testing.assert_array_equal(set(mons2), {1})  # type: ignore[arg-type]
 
     def test_scalar_max_months(self) -> None:
         (state1, mons1) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=1)
         (state2, mons2) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=3)
-        np.testing.assert_array_equal(set(state1), {1, 2, 3, 4})
-        np.testing.assert_array_equal(set(state2), {1, 2, 3, 4})
-        np.testing.assert_array_equal(set(mons1), {1})
-        np.testing.assert_array_equal(set(mons2), {1, 2, 3})
+        np.testing.assert_array_equal(set(state1), {1, 2, 3, 4})  # type: ignore[arg-type]
+        np.testing.assert_array_equal(set(state2), {1, 2, 3, 4})  # type: ignore[arg-type]
+        np.testing.assert_array_equal(set(mons1), {1})  # type: ignore[arg-type]
+        np.testing.assert_array_equal(set(mons2), {1, 2, 3})  # type: ignore[arg-type]
 
     def test_max_months_is_none(self) -> None:
         state = health.dist_enum_and_mons(self.num, self.distribution, self.prng)
-        np.testing.assert_array_equal(set(state), {1, 2, 3, 4})
+        np.testing.assert_array_equal(set(state), {1, 2, 3, 4})  # type: ignore[arg-type]
 
     def test_single_num(self) -> None:
         self.num = 1
