@@ -10,13 +10,14 @@ Notes
 from typing import ClassVar
 import unittest
 
+from slog import IntEnumPlus
 import dstauffman as dcs
 
 if dcs.HAVE_NUMPY:
     import numpy as np
 
 #%% Classes
-class _Gender(dcs.IntEnumPlus):
+class _Gender(IntEnumPlus):
     r"""Enumeration to match the MATLAB one from the test cases."""
     null: ClassVar[int]        = 0
     female: ClassVar[int]      = 1

@@ -13,7 +13,8 @@ import logging
 from typing import List, Tuple, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import INT_TOKEN, HAVE_NUMPY, LogLevel
+from slog import LogLevel
+from dstauffman import INT_TOKEN, HAVE_NUMPY
 
 from dstauffman.aerospace.quat_opt import quat_to_dcm
 

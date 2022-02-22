@@ -14,7 +14,8 @@ import doctest
 from typing import Any, ClassVar, Literal, overload, Tuple, TypeVar, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, IntEnumPlus, NP_DATETIME_FORM, NP_DATETIME_UNITS, RAD2DEG
+from slog import IntEnumPlus
+from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, NP_DATETIME_FORM, NP_DATETIME_UNITS, RAD2DEG
 
 from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH, PI, TAU
 from dstauffman.aerospace.orbit_conv import anomaly_eccentric_2_true, mean_motion_2_semimajor, anomaly_mean_2_eccentric

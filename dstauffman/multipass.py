@@ -17,7 +17,7 @@ from typing import Any, Callable, Iterable, List, Optional, Type, TYPE_CHECKING
 import unittest
 import warnings
 
-from dstauffman.enums import LogLevel
+from slog import LogLevel
 
 if TYPE_CHECKING:
     from types import TracebackType

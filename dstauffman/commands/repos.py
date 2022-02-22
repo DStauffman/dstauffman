@@ -13,7 +13,8 @@ from pathlib import Path
 from typing import FrozenSet, List, Optional, Set, Union
 import unittest
 
-from dstauffman import find_repo_issues, make_python_init, ReturnCodes
+from slog import ReturnCodes
+from dstauffman import find_repo_issues, make_python_init
 
 #%% Functions - parse_enforce
 def parse_enforce(input_args: List[str]) -> argparse.Namespace:

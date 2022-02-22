@@ -14,6 +14,7 @@ import logging
 from typing import Any, Callable, Dict, Iterable, List, Optional, Protocol, Tuple, TYPE_CHECKING, Union
 import unittest
 
+from slog import LogLevel
 from dstauffman import (
     DEGREE_SIGN,
     get_unit_conversion,
@@ -23,7 +24,6 @@ from dstauffman import (
     HAVE_PANDAS,
     intersect,
     is_datetime,
-    LogLevel,
     RAD2DEG,
     rms,
 )

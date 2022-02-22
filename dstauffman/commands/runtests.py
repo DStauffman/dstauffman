@@ -17,11 +17,11 @@ import sys
 from typing import List
 import unittest
 
+from slog import ReturnCodes
 from dstauffman import (
     get_root_dir,
     get_tests_dir,
     list_python_files,
-    ReturnCodes,
     run_coverage,
     run_docstrings,
     run_pytests,

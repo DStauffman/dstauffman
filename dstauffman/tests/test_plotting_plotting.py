@@ -12,12 +12,12 @@ from typing import List, Optional
 import unittest
 from unittest.mock import patch
 
+from slog import LogLevel
 from dstauffman import (
     capture_output,
     get_tests_dir,
     HAVE_MPL,
     HAVE_NUMPY,
-    LogLevel,
     NP_DATETIME_FORM,
     NP_INT64_PER_SEC,
     NP_TIMEDELTA_FORM,

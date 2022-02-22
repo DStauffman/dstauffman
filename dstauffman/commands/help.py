@@ -13,7 +13,8 @@ from pathlib import Path
 from typing import List
 import unittest
 
-from dstauffman import get_root_dir, ReturnCodes, version_info
+from slog import ReturnCodes
+from dstauffman import get_root_dir, version_info
 
 #%% Functions - print_help
 def print_help(help_file: Path = None) -> int:

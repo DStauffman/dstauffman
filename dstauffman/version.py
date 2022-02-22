@@ -7,7 +7,7 @@ Notes
 """
 
 #%% Constants
-version_info = (2, 5, 0)
+version_info = (3, 0, 0)
 
 # Below is data about the minor release history for potential use in deprecating older support.
 # For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html
@@ -18,6 +18,7 @@ Feb 09, 2021: dstauffman 2.2
 Mar 12, 2021: dstauffman 2.3
 Apr 09, 2021: dstauffman 2.4
 Jul 28, 2021: dstauffman 2.5
+Feb 22, 2022: dstauffman 3.0
 """
 
 # Historical notes:
@@ -28,3 +29,4 @@ Jul 28, 2021: dstauffman 2.5
 #      It also dropped support of Python 3.7 and now supports only 3.8+
 # v2.4 Used pathlib.Path instead of strings for files and folders.
 # v2.5 Added significant GPS and orbit ephemeris routines.
+# v3.0 Split the slog portions of the code into a separate repository.

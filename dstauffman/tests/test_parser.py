@@ -12,6 +12,7 @@ import logging
 import unittest
 from unittest.mock import patch
 
+from slog import LogLevel, ReturnCodes
 import dstauffman as dcs
 
 #%% _VALID_COMMANDS
@@ -112,7 +113,7 @@ class Test_execute_command(unittest.TestCase):
             rc = dcs.execute_command('help', argparse.Namespace())
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(rc, dcs.ReturnCodes.clean)
+        self.assertEqual(rc, ReturnCodes.clean)
         self.assertTrue(output)
 
     def test_bad_command(self) -> None:
@@ -121,7 +122,7 @@ class Test_execute_command(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, 'Command "bad" is not understood.')
-        self.assertEqual(rc, dcs.ReturnCodes.bad_command)
+        self.assertEqual(rc, ReturnCodes.bad_command)
 
 
 #%% process_command_line_options
@@ -188,7 +189,7 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertTrue(flags.use_display)
         self.assertTrue(flags.use_plotting)
         self.assertTrue(flags.use_hdf5)
-        self.assertEqual(flags.log_level, dcs.LogLevel.L8)
+        self.assertEqual(flags.log_level, LogLevel.L8)
         mocker.log.assert_called_once_with(dcs.parser.LogLevel.L8, 'Configuring Log Level at: LogLevel.L8: 14')
 
     def test_log_level2(self) -> None:
@@ -209,7 +210,7 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertFalse(flags.use_display)
         self.assertFalse(flags.use_plotting)
         self.assertFalse(flags.use_hdf5)
-        self.assertEqual(flags.log_level, dcs.LogLevel.L5)
+        self.assertEqual(flags.log_level, LogLevel.L5)
         mocker.assert_called_once_with(dcs.parser.LogLevel.L5, 'Configuring Log Level at: LogLevel.L5: 20')
 
 

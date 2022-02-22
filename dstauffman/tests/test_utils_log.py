@@ -13,6 +13,7 @@ from typing import Optional
 import unittest
 from unittest.mock import Mock, patch
 
+from slog import LogLevel
 import dstauffman as dcs
 
 if dcs.HAVE_NUMPY:
@@ -47,12 +48,12 @@ class Test_setup_dir(unittest.TestCase):
     def test_create_folder(self, mock_logger: Mock) -> None:
         dcs.setup_dir(self.folder)
         mock_logger.log.assert_called_once()
-        mock_logger.log.assert_called_with(dcs.LogLevel.L1, 'Created directory: "%s"', self.folder)
+        mock_logger.log.assert_called_with(LogLevel.L1, 'Created directory: "%s"', self.folder)
 
     def test_nested_folder(self, mock_logger: Mock) -> None:
         dcs.setup_dir(self.subdir)
         mock_logger.log.assert_called_once()
-        mock_logger.log.assert_called_with(dcs.LogLevel.L1, 'Created directory: "%s"', self.subdir)
+        mock_logger.log.assert_called_with(LogLevel.L1, 'Created directory: "%s"', self.subdir)
 
     def test_clean_up_folder(self, mock_logger: Mock) -> None:
         dcs.setup_dir(self.folder)
@@ -60,7 +61,7 @@ class Test_setup_dir(unittest.TestCase):
         with patch('dstauffman.utils_log.logger') as mock_logger2:
             dcs.setup_dir(self.folder)
             mock_logger2.log.assert_called_once()
-            mock_logger2.log.assert_called_with(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.folder)
+            mock_logger2.log.assert_called_with(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.folder)
         mock_logger.log.assert_called_once()
 
     def test_clean_up_partial(self, mock_logger: Mock) -> None:
@@ -71,7 +72,7 @@ class Test_setup_dir(unittest.TestCase):
         with patch('dstauffman.utils_log.logger') as mock_logger2:
             dcs.setup_dir(self.folder, recursive=False)
             mock_logger2.log.assert_called_once()
-            mock_logger2.log.assert_called_with(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.folder)
+            mock_logger2.log.assert_called_with(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.folder)
         self.assertEqual(mock_logger.log.call_count, 2)
 
     def test_fail_to_create_folder(self, mock_logger: Mock) -> None:
@@ -89,8 +90,8 @@ class Test_setup_dir(unittest.TestCase):
         with patch('dstauffman.utils_log.logger') as mock_logger2:
             dcs.setup_dir(self.folder, recursive=True)
             self.assertEqual(mock_logger2.log.call_count, 2)
-            mock_logger2.log.assert_any_call(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.subdir)
-            mock_logger2.log.assert_any_call(dcs.LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.subdir)
+            mock_logger2.log.assert_any_call(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.subdir)
+            mock_logger2.log.assert_any_call(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.subdir)
 
     def tearDown(self) -> None:
         def _clean(self) -> None:
@@ -133,8 +134,8 @@ class Test_fix_rollover(unittest.TestCase):
     def test_nominal(self, mock_logger: Mock) -> None:
         unrolled = dcs.fix_rollover(self.data, self.roll)
         np.testing.assert_array_equal(unrolled, self.exp)
-        mock_logger.log.assert_any_call(dcs.LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
-        mock_logger.log.assert_called_with(dcs.LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
+        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
         self.assertEqual(mock_logger.log.call_count, 2)
 
     def test_matrix_dim1(self, mock_logger: Mock) -> None:
@@ -151,8 +152,8 @@ class Test_fix_rollover(unittest.TestCase):
         exp = np.vstack((self.exp, self.exp))
         unrolled = dcs.fix_rollover(self.data2, self.roll, axis=self.axis)
         np.testing.assert_array_equal(unrolled, exp)
-        mock_logger.log.assert_any_call(dcs.LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
-        mock_logger.log.assert_called_with(dcs.LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
+        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
         self.assertEqual(mock_logger.log.call_count, 4)
 
     def test_non_integer_roll(self, mock_logger: Mock) -> None:
@@ -161,7 +162,7 @@ class Test_fix_rollover(unittest.TestCase):
         data = roll * ((exp / roll) % 1)
         unrolled = dcs.fix_rollover(data, roll)
         np.testing.assert_array_almost_equal(unrolled, exp, decimal=12)
-        mock_logger.log.assert_called_once_with(dcs.LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_called_once_with(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
 
     def test_signed_rollover(self, mock_logger: Mock) -> None:
         exp = np.arange(21)
@@ -169,7 +170,7 @@ class Test_fix_rollover(unittest.TestCase):
         roll = 8
         unrolled = dcs.fix_rollover(data, roll)
         np.testing.assert_array_equal(unrolled, exp)
-        mock_logger.log.assert_called_with(dcs.LogLevel.L6, 'corrected 3 top to bottom rollover(s)')
+        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 3 top to bottom rollover(s)')
 
     def test_recursive(self, mock_logger: Mock) -> None:
         pass  # TODO: figure out a test case where this actually happens.  I think the code was there for a reason?
@@ -198,8 +199,8 @@ class Test_fix_rollover(unittest.TestCase):
         exp[2] = np.nan
         unrolled = dcs.fix_rollover(data, self.roll)
         np.testing.assert_array_equal(unrolled, exp)
-        mock_logger.log.assert_any_call(dcs.LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
-        mock_logger.log.assert_called_with(dcs.LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
+        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
         self.assertEqual(mock_logger.log.call_count, 2)
 
 
@@ -228,8 +229,8 @@ class Test_remove_outliers(unittest.TestCase):
         self.assertEqual(self.x[5], 1e5)
         self.assertTrue(np.isnan(y[5]))
         self.assertTrue(np.isnan(y[15]))
-        mock_logger.log.assert_any_call(dcs.LogLevel.L6, 'Number of NaNs = %s', 2)
-        mock_logger.log.assert_any_call(dcs.LogLevel.L6, 'Number of outliers = %s', 2)
+        mock_logger.log.assert_any_call(LogLevel.L6, 'Number of NaNs = %s', 2)
+        mock_logger.log.assert_any_call(LogLevel.L6, 'Number of outliers = %s', 2)
 
     def test_sigma(self, mock_logger: Mock) -> None:
         x = np.random.rand(10000)

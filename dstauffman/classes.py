@@ -36,8 +36,9 @@ from typing import (
 import unittest
 import warnings
 
+from slog import is_dunder
+
 from dstauffman.constants import HAVE_H5PY, HAVE_NUMPY
-from dstauffman.paths import is_dunder
 from dstauffman.utils import find_in_range
 
 if HAVE_H5PY:

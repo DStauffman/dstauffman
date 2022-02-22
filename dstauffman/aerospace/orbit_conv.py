@@ -13,7 +13,8 @@ import logging
 from typing import Any, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import HAVE_NUMPY, HAVE_SCIPY, LogLevel
+from slog import LogLevel
+from dstauffman import HAVE_NUMPY, HAVE_SCIPY
 
 from dstauffman.aerospace.orbit_const import EARTH, JULIAN, PI, TAU
 

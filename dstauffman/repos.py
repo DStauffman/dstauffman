@@ -16,8 +16,8 @@ import sys
 from typing import Dict, FrozenSet, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 import unittest
 
+from slog import ReturnCodes
 from dstauffman.constants import HAVE_COVERAGE, HAVE_PYTEST
-from dstauffman.enums import ReturnCodes
 from dstauffman.paths import get_tests_dir, list_python_files
 from dstauffman.utils import line_wrap, read_text_file, write_text_file
 from dstauffman.utils_log import setup_dir

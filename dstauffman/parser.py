@@ -16,8 +16,7 @@ import sys
 from typing import List, Optional, Tuple
 import unittest
 
-from dstauffman.enums import LogLevel, ReturnCodes
-from dstauffman.logs import activate_logging
+from slog import activate_logging, LogLevel, ReturnCodes
 
 #%% Globals
 logger = logging.getLogger(__name__)

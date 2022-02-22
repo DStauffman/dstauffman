@@ -11,7 +11,8 @@ import doctest
 import logging
 import unittest
 
-from dstauffman import HAVE_NUMPY, HAVE_MPL, intersect, is_datetime, LogLevel
+from slog import LogLevel
+from dstauffman import HAVE_NUMPY, HAVE_MPL, intersect, is_datetime
 from dstauffman.aerospace import Kf, KfInnov
 from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, make_difference_plot, make_generic_plot
 from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots

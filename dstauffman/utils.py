@@ -26,8 +26,8 @@ from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overl
 import unittest
 import warnings
 
+from slog import ReturnCodes
 from dstauffman.constants import HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
-from dstauffman.enums import ReturnCodes
 from dstauffman.units import MONTHS_PER_YEAR
 
 if HAVE_NUMPY:

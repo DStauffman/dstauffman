@@ -10,7 +10,8 @@ Notes
 import unittest
 from unittest.mock import patch
 
-from dstauffman import HAVE_NUMPY, LogLevel
+from slog import LogLevel
+from dstauffman import HAVE_NUMPY
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:

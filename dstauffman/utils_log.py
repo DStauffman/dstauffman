@@ -15,8 +15,8 @@ from pathlib import Path
 from typing import Union
 import unittest
 
+from slog import LogLevel
 from dstauffman.constants import HAVE_NUMPY
-from dstauffman.enums import LogLevel
 from dstauffman.utils import find_in_range, rms
 
 if HAVE_NUMPY:

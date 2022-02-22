@@ -11,6 +11,7 @@ import datetime
 
 import numpy as np
 
+import slog as lg
 import dstauffman as dcs
 import dstauffman.estimation as estm
 import dstauffman.plotting as plot
@@ -120,7 +121,7 @@ if __name__ == '__main__':
     truth      = plot.TruthPlotter(truth_time, truth_data)  # type: ignore[assignment]
 
     # Logger
-    dcs.activate_logging(dcs.LogLevel.L8)
+    lg.activate_logging(lg.LogLevel.L8)
 
     # BPE Settings
     opti_opts                = estm.OptiOpts()

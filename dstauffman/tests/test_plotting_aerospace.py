@@ -12,7 +12,8 @@ from typing import List, Optional
 import unittest
 from unittest.mock import patch
 
-from dstauffman import HAVE_MPL, HAVE_NUMPY, LogLevel
+from slog import LogLevel
+from dstauffman import HAVE_MPL, HAVE_NUMPY
 from dstauffman.aerospace import quat_norm
 import dstauffman.plotting as plot
 

@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple, TypeVar, Union
 import unittest
 
+from slog import LogLevel
 from dstauffman import (
     convert_date,
     convert_time_units,
@@ -24,7 +25,6 @@ from dstauffman import (
     histcounts,
     HAVE_MPL,
     HAVE_NUMPY,
-    LogLevel,
 )
 
 from dstauffman.plotting.generic import make_bar_plot, make_time_plot

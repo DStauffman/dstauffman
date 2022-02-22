@@ -14,7 +14,8 @@ from typing import Any, Dict
 import unittest
 from unittest.mock import Mock, patch
 
-from dstauffman import capture_output, compare_two_classes, Frozen, get_tests_dir, HAVE_H5PY, HAVE_NUMPY, LogLevel, rss
+from slog import LogLevel
+from dstauffman import capture_output, compare_two_classes, Frozen, get_tests_dir, HAVE_H5PY, HAVE_NUMPY, rss
 import dstauffman.estimation as estm
 
 if HAVE_NUMPY:

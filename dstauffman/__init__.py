@@ -12,15 +12,13 @@ from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_DS, HAVE_NUMPY, 
                            HAVE_PYTEST, HAVE_SCIPY, INT_TOKEN, IS_WINDOWS, NP_DATETIME_UNITS, \
                            NP_DATETIME_FORM, NP_TIMEDELTA_FORM, NP_INT64_PER_SEC, NP_ONE_SECOND, \
                            NP_ONE_MINUTE, NP_ONE_HOUR, NP_ONE_DAY
-from .enums     import IntEnumPlus, consecutive, ReturnCodes, LogLevel
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
-from .logs      import activate_logging, deactivate_logging, flush_logging, log_multiline
 from .matlab    import load_matlab
 from .multipass import MultipassExceptionWrapper, parfor_wrapper
 from .parser    import main, parse_wrapper, parse_commands, execute_command, \
                            process_command_line_options
-from .paths     import is_dunder, get_root_dir, get_tests_dir, get_data_dir, get_images_dir, \
-                           get_output_dir, list_python_files
+from .paths     import get_root_dir, get_tests_dir, get_data_dir, get_images_dir, get_output_dir, \
+                           list_python_files
 from .repos     import run_docstrings, run_unittests, run_pytests, run_coverage, find_repo_issues, \
                            delete_pyc, get_python_definitions, make_python_init, \
                            write_unit_test_templates

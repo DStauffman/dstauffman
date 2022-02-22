@@ -308,9 +308,9 @@ class Test_make_python_init(unittest.TestCase):
 
     def setUp(self) -> None:
         self.folder   = dcs.get_root_dir()
-        self.text     = 'from .enums import'
-        self.text2    = 'from .enums     import IntEnumPlus'
-        self.line_num = 5
+        self.text     = 'from .matlab import load_matlab'
+        self.text2    = 'from .matlab    import load_matlab'
+        self.line_num = 6
         self.folder2  = dcs.get_tests_dir()
         self.filepath = self.folder2 / 'temp_file.py'
         self.filename = self.folder2 / '__init__2.py'

@@ -24,11 +24,11 @@ import unittest
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
+from slog import LogLevel
 from dstauffman import (
     Frozen,
     HAVE_NUMPY,
     load_method,
-    LogLevel,
     MultipassExceptionWrapper,
     parfor_wrapper,
     pprint_dict,
