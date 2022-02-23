@@ -14,7 +14,7 @@ else
     PYTHONPATH_ORIG=$PYTHONPATH
 
     # Add this location
-    export PYTHONPATH="$THISDIR:$THISDIR/../dstauffman2:$PYTHONPATH"
+    export PYTHONPATH="$THISDIR:$THISDIR/../slog:$THISDIR/../dstauffman2:$PYTHONPATH"
 
     if command -v python3 &>/dev/null; then
         # Try using python3
