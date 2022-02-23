@@ -1127,6 +1127,70 @@ class Test_plotting_add_datashaders(unittest.TestCase):
         plot.add_datashaders(self.datashaders)
 
 
+#%% plotting.fig_ax_factory
+@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+class Test_fig_ax_factory(unittest.TestCase):
+    r"""
+    Tests the plotting.fig_ax_factory function with the following cases:
+        TBD
+    """
+    def setUp(self) -> None:
+        self.fig_ax: Union[Tuple[None, ...], Tuple[Tuple[plt.Figure, plt.Axes], ...]] = (None, )
+
+    def test_1d_rows(self) -> None:
+        self.fig_ax = plot.fig_ax_factory(num_axes=4, layout='rows', sharex=True)  # type: ignore[call-overload]
+        self.assertEqual(len(self.fig_ax), 4)
+        # TODO: figure out how to test rows and sharex
+
+    def test_1d_cols(self) -> None:
+        self.fig_ax = plot.fig_ax_factory(num_axes=4, layout='cols', sharex=False)  # type: ignore[call-overload]
+        self.assertEqual(len(self.fig_ax), 4)
+        # TODO: figure out how to test rows and sharex
+
+    def test_1d_bad_layout(self) -> None:
+        with self.assertRaises(ValueError):
+            plot.fig_ax_factory(num_axes=4, layout='rowwise')  # type: ignore[call-overload]
+
+    def test_multi_figures(self) -> None:
+        self.fig_ax = plot.fig_ax_factory(2, 1)  # type: ignore[call-overload]
+        self.assertEqual(len(self.fig_ax), 2)
+        self.assertIsNot(self.fig_ax[0], self.fig_ax[1])
+
+    def test_2d(self) -> None:
+        self.fig_ax = plot.fig_ax_factory(num_axes=[2, 3], layout='rowwise', sharex=True)  # type: ignore[call-overload]
+        self.assertEqual(len(self.fig_ax), 6)
+
+    def test_2d_colwise(self) -> None:
+        self.fig_ax = plot.fig_ax_factory(num_axes=[3, 2], layout='colwise', sharex=False)  # type: ignore[call-overload]
+        self.assertEqual(len(self.fig_ax), 6)
+
+    def test_2d_bad_layout(self) -> None:
+        with self.assertRaises(ValueError):
+            plot.fig_ax_factory(num_axes=[4, 4], layout='rows')  # type: ignore[call-overload]
+
+    def test_suptitle(self) -> None:
+        self.fig_ax = plot.fig_ax_factory(num_axes=1, suptitle='Test Title')  # type: ignore[call-overload]
+        self.assertEqual(len(self.fig_ax), 1)
+        this_fig = self.fig_ax[0][0]  # type: ignore[index]
+        self.assertEqual(this_fig.canvas.manager.get_window_title(), 'Test Title')
+        self.assertEqual(this_fig._suptitle.get_text(), 'Test Title')
+
+    def test_passthrough(self) -> None:
+        fig_ax = plot.fig_ax_factory(num_axes=3, passthrough=True)  # type: ignore[call-overload]
+        self.assertEqual(len(fig_ax), 3)
+        for i in range(3):
+            self.assertIsNone(fig_ax[i])
+
+    def tearDown(self) -> None:
+        last_fig = None
+        for fig_ax in self.fig_ax:
+            if fig_ax is not None:
+                this_fig = fig_ax[0]
+                if this_fig is not last_fig:
+                    plt.close(this_fig)
+                last_fig = this_fig
+
+
 #%% Unit test execution
 if __name__ == '__main__':
     plot.suppress_plots()

@@ -14,6 +14,9 @@ import matplotlib.pyplot as plt
 
 #%% Script
 if __name__ == '__main__':
+    #%% Settings
+    comb_plots = True
+
     #%% Example 1
     # create data
     description = 'Focal Plane Sightings'
@@ -23,8 +26,7 @@ if __name__ == '__main__':
     innovs[:, points[1, :] > 0] += 0.2
 
     # build the figures and axes combinations to use
-    fig_ax = fig_ax_factory(num_axes=[2, 2], layout='colwise', sharex=True)
-    fig = fig_ax[0][0]
+    fig_ax = fig_ax_factory(num_axes=[2, 2], layout='colwise', sharex=True, passthrough=not comb_plots)  # type: ignore[call-overload]
 
     # populate the plots
     fig1 = make_connected_sets(description, points, innovs=None,   use_datashader=False, fig_ax=fig_ax[0], hide_innovs=True, color_by='none')
@@ -32,19 +34,24 @@ if __name__ == '__main__':
     fig3 = make_connected_sets(description, points, innovs=innovs, use_datashader=False, fig_ax=fig_ax[2], hide_innovs=True, color_by='direction')
     fig4 = make_connected_sets(description, points, innovs=innovs, use_datashader=False, fig_ax=fig_ax[3], hide_innovs=True, color_by='magnitude')
 
-    figmenu(fig)
-
+    if comb_plots:
+        fig = fig_ax[0][0]
+        figmenu(fig)
+        assert fig1 is fig2 and fig1 is fig3 and fig1 is fig4 and fig1 is fig, 'All figures should be identical.'
+    else:
+        figmenu([fig1, fig2, fig3, fig4])
+        assert fig1 is not fig2
+        assert fig1 is not fig3
+        assert fig1 is not fig4
     plt.show(block=False)
 
-    assert fig1 is fig2 and fig1 is fig3 and fig1 is fig4 and fig1 is fig, 'All figures should be identical.'
-
     #%% Example 2
-    fig_ax2 = fig_ax_factory(num_axes=2, layout='cols', sharex=False, return_figs=False, suptitle='Combined Plots')
+    fig_ax2 = fig_ax_factory(num_axes=2, layout='cols', sharex=False, suptitle='Combined Plots', passthrough=not comb_plots)  # type: ignore[call-overload]
     # histogram
     description = 'Histogram'
     data = np.array([0.5, 3.3, 1., 1.5, 1.5, 1.75, 2.5, 2.5])
     bins = np.array([0., 1., 2., 3., 5., 7.])
-    plot_histogram(description, data, bins, fig_ax=fig_ax2[0], skip_setup_plots=True)
+    plot_histogram(description, data, bins, fig_ax=fig_ax2[0], skip_setup_plots=comb_plots)
     # correlation matrix
     data = unit(np.random.rand(10, 10), axis=0)
     labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
@@ -64,14 +71,12 @@ if __name__ == '__main__':
     fig_ex2 = plot_correlation_matrix(data, labels, units=units, opts=opts, matrix_name=matrix_name, \
         cmin=cmin, cmax=cmax, xlabel=xlabel, ylabel=ylabel, plot_lower_only=plot_lower_only, \
         label_values=label_values, x_lab_rot=x_lab_rot, colormap=colormap, plot_border=plot_border, \
-        leg_scale=leg_scale, fig_ax=fig_ax2[1], skip_setup_plots=True)
-    setup_plots(fig_ex2, opts)
+        leg_scale=leg_scale, fig_ax=fig_ax2[1], skip_setup_plots=False)
 
     #%% Example 3
-    fig_ax3 = fig_ax_factory(num_figs=None, num_axes=[2, 2], layout='rowwise', sharex=True, suptitle='Vector Plots')
-    fig_ax3[0][0].canvas.manager.set_window_title('Vector Plots')
+    fig_ax3 = fig_ax_factory(num_figs=None, num_axes=[2, 2], layout='rowwise', sharex=True, suptitle='Vector Plots', passthrough=not comb_plots)  # type: ignore[call-overload]
     time = np.arange(30)
-    plot_time_history('1st', time, np.ones(30), units='one', fig_ax=([fig_ax3[0][0]], [fig_ax3[0][1]]), skip_setup_plots=True)
-    plot_time_history('2nd', time, np.array([[10], [11]]) + np.ones((2, 30)), units='two', fig_ax=([fig_ax3[1][0]], [fig_ax3[1][1]]), skip_setup_plots=True)
-    plot_time_history('3rd', time, np.array([[100], [110], [120]]) + np.ones((3, 30)), units='three', fig_ax=([fig_ax3[2][0]], [fig_ax3[2][1]]), skip_setup_plots=True)
-    fig_ex3 = plot_time_history('4th', time, np.array([[1000], [1100], [1200], [1300]]) + np.ones((4, 30)), units='four', fig_ax=([fig_ax3[3][0]], [fig_ax3[3][1]]), skip_setup_plots=False)
+    plot_time_history('1st', time, np.ones(30), units='one', fig_ax=fig_ax3[0], skip_setup_plots=comb_plots)
+    plot_time_history('2nd', time, np.array([[10], [11]]) + np.ones((2, 30)), units='two', fig_ax=fig_ax3[1], skip_setup_plots=comb_plots)
+    plot_time_history('3rd', time, np.array([[100], [110], [120]]) + np.ones((3, 30)), units='three', fig_ax=fig_ax3[2], skip_setup_plots=comb_plots)
+    fig_ex3 = plot_time_history('4th', time, np.array([[1000], [1100], [1200], [1300]]) + np.ones((4, 30)), units='four', fig_ax=fig_ax3[3], skip_setup_plots=False)

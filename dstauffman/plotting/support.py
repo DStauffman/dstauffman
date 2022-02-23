@@ -18,7 +18,7 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Dict, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -1918,14 +1918,37 @@ def add_datashaders(datashaders):
 
 
 #%% fig_ax_factory
+@overload
+def fig_ax_factory(
+    num_figs: Optional[int],
+    num_axes: Union[int, List[int]],
+    *,
+    suptitle: Union[str, List[str]],
+    layout: str,
+    sharex: bool,
+    passthrough: Literal[False] = ...,
+) -> Tuple[Tuple[Figure, Axes], ...]: ...
+
+@overload
+def fig_ax_factory(
+    num_figs: Optional[int],
+    num_axes: Union[int, List[int]],
+    *,
+    suptitle: Union[str, List[str]],
+    layout: str,
+    sharex: bool,
+    passthrough: Literal[True],
+) -> Tuple[None, ...]: ...
+
 def fig_ax_factory(
     num_figs: int = None,
-    suptitle: str = '',
     num_axes: Union[int, List[int]] = 1,
+    *,
+    suptitle: Union[str, List[str]] = '',
     layout: str = 'rows',
     sharex: bool = True,
-    return_figs: bool = False,
-) -> Tuple[Tuple[Figure, Axes], ...]:
+    passthrough: bool = False,
+) -> Union[Tuple[Tuple[Figure, Axes], ...], Tuple[None, ...]]:
     r"""
     Creates the figures and axes for use in a given plotting function.
 
@@ -1936,7 +1959,7 @@ def fig_ax_factory(
     num_axes
     layout
     sharex
-    return_figs
+    passthrough
 
     Notes
     -----
@@ -1967,29 +1990,36 @@ def fig_ax_factory(
             raise ValueError(f'Unexpected layout: "{layout}".')
     else:
         is_1d = False
+        if layout not in {'rowwise', 'colwise'}:
+            raise ValueError(f'Unexpected layout: "{layout}".')
         num_row = num_axes[0]
         num_col = num_axes[1]
     if num_figs is None:
-        (fig, axes) = plt.subplots(num_row, num_col, sharex=sharex)
+        num_figs = 1
+    if passthrough:
+        return tuple(None for _ in range(num_figs * num_row * num_col))
+    figs: List[Figure] = []
+    axes: Union[List[Axes], List[List[Axes]], List[List[List[Axes]]]] = []
+    for i in range(num_figs):
+        (fig, ax) = plt.subplots(num_row, num_col, sharex=sharex)
         if bool(suptitle):
-            fig.suptitle(suptitle)
-    else:
-        raise NotImplementedError('The multi-figure option has not yet been implemented.')
-        # assert not bool(suptitle), 'Suptitle not supported for muilt-figure options.'
+            this_title = suptitle[i] if isinstance(suptitle, list) else suptitle
+            fig.suptitle(this_title)
+            fig.canvas.manager.set_window_title(this_title)
+        figs.append(fig)
+        axes.append(ax)
     fig_ax: Tuple[Tuple[Figure, Axes], ...]
     if is_1d:
         assert isinstance(num_axes, int)
         if num_axes == 1:
-            fig_ax = ((fig, axes), )
+            fig_ax = tuple((figs[f], axes[f]) for f in range(num_figs))
         else:
-            fig_ax = tuple((fig, axes[i]) for i in range(num_axes))
+            fig_ax = tuple((figs[f], axes[f][i]) for f in range(num_figs) for i in range(num_axes))
     else:
         if layout == 'rowwise':
-            fig_ax = tuple((fig, axes[i, j]) for i in range(num_row) for j in range(num_col))
+            fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for i in range(num_row) for j in range(num_col))  # type: ignore[call-overload]
         elif layout == 'colwise':
-            fig_ax = tuple((fig, axes[i, j]) for j in range(num_col) for i in range(num_row))
-        else:
-            raise ValueError(f'Unexpected layout: "{layout}".')
+            fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for j in range(num_col) for i in range(num_row))  # type: ignore[call-overload]
     return fig_ax
 
 

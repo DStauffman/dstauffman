@@ -34,6 +34,7 @@ from dstauffman.plotting.support import (
     ColorMap,
     DEFAULT_COLORMAP,
     disp_xlimits,
+    fig_ax_factory,
     get_rms_indices,
     ignore_plot_data,
     plot_second_units_wrapper,
@@ -568,45 +569,40 @@ def make_generic_plot(
     num_axes = num_figs * num_rows * num_cols
 
     #% Create plots
-    if fig_ax is not None:
-        if fig_lists:
-            (figs, ax) = fig_ax
+    if fig_ax is None:
+        if num_cols == 1:
+            fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=num_rows, layout='rows', sharex=True)  # type: ignore[call-overload]
+        elif num_rows == 1:
+            # TODO: can this condition ever be true?
+            fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=num_cols, layout='cols', sharex=True)  # type: ignore[call-overload]
         else:
-            (fig, ax) = fig_ax
+            # TODO: colwise or rowwise?
+            fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=[num_rows, num_cols], layout='colwise', sharex=True)  # type: ignore[call-overload]
     else:
-        # create figures
-        fig = plt.figure()
-        if is_quat_diff and not make_subplots:
-            fig.canvas.manager.set_window_title(description + ' Components')
+        # check for single instance case and make it a tuple of tuples
+        if len(fig_ax) == 2:
+            if isinstance(fig_ax[0], Figure):
+                fig_ax = (fig_ax, )  # type: ignore[assignment]
+    # gather figures
+    assert fig_ax is not None
+    fig = fig_ax[0][0]
+    if is_quat_diff and not make_subplots:
+        fig.canvas.manager.set_window_title(description + ' Components')
+    else:
+        fig.canvas.manager.set_window_title(description)
+    if doing_diffs:
+        if have_both and not make_subplots:
+            f2 = fig_ax[-1][0]
+            f2.canvas.manager.set_window_title(description + ' Difference')
+            figs = [fig, f2]
         else:
-            fig.canvas.manager.set_window_title(description)
-        if doing_diffs:
-            if have_both and not make_subplots:
-                f2 = plt.figure()
-                f2.canvas.manager.set_window_title(description + ' Difference')
-                figs = [fig, f2]
-            else:
-                figs = [fig]
-        elif is_cat_plot:
-            figs = []
-        # create axes
-        ax = []
-        ax_prim = None
-        for i in range(num_figs):
-            if is_cat_plot:
-                if i > 0:
-                    fig = plt.figure()
-                fig.canvas.manager.set_window_title(titles[i])
-            if doing_diffs and i == 1:
-                fig = f2
-            for j in range(num_cols):
-                for k in range(num_rows):
-                    temp_axes = fig.add_subplot(num_rows, num_cols, k * num_cols + j + 1, sharex=ax_prim)
-                    if ax_prim is None:
-                        ax_prim = temp_axes
-                    ax.append(temp_axes)
-            if is_cat_plot:
-                figs.append(fig)
+            figs = [fig]
+    elif is_cat_plot:
+        figs = [fig_ax[i * num_rows * num_cols][0] for i in range(num_figs)]
+        for fig, title in zip(figs, titles):
+            fig.canvas.manager.set_window_title(title)
+    # gather axes
+    ax = [a for (f, a) in fig_ax]
     assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
     # preallocate datashaders
     datashaders = []
