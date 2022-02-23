@@ -570,6 +570,7 @@ def make_generic_plot(
 
     #% Create plots
     if fig_ax is None:
+        set_window_titles = True
         if num_cols == 1:
             fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=num_rows, layout='rows', sharex=True)  # type: ignore[call-overload]
         elif num_rows == 1:
@@ -579,6 +580,7 @@ def make_generic_plot(
             # TODO: colwise or rowwise?
             fig_ax = fig_ax_factory(num_figs=num_figs, num_axes=[num_rows, num_cols], layout='colwise', sharex=True)  # type: ignore[call-overload]
     else:
+        set_window_titles = False
         # check for single instance case and make it a tuple of tuples
         if len(fig_ax) == 2:
             if isinstance(fig_ax[0], Figure):
@@ -586,21 +588,24 @@ def make_generic_plot(
     # gather figures
     assert fig_ax is not None
     fig = fig_ax[0][0]
-    if is_quat_diff and not make_subplots:
-        fig.canvas.manager.set_window_title(description + ' Components')
-    else:
-        fig.canvas.manager.set_window_title(description)
+    if set_window_titles:
+        if is_quat_diff and not make_subplots:
+            fig.canvas.manager.set_window_title(description + ' Components')
+        else:
+            fig.canvas.manager.set_window_title(description)
     if doing_diffs:
         if have_both and not make_subplots:
             f2 = fig_ax[-1][0]
-            f2.canvas.manager.set_window_title(description + ' Difference')
+            if set_window_titles:
+                f2.canvas.manager.set_window_title(description + ' Difference')
             figs = [fig, f2]
         else:
             figs = [fig]
     elif is_cat_plot:
         figs = [fig_ax[i * num_rows * num_cols][0] for i in range(num_figs)]
-        for fig, title in zip(figs, titles):
-            fig.canvas.manager.set_window_title(title)
+        if set_window_titles:
+            for fig, title in zip(figs, titles):
+                fig.canvas.manager.set_window_title(title)
     # gather axes
     ax = [a for (f, a) in fig_ax]
     assert num_axes == len(ax), 'There is a mismatch in the number of axes.'
