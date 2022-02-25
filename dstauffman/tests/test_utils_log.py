@@ -134,8 +134,8 @@ class Test_fix_rollover(unittest.TestCase):
     def test_nominal(self, mock_logger: Mock) -> None:
         unrolled = dcs.fix_rollover(self.data, self.roll)
         np.testing.assert_array_equal(unrolled, self.exp)
-        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
-        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
         self.assertEqual(mock_logger.log.call_count, 2)
 
     def test_matrix_dim1(self, mock_logger: Mock) -> None:
@@ -152,8 +152,8 @@ class Test_fix_rollover(unittest.TestCase):
         exp = np.vstack((self.exp, self.exp))
         unrolled = dcs.fix_rollover(self.data2, self.roll, axis=self.axis)
         np.testing.assert_array_equal(unrolled, exp)
-        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
-        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
         self.assertEqual(mock_logger.log.call_count, 4)
 
     def test_non_integer_roll(self, mock_logger: Mock) -> None:
@@ -199,9 +199,23 @@ class Test_fix_rollover(unittest.TestCase):
         exp[2] = np.nan
         unrolled = dcs.fix_rollover(data, self.roll)
         np.testing.assert_array_equal(unrolled, exp)
-        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
-        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
         self.assertEqual(mock_logger.log.call_count, 2)
+
+    def test_high_rate_double_roll(self, mock_logger: Mock) -> None:
+        time = np.arange(40.0)
+        sign = (0.999 - np.mod(time / 10, 2))
+        vel = np.where(sign > 0, np.mod(time, 10.0), np.mod(9.0 - time, 10.0) + 1.0)
+        pos = np.cumsum(vel)
+        roll = 8.25
+        rolled_pos = pos - roll * np.floor(pos / roll)
+        unrolled_pos = dcs.fix_rollover(rolled_pos, roll, check_accel=True, sigma=2.5)
+        np.testing.assert_array_equal(unrolled_pos, pos)
+        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 5 top to bottom rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 3 bottom to top rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 4 rollovers due to acceleration checks')
+        self.assertGreater(mock_logger.log.call_count, 3)
 
 
 #%% remove_outliers

@@ -91,7 +91,7 @@ def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
 
 
 #%% Functions - fix_rollover
-def fix_rollover(data, roll, axis=None):
+def fix_rollover(data, roll, axis=None, check_accel=False, **kwargs):
     r"""
     Unrolls data that has finite ranges and rollovers.
 
@@ -129,16 +129,25 @@ def fix_rollover(data, roll, axis=None):
     [ 1 2 3 4 5 6 7 8 10 13 14 13 12 9]
 
     """
+    def comp_roll(comp, roll_ix):
+        # add final field to roll_ix so that final partition can be addressed
+        roll_aug = np.hstack((roll_ix, num_el - 1))
+        # loop only on original length of roll_ix
+        for i in range(roll_ix.size):
+            # creates a step function to be added to the input array where each
+            # step occurs after a roll over.
+            comp[roll_aug[i] + 1 : roll_aug[i + 1] + 1] += i + 1
+
     # call recursively when specifying an axis on 2D data
     if axis is not None:
         assert data.ndim == 2, 'Must be a 2D array when axis is specified'
         out = np.zeros_like(data)
         if axis == 0:
             for i in range(data.shape[1]):
-                out[:, i] = fix_rollover(data[:, i], roll)
+                out[:, i] = fix_rollover(data[:, i], roll, check_accel=check_accel, **kwargs)
         elif axis == 1:
             for i in range(data.shape[0]):
-                out[i, :] = fix_rollover(data[i, :], roll)
+                out[i, :] = fix_rollover(data[i, :], roll, check_accel=check_accel, **kwargs)
         else:
             raise ValueError(f'Unexpected axis: "{axis}".')
         return out
@@ -149,44 +158,44 @@ def fix_rollover(data, roll, axis=None):
             return np.array([])
         # t2b means top to bottom rollovers, while b2t means bottom to top rollovers
         num_el = data.size
-        compensation_t2b = np.zeros_like(data)
-        compensation_b2t = np.zeros_like(data)
+        compensation_t2b = np.zeros(data.shape, dtype=int)
+        compensation_b2t = np.zeros(data.shape, dtype=int)
     else:
         raise ValueError('Input argument "data" must be a vector.')
 
     # find indices for top to bottom rollovers, these indices act as partition boundaries
-    roll_ix = np.flatnonzero(find_in_range(np.diff(data), min_=roll / 2))
-    if roll_ix.size > 0:
-        # add final field to roll_ix so that final partition can be addressed
-        roll_ix = np.hstack((roll_ix, num_el - 1))
-        # loop only on original length of roll_ix, which is now length - 1
-        for i in range(roll_ix.size - 1):
-            # creates a step function to be added to the input array where each
-            # step down occurs after a top to bottom roll over.
-            compensation_t2b[roll_ix[i] + 1 : roll_ix[i + 1] + 1] = -roll * (i + 1)
-        # display a warning based on the log level
-        logger.log(LogLevel.L6, 'corrected {} bottom to top rollover(s)'.format(roll_ix.size - 1))
-
-    # find indices for top to bottom rollover, these indices act as partition boundaries
     roll_ix = np.flatnonzero(find_in_range(np.diff(data), max_=-roll / 2))
+    # compensation for top to bottom rollovers
     if roll_ix.size > 0:
-        # add final field to roll_ix so that final partition can be addressed
-        roll_ix = np.hstack((roll_ix, num_el - 1))
-        # loop only on original length of roll_ix, which is now length - 1
-        for i in range(roll_ix.size - 1):
-            # creates a step function to be added to the input array where each
-            # step up occurs after a bottom to top roll over.
-            compensation_b2t[roll_ix[i] + 1 : roll_ix[i + 1] + 1] = roll * (i + 1)
-        # display a warning based on the log level
-        logger.log(LogLevel.L6, 'corrected {} top to bottom rollover(s)'.format(roll_ix.size - 1))
+        comp_roll(compensation_t2b, roll_ix)
+        logger.log(LogLevel.L6, 'corrected {} top to bottom rollover(s)'.format(roll_ix.size))
+
+    # find indices for bottom to top rollover, these indices act as partition boundaries
+    roll_ix = np.flatnonzero(find_in_range(np.diff(data), min_=roll / 2))
+    # compensate for bottom to top rollovers
+    if roll_ix.size > 0:
+        comp_roll(compensation_b2t, roll_ix)
+        logger.log(LogLevel.L6, 'corrected {} bottom to top rollover(s)'.format(roll_ix.size))
 
     # create output
-    out = data + compensation_b2t + compensation_t2b
+    out = data + roll * (compensation_t2b - compensation_b2t)
+
+    # optionally check accelerations
+    if check_accel:
+        acc = np.diff(out, 2)
+        clean_acc = remove_outliers(acc, **kwargs)
+        bad_ix = np.flatnonzero(np.isnan(clean_acc) & ~np.isnan(acc))
+        if bad_ix.size > 0:
+            comp_roll(compensation_t2b, bad_ix[acc[bad_ix] < 0] + 1)
+            comp_roll(compensation_b2t, bad_ix[acc[bad_ix] > 0] + 1)
+            # recreate output
+            out = data + roll * (compensation_t2b - compensation_b2t)
+            logger.log(LogLevel.L6, 'corrected {} rollovers due to acceleration checks'.format(bad_ix.size))
 
     # double check for remaining rollovers
     if np.any(find_in_range(np.diff(out), min_=roll / 2, max_=-roll / 2)):
         logger.log(LogLevel.L6, 'A rollover was fixed recursively')
-        out = fix_rollover(out, roll)
+        out = fix_rollover(out, roll, check_accel=check_accel, **kwargs)
     return out
 
 
