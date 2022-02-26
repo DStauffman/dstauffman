@@ -25,12 +25,12 @@ before_script:
   - virtualenv static
   - source static/bin/activate
   - python -m pip install wheel
-  - python -m pip install coverage flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5 PyQt5-stubs pytest requests types-requests scipy tblib urllib3
+  - python -m pip install coverage flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5 PyQt5-stubs pytest qtpy requests types-requests scipy tblib urllib3
   - deactivate
   - virtualenv everything
   - source everything/bin/activate
   - python -m pip install wheel
-  - python -m pip install coverage datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PyQt5 pytest requests scipy tblib urllib3
+  - python -m pip install coverage datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PyQt5 pytest qtpy requests scipy tblib urllib3
   - deactivate
   - virtualenv core_only
   - source everything/bin/core_only
