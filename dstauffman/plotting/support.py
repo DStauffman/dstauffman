@@ -1970,7 +1970,7 @@ def fig_ax_factory(
     >>> from dstauffman.plotting import fig_ax_factory
     >>> import matplotlib.pyplot as plt
     >>> fig_ax = fig_ax_factory()
-    >>> (fig, ax) = fig_ax
+    >>> (fig, ax) = fig_ax[0]
     >>> assert isinstance(fig, plt.Figure)
     >>> assert isinstance(ax, plt.Axes)
 
