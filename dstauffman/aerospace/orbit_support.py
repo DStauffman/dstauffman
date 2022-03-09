@@ -12,7 +12,7 @@ import doctest
 from typing import overload, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import DEG2RAD, HAVE_NUMPY, magnitude, NP_DATETIME_UNITS, NP_ONE_DAY, ONE_MINUTE, ONE_HOUR, RAD2DEG
+from dstauffman import ARCSEC2RAD, DEG2RAD, HAVE_NUMPY, magnitude, NP_DATETIME_UNITS, NP_ONE_DAY, ONE_MINUTE, ONE_HOUR, RAD2DEG
 
 from dstauffman.aerospace.orbit_const import EARTH, JULIAN, TAU
 
@@ -481,6 +481,53 @@ def rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd):
     # calculate velocity in IJK frame
     v_ijk = v_sez_in_ijk + cross(omega_vector, r_ijk)
     return (r_ijk, v_ijk)
+
+
+#%% Functions - get_sun_radec
+def get_sun_radec(time_jd):
+    r"""
+
+    Notes
+    -----
+    #.  obliquity of ecliptic from Astronomical Almanac 2010.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import get_sun_radec, numpy_to_jd
+    >>> from dstauffman import convert_datetime_to_np
+    >>> import datetime
+    >>> date = datetime.datetime(2010, 6, 20, 15, 30, 45)
+    >>> np_date = convert_datetime_to_np(date)
+    >>> time_jd = numpy_to_jd(np_date)
+    >>> (ra, dec) = get_sun_radec(time_jd)
+    >>> print(f'{ra:.3f}')
+    1.565
+
+    >>> print(f'{dec:.3f}')
+    0.409
+
+    """
+    #  delta time in days since J2000
+    delta_time_days_J2000 = time_jd - JULIAN['jd_2000_01_01']
+    # Time in Julian centuries
+    T = delta_time_days_J2000 * JULIAN['day'] / JULIAN['century']
+    # (eq 25.2) Geometri mean longitude of the Sun, referred to the mean equinox of the date
+    Lo = np.mod(DEG2RAD * (280.46645 + 36000.76983 * T + 0.0003032 * T ** 2), TAU)
+    # (eq 25.3) Mean anomaly of the Sun
+    M = np.mod(DEG2RAD * (357.52910 + 35999.05030 * T - 0.0001559 * T ** 2 - 0.00000048 * T ** 3), TAU)
+    # Center of Sun
+    C = DEG2RAD * ((1.914600 - 0.004817 * T - 0.000014 * T ** 2) * np.sin(M) + (
+        0.019993 - 0.000101 * T) * np.sin(2 * M) + 0.000290 * np.sin(3 * M))
+    # true longitude
+    sun_true_longitude = np.mod(Lo + C, TAU)
+    # (eq 22.2) (arc-sec)
+    obliquity_of_ecliptic = ARCSEC2RAD * (23 * ONE_HOUR + 26 * ONE_MINUTE + 21.406 - 46.836769 * T
+        - 0.0001831 * T ** 2 + 0.00200340 * T ** 3 - 0.576e-6 * T ** 4 - 4.34e-8 * T ** 5)
+    # right ascension
+    ra = np.mod(np.arctan2(np.cos(obliquity_of_ecliptic) * np.sin(sun_true_longitude), np.cos(sun_true_longitude)), TAU)
+    # declination
+    dec = np.arcsin(np.sin(obliquity_of_ecliptic) * np.sin(sun_true_longitude))
+    return (ra, dec)
 
 
 #%% Unit Test

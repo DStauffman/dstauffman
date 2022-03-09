@@ -29,4 +29,5 @@ Feb 22, 2022: dstauffman 3.0
 #      It also dropped support of Python 3.7 and now supports only 3.8+
 # v2.4 Used pathlib.Path instead of strings for files and folders.
 # v2.5 Added significant GPS and orbit ephemeris routines.
-# v3.0 Split the slog portions of the code into a separate repository.
+# v3.0 Uses fig_ax_factory for creating figures where needed and switched to qtpy instead of only PyQt5.
+#      Split the slog portions of the code into a separate sub-repository.

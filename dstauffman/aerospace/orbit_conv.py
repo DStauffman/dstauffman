@@ -14,9 +14,11 @@ from typing import Any, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
-from dstauffman import HAVE_NUMPY, HAVE_SCIPY
+from dstauffman import HAVE_NUMPY, HAVE_SCIPY, ONE_DAY, ONE_HOUR
 
 from dstauffman.aerospace.orbit_const import EARTH, JULIAN, PI, TAU
+from dstauffman.aerospace.orbit_support import get_sun_radec
+from dstauffman.aerospace.quat import qrot
 
 if HAVE_NUMPY:
     import numpy as np
@@ -558,6 +560,78 @@ def sidereal_2_long(theta: _N, t: _N) -> _N:
             assert isinstance(lon, np.ndarray)
             lon[ix] -= TAU
     return lon
+
+
+#%% Functions - raan_2_mltan
+def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = False) -> _N:
+    r"""
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import numpy_to_jd, raan_2_mltan, r_2_hms
+    >>> from dstauffman import convert_datetime_to_np, DEG2RAD
+    >>> import datetime
+    >>> raan = DEG2RAD * 178.739073
+    >>> date = datetime.datetime(2010, 6, 20, 15, 30, 45)
+    >>> time_jd = numpy_to_jd(convert_datetime_to_np(date))
+    >>> mltan = raan_2_mltan(raan, time_jd)
+    >>> mltan_hms = r_2_hms(mltan)
+    >>> print(f'{mltan_hms[0]:2.0f}:{mltan_hms[1]:2.0f}:{mltan_hms[2]:.4f}')
+    17:56:20.1496
+
+    """
+    # right ascension of the sun
+    (ra_sun, dec_sun) = get_sun_radec(time_jd)
+    # mean local time of the ascending node (hours)
+    offset = 0.0 if return_descending else PI
+    mltan = np.mod(raan - ra_sun + offset, TAU)
+    return mltan
+
+
+#%% Functions - jd_2_sidereal
+def jd_2_sidereal(time_jd):
+    r"""
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import jd_2_sidereal, numpy_to_jd
+    >>> from dstauffman import convert_datetime_to_np
+    >>> import datetime
+    >>> date = datetime.datetime(1992, 8, 20, 12, 14, 0)
+    >>> time_jd = numpy_to_jd(convert_datetime_to_np(date))
+    >>> lst = jd_2_sidereal(time_jd)
+
+    """
+
+    #  delta time in days since J2000
+    delta_time_days_J2000 = time_jd - JULIAN['jd_2000_01_01']
+    # Time in Julian centuries
+    T = delta_time_days_J2000 * JULIAN['day'] / JULIAN['century']
+    # Vallado eq 3-45, p191
+    gmst_sec = 67310.54841 + (876600 * ONE_HOUR + 8640184.812866) * T + 0.093104 * T ** 2 - 6.2e-6 * T ** 3
+    # local sidereal time
+    lst = TAU * np.mod(gmst_sec / ONE_DAY, 1)
+    return lst
+
+
+#%% Functions - quat_eci_2_ecf
+def quat_eci_2_ecf(time_jd):
+    r"""
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import quat_eci_2_ecf, numpy_to_jd
+    >>> from dstauffman import convert_datetime_to_np
+    >>> import datetime
+    >>> date = datetime.datetime(1992, 8, 20, 12, 14, 0)
+    >>> time_jd = numpy_to_jd(convert_datetime_to_np(date))
+    >>> quat = quat_eci_2_ecf(time_jd)
+
+    """
+    # calculate the local sidereal time for the given epoch
+    lst = jd_2_sidereal(time_jd)
+    # return the Z-axis rotation for the local time
+    return qrot(3, lst)
 
 
 #%% Unit Test

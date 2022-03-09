@@ -19,12 +19,12 @@ from .orbit_conv  import anomaly_eccentric_2_mean, anomaly_eccentric_2_true, \
                              anomaly_hyperbolic_2_mean, anomaly_hyperbolic_2_true, \
                              anomaly_mean_2_eccentric, long_2_sidereal, mean_motion_2_semimajor, \
                              period_2_semimajor, semimajor_2_mean_motion, semimajor_2_period, \
-                             sidereal_2_long
+                             sidereal_2_long, raan_2_mltan, jd_2_sidereal, quat_eci_2_ecf
 from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to_jd, d_2_dms, \
                              dms_2_d, hms_2_r, r_2_hms, aer_2_rdr, aer_2_sez, geo_loc_2_ijk, \
                              ijk_2_rdr, ijk_2_sez, rdr_2_aer, rdr_2_ijk, sez_2_aer, sez_2_ijk, \
                              rv_aer_2_ijk, rv_aer_2_sez, rv_ijk_2_aer, rv_ijk_2_sez, \
-                             rv_sez_2_aer, rv_sez_2_ijk
+                             rv_sez_2_aer, rv_sez_2_ijk, get_sun_radec
 from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv
 from .quat        import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks, quat_assertions, \
                              enforce_pos_scalar, qrot, quat_from_axis_angle, quat_angle_diff, \
