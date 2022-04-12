@@ -5,6 +5,7 @@ image: python:latest
 variables:
   PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   DCS_TESTS_DIR: "$CI_PROJECT_DIR/dstauffman/tests"
+  QT_QPA_PLATFORM: "offscreen"
 
 # Pip's cache doesn't store the python packages
 # https://pip.pypa.io/en/stable/reference/pip_install/#caching
@@ -19,8 +20,17 @@ cache:
   #- py37/
   - core_only/
 
-before_script:
+stages:
+  - Environments
+  - Static Analysis
+  - Test
+  - Coverage
+
+make_envs:
+  stage: Environments
+  script:
   - python --version
+  - pip install --upgrade pip
   - pip install virtualenv
   - virtualenv static
   - source static/bin/activate
@@ -33,7 +43,7 @@ before_script:
   - python -m pip install coverage datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PyQt5 pytest qtpy requests scipy tblib urllib3
   - deactivate
   - virtualenv core_only
-  - source everything/bin/core_only
+  - source core_only/bin/activate
   - python -m pip install wheel
   - python -m pip install coverage pytest
   - deactivate
@@ -43,13 +53,9 @@ before_script:
   #- python -m pip install coverage flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5 pytest requests scipy tblib urllib3
   #- deactivate
 
-stages:
-  - Static Analysis
-  - Test
-  - Coverage
-
 mypy:
   stage: Static Analysis
+  allow_failure: true
   script:
   - pwd
   - ls -l
@@ -60,6 +66,7 @@ mypy:
 
 #flake8:
 #  stage: Static Analysis
+#  allow_failure: true
 #  script:
 #  - flake8 --max-line-length=100 dstauffman/**/*.py
 
@@ -71,63 +78,88 @@ mypy:
 
 unit_test:
   stage: Test
+  needs: ["make_envs"]
+  artifacts:
+    paths:
+    - $DCS_TESTS_DIR/.coverage.full
+    expire_in: 4 hours
   script:
   - pwd
   - ls -l
-  - source everythin/bin/activate
+  - source everything/bin/activate
   - python -m dstauffman tests --coverage --cov_file $DCS_TESTS_DIR/.coverage.full
 
 core_test:
   stage: Test
+  needs: ["make_envs"]
+  artifacts:
+    paths:
+    - $DCS_TESTS_DIR/.coverage.core
+    expire_in: 4 hours
   script:
   - pwd
-  - ls l
+  - ls -l
   - source core_only/bin/activate
   - python -m dstauffman tests --coverage --cov_file $DCS_TESTS_DIR/.coverage.core
 
 no_numba_test:
   stage: Test
+  needs: ["make_envs"]
+  artifacts:
+    paths:
+    - $DCS_TESTS_DIR/.coverage.no_numba
+    expire_in: 4 hours
   script:
   - pwd
-  - ls l
+  - ls -l
   - source static/bin/activate
   - python -m dstauffman tests --coverage --cov_file $DCS_TESTS_DIR/.coverage.no_numba
 
 command_test:
   stage: Test
+  needs: ["make_envs"]
+  artifacts:
+    paths:
+    - $DCS_TESTS_DIR/.coverage.commands
+    expire_in: 4 hours
   script:
   - pwd
-  - ls l
+  - ls -l
   - source core_only/bin/activate
   - export COVERAGE_FILE=$DCS_TESTS_DIR/.coverage.commands
-  - export PYTHONPATH=$DCS_TESTS_DIR/../..;$PYTHONPATH
+  - export PYTHONPATH=$DCS_TESTS_DIR/../..:$PYTHONPATH
   - coverage run $DCS_TESTS_DIR/test_commands_help.py
 
 basic_test:
   stage: Test
   script:
   - pwd
-  - ls l
+  - ls -l
   - source core_only/bin/activate
   - python -m dstauffman tests -u
 
 doc_test:
   stage: Test
+  needs: ["make_envs"]
   script:
   - pwd
   - ls -l
-  - source everythin/bin/activate
+  - source everything/bin/activate
   - python -m dstauffman tests -d
 
 coverage_report:
   stage: Coverage
+  needs: ["unit_test", "core_test", "no_numba_test", "command_test"]
+  artifacts:
+    paths:
+    - $DCS_TESTS_DIR/coverage_html_report/*
+    expire_in: 1 week
   script:
   - cd $DCS_TESTS_DIR
   - pwd
-  - ls l
+  - ls -l
   - source static/bin/activate
   - export COVERAGE_FILE=.coverage
   - coverage --version
   - coverage combine
   - coverage html
-  # TODO: add to artifacts, and make it depend on earlier tests

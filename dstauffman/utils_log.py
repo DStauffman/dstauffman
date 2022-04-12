@@ -53,7 +53,7 @@ def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
     Examples
     --------
     >>> from dstauffman import setup_dir
-    >>> setup_dir(r'C:\Temp\test_folder') # doctest: +SKIP
+    >>> setup_dir(r"C:\Temp\test_folder") # doctest: +SKIP
 
     """
     # convert older string API to paths
@@ -64,7 +64,7 @@ def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
         folder = Path(folder)
     if folder.is_dir():
         # Loop through the contained files/folders
-        for this_elem in folder.glob('*'):
+        for this_elem in folder.glob("*"):
             # alias the fullpath of this file element
             this_full_elem = this_elem.resolve()
             # check if a folder or file
@@ -129,6 +129,7 @@ def fix_rollover(data, roll, axis=None, check_accel=False, **kwargs):
     [ 1 2 3 4 5 6 7 8 10 13 14 13 12 9]
 
     """
+
     def comp_roll(comp, roll_ix, mode):
         # add final field to roll_ix so that final partition can be addressed
         roll_aug = np.hstack((roll_ix, num_el - 1))
@@ -136,18 +137,18 @@ def fix_rollover(data, roll, axis=None, check_accel=False, **kwargs):
         for i in range(roll_ix.size):
             # creates a step function to be added to the input array where each
             # step occurs after a roll over.
-            if mode == '+':
+            if mode == "+":
                 comp[roll_aug[i] + 1 : roll_aug[i + 1] + 1] += i + 1
-            elif mode == '-':
+            elif mode == "-":
                 comp[roll_aug[i] + 1 : roll_aug[i + 1] + 1] -= i + 1
-            elif mode == '++':
-                comp[roll_ix[i] + 1:] += np.arange(1, num_el - roll_ix[i])
-            elif mode == '--':
-                comp[roll_ix[i] + 1:] -= np.arange(1, num_el - roll_ix[i])
+            elif mode == "++":
+                comp[roll_ix[i] + 1 :] += np.arange(1, num_el - roll_ix[i])
+            elif mode == "--":
+                comp[roll_ix[i] + 1 :] -= np.arange(1, num_el - roll_ix[i])
 
     # call recursively when specifying an axis on 2D data
     if axis is not None:
-        assert data.ndim == 2, 'Must be a 2D array when axis is specified'
+        assert data.ndim == 2, "Must be a 2D array when axis is specified"
         out = np.zeros_like(data)
         if axis == 0:
             for i in range(data.shape[1]):
@@ -173,15 +174,15 @@ def fix_rollover(data, roll, axis=None, check_accel=False, **kwargs):
     roll_ix = np.flatnonzero(find_in_range(np.diff(data), max_=-roll / 2))
     # compensation for top to bottom rollovers
     if roll_ix.size > 0:
-        comp_roll(comp, roll_ix, '+')
-        logger.log(LogLevel.L6, 'corrected {} top to bottom rollover(s)'.format(roll_ix.size))
+        comp_roll(comp, roll_ix, "+")
+        logger.log(LogLevel.L6, "corrected {} top to bottom rollover(s)".format(roll_ix.size))
 
     # find indices for bottom to top rollover, these indices act as partition boundaries
     roll_ix = np.flatnonzero(find_in_range(np.diff(data), min_=roll / 2))
     # compensate for bottom to top rollovers
     if roll_ix.size > 0:
-        comp_roll(comp, roll_ix, '-')
-        logger.log(LogLevel.L6, 'corrected {} bottom to top rollover(s)'.format(roll_ix.size))
+        comp_roll(comp, roll_ix, "-")
+        logger.log(LogLevel.L6, "corrected {} bottom to top rollover(s)".format(roll_ix.size))
 
     # create output
     out = data + roll * comp
@@ -192,15 +193,15 @@ def fix_rollover(data, roll, axis=None, check_accel=False, **kwargs):
         clean_acc = remove_outliers(acc, **kwargs)
         bad_ix = np.flatnonzero(np.isnan(clean_acc) & ~np.isnan(acc))
         if bad_ix.size > 0:
-            comp_roll(comp, bad_ix[acc[bad_ix] < 0] + 1, '++')
-            comp_roll(comp, bad_ix[acc[bad_ix] > 0] + 1, '--')
+            comp_roll(comp, bad_ix[acc[bad_ix] < 0] + 1, "++")
+            comp_roll(comp, bad_ix[acc[bad_ix] > 0] + 1, "--")
             # recreate output
             out = data + roll * comp
-            logger.log(LogLevel.L6, 'corrected {} rollovers due to acceleration checks'.format(bad_ix.size))
+            logger.log(LogLevel.L6, "corrected {} rollovers due to acceleration checks".format(bad_ix.size))
 
     # double check for remaining rollovers
     if np.any(find_in_range(np.diff(out), min_=roll / 2, max_=-roll / 2)):
-        logger.log(LogLevel.L6, 'A rollover was fixed recursively')
+        logger.log(LogLevel.L6, "A rollover was fixed recursively")
         out = fix_rollover(out, roll, check_accel=check_accel, **kwargs)
     return out
 
@@ -283,15 +284,15 @@ def remove_outliers(x, /, sigma=3.0, axis=None, *, num_iters=3, return_stats=Fal
     rms_removed = rms(y, axis=axis, ignore_nans=True)
     num_replaced = np.count_nonzero(np.isnan(y)) - num_nans
     num_removed = num_replaced - num_hard
-    logger.log(LogLevel.L6, 'Number of NaNs = %s', num_nans)
-    logger.log(LogLevel.L6, 'Number exceeding hardmax = %s', num_hard)
-    logger.log(LogLevel.L6, 'Number of outliers = %s', num_removed)
+    logger.log(LogLevel.L6, "Number of NaNs = %s", num_nans)
+    logger.log(LogLevel.L6, "Number exceeding hardmax = %s", num_hard)
+    logger.log(LogLevel.L6, "Number of outliers = %s", num_removed)
     if rms_initial.ndim == 0:
-        logger.log(LogLevel.L6, 'RMS before removal = {:.6g}, after = {:.6g}'.format(rms_initial, rms_removed))
+        logger.log(LogLevel.L6, "RMS before removal = {:.6g}, after = {:.6g}".format(rms_initial, rms_removed))
     else:
         logger.log(
             LogLevel.L6,
-            'RMS before removal = {}, after = {}'.format(
+            "RMS before removal = {}, after = {}".format(
                 np.array_str(rms_initial, precision=6), np.array_str(rms_removed, precision=6)
             ),
         )
@@ -301,6 +302,6 @@ def remove_outliers(x, /, sigma=3.0, axis=None, *, num_iters=3, return_stats=Fal
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_utils_log', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_utils_log", exit=False)
     doctest.testmod(verbose=False)

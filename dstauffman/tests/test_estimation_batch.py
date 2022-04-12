@@ -30,7 +30,7 @@ class SimParams(Frozen):
         self.time: np.ndarray = time
         self.magnitude: float = magnitude
         self.frequency: float = frequency
-        self.phase: float     = phase
+        self.phase: float = phase
 
     def __eq__(self, other: Any) -> bool:
         if type(other) != type(self):
@@ -98,7 +98,7 @@ def get_parameter(sim_params, *, names):
 def set_parameter(sim_params, *, names, values):
     r"""Simple example parameter setter."""
     num = len(names)
-    assert len(values) == num, 'Names and Values must have the same length.'
+    assert len(values) == num, "Names and Values must have the same length."
     for (ix, name) in enumerate(names):
         if hasattr(sim_params, name):
             setattr(sim_params, name, values[ix])
@@ -138,11 +138,11 @@ class Test_estimation_OptiOpts(unittest.TestCase):
         opti_opts = estm.OptiOpts()
         with capture_output() as out:
             opti_opts.pprint()
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().strip().split("\n")
         out.close()
-        self.assertEqual(lines[0], 'OptiOpts')
-        self.assertEqual(lines[1], ' model_func      = None')
-        self.assertEqual(lines[-1], ' max_cores       = None')
+        self.assertEqual(lines[0], "OptiOpts")
+        self.assertEqual(lines[1], " model_func      = None")
+        self.assertEqual(lines[-1], " max_cores       = None")
 
 
 #%% estimation.OptiParam
@@ -157,79 +157,79 @@ class Test_estimation_OptiParam(unittest.TestCase):
     """
 
     def test_init(self) -> None:
-        opti_param = estm.OptiParam('test')
+        opti_param = estm.OptiParam("test")
         self.assertTrue(isinstance(opti_param, estm.OptiParam))
 
     def test_equality(self) -> None:
-        opti_param1 = estm.OptiParam('test')
-        opti_param2 = estm.OptiParam('test')
+        opti_param1 = estm.OptiParam("test")
+        opti_param2 = estm.OptiParam("test")
         self.assertEqual(opti_param1, opti_param2)
 
     def test_inequality(self) -> None:
-        opti_param1 = estm.OptiParam('test')
-        opti_param2 = estm.OptiParam('test')
+        opti_param1 = estm.OptiParam("test")
+        opti_param2 = estm.OptiParam("test")
         opti_param2.min_ = 5.5
         self.assertNotEqual(opti_param1, opti_param2)
 
     def test_inequality2(self) -> None:
-        opti_param = estm.OptiParam('test')
+        opti_param = estm.OptiParam("test")
         self.assertNotEqual(opti_param, 2)
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_get_array(self) -> None:
-        opti_param = estm.OptiParam('test')
+        opti_param = estm.OptiParam("test")
         params = [opti_param, opti_param]
         best = estm.OptiParam.get_array(params)
         np.testing.assert_array_equal(best, np.array([np.nan, np.nan]))
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_get_array2(self) -> None:
-        opti_param = estm.OptiParam('test')
+        opti_param = estm.OptiParam("test")
         params = [opti_param, opti_param]
-        values = estm.OptiParam.get_array(params, type_='min')
+        values = estm.OptiParam.get_array(params, type_="min")
         np.testing.assert_array_equal(values, np.array([-np.inf, -np.inf]))
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_get_array3(self) -> None:
-        opti_param = estm.OptiParam('test')
+        opti_param = estm.OptiParam("test")
         params = [opti_param, opti_param]
-        values = estm.OptiParam.get_array(params, type_='max')
+        values = estm.OptiParam.get_array(params, type_="max")
         np.testing.assert_array_equal(values, np.array([np.inf, np.inf]))
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_get_array4(self) -> None:
-        opti_param = estm.OptiParam('test')
+        opti_param = estm.OptiParam("test")
         params = [opti_param, opti_param]
-        for this_type in ['best', 'min', 'min_', 'max', 'max_', 'minstep', 'typical']:
+        for this_type in ["best", "min", "min_", "max", "max_", "minstep", "typical"]:
             # just test that these all execute, but don't worry about values
             estm.OptiParam.get_array(params, type_=this_type)
 
     def test_get_array5(self) -> None:
-        opti_param = estm.OptiParam('test')
+        opti_param = estm.OptiParam("test")
         params = [opti_param, opti_param]
         with self.assertRaises(ValueError):
-            estm.OptiParam.get_array(params, type_='bad_name')
+            estm.OptiParam.get_array(params, type_="bad_name")
 
     def test_get_names(self) -> None:
-        opti_param1 = estm.OptiParam('test1')
-        opti_param2 = estm.OptiParam('test2')
+        opti_param1 = estm.OptiParam("test1")
+        opti_param2 = estm.OptiParam("test2")
         params = [opti_param1, opti_param2]
         names = estm.OptiParam.get_names(params)
-        self.assertEqual(names, ['test1', 'test2'])
+        self.assertEqual(names, ["test1", "test2"])
 
     def test_pprint(self) -> None:
-        opti_param = estm.OptiParam('test')
+        opti_param = estm.OptiParam("test")
         with capture_output() as out:
             opti_param.pprint()
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().strip().split("\n")
         out.close()
-        self.assertEqual(lines[0], 'OptiParam')
-        self.assertEqual(lines[1], ' name    = test')
-        self.assertEqual(lines[2], ' best    = nan')
-        self.assertEqual(lines[3], ' min_    = -inf')
-        self.assertEqual(lines[4], ' max_    = inf')
-        self.assertEqual(lines[5], ' minstep = 0.0001')
-        self.assertEqual(lines[6], ' typical = 1.0')
+        self.assertEqual(lines[0], "OptiParam")
+        self.assertEqual(lines[1], " name    = test")
+        self.assertEqual(lines[2], " best    = nan")
+        self.assertEqual(lines[3], " min_    = -inf")
+        self.assertEqual(lines[4], " max_    = inf")
+        self.assertEqual(lines[5], " minstep = 0.0001")
+        self.assertEqual(lines[6], " typical = 1.0")
 
 
 #%% estimation.BpeResults
@@ -245,11 +245,11 @@ class Test_estimation_BpeResults(unittest.TestCase):
     def setUp(self) -> None:
         self.bpe_results = estm.BpeResults()
         self.bpe_results.num_evals = 5
-        self.filename = get_tests_dir() / 'test_estimation_results.hdf5'
-        self.filename2 = self.filename.with_suffix('.pkl')
+        self.filename = get_tests_dir() / "test_estimation_results.hdf5"
+        self.filename2 = self.filename.with_suffix(".pkl")
         estm.batch.logger.setLevel(LogLevel.L0)
 
-    @unittest.skipIf(not HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_save(self) -> None:
         self.bpe_results.save(self.filename)
         self.assertTrue(self.filename.is_file())
@@ -258,7 +258,7 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.bpe_results.save(self.filename, use_hdf5=False)
         self.assertTrue(self.filename2.is_file())
 
-    @unittest.skipIf(not HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_load(self) -> None:
         self.bpe_results.save(self.filename)
         bpe_results = estm.BpeResults.load(self.filename)
@@ -272,32 +272,32 @@ class Test_estimation_BpeResults(unittest.TestCase):
     def test_str(self) -> None:
         with capture_output() as out:
             print(self.bpe_results)
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().strip().split("\n")
         out.close()
-        self.assertEqual(lines[0], 'BpeResults')
-        self.assertTrue(lines[1].startswith('  begin_params = None'))
+        self.assertEqual(lines[0], "BpeResults")
+        self.assertTrue(lines[1].startswith("  begin_params = None"))
 
     def test_pprint(self) -> None:
-        self.bpe_results.param_names = ['a'.encode('utf-8')]
+        self.bpe_results.param_names = ["a".encode("utf-8")]
         self.bpe_results.begin_params = [1]
         self.bpe_results.final_params = [2]
         with capture_output() as out:
             self.bpe_results.pprint()
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().strip().split("\n")
         out.close()
-        self.assertEqual(lines[0], 'Initial cost: None')
-        self.assertEqual(lines[1], 'Initial parameters:')
-        self.assertEqual(lines[2].strip(), 'a = 1')
-        self.assertEqual(lines[3], 'Final cost: None')
-        self.assertEqual(lines[4], 'Final parameters:')
-        self.assertEqual(lines[5].strip(), 'a = 2')
+        self.assertEqual(lines[0], "Initial cost: None")
+        self.assertEqual(lines[1], "Initial parameters:")
+        self.assertEqual(lines[2].strip(), "a = 1")
+        self.assertEqual(lines[3], "Final cost: None")
+        self.assertEqual(lines[4], "Final parameters:")
+        self.assertEqual(lines[5].strip(), "a = 2")
 
     def test_pprint2(self) -> None:
         with capture_output() as out:
             self.bpe_results.pprint()
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, '')
+        self.assertEqual(output, "")
 
     def tearDown(self) -> None:
         self.filename.unlink(missing_ok=True)
@@ -317,16 +317,16 @@ class Test_estimation_CurrentResults(unittest.TestCase):
     def test_printing(self) -> None:
         with capture_output() as out:
             print(self.current_results)
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().strip().split("\n")
         out.close()
-        self.assertEqual(lines[0], 'Current Results:')
-        self.assertEqual(lines[1], '  Trust Radius: None')
-        self.assertEqual(lines[2], '  Best Cost: None')
-        self.assertEqual(lines[3], '  Best Params: None')
+        self.assertEqual(lines[0], "Current Results:")
+        self.assertEqual(lines[1], "  Trust Radius: None")
+        self.assertEqual(lines[2], "  Best Cost: None")
+        self.assertEqual(lines[3], "  Best Params: None")
 
 
 #%% estimation.batch._print_divider
-@patch('dstauffman.estimation.batch.logger')
+@patch("dstauffman.estimation.batch.logger")
 class Test_estimation_batch__print_divider(unittest.TestCase):
     r"""
     Tests the estimation.batch._print_divider function with the following cases:
@@ -335,38 +335,38 @@ class Test_estimation_batch__print_divider(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.output = '******************************'
+        self.output = "******************************"
 
     def test_with_new_line(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
         estm.batch._print_divider()
         self.assertEqual(mock_logger.log.call_count, 2)
-        mock_logger.log.assert_any_call(LogLevel.L5, ' ')
-        mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
+        mock_logger.log.assert_any_call(LogLevel.L5, " ")
+        mock_logger.log.assert_any_call(LogLevel.L5, "******************************")
 
     def test_no_new_line(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(LogLevel.L8)
         estm.batch._print_divider(new_line=False)
-        mock_logger.log.assert_called_with(LogLevel.L5, '******************************')
+        mock_logger.log.assert_called_with(LogLevel.L5, "******************************")
 
     def test_alternative_level(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(LogLevel.L2)
         estm.batch._print_divider(level=LogLevel.L0)
         self.assertEqual(mock_logger.log.call_count, 2)
-        mock_logger.log.assert_any_call(LogLevel.L0, ' ')
-        mock_logger.log.assert_any_call(LogLevel.L0, '******************************')
+        mock_logger.log.assert_any_call(LogLevel.L0, " ")
+        mock_logger.log.assert_any_call(LogLevel.L0, "******************************")
 
     def test_not_logging(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(LogLevel.L2)
         estm.batch._print_divider()
         self.assertEqual(mock_logger.log.call_count, 2)
-        mock_logger.log.assert_any_call(LogLevel.L5, ' ')
-        mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
+        mock_logger.log.assert_any_call(LogLevel.L5, " ")
+        mock_logger.log.assert_any_call(LogLevel.L5, "******************************")
         # TODO: how to test that this wouldn't log anything?
 
 
 #%% estimation.batch._function_wrapper
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_batch__function_wrapper(unittest.TestCase):
     r"""
     Tests the estimation.batch._function_wrapper function with the following cases:
@@ -397,7 +397,7 @@ class Test_estimation_batch__function_wrapper(unittest.TestCase):
     def test_model_args(self) -> None:
         (innovs, results) = estm.batch._function_wrapper(
             model_func=self.model_func,
-            model_args={'a': 5},
+            model_args={"a": 5},
             cost_func=self.cost_func,
             cost_args=self.cost_args,
             return_results=True,
@@ -410,7 +410,7 @@ class Test_estimation_batch__function_wrapper(unittest.TestCase):
             model_func=self.model_func,
             model_args=self.model_args,
             cost_func=self.cost_func,
-            cost_args={'a': 5},
+            cost_args={"a": 5},
             return_results=True,
         )
         np.testing.assert_array_equal(results, self.results)
@@ -418,7 +418,7 @@ class Test_estimation_batch__function_wrapper(unittest.TestCase):
 
     def test_innov_only(self) -> None:
         innovs = estm.batch._function_wrapper(
-            model_func=self.model_func, model_args=self.model_args, cost_func=self.cost_func, cost_args={'a': 5}
+            model_func=self.model_func, model_args=self.model_args, cost_func=self.cost_func, cost_args={"a": 5}
         )
         np.testing.assert_array_equal(innovs, self.innovs)
 
@@ -433,8 +433,8 @@ class Test_estimation_batch__parfor_function_wrapper(unittest.TestCase):
 
 
 #%% estimation.batch._finite_differences
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
-@patch('dstauffman.estimation.batch.logger')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@patch("dstauffman.estimation.batch.logger")
 class Test_estimation_batch__finite_differences(unittest.TestCase):
     r"""
     Tests the estimation.batch._finite_differences function with the following cases:
@@ -444,26 +444,26 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        time       = np.arange(251)
+        time = np.arange(251)
         sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time = np.arange(-10, 201)
         truth_data = 5 * np.sin(2 * np.pi * 10 * time / 1000 + 90 * np.pi / 180)
 
-        self.opti_opts                = estm.OptiOpts()
-        self.opti_opts.model_func     = sim_model
-        self.opti_opts.model_args     = {'sim_params': sim_params}
-        self.opti_opts.cost_func      = cost_wrapper
-        self.opti_opts.cost_args      = {'results_time': time, 'truth_time': truth_time, 'truth_data': truth_data}
+        self.opti_opts = estm.OptiOpts()
+        self.opti_opts.model_func = sim_model
+        self.opti_opts.model_args = {"sim_params": sim_params}
+        self.opti_opts.cost_func = cost_wrapper
+        self.opti_opts.cost_args = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
-        self.opti_opts.output_folder  = None
-        self.opti_opts.output_results = ''
-        self.opti_opts.params         = []
+        self.opti_opts.output_folder = None
+        self.opti_opts.output_results = ""
+        self.opti_opts.params = []
 
         # Parameters to estimate
-        self.opti_opts.params.append(estm.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
-        self.opti_opts.params.append(estm.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
-        self.opti_opts.params.append(estm.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+        self.opti_opts.params.append(estm.OptiParam("magnitude", best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+        self.opti_opts.params.append(estm.OptiParam("frequency", best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+        self.opti_opts.params.append(estm.OptiParam("phase", best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
         self.model_args = self.opti_opts.model_args
 
@@ -484,10 +484,10 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)
 
         # set relevant results variables
-        self.bpe_results.param_names  = [name.encode('utf-8') for name in names]
+        self.bpe_results.param_names = [name.encode("utf-8") for name in names]
         self.bpe_results.begin_params = self.cur_results.params.copy()
         self.bpe_results.begin_innovs = self.cur_results.innovs.copy()
-        self.bpe_results.begin_cost   = self.cur_results.cost
+        self.bpe_results.begin_cost = self.cur_results.cost
         self.bpe_results.costs.append(self.cur_results.cost)
 
         self.two_sided = False
@@ -551,7 +551,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
 
 
 #%% estimation.batch._levenberg_marquardt
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_batch__levenberg_marquardt(unittest.TestCase):
     r"""
     Tests the estimation.batch._levenberg_marquardt function with the following cases:
@@ -576,7 +576,7 @@ class Test_estimation_batch__levenberg_marquardt(unittest.TestCase):
 
 
 #%% estimation.batch._predict_func_change
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_batch__predict_func_change(unittest.TestCase):
     r"""
     Tests the estimation.batch._predict_func_change function with the following cases:
@@ -595,7 +595,7 @@ class Test_estimation_batch__predict_func_change(unittest.TestCase):
 
 
 #%% estimation.batch._check_for_convergence
-@patch('dstauffman.estimation.batch.logger')
+@patch("dstauffman.estimation.batch.logger")
 class Test_estimation_batch__check_for_convergence(unittest.TestCase):
     r"""
     Tests the estimation.batch._check_for_convergence function with the following cases:
@@ -604,7 +604,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        self.opti_opts = type('Class1', (object,), {'tol_cosmax_grad': 1, 'tol_delta_step': 2, 'tol_delta_cost': 3})
+        self.opti_opts = type("Class1", (object,), {"tol_cosmax_grad": 1, "tol_delta_step": 2, "tol_delta_cost": 3})
         self.cosmax = 10
         self.delta_step_len = 10
         self.pred_func_change = 10
@@ -618,7 +618,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.assertTrue(convergence)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(
-            LogLevel.L3, 'Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1'
+            LogLevel.L3, "Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1"
         )
 
     def test_convergence2(self, mock_logger: Mock) -> None:
@@ -626,7 +626,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.assertTrue(convergence)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(
-            LogLevel.L3, 'Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2'
+            LogLevel.L3, "Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2"
         )
 
     def test_convergence3(self, mock_logger: Mock) -> None:
@@ -634,7 +634,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.assertTrue(convergence)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(
-            LogLevel.L3, 'Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3'
+            LogLevel.L3, "Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3"
         )
 
     def test_convergence4(self, mock_logger: Mock) -> None:
@@ -642,26 +642,26 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.assertTrue(convergence)
         self.assertEqual(mock_logger.log.call_count, 3)
         mock_logger.log.assert_any_call(
-            LogLevel.L3, 'Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1'
+            LogLevel.L3, "Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1"
         )
         mock_logger.log.assert_any_call(
-            LogLevel.L3, 'Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2'
+            LogLevel.L3, "Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2"
         )
         mock_logger.log.assert_any_call(
-            LogLevel.L3, 'Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3'
+            LogLevel.L3, "Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3"
         )
 
     def test_no_logging(self, mock_logger: Mock) -> None:
         mock_logger.setLevel(logging.NOTSET)  # CRITICAL
-        with capture_output('err') as err:
+        with capture_output("err") as err:
             convergence = estm.batch._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
         self.assertTrue(convergence)
         error = err.getvalue().strip()
-        self.assertEqual(error, '')
+        self.assertEqual(error, "")
 
 
 #%% estimation.batch._double_dogleg
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_batch__double_dogleg(unittest.TestCase):
     r"""
     Tests the estimation.batch._double_dogleg function with the following cases:
@@ -715,8 +715,8 @@ class Test_estimation_batch__double_dogleg(unittest.TestCase):
 
 
 #%% estimation.batch._dogleg_search
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
-@patch('dstauffman.estimation.batch.logger')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@patch("dstauffman.estimation.batch.logger")
 class Test_estimation_batch__dogleg_search(unittest.TestCase):
     r"""
     Tests the estimation.batch._dogleg_search function with the following cases:
@@ -725,26 +725,26 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        time       = np.arange(251)
+        time = np.arange(251)
         sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time = np.arange(-10, 201)
         truth_data = 5 * np.sin(2 * np.pi * 10 * time / 1000 + 90 * np.pi / 180)
 
-        self.opti_opts                = estm.OptiOpts()
-        self.opti_opts.model_func     = sim_model
-        self.opti_opts.model_args     = {'sim_params': sim_params}
-        self.opti_opts.cost_func      = cost_wrapper
-        self.opti_opts.cost_args      = {'results_time': time, 'truth_time': truth_time, 'truth_data': truth_data}
+        self.opti_opts = estm.OptiOpts()
+        self.opti_opts.model_func = sim_model
+        self.opti_opts.model_args = {"sim_params": sim_params}
+        self.opti_opts.cost_func = cost_wrapper
+        self.opti_opts.cost_args = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
-        self.opti_opts.output_folder  = None
-        self.opti_opts.output_results = ''
-        self.opti_opts.params         = []
+        self.opti_opts.output_folder = None
+        self.opti_opts.output_results = ""
+        self.opti_opts.params = []
 
         # Parameters to estimate
-        self.opti_opts.params.append(estm.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
-        self.opti_opts.params.append(estm.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
-        self.opti_opts.params.append(estm.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+        self.opti_opts.params.append(estm.OptiParam("magnitude", best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+        self.opti_opts.params.append(estm.OptiParam("frequency", best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+        self.opti_opts.params.append(estm.OptiParam("phase", best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
         self.model_args = self.opti_opts.model_args
 
@@ -765,17 +765,17 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)
 
         # set relevant results variables
-        self.bpe_results.param_names  = [name.encode('utf-8') for name in names]
+        self.bpe_results.param_names = [name.encode("utf-8") for name in names]
         self.bpe_results.begin_params = self.cur_results.params.copy()
         self.bpe_results.begin_innovs = self.cur_results.innovs.copy()
-        self.bpe_results.begin_cost   = self.cur_results.cost
+        self.bpe_results.begin_cost = self.cur_results.cost
         self.bpe_results.costs.append(self.cur_results.cost)
 
         self.delta_param = np.array([1.0, 2.0, 3.0])
-        self.gradient    = np.array([4.0, 5.0, 6.0])
-        self.hessian     = np.array([[5.0, 2.0, 1.0], [1.0, 2.0, 5.0], [3.0, 3.0, 3.0]])
-        self.jacobian    = np.random.rand(201, 3)
-        self.normalized  = False
+        self.gradient = np.array([4.0, 5.0, 6.0])
+        self.hessian = np.array([[5.0, 2.0, 1.0], [1.0, 2.0, 5.0], [3.0, 3.0, 3.0]])
+        self.jacobian = np.random.rand(201, 3)
+        self.normalized = False
 
     def test_nominal(self, mock_logger: Mock) -> None:
         estm.batch._dogleg_search(
@@ -805,7 +805,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         )
 
     def test_levenberg_marquardt(self, mock_logger: Mock) -> None:
-        self.opti_opts.search_method = 'levenberg_marquardt'
+        self.opti_opts.search_method = "levenberg_marquardt"
         estm.batch._dogleg_search(
             self.opti_opts,
             self.opti_opts.model_args,
@@ -819,7 +819,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         )
 
     def test_bad_method(self, mock_logger: Mock) -> None:
-        self.opti_opts.search_method = 'bad_method'
+        self.opti_opts.search_method = "bad_method"
         with self.assertRaises(ValueError):
             estm.batch._dogleg_search(
                 self.opti_opts,
@@ -864,8 +864,8 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
 
 
 #%% estimation.batch._analyze_results
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
-@patch('dstauffman.estimation.batch.logger')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@patch("dstauffman.estimation.batch.logger")
 class Test_estimation_batch__analyze_results(unittest.TestCase):
     r"""
     Tests the estimation.batch._analyze_results function with the following cases:
@@ -875,9 +875,9 @@ class Test_estimation_batch__analyze_results(unittest.TestCase):
 
     def setUp(self) -> None:
         self.opti_opts = estm.OptiOpts()
-        self.opti_opts.params = [estm.OptiParam('a'), estm.OptiParam('b')]
+        self.opti_opts.params = [estm.OptiParam("a"), estm.OptiParam("b")]
         self.bpe_results = estm.BpeResults()
-        self.bpe_results.param_names = [x.encode('utf-8') for x in ['a', 'b']]
+        self.bpe_results.param_names = [x.encode("utf-8") for x in ["a", "b"]]
         self.jacobian = np.array([[1, 2], [3, 4], [5, 6]])
         self.normalized = False
 
@@ -894,7 +894,7 @@ class Test_estimation_batch__analyze_results(unittest.TestCase):
 
 
 #%% estimation.validate_opti_opts
-@patch('dstauffman.estimation.batch.logger')
+@patch("dstauffman.estimation.batch.logger")
 class Test_estimation_validate_opti_opts(unittest.TestCase):
     r"""
     Tests the estimation.validate_opti_opts function with the following cases:
@@ -904,15 +904,15 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
         self.opti_opts = estm.OptiOpts()
-        self.opti_opts.model_func     = str
-        self.opti_opts.model_args     = {'a': 1}
-        self.opti_opts.cost_func      = str
-        self.opti_opts.cost_args      = {'b': 2}
+        self.opti_opts.model_func = str
+        self.opti_opts.model_args = {"a": 1}
+        self.opti_opts.cost_func = str
+        self.opti_opts.cost_args = {"b": 2}
         self.opti_opts.get_param_func = str
         self.opti_opts.set_param_func = repr
-        self.opti_opts.output_folder  = None
-        self.opti_opts.output_results = ''
-        self.opti_opts.params         = [1, 2]
+        self.opti_opts.output_folder = None
+        self.opti_opts.output_results = ""
+        self.opti_opts.params = [1, 2]
 
     def support(self) -> None:
         with self.assertRaises(AssertionError):
@@ -921,15 +921,15 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
     def test_nominal(self, mock_logger: Mock) -> None:
         is_valid = estm.validate_opti_opts(self.opti_opts)
         self.assertTrue(is_valid)
-        mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
-        mock_logger.log.assert_any_call(LogLevel.L5, 'Validating optimization options.')
+        mock_logger.log.assert_any_call(LogLevel.L5, "******************************")
+        mock_logger.log.assert_any_call(LogLevel.L5, "Validating optimization options.")
 
     def test_no_logging(self, mock_logger: Mock) -> None:
         estm.batch.logger.setLevel(LogLevel.L3)
         is_valid = estm.validate_opti_opts(self.opti_opts)
         self.assertTrue(is_valid)
-        mock_logger.log.assert_any_call(LogLevel.L5, '******************************')
-        mock_logger.log.assert_any_call(LogLevel.L5, 'Validating optimization options.')
+        mock_logger.log.assert_any_call(LogLevel.L5, "******************************")
+        mock_logger.log.assert_any_call(LogLevel.L5, "Validating optimization options.")
 
     def test_not_valid1(self, mock_logger: Mock) -> None:
         self.opti_opts.model_func = None  # type: ignore[assignment]
@@ -964,17 +964,17 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
         self.support()
 
     def test_not_valid9(self, mock_logger: Mock) -> None:
-        self.opti_opts.slope_method = 'bad_sided'
+        self.opti_opts.slope_method = "bad_sided"
         self.support()
 
     def test_not_valid10(self, mock_logger: Mock) -> None:
-        self.opti_opts.search_method = 'wild_ass_guess'
+        self.opti_opts.search_method = "wild_ass_guess"
         self.support()
 
 
 #%% estimation.run_bpe
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
-@patch('dstauffman.estimation.batch.logger')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@patch("dstauffman.estimation.batch.logger")
 class Test_estimation_run_bpe(unittest.TestCase):
     r"""
     Tests the estimation.run_bpe function with the following cases:
@@ -983,26 +983,26 @@ class Test_estimation_run_bpe(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        time       = np.arange(251)
+        time = np.arange(251)
         sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time = np.arange(-10, 201)
         truth_data = 5 * np.sin(2 * np.pi * 10 * time / 1000 + 90 * np.pi / 180)
 
-        self.opti_opts                = estm.OptiOpts()
-        self.opti_opts.model_func     = sim_model
-        self.opti_opts.model_args     = {'sim_params': sim_params}
-        self.opti_opts.cost_func      = cost_wrapper
-        self.opti_opts.cost_args      = {'results_time': time, 'truth_time': truth_time, 'truth_data': truth_data}
+        self.opti_opts = estm.OptiOpts()
+        self.opti_opts.model_func = sim_model
+        self.opti_opts.model_args = {"sim_params": sim_params}
+        self.opti_opts.cost_func = cost_wrapper
+        self.opti_opts.cost_args = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
-        self.opti_opts.output_folder  = None
-        self.opti_opts.output_results = ''
-        self.opti_opts.params         = []
+        self.opti_opts.output_folder = None
+        self.opti_opts.output_results = ""
+        self.opti_opts.params = []
 
         # Parameters to estimate
-        self.opti_opts.params.append(estm.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
-        self.opti_opts.params.append(estm.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
-        self.opti_opts.params.append(estm.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+        self.opti_opts.params.append(estm.OptiParam("magnitude", best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+        self.opti_opts.params.append(estm.OptiParam("frequency", best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+        self.opti_opts.params.append(estm.OptiParam("phase", best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
     def test_nominal(self, mock_logger: Mock) -> None:
         mock_logger.level = LogLevel.L5
@@ -1028,7 +1028,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
 
     def test_two_sided(self, mock_logger: Mock) -> None:
         mock_logger.level = LogLevel.L5
-        self.opti_opts.slope_method = 'two_sided'
+        self.opti_opts.slope_method = "two_sided"
         estm.run_bpe(self.opti_opts)
         # for (ix, line) in enumerate(lines):
         #     if line == 'Running iteration 1.':
@@ -1051,18 +1051,18 @@ class Test_estimation_run_bpe(unittest.TestCase):
         # else:
         #     self.assertTrue(False, "Didn't converge")
 
-    @unittest.skipIf(not HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_saving(self, mock_logger: Mock) -> None:
         mock_logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
         self.opti_opts.max_iters = 1
         self.opti_opts.output_folder = get_tests_dir()
-        self.opti_opts.output_results = 'temp_results.hdf5'
+        self.opti_opts.output_results = "temp_results.hdf5"
         estm.run_bpe(self.opti_opts)
         # TODO: test with more iterations and files?
 
     def test_startup_finish_funcs(self, mock_logger: Mock) -> None:
-        self.opti_opts.start_func = lambda sim_params: {'settings': None, 'additional': None}
+        self.opti_opts.start_func = lambda sim_params: {"settings": None, "additional": None}
         self.opti_opts.final_func = lambda sim_params, settings, additional: None
         estm.batch.logger.setLevel(logging.CRITICAL)
         mock_logger.level = logging.CRITICAL
@@ -1079,11 +1079,11 @@ class Test_estimation_run_bpe(unittest.TestCase):
 
     def tearDown(self) -> None:
         if self.opti_opts.output_results and self.opti_opts.output_folder is not None:
-            files = [self.opti_opts.output_results, 'bpe_results_iter_1.hdf5', 'cur_results_iter_1.hdf5']
+            files = [self.opti_opts.output_results, "bpe_results_iter_1.hdf5", "cur_results_iter_1.hdf5"]
             for this_file in files:
                 self.opti_opts.output_folder.joinpath(this_file).unlink(missing_ok=True)
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

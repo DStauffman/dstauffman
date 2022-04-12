@@ -24,7 +24,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% plotting.make_quaternion_plot
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_quaternion_plot(unittest.TestCase):
     r"""
     Tests the plotting.make_quaternion_plot function with the following cases:
@@ -32,14 +32,14 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description      = 'example'
+        self.description      = "example"
         self.time_one         = np.arange(11)
         self.time_two         = np.arange(2, 13)
         self.quat_one         = quat_norm(np.random.rand(4, 11))
         self.quat_two         = quat_norm(np.random.rand(4, 11))
-        self.name_one         = 'test1'
-        self.name_two         = 'test2'
-        self.time_units       = 'sec'
+        self.name_one         = "test1"
+        self.name_two         = "test2"
+        self.time_units       = "sec"
         self.start_date       = str(datetime.datetime.now())
         self.plot_components  = True
         self.rms_xmin         = 0
@@ -51,9 +51,9 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.use_mean         = False
         self.plot_zero        = False
         self.show_rms         = True
-        self.legend_loc       = 'best'
+        self.legend_loc       = "best"
         self.show_extra       = True
-        self.second_units     = (u'µrad', 1e6)
+        self.second_units     = (u"µrad", 1e6)
         self.data_as_rows     = True
         self.tolerance        = 0
         self.return_err       = False
@@ -92,7 +92,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             label_vert_lines=self.label_vert_lines,
         )
         for i in range(3):
-            self.assertLess(abs(err['diff'][i]), 3.15)
+            self.assertLess(abs(err["diff"][i]), 3.15)
 
     def test_no_subplots(self) -> None:
         self.make_subplots = False
@@ -126,7 +126,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             label_vert_lines=self.label_vert_lines,
         )
         for i in range(3):
-            self.assertLess(abs(err['diff'][i]), 3.15)
+            self.assertLess(abs(err["diff"][i]), 3.15)
 
     def test_no_components(self) -> None:
         self.plot_components = False
@@ -160,11 +160,11 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             label_vert_lines=self.label_vert_lines,
         )
         for i in range(3):
-            self.assertLess(abs(err['diff'][i]), 3.15)
-        self.assertLess(abs(err['mag']), 3.15)
+            self.assertLess(abs(err["diff"][i]), 3.15)
+        self.assertLess(abs(err["mag"]), 3.15)
 
     def test_no_start_date(self) -> None:
-        self.start_date = ''
+        self.start_date = ""
         self.return_err = True
         (self.figs, err) = plot.make_quaternion_plot(
             self.description,
@@ -195,11 +195,11 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             label_vert_lines=self.label_vert_lines,
         )
         for i in range(3):
-            self.assertLess(abs(err['diff'][i]), 3.15)
+            self.assertLess(abs(err["diff"][i]), 3.15)
 
     def test_only_quat_one(self) -> None:
         self.quat_two.fill(np.nan)
-        self.name_two = ''
+        self.name_two = ""
         self.return_err = True
         (self.figs, err) = plot.make_quaternion_plot(
             self.description,
@@ -229,10 +229,10 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
-        self.assertTrue(np.all(np.isnan(err['diff'])))
+        self.assertTrue(np.all(np.isnan(err["diff"])))
 
     def test_only_quat_two(self) -> None:
-        self.name_one = ''
+        self.name_one = ""
         self.return_err = True
         (self.figs, err) = plot.make_quaternion_plot(
             self.description,
@@ -262,7 +262,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
-        self.assertTrue(np.all(np.isnan(err['diff'])))
+        self.assertTrue(np.all(np.isnan(err["diff"])))
 
     def test_rms_bounds(self) -> None:
         self.rms_xmin = 5
@@ -297,7 +297,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             label_vert_lines=self.label_vert_lines,
         )
         for i in range(3):
-            self.assertLess(abs(err['diff'][i]), 3.15)
+            self.assertLess(abs(err["diff"][i]), 3.15)
 
     def test_use_mean(self) -> None:
         self.figs = plot.make_quaternion_plot(
@@ -330,12 +330,12 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_none2(self) -> None:
         self.figs = plot.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)
 
-    @patch('dstauffman.plotting.generic.logger')
+    @patch("dstauffman.plotting.generic.logger")
     def test_none3(self, mock_logger):
-        self.figs = plot.make_quaternion_plot('', None, None, None, None)
+        self.figs = plot.make_quaternion_plot("", None, None, None, None)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(
-            LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', 'quat', ''
+            LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', "quat", ""
         )
 
     def tearDown(self) -> None:
@@ -416,7 +416,7 @@ class Test_plotting_plot_states(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     if HAVE_MPL:
         plt.ioff()
     unittest.main(exit=False)

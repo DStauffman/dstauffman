@@ -339,6 +339,6 @@ def update_covariance_opt(P, K, H):
 
 
 #%% Unit Test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_estimation_kalman', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_estimation_kalman", exit=False)
     doctest.testmod(verbose=False)

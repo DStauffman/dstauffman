@@ -56,7 +56,7 @@ logger = logging.getLogger(__name__)
 
 _Plotter: bool = True
 
-_Date = TypeVar('_Date', float, datetime.datetime)
+_Date = TypeVar("_Date", float, datetime.datetime)
 
 #%% Classes - Opts
 class Opts(Frozen):
@@ -116,29 +116,29 @@ class Opts(Frozen):
             .names     : list of str
                 Names of the data structures to be plotted
         """
-        self.case_name: str   = ''
+        self.case_name: str = ""
         self.date_zero: Optional[datetime.datetime] = None
-        self.save_plot: bool  = False
+        self.save_plot: bool = False
         self.save_path: Optional[Path] = None
-        self.show_plot: bool  = True
-        self.show_link: bool  = False
-        self.plot_type: str   = 'png'
-        self.sub_plots: bool  = True
-        self.sing_line: bool  = False
+        self.show_plot: bool = True
+        self.show_link: bool = False
+        self.plot_type: str = "png"
+        self.sub_plots: bool = True
+        self.sing_line: bool = False
         self.disp_xmin: _Date = -inf
-        self.disp_xmax: _Date =  inf
-        self.rms_xmin: _Date  = -inf
-        self.rms_xmax: _Date  =  inf
-        self.show_rms: bool   = True
-        self.use_mean: bool   = False
-        self.show_zero: bool  = False
-        self.quat_comp: bool  = True
-        self.show_xtra: bool  = True
-        self.time_base: str   = 'sec'
-        self.time_unit: str   = 'sec'
+        self.disp_xmax: _Date = inf
+        self.rms_xmin: _Date = -inf
+        self.rms_xmax: _Date = inf
+        self.show_rms: bool = True
+        self.use_mean: bool = False
+        self.show_zero: bool = False
+        self.quat_comp: bool = True
+        self.show_xtra: bool = True
+        self.time_base: str = "sec"
+        self.time_unit: str = "sec"
         self.colormap: Union[str, ColorMap] = None
-        self.leg_spot: str    = 'best'
-        self.classify: str    = ''
+        self.leg_spot: str = "best"
+        self.classify: str = ""
         self.names: List[str] = list()
         for arg in args:
             if arg is None:
@@ -150,29 +150,29 @@ class Opts(Frozen):
                     else:
                         raise ValueError(f'Unexpected option of "{key}" passed to Opts initializer."')
             else:
-                raise ValueError('Unexpected input argument receieved.')
+                raise ValueError("Unexpected input argument receieved.")
         use_datetime = False
         for (key, value) in kwargs.items():
-            if key == 'use_datetime':
+            if key == "use_datetime":
                 use_datetime = value
             elif hasattr(self, key):
                 setattr(self, key, value)
             else:
                 raise ValueError(f'Unexpected option of "{key}" passed to Opts initializer."')
         if use_datetime:
-            self.convert_dates('datetime')
+            self.convert_dates("datetime")
 
-    def __copy__(self) -> 'Opts':
+    def __copy__(self) -> "Opts":
         r"""Allows a new copy to be generated with data from the original."""
         new = type(self)(self)
         return new
 
     def get_names(self, ix: int) -> str:
         r"""Get the specified name from the list."""
-        if hasattr(self, 'names') and len(self.names) >= ix + 1:
+        if hasattr(self, "names") and len(self.names) >= ix + 1:
             name = self.names[ix]
         else:
-            name = ''
+            name = ""
         return name
 
     def get_date_zero_str(self, date: Union[datetime.datetime, np.ndarray] = None) -> str:
@@ -194,18 +194,18 @@ class Opts(Frozen):
           t(0) = 01-Apr-2019 18:00:00 Z
 
         """
-        TIMESTR_FORMAT = '%d-%b-%Y %H:%M:%S'
+        TIMESTR_FORMAT = "%d-%b-%Y %H:%M:%S"
         if date is None:
             if self.date_zero is None:
-                start_date: str = ''
+                start_date: str = ""
             else:
-                start_date = '  t(0) = ' + self.date_zero.strftime(TIMESTR_FORMAT) + ' Z'
+                start_date = "  t(0) = " + self.date_zero.strftime(TIMESTR_FORMAT) + " Z"
         else:
             if isinstance(date, datetime.datetime):
-                start_date = '  t(0) = ' + date.strftime(TIMESTR_FORMAT) + ' Z'
+                start_date = "  t(0) = " + date.strftime(TIMESTR_FORMAT) + " Z"
             else:
                 temp_date = datetime.datetime(*date)
-                start_date = '  t(0) = ' + temp_date.strftime(TIMESTR_FORMAT) + ' Z'
+                start_date = "  t(0) = " + temp_date.strftime(TIMESTR_FORMAT) + " Z"
         return start_date
 
     def get_time_limits(self) -> Tuple[_Date, _Date, _Date, _Date]:
@@ -216,18 +216,18 @@ class Opts(Frozen):
                 return convert_time_units(value, self.time_base, self.time_unit)
             return value
 
-        if self.time_base == 'datetime':
+        if self.time_base == "datetime":
             return (self.disp_xmin, self.disp_xmax, self.rms_xmin, self.rms_xmax)
 
         disp_xmin = _convert(self.disp_xmin)
         disp_xmax = _convert(self.disp_xmax)
-        rms_xmin  = _convert(self.rms_xmin)
-        rms_xmax  = _convert(self.rms_xmax)
+        rms_xmin = _convert(self.rms_xmin)
+        rms_xmax = _convert(self.rms_xmax)
         return (disp_xmin, disp_xmax, rms_xmin, rms_xmax)
 
-    def convert_dates(self, form: str, old_form: str = 'sec', numpy_form: str = 'datetime64[ns]') -> 'Opts':
+    def convert_dates(self, form: str, old_form: str = "sec", numpy_form: str = "datetime64[ns]") -> "Opts":
         r"""Converts between double and datetime representations."""
-        assert form in {'datetime', 'numpy', 'sec'}, f'Unexpected form of "{form}".'
+        assert form in {"datetime", "numpy", "sec"}, f'Unexpected form of "{form}".'
         self.time_base = form
         self.time_unit = form
         self.disp_xmin = convert_date(
@@ -345,27 +345,27 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     """
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
-        logger.log(LogLevel.L5, f' {description} plot skipped due to missing data.')
+        logger.log(LogLevel.L5, f" {description} plot skipped due to missing data.")
         return None
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # opts overrides
-    this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
+    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
-    time_units   = kwargs.pop('time_units', this_opts.time_base)
-    start_date   = kwargs.pop('start_date', this_opts.get_date_zero_str())
-    rms_xmin     = kwargs.pop('rms_xmin', this_opts.rms_xmin)
-    rms_xmax     = kwargs.pop('rms_xmax', this_opts.rms_xmax)
-    disp_xmin    = kwargs.pop('disp_xmin', this_opts.disp_xmin)
-    disp_xmax    = kwargs.pop('disp_xmax', this_opts.disp_xmax)
-    single_lines = kwargs.pop('single_lines', this_opts.sing_line)
-    colormap     = kwargs.pop('colormap', this_opts.colormap)
-    use_mean     = kwargs.pop('use_mean', this_opts.use_mean)
-    plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
-    show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
-    legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
+    time_units = kwargs.pop("time_units", this_opts.time_base)
+    start_date = kwargs.pop("start_date", this_opts.get_date_zero_str())
+    rms_xmin = kwargs.pop("rms_xmin", this_opts.rms_xmin)
+    rms_xmax = kwargs.pop("rms_xmax", this_opts.rms_xmax)
+    disp_xmin = kwargs.pop("disp_xmin", this_opts.disp_xmin)
+    disp_xmax = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    single_lines = kwargs.pop("single_lines", this_opts.sing_line)
+    colormap = kwargs.pop("colormap", this_opts.colormap)
+    use_mean = kwargs.pop("use_mean", this_opts.use_mean)
+    plot_zero = kwargs.pop("plot_zero", this_opts.show_zero)
+    show_rms = kwargs.pop("show_rms", this_opts.show_rms)
+    legend_loc = kwargs.pop("legend_loc", this_opts.leg_spot)
 
     # call wrapper function for most of the details
     fig = make_time_plot(
@@ -397,20 +397,20 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
 def plot_correlation_matrix(
     data,
     labels=None,
-    units='',
+    units="",
     *,
     opts=None,
-    matrix_name='Correlation Matrix',
+    matrix_name="Correlation Matrix",
     cmin=0,
     cmax=1,
-    xlabel='',
-    ylabel='',
+    xlabel="",
+    ylabel="",
     plot_lower_only=True,
     label_values=False,
     x_lab_rot=90,
     colormap=None,
     plot_border=None,
-    leg_scale='unity',
+    leg_scale="unity",
     fig_ax=None,
     skip_setup_plots=False,
 ):
@@ -500,7 +500,7 @@ def plot_correlation_matrix(
         opts = Opts()
     if colormap is None:
         if opts.colormap is None:
-            colormap = 'cool'
+            colormap = "cool"
         else:
             colormap = opts.colormap
     (new_units, scale) = get_unit_conversion(leg_scale, units)
@@ -525,7 +525,7 @@ def plot_correlation_matrix(
             ylab = labels
     # check lengths
     if len(xlab) != m or len(ylab) != n:
-        raise ValueError('Incorrectly sized labels.')
+        raise ValueError("Incorrectly sized labels.")
 
     # Determine if symmetric
     if m == n and np.all(
@@ -550,7 +550,7 @@ def plot_correlation_matrix(
         cmax = temp
 
     # determine which type of data to plot
-    this_title = matrix_name + (' [' + new_units + ']' if new_units else '')
+    this_title = matrix_name + (" [" + new_units + "]" if new_units else "")
 
     # Create plots
     if fig_ax is None:
@@ -566,7 +566,7 @@ def plot_correlation_matrix(
     else:
         fig.canvas.manager.set_window_title(sup.get_text())
     # set axis color to none
-    ax.patch.set_facecolor('none')
+    ax.patch.set_facecolor("none")
     # set title
     ax.set_title(this_title)
     # get colormap based on high and low limits
@@ -587,17 +587,17 @@ def plot_correlation_matrix(
                     )
                 if label_values:
                     ax.annotate(
-                        '{:.2g}'.format(scale * data[j, i]),
+                        "{:.2g}".format(scale * data[j, i]),
                         xy=(box_size * i + box_size / 2, box_size * j + box_size / 2),
-                        xycoords='data',
-                        horizontalalignment='center',
-                        verticalalignment='center',
+                        xycoords="data",
+                        horizontalalignment="center",
+                        verticalalignment="center",
                         fontsize=15,
                     )
     # show colorbar
     fig.colorbar(cm.get_smap(), ax=ax, shrink=0.9)
     # make square
-    ax.set_aspect('equal')
+    ax.set_aspect("equal")
     # set limits and tick labels
     ax.set_xlim(0, m)
     ax.set_ylim(0, n)
@@ -665,31 +665,31 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     """
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
-        logger.log(LogLevel.L5, f' {description} plot skipped due to missing data.')
+        logger.log(LogLevel.L5, f" {description} plot skipped due to missing data.")
         return
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # opts overrides
-    this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
+    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
-    time_units   = kwargs.pop('time_units', this_opts.time_base)
-    start_date   = kwargs.pop('start_date', this_opts.get_date_zero_str())
-    rms_xmin     = kwargs.pop('rms_xmin', this_opts.rms_xmin)
-    rms_xmax     = kwargs.pop('rms_xmax', this_opts.rms_xmax)
-    disp_xmin    = kwargs.pop('disp_xmin', this_opts.disp_xmin)
-    disp_xmax    = kwargs.pop('disp_xmax', this_opts.disp_xmax)
-    single_lines = kwargs.pop('single_lines', this_opts.sing_line)
-    colormap     = kwargs.pop('colormap', this_opts.colormap)
-    use_mean     = kwargs.pop('use_mean', this_opts.use_mean)
-    plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
-    show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
-    legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
+    time_units = kwargs.pop("time_units", this_opts.time_base)
+    start_date = kwargs.pop("start_date", this_opts.get_date_zero_str())
+    rms_xmin = kwargs.pop("rms_xmin", this_opts.rms_xmin)
+    rms_xmax = kwargs.pop("rms_xmax", this_opts.rms_xmax)
+    disp_xmin = kwargs.pop("disp_xmin", this_opts.disp_xmin)
+    disp_xmax = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    single_lines = kwargs.pop("single_lines", this_opts.sing_line)
+    colormap = kwargs.pop("colormap", this_opts.colormap)
+    use_mean = kwargs.pop("use_mean", this_opts.use_mean)
+    plot_zero = kwargs.pop("plot_zero", this_opts.show_zero)
+    show_rms = kwargs.pop("show_rms", this_opts.show_rms)
+    legend_loc = kwargs.pop("legend_loc", this_opts.leg_spot)
 
     # hard-coded values
     scale = 100
-    units = '%'
+    units = "%"
 
     # call wrapper function for most of the details
     fig = make_bar_plot(
@@ -725,10 +725,10 @@ def plot_histogram(
     bins,
     *,
     opts=None,
-    color='#1f77b4',
-    xlabel='Data',
-    ylabel='Number',
-    second_ylabel='Distribution [%]',
+    color="#1f77b4",
+    xlabel="Data",
+    ylabel="Number",
+    second_ylabel="Distribution [%]",
     normalize_spacing=False,
     use_exact_counts=False,
     show_pdf=False,
@@ -827,7 +827,7 @@ def plot_histogram(
         if use_exact_counts:
             num += 1
         if missing > 0:
-            xlab += ['Unbinned Data']
+            xlab += ["Unbinned Data"]
         plotting_bins = np.arange(num)
     else:
         plotting_bins = np.asanyarray(bins).copy()
@@ -842,7 +842,7 @@ def plot_histogram(
         rects.append(Rectangle((plotting_bins[i], 0), plotting_bins[i + 1] - plotting_bins[i], counts[i]))
     if missing > 0:
         rects.append(Rectangle((plotting_bins[-1], 0), 1, missing))
-    coll = PatchCollection(rects, facecolor=color, edgecolor='k')
+    coll = PatchCollection(rects, facecolor=color, edgecolor="k")
     ax.add_collection(coll)
     ax.grid(True)
     ax.set_xlabel(xlabel)
@@ -925,7 +925,7 @@ def setup_plots(figs, opts):
     if classification:
         for fig in figs:
             ax = fig.gca()
-            plot_classification(ax, classification, caveat=caveat, location='figure')
+            plot_classification(ax, classification, caveat=caveat, location="figure")
 
     # pack the figures
     bottom = 0.03 if classification else 0.0
@@ -951,7 +951,7 @@ def setup_plots(figs, opts):
 
 
 #%% Unit test
-if __name__ == '__main__':
+if __name__ == "__main__":
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_plotting_plotting', exit=False)
+    unittest.main(module="dstauffman.tests.test_plotting_plotting", exit=False)
     doctest.testmod(verbose=False)

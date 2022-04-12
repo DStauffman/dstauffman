@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     _B = Union[None, bool, np.ndarray]
     _I = Union[None, int, np.ndarray]
     _V = Union[None, float, np.ndarray]
-    _N = TypeVar('_N', float, np.ndarray)
+    _N = TypeVar("_N", float, np.ndarray)
 
 #%% Enums - OrbitType
 class OrbitType(IntEnumPlus):
@@ -112,7 +112,7 @@ class Elements(Frozen):
             self.type: _I = OrbitType.uninitialized
             self.equatorial: _B = False
             self.circular: _B = False
-            self.t: np.datetime64 = np.datetime64('nat', NP_DATETIME_UNITS)
+            self.t: np.datetime64 = np.datetime64("nat", NP_DATETIME_UNITS)
         else:
             self.a = np.full(num, np.nan)
             self.e = np.full(num, np.nan)
@@ -128,7 +128,7 @@ class Elements(Frozen):
             self.type = np.full(num, OrbitType.uninitialized, dtype=int)
             self.equatorial = np.zeros(num, dtype=bool)
             self.circular = np.zeros(num, dtype=bool)
-            self.t = np.full(num, np.datetime64('nat'), dtype=NP_DATETIME_FORM)  # type: ignore[assignment]
+            self.t = np.full(num, np.datetime64("nat"), dtype=NP_DATETIME_FORM)  # type: ignore[assignment]
 
     def __eq__(self, other: Any) -> bool:
         # if not of the same type, then they are not equal
@@ -138,10 +138,10 @@ class Elements(Frozen):
         for key in vars(self):
             x = getattr(self, key)
             y = getattr(other, key)
-            if key in {'type', 'equatorial', 'circular'}:
+            if key in {"type", "equatorial", "circular"}:
                 if not np.all(x == y):
                     return False
-            elif key in {'t'}:
+            elif key in {"t"}:
                 if not np.all((np.isnat(x) & np.isnat(y)) | (x == y)):
                     return False
             else:
@@ -156,7 +156,7 @@ class Elements(Frozen):
 
     def __getitem__(self, key):
         if self.a is None or isinstance(self.a, float):
-            raise IndexError('Elements is only a single instance and can not be indexed')
+            raise IndexError("Elements is only a single instance and can not be indexed")
         elements = Elements()
         for (field, value) in vars(self).items():
             setattr(elements, field, value[key])
@@ -183,19 +183,19 @@ class Elements(Frozen):
 
     def print_orrery(self, index: int = None):
         if index is None:
-            print(f'a = {self.a / 1000} km')  # type: ignore[operator]
-            print(f'e = {self.e}')
-            print(f'i = {self.i * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[operator]
-            print(f'\N{GREEK CAPITAL LETTER OMEGA} = {self.W * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[operator]
-            print(f'\N{GREEK SMALL LETTER OMEGA} = {self.w * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[operator]
-            print(f'M = {self.vo * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)')  # type: ignore[operator]
+            print(f"a = {self.a / 1000} km")  # type: ignore[operator]
+            print(f"e = {self.e}")
+            print(f"i = {self.i * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[operator]
+            print(f"\N{GREEK CAPITAL LETTER OMEGA} = {self.W * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[operator]
+            print(f"\N{GREEK SMALL LETTER OMEGA} = {self.w * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[operator]
+            print(f"M = {self.vo * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)")  # type: ignore[operator]
         else:
-            print(f'a = {self.a[index] / 1000} km')  # type: ignore[index]
-            print(f'e = {self.e[index]}')  # type: ignore[index]
-            print(f'i = {self.i[index] * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[index]
-            print(f'\N{GREEK CAPITAL LETTER OMEGA} = {self.W[index] * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[index]
-            print(f'\N{GREEK SMALL LETTER OMEGA} = {self.w[index] * RAD2DEG} {DEGREE_SIGN}')  # type: ignore[index]
-            print(f'M = {self.vo[index] * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)')  # type: ignore[index]
+            print(f"a = {self.a[index] / 1000} km")  # type: ignore[index]
+            print(f"e = {self.e[index]}")  # type: ignore[index]
+            print(f"i = {self.i[index] * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[index]
+            print(f"\N{GREEK CAPITAL LETTER OMEGA} = {self.W[index] * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[index]
+            print(f"\N{GREEK SMALL LETTER OMEGA} = {self.w[index] * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[index]
+            print(f"M = {self.vo[index] * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)")  # type: ignore[index]
 
 
 #%% Functions - _zero_divide
@@ -267,68 +267,68 @@ def two_line_elements(line1: str, line2: str) -> Elements:
      t          = 2006-05-11T19:03:00.000016096
 
     """
-    if not line1.startswith('1'):
+    if not line1.startswith("1"):
         raise ValueError(f'line1 must start with "1": {line1}')
-    if not line2.startswith('2'):
+    if not line2.startswith("2"):
         raise ValueError(f'line2 must start with "2": {line2}')
     if len(line1) != 69:
-        ValueError(f'line1 must have length 69: {line1}')
+        ValueError(f"line1 must have length 69: {line1}")
     if len(line2) != 69:
-        ValueError(f'line2 must have length 69: {line2}')
+        ValueError(f"line2 must have length 69: {line2}")
 
     try:
         year = int(line1[18:20])
     except:
-        raise ValueError(f'Error reading year from line1: {line1}')
+        raise ValueError(f"Error reading year from line1: {line1}")
 
     try:
         day = float(line1[20:32])
     except:
-        raise ValueError(f'Error reading day from line1: {line1}')
+        raise ValueError(f"Error reading day from line1: {line1}")
 
     try:
         i = float(line2[8:16])
     except:
-        raise ValueError('fError reading inclination (i) from line2: {line2}')
+        raise ValueError("fError reading inclination (i) from line2: {line2}")
     i = d_2_r(i)
 
     try:
         Omega = float(line2[17:25])
     except:
-        raise ValueError(f'Error reading longitude of ascending node (Omega) from line2: {line2}')
+        raise ValueError(f"Error reading longitude of ascending node (Omega) from line2: {line2}")
     Omega = d_2_r(Omega)
 
     try:
-        e = float('0.' + line2[26:33])
+        e = float("0." + line2[26:33])
     except:
-        raise ValueError(f'Error reading eccentricity (e) from line2: {line2}')
+        raise ValueError(f"Error reading eccentricity (e) from line2: {line2}")
 
     try:
         omega = float(line2[34:42])
     except:
-        raise ValueError(f'Error reading argument of perigee (omega) from line2: {line2}')
+        raise ValueError(f"Error reading argument of perigee (omega) from line2: {line2}")
     omega = d_2_r(omega)
 
     try:
         M = float(line2[43:51])
     except:
-        raise ValueError(f'Error reading mean anomaly (M) from line2: {line2}')
+        raise ValueError(f"Error reading mean anomaly (M) from line2: {line2}")
     M = d_2_r(M)
 
     try:
         revs_per_day = float(line2[52:63])
     except:
-        raise ValueError(f'Error reading revolutions per day from line2: {line2}')
+        raise ValueError(f"Error reading revolutions per day from line2: {line2}")
 
-    n = revs_per_day * TAU / JULIAN['day']  # [rad/sec]
+    n = revs_per_day * TAU / JULIAN["day"]  # [rad/sec]
     a = mean_motion_2_semimajor(n, MU_EARTH)
     E = anomaly_mean_2_eccentric(M, e)
     nu = anomaly_eccentric_2_true(E, e)
-    p = a * (1 - e ** 2)
+    p = a * (1 - e**2)
 
     time = (
         (datetime.datetime(2000 + year, 1, 1, 0, 0, 0) - datetime.datetime(2000, 1, 1, 0, 0, 0)).days
-        + JULIAN['jd_2000_01_01'] - 0.5 + day - 1
+        + JULIAN["jd_2000_01_01"] - 0.5 + day - 1
     )
 
     elements            = Elements()
@@ -423,7 +423,7 @@ def rv_2_oe(
         n[..., ix] = np.tile(np.array([[1.0], [0.0], [0.0]]), (1, np.count_nonzero(ix)))
         n_mag[ix] = 1.0
 
-    e = 1.0 / mu * ((norm_v ** 2 - _zero_divide(mu, norm_r)) * r - dot(r, v) * v)
+    e = 1.0 / mu * ((norm_v**2 - _zero_divide(mu, norm_r)) * r - dot(r, v) * v)
 
     # e
     e_mag = norm(e)
@@ -433,11 +433,11 @@ def rv_2_oe(
     num = e_mag.size
 
     # p
-    p = norm_h ** 2 / mu
+    p = norm_h**2 / mu
 
     # a
     # Note: a is infinite when eccentricity is exactly one
-    a = np.divide(p, 1.0 - e_mag ** 2, where=e_mag != 1, out=np.full(num, np.inf))
+    a = np.divide(p, 1.0 - e_mag**2, where=e_mag != 1, out=np.full(num, np.inf))
 
     # i
     i = np.arccos(_zero_divide(h[2, ...], norm_h), where=norm_h != 0, out=np.zeros_like(norm_h))
@@ -493,7 +493,7 @@ def rv_2_oe(
     circular = np.zeros(num, dtype=bool)
 
     # specific energy
-    E = norm_v ** 2 / 2 - _inf_divide(mu, norm_r)
+    E = norm_v**2 / 2 - _inf_divide(mu, norm_r)
     # test for type of orbit - elliptic
     ix = E < 0
     orbit_type[ix] = OrbitType.elliptic
@@ -554,12 +554,15 @@ def oe_2_rv(
     unit: bool = ...,
     *,
     return_PQW: Literal[False] = ...,
-) -> Tuple[np.ndarray, np.ndarray]: ...
+) -> Tuple[np.ndarray, np.ndarray]:
+    ...
+
 
 @overload
 def oe_2_rv(
     elements: Elements, mu: Union[float, np.ndarray] = ..., unit: bool = ..., *, return_PQW: Literal[True]
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]: ...
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    ...
 
 
 def oe_2_rv(
@@ -640,7 +643,7 @@ def oe_2_rv(
     if elements.p is not None:
         p = elements.p
     else:
-        p = a * (1.0 - e ** 2)
+        p = a * (1.0 - e**2)
     assert p is not None
 
     # magnitude of r in PQW frame
@@ -665,7 +668,7 @@ def oe_2_rv(
     T = np.array([
         [+cW * cw - sW * sw * ci, -cW * sw - sW * cw * ci, +sW * si],
         [+sW * cw + cW * sw * ci, -sW * sw + cW * cw * ci, -cW * si],
-        [+sw * si,                +cw * si,                     +ci],
+        [+sw * si               , +cw * si               ,      +ci],
     ])
 
     # translate r & v into IJK frame
@@ -683,6 +686,6 @@ def advance_elements(elements, mu, time):
 
 
 #%% Unit Test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_aerospace_orbits', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_aerospace_orbits", exit=False)
     doctest.testmod(verbose=False)

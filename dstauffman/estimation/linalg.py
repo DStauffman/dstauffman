@@ -188,6 +188,6 @@ def mat_divide(a, b, rcond=_EPS):
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_estimation_linalg', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_estimation_linalg", exit=False)
     doctest.testmod(verbose=False)

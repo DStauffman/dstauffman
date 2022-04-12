@@ -10,5 +10,5 @@ Notes
 from dstauffman import get_root_dir, run_pytests
 
 #%% Tests
-if __name__ == '__main__':
+if __name__ == "__main__":
     run_pytests(get_root_dir())

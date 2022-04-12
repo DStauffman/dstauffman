@@ -58,9 +58,9 @@ def convert_annual_to_monthly_probability(annual):
     """
     # check ranges
     if np.any(annual < 0):
-        raise ValueError('annual must be >= 0')
+        raise ValueError("annual must be >= 0")
     if np.any(annual > 1):
-        raise ValueError('annual must be <= 1')
+        raise ValueError("annual must be <= 1")
     # convert to equivalent probability and return result
     monthly = 1 - np.exp(np.log(1 - annual, out=np.full(annual.shape, -np.inf), where=annual != 1) / MONTHS_PER_YEAR)
     return monthly
@@ -94,9 +94,9 @@ def convert_monthly_to_annual_probability(monthly):
     """
     # check ranges
     if np.any(monthly < 0):
-        raise ValueError('monthly must be >= 0')
+        raise ValueError("monthly must be >= 0")
     if np.any(monthly > 1):
-        raise ValueError('annual must be <= 1')
+        raise ValueError("annual must be <= 1")
     # convert to equivalent probability and return result
     annual = 1 - (1 - monthly) ** MONTHS_PER_YEAR
     return annual
@@ -140,13 +140,13 @@ def prob_to_rate(prob, time=1):
 
     """
     # check for scalar case
-    was_numpy = hasattr(prob, 'ndim')
+    was_numpy = hasattr(prob, "ndim")
     prob = np.asanyarray(prob)
     # check ranges
     if np.any(prob < 0):
-        raise ValueError('Probability must be >= 0')
+        raise ValueError("Probability must be >= 0")
     if np.any(prob > 1):
-        raise ValueError('Probability must be <= 1')
+        raise ValueError("Probability must be <= 1")
     # calculate rate
     rate = -np.log(1 - prob, out=np.full(prob.shape, -np.inf), where=prob != 1) / time
     # prevent code from returning a bunch of negative zeros when prob is exactly 0
@@ -195,7 +195,7 @@ def rate_to_prob(rate, time=1):
     """
     # check ranges
     if np.any(rate < 0):
-        raise ValueError('Rate must be >= 0')
+        raise ValueError("Rate must be >= 0")
     # calculate probability
     prob = 1 - np.exp(-rate * time)
     return prob
@@ -365,7 +365,7 @@ def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -
     u = 1 / n * (n1 * u1 + n2 * u2)
     # calculate the combined standard deviation
     if n != 1:
-        s = sqrt(1 / (n - 1) * ((n1 - 1) * s1 ** 2 + n1 * u1 ** 2 + (n2 - 1) * s2 ** 2 + n2 * u2 ** 2 - n * u ** 2))
+        s = sqrt(1 / (n - 1) * ((n1 - 1) * s1**2 + n1 * u1**2 + (n2 - 1) * s2**2 + n2 * u2**2 - n * u**2))
     else:
         # special case where one of the data sets is empty
         if n1 == 1:
@@ -374,7 +374,7 @@ def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -
             s = s2
         else:
             # shouldn't be able to ever reach this line with assertions on
-            raise ValueError('Total samples are 1, but neither data set has only one item.')  # pragma: no cover
+            raise ValueError("Total samples are 1, but neither data set has only one item.")  # pragma: no cover
     return (n, u, s)
 
 
@@ -419,19 +419,19 @@ def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np
     """
     # get values from the dictionary
     try:
-        this_mean = values[field + '_mean']
+        this_mean = values[field + "_mean"]
     except KeyError:
         this_mean = 0
     try:
-        this_std = values[field + '_std']
+        this_std = values[field + "_std"]
     except KeyError:
         this_std = 1
     try:
-        this_min = values[field + '_min']
+        this_min = values[field + "_min"]
     except KeyError:
         this_min = -np.inf
     try:
-        this_max = values[field + '_max']
+        this_max = values[field + "_max"]
     except KeyError:
         this_max = np.inf
     # calculate the normal distribution
@@ -542,6 +542,6 @@ def ecdf(y, /):
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_health_stats', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_health_stats", exit=False)
     doctest.testmod(verbose=False)

@@ -81,10 +81,10 @@ def anomaly_eccentric_2_mean(E: _N, e: _N) -> _N:
     """
     # check if orbit is circular or elliptical
     if np.any(e >= 1):
-        raise ValueError('The mean anomaly is not defined when e >= 1')
+        raise ValueError("The mean anomaly is not defined when e >= 1")
     # check if E is outside the range of 0 to 2*pi
     if np.any((E > TAU) | (E < 0)):
-        logger.log(LogLevel.L6, 'The eccentric anomaly was outside the range of 0 to 2*pi')
+        logger.log(LogLevel.L6, "The eccentric anomaly was outside the range of 0 to 2*pi")
         E = np.mod(E, TAU)
     # calculate the mean anomaly
     M = E - e * np.sin(E)
@@ -126,10 +126,10 @@ def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
     """
     # check if orbit is circular or elliptical
     if np.any(e >= 1):
-        raise ValueError('The true anomaly is not defined when e >= 1')
+        raise ValueError("The true anomaly is not defined when e >= 1")
     # check if E is outside the range of 0 to 2*pi
     if np.any((E > TAU) | (E < 0)):
-        logger.log(LogLevel.L6, 'The eccentric anomaly was outside the range of 0 to 2*pi')
+        logger.log(LogLevel.L6, "The eccentric anomaly was outside the range of 0 to 2*pi")
         E = np.mod(E, TAU)
     # calculate nu
     nu = np.arccos((np.cos(E) - e) / (1.0 - e * np.cos(E)))
@@ -180,7 +180,7 @@ def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N:
     """
     # check if orbit is hyperbolic
     if np.any(e < 1):
-        raise ValueError('The hyperbolic anomaly is not defined when e < 1')
+        raise ValueError("The hyperbolic anomaly is not defined when e < 1")
     # calculate the mean anomaly
     M = e * np.sinh(F) - F
     return M
@@ -222,7 +222,7 @@ def anomaly_hyperbolic_2_true(F: _N, e: _N) -> _N:
     """
     # check if orbit is hyperbolic
     if np.any(e < 1):
-        raise ValueError('The hyperbolic anomaly is not defined when e < 1')
+        raise ValueError("The hyperbolic anomaly is not defined when e < 1")
     # calculate nu
     nu = 2 * np.arctan(np.sqrt((e + 1) / (e - 1)) * np.tanh(F / 2))  # TODO: use np.arctan2?
     # check half of unit circle for 0 to pi or pi to 2*pi range
@@ -271,10 +271,10 @@ def anomaly_mean_2_eccentric(M, e):
     """
     # check if orbit is circular or elliptical
     if np.any(e >= 1):
-        raise ValueError('The mean anomaly is not defined when e >= 1')
+        raise ValueError("The mean anomaly is not defined when e >= 1")
     # check if M is outside the range of 0 to 2*pi
     if np.any((M > TAU) | (M < 0)):
-        logger.log(LogLevel.L6, 'The mean anomaly was outside the range of 0 to 2*pi')
+        logger.log(LogLevel.L6, "The mean anomaly was outside the range of 0 to 2*pi")
         M = np.mod(M, TAU)
     # get vector lengths
     l1 = np.size(M)
@@ -340,11 +340,11 @@ def long_2_sidereal(lon: _N, jd: _N) -> _N:
 
     """
     # epoch
-    to = JULIAN['tg0_2000_time']
+    to = JULIAN["tg0_2000_time"]
     # theta at epoch
-    theta_go = JULIAN['tg0_2000']
+    theta_go = JULIAN["tg0_2000"]
     # earth rate per day
-    earth_rate = EARTH['omega'] * JULIAN['day']
+    earth_rate = EARTH["omega"] * JULIAN["day"]
     # find theta
     theta = np.mod(theta_go + earth_rate * (jd - to) + lon, TAU)
     return theta
@@ -385,8 +385,8 @@ def mean_motion_2_semimajor(n, mu):
 
     """
     if _any(n <= 0):
-        raise ValueError('The orbit is not defined when n <= 0')
-    a = (mu / n ** 2) ** (1 / 3)
+        raise ValueError("The orbit is not defined when n <= 0")
+    a = (mu / n**2) ** (1 / 3)
     return a
 
 
@@ -425,8 +425,8 @@ def period_2_semimajor(p: _N, mu: _N) -> _N:
 
     """
     if _any(p <= 0):
-        raise ValueError('The orbit is not defined when P <= 0')
-    a = (mu * p ** 2 / (TAU ** 2)) ** (1 / 3)
+        raise ValueError("The orbit is not defined when P <= 0")
+    a = (mu * p**2 / (TAU**2)) ** (1 / 3)
     return a
 
 
@@ -466,8 +466,8 @@ def semimajor_2_mean_motion(a: _N, mu: _N) -> _N:
 
     """
     if _any(a <= 0):
-        raise ValueError('The period is not defined when a <= 0')
-    n = sqrt(mu / a ** 3)
+        raise ValueError("The period is not defined when a <= 0")
+    n = sqrt(mu / a**3)
     return n
 
 
@@ -507,8 +507,8 @@ def semimajor_2_period(a: _N, mu: _N) -> _N:
 
     """
     if _any(a <= 0):
-        raise ValueError('The period is not defined when a <= 0')
-    p = TAU * sqrt(a ** 3 / mu)
+        raise ValueError("The period is not defined when a <= 0")
+    p = TAU * sqrt(a**3 / mu)
     return p
 
 
@@ -545,11 +545,11 @@ def sidereal_2_long(theta: _N, t: _N) -> _N:
 
     """
     # epoch
-    to = JULIAN['tg0_2000_time']
+    to = JULIAN["tg0_2000_time"]
     # theta at epoch
-    theta_go = JULIAN['tg0_2000']
+    theta_go = JULIAN["tg0_2000"]
     # find theta
-    earth_rate = EARTH['omega'] * JULIAN['day']
+    earth_rate = EARTH["omega"] * JULIAN["day"]
     lon = np.mod(theta - theta_go - earth_rate * (t - to), TAU)
     # change from (0:2*pi) range to (-pi:pi)
     ix = lon > PI
@@ -585,7 +585,7 @@ def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = False) -> _N:
     # mean local time of the ascending node (hours)
     offset = 0.0 if return_descending else PI
     mltan = np.mod(raan - ra_sun + offset, TAU)
-    return mltan
+    return mltan  # type: ignore[no-any-return]
 
 
 #%% Functions - jd_2_sidereal
@@ -604,11 +604,11 @@ def jd_2_sidereal(time_jd):
     """
 
     #  delta time in days since J2000
-    delta_time_days_J2000 = time_jd - JULIAN['jd_2000_01_01']
+    delta_time_days_J2000 = time_jd - JULIAN["jd_2000_01_01"]
     # Time in Julian centuries
-    T = delta_time_days_J2000 * JULIAN['day'] / JULIAN['century']
+    T = delta_time_days_J2000 * JULIAN["day"] / JULIAN["century"]
     # Vallado eq 3-45, p191
-    gmst_sec = 67310.54841 + (876600 * ONE_HOUR + 8640184.812866) * T + 0.093104 * T ** 2 - 6.2e-6 * T ** 3
+    gmst_sec = 67310.54841 + (876600 * ONE_HOUR + 8640184.812866) * T + 0.093104 * T**2 - 6.2e-6 * T**3
     # local sidereal time
     lst = TAU * np.mod(gmst_sec / ONE_DAY, 1)
     return lst
@@ -635,6 +635,6 @@ def quat_eci_2_ecf(time_jd):
 
 
 #%% Unit Test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_aerospace_orbit_conv', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_aerospace_orbit_conv", exit=False)
     doctest.testmod(verbose=False)

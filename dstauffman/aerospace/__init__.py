@@ -36,5 +36,5 @@ from .quat_opt    import qrot_single, quat_from_axis_angle_single, quat_interp_s
 from .vectors     import rot, drot, vec_cross, vec_angle, cart2sph, sph2cart, rv2dcm
 
 #%% Unittest
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

@@ -13,7 +13,7 @@ import platform
 import sys
 import unittest
 
-if platform.python_implementation() == 'CPython':
+if platform.python_implementation() == "CPython":
     try:
         # Try importing numba to determine if it is there.  Use this instead of HAVE_NUMBA from dstauffman
         # to avoid any circular dependencies
@@ -57,18 +57,18 @@ if HAVE_NUMBA:
         return njit(func, cache=True, *args, **kwargs)
 
     # target for vectorized functions
-    assert sys.version_info.major == 3, 'Must be Python 3'
-    assert sys.version_info.minor >= 8, 'Must be Python v3.8 or higher'
+    assert sys.version_info.major == 3, "Must be Python 3"
+    assert sys.version_info.minor >= 8, "Must be Python v3.8 or higher"
     if sys.version_info.minor > 8:
-        TARGET = 'cpu'  # Note: no longer using 'parallel' in Python v3.9+ as it breaks the vectorize error catching
+        TARGET = "cpu"  # Note: no longer using 'parallel' in Python v3.9+ as it breaks the vectorize error catching
     else:
-        TARGET = 'cpu'
+        TARGET = "cpu"
 else:
     # Support for when you don't have numba.  Note, some functions won't work as expected
-    TARGET = ''
+    TARGET = ""
     ncjit = fake_jit
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_nubs_passthrough', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_nubs_passthrough", exit=False)
     doctest.testmod(verbose=False)

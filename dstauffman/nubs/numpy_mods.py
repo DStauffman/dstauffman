@@ -31,7 +31,7 @@ def _reduce_shape(shape: Tuple, axis: int) -> List[int]:
     r"""Gives what will be the reduced array shape after applying an operation to the given axis."""
     num = len(shape)
     if num <= axis:
-        raise ValueError('The specified axis must be less than the number of dimensions.')
+        raise ValueError("The specified axis must be less than the number of dimensions.")
     out: List[int] = List()
     for (i, s) in enumerate(shape):
         if i != axis:
@@ -225,6 +225,6 @@ def np_any_axis1(x):
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_nubs_numpy_mods', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_nubs_numpy_mods", exit=False)
     doctest.testmod(verbose=False)

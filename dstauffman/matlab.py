@@ -48,9 +48,9 @@ def load_matlab(
     Examples
     --------
     >>> from dstauffman import load_matlab, get_tests_dir
-    >>> filename = get_tests_dir() / 'test_numbers.mat'
+    >>> filename = get_tests_dir() / "test_numbers.mat"
     >>> out = load_matlab(filename)
-    >>> print(out['row_nums'][1])
+    >>> print(out["row_nums"][1])
     2.2
 
     """
@@ -70,7 +70,7 @@ def load_matlab(
             if varlist is not None and key not in varlist:
                 continue
             # if no varlist (thus loading every key), still skip those that start with #
-            if varlist is None and key in {'#refs#', '#subsystem#'}:
+            if varlist is None and key in {"#refs#", "#subsystem#"}:
                 continue
             # alias this group
             grp = file[key]
@@ -92,14 +92,14 @@ def load_matlab(
                     out[key] = temp2
                 else:
                     out[key] = np.squeeze(values) if squeeze else values
-            elif 'EnumerationInstanceTag' in grp:
+            elif "EnumerationInstanceTag" in grp:
                 # likely a MATLAB enumerator???
-                class_name = grp.attrs['MATLAB_class'].decode()
+                class_name = grp.attrs["MATLAB_class"].decode()
                 if enums is None or class_name not in enums:
                     raise ValueError(
                         f'Tried to load a MATLAB enumeration class called "{class_name}" without a decoder ring, pass in via `enums`.'
                     )
-                ix = grp['ValueIndices'][()].T
+                ix = grp["ValueIndices"][()].T
                 values = np.array([enums[class_name][x] for x in ix.flatten()]).reshape(ix.shape)
                 out[key] = np.squeeze(values) if squeeze else values
             else:
@@ -108,7 +108,7 @@ def load_matlab(
         return out
 
     if not isinstance(filename, h5py.Group):
-        with h5py.File(filename, 'r') as file:
+        with h5py.File(filename, "r") as file:
             # normal method
             out = _load(file=file, varlist=varlist, squeeze=squeeze, enums=enums)
     else:
@@ -118,6 +118,6 @@ def load_matlab(
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_matlab', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_matlab", exit=False)
     doctest.testmod(verbose=False)

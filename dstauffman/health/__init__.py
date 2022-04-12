@@ -16,5 +16,5 @@ from .stats  import convert_annual_to_monthly_probability, convert_monthly_to_an
                         ar2mp, mp2ar, combine_sets, bounded_normal_draw, rand_draw, ecdf
 
 #%% Unittest
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

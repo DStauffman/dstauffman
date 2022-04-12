@@ -16,7 +16,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% estimation.orth
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_orth(unittest.TestCase):
     r"""
     Tests the estimation.orth function with the following cases:
@@ -48,7 +48,7 @@ class Test_estimation_orth(unittest.TestCase):
 
 
 #%% estimation.subspace
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_subspace(unittest.TestCase):
     r"""
     Tests the estimation.subspace function with the following cases:
@@ -79,7 +79,7 @@ class Test_estimation_subspace(unittest.TestCase):
 
 
 #%% estimation.mat_divide
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_mat_divide(unittest.TestCase):
     r"""
     Tests the estimation.mat_divide function with the following cases:
@@ -105,5 +105,5 @@ class Test_estimation_mat_divide(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

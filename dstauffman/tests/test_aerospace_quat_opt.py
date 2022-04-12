@@ -17,7 +17,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% aerospace.qrot_single
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_qrot_single(unittest.TestCase):
     r"""
     Tests the aerospace.qrot_single function with the following cases:
@@ -25,13 +25,13 @@ class Test_aerospace_qrot_single(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.axis   = np.array([1, 2, 3])
-        self.angle  = np.pi / 2
+        self.axis = np.array([1, 2, 3])
+        self.angle = np.pi / 2
         self.angle2 = np.pi / 3
-        r2o2        = np.sqrt(2) / 2
-        r3o2        = np.sqrt(3) / 2
-        self.quat   = np.array([[r2o2, 0, 0, r2o2], [0, r2o2, 0, r2o2], [0, 0, r2o2, r2o2]])
-        self.quat2  = np.array([[0.5, 0, 0, r3o2], [0, 0.5, 0, r3o2], [0, 0, 0.5, r3o2]])
+        r2o2 = np.sqrt(2) / 2
+        r3o2 = np.sqrt(3) / 2
+        self.quat = np.array([[r2o2, 0, 0, r2o2], [0, r2o2, 0, r2o2], [0, 0, r2o2, r2o2]])
+        self.quat2 = np.array([[0.5, 0, 0, r3o2], [0, 0.5, 0, r3o2], [0, 0, 0.5, r3o2]])
 
     def test_single_inputs(self) -> None:
         for i in range(len(self.axis)):
@@ -48,7 +48,7 @@ class Test_aerospace_qrot_single(unittest.TestCase):
 
 
 #%% aerospace.quat_from_axis_angle_single
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_from_axis_angle_single function with the following cases:
@@ -89,7 +89,7 @@ class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
 
 
 #%% aerospace.quat_interp_single
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_interp_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_interp_single function with the following cases:
@@ -132,7 +132,7 @@ class Test_aerospace_quat_interp_single(unittest.TestCase):
 
 
 #%% aerospace.quat_inv_single
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_inv_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_inv_single function with the following cases:
@@ -165,7 +165,7 @@ class Test_aerospace_quat_inv_single(unittest.TestCase):
 
 
 #%% aerospace.quat_mult_single
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_mult_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_mult_single function with the following cases:
@@ -214,7 +214,7 @@ class Test_aerospace_quat_mult_single(unittest.TestCase):
 
 
 #%% aerospace.quat_norm_single
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_norm_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_norm_single function with the following cases:
@@ -256,7 +256,7 @@ class Test_aerospace_quat_norm_single(unittest.TestCase):
 
 
 #%% aerospace.quat_prop_single
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_prop_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_prop_single function with the following cases:
@@ -291,7 +291,7 @@ class Test_aerospace_quat_prop_single(unittest.TestCase):
 
 
 #%% aerospace.quat_times_vector_single
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_times_vector_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_times_vector_single function with the following cases:
@@ -329,7 +329,7 @@ class Test_aerospace_quat_times_vector_single(unittest.TestCase):
 
 
 #%% aerospace.quat_to_dcm
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_to_dcm(unittest.TestCase):
     r"""
     Tests the aerospace.quat_to_dcm function with the following cases:
@@ -346,5 +346,5 @@ class Test_aerospace_quat_to_dcm(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

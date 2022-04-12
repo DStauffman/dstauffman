@@ -16,7 +16,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% estimation.calculate_kalman_gain
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_calculate_kalman_gain(unittest.TestCase):
     r"""
     Tests the estimation.calculate_kalman_gain function with the following cases:
@@ -50,7 +50,7 @@ class Test_estimation_calculate_kalman_gain(unittest.TestCase):
 
 
 #%% estimation.calculate_prediction
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_calculate_prediction(unittest.TestCase):
     r"""
     Tests the estimation.calculate_prediction function with the following cases:
@@ -74,7 +74,7 @@ class Test_estimation_calculate_prediction(unittest.TestCase):
 
 
 #%% estimation.calculate_innovation
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_calculate_innovation(unittest.TestCase):
     r"""
     Tests the estimation.calculate_innovation function with the following cases:
@@ -84,7 +84,7 @@ class Test_estimation_calculate_innovation(unittest.TestCase):
     def setUp(self) -> None:
         self.u_meas = np.array([1.0, 2.1, -3.0])
         self.u_pred = np.array([1.1, 2.0, -3.1])
-        self.exp    = np.array([-0.1, 0.1, 0.1])
+        self.exp = np.array([-0.1, 0.1, 0.1])
 
     def test_nominal(self) -> None:
         z = estm.calculate_innovation(self.u_meas, self.u_pred)
@@ -92,7 +92,7 @@ class Test_estimation_calculate_innovation(unittest.TestCase):
 
 
 #%% estimation.calculate_normalized_innovation
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_calculate_normalized_innovation(unittest.TestCase):
     r"""
     Tests the estimation.calculate_normalized_innovation function with the following cases:
@@ -102,7 +102,7 @@ class Test_estimation_calculate_normalized_innovation(unittest.TestCase):
 
     def setUp(self) -> None:
         self.z = np.array([0.1, 0.05, -0.2])
-        self.Pz = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0.0, 0.0, 0.2]], order='F')
+        self.Pz = np.array([[0.1, 0.01, 0.001], [0.01, 0.1, 0.001], [0.0, 0.0, 0.2]], order="F")
         self.exp = np.array([0.96868687, 0.41313131, -1.0])  # TODO: come up with more independent solution
 
     def test_nominal(self) -> None:
@@ -115,7 +115,7 @@ class Test_estimation_calculate_normalized_innovation(unittest.TestCase):
 
 
 #%% estimation.calculate_delta_state
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_calculate_delta_state(unittest.TestCase):
     r"""
     Tests the estimation.calculate_delta_state function with the following cases:
@@ -133,7 +133,7 @@ class Test_estimation_calculate_delta_state(unittest.TestCase):
 
 
 #%% estimation.propagate_covariance
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_propagate_covariance(unittest.TestCase):
     r"""
     Tests the estimation.propagate_covariance function with the following cases:
@@ -143,12 +143,12 @@ class Test_estimation_propagate_covariance(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.phi   = np.diag(np.array([1.0, 1, 1, -1, -1, -1]))
-        self.P     = 1e-3 * np.eye(6)
-        self.Q     = np.diag(np.array([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7]))
+        self.phi = np.diag(np.array([1.0, 1, 1, -1, -1, -1]))
+        self.P = 1e-3 * np.eye(6)
+        self.Q = np.diag(np.array([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7]))
         self.gamma = -1 * self.phi
-        self.exp   = 0.002
-        self.orig  = 0.001
+        self.exp = 0.002
+        self.orig = 0.001
 
     def test_nominal(self) -> None:
         out = estm.propagate_covariance(self.P, self.phi, self.Q)
@@ -180,7 +180,7 @@ class Test_estimation_propagate_covariance(unittest.TestCase):
 
 
 #%% estimation.update_covariance
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_update_covariance(unittest.TestCase):
     r"""
     Tests the estimation.update_covariance function with the following cases:
@@ -212,5 +212,5 @@ class Test_estimation_update_covariance(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

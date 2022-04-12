@@ -10,6 +10,6 @@ Notes
 from dstauffman import get_root_dir, list_python_files, run_docstrings
 
 #%% Execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     files = list_python_files(get_root_dir(), recursive=True)
     run_docstrings(files, verbose=False)

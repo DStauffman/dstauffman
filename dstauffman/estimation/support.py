@@ -55,20 +55,20 @@ def _get_sub_level(this_sub: Any, part: str) -> Any:
 
     """
     # simple case
-    if '[' not in part:
+    if "[" not in part:
         return getattr(this_sub, part)
 
     # not so simple case
-    sub_parts = part.split('[')
+    sub_parts = part.split("[")
     temp_sub = getattr(this_sub, sub_parts[0])
-    this_index = sub_parts[1].split(']')[0]
+    this_index = sub_parts[1].split("]")[0]
     try:
         this_key: Union[int, str] = int(this_index)
     except:
-        this_key = this_index.replace('"', '').replace("'", '')
+        this_key = this_index.replace('"', "").replace("'", "")
     this_value = temp_sub[this_key]
     if len(sub_parts) > 2:
-        ix = sub_parts[2].split(']')[0]
+        ix = sub_parts[2].split("]")[0]
         this_value = this_value[int(ix)]
     return this_value
 
@@ -103,9 +103,9 @@ def _check_valid_param_name(param: Any, name: str) -> bool:
 
     """
     # split the name into parts
-    parts = name.split('.')
+    parts = name.split(".")
     # check that the first part is param
-    if parts[0] != 'param':
+    if parts[0] != "param":
         return False
     level = 1
     this_sub = param
@@ -156,7 +156,7 @@ def get_parameter(param: Any, names: List[str]) -> List[Any]:
         if not is_valid:
             raise ValueError('Bad name "{}"'.format(name))
         # split the name into parts
-        parts = name.split('.')
+        parts = name.split(".")
         # loop through sublevels until you get the last value and add it to a set
         level = 1
         this_sub = param
@@ -203,7 +203,7 @@ def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
         if not is_valid:
             raise ValueError('Bad name "{}"'.format(name))
         # split the name into parts
-        parts = name.split('.')
+        parts = name.split(".")
         # loop through sublevels until you get to the appropriate level
         level = 1
         this_sub = param
@@ -211,24 +211,24 @@ def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
             this_sub = _get_sub_level(this_sub, parts[level])
             level += 1
         # find the key for this last level
-        if '[' not in parts[level]:
+        if "[" not in parts[level]:
             setattr(this_sub, parts[level], value)
             continue
-        sub_parts = parts[level].split('[')
-        this_index = sub_parts[1].split(']')[0]
+        sub_parts = parts[level].split("[")
+        this_index = sub_parts[1].split("]")[0]
         try:
             this_key: Union[int, str] = int(this_index)
         except:
-            this_key = this_index.replace('"', '').replace("'", '')
+            this_key = this_index.replace('"', "").replace("'", "")
         # set the value once on the last level
         if len(sub_parts) > 2:
-            ix = sub_parts[2].split(']')[0]
+            ix = sub_parts[2].split("]")[0]
             getattr(this_sub, sub_parts[0])[this_key][int(ix)] = value
         else:
             getattr(this_sub, sub_parts[0])[this_key] = value
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_estimation_support', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_estimation_support", exit=False)
     doctest.testmod(verbose=False)

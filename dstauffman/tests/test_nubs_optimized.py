@@ -36,12 +36,12 @@ class Test_np_any(unittest.TestCase):
         Some true
     """
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_false(self) -> None:
         x = np.zeros(1000, dtype=bool)
         self.assertFalse(nubs.np_any(x))
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_true(self) -> None:
         x = np.zeros(1000, dtype=bool)
         x[333] = True
@@ -62,12 +62,12 @@ class Test_np_all(unittest.TestCase):
         Some false
     """
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_true(self) -> None:
         x = np.ones(1000, dtype=bool)
         self.assertTrue(nubs.np_all(x))
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_false(self) -> None:
         x = np.ones(1000, dtype=bool)
         x[333] = False
@@ -90,17 +90,17 @@ class Test_issorted_opt(unittest.TestCase):
         Lists
     """
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_sorted(self) -> None:
         x = np.array([1, 3, 3, 5, 7])
         self.assertTrue(nubs.issorted_opt(x))
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_not_sorted(self) -> None:
         x = np.array([1, 4, 3, 5, 7])
         self.assertFalse(nubs.issorted_opt(x))
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_reverse_sorted(self) -> None:
         x = np.array([4, np.pi, 1.0, -1.0])
         self.assertFalse(nubs.issorted_opt(x))
@@ -113,7 +113,7 @@ class Test_issorted_opt(unittest.TestCase):
 
 
 #%% prob_to_rate_opt
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_prob_to_rate_opt(unittest.TestCase):
     r"""
     Tests the prob_to_rate_opt function with the following cases:
@@ -129,7 +129,7 @@ class Test_prob_to_rate_opt(unittest.TestCase):
         self.time = 5
         self.rate = np.hstack((0.0, -np.log(1 - self.prob[1:-1]) / self.time, np.inf))
 
-    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+    @unittest.skipIf(not _HAVE_NUMBA, "Skipping due to missing numba dependency.")
     def test_conversion(self) -> None:
         rate = nubs.prob_to_rate_opt(self.prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
@@ -152,7 +152,7 @@ class Test_prob_to_rate_opt(unittest.TestCase):
         with self.assertRaises(ValueError):
             nubs.prob_to_rate_opt(np.array([0.0, 0.5, 1.5]), 1.0)
 
-    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+    @unittest.skipIf(not _HAVE_NUMBA, "Skipping due to missing numba dependency.")
     def test_circular(self) -> None:
         rate = nubs.prob_to_rate_opt(self.prob, self.time)
         np.testing.assert_array_almost_equal(rate, self.rate)
@@ -161,7 +161,7 @@ class Test_prob_to_rate_opt(unittest.TestCase):
 
 
 #%% rate_to_prob_opt
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_rate_to_prob_opt(unittest.TestCase):
     r"""
     Tests the rate_to_prob_opt function with the following cases:
@@ -177,7 +177,7 @@ class Test_rate_to_prob_opt(unittest.TestCase):
         self.time = 5
         self.rate = np.hstack((0.0, -np.log(1 - self.prob[1:-1]) / self.time, np.inf))
 
-    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+    @unittest.skipIf(not _HAVE_NUMBA, "Skipping due to missing numba dependency.")
     def test_conversion(self) -> None:
         prob = nubs.rate_to_prob_opt(self.rate, self.time)
         np.testing.assert_array_almost_equal(prob, self.prob)
@@ -200,7 +200,7 @@ class Test_rate_to_prob_opt(unittest.TestCase):
         prob = nubs.rate_to_prob_opt(np.inf, 1)
         self.assertAlmostEqual(prob, 1.0)  # type: ignore[arg-type]
 
-    @unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+    @unittest.skipIf(not _HAVE_NUMBA, "Skipping due to missing numba dependency.")
     def test_circular(self) -> None:
         prob = nubs.rate_to_prob_opt(self.rate, self.time)
         np.testing.assert_array_almost_equal(prob, self.prob)
@@ -226,7 +226,7 @@ class Test_zero_divide(unittest.TestCase):
         self.assertEqual(nubs.zero_divide(5.0, 0.0), 0.0)
         self.assertEqual(nubs.zero_divide(0.0, 0.0), 0.0)
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_vectors(self) -> None:
         out = nubs.zero_divide(np.array([4.0, 3.14, 0.0]), np.array([2.0, 0.0, 0.0]))
         exp = np.array([2.0, 0.0, 0.0])
@@ -234,7 +234,7 @@ class Test_zero_divide(unittest.TestCase):
         out = nubs.zero_divide(np.array([0, -1, -2]), np.array([1, 0, 2]))
         np.testing.assert_array_equal(out, np.array([0, 0, -1]))
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_broadcasting1(self) -> None:
         out = nubs.zero_divide(np.array([4.0, 3.14, 0.0]), 2.0)
         exp = np.array([2.0, 1.57, 0.0])
@@ -243,7 +243,7 @@ class Test_zero_divide(unittest.TestCase):
         exp = np.array([0.0, 0.0, 0.0])
         np.testing.assert_array_equal(out, exp)
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_broadcasting2(self) -> None:
         # Numba broadcasting fails here prior to v0.53
         vec = np.array([[1.0, 0.0, 0.0], [3.0, 4.0, 0.0], [0.0, 0.0, 0.0]]).T
@@ -257,5 +257,5 @@ class Test_zero_divide(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

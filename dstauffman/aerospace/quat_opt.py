@@ -155,7 +155,7 @@ def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np
     """
     # check for desired times that are outside the time vector
     if (ti < time[0]) | (ti > time[-1]):
-        raise ValueError('Desired time not found within input time vector.')
+        raise ValueError("Desired time not found within input time vector.")
 
     # pull out bounding times and quaternions
     t1 = time[0]
@@ -166,7 +166,7 @@ def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np
     dq12 = quat_norm_single(quat_mult_single(q2, quat_inv_single(q1)))
     # find delta quaternion axis of rotation
     vec = dq12[0:3]
-    norm_vec = np.sqrt(np.sum(vec ** 2))
+    norm_vec = np.sqrt(np.sum(vec**2))
     # check for zero norm vectors
     norm_fix = norm_vec if norm_vec != 0.0 else 1.0
     ax = vec / norm_fix
@@ -504,6 +504,6 @@ def quat_to_dcm(quat: np.ndarray) -> np.ndarray:
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_aerospace_quat_opt', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_aerospace_quat_opt", exit=False)
     doctest.testmod(verbose=False)

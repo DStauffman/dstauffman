@@ -20,7 +20,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% plotting.plot_bpe_convergence
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_bpe_convergence(unittest.TestCase):
     r"""
     Tests the plotting.plot_bpe_convergence function with the following cases:
@@ -64,26 +64,26 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
         self.figs: List[Figure] = []
         self.bpe_results = BpeResults()
         self.opts = plot.Opts()
-        self.plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, 'covariance': True}
+        self.plots = {"innovs": True, "convergence": True, "correlation": True, "info_svd": True, "covariance": True}
 
-    @unittest.skipIf(not HAVE_MPL or not HAVE_NUMPY, 'Skipping due to missing matplotlib/numpy dependency.')
+    @unittest.skipIf(not HAVE_MPL or not HAVE_NUMPY, "Skipping due to missing matplotlib/numpy dependency.")
     def test_nominal(self) -> None:
         # add data
-        names = ['a', 'b', 'c', 'd']
+        names = ["a", "b", "c", "d"]
         matrix = np.random.rand(4, 4)
-        self.bpe_results.param_names  = [x.encode('utf-8') for x in names]
+        self.bpe_results.param_names = [x.encode("utf-8") for x in names]
         self.bpe_results.begin_innovs = np.array([1, 2, 3, 4], dtype=float)
         self.bpe_results.final_innovs = np.array([0.5, 0.25, 0.1, 0.05])
-        self.bpe_results.costs        = np.array([1, 0.1, 0.05, 0.01])
-        self.bpe_results.correlation  = matrix.copy()
-        self.bpe_results.info_svd     = matrix.copy()
-        self.bpe_results.covariance   = matrix.copy()
+        self.bpe_results.costs = np.array([1, 0.1, 0.05, 0.01])
+        self.bpe_results.correlation = matrix.copy()
+        self.bpe_results.info_svd = matrix.copy()
+        self.bpe_results.covariance = matrix.copy()
         self.figs = plot.plot_bpe_results(self.bpe_results, plots=self.plots)
 
     def test_nodata(self) -> None:
         with capture_output() as out:
             self.figs = plot.plot_bpe_results(self.bpe_results, plots=self.plots)
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().strip().split("\n")
         out.close()
         self.assertEqual(lines[0], "Data isn't available for Innovations plot.")
         self.assertEqual(lines[1], "Data isn't available for convergence plot.")
@@ -96,17 +96,17 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
 
     def test_bad_plot(self) -> None:
         with self.assertRaises(ValueError):
-            plot.plot_bpe_results(self.bpe_results, plots={'bad_key': False})
+            plot.plot_bpe_results(self.bpe_results, plots={"bad_key": False})
 
-    @unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+    @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
     def test_only_one_key(self) -> None:
-        plot.plot_bpe_results(self.bpe_results, plots={'innovs': False})
+        plot.plot_bpe_results(self.bpe_results, plots={"innovs": False})
 
     def tearDown(self) -> None:
         plot.close_all(self.figs)
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     plot.suppress_plots()
     unittest.main(exit=False)

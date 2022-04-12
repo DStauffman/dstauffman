@@ -20,7 +20,7 @@ from slog import activate_logging, LogLevel, ReturnCodes
 
 #%% Globals
 logger = logging.getLogger(__name__)
-_VALID_COMMANDS = frozenset({'coverage', 'enforce', 'help', 'make_init', 'tests', 'version'})
+_VALID_COMMANDS = frozenset({"coverage", "enforce", "help", "make_init", "tests", "version"})
 
 
 @dataclass(frozen=True)
@@ -43,7 +43,7 @@ def main() -> int:
     try:
         (command, args) = parse_wrapper(sys.argv[1:])
     except ValueError:
-        _print_bad_command(' '.join(sys.argv[1:]))
+        _print_bad_command(" ".join(sys.argv[1:]))
         return ReturnCodes.bad_command
     rc = execute_command(command, args)
     return sys.exit(rc)
@@ -56,12 +56,12 @@ def parse_wrapper(args: List[str]) -> Tuple[str, argparse.Namespace]:
     if len(args) >= 1:
         command = args[0]
     else:
-        command = 'help'
+        command = "help"
     # check for alternative forms of help with the base dcs command
-    if command in {'--help', '-h'}:
-        command = 'help'
-    elif command in {'--version', '-v'}:
-        command = 'version'
+    if command in {"--help", "-h"}:
+        command = "help"
+    elif command in {"--version", "-v"}:
+        command = "version"
     # pass the command and remaining arguments to the command parser
     parsed_args = parse_commands(command, args[1:])
     return (command, parsed_args)
@@ -87,7 +87,7 @@ def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
     Examples
     --------
     >>> from dstauffman import parse_commands
-    >>> command = 'help'
+    >>> command = "help"
     >>> args = []
     >>> parsed_args = parse_commands(command, args)
     >>> print(parsed_args)
@@ -100,7 +100,7 @@ def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
     # check for valid commands
     if command in _VALID_COMMANDS:
         # If valid, then parse the arguments with the appropiate method, so help calls parse_help etc.
-        func = getattr(commands, 'parse_' + command)
+        func = getattr(commands, "parse_" + command)
         parsed_args: argparse.Namespace = func(args)
     else:
         raise ValueError('Unexpected command "{}".'.format(command))
@@ -116,7 +116,7 @@ def execute_command(command: str, args: argparse.Namespace) -> int:
     # check for valid commands
     if command in _VALID_COMMANDS:
         # If valid, then call the appropriate method, so help calls execute_help etc.
-        func = getattr(commands, 'execute_' + command)
+        func = getattr(commands, "execute_" + command)
         rc: Optional[int] = func(args)
     else:
         _print_bad_command(command)
@@ -151,7 +151,7 @@ def process_command_line_options() -> _Flags:
     # get logger settings
     log_level = None
     for opt in sys.argv[1:]:
-        if opt.startswith('-l'):
+        if opt.startswith("-l"):
             if hasattr(LogLevel, level := opt[1:].upper()):
                 log_level = getattr(LogLevel, level)
             elif hasattr(logging, level := opt[2:].upper()):
@@ -159,21 +159,21 @@ def process_command_line_options() -> _Flags:
             else:
                 raise ValueError(f'Unexpected logging input of: "{opt}".')
             activate_logging(log_level)
-            logger.log(log_level, 'Configuring Log Level at: ' + str(log_level))
+            logger.log(log_level, "Configuring Log Level at: " + str(log_level))
 
     # get other settings
-    use_display = '-nodisp' not in sys.argv
-    use_plotting = '-noplot' not in sys.argv
-    use_hdf5 = '-nohdf5' not in sys.argv
+    use_display = "-nodisp" not in sys.argv
+    use_plotting = "-noplot" not in sys.argv
+    use_hdf5 = "-nohdf5" not in sys.argv
 
     # log any non-defaults
     print_func = lambda x: print(x) if log_level is None else lambda x: logger.log(LogLevel.L3, x)
     if not use_display:
-        print_func('Running without displaying any plots.')
+        print_func("Running without displaying any plots.")
     if not use_plotting:
-        print_func('Running without making any plots.')
+        print_func("Running without making any plots.")
     if not use_hdf5:
-        print_func('Running without saving to HDF5 files.')
+        print_func("Running without saving to HDF5 files.")
 
     # do operations based on those settings
     if use_plotting and not use_display:
@@ -188,6 +188,6 @@ def process_command_line_options() -> _Flags:
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_parser', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_parser", exit=False)
     doctest.testmod(verbose=False)

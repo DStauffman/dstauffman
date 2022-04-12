@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     _Chan = Union[List[str], Tuple[str, ...]]
     _Sets = Union[Set[str], FrozenSet[str]]
     _Time = Union[float, np.datetime64]
-    _T = TypeVar('_T')
+    _T = TypeVar("_T")
 
 #%% Support Functions
 @overload
@@ -40,7 +40,9 @@ def _chop_wrapper(
     inplace: bool = ...,
     return_ends: Literal[True],
     subclasses: _Sets = ...,
-) -> Tuple[_T, _T, _T]: ...
+) -> Tuple[_T, _T, _T]:
+    ...
+
 
 @overload
 def _chop_wrapper(
@@ -53,7 +55,9 @@ def _chop_wrapper(
     inplace: bool = ...,
     return_ends: Literal[False] = ...,
     subclasses: _Sets = ...,
-) -> _T: ...
+) -> _T:
+    ...
+
 
 def _chop_wrapper(
     orig: _T,
@@ -69,20 +73,20 @@ def _chop_wrapper(
     assert orig.time is not None, "You can't chop an uninitialized time field."  # type: ignore[attr-defined]
     use_dates = is_datetime(orig.time)  # type: ignore[attr-defined]
     if ti is None:
-        ti = np.datetime64('nat') if use_dates else -np.inf
+        ti = np.datetime64("nat") if use_dates else -np.inf
     if tf is None:
-        tf = np.datetime64('nat') if use_dates else np.inf
+        tf = np.datetime64("nat") if use_dates else np.inf
     assert ti is not None
     assert tf is not None
     if return_ends:
         left = copy.deepcopy(orig)
         right = copy.deepcopy(orig)
-        tl = np.datetime64('nat') if use_dates else -np.inf
-        tr = np.datetime64('nat') if use_dates else np.inf
-        chop_time(left, time_field='time', exclude=exclude, ti=tl, tf=ti, right=False)  # type: ignore[arg-type]
-        chop_time(right, time_field='time', exclude=exclude, ti=tf, tf=tr, left=False)  # type: ignore[arg-type]
+        tl = np.datetime64("nat") if use_dates else -np.inf
+        tr = np.datetime64("nat") if use_dates else np.inf
+        chop_time(left, time_field="time", exclude=exclude, ti=tl, tf=ti, right=False)  # type: ignore[arg-type]
+        chop_time(right, time_field="time", exclude=exclude, ti=tf, tf=tr, left=False)  # type: ignore[arg-type]
     out = orig if inplace else copy.deepcopy(orig)
-    chop_time(out, time_field='time', exclude=exclude, ti=ti, tf=tf, right=include_last)
+    chop_time(out, time_field="time", exclude=exclude, ti=ti, tf=tf, right=include_last)
     if subclasses is not None:
         for sub in subclasses:
             temp = getattr(out, sub).chop(ti=ti, tf=tf, include_last=include_last, inplace=inplace, return_ends=return_ends)
@@ -139,8 +143,8 @@ class KfInnov(Frozen):
     def __init__(
         self,
         *,
-        name: str = '',
-        units: str = '',
+        name: str = "",
+        units: str = "",
         chan: _Chan = None,
         num_innovs: int = 0,
         num_axes: int = 0,
@@ -152,7 +156,7 @@ class KfInnov(Frozen):
         if chan is not None:
             self.chan = chan
         elif num_axes > 0:
-            self.chan = ['' for i in range(num_axes)]
+            self.chan = ["" for i in range(num_axes)]
         else:
             self.chan = None
         self.units = units
@@ -163,8 +167,8 @@ class KfInnov(Frozen):
         if num_innovs > 0:
             self.time   = np.empty(num_innovs, dtype=time_dtype)
             innov_shape = (num_axes, num_innovs) if num_axes > 1 else (num_innovs,)
-            self.innov  = np.full(innov_shape, np.nan, dtype=float, order='F')
-            self.norm   = np.full(innov_shape, np.nan, dtype=float, order='F')
+            self.innov  = np.full(innov_shape, np.nan, dtype=float, order="F")
+            self.norm   = np.full(innov_shape, np.nan, dtype=float, order="F")
             self.status = np.empty(num_innovs, dtype=int)
         else:
             self.time   = None
@@ -205,7 +209,8 @@ class KfInnov(Frozen):
     @overload
     def chop(
         self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., inplace: bool = ..., return_ends: Literal[True]
-    ) -> Tuple[KfInnov, KfInnov, KfInnov]: ...
+    ) -> Tuple[KfInnov, KfInnov, KfInnov]:
+        ...
 
     @overload
     def chop(
@@ -216,12 +221,13 @@ class KfInnov(Frozen):
         include_last: bool = ...,
         inplace: bool = ...,
         return_ends: Literal[False] = ...,
-    ) -> KfInnov: ...
+    ) -> KfInnov:
+        ...
 
     def chop(
         self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
     ) -> Union[KfInnov, Tuple[KfInnov, KfInnov, KfInnov]]:
-        exclude = frozenset({'name', 'chan', 'units'})
+        exclude = frozenset({"name", "chan", "units"})
         out = _chop_wrapper(
             self, exclude=exclude, ti=ti, tf=tf, include_last=include_last, inplace=inplace, return_ends=return_ends
         )  # type: ignore[call-overload]
@@ -268,7 +274,7 @@ class Kf(Frozen):
     def __init__(
         self,
         *,
-        name: str = '',
+        name: str = "",
         chan: _Chan = None,
         num_points: int = 0,
         num_states: int = 0,
@@ -285,7 +291,7 @@ class Kf(Frozen):
         if chan is not None:
             self.chan = chan
         elif num_states > 0:
-            self.chan = ['' for i in range(num_states)]
+            self.chan = ["" for i in range(num_states)]
         else:
             self.chan = None
         self.time: Optional[np.ndarray]
@@ -300,14 +306,14 @@ class Kf(Frozen):
             num_active   = num_states if active_states is None else len(active_states)
             state_shape  = (num_active, num_points) if num_active > 1 else (num_points,)
             self.time    = np.empty(num_points, dtype=time_dtype)
-            self.att     = np.empty((4, num_points), order='F')
+            self.att     = np.empty((4, num_points), order="F")
             if use_pv:
-                self.pos = np.empty((3, num_points), order='F')
-                self.vel = np.empty((3, num_points), order='F')
+                self.pos = np.empty((3, num_points), order="F")
+                self.vel = np.empty((3, num_points), order="F")
             self.active  = active_states if active_states is not None else np.arange(num_states)
-            self.state   = np.empty(state_shape, order='F')
+            self.state   = np.empty(state_shape, order="F")
             self.istate  = np.empty(num_states)
-            self.covar   = np.empty(state_shape, order='F')
+            self.covar   = np.empty(state_shape, order="F")
         else:
             self.time    = None
             self.att     = None
@@ -321,10 +327,10 @@ class Kf(Frozen):
         self.innov: Any
         if innov_class is None:
             self.innov = KfInnov(time_dtype=time_dtype, chan=innov_chan, **kwargs)
-            self._subclasses = frozenset({'innov',})
+            self._subclasses = frozenset({"innov",})
         elif callable(innov_class):
             self.innov = innov_class(time_dtype=time_dtype, chan=innov_chan, **kwargs)
-            self._subclasses = frozenset({'innov',})
+            self._subclasses = frozenset({"innov",})
         else:
             for (name, func) in innov_class.items():
                 setattr(self, name, func(time_dtype=time_dtype, chan=innov_chan, **kwargs))
@@ -337,12 +343,12 @@ class Kf(Frozen):
             return
         # Save data
         value: Any
-        with h5py.File(filename, 'w') as file:
-            grp = file.create_group('self')
+        with h5py.File(filename, "w") as file:
+            grp = file.create_group("self")
             for key in vars(self):
-                if key == '_subclasses':
+                if key == "_subclasses":
                     # TODO: update to always write this field first
-                    value = [x.encode('utf-8') for x in getattr(self, key)]
+                    value = [x.encode("utf-8") for x in getattr(self, key)]
                     grp.create_dataset(key, data=value)
                 elif key in self._subclasses:
                     # handle substructures
@@ -351,9 +357,9 @@ class Kf(Frozen):
                     for subkey in vars(sub):
                         value = getattr(sub, subkey)
                         if value is not None:
-                            if subkey in {'chan'}:
-                                value = [x.encode('utf-8') for x in value]
-                            elif subkey in {'time'} and is_datetime(value):
+                            if subkey in {"chan"}:
+                                value = [x.encode("utf-8") for x in value]
+                            elif subkey in {"time"} and is_datetime(value):
                                 value = value.copy().astype(np.int64)
                             inner_grp.create_dataset(subkey, data=value)
                 else:
@@ -361,43 +367,43 @@ class Kf(Frozen):
                     value = getattr(self, key)
                     if value is not None:
                         # special case to handle lists of strings
-                        if key in {'chan'}:
-                            value = [x.encode('utf-8') for x in value]
-                        elif key in {'time'} and is_datetime(value):
+                        if key in {"chan"}:
+                            value = [x.encode("utf-8") for x in value]
+                        elif key in {"time"} and is_datetime(value):
                             value = value.copy().astype(np.int64)
                         grp.create_dataset(key, data=value)
 
     @classmethod
-    def load(cls, filename: Path = None, subclasses: _Sets = frozenset({'innov'})) -> Kf:
+    def load(cls, filename: Path = None, subclasses: _Sets = frozenset({"innov"})) -> Kf:
         r"""Load the object from disk."""
         if filename is None:
-            raise ValueError('No file specified to load.')
+            raise ValueError("No file specified to load.")
         # Load data
         out = cls()  # TODO: dynamically determine subclass field names and pv option?
-        with h5py.File(filename, 'r') as file:
+        with h5py.File(filename, "r") as file:
             for (key, grp) in file.items():
                 for field in grp:
                     if field in subclasses:
                         inner_grp = grp[field]
                         for subfield in inner_grp:
                             value = inner_grp[subfield][()]
-                            if subfield in {'chan'}:
-                                value = [x.decode('utf-8') for x in value]
-                            elif subfield in {'time'}:
+                            if subfield in {"chan"}:
+                                value = [x.decode("utf-8") for x in value]
+                            elif subfield in {"time"}:
                                 if value.dtype == np.int64:
                                     value.dtype = NP_DATETIME_FORM
                             elif isinstance(value, bytes):
-                                value = value.decode('utf-8')
+                                value = value.decode("utf-8")
                             setattr(getattr(out, field), subfield, value)
                     else:
                         value = grp[field][()]
-                        if field in {'chan'}:
-                            value = [x.decode('utf-8') for x in value]
-                        elif field in {'time'}:
+                        if field in {"chan"}:
+                            value = [x.decode("utf-8") for x in value]
+                        elif field in {"time"}:
                             if value.dtype == np.int64:
                                 value.dtype = NP_DATETIME_FORM
                         elif isinstance(value, bytes):
-                            value = value.decode('utf-8')
+                            value = value.decode("utf-8")
                         setattr(out, field, value)
         return out
 
@@ -421,7 +427,7 @@ class Kf(Frozen):
         kf.time = np.hstack((self.time, kf2.time))
         kf.istate = self.istate.copy() if self.istate is not None else None
         kf.active = self.active.copy() if self.active is not None else None  # TODO: assert that they are the same?
-        for field in {'att', 'pos', 'vel', 'state', 'covar'}:
+        for field in {"att", "pos", "vel", "state", "covar"}:
             if (x := getattr(self, field)) is not None and (y := getattr(kf2, field)) is not None:
                 setattr(kf, field, np.column_stack((x, y)))
         for sub in self._subclasses:
@@ -431,7 +437,8 @@ class Kf(Frozen):
     @overload
     def chop(
         self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., inplace: bool = ..., return_ends: Literal[True]
-    ) -> Tuple[Kf, Kf, Kf]: ...
+    ) -> Tuple[Kf, Kf, Kf]:
+        ...
 
     @overload
     def chop(
@@ -442,12 +449,13 @@ class Kf(Frozen):
         include_last: bool = ...,
         inplace: bool = ...,
         return_ends: Literal[False] = ...,
-    ) -> Kf: ...
+    ) -> Kf:
+        ...
 
     def chop(
         self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
     ) -> Union[Kf, Tuple[Kf, Kf, Kf]]:
-        exclude = frozenset({'name', 'chan', 'active', 'istate'} | self._subclasses)
+        exclude = frozenset({"name", "chan", "active", "istate"} | self._subclasses)
         out = _chop_wrapper(
             self,
             exclude=exclude,
@@ -502,12 +510,12 @@ class KfRecord(Frozen):
         self.z: Optional[np.ndarray]
         if num_points > 0:
             self.time = np.empty(num_points, dtype=time_dtype)
-            self.P    = np.empty((num_active, num_active, num_points), order='F')
-            self.stm  = np.empty((num_active, num_active, num_points), order='F')
-            self.H    = np.empty((num_axes, num_states, num_points), order='F')
-            self.Pz   = np.empty((num_axes, num_axes, num_points), order='F')
-            self.K    = np.empty((num_active, num_axes, num_points), order='F')
-            self.z    = np.empty((num_axes, num_points), order='F')
+            self.P    = np.empty((num_active, num_active, num_points), order="F")
+            self.stm  = np.empty((num_active, num_active, num_points), order="F")
+            self.H    = np.empty((num_axes, num_states, num_points), order="F")
+            self.Pz   = np.empty((num_axes, num_axes, num_points), order="F")
+            self.K    = np.empty((num_active, num_axes, num_points), order="F")
+            self.z    = np.empty((num_axes, num_points), order="F")
         else:
             self.time = None
             self.P    = None
@@ -539,7 +547,7 @@ class KfRecord(Frozen):
             Write as *.hdf5 instead of *.pkl
 
         """
-        convert_times = hasattr(self.time, 'dtype') and np.issubdtype(self.time.dtype, np.datetime64)  # type: ignore[union-attr]
+        convert_times = hasattr(self.time, "dtype") and np.issubdtype(self.time.dtype, np.datetime64)  # type: ignore[union-attr]
         if convert_times:
             orig_type = self.time.dtype  # type: ignore[union-attr]
             self.time.dtype = np.int64  # type: ignore[misc, union-attr]
@@ -561,7 +569,7 @@ class KfRecord(Frozen):
 
         """
         out: KfRecord = load_method(cls, filename=filename, use_hdf5=use_hdf5)
-        if hasattr(out.time, 'dtype') and out.time.dtype == np.int64:  # type: ignore[union-attr]
+        if hasattr(out.time, "dtype") and out.time.dtype == np.int64:  # type: ignore[union-attr]
             out.time.dtype = NP_DATETIME_FORM  # type: ignore[misc, union-attr]
         return out
 
@@ -583,7 +591,7 @@ class KfRecord(Frozen):
         assert kfrecord.time is not None
         assert kfrecord2.time is not None
         kfrecord.time = np.hstack((self.time, kfrecord2.time))
-        for field in {'P', 'stm', 'H', 'Pz', 'K', 'z'}:
+        for field in {"P", "stm", "H", "Pz", "K", "z"}:
             if (x := getattr(self, field)) is not None and (y := getattr(kfrecord2, field)) is not None:
                 setattr(kfrecord, field, np.concatenate((x, y), axis=x.ndim - 1))
         return kfrecord
@@ -591,7 +599,9 @@ class KfRecord(Frozen):
     @overload
     def chop(
         self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., inplace: bool = ..., return_ends: Literal[True]
-    ) -> Tuple[KfRecord, KfRecord, KfRecord]: ...
+    ) -> Tuple[KfRecord, KfRecord, KfRecord]:
+        ...
+
     @overload
     def chop(
         self,
@@ -601,7 +611,8 @@ class KfRecord(Frozen):
         include_last: bool = ...,
         inplace: bool = ...,
         return_ends: Literal[False] = ...,
-    ) -> KfRecord: ...
+    ) -> KfRecord:
+        ...
 
     def chop(
         self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
@@ -614,6 +625,6 @@ class KfRecord(Frozen):
 
 
 #%% Unit Test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_aerospace_classes', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_aerospace_classes", exit=False)
     doctest.testmod(verbose=False)

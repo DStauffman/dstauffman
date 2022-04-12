@@ -26,13 +26,13 @@ class Test_commands_print_help(unittest.TestCase):
             commands.print_help()
         output = out.getvalue().strip()
         out.close()
-        expected_header = output.startswith('#######\nlmspace\n#######\n') or output.startswith(
-            '##########\ndstauffman\n##########\n'
+        expected_header = output.startswith("#######\nlmspace\n#######\n") or output.startswith(
+            "##########\ndstauffman\n##########\n"
         )
         self.assertTrue(expected_header)
 
     def test_specify_file(self) -> None:
-        help_file = dcs.get_tests_dir() / 'test_commands_help.py'
+        help_file = dcs.get_tests_dir() / "test_commands_help.py"
         with dcs.capture_output() as out:
             commands.print_help(help_file)
         output = out.getvalue().strip()
@@ -52,7 +52,7 @@ class Test_commands_print_version(unittest.TestCase):
             commands.print_version()
         output = out.getvalue().strip()
         out.close()
-        self.assertIn('.', output)
+        self.assertIn(".", output)
 
 
 #%% commands.parse_help
@@ -102,8 +102,8 @@ class Test_commands_execute_help(unittest.TestCase):
             commands.execute_help(self.args)
         output = out.getvalue().strip()
         out.close()
-        expected_header = output.startswith('#######\nlmspace\n#######\n') or output.startswith(
-            '##########\ndstauffman\n##########\n'
+        expected_header = output.startswith("#######\nlmspace\n#######\n") or output.startswith(
+            "##########\ndstauffman\n##########\n"
         )
         self.assertTrue(expected_header)
 
@@ -123,9 +123,9 @@ class Test_commands_execute_version(unittest.TestCase):
             commands.execute_version(self.args)
         output = out.getvalue().strip()
         out.close()
-        self.assertIn('.', output)
+        self.assertIn(".", output)
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

@@ -16,7 +16,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% aerospace.rot
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_rot(unittest.TestCase):
     r"""
     Tests the aerospace.rot function with the following cases:
@@ -61,13 +61,13 @@ class Test_aerospace_rot(unittest.TestCase):
     def test_bad_axis(self) -> None:
         with self.assertRaises(ValueError) as context:
             space.rot(4, self.angle)
-        self.assertEqual(str(context.exception), 'Unexpected value for axis.')
+        self.assertEqual(str(context.exception), "Unexpected value for axis.")
         with self.assertRaises(ValueError):
             space.rot(np.pi / 2, 2)
 
 
 #%% aerospace.drot
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_drot(unittest.TestCase):
     r"""
     Tests the aerospace.drot function with the following cases:
@@ -77,7 +77,7 @@ class Test_aerospace_drot(unittest.TestCase):
 
 
 #%% aerospace.vec_cross
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_vec_cross(unittest.TestCase):
     r"""
     Tests the aerospace.vec_cross function with the following cases:
@@ -101,7 +101,7 @@ class Test_aerospace_vec_cross(unittest.TestCase):
 
 
 #%% aerospace.vec_angle
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_vec_angle(unittest.TestCase):
     r"""
     Tests the aerospace.vec_angle function with the following cases:
@@ -199,7 +199,7 @@ class Test_aerospace_vec_angle(unittest.TestCase):
 
 
 #%% aerospace.cart2sph
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_cart2sph(unittest.TestCase):
     r"""
     Tests the aerospace.cart2sph function with the following cases:
@@ -249,7 +249,7 @@ class Test_aerospace_cart2sph(unittest.TestCase):
 
 
 #%% aerospace.sph2cart
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_sph2cart(unittest.TestCase):
     r"""
     Tests the aerospace.sph2cart function with the following cases:
@@ -299,7 +299,7 @@ class Test_aerospace_sph2cart(unittest.TestCase):
 
 
 #%% aerospace.rv2dcm
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_rv2dcm(unittest.TestCase):
     r"""
     Tests the aerospace.rv2dcm function with the following cases:
@@ -319,12 +319,12 @@ class Test_aerospace_rv2dcm(unittest.TestCase):
     def test_complex(self) -> None:
         vec = np.array([np.sqrt(2) / 2, 0, np.sqrt(2) / 2])
         dcm = space.rv2dcm(vec)
-        mag = np.sqrt(np.sum(vec ** 2))
+        mag = np.sqrt(np.sum(vec**2))
         quat = space.quat_norm(np.hstack((vec / mag * np.sin(mag / 2), np.cos(mag / 2))))
         exp = space.quat_to_dcm(quat)
         np.testing.assert_array_almost_equal(dcm, exp, decimal=14)
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

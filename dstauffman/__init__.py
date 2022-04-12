@@ -37,8 +37,8 @@ from .utils_log import setup_dir, fix_rollover, remove_outliers
 from .version   import version_info
 
 #%% Constants
-__version__ = '.'.join(str(x) for x in version_info)
+__version__ = ".".join(str(x) for x in version_info)
 
 #%% Unit test
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

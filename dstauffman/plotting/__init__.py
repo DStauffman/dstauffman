@@ -26,9 +26,9 @@ from .support   import DEFAULT_COLORMAP, DEFAULT_CLASSIFICATION, COLOR_LISTS, My
                            rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \
                            plot_second_units_wrapper, plot_second_yunits, get_rms_indices, \
                            plot_vert_lines, plot_phases, get_classification, plot_classification, \
-                           align_plots, z_from_ci, save_figs_to_pdf, save_images_to_pdf, \
-                           add_datashaders, fig_ax_factory
+                           align_plots, z_from_ci, ci_from_z, save_figs_to_pdf, \
+                           save_images_to_pdf, add_datashaders, fig_ax_factory
 
 #%% Unittest
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

@@ -24,10 +24,13 @@ if TYPE_CHECKING:
 
 #%% Functions - d_2_r
 @overload
-def d_2_r(deg: float) -> float: ...
+def d_2_r(deg: float) -> float:
+    ...
+
 
 @overload
-def d_2_r(deg: np.ndarray) -> np.ndarray: ...
+def d_2_r(deg: np.ndarray) -> np.ndarray:
+    ...
 
 
 def d_2_r(deg: _N) -> _N:
@@ -36,10 +39,13 @@ def d_2_r(deg: _N) -> _N:
 
 #%% Functions r_2_d
 @overload
-def r_2_d(rad: float) -> float: ...
+def r_2_d(rad: float) -> float:
+    ...
+
 
 @overload
-def r_2_d(rad: np.ndarray) -> np.ndarray: ...
+def r_2_d(rad: np.ndarray) -> np.ndarray:
+    ...
 
 
 def r_2_d(rad: _N) -> _N:
@@ -63,10 +69,13 @@ def cross(x, y):
 
 #%% Functions - jd_to_numpy
 @overload
-def jd_to_numpy(jd: float) -> np.datetime64: ...
+def jd_to_numpy(jd: float) -> np.datetime64:
+    ...
+
 
 @overload
-def jd_to_numpy(jd: np.ndarray) -> np.ndarray: ...
+def jd_to_numpy(jd: np.ndarray) -> np.ndarray:
+    ...
 
 
 def jd_to_numpy(jd: _N) -> Union[np.datetime64, np.ndarray]:
@@ -82,17 +91,20 @@ def jd_to_numpy(jd: _N) -> Union[np.datetime64, np.ndarray]:
     2000-01-02T12:00:00.000000000
 
     """
-    delta_days = jd - JULIAN['jd_2000_01_01']
-    out = np.datetime64('2000-01-01T00:00:00', NP_DATETIME_UNITS) + NP_ONE_DAY * delta_days
+    delta_days = jd - JULIAN["jd_2000_01_01"]
+    out = np.datetime64("2000-01-01T00:00:00", NP_DATETIME_UNITS) + NP_ONE_DAY * delta_days
     return out
 
 
 #%% Functions - numpy_to_jd
 @overload
-def numpy_to_jd(date: np.datetime64) -> np.float64: ...
+def numpy_to_jd(date: np.datetime64) -> np.float64:
+    ...
+
 
 @overload
-def numpy_to_jd(date: np.ndarray) -> np.ndarray: ...
+def numpy_to_jd(date: np.ndarray) -> np.ndarray:
+    ...
 
 
 def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.ndarray]:
@@ -109,8 +121,8 @@ def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.
     2451546.5
 
     """
-    delta_days = (date - np.datetime64('2000-01-01T00:00:00', NP_DATETIME_UNITS)) / NP_ONE_DAY
-    out = delta_days + JULIAN['jd_2000_01_01']
+    delta_days = (date - np.datetime64("2000-01-01T00:00:00", NP_DATETIME_UNITS)) / NP_ONE_DAY
+    out = delta_days + JULIAN["jd_2000_01_01"]
     return out
 
 
@@ -118,7 +130,7 @@ def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.
 def d_2_dms(x, /):
     r"""Converts an angle from degrees to degrees, minutes and seconds."""
     if np.ndim(x) > 1:
-        raise ValueError('dms_2_d expects a vector as input.')
+        raise ValueError("dms_2_d expects a vector as input.")
     # calculate size of array
     n = np.size(x)
     # initialize output
@@ -136,7 +148,7 @@ def d_2_dms(x, /):
 def dms_2_d(x, /):
     r"""Converts an angle from degrees, minutes and seconds to degrees."""
     if x.shape[0] != 3:
-        raise ValueError('d_2_dms expects a 3xN array as input.')
+        raise ValueError("d_2_dms expects a 3xN array as input.")
     # find fractional degrees by adding parts together
     out = x[0, ...] + x[1, ...] / ONE_MINUTE + x[2, ...] / ONE_HOUR
     return out
@@ -146,7 +158,7 @@ def dms_2_d(x, /):
 def hms_2_r(x, /):
     r"""Converts a time from hours, minutes and seconds to radians."""
     if x.shape[0] != 3:
-        raise ValueError('hms_2_r expects a 3xN array as input.')
+        raise ValueError("hms_2_r expects a 3xN array as input.")
     # find fractional degrees by adding parts together
     hours = x[0, ...] + x[1, ...] / ONE_MINUTE + x[2, ...] / ONE_HOUR
     out = hours / 24 * TAU
@@ -157,7 +169,7 @@ def hms_2_r(x, /):
 def r_2_hms(x, /):
     r"""Converts an angle from radians to hours, minutes and seconds."""
     if np.ndim(x) > 1:
-        raise ValueError('r_2_hms expects a vector as input.')
+        raise ValueError("r_2_hms expects a vector as input.")
     # calculate size of array
     n = np.size(x)
     # initialize output
@@ -221,8 +233,8 @@ def geo_loc_2_ijk(geo_loc, time_jd):
     lambda_ = geo_loc[1, ...]
     H = geo_loc[2, ...]
     # find x & z
-    x = (EARTH['a'] / np.sqrt(1.0 - EARTH['e'] ** 2 * np.sin(L) ** 2) + H) * np.cos(L)
-    z = (EARTH['a'] * (1.0 - EARTH['e'] ** 2) / np.sqrt(1.0 - EARTH['e'] ** 2 * np.sin(L) ** 2) + H) * np.sin(L)
+    x = (EARTH["a"] / np.sqrt(1.0 - EARTH["e"] ** 2 * np.sin(L) ** 2) + H) * np.cos(L)
+    z = (EARTH["a"] * (1.0 - EARTH["e"] ** 2) / np.sqrt(1.0 - EARTH["e"] ** 2 * np.sin(L) ** 2) + H) * np.sin(L)
     # find theta
     theta = long_2_sidereal(lambda_, time_jd)
     # create vector in IJK frame
@@ -238,13 +250,13 @@ def ijk_2_rdr(ijk):
     j = ijk[1, ...]
     k = ijk[2, ...]
     # calculate magnitude of vectors
-    rang = np.sqrt(i ** 2 + j ** 2 + k ** 2)  # TODO: use magnitude
+    rang = np.sqrt(i**2 + j**2 + k**2)  # TODO: use magnitude
     # find azimuth
     ra = np.atan2(j, i)
     # change from [-pi pi] to [0 2*pi]
     ra = np.mod(ra, TAU)
     # find elevation
-    de = np.atan2(k, np.sqrt(i ** 2 + j ** 2))
+    de = np.atan2(k, np.sqrt(i**2 + j**2))
     # output array of values
     rdr = np.vstack((ra, de, rang))
     return rdr
@@ -258,8 +270,8 @@ def ijk_2_sez(ijk, geo_loc, time_jd):
         r"""Calculate the IJK to SEZ transformation matrix from L and theta."""
         return np.array([
             [ np.sin(L) * np.cos(theta), np.sin(L) * np.sin(theta), -np.cos(L)],
-            [-np.sin(theta)            , np.cos(theta)            ,  0.0      ],
-            [+np.cos(L) * np.cos(theta), np.cos(L) * np.sin(theta),  np.sin(L)],
+            [-np.sin(theta)            , np.cos(theta)            , 0.0       ],
+            [ np.cos(L) * np.cos(theta), np.cos(L) * np.sin(theta),  np.sin(L)],
         ])
 
     # find vector to observer in IJK frame
@@ -269,10 +281,10 @@ def ijk_2_sez(ijk, geo_loc, time_jd):
     # find the size of the input array
     (m, n) = ijk.shape
     if m != 3:
-        raise ValueError('ijk_2_sez expects an array of 3 dimensional vectors for sez')
+        raise ValueError("ijk_2_sez expects an array of 3 dimensional vectors for sez")
     (m, length) = geo_loc.shape
     if m != 3:
-        raise ValueError('ijk_2_sez expects an array of 3 dimensional vectors for geo_loc')
+        raise ValueError("ijk_2_sez expects an array of 3 dimensional vectors for geo_loc")
     # pull out data from geo_loc
     L = geo_loc[0, ...]
     lambda_ = geo_loc[1, ...]
@@ -298,7 +310,7 @@ def ijk_2_sez(ijk, geo_loc, time_jd):
             D = _find_D(L[i], theta[i])
             sez[:, i] = D @ sez_in_ijk[:, i]
     else:
-        raise ValueError('ijk and geo_loc must be arrays of the same length')
+        raise ValueError("ijk and geo_loc must be arrays of the same length")
     return sez
 
 
@@ -306,11 +318,11 @@ def ijk_2_sez(ijk, geo_loc, time_jd):
 def long_2_sidereal(lambda_, time_jd):
     r"""Converts a geographic longitude to sidereal longitude."""
     # epoch
-    to = JULIAN['tg0_2000_time']
+    to = JULIAN["tg0_2000_time"]
     # theta at epoch
-    theta_go = JULIAN['tg0_2000']
+    theta_go = JULIAN["tg0_2000"]
     # find theta
-    theta = np.mod(theta_go + EARTH['omega'] * JULIAN['day'] * (time_jd - to) + lambda_, TAU)
+    theta = np.mod(theta_go + EARTH["omega"] * JULIAN["day"] * (time_jd - to) + lambda_, TAU)
     return theta
 
 
@@ -346,13 +358,13 @@ def sez_2_aer(sez):
     y = sez[1, ...]
     z = sez[2, ...]
     # calculate magnitude of vectors
-    rho = np.sqrt(x ** 2 + y ** 2 + z ** 2)  # TODO: use magnitude
+    rho = np.sqrt(x**2 + y**2 + z**2)  # TODO: use magnitude
     # find azimuth
     az = np.atan2(y, -x)
     # change range from (-pi,pi) to (0,2*pi)
     az = np.mod(az, TAU)
     # find elevation (note Elevation is in range (-pi/2:pi/2)
-    el = np.atan(z / np.sqrt(x ** 2 + y ** 2))
+    el = np.atan(z / np.sqrt(x**2 + y**2))
     # output array of values
     aer = np.vstack((az, el, rho))
     return aer
@@ -366,17 +378,17 @@ def sez_2_ijk(sez, geo_loc, time_jd):
         r"""Calculate the SEZ to IJK transformation matrix from L and theta."""
         return np.array([
             [ np.sin(L) * np.cos(theta), -np.sin(theta), np.cos(L) * np.cos(theta)],
-            [+np.sin(L) * np.sin(theta),  np.cos(theta), np.cos(L) * np.sin(theta)],
+            [ np.sin(L) * np.sin(theta),  np.cos(theta), np.cos(L) * np.sin(theta)],
             [-np.cos(L)                ,  0.0          , np.sin(L)                ],
         ])
 
     # find the size of the input array
     (m, n) = sez.shape
     if m != 3:
-        raise ValueError('ijk_2_sez expects an array of 3 dimensional vectors for sez')
+        raise ValueError("ijk_2_sez expects an array of 3 dimensional vectors for sez")
     (m, length) = geo_loc.shape
     if m != 3:
-        raise ValueError('ijk_2_sez expects an array of 3 dimensional vectors for geo_loc')
+        raise ValueError("ijk_2_sez expects an array of 3 dimensional vectors for geo_loc")
     # pull out data from geo_loc
     L = geo_loc[0, ...]
     lambda_ = geo_loc[1, ...]
@@ -402,7 +414,7 @@ def sez_2_ijk(sez, geo_loc, time_jd):
             D = _find_D(L[i], theta[i])
             sez_in_ijk[:, i] = D @ sez[:, i]
     else:
-        raise ValueError('sez and geo_loc must be arrays of the same length')
+        raise ValueError("sez and geo_loc must be arrays of the same length")
     # find vector to observer's position
     R = geo_loc_2_ijk(geo_loc, time_jd)
     # add position vector to SEZ position
@@ -473,11 +485,11 @@ def rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd):
     # transform position from SEZ to IJK frame
     r_ijk = sez_2_ijk(r_sez, geo_loc, time_jd)
     # express SEZ velocity in IJK frame
-    v_sez_in_ijk = sez_2_ijk(v_sez, np.array([0.0, 0.0, -EARTH['a']]), time_jd)
+    v_sez_in_ijk = sez_2_ijk(v_sez, np.array([0.0, 0.0, -EARTH["a"]]), time_jd)
     # number of vectors
     n = r_sez.shape[1]
     # calculate omega vector (Earth spins about k axis)
-    omega_vector = np.repeat(np.array([0.0, 0.0, EARTH['omega']]), (1, n))
+    omega_vector = np.repeat(np.array([0.0, 0.0, EARTH["omega"]]), (1, n))
     # calculate velocity in IJK frame
     v_ijk = v_sez_in_ijk + cross(omega_vector, r_ijk)
     return (r_ijk, v_ijk)
@@ -507,22 +519,33 @@ def get_sun_radec(time_jd):
     0.409
 
     """
-    #  delta time in days since J2000
-    delta_time_days_J2000 = time_jd - JULIAN['jd_2000_01_01']
+    # delta time in days since J2000
+    delta_time_days_J2000 = time_jd - JULIAN["jd_2000_01_01"]
     # Time in Julian centuries
-    T = delta_time_days_J2000 * JULIAN['day'] / JULIAN['century']
-    # (eq 25.2) Geometri mean longitude of the Sun, referred to the mean equinox of the date
-    Lo = np.mod(DEG2RAD * (280.46645 + 36000.76983 * T + 0.0003032 * T ** 2), TAU)
+    T = delta_time_days_J2000 * JULIAN["day"] / JULIAN["century"]
+    # (eq 25.2) Geometric mean longitude of the Sun, referred to the mean equinox of the date
+    Lo = np.mod(DEG2RAD * (280.46645 + 36000.76983 * T + 0.0003032 * T**2), TAU)
     # (eq 25.3) Mean anomaly of the Sun
-    M = np.mod(DEG2RAD * (357.52910 + 35999.05030 * T - 0.0001559 * T ** 2 - 0.00000048 * T ** 3), TAU)
+    M = np.mod(DEG2RAD * (357.52910 + 35999.05030 * T - 0.0001559 * T**2 - 0.00000048 * T**3), TAU)
     # Center of Sun
-    C = DEG2RAD * ((1.914600 - 0.004817 * T - 0.000014 * T ** 2) * np.sin(M) + (
-        0.019993 - 0.000101 * T) * np.sin(2 * M) + 0.000290 * np.sin(3 * M))
+    C = DEG2RAD * (
+        (1.914600 - 0.004817 * T - 0.000014 * T**2) * np.sin(M)
+        + (0.019993 - 0.000101 * T) * np.sin(2 * M)
+        + 0.000290 * np.sin(3 * M)
+    )
     # true longitude
     sun_true_longitude = np.mod(Lo + C, TAU)
     # (eq 22.2) (arc-sec)
-    obliquity_of_ecliptic = ARCSEC2RAD * (23 * ONE_HOUR + 26 * ONE_MINUTE + 21.406 - 46.836769 * T
-        - 0.0001831 * T ** 2 + 0.00200340 * T ** 3 - 0.576e-6 * T ** 4 - 4.34e-8 * T ** 5)
+    obliquity_of_ecliptic = ARCSEC2RAD * (
+        23 * ONE_HOUR
+        + 26 * ONE_MINUTE
+        + 21.406
+        - 46.836769 * T
+        - 0.0001831 * T**2
+        + 0.00200340 * T**3
+        - 0.576e-6 * T**4
+        - 4.34e-8 * T**5
+    )
     # right ascension
     ra = np.mod(np.arctan2(np.cos(obliquity_of_ecliptic) * np.sin(sun_true_longitude), np.cos(sun_true_longitude)), TAU)
     # declination
@@ -531,6 +554,6 @@ def get_sun_radec(time_jd):
 
 
 #%% Unit Test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_aerospace_orbit_support', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_aerospace_orbit_support", exit=False)
     doctest.testmod(verbose=False)

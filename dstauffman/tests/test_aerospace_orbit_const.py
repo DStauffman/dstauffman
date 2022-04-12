@@ -20,19 +20,19 @@ class Test_orbits_all_values(unittest.TestCase):
 
     def setUp(self) -> None:
         self.float: List[str] = [
-            'PI',
-            'TAU',
-            'G',
-            'SIDEREAL_DAY',
-            'SIDEREAL_YEAR',
-            'AU',
-            'MU_SUN',
-            'MU_EARTH',
-            'SPEED_OF_LIGHT',
-            'ECLIPTIC',
+            "PI",
+            "TAU",
+            "G",
+            "SIDEREAL_DAY",
+            "SIDEREAL_YEAR",
+            "AU",
+            "MU_SUN",
+            "MU_EARTH",
+            "SPEED_OF_LIGHT",
+            "ECLIPTIC",
         ]
-        self.dicts: List[str] = ['SS_MASSES', 'JULIAN', 'EARTH', 'PALO_ALTO']
-        self.extra: List[str] = ['DEG2RAD', 'HAVE_NUMPY']  # imported constants
+        self.dicts: List[str] = ["SS_MASSES", "JULIAN", "EARTH", "PALO_ALTO"]
+        self.extra: List[str] = ["DEG2RAD", "HAVE_NUMPY"]  # imported constants
         self.master = set(self.float) | set(self.dicts) | set(self.extra)
 
     def test_values(self) -> None:
@@ -45,9 +45,9 @@ class Test_orbits_all_values(unittest.TestCase):
     def test_missing(self) -> None:
         for field in vars(space.orbit_const):
             if field.isupper():
-                self.assertTrue(field in self.master, 'Test is missing: {}'.format(field))
+                self.assertTrue(field in self.master, "Test is missing: {}".format(field))
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

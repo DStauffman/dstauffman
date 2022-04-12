@@ -108,21 +108,21 @@ def quat_assertions(
     if qndim == 1:
         assert qsize == 0 or qsize == QUAT_SIZE, 'Quaternion has invalid size: "{}"'.format(qsize)
     elif qndim == 2:
-        assert quat.shape[0] == QUAT_SIZE, 'Quaternion has invalid size for first ' + 'dimension: "{}"'.format(quat.shape[0])
+        assert quat.shape[0] == QUAT_SIZE, "Quaternion has invalid size for first " + 'dimension: "{}"'.format(quat.shape[0])
     else:
         assert False, 'Quaternion has too many dimensions: "{}".'.format(qndim)
     # if a null quaternion, then checks are done
     if qsize == 0:
         return
     # check that values are all real
-    assert np.all(np.isreal(quat)), 'Quaternion is not real'
+    assert np.all(np.isreal(quat)), "Quaternion is not real"
     # check ranges
     if qndim == 1:
         if np.any(nans := np.isnan(quat)):
             if allow_nans:
-                assert np.all(nans), 'Quaternions with NaNs must have NaNs for every component.'
+                assert np.all(nans), "Quaternions with NaNs must have NaNs for every component."
             else:
-                assert False, 'NaNs are not allow in quaternion.'
+                assert False, "NaNs are not allow in quaternion."
         else:
             assert -1 <= quat[0] <= 1, 'Quaternion has bad range in x value: "{}"'.format(quat[0])
             assert -1 <= quat[1] <= 1, 'Quaternion has bad range in y value: "{}"'.format(quat[1])
@@ -132,10 +132,10 @@ def quat_assertions(
         if np.any(nans := np.isnan(quat)):
             if allow_nans:
                 # TODO: this is a hack for typing!  set command is valid
-                temp = 'Quaternions with NaNs must have NaNs for every component.'
+                temp = "Quaternions with NaNs must have NaNs for every component."
                 assert set(np.count_nonzero(nans, axis=0)).issubset({0, 4}), temp
             else:
-                assert False, 'NaNs are not allow in quaternion.'
+                assert False, "NaNs are not allow in quaternion."
         ix = ~np.isnan(quat[0, :])
         assert np.all(-1 <= quat[0, ix]) and np.all(quat[0, ix] <= 1), (
             'Quaternion has bad range in x value, min: "{}", max:"{}"'.format(np.min(quat[0, ix]), np.max(quat[0, ix])))
@@ -147,7 +147,7 @@ def quat_assertions(
             'Quaternion has bad range in s value, min: "{}", max:"{}"'.format(np.min(quat[3, ix]), np.max(quat[3, ix])))
 
     # check normalization
-    q_norm_err = np.abs(1 - np.sum(quat ** 2, axis=0))
+    q_norm_err = np.abs(1 - np.sum(quat**2, axis=0))
     norm_check = q_norm_err <= precision
     if allow_nans:
         norm_check |= np.isnan(q_norm_err)
@@ -244,7 +244,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
         axis_set = set(axis)  # type: ignore[arg-type]
     except TypeError:
         axis_set = {axis}
-    assert len(axis_set - {1, 2, 3}) == 0, 'axis_set = {}'.format(axis_set)
+    assert len(axis_set - {1, 2, 3}) == 0, "axis_set = {}".format(axis_set)
     # calculations
     quat: np.ndarray
     if np.isscalar(angle) and np.isscalar(axis):
@@ -409,7 +409,7 @@ def quat_angle_diff(quat1: np.ndarray, quat2: np.ndarray, **kwargs) -> Tuple[np.
     dv = dq[0:3, ...]
 
     # sum vector components to get sin(theta/2)^2
-    mag2 = np.sum(dv ** 2, axis=0)
+    mag2 = np.sum(dv**2, axis=0)
 
     # take square root to get sin(theta/2)
     mag = np.sqrt(mag2)
@@ -613,9 +613,9 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
         ix_exclusive = (ti < time[0]) | (ti > time[-1])
     if np.any(ix_exclusive):
         if inclusive:
-            raise ValueError('Desired time not found within input time vector.')
+            raise ValueError("Desired time not found within input time vector.")
         else:
-            logger.log(LogLevel.L8, 'Desired time not found within input time vector.')
+            logger.log(LogLevel.L8, "Desired time not found within input time vector.")
 
     # Given times
     # find desired points that are contained in input time vector
@@ -653,7 +653,7 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
     dq12 = quat_norm(quat_mult(q2, quat_inv(q1, **kwargs), **kwargs), **kwargs)
     # find delta quaternion axis of rotation and normalize
     vec = dq12[0:3, :]
-    norm_vec = np.sqrt(np.sum(vec ** 2, axis=0))
+    norm_vec = np.sqrt(np.sum(vec**2, axis=0))
     vec = np.divide(vec, norm_vec, out=vec, where=norm_vec != 0)
     # find delta quaternion rotation angle
     ang = 2 * np.arcsin(norm_vec)
@@ -1058,7 +1058,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
         # build sequence str
         seq_str = str(int(seq[0])) + str(int(seq[1])) + str(int(seq[2]))
         # calculate terms based on sequence order
-        if seq_str == '123':
+        if seq_str == "123":
             # Identical to KLL pg 423
             c2_c3                     =  dcm[0, 0]
             s1_s2_c3_plus_s3_c1       =  dcm[1, 0]
@@ -1070,7 +1070,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
             s1_c2                     =  dcm[1, 2]
             c1_c2                     =  dcm[2, 2]
             group = 1
-        elif seq_str == '231':
+        elif seq_str == "231":
             c1_c2                     =  dcm[0, 0]
             minus_c1_s2_c3_plus_s3_s1 =  dcm[0, 1]
             c1_s2_s3_plus_c3_s1       =  dcm[0, 2]
@@ -1081,7 +1081,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
             s1_s2_c3_plus_s3_c1       =  dcm[2, 1]
             minus_s1_s2_s3_plus_c3_c1 =  dcm[2, 2]
             group = 1
-        elif seq_str == '312':
+        elif seq_str == "312":
             s1_s2_c3_plus_s3_c1       =  dcm[0, 2]
             minus_c1_s2_c3_plus_s3_s1 =  dcm[1, 2]
             minus_c2_s3               =  dcm[2, 0]
@@ -1092,7 +1092,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
             c1_c2                     =  dcm[1, 1]
             c2_c3                     =  dcm[2, 2]
             group = 1
-        elif seq_str == '132':
+        elif seq_str == "132":
             c2_c3                     =  dcm[0, 0]
             minus_c1_s2_c3_plus_s3_s1 =  dcm[1, 0]
             s1_s2_c3_plus_s3_c1       = -dcm[2, 0]
@@ -1103,7 +1103,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
             c1_s2_s3_plus_c3_s1       = -dcm[1, 2]
             minus_s1_s2_s3_plus_c3_c1 =  dcm[2, 2]
             group = 2
-        elif seq_str == '213':
+        elif seq_str == "213":
             s1_s2_c3_plus_s3_c1       = -dcm[0, 1]
             minus_c1_s2_c3_plus_s3_s1 =  dcm[2, 1]
             minus_c2_s3               = -dcm[1, 0]
@@ -1114,7 +1114,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
             c1_c2                     =  dcm[2, 2]
             c2_c3                     =  dcm[1, 1]
             group = 2
-        elif seq_str == '321':
+        elif seq_str == "321":
             s1_s2_c3_plus_s3_c1       = -dcm[1, 2]
             minus_c1_s2_c3_plus_s3_s1 =  dcm[0, 2]
             minus_c2_s3               = -dcm[2, 1]
@@ -1140,7 +1140,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
         s1 = np.sin(theta1)
         c1 = np.cos(theta1)
         # build remaining thetas
-        s3     = s1_s2_c3_plus_s3_c1 * c1       +  minus_c1_s2_c3_plus_s3_s1 * s1
+        s3     =       s1_s2_c3_plus_s3_c1 * c1 +  minus_c1_s2_c3_plus_s3_s1 * s1
         c3     = minus_s1_s2_s3_plus_c3_c1 * c1 +        c1_s2_s3_plus_c3_s1 * s1
         theta3 = np.arctan2(s3, c3)
         c2     = c2_c3 * c3 - minus_c2_s3 * s3
@@ -1156,6 +1156,6 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_aerospace_quat', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_aerospace_quat", exit=False)
     doctest.testmod(verbose=False)

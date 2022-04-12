@@ -54,8 +54,8 @@ else:
 
 #%% Constants
 if TYPE_CHECKING:
-    _T = TypeVar('_T')
-    _C = TypeVar('_C', int, 'Counter')
+    _T = TypeVar("_T")
+    _C = TypeVar("_C", int, "Counter")
     _SingleNum = Union[int, float, ndarray, datetime64]
     _Sets = Union[Set[str], FrozenSet[str]]
     _Time = Union[float, datetime64]
@@ -76,13 +76,13 @@ def _frozen(set: Callable) -> Callable:
             # If attribute already exists, simply set it
             set(self, name, value)
             return
-        if sys._getframe(1).f_code.co_name == '__init__':
+        if sys._getframe(1).f_code.co_name == "__init__":
             # Allow __setattr__ calls in __init__ calls of proper object types
             for key, val in sys._getframe(1).f_locals.items():  # pragma: no branch
-                if key == 'self' and isinstance(val, self.__class__):  # pragma: no branch
+                if key == "self" and isinstance(val, self.__class__):  # pragma: no branch
                     set(self, name, value)
                     return
-        raise AttributeError('You cannot add attribute of {} to {} in {}.'.format(name, self, sys._getframe(1).f_code.co_name))
+        raise AttributeError("You cannot add attribute of {} to {} in {}.".format(name, self, sys._getframe(1).f_code.co_name))
 
     # return the custom defined function
     return set_attr
@@ -115,10 +115,10 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclu
     Examples
     --------
     >>> from dstauffman import save_hdf5, get_tests_dir
-    >>> data = {'time': [1, 2, 3, 4, 5], 'data': [0, 0.5, 1.0, 1.5, 2], 'ver': 1.0}
-    >>> filename = get_tests_dir() / 'test_file.hdf5'
-    >>> meta = {'num_pts': 5}
-    >>> exclusions = {'ver', }
+    >>> data = {"time": [1, 2, 3, 4, 5], "data": [0, 0.5, 1.0, 1.5, 2], "ver": 1.0}
+    >>> filename = get_tests_dir() / "test_file.hdf5"
+    >>> meta = {"num_pts": 5}
+    >>> exclusions = {"ver", }
     >>> save_hdf5(data, filename, meta=meta, exclusions=exclusions)  # doctest: +SKIP
 
     """
@@ -126,11 +126,11 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclu
     if filename is None:
         return
     # alias keyword options
-    compression = kwargs.pop('compression', 'gzip')
-    shuffle = kwargs.pop('shuffle', True)
+    compression = kwargs.pop("compression", "gzip")
+    shuffle = kwargs.pop("shuffle", True)
     # Save data
-    with h5py.File(filename, 'w') as file:
-        grp = file.create_group('self')
+    with h5py.File(filename, "w") as file:
+        grp = file.create_group("self")
         if meta is not None:
             for (key, value) in meta.items():
                 grp.attrs[key] = value
@@ -159,28 +159,39 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclu
 
 #%% Methods - load_hdf5
 @overload
-def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[False] = ...) -> _T: ...
+def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[False] = ...) -> _T:
+    ...
+
 
 @overload
 def load_hdf5(
     cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]],
     filename: Optional[Path],
     return_meta: Literal[False] = ...,
-) -> Type[Any]: ...
+) -> Type[Any]:
+    ...
+
 
 @overload
-def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[False] = ...) -> Type[Any]: ...
+def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[False] = ...) -> Type[Any]:
+    ...
+
 
 @overload
-def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[_T, Dict[str, Any]]: ...
+def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[_T, Dict[str, Any]]:
+    ...
+
 
 @overload
 def load_hdf5(
     cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]], filename: Optional[Path], return_meta: Literal[True]
-) -> Tuple[Type[Any], Dict[str, Any]]: ...
+) -> Tuple[Type[Any], Dict[str, Any]]:
+    ...
+
 
 @overload
-def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[Type[Any], Dict[str, Any]]: ...
+def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[Type[Any], Dict[str, Any]]:
+    ...
 
 
 def load_hdf5(
@@ -204,29 +215,29 @@ def load_hdf5(
     Examples
     --------
     >>> from dstauffman import load_hdf5, get_tests_dir
-    >>> filename = get_tests_dir() / 'test_file.hdf5'
+    >>> filename = get_tests_dir() / "test_file.hdf5"
     >>> (data, meta) = load_hdf5(None, filename, return_meta=True)  # doctest: +SKIP
 
     """
     if filename is None:
-        raise ValueError('No file specified to load.')
+        raise ValueError("No file specified to load.")
     if return_meta:
         meta: Dict[str, Any] = {}
     # Load data
     out: Union[_T, Type[Any]]
     if cls is None:
-        out = type('Temp', (object,), {})
+        out = type("Temp", (object,), {})
         limit_fields = False
     elif isinstance(cls, dict):
-        out = type('Temp', (object,), cls)
+        out = type("Temp", (object,), cls)
         limit_fields = True
     elif isinstance(cls, (list, set, tuple)):
-        out = type('Temp', (object,), {k: None for k in cls})
+        out = type("Temp", (object,), {k: None for k in cls})
         limit_fields = True
     else:
         out = cls()
         limit_fields = False  # TODO: set to True or have option to raise or not raise error?
-    with h5py.File(filename, 'r') as file:
+    with h5py.File(filename, "r") as file:
         for key in file:
             grp = file[key]
             if return_meta:
@@ -235,7 +246,7 @@ def load_hdf5(
             for field in grp:
                 if limit_fields and not hasattr(out, field):
                     continue
-                    # raise AttributeError(f"type object '{out.__name__}' has not attribute '{field}'")
+                    # raise AttributeError(f'type object "{out.__name__}" has not attribute "{field}"')
                 # Note grp[field].value is now grp[field][()] because of updated HDF5 API
                 setattr(out, field, grp[field][()])
     if return_meta:
@@ -259,7 +270,7 @@ def save_pickle(self, filename: Path = None) -> None:
     # exit if no filename is given
     if filename is None:
         return
-    with open(filename, 'wb') as file:
+    with open(filename, "wb") as file:
         pickle.dump(self, file)
 
 
@@ -280,8 +291,8 @@ def load_pickle(cls: Type[_T], filename: Path = None) -> _T:
 
     """
     if filename is None:
-        raise ValueError('No file specified to load.')
-    with open(filename, 'rb') as file:
+        raise ValueError("No file specified to load.")
+    with open(filename, "rb") as file:
         out: _T = pickle.load(file)
     return out
 
@@ -307,10 +318,10 @@ def save_method(
     if not use_hdf5:
         # Version 1 (Pickle):
         if meta is not None:
-            raise ValueError('meta information cannot be used with pickle files.')
+            raise ValueError("meta information cannot be used with pickle files.")
         if exclusions is not None:
-            raise ValueError('exclusions cannot be used with pickle files.')
-        save_pickle(self, filename.with_suffix('.pkl'))
+            raise ValueError("exclusions cannot be used with pickle files.")
+        save_pickle(self, filename.with_suffix(".pkl"))
     else:
         # Version 2 (HDF5):
         save_hdf5(self, filename, meta=meta, exclusions=exclusions, **kwargs)
@@ -318,12 +329,15 @@ def save_method(
 
 #%% Methods - load_method
 @overload
-def load_method(cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[False] = ...) -> _T: ...
+def load_method(cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[False] = ...) -> _T:
+    ...
+
 
 @overload
 def load_method(
     cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[True]
-) -> Tuple[_T, Dict[str, Any]]: ...
+) -> Tuple[_T, Dict[str, Any]]:
+    ...
 
 
 def load_method(
@@ -341,12 +355,12 @@ def load_method(
 
     """
     if filename is None:
-        raise ValueError('No file specified to load.')
+        raise ValueError("No file specified to load.")
     if not use_hdf5:
         # Version 1 (Pickle):
         if return_meta:
-            raise ValueError('meta information cannot be used with pickle files.')
-        out = load_pickle(cls, filename.with_suffix('.pkl'))
+            raise ValueError("meta information cannot be used with pickle files.")
+        out = load_pickle(cls, filename.with_suffix(".pkl"))
     else:
         # Version 2 (HDF5):
         out = load_hdf5(cls, filename, return_meta=return_meta)  # type: ignore[call-overload]
@@ -392,8 +406,8 @@ def pprint_dict(
     Examples
     --------
     >>> from dstauffman import pprint_dict
-    >>> dct = {'a': 1, 'bb': 2, 'ccc': 3}
-    >>> name = 'Demonstration'
+    >>> dct = {"a": 1, "bb": 2, "ccc": 3}
+    >>> name = "Demonstration"
     >>> text = pprint_dict(dct, name=name)
     Demonstration
      a   = 1
@@ -404,15 +418,15 @@ def pprint_dict(
     # print the name of the class/dictionary
     lines: List[str] = []
     if name:
-        lines.append(' ' * offset + name)
+        lines.append(" " * offset + name)
     # build indentation padding
-    this_indent = ' ' * (indent + offset)
+    this_indent = " " * (indent + offset)
     # find the length of the longest field name
     pad_len = max(len(x) for x in dct)
     # loop through fields
     for (this_key, this_value) in dct.items():
-        if hasattr(this_value, 'pprint'):
-            this_name = f'{this_key} (class {this_value.__class__.__name__})'
+        if hasattr(this_value, "pprint"):
+            this_name = f"{this_key} (class {this_value.__class__.__name__})"
             try:
                 this_line = this_value.pprint(
                     name=this_name,
@@ -425,24 +439,24 @@ def pprint_dict(
                 )
             except:
                 # TODO: do I need this check or just let it fail?
-                warnings.warn('pprint recursive call failed, reverting to default.')
-                this_pad = ' ' * (pad_len - len(this_key)) if align else ''
-                this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
+                warnings.warn("pprint recursive call failed, reverting to default.")
+                this_pad = " " * (pad_len - len(this_key)) if align else ""
+                this_line = f"{this_indent}{this_key}{this_pad} = {this_value}"
         else:
-            this_pad = ' ' * (pad_len - len(this_key)) if align else ''
+            this_pad = " " * (pad_len - len(this_key)) if align else ""
             if max_elements is None or not HAVE_NUMPY:
-                this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
+                this_line = f"{this_indent}{this_key}{this_pad} = {this_value}"
             else:
                 if max_elements == 0:
                     if isinstance(this_value, ndarray):
-                        this_line = f'{this_indent}{this_key}{this_pad} = <ndarray {this_value.dtype} {this_value.shape}>'
+                        this_line = f"{this_indent}{this_key}{this_pad} = <ndarray {this_value.dtype} {this_value.shape}>"
                     else:
-                        this_line = f'{this_indent}{this_key}{this_pad} = {type(this_value)}'
+                        this_line = f"{this_indent}{this_key}{this_pad} = {type(this_value)}"
                 else:
                     with printoptions(threshold=max_elements):
-                        this_line = f'{this_indent}{this_key}{this_pad} = {this_value}'
+                        this_line = f"{this_indent}{this_key}{this_pad} = {this_value}"
         lines.append(this_line)
-    text = '\n'.join(lines)
+    text = "\n".join(lines)
     if disp:
         print(text)
     return text
@@ -496,8 +510,8 @@ def chop_time(
     --------
     >>> from dstauffman import chop_time
     >>> import numpy as np
-    >>> self = type('Temp', (object, ), {'time': np.array([1, 3, 4, 8]), 'data': np.array([7, 8, 9, 1])})
-    >>> time_field = 'time'
+    >>> self = type("Temp", (object, ), {"time": np.array([1, 3, 4, 8]), "data": np.array([7, 8, 9, 1])})
+    >>> time_field = "time"
     >>> ti = 2
     >>> tf = 5
     >>> print(self.time)
@@ -523,7 +537,7 @@ def chop_time(
         return
     # drop data
     for key in vars(self):
-        if key.startswith('_'):
+        if key.startswith("_"):
             continue
         if exclude is not None and key in exclude:
             continue
@@ -555,11 +569,11 @@ def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Union[Fro
     --------
     >>> from dstauffman import subsample_class
     >>> import numpy as np
-    >>> self = type('Temp', (object, ), {'time': np.array([1, 3, 4, 8]), \
-    ...     'data': np.array([7, 8, 9, 1]), 'name': 'name'})
+    >>> self = type("Temp", (object, ), {"time": np.array([1, 3, 4, 8]), \
+    ...     "data": np.array([7, 8, 9, 1]), "name": "name"})
     >>> skip = 2
     >>> start = 1
-    >>> skip_fields = {'name', }
+    >>> skip_fields = {"name", }
     >>> print(self.time)
     [1 3 4 8]
 
@@ -578,7 +592,7 @@ def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Union[Fro
 
     """
     for key in vars(self):
-        if key.startswith('_'):
+        if key.startswith("_"):
             continue
         if skip_fields is not None and key in skip_fields:
             continue
@@ -602,44 +616,47 @@ class Frozen(object):
         __setattr__ = _frozen(type.__setattr__)
 
     @overload
-    def pprint(self, return_text: Literal[True], **kwargs) -> str: ...
+    def pprint(self, return_text: Literal[True], **kwargs) -> str:
+        ...
 
     @overload
-    def pprint(self, return_text: Literal[False], **kwargs) -> None: ...
+    def pprint(self, return_text: Literal[False], **kwargs) -> None:
+        ...
 
     @overload
-    def pprint(self, **kwargs) -> Optional[str]: ...
+    def pprint(self, **kwargs) -> Optional[str]:
+        ...
 
     def pprint(self, return_text: bool = False, **kwargs) -> Optional[str]:
         r"""Displays a pretty print version of the class."""
-        name = kwargs.pop('name') if 'name' in kwargs else self.__class__.__name__
+        name = kwargs.pop("name") if "name" in kwargs else self.__class__.__name__
         text = pprint_dict(self.__dict__, name=name, **kwargs)
         return text if return_text else None
 
 
 #%% MetaClasses - SaveAndLoad
 class SaveAndLoad(type):
-    r"""Metaclass to add 'save' and 'load' methods to the given class."""
+    r"""Metaclass to add "save" and "load" methods to the given class."""
 
     def __init__(cls, name, bases, dct):
-        r"""Add the 'save' and 'load' classes if they are not already present."""
-        if not hasattr(cls, 'save'):
-            setattr(cls, 'save', save_method)
-        if not hasattr(cls, 'load'):
-            setattr(cls, 'load', classmethod(load_method))
+        r"""Add the "save" and "load" classes if they are not already present."""
+        if not hasattr(cls, "save"):
+            setattr(cls, "save", save_method)
+        if not hasattr(cls, "load"):
+            setattr(cls, "load", classmethod(load_method))
         super().__init__(name, bases, dct)
 
 
 #%% MetaClasses - SaveAndLoadPickle
 class SaveAndLoadPickle(type):
-    r"""Metaclass to add 'save' and 'load' methods to the given class."""
+    r"""Metaclass to add "save" and "load" methods to the given class."""
 
     def __init__(cls, name, bases, dct):
-        r"""Add the 'save' and 'load' classes if they are not already present."""
-        if not hasattr(cls, 'save'):
-            setattr(cls, 'save', save_pickle)
-        if not hasattr(cls, 'load'):
-            setattr(cls, 'load', classmethod(load_pickle))
+        r"""Add the "save" and "load" classes if they are not already present."""
+        if not hasattr(cls, "save"):
+            setattr(cls, "save", save_pickle)
+        if not hasattr(cls, "load"):
+            setattr(cls, "load", classmethod(load_pickle))
         super().__init__(name, bases, dct)
 
 
@@ -713,10 +730,12 @@ class Counter(Frozen):
         return Counter(abs(self._val))
 
     @overload
-    def __add__(self, other: int) -> int: ...
+    def __add__(self, other: int) -> int:
+        ...
 
     @overload
-    def __add__(self, other: Counter) -> Counter: ...
+    def __add__(self, other: Counter) -> Counter:
+        ...
 
     def __add__(self, other: _C) -> _C:
         if isinstance(other, Counter):
@@ -738,11 +757,12 @@ class Counter(Frozen):
         return self.__add__(other)
 
     @overload
-    def __sub__(self, other: int) -> int: ...
+    def __sub__(self, other: int) -> int:
+        ...
 
     @overload
-    def __sub__(self, other: Counter) -> Counter: ...
-
+    def __sub__(self, other: Counter) -> Counter:
+        ...
 
     def __sub__(self, other: _C) -> _C:
         if isinstance(other, Counter):
@@ -786,7 +806,7 @@ class Counter(Frozen):
         return str(self._val)
 
     def __repr__(self) -> str:
-        return 'Counter({})'.format(self._val)
+        return "Counter({})".format(self._val)
 
 
 #%% FixedDict
@@ -807,13 +827,13 @@ class FixedDict(dict):
     Examples
     --------
     >>> from dstauffman import FixedDict
-    >>> fixed = FixedDict({'key1': 1, 'key2': None})
-    >>> assert 'key1' in fixed
+    >>> fixed = FixedDict({"key1": 1, "key2": None})
+    >>> assert "key1" in fixed
 
     >>> fixed.freeze()
-    >>> fixed['new_key'] = 5 # doctest: +IGNORE_EXCEPTION_DETAIL
+    >>> fixed["new_key"] = 5 # doctest: +IGNORE_EXCEPTION_DETAIL
     Traceback (most recent call last):
-    KeyError: 'new_key'
+    KeyError: "new_key"
 
     """
 
@@ -900,6 +920,6 @@ class FixedDict(dict):
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_classes', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_classes", exit=False)
     doctest.testmod(verbose=False)

@@ -17,7 +17,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% aerospace.bsl
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_bsl(unittest.TestCase):
     r"""
     Tests the aerospace.bsl function with the following cases:
@@ -46,7 +46,7 @@ class Test_aerospace_bsl(unittest.TestCase):
 
 
 #%% aerospace.bsr
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_bsr(unittest.TestCase):
     r"""
     Tests the aerospace.bsr function with the following cases:
@@ -75,7 +75,7 @@ class Test_aerospace_bsr(unittest.TestCase):
 
 
 #%% aerospace.prn_01_to_m11
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_prn_01_to_m11(unittest.TestCase):
     r"""
     Tests the aerospace.prn_01_to_m11 function with the following cases:
@@ -84,8 +84,8 @@ class Test_aerospace_prn_01_to_m11(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.bits = np.array([ 1,  1,  1, 0, 0,  1,  1])
-        self.exp  = np.array([-1, -1, -1, 1, 1, -1, -1])
+        self.bits = np.array([1, 1, 1, 0, 0, 1, 1])
+        self.exp = np.array([-1, -1, -1, 1, 1, -1, -1])
 
     def test_nominal(self) -> None:
         out = space.prn_01_to_m11(self.bits)
@@ -99,7 +99,7 @@ class Test_aerospace_prn_01_to_m11(unittest.TestCase):
 
 
 #%% aerospace.get_prn_bits
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_get_prn_bits(unittest.TestCase):
     r"""
     Tests the aerospace.get_prn_bits function with the following cases:
@@ -127,7 +127,7 @@ class Test_aerospace_get_prn_bits(unittest.TestCase):
 
 
 #%% aerospace.correlate_prn
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_correlate_prn(unittest.TestCase):
     r"""
     Tests the aerospace.correlate_prn function with the following cases:
@@ -137,7 +137,7 @@ class Test_aerospace_correlate_prn(unittest.TestCase):
 
     def test_nominal(self) -> None:
         shift = np.arange(1023)
-        form = 'zero-one'
+        form = "zero-one"
         for i in range(1, 38):
             prn = space.generate_prn(i)
             cor = space.correlate_prn(prn, prn, shift, form)
@@ -147,14 +147,14 @@ class Test_aerospace_correlate_prn(unittest.TestCase):
     def test_alt_form(self) -> None:
         prn = space.prn_01_to_m11(space.generate_prn(1))
         shift = np.arange(1023)
-        form = 'one-one'
+        form = "one-one"
         cor = space.correlate_prn(prn, prn, shift, form)
         self.assertEqual(cor[0], 1)
         np.testing.assert_array_less(np.max(np.abs(cor[1:])), 0.1)
 
 
 #%% aerospace.generate_prn
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_generate_prn(unittest.TestCase):
     r"""
     Tests the aerospace.generate_prn function with the following cases:
@@ -169,7 +169,7 @@ class Test_aerospace_generate_prn(unittest.TestCase):
 
 
 #%% aerospace.gps_to_datetime
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_gps_to_datetime(unittest.TestCase):
     r"""
     Tests the aerospace.gps_to_datetime function with the following cases:
@@ -195,13 +195,13 @@ class Test_aerospace_gps_to_datetime(unittest.TestCase):
     def test_alt_form(self) -> None:
         week = np.array([1782, 1783])
         time = np.array([425916.0, 4132.56])
-        date_gps = space.gps_to_datetime(week, time, form='numpy')
-        exp = np.array([np.datetime64('2014-03-06T22:18:36', 'ns'), np.datetime64('2014-03-09T01:08:52.560000', 'ns')])
+        date_gps = space.gps_to_datetime(week, time, form="numpy")
+        exp = np.array([np.datetime64("2014-03-06T22:18:36", "ns"), np.datetime64("2014-03-09T01:08:52.560000", "ns")])
         np.testing.assert_array_equal(date_gps, exp)
 
 
 #%% aerospace.gps_to_utc_datetime
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
     r"""
     Tests the aerospace.gps_to_utc_datetime function with the following cases:
@@ -228,8 +228,8 @@ class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
     def test_alt_form(self) -> None:
         week = np.array([1782, 1783])
         time = np.array([425916, 4132])
-        date_utc = space.gps_to_utc_datetime(week, time, form='numpy')
-        exp = np.array([np.datetime64('2014-03-06T22:18:19', 'ns'), np.datetime64('2014-03-09T01:08:35', 'ns')])
+        date_utc = space.gps_to_utc_datetime(week, time, form="numpy")
+        exp = np.array([np.datetime64("2014-03-06T22:18:19", "ns"), np.datetime64("2014-03-09T01:08:35", "ns")])
         np.testing.assert_array_equal(date_utc, exp)
 
     def test_manual_leap_seconds(self) -> None:
@@ -241,5 +241,5 @@ class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

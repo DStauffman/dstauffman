@@ -10,5 +10,8 @@ include README.rst
 # Include the Change Log
 include CHANGELOG.md
 
+# Include the Project configuration
+include pyproject.toml
+
 # Include supporting files
 recursive-include dstauffman *.png *.pdf *.rst *.tex *.coveragerc *.bat *.sh

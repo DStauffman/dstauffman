@@ -1,0 +1,53 @@
+[build-system]
+requires = ["wheel", "setuptools"]
+build-backend = "setuptools.build_meta"
+
+[metadata]
+name = "dstauffman"
+#version = get_version()
+description = "Generic python utilities for Aerospace applications"
+long_description = "file: README.rst"
+long_description_content_type = "text/markdown; charset=UTF-8"  # TODO: RestructuredText
+url = "https://github.com/DStauffman/dstauffman"
+author = "David C. Stauffer"
+author_email = "dstauffman@yahoo.com"
+license = ""
+license_file = "file: LICENSE.txt"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Natural Language :: English",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Astronomy",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+project_urls = "Source = https://github.com/DStauffman/dstauffman"
+
+
+[bdist_wheel]
+universal = 1
+
+[aliases]
+test = "pytest"
+
+[options.extras_require]
+test = [
+    "pytest",
+    "pycodestyle",
+    "pytest-cov",
+]
+shading = [
+    "datashader>=0.13",
+]
+all = "%(test)s %(full)s"
+
+[tool.black]
+line-length = 128
+skip-string-normalization = 0

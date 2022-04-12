@@ -23,7 +23,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% plotting.make_time_plot
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_time_plot(unittest.TestCase):
     r"""
     Tests the plotting.make_time_plot function with the following cases:
@@ -31,31 +31,31 @@ class Test_plotting_make_time_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description      = 'Values vs Time'
-        self.time             = np.arange(-10.0, 10.1, 0.1)
-        self.data             = self.time + np.cos(self.time)
-        self.name             = ''
-        self.elements         = None
-        self.units            = ''
-        self.time_units       = 'sec'
-        self.start_date       = ''
-        self.rms_xmin         = -np.inf
-        self.rms_xmax         = np.inf
-        self.disp_xmin        = -np.inf
-        self.disp_xmax        = np.inf
-        self.single_lines     = False
-        self.colormap         = 'Paired'
-        self.use_mean         = False
-        self.plot_zero        = False
-        self.show_rms         = True
-        self.legend_loc       = 'best'
-        self.second_units     = None
-        self.ylabel           = None
-        self.data_as_rows     = True
-        self.extra_plotter    = None
-        self.use_zoh          = False
+        self.description = "Values vs Time"
+        self.time = np.arange(-10.0, 10.1, 0.1)
+        self.data = self.time + np.cos(self.time)
+        self.name = ""
+        self.elements = None
+        self.units = ""
+        self.time_units = "sec"
+        self.start_date = ""
+        self.rms_xmin = -np.inf
+        self.rms_xmax = np.inf
+        self.disp_xmin = -np.inf
+        self.disp_xmax = np.inf
+        self.single_lines = False
+        self.colormap = "Paired"
+        self.use_mean = False
+        self.plot_zero = False
+        self.show_rms = True
+        self.legend_loc = "best"
+        self.second_units = None
+        self.ylabel = None
+        self.data_as_rows = True
+        self.extra_plotter = None
+        self.use_zoh = False
         self.label_vert_lines = True
-        self.fig: plt.Figure  = None
+        self.fig: plt.Figure = None
 
     def test_simple(self) -> None:
         self.fig = plot.make_time_plot(self.description, self.time, self.data)
@@ -89,10 +89,10 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         )
 
     def test_scalars(self) -> None:
-        self.fig = plot.make_time_plot('', 0, 0)
+        self.fig = plot.make_time_plot("", 0, 0)
 
     def test_0d(self) -> None:
-        self.fig = plot.make_time_plot('', np.array(5), np.array(10.0))
+        self.fig = plot.make_time_plot("", np.array(5), np.array(10.0))
 
     def test_list1(self) -> None:
         data = [self.data, self.data + 0.5, self.data + 1.0]
@@ -112,7 +112,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         self.fig = plot.make_time_plot(self.description, self.time, data, data_as_rows=False)
 
     def test_datetimes(self) -> None:
-        time = np.datetime64('2021-06-01T00:00:00', NP_DATETIME_UNITS) + np.round(self.time * NP_INT64_PER_SEC).astype(
+        time = np.datetime64("2021-06-01T00:00:00", NP_DATETIME_UNITS) + np.round(self.time * NP_INT64_PER_SEC).astype(
             np.int64
         ).astype(NP_TIMEDELTA_FORM)
         self.fig = plot.make_time_plot(
@@ -122,8 +122,8 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             name=self.name,
             elements=self.elements,
             units=self.units,
-            time_units='numpy',
-            start_date='',
+            time_units="numpy",
+            start_date="",
             rms_xmin=time[5],
             rms_xmax=time[25],
             disp_xmin=time[1],
@@ -144,30 +144,30 @@ class Test_plotting_make_time_plot(unittest.TestCase):
 
     def test_strings(self) -> None:
         time = np.arange(100.0)
-        data = np.full(100, 'open', dtype='S6')
-        data[10:20] = 'closed'
+        data = np.full(100, "open", dtype="S6")
+        data[10:20] = "closed"
         self.fig = plot.make_time_plot(self.description, time, data, show_rms=False)
 
-    @unittest.skipIf(not HAVE_DS, 'Skipping due to missing datashader dependency.')
+    @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader(self) -> None:
-        time = np.linspace(0.0, 1000.0, 10 ** 6)
-        data = np.random.rand(10 ** 6)
+        time = np.linspace(0.0, 1000.0, 10**6)
+        data = np.random.rand(10**6)
         self.fig = plot.make_time_plot(self.description, time, data, use_datashader=True)
 
-    @unittest.skipIf(not HAVE_DS, 'Skipping due to missing datashader dependency.')
+    @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader_dates(self) -> None:
-        temp = np.linspace(0.0, 1000.0, 10 ** 6)
-        time = np.datetime64('2021-06-01T00:00:00', NP_DATETIME_UNITS) + np.round(temp * NP_INT64_PER_SEC).astype(
+        temp = np.linspace(0.0, 1000.0, 10**6)
+        time = np.datetime64("2021-06-01T00:00:00", NP_DATETIME_UNITS) + np.round(temp * NP_INT64_PER_SEC).astype(
             np.int64
         ).astype(NP_TIMEDELTA_FORM)
-        data = np.random.rand(10 ** 6)
-        self.fig = plot.make_time_plot(self.description, time, data, time_units='numpy', use_datashader=True)
+        data = np.random.rand(10**6)
+        self.fig = plot.make_time_plot(self.description, time, data, time_units="numpy", use_datashader=True)
 
-    @unittest.skipIf(not HAVE_DS, 'Skipping due to missing datashader dependency.')
+    @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader_strings(self) -> None:
-        time = np.linspace(0.0, 1000.0, 10 ** 4)
-        data = np.full(10 ** 4, 'open', dtype='S6')
-        data[1000:2000] = 'closed'
+        time = np.linspace(0.0, 1000.0, 10**4)
+        data = np.full(10**4, "open", dtype="S6")
+        data[1000:2000] = "closed"
         self.fig = plot.make_time_plot(self.description, time, data, show_rms=False, use_datashader=True)
 
     def tearDown(self) -> None:
@@ -176,7 +176,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
 
 
 #%% plotting.make_error_bar_plot
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_error_bar_plot(unittest.TestCase):
     r"""
     Tests the plotting.make_error_bar_plot function with the following cases:
@@ -184,30 +184,30 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description      = 'Random Data Error Bars'
-        self.time             = np.arange(11)
-        self.data             = np.array([[3.0], [-2.0], [5]]) + np.random.rand(3, 11)
-        self.mins             = self.data - 0.5 * np.random.rand(3, 11)
-        self.maxs             = self.data + 1.5 * np.random.rand(3, 11)
-        self.elements         = ['x', 'y', 'z']
-        self.units            = 'rad'
-        self.time_units       = 'sec'
-        self.start_date       = '  t0 = ' + str(datetime.datetime.now())
-        self.rms_xmin         = 1
-        self.rms_xmax         = 10
-        self.disp_xmin        = -2
-        self.disp_xmax        = np.inf
-        self.single_lines     = False
-        self.colormap         = 'tab10'
-        self.use_mean         = False
-        self.plot_zero        = False
-        self.show_rms         = True
-        self.legend_loc       = 'best'
-        self.second_units     = 'milli'
-        self.ylabel           = None
-        self.data_as_rows     = True
+        self.description = "Random Data Error Bars"
+        self.time = np.arange(11)
+        self.data = np.array([[3.0], [-2.0], [5]]) + np.random.rand(3, 11)
+        self.mins = self.data - 0.5 * np.random.rand(3, 11)
+        self.maxs = self.data + 1.5 * np.random.rand(3, 11)
+        self.elements = ["x", "y", "z"]
+        self.units = "rad"
+        self.time_units = "sec"
+        self.start_date = "  t0 = " + str(datetime.datetime.now())
+        self.rms_xmin = 1
+        self.rms_xmax = 10
+        self.disp_xmin = -2
+        self.disp_xmax = np.inf
+        self.single_lines = False
+        self.colormap = "tab10"
+        self.use_mean = False
+        self.plot_zero = False
+        self.show_rms = True
+        self.legend_loc = "best"
+        self.second_units = "milli"
+        self.ylabel = None
+        self.data_as_rows = True
         self.label_vert_lines = True
-        self.fig: plt.Figure  = None
+        self.fig: plt.Figure = None
 
     def test_nominal(self) -> None:
         self.fig = plot.make_error_bar_plot(
@@ -242,7 +242,7 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
 
 
 #%% plotting.make_difference_plot
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_difference_plot(unittest.TestCase):
     r"""
     Tests the plotting.make_difference_plot function with the following cases:
@@ -250,35 +250,35 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description      = 'example'
-        self.time_one         = np.arange(11)
-        self.time_two         = np.arange(2, 13)
-        self.data_one         = 1e-6 * np.random.rand(2, 11)
-        self.data_two         = self.data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6
-        self.name_one         = 'test1'
-        self.name_two         = 'test2'
-        self.elements         = ['x', 'y']
-        self.units            = 'rad'
-        self.time_units       = 'sec'
-        self.start_date       = str(datetime.datetime.now())
-        self.rms_xmin         = 0
-        self.rms_xmax         = 10
-        self.disp_xmin        = -2
-        self.disp_xmax        = np.inf
-        self.make_subplots    = True
-        self.single_lines     = False
-        self.colormap         = ListedColormap(plot.COLOR_LISTS['dbl_diff'].colors + plot.COLOR_LISTS['double'].colors)
-        self.use_mean         = False
-        self.plot_zero        = False
-        self.show_rms         = True
-        self.legend_loc       = 'best'
-        self.show_extra       = True
-        self.second_units     = 'micro'
-        self.ylabel           = None
-        self.data_as_rows     = True
-        self.tolerance        = 0
-        self.return_err       = True
-        self.use_zoh          = False
+        self.description = "example"
+        self.time_one = np.arange(11)
+        self.time_two = np.arange(2, 13)
+        self.data_one = 1e-6 * np.random.rand(2, 11)
+        self.data_two = self.data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6
+        self.name_one = "test1"
+        self.name_two = "test2"
+        self.elements = ["x", "y"]
+        self.units = "rad"
+        self.time_units = "sec"
+        self.start_date = str(datetime.datetime.now())
+        self.rms_xmin = 0
+        self.rms_xmax = 10
+        self.disp_xmin = -2
+        self.disp_xmax = np.inf
+        self.make_subplots = True
+        self.single_lines = False
+        self.colormap = ListedColormap(plot.COLOR_LISTS["dbl_diff"].colors + plot.COLOR_LISTS["double"].colors)
+        self.use_mean = False
+        self.plot_zero = False
+        self.show_rms = True
+        self.legend_loc = "best"
+        self.show_extra = True
+        self.second_units = "micro"
+        self.ylabel = None
+        self.data_as_rows = True
+        self.tolerance = 0
+        self.return_err = True
+        self.use_zoh = False
         self.label_vert_lines = True
         self.figs: Optional[List[plt.Figure]] = None
 
@@ -353,7 +353,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         )
 
     def test_no_start_date(self) -> None:
-        self.start_date = ''
+        self.start_date = ""
         (self.figs, err) = plot.make_difference_plot(
             self.description,
             self.time_one,
@@ -389,7 +389,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_only_data_one(self) -> None:
         self.data_two.fill(np.nan)
-        self.name_two = ''
+        self.name_two = ""
         (self.figs, err) = plot.make_difference_plot(
             self.description,
             self.time_one,
@@ -422,11 +422,11 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
-        self.assertTrue(np.all(np.isnan(err['diff'])))
+        self.assertTrue(np.all(np.isnan(err["diff"])))
 
     def test_only_data_two(self) -> None:
         self.data_one = None  # type: ignore[assignment]
-        self.name_one = ''
+        self.name_one = ""
         (self.figs, err) = plot.make_difference_plot(
             self.description,
             self.time_one,
@@ -459,7 +459,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
-        self.assertTrue(np.all(np.isnan(err['diff'])))
+        self.assertTrue(np.all(np.isnan(err["diff"])))
 
     def test_rms_bounds(self) -> None:
         self.rms_xmin = 5
@@ -658,12 +658,12 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     def test_none2(self) -> None:
         self.figs = plot.make_difference_plot(self.description, None, self.time_two, None, self.data_two)
 
-    @patch('dstauffman.plotting.generic.logger')
+    @patch("dstauffman.plotting.generic.logger")
     def test_none3(self, mock_logger):
-        self.figs = plot.make_difference_plot('', None, None, None, None)
+        self.figs = plot.make_difference_plot("", None, None, None, None)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(
-            LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', 'diff', ''
+            LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', "diff", ""
         )
 
     def tearDown(self) -> None:
@@ -673,7 +673,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
 
 #%% plotting.make_categories_plot
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_categories_plot(unittest.TestCase):
     r"""
     Tests the plotting.make_categories_plot with the following cases:
@@ -683,33 +683,33 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description      = 'Values vs Time'
-        self.time             = np.arange(-10.0, 10.1, 0.1)
-        self.data             = self.time + np.cos(self.time)
-        self.MeasStatus       = type('MeasStatus', (object,), {'rejected': 0, 'accepted': 1})
-        self.cats             = np.full(self.time.shape, self.MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined, type-var]
-        self.cats[50:100]     = self.MeasStatus.rejected  # type: ignore[attr-defined]
-        self.cat_names        = {0: 'rejected', 1: 'accepted'}
-        self.name             = ''
-        self.elements         = None
-        self.units            = ''
-        self.time_units       = 'sec'
-        self.start_date       = ''
-        self.rms_xmin         = -np.inf
-        self.rms_xmax         = np.inf
-        self.disp_xmin        = -np.inf
-        self.disp_xmax        = np.inf
-        self.make_subplots    = True
-        self.single_lines     = False
-        self.colormap         = 'Paired'
-        self.use_mean         = False
-        self.plot_zero        = False
-        self.show_rms         = True
-        self.legend_loc       = 'best'
-        self.second_units     = 'unity'
-        self.ylabel           = None
-        self.data_as_rows     = True
-        self.use_zoh          = False
+        self.description = "Values vs Time"
+        self.time = np.arange(-10.0, 10.1, 0.1)
+        self.data = self.time + np.cos(self.time)
+        self.MeasStatus = type("MeasStatus", (object,), {"rejected": 0, "accepted": 1})
+        self.cats = np.full(self.time.shape, self.MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined, type-var]
+        self.cats[50:100] = self.MeasStatus.rejected  # type: ignore[attr-defined]
+        self.cat_names = {0: "rejected", 1: "accepted"}
+        self.name = ""
+        self.elements = None
+        self.units = ""
+        self.time_units = "sec"
+        self.start_date = ""
+        self.rms_xmin = -np.inf
+        self.rms_xmax = np.inf
+        self.disp_xmin = -np.inf
+        self.disp_xmax = np.inf
+        self.make_subplots = True
+        self.single_lines = False
+        self.colormap = "Paired"
+        self.use_mean = False
+        self.plot_zero = False
+        self.show_rms = True
+        self.legend_loc = "best"
+        self.second_units = "unity"
+        self.ylabel = None
+        self.data_as_rows = True
+        self.use_zoh = False
         self.label_vert_lines = True
         self.figs: Optional[List[plt.Figure]] = None
 
@@ -746,7 +746,7 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
     def test_minimal(self) -> None:
         self.figs = plot.make_categories_plot(self.description, self.time, self.data, self.cats)
 
-    @unittest.skipIf(not HAVE_DS, 'Skipping due to missing datashader dependency.')
+    @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader_cats(self) -> None:
         time = np.arange(10000.0)
         data = time + np.sin(time / np.pi / 100.0)
@@ -761,7 +761,7 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
 
 
 #%% plotting.make_connected_sets
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_connected_plots(unittest.TestCase):
     r"""
     Tests the plotting.make_connected_plots with the following cases:
@@ -772,7 +772,7 @@ class Test_plotting_make_connected_plots(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description = 'Focal Plane Sightings'
+        self.description = "Focal Plane Sightings"
         self.points = 2 * np.random.rand(2, 100) - 1.0
         self.innovs = 0.1 * np.random.randn(*self.points.shape)
         self.fig: Optional[plt.Figure] = None
@@ -781,10 +781,10 @@ class Test_plotting_make_connected_plots(unittest.TestCase):
         self.fig = plot.make_connected_sets(self.description, self.points, self.innovs)
 
     def test_color_by_direction(self) -> None:
-        self.fig = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='direction')
+        self.fig = plot.make_connected_sets(self.description, self.points, self.innovs, color_by="direction")
 
     def test_color_by_magnitude(self) -> None:
-        self.fig = plot.make_connected_sets(self.description, self.points, self.innovs, color_by='magnitude')
+        self.fig = plot.make_connected_sets(self.description, self.points, self.innovs, color_by="magnitude")
 
     def test_center_origin(self) -> None:
         self.fig = plot.make_connected_sets(self.description, self.points, self.innovs, center_origin=True)
@@ -795,7 +795,7 @@ class Test_plotting_make_connected_plots(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     if HAVE_MPL:
         plt.ioff()
     unittest.main(exit=False)

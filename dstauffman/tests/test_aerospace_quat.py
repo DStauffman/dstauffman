@@ -53,7 +53,7 @@ class Test_aerospace_suppress_checks(unittest.TestCase):
 
 
 #%% aerospace.quat_assertions
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_assertions(unittest.TestCase):
     r"""
     Tests the aerospace.quat_assertions function with the following cases:
@@ -153,7 +153,7 @@ class Test_aerospace_quat_assertions(unittest.TestCase):
 
 
 #%% aerospace.enforce_pos_scalar
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_enforce_pos_scalar(unittest.TestCase):
     r"""
     Tests the aerospace.enforce_pos_scalar function with the following cases:
@@ -199,7 +199,7 @@ class Test_aerospace_enforce_pos_scalar(unittest.TestCase):
 
 
 #%% aerospace.qrot
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_qrot(unittest.TestCase):
     r"""
     Tests the aerospace.qrot function with the following cases:
@@ -261,7 +261,7 @@ class Test_aerospace_qrot(unittest.TestCase):
 
 
 #%% aerospace.quat_from_axis_angle
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_from_axis_angle(unittest.TestCase):
     r"""
     Tests the aerospace.quat_from_axis_angle function with the following cases:
@@ -327,7 +327,7 @@ class Test_aerospace_quat_from_axis_angle(unittest.TestCase):
 
 
 #%% aerospace.quat_angle_diff
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_angle_diff(unittest.TestCase):
     r"""
     Tests the aerospace.quat_angle_diff function with the following cases:
@@ -427,7 +427,7 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
 
 
 #%% aerospace.quat_from_euler
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_from_euler(unittest.TestCase):
     r"""
     Tests the aerospace.quat_from_euler function with the following cases:
@@ -514,7 +514,7 @@ class Test_aerospace_quat_from_euler(unittest.TestCase):
 
 
 #%% aerospace.quat_interp
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_interp(unittest.TestCase):
     r"""
     Tests the aerospace.quat_interp function with the following cases:
@@ -551,15 +551,15 @@ class Test_aerospace_quat_interp(unittest.TestCase):
             space.quat_interp(self.time, self.quat, self.ti_extra, inclusive=True)
 
     def test_extra2(self) -> None:
-        with patch('dstauffman.aerospace.quat.logger') as mock_logger:
+        with patch("dstauffman.aerospace.quat.logger") as mock_logger:
             qout = space.quat_interp(self.time, self.quat, self.ti_extra, inclusive=False)
         np.testing.assert_array_almost_equal(qout[:, 1:-1], self.qout)
         np.testing.assert_array_equal(qout[:, [0, -1]], np.nan)
-        mock_logger.log.assert_called_with(LogLevel.L8, 'Desired time not found within input time vector.')
+        mock_logger.log.assert_called_with(LogLevel.L8, "Desired time not found within input time vector.")
 
 
 #%% aerospace.quat_inv
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_inv(unittest.TestCase):
     r"""
     Tests the aerospace.quat_inv function with the following cases:
@@ -638,7 +638,7 @@ class Test_aerospace_quat_inv(unittest.TestCase):
 
 
 #%% aerospace.quat_mult
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_mult(unittest.TestCase):
     r"""
     Tests the aerospace.quat_mult function with the following cases:
@@ -750,7 +750,7 @@ class Test_aerospace_quat_mult(unittest.TestCase):
 
 
 #%% aerospace.quat_norm
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_norm(unittest.TestCase):
     r"""
     Tests the aerospace.quat_norm function with the following cases:
@@ -837,7 +837,7 @@ class Test_aerospace_quat_norm(unittest.TestCase):
 
 
 #%% aerospace.quat_prop
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_prop(unittest.TestCase):
     r"""
     Tests the aerospace.quat_prop function with the following cases:
@@ -873,7 +873,7 @@ class Test_aerospace_quat_prop(unittest.TestCase):
 
 
 #%% aerospace.quat_times_vector
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_times_vector(unittest.TestCase):
     r"""
     Tests the aerospace.quat_times_vector function with the following cases:
@@ -910,7 +910,7 @@ class Test_aerospace_quat_times_vector(unittest.TestCase):
 
 
 #%% aerospace.quat_to_euler
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_to_euler(unittest.TestCase):
     r"""
     Tests the aerospace.quat_to_euler function with the following cases:
@@ -983,5 +983,5 @@ class Test_aerospace_quat_to_euler(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

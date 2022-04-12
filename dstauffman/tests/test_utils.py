@@ -37,13 +37,13 @@ class Test__nan_equal(unittest.TestCase):
         non-numpy bad cases
     """
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_equal(self) -> None:
         a = np.array([1, 2, np.nan])
         b = np.array([1, 2, np.nan])
         self.assertTrue(dcs.utils._nan_equal(a, b))
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_not_equal(self) -> None:
         a = np.array([1, 2, np.nan])
         b = np.array([3, 2, np.nan])
@@ -57,10 +57,10 @@ class Test__nan_equal(unittest.TestCase):
         if dcs.HAVE_NUMPY:
             self.assertTrue(dcs.utils._nan_equal((1.0, 2, nan), [1, 2, nan]))
         self.assertTrue(dcs.utils._nan_equal({1.0, 2, nan}, {1, 2, nan}))
-        self.assertTrue(dcs.utils._nan_equal('text', 'text'))
+        self.assertTrue(dcs.utils._nan_equal("text", "text"))
         self.assertTrue(dcs.utils._nan_equal(None, None))
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_goods_tol(self) -> None:
         self.assertTrue(dcs.utils._nan_equal(1, 1, tolerance=1e-6))
         self.assertTrue(dcs.utils._nan_equal(1, 1.0, tolerance=1e-6))
@@ -69,7 +69,7 @@ class Test__nan_equal(unittest.TestCase):
         if dcs.HAVE_NUMPY:
             self.assertTrue(dcs.utils._nan_equal((1.0, 2, nan), [1, 2, nan], tolerance=1e-6))
         self.assertTrue(dcs.utils._nan_equal({1.0, 2, nan}, {1, 2, nan}, tolerance=1e-6))
-        self.assertTrue(dcs.utils._nan_equal('text', 'text', tolerance=1e-6))
+        self.assertTrue(dcs.utils._nan_equal("text", "text", tolerance=1e-6))
         self.assertTrue(dcs.utils._nan_equal(None, None, tolerance=1e-6))
 
     def test_bads(self) -> None:
@@ -78,11 +78,11 @@ class Test__nan_equal(unittest.TestCase):
         self.assertFalse(dcs.utils._nan_equal(1.1, 1.2))
         self.assertFalse(dcs.utils._nan_equal([1, 2, 3], [3, 2, 1]))
         self.assertFalse(dcs.utils._nan_equal([1, 2, 3, 4], [1, 2, 3]))
-        self.assertFalse(dcs.utils._nan_equal('text', 'good'))
-        self.assertFalse(dcs.utils._nan_equal('text', 'longer'))
+        self.assertFalse(dcs.utils._nan_equal("text", "good"))
+        self.assertFalse(dcs.utils._nan_equal("text", "longer"))
         self.assertFalse(dcs.utils._nan_equal(0, None))
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_tolerance(self) -> None:
         a = np.array([1, 2.0000, np.nan])
         b = np.array([1, 2.0001, np.nan])
@@ -91,13 +91,13 @@ class Test__nan_equal(unittest.TestCase):
         self.assertFalse(dcs.utils._nan_equal(a, b, tolerance=1e-12))
 
     def test_bad_tolerance(self) -> None:
-        with patch('dstauffman.utils.HAVE_NUMPY', False):
+        with patch("dstauffman.utils.HAVE_NUMPY", False):
             with self.assertRaises(ValueError):
                 dcs.utils._nan_equal(0.01, 0.01, 1e-6)
 
 
 #%% find_in_range
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_find_in_range(unittest.TestCase):
     r"""
     Tests the find_in_range function with the following cases:
@@ -107,20 +107,20 @@ class Test_find_in_range(unittest.TestCase):
 
     def test_normal_use(self) -> None:
         value = np.array([-1, -2, 0, np.nan, 15, 34.2, np.nan, 85])
-        exp   = np.array([ 1,  1, 1,      0,  1,    1,      0,  1], dtype=bool)
+        exp = np.array([1, 1, 1, 0, 1, 1, 0, 1], dtype=bool)
         valid = dcs.find_in_range(value)
         np.testing.assert_array_equal(valid, exp)
 
     def test_min_max(self) -> None:
         value = np.array([-1, -2, 0, np.nan, 15, 34.2, np.nan, 85])
-        exp   = np.array([ 0,  0, 0,      0,  1,    1,      0,  0], dtype=bool)
+        exp = np.array([0, 0, 0, 0, 1, 1, 0, 0], dtype=bool)
         valid = dcs.find_in_range(value, min_=10, max_=40)
         np.testing.assert_array_equal(valid, exp)
 
     def test_mask(self) -> None:
         value = np.array([-1, -2, 0, np.nan, 15, 34.2, np.nan, 85])
-        exp   = np.array([ 1,  0, 0,      0,  1,    0,      0,  0], dtype=bool)
-        mask  = np.array([ 1,  0, 0,      1,  1,    0,      0,  0], dtype=bool)
+        exp = np.array([1, 0, 0, 0, 1, 0, 0, 0], dtype=bool)
+        mask = np.array([1, 0, 0, 1, 1, 0, 0, 0], dtype=bool)
         valid = dcs.find_in_range(value, mask=mask)
         np.testing.assert_array_equal(valid, exp)
 
@@ -134,8 +134,8 @@ class Test_find_in_range(unittest.TestCase):
 
     def test_inclusive(self) -> None:
         value = np.array([1, 2, 3, 4, 5])
-        exp1  = np.array([0, 0, 1, 0, 0], dtype=bool)
-        exp2  = np.array([0, 1, 1, 1, 0], dtype=bool)
+        exp1 = np.array([0, 0, 1, 0, 0], dtype=bool)
+        exp2 = np.array([0, 1, 1, 1, 0], dtype=bool)
         exp_l = np.array([0, 1, 1, 0, 0], dtype=bool)
         exp_r = np.array([0, 0, 1, 1, 0], dtype=bool)
         valid = dcs.find_in_range(value, min_=2, max_=4)
@@ -153,8 +153,8 @@ class Test_find_in_range(unittest.TestCase):
 
     def test_precision(self) -> None:
         value = np.array([1, 1.999, 3.1, 4.005, 4.012, 5])
-        exp1  = np.array([0,     0,   1,     0,     0, 0], dtype=bool)
-        exp2  = np.array([0,     1,   1,     1,     0, 0], dtype=bool)
+        exp1 = np.array([0, 0, 1, 0, 0, 0], dtype=bool)
+        exp2 = np.array([0, 1, 1, 1, 0, 0], dtype=bool)
         valid = dcs.find_in_range(value, min_=2.0, max_=4.0)
         np.testing.assert_array_equal(valid, exp1)
         valid = dcs.find_in_range(value, min_=2.0, max_=4.0, precision=0.01)
@@ -162,23 +162,23 @@ class Test_find_in_range(unittest.TestCase):
 
     def test_2d_array(self) -> None:
         value = np.array([[-1, -2, 0, np.nan], [15, 34.2, np.nan, 85]])
-        exp   = np.array([[ 1,  1, 1,      0], [ 1,    1,      0,  1]], dtype=bool)
+        exp = np.array([[1, 1, 1, 0], [1, 1, 0, 1]], dtype=bool)
         valid = dcs.find_in_range(value)
         np.testing.assert_array_equal(valid, exp)
 
     def test_dates(self) -> None:
-        value = np.datetime64('2020-09-01 00:00:00', 'ns') + 10 ** 9 * np.arange(0, 5 * 60, 30, dtype=np.int64)
-        value[2] = np.datetime64('nat')
-        value[7] = np.datetime64('nat')
-        tmin = np.datetime64('2020-09-01 00:02:00', 'ns')
-        tmax = np.datetime64('2020-09-01 00:04:00', 'ns')
+        value = np.datetime64("2020-09-01 00:00:00", "ns") + 10**9 * np.arange(0, 5 * 60, 30, dtype=np.int64)
+        value[2] = np.datetime64("nat")
+        value[7] = np.datetime64("nat")
+        tmin = np.datetime64("2020-09-01 00:02:00", "ns")
+        tmax = np.datetime64("2020-09-01 00:04:00", "ns")
         exp = np.array([0, 0, 0, 0, 1, 1, 1, 0, 1, 0], dtype=bool)
         valid = dcs.find_in_range(value, min_=tmin, max_=tmax, inclusive=True)
         np.testing.assert_array_equal(valid, exp)
 
 
 #%% rms
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_rms(unittest.TestCase):
     r"""
     Tests the rms function with the following cases:
@@ -195,17 +195,17 @@ class Test_rms(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.inputs1   = np.array([0, 1, 0.0, -1])
-        self.outputs1  = np.sqrt(2)/2
-        self.inputs2   = [[0, 1, 0.0, -1], [1.0, 1, 1, 1]]
-        self.outputs2a = np.sqrt(3)/2
-        self.outputs2b = np.array([np.sqrt(2)/2, 1, np.sqrt(2)/2, 1])
-        self.outputs2c = np.array([np.sqrt(2)/2, 1])
-        self.outputs2d = np.array([[np.sqrt(2)/2], [1]])
-        self.inputs3   = np.hstack((self.inputs1, np.nan))
-        self.inputs4   = [[0, 0.0, np.nan], [1.0, np.nan, 1]]
-        self.outputs4a = np.sqrt(2)/2
-        self.outputs4b = np.array([np.sqrt(2)/2, 0, 1])
+        self.inputs1 = np.array([0, 1, 0.0, -1])
+        self.outputs1 = np.sqrt(2) / 2
+        self.inputs2 = [[0, 1, 0.0, -1], [1.0, 1, 1, 1]]
+        self.outputs2a = np.sqrt(3) / 2
+        self.outputs2b = np.array([np.sqrt(2) / 2, 1, np.sqrt(2) / 2, 1])
+        self.outputs2c = np.array([np.sqrt(2) / 2, 1])
+        self.outputs2d = np.array([[np.sqrt(2) / 2], [1]])
+        self.inputs3 = np.hstack((self.inputs1, np.nan))
+        self.inputs4 = [[0, 0.0, np.nan], [1.0, np.nan, 1]]
+        self.outputs4a = np.sqrt(2) / 2
+        self.outputs4b = np.array([np.sqrt(2) / 2, 0, 1])
         self.outputs4c = np.array([0, 1])
 
     def test_scalar_input(self) -> None:
@@ -299,7 +299,7 @@ class Test_rms(unittest.TestCase):
 
 
 #%% rss
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_rss(unittest.TestCase):
     r"""
     Tests the rss function with the following cases:
@@ -316,22 +316,22 @@ class Test_rss(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.inputs1   = np.array([0, 1, 0, -1])
-        self.outputs1  = 2
-        self.inputs2   = [[0, 1, 0, -1], [1, 1, 1, 1]]
+        self.inputs1 = np.array([0, 1, 0, -1])
+        self.outputs1 = 2
+        self.inputs2 = [[0, 1, 0, -1], [1, 1, 1, 1]]
         self.outputs2a = 6
         self.outputs2b = np.array([1, 2, 1, 2])
         self.outputs2c = np.array([2, 4])
         self.outputs2d = np.array([[2], [4]])
-        self.inputs3   = np.hstack((self.inputs1, np.nan))
-        self.inputs4   = [[0, 0, np.nan], [1, np.nan, 1]]
+        self.inputs3 = np.hstack((self.inputs1, np.nan))
+        self.inputs4 = [[0, 0, np.nan], [1, np.nan, 1]]
         self.outputs4a = 2
         self.outputs4b = np.array([1, 0, 1])
         self.outputs4c = np.array([0, 2])
 
     def test_scalar_input(self) -> None:
         out = dcs.rss(-1.5)
-        self.assertEqual(out, 1.5 ** 2)
+        self.assertEqual(out, 1.5**2)
 
     def test_empty(self) -> None:
         out = dcs.rss([])
@@ -368,7 +368,7 @@ class Test_rss(unittest.TestCase):
 
     def test_complex_rss(self) -> None:
         out = dcs.rss(1.5j)
-        self.assertEqual(out, 1.5 ** 2)
+        self.assertEqual(out, 1.5**2)
 
     def test_complex_conj(self) -> None:
         out = dcs.rss(np.array([1 + 1j, 1 - 1j]))
@@ -426,11 +426,11 @@ class Test_compare_two_classes(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.c1 = type('Class1', (object,), {'a': 0, 'b': '[1, 2, 3]', 'c': 'text', 'e': {'key1': 1}})
-        self.c2 = type('Class2', (object,), {'a': 0, 'b': '[1, 2, 4]', 'd': 'text', 'e': {'key1': 1}})
-        self.names = ['Class 1', 'Class 2']
-        self.c3 = type('Class3', (object,), {'a': 0, 'b': '[1, 2, 3]', 'c': 'text', 'e': self.c1})
-        self.c4 = type('Class4', (object,), {'a': 0, 'b': '[1, 2, 4]', 'd': 'text', 'e': self.c2})
+        self.c1 = type("Class1", (object,), {"a": 0, "b": "[1, 2, 3]", "c": "text", "e": {"key1": 1}})
+        self.c2 = type("Class2", (object,), {"a": 0, "b": "[1, 2, 4]", "d": "text", "e": {"key1": 1}})
+        self.names = ["Class 1", "Class 2"]
+        self.c3 = type("Class3", (object,), {"a": 0, "b": "[1, 2, 3]", "c": "text", "e": self.c1})
+        self.c4 = type("Class4", (object,), {"a": 0, "b": "[1, 2, 4]", "d": "text", "e": self.c2})
 
     def test_is_comparison(self) -> None:
         with dcs.capture_output() as out:
@@ -454,7 +454,7 @@ class Test_compare_two_classes(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(
-            output, 'b is different from c1 to c2.\nc is only in c1.\n' + 'd is only in c2.\n"c1" and "c2" are not the same.'
+            output, "b is different from c1 to c2.\nc is only in c1.\n" + 'd is only in c2.\n"c1" and "c2" are not the same.'
         )
         self.assertFalse(is_same)
 
@@ -471,7 +471,7 @@ class Test_compare_two_classes(unittest.TestCase):
             is_same = dcs.compare_two_classes(self.c1, self.c2, suppress_output=True, names=self.names)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, '')
+        self.assertEqual(output, "")
         self.assertFalse(is_same)
 
     def test_subclasses_match(self) -> None:
@@ -490,7 +490,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertFalse(is_same)
         self.assertEqual(
             output,
-            'b is different from c1 to c2.\nb is different from c1.e to c2.e.\n'
+            "b is different from c1 to c2.\nb is different from c1.e to c2.e.\n"
             + 'c is only in c1.e.\nd is only in c2.e.\n"c1.e" and "c2.e" are not the same.\n'
             + 'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.',
         )
@@ -501,22 +501,22 @@ class Test_compare_two_classes(unittest.TestCase):
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(
-            output, 'b is different from c1 to c2.\n' + 'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.'
+            output, "b is different from c1 to c2.\n" + 'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.'
         )
         self.assertFalse(is_same)
 
     def test_subdict_comparison(self) -> None:
-        delattr(self.c1, 'b')
-        delattr(self.c1, 'c')
-        delattr(self.c2, 'b')
-        delattr(self.c2, 'd')
+        delattr(self.c1, "b")
+        delattr(self.c1, "c")
+        delattr(self.c2, "b")
+        delattr(self.c2, "d")
         with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c1, self.c2)
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, '"c1" and "c2" are the same.')
         self.assertTrue(is_same)
-        self.c1.e['key1'] += 1  # type: ignore[attr-defined]
+        self.c1.e["key1"] += 1  # type: ignore[attr-defined]
         with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c1, self.c2)
         output = out.getvalue().strip()
@@ -525,22 +525,22 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertFalse(is_same)
 
     def test_custom_dicts(self) -> None:
-        delattr(self.c1, 'b')
-        delattr(self.c1, 'c')
-        delattr(self.c2, 'b')
-        delattr(self.c2, 'd')
+        delattr(self.c1, "b")
+        delattr(self.c1, "c")
+        delattr(self.c2, "b")
+        delattr(self.c2, "d")
         self.c1.e = dcs.FixedDict()  # type: ignore[attr-defined]
-        self.c1.e['key1'] = 1  # type: ignore[attr-defined]
+        self.c1.e["key1"] = 1  # type: ignore[attr-defined]
         self.c1.e.freeze()  # type: ignore[attr-defined]
         self.c2.e = dcs.FixedDict()  # type: ignore[attr-defined]
-        self.c2.e['key1'] = 1  # type: ignore[attr-defined]
+        self.c2.e["key1"] = 1  # type: ignore[attr-defined]
         with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c1, self.c2)
         output = out.getvalue().strip()
         out.close()
         self.assertEqual(output, '"c1.e" and "c2.e" are the same.\n"c1" and "c2" are the same.')
         self.assertTrue(is_same)
-        self.c1.e['key1'] += 1  # type: ignore[attr-defined]
+        self.c1.e["key1"] += 1  # type: ignore[attr-defined]
         with dcs.capture_output() as out:
             is_same = dcs.compare_two_classes(self.c1, self.c2)
         output = out.getvalue().strip()
@@ -559,7 +559,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertFalse(is_same)
         self.assertEqual(
             output,
-            'b is different from c1 to c2.\ne is different from c1 to c2.\n'
+            "b is different from c1 to c2.\ne is different from c1 to c2.\n"
             + 'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.',
         )
         is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=False, suppress_output=True)
@@ -581,7 +581,7 @@ class Test_compare_two_classes(unittest.TestCase):
         out.close()
         self.assertFalse(is_same)
         self.assertEqual(
-            output, 'e is different from c1 to c2.\nc is only in c2.\nd is only in c1.\n' + '"c1" and "c2" are not the same.'
+            output, "e is different from c1 to c2.\nc is only in c2.\nd is only in c1.\n" + '"c1" and "c2" are not the same.'
         )
 
     def test_ignore_callables(self) -> None:
@@ -612,9 +612,9 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertTrue(is_same)
 
     def test_subset(self) -> None:
-        delattr(self.c1, 'b')
-        delattr(self.c1, 'c')
-        self.c2.e['key2'] = 2  # type: ignore[attr-defined]
+        delattr(self.c1, "b")
+        delattr(self.c1, "c")
+        self.c2.e["key2"] = 2  # type: ignore[attr-defined]
         with dcs.capture_output() as out:
             is_same1 = dcs.compare_two_classes(self.c1, self.c2, ignore_callables=True, is_subset=False, suppress_output=True)
             is_same2 = dcs.compare_two_classes(self.c1, self.c2, ignore_callables=True, is_subset=True, suppress_output=False)
@@ -626,16 +626,16 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertFalse(is_same3)
         self.assertEqual(output, '"c1" and "c2" are the same (subset).')
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_tolerance(self) -> None:
         self.c1.a = 0.00000001  # type: ignore[attr-defined]
-        self.c2.e['key1'] = 1 + 1e-8  # type: ignore[attr-defined]
+        self.c2.e["key1"] = 1 + 1e-8  # type: ignore[attr-defined]
         is_same = dcs.compare_two_classes(self.c1, self.c2, tolerance=1e-4, suppress_output=True)
         self.assertFalse(is_same)
-        delattr(self.c1, 'b')
-        delattr(self.c1, 'c')
-        delattr(self.c2, 'b')
-        delattr(self.c2, 'd')
+        delattr(self.c1, "b")
+        delattr(self.c1, "c")
+        delattr(self.c2, "b")
+        delattr(self.c2, "d")
         is_same = dcs.compare_two_classes(self.c1, self.c2, tolerance=1e-4, suppress_output=True)
         self.assertTrue(is_same)
 
@@ -651,9 +651,9 @@ class Test_compare_two_dicts(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.d1 = {'a': 1, 'b': 2, 'c': 3, 'e': {'key1': 1}}
-        self.d2 = {'a': 1, 'b': 5, 'd': 6, 'e': {'key1': 1}}
-        self.names = ['Dict 1', 'Dict 2']
+        self.d1 = {"a": 1, "b": 2, "c": 3, "e": {"key1": 1}}
+        self.d2 = {"a": 1, "b": 5, "d": 6, "e": {"key1": 1}}
+        self.names = ["Dict 1", "Dict 2"]
 
     def test_good_comparison(self) -> None:
         with dcs.capture_output() as out:
@@ -670,7 +670,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         out.close()
         self.assertEqual(
             output,
-            'b is different.\n"d1[\'e\']" and "d2[\'e\']" are the same.\n'
+            'b is different.\n\"d1["e"]\" and \"d2["e"]\" are the same.\n'
             + 'c is only in d1.\nd is only in d2.\n"d1" and "d2" are not the same.',
         )
         self.assertFalse(is_same)
@@ -688,29 +688,29 @@ class Test_compare_two_dicts(unittest.TestCase):
             is_same = dcs.compare_two_dicts(self.d1, self.d2, suppress_output=True, names=self.names)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, '')
+        self.assertEqual(output, "")
         self.assertFalse(is_same)
 
     def test_is_subset(self) -> None:
-        d1 = {'a': 1, 'b': [1, 2], 'e': {'key1': 1}}
-        d2 = {'a': 1, 'b': [1, 2], 'c': 'extra', 'e': {'key1': 1, 'key2': 2}}
+        d1 = {"a": 1, "b": [1, 2], "e": {"key1": 1}}
+        d2 = {"a": 1, "b": [1, 2], "c": "extra", "e": {"key1": 1, "key2": 2}}
         with dcs.capture_output() as out:
             is_same1 = dcs.compare_two_dicts(d1, d2, suppress_output=True)
             is_same2 = dcs.compare_two_dicts(d1, d2, suppress_output=False, is_subset=True)
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().strip().split("\n")
         out.close()
         self.assertFalse(is_same1)
         self.assertTrue(is_same2)
         self.assertEqual(len(lines), 2)
-        self.assertEqual(lines[0], '"d1[\'e\']" and "d2[\'e\']" are the same (subset).')
+        self.assertEqual(lines[0], '"d1["e"]" and "d2["e"]" are the same (subset).')
         self.assertEqual(lines[1], '"d1" and "d2" are the same (subset).')
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_tolerance(self) -> None:
-        self.d1['a'] = 1.00000000001
-        self.d1['d'] = self.d2['d']
-        self.d2['c'] = self.d1['c']
-        self.d2['e']['key1'] = 0.999999999998  # type: ignore[index]
+        self.d1["a"] = 1.00000000001
+        self.d1["d"] = self.d2["d"]
+        self.d2["c"] = self.d1["c"]
+        self.d2["e"]["key1"] = 0.999999999998  # type: ignore[index]
         is_same = dcs.compare_two_dicts(self.d1, self.d2, tolerance=0.0001, suppress_output=True)
         self.assertTrue(is_same)
 
@@ -730,10 +730,10 @@ class Test_read_text_file(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.folder = dcs.get_tests_dir()
-        cls.contents = 'Hello, World!\n'
-        cls.filepath = cls.folder / 'temp_file.txt'
-        cls.badpath = pathlib.Path(r'AA:\non_existent_path\bad_file.txt')
-        with open(cls.filepath, 'wt') as file:
+        cls.contents = "Hello, World!\n"
+        cls.filepath = cls.folder / "temp_file.txt"
+        cls.badpath = pathlib.Path(r"AA:\non_existent_path\bad_file.txt")
+        with open(cls.filepath, "wt") as file:
             file.write(cls.contents)
 
     def test_reading(self) -> None:
@@ -772,24 +772,24 @@ class Test_write_text_file(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.folder = dcs.get_tests_dir()
-        cls.contents = 'Hello, World!\n'
-        cls.filepath = cls.folder / 'temp_file.txt'
-        cls.badpath = pathlib.Path(r'AA:\non_existent_path\bad_file.txt')
+        cls.contents = "Hello, World!\n"
+        cls.filepath = cls.folder / "temp_file.txt"
+        cls.badpath = pathlib.Path(r"AA:\non_existent_path\bad_file.txt")
 
     def test_writing(self) -> None:
         dcs.write_text_file(self.filepath, self.contents)
-        with open(self.filepath, 'rt') as file:
+        with open(self.filepath, "rt") as file:
             text = file.read()
         self.assertEqual(text, self.contents)
 
     def test_str(self) -> None:
         dcs.write_text_file(str(self.filepath), self.contents)
-        with open(str(self.filepath), 'rt') as file:
+        with open(str(self.filepath), "rt") as file:
             text = file.read()
         self.assertEqual(text, self.contents)
 
     def test_bad_writing(self) -> None:
-        if platform.system() != 'Windows':
+        if platform.system() != "Windows":
             return
         with dcs.capture_output() as out:
             with self.assertRaises((OSError, IOError, FileNotFoundError)):
@@ -813,37 +813,37 @@ class Test_capture_output(unittest.TestCase):
 
     def test_std_out(self) -> None:
         with dcs.capture_output() as out:
-            print('Hello, World!')
+            print("Hello, World!")
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, 'Hello, World!')
+        self.assertEqual(output, "Hello, World!")
 
     def test_std_err(self) -> None:
-        with dcs.capture_output('err') as err:
-            print('Error Raised.', file=sys.stderr)
+        with dcs.capture_output("err") as err:
+            print("Error Raised.", file=sys.stderr)
         error = err.getvalue().strip()
         err.close()
-        self.assertEqual(error, 'Error Raised.')
+        self.assertEqual(error, "Error Raised.")
 
     def test_all(self) -> None:
-        with dcs.capture_output('all') as (out, err):
-            print('Hello, World!')
-            print('Error Raised.', file=sys.stderr)
+        with dcs.capture_output("all") as (out, err):
+            print("Hello, World!")
+            print("Error Raised.", file=sys.stderr)
         output = out.getvalue().strip()
         error = err.getvalue().strip()
         out.close()
         err.close()
-        self.assertEqual(output, 'Hello, World!')
-        self.assertEqual(error, 'Error Raised.')
+        self.assertEqual(output, "Hello, World!")
+        self.assertEqual(error, "Error Raised.")
 
     def test_bad_value(self) -> None:
         with self.assertRaises(RuntimeError):
-            with dcs.capture_output('bad') as (out, err):
-                print('Lost values')
+            with dcs.capture_output("bad") as (out, err):
+                print("Lost values")
 
 
 #%% magnitude
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_magnitude(unittest.TestCase):
     r"""
     Tests the magnitude function with the following cases:
@@ -861,7 +861,7 @@ class Test_magnitude(unittest.TestCase):
     def test_bad_axis(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.magnitude(self.data, axis=2)
-        self.assertEqual(str(context.exception), 'axis 2 is out of bounds for array of dimension 2')
+        self.assertEqual(str(context.exception), "axis 2 is out of bounds for array of dimension 2")
 
     def test_single_vector(self) -> None:
         for i in range(3):
@@ -878,7 +878,7 @@ class Test_magnitude(unittest.TestCase):
     def test_single_vector_bad_axis(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.magnitude(self.data[:, 0], axis=1)
-        self.assertEqual(str(context.exception), 'axis 1 is out of bounds for array of dimension 1')
+        self.assertEqual(str(context.exception), "axis 1 is out of bounds for array of dimension 1")
 
     def test_list(self) -> None:
         data = [self.data[:, i] for i in range(self.data.shape[1])]
@@ -887,7 +887,7 @@ class Test_magnitude(unittest.TestCase):
 
 
 #%% unit
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_unit(unittest.TestCase):
     r"""
     Tests the unit function with the following cases:
@@ -906,7 +906,7 @@ class Test_unit(unittest.TestCase):
     def test_bad_axis(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.unit(self.data, axis=2)
-        self.assertEqual(str(context.exception), 'axis 2 is out of bounds for array of dimension 2')
+        self.assertEqual(str(context.exception), "axis 2 is out of bounds for array of dimension 2")
 
     def test_single_vector(self) -> None:
         for i in range(3):
@@ -921,7 +921,7 @@ class Test_unit(unittest.TestCase):
     def test_single_vector_bad_axis(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.unit(self.data[:, 0], axis=1)
-        self.assertEqual(str(context.exception), 'axis 1 is out of bounds for array of dimension 1')
+        self.assertEqual(str(context.exception), "axis 1 is out of bounds for array of dimension 1")
 
     def test_list(self) -> None:
         data = [self.data[:, i] for i in range(self.data.shape[1])]
@@ -930,7 +930,7 @@ class Test_unit(unittest.TestCase):
 
 
 #%% modd
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_modd(unittest.TestCase):
     r"""
     Tests the modd function with the following cases:
@@ -942,7 +942,7 @@ class Test_modd(unittest.TestCase):
 
     def setUp(self) -> None:
         self.x = np.array([-4, -3, -2, -1, 0, 1, 2, 3, 4])
-        self.y = np.array([ 4,  1,  2,  3, 4, 1, 2, 3, 4])
+        self.y = np.array([4, 1, 2, 3, 4, 1, 2, 3, 4])
         self.mod = 4
 
     def test_nominal(self) -> None:
@@ -987,27 +987,27 @@ class Test_is_np_int(unittest.TestCase):
         self.assertFalse(dcs.is_np_int(10.0))
 
     def test_large_int(self) -> None:
-        self.assertTrue(dcs.is_np_int(2 ** 62))
+        self.assertTrue(dcs.is_np_int(2**62))
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_np_int(self) -> None:
         self.assertTrue(dcs.is_np_int(np.array([1, 2, 3])))
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_np_float(self) -> None:
         self.assertFalse(dcs.is_np_int(np.array([2.0, np.pi])))
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_np_large_int(self) -> None:
-        self.assertTrue(dcs.is_np_int(np.array(2 ** 62)))
+        self.assertTrue(dcs.is_np_int(np.array(2**62)))
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_np_uint(self) -> None:
         self.assertTrue(dcs.is_np_int(np.array([1, 2, 3], dtype=np.uint32)))
 
 
 #%% np_digitize
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_np_digitize(unittest.TestCase):
     r"""
     Tests the np_digitize function with the following cases:
@@ -1054,7 +1054,7 @@ class Test_np_digitize(unittest.TestCase):
 
 
 #%% histcounts
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_histcounts(unittest.TestCase):
     r"""
     Tests the histcounts function with the following cases:
@@ -1084,7 +1084,7 @@ class Test_histcounts(unittest.TestCase):
 
 
 #%% full_print
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_full_print(unittest.TestCase):
     r"""
     Tests the full_print function with the following cases:
@@ -1097,10 +1097,10 @@ class Test_full_print(unittest.TestCase):
         out = []
         for line in lines:
             # normalize whitespace
-            temp = ' '.join(line.strip().split())
+            temp = " ".join(line.strip().split())
             # get rid of spaces near brackets
-            temp = temp.replace('[ ', '[')
-            temp = temp.replace(' ]', ']')
+            temp = temp.replace("[ ", "[")
+            temp = temp.replace(" ]", "]")
             out.append(temp)
         return out
 
@@ -1108,25 +1108,25 @@ class Test_full_print(unittest.TestCase):
         self.x = np.zeros((10, 5))
         self.x[3, :] = 1.23
         self.x_print = [
-            '[[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]',
-            '...',
-            '[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]]',
+            "[[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]",
+            "...",
+            "[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]]",
         ]
         self.x_full = [
-            '[[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]',
-            '[1.23 1.23 1.23 1.23 1.23]',
-            '[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]',
-            '[0. 0. 0. 0. 0.]]',
+            "[[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]",
+            "[1.23 1.23 1.23 1.23 1.23]",
+            "[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]",
+            "[0. 0. 0. 0. 0.]]",
         ]
         # explicitly set default threshold to 10 (since consoles sometimes use 1000 instead)
         self.orig = np.get_printoptions()
@@ -1135,7 +1135,7 @@ class Test_full_print(unittest.TestCase):
     def test_nominal(self) -> None:
         with dcs.capture_output() as out:
             print(self.x)
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().strip().split("\n")
         out.close()
         # normalize whitespace
         lines = self._norm_output(lines)
@@ -1143,7 +1143,7 @@ class Test_full_print(unittest.TestCase):
         with dcs.capture_output() as out:
             with dcs.full_print():
                 print(self.x)
-        lines = out.getvalue().strip().split('\n')
+        lines = out.getvalue().strip().split("\n")
         # normalize whitespace
         lines = self._norm_output(lines)
         out.close()
@@ -1155,7 +1155,7 @@ class Test_full_print(unittest.TestCase):
                 print(np.array(0))
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, '0')
+        self.assertEqual(output, "0")
 
     def test_small2(self) -> None:
         with dcs.capture_output() as out:
@@ -1163,15 +1163,15 @@ class Test_full_print(unittest.TestCase):
                 print(np.array([1.35, 1.58]))
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, '[1.35 1.58]')
+        self.assertEqual(output, "[1.35 1.58]")
 
     def test_keyword_arguments(self) -> None:
         with dcs.capture_output() as out:
-            with dcs.full_print(formatter={'float': lambda x: '{:.1f}'.format(x)}):
+            with dcs.full_print(formatter={"float": lambda x: "{:.1f}".format(x)}):
                 print(np.array([1.2345, 1001.555]))
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, '[1.2 1001.6]')
+        self.assertEqual(output, "[1.2 1001.6]")
 
     def tearDown(self) -> None:
         # restore the print_options
@@ -1186,40 +1186,40 @@ class Test_line_wrap(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.text = ('lots of repeated words ' * 4).strip()
+        self.text = ("lots of repeated words " * 4).strip()
         self.wrap = 40
         self.min_wrap = 0
         self.indent = 4
         self.out = [
-            'lots of repeated words lots of \\',
-            '    repeated words lots of repeated \\',
-            '    words lots of repeated words',
+            "lots of repeated words lots of \\",
+            "    repeated words lots of repeated \\",
+            "    words lots of repeated words",
         ]
 
     def test_str(self) -> None:
         out = dcs.line_wrap(self.text, self.wrap, self.min_wrap, self.indent)
-        self.assertEqual(out, '\n'.join(self.out))
+        self.assertEqual(out, "\n".join(self.out))
 
     def test_list(self) -> None:
         out = dcs.line_wrap([self.text], self.wrap, self.min_wrap, self.indent)
         self.assertEqual(out, self.out)
 
     def test_list2(self) -> None:
-        out = dcs.line_wrap(3 * ['aaaaaaaaaa bbbbbbbbbb cccccccccc'], wrap=25, min_wrap=15, indent=2)
-        self.assertEqual(out, 3 * ['aaaaaaaaaa bbbbbbbbbb \\', '  cccccccccc'])
+        out = dcs.line_wrap(3 * ["aaaaaaaaaa bbbbbbbbbb cccccccccc"], wrap=25, min_wrap=15, indent=2)
+        self.assertEqual(out, 3 * ["aaaaaaaaaa bbbbbbbbbb \\", "  cccccccccc"])
 
     def test_min_wrap(self) -> None:
-        out = dcs.line_wrap('aaaaaaaaaaaaaaaaaaaa bbbbbbbbbb', 25, 18, 0)
-        self.assertEqual(out, 'aaaaaaaaaaaaaaaaaaaa \\\nbbbbbbbbbb')
+        out = dcs.line_wrap("aaaaaaaaaaaaaaaaaaaa bbbbbbbbbb", 25, 18, 0)
+        self.assertEqual(out, "aaaaaaaaaaaaaaaaaaaa \\\nbbbbbbbbbb")
 
     def test_min_wrap2(self) -> None:
         with self.assertRaises(ValueError) as context:
-            dcs.line_wrap('aaaaaaaaaaaaaaaaaaaa bbbbbbbbbb', 25, 22, 0)
+            dcs.line_wrap("aaaaaaaaaaaaaaaaaaaa bbbbbbbbbb", 25, 22, 0)
         self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "22:25" was too small.')
 
 
 #%% combine_per_year
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_combine_per_year(unittest.TestCase):
     r"""
     Tests the combine_per_year function with the following cases:
@@ -1315,21 +1315,21 @@ class Test_get_env_var(unittest.TestCase):
     """
 
     def test_valid(self) -> None:
-        home = dcs.get_env_var('HOME')
+        home = dcs.get_env_var("HOME")
         self.assertTrue(bool(home))
 
     def test_bad_key(self) -> None:
         with self.assertRaises(KeyError):
-            dcs.get_env_var('Nonexisting_environment_key_name')
+            dcs.get_env_var("Nonexisting_environment_key_name")
 
     def test_default_key(self) -> None:
-        key = dcs.get_env_var('Nonexisting_environment_key_name', default='test')
-        self.assertEqual(key, 'test')
+        key = dcs.get_env_var("Nonexisting_environment_key_name", default="test")
+        self.assertEqual(key, "test")
 
     def test_not_allowed(self) -> None:
-        with patch('dstauffman.utils._ALLOWED_ENVS', {'user', 'username'}):
+        with patch("dstauffman.utils._ALLOWED_ENVS", {"user", "username"}):
             with self.assertRaises(KeyError):
-                dcs.get_env_var('HOME')
+                dcs.get_env_var("HOME")
 
 
 #%% get_username
@@ -1341,16 +1341,16 @@ class Test_get_username(unittest.TestCase):
     """
 
     def test_windows(self) -> None:
-        with patch('dstauffman.utils.IS_WINDOWS', True):
-            with patch.dict(os.environ, {'USER': 'name', 'USERNAME': 'name_two'}):
+        with patch("dstauffman.utils.IS_WINDOWS", True):
+            with patch.dict(os.environ, {"USER": "name", "USERNAME": "name_two"}):
                 username = dcs.get_username()
-        self.assertEqual(username, 'name_two')
+        self.assertEqual(username, "name_two")
 
     def test_unix(self) -> None:
-        with patch('dstauffman.utils.IS_WINDOWS', False):
-            with patch.dict(os.environ, {'USER': 'name', 'USERNAME': 'name_two'}):
+        with patch("dstauffman.utils.IS_WINDOWS", False):
+            with patch.dict(os.environ, {"USER": "name", "USERNAME": "name_two"}):
                 username = dcs.get_username()
-        self.assertEqual(username, 'name')
+        self.assertEqual(username, "name")
 
 
 #%% is_datetime
@@ -1363,7 +1363,7 @@ class Test_is_datetime(unittest.TestCase):
 
 
 #%% intersect
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_intersect(unittest.TestCase):
     r"""
     Tests the intersect function with the following cases:
@@ -1453,7 +1453,7 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(ib, np.array([0, 1, 2, 3, 5]))
 
     def test_int64(self) -> None:
-        t_offset = 2 ** 62
+        t_offset = 2**62
         a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
         b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
         (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)
@@ -1462,7 +1462,7 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(ib, np.array([5]))
 
     def test_int64_even_tol(self) -> None:
-        t_offset = 2 ** 62
+        t_offset = 2**62
         a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
         b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
         (c, ia, ib) = dcs.intersect(a, b, tolerance=2, return_indices=True)
@@ -1471,7 +1471,7 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(ib, np.array([0, 1, 3, 5]))
 
     def test_int64_odd_tol(self) -> None:
-        t_offset = 2 ** 62
+        t_offset = 2**62
         a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
         b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
         (c, ia, ib) = dcs.intersect(a, b, tolerance=3, return_indices=True)
@@ -1480,7 +1480,7 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30], dtype=np.int64) + t_offset)
 
     def test_npint64_tol(self) -> None:
-        t_offset = 2 ** 62
+        t_offset = 2**62
         a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
         b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
         (c, ia, ib) = dcs.intersect(a, b, tolerance=np.array(3), return_indices=True)
@@ -1495,8 +1495,8 @@ class Test_intersect(unittest.TestCase):
         self.assertEqual(len(c), 0)
 
     def test_datetimes(self) -> None:
-        date_zero = np.datetime64('2020-06-01 00:00:00', 'ms')
-        dt = np.arange(0, 11000, 1000).astype('timedelta64[ms]')
+        date_zero = np.datetime64("2020-06-01 00:00:00", "ms")
+        dt = np.arange(0, 11000, 1000).astype("timedelta64[ms]")
         a = date_zero + dt
         dt[3] += 5
         dt[5] -= 30
@@ -1509,7 +1509,7 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(ib, exp)
         # with tolerance
         exp = np.array([0, 1, 2, 3, 4, 6, 7, 8, 9, 10])
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=np.timedelta64(10, 'ms'), return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=np.timedelta64(10, "ms"), return_indices=True)
         np.testing.assert_array_equal(c, a[exp])
         np.testing.assert_array_equal(ia, exp)
         np.testing.assert_array_equal(ib, exp)
@@ -1522,7 +1522,7 @@ class Test_intersect(unittest.TestCase):
 
 
 #%% issorted
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_issorted(unittest.TestCase):
     r"""
     Tests the issorted function with the following cases:
@@ -1552,7 +1552,7 @@ class Test_issorted(unittest.TestCase):
 
 
 #%% zero_order_hold
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_zero_order_hold(unittest.TestCase):
     r"""
     Tests the zero_order_hold function with the following cases:
@@ -1569,113 +1569,113 @@ class Test_zero_order_hold(unittest.TestCase):
     #.  Uses scipy.interpolate.interp1d as the gold standard (but it's slower)
     """
 
-    @unittest.skipIf(not dcs.HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
+    @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_subsample(self) -> None:
         xp = np.linspace(0.0, 100 * np.pi, 500000)
         yp = np.sin(2 * np.pi * xp)
         x = np.arange(0.0, 350.0, 0.1)
-        func = interp1d(xp, yp, kind='zero', fill_value='extrapolate', assume_sorted=True)
+        func = interp1d(xp, yp, kind="zero", fill_value="extrapolate", assume_sorted=True)
         y_exp = func(x)
         y = dcs.zero_order_hold(x, xp, yp)
         np.testing.assert_array_equal(y, y_exp)
         y = dcs.zero_order_hold(x, xp, yp, assume_sorted=True)
         np.testing.assert_array_equal(y, y_exp)
 
-    @unittest.skipIf(not dcs.HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
+    @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_supersample(self) -> None:
         xp = np.array([0.0, 5000.0, 10000.0, 86400.0])
         yp = np.array([0, 1, -2, 0])
-        x  = np.arange(0.0, 86400.0)
-        func = interp1d(xp, yp, kind='zero', fill_value='extrapolate', assume_sorted=True)
+        x = np.arange(0.0, 86400.0)
+        func = interp1d(xp, yp, kind="zero", fill_value="extrapolate", assume_sorted=True)
         y_exp = func(x)
         y = dcs.zero_order_hold(x, xp, yp)
         np.testing.assert_array_equal(y, y_exp)
         y = dcs.zero_order_hold(x, xp, yp, assume_sorted=True)
         np.testing.assert_array_equal(y, y_exp)
 
-    @unittest.skipIf(not dcs.HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
+    @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_xp_not_sorted(self) -> None:
-        xp    = np.array([0, 10, 5, 15])
-        yp    = np.array([0, 1, -2, 3])
-        x     = np.array([10, 2, 14,  6,  8, 10, 4, 14, 0, 16])
-        y_exp = np.array([ 1, 0,  1, -2, -2,  1, 0,  1, 0,  3])
-        y     = dcs.zero_order_hold(x, xp, yp)
+        xp = np.array([0, 10, 5, 15])
+        yp = np.array([0, 1, -2, 3])
+        x = np.array([10, 2, 14, 6, 8, 10, 4, 14, 0, 16])
+        y_exp = np.array([1, 0, 1, -2, -2, 1, 0, 1, 0, 3])
+        y = dcs.zero_order_hold(x, xp, yp)
         np.testing.assert_array_equal(y, y_exp)
 
     def test_x_not_sorted(self) -> None:
-        xp    = np.array([0, 5, 10, 15])
-        yp    = np.array([0, -2, 1, 3])
-        x     = np.array([10, 2, 14,  6,  8, 10, 4, 14, 0, 16])
-        y_exp = np.array([ 1, 0,  1, -2, -2,  1, 0,  1, 0,  3])
-        y     = dcs.zero_order_hold(x, xp, yp)
+        xp = np.array([0, 5, 10, 15])
+        yp = np.array([0, -2, 1, 3])
+        x = np.array([10, 2, 14, 6, 8, 10, 4, 14, 0, 16])
+        y_exp = np.array([1, 0, 1, -2, -2, 1, 0, 1, 0, 3])
+        y = dcs.zero_order_hold(x, xp, yp)
         np.testing.assert_array_equal(y, y_exp)
 
-    @unittest.skipIf(not dcs.HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
+    @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_left_end(self) -> None:
-        xp    = np.array([0, 5, 10, 15, 4])
-        yp    = np.array([0, 1, -2, 3, 0])
-        x     = np.array([-4, -2, 0, 2, 4, 6])
+        xp = np.array([0, 5, 10, 15, 4])
+        yp = np.array([0, 1, -2, 3, 0])
+        x = np.array([-4, -2, 0, 2, 4, 6])
         y_exp = np.array([-5, -5, 0, 0, 0, 1])
-        y     = dcs.zero_order_hold(x, xp, yp, left=-5)
+        y = dcs.zero_order_hold(x, xp, yp, left=-5)
         np.testing.assert_array_equal(y, y_exp)
 
     def test_lists(self) -> None:
-        xp    = [0, 5, 10, 15]
-        yp    = [0, 1, 2, 3]
-        x     = [-4, -2, 0, 2, 4, 6, 20]
+        xp = [0, 5, 10, 15]
+        yp = [0, 1, 2, 3]
+        x = [-4, -2, 0, 2, 4, 6, 20]
         y_exp = [-1, -1, 0, 0, 0, 1, 3]
-        y     = dcs.zero_order_hold(x, xp, yp, left=-1)
+        y = dcs.zero_order_hold(x, xp, yp, left=-1)
         np.testing.assert_array_equal(y, y_exp)
 
     def test_bools(self) -> None:
-        xp    = np.array([1, 3, 4, 6, 8, 12], dtype=int)
-        yp    = np.array([1, 0, 0, 1, 1, 0], dtype=bool)
-        x     = np.arange(15, dtype=int)
+        xp = np.array([1, 3, 4, 6, 8, 12], dtype=int)
+        yp = np.array([1, 0, 0, 1, 1, 0], dtype=bool)
+        x = np.arange(15, dtype=int)
         y_exp = np.array([0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], dtype=bool)
-        y     = dcs.zero_order_hold(x, xp, yp, left=False)
+        y = dcs.zero_order_hold(x, xp, yp, left=False)
         self.assertEqual(y.dtype, bool)
         np.testing.assert_array_equal(y, y_exp)
 
-    @unittest.skipIf(not dcs.HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
+    @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_bools_unsorted(self) -> None:
-        xp    = np.array([1, 3, 6, 4, 8, 12], dtype=int)
-        yp    = np.array([1, 0, 1, 0, 1, 0], dtype=bool)
-        x     = np.arange(15, dtype=int)
+        xp = np.array([1, 3, 6, 4, 8, 12], dtype=int)
+        yp = np.array([1, 0, 1, 0, 1, 0], dtype=bool)
+        x = np.arange(15, dtype=int)
         y_exp = np.array([0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], dtype=bool)
-        y     = dcs.zero_order_hold(x, xp, yp, left=False)
+        y = dcs.zero_order_hold(x, xp, yp, left=False)
         self.assertEqual(y.dtype, bool)
         np.testing.assert_array_equal(y, y_exp)
 
     def test_indices(self) -> None:
-        xp      = np.array([0, 5, 10, 15])
-        yp      = np.array([0, 1, 2, 3])
-        x       = np.array([-4, -2, 0, 2, 4, 6, 20])
-        y_exp   = np.array([np.nan, np.nan, 0, 0, 0, 1, 3])
-        ix_exp  = np.array([None, None, 0, 0, 0, 1, 3])
+        xp = np.array([0, 5, 10, 15])
+        yp = np.array([0, 1, 2, 3])
+        x = np.array([-4, -2, 0, 2, 4, 6, 20])
+        y_exp = np.array([np.nan, np.nan, 0, 0, 0, 1, 3])
+        ix_exp = np.array([None, None, 0, 0, 0, 1, 3])
         (y, ix) = dcs.zero_order_hold(x, xp, yp, left=np.nan, return_indices=True)
         np.testing.assert_array_equal(y, y_exp)
         np.testing.assert_array_equal(ix, ix_exp)
 
     def test_indices_not_sorted(self) -> None:
-        xp      = np.array([0, 10, 5, 15])
-        yp      = np.array([0, 1, 2, 3])
-        x       = np.array([-4, -2, 0, 2, 4, 6, 20])
+        xp = np.array([0, 10, 5, 15])
+        yp = np.array([0, 1, 2, 3])
+        x = np.array([-4, -2, 0, 2, 4, 6, 20])
         with self.assertRaises(RuntimeError) as err:
             dcs.zero_order_hold(x, xp, yp, return_indices=True)
-        self.assertEqual(str(err.exception), 'Data must be sorted in order to ask for indices.')
+        self.assertEqual(str(err.exception), "Data must be sorted in order to ask for indices.")
 
     def test_missing_scipy(self) -> None:
-        xp    = np.array([0, 5, 10, 15, 4])
-        yp    = np.array([0, 1, -2, 3, 0])
-        x     = np.array([-4, -2, 0, 2, 4, 6])
+        xp = np.array([0, 5, 10, 15, 4])
+        yp = np.array([0, 1, -2, 3, 0])
+        x = np.array([-4, -2, 0, 2, 4, 6])
         with self.assertRaises(RuntimeError) as err:
-            with patch('dstauffman.utils.HAVE_SCIPY', False):
+            with patch("dstauffman.utils.HAVE_SCIPY", False):
                 dcs.zero_order_hold(x, xp, yp)
-        self.assertEqual(str(err.exception), 'You must have scipy available to run this.')
+        self.assertEqual(str(err.exception), "You must have scipy available to run this.")
 
 
 #%% drop_following_time
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_drop_following_time(unittest.TestCase):
     r"""
     Tests the drop_following_time function with the following cases:
@@ -1696,5 +1696,5 @@ class Test_drop_following_time(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

@@ -35,7 +35,7 @@ def get_root_dir() -> Path:
     Examples
     --------
     >>> from dstauffman import get_root_dir
-    >>> print('p = ', repr(get_root_dir()))  # doctest: +ELLIPSIS
+    >>> print("p = ", repr(get_root_dir()))  # doctest: +ELLIPSIS
     p = .../dstauffman/dstauffman')
 
     """
@@ -61,12 +61,12 @@ def get_tests_dir() -> Path:
     Examples
     --------
     >>> from dstauffman import get_tests_dir
-    >>> print('p = ', repr(get_tests_dir()))  # doctest: +ELLIPSIS
+    >>> print("p = ", repr(get_tests_dir()))  # doctest: +ELLIPSIS
     p = .../dstauffman/tests')
 
     """
-    # this folder is the 'tests' subfolder
-    return get_root_dir() / 'tests'
+    # this folder is the "tests" subfolder
+    return get_root_dir() / "tests"
 
 
 #%% Functions - get_data_dir
@@ -87,12 +87,12 @@ def get_data_dir() -> Path:
     Examples
     --------
     >>> from dstauffman import get_data_dir
-    >>> print('p = ', repr(get_data_dir()))  # doctest: +ELLIPSIS
+    >>> print("p = ", repr(get_data_dir()))  # doctest: +ELLIPSIS
     p = .../dstauffman/data')
 
     """
-    # this folder is the 'data' subfolder
-    return get_root_dir().parent / 'data'
+    # this folder is the "data" subfolder
+    return get_root_dir().parent / "data"
 
 
 #%% Functions - get_images_dir
@@ -113,12 +113,12 @@ def get_images_dir() -> Path:
     Examples
     --------
     >>> from dstauffman import get_images_dir
-    >>> print('p = ', repr(get_images_dir()))  # doctest: +ELLIPSIS
+    >>> print("p = ", repr(get_images_dir()))  # doctest: +ELLIPSIS
     p = .../dstauffman/images')
 
     """
-    # this folder is the 'images' subfolder
-    return get_root_dir().parent / 'images'
+    # this folder is the "images" subfolder
+    return get_root_dir().parent / "images"
 
 
 #%% Functions - get_output_dir
@@ -139,12 +139,12 @@ def get_output_dir() -> Path:
     Examples
     --------
     >>> from dstauffman import get_output_dir
-    >>> print('p = ', repr(get_output_dir()))  # doctest: +ELLIPSIS
+    >>> print("p = ", repr(get_output_dir()))  # doctest: +ELLIPSIS
     p = .../dstauffman/results')
 
     """
-    # this folder is the 'images' subfolder
-    return get_root_dir().parent / 'results'
+    # this folder is the "results" subfolder
+    return get_root_dir().parent / "results"
 
 
 #%% Functions - list_python_files
@@ -181,17 +181,17 @@ def list_python_files(folder: Path, recursive: bool = False, include_all: bool =
     if not folder.is_dir():
         return []
     if include_all:
-        files = list(folder.glob('*.py'))
+        files = list(folder.glob("*.py"))
     else:
-        files = [file for file in folder.glob('*.py') if not is_dunder(file.stem)]
+        files = [file for file in folder.glob("*.py") if not is_dunder(file.stem)]
     if recursive:
-        dirs = [x for x in folder.glob('*') if x.is_dir()]
+        dirs = [x for x in folder.glob("*") if x.is_dir()]
         for this_folder in sorted(dirs):
             files.extend(list_python_files(this_folder, recursive=recursive, include_all=include_all))
     return files
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_paths', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_paths", exit=False)
     doctest.testmod(verbose=False)

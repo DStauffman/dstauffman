@@ -17,14 +17,14 @@ if dcs.HAVE_NUMPY:
 #%% Supporting functions
 def _model_wrapper(x, y):
     if x is None:
-        raise ValueError('Bad value for x')
+        raise ValueError("Bad value for x")
     if y is None:
-        raise RuntimeError('Bad value for y')
+        raise RuntimeError("Bad value for y")
     return x + np.sin(x) + np.cos(y * 2)
 
 
 #%% parfor_wrapper
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_parfor_wrapper(unittest.TestCase):
     r"""
     Tests the parfor_wrapper function with the following cases:
@@ -52,14 +52,14 @@ class Test_parfor_wrapper(unittest.TestCase):
     def test_not_parallel_error(self) -> None:
         with self.assertRaises(ValueError) as context:
             dcs.parfor_wrapper(_model_wrapper, ((self.temp, self.temp), (None, None)), use_parfor=False)
-        self.assertEqual(str(context.exception), 'Bad value for x')
+        self.assertEqual(str(context.exception), "Bad value for x")
 
     def test_parallel_error(self) -> None:
         with self.assertRaises(RuntimeError) as context:
             dcs.parfor_wrapper(_model_wrapper, ((self.temp, self.temp), (self.temp, None)), use_parfor=True)
-        self.assertEqual(str(context.exception), 'Bad value for y')
+        self.assertEqual(str(context.exception), "Bad value for y")
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

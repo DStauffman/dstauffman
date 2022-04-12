@@ -54,23 +54,23 @@ def parse_enforce(input_args: List[str]) -> argparse.Namespace:
 
     """
     parser = argparse.ArgumentParser(
-        prog='dcs enforce',
-        description='Enforce consistency in the repo '
-        + 'for things like tabs, trailing whitespace, line endings and file execute permissions.',
+        prog="dcs enforce",
+        description="Enforce consistency in the repo "
+        + "for things like tabs, trailing whitespace, line endings and file execute permissions.",
     )
 
-    parser.add_argument('folder', help='Folder to search for source files')
-    parser.add_argument('-e', '--extensions', help='Extensions to search through.', action='append')
-    parser.add_argument('-l', '--list-all', help='List all files, even ones without problems.', action='store_true')
-    parser.add_argument('-i', '--ignore-tabs', help='Ignore tabs within the source code.', action='store_true')
-    parser.add_argument('-t', '--trailing', help='Show files with trailing whitespace', action='store_true')
-    parser.add_argument('-s', '--skip', help='Exclusions to not search.', action='append')
+    parser.add_argument("folder", help="Folder to search for source files")
+    parser.add_argument("-e", "--extensions", help="Extensions to search through.", action="append")
+    parser.add_argument("-l", "--list-all", help="List all files, even ones without problems.", action="store_true")
+    parser.add_argument("-i", "--ignore-tabs", help="Ignore tabs within the source code.", action="store_true")
+    parser.add_argument("-t", "--trailing", help="Show files with trailing whitespace", action="store_true")
+    parser.add_argument("-s", "--skip", help="Exclusions to not search.", action="append")
 
     group = parser.add_mutually_exclusive_group()
-    group.add_argument('-w', '--windows', help='Use Windows (CRLF) line-endings', action='store_true')
-    group.add_argument('-u', '--unix', help='Use Unix (LF) line-endings', action='store_true')
+    group.add_argument("-w", "--windows", help="Use Windows (CRLF) line-endings", action="store_true")
+    group.add_argument("-u", "--unix", help="Use Unix (LF) line-endings", action="store_true")
 
-    parser.add_argument('-x', '--execute', help='List files with execute permissions.', action='store_true')
+    parser.add_argument("-x", "--execute", help="List files with execute permissions.", action="store_true")
 
     args = parser.parse_args(input_args)
     return args
@@ -102,7 +102,7 @@ def execute_enforce(args: argparse.Namespace) -> int:
 
     """
     # defaults
-    def_extensions = {'m', 'py'}
+    def_extensions = {"m", "py"}
     # get settings from input arguments
     folder = Path(args.folder).resolve()
     list_all = args.list_all
@@ -112,15 +112,15 @@ def execute_enforce(args: argparse.Namespace) -> int:
     show_execute = args.execute
     check_eol: Optional[str]
     if args.windows:
-        check_eol = '\r\n'
+        check_eol = "\r\n"
     elif args.unix:
-        check_eol = '\n'
+        check_eol = "\n"
     else:
         check_eol = None
     extensions: Optional[Union[Set[str], FrozenSet[str]]]
     if args.extensions is None:
         extensions = frozenset(def_extensions)
-    elif len(args.extensions) == 1 and args.extensions[0] == '*':
+    elif len(args.extensions) == 1 and args.extensions[0] == "*":
         extensions = None
     else:
         extensions = args.extensions
@@ -175,15 +175,15 @@ def parse_make_init(input_args: List[str]) -> argparse.Namespace:
 
     """
     parser = argparse.ArgumentParser(
-        prog='dcs make_init', description='Make a python __init__.py' + 'file for the given folder.'
+        prog="dcs make_init", description="Make a python __init__.py" + "file for the given folder."
     )
 
-    parser.add_argument('folder', help='Folder to search for source files')
-    parser.add_argument('-l', '--lineup', help='Lines up the imports between files.', action='store_true')
-    parser.add_argument('-w', '--wrap', nargs='?', default=100, type=int, help='Number of lines to wrap at.')
-    parser.add_argument('-n', '--dry-run', help='Show what would be copied without doing it', action='store_true')
+    parser.add_argument("folder", help="Folder to search for source files")
+    parser.add_argument("-l", "--lineup", help="Lines up the imports between files.", action="store_true")
+    parser.add_argument("-w", "--wrap", nargs="?", default=100, type=int, help="Number of lines to wrap at.")
+    parser.add_argument("-n", "--dry-run", help="Show what would be copied without doing it", action="store_true")
     parser.add_argument(
-        '-o', '--outfile', nargs='?', default='__init__.py', help='Output file to produce, default is __init__.py'
+        "-o", "--outfile", nargs="?", default="__init__.py", help="Output file to produce, default is __init__.py"
     )
 
     args = parser.parse_args(input_args)
@@ -231,6 +231,6 @@ def execute_make_init(args: argparse.Namespace) -> int:
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_commands_repos', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_commands_repos", exit=False)
     doctest.testmod(verbose=False)

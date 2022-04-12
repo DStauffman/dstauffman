@@ -18,5 +18,5 @@ from .smoother import bf_smoother
 from .support  import get_parameter, set_parameter
 
 #%% Unittest
-if __name__ == '__main__':
+if __name__ == "__main__":
     pass

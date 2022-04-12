@@ -34,8 +34,8 @@ IN2CM: float = 2.54
 CM2IN: float = 1 / 2.54
 
 # Symbols
-DEGREE_SIGN: str = u'\N{DEGREE SIGN}'  # degree sign, also u'\u00b0' ° or chr(176)
-MICRO_SIGN: str = u'\N{MICRO SIGN}'  # micro sign, also u'\u00b5' μ or chr(181), note this is different than chr(956)
+DEGREE_SIGN: str = "\N{DEGREE SIGN}"  # degree sign, also u"\u00b0" ° or chr(176)
+MICRO_SIGN: str = "\N{MICRO SIGN}"  # micro sign, also u"\u00b5" μ or chr(181), note this is different than chr(956)
 
 #%% get_factors
 def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[float, str]:
@@ -46,11 +46,11 @@ def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[
     ----------
     prefix : str
         Unit standard metric prefix, from:
-            {'yotta', 'zetta', 'exa', 'peta', 'tera', 'giga', 'mega',
-             'kilo', 'hecto', 'deca', 'unity', 'deci', 'centi', 'milli',
-             'micro', 'nano', 'pico', 'femto', 'atto', 'zepto', 'yocto',
-             'arcminute', 'arcsecond', 'milliarcsecond', 'microarcsecond',
-             'percentage', 'arcsecond^2'}
+            {"yotta", "zetta", "exa", "peta", "tera", "giga", "mega",
+             "kilo", "hecto", "deca", "unity", "deci", "centi", "milli",
+             "micro", "nano", "pico", "femto", "atto", "zepto", "yocto",
+             "arcminute", "arcsecond", "milliarcsecond", "microarcsecond",
+             "percentage", "arcsecond^2"}
     inverse : bool, optional, default is False
         Whether to return the inverse version
 
@@ -74,7 +74,7 @@ def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[
     Examples
     --------
     >>> from dstauffman import get_factors
-    >>> (mult, label) = get_factors('micro')
+    >>> (mult, label) = get_factors("micro")
     >>> print(mult)
     1e-06
 
@@ -83,98 +83,98 @@ def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[
 
     """
     # find the desired units and label prefix
-    if prefix == 'yotta':
+    if prefix == "yotta":
         mult  = 1e24 if not inverse else 1e-24
-        label = 'Y'
-    elif prefix == 'zetta':
+        label = "Y"
+    elif prefix == "zetta":
         mult  = 1e21 if not inverse else 1e-21
-        label = 'Z'
-    elif prefix == 'exa':
+        label = "Z"
+    elif prefix == "exa":
         mult  = 1e18 if not inverse else 1e-18
-        label = 'E'
-    elif prefix == 'peta':
+        label = "E"
+    elif prefix == "peta":
         mult  = 1e15 if not inverse else 1e-15
-        label = 'P'
-    elif prefix == 'tera':
+        label = "P"
+    elif prefix == "tera":
         mult  = 1e12 if not inverse else 1e-12
-        label = 'T'
-    elif prefix == 'giga':
+        label = "T"
+    elif prefix == "giga":
         mult  = 1e9 if not inverse else 1e-9
-        label = 'G'
-    elif prefix == 'mega':
+        label = "G"
+    elif prefix == "mega":
         mult  = 1e6 if not inverse else 1e-6
-        label = 'M'
-    elif prefix == 'kilo':
+        label = "M"
+    elif prefix == "kilo":
         mult  = 1e3 if not inverse else 1e-3
-        label = 'k'
-    elif prefix == 'hecto':
+        label = "k"
+    elif prefix == "hecto":
         mult  = 1e2 if not inverse else 1e-2
-        label = 'h'
-    elif prefix == 'deca':
+        label = "h"
+    elif prefix == "deca":
         mult  = 1e1 if not inverse else 1e-1
-        label = 'da'
-    elif prefix == 'unity':
+        label = "da"
+    elif prefix == "unity":
         mult  = 1.0
-        label = ''
-    elif prefix == 'deci':
+        label = ""
+    elif prefix == "deci":
         mult  = 1e-1 if not inverse else 1e1
-        label = 'd'
-    elif prefix == 'centi':
+        label = "d"
+    elif prefix == "centi":
         mult  = 1e-2 if not inverse else 1e2
-        label = 'c'
-    elif prefix == 'milli':
+        label = "c"
+    elif prefix == "milli":
         mult  = 1e-3 if not inverse else 1e3
-        label = 'm'
-    elif prefix == 'micro':
+        label = "m"
+    elif prefix == "micro":
         mult  = 1e-6 if not inverse else 1e6
         label = MICRO_SIGN
-    elif prefix == 'nano':
+    elif prefix == "nano":
         mult  = 1e-9 if not inverse else 1e9
-        label = 'n'
-    elif prefix == 'pico':
+        label = "n"
+    elif prefix == "pico":
         mult  = 1e-12 if not inverse else 1e12
-        label = 'p'
-    elif prefix == 'femto':
+        label = "p"
+    elif prefix == "femto":
         mult  = 1e-15 if not inverse else 1e15
-        label = 'f'
-    elif prefix == 'atto':
+        label = "f"
+    elif prefix == "atto":
         mult  = 1e-18 if not inverse else 1e18
-        label = 'a'
-    elif prefix == 'zepto':
+        label = "a"
+    elif prefix == "zepto":
         mult  = 1e-21 if not inverse else 1e21
-        label = 'z'
-    elif prefix == 'yocto':
+        label = "z"
+    elif prefix == "yocto":
         mult  = 1e-24 if not inverse else 1e24
-        label = 'y'
+        label = "y"
     # Special cases
-    elif prefix == 'percentage':
+    elif prefix == "percentage":
         mult  = 0.01 if not inverse else 100.0
-        label = '%'
+        label = "%"
     # below follow some stupid english units for rotation angles (try to never use them!)
-    elif prefix == 'arcminute':
+    elif prefix == "arcminute":
         mult  = 1.0 / ONE_MINUTE * DEG2RAD if not inverse else ONE_MINUTE / DEG2RAD
-        label = 'amin'
-    elif prefix == 'arcsecond':
+        label = "amin"
+    elif prefix == "arcsecond":
         mult  = ARCSEC2RAD if not inverse else RAD2ARCSEC
-        label = 'asec'
-    elif prefix == 'arcsecond^2':
+        label = "asec"
+    elif prefix == "arcsecond^2":
         mult  = ARCSEC2RAD ** 2 if not inverse else RAD2ARCSEC ** 2
-        label = 'asec^2'
-    elif prefix == 'milliarcsecond':
+        label = "asec^2"
+    elif prefix == "milliarcsecond":
         mult  = 1e3 * ARCSEC2RAD if not inverse else 1e-3 * RAD2ARCSEC
-        label = 'mas'
-    elif prefix == 'microarcsecond':
+        label = "mas"
+    elif prefix == "microarcsecond":
         mult  = 1e6 * ARCSEC2RAD if not inverse else 1e-6 * RAD2ARCSEC
-        label = MICRO_SIGN + 'as'
+        label = MICRO_SIGN + "as"
     else:
-        raise ValueError('Unexpected value for units prefix.')
+        raise ValueError("Unexpected value for units prefix.")
     return (mult, label)
 
 
 #%% Functions - get_time_factor
 def get_time_factor(unit: str) -> int:
     r"""
-    Gets the time factor for the given unit relative to the base SI unit of 'sec'.
+    Gets the time factor for the given unit relative to the base SI unit of "sec".
 
     Parameters
     ----------
@@ -193,18 +193,18 @@ def get_time_factor(unit: str) -> int:
     Examples
     --------
     >>> from dstauffman import get_time_factor
-    >>> mult = get_time_factor('hr')
+    >>> mult = get_time_factor("hr")
     >>> print(mult)
     3600
 
     """
-    if unit == 'sec':
+    if unit == "sec":
         mult = 1
-    elif unit == 'min':
+    elif unit == "min":
         mult = ONE_MINUTE
-    elif unit == 'hr':
+    elif unit == "hr":
         mult = ONE_HOUR
-    elif unit == 'day':
+    elif unit == "day":
         mult = ONE_DAY
     else:
         raise ValueError(f'Unexpected value for "{unit}".')
@@ -212,7 +212,7 @@ def get_time_factor(unit: str) -> int:
 
 
 #%% Functions - get_unit_conversion
-def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, float]], units: str = '') -> Tuple[str, float]:
+def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, float]], units: str = "") -> Tuple[str, float]:
     r"""
     Acts as a wrapper to unit conversions for legends in plots and for scaling second axes.
 
@@ -220,11 +220,11 @@ def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, floa
     ----------
     conversion : str
         Unit standard metric prefix or some special cases, from:
-            {'yotta', 'zetta', 'exa', 'peta', 'tera', 'giga', 'mega',
-             'kilo', 'hecto', 'deca', 'unity', 'deci', 'centi', 'milli',
-             'micro', 'nano', 'pico', 'femto', 'atto', 'zepto', 'yocto',
-             'arcminute', 'arcsecond', 'milliarcsecond', 'microarcsecond',
-             'percentage', 'arcsecond^2'}
+            {"yotta", "zetta", "exa", "peta", "tera", "giga", "mega",
+             "kilo", "hecto", "deca", "unity", "deci", "centi", "milli",
+             "micro", "nano", "pico", "femto", "atto", "zepto", "yocto",
+             "arcminute", "arcsecond", "milliarcsecond", "microarcsecond",
+             "percentage", "arcsecond^2"}
     units : str
         label to apply the prefix to (sometimes replaced when dealing with radians and english units)
 
@@ -245,8 +245,8 @@ def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, floa
     Examples
     --------
     >>> from dstauffman import get_unit_conversion
-    >>> conversion = 'micro'
-    >>> units = 'rad'
+    >>> conversion = "micro"
+    >>> units = "rad"
     >>> (new_units, unit_mult) = get_unit_conversion(conversion, units)
     >>> print(unit_mult)
     1000000.0
@@ -256,29 +256,29 @@ def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, floa
 
     """
     if conversion is None:
-        return ('', 1)
+        return ("", 1)
     if isinstance(conversion, (int, float)):
-        return ('', conversion)
+        return ("", conversion)
     if not isinstance(conversion, str):
         return (conversion[0], conversion[1])
-    if conversion == 'percentage':
-        return ('%', 100)
+    if conversion == "percentage":
+        return ("%", 100)
     (unit_mult, label) = get_factors(conversion, inverse=True)
-    if units in {'', 'rad', 'rad^2'} and 'arc' in conversion:
+    if units in {"", "rad", "rad^2"} and "arc" in conversion:
         new_units = label
-    elif units == 'rad^2':
-        new_units = '(' + label + 'rad)^2'
+    elif units == "rad^2":
+        new_units = "(" + label + "rad)^2"
         unit_mult **= 2
-    elif not units or units == 'unitless':
+    elif not units or units == "unitless":
         # special empty cases
-        if conversion == 'milli':
-            new_units = 'ppk'
-        elif conversion == 'micro':
-            new_units = 'ppm'
-        elif conversion == 'nano':
-            new_units = 'ppb'
-        elif conversion == 'pico':
-            new_units = 'ppt'
+        if conversion == "milli":
+            new_units = "ppk"
+        elif conversion == "micro":
+            new_units = "ppm"
+        elif conversion == "nano":
+            new_units = "ppb"
+        elif conversion == "pico":
+            new_units = "ppt"
         elif label:
             raise ValueError("The unit conversion given doesn't work for empty units.")
         else:
@@ -289,6 +289,6 @@ def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, floa
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_units', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_units", exit=False)
     doctest.testmod(verbose=False)

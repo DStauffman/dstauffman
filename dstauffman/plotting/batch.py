@@ -64,10 +64,10 @@ def plot_bpe_convergence(costs, *, opts=None, fig_ax=None, skip_setup_plots=Fals
     # get number of iterations
     num_iters = len(costs) - 2
     time = np.arange(len(costs)) if HAVE_NUMPY else list(range(len(costs)))
-    labels = ['Begin'] + [str(x + 1) for x in range(num_iters)] + ['Final']
+    labels = ["Begin"] + [str(x + 1) for x in range(num_iters)] + ["Final"]
 
     # alias the title
-    this_title = 'Convergence by Iteration'
+    this_title = "Convergence by Iteration"
     if fig_ax is None:
         # create the figure and axis
         fig = plt.figure()
@@ -79,10 +79,10 @@ def plot_bpe_convergence(costs, *, opts=None, fig_ax=None, skip_setup_plots=Fals
     else:
         fig.canvas.manager.set_window_title(sup.get_text())
     # add an axis and plot the data
-    ax.semilogy(time, costs, 'b.-', linewidth=2)
+    ax.semilogy(time, costs, "b.-", linewidth=2)
     # add labels
-    ax.set_xlabel('Iteration')
-    ax.set_ylabel('Cost')
+    ax.set_xlabel("Iteration")
+    ax.set_ylabel("Cost")
     ax.set_title(this_title)
     ax.set_xticks(time)
     if len(costs) > 0:
@@ -103,12 +103,12 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
 
     # alias the names
     if bpe_results.param_names is not None:
-        names = [name.decode('utf-8') for name in bpe_results.param_names]
+        names = [name.decode("utf-8") for name in bpe_results.param_names]
     else:
         names = []
 
     # defaults for which plots to make
-    default_plots = {'innovs': False, 'convergence': False, 'correlation': False, 'info_svd': False, 'covariance': False}
+    default_plots = {"innovs": False, "convergence": False, "correlation": False, "info_svd": False, "covariance": False}
 
     # check for optional variables
     if opts is None:
@@ -126,49 +126,49 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
                 plots[key] = default_plots[key]
 
     # colormap information
-    kw_colormap = kwargs.pop('colormap', None)
+    kw_colormap = kwargs.pop("colormap", None)
 
     # preallocate output
     figs = []
 
     # time based plots
-    if plots['innovs']:
+    if plots["innovs"]:
         if bpe_results.begin_innovs is not None and bpe_results.final_innovs is not None:
             time = np.arange(len(bpe_results.begin_innovs))
             data = np.vstack((bpe_results.begin_innovs, bpe_results.final_innovs))
-            colormap = kw_colormap if kw_colormap is not None else 'bwr_r'
+            colormap = kw_colormap if kw_colormap is not None else "bwr_r"
             temp_opts = opts.__class__(opts)
             temp_opts.disp_xmin = temp_opts.disp_xmax = temp_opts.rms_xmin = temp_opts.rms_xmax = None
             fig = plot_time_history(
-                'Innovs Before and After',
+                "Innovs Before and After",
                 time,
                 data,
                 opts=temp_opts,
-                elements=['Before', 'After'],
+                elements=["Before", "After"],
                 colormap=colormap,
                 skip_setup_plots=True,
                 **kwargs,
             )
-            fig.axes[0].set_xlabel('Innovation Number')
+            fig.axes[0].set_xlabel("Innovation Number")
             setup_plots(fig, opts=temp_opts)
             figs.append(fig)
         else:
             print("Data isn't available for Innovations plot.")
-    if plots['convergence']:
+    if plots["convergence"]:
         if len(bpe_results.costs) != 0:
             fig = plot_bpe_convergence(bpe_results.costs, opts=opts)
             figs.append(fig)
         else:
             print("Data isn't available for convergence plot.")
 
-    if plots['correlation']:
+    if plots["correlation"]:
         if bpe_results.correlation is not None:
-            colormap = kw_colormap if kw_colormap is not None else 'bwr'
+            colormap = kw_colormap if kw_colormap is not None else "bwr"
             fig = plot_correlation_matrix(
                 bpe_results.correlation,
                 labels=names,
                 opts=opts,
-                matrix_name='Correlation Matrix',
+                matrix_name="Correlation Matrix",
                 cmin=-1,
                 plot_lower_only=True,
                 label_values=label_values,
@@ -178,31 +178,31 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
         else:
             print("Data isn't available for correlation plot.")
 
-    if plots['info_svd']:
+    if plots["info_svd"]:
         if bpe_results.info_svd is not None:
-            colormap = kw_colormap if kw_colormap is not None else 'cool'
+            colormap = kw_colormap if kw_colormap is not None else "cool"
             fig = plot_correlation_matrix(
                 np.abs(bpe_results.info_svd),
                 opts=opts,
                 cmin=0,
-                matrix_name='Information SVD Matrix',
+                matrix_name="Information SVD Matrix",
                 label_values=label_values,
-                labels=[['{}'.format(i + 1) for i in range(len(names))], names],
+                labels=[["{}".format(i + 1) for i in range(len(names))], names],
                 colormap=colormap,
             )
             figs.append(fig)
         else:
             print("Data isn't available for information SVD plot.")
 
-    if plots['covariance']:
+    if plots["covariance"]:
         if bpe_results.covariance is not None:
             max_mag = np.nanmax(np.abs(bpe_results.covariance))
-            colormap = kw_colormap if kw_colormap is not None else 'bwr'
+            colormap = kw_colormap if kw_colormap is not None else "bwr"
             fig = plot_correlation_matrix(
                 bpe_results.covariance,
                 labels=names,
                 opts=opts,
-                matrix_name='Covariance Matrix',
+                matrix_name="Covariance Matrix",
                 cmin=-max_mag,
                 cmax=max_mag,
                 plot_lower_only=True,
@@ -216,6 +216,6 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
 
 
 #%% Unit Test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_plotting_batch', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_plotting_batch", exit=False)
     doctest.testmod(verbose=False)

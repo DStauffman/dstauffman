@@ -20,7 +20,7 @@ if dcs.HAVE_NUMPY:
     import numpy as np
 
 #%% setup_dir
-@patch('dstauffman.utils_log.logger')
+@patch("dstauffman.utils_log.logger")
 class Test_setup_dir(unittest.TestCase):
     r"""
     Tests the setup_dir function with the following cases:
@@ -35,14 +35,14 @@ class Test_setup_dir(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.folder = dcs.get_tests_dir() / 'temp_dir'
-        self.subdir = dcs.get_tests_dir().joinpath('temp_dir', 'temp_dir2')
-        self.filename = self.folder / 'temp_file.txt'
-        self.subfile = self.subdir / 'temp_file.txt'
-        self.text = 'Hello, World!\n'
+        self.folder = dcs.get_tests_dir() / "temp_dir"
+        self.subdir = dcs.get_tests_dir().joinpath("temp_dir", "temp_dir2")
+        self.filename = self.folder / "temp_file.txt"
+        self.subfile = self.subdir / "temp_file.txt"
+        self.text = "Hello, World!\n"
 
     def test_empty_string(self, mock_logger: Mock) -> None:
-        dcs.setup_dir('')
+        dcs.setup_dir("")
         mock_logger.log.assert_not_called()
 
     def test_create_folder(self, mock_logger: Mock) -> None:
@@ -58,7 +58,7 @@ class Test_setup_dir(unittest.TestCase):
     def test_clean_up_folder(self, mock_logger: Mock) -> None:
         dcs.setup_dir(self.folder)
         dcs.write_text_file(self.filename, self.text)
-        with patch('dstauffman.utils_log.logger') as mock_logger2:
+        with patch("dstauffman.utils_log.logger") as mock_logger2:
             dcs.setup_dir(self.folder)
             mock_logger2.log.assert_called_once()
             mock_logger2.log.assert_called_with(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.folder)
@@ -66,10 +66,10 @@ class Test_setup_dir(unittest.TestCase):
 
     def test_clean_up_partial(self, mock_logger: Mock) -> None:
         dcs.setup_dir(self.folder)
-        dcs.write_text_file(self.filename, '')
+        dcs.write_text_file(self.filename, "")
         dcs.setup_dir(self.subdir)
-        dcs.write_text_file(self.subfile, '')
-        with patch('dstauffman.utils_log.logger') as mock_logger2:
+        dcs.write_text_file(self.subfile, "")
+        with patch("dstauffman.utils_log.logger") as mock_logger2:
             dcs.setup_dir(self.folder, recursive=False)
             mock_logger2.log.assert_called_once()
             mock_logger2.log.assert_called_with(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.folder)
@@ -87,7 +87,7 @@ class Test_setup_dir(unittest.TestCase):
     def test_clean_up_recursively(self, mock_logger: Mock) -> None:
         dcs.setup_dir(self.subdir)
         dcs.write_text_file(self.subfile, self.text)
-        with patch('dstauffman.utils_log.logger') as mock_logger2:
+        with patch("dstauffman.utils_log.logger") as mock_logger2:
             dcs.setup_dir(self.folder, recursive=True)
             self.assertEqual(mock_logger2.log.call_count, 2)
             mock_logger2.log.assert_any_call(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.subdir)
@@ -112,8 +112,8 @@ class Test_setup_dir(unittest.TestCase):
 
 
 #%% fix_rollover
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
-@patch('dstauffman.utils_log.logger')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@patch("dstauffman.utils_log.logger")
 class Test_fix_rollover(unittest.TestCase):
     r"""
     Tests the fix_rollover function with the following cases:
@@ -125,17 +125,17 @@ class Test_fix_rollover(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.data  = np.array([1, 2, 3, 4, 5, 6, 0, 1,  3,  6,  0,  6,  5, 2])
+        self.data = np.array([1, 2, 3, 4, 5, 6, 0, 1, 3, 6, 0, 6, 5, 2])
         self.data2 = np.array([], dtype=int)
-        self.exp   = np.array([1, 2, 3, 4, 5, 6, 7, 8, 10, 13, 14, 13, 12, 9])
-        self.roll  = 7
+        self.exp = np.array([1, 2, 3, 4, 5, 6, 7, 8, 10, 13, 14, 13, 12, 9])
+        self.roll = 7
         self.axis: Optional[int] = None
 
     def test_nominal(self, mock_logger: Mock) -> None:
         unrolled = dcs.fix_rollover(self.data, self.roll)
         np.testing.assert_array_equal(unrolled, self.exp)
-        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
-        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, "corrected 2 top to bottom rollover(s)")
+        mock_logger.log.assert_called_with(LogLevel.L6, "corrected 1 bottom to top rollover(s)")
         self.assertEqual(mock_logger.log.call_count, 2)
 
     def test_matrix_dim1(self, mock_logger: Mock) -> None:
@@ -152,8 +152,8 @@ class Test_fix_rollover(unittest.TestCase):
         exp = np.vstack((self.exp, self.exp))
         unrolled = dcs.fix_rollover(self.data2, self.roll, axis=self.axis)
         np.testing.assert_array_equal(unrolled, exp)
-        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
-        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, "corrected 2 top to bottom rollover(s)")
+        mock_logger.log.assert_called_with(LogLevel.L6, "corrected 1 bottom to top rollover(s)")
         self.assertEqual(mock_logger.log.call_count, 4)
 
     def test_non_integer_roll(self, mock_logger: Mock) -> None:
@@ -162,7 +162,7 @@ class Test_fix_rollover(unittest.TestCase):
         data = roll * ((exp / roll) % 1)
         unrolled = dcs.fix_rollover(data, roll)
         np.testing.assert_array_almost_equal(unrolled, exp, decimal=12)
-        mock_logger.log.assert_called_once_with(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
+        mock_logger.log.assert_called_once_with(LogLevel.L6, "corrected 2 top to bottom rollover(s)")
 
     def test_signed_rollover(self, mock_logger: Mock) -> None:
         exp = np.arange(21)
@@ -170,7 +170,7 @@ class Test_fix_rollover(unittest.TestCase):
         roll = 8
         unrolled = dcs.fix_rollover(data, roll)
         np.testing.assert_array_equal(unrolled, exp)
-        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 3 top to bottom rollover(s)')
+        mock_logger.log.assert_called_with(LogLevel.L6, "corrected 3 top to bottom rollover(s)")
 
     def test_recursive(self, mock_logger: Mock) -> None:
         pass  # TODO: figure out a test case where this actually happens.  I think the code was there for a reason?
@@ -199,28 +199,28 @@ class Test_fix_rollover(unittest.TestCase):
         exp[2] = np.nan
         unrolled = dcs.fix_rollover(data, self.roll)
         np.testing.assert_array_equal(unrolled, exp)
-        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 2 top to bottom rollover(s)')
-        mock_logger.log.assert_called_with(LogLevel.L6, 'corrected 1 bottom to top rollover(s)')
+        mock_logger.log.assert_any_call(LogLevel.L6, "corrected 2 top to bottom rollover(s)")
+        mock_logger.log.assert_called_with(LogLevel.L6, "corrected 1 bottom to top rollover(s)")
         self.assertEqual(mock_logger.log.call_count, 2)
 
     def test_high_rate_double_roll(self, mock_logger: Mock) -> None:
         time = np.arange(40.0)
-        sign = (0.999 - np.mod(time / 10, 2))
+        sign = 0.999 - np.mod(time / 10, 2)
         vel = np.where(sign > 0, np.mod(time, 10.0), np.mod(9.0 - time, 10.0) + 1.0)
         pos = np.cumsum(vel)
         roll = 8.25
         rolled_pos = pos - roll * np.floor(pos / roll)
         unrolled_pos = dcs.fix_rollover(rolled_pos, roll, check_accel=True, sigma=2.5)
         np.testing.assert_array_equal(unrolled_pos, pos)
-        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 5 top to bottom rollover(s)')
-        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 3 bottom to top rollover(s)')
-        mock_logger.log.assert_any_call(LogLevel.L6, 'corrected 4 rollovers due to acceleration checks')
+        mock_logger.log.assert_any_call(LogLevel.L6, "corrected 5 top to bottom rollover(s)")
+        mock_logger.log.assert_any_call(LogLevel.L6, "corrected 3 bottom to top rollover(s)")
+        mock_logger.log.assert_any_call(LogLevel.L6, "corrected 4 rollovers due to acceleration checks")
         self.assertGreater(mock_logger.log.call_count, 3)
 
 
 #%% remove_outliers
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
-@patch('dstauffman.utils_log.logger')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@patch("dstauffman.utils_log.logger")
 class Test_remove_outliers(unittest.TestCase):
     r"""
     Tests the remove_outliers function with the following cases:
@@ -243,8 +243,8 @@ class Test_remove_outliers(unittest.TestCase):
         self.assertEqual(self.x[5], 1e5)
         self.assertTrue(np.isnan(y[5]))
         self.assertTrue(np.isnan(y[15]))
-        mock_logger.log.assert_any_call(LogLevel.L6, 'Number of NaNs = %s', 2)
-        mock_logger.log.assert_any_call(LogLevel.L6, 'Number of outliers = %s', 2)
+        mock_logger.log.assert_any_call(LogLevel.L6, "Number of NaNs = %s", 2)
+        mock_logger.log.assert_any_call(LogLevel.L6, "Number of outliers = %s", 2)
 
     def test_sigma(self, mock_logger: Mock) -> None:
         x = np.random.rand(10000)
@@ -285,5 +285,5 @@ class Test_remove_outliers(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

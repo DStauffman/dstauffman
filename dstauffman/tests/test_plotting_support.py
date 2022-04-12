@@ -54,7 +54,7 @@ class Test_plotting_DEFAULT_CLASSIFICATION(unittest.TestCase):
 
 
 #%% plotting.COLOR_LISTS
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_COLOR_LISTS(unittest.TestCase):
     r"""
     Tests the plotting.COLOR_LISTS dictionary with the following cases:
@@ -62,15 +62,15 @@ class Test_plotting_COLOR_LISTS(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.keys = ['default', 'single', 'double', 'vec', 'quat', 'dbl_diff', 'vec_diff', 'quat_diff']
+        self.keys = ["default", "single", "double", "vec", "quat", "dbl_diff", "vec_diff", "quat_diff"]
 
     def test_nominal(self) -> None:
         for key in self.keys:
             self.assertIn(key, plot.COLOR_LISTS)
-        colormap = plot.COLOR_LISTS['quat_diff']
+        colormap = plot.COLOR_LISTS["quat_diff"]
         self.assertEqual(colormap.N, 8)
-        self.assertEqual(colormap.colors[0], 'xkcd:fuchsia')
-        self.assertEqual(colormap.colors[7], 'xkcd:chocolate')
+        self.assertEqual(colormap.colors[0], "xkcd:fuchsia")
+        self.assertEqual(colormap.colors[7], "xkcd:chocolate")
 
 
 #%% plotting._HoverButton
@@ -83,7 +83,7 @@ class Test_plotting__HoverButton(unittest.TestCase):
 
 
 #%% plotting.MyCustomToolbar
-@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, 'Skipping due to missing matplotlib/Qt dependency.')
+@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, "Skipping due to missing matplotlib/Qt dependency.")
 class Test_plotting_MyCustomToolbar(unittest.TestCase):
     r"""
     Tests the plotting.MyCustomToolbar class with the following cases:
@@ -142,7 +142,7 @@ class Test_plotting_MyCustomToolbar(unittest.TestCase):
 
 
 #%% plotting.ColorMap
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_ColorMap(unittest.TestCase):
     r"""
     Tests the plotting.ColorMap class with the following cases:
@@ -155,7 +155,7 @@ class Test_plotting_ColorMap(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.colormap   = 'Paired'
+        self.colormap   = "Paired"
         self.low        = 0
         self.high       = 1
         self.num_colors = 5
@@ -200,7 +200,7 @@ class Test_plotting_ColorMap(unittest.TestCase):
             cm.set_colors(ax)
 
     def test_existing_colormap(self) -> None:
-        colormap = colors.ListedColormap(['r', 'g', 'b'])
+        colormap = colors.ListedColormap(["r", "g", "b"])
         cm = plot.ColorMap(colormap, num_colors=3)
         red = cm.get_color(0)
         green = cm.get_color(1)
@@ -215,7 +215,7 @@ class Test_plotting_ColorMap(unittest.TestCase):
 
 
 #%% plotting.close_all
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_close_all(unittest.TestCase):
     r"""
     Tests the plotting.close_all function with the following cases:
@@ -246,7 +246,7 @@ class Test_plotting_close_all(unittest.TestCase):
 
 
 #%% plotting.get_nondeg_colorlists
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
     r"""
     Tests the plotting.get_nondeg_colorlists function with the following cases:
@@ -261,33 +261,33 @@ class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
     def test_one(self) -> None:
         clist = plot.get_nondeg_colorlists(1)
         self.assertEqual(clist.N, 3)
-        self.assertEqual(clist.colors[0], '#1f77b4')
-        self.assertEqual(clist.colors[1], 'xkcd:blue')
-        self.assertEqual(clist.colors[2], '#1f77b4')
+        self.assertEqual(clist.colors[0], "#1f77b4")
+        self.assertEqual(clist.colors[1], "xkcd:blue")
+        self.assertEqual(clist.colors[2], "#1f77b4")
 
     def test_two(self) -> None:
         clist = plot.get_nondeg_colorlists(2)
         self.assertEqual(clist.N, 6)
-        self.assertEqual(clist.colors[0], 'xkcd:red')
-        self.assertEqual(clist.colors[2], 'xkcd:fuchsia')
-        self.assertEqual(clist.colors[4], 'xkcd:red')
+        self.assertEqual(clist.colors[0], "xkcd:red")
+        self.assertEqual(clist.colors[2], "xkcd:fuchsia")
+        self.assertEqual(clist.colors[4], "xkcd:red")
 
     def test_three(self) -> None:
         clist = plot.get_nondeg_colorlists(3)
         self.assertEqual(clist.N, 9)
-        self.assertEqual(clist.colors[0], 'xkcd:red')
-        self.assertEqual(clist.colors[3], 'xkcd:fuchsia')
-        self.assertEqual(clist.colors[6], 'xkcd:red')
+        self.assertEqual(clist.colors[0], "xkcd:red")
+        self.assertEqual(clist.colors[3], "xkcd:fuchsia")
+        self.assertEqual(clist.colors[6], "xkcd:red")
 
     def test_four(self) -> None:
         clist = plot.get_nondeg_colorlists(4)
         self.assertEqual(clist.N, 12)
-        self.assertEqual(clist.colors[0], 'xkcd:red')
-        self.assertEqual(clist.colors[4], 'xkcd:fuchsia')
-        self.assertEqual(clist.colors[8], 'xkcd:red')
+        self.assertEqual(clist.colors[0], "xkcd:red")
+        self.assertEqual(clist.colors[4], "xkcd:fuchsia")
+        self.assertEqual(clist.colors[8], "xkcd:red")
 
     def test_five_to_ten(self) -> None:
-        cmap = cmx.get_cmap('tab20')
+        cmap = cmx.get_cmap("tab20")
         exp1 = cmap.colors[0]
         exp2 = cmap.colors[1]
         for i in [5, 8, 10]:
@@ -298,7 +298,7 @@ class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
             self.assertEqual(clist.colors[2 * i], exp1)
 
     def test_lots(self) -> None:
-        cmap = cmx.get_cmap('tab20')
+        cmap = cmx.get_cmap("tab20")
         exp1 = cmap.colors[0]
         exp2 = cmap.colors[1]
         for i in [11, 15, 20, 50]:
@@ -310,7 +310,7 @@ class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
 
 
 #%% plotting.ignore_plot_data
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_plotting_ignore_plot_data(unittest.TestCase):
     r"""
     Tests the plotting.ignore_plot_data function with the following cases:
@@ -394,9 +394,9 @@ class Test_plotting_resolve_name(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.bad_name = r'Bad name /\ <>!.png'
-        self.exp_win = 'Bad name __ __!.png'
-        self.exp_unix = r'Bad name _\ <>!.png'
+        self.bad_name = r"Bad name /\ <>!.png"
+        self.exp_win = "Bad name __ __!.png"
+        self.exp_unix = r"Bad name _\ <>!.png"
 
     def test_nominal(self) -> None:
         new_name = plot.resolve_name(self.bad_name)
@@ -414,22 +414,22 @@ class Test_plotting_resolve_name(unittest.TestCase):
         self.assertEqual(new_name, self.exp_unix)
 
     def test_no_bad_chars(self) -> None:
-        good_name = 'Good name - Nice job.txt'
+        good_name = "Good name - Nice job.txt"
         new_name = plot.resolve_name(good_name)
         self.assertEqual(new_name, good_name)
 
     def test_different_replacements(self) -> None:
         bad_name = 'new <>:"/\\|?*text'
-        new_name = plot.resolve_name(bad_name, force_win=True, rep_token='X')
-        self.assertEqual(new_name, 'new XXXXXXXXXtext')
-        new_name = plot.resolve_name(bad_name, force_win=True, rep_token='')
-        self.assertEqual(new_name, 'new text')
-        new_name = plot.resolve_name(bad_name, force_win=True, rep_token='YY')
-        self.assertEqual(new_name, 'new YYYYYYYYYYYYYYYYYYtext')
+        new_name = plot.resolve_name(bad_name, force_win=True, rep_token="X")
+        self.assertEqual(new_name, "new XXXXXXXXXtext")
+        new_name = plot.resolve_name(bad_name, force_win=True, rep_token="")
+        self.assertEqual(new_name, "new text")
+        new_name = plot.resolve_name(bad_name, force_win=True, rep_token="YY")
+        self.assertEqual(new_name, "new YYYYYYYYYYYYYYYYYYtext")
 
 
 #%% plotting.storefig
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_storefig(unittest.TestCase):
     r"""
     Tests the plotting.storefig function with the following cases:
@@ -452,9 +452,9 @@ class Test_plotting_storefig(unittest.TestCase):
         # create data
         cls.time = np.arange(0, 10, 0.1)
         cls.data = np.sin(cls.time)
-        cls.title = 'Test Plot'
+        cls.title = "Test Plot"
         cls.folder = get_tests_dir()
-        cls.plot_type = 'png'
+        cls.plot_type = "png"
         # create the figure and set the title
         cls.fig = plt.figure()
         cls.fig.canvas.manager.set_window_title(cls.title)
@@ -462,8 +462,8 @@ class Test_plotting_storefig(unittest.TestCase):
         ax = cls.fig.add_subplot(111)
         ax.plot(cls.time, cls.data)
         # add labels and legends
-        ax.set_xlabel('Time [year]')
-        ax.set_ylabel('Value [units]')
+        ax.set_xlabel("Time [year]")
+        ax.set_ylabel("Value [units]")
         ax.set_title(cls.title)
         # show a grid
         ax.grid(True)
@@ -472,33 +472,33 @@ class Test_plotting_storefig(unittest.TestCase):
     def test_saving(self) -> None:
         plot.storefig(self.fig, self.folder, self.plot_type)
         # assert that file exists
-        self.this_filename = self.folder.joinpath(self.title + '.' + self.plot_type)
+        self.this_filename = self.folder.joinpath(self.title + "." + self.plot_type)
         self.assertTrue(self.this_filename.is_file())
 
     def test_multiple_plot_types(self) -> None:
-        plot_types = ['png', 'svg']
+        plot_types = ["png", "svg"]
         plot.storefig(self.fig, self.folder, plot_types)
         # assert that files exist
         for this_type in plot_types:
-            self.this_filename = self.folder.joinpath(self.title + '.' + this_type)
+            self.this_filename = self.folder.joinpath(self.title + "." + this_type)
             self.assertTrue(self.this_filename.is_file())
 
     def test_save_as_jpg(self) -> None:
         # Note: this test case can fail if PIL is not installed, try "pip install Pillow"
-        plot.storefig(self.fig, self.folder, 'jpg')
+        plot.storefig(self.fig, self.folder, "jpg")
         # assert that files exist
-        self.this_filename = self.folder.joinpath(self.title + '.jpg')
+        self.this_filename = self.folder.joinpath(self.title + ".jpg")
         self.assertTrue(self.this_filename.is_file())
 
     def test_multiple_figures(self) -> None:
         plot.storefig([self.fig, self.fig], self.folder, self.plot_type)
         # assert that file exists
-        self.this_filename = self.folder.joinpath(self.title + '.' + self.plot_type)
+        self.this_filename = self.folder.joinpath(self.title + "." + self.plot_type)
         self.assertTrue(self.this_filename.is_file())
 
     def test_bad_folder(self) -> None:
         with self.assertRaises(ValueError):
-            plot.storefig(self.fig, 'X:\\non_existant_path')
+            plot.storefig(self.fig, "X:\\non_existant_path")
         # TODO:
         pass
 
@@ -508,16 +508,16 @@ class Test_plotting_storefig(unittest.TestCase):
 
     def test_bad_characters(self) -> None:
         # change to bad name
-        self.fig.canvas.manager.set_window_title('Bad < > / names')
+        self.fig.canvas.manager.set_window_title("Bad < > / names")
         # save file
         plot.storefig(self.fig, self.folder, self.plot_type)
         # restore filename
         self.fig.canvas.manager.set_window_title(self.title)
         # assert that file exists
-        if platform.system() == 'Windows':
-            self.this_filename = self.folder.joinpath('Bad _ _ _ names' + '.' + self.plot_type)
+        if platform.system() == "Windows":
+            self.this_filename = self.folder.joinpath("Bad _ _ _ names" + "." + self.plot_type)
         else:
-            self.this_filename = self.folder.joinpath('Bad < > _ names' + '.' + self.plot_type)
+            self.this_filename = self.folder.joinpath("Bad < > _ names" + "." + self.plot_type)
         self.assertTrue(self.this_filename.is_file())
 
     def tearDown(self) -> None:
@@ -531,7 +531,7 @@ class Test_plotting_storefig(unittest.TestCase):
 
 
 #%% plotting.titleprefix
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_titleprefix(unittest.TestCase):
     r"""
     Tests the plotting.titleprefix function with the following cases:
@@ -542,14 +542,14 @@ class Test_plotting_titleprefix(unittest.TestCase):
 
     def setUp(self) -> None:
         self.fig = plt.figure()
-        self.title = 'Figure Title'
-        self.prefix = 'Prefix'
+        self.title = "Figure Title"
+        self.prefix = "Prefix"
         self.fig.canvas.manager.set_window_title(self.title)
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)
         ax = self.fig.add_subplot(111)
         ax.plot(x, y)
-        ax.set_title('X vs Y')
+        ax.set_title("X vs Y")
 
     def test_normal(self) -> None:
         plot.titleprefix(self.fig, self.prefix)
@@ -565,7 +565,7 @@ class Test_plotting_titleprefix(unittest.TestCase):
 
 
 #%% plotting.disp_xlimits
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_disp_xlimits(unittest.TestCase):
     r"""
     Tests the plotting.disp_xlimits function with the following cases:
@@ -605,8 +605,8 @@ class Test_plotting_disp_xlimits(unittest.TestCase):
         plot.disp_xlimits(self.fig, xmax=np.inf)
 
     def test_nat(self) -> None:
-        plot.disp_xlimits(self.fig, xmin=np.datetime64('nat'), xmax=self.xmax)
-        plot.disp_xlimits(self.fig, xmax=np.datetime64('nat'), xmin=self.xmin)
+        plot.disp_xlimits(self.fig, xmin=np.datetime64("nat"), xmax=self.xmax)
+        plot.disp_xlimits(self.fig, xmax=np.datetime64("nat"), xmin=self.xmin)
 
     def test_datetime(self) -> None:
         plot.disp_xlimits(self.fig, xmin=np.inf, xmax=datetime.datetime(2020, 4, 15, 0, 0, 0))
@@ -616,7 +616,7 @@ class Test_plotting_disp_xlimits(unittest.TestCase):
 
 
 #%% plotting.zoom_ylim
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_zoom_ylim(unittest.TestCase):
     r"""
     Tests the plotting.zoom_ylim function with the following cases:
@@ -625,12 +625,12 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
 
     def setUp(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title('Figure Title')
+        self.fig.canvas.manager.set_window_title("Figure Title")
         self.ax = self.fig.add_subplot(111)
         self.time = np.arange(1, 10, 0.1)
-        self.data = self.time ** 2
+        self.data = self.time**2
         self.ax.plot(self.time, self.data)
-        self.ax.set_title('X vs Y')
+        self.ax.set_title("X vs Y")
         self.t_start = 3
         self.t_final = 5.0000001
 
@@ -660,15 +660,15 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
         (new_ymin, new_ymax) = self.ax.get_ylim()
         self.assertGreater(old_ymax, new_ymax)
         self.assertLess(old_ymin, new_ymin)
-        self.assertAlmostEqual(new_ymin, self.t_start ** 2)
-        self.assertAlmostEqual(new_ymax, self.t_final ** 2, places=4)
+        self.assertAlmostEqual(new_ymin, self.t_start**2)
+        self.assertAlmostEqual(new_ymax, self.t_final**2, places=4)
 
     def tearDown(self) -> None:
         plt.close(self.fig)
 
 
 #%% plotting.figmenu
-@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, 'Skipping due to missing matplotlib/Qt dependency.')
+@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, "Skipping due to missing matplotlib/Qt dependency.")
 class Test_plotting_figmenu(unittest.TestCase):
     r"""
     Tests the plotting.figmenu function with the following cases:
@@ -701,7 +701,7 @@ class Test_plotting_rgb_ints_to_hex(unittest.TestCase):
 
     def setUp(self) -> None:
         self.colors = [(255, 0, 0), (0, 255, 0), (0, 0, 255), (79, 129, 189), (0, 0, 0)]
-        self.hex_codes = ['#ff0000', '#00ff00', '#0000ff', '#4f81bd', '#000000']
+        self.hex_codes = ["#ff0000", "#00ff00", "#0000ff", "#4f81bd", "#000000"]
 
     def test_nominal(self) -> None:
         for (ix, this_color) in enumerate(self.colors):
@@ -710,11 +710,11 @@ class Test_plotting_rgb_ints_to_hex(unittest.TestCase):
 
     def test_bad_range(self) -> None:
         hex_code = plot.rgb_ints_to_hex((-100, 500, 9))
-        self.assertEqual(hex_code, '#00ff09')
+        self.assertEqual(hex_code, "#00ff09")
 
 
 #%% plotting.get_screen_resolution
-@unittest.skipIf(not _HAVE_QT, 'Skipping due to missing Qt dependency.')
+@unittest.skipIf(not _HAVE_QT, "Skipping due to missing Qt dependency.")
 class Test_plotting_get_screen_resolution(unittest.TestCase):
     r"""
     Tests the plotting.get_screen_resolution function with the following cases:
@@ -728,7 +728,7 @@ class Test_plotting_get_screen_resolution(unittest.TestCase):
 
 
 #%% plotting.show_zero_ylim
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_show_zero_ylim(unittest.TestCase):
     r"""
     Tests the plotting.show_zero_ylim function with the following cases:
@@ -740,15 +740,15 @@ class Test_plotting_show_zero_ylim(unittest.TestCase):
         self.ax = self.fig.add_subplot(111)
 
     def test_no_change(self) -> None:
-        self.ax.plot([1, 5, 10], [200, -150, 240], '.-')
+        self.ax.plot([1, 5, 10], [200, -150, 240], ".-")
         plot.show_zero_ylim(self.ax)
 
     def test_all_positive(self) -> None:
-        self.ax.plot([1, 5, 10], [200, 250, 240], '.-')
+        self.ax.plot([1, 5, 10], [200, 250, 240], ".-")
         plot.show_zero_ylim(self.ax)
 
     def test_all_negative(self) -> None:
-        self.ax.plot([1, 5, 10], [-200, -250, -240], '.-')
+        self.ax.plot([1, 5, 10], [-200, -250, -240], ".-")
         plot.show_zero_ylim(self.ax)
 
     def tearDown(self) -> None:
@@ -756,7 +756,7 @@ class Test_plotting_show_zero_ylim(unittest.TestCase):
 
 
 #%% plotting.plot_second_units_wrapper
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
     r"""
     Tests the plotting.plot_second_units_wrapper function with the following cases:
@@ -764,12 +764,12 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description = 'Values over time'
-        self.ylabel = 'Value [rad]'
+        self.description = "Values over time"
+        self.ylabel = "Value [rad]"
         self.second_units: Union[None, int, float, Tuple[str, float]] = None
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
-        self.ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
+        self.ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], ".-")
         self.ax.set_ylabel(self.ylabel)
         self.ax.set_title(self.description)
 
@@ -782,20 +782,20 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
         self.second_units = 100
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
-        self.assertEqual(ax2.get_ylabel(), '')
+        self.assertEqual(ax2.get_ylabel(), "")
 
     def test_float(self) -> None:
         self.second_units = 100.0
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
-        self.assertEqual(ax2.get_ylabel(), '')
+        self.assertEqual(ax2.get_ylabel(), "")
 
     def test_zero(self) -> None:
         self.second_units = 0.0
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertIsNone(ax2)
-        self.second_units = ('new', 0)
+        self.second_units = ("new", 0)
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertIsNone(ax2)
@@ -805,36 +805,36 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertIsNone(ax2)
-        self.second_units = ('new', np.nan)
+        self.second_units = ("new", np.nan)
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
         self.assertIsNone(ax2)
 
     def test_full_replace(self) -> None:
-        self.second_units = (u'Better Units [µrad]', 1e6)
+        self.second_units = (u"Better Units [µrad]", 1e6)
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
-        self.assertEqual(ax2.get_ylabel(), u'Better Units [µrad]')
+        self.assertEqual(ax2.get_ylabel(), u"Better Units [µrad]")
 
     def test_units_only(self) -> None:
-        self.second_units = ('mrad', 1e3)
+        self.second_units = ("mrad", 1e3)
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
-        self.assertEqual(ax2.get_ylabel(), 'Value [mrad]')
+        self.assertEqual(ax2.get_ylabel(), "Value [mrad]")
 
     def test_no_units(self) -> None:
-        self.ax.set_ylabel('Value')
-        self.second_units = ('New Value', 1e3)
+        self.ax.set_ylabel("Value")
+        self.second_units = ("New Value", 1e3)
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
-        self.assertEqual(self.ax.get_ylabel(), 'Value')
-        self.assertEqual(ax2.get_ylabel(), 'New Value')
+        self.assertEqual(self.ax.get_ylabel(), "Value")
+        self.assertEqual(ax2.get_ylabel(), "New Value")
 
     def tearDown(self) -> None:
         plt.close(self.fig)
 
 
 #%% plotting.plot_second_yunits
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_second_yunits(unittest.TestCase):
     r"""
     Tests the plotting.plot_second_yunits function with the following cases:
@@ -844,14 +844,14 @@ class Test_plotting_plot_second_yunits(unittest.TestCase):
     def setUp(self) -> None:
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
-        self.ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
-        self.ax.set_ylabel('Value [rad]')
-        self.ylab = u'Value [µrad]'
+        self.ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], ".-")
+        self.ax.set_ylabel("Value [rad]")
+        self.ylab = u"Value [µrad]"
         self.multiplier = 1e6
 
     def test_nominal(self) -> None:
         ax2 = plot.plot_second_yunits(self.ax, self.ylab, self.multiplier)
-        self.assertEqual(self.ax.get_ylabel(), 'Value [rad]')
+        self.assertEqual(self.ax.get_ylabel(), "Value [rad]")
         self.assertEqual(ax2.get_ylabel(), self.ylab)
 
     def tearDown(self) -> None:
@@ -859,7 +859,7 @@ class Test_plotting_plot_second_yunits(unittest.TestCase):
 
 
 #%% plotting.get_rms_indices
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_plotting_get_rms_indices(unittest.TestCase):
     r"""
     Tests the plotting.get_rms_indices function with the following cases:
@@ -874,10 +874,10 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
         self.xmin           = 1
         self.xmax           = 8
         self.exp: Dict[str, Union[np.ndarray, List[int]]] = dict()
-        self.exp['one']     = np.array([False,  True,  True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
-        self.exp['two']     = np.array([ True,  True,  True,  True,  True,  True,  True, False, False, False, False], dtype=bool)
-        self.exp['overlap'] = np.array([ True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
-        self.exp['pts']     = [1, 8]
+        self.exp["one"]     = np.array([False,  True,  True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
+        self.exp["two"]     = np.array([ True,  True,  True,  True,  True,  True,  True, False, False, False, False], dtype=bool)
+        self.exp["overlap"] = np.array([ True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
+        self.exp["pts"]     = [1, 8]
 
     def test_nominal(self) -> None:
         ix = plot.get_rms_indices(self.time_one, self.time_two, self.time_overlap, xmin=self.xmin, xmax=self.xmax)
@@ -885,17 +885,17 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
             np.testing.assert_array_equal(ix[key], self.exp[key])
 
     def test_only_time_one(self) -> None:
-        self.exp['two'] = np.array([])
-        self.exp['overlap'] = np.array([])
+        self.exp["two"] = np.array([])
+        self.exp["overlap"] = np.array([])
         ix = plot.get_rms_indices(self.time_one, None, None, xmin=self.xmin, xmax=self.xmax)
         for key in ix.keys():
             np.testing.assert_array_equal(ix[key], self.exp[key])
 
     def test_no_bounds(self) -> None:
-        self.exp['one'].fill(True)  # type: ignore[union-attr]
-        self.exp['two'].fill(True)  # type: ignore[union-attr]
-        self.exp['overlap'].fill(True)  # type: ignore[union-attr]
-        self.exp['pts'] = [0, 12]
+        self.exp["one"].fill(True)  # type: ignore[union-attr]
+        self.exp["two"].fill(True)  # type: ignore[union-attr]
+        self.exp["overlap"].fill(True)  # type: ignore[union-attr]
+        self.exp["pts"] = [0, 12]
         ix = plot.get_rms_indices(self.time_one, self.time_two, self.time_overlap)
         for key in ix.keys():
             np.testing.assert_array_equal(ix[key], self.exp[key])
@@ -908,7 +908,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
 
 
 #%% plotting.plot_vert_lines
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_vert_lines(unittest.TestCase):
     r"""
     Tests the plotting.plot_vert_lines function with the following cases:
@@ -918,7 +918,7 @@ class Test_plotting_plot_vert_lines(unittest.TestCase):
     def setUp(self) -> None:
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
-        self.ax.plot(np.arange(10), np.arange(10), label='Data')
+        self.ax.plot(np.arange(10), np.arange(10), label="Data")
         self.x = (2, 5)
 
     def test_nominal(self) -> None:
@@ -930,8 +930,8 @@ class Test_plotting_plot_vert_lines(unittest.TestCase):
         self.ax.legend()
 
     def test_multiple_lines(self) -> None:
-        labels = ['Line 1', 'Line 2', 'Line 3', 'Line 4']
-        colormap = colors.ListedColormap(['r', 'g', 'b', 'k'])
+        labels = ["Line 1", "Line 2", "Line 3", "Line 4"]
+        colormap = colors.ListedColormap(["r", "g", "b", "k"])
         plot.plot_vert_lines(self.ax, [1, 2.5, 3.5, 8], show_in_legend=True, labels=labels, colormap=colormap)
         self.ax.legend()
 
@@ -944,7 +944,7 @@ class Test_plotting_plot_vert_lines(unittest.TestCase):
 
 
 #%% plotting.plot_phases
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_phases(unittest.TestCase):
     r"""
     Tests the plotting.plot_phases function with the following cases:
@@ -955,15 +955,15 @@ class Test_plotting_plot_phases(unittest.TestCase):
 
     def setUp(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title('Sine Wave')
+        self.fig.canvas.manager.set_window_title("Sine Wave")
         self.ax = self.fig.add_subplot(111)
         time = np.arange(101)
         data = np.cos(time / 10)
         self.times = np.array([5, 20, 60, 90])
         self.times2 = np.array([[5, 20, 60, 90], [10, 60, 90, 95]])
-        self.ax.plot(time, data, '.-')
-        self.colormap = 'tab10'
-        self.labels = ['Part 1', 'Phase 2', 'Watch Out', 'Final']
+        self.ax.plot(time, data, ".-")
+        self.colormap = "tab10"
+        self.labels = ["Part 1", "Phase 2", "Watch Out", "Final"]
 
     def test_single_time(self) -> None:
         plot.plot_phases(self.ax, self.times, self.colormap, self.labels)
@@ -981,7 +981,7 @@ class Test_plotting_plot_phases(unittest.TestCase):
         plot.plot_phases(self.ax, self.times, group_all=True)
 
     def test_group_all(self) -> None:
-        plot.plot_phases(self.ax, self.times, group_all=True, labels=self.labels[0], colormap='red')
+        plot.plot_phases(self.ax, self.times, group_all=True, labels=self.labels[0], colormap="red")
 
     def tearDown(self) -> None:
         if self.fig:
@@ -989,7 +989,7 @@ class Test_plotting_plot_phases(unittest.TestCase):
 
 
 #%% plotting.plot_classification
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_classification(unittest.TestCase):
     r"""
     Tests the plotting.plot_classification function with the following cases:
@@ -1002,24 +1002,24 @@ class Test_plotting_plot_classification(unittest.TestCase):
     def setUp(self) -> None:
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
-        self.ax.plot([0, 10], [0, 10], '.-b')
+        self.ax.plot([0, 10], [0, 10], ".-b")
 
     def test_inside(self) -> None:
-        plot.plot_classification(self.ax, 'U', test=False, location='axis')
+        plot.plot_classification(self.ax, "U", test=False, location="axis")
 
     def test_outside(self) -> None:
-        plot.plot_classification(self.ax, 'U', test=False, location='figure')
+        plot.plot_classification(self.ax, "U", test=False, location="figure")
 
     def test_caveat(self) -> None:
-        plot.plot_classification(self.ax, 'U', caveat='//TEXT STR')
+        plot.plot_classification(self.ax, "U", caveat="//TEXT STR")
 
     def test_options(self) -> None:
-        for opt in {'C', 'S', 'T', 'TS'}:
-            plot.plot_classification(self.ax, opt, test=True, location='figure')
+        for opt in {"C", "S", "T", "TS"}:
+            plot.plot_classification(self.ax, opt, test=True, location="figure")
 
     def test_bad_option(self) -> None:
         with self.assertRaises(ValueError):
-            plot.plot_classification(self.ax, 'BadOption')
+            plot.plot_classification(self.ax, "BadOption")
 
     def tearDown(self) -> None:
         plt.close(self.fig)
@@ -1035,7 +1035,7 @@ class Test_plotting_align_plots(unittest.TestCase):
 
 
 #%% plotting.z_from_ci
-@unittest.skipIf(not HAVE_SCIPY, 'Skipping due to missing scipy dependency.')
+@unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
 class Test_plotting_z_from_ci(unittest.TestCase):
     r"""
     Tests the plotting.z_from_ci function with the following cases:
@@ -1049,11 +1049,11 @@ class Test_plotting_z_from_ci(unittest.TestCase):
     def test_nominal(self) -> None:
         for (ci, exp_z) in zip(self.cis, self.zs):
             z = plot.z_from_ci(ci)
-            self.assertTrue(abs(z - exp_z) < 0.001, '{} and {} are more than 0.001 from each other.'.format(z, exp_z))
+            self.assertTrue(abs(z - exp_z) < 0.001, "{} and {} are more than 0.001 from each other.".format(z, exp_z))
 
 
 #%% plotting.save_figs_to_pdf
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_save_figs_to_pdf(unittest.TestCase):
     r"""
     Tests the plotting.save_figs_to_pdf function with the following cases:
@@ -1071,7 +1071,7 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
         cls.fig2 = plt.figure()
         ax2 = cls.fig2.add_subplot(1, 1, 1)
         ax2.plot([0, 1, 2], [2, 4, 6])
-        cls.filename = get_tests_dir() / 'pdf_figures.pdf'
+        cls.filename = get_tests_dir() / "pdf_figures.pdf"
 
     def test_nominal(self) -> None:
         plot.save_figs_to_pdf([self.fig1, self.fig2], self.filename)
@@ -1090,7 +1090,7 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
 
 
 #%% plotting.add_datashaders
-@unittest.skipIf(not HAVE_DS or not HAVE_MPL, 'Skipping due to missing datashader dependency.')
+@unittest.skipIf(not HAVE_DS or not HAVE_MPL, "Skipping due to missing datashader dependency.")
 class Test_plotting_add_datashaders(unittest.TestCase):
     r"""
     Tests the plotting.add_datashaders function with the following cases:
@@ -1100,56 +1100,57 @@ class Test_plotting_add_datashaders(unittest.TestCase):
     def setUp(self) -> None:
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(1, 1, 1)
-        self.ax.plot([0, 0], [1, 1], '.-')
+        self.ax.plot([0, 0], [1, 1], ".-")
         self.points = 0.5 + 0.25 * np.random.rand(2, 1000)
-        self.datashaders = [{'time': self.points[0, :], 'data': self.points[1, :], 'ax': self.ax}]
+        self.datashaders = [{"time": self.points[0, :], "data": self.points[1, :], "ax": self.ax}]
 
     def test_nominal(self) -> None:
-        self.datashaders[0]['color'] = 'xkcd:black'
+        self.datashaders[0]["color"] = "xkcd:black"
         plot.add_datashaders(self.datashaders)
 
     def test_datetime(self) -> None:
-        self.datashaders[0]['color'] = 'xkcd:black'
-        self.datashaders.append({'color': 'xkcd:blue', 'ax': self.ax})
-        self.datashaders[1]['time'] = np.arange(np.datetime64('now', 'ns'), np.timedelta64(1, 'm'), np.timedelta64(1, 's'))
-        self.datashaders[1]['data'] = np.random.rand(*self.datashaders[1]['time'].shape)
-        self.datashaders[1]['time_units'] = 'numpy'
+        self.datashaders[0]["color"] = "xkcd:black"
+        self.datashaders.append({"color": "xkcd:blue", "ax": self.ax})
+        self.datashaders[1]["time"] = np.arange(np.datetime64("now", "ns"), np.timedelta64(1, "m"), np.timedelta64(1, "s"))
+        self.datashaders[1]["data"] = np.random.rand(*self.datashaders[1]["time"].shape)
+        self.datashaders[1]["time_units"] = "numpy"
         plot.add_datashaders(self.datashaders)
 
     def test_min_max(self) -> None:
-        self.datashaders[0]['colormap'] = 'autumn_r'
-        self.datashaders[0]['vmin'] = 0.2
-        self.datashaders[0]['vmax'] = 0.6
+        self.datashaders[0]["colormap"] = "autumn_r"
+        self.datashaders[0]["vmin"] = 0.2
+        self.datashaders[0]["vmax"] = 0.6
         plot.add_datashaders(self.datashaders)
 
     def test_colormap(self) -> None:
-        self.datashaders[0]['colormap'] = 'autumn_r'
+        self.datashaders[0]["colormap"] = "autumn_r"
         plot.add_datashaders(self.datashaders)
 
 
 #%% plotting.fig_ax_factory
-@unittest.skipIf(not HAVE_MPL, 'Skipping due to missing matplotlib dependency.')
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_fig_ax_factory(unittest.TestCase):
     r"""
     Tests the plotting.fig_ax_factory function with the following cases:
         TBD
     """
+
     def setUp(self) -> None:
-        self.fig_ax: Union[Tuple[None, ...], Tuple[Tuple[plt.Figure, plt.Axes], ...]] = (None, )
+        self.fig_ax: Union[Tuple[None, ...], Tuple[Tuple[plt.Figure, plt.Axes], ...]] = (None,)
 
     def test_1d_rows(self) -> None:
-        self.fig_ax = plot.fig_ax_factory(num_axes=4, layout='rows', sharex=True)  # type: ignore[call-overload]
+        self.fig_ax = plot.fig_ax_factory(num_axes=4, layout="rows", sharex=True)  # type: ignore[call-overload]
         self.assertEqual(len(self.fig_ax), 4)
         # TODO: figure out how to test rows and sharex
 
     def test_1d_cols(self) -> None:
-        self.fig_ax = plot.fig_ax_factory(num_axes=4, layout='cols', sharex=False)  # type: ignore[call-overload]
+        self.fig_ax = plot.fig_ax_factory(num_axes=4, layout="cols", sharex=False)  # type: ignore[call-overload]
         self.assertEqual(len(self.fig_ax), 4)
         # TODO: figure out how to test rows and sharex
 
     def test_1d_bad_layout(self) -> None:
         with self.assertRaises(ValueError):
-            plot.fig_ax_factory(num_axes=4, layout='rowwise')  # type: ignore[call-overload]
+            plot.fig_ax_factory(num_axes=4, layout="rowwise")  # type: ignore[call-overload]
 
     def test_multi_figures(self) -> None:
         self.fig_ax = plot.fig_ax_factory(2, 1)  # type: ignore[call-overload]
@@ -1157,23 +1158,23 @@ class Test_fig_ax_factory(unittest.TestCase):
         self.assertIsNot(self.fig_ax[0], self.fig_ax[1])
 
     def test_2d(self) -> None:
-        self.fig_ax = plot.fig_ax_factory(num_axes=[2, 3], layout='rowwise', sharex=True)  # type: ignore[call-overload]
+        self.fig_ax = plot.fig_ax_factory(num_axes=[2, 3], layout="rowwise", sharex=True)  # type: ignore[call-overload]
         self.assertEqual(len(self.fig_ax), 6)
 
     def test_2d_colwise(self) -> None:
-        self.fig_ax = plot.fig_ax_factory(num_axes=[3, 2], layout='colwise', sharex=False)  # type: ignore[call-overload]
+        self.fig_ax = plot.fig_ax_factory(num_axes=[3, 2], layout="colwise", sharex=False)  # type: ignore[call-overload]
         self.assertEqual(len(self.fig_ax), 6)
 
     def test_2d_bad_layout(self) -> None:
         with self.assertRaises(ValueError):
-            plot.fig_ax_factory(num_axes=[4, 4], layout='rows')  # type: ignore[call-overload]
+            plot.fig_ax_factory(num_axes=[4, 4], layout="rows")  # type: ignore[call-overload]
 
     def test_suptitle(self) -> None:
-        self.fig_ax = plot.fig_ax_factory(num_axes=1, suptitle='Test Title')  # type: ignore[call-overload]
+        self.fig_ax = plot.fig_ax_factory(num_axes=1, suptitle="Test Title")  # type: ignore[call-overload]
         self.assertEqual(len(self.fig_ax), 1)
         this_fig = self.fig_ax[0][0]  # type: ignore[index]
-        self.assertEqual(this_fig.canvas.manager.get_window_title(), 'Test Title')
-        self.assertEqual(this_fig._suptitle.get_text(), 'Test Title')
+        self.assertEqual(this_fig.canvas.manager.get_window_title(), "Test Title")
+        self.assertEqual(this_fig._suptitle.get_text(), "Test Title")
 
     def test_passthrough(self) -> None:
         fig_ax = plot.fig_ax_factory(num_axes=3, passthrough=True)  # type: ignore[call-overload]
@@ -1192,6 +1193,6 @@ class Test_fig_ax_factory(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     plot.suppress_plots()
     unittest.main(exit=False)

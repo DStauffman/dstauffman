@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 try:
     import tblib.pickling_support
 except ModuleNotFoundError:
-    warnings.warn('tblib not found, so parallelized tracebacks will not work.')
+    warnings.warn("tblib not found, so parallelized tracebacks will not work.")
 else:
     # TODO: is there a downside to always doing this?  Should I rely on the scripts that call it instead?
     tblib.pickling_support.install()
@@ -58,7 +58,7 @@ def parfor_wrapper(
     results: Any = None,
     use_parfor: bool = True,
     max_cores: Optional[int] = -1,
-    ignore_errors: bool = False
+    ignore_errors: bool = False,
 ) -> Any:
     r"""
     Wrapper function for the code that you want to run in a parallelized fashion.
@@ -114,7 +114,7 @@ def parfor_wrapper(
     errors: List[MultipassExceptionWrapper] = []
     if use_parfor and num_cores > 1:
         # parallel loop
-        with multiprocessing.get_context('spawn').Pool(num_cores) as pool:
+        with multiprocessing.get_context("spawn").Pool(num_cores) as pool:
             temp_results = list(pool.starmap(func, args))
         for result in temp_results:
             if isinstance(result, MultipassExceptionWrapper):
@@ -141,19 +141,19 @@ def parfor_wrapper(
             except StopIteration:
                 break
     if ignore_errors and len(errors) > 0:
-        logger.log(LogLevel.L2, 'There were %i error(s) in the processing.', len(errors))
+        logger.log(LogLevel.L2, "There were %i error(s) in the processing.", len(errors))
         for (i, err) in enumerate(errors):
             logger.log(
                 LogLevel.L6,
-                'Error %i: %s\n%s',
+                "Error %i: %s\n%s",
                 i + 1,
                 err.ee.with_traceback(err.tb),  # type: ignore[call-arg, type-var]
-                '\n'.join(traceback.format_tb(err.tb)),
+                "\n".join(traceback.format_tb(err.tb)),
             )
     return results
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_multipass', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_multipass", exit=False)
     doctest.testmod(verbose=False)

@@ -29,7 +29,7 @@ try:
 
     _HAVE_QT = True
 except ModuleNotFoundError:
-    warnings.warn('Qt (PyQt5, PyQt6, PySide2, PySide6) was not found. Some funtionality will be limited.')
+    warnings.warn("Qt (PyQt5, PyQt6, PySide2, PySide6) was not found. Some funtionality will be limited.")
     QPushButton = object
     _HAVE_QT = False
 
@@ -86,10 +86,10 @@ except ImportError:
 
 #%% Constants
 # Default colormap to use on certain plots
-DEFAULT_COLORMAP: str = 'Dark2'  # 'Paired', 'Dark2', 'tab10', 'tab20'
+DEFAULT_COLORMAP: str = "Dark2"  # "Paired", "Dark2", "tab10", "tab20"
 
 # Whether to include a classification on any generated plots
-DEFAULT_CLASSIFICATION: str = ''
+DEFAULT_CLASSIFICATION: str = ""
 
 if TYPE_CHECKING:
     _FigOrListFig = Union[Figure, List[Figure]]
@@ -97,37 +97,37 @@ if TYPE_CHECKING:
 COLOR_LISTS: Dict[str, colors.ListedColormap] = {}
 if HAVE_MPL:
     # default colormap
-    COLOR_LISTS['default']  = cmx.get_cmap(DEFAULT_COLORMAP)
-    assert isinstance(COLOR_LISTS['default'], colors.ListedColormap), 'Expecting a ListedColormap for the default.'
+    COLOR_LISTS["default"]  = cmx.get_cmap(DEFAULT_COLORMAP)
+    assert isinstance(COLOR_LISTS["default"], colors.ListedColormap), "Expecting a ListedColormap for the default."
     # single colors
-    COLOR_LISTS['same']     = colors.ListedColormap(tuple(repeat(cmx.get_cmap(DEFAULT_COLORMAP).colors[0], 8)))
-    COLOR_LISTS['same_old'] = colors.ListedColormap(tuple(repeat('#1f77b4', 8)))
-    COLOR_LISTS['single']   = colors.ListedColormap(('xkcd:red',))
+    COLOR_LISTS["same"]     = colors.ListedColormap(tuple(repeat(cmx.get_cmap(DEFAULT_COLORMAP).colors[0], 8)))
+    COLOR_LISTS["same_old"] = colors.ListedColormap(tuple(repeat("#1f77b4", 8)))
+    COLOR_LISTS["single"]   = colors.ListedColormap(("xkcd:red",))
     # doubles
-    COLOR_LISTS['double']   = colors.ListedColormap(('xkcd:red', 'xkcd:blue'))
-    COLOR_LISTS['dbl_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:cyan'))
+    COLOR_LISTS["double"]   = colors.ListedColormap(("xkcd:red", "xkcd:blue"))
+    COLOR_LISTS["dbl_off"]  = colors.ListedColormap(("xkcd:fuchsia", "xkcd:cyan"))
     # triples
-    COLOR_LISTS['vec']      = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue'))
-    COLOR_LISTS['vec_off']  = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan'))
+    COLOR_LISTS["vec"]      = colors.ListedColormap(("xkcd:red", "xkcd:green", "xkcd:blue"))
+    COLOR_LISTS["vec_off"]  = colors.ListedColormap(("xkcd:fuchsia", "xkcd:lightgreen", "xkcd:cyan"))
     # quads
-    COLOR_LISTS['quat']     = colors.ListedColormap(('xkcd:red', 'xkcd:green', 'xkcd:blue', 'xkcd:chocolate'))
-    COLOR_LISTS['quat_off'] = colors.ListedColormap(('xkcd:fuchsia', 'xkcd:lightgreen', 'xkcd:cyan', 'xkcd:brown'))
+    COLOR_LISTS["quat"]     = colors.ListedColormap(("xkcd:red", "xkcd:green", "xkcd:blue", "xkcd:chocolate"))
+    COLOR_LISTS["quat_off"] = colors.ListedColormap(("xkcd:fuchsia", "xkcd:lightgreen", "xkcd:cyan", "xkcd:brown"))
     # double combinations
-    COLOR_LISTS['dbl_diff']    = colors.ListedColormap(COLOR_LISTS['dbl_off'].colors + COLOR_LISTS['double'].colors)
-    COLOR_LISTS['dbl_diff_r']  = colors.ListedColormap(COLOR_LISTS['double'].colors + COLOR_LISTS['dbl_off'].colors)
+    COLOR_LISTS["dbl_diff"]    = colors.ListedColormap(COLOR_LISTS["dbl_off"].colors + COLOR_LISTS["double"].colors)
+    COLOR_LISTS["dbl_diff_r"]  = colors.ListedColormap(COLOR_LISTS["double"].colors + COLOR_LISTS["dbl_off"].colors)
     # triple combinations
-    COLOR_LISTS['vec_diff']    = colors.ListedColormap(COLOR_LISTS['vec_off'].colors + COLOR_LISTS['vec'].colors)
-    COLOR_LISTS['vec_diff_r']  = colors.ListedColormap(COLOR_LISTS['vec'].colors + COLOR_LISTS['vec_off'].colors)
+    COLOR_LISTS["vec_diff"]    = colors.ListedColormap(COLOR_LISTS["vec_off"].colors + COLOR_LISTS["vec"].colors)
+    COLOR_LISTS["vec_diff_r"]  = colors.ListedColormap(COLOR_LISTS["vec"].colors + COLOR_LISTS["vec_off"].colors)
     # quad combinations
-    COLOR_LISTS['quat_diff']   = colors.ListedColormap(COLOR_LISTS['quat_off'].colors + COLOR_LISTS['quat'].colors)
-    COLOR_LISTS['quat_diff_r'] = colors.ListedColormap(COLOR_LISTS['quat'].colors + COLOR_LISTS['quat_off'].colors)
+    COLOR_LISTS["quat_diff"]   = colors.ListedColormap(COLOR_LISTS["quat_off"].colors + COLOR_LISTS["quat"].colors)
+    COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)
 
 #%% Set Matplotlib global settings
 if HAVE_MPL:
-    plt.rcParams['figure.dpi'] = 160  # 160 for 4K monitors, 100 otherwise
-    plt.rcParams['figure.figsize'] = [11.0, 8.5]  # makes figures the same size as the paper, keeping aspect ratios even
-    plt.rcParams['figure.max_open_warning'] = 80  # Max number of figures to open before through a warning, 0 means unlimited
-    plt.rcParams['date.autoformatter.minute'] = '%H:%M:%S'  # makes seconds show, and not day, default is '%d %H:%M'
+    plt.rcParams["figure.dpi"] = 160  # 160 for 4K monitors, 100 otherwise
+    plt.rcParams["figure.figsize"] = [11.0, 8.5]  # makes figures the same size as the paper, keeping aspect ratios even
+    plt.rcParams["figure.max_open_warning"] = 80  # Max number of figures to open before through a warning, 0 means unlimited
+    plt.rcParams["date.autoformatter.minute"] = "%H:%M:%S"  # makes seconds show, and not day, default is '%d %H:%M'
 
 #%% Classes - _HoverButton
 class _HoverButton(QPushButton):
@@ -138,7 +138,7 @@ class _HoverButton(QPushButton):
         super().__init__(*args, **kwargs)
         # Enable mouse hover event tracking
         self.setMouseTracking(True)
-        self.setStyleSheet('border: 0px;')
+        self.setStyleSheet("border: 0px;")
         # set icon
         for this_arg in args:
             if isinstance(this_arg, QIcon):
@@ -147,11 +147,11 @@ class _HoverButton(QPushButton):
 
     def enterEvent(self, event):
         # Draw border on hover
-        self.setStyleSheet('border: 1px; border-style: solid;')  # pragma: no cover
+        self.setStyleSheet("border: 1px; border-style: solid;")  # pragma: no cover
 
     def leaveEvent(self, event):
         # Delete border after hover
-        self.setStyleSheet('border: 0px;')  # pragma: no cover
+        self.setStyleSheet("border: 0px;")  # pragma: no cover
 
 
 #%% Classes - MyCustomToolbar
@@ -191,21 +191,21 @@ class MyCustomToolbar:
         if fig.canvas.toolbar is None:
             return
         # create buttons - Prev Plot
-        icon = QIcon(str(get_images_dir() / 'prev_plot.png'))
-        self.btn_prev_plot = _HoverButton(icon, '')
-        self.btn_prev_plot.setToolTip('Show the previous plot')
+        icon = QIcon(str(get_images_dir() / "prev_plot.png"))
+        self.btn_prev_plot = _HoverButton(icon, "")
+        self.btn_prev_plot.setToolTip("Show the previous plot")
         fig.canvas.toolbar.addWidget(self.btn_prev_plot)
         self.btn_prev_plot.clicked.connect(self.prev_plot)
         # create buttons - Next Plot
-        icon = QIcon(str(get_images_dir() / 'next_plot.png'))
-        self.btn_next_plot = _HoverButton(icon, '')
-        self.btn_next_plot.setToolTip('Show the next plot')
+        icon = QIcon(str(get_images_dir() / "next_plot.png"))
+        self.btn_next_plot = _HoverButton(icon, "")
+        self.btn_next_plot.setToolTip("Show the next plot")
         fig.canvas.toolbar.addWidget(self.btn_next_plot)
         self.btn_next_plot.clicked.connect(self.next_plot)
         # create buttons - Close all
-        icon = QIcon(str(get_images_dir() / 'close_all.png'))
-        self.btn_close_all = _HoverButton(icon, '')
-        self.btn_close_all.setToolTip('Close all the open plots')
+        icon = QIcon(str(get_images_dir() / "close_all.png"))
+        self.btn_close_all = _HoverButton(icon, "")
+        self.btn_close_all.setToolTip("Close all the open plots")
         fig.canvas.toolbar.addWidget(self.btn_close_all)
         self.btn_close_all.clicked.connect(self._close_all)
 
@@ -332,7 +332,7 @@ class ColorMap(Frozen):
         if self.num_colors is None:
             raise ValueError("You can't call ColorMap.set_colors unless it was given a num_colors input.")
         try:
-            ax.set_prop_cycle('color', [self.get_color(i) for i in range(self.num_colors)])
+            ax.set_prop_cycle("color", [self.get_color(i) for i in range(self.num_colors)])
         except AttributeError:  # pragma: no cover
             # for older matplotlib versions, use deprecated set_color_cycle
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
@@ -400,17 +400,17 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
 
     """
     if num_channels == 1:
-        clist = colors.ListedColormap(('#1f77b4', 'xkcd:blue', '#1f77b4'))
+        clist = colors.ListedColormap(("#1f77b4", "xkcd:blue", "#1f77b4"))
     elif num_channels == 2:
-        clist = colors.ListedColormap(COLOR_LISTS['dbl_diff_r'].colors + COLOR_LISTS['double'].colors)
+        clist = colors.ListedColormap(COLOR_LISTS["dbl_diff_r"].colors + COLOR_LISTS["double"].colors)
     elif num_channels == 3:
-        clist = colors.ListedColormap(COLOR_LISTS['vec_diff_r'].colors + COLOR_LISTS['vec'].colors)
+        clist = colors.ListedColormap(COLOR_LISTS["vec_diff_r"].colors + COLOR_LISTS["vec"].colors)
     elif num_channels == 4:
-        clist = colors.ListedColormap(COLOR_LISTS['quat_diff_r'].colors + COLOR_LISTS['quat'].colors)
+        clist = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)
     else:
         ix = [x % 10 for x in range(num_channels)]
-        cmap1 = cmx.get_cmap('tab10')
-        cmap2 = cmx.get_cmap('tab20')
+        cmap1 = cmx.get_cmap("tab10")
+        cmap2 = cmx.get_cmap("tab20")
         temp = (
             tuple(cmap1.colors[x] for x in ix) + tuple(cmap2.colors[2 * x + 1] for x in ix) + tuple(cmap1.colors[x] for x in ix)
         )
@@ -496,7 +496,7 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
 
 
 #%% Functions - resolve_name
-def resolve_name(name: str, force_win: bool = None, rep_token: str = '_', strip_classification: bool = True) -> str:
+def resolve_name(name: str, force_win: bool = None, rep_token: str = "_", strip_classification: bool = True) -> str:
     r"""
     Resolves the given name to something that can be saved on the current OS.
 
@@ -525,12 +525,12 @@ def resolve_name(name: str, force_win: bool = None, rep_token: str = '_', strip_
 
     """
     # hard-coded values
-    bad_chars_win = ['<', '>', ':', '"', '/', '\\', '|', '?', '*']
-    bad_chars_unix = ['/']
+    bad_chars_win = ["<", ">", ":", '"', "/", "\\", "|", "?", "*"]
+    bad_chars_unix = ["/"]
 
     # determine OS and thus which characters are bad
     if force_win is None:
-        is_windows = platform.system() == 'Windows'
+        is_windows = platform.system() == "Windows"
     else:
         is_windows = force_win
     bad_chars = bad_chars_win if is_windows else bad_chars_unix
@@ -540,7 +540,7 @@ def resolve_name(name: str, force_win: bool = None, rep_token: str = '_', strip_
 
     # strip any leading classification text
     if strip_classification:
-        new_name = re.sub(r'^\(\S*\)\s', '', new_name, count=1)
+        new_name = re.sub(r"^\(\S*\)\s", "", new_name, count=1)
 
     # replace any bad characters with underscores
     for ch in bad_chars:
@@ -550,7 +550,7 @@ def resolve_name(name: str, force_win: bool = None, rep_token: str = '_', strip_
 
 
 #%% Functions - storefig
-def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Union[str, List[str]] = 'png') -> None:
+def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Union[str, List[str]] = "png") -> None:
     r"""
     Store the specified figures in the specified folder and with the specified plot type(s).
 
@@ -628,7 +628,7 @@ def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Uni
     for this_fig in figs:
         # get the title of the figure canvas
         raw_title = this_fig.canvas.manager.get_window_title()
-        if raw_title is None or raw_title == 'image':
+        if raw_title is None or raw_title == "image":
             # special case when you have a displayless backend, check the suptitle, then the title
             # from the first axes
             throw_warning = True
@@ -643,13 +643,13 @@ def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Uni
         # loop through the plot types
         for this_type in types:
             # save the figure to the specified plot type
-            this_fig.savefig(folder.joinpath(this_title + '.' + this_type), dpi=160, bbox_inches='tight', pad_inches=0.01)
+            this_fig.savefig(folder.joinpath(this_title + "." + this_type), dpi=160, bbox_inches="tight", pad_inches=0.01)
     if throw_warning:
-        warnings.warn('No window titles found, using the plot title instead (usually because there is no display).')
+        warnings.warn("No window titles found, using the plot title instead (usually because there is no display).")
 
 
 #%% Functions - titleprefix
-def titleprefix(fig: _FigOrListFig, prefix: str = '', process_all: bool = False) -> None:
+def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False) -> None:
     r"""
     Prepend a text string to all the titles on existing figures.
 
@@ -707,10 +707,10 @@ def titleprefix(fig: _FigOrListFig, prefix: str = '', process_all: bool = False)
     for this_fig in figs:
         # update canvas name
         this_canvas_title = this_fig.canvas.manager.get_window_title()
-        this_fig.canvas.manager.set_window_title(prefix + ' - ' + this_canvas_title)
+        this_fig.canvas.manager.set_window_title(prefix + " - " + this_canvas_title)
         # update the suptitle (if it exists)
         if (sup := this_fig._suptitle) is not None:
-            sup.set_text(prefix + ' - ' + sup.get_text())
+            sup.set_text(prefix + " - " + sup.get_text())
         elif process_all or sup is None:
             # get axes list and loop through them
             for this_axis in this_fig.axes:
@@ -720,7 +720,7 @@ def titleprefix(fig: _FigOrListFig, prefix: str = '', process_all: bool = False)
                 if not this_title:
                     continue
                 # modify and set new title
-                new_title = prefix + ' - ' + this_title
+                new_title = prefix + " - " + this_title
                 this_axis.set_title(new_title)
 
 
@@ -777,7 +777,7 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
         elif isinstance(this, Axes):
             ax.append(this)
         else:
-            raise ValueError('Unexpected item that is neither a figure nor axes.')
+            raise ValueError("Unexpected item that is neither a figure nor axes.")
     # loop through axes
     for this_axis in ax:
         # get xlimits for this axis
@@ -875,7 +875,7 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
     ix_time = (time >= t_start) & (time <= t_final)
     # exit if no data is in this time window
     if ~np.any(ix_time):
-        warnings.warn('No data matched the given time interval.')
+        warnings.warn("No data matched the given time interval.")
         return
     # pull out the minimums/maximums from the data
     if channel is None:
@@ -890,7 +890,7 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
         this_ymax = np.max(data[ix_time, channel])
     # optionally pad the bounds
     if pad < 0:
-        raise ValueError('The pad cannot be negative.')
+        raise ValueError("The pad cannot be negative.")
     if pad > 0:
         delta = this_ymax - this_ymin
         this_ymax += pad * delta
@@ -1042,6 +1042,10 @@ def show_zero_ylim(ax: Axes) -> None:
     ax : class matplotlib.axes.Axes
         Figure axes
 
+    Notes
+    -----
+    #.  Updated by David C. Stauffer in March 2022 to pad by 10% when the results have a narrow range.
+
     Examples
     --------
     >>> from dstauffman.plotting import show_zero_ylim
@@ -1054,12 +1058,23 @@ def show_zero_ylim(ax: Axes) -> None:
     >>> plt.close(fig)
 
     """
-    # optionally force zero to be plotted
+    # get the current y-limits, and the delta between them
     ylim = ax.get_ylim()
+    dt = ylim[1] - ylim[0]
+    changed = False
+    # set zero to always be included
     if min(ylim) > 0:
+        changed = True
         ax.set_ylim(bottom=0)
+        new_dt = ylim[1] - 0
     if max(ylim) < 0:
+        assert not changed, 'Should never change both axes.'
+        changed = True
         ax.set_ylim(top=0)
+        new_dt = 0 - ylim[0]
+    # if the old values fit within the top 5% of the original values, then pad by 10%
+    if changed and abs(dt) < abs(0.05 * new_dt):
+        ax.set_ylim(*(1.1 * x for x in ax.get_ylim()))
 
 
 #%% Functions - plot_second_units_wrapper
@@ -1108,7 +1123,7 @@ def plot_second_units_wrapper(ax: Axes, second_units: Union[None, int, float, Tu
     if second_units is not None:
         # determine what type of input was given
         if isinstance(second_units, (int, float)):
-            label = ''
+            label = ""
             value = second_units
         else:
             label = second_units[0]
@@ -1117,14 +1132,14 @@ def plot_second_units_wrapper(ax: Axes, second_units: Union[None, int, float, Tu
         if not np.isnan(value) and value != 0 and value != 1:
             # if all is good, build the new label and call the lower level function
             old_label = ax.get_ylabel()
-            ix1 = old_label.find('[')
-            ix2 = label.find('[')
+            ix1 = old_label.find("[")
+            ix2 = label.find("[")
             if ix2 >= 0:
                 # new label has units, so use them
                 new_label = label
             elif ix1 >= 0 and label:
                 # new label is only units, replace them in the old label
-                new_label = old_label[:ix1] + '[' + label + ']'
+                new_label = old_label[:ix1] + "[" + label + "]"
             else:
                 # neither label has units, just label them
                 new_label = label
@@ -1241,7 +1256,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
 
     # TODO: functionalize this more so there is less repeated code
     # initialize output
-    ix = {'pts': [], 'one': np.array([], dtype=bool), 'two': np.array([], dtype=bool), 'overlap': np.array([], dtype=bool)}
+    ix = {"pts": [], "one": np.array([], dtype=bool), "two": np.array([], dtype=bool), "overlap": np.array([], dtype=bool)}
     # alias some flags
     have1 = time_one is not None and np.size(time_one) > 0
     have2 = time_two is not None and np.size(time_two) > 0
@@ -1263,7 +1278,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
             t_max = np.max(time_two)
         else:
             # have neither time 1 nor time 2
-            raise AssertionError('At least one time vector must be given.')
+            raise AssertionError("At least one time vector must be given.")
     if _process(xmin, t_max, operator.lt):
         if have1:
             p1_min = time_one >= xmin
@@ -1271,7 +1286,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
             p2_min = time_two >= xmin
         if have3:
             p3_min = time_overlap >= xmin
-        ix['pts'].append(np.maximum(xmin, t_min))
+        ix["pts"].append(np.maximum(xmin, t_min))
     else:
         if have1:
             p1_min = np.ones(time_one.shape, dtype=bool)
@@ -1279,7 +1294,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
             p2_min = np.ones(time_two.shape, dtype=bool)
         if have3:
             p3_min = np.ones(time_overlap.shape, dtype=bool)
-        ix['pts'].append(t_min)
+        ix["pts"].append(t_min)
     if _process(xmax, t_min, operator.gt):
         if have1:
             p1_max = time_one <= xmax
@@ -1287,7 +1302,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
             p2_max = time_two <= xmax
         if have3:
             p3_max = time_overlap <= xmax
-        ix['pts'].append(np.minimum(xmax, t_max))
+        ix["pts"].append(np.minimum(xmax, t_max))
     else:
         if have1:
             p1_max = np.ones(time_one.shape, dtype=bool)
@@ -1295,15 +1310,15 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
             p2_max = np.ones(time_two.shape, dtype=bool)
         if have3:
             p3_max = np.ones(time_overlap.shape, dtype=bool)
-        ix['pts'].append(t_max)
-    assert len(ix['pts']) == 2 and ix['pts'][0] <= ix['pts'][1], 'Time points aren\'t as expected: "{}"'.format(ix['pts'])
+        ix["pts"].append(t_max)
+    assert len(ix["pts"]) == 2 and ix["pts"][0] <= ix["pts"][1], 'Time points aren\'t as expected: "{}"'.format(ix["pts"])
     # calculate indices
     if have1:
-        ix['one'] = p1_min & p1_max
+        ix["one"] = p1_min & p1_max
     if have2:
-        ix['two'] = p2_min & p2_max
+        ix["two"] = p2_min & p2_max
     if have3:
-        ix['overlap'] = p3_min & p3_max
+        ix["overlap"] = p3_min & p3_max
     return ix
 
 
@@ -1357,16 +1372,16 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
         colormap = colors.ListedColormap([(1.0, 0.75, 0.0), (0.75, 0.75, 1.0)])
     cm = ColorMap(colormap, num_colors=len(x))
     if labels is None:
-        labels = ['RMS Start Time', 'RMS Stop Time']
+        labels = ["RMS Start Time", "RMS Stop Time"]
     # plot vertical lines
     for (i, this_x) in enumerate(x):
         this_color = cm.get_color(i)
-        this_label = labels[i] if show_in_legend else ''
-        ax.axvline(this_x, linestyle='--', color=this_color, marker='+', markeredgecolor='m', markersize=10, label=this_label)
+        this_label = labels[i] if show_in_legend else ""
+        ax.axvline(this_x, linestyle="--", color=this_color, marker="+", markeredgecolor="m", markersize=10, label=this_label)
 
 
 #%% plot_phases
-def plot_phases(ax, times, colormap='tab10', labels=None, *, group_all=False):
+def plot_phases(ax, times, colormap="tab10", labels=None, *, group_all=False):
     r"""
     Plots some labeled phases as semi-transparent patchs on the given axes.
 
@@ -1411,9 +1426,9 @@ def plot_phases(ax, times, colormap='tab10', labels=None, *, group_all=False):
     # check for optional arguments
     if not group_all:
         cm = ColorMap(colormap=colormap, num_colors=num_segments)
-    elif colormap == 'tab10':
+    elif colormap == "tab10":
         # change to responible default for group_all case
-        colormap = 'xkcd:black'
+        colormap = "xkcd:black"
 
     # get the limits of the plot
     xlims = ax.get_xlim()
@@ -1455,8 +1470,8 @@ def plot_phases(ax, times, colormap='tab10', labels=None, *, group_all=False):
                     this_label,
                     xy=(x1, 0.99),
                     xycoords=ax.get_xaxis_transform(),
-                    horizontalalignment='left',
-                    verticalalignment='top',
+                    horizontalalignment="left",
+                    verticalalignment="top",
                     fontsize=15,
                     rotation=-90,
                     clip_on=True,
@@ -1508,18 +1523,18 @@ def get_classification(classify: str) -> Tuple[str, str]:
     if not classify:
         # check if not using any classification and if so return empties
         if not DEFAULT_CLASSIFICATION:
-            return ('', '')
+            return ("", "")
         # DCS: modify this section if you want a different default on your system (potentially put into a file instead?)
         classify = DEFAULT_CLASSIFICATION
 
     # get the classification based solely on the first letter and check that it is valid
     classification = classify[0]
-    assert classification in {'U', 'C', 'S', 'T'}, 'Unexpected classification of "{}" found'.format(classification)
+    assert classification in {"U", "C", "S", "T"}, 'Unexpected classification of "{}" found'.format(classification)
 
     # pull out anything past the first // as the caveat(s)
-    slashes = classify.find('//')
+    slashes = classify.find("//")
     if slashes == -1:
-        caveat = ''
+        caveat = ""
     else:
         caveat = classify[slashes:]
 
@@ -1527,7 +1542,7 @@ def get_classification(classify: str) -> Tuple[str, str]:
 
 
 #%% Functions - plot_classification
-def plot_classification(ax: Axes, classification: str = 'U', *, caveat: str = '', test: bool = False, location: str = 'figure'):
+def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = "", test: bool = False, location: str = "figure"):
     r"""
     Displays the classification in a box on each figure.
     Includes the option of printing another box for testing purposes.
@@ -1591,27 +1606,27 @@ def plot_classification(ax: Axes, classification: str = 'U', *, caveat: str = ''
         ax.text(
             0.5,
             0.97,
-            'This plot classification is labeled for test purposes only',
-            color='r',
-            horizontalalignment='center',
-            verticalalignment='top',
-            bbox=dict(facecolor='none', edgecolor='r'),
+            "This plot classification is labeled for test purposes only",
+            color="r",
+            horizontalalignment="center",
+            verticalalignment="top",
+            bbox=dict(facecolor="none", edgecolor="r"),
             transform=ax.transAxes,
         )
 
     # add classification box
-    if classification == 'U':
+    if classification == "U":
         color = (0.0, 0.0, 0.0)
-        text_str = 'UNCLASSIFIED'
-    elif classification == 'C':
+        text_str = "UNCLASSIFIED"
+    elif classification == "C":
         color = (0.0, 0.0, 1.0)
-        text_str = 'CONFIDENTIAL'
-    elif classification in 'S':
+        text_str = "CONFIDENTIAL"
+    elif classification in "S":
         color = (1.0, 0.0, 0.0)
-        text_str = 'SECRET'
-    elif classification in {'TS', 'T'}:
+        text_str = "SECRET"
+    elif classification in {"TS", "T"}:
         color = (1.0, 0.65, 0.0)
-        text_str = 'TOP SECRET'
+        text_str = "TOP SECRET"
     else:
         raise ValueError('Unexpected value for classification: "{}".'.format(classification))
     text_color = color
@@ -1621,58 +1636,58 @@ def plot_classification(ax: Axes, classification: str = 'U', *, caveat: str = ''
         text_str += caveat
 
     # allow other color options for certain caveats
-    if '//FAKE COLOR' in caveat:
+    if "//FAKE COLOR" in caveat:
         color = (0.0, 0.8, 0.0)
         text_color = (0.2, 0.2, 0.2)
 
     # add classification box
-    if location in {'axes', 'axis'}:
+    if location in {"axes", "axis"}:
         # inside the axes
         ax.text(
             0.99,
             0.01,
             text_str,
             color=text_color,
-            horizontalalignment='right',
-            verticalalignment='bottom',
-            fontweight='bold',
+            horizontalalignment="right",
+            verticalalignment="bottom",
+            fontweight="bold",
             fontsize=12,
-            bbox={'facecolor': 'none', 'edgecolor': color, 'linewidth': 2},
+            bbox={"facecolor": "none", "edgecolor": color, "linewidth": 2},
             transform=ax.transAxes,
         )
         return
     # other locations within the figure
-    vert_align = 'bottom'
-    if location == 'figure':
+    vert_align = "bottom"
+    if location == "figure":
         text_pos = (1.0, 0.005)
-        horz_align = 'right'
-    elif location == 'left':
+        horz_align = "right"
+    elif location == "left":
         text_pos = (0.0, 0.005)
-        horz_align = 'left'
-    elif location == 'top':
+        horz_align = "left"
+    elif location == "top":
         text_pos = (0.0, 0.995)
-        horz_align = 'left'
-        vert_align = 'top'
+        horz_align = "left"
+        vert_align = "top"
     else:
         raise ValueError(f'Unexpected location given: "{location}"')
     # create the label
     ax.annotate(
-        '\n  ' + text_str + '  ',
+        "\n  " + text_str + "  ",
         text_pos,
-        xycoords='figure fraction',
+        xycoords="figure fraction",
         color=text_color,
-        weight='bold',
+        weight="bold",
         fontsize=12,
         horizontalalignment=horz_align,
         verticalalignment=vert_align,
         linespacing=0,
         annotation_clip=False,
-        bbox=dict(boxstyle='square', facecolor='none', edgecolor=color, linewidth=2),
+        bbox=dict(boxstyle="square", facecolor="none", edgecolor=color, linewidth=2),
     )
     # add border
     fig = ax.figure
     r1 = Rectangle(
-        (0.0, 0.0), 1.0, 1.0, facecolor='none', edgecolor=color, clip_on=False, linewidth=3, transform=fig.transFigure
+        (0.0, 0.0), 1.0, 1.0, facecolor="none", edgecolor=color, clip_on=False, linewidth=3, transform=fig.transFigure
     )
     fig.patches.extend([r1])
 
@@ -1719,7 +1734,7 @@ def align_plots(figs: _FigOrListFig, pos: Tuple[int, int] = None) -> None:
 
 
 #%% Functions - z_from_ci
-def z_from_ci(ci):
+def z_from_ci(ci: Union[int, float]) -> float:
     r"""
     Calculates the Z score that matches the desired confidence interval.
 
@@ -1747,12 +1762,42 @@ def z_from_ci(ci):
     1.96
 
     """
-    z = st.norm.ppf(1 - (1 - ci) / 2)
-    return z
+    return st.norm.ppf(1 - (1 - ci) / 2)  # type: ignore[no-any-return]
+
+
+#%% Functions - ci_from_z
+def ci_from_z(z: Union[int, float]) -> float:
+    r"""
+    Calculates the confidence interval that matches the Z score.
+
+    Parameters
+    ----------
+    z : float
+        Desired z value
+
+    Returns
+    -------
+    ci : float
+        Desired confidence interval
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2022.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import ci_from_z
+    >>> z = 2
+    >>> ci = ci_from_z(z)
+    >>> print('{:.4f}'.format(ci))
+    0.9545
+
+    """
+    return st.norm.cdf(z) - st.norm.cdf(-z)  # type: ignore[no-any-return]
 
 
 #%% Functions - save_figs_to_pdf
-def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = Path('figs.pdf')) -> None:
+def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = Path("figs.pdf")) -> None:
     r"""
     Saves the given figures to a PDF file.
 
@@ -1794,18 +1839,18 @@ def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = 
 
         # Set metadata for PDF file
         d = pdf.infodict()
-        d['Title'] = 'PDF Figures'
-        d['Author'] = get_username()
-        d['CreationDate'] = datetime.datetime.now()
-        d['ModDate'] = d['CreationDate']
+        d["Title"] = "PDF Figures"
+        d["Author"] = get_username()
+        d["CreationDate"] = datetime.datetime.now()
+        d["ModDate"] = d["CreationDate"]
 
 
 #%% Functions - save_images_to_pdf
 def save_images_to_pdf(
     figs: Union[Figure, List[Figure]] = None,
     folder: Path = None,
-    plot_type: Union[str, List[str]] = 'png',
-    filename: Path = Path('figs.pdf'),
+    plot_type: Union[str, List[str]] = "png",
+    filename: Path = Path("figs.pdf"),
 ):
     r"""
     Uses figure names to find the already saved images and combine them into a PDF file.
@@ -1854,17 +1899,17 @@ def save_images_to_pdf(
 
     # create the metadata
     meta: Dict[str, Union[str, datetime.datetime]] = {}
-    meta['Title'] = 'PDF Figures'
-    meta['Author'] = get_username()
-    meta['CreationDate'] = datetime.datetime.now()
-    meta['ModDate'] = meta['CreationDate']
+    meta["Title"] = "PDF Figures"
+    meta["Author"] = get_username()
+    meta["CreationDate"] = datetime.datetime.now()
+    meta["ModDate"] = meta["CreationDate"]
 
     # Create PDF of images
     images = []
     for (ix, fig) in enumerate(figs):
-        this_image = folder.joinpath(fig.canvas.manager.get_window_title() + '.' + plot_type)
+        this_image = folder.joinpath(fig.canvas.manager.get_window_title() + "." + plot_type)
         image_rgba = Image.open(this_image)
-        image_jpg = image_rgba.convert('RGB')
+        image_jpg = image_rgba.convert("RGB")
         if ix == 0:
             im = image_jpg
         else:
@@ -1876,34 +1921,34 @@ def save_images_to_pdf(
 def add_datashaders(datashaders):
     r"""Adds the collection of datashaders to the axes."""
     if not HAVE_DS:
-        raise RuntimeError('You must have datashader installed to execute this.')
+        raise RuntimeError("You must have datashader installed to execute this.")
     # overlay the datashaders
     for this_ds in datashaders:
         # check for dates and convert as appropriate
-        if is_datetime(this_ds['time']):
+        if is_datetime(this_ds["time"]):
             df = pd.DataFrame(
-                {'time': convert_date(this_ds['time'], 'matplotlib', old_form=this_ds['time_units']), 'data': this_ds['data']}
+                {"time": convert_date(this_ds["time"], "matplotlib", old_form=this_ds["time_units"]), "data": this_ds["data"]}
             )
         else:
-            df = pd.DataFrame({'time': this_ds['time'], 'data': this_ds['data']})
-        if 'value' in this_ds:
-            df['value'] = this_ds['value']
+            df = pd.DataFrame({"time": this_ds["time"], "data": this_ds["data"]})
+        if "value" in this_ds:
+            df["value"] = this_ds["value"]
         # TODO: check for strings on Y axis and convert to values instead
-        this_axes = this_ds['ax']
-        if 'color' in this_ds:
-            cmap = alpha_colormap(this_ds['color'], min_alpha=40, max_alpha=255)
-        elif 'colormap' in this_ds:
-            cmap = this_ds['colormap']
+        this_axes = this_ds["ax"]
+        if "color" in this_ds:
+            cmap = alpha_colormap(this_ds["color"], min_alpha=40, max_alpha=255)
+        elif "colormap" in this_ds:
+            cmap = this_ds["colormap"]
         else:
-            raise ValueError(f'Color information was not in datashader with keys: {this_ds.keys()}')
-        vmin = this_ds.get('vmin', None)
-        vmax = this_ds.get('vmax', None)
-        aspect = this_ds.get('aspect', 'auto')
-        agg = ds.mean('value') if 'value' in this_ds and this_ds['value'] is not None else ds.count()
-        norm = this_ds.get('norm', 'log')
+            raise ValueError(f"Color information was not in datashader with keys: {this_ds.keys()}")
+        vmin = this_ds.get("vmin", None)
+        vmax = this_ds.get("vmax", None)
+        aspect = this_ds.get("aspect", "auto")
+        agg = ds.mean("value") if "value" in this_ds and this_ds["value"] is not None else ds.count()
+        norm = this_ds.get("norm", "log")
         dsshow(
             df,
-            ds.Point('time', 'data'),
+            ds.Point("time", "data"),
             agg,
             norm=norm,
             cmap=cmap,
@@ -1913,7 +1958,7 @@ def add_datashaders(datashaders):
             vmax=vmax,
             x_range=this_axes.get_xlim(),
             y_range=this_axes.get_ylim(),
-            shade_hook=partial(tf.dynspread, threshold=0.8, max_px=6, how='over'),
+            shade_hook=partial(tf.dynspread, threshold=0.8, max_px=6, how="over"),
         )
 
 
@@ -1927,7 +1972,9 @@ def fig_ax_factory(
     layout: str,
     sharex: bool,
     passthrough: Literal[False] = ...,
-) -> Tuple[Tuple[Figure, Axes], ...]: ...
+) -> Tuple[Tuple[Figure, Axes], ...]:
+    ...
+
 
 @overload
 def fig_ax_factory(
@@ -1938,14 +1985,16 @@ def fig_ax_factory(
     layout: str,
     sharex: bool,
     passthrough: Literal[True],
-) -> Tuple[None, ...]: ...
+) -> Tuple[None, ...]:
+    ...
+
 
 def fig_ax_factory(
     num_figs: int = None,
     num_axes: Union[int, List[int]] = 1,
     *,
-    suptitle: Union[str, List[str]] = '',
-    layout: str = 'rows',
+    suptitle: Union[str, List[str]] = "",
+    layout: str = "rows",
     sharex: bool = True,
     passthrough: bool = False,
 ) -> Union[Tuple[Tuple[Figure, Axes], ...], Tuple[None, ...]]:
@@ -1980,17 +2029,17 @@ def fig_ax_factory(
     """
     if isinstance(num_axes, int):
         is_1d = True
-        if layout == 'rows':
+        if layout == "rows":
             num_row = num_axes
             num_col = 1
-        elif layout == 'cols':
+        elif layout == "cols":
             num_row = 1
             num_col = num_axes
         else:
             raise ValueError(f'Unexpected layout: "{layout}".')
     else:
         is_1d = False
-        if layout not in {'rowwise', 'colwise'}:
+        if layout not in {"rowwise", "colwise"}:
             raise ValueError(f'Unexpected layout: "{layout}".')
         num_row = num_axes[0]
         num_col = num_axes[1]
@@ -2016,15 +2065,15 @@ def fig_ax_factory(
         else:
             fig_ax = tuple((figs[f], axes[f][i]) for f in range(num_figs) for i in range(num_axes))
     else:
-        if layout == 'rowwise':
+        if layout == "rowwise":
             fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for i in range(num_row) for j in range(num_col))  # type: ignore[call-overload]
-        elif layout == 'colwise':
+        elif layout == "colwise":
             fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for j in range(num_col) for i in range(num_row))  # type: ignore[call-overload]
     return fig_ax
 
 
 #%% Unit test
-if __name__ == '__main__':
+if __name__ == "__main__":
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_plotting_support', exit=False)
+    unittest.main(module="dstauffman.tests.test_plotting_support", exit=False)
     doctest.testmod(verbose=False)

@@ -263,11 +263,11 @@ def correlate_prn(prn1, prn2, shift, form):
 
     """
     # process inputs based on form
-    if form == 'zero-one':
+    if form == "zero-one":
         # change PRNs from (0,1) to (1,-1)
         prn1 = 1 * (prn1 == 0) + -1 * (prn1 == 1)
         prn2 = 1 * (prn2 == 0) + -1 * (prn2 == 1)
-    elif form == 'one-one':
+    elif form == "one-one":
         pass
     else:
         raise ValueError('Unexpected form: "%s"', form)
@@ -356,17 +356,18 @@ def generate_prn(sat: int, length: int = 1023) -> np.ndarray:
 #%% Functions - gps_to_datetime
 @overload
 def gps_to_datetime(
-    week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: Literal['datetime'] = ...
-) -> Union[datetime.datetime, List[datetime.datetime]]: ...
+    week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: Literal["datetime"] = ...
+) -> Union[datetime.datetime, List[datetime.datetime]]:
+    ...
+
 
 @overload
-def gps_to_datetime(
-    week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: Literal['numpy']
-) -> np.datetime64: ...
+def gps_to_datetime(week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: Literal["numpy"]) -> np.datetime64:
+    ...
 
 
 def gps_to_datetime(
-    week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: str = 'datetime'
+    week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: str = "datetime"
 ) -> Union[datetime.datetime, List[datetime.datetime], np.datetime64]:
     r"""
     Converts a GPS week and time to a Python datetime.
@@ -419,7 +420,7 @@ def gps_to_datetime(
 
     # GPS start week
     date_gps: Union[datetime.datetime, List[datetime.datetime], np.datetime64]
-    if form == 'datetime':
+    if form == "datetime":
         if np.size(week) == 1:
             start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * week))
             whole_sec  = int(time)
@@ -432,7 +433,7 @@ def gps_to_datetime(
                 whole_sec  = int(t)
                 micros     = round(1e6 * (t - whole_sec))
                 date_gps.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
-    elif form == 'numpy':
+    elif form == "numpy":
         start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY  # type: ignore[assignment]
         date_gps = start_week + time * NP_ONE_SECOND  # type: ignore[operator]
     else:
@@ -441,7 +442,7 @@ def gps_to_datetime(
 
 
 #%% Functions - gps_to_utc_datetime
-def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = None, form='datetime'):
+def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = None, form="datetime"):
     r"""
     Converts a GPS week and time to UTC time as a datetime.
 
@@ -536,7 +537,7 @@ def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = 
         gps_to_utc_offset = np.asanyarray(gps_to_utc_offset)
 
     # GPS start week
-    if form == 'datetime':
+    if form == "datetime":
         if np.size(week) == 1:
             start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * week))
             frac_sec   = time + gps_to_utc_offset
@@ -551,7 +552,7 @@ def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = 
                 whole_sec  = int(frac_sec)
                 micros     = round(1e6 * (frac_sec - whole_sec))
                 date_utc.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))  # type: ignore[attr-defined]
-    elif form == 'numpy':
+    elif form == "numpy":
         start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY
         date_utc = start_week + (time + gps_to_utc_offset) * NP_ONE_SECOND
     else:
@@ -560,6 +561,6 @@ def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = 
 
 
 #%% Unit Test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_aerospace_gps', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_aerospace_gps", exit=False)
     doctest.testmod(verbose=False)

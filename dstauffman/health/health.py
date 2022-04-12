@@ -161,10 +161,10 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     fig = None
 
     # check inputs
-    assert np.all(cost > 0), 'Costs must be positive.'
-    assert np.all(qaly > 0), 'Qalys must be positive.'
-    assert cost.shape == qaly.shape, 'Cost and Qalys must have same size.'
-    assert cost.size > 0, 'Costs and Qalys cannot be empty.'
+    assert np.all(cost > 0), "Costs must be positive."
+    assert np.all(qaly > 0), "Qalys must be positive."
+    assert cost.shape == qaly.shape, "Cost and Qalys must have same size."
+    assert cost.size > 0, "Costs and Qalys cannot be empty."
 
     # alias the number of strategies
     num = cost.size
@@ -188,7 +188,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
             # find the first occurence (increment by one to find the one less effective than the last)
             bad = np.flatnonzero(np.diff(sorted_qaly) < 0) + 1
             if len(bad) == 0:
-                raise ValueError('Index should never be empty, something unexpected happended.')  # pragma: no cover
+                raise ValueError("Index should never be empty, something unexpected happended.")  # pragma: no cover
             # update the mask and continue to next pass of while loop
             keep.pop(ix_sort[bad[0]])
             continue
@@ -203,7 +203,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
             # find the first bad occurence
             bad = np.flatnonzero(np.diff(icer_out) < 0)
             if len(bad) == 0:
-                raise ValueError('Index should never be empty, something unexpected happended.')  # pragma: no cover
+                raise ValueError("Index should never be empty, something unexpected happended.")  # pragma: no cover
             # update mask and continue to next pass
             keep.pop(ix_sort[bad[0]])
             continue
@@ -228,7 +228,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     # output as dataframe
     # build a name list if not given
     if names is None:
-        names = ['Strategy {}'.format(i + 1) for i in range(num)]
+        names = ["Strategy {}".format(i + 1) for i in range(num)]
     # preallocate some variables
     full_inc_costs = np.full((num), np.nan, dtype=float)
     full_inc_qalys = np.full((num), np.nan, dtype=float)
@@ -239,17 +239,17 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     full_icers[ix] = icer_out
     # make into dictionary with more explicit column names
     data = OrderedDict()
-    data['Strategy'] = names
-    data['Cost'] = cost
-    data['QALYs'] = qaly
-    data['Increment_Costs'] = full_inc_costs
-    data['Incremental_QALYs'] = full_inc_qalys
-    data['ICER'] = full_icers
-    data['Order'] = order
+    data["Strategy"] = names
+    data["Cost"] = cost
+    data["QALYs"] = qaly
+    data["Increment_Costs"] = full_inc_costs
+    data["Incremental_QALYs"] = full_inc_qalys
+    data["ICER"] = full_icers
+    data["Order"] = order
 
     # make the whole data set into a dataframe
     icer_data = pd.DataFrame.from_dict(data)
-    icer_data.set_index('Strategy', inplace=True)
+    icer_data.set_index("Strategy", inplace=True)
 
     # Make a plot
     if make_plot:
@@ -262,9 +262,9 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
 
 
 #%% Unit test
-if __name__ == '__main__':
+if __name__ == "__main__":
     import matplotlib.pyplot as plt
 
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_health_health', exit=False)
+    unittest.main(module="dstauffman.tests.test_health_health", exit=False)
     doctest.testmod(verbose=False)

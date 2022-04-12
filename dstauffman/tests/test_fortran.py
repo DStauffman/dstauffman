@@ -28,41 +28,41 @@ class Test__parse_source(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        lines = ['module test_mod']
-        lines.append('')
-        lines.append('use constants, only: RK')
-        lines.append('use utils ! for unit_vec')
-        lines.append('implicit none')
-        lines.append('function func')
-        lines.append('end function func')
-        lines.append('subroutine sub_name(x, y, z)')
-        lines.append('end subroutine')
-        lines.append('')
-        lines.append('! comment line')
-        lines.append('    function add(x, y) result(z) ! function to add stuff')
-        lines.append('    end function add')
-        lines.append('end module test_mod')
-        text = '\n'.join(lines)
-        self.filename = dcs.get_tests_dir() / 'temp_code.f90'
+        lines = ["module test_mod"]
+        lines.append("")
+        lines.append("use constants, only: RK")
+        lines.append("use utils ! for unit_vec")
+        lines.append("implicit none")
+        lines.append("function func")
+        lines.append("end function func")
+        lines.append("subroutine sub_name(x, y, z)")
+        lines.append("end subroutine")
+        lines.append("")
+        lines.append("! comment line")
+        lines.append("    function add(x, y) result(z) ! function to add stuff")
+        lines.append("    end function add")
+        lines.append("end module test_mod")
+        text = "\n".join(lines)
+        self.filename = dcs.get_tests_dir() / "temp_code.f90"
         dcs.write_text_file(self.filename, text)
 
     def test_function(self) -> None:
         this_code = dcs.fortran._parse_source(self.filename)
-        self.assertEqual(this_code.mod_name, 'test_mod')
-        self.assertEqual(this_code.uses, ['constants', 'utils'])
+        self.assertEqual(this_code.mod_name, "test_mod")
+        self.assertEqual(this_code.uses, ["constants", "utils"])
         self.assertEqual(this_code.types, [])
-        self.assertEqual(this_code.functions, ['func', 'add'])
-        self.assertEqual(this_code.subroutines, ['sub_name'])
+        self.assertEqual(this_code.functions, ["func", "add"])
+        self.assertEqual(this_code.subroutines, ["sub_name"])
 
     def test_not_single(self) -> None:
         code = dcs.fortran._parse_source(self.filename, assert_single=False)
         self.assertEqual(len(code), 1)
         this_code = code[0]
-        self.assertEqual(this_code.mod_name, 'test_mod')
-        self.assertEqual(this_code.uses, ['constants', 'utils'])
+        self.assertEqual(this_code.mod_name, "test_mod")
+        self.assertEqual(this_code.uses, ["constants", "utils"])
         self.assertEqual(this_code.types, [])
-        self.assertEqual(this_code.functions, ['func', 'add'])
-        self.assertEqual(this_code.subroutines, ['sub_name'])
+        self.assertEqual(this_code.functions, ["func", "add"])
+        self.assertEqual(this_code.subroutines, ["sub_name"])
 
     def tearDown(self) -> None:
         self.filename.unlink(missing_ok=True)
@@ -114,5 +114,5 @@ class Test_create_fortran_makefile(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

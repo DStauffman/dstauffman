@@ -39,7 +39,7 @@ class _Example_Frozen(dcs.Frozen):
 class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     load: ClassVar[
         Callable[
-            [Optional[pathlib.Path], DefaultNamedArg(bool, 'use_hdf5'), DefaultNamedArg(bool, 'return_meta')],
+            [Optional[pathlib.Path], DefaultNamedArg(bool, "use_hdf5"), DefaultNamedArg(bool, "return_meta")],
             _Example_SaveAndLoad,
         ]
     ]
@@ -47,9 +47,9 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
         [
             _Example_SaveAndLoad,
             Optional[pathlib.Path],
-            DefaultNamedArg(bool, 'use_hdf5'),
-            DefaultNamedArg(dict, 'meta'),
-            DefaultNamedArg(set, 'exclusions'),
+            DefaultNamedArg(bool, "use_hdf5"),
+            DefaultNamedArg(dict, "meta"),
+            DefaultNamedArg(set, "exclusions"),
         ],
         None,
     ]
@@ -98,7 +98,7 @@ class _Example_No_Override2(object, metaclass=dcs.SaveAndLoadPickle):
 
 
 class _Example_Times(object):
-    def __init__(self, time, data, name='name'):
+    def __init__(self, time, data, name="name"):
         self.time = time
         self.data = data
         self.name = name
@@ -108,8 +108,8 @@ class _Example_Times(object):
             self,
             ti=ti,
             tf=tf,
-            time_field='time',
-            exclude=frozenset({'name',}),
+            time_field="time",
+            exclude=frozenset({"name",}),
         )
 
     def subsample(self, skip=30, start=0):
@@ -117,7 +117,7 @@ class _Example_Times(object):
             self,
             skip=skip,
             start=start,
-            skip_fields=frozenset({'name',}),
+            skip_fields=frozenset({"name",}),
         )
 
 
@@ -139,87 +139,87 @@ class Test_pprint_dict(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.name = 'Example'
-        self.dct = {'a': 1, 'bb': 2, 'ccc': 3}
+        self.name = "Example"
+        self.dct = {"a": 1, "bb": 2, "ccc": 3}
 
     def test_nominal(self) -> None:
         with dcs.capture_output() as out:
             dcs.pprint_dict(self.dct, name=self.name)
-        lines = out.getvalue().strip().split('\n')
-        self.assertEqual(lines[0], 'Example')
-        self.assertEqual(lines[1], ' a   = 1')
-        self.assertEqual(lines[2], ' bb  = 2')
-        self.assertEqual(lines[3], ' ccc = 3')
+        lines = out.getvalue().strip().split("\n")
+        self.assertEqual(lines[0], "Example")
+        self.assertEqual(lines[1], " a   = 1")
+        self.assertEqual(lines[2], " bb  = 2")
+        self.assertEqual(lines[3], " ccc = 3")
 
     def test_no_name(self) -> None:
         with dcs.capture_output() as out:
             dcs.pprint_dict(self.dct)
-        lines = out.getvalue().strip().split('\n')
-        self.assertEqual(lines[0], 'a   = 1')
-        self.assertEqual(lines[1], ' bb  = 2')
-        self.assertEqual(lines[2], ' ccc = 3')
+        lines = out.getvalue().strip().split("\n")
+        self.assertEqual(lines[0], "a   = 1")
+        self.assertEqual(lines[1], " bb  = 2")
+        self.assertEqual(lines[2], " ccc = 3")
 
     def test_indent(self) -> None:
         with dcs.capture_output() as out:
             dcs.pprint_dict(self.dct, name=self.name, indent=4)
-        lines = out.getvalue().strip().split('\n')
-        self.assertEqual(lines[0], 'Example')
-        self.assertEqual(lines[1], '    a   = 1')
-        self.assertEqual(lines[2], '    bb  = 2')
-        self.assertEqual(lines[3], '    ccc = 3')
+        lines = out.getvalue().strip().split("\n")
+        self.assertEqual(lines[0], "Example")
+        self.assertEqual(lines[1], "    a   = 1")
+        self.assertEqual(lines[2], "    bb  = 2")
+        self.assertEqual(lines[3], "    ccc = 3")
 
     def test_no_align(self) -> None:
         with dcs.capture_output() as out:
             dcs.pprint_dict(self.dct, name=self.name, align=False)
-        lines = out.getvalue().strip().split('\n')
-        self.assertEqual(lines[0], 'Example')
-        self.assertEqual(lines[1], ' a = 1')
-        self.assertEqual(lines[2], ' bb = 2')
-        self.assertEqual(lines[3], ' ccc = 3')
+        lines = out.getvalue().strip().split("\n")
+        self.assertEqual(lines[0], "Example")
+        self.assertEqual(lines[1], " a = 1")
+        self.assertEqual(lines[2], " bb = 2")
+        self.assertEqual(lines[3], " ccc = 3")
 
     def test_printed(self) -> None:
         with dcs.capture_output() as out:
             text = dcs.pprint_dict(self.dct, name=self.name, disp=True)
         output = out.getvalue().strip()
-        lines = output.split('\n')
-        self.assertEqual(lines[0], 'Example')
-        self.assertEqual(lines[1], ' a   = 1')
-        self.assertEqual(lines[2], ' bb  = 2')
-        self.assertEqual(lines[3], ' ccc = 3')
+        lines = output.split("\n")
+        self.assertEqual(lines[0], "Example")
+        self.assertEqual(lines[1], " a   = 1")
+        self.assertEqual(lines[2], " bb  = 2")
+        self.assertEqual(lines[3], " ccc = 3")
         self.assertEqual(text, output)
 
     def test_not_printed(self) -> None:
         with dcs.capture_output() as out:
             text = dcs.pprint_dict(self.dct, name=self.name, disp=False)
         output = out.getvalue().strip()
-        self.assertEqual(output, '')
-        lines = text.split('\n')
-        self.assertEqual(lines[0], 'Example')
-        self.assertEqual(lines[1], ' a   = 1')
-        self.assertEqual(lines[2], ' bb  = 2')
-        self.assertEqual(lines[3], ' ccc = 3')
+        self.assertEqual(output, "")
+        lines = text.split("\n")
+        self.assertEqual(lines[0], "Example")
+        self.assertEqual(lines[1], " a   = 1")
+        self.assertEqual(lines[2], " bb  = 2")
+        self.assertEqual(lines[3], " ccc = 3")
 
-    @unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_max_elements(self) -> None:
-        self.dct['a'] = np.arange(10)  # type: ignore[assignment]
+        self.dct["a"] = np.arange(10)  # type: ignore[assignment]
         text1 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements=2)
         text2 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements=20)
         text3 = dcs.pprint_dict(self.dct, name=self.name, disp=False, max_elements=0)
-        lines1 = text1.split('\n')
-        lines2 = text2.split('\n')
-        lines3 = text3.split('\n')
-        self.assertEqual(lines1[1], ' a   = [0 1 2 ... 7 8 9]')
-        self.assertEqual(lines2[1], ' a   = [0 1 2 3 4 5 6 7 8 9]')
+        lines1 = text1.split("\n")
+        lines2 = text2.split("\n")
+        lines3 = text3.split("\n")
+        self.assertEqual(lines1[1], " a   = [0 1 2 ... 7 8 9]")
+        self.assertEqual(lines2[1], " a   = [0 1 2 3 4 5 6 7 8 9]")
         if dcs.IS_WINDOWS:
-            self.assertEqual(lines3[1], ' a   = <ndarray int32 (10,)>')
+            self.assertEqual(lines3[1], " a   = <ndarray int32 (10,)>")
         else:
-            self.assertEqual(lines3[1], ' a   = <ndarray int64 (10,)>')
+            self.assertEqual(lines3[1], " a   = <ndarray int64 (10,)>")
         self.assertEqual(lines3[2], " bb  = <class 'int'>")
         self.assertEqual(lines3[3], " ccc = <class 'int'>")
 
 
 #%% chop_time
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_chop_time(unittest.TestCase):
     r"""
     Tests the chop_time method with the following cases:
@@ -229,7 +229,7 @@ class Test_chop_time(unittest.TestCase):
     def setUp(self) -> None:
         self.time = np.array([7, 1, 3, 5])
         self.data = np.array([2, 4, 6, 8])
-        self.name = 'name'
+        self.name = "name"
         self.telm = _Example_Times(self.time, self.data, name=self.name)
         self.ti = 3
         self.tf = 6
@@ -244,7 +244,7 @@ class Test_chop_time(unittest.TestCase):
 
 
 #%% subsample_class
-@unittest.skipIf(not dcs.HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_subsample_class(unittest.TestCase):
     r"""
     Tests the subsample_class method with the following cases:
@@ -254,7 +254,7 @@ class Test_subsample_class(unittest.TestCase):
     def setUp(self) -> None:
         self.time = np.array([1, 7, 5, 3])
         self.data = np.array([8, 6, 4, 2])
-        self.name = 'nombre'
+        self.name = "nombre"
         self.telm = _Example_Times(self.time, self.data, name=self.name)
         self.skip = 2
         self.start = 1
@@ -277,7 +277,7 @@ class Test_Frozen(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.fields = ['field_one', 'field_two', 'field_ten']
+        self.fields = ["field_one", "field_two", "field_ten"]
 
     def test_calling(self) -> None:
         temp = _Example_Frozen()
@@ -287,9 +287,9 @@ class Test_Frozen(unittest.TestCase):
 
     def test_override_existing(self) -> None:
         temp = _Example_Frozen(dummy=5)
-        temp.field_one = 'not one'
+        temp.field_one = "not one"
         temp.dummy = 10
-        setattr(temp, 'dummy', 15)
+        setattr(temp, "dummy", 15)
         self.assertTrue(True)
 
     def test_new_attr(self) -> None:
@@ -313,32 +313,32 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.results1 = self.results1_cls()
         self.results2_cls = _Example_SaveAndLoadPickle
         self.results2 = self.results2_cls()
-        self.save_path1 = folder / 'results_test_save.hdf5'
-        self.save_path2 = folder / 'results_test_save.pkl'
+        self.save_path1 = folder / "results_test_save.hdf5"
+        self.save_path2 = folder / "results_test_save.pkl"
 
     def test_save1(self) -> None:
-        self.assertTrue(hasattr(self.results1, 'save'))
-        self.assertTrue(hasattr(self.results1, 'load'))
+        self.assertTrue(hasattr(self.results1, "save"))
+        self.assertTrue(hasattr(self.results1, "load"))
 
     def test_save2(self) -> None:
-        self.assertTrue(hasattr(self.results2, 'save'))
-        self.assertTrue(hasattr(self.results2, 'load'))
+        self.assertTrue(hasattr(self.results2, "save"))
+        self.assertTrue(hasattr(self.results2, "load"))
 
     def test_save3(self) -> None:
         temp = _Example_No_Override()
-        self.assertTrue(hasattr(temp, 'save'))
-        self.assertTrue(hasattr(temp, 'load'))
+        self.assertTrue(hasattr(temp, "save"))
+        self.assertTrue(hasattr(temp, "load"))
         self.assertEqual(temp.save(), 1)
         self.assertEqual(temp.load(), 2)
 
     def test_save4(self) -> None:
         temp = _Example_No_Override2()
-        self.assertTrue(hasattr(temp, 'save'))
-        self.assertTrue(hasattr(temp, 'load'))
+        self.assertTrue(hasattr(temp, "save"))
+        self.assertTrue(hasattr(temp, "load"))
         self.assertEqual(temp.save(), 1)
         self.assertEqual(temp.load(), 2)
 
-    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_saving_hdf5(self) -> None:
         self.results1.save(self.save_path1)
         results = self.results1_cls.load(self.save_path1)
@@ -359,7 +359,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         with self.assertRaises(ValueError):
             self.results1_cls.load(None)
 
-    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_classes_none(self) -> None:
         self.results1.z = 5
         self.results1.save(self.save_path1)
@@ -368,56 +368,56 @@ class Test_SaveAndLoad(unittest.TestCase):
         np.testing.assert_array_equal(results.y, self.results1.y)
         self.assertEqual(results.z, 5)
 
-    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_classes_dict(self) -> None:
         self.results1.z = 5
         self.results1.save(self.save_path1)
-        results = dcs.load_hdf5({'y': None}, self.save_path1)
-        self.assertFalse(hasattr(results, 'x'))
+        results = dcs.load_hdf5({"y": None}, self.save_path1)
+        self.assertFalse(hasattr(results, "x"))
         np.testing.assert_array_equal(results.y, self.results1.y)
-        self.assertFalse(hasattr(results, 'z'))
+        self.assertFalse(hasattr(results, "z"))
 
-    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_classless_list(self) -> None:
         self.results1.z = 5
         self.results1.save(self.save_path1)
-        results = dcs.load_hdf5(['x', 'y'], self.save_path1)
+        results = dcs.load_hdf5(["x", "y"], self.save_path1)
         np.testing.assert_array_equal(results.x, self.results1.x)
         np.testing.assert_array_equal(results.y, self.results1.y)
-        self.assertFalse(hasattr(results, 'z'))
+        self.assertFalse(hasattr(results, "z"))
 
-    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_classless_set(self) -> None:
         self.results1.z = 5
         self.results1.save(self.save_path1)
-        results = dcs.load_hdf5({'x', 'z'}, self.save_path1)
+        results = dcs.load_hdf5({"x", "z"}, self.save_path1)
         np.testing.assert_array_equal(results.x, self.results1.x)
-        self.assertFalse(hasattr(results, 'y'))
+        self.assertFalse(hasattr(results, "y"))
         self.assertEqual(results.z, 5)
 
-    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_classless_tuple(self) -> None:
         self.results1.z = 5
         self.results1.save(self.save_path1)
-        results = dcs.load_hdf5(('x', 'y', 'z'), self.save_path1)
+        results = dcs.load_hdf5(("x", "y", "z"), self.save_path1)
         np.testing.assert_array_equal(results.x, self.results1.x)
         np.testing.assert_array_equal(results.y, self.results1.y)
         self.assertEqual(results.z, 5)
 
-    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_bad_class_field(self) -> None:
-        dcs.save_hdf5({'x': self.results1.x, 'y': self.results1.y, 'z': self.results1.z, 'new': 5}, self.save_path1)
+        dcs.save_hdf5({"x": self.results1.x, "y": self.results1.y, "z": self.results1.z, "new": 5}, self.save_path1)
         with self.assertRaises(AttributeError):
             self.results1_cls.load(self.save_path1)
         results = dcs.load_hdf5(None, self.save_path1)
         np.testing.assert_array_equal(results.x, self.results1.x)
         np.testing.assert_array_equal(results.y, self.results1.y)
-        self.assertFalse(hasattr(results, 'z'))
+        self.assertFalse(hasattr(results, "z"))
         self.assertEqual(results.new, 5)
 
-    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_meta(self) -> None:
-        meta = {'num_pts': len(self.results1.x)}
+        meta = {"num_pts": len(self.results1.x)}
         self.results1.save(self.save_path1, meta=meta, compression=None, shuffle=False)  # type: ignore[call-arg]
         results = self.results1_cls.load(self.save_path1)
         self.assertTrue(dcs.compare_two_classes(results, self.results1, suppress_output=True, compare_recursively=True))
@@ -425,7 +425,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.assertTrue(dcs.compare_two_classes(results2, self.results1, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
         self.assertEqual(meta2, meta)  # type: ignore[has-type]
 
-    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_compression_and_shuffle(self) -> None:
         self.results1.save(self.save_path1, compression=6, shuffle=True)  # type: ignore[call-arg]
         results = self.results1_cls.load(self.save_path1)
@@ -434,11 +434,11 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.assertTrue(dcs.compare_two_classes(results2, self.results1, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
         self.assertEqual(meta2, {})  # type: ignore[has-type]
 
-    @unittest.skipIf(not dcs.HAVE_H5PY, 'Skipping due to missing h5py dependency.')
+    @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_exclusions(self) -> None:
         orig = self.results1.x.copy()
-        self.results1.save(self.save_path1, exclusions={'x', 'z'})
-        self.results1.x = 'Not original'
+        self.results1.save(self.save_path1, exclusions={"x", "z"})
+        self.results1.x = "Not original"
         results = self.results1_cls.load(self.save_path1)
         np.testing.assert_array_equal(results.y, self.results1.y)
         np.testing.assert_array_equal(results.x, orig)
@@ -446,13 +446,13 @@ class Test_SaveAndLoad(unittest.TestCase):
 
     def test_bad_meta(self) -> None:
         with self.assertRaises(ValueError) as err:
-            self.results1.save(self.save_path1, use_hdf5=False, meta={'num': 100})
-        self.assertEqual(str(err.exception), 'meta information cannot be used with pickle files.')
+            self.results1.save(self.save_path1, use_hdf5=False, meta={"num": 100})
+        self.assertEqual(str(err.exception), "meta information cannot be used with pickle files.")
 
     def test_bad_exclusions(self) -> None:
         with self.assertRaises(ValueError) as err:
-            self.results1.save(self.save_path1, use_hdf5=False, exclusions={'y', })
-        self.assertEqual(str(err.exception), 'exclusions cannot be used with pickle files.')
+            self.results1.save(self.save_path1, use_hdf5=False, exclusions={"y",})
+        self.assertEqual(str(err.exception), "exclusions cannot be used with pickle files.")
 
     def tearDown(self) -> None:
         self.save_path1.unlink(missing_ok=True)
@@ -621,9 +621,9 @@ class Test_Counter(unittest.TestCase):
             print(c1)
         output = out.getvalue().strip()
         out.close()
-        self.assertEqual(output, '1')
+        self.assertEqual(output, "1")
         output = repr(c1)
-        self.assertEqual(output, 'Counter(1)')
+        self.assertEqual(output, "Counter(1)")
 
 
 #%% FixedDict
@@ -634,33 +634,33 @@ class Test_FixedDict(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.keys = {'key1', 'key2'}
-        self.fixed = dcs.FixedDict({'key1': 1, 'key2': 2})
+        self.keys = {"key1", "key2"}
+        self.fixed = dcs.FixedDict({"key1": 1, "key2": 2})
 
     def test_nominal(self) -> None:
         self.assertEqual(self.keys, set(self.fixed))
 
     def test_key_creation_and_freeze(self) -> None:
-        self.fixed['new_key'] = 5
-        self.assertTrue('new_key' in self.fixed)
+        self.fixed["new_key"] = 5
+        self.assertTrue("new_key" in self.fixed)
         self.fixed.freeze()
         with self.assertRaises(KeyError):
-            self.fixed['bad_key'] = 6
+            self.fixed["bad_key"] = 6
 
     def test_change_value(self) -> None:
         self.fixed.freeze()
-        self.assertEqual(self.fixed['key1'], 1)
-        self.fixed['key1'] = 5
-        self.assertEqual(self.fixed['key1'], 5)
+        self.assertEqual(self.fixed["key1"], 1)
+        self.fixed["key1"] = 5
+        self.assertEqual(self.fixed["key1"], 5)
 
     def test_iteration(self) -> None:
         c = 0
         for (k, v) in self.fixed.items():
             c += 1
             self.assertIn(k, self.keys)
-            if k == 'key1':
+            if k == "key1":
                 self.assertEqual(v, 1)
-            elif k == 'key2':
+            elif k == "key2":
                 self.assertEqual(v, 2)
         self.assertEqual(c, 2)
 
@@ -669,39 +669,39 @@ class Test_FixedDict(unittest.TestCase):
         self.assertEqual(self.keys, set(fixed))
 
     def test_get(self) -> None:
-        value = self.fixed.get('key1')
+        value = self.fixed.get("key1")
         self.assertEqual(value, 1)
 
     def test_setdefault(self) -> None:
-        self.fixed.setdefault('new_key', 1)
-        self.assertEqual(self.fixed['new_key'], 1)
+        self.fixed.setdefault("new_key", 1)
+        self.assertEqual(self.fixed["new_key"], 1)
         self.fixed.freeze()
-        self.fixed.setdefault('key1', 5)
-        self.assertEqual(self.fixed['key1'], 1)
+        self.fixed.setdefault("key1", 5)
+        self.assertEqual(self.fixed["key1"], 1)
         with self.assertRaises(KeyError):
-            self.fixed.setdefault('newest_key', 5)
+            self.fixed.setdefault("newest_key", 5)
 
     def test_update(self) -> None:
         self.fixed.freeze()
-        dict2 = {'key1': 3}
+        dict2 = {"key1": 3}
         self.fixed.update(dict2)
-        self.assertEqual(self.fixed['key1'], 3)
-        dict2['bad_key'] = 5
+        self.assertEqual(self.fixed["key1"], 3)
+        dict2["bad_key"] = 5
         with self.assertRaises(KeyError):
             self.fixed.update(dict2)
 
     def test_update_not_frozen(self) -> None:
-        dict2 = {'key1': 3, 'new_key': 5}
+        dict2 = {"key1": 3, "new_key": 5}
         self.fixed.update(dict2)
-        self.assertEqual(self.fixed['key1'], 3)
-        self.assertTrue('new_key' in self.fixed)
+        self.assertEqual(self.fixed["key1"], 3)
+        self.assertTrue("new_key" in self.fixed)
 
     def test_update_kwargs(self) -> None:
         self.fixed.freeze()
-        dict2 = {'key1': 3}
+        dict2 = {"key1": 3}
         self.fixed.update(**dict2)
-        self.assertEqual(self.fixed['key1'], 3)
-        dict2['bad_key'] = 5
+        self.assertEqual(self.fixed["key1"], 3)
+        dict2["bad_key"] = 5
         with self.assertRaises(KeyError):
             self.fixed.update(**dict2)
 
@@ -711,29 +711,29 @@ class Test_FixedDict(unittest.TestCase):
 
     def test_bad_delete(self) -> None:
         with self.assertRaises(NotImplementedError):
-            del self.fixed['key1']
+            del self.fixed["key1"]
 
     def test_bad_pop(self) -> None:
         with self.assertRaises(NotImplementedError):
-            self.fixed.pop('key1')
+            self.fixed.pop("key1")
 
     def test_copy(self) -> None:
-        self.fixed['mutable'] = [1, 2, 3]
+        self.fixed["mutable"] = [1, 2, 3]
         new = copy.copy(self.fixed)
-        self.assertEqual(self.keys | {'mutable'}, set(new))
-        self.assertIs(new['mutable'], self.fixed['mutable'])
-        new['mutable'][1] = 5
-        self.assertEqual(new['mutable'][1], 5)
-        self.assertEqual(self.fixed['mutable'][1], 5)
+        self.assertEqual(self.keys | {"mutable"}, set(new))
+        self.assertIs(new["mutable"], self.fixed["mutable"])
+        new["mutable"][1] = 5
+        self.assertEqual(new["mutable"][1], 5)
+        self.assertEqual(self.fixed["mutable"][1], 5)
 
     def test_deepcopy(self) -> None:
-        self.fixed['mutable'] = [1, 2, 3]
+        self.fixed["mutable"] = [1, 2, 3]
         new = copy.deepcopy(self.fixed)
-        self.assertEqual(self.keys | {'mutable'}, set(new))
-        self.assertFalse(new['mutable'] is self.fixed['mutable'])
-        new['mutable'][1] = 5
-        self.assertEqual(new['mutable'][1], 5)
-        self.assertEqual(self.fixed['mutable'][1], 2)
+        self.assertEqual(self.keys | {"mutable"}, set(new))
+        self.assertFalse(new["mutable"] is self.fixed["mutable"])
+        new["mutable"][1] = 5
+        self.assertEqual(new["mutable"][1], 5)
+        self.assertEqual(self.fixed["mutable"][1], 2)
 
     def test_pickling(self) -> None:
         data = pickle.dumps(self.fixed)
@@ -743,5 +743,5 @@ class Test_FixedDict(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

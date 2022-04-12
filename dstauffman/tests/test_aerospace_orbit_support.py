@@ -29,7 +29,7 @@ class Test_d_2_r(unittest.TestCase):
     def test_nominal(self) -> None:
         self.assertEqual(space.d_2_r(180.0), pi)
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_vector(self) -> None:
         np.testing.assert_array_almost_equal(
             space.d_2_r(np.array([0.0, 45.0, 90.0, 180.0])), np.array([0.0, pi / 4, pi / 2, pi]), 14
@@ -47,7 +47,7 @@ class Test_r_2_d(unittest.TestCase):
     def test_nominal(self) -> None:
         self.assertEqual(space.r_2_d(pi), 180.0)
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_vector(self) -> None:
         np.testing.assert_array_almost_equal(
             space.r_2_d(np.array([0.0, pi / 4, pi / 2, pi])), np.array([0.0, 45.0, 90.0, 180.0]), 14
@@ -55,7 +55,7 @@ class Test_r_2_d(unittest.TestCase):
 
 
 #%% aerospace.norm
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_norm(unittest.TestCase):
     r"""
     Tests the aerospace.norm function with the following cases:
@@ -73,7 +73,7 @@ class Test_norm(unittest.TestCase):
 
 
 #%% aerospace.dot
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_dot(unittest.TestCase):
     r"""
     Tests the aerospace.dot function with the following cases:
@@ -86,7 +86,7 @@ class Test_dot(unittest.TestCase):
 
 
 #%% aerospace.cross
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_cross(unittest.TestCase):
     r"""
     Tests the aerospace.cross function with the following cases:
@@ -106,7 +106,7 @@ class Test_cross(unittest.TestCase):
 
 
 #%% aerospace.jd_to_numpy
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_jd_to_numpy(unittest.TestCase):
     r"""
     Tests the aerospace.jd_to_numpy function with the following cases:
@@ -115,17 +115,17 @@ class Test_jd_to_numpy(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        jd = space.numpy_to_jd(np.datetime64('2000-01-01T00:00:00'))
+        jd = space.numpy_to_jd(np.datetime64("2000-01-01T00:00:00"))
         self.assertEqual(jd, 2451545.0)
 
     def test_vectorized(self) -> None:
-        x = np.array([np.datetime64('2000-01-01T00:00:00'), np.datetime64('2000-01-01T12:00:00')])
+        x = np.array([np.datetime64("2000-01-01T00:00:00"), np.datetime64("2000-01-01T12:00:00")])
         jd = space.numpy_to_jd(x)
         np.testing.assert_array_equal(jd, np.array([2451545.0, 2451545.5]))
 
 
 #%% aerospace.jd_to_numpy
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_jd_to_numpy(unittest.TestCase):
     r"""
     Tests the aerospace.jd_to_numpy function with the following cases:
@@ -134,17 +134,17 @@ class Test_aerospace_jd_to_numpy(unittest.TestCase):
 
     def test_nominal(self) -> None:
         date = space.jd_to_numpy(2451545.0)
-        self.assertEqual(date, np.datetime64('2000-01-01T00:00:00'))
+        self.assertEqual(date, np.datetime64("2000-01-01T00:00:00"))
 
     def test_vectorized(self) -> None:
         jd = np.array([2451545.0, 2451545.5])
         date = space.jd_to_numpy(jd)
-        exp = np.array([np.datetime64('2000-01-01T00:00:00'), np.datetime64('2000-01-01T12:00:00')])
+        exp = np.array([np.datetime64("2000-01-01T00:00:00"), np.datetime64("2000-01-01T12:00:00")])
         np.testing.assert_array_equal(date, exp)
 
 
 #%% aerospace.d_2_dms
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_d_2_dms(unittest.TestCase):
     r"""
     Tests the aerospace.d_2_dms function with the following cases:
@@ -166,7 +166,7 @@ class Test_aerospace_d_2_dms(unittest.TestCase):
 
 
 #%% aerospace.dms_2_d
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_dms_2_d(unittest.TestCase):
     r"""
     Tests the aerospace.dms_2_d function with the following cases:
@@ -188,7 +188,7 @@ class Test_aerospace_dms_2_d(unittest.TestCase):
 
 
 #%% aerospace.hms_2_r
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_hms_2_r(unittest.TestCase):
     r"""
     Tests the aerospace.hms_2_r function with the following cases:
@@ -210,7 +210,7 @@ class Test_aerospace_hms_2_r(unittest.TestCase):
 
 
 #%% aerospace.r_2_hms
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_r_2_hms(unittest.TestCase):
     r"""
     Tests the aerospace.r_2_hms function with the following cases:
@@ -266,5 +266,5 @@ class Test_aerospace_r_2_hms(unittest.TestCase):
 #%% aerospace.rv_sez_2_ijk
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

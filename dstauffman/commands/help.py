@@ -33,7 +33,7 @@ def print_help(help_file: Path = None) -> int:
 
     """
     if help_file is None:
-        help_file = get_root_dir().parent / 'README.rst'
+        help_file = get_root_dir().parent / "README.rst"
     if not help_file.is_file():
         print(f'Warning: help file at "{help_file}" was not found.')
         return ReturnCodes.bad_help_file
@@ -59,10 +59,10 @@ def print_version() -> int:
 
     """
     try:
-        version = '.'.join(str(x) for x in version_info)
+        version = ".".join(str(x) for x in version_info)
         return_code = ReturnCodes.clean
     except:
-        version = 'unknown'
+        version = "unknown"
         return_code = ReturnCodes.bad_version
     print(version)
     return return_code
@@ -92,7 +92,7 @@ def parse_help(input_args: List[str]) -> argparse.Namespace:
     Namespace()
 
     """
-    parser = argparse.ArgumentParser(prog='dcs help')
+    parser = argparse.ArgumentParser(prog="dcs help")
 
     args = parser.parse_args(input_args)
     return args
@@ -122,7 +122,7 @@ def parse_version(input_args: List[str]) -> argparse.Namespace:
     Namespace()
 
     """
-    parser = argparse.ArgumentParser(prog='dcs version')
+    parser = argparse.ArgumentParser(prog="dcs version")
 
     args = parser.parse_args(input_args)
     return args
@@ -181,6 +181,6 @@ def execute_version(args: argparse.Namespace) -> int:
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_commands_help', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_commands_help", exit=False)
     doctest.testmod(verbose=False)

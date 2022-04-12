@@ -78,7 +78,7 @@ def rot(axis: int, angle: float) -> np.ndarray:
         dcm = np.array([[ca,  sa,  0.0], [-sa,  ca, 0.0], [0.0, 0.0, 1.0]])
     else:
         # Axis value not listed, so it can compile in nopython mode
-        raise ValueError('Unexpected value for axis.')
+        raise ValueError("Unexpected value for axis.")
     return dcm
 
 
@@ -136,7 +136,7 @@ def drot(axis: int, angle: float) -> np.ndarray:
     elif axis == 3:
         trans = np.array([[-sa,  ca, 0.0], [-ca, -sa, 0.0], [0.0, 0.0, 0.0]])
     else:
-        raise ValueError('Unexpected value for axis.')
+        raise ValueError("Unexpected value for axis.")
     return trans
 
 
@@ -240,16 +240,19 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     # an ambiguity for angles greater than pi/2 (90 deg).  Use the dot product result to resolve
     # the ambiguity.
     cross_prod = np.cross(vec1.T, vec2.T).T
-    cross_result = np.arcsin(np.sqrt(np.sum(cross_prod ** 2, axis=0)))
+    cross_result = np.arcsin(np.sqrt(np.sum(cross_prod**2, axis=0)))
     return np.where(dot_result > np.pi / 2, np.pi - cross_result, cross_result)
 
 
 #%% Functions - cart2sph
 @overload
-def cart2sph(x: float, y: float, z: float) -> Tuple[float, float, float]: ...
+def cart2sph(x: float, y: float, z: float) -> Tuple[float, float, float]:
+    ...
+
 
 @overload
-def cart2sph(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]: ...
+def cart2sph(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ...
 
 
 @ncjit
@@ -285,19 +288,22 @@ def cart2sph(x: _Numbers, y: _Numbers, z: _Numbers) -> Tuple[_Numbers, _Numbers,
     >>> (az, el, rad) = cart2sph(3, 4, 5)
 
     """
-    xy2 = x ** 2 + y ** 2
+    xy2 = x**2 + y**2
     az  = np.arctan2(y, x)
     el  = np.arctan2(z, np.sqrt(xy2))
-    rad = np.sqrt(xy2 + z ** 2)
+    rad = np.sqrt(xy2 + z**2)
     return (az, el, rad)
 
 
 #%% Functions - sph2cart
 @overload
-def sph2cart(az: float, el: float, rad: float) -> Tuple[float, float, float]: ...
+def sph2cart(az: float, el: float, rad: float) -> Tuple[float, float, float]:
+    ...
+
 
 @overload
-def sph2cart(az: np.ndarray, el: np.ndarray, rad: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]: ...
+def sph2cart(az: np.ndarray, el: np.ndarray, rad: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    ...
 
 
 @ncjit
@@ -392,6 +398,6 @@ def rv2dcm(vec: np.ndarray) -> np.ndarray:
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_aerospace_vectors', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_aerospace_vectors", exit=False)
     doctest.testmod(verbose=False)

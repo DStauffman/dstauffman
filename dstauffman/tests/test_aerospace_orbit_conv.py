@@ -38,7 +38,7 @@ class Test_aerospace__any(unittest.TestCase):
         self.assertTrue(space.orbit_conv._any(1.5))
         self.assertFalse(space.orbit_conv._any(0.0))
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_ndarray(self) -> None:
         self.assertTrue(space.orbit_conv._any(np.array([True, False, True], dtype=bool)))
         self.assertFalse(space.orbit_conv._any(np.array([False, False, False], dtype=bool)))
@@ -52,7 +52,7 @@ class Test_aerospace__any(unittest.TestCase):
 pass  # TODO: write this
 
 #%% aerospace.anomaly_eccentric_2_true
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
     r"""
     Tests the aerospace.anomaly_eccentric_2_true function with the following cases:
@@ -106,7 +106,7 @@ pass  # TODO: write this
 pass  # TODO: write this
 
 #%% aerospace.anomaly_mean_2_eccentric
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_anomaly_mean_2_eccentric(unittest.TestCase):
     r"""
     Tests the aerospace.anomaly_mean_2_eccentric function with the following cases:
@@ -169,7 +169,7 @@ pass  # TODO: write this
 pass  # TODO: write this
 
 #%% aerospace.mean_motion_2_semimajor
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_mean_motion_2_semimajor(unittest.TestCase):
     r"""
     Tests the aerospace.mean_motion_2_semimajor function with the following cases:
@@ -229,5 +229,5 @@ pass  # TODO: write this
 pass  # TODO: write this
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

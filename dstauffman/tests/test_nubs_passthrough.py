@@ -20,7 +20,7 @@ except ModuleNotFoundError:
     _HAVE_NUMBA = False
 
 #%% types
-@unittest.skipIf(not _HAVE_NUMBA, 'Skipping due to missing numba dependency.')
+@unittest.skipIf(not _HAVE_NUMBA, "Skipping due to missing numba dependency.")
 class Test_types(unittest.TestCase):
     r"""
     Tests the passthrough options with the following cases:
@@ -36,5 +36,5 @@ class Test_types(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

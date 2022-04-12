@@ -35,9 +35,9 @@ class _Config(Frozen):
         self.log_level = logging.INFO
 
         # output folder/files
-        self.output_folder = ''
-        self.output_results = 'results_model.hdf5'
-        self.output_params = 'results_param.pkl'
+        self.output_folder = ""
+        self.output_results = "results_model.hdf5"
+        self.output_params = "results_param.pkl"
 
         # Whether to save the final state information to disk
         self.save_final = False
@@ -52,7 +52,7 @@ class _Config(Frozen):
         self.max_cores = 4
 
         # default colormap
-        self.colormap = 'Paired'  #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
+        self.colormap = "Paired"  #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
 
 
 class _Model(Frozen):
@@ -69,10 +69,10 @@ class _Model(Frozen):
     def __init__(self) -> None:
         self.field1: int = 1
         self.field2 = np.array([1, 2, 3]) if HAVE_NUMPY else [1, 2, 3]
-        self.field3 = {'a': 5, 'b': np.array([1.5, 2.5, 10.0])} if HAVE_NUMPY else {'a': 5, 'b': [1.5, 2.5, 10.0]}
+        self.field3 = {"a": 5, "b": np.array([1.5, 2.5, 10.0])} if HAVE_NUMPY else {"a": 5, "b": [1.5, 2.5, 10.0]}
         self.field4 = FixedDict()
-        self.field4['new'] = np.array([3, 4, 5]) if HAVE_NUMPY else [3, 4, 5]
-        self.field4['old'] = '4 - 6'
+        self.field4["new"] = np.array([3, 4, 5]) if HAVE_NUMPY else [3, 4, 5]
+        self.field4["old"] = "4 - 6"
         self.field4.freeze()
 
 
@@ -95,8 +95,8 @@ class _Parameters(Frozen):
         self.models[0].field1 = 100
         self.models[1].field1 = 200
         self.models[1].field2[2] = 300
-        self.models[1].field3['a'] = 500.0
-        self.models[1].field4['new'][1] = 444
+        self.models[1].field3["a"] = 500.0
+        self.models[1].field4["new"][1] = 444
 
 
 #%% estimation._get_sub_level
@@ -125,7 +125,7 @@ class Test_estimation__check_valid_param_name(unittest.TestCase):
         cls.param = _Parameters()
 
     def test_nominal(self) -> None:
-        is_valid = estm.support._check_valid_param_name(self.param, 'param.config.log_level')
+        is_valid = estm.support._check_valid_param_name(self.param, "param.config.log_level")
         self.assertTrue(is_valid)
 
     def test_dictionary(self) -> None:
@@ -133,11 +133,11 @@ class Test_estimation__check_valid_param_name(unittest.TestCase):
         self.assertTrue(is_valid)
 
     def test_bad_name1(self) -> None:
-        is_valid = estm.support._check_valid_param_name(self.param, 'not_param.config.log_level')
+        is_valid = estm.support._check_valid_param_name(self.param, "not_param.config.log_level")
         self.assertFalse(is_valid)
 
     def test_bad_name2(self) -> None:
-        is_valid = estm.support._check_valid_param_name(self.param, 'param.config.logless_level')
+        is_valid = estm.support._check_valid_param_name(self.param, "param.config.logless_level")
         self.assertFalse(is_valid)
 
     def test_vector_element(self) -> None:
@@ -162,7 +162,7 @@ class Test_estimation__check_valid_param_name(unittest.TestCase):
 
 
 #%% estimation.get_parameter
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_get_parameter(unittest.TestCase):
     r"""
     Tests the estimation.get_parameter function with the following cases:
@@ -172,8 +172,8 @@ class Test_estimation_get_parameter(unittest.TestCase):
     def setUp(self) -> None:
         self.values = [-100, -2, -3, 44.0]
         self.names = [
-            'param.config.log_level',
-            'param.models[0].field1',
+            "param.config.log_level",
+            "param.models[0].field1",
             "param.models[1].field2[2]",
             "param.models[1].field3['b'][1]",
         ]
@@ -181,7 +181,7 @@ class Test_estimation_get_parameter(unittest.TestCase):
         self.param.config.log_level = self.values[0]
         self.param.models[0].field1 = self.values[1]  # type: ignore[assignment]
         self.param.models[1].field2[2] = self.values[2]  # type: ignore[index]
-        self.param.models[1].field3['b'][1] = self.values[3]  # type: ignore[index]
+        self.param.models[1].field3["b"][1] = self.values[3]  # type: ignore[index]
 
     def test_nominal(self) -> None:
         values = estm.get_parameter(self.param, self.names)
@@ -189,7 +189,7 @@ class Test_estimation_get_parameter(unittest.TestCase):
 
 
 #%% estimation.set_parameter
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_set_parameter(unittest.TestCase):
     r"""
     Tests the estimation.set_parameter function with the following cases:
@@ -200,8 +200,8 @@ class Test_estimation_set_parameter(unittest.TestCase):
         self.orig = [20, 100, 300, 2.5]
         self.values = [-100, -2, -3, 44.0]
         self.names = [
-            'param.config.log_level',
-            'param.models[0].field1',
+            "param.config.log_level",
+            "param.models[0].field1",
             "param.models[1].field2[2]",
             "param.models[1].field3['b'][1]",
         ]
@@ -209,7 +209,7 @@ class Test_estimation_set_parameter(unittest.TestCase):
         self.param.config.log_level = self.orig[0]
         self.param.models[0].field1 = self.orig[1]  # type: ignore[assignment]
         self.param.models[1].field2[2] = self.orig[2]  # type: ignore[index]
-        self.param.models[1].field3['b'][1] = self.orig[3]  # type: ignore[index]
+        self.param.models[1].field3["b"][1] = self.orig[3]  # type: ignore[index]
 
     def test_nominal(self) -> None:
         values = estm.get_parameter(self.param, self.names)
@@ -220,5 +220,5 @@ class Test_estimation_set_parameter(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

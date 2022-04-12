@@ -68,7 +68,7 @@ def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
 
     """
     delta_lambda = -H.T @ (mat_divide(Pz, z) + K.T @ lambda_bar)
-    I          = np.hstack((np.eye(K.shape[0]), np.zeros((K.shape[0], H.shape[1] - K.shape[0]))))
+    I = np.hstack((np.eye(K.shape[0]), np.zeros((K.shape[0], H.shape[1] - K.shape[0]))))
     I_minus_KH = I - K @ H
     lambda_hat = lambda_bar + delta_lambda
     LAMBDA_hat = I_minus_KH.T @ LAMBDA_bar @ I_minus_KH + H.T @ mat_divide(Pz, H)
@@ -139,9 +139,9 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
 
     """
     #% Initialization, set defaults
-    n_state  = kf_record.H.shape[1]
+    n_state = kf_record.H.shape[1]
     n_active = kf_record.K.shape[0]
-    n_time   = kf_record.time.size
+    n_time = kf_record.time.size
 
     # Storage for smoothed state updates
     x_delta = np.zeros((n_time, n_active)).T
@@ -166,10 +166,10 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
     # Compute smoothed state delta x_delta from  backward propagated information vector
     x_delta[:, -1] = -kf_record.P[:, :, -1] @ lambda_bar
     # Update information vector using innovation
-    H  = kf_record.H[:, :, -1]
+    H = kf_record.H[:, :, -1]
     Pz = kf_record.Pz[:, :, -1]
-    K  = kf_record.K[:, :, -1]
-    z  = kf_record.z[:, -1]
+    K = kf_record.K[:, :, -1]
+    z = kf_record.z[:, -1]
     # Update information
     (lambda_hat, LAMBDA_hat) = _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar)
 
@@ -177,11 +177,11 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
     for i in range(n_time - 2, 0, -1):
         stm = kf_record.stm[:, :, i + 1]  # TODO: why is this i+1? # TODO: allow unpacking function here?
         # Create local copies of current filter data matrices
-        P  = kf_record.P[:, :, i]
-        H  = kf_record.H[:, :, i]
+        P = kf_record.P[:, :, i]
+        H = kf_record.H[:, :, i]
         Pz = kf_record.Pz[:, :, i]
-        K  = kf_record.K[:, :, i]
-        z  = kf_record.z[:, i]
+        K = kf_record.K[:, :, i]
+        z = kf_record.z[:, i]
         # Propagate information vector and matrix backwards
         lambda_bar = stm.T @ lambda_hat
         LAMBDA_bar = stm.T @ LAMBDA_hat @ stm
@@ -195,6 +195,6 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_estimation_smoother', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_estimation_smoother", exit=False)
     doctest.testmod(verbose=False)

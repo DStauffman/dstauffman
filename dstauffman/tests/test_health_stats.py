@@ -18,7 +18,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% health.convert_annual_to_monthly_probability
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_health_convert_annual_to_monthly_probability(unittest.TestCase):
     r"""
     Tests the health.convert_annual_to_monthly_probability function with the following cases:
@@ -64,7 +64,7 @@ class Test_health_convert_annual_to_monthly_probability(unittest.TestCase):
 
 
 #%% health.convert_monthly_to_annual_probability
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_health_convert_monthly_to_annual_probability(unittest.TestCase):
     r"""
     Tests the health.convert_monthly_to_annual_probability function with the following cases:
@@ -110,7 +110,7 @@ class Test_health_convert_monthly_to_annual_probability(unittest.TestCase):
 
 
 #%% health.prob_to_rate
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_health_prob_to_rate(unittest.TestCase):
     r"""
     Tests the health.prob_to_rate function with the following cases:
@@ -156,7 +156,7 @@ class Test_health_prob_to_rate(unittest.TestCase):
 
 
 #%% health.rate_to_prob
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_health_rate_to_prob(unittest.TestCase):
     r"""
     Tests the health.rate_to_prob function with the following cases:
@@ -202,7 +202,7 @@ class Test_health_rate_to_prob(unittest.TestCase):
 
 
 #%% health.annual_rate_to_monthly_probability
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_health_annual_rate_to_monthly_probability(unittest.TestCase):
     r"""
     Tests the health.annual_rate_to_monthly_probability function with the following cases:
@@ -246,7 +246,7 @@ class Test_health_annual_rate_to_monthly_probability(unittest.TestCase):
 
 
 #%% health.monthly_probability_to_annual_rate
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_health_monthly_probability_to_annual_rate(unittest.TestCase):
     r"""
     Tests the health.monthly_probability_to_annual_rate function with the following cases:
@@ -365,14 +365,14 @@ class Test_health_combine_sets(unittest.TestCase):
         with self.assertRaises((AssertionError, ValueError)):
             health.combine_sets(5, self.u1, self.s1, -4, self.u2, self.s2)
 
-    @unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+    @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_broadcasting(self) -> None:
         with self.assertRaises(ValueError):
             (n, u, s) = health.combine_sets(np.array([self.n1, self.n1]), self.u1, self.s1, self.n2, self.u2, self.s2)  # type: ignore[arg-type]
 
 
 #%% health.bounded_normal_draw
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_health_bounded_normal_draw(unittest.TestCase):
     r"""
     Tests the health.bounded_normal_draw function with the following cases:
@@ -383,14 +383,14 @@ class Test_health_bounded_normal_draw(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.num    = 100000
-        self.mean   = 100.0
-        self.std    = 50.0
-        self.min    = 20.0
-        self.max    = 200.0
-        self.values = {'test_mean': self.mean, 'test_std': self.std, 'test_min': self.min, 'test_max': self.max}
-        self.field  = 'test'
-        self.prng   = np.random.RandomState()
+        self.num = 100000
+        self.mean = 100.0
+        self.std = 50.0
+        self.min = 20.0
+        self.max = 200.0
+        self.values = {"test_mean": self.mean, "test_std": self.std, "test_min": self.min, "test_max": self.max}
+        self.field = "test"
+        self.prng = np.random.RandomState()
 
     def test_nominal(self) -> None:
         out = health.bounded_normal_draw(self.num, self.values, self.field, self.prng)
@@ -398,9 +398,9 @@ class Test_health_bounded_normal_draw(unittest.TestCase):
         self.assertTrue(np.max(out) <= self.max)
 
     def test_bounds(self) -> None:
-        self.values['no_bounds_mean'] = self.mean
-        self.values['no_bounds_std'] = self.std
-        out = health.bounded_normal_draw(self.num, self.values, 'no_bounds', self.prng)
+        self.values["no_bounds_mean"] = self.mean
+        self.values["no_bounds_std"] = self.std
+        out = health.bounded_normal_draw(self.num, self.values, "no_bounds", self.prng)
         self.assertTrue(np.min(out) < self.min)
         self.assertTrue(np.max(out) > self.max)
         mean = np.mean(out)
@@ -410,20 +410,20 @@ class Test_health_bounded_normal_draw(unittest.TestCase):
 
     def test_optional_values(self) -> None:
         values: Dict[str, float] = {}
-        out = health.bounded_normal_draw(self.num, values, '', self.prng)
+        out = health.bounded_normal_draw(self.num, values, "", self.prng)
         mean = np.mean(out)
         std = np.std(out)
-        self.assertTrue(np.abs(mean - 0) < 1e-2, 'Bad mean.')
-        self.assertTrue(np.abs(std - 1) < 1e-2, 'Bad Std.')
+        self.assertTrue(np.abs(mean - 0) < 1e-2, "Bad mean.")
+        self.assertTrue(np.abs(std - 1) < 1e-2, "Bad Std.")
 
     def test_no_std(self) -> None:
-        self.values['test_std'] = 0
+        self.values["test_std"] = 0
         out = health.bounded_normal_draw(self.num, self.values, self.field, self.prng)
         self.assertTrue(np.all(np.abs(out - self.mean) < 1e-8))
 
 
 #%% health.rand_draw
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_health_rand_draw(unittest.TestCase):
     r"""
     Tests the health.rand_draw function with the following cases:
@@ -460,7 +460,7 @@ class Test_health_rand_draw(unittest.TestCase):
 
 
 #%% health.ecdf
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_health_ecdf(unittest.TestCase):
     r"""
     Tests the health.ecdf function with the following cases:
@@ -497,5 +497,5 @@ class Test_health_ecdf(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

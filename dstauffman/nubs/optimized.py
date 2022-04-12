@@ -180,9 +180,9 @@ def prob_to_rate_opt(prob: _N, time: _N) -> _N:
     """
     # check ranges
     if prob < 0:
-        raise ValueError('Probability must be >= 0')
+        raise ValueError("Probability must be >= 0")
     if prob > 1:
-        raise ValueError('Probability must be <= 1')
+        raise ValueError("Probability must be <= 1")
     # calculate rate
     if prob == 1:
         return math.inf
@@ -232,7 +232,7 @@ def rate_to_prob_opt(rate: _N, time: _N) -> _N:
     """
     # check ranges
     if rate < 0:
-        raise ValueError('Rate must be >= 0')
+        raise ValueError("Rate must be >= 0")
     # calculate probability
     return 1 - math.exp(-rate * time)
 
@@ -293,6 +293,6 @@ elif HAVE_NUMPY:
     zero_divide = vectorize(zero_divide, cache=True)
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_nubs_optimized', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_nubs_optimized", exit=False)
     doctest.testmod(verbose=False)

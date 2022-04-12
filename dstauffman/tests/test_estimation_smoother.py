@@ -18,7 +18,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 #%% estimation._update_information
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation__update_information(unittest.TestCase):
     r"""
     Tests the estimation._update_information function with the following cases:
@@ -28,9 +28,9 @@ class Test_estimation__update_information(unittest.TestCase):
     def setUp(self) -> None:
         num_states = 6
         num_axes = 2
-        self.H = np.ones((num_axes, num_states), order='F')
-        self.Pz = np.eye(num_axes, num_axes, order='F')
-        self.K = np.ones((num_states, num_axes), order='F')
+        self.H = np.ones((num_axes, num_states), order="F")
+        self.Pz = np.eye(num_axes, num_axes, order="F")
+        self.K = np.ones((num_states, num_axes), order="F")
         self.z = np.ones(num_axes)
         self.lambda_bar = np.ones(num_states)
         self.LAMBDA_bar = np.ones((num_states, num_states))
@@ -43,7 +43,7 @@ class Test_estimation__update_information(unittest.TestCase):
 
 
 #%% estimation.bf_smoother
-@unittest.skipIf(not HAVE_NUMPY, 'Skipping due to missing numpy dependency.')
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_bf_smoother(unittest.TestCase):
     r"""
     Tests the estimation.bf_smoother function with the following cases:
@@ -54,11 +54,11 @@ class Test_estimation_bf_smoother(unittest.TestCase):
         num_points = 5
         num_states = 6
         num_axes = 2
-        stm = np.eye(num_states, order='F')
-        P = np.eye(num_states, order='F')
-        H = np.ones((num_axes, num_states), order='F')
-        Pz = np.eye(num_axes, num_axes, order='F')
-        K = np.ones((num_states, num_axes), order='F')
+        stm = np.eye(num_states, order="F")
+        P = np.eye(num_states, order="F")
+        H = np.ones((num_axes, num_states), order="F")
+        Pz = np.eye(num_axes, num_axes, order="F")
+        K = np.ones((num_states, num_axes), order="F")
         z = np.ones(num_axes)
         self.lambda_bar_final = np.ones(num_states)
         self.kf_record = KfRecord(num_points=num_points, num_active=num_states, num_states=num_states, num_axes=num_axes)
@@ -84,5 +84,5 @@ class Test_estimation_bf_smoother(unittest.TestCase):
 
 
 #%% Unit test execution
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main(exit=False)

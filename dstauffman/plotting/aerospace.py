@@ -32,8 +32,8 @@ logger = logging.getLogger(__name__)
 
 #%% Constants
 # hard-coded values
-_LEG_FORMAT = '{:1.3f}'
-_TRUTH_COLOR = 'k'
+_LEG_FORMAT = "{:1.3f}"
+_TRUTH_COLOR = "k"
 
 #%% Functions - make_quaternion_plot
 def make_quaternion_plot(
@@ -43,10 +43,10 @@ def make_quaternion_plot(
     quat_one,
     quat_two,
     *,
-    name_one='',
-    name_two='',
-    time_units='sec',
-    start_date='',
+    name_one="",
+    name_two="",
+    time_units="sec",
+    start_date="",
     plot_components=True,
     rms_xmin=-inf,
     rms_xmax=inf,
@@ -57,9 +57,9 @@ def make_quaternion_plot(
     use_mean=False,
     plot_zero=False,
     show_rms=True,
-    legend_loc='best',
+    legend_loc="best",
     show_extra=True,
-    second_units='micro',
+    second_units="micro",
     leg_scale=None,
     data_as_rows=True,
     tolerance=0,
@@ -144,9 +144,9 @@ def make_quaternion_plot(
     ...     plt.close(fig)
 
     """
-    colormap = ColorMap(COLOR_LISTS['quat_diff'])
+    colormap = ColorMap(COLOR_LISTS["quat_diff"])
     return make_generic_plot(
-        'quat',
+        "quat",
         description=description,
         time_one=time_one,
         data_one=quat_one,
@@ -154,8 +154,8 @@ def make_quaternion_plot(
         data_two=quat_two,
         name_one=name_one,
         name_two=name_two,
-        elements=('X', 'Y', 'Z', 'S'),
-        units='rad',
+        elements=("X", "Y", "Z", "S"),
+        units="rad",
         time_units=time_units,
         start_date=start_date,
         rms_xmin=rms_xmin,
@@ -251,44 +251,44 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     if opts is None:
         opts = Opts()
     if fields is None:
-        fields = {'att': 'Attitude Quaternion'}
+        fields = {"att": "Attitude Quaternion"}
 
     # alias keywords
-    name_one = kwargs.pop('name_one', kf1.name)
-    name_two = kwargs.pop('name_two', kf2.name)
+    name_one = kwargs.pop("name_one", kf1.name)
+    name_two = kwargs.pop("name_two", kf2.name)
 
     # determine if converting units
     is_date_1 = is_datetime(kf1.time)
     is_date_2 = is_datetime(kf2.time)
-    is_date_o = opts.time_unit in {'numpy', 'datetime'}
+    is_date_o = opts.time_unit in {"numpy", "datetime"}
 
     # make local copy of opts that can be modified without changing the original
     this_opts = opts.__class__(opts)
     # allow opts to convert as necessary
     if is_date_1 or is_date_2 and not is_date_o:
-        this_opts.convert_dates('numpy', old_form=opts.time_base)
+        this_opts.convert_dates("numpy", old_form=opts.time_base)
     elif is_date_o and not is_date_1 and not is_date_2:
-        this_opts.convert_dates('sec', old_form=opts.time_base)
+        this_opts.convert_dates("sec", old_form=opts.time_base)
     # opts overrides
-    this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
+    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
-    time_units   = kwargs.pop('time_units', this_opts.time_base)
-    start_date   = kwargs.pop('start_date', this_opts.get_date_zero_str())
-    rms_xmin     = kwargs.pop('rms_xmin', this_opts.rms_xmin)
-    rms_xmax     = kwargs.pop('rms_xmax', this_opts.rms_xmax)
-    disp_xmin    = kwargs.pop('disp_xmin', this_opts.disp_xmin)
-    disp_xmax    = kwargs.pop('disp_xmax', this_opts.disp_xmax)
-    sub_plots    = kwargs.pop('make_subplots', this_opts.sub_plots)
-    plot_comps   = kwargs.pop('plot_components', this_opts.quat_comp)
-    single_lines = kwargs.pop('single_lines', this_opts.sing_line)
-    use_mean     = kwargs.pop('use_mean', this_opts.use_mean)
-    plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
-    show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
-    legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
+    time_units   = kwargs.pop("time_units", this_opts.time_base)
+    start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
+    rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
+    rms_xmax     = kwargs.pop("rms_xmax", this_opts.rms_xmax)
+    disp_xmin    = kwargs.pop("disp_xmin", this_opts.disp_xmin)
+    disp_xmax    = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    sub_plots    = kwargs.pop("make_subplots", this_opts.sub_plots)
+    plot_comps   = kwargs.pop("plot_components", this_opts.quat_comp)
+    single_lines = kwargs.pop("single_lines", this_opts.sing_line)
+    use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
+    show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
+    legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
 
     # hard-coded defaults
-    second_units = kwargs.pop('second_units', 'micro')
+    second_units = kwargs.pop("second_units", "micro")
 
     # initialize outputs
     figs = []
@@ -296,13 +296,13 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     printed = False
 
     if truth is not None:
-        raise NotImplementedError('Truth manipulations are not yet implemented.')
+        raise NotImplementedError("Truth manipulations are not yet implemented.")
 
     # call wrapper function for most of the details
     for (field, description) in fields.items():
         # print status
         if not printed:
-            logger.log(LogLevel.L4, f'Plotting {description} plots ...')
+            logger.log(LogLevel.L4, f"Plotting {description} plots ...")
             printed = True
         # make plots
         out = make_quaternion_plot(
@@ -339,7 +339,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        logger.log(LogLevel.L4, '... done.')
+        logger.log(LogLevel.L4, "... done.")
     if return_err:
         return (figs, err)
     return figs
@@ -349,7 +349,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 def plot_los(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""Plots the Line of Sight histories."""
     if fields is None:
-        fields = {'los': 'LOS'}
+        fields = {"los": "LOS"}
     out = plot_attitude(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)
     return out
 
@@ -415,45 +415,45 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     if opts is None:
         opts = Opts()
     if fields is None:
-        fields = {'pos': 'Position'}
+        fields = {"pos": "Position"}
 
     # determine if converting units
     is_date_1 = is_datetime(kf1.time)
     is_date_2 = is_datetime(kf2.time)
-    is_date_o = opts.time_unit in {'numpy', 'datetime'}
+    is_date_o = opts.time_unit in {"numpy", "datetime"}
 
     # make local copy of opts that can be modified without changing the original
     this_opts = opts.__class__(opts)
     # allow opts to convert as necessary
     if is_date_1 or is_date_2 and not is_date_o:
-        this_opts.convert_dates('numpy', old_form=opts.time_base)
+        this_opts.convert_dates("numpy", old_form=opts.time_base)
     elif is_date_o and not is_date_1 and not is_date_2:
-        this_opts.convert_dates('sec', old_form=opts.time_base)
+        this_opts.convert_dates("sec", old_form=opts.time_base)
     # opts overrides
-    this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
+    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
-    time_units   = kwargs.pop('time_units', this_opts.time_base)
-    start_date   = kwargs.pop('start_date', this_opts.get_date_zero_str())
-    rms_xmin     = kwargs.pop('rms_xmin', this_opts.rms_xmin)
-    rms_xmax     = kwargs.pop('rms_xmax', this_opts.rms_xmax)
-    disp_xmin    = kwargs.pop('disp_xmin', this_opts.disp_xmin)
-    disp_xmax    = kwargs.pop('disp_xmax', this_opts.disp_xmax)
-    sub_plots    = kwargs.pop('make_subplots', this_opts.sub_plots)
-    single_lines = kwargs.pop('single_lines', this_opts.sing_line)
-    use_mean     = kwargs.pop('use_mean', this_opts.use_mean)
-    plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
-    show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
-    legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
+    time_units   = kwargs.pop("time_units", this_opts.time_base)
+    start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
+    rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
+    rms_xmax     = kwargs.pop("rms_xmax", this_opts.rms_xmax)
+    disp_xmin    = kwargs.pop("disp_xmin", this_opts.disp_xmin)
+    disp_xmax    = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    sub_plots    = kwargs.pop("make_subplots", this_opts.sub_plots)
+    single_lines = kwargs.pop("single_lines", this_opts.sing_line)
+    use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
+    show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
+    legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
 
     # hard-coded defaults
-    elements      = kwargs.pop('elements', ['x', 'y', 'z'])
-    default_units = 'm' if 'pos' in fields else 'm/s' if 'vel' in fields else ''
-    units         = kwargs.pop('units', default_units)
-    second_units  = kwargs.pop('second_units', 'kilo')
+    elements      = kwargs.pop("elements", ["x", "y", "z"])
+    default_units = "m" if "pos" in fields else "m/s" if "vel" in fields else ""
+    units         = kwargs.pop("units", default_units)
+    second_units  = kwargs.pop("second_units", "kilo")
     colormap      = get_nondeg_colorlists(3)
-    name_one      = kwargs.pop('name_one', kf1.name)
-    name_two      = kwargs.pop('name_two', kf2.name)
+    name_one      = kwargs.pop("name_one", kf1.name)
+    name_two      = kwargs.pop("name_two", kf2.name)
 
     # initialize outputs
     figs = []
@@ -464,7 +464,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     for (field, description) in fields.items():
         # print status
         if not printed:
-            logger.log(LogLevel.L4, f'Plotting {description} plots ...')
+            logger.log(LogLevel.L4, f"Plotting {description} plots ...")
             printed = True
         # make plots
         out = make_difference_plot(
@@ -503,7 +503,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        logger.log(LogLevel.L4, '... done.')
+        logger.log(LogLevel.L4, "... done.")
     if return_err:
         return (figs, err)
     return figs
@@ -513,7 +513,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""Plots the Line of Sight histories."""
     if fields is None:
-        fields = {'vel': 'Velocity'}
+        fields = {"vel": "Velocity"}
     out = plot_position(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)
     return out
 
@@ -623,14 +623,14 @@ def plot_innovations(
     if opts is None:
         opts = Opts()
     if fields is None:
-        fields = {'innov': 'Innovations', 'norm': 'Normalized Innovations'}
+        fields = {"innov": "Innovations", "norm": "Normalized Innovations"}
     if number_field is None:
-        number_field = {'quad': 'Quad', 'sca': 'SCA'}
+        number_field = {"quad": "Quad", "sca": "SCA"}
 
     # aliases and defaults
-    name_one = kwargs.pop('name_one', kf1.name)
-    name_two = kwargs.pop('name_two', kf2.name)
-    description = name_one if name_one else name_two if name_two else ''
+    name_one = kwargs.pop("name_one", kf1.name)
+    name_two = kwargs.pop("name_two", kf2.name)
+    description = name_one if name_one else name_two if name_two else ""
     num_chan = 0
     for key in fields.keys():
         if getattr(kf1, key) is not None:
@@ -640,41 +640,41 @@ def plot_innovations(
         else:
             temp = 0
         num_chan = max(num_chan, temp)
-    elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
-    elements     = kwargs.pop('elements', elements)
-    units        = kwargs.pop('units', kf1.units)
-    second_units = kwargs.pop('second_units', 'micro')
+    elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f"Channel {i+1}" for i in range(num_chan)]
+    elements     = kwargs.pop("elements", elements)
+    units        = kwargs.pop("units", kf1.units)
+    second_units = kwargs.pop("second_units", "micro")
 
     # determine if converting units
     is_date_1 = is_datetime(kf1.time)
     is_date_2 = is_datetime(kf2.time)
-    is_date_o = opts.time_unit in {'numpy', 'datetime'}
+    is_date_o = opts.time_unit in {"numpy", "datetime"}
 
     # make local copy of opts that can be modified without changing the original
     this_opts = opts.__class__(opts)
     # allow opts to convert as necessary
     if is_date_1 or is_date_2 and not is_date_o:
-        this_opts.convert_dates('numpy', old_form=opts.time_base)
+        this_opts.convert_dates("numpy", old_form=opts.time_base)
     elif is_date_o and not is_date_1 and not is_date_2:
-        this_opts.convert_dates('sec', old_form=opts.time_base)
+        this_opts.convert_dates("sec", old_form=opts.time_base)
     # opts overrides
-    this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)
+    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
-    time_units   = kwargs.pop('time_units', this_opts.time_base)
-    start_date   = kwargs.pop('start_date', this_opts.get_date_zero_str())
-    rms_xmin     = kwargs.pop('rms_xmin', this_opts.rms_xmin)
-    rms_xmax     = kwargs.pop('rms_xmax', this_opts.rms_xmax)
-    disp_xmin    = kwargs.pop('disp_xmin', this_opts.disp_xmin)
-    disp_xmax    = kwargs.pop('disp_xmax', this_opts.disp_xmax)
-    sub_plots    = kwargs.pop('make_subplots', this_opts.sub_plots)
-    single_lines = kwargs.pop('single_lines', this_opts.sing_line)
-    use_mean     = kwargs.pop('use_mean', this_opts.use_mean)
-    plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
-    show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
-    legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
-    colormap     = kwargs.pop('colormap', this_opts.colormap)
-    tolerance    = kwargs.pop('tolerance', 0)
+    time_units   = kwargs.pop("time_units", this_opts.time_base)
+    start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
+    rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
+    rms_xmax     = kwargs.pop("rms_xmax", this_opts.rms_xmax)
+    disp_xmin    = kwargs.pop("disp_xmin", this_opts.disp_xmin)
+    disp_xmax    = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    sub_plots    = kwargs.pop("make_subplots", this_opts.sub_plots)
+    single_lines = kwargs.pop("single_lines", this_opts.sing_line)
+    use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
+    show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
+    legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    colormap     = kwargs.pop("colormap", this_opts.colormap)
+    tolerance    = kwargs.pop("tolerance", 0)
 
     # Initialize outputs
     figs = []
@@ -683,15 +683,15 @@ def plot_innovations(
 
     #% call wrapper functions for most of the details
     for (field, sub_description) in fields.items():
-        full_description = description + ' - ' + sub_description if description else sub_description
+        full_description = description + " - " + sub_description if description else sub_description
         # print status
         if not printed:
-            logger.log(LogLevel.L4, f'Plotting {full_description} plots ...')
+            logger.log(LogLevel.L4, f"Plotting {full_description} plots ...")
             printed = True
         # make plots
-        if 'Normalized' in sub_description:
-            units = u'σ'
-            this_second_units = 'unity'
+        if "Normalized" in sub_description:
+            units = u"σ"
+            this_second_units = "unity"
         else:
             this_second_units = second_units
         field_one = getattr(kf1, field)
@@ -741,10 +741,10 @@ def plot_innovations(
             err[field] = out[1]
         else:
             figs += out
-        this_ylabel = [e + ' Innovation [' + units + ']' for e in elements]
+        this_ylabel = [e + " Innovation [" + units + "]" for e in elements]
         if plot_by_status and field_one is not None and kf1.status is not None:
             figs += make_categories_plot(
-                full_description + ' by Category',
+                full_description + " by Category",
                 kf1.time,
                 field_one,
                 kf1.status,
@@ -771,7 +771,7 @@ def plot_innovations(
             )
         if plot_by_status and field_two is not None and kf2.status is not None:
             figs += make_categories_plot(
-                full_description + ' by Category',
+                full_description + " by Category",
                 kf2.time,
                 field_two,
                 kf2.status,
@@ -803,9 +803,9 @@ def plot_innovations(
                     this_number = getattr(kf1, quad)
                     break
             if this_number is not None:
-                num_names = {num: quad_name + ' ' + str(num) for num in np.unique(this_number)}
+                num_names = {num: quad_name + " " + str(num) for num in np.unique(this_number)}
                 figs += make_categories_plot(
-                    full_description + ' by ' + quad_name,
+                    full_description + " by " + quad_name,
                     kf1.time,
                     field_one,
                     this_number,
@@ -837,9 +837,9 @@ def plot_innovations(
                     this_number = getattr(kf2, quad)
                     break
             if this_number is not None:
-                num_names = {num: quad_name + ' ' + str(num) for num in np.unique(this_number)}
+                num_names = {num: quad_name + " " + str(num) for num in np.unique(this_number)}
                 figs += make_categories_plot(
-                    full_description + ' by ' + quad_name,
+                    full_description + " by " + quad_name,
                     kf2.time,
                     field_two,
                     this_number,
@@ -868,7 +868,7 @@ def plot_innovations(
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        logger.log(LogLevel.L4, '... done.')
+        logger.log(LogLevel.L4, "... done.")
     if return_err:
         return (figs, err)
     return figs
@@ -935,19 +935,19 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
     if opts is None:
         opts = Opts()
 
-    name = kf1.name + ' - ' if kf1.name else ''
-    description = name + 'Focal Plane Sightings'
-    extra_text = f' (by {kwargs["color_by"]})' if 'color_by' in kwargs and kwargs['color_by'] != 'none' else ''
-    logger.log(LogLevel.L4, f'Plotting {description} plots {extra_text}...')
+    name = kf1.name + " - " if kf1.name else ""
+    description = name + "Focal Plane Sightings"
+    extra_text = f' (by {kwargs["color_by"]})' if "color_by" in kwargs and kwargs["color_by"] != "none" else ""
+    logger.log(LogLevel.L4, f"Plotting {description} plots {extra_text}...")
 
     # check for data
     if kf1.fploc is None:
-        logger.log(LogLevel.L5, 'No focal plane data was provided, so no plots were generated.')
+        logger.log(LogLevel.L5, "No focal plane data was provided, so no plots were generated.")
         return []
 
     # alias opts
-    legend_loc = kwargs.pop('legend_loc', opts.leg_spot)
-    skip_setup_plots = kwargs.pop('skip_setup_plots', False)
+    legend_loc = kwargs.pop("legend_loc", opts.leg_spot)
+    skip_setup_plots = kwargs.pop("skip_setup_plots", False)
 
     # pull out time subset
     if t_bounds is None:
@@ -960,9 +960,9 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
     else:
         ix = get_rms_indices(kf1.time, xmin=t_bounds[0], xmax=t_bounds[1])
         if mask is None:
-            this_mask = ix['one']
+            this_mask = ix["one"]
         else:
-            this_mask = mask & ix['one']
+            this_mask = mask & ix["one"]
         fplocs = kf1.fploc[:, this_mask]
         innovs = kf1.innov[:, this_mask]
 
@@ -973,7 +973,7 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
     figs = [fig]
     if not skip_setup_plots:
         setup_plots(figs, opts)
-    logger.log(LogLevel.L4, '... done.')
+    logger.log(LogLevel.L4, "... done.")
     return figs
 
 
@@ -996,14 +996,14 @@ def plot_innov_hist(
     if opts is None:
         opts = Opts()
     if fields is None:
-        fields = {'innov': 'Innovations', 'norm': 'Normalized Innovations'}
+        fields = {"innov": "Innovations", "norm": "Normalized Innovations"}
 
-    description = kf1.name if kf1.name else ''
-    logger.log(LogLevel.L4, f'Plotting {description} plots ...')
+    description = kf1.name if kf1.name else ""
+    logger.log(LogLevel.L4, f"Plotting {description} plots ...")
 
     # check for data
     if kf1.innov is None:
-        logger.log(LogLevel.L5, 'No innovation data was provided, so no plots were generated.')
+        logger.log(LogLevel.L5, "No innovation data was provided, so no plots were generated.")
         return []
     data = kf1.innov[0, :]
 
@@ -1013,11 +1013,11 @@ def plot_innov_hist(
     #% call wrapper functions for most of the details
     for (field, sub_description) in fields.items():
         full_description = (
-            description + ' - ' + sub_description + ' Histogram' if description else sub_description + ' Histogram'
+            description + " - " + sub_description + " Histogram" if description else sub_description + " Histogram"
         )
         # print status
         if not printed:
-            logger.log(LogLevel.L4, f'Plotting {full_description} plots ...')
+            logger.log(LogLevel.L4, f"Plotting {full_description} plots ...")
             printed = True
         data = getattr(kf1, field)
         for i in range(data.shape[0]):
@@ -1026,10 +1026,10 @@ def plot_innov_hist(
                 data[i, :],
                 bins,
                 opts=opts,
-                color='#1f77b4',
-                xlabel='Data',
-                ylabel='Number',
-                second_ylabel='Distribution [%]',
+                color="#1f77b4",
+                xlabel="Data",
+                ylabel="Number",
+                second_ylabel="Distribution [%]",
                 normalize_spacing=normalize_spacing,
                 use_exact_counts=use_exact_counts,
                 show_pdf=show_pdf,
@@ -1107,7 +1107,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     if opts is None:
         opts = Opts()
     if fields is None:
-        fields = {'covar': 'Covariance'}
+        fields = {"covar": "Covariance"}
 
     # TODO: allow different sets of states in the different structures
 
@@ -1121,43 +1121,43 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
         else:
             temp = 0
         num_chan = max(num_chan, temp)
-    elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f'Channel {i+1}' for i in range(num_chan)]
-    elements     = kwargs.pop('elements', elements)
-    units        = kwargs.pop('units', 'mixed')
-    second_units = kwargs.pop('second_units', 'micro')
-    name_one     = kwargs.pop('name_one', kf1.name)
-    name_two     = kwargs.pop('name_two', kf2.name)
+    elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f"Channel {i+1}" for i in range(num_chan)]
+    elements     = kwargs.pop("elements", elements)
+    units        = kwargs.pop("units", "mixed")
+    second_units = kwargs.pop("second_units", "micro")
+    name_one     = kwargs.pop("name_one", kf1.name)
+    name_two     = kwargs.pop("name_two", kf2.name)
     if groups is None:
         groups = [i for i in range(num_chan)]
 
     # determine if converting units
     is_date_1 = is_datetime(kf1.time)
     is_date_2 = is_datetime(kf2.time)
-    is_date_o = opts.time_unit in {'numpy', 'datetime'}
+    is_date_o = opts.time_unit in {"numpy", "datetime"}
 
     # make local copy of opts that can be modified without changing the original
     this_opts = opts.__class__(opts)
     # allow opts to convert as necessary
     if is_date_1 or is_date_2 and not is_date_o:
-        this_opts.convert_dates('numpy', old_form=opts.time_base)
+        this_opts.convert_dates("numpy", old_form=opts.time_base)
     elif is_date_o and not is_date_1 and not is_date_2:
-        this_opts.convert_dates('sec', old_form=opts.time_base)
+        this_opts.convert_dates("sec", old_form=opts.time_base)
     # opts overrides
-    this_opts.save_plot = kwargs.pop('save_plot', this_opts.save_plot)  # TODO: why do I have this line?  Need to use this_opts below?
+    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)  # TODO: why do I have this line?  Need to use this_opts below?
 
     # alias opts
-    time_units   = kwargs.pop('time_units', this_opts.time_base)
-    start_date   = kwargs.pop('start_date', this_opts.get_date_zero_str())
-    rms_xmin     = kwargs.pop('rms_xmin', this_opts.rms_xmin)
-    rms_xmax     = kwargs.pop('rms_xmax', this_opts.rms_xmax)
-    disp_xmin    = kwargs.pop('disp_xmin', this_opts.disp_xmin)
-    disp_xmax    = kwargs.pop('disp_xmax', this_opts.disp_xmax)
-    sub_plots    = kwargs.pop('make_subplots', this_opts.sub_plots)
-    single_lines = kwargs.pop('single_lines', this_opts.sing_line)
-    use_mean     = kwargs.pop('use_mean', this_opts.use_mean)
-    plot_zero    = kwargs.pop('plot_zero', this_opts.show_zero)
-    show_rms     = kwargs.pop('show_rms', this_opts.show_rms)
-    legend_loc   = kwargs.pop('legend_loc', this_opts.leg_spot)
+    time_units   = kwargs.pop("time_units", this_opts.time_base)
+    start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
+    rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
+    rms_xmax     = kwargs.pop("rms_xmax", this_opts.rms_xmax)
+    disp_xmin    = kwargs.pop("disp_xmin", this_opts.disp_xmin)
+    disp_xmax    = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    sub_plots    = kwargs.pop("make_subplots", this_opts.sub_plots)
+    single_lines = kwargs.pop("single_lines", this_opts.sing_line)
+    use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
+    show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
+    legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
 
     # initialize output
     figs = []
@@ -1168,20 +1168,20 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     for (field, description) in fields.items():
         # print status
         if not printed:
-            logger.log(LogLevel.L4, f'Plotting {description} plots ...')
+            logger.log(LogLevel.L4, f"Plotting {description} plots ...")
             printed = True
         # make plots
         err[field] = {}
         for (ix, states) in enumerate(groups):
             this_units  = units if isinstance(units, str) else units[ix]
             this_2units = second_units[ix] if isinstance(second_units, list) else second_units
-            this_ylabel = description + f' [{this_units}]'
+            this_ylabel = description + f" [{this_units}]"
             states      = np.atleast_1d(states)
-            if hasattr(kf1, 'active') and kf1.active is not None:
+            if hasattr(kf1, "active") and kf1.active is not None:
                 (this_state_nums1, this_state_rows1, _) = intersect(kf1.active, states, return_indices=True)
             else:
                 this_state_nums1 = np.array([], dtype=int)
-            if hasattr(kf2, 'active') and kf2.active is not None:
+            if hasattr(kf2, "active") and kf2.active is not None:
                 (this_state_nums2, this_state_rows2, _) = intersect(kf2.active, states, return_indices=True)
             else:
                 this_state_nums2 = np.array([], dtype=int)
@@ -1191,7 +1191,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
             have_data1 = data_one is not None and np.any(~np.isnan(data_one))
             have_data2 = data_two is not None and np.any(~np.isnan(data_two))
             if have_data1 or have_data2:
-                this_description = description + ' for State ' + ','.join(str(x) for x in this_state_nums)
+                this_description = description + " for State " + ",".join(str(x) for x in this_state_nums)
                 this_elements = [elements[state] for state in this_state_nums]
                 colormap = get_nondeg_colorlists(len(this_elements))
                 out = make_difference_plot(
@@ -1224,15 +1224,15 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
                 )
                 if return_err:
                     figs += out[0]
-                    err[field][f'Group {ix+1}'] = out[1]
+                    err[field][f"Group {ix+1}"] = out[1]
                 else:
                     figs += out
     # Setup plots
     setup_plots(figs, opts)
     if printed:
-        logger.log(LogLevel.L4, '... done.')
+        logger.log(LogLevel.L4, "... done.")
     if not figs:
-        logger.log(LogLevel.L5, 'No covariance data was provided, so no plots were generated.')
+        logger.log(LogLevel.L5, "No covariance data was provided, so no plots were generated.")
     if return_err:
         return (figs, err)
     return figs
@@ -1242,13 +1242,13 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
 def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""Plots the Kalman Filter state histories."""
     if fields is None:
-        fields = {'state': 'State Estimates'}
+        fields = {"state": "State Estimates"}
     out = plot_covariance(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)
     return out
 
 
 #%% Unit Test
-if __name__ == '__main__':
+if __name__ == "__main__":
     plt.ioff()
-    unittest.main(module='dstauffman.tests.test_plotting_aerospace', exit=False)
+    unittest.main(module="dstauffman.tests.test_plotting_aerospace", exit=False)
     doctest.testmod(verbose=False)

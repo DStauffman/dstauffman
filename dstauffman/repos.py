@@ -69,9 +69,9 @@ def run_docstrings(files: List[Path], verbose: bool = False) -> int:
     # loop through and test each file
     for file in files:
         if verbose:
-            print('')
-            print('******************************')
-            print('******************************')
+            print("")
+            print("******************************")
+            print("******************************")
             print(f'Testing "{file}":')
         (failure_count, test_count) = doctest.testfile(file, report=True, verbose=verbose, module_relative=False)  # type: ignore[arg-type]
         if failure_count > 0:
@@ -100,7 +100,7 @@ def run_unittests(names: str, verbose: bool = False) -> int:
     Examples
     --------
     >>> from dstauffman import run_unittests
-    >>> names = 'dstauffman.tests'
+    >>> names = "dstauffman.tests"
     >>> return_code = run_unittests(names) # doctest: +SKIP
 
     """
@@ -163,7 +163,7 @@ def run_pytests(folder: Path, *args, **kwargs) -> int:
         else:
             qapp = QApplication.instance()
     # run tests using pytest
-    exit_code = pytest.main([str(folder), '-rfEsP'] + list(*args), **kwargs)
+    exit_code = pytest.main([str(folder), "-rfEsP"] + list(*args), **kwargs)
     # close the qapp
     if qapp is not None:
         qapp.closeAllWindows()
@@ -199,15 +199,15 @@ def run_coverage(folder: Path, *, report: bool = True, cov_file: Path = None) ->
     """
     # check that coverage tool was imported
     if not HAVE_COVERAGE:
-        print('coverage tool is not available, no report was generated.')
+        print("coverage tool is not available, no report was generated.")
         return_code: int = ReturnCodes.no_coverage_tool
         return return_code
 
     # Get information on the test folder
     test_folder = get_tests_dir()
-    data_file   = test_folder / '.coverage' if cov_file is None else Path(cov_file)
-    config_file = test_folder / '.coveragerc'
-    cov_folder  = test_folder / 'coverage_html_report'
+    data_file = test_folder / ".coverage" if cov_file is None else Path(cov_file)
+    config_file = test_folder / ".coveragerc"
+    cov_folder = test_folder / "coverage_html_report"
 
     # Instantiate the coverage tool and start tracking
     cov = Coverage(data_file=data_file, config_file=config_file)
@@ -230,7 +230,7 @@ def run_coverage(folder: Path, *, report: bool = True, cov_file: Path = None) ->
 #%% find_repo_issues
 def find_repo_issues(
     folder: Path,
-    extensions: Union[FrozenSet[str], Set[str], Tuple[str, ...], str, None] = frozenset(('.m', '.py')),
+    extensions: Union[FrozenSet[str], Set[str], Tuple[str, ...], str, None] = frozenset((".m", ".py")),
     *,
     list_all: bool = False,
     check_tabs: bool = True,
@@ -247,7 +247,7 @@ def find_repo_issues(
     folder : class pathlib.Path
         Folder path to search
     extensions : tuple of str
-        File extensions to consider, default is ('.m', '.py')
+        File extensions to consider, default is (".m", ".py")
     list_all : bool, optional, default is False
         Whether to list all the files, or only those with problems in them
     check_tabs : bool, optional, default is True
@@ -257,7 +257,7 @@ def find_repo_issues(
     exclusions : tuple of pathlib.Path
         Folders to ignore, default is empty
     check_eol : str
-        If not None, then the line endings to check, such as '\r\n'
+        If not None, then the line endings to check, such as "\r\n"
     show_execute : bool
         Whether to show files that have execute permissions, default is False
 
@@ -292,7 +292,7 @@ def find_repo_issues(
     if isinstance(exclusions, Path):
         exclusions = (exclusions,)
 
-    for this_file in folder.rglob('*'):
+    for this_file in folder.rglob("*"):
         if not this_file.is_file():
             continue
         if extensions is None or this_file.suffix in extensions:
@@ -305,7 +305,7 @@ def find_repo_issues(
             if show_execute and os.access(this_file, os.X_OK):
                 print(f'File: "{this_file}" has execute privileges.')
                 is_clean = False
-            with open(this_file, encoding='utf8', newline='') as file:
+            with open(this_file, encoding="utf8", newline="") as file:
                 bad_lines = False
                 try:
                     lines = file.readlines()
@@ -313,19 +313,19 @@ def find_repo_issues(
                     print(f'File: "{this_file}" was not a valid utf-8 file.')
                     is_clean = False
                 for (c, line) in enumerate(lines):
-                    sline = line.rstrip('\n').rstrip('\r').rstrip('\n')  # for all possible orderings
-                    if check_tabs and line.count('\t') > 0:
+                    sline = line.rstrip("\n").rstrip("\r").rstrip("\n")  # for all possible orderings
+                    if check_tabs and line.count("\t") > 0:
                         if not already_listed:
                             print(f'Evaluating: "{this_file}"')
                             already_listed = True
                             is_clean = False
-                        print('    Line {:03}: '.format(c + 1) + repr(line))
-                    elif trailing and len(sline) >= 1 and sline[-1] == ' ':
+                        print("    Line {:03}: ".format(c + 1) + repr(line))
+                    elif trailing and len(sline) >= 1 and sline[-1] == " ":
                         if not already_listed:
                             print(f'Evaluating: "{this_file}"')
                             already_listed = True
                             is_clean = False
-                        print('    Line {:03}: '.format(c + 1) + repr(line))
+                        print("    Line {:03}: ".format(c + 1) + repr(line))
                     if check_eol is not None and c != len(lines) - 1 and not line.endswith(check_eol) and not bad_lines:
                         line_ending = line[-(len(line) - len(sline)) :]
                         print('File: "{}" has bad line endings of "{}".'.format(this_file, repr(line_ending)[1:-1]))
@@ -360,7 +360,7 @@ def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = T
     def _remove_pyc(file):
         r"""Do the actual file removal."""
         # check for allowable extensions
-        assert file.suffix in {'.pyc',}
+        assert file.suffix in {".pyc",}
         assert file.is_file()
         # remove this file
         if print_progress:
@@ -369,12 +369,12 @@ def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = T
 
     if recursive:
         # walk through folder
-        for file in folder.rglob('*.pyc'):
+        for file in folder.rglob("*.pyc"):
             # remove relevant files
             _remove_pyc(file)
     else:
         # list files in folder
-        for file in folder.glob('*.pyc'):
+        for file in folder.glob("*.pyc"):
             # remove relevant files
             _remove_pyc(file)
 
@@ -397,35 +397,35 @@ def get_python_definitions(text: str, *, include_private: bool = False) -> List[
     Examples
     --------
     >>> from dstauffman import get_python_definitions
-    >>> text = 'def a():\n    pass\n'
+    >>> text = "def a():\n    pass\n"
     >>> funcs = get_python_definitions(text)
     >>> print(funcs)
     ['a']
 
     """
-    cap_letters = frozenset('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
-    extended_letters = frozenset(cap_letters & {'_'})
+    cap_letters = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    extended_letters = frozenset(cap_letters & {"_"})
     assert len(cap_letters) == 26
     funcs: List[str] = []
     skip_next = False
-    for line in text.split('\n'):
+    for line in text.split("\n"):
         # check for @overload function definitions and skip them
         if skip_next:
             skip_next = False
             continue
-        if line == '@overload':
+        if line == "@overload":
             skip_next = True
             continue
-        if line.startswith('class ') and (include_private or not line.startswith('class _')):
-            temp = line[len('class ') :].split('(')
-            temp = temp[0].split(':')  # for classes without arguments
+        if line.startswith("class ") and (include_private or not line.startswith("class _")):
+            temp = line[len("class ") :].split("(")
+            temp = temp[0].split(":")  # for classes without arguments
             funcs.append(temp[0])
-        if line.startswith('def ') and (include_private or not line.startswith('def _')):
-            temp = line[len('def ') :].split('(')
-            temp = temp[0].split(':')  # for functions without arguments
+        if line.startswith("def ") and (include_private or not line.startswith("def _")):
+            temp = line[len("def ") :].split("(")
+            temp = temp[0].split(":")  # for functions without arguments
             funcs.append(temp[0])
-        if len(line) > 0 and line[0] in cap_letters and '=' in line and ' ' in line:
-            temp2 = line.split(' ')[0].split(':')[0]
+        if len(line) > 0 and line[0] in cap_letters and "=" in line and " " in line:
+            temp2 = line.split(" ")[0].split(":")[0]
             if len(extended_letters - set(temp2)) == 0:
                 funcs.append(temp2)
     return funcs
@@ -462,16 +462,16 @@ def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, file
 
     """
     # exclusions
-    exclusions = ['__init__.py']
+    exclusions = ["__init__.py"]
     # initialize intermediate results
     results = {}
     # Loop through the contained files/folders
-    for this_elem in folder.glob('*'):
+    for this_elem in folder.glob("*"):
         # check if a folder or file
         if not this_elem.is_dir():
             # only process source *.py files
-            if this_elem.suffix == '.py':
-                # exclude any existing '__init__.py' file
+            if this_elem.suffix == ".py":
+                # exclude any existing "__init__.py" file
                 if any([exc in this_elem.parents for exc in exclusions]):
                     continue
                 # read the contents of the file
@@ -485,30 +485,30 @@ def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, file
     all_funcs = [func for k in results for func in results[k]]
     if len(all_funcs) != len(set(all_funcs)):
         print(
-            'Uniqueness Problem: {funs} functions, but only {uni_funcs} unique functions'.format(
+            "Uniqueness Problem: {funs} functions, but only {uni_funcs} unique functions".format(
                 funs=len(all_funcs), uni_funcs=len(set(all_funcs))
             )
         )
     dups = set([x for x in all_funcs if all_funcs.count(x) > 1])
     if dups:
-        print('Duplicated functions:')
+        print("Duplicated functions:")
         print(dups)
     # get information about padding
     max_len = max(len(x) for x in results)
-    indent = len('from . import ') + max_len + 4
+    indent = len("from . import ") + max_len + 4
     # start building text output
     text: List[str] = []
     # loop through results and build text output
     for key in sorted(results):
-        pad = ' ' * (max_len - len(key)) if lineup else ''
-        temp = ', '.join(results[key])
-        header = 'from .' + key + pad + ' import '
+        pad = " " * (max_len - len(key)) if lineup else ""
+        temp = ", ".join(results[key])
+        header = "from ." + key + pad + " import "
         min_wrap = len(header)
         this_line = [header + temp]
         wrapped_lines = line_wrap(this_line, wrap=wrap, min_wrap=min_wrap, indent=indent)
         text += wrapped_lines
     # combined the text into a single string with newline characters
-    output = '\n'.join(text)
+    output = "\n".join(text)
     # optionally write the results to a file
     if filename is not None:
         write_text_file(filename, output)
@@ -520,7 +520,7 @@ def write_unit_test_templates(
     folder: Path,
     output: Path,
     *,
-    author: str = 'unknown',
+    author: str = "unknown",
     exclude: Union[Path, Tuple[Path, ...]] = None,
     recursive: bool = True,
     repo_subs: Dict[str, str] = None,
@@ -555,20 +555,20 @@ def write_unit_test_templates(
     >>> from dstauffman import write_unit_test_templates, get_root_dir, get_tests_dir
     >>> from pathlib import Path
     >>> folder = get_root_dir()
-    >>> output = Path(str(get_tests_dir()) + '_template')
-    >>> author = 'David C. Stauffer'
+    >>> output = Path(str(get_tests_dir()) + "_template")
+    >>> author = "David C. Stauffer"
     >>> exclude = get_tests_dir() # can also be tuple of exclusions
     >>> write_unit_test_templates(folder, output, author=author, exclude=exclude) # doctest: +SKIP
 
     """
     # hard-coded substitutions for imports
     _subs = {
-        'dstauffman': 'dcs',
-        'dstauffman.aerospace': 'space',
-        'dstauffman.commands': 'commands',
-        'dstauffman.estimation': 'estm',
-        'dstauffman.health': 'health',
-        'dstauffman.plotting': 'plot',
+        "dstauffman": "dcs",
+        "dstauffman.aerospace": "space",
+        "dstauffman.commands": "commands",
+        "dstauffman.estimation": "estm",
+        "dstauffman.health": "health",
+        "dstauffman.plotting": "plot",
     }
     if repo_subs is not None:
         _subs.update(repo_subs)
@@ -582,8 +582,8 @@ def write_unit_test_templates(
     repo_name = files[0].parent.name
     # get date information
     now = datetime.datetime.now()
-    month = now.strftime('%B')
-    year = now.strftime('%Y')
+    month = now.strftime("%B")
+    year = now.strftime("%Y")
     for file in files:
         # check for exclusions
         if exclude is not None and exclude in file.parents or output in file.parents:
@@ -593,37 +593,37 @@ def write_unit_test_templates(
         # get a list of definitions from the text file
         funcs = get_python_definitions(this_text, include_private=True)
         # get the name of the test file
-        names = str(file)[num:].replace('\\', '/').split('/')
+        names = str(file)[num:].replace("\\", "/").split("/")
         # get the name of the repo or sub-repo
-        sub_repo = '.'.join(names[:-1])
-        this_repo = repo_name + ('.' + sub_repo if sub_repo else '')
+        sub_repo = ".".join(names[:-1])
+        this_repo = repo_name + ("." + sub_repo if sub_repo else "")
         # create the text to write to the file
         text = ['r"""']
         text += [f'Test file for the `{names[-1][:-3]}` module of the "{this_repo}" library.']
-        text += ['', 'Notes', '-----', f'#.  Written by {author} in {month} {year}.']
+        text += ["", "Notes", "-----", f"#.  Written by {author} in {month} {year}."]
         if add_classification:
-            text += ['', 'Classification', '--------------', 'TBD']
-        text += ['"""', '', '#%% Imports', 'import unittest', '']
-        import_text = 'import ' + this_repo
+            text += ["", "Classification", "--------------", "TBD"]
+        text += ['"""', "", "#%% Imports", "import unittest", ""]
+        import_text = "import " + this_repo
         if this_repo in _subs:
-            import_text += ' as ' + _subs[this_repo]
-        text += [import_text, '']
+            import_text += " as " + _subs[this_repo]
+        text += [import_text, ""]
         for func in funcs:
-            if func.startswith('_'):
-                func = names[-1][:-3] + '.' + func
-            func_name = sub_repo + '.' + func if sub_repo else func
-            temp_name = func_name.replace('.', '_')
-            text += [f'#%% {func_name}', f'class Test_{temp_name}(unittest.TestCase):', '    r"""']
-            text += [f'    Tests the {func_name} function with the following cases:', '        TBD']
-            text += ['    """', '    pass # TODO: write this', '']
+            if func.startswith("_"):
+                func = names[-1][:-3] + "." + func
+            func_name = sub_repo + "." + func if sub_repo else func
+            temp_name = func_name.replace(".", "_")
+            text += [f"#%% {func_name}", f"class Test_{temp_name}(unittest.TestCase):", '    r"""']
+            text += [f"    Tests the {func_name} function with the following cases:", "        TBD"]
+            text += ['    """', "    pass # TODO: write this", ""]
 
-        text += ['#%% Unit test execution', "if __name__ == '__main__':", '    unittest.main(exit=False)', '']
-        new_file = Path.joinpath(output, 'test_' + '_'.join(names))
+        text += ["#%% Unit test execution", 'if __name__ == "__main__":', "    unittest.main(exit=False)", ""]
+        new_file = Path.joinpath(output, "test_" + "_".join(names))
         print(f'Writing: "{new_file}".')
-        write_text_file(new_file, '\n'.join(text))
+        write_text_file(new_file, "\n".join(text))
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_repos', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_repos", exit=False)
     doctest.testmod(verbose=False)

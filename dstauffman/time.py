@@ -37,16 +37,16 @@ if TYPE_CHECKING:
 #%% Constants
 # maps other names of units to the ones expected by numpy
 _NP_MAP = {
-    'year': 'Y',
-    'month': 'M',
-    'week': 'W',
-    'day': 'D',
-    'hour': 'h',
-    'hr': 'h',
-    'minute': 'm',
-    'min': 'm',
-    'second': 's',
-    'sec': 's',
+    "year": "Y",
+    "month": "M",
+    "week": "W",
+    "day": "D",
+    "hour": "h",
+    "hr": "h",
+    "minute": "m",
+    "min": "m",
+    "second": "s",
+    "sec": "s",
 }
 
 #%% Functions - get_np_time_units
@@ -76,7 +76,7 @@ def get_np_time_units(date: Union[np.datetime64, np.timedelta64, str]) -> Option
     --------
     >>> from dstauffman import get_np_time_units
     >>> import numpy as np
-    >>> x = np.datetime64('now')
+    >>> x = np.datetime64("now")
     >>> units = get_np_time_units(x)
     >>> print(units)
     s
@@ -88,10 +88,10 @@ def get_np_time_units(date: Union[np.datetime64, np.timedelta64, str]) -> Option
     else:
         unit_str = str(date.dtype)
     # parse for a name and units in brackets
-    matches = re.split(r'\[(.*)\]$', unit_str)
+    matches = re.split(r"\[(.*)\]$", unit_str)
     form = matches[0]
     # do a sanity check and return the result
-    assert form in {'datetime64', 'timedelta64'}, f'Only expecting datetime64 or timedelta64, not "{form}".'
+    assert form in {"datetime64", "timedelta64"}, f'Only expecting datetime64 or timedelta64, not "{form}".'
     return None if len(matches) == 1 else matches[1]
 
 
@@ -177,10 +177,10 @@ def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, flo
     >>> import numpy as np
     >>> date_zero  = np.datetime64(datetime.date(2020, 1, 1))
     >>> dt_sec     = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
-    >>> date_in    = date_zero + np.round(1000*dt_sec).astype('timedelta64[ms]')
-    >>> time_delta = np.timedelta64(200, 'ms')
+    >>> date_in    = date_zero + np.round(1000*dt_sec).astype("timedelta64[ms]")
+    >>> time_delta = np.timedelta64(200, "ms")
     >>> date_out   = round_np_datetime(date_in, time_delta)
-    >>> expected   = date_zero + np.array([0, 200, 400, 400, 600, 600]).astype('timedelta64[ms]')
+    >>> expected   = date_zero + np.array([0, 200, 400, 400, 600, 600]).astype("timedelta64[ms]")
     >>> print(all(date_out == expected))
     True
 
@@ -242,7 +242,7 @@ def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = 
     # check if date value is too close to the tolerance floor
     max_date = np.max(np.abs(date_in), initial=0)
     if (max_date / time_delta) > (0.01 / np.finfo(float).eps):
-        warnings.warn('This function may have problems if time_delta gets too small.')
+        warnings.warn("This function may have problems if time_delta gets too small.")
     quants = date_in / time_delta
     if floor:
         rounded = np.floor(quants)
@@ -254,10 +254,13 @@ def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = 
 
 #%% Functions - round_time
 @overload
-def round_time(x: np.datetime64, /, t_round: np.timedelta64) -> np.datetime64: ...
+def round_time(x: np.datetime64, /, t_round: np.timedelta64) -> np.datetime64:
+    ...
+
 
 @overload
-def round_time(x: np.ndarray, /, t_round: np.timedelta64) -> np.ndarray: ...
+def round_time(x: np.ndarray, /, t_round: np.timedelta64) -> np.ndarray:
+    ...
 
 
 def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
@@ -288,7 +291,7 @@ def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
     >>> date_zero = np.datetime64(datetime.date(2020, 1, 1)).astype(NP_DATETIME_FORM)
     >>> x_sec     = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
     >>> x_np      = date_zero + np.round(NP_INT64_PER_SEC * x_sec).astype(NP_TIMEDELTA_FORM)
-    >>> t_round   = np.timedelta64(200, 'ms').astype(NP_TIMEDELTA_FORM)
+    >>> t_round   = np.timedelta64(200, "ms").astype(NP_TIMEDELTA_FORM)
 
     >>> date_out1 = round_time(x_sec, t_round)
     >>> expected1 = np.array([0., 0.2, 0.4, 0.4, 0.6, 0.6])
@@ -296,7 +299,7 @@ def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
     True
 
     >>> date_out2 = round_time(x_np, t_round)
-    >>> expected2 = date_zero + np.array([0, 200, 400, 400, 600, 600]).astype('timedelta64[ms]' \
+    >>> expected2 = date_zero + np.array([0, 200, 400, 400, 600, 600]).astype("timedelta64[ms]" \
     ...     ).astype(NP_TIMEDELTA_FORM)
     >>> print(all(date_out2 == expected2))
     True
@@ -310,7 +313,7 @@ def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
 
 
 #%% Functions - convert_date
-def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='datetime64[ns]'):
+def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="datetime64[ns]"):
     r"""
     Converts the given date between different forms.
 
@@ -319,8 +322,8 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     date : as `old_form`
         Date
     form : str
-        Desired date output form, from: {'datetime', 'numpy', 'matplotlib', 'sec', 'min', 'hr',
-            'day', 'month', 'year'}
+        Desired date output form, from: {"datetime", "numpy", "matplotlib", "sec", "min", "hr",
+            "day", "month", "year"}
     date_zero : class datetime.datetime
         Date represented by zero when using numeric forms
     old_form : str
@@ -345,7 +348,7 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     >>> from dstauffman import convert_date
     >>> from datetime import datetime
     >>> date = 3725.5
-    >>> form = 'datetime'
+    >>> form = "datetime"
     >>> date_zero = datetime(2020, 6, 1, 0, 0, 0)
     >>> out = convert_date(date, form, date_zero)
     >>> print(out)
@@ -353,8 +356,8 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
 
     """
     # hard-coded values
-    date_forms = {'datetime', 'numpy', 'matplotlib'}
-    time_forms = {'sec',}  # TODO: allow for 'min', 'hr', 'day', 'month', 'year', etc.
+    date_forms = {"datetime", "numpy", "matplotlib"}
+    time_forms = {"sec",}  # TODO: allow for "min", "hr", "day", "month", "year", etc.
     all_forms = date_forms | time_forms
     # data checks
     assert form in all_forms, f'Unexpected form of "{form}".'
@@ -363,11 +366,11 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
     if form == old_form:
         return date
     # check MPL conditions
-    if not HAVE_MPL and (form == 'matplotlib' or old_form == 'matplotlib'):
-        raise RuntimeError('You must have matplotlib installed to do this conversion.')
+    if not HAVE_MPL and (form == "matplotlib" or old_form == "matplotlib"):
+        raise RuntimeError("You must have matplotlib installed to do this conversion.")
     # convert to array as necessary
     is_actual_date: bool
-    if form != 'datetime' and old_form != 'datetime':
+    if form != "datetime" and old_form != "datetime":
         date = np.asanyarray(date)
         is_actual_date = np.any(isfinite(date))
     else:
@@ -388,33 +391,33 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
             is_actual_date = np.any(isfinite(date))
     # check for bad date_zero
     if form in time_forms or (old_form in time_forms and is_actual_date):
-        assert date_zero is not None, 'You must specify a date_zero.'
-        assert isinstance(date_zero, datetime.datetime), 'The date_zero is expected to be a datetime object.'
+        assert date_zero is not None, "You must specify a date_zero."
+        assert isinstance(date_zero, datetime.datetime), "The date_zero is expected to be a datetime object."
     # do all possible conversions
     # from seconds
     if old_form in time_forms:
         is_num = isfinite(date) if is_actual_date else False
-        if form == 'datetime':
+        if form == "datetime":
             out = date_zero + datetime.timedelta(seconds=date) if is_num else None
-        elif form == 'numpy':
-            out = np.full(date.shape, np.datetime64('nat'), dtype=numpy_form)
+        elif form == "numpy":
+            out = np.full(date.shape, np.datetime64("nat"), dtype=numpy_form)
             if np.any(is_num):
                 datetime_units = get_np_time_units(numpy_form)
                 date_zero_np = np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)
                 if np.issubdtype(date.dtype, np.signedinteger):
-                    out[is_num] = (date_zero_np + (date[is_num].astype(np.int64) * 10 ** 9).astype('timedelta64[ns]')).astype(numpy_form)
+                    out[is_num] = (date_zero_np + (date[is_num].astype(np.int64) * 10 ** 9).astype("timedelta64[ns]")).astype(numpy_form)
                 else:
-                    out[is_num] = (date_zero_np + np.round(date[is_num] * 1e9).astype('timedelta64[ns]')).astype(numpy_form)
-        elif form == 'matplotlib':
+                    out[is_num] = (date_zero_np + np.round(date[is_num] * 1e9).astype("timedelta64[ns]")).astype(numpy_form)
+        elif form == "matplotlib":
             out = date.copy()
             if np.any(is_num):
                 out[is_num] = dates.date2num(date_zero) + date[is_num] / ONE_DAY
     # from datetime
-    elif old_form == 'datetime':
+    elif old_form == "datetime":
         is_num = date is not None
-        if form == 'numpy':
+        if form == "numpy":
             out = np.array(date, dtype=numpy_form)
-        elif form == 'matplotlib':
+        elif form == "matplotlib":
             out = dates.date2num(date) if is_num else np.nan
         elif form in time_forms:
             if is_num:
@@ -423,31 +426,31 @@ def convert_date(date, form, date_zero=None, *, old_form='sec', numpy_form='date
             else:
                 out = nan
     # from numpy
-    elif old_form == 'numpy':
+    elif old_form == "numpy":
         is_num = ~np.isnat(date)
-        if form == 'datetime':
-            out = datetime.datetime.utcfromtimestamp(date.astype('datetime64[ns]').astype(np.int64) / 10 ** 9) if is_num else None
-        elif form == 'matplotlib':
+        if form == "datetime":
+            out = datetime.datetime.utcfromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10 ** 9) if is_num else None
+        elif form == "matplotlib":
             out = dates.date2num(date)
         elif form in time_forms:
             out = np.full(date.shape, np.nan)
             if np.any(is_num):
-                out[is_num] = (date[is_num] - np.array(date_zero, dtype='datetime64[ns]')).astype('timedelta64[ns]').astype(np.int64) / 10 ** 9
+                out[is_num] = (date[is_num] - np.array(date_zero, dtype="datetime64[ns]")).astype("timedelta64[ns]").astype(np.int64) / 10**9
     # from matplotlib
-    elif old_form == 'matplotlib':
+    elif old_form == "matplotlib":
         is_num = np.isfinite(date)
-        if form == 'datetime':
+        if form == "datetime":
             out = dates.num2date(date) if is_num else None
-        elif form == 'numpy':
-            out = np.full(date.shape, np.datetime64('nat'), dtype=numpy_form)
+        elif form == "numpy":
+            out = np.full(date.shape, np.datetime64("nat"), dtype=numpy_form)
             if np.any(is_num):
                 # TODO: I don't like this method, but the dates.num2date always returns a timezone aware datetime
                 out[is_num] = np.array([x.replace(tzinfo=None) for x in dates.num2date(date[is_num])], dtype=numpy_form)
         elif form in time_forms:
             out = ONE_DAY * (date - dates.date2num(date_zero))
     # convert from seconds to other time forms if necessary
-    if form in time_forms and form != 'sec':
-        raise ValueError('Time forms other than seconds are not yet implemented.')
+    if form in time_forms and form != "sec":
+        raise ValueError("Time forms other than seconds are not yet implemented.")
     return out
 
 
@@ -478,8 +481,8 @@ def convert_time_units(time, old_unit, new_unit):
     --------
     >>> from dstauffman import convert_time_units
     >>> time = 7200.
-    >>> old_unit = 'sec'
-    >>> new_unit = 'hr'
+    >>> old_unit = "sec"
+    >>> new_unit = "hr"
     >>> out = convert_time_units(time, old_unit, new_unit)
     >>> print(out)
     2.0
@@ -524,7 +527,7 @@ def convert_datetime_to_np(time, /, units=NP_DATETIME_UNITS):
 
     """
     if isinstance(time, list):
-        out = np.empty(len(time), dtype='datetime64[' + units + ']')
+        out = np.empty(len(time), dtype="datetime64[" + units + "]")
         for (ix, t) in enumerate(time):
             out[ix] = np.datetime64(t, units)
         return out
@@ -564,7 +567,7 @@ def convert_duration_to_np(dt, /, units=NP_DATETIME_UNITS):
 
 
 #%% Functions - convert_num_dt_to_np
-def convert_num_dt_to_np(dt, /, units='sec', np_units=NP_TIMEDELTA_FORM):
+def convert_num_dt_to_np(dt, /, units="sec", np_units=NP_TIMEDELTA_FORM):
     r"""Convenience wrapper to convert a number of seconds to a numpy.timedelta64 with the desired units.
 
     Parameters
@@ -599,7 +602,7 @@ def convert_num_dt_to_np(dt, /, units='sec', np_units=NP_TIMEDELTA_FORM):
 
 #%% Functions - get_delta_time_str
 def get_delta_time_str(
-    start_time: Union[datetime.datetime, datetime.timedelta], final_time: datetime.datetime = None, *, format_: str = '%H:%M:%S'
+    start_time: Union[datetime.datetime, datetime.timedelta], final_time: datetime.datetime = None, *, format_: str = "%H:%M:%S"
 ) -> str:
     r"""
     Determine the elapsed time in a form useful for logging.
@@ -644,6 +647,6 @@ def get_delta_time_str(
 
 
 #%% Unit test
-if __name__ == '__main__':
-    unittest.main(module='dstauffman.tests.test_time', exit=False)
+if __name__ == "__main__":
+    unittest.main(module="dstauffman.tests.test_time", exit=False)
     doctest.testmod(verbose=False)
