@@ -835,6 +835,16 @@ class Test_aerospace_quat_norm(unittest.TestCase):
         q4_inv = space.quat_norm(self.q4_inp, allow_nans=True)
         np.testing.assert_array_almost_equal(q4_inv, self.q4_out)
 
+    def test_some_nans(self) -> None:
+        self.q4_inp[1, 2] = np.nan
+        self.q4_out[:, 2] = np.nan
+        with self.assertRaises(AssertionError):
+            space.quat_norm(self.q4_inp)
+        quat_norm = space.quat_norm(self.q4_inp, allow_nans=True)
+        np.testing.assert_array_almost_equal(quat_norm, self.q4_out)
+        self.assertEqual(quat_norm.ndim, 2)
+        np.testing.assert_array_equal(quat_norm.shape, self.q4_out.shape)
+
 
 #%% aerospace.quat_prop
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")

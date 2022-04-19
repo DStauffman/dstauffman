@@ -79,6 +79,8 @@ class Opts(Frozen):
                 Flag to show a link to the folder where the plots were saved
             .plot_type : str
                 Type of plot to save to disk, from {'png','jpg','fig','emf'}
+            .show_warn : bool
+                Whether to show warning if saving by title instead of window (i.e. no display is found)
             .sub_plots : bool
                 Flag specifying whether to plot as subplots or separate figures
             .sing_line : bool
@@ -116,29 +118,30 @@ class Opts(Frozen):
             .names     : list of str
                 Names of the data structures to be plotted
         """
-        self.case_name: str = ""
+        self.case_name: str   = ""
         self.date_zero: Optional[datetime.datetime] = None
-        self.save_plot: bool = False
+        self.save_plot: bool  = False
         self.save_path: Optional[Path] = None
-        self.show_plot: bool = True
-        self.show_link: bool = False
-        self.plot_type: str = "png"
-        self.sub_plots: bool = True
-        self.sing_line: bool = False
+        self.show_plot: bool  = True
+        self.show_link: bool  = False
+        self.plot_type: str   = "png"
+        self.show_warn: bool  = True
+        self.sub_plots: bool  = True
+        self.sing_line: bool  = False
         self.disp_xmin: _Date = -inf
-        self.disp_xmax: _Date = inf
-        self.rms_xmin: _Date = -inf
-        self.rms_xmax: _Date = inf
-        self.show_rms: bool = True
-        self.use_mean: bool = False
-        self.show_zero: bool = False
-        self.quat_comp: bool = True
-        self.show_xtra: bool = True
-        self.time_base: str = "sec"
-        self.time_unit: str = "sec"
+        self.disp_xmax: _Date =  inf
+        self.rms_xmin: _Date  = -inf
+        self.rms_xmax: _Date  =  inf
+        self.show_rms: bool   = True
+        self.use_mean: bool   = False
+        self.show_zero: bool  = False
+        self.quat_comp: bool  = True
+        self.show_xtra: bool  = True
+        self.time_base: str   = "sec"
+        self.time_unit: str   = "sec"
         self.colormap: Union[str, ColorMap] = None
-        self.leg_spot: str = "best"
-        self.classify: str = ""
+        self.leg_spot: str    = "best"
+        self.classify: str    = ""
         self.names: List[str] = list()
         for arg in args:
             if arg is None:
@@ -221,8 +224,8 @@ class Opts(Frozen):
 
         disp_xmin = _convert(self.disp_xmin)
         disp_xmax = _convert(self.disp_xmax)
-        rms_xmin = _convert(self.rms_xmin)
-        rms_xmax = _convert(self.rms_xmax)
+        rms_xmin  = _convert(self.rms_xmin)
+        rms_xmax  = _convert(self.rms_xmax)
         return (disp_xmin, disp_xmax, rms_xmin, rms_xmax)
 
     def convert_dates(self, form: str, old_form: str = "sec", numpy_form: str = "datetime64[ns]") -> "Opts":
@@ -354,18 +357,18 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
-    time_units = kwargs.pop("time_units", this_opts.time_base)
-    start_date = kwargs.pop("start_date", this_opts.get_date_zero_str())
-    rms_xmin = kwargs.pop("rms_xmin", this_opts.rms_xmin)
-    rms_xmax = kwargs.pop("rms_xmax", this_opts.rms_xmax)
-    disp_xmin = kwargs.pop("disp_xmin", this_opts.disp_xmin)
-    disp_xmax = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    time_units   = kwargs.pop("time_units", this_opts.time_base)
+    start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
+    rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
+    rms_xmax     = kwargs.pop("rms_xmax", this_opts.rms_xmax)
+    disp_xmin    = kwargs.pop("disp_xmin", this_opts.disp_xmin)
+    disp_xmax    = kwargs.pop("disp_xmax", this_opts.disp_xmax)
     single_lines = kwargs.pop("single_lines", this_opts.sing_line)
-    colormap = kwargs.pop("colormap", this_opts.colormap)
-    use_mean = kwargs.pop("use_mean", this_opts.use_mean)
-    plot_zero = kwargs.pop("plot_zero", this_opts.show_zero)
-    show_rms = kwargs.pop("show_rms", this_opts.show_rms)
-    legend_loc = kwargs.pop("legend_loc", this_opts.leg_spot)
+    colormap     = kwargs.pop("colormap", this_opts.colormap)
+    use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
+    show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
+    legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
 
     # call wrapper function for most of the details
     fig = make_time_plot(
@@ -674,18 +677,18 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
-    time_units = kwargs.pop("time_units", this_opts.time_base)
-    start_date = kwargs.pop("start_date", this_opts.get_date_zero_str())
-    rms_xmin = kwargs.pop("rms_xmin", this_opts.rms_xmin)
-    rms_xmax = kwargs.pop("rms_xmax", this_opts.rms_xmax)
-    disp_xmin = kwargs.pop("disp_xmin", this_opts.disp_xmin)
-    disp_xmax = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    time_units   = kwargs.pop("time_units", this_opts.time_base)
+    start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
+    rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
+    rms_xmax     = kwargs.pop("rms_xmax", this_opts.rms_xmax)
+    disp_xmin    = kwargs.pop("disp_xmin", this_opts.disp_xmin)
+    disp_xmax    = kwargs.pop("disp_xmax", this_opts.disp_xmax)
     single_lines = kwargs.pop("single_lines", this_opts.sing_line)
-    colormap = kwargs.pop("colormap", this_opts.colormap)
-    use_mean = kwargs.pop("use_mean", this_opts.use_mean)
-    plot_zero = kwargs.pop("plot_zero", this_opts.show_zero)
-    show_rms = kwargs.pop("show_rms", this_opts.show_rms)
-    legend_loc = kwargs.pop("legend_loc", this_opts.leg_spot)
+    colormap     = kwargs.pop("colormap", this_opts.colormap)
+    use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
+    show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
+    legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
 
     # hard-coded values
     scale = 100
@@ -945,7 +948,7 @@ def setup_plots(figs, opts):
 
     # optionally save the plot
     if opts.save_plot:
-        storefig(figs, opts.save_path, opts.plot_type)
+        storefig(figs, opts.save_path, opts.plot_type, opts.show_warn)
         if opts.show_link & len(figs) > 0:
             print(r'Plots saved to <a href="{}">{}</a>'.format(opts.save_path, opts.save_path))
 

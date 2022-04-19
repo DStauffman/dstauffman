@@ -550,7 +550,12 @@ def resolve_name(name: str, force_win: bool = None, rep_token: str = "_", strip_
 
 
 #%% Functions - storefig
-def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Union[str, List[str]] = "png") -> None:
+def storefig(
+        fig: _FigOrListFig,
+        folder: Union[str, Path] = None,
+        plot_type: Union[str, List[str]] = "png",
+        show_warn: bool = True,
+    ) -> None:
     r"""
     Store the specified figures in the specified folder and with the specified plot type(s).
 
@@ -562,6 +567,8 @@ def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Uni
         Location to save figures to
     plot_type : str
         Type of figure to save to disk, like 'png' or 'jpg'
+    show_warn : bool, optional, default is True
+        Whether to show a warning if the plot title is used instead of thewindow canvas (i.e. you don't have a display)
 
     Raises
     ------
@@ -644,7 +651,7 @@ def storefig(fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Uni
         for this_type in types:
             # save the figure to the specified plot type
             this_fig.savefig(folder.joinpath(this_title + "." + this_type), dpi=160, bbox_inches="tight", pad_inches=0.01)
-    if throw_warning:
+    if throw_warning and show_warn:
         warnings.warn("No window titles found, using the plot title instead (usually because there is no display).")
 
 

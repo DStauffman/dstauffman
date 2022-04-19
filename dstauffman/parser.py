@@ -13,7 +13,7 @@ from dataclasses import dataclass
 import doctest
 import logging
 import sys
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 import unittest
 
 from slog import activate_logging, LogLevel, ReturnCodes
@@ -127,9 +127,13 @@ def execute_command(command: str, args: argparse.Namespace) -> int:
 
 
 #%% process_command_line_options
-def process_command_line_options() -> _Flags:
+def process_command_line_options(log_start: Union[bool, str] = None) -> _Flags:
     r"""
     Parses sys.argv to determine any command line options for use in scripts.
+
+    Parameters
+    ----------
+    log_start : optional, bool or filename string to log when setting log level
 
     Returns
     -------
@@ -139,6 +143,7 @@ def process_command_line_options() -> _Flags:
     Notes
     -----
     #.  Written by David C. Stauffer in July 2020.
+    #.  Expanded by David C. Stauffer in April 2022 to optionally specify the file doing the logging.
 
     Examples
     --------
@@ -158,7 +163,7 @@ def process_command_line_options() -> _Flags:
                 log_level = getattr(logging, level)
             else:
                 raise ValueError(f'Unexpected logging input of: "{opt}".')
-            activate_logging(log_level)
+            activate_logging(log_level, log_start=log_start)
             logger.log(log_level, "Configuring Log Level at: " + str(log_level))
 
     # get other settings
