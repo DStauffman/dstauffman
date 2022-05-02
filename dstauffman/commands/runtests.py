@@ -112,12 +112,14 @@ def execute_tests(args: argparse.Namespace) -> int:
 
     """
     # alias options
+    # fmt: off
     coverage   = args.coverage
     cov_file   = args.cov_file
     docstrings = args.docstrings
     library    = args.library
     verbose    = args.verbose
     use_pytest = not args.unittest
+    # fmt: on
 
     # get test location information
     if library is None:
@@ -242,8 +244,8 @@ def execute_coverage(args: argparse.Namespace) -> int:
             subprocess.call(["open", str(filename)])
         # TODO: as of 2022-04, mypy v0.942 fails to recognize platform.system() == 'Windows'
         # elif platform.system() == "Windows":
-        elif sys.platform == 'win32':
-            assert platform.system() == 'Windows'
+        elif sys.platform == "win32":
+            assert platform.system() == "Windows"
             os.startfile(filename)
         else:
             subprocess.call(["xdg-open", str(filename)])

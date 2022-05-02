@@ -63,6 +63,7 @@ _LEG_FORMAT = "{:1.3f}"
 _TRUTH_COLOR = "k"
 
 if TYPE_CHECKING:
+
     class _ExtraPlotter(Protocol):
         def __call__(self, fig: Figure, ax: Axis) -> None:
             ...
@@ -1789,6 +1790,7 @@ def make_connected_sets(
     colors_line: Union[str, ColorMap, Tuple[Any, ...]]
     colors_pred: Union[str, ColorMap, Tuple[Any, ...]]
     ds_value: Optional[np.ndarray]
+    # fmt: off
     if color_by in null_options:
         colors_line = "xkcd:red"
         colors_pred = "xkcd:blue" if colormap is None else colormap
@@ -1829,6 +1831,7 @@ def make_connected_sets(
         ds_color    = "autumn_r" if not isinstance(colormap, str) else colormap
     else:
         raise ValueError(f'Unexpected value for color_by of "{color_by}"')
+    # fmt: on
 
     # create figure and axes (needs to be done before building datashader information)
     if fig_ax is None:

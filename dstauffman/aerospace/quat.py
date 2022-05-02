@@ -127,7 +127,7 @@ def quat_assertions(
             assert -1 <= quat[0] <= 1, 'Quaternion has bad range in x value: "{}"'.format(quat[0])
             assert -1 <= quat[1] <= 1, 'Quaternion has bad range in y value: "{}"'.format(quat[1])
             assert -1 <= quat[2] <= 1, 'Quaternion has bad range in z value: "{}"'.format(quat[2])
-            assert  0 <= quat[3] <= 1, 'Quaternion has bad range in s value: "{}"'.format(quat[3])
+            assert  0 <= quat[3] <= 1, 'Quaternion has bad range in s value: "{}"'.format(quat[3])  # fmt: skip
     else:
         if np.any(nans := np.isnan(quat)):
             if allow_nans:
@@ -137,14 +137,18 @@ def quat_assertions(
             else:
                 assert False, "NaNs are not allow in quaternion."
         ix = ~np.isnan(quat[0, :])
-        assert np.all(-1 <= quat[0, ix]) and np.all(quat[0, ix] <= 1), (
-            'Quaternion has bad range in x value, min: "{}", max:"{}"'.format(np.min(quat[0, ix]), np.max(quat[0, ix])))
-        assert np.all(-1 <= quat[1, ix]) and np.all(quat[1, ix] <= 1), (
-            'Quaternion has bad range in y value, min: "{}", max:"{}"'.format(np.min(quat[1, ix]), np.max(quat[1, ix])))
-        assert np.all(-1 <= quat[2, ix]) and np.all(quat[2, ix] <= 1), (
-            'Quaternion has bad range in z value, min: "{}", max:"{}"'.format(np.min(quat[2, ix]), np.max(quat[2, ix])))
-        assert np.all( 0 <= quat[3, ix]) and np.all(quat[3, ix] <= 1), (
-            'Quaternion has bad range in s value, min: "{}", max:"{}"'.format(np.min(quat[3, ix]), np.max(quat[3, ix])))
+        assert np.all(-1 <= quat[0, ix]) and np.all(
+            quat[0, ix] <= 1
+        ), 'Quaternion has bad range in x value, min: "{}", max:"{}"'.format(np.min(quat[0, ix]), np.max(quat[0, ix]))
+        assert np.all(-1 <= quat[1, ix]) and np.all(
+            quat[1, ix] <= 1
+        ), 'Quaternion has bad range in y value, min: "{}", max:"{}"'.format(np.min(quat[1, ix]), np.max(quat[1, ix]))
+        assert np.all(-1 <= quat[2, ix]) and np.all(
+            quat[2, ix] <= 1
+        ), 'Quaternion has bad range in z value, min: "{}", max:"{}"'.format(np.min(quat[2, ix]), np.max(quat[2, ix]))
+        assert np.all(0 <= quat[3, ix]) and np.all(
+            quat[3, ix] <= 1
+        ), 'Quaternion has bad range in s value, min: "{}", max:"{}"'.format(np.min(quat[3, ix]), np.max(quat[3, ix]))
 
     # check normalization
     q_norm_err = np.abs(1 - np.sum(quat**2, axis=0))
@@ -795,12 +799,14 @@ def quat_mult(a: np.ndarray, b: np.ndarray, **kwargs) -> np.ndarray:
         return c
     # single quaternion inputs case
     if is_single_a and is_single_b:
+        # fmt: off
         c = np.array([
             [ a[3],  a[2], -a[1],  a[0]],
             [-a[2],  a[3],  a[0],  a[1]],
             [ a[1], -a[0],  a[3],  a[2]],
             [-a[0], -a[1], -a[2],  a[3]],
         ]) @ b
+        # fmt: on
         # enforce positive scalar component
         if c[3] < 0:
             c = np.negative(c, out=c)
@@ -816,12 +822,14 @@ def quat_mult(a: np.ndarray, b: np.ndarray, **kwargs) -> np.ndarray:
         b3 = b[2, ...]
         b4 = b[3, ...]
         # compute the combine multiplication result
+        # fmt: off
         c = np.array([
             +b1 * a4 + b2 * a3 - b3 * a2 + b4 * a1,
             -b1 * a3 + b2 * a4 + b3 * a1 + b4 * a2,
             +b1 * a2 - b2 * a1 + b3 * a4 + b4 * a3,
             -b1 * a1 - b2 * a2 - b3 * a3 + b4 * a4,
         ])
+        # fmt: on
         # enforce positive scalar component
         c[:, c[3, :] < 0] = -c[:, c[3, :] < 0]
     quat_norm(c, inplace=True, **kwargs)
@@ -918,12 +926,14 @@ def quat_prop(quat: np.ndarray, delta_ang: np.ndarray, *, renorm: bool = True, *
     # TODO: expand to allow a time history of delta_ang
     # compute angle rate matrix (note: transposed to make 'F' order), use it to compute a delta
     # quaternion, and then propagate by adding the delta
+    # fmt: off
     quat_new: np.ndarray = quat + 0.5 * np.array([
         [      0      , -delta_ang[2],   delta_ang[1], -delta_ang[0]],
         [ delta_ang[2],       0      ,  -delta_ang[0], -delta_ang[1]],
         [-delta_ang[1],  delta_ang[0],       0       , -delta_ang[2]],
         [ delta_ang[0],  delta_ang[1],   delta_ang[2],       0      ],
     ]).T @ quat
+    # fmt: on
     # ensure positive scalar component
     if quat_new[3] < 0:
         quat_new[:] = -quat_new
@@ -1058,6 +1068,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
         # build sequence str
         seq_str = str(int(seq[0])) + str(int(seq[1])) + str(int(seq[2]))
         # calculate terms based on sequence order
+        # fmt: off
         if seq_str == "123":
             # Identical to KLL pg 423
             c2_c3                     =  dcm[0, 0]
@@ -1127,6 +1138,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
             group = 2
         else:
             raise ValueError('Invalid axis rotation sequence: "{}"'.format(seq_str))
+        # fmt: on
 
         # Compute angles
         if s1_c2 == 0 and c1_c2 == 0:
@@ -1135,16 +1147,18 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
             if group == 1:
                 theta1 = np.arctan2(-s1_c2, c1_c2)
             else:
-                theta1 = np.arctan2( s1_c2, c1_c2)
+                theta1 = np.arctan2( s1_c2, c1_c2)  # fmt: skip
         # compute sin and cos
         s1 = np.sin(theta1)
         c1 = np.cos(theta1)
         # build remaining thetas
+        # fmt: off
         s3     =       s1_s2_c3_plus_s3_c1 * c1 +  minus_c1_s2_c3_plus_s3_s1 * s1
         c3     = minus_s1_s2_s3_plus_c3_c1 * c1 +        c1_s2_s3_plus_c3_s1 * s1
         theta3 = np.arctan2(s3, c3)
         c2     = c2_c3 * c3 - minus_c2_s3 * s3
         theta2 = np.arctan2(s2, c2)
+        # fmt: on
 
         # Store output
         euler[:, i] = np.array([theta1, theta2, theta3])

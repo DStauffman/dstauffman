@@ -96,6 +96,7 @@ if TYPE_CHECKING:
 
 COLOR_LISTS: Dict[str, colors.ListedColormap] = {}
 if HAVE_MPL:
+    # fmt: off
     # default colormap
     COLOR_LISTS["default"]  = cmx.get_cmap(DEFAULT_COLORMAP)
     assert isinstance(COLOR_LISTS["default"], colors.ListedColormap), "Expecting a ListedColormap for the default."
@@ -121,6 +122,7 @@ if HAVE_MPL:
     # quad combinations
     COLOR_LISTS["quat_diff"]   = colors.ListedColormap(COLOR_LISTS["quat_off"].colors + COLOR_LISTS["quat"].colors)
     COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)
+    # fmt: on
 
 #%% Set Matplotlib global settings
 if HAVE_MPL:
@@ -551,11 +553,11 @@ def resolve_name(name: str, force_win: bool = None, rep_token: str = "_", strip_
 
 #%% Functions - storefig
 def storefig(
-        fig: _FigOrListFig,
-        folder: Union[str, Path] = None,
-        plot_type: Union[str, List[str]] = "png",
-        show_warn: bool = True,
-    ) -> None:
+    fig: _FigOrListFig,
+    folder: Union[str, Path] = None,
+    plot_type: Union[str, List[str]] = "png",
+    show_warn: bool = True,
+) -> None:
     r"""
     Store the specified figures in the specified folder and with the specified plot type(s).
 
@@ -1075,7 +1077,7 @@ def show_zero_ylim(ax: Axes) -> None:
         ax.set_ylim(bottom=0)
         new_dt = ylim[1] - 0
     if max(ylim) < 0:
-        assert not changed, 'Should never change both axes.'
+        assert not changed, "Should never change both axes."
         changed = True
         ax.set_ylim(top=0)
         new_dt = 0 - ylim[0]

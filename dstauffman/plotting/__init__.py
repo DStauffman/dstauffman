@@ -9,13 +9,14 @@ Notes
 """
 
 #%% Imports
+# fmt: off
 from .aerospace import make_quaternion_plot, plot_attitude, plot_los, plot_position, \
                            plot_velocity, plot_innovations, plot_innov_fplocs, plot_innov_hist, \
                            plot_covariance, plot_states
 from .batch     import plot_bpe_convergence, plot_bpe_results
 from .generic   import make_generic_plot, make_time_plot, make_error_bar_plot, \
-                           make_difference_plot, make_categories_plot, make_connected_sets, \
-                           make_bar_plot
+                           make_difference_plot, make_categories_plot, make_bar_plot, \
+                           make_connected_sets
 from .health    import TruthPlotter, plot_health_time_history, plot_health_monte_carlo, \
                            plot_icer, plot_population_pyramid
 from .plotting  import Opts, suppress_plots, unsuppress_plots, plot_time_history, \
@@ -28,7 +29,8 @@ from .support   import DEFAULT_COLORMAP, DEFAULT_CLASSIFICATION, COLOR_LISTS, My
                            plot_vert_lines, plot_phases, get_classification, plot_classification, \
                            align_plots, z_from_ci, ci_from_z, save_figs_to_pdf, \
                            save_images_to_pdf, add_datashaders, fig_ax_factory
+# fmt: on
 
-#%% Unittest
+#%% Unit test
 if __name__ == "__main__":
     pass

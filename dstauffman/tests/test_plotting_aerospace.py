@@ -32,6 +32,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        # fmt: off
         self.description      = "example"
         self.time_one         = np.arange(11)
         self.time_two         = np.arange(2, 13)
@@ -53,13 +54,14 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.show_rms         = True
         self.legend_loc       = "best"
         self.show_extra       = True
-        self.second_units     = (u"µrad", 1e6)
+        self.second_units     = ("µrad", 1e6)
         self.data_as_rows     = True
         self.tolerance        = 0
         self.return_err       = False
         self.use_zoh          = False
         self.label_vert_lines = True
         self.figs: Optional[List[Figure]] = None
+        # fmt: on
 
     def test_nominal(self) -> None:
         self.return_err = True

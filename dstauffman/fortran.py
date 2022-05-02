@@ -44,6 +44,7 @@ class _FortranSource(Frozen):
 
     def __init__(self, mod_name: str = "", prog_name: str = ""):
         r"""Creates the instance of the class."""
+        # fmt: off
         self.prog_name: str         = prog_name
         self.mod_name: str          = mod_name
         self.uses: List[str]        = []
@@ -51,6 +52,7 @@ class _FortranSource(Frozen):
         self.functions: List[str]   = []
         self.subroutines: List[str] = []
         self.prefix: str            = ""
+        # fmt: on
 
     def validate(self) -> None:
         r"""Validates that the resulting parse is good."""
@@ -373,6 +375,7 @@ def _get_template(
     >>> template = _get_template("gfortran")
 
     """
+    # fmt: off
     # default compiler flags and build settings
     if fcflags is None:
         fcflags             = {}
@@ -392,6 +395,7 @@ def _get_template(
     mods["gfortran"] = r"-J$(OBJDIR) -I$(OBJDIR)"
     mods["ifort"]    = r"-module $(OBJDIR)"
     mods["win"]      = r"/module:$(B)"
+    # fmt: on
     if not build:
         build = "debug" if is_debug else "release"
     this_fcflags = fcflags[compiler]
@@ -403,6 +407,7 @@ def _get_template(
     if use_preprocessor:
         this_fcflags += " " + preproc[compiler]
     # build Unix template
+    # fmt: off
     if compiler != "win":
         template = (
             "# compiler and flags\n"
@@ -484,6 +489,7 @@ clean :
 
 """
         )
+    # fmt: on
     return template
 
 
@@ -543,7 +549,7 @@ def _write_makefile(
     token_src = "OBJS   = \\"
     token_run = "# main executable"
     token_obj = "# object file dependencies"
-    len_line  = 200
+    len_line  = 200  # fmt: skip
 
     # optional inputs
     is_unit_test = program is None
@@ -581,6 +587,7 @@ def _write_makefile(
                 this_rule = this_name + ".exe : " + this_name + ".f90 $(B)" + this_name + _OBJ_EXT
                 run_rules.append(this_rule)
                 this_depd = _build_dependencies(this_code.uses)
+                # fmt: off
                 if is_win:
                     this_rule = (
                         "\t$(FC) $(FCFLAGS) /exe:" + this_name + ".exe " + this_name
@@ -591,6 +598,7 @@ def _write_makefile(
                         "\t$(FC) $(FCFLAGS) -o " + this_name + ".exe " + this_name
                         + ".f90 -I$(OBJDIR) -I$(OBJLOC) " + " ".join(this_depd) + " $(addprefix $(OBJLOC)/,$(OBJS))"
                     )
+                # fmt: on
                 if this_name == "run_all_tests":
                     this_rule = line_wrap(this_rule, wrap=len_line, indent=8, line_cont="\\")
                 run_rules.append(this_rule)
@@ -598,6 +606,7 @@ def _write_makefile(
         assert isinstance(program, str)  # for mypy
         run_rules = [""]
         run_rules.append(program + " : " + prefix_src + program + ".f90 " + prefix_bld + program + _OBJ_EXT)
+        # fmt: off
         if is_win:
             run_rules.append(
                 "\t$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) /exe:" + program
@@ -608,6 +617,7 @@ def _write_makefile(
                 "\t$(FC) $(FCFLAGS) $(DBFLAGS) $(FPPFLAGS) -o " + program + ".exe " + prefix_src
                 + program + ".f90 -I$(OBJDIR) $(addprefix " + prefix_bld + ",$(OBJS))"
             )
+        # fmt: on
     if is_unit_test:
         all_rule = "all : " + " ".join([x + ".exe" for x in runners])
     else:

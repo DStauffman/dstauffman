@@ -5,6 +5,7 @@ At least they are functions that I (David C. Stauffer) have found useful.  Your 
 """
 
 #%% Imports
+# fmt: off
 from .classes   import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, load_method, \
                            pprint_dict, chop_time, subsample_class, Frozen, SaveAndLoad, \
                            SaveAndLoadPickle, Counter, FixedDict
@@ -29,12 +30,13 @@ from .units     import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, 
                            ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, DEGREE_SIGN, \
                            MICRO_SIGN, get_factors, get_time_factor, get_unit_conversion
 from .utils     import find_in_range, rms, rss, compare_two_classes, compare_two_dicts, \
-                           read_text_file, write_text_file, capture_output, magnitude, unit, \
-                           modd, is_np_int, np_digitize, histcounts, full_print, line_wrap, \
+                           read_text_file, write_text_file, capture_output, magnitude, unit, modd, \
+                           is_np_int, np_digitize, histcounts, full_print, line_wrap, \
                            combine_per_year, execute, execute_wrapper, get_env_var, get_username, \
                            is_datetime, intersect, issorted, zero_order_hold, drop_following_time
 from .utils_log import setup_dir, fix_rollover, remove_outliers
 from .version   import version_info
+# fmt: on
 
 #%% Constants
 __version__ = ".".join(str(x) for x in version_info)

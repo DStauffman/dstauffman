@@ -9,6 +9,7 @@ Notes
 #%% Imports
 from __future__ import annotations
 import datetime
+import os
 import pathlib
 import platform
 from typing import Dict, List, Optional, Tuple, Union
@@ -30,6 +31,8 @@ try:
     _HAVE_QT = True
 except ModuleNotFoundError:
     _HAVE_QT = False
+
+_HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
 
 #%% plotting.DEFAULT_COLORMAP
 class Test_plotting_DEFAULT_COLORMAP(unittest.TestCase):
@@ -83,7 +86,7 @@ class Test_plotting__HoverButton(unittest.TestCase):
 
 
 #%% plotting.MyCustomToolbar
-@unittest.skipIf(not HAVE_MPL or not _HAVE_QT, "Skipping due to missing matplotlib/Qt dependency.")
+@unittest.skipIf(not HAVE_MPL or not _HAVE_QT or not _HAVE_DISPLAY, "Skipping due to missing matplotlib/Qt/DISPLAY dependency.")
 class Test_plotting_MyCustomToolbar(unittest.TestCase):
     r"""
     Tests the plotting.MyCustomToolbar class with the following cases:
@@ -155,11 +158,13 @@ class Test_plotting_ColorMap(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        # fmt: off
         self.colormap   = "Paired"
         self.low        = 0
         self.high       = 1
         self.num_colors = 5
         self.fig: Optional[plt.Figure] = None
+        # fmt: on
 
     def test_nominal(self) -> None:
         cm = plot.ColorMap(self.colormap, self.low, self.high)
@@ -468,16 +473,18 @@ class Test_plotting_storefig(unittest.TestCase):
         # show a grid
         ax.grid(True)
         cls.this_filename = None
+        # suppress warnings for no display
+        cls.show_warn = _HAVE_DISPLAY
 
     def test_saving(self) -> None:
-        plot.storefig(self.fig, self.folder, self.plot_type)
+        plot.storefig(self.fig, self.folder, self.plot_type, self.show_warn)
         # assert that file exists
         self.this_filename = self.folder.joinpath(self.title + "." + self.plot_type)
         self.assertTrue(self.this_filename.is_file())
 
     def test_multiple_plot_types(self) -> None:
         plot_types = ["png", "svg"]
-        plot.storefig(self.fig, self.folder, plot_types)
+        plot.storefig(self.fig, self.folder, plot_types, self.show_warn)
         # assert that files exist
         for this_type in plot_types:
             self.this_filename = self.folder.joinpath(self.title + "." + this_type)
@@ -485,20 +492,20 @@ class Test_plotting_storefig(unittest.TestCase):
 
     def test_save_as_jpg(self) -> None:
         # Note: this test case can fail if PIL is not installed, try "pip install Pillow"
-        plot.storefig(self.fig, self.folder, "jpg")
+        plot.storefig(self.fig, self.folder, "jpg", self.show_warn)
         # assert that files exist
         self.this_filename = self.folder.joinpath(self.title + ".jpg")
         self.assertTrue(self.this_filename.is_file())
 
     def test_multiple_figures(self) -> None:
-        plot.storefig([self.fig, self.fig], self.folder, self.plot_type)
+        plot.storefig([self.fig, self.fig], self.folder, self.plot_type, self.show_warn)
         # assert that file exists
         self.this_filename = self.folder.joinpath(self.title + "." + self.plot_type)
         self.assertTrue(self.this_filename.is_file())
 
     def test_bad_folder(self) -> None:
         with self.assertRaises(ValueError):
-            plot.storefig(self.fig, "X:\\non_existant_path")
+            plot.storefig(self.fig, "X:\\non_existant_path", show_warn=self.show_warn)
         # TODO:
         pass
 
@@ -509,10 +516,14 @@ class Test_plotting_storefig(unittest.TestCase):
     def test_bad_characters(self) -> None:
         # change to bad name
         self.fig.canvas.manager.set_window_title("Bad < > / names")
+        if not _HAVE_DISPLAY:
+            self.fig.axes[0].set_title("Bad < > / names")
         # save file
-        plot.storefig(self.fig, self.folder, self.plot_type)
+        plot.storefig(self.fig, self.folder, self.plot_type, self.show_warn)
         # restore filename
         self.fig.canvas.manager.set_window_title(self.title)
+        if not _HAVE_DISPLAY:
+            self.fig.axes[0].set_title(self.title)
         # assert that file exists
         if platform.system() == "Windows":
             self.this_filename = self.folder.joinpath("Bad _ _ _ names" + "." + self.plot_type)
@@ -811,10 +822,10 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
         self.assertIsNone(ax2)
 
     def test_full_replace(self) -> None:
-        self.second_units = (u"Better Units [µrad]", 1e6)
+        self.second_units = ("Better Units [µrad]", 1e6)
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
-        self.assertEqual(ax2.get_ylabel(), u"Better Units [µrad]")
+        self.assertEqual(ax2.get_ylabel(), "Better Units [µrad]")
 
     def test_units_only(self) -> None:
         self.second_units = ("mrad", 1e3)
@@ -846,7 +857,7 @@ class Test_plotting_plot_second_yunits(unittest.TestCase):
         self.ax = self.fig.add_subplot(111)
         self.ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], ".-")
         self.ax.set_ylabel("Value [rad]")
-        self.ylab = u"Value [µrad]"
+        self.ylab = "Value [µrad]"
         self.multiplier = 1e6
 
     def test_nominal(self) -> None:
@@ -868,6 +879,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        # fmt: off
         self.time_one       = np.arange(11)
         self.time_two       = np.arange(2, 13)
         self.time_overlap   = np.arange(2, 11)
@@ -878,6 +890,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
         self.exp["two"]     = np.array([ True,  True,  True,  True,  True,  True,  True, False, False, False, False], dtype=bool)
         self.exp["overlap"] = np.array([ True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
         self.exp["pts"]     = [1, 8]
+        # fmt: on
 
     def test_nominal(self) -> None:
         ix = plot.get_rms_indices(self.time_one, self.time_two, self.time_overlap, xmin=self.xmin, xmax=self.xmax)
@@ -1043,8 +1056,10 @@ class Test_plotting_z_from_ci(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        # fmt: off
         self.cis = [0.90,  0.95,  0.98,  0.99]
         self.zs  = [1.645, 1.96, 2.326, 2.576]
+        # fmt: on
 
     def test_nominal(self) -> None:
         for (ci, exp_z) in zip(self.cis, self.zs):
@@ -1173,7 +1188,8 @@ class Test_fig_ax_factory(unittest.TestCase):
         self.fig_ax = plot.fig_ax_factory(num_axes=1, suptitle="Test Title")  # type: ignore[call-overload]
         self.assertEqual(len(self.fig_ax), 1)
         this_fig = self.fig_ax[0][0]  # type: ignore[index]
-        self.assertEqual(this_fig.canvas.manager.get_window_title(), "Test Title")
+        if _HAVE_DISPLAY:
+            self.assertEqual(this_fig.canvas.manager.get_window_title(), "Test Title")
         self.assertEqual(this_fig._suptitle.get_text(), "Test Title")
 
     def test_passthrough(self) -> None:

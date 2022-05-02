@@ -288,7 +288,7 @@ def find_repo_issues(
     is_clean = True
 
     if isinstance(extensions, str):
-        extensions = {extensions,}
+        extensions = {extensions,}  # fmt: skip
     if isinstance(exclusions, Path):
         exclusions = (exclusions,)
 
@@ -360,7 +360,7 @@ def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = T
     def _remove_pyc(file):
         r"""Do the actual file removal."""
         # check for allowable extensions
-        assert file.suffix in {".pyc",}
+        assert file.suffix in {".pyc",}  # fmt: skip
         assert file.is_file()
         # remove this file
         if print_progress:
@@ -408,14 +408,21 @@ def get_python_definitions(text: str, *, include_private: bool = False) -> List[
     assert len(cap_letters) == 26
     funcs: List[str] = []
     skip_next = False
+    skip_strs = False
     for line in text.split("\n"):
         # check for @overload function definitions and skip them
         if skip_next:
             skip_next = False
             continue
+        if skip_strs:
+            if line.endswith('"""'):
+                skip_strs = False
+            continue
         if line == "@overload":
             skip_next = True
             continue
+        if line.startswith('r"""') or line.startswith('"""'):
+            skip_strs = True
         if line.startswith("class ") and (include_private or not line.startswith("class _")):
             temp = line[len("class ") :].split("(")
             temp = temp[0].split(":")  # for classes without arguments

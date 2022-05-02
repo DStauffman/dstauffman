@@ -100,11 +100,6 @@ dstauffman.egg-info/*
 **/docs/*/*.vrb
 
 # =========================
-# PyCharm Files #
-# =========================
-.idea/*
-
-# =========================
 # Folder/Files #
 # =========================
 coverage_html_report/

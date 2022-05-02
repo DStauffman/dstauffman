@@ -107,20 +107,20 @@ class Test_find_in_range(unittest.TestCase):
 
     def test_normal_use(self) -> None:
         value = np.array([-1, -2, 0, np.nan, 15, 34.2, np.nan, 85])
-        exp = np.array([1, 1, 1, 0, 1, 1, 0, 1], dtype=bool)
+        exp   = np.array([ 1,  1, 1,      0,  1,    1,      0,  1], dtype=bool)  # fmt: skip
         valid = dcs.find_in_range(value)
         np.testing.assert_array_equal(valid, exp)
 
     def test_min_max(self) -> None:
         value = np.array([-1, -2, 0, np.nan, 15, 34.2, np.nan, 85])
-        exp = np.array([0, 0, 0, 0, 1, 1, 0, 0], dtype=bool)
+        exp   = np.array([ 0,  0, 0,      0,  1,    1,      0,  0], dtype=bool)  # fmt: skip
         valid = dcs.find_in_range(value, min_=10, max_=40)
         np.testing.assert_array_equal(valid, exp)
 
     def test_mask(self) -> None:
         value = np.array([-1, -2, 0, np.nan, 15, 34.2, np.nan, 85])
-        exp = np.array([1, 0, 0, 0, 1, 0, 0, 0], dtype=bool)
-        mask = np.array([1, 0, 0, 1, 1, 0, 0, 0], dtype=bool)
+        exp   = np.array([ 1,  0, 0,      0,  1,    0,      0,  0], dtype=bool)  # fmt: skip
+        mask  = np.array([ 1,  0, 0,      1,  1,    0,      0,  0], dtype=bool)  # fmt: skip
         valid = dcs.find_in_range(value, mask=mask)
         np.testing.assert_array_equal(valid, exp)
 
@@ -133,11 +133,13 @@ class Test_find_in_range(unittest.TestCase):
             dcs.find_in_range([0, 1], max_=-np.inf)
 
     def test_inclusive(self) -> None:
+        # fmt: off
         value = np.array([1, 2, 3, 4, 5])
-        exp1 = np.array([0, 0, 1, 0, 0], dtype=bool)
-        exp2 = np.array([0, 1, 1, 1, 0], dtype=bool)
+        exp1  = np.array([0, 0, 1, 0, 0], dtype=bool)
+        exp2  = np.array([0, 1, 1, 1, 0], dtype=bool)
         exp_l = np.array([0, 1, 1, 0, 0], dtype=bool)
         exp_r = np.array([0, 0, 1, 1, 0], dtype=bool)
+        # fmt: on
         valid = dcs.find_in_range(value, min_=2, max_=4)
         np.testing.assert_array_equal(valid, exp1)
         valid = dcs.find_in_range(value, min_=2, max_=4, inclusive=True)
@@ -153,8 +155,8 @@ class Test_find_in_range(unittest.TestCase):
 
     def test_precision(self) -> None:
         value = np.array([1, 1.999, 3.1, 4.005, 4.012, 5])
-        exp1 = np.array([0, 0, 1, 0, 0, 0], dtype=bool)
-        exp2 = np.array([0, 1, 1, 1, 0, 0], dtype=bool)
+        exp1  = np.array([0,     0,   1,     0,     0, 0], dtype=bool)  # fmt: skip
+        exp2  = np.array([0,     1,   1,     1,     0, 0], dtype=bool)  # fmt: skip
         valid = dcs.find_in_range(value, min_=2.0, max_=4.0)
         np.testing.assert_array_equal(valid, exp1)
         valid = dcs.find_in_range(value, min_=2.0, max_=4.0, precision=0.01)
@@ -162,7 +164,7 @@ class Test_find_in_range(unittest.TestCase):
 
     def test_2d_array(self) -> None:
         value = np.array([[-1, -2, 0, np.nan], [15, 34.2, np.nan, 85]])
-        exp = np.array([[1, 1, 1, 0], [1, 1, 0, 1]], dtype=bool)
+        exp   = np.array([[ 1,  1, 1,      0], [ 1,    1,      0,  1]], dtype=bool)  # fmt: skip
         valid = dcs.find_in_range(value)
         np.testing.assert_array_equal(valid, exp)
 
@@ -195,18 +197,20 @@ class Test_rms(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.inputs1 = np.array([0, 1, 0.0, -1])
-        self.outputs1 = np.sqrt(2) / 2
-        self.inputs2 = [[0, 1, 0.0, -1], [1.0, 1, 1, 1]]
-        self.outputs2a = np.sqrt(3) / 2
-        self.outputs2b = np.array([np.sqrt(2) / 2, 1, np.sqrt(2) / 2, 1])
-        self.outputs2c = np.array([np.sqrt(2) / 2, 1])
-        self.outputs2d = np.array([[np.sqrt(2) / 2], [1]])
-        self.inputs3 = np.hstack((self.inputs1, np.nan))
-        self.inputs4 = [[0, 0.0, np.nan], [1.0, np.nan, 1]]
-        self.outputs4a = np.sqrt(2) / 2
-        self.outputs4b = np.array([np.sqrt(2) / 2, 0, 1])
+        # fmt: off
+        self.inputs1   = np.array([0, 1, 0.0, -1])
+        self.outputs1  = np.sqrt(2)/2
+        self.inputs2   = [[0, 1, 0.0, -1], [1.0, 1, 1, 1]]
+        self.outputs2a = np.sqrt(3)/2
+        self.outputs2b = np.array([np.sqrt(2)/2, 1, np.sqrt(2)/2, 1])
+        self.outputs2c = np.array([np.sqrt(2)/2, 1])
+        self.outputs2d = np.array([[np.sqrt(2)/2], [1]])
+        self.inputs3   = np.hstack((self.inputs1, np.nan))
+        self.inputs4   = [[0, 0.0, np.nan], [1.0, np.nan, 1]]
+        self.outputs4a = np.sqrt(2)/2
+        self.outputs4b = np.array([np.sqrt(2)/2, 0, 1])
         self.outputs4c = np.array([0, 1])
+        # fmt: on
 
     def test_scalar_input(self) -> None:
         out = dcs.rms(-1.5)
@@ -316,18 +320,20 @@ class Test_rss(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.inputs1 = np.array([0, 1, 0, -1])
-        self.outputs1 = 2
-        self.inputs2 = [[0, 1, 0, -1], [1, 1, 1, 1]]
+        # fmt: off
+        self.inputs1   = np.array([0, 1, 0, -1])
+        self.outputs1  = 2
+        self.inputs2   = [[0, 1, 0, -1], [1, 1, 1, 1]]
         self.outputs2a = 6
         self.outputs2b = np.array([1, 2, 1, 2])
         self.outputs2c = np.array([2, 4])
         self.outputs2d = np.array([[2], [4]])
-        self.inputs3 = np.hstack((self.inputs1, np.nan))
-        self.inputs4 = [[0, 0, np.nan], [1, np.nan, 1]]
+        self.inputs3   = np.hstack((self.inputs1, np.nan))
+        self.inputs4   = [[0, 0, np.nan], [1, np.nan, 1]]
         self.outputs4a = 2
         self.outputs4b = np.array([1, 0, 1])
         self.outputs4c = np.array([0, 2])
+        # fmt: on
 
     def test_scalar_input(self) -> None:
         out = dcs.rss(-1.5)
@@ -670,7 +676,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         out.close()
         self.assertEqual(
             output,
-            'b is different.\n\"d1["e"]\" and \"d2["e"]\" are the same.\n'
+            "b is different.\n\"d1['e']\" and \"d2['e']\" are the same.\n"
             + 'c is only in d1.\nd is only in d2.\n"d1" and "d2" are not the same.',
         )
         self.assertFalse(is_same)
@@ -702,7 +708,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertFalse(is_same1)
         self.assertTrue(is_same2)
         self.assertEqual(len(lines), 2)
-        self.assertEqual(lines[0], '"d1["e"]" and "d2["e"]" are the same (subset).')
+        self.assertEqual(lines[0], "\"d1['e']\" and \"d2['e']\" are the same (subset).")
         self.assertEqual(lines[1], '"d1" and "d2" are the same (subset).')
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
@@ -942,7 +948,7 @@ class Test_modd(unittest.TestCase):
 
     def setUp(self) -> None:
         self.x = np.array([-4, -3, -2, -1, 0, 1, 2, 3, 4])
-        self.y = np.array([4, 1, 2, 3, 4, 1, 2, 3, 4])
+        self.y = np.array([ 4,  1,  2,  3, 4, 1, 2, 3, 4])  # fmt: skip
         self.mod = 4
 
     def test_nominal(self) -> None:
@@ -1585,7 +1591,7 @@ class Test_zero_order_hold(unittest.TestCase):
     def test_supersample(self) -> None:
         xp = np.array([0.0, 5000.0, 10000.0, 86400.0])
         yp = np.array([0, 1, -2, 0])
-        x = np.arange(0.0, 86400.0)
+        x  = np.arange(0.0, 86400.0)  # fmt: skip
         func = interp1d(xp, yp, kind="zero", fill_value="extrapolate", assume_sorted=True)
         y_exp = func(x)
         y = dcs.zero_order_hold(x, xp, yp)
@@ -1593,85 +1599,87 @@ class Test_zero_order_hold(unittest.TestCase):
         y = dcs.zero_order_hold(x, xp, yp, assume_sorted=True)
         np.testing.assert_array_equal(y, y_exp)
 
+    # fmt: off
     @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_xp_not_sorted(self) -> None:
-        xp = np.array([0, 10, 5, 15])
-        yp = np.array([0, 1, -2, 3])
-        x = np.array([10, 2, 14, 6, 8, 10, 4, 14, 0, 16])
-        y_exp = np.array([1, 0, 1, -2, -2, 1, 0, 1, 0, 3])
-        y = dcs.zero_order_hold(x, xp, yp)
+        xp    = np.array([0, 10, 5, 15])
+        yp    = np.array([0, 1, -2, 3])
+        x     = np.array([10, 2, 14,  6,  8, 10, 4, 14, 0, 16])
+        y_exp = np.array([ 1, 0,  1, -2, -2,  1, 0,  1, 0,  3])
+        y     = dcs.zero_order_hold(x, xp, yp)
         np.testing.assert_array_equal(y, y_exp)
 
     def test_x_not_sorted(self) -> None:
-        xp = np.array([0, 5, 10, 15])
-        yp = np.array([0, -2, 1, 3])
-        x = np.array([10, 2, 14, 6, 8, 10, 4, 14, 0, 16])
-        y_exp = np.array([1, 0, 1, -2, -2, 1, 0, 1, 0, 3])
-        y = dcs.zero_order_hold(x, xp, yp)
+        xp    = np.array([0, 5, 10, 15])
+        yp    = np.array([0, -2, 1, 3])
+        x     = np.array([10, 2, 14,  6,  8, 10, 4, 14, 0, 16])
+        y_exp = np.array([ 1, 0,  1, -2, -2,  1, 0,  1, 0,  3])
+        y     = dcs.zero_order_hold(x, xp, yp)
         np.testing.assert_array_equal(y, y_exp)
 
     @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_left_end(self) -> None:
-        xp = np.array([0, 5, 10, 15, 4])
-        yp = np.array([0, 1, -2, 3, 0])
-        x = np.array([-4, -2, 0, 2, 4, 6])
+        xp    = np.array([0, 5, 10, 15, 4])
+        yp    = np.array([0, 1, -2, 3, 0])
+        x     = np.array([-4, -2, 0, 2, 4, 6])
         y_exp = np.array([-5, -5, 0, 0, 0, 1])
-        y = dcs.zero_order_hold(x, xp, yp, left=-5)
+        y     = dcs.zero_order_hold(x, xp, yp, left=-5)
         np.testing.assert_array_equal(y, y_exp)
 
     def test_lists(self) -> None:
-        xp = [0, 5, 10, 15]
-        yp = [0, 1, 2, 3]
-        x = [-4, -2, 0, 2, 4, 6, 20]
+        xp    = [0, 5, 10, 15]
+        yp    = [0, 1, 2, 3]
+        x     = [-4, -2, 0, 2, 4, 6, 20]
         y_exp = [-1, -1, 0, 0, 0, 1, 3]
-        y = dcs.zero_order_hold(x, xp, yp, left=-1)
+        y     = dcs.zero_order_hold(x, xp, yp, left=-1)
         np.testing.assert_array_equal(y, y_exp)
 
     def test_bools(self) -> None:
-        xp = np.array([1, 3, 4, 6, 8, 12], dtype=int)
-        yp = np.array([1, 0, 0, 1, 1, 0], dtype=bool)
-        x = np.arange(15, dtype=int)
+        xp    = np.array([1, 3, 4, 6, 8, 12], dtype=int)
+        yp    = np.array([1, 0, 0, 1, 1, 0], dtype=bool)
+        x     = np.arange(15, dtype=int)
         y_exp = np.array([0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], dtype=bool)
-        y = dcs.zero_order_hold(x, xp, yp, left=False)
+        y     = dcs.zero_order_hold(x, xp, yp, left=False)
         self.assertEqual(y.dtype, bool)
         np.testing.assert_array_equal(y, y_exp)
 
     @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_bools_unsorted(self) -> None:
-        xp = np.array([1, 3, 6, 4, 8, 12], dtype=int)
-        yp = np.array([1, 0, 1, 0, 1, 0], dtype=bool)
-        x = np.arange(15, dtype=int)
+        xp    = np.array([1, 3, 6, 4, 8, 12], dtype=int)
+        yp    = np.array([1, 0, 1, 0, 1, 0], dtype=bool)
+        x     = np.arange(15, dtype=int)
         y_exp = np.array([0, 1, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0], dtype=bool)
-        y = dcs.zero_order_hold(x, xp, yp, left=False)
+        y     = dcs.zero_order_hold(x, xp, yp, left=False)
         self.assertEqual(y.dtype, bool)
         np.testing.assert_array_equal(y, y_exp)
 
     def test_indices(self) -> None:
-        xp = np.array([0, 5, 10, 15])
-        yp = np.array([0, 1, 2, 3])
-        x = np.array([-4, -2, 0, 2, 4, 6, 20])
-        y_exp = np.array([np.nan, np.nan, 0, 0, 0, 1, 3])
-        ix_exp = np.array([None, None, 0, 0, 0, 1, 3])
+        xp      = np.array([0, 5, 10, 15])
+        yp      = np.array([0, 1, 2, 3])
+        x       = np.array([-4, -2, 0, 2, 4, 6, 20])
+        y_exp   = np.array([np.nan, np.nan, 0, 0, 0, 1, 3])
+        ix_exp  = np.array([None, None, 0, 0, 0, 1, 3])
         (y, ix) = dcs.zero_order_hold(x, xp, yp, left=np.nan, return_indices=True)
         np.testing.assert_array_equal(y, y_exp)
         np.testing.assert_array_equal(ix, ix_exp)
 
     def test_indices_not_sorted(self) -> None:
-        xp = np.array([0, 10, 5, 15])
-        yp = np.array([0, 1, 2, 3])
-        x = np.array([-4, -2, 0, 2, 4, 6, 20])
+        xp      = np.array([0, 10, 5, 15])
+        yp      = np.array([0, 1, 2, 3])
+        x       = np.array([-4, -2, 0, 2, 4, 6, 20])
         with self.assertRaises(RuntimeError) as err:
             dcs.zero_order_hold(x, xp, yp, return_indices=True)
         self.assertEqual(str(err.exception), "Data must be sorted in order to ask for indices.")
 
     def test_missing_scipy(self) -> None:
-        xp = np.array([0, 5, 10, 15, 4])
-        yp = np.array([0, 1, -2, 3, 0])
-        x = np.array([-4, -2, 0, 2, 4, 6])
+        xp    = np.array([0, 5, 10, 15, 4])
+        yp    = np.array([0, 1, -2, 3, 0])
+        x     = np.array([-4, -2, 0, 2, 4, 6])
         with self.assertRaises(RuntimeError) as err:
             with patch("dstauffman.utils.HAVE_SCIPY", False):
                 dcs.zero_order_hold(x, xp, yp)
         self.assertEqual(str(err.exception), "You must have scipy available to run this.")
+    # fmt: on
 
 
 #%% drop_following_time

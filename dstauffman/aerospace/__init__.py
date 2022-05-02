@@ -10,8 +10,10 @@ Notes
 """
 
 #%% Imports
+# fmt: off
 from .classes     import KfInnov, Kf, KfRecord
-from .gps         import bsl, bsr, prn_01_to_m11, get_prn_bits, correlate_prn, generate_prn, \
+from .gps         import GPS_DATE_ZERO, ONE_DAY, DAYS_PER_WEEK, WEEK_ROLLOVER, bsl, bsr, \
+                             prn_01_to_m11, get_prn_bits, correlate_prn, generate_prn, \
                              gps_to_datetime, gps_to_utc_datetime
 from .orbit_const import PI, TAU, G, SS_MASSES, SIDEREAL_DAY, SIDEREAL_YEAR, AU, MU_SUN, \
                              MU_EARTH, JULIAN, SPEED_OF_LIGHT, ECLIPTIC, EARTH, PALO_ALTO
@@ -22,10 +24,10 @@ from .orbit_conv  import anomaly_eccentric_2_mean, anomaly_eccentric_2_true, \
                              sidereal_2_long, raan_2_mltan, jd_2_sidereal, quat_eci_2_ecf
 from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to_jd, d_2_dms, \
                              dms_2_d, hms_2_r, r_2_hms, aer_2_rdr, aer_2_sez, geo_loc_2_ijk, \
-                             ijk_2_rdr, ijk_2_sez, rdr_2_aer, rdr_2_ijk, sez_2_aer, sez_2_ijk, \
-                             rv_aer_2_ijk, rv_aer_2_sez, rv_ijk_2_aer, rv_ijk_2_sez, \
-                             rv_sez_2_aer, rv_sez_2_ijk, get_sun_radec
-from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv
+                             ijk_2_rdr, ijk_2_sez, long_2_sidereal, rdr_2_aer, rdr_2_ijk, \
+                             sez_2_aer, sez_2_ijk, rv_aer_2_ijk, rv_aer_2_sez, rv_ijk_2_aer, \
+                             rv_ijk_2_sez, rv_sez_2_aer, rv_sez_2_ijk, get_sun_radec
+from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv, advance_elements
 from .quat        import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks, quat_assertions, \
                              enforce_pos_scalar, qrot, quat_from_axis_angle, quat_angle_diff, \
                              quat_from_euler, quat_interp, quat_inv, quat_mult, quat_norm, \
@@ -34,7 +36,8 @@ from .quat_opt    import qrot_single, quat_from_axis_angle_single, quat_interp_s
                              quat_inv_single, quat_mult_single, quat_norm_single, \
                              quat_prop_single, quat_times_vector_single, quat_to_dcm
 from .vectors     import rot, drot, vec_cross, vec_angle, cart2sph, sph2cart, rv2dcm
+# fmt: on
 
-#%% Unittest
+#%% Unit test
 if __name__ == "__main__":
     pass

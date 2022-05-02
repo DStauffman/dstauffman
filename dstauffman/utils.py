@@ -587,7 +587,7 @@ def compare_two_dicts(
                     s1,
                     s2,
                     suppress_output=suppress_output,
-                    names=[f'{name1}["{key}"]', f'{name2}["{key}"]'],
+                    names=[f"{name1}['{key}']", f"{name2}['{key}']"],
                     is_subset=is_subset,
                     tolerance=tolerance,
                 )
@@ -1501,7 +1501,10 @@ def get_username() -> str:
     """
     if IS_WINDOWS:
         return os.environ["USERNAME"]
-    return os.environ["USER"]
+    try:
+        return os.environ["USER"]
+    except KeyError:
+        return os.environ["GITLAB_USER_LOGIN"]
 
 
 #%% Functions - is_datetime

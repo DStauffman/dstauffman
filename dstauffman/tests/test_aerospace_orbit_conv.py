@@ -71,7 +71,7 @@ class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
     def test_nominal(self) -> None:
         nu = space.anomaly_eccentric_2_true(self.E2, self.e2)
         assert isinstance(nu, float)
-        self.assertEqual(nu, self.exp2)
+        self.assertAlmostEqual(nu, self.exp2, 14)
 
     def test_vector1(self) -> None:
         E = np.array([self.E1, self.E2])
@@ -79,7 +79,7 @@ class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
         nu = space.anomaly_eccentric_2_true(E, e)
         assert isinstance(nu, np.ndarray)
         self.assertEqual(nu.shape, (2,))
-        self.assertEqual(nu[1], self.exp2)
+        self.assertAlmostEqual(nu[1], self.exp2, 14)
 
     def test_vector2(self) -> None:
         E = self.E2
@@ -87,7 +87,7 @@ class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
         nu = space.anomaly_eccentric_2_true(E, e)
         assert isinstance(nu, np.ndarray)
         self.assertEqual(nu.shape, (2,))
-        self.assertEqual(nu[1], self.exp2)
+        self.assertAlmostEqual(nu[1], self.exp2, 14)
 
     def test_vector3(self) -> None:
         E = np.array([self.E1, self.E2])
@@ -96,7 +96,7 @@ class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
         assert isinstance(nu, np.ndarray)
         self.assertEqual(nu.shape, (2,))
         self.assertEqual(nu[0], self.exp1)
-        self.assertEqual(nu[1], self.exp2)
+        self.assertAlmostEqual(nu[1], self.exp2, 14)
 
 
 #%% aerospace.anomaly_hyperbolic_2_mean

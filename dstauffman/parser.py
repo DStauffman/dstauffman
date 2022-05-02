@@ -133,7 +133,8 @@ def process_command_line_options(log_start: Union[bool, str] = None) -> _Flags:
 
     Parameters
     ----------
-    log_start : optional, bool or filename string to log when setting log level
+    log_start : bool or str, optional
+        Whether to log the time of the start, and if a string, then log the name that started it
 
     Returns
     -------

@@ -307,6 +307,7 @@ class Test_make_python_init(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        # fmt: off
         self.folder   = dcs.get_root_dir()
         self.text     = "from .matlab import load_matlab"
         self.text2    = "from .matlab    import load_matlab"
@@ -314,6 +315,7 @@ class Test_make_python_init(unittest.TestCase):
         self.folder2  = dcs.get_tests_dir()
         self.filepath = self.folder2 / "temp_file.py"
         self.filename = self.folder2 / "__init__2.py"
+        # fmt: on
 
     def test_nominal_use(self) -> None:
         text = dcs.make_python_init(self.folder)

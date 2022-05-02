@@ -273,6 +273,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
+    # fmt: off
     time_units   = kwargs.pop("time_units", this_opts.time_base)
     start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
     rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
@@ -286,6 +287,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    # fmt: on
 
     # hard-coded defaults
     second_units = kwargs.pop("second_units", "micro")
@@ -433,6 +435,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
+    # fmt: off
     time_units   = kwargs.pop("time_units", this_opts.time_base)
     start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
     rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
@@ -454,6 +457,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     colormap      = get_nondeg_colorlists(3)
     name_one      = kwargs.pop("name_one", kf1.name)
     name_two      = kwargs.pop("name_two", kf2.name)
+    # fmt: on
 
     # initialize outputs
     figs = []
@@ -640,10 +644,12 @@ def plot_innovations(
         else:
             temp = 0
         num_chan = max(num_chan, temp)
+    # fmt: off
     elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f"Channel {i+1}" for i in range(num_chan)]
     elements     = kwargs.pop("elements", elements)
     units        = kwargs.pop("units", kf1.units)
     second_units = kwargs.pop("second_units", "micro")
+    # fmt: on
 
     # determine if converting units
     is_date_1 = is_datetime(kf1.time)
@@ -661,6 +667,7 @@ def plot_innovations(
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
+    # fmt: off
     time_units   = kwargs.pop("time_units", this_opts.time_base)
     start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
     rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
@@ -675,6 +682,7 @@ def plot_innovations(
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
     colormap     = kwargs.pop("colormap", this_opts.colormap)
     tolerance    = kwargs.pop("tolerance", 0)
+    # fmt: on
 
     # Initialize outputs
     figs = []
@@ -690,7 +698,7 @@ def plot_innovations(
             printed = True
         # make plots
         if "Normalized" in sub_description:
-            units = u"σ"
+            units = "σ"
             this_second_units = "unity"
         else:
             this_second_units = second_units
@@ -1121,12 +1129,14 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
         else:
             temp = 0
         num_chan = max(num_chan, temp)
+    # fmt: off
     elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f"Channel {i+1}" for i in range(num_chan)]
     elements     = kwargs.pop("elements", elements)
     units        = kwargs.pop("units", "mixed")
     second_units = kwargs.pop("second_units", "micro")
     name_one     = kwargs.pop("name_one", kf1.name)
     name_two     = kwargs.pop("name_two", kf2.name)
+    # fmt: on
     if groups is None:
         groups = [i for i in range(num_chan)]
 
@@ -1143,9 +1153,11 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     elif is_date_o and not is_date_1 and not is_date_2:
         this_opts.convert_dates("sec", old_form=opts.time_base)
     # opts overrides
-    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)  # TODO: why do I have this line?  Need to use this_opts below?
+    # TODO: why do I have this line?  Need to use this_opts below?
+    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
+    # fmt: off
     time_units   = kwargs.pop("time_units", this_opts.time_base)
     start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
     rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
@@ -1158,6 +1170,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    # fmt: on
 
     # initialize output
     figs = []
@@ -1173,10 +1186,10 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
         # make plots
         err[field] = {}
         for (ix, states) in enumerate(groups):
-            this_units  = units if isinstance(units, str) else units[ix]
+            this_units = units if isinstance(units, str) else units[ix]
             this_2units = second_units[ix] if isinstance(second_units, list) else second_units
             this_ylabel = description + f" [{this_units}]"
-            states      = np.atleast_1d(states)
+            states = np.atleast_1d(states)
             if hasattr(kf1, "active") and kf1.active is not None:
                 (this_state_nums1, this_state_rows1, _) = intersect(kf1.active, states, return_indices=True)
             else:
@@ -1186,8 +1199,8 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
             else:
                 this_state_nums2 = np.array([], dtype=int)
             this_state_nums = np.union1d(this_state_nums1, this_state_nums2)
-            data_one   = np.atleast_2d(getattr(kf1, field)[this_state_rows1, :]) if getattr(kf1, field) is not None else None
-            data_two   = np.atleast_2d(getattr(kf2, field)[this_state_rows2, :]) if getattr(kf2, field) is not None else None
+            data_one = np.atleast_2d(getattr(kf1, field)[this_state_rows1, :]) if getattr(kf1, field) is not None else None
+            data_two = np.atleast_2d(getattr(kf2, field)[this_state_rows2, :]) if getattr(kf2, field) is not None else None
             have_data1 = data_one is not None and np.any(~np.isnan(data_one))
             have_data2 = data_two is not None and np.any(~np.isnan(data_two))
             if have_data1 or have_data2:

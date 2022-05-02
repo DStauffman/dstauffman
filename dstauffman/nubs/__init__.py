@@ -7,10 +7,14 @@ Notes
 """
 
 #%% Imports
-from .numpy_mods import issorted_ascend, issorted_descend, np_all_axis0, np_all_axis1, np_any_axis0, np_any_axis1
+# fmt: off
+from .numpy_mods  import issorted_ascend, issorted_descend, np_all_axis0, np_all_axis1, \
+                             np_any_axis0, np_any_axis1
+from .optimized   import np_any, np_all, issorted_opt, prob_to_rate_opt, rate_to_prob_opt, \
+                             zero_divide
 from .passthrough import fake_jit, HAVE_NUMBA, ncjit, TARGET
-from .optimized import np_any, np_all, issorted_opt, prob_to_rate_opt, rate_to_prob_opt, zero_divide
+# fmt: on
 
-#%% Unittest
+#%% Unit test
 if __name__ == "__main__":
     pass
