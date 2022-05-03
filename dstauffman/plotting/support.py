@@ -14,6 +14,7 @@ from functools import partial
 import gc
 from itertools import repeat
 import operator
+import os
 from pathlib import Path
 import platform
 import re
@@ -44,6 +45,7 @@ from dstauffman import (
     HAVE_PANDAS,
     HAVE_SCIPY,
     is_datetime,
+    IS_WINDOWS,
 )
 
 if HAVE_MPL:
@@ -131,6 +133,10 @@ if HAVE_MPL:
     plt.rcParams["figure.max_open_warning"] = 80  # Max number of figures to open before through a warning, 0 means unlimited
     plt.rcParams["date.autoformatter.minute"] = "%H:%M:%S"  # makes seconds show, and not day, default is '%d %H:%M'
 
+# Whether a display exists to draw on or not
+# TODO: make this public?
+_HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
+
 #%% Classes - _HoverButton
 class _HoverButton(QPushButton):
     r"""Custom button that allows hovering and icons."""
@@ -181,6 +187,9 @@ class MyCustomToolbar:
 
     def __init__(self, fig):
         r"""Initialize the custom toolbar."""
+        # check to see if a display exists and if not, then return without creating buttons
+        if not _HAVE_DISPLAY:
+            return
         # check to see if a QApplication exists, and if not, make one
         if QApplication.instance() is None:
             self.qapp = QApplication(sys.argv)  # pragma: no cover
@@ -497,6 +506,74 @@ def whitten(color, white=(1, 1, 1, 1), dt=0.30):
     return new_color
 
 
+#%% Functions - get_figure_title
+@overload
+def get_figure_title(fig: Figure, raise_warning: Literal[False] = ...) -> str:
+    ...
+
+
+@overload
+def get_figure_title(fig: Figure, raise_warning: Literal[True]) -> Tuple[str, bool]:
+    ...
+
+
+def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tuple[str, bool]]:
+    r"""
+    Gets the name of the given figure.  First trying the canvas, then the suptitle, then the title.
+
+    Parameters
+    ----------
+    fig : class Figure
+        Figure to get the title from
+    raise_warning : bool, optional
+        Whether to return a flag about any warnings
+
+    Returns
+    -------
+    raw_title : str
+        Figure title
+    throw_warning : bool
+        Whether a warning should be thrown
+
+    Notes
+    -----
+    #.  Functionalized out of storefig by David C. Stauffer in May 2022 to use elsewhere.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import plot_time_history, get_figure_title
+    >>> import matplotlib.pyplot as plt
+    >>> fig = plot_time_history('My Title', 0, 0)
+    >>> title = get_figure_title(fig)
+    >>> print(title)
+    My Title
+
+    Close plot
+    >>> plt.close(fig)
+
+    """
+    # preallocate if a warning should be thrown
+    throw_warning = False
+    # get the title of the figure canvas
+    raw_title = fig.canvas.manager.get_window_title()
+    if raw_title is None or raw_title == "image":
+        # special case when you have a displayless backend, check the suptitle, then the title
+        # from the first axes
+        throw_warning = True
+        if (sup := fig._suptitle) is not None:
+            raw_title = sup.get_text()
+        else:
+            try:
+                raw_title = fig.axes[0].get_title()
+            except:
+                pass
+    if raw_title is None:
+        raw_title = "None"
+    if raise_warning:
+        return raw_title, throw_warning
+    return raw_title  # type: ignore[no-any-return]
+
+
 #%% Functions - resolve_name
 def resolve_name(name: str, force_win: bool = None, rep_token: str = "_", strip_classification: bool = True) -> str:
     r"""
@@ -608,8 +685,9 @@ def storefig(
     Close plot
     >>> plt.close(fig)
 
-    Delete file
-    >>> folder.joinpath('Figure Title.png').unlink()
+    Delete potential file(s)
+    >>> folder.joinpath('Figure Title.png').unlink(missing_ok=True)
+    >>> folder.joinpath('X vs Y.png').unlink(missing_ok=True)
 
     """
     # make sure figs is a list
@@ -635,19 +713,8 @@ def storefig(
     # loop through the figures
     throw_warning = False
     for this_fig in figs:
-        # get the title of the figure canvas
-        raw_title = this_fig.canvas.manager.get_window_title()
-        if raw_title is None or raw_title == "image":
-            # special case when you have a displayless backend, check the suptitle, then the title
-            # from the first axes
-            throw_warning = True
-            if (sup := this_fig._suptitle) is not None:
-                raw_title = sup.get_text()
-            else:
-                try:
-                    raw_title = this_fig.axes[0].get_title()
-                except:
-                    pass
+        (raw_title, need_warning) = get_figure_title(this_fig, raise_warning=True)
+        throw_warning |= need_warning
         this_title = resolve_name(raw_title)
         # loop through the plot types
         for this_type in types:
@@ -1025,6 +1092,9 @@ def get_screen_resolution() -> Tuple[int, int]:
     >>> print('{}x{}'.format(screen_width, screen_height)) # doctest: +SKIP
 
     """
+    # if you don't have a display, then return zeros
+    if not _HAVE_DISPLAY:
+        return (0, 0)
     # check to see if a QApplication exists, and if not, make one
     app: Union[QApplication, QCoreApplication]
     if QApplication.instance() is None:
@@ -1858,7 +1928,7 @@ def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = 
 def save_images_to_pdf(
     figs: Union[Figure, List[Figure]] = None,
     folder: Path = None,
-    plot_type: Union[str, List[str]] = "png",
+    plot_type: str = "png",
     filename: Path = Path("figs.pdf"),
 ):
     r"""
@@ -1868,6 +1938,10 @@ def save_images_to_pdf(
     ----------
     figs : figure or List[figure] or None
         Figures to save, None means save all open figures
+    folder : Path, optional
+        Folder to load the figures from
+    plot_type: str, optional
+        Type of figure to try and load from
     filename : str, optional
         Name of the file to save the figures to, defaults to 'figs.pdf' in the current folder
 
@@ -1916,7 +1990,8 @@ def save_images_to_pdf(
     # Create PDF of images
     images = []
     for (ix, fig) in enumerate(figs):
-        this_image = folder.joinpath(fig.canvas.manager.get_window_title() + "." + plot_type)
+        fig_title = get_figure_title(fig)
+        this_image = folder.joinpath(fig_title + "." + plot_type)
         image_rgba = Image.open(this_image)
         image_jpg = image_rgba.convert("RGB")
         if ix == 0:

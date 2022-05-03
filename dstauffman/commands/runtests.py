@@ -49,20 +49,11 @@ def parse_tests(input_args: List[str]) -> argparse.Namespace:
 
     Examples
     --------
-    >>> from dstauffman import pprint_dict
     >>> from dstauffman.commands import parse_tests
     >>> input_args = []
     >>> args = parse_tests(input_args)
-    >>> #print(args)  # TODO: use when Python v3.9 everywhere
-    >>> #Namespace(docstrings=False, unittest=False, verbose=False, library=None)
-    >>> _ = pprint_dict(vars(args), name='args')
-    args
-     docstrings = False
-     unittest   = False
-     verbose    = False
-     library    = None
-     coverage   = False
-     cov_file   = None
+    >>> print(args)
+    Namespace(docstrings=False, unittest=False, verbose=False, library=None, coverage=False, cov_file=None)
 
     """
     parser = argparse.ArgumentParser(prog="dcs tests", description="Runs all the built-in unit tests.")
@@ -172,17 +163,11 @@ def parse_coverage(input_args: List[str]) -> argparse.Namespace:
 
     Examples
     --------
-    >>> from dstauffman import pprint_dict
     >>> from dstauffman.commands import parse_coverage
     >>> input_args = []
     >>> args = parse_coverage(input_args)
-    >>> # TODO: go back to this when v3.9 everywhere
-    >>> print(args)  # doctest: +SKIP
-    >>> #Namespace(no_report=False, cov_file=None)
-    >>> _ = pprint_dict(vars(args), name='args', indent=1)  # doctest: +ELLIPSIS
-    args
-     no_report = False
-     cov_file  = None
+    >>> print(args)
+    Namespace(no_report=False, cov_file=None)
 
     """
     parser = argparse.ArgumentParser(

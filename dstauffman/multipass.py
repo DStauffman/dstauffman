@@ -47,7 +47,7 @@ class MultipassExceptionWrapper(object):
 
     def re_raise(self) -> None:
         r"""Re-raise a previously saved exception and traceback."""
-        raise self.ee.with_traceback(self.tb)  # type: ignore[call-arg, misc, type-var]
+        raise self.ee.with_traceback(self.tb)  # type: ignore[call-arg, misc]
 
 
 #%% Functions - parfor_wrapper
@@ -147,7 +147,7 @@ def parfor_wrapper(
                 LogLevel.L6,
                 "Error %i: %s\n%s",
                 i + 1,
-                err.ee.with_traceback(err.tb),  # type: ignore[call-arg, type-var]
+                err.ee.with_traceback(err.tb),  # type: ignore[call-arg]
                 "\n".join(traceback.format_tb(err.tb)),
             )
     return results

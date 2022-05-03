@@ -451,6 +451,7 @@ class Test_plotting_storefig(unittest.TestCase):
     plot_type: str
     fig: plt.Figure
     this_filename: Optional[pathlib.Path]
+    show_warn: bool
 
     @classmethod
     def setUpClass(cls) -> None:

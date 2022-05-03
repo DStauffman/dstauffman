@@ -33,24 +33,12 @@ def parse_enforce(input_args: List[str]) -> argparse.Namespace:
 
     Examples
     --------
-    >>> from dstauffman import get_root_dir, pprint_dict
+    >>> from dstauffman import get_root_dir
     >>> from dstauffman.commands import parse_enforce
     >>> input_args = [str(get_root_dir())]
     >>> args = parse_enforce(input_args)
-    >>> # TODO: go back to this when v3.9 everywhere
-    >>> print(args) # doctest: +SKIP
-    >>> #Namespace(folder='...', extensions=None, list_all=False, ignore_tabs=False, trailing=False, skip=None, windows=False, unix=False, execute=False)
-    >>> _ = pprint_dict(vars(args), name='args', indent=1)  # doctest: +ELLIPSIS
-    args
-     folder      = ...
-     extensions  = None
-     list_all    = False
-     ignore_tabs = False
-     trailing    = False
-     skip        = None
-     windows     = False
-     unix        = False
-     execute     = False
+    >>> print(args)  # doctest: +ELLIPSIS
+    Namespace(folder='...', extensions=None, list_all=False, ignore_tabs=False, trailing=False, skip=None, windows=False, unix=False, execute=False)
 
     """
     parser = argparse.ArgumentParser(
@@ -158,20 +146,12 @@ def parse_make_init(input_args: List[str]) -> argparse.Namespace:
 
     Examples
     --------
-    >>> from dstauffman import get_root_dir, pprint_dict
+    >>> from dstauffman import get_root_dir
     >>> from dstauffman.commands import parse_make_init
     >>> input_args = [str(get_root_dir()), '-l']
     >>> args = parse_make_init(input_args)
-    >>> # TODO: go back to this when Python v3.9 everywhere
-    >>> print(args) # doctest: +SKIP
-    >>> #Namespace(folder='...', lineup=True, wrap=100, dry_run=False, outfile='__init__.py')
-    >>> _ = pprint_dict(vars(args), name='args')  # doctest: +ELLIPSIS
-    args
-     folder  = ...
-     lineup  = True
-     wrap    = 100
-     dry_run = False
-     outfile = __init__.py
+    >>> print(args) # doctest: +ELLIPSIS
+    Namespace(folder='...', lineup=True, wrap=100, dry_run=False, outfile='__init__.py')
 
     """
     parser = argparse.ArgumentParser(
@@ -214,11 +194,13 @@ def execute_make_init(args: argparse.Namespace) -> int:
     >>> return_code = execute_make_init(args) # doctest: +SKIP
 
     """
+    # fmt: off
     folder   = Path(args.folder).resolve()
     lineup   = args.lineup
     wrap     = args.wrap
     filename = Path(args.outfile).resolve()
     dry_run  = args.dry_run
+    # fmt: on
 
     if dry_run:
         cmd = f'make_python_init(r"{folder}", lineup={lineup}, wrap={wrap}, filename=r"{filename}")'
