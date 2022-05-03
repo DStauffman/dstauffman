@@ -278,12 +278,14 @@ def quat_mult_single(a: np.ndarray, b: np.ndarray, inplace: bool = False) -> np.
     """
     c = a if inplace else a.copy()
     # single quaternion inputs case (note: transposed to make 'F' order)
+    # fmt: off
     c[:] = np.array([
         [ a[3], -a[2],  a[1], -a[0]],
         [ a[2],  a[3], -a[0], -a[1]],
         [-a[1],  a[0],  a[3], -a[2]],
         [ a[0],  a[1],  a[2],  a[3]],
     ]).T @ b
+    # fmt: on
     # enforce positive scalar component
     if c[3] < 0:
         c[:] = -c
@@ -385,12 +387,14 @@ def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray, inplace: bool = Fa
     quat_new = quat if inplace else quat.copy()
     # compute angle rate matrix (note: transposed to make 'F' order), use it to compute a delta
     # quaternion, and then propagate by adding the delta
+    # fmt: off
     quat_new += 0.5 * np.array([
         [      0      , -delta_ang[2],  delta_ang[1], -delta_ang[0]],
         [ delta_ang[2],       0      , -delta_ang[0], -delta_ang[1]],
         [-delta_ang[1],  delta_ang[0],      0       , -delta_ang[2]],
         [ delta_ang[0],  delta_ang[1],  delta_ang[2],       0      ],
     ]).T @ quat
+    # fmt: on
     # ensure positive scalar component
     if quat_new[3] < 0:
         quat_new[:] = -quat_new

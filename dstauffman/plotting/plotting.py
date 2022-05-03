@@ -118,6 +118,7 @@ class Opts(Frozen):
             .names     : list of str
                 Names of the data structures to be plotted
         """
+        # fmt: off
         self.case_name: str   = ""
         self.date_zero: Optional[datetime.datetime] = None
         self.save_plot: bool  = False
@@ -143,6 +144,7 @@ class Opts(Frozen):
         self.leg_spot: str    = "best"
         self.classify: str    = ""
         self.names: List[str] = list()
+        # fmt: on
         for arg in args:
             if arg is None:
                 continue
@@ -224,8 +226,8 @@ class Opts(Frozen):
 
         disp_xmin = _convert(self.disp_xmin)
         disp_xmax = _convert(self.disp_xmax)
-        rms_xmin  = _convert(self.rms_xmin)
-        rms_xmax  = _convert(self.rms_xmax)
+        rms_xmin  = _convert(self.rms_xmin)  # fmt: skip
+        rms_xmax  = _convert(self.rms_xmax)  # fmt: skip
         return (disp_xmin, disp_xmax, rms_xmin, rms_xmax)
 
     def convert_dates(self, form: str, old_form: str = "sec", numpy_form: str = "datetime64[ns]") -> "Opts":
@@ -357,6 +359,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
+    # fmt: off
     time_units   = kwargs.pop("time_units", this_opts.time_base)
     start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
     rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
@@ -369,6 +372,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    # fmt: on
 
     # call wrapper function for most of the details
     fig = make_time_plot(
@@ -677,6 +681,7 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
 
     # alias opts
+    # fmt: off
     time_units   = kwargs.pop("time_units", this_opts.time_base)
     start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
     rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
@@ -689,6 +694,7 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    # fmt: on
 
     # hard-coded values
     scale = 100

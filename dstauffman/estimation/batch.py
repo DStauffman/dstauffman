@@ -70,33 +70,35 @@ class OptiOpts(Frozen):
     """
 
     def __init__(self):
+        # fmt: off
         # specifically required settings
-        self.model_func: Callable = None
-        self.model_args: Dict[str, Any] = None  # {}
-        self.cost_func: Callable = None
-        self.cost_args: Dict[str, Any] = None  # {} # TODO: add note, these are additional cost args, plus model_args
-        self.get_param_func: Callable = None
-        self.set_param_func: Callable = None
-        self.output_folder: Optional[Path] = None
-        self.output_results: str = "bpe_results.hdf5"
-        self.params: List[Any] = None  # []
+        self.model_func: Callable           = None
+        self.model_args: Dict[str, Any]     = None  # {}
+        self.cost_func: Callable            = None
+        self.cost_args: Dict[str, Any]      = None  # {} # TODO: add note, these are additional cost args, plus model_args
+        self.get_param_func: Callable       = None
+        self.set_param_func: Callable       = None
+        self.output_folder: Optional[Path]  = None
+        self.output_results: str            = "bpe_results.hdf5"
+        self.params: List[Any]              = None  # []
         self.start_func: Optional[Callable] = None
         self.final_func: Optional[Callable] = None
 
         # less common optimization settings
-        self.slope_method: str = "one_sided"  # from {'one_sided', 'two_sided'}
-        self.is_max_like: bool = False
-        self.search_method: str = "trust_region"  # from {'trust_region', 'levenberg_marquardt'}
-        self.max_iters: int = 10
-        self.tol_cosmax_grad: float = 1e-4
-        self.tol_delta_step: float = 1e-20
-        self.tol_delta_cost: float = 1e-20
-        self.step_limit: int = 5
-        self.x_bias: float = 0.8
-        self.grow_radius: float = 2.0
-        self.shrink_radius: float = 0.5
-        self.trust_radius: float = 1.0
+        self.slope_method: str        = "one_sided"  # from {"one_sided", "two_sided"}
+        self.is_max_like: bool        = False
+        self.search_method: str       = "trust_region"  # from {"trust_region", "levenberg_marquardt"}
+        self.max_iters: int           = 10
+        self.tol_cosmax_grad: float   = 1e-4
+        self.tol_delta_step: float    = 1e-20
+        self.tol_delta_cost: float    = 1e-20
+        self.step_limit: int          = 5
+        self.x_bias: float            = 0.8
+        self.grow_radius: float       = 2.0
+        self.shrink_radius: float     = 0.5
+        self.trust_radius: float      = 1.0
         self.max_cores: Optional[int] = None  # set to a number to parallelize, use -1 for all
+        # fmt: on
 
     def __eq__(self, other: Any) -> bool:
         r"""Check for equality based on the values of the fields."""
@@ -254,19 +256,21 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     save: Callable[[BpeResults, Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]
 
     def __init__(self):
-        self.param_names = None
+        # fmt: off
+        self.param_names  = None
         self.begin_params = None
         self.begin_innovs = None
-        self.begin_cost = None
-        self.num_evals = 0
-        self.num_iters = 0
-        self.costs = []
-        self.correlation = None
-        self.info_svd = None
-        self.covariance = None
+        self.begin_cost   = None
+        self.num_evals    = 0
+        self.num_iters    = 0
+        self.costs        = []
+        self.correlation  = None
+        self.info_svd     = None
+        self.covariance   = None
         self.final_params = None
         self.final_innovs = None
-        self.final_cost = None
+        self.final_cost   = None
+        # fmt: on
 
     def __str__(self) -> str:
         r"""
@@ -386,10 +390,12 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
     save: Callable[["CurrentResults", Optional[Path]], None]
 
     def __init__(self):
+        # fmt: off
         self.trust_rad = None
-        self.params = None
-        self.innovs = None
-        self.cost = None
+        self.params    = None
+        self.innovs    = None
+        self.cost      = None
+        # fmt: on
 
     def __str__(self) -> str:
         r"""Print a useful summary of results."""
@@ -561,16 +567,18 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     step_sf = 0.1
 
     # alias useful values
-    names = [name.decode("utf-8") for name in bpe_results.param_names]
-    num_param = len(cur_results.params)
-    num_innov = cur_results.innovs.size
-    param_signs = np.sign(cur_results.params)
+    # fmt: off
+    names         = [name.decode("utf-8") for name in bpe_results.param_names]
+    num_param     = len(cur_results.params)
+    num_innov     = cur_results.innovs.size
+    param_signs   = np.sign(cur_results.params)
     param_signs[param_signs == 0] = 1
     param_minstep = OptiParam.get_array(opti_opts.params, type_="minstep")
-    params_min = OptiParam.get_array(opti_opts.params, type_="min")
-    params_max = OptiParam.get_array(opti_opts.params, type_="max")
+    params_min    = OptiParam.get_array(opti_opts.params, type_="min")
+    params_max    = OptiParam.get_array(opti_opts.params, type_="max")
     if normalized:
         param_typical = OptiParam.get_array(opti_opts.params, type_="typical")
+    # fmt: on
 
     # initialize output
     jacobian = np.zeros((num_innov, num_param), dtype=float)
@@ -902,13 +910,15 @@ def _dogleg_search(
     log_det_B = 0  # TODO: get this elsewhere for max_likelihood mode
 
     # initialize status flags and counters
-    try_again = True
+    # fmt: off
+    try_again       = True
     tried_expanding = False
     tried_shrinking = False
-    num_shrinks = 0
-    step_number = 0
-    failed = False
-    was_limited = False
+    num_shrinks     = 0
+    step_number     = 0
+    failed          = False
+    was_limited     = False
+    # fmt: on
 
     # try a step
     while (num_shrinks < opti_opts.step_limit) and try_again and not was_limited:
@@ -922,10 +932,12 @@ def _dogleg_search(
             )
 
         elif search_method == "levenberg_marquardt":
-            new_delta_param = _levenberg_marquardt(jacobian, cur_results.innovs, lambda_=1 / trust_radius)
-            step_type = "Levenberg-Marquardt"
-            step_len = norm(new_delta_param)
-            step_scale = step_len / norm(new_delta_param)
+            # fmt: off
+            new_delta_param = _levenberg_marquardt(jacobian, cur_results.innovs, lambda_=1/trust_radius)
+            step_type       = "Levenberg-Marquardt"
+            step_len        = norm(new_delta_param)
+            step_scale      = step_len/norm(new_delta_param)
+            # fmt: on
 
         else:
             raise ValueError('Unexpected value for search_method of "{}".'.format(search_method))
@@ -969,7 +981,7 @@ def _dogleg_search(
             # update the new best values
             cur_results.params = params.copy()
             cur_results.innovs = innovs.copy()
-            cur_results.cost = trial_cost
+            cur_results.cost   = trial_cost  # fmt: skip
             # Determine what to do next
             if step_type == "Newton":
                 # this was a Newton step.
@@ -983,10 +995,12 @@ def _dogleg_search(
             else:
                 # Constrained step yielded some improvement and there is a possibility that a still
                 # larger step might do better.
-                trust_radius = opti_opts.grow_radius * step_len
+                # fmt: off
+                trust_radius    = opti_opts.grow_radius * step_len
                 tried_expanding = True
-                try_again = True
+                try_again       = True
                 step_resolution = "Constrained step yielded some improvement, so try still longer step."
+                # fmt: on
 
         else:
             # Candidate step yielded no improvement
@@ -1106,9 +1120,11 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
             pass  # caught in earlier exception (hopefully?)
 
     # update the results
+    # fmt: off
     bpe_results.correlation = correlation
-    bpe_results.info_svd = V_jacobian.T
-    bpe_results.covariance = covariance
+    bpe_results.info_svd    = V_jacobian.T
+    bpe_results.covariance  = covariance
+    # fmt: on
 
 
 #%% validate_opti_opts
@@ -1238,14 +1254,15 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     delta_param = np.zeros(len(names))
 
     # initialize current results
+    # fmt: off
     cur_results.trust_rad = opti_opts.trust_radius
-    cur_results.cost = 0.5 * rss(cur_results.innovs, ignore_nans=True)
-    cur_results.params = opti_opts.get_param_func(names=names, **model_args)
+    cur_results.cost      = 0.5 * rss(cur_results.innovs, ignore_nans=True)
+    cur_results.params    = opti_opts.get_param_func(names=names, **model_args)
 
     # set relevant results variables
     bpe_results.begin_params = cur_results.params.copy()
     bpe_results.begin_innovs = cur_results.innovs.copy()
-    bpe_results.begin_cost = cur_results.cost
+    bpe_results.begin_cost   = cur_results.cost
     bpe_results.costs.append(cur_results.cost)
 
     # display initial status
@@ -1260,8 +1277,9 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
 
     # Do some stuff
     convergence = False
-    failed = False
-    jacobian = 0
+    failed      = False
+    jacobian    = 0
+    # fmt: on
     while iter_count <= opti_opts.max_iters:
         # update status
         _print_divider(level=LogLevel.L3)
@@ -1338,7 +1356,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     cur_results.cost = 0.5 * rss(cur_results.innovs, ignore_nans=True)
     bpe_results.final_innovs = cur_results.innovs.copy()
     bpe_results.final_params = cur_results.params.copy()
-    bpe_results.final_cost = cur_results.cost
+    bpe_results.final_cost   = cur_results.cost  # fmt: skip
     bpe_results.costs.append(cur_results.cost)
 
     # display final status

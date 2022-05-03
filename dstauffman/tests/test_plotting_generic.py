@@ -31,31 +31,33 @@ class Test_plotting_make_time_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description = "Values vs Time"
-        self.time = np.arange(-10.0, 10.1, 0.1)
-        self.data = self.time + np.cos(self.time)
-        self.name = ""
-        self.elements = None
-        self.units = ""
-        self.time_units = "sec"
-        self.start_date = ""
-        self.rms_xmin = -np.inf
-        self.rms_xmax = np.inf
-        self.disp_xmin = -np.inf
-        self.disp_xmax = np.inf
-        self.single_lines = False
-        self.colormap = "Paired"
-        self.use_mean = False
-        self.plot_zero = False
-        self.show_rms = True
-        self.legend_loc = "best"
-        self.second_units = None
-        self.ylabel = None
-        self.data_as_rows = True
-        self.extra_plotter = None
-        self.use_zoh = False
+        # fmt: off
+        self.description      = "Values vs Time"
+        self.time             = np.arange(-10.0, 10.1, 0.1)
+        self.data             = self.time + np.cos(self.time)
+        self.name             = ""
+        self.elements         = None
+        self.units            = ""
+        self.time_units       = "sec"
+        self.start_date       = ""
+        self.rms_xmin         = -np.inf
+        self.rms_xmax         = np.inf
+        self.disp_xmin        = -np.inf
+        self.disp_xmax        = np.inf
+        self.single_lines     = False
+        self.colormap         = "Paired"
+        self.use_mean         = False
+        self.plot_zero        = False
+        self.show_rms         = True
+        self.legend_loc       = "best"
+        self.second_units     = None
+        self.ylabel           = None
+        self.data_as_rows     = True
+        self.extra_plotter    = None
+        self.use_zoh          = False
         self.label_vert_lines = True
-        self.fig: plt.Figure = None
+        self.fig: plt.Figure  = None
+        # fmt: on
 
     def test_simple(self) -> None:
         self.fig = plot.make_time_plot(self.description, self.time, self.data)
@@ -184,30 +186,32 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description = "Random Data Error Bars"
-        self.time = np.arange(11)
-        self.data = np.array([[3.0], [-2.0], [5]]) + np.random.rand(3, 11)
-        self.mins = self.data - 0.5 * np.random.rand(3, 11)
-        self.maxs = self.data + 1.5 * np.random.rand(3, 11)
-        self.elements = ["x", "y", "z"]
-        self.units = "rad"
-        self.time_units = "sec"
-        self.start_date = "  t0 = " + str(datetime.datetime.now())
-        self.rms_xmin = 1
-        self.rms_xmax = 10
-        self.disp_xmin = -2
-        self.disp_xmax = np.inf
-        self.single_lines = False
-        self.colormap = "tab10"
-        self.use_mean = False
-        self.plot_zero = False
-        self.show_rms = True
-        self.legend_loc = "best"
-        self.second_units = "milli"
-        self.ylabel = None
-        self.data_as_rows = True
+        # fmt: off
+        self.description      = "Random Data Error Bars"
+        self.time             = np.arange(11)
+        self.data             = np.array([[3.0], [-2.0], [5]]) + np.random.rand(3, 11)
+        self.mins             = self.data - 0.5 * np.random.rand(3, 11)
+        self.maxs             = self.data + 1.5 * np.random.rand(3, 11)
+        self.elements         = ["x", "y", "z"]
+        self.units            = "rad"
+        self.time_units       = "sec"
+        self.start_date       = "  t0 = " + str(datetime.datetime.now())
+        self.rms_xmin         = 1
+        self.rms_xmax         = 10
+        self.disp_xmin        = -2
+        self.disp_xmax        = np.inf
+        self.single_lines     = False
+        self.colormap         = "tab10"
+        self.use_mean         = False
+        self.plot_zero        = False
+        self.show_rms         = True
+        self.legend_loc       = "best"
+        self.second_units     = "milli"
+        self.ylabel           = None
+        self.data_as_rows     = True
         self.label_vert_lines = True
-        self.fig: plt.Figure = None
+        self.fig: plt.Figure  = None
+        # fmt: on
 
     def test_nominal(self) -> None:
         self.fig = plot.make_error_bar_plot(
@@ -250,37 +254,39 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description = "example"
-        self.time_one = np.arange(11)
-        self.time_two = np.arange(2, 13)
-        self.data_one = 1e-6 * np.random.rand(2, 11)
-        self.data_two = self.data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6
-        self.name_one = "test1"
-        self.name_two = "test2"
-        self.elements = ["x", "y"]
-        self.units = "rad"
-        self.time_units = "sec"
-        self.start_date = str(datetime.datetime.now())
-        self.rms_xmin = 0
-        self.rms_xmax = 10
-        self.disp_xmin = -2
-        self.disp_xmax = np.inf
-        self.make_subplots = True
-        self.single_lines = False
-        self.colormap = ListedColormap(plot.COLOR_LISTS["dbl_diff"].colors + plot.COLOR_LISTS["double"].colors)
-        self.use_mean = False
-        self.plot_zero = False
-        self.show_rms = True
-        self.legend_loc = "best"
-        self.show_extra = True
-        self.second_units = "micro"
-        self.ylabel = None
-        self.data_as_rows = True
-        self.tolerance = 0
-        self.return_err = True
-        self.use_zoh = False
+        # fmt: off
+        self.description      = "example"
+        self.time_one         = np.arange(11)
+        self.time_two         = np.arange(2, 13)
+        self.data_one         = 1e-6 * np.random.rand(2, 11)
+        self.data_two         = self.data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6
+        self.name_one         = "test1"
+        self.name_two         = "test2"
+        self.elements         = ["x", "y"]
+        self.units            = "rad"
+        self.time_units       = "sec"
+        self.start_date       = str(datetime.datetime.now())
+        self.rms_xmin         = 0
+        self.rms_xmax         = 10
+        self.disp_xmin        = -2
+        self.disp_xmax        = np.inf
+        self.make_subplots    = True
+        self.single_lines     = False
+        self.colormap         = ListedColormap(plot.COLOR_LISTS["dbl_diff"].colors + plot.COLOR_LISTS["double"].colors)
+        self.use_mean         = False
+        self.plot_zero        = False
+        self.show_rms         = True
+        self.legend_loc       = "best"
+        self.show_extra       = True
+        self.second_units     = "micro"
+        self.ylabel           = None
+        self.data_as_rows     = True
+        self.tolerance        = 0
+        self.return_err       = True
+        self.use_zoh          = False
         self.label_vert_lines = True
         self.figs: Optional[List[plt.Figure]] = None
+        # fmt: on
 
     def test_nominal(self) -> None:
         self.return_err = False
@@ -683,35 +689,37 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description = "Values vs Time"
-        self.time = np.arange(-10.0, 10.1, 0.1)
-        self.data = self.time + np.cos(self.time)
-        self.MeasStatus = type("MeasStatus", (object,), {"rejected": 0, "accepted": 1})
-        self.cats = np.full(self.time.shape, self.MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined, type-var]
-        self.cats[50:100] = self.MeasStatus.rejected  # type: ignore[attr-defined]
-        self.cat_names = {0: "rejected", 1: "accepted"}
-        self.name = ""
-        self.elements = None
-        self.units = ""
-        self.time_units = "sec"
-        self.start_date = ""
-        self.rms_xmin = -np.inf
-        self.rms_xmax = np.inf
-        self.disp_xmin = -np.inf
-        self.disp_xmax = np.inf
-        self.make_subplots = True
-        self.single_lines = False
-        self.colormap = "Paired"
-        self.use_mean = False
-        self.plot_zero = False
-        self.show_rms = True
-        self.legend_loc = "best"
-        self.second_units = "unity"
-        self.ylabel = None
-        self.data_as_rows = True
-        self.use_zoh = False
+        # fmt: off
+        self.description      = "Values vs Time"
+        self.time             = np.arange(-10.0, 10.1, 0.1)
+        self.data             = self.time + np.cos(self.time)
+        self.MeasStatus       = type("MeasStatus", (object,), {"rejected": 0, "accepted": 1})
+        self.cats             = np.full(self.time.shape, self.MeasStatus.accepted, dtype=int)  # type: ignore[attr-defined, type-var]
+        self.cats[50:100]     = self.MeasStatus.rejected  # type: ignore[attr-defined]
+        self.cat_names        = {0: "rejected", 1: "accepted"}
+        self.name             = ""
+        self.elements         = None
+        self.units            = ""
+        self.time_units       = "sec"
+        self.start_date       = ""
+        self.rms_xmin         = -np.inf
+        self.rms_xmax         = np.inf
+        self.disp_xmin        = -np.inf
+        self.disp_xmax        = np.inf
+        self.make_subplots    = True
+        self.single_lines     = False
+        self.colormap         = "Paired"
+        self.use_mean         = False
+        self.plot_zero        = False
+        self.show_rms         = True
+        self.legend_loc       = "best"
+        self.second_units     = "unity"
+        self.ylabel           = None
+        self.data_as_rows     = True
+        self.use_zoh          = False
         self.label_vert_lines = True
         self.figs: Optional[List[plt.Figure]] = None
+        # fmt: on
 
     def test_nominal(self) -> None:
         self.figs = plot.make_categories_plot(

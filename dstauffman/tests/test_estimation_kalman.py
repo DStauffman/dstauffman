@@ -84,7 +84,7 @@ class Test_estimation_calculate_innovation(unittest.TestCase):
     def setUp(self) -> None:
         self.u_meas = np.array([1.0, 2.1, -3.0])
         self.u_pred = np.array([1.1, 2.0, -3.1])
-        self.exp = np.array([-0.1, 0.1, 0.1])
+        self.exp    = np.array([-0.1, 0.1, 0.1])  # fmt: skip
 
     def test_nominal(self) -> None:
         z = estm.calculate_innovation(self.u_meas, self.u_pred)
@@ -143,12 +143,14 @@ class Test_estimation_propagate_covariance(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.phi = np.diag(np.array([1.0, 1, 1, -1, -1, -1]))
-        self.P = 1e-3 * np.eye(6)
-        self.Q = np.diag(np.array([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7]))
+        # fmt: off
+        self.phi   = np.diag(np.array([1.0, 1, 1, -1, -1, -1]))
+        self.P     = 1e-3 * np.eye(6)
+        self.Q     = np.diag(np.array([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7]))
         self.gamma = -1 * self.phi
-        self.exp = 0.002
-        self.orig = 0.001
+        self.exp   = 0.002
+        self.orig  = 0.001
+        # fmt: on
 
     def test_nominal(self) -> None:
         out = estm.propagate_covariance(self.P, self.phi, self.Q)

@@ -77,11 +77,13 @@ class Test_round_np_datetime(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        date_zero = np.datetime64(datetime.date(2020, 1, 1))
-        dt_sec = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
-        self.date_in = date_zero + np.round(1000 * dt_sec).astype("timedelta64[ms]")
+        # fmt: off
+        date_zero       = np.datetime64(datetime.date(2020, 1, 1))
+        dt_sec          = np.array([0, 0.2, 0.35, 0.45, 0.59, 0.61])
+        self.date_in    = date_zero + np.round(1000 * dt_sec).astype("timedelta64[ms]")
         self.time_delta = np.timedelta64(200, "ms")
-        self.expected = date_zero + np.array([0, 200, 400, 400, 600, 600]).astype("timedelta64[ms]")
+        self.expected   = date_zero + np.array([0, 200, 400, 400, 600, 600]).astype("timedelta64[ms]")
+        # fmt: on
 
     def test_nominal(self) -> None:
         date_out = dcs.round_np_datetime(self.date_in, self.time_delta)

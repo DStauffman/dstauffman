@@ -383,14 +383,16 @@ class Test_health_bounded_normal_draw(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.num = 100000
-        self.mean = 100.0
-        self.std = 50.0
-        self.min = 20.0
-        self.max = 200.0
+        # fmt: off
+        self.num    = 100000
+        self.mean   = 100.0
+        self.std    = 50.0
+        self.min    = 20.0
+        self.max    = 200.0
         self.values = {"test_mean": self.mean, "test_std": self.std, "test_min": self.min, "test_max": self.max}
-        self.field = "test"
-        self.prng = np.random.RandomState()
+        self.field  = "test"
+        self.prng   = np.random.RandomState()
+        # fmt: on
 
     def test_nominal(self) -> None:
         out = health.bounded_normal_draw(self.num, self.values, self.field, self.prng)

@@ -22,17 +22,19 @@ class Test_commands_parse_enforce(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.folder = str(dcs.get_root_dir())
-        self.expected = argparse.Namespace()
-        self.expected.execute = False
-        self.expected.extensions = None
-        self.expected.folder = self.folder
+        # fmt: off
+        self.folder               = str(dcs.get_root_dir())
+        self.expected             = argparse.Namespace()
+        self.expected.execute     = False
+        self.expected.extensions  = None
+        self.expected.folder      = self.folder
         self.expected.ignore_tabs = False
-        self.expected.list_all = False
-        self.expected.skip = None
-        self.expected.trailing = False
-        self.expected.unix = False
-        self.expected.windows = False
+        self.expected.list_all    = False
+        self.expected.skip        = None
+        self.expected.trailing    = False
+        self.expected.unix        = False
+        self.expected.windows     = False
+        # fmt: on
 
     def test_nominal(self) -> None:
         args = commands.parse_enforce([self.folder])
@@ -159,13 +161,15 @@ class Test_commands_parse_make_init(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.folder = str(dcs.get_root_dir())
-        self.expected = argparse.Namespace()
+        # fmt: off
+        self.folder           = str(dcs.get_root_dir())
+        self.expected         = argparse.Namespace()
         self.expected.dry_run = False
-        self.expected.folder = self.folder
-        self.expected.lineup = False
+        self.expected.folder  = self.folder
+        self.expected.lineup  = False
         self.expected.outfile = "__init__.py"
-        self.expected.wrap = 100
+        self.expected.wrap    = 100
+        # fmt: on
 
     def test_nominal(self) -> None:
         args = commands.parse_make_init([self.folder])

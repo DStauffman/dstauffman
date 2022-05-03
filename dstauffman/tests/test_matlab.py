@@ -19,12 +19,14 @@ if dcs.HAVE_NUMPY:
 #%% Classes
 class _Gender(IntEnumPlus):
     r"""Enumeration to match the MATLAB one from the test cases."""
+    # fmt: off
     null: ClassVar[int]        = 0
     female: ClassVar[int]      = 1
     male: ClassVar[int]        = 2
     uncirc_male: ClassVar[int] = 3
     circ_male: ClassVar[int]   = 4
     non_binary: ClassVar[int]  = 5
+    # fmt: on
 
 
 #%% load_matlab
@@ -83,7 +85,7 @@ class Test_load_matlab(unittest.TestCase):
 
     def test_cell_arrays(self) -> None:
         out = dcs.load_matlab(self.filename4, varlist=("cdat",))
-        self.assertEqual(out.keys(), {"cdat",})
+        self.assertEqual(out.keys(), {"cdat",})  # fmt: skip
         np.testing.assert_array_equal(out["cdat"][0], self.row_nums_1d)
         np.testing.assert_array_equal(out["cdat"][1], self.col_nums_1d)
         np.testing.assert_array_equal(out["cdat"][2], self.mat_nums)

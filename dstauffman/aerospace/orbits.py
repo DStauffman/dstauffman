@@ -326,6 +326,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     nu = anomaly_eccentric_2_true(E, e)
     p = a * (1 - e**2)
 
+    # fmt: off
     time = (
         (datetime.datetime(2000 + year, 1, 1, 0, 0, 0) - datetime.datetime(2000, 1, 1, 0, 0, 0)).days
         + JULIAN["jd_2000_01_01"] - 0.5 + day - 1
@@ -347,6 +348,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     elements.T          = TAU * np.sqrt(a ** 3 / MU_EARTH)
     elements.t          = jd_to_numpy(time)
     elements.type       = OrbitType.elliptic
+    # fmt: on
 
     return elements
 
@@ -466,11 +468,11 @@ def rv_2_oe(
     uo[np.abs(uo - TAU) < precision] = 0.0
 
     # P
-    P = np.asanyarray(np.mod(W + w, TAU))
+    P = np.asanyarray(np.mod(W + w, TAU, where=~np.isnan(W), out=np.full(num, np.nan)))
     P[np.abs(P - TAU) < precision] = 0.0
 
     # lo
-    lo = np.asanyarray(np.mod(W + w + vo, TAU))
+    lo = np.asanyarray(np.mod(W + w + vo, TAU, where=~np.isnan(W), out=np.full(num, np.nan)))
     lo[np.abs(lo - TAU) < precision] = 0.0
 
     # tell if equatorial
@@ -478,6 +480,7 @@ def rv_2_oe(
 
     # convert to degrees specified
     if unit:
+        # fmt: off
         i  = r_2_d(i)
         W  = r_2_d(W)
         w  = r_2_d(w)
@@ -485,6 +488,7 @@ def rv_2_oe(
         uo = r_2_d(uo)
         P  = r_2_d(P)
         lo = r_2_d(lo)
+        # fmt: on
 
     # allocate stuff
     orbit_type = np.full(num, OrbitType.uninitialized, dtype=int)
@@ -510,6 +514,7 @@ def rv_2_oe(
     orbit_type[ix] = OrbitType.hyperbolic
 
     # populate elements structure
+    # fmt: off
     if is_scalar:
         elements = Elements()
         elements.a          = float(a)
@@ -542,6 +547,7 @@ def rv_2_oe(
         elements.type[:]       = orbit_type  # type: ignore[index]
         elements.T[:]          = T           # type: ignore[index]
         elements.circular[:]   = circular    # type: ignore[index]
+    # fmt: on
 
     return elements
 
@@ -633,10 +639,12 @@ def oe_2_rv(
 
     # adjust if angles are in degrees
     if unit:
+        # fmt: off
         i  = d_2_r(i)
         W  = d_2_r(W)
         w  = d_2_r(w)
         nu = d_2_r(nu)
+        # fmt: on
 
     #% calculations
     # parameter
@@ -665,11 +673,13 @@ def oe_2_rv(
 
     # transformation matrix
     # TODO: create quaternion and use qrot instead
+    # fmt: off
     T = np.array([
         [+cW * cw - sW * sw * ci, -cW * sw - sW * cw * ci, +sW * si],
         [+sW * cw + cW * sw * ci, -sW * sw + cW * cw * ci, -cW * si],
         [+sw * si               , +cw * si               ,      +ci],
     ])
+    # fmt: on
 
     # translate r & v into IJK frame
     r = T @ r_PQW

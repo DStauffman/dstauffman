@@ -20,7 +20,7 @@ if HAVE_NUMPY:
 
 #%% Constants
 GPS_DATE_ZERO = datetime.datetime(1980, 1, 6, 0, 0, 0)
-ONE_DAY       = 86400
+ONE_DAY       = 86400  # fmt: skip
 DAYS_PER_WEEK = 7
 WEEK_ROLLOVER = 1024
 if HAVE_NUMPY:
@@ -421,6 +421,7 @@ def gps_to_datetime(
     # GPS start week
     date_gps: Union[datetime.datetime, List[datetime.datetime], np.datetime64]
     if form == "datetime":
+        # fmt: off
         if np.size(week) == 1:
             start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * week))
             whole_sec  = int(time)
@@ -433,6 +434,7 @@ def gps_to_datetime(
                 whole_sec  = int(t)
                 micros     = round(1e6 * (t - whole_sec))
                 date_gps.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
+        # fmt: on
     elif form == "numpy":
         start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY  # type: ignore[assignment]
         date_gps = start_week + time * NP_ONE_SECOND  # type: ignore[operator]
@@ -520,7 +522,7 @@ def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = 
         days_since_date_zero = week * DAYS_PER_WEEK + time / ONE_DAY
         # GPS offset for 1 Jan 1999 to 1 Jan 2006
         # Note: 9492 = datenum([2006 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero <  9492 + 13 / ONE_DAY] = -13
+        gps_to_utc_offset[days_since_date_zero <  9492 + 13 / ONE_DAY] = -13  # fmt: skip
         # GPS offset for 1 Jan 2006 to 1 Jan 2009
         # Note: 10588 = datenum([2009 1 1 0 0 0]) - datenum(date_zero)
         gps_to_utc_offset[days_since_date_zero < 10588 + 14 / ONE_DAY] = -14
@@ -538,6 +540,7 @@ def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = 
 
     # GPS start week
     if form == "datetime":
+        # fmt: off
         if np.size(week) == 1:
             start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * week))
             frac_sec   = time + gps_to_utc_offset
@@ -552,6 +555,7 @@ def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = 
                 whole_sec  = int(frac_sec)
                 micros     = round(1e6 * (frac_sec - whole_sec))
                 date_utc.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))  # type: ignore[attr-defined]
+        # fmt: on
     elif form == "numpy":
         start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY
         date_utc = start_week + (time + gps_to_utc_offset) * NP_ONE_SECOND

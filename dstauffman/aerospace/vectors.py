@@ -70,6 +70,7 @@ def rot(axis: int, angle: float) -> np.ndarray:
     sa = np.sin(angle)
 
     # build direction cosine matrix
+    # fmt: off
     if axis == 1:
         dcm = np.array([[1.0, 0.0, 0.0], [0.0,  ca,  sa], [0.0, -sa,  ca]])
     elif axis == 2:
@@ -79,6 +80,7 @@ def rot(axis: int, angle: float) -> np.ndarray:
     else:
         # Axis value not listed, so it can compile in nopython mode
         raise ValueError("Unexpected value for axis.")
+    # fmt: on
     return dcm
 
 
@@ -129,6 +131,7 @@ def drot(axis: int, angle: float) -> np.ndarray:
     sa = np.sin(angle)
 
     # build direction cosine matrix
+    # fmt: off
     if axis == 1:
         trans = np.array([[0.0, 0.0, 0.0], [0.0, -sa,  ca], [0.0, -ca, -sa]])
     elif axis == 2:
@@ -137,6 +140,7 @@ def drot(axis: int, angle: float) -> np.ndarray:
         trans = np.array([[-sa,  ca, 0.0], [-ca, -sa, 0.0], [0.0, 0.0, 0.0]])
     else:
         raise ValueError("Unexpected value for axis.")
+    # fmt: on
     return trans
 
 
@@ -289,8 +293,8 @@ def cart2sph(x: _Numbers, y: _Numbers, z: _Numbers) -> Tuple[_Numbers, _Numbers,
 
     """
     xy2 = x**2 + y**2
-    az  = np.arctan2(y, x)
-    el  = np.arctan2(z, np.sqrt(xy2))
+    az = np.arctan2(y, x)
+    el = np.arctan2(z, np.sqrt(xy2))
     rad = np.sqrt(xy2 + z**2)
     return (az, el, rad)
 

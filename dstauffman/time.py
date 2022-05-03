@@ -357,7 +357,8 @@ def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="date
     """
     # hard-coded values
     date_forms = {"datetime", "numpy", "matplotlib"}
-    time_forms = {"sec",}  # TODO: allow for "min", "hr", "day", "month", "year", etc.
+    # TODO: allow time forms for "min", "hr", "day", "month", "year", etc.
+    time_forms = {"sec",}  # fmt: skip
     all_forms = date_forms | time_forms
     # data checks
     assert form in all_forms, f'Unexpected form of "{form}".'
@@ -405,7 +406,7 @@ def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="date
                 datetime_units = get_np_time_units(numpy_form)
                 date_zero_np = np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)
                 if np.issubdtype(date.dtype, np.signedinteger):
-                    out[is_num] = (date_zero_np + (date[is_num].astype(np.int64) * 10 ** 9).astype("timedelta64[ns]")).astype(numpy_form)
+                    out[is_num] = (date_zero_np + (date[is_num].astype(np.int64) * 10**9).astype("timedelta64[ns]")).astype(numpy_form)  # fmt: skip
                 else:
                     out[is_num] = (date_zero_np + np.round(date[is_num] * 1e9).astype("timedelta64[ns]")).astype(numpy_form)
         elif form == "matplotlib":
@@ -429,13 +430,13 @@ def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="date
     elif old_form == "numpy":
         is_num = ~np.isnat(date)
         if form == "datetime":
-            out = datetime.datetime.utcfromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10 ** 9) if is_num else None
+            out = datetime.datetime.utcfromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9) if is_num else None  # fmt: skip
         elif form == "matplotlib":
             out = dates.date2num(date)
         elif form in time_forms:
             out = np.full(date.shape, np.nan)
             if np.any(is_num):
-                out[is_num] = (date[is_num] - np.array(date_zero, dtype="datetime64[ns]")).astype("timedelta64[ns]").astype(np.int64) / 10**9
+                out[is_num] = (date[is_num] - np.array(date_zero, dtype="datetime64[ns]")).astype("timedelta64[ns]").astype(np.int64) / 10**9  # fmt: skip
     # from matplotlib
     elif old_form == "matplotlib":
         is_num = np.isfinite(date)

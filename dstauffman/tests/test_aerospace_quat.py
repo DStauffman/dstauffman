@@ -212,15 +212,17 @@ class Test_aerospace_qrot(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.axis   = np.array([1, 2, 3])
-        self.angle  = np.pi / 2
-        self.angle2 = np.pi / 3
-        r2o2        = np.sqrt(2) / 2
-        r3o2        = np.sqrt(3) / 2
-        self.quat   = np.array([[r2o2, 0, 0, r2o2], [0, r2o2, 0, r2o2], [0, 0, r2o2, r2o2]])
-        self.quat2  = np.array([[0.5, 0, 0, r3o2], [0, 0.5, 0, r3o2], [0, 0, 0.5, r3o2]])
-        self.null   = np.array([], dtype=int)
+        # fmt: off
+        self.axis      = np.array([1, 2, 3])
+        self.angle     = np.pi / 2
+        self.angle2    = np.pi / 3
+        r2o2           = np.sqrt(2) / 2
+        r3o2           = np.sqrt(3) / 2
+        self.quat      = np.array([[r2o2, 0, 0, r2o2], [0, r2o2, 0, r2o2], [0, 0, r2o2, r2o2]])
+        self.quat2     = np.array([[0.5, 0, 0, r3o2], [0, 0.5, 0, r3o2], [0, 0, 0.5, r3o2]])
+        self.null      = np.array([], dtype=int)
         self.null_quat = np.zeros((4, 0))
+        # fmt: on
 
     def test_single_inputs(self) -> None:
         for i in range(len(self.axis)):
@@ -300,10 +302,12 @@ class Test_aerospace_quat_from_axis_angle(unittest.TestCase):
         ).T
         angle = 1e-6 * np.sqrt(50)
         quat = space.quat_from_axis_angle(axis, angle)
+        # fmt: off
         exp = np.column_stack([
             space.qrot(np.array([1, 2, 3]), angle),
             space.quat_mult(space.quat_mult(space.qrot(1, 3e-6), space.qrot(2, 4e-6)), space.qrot(3, 5e-6)),
         ])
+        # fmt: on
         np.testing.assert_array_almost_equal(quat, exp, 10)
 
     def test_multi_axis_angle(self) -> None:
@@ -338,6 +342,7 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        # fmt: off
         self.quat1 = np.array([0.5, 0.5, 0.5, 0.5])
         self.dq1   = space.qrot(1, 0.001)
         self.dq2   = space.qrot(2, 0.05)
@@ -347,6 +352,7 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
         self.comp  = np.array([[0.001, 0], [0, 0.05], [0, 0]])
         self.null: np.typing.NDArray[np.float64] = np.array([])
         self.null_quat = np.zeros((4, 0))
+        # fmt: on
 
     def test_nominal1(self) -> None:
         (theta, comp) = space.quat_angle_diff(self.quat1, self.dqq1)
@@ -441,6 +447,7 @@ class Test_aerospace_quat_from_euler(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        # fmt: off
         self.a      = np.array([0.01, 0.02, 0.03])
         self.b      = np.array([0.04, 0.05, 0.06])
         self.angles = np.column_stack((self.a, self.b))
@@ -451,6 +458,7 @@ class Test_aerospace_quat_from_euler(unittest.TestCase):
             [0.00514916, 0.02073308],
             [0.99982426, 0.99902285],
         ])
+        # fmt: on
 
     def test_nominal1(self) -> None:
         quat = space.quat_from_euler(self.a, self.seq)
@@ -524,7 +532,7 @@ class Test_aerospace_quat_interp(unittest.TestCase):
     def setUp(self) -> None:
         self.time = np.array([1, 3, 5])
         self.quat = np.column_stack((space.qrot(1, 0), space.qrot(1, np.pi / 2), space.qrot(1, np.pi)))
-        self.ti   = np.array([1, 2, 4.5, 5])
+        self.ti   = np.array([1, 2, 4.5, 5])  # fmt: skip
         self.qout = np.column_stack(
             (space.qrot(1, 0), space.qrot(1, np.pi / 4), space.qrot(1, 3.5 / 4 * np.pi), space.qrot(1, np.pi))
         )

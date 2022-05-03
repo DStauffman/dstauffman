@@ -109,7 +109,7 @@ class _Example_Times(object):
             ti=ti,
             tf=tf,
             time_field="time",
-            exclude=frozenset({"name",}),
+            exclude=frozenset({"name",}),  # fmt: skip
         )
 
     def subsample(self, skip=30, start=0):
@@ -117,7 +117,7 @@ class _Example_Times(object):
             self,
             skip=skip,
             start=start,
-            skip_fields=frozenset({"name",}),
+            skip_fields=frozenset({"name",}),  # fmt: skip
         )
 
 
@@ -451,7 +451,7 @@ class Test_SaveAndLoad(unittest.TestCase):
 
     def test_bad_exclusions(self) -> None:
         with self.assertRaises(ValueError) as err:
-            self.results1.save(self.save_path1, use_hdf5=False, exclusions={"y",})
+            self.results1.save(self.save_path1, use_hdf5=False, exclusions={"y",})  # fmt: skip
         self.assertEqual(str(err.exception), "exclusions cannot be used with pickle files.")
 
     def tearDown(self) -> None:
@@ -512,12 +512,12 @@ class Test_Counter(unittest.TestCase):
 
     def test_math_int7(self) -> None:
         c = dcs.Counter(10)
-        c = 0 +c  # type: ignore[assignment]
+        c = 0 + c  # type: ignore[assignment]  # fmt: skip
         self.assertEqual(c, 10)
         self.assertEqual(type(c), int)
 
     def test_math_int8(self) -> None:
-        c = 0 -dcs.Counter(10)
+        c = 0 -dcs.Counter(10)  # fmt: skip
         self.assertEqual(c, -10)
         self.assertEqual(type(c), int)
 
@@ -532,7 +532,7 @@ class Test_Counter(unittest.TestCase):
         self.assertEqual(c3, dcs.Counter(10))
         c3 = c1 + (-c2)
         self.assertEqual(c3, dcs.Counter(10))
-        c3 = +c1 -c2
+        c3 = +c1 -c2  # fmt: skip
         self.assertEqual(c3, dcs.Counter(10))
         c1 -= c2
         self.assertEqual(c1, dcs.Counter(10))

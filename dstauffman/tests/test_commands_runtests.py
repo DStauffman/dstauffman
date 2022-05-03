@@ -22,14 +22,16 @@ class Test_commands_parse_tests(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.folder = dcs.get_root_dir()
-        self.expected = argparse.Namespace()
+        # fmt: off
+        self.folder              = dcs.get_root_dir()
+        self.expected            = argparse.Namespace()
         self.expected.docstrings = False
-        self.expected.unittest = False
-        self.expected.verbose = False
-        self.expected.library = None
-        self.expected.coverage = False
-        self.expected.cov_file = None
+        self.expected.unittest   = False
+        self.expected.verbose    = False
+        self.expected.library    = None
+        self.expected.coverage   = False
+        self.expected.cov_file   = None
+        # fmt: on
 
     def test_nominal(self) -> None:
         args = commands.parse_tests([])

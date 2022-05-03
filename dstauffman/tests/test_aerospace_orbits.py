@@ -101,22 +101,24 @@ class Test_aerospace_two_line_elements(unittest.TestCase):
         line1 = "1 25544U 98067A   06132.29375000  .00013633  00000-0  92740-4 0  9181"
         line2 = "2 25544  51.6383  12.2586 0009556 188.7367 320.5459 15.75215761427503"
         elements = space.two_line_elements(line1, line2)
-        exp = space.Elements()
-        exp.a = 6722154.278502964
-        exp.e = 0.0009556
-        exp.i = 0.9012583551325879
-        exp.W = 0.21395293168497687
-        exp.w = 3.294076834348782
-        exp.vo = 5.593365747043137
-        exp.p = 6722148.1400242
-        exp.uo = 8.88744258139192
-        exp.P = 3.5080297660337587
-        exp.lo = 9.101395513076895
-        exp.T = 5484.96289455295
-        exp.type = space.OrbitType.elliptic
+        # fmt: off
+        exp            = space.Elements()
+        exp.a          = 6722154.278502964
+        exp.e          = 0.0009556
+        exp.i          = 0.9012583551325879
+        exp.W          = 0.21395293168497687
+        exp.w          = 3.294076834348782
+        exp.vo         = 5.593365747043137
+        exp.p          = 6722148.1400242
+        exp.uo         = 8.88744258139192
+        exp.P          = 3.5080297660337587
+        exp.lo         = 9.101395513076895
+        exp.T          = 5484.96289455295
+        exp.type       = space.OrbitType.elliptic
         exp.equatorial = False
-        exp.circular = False
-        exp.t = space.jd_to_numpy(2453867.79375)
+        exp.circular   = False
+        exp.t          = space.jd_to_numpy(2453867.79375)
+        # fmt: on
         self.assertEqual(elements, exp)
 
     def test_file(self) -> None:
@@ -180,38 +182,40 @@ class Test_aerospace_rv_2_oe(unittest.TestCase):
     def test_zeros(self) -> None:
         r0 = np.zeros(3)
         v0 = np.zeros(3)
-        exp1 = space.Elements()
-        exp1.a = 0.0
-        exp1.e = 0.0
-        exp1.i = 0.0
-        exp1.W = 0.0
-        exp1.w = 0.0
-        exp1.vo = 0.0
-        exp1.p = 0.0
-        exp1.uo = 0.0
-        exp1.P = 0.0
-        exp1.lo = 0.0
-        exp1.T = 0.0
-        exp1.type = space.OrbitType.elliptic
+        # fmt: off
+        exp1            = space.Elements()
+        exp1.a          = 0.0
+        exp1.e          = 0.0
+        exp1.i          = 0.0
+        exp1.W          = 0.0
+        exp1.w          = 0.0
+        exp1.vo         = 0.0
+        exp1.p          = 0.0
+        exp1.uo         = 0.0
+        exp1.P          = 0.0
+        exp1.lo         = 0.0
+        exp1.T          = 0.0
+        exp1.type       = space.OrbitType.elliptic
         exp1.equatorial = True
-        exp1.circular = True
-        exp1.t = np.datetime64("nat")
-        exp2 = space.Elements()
-        exp2.a = np.inf
-        exp2.e = 1.0
-        exp2.i = 0.0
-        exp2.W = 0.0
-        exp2.w = np.pi
-        exp2.vo = np.pi
-        exp2.p = 0.0
-        exp2.uo = 0.0
-        exp2.P = np.pi
-        exp2.lo = 0.0
-        exp2.T = np.inf
-        exp2.type = space.OrbitType.elliptic
+        exp1.circular   = True
+        exp1.t          = np.datetime64("nat")
+        exp2            = space.Elements()
+        exp2.a          = np.inf
+        exp2.e          = 1.0
+        exp2.i          = 0.0
+        exp2.W          = 0.0
+        exp2.w          = np.pi
+        exp2.vo         = np.pi
+        exp2.p          = 0.0
+        exp2.uo         = 0.0
+        exp2.P          = np.pi
+        exp2.lo         = 0.0
+        exp2.T          = np.inf
+        exp2.type       = space.OrbitType.elliptic
         exp2.equatorial = True
-        exp2.circular = False
-        exp2.t = np.datetime64("nat")
+        exp2.circular   = False
+        exp2.t          = np.datetime64("nat")
+        # fmt: on
         oe1 = space.rv_2_oe(r0, self.v1)
         self.assertEqual(oe1, exp1)
         oe2 = space.rv_2_oe(self.r1, v0)
@@ -221,6 +225,19 @@ class Test_aerospace_rv_2_oe(unittest.TestCase):
         exp4 = exp1.combine(exp2).combine(exp1)
         oe4 = space.rv_2_oe(np.column_stack((r0, self.r1, r0)), np.column_stack((self.v1, v0, v0)))
         self.assertEqual(oe4, exp4)
+
+    def test_nans1(self) -> None:
+        oe = space.rv_2_oe(np.full(3, np.nan), np.full(3, np.nan))
+        self.assertTrue(np.isnan(oe.a))
+
+    def test_nans2(self) -> None:
+        r = np.column_stack((self.r1, self.r2, np.full(3, np.nan)))
+        v = np.column_stack((self.v1, self.v2, np.full(3, np.nan)))
+        mu = np.array([1.0, space.MU_EARTH, space.MU_EARTH])
+        elements = space.rv_2_oe(r, v, mu=mu)
+        elements.pprint()
+        exp_a = np.array([self.a1, self.a2, np.nan])
+        np.testing.assert_array_equal(elements.a, exp_a)  # type: ignore[arg-type]
 
 
 #%% aerospace.oe_2_rv
@@ -232,24 +249,26 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.r = np.array([-0.8, 0.6, 0.5])
-        self.v = np.array([-0.4, -0.8, 0.6])
-        self.oe = space.Elements()
-        self.oe.a = 1.590193260353663
-        self.oe.e = 0.3169963595807386
-        self.oe.i = 0.7439637316462275
-        self.oe.W = 1.923786714621807
-        self.oe.w = 0.229262256060102
-        self.oe.vo = 0.4920582123765659
-        self.oe.p = 1.4304000000000001
-        self.oe.uo = 0.7213204684366679
-        self.oe.P = 2.153048970681909
-        self.oe.lo = 2.645107183058475
-        self.oe.T = 12.599541202147304
-        self.oe.type = space.OrbitType.elliptic
+        # fmt: off
+        self.r             = np.array([-0.8, 0.6, 0.5])
+        self.v             = np.array([-0.4, -0.8, 0.6])
+        self.oe            = space.Elements()
+        self.oe.a          = 1.590193260353663
+        self.oe.e          = 0.3169963595807386
+        self.oe.i          = 0.7439637316462275
+        self.oe.W          = 1.923786714621807
+        self.oe.w          = 0.229262256060102
+        self.oe.vo         = 0.4920582123765659
+        self.oe.p          = 1.4304000000000001
+        self.oe.uo         = 0.7213204684366679
+        self.oe.P          = 2.153048970681909
+        self.oe.lo         = 2.645107183058475
+        self.oe.T          = 12.599541202147304
+        self.oe.type       = space.OrbitType.elliptic
         self.oe.equatorial = False
-        self.oe.circular = False
-        self.oe.t = np.datetime64("nat")
+        self.oe.circular   = False
+        self.oe.t          = np.datetime64("nat")
+        # fmt: on
 
     def test_nominal(self) -> None:
         (r, v) = space.oe_2_rv(self.oe)
@@ -260,42 +279,44 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
         pass  # TODO: write this
 
     def test_zeros(self) -> None:
-        r0 = np.zeros(3)
-        v0 = np.zeros(3)
-        r1 = np.array([1.0, 0.0, 0.0])
-        v1 = np.array([0.0, 1.0, 0.0])
-        oe1 = space.Elements()
-        oe1.a = 0.0
-        oe1.e = 0.0
-        oe1.i = 0.0
-        oe1.W = 0.0
-        oe1.w = 0.0
-        oe1.vo = 0.0
-        oe1.p = 0.0
-        oe1.uo = 0.0
-        oe1.P = 0.0
-        oe1.lo = 0.0
-        oe1.T = 0.0
-        oe1.type = space.OrbitType.elliptic
+        # fmt: off
+        r0             = np.zeros(3)
+        v0             = np.zeros(3)
+        r1             = np.array([1.0, 0.0, 0.0])
+        v1             = np.array([0.0, 1.0, 0.0])
+        oe1            = space.Elements()
+        oe1.a          = 0.0
+        oe1.e          = 0.0
+        oe1.i          = 0.0
+        oe1.W          = 0.0
+        oe1.w          = 0.0
+        oe1.vo         = 0.0
+        oe1.p          = 0.0
+        oe1.uo         = 0.0
+        oe1.P          = 0.0
+        oe1.lo         = 0.0
+        oe1.T          = 0.0
+        oe1.type       = space.OrbitType.elliptic
         oe1.equatorial = True
-        oe1.circular = True
-        oe1.t = np.datetime64("nat")
-        oe2 = space.Elements()
-        oe2.a = np.inf
-        oe2.e = 1.0
-        oe2.i = 0.0
-        oe2.W = 0.0
-        oe2.w = np.pi
-        oe2.vo = np.pi
-        oe2.p = 0.0
-        oe2.uo = 0.0
-        oe2.P = np.pi
-        oe2.lo = 0.0
-        oe2.T = np.inf
-        oe2.type = space.OrbitType.elliptic
+        oe1.circular   = True
+        oe1.t          = np.datetime64("nat")
+        oe2            = space.Elements()
+        oe2.a          = np.inf
+        oe2.e          = 1.0
+        oe2.i          = 0.0
+        oe2.W          = 0.0
+        oe2.w          = np.pi
+        oe2.vo         = np.pi
+        oe2.p          = 0.0
+        oe2.uo         = 0.0
+        oe2.P          = np.pi
+        oe2.lo         = 0.0
+        oe2.T          = np.inf
+        oe2.type       = space.OrbitType.elliptic
         oe2.equatorial = True
-        oe2.circular = False
-        oe2.t = np.datetime64("nat")
+        oe2.circular   = False
+        oe2.t          = np.datetime64("nat")
+        # fmt: on
         # TODO: fix this case
         # (r, v) = space.oe_2_rv(oe1)
         # np.testing.assert_array_equal(r, r0)

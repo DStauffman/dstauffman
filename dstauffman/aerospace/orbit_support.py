@@ -268,11 +268,13 @@ def ijk_2_sez(ijk, geo_loc, time_jd):
     #% Subfunctions
     def _find_D(L, theta):
         r"""Calculate the IJK to SEZ transformation matrix from L and theta."""
+        # fmt: off
         return np.array([
             [ np.sin(L) * np.cos(theta), np.sin(L) * np.sin(theta), -np.cos(L)],
             [-np.sin(theta)            , np.cos(theta)            , 0.0       ],
             [ np.cos(L) * np.cos(theta), np.cos(L) * np.sin(theta),  np.sin(L)],
         ])
+        # fmt: on
 
     # find vector to observer in IJK frame
     R = geo_loc_2_ijk(geo_loc, time_jd)
@@ -376,11 +378,13 @@ def sez_2_ijk(sez, geo_loc, time_jd):
     #% Subfunctions
     def _find_D(L, theta):
         r"""Calculate the SEZ to IJK transformation matrix from L and theta."""
+        # fmt: off
         return np.array([
             [ np.sin(L) * np.cos(theta), -np.sin(theta), np.cos(L) * np.cos(theta)],
             [ np.sin(L) * np.sin(theta),  np.cos(theta), np.cos(L) * np.sin(theta)],
             [-np.cos(L)                ,  0.0          , np.sin(L)                ],
         ])
+        # fmt: on
 
     # find the size of the input array
     (m, n) = sez.shape
@@ -437,6 +441,7 @@ def rv_aer_2_sez(r_aer, v_aer):
     r_sez = aer_2_sez(r_aer)
 
     # pull out az, el and range and their derivatives
+    # fmt: off
     az  = r_aer[0, ...]
     el  = r_aer[1, ...]
     rho = r_aer[2, ...]
@@ -450,6 +455,7 @@ def rv_aer_2_sez(r_aer, v_aer):
          rho_dot * np.cos(el) * np.sin(az) - rho * np.sin(el) * el_dot * np.sin(az) + rho * np.cos(el) * np.cos(az) * az_dot,
          rho_dot * np.sin(el) + rho * np.cos(el) * el_dot,
     ])
+    # fmt: on
     return (r_sez, v_sez)
 
 

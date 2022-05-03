@@ -30,7 +30,7 @@ class SimParams(Frozen):
         self.time: np.ndarray = time
         self.magnitude: float = magnitude
         self.frequency: float = frequency
-        self.phase: float = phase
+        self.phase: float     = phase  # fmt: skip
 
     def __eq__(self, other: Any) -> bool:
         if type(other) != type(self):
@@ -444,21 +444,23 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        time = np.arange(251)
+        time       = np.arange(251)  # fmt: skip
         sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time = np.arange(-10, 201)
         truth_data = 5 * np.sin(2 * np.pi * 10 * time / 1000 + 90 * np.pi / 180)
 
-        self.opti_opts = estm.OptiOpts()
-        self.opti_opts.model_func = sim_model
-        self.opti_opts.model_args = {"sim_params": sim_params}
-        self.opti_opts.cost_func = cost_wrapper
-        self.opti_opts.cost_args = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
+        # fmt: off
+        self.opti_opts                = estm.OptiOpts()
+        self.opti_opts.model_func     = sim_model
+        self.opti_opts.model_args     = {"sim_params": sim_params}
+        self.opti_opts.cost_func      = cost_wrapper
+        self.opti_opts.cost_args      = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
-        self.opti_opts.output_folder = None
+        self.opti_opts.output_folder  = None
         self.opti_opts.output_results = ""
-        self.opti_opts.params = []
+        self.opti_opts.params         = []
+        # fmt: on
 
         # Parameters to estimate
         self.opti_opts.params.append(estm.OptiParam("magnitude", best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
@@ -487,7 +489,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.bpe_results.param_names = [name.encode("utf-8") for name in names]
         self.bpe_results.begin_params = self.cur_results.params.copy()
         self.bpe_results.begin_innovs = self.cur_results.innovs.copy()
-        self.bpe_results.begin_cost = self.cur_results.cost
+        self.bpe_results.begin_cost   = self.cur_results.cost  # fmt: skip
         self.bpe_results.costs.append(self.cur_results.cost)
 
         self.two_sided = False
@@ -725,21 +727,23 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        time = np.arange(251)
+        time       = np.arange(251)  # fmt: skip
         sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time = np.arange(-10, 201)
         truth_data = 5 * np.sin(2 * np.pi * 10 * time / 1000 + 90 * np.pi / 180)
 
-        self.opti_opts = estm.OptiOpts()
-        self.opti_opts.model_func = sim_model
-        self.opti_opts.model_args = {"sim_params": sim_params}
-        self.opti_opts.cost_func = cost_wrapper
-        self.opti_opts.cost_args = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
+        # fmt: off
+        self.opti_opts                = estm.OptiOpts()
+        self.opti_opts.model_func     = sim_model
+        self.opti_opts.model_args     = {"sim_params": sim_params}
+        self.opti_opts.cost_func      = cost_wrapper
+        self.opti_opts.cost_args      = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
-        self.opti_opts.output_folder = None
+        self.opti_opts.output_folder  = None
         self.opti_opts.output_results = ""
-        self.opti_opts.params = []
+        self.opti_opts.params         = []
+        # fmt: on
 
         # Parameters to estimate
         self.opti_opts.params.append(estm.OptiParam("magnitude", best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
@@ -765,17 +769,19 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)
 
         # set relevant results variables
-        self.bpe_results.param_names = [name.encode("utf-8") for name in names]
+        # fmt: off
+        self.bpe_results.param_names  = [name.encode("utf-8") for name in names]
         self.bpe_results.begin_params = self.cur_results.params.copy()
         self.bpe_results.begin_innovs = self.cur_results.innovs.copy()
-        self.bpe_results.begin_cost = self.cur_results.cost
+        self.bpe_results.begin_cost   = self.cur_results.cost
         self.bpe_results.costs.append(self.cur_results.cost)
 
         self.delta_param = np.array([1.0, 2.0, 3.0])
-        self.gradient = np.array([4.0, 5.0, 6.0])
-        self.hessian = np.array([[5.0, 2.0, 1.0], [1.0, 2.0, 5.0], [3.0, 3.0, 3.0]])
-        self.jacobian = np.random.rand(201, 3)
-        self.normalized = False
+        self.gradient    = np.array([4.0, 5.0, 6.0])
+        self.hessian     = np.array([[5.0, 2.0, 1.0], [1.0, 2.0, 5.0], [3.0, 3.0, 3.0]])
+        self.jacobian    = np.random.rand(201, 3)
+        self.normalized  = False
+        # fmt: on
 
     def test_nominal(self, mock_logger: Mock) -> None:
         estm.batch._dogleg_search(
@@ -903,16 +909,18 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        self.opti_opts = estm.OptiOpts()
-        self.opti_opts.model_func = str
-        self.opti_opts.model_args = {"a": 1}
-        self.opti_opts.cost_func = str
-        self.opti_opts.cost_args = {"b": 2}
+        # fmt: off
+        self.opti_opts                = estm.OptiOpts()
+        self.opti_opts.model_func     = str
+        self.opti_opts.model_args     = {"a": 1}
+        self.opti_opts.cost_func      = str
+        self.opti_opts.cost_args      = {"b": 2}
         self.opti_opts.get_param_func = str
         self.opti_opts.set_param_func = repr
-        self.opti_opts.output_folder = None
+        self.opti_opts.output_folder  = None
         self.opti_opts.output_results = ""
-        self.opti_opts.params = [1, 2]
+        self.opti_opts.params         = [1, 2]
+        # fmt: on
 
     def support(self) -> None:
         with self.assertRaises(AssertionError):
@@ -983,21 +991,23 @@ class Test_estimation_run_bpe(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        time = np.arange(251)
+        time       = np.arange(251)  # fmt: skip
         sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
         truth_time = np.arange(-10, 201)
         truth_data = 5 * np.sin(2 * np.pi * 10 * time / 1000 + 90 * np.pi / 180)
 
-        self.opti_opts = estm.OptiOpts()
-        self.opti_opts.model_func = sim_model
-        self.opti_opts.model_args = {"sim_params": sim_params}
-        self.opti_opts.cost_func = cost_wrapper
-        self.opti_opts.cost_args = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
+        # fmt: off
+        self.opti_opts                = estm.OptiOpts()
+        self.opti_opts.model_func     = sim_model
+        self.opti_opts.model_args     = {"sim_params": sim_params}
+        self.opti_opts.cost_func      = cost_wrapper
+        self.opti_opts.cost_args      = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
-        self.opti_opts.output_folder = None
+        self.opti_opts.output_folder  = None
         self.opti_opts.output_results = ""
-        self.opti_opts.params = []
+        self.opti_opts.params         = []
+        # fmt: on
 
         # Parameters to estimate
         self.opti_opts.params.append(estm.OptiParam("magnitude", best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))

@@ -32,7 +32,7 @@ class Test_estimation_orth(unittest.TestCase):
         )
         self.A2 = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
         self.r2 = 2
-        self.Q2 = np.array([[-0.70710678, 0.0,], [0.0, 1.0], [-0.70710678, 0.0]])
+        self.Q2 = np.array([[-0.70710678, 0.0,], [0.0, 1.0], [-0.70710678, 0.0]])  # fmt: skip
 
     def test_rank3(self) -> None:
         r = np.linalg.matrix_rank(self.A1)
@@ -57,6 +57,7 @@ class Test_estimation_subspace(unittest.TestCase):
 
     def setUp(self) -> None:
         self.A = np.array([[1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1], [1, 1, 1], [-1, 1, -1], [1, -1, -1], [-1, -1, 1]])
+        # fmt: off
         self.B = np.array([
             [ 1,  1,  1,  1],
             [ 1, -1,  1, -1],
@@ -67,6 +68,7 @@ class Test_estimation_subspace(unittest.TestCase):
             [-1, -1,  1,  1],
             [-1,  1,  1, -1],
         ])
+        # fmt: on
         self.theta = np.pi / 2
 
     def test_nominal(self) -> None:

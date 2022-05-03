@@ -25,13 +25,15 @@ class Test_aerospace_qrot_single(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.axis = np.array([1, 2, 3])
-        self.angle = np.pi / 2
+        # fmt: off
+        self.axis   = np.array([1, 2, 3])
+        self.angle  = np.pi / 2
         self.angle2 = np.pi / 3
-        r2o2 = np.sqrt(2) / 2
-        r3o2 = np.sqrt(3) / 2
-        self.quat = np.array([[r2o2, 0, 0, r2o2], [0, r2o2, 0, r2o2], [0, 0, r2o2, r2o2]])
-        self.quat2 = np.array([[0.5, 0, 0, r3o2], [0, 0.5, 0, r3o2], [0, 0, 0.5, r3o2]])
+        r2o2        = np.sqrt(2) / 2
+        r3o2        = np.sqrt(3) / 2
+        self.quat   = np.array([[r2o2, 0, 0, r2o2], [0, r2o2, 0, r2o2], [0, 0, r2o2, r2o2]])
+        self.quat2  = np.array([[0.5, 0, 0, r3o2], [0, 0.5, 0, r3o2], [0, 0, 0.5, r3o2]])
+        # fmt: on
 
     def test_single_inputs(self) -> None:
         for i in range(len(self.axis)):

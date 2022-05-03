@@ -164,6 +164,7 @@ class KfInnov(Frozen):
         self.innov: Optional[np.ndarray]
         self.norm: Optional[np.ndarray]
         self.status: Optional[np.ndarray]
+        # fmt: off
         if num_innovs > 0:
             self.time   = np.empty(num_innovs, dtype=time_dtype)
             innov_shape = (num_axes, num_innovs) if num_axes > 1 else (num_innovs,)
@@ -175,6 +176,7 @@ class KfInnov(Frozen):
             self.innov  = None
             self.norm   = None
             self.status = None
+        # fmt: on
         self.fploc: Optional[np.ndarray] = None
         self.snr: Optional[np.ndarray] = None
 
@@ -302,6 +304,7 @@ class Kf(Frozen):
         self.state: Optional[np.ndarray]
         self.istate: Optional[np.ndarray]
         self.covar: Optional[np.ndarray]
+        # fmt: off
         if num_points > 0:
             num_active   = num_states if active_states is None else len(active_states)
             state_shape  = (num_active, num_points) if num_active > 1 else (num_points,)
@@ -325,12 +328,13 @@ class Kf(Frozen):
             self.istate  = None
             self.covar   = None
         self.innov: Any
+        # fmt: on
         if innov_class is None:
             self.innov = KfInnov(time_dtype=time_dtype, chan=innov_chan, **kwargs)
-            self._subclasses = frozenset({"innov",})
+            self._subclasses = frozenset({"innov",})  # fmt: skip
         elif callable(innov_class):
             self.innov = innov_class(time_dtype=time_dtype, chan=innov_chan, **kwargs)
-            self._subclasses = frozenset({"innov",})
+            self._subclasses = frozenset({"innov",})  # fmt: skip
         else:
             for (name, func) in innov_class.items():
                 setattr(self, name, func(time_dtype=time_dtype, chan=innov_chan, **kwargs))
@@ -508,6 +512,7 @@ class KfRecord(Frozen):
         self.Pz: Optional[np.ndarray]
         self.K: Optional[np.ndarray]
         self.z: Optional[np.ndarray]
+        # fmt: off
         if num_points > 0:
             self.time = np.empty(num_points, dtype=time_dtype)
             self.P    = np.empty((num_active, num_active, num_points), order="F")
@@ -524,9 +529,11 @@ class KfRecord(Frozen):
             self.Pz   = None
             self.K    = None
             self.z    = None
+        # fmt: on
 
     def keep_subset(self, ix_keep: np.ndarray) -> None:
         r"""Returns only the specified indices (likely only accepted measurements)."""
+        # fmt: off
         self.time = self.time[ix_keep].copy() if self.time is not None else None
         self.P    = self.P[:, :, ix_keep].copy() if self.P is not None else None
         self.stm  = self.stm[:, :, ix_keep].copy() if self.stm is not None else None
@@ -534,6 +541,7 @@ class KfRecord(Frozen):
         self.Pz   = self.Pz[:, :, ix_keep].copy() if self.Pz is not None else None
         self.K    = self.K[:, :, ix_keep].copy() if self.K is not None else None
         self.z    = self.z[:, ix_keep].copy() if self.z is not None else None
+        # fmt: on
 
     def save(self, filename: Path = None, use_hdf5: bool = True) -> None:
         r"""

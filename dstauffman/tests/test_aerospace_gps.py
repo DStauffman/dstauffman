@@ -84,8 +84,8 @@ class Test_aerospace_prn_01_to_m11(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.bits = np.array([1, 1, 1, 0, 0, 1, 1])
-        self.exp = np.array([-1, -1, -1, 1, 1, -1, -1])
+        self.bits = np.array([ 1,  1,  1, 0, 0,  1,  1])  # fmt: skip
+        self.exp  = np.array([-1, -1, -1, 1, 1, -1, -1])  # fmt: skip
 
     def test_nominal(self) -> None:
         out = space.prn_01_to_m11(self.bits)

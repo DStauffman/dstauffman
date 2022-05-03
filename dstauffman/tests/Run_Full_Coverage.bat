@@ -23,14 +23,17 @@ call %envs_home%\core_only\Scripts\activate
 call dcs tests --coverage --cov_file %tests_home%\.coverage.core
 
 REM Re-run the command help tests to make sure this gets code coverage
-SET COVERAGE_FILE=.coverage.commands
+SET COVERAGE_FILE=%tests_home%\.coverage.commands
+SET COVERAGE_RCFILE=%tests_home%\.coveragerc
 SET PYTHONPATH=%tests_home%\..\..;%PYTHONPATH%
 call coverage run %tests_home%\test_commands_help.py
 
 cd %tests_home%
 SET COVERAGE_FILE=.coverage
+SET COVERAGE_RCFILE=.coveragerc
 call coverage combine --keep
 call coverage html
+call coverage xml
 call deactivate
 
 REM Open the report

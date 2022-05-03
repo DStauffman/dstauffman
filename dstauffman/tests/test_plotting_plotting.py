@@ -176,18 +176,20 @@ class Test_plotting_plot_time_history(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.description = "Plot description"
-        self.time = np.arange(0, 10, 0.1) + 2000
-        num_channels = 5
-        self.row_data = np.random.rand(len(self.time), num_channels)
-        mag = np.sum(self.row_data, axis=1)
-        self.row_data = 10 * self.row_data / np.expand_dims(mag, axis=1)
-        self.col_data = self.row_data.T.copy()
-        self.units = "percentage"
-        self.opts = plot.Opts()
+        # fmt: off
+        self.description    = "Plot description"
+        self.time           = np.arange(0, 10, 0.1) + 2000
+        num_channels        = 5
+        self.row_data       = np.random.rand(len(self.time), num_channels)
+        mag                 = np.sum(self.row_data, axis=1)
+        self.row_data       = 10 * self.row_data / np.expand_dims(mag, axis=1)
+        self.col_data       = self.row_data.T.copy()
+        self.units          = "percentage"
+        self.opts           = plot.Opts()
         self.opts.show_plot = False
-        self.elements = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
+        self.elements       = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
         self.figs: List[plt.Figure] = []
+        # fmt: on
 
     def test_nominal(self) -> None:
         self.figs.append(plot.plot_time_history(self.description, self.time, self.row_data, opts=self.opts, data_as_rows=False))

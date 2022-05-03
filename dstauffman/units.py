@@ -82,6 +82,7 @@ def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[
     µ
 
     """
+    # fmt: off
     # find the desired units and label prefix
     if prefix == "yotta":
         mult  = 1e24 if not inverse else 1e-24
@@ -168,6 +169,7 @@ def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[
         label = MICRO_SIGN + "as"
     else:
         raise ValueError("Unexpected value for units prefix.")
+    # fmt: on
     return (mult, label)
 
 
