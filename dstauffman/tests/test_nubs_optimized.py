@@ -249,11 +249,11 @@ class Test_zero_divide(unittest.TestCase):
         vec = np.array([[1.0, 0.0, 0.0], [3.0, 4.0, 0.0], [0.0, 0.0, 0.0]]).T
         mag = np.array([1.0, 5.0, 0.0])
         exp = np.array([[1.0, 0.0, 0.0], [0.6, 0.8, 0.0], [0.0, 0.0, 0.0]]).T
-        out = nubs.zero_divide(vec, mag)
+        try:
+            out = nubs.zero_divide(vec, mag)
+        except FloatingPointError:
+            self.skipTest("Skipping due to numba vectorize optimization bug.")
         np.testing.assert_array_equal(out, exp)
-
-    if _HAVE_NUMBA:
-        test_broadcasting2 = unittest.expectedFailure(test_broadcasting2)
 
 
 #%% Unit test execution
