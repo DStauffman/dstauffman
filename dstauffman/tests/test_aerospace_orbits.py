@@ -228,14 +228,13 @@ class Test_aerospace_rv_2_oe(unittest.TestCase):
 
     def test_nans1(self) -> None:
         oe = space.rv_2_oe(np.full(3, np.nan), np.full(3, np.nan))
-        self.assertTrue(np.isnan(oe.a))
+        self.assertTrue(np.isnan(oe.a))  # type: ignore[arg-type]
 
     def test_nans2(self) -> None:
         r = np.column_stack((self.r1, self.r2, np.full(3, np.nan)))
         v = np.column_stack((self.v1, self.v2, np.full(3, np.nan)))
         mu = np.array([1.0, space.MU_EARTH, space.MU_EARTH])
         elements = space.rv_2_oe(r, v, mu=mu)
-        elements.pprint()
         exp_a = np.array([self.a1, self.a2, np.nan])
         np.testing.assert_array_equal(elements.a, exp_a)  # type: ignore[arg-type]
 
@@ -351,6 +350,10 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
                                 self.assertAlmostEqual(oe.w, oe2.w, msg="w is different")  # type: ignore[arg-type]
                                 self.assertAlmostEqual(oe.W, oe2.W, msg="W is different")  # type: ignore[arg-type]
                                 self.assertAlmostEqual(oe.vo, oe2.vo, msg="nu is different")  # type: ignore[arg-type]
+
+
+#%% aerospace.advance_elements
+pass  # TODO: write this
 
 
 #%% Unit test execution

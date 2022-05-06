@@ -9,12 +9,12 @@ Notes
 #%% Imports
 from __future__ import annotations
 import doctest
-from typing import overload, TYPE_CHECKING, Union
+from typing import overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import ARCSEC2RAD, DEG2RAD, HAVE_NUMPY, magnitude, NP_DATETIME_UNITS, NP_ONE_DAY, ONE_MINUTE, ONE_HOUR, RAD2DEG
 
-from dstauffman.aerospace.orbit_const import EARTH, JULIAN, TAU
+from dstauffman.aerospace.orbit_const import EARTH, JULIAN, PI, TAU
 
 if HAVE_NUMPY:
     import numpy as np
@@ -502,12 +502,33 @@ def rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd):
 
 
 #%% Functions - get_sun_radec
-def get_sun_radec(time_jd):
+def get_sun_radec(time_jd: _N, return_early: bool = False) -> Tuple[np.ndarray, np.ndarray]:
     r"""
+    Gets the right ascension and declination angles to the Sun for the given julian time.
+
+    Parameters
+    ----------
+    time_jd : np.ndarray
+        Julian date
+    return_early : bool, optional, default is False
+        Whether to return early with solar longitude and obliquity instead of ra and dec
+
+    Returns
+    -------
+    ra : np.ndarray
+        Right ascension [rad]
+    dec : np.ndarray
+        Declination [rad]
+    ~ or ~
+    sun_true_longitude : np.ndarray
+        Solar longitude [rad]
+    obliquity_of_ecliptic : np.ndarray
+        Obliquity of the ecliptic plane [rad]
 
     Notes
     -----
     #.  obliquity of ecliptic from Astronomical Almanac 2010.
+    #.  Updated by David C. Stauffer in May 2022 to optional return early with sun ecliptic parameters.
 
     Examples
     --------
@@ -552,11 +573,102 @@ def get_sun_radec(time_jd):
         - 0.576e-6 * T**4
         - 4.34e-8 * T**5
     )
+    if return_early:
+        return (sun_true_longitude, obliquity_of_ecliptic)  # type: ignore[return-value]
     # right ascension
     ra = np.mod(np.arctan2(np.cos(obliquity_of_ecliptic) * np.sin(sun_true_longitude), np.cos(sun_true_longitude)), TAU)
     # declination
     dec = np.arcsin(np.sin(obliquity_of_ecliptic) * np.sin(sun_true_longitude))
     return (ra, dec)
+
+
+#%% Functions - beta_from_oe
+def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> np.ndarray:
+    r"""
+    Calculates the beta angle between the sun and the orbit plane.
+
+    Parameters
+    ----------
+    raan : np.ndarray
+        Right ascension of the ascending node
+    inclination : np.ndarray
+        Inclination of the orbit plane
+    time_jd : np.ndarray
+        Julian date
+
+    Returns
+    -------
+    np.ndarry
+        Beta angle
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2022.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import beta_from_oe
+    >>> raan = 0.5
+    >>> inclination = 1.4
+    >>> time_jd = 2455368.5
+    >>> beta = beta_from_oe(raan, inclination, time_jd)
+    >>> print(f"{beta:0.4f}")
+    -0.8068
+
+    """
+    (Ls, ob) = get_sun_radec(time_jd, return_early=True)
+    sin_beta = (np.cos(Ls) * np.sin(raan) * np.sin(inclination)
+        - np.sin(Ls) * np.cos(ob) * np.cos(raan) * np.sin(inclination)
+        + np.sin(Ls) * np.sin(ob) * np.cos(inclination)
+    )
+    return np.arcsin(sin_beta)  # type: ignore[no-any-return]
+
+
+#%% Functions - eclipse_fraction
+def eclipse_fraction(altitude: _N, beta: _N) -> np.ndarray:
+    r"""
+    Gets the faction of the orbit period for which the satellite is in umbra.
+
+    Parameters
+    ----------
+    altitude : np.ndarray
+        Spacecraft altitude [m]
+    beta : np.ndarray
+        Sun beta angle [rad]
+
+    Returns
+    -------
+    eclipse : np.ndarray
+        Fraction of orbit period spent in Earth eclipse
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2022
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import eclipse_fraction
+    >>> altitude = 16000.0
+    >>> beta = 3.14/6
+    >>> eclipse = eclipse_fraction(altitude, beta)
+    >>> print(f"{eclipse:.4f}")
+    0.4740
+
+    """
+    # force inputs to be ndarrays so they can be indexed
+    beta = np.asanyarray(beta)
+    altitude = np.asanyarray(altitude)
+    # alias the Earth radius
+    Re = EARTH["a"]
+    # find the limit of when you have any eclipse
+    beta_star = np.arcsin(Re / (Re + altitude))
+    # initialize the output and get an index into when you have some level of eclipse
+    eclipse = np.zeros(beta.shape)
+    ix = np.abs(beta) < beta_star
+    # do the actual eclipse fraction calculation
+    h = altitude[ix]
+    eclipse[ix] = 1 / PI * np.arccos(np.sqrt(h**2 + 2 * Re * h) / ((Re + h) * np.cos(beta[ix])))
+    return eclipse
 
 
 #%% Unit Test

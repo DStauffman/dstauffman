@@ -7,9 +7,10 @@ Notes
 """
 
 #%% Imports
+import datetime
 import unittest
 
-from dstauffman import HAVE_NUMPY
+from dstauffman import convert_datetime_to_np, HAVE_NUMPY
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -264,6 +265,38 @@ class Test_aerospace_r_2_hms(unittest.TestCase):
 #%% aerospace.rv_sez_2_aer
 
 #%% aerospace.rv_sez_2_ijk
+
+#%% aerospace.get_sun_radec
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_get_sun_radec(unittest.TestCase):
+    r"""
+    Tests the get_sun_radec function with the following cases:
+        Nominal
+        Return early
+    """
+    def setUp(self):
+        date = datetime.datetime(2010, 6, 20, 15, 30, 45)
+        np_date = convert_datetime_to_np(date)
+        self.time_jd = space.numpy_to_jd(np_date)
+
+    def test_nominal(self):
+        (ra, dec) = space.get_sun_radec(self.time_jd)
+        self.assertAlmostEqual(ra, 1.5647769687035675, 14)  # TODO: get independent source for this
+        self.assertAlmostEqual(dec, 0.4090622181809259, 14)  # TODO: get independent source for this
+
+    def test_return_early(self):
+        (Ls, ob) = space.get_sun_radec(self.time_jd, return_early=True)
+        self.assertAlmostEqual(Ls, 1.5652736057656844, 14)  # TODO: get independent source for this
+        self.assertAlmostEqual(ob, 0.40906882950150103, 14)  # TODO: get independent source for this
+
+
+#%% aerospace.beta_from_oe
+pass  # TODO: write this
+
+
+#%% aerospace.eclipse_fraction
+pass  # TODO: write this
+
 
 #%% Unit test execution
 if __name__ == "__main__":

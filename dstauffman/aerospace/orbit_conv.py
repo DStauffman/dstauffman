@@ -585,7 +585,7 @@ def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = False) -> _N:
     # mean local time of the ascending node (hours)
     offset = 0.0 if return_descending else PI
     mltan = np.mod(raan - ra_sun + offset, TAU)
-    return mltan  # type: ignore[no-any-return]
+    return mltan
 
 
 #%% Functions - jd_2_sidereal

@@ -26,7 +26,8 @@ from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to
                              dms_2_d, hms_2_r, r_2_hms, aer_2_rdr, aer_2_sez, geo_loc_2_ijk, \
                              ijk_2_rdr, ijk_2_sez, long_2_sidereal, rdr_2_aer, rdr_2_ijk, \
                              sez_2_aer, sez_2_ijk, rv_aer_2_ijk, rv_aer_2_sez, rv_ijk_2_aer, \
-                             rv_ijk_2_sez, rv_sez_2_aer, rv_sez_2_ijk, get_sun_radec
+                             rv_ijk_2_sez, rv_sez_2_aer, rv_sez_2_ijk, get_sun_radec, \
+                             beta_from_oe, eclipse_fraction
 from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv, advance_elements
 from .quat        import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks, quat_assertions, \
                              enforce_pos_scalar, qrot, quat_from_axis_angle, quat_angle_diff, \
