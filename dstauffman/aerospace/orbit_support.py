@@ -625,7 +625,27 @@ def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> np.ndarray:
 
 
 #%% Functions - eclipse_fraction
-def eclipse_fraction(altitude: _N, beta: _N) -> np.ndarray:
+@overload
+def eclipse_fraction(altitude: float, beta: float) -> float:
+    ...
+
+
+@overload
+def eclipse_fraction(altitude: float, beta: np.ndarray) -> np.ndarray:
+    ...
+
+
+@overload
+def eclipse_fraction(altitude: np.ndarray, beta: float) -> np.ndarray:
+    ...
+
+
+@overload
+def eclipse_fraction(altitude: np.ndarray, beta: np.ndarray) -> np.ndarray:
+    ...
+
+
+def eclipse_fraction(altitude: _N, beta: _N) -> _N:
     r"""
     Gets the faction of the orbit period for which the satellite is in umbra.
 
@@ -661,9 +681,12 @@ def eclipse_fraction(altitude: _N, beta: _N) -> np.ndarray:
     # alias the Earth radius
     Re = EARTH["a"]
     # find the limit of when you have any eclipse
-    beta_star = np.arcsin(Re / (Re + altitude))
+    ix_good = altitude >= 0
+    beta_star = np.full(ix_good.shape, np.nan)
+    beta_star = np.divide(Re, Re + altitude, out=beta_star, where=ix_good)
+    beta_star = np.arcsin(Re / (Re + altitude), out=beta_star, where=ix_good)
     # initialize the output and get an index into when you have some level of eclipse
-    eclipse = np.zeros(beta.shape)
+    eclipse = np.where(ix_good, 0, np.nan)
     ix = np.abs(beta) < beta_star
     # do the actual eclipse fraction calculation
     h = altitude[ix]

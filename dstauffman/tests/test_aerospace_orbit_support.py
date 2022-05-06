@@ -295,7 +295,23 @@ pass  # TODO: write this
 
 
 #%% aerospace.eclipse_fraction
-pass  # TODO: write this
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_eclipse_fraction(unittest.TestCase):
+    def setUp(self) -> None:
+        self.altitude = 16000.0
+        self.beta = np.pi/6
+        self.exp = 0.4739855149323683  # TODO: get independently
+
+    def test_nominal(self) -> None:
+        fe = space.eclipse_fraction(self.altitude, self.beta)
+        self.assertAlmostEqual(fe, self.exp)
+
+    def test_bad_values(self) -> None:
+        altitude = np.array([self.altitude, np.nan, -1000000.0])
+        beta = np.array([self.beta, np.nan, self.beta])
+        exp = np.array([self.exp, np.nan, np.nan])
+        fe = space.eclipse_fraction(altitude, beta)
+        np.testing.assert_array_almost_equal(fe, exp, 14)
 
 
 #%% Unit test execution
