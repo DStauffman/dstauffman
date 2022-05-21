@@ -146,7 +146,7 @@ def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np
     >>> from dstauffman.aerospace import quat_interp_single
     >>> import numpy as np
     >>> time  = np.array([1., 5.])
-    >>> quat = np.array([[0., 0.5], [0., -0.5], [0., -0.5], [1., 0.5]], order='F')
+    >>> quat = np.array([[0., 0.5], [0., -0.5], [0., -0.5], [1., 0.5]], order="F")
     >>> ti = 3.
     >>> qout = quat_interp_single(time, quat, ti)
     >>> print(np.array_str(qout, precision=8, suppress_small=True)) # doctest: +NORMALIZE_WHITESPACE
@@ -277,7 +277,7 @@ def quat_mult_single(a: np.ndarray, b: np.ndarray, inplace: bool = False) -> np.
 
     """
     c = a if inplace else a.copy()
-    # single quaternion inputs case (note: transposed to make 'F' order)
+    # single quaternion inputs case (note: transposed to make "F" order)
     # fmt: off
     c[:] = np.array([
         [ a[3], -a[2],  a[1], -a[0]],
@@ -385,7 +385,7 @@ def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray, inplace: bool = Fa
 
     """
     quat_new = quat if inplace else quat.copy()
-    # compute angle rate matrix (note: transposed to make 'F' order), use it to compute a delta
+    # compute angle rate matrix (note: transposed to make "F" order), use it to compute a delta
     # quaternion, and then propagate by adding the delta
     # fmt: off
     quat_new += 0.5 * np.array([

@@ -304,7 +304,7 @@ class Test_aerospace_eclipse_fraction(unittest.TestCase):
 
     def test_nominal(self) -> None:
         fe = space.eclipse_fraction(self.altitude, self.beta)
-        self.assertAlmostEqual(fe, self.exp)
+        self.assertAlmostEqual(fe, self.exp, 14)
 
     def test_bad_values(self) -> None:
         altitude = np.array([self.altitude, np.nan, -1000000.0])

@@ -227,7 +227,7 @@ def execute_coverage(args: argparse.Namespace) -> int:
             return ReturnCodes.bad_command
         if platform.system() == "Darwin":
             subprocess.call(["open", str(filename)])
-        # TODO: as of 2022-04, mypy v0.942 fails to recognize platform.system() == 'Windows'
+        # TODO: as of 2022-04, mypy v0.942 fails to recognize platform.system() == "Windows"
         # elif platform.system() == "Windows":
         elif sys.platform == "win32":
             assert platform.system() == "Windows"

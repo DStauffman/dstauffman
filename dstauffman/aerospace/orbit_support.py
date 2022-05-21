@@ -115,7 +115,7 @@ def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.
     --------
     >>> from dstauffman.aerospace import numpy_to_jd
     >>> import numpy as np
-    >>> date = np.datetime64('2000-01-02T12:00:00')
+    >>> date = np.datetime64("2000-01-02T12:00:00")
     >>> jd = numpy_to_jd(date)
     >>> print(jd)
     2451546.5
@@ -539,10 +539,10 @@ def get_sun_radec(time_jd: _N, return_early: bool = False) -> Tuple[np.ndarray, 
     >>> np_date = convert_datetime_to_np(date)
     >>> time_jd = numpy_to_jd(np_date)
     >>> (ra, dec) = get_sun_radec(time_jd)
-    >>> print(f'{ra:.3f}')
+    >>> print(f"{ra:.3f}")
     1.565
 
-    >>> print(f'{dec:.3f}')
+    >>> print(f"{dec:.3f}")
     0.409
 
     """
@@ -617,7 +617,8 @@ def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> np.ndarray:
 
     """
     (Ls, ob) = get_sun_radec(time_jd, return_early=True)
-    sin_beta = (np.cos(Ls) * np.sin(raan) * np.sin(inclination)
+    sin_beta = (
+        np.cos(Ls) * np.sin(raan) * np.sin(inclination)
         - np.sin(Ls) * np.cos(ob) * np.cos(raan) * np.sin(inclination)
         + np.sin(Ls) * np.sin(ob) * np.cos(inclination)
     )
@@ -684,7 +685,7 @@ def eclipse_fraction(altitude: _N, beta: _N) -> _N:
     ix_good = altitude >= 0
     beta_star = np.full(ix_good.shape, np.nan)
     beta_star = np.divide(Re, Re + altitude, out=beta_star, where=ix_good)
-    beta_star = np.arcsin(Re / (Re + altitude), out=beta_star, where=ix_good)
+    beta_star = np.arcsin(beta_star, out=beta_star, where=ix_good)
     # initialize the output and get an index into when you have some level of eclipse
     eclipse = np.where(ix_good, 0, np.nan)
     ix = np.abs(beta) < beta_star

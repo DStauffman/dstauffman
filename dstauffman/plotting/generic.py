@@ -129,7 +129,7 @@ def make_generic_plot(
     Parameters
     ----------
     plot_type : str
-        The time of plot to create, from {'time', 'bar', 'errorbar', 'cats', 'categories', 'quat', 'quaternion'}
+        The time of plot to create, from {"time", "bar", "errorbar", "cats", "categories", "quat", "quaternion"}
     description : str
         name of the data being plotted, used as title
     time_one : (A, ) array_like
@@ -157,7 +157,7 @@ def make_generic_plot(
     units : list
         name of units for plot
     time_units : str, optional
-        time units, defaults to 'sec', use 'datetime' for datetime histories
+        time units, defaults to "sec", use "datetime" for datetime histories
     start_date : str, optional
         date of t(0), may be an empty string
     rms_xmin : float, optional
@@ -183,7 +183,7 @@ def make_generic_plot(
     ignore_empties : bool, optional, default is False
         Removes any entries from the plot and legend that contain only zeros or only NaNs
     legend_loc : str, optional
-        location to put the legend, default is 'best', use 'none' to suppress legend
+        location to put the legend, default is "best", use "none" to suppress legend
     show_extra : bool, optional
         whether to show missing data on difference plots
     plot_components : bool, optional, default is True
@@ -226,27 +226,27 @@ def make_generic_plot(
     --------
     >>> from dstauffman.plotting import make_generic_plot
     >>> import numpy as np
-    >>> plot_type        = 'time'
-    >>> description      = 'Values vs Time'
+    >>> plot_type        = "time"
+    >>> description      = "Values vs Time"
     >>> time_one         = np.arange(-10., 10.1, 0.1)
     >>> data_one         = time_one + np.cos(time_one)
-    >>> name_one         = ''
+    >>> name_one         = ""
     >>> elements         = None
-    >>> units            = ''
-    >>> time_units       = 'sec'
-    >>> start_date       = ''
+    >>> units            = ""
+    >>> time_units       = "sec"
+    >>> start_date       = ""
     >>> rms_xmin         = -np.inf
     >>> rms_xmax         = np.inf
     >>> disp_xmin        = -np.inf
     >>> disp_xmax        = np.inf
     >>> single_lines     = False
     >>> make_subplots    = False
-    >>> colormap         = 'Paired'
+    >>> colormap         = "Paired"
     >>> use_mean         = False
     >>> plot_zero        = False
     >>> show_rms         = True
     >>> ignore_empties   = False
-    >>> legend_loc       = 'best'
+    >>> legend_loc       = "best"
     >>> show_extra       = True
     >>> second_units     = None
     >>> leg_scale        = None
@@ -1035,25 +1035,25 @@ def make_time_plot(
     --------
     >>> from dstauffman.plotting import make_time_plot
     >>> import numpy as np
-    >>> description      = 'Values vs Time'
+    >>> description      = "Values vs Time"
     >>> time             = np.arange(-10., 10.1, 0.1)
     >>> data             = time + np.cos(time)
-    >>> name             = ''
+    >>> name             = ""
     >>> elements         = None
-    >>> units            = ''
-    >>> time_units       = 'sec'
-    >>> start_date       = ''
+    >>> units            = ""
+    >>> time_units       = "sec"
+    >>> start_date       = ""
     >>> rms_xmin         = -np.inf
     >>> rms_xmax         = np.inf
     >>> disp_xmin        = -np.inf
     >>> disp_xmax        = np.inf
     >>> single_lines     = False
-    >>> colormap         = 'Paired'
+    >>> colormap         = "Paired"
     >>> use_mean         = False
     >>> plot_zero        = False
     >>> show_rms         = True
     >>> ignore_empties   = False
-    >>> legend_loc       = 'best'
+    >>> legend_loc       = "best"
     >>> second_units     = None
     >>> leg_scale        = None
     >>> ylabel           = None
@@ -1166,26 +1166,26 @@ def make_error_bar_plot(
     >>> from dstauffman.plotting import make_error_bar_plot
     >>> import numpy as np
     >>> from datetime import datetime
-    >>> description      = 'Random Data Error Bars'
+    >>> description      = "Random Data Error Bars"
     >>> time             = np.arange(11)
     >>> data             = np.array([[3.], [-2.], [5]]) + np.random.rand(3, 11)
     >>> mins             = data - 0.5 * np.random.rand(3, 11)
     >>> maxs             = data + 1.5 * np.random.rand(3, 11)
-    >>> elements         = ['x', 'y', 'z']
-    >>> units            = 'rad'
-    >>> time_units       = 'sec'
-    >>> start_date       = '  t0 = ' + str(datetime.now())
+    >>> elements         = ["x", "y", "z"]
+    >>> units            = "rad"
+    >>> time_units       = "sec"
+    >>> start_date       = "  t0 = " + str(datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
     >>> disp_xmin        = -2
     >>> disp_xmax        = np.inf
     >>> single_lines     = False
-    >>> colormap         = 'tab10'
+    >>> colormap         = "tab10"
     >>> use_mean         = False
     >>> plot_zero        = False
     >>> show_rms         = True
-    >>> legend_loc       = 'best'
-    >>> second_units     = 'milli'
+    >>> legend_loc       = "best"
+    >>> second_units     = "milli"
     >>> leg_scale        = None
     >>> ylabel           = None
     >>> data_as_rows     = True
@@ -1306,16 +1306,16 @@ def make_difference_plot(
     >>> from dstauffman.plotting import make_difference_plot, get_nondeg_colorlists
     >>> import numpy as np
     >>> from datetime import datetime
-    >>> description      = 'example'
+    >>> description      = "example"
     >>> time_one         = np.arange(11)
     >>> time_two         = np.arange(2, 13)
     >>> data_one         = 50e-6 * np.random.rand(2, 11)
     >>> data_two         = data_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e-6 * np.random.rand(2, 11)
-    >>> name_one         = 'test1'
-    >>> name_two         = 'test2'
-    >>> elements         = ['x', 'y']
-    >>> units            = 'rad'
-    >>> time_units       = 'sec'
+    >>> name_one         = "test1"
+    >>> name_two         = "test2"
+    >>> elements         = ["x", "y"]
+    >>> units            = "rad"
+    >>> time_units       = "sec"
     >>> start_date       = str(datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
@@ -1327,9 +1327,9 @@ def make_difference_plot(
     >>> use_mean         = False
     >>> plot_zero        = False
     >>> show_rms         = True
-    >>> legend_loc       = 'best'
+    >>> legend_loc       = "best"
     >>> show_extra       = True
-    >>> second_units     = (u'µrad', 1e6)
+    >>> second_units     = ("µrad", 1e6)
     >>> leg_scale        = None
     >>> ylabel           = None
     >>> data_as_rows     = True
@@ -1453,30 +1453,30 @@ def make_categories_plot(
     --------
     >>> from dstauffman.plotting import make_categories_plot
     >>> import numpy as np
-    >>> description      = 'Values vs Time'
+    >>> description      = "Values vs Time"
     >>> time             = np.arange(-10., 10.1, 0.1)
     >>> data             = np.vstack((time + np.cos(time), np.ones(time.shape, dtype=float)))
     >>> data[1, 60:85]   = 2
-    >>> MeasStatus       = type('MeasStatus', (object,), {'rejected': 0, 'accepted': 1})
+    >>> MeasStatus       = type("MeasStatus", (object,), {"rejected": 0, "accepted": 1})
     >>> cats             = np.full(time.shape, MeasStatus.accepted, dtype=int)
     >>> cats[50:100]     = MeasStatus.rejected
-    >>> cat_names        = {0: 'rejected', 1: 'accepted'}
-    >>> name             = ''
+    >>> cat_names        = {0: "rejected", 1: "accepted"}
+    >>> name             = ""
     >>> elements         = None
-    >>> units            = ''
-    >>> time_units       = 'sec'
-    >>> start_date       = ''
+    >>> units            = ""
+    >>> time_units       = "sec"
+    >>> start_date       = ""
     >>> rms_xmin         = -np.inf
     >>> rms_xmax         = np.inf
     >>> disp_xmin        = -np.inf
     >>> disp_xmax        = np.inf
     >>> make_subplots    = True
     >>> single_lines     = False
-    >>> colormap         = 'Paired'
+    >>> colormap         = "Paired"
     >>> use_mean         = True
     >>> plot_zero        = False
     >>> show_rms         = True
-    >>> legend_loc       = 'best'
+    >>> legend_loc       = "best"
     >>> second_units     = None
     >>> leg_scale        = None
     >>> ylabel           = None
@@ -1593,27 +1593,27 @@ def make_bar_plot(
     --------
     >>> from dstauffman.plotting import make_bar_plot
     >>> import numpy as np
-    >>> description      = 'Test vs Time'
+    >>> description      = "Test vs Time"
     >>> time             = np.arange(0, 5, 1./12) + 2000
     >>> data             = np.random.rand(5, len(time))
     >>> mag              = np.sum(data, axis=0)
     >>> data             = 100 * data / mag
-    >>> name             = ''
+    >>> name             = ""
     >>> elements         = None
-    >>> units            = '%'
-    >>> time_units       = 'sec'
-    >>> start_date       = ''
+    >>> units            = "%"
+    >>> time_units       = "sec"
+    >>> start_date       = ""
     >>> rms_xmin         = -np.inf
     >>> rms_xmax         = np.inf
     >>> disp_xmin        = -np.inf
     >>> disp_xmax        = np.inf
     >>> single_lines     = False
-    >>> colormap         = 'Paired'
+    >>> colormap         = "Paired"
     >>> use_mean         = True
     >>> plot_zero        = False
     >>> show_rms         = True
     >>> ignore_empties   = False
-    >>> legend_loc       = 'best'
+    >>> legend_loc       = "best"
     >>> second_units     = None
     >>> ylabel           = None
     >>> data_as_rows     = True
@@ -1699,18 +1699,18 @@ def make_connected_sets(
     hide_innovs : bool, optional, default is False
         Whether to hide the innovations and only show the sightings
     color_by : str
-        How to color the innovations, 'none' for same calor, 'magnitude' to color by innovation
-        magnitude, or 'direction' to color by polar direction
+        How to color the innovations, "none" for same calor, "magnitude" to color by innovation
+        magnitude, or "direction" to color by polar direction
     center_origin : bool, optional, default is False
         Whether to center the origin in the plot
-    legend_loc : str, optional, default is 'best'
+    legend_loc : str, optional, default is "best"
         Location of the legend in the plot
     units : str, optional
         Units to label on the plot
     mag_ratio : float, optional
         Percentage highest innovation magnitude to use, typically 0.95-1.0, but lets you exclude
         outliers that otherwise make the colorbar less useful
-    leg_scale : str, optional, default is 'micro'
+    leg_scale : str, optional, default is "micro"
         Amount to scale the colorbar legend
     colormap : str, optional
         Name to use instead of the default colormaps, which depend on the mode
@@ -1730,17 +1730,17 @@ def make_connected_sets(
     --------
     >>> from dstauffman.plotting import make_connected_sets
     >>> import numpy as np
-    >>> description = 'Focal Plane Sightings'
+    >>> description = "Focal Plane Sightings"
     >>> points = np.array([[0.1, 0.6, 0.7], [1.1, 1.6, 1.7]])
     >>> innovs = 5*np.array([[0.01, 0.02, 0.03], [-0.01, -0.015, -0.01]])
     >>> fig = make_connected_sets(description, points, innovs)
 
     >>> points2 = 2 * np.random.rand(2, 100) - 1.
     >>> innovs2 = 0.1 * np.random.randn(*points2.shape)
-    >>> fig2 = make_connected_sets(description, points2, innovs2, color_by='direction')
+    >>> fig2 = make_connected_sets(description, points2, innovs2, color_by="direction")
 
-    >>> fig3 = make_connected_sets(description, points2, innovs2, color_by='magnitude', \
-    ...     leg_scale='milli', units='m')
+    >>> fig3 = make_connected_sets(description, points2, innovs2, color_by="magnitude", \
+    ...     leg_scale="milli", units="m")
 
     >>> import matplotlib.pyplot as plt
     >>> plt.close(fig)

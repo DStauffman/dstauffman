@@ -269,7 +269,7 @@ def monthly_probability_to_annual_rate(prob):
     >>> import numpy as np
     >>> prob = np.array([0, 0.04081054, 0.07995559, 0.34075937, 1])
     >>> rate = monthly_probability_to_annual_rate(prob)
-    >>> print(' '.join(('{:.2f}'.format(x) for x in rate))) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(" ".join(("{:.2f}".format(x) for x in rate))) # doctest: +NORMALIZE_WHITESPACE
     0.00 0.50 1.00 5.00 inf
 
     """
@@ -411,8 +411,8 @@ def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np
     >>> from dstauffman.health import bounded_normal_draw
     >>> import numpy as np
     >>> num   = 10
-    >>> values = {'last_mean': 2, 'last_std': 0.5, 'last_min': 1, 'last_max': 3}
-    >>> field  = 'last'
+    >>> values = {"last_mean": 2, "last_std": 0.5, "last_min": 1, "last_max": 3}
+    >>> field  = "last"
     >>> prng   = np.random.RandomState()
     >>> out    = bounded_normal_draw(num, values, field, prng)
 

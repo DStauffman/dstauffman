@@ -99,14 +99,14 @@ def make_quaternion_plot(
     >>> from dstauffman.aerospace import quat_norm
     >>> import numpy as np
     >>> from datetime import datetime
-    >>> description      = 'example'
+    >>> description      = "example"
     >>> time_one         = np.arange(11)
     >>> time_two         = np.arange(2, 13)
     >>> quat_one         = quat_norm(np.random.rand(4, 11))
     >>> quat_two         = quat_norm(quat_one[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] + 1e-5 * np.random.rand(4, 11))
-    >>> name_one         = 'test1'
-    >>> name_two         = 'test2'
-    >>> time_units       = 'sec'
+    >>> name_one         = "test1"
+    >>> name_two         = "test2"
+    >>> time_units       = "sec"
     >>> start_date       = str(datetime.now())
     >>> rms_xmin         = 1
     >>> rms_xmax         = 10
@@ -117,10 +117,10 @@ def make_quaternion_plot(
     >>> use_mean         = False
     >>> plot_zero        = False
     >>> show_rms         = True
-    >>> legend_loc       = 'best'
+    >>> legend_loc       = "best"
     >>> show_extra       = True
     >>> plot_components  = True
-    >>> second_units     = (u'µrad', 1e6)
+    >>> second_units     = ("µrad", 1e6)
     >>> leg_scale        = None
     >>> data_as_rows     = True
     >>> tolerance        = 0
@@ -219,19 +219,19 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     >>> q2 = quat_mult(dq, q1)
 
     >>> kf1      = Kf()
-    >>> kf1.name = 'KF1'
+    >>> kf1.name = "KF1"
     >>> kf1.time = np.arange(11)
     >>> kf1.att  = np.tile(q1[:, np.newaxis], (1, kf1.time.size))
 
     >>> kf2      = Kf()
-    >>> kf2.name = 'KF2'
+    >>> kf2.name = "KF2"
     >>> kf2.time = np.arange(2, 13)
     >>> kf2.att  = np.tile(q2[:, np.newaxis], (1, kf2.time.size))
     >>> kf2.att[3,4] += 50e-6
     >>> kf2.att = quat_norm(kf2.att)
 
     >>> opts = Opts()
-    >>> opts.case_name = 'test_plot'
+    >>> opts.case_name = "test_plot"
     >>> opts.quat_comp = True
     >>> opts.sub_plots = True
 
@@ -388,13 +388,13 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     >>> import numpy as np
 
     >>> kf1      = Kf()
-    >>> kf1.name = 'KF1'
+    >>> kf1.name = "KF1"
     >>> kf1.time = np.arange(11)
     >>> kf1.pos  = 1e6 * np.random.rand(3, 11)
     >>> kf1.vel  = 1e3 * np.random.rand(3, 11)
 
     >>> kf2      = Kf()
-    >>> kf2.name = 'KF2'
+    >>> kf2.name = "KF2"
     >>> kf2.time = np.arange(2, 13)
     >>> kf2.pos  = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5
     >>> kf2.vel  = kf1.vel[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 100
@@ -594,7 +594,7 @@ def plot_innovations(
     >>> num_innovs = 11
 
     >>> kf1       = KfInnov()
-    >>> kf1.units = 'm'
+    >>> kf1.units = "m"
     >>> kf1.time  = np.arange(num_innovs, dtype=float)
     >>> kf1.innov = 1e-6 * np.ones((num_axes, num_innovs)) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
     >>> kf1.norm  = np.ones((num_axes, num_innovs)) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
@@ -606,7 +606,7 @@ def plot_innovations(
     >>> kf2.norm  = kf1.norm[:, ix] + 0.1 * np.random.rand(num_axes, ix.size)
 
     >>> opts = Opts()
-    >>> opts.case_name = 'test_plot'
+    >>> opts.case_name = "test_plot"
     >>> opts.sub_plots = True
 
     >>> fig_hand = plot_innovations(kf1, kf2, opts=opts)
@@ -919,17 +919,17 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
     >>> num_innovs = 11
 
     >>> kf1       = KfInnov()
-    >>> kf1.units = 'm'
+    >>> kf1.units = "m"
     >>> kf1.time  = np.arange(num_innovs, dtype=float)
     >>> kf1.innov = np.full((num_axes, num_innovs), 5e-3) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
     >>> kf1.innov[:, :5] *= 0.1
     >>> kf1.fploc = np.full((num_axes, num_innovs), 0.05) + 0.2 * np.random.rand(num_axes, num_innovs) - 0.1
 
     >>> opts = Opts()
-    >>> opts.case_name = 'test_plot'
+    >>> opts.case_name = "test_plot"
     >>> opts.sub_plots = True
 
-    >>> fig_hand = plot_innov_fplocs(kf1, opts=opts, color_by='magnitude')
+    >>> fig_hand = plot_innov_fplocs(kf1, opts=opts, color_by="magnitude")
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -1083,18 +1083,18 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     >>> num_states = 6
 
     >>> kf1        = Kf()
-    >>> kf1.name   = 'KF1'
+    >>> kf1.name   = "KF1"
     >>> kf1.time   = np.arange(num_points, dtype=float)
     >>> kf1.covar  = 1e-6 * np.tile(np.arange(1, num_states+1, dtype=float)[:, np.newaxis], (1, num_points))
     >>> kf1.active = np.array([1, 2, 3, 4, 8, 12])
 
-    >>> kf2        = Kf(name='KF2')
+    >>> kf2        = Kf(name="KF2")
     >>> kf2.time   = kf1.time
     >>> kf2.covar  = kf1.covar + 1e-9 * np.random.rand(*kf1.covar.shape)
     >>> kf2.active = kf1.active
 
     >>> opts = Opts()
-    >>> opts.case_name = 'test_plot'
+    >>> opts.case_name = "test_plot"
     >>> opts.sub_plots = True
 
     >>> fig_hand = plot_covariance(kf1, kf2, opts=opts)

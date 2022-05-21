@@ -131,7 +131,7 @@ if HAVE_MPL:
     plt.rcParams["figure.dpi"] = 160  # 160 for 4K monitors, 100 otherwise
     plt.rcParams["figure.figsize"] = [11.0, 8.5]  # makes figures the same size as the paper, keeping aspect ratios even
     plt.rcParams["figure.max_open_warning"] = 80  # Max number of figures to open before through a warning, 0 means unlimited
-    plt.rcParams["date.autoformatter.minute"] = "%H:%M:%S"  # makes seconds show, and not day, default is '%d %H:%M'
+    plt.rcParams["date.autoformatter.minute"] = "%H:%M:%S"  # makes seconds show, and not day, default is "%d %H:%M"
 
 # Whether a display exists to draw on or not
 # TODO: make this public?
@@ -173,7 +173,7 @@ class MyCustomToolbar:
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.manager.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title("Figure Title")
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
@@ -290,13 +290,13 @@ class ColorMap(Frozen):
     >>> from dstauffman.plotting import ColorMap
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> cm = ColorMap('Paired', num_colors=12)
+    >>> cm = ColorMap("Paired", num_colors=12)
     >>> time = np.arange(0, 10, 0.1)
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.plot(time, np.sin(time), color=cm.get_color(0))
     >>> _ = ax.plot(time, np.cos(time), color=cm.get_color(1))
-    >>> _ = ax.legend(['Sin', 'Cos'])
+    >>> _ = ax.legend(["Sin", "Cos"])
     >>> plt.show(block=False) # doctest: +SKIP
 
     Close plot
@@ -370,7 +370,7 @@ def close_all(figs: _FigOrListFig = None) -> None:
 
     """
     # Note that it's better to loop through and close the plots individually than to use
-    # plt.close('all'), as that can sometimes cause the iPython kernel to quit #DCS: 2015-06-11
+    # plt.close("all"), as that can sometimes cause the iPython kernel to quit #DCS: 2015-06-11
     if figs is None:
         for this_fig in plt.get_fignums():
             plt.close(this_fig)
@@ -543,7 +543,7 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tup
     --------
     >>> from dstauffman.plotting import plot_time_history, get_figure_title
     >>> import matplotlib.pyplot as plt
-    >>> fig = plot_time_history('My Title', 0, 0)
+    >>> fig = plot_time_history("My Title", 0, 0)
     >>> title = get_figure_title(fig)
     >>> print(title)
     My Title
@@ -596,7 +596,7 @@ def resolve_name(name: str, force_win: bool = None, rep_token: str = "_", strip_
     Examples
     --------
     >>> from dstauffman.plotting import resolve_name
-    >>> name = '(U//FOUO) Bad name /\ <>!'
+    >>> name = "(U//FOUO) Bad name /\ <>!"
     >>> force_win = True
     >>> new_name = resolve_name(name, force_win=force_win)
     >>> print(new_name)
@@ -630,10 +630,7 @@ def resolve_name(name: str, force_win: bool = None, rep_token: str = "_", strip_
 
 #%% Functions - storefig
 def storefig(
-    fig: _FigOrListFig,
-    folder: Union[str, Path] = None,
-    plot_type: Union[str, List[str]] = "png",
-    show_warn: bool = True,
+    fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Union[str, List[str]] = "png", show_warn: bool = True
 ) -> None:
     r"""
     Store the specified figures in the specified folder and with the specified plot type(s).
@@ -645,7 +642,7 @@ def storefig(
     folder : str
         Location to save figures to
     plot_type : str
-        Type of figure to save to disk, like 'png' or 'jpg'
+        Type of figure to save to disk, like "png" or "jpg"
     show_warn : bool, optional, default is True
         Whether to show a warning if the plot title is used instead of thewindow canvas (i.e. you don't have a display)
 
@@ -657,7 +654,7 @@ def storefig(
     Notes
     -----
     #.  Uses the figure.canvas.manager.get_window_title property to determine the figure name.  If
-        that is not set or default ('image'), then it tries the figure suptitle or first axes title.
+        that is not set or default ("image"), then it tries the figure suptitle or first axes title.
 
     See Also
     --------
@@ -671,23 +668,23 @@ def storefig(
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.manager.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title("Figure Title")
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
     >>> _ = ax.plot(x, y)
-    >>> _ = ax.set_title('X vs Y')
+    >>> _ = ax.set_title("X vs Y")
     >>> plt.show(block=False) # doctest: +SKIP
     >>> folder = get_tests_dir()
-    >>> plot_type = 'png'
+    >>> plot_type = "png"
     >>> storefig(fig, folder, plot_type)
 
     Close plot
     >>> plt.close(fig)
 
     Delete potential file(s)
-    >>> folder.joinpath('Figure Title.png').unlink(missing_ok=True)
-    >>> folder.joinpath('X vs Y.png').unlink(missing_ok=True)
+    >>> folder.joinpath("Figure Title.png").unlink(missing_ok=True)
+    >>> folder.joinpath("X vs Y.png").unlink(missing_ok=True)
 
     """
     # make sure figs is a list
@@ -756,14 +753,14 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.manager.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title("Figure Title")
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
     >>> _ = ax.plot(x, y)
-    >>> _ = ax.set_title('X vs Y')
+    >>> _ = ax.set_title("X vs Y")
     >>> plt.show(block=False) # doctest: +SKIP
-    >>> prefix = 'Baseline'
+    >>> prefix = "Baseline"
     >>> titleprefix(fig, prefix)
     >>> plt.draw() # doctest: +SKIP
 
@@ -826,12 +823,12 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.manager.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title("Figure Title")
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
     >>> _ = ax.plot(x, y)
-    >>> _ = ax.set_title('X vs Y')
+    >>> _ = ax.set_title("X vs Y")
     >>> plt.show(block=False) # doctest: +SKIP
     >>> xmin = 2
     >>> xmax = 5
@@ -914,12 +911,12 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.manager.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title("Figure Title")
     >>> ax = fig.add_subplot(111)
     >>> time = np.arange(1, 10, 0.1)
     >>> data = time ** 2
     >>> _ = ax.plot(time, data)
-    >>> _ = ax.set_title('X vs Y')
+    >>> _ = ax.set_title("X vs Y")
     >>> plt.show(block=False) # doctest: +SKIP
 
     Zoom X-axis and show how Y doesn't rescale
@@ -1007,14 +1004,14 @@ def figmenu(figs: _FigOrListFig) -> None:
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.manager.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title("Figure Title")
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
     >>> _ = ax.plot(x, y)
-    >>> _ = ax.set_title('X vs Y')
-    >>> _ = ax.set_xlabel('time [years]')
-    >>> _ = ax.set_ylabel('value [radians]')
+    >>> _ = ax.set_title("X vs Y")
+    >>> _ = ax.set_xlabel("time [years]")
+    >>> _ = ax.set_ylabel("value [radians]")
     >>> plt.show(block=False) # doctest: +SKIP
     >>> figmenu(fig)
 
@@ -1089,7 +1086,7 @@ def get_screen_resolution() -> Tuple[int, int]:
     --------
     >>> from dstauffman.plotting import get_screen_resolution
     >>> (screen_width, screen_height) = get_screen_resolution()
-    >>> print('{}x{}'.format(screen_width, screen_height)) # doctest: +SKIP
+    >>> print("{}x{}".format(screen_width, screen_height)) # doctest: +SKIP
 
     """
     # if you don't have a display, then return zeros
@@ -1131,7 +1128,7 @@ def show_zero_ylim(ax: Axes) -> None:
     >>> import matplotlib.pyplot as plt
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
-    >>> _ = ax.plot([1, 5, 10], [200, 250, 240], '.-')
+    >>> _ = ax.plot([1, 5, 10], [200, 250, 240], ".-")
     >>> show_zero_ylim(ax)
 
     >>> plt.close(fig)
@@ -1183,12 +1180,12 @@ def plot_second_units_wrapper(ax: Axes, second_units: Union[None, int, float, Tu
     --------
     >>> from dstauffman.plotting import plot_second_units_wrapper
     >>> import matplotlib.pyplot as plt
-    >>> description = 'Values over time'
-    >>> ylabel = 'Value [rad]'
-    >>> second_units = (u'Better Units [µrad]', 1e6)
+    >>> description = "Values over time"
+    >>> ylabel = "Value [rad]"
+    >>> second_units = ("Better Units [µrad]", 1e6)
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
-    >>> _ = ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
+    >>> _ = ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], ".-")
     >>> _ = ax.set_ylabel(ylabel)
     >>> _ = ax.set_title(description)
     >>> _ = plot_second_units_wrapper(ax, second_units)
@@ -1251,9 +1248,9 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
     >>> import matplotlib.pyplot as plt
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
-    >>> _ = ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], '.-')
-    >>> _ = ax.set_ylabel('Value [rad]')
-    >>> ylab = u'Value [µrad]'
+    >>> _ = ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], ".-")
+    >>> _ = ax.set_ylabel("Value [rad]")
+    >>> ylab = "Value [µrad]"
     >>> multiplier = 1e6
     >>> _ = plot_second_yunits(ax, ylab, multiplier)
 
@@ -1312,7 +1309,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
     >>> xmin         = 1
     >>> xmax         = 8
     >>> ix = get_rms_indices(time_one, time_two, time_overlap, xmin=xmin, xmax=xmax)
-    >>> print(ix['pts'])
+    >>> print(ix["pts"])
     [1, 8]
 
     """
@@ -1438,7 +1435,7 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
     >>> import numpy as np
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
-    >>> _ = ax.plot(np.arange(10), np.arange(10), label='Data')
+    >>> _ = ax.plot(np.arange(10), np.arange(10), label="Data")
     >>> x = (2, 5)
     >>> plot_vert_lines(ax, x, show_in_legend=False)
     >>> _ = ax.legend()
@@ -1477,15 +1474,15 @@ def plot_phases(ax, times, colormap="tab10", labels=None, *, group_all=False):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.manager.set_window_title('Sine Wave')
+    >>> fig.canvas.manager.set_window_title("Sine Wave")
     >>> ax = fig.add_subplot(111)
     >>> time = np.arange(101)
     >>> data = np.cos(time / 10)
-    >>> _ = ax.plot(time, data, '.-')
+    >>> _ = ax.plot(time, data, ".-")
     >>> times = np.array([5, 20, 60, 90])
     >>> # times = np.array([[5, 20, 60, 90], [10, 60, 90, 95]])
-    >>> labels = ['Part 1', 'Phase 2', 'Watch Out', 'Final']
-    >>> colors = COLOR_LISTS['quat']
+    >>> labels = ["Part 1", "Phase 2", "Watch Out", "Final"]
+    >>> colors = COLOR_LISTS["quat"]
     >>> plot_phases(ax, times, colors, labels)
     >>> plt.show(block=False) # doctest: +SKIP
 
@@ -1574,7 +1571,7 @@ def get_classification(classify: str) -> Tuple[str, str]:
     Returns
     -------
     classification : str)
-        Classification to use, from {'U', 'C', 'S', 'TS'}
+        Classification to use, from {"U", "C", "S", "TS"}
     caveat : str
         The extra caveats beyond the main classification
 
@@ -1589,7 +1586,7 @@ def get_classification(classify: str) -> Tuple[str, str]:
     Examples
     --------
     >>> from dstauffman.plotting import get_classification
-    >>> classify = 'UNCLASSIFIED//MADE UP CAVEAT'
+    >>> classify = "UNCLASSIFIED//MADE UP CAVEAT"
     >>> (classification, caveat) = get_classification(classify)
     >>> print(classification)
     U
@@ -1631,13 +1628,13 @@ def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = ""
     ax : class matplotlib.axes.Axes
         Figure axes
     classification : str
-        Level of classification, from {'U', 'C', 'S', 'T', 'TS'}
+        Level of classification, from {"U", "C", "S", "T", "TS"}
     caveat : str, optional
         Any additional caveats beyone the classification level
     test : bool, optional
         Whether to print the testing box, default is false
     location : str, optional
-        Where to put the label, from {'axes', 'axis', 'figure', 'left', 'top'}
+        Where to put the label, from {"axes", "axis", "figure", "left", "top"}
 
     See Also
     --------
@@ -1655,20 +1652,20 @@ def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = ""
     >>> import matplotlib.pyplot as plt
     >>> fig1 = plt.figure()
     >>> ax1 = fig1.add_subplot(111)
-    >>> _ = ax1.plot([0, 10], [0, 10], '.-b')
-    >>> plot_classification(ax1, 'U', test=False, location='figure')
+    >>> _ = ax1.plot([0, 10], [0, 10], ".-b")
+    >>> plot_classification(ax1, "U", test=False, location="figure")
     >>> plt.show(block=False) # doctest: +SKIP
 
     >>> fig2 = plt.figure()
     >>> ax2 = fig2.add_subplot(111)
     >>> _ = ax2.plot(0, 0)
-    >>> plot_classification(ax2, 'S', caveat='//MADE UP CAVEAT', test=True, location='figure')
+    >>> plot_classification(ax2, "S", caveat="//MADE UP CAVEAT", test=True, location="figure")
     >>> plt.show(block=False) # doctest: +SKIP
 
     >>> fig3 = plt.figure()
     >>> ax3 = fig3.add_subplot(111)
     >>> _ = ax3.plot(1, 1)
-    >>> plot_classification(ax3, 'C', test=True, location='axis')
+    >>> plot_classification(ax3, "C", test=True, location="axis")
     >>> plt.show(block=False) # doctest: +SKIP
 
     >>> plt.close(fig1)
@@ -1788,8 +1785,8 @@ def align_plots(figs: _FigOrListFig, pos: Tuple[int, int] = None) -> None:
     Examples
     --------
     >>> from dstauffman.plotting import align_plots, make_time_plot
-    >>> #fig1 = make_time_plot('Plot 1', 0, 0) # TODO: get this working
-    >>> #fig2 = make_time_plot('Plot 2', 1, 1)
+    >>> #fig1 = make_time_plot("Plot 1", 0, 0) # TODO: get this working
+    >>> #fig2 = make_time_plot("Plot 2", 1, 1)
     >>> #figs = [fig1, fig2]
     >>> #align_plots(figs)
 
@@ -1837,7 +1834,7 @@ def z_from_ci(ci: Union[int, float]) -> float:
     >>> from dstauffman.plotting import z_from_ci
     >>> ci = 0.95
     >>> z = z_from_ci(ci)
-    >>> print('{:.2f}'.format(z))
+    >>> print("{:.2f}".format(z))
     1.96
 
     """
@@ -1868,7 +1865,7 @@ def ci_from_z(z: Union[int, float]) -> float:
     >>> from dstauffman.plotting import ci_from_z
     >>> z = 2
     >>> ci = ci_from_z(z)
-    >>> print('{:.4f}'.format(ci))
+    >>> print("{:.4f}".format(ci))
     0.9545
 
     """
@@ -1885,7 +1882,7 @@ def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = 
     figs : figure or List[figure] or None
         Figures to save, None means save all open figures
     filename : str, optional
-        Name of the file to save the figures to, defaults to 'figs.pdf' in the current folder
+        Name of the file to save the figures to, defaults to "figs.pdf" in the current folder
 
     Notes
     -----
@@ -1895,8 +1892,8 @@ def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = 
     --------
     >>> from dstauffman.plotting import close_all, plot_time_history, save_figs_to_pdf
     >>> from dstauffman import get_tests_dir
-    >>> fig = plot_time_history('test', 0, 0)
-    >>> filename = get_tests_dir() / 'figs.pdf'
+    >>> fig = plot_time_history("test", 0, 0)
+    >>> filename = get_tests_dir() / "figs.pdf"
     >>> save_figs_to_pdf(fig, filename)  # doctest: +SKIP
 
     Delete file and close figure
@@ -1943,7 +1940,7 @@ def save_images_to_pdf(
     plot_type: str, optional
         Type of figure to try and load from
     filename : str, optional
-        Name of the file to save the figures to, defaults to 'figs.pdf' in the current folder
+        Name of the file to save the figures to, defaults to "figs.pdf" in the current folder
 
     Notes
     -----
@@ -1957,16 +1954,16 @@ def save_images_to_pdf(
     --------
     >>> from dstauffman.plotting import close_all, plot_time_history, save_images_to_pdf, storefig
     >>> from dstauffman import get_tests_dir
-    >>> fig = plot_time_history('test', 0, 0)
+    >>> fig = plot_time_history("test", 0, 0)
     >>> folder = get_tests_dir()
-    >>> filename = get_tests_dir() / 'figs.pdf'
-    >>> plot_type = 'png'
+    >>> filename = get_tests_dir() / "figs.pdf"
+    >>> plot_type = "png"
     >>> storefig(fig, folder, plot_type)
     >>> save_images_to_pdf(fig, folder, plot_type, filename)
 
     Delete file and close figure
     >>> filename.unlink(missing_ok=True)
-    >>> image_filename = folder / 'test.png'
+    >>> image_filename = folder / "test.png"
     >>> image_filename.unlink(missing_ok=True)
     >>> close_all([fig])
 

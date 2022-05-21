@@ -78,7 +78,7 @@ class Opts(Frozen):
             .show_link : bool
                 Flag to show a link to the folder where the plots were saved
             .plot_type : str
-                Type of plot to save to disk, from {'png','jpg','fig','emf'}
+                Type of plot to save to disk, from {"png","jpg","fig","emf"}
             .show_warn : bool
                 Whether to show warning if saving by title instead of window (i.e. no display is found)
             .sub_plots : bool
@@ -104,15 +104,15 @@ class Opts(Frozen):
             .show_xtra : bool
                 Flag to show extra points in one vector or the other when plotting differences
             .time_base : str
-                Base units of time, typically from {'sec', 'months'}
+                Base units of time, typically from {"sec", "months"}
             .time_unit : str
-                Time unit for the x axis, from {'', 'sec', 'min', 'hr', 'day', 'month', 'year'}
+                Time unit for the x axis, from {"", "sec", "min", "hr", "day", "month", "year"}
             .colormap  : str
                 Name of the colormap to use
             .leg_spot  : str
-                Location to place the legend, from {'best', 'upper right', 'upper left',
-                'lower left', 'lower right', 'right', 'center left', 'center right', 'lower center',
-                'upper center', 'center' or tuple of position}
+                Location to place the legend, from {"best", "upper right", "upper left",
+                "lower left", "lower right", "right", "center left", "center right", "lower center",
+                "upper center", "center" or tuple of position}
             .classify  : str
                 Classification level to put on plots
             .names     : list of str
@@ -333,15 +333,15 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     >>> from dstauffman.plotting import plot_time_history
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> description = 'Random Data'
+    >>> description = "Random Data"
     >>> time = np.arange(0, 5, 1./12) + 2000
     >>> data = np.random.rand(5, len(time)).cumsum(axis=1)
     >>> data = 10 * data / np.expand_dims(data[:, -1], axis=1)
     >>> fig  = plot_time_history(description, time, data)
 
     Date based version
-    >>> time2 = np.datetime64('2020-05-01 00:00:00', 'ns') + 10**9*np.arange(0, 5*60, 5, dtype=np.int64)
-    >>> fig2 = plot_time_history(description, time2, data, time_units='datetime')
+    >>> time2 = np.datetime64("2020-05-01 00:00:00", "ns") + 10**9*np.arange(0, 5*60, 5, dtype=np.int64)
+    >>> fig2 = plot_time_history(description, time2, data, time_units="datetime")
 
     Close plots
     >>> plt.close(fig)
@@ -455,7 +455,7 @@ def plot_correlation_matrix(
     plot_border : str, optional
         Color of the border to plot
     leg_scale : str, optional
-        factor to use when scaling the value in the legend, default is 'unity'
+        factor to use when scaling the value in the legend, default is "unity"
     fig_ax : (fig, ax) tuple, optional
         Figure and axis to use, otherwise create new ones
     skip_setup_plots : bool, optional, default is False
@@ -477,20 +477,20 @@ def plot_correlation_matrix(
     >>> import numpy as np
     >>> import matplotlib.pyplot as plt
     >>> data = unit(np.random.rand(10, 10), axis=0)
-    >>> labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
-    >>> units = 'm'
+    >>> labels = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
+    >>> units = "m"
     >>> opts = None
-    >>> matrix_name = 'Correlation Matrix'
+    >>> matrix_name = "Correlation Matrix"
     >>> cmin = 0
     >>> cmax = 1
-    >>> xlabel = ''
-    >>> ylabel = ''
+    >>> xlabel = ""
+    >>> ylabel = ""
     >>> plot_lower_only = True
     >>> label_values = True
     >>> x_lab_rot = 90
     >>> colormap = None
     >>> plot_border=None
-    >>> leg_scale = 'centi'
+    >>> leg_scale = "centi"
     >>> fig_ax = None
     >>> skip_setup_plots = False
     >>> fig = plot_correlation_matrix(data, labels, units=units, opts=opts, matrix_name=matrix_name, \
@@ -658,7 +658,7 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     --------
     >>> from dstauffman.plotting import plot_bar_breakdown
     >>> import numpy as np
-    >>> description = 'Test'
+    >>> description = "Test"
     >>> time = np.arange(0, 5, 1./12) + 2000
     >>> data = np.random.rand(5, len(time))
     >>> mag  = np.sum(data, axis=0)
@@ -795,7 +795,7 @@ def plot_histogram(
     --------
     >>> from dstauffman.plotting import plot_histogram
     >>> import numpy as np
-    >>> description = 'Histogram'
+    >>> description = "Histogram"
     >>> data = np.array([0.5, 3.3, 1., 1.5, 1.5, 1.75, 2.5, 2.5])
     >>> bins = np.array([0., 1., 2., 3., 5., 7.])
     >>> fig = plot_histogram(description, data, bins)
@@ -890,7 +890,7 @@ def setup_plots(figs, opts):
         List of figures
     opts : class Opts
         Optional plotting controls
-    plot_type : optional, {'time', 'time_no_yscale', 'dist', 'dist_no_yscale'}
+    plot_type : optional, {"time", "time_no_yscale", "dist", "dist_no_yscale"}
 
     Notes
     -----
@@ -902,17 +902,17 @@ def setup_plots(figs, opts):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.manager.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title("Figure Title")
     >>> ax = fig.add_subplot(111)
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
     >>> _ = ax.plot(x, y)
-    >>> _ = ax.set_title('X vs Y')
-    >>> _ = ax.set_xlabel('time [years]')
-    >>> _ = ax.set_ylabel('value [radians]')
+    >>> _ = ax.set_title("X vs Y")
+    >>> _ = ax.set_xlabel("time [years]")
+    >>> _ = ax.set_ylabel("value [radians]")
     >>> plt.show(block=False) # doctest: +SKIP
     >>> opts = Opts()
-    >>> opts.case_name = 'Testing'
+    >>> opts.case_name = "Testing"
     >>> opts.show_plot = True
     >>> opts.save_plot = False
     >>> setup_plots(fig, opts)

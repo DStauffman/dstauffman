@@ -33,8 +33,8 @@ if TYPE_CHECKING:
 #%% Enums - OrbitType
 class OrbitType(IntEnumPlus):
     r"""
-    Values for the possible orbit types, from {'elliptic', 'parabolic', 'hyperbolic'},
-    Plus an 'uninitialized' value.  Note that 'circular' is not an option, but falls under elliptic.
+    Values for the possible orbit types, from {"elliptic", "parabolic", "hyperbolic"},
+    Plus an "uninitialized" value.  Note that "circular" is not an option, but falls under elliptic.
 
     Examples
     --------
@@ -245,8 +245,8 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     Examples
     --------
     >>> from dstauffman.aerospace import two_line_elements
-    >>> line1 = '1 25544U 98067A   06132.29375000  .00013633  00000-0  92740-4 0  9181'
-    >>> line2 = '2 25544  51.6383  12.2586 0009556 188.7367 320.5459 15.75215761427503'
+    >>> line1 = "1 25544U 98067A   06132.29375000  .00013633  00000-0  92740-4 0  9181"
+    >>> line2 = "2 25544  51.6383  12.2586 0009556 188.7367 320.5459 15.75215761427503"
     >>> elements = two_line_elements(line1,line2)
     >>> elements.pprint()
     Elements
@@ -555,11 +555,7 @@ def rv_2_oe(
 #%% oe_2_rv
 @overload
 def oe_2_rv(
-    elements: Elements,
-    mu: Union[float, np.ndarray] = ...,
-    unit: bool = ...,
-    *,
-    return_PQW: Literal[False] = ...,
+    elements: Elements, mu: Union[float, np.ndarray] = ..., unit: bool = ..., *, return_PQW: Literal[False] = ...
 ) -> Tuple[np.ndarray, np.ndarray]:
     ...
 

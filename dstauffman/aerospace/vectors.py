@@ -219,7 +219,7 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     1e-05
 
     >>> angle2 = vec_angle(vec1, vec3, use_cross=False)
-    >>> print(f'{angle2:12.12f}')
+    >>> print(f"{angle2:12.12f}")
     1.570796326795
 
     """

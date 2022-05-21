@@ -36,8 +36,8 @@ def make_preamble(
         LaTeX reference label for table
     cols : str
         LaTeX string describing columns
-    size : str, optional, from {r'\tiny', r'\scriptsize', r'\footnotesize', r'\small',
-        r'\normalsize', r'\large', r'\Large', r'\LARGE', r'\huge', r'\Huge'}
+    size : str, optional, from {r"\tiny", r"\scriptsize", r"\footnotesize", r"\small",
+        r"\normalsize", r"\large", r"\Large", r"\LARGE", r"\huge", r"\Huge"}
         Size of the text within the table, default is \small
     use_mini : bool, optional, default is False
         Whether to build the table as a minipage or not
@@ -53,7 +53,7 @@ def make_preamble(
     Examples
     --------
     >>> from dstauffman.health import make_preamble
-    >>> out = make_preamble('Table Caption', 'tab:this_label', 'lcc')
+    >>> out = make_preamble("Table Caption", "tab:this_label", "lcc")
     >>> print(out) # doctest: +ELLIPSIS
     ['\\begin{table}[H]', '    \\small', '    \\centering', '    \\caption{Table Caption}%', ...
 

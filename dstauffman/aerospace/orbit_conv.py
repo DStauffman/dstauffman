@@ -75,7 +75,7 @@ def anomaly_eccentric_2_mean(E: _N, e: _N) -> _N:
     >>> E = pi / 4
     >>> e = 0.5
     >>> M = anomaly_eccentric_2_mean(E, e)
-    >>> print(f'{M:.8f}')
+    >>> print(f"{M:.8f}")
     0.43184477
 
     """
@@ -120,7 +120,7 @@ def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
     >>> E = pi / 4
     >>> e = 0.5
     >>> nu = anomaly_eccentric_2_true(E, e)
-    >>> print(f'{nu:.8f}')
+    >>> print(f"{nu:.8f}")
     1.24466863
 
     """
@@ -174,7 +174,7 @@ def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N:
     >>> F = pi/4
     >>> e = 1.5
     >>> M = anomaly_hyperbolic_2_mean(F, e)
-    >>> print(f'{M:.8f}')
+    >>> print(f"{M:.8f}")
     0.51760828
 
     """
@@ -216,7 +216,7 @@ def anomaly_hyperbolic_2_true(F: _N, e: _N) -> _N:
     >>> F = pi/4
     >>> e = 1.5
     >>> nu = anomaly_hyperbolic_2_true(F, e)
-    >>> print(f'{nu:.8f}')
+    >>> print(f"{nu:.8f}")
     1.39213073
 
     """
@@ -335,7 +335,7 @@ def long_2_sidereal(lon: _N, jd: _N) -> _N:
     >>> lon = -2.13
     >>> jd = 2454587
     >>> theta = long_2_sidereal(lon, jd)
-    >>> print(f'{theta:.8f}')
+    >>> print(f"{theta:.8f}")
     4.83897078
 
     """
@@ -540,7 +540,7 @@ def sidereal_2_long(theta: _N, t: _N) -> _N:
     >>> theta = 4.839
     >>> jd = 2454587
     >>> lon = sidereal_2_long(theta, jd)
-    >>> print(f'{lon:.8f}')
+    >>> print(f"{lon:.8f}")
     -2.12997078
 
     """
@@ -576,7 +576,7 @@ def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = False) -> _N:
     >>> time_jd = numpy_to_jd(convert_datetime_to_np(date))
     >>> mltan = raan_2_mltan(raan, time_jd)
     >>> mltan_hms = r_2_hms(mltan)
-    >>> print(f'{mltan_hms[0]:2.0f}:{mltan_hms[1]:2.0f}:{mltan_hms[2]:.4f}')
+    >>> print(f"{mltan_hms[0]:2.0f}:{mltan_hms[1]:2.0f}:{mltan_hms[2]:.4f}")
     17:56:20.1496
 
     """

@@ -143,11 +143,11 @@ class OptiParam(Frozen):
     --------
     >>> from dstauffman.estimation import OptiParam
     >>> params = []
-    >>> params.append(OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
-    >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
-    >>> params.append(OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+    >>> params.append(OptiParam("magnitude", best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+    >>> params.append(OptiParam("frequency", best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+    >>> params.append(OptiParam("phase", best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
-    >>> print(OptiParam.get_array(params, 'best')) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(OptiParam.get_array(params, "best")) # doctest: +NORMALIZE_WHITESPACE
     [ 2.5 20. 180. ]
 
     >>> print(OptiParam.get_names(params))
@@ -195,18 +195,18 @@ class OptiParam(Frozen):
         ----------
         opti_param : list of class OptiParam
             List of optimization parameters
-        type_ : str, optional, from {'best', 'min', 'min_', 'max', 'max_', 'minstep', 'typical'}
+        type_ : str, optional, from {"best", "min", "min_", "max", "max_", "minstep", "typical"}
             Array of values from the list of optimization parameters
 
         Examples
         --------
         >>> from dstauffman.estimation import OptiParam
         >>> params = []
-        >>> params.append(OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
-        >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
-        >>> params.append(OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+        >>> params.append(OptiParam("magnitude", best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+        >>> params.append(OptiParam("frequency", best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+        >>> params.append(OptiParam("phase", best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
-        >>> print(OptiParam.get_array(params, 'best')) # doctest: +NORMALIZE_WHITESPACE
+        >>> print(OptiParam.get_array(params, "best")) # doctest: +NORMALIZE_WHITESPACE
         [ 2.5 20. 180. ]
 
         """
@@ -230,9 +230,9 @@ class OptiParam(Frozen):
         --------
         >>> from dstauffman.estimation import OptiParam
         >>> params = []
-        >>> params.append(OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
-        >>> params.append(OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
-        >>> params.append(OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+        >>> params.append(OptiParam("magnitude", best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+        >>> params.append(OptiParam("frequency", best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+        >>> params.append(OptiParam("phase", best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
         >>> print(OptiParam.get_names(params))
         ['magnitude', 'frequency', 'phase']
@@ -280,7 +280,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         --------
         >>> from dstauffman.estimation import BpeResults
         >>> bpe_results = BpeResults()
-        >>> bpe_results.param_names  = ['a'.encode('utf-8')]
+        >>> bpe_results.param_names  = ["a".encode("utf-8")]
         >>> bpe_results.begin_params = [1]
         >>> bpe_results.final_params = [2]
         >>> print(bpe_results)
@@ -325,7 +325,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         --------
         >>> from dstauffman.estimation import BpeResults
         >>> bpe_results = BpeResults()
-        >>> bpe_results.param_names  = ['a'.encode('utf-8')]
+        >>> bpe_results.param_names  = ["a".encode("utf-8")]
         >>> bpe_results.begin_params = [1]
         >>> bpe_results.final_params = [2]
         >>> bpe_results.pprint()
@@ -461,7 +461,7 @@ def _function_wrapper(*, model_func, cost_func, model_args, cost_args, return_re
     >>> import numpy as np
     >>> model_func = lambda x: 2*x
     >>> cost_func = lambda y, x: y / 10
-    >>> model_args = {'x': np.array([1, 2, 3], dtype=float)}
+    >>> model_args = {"x": np.array([1, 2, 3], dtype=float)}
     >>> cost_args = dict()
     >>> (innovs, results) = _function_wrapper(model_func=model_func, cost_func=cost_func, \
     ...     model_args=model_args, cost_args=cost_args, return_results=True)
@@ -1064,9 +1064,9 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     >>> from dstauffman.estimation import OptiOpts, BpeResults, OptiParam
     >>> import numpy as np
     >>> opti_opts = OptiOpts()
-    >>> opti_opts.params = [OptiParam('a'), OptiParam('b')]
+    >>> opti_opts.params = [OptiParam("a"), OptiParam("b")]
     >>> bpe_results = BpeResults()
-    >>> bpe_results.param_names = [x.encode('utf-8') for x in ['a', 'b']]
+    >>> bpe_results.param_names = [x.encode("utf-8") for x in ["a", "b"]]
     >>> jacobian = np.array([[1, 2], [3, 4], [5, 6]])
     >>> normalized = False
     >>> _analyze_results(opti_opts, bpe_results, jacobian, normalized)
@@ -1142,13 +1142,13 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     >>> from dstauffman.estimation import OptiOpts, validate_opti_opts
     >>> opti_opts = OptiOpts()
     >>> opti_opts.model_func     = str
-    >>> opti_opts.model_args     = {'a': 1}
+    >>> opti_opts.model_args     = {"a": 1}
     >>> opti_opts.cost_func      = str
-    >>> opti_opts.cost_args      = {'b': 2}
+    >>> opti_opts.cost_args      = {"b": 2}
     >>> opti_opts.get_param_func = str
     >>> opti_opts.set_param_func = repr
-    >>> opti_opts.output_folder  = ''
-    >>> opti_opts.output_results = ''
+    >>> opti_opts.output_folder  = ""
+    >>> opti_opts.output_results = ""
     >>> opti_opts.params         = [1, 2]
 
     >>> is_valid = validate_opti_opts(opti_opts)

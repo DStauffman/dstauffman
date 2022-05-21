@@ -42,7 +42,7 @@ def _get_sub_level(this_sub: Any, part: str) -> Any:
     >>> param = _Parameters()
     >>> model = param.models[0]
     >>> this_sub = param
-    >>> part = 'models[0]'
+    >>> part = "models[0]"
     >>> model2 = _get_sub_level(this_sub, part)
     >>> print(model is model2)
     True
@@ -95,7 +95,7 @@ def _check_valid_param_name(param: Any, name: str) -> bool:
     >>> from dstauffman.estimation.support import _check_valid_param_name
     >>> from dstauffman.tests.test_estimation_support import _Parameters
     >>> param = _Parameters()
-    >>> names = ['param.config.log_level', 'param.config.made_up_field_name', \
+    >>> names = ["param.config.log_level", "param.config.made_up_field_name", \
     ...     "param.models[1].bad_name['beta']", "param.models[0].field3['a']"]
     >>> is_valid = [_check_valid_param_name(param, name) for name in names]
     >>> print(is_valid)
@@ -141,7 +141,7 @@ def get_parameter(param: Any, names: List[str]) -> List[Any]:
     >>> from dstauffman.estimation import get_parameter
     >>> from dstauffman.tests.test_estimation_support import _Parameters
     >>> param = _Parameters()
-    >>> names = ['param.config.log_level', 'param.models[0].field1', "param.models[1].field2[2]", "param.models[1].field3['b'][1]"]
+    >>> names = ["param.config.log_level", "param.models[0].field1", "param.models[1].field2[2]", "param.models[1].field3['b'][1]"]
     >>> values = get_parameter(param, names)
     >>> print([x for x in values]) #doctest: +NORMALIZE_WHITESPACE
     [20, 100, 300, 2.5]
@@ -186,7 +186,7 @@ def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
     >>> from dstauffman.estimation import set_parameter
     >>> from dstauffman.tests.test_estimation_support import _Parameters
     >>> param = _Parameters()
-    >>> names = ['param.config.log_level', 'param.models[0].field1', "param.models[1].field2[2]", "param.models[1].field3['b'][1]"]
+    >>> names = ["param.config.log_level", "param.models[0].field1", "param.models[1].field2[2]", "param.models[1].field3['b'][1]"]
     >>> values = [-100, -2, -3, 44.]
     >>> print(param.models[0].field1)
     100

@@ -234,7 +234,7 @@ def correlate_prn(prn1, prn2, shift, form):
     prn1  : psuedo-random number stream 1
     prn2  : psuedo-random number stream 2
     shift : bit shift between codes
-    form  : 'zero-one' or 'one-one'
+    form  : "zero-one" or "one-one"
 
     Returns
     -------
@@ -256,7 +256,7 @@ def correlate_prn(prn1, prn2, shift, form):
     >>> import numpy as np
     >>> prn   = generate_prn(1)
     >>> shift = np.arange(1023)
-    >>> form = 'zero-one'
+    >>> form  = "zero-one"
     >>> cor   = correlate_prn(prn, prn, shift, form)
     >>> assert(cor[0] == 1)
     >>> assert(np.max(np.abs(cor[1:])) < 0.1)

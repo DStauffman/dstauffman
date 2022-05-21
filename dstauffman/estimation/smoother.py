@@ -58,9 +58,9 @@ def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
     >>> import numpy as np
     >>> num_states = 6
     >>> num_axes = 2
-    >>> H = np.ones((num_axes, num_states), order='F')
-    >>> Pz = np.eye(num_axes, num_axes, order='F')
-    >>> K = np.ones((num_states, num_axes), order='F')
+    >>> H = np.ones((num_axes, num_states), order="F")
+    >>> Pz = np.eye(num_axes, num_axes, order="F")
+    >>> K = np.ones((num_states, num_axes), order="F")
     >>> z = np.ones(num_axes)
     >>> lambda_bar = np.ones(num_states)
     >>> LAMBDA_bar = np.ones((num_states, num_states))
@@ -119,11 +119,11 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
     >>> num_points = 5
     >>> num_states = 6
     >>> num_axes = 2
-    >>> stm = np.eye(num_states, order='F')
-    >>> P = np.eye(num_states, order='F')
-    >>> H = np.ones((num_axes, num_states), order='F')
-    >>> Pz = np.eye(num_axes, num_axes, order='F')
-    >>> K = np.ones((num_states, num_axes), order='F')
+    >>> stm = np.eye(num_states, order="F")
+    >>> P = np.eye(num_states, order="F")
+    >>> H = np.ones((num_axes, num_states), order="F")
+    >>> Pz = np.eye(num_axes, num_axes, order="F")
+    >>> K = np.ones((num_states, num_axes), order="F")
     >>> z = np.ones(num_axes)
     >>> lambda_bar_final = np.ones(num_states)
     >>> kf_record = KfRecord(num_points=num_points, num_active=num_states, num_states=num_states, num_axes=num_axes)

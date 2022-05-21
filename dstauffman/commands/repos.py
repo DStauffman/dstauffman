@@ -148,7 +148,7 @@ def parse_make_init(input_args: List[str]) -> argparse.Namespace:
     --------
     >>> from dstauffman import get_root_dir
     >>> from dstauffman.commands import parse_make_init
-    >>> input_args = [str(get_root_dir()), '-l']
+    >>> input_args = [str(get_root_dir()), "-l"]
     >>> args = parse_make_init(input_args)
     >>> print(args) # doctest: +ELLIPSIS
     Namespace(folder='...', lineup=True, wrap=100, dry_run=False, outfile='__init__.py')
