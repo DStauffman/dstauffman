@@ -8,14 +8,15 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import doctest
 import logging
 from typing import Any, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
-from dstauffman import HAVE_NUMPY, HAVE_SCIPY, ONE_DAY, ONE_HOUR
 
+from dstauffman import HAVE_NUMPY, HAVE_SCIPY, ONE_DAY, ONE_HOUR
 from dstauffman.aerospace.orbit_const import EARTH, JULIAN, PI, TAU
 from dstauffman.aerospace.orbit_support import get_sun_radec
 from dstauffman.aerospace.quat import qrot
@@ -25,6 +26,7 @@ if HAVE_NUMPY:
     from numpy import sqrt
 else:
     from math import sqrt  # type: ignore[misc]
+
     from dstauffman.nubs import np_any
 if HAVE_SCIPY:
     from scipy.optimize import root

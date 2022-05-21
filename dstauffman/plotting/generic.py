@@ -15,6 +15,7 @@ from typing import Any, Callable, Dict, Iterable, List, Optional, Protocol, Tupl
 import unittest
 
 from slog import LogLevel
+
 from dstauffman import (
     DEGREE_SIGN,
     get_unit_conversion,

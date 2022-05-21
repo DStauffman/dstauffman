@@ -14,6 +14,7 @@ from unittest.mock import Mock, patch
 import dstauffman as dcs
 import dstauffman.commands as commands
 
+
 #%% commands.parse_enforce
 class Test_commands_parse_enforce(unittest.TestCase):
     r"""

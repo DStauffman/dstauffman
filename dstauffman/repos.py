@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import datetime
 import doctest
 import os
@@ -17,6 +18,7 @@ from typing import Dict, FrozenSet, List, Optional, Set, Tuple, TYPE_CHECKING, U
 import unittest
 
 from slog import ReturnCodes
+
 from dstauffman.constants import HAVE_COVERAGE, HAVE_PYTEST
 from dstauffman.paths import get_tests_dir, list_python_files
 from dstauffman.utils import line_wrap, read_text_file, write_text_file
@@ -166,7 +168,7 @@ def run_pytests(folder: Path, *args, **kwargs) -> int:
     exit_code = pytest.main([str(folder), "-rfEsP"] + list(*args), **kwargs)
     # close the qapp
     if qapp is not None:
-        qapp.closeAllWindows()
+        qapp.closeAllWindows()  # type: ignore[attr-defined]
     return_code = ReturnCodes.clean if exit_code == 0 else ReturnCodes.test_failures
     return return_code
 

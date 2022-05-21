@@ -11,7 +11,6 @@ import unittest
 
 from dstauffman import HAVE_NUMPY
 from dstauffman.aerospace import KfRecord
-
 import dstauffman.estimation as estm
 
 if HAVE_NUMPY:

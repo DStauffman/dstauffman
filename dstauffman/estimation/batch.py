@@ -12,6 +12,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 from copy import deepcopy
 import doctest
 from itertools import repeat
@@ -25,6 +26,7 @@ if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
 from slog import LogLevel
+
 from dstauffman import (
     Frozen,
     HAVE_NUMPY,
@@ -36,9 +38,8 @@ from dstauffman import (
     SaveAndLoad,
     setup_dir,
 )
-from dstauffman.nubs import ncjit
-
 from dstauffman.estimation.linalg import mat_divide
+from dstauffman.nubs import ncjit
 
 if HAVE_NUMPY:
     import numpy as np
@@ -48,7 +49,7 @@ if HAVE_NUMPY:
     isnan = np.isnan
     nan = np.nan
 else:
-    from math import inf, nan, isnan  # type: ignore[misc]
+    from math import inf, isnan, nan  # type: ignore[misc]
 
 #%% Globals
 logger = logging.getLogger(__name__)

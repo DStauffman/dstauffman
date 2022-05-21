@@ -16,6 +16,7 @@ from typing import Union
 import unittest
 
 from slog import LogLevel
+
 from dstauffman.constants import HAVE_NUMPY
 from dstauffman.utils import find_in_range, rms
 

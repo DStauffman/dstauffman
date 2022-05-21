@@ -14,6 +14,7 @@ import unittest
 from unittest.mock import Mock, patch
 
 from slog import LogLevel
+
 import dstauffman as dcs
 
 if dcs.HAVE_NUMPY:

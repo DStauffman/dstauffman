@@ -6,11 +6,21 @@ Notes
 #.  Written by David C. Stauffer in January 2022.
 """
 
+import matplotlib.pyplot as plt
+import numpy as np
+
 #%% Imports
 from dstauffman import unit
-from dstauffman.plotting import fig_ax_factory, figmenu, make_connected_sets, Opts, plot_correlation_matrix, plot_histogram, plot_time_history, setup_plots
-import numpy as np
-import matplotlib.pyplot as plt
+from dstauffman.plotting import (
+    fig_ax_factory,
+    figmenu,
+    make_connected_sets,
+    Opts,
+    plot_correlation_matrix,
+    plot_histogram,
+    plot_time_history,
+    setup_plots,
+)
 
 #%% Script
 if __name__ == '__main__':

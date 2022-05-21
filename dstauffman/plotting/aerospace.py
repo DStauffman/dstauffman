@@ -12,7 +12,8 @@ import logging
 import unittest
 
 from slog import LogLevel
-from dstauffman import HAVE_NUMPY, HAVE_MPL, intersect, is_datetime
+
+from dstauffman import HAVE_MPL, HAVE_NUMPY, intersect, is_datetime
 from dstauffman.aerospace import Kf, KfInnov
 from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, make_difference_plot, make_generic_plot
 from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
@@ -1175,15 +1176,10 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     # initialize output
     figs = []
     err = dict()
-    printed = False
 
     #% call wrapper functions for most of the details
     for (field, description) in fields.items():
-        # print status
-        if not printed:
-            logger.log(LogLevel.L4, f"Plotting {description} plots ...")
-            printed = True
-        # make plots
+        logger.log(LogLevel.L4, f"Plotting {description} plots ...")
         err[field] = {}
         for (ix, states) in enumerate(groups):
             this_units = units if isinstance(units, str) else units[ix]
@@ -1191,11 +1187,11 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
             this_ylabel = description + f" [{this_units}]"
             states = np.atleast_1d(states)
             if hasattr(kf1, "active") and kf1.active is not None:
-                (this_state_nums1, this_state_rows1, _) = intersect(kf1.active, states, return_indices=True)
+                (this_state_nums1, this_state_rows1, found_rows1) = intersect(kf1.active, states, return_indices=True)
             else:
                 this_state_nums1 = np.array([], dtype=int)
             if hasattr(kf2, "active") and kf2.active is not None:
-                (this_state_nums2, this_state_rows2, _) = intersect(kf2.active, states, return_indices=True)
+                (this_state_nums2, this_state_rows2, found_rows2) = intersect(kf2.active, states, return_indices=True)
             else:
                 this_state_nums2 = np.array([], dtype=int)
             this_state_nums = np.union1d(this_state_nums1, this_state_nums2)
@@ -1203,6 +1199,14 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
             data_two = np.atleast_2d(getattr(kf2, field)[this_state_rows2, :]) if getattr(kf2, field) is not None else None
             have_data1 = data_one is not None and np.any(~np.isnan(data_one))
             have_data2 = data_two is not None and np.any(~np.isnan(data_two))
+            if have_data1 and this_state_nums1.size < this_state_nums.size:
+                temp = np.full((this_state_nums.size, data_one.shape[1]), np.nan)
+                temp[found_rows1, :] = data_one
+                data_one = temp
+            if have_data2 and this_state_nums2.size < this_state_nums.size:
+                temp = np.full((this_state_nums.size, data_two.shape[1]), np.nan)
+                temp[found_rows2, :] = data_two
+                data_two = temp
             if have_data1 or have_data2:
                 this_description = description + " for State " + ",".join(str(x) for x in this_state_nums)
                 this_elements = [elements[state] for state in this_state_nums]
@@ -1240,12 +1244,12 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
                     err[field][f"Group {ix+1}"] = out[1]
                 else:
                     figs += out
+        logger.log(LogLevel.L4, "... done.")
+
     # Setup plots
     setup_plots(figs, opts)
-    if printed:
-        logger.log(LogLevel.L4, "... done.")
     if not figs:
-        logger.log(LogLevel.L5, "No covariance data was provided, so no plots were generated.")
+        logger.log(LogLevel.L5, f"No {'/'.join(fields.values())} data was provided, so no plots were generated.")
     if return_err:
         return (figs, err)
     return figs

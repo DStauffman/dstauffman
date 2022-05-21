@@ -8,14 +8,15 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import doctest
 import logging
 from typing import List, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
-from dstauffman import INT_TOKEN, HAVE_NUMPY
 
+from dstauffman import HAVE_NUMPY, INT_TOKEN
 from dstauffman.aerospace.quat_opt import quat_to_dcm
 
 if HAVE_NUMPY:

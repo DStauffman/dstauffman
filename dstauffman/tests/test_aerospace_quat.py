@@ -11,6 +11,7 @@ import unittest
 from unittest.mock import patch
 
 from slog import LogLevel
+
 from dstauffman import HAVE_NUMPY
 import dstauffman.aerospace as space
 

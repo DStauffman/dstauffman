@@ -9,6 +9,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import doctest
 import math
 from typing import Sequence, TYPE_CHECKING, Union

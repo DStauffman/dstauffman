@@ -8,17 +8,18 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import copy
 import datetime
 import doctest
-from typing import Any, ClassVar, Literal, overload, Tuple, TypeVar, TYPE_CHECKING, Union
+from typing import Any, ClassVar, Literal, overload, Tuple, TYPE_CHECKING, TypeVar, Union
 import unittest
 
 from slog import IntEnumPlus
-from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, NP_DATETIME_FORM, NP_DATETIME_UNITS, RAD2DEG
 
+from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, NP_DATETIME_FORM, NP_DATETIME_UNITS, RAD2DEG
 from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH, PI, TAU
-from dstauffman.aerospace.orbit_conv import anomaly_eccentric_2_true, mean_motion_2_semimajor, anomaly_mean_2_eccentric
+from dstauffman.aerospace.orbit_conv import anomaly_eccentric_2_true, anomaly_mean_2_eccentric, mean_motion_2_semimajor
 from dstauffman.aerospace.orbit_support import cross, d_2_r, dot, jd_to_numpy, norm, r_2_d
 
 if HAVE_NUMPY:

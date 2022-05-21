@@ -11,7 +11,6 @@ from typing import Dict
 import unittest
 
 from dstauffman import HAVE_NUMPY
-
 import dstauffman.health as health
 
 if HAVE_NUMPY:

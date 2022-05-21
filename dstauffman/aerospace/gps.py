@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import datetime
 import doctest
 from typing import Dict, List, Literal, overload, Tuple, Union

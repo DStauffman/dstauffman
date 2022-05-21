@@ -9,12 +9,14 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import logging
 from typing import Any, Dict
 import unittest
 from unittest.mock import Mock, patch
 
 from slog import LogLevel
+
 from dstauffman import capture_output, compare_two_classes, Frozen, get_tests_dir, HAVE_H5PY, HAVE_NUMPY, rss
 import dstauffman.estimation as estm
 

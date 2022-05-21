@@ -13,6 +13,7 @@ from pathlib import Path
 
 from setuptools import setup
 
+
 #%% Support functions - readme
 def readme():
     r"""Opens the README.rst file for additional descriptions."""

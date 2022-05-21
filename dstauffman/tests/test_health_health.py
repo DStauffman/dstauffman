@@ -9,12 +9,13 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 from typing import Optional
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY, HAVE_PANDAS
-from dstauffman.plotting import Opts, suppress_plots
 import dstauffman.health as health
+from dstauffman.plotting import Opts, suppress_plots
 
 if HAVE_MPL:
     import matplotlib.pyplot as plt

@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 from collections.abc import Mapping
 import copy
 import pathlib
@@ -105,19 +106,12 @@ class _Example_Times(object):
 
     def chop(self, ti=-inf, tf=inf):
         dcs.chop_time(
-            self,
-            ti=ti,
-            tf=tf,
-            time_field="time",
-            exclude=frozenset({"name",}),  # fmt: skip
+            self, ti=ti, tf=tf, time_field="time", exclude=frozenset({"name",})  # fmt: skip
         )
 
     def subsample(self, skip=30, start=0):
         dcs.subsample_class(
-            self,
-            skip=skip,
-            start=start,
-            skip_fields=frozenset({"name",}),  # fmt: skip
+            self, skip=skip, start=start, skip_fields=frozenset({"name",})  # fmt: skip
         )
 
 

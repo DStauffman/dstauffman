@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import doctest
 from typing import List, overload, Tuple, TYPE_CHECKING, Union
 import unittest

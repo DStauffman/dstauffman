@@ -13,6 +13,7 @@ import unittest
 from unittest.mock import patch
 
 from slog import LogLevel
+
 from dstauffman import (
     capture_output,
     get_tests_dir,

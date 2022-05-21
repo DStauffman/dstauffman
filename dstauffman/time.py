@@ -8,10 +8,11 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import datetime
 import doctest
 import re
-from time import strftime, gmtime
+from time import gmtime, strftime
 from typing import Optional, overload, TYPE_CHECKING, Union
 import unittest
 import warnings

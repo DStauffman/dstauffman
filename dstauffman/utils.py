@@ -10,6 +10,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 from collections.abc import Mapping
 from contextlib import contextmanager
 import datetime
@@ -22,22 +23,23 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
-from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Tuple, TypeVar, TYPE_CHECKING, Union
+from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, TypeVar, Union
 import unittest
 import warnings
 
 from slog import ReturnCodes
+
 from dstauffman.constants import HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
 from dstauffman.units import MONTHS_PER_YEAR
 
 if HAVE_NUMPY:
     import numpy as np
-    from numpy import inf, nan, logical_not
+    from numpy import inf, logical_not, nan
 
     if TYPE_CHECKING:
         from numpy.typing import ArrayLike
 else:
-    from math import inf, nan, isnan
+    from math import inf, isnan, nan
 
     logical_not = lambda x: not x  # type: ignore[assignment]
 if HAVE_SCIPY:

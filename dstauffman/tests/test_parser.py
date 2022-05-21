@@ -13,7 +13,9 @@ import unittest
 from unittest.mock import patch
 
 from slog import LogLevel, ReturnCodes
+
 import dstauffman as dcs
+
 
 #%% _VALID_COMMANDS
 class Test__VALID_COMMANDS(unittest.TestCase):

@@ -11,10 +11,12 @@ import datetime
 from typing import List, Optional
 import unittest
 from unittest.mock import patch
+import warnings
 
 from slog import LogLevel
+
 from dstauffman import HAVE_MPL, HAVE_NUMPY
-from dstauffman.aerospace import quat_norm
+from dstauffman.aerospace import Kf, quat_norm
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -409,12 +411,45 @@ class Test_plotting_plot_covariance(unittest.TestCase):
 
 
 #%% plotting.plot_states
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_states(unittest.TestCase):
     r"""
     Tests the plotting.plot_states function with the following cases:
-        TBD
+        Single Kf structure
+        Comparison
+        Comparison with mismatched states
+        Error output
     """
-    pass  # TODO: write this
+    def setUp(self) -> None:
+        self.gnd1 = Kf(name='GARSE', num_points=30, num_states=9, active_states=np.arange(9))
+        self.gnd2 = Kf(name='GBARS', num_points=60, num_states=8, active_states=np.array([0, 1, 2, 3, 5, 6, 7, 8]))
+        self.gnd1.time[:] = np.arange(30.)  # type: ignore[index]
+        self.gnd2.time[:] = np.arange(60.) - 10.  # type: ignore[index]
+        self.gnd1.state.fill(1.0)  # type: ignore[union-attr]
+        self.gnd2.state.fill(0.99)  # type: ignore[union-attr]
+        self.opts = plot.Opts()
+        self.opts.show_plot = False
+        self.figs: List[Figure] = []
+
+    def test_single(self) -> None:
+        self.figs += plot.plot_states(self.gnd1, opts=self.opts)
+
+    def test_comp(self) -> None:
+        self.figs += plot.plot_states(self.gnd1, self.gnd2, opts=self.opts)
+
+    def test_errs(self) -> None:
+        (figs, err) = plot.plot_states(self.gnd1, self.gnd2, opts=self.opts, return_err=True)
+        self.figs += figs
+        self.assertEqual(err.keys(), {'state'})
+
+    def test_groups(self) -> None:
+        groups = [(0, 1, 2), (3, 4, 5), (6, 7, 8)]
+        with warnings.catch_warnings():
+            warnings.filterwarnings("ignore", message="Mean of empty slice")
+            self.figs += plot.plot_states(self.gnd1, self.gnd2, groups=groups, opts=self.opts)
+
+    def tearDown(self) -> None:
+        plot.close_all(self.figs)
 
 
 #%% Unit test execution

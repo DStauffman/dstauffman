@@ -11,6 +11,7 @@ from typing import ClassVar
 import unittest
 
 from slog import IntEnumPlus
+
 import dstauffman as dcs
 
 if dcs.HAVE_NUMPY:

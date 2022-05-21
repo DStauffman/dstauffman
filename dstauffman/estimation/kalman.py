@@ -11,9 +11,8 @@ import doctest
 import unittest
 
 from dstauffman import HAVE_NUMPY
-from dstauffman.nubs import ncjit
-
 from dstauffman.estimation.linalg import mat_divide
+from dstauffman.nubs import ncjit
 
 if HAVE_NUMPY:
     import numpy as np

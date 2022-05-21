@@ -10,6 +10,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import copy
 import doctest
 from pathlib import Path
@@ -44,11 +45,12 @@ from dstauffman.utils import find_in_range
 if HAVE_H5PY:
     import h5py
 if HAVE_NUMPY:
-    from numpy import all as np_all, datetime64, ndarray, inf, printoptions
+    from numpy import all as np_all, datetime64, inf, ndarray, printoptions
 else:
-    from dstauffman.nubs import np_all  # type: ignore[no-redef]
-    from math import inf
     from array import array as ndarray  # type: ignore[misc]
+    from math import inf
+
+    from dstauffman.nubs import np_all  # type: ignore[no-redef]
 
     datetime64 = ndarray  # type: ignore[assignment, misc]
 

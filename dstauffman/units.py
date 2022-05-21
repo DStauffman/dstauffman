@@ -8,10 +8,9 @@ Notes
 
 #%% Imports
 import doctest
+from math import pi
 from typing import Tuple, Union
 import unittest
-
-from math import pi
 
 #%% Constants - Unit Conversions
 # Time

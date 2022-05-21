@@ -14,6 +14,7 @@ from unittest.mock import Mock, patch
 import dstauffman as dcs
 import dstauffman.commands as commands
 
+
 #%% commands.parse_tests
 class Test_commands_parse_tests(unittest.TestCase):
     r"""
@@ -74,12 +75,7 @@ class Test_commands_execute_tests(unittest.TestCase):
     def setUp(self) -> None:
         self.folder = dcs.get_root_dir()
         self.args = argparse.Namespace(
-            docstrings=False,
-            unittest=False,
-            verbose=False,
-            library=None,
-            coverage=False,
-            cov_file=None,
+            docstrings=False, unittest=False, verbose=False, library=None, coverage=False, cov_file=None
         )
         self.patch_args = {
             "folder": self.folder,

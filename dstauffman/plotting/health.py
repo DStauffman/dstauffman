@@ -10,6 +10,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import doctest
 import unittest
 import warnings
@@ -25,7 +26,6 @@ except ModuleNotFoundError:
 
 from dstauffman import Frozen, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, rms
 from dstauffman.health import bins_to_str_ranges
-
 from dstauffman.plotting.plotting import Opts, setup_plots
 from dstauffman.plotting.support import (
     ColorMap,

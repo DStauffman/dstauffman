@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import datetime
 import doctest
 import logging
@@ -16,17 +17,17 @@ from typing import List, Optional, Tuple, TypeVar, Union
 import unittest
 
 from slog import LogLevel
+
 from dstauffman import (
     convert_date,
     convert_time_units,
     find_in_range,
     Frozen,
     get_unit_conversion,
-    histcounts,
     HAVE_MPL,
     HAVE_NUMPY,
+    histcounts,
 )
-
 from dstauffman.plotting.generic import make_bar_plot, make_time_plot
 from dstauffman.plotting.support import (
     ColorMap,

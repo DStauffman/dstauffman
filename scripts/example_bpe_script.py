@@ -12,9 +12,11 @@ import datetime
 import numpy as np
 
 import slog as lg
+
 import dstauffman as dcs
 import dstauffman.estimation as estm
 import dstauffman.plotting as plot
+
 
 #%% Classes - SimParams
 class SimParams(dcs.Frozen):

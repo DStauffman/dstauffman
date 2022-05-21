@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import doctest
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple, Union

@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import datetime
 import doctest
 from functools import partial
@@ -24,14 +25,14 @@ import unittest
 import warnings
 
 try:
-    from qtpy.QtCore import QCoreApplication, QSize
+    from qtpy.QtCore import QSize
     from qtpy.QtGui import QIcon
     from qtpy.QtWidgets import QApplication, QPushButton
 
     _HAVE_QT = True
 except ModuleNotFoundError:
     warnings.warn("Qt (PyQt5, PyQt6, PySide2, PySide6) was not found. Some funtionality will be limited.")
-    QPushButton = object
+    QPushButton = object  # type: ignore[assignment, misc]
     _HAVE_QT = False
 
 from dstauffman import (
@@ -53,13 +54,12 @@ if HAVE_MPL:
     from matplotlib.backends.backend_pdf import PdfPages
     import matplotlib.cm as cmx
     import matplotlib.colors as colors
-    from matplotlib.dates import date2num
+
+    # Newer date stamps on axes, done here as this is the lowest level of the plotting submodule
+    from matplotlib.dates import ConciseDateConverter, date2num
     from matplotlib.figure import Figure
     from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
-
-    # Newer date stamps on axes, done here as this is the lowest level of the plotting submodule
-    from matplotlib.dates import ConciseDateConverter
     import matplotlib.units as munits
 
     converter = ConciseDateConverter()
@@ -67,8 +67,8 @@ if HAVE_MPL:
     munits.registry[datetime.datetime] = converter
     if HAVE_DS:
         import datashader as ds
+        from datashader.mpl_ext import alpha_colormap, dsshow
         import datashader.transfer_functions as tf
-        from datashader.mpl_ext import dsshow, alpha_colormap
 if HAVE_NUMPY:
     import numpy as np
 
@@ -1093,11 +1093,11 @@ def get_screen_resolution() -> Tuple[int, int]:
     if not _HAVE_DISPLAY:
         return (0, 0)
     # check to see if a QApplication exists, and if not, make one
-    app: Union[QApplication, QCoreApplication]
+    app: QApplication
     if QApplication.instance() is None:
         app = QApplication(sys.argv)  # pragma: no cover
     else:
-        app = QApplication.instance()
+        app = QApplication.instance()  # type: ignore[assignment]
     # query the resolution
     screen_resolution = app.screens()[0].geometry()
     # pull out the desired information
@@ -1923,10 +1923,7 @@ def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = 
 
 #%% Functions - save_images_to_pdf
 def save_images_to_pdf(
-    figs: Union[Figure, List[Figure]] = None,
-    folder: Path = None,
-    plot_type: str = "png",
-    filename: Path = Path("figs.pdf"),
+    figs: Union[Figure, List[Figure]] = None, folder: Path = None, plot_type: str = "png", filename: Path = Path("figs.pdf")
 ):
     r"""
     Uses figure names to find the already saved images and combine them into a PDF file.

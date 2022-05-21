@@ -274,6 +274,7 @@ class Test_aerospace_get_sun_radec(unittest.TestCase):
         Nominal
         Return early
     """
+
     def setUp(self):
         date = datetime.datetime(2010, 6, 20, 15, 30, 45)
         np_date = convert_datetime_to_np(date)
@@ -299,7 +300,7 @@ pass  # TODO: write this
 class Test_aerospace_eclipse_fraction(unittest.TestCase):
     def setUp(self) -> None:
         self.altitude = 16000.0
-        self.beta = np.pi/6
+        self.beta = np.pi / 6
         self.exp = 0.4739855149323683  # TODO: get independently
 
     def test_nominal(self) -> None:

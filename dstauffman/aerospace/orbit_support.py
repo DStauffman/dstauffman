@@ -8,12 +8,12 @@ Notes
 
 #%% Imports
 from __future__ import annotations
+
 import doctest
 from typing import overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import ARCSEC2RAD, DEG2RAD, HAVE_NUMPY, magnitude, NP_DATETIME_UNITS, NP_ONE_DAY, ONE_MINUTE, ONE_HOUR, RAD2DEG
-
+from dstauffman import ARCSEC2RAD, DEG2RAD, HAVE_NUMPY, magnitude, NP_DATETIME_UNITS, NP_ONE_DAY, ONE_HOUR, ONE_MINUTE, RAD2DEG
 from dstauffman.aerospace.orbit_const import EARTH, JULIAN, PI, TAU
 
 if HAVE_NUMPY:

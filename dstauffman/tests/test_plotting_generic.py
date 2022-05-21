@@ -13,6 +13,7 @@ import unittest
 from unittest.mock import patch
 
 from slog import LogLevel
+
 from dstauffman import HAVE_DS, HAVE_MPL, HAVE_NUMPY, NP_DATETIME_UNITS, NP_INT64_PER_SEC, NP_TIMEDELTA_FORM
 import dstauffman.plotting as plot
 

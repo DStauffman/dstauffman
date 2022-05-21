@@ -12,7 +12,6 @@ import doctest
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY
-
 from dstauffman.plotting.plotting import Opts, plot_correlation_matrix, plot_time_history, setup_plots
 
 if HAVE_MPL:

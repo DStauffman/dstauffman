@@ -2,9 +2,10 @@
 Example script that matches the "Introduction to Space Flight" by Francis J Hale.
 """
 
+import numpy as np
+
 import dstauffman as dcs
 import dstauffman.aerospace as space
-import numpy as np
 
 line1 = '1 25544U 98067A   06132.29375000  .00013633  00000-0  92740-4 0  9181'
 line2 = '2 25544  51.6383  12.2586 0009556 188.7367 320.5459 15.75215761427503'
