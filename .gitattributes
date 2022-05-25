@@ -14,11 +14,13 @@
 *.htm text
 *.html text
 *.ini text
+*.lock text
 *.md text
 *.prj text
 *.php text
 *.rst text
 *.tex text
+*.toml text
 *.txt text
 *.make text
 
