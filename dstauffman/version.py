@@ -7,7 +7,7 @@ Notes
 """
 
 #%% Constants
-version_info = (3, 0, 0)
+version_info = (3, 1, 0)
 
 # Below is data about the minor release history for potential use in deprecating older support.
 # For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html
@@ -19,6 +19,7 @@ Mar 12, 2021: dstauffman 2.3
 Apr 09, 2021: dstauffman 2.4
 Jul 28, 2021: dstauffman 2.5
 Feb 22, 2022: dstauffman 3.0
+May 24, 2022: dstauffman 3.1
 """
 
 # Historical notes:
@@ -31,3 +32,4 @@ Feb 22, 2022: dstauffman 3.0
 # v2.5 Added significant GPS and orbit ephemeris routines.
 # v3.0 Uses fig_ax_factory for creating figures where needed and switched to qtpy instead of only PyQt5.
 #      Split the slog portions of the code into a separate sub-repository.
+# v3.1 Added support for using poetry as your dependency manager.

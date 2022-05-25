@@ -39,7 +39,7 @@ import warnings
 
 from slog import is_dunder
 
-from dstauffman.constants import HAVE_H5PY, HAVE_NUMPY
+from dstauffman.constants import HAVE_H5PY, HAVE_NUMPY, HAVE_PANDAS
 from dstauffman.utils import find_in_range
 
 if HAVE_H5PY:
@@ -53,6 +53,8 @@ else:
     from dstauffman.nubs import np_all  # type: ignore[no-redef]
 
     datetime64 = ndarray  # type: ignore[assignment, misc]
+if HAVE_PANDAS:
+    from pandas import DataFrame
 
 #%% Constants
 if TYPE_CHECKING:
@@ -136,7 +138,8 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclu
         if meta is not None:
             for (key, value) in meta.items():
                 grp.attrs[key] = value
-        temp = vars(self) if not isinstance(self, dict) else self
+        types = (dict, DataFrame) if HAVE_PANDAS else (dict, )
+        temp = vars(self) if not isinstance(self, types) else self
         for key in temp:
             if is_dunder(key):
                 continue

@@ -27,6 +27,8 @@ if dcs.HAVE_NUMPY:
     inf = np.inf
 else:
     from math import inf
+if dcs.HAVE_PANDAS:
+    from pandas import DataFrame
 
 #%% Locals classes for testing
 class _Example_Frozen(dcs.Frozen):
@@ -115,8 +117,26 @@ class _Example_Times(object):
         )
 
 
-#%% save_hdf5 - covered by SaveAndLoad
-#%% load_hdf5 - covered by SaveAndLoad
+#%% save_hdf5 & load_hdf5 - mostly covered by SaveAndLoad
+class Test_save_and_load_hdf5(unittest.TestCase):
+    r"""
+    Additionally tests the save and load HDF5 functions with a pandas DataFrame.
+    """
+    def setUp(self) -> None:
+        self.filename = dcs.get_tests_dir() / "results_test_df_save.hdf5"
+
+    @unittest.skipIf(not dcs.HAVE_PANDAS, "Skipping due to missing pandas dependency.")
+    def test_pandas(self) -> None:
+        data = {"a": np.array([1, 3, 5]), "b": np.array([2.0, 4.0, 6.0])}
+        df = DataFrame(data)
+        dcs.save_hdf5(df, self.filename)
+        data2 = dcs.load_hdf5(None, self.filename)
+        for key in data.keys():
+            np.testing.assert_array_equal(data[key], getattr(data2, key))
+
+    def tearDown(self) -> None:
+        self.filename.unlink(missing_ok=True)
+
 #%% save_pickle - covered by SaveAndLoad
 #%% load_pickle - covered by SaveAndLoad
 #%% save_method - covered by SaveAndLoad

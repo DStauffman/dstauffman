@@ -17,7 +17,6 @@ cache:
   - .cache/pip
   - static/
   - everything/
-  #- py37/
   - core_only/
 
 stages:
@@ -37,24 +36,22 @@ make_envs:
   - pip install virtualenv
   - virtualenv static
   - source static/bin/activate
+  - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PySide6 pytest qtpy requests types-requests scipy tblib urllib3
+  - python -m pip install coverage flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5-stubs PySide6 pytest qtpy requests types-requests scipy tblib urllib3
   - deactivate
   - virtualenv everything
   - source everything/bin/activate
+  - python -m pip install --upgrade pip
   - python -m pip install wheel
   - python -m pip install coverage datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PySide6 pytest qtpy requests scipy tblib urllib3
   - deactivate
   - virtualenv core_only
   - source core_only/bin/activate
+  - python -m pip install --upgrade pip
   - python -m pip install wheel
   - python -m pip install coverage pytest
   - deactivate
-  #- virtualenv py37 --python=/usr/bin/python3.7  # TODO: just different docker image
-  #- source py37/bin/activate
-  #- python -m pip install wheel
-  #- python -m pip install coverage flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5 pytest requests scipy tblib urllib3
-  #- deactivate
 
 mypy:
   stage: Static Analysis
@@ -71,7 +68,7 @@ mypy:
 #  stage: Static Analysis
 #  allow_failure: true
 #  script:
-#  - flake8 --max-line-length=100 dstauffman/**/*.py
+#  - flake8 --max-line-length=128 dstauffman/**/*.py
 
 #pylint:
 #  stage: Static Analysis
@@ -157,12 +154,16 @@ coverage_report:
     paths:
     - $DCS_TESTS_DIR/coverage_html_report/*
     expire_in: 1 week
+    reports:
+      cobertura: $DCS_TESTS_DIR/coverage_html_report/coverage.xml
+  coverage: '/TOTAL.*\s([.\d]+)%/'
   script:
+  - source static/bin/activate
   - cd $DCS_TESTS_DIR
   - pwd
   - ls -l
-  - source static/bin/activate
   - export COVERAGE_FILE=.coverage
   - coverage --version
   - coverage combine
   - coverage html
+  - coverage xml
