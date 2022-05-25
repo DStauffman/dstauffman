@@ -13,7 +13,7 @@ import dstauffman as dcs
 import dstauffman.plotting as plot
 
 #%% Main function
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     #%% Create some fake data
     # random data
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # normalize the random data
     data = dcs.unit(data, axis=0)
     # labels for the plot
-    labels = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']
+    labels = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
     # make some symmetric data
     sym = data.copy()
     num = sym.shape[0]

@@ -97,18 +97,18 @@ i = 50000, np_all(x)
 #%% Functions - parse_results
 def parse_results(text):
     r"""Parses the output into a more succient table."""
-    lines = text.split('\n')
+    lines = text.split("\n")
     table = pd.DataFrame(
-        index=['None', '0', '10', '100', '1000', '10000', '50000'],
-        columns=['any(x)', 'np.any(x)', 'np_any(x)', 'all(x)', 'np.all(x)', 'np_all(x)'],
+        index=["None", "0", "10", "100", "1000", "10000", "50000"],
+        columns=["any(x)", "np.any(x)", "np_any(x)", "all(x)", "np.all(x)", "np_all(x)"],
     )
     for (ix, line) in enumerate(lines):
-        if line.startswith('i = '):
-            parts = line.split(', ')
-            value = parts[0].split(' = ')[1]
+        if line.startswith("i = "):
+            parts = line.split(", ")
+            value = parts[0].split(" = ")[1]
             func = parts[1]
             next_line = lines[ix + 1]
-            speed = next_line.split(' ± ')[0]
+            speed = next_line.split(" ± ")[0]
             table.loc[value][func] = speed
         else:
             continue
@@ -116,29 +116,29 @@ def parse_results(text):
 
 
 #%% Script
-if __name__ == '__main__':
+if __name__ == "__main__":
     ipython = get_ipython()
     for i in [None, 0, 10, 100, 1000, 10000, 50000]:
         x = np.zeros(100000, dtype=bool)
         if x is not None:
             x[i] = True
-        print(f'i = {i}, any(x)')
-        ipython.magic('timeit any(x)')
-        print(f'i = {i}, np.any(x)')
-        ipython.magic('timeit np.any(x)')
-        print(f'i = {i}, np_any(x)')
-        ipython.magic('timeit nubs.np_any(x)')
+        print(f"i = {i}, any(x)")
+        ipython.magic("timeit any(x)")
+        print(f"i = {i}, np.any(x)")
+        ipython.magic("timeit np.any(x)")
+        print(f"i = {i}, np_any(x)")
+        ipython.magic("timeit nubs.np_any(x)")
 
     for i in [None, 0, 10, 100, 1000, 10000, 50000]:
         x = np.ones(100000, dtype=bool)
         if x is not None:
             x[i] = False
-        print(f'i = {i}, all(x)')
-        ipython.magic('timeit all(x)')
-        print(f'i = {i}, np.all(x)')
-        ipython.magic('timeit np.all(x)')
-        print(f'i = {i}, np_all(x)')
-        ipython.magic('timeit nubs.np_all(x)')
+        print(f"i = {i}, all(x)")
+        ipython.magic("timeit all(x)")
+        print(f"i = {i}, np.all(x)")
+        ipython.magic("timeit np.all(x)")
+        print(f"i = {i}, np_all(x)")
+        ipython.magic("timeit nubs.np_all(x)")
 
     # table = parse_results(text)
     # print(table)

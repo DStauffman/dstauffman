@@ -19,11 +19,11 @@ if flags.use_plotting:
     import dstauffman.plotting as plot
 
 #%% Main function
-if __name__ == '__main__':
+if __name__ == "__main__":
     #%% Create some fake data
     time = np.arange(0.0, 20.0, 0.01)
     data = np.vstack((np.sin(time), np.cos(time) + 2.0))
-    description = 'Sin and Cosine plots'
+    description = "Sin and Cosine plots"
 
     #%% create opts
     if flags.use_plotting:

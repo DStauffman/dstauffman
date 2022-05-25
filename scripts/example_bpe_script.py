@@ -39,7 +39,7 @@ class SimParams(dcs.Frozen):
 
     def __repr__(self):
         r"""Detailed string representation."""
-        return 'mag={}, freq={}, phs={}'.format(self.magnitude, self.frequency, self.phase)
+        return "mag={}, freq={}, phs={}".format(self.magnitude, self.frequency, self.phase)
 
 
 #%% Functions - _get_truth_index
@@ -99,7 +99,7 @@ def get_parameter(sim_params, *, names):
 def set_parameter(sim_params, *, names, values):
     r"""Set the model parameters."""
     num = len(names)
-    assert len(values) == num, 'Names and Values must have the same length.'
+    assert len(values) == num, "Names and Values must have the same length."
     for (ix, name) in enumerate(names):
         if hasattr(sim_params, name):
             setattr(sim_params, name, values[ix])
@@ -108,11 +108,11 @@ def set_parameter(sim_params, *, names, values):
 
 
 #%% Script
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Constants
-    rerun      = True
+    rerun      = True  # fmt: skip
     make_plots = True
-    time       = np.arange(251)
+    time       = np.arange(251)  # fmt: skip
 
     # Parameters
     sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
@@ -126,19 +126,20 @@ if __name__ == '__main__':
     lg.activate_logging(lg.LogLevel.L8)
 
     # BPE Settings
+    # fmt: off
     opti_opts                = estm.OptiOpts()
     opti_opts.model_func     = sim_model
-    opti_opts.model_args     = {'sim_params': sim_params}
+    opti_opts.model_args     = {"sim_params": sim_params}
     opti_opts.cost_func      = cost_wrapper
-    opti_opts.cost_args      = {'results_time': time, 'truth_time': truth_time, 'truth_data': truth_data}
+    opti_opts.cost_args = {"results_time": time, "truth_time": truth_time, "truth_data": truth_data}
     opti_opts.get_param_func = get_parameter
     opti_opts.set_param_func = set_parameter
-    opti_opts.output_folder  = dcs.get_output_dir() / datetime.datetime.now().strftime('%Y-%m-%d')
-    opti_opts.output_results = 'bpe_results.hdf5'
+    opti_opts.output_folder  = dcs.get_output_dir() / datetime.datetime.now().strftime("%Y-%m-%d")
+    opti_opts.output_results = "bpe_results.hdf5"
     opti_opts.params         = []
 
     # less common optimization settings
-    opti_opts.slope_method    = 'one_sided'  # or 'two_sided'
+    opti_opts.slope_method    = "one_sided"  # or "two_sided"
     opti_opts.is_max_like     = False
     opti_opts.max_iters       = 10
     opti_opts.tol_cosmax_grad = 1e-4
@@ -152,9 +153,10 @@ if __name__ == '__main__':
     opti_opts.max_cores       = None  # None means no parallelization, -1 means use all cores
 
     # Parameters to estimate
-    opti_opts.params.append(estm.OptiParam('magnitude', best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
-    opti_opts.params.append(estm.OptiParam('frequency', best=20, min_=1, max_=1000, typical=60, minstep=0.01))
-    opti_opts.params.append(estm.OptiParam('phase', best=180, min_=0, max_=360, typical=100, minstep=0.1))
+    opti_opts.params.append(estm.OptiParam("magnitude", best=2.5, min_=-10, max_=10, typical=5, minstep=0.01))
+    opti_opts.params.append(estm.OptiParam("frequency", best=20, min_=1, max_=1000, typical=60, minstep=0.01))
+    opti_opts.params.append(estm.OptiParam("phase", best=180, min_=0, max_=360, typical=100, minstep=0.1))
+    # fmt: on
 
     # Run code
     if rerun:
@@ -166,16 +168,16 @@ if __name__ == '__main__':
     # Plot results
     if make_plots:
         # build opts
-        opts           = plot.Opts()
-        opts.case_name = 'Model Results'
+        opts           = plot.Opts()  # fmt: skip
+        opts.case_name = "Model Results"
         opts.save_path = dcs.get_output_dir()
         opts.save_plot = True
 
         # make model plots
-        f0 = plot.plot_health_monte_carlo(time, results, 'Output', opts=opts, truth=truth)
+        f0 = plot.plot_health_monte_carlo(time, results, "Output", opts=opts, truth=truth)
         extra_plotter = lambda fig, ax: truth.plot_truth(ax[0], scale=1)  # type: ignore[attr-defined]
-        f1 = plot.plot_time_history('Output vs. Time', time, results, opts=opts, extra_plotter=extra_plotter)
+        f1 = plot.plot_time_history("Output vs. Time", time, results, opts=opts, extra_plotter=extra_plotter)
 
         # make BPE plots
-        bpe_plots = {'innovs': True, 'convergence': True, 'correlation': True, 'info_svd': True, 'covariance': True}
+        bpe_plots = {"innovs": True, "convergence": True, "correlation": True, "info_svd": True, "covariance": True}
         plot.plot_bpe_results(bpe_results, opts=opts, plots=bpe_plots)
