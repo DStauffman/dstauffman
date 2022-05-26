@@ -1267,15 +1267,15 @@ python-versions = ">=3.7"
 heapdict = "*"
 
 [extras]
-numeric = ["h5py", "matplotlib", "numpy", "pandas", "PyQt5", "qtpy", "scipy", "tblib"]
-shader = ["datashader", "h5py", "matplotlib", "numba", "numpy", "pandas", "PyQt5", "qtpy", "scipy", "tblib"]
+numeric = ["h5py", "matplotlib", "numpy", "pandas", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
+shader = ["datashader", "h5py", "matplotlib", "numba", "numpy", "pandas", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
 spyder = ["spyder-kernels"]
 static = ["black", "flake8", "isort", "pylint", "mypy", "PyQt5-stubs"]
 
 [metadata]
 lock-version = "1.1"
 python-versions = ">=3.9, <3.11"
-content-hash = "55017b8de000762aa0856d2b0b04f9f5f9ecf37a4b0680c746c74c596835b9f1"
+content-hash = "b8aac1c2c44091498a9ae47aaa640897de986ad17caa6fc2cc0d33e62e1b7825"
 
 [metadata.files]
 appnope = [
