@@ -96,3 +96,40 @@ skip_glob = ["__init__.py", "*/__init__.py"]
 sections = ["FUTURE", "STDLIB", "THIRDPARTY", "SLOG", "FIRSTPARTY", "LOCALFOLDER"]
 known_slog = ["slog"]
 
+[tool.mypy]
+show_error_codes       = true
+warn_return_any        = true
+warn_unused_configs    = true
+warn_unreachable       = true
+warn_unused_ignores    = true
+#disallow_untyped_calls = true
+#disallow_untyped_defs  = true
+files                  = ["$MYPY_CONFIG_FILE_DIR/dstauffman/**/*.py", "$MYPY_CONFIG_FILE_DIR/scripts/*.py"]
+mypy_path              = "$MYPY_CONFIG_FILE_DIR/../slog"
+#linecount_report       = ".mypy_report"
+#any_exprs_report       = ".mypy_report"
+#html_report            = ".mypy_report"
+#cobertura_xml_report   = ".mypy_report"
+#linecoverage_report    = ".mypy_report"
+#lineprecision_report   = ".mypy_report"
+#xml_report             = ".mypy_report"
+
+[[tool.mypy.overrides]]
+module = [
+    "coverage.*",
+    "datashader.*",
+    "h5py.*",
+    "matplotlib.*",
+    "numba.*",
+    # "numpy.*",
+    "pandas.*",
+    "PIL.*",
+    # "PyQt5.*",
+    "pytest.*",
+    "qtpy.*",  # Note would be nice to get rid of this, since PyQt5 is actually stubbed
+    # "request.*",
+    "scipy.*",
+    "tblib.*",
+    "urllib3.*"
+]
+ignore_missing_imports = true
