@@ -663,7 +663,7 @@ def read_text_file(filename: Union[str, Path]) -> str:
         # open file for reading
         with open(filename, "rt") as file:
             # read file
-            text = file.read()  # pragma: no branch
+            text = file.read()
         # return results
         return text
     except:
@@ -708,7 +708,7 @@ def write_text_file(filename: Union[str, Path], text: str) -> None:
         # open file for writing
         with open(filename, "wt") as file:
             # write file
-            file.write(text)  # pragma: no branch
+            file.write(text)
     except:
         # on any exceptions, print a message and re-raise the error
         print(f'Unable to open file "{filename}" for writing.')
@@ -1505,7 +1505,7 @@ def get_username() -> str:
         return os.environ["USERNAME"]
     try:
         return os.environ["USER"]
-    except KeyError:
+    except KeyError:  # pragma: no cover
         return os.environ["GITLAB_USER_LOGIN"]
 
 

@@ -407,9 +407,9 @@ class Test_plotting_resolve_name(unittest.TestCase):
     def test_nominal(self) -> None:
         new_name = plot.resolve_name(self.bad_name)
         if IS_WINDOWS:
-            self.assertEqual(new_name, self.exp_win)
+            self.assertEqual(new_name, self.exp_win)  # pragma: no cover unix
         else:
-            self.assertEqual(new_name, self.exp_unix)
+            self.assertEqual(new_name, self.exp_unix)  # pragma: no cover windows
 
     def test_nominal_win(self) -> None:
         new_name = plot.resolve_name(self.bad_name, force_win=True)
@@ -518,19 +518,19 @@ class Test_plotting_storefig(unittest.TestCase):
     def test_bad_characters(self) -> None:
         # change to bad name
         self.fig.canvas.manager.set_window_title("Bad < > / names")
-        if not _HAVE_DISPLAY:
+        if not _HAVE_DISPLAY:  # pragma: no cover
             self.fig.axes[0].set_title("Bad < > / names")
         # save file
         plot.storefig(self.fig, self.folder, self.plot_type, self.show_warn)
         # restore filename
         self.fig.canvas.manager.set_window_title(self.title)
-        if not _HAVE_DISPLAY:
+        if not _HAVE_DISPLAY:  # pragma: no cover
             self.fig.axes[0].set_title(self.title)
         # assert that file exists
         if platform.system() == "Windows":
-            self.this_filename = self.folder.joinpath("Bad _ _ _ names" + "." + self.plot_type)
+            self.this_filename = self.folder.joinpath("Bad _ _ _ names" + "." + self.plot_type)  # pragma: no cover unix
         else:
-            self.this_filename = self.folder.joinpath("Bad < > _ names" + "." + self.plot_type)
+            self.this_filename = self.folder.joinpath("Bad < > _ names" + "." + self.plot_type)  # pragma: no cover windows
         self.assertTrue(self.this_filename.is_file())
 
     def tearDown(self) -> None:
@@ -999,8 +999,7 @@ class Test_plotting_plot_phases(unittest.TestCase):
         plot.plot_phases(self.ax, self.times, group_all=True, labels=self.labels[0], colormap="red")
 
     def tearDown(self) -> None:
-        if self.fig:
-            plt.close(self.fig)
+        plt.close(self.fig)
 
 
 #%% plotting.plot_classification
@@ -1190,7 +1189,7 @@ class Test_fig_ax_factory(unittest.TestCase):
         self.fig_ax = plot.fig_ax_factory(num_axes=1, suptitle="Test Title")  # type: ignore[call-overload]
         self.assertEqual(len(self.fig_ax), 1)
         this_fig = self.fig_ax[0][0]  # type: ignore[index]
-        if _HAVE_DISPLAY:
+        if _HAVE_DISPLAY:  # pragma: no cover
             self.assertEqual(this_fig.canvas.manager.get_window_title(), "Test Title")
         self.assertEqual(this_fig._suptitle.get_text(), "Test Title")
 

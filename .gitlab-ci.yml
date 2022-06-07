@@ -15,15 +15,16 @@ variables:
 cache:
   paths:
   - .cache/pip
-  - static/
-  - everything/
-  - core_only/
+  - static
+  - everything
+  - core_only
 
 stages:
   - Environments
   - Static Analysis
   - Test
   - Coverage
+  - Deploy
 
 make_envs:
   stage: Environments
@@ -34,23 +35,23 @@ make_envs:
   - python --version
   - pip install --upgrade pip
   - pip install virtualenv
+  - virtualenv core_only
+  - source core_only/bin/activate
+  - python -m pip install --upgrade pip
+  - python -m pip install wheel
+  - python -m pip install coverage[toml] pytest
+  - deactivate
   - virtualenv static
   - source static/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5-stubs PySide6 pytest qtpy requests types-requests scipy tblib urllib3
+  - python -m pip install coverage[toml] flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5-stubs PySide6 pytest qtpy requests types-requests scipy tblib urllib3
   - deactivate
   - virtualenv everything
   - source everything/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PySide6 pytest qtpy requests scipy tblib urllib3
-  - deactivate
-  - virtualenv core_only
-  - source core_only/bin/activate
-  - python -m pip install --upgrade pip
-  - python -m pip install wheel
-  - python -m pip install coverage pytest
+  - python -m pip install coverage[toml] datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PySide6 pytest qtpy requests scipy tblib urllib3
   - deactivate
 
 mypy:
@@ -125,13 +126,21 @@ command_test:
   script:
   - pwd
   - ls -l
+  - export COVERAGE_FILE=$DCS_TESTS_DIR/.coverage.imports
+  - export COVERAGE_RCFILE=$CI_PROJECT_DIR/pyproject.toml
+  - export PYTHONPATH=$CI_PROJECT_DIR:$PYTHONPATH
   - source core_only/bin/activate
-  - export COVERAGE_FILE=$DCS_TESTS_DIR/.coverage.commands
-  - export PYTHONPATH=$DCS_TESTS_DIR/../..:$PYTHONPATH
   - coverage run $DCS_TESTS_DIR/test_commands_help.py
+  - deactivate
+  - source static/bin/activate
+  - coverage run --append $DCS_TESTS_DIR/test_version.py
+  - deactivate
+  - source everything/bin/activate
+  - coverage run --append $DCS_TESTS_DIR/test_version.py
 
 basic_test:
   stage: Test
+  needs: ["make_envs"]
   script:
   - pwd
   - ls -l
@@ -149,21 +158,42 @@ doc_test:
 
 coverage_report:
   stage: Coverage
-  needs: ["unit_test", "core_test", "no_numba_test", "command_test"]
+  needs: ["unit_test", "core_test", "no_numba_test", "import_test"]
+  dependencies: ["unit_test", "core_test", "no_numba_test", "import_test"]
   artifacts:
     paths:
     - $DCS_TESTS_DIR/coverage_html_report/*
     expire_in: 1 week
     reports:
       cobertura: $DCS_TESTS_DIR/coverage_html_report/coverage.xml
+    # For GitLab v15.0 (available in 14.10, but not 14.9)
+    #  coverage_report:
+    #    coverage_format: cobertura
+    #    path: $DCS_TESTS_DIR/coverage_html_report/coverage.xml
   coverage: '/TOTAL.*\s([.\d]+)%/'
   script:
   - source static/bin/activate
   - cd $DCS_TESTS_DIR
   - pwd
-  - ls -l
+  - ls -la
   - export COVERAGE_FILE=.coverage
   - coverage --version
-  - coverage combine
-  - coverage html
-  - coverage xml
+  - coverage combine --keep
+  - coverage html --rcfile $CI_PROJECT_DIR/pyproject.toml
+  - coverage xml --rcfile $CI_PROJECT_DIR/pyproject.toml
+
+build_code:
+  stage: Deploy
+  needs: ["unit_test", "core_test", "no_numba_test", "import_test"]
+  only:
+  - tags
+  except:
+  - branches
+  before_script:
+  - pip install poetry
+  script:
+  - poetry --version
+  - poetry build
+  - poetry config repositories.gitlab "https://gitlab.us.lmco.com/api/v4/projects/$CI_PROJECT_ID/packages/pypi"
+  - poetry config http-basic.gitlab gitlab-ci-token "$CI_JOB_TOKEN"
+  - poetry publish --repository gitlab

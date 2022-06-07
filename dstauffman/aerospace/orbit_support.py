@@ -221,11 +221,11 @@ def geo_loc_2_ijk(geo_loc, time_jd):
     >>> from dstauffman.aerospace import geo_loc_2_ijk
     >>> import numpy as np
     >>> R = geo_loc_2_ijk(np.array([0.65, -2.13, 4.]), 2454587)
-    >>> with np.printoptions(precision=8):
+    >>> with np.printoptions(precision=5):
     ...     print(R) # doctest: +NORMALIZE_WHITESPACE
-    [[  641795.75242525]
-     [-5043096.63066764]
-     [ 3838833.11215428]]
+    [[  641795.75243]
+     [-5043096.63067]
+     [ 3838833.11215]]
 
     """
     # pull out data from geo_loc

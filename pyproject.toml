@@ -80,9 +80,52 @@ spyder = ["spyder-kernels"]
 numeric = ["h5py", "matplotlib", "numpy", "pandas", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
 shader = ["datashader", "h5py", "matplotlib", "numba", "numpy", "pandas", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
 
+[tool.poetry.scripts]
+lms = "dstauffman.__main__:main"
+
 [tool.black]
 line-length = 128
 target_version = ["py39"]
+
+[tool.coverage.run]
+branch = true
+omit = ["*/site-packages/*", "*/.eggs/*"]
+disable_warnings = ["couldnt-parse"]
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+    # Create platform independent pragmas (potentially have the test runner modify this)
+    "pragma: no cover windows",
+    "pragma: no cover unix",
+
+    # Don't complain about missing debug-only code:
+    "def __repr__",
+    "if self\\.debug",
+    "def _main",
+
+    # Don't complain if tests don't hit defensive assertion code:
+    "raise AssertionError",
+    "raise NotImplementedError",
+
+    # Don't complain if non-runnable code isn't run:
+    "if 0:",
+    "if False:",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:",
+
+    # Don't complain about typing overloads
+    "@overload"
+]
+ignore_errors = true
+
+[html]
+directory = "coverage_html_report"
+
+[xml]
+output = "coverage_html_report/coverage.xml"
 
 [tool.isort]
 py_version = 39

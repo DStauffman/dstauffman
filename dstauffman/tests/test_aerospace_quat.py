@@ -35,10 +35,11 @@ class Test_aerospace_suppress_checks(unittest.TestCase):
     Tests the suppress_quat_checks and unsupress_quat_checks functions with the following cases:
         Suppress and Unsuppress
     """
+    orig_flag: bool
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.orig_flag = space.quat._USE_ASSERTIONS  # type: ignore[attr-defined]
+        cls.orig_flag = space.quat._USE_ASSERTIONS
 
     def test_suppress_and_unsupress(self) -> None:
         space.suppress_quat_checks()
@@ -46,11 +47,11 @@ class Test_aerospace_suppress_checks(unittest.TestCase):
         space.unsuppress_quat_checks()
         self.assertTrue(space.quat._USE_ASSERTIONS)
 
-    def tearDown(self) -> None:
-        if self.orig_flag:  # type: ignore[attr-defined]
-            space.unsuppress_quat_checks()  # pragma: no cover
+    def tearDown(self) -> None:  # pragma: no cover
+        if self.orig_flag:
+            space.unsuppress_quat_checks()
         else:
-            space.suppress_quat_checks()  # pragma: no cover
+            space.suppress_quat_checks()
 
 
 #%% aerospace.quat_assertions

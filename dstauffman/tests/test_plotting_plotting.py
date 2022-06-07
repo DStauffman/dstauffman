@@ -141,10 +141,11 @@ class Test_plotting_Plotter(unittest.TestCase):
     Tests the plotting.Plotter class with the following cases:
         Suppress and Unsuppress
     """
+    orig_flag: bool
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.orig_flag = plot.plotting._Plotter  # type: ignore[attr-defined]
+        cls.orig_flag = plot.plotting._Plotter
 
     def test_suppress_and_unsupress(self) -> None:
         plot.suppress_plots()
@@ -152,8 +153,8 @@ class Test_plotting_Plotter(unittest.TestCase):
         plot.unsuppress_plots()
         self.assertTrue(plot.plotting._Plotter)
 
-    def tearDown(self) -> None:
-        if self.orig_flag:  # type: ignore[attr-defined]
+    def tearDown(self) -> None:  # pragma: no cover
+        if self.orig_flag:
             plot.unsuppress_plots()
         else:
             plot.suppress_plots()

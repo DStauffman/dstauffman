@@ -20,7 +20,7 @@ import unittest
 from slog import ReturnCodes
 
 from dstauffman.constants import HAVE_COVERAGE, HAVE_PYTEST
-from dstauffman.paths import get_tests_dir, list_python_files
+from dstauffman.paths import get_root_dir, get_tests_dir, list_python_files
 from dstauffman.utils import line_wrap, read_text_file, write_text_file
 from dstauffman.utils_log import setup_dir
 
@@ -208,7 +208,7 @@ def run_coverage(folder: Path, *, report: bool = True, cov_file: Path = None) ->
     # Get information on the test folder
     test_folder = get_tests_dir()
     data_file = test_folder / ".coverage" if cov_file is None else Path(cov_file)
-    config_file = test_folder / ".coveragerc"
+    config_file = get_root_dir().parent / "pyproject.toml"
     cov_folder = test_folder / "coverage_html_report"
 
     # Instantiate the coverage tool and start tracking

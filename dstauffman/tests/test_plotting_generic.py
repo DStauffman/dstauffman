@@ -94,6 +94,10 @@ class Test_plotting_make_time_plot(unittest.TestCase):
     def test_scalars(self) -> None:
         self.fig = plot.make_time_plot("", 0, 0)
 
+    def test_bad_description(self) -> None:
+        with self.assertRaises(AssertionError):
+            plot.make_time_plot(None, 0, 0)
+
     def test_0d(self) -> None:
         self.fig = plot.make_time_plot("", np.array(5), np.array(10.0))
 
@@ -240,6 +244,10 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
             data_as_rows=self.data_as_rows,
             label_vert_lines=self.label_vert_lines,
         )
+
+    def test_bad_data(self) -> None:
+        with self.assertRaises(AssertionError):
+            plot.make_error_bar_plot(None, self.time, self.data, self.mins, self.maxs)
 
     def tearDown(self) -> None:
         if self.fig:
@@ -673,6 +681,10 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
             LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', "diff", ""
         )
 
+    def test_bad_inputs(self) -> None:
+        with self.assertRaises(AssertionError):
+            plot.make_difference_plot(None, None, None, None, None)
+
     def tearDown(self) -> None:
         if self.figs:
             for this_fig in self.figs:
@@ -755,6 +767,10 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
     def test_minimal(self) -> None:
         self.figs = plot.make_categories_plot(self.description, self.time, self.data, self.cats)
 
+    def test_bad_inputs(self) -> None:
+        with self.assertRaises(AssertionError):
+            plot.make_categories_plot(None, self.time, self.data, self.cats)
+
     @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader_cats(self) -> None:
         time = np.arange(10000.0)
@@ -797,6 +813,10 @@ class Test_plotting_make_connected_plots(unittest.TestCase):
 
     def test_center_origin(self) -> None:
         self.fig = plot.make_connected_sets(self.description, self.points, self.innovs, center_origin=True)
+
+    def test_bad_inputs(self) -> None:
+        with self.assertRaises(ValueError):
+            plot.make_connected_sets(self.description, self.points, self.innovs, color_by="bad_option")
 
     def tearDown(self) -> None:
         if self.fig:

@@ -16,14 +16,14 @@ SET PYTHONPATH=%tests_home%\..\..;%PYTHONPATH%
 REM Run the coverage tool and generate the report
 REM TODO: this first option doesn't collect the statistics correctly
 REM call coverage run -m dstauffman tests
-call coverage run %tests_home%\run_all_tests.py
-call coverage html
+call coverage run %tests_home%\run_all_tests.py  --rcfile %tests_home%\..\..\pyproject.toml
+call coverage html --rcfile %tests_home%\..\..\pyproject.toml
 
 REM Set the path back to orignals
 SET PYTHONPATH=%PYHONPATH_ORIG%
 
 REM Open the report
-start coverage_html_report\index.html
+start %tests_home%\coverage_html_report\index.html
 
 echo Press any key to continue . . .
 pause >nul

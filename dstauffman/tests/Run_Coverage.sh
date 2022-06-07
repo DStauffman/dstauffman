@@ -8,11 +8,11 @@ PYTHONPATH_ORIG=$PYTHONPATH
 PYTHONPATH=$dir/../..:$PYTHONPATH
 # run the coverage tests
 #coverage run -m dstauffman tests
-coverage run $dir/run_all_tests.py
+coverage run $dir/run_all_tests.py --rcfile $dir/../../pyproject.toml
 # restore the paths
 PYTHONPATH=$PYTHONPATH_ORIG
 # generate the coverage report
-coverage html
+coverage html --rcfile $dir/../../pyproject.toml
 # open the report
 xdg-open ./coverage_html_report/index.html
 # pause execution so the user can see the results
