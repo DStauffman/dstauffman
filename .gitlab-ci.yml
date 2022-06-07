@@ -45,13 +45,13 @@ make_envs:
   - source static/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage[toml] flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5-stubs PySide6 pytest qtpy requests types-requests scipy tblib urllib3
+  - python -m pip install coverage[toml] flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5-stubs PySide6 pytest qtpy scipy tblib
   - deactivate
   - virtualenv everything
   - source everything/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage[toml] datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PySide6 pytest qtpy requests scipy tblib urllib3
+  - python -m pip install coverage[toml] datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PySide6 pytest qtpy scipy tblib
   - deactivate
 
 mypy:

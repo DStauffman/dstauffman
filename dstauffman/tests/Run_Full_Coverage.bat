@@ -11,6 +11,7 @@ IF #%tests_home1:~-1%# == #\# SET tests_home=%tests_home1:~0,-1%
 REM Run with only core Python
 CALL %envs_home%\core_only\Scripts\activate
 CALL dcs tests --coverage --cov_file %tests_home%\.coverage.core
+CALL dcs tests -l %tests_home%\..\..\..\slog --coverage --cov_file %tests_home%\.coverage.slog
 CALL deactivate
 
 REM Run without numba/datashader (as JIT can confuse things)
@@ -26,7 +27,7 @@ CALL deactivate
 REM Re-run some tests to measure root import statements
 SET COVERAGE_FILE=%tests_home%\.coverage.imports
 SET COVERAGE_RCFILE=%tests_home%\..\..\pyproject.toml
-SET PYTHONPATH=%tests_home%\..\..;%PYTHONPATH%
+SET PYTHONPATH=%tests_home%\..\..;%tests_home%\..\..\..\slog;%PYTHONPATH%
 CALL %envs_home%\static\Scripts\activate
 CALL coverage run %tests_home%\test_version.py
 CALL deactivate
