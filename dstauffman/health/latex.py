@@ -24,7 +24,7 @@ def make_preamble(
     *,
     use_mini: bool = False,
     short_cap: str = None,
-    numbered: bool = True
+    numbered: bool = True,
 ) -> List[str]:
     r"""
     Write the table header and preamble.

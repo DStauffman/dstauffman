@@ -138,7 +138,7 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclu
         if meta is not None:
             for (key, value) in meta.items():
                 grp.attrs[key] = value
-        types = (dict, DataFrame) if HAVE_PANDAS else (dict, )
+        types = (dict, DataFrame) if HAVE_PANDAS else (dict,)
         temp = vars(self) if not isinstance(self, types) else self
         for key in temp:
             if is_dunder(key):

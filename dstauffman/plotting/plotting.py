@@ -98,6 +98,8 @@ class Opts(Frozen):
                 Flag for whether to show the RMS in the legend
             .use_mean  : bool
                 Flag for using mean instead of RMS for legend calculations
+            .lab_vert  : bool
+                Flag for labeling the vertical lines in the legend when showing the RMS
             .show_zero : bool
                 Flag for whether to show Y=0 on the plot axis
             .quat_comp : bool
@@ -136,6 +138,7 @@ class Opts(Frozen):
         self.rms_xmax: _Date  =  inf
         self.show_rms: bool   = True
         self.use_mean: bool   = False
+        self.lab_vert: bool   = True
         self.show_zero: bool  = False
         self.quat_comp: bool  = True
         self.show_xtra: bool  = True
@@ -370,6 +373,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     single_lines = kwargs.pop("single_lines", this_opts.sing_line)
     colormap     = kwargs.pop("colormap", this_opts.colormap)
     use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    lab_vert     = kwargs.pop("label_vert_lines", this_opts.lab_vert)
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
@@ -389,6 +393,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
         single_lines=single_lines,
         colormap=colormap,
         use_mean=use_mean,
+        label_vert_lines=lab_vert,
         plot_zero=plot_zero,
         show_rms=show_rms,
         legend_loc=legend_loc,
@@ -692,6 +697,7 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     single_lines = kwargs.pop("single_lines", this_opts.sing_line)
     colormap     = kwargs.pop("colormap", this_opts.colormap)
     use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    lab_vert     = kwargs.pop("label_vert_lines", this_opts.lab_vert)
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
@@ -716,6 +722,7 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
         single_lines=single_lines,
         colormap=colormap,
         use_mean=use_mean,
+        label_vert_lines=lab_vert,
         plot_zero=plot_zero,
         show_rms=show_rms,
         legend_loc=legend_loc,

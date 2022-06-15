@@ -122,6 +122,7 @@ class Test_save_and_load_hdf5(unittest.TestCase):
     r"""
     Additionally tests the save and load HDF5 functions with a pandas DataFrame.
     """
+
     def setUp(self) -> None:
         self.filename = dcs.get_tests_dir() / "results_test_df_save.hdf5"
 
@@ -136,6 +137,7 @@ class Test_save_and_load_hdf5(unittest.TestCase):
 
     def tearDown(self) -> None:
         self.filename.unlink(missing_ok=True)
+
 
 #%% save_pickle - covered by SaveAndLoad
 #%% load_pickle - covered by SaveAndLoad
@@ -225,9 +227,9 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(lines1[1], " a   = [0 1 2 ... 7 8 9]")
         self.assertEqual(lines2[1], " a   = [0 1 2 3 4 5 6 7 8 9]")
         if dcs.IS_WINDOWS:
-            self.assertEqual(lines3[1], " a   = <ndarray int32 (10,)>")
+            self.assertEqual(lines3[1], " a   = <ndarray int32 (10,)>")  # pragma: noc unix
         else:
-            self.assertEqual(lines3[1], " a   = <ndarray int64 (10,)>")
+            self.assertEqual(lines3[1], " a   = <ndarray int64 (10,)>")  # pragma: noc windows
         self.assertEqual(lines3[2], " bb  = <class 'int'>")
         self.assertEqual(lines3[3], " ccc = <class 'int'>")
 
@@ -674,7 +676,7 @@ class Test_FixedDict(unittest.TestCase):
             self.assertIn(k, self.keys)
             if k == "key1":
                 self.assertEqual(v, 1)
-            elif k == "key2":
+            elif k == "key2":  # pragma: no branch
                 self.assertEqual(v, 2)
         self.assertEqual(c, 2)
 

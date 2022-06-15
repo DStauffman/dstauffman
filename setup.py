@@ -58,7 +58,7 @@ setup(
         "scipy",
         "tblib",
     ],
-    extra_require={"shading": ["datashader>=0.12"]},
+    extra_require={"shading": ["datashader>=0.13"]},
     python_requires=">=3.8",
     include_package_data=True,
     zip_safe=False,

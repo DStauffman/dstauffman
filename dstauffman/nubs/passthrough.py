@@ -23,14 +23,14 @@ if platform.python_implementation() == "CPython":
     except ModuleNotFoundError:
         HAVE_NUMBA = False
 else:
-    HAVE_NUMBA = False
+    HAVE_NUMBA = False  # pragma: no cover
 
 #%% Support Functions
 def _fake_decorator(func):
     r"""Fake decorator for when numba isn't installed."""
 
     @functools.wraps(func)
-    def wrapped_decorator(*args, **kwargs):
+    def wrapped_decorator(*args, **kwargs):  # pragma: no cover
         if len(args) == 1 and len(kwargs) == 0 and callable(args[0]):
             # must treat this differently if no arguments were passed
             return func(args[0])
@@ -59,10 +59,8 @@ if HAVE_NUMBA:
     # target for vectorized functions
     assert sys.version_info.major == 3, "Must be Python 3"
     assert sys.version_info.minor >= 8, "Must be Python v3.8 or higher"
-    if sys.version_info.minor > 8:
-        TARGET = "cpu"  # Note: no longer using "parallel" in Python v3.9+ as it breaks the vectorize error catching
-    else:
-        TARGET = "cpu"
+    # Note: no longer using "parallel" in Python v3.9+ as it breaks the vectorize error catching
+    TARGET = "cpu" if sys.version_info.minor > 8 else "cpu"
 else:
     # Support for when you don't have numba.  Note, some functions won't work as expected
     TARGET = ""

@@ -253,7 +253,7 @@ class Test_zero_divide(unittest.TestCase):
             out = nubs.zero_divide(vec, mag)
         except FloatingPointError:
             self.skipTest("Skipping due to numba vectorize optimization bug.")
-        np.testing.assert_array_equal(out, exp)
+        np.testing.assert_array_equal(out, exp)  # pragma: no cover
 
 
 #%% Unit test execution

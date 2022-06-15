@@ -18,6 +18,7 @@ cache:
   - static
   - everything
   - core_only
+  - poetry
 
 stages:
   - Environments
@@ -52,6 +53,12 @@ make_envs:
   - python -m pip install --upgrade pip
   - python -m pip install wheel
   - python -m pip install coverage[toml] datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PySide6 pytest qtpy scipy tblib
+  - deactivate
+  - virtualenv poetry
+  - source poetry/bin/activate
+  - python -m pip install --upgrade pip
+  - python -m pip install wheel
+  - python -m pip install poetry
   - deactivate
 
 mypy:
@@ -189,11 +196,9 @@ build_code:
   - tags
   except:
   - branches
-  before_script:
-  - pip install poetry
   script:
+  - source poetry/bin/activate
   - poetry --version
   - poetry build
-  - poetry config repositories.gitlab "https://gitlab.us.lmco.com/api/v4/projects/$CI_PROJECT_ID/packages/pypi"
-  - poetry config http-basic.gitlab gitlab-ci-token "$CI_JOB_TOKEN"
-  - poetry publish --repository gitlab
+  - poetry config repositories.github "https://github.com/api/v4/projects/$CI_PROJECT_ID/packages/pypi"
+  - poetry publish --repository github --username "$POETRY_HTTP_BASIC_GITHUB_USERNAME" --password "$POETRY_HTTP_BASIC_GITHUB_PASSWORD"

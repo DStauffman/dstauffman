@@ -34,7 +34,7 @@ class SimParams(Frozen):
         self.frequency: float = frequency
         self.phase: float     = phase  # fmt: skip
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: Any) -> bool:  # pragma: no cover
         if type(other) != type(self):
             return False
         for key in vars(self):
@@ -67,7 +67,7 @@ def sim_model(sim_params):
 # Functions - truth
 def truth(time, magnitude=5.0, frequency=10.0, phase=90.0):
     r"""Simple example truth data."""
-    return magnitude * np.sin(2 * np.pi * frequency * time / 1000 + phase * np.pi / 180)
+    return magnitude * np.sin(2 * np.pi * frequency * time / 1000 + phase * np.pi / 180)  # pragma: no cover
 
 
 # Functions - cost_wrapper
@@ -91,7 +91,7 @@ def get_parameter(sim_params, *, names):
     for (ix, name) in enumerate(names):
         if hasattr(sim_params, name):
             values[ix] = getattr(sim_params, name)
-        else:
+        else:  # pragma: no cover
             raise ValueError('Bad parameter name: "{}".'.format(name))
     return values
 
@@ -104,7 +104,7 @@ def set_parameter(sim_params, *, names, values):
     for (ix, name) in enumerate(names):
         if hasattr(sim_params, name):
             setattr(sim_params, name, values[ix])
-        else:
+        else:  # pragma: no cover
             raise ValueError('Bad parameter name: "{}".'.format(name))
 
 

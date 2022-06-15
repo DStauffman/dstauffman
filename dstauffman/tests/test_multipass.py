@@ -19,7 +19,7 @@ def _model_wrapper(x, y):
     if x is None:
         raise ValueError("Bad value for x")
     if y is None:
-        raise RuntimeError("Bad value for y")
+        raise RuntimeError("Bad value for y")  # pragma: no cover
     return x + np.sin(x) + np.cos(y * 2)
 
 

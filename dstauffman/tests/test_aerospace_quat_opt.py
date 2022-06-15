@@ -124,7 +124,7 @@ class Test_aerospace_quat_interp_single(unittest.TestCase):
         ix = np.array([1, 2])
         qout = space.quat_interp_single(self.time[ix], self.quat[:, ix], self.ti[3])
         if qout[0] > 0:
-            np.testing.assert_array_almost_equal(qout, self.qout[:, 3])
+            np.testing.assert_array_almost_equal(qout, self.qout[:, 3])  # pragma: no cover
         else:
             np.testing.assert_array_almost_equal(qout, -self.qout[:, 3])
 
@@ -308,7 +308,7 @@ class Test_aerospace_quat_times_vector_single(unittest.TestCase):
 
     def test_integers(self) -> None:
         # Expected to fail until numba supports @ for matrix multiplication for integers.
-        for i in range(2):
+        for i in range(2):  # pragma: no cover
             vec = space.quat_times_vector_single(self.quat[:, i], self.vec[:, i])
             np.testing.assert_array_almost_equal(vec, self.out[:, i])
 

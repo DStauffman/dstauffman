@@ -420,11 +420,12 @@ class Test_plotting_plot_states(unittest.TestCase):
         Comparison with mismatched states
         Error output
     """
+
     def setUp(self) -> None:
-        self.gnd1 = Kf(name='GARSE', num_points=30, num_states=9, active_states=np.arange(9))
-        self.gnd2 = Kf(name='GBARS', num_points=60, num_states=8, active_states=np.array([0, 1, 2, 3, 5, 6, 7, 8]))
-        self.gnd1.time[:] = np.arange(30.)  # type: ignore[index]
-        self.gnd2.time[:] = np.arange(60.) - 10.  # type: ignore[index]
+        self.gnd1 = Kf(name="GARSE", num_points=30, num_states=9, active_states=np.arange(9))
+        self.gnd2 = Kf(name="GBARS", num_points=60, num_states=8, active_states=np.array([0, 1, 2, 3, 5, 6, 7, 8]))
+        self.gnd1.time[:] = np.arange(30.0)  # type: ignore[index]
+        self.gnd2.time[:] = np.arange(60.0) - 10.0  # type: ignore[index]
         self.gnd1.state.fill(1.0)  # type: ignore[union-attr]
         self.gnd2.state.fill(0.99)  # type: ignore[union-attr]
         self.opts = plot.Opts()
@@ -449,7 +450,7 @@ class Test_plotting_plot_states(unittest.TestCase):
         mock_logger.log.assert_any_call(LogLevel.L4, "Plotting State Estimates plots ...")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
         self.figs += figs
-        self.assertEqual(err.keys(), {'state'})
+        self.assertEqual(err.keys(), {"state"})
 
     def test_groups(self) -> None:
         groups = [(0, 1, 2), (3, 4, 5), (6, 7, 8)]

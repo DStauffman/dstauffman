@@ -8,6 +8,9 @@ Notes
 
 #%% Imports
 import unittest
+from unittest.mock import patch
+
+from slog import LogLevel
 
 from dstauffman import HAVE_NUMPY
 import dstauffman.aerospace as space
@@ -49,7 +52,63 @@ class Test_aerospace__any(unittest.TestCase):
 
 
 #%% anomaly_eccentric_2_mean
-pass  # TODO: write this
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_anomaly_eccentric_2_mean(unittest.TestCase):
+    r"""
+    Tests the aerospace.anomaly_eccentric_2_mean function with the following cases:
+        Nominal
+        Vectorized (x3)
+    """
+
+    def setUp(self) -> None:
+        self.E1 = 0.0
+        self.E2 = np.pi / 4
+        self.e1 = 0.0
+        self.e2 = 0.5
+        self.exp1 = 0.0
+        self.exp2 = 0.4318447728041745  # TODO: come up with independently
+
+    def test_nominal(self) -> None:
+        M = space.anomaly_eccentric_2_mean(self.E2, self.e2)
+        assert isinstance(M, float)
+        self.assertAlmostEqual(M, self.exp2, 14)
+
+    def test_vector1(self) -> None:
+        E = np.array([self.E1, self.E2])
+        e = self.e2
+        M = space.anomaly_eccentric_2_mean(E, e)
+        assert isinstance(M, np.ndarray)
+        self.assertEqual(M.shape, (2,))
+        self.assertAlmostEqual(M[1], self.exp2, 14)
+
+    def test_vector2(self) -> None:
+        E = self.E2
+        e = np.array([self.e1, self.e2])
+        M = space.anomaly_eccentric_2_mean(E, e)
+        assert isinstance(M, np.ndarray)
+        self.assertEqual(M.shape, (2,))
+        self.assertAlmostEqual(M[1], self.exp2, 14)
+
+    def test_vector3(self) -> None:
+        E = np.array([self.E1, self.E2])
+        e = np.array([self.e1, self.e2])
+        M = space.anomaly_eccentric_2_mean(E, e)
+        assert isinstance(M, np.ndarray)
+        self.assertEqual(M.shape, (2,))
+        self.assertEqual(M[0], self.exp1)
+        self.assertAlmostEqual(M[1], self.exp2, 14)
+
+    def test_hyperbolic(self) -> None:
+        with self.assertRaises(ValueError):
+            space.anomaly_eccentric_2_mean(self.E2, 1.1)
+
+    def test_range_loop(self) -> None:
+        with patch("dstauffman.aerospace.orbit_conv.logger") as mock_logger:
+            M = space.anomaly_eccentric_2_mean(self.E2 + 2 * np.pi, self.e2)
+        assert isinstance(M, float)
+        mock_logger.log.assert_called_with(LogLevel.L6, "The eccentric anomaly was outside the range of 0 to 2*pi")
+        self.assertAlmostEqual(M, self.exp2, 14)
+
 
 #%% aerospace.anomaly_eccentric_2_true
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
@@ -97,6 +156,17 @@ class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
         self.assertEqual(nu.shape, (2,))
         self.assertEqual(nu[0], self.exp1)
         self.assertAlmostEqual(nu[1], self.exp2, 14)
+
+    def test_hyperbolic(self) -> None:
+        with self.assertRaises(ValueError):
+            space.anomaly_eccentric_2_true(self.E2, 1.1)
+
+    def test_range_loop(self) -> None:
+        with patch("dstauffman.aerospace.orbit_conv.logger") as mock_logger:
+            nu = space.anomaly_eccentric_2_true(self.E2 + 2 * np.pi, self.e2)
+        assert isinstance(nu, float)
+        mock_logger.log.assert_called_with(LogLevel.L6, "The eccentric anomaly was outside the range of 0 to 2*pi")
+        self.assertAlmostEqual(nu, self.exp2, 14)
 
 
 #%% aerospace.anomaly_hyperbolic_2_mean

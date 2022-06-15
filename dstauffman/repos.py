@@ -624,7 +624,7 @@ def write_unit_test_templates(
             temp_name = func_name.replace(".", "_")
             text += [f"#%% {func_name}", f"class Test_{temp_name}(unittest.TestCase):", '    r"""']
             text += [f"    Tests the {func_name} function with the following cases:", "        TBD"]
-            text += ['    """', "    pass # TODO: write this", ""]
+            text += ['    """', "    pass  # TODO: write this", ""]
 
         text += ["#%% Unit test execution", 'if __name__ == "__main__":', "    unittest.main(exit=False)", ""]
         new_file = Path.joinpath(output, "test_" + "_".join(names))

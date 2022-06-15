@@ -66,7 +66,7 @@ class Test__nan_equal(unittest.TestCase):
         self.assertTrue(dcs.utils._nan_equal(1, 1.0, tolerance=1e-6))
         self.assertTrue(dcs.utils._nan_equal(1.0, 1.0, tolerance=1e-6))
         self.assertTrue(dcs.utils._nan_equal([1.0, 2, nan], [1, 2, nan], tolerance=1e-6))
-        if dcs.HAVE_NUMPY:
+        if dcs.HAVE_NUMPY:  # pragma: no branch
             self.assertTrue(dcs.utils._nan_equal((1.0, 2, nan), [1, 2, nan], tolerance=1e-6))
         self.assertTrue(dcs.utils._nan_equal({1.0, 2, nan}, {1, 2, nan}, tolerance=1e-6))
         self.assertTrue(dcs.utils._nan_equal("text", "text", tolerance=1e-6))
@@ -573,10 +573,10 @@ class Test_compare_two_classes(unittest.TestCase):
 
     def test_callables(self) -> None:
         def f(x):
-            return x
+            return x  # pragma: no cover
 
         def g(x):
-            return x
+            return x  # pragma: no cover
 
         self.c3.e = f  # type: ignore[attr-defined]
         self.c4.e = g  # type: ignore[attr-defined]
@@ -592,10 +592,10 @@ class Test_compare_two_classes(unittest.TestCase):
 
     def test_ignore_callables(self) -> None:
         def f(x):
-            return x
+            return x  # pragma: no cover
 
         def g(x):
-            return x
+            return x  # pragma: no cover
 
         self.c3.e = f  # type: ignore[attr-defined]
         self.c4.e = g  # type: ignore[attr-defined]
@@ -796,7 +796,7 @@ class Test_write_text_file(unittest.TestCase):
 
     def test_bad_writing(self) -> None:
         if platform.system() != "Windows":
-            return
+            return  # pragma: noc windows
         with dcs.capture_output() as out:
             with self.assertRaises((OSError, IOError, FileNotFoundError)):
                 dcs.write_text_file(self.badpath, self.contents)
@@ -845,7 +845,7 @@ class Test_capture_output(unittest.TestCase):
     def test_bad_value(self) -> None:
         with self.assertRaises(RuntimeError):
             with dcs.capture_output("bad") as (out, err):
-                print("Lost values")
+                print("Lost values")  # pragma: no cover
 
 
 #%% magnitude

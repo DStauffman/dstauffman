@@ -105,7 +105,7 @@ class Test_setup_dir(unittest.TestCase):
 
         try:
             _clean(self)
-        except {PermissionError, OSError}:  # type: ignore[misc]
+        except {PermissionError, OSError}:  # type: ignore[misc]  # pragma: no cover
             # pause to let Windows catch up and close files
             time.sleep(1)
             # retry

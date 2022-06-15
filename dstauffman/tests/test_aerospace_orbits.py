@@ -325,7 +325,7 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
         # np.testing.assert_array_equal(v, v1)
 
     @unittest.skip("Skip this slow test. Run for extra credit.")
-    def test_round_trip(self) -> None:
+    def test_round_trip(self) -> None:  # pragma: no cover
         oe = space.Elements()
         for a in [0.1, 0.9, 1.0, 2.0, 10.0]:
             for e in [0.01, 0.1, 0.5, 0.999]:  # 1.0, 2.0, 5.0, 1000., np.inf

@@ -508,7 +508,7 @@ def _parfor_function_wrapper(opti_opts, msg, model_args):
     Examples
     --------
     >>> from dstauffman.estimation.batch import _parfor_function_wrapper, OptiOpts
-    >>> pass # TODO: write this
+    >>> pass  # TODO: write this
 
     """
     try:

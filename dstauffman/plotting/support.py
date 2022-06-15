@@ -1561,7 +1561,7 @@ def plot_phases(ax, times, colormap="tab10", labels=None, *, group_all=False):
 #%% Functions - get_classification
 def get_classification(classify: str) -> Tuple[str, str]:
     r"""
-    Gets the classification and any caveats from the text in OPTS.
+    Gets the classification and any caveats from the text in the classify string.
 
     Parameters
     ----------

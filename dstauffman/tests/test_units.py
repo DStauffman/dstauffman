@@ -271,6 +271,15 @@ class Test_get_unit_conversion(unittest.TestCase):
         self.assertEqual(unit, "nrad")
         self.assertEqual(mult, 1e9)
 
+    def test_percentage(self) -> None:
+        (unit, mult) = dcs.get_unit_conversion("percentage")
+        self.assertEqual(unit, "%")
+        self.assertEqual(mult, 100)
+
+    def test_empty(self) -> None:
+        with self.assertRaises(ValueError):
+            dcs.get_unit_conversion("giga", "")
+
 
 #%% Unit test execution
 if __name__ == "__main__":

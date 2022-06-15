@@ -223,6 +223,11 @@ class Test_convert_date(unittest.TestCase):
         out = dcs.convert_date(self.matplotlib, "sec", self.date_zero, old_form="matplotlib")
         self.assertAlmostEqual(out, self.seconds, 6)
 
+    def test_mpl_missing_error(self) -> None:
+        if not dcs.HAVE_MPL:
+            with self.assertRaises(RuntimeError):
+                dcs.convert_date(1000.0, "datetime", old_form="matplotlib")
+
     def test_infs_and_nans(self) -> None:
         out = dcs.convert_date(inf, "datetime")
         self.assertIsNone(out)
@@ -317,9 +322,11 @@ class Test_convert_date(unittest.TestCase):
         dates = [self.datetime, self.date]
         out = dcs.convert_date(dates, "numpy", old_form="datetime")
         np.testing.assert_array_equal(out, np.array([self.numpy, self.np2]))
-        if dcs.HAVE_MPL:
+        if dcs.HAVE_MPL:  # pragma: no branch
             out = dcs.convert_date(dates, "matplotlib", old_form="datetime")
             np.testing.assert_array_equal(out, np.array([self.matplotlib, self.mpl2]))
+        out = dcs.convert_date([self.seconds, self.seconds], "numpy", self.date_zero, old_form="sec")
+        np.testing.assert_array_equal(out, np.array([self.numpy, self.numpy]))
 
     @unittest.skipIf(not dcs.HAVE_MPL, "Skipping due to missing matplotlib dependency.")
     def test_seconds_vectors(self) -> None:
@@ -346,6 +353,10 @@ class Test_convert_date(unittest.TestCase):
         np.testing.assert_array_equal(out, exp)
         out = dcs.convert_date(times2, "numpy", self.datetime)
         np.testing.assert_array_equal(out, exp)
+
+    def test_future_forms(self) -> None:
+        with self.assertRaises(AssertionError):
+            dcs.convert_date(self.seconds / dcs.ONE_MINUTE, "min", self.date_zero, old_form="sec")
 
 
 #%% convert_time_units

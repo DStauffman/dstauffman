@@ -407,9 +407,9 @@ class Test_plotting_resolve_name(unittest.TestCase):
     def test_nominal(self) -> None:
         new_name = plot.resolve_name(self.bad_name)
         if IS_WINDOWS:
-            self.assertEqual(new_name, self.exp_win)  # pragma: no cover unix
+            self.assertEqual(new_name, self.exp_win)  # pragma: noc unix
         else:
-            self.assertEqual(new_name, self.exp_unix)  # pragma: no cover windows
+            self.assertEqual(new_name, self.exp_unix)  # pragma: noc windows
 
     def test_nominal_win(self) -> None:
         new_name = plot.resolve_name(self.bad_name, force_win=True)
@@ -528,9 +528,9 @@ class Test_plotting_storefig(unittest.TestCase):
             self.fig.axes[0].set_title(self.title)
         # assert that file exists
         if platform.system() == "Windows":
-            self.this_filename = self.folder.joinpath("Bad _ _ _ names" + "." + self.plot_type)  # pragma: no cover unix
+            self.this_filename = self.folder.joinpath("Bad _ _ _ names" + "." + self.plot_type)  # pragma: noc unix
         else:
-            self.this_filename = self.folder.joinpath("Bad < > _ names" + "." + self.plot_type)  # pragma: no cover windows
+            self.this_filename = self.folder.joinpath("Bad < > _ names" + "." + self.plot_type)  # pragma: noc windows
         self.assertTrue(self.this_filename.is_file())
 
     def tearDown(self) -> None:

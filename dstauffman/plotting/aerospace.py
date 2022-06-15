@@ -285,6 +285,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     plot_comps   = kwargs.pop("plot_components", this_opts.quat_comp)
     single_lines = kwargs.pop("single_lines", this_opts.sing_line)
     use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    lab_vert     = kwargs.pop("label_vert_lines", this_opts.lab_vert)
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
@@ -326,6 +327,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             plot_components=plot_comps,
             single_lines=single_lines,
             use_mean=use_mean,
+            label_vert_lines=lab_vert,
             plot_zero=plot_zero,
             show_rms=show_rms,
             legend_loc=legend_loc,
@@ -446,6 +448,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     sub_plots    = kwargs.pop("make_subplots", this_opts.sub_plots)
     single_lines = kwargs.pop("single_lines", this_opts.sing_line)
     use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    lab_vert     = kwargs.pop("label_vert_lines", this_opts.lab_vert)
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
@@ -491,6 +494,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             make_subplots=sub_plots,
             colormap=colormap,
             use_mean=use_mean,
+            label_vert_lines=lab_vert,
             plot_zero=plot_zero,
             single_lines=single_lines,
             show_rms=show_rms,
@@ -678,6 +682,7 @@ def plot_innovations(
     sub_plots    = kwargs.pop("make_subplots", this_opts.sub_plots)
     single_lines = kwargs.pop("single_lines", this_opts.sing_line)
     use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    lab_vert     = kwargs.pop("label_vert_lines", this_opts.lab_vert)
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
@@ -735,6 +740,7 @@ def plot_innovations(
             disp_xmax=disp_xmax,
             make_subplots=sub_plots,
             use_mean=use_mean,
+            label_vert_lines=lab_vert,
             plot_zero=plot_zero,
             show_rms=show_rms,
             single_lines=single_lines,
@@ -769,6 +775,7 @@ def plot_innovations(
                 disp_xmax=disp_xmax,
                 make_subplots=sub_plots,
                 use_mean=use_mean,
+                label_vert_lines=lab_vert,
                 plot_zero=plot_zero,
                 show_rms=show_rms,
                 single_lines=single_lines,
@@ -796,6 +803,7 @@ def plot_innovations(
                 disp_xmax=disp_xmax,
                 make_subplots=sub_plots,
                 use_mean=use_mean,
+                label_vert_lines=lab_vert,
                 plot_zero=plot_zero,
                 show_rms=show_rms,
                 single_lines=single_lines,
@@ -830,6 +838,7 @@ def plot_innovations(
                     disp_xmax=disp_xmax,
                     make_subplots=sub_plots,
                     use_mean=use_mean,
+                    label_vert_lines=lab_vert,
                     plot_zero=plot_zero,
                     show_rms=show_rms,
                     single_lines=single_lines,
@@ -864,6 +873,7 @@ def plot_innovations(
                     disp_xmax=disp_xmax,
                     make_subplots=sub_plots,
                     use_mean=use_mean,
+                    label_vert_lines=lab_vert,
                     plot_zero=plot_zero,
                     show_rms=show_rms,
                     single_lines=single_lines,
@@ -1168,6 +1178,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     sub_plots    = kwargs.pop("make_subplots", this_opts.sub_plots)
     single_lines = kwargs.pop("single_lines", this_opts.sing_line)
     use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    lab_vert     = kwargs.pop("label_vert_lines", this_opts.lab_vert)
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
@@ -1229,6 +1240,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
                     disp_xmax=disp_xmax,
                     make_subplots=sub_plots,
                     use_mean=use_mean,
+                    label_vert_lines=lab_vert,
                     plot_zero=plot_zero,
                     show_rms=show_rms,
                     single_lines=single_lines,
