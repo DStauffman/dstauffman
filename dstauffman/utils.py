@@ -44,6 +44,7 @@ else:
     logical_not = lambda x: not x  # type: ignore[assignment]
 if HAVE_SCIPY:
     from scipy.interpolate import interp1d
+    from scipy.signal import sosfiltfilt, butter
 
 #%% Globals
 _ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked
@@ -123,12 +124,10 @@ def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:
                     if len(a) != len(b):
                         return False
                     return all(x == y or _is_nan(x) or _is_nan(y) for (x, y) in zip(a, b))
-                else:
-                    return False
-            else:
-                if hasattr(b, "__len__"):
-                    return False
-                return a == b or _is_nan(a) or _is_nan(b)
+                return False
+            if hasattr(b, "__len__"):
+                return False
+            return a == b or _is_nan(a) or _is_nan(b)
     except AssertionError:
         # if assertion fails, then they are not equal
         return False
@@ -480,8 +479,7 @@ def compare_two_classes(
                                 and is_same
                             )
                         continue
-                    else:
-                        continue  # pragma: no cover (actually covered, optimization issue)
+                    continue
                 else:
                     is_same = _not_true_print()
                     continue
@@ -621,7 +619,7 @@ def compare_two_dicts(
 
 
 #%% Functions - read_text_file
-def read_text_file(filename: Union[str, Path]) -> str:
+def read_text_file(filename: Union[str, Path], encoding: str = "utf-8") -> str:
     r"""
     Open and read a complete text file.
 
@@ -661,7 +659,7 @@ def read_text_file(filename: Union[str, Path]) -> str:
     """
     try:
         # open file for reading
-        with open(filename, "rt") as file:
+        with open(filename, "rt", encoding=encoding) as file:
             # read file
             text = file.read()
         # return results
@@ -673,7 +671,7 @@ def read_text_file(filename: Union[str, Path]) -> str:
 
 
 #%% Functions - write_text_file
-def write_text_file(filename: Union[str, Path], text: str) -> None:
+def write_text_file(filename: Union[str, Path], text: str, encoding: str = "utf-8") -> None:
     r"""
     Open and write the specified text to a file.
 
@@ -706,7 +704,7 @@ def write_text_file(filename: Union[str, Path], text: str) -> None:
     """
     try:
         # open file for writing
-        with open(filename, "wt") as file:
+        with open(filename, "wt", encoding=encoding) as file:
             # write file
             file.write(text)
     except:
@@ -752,8 +750,8 @@ def capture_output(mode: str = "out"):
 
     """
     # alias modes
-    capture_out = True if mode == "out" or mode == "all" else False
-    capture_err = True if mode == "err" or mode == "all" else False
+    capture_out = mode in {"out", "all"}
+    capture_err = mode in {"err", "all"}
     # create new string buffers
     new_out, new_err = StringIO(), StringIO()
     # alias the old string buffers for restoration afterwards
@@ -816,7 +814,7 @@ def magnitude(data: _Lists, axis: int = 0) -> Union[float, np.ndarray]:
         data = np.vstack(data).T
     assert isinstance(data, np.ndarray)
     if axis >= data.ndim:
-        raise ValueError("axis {} is out of bounds for array of dimension {}".format(axis, data.ndim))
+        raise ValueError(f"axis {axis} is out of bounds for array of dimension {data.ndim}")
     return np.sqrt(np.sum(data * np.conj(data), axis=axis))  # type: ignore[no-any-return]
 
 
@@ -862,7 +860,7 @@ def unit(data: _Lists, axis: int = 0) -> np.ndarray:
         data = np.vstack(data).T
     assert isinstance(data, np.ndarray)
     if axis >= data.ndim:
-        raise ValueError("axis {} is out of bounds for array of dimension {}".format(axis, data.ndim))
+        raise ValueError(f"axis {axis} is out of bounds for array of dimension {data.ndim}")
     # calculate the magnitude of each vector
     mag = np.asanyarray(magnitude(data, axis=axis))
     # check for zero vectors, and replace magnitude with 1 to make them unchanged
@@ -912,9 +910,9 @@ def modd(x1, x2, /, out=None):
     if out is None:
         y = np.mod(x1 - 1, x2) + 1
         return y
-    else:
-        np.mod(x1 - 1, x2, out)
-        np.add(out, 1, out)  # needed to force add to be inplace operation
+    np.mod(x1 - 1, x2, out)
+    np.add(out, 1, out)  # needed to force add to be inplace operation
+    return out
 
 
 #%% is_np_int
@@ -1204,7 +1202,7 @@ def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: in
             # find the last whitespace to break on, possibly with a minimum start
             space_break = this_line.rfind(" ", min_wrap, wrap - 1)
             if space_break == -1 or space_break <= indent:
-                raise ValueError('The specified min_wrap:wrap of "{}:{}" was too small.'.format(min_wrap, wrap))
+                raise ValueError(f'The specified min_wrap:wrap of "{min_wrap}:{wrap}" was too small.')
             # add the shorter line
             out.append(this_line[:space_break] + " " + line_cont)
             # reduce and repeat
@@ -1412,7 +1410,7 @@ def execute_wrapper(
     if dry_run:
         if isinstance(command, list):
             command = shlex.join(command)
-        print('Would execute "{}" in "{}"'.format(command, folder))
+        print(f'Would execute "{command}" in "{folder}"')
         return ReturnCodes.clean
     # clean up command
     if isinstance(command, str):
@@ -1423,7 +1421,7 @@ def execute_wrapper(
         raise TypeError("Unexpected type for the command list.")
     # check that the folder exists
     if not folder.is_dir():
-        print('Warning: folder "{}" doesn\'t exist, so command "{}" was not executed.'.format(folder, command))
+        print(f'Warning: folder "{folder}" doesn\'t exist, so command "{command}" was not executed.')
         return ReturnCodes.bad_folder
     # execute command and print status
     assert print_status or filename is not None, "You must either print the status or save results to a filename."
@@ -1471,12 +1469,12 @@ def get_env_var(env_key: str, default: str = None) -> str:
     """
     if _ALLOWED_ENVS is not None:
         if env_key not in _ALLOWED_ENVS:
-            raise KeyError('The environment variable of "{}" is not on the allowed list.'.format(env_key))
+            raise KeyError(f'The environment variable of "{env_key}" is not on the allowed list.')
     try:
         value = os.environ[env_key]
     except KeyError:
         if default is None:
-            raise KeyError('The appropriate environment variable "{}" has not been set.'.format(env_key)) from None
+            raise KeyError(f'The appropriate environment variable "{env_key}" has not been set.') from None
         value = default
     return value
 
@@ -1773,6 +1771,111 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
     func = interp1d(xp, yp, kind="zero", fill_value="extrapolate", assume_sorted=False)
     return np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
 
+#%% linear_interp
+def linear_interp(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=False):
+    r"""
+    Interpolates a function by holding at the most recent value.
+
+    Parameters
+    ----------
+    x : array_like
+        The x-coordinates at which to evaluate the interpolated values.
+    xp: 1-D sequence of floats
+        The x-coordinates of the data points, must be increasing if argument period is not specified. Otherwise, xp is internally sorted after normalizing the periodic boundaries with xp = xp % period.
+    yp: 1-D sequence of float or complex
+        The y-coordinates of the data points, same length as xp.
+    left: int or float, optional, default is np.nan
+        Value to use for any value less that all points in xp
+    assume_sorted : bool, optional, default is False
+        Whether you can assume the data is sorted and do simpler (i.e. faster) calculations
+
+    Returns
+    -------
+    y : float or complex (corresponding to fp) or ndarray
+        The interpolated values, same shape as x.
+
+    Notes
+    -----
+    #.  Written by Steven Hiramoto in June 2022.
+
+    Examples
+    --------
+    >>> from dstauffman import linear_interp
+    >>> import numpy as np
+    >>> xp = np.array([0.0, 111.0, 2000.0, 5000.0])
+    >>> yp = np.array([0.0, 1.0, -2.0, 3.0])
+    >>> x = np.arange(0, 6001, dtype=float)
+    >>> y = linear_interp(x, xp, yp)
+
+    """
+    # force arrays
+    x = np.asanyarray(x)
+    xp = np.asanyarray(xp)
+    yp = np.asanyarray(yp)
+    # find the minimum value, as anything left of this is considered extrapolated
+    xmin = xp[0] if assume_sorted else np.min(xp)
+    # use slower scipy version
+
+    if not HAVE_SCIPY:
+        raise RuntimeError("You must have scipy available to run this.")
+    if return_indices:
+        raise RuntimeError("Data must be sorted in order to ask for indices.")
+    func = interp1d(xp, yp, kind="linear", fill_value="extrapolate", assume_sorted=False)
+    return np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
+
+#%% linear_lowpass_interp
+def linear_lowpass_interp(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=False):
+    r"""
+    Interpolates a function by holding at the most recent value.
+
+    Parameters
+    ----------
+    x : array_like
+        The x-coordinates at which to evaluate the interpolated values.
+    xp: 1-D sequence of floats
+        The x-coordinates of the data points, must be increasing if argument period is not specified. Otherwise, xp is internally sorted after normalizing the periodic boundaries with xp = xp % period.
+    yp: 1-D sequence of float or complex
+        The y-coordinates of the data points, same length as xp.
+    left: int or float, optional, default is np.nan
+        Value to use for any value less that all points in xp
+    assume_sorted : bool, optional, default is False
+        Whether you can assume the data is sorted and do simpler (i.e. faster) calculations
+
+    Returns
+    -------
+    y : float or complex (corresponding to fp) or ndarray
+        The interpolated values, same shape as x.
+
+    Notes
+    -----
+    #.  Written by Steven Hiramoto in June 2022.
+
+    Examples
+    --------
+    >>> from dstauffman import linear_lowpass_interp
+    >>> import numpy as np
+    >>> xp = np.array([0.0, 111.0, 2000.0, 5000.0])
+    >>> yp = np.array([0.0, 1.0, -2.0, 3.0])
+    >>> x = np.arange(0, 6001, dtype=float)
+    >>> y = linear_lowpass_interp(x, xp, yp)
+
+    """
+    # force arrays
+    x = np.asanyarray(x)
+    xp = np.asanyarray(xp)
+    yp = np.asanyarray(yp)
+    # find the minimum value, as anything left of this is considered extrapolated
+    xmin = xp[0] if assume_sorted else np.min(xp)
+    # use slower scipy version
+
+    if not HAVE_SCIPY:
+        raise RuntimeError("You must have scipy available to run this.")
+    if return_indices:
+        raise RuntimeError("Data must be sorted in order to ask for indices.")
+    func = interp1d(xp, yp, kind="linear", fill_value="extrapolate", assume_sorted=False)
+    interpfunc = np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
+    sos = butter(2, 0.01, btype="low", fs=1, output="sos")  # TODO: allow these to be passed in
+    return sosfiltfilt(sos, interpfunc)
 
 #%% drop_following_time
 def drop_following_time(times, drop_starts, dt_drop):

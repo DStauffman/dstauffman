@@ -452,8 +452,8 @@ def rv_aer_2_sez(r_aer, v_aer):
     # calculate velocity transform
     v_sez = np.array([
         -rho_dot * np.cos(el) * np.cos(az) + rho * np.sin(el) * el_dot * np.cos(az) + rho * np.cos(el) * np.sin(az) * az_dot,
-         rho_dot * np.cos(el) * np.sin(az) - rho * np.sin(el) * el_dot * np.sin(az) + rho * np.cos(el) * np.cos(az) * az_dot,
-         rho_dot * np.sin(el) + rho * np.cos(el) * el_dot,
+        +rho_dot * np.cos(el) * np.sin(az) - rho * np.sin(el) * el_dot * np.sin(az) + rho * np.cos(el) * np.cos(az) * az_dot,
+        +rho_dot * np.sin(el) + rho * np.cos(el) * el_dot,
     ])
     # fmt: on
     return (r_sez, v_sez)

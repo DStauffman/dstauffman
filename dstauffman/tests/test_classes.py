@@ -42,7 +42,7 @@ class _Example_Frozen(dcs.Frozen):
 class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     load: ClassVar[
         Callable[
-            [Optional[pathlib.Path], DefaultNamedArg(bool, "use_hdf5"), DefaultNamedArg(bool, "return_meta")],
+            [Optional[pathlib.Path], DefaultNamedArg(bool, "use_hdf5"), DefaultNamedArg(bool, "return_meta")],  # noqa: F821
             _Example_SaveAndLoad,
         ]
     ]
@@ -50,9 +50,9 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
         [
             _Example_SaveAndLoad,
             Optional[pathlib.Path],
-            DefaultNamedArg(bool, "use_hdf5"),
-            DefaultNamedArg(dict, "meta"),
-            DefaultNamedArg(set, "exclusions"),
+            DefaultNamedArg(bool, "use_hdf5"),  # noqa: F821
+            DefaultNamedArg(dict, "meta"),  # noqa: F821
+            DefaultNamedArg(set, "exclusions"),  # noqa: F821
         ],
         None,
     ]

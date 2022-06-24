@@ -652,13 +652,13 @@ def oe_2_rv(
     assert p is not None
 
     # magnitude of r in PQW frame
-    r_mag = p / (1 + e * np.cos(nu))
+    r_mag = _zero_divide(p, (1 + e * np.cos(nu)))
 
     # r in PQW frame
     r_PQW = np.array([r_mag * np.cos(nu), r_mag * np.sin(nu), 0.0])
 
     # v in PQW frame
-    v_PQW = np.sqrt(mu / p) * np.array([-np.sin(nu), e + np.cos(nu), 0.0])
+    v_PQW = np.sqrt(_zero_divide(mu, p)) * np.array([-np.sin(nu), e + np.cos(nu), 0.0])
 
     # cosine and sine terms
     cw = np.cos(w)

@@ -33,7 +33,8 @@ from .utils     import find_in_range, rms, rss, compare_two_classes, compare_two
                            read_text_file, write_text_file, capture_output, magnitude, unit, modd, \
                            is_np_int, np_digitize, histcounts, full_print, line_wrap, \
                            combine_per_year, execute, execute_wrapper, get_env_var, get_username, \
-                           is_datetime, intersect, issorted, zero_order_hold, drop_following_time
+                           is_datetime, intersect, issorted, zero_order_hold, linear_interp, \
+                           linear_lowpass_interp, drop_following_time
 from .utils_log import setup_dir, fix_rollover, remove_outliers
 from .version   import version_info
 # fmt: on

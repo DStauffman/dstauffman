@@ -46,7 +46,7 @@ make_envs:
   - source static/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage[toml] flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint PyQt5-stubs PySide6 pytest qtpy scipy tblib
+  - python -m pip install coverage[toml] flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint pylint-exit PyQt5-stubs PySide6 pytest qtpy scipy tblib
   - deactivate
   - virtualenv everything
   - source everything/bin/activate
@@ -59,6 +59,7 @@ make_envs:
   - python -m pip install --upgrade pip
   - python -m pip install wheel
   - python -m pip install poetry
+  - python -m pip install twine  # GitLab doesn't fully support poetry for publishing yet, use twine instead
   - deactivate
 
 mypy:
@@ -72,17 +73,27 @@ mypy:
   - mypy --version
   - mypy
 
-#flake8:
-#  stage: Static Analysis
-#  allow_failure: true
-#  script:
-#  - flake8 --max-line-length=128 dstauffman/**/*.py
+flake8:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+  - pwd
+  - ls -l
+  - source static/bin/activate
+  - python --version
+  - flake8 --version
+  - flake8 .
 
-#pylint:
-#  stage: Static Analysis
-#  allow_failure: true
-#  script:
-#  - pylint -d C0301 dstauffman/**/*.py
+pylint:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+  - pwd
+  - ls -l
+  - source static/bin/activate
+  - python --version
+  - pylint --version
+  - pylint dstauffman || pylint-exit $?
 
 unit_test:
   stage: Test
@@ -123,12 +134,12 @@ no_numba_test:
   - source static/bin/activate
   - python -m dstauffman tests --coverage --cov_file $DCS_TESTS_DIR/.coverage.no_numba
 
-command_test:
+import_test:
   stage: Test
   needs: ["make_envs"]
   artifacts:
     paths:
-    - $DCS_TESTS_DIR/.coverage.commands
+    - $DCS_TESTS_DIR/.coverage.imports
     expire_in: 4 hours
   script:
   - pwd
@@ -198,7 +209,12 @@ build_code:
   - branches
   script:
   - source poetry/bin/activate
+  - echo "Publishing to $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/pypi"
   - poetry --version
   - poetry build
-  - poetry config repositories.github "https://github.com/api/v4/projects/$CI_PROJECT_ID/packages/pypi"
-  - poetry publish --repository github --username "$POETRY_HTTP_BASIC_GITHUB_USERNAME" --password "$POETRY_HTTP_BASIC_GITHUB_PASSWORD"
+  - poetry config repositories.github "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/pypi"
+  - poetry config http-basic.gitlab gitlab-ci-token "$CI_JOB_TOKEN"
+  # Note: GitLab doesn't fully support poetry for publishing yet, use twine instead
+  # - poetry publish --repository github
+  - export TWINE_CERT=/home/.git-cert/lm_ca_combined.pem
+  - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*

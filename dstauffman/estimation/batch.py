@@ -254,7 +254,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     >>> bpe_results = BpeResults()
 
     """
-    save: Callable[[BpeResults, Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]
+    save: Callable[[BpeResults, Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]  # noqa: F821
 
     def __init__(self):
         # fmt: off
@@ -944,7 +944,7 @@ def _dogleg_search(
             raise ValueError('Unexpected value for search_method of "{}".'.format(search_method))
 
         # predict function change based on linearized model
-        pred_func_change = _predict_func_change(new_delta_param, gradient, hessian)
+        pred_func_change = _predict_func_change(new_delta_param, gradient, hessian)  # noqa: F841
 
         # set new parameter values
         params = orig_params + new_delta_param

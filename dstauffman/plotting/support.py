@@ -465,7 +465,7 @@ def ignore_plot_data(data, ignore_empties, col=None):
 
     """
     # if data is None, then always ignore it
-    if data is None or np.all(data == None):
+    if data is None or np.all(data == None):  # noqa: E711
         return True
     # if we are not ignoring empties and data is not None, then never ignore
     if not ignore_empties:

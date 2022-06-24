@@ -1682,6 +1682,14 @@ class Test_zero_order_hold(unittest.TestCase):
     # fmt: on
 
 
+#%% linear_interp
+pass  # TODO: write this
+
+
+#%% linear_lowpass_interp
+pass  # TODO: write this
+
+
 #%% drop_following_time
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_drop_following_time(unittest.TestCase):

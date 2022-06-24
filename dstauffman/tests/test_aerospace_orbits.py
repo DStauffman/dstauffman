@@ -129,7 +129,8 @@ class Test_aerospace_two_line_elements(unittest.TestCase):
             line2 = lines[3 * i + 2]
             elements = space.two_line_elements(line1, line2)
             self.assertTrue(this_name.startswith("GPS "))
-            # TODO: do something with this data
+            self.assertGreater(elements.e, 0.0)
+            self.assertLess(elements.e, 1.0)
 
 
 #%% aerospace.rv_2_oe
@@ -282,7 +283,7 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
         r0             = np.zeros(3)
         v0             = np.zeros(3)
         r1             = np.array([1.0, 0.0, 0.0])
-        v1             = np.array([0.0, 1.0, 0.0])
+        v1             = np.array([0.0, np.sqrt(2), 0.0])
         oe1            = space.Elements()
         oe1.a          = 0.0
         oe1.e          = 0.0
@@ -304,25 +305,24 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
         oe2.e          = 1.0
         oe2.i          = 0.0
         oe2.W          = 0.0
-        oe2.w          = np.pi
-        oe2.vo         = np.pi
-        oe2.p          = 0.0
+        oe2.w          = 0.0  # np.pi
+        oe2.vo         = 0.0  # np.pi
+        oe2.p          = 2.0  # 0.0
         oe2.uo         = 0.0
-        oe2.P          = np.pi
+        oe2.P          = 0.0  # np.pi
         oe2.lo         = 0.0
         oe2.T          = np.inf
-        oe2.type       = space.OrbitType.elliptic
+        oe2.type       = space.OrbitType.parabolic
         oe2.equatorial = True
         oe2.circular   = False
         oe2.t          = np.datetime64("nat")
         # fmt: on
-        # TODO: fix this case
-        # (r, v) = space.oe_2_rv(oe1)
-        # np.testing.assert_array_equal(r, r0)
-        # np.testing.assert_array_equal(v, v0)
-        # (r, v) = space.oe_2_rv(oe2)
-        # np.testing.assert_array_equal(r, r1)
-        # np.testing.assert_array_equal(v, v1)
+        (r, v) = space.oe_2_rv(oe1)
+        np.testing.assert_array_equal(r, r0)
+        np.testing.assert_array_equal(v, v0)
+        (r, v) = space.oe_2_rv(oe2)
+        np.testing.assert_array_equal(r, r1)
+        np.testing.assert_array_equal(v, v1)
 
     @unittest.skip("Skip this slow test. Run for extra credit.")
     def test_round_trip(self) -> None:  # pragma: no cover
