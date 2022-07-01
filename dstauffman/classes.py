@@ -86,7 +86,9 @@ def _frozen(set_: Callable) -> Callable:
                 if key == "self" and isinstance(val, self.__class__):  # pragma: no branch
                     set_(self, name, value)
                     return
+        # fmt: off
         raise AttributeError(f"You cannot add attribute of {name} to {self} in {sys._getframe(1).f_code.co_name}.")  # pylint: disable=protected-access
+        # fmt: on
 
     # return the custom defined function
     return set_attr

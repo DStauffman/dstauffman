@@ -81,11 +81,10 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
     # maximum number of months in each state
     if max_months is None:
         return state
-    else:
-        if np.isscalar(max_months):
-            max_months = np.full(len(distribution), max_months)
-        mons = np.ceil(max_months[state - start_num] * prng.beta(alpha, beta, num)).astype(int)
-        return (state, mons)
+    if np.isscalar(max_months):
+        max_months = np.full(len(distribution), max_months)
+    mons = np.ceil(max_months[state - start_num] * prng.beta(alpha, beta, num)).astype(int)
+    return (state, mons)
 
 
 #%% Functions - icer
@@ -228,7 +227,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     # output as dataframe
     # build a name list if not given
     if names is None:
-        names = ["Strategy {}".format(i + 1) for i in range(num)]
+        names = [f"Strategy {i + 1}" for i in range(num)]
     # preallocate some variables
     full_inc_costs = np.full((num), np.nan, dtype=float)
     full_inc_qalys = np.full((num), np.nan, dtype=float)
@@ -254,7 +253,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     # Make a plot
     if make_plot:
         # delayed import to eliminate circular imports
-        from dstauffman.plotting import plot_icer
+        from dstauffman.plotting import plot_icer  # pylint: disable=import-outside-toplevel
 
         fig = plot_icer(qaly, cost, ix, baseline=baseline, names=names, opts=opts)
 

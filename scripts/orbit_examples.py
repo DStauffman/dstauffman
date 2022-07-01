@@ -39,13 +39,13 @@ print(f"{r_mag=}")
 v_mag = dcs.magnitude(v)
 print(f"{v_mag=}")
 
-E = v_mag ** 2 / 2 - mu / r_mag
+E = v_mag**2 / 2 - mu / r_mag
 print(f"{E=}")
 
 a = -mu / (2 * E)
 print(f"{a=}")
 
-e = 1 / mu * ((v_mag ** 2 - mu / r_mag) * r - np.sum(r * v, axis=0) * v)
+e = 1 / mu * ((v_mag**2 - mu / r_mag) * r - np.sum(r * v, axis=0) * v)
 print(f"{e=}")
 
 e_mag = dcs.magnitude(e)
@@ -84,7 +84,7 @@ if np.dot(r, v) < 0:
     vo = 2 * np.pi - vo
 print(f"{vo=}; {dcs.RAD2DEG*vo=}")
 
-T = 2 * np.pi * np.sqrt(a ** 3 / mu)
+T = 2 * np.pi * np.sqrt(a**3 / mu)
 print(f"{T=}")
 
 u = np.arccos((e_mag + np.cos(vo)) / (1 + e_mag * np.cos(vo)))
@@ -119,7 +119,7 @@ np.testing.assert_array_almost_equal(oe.uo, uo, err_msg="uo is different")  # ty
 np.testing.assert_array_almost_equal(oe.P, P, err_msg="Pi is different")  # type: ignore[arg-type]
 np.testing.assert_array_almost_equal(oe.lo, lo, err_msg="lo is different")  # type: ignore[arg-type]
 np.testing.assert_array_almost_equal(oe.T, T, err_msg="T is different")  # type: ignore[arg-type]
-# np.testing.assert_array_almost_equal(oe.t, t, err_msg="t is different")
+# np.testing.assert_array_almost_equal(oe.t, t, err_msg="t is different")  # type: ignore[arg-type]
 
 
 #%% Example 3

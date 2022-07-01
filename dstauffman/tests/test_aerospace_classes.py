@@ -622,7 +622,8 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         kf_record3 = kf_record1.combine(kf_record2, inplace=True)
         self.assertIs(kf_record1, kf_record3)
         np.testing.assert_array_equal(
-            kf_record3.time, self.date_zero + (10**9 * np.arange(90, dtype=np.int64)).astype(NP_TIMEDELTA_FORM)  # type: ignore[arg-type]
+            kf_record3.time,  # type: ignore[arg-type]
+            self.date_zero + (10**9 * np.arange(90, dtype=np.int64)).astype(NP_TIMEDELTA_FORM),
         )
         self.assertEqual(kf_record3.P.shape, (6, 6, 90), "P shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record3.stm.shape, (6, 6, 90), "stm shape mismatch.")  # type: ignore[union-attr]

@@ -98,7 +98,7 @@ class TruthPlotter(Frozen):
                 self.data_lo = data[:, 0]
                 self.data_hi = data[:, 2]
             else:
-                raise ValueError("Bad shape for data of {}.".format(data.shape))
+                raise ValueError(f"Bad shape for data of {data.shape}.")
 
     @property
     def is_null(self) -> bool:
@@ -112,8 +112,7 @@ class TruthPlotter(Frozen):
             return data
         if ix is None:
             return scale * data
-        else:
-            return scale * data[:, ix]
+        return scale * data[:, ix]
 
     def plot_truth(self, ax, scale=1, ix=None, *, hold_xlim=True, hold_ylim=False):
         r"""Add the information in the TruthPlotter instance to the given axes, with the optional scale."""
@@ -153,7 +152,7 @@ class TruthPlotter(Frozen):
                         zorder=6,
                     )
         else:
-            raise ValueError('Unexpected value for type_ of "{}".'.format(self.type_))
+            raise ValueError(f'Unexpected value for type_ of "{self.type_}".')
         # potentially restore the original limits, since they might have been changed by the truth data
         if hold_xlim and x_lim != ax.get_xbound():
             ax.set_xbound(*x_lim)
@@ -274,13 +273,11 @@ def plot_health_time_history(
         names = opts.names
     else:
         assert False, "Data must be 0D to 3D array."
-    assert (
-        time.shape[0] == data.shape[0]
-    ), "Time and data must be the same length. Current time.shape={} and data.shape={}".format(time.shape, data.shape)
+    assert time.shape[0] == data.shape[0], f"Time and data must be the same length. Current {time.shape=} and {data.shape=}"
     if legend is not None:
         assert len(legend) == num_bins, "Number of data channels does not match the legend."
     else:
-        legend = ["Channel {}".format(i + 1) for i in range(num_bins)]
+        legend = [f"Channel {i + 1}" for i in range(num_bins)]
 
     # process other inputs
     this_title = label + " vs. Time"
@@ -481,21 +478,21 @@ def plot_health_monte_carlo(
         for ix in range(data.shape[1]):
             this_label = opts.get_names(ix)
             if not this_label:
-                this_label = "Series {}".format(ix + 1)
+                this_label = f"Series {ix + 1}"
             if rms_in_legend:
-                this_label += " (RMS: {:.2f})".format(rms_data[ix])
+                this_label += f" (RMS: {rms_data[ix]:.2f})"
             ax.plot(time, data[:, ix], ".-", linewidth=2, zorder=10, label=this_label)
     else:
         this_label = opts.get_names(0) + label
         if rms_in_legend:
-            this_label += " (RMS: {:.2f})".format(rms_data)
+            this_label += f" (RMS: {rms_data:.2f})"
         ax.plot(time, mean, ".-", linewidth=2, color="#0000cd", zorder=10, label=this_label)
         if plot_sigmas and num_series > 1:
-            sigma_label = r"$\pm {}\sigma$".format(plot_sigmas)
+            sigma_label = f"$\\pm {plot_sigmas}\\sigma$"
             ax.plot(time, mean + plot_sigmas * std, ".-", markersize=2, color="#20b2aa", zorder=6, label=sigma_label)
             ax.plot(time, mean - plot_sigmas * std, ".-", markersize=2, color="#20b2aa", zorder=6)
         if plot_confidence and num_series > 1:
-            conf_label = "{}% C.I.".format(100 * plot_confidence)
+            conf_label = f"{100 * plot_confidence}% C.I."
             conf_z = z_from_ci(plot_confidence)
             conf_std = conf_z * std / np.sqrt(num_series)
             ax.plot(time, mean + conf_std, ".-", markersize=2, color="#2e8b57", zorder=7, label=conf_label)

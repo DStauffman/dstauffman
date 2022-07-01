@@ -357,9 +357,11 @@ def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="date
 
     """
     # hard-coded values
+    # fmt: off
     date_forms = {"datetime", "numpy", "matplotlib"}
     # TODO: allow time forms for "min", "hr", "day", "month", "year", etc.
-    time_forms = {"sec",}  # fmt: skip
+    time_forms = {"sec",}
+    # fmt: on
     all_forms = date_forms | time_forms
     # data checks
     assert form in all_forms, f'Unexpected form of "{form}".'

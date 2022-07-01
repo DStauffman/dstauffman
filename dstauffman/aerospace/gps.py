@@ -518,12 +518,13 @@ def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = 
 
     # check for optional inputs
     if gps_to_utc_offset is None:
+        # fmt: off
         # offset starting from Jan 1, 2017
         gps_to_utc_offset = np.full(week.shape, -18)
         days_since_date_zero = week * DAYS_PER_WEEK + time / ONE_DAY
         # GPS offset for 1 Jan 1999 to 1 Jan 2006
         # Note: 9492 = datenum([2006 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero <  9492 + 13 / ONE_DAY] = -13  # fmt: skip
+        gps_to_utc_offset[days_since_date_zero <  9492 + 13 / ONE_DAY] = -13
         # GPS offset for 1 Jan 2006 to 1 Jan 2009
         # Note: 10588 = datenum([2009 1 1 0 0 0]) - datenum(date_zero)
         gps_to_utc_offset[days_since_date_zero < 10588 + 14 / ONE_DAY] = -14
@@ -536,6 +537,7 @@ def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = 
         # GPS offset for 1 Jul 2015 to 1 Jan 2017
         # Note: 13510 = datenum([2017 1 1 0 0 0]) - datenum(date_zero)
         gps_to_utc_offset[days_since_date_zero < 13510 + 17 / ONE_DAY] = -17
+        # fmt: on
     else:
         gps_to_utc_offset = np.asanyarray(gps_to_utc_offset)
 

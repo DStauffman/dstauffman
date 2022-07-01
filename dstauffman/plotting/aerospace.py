@@ -1265,7 +1265,10 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     # Setup plots
     setup_plots(figs, opts)
     if not figs:
-        logger.log(LogLevel.L5, "No {'/'.join(fields.values())} data was provided, so no plots were generated.")
+        logger.log(  # pylint: disable=logging-fstring-interpolation
+            LogLevel.L5,
+            f"No {'/'.join(fields.values())} data was provided, so no plots were generated.",
+        )
     if return_err:
         return (figs, err)
     return figs

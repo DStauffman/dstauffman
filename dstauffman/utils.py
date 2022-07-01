@@ -44,7 +44,7 @@ else:
     logical_not = lambda x: not x  # type: ignore[assignment]  # pylint: disable=unnecessary-lambda-assignment
 if HAVE_SCIPY:
     from scipy.interpolate import interp1d
-    from scipy.signal import sosfiltfilt, butter
+    from scipy.signal import butter, sosfiltfilt
 
 #%% Globals
 _ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked

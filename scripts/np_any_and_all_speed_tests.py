@@ -5,7 +5,7 @@ from IPython import get_ipython  # type: ignore[import]
 import numpy as np
 import pandas as pd
 
-import dstauffman.nubs as nubs
+import dstauffman.nubs as nubs  # noqa: F401
 
 #%% Results
 text = r"""i = None, any(x)

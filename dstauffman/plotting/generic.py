@@ -351,10 +351,12 @@ def make_generic_plot(
         raise NotImplementedError("Not yet implemented")
 
     # determine which plotting function to use
+    # fmt: off
     if use_zoh:
         plot_func = lambda ax, *args, **kwargs: ax.step(*args, where="post", **kwargs)  # pylint: disable=unnecessary-lambda-assignment
     else:
         plot_func = lambda ax, *args, **kwargs: ax.plot(*args, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
+    # fmt: on
 
     # get the categories
     if is_cat_plot:

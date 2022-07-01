@@ -964,7 +964,7 @@ def setup_plots(figs, opts):
     if opts.save_plot:
         storefig(figs, opts.save_path, opts.plot_type, opts.show_warn)
         if opts.show_link & len(figs) > 0:
-            print(r'Plots saved to <a href="{opts.save_path}">{opts.save_path}</a>')
+            print(f'Plots saved to <a href="{opts.save_path}">{opts.save_path}</a>')
 
 
 #%% Unit test

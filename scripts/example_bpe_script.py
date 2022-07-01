@@ -110,17 +110,21 @@ def set_parameter(sim_params, *, names, values):
 #%% Script
 if __name__ == "__main__":
     # Constants
-    rerun      = True  # fmt: skip
+    # fmt: off
+    rerun      = True
     make_plots = True
-    time       = np.arange(251)  # fmt: skip
+    time       = np.arange(251)
+    # fmt: on
 
     # Parameters
     sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
 
     # Truth data
+    # fmt: off
     truth_time = np.arange(-10, 201)
     truth_data = truth(truth_time)
     truth      = plot.TruthPlotter(truth_time, truth_data)  # type: ignore[assignment]
+    # fmt: on
 
     # Logger
     lg.activate_logging(lg.LogLevel.L8)
@@ -168,10 +172,12 @@ if __name__ == "__main__":
     # Plot results
     if make_plots:
         # build opts
-        opts           = plot.Opts()  # fmt: skip
+        # fmt: off
+        opts           = plot.Opts()
         opts.case_name = "Model Results"
         opts.save_path = dcs.get_output_dir()
         opts.save_plot = True
+        # fmt: on
 
         # make model plots
         f0 = plot.plot_health_monte_carlo(time, results, "Output", opts=opts, truth=truth)

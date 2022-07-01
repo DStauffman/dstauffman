@@ -460,6 +460,7 @@ class Test_plotting_plot_population_pyramid(unittest.TestCase):
     """
 
     def setUp(self) -> None:
+        # fmt: off
         self.age_bins = np.array([0, 5, 10, 15, 20, 1000], dtype=int) if HAVE_NUMPY else [0, 5, 1000]
         self.male_per = np.array([100, 200, 300, 400, 500], dtype=int) if HAVE_NUMPY else [100, 200, 500]
         self.fmal_per = np.array([125, 225, 325, 375, 450], dtype=int) if HAVE_NUMPY else [125, 225, 450]
@@ -470,6 +471,7 @@ class Test_plotting_plot_population_pyramid(unittest.TestCase):
         self.color1   = "k"
         self.color2   = "w"
         self.fig: Optional[List[plt.Figure]]
+        # fmt: on
 
     def test_nominal(self) -> None:
         self.fig = plot.plot_population_pyramid(
