@@ -86,7 +86,7 @@ def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
         try:
             folder.mkdir(parents=True)
             logger.log(LogLevel.L1, 'Created directory: "%s"', folder)
-        except:  # pragma: no cover
+        except:  # pragma: no cover  # pylint: disable=try-except-raise
             # re-raise last exception, could try to handle differently in the future
             raise  # pragma: no cover
 
@@ -176,14 +176,14 @@ def fix_rollover(data, roll, axis=None, check_accel=False, **kwargs):
     # compensation for top to bottom rollovers
     if roll_ix.size > 0:
         comp_roll(comp, roll_ix, "+")
-        logger.log(LogLevel.L6, "corrected {} top to bottom rollover(s)".format(roll_ix.size))
+        logger.log(LogLevel.L6, "corrected %s top to bottom rollover(s)", roll_ix.size)
 
     # find indices for bottom to top rollover, these indices act as partition boundaries
     roll_ix = np.flatnonzero(find_in_range(np.diff(data), min_=roll / 2))
     # compensate for bottom to top rollovers
     if roll_ix.size > 0:
         comp_roll(comp, roll_ix, "-")
-        logger.log(LogLevel.L6, "corrected {} bottom to top rollover(s)".format(roll_ix.size))
+        logger.log(LogLevel.L6, "corrected %s bottom to top rollover(s)", roll_ix.size)
 
     # create output
     out = data + roll * comp
@@ -198,7 +198,7 @@ def fix_rollover(data, roll, axis=None, check_accel=False, **kwargs):
             comp_roll(comp, bad_ix[acc[bad_ix] > 0] + 1, "--")
             # recreate output
             out = data + roll * comp
-            logger.log(LogLevel.L6, "corrected {} rollovers due to acceleration checks".format(bad_ix.size))
+            logger.log(LogLevel.L6, "corrected %s rollovers due to acceleration checks", bad_ix.size)
 
     # double check for remaining rollovers
     if np.any(find_in_range(np.diff(out), min_=roll / 2, max_=-roll / 2)):
@@ -289,13 +289,13 @@ def remove_outliers(x, /, sigma=3.0, axis=None, *, num_iters=3, return_stats=Fal
     logger.log(LogLevel.L6, "Number exceeding hardmax = %s", num_hard)
     logger.log(LogLevel.L6, "Number of outliers = %s", num_removed)
     if rms_initial.ndim == 0:
-        logger.log(LogLevel.L6, "RMS before removal = {:.6g}, after = {:.6g}".format(rms_initial, rms_removed))
+        logger.log(LogLevel.L6, "RMS before removal = %s, after = %s", f"{rms_initial:.6g}", f"{rms_removed:.6g}")
     else:
         logger.log(
             LogLevel.L6,
-            "RMS before removal = {}, after = {}".format(
-                np.array_str(rms_initial, precision=6), np.array_str(rms_removed, precision=6)
-            ),
+            "RMS before removal = %s, after = %s",
+            np.array_str(rms_initial, precision=6),
+            np.array_str(rms_removed, precision=6),
         )
     if return_stats:
         return (y, num_replaced, rms_initial, rms_removed)

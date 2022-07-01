@@ -74,8 +74,7 @@ class _FortranSource(Frozen):
             if self.mod_name:
                 raise AssertionError("Code should not have a program and module defined.")
             return self.prog_name
-        else:
-            return self.mod_name
+        return self.mod_name
 
     @property
     def has_setup(self) -> bool:
@@ -176,7 +175,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
             this_use = temp.split(",")[0]
             assert bool(this_use), "Use statement should not be empty."
             assert this_code is not None, "_FortranSource class should already be instantiated."
-            assert this_name == this_code.name, 'Mismatch in module name "{}" vs "{}".'.format(this_name, this_code.name)
+            assert this_name == this_code.name, f'Mismatch in module name "{this_name}" vs "{this_code.name}".'
             this_code.uses.append(this_use)
         elif this_line.startswith("type ") and not this_line.startswith("type("):
             # type declaration
@@ -185,7 +184,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
             this_type = temp.split(" ")[0]
             assert bool(this_type), "Type statement should not be empty."
             assert this_code is not None, "_FortranSource class should already be instantiated."
-            assert this_name == this_code.name, 'Mismatch in module name "{}" vs "{}".'.format(this_name, this_code.name)
+            assert this_name == this_code.name, f'Mismatch in module name "{this_name}" vs "{this_code.name}".'
             this_code.types.append(this_type)
         elif this_line.startswith("function "):
             # function declaration
@@ -193,7 +192,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
             this_function = temp.split("(")[0]
             assert bool(this_function), "Function name should not be empty for line: " + this_line + f' in "{filename}".'
             assert this_code is not None, "_FortranSource class should already be instantiated."
-            assert this_name == this_code.name, 'Mismatch in module name "{}" vs "{}".'.format(this_name, this_code.name)
+            assert this_name == this_code.name, f'Mismatch in module name "{this_name}" vs "{this_code.name}".'
             this_code.functions.append(this_function)
         elif this_line.startswith("subroutine "):
             # subroutine declaration
@@ -201,7 +200,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
             this_subroutine = temp.split("(")[0]
             assert bool(this_subroutine), "Subroutine name should not be empty for line: " + this_line + f' in "{filename}".'
             assert this_code is not None, "_FortranSource class should already be instantiated."
-            assert this_name == this_code.name, 'Mismatch in module name "{}" vs "{}".'.format(this_name, this_code.name)
+            assert this_name == this_code.name, f'Mismatch in module name "{this_name}" vs "{this_code.name}".'
             this_code.subroutines.append(this_subroutine)
         else:
             # normal code line
@@ -290,7 +289,7 @@ def _write_all_unit_test(filename: Path, all_code: List[_FortranSource], header:
     # loop through each file
     counter = 1
     for code in all_code:
-        code.prefix = "t{}_".format(counter)
+        code.prefix = f"t{counter}_"
         counter += 1
     # build headers
     lines = []

@@ -235,9 +235,6 @@ pass  # TODO: write this
 #%% aerospace.anomaly_true_2_mean
 pass  # TODO: write this
 
-#%% aerospace.long_2_sidereal
-pass  # TODO: write this
-
 #%% aerospace.mean_motion_2_semimajor
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_mean_motion_2_semimajor(unittest.TestCase):

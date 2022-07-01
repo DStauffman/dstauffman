@@ -209,7 +209,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
     def test_no_data(self, mock_logger):
         plot.plot_time_history("", self.time, None)
         self.assertEqual(mock_logger.log.call_count, 1)
-        mock_logger.log.assert_called_with(LogLevel.L5, "  plot skipped due to missing data.")
+        mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "")
 
     def test_ignore_zeros(self) -> None:
         self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True))
@@ -225,7 +225,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         not_a_fig = plot.plot_time_history("All Zeros", self.time, self.col_data, ignore_empties=True)
         self.assertIs(not_a_fig, None)
         self.assertEqual(mock_logger.log.call_count, 1)
-        mock_logger.log.assert_called_with(LogLevel.L5, " All Zeros plot skipped due to missing data.")
+        mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "All Zeros")
 
     def test_not_ndarray(self) -> None:
         self.figs.append(plot.plot_time_history("Zero", 0, 0))
@@ -437,7 +437,7 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
     def test_null_data(self, mock_logger):
         plot.plot_bar_breakdown("", self.time, None)
         self.assertEqual(mock_logger.log.call_count, 1)
-        mock_logger.log.assert_called_with(LogLevel.L5, "  plot skipped due to missing data.")
+        mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "")
 
     def test_colormap(self) -> None:
         self.opts.colormap = "Dark2"

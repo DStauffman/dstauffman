@@ -19,9 +19,11 @@ from .orbit_const import PI, TAU, G, SS_MASSES, SIDEREAL_DAY, SIDEREAL_YEAR, AU,
                              MU_EARTH, JULIAN, SPEED_OF_LIGHT, ECLIPTIC, EARTH, PALO_ALTO
 from .orbit_conv  import anomaly_eccentric_2_mean, anomaly_eccentric_2_true, \
                              anomaly_hyperbolic_2_mean, anomaly_hyperbolic_2_true, \
-                             anomaly_mean_2_eccentric, long_2_sidereal, mean_motion_2_semimajor, \
-                             period_2_semimajor, semimajor_2_mean_motion, semimajor_2_period, \
-                             sidereal_2_long, raan_2_mltan, jd_2_sidereal, quat_eci_2_ecf
+                             anomaly_mean_2_eccentric, anomaly_mean_2_true, \
+                             anomaly_true_2_eccentric, anomaly_true_2_hyperbolic, \
+                             anomaly_true_2_mean, mean_motion_2_semimajor, period_2_semimajor, \
+                             semimajor_2_mean_motion, semimajor_2_period, sidereal_2_long, \
+                             raan_2_mltan, jd_2_sidereal, quat_eci_2_ecf
 from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to_jd, d_2_dms, \
                              dms_2_d, hms_2_r, r_2_hms, aer_2_rdr, aer_2_sez, geo_loc_2_ijk, \
                              ijk_2_rdr, ijk_2_sez, long_2_sidereal, rdr_2_aer, rdr_2_ijk, \

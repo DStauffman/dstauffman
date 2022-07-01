@@ -44,7 +44,7 @@ def _fake_decorator(func):
 
 
 @_fake_decorator
-def fake_jit(func, *args, **kwargs):
+def fake_jit(func, *args, **kwargs):  # pylint: disable=unused-argument
     r"""Fake jit decorator for when numba isn't installed."""
     return func
 

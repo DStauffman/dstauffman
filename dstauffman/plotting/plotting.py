@@ -147,7 +147,7 @@ class Opts(Frozen):
         self.colormap: Union[str, ColorMap] = None
         self.leg_spot: str    = "best"
         self.classify: str    = ""
-        self.names: List[str] = list()
+        self.names: List[str] = []
         # fmt: on
         for arg in args:
             if arg is None:
@@ -269,7 +269,7 @@ def suppress_plots() -> None:
     >>> suppress_plots()
 
     """
-    global _Plotter
+    global _Plotter  # pylint: disable=global-statement
     _Plotter = False
     if HAVE_MPL:
         plt.ioff()
@@ -290,7 +290,7 @@ def unsuppress_plots() -> None:
     >>> unsuppress_plots()
 
     """
-    global _Plotter
+    global _Plotter  # pylint: disable=global-statement
     _Plotter = True
 
 
@@ -354,7 +354,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     """
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
-        logger.log(LogLevel.L5, f" {description} plot skipped due to missing data.")
+        logger.log(LogLevel.L5, " %s plot skipped due to missing data.", description)
         return None
 
     # make local copy of opts that can be modified without changing the original
@@ -541,7 +541,7 @@ def plot_correlation_matrix(
         raise ValueError("Incorrectly sized labels.")
 
     # Determine if symmetric
-    if m == n and np.all(
+    if m == n and np.all(  # pylint: disable=simplifiable-if-statement
         np.abs(np.subtract(data, np.transpose(data), out=np.zeros(data.shape, dtype=data.dtype), where=~np.isnan(data)))
         < precision
     ):
@@ -574,7 +574,7 @@ def plot_correlation_matrix(
     else:
         (fig, ax) = fig_ax
     # set figure title
-    if (sup := fig._suptitle) is None:
+    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
         fig.canvas.manager.set_window_title(matrix_name)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())
@@ -600,7 +600,7 @@ def plot_correlation_matrix(
                     )
                 if label_values:
                     ax.annotate(
-                        "{:.2g}".format(scale * data[j, i]),
+                        f"{scale * data[j, i]:.2g}",
                         xy=(box_size * i + box_size / 2, box_size * j + box_size / 2),
                         xycoords="data",
                         horizontalalignment="center",
@@ -678,8 +678,8 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     """
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
-        logger.log(LogLevel.L5, f" {description} plot skipped due to missing data.")
-        return
+        logger.log(LogLevel.L5, " %s plot skipped due to missing data.", description)
+        return None
 
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
@@ -826,7 +826,7 @@ def plot_histogram(
         ax = fig.add_subplot(1, 1, 1)
     else:
         (fig, ax) = fig_ax
-    if (sup := fig._suptitle) is None:
+    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
         fig.canvas.manager.set_window_title(description)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())
@@ -964,7 +964,7 @@ def setup_plots(figs, opts):
     if opts.save_plot:
         storefig(figs, opts.save_path, opts.plot_type, opts.show_warn)
         if opts.show_link & len(figs) > 0:
-            print(r'Plots saved to <a href="{}">{}</a>'.format(opts.save_path, opts.save_path))
+            print(r'Plots saved to <a href="{opts.save_path}">{opts.save_path}</a>')
 
 
 #%% Unit test

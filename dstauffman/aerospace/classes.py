@@ -230,6 +230,7 @@ class KfInnov(Frozen):
     def chop(
         self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
     ) -> Union[KfInnov, Tuple[KfInnov, KfInnov, KfInnov]]:
+        r"""Chops the KfInnov data structure to the given time bounds."""
         exclude = frozenset({"name", "chan", "units"})
         out = _chop_wrapper(
             self, exclude=exclude, ti=ti, tf=tf, include_last=include_last, inplace=inplace, return_ends=return_ends
@@ -337,8 +338,8 @@ class Kf(Frozen):
             self.innov = innov_class(time_dtype=time_dtype, chan=innov_chan, **kwargs)
             self._subclasses = frozenset({"innov",})  # fmt: skip
         else:
-            for (name, func) in innov_class.items():
-                setattr(self, name, func(time_dtype=time_dtype, chan=innov_chan, **kwargs))
+            for (innov_name, func) in innov_class.items():
+                setattr(self, innov_name, func(time_dtype=time_dtype, chan=innov_chan, **kwargs))
             self._subclasses = frozenset(innov_class.keys())
 
     def save(self, filename: Path = None) -> None:
@@ -386,7 +387,7 @@ class Kf(Frozen):
         # Load data
         out = cls()  # TODO: dynamically determine subclass field names and pv option?
         with h5py.File(filename, "r") as file:
-            for (key, grp) in file.items():
+            for grp in file.values():  # pylint: disable=too-many-nested-blocks
                 for field in grp:
                     if field in subclasses:
                         inner_grp = grp[field]
@@ -413,7 +414,7 @@ class Kf(Frozen):
         return out
 
     def combine(self, kf2: Kf, /, *, inplace: bool = False) -> Kf:
-        r"""Combines two KfInnov structures together."""
+        r"""Combines two Kf structures together."""
         # allow an empty structure to be passed through
         if self.time is None:
             if inplace:
@@ -432,7 +433,7 @@ class Kf(Frozen):
         kf.time = np.hstack((self.time, kf2.time))
         kf.istate = self.istate.copy() if self.istate is not None else None
         kf.active = self.active.copy() if self.active is not None else None  # TODO: assert that they are the same?
-        for field in {"att", "pos", "vel", "state", "covar"}:
+        for field in frozenset({"att", "pos", "vel", "state", "covar"}):
             if (x := getattr(self, field)) is not None and (y := getattr(kf2, field)) is not None:
                 setattr(kf, field, np.column_stack((x, y)))
         for sub in self._subclasses:
@@ -460,6 +461,7 @@ class Kf(Frozen):
     def chop(
         self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
     ) -> Union[Kf, Tuple[Kf, Kf, Kf]]:
+        r"""Chops the Kf structure to the given time bounds."""
         exclude = frozenset({"name", "chan", "active", "istate"} | self._subclasses)
         out = _chop_wrapper(
             self,
@@ -600,7 +602,7 @@ class KfRecord(Frozen):
         assert kfrecord.time is not None
         assert kfrecord2.time is not None
         kfrecord.time = np.hstack((self.time, kfrecord2.time))
-        for field in {"P", "stm", "H", "Pz", "K", "z"}:
+        for field in frozenset({"P", "stm", "H", "Pz", "K", "z"}):
             if (x := getattr(self, field)) is not None and (y := getattr(kfrecord2, field)) is not None:
                 setattr(kfrecord, field, np.concatenate((x, y), axis=x.ndim - 1))
         return kfrecord
@@ -626,6 +628,7 @@ class KfRecord(Frozen):
     def chop(
         self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
     ) -> Union[KfRecord, Tuple[KfRecord, KfRecord, KfRecord]]:
+        r"""Chops the KfRecord structure to the given time bounds."""
         exclude: FrozenSet[str] = frozenset({})
         out = _chop_wrapper(
             self, exclude=exclude, ti=ti, tf=tf, include_last=include_last, inplace=inplace, return_ends=return_ends

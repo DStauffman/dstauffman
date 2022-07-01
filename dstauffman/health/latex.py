@@ -185,11 +185,11 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
         right = bins[r + 1] - dt
         # check for large values, and replace appropriately
         if left == right:
-            this_str = "{:g}".format(left)
+            this_str = f"{left:g}"
         elif right < cutoff:
-            this_str = "{:g}-{:g}".format(left, right)
+            this_str = f"{left:g}-{right:g}"
         else:
-            this_str = "{:g}+".format(left)
+            this_str = f"{left:g}+"
         # save this result
         out.append(this_str)
     # return everything combined as a list

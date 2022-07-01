@@ -4,11 +4,12 @@ Plots related to Kalman Filter analysis.
 Notes
 -----
 #.  Written by David C. Stauffer in April 2019.
-"""
+"""  # pylint: disable=too-many-lines
 
 #%% Imports
 import doctest
 import logging
+from typing import Optional
 import unittest
 
 from slog import LogLevel
@@ -296,7 +297,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     # initialize outputs
     figs = []
-    err = dict()
+    err = {}
     printed = False
 
     if truth is not None:
@@ -306,7 +307,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     for (field, description) in fields.items():
         # print status
         if not printed:
-            logger.log(LogLevel.L4, f"Plotting {description} plots ...")
+            logger.log(LogLevel.L4, "Plotting %s plots ...", description)
             printed = True
         # make plots
         out = make_quaternion_plot(
@@ -465,14 +466,14 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
     # initialize outputs
     figs = []
-    err = dict()
+    err = {}
     printed = False
 
     # call wrapper function for most of the details
     for (field, description) in fields.items():
         # print status
         if not printed:
-            logger.log(LogLevel.L4, f"Plotting {description} plots ...")
+            logger.log(LogLevel.L4, "Plotting %s plots ...", description)
             printed = True
         # make plots
         out = make_difference_plot(
@@ -692,7 +693,7 @@ def plot_innovations(
 
     # Initialize outputs
     figs = []
-    err = dict()
+    err = {}
     printed = False
 
     #% call wrapper functions for most of the details
@@ -700,7 +701,7 @@ def plot_innovations(
         full_description = description + " - " + sub_description if description else sub_description
         # print status
         if not printed:
-            logger.log(LogLevel.L4, f"Plotting {full_description} plots ...")
+            logger.log(LogLevel.L4, "Plotting %s plots ...", full_description)
             printed = True
         # make plots
         if "Normalized" in sub_description:
@@ -815,11 +816,13 @@ def plot_innovations(
             )
         if plot_by_number and field_one is not None:
             this_number = None
+            quad_name: Optional[str] = None
             for (quad, quad_name) in number_field.items():
                 if hasattr(kf1, quad):
                     this_number = getattr(kf1, quad)
                     break
             if this_number is not None:
+                assert isinstance(quad_name, str), "quad_name should have been set in earlier for loop."
                 num_names = {num: quad_name + " " + str(num) for num in np.unique(this_number)}
                 figs += make_categories_plot(
                     full_description + " by " + quad_name,
@@ -957,7 +960,7 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
     name = kf1.name + " - " if kf1.name else ""
     description = name + "Focal Plane Sightings"
     extra_text = f' (by {kwargs["color_by"]})' if "color_by" in kwargs and kwargs["color_by"] != "none" else ""
-    logger.log(LogLevel.L4, f"Plotting {description} plots {extra_text}...")
+    logger.log(LogLevel.L4, "Plotting %s plots %s...", description, extra_text)
 
     # check for data
     if kf1.fploc is None:
@@ -1009,6 +1012,7 @@ def plot_innov_hist(
     pdf_x=None,
     pdf_y=None,
 ):
+    r"""Plots the innovation histogram."""
     # check optional inputs
     if kf1 is None:
         kf1 = KfInnov()
@@ -1018,7 +1022,7 @@ def plot_innov_hist(
         fields = {"innov": "Innovations", "norm": "Normalized Innovations"}
 
     description = kf1.name if kf1.name else ""
-    logger.log(LogLevel.L4, f"Plotting {description} plots ...")
+    logger.log(LogLevel.L4, "Plotting %s plots ...", description)
 
     # check for data
     if kf1.innov is None:
@@ -1036,7 +1040,7 @@ def plot_innov_hist(
         )
         # print status
         if not printed:
-            logger.log(LogLevel.L4, f"Plotting {full_description} plots ...")
+            logger.log(LogLevel.L4, "Plotting %s plots ...", full_description)
             printed = True
         data = getattr(kf1, field)
         for i in range(data.shape[0]):
@@ -1149,7 +1153,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     name_two     = kwargs.pop("name_two", kf2.name)
     # fmt: on
     if groups is None:
-        groups = [i for i in range(num_chan)]
+        groups = list(range(num_chan))
 
     # determine if converting units
     is_date_1 = is_datetime(kf1.time)
@@ -1186,11 +1190,11 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
 
     # initialize output
     figs = []
-    err = dict()
+    err = {}
 
     #% call wrapper functions for most of the details
     for (field, description) in fields.items():
-        logger.log(LogLevel.L4, f"Plotting {description} plots ...")
+        logger.log(LogLevel.L4, "Plotting %s plots ...", description)
         err[field] = {}
         for (ix, states) in enumerate(groups):
             this_units = units if isinstance(units, str) else units[ix]
@@ -1261,7 +1265,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     # Setup plots
     setup_plots(figs, opts)
     if not figs:
-        logger.log(LogLevel.L5, f"No {'/'.join(fields.values())} data was provided, so no plots were generated.")
+        logger.log(LogLevel.L5, "No {'/'.join(fields.values())} data was provided, so no plots were generated.")
     if return_err:
         return (figs, err)
     return figs

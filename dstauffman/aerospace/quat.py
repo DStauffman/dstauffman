@@ -4,7 +4,7 @@ Contains generic quaternion utilities that can be independently defined and used
 Notes
 -----
 #.  Written by David C. Stauffer in April 2015.
-"""
+"""  # pylint: disable=too-many-lines
 
 #%% Imports
 from __future__ import annotations
@@ -51,7 +51,7 @@ def suppress_quat_checks() -> None:
     >>> suppress_quat_checks()
 
     """
-    global _USE_ASSERTIONS
+    global _USE_ASSERTIONS  # pylint: disable=global-statement
     _USE_ASSERTIONS = False
 
 
@@ -70,7 +70,7 @@ def unsuppress_quat_checks() -> None:
     >>> unsuppress_quat_checks()
 
     """
-    global _USE_ASSERTIONS
+    global _USE_ASSERTIONS  # pylint: disable=global-statement
     _USE_ASSERTIONS = True
 
 
@@ -107,11 +107,11 @@ def quat_assertions(
     qndim = quat.ndim
     # check sizes and dimensions
     if qndim == 1:
-        assert qsize == 0 or qsize == QUAT_SIZE, 'Quaternion has invalid size: "{}"'.format(qsize)
+        assert qsize in {0, QUAT_SIZE}, f'Quaternion has invalid size: "{qsize}"'
     elif qndim == 2:
-        assert quat.shape[0] == QUAT_SIZE, "Quaternion has invalid size for first " + 'dimension: "{}"'.format(quat.shape[0])
+        assert quat.shape[0] == QUAT_SIZE, "Quaternion has invalid size for first " + f'dimension: "{quat.shape[0]}"'
     else:
-        assert False, 'Quaternion has too many dimensions: "{}".'.format(qndim)
+        assert False, f'Quaternion has too many dimensions: "{qndim}".'
     # if a null quaternion, then checks are done
     if qsize == 0:
         return
@@ -125,10 +125,10 @@ def quat_assertions(
             else:
                 assert False, "NaNs are not allow in quaternion."
         else:
-            assert -1 <= quat[0] <= 1, 'Quaternion has bad range in x value: "{}"'.format(quat[0])
-            assert -1 <= quat[1] <= 1, 'Quaternion has bad range in y value: "{}"'.format(quat[1])
-            assert -1 <= quat[2] <= 1, 'Quaternion has bad range in z value: "{}"'.format(quat[2])
-            assert  0 <= quat[3] <= 1, 'Quaternion has bad range in s value: "{}"'.format(quat[3])  # fmt: skip
+            assert -1 <= quat[0] <= 1, f'Quaternion has bad range in x value: "{quat[0]}"'
+            assert -1 <= quat[1] <= 1, f'Quaternion has bad range in y value: "{quat[1]}"'
+            assert -1 <= quat[2] <= 1, f'Quaternion has bad range in z value: "{quat[2]}"'
+            assert  0 <= quat[3] <= 1, f'Quaternion has bad range in s value: "{quat[3]}"'  # fmt: skip
     else:
         if np.any(nans := np.isnan(quat)):
             if allow_nans:
@@ -140,23 +140,23 @@ def quat_assertions(
         ix = ~np.isnan(quat[0, :])
         assert np.all(-1 <= quat[0, ix]) and np.all(
             quat[0, ix] <= 1
-        ), 'Quaternion has bad range in x value, min: "{}", max:"{}"'.format(np.min(quat[0, ix]), np.max(quat[0, ix]))
+        ), f'Quaternion has bad range in x value, min: "{np.min(quat[0, ix])}", max:"{np.max(quat[0, ix])}"'
         assert np.all(-1 <= quat[1, ix]) and np.all(
             quat[1, ix] <= 1
-        ), 'Quaternion has bad range in y value, min: "{}", max:"{}"'.format(np.min(quat[1, ix]), np.max(quat[1, ix]))
+        ), f'Quaternion has bad range in y value, min: "{np.min(quat[1, ix])}", max:"{np.max(quat[1, ix])}"'
         assert np.all(-1 <= quat[2, ix]) and np.all(
             quat[2, ix] <= 1
-        ), 'Quaternion has bad range in z value, min: "{}", max:"{}"'.format(np.min(quat[2, ix]), np.max(quat[2, ix]))
+        ), f'Quaternion has bad range in z value, min: "{np.min(quat[2, ix])}", max:"{np.max(quat[2, ix])}"'
         assert np.all(0 <= quat[3, ix]) and np.all(
             quat[3, ix] <= 1
-        ), 'Quaternion has bad range in s value, min: "{}", max:"{}"'.format(np.min(quat[3, ix]), np.max(quat[3, ix]))
+        ), f'Quaternion has bad range in s value, min: "{np.min(quat[3, ix])}", max:"{np.max(quat[3, ix])}"'
 
     # check normalization
     q_norm_err = np.abs(1 - np.sum(quat**2, axis=0))
     norm_check = q_norm_err <= precision
     if allow_nans:
         norm_check |= np.isnan(q_norm_err)
-    assert np.all(norm_check), 'Quaternion has invalid normalization error "{}".'.format(np.max(q_norm_err))
+    assert np.all(norm_check), f'Quaternion has invalid normalization error "{np.max(q_norm_err)}".'
 
 
 #%% Functions - enforce_pos_scalar
@@ -249,7 +249,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
         axis_set = set(axis)  # type: ignore[arg-type]
     except TypeError:
         axis_set = {axis}
-    assert len(axis_set - {1, 2, 3}) == 0, "axis_set = {}".format(axis_set)
+    assert len(axis_set - {1, 2, 3}) == 0, f"axis_set = {axis_set}"
     # calculations
     quat: np.ndarray
     if np.isscalar(angle) and np.isscalar(axis):
@@ -517,7 +517,7 @@ def quat_from_euler(angles: ArrayLike, seq: ArrayLike = None, **kwargs) -> np.nd
         # note that was 2D
         is_vector = False
     else:
-        raise ValueError('Unexpected number of dimensions in angle: "{}"'.format(ndim))
+        raise ValueError(f'Unexpected number of dimensions in angle: "{ndim}"')
     # get the number of quaternions to end up making
     assert isinstance(angles, np.ndarray)
     num = angles.shape[1]
@@ -532,8 +532,8 @@ def quat_from_euler(angles: ArrayLike, seq: ArrayLike = None, **kwargs) -> np.nd
     for i in range(num):
         q_temp = np.array([0.0, 0.0, 0.0, 1.0])
         # apply each rotation
-        for j in range(len(seq)):  # type: ignore[arg-type]
-            q_single = qrot(seq[j], angles[j, i], **kwargs)  # type: ignore[index]
+        for (j, this_seq) in enumerate(seq):  # type: ignore[arg-type]
+            q_single = qrot(this_seq, angles[j, i], **kwargs)
             q_temp = quat_mult(q_temp, q_single, **kwargs)
         # save output
         quat[:, i] = q_temp
@@ -602,7 +602,7 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
     if num == 0:
         # optimization for when ti is empty
         return qout
-    elif num == 1:
+    if num == 1:
         # optimization for simple use case(s), where ti is a scalar and contained in time
         if ti in time:
             ix = np.where(ti == time)[0]
@@ -619,8 +619,7 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
     if np.any(ix_exclusive):
         if inclusive:
             raise ValueError("Desired time not found within input time vector.")
-        else:
-            logger.log(LogLevel.L8, "Desired time not found within input time vector.")
+        logger.log(LogLevel.L8, "Desired time not found within input time vector.")
 
     # Given times
     # find desired points that are contained in input time vector
@@ -1049,7 +1048,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
         seq = (3, 1, 2)
     # assert quaternion checks
     quat_assertions(quat, **kwargs)
-    assert len(seq) == 3, 'Sequence must have len of 3, not "{}"'.format(len(seq))
+    assert len(seq) == 3, f'Sequence must have len of 3, not "{len(seq)}"'
     if quat.ndim == 1:
         # quat is a 1D
         is_vector = True
@@ -1138,7 +1137,7 @@ def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], 
             c2_c3                     =  dcm[2, 2]
             group = 2
         else:
-            raise ValueError('Invalid axis rotation sequence: "{}"'.format(seq_str))
+            raise ValueError(f'Invalid axis rotation sequence: "{seq_str}"')
         # fmt: on
 
         # Compute angles

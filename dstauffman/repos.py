@@ -61,7 +61,7 @@ def run_docstrings(files: List[Path], verbose: bool = False) -> int:
     """
     # disable plots from showing up
     try:
-        from dstauffman.plotting import suppress_plots
+        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
     except:
         pass
     else:
@@ -75,7 +75,7 @@ def run_docstrings(files: List[Path], verbose: bool = False) -> int:
             print("******************************")
             print("******************************")
             print(f'Testing "{file}":')
-        (failure_count, test_count) = doctest.testfile(file, report=True, verbose=verbose, module_relative=False)  # type: ignore[arg-type]
+        (failure_count, _) = doctest.testfile(file, report=True, verbose=verbose, module_relative=False)  # type: ignore[arg-type]
         if failure_count > 0:
             had_failure = True
     return_code = ReturnCodes.test_failures if had_failure else ReturnCodes.clean
@@ -108,7 +108,7 @@ def run_unittests(names: str, verbose: bool = False) -> int:
     """
     # disable plots from showing up
     try:
-        from dstauffman.plotting import suppress_plots
+        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
     except:
         pass
     else:
@@ -147,7 +147,7 @@ def run_pytests(folder: Path, *args, **kwargs) -> int:
     """
     # disable plots from showing up
     try:
-        from dstauffman.plotting import suppress_plots
+        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
     except:
         pass
     else:
@@ -156,7 +156,7 @@ def run_pytests(folder: Path, *args, **kwargs) -> int:
     # open a qapp
     qapp: Union[None, QApplication, QCoreApplication]
     try:
-        from qtpy.QtWidgets import QApplication
+        from qtpy.QtWidgets import QApplication  # pylint: disable=import-outside-toplevel
     except ModuleNotFoundError:
         qapp = None
     else:
@@ -321,16 +321,16 @@ def find_repo_issues(
                             print(f'Evaluating: "{this_file}"')
                             already_listed = True
                             is_clean = False
-                        print("    Line {:03}: ".format(c + 1) + repr(line))
+                        print(f"    Line {c + 1:03}: " + repr(line))
                     elif trailing and len(sline) >= 1 and sline[-1] == " ":
                         if not already_listed:
                             print(f'Evaluating: "{this_file}"')
                             already_listed = True
                             is_clean = False
-                        print("    Line {:03}: ".format(c + 1) + repr(line))
+                        print(f"    Line {c + 1:03}: " + repr(line))
                     if check_eol is not None and c != len(lines) - 1 and not line.endswith(check_eol) and not bad_lines:
                         line_ending = line[-(len(line) - len(sline)) :]
-                        print('File: "{}" has bad line endings of "{}".'.format(this_file, repr(line_ending)[1:-1]))
+                        print(f'File: "{this_file}" has bad line endings of "{repr(line_ending)[1:-1]}".')
                         bad_lines = True
                         is_clean = False
     # end checks, return overall result
@@ -481,7 +481,7 @@ def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, file
             # only process source *.py files
             if this_elem.suffix == ".py":
                 # exclude any existing "__init__.py" file
-                if any([exc in this_elem.parents for exc in exclusions]):
+                if any((exc in this_elem.parents for exc in exclusions)):
                     continue
                 # read the contents of the file
                 this_text = read_text_file(this_elem)
@@ -491,14 +491,10 @@ def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, file
                 if len(funcs) > 0:
                     results[this_elem.stem] = funcs
     # check for duplicates
-    all_funcs = [func for k in results for func in results[k]]
+    all_funcs = [func for v in results.values() for func in v]
     if len(all_funcs) != len(set(all_funcs)):
-        print(
-            "Uniqueness Problem: {funs} functions, but only {uni_funcs} unique functions".format(
-                funs=len(all_funcs), uni_funcs=len(set(all_funcs))
-            )
-        )
-    dups = set([x for x in all_funcs if all_funcs.count(x) > 1])
+        print(f"Uniqueness Problem: {len(all_funcs)} functions, but only {len(set(all_funcs))} unique functions")
+    dups = set((x for x in all_funcs if all_funcs.count(x) > 1))
     if dups:
         print("Duplicated functions:")
         print(dups)

@@ -383,10 +383,7 @@ def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="date
             is_actual_date = True
         elif isinstance(date, list):
             # Note: this assumes all entries of the list are the same
-            if len(date) > 0 and isinstance(date[0], (datetime.datetime, datetime.date)):
-                is_actual_date = True
-            else:
-                is_actual_date = False
+            is_actual_date = len(date) > 0 and isinstance(date[0], (datetime.datetime, datetime.date))
         elif isinstance(date, (int, float)):
             is_actual_date = isfinite(date)
         else:
@@ -597,8 +594,7 @@ def convert_num_dt_to_np(dt, /, units="sec", np_units=NP_TIMEDELTA_FORM):
     5400000000000 nanoseconds
 
     """
-    if units in _NP_MAP:
-        units = _NP_MAP[units]
+    units = _NP_MAP.get(units, units)
     return np.timedelta64(dt, units).astype(np_units)
 
 

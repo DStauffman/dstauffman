@@ -34,6 +34,7 @@ def d_2_r(deg: np.ndarray) -> np.ndarray:
 
 
 def d_2_r(deg: _N) -> _N:
+    r"""Converts degrees to radians."""
     return DEG2RAD * deg
 
 
@@ -49,49 +50,53 @@ def r_2_d(rad: np.ndarray) -> np.ndarray:
 
 
 def r_2_d(rad: _N) -> _N:
+    r"""Converts radians to degrees."""
     return RAD2DEG * rad
 
 
 #%% Functions - norm
 def norm(x):
+    r"""Alias to the magnitude function, calculating the vector magnitude."""
     return np.asanyarray(magnitude(x))
 
 
 #%% Functions - dot
 def dot(x, y):
+    r"""Dot product between two vectors."""
     return np.sum(x * y, axis=0)
 
 
 #%% Functions - cross
 def cross(x, y):
+    r"""Cross product between two vectors."""
     return np.cross(x.T, y.T).T
 
 
 #%% Functions - jd_to_numpy
 @overload
-def jd_to_numpy(jd: float) -> np.datetime64:
+def jd_to_numpy(time_jd: float) -> np.datetime64:
     ...
 
 
 @overload
-def jd_to_numpy(jd: np.ndarray) -> np.ndarray:
+def jd_to_numpy(time_jd: np.ndarray) -> np.ndarray:
     ...
 
 
-def jd_to_numpy(jd: _N) -> Union[np.datetime64, np.ndarray]:
+def jd_to_numpy(time_jd: _N) -> Union[np.datetime64, np.ndarray]:
     r"""
     Converts a julian date to a numpy datetime64.
 
     Examples
     --------
     >>> from dstauffman.aerospace import jd_to_numpy
-    >>> jd = 2451546.5
-    >>> date = jd_to_numpy(jd)
+    >>> time_jd = 2451546.5
+    >>> date = jd_to_numpy(time_jd)
     >>> print(date)
     2000-01-02T12:00:00.000000000
 
     """
-    delta_days = jd - JULIAN["jd_2000_01_01"]
+    delta_days = time_jd - JULIAN["jd_2000_01_01"]
     out = np.datetime64("2000-01-01T00:00:00", NP_DATETIME_UNITS) + NP_ONE_DAY * delta_days
     return out
 
@@ -116,8 +121,8 @@ def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.
     >>> from dstauffman.aerospace import numpy_to_jd
     >>> import numpy as np
     >>> date = np.datetime64("2000-01-02T12:00:00")
-    >>> jd = numpy_to_jd(date)
-    >>> print(jd)
+    >>> time_jd = numpy_to_jd(date)
+    >>> print(time_jd)
     2451546.5
 
     """
@@ -317,14 +322,46 @@ def ijk_2_sez(ijk, geo_loc, time_jd):
 
 
 #%% Functions - long_2_sidereal
-def long_2_sidereal(lambda_, time_jd):
-    r"""Converts a geographic longitude to sidereal longitude."""
+def long_2_sidereal(lon: _N, time_jd: _N) -> _N:
+    r"""
+    Converts a geographic longitude to sidereal longitude.
+
+    Parameters
+    ----------
+    lon : float or (N, ) ndarray
+        Geographic longitude [rad]
+    time_jd : float or (N, ) ndarray
+        Julian date
+
+    Returns
+    -------
+    theta : float or (N, ) ndarray
+        Sidereal longitude [rad]
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer for AA279 on 12 May 2007.
+    #.  Translated into Python by David C. Stauffer in October 2021.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import long_2_sidereal
+    >>> from math import pi
+    >>> lon = -2.13
+    >>> time_jd = 2454587
+    >>> theta = long_2_sidereal(lon, time_jd)
+    >>> print(f"{theta:.8f}")
+    4.83897078
+
+    """
     # epoch
     to = JULIAN["tg0_2000_time"]
     # theta at epoch
     theta_go = JULIAN["tg0_2000"]
+    # earth rate per day
+    earth_rate = EARTH["omega"] * JULIAN["day"]
     # find theta
-    theta = np.mod(theta_go + EARTH["omega"] * JULIAN["day"] * (time_jd - to) + lambda_, TAU)
+    theta = np.mod(theta_go + earth_rate * (time_jd - to) + lon, TAU)
     return theta
 
 
@@ -428,6 +465,7 @@ def sez_2_ijk(sez, geo_loc, time_jd):
 
 #%% Functions - rv_aer_2_ijk
 def rv_aer_2_ijk(r_aer, v_aer, geo_loc, time_jd):
+    r"""Converts position and velocity from Az/El/range to IJK cartesion."""
     # transform to SEZ frame
     (r_sez, v_sez) = rv_aer_2_sez(r_aer, v_aer)
     # transform to IJK frame
@@ -437,6 +475,7 @@ def rv_aer_2_ijk(r_aer, v_aer, geo_loc, time_jd):
 
 #%% Functions - rv_aer_2_sez
 def rv_aer_2_sez(r_aer, v_aer):
+    r"""Converts position and velocity from Az/El/range to SEZ cartesion."""
     # tranform position vector
     r_sez = aer_2_sez(r_aer)
 
@@ -461,6 +500,7 @@ def rv_aer_2_sez(r_aer, v_aer):
 
 #%% Functions - rv_ijk_2_aer
 def rv_ijk_2_aer(r_ijk, v_ijk, geo_loc, time_jd):
+    r"""Converts position and velocity IJK cartesion to Az/El/range."""
     # transform from IJK frame to SEZ frame
     (r_sez, v_sez) = rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd)
     # transform from SEZ frame to AER frame
@@ -470,6 +510,7 @@ def rv_ijk_2_aer(r_ijk, v_ijk, geo_loc, time_jd):
 
 #%% Functions - rv_ijk_2_sez
 def rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd):
+    r"""Converts position and velocity from IJK to SEZ cartesian."""
     # transform position from SEZ to IJK frame
     r_sez = sez_2_ijk(r_ijk, geo_loc, time_jd)
     # TODO: is this really true?
@@ -479,6 +520,7 @@ def rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd):
 
 #%% Functions - rv_sez_2_aer
 def rv_sez_2_aer(r_sez, v_sez):
+    r"""Converts position and velocity SEZ cartesion to Az/El/range."""
     # transform position from SEZ to AER frame
     r_aer = sez_2_aer(r_sez)
     # TODO: calculate v_aer - don't think this is correct.
@@ -488,6 +530,7 @@ def rv_sez_2_aer(r_sez, v_sez):
 
 #%% Functions - rv_sez_2_ijk
 def rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd):
+    r"""Converts position and velocity SEZ to IJK cartesion."""
     # transform position from SEZ to IJK frame
     r_ijk = sez_2_ijk(r_sez, geo_loc, time_jd)
     # express SEZ velocity in IJK frame

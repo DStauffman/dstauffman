@@ -271,7 +271,7 @@ def correlate_prn(prn1, prn2, shift, form):
     elif form == "one-one":
         pass
     else:
-        raise ValueError('Unexpected form: "%s"', form)
+        raise ValueError(f'Unexpected form: "{form}"')
     shift = np.asanyarray(shift)
 
     cor = np.zeros(shift.shape)

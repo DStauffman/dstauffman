@@ -50,7 +50,7 @@ else:
     from array import array as ndarray  # type: ignore[misc]
     from math import inf
 
-    from dstauffman.nubs import np_all  # type: ignore[no-redef]
+    from dstauffman.nubs import np_all  # type: ignore[no-redef]  # pylint: disable=ungrouped-imports
 
     datetime64 = ndarray  # type: ignore[assignment, misc]
 if HAVE_PANDAS:
@@ -65,7 +65,7 @@ if TYPE_CHECKING:
     _Time = Union[float, datetime64]
 
 #%% Functions - _frozen
-def _frozen(set: Callable) -> Callable:
+def _frozen(set_: Callable) -> Callable:
     r"""
     Support function for Frozen class.
 
@@ -78,15 +78,15 @@ def _frozen(set: Callable) -> Callable:
     def set_attr(self, name, value):
         if hasattr(self, name):
             # If attribute already exists, simply set it
-            set(self, name, value)
+            set_(self, name, value)
             return
-        if sys._getframe(1).f_code.co_name == "__init__":
+        if sys._getframe(1).f_code.co_name == "__init__":  # pylint: disable=protected-access
             # Allow __setattr__ calls in __init__ calls of proper object types
-            for key, val in sys._getframe(1).f_locals.items():  # pragma: no branch
+            for key, val in sys._getframe(1).f_locals.items():  # pragma: no branch  # pylint: disable=protected-access
                 if key == "self" and isinstance(val, self.__class__):  # pragma: no branch
-                    set(self, name, value)
+                    set_(self, name, value)
                     return
-        raise AttributeError("You cannot add attribute of {} to {} in {}.".format(name, self, sys._getframe(1).f_code.co_name))
+        raise AttributeError(f"You cannot add attribute of {name} to {self} in {sys._getframe(1).f_code.co_name}.")  # pylint: disable=protected-access
 
     # return the custom defined function
     return set_attr
@@ -280,7 +280,7 @@ def save_pickle(self, filename: Path = None) -> None:
 
 
 #%% Methods - load_pickle
-def load_pickle(cls: Type[_T], filename: Path = None) -> _T:
+def load_pickle(cls: Type[_T], filename: Path = None) -> _T:  # pylint: disable=unused-argument
     r"""
     Load a class instance from a pickle file.
 
@@ -606,7 +606,7 @@ def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Union[Fro
 
 
 #%% Classes - Frozen
-class Frozen(object):
+class Frozen:
     r"""
     Frozen class that doesn't allow new attributes.
 
@@ -786,7 +786,7 @@ class Counter(Frozen):
         return self
 
     def __rsub__(self, other: _C) -> _C:
-        return -self.__sub__(other)
+        return -self.__sub__(other)  # pylint: disable=invalid-unary-operand-type
 
     def __truediv__(self, other: Union[int, float]) -> float:
         if isinstance(other, (float, int)):
@@ -811,7 +811,7 @@ class Counter(Frozen):
         return str(self._val)
 
     def __repr__(self) -> str:
-        return "Counter({})".format(self._val)
+        return f"Counter({self._val})"
 
 
 #%% FixedDict
@@ -852,7 +852,7 @@ class FixedDict(dict):
         super().__init__(*args, **kwargs)
         self._frozen: bool = False
 
-    def __getitem__(self, k: Any) -> Any:
+    def __getitem__(self, k: Any) -> Any:  # pylint: disable=useless-super-delegation
         return super().__getitem__(k)
 
     def __setitem__(self, k: Any, v: Any) -> Any:
@@ -864,7 +864,7 @@ class FixedDict(dict):
     def __delitem__(self, k: Any) -> None:
         raise NotImplementedError
 
-    def __contains__(self, k: Any) -> Any:
+    def __contains__(self, k: Any) -> Any:  # pylint: disable=useless-super-delegation
         return super().__contains__(k)
 
     def __copy__(self) -> FixedDict:
@@ -881,7 +881,7 @@ class FixedDict(dict):
         # Call __new__ (and thus __init__) on unpickling.
         return ()
 
-    def get(self, k: Any, default: Any = None) -> Any:
+    def get(self, k: Any, default: Any = None) -> Any:  # pylint: disable=useless-super-delegation
         r""".get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
         return super().get(k, default)
 

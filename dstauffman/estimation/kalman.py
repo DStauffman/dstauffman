@@ -261,7 +261,7 @@ def propagate_covariance(P, phi, Q, *, gamma=None, inplace=True):
     >>> P = 1e-3 * np.eye(6)
     >>> phi = np.diag([1., 1, 1, -1, -1, -1])
     >>> Q = np.diag([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7])
-    >>> propagate_covariance(P, phi, Q)
+    >>> _ = propagate_covariance(P, phi, Q)
     >>> print(P[0, 0])
     0.002
 
@@ -272,8 +272,8 @@ def propagate_covariance(P, phi, Q, *, gamma=None, inplace=True):
         out = phi @ P @ phi.T + gamma @ Q @ gamma.T
     if inplace:
         P[:] = out
-    else:
-        return out
+        return P
+    return out
 
 
 @ncjit
@@ -319,7 +319,7 @@ def update_covariance(P, K, H, *, inplace=True):
     >>> P[0, -1] = 5e-2
     >>> K = np.ones((6, 3))
     >>> H = np.hstack((np.eye(3), np.eye(3)))
-    >>> update_covariance(P, K, H)
+    >>> _ = update_covariance(P, K, H)
     >>> print(P[-1, -1])
     -0.05
 
@@ -327,8 +327,8 @@ def update_covariance(P, K, H, *, inplace=True):
     out = (np.eye(*P.shape) - K @ H) @ P
     if inplace:
         P[:] = out
-    else:
-        return out
+        return P
+    return out
 
 
 @ncjit

@@ -39,7 +39,7 @@ def print_help(help_file: Path = None) -> int:
     if not help_file.is_file():
         print(f'Warning: help file at "{help_file}" was not found.')
         return ReturnCodes.bad_help_file
-    with open(help_file) as file:
+    with open(help_file, encoding="utf-8") as file:
         text = file.read()
     print(text)
     return ReturnCodes.clean
@@ -131,7 +131,7 @@ def parse_version(input_args: List[str]) -> argparse.Namespace:
 
 
 #%% Functions - execute_help
-def execute_help(args: argparse.Namespace) -> int:
+def execute_help(args: argparse.Namespace) -> int:  # pylint: disable=unused-argument
     r"""
     Executes the help command.
 
@@ -157,7 +157,7 @@ def execute_help(args: argparse.Namespace) -> int:
 
 
 #%% Functions - execute_version
-def execute_version(args: argparse.Namespace) -> int:
+def execute_version(args: argparse.Namespace) -> int:  # pylint: disable=unused-argument
     r"""
     Executes the version command.
 

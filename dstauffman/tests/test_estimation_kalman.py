@@ -154,12 +154,12 @@ class Test_estimation_propagate_covariance(unittest.TestCase):
 
     def test_nominal(self) -> None:
         out = estm.propagate_covariance(self.P, self.phi, self.Q)
-        self.assertIsNone(out)
+        self.assertIs(out, self.P)
         self.assertEqual(self.P[0, 0], self.exp)
 
     def test_gamma(self) -> None:
         out = estm.propagate_covariance(self.P, self.phi, self.Q, gamma=self.gamma)
-        self.assertIsNone(out)
+        self.assertIs(out, self.P)
         self.assertEqual(self.P[0, 0], self.exp)
 
     def test_nominal_out(self) -> None:
@@ -200,7 +200,7 @@ class Test_estimation_update_covariance(unittest.TestCase):
 
     def test_nominal(self) -> None:
         out = estm.update_covariance(self.P, self.K, self.H, inplace=True)
-        self.assertIsNone(out)
+        self.assertIs(out, self.P)
         self.assertEqual(self.P[-1, -1], self.exp)
 
     def test_out(self) -> None:

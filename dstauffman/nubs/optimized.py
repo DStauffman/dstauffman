@@ -63,7 +63,7 @@ def np_any(x: Sequence, /) -> bool:
     True
 
     """
-    for i in range(len(x)):
+    for i in range(len(x)):  # pylint: disable=consider-using-enumerate
         if x[i]:
             return True
     return False
@@ -99,7 +99,7 @@ def np_all(x: Sequence, /) -> bool:
     False
 
     """
-    for i in range(len(x)):
+    for i in range(len(x)):  # pylint: disable=consider-using-enumerate
         if not x[i]:
             return False
     return True

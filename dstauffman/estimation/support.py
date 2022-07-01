@@ -154,7 +154,7 @@ def get_parameter(param: Any, names: List[str]) -> List[Any]:
         # check that this name is valid
         is_valid = _check_valid_param_name(param, name)
         if not is_valid:
-            raise ValueError('Bad name "{}"'.format(name))
+            raise ValueError(f'Bad name "{name}"')
         # split the name into parts
         parts = name.split(".")
         # loop through sublevels until you get the last value and add it to a set
@@ -201,7 +201,7 @@ def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
         # check that this name is valid
         is_valid = _check_valid_param_name(param, name)
         if not is_valid:
-            raise ValueError('Bad name "{}"'.format(name))
+            raise ValueError(f'Bad name "{name}"')
         # split the name into parts
         parts = name.split(".")
         # loop through sublevels until you get to the appropriate level

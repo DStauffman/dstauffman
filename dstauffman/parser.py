@@ -25,7 +25,7 @@ _VALID_COMMANDS = frozenset({"coverage", "enforce", "help", "make_init", "tests"
 
 
 @dataclass(frozen=True)
-class _Flags(object):
+class _Flags:
     log_level: Optional[int]
     use_display: bool
     use_plotting: bool
@@ -96,7 +96,7 @@ def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
 
     """
     # delayed import of commands
-    import dstauffman.commands as commands
+    import dstauffman.commands as commands  # pylint: disable=import-outside-toplevel
 
     # check for valid commands
     if command in _VALID_COMMANDS:
@@ -104,7 +104,7 @@ def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
         func = getattr(commands, "parse_" + command)
         parsed_args: argparse.Namespace = func(args)
     else:
-        raise ValueError('Unexpected command "{}".'.format(command))
+        raise ValueError(f'Unexpected command "{command}".')
     return parsed_args
 
 
@@ -112,7 +112,7 @@ def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
 def execute_command(command: str, args: argparse.Namespace) -> int:
     r"""Executes the given command."""
     # delayed import of commands
-    import dstauffman.commands as commands
+    import dstauffman.commands as commands  # pylint: disable=import-outside-toplevel
 
     # check for valid commands
     if command in _VALID_COMMANDS:
@@ -166,7 +166,7 @@ def process_command_line_options(log_start: Union[bool, str] = None) -> _Flags:
             else:
                 raise ValueError(f'Unexpected logging input of: "{opt}".')
             activate_logging(log_level, log_start=log_start)
-            logger.log(log_level, "Configuring Log Level at: " + str(log_level))
+            logger.log(log_level, "Configuring Log Level at: %s", log_level)
 
     # get other settings
     use_display = "-nodisp" not in sys.argv
@@ -174,7 +174,7 @@ def process_command_line_options(log_start: Union[bool, str] = None) -> _Flags:
     use_hdf5 = "-nohdf5" not in sys.argv
 
     # log any non-defaults
-    print_func = lambda x: print(x) if log_level is None else lambda x: logger.log(LogLevel.L3, x)
+    print_func = lambda x: print(x) if log_level is None else lambda x: logger.log(LogLevel.L3, x)  # pylint: disable=unnecessary-lambda-assignment
     if not use_display:
         print_func("Running without displaying any plots.")
     if not use_plotting:
@@ -184,7 +184,7 @@ def process_command_line_options(log_start: Union[bool, str] = None) -> _Flags:
 
     # do operations based on those settings
     if use_plotting and not use_display:
-        from dstauffman.plotting import suppress_plots
+        from dstauffman.plotting import suppress_plots  # pylint: disable=import-outside-toplevel
 
         suppress_plots()
 

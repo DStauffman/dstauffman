@@ -27,7 +27,7 @@ if HAVE_NUMPY:
 else:
     from math import sqrt  # type: ignore[misc]
 
-    from dstauffman.nubs import np_any
+    from dstauffman.nubs import np_any  # pylint: disable=ungrouped-imports
 if HAVE_SCIPY:
     from scipy.optimize import root
 if TYPE_CHECKING:
@@ -40,12 +40,11 @@ logger = logging.getLogger(__name__)
 def _any(x: Any) -> bool:
     if isinstance(x, bool):
         return x
-    elif isinstance(x, (int, float)):
+    if isinstance(x, (int, float)):
         return bool(x)
-    elif HAVE_NUMPY:
+    if HAVE_NUMPY:
         return np.any(x)  # type: ignore[return-value]
-    else:
-        return np_any(x)  # type: ignore[no-any-return]
+    return np_any(x)  # type: ignore[no-any-return]
 
 
 #%% Functions - anomaly_eccentric_2_mean
@@ -271,6 +270,11 @@ def anomaly_mean_2_eccentric(M, e):
     0.0
 
     """
+
+    def _anomalies(E, M, e):
+        r"""(Non-linear) Relationship between anomalies to be used in root finder."""
+        return M - E + e * np.sin(E)
+
     # check if orbit is circular or elliptical
     if np.any(e >= 1):
         raise ValueError("The mean anomaly is not defined when e >= 1")
@@ -286,14 +290,14 @@ def anomaly_mean_2_eccentric(M, e):
         M = np.repeat(M, l2)
         e = np.repeat(e, l1)
     if l1 == 1 and l2 == 1:
-        temp = root(lambda E: M - E + e * np.sin(E), PI)
+        temp = root(lambda E: _anomalies(E, M, e), PI)
         E = temp.x[0]
     else:
         num = max(l1, l2)
         E = np.zeros(num)
         for i in range(num):
-            # calculate the eccentric anomalyS
-            temp = root(lambda E: M[i] - E + e[i] * np.sin(E), PI)
+            # calculate the eccentric anomaly
+            temp = root(lambda E: _anomalies(E, M[i], e[i]), PI)  # pylint: disable=cell-var-from-loop
             E[i] = temp.x[0]
     # mod with 2*pi in case a different solution was found
     E = np.mod(E, TAU)
@@ -301,55 +305,66 @@ def anomaly_mean_2_eccentric(M, e):
 
 
 #%% Functions - anomaly_mean_2_true
+def anomaly_mean_2_true(M, e):
+    r"""Finds the eccentric anomaly from the true anomaly."""
+    E = anomaly_mean_2_eccentric(M, e)
+    nu = anomaly_eccentric_2_true(E, e)
+    return nu
+
 
 #%% Functions - anomaly_true_2_eccentric
+def anomaly_true_2_eccentric(nu, e):
+    r"""Finds the true anomaly from the eccentric anomaly."""
+    # check if orbit is circular or elliptical
+    if np.any(e >= 1.0):
+        raise ValueError("The eccentric anomaly is not defined when e >= 1")
+    # check if nu is outside the range of 0 to 2*pi
+    if np.any((nu > TAU) | (nu < 0.0)):
+        logger.log(LogLevel.L6, "The true anomaly was outside the range of 0 to 2*pi")
+        nu = np.mod(nu, TAU)
+    # calculate E
+    E = np.arccos((e + np.cos(nu)) / (1.0 + e * np.cos(nu)))
+    # check half of unit circle for 0 to pi or pi to 2*pi range
+    ix = nu > PI
+    # correct nu if it falls in lower half of unit circle
+    if np.any(ix):
+        if np.size(ix) == 1:
+            E = TAU - E
+        else:
+            assert isinstance(E, np.ndarray)
+            E[ix] = TAU - E[ix]
+    return E
+
 
 #%% Functions - anomaly_true_2_hyperbolic
+def anomaly_true_2_hyperbolic(nu, e):
+    r"""Finds the hyperbolic anomaly from the true anomaly."""
+    # check if orbit is hyperbolic
+    if np.any(e < 1.0):
+        raise ValueError("The hyperbolic anomaly is not defined when e < 1")
+    # check if nu is outside the range of 0 to 2*pi
+    if np.any((nu > TAU) | (nu < 0.0)):
+        logger.log(LogLevel.L6, "The true anomaly was outside the range of 0 to 2*pi")
+        nu = np.mod(nu, TAU)
+    # calculate F
+    F = np.arccosh((e + np.cos(nu)) / (1.0 + e * np.cos(nu)))
+    # check half of unit circle for 0 to pi or pi to 2*pi range
+    ix = nu > PI
+    # correct nu if it falls in lower half plane
+    if np.any(ix):
+        if np.size(ix) == 1:
+            F = -F
+        else:
+            F = np.negative(F, where=ix, out=F)
+    return F
+
 
 #%% Functions - anomaly_true_2_mean
-
-#%% Functions - long_2_sidereal
-def long_2_sidereal(lon: _N, jd: _N) -> _N:
-    r"""
-    Converts a geographic longitude to sidereal longitude.
-
-    Parameters
-    ----------
-    lon : float or (N, ) ndarray
-        Geographic longitude [rad]
-    t : float or (N, ) ndarray
-        Julian date
-
-    Returns
-    -------
-    theta : float or (N, ) ndarray
-        Sidereal longitude [rad]
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer for AA279 on 12 May 2007.
-    #.  Translated into Python by David C. Stauffer in October 2021.
-
-    Examples
-    --------
-    >>> from dstauffman.aerospace import long_2_sidereal
-    >>> from math import pi
-    >>> lon = -2.13
-    >>> jd = 2454587
-    >>> theta = long_2_sidereal(lon, jd)
-    >>> print(f"{theta:.8f}")
-    4.83897078
-
-    """
-    # epoch
-    to = JULIAN["tg0_2000_time"]
-    # theta at epoch
-    theta_go = JULIAN["tg0_2000"]
-    # earth rate per day
-    earth_rate = EARTH["omega"] * JULIAN["day"]
-    # find theta
-    theta = np.mod(theta_go + earth_rate * (jd - to) + lon, TAU)
-    return theta
+def anomaly_true_2_mean(nu, e):
+    r"""Finds the mean anomaly from the true anomaly."""
+    E = anomaly_true_2_eccentric(nu, e)
+    M = anomaly_eccentric_2_mean(E, e)
+    return M
 
 
 #%% Functions - mean_motion_2_semimajor
@@ -583,7 +598,7 @@ def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = False) -> _N:
 
     """
     # right ascension of the sun
-    (ra_sun, dec_sun) = get_sun_radec(time_jd)
+    (ra_sun, _) = get_sun_radec(time_jd)
     # mean local time of the ascending node (hours)
     offset = 0.0 if return_descending else PI
     mltan = np.mod(raan - ra_sun + offset, TAU)

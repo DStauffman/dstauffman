@@ -8,7 +8,7 @@ Notes
 #.  Written by David C. Stauffer in May 2015 and continued in April 2016.  This work is based
     loosely on prior experience at Lockheed Martin using the GOLF/BPE code with GARSE, but all the
     numeric algorithms are re-coded from external sources to avoid any potential proprietary issues.
-"""
+"""  # pylint: disable=too-many-lines
 
 #%% Imports
 from __future__ import annotations
@@ -21,9 +21,6 @@ from pathlib import Path
 import time
 from typing import Any, Callable, ClassVar, Dict, List, Optional, Tuple, TYPE_CHECKING
 import unittest
-
-if TYPE_CHECKING:
-    from mypy_extensions import DefaultNamedArg
 
 from slog import LogLevel
 
@@ -50,6 +47,9 @@ if HAVE_NUMPY:
     nan = np.nan
 else:
     from math import inf, isnan, nan  # type: ignore[misc]
+
+if TYPE_CHECKING:
+    from mypy_extensions import DefaultNamedArg
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -104,7 +104,7 @@ class OptiOpts(Frozen):
     def __eq__(self, other: Any) -> bool:
         r"""Check for equality based on the values of the fields."""
         # if not of the same type, then they are not equal
-        if type(other) != type(self):
+        if not isinstance(other, type(self)):
             return False
         # loop through the fields, and if any are not equal, then it's not equal
         for key in vars(self):
@@ -176,7 +176,7 @@ class OptiParam(Frozen):
     def __eq__(self, other: Any) -> bool:
         r"""Check for equality between two OptiParam instances."""
         # if not of the same type, then they are not equal
-        if type(other) != type(self):
+        if not isinstance(other, type(self)):
             return False
         # loop through the fields, and if any are not equal (or both NaNs), then it's not equal
         for key in vars(self):
@@ -217,7 +217,7 @@ class OptiParam(Frozen):
         elif type_ in {"min", "max"}:
             key = type_ + "_"
         else:
-            raise ValueError('Unexpected type of "{}"'.format(type_))
+            raise ValueError(f'Unexpected type of "{type_}"')
         # pull out the data
         out = np.array([getattr(x, key) for x in opti_param])
         return out
@@ -318,7 +318,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         text = pprint_dict(dct, name=name, indent=2, align=True, disp=False)
         return text
 
-    def pprint(self) -> None:  # type: ignore[override]
+    def pprint(self) -> None:  # type: ignore[override]  # pylint: disable=arguments-differ
         r"""
         Print summary results.
 
@@ -345,10 +345,10 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         dct1 = {name.replace("param.", "param.ix(c)."): self.begin_params[i] for (i, name) in enumerate(names)}
         dct2 = {name.replace("param.", "param.ix(c)."): self.final_params[i] for (i, name) in enumerate(names)}
         # print the initial cost/values
-        print("Initial cost: {}".format(self.begin_cost))
+        print(f"Initial cost: {self.begin_cost}")
         pprint_dict(dct1, name="Initial parameters:", indent=8)
         # print the final cost/values
-        print("Final cost: {}".format(self.final_cost))
+        print(f"Final cost: {self.final_cost}")
         pprint_dict(dct2, name="Final parameters:", indent=8)
 
     @classmethod
@@ -367,7 +367,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         out: BpeResults = load_method(cls, filename=filename, use_hdf5=use_hdf5)
         out.num_evals = int(out.num_evals)
         out.num_iters = int(out.num_iters)
-        out.costs = [c for c in out.costs]
+        out.costs = list(out.costs)
         return out
 
 
@@ -401,9 +401,9 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
     def __str__(self) -> str:
         r"""Print a useful summary of results."""
         text = [" Current Results:"]
-        text.append("  Trust Radius: {}".format(self.trust_rad))
-        text.append("  Best Cost: {}".format(self.cost))
-        text.append("  Best Params: {}".format(self.params))
+        text.append(f"  Trust Radius: {self.trust_rad}")
+        text.append(f"  Best Cost: {self.cost}")
+        text.append(f"  Best Params: {self.params}")
         return "\n".join(text)
 
 
@@ -517,7 +517,7 @@ def _parfor_function_wrapper(opti_opts, msg, model_args):
         innovs = _function_wrapper(
             model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, cost_args=opti_opts.cost_args, model_args=model_args
         )
-    except Exception as e:
+    except Exception as e:  # pylint: disable=broad-except
         return MultipassExceptionWrapper(e)
     return innovs
 
@@ -614,7 +614,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         loop_params.append(temp)
 
     # setup model (for possible parallelization)
-    messages = ["  Running model with {} = {}".format(names[ix % num_param], values) for (ix, values) in enumerate(loop_params)]
+    messages = [f"  Running model with {names[ix % num_param]} = {values}" for (ix, values) in enumerate(loop_params)]
     num_evals = len(loop_params)
     each_model_args = []
     for values in loop_params:
@@ -755,25 +755,25 @@ def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
         convergence = True
         logger.log(
             LogLevel.L3,
-            "Declare convergence because cosmax of {} <= options.tol_cosmax_grad of {}".format(
-                cosmax, opti_opts.tol_cosmax_grad
-            ),
+            "Declare convergence because cosmax of %s <= options.tol_cosmax_grad of %s",
+            cosmax,
+            opti_opts.tol_cosmax_grad,
         )
     if delta_step_len <= opti_opts.tol_delta_step:
         convergence = True
         logger.log(
             LogLevel.L3,
-            "Declare convergence because delta_step_len of {} <= options.tol_delta_step of {}".format(
-                delta_step_len, opti_opts.tol_delta_step
-            ),
+            "Declare convergence because delta_step_len of %s <= options.tol_delta_step of %s",
+            delta_step_len,
+            opti_opts.tol_delta_step,
         )
     if abs(pred_func_change) <= opti_opts.tol_delta_cost:
         convergence = True
         logger.log(
             LogLevel.L3,
-            "Declare convergence because abs(pred_func_change) of {} <= options.tol_delta_cost of {}".format(
-                abs(pred_func_change), opti_opts.tol_delta_cost
-            ),
+            "Declare convergence because abs(pred_func_change) of %s <= options.tol_delta_cost of %s",
+            abs(pred_func_change),
+            opti_opts.tol_delta_cost,
         )
     return convergence
 
@@ -941,10 +941,12 @@ def _dogleg_search(
             # fmt: on
 
         else:
-            raise ValueError('Unexpected value for search_method of "{}".'.format(search_method))
+            raise ValueError(f'Unexpected value for search_method of "{search_method}".')
 
         # predict function change based on linearized model
-        pred_func_change = _predict_func_change(new_delta_param, gradient, hessian)  # noqa: F841
+        pred_func_change = _predict_func_change(  # noqa: F841  # pylint: disable=unused-variable
+            new_delta_param, gradient, hessian
+        )
 
         # set new parameter values
         params = orig_params + new_delta_param
@@ -1023,9 +1025,9 @@ def _dogleg_search(
                 num_shrinks += 1
                 try_again = True
 
-        logger.log(LogLevel.L8, " Tried a {} step of length: {}, (with scale: {}).".format(step_type, step_len, step_scale))
-        logger.log(LogLevel.L8, " New trial cost: {}".format(trial_cost))
-        logger.log(LogLevel.L8, " With result: {}".format(step_resolution))
+        logger.log(LogLevel.L8, " Tried a %s step of length: %s, (with scale: %s).", step_type, step_len, step_scale)
+        logger.log(LogLevel.L8, " New trial cost: %s", trial_cost)
+        logger.log(LogLevel.L8, " With result: %s", step_resolution)
         if was_limited:
             logger.log(LogLevel.L8, " Caution, the step length was limited by the given bounds.")
 
@@ -1033,9 +1035,9 @@ def _dogleg_search(
     if num_shrinks >= opti_opts.step_limit:
         logger.log(LogLevel.L8, "Died on step cuts.")
         logger.log(LogLevel.L8, " Failed to find any step on the dogleg path that was actually an improvement")
-        logger.log(LogLevel.L8, " before exceeding the step cut limit, which was {}  steps.".format(opti_opts.step_limit))
+        logger.log(LogLevel.L8, " before exceeding the step cut limit, which was %s  steps.", opti_opts.step_limit)
         failed = True
-    logger.log(LogLevel.L5, " New parameters are: {}".format(cur_results.params))
+    logger.log(LogLevel.L5, " New parameters are: %s", cur_results.params)
     return failed
 
 
@@ -1081,7 +1083,7 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
 
     # update the status
     logger.log(LogLevel.L5, "Analyzing final results.")
-    logger.log(LogLevel.L8, "There were a total of {} function model evaluations.".format(bpe_results.num_evals))
+    logger.log(LogLevel.L8, "There were a total of %s function model evaluations.", bpe_results.num_evals)
 
     # exit if nothing else to analyze
     if opti_opts.max_iters == 0:
@@ -1212,7 +1214,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
 
     # alias some stuff
     names = OptiParam.get_names(opti_opts.params)
-    two_sided = True if opti_opts.slope_method == "two_sided" else False
+    two_sided = opti_opts.slope_method == "two_sided"
 
     # determine if saving data
     is_saving = opti_opts.output_folder is not None and bool(opti_opts.output_results)
@@ -1235,7 +1237,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     if opti_opts.start_func is not None:
         init_saves = opti_opts.start_func(**model_args)
     else:
-        init_saves = dict()
+        init_saves = {}
 
     # future calculations
     hessian_log_det_b = 0  # TODO: calculate somewhere later
@@ -1267,8 +1269,8 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     bpe_results.costs.append(cur_results.cost)
 
     # display initial status
-    logger.log(LogLevel.L5, " Initial parameters: {}".format(cur_results.params))
-    logger.log(LogLevel.L5, " Initial cost: {}".format(cur_results.cost))
+    logger.log(LogLevel.L5, " Initial parameters: %s", cur_results.params)
+    logger.log(LogLevel.L5, " Initial cost: %s", cur_results.cost)
 
     # Set-up saving: check that the folder exists
     if is_saving:
@@ -1284,7 +1286,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     while iter_count <= opti_opts.max_iters:
         # update status
         _print_divider(level=LogLevel.L3)
-        logger.log(LogLevel.L3, "Running iteration {}.".format(iter_count))
+        logger.log(LogLevel.L3, "Running iteration %s.", iter_count)
 
         # run finite differences code to numerically approximate the Jacobian, gradient and Hessian
         (jacobian, gradient, hessian) = _finite_differences(
@@ -1298,7 +1300,8 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
             cur_results.trust_rad += opti_opts.grow_radius
             logger.log(
                 LogLevel.L8,
-                "Old step still in descent direction, so expand current trust_radius to {}.".format(cur_results.trust_rad),
+                "Old step still in descent direction, so expand current trust_radius to %s.",
+                cur_results.trust_rad,
             )
 
         # calculate the delta parameter step to try on the next iteration
@@ -1335,7 +1338,9 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     # display if this converged out timed out on iteration steps
     if not convergence and not failed:
         logger.log(
-            LogLevel.L5, "Stopped iterating due to hitting the max number of iterations: {}.".format(opti_opts.max_iters)
+            LogLevel.L5,
+            "Stopped iterating due to hitting the max number of iterations: %s.",
+            opti_opts.max_iters,
         )
 
     # run an optional final function before doing the final simulation
@@ -1361,20 +1366,20 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     bpe_results.costs.append(cur_results.cost)
 
     # display final status
-    logger.log(LogLevel.L5, " Final parameters: {}".format(bpe_results.final_params))
-    logger.log(LogLevel.L5, " Final cost: {}".format(bpe_results.final_cost))
+    logger.log(LogLevel.L5, " Final parameters: %s", bpe_results.final_params)
+    logger.log(LogLevel.L5, " Final cost: %s", bpe_results.final_cost)
 
     # analyze BPE results
     _analyze_results(opti_opts, bpe_results, jacobian)
 
     # show status and save results
     if is_saving:
-        logger.log(LogLevel.L2, 'Saving results to: "{}".'.format(filename))
+        logger.log(LogLevel.L2, 'Saving results to: "%s".', filename)
     if is_saving:
         bpe_results.save(filename)
 
     # display total elapsed time
-    logger.log(LogLevel.L1, "BPE Model completed: " + time.strftime("%H:%M:%S", time.gmtime(time.time() - start_model)))
+    logger.log(LogLevel.L1, "BPE Model completed: %s", time.strftime("%H:%M:%S", time.gmtime(time.time() - start_model)))
 
     return (bpe_results, results)
 

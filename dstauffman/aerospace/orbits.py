@@ -15,15 +15,26 @@ import doctest
 from typing import Any, ClassVar, Literal, overload, Tuple, TYPE_CHECKING, TypeVar, Union
 import unittest
 
-from slog import IntEnumPlus
+from slog import IntEnumPlus, is_dunder
 
-from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, NP_DATETIME_FORM, NP_DATETIME_UNITS, RAD2DEG
+from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, HAVE_SCIPY, NP_DATETIME_FORM, NP_DATETIME_UNITS, RAD2DEG
 from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH, PI, TAU
-from dstauffman.aerospace.orbit_conv import anomaly_eccentric_2_true, anomaly_mean_2_eccentric, mean_motion_2_semimajor
+from dstauffman.aerospace.orbit_conv import (
+    anomaly_eccentric_2_mean,
+    anomaly_eccentric_2_true,
+    anomaly_hyperbolic_2_mean,
+    anomaly_hyperbolic_2_true,
+    anomaly_mean_2_eccentric,
+    anomaly_true_2_eccentric,
+    anomaly_true_2_hyperbolic,
+    mean_motion_2_semimajor,
+)
 from dstauffman.aerospace.orbit_support import cross, d_2_r, dot, jd_to_numpy, norm, r_2_d
 
 if HAVE_NUMPY:
     import numpy as np
+if HAVE_SCIPY:
+    from scipy.optimize import root
 
 if TYPE_CHECKING:
     _B = Union[None, bool, np.ndarray]
@@ -133,7 +144,7 @@ class Elements(Frozen):
 
     def __eq__(self, other: Any) -> bool:
         # if not of the same type, then they are not equal
-        if type(other) != type(self):
+        if not isinstance(other, type(self)):
             return False
         # loop through the fields, and if any are not equal, then it's not equal
         for key in vars(self):
@@ -183,6 +194,7 @@ class Elements(Frozen):
         return elements
 
     def print_orrery(self, index: int = None):
+        r"""Prints the orbital elements as expected for the Orrery algorithms."""
         if index is None:
             print(f"a = {self.a / 1000} km")  # type: ignore[operator]
             print(f"e = {self.e}")
@@ -279,47 +291,47 @@ def two_line_elements(line1: str, line2: str) -> Elements:
 
     try:
         year = int(line1[18:20])
-    except:
-        raise ValueError(f"Error reading year from line1: {line1}")
+    except Exception as exc:
+        raise ValueError(f"Error reading year from line1: {line1}") from exc
 
     try:
         day = float(line1[20:32])
-    except:
-        raise ValueError(f"Error reading day from line1: {line1}")
+    except Exception as exc:
+        raise ValueError(f"Error reading day from line1: {line1}") from exc
 
     try:
         i = float(line2[8:16])
-    except:
-        raise ValueError("fError reading inclination (i) from line2: {line2}")
+    except Exception as exc:
+        raise ValueError("fError reading inclination (i) from line2: {line2}") from exc
     i = d_2_r(i)
 
     try:
         Omega = float(line2[17:25])
-    except:
-        raise ValueError(f"Error reading longitude of ascending node (Omega) from line2: {line2}")
+    except Exception as exc:
+        raise ValueError(f"Error reading longitude of ascending node (Omega) from line2: {line2}") from exc
     Omega = d_2_r(Omega)
 
     try:
         e = float("0." + line2[26:33])
-    except:
-        raise ValueError(f"Error reading eccentricity (e) from line2: {line2}")
+    except Exception as exc:
+        raise ValueError(f"Error reading eccentricity (e) from line2: {line2}") from exc
 
     try:
         omega = float(line2[34:42])
-    except:
-        raise ValueError(f"Error reading argument of perigee (omega) from line2: {line2}")
+    except Exception as exc:
+        raise ValueError(f"Error reading argument of perigee (omega) from line2: {line2}") from exc
     omega = d_2_r(omega)
 
     try:
         M = float(line2[43:51])
-    except:
-        raise ValueError(f"Error reading mean anomaly (M) from line2: {line2}")
+    except Exception as exc:
+        raise ValueError(f"Error reading mean anomaly (M) from line2: {line2}") from exc
     M = d_2_r(M)
 
     try:
         revs_per_day = float(line2[52:63])
-    except:
-        raise ValueError(f"Error reading revolutions per day from line2: {line2}")
+    except Exception as exc:
+        raise ValueError(f"Error reading revolutions per day from line2: {line2}") from exc
 
     n = revs_per_day * TAU / JULIAN["day"]  # [rad/sec]
     a = mean_motion_2_semimajor(n, MU_EARTH)
@@ -689,7 +701,101 @@ def oe_2_rv(
 
 #%% Functions - advance_elements
 def advance_elements(elements, mu, time):
-    pass
+    r"""
+    Takes the given orbital elements and advancing them in time.
+
+    Parameters
+    ----------
+    elements : class
+    mu : float
+    time : float
+
+    Notes
+    -----
+    #.  The only parameter that will change is the true anomaly.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import advance_elements, Elements, OrbitType, PI
+    >>> elements = Elements()
+    >>> elements.a = 7e6
+    >>> elements.e = 0.0
+    >>> elements.i = PI / 4
+    >>> elements.W = 0.0
+    >>> elements.w = 0.0
+    >>> elements.vo = 0.0
+    >>> elements.t = 0.0
+    >>> elements.type = OrbitType.elliptic
+    >>> elements.equatorial = True
+    >>> elements.circular = True
+    >>> mu = 3.9863e14
+    >>> time = 600.0
+    >>> new_elements = advance_elements(elements, mu, time)
+    >>> new_elements.pprint()  # doctest: +ELLIPSIS
+    Elements
+     a          = 7000000.0
+     e          = 0.0
+     i          = 0.7853981633974...
+     W          = 0.0
+     w          = 0.0
+     vo         = 0.646828549162...
+     p          = None
+     uo         = None
+     P          = None
+     lo         = None
+     T          = None
+     type       = OrbitType.elliptic: 1
+     equatorial = True
+     circular   = True
+     t          = 0.00694444444444...
+
+    """
+    # pull out short names for easier calculations
+    a = elements.a
+    e = elements.e
+    vo = elements.vo
+    # initialize output to the same as the input
+    new_elements = Elements()
+    for (key, value) in vars(elements).items():
+        if not is_dunder(key):
+            setattr(new_elements, key, value)
+    if elements.type == OrbitType.elliptic:
+        # initial mean anomaly
+        Ei = anomaly_true_2_eccentric(vo, e)
+        Mi = anomaly_eccentric_2_mean(Ei, e)
+        # find new mean anomaly based on delta time
+        M = np.mod(np.sqrt(mu / a**3) * time + Mi, TAU)
+        # solve transcendental function for E
+        temp = root(lambda E: M - E + e * np.sin(E), PI)
+        E = temp.x[0]
+        # calculate the new true anomaly from the eccentric anomaly
+        nu = anomaly_eccentric_2_true(E, e)
+    elif elements.type == OrbitType.parabolic:
+        Ei = 0
+        Mi = anomaly_eccentric_2_mean(Ei, e)  # find new mean anomaly based on delta time
+        M = np.mod(np.sqrt(mu / a**3) * time + Mi, TAU)
+        # solve transcendental function for E
+        temp = root(lambda E: M - E + e * np.sin(E), PI)
+        E = temp.x[0]
+        # calculate the new true anomaly from the eccentric anomaly
+        nu = anomaly_eccentric_2_true(E, e)
+    elif elements.type == OrbitType.hyperbolic:
+        Fi = anomaly_true_2_hyperbolic(vo, e)
+        Mi = anomaly_hyperbolic_2_mean(Fi, e)
+        # find new mean anomaly based on delta time
+        M = np.mod(np.sqrt(mu / (-a) ** 3) * time + Mi, TAU)
+        # solve transcendental function for F
+        temp = root(lambda F: M + F - e * np.sinh(F), PI)
+        F = temp.x[0]
+        # calculate the new true anomaly from the eccentric anomaly
+        nu = anomaly_hyperbolic_2_true(F, e)
+    else:
+        raise ValueError(f'Unexpected orbit type: "{type}"')
+
+    # store update variables
+    new_elements.vo = nu
+    new_elements.t = elements.t + time / JULIAN["day"]
+    return new_elements
 
 
 #%% Unit Test

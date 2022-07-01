@@ -4,7 +4,7 @@ Defines low-level plotting routines meant to be wrapped in higher level ones.
 Notes
 -----
 #.  Written by David C. Stauffer in May 2020.
-"""
+"""  # pylint: disable=too-many-lines
 
 #%% Imports
 from __future__ import annotations
@@ -296,13 +296,11 @@ def make_generic_plot(
     is_quat_diff = plot_type in {"quat", "quaternions"}
     is_cat_plot = plot_type in {"cats", "categorical"}
     fig_lists = plot_type in {"cats", "categorical", "diff", "differences", "quat", "quaternions"}
-    time_is_list = isinstance(time_one, list) or isinstance(time_one, tuple)
+    time_is_list = isinstance(time_one, (list, tuple))
     if time_is_list:
-        assert (
-            time_two is None or isinstance(time_two, list) or isinstance(time_two, tuple)
-        ), "Both times must be lists if one is."
-    data_is_list = isinstance(data_one, list) or isinstance(data_one, tuple)
-    dat2_is_list = isinstance(data_two, list) or isinstance(data_two, tuple)
+        assert time_two is None or isinstance(time_two, (list, tuple)), "Both times must be lists if one is."
+    data_is_list = isinstance(data_one, (list, tuple))
+    dat2_is_list = isinstance(data_two, (list, tuple))
     if is_cat_plot:
         assert cats is not None, f"You must pass in the categories if doing a {plot_type} plot."
     if doing_diffs:
@@ -354,9 +352,9 @@ def make_generic_plot(
 
     # determine which plotting function to use
     if use_zoh:
-        plot_func = lambda ax, *args, **kwargs: ax.step(*args, where="post", **kwargs)
+        plot_func = lambda ax, *args, **kwargs: ax.step(*args, where="post", **kwargs)  # pylint: disable=unnecessary-lambda-assignment
     else:
-        plot_func = lambda ax, *args, **kwargs: ax.plot(*args, **kwargs)
+        plot_func = lambda ax, *args, **kwargs: ax.plot(*args, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
 
     # get the categories
     if is_cat_plot:
@@ -398,15 +396,15 @@ def make_generic_plot(
         elements = [f"Channel {i+1}" for i in range(np.max((s1, s2)))]
     # find number of elements being plotted
     num_channels = len(elements)
-    assert num_channels == np.maximum(s1, s2), "The given elements need to match the data sizes, got " + "{} and {}.".format(
-        num_channels, np.maximum(s1, s2)
-    )
-    assert s0a == 0 or s0a == 1 or s0a == num_channels, "The time doesn't match the number of elements."
-    assert s0b == 0 or s0b == 1 or s0b == num_channels, "The time doesn't match the number of elements."
-    assert s1 == 0 or s2 == 0 or s1 == s2, f"Sizes of data channels must be consistent, got {s1} and {s2}."
+    assert num_channels == np.maximum(
+        s1, s2
+    ), "The given elements need to match the data sizes, got {num_channels} and {np.maximum(s1, s2)}."
+    assert s0a in (0, 1, num_channels), "The time doesn't match the number of elements."
+    assert s0b in (0, 1, num_channels), "The time doesn't match the number of elements."
+    assert s1 in (0, s2) or s2 == 0, f"Sizes of data channels must be consistent, got {s1} and {s2}."
     if is_quat_diff:
-        assert s1 == 0 or s1 == 4, "Must be a 4-element quaternion"
-        assert s2 == 0 or s2 == 4, "Must be a 4-element quaternion"
+        assert s1 in (0, 4), "Must be a 4-element quaternion"
+        assert s2 in (0, 4), "Must be a 4-element quaternion"
 
     #% Calculations
     # build RMS indices
@@ -456,10 +454,10 @@ def make_generic_plot(
         data_func: Union[_FuncLamb, List[_FuncLamb], Dict[Any, np.ndarray]]
         if not use_mean:
             func_name = "RMS"
-            func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)
+            func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)  # pylint: disable=unnecessary-lambda-assignment
         else:
             func_name = "Mean"
-            func_lamb = lambda x, y: np.nanmean(x, axis=y)  # type: ignore[no-any-return]
+            func_lamb = lambda x, y: np.nanmean(x, axis=y)  # type: ignore[no-any-return]  # pylint: disable=unnecessary-lambda-assignment
         if not doing_diffs and not is_cat_plot:
             if data_is_list:
                 data_func = [func_lamb(data_one[j][ix["one"][j]], None) for j in range(num_channels)]
@@ -615,7 +613,7 @@ def make_generic_plot(
     # preallocate datashaders
     datashaders = []
     # plot data
-    for (i, this_axes) in enumerate(ax):
+    for (i, this_axes) in enumerate(ax):  # pylint: disable=too-many-nested-blocks
         is_diff_plot = doing_diffs and (i > num_rows - 1 or (not single_lines and make_subplots and i == 1))
         loop_counter: Iterable[int]
         if plot_type == "bar":
@@ -931,9 +929,7 @@ def make_generic_plot(
             this_axes.set_title(description + " Difference")
         if (time_is_list and is_datetime(time_one[0])) or is_datetime(time_one) or is_datetime(time_two):
             this_axes.set_xlabel("Date")
-            assert time_units in {"datetime", "numpy"}, 'Expected time units of "datetime" or "numpy", ' + 'not "{}".'.format(
-                time_units
-            )
+            assert time_units in {"datetime", "numpy"}, f'Expected time units of "datetime" or "numpy", not "{time_units}".'
         else:
             this_axes.set_xlabel(f"Time [{time_units}]{start_date}")
         if ylabel is None:
@@ -1840,7 +1836,7 @@ def make_connected_sets(
         ax = fig.add_subplot(1, 1, 1)
     else:
         (fig, ax) = fig_ax
-    if (sup := fig._suptitle) is None:
+    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
         fig.canvas.manager.set_window_title(description + extra_text)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())

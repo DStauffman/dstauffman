@@ -4,7 +4,7 @@ Defines useful plotting utilities.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
-"""
+"""  # pylint: disable=too-many-lines
 
 #%% Imports
 from __future__ import annotations
@@ -153,12 +153,12 @@ class _HoverButton(QPushButton):
                 self.setIcon(this_arg)
                 self.setIconSize(QSize(24, 24))
 
-    def enterEvent(self, event):
-        # Draw border on hover
+    def enterEvent(self, event):  # pylint: disable=unused-argument
+        r"""Draw border on hover."""
         self.setStyleSheet("border: 1px; border-style: solid;")  # pragma: no cover
 
-    def leaveEvent(self, event):
-        # Delete border after hover
+    def leaveEvent(self, event):  # pylint: disable=unused-argument
+        r"""Delete border after hover."""
         self.setStyleSheet("border: 0px;")  # pragma: no cover
 
 
@@ -220,18 +220,18 @@ class MyCustomToolbar:
         fig.canvas.toolbar.addWidget(self.btn_close_all)
         self.btn_close_all.clicked.connect(self._close_all)
 
-    def _close_all(self, *args):
+    def _close_all(self, *args):  # pylint: disable=unused-argument
         r"""Close all the currently open plots."""
         close_all()
 
-    def next_plot(self, *args):
+    def next_plot(self, *args):  # pylint: disable=unused-argument
         r"""Bring up the next plot in the series."""
         # get all the figure numbers
         all_figs = plt.get_fignums()
         # get the active figure number
         this_fig = self.fig_number
         # loop through all the figures
-        for i in range(len(all_figs)):
+        for i in range(len(all_figs)):  # pylint: disable=consider-using-enumerate
             # find the active figure within the list
             if this_fig == all_figs[i]:
                 # find the next figure, with allowances for rolling over the list
@@ -244,14 +244,14 @@ class MyCustomToolbar:
         # make it the active window
         fig.canvas.manager.window.raise_()
 
-    def prev_plot(self, *args):
+    def prev_plot(self, *args):  # pylint: disable=unused-argument
         r"""Bring up the previous plot in the series."""
         # get all the figure numbers
         all_figs = plt.get_fignums()
         # get the active figure number
         this_fig = self.fig_number
         # loop through all the figures
-        for i in range(len(all_figs)):
+        for i in range(len(all_figs)):  # pylint: disable=consider-using-enumerate
             # find the active figure within the list
             if this_fig == all_figs[i]:
                 # find the next figure, with allowances for rolling over the list
@@ -465,7 +465,7 @@ def ignore_plot_data(data, ignore_empties, col=None):
 
     """
     # if data is None, then always ignore it
-    if data is None or np.all(data == None):  # noqa: E711
+    if data is None or np.all(data == None):  # noqa: E711  # pylint: disable=singleton-comparison
         return True
     # if we are not ignoring empties and data is not None, then never ignore
     if not ignore_empties:
@@ -560,7 +560,7 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tup
         # special case when you have a displayless backend, check the suptitle, then the title
         # from the first axes
         throw_warning = True
-        if (sup := fig._suptitle) is not None:
+        if (sup := fig._suptitle) is not None:  # pylint: disable=protected-access
             raw_title = sup.get_text()
         else:
             try:
@@ -706,7 +706,7 @@ def storefig(
         folder = Path.cwd()  # pragma: no cover
     # confirm that the folder exists
     if not folder.is_dir():
-        raise ValueError('The specfied folder "{}" does not exist.'.format(folder))
+        raise ValueError(f'The specfied folder "{folder}" does not exist.')
     # loop through the figures
     throw_warning = False
     for this_fig in figs:
@@ -782,7 +782,7 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
         this_canvas_title = this_fig.canvas.manager.get_window_title()
         this_fig.canvas.manager.set_window_title(prefix + " - " + this_canvas_title)
         # update the suptitle (if it exists)
-        if (sup := this_fig._suptitle) is not None:
+        if (sup := this_fig._suptitle) is not None:  # pylint: disable=protected-access
             sup.set_text(prefix + " - " + sup.get_text())
         elif process_all or sup is None:
             # get axes list and loop through them
@@ -1024,8 +1024,8 @@ def figmenu(figs: _FigOrListFig) -> None:
     if not isinstance(figs, list):
         figs.toolbar_custom_ = MyCustomToolbar(figs)
     else:
-        for i in range(len(figs)):
-            figs[i].toolbar_custom_ = MyCustomToolbar(figs[i])
+        for fig in figs:
+            fig.toolbar_custom_ = MyCustomToolbar(fig)
 
 
 #%% rgb_ints_to_hex
@@ -1057,7 +1057,7 @@ def rgb_ints_to_hex(int_tuple: Tuple[int, int, int]) -> str:
         return max(min_, min(x, max_))
 
     (r, g, b) = int_tuple
-    hex_code = "#{0:02x}{1:02x}{2:02x}".format(clamp(r), clamp(g), clamp(b))
+    hex_code = f"#{clamp(r):02x}{clamp(g):02x}{clamp(b):02x}"
     return hex_code
 
 
@@ -1387,7 +1387,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
         if have3:
             p3_max = np.ones(time_overlap.shape, dtype=bool)
         ix["pts"].append(t_max)
-    assert len(ix["pts"]) == 2 and ix["pts"][0] <= ix["pts"][1], 'Time points aren\'t as expected: "{}"'.format(ix["pts"])
+    assert len(ix["pts"]) == 2 and ix["pts"][0] <= ix["pts"][1], f'Time points aren\'t as expected: "{ix["pts"]}"'
     # calculate indices
     if have1:
         ix["one"] = p1_min & p1_max
@@ -1605,7 +1605,7 @@ def get_classification(classify: str) -> Tuple[str, str]:
 
     # get the classification based solely on the first letter and check that it is valid
     classification = classify[0]
-    assert classification in {"U", "C", "S", "T"}, 'Unexpected classification of "{}" found'.format(classification)
+    assert classification in frozenset({"U", "C", "S", "T"}), f'Unexpected classification of "{classification}" found'
 
     # pull out anything past the first // as the caveat(s)
     slashes = classify.find("//")
@@ -1704,7 +1704,7 @@ def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = ""
         color = (1.0, 0.65, 0.0)
         text_str = "TOP SECRET"
     else:
-        raise ValueError('Unexpected value for classification: "{}".'.format(classification))
+        raise ValueError(f'Unexpected value for classification: "{classification}".')
     text_color = color
 
     # add optional caveats

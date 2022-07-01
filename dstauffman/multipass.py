@@ -36,7 +36,7 @@ else:
 logger = logging.getLogger(__name__)
 
 #%% Classes - MultipassExceptionWrapper
-class MultipassExceptionWrapper(object):
+class MultipassExceptionWrapper:
     r"""Exception wrapper that can pass through multiprocessing calls and back to main."""
 
     def __init__(self, ee: Type[BaseException]):

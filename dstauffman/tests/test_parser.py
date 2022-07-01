@@ -192,7 +192,7 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertTrue(flags.use_plotting)
         self.assertTrue(flags.use_hdf5)
         self.assertEqual(flags.log_level, LogLevel.L8)
-        mocker.log.assert_called_once_with(dcs.parser.LogLevel.L8, "Configuring Log Level at: LogLevel.L8: 14")
+        mocker.log.assert_called_once_with(dcs.parser.LogLevel.L8, "Configuring Log Level at: %s", LogLevel.L8)
 
     def test_log_level2(self) -> None:
         with patch("dstauffman.parser.logger") as mocker:
@@ -202,7 +202,7 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertTrue(flags.use_plotting)
         self.assertTrue(flags.use_hdf5)
         self.assertEqual(flags.log_level, logging.INFO)
-        mocker.log.assert_called_once_with(logging.INFO, "Configuring Log Level at: 20")
+        mocker.log.assert_called_once_with(logging.INFO, "Configuring Log Level at: %s", 20)
 
     def test_everything(self) -> None:
         logger = logging.getLogger("dstauffman.parser")  # Note: alternative syntax for mocker
@@ -213,7 +213,7 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertFalse(flags.use_plotting)
         self.assertFalse(flags.use_hdf5)
         self.assertEqual(flags.log_level, LogLevel.L5)
-        mocker.assert_called_once_with(dcs.parser.LogLevel.L5, "Configuring Log Level at: LogLevel.L5: 20")
+        mocker.assert_called_once_with(dcs.parser.LogLevel.L5, "Configuring Log Level at: %s", LogLevel.L5)
 
 
 #%% Unit test execution

@@ -622,7 +622,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.assertTrue(convergence)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(
-            LogLevel.L3, "Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1"
+            LogLevel.L3, "Declare convergence because cosmax of %s <= options.tol_cosmax_grad of %s", 0.5, 1
         )
 
     def test_convergence2(self, mock_logger: Mock) -> None:
@@ -630,7 +630,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.assertTrue(convergence)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(
-            LogLevel.L3, "Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2"
+            LogLevel.L3, "Declare convergence because delta_step_len of %s <= options.tol_delta_step of %s", 1.5, 2
         )
 
     def test_convergence3(self, mock_logger: Mock) -> None:
@@ -638,7 +638,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.assertTrue(convergence)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(
-            LogLevel.L3, "Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3"
+            LogLevel.L3, "Declare convergence because abs(pred_func_change) of %s <= options.tol_delta_cost of %s", 2.5, 3
         )
 
     def test_convergence4(self, mock_logger: Mock) -> None:
@@ -646,13 +646,13 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.assertTrue(convergence)
         self.assertEqual(mock_logger.log.call_count, 3)
         mock_logger.log.assert_any_call(
-            LogLevel.L3, "Declare convergence because cosmax of 0.5 <= options.tol_cosmax_grad of 1"
+            LogLevel.L3, "Declare convergence because cosmax of %s <= options.tol_cosmax_grad of %s", 0.5, 1
         )
         mock_logger.log.assert_any_call(
-            LogLevel.L3, "Declare convergence because delta_step_len of 1.5 <= options.tol_delta_step of 2"
+            LogLevel.L3, "Declare convergence because delta_step_len of %s <= options.tol_delta_step of %s", 1.5, 2
         )
         mock_logger.log.assert_any_call(
-            LogLevel.L3, "Declare convergence because abs(pred_func_change) of 2.5 <= options.tol_delta_cost of 3"
+            LogLevel.L3, "Declare convergence because abs(pred_func_change) of %s <= options.tol_delta_cost of %s", 2.5, 3
         )
 
     def test_no_logging(self, mock_logger: Mock) -> None:

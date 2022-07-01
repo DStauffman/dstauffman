@@ -6,7 +6,7 @@ Notes
 #.  By design, this module does not reference any other piece of the dstauffman code base except
         constants to avoid circular references.
 #.  Written by David C. Stauffer in March 2015.
-"""
+"""  # pylint: disable=too-many-lines
 
 #%% Imports
 from __future__ import annotations
@@ -41,7 +41,7 @@ if HAVE_NUMPY:
 else:
     from math import inf, isnan, nan
 
-    logical_not = lambda x: not x  # type: ignore[assignment]
+    logical_not = lambda x: not x  # type: ignore[assignment]  # pylint: disable=unnecessary-lambda-assignment
 if HAVE_SCIPY:
     from scipy.interpolate import interp1d
     from scipy.signal import sosfiltfilt, butter
@@ -56,7 +56,7 @@ if TYPE_CHECKING:
     _Number = Union[float, int, np.ndarray]
 
 #%% Functions - _nan_equal
-def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:
+def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:  # pylint: disable=too-many-return-statements
     r"""
     Test ndarrays for equality, but ignore NaNs.
 
@@ -423,7 +423,7 @@ def compare_two_classes(
         return hasattr(obj, "__dict__") and not _is_function(obj)  # and hasattr(obj, "__call__")
 
     def _is_public(name):
-        r"""Returns True if the name is public, ie doesn't start with an underscore."""
+        r"""Return True if the name is public, ie doesn't start with an underscore."""
         return not name.startswith("_")
 
     # preallocate answer to True until proven otherwise
@@ -436,7 +436,7 @@ def compare_two_classes(
         name1 = "c1"
         name2 = "c2"
     # simple test
-    if c1 is not c2:
+    if c1 is not c2:  # pylint: disable=too-many-nested-blocks
         # get the list of public attributes
         attrs1 = frozenset(filter(_is_public, dir(c1)))
         attrs2 = frozenset(filter(_is_public, dir(c2)))
@@ -480,18 +480,15 @@ def compare_two_classes(
                             )
                         continue
                     continue
-                else:
-                    is_same = _not_true_print()
-                    continue
-            else:
-                if _is_class_instance(attr2):
-                    is_same = _not_true_print()
+                is_same = _not_true_print()
+                continue
+            if _is_class_instance(attr2):
+                is_same = _not_true_print()
             if _is_function(attr1) or _is_function(attr2):
                 if ignore_callables:
                     continue  # pragma: no cover (actually covered, optimization issue)
-                else:
-                    is_same = _not_true_print()
-                    continue
+                is_same = _not_true_print()
+                continue
             # if any differences, then this test fails
             if isinstance(attr1, Mapping) and isinstance(attr2, Mapping):
                 is_same = (
@@ -1260,7 +1257,7 @@ def combine_per_year(data: Optional[np.ndarray], func: Callable[..., Any] = None
     if data is None:
         return None
     # check dimensionality
-    is_1d = True if data.ndim == 1 else False
+    is_1d = data.ndim == 1
     # get original sizes
     if is_1d:
         data = data[:, np.newaxis]
@@ -1324,7 +1321,7 @@ def execute(command: Union[str, List[str]], folder: Path, *, ignored_codes: Iter
         env = os.environ.copy().update(env)
 
     # create a process to spawn the thread
-    popen = subprocess.Popen(
+    popen = subprocess.Popen(  # pylint: disable=consider-using-with
         command,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
@@ -1468,7 +1465,7 @@ def get_env_var(env_key: str, default: str = None) -> str:
 
     """
     if _ALLOWED_ENVS is not None:
-        if env_key not in _ALLOWED_ENVS:
+        if env_key not in _ALLOWED_ENVS:  # pylint: disable=unsupported-membership-test
             raise KeyError(f'The environment variable of "{env_key}" is not on the allowed list.')
     try:
         value = os.environ[env_key]
@@ -1771,6 +1768,7 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
     func = interp1d(xp, yp, kind="zero", fill_value="extrapolate", assume_sorted=False)
     return np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
 
+
 #%% linear_interp
 def linear_interp(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=False):
     r"""
@@ -1822,6 +1820,7 @@ def linear_interp(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=Fa
         raise RuntimeError("Data must be sorted in order to ask for indices.")
     func = interp1d(xp, yp, kind="linear", fill_value="extrapolate", assume_sorted=False)
     return np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
+
 
 #%% linear_lowpass_interp
 def linear_lowpass_interp(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=False):
@@ -1876,6 +1875,7 @@ def linear_lowpass_interp(x, xp, yp, *, left=nan, assume_sorted=False, return_in
     interpfunc = np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
     sos = butter(2, 0.01, btype="low", fs=1, output="sos")  # TODO: allow these to be passed in
     return sosfiltfilt(sos, interpfunc)
+
 
 #%% drop_following_time
 def drop_following_time(times, drop_starts, dt_drop):

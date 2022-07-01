@@ -73,7 +73,7 @@ def plot_bpe_convergence(costs, *, opts=None, fig_ax=None, skip_setup_plots=Fals
         ax = fig.add_subplot(111)
     else:
         (fig, ax) = fig_ax
-    if (sup := fig._suptitle) is None:
+    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
         fig.canvas.manager.set_window_title(this_title)
     else:
         fig.canvas.manager.set_window_title(sup.get_text())
@@ -118,11 +118,11 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
         # check for unexpected keys
         for key in plots:
             if key not in default_plots:
-                raise ValueError('Unexpected plotting option: "{}".'.format(key))
-        # start with the defaults, and then overlay any specified inputs
-        for key in default_plots:
-            if key not in plots:
-                plots[key] = default_plots[key]
+                raise ValueError(f'Unexpected plotting option: "{key}".')
+        # overlay any missing default plots
+        missing_keys = set(default_plots.keys()) - set(plots.keys())
+        for key in missing_keys:
+            plots[key] = default_plots[key]
 
     # colormap information
     kw_colormap = kwargs.pop("colormap", None)
@@ -186,7 +186,7 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
                 cmin=0,
                 matrix_name="Information SVD Matrix",
                 label_values=label_values,
-                labels=[["{}".format(i + 1) for i in range(len(names))], names],
+                labels=[[f"{i + 1}" for i in range(len(names))], names],
                 colormap=colormap,
             )
             figs.append(fig)

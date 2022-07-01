@@ -435,19 +435,19 @@ class Test_plotting_plot_states(unittest.TestCase):
     def test_single(self) -> None:
         with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
             self.figs += plot.plot_states(self.gnd1, opts=self.opts)
-        mock_logger.log.assert_any_call(LogLevel.L4, "Plotting State Estimates plots ...")
+        mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
 
     def test_comp(self) -> None:
         with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
             self.figs += plot.plot_states(self.gnd1, self.gnd2, opts=self.opts)
-        mock_logger.log.assert_any_call(LogLevel.L4, "Plotting State Estimates plots ...")
+        mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
 
     def test_errs(self) -> None:
         with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
             (figs, err) = plot.plot_states(self.gnd1, self.gnd2, opts=self.opts, return_err=True)
-        mock_logger.log.assert_any_call(LogLevel.L4, "Plotting State Estimates plots ...")
+        mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
         self.figs += figs
         self.assertEqual(err.keys(), {"state"})
@@ -458,7 +458,7 @@ class Test_plotting_plot_states(unittest.TestCase):
             warnings.filterwarnings("ignore", message="Mean of empty slice")
             with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
                 self.figs += plot.plot_states(self.gnd1, self.gnd2, groups=groups, opts=self.opts)
-        mock_logger.log.assert_any_call(LogLevel.L4, "Plotting State Estimates plots ...")
+        mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
 
     def tearDown(self) -> None:
