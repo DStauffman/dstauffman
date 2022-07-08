@@ -15,6 +15,7 @@
 *.html text
 *.ini text
 *.lock text
+*.make text
 *.md text
 *.prj text
 *.php text
@@ -22,7 +23,7 @@
 *.tex text
 *.toml text
 *.txt text
-*.make text
+*.yml text
 
 # Windows specific files to always have CRLF
 *.bat text eol=crlf

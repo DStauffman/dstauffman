@@ -1,0 +1,198 @@
+name: CI
+
+on: [push]
+
+env:
+  PIP_CACHE_DIR: "$GITHUB_WORKSPACE/.cache/pip"
+  DCS_TESTS_DIR: "$GITHUB_WORKSPACE/dstauffman/tests"
+  QT_QPA_PLATFORM: "offscreen"
+
+jobs:
+  make_envs:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+        cache: "pip"
+        cache-dependency-path: |
+          ".cache/pip"
+          "static"
+          "everything"
+          "core_only"
+          "poetry"
+    - run: |
+        apt-get update -qq && apt-get install -y -qq libopengl0
+        python --version
+        pip install --upgrade pip
+        pip intall virtualenv
+        virtualenv core_only
+        source core_only/bin/activate
+        python -m pip install --upgrade pip
+        python -m pip install wheel
+        python -m pip install coverage[toml] pytest
+        deactivate
+        virtualenv static
+        source static/bin/activate
+        python -m pip install --upgrade pip
+        python -m pip install wheel
+        python -m pip install coverage[toml] flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint pylint-exit PyQt5-stubs PySide6 pytest qtpy scipy tblib
+        deactivate
+        virtualenv everything
+        source everything/bin/activate
+        python -m pip install --upgrade pip
+        python -m pip install wheel
+        python -m pip install coverage[toml] datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PySide6 pytest qtpy scipy tblib
+        deactivate
+        virtualenv poetry
+        source poetry/bin/activate
+        python -m pip install --upgrade pip
+        python -m pip install wheel
+        python -m pip install poetry
+        deactivate
+
+  static_analysis:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    - name: Mypy Analysis
+      continue-on-error: true
+      run: |
+        pwd
+        ls -l
+        source static/bin/activate
+        python --version
+        mypy --version
+        mypy
+    - name: Flake8 Analysis
+      continue-on-error: true
+      run: |
+        pwd
+        ls -l
+        source static/bin/activate
+        python --version
+        flake8 --version
+        flake8 .
+    - name: Pylint Analysis
+      continue-on-error: true
+      run: |
+        pwd
+        ls -l
+        source static/bin/activate
+        python --version
+        pylint --version
+        pylint dstauffman || pylint-exit $?
+
+  unit_tests:
+    needs: make_envs
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Checkout repository
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+    - name: Run unit test
+      run: |
+        pwd
+        ls -l
+        source everything/bin/activate
+        python -m dstauffman tests --coverage --cov_file $DCS_TESTS_DIR/.coverage.full
+    - name: Upload unit test coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: core-unittest
+        path: $DCS_TESTS_DIR/.coverage.full
+        retention-days: 1
+
+    - name: Run core test
+      run: |
+        pwd
+        ls -l
+        source core_only/bin/activate
+        python -m dstauffman tests --coverage --cov_file $DCS_TESTS_DIR/.coverage.core
+    - name: Upload core test coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: core-coverage
+        path: $DCS_TESTS_DIR/.coverage.core
+        retention-days: 1
+
+    - name: Run numba test
+      run: |
+        pwd
+        ls -l
+        source static/bin/activate
+        python -m dstauffman tests --coverage --cov_file $DCS_TESTS_DIR/.coverage.no_numba
+    - name: Upload no numba test coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: core-nonumbatest
+        path: $DCS_TESTS_DIR/.coverage.no_numba
+        retention-days: 1
+
+    - name: Run import test
+      run: |
+        pwd
+        ls -l
+        export COVERAGE_FILE=$DCS_TESTS_DIR/.coverage.imports
+        export COVERAGE_RCFILE=$CI_PROJECT_DIR/pyproject.toml
+        export PYTHONPATH=$CI_PROJECT_DIR:$PYTHONPATH
+        source core_only/bin/activate
+        coverage run $DCS_TESTS_DIR/test_commands_help.py
+        deactivate
+        source static/bin/activate
+        coverage run --append $DCS_TESTS_DIR/test_version.py
+        deactivate
+        source everything/bin/activate
+        coverage run --append $DCS_TESTS_DIR/test_version.py
+    - name: Upload import coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: core-import
+        path: $DCS_TESTS_DIR/.coverage.imports
+        retention-days: 1
+
+    - name: Run basic test
+      run: |
+        pwd
+        ls -l
+        source core_only/bin/activate
+        python -m dstauffman tests -u
+
+    - name: Run doc test
+      run: |
+        pwd
+        ls -l
+        source everything/bin/activate
+        python -m dsatuffman tests -d
+
+  coverage:
+    needs: unit_tests
+    runs-on: ubuntu-latest
+    steps:
+    - name: Download coverage core
+      uses: actions/download-artifact@v3
+      with:
+        name: core-coverage
+    - name: Run Full code coverage
+      run: |
+        source static/bin/activate
+        cd $DCS_TESTS_DIR
+        pwd
+        ls -la
+        export COVERAGE_FILE=.coverage
+        coverage --version
+        coverage combine --keep
+        coverage html --rcfile $GITHUB_WORKSPACE/pyproject.toml
+        coverage xml --rcfile $GITHUB_WORKSPACE/pyproject.toml
+    - name: Upload full coverage
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage_html_report
+        path: $DCS_TESTS_DIR/coverage_html_report/*
