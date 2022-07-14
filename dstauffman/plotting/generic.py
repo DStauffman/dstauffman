@@ -459,10 +459,10 @@ def make_generic_plot(
             func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)  # pylint: disable=unnecessary-lambda-assignment
         else:
             func_name = "Mean"
-            func_lamb = lambda x, y: np.nanmean(x, axis=y)  # type: ignore[no-any-return]  # pylint: disable=unnecessary-lambda-assignment
+            func_lamb = lambda x, y: np.nanmean(x, axis=y)  # type: ignore[assignment, return-value]  # pylint: disable=unnecessary-lambda-assignment
         if not doing_diffs and not is_cat_plot:
             if data_is_list:
-                data_func = [func_lamb(data_one[j][ix["one"][j]], None) for j in range(num_channels)]
+                data_func = [func_lamb(data_one[j][ix["one"][j]], None) for j in range(num_channels)]  # type: ignore[misc]
             elif data_as_rows:
                 data_func = func_lamb(data_one[:, ix["one"]], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[assignment]
             else:
@@ -490,7 +490,7 @@ def make_generic_plot(
                     this_ix = ix["one"] & (cats == cat)
                     if np.any(this_ix):
                         data_func[cat] = (
-                            func_lamb(data_one[:, this_ix], 1) if data_as_rows else func_lamb(data_one[:, this_ix], 1)
+                            func_lamb(data_one[:, this_ix], 1) if data_as_rows else func_lamb(data_one[:, this_ix], 1)  # type: ignore[assignment]
                         )
                     else:
                         data_func[cat] = np.full(num_channels, np.nan)
@@ -794,7 +794,7 @@ def make_generic_plot(
                         this_label2 = f"{name_two} {elements[j]}" if name_two else str(elements[j])
                         this_color2 = cm.get_color(j + num_channels)
                         if show_rms and not is_quat_diff:
-                            value = _LEG_FORMAT.format(leg_conv * data2_func[j])
+                            value = _LEG_FORMAT.format(leg_conv * data2_func[j])  # type: ignore[index]
                             if leg_units:
                                 this_label2 += f" ({func_name}: {value} {leg_units})"
                             else:
@@ -841,7 +841,7 @@ def make_generic_plot(
                 if single_lines and i % num_channels != j and not is_quat_diff or (is_quat_diff and not plot_components):
                     continue
                 if show_rms:
-                    value = _LEG_FORMAT.format(leg_conv * nondeg_func[j])
+                    value = _LEG_FORMAT.format(leg_conv * nondeg_func[j])  # type: ignore[index]
                     this_label = f"{elements[j]} ({func_name}: {value}) {leg_units})"
                 else:
                     this_label = elements[j]
@@ -865,7 +865,7 @@ def make_generic_plot(
                     plot_func(this_axes, time_overlap, this_data, ".-", markersize=4, label=this_label, color=this_color)
             if is_quat_diff and not plot_components or (single_lines and (i + 1) % num_channels == 0):
                 if show_rms:
-                    value = _LEG_FORMAT.format(leg_conv * mag_func)
+                    value = _LEG_FORMAT.format(leg_conv * mag_func)  # type: ignore[operator]
                     this_label = f"Angle ({func_name}: {value} {leg_units})"
                 else:
                     this_label = "Angle"

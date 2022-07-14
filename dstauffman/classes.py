@@ -161,7 +161,10 @@ def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclu
                 if force_no_compression:
                     grp.create_dataset(key, data=value, compression=None, shuffle=False, **kwargs)
                 else:
-                    grp.create_dataset(key, data=value, compression=compression, shuffle=shuffle, **kwargs)
+                    try:
+                        grp.create_dataset(key, data=value, compression=compression, shuffle=shuffle, **kwargs)
+                    except TypeError as exception:
+                        raise TypeError(f'Problem converting field: "{key}"') from exception
 
 
 #%% Methods - load_hdf5

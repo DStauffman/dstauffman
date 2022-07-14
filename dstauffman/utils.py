@@ -263,7 +263,7 @@ def rms(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: 
         return np.nan
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
-        out = np.sqrt(np.mean(data * np.conj(data), axis=axis, keepdims=keepdims))
+        out = np.sqrt(np.mean(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[arg-type]
     else:
         # check for all NaNs case
         if np.all(np.isnan(data)):
@@ -277,7 +277,7 @@ def rms(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: 
                     shape = (*data.shape[:axis], *data.shape[axis + 1 :])
                 out = np.full(shape, np.nan)
         else:
-            out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))
+            out = np.sqrt(np.nanmean(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[arg-type]
     # return the result
     return out  # type: ignore[no-any-return]
 
@@ -337,7 +337,7 @@ def rss(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: 
         return np.nan
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
-        out = np.sum(data * np.conj(data), axis=axis, keepdims=keepdims)  # type: ignore[arg-type]
+        out = np.sum(data * np.conj(data), axis=axis, keepdims=keepdims)
     else:
         # check for all NaNs case
         if np.all(np.isnan(data)):
@@ -351,9 +351,9 @@ def rss(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: 
                     shape = (*data.shape[:axis], *data.shape[axis + 1 :])
                 out = np.full(shape, np.nan)
         else:
-            out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)  # type: ignore[arg-type]
+            out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
     # return the result
-    return out  # type: ignore[no-any-return]
+    return out  # type: ignore[return-value]
 
 
 #%% Functions - compare_two_classes
