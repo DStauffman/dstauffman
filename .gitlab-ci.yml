@@ -46,7 +46,7 @@ make_envs:
   - source static/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage[toml] flake8 h5py matplotlib mypy numpy pandas pprofile pyarrow pylint pylint-exit PyQt5-stubs PySide6 pytest qtpy scipy tblib
+  - python -m pip install black coverage[toml] flake8 h5py isort matplotlib mypy numpy pandas pprofile pyarrow pylint pylint-exit PyQt5-stubs PySide6 pytest qtpy scipy tblib
   - deactivate
   - virtualenv everything
   - source everything/bin/activate
@@ -94,6 +94,27 @@ pylint:
   - python --version
   - pylint --version
   - pylint dstauffman || pylint-exit $?
+
+black:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+  - pwd
+  - ls -l
+  - source static/bin/activate
+  - python --version
+  - black --version
+  - black . --check
+
+isort:
+  stage: Static Analysis
+  allow_failure: true
+  script:
+  - pwd
+  - ls -l
+  - source static/bin/activate
+  - isort --version
+  - isort . --diff
 
 unit_test:
   stage: Test
@@ -203,6 +224,7 @@ coverage_report:
 build_code:
   stage: Deploy
   needs: ["unit_test", "core_test", "no_numba_test", "import_test"]
+  allow_failure: true
   only:
   - tags
   except:
@@ -216,5 +238,4 @@ build_code:
   - poetry config http-basic.gitlab gitlab-ci-token "$CI_JOB_TOKEN"
   # Note: GitLab doesn't fully support poetry for publishing yet, use twine instead
   # - poetry publish --repository github
-  - export TWINE_CERT=/home/.git-cert/lm_ca_combined.pem
   - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*

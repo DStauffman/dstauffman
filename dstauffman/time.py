@@ -13,7 +13,7 @@ import datetime
 import doctest
 import re
 from time import gmtime, strftime
-from typing import Optional, overload, TYPE_CHECKING, Union
+from typing import Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -34,6 +34,7 @@ else:
 if TYPE_CHECKING:
     _AllDates = Union[None, int, float, datetime.datetime, datetime.date, np.ndarray, np.datetime64]
     _NPDates = Union[np.datetime64, np.ndarray]
+    _NInt = np.typing.NDArray[np.int_]
 
 #%% Constants
 # maps other names of units to the ones expected by numpy
@@ -94,6 +95,38 @@ def get_np_time_units(date: Union[np.datetime64, np.timedelta64, str]) -> Option
     # do a sanity check and return the result
     assert form in {"datetime64", "timedelta64"}, f'Only expecting datetime64 or timedelta64, not "{form}".'
     return None if len(matches) == 1 else matches[1]
+
+
+#%% Functions - get_ymd_from_np
+def get_ymd_from_np(date: _NPDates) -> Tuple[_NInt, _NInt, _NInt]:
+    r"""
+    Gets the year, month, and day for a given numpy datetime64.
+
+    Notes
+    -----
+    #.  This functionality should absolutely already be included within numpy.
+    #.  Written by David C. Stauffer in July 2022 based on https://stackoverflow.com/questions/13648774/get-year-month-or-day-from-numpy-datetime64
+
+    Examples
+    --------
+    >>> from dstauffman import get_ymd_from_np
+    >>> import numpy as np
+    >>> date = np.array([np.datetime64('2022-07-15T12:34:56'), np.datetime64('1905-03-30T23:15:00')])
+    >>> (y, m, d) = get_ymd_from_np(date)
+    >>> print(y)
+    [2022 1905]
+
+    >>> print(m)
+    [7 3]
+
+    >>> print(d)
+    [15 30]
+
+    """
+    year = date.astype("datetime64[Y]").astype(int) + 1970
+    month = date.astype("datetime64[M]").astype(int) % 12 + 1
+    day = (date - date.astype("datetime64[M]")).astype("timedelta64[D]").astype(int) + 1
+    return (year, month, day)
 
 
 #%% Functions - round_datetime

@@ -4,7 +4,7 @@ Defines useful plotting utilities.
 Notes
 -----
 #.  Written by David C. Stauffer in March 2015.
-"""
+"""  # pylint: disable=too-many-lines
 
 #%% Imports
 from __future__ import annotations
@@ -42,8 +42,10 @@ from dstauffman.plotting.support import (
 
 if HAVE_MPL:
     from matplotlib.collections import PatchCollection
+    import matplotlib.colors as colors
     from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
+    import matplotlib.transforms as transforms
 if HAVE_NUMPY:
     import numpy as np
 
@@ -748,11 +750,13 @@ def plot_histogram(
     second_ylabel="Distribution [%]",
     normalize_spacing=False,
     use_exact_counts=False,
-    show_pdf=False,
-    pdf_x=None,
-    pdf_y=None,
+    show_cdf=False,
+    cdf_x=None,
+    cdf_y=None,
+    cdf_colormap=None,
     fig_ax=None,
     skip_setup_plots=False,
+    **kwargs,
 ):
     r"""
     Creates a histogram plot of the given data and bins.
@@ -779,12 +783,12 @@ def plot_histogram(
         Whether to normalize all the bins to the same horizontal size
     use_exact_counts : bool, optional, default is False
         Whether to bin things based only on exactly equal values
-    show_pdf : bool, optional, default is False
-        Whether to draw the PDF result
-    pdf_x : scalar or (B, ) ndarray
-        X values to draw lines at PDF
-    pdf_y : scalar or (C, ) ndarray
-        Y values to draw lines at PDF
+    show_cdf : bool, optional, default is False
+        Whether to draw the CDF result
+    cdf_x : scalar or (B, ) ndarray
+        X values to draw lines at CDF
+    cdf_y : scalar or (C, ) ndarray
+        Y values to draw lines at CDF
     fig_ax : (fig, ax) tuple, optional
         Figure and axis to use, otherwise create new ones
     skip_setup_plots : bool, optional, default is False
@@ -808,8 +812,8 @@ def plot_histogram(
     >>> bins = np.array([0., 1., 2., 3., 5., 7.])
     >>> fig = plot_histogram(description, data, bins)
 
-    With PDF
-    >>> fig2 = plot_histogram(description, data, bins, show_pdf=True, pdf_y=0.5)
+    With CDF
+    >>> fig2 = plot_histogram(description, data, bins, show_cdf=True, cdf_y=0.5)
 
     Close plot
     >>> import matplotlib.pyplot as plt
@@ -820,6 +824,8 @@ def plot_histogram(
     # check optional inputs
     if opts is None:
         opts = Opts()
+    legend_loc = kwargs.pop("legend_loc", opts.leg_spot)
+    assert not bool(kwargs), f"Unexpected keyword arguments were passed in: {list(kwargs.keys())}."
     # create plot
     if fig_ax is None:
         fig = plt.figure()
@@ -859,7 +865,7 @@ def plot_histogram(
         rects.append(Rectangle((plotting_bins[i], 0), plotting_bins[i + 1] - plotting_bins[i], counts[i]))
     if missing > 0:
         rects.append(Rectangle((plotting_bins[-1], 0), 1, missing))
-    coll = PatchCollection(rects, facecolor=color, edgecolor="k")
+    coll = PatchCollection(rects, facecolor=color, edgecolor="k", zorder=6)
     ax.add_collection(coll)
     ax.grid(True)
     ax.set_xlabel(xlabel)
@@ -879,9 +885,72 @@ def plot_histogram(
             ax.set_xticks(plotting_bins[:-1] + 0.5)
         ax.set_xticklabels(xlab)
     plot_second_yunits(ax, ylab=second_ylabel, multiplier=100 / data.size)
-    # Optionally add PDF information
-    if show_pdf:
-        pass  # TODO: add this
+    # Optionally add CDF information
+    using_cdf = show_cdf or cdf_x is not None or cdf_y is not None
+    if using_cdf:
+        # prepare the colormap
+        if cdf_colormap is None:
+            cdf_colormap = colors.ListedColormap(([0, 0.8, 0], "r", "m"))
+        cm = ColorMap(colormap=cdf_colormap, num_colors=3)
+        # create fake items to add to legend
+        p = Rectangle((0, 0), 1, 1, facecolor=color, linewidth=0, edgecolor="none")
+        # create a transform with X in data units and Y in axes units
+        trans = transforms.blended_transform_factory(ax.transData, ax.transAxes)
+        # create the CDF
+        cdf = np.hstack([0, np.cumsum(counts)]) / data.size
+    if show_cdf:
+        # plot the CDF
+        ax3 = ax.twinx()
+        ax3.set_ylim(0, 100)
+        ax3.spines.right.set_position(("axes", 1.06))
+        ax3.yaxis.label.set_color(cm.get_color(0))
+        ax3.set_ylabel("CDF Distribution [%]")
+        ax3.tick_params(axis="y", colors=cm.get_color(0))
+        # Note: plot on transformed axes instead of ax3 to maintain constant pan/zoom
+        ax.step(plotting_bins, cdf, color=cm.get_color(0), label="CDF", zorder=8, transform=trans)
+    if cdf_x is not None:
+        try:
+            _ = len(cdf_x)
+        except TypeError:
+            cdf_x = [cdf_x]
+        for this_x in cdf_x:
+            this_ix = np.argmax(plotting_bins >= this_x)
+            this_bin = plotting_bins[this_ix]
+            this_cdf = cdf[this_ix]
+            ax.plot(
+                [0, 1],
+                [this_cdf, this_cdf],
+                color=cm.get_color(1),
+                label=f"{this_x:.3g}={100*this_cdf:.3g}p",
+                zorder=9,
+                transform=ax.transAxes,
+            )
+            ax.plot(
+                this_bin,
+                this_cdf,
+                marker="o",
+                markeredgecolor=cm.get_color(1),
+                markerfacecolor="none",
+                label="",
+                zorder=10,
+                transform=trans,
+            )
+    if cdf_y is not None:
+        try:
+            _ = len(cdf_y)
+        except TypeError:
+            cdf_y = [cdf_y]
+        for this_cdf in cdf_y:
+            this_ix = np.argmax(cdf >= this_cdf)
+            this_bin = plotting_bins[this_ix]
+            ax.axvline(this_bin, label=f"{100*this_cdf:.3g}p={this_bin:.3g}", color=cm.get_color(2), zorder=9)
+            ax.plot(this_bin, cdf[this_ix], marker="x", color=cm.get_color(2), label="", zorder=10, transform=trans)
+    if using_cdf:
+        # Add a legend now, since there is something to display
+        (handles, labels) = ax.get_legend_handles_labels()
+        handles.insert(0, p)
+        labels.insert(0, "PDF")
+        ax.legend(handles, labels, loc=legend_loc)
     if not skip_setup_plots:
         setup_plots(fig, opts=opts)
     return fig

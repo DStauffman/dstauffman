@@ -41,6 +41,35 @@ class Test_get_np_time_units(unittest.TestCase):
         self.assertEqual(units, "ns")
 
 
+#%% get_ymd_from_np
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_get_ymd_from_np(unittest.TestCase):
+    r"""
+    Tests the get_ymd_from_np function with the following cases:
+        Single
+        Vector
+    """
+
+    def setUp(self) -> None:
+        self.date1 = np.datetime64("2022-07-15T12:34:56")
+        self.date2 = np.datetime64("1905-03-30T23:15:00")
+        self.date = np.array([self.date1, self.date2])
+        self.exp1 = (2022, 7, 15)
+        self.exp2 = (1905, 3, 30)
+
+    def test_nominal(self) -> None:
+        ymd = dcs.get_ymd_from_np(self.date1)
+        self.assertEqual(ymd, self.exp1)
+        ymd = dcs.get_ymd_from_np(self.date2)
+        self.assertEqual(ymd, self.exp2)
+
+    def test_vector(self) -> None:
+        (y, m, d) = dcs.get_ymd_from_np(self.date)
+        np.testing.assert_array_equal(y, np.array([self.exp1[0], self.exp2[0]]))
+        np.testing.assert_array_equal(m, np.array([self.exp1[1], self.exp2[1]]))
+        np.testing.assert_array_equal(d, np.array([self.exp1[2], self.exp2[2]]))
+
+
 #%% round_datetime
 class Test_round_datetime(unittest.TestCase):
     r"""

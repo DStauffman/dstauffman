@@ -23,7 +23,7 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
-from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Set, Tuple, TYPE_CHECKING, TypeVar, Union
 import unittest
 import warnings
 
@@ -367,6 +367,7 @@ def compare_two_classes(
     compare_recursively: bool = True,
     is_subset: bool = False,
     tolerance: float = None,
+    exclude: Set[str] = None,
 ) -> bool:
     r"""
     Compare two classes by going through all their public attributes and showing that they are equal.
@@ -387,6 +388,8 @@ def compare_two_classes(
         If True, only compares in c1 is a strict subset of c2, but c2 can have extra fields, defaults to False
     tolerance : float, optional
         Numerical tolerance used to compare two numbers that are close together to consider them equal
+    exclude: set of str, optional
+        Field attributes to exclude in the comparison, typically because they are non-standard and can't be compared
 
     Returns
     -------
@@ -443,6 +446,9 @@ def compare_two_classes(
         # compare the attributes that are in both
         same = attrs1 & attrs2
         for this_attr in sorted(same):
+            if exclude is not None and this_attr in exclude:
+                # TODO: what if only in one and not the other?  Should they still be excluded?
+                continue
             # alias the attributes
             attr1 = inspect.getattr_static(c1, this_attr)
             attr2 = inspect.getattr_static(c2, this_attr)

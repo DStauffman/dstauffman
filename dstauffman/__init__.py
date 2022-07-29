@@ -23,9 +23,10 @@ from .paths     import get_root_dir, get_tests_dir, get_data_dir, get_images_dir
 from .repos     import run_docstrings, run_unittests, run_pytests, run_coverage, find_repo_issues, \
                            delete_pyc, get_python_definitions, make_python_init, \
                            write_unit_test_templates
-from .time      import get_np_time_units, round_datetime, round_np_datetime, round_num_datetime, \
-                           round_time, convert_date, convert_time_units, convert_datetime_to_np, \
-                           convert_duration_to_np, convert_num_dt_to_np, get_delta_time_str
+from .time      import get_np_time_units, get_ymd_from_np, round_datetime, round_np_datetime, \
+                           round_num_datetime, round_time, convert_date, convert_time_units, \
+                           convert_datetime_to_np, convert_duration_to_np, convert_num_dt_to_np, \
+                           get_delta_time_str
 from .units     import ONE_MINUTE, ONE_HOUR, ONE_DAY, MONTHS_PER_YEAR, RAD2DEG, DEG2RAD, \
                            ARCSEC2RAD, RAD2ARCSEC, FT2M, M2FT, IN2CM, CM2IN, DEGREE_SIGN, \
                            MICRO_SIGN, get_factors, get_time_factor, get_unit_conversion

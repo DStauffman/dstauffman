@@ -251,8 +251,8 @@ def load_hdf5(
         for key in file:
             grp = file[key]
             if return_meta:
-                for (key, value) in grp.attrs.items():
-                    meta[key] = value
+                for (key2, value) in grp.attrs.items():
+                    meta[key2] = value
             for field in grp:
                 if limit_fields and not hasattr(out, field):
                     continue
@@ -334,24 +334,30 @@ def save_method(
         save_pickle(self, filename.with_suffix(".pkl"))
     else:
         # Version 2 (HDF5):
+        if hasattr(self, "_save_convert_hdf5") and callable(self._save_convert_hdf5):  # pylint: disable=protected-access
+            kwargs = self._save_convert_hdf5()  # pylint: disable=protected-access
+        else:
+            kwargs = {}
         save_hdf5(self, filename, meta=meta, exclusions=exclusions, **kwargs)
+        if hasattr(self, "_save_restore_hdf5") and callable(self._save_restore_hdf5):  # pylint: disable=protected-access
+            self._save_restore_hdf5(**kwargs)  # pylint: disable=protected-access
 
 
 #%% Methods - load_method
 @overload
-def load_method(cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[False] = ...) -> _T:
+def load_method(cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[False] = ..., **kwargs) -> _T:
     ...
 
 
 @overload
 def load_method(
-    cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[True]
+    cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[True], **kwargs
 ) -> Tuple[_T, Dict[str, Any]]:
     ...
 
 
 def load_method(
-    cls: Type[_T], filename: Path = None, use_hdf5: bool = True, return_meta: bool = False
+    cls: Type[_T], filename: Path = None, use_hdf5: bool = True, return_meta: bool = False, **kwargs
 ) -> Union[_T, Tuple[_T, Dict[str, Any]]]:
     r"""
     Load the object from disk.
@@ -374,6 +380,8 @@ def load_method(
     else:
         # Version 2 (HDF5):
         out = load_hdf5(cls, filename, return_meta=return_meta)  # type: ignore[call-overload]
+        if hasattr(out, "_save_restore_hdf5") and callable(out._save_restore_hdf5):  # type: ignore[attr-defined]  # pylint: disable=protected-access
+            out._save_restore_hdf5(**kwargs)  # type: ignore[attr-defined]  # pylint: disable=protected-access
     return out
 
 
