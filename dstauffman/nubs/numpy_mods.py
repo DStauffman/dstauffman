@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import Tuple
+from typing import Tuple, TYPE_CHECKING
 import unittest
 
 from dstauffman.nubs.passthrough import HAVE_NUMBA, ncjit
@@ -25,6 +25,9 @@ try:
     import numpy as np
 except ModuleNotFoundError:
     pass
+
+if TYPE_CHECKING:
+    _B = np.typing.NDArray[np.bool_]
 
 #%% _reduce_shape
 @ncjit
@@ -104,7 +107,7 @@ def issorted_descend(x: np.ndarray) -> boolean:
 
 #%% Functions - np_all_axis0
 @ncjit
-def np_all_axis0(x):
+def np_all_axis0(x: _B) -> _B:
     r"""
     Numba compatible version of np.all(x, axis=0).
 
@@ -131,13 +134,13 @@ def np_all_axis0(x):
         for i in range(x.shape[0]):
             out = np.logical_and(out, x[i, :, ...])
     else:
-        out = np.all(x)
+        out = np.all(x)  # type: ignore[assignment]
     return out
 
 
 #%% Functions - np_all_axis1
 @ncjit
-def np_all_axis1(x):
+def np_all_axis1(x: _B) -> _B:
     """Numba compatible version of np.all(x, axis=1).
 
     Parameters
@@ -166,7 +169,7 @@ def np_all_axis1(x):
 
 #%% Functions - np_any_axis0
 @ncjit
-def np_any_axis0(x):
+def np_any_axis0(x: _B) -> _B:
     """Numba compatible version of np.any(x, axis=0).
 
     Parameters
@@ -192,13 +195,13 @@ def np_any_axis0(x):
         for i in range(x.shape[0]):
             out = np.logical_or(out, x[i, :, ...])
     else:
-        out = np.any(x)
+        out = np.any(x)  # type: ignore[assignment]
     return out
 
 
 #%% Functions - np_any_axis1
 @ncjit
-def np_any_axis1(x):
+def np_any_axis1(x: _B) -> _B:
     """Numba compatible version of np.any(x, axis=1).
 
     Parameters

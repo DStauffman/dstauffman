@@ -13,11 +13,8 @@ from collections.abc import Mapping
 import copy
 import pathlib
 import pickle
-from typing import Callable, ClassVar, Optional, TYPE_CHECKING
+from typing import Callable, ClassVar, List, Optional, TYPE_CHECKING, Union
 import unittest
-
-if TYPE_CHECKING:
-    from mypy_extensions import DefaultNamedArg
 
 import dstauffman as dcs
 
@@ -30,13 +27,19 @@ else:
 if dcs.HAVE_PANDAS:
     from pandas import DataFrame
 
+if TYPE_CHECKING:
+    from mypy_extensions import DefaultNamedArg
+
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+
 #%% Locals classes for testing
 class _Example_Frozen(dcs.Frozen):
-    def __init__(self, dummy=None):
-        self.field_one = 1
-        self.field_two = 2
-        self.field_ten = 10
-        self.dummy = dummy if dummy is not None else 0
+    def __init__(self, dummy: int = None):
+        self.field_one: Union[int, str] = 1
+        self.field_two: int = 2
+        self.field_ten: int = 10
+        self.dummy: Optional[int] = dummy if dummy is not None else 0
 
 
 class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
@@ -56,8 +59,11 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
         ],
         None,
     ]
+    x: Union[_I, List[int]]
+    y: Union[_I, List[int]]
+    z: Optional[int]
 
-    def __init__(self):
+    def __init__(self) -> None:
         if dcs.HAVE_NUMPY:
             self.x = np.array([1, 3, 5])
             self.y = np.array([2, 4, 6])
@@ -70,8 +76,10 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
 class _Example_SaveAndLoadPickle(dcs.Frozen, metaclass=dcs.SaveAndLoadPickle):
     load: ClassVar[Callable[[Optional[pathlib.Path]], _Example_SaveAndLoadPickle]]
     save: Callable[[_Example_SaveAndLoadPickle, Optional[pathlib.Path]], None]
+    a: Union[_I, List[int]]
+    b: Union[_I, List[int]]
 
-    def __init__(self):
+    def __init__(self) -> None:
         if dcs.HAVE_NUMPY:
             self.a = np.array([1, 2, 3])
             self.b = np.array([4, 5, 6])
@@ -82,36 +90,36 @@ class _Example_SaveAndLoadPickle(dcs.Frozen, metaclass=dcs.SaveAndLoadPickle):
 
 class _Example_No_Override(object, metaclass=dcs.SaveAndLoad):
     @staticmethod
-    def save():
+    def save() -> int:
         return 1
 
     @staticmethod
-    def load():
+    def load() -> int:
         return 2
 
 
 class _Example_No_Override2(object, metaclass=dcs.SaveAndLoadPickle):
     @staticmethod
-    def save():
+    def save() -> int:
         return 1
 
     @staticmethod
-    def load():
+    def load() -> int:
         return 2
 
 
 class _Example_Times(object):
-    def __init__(self, time, data, name="name"):
+    def __init__(self, time: _N, data: _N, name: str = "name"):
         self.time = time
         self.data = data
         self.name = name
 
-    def chop(self, ti=-inf, tf=inf):
+    def chop(self, ti: float = -inf, tf: float = inf) -> None:
         dcs.chop_time(
             self, ti=ti, tf=tf, time_field="time", exclude=frozenset({"name",})  # fmt: skip
         )
 
-    def subsample(self, skip=30, start=0):
+    def subsample(self, skip: int = 30, start: int = 0) -> None:
         dcs.subsample_class(
             self, skip=skip, start=start, skip_fields=frozenset({"name",})  # fmt: skip
         )
@@ -454,7 +462,7 @@ class Test_SaveAndLoad(unittest.TestCase):
     def test_exclusions(self) -> None:
         orig = self.results1.x.copy()
         self.results1.save(self.save_path1, exclusions={"x", "z"})
-        self.results1.x = "Not original"
+        self.results1.x = "Not original"  # type: ignore[assignment]
         results = self.results1_cls.load(self.save_path1)
         np.testing.assert_array_equal(results.y, self.results1.y)
         np.testing.assert_array_equal(results.x, orig)

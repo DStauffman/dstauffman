@@ -335,12 +335,12 @@ def save_method(
     else:
         # Version 2 (HDF5):
         if hasattr(self, "_save_convert_hdf5") and callable(self._save_convert_hdf5):  # pylint: disable=protected-access
-            kwargs = self._save_convert_hdf5()  # pylint: disable=protected-access
+            restore_kwargs = self._save_convert_hdf5()  # pylint: disable=protected-access
         else:
-            kwargs = {}
+            restore_kwargs = {}
         save_hdf5(self, filename, meta=meta, exclusions=exclusions, **kwargs)
         if hasattr(self, "_save_restore_hdf5") and callable(self._save_restore_hdf5):  # pylint: disable=protected-access
-            self._save_restore_hdf5(**kwargs)  # pylint: disable=protected-access
+            self._save_restore_hdf5(**restore_kwargs)  # pylint: disable=protected-access
 
 
 #%% Methods - load_method

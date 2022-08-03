@@ -433,6 +433,11 @@ class Test_plotting_resolve_name(unittest.TestCase):
         new_name = plot.resolve_name(bad_name, force_win=True, rep_token="YY")
         self.assertEqual(new_name, "new YYYYYYYYYYYYYYYYYYtext")
 
+    def test_newlines(self) -> None:
+        bad_name = "Hello\nWorld.jpg"
+        new_name = plot.resolve_name(bad_name)
+        self.assertEqual(new_name, "Hello_World.jpg")
+
 
 #%% plotting.storefig
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")

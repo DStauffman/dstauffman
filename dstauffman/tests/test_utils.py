@@ -572,10 +572,10 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertFalse(is_same)
 
     def test_callables(self) -> None:
-        def f(x):
+        def f(x: int) -> int:
             return x  # pragma: no cover
 
-        def g(x):
+        def g(x: int) -> int:
             return x  # pragma: no cover
 
         self.c3.e = f  # type: ignore[attr-defined]
@@ -591,10 +591,10 @@ class Test_compare_two_classes(unittest.TestCase):
         )
 
     def test_ignore_callables(self) -> None:
-        def f(x):
+        def f(x: float) -> float:
             return x  # pragma: no cover
 
-        def g(x):
+        def g(x: float) -> float:
             return x  # pragma: no cover
 
         self.c3.e = f  # type: ignore[attr-defined]

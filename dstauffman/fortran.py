@@ -531,17 +531,20 @@ def _write_makefile(
 
     """
     # subfunction to build dependencies with checks for external or intrinsics
-    def _build_dependencies(uses):
+    def _build_dependencies(uses: Iterable[str]) -> List[str]:
         # create sorted list of uses that are not intrinsic or external
-        sorted_uses = sorted(list({x for x in uses if x not in _INTRINSIC_MODS and x not in external_sources}))
+        sorted_uses = sorted(
+            list({x for x in uses if x not in _INTRINSIC_MODS and (external_sources is None or x not in external_sources)})
+        )
         # build the normal dependencies
         dependencies = []
         for x in sorted_uses:
             dependencies.append(prefix_bld + x + _OBJ_EXT)
         # append any external dependencies at the end, but still in sorted order
-        for x in sorted(external_sources):
-            if x in uses:
-                dependencies.append(prefix_ext + x + _OBJ_EXT)
+        if external_sources is not None:
+            for x in sorted(external_sources):
+                if x in uses:
+                    dependencies.append(prefix_ext + x + _OBJ_EXT)
         return dependencies
 
     # hard-coded values

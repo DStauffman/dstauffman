@@ -604,8 +604,8 @@ def resolve_name(name: str, force_win: bool = None, rep_token: str = "_", strip_
 
     """
     # hard-coded values
-    bad_chars_win = ["<", ">", ":", '"', "/", "\\", "|", "?", "*"]
-    bad_chars_unix = ["/"]
+    bad_chars_win = ["<", ">", ":", '"', "/", "\\", "|", "?", "*", "\n"]
+    bad_chars_unix = ["/", "\n"]
 
     # determine OS and thus which characters are bad
     if force_win is None:

@@ -8,8 +8,10 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
+
 import logging
-from typing import List
+from typing import Any, Dict, List, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import FixedDict, Frozen, HAVE_NUMPY
@@ -17,6 +19,10 @@ import dstauffman.estimation as estm
 
 if HAVE_NUMPY:
     import numpy as np
+
+if TYPE_CHECKING:
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
 
 #%% Classes - _Config
 class _Config(Frozen):
@@ -32,27 +38,27 @@ class _Config(Frozen):
 
     def __init__(self) -> None:
         # log level for how much information to display while running
-        self.log_level = logging.INFO
+        self.log_level: int = logging.INFO
 
         # output folder/files
-        self.output_folder = ""
-        self.output_results = "results_model.hdf5"
-        self.output_params = "results_param.pkl"
+        self.output_folder: str = ""
+        self.output_results: str = "results_model.hdf5"
+        self.output_params: str = "results_param.pkl"
 
         # Whether to save the final state information to disk
-        self.save_final = False
+        self.save_final: bool = False
 
         # randomness
-        self.repeatable_randomness = False
-        self.repeatable_seed = 1000
-        self.repeatable_offset = 0
+        self.repeatable_randomness: bool = False
+        self.repeatable_seed: int = 1000
+        self.repeatable_offset: int = 0
 
         # parallelization
-        self.use_parfor = False
-        self.max_cores = 4
+        self.use_parfor: bool = False
+        self.max_cores: int = 4
 
         # default colormap
-        self.colormap = "Paired"  #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
+        self.colormap: str = "Paired"  #'Dark2' # 'YlGn' # 'gnuplot2' # 'cubehelix'
 
 
 class _Model(Frozen):
@@ -68,9 +74,11 @@ class _Model(Frozen):
 
     def __init__(self) -> None:
         self.field1: int = 1
-        self.field2 = np.array([1, 2, 3]) if HAVE_NUMPY else [1, 2, 3]
-        self.field3 = {"a": 5, "b": np.array([1.5, 2.5, 10.0])} if HAVE_NUMPY else {"a": 5, "b": [1.5, 2.5, 10.0]}
-        self.field4 = FixedDict()
+        self.field2: Union[_I, List[int]] = np.array([1, 2, 3]) if HAVE_NUMPY else [1, 2, 3]
+        self.field3: Dict[str, Union[int, float, _N, List[float]]] = (
+            {"a": 5, "b": np.array([1.5, 2.5, 10.0])} if HAVE_NUMPY else {"a": 5, "b": [1.5, 2.5, 10.0]}
+        )
+        self.field4: Dict[str, Any] = FixedDict()
         self.field4["new"] = np.array([3, 4, 5]) if HAVE_NUMPY else [3, 4, 5]
         self.field4["old"] = "4 - 6"
         self.field4.freeze()
@@ -88,7 +96,7 @@ class _Parameters(Frozen):
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = _Config()
         self.model = _Model()
         self.models: List[_Model] = [_Model(), _Model()]
@@ -178,9 +186,9 @@ class Test_estimation_get_parameter(unittest.TestCase):
             "param.models[1].field3['b'][1]",
         ]
         self.param = _Parameters()
-        self.param.config.log_level = self.values[0]
+        self.param.config.log_level = self.values[0]  # type: ignore[assignment]
         self.param.models[0].field1 = self.values[1]  # type: ignore[assignment]
-        self.param.models[1].field2[2] = self.values[2]  # type: ignore[index]
+        self.param.models[1].field2[2] = self.values[2]  # type: ignore[call-overload]
         self.param.models[1].field3["b"][1] = self.values[3]  # type: ignore[index]
 
     def test_nominal(self) -> None:
@@ -206,9 +214,9 @@ class Test_estimation_set_parameter(unittest.TestCase):
             "param.models[1].field3['b'][1]",
         ]
         self.param = _Parameters()
-        self.param.config.log_level = self.orig[0]
+        self.param.config.log_level = self.orig[0]  # type: ignore[assignment]
         self.param.models[0].field1 = self.orig[1]  # type: ignore[assignment]
-        self.param.models[1].field2[2] = self.orig[2]  # type: ignore[index]
+        self.param.models[1].field2[2] = self.orig[2]  # type: ignore[call-overload]
         self.param.models[1].field3["b"][1] = self.orig[3]  # type: ignore[index]
 
     def test_nominal(self) -> None:

@@ -545,7 +545,27 @@ def rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd):
 
 
 #%% Functions - get_sun_radec
-def get_sun_radec(time_jd: _N, return_early: bool = False) -> Tuple[np.ndarray, np.ndarray]:
+@overload
+def get_sun_radec(time_jd: float) -> Tuple[float, float]:
+    ...
+
+
+@overload
+def get_sun_radec(time_jd: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+    ...
+
+
+@overload
+def get_sun_radec(time_jd: float, return_early: bool) -> Tuple[float, float]:
+    ...
+
+
+@overload
+def get_sun_radec(time_jd: np.ndarray, return_early: bool) -> Tuple[np.ndarray, np.ndarray]:
+    ...
+
+
+def get_sun_radec(time_jd: _N, return_early: bool = False) -> Tuple[_N, _N]:
     r"""
     Gets the right ascension and declination angles to the Sun for the given julian time.
 
@@ -617,7 +637,7 @@ def get_sun_radec(time_jd: _N, return_early: bool = False) -> Tuple[np.ndarray, 
         - 4.34e-8 * T**5
     )
     if return_early:
-        return (sun_true_longitude, obliquity_of_ecliptic)  # type: ignore[return-value]
+        return (sun_true_longitude, obliquity_of_ecliptic)
     # right ascension
     ra = np.mod(np.arctan2(np.cos(obliquity_of_ecliptic) * np.sin(sun_true_longitude), np.cos(sun_true_longitude)), TAU)
     # declination

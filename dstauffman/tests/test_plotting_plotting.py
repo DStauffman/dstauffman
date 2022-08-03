@@ -10,7 +10,7 @@ Notes
 import datetime
 from typing import List, Optional
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from slog import LogLevel
 
@@ -206,7 +206,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, opts=self.opts))
 
     @patch("dstauffman.plotting.plotting.logger")
-    def test_no_data(self, mock_logger):
+    def test_no_data(self, mock_logger: Mock) -> None:
         plot.plot_time_history("", self.time, None)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "")
@@ -220,7 +220,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True))
 
     @patch("dstauffman.plotting.plotting.logger")
-    def test_ignore_zeros3(self, mock_logger):
+    def test_ignore_zeros3(self, mock_logger: Mock) -> None:
         self.col_data = np.zeros(self.col_data.shape)
         not_a_fig = plot.plot_time_history("All Zeros", self.time, self.col_data, ignore_empties=True)
         self.assertIs(not_a_fig, None)
@@ -434,7 +434,7 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, ignore_empties=True))
 
     @patch("dstauffman.plotting.plotting.logger")
-    def test_null_data(self, mock_logger):
+    def test_null_data(self, mock_logger: Mock) -> None:
         plot.plot_bar_breakdown("", self.time, None)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "")

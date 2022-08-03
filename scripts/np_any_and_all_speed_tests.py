@@ -95,7 +95,7 @@ i = 50000, np_all(x)
 """
 
 #%% Functions - parse_results
-def parse_results(text):
+def parse_results(text: str) -> pd.DataFrame:
     r"""Parses the output into a more succient table."""
     lines = text.split("\n")
     table = pd.DataFrame(

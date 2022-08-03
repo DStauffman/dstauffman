@@ -7,6 +7,8 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
+
 import contextlib
 import time
 from typing import Optional
@@ -95,7 +97,7 @@ class Test_setup_dir(unittest.TestCase):
             mock_logger2.log.assert_any_call(LogLevel.L1, 'Files/Sub-folders were removed from: "%s"', self.subdir)
 
     def tearDown(self) -> None:
-        def _clean(self) -> None:
+        def _clean(self: Test_setup_dir) -> None:
             self.filename.unlink(missing_ok=True)
             self.subfile.unlink(missing_ok=True)
             with contextlib.suppress(FileNotFoundError):

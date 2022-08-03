@@ -10,7 +10,7 @@ Notes
 import datetime
 from typing import List, Optional
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from slog import LogLevel
 
@@ -674,7 +674,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.figs = plot.make_difference_plot(self.description, None, self.time_two, None, self.data_two)
 
     @patch("dstauffman.plotting.generic.logger")
-    def test_none3(self, mock_logger):
+    def test_none3(self, mock_logger: Mock) -> None:
         self.figs = plot.make_difference_plot("", None, None, None, None)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(

@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 import datetime
+from typing import Any, List, Tuple, TYPE_CHECKING
 
 import numpy as np
 
@@ -17,33 +18,37 @@ import dstauffman as dcs
 import dstauffman.estimation as estm
 import dstauffman.plotting as plot
 
+if TYPE_CHECKING:
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+
 
 #%% Classes - SimParams
 class SimParams(dcs.Frozen):
     r"""Simulation model parameters."""
 
-    def __init__(self, time, *, magnitude, frequency, phase):
+    def __init__(self, time: _N, *, magnitude: float, frequency: float, phase: float):
         self.time = time
         self.magnitude = magnitude
         self.frequency = frequency
         self.phase = phase
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         r"""Allows classes to compare contents to determine if equal."""
-        if type(other) != type(self):
+        if not isinstance(other, SimParams):
             return False
         for key in vars(self):
             if np.any(getattr(self, key) != getattr(other, key)):
                 return False
         return True
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         r"""Detailed string representation."""
-        return "mag={}, freq={}, phs={}".format(self.magnitude, self.frequency, self.phase)
+        return f"mag={self.magnitude}, freq={self.frequency}, phs={self.phase}"
 
 
 #%% Functions - _get_truth_index
-def _get_truth_index(results_time, truth_time):
+def _get_truth_index(results_time: _N, truth_time: _N) -> Tuple[_I, _I]:
     r"""Find the indices to the truth data from the results time."""
     # Hard-coded values
     precision = 1e-7
@@ -56,7 +61,7 @@ def _get_truth_index(results_time, truth_time):
 
 
 #%% Functions - sim_model
-def sim_model(sim_params):
+def sim_model(sim_params: SimParams) -> _N:
     r"""Run the simple example simulation model."""
     return sim_params.magnitude * np.sin(
         2 * np.pi * sim_params.frequency * sim_params.time / 1000 + sim_params.phase * np.pi / 180
@@ -64,13 +69,15 @@ def sim_model(sim_params):
 
 
 #%% Functions - truth
-def truth(time, magnitude=5, frequency=10, phase=90):
+def truth(time: _N, magnitude: float = 5.0, frequency: float = 10.0, phase: float = 90.0) -> _N:
     r"""Return true values for simple example truth data."""
     return magnitude * np.sin(2 * np.pi * frequency * time / 1000 + phase * np.pi / 180)
 
 
 #%% Functions - cost_wrapper
-def cost_wrapper(results_data, *, results_time, truth_time, truth_data, sim_params):
+def cost_wrapper(
+    results_data: _N, *, results_time: _N, truth_time: _N, truth_data: _N, sim_params: SimParams
+) -> _N:  # pylint: disable=unused-argument
     r"""Calculate innovations (cost) for the model."""
     # Pull out overlapping time points and indices
     (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
@@ -79,11 +86,11 @@ def cost_wrapper(results_data, *, results_time, truth_time, truth_data, sim_para
 
     # calculate the innovations
     innovs = sub_result - sub_truth
-    return innovs
+    return innovs  # type: ignore[no-any-return]
 
 
 #%% Functions - get_parameter
-def get_parameter(sim_params, *, names):
+def get_parameter(sim_params: SimParams, *, names: List[str]) -> Any:
     r"""Get the model parameters."""
     num = len(names)
     values = np.full(num, np.nan, dtype=float)
@@ -91,12 +98,12 @@ def get_parameter(sim_params, *, names):
         if hasattr(sim_params, name):
             values[ix] = getattr(sim_params, name)
         else:
-            raise ValueError('Bad parameter name: "{}".'.format(name))
+            raise ValueError(f'Bad parameter name: "{name}".')
     return values
 
 
 #%% Functions - set_parameter
-def set_parameter(sim_params, *, names, values):
+def set_parameter(sim_params: SimParams, *, names: List[str], values: List[Any]) -> None:
     r"""Set the model parameters."""
     num = len(names)
     assert len(values) == num, "Names and Values must have the same length."
@@ -104,7 +111,7 @@ def set_parameter(sim_params, *, names, values):
         if hasattr(sim_params, name):
             setattr(sim_params, name, values[ix])
         else:
-            raise ValueError('Bad parameter name: "{}".'.format(name))
+            raise ValueError(f'Bad parameter name: "{name}".')
 
 
 #%% Script
@@ -113,15 +120,15 @@ if __name__ == "__main__":
     # fmt: off
     rerun      = True
     make_plots = True
-    time       = np.arange(251)
+    time       = np.arange(251.0)
     # fmt: on
 
     # Parameters
-    sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
+    sim_params = SimParams(time, magnitude=3.5, frequency=12.0, phase=180.0)
 
     # Truth data
     # fmt: off
-    truth_time = np.arange(-10, 201)
+    truth_time = np.arange(-10.0, 201.0)
     truth_data = truth(truth_time)
     truth      = plot.TruthPlotter(truth_time, truth_data)  # type: ignore[assignment]
     # fmt: on

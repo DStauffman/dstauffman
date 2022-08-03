@@ -75,7 +75,7 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
         self.bpe_results.param_names  = [x.encode("utf-8") for x in names]
         self.bpe_results.begin_innovs = np.array([1, 2, 3, 4], dtype=float)
         self.bpe_results.final_innovs = np.array([0.5, 0.25, 0.1, 0.05])
-        self.bpe_results.costs        = np.array([1, 0.1, 0.05, 0.01])
+        self.bpe_results.costs        = [1.0, 0.1, 0.05, 0.01]
         self.bpe_results.correlation  = matrix.copy()
         self.bpe_results.info_svd     = matrix.copy()
         self.bpe_results.covariance   = matrix.copy()

@@ -208,7 +208,7 @@ class Test_aerospace_cart2sph(unittest.TestCase):
         Full loop
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.xyz1 = (1.0, 0.0, 0.0)
         self.aer1 = (0.0, 0.0, 1.0)
         self.xyz2 = (0.0, -1.0, 0.0)
@@ -258,7 +258,7 @@ class Test_aerospace_sph2cart(unittest.TestCase):
         Full loop
     """
 
-    def setUp(self):
+    def setUp(self) -> None:
         self.xyz1 = (1.0, 0.0, 0.0)
         self.aer1 = (0.0, 0.0, 1.0)
         self.xyz2 = (0.0, -1.0, 0.0)

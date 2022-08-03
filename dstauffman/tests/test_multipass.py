@@ -7,6 +7,9 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
+
+from typing import Optional, TYPE_CHECKING
 import unittest
 
 import dstauffman as dcs
@@ -14,13 +17,16 @@ import dstauffman as dcs
 if dcs.HAVE_NUMPY:
     import numpy as np
 
+if TYPE_CHECKING:
+    _N = np.typing.NDArray[np.float64]
+
 #%% Supporting functions
-def _model_wrapper(x, y):
+def _model_wrapper(x: Optional[_N], y: Optional[_N]) -> _N:
     if x is None:
         raise ValueError("Bad value for x")
     if y is None:
         raise RuntimeError("Bad value for y")  # pragma: no cover
-    return x + np.sin(x) + np.cos(y * 2)
+    return x + np.sin(x) + np.cos(y * 2)  # type: ignore[no-any-return]
 
 
 #%% parfor_wrapper

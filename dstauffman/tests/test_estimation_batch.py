@@ -11,7 +11,7 @@ Notes
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
 
@@ -23,19 +23,25 @@ import dstauffman.estimation as estm
 if HAVE_NUMPY:
     import numpy as np
 
+if TYPE_CHECKING:
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+
 #%% Setup for testing
 # Classes - SimParams
 class SimParams(Frozen):
     r"""Simulation model parameters."""
 
-    def __init__(self, time, *, magnitude, frequency, phase):
-        self.time: np.ndarray = time
-        self.magnitude: float = magnitude
-        self.frequency: float = frequency
-        self.phase: float     = phase  # fmt: skip
+    def __init__(self, time: _N, *, magnitude: float, frequency: float, phase: float) -> None:
+        # fmt: off
+        self.time      = time
+        self.magnitude = magnitude
+        self.frequency = frequency
+        self.phase     = phase
+        # fmt: on
 
     def __eq__(self, other: Any) -> bool:  # pragma: no cover
-        if type(other) != type(self):
+        if not isinstance(other, type(self)):
             return False
         for key in vars(self):
             if np.any(getattr(self, key) != getattr(other, key)):
@@ -44,7 +50,7 @@ class SimParams(Frozen):
 
 
 # Functions - _get_truth_index
-def _get_truth_index(results_time: np.ndarray, truth_time: np.ndarray):
+def _get_truth_index(results_time: _N, truth_time: _N) -> Tuple[_I, _I]:
     r"""Finds the indices to the truth data from the results time."""
     # Hard-coded values
     precision = 1e-7
@@ -57,7 +63,7 @@ def _get_truth_index(results_time: np.ndarray, truth_time: np.ndarray):
 
 
 # Functions - sim_model
-def sim_model(sim_params):
+def sim_model(sim_params: SimParams) -> _N:
     r"""Simple example simulation model."""
     return sim_params.magnitude * np.sin(
         2 * np.pi * sim_params.frequency * sim_params.time / 1000 + sim_params.phase * np.pi / 180
@@ -65,13 +71,13 @@ def sim_model(sim_params):
 
 
 # Functions - truth
-def truth(time, magnitude=5.0, frequency=10.0, phase=90.0):
+def truth(time: _N, magnitude: float = 5.0, frequency: float = 10.0, phase: float = 90.0) -> _N:
     r"""Simple example truth data."""
     return magnitude * np.sin(2 * np.pi * frequency * time / 1000 + phase * np.pi / 180)  # pragma: no cover
 
 
 # Functions - cost_wrapper
-def cost_wrapper(results_data, *, results_time, truth_time, truth_data, sim_params):
+def cost_wrapper(results_data: _N, *, results_time: _N, truth_time: _N, truth_data: _N, sim_params: SimParams) -> _N:
     r"""Example Cost wrapper for the model."""
     # Pull out overlapping time points and indices
     (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
@@ -79,12 +85,12 @@ def cost_wrapper(results_data, *, results_time, truth_time, truth_data, sim_para
     sub_result = results_data[ix_results]
 
     # calculate the innovations
-    innovs = sub_result - sub_truth
+    innovs: _N = sub_result - sub_truth
     return innovs
 
 
 # Functions - get_parameter
-def get_parameter(sim_params, *, names):
+def get_parameter(sim_params: SimParams, *, names: List[str]) -> _N:
     r"""Simple example parameter getter."""
     num = len(names)
     values = np.full(num, np.nan, dtype=float)
@@ -97,7 +103,7 @@ def get_parameter(sim_params, *, names):
 
 
 # Functions - set_parameter
-def set_parameter(sim_params, *, names, values):
+def set_parameter(sim_params: SimParams, *, names: List[str], values: _N) -> None:
     r"""Simple example parameter setter."""
     num = len(names)
     assert len(values) == num, "Names and Values must have the same length."
@@ -281,18 +287,18 @@ class Test_estimation_BpeResults(unittest.TestCase):
 
     def test_pprint(self) -> None:
         self.bpe_results.param_names = ["a".encode("utf-8")]
-        self.bpe_results.begin_params = [1]
-        self.bpe_results.final_params = [2]
+        self.bpe_results.begin_params = [1.0]  # type: ignore[assignment]
+        self.bpe_results.final_params = [2.0]  # type: ignore[assignment]
         with capture_output() as out:
             self.bpe_results.pprint()
         lines = out.getvalue().strip().split("\n")
         out.close()
         self.assertEqual(lines[0], "Initial cost: None")
         self.assertEqual(lines[1], "Initial parameters:")
-        self.assertEqual(lines[2].strip(), "a = 1")
+        self.assertEqual(lines[2].strip(), "a = 1.0")
         self.assertEqual(lines[3], "Final cost: None")
         self.assertEqual(lines[4], "Final parameters:")
-        self.assertEqual(lines[5].strip(), "a = 2")
+        self.assertEqual(lines[5].strip(), "a = 2.0")
 
     def test_pprint2(self) -> None:
         with capture_output() as out:
@@ -446,9 +452,9 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        time       = np.arange(251)  # fmt: skip
-        sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
-        truth_time = np.arange(-10, 201)
+        time       = np.arange(251.0)  # fmt: skip
+        sim_params = SimParams(time, magnitude=3.5, frequency=12.0, phase=180.0)
+        truth_time = np.arange(-10.0, 201.0)
         truth_data = 5 * np.sin(2 * np.pi * 10 * time / 1000 + 90 * np.pi / 180)
 
         # fmt: off
@@ -485,11 +491,11 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.cur_results.trust_rad = self.opti_opts.trust_radius
         self.cur_results.cost = 0.5 * rss(self.cur_results.innovs, ignore_nans=True)
         names = estm.OptiParam.get_names(self.opti_opts.params)
-        self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)
+        self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)  # type: ignore[assignment]
 
         # set relevant results variables
         self.bpe_results.param_names = [name.encode("utf-8") for name in names]
-        self.bpe_results.begin_params = self.cur_results.params.copy()
+        self.bpe_results.begin_params = self.cur_results.params.copy()  # type: ignore[union-attr]
         self.bpe_results.begin_innovs = self.cur_results.innovs.copy()
         self.bpe_results.begin_cost   = self.cur_results.cost  # fmt: skip
         self.bpe_results.costs.append(self.cur_results.cost)
@@ -729,9 +735,9 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        time       = np.arange(251)  # fmt: skip
-        sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
-        truth_time = np.arange(-10, 201)
+        time       = np.arange(251.0)  # fmt: skip
+        sim_params = SimParams(time, magnitude=3.5, frequency=12.0, phase=180.0)
+        truth_time = np.arange(-10.0, 201.0)
         truth_data = 5 * np.sin(2 * np.pi * 10 * time / 1000 + 90 * np.pi / 180)
 
         # fmt: off
@@ -768,12 +774,12 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         self.cur_results.trust_rad = self.opti_opts.trust_radius
         self.cur_results.cost = 0.5 * rss(self.cur_results.innovs, ignore_nans=True)
         names = estm.OptiParam.get_names(self.opti_opts.params)
-        self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)
+        self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)  # type: ignore[assignment]
 
         # set relevant results variables
         # fmt: off
         self.bpe_results.param_names  = [name.encode("utf-8") for name in names]
-        self.bpe_results.begin_params = self.cur_results.params.copy()
+        self.bpe_results.begin_params = self.cur_results.params.copy()  # type: ignore[union-attr]
         self.bpe_results.begin_innovs = self.cur_results.innovs.copy()
         self.bpe_results.begin_cost   = self.cur_results.cost
         self.bpe_results.costs.append(self.cur_results.cost)
@@ -842,7 +848,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
             )
 
     def test_minimums(self, mock_logger: Mock) -> None:
-        self.opti_opts.params[0].min_ = 10
+        self.opti_opts.params[0].min_ = 10  # type: ignore[index]
         estm.batch._dogleg_search(
             self.opti_opts,
             self.opti_opts.model_args,
@@ -942,27 +948,27 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
         mock_logger.log.assert_any_call(LogLevel.L5, "Validating optimization options.")
 
     def test_not_valid1(self, mock_logger: Mock) -> None:
-        self.opti_opts.model_func = None  # type: ignore[assignment]
+        self.opti_opts.model_func = None
         self.support()
 
     def test_not_valid2(self, mock_logger: Mock) -> None:
-        self.opti_opts.model_args = None  # type: ignore[assignment]
+        self.opti_opts.model_args = None
         self.support()
 
     def test_not_valid3(self, mock_logger: Mock) -> None:
-        self.opti_opts.cost_func = None  # type: ignore[assignment]
+        self.opti_opts.cost_func = None
         self.support()
 
     def test_not_valid4(self, mock_logger: Mock) -> None:
-        self.opti_opts.cost_args = None  # type: ignore[assignment]
+        self.opti_opts.cost_args = None
         self.support()
 
     def test_not_valid5(self, mock_logger: Mock) -> None:
-        self.opti_opts.get_param_func = None  # type: ignore[assignment]
+        self.opti_opts.get_param_func = None
         self.support()
 
     def test_not_valid6(self, mock_logger: Mock) -> None:
-        self.opti_opts.set_param_func = None  # type: ignore[assignment]
+        self.opti_opts.set_param_func = None
         self.support()
 
     def test_not_valid7(self, mock_logger: Mock) -> None:
@@ -970,7 +976,7 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
         self.support()
 
     def test_not_valid8(self, mock_logger: Mock) -> None:
-        self.opti_opts.params = None  # type: ignore[assignment]
+        self.opti_opts.params = None
         self.support()
 
     def test_not_valid9(self, mock_logger: Mock) -> None:
@@ -993,9 +999,9 @@ class Test_estimation_run_bpe(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        time       = np.arange(251)  # fmt: skip
-        sim_params = SimParams(time, magnitude=3.5, frequency=12, phase=180)
-        truth_time = np.arange(-10, 201)
+        time       = np.arange(251.0)  # fmt: skip
+        sim_params = SimParams(time, magnitude=3.5, frequency=12.0, phase=180.0)
+        truth_time = np.arange(-10.0, 201.0)
         truth_data = 5 * np.sin(2 * np.pi * 10 * time / 1000 + 90 * np.pi / 180)
 
         # fmt: off

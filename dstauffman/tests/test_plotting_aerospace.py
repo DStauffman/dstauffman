@@ -10,7 +10,7 @@ Notes
 import datetime
 from typing import List, Optional
 import unittest
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 import warnings
 
 from slog import LogLevel
@@ -335,7 +335,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.figs = plot.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)
 
     @patch("dstauffman.plotting.generic.logger")
-    def test_none3(self, mock_logger):
+    def test_none3(self, mock_logger: Mock) -> None:
         self.figs = plot.make_quaternion_plot("", None, None, None, None)
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(

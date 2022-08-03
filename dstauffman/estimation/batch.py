@@ -19,7 +19,7 @@ from itertools import repeat
 import logging
 from pathlib import Path
 import time
-from typing import Any, Callable, ClassVar, Dict, List, Optional, Tuple, TYPE_CHECKING
+from typing import Any, Callable, ClassVar, Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
@@ -51,6 +51,9 @@ else:
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
+    _N = np.typing.NDArray[np.float64]
+    _M = np.typing.NDArray[np.float64]  # 2D
+
 #%% Globals
 logger = logging.getLogger(__name__)
 
@@ -70,20 +73,20 @@ class OptiOpts(Frozen):
 
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         # fmt: off
         # specifically required settings
-        self.model_func: Callable           = None
-        self.model_args: Dict[str, Any]     = None  # {}
-        self.cost_func: Callable            = None
-        self.cost_args: Dict[str, Any]      = None  # {} # TODO: add note, these are additional cost args, plus model_args
-        self.get_param_func: Callable       = None
-        self.set_param_func: Callable       = None
-        self.output_folder: Optional[Path]  = None
-        self.output_results: str            = "bpe_results.hdf5"
-        self.params: List[Any]              = None  # []
-        self.start_func: Optional[Callable] = None
-        self.final_func: Optional[Callable] = None
+        self.model_func: Optional[Callable]       = None
+        self.model_args: Optional[Dict[str, Any]] = None  # {}
+        self.cost_func: Optional[Callable]        = None
+        self.cost_args: Optional[Dict[str, Any]]  = None  # {} # TODO: add note, these are additional cost args, plus model_args
+        self.get_param_func: Optional[Callable]   = None
+        self.set_param_func: Optional[Callable]   = None
+        self.output_folder: Optional[Path]        = None
+        self.output_results: str                  = "bpe_results.hdf5"
+        self.params: Optional[List[Any]]          = None  # []
+        self.start_func: Optional[Callable]       = None
+        self.final_func: Optional[Callable]       = None
 
         # less common optimization settings
         self.slope_method: str        = "one_sided"  # from {"one_sided", "two_sided"}
@@ -188,7 +191,7 @@ class OptiParam(Frozen):
         return True
 
     @staticmethod
-    def get_array(opti_param: List[OptiParam], type_: str = "best") -> np.ndarray:
+    def get_array(opti_param: List[OptiParam], type_: str = "best") -> _N:
         r"""
         Get a numpy vector of all the optimization parameters for the desired type.
 
@@ -256,21 +259,21 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     """
     save: Callable[[BpeResults, Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]  # noqa: F821
 
-    def __init__(self):
+    def __init__(self) -> None:
         # fmt: off
-        self.param_names  = None
-        self.begin_params = None
-        self.begin_innovs = None
-        self.begin_cost   = None
-        self.num_evals    = 0
-        self.num_iters    = 0
-        self.costs        = []
-        self.correlation  = None
-        self.info_svd     = None
-        self.covariance   = None
-        self.final_params = None
-        self.final_innovs = None
-        self.final_cost   = None
+        self.param_names: Optional[List[bytes]] = None
+        self.begin_params: Optional[_N]         = None
+        self.begin_innovs: Optional[_N]         = None
+        self.begin_cost: Optional[float]        = None
+        self.num_evals: int                     = 0
+        self.num_iters: int                     = 0
+        self.costs: List[float]                 = []
+        self.correlation: Optional[_M]          = None
+        self.info_svd: Optional[_M]             = None
+        self.covariance: Optional[_M]           = None
+        self.final_params: Optional[_N]         = None
+        self.final_innovs: Optional[_N]         = None
+        self.final_cost: Optional[float]        = None
         # fmt: on
 
     def __str__(self) -> str:
@@ -390,12 +393,12 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
     load: ClassVar[Callable[[Optional[Path]], "CurrentResults"]]
     save: Callable[["CurrentResults", Optional[Path]], None]
 
-    def __init__(self):
+    def __init__(self) -> None:
         # fmt: off
-        self.trust_rad = None
-        self.params    = None
-        self.innovs    = None
-        self.cost      = None
+        self.trust_rad: Optional[float] = None
+        self.params: Optional[float]    = None
+        self.innovs: Optional[_N]       = None
+        self.cost: Optional[float]      = None
         # fmt: on
 
     def __str__(self) -> str:
@@ -430,7 +433,38 @@ def _print_divider(new_line: bool = True, level: int = LogLevel.L5) -> None:
 
 
 #%% _function_wrapper
-def _function_wrapper(*, model_func, cost_func, model_args, cost_args, return_results=False):
+@overload
+def _function_wrapper(
+    *,
+    model_func: Callable,
+    cost_func: Callable,
+    model_args: Dict[str, Any],
+    cost_args: Dict[str, Any],
+    return_results: Literal[False] = ...,
+) -> _N:
+    ...
+
+
+@overload
+def _function_wrapper(
+    *,
+    model_func: Callable,
+    cost_func: Callable,
+    model_args: Dict[str, Any],
+    cost_args: Dict[str, Any],
+    return_results: Literal[True],
+) -> Tuple[_N, _N]:
+    ...
+
+
+def _function_wrapper(
+    *,
+    model_func: Callable,
+    cost_func: Callable,
+    model_args: Dict[str, Any],
+    cost_args: Dict[str, Any],
+    return_results: bool = False,
+) -> Union[_N, Tuple[_N, _N]]:
     r"""
     Wrap the call to the model function.
 
@@ -484,11 +518,11 @@ def _function_wrapper(*, model_func, cost_func, model_args, cost_args, return_re
 
     if return_results:
         return (innovs, results)
-    return innovs
+    return innovs  # type: ignore[no-any-return]
 
 
 #%% _parfor_function_wrapper
-def _parfor_function_wrapper(opti_opts, msg, model_args):
+def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: Dict[str, Any]) -> Union[_N, MultipassExceptionWrapper]:
     r"""
     Wrapper to _function_wrapper specifically for the purposes of parallelizing the inner loop evaluations.
 
@@ -511,6 +545,10 @@ def _parfor_function_wrapper(opti_opts, msg, model_args):
     >>> pass  # TODO: write this
 
     """
+    assert opti_opts.model_func is not None
+    assert opti_opts.model_args is not None
+    assert opti_opts.cost_func is not None
+    assert opti_opts.cost_args is not None
     try:
         if msg:
             logger.log(LogLevel.L8, msg)
@@ -518,7 +556,7 @@ def _parfor_function_wrapper(opti_opts, msg, model_args):
             model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, cost_args=opti_opts.cost_args, model_args=model_args
         )
     except Exception as e:  # pylint: disable=broad-except
-        return MultipassExceptionWrapper(e)
+        return MultipassExceptionWrapper(e)  # type: ignore[arg-type]
     return innovs
 
 
@@ -1208,6 +1246,14 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     """
     # check for valid parameters
     validate_opti_opts(opti_opts)
+    # TODO: wish this info could be passed back to mypy from the validate_opti_opts function
+    assert opti_opts.params is not None
+    assert opti_opts.model_func is not None
+    assert opti_opts.model_args is not None
+    assert opti_opts.cost_func is not None
+    assert opti_opts.cost_args is not None
+    assert opti_opts.get_param_func is not None
+    assert opti_opts.set_param_func is not None
 
     # start timer
     start_model = time.time()
@@ -1248,7 +1294,10 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     _print_divider(new_line, level=LogLevel.L3)
     logger.log(LogLevel.L3, "Running initial simulation.")
     cur_results.innovs = _function_wrapper(
-        model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, model_args=model_args, cost_args=opti_opts.cost_args
+        model_func=opti_opts.model_func,
+        cost_func=opti_opts.cost_func,
+        model_args=model_args,
+        cost_args=opti_opts.cost_args,
     )
     bpe_results.num_evals += 1
 
@@ -1263,7 +1312,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     cur_results.params    = opti_opts.get_param_func(names=names, **model_args)
 
     # set relevant results variables
-    bpe_results.begin_params = cur_results.params.copy()
+    bpe_results.begin_params = cur_results.params.copy()  # type: ignore[union-attr]
     bpe_results.begin_innovs = cur_results.innovs.copy()
     bpe_results.begin_cost   = cur_results.cost
     bpe_results.costs.append(cur_results.cost)
@@ -1361,7 +1410,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     bpe_results.num_evals += 1
     cur_results.cost = 0.5 * rss(cur_results.innovs, ignore_nans=True)
     bpe_results.final_innovs = cur_results.innovs.copy()
-    bpe_results.final_params = cur_results.params.copy()
+    bpe_results.final_params = cur_results.params.copy()  # type: ignore[union-attr]
     bpe_results.final_cost   = cur_results.cost  # fmt: skip
     bpe_results.costs.append(cur_results.cost)
 
