@@ -14,15 +14,7 @@ from unittest.mock import Mock, patch
 
 from slog import capture_output, LogLevel
 
-from dstauffman import (
-    get_tests_dir,
-    HAVE_MPL,
-    HAVE_NUMPY,
-    NP_DATETIME_FORM,
-    NP_INT64_PER_SEC,
-    NP_TIMEDELTA_FORM,
-    unit,
-)
+from dstauffman import get_tests_dir, HAVE_MPL, HAVE_NUMPY, NP_DATETIME_FORM, NP_INT64_PER_SEC, NP_TIMEDELTA_FORM, unit
 import dstauffman.plotting as plot
 
 if HAVE_MPL:

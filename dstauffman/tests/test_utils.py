@@ -1657,14 +1657,14 @@ class Test_linear_interp(unittest.TestCase):
     def setUp(self) -> None:
         self.x1 = np.arange(1.0, 5.1, 0.1)  # 40 pts
         self.x2 = np.arange(5.2, 9.2, 0.2)  # 20 pts
-        self.x3 = np.arange(9.5, 14.5, 0.5) # 10 pts
+        self.x3 = np.arange(9.5, 14.5, 0.5)  # 10 pts
         self.m1 = 2.0
         self.m2 = -1.0
         self.m3 = 5.0
         self.b0 = -8.0
         self.y1 = self.m1 * (self.x1 - self.x1[0]) + self.b0 + self.m1
-        self.y2 = self.m2 * (self.x2 - self.x2[0]) + self.y1[-1] + 0.2*self.m2
-        self.y3 = self.m3 * (self.x3 - self.x3[0]) + self.y2[-1] + 0.5*self.m3
+        self.y2 = self.m2 * (self.x2 - self.x2[0]) + self.y1[-1] + 0.2 * self.m2
+        self.y3 = self.m3 * (self.x3 - self.x3[0]) + self.y2[-1] + 0.5 * self.m3
         self.x = np.hstack((self.x1, self.x2, self.x3))
         self.y = np.hstack([self.y1, self.y2, self.y3])
         self.xp = np.array([1.0, 5.0, 9.0, 14.0])
@@ -1753,6 +1753,7 @@ class Test_linear_lowpass_interp(unittest.TestCase):
     def test_filter_parameters(self) -> None:
         y = dcs.linear_lowpass_interp(self.x, self.xp, self.yp, filt_order=4, filt_freq=0.02, filt_samp=0.1)
         self.assertTrue(np.all(y < 5.0))
+
 
 #%% drop_following_time
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
