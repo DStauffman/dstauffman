@@ -11,6 +11,8 @@ import argparse
 import unittest
 from unittest.mock import Mock, patch
 
+from slog import capture_output
+
 import dstauffman as dcs
 import dstauffman.commands as commands
 
@@ -79,11 +81,11 @@ class Test_commands_parse_enforce(unittest.TestCase):
         self.assertEqual(args, self.expected)
 
     def test_bad_os_combination(self) -> None:
-        with dcs.capture_output("err") as err:
+        with capture_output("err") as ctx:
             with self.assertRaises(SystemExit):
                 commands.parse_enforce([self.folder, "-w", "-u"])
-        stderr = err.getvalue().strip()
-        err.close()
+        stderr = ctx.get_error()
+        ctx.close()
         self.assertTrue(stderr.startswith("usage: dcs enforce"))
 
     def test_execute(self) -> None:
@@ -220,10 +222,10 @@ class Test_commands_execute_make_init(unittest.TestCase):
 
     def test_dry_num(self, mocker: Mock) -> None:
         self.args.dry_run = True
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             commands.execute_make_init(self.args)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         mocker.assert_not_called()
         self.assertTrue(output.startswith('Would execute "make_python_init('))
 

@@ -11,10 +11,11 @@ import copy
 import os
 import pathlib
 import platform
-import sys
 from typing import List, Union
 import unittest
 from unittest.mock import patch
+
+from slog import capture_output
 
 import dstauffman as dcs
 
@@ -439,60 +440,60 @@ class Test_compare_two_classes(unittest.TestCase):
         self.c4 = type("Class4", (object,), {"a": 0, "b": "[1, 2, 4]", "d": "text", "e": self.c2})
 
     def test_is_comparison(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c1, self.c1)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, '"c1" and "c2" are the same.')
         self.assertTrue(is_same)
 
     def test_good_comparison(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c1, copy.deepcopy(self.c1))
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, '"c1" and "c2" are the same.')
         self.assertTrue(is_same)
 
     def test_bad_comparison(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c1, self.c2)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(
             output, "b is different from c1 to c2.\nc is only in c1.\n" + 'd is only in c2.\n"c1" and "c2" are not the same.'
         )
         self.assertFalse(is_same)
 
     def test_names(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c2, self.c2, names=self.names)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, '"Class 1" and "Class 2" are the same.')
         self.assertTrue(is_same)
 
     def test_suppression(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c1, self.c2, suppress_output=True, names=self.names)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, "")
         self.assertFalse(is_same)
 
     def test_subclasses_match(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c3, self.c3, ignore_callables=False)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, '"c1" and "c2" are the same.')
         self.assertTrue(is_same)
 
     def test_subclasses_recurse(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertFalse(is_same)
         self.assertEqual(
             output,
@@ -502,10 +503,10 @@ class Test_compare_two_classes(unittest.TestCase):
         )
 
     def test_subclasses_norecurse(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False, compare_recursively=False)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(
             output, "b is different from c1 to c2.\n" + 'c is only in c1.\nd is only in c2.\n"c1" and "c2" are not the same.'
         )
@@ -516,17 +517,17 @@ class Test_compare_two_classes(unittest.TestCase):
         delattr(self.c1, "c")
         delattr(self.c2, "b")
         delattr(self.c2, "d")
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c1, self.c2)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, '"c1" and "c2" are the same.')
         self.assertTrue(is_same)
         self.c1.e["key1"] += 1  # type: ignore[attr-defined]
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c1, self.c2)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, '"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 
@@ -540,17 +541,17 @@ class Test_compare_two_classes(unittest.TestCase):
         self.c1.e.freeze()  # type: ignore[attr-defined]
         self.c2.e = dcs.FixedDict()  # type: ignore[attr-defined]
         self.c2.e["key1"] = 1  # type: ignore[attr-defined]
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c1, self.c2)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, '"c1.e" and "c2.e" are the same.\n"c1" and "c2" are the same.')
         self.assertTrue(is_same)
         self.c1.e["key1"] += 1  # type: ignore[attr-defined]
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c1, self.c2)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(
             output, 'key1 is different.\n"c1.e" and "c2.e" are not the same.\n' + '"c1" and "c2" are not the same.'
         )
@@ -558,10 +559,10 @@ class Test_compare_two_classes(unittest.TestCase):
 
     def test_mismatched_subclasses(self) -> None:
         self.c4.e = 5  # type: ignore[attr-defined]
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c3, self.c4, ignore_callables=False)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertFalse(is_same)
         self.assertEqual(
             output,
@@ -581,10 +582,10 @@ class Test_compare_two_classes(unittest.TestCase):
         self.c3.e = f  # type: ignore[attr-defined]
         self.c4.e = g  # type: ignore[attr-defined]
         self.c4.b = self.c3.b  # type: ignore[attr-defined]
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=False)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertFalse(is_same)
         self.assertEqual(
             output, "e is different from c1 to c2.\nc is only in c2.\nd is only in c1.\n" + '"c1" and "c2" are not the same.'
@@ -600,20 +601,20 @@ class Test_compare_two_classes(unittest.TestCase):
         self.c3.e = f  # type: ignore[attr-defined]
         self.c4.e = g  # type: ignore[attr-defined]
         self.c4.b = self.c3.b  # type: ignore[attr-defined]
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(self.c4, self.c3, ignore_callables=True)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertFalse(is_same)
         self.assertEqual(output, 'c is only in c2.\nd is only in c1.\n"c1" and "c2" are not the same.')
 
     def test_two_different_lists(self) -> None:
         c1 = [1]
         c2 = [1]
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_classes(c1, c2, ignore_callables=True)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, '"c1" and "c2" are the same.')
         self.assertTrue(is_same)
 
@@ -621,12 +622,12 @@ class Test_compare_two_classes(unittest.TestCase):
         delattr(self.c1, "b")
         delattr(self.c1, "c")
         self.c2.e["key2"] = 2  # type: ignore[attr-defined]
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same1 = dcs.compare_two_classes(self.c1, self.c2, ignore_callables=True, is_subset=False, suppress_output=True)
             is_same2 = dcs.compare_two_classes(self.c1, self.c2, ignore_callables=True, is_subset=True, suppress_output=False)
             is_same3 = dcs.compare_two_classes(self.c2, self.c1, ignore_callables=True, is_subset=True, suppress_output=True)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertFalse(is_same1)
         self.assertTrue(is_same2)
         self.assertFalse(is_same3)
@@ -662,18 +663,18 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.names = ["Dict 1", "Dict 2"]
 
     def test_good_comparison(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_dicts(self.d1, self.d1)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, '"d1" and "d2" are the same.')
         self.assertTrue(is_same)
 
     def test_bad_comparison(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_dicts(self.d1, self.d2)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(
             output,
             "b is different.\n\"d1['e']\" and \"d2['e']\" are the same.\n"
@@ -682,29 +683,29 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertFalse(is_same)
 
     def test_names(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_dicts(self.d2, self.d2, names=self.names)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, '"Dict 1" and "Dict 2" are the same.')
         self.assertTrue(is_same)
 
     def test_suppression(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same = dcs.compare_two_dicts(self.d1, self.d2, suppress_output=True, names=self.names)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, "")
         self.assertFalse(is_same)
 
     def test_is_subset(self) -> None:
         d1 = {"a": 1, "b": [1, 2], "e": {"key1": 1}}
         d2 = {"a": 1, "b": [1, 2], "c": "extra", "e": {"key1": 1, "key2": 2}}
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             is_same1 = dcs.compare_two_dicts(d1, d2, suppress_output=True)
             is_same2 = dcs.compare_two_dicts(d1, d2, suppress_output=False, is_subset=True)
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertFalse(is_same1)
         self.assertTrue(is_same2)
         self.assertEqual(len(lines), 2)
@@ -751,11 +752,11 @@ class Test_read_text_file(unittest.TestCase):
         self.assertEqual(text, self.contents)
 
     def test_bad_reading(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             with self.assertRaises((OSError, IOError, FileNotFoundError)):
                 dcs.read_text_file(self.badpath)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for reading.')
 
     @classmethod
@@ -797,55 +798,16 @@ class Test_write_text_file(unittest.TestCase):
     def test_bad_writing(self) -> None:
         if platform.system() != "Windows":
             return  # pragma: noc windows
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             with self.assertRaises((OSError, IOError, FileNotFoundError)):
                 dcs.write_text_file(self.badpath, self.contents)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for writing.')
 
     @classmethod
     def tearDownClass(cls) -> None:
         cls.filepath.unlink(missing_ok=True)
-
-
-#%% capture_output
-class Test_capture_output(unittest.TestCase):
-    r"""
-    Tests the capture_output function with the following cases:
-        capture standard output
-        capture standard error
-    """
-
-    def test_std_out(self) -> None:
-        with dcs.capture_output() as out:
-            print("Hello, World!")
-        output = out.getvalue().strip()
-        out.close()
-        self.assertEqual(output, "Hello, World!")
-
-    def test_std_err(self) -> None:
-        with dcs.capture_output("err") as err:
-            print("Error Raised.", file=sys.stderr)
-        error = err.getvalue().strip()
-        err.close()
-        self.assertEqual(error, "Error Raised.")
-
-    def test_all(self) -> None:
-        with dcs.capture_output("all") as (out, err):
-            print("Hello, World!")
-            print("Error Raised.", file=sys.stderr)
-        output = out.getvalue().strip()
-        error = err.getvalue().strip()
-        out.close()
-        err.close()
-        self.assertEqual(output, "Hello, World!")
-        self.assertEqual(error, "Error Raised.")
-
-    def test_bad_value(self) -> None:
-        with self.assertRaises(RuntimeError):
-            with dcs.capture_output("bad") as (out, err):
-                print("Lost values")  # pragma: no cover
 
 
 #%% magnitude
@@ -1139,44 +1101,44 @@ class Test_full_print(unittest.TestCase):
         np.set_printoptions(threshold=10)
 
     def test_nominal(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             print(self.x)
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         # normalize whitespace
         lines = self._norm_output(lines)
         self.assertEqual(lines, self.x_print)
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             with dcs.full_print():
                 print(self.x)
-        lines = out.getvalue().strip().split("\n")
+        lines = ctx.get_output().split("\n")
         # normalize whitespace
         lines = self._norm_output(lines)
-        out.close()
+        ctx.close()
         self.assertEqual(lines, self.x_full)
 
     def test_small1(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             with dcs.full_print():
                 print(np.array(0))
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, "0")
 
     def test_small2(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             with dcs.full_print():
                 print(np.array([1.35, 1.58]))
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, "[1.35 1.58]")
 
     def test_keyword_arguments(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             with dcs.full_print(formatter={"float": lambda x: "{:.1f}".format(x)}):
                 print(np.array([1.2345, 1001.555]))
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, "[1.2 1001.6]")
 
     def tearDown(self) -> None:
@@ -1683,12 +1645,114 @@ class Test_zero_order_hold(unittest.TestCase):
 
 
 #%% linear_interp
-pass  # TODO: write this
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_linear_interp(unittest.TestCase):
+    r"""
+    Tests the linear_interp function with the following cases:
+        Sorted
+        Not-sorted
+        Extrapolation
+    """
+
+    def setUp(self) -> None:
+        self.x1 = np.arange(1.0, 5.1, 0.1)  # 40 pts
+        self.x2 = np.arange(5.2, 9.2, 0.2)  # 20 pts
+        self.x3 = np.arange(9.5, 14.5, 0.5) # 10 pts
+        self.m1 = 2.0
+        self.m2 = -1.0
+        self.m3 = 5.0
+        self.b0 = -8.0
+        self.y1 = self.m1 * (self.x1 - self.x1[0]) + self.b0 + self.m1
+        self.y2 = self.m2 * (self.x2 - self.x2[0]) + self.y1[-1] + 0.2*self.m2
+        self.y3 = self.m3 * (self.x3 - self.x3[0]) + self.y2[-1] + 0.5*self.m3
+        self.x = np.hstack((self.x1, self.x2, self.x3))
+        self.y = np.hstack([self.y1, self.y2, self.y3])
+        self.xp = np.array([1.0, 5.0, 9.0, 14.0])
+        (self.yp, self.ix, _) = dcs.intersect(self.x, self.xp, return_indices=True, tolerance=1e-10)
+        self.yp = self.y[self.ix]
+
+    def test_sorted(self) -> None:
+        y = dcs.linear_interp(self.x, self.xp, self.yp)
+        np.testing.assert_array_almost_equal(y, self.y, 12)
+
+    @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
+    def test_unsorted(self) -> None:
+        ix = np.arange(self.xp.size)
+        while dcs.issorted(ix):
+            np.random.shuffle(ix)
+        y = dcs.linear_interp(self.x, self.xp[ix], self.yp[ix], assume_sorted=False)
+        np.testing.assert_array_almost_equal(y, self.y, 12)
+
+    def test_extrapolate_numpy(self) -> None:
+        xp = self.xp.copy()
+        yp = self.yp.copy()
+        xp[0] = self.x[5]
+        yp[0] = self.y[5]
+        xp[-1] = self.x[-5]
+        yp[-1] = self.y[-5]
+        exp = self.y.copy()
+        exp[0:5] = 0.5
+        exp[-4:] = 1000.0
+        with self.assertRaises(ValueError) as context:
+            dcs.linear_interp(self.x, xp, yp, left=0.5, right=1000.0)
+        self.assertEqual(str(context.exception), "Desired points outside given xp array and extrapolation is False")
+        y = dcs.linear_interp(self.x, xp, yp, left=0.5, right=1000.0, extrapolate=True)
+        np.testing.assert_array_almost_equal(y, exp, 12)
+
+    def test_extrapolation_scipy(self) -> None:
+        xp = self.xp.copy()
+        yp = self.yp.copy()
+        xp[0] = self.x[5]
+        yp[0] = self.y[5]
+        xp[-1] = self.x[-5]
+        yp[-1] = self.y[-5]
+        exp = self.y.copy()
+        exp[0:5] = 0.7
+        exp[-4:] = 750.0
+        ix = np.arange(xp.size)
+        while dcs.issorted(ix):
+            np.random.shuffle(ix)
+        with self.assertRaises(ValueError) as context:
+            dcs.linear_interp(self.x, xp[ix], yp[ix], assume_sorted=False, extrapolate=False)
+        self.assertEqual(str(context.exception), "A value in x_new is below the interpolation range.")
+        y = dcs.linear_interp(self.x, xp[ix], yp[ix], assume_sorted=False, extrapolate=True)
+        np.testing.assert_array_almost_equal(y, self.y, 12)
+        y = dcs.linear_interp(self.x, xp[ix], yp[ix], left=0.7, right=750.0, assume_sorted=False, extrapolate=True)
+        np.testing.assert_array_almost_equal(y, exp, 12)
 
 
-#%% linear_lowpass_interp
-pass  # TODO: write this
+#%% Test_linear_lowpass_interp
+@unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
+class Test_linear_lowpass_interp(unittest.TestCase):
+    r"""
+    Tests the Test_linear_lowpass_interp function with the following cases:
+        Nominal
+        Alternative filter parameters
+        Extrapolation
+    """
 
+    def setUp(self) -> None:
+        self.x = np.arange(0, 10.1, 0.1)
+        self.xp = np.array([0.0, 5.0, 10.0])
+        self.yp = np.array([0.0, 5.0, 0.0])
+        self.y = np.hstack([np.arange(0.0, 5.0, 0.1), np.arange(5.0, -0.1, -0.1)])
+
+    def test_nominal(self) -> None:
+        y = dcs.linear_lowpass_interp(self.x, self.xp, self.yp)
+        # test that there was no overshoot at the turn-around
+        self.assertTrue(np.all(y < 5.0))
+
+    def test_extrapolation(self) -> None:
+        self.xp[-1] = 8.0
+        with self.assertRaises(ValueError) as context:
+            dcs.linear_lowpass_interp(self.x, self.xp, self.yp)
+        self.assertEqual(str(context.exception), "A value in x_new is above the interpolation range.")
+        y = dcs.linear_lowpass_interp(self.x, self.xp, self.yp, extrapolate=True)
+        self.assertTrue(np.all(y < 5.0))
+
+    def test_filter_parameters(self) -> None:
+        y = dcs.linear_lowpass_interp(self.x, self.xp, self.yp, filt_order=4, filt_freq=0.02, filt_samp=0.1)
+        self.assertTrue(np.all(y < 5.0))
 
 #%% drop_following_time
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")

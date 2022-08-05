@@ -10,7 +10,9 @@ Notes
 from typing import List, Union
 import unittest
 
-from dstauffman import capture_output, HAVE_MPL, HAVE_NUMPY
+from slog import capture_output
+
+from dstauffman import HAVE_MPL, HAVE_NUMPY
 from dstauffman.estimation import BpeResults
 import dstauffman.plotting as plot
 
@@ -83,10 +85,10 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
         self.figs = plot.plot_bpe_results(self.bpe_results, plots=self.plots)
 
     def test_nodata(self) -> None:
-        with capture_output() as out:
+        with capture_output() as ctx:
             self.figs = plot.plot_bpe_results(self.bpe_results, plots=self.plots)
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "Data isn't available for Innovations plot.")
         self.assertEqual(lines[1], "Data isn't available for convergence plot.")
         self.assertEqual(lines[2], "Data isn't available for correlation plot.")

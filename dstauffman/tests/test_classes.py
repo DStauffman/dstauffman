@@ -16,6 +16,8 @@ import pickle
 from typing import Callable, ClassVar, List, Optional, TYPE_CHECKING, Union
 import unittest
 
+from slog import capture_output
+
 import dstauffman as dcs
 
 if dcs.HAVE_NUMPY:
@@ -167,45 +169,50 @@ class Test_pprint_dict(unittest.TestCase):
         self.dct = {"a": 1, "bb": 2, "ccc": 3}
 
     def test_nominal(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.pprint_dict(self.dct, name=self.name)
-        lines = out.getvalue().strip().split("\n")
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "Example")
         self.assertEqual(lines[1], " a   = 1")
         self.assertEqual(lines[2], " bb  = 2")
         self.assertEqual(lines[3], " ccc = 3")
 
     def test_no_name(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.pprint_dict(self.dct)
-        lines = out.getvalue().strip().split("\n")
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "a   = 1")
         self.assertEqual(lines[1], " bb  = 2")
         self.assertEqual(lines[2], " ccc = 3")
 
     def test_indent(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.pprint_dict(self.dct, name=self.name, indent=4)
-        lines = out.getvalue().strip().split("\n")
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "Example")
         self.assertEqual(lines[1], "    a   = 1")
         self.assertEqual(lines[2], "    bb  = 2")
         self.assertEqual(lines[3], "    ccc = 3")
 
     def test_no_align(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.pprint_dict(self.dct, name=self.name, align=False)
-        lines = out.getvalue().strip().split("\n")
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "Example")
         self.assertEqual(lines[1], " a = 1")
         self.assertEqual(lines[2], " bb = 2")
         self.assertEqual(lines[3], " ccc = 3")
 
     def test_printed(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             text = dcs.pprint_dict(self.dct, name=self.name, disp=True)
-        output = out.getvalue().strip()
+        output = ctx.get_output()
         lines = output.split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "Example")
         self.assertEqual(lines[1], " a   = 1")
         self.assertEqual(lines[2], " bb  = 2")
@@ -213,11 +220,12 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(text, output)
 
     def test_not_printed(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             text = dcs.pprint_dict(self.dct, name=self.name, disp=False)
-        output = out.getvalue().strip()
-        self.assertEqual(output, "")
+        output = ctx.get_output()
         lines = text.split("\n")
+        ctx.close()
+        self.assertEqual(output, "")
         self.assertEqual(lines[0], "Example")
         self.assertEqual(lines[1], " a   = 1")
         self.assertEqual(lines[2], " bb  = 2")
@@ -641,10 +649,10 @@ class Test_Counter(unittest.TestCase):
 
     def test_print(self) -> None:
         c1 = dcs.Counter(1)
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             print(c1)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, "1")
         output = repr(c1)
         self.assertEqual(output, "Counter(1)")

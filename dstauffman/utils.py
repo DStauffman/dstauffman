@@ -716,67 +716,6 @@ def write_text_file(filename: Union[str, Path], text: str, encoding: str = "utf-
         raise
 
 
-#%% Functions - capture_output
-@contextmanager
-def capture_output(mode: str = "out"):
-    r"""
-    Capture the stdout and stderr streams instead of displaying to the screen.
-
-    Parameters
-    ----------
-    mode : str
-        Mode to use when capturing output
-            "out" captures just sys.stdout
-            "err" captures just sys.stderr
-            "all" captures both sys.stdout and sys.stderr
-
-    Returns
-    -------
-    out : class StringIO
-        stdout stream output
-    err : class StringIO
-        stderr stream output
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in March 2015.
-
-    Examples
-    --------
-    >>> from dstauffman import capture_output
-    >>> with capture_output() as out:
-    ...     print("Hello, World!")
-    >>> output = out.getvalue().strip()
-    >>> out.close()
-    >>> print(output)
-    Hello, World!
-
-    """
-    # alias modes
-    capture_out = mode in {"out", "all"}
-    capture_err = mode in {"err", "all"}
-    # create new string buffers
-    new_out, new_err = StringIO(), StringIO()
-    # alias the old string buffers for restoration afterwards
-    old_out, old_err = sys.stdout, sys.stderr
-    try:
-        # override the system buffers with the new ones
-        if capture_out:
-            sys.stdout = new_out
-        if capture_err:
-            sys.stderr = new_err
-        # yield results as desired
-        if mode == "out":
-            yield sys.stdout
-        elif mode == "err":
-            yield sys.stderr
-        elif mode == "all":
-            yield sys.stdout, sys.stderr
-    finally:
-        # restore the original buffers once all results are read
-        sys.stdout, sys.stderr = old_out, old_err
-
-
 #%% Functions - magnitude
 def magnitude(data: _Lists, axis: int = 0) -> Union[float, np.ndarray]:
     r"""
@@ -1776,7 +1715,7 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
 
 
 #%% linear_interp
-def linear_interp(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=False):
+def linear_interp(x, xp, yp, *, left=None, right=None, assume_sorted=False, extrapolate=False):
     r"""
     Interpolates a function by holding at the most recent value.
 
@@ -1809,27 +1748,51 @@ def linear_interp(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=Fa
     >>> xp = np.array([0.0, 111.0, 2000.0, 5000.0])
     >>> yp = np.array([0.0, 1.0, -2.0, 3.0])
     >>> x = np.arange(0, 6001, dtype=float)
-    >>> y = linear_interp(x, xp, yp)
+    >>> y = linear_interp(x, xp, yp, extrapolate=True)
 
     """
     # force arrays
     x = np.asanyarray(x)
     xp = np.asanyarray(xp)
     yp = np.asanyarray(yp)
-    # find the minimum value, as anything left of this is considered extrapolated
-    xmin = xp[0] if assume_sorted else np.min(xp)
+    # use simpler numpy version if data is sorted
+    if assume_sorted or issorted(xp):
+        if not extrapolate:
+            # checks the bounds for any bad data
+            if np.any(x < xp[0]) or np.any(x > xp[-1]):
+                raise ValueError("Desired points outside given xp array and extrapolation is False")
+        out = np.interp(x, xp, yp, left=left, right=right)
+        return out
     # use slower scipy version
-
     if not HAVE_SCIPY:
         raise RuntimeError("You must have scipy available to run this.")
-    if return_indices:
-        raise RuntimeError("Data must be sorted in order to ask for indices.")
-    func = interp1d(xp, yp, kind="linear", fill_value="extrapolate", assume_sorted=False)
-    return np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
+    if extrapolate:
+        bounds_error = False
+        if left is None or right is None:
+            fill_value = "extrapolate"
+        else:
+            fill_value = (left, right)
+    else:
+        bounds_error = True
+        fill_value = None
+    func = interp1d(xp, yp, kind="linear", fill_value=fill_value, bounds_error=bounds_error, assume_sorted=False)
+    return func(x).astype(yp.dtype)
 
 
 #%% linear_lowpass_interp
-def linear_lowpass_interp(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=False):
+def linear_lowpass_interp(
+        x,
+        xp,
+        yp,
+        *,
+        left=nan,
+        assume_sorted=False,
+        extrapolate=False,
+        filt_order=2,
+        filt_freq=0.01,
+        filt_samp=1.0,
+        **kwargs,
+    ):
     r"""
     Interpolates a function by holding at the most recent value.
 
@@ -1862,25 +1825,26 @@ def linear_lowpass_interp(x, xp, yp, *, left=nan, assume_sorted=False, return_in
     >>> xp = np.array([0.0, 111.0, 2000.0, 5000.0])
     >>> yp = np.array([0.0, 1.0, -2.0, 3.0])
     >>> x = np.arange(0, 6001, dtype=float)
-    >>> y = linear_lowpass_interp(x, xp, yp)
+    >>> y = linear_lowpass_interp(x, xp, yp, extrapolate=True)
 
     """
     # force arrays
     x = np.asanyarray(x)
     xp = np.asanyarray(xp)
     yp = np.asanyarray(yp)
-    # find the minimum value, as anything left of this is considered extrapolated
-    xmin = xp[0] if assume_sorted else np.min(xp)
-    # use slower scipy version
-
+    # must have scipy to execute this function
     if not HAVE_SCIPY:
         raise RuntimeError("You must have scipy available to run this.")
-    if return_indices:
-        raise RuntimeError("Data must be sorted in order to ask for indices.")
-    func = interp1d(xp, yp, kind="linear", fill_value="extrapolate", assume_sorted=False)
-    interpfunc = np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
-    sos = butter(2, 0.01, btype="low", fs=1, output="sos")  # TODO: allow these to be passed in
-    return sosfiltfilt(sos, interpfunc)
+    if extrapolate:
+        bounds_error = False
+        fill_value = "extrapolate"
+    else:
+        bounds_error = True
+        fill_value = None
+    func = interp1d(xp, yp, kind="linear", bounds_error=bounds_error, fill_value=fill_value, assume_sorted=assume_sorted)
+    temp = func(x).astype(yp.dtype)
+    sos = butter(filt_order, filt_freq, fs=filt_samp, output="sos", **kwargs)
+    return sosfiltfilt(sos, temp)
 
 
 #%% drop_following_time

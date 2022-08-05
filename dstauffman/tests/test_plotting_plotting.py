@@ -12,10 +12,9 @@ from typing import List, Optional
 import unittest
 from unittest.mock import Mock, patch
 
-from slog import LogLevel
+from slog import capture_output, LogLevel
 
 from dstauffman import (
-    capture_output,
     get_tests_dir,
     HAVE_MPL,
     HAVE_NUMPY,
@@ -102,10 +101,10 @@ class Test_plotting_Opts(unittest.TestCase):
 
     def test_pprint(self) -> None:
         opts = plot.Opts()
-        with capture_output() as out:
+        with capture_output() as ctx:
             opts.pprint(indent=2)
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "Opts")
         self.assertEqual(lines[1], "  case_name = ")
         self.assertEqual(lines[3], "  save_plot = False")
@@ -600,10 +599,10 @@ class Test_plotting_setup_plots(unittest.TestCase):
         this_filename = get_tests_dir().joinpath(self.opts.case_name + " - Figure Title.png")
         self.opts.save_plot = True
         self.opts.show_link = True
-        with capture_output() as out:
+        with capture_output() as ctx:
             plot.setup_plots(self.fig, self.opts)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         # remove file
         this_filename.unlink(missing_ok=True)
         self.assertTrue(output.startswith('Plots saved to <a href="'))

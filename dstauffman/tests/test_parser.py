@@ -12,7 +12,7 @@ import logging
 import unittest
 from unittest.mock import patch
 
-from slog import LogLevel, ReturnCodes
+from slog import capture_output, LogLevel, ReturnCodes
 
 import dstauffman as dcs
 
@@ -40,10 +40,10 @@ class Test_parser__print_bad_command(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.parser._print_bad_command("garbage")
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, 'Command "garbage" is not understood.')
 
 
@@ -111,18 +111,18 @@ class Test_execute_command(unittest.TestCase):
     """
 
     def test_good_command(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             rc = dcs.execute_command("help", argparse.Namespace())
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(rc, ReturnCodes.clean)
         self.assertTrue(output)
 
     def test_bad_command(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             rc = dcs.execute_command("bad", argparse.Namespace())
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, 'Command "bad" is not understood.')
         self.assertEqual(rc, ReturnCodes.bad_command)
 
@@ -149,11 +149,11 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertEqual(keys, {"log_level", "use_display", "use_hdf5", "use_plotting"})
 
     def test_no_display(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             with patch("sys.argv", ["name.py", "-nodisp"]):
                 flags = dcs.process_command_line_options()
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertFalse(flags.use_display)
         self.assertTrue(flags.use_plotting)
         self.assertTrue(flags.use_hdf5)
@@ -161,11 +161,11 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertEqual(output, "Running without displaying any plots.")
 
     def test_no_plotting(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             with patch("sys.argv", ["name.py", "-noplot"]):
                 flags = dcs.process_command_line_options()
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertTrue(flags.use_display)
         self.assertFalse(flags.use_plotting)
         self.assertTrue(flags.use_hdf5)
@@ -173,11 +173,11 @@ class Test_process_command_line_options(unittest.TestCase):
         self.assertEqual(output, "Running without making any plots.")
 
     def test_no_hdf5(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             with patch("sys.argv", ["name.py", "-nohdf5"]):
                 flags = dcs.process_command_line_options()
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertTrue(flags.use_display)
         self.assertTrue(flags.use_plotting)
         self.assertFalse(flags.use_hdf5)

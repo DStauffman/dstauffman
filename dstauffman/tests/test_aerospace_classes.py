@@ -10,7 +10,9 @@ Notes
 import copy
 import unittest
 
-from dstauffman import capture_output, get_tests_dir, HAVE_NUMPY, NP_DATETIME_FORM, NP_DATETIME_UNITS, NP_TIMEDELTA_FORM
+from slog import capture_output
+
+from dstauffman import get_tests_dir, HAVE_NUMPY, NP_DATETIME_FORM, NP_DATETIME_UNITS, NP_TIMEDELTA_FORM
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -571,9 +573,10 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         kf_record = space.KfRecord(num_points=5)
         assert kf_record.time is not None
         kf_record.time[:] = np.arange(5)
-        with capture_output() as out:
+        with capture_output() as ctx:
             kf_record.pprint()
-        lines = out.getvalue().strip().split("\n")
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "KfRecord")
         self.assertEqual(lines[1], " time = [0. 1. 2. 3. 4.]")
 
@@ -581,9 +584,10 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         kf_record = space.KfRecord(num_points=5)
         assert kf_record.time is not None
         kf_record.time[:] = np.arange(5)
-        with capture_output() as out:
+        with capture_output() as ctx:
             kf_record.pprint(max_elements=0)
-        lines = out.getvalue().strip().split("\n")
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "KfRecord")
         self.assertEqual(lines[1], " time = <ndarray float64 (5,)>")
 

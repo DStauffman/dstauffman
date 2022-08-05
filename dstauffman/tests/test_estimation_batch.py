@@ -15,9 +15,9 @@ from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
 
-from slog import LogLevel
+from slog import capture_output, LogLevel
 
-from dstauffman import capture_output, compare_two_classes, Frozen, get_tests_dir, HAVE_H5PY, HAVE_NUMPY, rss
+from dstauffman import compare_two_classes, Frozen, get_tests_dir, HAVE_H5PY, HAVE_NUMPY, rss
 import dstauffman.estimation as estm
 
 if HAVE_NUMPY:
@@ -144,10 +144,10 @@ class Test_estimation_OptiOpts(unittest.TestCase):
 
     def test_pprint(self) -> None:
         opti_opts = estm.OptiOpts()
-        with capture_output() as out:
+        with capture_output() as ctx:
             opti_opts.pprint()
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "OptiOpts")
         self.assertEqual(lines[1], " model_func      = None")
         self.assertEqual(lines[-1], " max_cores       = None")
@@ -227,10 +227,10 @@ class Test_estimation_OptiParam(unittest.TestCase):
 
     def test_pprint(self) -> None:
         opti_param = estm.OptiParam("test")
-        with capture_output() as out:
+        with capture_output() as ctx:
             opti_param.pprint()
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "OptiParam")
         self.assertEqual(lines[1], " name    = test")
         self.assertEqual(lines[2], " best    = nan")
@@ -278,10 +278,10 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.assertTrue(compare_two_classes(bpe_results, self.bpe_results, suppress_output=True))
 
     def test_str(self) -> None:
-        with capture_output() as out:
+        with capture_output() as ctx:
             print(self.bpe_results)
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "BpeResults")
         self.assertTrue(lines[1].startswith("  begin_params = None"))
 
@@ -289,10 +289,10 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.bpe_results.param_names = ["a".encode("utf-8")]
         self.bpe_results.begin_params = [1.0]  # type: ignore[assignment]
         self.bpe_results.final_params = [2.0]  # type: ignore[assignment]
-        with capture_output() as out:
+        with capture_output() as ctx:
             self.bpe_results.pprint()
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "Initial cost: None")
         self.assertEqual(lines[1], "Initial parameters:")
         self.assertEqual(lines[2].strip(), "a = 1.0")
@@ -301,10 +301,10 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.assertEqual(lines[5].strip(), "a = 2.0")
 
     def test_pprint2(self) -> None:
-        with capture_output() as out:
+        with capture_output() as ctx:
             self.bpe_results.pprint()
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, "")
 
     def tearDown(self) -> None:
@@ -323,10 +323,10 @@ class Test_estimation_CurrentResults(unittest.TestCase):
         self.current_results = estm.CurrentResults()
 
     def test_printing(self) -> None:
-        with capture_output() as out:
+        with capture_output() as ctx:
             print(self.current_results)
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "Current Results:")
         self.assertEqual(lines[1], "  Trust Radius: None")
         self.assertEqual(lines[2], "  Best Cost: None")
@@ -663,10 +663,11 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
 
     def test_no_logging(self, mock_logger: Mock) -> None:
         mock_logger.setLevel(logging.NOTSET)  # CRITICAL
-        with capture_output("err") as err:
+        with capture_output("err") as ctx:
             convergence = estm.batch._check_for_convergence(self.opti_opts, 0.5, 1.5, 2.5)
+        error = ctx.get_error()
+        ctx.close()
         self.assertTrue(convergence)
-        error = err.getvalue().strip()
         self.assertEqual(error, "")
 
 

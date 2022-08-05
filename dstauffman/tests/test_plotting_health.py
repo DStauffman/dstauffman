@@ -11,7 +11,9 @@ Notes
 from typing import List, Optional
 import unittest
 
-from dstauffman import capture_output, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY
+from slog import capture_output
+
+from dstauffman import HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -140,10 +142,10 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_pprint(self) -> None:
         truth = plot.TruthPlotter(self.x, self.y + 0.01, lo=self.y, hi=self.y + 0.03)
-        with capture_output() as out:
+        with capture_output() as ctx:
             truth.pprint()
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "TruthPlotter")
         self.assertTrue(lines[1].startswith(" time    = ["))
         self.assertEqual(lines[-1], " name    = Observed")
@@ -218,10 +220,10 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
         self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label, legend=self.legend))
 
     def test_no_data(self) -> None:
-        with capture_output() as out:
+        with capture_output() as ctx:
             plot.plot_health_time_history(self.time, None, "")
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, "plot skipped due to missing data.")
 
     def test_ignore_zeros(self) -> None:
@@ -234,10 +236,10 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
 
     def test_ignore_zeros3(self) -> None:
         self.data = np.zeros(self.data.shape)
-        with capture_output() as out:
+        with capture_output() as ctx:
             not_a_fig = plot.plot_health_time_history(self.time, self.data, label="All Zeros", ignore_empties=True)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertIs(not_a_fig, None)
         self.assertEqual(output, "All Zeros plot skipped due to missing data.")
 

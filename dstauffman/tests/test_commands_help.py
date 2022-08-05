@@ -11,6 +11,8 @@ import argparse
 from typing import List
 import unittest
 
+from slog import capture_output
+
 import dstauffman as dcs
 import dstauffman.commands as commands
 
@@ -23,10 +25,10 @@ class Test_commands_print_help(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             commands.print_help()
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         expected_header = output.startswith("#######\nlmspace\n#######\n") or output.startswith(
             "##########\ndstauffman\n##########\n"
         )
@@ -34,10 +36,10 @@ class Test_commands_print_help(unittest.TestCase):
 
     def test_specify_file(self) -> None:
         help_file = dcs.get_tests_dir() / "test_commands_help.py"
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             commands.print_help(help_file)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertTrue(output.startswith('r"""\nTest file for the `help` module'))
 
 
@@ -49,10 +51,10 @@ class Test_commands_print_version(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             commands.print_version()
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertIn(".", output)
 
 
@@ -99,10 +101,10 @@ class Test_commands_execute_help(unittest.TestCase):
         self.args = argparse.Namespace()
 
     def test_nominal(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             commands.execute_help(self.args)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         expected_header = output.startswith("#######\nlmspace\n#######\n") or output.startswith(
             "##########\ndstauffman\n##########\n"
         )
@@ -120,10 +122,10 @@ class Test_commands_execute_version(unittest.TestCase):
         self.args = argparse.Namespace()
 
     def test_nominal(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             commands.execute_version(self.args)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertIn(".", output)
 
 

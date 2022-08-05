@@ -16,6 +16,8 @@ from typing import List
 import unittest
 from unittest.mock import patch
 
+from slog import capture_output
+
 import dstauffman as dcs
 
 
@@ -91,49 +93,47 @@ class Test_find_repo_issues(unittest.TestCase):
         cls.bad2 = "    Line 005: '    Start and end line    " + cls.linesep + "'"
 
     def test_nominal(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.find_repo_issues(self.folder, extensions=".m", list_all=False, trailing=False)
-        lines = out.getvalue().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
         self.assertEqual(lines[1], self.bad1)
-        self.assertEqual(lines[2], "")
-        self.assertEqual(len(lines), 3)
+        self.assertEqual(len(lines), 2)
 
     def test_different_extensions(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.find_repo_issues(self.folder, extensions=(".txt",))
-        lines = out.getvalue().strip().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines[0], "")
         self.assertEqual(len(lines), 1)
 
     def test_list_all(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.find_repo_issues(self.folder, list_all=True)
-        lines = out.getvalue().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertTrue(self.bad1 in lines)
         self.assertFalse(self.bad2 in lines)
 
     def test_trailing_spaces(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.find_repo_issues(self.folder, trailing=True)
-        lines = out.getvalue().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
         self.assertEqual(lines[1], self.bad2)
         self.assertTrue(lines[2].startswith('Evaluating: "'))
         self.assertEqual(lines[3], self.bad1)
         self.assertEqual(lines[4], self.bad2)
-        self.assertEqual(lines[5], "")
-        self.assertEqual(len(lines), 6)
+        self.assertEqual(len(lines), 5)
 
     def test_trailing_and_list_all(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.find_repo_issues(self.folder, list_all=True, trailing=True)
-        lines = out.getvalue().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
         self.assertTrue(self.bad1 in lines)
         self.assertTrue(self.bad2 in lines)
@@ -141,40 +141,38 @@ class Test_find_repo_issues(unittest.TestCase):
 
     def test_exclusions_skip(self) -> None:
         exclusions = self.folder
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.find_repo_issues(self.folder, exclusions=exclusions)
-        lines = out.getvalue().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertEqual(lines, [""])
 
     def test_exclusions_invalid(self) -> None:
         exclusions = (pathlib.Path(r"C:\non_existant_path"),)
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.find_repo_issues(self.folder, exclusions=exclusions)
-        lines = out.getvalue().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
         self.assertEqual(lines[1], self.bad1)
-        self.assertEqual(lines[2], "")
-        self.assertEqual(len(lines), 3)
+        self.assertEqual(len(lines), 2)
 
     def test_bad_newlines(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.find_repo_issues(self.folder, extensions=".m", check_eol="0")
-        lines = out.getvalue().split("\n")
-        out.close()
+        lines = ctx.get_output().split("\n")
+        ctx.close()
         self.assertTrue(lines[0].startswith('File: "'))
         self.assertIn('" has bad line endings of "', lines[0])
         self.assertTrue(lines[3].startswith('Evaluating: "'))
         self.assertEqual(lines[4], self.bad1)
-        self.assertEqual(lines[5], "")
-        self.assertEqual(len(lines), 6)
+        self.assertEqual(len(lines), 5)
 
     def test_ignore_tabs(self) -> None:
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.find_repo_issues(self.folder, extensions=".m", check_tabs=False)
-        output = out.getvalue()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertEqual(output, "")
 
     @classmethod
@@ -204,10 +202,10 @@ class Test_delete_pyc(unittest.TestCase):
         self.assertTrue(self.file1.is_file())
         self.assertTrue(self.fold2.is_dir())
         self.assertTrue(self.file2.is_file())
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.delete_pyc(self.fold1)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         lines = output.split("\n")
         self.assertFalse(self.file1.is_file())
         self.assertFalse(self.file2.is_file())
@@ -219,10 +217,10 @@ class Test_delete_pyc(unittest.TestCase):
         self.assertTrue(self.file1.is_file())
         self.assertTrue(self.fold2.is_dir())
         self.assertTrue(self.file2.is_file())
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.delete_pyc(self.fold1, recursive=False)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         lines = output.split("\n")
         self.assertFalse(self.file1.is_file())
         self.assertTrue(self.file2.is_file())
@@ -234,10 +232,10 @@ class Test_delete_pyc(unittest.TestCase):
         self.assertTrue(self.file1.is_file())
         self.assertTrue(self.fold2.is_dir())
         self.assertTrue(self.file2.is_file())
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             dcs.delete_pyc(self.fold1, print_progress=False)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertFalse(self.file1.is_file())
         self.assertFalse(self.file2.is_file())
         self.assertEqual(output, "")
@@ -327,10 +325,10 @@ class Test_make_python_init(unittest.TestCase):
     def test_duplicated_funcs(self) -> None:
         with open(self.filepath, "wt") as file:
             file.write("def Test_Frozen():\n    pass\n")
-        with dcs.capture_output() as out:
+        with capture_output() as ctx:
             text = dcs.make_python_init(self.folder2)
-        output = out.getvalue().strip()
-        out.close()
+        output = ctx.get_output()
+        ctx.close()
         self.assertRegex(text[0:100], r"from \.temp\_file(\s{2,})import Test_Frozen")
         self.assertTrue(output.startswith("Uniqueness Problem"))
 
@@ -381,10 +379,10 @@ class Test_write_unit_test_templates(unittest.TestCase):
     def test_nominal(self) -> None:
         with patch("dstauffman.repos.write_text_file") as mock_writer:
             with patch("dstauffman.repos.setup_dir") as mock_dir:
-                with dcs.capture_output() as out:
+                with capture_output() as ctx:
                     dcs.write_unit_test_templates(self.folder, self.output, author=self.author, exclude=self.exclude)
-                lines = out.getvalue().strip().split("\n")
-                out.close()
+                lines = ctx.get_output().split("\n")
+                ctx.close()
                 self.assertEqual(mock_dir.call_count, 1)
         self.assertGreater(len(lines), 5)
         self.assertTrue(lines[0].startswith("Writing: "))
