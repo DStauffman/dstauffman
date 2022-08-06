@@ -11,13 +11,18 @@ from __future__ import annotations
 
 import datetime
 import doctest
-from typing import Dict, List, Literal, Optional, overload, Tuple, Union
+from typing import Dict, List, Literal, NoReturn, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY, NP_DATETIME_UNITS, NP_ONE_DAY, NP_ONE_SECOND
 
 if HAVE_NUMPY:
     import numpy as np
+
+if TYPE_CHECKING:
+    _D = np.typing.NDArray[np.datetime64]
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
 
 #%% Constants
 GPS_DATE_ZERO = datetime.datetime(1980, 1, 6, 0, 0, 0)
@@ -27,8 +32,13 @@ WEEK_ROLLOVER = 1024
 if HAVE_NUMPY:
     NP_GPS_DATE_ZERO = np.datetime64(GPS_DATE_ZERO, NP_DATETIME_UNITS)
 
+#%% Mypy support - _assert_never
+def _assert_never(value: NoReturn) -> NoReturn:
+    r"""Static and Runtime checker for possible options."""
+    raise ValueError(f"This code should never be reached, got: {value}")
+
 #%% Functions - bsl
-def bsl(bits: np.ndarray, shift: int = 1, *, inplace: bool = False) -> np.ndarray:
+def bsl(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
     r"""
     Bit shifts left.
 
@@ -69,7 +79,7 @@ def bsl(bits: np.ndarray, shift: int = 1, *, inplace: bool = False) -> np.ndarra
 
 
 #%% Functions - bsr
-def bsr(bits: np.ndarray, shift: int = 1, *, inplace: bool = False) -> np.ndarray:
+def bsr(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
     r"""
     Bit shifts right.
 
@@ -111,7 +121,7 @@ def bsr(bits: np.ndarray, shift: int = 1, *, inplace: bool = False) -> np.ndarra
 
 
 #%% Functions - prn_01_to_m11
-def prn_01_to_m11(bits: np.ndarray, *, inplace: bool = False) -> np.ndarray:
+def prn_01_to_m11(bits: _I, *, inplace: bool = False) -> _I:
     r"""
     Shifts bits from (0,1) to (1,-1)
 
@@ -226,7 +236,7 @@ def get_prn_bits(sat: int) -> Tuple[int, int]:
 
 
 #%% Functions - correlate_prn
-def correlate_prn(prn1, prn2, shift, form):
+def correlate_prn(prn1: _I, prn2: _I, shift: Union[int, _I], form: Literal["zero-one", "one-one"]) -> _N:
     r"""
     Correlates two PRN codes with an optional shift.
 
@@ -271,7 +281,7 @@ def correlate_prn(prn1, prn2, shift, form):
     elif form == "one-one":
         pass
     else:
-        raise ValueError(f'Unexpected form: "{form}"')
+        _assert_never(form)
     shift = np.asanyarray(shift)
 
     cor = np.zeros(shift.shape)
@@ -289,7 +299,7 @@ def correlate_prn(prn1, prn2, shift, form):
 
 
 #%% Functions - generate_prn
-def generate_prn(sat: int, length: int = 1023) -> np.ndarray:
+def generate_prn(sat: int, length: int = 1023) -> _I:
     r"""
     Generates the prn bit stream.
 
@@ -354,22 +364,28 @@ def generate_prn(sat: int, length: int = 1023) -> np.ndarray:
     return prn
 
 
-#%% Functions - gps_to_datetime
+#%% Functions - gps_to_datetime@overload
 @overload
 def gps_to_datetime(
-    week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: Literal["datetime"] = ...
+    week: Union[int, _I], time: Union[int, float, _I, _N]
+) -> Union[datetime.datetime, List[datetime.datetime]]:
+    ...
+
+@overload
+def gps_to_datetime(
+    week: Union[int, _I], time: Union[int, float, _I, _N], form: Literal["datetime"] = ...
 ) -> Union[datetime.datetime, List[datetime.datetime]]:
     ...
 
 
 @overload
-def gps_to_datetime(week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: Literal["numpy"]) -> np.datetime64:
+def gps_to_datetime(week: Union[int, _I], time: Union[int, float, _I, _N], form: Literal["numpy"]) -> Union[np.datetime64, _D]:
     ...
 
 
 def gps_to_datetime(
-    week: Union[int, np.ndarray], time: Union[int, float, np.ndarray], form: str = "datetime"
-) -> Union[datetime.datetime, List[datetime.datetime], np.datetime64]:
+    week: Union[int, _I], time: Union[int, float, _I, _N], form: Literal["datetime", "numpy"] = "datetime"
+) -> Union[datetime.datetime, List[datetime.datetime], np.datetime64, _D]:
     r"""
     Converts a GPS week and time to a Python datetime.
 
@@ -440,12 +456,31 @@ def gps_to_datetime(
         start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY  # type: ignore[assignment]
         date_gps = start_week + time * NP_ONE_SECOND  # type: ignore[operator]
     else:
-        raise ValueError(f'Unexpected value for form: "{form}".')
+        _assert_never(form)
     return date_gps
 
 
 #%% Functions - gps_to_utc_datetime
-def gps_to_utc_datetime(week, time, gps_to_utc_offset: Optional[Union[int, np.ndarray]] = None, form="datetime"):
+@overload
+def gps_to_utc_datetime(week: Union[int, _I], time: Union[int, float, _I, _N]) -> Union[datetime.datetime, List[datetime.datetime]]:
+    ...
+
+
+@overload
+def gps_to_utc_datetime(
+    week: Union[int, _I], time: Union[int, float, _I, _N], gps_to_utc_offset: Optional[Union[int, _I]], form: Literal["datetime"] = ...
+) -> Union[datetime.datetime, List[datetime.datetime]]:
+    ...
+
+
+@overload
+def gps_to_utc_datetime(week: Union[int, _I], time: Union[int, float, _I, _N], gps_to_utc_offset: Optional[Union[int, _I]], form: Literal["numpy"]) -> Union[np.datetime64, _D]:
+    ...
+
+
+def gps_to_utc_datetime(
+    week: Union[int, _I], time: Union[int, float, _I, _N], gps_to_utc_offset: Optional[Union[int, _I]] = None, form: Literal["datetime", "numpy"] = "datetime"
+) -> Union[datetime.datetime, List[datetime.datetime], np.datetime64, _D]:
     r"""
     Converts a GPS week and time to UTC time as a datetime.
 
@@ -542,26 +577,27 @@ def gps_to_utc_datetime(week, time, gps_to_utc_offset: Optional[Union[int, np.nd
         gps_to_utc_offset = np.asanyarray(gps_to_utc_offset)
 
     # GPS start week
+    date_utc: Union[datetime.datetime, List[datetime.datetime], np.datetime64, _D]
     if form == "datetime":
         # fmt: off
         if np.size(week) == 1:
             start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * week))
             frac_sec   = time + gps_to_utc_offset
             whole_sec  = int(frac_sec)
-            micros     = round(1e6 * (frac_sec - whole_sec))
+            micros     = round(1e6 * (frac_sec - whole_sec))  # type: ignore[call-overload]
             date_utc   = start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros)
         else:
-            date_utc = []  # type: ignore[assignment]
+            date_utc = []
             for (w, t, off) in zip(week, time, gps_to_utc_offset):
                 start_week = GPS_DATE_ZERO + datetime.timedelta(days=int(DAYS_PER_WEEK * w))
                 frac_sec   = t + off
                 whole_sec  = int(frac_sec)
-                micros     = round(1e6 * (frac_sec - whole_sec))
-                date_utc.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))  # type: ignore[attr-defined]
+                micros     = round(1e6 * (frac_sec - whole_sec))  # type: ignore[call-overload]
+                date_utc.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
         # fmt: on
     elif form == "numpy":
-        start_week = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY
-        date_utc = start_week + (time + gps_to_utc_offset) * NP_ONE_SECOND
+        start_week_np = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY
+        date_utc = start_week_np + (time + gps_to_utc_offset) * NP_ONE_SECOND
     else:
         raise ValueError(f'Unexpected value for form: "{form}".')
     return date_utc

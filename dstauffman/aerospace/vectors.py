@@ -23,6 +23,7 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     _Numbers = Union[float, np.ndarray]
     _Lists = Union[List[np.ndarray], Tuple[np.ndarray, ...], np.ndarray]
+    _N = np.typing.NDArray[np.float64]
 
 #%% Functions - rot
 @ncjit
@@ -181,7 +182,7 @@ def vec_cross(vec: np.ndarray) -> np.ndarray:
 
 
 #%% Functions - vec_angle
-def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bool = True):
+def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bool = True) -> Union[float, _N]:
     r"""
     Calculates the angle between two unit vectors.
 
@@ -240,7 +241,7 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     dot_prod = np.multiply(vec1.T, np.conj(vec2).T).T
     dot_result = np.arccos(np.sum(dot_prod, axis=0))
     if not use_cross:
-        return dot_result
+        return dot_result  # type: ignore[no-any-return]
     # if desired, use cross product result, which is more accurate for small differences, but has
     # an ambiguity for angles greater than pi/2 (90 deg).  Use the dot product result to resolve
     # the ambiguity.

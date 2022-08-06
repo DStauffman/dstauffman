@@ -8,6 +8,7 @@ Notes
 
 #%% Imports
 import datetime
+from typing import Final
 import unittest
 
 from dstauffman import HAVE_NUMPY
@@ -137,7 +138,7 @@ class Test_aerospace_correlate_prn(unittest.TestCase):
 
     def test_nominal(self) -> None:
         shift = np.arange(1023)
-        form = "zero-one"
+        form: Final = "zero-one"
         for i in range(1, 38):
             prn = space.generate_prn(i)
             cor = space.correlate_prn(prn, prn, shift, form)
@@ -147,7 +148,7 @@ class Test_aerospace_correlate_prn(unittest.TestCase):
     def test_alt_form(self) -> None:
         prn = space.prn_01_to_m11(space.generate_prn(1))
         shift = np.arange(1023)
-        form = "one-one"
+        form: Final = "one-one"
         cor = space.correlate_prn(prn, prn, shift, form)
         self.assertEqual(cor[0], 1)
         np.testing.assert_array_less(np.max(np.abs(cor[1:])), 0.1)
@@ -199,6 +200,10 @@ class Test_aerospace_gps_to_datetime(unittest.TestCase):
         exp = np.array([np.datetime64("2014-03-06T22:18:36", "ns"), np.datetime64("2014-03-09T01:08:52.560000", "ns")])
         np.testing.assert_array_equal(date_gps, exp)
 
+    def test_unknown_form(self) -> None:
+        with self.assertRaises(ValueError):
+            space.gps_to_datetime(1, 1, form="bad_form")  # type: ignore[call-overload]
+
 
 #%% aerospace.gps_to_utc_datetime
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
@@ -228,7 +233,7 @@ class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
     def test_alt_form(self) -> None:
         week = np.array([1782, 1783])
         time = np.array([425916, 4132])
-        date_utc = space.gps_to_utc_datetime(week, time, form="numpy")
+        date_utc = space.gps_to_utc_datetime(week, time, form="numpy")  # type: ignore[call-overload]
         exp = np.array([np.datetime64("2014-03-06T22:18:19", "ns"), np.datetime64("2014-03-09T01:08:35", "ns")])
         np.testing.assert_array_equal(date_utc, exp)
 
@@ -238,6 +243,10 @@ class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
         date_utc = space.gps_to_utc_datetime(week, time, gps_to_utc_offset=-200)
         exp = datetime.datetime(2033, 10, 20, 22, 15, 15)
         self.assertEqual(date_utc, exp)
+
+    def test_unknown_form(self) -> None:
+        with self.assertRaises(ValueError):
+            space.gps_to_utc_datetime(1, 1, gps_to_utc_offset=0, form="bad_form")  # type: ignore[call-overload]
 
 
 #%% Unit test execution

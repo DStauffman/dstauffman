@@ -7,7 +7,10 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
+
 import doctest
+from typing import TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY
@@ -16,11 +19,15 @@ from dstauffman.nubs import ncjit
 if HAVE_NUMPY:
     import numpy as np
 
+if TYPE_CHECKING:
+    _N = np.typing.NDArray[np.float64]
+    _M = np.typing.NDArray[np.float64]  # 2D
+
 #%% Constants
-_EPS = np.finfo(float).eps if HAVE_NUMPY else 2.220446049250313e-16
+_EPS = float(np.finfo(float).eps) if HAVE_NUMPY else 2.220446049250313e-16
 
 #%% orth
-def orth(A):
+def orth(A: _M) -> _M:
     r"""
     Orthogonalization basis for the range of A.
 
@@ -84,7 +91,7 @@ def orth(A):
 
 
 #%% subspace
-def subspace(A, B):
+def subspace(A: _M, B: _M) -> float:
     r"""
     Angle between two subspaces specified by the columns of A and B.
 
@@ -133,13 +140,13 @@ def subspace(A, B):
     # compute the projection according to Ref 1
     B = B - A @ (A.T @ B)
     # make sure it's magnitude is less than 1 and compute arcsin
-    theta = np.arcsin(np.minimum(1, np.linalg.norm(B)))
-    return theta
+    theta = np.arcsin(np.minimum(1.0, np.linalg.norm(B)))
+    return theta  # type: ignore[no-any-return]
 
 
 #%% mat_divide
 @ncjit
-def mat_divide(a, b, rcond=_EPS):
+def mat_divide(a: _M, b: _N, rcond: float = _EPS) -> Union[_N, _M]:
     r"""
     Solves the least square solution for x in A*x = b.
 

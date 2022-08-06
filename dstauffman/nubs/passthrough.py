@@ -7,10 +7,13 @@ Notes
 """
 
 #%% Normal Imports
+from __future__ import annotations
+
 import doctest
 import functools
 import platform
 import sys
+from typing import Any, Callable, TYPE_CHECKING
 import unittest
 
 if platform.python_implementation() == "CPython":
@@ -25,8 +28,11 @@ if platform.python_implementation() == "CPython":
 else:
     HAVE_NUMBA = False  # pragma: no cover
 
+if TYPE_CHECKING:
+    _C = Callable[..., Any]
+
 #%% Support Functions
-def _fake_decorator(func):
+def _fake_decorator(func: _C) -> _C:
     r"""Fake decorator for when numba isn't installed."""
 
     @functools.wraps(func)
@@ -35,8 +41,8 @@ def _fake_decorator(func):
             # must treat this differently if no arguments were passed
             return func(args[0])
 
-        def real_decorator(func2):
-            return func(func2, *args, **kwargs)
+        def real_decorator(func2: _C) -> _C:
+            return func(func2, *args, **kwargs)  # type: ignore[no-any-return]
 
         return real_decorator
 
@@ -44,7 +50,7 @@ def _fake_decorator(func):
 
 
 @_fake_decorator
-def fake_jit(func, *args, **kwargs):  # pylint: disable=unused-argument
+def fake_jit(func: _C, *args, **kwargs) -> _C:  # pylint: disable=unused-argument
     r"""Fake jit decorator for when numba isn't installed."""
     return func
 
@@ -52,9 +58,9 @@ def fake_jit(func, *args, **kwargs):  # pylint: disable=unused-argument
 #%% Conditional imports
 if HAVE_NUMBA:
     # always cached version of njit, which is also jit(cache=True, nopython=True)
-    def ncjit(func, *args, **kwargs):
+    def ncjit(func: _C, *args, **kwargs) -> _C:
         r"""Fake decorator for when numba isn't installed."""
-        return njit(func, cache=True, *args, **kwargs)
+        return njit(func, cache=True, *args, **kwargs)  # type: ignore[no-any-return]
 
     # target for vectorized functions
     assert sys.version_info.major == 3, "Must be Python 3"
