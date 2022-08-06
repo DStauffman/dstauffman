@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import doctest
 import logging
-from typing import List, Tuple, TYPE_CHECKING, Union
+from typing import List, Optional, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
@@ -443,7 +443,7 @@ def quat_angle_diff(quat1: np.ndarray, quat2: np.ndarray, **kwargs) -> Tuple[np.
 
 
 #%% Functions - quat_from_euler
-def quat_from_euler(angles: ArrayLike, seq: ArrayLike = None, **kwargs) -> np.ndarray:
+def quat_from_euler(angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs) -> np.ndarray:
     r"""
     Convert set(s) of euler angles to quaternion(s).
 
@@ -996,7 +996,7 @@ def quat_times_vector(quat: np.ndarray, v: np.ndarray) -> np.ndarray:
 
 
 #%% Functions - quat_to_euler
-def quat_to_euler(quat: np.ndarray, seq: Union[Tuple[int, int, int], List[int], np.ndarray] = None, **kwargs) -> np.ndarray:
+def quat_to_euler(quat: np.ndarray, seq: Optional[Union[Tuple[int, int, int], List[int], np.ndarray]] = None, **kwargs) -> np.ndarray:
     r"""
     Convert quaternion to Euler angles for one of 6 input angle sequences.
 

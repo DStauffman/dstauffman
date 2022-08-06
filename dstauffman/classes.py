@@ -95,7 +95,7 @@ def _frozen(set_: Callable) -> Callable:
 
 
 #%% Methods - save_hdf5
-def save_hdf5(self, filename: Path = None, *, meta: Dict[str, Any] = None, exclusions: _Sets = None, **kwargs) -> None:
+def save_hdf5(self, filename: Optional[Path] = None, *, meta: Optional[Dict[str, Any]] = None, exclusions: Optional[_Sets] = None, **kwargs) -> None:
     r"""
     Save the object to disk as an HDF5 file.
 
@@ -206,7 +206,7 @@ def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal
 
 def load_hdf5(
     cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], Tuple[str, ...]],
-    filename: Path = None,
+    filename: Optional[Path] = None,
     return_meta: bool = False,
 ) -> Union[_T, Type[Any], Tuple[_T, Dict[str, Any]], Tuple[Type[Any], Dict[str, Any]]]:
     r"""
@@ -265,7 +265,7 @@ def load_hdf5(
 
 
 #%% Methods - save_pickle
-def save_pickle(self, filename: Path = None) -> None:
+def save_pickle(self, filename: Optional[Path] = None) -> None:
     r"""
     Save a class instances to a pickle file.
 
@@ -285,7 +285,7 @@ def save_pickle(self, filename: Path = None) -> None:
 
 
 #%% Methods - load_pickle
-def load_pickle(cls: Type[_T], filename: Path = None) -> _T:  # pylint: disable=unused-argument
+def load_pickle(cls: Type[_T], filename: Optional[Path] = None) -> _T:  # pylint: disable=unused-argument
     r"""
     Load a class instance from a pickle file.
 
@@ -309,7 +309,7 @@ def load_pickle(cls: Type[_T], filename: Path = None) -> _T:  # pylint: disable=
 
 #%% Methods - save_method
 def save_method(
-    self, filename: Path = None, use_hdf5: bool = True, *, meta: Dict[str, Any] = None, exclusions: _Sets = None, **kwargs
+    self, filename: Optional[Path] = None, use_hdf5: bool = True, *, meta: Optional[Dict[str, Any]] = None, exclusions: Optional[_Sets] = None, **kwargs
 ) -> None:
     r"""
     Save the object to disk.
@@ -357,7 +357,7 @@ def load_method(
 
 
 def load_method(
-    cls: Type[_T], filename: Path = None, use_hdf5: bool = True, return_meta: bool = False, **kwargs
+    cls: Type[_T], filename: Optional[Path] = None, use_hdf5: bool = True, return_meta: bool = False, **kwargs
 ) -> Union[_T, Tuple[_T, Dict[str, Any]]]:
     r"""
     Load the object from disk.
@@ -484,11 +484,11 @@ def pprint_dict(
 def chop_time(
     self: Any,
     time_field: str,
-    exclude: _Sets = None,
+    exclude: Optional[_Sets] = None,
     ti: _Time = -inf,
     tf: _Time = inf,
     inclusive: bool = False,
-    mask: Union[bool, ndarray] = None,
+    mask: Optional[Union[bool, ndarray]] = None,
     precision: _SingleNum = 0,
     left: bool = True,
     right: bool = True,
@@ -564,7 +564,7 @@ def chop_time(
 
 
 #%% Functions - subsample_class
-def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Union[FrozenSet[str], Set[str]] = None) -> None:
+def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Union[FrozenSet[str], Optional[Set[str]]] = None) -> None:
     r"""
     Subsamples the class instance to every `skip` data point.
 
@@ -894,11 +894,11 @@ class FixedDict(dict):
         # Call __new__ (and thus __init__) on unpickling.
         return ()
 
-    def get(self, k: Any, default: Any = None) -> Any:  # pylint: disable=useless-super-delegation
+    def get(self, k: Any, default: Optional[Any] = None) -> Any:  # pylint: disable=useless-super-delegation
         r""".get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
         return super().get(k, default)
 
-    def setdefault(self, k: Any, default: Any = None) -> Any:
+    def setdefault(self, k: Any, default: Optional[Any] = None) -> Any:
         r"""D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D."""
         if self._frozen:
             if k not in self:

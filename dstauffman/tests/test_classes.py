@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 #%% Locals classes for testing
 class _Example_Frozen(dcs.Frozen):
-    def __init__(self, dummy: int = None):
+    def __init__(self, dummy: Optional[int] = None):
         self.field_one: Union[int, str] = 1
         self.field_two: int = 2
         self.field_ten: int = 10

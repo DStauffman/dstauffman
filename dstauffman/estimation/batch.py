@@ -359,7 +359,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         pprint_dict(dct2, name="Final parameters:", indent=8)
 
     @classmethod
-    def load(cls, filename: Path = None, use_hdf5: bool = True) -> BpeResults:
+    def load(cls, filename: Optional[Path] = None, use_hdf5: bool = True) -> BpeResults:
         r"""
         Load the object from disk.
 

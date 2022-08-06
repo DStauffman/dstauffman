@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import datetime
 import doctest
-from typing import Dict, List, Literal, overload, Tuple, Union
+from typing import Dict, List, Literal, Optional, overload, Tuple, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY, NP_DATETIME_UNITS, NP_ONE_DAY, NP_ONE_SECOND
@@ -445,7 +445,7 @@ def gps_to_datetime(
 
 
 #%% Functions - gps_to_utc_datetime
-def gps_to_utc_datetime(week, time, gps_to_utc_offset: Union[int, np.ndarray] = None, form="datetime"):
+def gps_to_utc_datetime(week, time, gps_to_utc_offset: Optional[Union[int, np.ndarray]] = None, form="datetime"):
     r"""
     Converts a GPS week and time to UTC time as a datetime.
 

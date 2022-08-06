@@ -38,7 +38,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
     save: Callable[[Results, Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]  # noqa: F821
     # fmt: on
 
-    def __init__(self, num: float = 0, date_zero: datetime.datetime = None):
+    def __init__(self, num: float = 0, date_zero: Optional[datetime.datetime] = None):
         self.time = np.arange(num)
         self.data = np.random.rand(*self.time.shape)
         self.date = np.full(self.time.shape, np.datetime64("NaT", NP_DATETIME_UNITS))

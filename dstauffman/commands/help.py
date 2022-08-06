@@ -10,7 +10,7 @@ Notes
 import argparse
 import doctest
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 import unittest
 
 from slog import ReturnCodes
@@ -19,7 +19,7 @@ from dstauffman import get_root_dir, version_info
 
 
 #%% Functions - print_help
-def print_help(help_file: Path = None) -> int:
+def print_help(help_file: Optional[Path] = None) -> int:
     r"""
     Prints the contents of the README.rst file.
 

@@ -1247,11 +1247,11 @@ class Test_combine_per_year(unittest.TestCase):
 
     def test_bad_func1(self) -> None:
         with self.assertRaises(AssertionError):
-            dcs.combine_per_year(self.data)
+            dcs.combine_per_year(self.data)  # type: ignore[call-overload]
 
     def test_bad_func2(self) -> None:
         with self.assertRaises(AssertionError):
-            dcs.combine_per_year(self.data, func=1.5)
+            dcs.combine_per_year(self.data, func=1.5)  # type: ignore[call-overload]
 
 
 #%% execute

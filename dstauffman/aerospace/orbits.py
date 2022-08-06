@@ -12,7 +12,7 @@ from __future__ import annotations
 import copy
 import datetime
 import doctest
-from typing import Any, ClassVar, Literal, overload, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Any, ClassVar, Literal, Optional, overload, Tuple, TYPE_CHECKING, TypeVar, Union
 import unittest
 
 from slog import IntEnumPlus, is_dunder
@@ -108,23 +108,25 @@ class Elements(Frozen):
 
     """
 
-    def __init__(self, num: int = None):
+    def __init__(self, num: Optional[int] = None):
         if num is None:
-            self.a: _V = None
-            self.e: _V = None
-            self.i: _V = None
-            self.W: _V = None
-            self.w: _V = None
-            self.vo: _V = None
-            self.p: _V = None
-            self.uo: _V = None
-            self.P: _V = None
-            self.lo: _V = None
-            self.T: _V = None
-            self.type: _I = OrbitType.uninitialized
-            self.equatorial: _B = False
-            self.circular: _B = False
+            # fmt: off
+            self.a: Optional[_V]  = None
+            self.e: Optional[_V]  = None
+            self.i: Optional[_V]  = None
+            self.W: Optional[_V]  = None
+            self.w: Optional[_V]  = None
+            self.vo: Optional[_V] = None
+            self.p: Optional[_V]  = None
+            self.uo: Optional[_V] = None
+            self.P: Optional[_V]  = None
+            self.lo: Optional[_V] = None
+            self.T: Optional[_V]  = None
+            self.type: _I         = OrbitType.uninitialized
+            self.equatorial: _B   = False
+            self.circular: _B     = False
             self.t: np.datetime64 = np.datetime64("nat", NP_DATETIME_UNITS)
+            # fmt: on
         else:
             self.a = np.full(num, np.nan)
             self.e = np.full(num, np.nan)
@@ -193,7 +195,7 @@ class Elements(Frozen):
             setattr(elements, key, np.hstack((value, getattr(elements2, key))))
         return elements
 
-    def print_orrery(self, index: int = None):
+    def print_orrery(self, index: Optional[int] = None):
         r"""Prints the orbital elements as expected for the Orrery algorithms."""
         if index is None:
             print(f"a = {self.a / 1000} km")  # type: ignore[operator]

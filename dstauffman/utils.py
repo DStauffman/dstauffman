@@ -55,7 +55,7 @@ if TYPE_CHECKING:
     _Number = Union[float, int, np.ndarray]
 
 #%% Functions - _nan_equal
-def _nan_equal(a: Any, b: Any, /, tolerance: float = None) -> bool:  # pylint: disable=too-many-return-statements
+def _nan_equal(a: Any, b: Any, /, tolerance: Optional[float] = None) -> bool:  # pylint: disable=too-many-return-statements
     r"""
     Test ndarrays for equality, but ignore NaNs.
 
@@ -140,7 +140,7 @@ def find_in_range(
     max_: _SingleNum = inf,
     *,
     inclusive: bool = False,
-    mask: Union[bool, np.ndarray] = None,
+    mask: Optional[Union[bool, np.ndarray]] = None,
     precision: _SingleNum = 0,
     left: bool = False,
     right: bool = False,
@@ -223,7 +223,7 @@ def rms(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool =
     ...
 
 
-def rms(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
+def rms(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
     r"""
     Calculate the root mean square of a number series.
 
@@ -297,7 +297,7 @@ def rss(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool =
     ...
 
 
-def rss(data: ArrayLike, axis: int = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
+def rss(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
     r"""
     Calculate the root sum square of a number series.
 
@@ -361,12 +361,12 @@ def compare_two_classes(
     c2: Any,
     /,
     suppress_output: bool = False,
-    names: Union[Tuple[str, str], List[str]] = None,
+    names: Optional[Union[Tuple[str, str], List[str]]] = None,
     ignore_callables: bool = True,
     compare_recursively: bool = True,
     is_subset: bool = False,
-    tolerance: float = None,
-    exclude: Set[str] = None,
+    tolerance: Optional[float] = None,
+    exclude: Optional[Set[str]] = None,
 ) -> bool:
     r"""
     Compare two classes by going through all their public attributes and showing that they are equal.
@@ -529,9 +529,9 @@ def compare_two_dicts(
     d2: Mapping[Any, Any],
     /,
     suppress_output: bool = False,
-    names: Union[Tuple[str, str], List[str]] = None,
+    names: Optional[Union[Tuple[str, str], List[str]]] = None,
     is_subset: bool = False,
-    tolerance: float = None,
+    tolerance: Optional[float] = None,
 ) -> bool:
     r"""
     Compare two dictionaries for the same keys, and the same value of those keys.
@@ -1157,16 +1157,16 @@ def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: in
 
 #%% combine_per_year
 @overload
-def combine_per_year(data: None, func: Any) -> None:
+def combine_per_year(data: None, func: Callable[..., Any]) -> None:
     ...
 
 
 @overload
-def combine_per_year(data: np.ndarray, func: Any = ...) -> np.ndarray:
+def combine_per_year(data: np.ndarray, func: Callable[..., Any]) -> np.ndarray:
     ...
 
 
-def combine_per_year(data: Optional[np.ndarray], func: Callable[..., Any] = None) -> Optional[np.ndarray]:
+def combine_per_year(data: Optional[np.ndarray], func: Optional[Callable[..., Any]] = None) -> Optional[np.ndarray]:
     r"""
     Combine the time varying values over one year increments using a supplied function.
 
@@ -1225,7 +1225,7 @@ def combine_per_year(data: Optional[np.ndarray], func: Callable[..., Any] = None
 
 
 #%% Functions - execute
-def execute(command: Union[str, List[str]], folder: Path, *, ignored_codes: Iterable[int] = None, env: Dict[str, str] = None):
+def execute(command: Union[str, List[str]], folder: Path, *, ignored_codes: Optional[Iterable[int]] = None, env: Optional[Dict[str, str]] = None):
     r"""
     Wrapper to subprocess that allows the screen to be updated for long running commands.
 
@@ -1306,9 +1306,9 @@ def execute_wrapper(
     folder: Path,
     *,
     dry_run: bool = False,
-    ignored_codes: Iterable[int] = None,
-    filename: Path = None,
-    env: Dict[str, str] = None,
+    ignored_codes: Optional[Iterable[int]] = None,
+    filename: Optional[Path] = None,
+    env: Optional[Dict[str, str]] = None,
     print_status: bool = True,
 ) -> Union[ReturnCodes, List[str]]:
     r"""
@@ -1381,7 +1381,7 @@ def execute_wrapper(
 
 
 #%% Functions - get_env_var
-def get_env_var(env_key: str, default: str = None) -> str:
+def get_env_var(env_key: str, default: Optional[str] = None) -> str:
     r"""
     Return an environment variable assuming is has been set.
 

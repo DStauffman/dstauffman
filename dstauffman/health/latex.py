@@ -8,7 +8,7 @@ Notes
 #%% Imports
 import doctest
 from math import isinf, isnan
-from typing import List, Union
+from typing import List, Optional, Union
 import unittest
 
 from dstauffman import MONTHS_PER_YEAR
@@ -23,7 +23,7 @@ def make_preamble(
     size: str = r"\small",
     *,
     use_mini: bool = False,
-    short_cap: str = None,
+    short_cap: Optional[str] = None,
     numbered: bool = True,
 ) -> List[str]:
     r"""

@@ -128,7 +128,7 @@ def execute_command(command: str, args: argparse.Namespace) -> int:
 
 
 #%% process_command_line_options
-def process_command_line_options(log_start: Union[bool, str] = None) -> _Flags:
+def process_command_line_options(log_start: Optional[Union[bool, str]] = None) -> _Flags:
     r"""
     Parses sys.argv to determine any command line options for use in scripts.
 

@@ -12,6 +12,7 @@ Notes
 from __future__ import annotations
 
 import doctest
+from typing import Optional
 import unittest
 import warnings
 
@@ -74,10 +75,10 @@ class TruthPlotter(Frozen):
 
     def __init__(
         self,
-        time: np.ndarray = None,
-        data: np.ndarray = None,
-        lo: np.ndarray = None,
-        hi: np.ndarray = None,
+        time: Optional[np.ndarray] = None,
+        data: Optional[np.ndarray] = None,
+        lo: Optional[np.ndarray] = None,
+        hi: Optional[np.ndarray] = None,
         type_: str = "normal",
         name: str = "Observed",
     ):

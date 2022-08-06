@@ -146,7 +146,7 @@ class Opts(Frozen):
         self.show_xtra: bool  = True
         self.time_base: str   = "sec"
         self.time_unit: str   = "sec"
-        self.colormap: Union[str, ColorMap] = None
+        self.colormap:Optional[ Union[str, ColorMap]] = None
         self.leg_spot: str    = "best"
         self.classify: str    = ""
         self.names: List[str] = []
@@ -186,7 +186,7 @@ class Opts(Frozen):
             name = ""
         return name
 
-    def get_date_zero_str(self, date: Union[datetime.datetime, np.ndarray] = None) -> str:
+    def get_date_zero_str(self, date: Optional[Union[datetime.datetime, np.ndarray]] = None) -> str:
         r"""
         Gets a string representation of date_zero, typically used to print on an X axis.
 

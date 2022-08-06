@@ -216,7 +216,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
 
 
 #%% Functions - _write_unit_test
-def _write_unit_test(filename: Path, code: _FortranSource, header: str = None) -> None:
+def _write_unit_test(filename: Path, code: _FortranSource, header: Optional[str] = None) -> None:
     r"""
     Writes a unit test for the given module.
 
@@ -268,7 +268,7 @@ def _write_unit_test(filename: Path, code: _FortranSource, header: str = None) -
 
 
 #%% Functions - _write_all_unit_test
-def _write_all_unit_test(filename: Path, all_code: List[_FortranSource], header: str = None) -> None:
+def _write_all_unit_test(filename: Path, all_code: List[_FortranSource], header: Optional[str] = None) -> None:
     r"""
     Writes a wrapper run_all_tests program to run all the unit tests.
 
@@ -347,8 +347,8 @@ def _get_template(
     is_debug: bool = False,
     build: str = "",
     *,
-    fcflags: Dict[str, str] = None,
-    dbflags: Dict[str, str] = None,
+    fcflags: Optional[Dict[str, str]] = None,
+    dbflags: Optional[Dict[str, str]] = None,
     use_preprocessor: bool = False,
 ) -> str:
     r"""
@@ -497,13 +497,13 @@ def _write_makefile(
     makefile: Path,
     code: List[_FortranSource],
     *,
-    template: str = None,
-    program: str = None,
+    template: Optional[str] = None,
+    program: Optional[str] = None,
     compiler: str = "gfortran",
     is_debug: bool = False,
-    sources: Iterable[str] = None,
-    external_sources: Iterable[str] = None,
-    replacements: Dict[str, str] = None,
+    sources: Optional[Iterable[str]] = None,
+    external_sources: Optional[Iterable[str]] = None,
+    replacements: Optional[Dict[str, str]] = None,
 ) -> None:
     r"""
     Reads the given makefile template and inserts the relevant rules based on the given source code.
@@ -674,7 +674,7 @@ def _write_makefile(
 
 #%% Functions - create_fortran_unit_tests
 def create_fortran_unit_tests(
-    folder: Path, *, template: str = None, external_sources: Iterable[str] = None, header: str = None
+    folder: Path, *, template: Optional[str] = None, external_sources: Optional[Iterable[str]] = None, header: Optional[str] = None
 ) -> None:
     r"""
     Parses the given folder for Fortran unit test files to build programs that will execute them.
@@ -743,8 +743,8 @@ def create_fortran_makefile(
     *,
     compiler: str = "gfortran",
     is_debug: bool = True,
-    template: str = None,
-    replacements: Dict[str, str] = None,
+    template: Optional[str] = None,
+    replacements: Optional[Dict[str, str]] = None,
 ) -> None:
     r"""
     Parses the given folder for Fortran source files to build a makefile.

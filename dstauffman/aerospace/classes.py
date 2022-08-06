@@ -63,13 +63,13 @@ def _chop_wrapper(
 def _chop_wrapper(
     orig: _T,
     exclude: _Sets,
-    ti: _Time = None,
-    tf: _Time = None,
+    ti: Optional[_Time] = None,
+    tf: Optional[_Time] = None,
     *,
     include_last: bool = True,
     inplace: bool = False,
     return_ends: bool = False,
-    subclasses: _Sets = None,
+    subclasses: Optional[_Sets] = None,
 ) -> Union[_T, Tuple[_T, _T, _T]]:
     assert orig.time is not None, "You can't chop an uninitialized time field."  # type: ignore[attr-defined]
     use_dates = is_datetime(orig.time)  # type: ignore[attr-defined]
@@ -146,7 +146,7 @@ class KfInnov(Frozen):
         *,
         name: str = "",
         units: str = "",
-        chan: _Chan = None,
+        chan: Optional[_Chan] = None,
         num_innovs: int = 0,
         num_axes: int = 0,
         time_dtype: DTypeLike = float,
@@ -228,7 +228,7 @@ class KfInnov(Frozen):
         ...
 
     def chop(
-        self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
+        self, ti: Optional[_Time] = None, tf: Optional[_Time] = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
     ) -> Union[KfInnov, Tuple[KfInnov, KfInnov, KfInnov]]:
         r"""Chops the KfInnov data structure to the given time bounds."""
         exclude = frozenset({"name", "chan", "units"})
@@ -279,14 +279,14 @@ class Kf(Frozen):
         self,
         *,
         name: str = "",
-        chan: _Chan = None,
+        chan: Optional[_Chan] = None,
         num_points: int = 0,
         num_states: int = 0,
         time_dtype: DTypeLike = float,
-        active_states: np.ndarray = None,
+        active_states: Optional[np.ndarray] = None,
         innov_class: Any = None,
         use_pv: bool = True,
-        innov_chan: _Chan = None,
+        innov_chan: Optional[_Chan] = None,
         **kwargs,
     ):
         r"""Initializes a new Kf instance."""
@@ -342,7 +342,7 @@ class Kf(Frozen):
                 setattr(self, innov_name, func(time_dtype=time_dtype, chan=innov_chan, **kwargs))
             self._subclasses = frozenset(innov_class.keys())
 
-    def save(self, filename: Path = None) -> None:
+    def save(self, filename: Optional[Path] = None) -> None:
         r"""Save the object to disk as an HDF5 file."""
         # exit if no filename is given
         if filename is None:
@@ -380,7 +380,7 @@ class Kf(Frozen):
                         grp.create_dataset(key, data=value)
 
     @classmethod
-    def load(cls, filename: Path = None, subclasses: _Sets = frozenset({"innov"})) -> Kf:
+    def load(cls, filename: Optional[Path] = None, subclasses: _Sets = frozenset({"innov"})) -> Kf:
         r"""Load the object from disk."""
         if filename is None:
             raise ValueError("No file specified to load.")
@@ -459,7 +459,7 @@ class Kf(Frozen):
         ...
 
     def chop(
-        self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
+        self, ti: Optional[_Time] = None, tf: Optional[_Time] = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
     ) -> Union[Kf, Tuple[Kf, Kf, Kf]]:
         r"""Chops the Kf structure to the given time bounds."""
         exclude = frozenset({"name", "chan", "active", "istate"} | self._subclasses)
@@ -546,7 +546,7 @@ class KfRecord(Frozen):
         self.z    = self.z[:, ix_keep].copy() if self.z is not None else None
         # fmt: on
 
-    def save(self, filename: Path = None, use_hdf5: bool = True) -> None:
+    def save(self, filename: Optional[Path] = None, use_hdf5: bool = True) -> None:
         r"""
         Save the object to disk.
 
@@ -567,7 +567,7 @@ class KfRecord(Frozen):
             self.time.dtype = orig_type  # type: ignore[misc, union-attr]
 
     @classmethod
-    def load(cls, filename: Path = None, use_hdf5: bool = True) -> KfRecord:
+    def load(cls, filename: Optional[Path] = None, use_hdf5: bool = True) -> KfRecord:
         r"""
         Load the object from disk.
 
@@ -626,7 +626,7 @@ class KfRecord(Frozen):
         ...
 
     def chop(
-        self, ti: _Time = None, tf: _Time = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
+        self, ti: Optional[_Time] = None, tf: Optional[_Time] = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
     ) -> Union[KfRecord, Tuple[KfRecord, KfRecord, KfRecord]]:
         r"""Chops the KfRecord structure to the given time bounds."""
         exclude: FrozenSet[str] = frozenset({})

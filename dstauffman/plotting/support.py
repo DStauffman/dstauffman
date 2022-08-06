@@ -350,7 +350,7 @@ class ColorMap(Frozen):
 
 
 #%% Functions - close_all
-def close_all(figs: _FigOrListFig = None) -> None:
+def close_all(figs: Optional[_FigOrListFig] = None) -> None:
     r"""
     Close all the open figures, or if a list is specified, then close all of them.
 
@@ -575,7 +575,7 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tup
 
 
 #%% Functions - resolve_name
-def resolve_name(name: str, force_win: bool = None, rep_token: str = "_", strip_classification: bool = True) -> str:
+def resolve_name(name: str, force_win: Optional[bool] = None, rep_token: str = "_", strip_classification: bool = True) -> str:
     r"""
     Resolves the given name to something that can be saved on the current OS.
 
@@ -630,7 +630,7 @@ def resolve_name(name: str, force_win: bool = None, rep_token: str = "_", strip_
 
 #%% Functions - storefig
 def storefig(
-    fig: _FigOrListFig, folder: Union[str, Path] = None, plot_type: Union[str, List[str]] = "png", show_warn: bool = True
+    fig: _FigOrListFig, folder: Optional[Union[str, Path]] = None, plot_type: Union[str, List[str]] = "png", show_warn: bool = True
 ) -> None:
     r"""
     Store the specified figures in the specified folder and with the specified plot type(s).
@@ -1769,7 +1769,7 @@ def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = ""
 
 
 #%% Functions - align_plots
-def align_plots(figs: _FigOrListFig, pos: Tuple[int, int] = None) -> None:
+def align_plots(figs: _FigOrListFig, pos: Optional[Tuple[int, int]] = None) -> None:
     """
     Aligns all the figures in one location.
 
@@ -1873,7 +1873,7 @@ def ci_from_z(z: Union[int, float]) -> float:
 
 
 #%% Functions - save_figs_to_pdf
-def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = Path("figs.pdf")) -> None:
+def save_figs_to_pdf(figs: Optional[Union[Figure, List[Figure]]] = None, filename: Path = Path("figs.pdf")) -> None:
     r"""
     Saves the given figures to a PDF file.
 
@@ -1923,7 +1923,7 @@ def save_figs_to_pdf(figs: Union[Figure, List[Figure]] = None, filename: Path = 
 
 #%% Functions - save_images_to_pdf
 def save_images_to_pdf(
-    figs: Union[Figure, List[Figure]] = None, folder: Path = None, plot_type: str = "png", filename: Path = Path("figs.pdf")
+    figs: Optional[Union[Figure, List[Figure]]] = None, folder: Optional[Path] = None, plot_type: str = "png", filename: Path = Path("figs.pdf")
 ):
     r"""
     Uses figure names to find the already saved images and combine them into a PDF file.
@@ -2068,7 +2068,7 @@ def fig_ax_factory(
 
 
 def fig_ax_factory(
-    num_figs: int = None,
+    num_figs: Optional[int] = None,
     num_axes: Union[int, List[int]] = 1,
     *,
     suptitle: Union[str, List[str]] = "",

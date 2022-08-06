@@ -24,10 +24,10 @@ if HAVE_NUMPY:
 #%% load_matlab
 def load_matlab(
     filename: Union[str, Path],
-    varlist: Union[List[str], Set[str], Tuple[str]] = None,
+    varlist: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
     *,
     squeeze: bool = True,
-    enums: Dict[str, Any] = None,
+    enums: Optional[Dict[str, Any]] = None,
 ) -> Dict[str, Any]:
     r"""
     Load simple arrays from a MATLAB v7.3 HDF5 based *.mat file.

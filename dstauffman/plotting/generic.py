@@ -116,11 +116,11 @@ def make_generic_plot(
     tolerance=0,
     return_err: bool = False,
     data_as_rows: bool = True,
-    extra_plotter: _ExtraPlotter = None,
+    extra_plotter: Optional[_ExtraPlotter] = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     use_datashader: bool = False,
-    fig_ax: Tuple[Figure, Axis] = None,
+    fig_ax: Optional[Tuple[Figure, Axis]] = None,
 ):
     r"""
     Generic plotting function called by all the other low level plots.
@@ -1014,11 +1014,11 @@ def make_time_plot(
     leg_scale=None,
     ylabel=None,
     data_as_rows: bool = True,
-    extra_plotter: _ExtraPlotter = None,
+    extra_plotter: Optional[_ExtraPlotter] = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     use_datashader: bool = False,
-    fig_ax: Tuple[Figure, Axis] = None,
+    fig_ax: Optional[Tuple[Figure, Axis]] = None,
 ):
     r"""
     Generic data versus time plotting routine.
@@ -1134,10 +1134,10 @@ def make_error_bar_plot(
     leg_scale=None,
     ylabel=None,
     data_as_rows: bool = True,
-    extra_plotter: _ExtraPlotter = None,
+    extra_plotter: Optional[_ExtraPlotter] = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    fig_ax: Tuple[Figure, Axis] = None,
+    fig_ax: Optional[Tuple[Figure, Axis]] = None,
 ):
     r"""
     Generic plotting routine to make error bars.
@@ -1272,9 +1272,9 @@ def make_difference_plot(
     return_err: bool = False,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    extra_plotter: _ExtraPlotter = None,
+    extra_plotter: Optional[_ExtraPlotter] = None,
     use_datashader: bool = False,
-    fig_ax: Tuple[Figure, Axis] = None,
+    fig_ax: Optional[Tuple[Figure, Axis]] = None,
 ):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
@@ -1425,9 +1425,9 @@ def make_categories_plot(
     data_as_rows: bool = True,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    extra_plotter: _ExtraPlotter = None,
+    extra_plotter: Optional[_ExtraPlotter] = None,
     use_datashader: bool = False,
-    fig_ax: Tuple[Figure, Axis] = None,
+    fig_ax: Optional[Tuple[Figure, Axis]] = None,
 ):
     r"""
     Data versus time plotting routine when grouped into categories.
@@ -1560,10 +1560,10 @@ def make_bar_plot(
     second_units=None,
     ylabel=None,
     data_as_rows: bool = True,
-    extra_plotter: _ExtraPlotter = None,
+    extra_plotter: Optional[_ExtraPlotter ]= None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    fig_ax: Tuple[Figure, Axis] = None,
+    fig_ax: Optional[Tuple[Figure, Axis]] = None,
 ):
     r"""
     Plots a filled bar chart, using methods optimized for larger data sets.
@@ -1676,13 +1676,13 @@ def make_connected_sets(
     center_origin: bool = False,
     legend_loc: str = "best",
     units: str = "",
-    mag_ratio: float = None,
+    mag_ratio: Optional[float] = None,
     leg_scale: str = "unity",
-    colormap: Union[str, ColorMap] = None,
+    colormap: Optional[Union[str, ColorMap]] = None,
     use_datashader: bool = False,
     add_quiver: bool = False,
-    quiver_scale: float = None,
-    fig_ax: Tuple[Figure, Axis] = None,
+    quiver_scale: Optional[float] = None,
+    fig_ax: Optional[Tuple[Figure, Axis]] = None,
 ):
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.

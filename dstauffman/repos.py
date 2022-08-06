@@ -174,7 +174,7 @@ def run_pytests(folder: Path, *args, **kwargs) -> int:
 
 
 #%% run_coverage
-def run_coverage(folder: Path, *, report: bool = True, cov_file: Path = None) -> int:
+def run_coverage(folder: Path, *, report: bool = True, cov_file: Optional[Path] = None) -> int:
     r"""
     Wraps the pytests with a Code Coverage report.
 
@@ -237,8 +237,8 @@ def find_repo_issues(
     list_all: bool = False,
     check_tabs: bool = True,
     trailing: bool = False,
-    exclusions: Union[Tuple[Path, ...], Path] = None,
-    check_eol: str = None,
+    exclusions: Optional[Union[Tuple[Path, ...], Path]] = None,
+    check_eol: Optional[str] = None,
     show_execute: bool = False,
 ) -> bool:
     r"""
@@ -443,7 +443,7 @@ def get_python_definitions(text: str, *, include_private: bool = False) -> List[
 
 
 #%% Functions - make_python_init
-def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, filename: Path = None) -> str:
+def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, filename: Optional[Path] = None) -> str:
     r"""
     Make the Python __init__.py file based on the files/definitions found within the specified folder.
 
@@ -528,9 +528,9 @@ def write_unit_test_templates(
     output: Path,
     *,
     author: str = "unknown",
-    exclude: Union[Path, Tuple[Path, ...]] = None,
+    exclude: Optional[Union[Path, Tuple[Path, ...]]] = None,
     recursive: bool = True,
-    repo_subs: Dict[str, str] = None,
+    repo_subs: Optional[Dict[str, str]] = None,
     add_classification: bool = False,
 ) -> None:
     r"""

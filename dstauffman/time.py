@@ -130,7 +130,7 @@ def get_ymd_from_np(date: _NPDates) -> Tuple[_NInt, _NInt, _NInt]:
 
 
 #%% Functions - round_datetime
-def round_datetime(dt: datetime.datetime = None, /, round_to_sec: int = 60, floor: bool = False) -> datetime.datetime:
+def round_datetime(dt: Optional[datetime.datetime] = None, /, round_to_sec: int = 60, floor: bool = False) -> datetime.datetime:
     r"""
     Round a datetime object to any time lapse in seconds.
 
@@ -635,7 +635,7 @@ def convert_num_dt_to_np(dt, /, units="sec", np_units=NP_TIMEDELTA_FORM):
 
 #%% Functions - get_delta_time_str
 def get_delta_time_str(
-    start_time: Union[datetime.datetime, datetime.timedelta], final_time: datetime.datetime = None, *, format_: str = "%H:%M:%S"
+    start_time: Union[datetime.datetime, datetime.timedelta], final_time: Optional[datetime.datetime] = None, *, format_: str = "%H:%M:%S"
 ) -> str:
     r"""
     Determine the elapsed time in a form useful for logging.
