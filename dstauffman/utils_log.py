@@ -12,7 +12,7 @@ import contextlib
 import doctest
 import logging
 from pathlib import Path
-from typing import Union
+from typing import Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
@@ -22,6 +22,13 @@ from dstauffman.utils import find_in_range, rms
 
 if HAVE_NUMPY:
     import numpy as np
+
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
+
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+    _F = Union[float, _N]
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -92,7 +99,38 @@ def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
 
 
 #%% Functions - fix_rollover
-def fix_rollover(data, roll, axis=None, check_accel=False, **kwargs):
+@overload
+def fix_rollover(data: _I, roll: int) -> _I:
+    ...
+
+
+@overload
+def fix_rollover(data: _N, roll: float) -> _N:
+    ...
+
+
+@overload
+def fix_rollover(data: _I, roll: int, axis: int) -> _I:
+    ...
+
+
+@overload
+def fix_rollover(data: _N, roll: float, axis: int) -> _N:
+    ...
+
+
+
+@overload
+def fix_rollover(data: _I, roll: int, axis: Optional[int], check_accel: bool, **kwargs) -> _I:
+    ...
+
+
+@overload
+def fix_rollover(data: _N, roll: float, axis: Optional[int], check_accel: bool, **kwargs) -> _N:
+    ...
+
+
+def fix_rollover(data: Union[_I, _N], roll: Union[int, float], axis: Optional[int] = None, check_accel: bool = False, **kwargs) -> Union[_I, _N]:
     r"""
     Unrolls data that has finite ranges and rollovers.
 
@@ -153,10 +191,10 @@ def fix_rollover(data, roll, axis=None, check_accel=False, **kwargs):
         out = np.zeros_like(data)
         if axis == 0:
             for i in range(data.shape[1]):
-                out[:, i] = fix_rollover(data[:, i], roll, check_accel=check_accel, **kwargs)
+                out[:, i] = fix_rollover(data[:, i], roll, check_accel=check_accel, **kwargs)  # type: ignore[arg-type]
         elif axis == 1:
             for i in range(data.shape[0]):
-                out[i, :] = fix_rollover(data[i, :], roll, check_accel=check_accel, **kwargs)
+                out[i, :] = fix_rollover(data[i, :], roll, check_accel=check_accel, **kwargs)  # type: ignore[arg-type]
         else:
             raise ValueError(f'Unexpected axis: "{axis}".')
         return out
@@ -203,12 +241,41 @@ def fix_rollover(data, roll, axis=None, check_accel=False, **kwargs):
     # double check for remaining rollovers
     if np.any(find_in_range(np.diff(out), min_=roll / 2, max_=-roll / 2)):
         logger.log(LogLevel.L6, "A rollover was fixed recursively")
-        out = fix_rollover(out, roll, check_accel=check_accel, **kwargs)
+        out = fix_rollover(out, roll, check_accel=check_accel, **kwargs)  # type: ignore[arg-type]
     return out
 
 
 #%% remove_outliers
-def remove_outliers(x, /, sigma=3.0, axis=None, *, num_iters=3, return_stats=False, inplace=False, hardmax=None):
+@overload
+def remove_outliers(x: ArrayLike, /) -> _N:
+    ...
+
+
+@overload
+def remove_outliers(x: ArrayLike, /, sigma: float) -> _N:
+    ...
+
+
+@overload
+def remove_outliers(x: ArrayLike, /, sigma: float, axis: Optional[int], *, num_iters: int, return_stats: Literal[False] = ..., inplace: bool, hardmax: Optional[float]) -> _N:
+    ...
+
+
+@overload
+def remove_outliers(x: ArrayLike, /, sigma: float, axis: Optional[int], *, num_iters: int, return_stats: Literal[True], inplace: bool, hardmax: Optional[float]) -> Tuple[_N, int, _F, _F]:
+    ...
+
+
+def remove_outliers(
+    x: ArrayLike,
+    /,
+    sigma: float = 3.0,
+    axis: Optional[int] = None,
+    *,
+    num_iters: int = 3,
+    return_stats: bool = False,
+    inplace: bool = False,
+    hardmax: Optional[float] = None) -> Union[_N, Tuple[_N, int, _F, _F]]:
     r"""
     Removes the outliers from a data set based on the RMS of the points in the set.
 
@@ -279,10 +346,10 @@ def remove_outliers(x, /, sigma=3.0, axis=None, *, num_iters=3, return_stats=Fal
     for i in range(num_iters):
         rms_all = rms(y, axis=axis, ignore_nans=True, keepdims=True)
         if i == 0:
-            rms_initial = np.squeeze(rms_all)
+            rms_initial: _N = np.squeeze(rms_all)
         ix_bad = np.greater(np.abs(y), rms_all * sigma, out=np.zeros(y.shape, dtype=bool), where=~np.isnan(y))
         y[ix_bad] = np.nan
-    rms_removed = rms(y, axis=axis, ignore_nans=True)
+    rms_removed: _F = rms(y, axis=axis, ignore_nans=True)
     num_replaced = np.count_nonzero(np.isnan(y)) - num_nans
     num_removed = num_replaced - num_hard
     logger.log(LogLevel.L6, "Number of NaNs = %s", num_nans)
@@ -295,7 +362,7 @@ def remove_outliers(x, /, sigma=3.0, axis=None, *, num_iters=3, return_stats=Fal
             LogLevel.L6,
             "RMS before removal = %s, after = %s",
             np.array_str(rms_initial, precision=6),
-            np.array_str(rms_removed, precision=6),
+            np.array_str(rms_removed, precision=6),  # type: ignore[arg-type]
         )
     if return_stats:
         return (y, num_replaced, rms_initial, rms_removed)

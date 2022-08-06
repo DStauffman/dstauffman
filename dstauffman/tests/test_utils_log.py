@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import contextlib
 import time
-from typing import Optional
+from typing import Optional, TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
 
@@ -21,6 +21,9 @@ import dstauffman as dcs
 
 if dcs.HAVE_NUMPY:
     import numpy as np
+
+if TYPE_CHECKING:
+    _N = np.typing.NDArray[np.float64]
 
 #%% setup_dir
 @patch("dstauffman.utils_log.logger")
@@ -164,7 +167,7 @@ class Test_fix_rollover(unittest.TestCase):
     def test_non_integer_roll(self, mock_logger: Mock) -> None:
         exp = np.arange(0.0, 10.1, 0.1)
         roll = 3.35
-        data = roll * ((exp / roll) % 1)
+        data: _N = roll * ((exp / roll) % 1.0)
         unrolled = dcs.fix_rollover(data, roll)
         np.testing.assert_array_almost_equal(unrolled, exp, decimal=12)
         mock_logger.log.assert_called_once_with(LogLevel.L6, "corrected %s top to bottom rollover(s)", 2)
@@ -215,7 +218,7 @@ class Test_fix_rollover(unittest.TestCase):
         pos = np.cumsum(vel)
         roll = 8.25
         rolled_pos = pos - roll * np.floor(pos / roll)
-        unrolled_pos = dcs.fix_rollover(rolled_pos, roll, check_accel=True, sigma=2.5)
+        unrolled_pos = dcs.fix_rollover(rolled_pos, roll, check_accel=True, sigma=2.5)  # type: ignore[call-overload]
         np.testing.assert_array_equal(unrolled_pos, pos)
         mock_logger.log.assert_any_call(LogLevel.L6, "corrected %s top to bottom rollover(s)", 5)
         mock_logger.log.assert_any_call(LogLevel.L6, "corrected %s bottom to top rollover(s)", 3)
@@ -265,7 +268,7 @@ class Test_remove_outliers(unittest.TestCase):
         x[1, 20] = 1e3
         x[0, 30] = 1.4e-3
         for axis in [0, 1, None]:
-            y = dcs.remove_outliers(x, axis=axis, sigma=3)
+            y = dcs.remove_outliers(x, axis=axis, sigma=3.0)  # type: ignore[call-overload]
             self.assertEqual(y.shape, (3, 5000))
             if axis in {1, None}:
                 self.assertTrue(np.isnan(y[0, 10]))
@@ -276,11 +279,11 @@ class Test_remove_outliers(unittest.TestCase):
             self.assertFalse(np.isnan(y[0, 30]))
 
     def test_inplace(self, mock_logger: Mock) -> None:
-        y = dcs.remove_outliers(self.x, inplace=True)
+        y = dcs.remove_outliers(self.x, inplace=True)  # type: ignore[call-overload]
         self.assertIs(y, self.x)
 
     def test_stats(self, mock_logger: Mock) -> None:
-        (y, num_replaced, rms_initial, rms_removed) = dcs.remove_outliers(self.x, return_stats=True)
+        (y, num_replaced, rms_initial, rms_removed) = dcs.remove_outliers(self.x, return_stats=True)  # type: ignore[call-overload]
         self.assertEqual(self.x[0], y[0])
         self.assertEqual(self.x[5], 1e5)
         self.assertTrue(np.isnan(y[5]))
