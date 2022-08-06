@@ -32,7 +32,7 @@ class Test_estimation_calculate_kalman_gain(unittest.TestCase):
         self.exp_pz = 5.0125e-01  # TODO: come up with something that can be known better
 
     def test_nominal(self) -> None:
-        K = estm.calculate_kalman_gain(self.P, self.H, self.R)
+        K = estm.calculate_kalman_gain(self.P, self.H, self.R)  # type: ignore[call-overload]
         self.assertAlmostEqual(K[0, 0], self.exp, 14)
 
     def test_inverse(self) -> None:
@@ -40,7 +40,7 @@ class Test_estimation_calculate_kalman_gain(unittest.TestCase):
         self.assertAlmostEqual(K[0, 0], self.exp, 12)
 
     def test_innov_cov(self) -> None:
-        (K, Pz) = estm.calculate_kalman_gain(self.P, self.H, self.R, return_innov_cov=True)
+        (K, Pz) = estm.calculate_kalman_gain(self.P, self.H, self.R, return_innov_cov=True)  # type: ignore[call-overload]
         self.assertAlmostEqual(K[0, 0], self.exp, 14)
         self.assertAlmostEqual(Pz[0, 0], self.exp_pz, 14)
 
@@ -147,7 +147,7 @@ class Test_estimation_propagate_covariance(unittest.TestCase):
         self.phi   = np.diag(np.array([1.0, 1, 1, -1, -1, -1]))
         self.P     = 1e-3 * np.eye(6)
         self.Q     = np.diag(np.array([1e-3, 1e-3, 1e-5, 1e-7, 1e-7, 1e-7]))
-        self.gamma = -1 * self.phi
+        self.gamma = -1.0 * self.phi
         self.exp   = 0.002
         self.orig  = 0.001
         # fmt: on

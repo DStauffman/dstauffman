@@ -31,14 +31,14 @@ class Test_aerospace_rot(unittest.TestCase):
         r3o2 = np.sqrt(3) / 2
 
         # reference 1
-        self.r1x = np.array([[1.0, 0.0, 0.0], [0.0, r3o2, 0.5], [0.0, -0.5, r3o2]], dtype=float)
-        self.r1y = np.array([[r3o2, 0.0, -0.5], [0.0, 1.0, 0.0], [0.5, 0.0, r3o2]], dtype=float)
-        self.r1z = np.array([[r3o2, 0.5, 0.0], [-0.5, r3o2, 0.0], [0.0, 0.0, 1.0]], dtype=float)
+        self.r1x = np.array([[1.0, 0.0, 0.0], [0.0, r3o2, 0.5], [0.0, -0.5, r3o2]])
+        self.r1y = np.array([[r3o2, 0.0, -0.5], [0.0, 1.0, 0.0], [0.5, 0.0, r3o2]])
+        self.r1z = np.array([[r3o2, 0.5, 0.0], [-0.5, r3o2, 0.0], [0.0, 0.0, 1.0]])
 
         # reference 2
-        self.r2x = np.array([[1.0, 0.0, 0.0], [0.0, -r2o2, r2o2], [0.0, -r2o2, -r2o2]], dtype=float)
-        self.r2y = np.array([[-r2o2, 0.0, -r2o2], [0.0, 1.0, 0], [r2o2, 0.0, -r2o2]], dtype=float)
-        self.r2z = np.array([[-r2o2, r2o2, 0.0], [-r2o2, -r2o2, 0.0], [0.0, 0.0, 1.0]], dtype=float)
+        self.r2x = np.array([[1.0, 0.0, 0.0], [0.0, -r2o2, r2o2], [0.0, -r2o2, -r2o2]])
+        self.r2y = np.array([[-r2o2, 0.0, -r2o2], [0.0, 1.0, 0], [r2o2, 0.0, -r2o2]])
+        self.r2z = np.array([[-r2o2, r2o2, 0.0], [-r2o2, -r2o2, 0.0], [0.0, 0.0, 1.0]])
 
         self.tolerance = 1e-12
 

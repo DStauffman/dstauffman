@@ -7,19 +7,27 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
+
 import doctest
+from typing import Optional, Tuple, TYPE_CHECKING
 import unittest
 
 from dstauffman import HAVE_NUMPY
+from dstauffman.aerospace import KfRecord
 from dstauffman.estimation.linalg import mat_divide
 from dstauffman.nubs import ncjit
 
 if HAVE_NUMPY:
     import numpy as np
 
+if TYPE_CHECKING:
+    _N = np.typing.NDArray[np.float64]
+    _M = np.typing.NDArray[np.float64]  # 2D
+
 #%% _update_information
 @ncjit
-def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
+def _update_information(H: _M, Pz: _M, z: _N, K: _M, lambda_bar: _N, LAMBDA_bar: _N) -> Tuple[_N, _N]:
     r"""
     Update information vector and matrix using innovation.
 
@@ -77,7 +85,7 @@ def _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar):
 
 
 #%% bf_smoother
-def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
+def bf_smoother(kf_record: KfRecord, lambda_bar: Optional[_N] = None, LAMBDA_bar: Optional[_M] = None) -> Tuple[_M, _M, _N]:
     r"""
     Modified Bryson Frasier smoother.
 
@@ -139,6 +147,15 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
     >>> (x_delta, lambda_bar_initial, LAMBDA_bar_initial) = bf_smoother(kf_record)
 
     """
+    #% Assertions for typing
+    assert kf_record.H is not None
+    assert kf_record.K is not None
+    assert kf_record.P is not None
+    assert kf_record.Pz is not None
+    assert kf_record.stm is not None
+    assert kf_record.time is not None
+    assert kf_record.z is not None
+
     #% Initialization, set defaults
     # fmt: off
     n_state  = kf_record.H.shape[1]
@@ -198,7 +215,7 @@ def bf_smoother(kf_record, lambda_bar=None, LAMBDA_bar=None):
         # Update information
         (lambda_hat, LAMBDA_hat) = _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar)
 
-    return (x_delta, lambda_bar, LAMBDA_bar)
+    return (x_delta, lambda_bar, LAMBDA_bar)  # type: ignore[return-value]
 
 
 #%% Unit test

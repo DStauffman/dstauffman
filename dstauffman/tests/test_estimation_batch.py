@@ -93,7 +93,7 @@ def cost_wrapper(results_data: _N, *, results_time: _N, truth_time: _N, truth_da
 def get_parameter(sim_params: SimParams, *, names: List[str]) -> _N:
     r"""Simple example parameter getter."""
     num = len(names)
-    values = np.full(num, np.nan, dtype=float)
+    values = np.full(num, np.nan)
     for (ix, name) in enumerate(names):
         if hasattr(sim_params, name):
             values[ix] = getattr(sim_params, name)
@@ -491,11 +491,11 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.cur_results.trust_rad = self.opti_opts.trust_radius
         self.cur_results.cost = 0.5 * rss(self.cur_results.innovs, ignore_nans=True)
         names = estm.OptiParam.get_names(self.opti_opts.params)
-        self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)  # type: ignore[assignment]
+        self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)
 
         # set relevant results variables
         self.bpe_results.param_names = [name.encode("utf-8") for name in names]
-        self.bpe_results.begin_params = self.cur_results.params.copy()  # type: ignore[union-attr]
+        self.bpe_results.begin_params = self.cur_results.params.copy()
         self.bpe_results.begin_innovs = self.cur_results.innovs.copy()
         self.bpe_results.begin_cost   = self.cur_results.cost  # fmt: skip
         self.bpe_results.costs.append(self.cur_results.cost)
@@ -614,7 +614,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
 
     def setUp(self) -> None:
         estm.batch.logger.setLevel(LogLevel.L5)
-        self.opti_opts = type("Class1", (object,), {"tol_cosmax_grad": 1, "tol_delta_step": 2, "tol_delta_cost": 3})
+        self.opti_opts: estm.OptiOpts = type("Class1", (object,), {"tol_cosmax_grad": 1, "tol_delta_step": 2, "tol_delta_cost": 3})  # type: ignore[assignment]
         self.cosmax = 10
         self.delta_step_len = 10
         self.pred_func_change = 10
@@ -775,12 +775,12 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         self.cur_results.trust_rad = self.opti_opts.trust_radius
         self.cur_results.cost = 0.5 * rss(self.cur_results.innovs, ignore_nans=True)
         names = estm.OptiParam.get_names(self.opti_opts.params)
-        self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)  # type: ignore[assignment]
+        self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)
 
         # set relevant results variables
         # fmt: off
         self.bpe_results.param_names  = [name.encode("utf-8") for name in names]
-        self.bpe_results.begin_params = self.cur_results.params.copy()  # type: ignore[union-attr]
+        self.bpe_results.begin_params = self.cur_results.params.copy()
         self.bpe_results.begin_innovs = self.cur_results.innovs.copy()
         self.bpe_results.begin_cost   = self.cur_results.cost
         self.bpe_results.costs.append(self.cur_results.cost)
@@ -793,6 +793,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         # fmt: on
 
     def test_nominal(self, mock_logger: Mock) -> None:
+        assert self.opti_opts.model_args is not None
         estm.batch._dogleg_search(
             self.opti_opts,
             self.opti_opts.model_args,
@@ -806,6 +807,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         )
 
     def test_normalized(self, mock_logger: Mock) -> None:
+        assert self.opti_opts.model_args is not None
         self.normalized = True
         estm.batch._dogleg_search(
             self.opti_opts,
@@ -820,6 +822,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         )
 
     def test_levenberg_marquardt(self, mock_logger: Mock) -> None:
+        assert self.opti_opts.model_args is not None
         self.opti_opts.search_method = "levenberg_marquardt"
         estm.batch._dogleg_search(
             self.opti_opts,
@@ -834,6 +837,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         )
 
     def test_bad_method(self, mock_logger: Mock) -> None:
+        assert self.opti_opts.model_args is not None
         self.opti_opts.search_method = "bad_method"
         with self.assertRaises(ValueError):
             estm.batch._dogleg_search(
@@ -849,6 +853,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
             )
 
     def test_minimums(self, mock_logger: Mock) -> None:
+        assert self.opti_opts.model_args is not None
         self.opti_opts.params[0].min_ = 10  # type: ignore[index]
         estm.batch._dogleg_search(
             self.opti_opts,
@@ -863,6 +868,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         )
 
     def test_huge_trust_radius(self, mock_logger: Mock) -> None:
+        assert self.opti_opts.model_args is not None
         # TODO: figure out how to get this to shrink a Newton step.
         self.opti_opts.trust_radius = 1000000
         estm.batch._dogleg_search(
@@ -928,7 +934,7 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
         self.opti_opts.set_param_func = repr
         self.opti_opts.output_folder  = None
         self.opti_opts.output_results = ""
-        self.opti_opts.params         = [1, 2]
+        self.opti_opts.params         = [1, 2]  # type: ignore[list-item]
         # fmt: on
 
     def support(self) -> None:

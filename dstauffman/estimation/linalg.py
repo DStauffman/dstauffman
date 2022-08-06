@@ -175,8 +175,8 @@ def mat_divide(a, b, rcond=_EPS):
     --------
     >>> from dstauffman.estimation import mat_divide
     >>> import numpy as np
-    >>> a = np.array([[1, 2], [3, 4]], dtype=float)
-    >>> x = np.array([1, -1], dtype=float)
+    >>> a = np.array([[1.0, 2.0], [3.0, 4.0]])
+    >>> x = np.array([1.0, -1.0])
     >>> b = a @ x
     >>> out = mat_divide(a, b)
     >>> with np.printoptions(precision=8):

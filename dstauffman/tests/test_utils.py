@@ -1208,7 +1208,7 @@ class Test_combine_per_year(unittest.TestCase):
         self.data2 = np.arange(10)
         self.data3 = np.column_stack((self.data, self.data))
         self.data4 = np.column_stack((self.data2, self.data2))
-        self.data5 = np.full(120, np.nan, dtype=float)
+        self.data5 = np.full(120, np.nan)
         self.func1 = np.nanmean
         self.func2 = np.nansum
 
@@ -1349,22 +1349,22 @@ class Test_intersect(unittest.TestCase):
         np.testing.assert_array_equal(ib, np.array([2, 6], dtype=int))
 
     def test_floats(self) -> None:
-        a = np.array([1, 2.5, 4, 6], dtype=float)
-        b = np.array([0, 8, 2.5, 4, 6], dtype=float)
+        a = np.array([1, 2.5, 4, 6])
+        b = np.array([0, 8, 2.5, 4, 6])
         (c, ia, ib) = dcs.intersect(a, b, return_indices=True)
-        np.testing.assert_array_equal(c, np.array([2.5, 4, 6], dtype=float))
+        np.testing.assert_array_equal(c, np.array([2.5, 4, 6]))
         np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
         np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
 
     def test_unique(self) -> None:
-        a = np.array([1, 2.5, 4, 6], dtype=float)
-        b = np.array([0, 8, 2.5, 4, 6], dtype=float)
+        a = np.array([1, 2.5, 4, 6])
+        b = np.array([0, 8, 2.5, 4, 6])
         (c, ia, ib) = dcs.intersect(a, b, assume_unique=True, return_indices=True)
-        np.testing.assert_array_equal(c, np.array([2.5, 4, 6], dtype=float))
+        np.testing.assert_array_equal(c, np.array([2.5, 4, 6]))
         np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
         np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
         (c, ia, ib) = dcs.intersect(a, b, tolerance=1e-7, assume_unique=True, return_indices=True)
-        np.testing.assert_array_equal(c, np.array([2.5, 4, 6], dtype=float))
+        np.testing.assert_array_equal(c, np.array([2.5, 4, 6]))
         np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
         np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
 
@@ -1378,7 +1378,7 @@ class Test_intersect(unittest.TestCase):
         a = np.array([1.0, 2.0, 3.1, 3.9, 4.0, 6.0])
         b = np.array([2.0, 3.0, 4.0, 5.0])
         (c, ia, ib) = dcs.intersect(a, b, tolerance=0.12, return_indices=True)
-        np.testing.assert_array_equal(c, np.array([2.0, 3.1, 3.9, 4.0], dtype=float))
+        np.testing.assert_array_equal(c, np.array([2.0, 3.1, 3.9, 4.0]))
         np.testing.assert_array_equal(ia, np.array([1, 2, 3, 4], dtype=int))
         np.testing.assert_array_equal(ib, np.array([0, 1, 2], dtype=int))
 
@@ -1386,9 +1386,9 @@ class Test_intersect(unittest.TestCase):
         a = np.array([1.0, 3.0, 5.0, 7.0, 9.0])
         b = np.array([1.01, 2.02, 3.03, 4.04, 5.05, 6.06, 7.07, 8.08, 9.09])
         c = dcs.intersect(a, b, tolerance=0.055, return_indices=False)
-        np.testing.assert_array_equal(c, np.array([1.0, 3.0, 5.0], dtype=float))
+        np.testing.assert_array_equal(c, np.array([1.0, 3.0, 5.0]))
         c2 = dcs.intersect(b, a, tolerance=0.055, return_indices=False)
-        np.testing.assert_array_equal(c2, np.array([1.01, 3.03, 5.05], dtype=float))
+        np.testing.assert_array_equal(c2, np.array([1.01, 3.03, 5.05]))
 
     def test_scalars(self) -> None:
         a = 5

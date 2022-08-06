@@ -169,8 +169,8 @@ class KfInnov(Frozen):
         if num_innovs > 0:
             self.time   = np.empty(num_innovs, dtype=time_dtype)
             innov_shape = (num_axes, num_innovs) if num_axes > 1 else (num_innovs,)
-            self.innov  = np.full(innov_shape, np.nan, dtype=float, order="F")
-            self.norm   = np.full(innov_shape, np.nan, dtype=float, order="F")
+            self.innov  = np.full(innov_shape, np.nan, order="F")
+            self.norm   = np.full(innov_shape, np.nan, order="F")
             self.status = np.empty(num_innovs, dtype=int)
         else:
             self.time   = None

@@ -451,7 +451,7 @@ def make_generic_plot(
             diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
     # calculate the rms (or mean) values
     if show_rms or return_err:
-        nans = np.full(num_channels, np.nan, dtype=float)  # TODO: num_channels should be 3 for is_quat_diff
+        nans = np.full(num_channels, np.nan)  # TODO: num_channels should be 3 for is_quat_diff
         func_lamb: _FuncLamb
         data_func: Union[_FuncLamb, List[_FuncLamb], Dict[Any, np.ndarray]]
         if not use_mean:
@@ -1454,7 +1454,7 @@ def make_categories_plot(
     >>> import numpy as np
     >>> description      = "Values vs Time"
     >>> time             = np.arange(-10., 10.1, 0.1)
-    >>> data             = np.vstack((time + np.cos(time), np.ones(time.shape, dtype=float)))
+    >>> data             = np.vstack((time + np.cos(time), np.ones(time.shape)))
     >>> data[1, 60:85]   = 2
     >>> MeasStatus       = type("MeasStatus", (object,), {"rejected": 0, "accepted": 1})
     >>> cats             = np.full(time.shape, MeasStatus.accepted, dtype=int)

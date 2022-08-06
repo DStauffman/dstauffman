@@ -1210,7 +1210,7 @@ def combine_per_year(data: Optional[np.ndarray], func: Callable[..., Any] = None
     num_year = num_time // MONTHS_PER_YEAR
     # check for case with all NaNs
     if np.all(np.isnan(data)):
-        data2 = np.full((num_year, num_chan), np.nan, dtype=float)
+        data2 = np.full((num_year, num_chan), np.nan)
     else:
         # disables warnings for time points that are all NaNs for nansum or nanmean
         with warnings.catch_warnings():
@@ -1687,7 +1687,7 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
     >>> import numpy as np
     >>> xp = np.array([0., 111., 2000., 5000.])
     >>> yp = np.array([0, 1, -2, 3])
-    >>> x = np.arange(0, 6001, dtype=float)
+    >>> x = np.arange(0.0, 6001.0)
     >>> y = zero_order_hold(x, xp, yp)
 
     """
@@ -1746,7 +1746,7 @@ def linear_interp(x, xp, yp, *, left=None, right=None, assume_sorted=False, extr
     >>> import numpy as np
     >>> xp = np.array([0.0, 111.0, 2000.0, 5000.0])
     >>> yp = np.array([0.0, 1.0, -2.0, 3.0])
-    >>> x = np.arange(0, 6001, dtype=float)
+    >>> x = np.arange(0.0, 6001.0)
     >>> y = linear_interp(x, xp, yp, extrapolate=True)
 
     """
@@ -1822,7 +1822,7 @@ def linear_lowpass_interp(
     >>> import numpy as np
     >>> xp = np.array([0.0, 111.0, 2000.0, 5000.0])
     >>> yp = np.array([0.0, 1.0, -2.0, 3.0])
-    >>> x = np.arange(0, 6001, dtype=float)
+    >>> x = np.arange(0.0, 6001.0)
     >>> y = linear_lowpass_interp(x, xp, yp, extrapolate=True)
 
     """

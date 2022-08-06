@@ -50,7 +50,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
         self.date = self.date.astype(np.int64)
         return {}
 
-    def _save_restore_hdf5(self, **kwargs: Any) -> None:
+    def _save_restore_hdf5(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
         self.date = self.date.astype(NP_DATETIME_FORM)
 
 

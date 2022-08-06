@@ -456,7 +456,7 @@ def ignore_plot_data(data, ignore_empties, col=None):
     --------
     >>> from dstauffman.plotting import ignore_plot_data
     >>> import numpy as np
-    >>> data = np.zeros((3, 10), dtype=float)
+    >>> data = np.zeros((3, 10))
     >>> ignore_empties = True
     >>> col = 2
     >>> ignore = ignore_plot_data(data, ignore_empties, col)

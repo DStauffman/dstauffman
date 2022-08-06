@@ -90,15 +90,15 @@ class Test_estimation_mat_divide(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        a = np.array([[1, 2], [3, 4]], dtype=float)
-        exp = np.array([1, -1], dtype=float)
+        a = np.array([[1.0, 2.0], [3.0, 4.0]])
+        exp = np.array([1.0, -1.0])
         b = a @ exp
         x = estm.mat_divide(a, b)
         np.testing.assert_array_almost_equal(x, exp, 14)
 
     def test_rcond(self) -> None:
-        a = np.array([[1e6, 1e6], [1e6, 1e6 + 1e-8]], dtype=float)
-        exp = np.array([1, -1], dtype=float)
+        a = np.array([[1e6, 1e6], [1e6, 1e6 + 1e-8]])
+        exp = np.array([1.0, -1.0])
         b = a @ exp
         x1 = estm.mat_divide(a, b, rcond=1e-16)
         x2 = estm.mat_divide(a, b, rcond=1e-6)

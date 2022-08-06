@@ -211,7 +211,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
         break
 
     # save the final ordering
-    order = np.full(cost.shape, np.nan, dtype=float)
+    order = np.full(cost.shape, np.nan)
     order[keep] = ix_sort
 
     # build an index to pull data out
@@ -229,9 +229,9 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     if names is None:
         names = [f"Strategy {i + 1}" for i in range(num)]
     # preallocate some variables
-    full_inc_costs = np.full((num), np.nan, dtype=float)
-    full_inc_qalys = np.full((num), np.nan, dtype=float)
-    full_icers = np.full((num), np.nan, dtype=float)
+    full_inc_costs = np.full((num), np.nan)
+    full_inc_qalys = np.full((num), np.nan)
+    full_icers = np.full((num), np.nan)
     # fill the calculations in where applicable
     full_inc_costs[ix] = inc_cost
     full_inc_qalys[ix] = inc_qaly

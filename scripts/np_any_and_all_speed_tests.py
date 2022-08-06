@@ -5,10 +5,10 @@ from IPython import get_ipython  # type: ignore[import]
 import numpy as np
 import pandas as pd
 
-import dstauffman.nubs as nubs  # noqa: F401
+import dstauffman.nubs as nubs  # noqa: F401  # pylint: disable=unused-import
 
 #%% Results
-text = r"""i = None, any(x)
+TEXT = r"""i = None, any(x)
 111 ns ± 1.81 ns per loop (mean ± std. dev. of 7 runs, 10000000 loops each)
 i = None, np.any(x)
 3.74 µs ± 47.6 ns per loop (mean ± std. dev. of 7 runs, 100000 loops each)
@@ -140,7 +140,7 @@ if __name__ == "__main__":
         print(f"i = {i}, np_all(x)")
         ipython.magic("timeit nubs.np_all(x)")
 
-    # table = parse_results(text)
+    # table = parse_results(TEXT)
     # print(table)
 
     # Gives:

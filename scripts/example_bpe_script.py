@@ -4,7 +4,7 @@ Example script for running the Batch Parameter Estimation (BPE) portion of the D
 Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
-"""
+"""  # pylint: disable=redefined-outer-name
 
 #%% Imports
 import datetime
@@ -75,9 +75,9 @@ def truth(time: _N, magnitude: float = 5.0, frequency: float = 10.0, phase: floa
 
 
 #%% Functions - cost_wrapper
-def cost_wrapper(
+def cost_wrapper(  # pylint: disable=unused-argument
     results_data: _N, *, results_time: _N, truth_time: _N, truth_data: _N, sim_params: SimParams
-) -> _N:  # pylint: disable=unused-argument
+) -> _N:
     r"""Calculate innovations (cost) for the model."""
     # Pull out overlapping time points and indices
     (ix_truth, ix_results) = _get_truth_index(results_time, truth_time)
@@ -93,7 +93,7 @@ def cost_wrapper(
 def get_parameter(sim_params: SimParams, *, names: List[str]) -> Any:
     r"""Get the model parameters."""
     num = len(names)
-    values = np.full(num, np.nan, dtype=float)
+    values = np.full(num, np.nan)
     for (ix, name) in enumerate(names):
         if hasattr(sim_params, name):
             values[ix] = getattr(sim_params, name)
@@ -188,7 +188,7 @@ if __name__ == "__main__":
 
         # make model plots
         f0 = plot.plot_health_monte_carlo(time, results, "Output", opts=opts, truth=truth)
-        extra_plotter = lambda fig, ax: truth.plot_truth(ax[0], scale=1)  # type: ignore[attr-defined]
+        extra_plotter = lambda fig, ax: truth.plot_truth(ax[0], scale=1)  # type: ignore[attr-defined]  # pylint: disable=unnecessary-lambda-assignment
         f1 = plot.plot_time_history("Output vs. Time", time, results, opts=opts, extra_plotter=extra_plotter)
 
         # make BPE plots

@@ -187,14 +187,14 @@ class Test_fix_rollover(unittest.TestCase):
 
     def test_bad_ndims(self, mock_logger: Mock) -> None:
         with self.assertRaises(ValueError) as context:
-            dcs.fix_rollover(np.zeros((2, 5), dtype=float), self.roll)
+            dcs.fix_rollover(np.zeros((2, 5)), self.roll)
         self.assertEqual(str(context.exception), 'Input argument "data" must be a vector.')
 
     def test_bad_axis(self, mock_logger: Mock) -> None:
         with self.assertRaises(AssertionError):
-            dcs.fix_rollover(np.zeros((2, 3, 4), dtype=float), self.roll, axis=2)
+            dcs.fix_rollover(np.zeros((2, 3, 4)), self.roll, axis=2)
         with self.assertRaises(ValueError) as context:
-            dcs.fix_rollover(np.zeros((2, 5), dtype=float), self.roll, axis=2)
+            dcs.fix_rollover(np.zeros((2, 5)), self.roll, axis=2)
         self.assertEqual(str(context.exception), 'Unexpected axis: "2".')
 
     def test_with_nans(self, mock_logger: Mock) -> None:

@@ -327,7 +327,7 @@ class Test_plotting_ignore_plot_data(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.data = np.zeros((3, 10), dtype=float)
+        self.data = np.zeros((3, 10))
         self.ignore_empties = True
 
     def test_none(self) -> None:

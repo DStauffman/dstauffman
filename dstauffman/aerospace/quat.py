@@ -596,7 +596,7 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
             raise
 
     # initialize output
-    qout = np.full((QUAT_SIZE, num), np.nan, dtype=float)
+    qout = np.full((QUAT_SIZE, num), np.nan)
 
     # Simple cases
     if num == 0:

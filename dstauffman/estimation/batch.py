@@ -66,6 +66,10 @@ class OptiOpts(Frozen):
     -------
     pprint : Displays a pretty print version of the class.
 
+    Notes
+    -----
+    #.  The cost_args are additional arguments to the cost function, plus anything in model args.
+
     Examples
     --------
     >>> from dstauffman.estimation import OptiOpts
@@ -77,14 +81,14 @@ class OptiOpts(Frozen):
         # fmt: off
         # specifically required settings
         self.model_func: Optional[Callable]       = None
-        self.model_args: Optional[Dict[str, Any]] = None  # {}
+        self.model_args: Optional[Dict[str, Any]] = None
         self.cost_func: Optional[Callable]        = None
-        self.cost_args: Optional[Dict[str, Any]]  = None  # {} # TODO: add note, these are additional cost args, plus model_args
+        self.cost_args: Optional[Dict[str, Any]]  = None
         self.get_param_func: Optional[Callable]   = None
         self.set_param_func: Optional[Callable]   = None
         self.output_folder: Optional[Path]        = None
         self.output_results: str                  = "bpe_results.hdf5"
-        self.params: Optional[List[Any]]          = None  # []
+        self.params: Optional[List[OptiParam]]    = None
         self.start_func: Optional[Callable]       = None
         self.final_func: Optional[Callable]       = None
 
@@ -396,7 +400,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
     def __init__(self) -> None:
         # fmt: off
         self.trust_rad: Optional[float] = None
-        self.params: Optional[float]    = None
+        self.params: Optional[_N]       = None
         self.innovs: Optional[_N]       = None
         self.cost: Optional[float]      = None
         # fmt: on
@@ -496,7 +500,7 @@ def _function_wrapper(
     >>> import numpy as np
     >>> model_func = lambda x: 2*x
     >>> cost_func = lambda y, x: y / 10
-    >>> model_args = {"x": np.array([1, 2, 3], dtype=float)}
+    >>> model_args = {"x": np.array([1.0, 2.0, 3.0])}
     >>> cost_args = dict()
     >>> (innovs, results) = _function_wrapper(model_func=model_func, cost_func=cost_func, \
     ...     model_args=model_args, cost_args=cost_args, return_results=True)
@@ -561,7 +565,15 @@ def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: Dict[str
 
 
 #%% _finite_differences
-def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_sided=False, normalized=False):
+def _finite_differences(
+    opti_opts: OptiOpts,
+    model_args: Dict[str, Any],
+    bpe_results: BpeResults,
+    cur_results: CurrentResults,
+    *,
+    two_sided: bool = False,
+    normalized: bool = False,
+):
     r"""
     Perturb the state by a litte bit and calculate the numerical slope (Jacobian approximation).
 
@@ -601,6 +613,14 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         on Optimization, 2000.
 
     """
+    # assertions for typing
+    assert bpe_results.param_names is not None
+    assert cur_results.innovs is not None
+    assert cur_results.params is not None
+    assert cur_results.trust_rad is not None
+    assert opti_opts.params is not None
+    assert opti_opts.set_param_func is not None
+
     # hard-coded values
     sqrt_eps = np.sqrt(np.finfo(float).eps)
     step_sf = 0.1
@@ -620,7 +640,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
     # fmt: on
 
     # initialize output
-    jacobian = np.zeros((num_innov, num_param), dtype=float)
+    jacobian = np.zeros((num_innov, num_param))
 
     # initialize loop variables
     grad_log_det_B = 0  # TODO: calculate somewhere later
@@ -629,7 +649,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
         perturb_fact = 1  # TODO: how to get perturb_fact?
         param_perturb = perturb_fact * sqrt_eps * param_signs
     else:
-        temp_step = np.abs(cur_results.params) * step_sf * 1 / cur_results.trust_rad
+        temp_step = np.abs(cur_results.params) * step_sf * 1.0 / cur_results.trust_rad
         param_perturb = param_signs * np.maximum(temp_step, param_minstep)
 
     # build parameters for each upcoming model execution
@@ -685,7 +705,7 @@ def _finite_differences(opti_opts, model_args, bpe_results, cur_results, *, two_
 
 #%% _levenberg_marquardt
 @ncjit
-def _levenberg_marquardt(jacobian, innovs, lambda_=0):
+def _levenberg_marquardt(jacobian: _M, innovs: _N, lambda_: float = 0.0) -> _N:
     r"""
     Classical Levenberg-Marquardt parameter search step.
 
@@ -729,12 +749,12 @@ def _levenberg_marquardt(jacobian, innovs, lambda_=0):
         innovs_aug = np.hstack((innovs, np.zeros(num_params)))
         # calucalte based on augmented forms
         delta_param = -mat_divide(jacobian_aug, innovs_aug)
-    return delta_param
+    return delta_param  # type: ignore[no-any-return]
 
 
 #%% _predict_func_change
 @ncjit
-def _predict_func_change(delta_param, gradient, hessian):
+def _predict_func_change(delta_param: _N, gradient: _M, hessian: _M) -> float:
     r"""
     Predict change in sum of squared errors function.
 
@@ -779,11 +799,11 @@ def _predict_func_change(delta_param, gradient, hessian):
     """
     # calculate and return the predicted change
     delta_func = gradient.T @ delta_param + 0.5 * delta_param.T @ hessian @ delta_param
-    return delta_func
+    return delta_func  # type: ignore[return-value]
 
 
 #%% _check_for_convergence
-def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
+def _check_for_convergence(opti_opts: OptiOpts, cosmax: float, delta_step_len: float, pred_func_change: float) -> bool:
     r"""Check for convergence."""
     # initialize the output and assume not converged
     convergence = False
@@ -818,7 +838,9 @@ def _check_for_convergence(opti_opts, cosmax, delta_step_len, pred_func_change):
 
 #%% _double_dogleg
 @ncjit
-def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radius):
+def _double_dogleg(
+    delta_param: _N, gradient: _M, grad_hessian_grad: float, x_bias: _N, trust_radius: float
+) -> Tuple[_N, float, float, str]:
     r"""
     Compute a double dog-leg parameter search.
 
@@ -860,8 +882,8 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
 
     """
     # Calculate some norms
-    newton_len = norm(delta_param)
-    gradient_len = norm(gradient)
+    newton_len: float = norm(delta_param)  # type: ignore[assignment]
+    gradient_len: float = norm(gradient)  # type: ignore[assignment]
     cauchy_len = gradient_len**3 / grad_hessian_grad
     # relaxed_Newton_point is between the initial point and the Newton point
     # If x_bias = 0, the relaxed point is at the Newton point
@@ -873,7 +895,7 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
         # Newton step is inside the trust region so take it
         new_delta_param = delta_param.copy()
         step_type = "Newton"
-        step_scale = 1
+        step_scale = 1.0
     else:
         # Compute a step somewhere on the dog leg
         if trust_radius / newton_len >= relaxed_newton_len:
@@ -916,20 +938,39 @@ def _double_dogleg(delta_param, gradient, grad_hessian_grad, x_bias, trust_radiu
             new_delta_param = cauchy_pt + new_cau_weighting * new_minus_cau
 
     # calculate the new step length for output
-    step_len = norm(new_delta_param)
+    step_len: float = norm(new_delta_param)  # type: ignore[assignment]
 
     return (new_delta_param, step_len, step_scale, step_type)
 
 
 #%% _dogleg_search
 def _dogleg_search(
-    opti_opts, model_args, bpe_results, cur_results, delta_param, jacobian, gradient, hessian, *, normalized=False
-):
+    opti_opts: OptiOpts,
+    model_args: Dict[str, Any],
+    bpe_results: BpeResults,
+    cur_results: CurrentResults,
+    delta_param: _N,
+    jacobian: _M,
+    gradient: _M,
+    hessian: _M,
+    *,
+    normalized: bool = False,
+) -> bool:
     r"""
     Search for improved parameters for nonlinear least square or maximum likelihood function.
 
     Uses a trust radius search path.
     """
+    # assertions for static typing
+    assert bpe_results.param_names is not None
+    assert cur_results.params is not None
+    assert cur_results.trust_rad is not None
+    assert opti_opts.model_func is not None
+    assert opti_opts.cost_func is not None
+    assert opti_opts.cost_args is not None
+    assert opti_opts.params is not None
+    assert opti_opts.set_param_func is not None
+
     # process inputs
     search_method = opti_opts.search_method.lower().replace(" ", "_")
     if normalized:
@@ -946,7 +987,7 @@ def _dogleg_search(
 
     # do some calculations for things constant within the loop
     grad_hessian_grad = gradient.T @ hessian @ gradient
-    log_det_B = 0  # TODO: get this elsewhere for max_likelihood mode
+    log_det_B = 0.0  # TODO: get this elsewhere for max_likelihood mode
 
     # initialize status flags and counters
     # fmt: off
@@ -1015,6 +1056,7 @@ def _dogleg_search(
             trial_cost = 0.5 * sum_sq_innov
 
         # check if this step actually an improvement
+        assert cur_results.cost is not None
         is_improvement = trial_cost < cur_results.cost
 
         # decide what to do with this step
@@ -1080,7 +1122,7 @@ def _dogleg_search(
 
 
 #%% _analyze_results
-def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
+def _analyze_results(opti_opts: OptiOpts, bpe_results: BpeResults, jacobian: _M, normalized: bool = False) -> None:
     r"""
     Analyze the results.
 
@@ -1113,6 +1155,10 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
     >>> _analyze_results(opti_opts, bpe_results, jacobian, normalized)
 
     """
+    # asserts for static typing
+    assert bpe_results.param_names is not None
+    assert opti_opts.params is not None
+
     # hard-coded values
     min_eig = 1e-14  # minimum allowed eigenvalue
 
@@ -1143,8 +1189,8 @@ def _analyze_results(opti_opts, bpe_results, jacobian, normalized=False):
         covariance = V_jacobian @ np.diag(temp) @ Vh_jacobian
     except MemoryError:  # pragma: no cover
         logger.log(LogLevel.L5, "Singular value decomposition of Jacobian failed.")
-        V_jacobian = np.full((num_params, num_params), np.nan, dtype=float)
-        covariance = np.inv(jacobian.T @ jacobian)
+        V_jacobian = np.full((num_params, num_params), np.nan)
+        covariance = np.linalg.inv(jacobian.T @ jacobian)
 
     param_one_sigmas = np.sqrt(np.diag(covariance))
     param_one_sigmas[param_one_sigmas < min_eig] = np.nan
@@ -1310,9 +1356,10 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     cur_results.trust_rad = opti_opts.trust_radius
     cur_results.cost      = 0.5 * rss(cur_results.innovs, ignore_nans=True)
     cur_results.params    = opti_opts.get_param_func(names=names, **model_args)
+    assert cur_results.params is not None
 
     # set relevant results variables
-    bpe_results.begin_params = cur_results.params.copy()  # type: ignore[union-attr]
+    bpe_results.begin_params = cur_results.params.copy()
     bpe_results.begin_innovs = cur_results.innovs.copy()
     bpe_results.begin_cost   = cur_results.cost
     bpe_results.costs.append(cur_results.cost)
@@ -1330,7 +1377,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     # Do some stuff
     convergence = False
     failed      = False
-    jacobian    = 0
+    jacobian    = np.array([[0.0]])
     # fmt: on
     while iter_count <= opti_opts.max_iters:
         # update status
@@ -1360,7 +1407,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
             delta_param = _levenberg_marquardt(jacobian, cur_results.innovs, lambda_=0)
 
         # find the step length
-        delta_step_len = norm(delta_param)
+        delta_step_len: float = norm(delta_param)  # type: ignore[assignment]
         pred_func_change = _predict_func_change(delta_param, gradient, hessian)
 
         # check for convergence conditions
@@ -1410,7 +1457,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     bpe_results.num_evals += 1
     cur_results.cost = 0.5 * rss(cur_results.innovs, ignore_nans=True)
     bpe_results.final_innovs = cur_results.innovs.copy()
-    bpe_results.final_params = cur_results.params.copy()  # type: ignore[union-attr]
+    bpe_results.final_params = cur_results.params.copy()
     bpe_results.final_cost   = cur_results.cost  # fmt: skip
     bpe_results.costs.append(cur_results.cost)
 

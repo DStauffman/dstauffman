@@ -7,7 +7,10 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
+
 import doctest
+from typing import Literal, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY
@@ -17,8 +20,24 @@ from dstauffman.nubs import ncjit
 if HAVE_NUMPY:
     import numpy as np
 
+if TYPE_CHECKING:
+    _N = np.typing.NDArray[np.float64]
+    _M = np.typing.NDArray[np.float64]  # 2D
+
 #%% Functions - calculate_kalman_gain
-def calculate_kalman_gain(P, H, R, *, use_inverse=False, return_innov_cov=False):
+@overload
+def calculate_kalman_gain(P: _M, H: _M, R: _M, *, use_inverse: bool, return_innov_cov: Literal[False] = ...) -> _M:
+    ...
+
+
+@overload
+def calculate_kalman_gain(P: _M, H: _M, R: _M, *, use_inverse: bool, return_innov_cov: Literal[True]) -> Tuple[_M, _M]:
+    ...
+
+
+def calculate_kalman_gain(
+    P: _M, H: _M, R: _M, *, use_inverse: bool = False, return_innov_cov: bool = False
+) -> Union[_M, Tuple[_M, _M]]:
     r"""
     Calculates K, the Kalman Gain matrix.
 
@@ -69,7 +88,7 @@ def calculate_kalman_gain(P, H, R, *, use_inverse=False, return_innov_cov=False)
 
 
 @ncjit
-def calculate_kalman_gain_opt(P, H, R):
+def calculate_kalman_gain_opt(P: _M, H: _M, R: _M) -> Tuple[_M, _M]:
     r"""Calculate the Kalman gain, in a way optimized for use with numba."""
     Pz = H @ P @ H.T + R
     K = mat_divide(Pz.T, (P @ H.T).T).T
@@ -78,7 +97,7 @@ def calculate_kalman_gain_opt(P, H, R):
 
 #%% Functions - calculate_prediction
 @ncjit
-def calculate_prediction(H, state, const=None):
+def calculate_prediction(H: _M, state: _N, const: _N = None) -> _N:
     r"""
     Calculates u, the measurement prediction.
 
@@ -118,7 +137,7 @@ def calculate_prediction(H, state, const=None):
 
 #%% Functions - calculate_innovation
 @ncjit
-def calculate_innovation(u_meas, u_pred):
+def calculate_innovation(u_meas: _N, u_pred: _N) -> _N:
     r"""
     Calculates z, the Kalman Filter innovation.
 
@@ -155,7 +174,7 @@ def calculate_innovation(u_meas, u_pred):
 
 #%% Functions - calculate_normalized_innovation
 @ncjit
-def calculate_normalized_innovation(z, Pz, use_inverse=False):
+def calculate_normalized_innovation(z: _N, Pz: _M, use_inverse: bool = False) -> _N:
     r"""
     Calculates nu, the Normalized Kalman Filter Innovation.
 
@@ -191,12 +210,12 @@ def calculate_normalized_innovation(z, Pz, use_inverse=False):
     """
     if use_inverse:
         return np.linalg.inv(Pz) @ z
-    return mat_divide(Pz, z)
+    return mat_divide(Pz, z)  # type: ignore[no-any-return]
 
 
 #%% Functions - calculate_delta_state
 @ncjit
-def calculate_delta_state(K, z):
+def calculate_delta_state(K: _M, z: _N) -> _N:
     r"""
     Calculates dx, the delta state for a given measurement.
 
@@ -227,7 +246,7 @@ def calculate_delta_state(K, z):
 
 
 #%% Functions - propagate_covariance
-def propagate_covariance(P, phi, Q, *, gamma=None, inplace=True):
+def propagate_covariance(P: _M, phi: _M, Q: _M, *, gamma: _M = None, inplace: bool = True) -> _M:
     r"""
     Propagates the covariance forward in time.
 
@@ -277,7 +296,7 @@ def propagate_covariance(P, phi, Q, *, gamma=None, inplace=True):
 
 
 @ncjit
-def propagate_covariance_opt(P, phi, Q, gamma=None):
+def propagate_covariance_opt(P: _M, phi: _M, Q: _M, gamma: _M = None) -> None:
     r"""Propagate the covariance in time, in a way optimized for use with numba."""
     if gamma is None:
         P[:] = phi @ P @ phi.T + Q
@@ -286,7 +305,7 @@ def propagate_covariance_opt(P, phi, Q, gamma=None):
 
 
 #%% Functions - update_covariance
-def update_covariance(P, K, H, *, inplace=True):
+def update_covariance(P: _M, K: _M, H: _M, *, inplace: bool = True) -> _M:
     r"""
     Updates the covariance for a given measurement.
 
@@ -324,7 +343,7 @@ def update_covariance(P, K, H, *, inplace=True):
     -0.05
 
     """
-    out = (np.eye(*P.shape) - K @ H) @ P
+    out = (np.eye(P.shape[0], P.shape[1]) - K @ H) @ P
     if inplace:
         P[:] = out
         return P
@@ -332,9 +351,9 @@ def update_covariance(P, K, H, *, inplace=True):
 
 
 @ncjit
-def update_covariance_opt(P, K, H):
+def update_covariance_opt(P: _M, K: _M, H: _M) -> None:
     r"""Propagate the covariance in time, in a way optimized for use with numba."""
-    P[:] = (np.eye(*P.shape) - K @ H) @ P
+    P[:] = (np.eye(P.shape[0], P.shape[1]) - K @ H) @ P
 
 
 #%% Unit Test

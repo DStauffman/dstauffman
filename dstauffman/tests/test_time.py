@@ -359,7 +359,7 @@ class Test_convert_date(unittest.TestCase):
 
     @unittest.skipIf(not dcs.HAVE_MPL, "Skipping due to missing matplotlib dependency.")
     def test_seconds_vectors(self) -> None:
-        dates = np.array([self.seconds, -inf, inf, nan], dtype=float)
+        dates = np.array([self.seconds, -inf, inf, nan])
         out = dcs.convert_date(dates, "matplotlib", self.date_zero, old_form="sec")
         np.testing.assert_array_equal(out, np.array([self.matplotlib, -inf, inf, nan]))
         out = dcs.convert_date(dates, "numpy", self.date_zero, old_form="sec")
@@ -367,7 +367,7 @@ class Test_convert_date(unittest.TestCase):
 
     @unittest.skipIf(not dcs.HAVE_MPL, "Skipping due to missing matplotlib dependency.")
     def test_mpl_vectors(self) -> None:
-        dates = np.array([self.matplotlib, -inf, inf, nan], dtype=float)
+        dates = np.array([self.matplotlib, -inf, inf, nan])
         out = dcs.convert_date(dates, "sec", self.date_zero, old_form="matplotlib")
         np.testing.assert_array_almost_equal(out, np.array([self.seconds, -inf, inf, nan]))
         out = dcs.convert_date(dates, "numpy", self.date_zero, old_form="matplotlib")
@@ -375,7 +375,7 @@ class Test_convert_date(unittest.TestCase):
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_numpy_floats_and_ints(self) -> None:
-        times1 = np.arange(10, dtype=float)
+        times1 = np.arange(10.0)
         times2 = np.arange(10, dtype=int)
         exp = self.numpy + 10**9 * np.arange(10).astype(np.int64)
         out = dcs.convert_date(times1, "numpy", self.datetime)
