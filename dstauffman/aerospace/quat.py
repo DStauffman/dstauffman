@@ -22,8 +22,11 @@ from dstauffman.aerospace.quat_opt import quat_to_dcm
 if HAVE_NUMPY:
     import numpy as np
 
-    if TYPE_CHECKING:
-        from numpy.typing import ArrayLike
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
+
+    _N = np.typing.NDArray[np.float64]
+    _Q = np.typing.NDArray[np.float64]
 
 #%% Loggers
 logger = logging.getLogger(__name__)
@@ -76,7 +79,7 @@ def unsuppress_quat_checks() -> None:
 
 #%% Functions - quat_assertions
 def quat_assertions(
-    quat: np.ndarray, *, precision: float = 1e-12, skip_assertions: bool = False, allow_nans: bool = False
+    quat: _Q, *, precision: float = 1e-12, skip_assertions: bool = False, allow_nans: bool = False
 ) -> None:
     r"""
     Check assertions about valid quaternions.
@@ -160,7 +163,7 @@ def quat_assertions(
 
 
 #%% Functions - enforce_pos_scalar
-def enforce_pos_scalar(quat: np.ndarray, inplace: bool = False) -> np.ndarray:
+def enforce_pos_scalar(quat: _Q, inplace: bool = False) -> _Q:
     r"""
     Enforces the standard of a positive scalar component.
 
@@ -204,7 +207,7 @@ def enforce_pos_scalar(quat: np.ndarray, inplace: bool = False) -> np.ndarray:
 
 
 #%% Functions - qrot
-def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
+def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> _Q:
     r"""
     Construct a quaternion expressing a rotation about a single axis.
 
@@ -275,7 +278,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
 
 
 #%% Functions - quat_from_axis_angle
-def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndarray:
+def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> _Q:
     r"""
     Construct a quaternion expressing the given rotations about the given axes.
 
@@ -341,7 +344,7 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> np.ndar
 
 
 #%% Functions - quat_angle_diff
-def quat_angle_diff(quat1: np.ndarray, quat2: np.ndarray, **kwargs) -> Tuple[np.ndarray, np.ndarray]:
+def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs) -> Tuple[_Q, _Q]:
     r"""
     Calculate the angular difference between two quaternions.
 
@@ -443,7 +446,7 @@ def quat_angle_diff(quat1: np.ndarray, quat2: np.ndarray, **kwargs) -> Tuple[np.
 
 
 #%% Functions - quat_from_euler
-def quat_from_euler(angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs) -> np.ndarray:
+def quat_from_euler(angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs) -> _Q:
     r"""
     Convert set(s) of euler angles to quaternion(s).
 
@@ -544,7 +547,7 @@ def quat_from_euler(angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs
 
 
 #%% Functions - quat_interp
-def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: bool = True, **kwargs) -> np.ndarray:
+def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs) -> _Q:
     r"""
     Interpolate quaternions from a monotonic time series of quaternions.
 
@@ -683,7 +686,7 @@ def quat_interp(time: np.ndarray, quat: np.ndarray, ti: np.ndarray, inclusive: b
 
 
 #%% Functions - quat_inv
-def quat_inv(q1: np.ndarray, inplace: bool = False, **kwargs) -> np.ndarray:
+def quat_inv(q1: _Q, inplace: bool = False, **kwargs) -> _Q:
     r"""
     Return the inverse of a normalized quaternions.
 
@@ -738,7 +741,7 @@ def quat_inv(q1: np.ndarray, inplace: bool = False, **kwargs) -> np.ndarray:
 
 
 #%% Functions - quat_mult
-def quat_mult(a: np.ndarray, b: np.ndarray, **kwargs) -> np.ndarray:
+def quat_mult(a: _Q, b: _Q, **kwargs) -> _Q:
     r"""
     Multiply quaternions together.
 
@@ -838,7 +841,7 @@ def quat_mult(a: np.ndarray, b: np.ndarray, **kwargs) -> np.ndarray:
 
 
 #%% Functions - quat_norm
-def quat_norm(x: np.ndarray, /, inplace: bool = False, **kwargs) -> np.ndarray:
+def quat_norm(x: _Q, /, inplace: bool = False, **kwargs) -> _Q:
     r"""
     Normalize each column of the input matrix.
 
@@ -882,7 +885,7 @@ def quat_norm(x: np.ndarray, /, inplace: bool = False, **kwargs) -> np.ndarray:
 
 
 #%% Functions - quat_prop
-def quat_prop(quat: np.ndarray, delta_ang: np.ndarray, *, renorm: bool = True, **kwargs) -> np.ndarray:
+def quat_prop(quat: _Q, delta_ang: _N, *, renorm: bool = True, **kwargs) -> _Q:
     r"""
     Approximate propagation of a quaternion using a small delta angle.
 
@@ -945,7 +948,7 @@ def quat_prop(quat: np.ndarray, delta_ang: np.ndarray, *, renorm: bool = True, *
 
 
 #%% Functions - quat_times_vector
-def quat_times_vector(quat: np.ndarray, v: np.ndarray) -> np.ndarray:
+def quat_times_vector(quat: _Q, v: _N) -> _Q:
     r"""
     Multiply quaternion(s) against vector(s).
 
@@ -996,7 +999,7 @@ def quat_times_vector(quat: np.ndarray, v: np.ndarray) -> np.ndarray:
 
 
 #%% Functions - quat_to_euler
-def quat_to_euler(quat: np.ndarray, seq: Optional[Union[Tuple[int, int, int], List[int], np.ndarray]] = None, **kwargs) -> np.ndarray:
+def quat_to_euler(quat: _Q, seq: Optional[Union[Tuple[int, int, int], List[int], _N]] = None, **kwargs) -> _N:
     r"""
     Convert quaternion to Euler angles for one of 6 input angle sequences.
 

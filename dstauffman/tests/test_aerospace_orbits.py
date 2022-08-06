@@ -344,12 +344,12 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
                                 oe.circular = True if e == 0 else False
                                 (r, v) = space.oe_2_rv(oe)
                                 oe2 = space.rv_2_oe(r, v)
-                                self.assertAlmostEqual(oe.a, oe2.a, msg="a is different")  # type: ignore[arg-type]
-                                self.assertAlmostEqual(oe.e, oe2.e, msg="e is different")  # type: ignore[arg-type]
-                                self.assertAlmostEqual(oe.i, oe2.i, msg="i is different")  # type: ignore[arg-type]
-                                self.assertAlmostEqual(oe.w, oe2.w, msg="w is different")  # type: ignore[arg-type]
-                                self.assertAlmostEqual(oe.W, oe2.W, msg="W is different")  # type: ignore[arg-type]
-                                self.assertAlmostEqual(oe.vo, oe2.vo, msg="nu is different")  # type: ignore[arg-type]
+                                self.assertAlmostEqual(oe.a, oe2.a, msg="a is different")  # type: ignore[misc]
+                                self.assertAlmostEqual(oe.e, oe2.e, msg="e is different")  # type: ignore[misc]
+                                self.assertAlmostEqual(oe.i, oe2.i, msg="i is different")  # type: ignore[misc]
+                                self.assertAlmostEqual(oe.w, oe2.w, msg="w is different")  # type: ignore[misc]
+                                self.assertAlmostEqual(oe.W, oe2.W, msg="W is different")  # type: ignore[misc]
+                                self.assertAlmostEqual(oe.vo, oe2.vo, msg="nu is different")  # type: ignore[misc]
 
 
 #%% aerospace.advance_elements

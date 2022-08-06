@@ -103,7 +103,7 @@ class Test_aerospace_quat_assertions(unittest.TestCase):
 
     def test_bad3(self) -> None:
         with self.assertRaises(AssertionError):
-            space.quat_assertions(self.q8)
+            space.quat_assertions(self.q8)  # type: ignore[arg-type]
 
     def test_bad4(self) -> None:
         with self.assertRaises(AssertionError):

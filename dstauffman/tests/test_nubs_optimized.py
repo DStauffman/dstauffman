@@ -136,9 +136,9 @@ class Test_prob_to_rate_opt(unittest.TestCase):
 
     def test_scalar(self) -> None:
         rate = nubs.prob_to_rate_opt(self.prob[15], self.time)
-        self.assertAlmostEqual(rate, self.rate[15])  # type: ignore[arg-type]
+        self.assertAlmostEqual(rate, self.rate[15])
         rate = nubs.prob_to_rate_opt(float(self.prob[15]), self.time)
-        self.assertAlmostEqual(rate, float(self.rate[15]))  # type: ignore[arg-type]
+        self.assertAlmostEqual(rate, float(self.rate[15]))
         rate = nubs.prob_to_rate_opt(1, 1)
         self.assertEqual(rate, np.inf)
         rate = nubs.prob_to_rate_opt(0, 1)
@@ -184,9 +184,9 @@ class Test_rate_to_prob_opt(unittest.TestCase):
 
     def test_scalar(self) -> None:
         prob = nubs.rate_to_prob_opt(self.rate[20], self.time)
-        self.assertAlmostEqual(prob, self.prob[20])  # type: ignore[arg-type]
+        self.assertAlmostEqual(prob, self.prob[20])
         prob = nubs.rate_to_prob_opt(float(self.rate[20]), self.time)
-        self.assertAlmostEqual(prob, float(self.prob[20]))  # type: ignore[arg-type]
+        self.assertAlmostEqual(prob, float(self.prob[20]))
         prob = nubs.rate_to_prob_opt(0, 1)
         self.assertEqual(prob, 0.0)
         prob = nubs.rate_to_prob_opt(np.inf, 1)
@@ -198,7 +198,7 @@ class Test_rate_to_prob_opt(unittest.TestCase):
 
     def test_infinity(self) -> None:
         prob = nubs.rate_to_prob_opt(np.inf, 1)
-        self.assertAlmostEqual(prob, 1.0)  # type: ignore[arg-type]
+        self.assertAlmostEqual(prob, 1.0)
 
     @unittest.skipIf(not _HAVE_NUMBA, "Skipping due to missing numba dependency.")
     def test_circular(self) -> None:
