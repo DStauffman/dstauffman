@@ -83,6 +83,7 @@ opts1.sub_plots = True
 opts1.date_zero = date_zero
 opts1.rms_xmin  = 4
 opts1.rms_xmax  = 20
+opts1.time_unit = "min"
 
 opts2           = plot.Opts(opts1).convert_dates("numpy")
 opts2.case_name = "Test 2: dates-sec"

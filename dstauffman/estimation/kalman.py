@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import Literal, overload, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import HAVE_NUMPY

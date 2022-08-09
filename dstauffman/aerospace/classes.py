@@ -228,7 +228,13 @@ class KfInnov(Frozen):
         ...
 
     def chop(
-        self, ti: Optional[_Time] = None, tf: Optional[_Time] = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
+        self,
+        ti: Optional[_Time] = None,
+        tf: Optional[_Time] = None,
+        *,
+        include_last: bool = True,
+        inplace: bool = False,
+        return_ends: bool = False,
     ) -> Union[KfInnov, Tuple[KfInnov, KfInnov, KfInnov]]:
         r"""Chops the KfInnov data structure to the given time bounds."""
         exclude = frozenset({"name", "chan", "units"})
@@ -459,7 +465,13 @@ class Kf(Frozen):
         ...
 
     def chop(
-        self, ti: Optional[_Time] = None, tf: Optional[_Time] = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
+        self,
+        ti: Optional[_Time] = None,
+        tf: Optional[_Time] = None,
+        *,
+        include_last: bool = True,
+        inplace: bool = False,
+        return_ends: bool = False,
     ) -> Union[Kf, Tuple[Kf, Kf, Kf]]:
         r"""Chops the Kf structure to the given time bounds."""
         exclude = frozenset({"name", "chan", "active", "istate"} | self._subclasses)
@@ -626,7 +638,13 @@ class KfRecord(Frozen):
         ...
 
     def chop(
-        self, ti: Optional[_Time] = None, tf: Optional[_Time] = None, *, include_last: bool = True, inplace: bool = False, return_ends: bool = False
+        self,
+        ti: Optional[_Time] = None,
+        tf: Optional[_Time] = None,
+        *,
+        include_last: bool = True,
+        inplace: bool = False,
+        return_ends: bool = False,
     ) -> Union[KfRecord, Tuple[KfRecord, KfRecord, KfRecord]]:
         r"""Chops the KfRecord structure to the given time bounds."""
         exclude: FrozenSet[str] = frozenset({})

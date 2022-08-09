@@ -95,7 +95,14 @@ def _frozen(set_: Callable) -> Callable:
 
 
 #%% Methods - save_hdf5
-def save_hdf5(self, filename: Optional[Path] = None, *, meta: Optional[Dict[str, Any]] = None, exclusions: Optional[_Sets] = None, **kwargs) -> None:
+def save_hdf5(
+    self,
+    filename: Optional[Path] = None,
+    *,
+    meta: Optional[Dict[str, Any]] = None,
+    exclusions: Optional[_Sets] = None,
+    **kwargs,
+) -> None:
     r"""
     Save the object to disk as an HDF5 file.
 
@@ -309,7 +316,13 @@ def load_pickle(cls: Type[_T], filename: Optional[Path] = None) -> _T:  # pylint
 
 #%% Methods - save_method
 def save_method(
-    self, filename: Optional[Path] = None, use_hdf5: bool = True, *, meta: Optional[Dict[str, Any]] = None, exclusions: Optional[_Sets] = None, **kwargs
+    self,
+    filename: Optional[Path] = None,
+    use_hdf5: bool = True,
+    *,
+    meta: Optional[Dict[str, Any]] = None,
+    exclusions: Optional[_Sets] = None,
+    **kwargs,
 ) -> None:
     r"""
     Save the object to disk.
@@ -564,7 +577,9 @@ def chop_time(
 
 
 #%% Functions - subsample_class
-def subsample_class(self, skip: int = 30, start: int = 0, skip_fields: Union[FrozenSet[str], Optional[Set[str]]] = None) -> None:
+def subsample_class(
+    self, skip: int = 30, start: int = 0, skip_fields: Union[FrozenSet[str], Optional[Set[str]]] = None
+) -> None:
     r"""
     Subsamples the class instance to every `skip` data point.
 

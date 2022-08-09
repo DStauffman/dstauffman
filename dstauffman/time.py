@@ -635,7 +635,10 @@ def convert_num_dt_to_np(dt, /, units="sec", np_units=NP_TIMEDELTA_FORM):
 
 #%% Functions - get_delta_time_str
 def get_delta_time_str(
-    start_time: Union[datetime.datetime, datetime.timedelta], final_time: Optional[datetime.datetime] = None, *, format_: str = "%H:%M:%S"
+    start_time: Union[datetime.datetime, datetime.timedelta],
+    final_time: Optional[datetime.datetime] = None,
+    *,
+    format_: str = "%H:%M:%S",
 ) -> str:
     r"""
     Determine the elapsed time in a form useful for logging.

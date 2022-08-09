@@ -674,7 +674,11 @@ def _write_makefile(
 
 #%% Functions - create_fortran_unit_tests
 def create_fortran_unit_tests(
-    folder: Path, *, template: Optional[str] = None, external_sources: Optional[Iterable[str]] = None, header: Optional[str] = None
+    folder: Path,
+    *,
+    template: Optional[str] = None,
+    external_sources: Optional[Iterable[str]] = None,
+    header: Optional[str] = None,
 ) -> None:
     r"""
     Parses the given folder for Fortran unit test files to build programs that will execute them.

@@ -37,6 +37,7 @@ def _assert_never(value: NoReturn) -> NoReturn:
     r"""Static and Runtime checker for possible options."""
     raise ValueError(f"This code should never be reached, got: {value}")
 
+
 #%% Functions - bsl
 def bsl(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
     r"""
@@ -364,12 +365,11 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
     return prn
 
 
-#%% Functions - gps_to_datetime@overload
+#%% Functions - gps_to_datetime
 @overload
-def gps_to_datetime(
-    week: Union[int, _I], time: Union[int, float, _I, _N]
-) -> Union[datetime.datetime, List[datetime.datetime]]:
+def gps_to_datetime(week: Union[int, _I], time: Union[int, float, _I, _N]) -> Union[datetime.datetime, List[datetime.datetime]]:
     ...
+
 
 @overload
 def gps_to_datetime(
@@ -462,24 +462,34 @@ def gps_to_datetime(
 
 #%% Functions - gps_to_utc_datetime
 @overload
-def gps_to_utc_datetime(week: Union[int, _I], time: Union[int, float, _I, _N]) -> Union[datetime.datetime, List[datetime.datetime]]:
-    ...
-
-
-@overload
 def gps_to_utc_datetime(
-    week: Union[int, _I], time: Union[int, float, _I, _N], gps_to_utc_offset: Optional[Union[int, _I]], form: Literal["datetime"] = ...
+    week: Union[int, _I], time: Union[int, float, _I, _N]
 ) -> Union[datetime.datetime, List[datetime.datetime]]:
     ...
 
 
 @overload
-def gps_to_utc_datetime(week: Union[int, _I], time: Union[int, float, _I, _N], gps_to_utc_offset: Optional[Union[int, _I]], form: Literal["numpy"]) -> Union[np.datetime64, _D]:
+def gps_to_utc_datetime(
+    week: Union[int, _I],
+    time: Union[int, float, _I, _N],
+    gps_to_utc_offset: Optional[Union[int, _I]],
+    form: Literal["datetime"] = ...,
+) -> Union[datetime.datetime, List[datetime.datetime]]:
+    ...
+
+
+@overload
+def gps_to_utc_datetime(
+    week: Union[int, _I], time: Union[int, float, _I, _N], gps_to_utc_offset: Optional[Union[int, _I]], form: Literal["numpy"]
+) -> Union[np.datetime64, _D]:
     ...
 
 
 def gps_to_utc_datetime(
-    week: Union[int, _I], time: Union[int, float, _I, _N], gps_to_utc_offset: Optional[Union[int, _I]] = None, form: Literal["datetime", "numpy"] = "datetime"
+    week: Union[int, _I],
+    time: Union[int, float, _I, _N],
+    gps_to_utc_offset: Optional[Union[int, _I]] = None,
+    form: Literal["datetime", "numpy"] = "datetime",
 ) -> Union[datetime.datetime, List[datetime.datetime], np.datetime64, _D]:
     r"""
     Converts a GPS week and time to UTC time as a datetime.

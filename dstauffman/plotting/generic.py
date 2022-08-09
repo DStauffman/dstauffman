@@ -1560,7 +1560,7 @@ def make_bar_plot(
     second_units=None,
     ylabel=None,
     data_as_rows: bool = True,
-    extra_plotter: Optional[_ExtraPlotter ]= None,
+    extra_plotter: Optional[_ExtraPlotter] = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     fig_ax: Optional[Tuple[Figure, Axis]] = None,

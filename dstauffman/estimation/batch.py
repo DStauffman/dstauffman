@@ -560,7 +560,7 @@ def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: Dict[str
             model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, cost_args=opti_opts.cost_args, model_args=model_args
         )
     except Exception as e:  # pylint: disable=broad-except
-        return MultipassExceptionWrapper(e)  # type: ignore[arg-type]
+        return MultipassExceptionWrapper(e)
     return innovs
 
 

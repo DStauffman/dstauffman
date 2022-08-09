@@ -630,7 +630,10 @@ def resolve_name(name: str, force_win: Optional[bool] = None, rep_token: str = "
 
 #%% Functions - storefig
 def storefig(
-    fig: _FigOrListFig, folder: Optional[Union[str, Path]] = None, plot_type: Union[str, List[str]] = "png", show_warn: bool = True
+    fig: _FigOrListFig,
+    folder: Optional[Union[str, Path]] = None,
+    plot_type: Union[str, List[str]] = "png",
+    show_warn: bool = True,
 ) -> None:
     r"""
     Store the specified figures in the specified folder and with the specified plot type(s).
@@ -1923,7 +1926,10 @@ def save_figs_to_pdf(figs: Optional[Union[Figure, List[Figure]]] = None, filenam
 
 #%% Functions - save_images_to_pdf
 def save_images_to_pdf(
-    figs: Optional[Union[Figure, List[Figure]]] = None, folder: Optional[Path] = None, plot_type: str = "png", filename: Path = Path("figs.pdf")
+    figs: Optional[Union[Figure, List[Figure]]] = None,
+    folder: Optional[Path] = None,
+    plot_type: str = "png",
+    filename: Path = Path("figs.pdf"),
 ):
     r"""
     Uses figure names to find the already saved images and combine them into a PDF file.

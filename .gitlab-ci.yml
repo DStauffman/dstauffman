@@ -199,17 +199,15 @@ coverage_report:
   stage: Coverage
   needs: ["unit_test", "core_test", "no_numba_test", "import_test"]
   dependencies: ["unit_test", "core_test", "no_numba_test", "import_test"]
+  coverage: '/(?i)total.*? (100(?:\.0+)?\%|[1-9]?\d(?:\.\d+)?\%)$/'
   artifacts:
     paths:
     - $DCS_TESTS_DIR/coverage_html_report/*
     expire_in: 1 week
     reports:
-      cobertura: $DCS_TESTS_DIR/coverage_html_report/coverage.xml
-    # For GitLab v15.0 (available in 14.10, but not 14.9)
-    #  coverage_report:
-    #    coverage_format: cobertura
-    #    path: $DCS_TESTS_DIR/coverage_html_report/coverage.xml
-  coverage: '/TOTAL.*\s([.\d]+)%/'
+      coverage_report:
+        coverage_format: cobertura
+        path: $DCS_TESTS_DIR/coverage_html_report/coverage.xml
   script:
   - source static/bin/activate
   - cd $DCS_TESTS_DIR

@@ -78,9 +78,7 @@ def unsuppress_quat_checks() -> None:
 
 
 #%% Functions - quat_assertions
-def quat_assertions(
-    quat: _Q, *, precision: float = 1e-12, skip_assertions: bool = False, allow_nans: bool = False
-) -> None:
+def quat_assertions(quat: _Q, *, precision: float = 1e-12, skip_assertions: bool = False, allow_nans: bool = False) -> None:
     r"""
     Check assertions about valid quaternions.
 
@@ -792,7 +790,7 @@ def quat_mult(a: _Q, b: _Q, **kwargs) -> _Q:
     # check for null case
     if a.size * b.size == 0:
         if min(a.shape[0], b.shape[0]) == 0:
-            c: np.typing.NDArray[np.float64] = np.array([])
+            c: _Q = np.array([])
         else:
             if a.size == 0:
                 c = np.zeros(a.shape)

@@ -8,6 +8,8 @@ Notes
 """
 
 #%% Imports
+from __future__ import annotations
+
 import contextlib
 import doctest
 import logging
@@ -119,7 +121,6 @@ def fix_rollover(data: _N, roll: float, axis: int) -> _N:
     ...
 
 
-
 @overload
 def fix_rollover(data: _I, roll: int, axis: Optional[int], check_accel: bool, **kwargs) -> _I:
     ...
@@ -130,7 +131,9 @@ def fix_rollover(data: _N, roll: float, axis: Optional[int], check_accel: bool, 
     ...
 
 
-def fix_rollover(data: Union[_I, _N], roll: Union[int, float], axis: Optional[int] = None, check_accel: bool = False, **kwargs) -> Union[_I, _N]:
+def fix_rollover(
+    data: Union[_I, _N], roll: Union[int, float], axis: Optional[int] = None, check_accel: bool = False, **kwargs
+) -> Union[_I, _N]:
     r"""
     Unrolls data that has finite ranges and rollovers.
 
@@ -257,12 +260,32 @@ def remove_outliers(x: ArrayLike, /, sigma: float) -> _N:
 
 
 @overload
-def remove_outliers(x: ArrayLike, /, sigma: float, axis: Optional[int], *, num_iters: int, return_stats: Literal[False] = ..., inplace: bool, hardmax: Optional[float]) -> _N:
+def remove_outliers(
+    x: ArrayLike,
+    /,
+    sigma: float,
+    axis: Optional[int],
+    *,
+    num_iters: int,
+    return_stats: Literal[False] = ...,
+    inplace: bool,
+    hardmax: Optional[float],
+) -> _N:
     ...
 
 
 @overload
-def remove_outliers(x: ArrayLike, /, sigma: float, axis: Optional[int], *, num_iters: int, return_stats: Literal[True], inplace: bool, hardmax: Optional[float]) -> Tuple[_N, int, _F, _F]:
+def remove_outliers(
+    x: ArrayLike,
+    /,
+    sigma: float,
+    axis: Optional[int],
+    *,
+    num_iters: int,
+    return_stats: Literal[True],
+    inplace: bool,
+    hardmax: Optional[float],
+) -> Tuple[_N, int, _F, _F]:
     ...
 
 
@@ -275,7 +298,8 @@ def remove_outliers(
     num_iters: int = 3,
     return_stats: bool = False,
     inplace: bool = False,
-    hardmax: Optional[float] = None) -> Union[_N, Tuple[_N, int, _F, _F]]:
+    hardmax: Optional[float] = None,
+) -> Union[_N, Tuple[_N, int, _F, _F]]:
     r"""
     Removes the outliers from a data set based on the RMS of the points in the set.
 

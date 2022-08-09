@@ -14,7 +14,7 @@ import logging
 import multiprocessing
 import sys
 import traceback
-from typing import Any, Callable, Iterable, List, Optional, Type, TYPE_CHECKING
+from typing import Any, Callable, Iterable, List, Optional, TYPE_CHECKING
 import unittest
 import warnings
 
@@ -39,16 +39,16 @@ logger = logging.getLogger(__name__)
 class MultipassExceptionWrapper:
     r"""Exception wrapper that can pass through multiprocessing calls and back to main."""
 
-    def __init__(self, ee: Type[BaseException]):
+    def __init__(self, ee: BaseException):
         # save exception
         self.ee = ee
         # save traceback
-        # Note: sys.exc_info: Union[Tuple[None, None, None], Tuple[Type[BaseException], Any, TracebackType]]
+        # Note: sys.exc_info: Union[Tuple[None, None, None], Tuple[BaseException, Any, TracebackType]]
         self.tb: Optional[TracebackType] = sys.exc_info()[2]
 
     def re_raise(self) -> None:
         r"""Re-raise a previously saved exception and traceback."""
-        raise self.ee.with_traceback(self.tb)  # type: ignore[call-arg, misc]
+        raise self.ee.with_traceback(self.tb)
 
 
 #%% Functions - parfor_wrapper
@@ -148,7 +148,7 @@ def parfor_wrapper(
                 LogLevel.L6,
                 "Error %i: %s\n%s",
                 i + 1,
-                err.ee.with_traceback(err.tb),  # type: ignore[call-arg]
+                err.ee.with_traceback(err.tb),
                 "\n".join(traceback.format_tb(err.tb)),
             )
     return results

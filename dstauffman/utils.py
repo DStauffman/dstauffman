@@ -1225,7 +1225,13 @@ def combine_per_year(data: Optional[np.ndarray], func: Optional[Callable[..., An
 
 
 #%% Functions - execute
-def execute(command: Union[str, List[str]], folder: Path, *, ignored_codes: Optional[Iterable[int]] = None, env: Optional[Dict[str, str]] = None):
+def execute(
+    command: Union[str, List[str]],
+    folder: Path,
+    *,
+    ignored_codes: Optional[Iterable[int]] = None,
+    env: Optional[Dict[str, str]] = None,
+):
     r"""
     Wrapper to subprocess that allows the screen to be updated for long running commands.
 
