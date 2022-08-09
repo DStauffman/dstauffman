@@ -145,11 +145,7 @@ def parfor_wrapper(
         logger.log(LogLevel.L2, "There were %i error(s) in the processing.", len(errors))
         for (i, err) in enumerate(errors):
             logger.log(
-                LogLevel.L6,
-                "Error %i: %s\n%s",
-                i + 1,
-                err.ee.with_traceback(err.tb),
-                "\n".join(traceback.format_tb(err.tb)),
+                LogLevel.L6, "Error %i: %s\n%s", i + 1, err.ee.with_traceback(err.tb), "\n".join(traceback.format_tb(err.tb))
             )
     return results
 

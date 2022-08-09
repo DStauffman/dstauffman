@@ -1340,10 +1340,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     _print_divider(new_line, level=LogLevel.L3)
     logger.log(LogLevel.L3, "Running initial simulation.")
     cur_results.innovs = _function_wrapper(
-        model_func=opti_opts.model_func,
-        cost_func=opti_opts.cost_func,
-        model_args=model_args,
-        cost_args=opti_opts.cost_args,
+        model_func=opti_opts.model_func, cost_func=opti_opts.cost_func, model_args=model_args, cost_args=opti_opts.cost_args
     )
     bpe_results.num_evals += 1
 
@@ -1395,9 +1392,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
         if grad_dot_step > 0 and iter_count > 1:
             cur_results.trust_rad += opti_opts.grow_radius
             logger.log(
-                LogLevel.L8,
-                "Old step still in descent direction, so expand current trust_radius to %s.",
-                cur_results.trust_rad,
+                LogLevel.L8, "Old step still in descent direction, so expand current trust_radius to %s.", cur_results.trust_rad
             )
 
         # calculate the delta parameter step to try on the next iteration
@@ -1433,11 +1428,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
 
     # display if this converged out timed out on iteration steps
     if not convergence and not failed:
-        logger.log(
-            LogLevel.L5,
-            "Stopped iterating due to hitting the max number of iterations: %s.",
-            opti_opts.max_iters,
-        )
+        logger.log(LogLevel.L5, "Stopped iterating due to hitting the max number of iterations: %s.", opti_opts.max_iters)
 
     # run an optional final function before doing the final simulation
     if opti_opts.final_func is not None:

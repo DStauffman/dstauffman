@@ -1786,16 +1786,7 @@ def linear_interp(x, xp, yp, *, left=None, right=None, assume_sorted=False, extr
 
 #%% linear_lowpass_interp
 def linear_lowpass_interp(
-    x,
-    xp,
-    yp,
-    *,
-    assume_sorted=False,
-    extrapolate=False,
-    filt_order=2,
-    filt_freq=0.01,
-    filt_samp=1.0,
-    **kwargs,
+    x, xp, yp, *, assume_sorted=False, extrapolate=False, filt_order=2, filt_freq=0.01, filt_samp=1.0, **kwargs
 ):
     r"""
     Interpolates a function by holding at the most recent value.
