@@ -14,7 +14,8 @@ from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_DS, HAVE_NUMPY, 
                            NP_DATETIME_FORM, NP_TIMEDELTA_FORM, NP_INT64_PER_SEC, NP_ONE_SECOND, \
                            NP_ONE_MINUTE, NP_ONE_HOUR, NP_ONE_DAY
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
-from .matlab    import load_matlab
+from .latex     import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
+from .matlab    import load_matlab, orth, subspace, mat_divide
 from .multipass import MultipassExceptionWrapper, parfor_wrapper
 from .parser    import main, parse_wrapper, parse_commands, execute_command, \
                            process_command_line_options
@@ -23,6 +24,11 @@ from .paths     import get_root_dir, get_tests_dir, get_data_dir, get_images_dir
 from .repos     import run_docstrings, run_unittests, run_pytests, run_coverage, find_repo_issues, \
                            delete_pyc, get_python_definitions, make_python_init, \
                            write_unit_test_templates
+from .stats     import convert_annual_to_monthly_probability, \
+                           convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
+                           rate_to_prob, annual_rate_to_monthly_probability, \
+                           monthly_probability_to_annual_rate, ar2mp, mp2ar, combine_sets, \
+                           bounded_normal_draw, rand_draw, ecdf
 from .time      import get_np_time_units, get_ymd_from_np, round_datetime, round_np_datetime, \
                            round_num_datetime, round_time, convert_date, convert_time_units, \
                            convert_datetime_to_np, convert_duration_to_np, convert_num_dt_to_np, \

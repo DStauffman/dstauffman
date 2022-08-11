@@ -12,9 +12,10 @@ from __future__ import annotations
 import doctest
 import unittest
 
+from nubs import ncjit
+
 from dstauffman import HAVE_NUMPY
 from dstauffman.aerospace.vectors import vec_cross
-from dstauffman.nubs import ncjit
 
 if HAVE_NUMPY:
     import numpy as np

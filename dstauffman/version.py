@@ -7,7 +7,7 @@ Notes
 """
 
 #%% Constants
-version_info = (3, 2, 0)
+version_info = (3, 3, 0)
 
 # Below is data about the minor release history for potential use in deprecating older support.
 # For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html
@@ -21,6 +21,7 @@ Jul 28, 2021: dstauffman 2.5
 Feb 22, 2022: dstauffman 3.0
 May 24, 2022: dstauffman 3.1
 Aug 04, 2022: dstauffman 3.2
+Aug 10, 2022: dstauffman 3.3
 """
 
 # Historical notes:
@@ -35,3 +36,4 @@ Aug 04, 2022: dstauffman 3.2
 #      Split the slog portions of the code into a separate sub-repository.
 # v3.1 Added support for using poetry as your dependency manager.
 # v3.2 Change the way capture_output works internally and moved it to only be within slog.
+# v3.3 Move nubs and slog to be their own module level dependencies.

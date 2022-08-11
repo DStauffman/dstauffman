@@ -1,5 +1,5 @@
 r"""
-Test file for the `optimized` module of the "dstauffman" library.
+Test file for the `optimized` module of the "nubs" library.
 
 Notes
 -----
@@ -9,7 +9,7 @@ Notes
 #%% Imports
 import unittest
 
-import dstauffman.nubs as nubs
+import nubs as nubs
 
 try:
     import numba

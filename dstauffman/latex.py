@@ -11,8 +11,9 @@ from math import isinf, isnan
 from typing import List, Optional, Union
 import unittest
 
-from dstauffman import MONTHS_PER_YEAR
-from dstauffman.nubs import prob_to_rate_opt
+from nubs import prob_to_rate_opt
+
+from dstauffman.units import MONTHS_PER_YEAR
 
 
 #%% Functions - make_preamble
@@ -53,7 +54,7 @@ def make_preamble(
 
     Examples
     --------
-    >>> from dstauffman.health import make_preamble
+    >>> from dstauffman import make_preamble
     >>> out = make_preamble("Table Caption", "tab:this_label", "lcc")
     >>> print(out) # doctest: +ELLIPSIS
     ['\\begin{table}[H]', '    \\small', '    \\centering', '    \\caption{Table Caption}%', ...
@@ -125,7 +126,7 @@ def make_conclusion(*, use_mini: bool = False) -> List[str]:
 
     Examples
     --------
-    >>> from dstauffman.health import make_conclusion
+    >>> from dstauffman import make_conclusion
     >>> out = make_conclusion()
     >>> print(out)
     ['        \\bottomrule', '    \\end{tabular}', '\\end{table}', '']
@@ -163,7 +164,7 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
 
     Examples
     --------
-    >>> from dstauffman.health import bins_to_str_ranges
+    >>> from dstauffman import bins_to_str_ranges
     >>> import numpy as np
     >>> age_bins = np.array([0, 20, 40, 60, 100000], dtype=int)
     >>> age_strs = bins_to_str_ranges(age_bins)
@@ -227,7 +228,7 @@ def latex_str(
 
     Examples
     --------
-    >>> from dstauffman.health import latex_str
+    >>> from dstauffman import latex_str
     >>> value = 3.14159
     >>> digits = 3
     >>> value_str = latex_str(value, digits)
@@ -259,5 +260,5 @@ def latex_str(
 
 #%% Unit test
 if __name__ == "__main__":
-    unittest.main(module="dstauffman.tests.test_health_latex", exit=False)
+    unittest.main(module="dstauffman.tests.test_latex", exit=False)
     doctest.testmod(verbose=False)

@@ -13,8 +13,9 @@ import doctest
 from typing import List, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
+from nubs import ncjit
+
 from dstauffman import HAVE_NUMPY, unit
-from dstauffman.nubs import ncjit
 
 if HAVE_NUMPY:
     import numpy as np

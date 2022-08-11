@@ -9,9 +9,10 @@ Notes
 #%% Imports
 import unittest
 
+from nubs import HAVE_NUMBA
+
 from dstauffman import HAVE_NUMPY
 import dstauffman.aerospace as space
-from dstauffman.nubs import HAVE_NUMBA
 
 if HAVE_NUMPY:
     import numpy as np

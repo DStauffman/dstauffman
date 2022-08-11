@@ -25,8 +25,7 @@ except ModuleNotFoundError:
 
     parse = setuptools.version.pkg_resources.packaging.version.parse
 
-from dstauffman import Frozen, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, rms
-from dstauffman.health import bins_to_str_ranges
+from dstauffman import bins_to_str_ranges, Frozen, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, rms
 from dstauffman.plotting.plotting import Opts, setup_plots
 from dstauffman.plotting.support import (
     ColorMap,

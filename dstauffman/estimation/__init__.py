@@ -14,7 +14,6 @@ from .kalman   import calculate_kalman_gain, calculate_kalman_gain_opt, calculat
                           calculate_innovation, calculate_normalized_innovation, \
                           calculate_delta_state, propagate_covariance, propagate_covariance_opt, \
                           update_covariance, update_covariance_opt
-from .linalg   import orth, subspace, mat_divide
 from .smoother import bf_smoother
 from .support  import get_parameter, set_parameter
 # fmt: on

@@ -13,10 +13,10 @@ import doctest
 from typing import Optional, Tuple, TYPE_CHECKING
 import unittest
 
-from dstauffman import HAVE_NUMPY
+from nubs import ncjit
+
+from dstauffman import HAVE_NUMPY, mat_divide
 from dstauffman.aerospace import KfRecord
-from dstauffman.estimation.linalg import mat_divide
-from dstauffman.nubs import ncjit
 
 if HAVE_NUMPY:
     import numpy as np

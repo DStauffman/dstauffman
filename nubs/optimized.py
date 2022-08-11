@@ -15,18 +15,14 @@ import math
 from typing import Sequence, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman.nubs.passthrough import fake_jit, HAVE_NUMBA, ncjit, TARGET
+from nubs.passthrough import fake_jit, HAVE_NUMBA, HAVE_NUMPY, ncjit, TARGET
 
 if HAVE_NUMBA:
     from numba import float32, float64, int32, int64, vectorize
 else:
-    float32 = float64 = int32 = int64 = fake_jit
-    try:
+    if HAVE_NUMPY:
         from numpy import vectorize
-
-        HAVE_NUMPY = True
-    except ImportError:
-        HAVE_NUMPY = False
+    float32 = float64 = int32 = int64 = fake_jit
 
 if TYPE_CHECKING:
     from numpy import ndarray
@@ -52,7 +48,7 @@ def np_any(x: Sequence, /) -> bool:
 
     Examples
     --------
-    >>> from dstauffman.nubs import np_any
+    >>> from nubs import np_any
     >>> import numpy as np
     >>> x = np.zeros(1000, dtype=bool)
     >>> print(np_any(x))
@@ -88,7 +84,7 @@ def np_all(x: Sequence, /) -> bool:
 
     Examples
     --------
-    >>> from dstauffman.nubs import np_all
+    >>> from nubs import np_all
     >>> import numpy as np
     >>> x = np.ones(1000, dtype=bool)
     >>> print(np_all(x))
@@ -124,7 +120,7 @@ def issorted_opt(x: Sequence, /, descend: bool = False) -> bool:
 
     Examples
     --------
-    >>> from dstauffman.nubs import issorted_opt
+    >>> from nubs import issorted_opt
     >>> import numpy as np
     >>> x = np.array([1, 3, 3, 5, 7])
     >>> print(issorted_opt(x))
@@ -170,7 +166,7 @@ def prob_to_rate_opt(prob: _N, time: _N) -> _N:
 
     Examples
     --------
-    >>> from dstauffman.nubs import HAVE_NUMBA, prob_to_rate_opt
+    >>> from nubs import HAVE_NUMBA, prob_to_rate_opt
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
     >>> time = 3
@@ -222,7 +218,7 @@ def rate_to_prob_opt(rate: _N, time: _N) -> _N:
 
     Examples
     --------
-    >>> from dstauffman.nubs import HAVE_NUMBA, rate_to_prob_opt
+    >>> from nubs import HAVE_NUMBA, rate_to_prob_opt
     >>> import numpy as np
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
     >>> time = 1./12
@@ -267,7 +263,7 @@ def zero_divide(num: _N, den: _N) -> _N:
 
     Examples
     --------
-    >>> from dstauffman.nubs import zero_divide
+    >>> from nubs import zero_divide
     >>> print(zero_divide(1., .2))
     5.0
 
@@ -295,5 +291,5 @@ elif HAVE_NUMPY:
 
 #%% Unit test
 if __name__ == "__main__":
-    unittest.main(module="dstauffman.tests.test_nubs_optimized", exit=False)
+    unittest.main(module="nubs.tests.test_optimized", exit=False)
     doctest.testmod(verbose=False)

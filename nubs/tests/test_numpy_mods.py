@@ -1,5 +1,5 @@
 r"""
-Test file for the `numba` module of the "dstauffman" library.
+Test file for the `numba` module of the "nubs" library.
 
 Notes
 -----
@@ -9,10 +9,9 @@ Notes
 #%% Imports
 import unittest
 
-from dstauffman import HAVE_NUMPY
-import dstauffman.nubs as nubs
+import nubs as nubs
 
-if HAVE_NUMPY:
+if nubs.HAVE_NUMPY:
     import numpy as np
 
     pi = np.pi
@@ -41,7 +40,7 @@ class Test__reduce_shape(unittest.TestCase):
 
 
 #%% issorted_ascend
-@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@unittest.skipIf(not nubs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_issorted_ascend(unittest.TestCase):
     r"""
     Tests the issorted_ascend function with the following cases:
@@ -66,7 +65,7 @@ class Test_issorted_ascend(unittest.TestCase):
 
 
 #%% issorted_descend
-@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@unittest.skipIf(not nubs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_issorted_descend(unittest.TestCase):
     r"""
     Tests the issorted_descend function with the following cases:
@@ -91,7 +90,7 @@ class Test_issorted_descend(unittest.TestCase):
 
 
 #%% np_all_axis0, np_all_axis1, np_any_axis0, np_any_axis1
-@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+@unittest.skipIf(not nubs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_np_all_axis0(unittest.TestCase):
     r"""
     Tests the np_all_axis0 function with the following cases:

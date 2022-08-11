@@ -18,8 +18,7 @@ import unittest
 
 if platform.python_implementation() == "CPython":
     try:
-        # Try importing numba to determine if it is there.  Use this instead of HAVE_NUMBA from dstauffman
-        # to avoid any circular dependencies
+        # Try importing numba to determine if it is there.
         from numba import njit
 
         HAVE_NUMBA = True
@@ -27,6 +26,14 @@ if platform.python_implementation() == "CPython":
         HAVE_NUMBA = False
 else:
     HAVE_NUMBA = False  # pragma: no cover
+
+try:
+    import numpy
+
+    assert numpy
+    HAVE_NUMPY = True
+except ModuleNotFoundError:
+    HAVE_NUMPY = False
 
 if TYPE_CHECKING:
     _C = Callable[..., Any]
@@ -74,5 +81,5 @@ else:
 
 #%% Unit test
 if __name__ == "__main__":
-    unittest.main(module="dstauffman.tests.test_nubs_passthrough", exit=False)
+    unittest.main(module="nubs.tests.test_passthrough", exit=False)
     doctest.testmod(verbose=False)

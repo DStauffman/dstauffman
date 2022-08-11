@@ -6,22 +6,22 @@ THISDIR=${BASH_SOURCE%/*}
 
 if grep -i -q windows <<< "$OS"; then
     # Windows - (presumably via Git-Bash)
-    # Pass through to dcspython.bat
-    $THISDIR/dcspython.bat ${@}
+    # Pass through to dcspypy.bat
+    $THISDIR/dcspypy.bat ${@}
 else
     # Presumably Linux
     # Setup PYTHONPATH, first remember the original python path
     PYTHONPATH_ORIG=$PYTHONPATH
 
     # Add this location
-    export PYTHONPATH="$THISDIR:$THISDIR/../slog:$THISDIR/../dstauffman2:$PYTHONPATH"
+    export PYTHONPATH="$THISDIR/..:$THISDIR/../../slog:$THISDIR/../../dstauffman2:$PYTHONPATH"
 
-    if command -v python3 &>/dev/null; then
-        # Try using python3
-        exec python3 ${@}
+    if command -v pypy3 &>/dev/null; then
+        # Try using pypy3
+        exec pypy3 ${@}
     else
-        # If that didn't work, then try just python
-        exec python ${@}
+        # If that didn't work, then try just pypy
+        exec pypy ${@}
     fi
 
     # CLEANUP

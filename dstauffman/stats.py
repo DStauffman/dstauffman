@@ -13,7 +13,8 @@ import doctest
 from typing import Dict, Tuple
 import unittest
 
-from dstauffman import HAVE_NUMPY, MONTHS_PER_YEAR
+from dstauffman.constants import HAVE_NUMPY
+from dstauffman.units import MONTHS_PER_YEAR
 
 if HAVE_NUMPY:
     import numpy as np
@@ -48,7 +49,7 @@ def convert_annual_to_monthly_probability(annual):
 
     Examples
     --------
-    >>> from dstauffman.health import convert_annual_to_monthly_probability
+    >>> from dstauffman import convert_annual_to_monthly_probability
     >>> import numpy as np
     >>> annual  = np.array([0, 0.1, 1])
     >>> monthly = convert_annual_to_monthly_probability(annual)
@@ -84,7 +85,7 @@ def convert_monthly_to_annual_probability(monthly):
 
     Examples
     --------
-    >>> from dstauffman.health import convert_monthly_to_annual_probability
+    >>> from dstauffman import convert_monthly_to_annual_probability
     >>> import numpy as np
     >>> monthly = np.array([0, 0.1, 1])
     >>> annual = convert_monthly_to_annual_probability(monthly)
@@ -130,7 +131,7 @@ def prob_to_rate(prob, time=1):
 
     Examples
     --------
-    >>> from dstauffman.health import prob_to_rate
+    >>> from dstauffman import prob_to_rate
     >>> import numpy as np
     >>> prob = np.array([0, 0.1, 1])
     >>> time = 3
@@ -184,7 +185,7 @@ def rate_to_prob(rate, time=1):
 
     Examples
     --------
-    >>> from dstauffman.health import rate_to_prob
+    >>> from dstauffman import rate_to_prob
     >>> import numpy as np
     >>> rate = np.array([0, 0.1, 1, 100, np.inf])
     >>> time = 1./12
@@ -227,7 +228,7 @@ def annual_rate_to_monthly_probability(rate):
 
     Examples
     --------
-    >>> from dstauffman.health import annual_rate_to_monthly_probability
+    >>> from dstauffman import annual_rate_to_monthly_probability
     >>> import numpy as np
     >>> rate = np.array([0, 0.5, 1, 5, np.inf])
     >>> prob = annual_rate_to_monthly_probability(rate)
@@ -266,7 +267,7 @@ def monthly_probability_to_annual_rate(prob):
 
     Examples
     --------
-    >>> from dstauffman.health import monthly_probability_to_annual_rate
+    >>> from dstauffman import monthly_probability_to_annual_rate
     >>> import numpy as np
     >>> prob = np.array([0, 0.04081054, 0.07995559, 0.34075937, 1])
     >>> rate = monthly_probability_to_annual_rate(prob)
@@ -334,7 +335,7 @@ def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -
 
     Examples
     --------
-    >>> from dstauffman.health import combine_sets
+    >>> from dstauffman import combine_sets
     >>> n1 = 5
     >>> u1 = 1
     >>> s1 = 0.5
@@ -409,7 +410,7 @@ def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np
 
     Examples
     --------
-    >>> from dstauffman.health import bounded_normal_draw
+    >>> from dstauffman import bounded_normal_draw
     >>> import numpy as np
     >>> num   = 10
     >>> values = {"last_mean": 2, "last_std": 0.5, "last_min": 1, "last_max": 3}
@@ -477,7 +478,7 @@ def rand_draw(chances, prng, *, check_bounds=True):
 
     Examples
     --------
-    >>> from dstauffman.health import rand_draw
+    >>> from dstauffman import rand_draw
     >>> import numpy as np
     >>> chances = np.array([-0.5, 0., 0.5, 1., 5, np.inf])
     >>> prng = np.random.RandomState()
@@ -528,7 +529,7 @@ def ecdf(y, /):
 
     Examples
     --------
-    >>> from dstauffman.health import ecdf
+    >>> from dstauffman import ecdf
     >>> import numpy as np
     >>> y = np.random.rand(1000)
     >>> (x, f) = ecdf(y)
@@ -544,5 +545,5 @@ def ecdf(y, /):
 
 #%% Unit test
 if __name__ == "__main__":
-    unittest.main(module="dstauffman.tests.test_health_stats", exit=False)
+    unittest.main(module="dstauffman.tests.test_stats", exit=False)
     doctest.testmod(verbose=False)

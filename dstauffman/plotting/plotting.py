@@ -754,6 +754,7 @@ def plot_histogram(
     cdf_x=None,
     cdf_y=None,
     cdf_colormap=None,
+    cdf_same_axis=False,
     fig_ax=None,
     skip_setup_plots=False,
     **kwargs,
@@ -874,7 +875,10 @@ def plot_histogram(
         ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins) + 1])
     else:
         ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins)])
-    ax.set_ylim([0, 1.05 * np.max(counts)])
+    if cdf_same_axis:
+        ax.set_ylim([0, data.size])
+    else:
+        ax.set_ylim([0, 1.05 * np.max(counts)])
     if normalize_spacing:
         ax.set_xticks(plotting_bins)
         ax.set_xticklabels(xlab)
@@ -900,12 +904,13 @@ def plot_histogram(
         cdf = np.hstack([0, np.cumsum(counts)]) / data.size
     if show_cdf:
         # plot the CDF
-        ax3 = ax.twinx()
-        ax3.set_ylim(0, 100)
-        ax3.spines.right.set_position(("axes", 1.06))
-        ax3.yaxis.label.set_color(cm.get_color(0))
-        ax3.set_ylabel("CDF Distribution [%]")
-        ax3.tick_params(axis="y", colors=cm.get_color(0))
+        if not cdf_same_axis:
+            ax3 = ax.twinx()
+            ax3.set_ylim(0, 100)
+            ax3.spines.right.set_position(("axes", 1.06))
+            ax3.yaxis.label.set_color(cm.get_color(0))
+            ax3.set_ylabel("CDF Distribution [%]")
+            ax3.tick_params(axis="y", colors=cm.get_color(0))
         # Note: plot on transformed axes instead of ax3 to maintain constant pan/zoom
         ax.step(plotting_bins, cdf, color=cm.get_color(0), label="CDF", zorder=8, transform=trans)
     if cdf_x is not None:

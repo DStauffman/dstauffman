@@ -22,12 +22,14 @@ import time
 from typing import Any, Callable, ClassVar, Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
+from nubs import ncjit
 from slog import LogLevel
 
 from dstauffman import (
     Frozen,
     HAVE_NUMPY,
     load_method,
+    mat_divide,
     MultipassExceptionWrapper,
     parfor_wrapper,
     pprint_dict,
@@ -35,8 +37,6 @@ from dstauffman import (
     SaveAndLoad,
     setup_dir,
 )
-from dstauffman.estimation.linalg import mat_divide
-from dstauffman.nubs import ncjit
 
 if HAVE_NUMPY:
     import numpy as np

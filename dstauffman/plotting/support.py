@@ -1998,7 +1998,8 @@ def save_images_to_pdf(
             im = image_jpg
         else:
             images.append(image_jpg)
-    im.save(filename, save_all=True, append_images=images, metadata=meta)  # TODO: metadata not saving?
+    if len(images) > 0:
+        im.save(filename, save_all=True, append_images=images, metadata=meta)  # TODO: metadata not saving?
 
 
 #%% add_datashaders

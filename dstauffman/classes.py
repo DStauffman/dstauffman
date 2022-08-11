@@ -50,7 +50,7 @@ else:
     from array import array as ndarray  # type: ignore[misc]
     from math import inf
 
-    from dstauffman.nubs import np_all  # type: ignore[no-redef]  # pylint: disable=ungrouped-imports
+    from nubs import np_all  # type: ignore[no-redef]  # pylint: disable=ungrouped-imports
 
     datetime64 = ndarray  # type: ignore[assignment, misc]
 if HAVE_PANDAS:

@@ -13,9 +13,9 @@ import doctest
 from typing import Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
-from dstauffman import HAVE_NUMPY
-from dstauffman.estimation.linalg import mat_divide
-from dstauffman.nubs import ncjit
+from nubs import ncjit
+
+from dstauffman import HAVE_NUMPY, mat_divide
 
 if HAVE_NUMPY:
     import numpy as np

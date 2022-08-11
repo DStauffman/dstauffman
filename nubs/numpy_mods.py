@@ -13,18 +13,15 @@ import doctest
 from typing import Tuple, TYPE_CHECKING
 import unittest
 
-from dstauffman.nubs.passthrough import HAVE_NUMBA, ncjit
+from nubs.passthrough import HAVE_NUMBA, HAVE_NUMPY, ncjit
 
 if HAVE_NUMBA:
     from numba import boolean
     from numba.typed import List
 else:
     List = list
-try:
-    # Note: avoid using HAVE_NUMPY from dstauffman to avoid circular imports
+if HAVE_NUMPY:
     import numpy as np
-except ModuleNotFoundError:
-    pass
 
 if TYPE_CHECKING:
     _B = np.typing.NDArray[np.bool_]
@@ -60,7 +57,7 @@ def issorted_ascend(x: np.ndarray) -> boolean:
 
     Examples
     --------
-    >>> from dstauffman.nubs import issorted_ascend
+    >>> from nubs import issorted_ascend
     >>> import numpy as np
     >>> x = np.array([1, 3, 3, 5, 7])
     >>> print(issorted_ascend(x))
@@ -91,7 +88,7 @@ def issorted_descend(x: np.ndarray) -> boolean:
 
     Examples
     --------
-    >>> from dstauffman.nubs import issorted_descend
+    >>> from nubs import issorted_descend
     >>> import numpy as np
     >>> x = np.array([1, 3, 3, 5, 7])
     >>> print(issorted_descend(x))
@@ -122,7 +119,7 @@ def np_all_axis0(x: _B) -> _B:
 
     Examples
     --------
-    >>> from dstauffman.nubs import np_all_axis0
+    >>> from nubs import np_all_axis0
     >>> import numpy as np
     >>> x = np.array([[True, True, False, False], [True, False, True, False]], dtype=np.bool_)
     >>> print(np_all_axis0(x))
@@ -154,7 +151,7 @@ def np_all_axis1(x: _B) -> _B:
 
     Examples
     --------
-    >>> from dstauffman.nubs import np_all_axis1
+    >>> from nubs import np_all_axis1
     >>> import numpy as np
     >>> x = np.array([[True, True, False, False], [True, False, True, False]], dtype=np.bool_)
     >>> print(np_all_axis1(x))
@@ -183,7 +180,7 @@ def np_any_axis0(x: _B) -> _B:
 
     Examples
     --------
-    >>> from dstauffman.nubs import np_any_axis0
+    >>> from nubs import np_any_axis0
     >>> import numpy as np
     >>> x = np.array([[True, True, False, False], [True, False, True, False]], dtype=np.bool_)
     >>> print(np_any_axis0(x))
@@ -215,7 +212,7 @@ def np_any_axis1(x: _B) -> _B:
 
     Examples
     --------
-    >>> from dstauffman.nubs import np_any_axis1
+    >>> from nubs import np_any_axis1
     >>> import numpy as np
     >>> x = np.array([[True, True, False, False], [True, False, True, False]], dtype=np.bool_)
     >>> print(np_any_axis1(x))
@@ -230,5 +227,5 @@ def np_any_axis1(x: _B) -> _B:
 
 #%% Unit test
 if __name__ == "__main__":
-    unittest.main(module="dstauffman.tests.test_nubs_numpy_mods", exit=False)
+    unittest.main(module="nubs.tests.test_numpy_mods", exit=False)
     doctest.testmod(verbose=False)

@@ -5,7 +5,7 @@ from IPython import get_ipython  # type: ignore[import]
 import numpy as np
 import pandas as pd
 
-import dstauffman.nubs as nubs  # noqa: F401  # pylint: disable=unused-import
+import nubs as nubs  # noqa: F401  # pylint: disable=unused-import
 
 #%% Results
 TEXT = r"""i = None, any(x)
