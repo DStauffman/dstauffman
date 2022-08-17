@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "dstauffman"
-version = "3.1.5"
+version = "3.3.0"
 description = "Generic python utilities for Aerospace applications"
 license = "LGPLv3"
 authors = ["David C. Stauffer <dstauffman@yahoo.com>"]
@@ -65,11 +65,10 @@ pytest-cov = "^3.0.0"
 numeric = ["h5py", "matplotlib", "numpy", "pandas", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
 shader = ["datashader", "h5py", "matplotlib", "numba", "numpy", "pandas", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
 spyder = ["spyder-kernels"]
-static = ["black", "flake8", "isort", "pycodestyle", "pylint", "mypy", "PyQt5-stubs"]
-
+static = ["black", "flake8", "isort", "mypy", "pycodestyle", "pylint", "PyQt5-stubs"]
 
 [tool.poetry.scripts]
-lms = "dstauffman.__main__:main"
+dcs = "dstauffman.__main__:main"
 
 [tool.black]
 line-length = 128

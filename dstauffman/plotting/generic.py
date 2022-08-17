@@ -400,7 +400,7 @@ def make_generic_plot(
     num_channels = len(elements)
     assert num_channels == np.maximum(
         s1, s2
-    ), "The given elements need to match the data sizes, got {num_channels} and {np.maximum(s1, s2)}."
+    ), f"The given elements need to match the data sizes, got {num_channels} and {np.maximum(s1, s2)}."
     assert s0a in (0, 1, num_channels), "The time doesn't match the number of elements."
     assert s0b in (0, 1, num_channels), "The time doesn't match the number of elements."
     assert s1 in (0, s2) or s2 == 0, f"Sizes of data channels must be consistent, got {s1} and {s2}."
