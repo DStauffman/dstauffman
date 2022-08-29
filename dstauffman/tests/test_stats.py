@@ -484,16 +484,67 @@ class Test_ecdf(unittest.TestCase):
         np.testing.assert_array_equal(f, np.array([0, 1]))
 
     def test_list(self) -> None:
-        y = [0, 0.1, 0.2, 0.8, 0.9, 1.0]
+        y = [0.0, 0.1, 0.2, 0.8, 0.9, 1.0]
         (x, f) = dcs.ecdf(y)
         np.testing.assert_array_almost_equal(x, np.arange(1, 7) / 6, 14)
         np.testing.assert_array_equal(f, y)
+
+    def test_scalar(self) -> None:
+        (x, f) = dcs.ecdf(0.5)
+        np.testing.assert_array_equal(x, np.array([1.0]))
+        np.testing.assert_array_equal(f, np.array([0.5]))
 
     def test_unique(self) -> None:
         y = np.array([0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 1.0])
         (x, f) = dcs.ecdf(y)
         np.testing.assert_array_almost_equal(x, np.array([3 / 7, 6 / 7, 1.0]), 14)
         np.testing.assert_array_equal(f, np.array([0.0, 0.5, 1.0]))
+
+
+#%% apply_prob_to_mask
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_apply_prob_to_mask(unittest.TestCase):
+    r"""
+    Tests the dcs.apply_prob_to_mask function with the following cases:
+        Nominal
+        Inplace
+        Zero prob
+        100% prob
+    """
+
+    def setUp(self) -> None:
+        self.prng = np.random.RandomState()
+
+    def test_nominal(self) -> None:
+        mask = self.prng.rand(50000) < 0.5
+        prob = 0.3
+        num = np.count_nonzero(mask)
+        out = dcs.apply_prob_to_mask(mask, prob, self.prng)
+        self.assertIsNot(out, mask)
+        self.assertLess(num, 30000, "Too many trues in mask.")
+        self.assertLess(np.count_nonzero(out), 4 * num // 10, "Too many trues in out.")
+
+    def test_inplace(self) -> None:
+        mask = self.prng.rand(50000) < 0.2
+        prob = 0.8
+        num = np.count_nonzero(mask)
+        out = dcs.apply_prob_to_mask(mask, prob, self.prng, inplace=True)
+        self.assertIs(out, mask)
+        self.assertLess(num, 20000, "Too many trues in mask.")
+        self.assertLess(np.count_nonzero(out), num, "Too many trues in out.")
+
+    def test_zero_prob(self) -> None:
+        mask = self.prng.rand(1000) < 0.8
+        prob = 0.0
+        out = dcs.apply_prob_to_mask(mask, prob, self.prng)
+        self.assertTrue(np.all(~out))
+
+    def test_one_prob(self) -> None:
+        mask = self.prng.rand(1000) < 0.4
+        prob = 1.0
+        out = dcs.apply_prob_to_mask(mask, prob, self.prng)
+        self.assertIsNot(out, mask)
+        np.testing.assert_array_equal(out, mask)
 
 
 #%% Unit test execution

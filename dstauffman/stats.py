@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import Dict, Tuple
+from typing import Dict, List, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman.constants import HAVE_NUMPY
@@ -23,8 +23,12 @@ if HAVE_NUMPY:
 else:
     from math import sqrt  # type: ignore[misc]
 
+if TYPE_CHECKING:
+    _B = np.typing.NDArray[np.bool_]
+    _N = np.typing.NDArray[np.float64]
+
 #%% Functions - convert_annual_to_monthly_probability
-def convert_annual_to_monthly_probability(annual):
+def convert_annual_to_monthly_probability(annual: _N) -> _N:
     r"""
     Convert a given annual probabily into the equivalent monthly one.
 
@@ -59,17 +63,18 @@ def convert_annual_to_monthly_probability(annual):
 
     """
     # check ranges
-    if np.any(annual < 0):
+    if np.any(annual < 0.0):
         raise ValueError("annual must be >= 0")
-    if np.any(annual > 1):
+    if np.any(annual > 1.0):
         raise ValueError("annual must be <= 1")
     # convert to equivalent probability and return result
-    monthly = 1 - np.exp(np.log(1 - annual, out=np.full(annual.shape, -np.inf), where=annual != 1) / MONTHS_PER_YEAR)
+    out = np.full(annual.shape, -np.inf)
+    monthly = 1.0 - np.exp(np.log(1.0 - annual, out=out, where=annual != 1.0) / MONTHS_PER_YEAR)
     return monthly
 
 
 #%% Functions - convert_monthly_to_annual_probability
-def convert_monthly_to_annual_probability(monthly):
+def convert_monthly_to_annual_probability(monthly: _N) -> _N:
     r"""
     Convert a given monthly probability into the equivalent annual one.
 
@@ -95,12 +100,12 @@ def convert_monthly_to_annual_probability(monthly):
 
     """
     # check ranges
-    if np.any(monthly < 0):
+    if np.any(monthly < 0.0):
         raise ValueError("monthly must be >= 0")
-    if np.any(monthly > 1):
+    if np.any(monthly > 1.0):
         raise ValueError("annual must be <= 1")
     # convert to equivalent probability and return result
-    annual = 1 - (1 - monthly) ** MONTHS_PER_YEAR
+    annual = 1.0 - (1.0 - monthly) ** MONTHS_PER_YEAR
     return annual
 
 
@@ -448,7 +453,7 @@ def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np
 
 
 #%% Functions - rand_draw
-def rand_draw(chances, prng, *, check_bounds=True):
+def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = True) -> _B:
     r"""
     Draws psuedo-random numbers from the given generator to compare to given factors.
     Has optimizations to ignore factors less than or equal to zero.
@@ -507,7 +512,7 @@ def rand_draw(chances, prng, *, check_bounds=True):
 
 
 #%% Functions - ecdf
-def ecdf(y, /):
+def ecdf(y: Union[float, List[float], _N], /) -> Tuple[_N, _N]:
     r"""
     Calculate the empirical cumulative distribution function, as in Matlab's ecdf function.
 
@@ -541,6 +546,46 @@ def ecdf(y, /):
     f, counts = np.unique(y, return_counts=True)
     x = np.cumsum(counts) / np.size(y)
     return (x, f)
+
+
+#%% Functions - apply_prob_to_mask
+def apply_prob_to_mask(mask: _B, prob: float, prng: np.random.RandomState, inplace: bool = False) -> _B:
+    r"""
+    Applies a one-time probability to a logical mask while minimizing the random number calls.
+
+    Parameters
+    ----------
+    mask : ndarray of bool
+        Input mask
+    prob : float
+        Probability to apply to mask
+
+    Returns
+    -------
+    out : ndarray of bool
+        Output mask
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in August 2022.
+
+    Examples
+    --------
+    >>> from dstauffman import apply_prob_to_mask
+    >>> import numpy as np
+    >>> prng = np.random.RandomState()
+    >>> mask = prng.rand(50000) < 0.5
+    >>> prob = 0.3
+    >>> out = apply_prob_to_mask(mask, prob, prng)
+    >>> assert np.count_nonzero(mask) < 30000, "Too many trues in mask."
+    >>> assert np.count_nonzero(out) < 0.4 * np.count_nonzero(mask), "Too many trues in out."
+
+    """
+    out = mask if inplace else mask.copy()
+
+    keep = prng.rand(np.count_nonzero(mask)) < prob
+    out[mask] &= keep
+    return out
 
 
 #%% Unit test

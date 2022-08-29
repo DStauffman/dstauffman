@@ -28,7 +28,7 @@ from .stats     import convert_annual_to_monthly_probability, \
                            convert_monthly_to_annual_probability, ca2mp, cm2ap, prob_to_rate, \
                            rate_to_prob, annual_rate_to_monthly_probability, \
                            monthly_probability_to_annual_rate, ar2mp, mp2ar, combine_sets, \
-                           bounded_normal_draw, rand_draw, ecdf
+                           bounded_normal_draw, rand_draw, ecdf, apply_prob_to_mask
 from .time      import get_np_time_units, get_ymd_from_np, round_datetime, round_np_datetime, \
                            round_num_datetime, round_time, convert_date, convert_time_units, \
                            convert_datetime_to_np, convert_duration_to_np, convert_num_dt_to_np, \
