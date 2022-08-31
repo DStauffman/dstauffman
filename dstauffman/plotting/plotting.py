@@ -27,6 +27,7 @@ from dstauffman import (
     HAVE_MPL,
     HAVE_NUMPY,
     histcounts,
+    np_digitize,
 )
 from dstauffman.plotting.generic import make_bar_plot, make_time_plot
 from dstauffman.plotting.support import (
@@ -755,6 +756,7 @@ def plot_histogram(
     cdf_y=None,
     cdf_colormap=None,
     cdf_same_axis=False,
+    cdf_round_to_bin=False,
     fig_ax=None,
     skip_setup_plots=False,
     **kwargs,
@@ -790,6 +792,12 @@ def plot_histogram(
         X values to draw lines at CDF
     cdf_y : scalar or (C, ) ndarray
         Y values to draw lines at CDF
+    cdf_colormap : str or matplotlib.colors.Colormap, optional
+        Colors/colormap to use for CDF lines
+    cdf_same_axis : bool, optional, default is False
+        Whether to use the same axis for the CDF, or to create a secondary one
+    cdF_round_to_bin : bool, optional, default is False
+        Whether to round the CDF crossings to bin edges
     fig_ax : (fig, ax) tuple, optional
         Figure and axis to use, otherwise create new ones
     skip_setup_plots : bool, optional, default is False
@@ -901,7 +909,12 @@ def plot_histogram(
         # create a transform with X in data units and Y in axes units
         trans = transforms.blended_transform_factory(ax.transData, ax.transAxes)
         # create the CDF
-        cdf = np.hstack([0, np.cumsum(counts)]) / data.size
+        if cdf_round_to_bin:
+            cdf = np.hstack([0, np.cumsum(counts)]) / data.size
+            cdf_bin = plotting_bins
+        else:
+            cdf = np.hstack([np.arange(data.size) / data.size, 1.0])
+            cdf_bin = np.hstack([0.0, np.sort(data)])
     if show_cdf:
         # plot the CDF
         if not cdf_same_axis:
@@ -912,15 +925,20 @@ def plot_histogram(
             ax3.set_ylabel("CDF Distribution [%]")
             ax3.tick_params(axis="y", colors=cm.get_color(0))
         # Note: plot on transformed axes instead of ax3 to maintain constant pan/zoom
-        ax.step(plotting_bins, cdf, color=cm.get_color(0), label="CDF", zorder=8, transform=trans)
+        if normalize_spacing:
+            temp = np_digitize(cdf_bin, bins)
+            cdf_scaled = temp + (cdf_bin - bins[temp]) / (bins[temp + 1] - bins[temp])
+            ax.step(cdf_scaled, cdf, color=cm.get_color(0), label="CDF", zorder=8, transform=trans)
+        else:
+            ax.step(cdf_bin, cdf, color=cm.get_color(0), label="CDF", zorder=8, transform=trans)
     if cdf_x is not None:
         try:
             _ = len(cdf_x)
         except TypeError:
             cdf_x = [cdf_x]
         for this_x in cdf_x:
-            this_ix = np.argmax(plotting_bins >= this_x)
-            this_bin = plotting_bins[this_ix]
+            this_ix = np.argmax(cdf_bin >= this_x)
+            this_bin = cdf_scaled[this_ix] if normalize_spacing else cdf_bin[this_ix]
             this_cdf = cdf[this_ix]
             ax.plot(
                 [0, 1],
@@ -947,8 +965,9 @@ def plot_histogram(
             cdf_y = [cdf_y]
         for this_cdf in cdf_y:
             this_ix = np.argmax(cdf >= this_cdf)
-            this_bin = plotting_bins[this_ix]
-            ax.axvline(this_bin, label=f"{100*this_cdf:.3g}p={this_bin:.3g}", color=cm.get_color(2), zorder=9)
+            this_label = f"{100*this_cdf:.3g}p={cdf_bin[this_ix]:.3g}"
+            this_bin = cdf_scaled[this_ix] if normalize_spacing else cdf_bin[this_ix]
+            ax.axvline(this_bin, label=this_label, color=cm.get_color(2), zorder=9)
             ax.plot(this_bin, cdf[this_ix], marker="x", color=cm.get_color(2), label="", zorder=10, transform=trans)
     if using_cdf:
         # Add a legend now, since there is something to display
