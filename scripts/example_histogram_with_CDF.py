@@ -16,4 +16,16 @@ if __name__ == "__main__":
     cdf_x = 0.75
     cdf_y = 0.5
 
-    plot_histogram(description, data, bins, skip_setup_plots=True, show_cdf=True, cdf_x=cdf_x, cdf_y=cdf_y)
+    # bins2 = np.array([0.0, 0.1, 0.5, 1.0, 2.0, np.inf])
+
+    plot_histogram(
+        description,
+        data,
+        bins,
+        skip_setup_plots=True,
+        show_cdf=True,
+        cdf_x=cdf_x,
+        cdf_y=cdf_y,
+        cdf_round_to_bin=False,
+        normalize_spacing=False,
+    )

@@ -35,7 +35,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
 
     # fmt: off
     load: ClassVar[Callable[[Optional[Path], DefaultNamedArg(bool, "use_hdf5")], Results]]  # noqa: F821
-    save: Callable[[Results, Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]  # noqa: F821
+    save: Callable[[Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]  # noqa: F821
     # fmt: on
 
     def __init__(self, num: float = 0, date_zero: Optional[datetime.datetime] = None):

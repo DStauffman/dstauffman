@@ -41,6 +41,7 @@ else:
     from math import inf, isnan, nan
 
     logical_not = lambda x: not x  # type: ignore[assignment]  # pylint: disable=unnecessary-lambda-assignment
+
 if HAVE_SCIPY:
     from scipy.interpolate import interp1d
     from scipy.signal import butter, sosfiltfilt

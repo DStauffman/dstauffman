@@ -70,7 +70,7 @@ def convert_annual_to_monthly_probability(annual: _N) -> _N:
     # convert to equivalent probability and return result
     out = np.full(annual.shape, -np.inf)
     monthly = 1.0 - np.exp(np.log(1.0 - annual, out=out, where=annual != 1.0) / MONTHS_PER_YEAR)
-    return monthly
+    return monthly  # type: ignore[no-any-return]
 
 
 #%% Functions - convert_monthly_to_annual_probability
