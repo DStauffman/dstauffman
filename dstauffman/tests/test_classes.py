@@ -53,7 +53,6 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     ]
     save: Callable[
         [
-            _Example_SaveAndLoad,
             Optional[pathlib.Path],
             DefaultNamedArg(bool, "use_hdf5"),  # noqa: F821
             DefaultNamedArg(dict, "meta"),  # noqa: F821
@@ -77,7 +76,7 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
 
 class _Example_SaveAndLoadPickle(dcs.Frozen, metaclass=dcs.SaveAndLoadPickle):
     load: ClassVar[Callable[[Optional[pathlib.Path]], _Example_SaveAndLoadPickle]]
-    save: Callable[[_Example_SaveAndLoadPickle, Optional[pathlib.Path]], None]
+    save: Callable[[Optional[pathlib.Path]], None]
     a: Union[_I, List[int]]
     b: Union[_I, List[int]]
 

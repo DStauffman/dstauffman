@@ -20,6 +20,7 @@ from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY,
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
+    import matplotlib as mpl
     import matplotlib.cm as cmx
     import matplotlib.colors as colors
     import matplotlib.pyplot as plt
@@ -293,7 +294,7 @@ class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
         self.assertEqual(clist.colors[8], "xkcd:red")
 
     def test_five_to_ten(self) -> None:
-        cmap = cmx.get_cmap("tab20")
+        cmap = mpl.colormaps["tab20"]
         exp1 = cmap.colors[0]
         exp2 = cmap.colors[1]
         for i in [5, 8, 10]:
@@ -304,7 +305,7 @@ class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
             self.assertEqual(clist.colors[2 * i], exp1)
 
     def test_lots(self) -> None:
-        cmap = cmx.get_cmap("tab20")
+        cmap = mpl.colormaps["tab20"]
         exp1 = cmap.colors[0]
         exp2 = cmap.colors[1]
         for i in [11, 15, 20, 50]:

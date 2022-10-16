@@ -50,6 +50,7 @@ from dstauffman import (
 )
 
 if HAVE_MPL:
+    import matplotlib as mpl
     from matplotlib.axes import Axes
     from matplotlib.backends.backend_pdf import PdfPages
     import matplotlib.cm as cmx
@@ -100,10 +101,10 @@ COLOR_LISTS: Dict[str, colors.ListedColormap] = {}
 if HAVE_MPL:
     # fmt: off
     # default colormap
-    COLOR_LISTS["default"]  = cmx.get_cmap(DEFAULT_COLORMAP)
+    COLOR_LISTS["default"]  = mpl.colormaps[DEFAULT_COLORMAP]
     assert isinstance(COLOR_LISTS["default"], colors.ListedColormap), "Expecting a ListedColormap for the default."
     # single colors
-    COLOR_LISTS["same"]     = colors.ListedColormap(tuple(repeat(cmx.get_cmap(DEFAULT_COLORMAP).colors[0], 8)))
+    COLOR_LISTS["same"]     = colors.ListedColormap(tuple(repeat(mpl.colormaps[DEFAULT_COLORMAP].colors[0], 8)))
     COLOR_LISTS["same_old"] = colors.ListedColormap(tuple(repeat("#1f77b4", 8)))
     COLOR_LISTS["single"]   = colors.ListedColormap(("xkcd:red",))
     # doubles
@@ -420,8 +421,8 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
         clist = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)
     else:
         ix = [x % 10 for x in range(num_channels)]
-        cmap1 = cmx.get_cmap("tab10")
-        cmap2 = cmx.get_cmap("tab20")
+        cmap1 = mpl.colormaps["tab10"]
+        cmap2 = mpl.colormaps["tab20"]
         temp = (
             tuple(cmap1.colors[x] for x in ix) + tuple(cmap2.colors[2 * x + 1] for x in ix) + tuple(cmap1.colors[x] for x in ix)
         )

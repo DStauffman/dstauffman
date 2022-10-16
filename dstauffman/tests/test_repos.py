@@ -114,19 +114,17 @@ class Test_find_repo_issues(unittest.TestCase):
             dcs.find_repo_issues(self.folder, list_all=True)
         lines = ctx.get_output().split("\n")
         ctx.close()
-        self.assertTrue(self.bad1 in lines)
-        self.assertFalse(self.bad2 in lines)
+        self.assertIn(self.bad1, lines)
+        self.assertNotIn(self.bad2, lines)
 
     def test_trailing_spaces(self) -> None:
         with capture_output() as ctx:
             dcs.find_repo_issues(self.folder, trailing=True)
         lines = ctx.get_output().split("\n")
         ctx.close()
-        self.assertTrue(lines[0].startswith('Evaluating: "'))
-        self.assertEqual(lines[1], self.bad2)
-        self.assertTrue(lines[2].startswith('Evaluating: "'))
-        self.assertEqual(lines[3], self.bad1)
-        self.assertEqual(lines[4], self.bad2)
+        self.assertEqual(sum(x.startswith('Evaluating: "') for x in lines), 2)
+        self.assertIn(self.bad1, lines)
+        self.assertIn(self.bad2, lines)
         self.assertEqual(len(lines), 5)
 
     def test_trailing_and_list_all(self) -> None:
@@ -135,8 +133,8 @@ class Test_find_repo_issues(unittest.TestCase):
         lines = ctx.get_output().split("\n")
         ctx.close()
         self.assertTrue(lines[0].startswith('Evaluating: "'))
-        self.assertTrue(self.bad1 in lines)
-        self.assertTrue(self.bad2 in lines)
+        self.assertIn(self.bad1, lines)
+        self.assertIn(self.bad2, lines)
         self.assertTrue(len(lines) > 7)
 
     def test_exclusions_skip(self) -> None:
@@ -164,8 +162,8 @@ class Test_find_repo_issues(unittest.TestCase):
         ctx.close()
         self.assertTrue(lines[0].startswith('File: "'))
         self.assertIn('" has bad line endings of "', lines[0])
-        self.assertTrue(lines[3].startswith('Evaluating: "'))
-        self.assertEqual(lines[4], self.bad1)
+        self.assertTrue(any(x.startswith('Evaluating: "') for x in lines))
+        self.assertIn(self.bad1, lines)
         self.assertEqual(len(lines), 5)
 
     def test_ignore_tabs(self) -> None:

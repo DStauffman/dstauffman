@@ -261,7 +261,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     >>> bpe_results = BpeResults()
 
     """
-    save: Callable[[BpeResults, Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]  # noqa: F821
+    save: Callable[[Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]  # noqa: F821
 
     def __init__(self) -> None:
         # fmt: off
@@ -395,7 +395,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
 
     """
     load: ClassVar[Callable[[Optional[Path]], "CurrentResults"]]
-    save: Callable[["CurrentResults", Optional[Path]], None]
+    save: Callable[[Optional[Path]], None]
 
     def __init__(self) -> None:
         # fmt: off

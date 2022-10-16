@@ -353,9 +353,9 @@ def make_generic_plot(
     # determine which plotting function to use
     # fmt: off
     if use_zoh:
-        plot_func = lambda ax, *args, **kwargs: ax.step(*args, where="post", **kwargs)  # pylint: disable=unnecessary-lambda-assignment
+        plot_func = lambda ax, *args, **kwargs: ax.step(*args, where="post", markerfacecolor="none", **kwargs)  # pylint: disable=unnecessary-lambda-assignment
     else:
-        plot_func = lambda ax, *args, **kwargs: ax.plot(*args, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
+        plot_func = lambda ax, *args, **kwargs: ax.plot(*args, markerfacecolor="none", **kwargs)  # pylint: disable=unnecessary-lambda-assignment
     # fmt: on
 
     # get the categories
