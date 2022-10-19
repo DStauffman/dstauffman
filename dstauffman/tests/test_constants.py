@@ -36,7 +36,8 @@ class Test_all_values(unittest.TestCase):
             "IS_WINDOWS",
         ]
         self.xtra: List[str] = ["NP_ONE_DAY", "NP_ONE_HOUR", "NP_ONE_MINUTE", "NP_ONE_SECOND"]
-        self.master = set(self.ints) | set(self.strs) | set(self.bool) | set(self.xtra)
+        self.nats: List[str] = ["NP_NAT"]
+        self.master = set(self.ints) | set(self.strs) | set(self.bool) | set(self.xtra) | set(self.nats)
 
     def test_values(self) -> None:
         # confirm that all the expected values exist and have the correct type
@@ -51,6 +52,11 @@ class Test_all_values(unittest.TestCase):
                 self.assertTrue(isinstance(getattr(dcs, key), np.timedelta64))
             else:
                 self.assertIsNone(getattr(dcs, key))
+        for key in self.nats:
+            if dcs.HAVE_NUMPY:
+                self.assertTrue(isinstance(getattr(dcs, key), np.datetime64))
+            else:
+                self.assertIsNone(getattr(dcs, key))
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_np_times(self) -> None:
@@ -58,6 +64,8 @@ class Test_all_values(unittest.TestCase):
         self.assertEqual(dcs.NP_ONE_MINUTE.astype(np.int64), 60 * 10**9)
         self.assertEqual(dcs.NP_ONE_HOUR.astype(np.int64), 3600 * 10**9)
         self.assertEqual(dcs.NP_ONE_DAY.astype(np.int64), 86400 * 10**9)
+        self.assertTrue(np.isnat(dcs.NP_NAT))
+        self.assertEqual(dcs.NP_NAT.astype(np.int64), np.array(np.nan).astype(np.int64))
 
     def test_missing(self) -> None:
         for field in vars(dcs.constants):

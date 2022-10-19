@@ -110,8 +110,9 @@ if HAVE_NUMPY:
     NP_ONE_MINUTE: np.timedelta64 = np.timedelta64(1, "m").astype(NP_TIMEDELTA_FORM)
     NP_ONE_HOUR: np.timedelta64 = np.timedelta64(1, "h").astype(NP_TIMEDELTA_FORM)
     NP_ONE_DAY: np.timedelta64 = np.timedelta64(1, "D").astype(NP_TIMEDELTA_FORM)
+    NP_NAT: np.datetime64 = np.datetime64("NaT", NP_DATETIME_UNITS)
 else:
-    NP_ONE_SECOND = NP_ONE_MINUTE = NP_ONE_HOUR = NP_ONE_DAY = None  # type: ignore[assignment]
+    NP_ONE_SECOND = NP_ONE_MINUTE = NP_ONE_HOUR = NP_ONE_DAY = NP_NAT = None  # type: ignore[assignment]
 
 #%% Functions
 # None
