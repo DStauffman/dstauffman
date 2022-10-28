@@ -34,6 +34,7 @@ include = ["MANIFEST.in", "LICENSE.txt", "README.rst", "CHANGELOG.md", "pyprojec
 
 [tool.poetry.dependencies]
 python = ">=3.9, <3.12"
+nubs = {path = "../nubs/", develop = false}
 slog = {path = "../slog/", develop = false}
 black = {version = "^22.0.0", optional = true}
 datashader = {version = "^0.13", optional = true}
@@ -140,9 +141,10 @@ warn_unused_ignores    = true
 no_implicit_optional   = true
 files                  = [
     "$MYPY_CONFIG_FILE_DIR/dstauffman/**/*.py",
-    "$MYPY_CONFIG_FILE_DIR/scripts/*.py",
-    "$MYPY_CONFIG_FILE_DIR/nubs/**/*.py"]
-mypy_path              = "$MYPY_CONFIG_FILE_DIR/../slog"
+    "$MYPY_CONFIG_FILE_DIR/scripts/*.py"]
+mypy_path              = [
+    "$MYPY_CONFIG_FILE_DIR/../nubs",
+    "$MYPY_CONFIG_FILE_DIR/../slog"]
 #linecount_report       = ".mypy_report"
 #any_exprs_report       = ".mypy_report"
 #html_report            = ".mypy_report"
