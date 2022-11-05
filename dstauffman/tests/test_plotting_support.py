@@ -381,13 +381,13 @@ class Test_plotting_whitten(unittest.TestCase):
         Nominal
     """
 
-    def setUp(self) -> None:
-        self.color = (1, 0.4, 0)
-        self.whittened_color = (1.0, 0.58, 0.3)
-
     def test_nominal(self) -> None:
-        new_color = plot.whitten(self.color)
-        self.assertEqual(new_color, self.whittened_color)
+        new_color = plot.whitten((1.0, 0.4, 0.0))
+        self.assertEqual(new_color, (1.0, 0.58, 0.3))
+
+    def test_blacken(self) -> None:
+        new_color = plot.whitten((1.0, 0.4, 0.0, 0.5), white=(0.0, 0.0, 0.0, 0.0), dt=0.5)
+        self.assertEqual(new_color, (0.5, 0.2, 0.0, 0.25))
 
 
 #%% plotting.resolve_name

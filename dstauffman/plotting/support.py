@@ -59,7 +59,7 @@ if HAVE_MPL:
     # Newer date stamps on axes, done here as this is the lowest level of the plotting submodule
     from matplotlib.dates import ConciseDateConverter, date2num
     from matplotlib.figure import Figure
-    from matplotlib.patches import Rectangle
+    from matplotlib.patches import Patch, Rectangle
     import matplotlib.pyplot as plt
     import matplotlib.units as munits
 
@@ -480,7 +480,7 @@ def ignore_plot_data(data, ignore_empties, col=None):
 
 
 #%% Functions - whitten
-def whitten(color, white=(1, 1, 1, 1), dt=0.30):
+def whitten(color: Tuple[float, ...], white: Tuple[float, ...] = (1.0, 1.0, 1.0, 1.0), dt: float = 0.30) -> Tuple[float, ...]:
     r"""
     Shift an RGBA color towards white.
 
@@ -1461,7 +1461,15 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
 
 
 #%% plot_phases
-def plot_phases(ax, times, colormap="tab10", labels=None, *, group_all=False):
+def plot_phases(
+        ax,
+        times,
+        colormap = "tab10",
+        labels: Optional[Union[List[str], str]] = None,
+        *,
+        group_all: bool = False,
+        use_legend: bool = False
+    ) -> Tuple[List[Axes], List[str]]:
     r"""
     Plots some labeled phases as semi-transparent patchs on the given axes.
 
@@ -1482,12 +1490,13 @@ def plot_phases(ax, times, colormap="tab10", labels=None, *, group_all=False):
     >>> ax = fig.add_subplot(111)
     >>> time = np.arange(101)
     >>> data = np.cos(time / 10)
-    >>> _ = ax.plot(time, data, ".-")
+    >>> _ = ax.plot(time, data, ".-", label="data")
     >>> times = np.array([5, 20, 60, 90])
     >>> # times = np.array([[5, 20, 60, 90], [10, 60, 90, 95]])
     >>> labels = ["Part 1", "Phase 2", "Watch Out", "Final"]
     >>> colors = COLOR_LISTS["quat"]
-    >>> plot_phases(ax, times, colors, labels)
+    >>> (handles, leg_labels) = plot_phases(ax, times, colors, labels, use_legend=False)
+    >>> ax.legend(handles=handles, labels=leg_labels, loc="best")
     >>> plt.show(block=False) # doctest: +SKIP
 
     Close plot
@@ -1507,7 +1516,7 @@ def plot_phases(ax, times, colormap="tab10", labels=None, *, group_all=False):
     if not group_all:
         cm = ColorMap(colormap=colormap, num_colors=num_segments)
     elif colormap == "tab10":
-        # change to responible default for group_all case
+        # change to responsible default for group_all case
         colormap = "xkcd:black"
 
     # get the limits of the plot
@@ -1519,6 +1528,7 @@ def plot_phases(ax, times, colormap="tab10", labels=None, *, group_all=False):
         times = np.vstack((times, np.hstack((times[1:], max(times[-1], xlims[1])))))
 
     # loop through all the phases
+    handles, leg_labels = ax.get_legend_handles_labels()
     for i in range(num_segments):
         # get the label and color for this phase
         this_color = cm.get_color(i) if not group_all else colormap
@@ -1546,20 +1556,30 @@ def plot_phases(ax, times, colormap="tab10", labels=None, *, group_all=False):
         if labels is not None:
             this_label = labels[i] if not group_all else labels
             if bool(this_label):
-                ax.annotate(
-                    this_label,
-                    xy=(x1, 0.99),
-                    xycoords=ax.get_xaxis_transform(),
-                    horizontalalignment="left",
-                    verticalalignment="top",
-                    fontsize=15,
-                    rotation=-90,
-                    clip_on=True,
-                )
+                if use_legend:
+                    if group_all and i > 0:
+                        continue
+                    handles.append(Patch(facecolor=this_color, edgecolor=this_color, label=this_label, alpha=transparency))
+                    leg_labels.append(this_label)
+                else:
+                    ax.annotate(
+                        this_label,
+                        xy=(x1, 0.99),
+                        xycoords=ax.get_xaxis_transform(),
+                        horizontalalignment="left",
+                        verticalalignment="top",
+                        fontsize=15,
+                        rotation=-90,
+                        clip_on=True,
+                    )
+    # TODO: this should be sufficient, but doesn't seem to persist, so return them and reset them
+    # in the calling level function instead
+    # ax.legend(handles=handles, labels=leg_labels)
 
     # reset any limits that might have changed due to the patches
     ax.set_xlim(xlims)
     ax.set_ylim(ylims)
+    return handles, leg_labels
 
 
 #%% Functions - get_classification
