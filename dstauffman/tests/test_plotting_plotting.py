@@ -72,7 +72,7 @@ class Test_plotting_Opts(unittest.TestCase):
         opts.disp_xmin = 60
         opts.disp_xmax = inf
         opts.rms_xmin = -inf
-        opts.rms_xmax = None
+        opts.rms_xmax = None  # type: ignore[assignment]
         opts.time_base = "sec"
         opts.time_unit = "min"
         (d1, d2, r1, r2) = opts.get_time_limits()

@@ -42,7 +42,7 @@ if HAVE_MPL:
 
         assert datashader
         HAVE_DS = True
-    except ImportError:
+    except ModuleNotFoundError:
         HAVE_DS = False
 else:
     HAVE_DS = False

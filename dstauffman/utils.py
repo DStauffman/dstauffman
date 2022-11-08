@@ -1494,7 +1494,7 @@ def is_datetime(time: ArrayLike) -> bool:
     """
     out = False
     if isinstance(time, datetime.datetime) or (  # type: ignore[unreachable]
-        hasattr(time, "dtype") and np.issubdtype(time.dtype, np.datetime64)  # type: ignore[union-attr]
+        hasattr(time, "dtype") and np.issubdtype(time.dtype, np.datetime64)
     ):
         out = True
     return out

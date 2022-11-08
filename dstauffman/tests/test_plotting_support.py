@@ -33,6 +33,8 @@ try:
     _HAVE_QT = True
 except ModuleNotFoundError:
     _HAVE_QT = False
+except ImportError:
+    _HAVE_QT = False
 
 _HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
 

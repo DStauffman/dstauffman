@@ -256,8 +256,8 @@ class Test_rms(unittest.TestCase):
 
     def test_complex_conj(self) -> None:
         out = dcs.rms(np.array([1 + 1j, 1 - 1j]))
-        assert isinstance(out, complex)
-        self.assertAlmostEqual(out, np.sqrt(2))
+        assert isinstance(out, complex)  # type: ignore[unreachable]
+        self.assertAlmostEqual(out, np.sqrt(2))  # type: ignore[unreachable]
 
     def test_with_nans(self) -> None:
         out = dcs.rms(self.inputs3, ignore_nans=False)

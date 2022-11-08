@@ -21,7 +21,7 @@ if HAVE_NUMPY:
 
     sqrt = np.sqrt
 else:
-    from math import sqrt  # type: ignore[misc]
+    from math import sqrt  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     _B = np.typing.NDArray[np.bool_]

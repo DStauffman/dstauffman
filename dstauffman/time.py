@@ -13,7 +13,7 @@ import datetime
 import doctest
 import re
 from time import gmtime, strftime
-from typing import Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Any, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -29,7 +29,7 @@ if HAVE_NUMPY:
     isfinite = np.isfinite
     nan = np.nan
 else:
-    from math import isfinite, nan  # type: ignore[misc]
+    from math import isfinite, nan  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     _AllDates = Union[None, int, float, datetime.datetime, datetime.date, np.ndarray, np.datetime64]
@@ -347,7 +347,14 @@ def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
 
 
 #%% Functions - convert_date
-def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="datetime64[ns]"):
+def convert_date(
+    date: Any,
+    form: str,
+    date_zero: Optional[datetime.datetime] = None,
+    *,
+    old_form: str = "sec",
+    numpy_form: str = "datetime64[ns]",
+) -> _AllDates:
     r"""
     Converts the given date between different forms.
 
@@ -401,7 +408,8 @@ def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="date
     assert old_form in all_forms, f'Unexpected old_form of "{old_form}".'
     # exit if not changing anything
     if form == old_form:
-        return date
+        return date  # type: ignore[no-any-return]
+    out: _AllDates
     # check MPL conditions
     if not HAVE_MPL and (form == "matplotlib" or old_form == "matplotlib"):
         raise RuntimeError("You must have matplotlib installed to do this conversion.")
@@ -409,7 +417,7 @@ def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="date
     is_actual_date: bool
     if form != "datetime" and old_form != "datetime":
         date = np.asanyarray(date)
-        is_actual_date = np.any(isfinite(date))
+        is_actual_date = np.any(isfinite(date))  # type: ignore[assignment]
     else:
         # determine if you have real dates to process
         if date is None:
@@ -422,7 +430,7 @@ def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="date
         elif isinstance(date, (int, float)):
             is_actual_date = isfinite(date)
         else:
-            is_actual_date = np.any(isfinite(date))
+            is_actual_date = np.any(isfinite(date))  # type: ignore[assignment]
     # check for bad date_zero
     if form in time_forms or (old_form in time_forms and is_actual_date):
         assert date_zero is not None, "You must specify a date_zero."
@@ -432,7 +440,7 @@ def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="date
     if old_form in time_forms:
         is_num = isfinite(date) if is_actual_date else False
         if form == "datetime":
-            out = date_zero + datetime.timedelta(seconds=date) if is_num else None
+            out = date_zero + datetime.timedelta(seconds=date) if is_num else None  # type: ignore[assignment, operator]
         elif form == "numpy":
             out = np.full(date.shape, np.datetime64("nat"), dtype=numpy_form)
             if np.any(is_num):
@@ -445,7 +453,7 @@ def convert_date(date, form, date_zero=None, *, old_form="sec", numpy_form="date
         elif form == "matplotlib":  # pragma: no branch
             out = date.copy()
             if np.any(is_num):
-                out[is_num] = dates.date2num(date_zero) + date[is_num] / ONE_DAY
+                out[is_num] = dates.date2num(date_zero) + date[is_num] / ONE_DAY  # type: ignore[index]
     # from datetime
     elif old_form == "datetime":
         is_num = date is not None

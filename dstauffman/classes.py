@@ -47,7 +47,7 @@ if HAVE_H5PY:
 if HAVE_NUMPY:
     from numpy import all as np_all, datetime64, inf, ndarray, printoptions
 else:
-    from array import array as ndarray  # type: ignore[misc]
+    from array import array as ndarray  # type: ignore[assignment]
     from math import inf
 
     from nubs import np_all  # type: ignore[no-redef]  # pylint: disable=ungrouped-imports
@@ -393,8 +393,8 @@ def load_method(
     else:
         # Version 2 (HDF5):
         out = load_hdf5(cls, filename, return_meta=return_meta)  # type: ignore[call-overload]
-        if hasattr(out, "_save_restore_hdf5") and callable(out._save_restore_hdf5):  # type: ignore[attr-defined]  # pylint: disable=protected-access
-            out._save_restore_hdf5(**kwargs)  # type: ignore[attr-defined]  # pylint: disable=protected-access
+        if hasattr(out, "_save_restore_hdf5") and callable(out._save_restore_hdf5):  # pylint: disable=protected-access
+            out._save_restore_hdf5(**kwargs)  # pylint: disable=protected-access
     return out
 
 
@@ -876,7 +876,7 @@ class FixedDict(dict):
         instance._frozen = False
         return instance
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self._frozen: bool = False
 

@@ -135,7 +135,7 @@ class Test_save_and_load_hdf5(unittest.TestCase):
     def setUp(self) -> None:
         self.filename = dcs.get_tests_dir() / "results_test_df_save.hdf5"
 
-    @unittest.skipIf(not dcs.HAVE_PANDAS, "Skipping due to missing pandas dependency.")
+    @unittest.skipIf(not dcs.HAVE_PANDAS or not dcs.HAVE_H5PY, "Skipping due to missing pandas/h5py dependency.")
     def test_pandas(self) -> None:
         data = {"a": np.array([1, 3, 5]), "b": np.array([2.0, 4.0, 6.0])}
         df = DataFrame(data)

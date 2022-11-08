@@ -35,7 +35,7 @@ num_axes   = 2  # fmt: skip
 num_innovs = 11
 
 t_bounds1 = np.arange(2, 8)
-t_bounds2 = dcs.convert_date(date_zero, "numpy", old_form="datetime") + dcs.NP_ONE_SECOND * t_bounds1
+t_bounds2 = dcs.convert_date(date_zero, "numpy", old_form="datetime") + dcs.NP_ONE_SECOND * t_bounds1  # type: ignore[operator]
 
 bins = [-np.inf, -5e-6, -5e-7, 0.0, 5e-7, 5e-6, np.inf]
 
@@ -97,10 +97,10 @@ opts4.case_name = "Test 4: dates-dates"
 
 #%% Copies
 kd1 = deepcopy(kf1)
-kd1.time = dcs.convert_date(kf1.time, "numpy", date_zero=date_zero)
+kd1.time = dcs.convert_date(kf1.time, "numpy", date_zero=date_zero)  # type: ignore[assignment]
 kd1.innov.time = dcs.convert_date(kf1.innov.time, "numpy", date_zero=date_zero)
 kd2 = deepcopy(kf2)
-kd2.time = dcs.convert_date(kf2.time, "numpy", date_zero=date_zero)
+kd2.time = dcs.convert_date(kf2.time, "numpy", date_zero=date_zero)  # type: ignore[assignment]
 kd2.innov.time = dcs.convert_date(kf2.innov.time, "numpy", date_zero=date_zero)
 
 #%% Plots

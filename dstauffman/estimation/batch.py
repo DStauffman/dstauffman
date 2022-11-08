@@ -46,7 +46,7 @@ if HAVE_NUMPY:
     isnan = np.isnan
     nan = np.nan
 else:
-    from math import inf, isnan, nan  # type: ignore[misc]
+    from math import inf, isnan, nan  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg

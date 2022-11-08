@@ -25,7 +25,7 @@ if HAVE_NUMPY:
     import numpy as np
     from numpy import sqrt
 else:
-    from math import sqrt  # type: ignore[misc]
+    from math import sqrt  # type: ignore[assignment]
 
     from nubs import np_any  # pylint: disable=ungrouped-imports
 if HAVE_SCIPY:

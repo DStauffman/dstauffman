@@ -12,7 +12,7 @@ import unittest
 
 from slog import capture_output
 
-from dstauffman import get_tests_dir, HAVE_NUMPY, NP_DATETIME_FORM, NP_DATETIME_UNITS, NP_TIMEDELTA_FORM
+from dstauffman import get_tests_dir, HAVE_H5PY, HAVE_NUMPY, NP_DATETIME_FORM, NP_DATETIME_UNITS, NP_TIMEDELTA_FORM
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -294,6 +294,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         self.assertIsNone(kf.covar)
         self.assertTrue(isinstance(kf.innov, space.KfInnov))
 
+    @unittest.skipIf(not HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_save_and_load(self) -> None:
         kf = space.Kf(num_points=2, num_states=3, num_axes=2, num_innovs=4)
         kf.chan = ["a", "b", "c"]

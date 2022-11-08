@@ -1474,7 +1474,7 @@ def plot_phases(
     group_all: bool = False,
     use_legend: bool = False,
     transparency: float = 0.2,  # 1.0 = opaque
-) -> Tuple[List[Axes], List[str]]:
+) -> None:
     r"""
     Plots some labeled phases as semi-transparent patchs on the given axes.
 
@@ -1500,8 +1500,8 @@ def plot_phases(
     >>> # times = np.array([[5, 20, 60, 90], [10, 60, 90, 95]])
     >>> labels = ["Part 1", "Phase 2", "Watch Out", "Final"]
     >>> colors = COLOR_LISTS["quat"]
-    >>> (handles, leg_labels) = plot_phases(ax, times, colors, labels, use_legend=False)
-    >>> ax.legend(handles=handles, labels=leg_labels, loc="best")
+    >>> plot_phases(ax, times, colors, labels, use_legend=False)
+    >>> ax.legend(loc="best")
     >>> plt.show(block=False) # doctest: +SKIP
 
     Close plot

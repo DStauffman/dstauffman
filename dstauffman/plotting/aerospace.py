@@ -816,7 +816,7 @@ def plot_innovations(
             )
         if plot_by_number and field_one is not None:
             this_number = None
-            quad_name: Optional[str] = None
+            quad_name: Optional[str] = None  # type: ignore[annotation-unchecked]
             for (quad, quad_name) in number_field.items():
                 if hasattr(kf1, quad):
                     this_number = getattr(kf1, quad)

@@ -18,7 +18,7 @@ from dstauffman import DEG2RAD, HAVE_NUMPY
 if HAVE_NUMPY:
     from numpy import pi as PI, sqrt
 else:
-    from math import pi as PI, sqrt  # type: ignore[misc]
+    from math import pi as PI, sqrt  # type: ignore[assignment]
 
 #%% Constants
 # Written by David C. Stauffer for AA 279 on 28 Apr 2007, constants provided by Professor West.

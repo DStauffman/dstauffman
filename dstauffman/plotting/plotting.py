@@ -13,7 +13,7 @@ import datetime
 import doctest
 import logging
 from pathlib import Path
-from typing import List, Optional, Tuple, TypeVar, Union
+from typing import List, Optional, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
@@ -53,20 +53,21 @@ if HAVE_NUMPY:
     inf = np.inf
     isfinite = np.isfinite
 else:
-    from math import inf, isfinite  # type: ignore[misc]
+    from math import inf, isfinite  # type: ignore[assignment]
+
+if TYPE_CHECKING:
+    _Date = Union[float, datetime.datetime, np.datetime64]
 
 #%% Globals
 logger = logging.getLogger(__name__)
 
 _Plotter: bool = True
 
-_Date = TypeVar("_Date", float, datetime.datetime)
-
 #%% Classes - Opts
 class Opts(Frozen):
     r"""Optional plotting configurations."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, **kwargs) -> None:
         r"""
         Default configuration for plots.
             .case_name : str
@@ -242,16 +243,16 @@ class Opts(Frozen):
         assert form in {"datetime", "numpy", "sec"}, f'Unexpected form of "{form}".'
         self.time_base = form
         self.time_unit = form
-        self.disp_xmin = convert_date(
+        self.disp_xmin = convert_date(  # type: ignore[assignment]
             self.disp_xmin, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
-        self.disp_xmax = convert_date(
+        self.disp_xmax = convert_date(  # type: ignore[assignment]
             self.disp_xmax, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
-        self.rms_xmin = convert_date(
+        self.rms_xmin = convert_date(  # type: ignore[assignment]
             self.rms_xmin, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
-        self.rms_xmax = convert_date(
+        self.rms_xmax = convert_date(  # type: ignore[assignment]
             self.rms_xmax, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
         return self

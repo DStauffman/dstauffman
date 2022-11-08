@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from qtpy.QtCore import QCoreApplication
     from qtpy.QtWidgets import QApplication
 
-    assert QApplication
+    assert QApplication  # type: ignore[truthy-function]
 
 #%% run_docstrings
 def run_docstrings(files: List[Path], verbose: bool = False) -> int:
