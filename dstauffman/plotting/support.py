@@ -63,7 +63,7 @@ if HAVE_MPL:
     # Newer date stamps on axes, done here as this is the lowest level of the plotting submodule
     from matplotlib.dates import ConciseDateConverter, date2num
     from matplotlib.figure import Figure
-    from matplotlib.patches import Patch, Rectangle
+    from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
     import matplotlib.units as munits
 
@@ -1466,15 +1466,15 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
 
 #%% plot_phases
 def plot_phases(
-        ax,
-        times,
-        colormap = "tab10",
-        labels: Optional[Union[List[str], str]] = None,
-        *,
-        group_all: bool = False,
-        use_legend: bool = False,
-        transparency: float = 0.2,  # 1.0 = opaque
-    ) -> Tuple[List[Axes], List[str]]:
+    ax,
+    times,
+    colormap="tab10",
+    labels: Optional[Union[List[str], str]] = None,
+    *,
+    group_all: bool = False,
+    use_legend: bool = False,
+    transparency: float = 0.2,  # 1.0 = opaque
+) -> Tuple[List[Axes], List[str]]:
     r"""
     Plots some labeled phases as semi-transparent patchs on the given axes.
 
@@ -1530,7 +1530,6 @@ def plot_phases(
         times = np.vstack((times, np.hstack((times[1:], max(times[-1], xlims[1])))))
 
     # loop through all the phases
-    handles, leg_labels = ax.get_legend_handles_labels()
     for i in range(num_segments):
         # get the label and color for this phase
         this_color = cm.get_color(i) if not group_all else colormap

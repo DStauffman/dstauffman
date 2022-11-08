@@ -3,18 +3,21 @@
 #%% Imports
 import datetime
 
-from dstauffman import convert_datetime_to_np, NP_ONE_SECOND
-from dstauffman.plotting import make_time_plot, plot_phases, COLOR_LISTS
 import matplotlib.pyplot as plt
 import numpy as np
+
+from dstauffman import convert_datetime_to_np, NP_ONE_SECOND
+from dstauffman.plotting import COLOR_LISTS, make_time_plot, plot_phases
 
 
 #%% Functions
 def extra_plotter(time_phases, labels="Times", group_all=True, use_legend=False):  # pylint: disable=redefined-outer-name
     """Wrapper to the plot_phases to be passed into other functions."""
+
     def _plot_phases(fig, ax):  # pylint: disable=redefined-outer-name,unused-argument
         for this_axes in ax:
             plot_phases(this_axes, time_phases, labels=labels, group_all=group_all, use_legend=use_legend)
+
     return _plot_phases
 
 
@@ -33,7 +36,7 @@ if __name__ == "__main__":
     colors = COLOR_LISTS["quat"]
     plot_phases(ax, times, colors, labels, use_legend=False)
     ax.legend(loc="best")
-    plt.show(block=False) # doctest: +SKIP
+    plt.show(block=False)  # doctest: +SKIP
 
     #%% Through wrapper
     dates = [
