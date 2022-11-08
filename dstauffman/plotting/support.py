@@ -34,6 +34,10 @@ except ModuleNotFoundError:
     warnings.warn("Qt (PyQt5, PyQt6, PySide2, PySide6) was not found. Some funtionality will be limited.")
     QPushButton = object  # type: ignore[assignment, misc]
     _HAVE_QT = False
+except ImportError:
+    warnings.warn("QTPY was found, but failed to import, likely due to a missing library dependency.")
+    QPushButton = object  # type: ignore[assignment, misc]
+    _HAVE_QT = False
 
 from dstauffman import (
     convert_date,
@@ -84,7 +88,7 @@ if HAVE_SCIPY:
     import scipy.stats as st
 try:
     from PIL import Image
-except ImportError:
+except ModuleNotFoundError:
     pass
 
 #%% Constants
@@ -1468,7 +1472,8 @@ def plot_phases(
         labels: Optional[Union[List[str], str]] = None,
         *,
         group_all: bool = False,
-        use_legend: bool = False
+        use_legend: bool = False,
+        transparency: float = 0.2,  # 1.0 = opaque
     ) -> Tuple[List[Axes], List[str]]:
     r"""
     Plots some labeled phases as semi-transparent patchs on the given axes.
@@ -1503,9 +1508,6 @@ def plot_phases(
     >>> plt.close(fig)
 
     """
-    # hard-coded values
-    transparency = 0.2  # 1 = opaque
-
     # get number of segments
     if times.ndim == 1:
         num_segments = times.size
@@ -1532,54 +1534,46 @@ def plot_phases(
     for i in range(num_segments):
         # get the label and color for this phase
         this_color = cm.get_color(i) if not group_all else colormap
+        if labels is not None:
+            if group_all:
+                assert isinstance(labels, str), "Labels must be a string if grouping all."
+                if use_legend:
+                    this_label = labels if i == 0 else ""
+                else:
+                    this_label = labels
+            else:
+                assert isinstance(labels, list), "Labels must be a list if not grouping all."
+                this_label = labels[i]
         # get the locations for this phase
         x1 = times[0, i]
         x2 = times[1, i]
-        if is_datetime(x1):
-            # convert to floats, as the annotate command can't handle this case
-            x1 = date2num(x1)
-            x2 = date2num(x2)
         # create the shaded box
-        ax.add_patch(
-            Rectangle(
-                (x1, 0),
-                x2 - x1,
-                1,
-                facecolor=this_color,
-                edgecolor=this_color,
-                alpha=transparency,
-                transform=ax.get_xaxis_transform(),
-                clip_on=True,
-            )
+        ax.axvspan(
+            x1,
+            x2,
+            facecolor=this_color,
+            edgecolor=this_color,
+            alpha=transparency,
+            clip_on=True,
+            label=this_label if use_legend else "",
         )
         # create the label
-        if labels is not None:
-            this_label = labels[i] if not group_all else labels
-            if bool(this_label):
-                if use_legend:
-                    if group_all and i > 0:
-                        continue
-                    handles.append(Patch(facecolor=this_color, edgecolor=this_color, label=this_label, alpha=transparency))
-                    leg_labels.append(this_label)
-                else:
-                    ax.annotate(
-                        this_label,
-                        xy=(x1, 0.99),
-                        xycoords=ax.get_xaxis_transform(),
-                        horizontalalignment="left",
-                        verticalalignment="top",
-                        fontsize=15,
-                        rotation=-90,
-                        clip_on=True,
-                    )
-    # TODO: this should be sufficient, but doesn't seem to persist, so return them and reset them
-    # in the calling level function instead
-    # ax.legend(handles=handles, labels=leg_labels)
+        if bool(this_label) and not use_legend:
+            xy = (date2num(x1), 0.99) if is_datetime(x1) else (x1, 0.99)
+            ax.annotate(
+                this_label,
+                xy=xy,
+                xycoords=ax.get_xaxis_transform(),
+                horizontalalignment="left",
+                verticalalignment="top",
+                fontsize=15,
+                rotation=-90,
+                clip_on=True,
+            )
 
     # reset any limits that might have changed due to the patches
     ax.set_xlim(xlims)
     ax.set_ylim(ylims)
-    return handles, leg_labels
 
 
 #%% Functions - get_classification

@@ -159,6 +159,8 @@ def run_pytests(folder: Path, *args, **kwargs) -> int:
         from qtpy.QtWidgets import QApplication  # pylint: disable=import-outside-toplevel
     except ModuleNotFoundError:
         qapp = None
+    except ImportError:
+        qapp = None
     else:
         if QApplication.instance() is None:
             qapp = QApplication(sys.argv)
