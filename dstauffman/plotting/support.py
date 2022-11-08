@@ -1557,7 +1557,7 @@ def plot_phases(
             label=this_label if use_legend else "",
         )
         # create the label
-        if bool(this_label) and not use_legend:
+        if labels is not None and not use_legend and bool(this_label):
             xy = (date2num(x1), 0.99) if is_datetime(x1) else (x1, 0.99)
             ax.annotate(
                 this_label,
