@@ -1501,7 +1501,7 @@ def plot_phases(
     >>> labels = ["Part 1", "Phase 2", "Watch Out", "Final"]
     >>> colors = COLOR_LISTS["quat"]
     >>> plot_phases(ax, times, colors, labels, use_legend=False)
-    >>> ax.legend(loc="best")
+    >>> _ = ax.legend(loc="best")
     >>> plt.show(block=False) # doctest: +SKIP
 
     Close plot
