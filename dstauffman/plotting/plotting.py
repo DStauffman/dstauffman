@@ -56,7 +56,7 @@ else:
     from math import inf, isfinite  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    _Date = Union[float, datetime.datetime, np.datetime64]
+    _Date = Union[None, int, float, datetime.datetime, datetime.date, np.ndarray, np.datetime64]
 
 #%% Globals
 logger = logging.getLogger(__name__)
@@ -243,16 +243,16 @@ class Opts(Frozen):
         assert form in {"datetime", "numpy", "sec"}, f'Unexpected form of "{form}".'
         self.time_base = form
         self.time_unit = form
-        self.disp_xmin = convert_date(  # type: ignore[assignment]
+        self.disp_xmin = convert_date(
             self.disp_xmin, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
-        self.disp_xmax = convert_date(  # type: ignore[assignment]
+        self.disp_xmax = convert_date(
             self.disp_xmax, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
-        self.rms_xmin = convert_date(  # type: ignore[assignment]
+        self.rms_xmin = convert_date(
             self.rms_xmin, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
-        self.rms_xmax = convert_date(  # type: ignore[assignment]
+        self.rms_xmax = convert_date(
             self.rms_xmax, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
         return self

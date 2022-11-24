@@ -1819,7 +1819,7 @@ def make_connected_sets(
             max_innov = np.max(innov_mags)
         else:
             sorted_innovs = np.sort(innov_mags)
-            max_innov = sorted_innovs[int(np.ceil(mag_ratio * innov_mags.size)) - 1]
+            max_innov = sorted_innovs[int(np.ceil(mag_ratio * innov_mags.size)) - 1] if innov_mags.size > 0 else 0
         innov_cmap = ColorMap(colormap="autumn_r" if colormap is None else colormap, low=0, high=max_innov)
         colors_line = tuple(innov_cmap.get_color(x) for x in innov_mags[ix])
         colors_pred = colors_line

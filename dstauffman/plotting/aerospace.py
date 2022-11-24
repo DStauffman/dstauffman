@@ -814,7 +814,7 @@ def plot_innovations(
                 colormap=cat_colors,
                 **kwargs,
             )
-        if plot_by_number and field_one is not None:
+        if plot_by_number and field_one is not None and ~np.all(np.isnan(field_one)):
             this_number = None
             quad_name: Optional[str] = None  # type: ignore[annotation-unchecked]
             for (quad, quad_name) in number_field.items():
@@ -851,7 +851,7 @@ def plot_innovations(
                     colormap=number_colors,
                     **kwargs,
                 )
-        if plot_by_number and field_two is not None:
+        if plot_by_number and field_two is not None and ~np.all(np.isnan(field_two)):
             this_number = None
             for (quad, quad_name) in number_field.items():
                 if hasattr(kf2, quad):
@@ -959,7 +959,7 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
 
     name = kf1.name + " - " if kf1.name else ""
     description = name + "Focal Plane Sightings"
-    extra_text = f' (by {kwargs["color_by"]})' if "color_by" in kwargs and kwargs["color_by"] != "none" else ""
+    extra_text = f'(by {kwargs["color_by"]}) ' if "color_by" in kwargs and kwargs["color_by"] != "none" else ""
     logger.log(LogLevel.L4, "Plotting %s plots %s...", description, extra_text)
 
     # check for data
