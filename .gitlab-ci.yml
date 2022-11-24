@@ -31,7 +31,6 @@ stages:
 make_envs:
   stage: Environments
   script:
-  # Install dependencies for PySide6  (to fix bugs https://bugreports.qt.io/browse/PYSIDE-1547 & https://bugreports.qt.io/browse/QTBUG-89754)
   - apt-get update -qq && apt-get install -y -qq libopengl0
   # Create virtual environments
   - python --version
@@ -47,13 +46,13 @@ make_envs:
   - source static/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install black coverage[toml] flake8 h5py isort matplotlib mypy numpy pandas pprofile pyarrow pylint pylint-exit PyQt5-stubs PySide6 pytest qtpy scipy tblib
+  - python -m pip install black coverage[toml] flake8 h5py isort matplotlib mypy numpy pandas pprofile pyarrow pylint pylint-exit PyQt5 PyQt5-stubs pytest qtpy scipy tblib
   - deactivate
   - virtualenv everything
   - source everything/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage[toml] datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PySide6 pytest qtpy scipy tblib
+  - python -m pip install coverage[toml] datashader fastparquet h5py matplotlib mypy numba numpy pandas pprofile pyarrow PyQt5 pytest qtpy scipy tblib
   - deactivate
   - virtualenv poetry
   - source poetry/bin/activate
