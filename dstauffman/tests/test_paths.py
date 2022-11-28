@@ -91,7 +91,7 @@ class Test_list_python_files(unittest.TestCase):
 
     def test_nominal(self) -> None:
         files = dcs.list_python_files(self.folder)
-        for (file, exp) in zip(files, self.expected):
+        for (file, exp) in zip(sorted(files), self.expected):
             self.assertEqual(file, exp)
 
 
