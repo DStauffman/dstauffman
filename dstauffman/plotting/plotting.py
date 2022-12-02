@@ -29,7 +29,7 @@ from dstauffman import (
     histcounts,
     np_digitize,
 )
-from dstauffman.plotting.generic import make_bar_plot, make_time_plot
+from dstauffman.plotting.generic import make_bar_plot, make_difference_plot, make_time_plot
 from dstauffman.plotting.support import (
     ColorMap,
     figmenu,
@@ -315,10 +315,10 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
         plotting options
     ignore_empties : bool, optional
         Removes any entries from the plot and legend that contain only zeros or only NaNs
-    save_plot : bool, optional
-        Ability to overide the option in opts
     skip_setup_plots : bool, optional, default is False
         Whether to skip the setup_plots step, in case you are manually adding to an existing axis
+    save_plot : bool, optional
+        Ability to overide the option in opts
     kwargs : dict
         Remaining keyword arguments will be passed to make_time_plot
 
@@ -388,6 +388,127 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
         description,
         time,
         data,
+        time_units=time_units,
+        start_date=start_date,
+        rms_xmin=rms_xmin,
+        rms_xmax=rms_xmax,
+        disp_xmin=disp_xmin,
+        disp_xmax=disp_xmax,
+        single_lines=single_lines,
+        colormap=colormap,
+        use_mean=use_mean,
+        label_vert_lines=lab_vert,
+        plot_zero=plot_zero,
+        show_rms=show_rms,
+        legend_loc=legend_loc,
+        **kwargs,
+    )
+
+    # setup plots
+    if not skip_setup_plots:
+        setup_plots(fig, this_opts)
+    return fig
+
+
+#%% Functions - plot_time_difference
+def plot_time_difference(description, time_one, data_one, time_two, data_two, opts=None, *, ignore_empties=False, skip_setup_plots=False, **kwargs):
+    r"""
+    Plot multiple metrics over time.
+
+    Parameters
+    ----------
+    description : str
+        Name to label on the plots
+    time_one : 1D ndarray
+        time history
+    data_one : 0D, 1D, or 2D ndarray
+        data for corresponding time history, time is last dimension unless passing data_as_rows=False through
+    time_two : 1D ndarray
+        time history for series two
+    data_two : 0D, 1D, or 2D ndarray
+        data for corresponding time history, time is last dimension unless passing data_as_rows=False through
+    opts : class Opts, optional
+        plotting options
+    ignore_empties : bool, optional
+        Removes any entries from the plot and legend that contain only zeros or only NaNs
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step, in case you are manually adding to an existing axis
+    save_plot : bool, optional
+        Ability to overide the option in opts
+    kwargs : dict
+        Remaining keyword arguments will be passed to make_time_plot
+
+    Returns
+    -------
+    fig : object
+        figure handle, if None, no figure was created
+
+    See Also
+    --------
+    make_time_plot
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2022.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import plot_time_difference
+    >>> import matplotlib.pyplot as plt
+    >>> import numpy as np
+    >>> description = "Random Data"
+    >>> time_one = np.arange(0, 5, 1./12) + 2000
+    >>> data_one = np.random.rand(5, len(time_one)).cumsum(axis=1)
+    >>> data_one[:] = 10 * data_one / np.expand_dims(data_one[:, -1], axis=1)
+    >>> time_two = np.arange(0, 5, 0.5) + 2000
+    >>> data_two = np.random.rand(5, len(time_two)).cumsum(axis=1)
+    >>> data_two[:] = 10 * data_two / np.expand_dims(data_two[:, -1], axis=1)
+    >>> fig = plot_time_difference(description, time_one, data_one, time_two, data_two)
+
+    Date based version
+    >>> time1 = np.datetime64("2020-05-01 00:00:00", "ns") + 10**9*np.arange(0, 5*60, 5, dtype=np.int64)
+    >>> time2 = np.datetime64("2020-05-01 00:00:00", "ns") + 10**9*np.arange(0, 5*60, 30, dtype=np.int64)
+    >>> fig2 = plot_time_difference(description, time1, data_one, time2, data_two, time_units="datetime")
+
+    Close plots
+    >>> plt.close(fig)
+    >>> plt.close(fig2)
+
+    """
+    # check for valid data
+    if ignore_plot_data(data_one, ignore_empties) and ignore_plot_data(data_two, ignore_empties):
+        logger.log(LogLevel.L5, " %s plot skipped due to missing data.", description)
+        return None
+
+    # make local copy of opts that can be modified without changing the original
+    this_opts = Opts() if opts is None else opts.__class__(opts)
+    # opts overrides
+    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
+
+    # alias opts
+    # fmt: off
+    time_units   = kwargs.pop("time_units", this_opts.time_base)
+    start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
+    rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
+    rms_xmax     = kwargs.pop("rms_xmax", this_opts.rms_xmax)
+    disp_xmin    = kwargs.pop("disp_xmin", this_opts.disp_xmin)
+    disp_xmax    = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    single_lines = kwargs.pop("single_lines", this_opts.sing_line)
+    colormap     = kwargs.pop("colormap", this_opts.colormap)
+    use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    lab_vert     = kwargs.pop("label_vert_lines", this_opts.lab_vert)
+    plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
+    show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
+    legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    # fmt: on
+
+    # call wrapper function for most of the details
+    fig = make_difference_plot(
+        description=description,
+        time_one=time_one,
+        time_two=time_two,
+        data_one=data_one,
+        data_two=data_two,
         time_units=time_units,
         start_date=start_date,
         rms_xmin=rms_xmin,
