@@ -35,6 +35,7 @@ from dstauffman.plotting.support import (
     figmenu,
     get_classification,
     ignore_plot_data,
+    is_notebook,
     plot_classification,
     plot_second_yunits,
     storefig,
@@ -133,7 +134,7 @@ class Opts(Frozen):
         self.show_plot: bool  = True
         self.show_link: bool  = False
         self.plot_type: str   = "png"
-        self.show_warn: bool  = True
+        self.show_warn: bool  = not is_notebook()
         self.sub_plots: bool  = True
         self.sing_line: bool  = False
         self.disp_xmin: _Date = -inf

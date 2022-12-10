@@ -23,13 +23,14 @@ from .plotting  import Opts, suppress_plots, unsuppress_plots, plot_time_history
                            plot_time_difference, plot_correlation_matrix, plot_bar_breakdown, \
                            plot_histogram, setup_plots
 from .support   import DEFAULT_COLORMAP, DEFAULT_CLASSIFICATION, COLOR_LISTS, MyCustomToolbar, \
-                           ColorMap, close_all, get_nondeg_colorlists, ignore_plot_data, whitten, \
-                           get_figure_title, resolve_name, storefig, titleprefix, disp_xlimits, \
-                           zoom_ylim, figmenu, rgb_ints_to_hex, get_screen_resolution, \
-                           show_zero_ylim, plot_second_units_wrapper, plot_second_yunits, \
-                           get_rms_indices, plot_vert_lines, plot_phases, get_classification, \
-                           plot_classification, align_plots, z_from_ci, ci_from_z, \
-                           save_figs_to_pdf, save_images_to_pdf, add_datashaders, fig_ax_factory
+                           ColorMap, is_notebook, close_all, get_nondeg_colorlists, \
+                           ignore_plot_data, whitten, get_figure_title, resolve_name, storefig, \
+                           titleprefix, disp_xlimits, zoom_ylim, figmenu, rgb_ints_to_hex, \
+                           get_screen_resolution, show_zero_ylim, plot_second_units_wrapper, \
+                           plot_second_yunits, get_rms_indices, plot_vert_lines, plot_phases, \
+                           get_classification, plot_classification, align_plots, z_from_ci, \
+                           ci_from_z, save_figs_to_pdf, save_images_to_pdf, add_datashaders, \
+                           fig_ax_factory
 # fmt: on
 
 #%% Unit test

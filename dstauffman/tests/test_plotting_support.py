@@ -223,6 +223,17 @@ class Test_plotting_ColorMap(unittest.TestCase):
             plt.close(self.fig)
 
 
+#%% plotting.is_notebook
+class Test_plotting_is_notebook(unittest.TestCase):
+    r"""
+    Tests the plotting.is_notebook function with the following cases:
+        Nominal (assumed to not be a notebook)
+    """
+
+    def test_nominal(self) -> None:
+        self.assertFalse(plot.is_notebook())
+
+
 #%% plotting.close_all
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_close_all(unittest.TestCase):

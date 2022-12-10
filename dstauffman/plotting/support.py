@@ -204,7 +204,7 @@ class MyCustomToolbar:
         # to determine which figure actually triggered the button events.)
         self.fig_number = fig.number
         # Check if you have a canvas to draw on, and if not, return without creating buttons
-        if fig.canvas.toolbar is None:
+        if fig.canvas.toolbar is None or is_notebook():
             return
         # create buttons - Prev Plot
         icon = QIcon(str(get_images_dir() / "prev_plot.png"))
@@ -352,6 +352,38 @@ class ColorMap(Frozen):
         except AttributeError:  # pragma: no cover
             # for older matplotlib versions, use deprecated set_color_cycle
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
+
+
+#%% Functions - is_notebook
+def is_notebook() -> bool:
+    r"""
+    Determines if you are running in a Jupyter/IPython notebook or not.
+
+    Outputs
+    -------
+    bool
+        Whether you are in a notebook
+
+    Notes
+    -----
+    #.  Taken from https://stackoverflow.com/a/39662359/5042185 in December 2022.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import is_notebook
+    >>> print(is_notebook())
+    False
+
+    """
+    try:
+        shell = get_ipython().__class__.__name__
+        if shell == "ZMQInteractiveShell":
+            return True  # Jupyter notebook or qtconsole
+        if shell == "TerminalInteractiveShell":
+            return False  # Terminal running IPython
+        return False  # Other unknown type (?)
+    except NameError:
+        return False  # Likely standard Python interpreter
 
 
 #%% Functions - close_all
