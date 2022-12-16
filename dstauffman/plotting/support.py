@@ -317,7 +317,7 @@ class ColorMap(Frozen):
             high = num_colors - 1
         elif isinstance(colormap, colors.ListedColormap):
             low = 0
-            high = colormap.N
+            high = colormap.N - 1
         # get colormap based on high and low limits
         if colormap is None:
             cmap = plt.get_cmap(DEFAULT_COLORMAP)
@@ -327,6 +327,9 @@ class ColorMap(Frozen):
             cmap = None
         else:
             cmap = plt.get_cmap(colormap)
+            if isinstance(cmap, colors.ListedColormap):
+                low = 0
+                high = colormap.N - 1
         if cmap is None:
             self.smap = colormap.get_smap()
         else:
@@ -376,7 +379,7 @@ def is_notebook() -> bool:
 
     """
     try:
-        shell = get_ipython().__class__.__name__
+        shell = get_ipython().__class__.__name__  # type: ignore[name-defined]
         if shell == "ZMQInteractiveShell":
             return True  # Jupyter notebook or qtconsole
         if shell == "TerminalInteractiveShell":

@@ -412,7 +412,9 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
 
 
 #%% Functions - plot_time_difference
-def plot_time_difference(description, time_one, data_one, time_two, data_two, opts=None, *, ignore_empties=False, skip_setup_plots=False, **kwargs):
+def plot_time_difference(
+    description, time_one, data_one, time_two, data_two, opts=None, *, ignore_empties=False, skip_setup_plots=False, **kwargs
+):
     r"""
     Plot multiple metrics over time.
 
@@ -464,16 +466,18 @@ def plot_time_difference(description, time_one, data_one, time_two, data_two, op
     >>> time_two = np.arange(0, 5, 0.5) + 2000
     >>> data_two = np.random.rand(5, len(time_two)).cumsum(axis=1)
     >>> data_two[:] = 10 * data_two / np.expand_dims(data_two[:, -1], axis=1)
-    >>> fig = plot_time_difference(description, time_one, data_one, time_two, data_two)
+    >>> figs1 = plot_time_difference(description, time_one, data_one, time_two, data_two)
 
     Date based version
     >>> time1 = np.datetime64("2020-05-01 00:00:00", "ns") + 10**9*np.arange(0, 5*60, 5, dtype=np.int64)
     >>> time2 = np.datetime64("2020-05-01 00:00:00", "ns") + 10**9*np.arange(0, 5*60, 30, dtype=np.int64)
-    >>> fig2 = plot_time_difference(description, time1, data_one, time2, data_two, time_units="datetime")
+    >>> figs2 = plot_time_difference(description, time1, data_one, time2, data_two, time_units="datetime")
 
     Close plots
-    >>> plt.close(fig)
-    >>> plt.close(fig2)
+    >>> for fig in figs1:
+    ...     plt.close(fig)
+    >>> for fig in figs2:
+    ...     plt.close(fig)
 
     """
     # check for valid data

@@ -11,7 +11,7 @@ Notes
 #%% Import
 from pathlib import Path
 
-from setuptools import setup
+from setuptools import setup  # type: ignore[import]
 
 
 #%% Support functions - readme

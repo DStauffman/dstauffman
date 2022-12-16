@@ -249,7 +249,11 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     cross_prod = np.cross(vec1.T, vec2.T).T
     temp = np.sqrt(np.sum(cross_prod**2, axis=0))
     # return dot product result for sums greater than 1 (due to small numerical inconsistencies near 180 deg separation)
-    cross_result = np.arcsin(temp, out=dot_result.copy(), where=temp <= 1.0)
+    if temp.ndim == 0:
+        # Note: this seems like a bug in numpy to have to have this branch
+        cross_result = np.arcsin(temp) if temp <= 1.0 else dot_result
+    else:
+        cross_result = np.arcsin(temp, out=dot_result.copy(), where=temp <= 1.0)
     return np.where(dot_result > np.pi / 2, np.pi - cross_result, cross_result)
 
 
