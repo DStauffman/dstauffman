@@ -329,7 +329,7 @@ class ColorMap(Frozen):
             cmap = plt.get_cmap(colormap)
             if isinstance(cmap, colors.ListedColormap):
                 low = 0
-                high = colormap.N - 1
+                high = cmap.N - 1
         if cmap is None:
             self.smap = colormap.get_smap()
         else:
