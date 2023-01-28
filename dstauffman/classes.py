@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 #.  Added mutable integer Counter class in January 2016.
 #.  Updated by David C. Stauffer in June 2020 to make MetaClass methods public for direct use if desired.
-"""
+"""  # pylint: disable=too-many-lines
 
 #%% Imports
 from __future__ import annotations
@@ -37,15 +37,16 @@ from typing import (
 import unittest
 import warnings
 
-from slog import is_dunder
+from slog import IntEnumPlus, is_dunder
 
-from dstauffman.constants import HAVE_H5PY, HAVE_NUMPY, HAVE_PANDAS
+from dstauffman.constants import HAVE_H5PY, HAVE_NUMPY, HAVE_PANDAS, NP_DATETIME_FORM
+from dstauffman.time import is_datetime
 from dstauffman.utils import find_in_range
 
 if HAVE_H5PY:
     import h5py
 if HAVE_NUMPY:
-    from numpy import all as np_all, datetime64, inf, ndarray, printoptions
+    from numpy import all as np_all, datetime64, inf, int64, ndarray, printoptions
 else:
     from array import array as ndarray  # type: ignore[assignment]
     from math import inf
@@ -74,8 +75,9 @@ def _frozen(set_: Callable) -> Callable:
     a class derived from Frozen.
 
     """
-    # define a custom set_attr function (instead of default setattr)
+
     def set_attr(self, name, value):
+        r"""Define a custom set_attr function (instead of default setattr)."""
         if hasattr(self, name):
             # If attribute already exists, simply set it
             set_(self, name, value)
@@ -99,6 +101,8 @@ def save_hdf5(
     self,
     filename: Optional[Path] = None,
     *,
+    file: Optional[h5py.File] = None,
+    base_group: str = "self",
     meta: Optional[Dict[str, Any]] = None,
     exclusions: Optional[_Sets] = None,
     **kwargs,
@@ -135,20 +139,21 @@ def save_hdf5(
     >>> save_hdf5(data, filename, meta=meta, exclusions=exclusions)  # doctest: +SKIP
 
     """
-    # exit if no filename is given
-    if filename is None:
-        return
-    # alias keyword options
-    compression = kwargs.pop("compression", "gzip")
-    shuffle = kwargs.pop("shuffle", True)
-    # Save data
-    with h5py.File(filename, "w") as file:
-        grp = file.create_group("self")
+
+    def _save_data(self, *, file: h5py.File, base_group: str, meta, exclusions, **kwargs):
+        # alias keyword options
+        compression = kwargs.pop("compression", "gzip")
+        shuffle = kwargs.pop("shuffle", True)
+        # create group
+        grp = file.create_group(base_group)
+        # write meta data
         if meta is not None:
             for (key, value) in meta.items():
                 grp.attrs[key] = value
+        # figure out how to loop over self
         types = (dict, DataFrame) if HAVE_PANDAS else (dict,)
         temp = vars(self) if not isinstance(self, types) else self
+        # loop and write data by name and type criteria
         for key in temp:
             if is_dunder(key):
                 continue
@@ -156,6 +161,13 @@ def save_hdf5(
                 continue
             value = temp[key]
             if value is not None:
+                if isinstance(value, dict):
+                    _save_data(value, file=file, base_group=f"{base_group}/{key}", meta=None, exclusions=exclusions, **kwargs)
+                    continue
+                if hasattr(value, "__metaclass__") and value.__metaclass__ is Frozen.__metaclass__:
+                    # TODO: is their a more generic way other than just checking the metaclass?
+                    _save_data(value, file=file, base_group=f"{base_group}/{key}", meta=None, exclusions=exclusions, **kwargs)
+                    continue
                 if isinstance(value, (str, bytes)):
                     force_no_compression = True
                 else:
@@ -172,6 +184,18 @@ def save_hdf5(
                         grp.create_dataset(key, data=value, compression=compression, shuffle=shuffle, **kwargs)
                     except TypeError as exception:
                         raise TypeError(f'Problem converting field: "{key}"') from exception
+
+    # check for nominal process of creating new file
+    if file is None:
+        # exit if no filename
+        if filename is None:
+            return
+        # Save data
+        with h5py.File(filename, "w") as new_file:
+            _save_data(self, file=new_file, base_group=base_group, meta=meta, exclusions=exclusions, **kwargs)
+        return
+    # if file is given, then continue writing to the already open file
+    _save_data(self, file=file, base_group=base_group, meta=meta, exclusions=exclusions, **kwargs)
 
 
 #%% Methods - load_hdf5
@@ -236,6 +260,25 @@ def load_hdf5(
     >>> (data, meta) = load_hdf5(None, filename, return_meta=True)  # doctest: +SKIP
 
     """
+
+    def _load_dataset(out: Any, group: h5py.Group, prefix: str, limit_fields: bool) -> h5py.Dataset:
+        for field in group:
+            if limit_fields and not hasattr(out, field):
+                continue
+                # raise AttributeError(f'type object "{out.__name__}" has not attribute "{field}"')
+            if isinstance(group[field], h5py.Group):
+                if hasattr(out, field):
+                    _load_dataset(getattr(out, field), group[field], prefix=f"{prefix}/field", limit_fields=limit_fields)
+                else:
+                    if limit_fields:
+                        continue  # or raise AttributeError?
+                    temp = type("Temp", (object,), {})
+                    _load_dataset(temp, group[field], prefix=f"{prefix}/field", limit_fields=limit_fields)
+                    setattr(out, field, temp)
+                continue
+            # Note grp[field].value is now grp[field][()] because of updated HDF5 API
+            setattr(out, field, group[field][()])
+
     if filename is None:
         raise ValueError("No file specified to load.")
     if return_meta:
@@ -256,16 +299,11 @@ def load_hdf5(
         limit_fields = False  # TODO: set to True or have option to raise or not raise error?
     with h5py.File(filename, "r") as file:
         for key in file:
-            grp = file[key]
+            group = file[key]
             if return_meta:
-                for (key2, value) in grp.attrs.items():
+                for (key2, value) in group.attrs.items():
                     meta[key2] = value
-            for field in grp:
-                if limit_fields and not hasattr(out, field):
-                    continue
-                    # raise AttributeError(f'type object "{out.__name__}" has not attribute "{field}"')
-                # Note grp[field].value is now grp[field][()] because of updated HDF5 API
-                setattr(out, field, grp[field][()])
+            _load_dataset(out, group=group, prefix=f"/{key}", limit_fields=limit_fields)
     if return_meta:
         return (out, meta)  # type: ignore[return-value]
     return out
@@ -351,6 +389,15 @@ def save_method(
             restore_kwargs = self._save_convert_hdf5()  # pylint: disable=protected-access
         else:
             restore_kwargs = {}
+        try:
+            additional_exclusions = self._exclude_fields()  # pylint: disable=protected-access
+        except AttributeError:
+            pass
+        else:
+            if exclusions is None:
+                exclusions = set(additional_exclusions)
+            else:
+                exclusions |= set(additional_exclusions)
         save_hdf5(self, filename, meta=meta, exclusions=exclusions, **kwargs)
         if hasattr(self, "_save_restore_hdf5") and callable(self._save_restore_hdf5):  # pylint: disable=protected-access
             self._save_restore_hdf5(**restore_kwargs)  # pylint: disable=protected-access
@@ -396,6 +443,43 @@ def load_method(
         if hasattr(out, "_save_restore_hdf5") and callable(out._save_restore_hdf5):  # pylint: disable=protected-access
             out._save_restore_hdf5(**kwargs)  # pylint: disable=protected-access
     return out
+
+
+#%% save_convert_hdf5
+def save_convert_hdf5(self) -> Dict[str, bool]:
+    r"""Supporting class for saving to HDF5."""
+    try:
+        datetime_fields = self._datetime_fields()  # pylint: disable=protected-access
+    except AttributeError:
+        datetime_fields = tuple()
+    convert_dates = all(map(lambda key: is_datetime(getattr(self, key)), datetime_fields))
+    if convert_dates:
+        assert HAVE_NUMPY, "Must have numpy to convert the dates."
+        for key in datetime_fields:
+            if (value := getattr(self, key)) is not None:
+                setattr(self, key, value.astype(int64))
+    return {"convert_dates": convert_dates}
+
+
+#%% save_restore_hdf5
+def save_restore_hdf5(self, *, convert_dates: bool = False, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+    r"""Supporting class for loading from HDF5."""
+    if convert_dates:
+        assert HAVE_NUMPY, "Must have numpy to convert dates."
+        try:
+            datetime_fields = self._datetime_fields()  # pylint: disable=protected-access
+        except AttributeError:
+            datetime_fields = tuple()
+        for key in datetime_fields:
+            if (value := getattr(self, key)) is not None:
+                setattr(self, key, value.astype(NP_DATETIME_FORM))
+    try:
+        string_fields = self._string_fields()  # pylint: disable=protected-access
+    except AttributeError:
+        string_fields = tuple()
+    for key in string_fields:
+        if not isinstance(getattr(self, key), str):
+            setattr(self, key, getattr(self, key).decode("utf-8"))
 
 
 #%% pprint_dict
@@ -481,6 +565,8 @@ def pprint_dict(
                 if max_elements == 0:
                     if isinstance(this_value, ndarray):
                         this_line = f"{this_indent}{this_key}{this_pad} = <ndarray {this_value.dtype} {this_value.shape}>"
+                    elif isinstance(this_value, IntEnumPlus):  # TODO: may not be necessary on newer versions of Python?
+                        this_line = f"{this_indent}{this_key}{this_pad} = {this_value.__class__.__name__}"
                     else:
                         this_line = f"{this_indent}{this_key}{this_pad} = {type(this_value)}"
                 else:
@@ -677,6 +763,11 @@ class SaveAndLoad(type):
             setattr(cls, "save", save_method)
         if not hasattr(cls, "load"):
             setattr(cls, "load", classmethod(load_method))
+        if not hasattr(cls, "_save_convert_hdf5"):
+            setattr(cls, "_save_convert_hdf5", save_convert_hdf5)
+        if not hasattr(cls, "_save_restore_hdf5"):
+            setattr(cls, "_save_restore_hdf5", save_restore_hdf5)
+
         super().__init__(name, bases, dct)
 
 
@@ -927,6 +1018,7 @@ class FixedDict(dict):
     def update(self, mapping=(), **kwargs) -> None:  # type: ignore[override]
         r"""
         D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
+
         If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
         If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
         In either case, this is followed by: for k in F:  D[k] = F[k]

@@ -86,7 +86,7 @@ def cost_wrapper(  # pylint: disable=unused-argument
 
     # calculate the innovations
     innovs = sub_result - sub_truth
-    return innovs  # type: ignore[no-any-return]
+    return innovs
 
 
 #%% Functions - get_parameter

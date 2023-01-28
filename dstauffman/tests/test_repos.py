@@ -309,7 +309,7 @@ class Test_make_python_init(unittest.TestCase):
         self.folder   = dcs.get_root_dir()
         self.text     = "from .matlab import load_matlab"
         self.text2    = "from .matlab    import load_matlab"
-        self.line_num = 7
+        self.line_num = 8
         self.folder2  = dcs.get_tests_dir()
         self.filepath = self.folder2 / "temp_file.py"
         self.filename = self.folder2 / "__init__2.py"
@@ -338,7 +338,7 @@ class Test_make_python_init(unittest.TestCase):
     def test_big_wrap(self) -> None:
         text = dcs.make_python_init(self.folder, wrap=1000)
         lines = text.split("\n")
-        self.assertEqual(lines[self.line_num - 3][0 : len(self.text2)], self.text2)
+        self.assertEqual(lines[self.line_num - 4][0 : len(self.text2)], self.text2)
 
     def test_small_wrap(self) -> None:
         with self.assertRaises(ValueError) as context:

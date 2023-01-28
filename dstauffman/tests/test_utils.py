@@ -1714,7 +1714,8 @@ class Test_linear_interp(unittest.TestCase):
             np.random.shuffle(ix)
         with self.assertRaises(ValueError) as context:
             dcs.linear_interp(self.x, xp[ix], yp[ix], assume_sorted=False, extrapolate=False)
-        self.assertEqual(str(context.exception), "A value in x_new is below the interpolation range.")
+        text = str(context.exception)
+        self.assertTrue(text.startswith("A value ") and "in x_new is below the interpolation range" in text)
         y = dcs.linear_interp(self.x, xp[ix], yp[ix], assume_sorted=False, extrapolate=True)
         np.testing.assert_array_almost_equal(y, self.y, 12)
         y = dcs.linear_interp(self.x, xp[ix], yp[ix], left=0.7, right=750.0, assume_sorted=False, extrapolate=True)
@@ -1746,7 +1747,8 @@ class Test_linear_lowpass_interp(unittest.TestCase):
         self.xp[-1] = 8.0
         with self.assertRaises(ValueError) as context:
             dcs.linear_lowpass_interp(self.x, self.xp, self.yp)
-        self.assertEqual(str(context.exception), "A value in x_new is above the interpolation range.")
+        text = str(context.exception)
+        self.assertTrue(text.startswith("A value ") and "in x_new is above the interpolation range" in text)
         y = dcs.linear_lowpass_interp(self.x, self.xp, self.yp, extrapolate=True)
         self.assertTrue(np.all(y < 5.0))
 

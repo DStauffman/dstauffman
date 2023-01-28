@@ -447,7 +447,6 @@ def compare_two_classes(
         same = attrs1 & attrs2
         for this_attr in sorted(same):
             if exclude is not None and this_attr in exclude:
-                # TODO: what if only in one and not the other?  Should they still be excluded?
                 continue
             # alias the attributes
             attr1 = inspect.getattr_static(c1, this_attr)
@@ -505,6 +504,9 @@ def compare_two_classes(
         # find the attributes in one but not the other, if any, then this test fails
         diff = attrs1 ^ attrs2
         for this_attr in sorted(diff):
+            if exclude is not None and this_attr in exclude:
+                # TODO: Should this case be allowed, or is it still a failure?
+                continue
             if is_subset and this_attr in attrs2:
                 # if only checking that c1 is a subset of c2, then skip this condition
                 continue
@@ -533,6 +535,7 @@ def compare_two_dicts(
     names: Optional[Union[Tuple[str, str], List[str]]] = None,
     is_subset: bool = False,
     tolerance: Optional[float] = None,
+    exclude: Optional[Set[str]] = None,
 ) -> bool:
     r"""
     Compare two dictionaries for the same keys, and the same value of those keys.
@@ -583,6 +586,8 @@ def compare_two_dicts(
         # compare the keys that are in both
         same = set(d1) & set(d2)
         for key in sorted(same):
+            if exclude is not None and key in exclude:
+                continue
             s1 = d1[key]
             s2 = d2[key]
             if isinstance(s1, dict) and isinstance(s2, dict):
@@ -602,6 +607,9 @@ def compare_two_dicts(
         # find keys in one but not the other, if any, then this test fails
         diff = set(d1) ^ set(d2)
         for key in sorted(diff):
+            if exclude is not None and key in exclude:
+                # TODO: Should this case be allowed, or is it still a failure?
+                continue
             if is_subset and key in d2:
                 # if only checking that d1 is a subset of d2, then skip this condition
                 continue
