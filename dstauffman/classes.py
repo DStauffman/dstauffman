@@ -446,12 +446,15 @@ def load_method(
 
 
 #%% save_convert_hdf5
-def save_convert_hdf5(self) -> Dict[str, bool]:
+def save_convert_hdf5(self, **kwargs: Any) -> Dict[str, bool]:
     r"""Supporting class for saving to HDF5."""
-    try:
-        datetime_fields = self._datetime_fields()  # pylint: disable=protected-access
-    except AttributeError:
-        datetime_fields = tuple()
+    if "datetime_fields" in kwargs:
+        datetime_fields = kwargs["datetime_fields"]
+    else:
+        try:
+            datetime_fields = self._datetime_fields()  # pylint: disable=protected-access
+        except AttributeError:
+            datetime_fields = tuple()
     convert_dates = all(map(lambda key: is_datetime(getattr(self, key)), datetime_fields))
     if convert_dates:
         assert HAVE_NUMPY, "Must have numpy to convert the dates."
@@ -480,6 +483,14 @@ def save_restore_hdf5(self, *, convert_dates: bool = False, **kwargs: Any) -> No
     for key in string_fields:
         if not isinstance(getattr(self, key), str):
             setattr(self, key, getattr(self, key).decode("utf-8"))
+
+
+#%% pprint
+def pprint(self, return_text: bool = False, **kwargs: Any) -> Optional[str]:
+    r"""Displays a pretty print version of the class."""
+    name = kwargs.pop("name") if "name" in kwargs else self.__class__.__name__
+    text = pprint_dict(self.__dict__, name=name, **kwargs)
+    return text if return_text else None
 
 
 #%% pprint_dict

@@ -280,6 +280,7 @@ def make_generic_plot(
     # some basic flags and checks
     assert plot_type in {
         "time",
+        "scatter",
         "bar",
         "errorbar",
         "cats",
@@ -517,6 +518,9 @@ def make_generic_plot(
             bottoms = np.concatenate((np.zeros((1, len(time_one))), np.cumsum(data_one, axis=0)), axis=0)
         else:
             bottoms = np.concatenate((np.zeros((len(time_one), 1)), np.cumsum(data_one, axis=1)), axis=1)
+    elif plot_type == "scatter":
+        symbol_one = "."
+        symbol_two = "."
     elif is_cat_plot:
         symbol_one = ":"
         symbol_two = "."
@@ -1019,6 +1023,7 @@ def make_time_plot(
     label_vert_lines: bool = True,
     use_datashader: bool = False,
     fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    plot_type: str = "time",  # {"time", "scatter"}
 ):
     r"""
     Generic data versus time plotting routine.
@@ -1076,7 +1081,7 @@ def make_time_plot(
 
     """
     return make_generic_plot(
-        plot_type="time",
+        plot_type=plot_type,
         description=description,
         time_one=time,
         data_one=data,

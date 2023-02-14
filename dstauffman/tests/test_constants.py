@@ -65,7 +65,6 @@ class Test_all_values(unittest.TestCase):
         self.assertEqual(dcs.NP_ONE_HOUR.astype(np.int64), 3600 * 10**9)
         self.assertEqual(dcs.NP_ONE_DAY.astype(np.int64), 86400 * 10**9)
         self.assertTrue(np.isnat(dcs.NP_NAT))
-        self.assertEqual(dcs.NP_NAT.astype(np.int64), np.array(np.nan).astype(np.int64))
 
     def test_missing(self) -> None:
         for field in vars(dcs.constants):

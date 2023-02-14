@@ -1501,7 +1501,7 @@ def is_datetime(time: ArrayLike) -> bool:
 
     """
     out = False
-    if isinstance(time, datetime.datetime) or (  # type: ignore[unreachable]
+    if isinstance(time, datetime.datetime) or (
         hasattr(time, "dtype") and np.issubdtype(time.dtype, np.datetime64)
     ):
         out = True
@@ -1731,7 +1731,7 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
 #%% linear_interp
 def linear_interp(x, xp, yp, *, left=None, right=None, assume_sorted=False, extrapolate=False):
     r"""
-    Interpolates a function by holding at the most recent value.
+    Interpolates a function using linear interpolation.
 
     Parameters
     ----------
@@ -1740,15 +1740,19 @@ def linear_interp(x, xp, yp, *, left=None, right=None, assume_sorted=False, extr
     xp: 1-D sequence of floats
         The x-coordinates of the data points, must be increasing if argument period is not specified. Otherwise, xp is internally sorted after normalizing the periodic boundaries with xp = xp % period.
     yp: 1-D sequence of float or complex
-        The y-coordinates of the data points, same length as xp.
-    left: int or float, optional, default is np.nan
-        Value to use for any value less that all points in xp
+        The y-coordinates of the data points, same length as xp
+    left: int or float, optional, default is yp[0]
+        Value to use for any value less than all points in xp
+    right: int or float, optional, default is yp[-1]
+        Value to use for any value greater than all points in xp
     assume_sorted : bool, optional, default is False
         Whether you can assume the data is sorted and do simpler (i.e. faster) calculations
+    extrapolate : bool, optional, default is False
+        Whether to allow function to extrapolate data on either end
 
     Returns
     -------
-    y : float or complex (corresponding to fp) or ndarray
+    y : float or complex (corresponding to yp) or ndarray
         The interpolated values, same shape as x.
 
     Notes
@@ -1798,7 +1802,7 @@ def linear_lowpass_interp(
     x, xp, yp, *, assume_sorted=False, extrapolate=False, filt_order=2, filt_freq=0.01, filt_samp=1.0, **kwargs
 ):
     r"""
-    Interpolates a function by holding at the most recent value.
+    Interpolates a function using linear interpolation along with a configurable low pass filter.
 
     Parameters
     ----------
@@ -1808,14 +1812,22 @@ def linear_lowpass_interp(
         The x-coordinates of the data points, must be increasing if argument period is not specified. Otherwise, xp is internally sorted after normalizing the periodic boundaries with xp = xp % period.
     yp: 1-D sequence of float or complex
         The y-coordinates of the data points, same length as xp.
-    left: int or float, optional, default is np.nan
-        Value to use for any value less that all points in xp
     assume_sorted : bool, optional, default is False
         Whether you can assume the data is sorted and do simpler (i.e. faster) calculations
+    extrapolate : bool, optional, default is False
+        Whether to allow function to extrapolate data on either end
+    filt_order : int, optional, default is 2
+        Low pass filter order
+    filt_freq : float, optional, default is 0.01
+        Default filter frequency
+    filt_samp : float, optional, default is 1.0
+        Default filter sample rate
+    kwargs : Any
+        Additional key-word arguments to pass through to scipy.signal.butter
 
     Returns
     -------
-    y : float or complex (corresponding to fp) or ndarray
+    y : float or complex (corresponding to yp) or ndarray
         The interpolated values, same shape as x.
 
     Notes

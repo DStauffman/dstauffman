@@ -20,7 +20,7 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -2052,7 +2052,9 @@ def save_images_to_pdf(
 
 
 #%% add_datashaders
-def add_datashaders(datashaders):
+def add_datashaders(
+    datashaders: List[Dict[str, Any]], threshold: float = 0.8, max_px: int = 6, how: str = "over", zorder: Optional[int] = None
+):
     r"""Adds the collection of datashaders to the axes."""
     if not HAVE_DS:
         raise RuntimeError("You must have datashader installed to execute this.")
@@ -2092,7 +2094,8 @@ def add_datashaders(datashaders):
             vmax=vmax,
             x_range=this_axes.get_xlim(),
             y_range=this_axes.get_ylim(),
-            shade_hook=partial(tf.dynspread, threshold=0.8, max_px=6, how="over"),
+            shade_hook=partial(tf.dynspread, threshold=threshold, max_px=max_px, how=how),
+            zorder=zorder,
         )
 
 
