@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 import unittest
 
 from dstauffman import HAVE_NUMPY
@@ -15,7 +15,8 @@ import dstauffman.aerospace as space
 if HAVE_NUMPY:
     import numpy as np
 
-#%% aerospace.rot
+
+# %% aerospace.rot
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_rot(unittest.TestCase):
     r"""
@@ -66,7 +67,7 @@ class Test_aerospace_rot(unittest.TestCase):
             space.rot(np.pi / 2, 2)
 
 
-#%% aerospace.drot
+# %% aerospace.drot
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_drot(unittest.TestCase):
     r"""
@@ -76,7 +77,7 @@ class Test_aerospace_drot(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% aerospace.vec_cross
+# %% aerospace.vec_cross
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_vec_cross(unittest.TestCase):
     r"""
@@ -100,7 +101,7 @@ class Test_aerospace_vec_cross(unittest.TestCase):
         np.testing.assert_array_equal(c, self.c)
 
 
-#%% aerospace.vec_angle
+# %% aerospace.vec_angle
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_vec_angle(unittest.TestCase):
     r"""
@@ -198,7 +199,7 @@ class Test_aerospace_vec_angle(unittest.TestCase):
         self.assertAlmostEqual(angle, self.exp3, 14)
 
 
-#%% aerospace.cart2sph
+# %% aerospace.cart2sph
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_cart2sph(unittest.TestCase):
     r"""
@@ -248,7 +249,7 @@ class Test_aerospace_cart2sph(unittest.TestCase):
         np.testing.assert_array_almost_equal(z, z2, 14)
 
 
-#%% aerospace.sph2cart
+# %% aerospace.sph2cart
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_sph2cart(unittest.TestCase):
     r"""
@@ -298,7 +299,7 @@ class Test_aerospace_sph2cart(unittest.TestCase):
         np.testing.assert_array_almost_equal(rad, rad2, 14)
 
 
-#%% aerospace.rv2dcm
+# %% aerospace.rv2dcm
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_rv2dcm(unittest.TestCase):
     r"""
@@ -325,6 +326,6 @@ class Test_aerospace_rv2dcm(unittest.TestCase):
         np.testing.assert_array_almost_equal(dcm, exp, decimal=14)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

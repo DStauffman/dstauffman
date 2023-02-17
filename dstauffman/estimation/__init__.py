@@ -7,7 +7,7 @@ Notes
 #.  Moved into subfolder by David C. Stauffer in July 2020.
 """
 
-#%% Imports
+# %% Imports
 # fmt: off
 from .batch    import OptiOpts, OptiParam, BpeResults, CurrentResults, validate_opti_opts, run_bpe
 from .kalman   import calculate_kalman_gain, calculate_kalman_gain_opt, calculate_prediction, \
@@ -18,6 +18,6 @@ from .smoother import bf_smoother
 from .support  import get_parameter, set_parameter
 # fmt: on
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     pass

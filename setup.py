@@ -8,13 +8,13 @@ Notes
     is ever so desired.
 """
 
-#%% Import
+# %% Import
 from pathlib import Path
 
 from setuptools import setup  # type: ignore[import]
 
 
-#%% Support functions - readme
+# %% Support functions - readme
 def readme():
     r"""Opens the README.rst file for additional descriptions."""
     filename = Path(__file__).resolve().parent / "README.rst"
@@ -22,7 +22,7 @@ def readme():
         return file.read()
 
 
-#%% Support functions - get_version
+# %% Support functions - get_version
 def get_version():
     r"""Reads the version information from the library."""
     filename = Path(__file__).resolve().parent.joinpath("dstauffman", "version.py")
@@ -34,7 +34,7 @@ def get_version():
     raise RuntimeError("Unable to load version information.")
 
 
-#%% Setup
+# %% Setup
 setup(
     name="dstauffman",
     version=get_version(),

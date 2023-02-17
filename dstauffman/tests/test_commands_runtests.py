@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 import argparse
 import unittest
 from unittest.mock import Mock, patch
@@ -15,7 +15,7 @@ import dstauffman as dcs
 import dstauffman.commands as commands
 
 
-#%% commands.parse_tests
+# %% commands.parse_tests
 class Test_commands_parse_tests(unittest.TestCase):
     r"""
     Tests the commands.parse_tests function with the following cases:
@@ -64,7 +64,7 @@ class Test_commands_parse_tests(unittest.TestCase):
         self.assertEqual(args, self.expected)
 
 
-#%% commands.execute_tests
+# %% commands.execute_tests
 class Test_commands_execute_tests(unittest.TestCase):
     r"""
     Tests the commands.execute_tests function with the following cases:
@@ -133,7 +133,7 @@ class Test_commands_execute_tests(unittest.TestCase):
         mocker.assert_called_once_with(self.folder, cov_file=None, report=False)
 
 
-#%% commands.parse_coverage
+# %% commands.parse_coverage
 class Test_commands_parse_coverage(unittest.TestCase):
     r"""
     Tests the commands.parse_coverage function with the following cases:
@@ -142,7 +142,7 @@ class Test_commands_parse_coverage(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% commands.execute_coverage
+# %% commands.execute_coverage
 class Test_commands_execute_coverage(unittest.TestCase):
     r"""
     Tests the commands.execute_coverage function with the following cases:
@@ -151,6 +151,6 @@ class Test_commands_execute_coverage(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

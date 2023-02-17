@@ -10,7 +10,7 @@ Notes
     numeric algorithms are re-coded from external sources to avoid any potential proprietary issues.
 """  # pylint: disable=too-many-lines
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 from copy import deepcopy
@@ -54,10 +54,11 @@ if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
 
-#%% Globals
+# %% Globals
 logger = logging.getLogger(__name__)
 
-#%% OptiOpts
+
+# %% OptiOpts
 class OptiOpts(Frozen):
     r"""
     Optimization options for the batch parameter estimator.
@@ -121,7 +122,7 @@ class OptiOpts(Frozen):
         return True
 
 
-#%% OptiParam
+# %% OptiParam
 class OptiParam(Frozen):
     r"""
     Optimization parameter to be estimated by the batch parameters estimator.
@@ -250,7 +251,7 @@ class OptiParam(Frozen):
         return names
 
 
-#%% BpeResults
+# %% BpeResults
 class BpeResults(Frozen, metaclass=SaveAndLoad):
     r"""
     Batch Parameter Estimator Results.
@@ -378,7 +379,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         return out
 
 
-#%% CurrentResults
+# %% CurrentResults
 class CurrentResults(Frozen, metaclass=SaveAndLoad):
     r"""
     Current results used as temporary values through the analysis.
@@ -414,7 +415,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
         return "\n".join(text)
 
 
-#%% _print_divider
+# %% _print_divider
 def _print_divider(new_line: bool = True, level: int = LogLevel.L5) -> None:
     r"""
     Print some characters to the std out to break apart the different stpes within the model.
@@ -436,7 +437,7 @@ def _print_divider(new_line: bool = True, level: int = LogLevel.L5) -> None:
     logger.log(level, "******************************")
 
 
-#%% _function_wrapper
+# %% _function_wrapper
 @overload
 def _function_wrapper(
     *,
@@ -525,7 +526,7 @@ def _function_wrapper(
     return innovs  # type: ignore[no-any-return]
 
 
-#%% _parfor_function_wrapper
+# %% _parfor_function_wrapper
 def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: Dict[str, Any]) -> Union[_N, MultipassExceptionWrapper]:
     r"""
     Wrapper to _function_wrapper specifically for the purposes of parallelizing the inner loop evaluations.
@@ -564,7 +565,7 @@ def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: Dict[str
     return innovs
 
 
-#%% _finite_differences
+# %% _finite_differences
 def _finite_differences(
     opti_opts: OptiOpts,
     model_args: Dict[str, Any],
@@ -703,7 +704,7 @@ def _finite_differences(
     return (jacobian, gradient, hessian)
 
 
-#%% _levenberg_marquardt
+# %% _levenberg_marquardt
 @ncjit
 def _levenberg_marquardt(jacobian: _M, innovs: _N, lambda_: float = 0.0) -> _N:
     r"""
@@ -752,7 +753,7 @@ def _levenberg_marquardt(jacobian: _M, innovs: _N, lambda_: float = 0.0) -> _N:
     return delta_param  # type: ignore[no-any-return]
 
 
-#%% _predict_func_change
+# %% _predict_func_change
 @ncjit
 def _predict_func_change(delta_param: _N, gradient: _M, hessian: _M) -> float:
     r"""
@@ -802,7 +803,7 @@ def _predict_func_change(delta_param: _N, gradient: _M, hessian: _M) -> float:
     return delta_func  # type: ignore[return-value]
 
 
-#%% _check_for_convergence
+# %% _check_for_convergence
 def _check_for_convergence(opti_opts: OptiOpts, cosmax: float, delta_step_len: float, pred_func_change: float) -> bool:
     r"""Check for convergence."""
     # initialize the output and assume not converged
@@ -836,7 +837,7 @@ def _check_for_convergence(opti_opts: OptiOpts, cosmax: float, delta_step_len: f
     return convergence
 
 
-#%% _double_dogleg
+# %% _double_dogleg
 @ncjit
 def _double_dogleg(
     delta_param: _N, gradient: _M, grad_hessian_grad: float, x_bias: _N, trust_radius: float
@@ -943,7 +944,7 @@ def _double_dogleg(
     return (new_delta_param, step_len, step_scale, step_type)
 
 
-#%% _dogleg_search
+# %% _dogleg_search
 def _dogleg_search(
     opti_opts: OptiOpts,
     model_args: Dict[str, Any],
@@ -1121,7 +1122,7 @@ def _dogleg_search(
     return failed
 
 
-#%% _analyze_results
+# %% _analyze_results
 def _analyze_results(opti_opts: OptiOpts, bpe_results: BpeResults, jacobian: _M, normalized: bool = False) -> None:
     r"""
     Analyze the results.
@@ -1214,7 +1215,7 @@ def _analyze_results(opti_opts: OptiOpts, bpe_results: BpeResults, jacobian: _M,
     # fmt: on
 
 
-#%% validate_opti_opts
+# %% validate_opti_opts
 def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     r"""
     Validate the optimization options.
@@ -1263,7 +1264,7 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     return True
 
 
-#%% run_bpe
+# %% run_bpe
 def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     r"""
     Run the batch parameter estimator with the given model optimization options.
@@ -1471,7 +1472,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     return (bpe_results, results)
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_estimation_batch", exit=False)
     doctest.testmod(verbose=False)

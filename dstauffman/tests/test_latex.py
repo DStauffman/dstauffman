@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in May 2015.
 """
 
-#%% Imports
+# %% Imports
 from typing import List, Union
 import unittest
 
@@ -20,7 +20,8 @@ if dcs.HAVE_NUMPY:
 else:
     from math import inf, nan
 
-#%% make_preamble
+
+# %% make_preamble
 class Test_make_preamble(unittest.TestCase):
     r"""
     Tests the dcs.make_preamble function with the following cases:
@@ -66,7 +67,7 @@ class Test_make_preamble(unittest.TestCase):
             dcs.make_preamble(self.caption, self.label, self.cols, short_cap="Short cap", numbered=False)
 
 
-#%% make_conclusion
+# %% make_conclusion
 class Test_make_conclusion(unittest.TestCase):
     r"""
     Tests the dcs.make_conclusion function with the following cases:
@@ -83,7 +84,7 @@ class Test_make_conclusion(unittest.TestCase):
         self.assertEqual(out, ["            \\bottomrule", "        \\end{tabular}", "    \\end{minipage}", "\\end{table}", ""])
 
 
-#%% bins_to_str_ranges
+# %% bins_to_str_ranges
 class Test_bins_to_str_ranges(unittest.TestCase):
     r"""
     Tests the dcs.bins_to_str_ranges function with the following cases:
@@ -138,7 +139,7 @@ class Test_bins_to_str_ranges(unittest.TestCase):
         self.assertEqual(out, ["Urban", "Rural"])
 
 
-#%% latex_str
+# %% latex_str
 class Test_latex_str(unittest.TestCase):
     r"""
     Tests the dcs.latex_str function with the following cases:
@@ -234,6 +235,6 @@ class Test_latex_str(unittest.TestCase):
         self.assertEqual(value_str, r"$\infty$")
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

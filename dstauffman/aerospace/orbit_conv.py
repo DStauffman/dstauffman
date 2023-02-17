@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2021.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -33,10 +33,11 @@ if HAVE_SCIPY:
 if TYPE_CHECKING:
     _N = Union[float, np.ndarray]
 
-#%% Globals
+# %% Globals
 logger = logging.getLogger(__name__)
 
-#%% Functions - _any
+
+# %% Functions - _any
 def _any(x: Any) -> bool:
     if isinstance(x, bool):
         return x
@@ -47,7 +48,7 @@ def _any(x: Any) -> bool:
     return np_any(x)  # type: ignore[no-any-return]
 
 
-#%% Functions - anomaly_eccentric_2_mean
+# %% Functions - anomaly_eccentric_2_mean
 def anomaly_eccentric_2_mean(E: _N, e: _N) -> _N:
     r"""
     Finds the mean anomaly from the eccentric anomaly.
@@ -92,7 +93,7 @@ def anomaly_eccentric_2_mean(E: _N, e: _N) -> _N:
     return M
 
 
-#%% Functions - anomaly_eccentric_2_true
+# %% Functions - anomaly_eccentric_2_true
 def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
     r"""
     Finds the true anomaly from the eccentric anomaly.
@@ -146,7 +147,7 @@ def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
     return nu
 
 
-#%% Functions - anomaly_hyperbolic_2_mean
+# %% Functions - anomaly_hyperbolic_2_mean
 def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N:
     r"""
     Finds the mean anomaly from the hyperbolic anomaly.
@@ -187,9 +188,8 @@ def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N:
     return M
 
 
-#%% Functions - anomaly_hyperbolic_2_true
+# %% Functions - anomaly_hyperbolic_2_true
 def anomaly_hyperbolic_2_true(F: _N, e: _N) -> _N:
-
     r"""
     Finds the true anomaly from the hyperbolic anomaly.
 
@@ -238,7 +238,7 @@ def anomaly_hyperbolic_2_true(F: _N, e: _N) -> _N:
     return nu  # type: ignore[no-any-return]
 
 
-#%% Functions - anomaly_mean_2_eccentric
+# %% Functions - anomaly_mean_2_eccentric
 def anomaly_mean_2_eccentric(M, e):
     r"""
     Finds the eccentric anomaly from the mean anomaly.
@@ -304,7 +304,7 @@ def anomaly_mean_2_eccentric(M, e):
     return E
 
 
-#%% Functions - anomaly_mean_2_true
+# %% Functions - anomaly_mean_2_true
 def anomaly_mean_2_true(M, e):
     r"""Finds the eccentric anomaly from the true anomaly."""
     E = anomaly_mean_2_eccentric(M, e)
@@ -312,7 +312,7 @@ def anomaly_mean_2_true(M, e):
     return nu
 
 
-#%% Functions - anomaly_true_2_eccentric
+# %% Functions - anomaly_true_2_eccentric
 def anomaly_true_2_eccentric(nu, e):
     r"""Finds the true anomaly from the eccentric anomaly."""
     # check if orbit is circular or elliptical
@@ -336,7 +336,7 @@ def anomaly_true_2_eccentric(nu, e):
     return E
 
 
-#%% Functions - anomaly_true_2_hyperbolic
+# %% Functions - anomaly_true_2_hyperbolic
 def anomaly_true_2_hyperbolic(nu, e):
     r"""Finds the hyperbolic anomaly from the true anomaly."""
     # check if orbit is hyperbolic
@@ -359,7 +359,7 @@ def anomaly_true_2_hyperbolic(nu, e):
     return F
 
 
-#%% Functions - anomaly_true_2_mean
+# %% Functions - anomaly_true_2_mean
 def anomaly_true_2_mean(nu, e):
     r"""Finds the mean anomaly from the true anomaly."""
     E = anomaly_true_2_eccentric(nu, e)
@@ -367,7 +367,7 @@ def anomaly_true_2_mean(nu, e):
     return M
 
 
-#%% Functions - mean_motion_2_semimajor
+# %% Functions - mean_motion_2_semimajor
 def mean_motion_2_semimajor(n, mu):
     r"""
     Calculates the semi-major axis from the mean motion.
@@ -407,7 +407,7 @@ def mean_motion_2_semimajor(n, mu):
     return a
 
 
-#%% Functions - period_2_semimajor
+# %% Functions - period_2_semimajor
 def period_2_semimajor(p: _N, mu: _N) -> _N:
     r"""
     Calculates the semi-major axis from the period.
@@ -447,7 +447,7 @@ def period_2_semimajor(p: _N, mu: _N) -> _N:
     return a
 
 
-#%% Functions - semimajor_2_mean_motion
+# %% Functions - semimajor_2_mean_motion
 def semimajor_2_mean_motion(a: _N, mu: _N) -> _N:
     r"""
     Calculates the mean motion from the semi-major axis.
@@ -488,7 +488,7 @@ def semimajor_2_mean_motion(a: _N, mu: _N) -> _N:
     return n
 
 
-#%% Functions - semimajor_2_period
+# %% Functions - semimajor_2_period
 def semimajor_2_period(a: _N, mu: _N) -> _N:
     r"""
     Calculates the period from the semi-major axis.
@@ -529,7 +529,7 @@ def semimajor_2_period(a: _N, mu: _N) -> _N:
     return p
 
 
-#%% Functions - sidereal_2_long
+# %% Functions - sidereal_2_long
 def sidereal_2_long(theta: _N, t: _N) -> _N:
     r"""
     Converts a sidereal longitude to a geographic longitude.
@@ -579,7 +579,7 @@ def sidereal_2_long(theta: _N, t: _N) -> _N:
     return lon
 
 
-#%% Functions - raan_2_mltan
+# %% Functions - raan_2_mltan
 def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = False) -> _N:
     r"""
 
@@ -605,7 +605,7 @@ def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = False) -> _N:
     return mltan
 
 
-#%% Functions - jd_2_sidereal
+# %% Functions - jd_2_sidereal
 def jd_2_sidereal(time_jd):
     r"""
 
@@ -631,7 +631,7 @@ def jd_2_sidereal(time_jd):
     return lst
 
 
-#%% Functions - quat_eci_2_ecf
+# %% Functions - quat_eci_2_ecf
 def quat_eci_2_ecf(time_jd):
     r"""
 
@@ -651,7 +651,7 @@ def quat_eci_2_ecf(time_jd):
     return qrot(3, lst)
 
 
-#%% Unit Test
+# %% Unit Test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_aerospace_orbit_conv", exit=False)
     doctest.testmod(verbose=False)

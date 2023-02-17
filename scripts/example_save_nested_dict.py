@@ -1,6 +1,6 @@
 """Script to demonstrate the different interpolation options."""
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import copy
@@ -19,7 +19,7 @@ if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
 
 
-#%% Classes
+# %% Classes
 class MyData(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     """Class based version of data."""
 
@@ -47,14 +47,14 @@ class MyCollection(dict, metaclass=dcs.SaveAndLoad):  # type: ignore[misc]
     # fmt: on
 
 
-#%% Script
+# %% Script
 if __name__ == "__main__":
     folder = dcs.get_tests_dir()
     num_pts = 5
     first = {"time": [1, 2, 3, 4, 5], "data": [0, 0.5, 1.0, 1.5, 2], "ver": "1.0"}
     second = {"time": [10, 20, 30, 40, 50], "data": [1.0, 0.5, 0.0, 0.5, 1.0]}
 
-    #%% Example 1
+    # %% Example 1
     data1 = copy.deepcopy(first)
     filename1 = folder / "test_file1.hdf5"
     meta = {"num_pts": num_pts}
@@ -69,7 +69,7 @@ if __name__ == "__main__":
     dcs.compare_two_dicts(meta, meta1, names=["meta", "meta1"])
     dcs.compare_two_dicts(data1, out_dict1, exclude={"ver",}, names=["data1", "out1"])  # fmt: skip
 
-    #%% Example 2
+    # %% Example 2
     data2 = {}
     data2["first"] = copy.deepcopy(first)
     data2["second"] = copy.deepcopy(second)
@@ -83,7 +83,7 @@ if __name__ == "__main__":
 
     dcs.compare_two_dicts(data2, out_dict2, exclude={"ver",}, names=["data2", "out2"])  # fmt: skip
 
-    #%% Example 3
+    # %% Example 3
     data3 = MyData(num_pts)
     data3.time[:] = first["time"]
     data3.data[:] = first["data"]
@@ -97,7 +97,7 @@ if __name__ == "__main__":
         data3, out3, exclude={"ver", "load", "save", "pprint"}, names=["data3", "out3"], ignore_callables=True
     )
 
-    #%% Example 4
+    # %% Example 4
     data4 = MyCollection({"first": MyData(num_pts), "second": MyData(num_pts)})
     data4["first"].time[:] = first["time"]
     data4["first"].data[:] = first["data"]
@@ -114,7 +114,7 @@ if __name__ == "__main__":
             value, getattr(out4, key), exclude={"ver", "load", "save", "pprint"}, names=[f"data4.{key}", f"out4.{key}"]
         )
 
-    #%% Delete files
+    # %% Delete files
     filename1.unlink(missing_ok=True)
     filename2.unlink(missing_ok=True)
     filename3.unlink(missing_ok=True)

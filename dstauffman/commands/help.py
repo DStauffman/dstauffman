@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 import argparse
 import doctest
 from pathlib import Path
@@ -18,7 +18,7 @@ from slog import ReturnCodes
 from dstauffman import get_root_dir, version_info
 
 
-#%% Functions - print_help
+# %% Functions - print_help
 def print_help(help_file: Optional[Path] = None) -> int:
     r"""
     Prints the contents of the README.rst file.
@@ -45,7 +45,7 @@ def print_help(help_file: Optional[Path] = None) -> int:
     return ReturnCodes.clean
 
 
-#%% Functions - print_version
+# %% Functions - print_version
 def print_version() -> int:
     r"""Prints the version of the library.
 
@@ -70,7 +70,7 @@ def print_version() -> int:
     return return_code
 
 
-#%% Functions - parse_help
+# %% Functions - parse_help
 def parse_help(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for help command.
@@ -100,7 +100,7 @@ def parse_help(input_args: List[str]) -> argparse.Namespace:
     return args
 
 
-#%% Functions - parse_version
+# %% Functions - parse_version
 def parse_version(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for version command.
@@ -130,7 +130,7 @@ def parse_version(input_args: List[str]) -> argparse.Namespace:
     return args
 
 
-#%% Functions - execute_help
+# %% Functions - execute_help
 def execute_help(args: argparse.Namespace) -> int:  # pylint: disable=unused-argument
     r"""
     Executes the help command.
@@ -156,7 +156,7 @@ def execute_help(args: argparse.Namespace) -> int:  # pylint: disable=unused-arg
     return return_code
 
 
-#%% Functions - execute_version
+# %% Functions - execute_version
 def execute_version(args: argparse.Namespace) -> int:  # pylint: disable=unused-argument
     r"""
     Executes the version command.
@@ -182,7 +182,7 @@ def execute_version(args: argparse.Namespace) -> int:  # pylint: disable=unused-
     return return_code
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_commands_help", exit=False)
     doctest.testmod(verbose=False)

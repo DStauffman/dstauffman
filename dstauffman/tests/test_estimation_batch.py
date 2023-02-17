@@ -7,7 +7,7 @@ Notes
 #.  Renamed from bpe.py to estimation.py by David C. Stauffer in May 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import logging
@@ -27,7 +27,8 @@ if TYPE_CHECKING:
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
 
-#%% Setup for testing
+
+# %% Setup for testing
 # Classes - SimParams
 class SimParams(Frozen):
     r"""Simulation model parameters."""
@@ -94,7 +95,7 @@ def get_parameter(sim_params: SimParams, *, names: List[str]) -> _N:
     r"""Simple example parameter getter."""
     num = len(names)
     values = np.full(num, np.nan)
-    for (ix, name) in enumerate(names):
+    for ix, name in enumerate(names):
         if hasattr(sim_params, name):
             values[ix] = getattr(sim_params, name)
         else:  # pragma: no cover
@@ -107,14 +108,14 @@ def set_parameter(sim_params: SimParams, *, names: List[str], values: _N) -> Non
     r"""Simple example parameter setter."""
     num = len(names)
     assert len(values) == num, "Names and Values must have the same length."
-    for (ix, name) in enumerate(names):
+    for ix, name in enumerate(names):
         if hasattr(sim_params, name):
             setattr(sim_params, name, values[ix])
         else:  # pragma: no cover
             raise ValueError('Bad parameter name: "{}".'.format(name))
 
 
-#%% estimation.OptiOpts
+# %% estimation.OptiOpts
 class Test_estimation_OptiOpts(unittest.TestCase):
     r"""
     Tests the estimation.OptiOpts class with the following cases:
@@ -153,7 +154,7 @@ class Test_estimation_OptiOpts(unittest.TestCase):
         self.assertEqual(lines[-1], " max_cores       = None")
 
 
-#%% estimation.OptiParam
+# %% estimation.OptiParam
 class Test_estimation_OptiParam(unittest.TestCase):
     r"""
     Tests the estimation.OptiParam class with the following cases:
@@ -240,7 +241,7 @@ class Test_estimation_OptiParam(unittest.TestCase):
         self.assertEqual(lines[6], " typical = 1.0")
 
 
-#%% estimation.BpeResults
+# %% estimation.BpeResults
 class Test_estimation_BpeResults(unittest.TestCase):
     r"""
     Tests the estimation.BpeResults class with the following cases:
@@ -312,7 +313,7 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.filename2.unlink(missing_ok=True)
 
 
-#%% estimation.CurrentResults
+# %% estimation.CurrentResults
 class Test_estimation_CurrentResults(unittest.TestCase):
     r"""
     Tests the estimation.CurrentResults class with the following cases:
@@ -333,7 +334,7 @@ class Test_estimation_CurrentResults(unittest.TestCase):
         self.assertEqual(lines[3], "  Best Params: None")
 
 
-#%% estimation.batch._print_divider
+# %% estimation.batch._print_divider
 @patch("dstauffman.estimation.batch.logger")
 class Test_estimation_batch__print_divider(unittest.TestCase):
     r"""
@@ -373,7 +374,7 @@ class Test_estimation_batch__print_divider(unittest.TestCase):
         # TODO: how to test that this wouldn't log anything?
 
 
-#%% estimation.batch._function_wrapper
+# %% estimation.batch._function_wrapper
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_batch__function_wrapper(unittest.TestCase):
     r"""
@@ -431,7 +432,7 @@ class Test_estimation_batch__function_wrapper(unittest.TestCase):
         np.testing.assert_array_equal(innovs, self.innovs)
 
 
-#%% estimation.batch._parfor_function_wrapper
+# %% estimation.batch._parfor_function_wrapper
 class Test_estimation_batch__parfor_function_wrapper(unittest.TestCase):
     r"""
     Tests the estimation.batch._parfor_function_wrapper function with the following cases:
@@ -440,7 +441,7 @@ class Test_estimation_batch__parfor_function_wrapper(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% estimation.batch._finite_differences
+# %% estimation.batch._finite_differences
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 @patch("dstauffman.estimation.batch.logger")
 class Test_estimation_batch__finite_differences(unittest.TestCase):
@@ -560,7 +561,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.assertEqual(hessian.shape, (3, 3))
 
 
-#%% estimation.batch._levenberg_marquardt
+# %% estimation.batch._levenberg_marquardt
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_batch__levenberg_marquardt(unittest.TestCase):
     r"""
@@ -585,7 +586,7 @@ class Test_estimation_batch__levenberg_marquardt(unittest.TestCase):
         np.testing.assert_array_almost_equal(delta_param, b)
 
 
-#%% estimation.batch._predict_func_change
+# %% estimation.batch._predict_func_change
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_batch__predict_func_change(unittest.TestCase):
     r"""
@@ -604,7 +605,7 @@ class Test_estimation_batch__predict_func_change(unittest.TestCase):
         self.assertEqual(delta_func, self.pred_change)
 
 
-#%% estimation.batch._check_for_convergence
+# %% estimation.batch._check_for_convergence
 @patch("dstauffman.estimation.batch.logger")
 class Test_estimation_batch__check_for_convergence(unittest.TestCase):
     r"""
@@ -671,7 +672,7 @@ class Test_estimation_batch__check_for_convergence(unittest.TestCase):
         self.assertEqual(error, "")
 
 
-#%% estimation.batch._double_dogleg
+# %% estimation.batch._double_dogleg
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_batch__double_dogleg(unittest.TestCase):
     r"""
@@ -725,7 +726,7 @@ class Test_estimation_batch__double_dogleg(unittest.TestCase):
         )
 
 
-#%% estimation.batch._dogleg_search
+# %% estimation.batch._dogleg_search
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 @patch("dstauffman.estimation.batch.logger")
 class Test_estimation_batch__dogleg_search(unittest.TestCase):
@@ -884,7 +885,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         )
 
 
-#%% estimation.batch._analyze_results
+# %% estimation.batch._analyze_results
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 @patch("dstauffman.estimation.batch.logger")
 class Test_estimation_batch__analyze_results(unittest.TestCase):
@@ -914,7 +915,7 @@ class Test_estimation_batch__analyze_results(unittest.TestCase):
         estm.batch._analyze_results(self.opti_opts, self.bpe_results, self.jacobian, self.normalized)
 
 
-#%% estimation.validate_opti_opts
+# %% estimation.validate_opti_opts
 @patch("dstauffman.estimation.batch.logger")
 class Test_estimation_validate_opti_opts(unittest.TestCase):
     r"""
@@ -995,7 +996,7 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
         self.support()
 
 
-#%% estimation.run_bpe
+# %% estimation.run_bpe
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 @patch("dstauffman.estimation.batch.logger")
 class Test_estimation_run_bpe(unittest.TestCase):
@@ -1109,6 +1110,6 @@ class Test_estimation_run_bpe(unittest.TestCase):
                 self.opti_opts.output_folder.joinpath(this_file).unlink(missing_ok=True)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

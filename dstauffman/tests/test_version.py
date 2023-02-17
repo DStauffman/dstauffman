@@ -6,13 +6,13 @@ Notes
 #.  Written by David C. Stauffer in February 2019.
 """
 
-#%% Imports
+# %% Imports
 import unittest
 
 import dstauffman as dcs
 
 
-#%% version_info
+# %% version_info
 class Test_version_info(unittest.TestCase):
     r"""
     Tests the get_root_dir function with the following cases:
@@ -34,6 +34,6 @@ class Test_version_info(unittest.TestCase):
         self.assertTrue(found)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

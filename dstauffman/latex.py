@@ -5,7 +5,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in Jan 2015, moved to separate file in Jan 2017.
 """
-#%% Imports
+# %% Imports
 import doctest
 from math import isinf, isnan
 from typing import List, Optional, Union
@@ -16,7 +16,7 @@ from nubs import prob_to_rate_opt
 from dstauffman.units import MONTHS_PER_YEAR
 
 
-#%% Functions - make_preamble
+# %% Functions - make_preamble
 def make_preamble(
     caption: str,
     label: str,
@@ -108,7 +108,7 @@ def make_preamble(
     return out
 
 
-#%% Functions - make_conclusion
+# %% Functions - make_conclusion
 def make_conclusion(*, use_mini: bool = False) -> List[str]:
     r"""
     Write closing tags at the end of the table.
@@ -139,7 +139,7 @@ def make_conclusion(*, use_mini: bool = False) -> List[str]:
     return out
 
 
-#%% Functions - bins_to_str_ranges
+# %% Functions - bins_to_str_ranges
 def bins_to_str_ranges(bins, dt=1, cutoff=1000):
     r"""
     Take a given bin vector, and returns a string representation with both boundaries.
@@ -197,7 +197,7 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
     return out
 
 
-#%% Functions - latex_str
+# %% Functions - latex_str
 def latex_str(
     value: Union[int, float, str], digits: int = -1, fixed: bool = False, cmp2ar: bool = False, capped: int = 1073741823
 ) -> str:  # 1073741823 = 2**30-1
@@ -258,7 +258,7 @@ def latex_str(
     return value_str
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_latex", exit=False)
     doctest.testmod(verbose=False)

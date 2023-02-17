@@ -6,16 +6,15 @@ Notes
 #.  Written by David C. Stauffer in May 2015.
 """
 
-#%% Imports
+# %% Imports
 import numpy as np
 
 import dstauffman as dcs
 import dstauffman.plotting as plot
 
-#%% Main function
+# %% Main function
 if __name__ == "__main__":
-
-    #%% Create some fake data
+    # %% Create some fake data
     # random data
     data = np.random.rand(10, 10)
     # normalize the random data
@@ -36,6 +35,6 @@ if __name__ == "__main__":
     # create opts
     opts = plot.Opts()
 
-    #%% Create the plots
+    # %% Create the plots
     fig1 = plot.plot_correlation_matrix(data, labels, opts=opts)
     fig2 = plot.plot_correlation_matrix(sym, labels, opts=opts)

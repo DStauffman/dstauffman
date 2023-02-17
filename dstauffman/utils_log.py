@@ -7,7 +7,7 @@ Notes
 #.  Split by logging options by David C. Stauffer in June 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import contextlib
@@ -32,10 +32,11 @@ if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
     _F = Union[float, _N]
 
-#%% Globals
+# %% Globals
 logger = logging.getLogger(__name__)
 
-#%% Functions - setup_dir
+
+# %% Functions - setup_dir
 def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
     r"""
     Clear the contents for existing folders or instantiates the directory if it doesn't exist.
@@ -100,7 +101,7 @@ def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
             raise  # pragma: no cover
 
 
-#%% Functions - fix_rollover
+# %% Functions - fix_rollover
 @overload
 def fix_rollover(data: _I, roll: int) -> _I:
     ...
@@ -248,7 +249,7 @@ def fix_rollover(
     return out
 
 
-#%% remove_outliers
+# %% remove_outliers
 @overload
 def remove_outliers(x: ArrayLike, /) -> _N:
     ...
@@ -393,7 +394,7 @@ def remove_outliers(
     return y
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_utils_log", exit=False)
     doctest.testmod(verbose=False)

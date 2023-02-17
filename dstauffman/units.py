@@ -6,13 +6,13 @@ Notes
 #.  Written by David C. Stauffer in February 2016.
 """
 
-#%% Imports
+# %% Imports
 import doctest
 from math import pi
 from typing import Tuple, Union
 import unittest
 
-#%% Constants - Unit Conversions
+# %% Constants - Unit Conversions
 # Time
 ONE_MINUTE: int = 60
 ONE_HOUR: int = 3600
@@ -36,7 +36,8 @@ CM2IN: float = 1 / 2.54
 DEGREE_SIGN: str = "\N{DEGREE SIGN}"  # degree sign, also u"\u00b0" ° or chr(176)
 MICRO_SIGN: str = "\N{MICRO SIGN}"  # micro sign, also u"\u00b5" μ or chr(181), note this is different than chr(956)
 
-#%% get_factors
+
+# %% get_factors
 def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[float, str]:
     r"""
     Get the multiplication factor and unit label for the desired units.
@@ -172,7 +173,7 @@ def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[
     return (mult, label)
 
 
-#%% Functions - get_time_factor
+# %% Functions - get_time_factor
 def get_time_factor(unit: str) -> int:
     r"""
     Gets the time factor for the given unit relative to the base SI unit of "sec".
@@ -212,7 +213,7 @@ def get_time_factor(unit: str) -> int:
     return mult
 
 
-#%% Functions - get_unit_conversion
+# %% Functions - get_unit_conversion
 def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, float]], units: str = "") -> Tuple[str, float]:
     r"""
     Acts as a wrapper to unit conversions for legends in plots and for scaling second axes.
@@ -289,7 +290,7 @@ def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, floa
     return (new_units, unit_mult)
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_units", exit=False)
     doctest.testmod(verbose=False)

@@ -6,14 +6,14 @@ Notes
 #.  Written by David C. Stauffer in July 2021.
 """
 
-#%% Imports
+# %% Imports
 from typing import List
 import unittest
 
 import dstauffman.aerospace as space
 
 
-#%% Classes for testing
+# %% Classes for testing
 class Test_orbits_all_values(unittest.TestCase):
     r"""
     Tests all the constant values in the module.
@@ -49,6 +49,6 @@ class Test_orbits_all_values(unittest.TestCase):
                 self.assertTrue(field in self.master, "Test is missing: {}".format(field))
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

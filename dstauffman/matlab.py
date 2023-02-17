@@ -8,7 +8,7 @@ Notes
 #.  Combined by David C. Stauffer in August 2022 for what used to be estimation.linalg.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -30,11 +30,11 @@ if TYPE_CHECKING:
     _M = np.typing.NDArray[np.float64]  # 2D
 
 
-#%% Constants
+# %% Constants
 _EPS = float(np.finfo(float).eps) if HAVE_NUMPY else 2.220446049250313e-16
 
 
-#%% load_matlab
+# %% load_matlab
 def load_matlab(
     filename: Union[str, Path],
     varlist: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
@@ -131,7 +131,7 @@ def load_matlab(
     return out
 
 
-#%% orth
+# %% orth
 def orth(A: _M) -> _M:
     r"""
     Orthogonalization basis for the range of A.
@@ -195,7 +195,7 @@ def orth(A: _M) -> _M:
     return Q
 
 
-#%% subspace
+# %% subspace
 def subspace(A: _M, B: _M) -> float:
     r"""
     Angle between two subspaces specified by the columns of A and B.
@@ -249,7 +249,7 @@ def subspace(A: _M, B: _M) -> float:
     return theta  # type: ignore[no-any-return]
 
 
-#%% mat_divide
+# %% mat_divide
 @ncjit
 def mat_divide(a: _M, b: _N, rcond: float = _EPS) -> Union[_N, _M]:
     r"""
@@ -299,7 +299,7 @@ def mat_divide(a: _M, b: _N, rcond: float = _EPS) -> Union[_N, _M]:
     return np.linalg.lstsq(a, b, rcond=rcond)[0]
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_matlab", exit=False)
     doctest.testmod(verbose=False)

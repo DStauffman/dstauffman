@@ -7,7 +7,7 @@ Notes
 #.  Moved out of utils and into paths.py file in February 2019 by David C. Stauffer.
 """
 
-#%% Imports
+# %% Imports
 import doctest
 from functools import lru_cache
 from pathlib import Path
@@ -17,7 +17,7 @@ import unittest
 from slog import is_dunder
 
 
-#%% Functions - get_root_dir
+# %% Functions - get_root_dir
 @lru_cache
 def get_root_dir() -> Path:
     r"""
@@ -43,7 +43,7 @@ def get_root_dir() -> Path:
     return Path(__file__).resolve().parent
 
 
-#%% Functions - get_tests_dir
+# %% Functions - get_tests_dir
 @lru_cache
 def get_tests_dir() -> Path:
     r"""
@@ -69,7 +69,7 @@ def get_tests_dir() -> Path:
     return get_root_dir() / "tests"
 
 
-#%% Functions - get_data_dir
+# %% Functions - get_data_dir
 @lru_cache
 def get_data_dir() -> Path:
     r"""
@@ -95,7 +95,7 @@ def get_data_dir() -> Path:
     return get_root_dir().parent / "data"
 
 
-#%% Functions - get_images_dir
+# %% Functions - get_images_dir
 @lru_cache
 def get_images_dir() -> Path:
     r"""
@@ -121,7 +121,7 @@ def get_images_dir() -> Path:
     return get_root_dir().parent / "images"
 
 
-#%% Functions - get_output_dir
+# %% Functions - get_output_dir
 @lru_cache
 def get_output_dir() -> Path:
     r"""
@@ -147,7 +147,7 @@ def get_output_dir() -> Path:
     return get_root_dir().parent / "results"
 
 
-#%% Functions - list_python_files
+# %% Functions - list_python_files
 def list_python_files(folder: Path, recursive: bool = False, include_all: bool = False) -> List[Path]:
     r"""
     Returns a list of all non dunder python files in the folder.
@@ -191,7 +191,7 @@ def list_python_files(folder: Path, recursive: bool = False, include_all: bool =
     return files
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_paths", exit=False)
     doctest.testmod(verbose=False)

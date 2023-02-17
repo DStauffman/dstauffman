@@ -5,11 +5,12 @@ Notes
 -----
 #.  Written by David C. Stauffer in January 2022.
 """
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-#%% Imports
+# %% Imports
 from dstauffman import unit
 from dstauffman.plotting import (
     fig_ax_factory,
@@ -21,12 +22,12 @@ from dstauffman.plotting import (
     plot_time_history,
 )
 
-#%% Script
+# %% Script
 if __name__ == "__main__":
-    #%% Settings
+    # %% Settings
     comb_plots = True
 
-    #%% Example 1
+    # %% Example 1
     # create data
     description = "Focal Plane Sightings"
     points = 2 * np.random.rand(2, 1000) - 1.0
@@ -62,7 +63,7 @@ if __name__ == "__main__":
         assert fig1 is not fig4
     plt.show(block=False)
 
-    #%% Example 2
+    # %% Example 2
     fig_ax2 = fig_ax_factory(num_axes=2, layout="cols", sharex=False, suptitle="Combined Plots", passthrough=not comb_plots)  # type: ignore[call-overload]
     # histogram
     description = "Histogram"
@@ -82,8 +83,8 @@ if __name__ == "__main__":
     plot_lower_only = True
     label_values = True
     x_lab_rot = 90
-    colormap = None
-    plot_border = None
+    colormap: Optional[str] = None
+    plot_border: Optional[str] = None
     leg_scale = "centi"
     fig_ex2 = plot_correlation_matrix(
         data,
@@ -105,7 +106,7 @@ if __name__ == "__main__":
         skip_setup_plots=False,
     )
 
-    #%% Example 3
+    # %% Example 3
     fig_ax3 = fig_ax_factory(num_figs=None, num_axes=[2, 2], layout="rowwise", sharex=True, suptitle="Vector Plots", passthrough=not comb_plots)  # type: ignore[call-overload]
     time = np.arange(30)
     plot_time_history("1st", time, np.ones(30), units="one", fig_ax=fig_ax3[0], skip_setup_plots=comb_plots)

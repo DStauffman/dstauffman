@@ -7,9 +7,9 @@ Notes
 #.  Moved into subfolder by David C. Stauffer in July 2020.
 """
 
-#%% Imports
+# %% Imports
 from .health import dist_enum_and_mons, icer
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     pass

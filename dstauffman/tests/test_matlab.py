@@ -7,7 +7,7 @@ Notes
 #.  Expanded by David C. Stauffer in December 2018 for additional linalg functions.
 """
 
-#%% Imports
+# %% Imports
 from typing import ClassVar
 import unittest
 
@@ -19,7 +19,7 @@ if dcs.HAVE_NUMPY:
     import numpy as np
 
 
-#%% Classes
+# %% Classes
 class _Gender(IntEnumPlus):
     r"""Enumeration to match the MATLAB one from the test cases."""
     # fmt: off
@@ -32,7 +32,7 @@ class _Gender(IntEnumPlus):
     # fmt: on
 
 
-#%% load_matlab
+# %% load_matlab
 @unittest.skipIf(not dcs.HAVE_H5PY or not dcs.HAVE_NUMPY, "Skipping due to missing h5py/numpy dependency.")
 class Test_load_matlab(unittest.TestCase):
     r"""
@@ -128,7 +128,7 @@ class Test_load_matlab(unittest.TestCase):
         np.testing.assert_array_equal(out["data"]["nc"][2]["m"], self.mat_nums)
 
 
-#%% estimation.orth
+# %% estimation.orth
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_orth(unittest.TestCase):
     r"""
@@ -160,7 +160,7 @@ class Test_estimation_orth(unittest.TestCase):
         np.testing.assert_array_almost_equal(Q, self.Q2)
 
 
-#%% estimation.subspace
+# %% estimation.subspace
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_subspace(unittest.TestCase):
     r"""
@@ -193,7 +193,7 @@ class Test_estimation_subspace(unittest.TestCase):
         self.assertAlmostEqual(theta, self.theta)
 
 
-#%% estimation.mat_divide
+# %% estimation.mat_divide
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_mat_divide(unittest.TestCase):
     r"""
@@ -219,6 +219,6 @@ class Test_estimation_mat_divide(unittest.TestCase):
         np.testing.assert_array_almost_equal(x2, np.zeros(2), 2)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

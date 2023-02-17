@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2019.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import contextlib
@@ -21,7 +21,7 @@ from slog import capture_output
 import dstauffman as dcs
 
 
-#%% run_docstrings
+# %% run_docstrings
 class Test_run_docstrings(unittest.TestCase):
     r"""
     Tests the run_docstrings function with the following cases:
@@ -30,7 +30,7 @@ class Test_run_docstrings(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% run_unittests
+# %% run_unittests
 class Test_run_unittests(unittest.TestCase):
     r"""
     Tests the run_unittests function with the following cases:
@@ -39,7 +39,7 @@ class Test_run_unittests(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% run_pytests
+# %% run_pytests
 class Test_run_pytests(unittest.TestCase):
     r"""
     Tests the run_pytests function with the following cases:
@@ -48,7 +48,7 @@ class Test_run_pytests(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% run_coverage
+# %% run_coverage
 class Test_run_coverage(unittest.TestCase):
     r"""
     Tests the run_coverage function with the following cases:
@@ -57,7 +57,7 @@ class Test_run_coverage(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% find_repo_issues
+# %% find_repo_issues
 class Test_find_repo_issues(unittest.TestCase):
     r"""
     Tests the find_repo_issues function with the following cases:
@@ -179,7 +179,7 @@ class Test_find_repo_issues(unittest.TestCase):
             this_file.unlink(missing_ok=True)
 
 
-#%% delete_pyc
+# %% delete_pyc
 class Test_delete_pyc(unittest.TestCase):
     r"""
     Tests the delete_pyc function with the following cases:
@@ -245,7 +245,7 @@ class Test_delete_pyc(unittest.TestCase):
             os.removedirs(self.fold2)
 
 
-#%% get_python_definitions
+# %% get_python_definitions
 class Test_get_python_definitions(unittest.TestCase):
     r"""
     Tests the get_python_definitions function with the following cases:
@@ -297,7 +297,7 @@ class Test_get_python_definitions(unittest.TestCase):
         self.assertEqual(funcs, ["fun", "CONSTANT"])
 
 
-#%% make_python_init
+# %% make_python_init
 class Test_make_python_init(unittest.TestCase):
     r"""
     Tests the make_python_init function with the following cases:
@@ -361,7 +361,7 @@ class Test_make_python_init(unittest.TestCase):
         self.filename.unlink(missing_ok=True)
 
 
-#%% write_unit_test_templates
+# %% write_unit_test_templates
 class Test_write_unit_test_templates(unittest.TestCase):
     r"""
     Tests the write_unit_test_templates function with the following cases:
@@ -387,6 +387,6 @@ class Test_write_unit_test_templates(unittest.TestCase):
         self.assertGreater(mock_writer.call_count, 5)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

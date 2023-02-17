@@ -6,7 +6,7 @@ Notes
 #.  Split out of utils by David C. Stauffer in July 2019.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import datetime
@@ -35,7 +35,8 @@ if TYPE_CHECKING:
 
     assert QApplication  # type: ignore[truthy-function]
 
-#%% run_docstrings
+
+# %% run_docstrings
 def run_docstrings(files: List[Path], verbose: bool = False) -> int:
     r"""
     Runs all the docstrings in the given files.
@@ -82,7 +83,7 @@ def run_docstrings(files: List[Path], verbose: bool = False) -> int:
     return return_code
 
 
-#%% run_unittests
+# %% run_unittests
 def run_unittests(names: str, verbose: bool = False) -> int:
     r"""
     Runs all the unittests with the given names using unittest.
@@ -123,7 +124,7 @@ def run_unittests(names: str, verbose: bool = False) -> int:
     return return_code
 
 
-#%% run_pytests
+# %% run_pytests
 def run_pytests(folder: Path, *args, **kwargs) -> int:
     r"""
     Runs all the unittests using pytest as the runner instead of unittest.
@@ -175,7 +176,7 @@ def run_pytests(folder: Path, *args, **kwargs) -> int:
     return return_code
 
 
-#%% run_coverage
+# %% run_coverage
 def run_coverage(folder: Path, *, report: bool = True, cov_file: Optional[Path] = None) -> int:
     r"""
     Wraps the pytests with a Code Coverage report.
@@ -231,7 +232,7 @@ def run_coverage(folder: Path, *, report: bool = True, cov_file: Optional[Path] 
     return return_code
 
 
-#%% find_repo_issues
+# %% find_repo_issues
 def find_repo_issues(
     folder: Path,
     extensions: Union[FrozenSet[str], Set[str], Tuple[str, ...], str, None] = frozenset((".m", ".py")),
@@ -316,7 +317,7 @@ def find_repo_issues(
                 except UnicodeDecodeError:  # pragma: no cover
                     print(f'File: "{this_file}" was not a valid utf-8 file.')
                     is_clean = False
-                for (c, line) in enumerate(lines):
+                for c, line in enumerate(lines):
                     sline = line.rstrip("\n").rstrip("\r").rstrip("\n")  # for all possible orderings
                     if check_tabs and line.count("\t") > 0:
                         if not already_listed:
@@ -339,7 +340,7 @@ def find_repo_issues(
     return is_clean
 
 
-#%% Functions - delete_pyc
+# %% Functions - delete_pyc
 def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = True) -> None:
     r"""
     Delete all the *.pyc files (Python Byte Code) in the specified directory.
@@ -385,7 +386,7 @@ def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = T
             _remove_pyc(file)
 
 
-#%% Functions - get_python_definitions
+# %% Functions - get_python_definitions
 def get_python_definitions(text: str, *, include_private: bool = False) -> List[str]:
     r"""
     Get all public class and def names from the text of the file.
@@ -444,7 +445,7 @@ def get_python_definitions(text: str, *, include_private: bool = False) -> List[
     return funcs
 
 
-#%% Functions - make_python_init
+# %% Functions - make_python_init
 def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, filename: Optional[Path] = None) -> str:
     r"""
     Make the Python __init__.py file based on the files/definitions found within the specified folder.
@@ -524,7 +525,7 @@ def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, file
     return output
 
 
-#%% write_unit_test_templates
+# %% write_unit_test_templates
 def write_unit_test_templates(
     folder: Path,
     output: Path,
@@ -632,7 +633,7 @@ def write_unit_test_templates(
         write_text_file(new_file, "\n".join(text))
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_repos", exit=False)
     doctest.testmod(verbose=False)

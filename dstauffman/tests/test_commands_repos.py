@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 import argparse
 import unittest
 from unittest.mock import Mock, patch
@@ -17,7 +17,7 @@ import dstauffman as dcs
 import dstauffman.commands as commands
 
 
-#%% commands.parse_enforce
+# %% commands.parse_enforce
 class Test_commands_parse_enforce(unittest.TestCase):
     r"""
     Tests the commands.parse_enforce function with the following cases:
@@ -94,7 +94,7 @@ class Test_commands_parse_enforce(unittest.TestCase):
         self.assertEqual(args, self.expected)
 
 
-#%% commands.execute_enforce
+# %% commands.execute_enforce
 @patch("dstauffman.commands.repos.find_repo_issues")
 class Test_commands_execute_enforce(unittest.TestCase):
     r"""
@@ -156,7 +156,7 @@ class Test_commands_execute_enforce(unittest.TestCase):
         mocker.assert_called_once_with(**self.patch_args)
 
 
-#%% commands.parse_make_init
+# %% commands.parse_make_init
 class Test_commands_parse_make_init(unittest.TestCase):
     r"""
     Tests the commands.parse_make_init function with the following cases:
@@ -199,7 +199,7 @@ class Test_commands_parse_make_init(unittest.TestCase):
         self.assertEqual(args, self.expected)
 
 
-#%% commands.execute_make_init
+# %% commands.execute_make_init
 @patch("dstauffman.commands.repos.make_python_init")
 class Test_commands_execute_make_init(unittest.TestCase):
     r"""
@@ -248,6 +248,6 @@ class Test_commands_execute_make_init(unittest.TestCase):
         mocker.assert_called_once_with(self.folder, **self.patch_args)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

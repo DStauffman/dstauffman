@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in May 2020.
 """
 
-#%% Imports
+# %% Imports
 import datetime
 import unittest
 
@@ -23,7 +23,8 @@ else:
 if dcs.HAVE_MPL:
     import matplotlib.dates as dates
 
-#%% get_np_time_units
+
+# %% get_np_time_units
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_get_np_time_units(unittest.TestCase):
     r"""
@@ -41,7 +42,7 @@ class Test_get_np_time_units(unittest.TestCase):
         self.assertEqual(units, "ns")
 
 
-#%% get_ymd_from_np
+# %% get_ymd_from_np
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_get_ymd_from_np(unittest.TestCase):
     r"""
@@ -70,7 +71,7 @@ class Test_get_ymd_from_np(unittest.TestCase):
         np.testing.assert_array_equal(d, np.array([self.exp1[2], self.exp2[2]]))
 
 
-#%% round_datetime
+# %% round_datetime
 class Test_round_datetime(unittest.TestCase):
     r"""
     Tests the round_datetime function with the following cases:
@@ -96,7 +97,7 @@ class Test_round_datetime(unittest.TestCase):
         self.assertEqual(rounded_time, datetime.datetime(2015, 3, 13, 8, 4, 0))
 
 
-#%% round_np_datetime
+# %% round_np_datetime
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_round_np_datetime(unittest.TestCase):
     r"""
@@ -119,7 +120,7 @@ class Test_round_np_datetime(unittest.TestCase):
         np.testing.assert_array_equal(date_out, self.expected)
 
 
-#%% round_num_datetime
+# %% round_num_datetime
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_round_num_datetime(unittest.TestCase):
     r"""
@@ -145,7 +146,7 @@ class Test_round_num_datetime(unittest.TestCase):
         np.testing.assert_array_almost_equal(date_out, np.array([0.0, 1.0, 1.0, 3.0, 4.0]), 12)
 
 
-#%% round_time
+# %% round_time
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_round_time(unittest.TestCase):
     r"""
@@ -172,7 +173,7 @@ class Test_round_time(unittest.TestCase):
         np.testing.assert_array_equal(date_out, expected)
 
 
-#%% convert_date
+# %% convert_date
 class Test_convert_date(unittest.TestCase):
     r"""
     Tests the convert_date function with the following cases:
@@ -388,7 +389,7 @@ class Test_convert_date(unittest.TestCase):
             dcs.convert_date(self.seconds / dcs.ONE_MINUTE, "min", self.date_zero, old_form="sec")
 
 
-#%% convert_time_units
+# %% convert_time_units
 class Test_convert_time_units(unittest.TestCase):
     r"""
     Tests the convert_time_units function with the following cases:
@@ -441,7 +442,7 @@ class Test_convert_time_units(unittest.TestCase):
             dcs.convert_time_units(1, "sec", "bad")
 
 
-#%% convert_datetime_to_np
+# %% convert_datetime_to_np
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_convert_datetime_to_np(unittest.TestCase):
     r"""
@@ -456,7 +457,7 @@ class Test_convert_datetime_to_np(unittest.TestCase):
         self.assertEqual(out, exp)
 
 
-#%% convert_duration_to_np
+# %% convert_duration_to_np
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_convert_duration_to_np(unittest.TestCase):
     r"""
@@ -471,7 +472,7 @@ class Test_convert_duration_to_np(unittest.TestCase):
         self.assertEqual(out, exp)
 
 
-#%% convert_num_dt_to_np
+# %% convert_num_dt_to_np
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_convert_num_dt_to_np(unittest.TestCase):
     r"""
@@ -507,14 +508,14 @@ class Test_convert_num_dt_to_np(unittest.TestCase):
             "second": "s",
             "sec": "s",
         }
-        for (key, value) in map_.items():
+        for key, value in map_.items():
             dt = 90
             out = dcs.convert_num_dt_to_np(dt, units=key)
             exp = np.timedelta64(90, value).astype(dcs.NP_TIMEDELTA_FORM)
             self.assertEqual(out, exp)
 
 
-#%% get_delta_time_str
+# %% get_delta_time_str
 class Test_get_delta_time_str(unittest.TestCase):
     r"""
     Tests the get_delta_time_str function with the following cases:
@@ -538,6 +539,6 @@ class Test_get_delta_time_str(unittest.TestCase):
         self.assertEqual(dcs.get_delta_time_str(datetime.timedelta(seconds=5402)), "01:30:02")
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -35,7 +35,8 @@ if TYPE_CHECKING:
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
 
-#%% Locals classes for testing
+
+# %% Locals classes for testing
 class _Example_Frozen(dcs.Frozen):
     def __init__(self, dummy: Optional[int] = None):
         self.field_one: Union[int, str] = 1
@@ -126,7 +127,7 @@ class _Example_Times(object):
         )
 
 
-#%% save_hdf5 & load_hdf5 - mostly covered by SaveAndLoad
+# %% save_hdf5 & load_hdf5 - mostly covered by SaveAndLoad
 class Test_save_and_load_hdf5(unittest.TestCase):
     r"""
     Additionally tests the save and load HDF5 functions with a pandas DataFrame.
@@ -148,12 +149,13 @@ class Test_save_and_load_hdf5(unittest.TestCase):
         self.filename.unlink(missing_ok=True)
 
 
-#%% save_pickle - covered by SaveAndLoad
-#%% load_pickle - covered by SaveAndLoad
-#%% save_method - covered by SaveAndLoad
-#%% load_method - covered by SaveAndLoad
+# %% save_pickle - covered by SaveAndLoad
+# %% load_pickle - covered by SaveAndLoad
+# %% save_method - covered by SaveAndLoad
+# %% load_method - covered by SaveAndLoad
 
-#%% pprint_dict
+
+# %% pprint_dict
 class Test_pprint_dict(unittest.TestCase):
     r"""
     Tests the pprint_dict function with the following cases:
@@ -249,7 +251,7 @@ class Test_pprint_dict(unittest.TestCase):
         self.assertEqual(lines3[3], " ccc = <class 'int'>")
 
 
-#%% chop_time
+# %% chop_time
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_chop_time(unittest.TestCase):
     r"""
@@ -274,7 +276,7 @@ class Test_chop_time(unittest.TestCase):
         self.assertEqual(self.telm.name, self.name)
 
 
-#%% subsample_class
+# %% subsample_class
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_subsample_class(unittest.TestCase):
     r"""
@@ -299,7 +301,7 @@ class Test_subsample_class(unittest.TestCase):
         self.assertEqual(self.telm.name, self.name)
 
 
-#%% Frozen
+# %% Frozen
 class Test_Frozen(unittest.TestCase):
     r"""
     Test the Frozen class with the following cases:
@@ -329,7 +331,7 @@ class Test_Frozen(unittest.TestCase):
             temp.new_field_that_does_not_exist = 1  # type: ignore[attr-defined]
 
 
-#%% SaveAndLoad
+# %% SaveAndLoad
 class Test_SaveAndLoad(unittest.TestCase):
     r"""
     Tests SaveAndLoad metaclass with the following cases:
@@ -490,7 +492,7 @@ class Test_SaveAndLoad(unittest.TestCase):
         self.save_path2.unlink(missing_ok=True)
 
 
-#%% SaveAndLoadPickle
+# %% SaveAndLoadPickle
 class Test_SaveAndLoadPickle(unittest.TestCase):
     r"""
     Tests the SaveAndLoadPickle class with the following cases:
@@ -499,7 +501,7 @@ class Test_SaveAndLoadPickle(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% Counter
+# %% Counter
 class Test_Counter(unittest.TestCase):
     r"""
     Tests the Counter class with the following cases:
@@ -657,7 +659,7 @@ class Test_Counter(unittest.TestCase):
         self.assertEqual(output, "Counter(1)")
 
 
-#%% FixedDict
+# %% FixedDict
 class Test_FixedDict(unittest.TestCase):
     r"""
     Tests the FixedDict class with the following cases:
@@ -686,7 +688,7 @@ class Test_FixedDict(unittest.TestCase):
 
     def test_iteration(self) -> None:
         c = 0
-        for (k, v) in self.fixed.items():
+        for k, v in self.fixed.items():
             c += 1
             self.assertIn(k, self.keys)
             if k == "key1":
@@ -773,6 +775,6 @@ class Test_FixedDict(unittest.TestCase):
         self.assertEqual(self.fixed._frozen, new._frozen)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

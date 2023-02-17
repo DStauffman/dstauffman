@@ -7,7 +7,7 @@ Notes
 #.  Renamed from analysis.py to health.py by David C. Stauffer in May 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 from typing import Optional
@@ -22,7 +22,8 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
 
-#%% health.dist_enum_and_mons
+
+# %% health.dist_enum_and_mons
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_health_dist_enum_and_mons(unittest.TestCase):
     r"""
@@ -112,7 +113,7 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
         self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
 
 
-#%% health.icer
+# %% health.icer
 @unittest.skipIf(not HAVE_NUMPY or not HAVE_PANDAS, "Skipping due to missing numpy/pandas dependency.")
 class Test_health_icer(unittest.TestCase):
     r"""
@@ -273,7 +274,7 @@ class Test_health_icer(unittest.TestCase):
             plt.close(self.fig)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     suppress_plots()
     unittest.main(exit=False)

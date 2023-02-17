@@ -6,8 +6,8 @@ Notes
 #.  Written by David C. Stauffer in December 2020.
 """
 
-#%% Constants
-version_info = (3, 3, 1)
+# %% Constants
+version_info = (3, 3, 2)
 
 # Below is data about the minor release history for potential use in deprecating older support.
 # For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html

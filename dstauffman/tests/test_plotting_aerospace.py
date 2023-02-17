@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in December 2018.
 """
 
-#%% Imports
+# %% Imports
 import datetime
 from typing import List, Optional
 import unittest
@@ -25,7 +25,8 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
 
-#%% plotting.make_quaternion_plot
+
+# %% plotting.make_quaternion_plot
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_quaternion_plot(unittest.TestCase):
     r"""
@@ -347,7 +348,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             plot.close_all(self.figs)
 
 
-#%% plotting.plot_attitude
+# %% plotting.plot_attitude
 class Test_plotting_plot_attitude(unittest.TestCase):
     r"""
     Tests the plotting.plot_attitude function with the following cases:
@@ -356,7 +357,7 @@ class Test_plotting_plot_attitude(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% plotting.plot_los
+# %% plotting.plot_los
 class Test_plotting_plot_los(unittest.TestCase):
     r"""
     Tests the plotting.plot_los function with the following cases:
@@ -365,7 +366,7 @@ class Test_plotting_plot_los(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% plotting.plot_position
+# %% plotting.plot_position
 class Test_plotting_plot_position(unittest.TestCase):
     r"""
     Tests the plotting.plot_position function with the following cases:
@@ -374,7 +375,7 @@ class Test_plotting_plot_position(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% plotting.plot_velocity
+# %% plotting.plot_velocity
 class Test_plotting_plot_velocity(unittest.TestCase):
     r"""
     Tests the plotting.plot_velocity function with the following cases:
@@ -383,7 +384,7 @@ class Test_plotting_plot_velocity(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% plotting.plot_innovations
+# %% plotting.plot_innovations
 class Test_plotting_plot_innovations(unittest.TestCase):
     r"""
     Tests the plotting.plot_innovations function with the following cases:
@@ -392,7 +393,7 @@ class Test_plotting_plot_innovations(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% plotting.plot_innov_fplocs
+# %% plotting.plot_innov_fplocs
 class Test_plotting_plot_innov_fplocs(unittest.TestCase):
     r"""
     Tests the plotting.plot_innov_fplocs function with the following cases:
@@ -401,7 +402,7 @@ class Test_plotting_plot_innov_fplocs(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% plotting.plot_covariance
+# %% plotting.plot_covariance
 class Test_plotting_plot_covariance(unittest.TestCase):
     r"""
     Tests the plotting.plot_covariance function with the following cases:
@@ -410,7 +411,7 @@ class Test_plotting_plot_covariance(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% plotting.plot_states
+# %% plotting.plot_states
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_states(unittest.TestCase):
     r"""
@@ -465,7 +466,7 @@ class Test_plotting_plot_states(unittest.TestCase):
         plot.close_all(self.figs)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     if HAVE_MPL:
         plt.ioff()

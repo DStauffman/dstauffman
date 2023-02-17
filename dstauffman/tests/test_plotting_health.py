@@ -7,7 +7,7 @@ Notes
 #.  Separated into plot_health.py from plotting.py by David C. Stauffer in May 2020.
 """
 
-#%% Imports
+# %% Imports
 from typing import List, Optional
 import unittest
 
@@ -21,7 +21,8 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
 
-#%% plotting.TruthPlotter
+
+# %% plotting.TruthPlotter
 @unittest.skipIf(not HAVE_MPL or not HAVE_NUMPY, "Skipping due to missing matplotlib/numpy dependency.")
 class Test_plotting_TruthPlotter(unittest.TestCase):
     r"""
@@ -169,7 +170,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
             plt.close(self.fig)
 
 
-#%% plotting.plot_health_time_history
+# %% plotting.plot_health_time_history
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_health_time_history(unittest.TestCase):
     r"""
@@ -304,7 +305,7 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
                 plt.close(this_fig)
 
 
-#%% plotting.plot_health_monte_carlo
+# %% plotting.plot_health_monte_carlo
 @unittest.skipIf(not HAVE_MPL or not HAVE_NUMPY, "Skipping due to missing matplotlib/numpy dependency.")
 class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
     r"""
@@ -443,7 +444,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
             plt.close(self.fig)
 
 
-#%% plotting.plot_icer
+# %% plotting.plot_icer
 class Test_plotting_plot_icer(unittest.TestCase):
     r"""
     Tests the plotting.plot_icer function with the following cases:
@@ -452,7 +453,7 @@ class Test_plotting_plot_icer(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% plotting.plot_population_pyramid
+# %% plotting.plot_population_pyramid
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_population_pyramid(unittest.TestCase):
     r"""
@@ -496,7 +497,7 @@ class Test_plotting_plot_population_pyramid(unittest.TestCase):
             plt.close(self.fig)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     plot.suppress_plots()
     unittest.main(exit=False)

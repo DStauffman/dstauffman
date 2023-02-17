@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in December 2015.
 """
 
-#%% Imports
+# %% Imports
 from typing import Dict
 import unittest
 
@@ -15,7 +15,8 @@ import dstauffman as dcs
 if dcs.HAVE_NUMPY:
     import numpy as np
 
-#%% convert_annual_to_monthly_probability
+
+# %% convert_annual_to_monthly_probability
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_convert_annual_to_monthly_probability(unittest.TestCase):
     r"""
@@ -61,7 +62,7 @@ class Test_convert_annual_to_monthly_probability(unittest.TestCase):
         np.testing.assert_array_almost_equal(monthly, self.monthly)
 
 
-#%% convert_monthly_to_annual_probability
+# %% convert_monthly_to_annual_probability
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_convert_monthly_to_annual_probability(unittest.TestCase):
     r"""
@@ -107,7 +108,7 @@ class Test_convert_monthly_to_annual_probability(unittest.TestCase):
         np.testing.assert_array_almost_equal(annual, self.annuals)
 
 
-#%% prob_to_rate
+# %% prob_to_rate
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_prob_to_rate(unittest.TestCase):
     r"""
@@ -153,7 +154,7 @@ class Test_prob_to_rate(unittest.TestCase):
         np.testing.assert_array_almost_equal(prob, self.prob)
 
 
-#%% rate_to_prob
+# %% rate_to_prob
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_rate_to_prob(unittest.TestCase):
     r"""
@@ -199,7 +200,7 @@ class Test_rate_to_prob(unittest.TestCase):
         np.testing.assert_array_almost_equal(rate, self.rate)
 
 
-#%% annual_rate_to_monthly_probability
+# %% annual_rate_to_monthly_probability
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_annual_rate_to_monthly_probability(unittest.TestCase):
     r"""
@@ -243,7 +244,7 @@ class Test_annual_rate_to_monthly_probability(unittest.TestCase):
         np.testing.assert_array_almost_equal(prob, self.prob)
 
 
-#%% monthly_probability_to_annual_rate
+# %% monthly_probability_to_annual_rate
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_monthly_probability_to_annual_rate(unittest.TestCase):
     r"""
@@ -287,7 +288,7 @@ class Test_monthly_probability_to_annual_rate(unittest.TestCase):
         np.testing.assert_array_almost_equal(rate, self.rate)
 
 
-#%% combine_sets
+# %% combine_sets
 class Test_combine_sets(unittest.TestCase):
     r"""
     Tests the dcs.combine_sets function with the following cases:
@@ -369,7 +370,7 @@ class Test_combine_sets(unittest.TestCase):
             (n, u, s) = dcs.combine_sets(np.array([self.n1, self.n1]), self.u1, self.s1, self.n2, self.u2, self.s2)  # type: ignore[arg-type]
 
 
-#%% bounded_normal_draw
+# %% bounded_normal_draw
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_bounded_normal_draw(unittest.TestCase):
     r"""
@@ -422,7 +423,7 @@ class Test_bounded_normal_draw(unittest.TestCase):
         self.assertTrue(np.all(np.abs(out - self.mean) < 1e-8))
 
 
-#%% rand_draw
+# %% rand_draw
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_rand_draw(unittest.TestCase):
     r"""
@@ -459,7 +460,7 @@ class Test_rand_draw(unittest.TestCase):
         self.assertTrue(is_set[2])
 
 
-#%% ecdf
+# %% ecdf
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_ecdf(unittest.TestCase):
     r"""
@@ -501,7 +502,7 @@ class Test_ecdf(unittest.TestCase):
         np.testing.assert_array_equal(f, np.array([0.0, 0.5, 1.0]))
 
 
-#%% apply_prob_to_mask
+# %% apply_prob_to_mask
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_apply_prob_to_mask(unittest.TestCase):
     r"""
@@ -547,6 +548,6 @@ class Test_apply_prob_to_mask(unittest.TestCase):
         np.testing.assert_array_equal(out, mask)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

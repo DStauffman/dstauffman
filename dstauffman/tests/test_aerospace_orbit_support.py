@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in August 2021.
 """
 
-#%% Imports
+# %% Imports
 import datetime
 import unittest
 
@@ -19,7 +19,8 @@ if HAVE_NUMPY:
 else:
     from math import pi
 
-#%% aerospace.d_2_r
+
+# %% aerospace.d_2_r
 class Test_d_2_r(unittest.TestCase):
     r"""
     Tests the aerospace.d_2_r function with the following cases:
@@ -37,7 +38,7 @@ class Test_d_2_r(unittest.TestCase):
         )
 
 
-#%% aerospace.r_2_d
+# %% aerospace.r_2_d
 class Test_r_2_d(unittest.TestCase):
     r"""
     Tests the aerospace.r_2_d function with the following cases:
@@ -55,7 +56,7 @@ class Test_r_2_d(unittest.TestCase):
         )
 
 
-#%% aerospace.norm
+# %% aerospace.norm
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_norm(unittest.TestCase):
     r"""
@@ -73,7 +74,7 @@ class Test_norm(unittest.TestCase):
         np.testing.assert_array_equal(mag, np.array([5.0, 10.0]))
 
 
-#%% aerospace.dot
+# %% aerospace.dot
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_dot(unittest.TestCase):
     r"""
@@ -86,7 +87,7 @@ class Test_dot(unittest.TestCase):
         self.assertEqual(x, 1 * 2 + 3 * 4 + 5 * 6)
 
 
-#%% aerospace.cross
+# %% aerospace.cross
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_cross(unittest.TestCase):
     r"""
@@ -106,7 +107,7 @@ class Test_cross(unittest.TestCase):
         np.testing.assert_array_equal(x, exp)
 
 
-#%% aerospace.jd_to_numpy
+# %% aerospace.jd_to_numpy
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_jd_to_numpy(unittest.TestCase):
     r"""
@@ -125,7 +126,7 @@ class Test_jd_to_numpy(unittest.TestCase):
         np.testing.assert_array_equal(jd, np.array([2451545.0, 2451545.5]))
 
 
-#%% aerospace.jd_to_numpy
+# %% aerospace.jd_to_numpy
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_jd_to_numpy(unittest.TestCase):
     r"""
@@ -144,7 +145,7 @@ class Test_aerospace_jd_to_numpy(unittest.TestCase):
         np.testing.assert_array_equal(date, exp)
 
 
-#%% aerospace.d_2_dms
+# %% aerospace.d_2_dms
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_d_2_dms(unittest.TestCase):
     r"""
@@ -166,7 +167,7 @@ class Test_aerospace_d_2_dms(unittest.TestCase):
             space.d_2_dms(np.zeros((3, 10)))
 
 
-#%% aerospace.dms_2_d
+# %% aerospace.dms_2_d
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_dms_2_d(unittest.TestCase):
     r"""
@@ -188,7 +189,7 @@ class Test_aerospace_dms_2_d(unittest.TestCase):
             space.dms_2_d(np.zeros(10))
 
 
-#%% aerospace.hms_2_r
+# %% aerospace.hms_2_r
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_hms_2_r(unittest.TestCase):
     r"""
@@ -210,7 +211,7 @@ class Test_aerospace_hms_2_r(unittest.TestCase):
         np.testing.assert_array_almost_equal(x, np.array([0.0, self.exp, 2 * pi / 3, 2 * pi]), 11)
 
 
-#%% aerospace.r_2_hms
+# %% aerospace.r_2_hms
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_r_2_hms(unittest.TestCase):
     r"""
@@ -234,39 +235,40 @@ class Test_aerospace_r_2_hms(unittest.TestCase):
         np.testing.assert_array_almost_equal(hms, exp, 11)
 
 
-#%% aerospace.aer_2_rdr
+# %% aerospace.aer_2_rdr
 
-#%% aerospace.aer_2_sez
+# %% aerospace.aer_2_sez
 
-#%% aerospace.geo_loc_2_ijk
+# %% aerospace.geo_loc_2_ijk
 
-#%% aerospace.ijk_2_rdr
+# %% aerospace.ijk_2_rdr
 
-#%% aerospace.ijk_2_sez
+# %% aerospace.ijk_2_sez
 
-#%% aerospace.long_2_sidereal
+# %% aerospace.long_2_sidereal
 
-#%% aerospace.rdr_2_aer
+# %% aerospace.rdr_2_aer
 
-#%% aerospace.rdr_2_ijk
+# %% aerospace.rdr_2_ijk
 
-#%% aerospace.sez_2_aer
+# %% aerospace.sez_2_aer
 
-#%% aerospace.sez_2_ijk
+# %% aerospace.sez_2_ijk
 
-#%% aerospace.rv_aer_2_ijk
+# %% aerospace.rv_aer_2_ijk
 
-#%% aerospace.rv_aer_2_sez
+# %% aerospace.rv_aer_2_sez
 
-#%% aerospace.rv_ijk_2_aer
+# %% aerospace.rv_ijk_2_aer
 
-#%% aerospace.rv_ijk_2_sez
+# %% aerospace.rv_ijk_2_sez
 
-#%% aerospace.rv_sez_2_aer
+# %% aerospace.rv_sez_2_aer
 
-#%% aerospace.rv_sez_2_ijk
+# %% aerospace.rv_sez_2_ijk
 
-#%% aerospace.get_sun_radec
+
+# %% aerospace.get_sun_radec
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_get_sun_radec(unittest.TestCase):
     r"""
@@ -291,11 +293,11 @@ class Test_aerospace_get_sun_radec(unittest.TestCase):
         self.assertAlmostEqual(ob, 0.40906882950150103, 14)  # TODO: get independent source for this
 
 
-#%% aerospace.beta_from_oe
+# %% aerospace.beta_from_oe
 pass  # TODO: write this
 
 
-#%% aerospace.eclipse_fraction
+# %% aerospace.eclipse_fraction
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_eclipse_fraction(unittest.TestCase):
     def setUp(self) -> None:
@@ -315,6 +317,6 @@ class Test_aerospace_eclipse_fraction(unittest.TestCase):
         np.testing.assert_array_almost_equal(fe, exp, 14)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

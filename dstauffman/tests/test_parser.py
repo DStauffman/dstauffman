@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 import argparse
 import logging
 import unittest
@@ -17,7 +17,7 @@ from slog import capture_output, LogLevel, ReturnCodes
 import dstauffman as dcs
 
 
-#%% _VALID_COMMANDS
+# %% _VALID_COMMANDS
 class Test__VALID_COMMANDS(unittest.TestCase):
     r"""
     Tests the _VALID_COMMANDS enumerator for expected values.
@@ -32,7 +32,7 @@ class Test__VALID_COMMANDS(unittest.TestCase):
         self.assertIn("version", dcs.parser._VALID_COMMANDS)
 
 
-#%% parser._print_bad_command
+# %% parser._print_bad_command
 class Test_parser__print_bad_command(unittest.TestCase):
     r"""
     Tests the parser._print_bad_command function with the following cases:
@@ -47,7 +47,7 @@ class Test_parser__print_bad_command(unittest.TestCase):
         self.assertEqual(output, 'Command "garbage" is not understood.')
 
 
-#%% main
+# %% main
 class Test_main(unittest.TestCase):
     r"""
     Tests the main function with the following cases:
@@ -56,7 +56,7 @@ class Test_main(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% parse_wrapper
+# %% parse_wrapper
 class Test_parse_wrapper(unittest.TestCase):
     r"""
     Tests the parse_wrapper function with the following cases:
@@ -81,7 +81,7 @@ class Test_parse_wrapper(unittest.TestCase):
         self.assertEqual(command, "help")
 
 
-#%% parse_commands
+# %% parse_commands
 class Test_parse_commands(unittest.TestCase):
     r"""
     Tests the parse_commands function with the following cases:
@@ -102,7 +102,7 @@ class Test_parse_commands(unittest.TestCase):
         self.assertEqual(str(context.exception), 'Unexpected command "bad".')
 
 
-#%% execute_command
+# %% execute_command
 class Test_execute_command(unittest.TestCase):
     r"""
     Tests the execute_command function with the following cases:
@@ -127,7 +127,7 @@ class Test_execute_command(unittest.TestCase):
         self.assertEqual(rc, ReturnCodes.bad_command)
 
 
-#%% process_command_line_options
+# %% process_command_line_options
 class Test_process_command_line_options(unittest.TestCase):
     r"""
     Tests the process_command_line_options function with the following cases:
@@ -216,6 +216,6 @@ class Test_process_command_line_options(unittest.TestCase):
         mocker.assert_called_once_with(dcs.parser.LogLevel.L5, "Configuring Log Level at: %s", LogLevel.L5)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

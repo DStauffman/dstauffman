@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in May 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import datetime
@@ -36,7 +36,7 @@ if TYPE_CHECKING:
     _NPDates = Union[np.datetime64, np.ndarray]
     _NInt = np.typing.NDArray[np.int_]
 
-#%% Constants
+# %% Constants
 # maps other names of units to the ones expected by numpy
 _NP_MAP = {
     "year": "Y",
@@ -51,7 +51,8 @@ _NP_MAP = {
     "sec": "s",
 }
 
-#%% Functions - get_np_time_units
+
+# %% Functions - get_np_time_units
 def get_np_time_units(date: Union[np.datetime64, np.timedelta64, str]) -> Optional[str]:
     r"""
     Gets the units for a given datetime64 or timedelta64.
@@ -97,7 +98,7 @@ def get_np_time_units(date: Union[np.datetime64, np.timedelta64, str]) -> Option
     return None if len(matches) == 1 else matches[1]
 
 
-#%% Functions - get_ymd_from_np
+# %% Functions - get_ymd_from_np
 def get_ymd_from_np(date: _NPDates) -> Tuple[_NInt, _NInt, _NInt]:
     r"""
     Gets the year, month, and day for a given numpy datetime64.
@@ -129,7 +130,7 @@ def get_ymd_from_np(date: _NPDates) -> Tuple[_NInt, _NInt, _NInt]:
     return (year, month, day)
 
 
-#%% Functions - round_datetime
+# %% Functions - round_datetime
 def round_datetime(dt: Optional[datetime.datetime] = None, /, round_to_sec: int = 60, floor: bool = False) -> datetime.datetime:
     r"""
     Round a datetime object to any time lapse in seconds.
@@ -180,7 +181,7 @@ def round_datetime(dt: Optional[datetime.datetime] = None, /, round_to_sec: int 
     return dt + datetime.timedelta(0, rounding - seconds, -dt.microsecond)
 
 
-#%% Functions - round_np_datetime
+# %% Functions - round_np_datetime
 def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, floor: bool = False) -> np.datetime64:
     r"""
     Rounds a numpy datetime64 time to the specified delta.
@@ -236,7 +237,7 @@ def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, flo
     return date_out
 
 
-#%% Functions - round_num_datetime
+# %% Functions - round_num_datetime
 def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = False) -> np.ndarray:
     r"""
     Rounds a numerical datetime to the given value.
@@ -286,7 +287,7 @@ def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = 
     return date_out
 
 
-#%% Functions - round_time
+# %% Functions - round_time
 @overload
 def round_time(x: np.datetime64, /, t_round: np.timedelta64) -> np.datetime64:
     ...
@@ -346,7 +347,7 @@ def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
     return round_num_datetime(x, t_round.astype(np.int64) / NP_INT64_PER_SEC)  # type: ignore[arg-type]
 
 
-#%% Functions - convert_date
+# %% Functions - convert_date
 def convert_date(
     date: Any,
     form: str,
@@ -496,7 +497,7 @@ def convert_date(
     return out
 
 
-#%% Functions - convert_time_units
+# %% Functions - convert_time_units
 def convert_time_units(time, old_unit, new_unit):
     r"""
     Converts the given time history from the old units to the new units.
@@ -538,7 +539,7 @@ def convert_time_units(time, old_unit, new_unit):
     return time * mult
 
 
-#%% Functions - convert_datetime_to_np
+# %% Functions - convert_datetime_to_np
 def convert_datetime_to_np(time, /, units=NP_DATETIME_UNITS):
     r"""
     Convenience wrapper to convert a datetime.datetime to a numpy.datetime64 with the desired units.
@@ -570,13 +571,13 @@ def convert_datetime_to_np(time, /, units=NP_DATETIME_UNITS):
     """
     if isinstance(time, list):
         out = np.empty(len(time), dtype="datetime64[" + units + "]")
-        for (ix, t) in enumerate(time):
+        for ix, t in enumerate(time):
             out[ix] = np.datetime64(t, units)
         return out
     return np.datetime64(time, units)
 
 
-#%% Functions - convert_duration_to_np
+# %% Functions - convert_duration_to_np
 def convert_duration_to_np(dt, /, units=NP_DATETIME_UNITS):
     r"""Convenience wrapper to convert a datetime.timedelta to a numpy.timedelta64 with the desired units.
 
@@ -608,7 +609,7 @@ def convert_duration_to_np(dt, /, units=NP_DATETIME_UNITS):
     return np.timedelta64(dt, units)
 
 
-#%% Functions - convert_num_dt_to_np
+# %% Functions - convert_num_dt_to_np
 def convert_num_dt_to_np(dt, /, units="sec", np_units=NP_TIMEDELTA_FORM):
     r"""Convenience wrapper to convert a number of seconds to a numpy.timedelta64 with the desired units.
 
@@ -641,7 +642,7 @@ def convert_num_dt_to_np(dt, /, units="sec", np_units=NP_TIMEDELTA_FORM):
     return np.timedelta64(dt, units).astype(np_units)
 
 
-#%% Functions - get_delta_time_str
+# %% Functions - get_delta_time_str
 def get_delta_time_str(
     start_time: Union[datetime.datetime, datetime.timedelta],
     final_time: Optional[datetime.datetime] = None,
@@ -690,7 +691,7 @@ def get_delta_time_str(
     return strftime(format_, gmtime(delta_time.total_seconds()))
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_time", exit=False)
     doctest.testmod(verbose=False)

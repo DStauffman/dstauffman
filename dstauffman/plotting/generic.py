@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in May 2020.
 """  # pylint: disable=too-many-lines
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -58,7 +58,7 @@ else:
 if HAVE_PANDAS:
     import pandas as pd
 
-#%% Constants
+# %% Constants
 # hard-coded values
 _LEG_FORMAT = "{:1.3f}"
 _TRUTH_COLOR = "k"
@@ -74,10 +74,11 @@ if TYPE_CHECKING:
     _Figs = List[Figure]
     _FuncLamb = Callable[[Any, Any], float]
 
-#%% Globals
+# %% Globals
 logger = logging.getLogger(__name__)
 
-#%% Functions - make_generic_plot
+
+# %% Functions - make_generic_plot
 def make_generic_plot(
     plot_type: str,
     description: str,
@@ -409,7 +410,7 @@ def make_generic_plot(
         assert s1 in (0, 4), "Must be a 4-element quaternion"
         assert s2 in (0, 4), "Must be a 4-element quaternion"
 
-    #% Calculations
+    # % Calculations
     # build RMS indices
     if data_is_list:
         ix: Dict[str, Any] = {"one": [], "t_min": None, "t_max": None}
@@ -575,7 +576,7 @@ def make_generic_plot(
         num_cols = 1
     num_axes = num_figs * num_rows * num_cols
 
-    #% Create plots
+    # % Create plots
     if fig_ax is None:
         set_window_titles = True
         if num_cols == 1:
@@ -619,7 +620,7 @@ def make_generic_plot(
     # preallocate datashaders
     datashaders = []
     # plot data
-    for (i, this_axes) in enumerate(ax):  # pylint: disable=too-many-nested-blocks
+    for i, this_axes in enumerate(ax):  # pylint: disable=too-many-nested-blocks
         is_diff_plot = doing_diffs and (i > num_rows - 1 or (not single_lines and make_subplots and i == 1))
         loop_counter: Iterable[int]
         if plot_type == "bar":
@@ -643,7 +644,7 @@ def make_generic_plot(
         else:
             loop_counter = range(num_channels) if not is_quat_diff or not is_diff_plot else range(3)
         if not is_diff_plot:
-            #% standard plot
+            # % standard plot
             for j in loop_counter:
                 this_label = f"{name_one} {elements[j]}" if name_one else str(elements[j])
                 if show_rms and not is_cat_plot and not is_quat_diff:
@@ -667,7 +668,7 @@ def make_generic_plot(
                 else:
                     this_zorder = 9
                 if plot_type == "bar":
-                    #% bar plot
+                    # % bar plot
                     this_bottom1 = bottoms[j] if data_is_list else bottoms[j, :] if data_as_rows else bottoms[:, j]  # type: ignore[call-overload]
                     this_bottom2 = bottoms[j + 1] if data_is_list else bottoms[j + 1, :] if data_as_rows else bottoms[:, j + 1]  # type: ignore[call-overload]
                     if not ignore_plot_data(this_data, ignore_empties):
@@ -683,7 +684,7 @@ def make_generic_plot(
                             edgecolor="none",
                         )
                 elif is_cat_plot:
-                    #% cat plot
+                    # % cat plot
                     # plot the full underlying line once
                     if not use_datashader or this_time.size <= datashader_pts:
                         plot_func(
@@ -740,7 +741,7 @@ def make_generic_plot(
                                 zorder=3,
                             )
                 else:
-                    #% default plots
+                    # % default plots
                     if not doing_diffs or (doing_diffs and have_data_one):
                         if is_quat_diff and not have_data_two:
                             # TODO: get rid of this special case or rework into colormap?
@@ -840,7 +841,7 @@ def make_generic_plot(
                         capsize=2,
                     )
         else:
-            #% Difference plot
+            # % Difference plot
             for j in loop_counter:
                 if single_lines and i % num_channels != j and not is_quat_diff or (is_quat_diff and not plot_components):
                     continue
@@ -992,7 +993,7 @@ def make_generic_plot(
     return fig
 
 
-#%% Functions - make_time_plot
+# %% Functions - make_time_plot
 def make_time_plot(
     description,
     time,
@@ -1113,7 +1114,7 @@ def make_time_plot(
     )
 
 
-#%% Functions - make_error_bar_plot
+# %% Functions - make_error_bar_plot
 def make_error_bar_plot(
     description,
     time,
@@ -1243,7 +1244,7 @@ def make_error_bar_plot(
     )
 
 
-#%% Functions - make_difference_plot
+# %% Functions - make_difference_plot
 def make_difference_plot(
     description,
     time_one,
@@ -1400,7 +1401,7 @@ def make_difference_plot(
     )
 
 
-#%% Functions - make_categories_plot
+# %% Functions - make_categories_plot
 def make_categories_plot(
     description,
     time,
@@ -1540,7 +1541,7 @@ def make_categories_plot(
     )
 
 
-#%% Functions - make_bar_plot
+# %% Functions - make_bar_plot
 def make_bar_plot(
     description,
     time,
@@ -1670,7 +1671,7 @@ def make_bar_plot(
     )
 
 
-#%% make_connected_sets
+# %% make_connected_sets
 def make_connected_sets(
     description,
     points,
@@ -1909,7 +1910,7 @@ def make_connected_sets(
     return fig
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     plt.ioff()
     unittest.main(module="dstauffman.tests.test_plotting_generic", exit=False)

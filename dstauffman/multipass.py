@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in November 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -23,7 +23,7 @@ from slog import LogLevel
 if TYPE_CHECKING:
     from types import TracebackType
 
-#%% Activate exception support for parallel code
+# %% Activate exception support for parallel code
 try:
     import tblib.pickling_support
 except ModuleNotFoundError:
@@ -32,10 +32,11 @@ else:
     # TODO: is there a downside to always doing this?  Should I rely on the scripts that call it instead?
     tblib.pickling_support.install()
 
-#%% Globals
+# %% Globals
 logger = logging.getLogger(__name__)
 
-#%% Classes - MultipassExceptionWrapper
+
+# %% Classes - MultipassExceptionWrapper
 class MultipassExceptionWrapper:
     r"""Exception wrapper that can pass through multiprocessing calls and back to main."""
 
@@ -51,7 +52,7 @@ class MultipassExceptionWrapper:
         raise self.ee.with_traceback(self.tb)
 
 
-#%% Functions - parfor_wrapper
+# %% Functions - parfor_wrapper
 def parfor_wrapper(
     func: Callable,
     args: Iterable,
@@ -143,14 +144,14 @@ def parfor_wrapper(
                 break
     if ignore_errors and len(errors) > 0:
         logger.log(LogLevel.L2, "There were %i error(s) in the processing.", len(errors))
-        for (i, err) in enumerate(errors):
+        for i, err in enumerate(errors):
             logger.log(
                 LogLevel.L6, "Error %i: %s\n%s", i + 1, err.ee.with_traceback(err.tb), "\n".join(traceback.format_tb(err.tb))
             )
     return results
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_multipass", exit=False)
     doctest.testmod(verbose=False)

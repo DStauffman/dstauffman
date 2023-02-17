@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2021.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -20,7 +20,7 @@ if HAVE_NUMPY:
 else:
     from math import pi as PI, sqrt  # type: ignore[assignment]
 
-#%% Constants
+# %% Constants
 # Written by David C. Stauffer for AA 279 on 28 Apr 2007, constants provided by Professor West.
 
 # Convenient aliases
@@ -86,7 +86,7 @@ PALO_ALTO["lng"] = -122.138162 * DEG2RAD  # East [rad]
 PALO_ALTO["alt"] = 4.0  # Altitude [m]
 PALO_ALTO["geo_loc"] = (PALO_ALTO["lat"], PALO_ALTO["lng"], PALO_ALTO["alt"])  # type: ignore[assignment]
 
-#%% Unit Test
+# %% Unit Test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_aerospace_orbit_const", exit=False)
     doctest.testmod(verbose=False)

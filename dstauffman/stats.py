@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in December 2015.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -27,7 +27,8 @@ if TYPE_CHECKING:
     _B = np.typing.NDArray[np.bool_]
     _N = np.typing.NDArray[np.float64]
 
-#%% Functions - convert_annual_to_monthly_probability
+
+# %% Functions - convert_annual_to_monthly_probability
 def convert_annual_to_monthly_probability(annual: _N) -> _N:
     r"""
     Convert a given annual probabily into the equivalent monthly one.
@@ -73,7 +74,7 @@ def convert_annual_to_monthly_probability(annual: _N) -> _N:
     return monthly  # type: ignore[no-any-return]
 
 
-#%% Functions - convert_monthly_to_annual_probability
+# %% Functions - convert_monthly_to_annual_probability
 def convert_monthly_to_annual_probability(monthly: _N) -> _N:
     r"""
     Convert a given monthly probability into the equivalent annual one.
@@ -109,11 +110,12 @@ def convert_monthly_to_annual_probability(monthly: _N) -> _N:
     return annual
 
 
-#%% Functions - ca2mp & cm2ap aliases
+# %% Functions - ca2mp & cm2ap aliases
 ca2mp = convert_annual_to_monthly_probability
 cm2ap = convert_monthly_to_annual_probability
 
-#%% Functions - prob_to_rate
+
+# %% Functions - prob_to_rate
 def prob_to_rate(prob, time=1):
     r"""
     Convert a given probability and time to a rate.
@@ -167,7 +169,7 @@ def prob_to_rate(prob, time=1):
     return rate
 
 
-#%% Functions - rate_to_prob
+# %% Functions - rate_to_prob
 def rate_to_prob(rate, time=1):
     r"""
     Convert a given rate and time to a probability.
@@ -208,7 +210,7 @@ def rate_to_prob(rate, time=1):
     return prob
 
 
-#%% Functions - annual_rate_to_monthly_probability
+# %% Functions - annual_rate_to_monthly_probability
 def annual_rate_to_monthly_probability(rate):
     r"""
     Convert a given annual rate to a monthly probability.
@@ -247,7 +249,7 @@ def annual_rate_to_monthly_probability(rate):
     return prob
 
 
-#%% Functions - monthly_probability_to_annual_rate
+# %% Functions - monthly_probability_to_annual_rate
 def monthly_probability_to_annual_rate(prob):
     r"""
     Convert a given monthly probability to an annual rate.
@@ -285,11 +287,12 @@ def monthly_probability_to_annual_rate(prob):
     return rate
 
 
-#%% Functions - ar2mp
+# %% Functions - ar2mp
 ar2mp = annual_rate_to_monthly_probability
 mp2ar = monthly_probability_to_annual_rate
 
-#%% Functions - combine_sets
+
+# %% Functions - combine_sets
 def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -> Tuple[int, float, float]:
     r"""
     Combine the mean and standard deviations for two non-overlapping sets of data.
@@ -385,7 +388,7 @@ def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -
     return (n, u, s)
 
 
-#%% Functions - bounded_normal_draw
+# %% Functions - bounded_normal_draw
 def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np.random.RandomState) -> np.ndarray:
     r"""
     Create a normalized distribution with the given mean and standard deviations.
@@ -452,7 +455,7 @@ def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np
     return out
 
 
-#%% Functions - rand_draw
+# %% Functions - rand_draw
 def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = True) -> _B:
     r"""
     Draws psuedo-random numbers from the given generator to compare to given factors.
@@ -511,7 +514,7 @@ def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = 
     return is_set
 
 
-#%% Functions - ecdf
+# %% Functions - ecdf
 def ecdf(y: Union[float, List[float], _N], /) -> Tuple[_N, _N]:
     r"""
     Calculate the empirical cumulative distribution function, as in Matlab's ecdf function.
@@ -548,7 +551,7 @@ def ecdf(y: Union[float, List[float], _N], /) -> Tuple[_N, _N]:
     return (x, f)
 
 
-#%% Functions - apply_prob_to_mask
+# %% Functions - apply_prob_to_mask
 def apply_prob_to_mask(mask: _B, prob: float, prng: np.random.RandomState, inplace: bool = False) -> _B:
     r"""
     Applies a one-time probability to a logical mask while minimizing the random number calls.
@@ -588,7 +591,7 @@ def apply_prob_to_mask(mask: _B, prob: float, prng: np.random.RandomState, inpla
     return out
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_stats", exit=False)
     doctest.testmod(verbose=False)

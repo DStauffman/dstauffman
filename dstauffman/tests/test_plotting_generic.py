@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in May 2020.
 """
 
-#%% Imports
+# %% Imports
 import datetime
 from typing import List, Optional
 import unittest
@@ -23,7 +23,8 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
 
-#%% plotting.make_time_plot
+
+# %% plotting.make_time_plot
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_time_plot(unittest.TestCase):
     r"""
@@ -182,7 +183,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             plt.close(self.fig)
 
 
-#%% plotting.make_error_bar_plot
+# %% plotting.make_error_bar_plot
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_error_bar_plot(unittest.TestCase):
     r"""
@@ -254,7 +255,7 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
             plt.close(self.fig)
 
 
-#%% plotting.make_difference_plot
+# %% plotting.make_difference_plot
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_difference_plot(unittest.TestCase):
     r"""
@@ -691,7 +692,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
                 plt.close(this_fig)
 
 
-#%% plotting.make_categories_plot
+# %% plotting.make_categories_plot
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_categories_plot(unittest.TestCase):
     r"""
@@ -785,7 +786,7 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
                 plt.close(this_fig)
 
 
-#%% plotting.make_connected_sets
+# %% plotting.make_connected_sets
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_connected_plots(unittest.TestCase):
     r"""
@@ -823,7 +824,7 @@ class Test_plotting_make_connected_plots(unittest.TestCase):
             plt.close(self.fig)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     if HAVE_MPL:
         plt.ioff()

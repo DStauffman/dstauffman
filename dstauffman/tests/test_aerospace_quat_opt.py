@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in February 2021.
 """
 
-#%% Imports
+# %% Imports
 import unittest
 
 from nubs import HAVE_NUMBA
@@ -17,7 +17,8 @@ import dstauffman.aerospace as space
 if HAVE_NUMPY:
     import numpy as np
 
-#%% aerospace.qrot_single
+
+# %% aerospace.qrot_single
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_qrot_single(unittest.TestCase):
     r"""
@@ -50,7 +51,7 @@ class Test_aerospace_qrot_single(unittest.TestCase):
         self.assertGreater(quat[3], 0)
 
 
-#%% aerospace.quat_from_axis_angle_single
+# %% aerospace.quat_from_axis_angle_single
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
     r"""
@@ -91,7 +92,7 @@ class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
         np.testing.assert_array_equal(quat, np.array([0.0, 0.0, 0.0, 1.0]))
 
 
-#%% aerospace.quat_interp_single
+# %% aerospace.quat_interp_single
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_interp_single(unittest.TestCase):
     r"""
@@ -134,7 +135,7 @@ class Test_aerospace_quat_interp_single(unittest.TestCase):
             space.quat_interp_single(self.time, self.quat, 10.0)
 
 
-#%% aerospace.quat_inv_single
+# %% aerospace.quat_inv_single
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_inv_single(unittest.TestCase):
     r"""
@@ -167,7 +168,7 @@ class Test_aerospace_quat_inv_single(unittest.TestCase):
         self.assertLess(np.max(np.abs(q1_inv - self.q1_inp)), 1e-8)
 
 
-#%% aerospace.quat_mult_single
+# %% aerospace.quat_mult_single
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_mult_single(unittest.TestCase):
     r"""
@@ -216,7 +217,7 @@ class Test_aerospace_quat_mult_single(unittest.TestCase):
         self.assertLess(np.max(np.abs(quat - self.q4)), 1e-8)
 
 
-#%% aerospace.quat_norm_single
+# %% aerospace.quat_norm_single
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_norm_single(unittest.TestCase):
     r"""
@@ -258,7 +259,7 @@ class Test_aerospace_quat_norm_single(unittest.TestCase):
         self.assertLess(np.max(np.abs(quat_norm - self.q3_inp)), 1e-8)
 
 
-#%% aerospace.quat_prop_single
+# %% aerospace.quat_prop_single
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_prop_single(unittest.TestCase):
     r"""
@@ -293,7 +294,7 @@ class Test_aerospace_quat_prop_single(unittest.TestCase):
         self.assertLess(np.max(np.abs(quat - self.quat_new)), 1e-8)
 
 
-#%% aerospace.quat_times_vector_single
+# %% aerospace.quat_times_vector_single
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_times_vector_single(unittest.TestCase):
     r"""
@@ -331,7 +332,7 @@ class Test_aerospace_quat_times_vector_single(unittest.TestCase):
         self.assertLess(np.max(np.abs(vec - self.out[:, 0])), 1e-8)
 
 
-#%% aerospace.quat_to_dcm
+# %% aerospace.quat_to_dcm
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_to_dcm(unittest.TestCase):
     r"""
@@ -348,6 +349,6 @@ class Test_aerospace_quat_to_dcm(unittest.TestCase):
         np.testing.assert_array_almost_equal(dcm, self.dcm)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in December 2018.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 from typing import Optional, TYPE_CHECKING
@@ -20,7 +20,8 @@ if dcs.HAVE_NUMPY:
 if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
 
-#%% Supporting functions
+
+# %% Supporting functions
 def _model_wrapper(x: Optional[_N], y: Optional[_N]) -> _N:
     if x is None:
         raise ValueError("Bad value for x")
@@ -29,7 +30,7 @@ def _model_wrapper(x: Optional[_N], y: Optional[_N]) -> _N:
     return x + np.sin(x) + np.cos(y * 2)  # type: ignore[no-any-return]
 
 
-#%% parfor_wrapper
+# %% parfor_wrapper
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_parfor_wrapper(unittest.TestCase):
     r"""
@@ -66,6 +67,6 @@ class Test_parfor_wrapper(unittest.TestCase):
         self.assertEqual(str(context.exception), "Bad value for y")
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

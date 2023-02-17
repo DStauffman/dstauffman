@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 """
 
-#%% Imports
+# %% Imports
 from typing import List
 import unittest
 
@@ -15,7 +15,8 @@ import dstauffman as dcs
 if dcs.HAVE_NUMPY:
     import numpy as np
 
-#%% Classes for testing
+
+# %% Classes for testing
 class Test_all_values(unittest.TestCase):
     r"""
     Tests all the constant values in the module.
@@ -72,6 +73,6 @@ class Test_all_values(unittest.TestCase):
                 self.assertTrue(field in self.master, "Test is missing: {}".format(field))
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

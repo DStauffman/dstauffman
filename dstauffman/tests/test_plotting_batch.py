@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in May 2015.
 """
 
-#%% Imports
+# %% Imports
 from typing import List, Union
 import unittest
 
@@ -21,7 +21,8 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
 
-#%% plotting.plot_bpe_convergence
+
+# %% plotting.plot_bpe_convergence
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_bpe_convergence(unittest.TestCase):
     r"""
@@ -55,7 +56,7 @@ class Test_plotting_plot_bpe_convergence(unittest.TestCase):
         plot.close_all(self.figs)
 
 
-#%% plotting.plot_bpe_results
+# %% plotting.plot_bpe_results
 class Test_plotting_plot_bpe_results(unittest.TestCase):
     r"""
     Tests the plotting.plot_bpe_results function with the following cases:
@@ -110,7 +111,7 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
         plot.close_all(self.figs)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     plot.suppress_plots()
     unittest.main(exit=False)

@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in August 2021.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -22,7 +22,8 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     _N = Union[float, np.ndarray]
 
-#%% Functions - d_2_r
+
+# %% Functions - d_2_r
 @overload
 def d_2_r(deg: float) -> float:
     ...
@@ -38,7 +39,7 @@ def d_2_r(deg: _N) -> _N:
     return DEG2RAD * deg
 
 
-#%% Functions r_2_d
+# %% Functions r_2_d
 @overload
 def r_2_d(rad: float) -> float:
     ...
@@ -54,25 +55,25 @@ def r_2_d(rad: _N) -> _N:
     return RAD2DEG * rad
 
 
-#%% Functions - norm
+# %% Functions - norm
 def norm(x):
     r"""Alias to the magnitude function, calculating the vector magnitude."""
     return np.asanyarray(magnitude(x))
 
 
-#%% Functions - dot
+# %% Functions - dot
 def dot(x, y):
     r"""Dot product between two vectors."""
     return np.sum(x * y, axis=0)
 
 
-#%% Functions - cross
+# %% Functions - cross
 def cross(x, y):
     r"""Cross product between two vectors."""
     return np.cross(x.T, y.T).T
 
 
-#%% Functions - jd_to_numpy
+# %% Functions - jd_to_numpy
 @overload
 def jd_to_numpy(time_jd: float) -> np.datetime64:
     ...
@@ -101,7 +102,7 @@ def jd_to_numpy(time_jd: _N) -> Union[np.datetime64, np.ndarray]:
     return out
 
 
-#%% Functions - numpy_to_jd
+# %% Functions - numpy_to_jd
 @overload
 def numpy_to_jd(date: np.datetime64) -> np.float64:
     ...
@@ -131,7 +132,7 @@ def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.
     return out
 
 
-#%% Functions - d_2_dms
+# %% Functions - d_2_dms
 def d_2_dms(x, /):
     r"""Converts an angle from degrees to degrees, minutes and seconds."""
     if np.ndim(x) > 1:
@@ -149,7 +150,7 @@ def d_2_dms(x, /):
     return out
 
 
-#%% Functions - dms_2_d
+# %% Functions - dms_2_d
 def dms_2_d(x, /):
     r"""Converts an angle from degrees, minutes and seconds to degrees."""
     if x.shape[0] != 3:
@@ -159,7 +160,7 @@ def dms_2_d(x, /):
     return out
 
 
-#%% Functions - hms_2_r
+# %% Functions - hms_2_r
 def hms_2_r(x, /):
     r"""Converts a time from hours, minutes and seconds to radians."""
     if x.shape[0] != 3:
@@ -170,7 +171,7 @@ def hms_2_r(x, /):
     return out
 
 
-#%% Functions - r_2_hms
+# %% Functions - r_2_hms
 def r_2_hms(x, /):
     r"""Converts an angle from radians to hours, minutes and seconds."""
     if np.ndim(x) > 1:
@@ -190,7 +191,7 @@ def r_2_hms(x, /):
     return out
 
 
-#%% Functions - aer_2_rdr
+# %% Functions - aer_2_rdr
 def aer_2_rdr(aer, geo_loc, time):
     r"""Converts Az/El/range to RA/Dec/range."""
     sez = aer_2_sez(aer)
@@ -199,7 +200,7 @@ def aer_2_rdr(aer, geo_loc, time):
     return rdr
 
 
-#%% Functions - aer_2_sez
+# %% Functions - aer_2_sez
 def aer_2_sez(aer):
     r"""Converts Az/El/range to SEZ cartesian."""
     # pull out az, el and range
@@ -211,7 +212,7 @@ def aer_2_sez(aer):
     return sez
 
 
-#%% Functions - geo_loc_2_ijk
+# %% Functions - geo_loc_2_ijk
 def geo_loc_2_ijk(geo_loc, time_jd):
     r"""
     Converts a geographic location to IJK coordinates.
@@ -247,7 +248,7 @@ def geo_loc_2_ijk(geo_loc, time_jd):
     return R
 
 
-#%% Functions - ijk_2_rdr
+# %% Functions - ijk_2_rdr
 def ijk_2_rdr(ijk):
     r"""Converts IJK cartesian to Ra/Dec/range."""
     # pull out i,j,k row vectors
@@ -267,10 +268,11 @@ def ijk_2_rdr(ijk):
     return rdr
 
 
-#%% Functions - ijk_2_sez
+# %% Functions - ijk_2_sez
 def ijk_2_sez(ijk, geo_loc, time_jd):
     r"""Converts IJK coordinates to SEZ coordinates."""
-    #% Subfunctions
+
+    # % Subfunctions
     def _find_D(L, theta):
         r"""Calculate the IJK to SEZ transformation matrix from L and theta."""
         # fmt: off
@@ -321,7 +323,7 @@ def ijk_2_sez(ijk, geo_loc, time_jd):
     return sez
 
 
-#%% Functions - long_2_sidereal
+# %% Functions - long_2_sidereal
 def long_2_sidereal(lon: _N, time_jd: _N) -> _N:
     r"""
     Converts a geographic longitude to sidereal longitude.
@@ -365,7 +367,7 @@ def long_2_sidereal(lon: _N, time_jd: _N) -> _N:
     return theta
 
 
-#%% Functions - rdr_2_aer
+# %% Functions - rdr_2_aer
 def rdr_2_aer(rdr, geo_loc, time):
     r"""Converts RA/Dec/range to Az/El/range."""
     # transform rdr to ijk frame
@@ -377,7 +379,7 @@ def rdr_2_aer(rdr, geo_loc, time):
     return aer
 
 
-#%% Functions - rdr_2_ijk
+# %% Functions - rdr_2_ijk
 def rdr_2_ijk(rdr):
     r"""Converts Ra/Dec/range to IJK cartesian."""
     # pull out components
@@ -389,7 +391,7 @@ def rdr_2_ijk(rdr):
     return ijk
 
 
-#%% Functions - sez_2_aer
+# %% Functions - sez_2_aer
 def sez_2_aer(sez):
     r"""Converts SEZ cartesian to Az/El/range."""
     # pull out x,y,z row vectors
@@ -409,10 +411,11 @@ def sez_2_aer(sez):
     return aer
 
 
-#%% Functions - sez_2_ijk
+# %% Functions - sez_2_ijk
 def sez_2_ijk(sez, geo_loc, time_jd):
     r"""Converts SEZ coordinates to IJK coordinates."""
-    #% Subfunctions
+
+    # % Subfunctions
     def _find_D(L, theta):
         r"""Calculate the SEZ to IJK transformation matrix from L and theta."""
         # fmt: off
@@ -463,7 +466,7 @@ def sez_2_ijk(sez, geo_loc, time_jd):
     return ijk
 
 
-#%% Functions - rv_aer_2_ijk
+# %% Functions - rv_aer_2_ijk
 def rv_aer_2_ijk(r_aer, v_aer, geo_loc, time_jd):
     r"""Converts position and velocity from Az/El/range to IJK cartesion."""
     # transform to SEZ frame
@@ -473,7 +476,7 @@ def rv_aer_2_ijk(r_aer, v_aer, geo_loc, time_jd):
     return (r_ijk, v_ijk)
 
 
-#%% Functions - rv_aer_2_sez
+# %% Functions - rv_aer_2_sez
 def rv_aer_2_sez(r_aer, v_aer):
     r"""Converts position and velocity from Az/El/range to SEZ cartesion."""
     # tranform position vector
@@ -498,7 +501,7 @@ def rv_aer_2_sez(r_aer, v_aer):
     return (r_sez, v_sez)
 
 
-#%% Functions - rv_ijk_2_aer
+# %% Functions - rv_ijk_2_aer
 def rv_ijk_2_aer(r_ijk, v_ijk, geo_loc, time_jd):
     r"""Converts position and velocity IJK cartesion to Az/El/range."""
     # transform from IJK frame to SEZ frame
@@ -508,7 +511,7 @@ def rv_ijk_2_aer(r_ijk, v_ijk, geo_loc, time_jd):
     return (r_aer, v_aer)
 
 
-#%% Functions - rv_ijk_2_sez
+# %% Functions - rv_ijk_2_sez
 def rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd):
     r"""Converts position and velocity from IJK to SEZ cartesian."""
     # transform position from SEZ to IJK frame
@@ -518,7 +521,7 @@ def rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd):
     return (r_sez, v_sez)
 
 
-#%% Functions - rv_sez_2_aer
+# %% Functions - rv_sez_2_aer
 def rv_sez_2_aer(r_sez, v_sez):
     r"""Converts position and velocity SEZ cartesion to Az/El/range."""
     # transform position from SEZ to AER frame
@@ -528,7 +531,7 @@ def rv_sez_2_aer(r_sez, v_sez):
     return (r_aer, v_aer)
 
 
-#%% Functions - rv_sez_2_ijk
+# %% Functions - rv_sez_2_ijk
 def rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd):
     r"""Converts position and velocity SEZ to IJK cartesion."""
     # transform position from SEZ to IJK frame
@@ -544,7 +547,7 @@ def rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd):
     return (r_ijk, v_ijk)
 
 
-#%% Functions - get_sun_radec
+# %% Functions - get_sun_radec
 @overload
 def get_sun_radec(time_jd: float) -> Tuple[float, float]:
     ...
@@ -645,7 +648,7 @@ def get_sun_radec(time_jd: _N, return_early: bool = False) -> Tuple[_N, _N]:
     return (ra, dec)
 
 
-#%% Functions - beta_from_oe
+# %% Functions - beta_from_oe
 def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> np.ndarray:
     r"""
     Calculates the beta angle between the sun and the orbit plane.
@@ -688,7 +691,7 @@ def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> np.ndarray:
     return np.arcsin(sin_beta)  # type: ignore[no-any-return]
 
 
-#%% Functions - eclipse_fraction
+# %% Functions - eclipse_fraction
 @overload
 def eclipse_fraction(altitude: float, beta: float) -> float:
     ...
@@ -758,7 +761,7 @@ def eclipse_fraction(altitude: _N, beta: _N) -> _N:
     return eclipse
 
 
-#%% Unit Test
+# %% Unit Test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_aerospace_orbit_support", exit=False)
     doctest.testmod(verbose=False)

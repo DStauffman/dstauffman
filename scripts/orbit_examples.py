@@ -28,7 +28,7 @@ np.testing.assert_array_almost_equal(oe.w, oe2.w, err_msg="w is different")  # t
 np.testing.assert_array_almost_equal(oe.W, oe2.W, err_msg="W is different")  # type: ignore[arg-type]
 np.testing.assert_array_almost_equal(oe.vo, oe2.vo, err_msg="nu is different")  # type: ignore[arg-type]
 
-#%% Intro to Space Flight Example
+# %% Intro to Space Flight Example
 r = np.array([-0.8, 0.6, 0.5])
 v = np.array([-0.4, -0.8, 0.6])
 mu = 1.0
@@ -122,7 +122,7 @@ np.testing.assert_array_almost_equal(oe.T, T, err_msg="T is different")  # type:
 # np.testing.assert_array_almost_equal(oe.t, t, err_msg="t is different")  # type: ignore[arg-type]
 
 
-#%% Example 3
+# %% Example 3
 r = np.array([-0.0707033342747565, 0.07070333427475654, 0.00027774964281135])
 v = np.array([-2.2585415009051526, -2.2138180776640843, 8.7845325527614843e-05])
 oe = space.rv_2_oe(r, v)

@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in February 2019.
 """
 
-#%% Imports
+# %% Imports
 import inspect
 import os
 import pathlib
@@ -15,7 +15,7 @@ import unittest
 import dstauffman as dcs
 
 
-#%% get_root_dir
+# %% get_root_dir
 class Test_get_root_dir(unittest.TestCase):
     r"""
     Tests the get_root_dir function with the following cases:
@@ -30,7 +30,7 @@ class Test_get_root_dir(unittest.TestCase):
         self.assertTrue(folder.is_dir())
 
 
-#%% get_tests_dir
+# %% get_tests_dir
 class Test_get_tests_dir(unittest.TestCase):
     r"""
     Tests the get_tests_dir function with the following cases:
@@ -42,7 +42,7 @@ class Test_get_tests_dir(unittest.TestCase):
         self.assertEqual(str(folder), os.path.join(str(dcs.get_root_dir()), "tests"))
 
 
-#%% get_data_dir
+# %% get_data_dir
 class Test_get_data_dir(unittest.TestCase):
     r"""
     Tests the get_data_dir function with the following cases:
@@ -54,7 +54,7 @@ class Test_get_data_dir(unittest.TestCase):
         self.assertEqual(str(folder), os.path.abspath(os.path.join(str(dcs.get_root_dir()), "..", "data")))
 
 
-#%% get_images_dir
+# %% get_images_dir
 class Test_get_images_dir(unittest.TestCase):
     r"""
     Tests the get_images_dir function with the following cases:
@@ -66,7 +66,7 @@ class Test_get_images_dir(unittest.TestCase):
         self.assertEqual(str(folder), os.path.abspath(os.path.join(str(dcs.get_root_dir()), "..", "images")))
 
 
-#%% get_output_dir
+# %% get_output_dir
 class Test_get_output_dir(unittest.TestCase):
     r"""
     Tests the get_output_dir function with the following cases:
@@ -78,7 +78,7 @@ class Test_get_output_dir(unittest.TestCase):
         self.assertEqual(str(folder), os.path.abspath(os.path.join(str(dcs.get_root_dir()), "..", "results")))
 
 
-#%% list_python_files
+# %% list_python_files
 class Test_list_python_files(unittest.TestCase):
     r"""
     Tests the list_python_files function with the following cases:
@@ -91,10 +91,10 @@ class Test_list_python_files(unittest.TestCase):
 
     def test_nominal(self) -> None:
         files = dcs.list_python_files(self.folder)
-        for (file, exp) in zip(sorted(files), self.expected):
+        for file, exp in zip(sorted(files), self.expected):
             self.assertEqual(file, exp)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

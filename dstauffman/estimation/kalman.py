@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in April 2019.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -24,7 +24,8 @@ if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
 
-#%% Functions - calculate_kalman_gain
+
+# %% Functions - calculate_kalman_gain
 @overload
 def calculate_kalman_gain(P: _M, H: _M, R: _M, *, use_inverse: bool, return_innov_cov: Literal[False] = ...) -> _M:
     ...
@@ -95,7 +96,7 @@ def calculate_kalman_gain_opt(P: _M, H: _M, R: _M) -> Tuple[_M, _M]:
     return (K, Pz)
 
 
-#%% Functions - calculate_prediction
+# %% Functions - calculate_prediction
 @ncjit
 def calculate_prediction(H: _M, state: _N, const: Optional[_N] = None) -> _N:
     r"""
@@ -135,7 +136,7 @@ def calculate_prediction(H: _M, state: _N, const: Optional[_N] = None) -> _N:
     return H @ (state + const)
 
 
-#%% Functions - calculate_innovation
+# %% Functions - calculate_innovation
 @ncjit
 def calculate_innovation(u_meas: _N, u_pred: _N) -> _N:
     r"""
@@ -172,7 +173,7 @@ def calculate_innovation(u_meas: _N, u_pred: _N) -> _N:
     return u_meas - u_pred
 
 
-#%% Functions - calculate_normalized_innovation
+# %% Functions - calculate_normalized_innovation
 @ncjit
 def calculate_normalized_innovation(z: _N, Pz: _M, use_inverse: bool = False) -> _N:
     r"""
@@ -213,7 +214,7 @@ def calculate_normalized_innovation(z: _N, Pz: _M, use_inverse: bool = False) ->
     return mat_divide(Pz, z)  # type: ignore[no-any-return]
 
 
-#%% Functions - calculate_delta_state
+# %% Functions - calculate_delta_state
 @ncjit
 def calculate_delta_state(K: _M, z: _N) -> _N:
     r"""
@@ -245,7 +246,7 @@ def calculate_delta_state(K: _M, z: _N) -> _N:
     return K @ z
 
 
-#%% Functions - propagate_covariance
+# %% Functions - propagate_covariance
 def propagate_covariance(P: _M, phi: _M, Q: _M, *, gamma: Optional[_M] = None, inplace: bool = True) -> _M:
     r"""
     Propagates the covariance forward in time.
@@ -304,7 +305,7 @@ def propagate_covariance_opt(P: _M, phi: _M, Q: _M, gamma: Optional[_M] = None) 
         P[:] = phi @ P @ phi.T + gamma @ Q @ gamma.T
 
 
-#%% Functions - update_covariance
+# %% Functions - update_covariance
 def update_covariance(P: _M, K: _M, H: _M, *, inplace: bool = True) -> _M:
     r"""
     Updates the covariance for a given measurement.
@@ -356,7 +357,7 @@ def update_covariance_opt(P: _M, K: _M, H: _M) -> None:
     P[:] = (np.eye(P.shape[0], P.shape[1]) - K @ H) @ P
 
 
-#%% Unit Test
+# %% Unit Test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_estimation_kalman", exit=False)
     doctest.testmod(verbose=False)

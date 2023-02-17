@@ -8,7 +8,7 @@ Notes
 #.  Pulled into dstauffman by David C. Stauffer in July 2020.
 """
 
-#%% Imports
+# %% Imports
 import doctest
 from typing import Any, List, Union
 import unittest
@@ -18,7 +18,8 @@ from dstauffman import HAVE_NUMPY
 if HAVE_NUMPY:
     import numpy as np
 
-#%% _get_sub_level
+
+# %% _get_sub_level
 def _get_sub_level(this_sub: Any, part: str) -> Any:
     r"""
     Gets the subfield level of parameters, with options to index by number into a list.
@@ -73,7 +74,7 @@ def _get_sub_level(this_sub: Any, part: str) -> Any:
     return this_value
 
 
-#%% _check_valid_param_name
+# %% _check_valid_param_name
 def _check_valid_param_name(param: Any, name: str) -> bool:
     r"""
     Checks whether the specified name actually exists.
@@ -119,7 +120,7 @@ def _check_valid_param_name(param: Any, name: str) -> bool:
     return True
 
 
-#%% get_parameter
+# %% get_parameter
 def get_parameter(param: Any, names: List[str]) -> List[Any]:
     r"""
     Gets the desired parameter by name.
@@ -150,7 +151,7 @@ def get_parameter(param: Any, names: List[str]) -> List[Any]:
     # initialized the output values
     values = [np.nan for _ in range(len(names))]
     # loop through the names
-    for (ix, name) in enumerate(names):
+    for ix, name in enumerate(names):
         # check that this name is valid
         is_valid = _check_valid_param_name(param, name)
         if not is_valid:
@@ -167,7 +168,7 @@ def get_parameter(param: Any, names: List[str]) -> List[Any]:
     return values
 
 
-#%% set_parameter
+# %% set_parameter
 def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
     r"""
     Sets the desired parameter by a given name.
@@ -197,7 +198,7 @@ def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
 
     """
     # loop through the name/value pairs
-    for (name, value) in zip(names, values):
+    for name, value in zip(names, values):
         # check that this name is valid
         is_valid = _check_valid_param_name(param, name)
         if not is_valid:
@@ -228,7 +229,7 @@ def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
             getattr(this_sub, sub_parts[0])[this_key] = value
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_estimation_support", exit=False)
     doctest.testmod(verbose=False)

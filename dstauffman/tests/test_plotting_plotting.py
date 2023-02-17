@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 """
 
-#%% Imports
+# %% Imports
 import datetime
 from typing import List, Optional
 import unittest
@@ -26,7 +26,8 @@ if HAVE_NUMPY:
 else:
     from math import inf
 
-#%% plotting.Opts
+
+# %% plotting.Opts
 class Test_plotting_Opts(unittest.TestCase):
     r"""
     Tests the plotting.Opts class with the following cases:
@@ -126,7 +127,7 @@ class Test_plotting_Opts(unittest.TestCase):
         self.assertEqual(opts.disp_xmax, datetime.datetime(2020, 6, 1, 0, 2, 30))
 
 
-#%% plotting.suppress_plots and plotting.unsupress_plots
+# %% plotting.suppress_plots and plotting.unsupress_plots
 class Test_plotting_Plotter(unittest.TestCase):
     r"""
     Tests the plotting.Plotter class with the following cases:
@@ -151,7 +152,7 @@ class Test_plotting_Plotter(unittest.TestCase):
             plot.suppress_plots()
 
 
-#%% plotting.plot_time_history
+# %% plotting.plot_time_history
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_time_history(unittest.TestCase):
     r"""
@@ -258,7 +259,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
                 plt.close(this_fig)
 
 
-#%% plotting.plot_correlation_matrix
+# %% plotting.plot_correlation_matrix
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_correlation_matrix(unittest.TestCase):
     r"""
@@ -378,7 +379,7 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
             plt.close(self.figs.pop())
 
 
-#%% plotting.plot_bar_breakdown
+# %% plotting.plot_bar_breakdown
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_bar_breakdown(unittest.TestCase):
     r"""
@@ -463,7 +464,7 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
                 plt.close(this_fig)
 
 
-#%% plotting.plot_histogram
+# %% plotting.plot_histogram
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_histogram(unittest.TestCase):
     r"""
@@ -532,7 +533,7 @@ class Test_plotting_plot_histogram(unittest.TestCase):
             plt.close(self.fig)
 
 
-#%% plotting.setup_plots
+# %% plotting.setup_plots
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_setup_plots(unittest.TestCase):
     r"""
@@ -603,7 +604,7 @@ class Test_plotting_setup_plots(unittest.TestCase):
         plt.close(self.fig)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     plot.suppress_plots()
     unittest.main(exit=False)

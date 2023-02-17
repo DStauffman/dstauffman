@@ -8,7 +8,7 @@ Notes
 #.  Moved to consolidated plotting submodule by David C. Stauffer in July 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -45,7 +45,8 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
 
-#%% Classes - TruthPlotter
+
+# %% Classes - TruthPlotter
 class TruthPlotter(Frozen):
     r"""
     Class wrapper for the different types of truth data to include on plots.
@@ -160,7 +161,7 @@ class TruthPlotter(Frozen):
             ax.set_ybound(*y_lim)
 
 
-#%% Functions - plot_health_time_history
+# %% Functions - plot_health_time_history
 def plot_health_time_history(
     time,
     data,
@@ -336,7 +337,7 @@ def plot_health_time_history(
     return fig
 
 
-#%% Functions - plot_health_monte_carlo
+# %% Functions - plot_health_monte_carlo
 def plot_health_monte_carlo(
     time,
     data,
@@ -525,7 +526,7 @@ def plot_health_monte_carlo(
     return fig
 
 
-#%% Functions - plot_icer
+# %% Functions - plot_icer
 def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
     r"""Plot the icer results."""
     # check optional inputs
@@ -571,7 +572,7 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
     return fig
 
 
-#%% Functions - plot_population_pyramid
+# %% Functions - plot_population_pyramid
 def plot_population_pyramid(
     age_bins,
     male_per,
@@ -679,7 +680,7 @@ def plot_population_pyramid(
     return fig
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     plt.ioff()
     unittest.main(module="dstauffman.tests.test_plotting_health", exit=False)

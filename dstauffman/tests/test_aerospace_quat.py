@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -24,7 +24,8 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     _Q = np.typing.NDArray[np.float64]
 
-#%% aerospace.QUAT_SIZE
+
+# %% aerospace.QUAT_SIZE
 class Test_aerospace_QUAT_SIZE(unittest.TestCase):
     r"""
     Tests the aerospace.QUAT_SIZE function with the following cases:
@@ -35,7 +36,7 @@ class Test_aerospace_QUAT_SIZE(unittest.TestCase):
         self.assertEqual(space.QUAT_SIZE, 4)
 
 
-#%% aerospace.suppress_quat_checks and aerospace.unsupress_quat_checks
+# %% aerospace.suppress_quat_checks and aerospace.unsupress_quat_checks
 class Test_aerospace_suppress_checks(unittest.TestCase):
     r"""
     Tests the suppress_quat_checks and unsupress_quat_checks functions with the following cases:
@@ -60,7 +61,7 @@ class Test_aerospace_suppress_checks(unittest.TestCase):
             space.suppress_quat_checks()
 
 
-#%% aerospace.quat_assertions
+# %% aerospace.quat_assertions
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_assertions(unittest.TestCase):
     r"""
@@ -160,7 +161,7 @@ class Test_aerospace_quat_assertions(unittest.TestCase):
             space.quat_assertions(self.q4, allow_nans=True)
 
 
-#%% aerospace.enforce_pos_scalar
+# %% aerospace.enforce_pos_scalar
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_enforce_pos_scalar(unittest.TestCase):
     r"""
@@ -206,7 +207,7 @@ class Test_aerospace_enforce_pos_scalar(unittest.TestCase):
         self.assertTrue(np.all(np.isnan(q)))
 
 
-#%% aerospace.qrot
+# %% aerospace.qrot
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_qrot(unittest.TestCase):
     r"""
@@ -270,7 +271,7 @@ class Test_aerospace_qrot(unittest.TestCase):
         self.assertGreater(quat[3], 0)
 
 
-#%% aerospace.quat_from_axis_angle
+# %% aerospace.quat_from_axis_angle
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_from_axis_angle(unittest.TestCase):
     r"""
@@ -338,7 +339,7 @@ class Test_aerospace_quat_from_axis_angle(unittest.TestCase):
         np.testing.assert_array_equal(quat, exp)
 
 
-#%% aerospace.quat_angle_diff
+# %% aerospace.quat_angle_diff
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_angle_diff(unittest.TestCase):
     r"""
@@ -440,7 +441,7 @@ class Test_aerospace_quat_angle_diff(unittest.TestCase):
         self.assertEqual(comp.shape, (3, 0))
 
 
-#%% aerospace.quat_from_euler
+# %% aerospace.quat_from_euler
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_from_euler(unittest.TestCase):
     r"""
@@ -529,7 +530,7 @@ class Test_aerospace_quat_from_euler(unittest.TestCase):
             space.quat_from_euler(np.zeros((3, 3, 1)))
 
 
-#%% aerospace.quat_interp
+# %% aerospace.quat_interp
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_interp(unittest.TestCase):
     r"""
@@ -574,7 +575,7 @@ class Test_aerospace_quat_interp(unittest.TestCase):
         mock_logger.log.assert_called_with(LogLevel.L8, "Desired time not found within input time vector.")
 
 
-#%% aerospace.quat_inv
+# %% aerospace.quat_inv
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_inv(unittest.TestCase):
     r"""
@@ -653,7 +654,7 @@ class Test_aerospace_quat_inv(unittest.TestCase):
         np.testing.assert_array_almost_equal(q3_inv, self.q3_out)
 
 
-#%% aerospace.quat_mult
+# %% aerospace.quat_mult
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_mult(unittest.TestCase):
     r"""
@@ -765,7 +766,7 @@ class Test_aerospace_quat_mult(unittest.TestCase):
         np.testing.assert_array_equal(quat.shape, self.null.shape)
 
 
-#%% aerospace.quat_norm
+# %% aerospace.quat_norm
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_norm(unittest.TestCase):
     r"""
@@ -862,7 +863,7 @@ class Test_aerospace_quat_norm(unittest.TestCase):
         np.testing.assert_array_equal(quat_norm.shape, self.q4_out.shape)
 
 
-#%% aerospace.quat_prop
+# %% aerospace.quat_prop
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_prop(unittest.TestCase):
     r"""
@@ -898,7 +899,7 @@ class Test_aerospace_quat_prop(unittest.TestCase):
         np.testing.assert_array_almost_equal(quat, self.quat_unnorm, 12)
 
 
-#%% aerospace.quat_times_vector
+# %% aerospace.quat_times_vector
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_times_vector(unittest.TestCase):
     r"""
@@ -935,7 +936,7 @@ class Test_aerospace_quat_times_vector(unittest.TestCase):
         np.testing.assert_array_almost_equal(vec1, vec2)
 
 
-#%% aerospace.quat_to_euler
+# %% aerospace.quat_to_euler
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_to_euler(unittest.TestCase):
     r"""
@@ -1008,6 +1009,6 @@ class Test_aerospace_quat_to_euler(unittest.TestCase):
             space.quat_to_euler(self.zero_quat, np.array([1, 2]))
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

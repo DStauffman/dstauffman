@@ -9,7 +9,7 @@ Notes
         quaternions.
 """
 
-#%% Imports
+# %% Imports
 # fmt: off
 from .classes     import KfInnov, Kf, KfRecord
 from .gps         import GPS_DATE_ZERO, ONE_DAY, DAYS_PER_WEEK, WEEK_ROLLOVER, bsl, bsr, \
@@ -41,6 +41,6 @@ from .quat_opt    import qrot_single, quat_from_axis_angle_single, quat_interp_s
 from .vectors     import rot, drot, vec_cross, vec_angle, cart2sph, sph2cart, rv2dcm
 # fmt: on
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     pass

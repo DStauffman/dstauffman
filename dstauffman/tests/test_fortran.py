@@ -6,13 +6,13 @@ Notes
 #.  Written by David C. Stauffer in December 2019.
 """
 
-#%% Imports
+# %% Imports
 import unittest
 
 import dstauffman as dcs
 
 
-#%% _FortranSource
+# %% _FortranSource
 class Test__FortranSource(unittest.TestCase):
     r"""
     Tests the _FortranSource class with the following cases:
@@ -21,7 +21,7 @@ class Test__FortranSource(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% _parse_source
+# %% _parse_source
 class Test__parse_source(unittest.TestCase):
     r"""
     Tests the _parse_source function with the following cases:
@@ -69,7 +69,7 @@ class Test__parse_source(unittest.TestCase):
         self.filename.unlink(missing_ok=True)
 
 
-#%% _write_unit_test
+# %% _write_unit_test
 class Test__write_unit_test(unittest.TestCase):
     r"""
     Tests the _write_unit_test function with the following cases:
@@ -78,7 +78,7 @@ class Test__write_unit_test(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% _write_all_unit_test
+# %% _write_all_unit_test
 class Test__write_all_unit_test(unittest.TestCase):
     r"""
     Tests the _write_all_unit_test function with the following cases:
@@ -87,7 +87,7 @@ class Test__write_all_unit_test(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% _write_makefile
+# %% _write_makefile
 class Test__write_makefile(unittest.TestCase):
     r"""
     Tests the _write_makefile function with the following cases:
@@ -96,7 +96,7 @@ class Test__write_makefile(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% create_fortran_unit_tests
+# %% create_fortran_unit_tests
 class Test_create_fortran_unit_tests(unittest.TestCase):
     r"""
     Tests the create_fortran_unit_tests function with the following cases:
@@ -105,7 +105,7 @@ class Test_create_fortran_unit_tests(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% create_fortran_makefile
+# %% create_fortran_makefile
 class Test_create_fortran_makefile(unittest.TestCase):
     r"""
     Tests the create_fortran_makefile function with the following cases:
@@ -114,6 +114,6 @@ class Test_create_fortran_makefile(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

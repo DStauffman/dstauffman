@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 """
 
-#%% Imports
+# %% Imports
 import copy
 import os
 import pathlib
@@ -28,7 +28,8 @@ else:
 if dcs.HAVE_SCIPY:
     from scipy.interpolate import interp1d
 
-#%% _nan_equal
+
+# %% _nan_equal
 class Test__nan_equal(unittest.TestCase):
     r"""
     Tests the _nan_equal function with the following cases:
@@ -97,7 +98,7 @@ class Test__nan_equal(unittest.TestCase):
                 dcs.utils._nan_equal(0.01, 0.01, 1e-6)
 
 
-#%% find_in_range
+# %% find_in_range
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_find_in_range(unittest.TestCase):
     r"""
@@ -180,7 +181,7 @@ class Test_find_in_range(unittest.TestCase):
         np.testing.assert_array_equal(valid, exp)
 
 
-#%% rms
+# %% rms
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_rms(unittest.TestCase):
     r"""
@@ -303,7 +304,7 @@ class Test_rms(unittest.TestCase):
         self.assertEqual(out.shape, (4, 1))
 
 
-#%% rss
+# %% rss
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_rss(unittest.TestCase):
     r"""
@@ -421,7 +422,7 @@ class Test_rss(unittest.TestCase):
         self.assertEqual(out.shape, (4, 1))
 
 
-#%% compare_two_classes
+# %% compare_two_classes
 class Test_compare_two_classes(unittest.TestCase):
     r"""
     Tests the compare_two_classes function with the following cases:
@@ -647,7 +648,7 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertTrue(is_same)
 
 
-#%% compare_two_dicts
+# %% compare_two_dicts
 class Test_compare_two_dicts(unittest.TestCase):
     r"""
     Tests the compare_two_dicts function with the following cases:
@@ -722,7 +723,7 @@ class Test_compare_two_dicts(unittest.TestCase):
         self.assertTrue(is_same)
 
 
-#%% read_text_file
+# %% read_text_file
 class Test_read_text_file(unittest.TestCase):
     r"""
     Tests the read_text_file function with the following cases:
@@ -764,7 +765,7 @@ class Test_read_text_file(unittest.TestCase):
         cls.filepath.unlink(missing_ok=True)
 
 
-#%% write_text_file
+# %% write_text_file
 class Test_write_text_file(unittest.TestCase):
     r"""
     Tests the write_text_file function with the following cases:
@@ -810,7 +811,7 @@ class Test_write_text_file(unittest.TestCase):
         cls.filepath.unlink(missing_ok=True)
 
 
-#%% magnitude
+# %% magnitude
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_magnitude(unittest.TestCase):
     r"""
@@ -854,7 +855,7 @@ class Test_magnitude(unittest.TestCase):
         np.testing.assert_array_almost_equal(mag, self.mag)
 
 
-#%% unit
+# %% unit
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_unit(unittest.TestCase):
     r"""
@@ -897,7 +898,7 @@ class Test_unit(unittest.TestCase):
         np.testing.assert_array_almost_equal(norm_data, self.norm_data)
 
 
-#%% modd
+# %% modd
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_modd(unittest.TestCase):
     r"""
@@ -935,7 +936,7 @@ class Test_modd(unittest.TestCase):
         np.testing.assert_array_equal(out, self.y)
 
 
-#%% is_np_int
+# %% is_np_int
 class Test_is_np_int(unittest.TestCase):
     r"""
     Tests the is_np_int function with the following cases:
@@ -974,7 +975,7 @@ class Test_is_np_int(unittest.TestCase):
         self.assertTrue(dcs.is_np_int(np.array([1, 2, 3], dtype=np.uint32)))
 
 
-#%% np_digitize
+# %% np_digitize
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_np_digitize(unittest.TestCase):
     r"""
@@ -1021,7 +1022,7 @@ class Test_np_digitize(unittest.TestCase):
             dcs.np_digitize(np.array([1, 10, np.nan]), self.bins)
 
 
-#%% histcounts
+# %% histcounts
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_histcounts(unittest.TestCase):
     r"""
@@ -1051,7 +1052,7 @@ class Test_histcounts(unittest.TestCase):
             dcs.histcounts(self.x, np.array([100, 1000]))
 
 
-#%% full_print
+# %% full_print
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_full_print(unittest.TestCase):
     r"""
@@ -1146,7 +1147,7 @@ class Test_full_print(unittest.TestCase):
         np.set_printoptions(**self.orig)
 
 
-#%% line_wrap
+# %% line_wrap
 class Test_line_wrap(unittest.TestCase):
     r"""
     Tests the line_wrap function with the following cases:
@@ -1186,7 +1187,7 @@ class Test_line_wrap(unittest.TestCase):
         self.assertEqual(str(context.exception), 'The specified min_wrap:wrap of "22:25" was too small.')
 
 
-#%% combine_per_year
+# %% combine_per_year
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_combine_per_year(unittest.TestCase):
     r"""
@@ -1254,7 +1255,7 @@ class Test_combine_per_year(unittest.TestCase):
             dcs.combine_per_year(self.data, func=1.5)  # type: ignore[call-overload]
 
 
-#%% execute
+# %% execute
 class Test_execute(unittest.TestCase):
     r"""
     Tests the execute function with the following cases:
@@ -1263,7 +1264,7 @@ class Test_execute(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% execute_wrapper
+# %% execute_wrapper
 class Test_execute_wrapper(unittest.TestCase):
     r"""
     Tests the execute_wrapper function with the following cases:
@@ -1272,7 +1273,7 @@ class Test_execute_wrapper(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% get_env_var
+# %% get_env_var
 class Test_get_env_var(unittest.TestCase):
     r"""
     Tests the get_env_var function with the following cases:
@@ -1300,7 +1301,7 @@ class Test_get_env_var(unittest.TestCase):
                 dcs.get_env_var("HOME")
 
 
-#%% get_username
+# %% get_username
 class Test_get_username(unittest.TestCase):
     r"""
     Tests the function with the following cases:
@@ -1321,7 +1322,7 @@ class Test_get_username(unittest.TestCase):
         self.assertEqual(username, "name")
 
 
-#%% is_datetime
+# %% is_datetime
 class Test_is_datetime(unittest.TestCase):
     r"""
     Tests the is_datetime function with the following cases:
@@ -1330,7 +1331,7 @@ class Test_is_datetime(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% intersect
+# %% intersect
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_intersect(unittest.TestCase):
     r"""
@@ -1489,7 +1490,7 @@ class Test_intersect(unittest.TestCase):
         self.assertEqual(c, 225409)
 
 
-#%% issorted
+# %% issorted
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_issorted(unittest.TestCase):
     r"""
@@ -1519,7 +1520,7 @@ class Test_issorted(unittest.TestCase):
         self.assertFalse(dcs.issorted(x, descend=True))
 
 
-#%% zero_order_hold
+# %% zero_order_hold
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_zero_order_hold(unittest.TestCase):
     r"""
@@ -1644,7 +1645,7 @@ class Test_zero_order_hold(unittest.TestCase):
     # fmt: on
 
 
-#%% linear_interp
+# %% linear_interp
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_linear_interp(unittest.TestCase):
     r"""
@@ -1722,7 +1723,7 @@ class Test_linear_interp(unittest.TestCase):
         np.testing.assert_array_almost_equal(y, exp, 12)
 
 
-#%% Test_linear_lowpass_interp
+# %% Test_linear_lowpass_interp
 @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
 class Test_linear_lowpass_interp(unittest.TestCase):
     r"""
@@ -1757,7 +1758,7 @@ class Test_linear_lowpass_interp(unittest.TestCase):
         self.assertTrue(np.all(y < 5.0))
 
 
-#%% drop_following_time
+# %% drop_following_time
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_drop_following_time(unittest.TestCase):
     r"""
@@ -1778,6 +1779,6 @@ class Test_drop_following_time(unittest.TestCase):
         np.testing.assert_array_equal(drop_mask, self.exp)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

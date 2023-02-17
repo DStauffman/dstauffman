@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in December 2018.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import datetime
@@ -38,7 +38,8 @@ except ImportError:
 
 _HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
 
-#%% plotting.DEFAULT_COLORMAP
+
+# %% plotting.DEFAULT_COLORMAP
 class Test_plotting_DEFAULT_COLORMAP(unittest.TestCase):
     r"""
     Tests the plotting.DEFAULT_COLORMAP constant with the following cases:
@@ -49,7 +50,7 @@ class Test_plotting_DEFAULT_COLORMAP(unittest.TestCase):
         self.assertTrue(isinstance(plot.DEFAULT_COLORMAP, str))
 
 
-#%% plotting.DEFAULT_CLASSIFICATION
+# %% plotting.DEFAULT_CLASSIFICATION
 class Test_plotting_DEFAULT_CLASSIFICATION(unittest.TestCase):
     r"""
     Tests the plotting.DEFAULT_CLASSIFICATION constant with the following cases:
@@ -60,7 +61,7 @@ class Test_plotting_DEFAULT_CLASSIFICATION(unittest.TestCase):
         self.assertTrue(isinstance(plot.DEFAULT_CLASSIFICATION, str))
 
 
-#%% plotting.COLOR_LISTS
+# %% plotting.COLOR_LISTS
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_COLOR_LISTS(unittest.TestCase):
     r"""
@@ -80,7 +81,7 @@ class Test_plotting_COLOR_LISTS(unittest.TestCase):
         self.assertEqual(colormap.colors[7], "xkcd:chocolate")
 
 
-#%% plotting._HoverButton
+# %% plotting._HoverButton
 class Test_plotting__HoverButton(unittest.TestCase):
     r"""
     Tests the plotting._HoverButton class with the following cases:
@@ -89,7 +90,7 @@ class Test_plotting__HoverButton(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% plotting.MyCustomToolbar
+# %% plotting.MyCustomToolbar
 @unittest.skipIf(not HAVE_MPL or not _HAVE_QT or not _HAVE_DISPLAY, "Skipping due to missing matplotlib/Qt/DISPLAY dependency.")
 class Test_plotting_MyCustomToolbar(unittest.TestCase):
     r"""
@@ -148,7 +149,7 @@ class Test_plotting_MyCustomToolbar(unittest.TestCase):
         plt.close(self.fig2)
 
 
-#%% plotting.ColorMap
+# %% plotting.ColorMap
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_ColorMap(unittest.TestCase):
     r"""
@@ -223,7 +224,7 @@ class Test_plotting_ColorMap(unittest.TestCase):
             plt.close(self.fig)
 
 
-#%% plotting.is_notebook
+# %% plotting.is_notebook
 class Test_plotting_is_notebook(unittest.TestCase):
     r"""
     Tests the plotting.is_notebook function with the following cases:
@@ -234,7 +235,7 @@ class Test_plotting_is_notebook(unittest.TestCase):
         self.assertFalse(plot.is_notebook())
 
 
-#%% plotting.close_all
+# %% plotting.close_all
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_close_all(unittest.TestCase):
     r"""
@@ -265,7 +266,7 @@ class Test_plotting_close_all(unittest.TestCase):
         self.assertFalse(plt.fignum_exists(fig2.number))
 
 
-#%% plotting.get_nondeg_colorlists
+# %% plotting.get_nondeg_colorlists
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
     r"""
@@ -329,7 +330,7 @@ class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
             self.assertEqual(clist.colors[2 * i], exp1)
 
 
-#%% plotting.ignore_plot_data
+# %% plotting.ignore_plot_data
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_plotting_ignore_plot_data(unittest.TestCase):
     r"""
@@ -387,7 +388,7 @@ class Test_plotting_ignore_plot_data(unittest.TestCase):
         self.assertFalse(ignore)
 
 
-#%% plotting.whitten
+# %% plotting.whitten
 class Test_plotting_whitten(unittest.TestCase):
     r"""
     Tests the plotting.whitten function with the following cases:
@@ -403,7 +404,7 @@ class Test_plotting_whitten(unittest.TestCase):
         self.assertEqual(new_color, (0.5, 0.2, 0.0, 0.25))
 
 
-#%% plotting.resolve_name
+# %% plotting.resolve_name
 class Test_plotting_resolve_name(unittest.TestCase):
     r"""
     Tests the plotting.resolve_name function with the following cases:
@@ -453,7 +454,7 @@ class Test_plotting_resolve_name(unittest.TestCase):
         self.assertEqual(new_name, "Hello_World.jpg")
 
 
-#%% plotting.storefig
+# %% plotting.storefig
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_storefig(unittest.TestCase):
     r"""
@@ -562,7 +563,7 @@ class Test_plotting_storefig(unittest.TestCase):
         plt.close(cls.fig)
 
 
-#%% plotting.titleprefix
+# %% plotting.titleprefix
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_titleprefix(unittest.TestCase):
     r"""
@@ -596,7 +597,7 @@ class Test_plotting_titleprefix(unittest.TestCase):
         plt.close(self.fig)
 
 
-#%% plotting.disp_xlimits
+# %% plotting.disp_xlimits
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_disp_xlimits(unittest.TestCase):
     r"""
@@ -647,7 +648,7 @@ class Test_plotting_disp_xlimits(unittest.TestCase):
         plt.close(self.fig)
 
 
-#%% plotting.zoom_ylim
+# %% plotting.zoom_ylim
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_zoom_ylim(unittest.TestCase):
     r"""
@@ -699,7 +700,7 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
         plt.close(self.fig)
 
 
-#%% plotting.figmenu
+# %% plotting.figmenu
 @unittest.skipIf(not HAVE_MPL or not _HAVE_QT, "Skipping due to missing matplotlib/Qt dependency.")
 class Test_plotting_figmenu(unittest.TestCase):
     r"""
@@ -723,7 +724,7 @@ class Test_plotting_figmenu(unittest.TestCase):
         plt.close(self.fig2)
 
 
-#%% plotting.rgb_ints_to_hex
+# %% plotting.rgb_ints_to_hex
 class Test_plotting_rgb_ints_to_hex(unittest.TestCase):
     r"""
     Tests the plotting.rgb_ints_to_hex function with the following cases:
@@ -736,7 +737,7 @@ class Test_plotting_rgb_ints_to_hex(unittest.TestCase):
         self.hex_codes = ["#ff0000", "#00ff00", "#0000ff", "#4f81bd", "#000000"]
 
     def test_nominal(self) -> None:
-        for (ix, this_color) in enumerate(self.colors):
+        for ix, this_color in enumerate(self.colors):
             hex_codes = plot.rgb_ints_to_hex(this_color)
             self.assertEqual(hex_codes, self.hex_codes[ix])
 
@@ -745,7 +746,7 @@ class Test_plotting_rgb_ints_to_hex(unittest.TestCase):
         self.assertEqual(hex_code, "#00ff09")
 
 
-#%% plotting.get_screen_resolution
+# %% plotting.get_screen_resolution
 @unittest.skipIf(not _HAVE_QT, "Skipping due to missing Qt dependency.")
 class Test_plotting_get_screen_resolution(unittest.TestCase):
     r"""
@@ -759,7 +760,7 @@ class Test_plotting_get_screen_resolution(unittest.TestCase):
         self.assertGreater(screen_height, 0)
 
 
-#%% plotting.show_zero_ylim
+# %% plotting.show_zero_ylim
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_show_zero_ylim(unittest.TestCase):
     r"""
@@ -787,7 +788,7 @@ class Test_plotting_show_zero_ylim(unittest.TestCase):
         plt.close(self.fig)
 
 
-#%% plotting.plot_second_units_wrapper
+# %% plotting.plot_second_units_wrapper
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
     r"""
@@ -865,7 +866,7 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
         plt.close(self.fig)
 
 
-#%% plotting.plot_second_yunits
+# %% plotting.plot_second_yunits
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_second_yunits(unittest.TestCase):
     r"""
@@ -890,7 +891,7 @@ class Test_plotting_plot_second_yunits(unittest.TestCase):
         plt.close(self.fig)
 
 
-#%% plotting.get_rms_indices
+# %% plotting.get_rms_indices
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_plotting_get_rms_indices(unittest.TestCase):
     r"""
@@ -941,7 +942,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
         pass  # TODO: write this
 
 
-#%% plotting.plot_vert_lines
+# %% plotting.plot_vert_lines
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_vert_lines(unittest.TestCase):
     r"""
@@ -977,7 +978,7 @@ class Test_plotting_plot_vert_lines(unittest.TestCase):
         plt.close(self.fig)
 
 
-#%% plotting.plot_phases
+# %% plotting.plot_phases
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_phases(unittest.TestCase):
     r"""
@@ -1021,7 +1022,7 @@ class Test_plotting_plot_phases(unittest.TestCase):
         plt.close(self.fig)
 
 
-#%% plotting.plot_classification
+# %% plotting.plot_classification
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_classification(unittest.TestCase):
     r"""
@@ -1058,7 +1059,7 @@ class Test_plotting_plot_classification(unittest.TestCase):
         plt.close(self.fig)
 
 
-#%% plotting.align_plots
+# %% plotting.align_plots
 class Test_plotting_align_plots(unittest.TestCase):
     r"""
     Tests the plotting.align_plots function with the following cases:
@@ -1067,7 +1068,7 @@ class Test_plotting_align_plots(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% plotting.z_from_ci
+# %% plotting.z_from_ci
 @unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
 class Test_plotting_z_from_ci(unittest.TestCase):
     r"""
@@ -1082,12 +1083,12 @@ class Test_plotting_z_from_ci(unittest.TestCase):
         # fmt: on
 
     def test_nominal(self) -> None:
-        for (ci, exp_z) in zip(self.cis, self.zs):
+        for ci, exp_z in zip(self.cis, self.zs):
             z = plot.z_from_ci(ci)
             self.assertTrue(abs(z - exp_z) < 0.001, "{} and {} are more than 0.001 from each other.".format(z, exp_z))
 
 
-#%% plotting.save_figs_to_pdf
+# %% plotting.save_figs_to_pdf
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_save_figs_to_pdf(unittest.TestCase):
     r"""
@@ -1124,7 +1125,7 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
         cls.filename.unlink(missing_ok=True)
 
 
-#%% plotting.add_datashaders
+# %% plotting.add_datashaders
 @unittest.skipIf(not HAVE_DS or not HAVE_MPL, "Skipping due to missing datashader dependency.")
 class Test_plotting_add_datashaders(unittest.TestCase):
     r"""
@@ -1162,7 +1163,7 @@ class Test_plotting_add_datashaders(unittest.TestCase):
         plot.add_datashaders(self.datashaders)
 
 
-#%% plotting.fig_ax_factory
+# %% plotting.fig_ax_factory
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_fig_ax_factory(unittest.TestCase):
     r"""
@@ -1228,7 +1229,7 @@ class Test_fig_ax_factory(unittest.TestCase):
                 last_fig = this_fig
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     plot.suppress_plots()
     unittest.main(exit=False)

@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 import argparse
 from typing import List
 import unittest
@@ -17,7 +17,7 @@ import dstauffman as dcs
 import dstauffman.commands as commands
 
 
-#%% commands.print_help
+# %% commands.print_help
 class Test_commands_print_help(unittest.TestCase):
     r"""
     Tests the commands.print_help function with the following cases:
@@ -43,7 +43,7 @@ class Test_commands_print_help(unittest.TestCase):
         self.assertTrue(output.startswith('r"""\nTest file for the `help` module'))
 
 
-#%% commands.print_version
+# %% commands.print_version
 class Test_commands_print_version(unittest.TestCase):
     r"""
     Tests the commands.print_version function with the following cases:
@@ -58,7 +58,7 @@ class Test_commands_print_version(unittest.TestCase):
         self.assertIn(".", output)
 
 
-#%% commands.parse_help
+# %% commands.parse_help
 class Test_commands_parse_help(unittest.TestCase):
     r"""
     Tests the commands.parse_help function with the following cases:
@@ -74,7 +74,7 @@ class Test_commands_parse_help(unittest.TestCase):
         self.assertEqual(args, self.expected)
 
 
-#%% commands.parse_version
+# %% commands.parse_version
 class Test_commands_parse_version(unittest.TestCase):
     r"""
     Tests the commands.parse_version function with the following cases:
@@ -90,7 +90,7 @@ class Test_commands_parse_version(unittest.TestCase):
         self.assertEqual(args, self.expected)
 
 
-#%% commands.execute_help
+# %% commands.execute_help
 class Test_commands_execute_help(unittest.TestCase):
     r"""
     Tests the commands.execute_help function with the following cases:
@@ -111,7 +111,7 @@ class Test_commands_execute_help(unittest.TestCase):
         self.assertTrue(expected_header)
 
 
-#%% commands.execute_version
+# %% commands.execute_version
 class Test_commands_execute_version(unittest.TestCase):
     r"""
     Tests the commands.execute_version function with the following cases:
@@ -129,6 +129,6 @@ class Test_commands_execute_version(unittest.TestCase):
         self.assertIn(".", output)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

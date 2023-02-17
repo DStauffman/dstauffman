@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2021.
 """
 
-#%% Imports
+# %% Imports
 import unittest
 
 from dstauffman import get_data_dir, HAVE_NUMPY, read_text_file
@@ -15,7 +15,8 @@ import dstauffman.aerospace as space
 if HAVE_NUMPY:
     import numpy as np
 
-#%% aerospace.OrbitType
+
+# %% aerospace.OrbitType
 class Test_aerospace_OrbitType(unittest.TestCase):
     r"""
     Tests the aerospace.OrbitType class with the following cases:
@@ -27,7 +28,7 @@ class Test_aerospace_OrbitType(unittest.TestCase):
         self.assertEqual(orbit_types.list_of_names(), ["uninitialized", "elliptic", "parabolic", "hyperbolic"])
 
 
-#%% aerospace.Elements
+# %% aerospace.Elements
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_Elements(unittest.TestCase):
     r"""
@@ -88,7 +89,7 @@ class Test_aerospace_Elements(unittest.TestCase):
         self.assertEqual(elements3, exp)
 
 
-#%% aerospace.two_line_elements
+# %% aerospace.two_line_elements
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_two_line_elements(unittest.TestCase):
     r"""
@@ -133,7 +134,7 @@ class Test_aerospace_two_line_elements(unittest.TestCase):
             self.assertLess(elements.e, 1.0)  # type: ignore[arg-type]
 
 
-#%% aerospace.rv_2_oe
+# %% aerospace.rv_2_oe
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_rv_2_oe(unittest.TestCase):
     r"""
@@ -240,7 +241,7 @@ class Test_aerospace_rv_2_oe(unittest.TestCase):
         np.testing.assert_array_equal(elements.a, exp_a)  # type: ignore[arg-type]
 
 
-#%% aerospace.oe_2_rv
+# %% aerospace.oe_2_rv
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_oe_2_rv(unittest.TestCase):
     r"""
@@ -352,10 +353,10 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
                                 self.assertAlmostEqual(oe.vo, oe2.vo, msg="nu is different")  # type: ignore[misc]
 
 
-#%% aerospace.advance_elements
+# %% aerospace.advance_elements
 pass  # TODO: write this
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

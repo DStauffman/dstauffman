@@ -6,8 +6,8 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 from dstauffman import main
 
-#%% Parse arguments (and will execute from there)
+# %% Parse arguments (and will execute from there)
 rc = main()

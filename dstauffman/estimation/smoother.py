@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -25,7 +25,8 @@ if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
 
-#%% _update_information
+
+# %% _update_information
 @ncjit
 def _update_information(H: _M, Pz: _M, z: _N, K: _M, lambda_bar: _N, LAMBDA_bar: _N) -> Tuple[_N, _N]:
     r"""
@@ -84,7 +85,7 @@ def _update_information(H: _M, Pz: _M, z: _N, K: _M, lambda_bar: _N, LAMBDA_bar:
     return (lambda_hat, LAMBDA_hat)
 
 
-#%% bf_smoother
+# %% bf_smoother
 def bf_smoother(kf_record: KfRecord, lambda_bar: Optional[_N] = None, LAMBDA_bar: Optional[_M] = None) -> Tuple[_M, _M, _N]:
     r"""
     Modified Bryson Frasier smoother.
@@ -147,7 +148,7 @@ def bf_smoother(kf_record: KfRecord, lambda_bar: Optional[_N] = None, LAMBDA_bar
     >>> (x_delta, lambda_bar_initial, LAMBDA_bar_initial) = bf_smoother(kf_record)
 
     """
-    #% Assertions for typing
+    # % Assertions for typing
     assert kf_record.H is not None
     assert kf_record.K is not None
     assert kf_record.P is not None
@@ -156,7 +157,7 @@ def bf_smoother(kf_record: KfRecord, lambda_bar: Optional[_N] = None, LAMBDA_bar
     assert kf_record.time is not None
     assert kf_record.z is not None
 
-    #% Initialization, set defaults
+    # % Initialization, set defaults
     # fmt: off
     n_state  = kf_record.H.shape[1]
     n_active = kf_record.K.shape[0]
@@ -182,7 +183,7 @@ def bf_smoother(kf_record: KfRecord, lambda_bar: Optional[_N] = None, LAMBDA_bar
             x_delta[:, i] = -kf_record.P[:, :, i] @ lambda_bar
         return (x_delta, lambda_bar, LAMBDA_bar)
 
-    #% Final point
+    # % Final point
     # Compute smoothed state delta x_delta from  backward propagated information vector
     x_delta[:, -1] = -kf_record.P[:, :, -1] @ lambda_bar
     # Update information vector using innovation
@@ -195,7 +196,7 @@ def bf_smoother(kf_record: KfRecord, lambda_bar: Optional[_N] = None, LAMBDA_bar
     # Update information
     (lambda_hat, LAMBDA_hat) = _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar)
 
-    #% Backwards time loop
+    # % Backwards time loop
     for i in range(n_time - 2, 0, -1):
         stm = kf_record.stm[:, :, i + 1]  # TODO: why is this i+1? # TODO: allow unpacking function here?
         # Create local copies of current filter data matrices
@@ -218,7 +219,7 @@ def bf_smoother(kf_record: KfRecord, lambda_bar: Optional[_N] = None, LAMBDA_bar
     return (x_delta, lambda_bar, LAMBDA_bar)  # type: ignore[return-value]
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_estimation_smoother", exit=False)
     doctest.testmod(verbose=False)

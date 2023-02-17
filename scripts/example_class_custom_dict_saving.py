@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2022.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import datetime
@@ -31,7 +31,8 @@ if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
     _D = np.typing.NDArray[np.datetime64]
 
-#%% Classes
+
+# %% Classes
 class Results(Frozen, metaclass=SaveAndLoad):
     """Custom class using datetime64's that can be saved and loaded from HDF5 files."""
 
@@ -69,7 +70,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
         return ("meta",)
 
 
-#%% Main function
+# %% Main function
 if __name__ == "__main__":
     # inputs
     num_pts = 100.0

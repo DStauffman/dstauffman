@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in December 2018.
 """
 
-#%% Imports
+# %% Imports
 import copy
 import unittest
 
@@ -18,7 +18,8 @@ import dstauffman.aerospace as space
 if HAVE_NUMPY:
     import numpy as np
 
-#%% aerospace.KfInnov
+
+# %% aerospace.KfInnov
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_KfInnov(unittest.TestCase):
     r"""
@@ -267,7 +268,7 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         self.assertEqual(innov4.status.shape, (39,))
 
 
-#%% aerospace.Kf
+# %% aerospace.Kf
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_Kf(unittest.TestCase):
     r"""
@@ -512,7 +513,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         self.filename.unlink(missing_ok=True)
 
 
-#%% aerospace.KfRecord
+# %% aerospace.KfRecord
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_KfRecord(unittest.TestCase):
     r"""
@@ -702,7 +703,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         self.assertEqual(kf_record4.z.shape, (2, 39), "z shape mismatch.")  # type: ignore[union-attr]
 
 
-#%% Simple instantiation tests without numpy
+# %% Simple instantiation tests without numpy
 class Test_classes_no_numpy(unittest.TestCase):
     r"""
     Tests instantiation of the following classes, whether numpy exists or not.
@@ -722,6 +723,6 @@ class Test_classes_no_numpy(unittest.TestCase):
         self.assertIsInstance(kf_record, space.KfRecord)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

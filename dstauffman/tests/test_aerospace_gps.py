@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in December 2018.
 """
 
-#%% Imports
+# %% Imports
 import datetime
 from typing import Final
 import unittest
@@ -17,7 +17,8 @@ import dstauffman.aerospace as space
 if HAVE_NUMPY:
     import numpy as np
 
-#%% aerospace.bsl
+
+# %% aerospace.bsl
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_bsl(unittest.TestCase):
     r"""
@@ -46,7 +47,7 @@ class Test_aerospace_bsl(unittest.TestCase):
         np.testing.assert_array_equal(out, np.array([1, 1, 0, 0, 1]))
 
 
-#%% aerospace.bsr
+# %% aerospace.bsr
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_bsr(unittest.TestCase):
     r"""
@@ -75,7 +76,7 @@ class Test_aerospace_bsr(unittest.TestCase):
         np.testing.assert_array_equal(out, np.array([1, 1, 1, 0, 0]))
 
 
-#%% aerospace.prn_01_to_m11
+# %% aerospace.prn_01_to_m11
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_prn_01_to_m11(unittest.TestCase):
     r"""
@@ -99,7 +100,7 @@ class Test_aerospace_prn_01_to_m11(unittest.TestCase):
         np.testing.assert_array_equal(out, self.exp)
 
 
-#%% aerospace.get_prn_bits
+# %% aerospace.get_prn_bits
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_get_prn_bits(unittest.TestCase):
     r"""
@@ -127,7 +128,7 @@ class Test_aerospace_get_prn_bits(unittest.TestCase):
         self.assertEqual(str(err.exception), 'Unexpected satellite number: "38"')
 
 
-#%% aerospace.correlate_prn
+# %% aerospace.correlate_prn
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_correlate_prn(unittest.TestCase):
     r"""
@@ -154,7 +155,7 @@ class Test_aerospace_correlate_prn(unittest.TestCase):
         np.testing.assert_array_less(np.max(np.abs(cor[1:])), 0.1)
 
 
-#%% aerospace.generate_prn
+# %% aerospace.generate_prn
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_generate_prn(unittest.TestCase):
     r"""
@@ -169,7 +170,7 @@ class Test_aerospace_generate_prn(unittest.TestCase):
             # TODO: need external validation source
 
 
-#%% aerospace.gps_to_datetime
+# %% aerospace.gps_to_datetime
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_gps_to_datetime(unittest.TestCase):
     r"""
@@ -205,7 +206,7 @@ class Test_aerospace_gps_to_datetime(unittest.TestCase):
             space.gps_to_datetime(1, 1, form="bad_form")  # type: ignore[call-overload]
 
 
-#%% aerospace.gps_to_utc_datetime
+# %% aerospace.gps_to_utc_datetime
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
     r"""
@@ -249,6 +250,6 @@ class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
             space.gps_to_utc_datetime(1, 1, gps_to_utc_offset=0, form="bad_form")  # type: ignore[call-overload]
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

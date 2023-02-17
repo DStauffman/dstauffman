@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2022.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import datetime
@@ -29,7 +29,8 @@ from dstauffman import (
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
 
-#%% Classes
+
+# %% Classes
 class Results(Frozen, metaclass=SaveAndLoad):
     """Custom class using datetime64's that can be saved and loaded from HDF5 files."""
 
@@ -54,7 +55,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
         self.date = self.date.astype(NP_DATETIME_FORM)
 
 
-#%% Main function
+# %% Main function
 if __name__ == "__main__":
     # inputs
     num_pts = 100.0

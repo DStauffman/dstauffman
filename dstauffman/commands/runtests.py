@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 import argparse
 import doctest
 import os
@@ -22,7 +22,7 @@ from slog import ReturnCodes
 from dstauffman import get_root_dir, get_tests_dir, list_python_files, run_coverage, run_docstrings, run_pytests, run_unittests
 
 
-#%% Functions - parse_tests
+# %% Functions - parse_tests
 def parse_tests(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for the tests command.
@@ -68,7 +68,7 @@ def parse_tests(input_args: List[str]) -> argparse.Namespace:
     return args
 
 
-#%% Functions - execute_tests
+# %% Functions - execute_tests
 def execute_tests(args: argparse.Namespace) -> int:
     r"""
     Executes the tests commands.
@@ -136,7 +136,7 @@ def execute_tests(args: argparse.Namespace) -> int:
     return return_code
 
 
-#%% Functions - parse_coverage
+# %% Functions - parse_coverage
 def parse_coverage(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for the coverage command.
@@ -176,7 +176,7 @@ def parse_coverage(input_args: List[str]) -> argparse.Namespace:
     return args
 
 
-#%% Functions - execute_coverage
+# %% Functions - execute_coverage
 def execute_coverage(args: argparse.Namespace) -> int:
     r"""
     Executes the coverage commands.
@@ -231,7 +231,7 @@ def execute_coverage(args: argparse.Namespace) -> int:
     return return_code
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_commands_runtests", exit=False)
     doctest.testmod(verbose=False)

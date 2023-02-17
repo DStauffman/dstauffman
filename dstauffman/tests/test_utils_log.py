@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.  Split to separate file in June 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import contextlib
@@ -25,7 +25,8 @@ if dcs.HAVE_NUMPY:
 if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
 
-#%% setup_dir
+
+# %% setup_dir
 @patch("dstauffman.utils_log.logger")
 class Test_setup_dir(unittest.TestCase):
     r"""
@@ -117,7 +118,7 @@ class Test_setup_dir(unittest.TestCase):
             _clean(self)
 
 
-#%% fix_rollover
+# %% fix_rollover
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 @patch("dstauffman.utils_log.logger")
 class Test_fix_rollover(unittest.TestCase):
@@ -226,7 +227,7 @@ class Test_fix_rollover(unittest.TestCase):
         self.assertGreater(mock_logger.log.call_count, 3)
 
 
-#%% remove_outliers
+# %% remove_outliers
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 @patch("dstauffman.utils_log.logger")
 class Test_remove_outliers(unittest.TestCase):
@@ -292,6 +293,6 @@ class Test_remove_outliers(unittest.TestCase):
         self.assertGreater(rms_initial, rms_removed)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

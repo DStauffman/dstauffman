@@ -1,6 +1,6 @@
 """Script to run the GND plots with different time and opts combinations."""
 
-#%% Imports
+# %% Imports
 from copy import deepcopy
 import datetime
 from typing import Dict
@@ -11,7 +11,7 @@ import dstauffman as dcs
 import dstauffman.aerospace as space
 import dstauffman.plotting as plot
 
-#%% Flags
+# %% Flags
 plots: Dict[str, bool] = {}
 plots["att"] = True
 plots["pos"] = False
@@ -22,7 +22,7 @@ plots["cov"] = False
 plots["los"] = False
 plots["sts"] = False
 
-#%% Initializations
+# %% Initializations
 q1 = space.quat_norm(np.array([0.1, -0.2, 0.3, 0.4]))
 dq = space.quat_from_euler(1e-6 * np.array([-300, 100, 200]), [3, 1, 2])
 q2 = space.quat_mult(dq, q1)
@@ -39,7 +39,7 @@ t_bounds2 = dcs.convert_date(date_zero, "numpy", old_form="datetime") + dcs.NP_O
 
 bins = [-np.inf, -5e-6, -5e-7, 0.0, 5e-7, 5e-6, np.inf]
 
-#%% KF1
+# %% KF1
 # fmt: off
 kf1        = space.Kf()
 kf1.name   = "KF1"
@@ -95,7 +95,7 @@ opts4           = plot.Opts(opts2)
 opts4.case_name = "Test 4: dates-dates"
 # fmt: on
 
-#%% Copies
+# %% Copies
 kd1 = deepcopy(kf1)
 kd1.time = dcs.convert_date(kf1.time, "numpy", date_zero=date_zero)  # type: ignore[assignment]
 kd1.innov.time = dcs.convert_date(kf1.innov.time, "numpy", date_zero=date_zero)
@@ -103,7 +103,7 @@ kd2 = deepcopy(kf2)
 kd2.time = dcs.convert_date(kf2.time, "numpy", date_zero=date_zero)  # type: ignore[assignment]
 kd2.innov.time = dcs.convert_date(kf2.innov.time, "numpy", date_zero=date_zero)
 
-#%% Plots
+# %% Plots
 if plots["att"]:
     f1 = plot.plot_attitude(kf1, kf2, opts=opts1)
     f2 = plot.plot_attitude(kd1, kd2, opts=opts2, second_units=("mrad", 1e3))

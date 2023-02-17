@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2021.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import copy
@@ -42,7 +42,8 @@ if TYPE_CHECKING:
     _V = Union[None, float, np.ndarray]
     _N = TypeVar("_N", float, np.ndarray)
 
-#%% Enums - OrbitType
+
+# %% Enums - OrbitType
 class OrbitType(IntEnumPlus):
     r"""
     Values for the possible orbit types, from {"elliptic", "parabolic", "hyperbolic"},
@@ -61,7 +62,7 @@ class OrbitType(IntEnumPlus):
     hyperbolic: ClassVar[int] = 3
 
 
-#%% Classes - Elements
+# %% Classes - Elements
 class Elements(Frozen):
     r"""
     Orbital Elements class
@@ -172,7 +173,7 @@ class Elements(Frozen):
         if self.a is None or isinstance(self.a, float):
             raise IndexError("Elements is only a single instance and can not be indexed")
         elements = Elements()
-        for (field, value) in vars(self).items():
+        for field, value in vars(self).items():
             setattr(elements, field, value[key])
         return elements
 
@@ -181,7 +182,7 @@ class Elements(Frozen):
         # allow an empty structure to be passed through
         if self.a is None:
             if inplace:
-                for (key, value) in vars(elements2).items():
+                for key, value in vars(elements2).items():
                     setattr(self, key, value)
             return elements2  # TODO: make a copy?
         # concatenate fields
@@ -191,7 +192,7 @@ class Elements(Frozen):
             elements = copy.deepcopy(self)
         if elements2.a is None:
             return elements
-        for (key, value) in vars(self).items():
+        for key, value in vars(self).items():
             setattr(elements, key, np.hstack((value, getattr(elements2, key))))
         return elements
 
@@ -213,12 +214,12 @@ class Elements(Frozen):
             print(f"M = {self.vo[index] * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)")  # type: ignore[index]
 
 
-#%% Functions - _zero_divide
+# %% Functions - _zero_divide
 def _zero_divide(x, y):
     return np.divide(x, y, where=y != 0, out=np.zeros_like(y))
 
 
-#%% Functions - _inf_divide
+# %% Functions - _inf_divide
 def _inf_divide(x, y):
     return np.divide(x, y, where=y != 0, out=np.full(y.shape, np.inf))
 
@@ -232,9 +233,8 @@ def _fix_instab(x, precision):
         x[ix] = -1.0
 
 
-#%% Functions - two_line_elements
+# %% Functions - two_line_elements
 def two_line_elements(line1: str, line2: str) -> Elements:
-
     r"""
     Convert two-line elements to elements structure
 
@@ -368,7 +368,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     return elements
 
 
-#%% Functions - rv_2_oe
+# %% Functions - rv_2_oe
 def rv_2_oe(
     r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1.0, unit: bool = False, precision: float = 1e-12
 ) -> Elements:
@@ -567,7 +567,7 @@ def rv_2_oe(
     return elements
 
 
-#%% oe_2_rv
+# %% oe_2_rv
 @overload
 def oe_2_rv(
     elements: Elements, mu: Union[float, np.ndarray] = ..., unit: bool = ..., *, return_PQW: Literal[False] = ...
@@ -657,7 +657,7 @@ def oe_2_rv(
         nu = d_2_r(nu)
         # fmt: on
 
-    #% calculations
+    # % calculations
     # parameter
     if elements.p is not None:
         p = elements.p
@@ -701,7 +701,7 @@ def oe_2_rv(
     return (r, v)
 
 
-#%% Functions - advance_elements
+# %% Functions - advance_elements
 def advance_elements(elements, mu, time):
     r"""
     Takes the given orbital elements and advancing them in time.
@@ -758,7 +758,7 @@ def advance_elements(elements, mu, time):
     vo = elements.vo
     # initialize output to the same as the input
     new_elements = Elements()
-    for (key, value) in vars(elements).items():
+    for key, value in vars(elements).items():
         if not is_dunder(key):
             setattr(new_elements, key, value)
     if elements.type == OrbitType.elliptic:
@@ -800,7 +800,7 @@ def advance_elements(elements, mu, time):
     return new_elements
 
 
-#%% Unit Test
+# %% Unit Test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_aerospace_orbits", exit=False)
     doctest.testmod(verbose=False)

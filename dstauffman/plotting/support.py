@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 """  # pylint: disable=too-many-lines
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import datetime
@@ -91,7 +91,7 @@ try:
 except ModuleNotFoundError:
     pass
 
-#%% Constants
+# %% Constants
 # Default colormap to use on certain plots
 DEFAULT_COLORMAP: str = "Dark2"  # "Paired", "Dark2", "tab10", "tab20"
 
@@ -131,7 +131,7 @@ if HAVE_MPL:
     COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)
     # fmt: on
 
-#%% Set Matplotlib global settings
+# %% Set Matplotlib global settings
 if HAVE_MPL:
     plt.rcParams["figure.dpi"] = 160  # 160 for 4K monitors, 100 otherwise
     plt.rcParams["figure.figsize"] = [11.0, 8.5]  # makes figures the same size as the paper, keeping aspect ratios even
@@ -142,7 +142,8 @@ if HAVE_MPL:
 # TODO: make this public?
 _HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
 
-#%% Classes - _HoverButton
+
+# %% Classes - _HoverButton
 class _HoverButton(QPushButton):
     r"""Custom button that allows hovering and icons."""
 
@@ -167,7 +168,7 @@ class _HoverButton(QPushButton):
         self.setStyleSheet("border: 0px;")  # pragma: no cover
 
 
-#%% Classes - MyCustomToolbar
+# %% Classes - MyCustomToolbar
 class MyCustomToolbar:
     r"""
     Define a custom toolbar to use in any matplotlib plots.
@@ -270,7 +271,7 @@ class MyCustomToolbar:
         fig.canvas.manager.window.raise_()
 
 
-#%% Classes - ColorMap
+# %% Classes - ColorMap
 class ColorMap(Frozen):
     r"""
     Colormap class for easier setting of colormaps in matplotlib.
@@ -357,7 +358,7 @@ class ColorMap(Frozen):
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
 
 
-#%% Functions - is_notebook
+# %% Functions - is_notebook
 def is_notebook() -> bool:
     r"""
     Determines if you are running in a Jupyter/IPython notebook or not.
@@ -389,7 +390,7 @@ def is_notebook() -> bool:
         return False  # Likely standard Python interpreter
 
 
-#%% Functions - close_all
+# %% Functions - close_all
 def close_all(figs: Optional[_FigOrListFig] = None) -> None:
     r"""
     Close all the open figures, or if a list is specified, then close all of them.
@@ -420,7 +421,7 @@ def close_all(figs: Optional[_FigOrListFig] = None) -> None:
     gc.collect()
 
 
-#%% Functions - get_nondeg_colorlists
+# %% Functions - get_nondeg_colorlists
 def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
     r"""
     Get a nice colormap for the given number of channels to plot and use for non-deg comparisons.
@@ -469,7 +470,7 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
     return clist
 
 
-#%% Functions - ignore_plot_data
+# %% Functions - ignore_plot_data
 def ignore_plot_data(data, ignore_empties, col=None):
     r"""
     Determine whether to ignore this data or not.
@@ -518,7 +519,7 @@ def ignore_plot_data(data, ignore_empties, col=None):
     return ignore
 
 
-#%% Functions - whitten
+# %% Functions - whitten
 def whitten(color: Tuple[float, ...], white: Tuple[float, ...] = (1.0, 1.0, 1.0, 1.0), dt: float = 0.30) -> Tuple[float, ...]:
     r"""
     Shift an RGBA color towards white.
@@ -546,7 +547,7 @@ def whitten(color: Tuple[float, ...], white: Tuple[float, ...] = (1.0, 1.0, 1.0,
     return new_color
 
 
-#%% Functions - get_figure_title
+# %% Functions - get_figure_title
 @overload
 def get_figure_title(fig: Figure, raise_warning: Literal[False] = ...) -> str:
     ...
@@ -614,7 +615,7 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tup
     return raw_title  # type: ignore[no-any-return]
 
 
-#%% Functions - resolve_name
+# %% Functions - resolve_name
 def resolve_name(name: str, force_win: Optional[bool] = None, rep_token: str = "_", strip_classification: bool = True) -> str:
     r"""
     Resolves the given name to something that can be saved on the current OS.
@@ -668,7 +669,7 @@ def resolve_name(name: str, force_win: Optional[bool] = None, rep_token: str = "
     return new_name
 
 
-#%% Functions - storefig
+# %% Functions - storefig
 def storefig(
     fig: _FigOrListFig,
     folder: Optional[Union[str, Path]] = None,
@@ -764,7 +765,7 @@ def storefig(
         warnings.warn("No window titles found, using the plot title instead (usually because there is no display).")
 
 
-#%% Functions - titleprefix
+# %% Functions - titleprefix
 def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False) -> None:
     r"""
     Prepend a text string to all the titles on existing figures.
@@ -840,7 +841,7 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
                 this_axis.set_title(new_title)
 
 
-#%% Functions - disp_xlimits
+# %% Functions - disp_xlimits
 def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
     r"""
     Set the xlimits to the specified xmin and xmax.
@@ -922,7 +923,7 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
         this_axis.set_xlim((new_xmin, new_xmax))
 
 
-#%% Functions - zoom_ylim
+# %% Functions - zoom_ylim
 def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=None, pad=0.1):
     r"""
     Zooms the Y-axis to the data for the given time bounds, with an optional pad.
@@ -1031,7 +1032,7 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
         ax.set_ylim(top=this_ymax)
 
 
-#%% Functions - figmenu
+# %% Functions - figmenu
 def figmenu(figs: _FigOrListFig) -> None:
     r"""
     Add a custom toolbar to the figures.
@@ -1071,7 +1072,7 @@ def figmenu(figs: _FigOrListFig) -> None:
             fig.toolbar_custom_ = MyCustomToolbar(fig)
 
 
-#%% rgb_ints_to_hex
+# %% rgb_ints_to_hex
 def rgb_ints_to_hex(int_tuple: Tuple[int, int, int]) -> str:
     r"""
     Convert a tuple of ints with (0, 255) to the equivalent hex color code.
@@ -1104,7 +1105,7 @@ def rgb_ints_to_hex(int_tuple: Tuple[int, int, int]) -> str:
     return hex_code
 
 
-#%% Functions - get_screen_resolution
+# %% Functions - get_screen_resolution
 def get_screen_resolution() -> Tuple[int, int]:
     r"""
     Gets the current monitor screen resolution.
@@ -1151,7 +1152,7 @@ def get_screen_resolution() -> Tuple[int, int]:
     return (screen_width, screen_height)
 
 
-#%% Functions - show_zero_ylim
+# %% Functions - show_zero_ylim
 def show_zero_ylim(ax: Axes) -> None:
     r"""
     Forces the given axes to always include the point zero.
@@ -1196,7 +1197,7 @@ def show_zero_ylim(ax: Axes) -> None:
         ax.set_ylim(*(1.1 * x for x in ax.get_ylim()))
 
 
-#%% Functions - plot_second_units_wrapper
+# %% Functions - plot_second_units_wrapper
 def plot_second_units_wrapper(ax: Axes, second_units: Union[None, int, float, Tuple[str, float]]) -> Axes:
     r"""
     Wrapper to plot_second_yunits that allows numeric or dict options.
@@ -1266,7 +1267,7 @@ def plot_second_units_wrapper(ax: Axes, second_units: Union[None, int, float, Tu
     return ax2
 
 
-#%% Functions - plot_second_yunits
+# %% Functions - plot_second_yunits
 def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
     r"""
     Plots a second Y axis on the right side of the plot with a different scaling.
@@ -1307,7 +1308,7 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
     return ax2
 
 
-#%% Functions - get_rms_indices
+# %% Functions - get_rms_indices
 def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-inf, xmax=inf):
     r"""
     Gets the indices and time points for doing RMS calculations and plotting RMS lines.
@@ -1441,7 +1442,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
     return ix
 
 
-#%% Functions - plot_vert_lines
+# %% Functions - plot_vert_lines
 def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
     r"""
     Plots a vertical line at the RMS start and stop times.
@@ -1493,13 +1494,13 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
     if labels is None:
         labels = ["RMS Start Time", "RMS Stop Time"]
     # plot vertical lines
-    for (i, this_x) in enumerate(x):
+    for i, this_x in enumerate(x):
         this_color = cm.get_color(i)
         this_label = labels[i] if show_in_legend else ""
         ax.axvline(this_x, linestyle="--", color=this_color, marker="+", markeredgecolor="m", markersize=10, label=this_label)
 
 
-#%% plot_phases
+# %% plot_phases
 def plot_phases(
     ax,
     times,
@@ -1610,7 +1611,7 @@ def plot_phases(
     ax.set_ylim(ylims)
 
 
-#%% Functions - get_classification
+# %% Functions - get_classification
 def get_classification(classify: str) -> Tuple[str, str]:
     r"""
     Gets the classification and any caveats from the text in the classify string.
@@ -1669,7 +1670,7 @@ def get_classification(classify: str) -> Tuple[str, str]:
     return (classification, caveat)
 
 
-#%% Functions - plot_classification
+# %% Functions - plot_classification
 def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = "", test: bool = False, location: str = "figure"):
     r"""
     Displays the classification in a box on each figure.
@@ -1820,7 +1821,7 @@ def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = ""
     fig.patches.extend([r1])
 
 
-#%% Functions - align_plots
+# %% Functions - align_plots
 def align_plots(figs: _FigOrListFig, pos: Optional[Tuple[int, int]] = None) -> None:
     """
     Aligns all the figures in one location.
@@ -1861,7 +1862,7 @@ def align_plots(figs: _FigOrListFig, pos: Optional[Tuple[int, int]] = None) -> N
         fig.canvas.manager.window.move(x_pos, y_pos)
 
 
-#%% Functions - z_from_ci
+# %% Functions - z_from_ci
 def z_from_ci(ci: Union[int, float]) -> float:
     r"""
     Calculates the Z score that matches the desired confidence interval.
@@ -1893,7 +1894,7 @@ def z_from_ci(ci: Union[int, float]) -> float:
     return st.norm.ppf(1 - (1 - ci) / 2)  # type: ignore[no-any-return]
 
 
-#%% Functions - ci_from_z
+# %% Functions - ci_from_z
 def ci_from_z(z: Union[int, float]) -> float:
     r"""
     Calculates the confidence interval that matches the Z score.
@@ -1924,7 +1925,7 @@ def ci_from_z(z: Union[int, float]) -> float:
     return st.norm.cdf(z) - st.norm.cdf(-z)  # type: ignore[no-any-return]
 
 
-#%% Functions - save_figs_to_pdf
+# %% Functions - save_figs_to_pdf
 def save_figs_to_pdf(figs: Optional[Union[Figure, List[Figure]]] = None, filename: Path = Path("figs.pdf")) -> None:
     r"""
     Saves the given figures to a PDF file.
@@ -1973,7 +1974,7 @@ def save_figs_to_pdf(figs: Optional[Union[Figure, List[Figure]]] = None, filenam
         d["ModDate"] = d["CreationDate"]
 
 
-#%% Functions - save_images_to_pdf
+# %% Functions - save_images_to_pdf
 def save_images_to_pdf(
     figs: Optional[Union[Figure, List[Figure]]] = None,
     folder: Optional[Path] = None,
@@ -2038,7 +2039,7 @@ def save_images_to_pdf(
 
     # Create PDF of images
     images = []
-    for (ix, fig) in enumerate(figs):
+    for ix, fig in enumerate(figs):
         fig_title = get_figure_title(fig)
         this_image = folder.joinpath(fig_title + "." + plot_type)
         image_rgba = Image.open(this_image)
@@ -2051,7 +2052,7 @@ def save_images_to_pdf(
         im.save(filename, save_all=True, append_images=images, metadata=meta)  # TODO: metadata not saving?
 
 
-#%% add_datashaders
+# %% add_datashaders
 def add_datashaders(
     datashaders: List[Dict[str, Any]],
     threshold: float = 0.8,
@@ -2105,7 +2106,7 @@ def add_datashaders(
         )
 
 
-#%% fig_ax_factory
+# %% fig_ax_factory
 @overload
 def fig_ax_factory(
     num_figs: Optional[int],
@@ -2215,7 +2216,7 @@ def fig_ax_factory(
     return fig_ax
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     plt.ioff()
     unittest.main(module="dstauffman.tests.test_plotting_support", exit=False)

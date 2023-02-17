@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in February 2021.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -20,7 +20,8 @@ from dstauffman.aerospace.vectors import vec_cross
 if HAVE_NUMPY:
     import numpy as np
 
-#%% Functions - qrot_single
+
+# %% Functions - qrot_single
 @ncjit
 def qrot_single(axis: int, angle: float) -> np.ndarray:
     r"""
@@ -71,7 +72,7 @@ def qrot_single(axis: int, angle: float) -> np.ndarray:
     return quat
 
 
-#%% Functions - quat_from_axis_angle_single
+# %% Functions - quat_from_axis_angle_single
 @ncjit
 def quat_from_axis_angle_single(axis: np.ndarray, angle: float) -> np.ndarray:
     r"""
@@ -119,7 +120,7 @@ def quat_from_axis_angle_single(axis: np.ndarray, angle: float) -> np.ndarray:
     return np.array([axis[0] * s, axis[1] * s, axis[2] * s, c])
 
 
-#%% Functions - quat_interp_single
+# %% Functions - quat_interp_single
 @ncjit
 def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np.ndarray:
     r"""
@@ -186,7 +187,7 @@ def quat_interp_single(time: np.ndarray, quat: np.ndarray, ti: np.ndarray) -> np
     return qout
 
 
-#%% Functions - quat_inv_single
+# %% Functions - quat_inv_single
 @ncjit
 def quat_inv_single(q1: np.ndarray, inplace: bool = False) -> np.ndarray:
     r"""
@@ -229,7 +230,7 @@ def quat_inv_single(q1: np.ndarray, inplace: bool = False) -> np.ndarray:
     return q1 * np.array([-1.0, -1.0, -1.0, 1.0])  # type: ignore[no-any-return]
 
 
-#%% Functions - quat_mult_single
+# %% Functions - quat_mult_single
 @ncjit
 def quat_mult_single(a: np.ndarray, b: np.ndarray, inplace: bool = False) -> np.ndarray:
     r"""
@@ -295,7 +296,7 @@ def quat_mult_single(a: np.ndarray, b: np.ndarray, inplace: bool = False) -> np.
     return c
 
 
-#%% Functions - quat_norm_single
+# %% Functions - quat_norm_single
 @ncjit
 def quat_norm_single(x: np.ndarray, inplace: bool = False) -> np.ndarray:
     r"""
@@ -340,7 +341,7 @@ def quat_norm_single(x: np.ndarray, inplace: bool = False) -> np.ndarray:
     return x / np.sqrt(np.sum(x * x, axis=0))  # type: ignore[no-any-return]
 
 
-#%% Functions - quat_prop_single
+# %% Functions - quat_prop_single
 @ncjit
 def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray, inplace: bool = False, renorm: bool = False) -> np.ndarray:
     r"""
@@ -406,7 +407,7 @@ def quat_prop_single(quat: np.ndarray, delta_ang: np.ndarray, inplace: bool = Fa
     return quat_new
 
 
-#%% Functions - quat_times_vector_single
+# %% Functions - quat_times_vector_single
 @ncjit
 def quat_times_vector_single(quat: np.ndarray, v: np.ndarray, inplace: bool = False) -> np.ndarray:
     r"""
@@ -459,7 +460,7 @@ def quat_times_vector_single(quat: np.ndarray, v: np.ndarray, inplace: bool = Fa
     return vec
 
 
-#%% Functions - quat_to_dcm
+# %% Functions - quat_to_dcm
 @ncjit
 def quat_to_dcm(quat: np.ndarray) -> np.ndarray:
     r"""
@@ -509,7 +510,7 @@ def quat_to_dcm(quat: np.ndarray) -> np.ndarray:
     return dcm
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_aerospace_quat_opt", exit=False)
     doctest.testmod(verbose=False)

@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 """
 
-#%% Imports
+# %% Imports
 import os
 import unittest
 import warnings
@@ -14,7 +14,7 @@ import warnings
 HAVE_H5PY: bool
 HAVE_NUMPY: bool
 
-#%% Set flags for optional dependencies
+# %% Set flags for optional dependencies
 try:
     import coverage
 
@@ -74,7 +74,7 @@ try:
 except ModuleNotFoundError:
     HAVE_SCIPY = False
 
-#%% Optional settings
+# %% Optional settings
 if HAVE_NUMPY:
     # Set NumPy error state for module
     np.seterr(invalid="raise", divide="raise")
@@ -85,7 +85,7 @@ else:
 if not HAVE_H5PY:
     warnings.warn("h5py was not imported, so some file save and load capabilities will be limited.")
 
-#%% Constants
+# %% Constants
 # A specified integer token value to use when you need one
 INT_TOKEN: int = -1
 
@@ -104,7 +104,7 @@ NP_TIMEDELTA_FORM: str = "timedelta64[ns]"
 # Scale factor for converting numpy time forms to seconds (nanoseconds per second)
 NP_INT64_PER_SEC: int = 10**9
 
-#% Numpy constants
+# % Numpy constants
 if HAVE_NUMPY:
     NP_ONE_SECOND: np.timedelta64 = np.timedelta64(1, "s").astype(NP_TIMEDELTA_FORM)
     NP_ONE_MINUTE: np.timedelta64 = np.timedelta64(1, "m").astype(NP_TIMEDELTA_FORM)
@@ -114,10 +114,10 @@ if HAVE_NUMPY:
 else:
     NP_ONE_SECOND = NP_ONE_MINUTE = NP_ONE_HOUR = NP_ONE_DAY = NP_NAT = None  # type: ignore[assignment]
 
-#%% Functions
+# %% Functions
 # None
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     # print all the constants (anything in ALL_CAPS)
     fields = [k for k in sorted(dir()) if k.isupper()]

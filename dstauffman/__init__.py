@@ -4,7 +4,7 @@ The "dstauffman" module is a generic Python code library of useful functions.
 At least they are functions that I (David C. Stauffer) have found useful.  Your results may vary!
 """
 
-#%% Imports
+# %% Imports
 # fmt: off
 from .classes   import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, load_method, \
                            pprint, pprint_dict, chop_time, subsample_class, Frozen, SaveAndLoad, \
@@ -46,9 +46,9 @@ from .utils_log import setup_dir, fix_rollover, remove_outliers
 from .version   import version_info
 # fmt: on
 
-#%% Constants
+# %% Constants
 __version__ = ".".join(str(x) for x in version_info)
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     pass

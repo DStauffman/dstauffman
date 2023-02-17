@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2021.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import datetime
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
 
-#%% Constants
+# %% Constants
 GPS_DATE_ZERO = datetime.datetime(1980, 1, 6, 0, 0, 0)
 ONE_DAY       = 86400  # fmt: skip
 DAYS_PER_WEEK = 7
@@ -32,13 +32,14 @@ WEEK_ROLLOVER = 1024
 if HAVE_NUMPY:
     NP_GPS_DATE_ZERO = np.datetime64(GPS_DATE_ZERO, NP_DATETIME_UNITS)
 
-#%% Mypy support - _assert_never
+
+# %% Mypy support - _assert_never
 def _assert_never(value: NoReturn) -> NoReturn:
     r"""Static and Runtime checker for possible options."""
     raise ValueError(f"This code should never be reached, got: {value}")
 
 
-#%% Functions - bsl
+# %% Functions - bsl
 def bsl(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
     r"""
     Bit shifts left.
@@ -79,7 +80,7 @@ def bsl(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
     return out
 
 
-#%% Functions - bsr
+# %% Functions - bsr
 def bsr(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
     r"""
     Bit shifts right.
@@ -121,7 +122,7 @@ def bsr(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
     return out
 
 
-#%% Functions - prn_01_to_m11
+# %% Functions - prn_01_to_m11
 def prn_01_to_m11(bits: _I, *, inplace: bool = False) -> _I:
     r"""
     Shifts bits from (0,1) to (1,-1)
@@ -156,7 +157,7 @@ def prn_01_to_m11(bits: _I, *, inplace: bool = False) -> _I:
     return out
 
 
-#%% Functions - get_prn_bits
+# %% Functions - get_prn_bits
 def get_prn_bits(sat: int) -> Tuple[int, int]:
     r"""
     Gets the bit numbers to generate the desired prn sequence.
@@ -236,7 +237,7 @@ def get_prn_bits(sat: int) -> Tuple[int, int]:
     return prn_bits[sat]
 
 
-#%% Functions - correlate_prn
+# %% Functions - correlate_prn
 def correlate_prn(prn1: _I, prn2: _I, shift: Union[int, _I], form: Literal["zero-one", "one-one"]) -> _N:
     r"""
     Correlates two PRN codes with an optional shift.
@@ -299,7 +300,7 @@ def correlate_prn(prn1: _I, prn2: _I, shift: Union[int, _I], form: Literal["zero
     return cor
 
 
-#%% Functions - generate_prn
+# %% Functions - generate_prn
 def generate_prn(sat: int, length: int = 1023) -> _I:
     r"""
     Generates the prn bit stream.
@@ -365,7 +366,7 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
     return prn
 
 
-#%% Functions - gps_to_datetime
+# %% Functions - gps_to_datetime
 @overload
 def gps_to_datetime(week: Union[int, _I], time: Union[int, float, _I, _N]) -> Union[datetime.datetime, List[datetime.datetime]]:
     ...
@@ -460,7 +461,7 @@ def gps_to_datetime(
     return date_gps
 
 
-#%% Functions - gps_to_utc_datetime
+# %% Functions - gps_to_utc_datetime
 @overload
 def gps_to_utc_datetime(
     week: Union[int, _I], time: Union[int, float, _I, _N]
@@ -613,7 +614,7 @@ def gps_to_utc_datetime(
     return date_utc
 
 
-#%% Unit Test
+# %% Unit Test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_aerospace_gps", exit=False)
     doctest.testmod(verbose=False)

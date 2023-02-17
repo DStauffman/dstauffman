@@ -1,6 +1,6 @@
 """Script to use the plot_phases directly or threw a wrapper."""
 
-#%% Imports
+# %% Imports
 import datetime
 
 import matplotlib.pyplot as plt
@@ -10,7 +10,7 @@ from dstauffman import convert_datetime_to_np, NP_ONE_SECOND
 from dstauffman.plotting import COLOR_LISTS, make_time_plot, plot_phases
 
 
-#%% Functions
+# %% Functions
 def extra_plotter(time_phases, labels="Times", group_all=True, use_legend=False):  # pylint: disable=redefined-outer-name
     """Wrapper to the plot_phases to be passed into other functions."""
 
@@ -21,9 +21,9 @@ def extra_plotter(time_phases, labels="Times", group_all=True, use_legend=False)
     return _plot_phases
 
 
-#%% Script
+# %% Script
 if __name__ == "__main__":
-    #%% Use directly
+    # %% Use directly
     fig = plt.figure()
     fig.canvas.manager.set_window_title("Sine Wave")
     ax = fig.add_subplot(111)
@@ -38,7 +38,7 @@ if __name__ == "__main__":
     ax.legend(loc="best")
     plt.show(block=False)  # doctest: +SKIP
 
-    #%% Through wrapper
+    # %% Through wrapper
     dates = [
         (datetime.datetime(2022, 11, 11, 11, 0, 0), datetime.datetime(2022, 11, 11, 11, 0, 30)),
         (datetime.datetime(2022, 11, 11, 11, 5, 0), datetime.datetime(2022, 11, 11, 11, 6, 0)),

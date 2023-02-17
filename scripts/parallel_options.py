@@ -1,6 +1,6 @@
 """Logging when parallel tests."""  # pylint: disable=redefined-outer-name
 
-#%% Imports
+# %% Imports
 from itertools import repeat
 import logging
 from time import sleep
@@ -9,11 +9,11 @@ import slog as lg
 
 import dstauffman as dcs
 
-#%% Globals
+# %% Globals
 logger = logging.getLogger(__name__)
 
 
-#%% Functions
+# %% Functions
 def func(num: int, pause) -> dict[str, int]:
     """Long-running function that sometimes errors."""
     if num in {5, 15}:
@@ -24,7 +24,7 @@ def func(num: int, pause) -> dict[str, int]:
     return out
 
 
-#%% Script
+# %% Script
 if __name__ == "__main__":
     lg.activate_logging(lg.LogLevel.L8)
     num_pts = 5

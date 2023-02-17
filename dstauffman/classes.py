@@ -8,7 +8,7 @@ Notes
 #.  Updated by David C. Stauffer in June 2020 to make MetaClass methods public for direct use if desired.
 """  # pylint: disable=too-many-lines
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import copy
@@ -57,7 +57,7 @@ else:
 if HAVE_PANDAS:
     from pandas import DataFrame
 
-#%% Constants
+# %% Constants
 if TYPE_CHECKING:
     _T = TypeVar("_T")
     _C = TypeVar("_C", int, "Counter")
@@ -65,7 +65,8 @@ if TYPE_CHECKING:
     _Sets = Union[Set[str], FrozenSet[str]]
     _Time = Union[float, datetime64]
 
-#%% Functions - _frozen
+
+# %% Functions - _frozen
 def _frozen(set_: Callable) -> Callable:
     r"""
     Support function for Frozen class.
@@ -96,7 +97,7 @@ def _frozen(set_: Callable) -> Callable:
     return set_attr
 
 
-#%% Methods - save_hdf5
+# %% Methods - save_hdf5
 def save_hdf5(
     self,
     filename: Optional[Path] = None,
@@ -148,7 +149,7 @@ def save_hdf5(
         grp = file.create_group(base_group)
         # write meta data
         if meta is not None:
-            for (key, value) in meta.items():
+            for key, value in meta.items():
                 grp.attrs[key] = value
         # figure out how to loop over self
         types = (dict, DataFrame) if HAVE_PANDAS else (dict,)
@@ -198,7 +199,7 @@ def save_hdf5(
     _save_data(self, file=file, base_group=base_group, meta=meta, exclusions=exclusions, **kwargs)
 
 
-#%% Methods - load_hdf5
+# %% Methods - load_hdf5
 @overload
 def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[False] = ...) -> _T:
     ...
@@ -301,7 +302,7 @@ def load_hdf5(
         for key in file:
             group = file[key]
             if return_meta:
-                for (key2, value) in group.attrs.items():
+                for key2, value in group.attrs.items():
                     meta[key2] = value
             _load_dataset(out, group=group, prefix=f"/{key}", limit_fields=limit_fields)
     if return_meta:
@@ -309,7 +310,7 @@ def load_hdf5(
     return out
 
 
-#%% Methods - save_pickle
+# %% Methods - save_pickle
 def save_pickle(self, filename: Optional[Path] = None) -> None:
     r"""
     Save a class instances to a pickle file.
@@ -329,7 +330,7 @@ def save_pickle(self, filename: Optional[Path] = None) -> None:
         pickle.dump(self, file)
 
 
-#%% Methods - load_pickle
+# %% Methods - load_pickle
 def load_pickle(cls: Type[_T], filename: Optional[Path] = None) -> _T:  # pylint: disable=unused-argument
     r"""
     Load a class instance from a pickle file.
@@ -352,7 +353,7 @@ def load_pickle(cls: Type[_T], filename: Optional[Path] = None) -> _T:  # pylint
     return out
 
 
-#%% Methods - save_method
+# %% Methods - save_method
 def save_method(
     self,
     filename: Optional[Path] = None,
@@ -403,7 +404,7 @@ def save_method(
             self._save_restore_hdf5(**restore_kwargs)  # pylint: disable=protected-access
 
 
-#%% Methods - load_method
+# %% Methods - load_method
 @overload
 def load_method(cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[False] = ..., **kwargs) -> _T:
     ...
@@ -445,7 +446,7 @@ def load_method(
     return out
 
 
-#%% save_convert_hdf5
+# %% save_convert_hdf5
 def save_convert_hdf5(self, **kwargs: Any) -> Dict[str, bool]:
     r"""Supporting class for saving to HDF5."""
     if "datetime_fields" in kwargs:
@@ -464,7 +465,7 @@ def save_convert_hdf5(self, **kwargs: Any) -> Dict[str, bool]:
     return {"convert_dates": convert_dates}
 
 
-#%% save_restore_hdf5
+# %% save_restore_hdf5
 def save_restore_hdf5(self, *, convert_dates: bool = False, **kwargs: Any) -> None:  # pylint: disable=unused-argument
     r"""Supporting class for loading from HDF5."""
     if convert_dates:
@@ -485,7 +486,7 @@ def save_restore_hdf5(self, *, convert_dates: bool = False, **kwargs: Any) -> No
             setattr(self, key, getattr(self, key).decode("utf-8"))
 
 
-#%% pprint
+# %% pprint
 def pprint(self, return_text: bool = False, **kwargs: Any) -> Optional[str]:
     r"""Displays a pretty print version of the class."""
     name = kwargs.pop("name") if "name" in kwargs else self.__class__.__name__
@@ -493,7 +494,7 @@ def pprint(self, return_text: bool = False, **kwargs: Any) -> Optional[str]:
     return text if return_text else None
 
 
-#%% pprint_dict
+# %% pprint_dict
 def pprint_dict(
     dct: Dict[Any, Any],
     *,
@@ -550,7 +551,7 @@ def pprint_dict(
     # find the length of the longest field name
     pad_len = max(len(x) for x in dct)
     # loop through fields
-    for (this_key, this_value) in dct.items():
+    for this_key, this_value in dct.items():
         if hasattr(this_value, "pprint"):
             this_name = f"{this_key} (class {this_value.__class__.__name__})"
             try:
@@ -590,7 +591,7 @@ def pprint_dict(
     return text
 
 
-#%% Functions - chop_time
+# %% Functions - chop_time
 def chop_time(
     self: Any,
     time_field: str,
@@ -673,7 +674,7 @@ def chop_time(
             setattr(self, key, old[..., ix])
 
 
-#%% Functions - subsample_class
+# %% Functions - subsample_class
 def subsample_class(
     self, skip: int = 30, start: int = 0, skip_fields: Union[FrozenSet[str], Optional[Set[str]]] = None
 ) -> None:
@@ -730,7 +731,7 @@ def subsample_class(
             setattr(self, key, old[..., start::skip])
 
 
-#%% Classes - Frozen
+# %% Classes - Frozen
 class Frozen:
     r"""
     Frozen class that doesn't allow new attributes.
@@ -764,7 +765,7 @@ class Frozen:
         return text if return_text else None
 
 
-#%% MetaClasses - SaveAndLoad
+# %% MetaClasses - SaveAndLoad
 class SaveAndLoad(type):
     r"""Metaclass to add "save" and "load" methods to the given class."""
 
@@ -782,7 +783,7 @@ class SaveAndLoad(type):
         super().__init__(name, bases, dct)
 
 
-#%% MetaClasses - SaveAndLoadPickle
+# %% MetaClasses - SaveAndLoadPickle
 class SaveAndLoadPickle(type):
     r"""Metaclass to add "save" and "load" methods to the given class."""
 
@@ -795,7 +796,7 @@ class SaveAndLoadPickle(type):
         super().__init__(name, bases, dct)
 
 
-#%% Classes - Counter
+# %% Classes - Counter
 class Counter(Frozen):
     r"""
     Mutable integer counter wrapper class.
@@ -944,7 +945,7 @@ class Counter(Frozen):
         return f"Counter({self._val})"
 
 
-#%% FixedDict
+# %% FixedDict
 class FixedDict(dict):
     r"""
     A dictionary with immutable keys, but mutable values.
@@ -1055,7 +1056,7 @@ class FixedDict(dict):
         self._frozen = True
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_classes", exit=False)
     doctest.testmod(verbose=False)

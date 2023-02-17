@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2021.
 """
 
-#%% Imports
+# %% Imports
 import unittest
 from unittest.mock import patch
 
@@ -18,7 +18,8 @@ import dstauffman.aerospace as space
 if HAVE_NUMPY:
     import numpy as np
 
-#%% _any
+
+# %% _any
 class Test_aerospace__any(unittest.TestCase):
     r"""
     Tests the aerospace._any function with the following cases:
@@ -51,7 +52,7 @@ class Test_aerospace__any(unittest.TestCase):
         self.assertFalse(space.orbit_conv._any([False, False, False]))
 
 
-#%% anomaly_eccentric_2_mean
+# %% anomaly_eccentric_2_mean
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_anomaly_eccentric_2_mean(unittest.TestCase):
     r"""
@@ -110,7 +111,7 @@ class Test_aerospace_anomaly_eccentric_2_mean(unittest.TestCase):
         self.assertAlmostEqual(M, self.exp2, 14)
 
 
-#%% aerospace.anomaly_eccentric_2_true
+# %% aerospace.anomaly_eccentric_2_true
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
     r"""
@@ -169,13 +170,14 @@ class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
         self.assertAlmostEqual(nu, self.exp2, 14)
 
 
-#%% aerospace.anomaly_hyperbolic_2_mean
+# %% aerospace.anomaly_hyperbolic_2_mean
 pass  # TODO: write this
 
-#%% aerospace.anomaly_hyperbolic_2_true
+# %% aerospace.anomaly_hyperbolic_2_true
 pass  # TODO: write this
 
-#%% aerospace.anomaly_mean_2_eccentric
+
+# %% aerospace.anomaly_mean_2_eccentric
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_anomaly_mean_2_eccentric(unittest.TestCase):
     r"""
@@ -223,19 +225,20 @@ class Test_aerospace_anomaly_mean_2_eccentric(unittest.TestCase):
         self.assertEqual(E[1], self.exp2)
 
 
-#%% aerospace.anomaly_mean_2_true
+# %% aerospace.anomaly_mean_2_true
 pass  # TODO: write this
 
-#%% aerospace.anomaly_true_2_eccentric
+# %% aerospace.anomaly_true_2_eccentric
 pass  # TODO: write this
 
-#%% aerospace.anomaly_true_2_hyperbolic
+# %% aerospace.anomaly_true_2_hyperbolic
 pass  # TODO: write this
 
-#%% aerospace.anomaly_true_2_mean
+# %% aerospace.anomaly_true_2_mean
 pass  # TODO: write this
 
-#%% aerospace.mean_motion_2_semimajor
+
+# %% aerospace.mean_motion_2_semimajor
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_mean_motion_2_semimajor(unittest.TestCase):
     r"""
@@ -283,18 +286,18 @@ class Test_aerospace_mean_motion_2_semimajor(unittest.TestCase):
         self.assertEqual(a[1], self.exp2)
 
 
-#%% aerospace.period_2_semimajor
+# %% aerospace.period_2_semimajor
 pass  # TODO: write this
 
-#%% aerospace.semimajor_2_mean_motion
+# %% aerospace.semimajor_2_mean_motion
 pass  # TODO: write this
 
-#%% aerospace.semimajor_2_period
+# %% aerospace.semimajor_2_period
 pass  # TODO: write this
 
-#%% aerospace.sidereal_2_long
+# %% aerospace.sidereal_2_long
 pass  # TODO: write this
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -20,13 +20,14 @@ from dstauffman import HAVE_NUMPY, unit
 if HAVE_NUMPY:
     import numpy as np
 
-#%% Constants
+# %% Constants
 if TYPE_CHECKING:
     _Numbers = Union[float, np.ndarray]
     _Lists = Union[List[np.ndarray], Tuple[np.ndarray, ...], np.ndarray]
     _N = np.typing.NDArray[np.float64]
 
-#%% Functions - rot
+
+# %% Functions - rot
 @ncjit
 def rot(axis: int, angle: float) -> np.ndarray:
     r"""
@@ -87,7 +88,7 @@ def rot(axis: int, angle: float) -> np.ndarray:
     return dcm
 
 
-#%% Functions - drot
+# %% Functions - drot
 @ncjit
 def drot(axis: int, angle: float) -> np.ndarray:
     r"""
@@ -147,7 +148,7 @@ def drot(axis: int, angle: float) -> np.ndarray:
     return trans
 
 
-#%% Functions - vec_cross
+# %% Functions - vec_cross
 @ncjit
 def vec_cross(vec: np.ndarray) -> np.ndarray:
     r"""
@@ -182,7 +183,7 @@ def vec_cross(vec: np.ndarray) -> np.ndarray:
     return np.array([[0, -vec[2], vec[1]], [vec[2], 0, -vec[0]], [-vec[1], vec[0], 0]])
 
 
-#%% Functions - vec_angle
+# %% Functions - vec_angle
 def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bool = True) -> Union[float, _N]:
     r"""
     Calculates the angle between two unit vectors.
@@ -257,7 +258,7 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     return np.where(dot_result > np.pi / 2, np.pi - cross_result, cross_result)
 
 
-#%% Functions - cart2sph
+# %% Functions - cart2sph
 @overload
 def cart2sph(x: float, y: float, z: float) -> Tuple[float, float, float]:
     ...
@@ -308,7 +309,7 @@ def cart2sph(x: _Numbers, y: _Numbers, z: _Numbers) -> Tuple[_Numbers, _Numbers,
     return (az, el, rad)
 
 
-#%% Functions - sph2cart
+# %% Functions - sph2cart
 @overload
 def sph2cart(az: float, el: float, rad: float) -> Tuple[float, float, float]:
     ...
@@ -363,7 +364,7 @@ def sph2cart(az: _Numbers, el: _Numbers, rad: _Numbers) -> Tuple[_Numbers, _Numb
     return (x, y, z)
 
 
-#%% Funcctions - rv2dcm
+# %% Funcctions - rv2dcm
 @ncjit
 def rv2dcm(vec: np.ndarray) -> np.ndarray:
     r"""
@@ -410,7 +411,7 @@ def rv2dcm(vec: np.ndarray) -> np.ndarray:
     return dcm
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_aerospace_vectors", exit=False)
     doctest.testmod(verbose=False)

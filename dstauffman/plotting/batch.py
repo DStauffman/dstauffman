@@ -7,7 +7,7 @@ Notes
 #.  Moved to joint plotting submodule by David C. Stauffer in July 2020.
 """
 
-#%% Imports
+# %% Imports
 import doctest
 import unittest
 
@@ -19,7 +19,8 @@ if HAVE_MPL:
 if HAVE_NUMPY:
     import numpy as np
 
-#%% Functions - plot_bpe_convergence
+
+# %% Functions - plot_bpe_convergence
 def plot_bpe_convergence(costs, *, opts=None, fig_ax=None, skip_setup_plots=False):
     r"""
     Plot the BPE convergence rate by iteration on a log scale.
@@ -94,7 +95,7 @@ def plot_bpe_convergence(costs, *, opts=None, fig_ax=None, skip_setup_plots=Fals
     return fig
 
 
-#%% plot_bpe_results
+# %% plot_bpe_results
 def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
     r"""Plot the results of estimation."""
     # hard-coded options
@@ -214,7 +215,7 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
     return figs
 
 
-#%% Unit Test
+# %% Unit Test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_plotting_batch", exit=False)
     doctest.testmod(verbose=False)

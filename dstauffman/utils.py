@@ -8,7 +8,7 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 """  # pylint: disable=too-many-lines
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 from collections.abc import Mapping
@@ -46,7 +46,7 @@ if HAVE_SCIPY:
     from scipy.interpolate import interp1d
     from scipy.signal import butter, sosfiltfilt
 
-#%% Globals
+# %% Globals
 _ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked
 
 if TYPE_CHECKING:
@@ -55,7 +55,8 @@ if TYPE_CHECKING:
     _Lists = Union[np.ndarray, List[np.ndarray], Tuple[np.ndarray, ...]]
     _Number = Union[float, int, np.ndarray]
 
-#%% Functions - _nan_equal
+
+# %% Functions - _nan_equal
 def _nan_equal(a: Any, b: Any, /, tolerance: Optional[float] = None) -> bool:  # pylint: disable=too-many-return-statements
     r"""
     Test ndarrays for equality, but ignore NaNs.
@@ -134,7 +135,7 @@ def _nan_equal(a: Any, b: Any, /, tolerance: Optional[float] = None) -> bool:  #
     return True
 
 
-#%% Functions - find_in_range
+# %% Functions - find_in_range
 def find_in_range(
     value: ArrayLike,
     min_: _SingleNum = -inf,
@@ -208,7 +209,7 @@ def find_in_range(
     return valid  # type: ignore[no-any-return]
 
 
-#%% Functions - rms
+# %% Functions - rms
 @overload
 def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> Union[float, int]:
     ...
@@ -282,7 +283,7 @@ def rms(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ign
     return out  # type: ignore[no-any-return]
 
 
-#%% Functions - rss
+# %% Functions - rss
 @overload
 def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> Union[float, int]:
     ...
@@ -356,7 +357,7 @@ def rss(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ign
     return out  # type: ignore[return-value]
 
 
-#%% Functions - compare_two_classes
+# %% Functions - compare_two_classes
 def compare_two_classes(
     c1: Any,
     c2: Any,
@@ -526,7 +527,7 @@ def compare_two_classes(
     return is_same
 
 
-#%% Functions - compare_two_dicts
+# %% Functions - compare_two_dicts
 def compare_two_dicts(
     d1: Mapping[Any, Any],
     d2: Mapping[Any, Any],
@@ -629,7 +630,7 @@ def compare_two_dicts(
     return is_same
 
 
-#%% Functions - read_text_file
+# %% Functions - read_text_file
 def read_text_file(filename: Union[str, Path], encoding: str = "utf-8") -> str:
     r"""
     Open and read a complete text file.
@@ -681,7 +682,7 @@ def read_text_file(filename: Union[str, Path], encoding: str = "utf-8") -> str:
         raise
 
 
-#%% Functions - write_text_file
+# %% Functions - write_text_file
 def write_text_file(filename: Union[str, Path], text: str, encoding: str = "utf-8") -> None:
     r"""
     Open and write the specified text to a file.
@@ -724,7 +725,7 @@ def write_text_file(filename: Union[str, Path], text: str, encoding: str = "utf-
         raise
 
 
-#%% Functions - magnitude
+# %% Functions - magnitude
 def magnitude(data: _Lists, axis: int = 0) -> Union[float, np.ndarray]:
     r"""
     Return a vector of magnitudes for each subvector along a specified dimension.
@@ -768,7 +769,7 @@ def magnitude(data: _Lists, axis: int = 0) -> Union[float, np.ndarray]:
     return np.sqrt(np.sum(data * np.conj(data), axis=axis))  # type: ignore[no-any-return]
 
 
-#%% Functions - unit
+# %% Functions - unit
 def unit(data: _Lists, axis: int = 0) -> np.ndarray:
     r"""
     Normalize a matrix into unit vectors along a specified dimension.
@@ -820,7 +821,7 @@ def unit(data: _Lists, axis: int = 0) -> np.ndarray:
     return norm_data
 
 
-#%% modd
+# %% modd
 def modd(x1, x2, /, out=None):
     r"""
     Return element-wise remainder of division, except that instead of zero it gives the divisor instead.
@@ -865,7 +866,7 @@ def modd(x1, x2, /, out=None):
     return out
 
 
-#%% is_np_int
+# %% is_np_int
 def is_np_int(x, /):
     r"""
     Returns True if the input is an int or any form of an np.integer type.
@@ -905,7 +906,7 @@ def is_np_int(x, /):
     return False
 
 
-#%% np_digitize
+# %% np_digitize
 def np_digitize(x, /, bins, right=False):
     r"""
     Act as a wrapper to the numpy.digitize function with customizations.
@@ -980,7 +981,7 @@ def np_digitize(x, /, bins, right=False):
     return out
 
 
-#%% histcounts
+# %% histcounts
 def histcounts(x, /, bins, right=False):
     r"""
     Count the number of points in each of the given bins.
@@ -1029,7 +1030,7 @@ def histcounts(x, /, bins, right=False):
     return hist
 
 
-#%% full_print
+# %% full_print
 @contextmanager
 def full_print(**kwargs):
     r"""
@@ -1091,7 +1092,7 @@ def full_print(**kwargs):
     np.set_printoptions(**opt)
 
 
-#%% line_wrap
+# %% line_wrap
 @overload
 def line_wrap(text: str, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> str:
     ...
@@ -1164,7 +1165,7 @@ def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: in
     return out
 
 
-#%% combine_per_year
+# %% combine_per_year
 @overload
 def combine_per_year(data: None, func: Callable[..., Any]) -> None:
     ...
@@ -1233,7 +1234,7 @@ def combine_per_year(data: Optional[np.ndarray], func: Optional[Callable[..., An
     return data2
 
 
-#%% Functions - execute
+# %% Functions - execute
 def execute(
     command: Union[str, List[str]],
     folder: Path,
@@ -1315,7 +1316,7 @@ def execute(
     return ReturnCodes.clean
 
 
-#%% Functions - execute_wrapper
+# %% Functions - execute_wrapper
 def execute_wrapper(
     command: Union[str, List[str]],
     folder: Path,
@@ -1395,7 +1396,7 @@ def execute_wrapper(
     return lines
 
 
-#%% Functions - get_env_var
+# %% Functions - get_env_var
 def get_env_var(env_key: str, default: Optional[str] = None) -> str:
     r"""
     Return an environment variable assuming is has been set.
@@ -1435,7 +1436,7 @@ def get_env_var(env_key: str, default: Optional[str] = None) -> str:
     return value
 
 
-#%% Functions - get_username
+# %% Functions - get_username
 def get_username() -> str:
     r"""
     Gets the current username based on environment variables.
@@ -1463,7 +1464,7 @@ def get_username() -> str:
         return os.environ["GITLAB_USER_LOGIN"]
 
 
-#%% Functions - is_datetime
+# %% Functions - is_datetime
 def is_datetime(time: ArrayLike) -> bool:
     r"""
     Determines if the given time is either a datetime.datetime or np.datetime64 or just a regular number.
@@ -1501,14 +1502,12 @@ def is_datetime(time: ArrayLike) -> bool:
 
     """
     out = False
-    if isinstance(time, datetime.datetime) or (
-        hasattr(time, "dtype") and np.issubdtype(time.dtype, np.datetime64)
-    ):
+    if isinstance(time, datetime.datetime) or (hasattr(time, "dtype") and np.issubdtype(time.dtype, np.datetime64)):
         out = True
     return out
 
 
-#%% Functions - intersect
+# %% Functions - intersect
 def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False):
     r"""
     Finds the intersect of two arrays given a numerical tolerance.
@@ -1635,7 +1634,7 @@ def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False
     return c
 
 
-#%% issorted
+# %% issorted
 def issorted(x, /, descend=False):
     r"""
     Tells whether the given array is sorted or not.
@@ -1669,7 +1668,7 @@ def issorted(x, /, descend=False):
     return np.all(x[:-1] <= x[1:])
 
 
-#%% zero_order_hold
+# %% zero_order_hold
 def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=False):
     r"""
     Interpolates a function by holding at the most recent value.
@@ -1728,7 +1727,7 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
     return np.where(np.asanyarray(x) < xmin, left, func(x).astype(yp.dtype))
 
 
-#%% linear_interp
+# %% linear_interp
 def linear_interp(x, xp, yp, *, left=None, right=None, assume_sorted=False, extrapolate=False):
     r"""
     Interpolates a function using linear interpolation.
@@ -1797,7 +1796,7 @@ def linear_interp(x, xp, yp, *, left=None, right=None, assume_sorted=False, extr
     return func(x).astype(yp.dtype)
 
 
-#%% linear_lowpass_interp
+# %% linear_lowpass_interp
 def linear_lowpass_interp(
     x, xp, yp, *, assume_sorted=False, extrapolate=False, filt_order=2, filt_freq=0.01, filt_samp=1.0, **kwargs
 ):
@@ -1863,7 +1862,7 @@ def linear_lowpass_interp(
     return sosfiltfilt(sos, temp)
 
 
-#%% drop_following_time
+# %% drop_following_time
 def drop_following_time(times, drop_starts, dt_drop):
     r"""
     Drops the times within the dt_drop after drop_starts.
@@ -1904,7 +1903,7 @@ def drop_following_time(times, drop_starts, dt_drop):
     return drop_mask
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_utils", exit=False)
     doctest.testmod(verbose=False)

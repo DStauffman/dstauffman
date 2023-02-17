@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in April 2019.
 """  # pylint: disable=too-many-lines
 
-#%% Imports
+# %% Imports
 import doctest
 import logging
 from typing import Optional
@@ -29,15 +29,16 @@ if HAVE_NUMPY:
 else:
     from math import inf
 
-#%% Globals
+# %% Globals
 logger = logging.getLogger(__name__)
 
-#%% Constants
+# %% Constants
 # hard-coded values
 _LEG_FORMAT = "{:1.3f}"
 _TRUTH_COLOR = "k"
 
-#%% Functions - make_quaternion_plot
+
+# %% Functions - make_quaternion_plot
 def make_quaternion_plot(
     description,
     time_one,
@@ -185,7 +186,7 @@ def make_quaternion_plot(
     )
 
 
-#%% plot_attitude
+# %% plot_attitude
 def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""
     Plots the attitude quaternion history.
@@ -304,7 +305,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         raise NotImplementedError("Truth manipulations are not yet implemented.")
 
     # call wrapper function for most of the details
-    for (field, description) in fields.items():
+    for field, description in fields.items():
         # print status
         if not printed:
             logger.log(LogLevel.L4, "Plotting %s plots ...", description)
@@ -351,7 +352,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     return figs
 
 
-#%% plot_los
+# %% plot_los
 def plot_los(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""Plots the Line of Sight histories."""
     if fields is None:
@@ -360,7 +361,7 @@ def plot_los(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fie
     return out
 
 
-#%% plot_position
+# %% plot_position
 def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""
     Plots the position and velocity history.
@@ -470,7 +471,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     printed = False
 
     # call wrapper function for most of the details
-    for (field, description) in fields.items():
+    for field, description in fields.items():
         # print status
         if not printed:
             logger.log(LogLevel.L4, "Plotting %s plots ...", description)
@@ -519,7 +520,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     return figs
 
 
-#%% plot_velocity
+# %% plot_velocity
 def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""Plots the Line of Sight histories."""
     if fields is None:
@@ -528,7 +529,7 @@ def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     return out
 
 
-#%% plot_innovations
+# %% plot_innovations
 def plot_innovations(
     kf1=None,
     kf2=None,
@@ -696,8 +697,8 @@ def plot_innovations(
     err = {}
     printed = False
 
-    #% call wrapper functions for most of the details
-    for (field, sub_description) in fields.items():
+    # % call wrapper functions for most of the details
+    for field, sub_description in fields.items():
         full_description = description + " - " + sub_description if description else sub_description
         # print status
         if not printed:
@@ -817,7 +818,7 @@ def plot_innovations(
         if plot_by_number and field_one is not None and ~np.all(np.isnan(field_one)):
             this_number = None
             quad_name: Optional[str] = None  # type: ignore[annotation-unchecked]
-            for (quad, quad_name) in number_field.items():
+            for quad, quad_name in number_field.items():
                 if hasattr(kf1, quad):
                     this_number = getattr(kf1, quad)
                     break
@@ -853,7 +854,7 @@ def plot_innovations(
                 )
         if plot_by_number and field_two is not None and ~np.all(np.isnan(field_two)):
             this_number = None
-            for (quad, quad_name) in number_field.items():
+            for quad, quad_name in number_field.items():
                 if hasattr(kf2, quad):
                     this_number = getattr(kf2, quad)
                     break
@@ -896,7 +897,7 @@ def plot_innovations(
     return figs
 
 
-#%% plot_innov_fplocs
+# %% plot_innov_fplocs
 def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
     r"""
     Plots the innovations on the focal plane, connecting the sighting and prediction with the innovation.
@@ -999,7 +1000,7 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
     return figs
 
 
-#%% plot_innov_hist
+# %% plot_innov_hist
 def plot_innov_hist(
     kf1,
     bins,
@@ -1033,8 +1034,8 @@ def plot_innov_hist(
     figs = []
     printed = False
 
-    #% call wrapper functions for most of the details
-    for (field, sub_description) in fields.items():
+    # % call wrapper functions for most of the details
+    for field, sub_description in fields.items():
         full_description = (
             description + " - " + sub_description + " Histogram" if description else sub_description + " Histogram"
         )
@@ -1063,7 +1064,7 @@ def plot_innov_hist(
     return figs
 
 
-#%% plot_covariance
+# %% plot_covariance
 def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, groups=None, fields=None, **kwargs):
     r"""
     Plots the Kalman Filter square root diagonal variance value.
@@ -1192,11 +1193,11 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     figs = []
     err = {}
 
-    #% call wrapper functions for most of the details
-    for (field, description) in fields.items():
+    # % call wrapper functions for most of the details
+    for field, description in fields.items():
         logger.log(LogLevel.L4, "Plotting %s plots ...", description)
         err[field] = {}
-        for (ix, states) in enumerate(groups):
+        for ix, states in enumerate(groups):
             this_units = units if isinstance(units, str) else units[ix]
             this_2units = second_units[ix] if isinstance(second_units, list) else second_units
             this_ylabel = description + f" [{this_units}]"
@@ -1273,7 +1274,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     return figs
 
 
-#%% plot_states
+# %% plot_states
 def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
     r"""Plots the Kalman Filter state histories."""
     if fields is None:
@@ -1282,7 +1283,7 @@ def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, 
     return out
 
 
-#%% Unit Test
+# %% Unit Test
 if __name__ == "__main__":
     plt.ioff()
     unittest.main(module="dstauffman.tests.test_plotting_aerospace", exit=False)

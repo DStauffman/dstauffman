@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 import argparse
 import doctest
 from pathlib import Path
@@ -18,7 +18,7 @@ from slog import ReturnCodes
 from dstauffman import find_repo_issues, make_python_init
 
 
-#%% Functions - parse_enforce
+# %% Functions - parse_enforce
 def parse_enforce(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for enforce command.
@@ -66,7 +66,7 @@ def parse_enforce(input_args: List[str]) -> argparse.Namespace:
     return args
 
 
-#%% Functions - execute_enforce
+# %% Functions - execute_enforce
 def execute_enforce(args: argparse.Namespace) -> int:
     r"""
     Executes the enforce command.
@@ -131,7 +131,7 @@ def execute_enforce(args: argparse.Namespace) -> int:
     return return_code
 
 
-#%% Functions - parse_make_init
+# %% Functions - parse_make_init
 def parse_make_init(input_args: List[str]) -> argparse.Namespace:
     r"""
     Parser for make_init command.
@@ -172,7 +172,7 @@ def parse_make_init(input_args: List[str]) -> argparse.Namespace:
     return args
 
 
-#%% Functions - execute_make_init
+# %% Functions - execute_make_init
 def execute_make_init(args: argparse.Namespace) -> int:
     r"""
     Executes the make_init command.
@@ -214,7 +214,7 @@ def execute_make_init(args: argparse.Namespace) -> int:
     return return_code
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_commands_repos", exit=False)
     doctest.testmod(verbose=False)

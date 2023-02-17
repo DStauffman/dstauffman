@@ -1,11 +1,11 @@
 """Example to plot a PDF histogram with a CDF line overlaid."""
 
-#%% Imports
+# %% Imports
 import numpy as np
 
 from dstauffman.plotting import close_all, plot_histogram
 
-#%% Script
+# %% Script
 if __name__ == "__main__":
     close_all()
     description = "Histogram"

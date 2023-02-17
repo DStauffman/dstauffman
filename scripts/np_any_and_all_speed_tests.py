@@ -1,13 +1,13 @@
 r"""Runs speed comparisons for the any and all commands."""
 
-#%% Imports
+# %% Imports
 from IPython import get_ipython  # type: ignore[import]
 import numpy as np
 import pandas as pd
 
 import nubs as nubs  # noqa: F401  # pylint: disable=unused-import
 
-#%% Results
+# %% Results
 TEXT = r"""i = None, any(x)
 111 ns ± 1.81 ns per loop (mean ± std. dev. of 7 runs, 10000000 loops each)
 i = None, np.any(x)
@@ -94,7 +94,8 @@ i = 50000, np_all(x)
 22.5 µs ± 96 ns per loop (mean ± std. dev. of 7 runs, 10000 loops each)
 """
 
-#%% Functions - parse_results
+
+# %% Functions - parse_results
 def parse_results(text: str) -> pd.DataFrame:
     r"""Parses the output into a more succient table."""
     lines = text.split("\n")
@@ -102,7 +103,7 @@ def parse_results(text: str) -> pd.DataFrame:
         index=["None", "0", "10", "100", "1000", "10000", "50000"],
         columns=["any(x)", "np.any(x)", "np_any(x)", "all(x)", "np.all(x)", "np_all(x)"],
     )
-    for (ix, line) in enumerate(lines):
+    for ix, line in enumerate(lines):
         if line.startswith("i = "):
             parts = line.split(", ")
             value = parts[0].split(" = ")[1]
@@ -115,7 +116,7 @@ def parse_results(text: str) -> pd.DataFrame:
     return table
 
 
-#%% Script
+# %% Script
 if __name__ == "__main__":
     ipython = get_ipython()
     for i in [None, 0, 10, 100, 1000, 10000, 50000]:

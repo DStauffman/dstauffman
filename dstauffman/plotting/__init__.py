@@ -8,7 +8,7 @@ Notes
 #.  Split into separate submodule to not require matplotlib in July 2020.
 """
 
-#%% Imports
+# %% Imports
 # fmt: off
 from .aerospace import make_quaternion_plot, plot_attitude, plot_los, plot_position, \
                            plot_velocity, plot_innovations, plot_innov_fplocs, plot_innov_hist, \
@@ -33,6 +33,6 @@ from .support   import DEFAULT_COLORMAP, DEFAULT_CLASSIFICATION, COLOR_LISTS, My
                            fig_ax_factory
 # fmt: on
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     pass

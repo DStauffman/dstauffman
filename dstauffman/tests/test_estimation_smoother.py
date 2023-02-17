@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in July 2020.
 """
 
-#%% Imports
+# %% Imports
 import unittest
 
 from dstauffman import HAVE_NUMPY
@@ -16,7 +16,8 @@ import dstauffman.estimation as estm
 if HAVE_NUMPY:
     import numpy as np
 
-#%% estimation._update_information
+
+# %% estimation._update_information
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation__update_information(unittest.TestCase):
     r"""
@@ -41,7 +42,7 @@ class Test_estimation__update_information(unittest.TestCase):
         # TODO: assert something
 
 
-#%% estimation.bf_smoother
+# %% estimation.bf_smoother
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_bf_smoother(unittest.TestCase):
     r"""
@@ -82,6 +83,6 @@ class Test_estimation_bf_smoother(unittest.TestCase):
         # TODO: assert something
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

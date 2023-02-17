@@ -7,7 +7,7 @@ Notes
 #.  Incorporated into dstauffman by David C. Stauffer in July 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import logging
@@ -24,7 +24,8 @@ if TYPE_CHECKING:
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
 
-#%% Classes - _Config
+
+# %% Classes - _Config
 class _Config(Frozen):
     r"""
     High level model configuration parameters.
@@ -84,7 +85,7 @@ class _Model(Frozen):
         self.field4.freeze()
 
 
-#%% Classes - _Parameters
+# %% Classes - _Parameters
 class _Parameters(Frozen):
     r"""
     Example wrapper parameters master class.
@@ -107,7 +108,7 @@ class _Parameters(Frozen):
         self.models[1].field4["new"][1] = 444
 
 
-#%% estimation._get_sub_level
+# %% estimation._get_sub_level
 class Test_estimation__get_sub_level(unittest.TestCase):
     r"""
     Tests the estimation._get_sub_level function with the following cases:
@@ -116,7 +117,7 @@ class Test_estimation__get_sub_level(unittest.TestCase):
     pass  # TODO: write this
 
 
-#%% estimation._check_valid_param_name
+# %% estimation._check_valid_param_name
 class Test_estimation__check_valid_param_name(unittest.TestCase):
     r"""
     Tests the estimation._check_valid_param_name function with the following cases:
@@ -169,7 +170,7 @@ class Test_estimation__check_valid_param_name(unittest.TestCase):
         self.assertTrue(is_valid)
 
 
-#%% estimation.get_parameter
+# %% estimation.get_parameter
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_get_parameter(unittest.TestCase):
     r"""
@@ -196,7 +197,7 @@ class Test_estimation_get_parameter(unittest.TestCase):
         np.testing.assert_array_almost_equal(values, self.values)
 
 
-#%% estimation.set_parameter
+# %% estimation.set_parameter
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_set_parameter(unittest.TestCase):
     r"""
@@ -227,6 +228,6 @@ class Test_estimation_set_parameter(unittest.TestCase):
         np.testing.assert_array_almost_equal(values, self.values)
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

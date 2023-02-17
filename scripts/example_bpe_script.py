@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in May 2015.
 """  # pylint: disable=redefined-outer-name
 
-#%% Imports
+# %% Imports
 import datetime
 from typing import Any, List, Tuple, TYPE_CHECKING
 
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
 
 
-#%% Classes - SimParams
+# %% Classes - SimParams
 class SimParams(dcs.Frozen):
     r"""Simulation model parameters."""
 
@@ -47,7 +47,7 @@ class SimParams(dcs.Frozen):
         return f"mag={self.magnitude}, freq={self.frequency}, phs={self.phase}"
 
 
-#%% Functions - _get_truth_index
+# %% Functions - _get_truth_index
 def _get_truth_index(results_time: _N, truth_time: _N) -> Tuple[_I, _I]:
     r"""Find the indices to the truth data from the results time."""
     # Hard-coded values
@@ -60,7 +60,7 @@ def _get_truth_index(results_time: _N, truth_time: _N) -> Tuple[_I, _I]:
     return (ix_truth, ix_results)
 
 
-#%% Functions - sim_model
+# %% Functions - sim_model
 def sim_model(sim_params: SimParams) -> _N:
     r"""Run the simple example simulation model."""
     return sim_params.magnitude * np.sin(  # type: ignore[no-any-return]
@@ -68,13 +68,13 @@ def sim_model(sim_params: SimParams) -> _N:
     )
 
 
-#%% Functions - truth
+# %% Functions - truth
 def truth(time: _N, magnitude: float = 5.0, frequency: float = 10.0, phase: float = 90.0) -> _N:
     r"""Return true values for simple example truth data."""
     return magnitude * np.sin(2 * np.pi * frequency * time / 1000 + phase * np.pi / 180)  # type: ignore[no-any-return]
 
 
-#%% Functions - cost_wrapper
+# %% Functions - cost_wrapper
 def cost_wrapper(  # pylint: disable=unused-argument
     results_data: _N, *, results_time: _N, truth_time: _N, truth_data: _N, sim_params: SimParams
 ) -> _N:
@@ -89,12 +89,12 @@ def cost_wrapper(  # pylint: disable=unused-argument
     return innovs
 
 
-#%% Functions - get_parameter
+# %% Functions - get_parameter
 def get_parameter(sim_params: SimParams, *, names: List[str]) -> Any:
     r"""Get the model parameters."""
     num = len(names)
     values = np.full(num, np.nan)
-    for (ix, name) in enumerate(names):
+    for ix, name in enumerate(names):
         if hasattr(sim_params, name):
             values[ix] = getattr(sim_params, name)
         else:
@@ -102,19 +102,19 @@ def get_parameter(sim_params: SimParams, *, names: List[str]) -> Any:
     return values
 
 
-#%% Functions - set_parameter
+# %% Functions - set_parameter
 def set_parameter(sim_params: SimParams, *, names: List[str], values: List[Any]) -> None:
     r"""Set the model parameters."""
     num = len(names)
     assert len(values) == num, "Names and Values must have the same length."
-    for (ix, name) in enumerate(names):
+    for ix, name in enumerate(names):
         if hasattr(sim_params, name):
             setattr(sim_params, name, values[ix])
         else:
             raise ValueError(f'Bad parameter name: "{name}".')
 
 
-#%% Script
+# %% Script
 if __name__ == "__main__":
     # Constants
     # fmt: off

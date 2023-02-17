@@ -6,14 +6,14 @@ Notes
 #.  Written by David C. Stauffer in February 2016.
 """
 
-#%% Imports
+# %% Imports
 from typing import List
 import unittest
 
 import dstauffman as dcs
 
 
-#%% Unit Conversions
+# %% Unit Conversions
 class Test_Constants(unittest.TestCase):
     r"""
     Tests the UnitConversions class with the following methods:
@@ -48,7 +48,7 @@ class Test_Constants(unittest.TestCase):
                 self.assertTrue(field in self.master, "Test is missing: {}".format(field))
 
 
-#%% get_factors
+# %% get_factors
 class Test_get_factors(unittest.TestCase):
     r"""
     Tests the get_factors function with the following cases:
@@ -132,7 +132,7 @@ class Test_get_factors(unittest.TestCase):
         names = ["arcminute", "arcsecond", "milliarcsecond", "microarcsecond", "arcsecond^2"]
         mults = [dcs.DEG2RAD / 60, dcs.DEG2RAD / 3600, dcs.DEG2RAD / 3.6, 1e3 * dcs.DEG2RAD / 3.6, dcs.DEG2RAD**2 / 3600**2]
         labels = ["amin", "asec", "mas", "µas", "asec^2"]
-        for (fact, exp_mult, exp_label) in zip(names, mults, labels):
+        for fact, exp_mult, exp_label in zip(names, mults, labels):
             (mult, label) = dcs.get_factors(fact)
             self.assertAlmostEqual(mult, exp_mult, 14, "Bad multiplication factor for {}".format(fact))
             self.assertEqual(label, exp_label, "Bad label for {}".format(fact))
@@ -149,7 +149,7 @@ class Test_get_factors(unittest.TestCase):
         self.assertEqual(label, "%")
 
 
-#%% get_time_factor
+# %% get_time_factor
 class Test_get_time_factor(unittest.TestCase):
     r"""
     Tests the get_time_factor function with the following cases:
@@ -161,7 +161,7 @@ class Test_get_time_factor(unittest.TestCase):
         self.mults = [1, 60, 3600, 86400]
 
     def test_nominal(self) -> None:
-        for (unit, mult) in zip(self.units, self.mults):
+        for unit, mult in zip(self.units, self.mults):
             out = dcs.get_time_factor(unit)
             self.assertEqual(out, mult)
 
@@ -170,7 +170,7 @@ class Test_get_time_factor(unittest.TestCase):
             dcs.get_time_factor("bad")
 
 
-#%% get_unit_conversion
+# %% get_unit_conversion
 class Test_get_unit_conversion(unittest.TestCase):
     r"""
     Tests the get_unit_conversion function with the following cases:
@@ -281,6 +281,6 @@ class Test_get_unit_conversion(unittest.TestCase):
             dcs.get_unit_conversion("giga", "")
 
 
-#%% Unit test execution
+# %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

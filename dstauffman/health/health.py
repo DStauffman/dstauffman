@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in October 2017.
 """
 
-#%% Imports
+# %% Imports
 from collections import OrderedDict
 import doctest
 import unittest
@@ -18,7 +18,8 @@ if HAVE_NUMPY:
 if HAVE_PANDAS:
     import pandas as pd
 
-#%% Functions - dist_enum_and_mons
+
+# %% Functions - dist_enum_and_mons
 def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
     r"""
     Create a distribution for an enumerated state with a duration (such as a disease status).
@@ -87,7 +88,7 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
     return (state, mons)
 
 
-#%% Functions - icer
+# %% Functions - icer
 def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     r"""
     Calculate the incremental cost effectiveness ratios with steps to throw out dominated strategies.
@@ -260,7 +261,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     return (inc_cost, inc_qaly, icer_out, order, icer_data, fig)
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     import matplotlib.pyplot as plt
 

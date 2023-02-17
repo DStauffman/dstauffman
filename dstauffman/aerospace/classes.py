@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in April 2019.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import copy
@@ -29,7 +29,8 @@ if TYPE_CHECKING:
     _Time = Union[float, np.datetime64]
     _T = TypeVar("_T")
 
-#%% Support Functions
+
+# %% Support Functions
 @overload
 def _chop_wrapper(
     orig: _T,
@@ -102,7 +103,7 @@ def _chop_wrapper(
     return out
 
 
-#%% KfInnov
+# %% KfInnov
 class KfInnov(Frozen):
     r"""
     A class for Kalman Filter innovations outputs.
@@ -186,7 +187,7 @@ class KfInnov(Frozen):
         # allow an empty structure to be passed through
         if self.time is None:
             if inplace:
-                for (key, value) in vars(kfinnov2).items():
+                for key, value in vars(kfinnov2).items():
                     setattr(self, key, value)
             return kfinnov2  # TODO: make a copy?
         # concatenate fields
@@ -244,7 +245,7 @@ class KfInnov(Frozen):
         return out  # type: ignore[no-any-return]
 
 
-#%% Kf
+# %% Kf
 class Kf(Frozen):
     r"""
     A class for doing Kalman Filter analysis.
@@ -344,7 +345,7 @@ class Kf(Frozen):
             self.innov = innov_class(time_dtype=time_dtype, chan=innov_chan, **kwargs)
             self._subclasses = frozenset({"innov",})  # fmt: skip
         else:
-            for (innov_name, func) in innov_class.items():
+            for innov_name, func in innov_class.items():
                 setattr(self, innov_name, func(time_dtype=time_dtype, chan=innov_chan, **kwargs))
             self._subclasses = frozenset(innov_class.keys())
 
@@ -424,7 +425,7 @@ class Kf(Frozen):
         # allow an empty structure to be passed through
         if self.time is None:
             if inplace:
-                for (key, value) in vars(kf2).items():
+                for key, value in vars(kf2).items():
                     setattr(self, key, value)
             return kf2  # TODO: make a copy?
         # concatenate fields
@@ -488,7 +489,7 @@ class Kf(Frozen):
         return out  # type: ignore[no-any-return]
 
 
-#%% Classes - KfRecord
+# %% Classes - KfRecord
 class KfRecord(Frozen):
     r"""
     Full records of the Kalman Filter for use in a backards information smoother.
@@ -601,7 +602,7 @@ class KfRecord(Frozen):
         # allow an empty structure to be passed through
         if self.time is None:
             if inplace:
-                for (key, value) in vars(kfrecord2).items():
+                for key, value in vars(kfrecord2).items():
                     setattr(self, key, value)
             return kfrecord2  # TODO: make a copy?
         # concatenate fields
@@ -654,7 +655,7 @@ class KfRecord(Frozen):
         return out  # type: ignore[no-any-return]
 
 
-#%% Unit Test
+# %% Unit Test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_aerospace_classes", exit=False)
     doctest.testmod(verbose=False)

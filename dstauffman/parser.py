@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in March 2020.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import argparse
@@ -19,7 +19,7 @@ import unittest
 
 from slog import activate_logging, LogLevel, ReturnCodes
 
-#%% Globals
+# %% Globals
 logger = logging.getLogger(__name__)
 _VALID_COMMANDS = frozenset({"coverage", "enforce", "help", "make_init", "tests", "version"})
 
@@ -32,13 +32,13 @@ class _Flags:
     use_hdf5: bool
 
 
-#%% Functions - _print_bad_command
+# %% Functions - _print_bad_command
 def _print_bad_command(command: str) -> None:
     r"""Prints to the command line when a command name is not understood."""
     print(f'Command "{command}" is not understood.')
 
 
-#%% Functions - main
+# %% Functions - main
 def main() -> int:
     r"""Main function called when executed using the command line api."""
     try:
@@ -50,7 +50,7 @@ def main() -> int:
     return sys.exit(rc)
 
 
-#%% Functions - parse_wrapper
+# %% Functions - parse_wrapper
 def parse_wrapper(args: List[str]) -> Tuple[str, argparse.Namespace]:
     r"""Wrapper function to parse out the command name from the rest of the arguments."""
     # check for no command option
@@ -68,7 +68,7 @@ def parse_wrapper(args: List[str]) -> Tuple[str, argparse.Namespace]:
     return (command, parsed_args)
 
 
-#%% Functions - parse_commands
+# %% Functions - parse_commands
 def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
     r"""
     Splits the parsing based on the name of the command.
@@ -108,7 +108,7 @@ def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
     return parsed_args
 
 
-#%% Functions - execute_command
+# %% Functions - execute_command
 def execute_command(command: str, args: argparse.Namespace) -> int:
     r"""Executes the given command."""
     # delayed import of commands
@@ -127,7 +127,7 @@ def execute_command(command: str, args: argparse.Namespace) -> int:
     return rc
 
 
-#%% process_command_line_options
+# %% process_command_line_options
 def process_command_line_options(log_start: Optional[Union[bool, str]] = None) -> _Flags:
     r"""
     Parses sys.argv to determine any command line options for use in scripts.
@@ -196,7 +196,7 @@ def process_command_line_options(log_start: Optional[Union[bool, str]] = None) -
     return flags
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_parser", exit=False)
     doctest.testmod(verbose=False)

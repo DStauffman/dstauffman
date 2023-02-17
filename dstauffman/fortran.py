@@ -6,7 +6,7 @@ Notes
 #.  Written by David C. Stauffer in December 2019.
 """
 
-#%% Imports
+# %% Imports
 from __future__ import annotations
 
 import doctest
@@ -17,7 +17,7 @@ import unittest
 from dstauffman.classes import Frozen
 from dstauffman.utils import line_wrap, read_text_file, write_text_file
 
-#%% Constants
+# %% Constants
 # Maximum line length to use in any Fortran file
 _MAX_LINE_LENGTH = 132
 # Intrinsic modules
@@ -25,7 +25,8 @@ _INTRINSIC_MODS = {"ieee_arithmetic", "iso_c_binding", "iso_fortran_env"}
 # Object file extension
 _OBJ_EXT = ".obj"
 
-#%% Classes - _FortranSource
+
+# %% Classes - _FortranSource
 class _FortranSource(Frozen):
     r"""
     Class to contain information about the Fortran source code.
@@ -97,7 +98,7 @@ class _FortranSource(Frozen):
         return "teardownclass" in self.subroutines  # TODO get real name from FRUIT
 
 
-#%% Functions - _parse_source
+# %% Functions - _parse_source
 @overload
 def _parse_source(filename: Path, assert_single: Literal[True] = ...) -> _FortranSource:
     ...
@@ -215,7 +216,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
     return code
 
 
-#%% Functions - _write_unit_test
+# %% Functions - _write_unit_test
 def _write_unit_test(filename: Path, code: _FortranSource, header: Optional[str] = None) -> None:
     r"""
     Writes a unit test for the given module.
@@ -267,7 +268,7 @@ def _write_unit_test(filename: Path, code: _FortranSource, header: Optional[str]
     write_text_file(filename, text)
 
 
-#%% Functions - _write_all_unit_test
+# %% Functions - _write_all_unit_test
 def _write_all_unit_test(filename: Path, all_code: List[_FortranSource], header: Optional[str] = None) -> None:
     r"""
     Writes a wrapper run_all_tests program to run all the unit tests.
@@ -340,7 +341,7 @@ def _write_all_unit_test(filename: Path, all_code: List[_FortranSource], header:
     write_text_file(filename, text)
 
 
-#%% Functions - _makefile_template
+# %% Functions - _makefile_template
 def _get_template(
     compiler: str = "gfortran",
     program: str = "prog",
@@ -492,7 +493,7 @@ clean :
     return template
 
 
-#%% Functions - _write_makefile
+# %% Functions - _write_makefile
 def _write_makefile(
     makefile: Path,
     code: List[_FortranSource],
@@ -530,6 +531,7 @@ def _write_makefile(
     >>> _write_makefile(makefile, code=code, template=template) # doctest: +SKIP
 
     """
+
     # subfunction to build dependencies with checks for external or intrinsics
     def _build_dependencies(uses: Iterable[str]) -> List[str]:
         # create sorted list of uses that are not intrinsic or external
@@ -666,13 +668,13 @@ def _write_makefile(
     text = "\n".join(new_lines)
     # Replace any desired string tokens
     if replacements is not None:
-        for (key, value) in replacements.items():
+        for key, value in replacements.items():
             text = text.replace(key, value)
     print(f'Writing "{makefile}".')
     write_text_file(makefile, text)
 
 
-#%% Functions - create_fortran_unit_tests
+# %% Functions - create_fortran_unit_tests
 def create_fortran_unit_tests(
     folder: Path,
     *,
@@ -738,7 +740,7 @@ def create_fortran_unit_tests(
         _write_makefile(makefile, code=all_code, template=template, external_sources=external_sources)
 
 
-#%% create_fortran_makefile
+# %% create_fortran_makefile
 def create_fortran_makefile(
     folder: Path,
     makefile: Path,
@@ -805,7 +807,7 @@ def create_fortran_makefile(
     )
 
 
-#%% Unit test
+# %% Unit test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_fortran", exit=False)
     doctest.testmod(verbose=False)
