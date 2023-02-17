@@ -2053,7 +2053,12 @@ def save_images_to_pdf(
 
 #%% add_datashaders
 def add_datashaders(
-    datashaders: List[Dict[str, Any]], threshold: float = 0.8, max_px: int = 6, how: str = "over", zorder: Optional[int] = None
+    datashaders: List[Dict[str, Any]],
+    threshold: float = 0.8,
+    max_px: int = 6,
+    how: str = "over",
+    zorder: Optional[int] = None,
+    alpha: float = 1.0,
 ):
     r"""Adds the collection of datashaders to the axes."""
     if not HAVE_DS:
@@ -2096,6 +2101,7 @@ def add_datashaders(
             y_range=this_axes.get_ylim(),
             shade_hook=partial(tf.dynspread, threshold=threshold, max_px=max_px, how=how),
             zorder=zorder,
+            alpha=alpha,
         )
 
 
