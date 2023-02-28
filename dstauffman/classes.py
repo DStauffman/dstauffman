@@ -273,9 +273,12 @@ def load_hdf5(
                 else:
                     if limit_fields:
                         continue  # or raise AttributeError?
-                    temp = type("Temp", (object,), {})
+                    temp = type("Temp", (object,), {})  # TODO: be able to specify this?
                     _load_dataset(temp, group[field], prefix=f"{prefix}/field", limit_fields=limit_fields)
-                    setattr(out, field, temp)
+                    if isinstance(out, dict):
+                        out[field] = temp
+                    else:
+                        setattr(out, field, temp)
                 continue
             # Note grp[field].value is now grp[field][()] because of updated HDF5 API
             setattr(out, field, group[field][()])
@@ -470,17 +473,23 @@ def save_restore_hdf5(self, *, convert_dates: bool = False, **kwargs: Any) -> No
     r"""Supporting class for loading from HDF5."""
     if convert_dates:
         assert HAVE_NUMPY, "Must have numpy to convert dates."
-        try:
-            datetime_fields = self._datetime_fields()  # pylint: disable=protected-access
-        except AttributeError:
-            datetime_fields = tuple()
+        if "datetime_fields" in kwargs:
+            datetime_fields = kwargs["datetime_fields"]
+        else:
+            try:
+                datetime_fields = self._datetime_fields()  # pylint: disable=protected-access
+            except AttributeError:
+                datetime_fields = tuple()
         for key in datetime_fields:
             if (value := getattr(self, key)) is not None:
                 setattr(self, key, value.astype(NP_DATETIME_FORM))
-    try:
-        string_fields = self._string_fields()  # pylint: disable=protected-access
-    except AttributeError:
-        string_fields = tuple()
+    if "string_fields" in kwargs:
+        string_fields = kwargs["string_fields"]
+    else:
+        try:
+            string_fields = self._string_fields()  # pylint: disable=protected-access
+        except AttributeError:
+            string_fields = tuple()
     for key in string_fields:
         if not isinstance(getattr(self, key), str):
             setattr(self, key, getattr(self, key).decode("utf-8"))

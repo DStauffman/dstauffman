@@ -215,7 +215,8 @@ def run_coverage(folder: Path, *, report: bool = True, cov_file: Optional[Path] 
     cov_folder = test_folder / "coverage_html_report"
 
     # Instantiate the coverage tool and start tracking
-    cov = Coverage(data_file=data_file, config_file=config_file)
+    # TODO: work around temporary coverage bug?  Should definitely be able to pass pathlib.Path instead of str here
+    cov = Coverage(data_file=str(data_file), config_file=str(config_file))
     cov.start()
 
     # Call test code
