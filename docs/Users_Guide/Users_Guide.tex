@@ -342,7 +342,7 @@ To test this function, all the different inputs are used one at a time, a scalar
 With all of these combinations, it's sometimes hard to know what doesn't need to be tested.  For instance, a separate int case is not included, because they will convert to floats as necessary.  Additionally a bad axis case is not included, because the function is meant to mimic the np.mean function, so that function will catch the error for us in whatever it's normal behavior is.
 
 \begin{Python}
-#%% rms
+# %% rms
 class Test_rms(unittest.TestCase):
     r"""
     Tests the rms function with these cases:

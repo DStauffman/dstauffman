@@ -57,7 +57,7 @@ kf1.innov.innov = 1e-6 * np.ones((num_axes, num_innovs)) * np.sign(np.random.ran
 kf1.innov.norm  = np.ones((num_axes, num_innovs)) * np.sign(np.random.rand(num_axes, num_innovs) - 0.5)
 kf1.innov.fploc = np.random.rand(2, num_innovs)
 
-#%% KF2
+# %% KF2
 kf2        = space.Kf()
 kf2.name   = "KF2"
 kf2.time   = np.arange(2, 13)
@@ -75,7 +75,7 @@ kf2.innov.time  = kf1.innov.time[ix]
 kf2.innov.innov = kf1.innov.innov[:, ix] + 1e-8 * np.random.rand(num_axes, ix.size)
 kf2.innov.norm  = kf1.innov.norm[:, ix] + 0.1 * np.random.rand(num_axes, ix.size)
 
-#%% Opts
+# %% Opts
 opts1           = plot.Opts()
 opts1.case_name = "Test 1: sec-sec"
 opts1.quat_comp = True

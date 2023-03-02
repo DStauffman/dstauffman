@@ -614,7 +614,7 @@ def write_unit_test_templates(
         text += ["", "Notes", "-----", f"#.  Written by {author} in {month} {year}."]
         if add_classification:
             text += ["", "Classification", "--------------", "TBD"]
-        text += ['"""', "", "#%% Imports", "import unittest", ""]
+        text += ['"""', "", "# %% Imports", "import unittest", ""]
         import_text = "import " + this_repo
         if this_repo in _subs:
             import_text += " as " + _subs[this_repo]
@@ -624,11 +624,11 @@ def write_unit_test_templates(
                 func = names[-1][:-3] + "." + func
             func_name = sub_repo + "." + func if sub_repo else func
             temp_name = func_name.replace(".", "_")
-            text += [f"#%% {func_name}", f"class Test_{temp_name}(unittest.TestCase):", '    r"""']
+            text += [f"# %% {func_name}", f"class Test_{temp_name}(unittest.TestCase):", '    r"""']
             text += [f"    Tests the {func_name} function with the following cases:", "        TBD"]
             text += ['    """', "    pass  # TODO: write this", ""]
 
-        text += ["#%% Unit test execution", 'if __name__ == "__main__":', "    unittest.main(exit=False)", ""]
+        text += ["# %% Unit test execution", 'if __name__ == "__main__":', "    unittest.main(exit=False)", ""]
         new_file = Path.joinpath(output, "test_" + "_".join(names))
         print(f'Writing: "{new_file}".')
         write_text_file(new_file, "\n".join(text))
