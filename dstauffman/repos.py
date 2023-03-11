@@ -548,7 +548,7 @@ def write_unit_test_templates(
         Folder location of the output unit tests
     author : str, optional
         Name of the author
-    exclude : str or Tuple[str], optional
+    exclude : pathlib.Path or (pathlib.Path, ...), optional
         Names to exclude
     recursive : bool, optional
         Whether to process recursively

@@ -12,8 +12,8 @@ Notes
 # %% Imports
 # fmt: off
 from .classes     import KfInnov, Kf, KfRecord
-from .gps         import GPS_DATE_ZERO, ONE_DAY, DAYS_PER_WEEK, WEEK_ROLLOVER, bsl, bsr, \
-                             prn_01_to_m11, get_prn_bits, correlate_prn, generate_prn, \
+from .gps         import GPS_DATE_ZERO, ONE_DAY, DAYS_PER_WEEK, WEEK_ROLLOVER, NP_GPS_DATE_ZERO, \
+                             bsl, bsr, prn_01_to_m11, get_prn_bits, correlate_prn, generate_prn, \
                              gps_to_datetime, gps_to_utc_datetime
 from .orbit_const import PI, TAU, G, SS_MASSES, SIDEREAL_DAY, SIDEREAL_YEAR, AU, MU_SUN, \
                              MU_EARTH, JULIAN, SPEED_OF_LIGHT, ECLIPTIC, EARTH, PALO_ALTO

@@ -72,60 +72,61 @@ class Opts(Frozen):
     def __init__(self, *args, **kwargs) -> None:
         r"""
         Default configuration for plots.
-            .case_name : str
-                Name of the case to be plotted
-            .date_zero : datetime
-                Date of t = 0 time [year month day hour minute second]
-            .save_plot : bool
-                Flag for whether to save the plots
-            .save_path : str
-                Location for the plots to be saved
-            .show_plot : bool
-                Flag to show the plots or only save to disk
-            .show_link : bool
-                Flag to show a link to the folder where the plots were saved
-            .plot_type : str
-                Type of plot to save to disk, from {"png","jpg","fig","emf"}
-            .show_warn : bool
-                Whether to show warning if saving by title instead of window (i.e. no display is found)
-            .sub_plots : bool
-                Flag specifying whether to plot as subplots or separate figures
-            .sing_line : bool
-                Flag specifying whether to plot only one line per axes, using subplots as necessary
-            .disp_xmin : float
-                Minimum time to display on plot [sec]
-            .disp_xmax : float
-                Maximum time to display on plot [sec]
-            .rms_xmin  : float
-                Minimum time from which to begin RMS calculations [sec]
-            .rms_xmax  : float
-                Maximum time from which to end RMS calculations [sec]
-            .show_rms  : bool
-                Flag for whether to show the RMS in the legend
-            .use_mean  : bool
-                Flag for using mean instead of RMS for legend calculations
-            .lab_vert  : bool
-                Flag for labeling the vertical lines in the legend when showing the RMS
-            .show_zero : bool
-                Flag for whether to show Y=0 on the plot axis
-            .quat_comp : bool
-                Flag to plot quaternion component differences or just the angle
-            .show_xtra : bool
-                Flag to show extra points in one vector or the other when plotting differences
-            .time_base : str
-                Base units of time, typically from {"sec", "months"}
-            .time_unit : str
-                Time unit for the x axis, from {"", "sec", "min", "hr", "day", "month", "year"}
-            .colormap  : str
-                Name of the colormap to use
-            .leg_spot  : str
-                Location to place the legend, from {"best", "upper right", "upper left",
-                "lower left", "lower right", "right", "center left", "center right", "lower center",
-                "upper center", "center" or tuple of position}
-            .classify  : str
-                Classification level to put on plots
-            .names     : list of str
-                Names of the data structures to be plotted
+
+        .case_name : str
+            Name of the case to be plotted
+        .date_zero : datetime
+            Date of t = 0 time [year month day hour minute second]
+        .save_plot : bool
+            Flag for whether to save the plots
+        .save_path : str
+            Location for the plots to be saved
+        .show_plot : bool
+            Flag to show the plots or only save to disk
+        .show_link : bool
+            Flag to show a link to the folder where the plots were saved
+        .plot_type : str
+            Type of plot to save to disk, from {"png","jpg","fig","emf"}
+        .show_warn : bool
+            Whether to show warning if saving by title instead of window (i.e. no display is found)
+        .sub_plots : bool
+            Flag specifying whether to plot as subplots or separate figures
+        .sing_line : bool
+            Flag specifying whether to plot only one line per axes, using subplots as necessary
+        .disp_xmin : float
+            Minimum time to display on plot [sec]
+        .disp_xmax : float
+            Maximum time to display on plot [sec]
+        .rms_xmin  : float
+            Minimum time from which to begin RMS calculations [sec]
+        .rms_xmax  : float
+            Maximum time from which to end RMS calculations [sec]
+        .show_rms  : bool
+            Flag for whether to show the RMS in the legend
+        .use_mean  : bool
+            Flag for using mean instead of RMS for legend calculations
+        .lab_vert  : bool
+            Flag for labeling the vertical lines in the legend when showing the RMS
+        .show_zero : bool
+            Flag for whether to show Y=0 on the plot axis
+        .quat_comp : bool
+            Flag to plot quaternion component differences or just the angle
+        .show_xtra : bool
+            Flag to show extra points in one vector or the other when plotting differences
+        .time_base : str
+            Base units of time, typically from {"sec", "months"}
+        .time_unit : str
+            Time unit for the x axis, from {"", "sec", "min", "hr", "day", "month", "year"}
+        .colormap  : str
+            Name of the colormap to use
+        .leg_spot  : str
+            Location to place the legend, from {"best", "upper right", "upper left",
+            "lower left", "lower right", "right", "center left", "center right", "lower center",
+            "upper center", "center" or tuple of position}
+        .classify  : str
+            Classification level to put on plots
+        .names     : list of str
+            Names of the data structures to be plotted
         """
         # fmt: off
         self.case_name: str   = ""
@@ -367,6 +368,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
+    this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
 
     # alias opts
     # fmt: off
@@ -490,6 +492,7 @@ def plot_time_difference(
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
+    this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
 
     # alias opts
     # fmt: off
@@ -816,6 +819,7 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
+    this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
 
     # alias opts
     # fmt: off

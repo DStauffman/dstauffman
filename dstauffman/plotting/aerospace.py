@@ -74,8 +74,8 @@ def make_quaternion_plot(
 ):
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
-    Plots two quaternion histories over time, along with a difference from one another.
 
+    Plots two quaternion histories over time, along with a difference from one another.
     See make_generic_plot for input details.
 
     Returns
@@ -274,6 +274,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         this_opts.convert_dates("sec", old_form=opts.time_base)
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
+    this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
 
     # alias opts
     # fmt: off
@@ -438,6 +439,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         this_opts.convert_dates("sec", old_form=opts.time_base)
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
+    this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
 
     # alias opts
     # fmt: off
@@ -672,6 +674,7 @@ def plot_innovations(
         this_opts.convert_dates("sec", old_form=opts.time_base)
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
+    this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
 
     # alias opts
     # fmt: off
@@ -1169,8 +1172,8 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     elif is_date_o and not is_date_1 and not is_date_2:
         this_opts.convert_dates("sec", old_form=opts.time_base)
     # opts overrides
-    # TODO: why do I have this line?  Need to use this_opts below?
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
+    this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
 
     # alias opts
     # fmt: off

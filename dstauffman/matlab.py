@@ -37,7 +37,7 @@ _EPS = float(np.finfo(float).eps) if HAVE_NUMPY else 2.220446049250313e-16
 # %% load_matlab
 def load_matlab(
     filename: Union[str, Path],
-    varlist: Optional[Union[List[str], Set[str], Tuple[str]]] = None,
+    varlist: Optional[Union[List[str], Set[str], Tuple[str, ...]]] = None,
     *,
     squeeze: bool = True,
     enums: Optional[Dict[str, Any]] = None,
@@ -71,7 +71,7 @@ def load_matlab(
 
     def _load(
         file: h5py.Group,
-        varlist: Optional[Union[List[str], Set[str], Tuple[str]]],
+        varlist: Optional[Union[List[str], Set[str], Tuple[str, ...]]],
         squeeze: bool,
         enums: Optional[Dict[str, Any]],
     ) -> Dict[str, Any]:
