@@ -934,7 +934,7 @@ def make_generic_plot(
                 this_axes.set_title(description)
         elif doing_diffs and ((single_lines and i == num_rows) or (not single_lines and i == 1)):
             this_axes.set_title(description + " Difference")
-        if (time_is_list and is_datetime(time_one[0])) or is_datetime(time_one) or is_datetime(time_two):
+        if (time_is_list and len(time_one) > 0 and is_datetime(time_one[0])) or is_datetime(time_one) or is_datetime(time_two):
             this_axes.set_xlabel("Date")
             assert time_units in {"datetime", "numpy"}, f'Expected time units of "datetime" or "numpy", not "{time_units}".'
         else:
