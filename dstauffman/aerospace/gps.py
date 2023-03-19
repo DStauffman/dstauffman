@@ -31,6 +31,8 @@ DAYS_PER_WEEK = 7
 WEEK_ROLLOVER = 1024
 if HAVE_NUMPY:
     NP_GPS_DATE_ZERO = np.datetime64(GPS_DATE_ZERO, NP_DATETIME_UNITS)
+else:
+    NP_GPS_DATE_ZERO = None  # type: ignore[assignment]
 
 
 # %% Mypy support - _assert_never

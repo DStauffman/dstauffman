@@ -6,6 +6,7 @@ At least they are functions that I (David C. Stauffer) have found useful.  Your 
 
 # %% Imports
 # fmt: off
+from .binary    import int2bin, int2hex
 from .classes   import save_hdf5, load_hdf5, save_pickle, load_pickle, save_method, load_method, \
                            save_convert_hdf5, save_restore_hdf5, pprint, pprint_dict, chop_time, \
                            subsample_class, Frozen, SaveAndLoad, SaveAndLoadPickle, Counter, \
