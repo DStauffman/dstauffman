@@ -32,14 +32,14 @@ def _pad_string(text: str, sep: int = 4, sep_char: str = " ") -> str:
     num = len(text)
     it = reversed(range(1, num + 1))
     mod = num % sep
-    temp = ["".join((text[num - next(it)] for _ in range(mod)))] if mod !=0 else []
-    for i in range(num // sep):
-        temp.append("".join((text[num - next(it)] for _ in range(sep))))
+    temp = ["".join((text[num - next(it)] for _ in range(mod)))] if mod != 0 else []
+    for _ in range(num // sep):
+        temp.append("".join((text[num - next(it)] for __ in range(sep))))
     return sep_char.join(temp)
 
 
 # %% Functions - int2bin
-def int2bin(num: int, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_char = "_") -> str:
+def int2bin(num: int, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_char: str = "_") -> str:
     r"""
     Convert a given integer to a binary string representation.
 

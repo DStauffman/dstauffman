@@ -1739,7 +1739,7 @@ def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = ""
             color="r",
             horizontalalignment="center",
             verticalalignment="top",
-            bbox=dict(facecolor="none", edgecolor="r"),
+            bbox={"facecolor": "none", "edgecolor": "r"},
             transform=ax.transAxes,
         )
 
@@ -1811,7 +1811,7 @@ def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = ""
         verticalalignment=vert_align,
         linespacing=0,
         annotation_clip=False,
-        bbox=dict(boxstyle="square", facecolor="none", edgecolor=color, linewidth=2),
+        bbox={"boxstyle": "square", "facecolor": "none", "edgecolor": color, "linewidth": 2},
     )
     # add border
     fig = ax.figure

@@ -473,7 +473,7 @@ def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, file
     >>> folder = get_root_dir()
     >>> text = make_python_init(folder)
     >>> print(text[0:22])
-    from .classes   import
+    from .binary    import
 
     """
     # exclusions

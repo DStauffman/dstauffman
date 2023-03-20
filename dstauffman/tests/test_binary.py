@@ -94,7 +94,7 @@ class Test_int2hex(unittest.TestCase):
     """
 
     def test_default(self) -> None:
-        hex_str = dcs.int2hex(0x0001_abcd)
+        hex_str = dcs.int2hex(0x0001_ABCD)
         self.assertEqual(hex_str, "0x1abcd")
 
     def test_pad(self) -> None:
@@ -102,7 +102,7 @@ class Test_int2hex(unittest.TestCase):
         self.assertEqual(hex_str, "0x000001234567")
 
     def test_sep(self) -> None:
-        hex_str = dcs.int2hex(0x11ac11, sep=2)
+        hex_str = dcs.int2hex(0x11AC11, sep=2)
         self.assertEqual(hex_str, "0x11_ac_11")
 
     def test_pad_char(self) -> None:
@@ -114,7 +114,7 @@ class Test_int2hex(unittest.TestCase):
         self.assertEqual(hex_str, "0xf fff")
 
     def test_upper(self) -> None:
-        hex_str = dcs.int2hex(0xfedcba0, upper=True, sep=4)
+        hex_str = dcs.int2hex(0xFEDCBA0, upper=True, sep=4)
         self.assertEqual(hex_str, "0xFED_CBA0")
 
 

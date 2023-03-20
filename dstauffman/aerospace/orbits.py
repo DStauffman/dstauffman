@@ -287,9 +287,9 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     if not line2.startswith("2"):
         raise ValueError(f'line2 must start with "2": {line2}')
     if len(line1) != 69:
-        ValueError(f"line1 must have length 69: {line1}")
+        raise ValueError(f"line1 must have length 69: {line1}")
     if len(line2) != 69:
-        ValueError(f"line2 must have length 69: {line2}")
+        raise ValueError(f"line2 must have length 69: {line2}")
 
     try:
         year = int(line1[18:20])
