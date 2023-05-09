@@ -1284,8 +1284,8 @@ def make_difference_plot(
 ):
     r"""
     Generic difference comparison plot for use in other wrapper functions.
-    Plots two vector histories over time, along with a difference from one another.
 
+    Plots two vector histories over time, along with a difference from one another.
     See make_generic_plot for input details.
 
     Returns

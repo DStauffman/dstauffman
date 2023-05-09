@@ -16,10 +16,10 @@ import unittest
 
 from slog import LogLevel
 
-from dstauffman import HAVE_NUMPY, HAVE_SCIPY, ONE_DAY, ONE_HOUR
+from dstauffman import ARCSEC2RAD, HAVE_NUMPY, HAVE_SCIPY
 from dstauffman.aerospace.orbit_const import EARTH, JULIAN, PI, TAU
-from dstauffman.aerospace.orbit_support import get_sun_radec
-from dstauffman.aerospace.quat import qrot
+from dstauffman.aerospace.orbit_support import d_2_r, get_sun_radec, jd_2_century
+from dstauffman.aerospace.quat import qrot, quat_mult
 
 if HAVE_NUMPY:
     import numpy as np
@@ -31,7 +31,9 @@ else:
 if HAVE_SCIPY:
     from scipy.optimize import root
 if TYPE_CHECKING:
-    _N = Union[float, np.ndarray]
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+    _FN = Union[float, _N]
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -49,7 +51,7 @@ def _any(x: Any) -> bool:
 
 
 # %% Functions - anomaly_eccentric_2_mean
-def anomaly_eccentric_2_mean(E: _N, e: _N) -> _N:
+def anomaly_eccentric_2_mean(E: _FN, e: _FN) -> _FN:
     r"""
     Finds the mean anomaly from the eccentric anomaly.
 
@@ -94,7 +96,7 @@ def anomaly_eccentric_2_mean(E: _N, e: _N) -> _N:
 
 
 # %% Functions - anomaly_eccentric_2_true
-def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
+def anomaly_eccentric_2_true(E: _FN, e: _FN) -> _FN:
     r"""
     Finds the true anomaly from the eccentric anomaly.
 
@@ -148,7 +150,7 @@ def anomaly_eccentric_2_true(E: _N, e: _N) -> _N:
 
 
 # %% Functions - anomaly_hyperbolic_2_mean
-def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N:
+def anomaly_hyperbolic_2_mean(F: _FN, e: _FN) -> _FN:
     r"""
     Finds the mean anomaly from the hyperbolic anomaly.
 
@@ -189,7 +191,7 @@ def anomaly_hyperbolic_2_mean(F: _N, e: _N) -> _N:
 
 
 # %% Functions - anomaly_hyperbolic_2_true
-def anomaly_hyperbolic_2_true(F: _N, e: _N) -> _N:
+def anomaly_hyperbolic_2_true(F: _FN, e: _FN) -> _FN:
     r"""
     Finds the true anomaly from the hyperbolic anomaly.
 
@@ -239,7 +241,7 @@ def anomaly_hyperbolic_2_true(F: _N, e: _N) -> _N:
 
 
 # %% Functions - anomaly_mean_2_eccentric
-def anomaly_mean_2_eccentric(M, e):
+def anomaly_mean_2_eccentric(M: _FN, e: _FN) -> _FN:
     r"""
     Finds the eccentric anomaly from the mean anomaly.
 
@@ -261,7 +263,7 @@ def anomaly_mean_2_eccentric(M, e):
     #.  Translated into Python by David C. Stauffer in July 2021.
 
     Examples
-    -------
+    --------
     >>> from dstauffman.aerospace import anomaly_mean_2_eccentric
     >>> M = 0.
     >>> e = 0.5
@@ -271,7 +273,7 @@ def anomaly_mean_2_eccentric(M, e):
 
     """
 
-    def _anomalies(E, M, e):
+    def _anomalies(E: _FN, M: _FN, e: _FN) -> _FN:
         r"""(Non-linear) Relationship between anomalies to be used in root finder."""
         return M - E + e * np.sin(E)
 
@@ -297,15 +299,15 @@ def anomaly_mean_2_eccentric(M, e):
         E = np.zeros(num)
         for i in range(num):
             # calculate the eccentric anomaly
-            temp = root(lambda E: _anomalies(E, M[i], e[i]), PI)  # pylint: disable=cell-var-from-loop
+            temp = root(lambda E: _anomalies(E, M[i], e[i]), PI)  # type: ignore[index]  # pylint: disable=cell-var-from-loop
             E[i] = temp.x[0]
     # mod with 2*pi in case a different solution was found
     E = np.mod(E, TAU)
-    return E
+    return E  # type: ignore[no-any-return]
 
 
 # %% Functions - anomaly_mean_2_true
-def anomaly_mean_2_true(M, e):
+def anomaly_mean_2_true(M: _FN, e: _FN) -> _FN:
     r"""Finds the eccentric anomaly from the true anomaly."""
     E = anomaly_mean_2_eccentric(M, e)
     nu = anomaly_eccentric_2_true(E, e)
@@ -313,7 +315,7 @@ def anomaly_mean_2_true(M, e):
 
 
 # %% Functions - anomaly_true_2_eccentric
-def anomaly_true_2_eccentric(nu, e):
+def anomaly_true_2_eccentric(nu: _FN, e: _FN) -> _FN:
     r"""Finds the true anomaly from the eccentric anomaly."""
     # check if orbit is circular or elliptical
     if np.any(e >= 1.0):
@@ -337,7 +339,7 @@ def anomaly_true_2_eccentric(nu, e):
 
 
 # %% Functions - anomaly_true_2_hyperbolic
-def anomaly_true_2_hyperbolic(nu, e):
+def anomaly_true_2_hyperbolic(nu: _FN, e: _FN) -> _FN:
     r"""Finds the hyperbolic anomaly from the true anomaly."""
     # check if orbit is hyperbolic
     if np.any(e < 1.0):
@@ -360,7 +362,7 @@ def anomaly_true_2_hyperbolic(nu, e):
 
 
 # %% Functions - anomaly_true_2_mean
-def anomaly_true_2_mean(nu, e):
+def anomaly_true_2_mean(nu: _FN, e: _FN) -> _FN:
     r"""Finds the mean anomaly from the true anomaly."""
     E = anomaly_true_2_eccentric(nu, e)
     M = anomaly_eccentric_2_mean(E, e)
@@ -368,7 +370,7 @@ def anomaly_true_2_mean(nu, e):
 
 
 # %% Functions - mean_motion_2_semimajor
-def mean_motion_2_semimajor(n, mu):
+def mean_motion_2_semimajor(n: _FN, mu: _FN) -> _FN:
     r"""
     Calculates the semi-major axis from the mean motion.
 
@@ -408,7 +410,7 @@ def mean_motion_2_semimajor(n, mu):
 
 
 # %% Functions - period_2_semimajor
-def period_2_semimajor(p: _N, mu: _N) -> _N:
+def period_2_semimajor(p: _FN, mu: _FN) -> _FN:
     r"""
     Calculates the semi-major axis from the period.
 
@@ -448,7 +450,7 @@ def period_2_semimajor(p: _N, mu: _N) -> _N:
 
 
 # %% Functions - semimajor_2_mean_motion
-def semimajor_2_mean_motion(a: _N, mu: _N) -> _N:
+def semimajor_2_mean_motion(a: _FN, mu: _FN) -> _FN:
     r"""
     Calculates the mean motion from the semi-major axis.
 
@@ -489,7 +491,7 @@ def semimajor_2_mean_motion(a: _N, mu: _N) -> _N:
 
 
 # %% Functions - semimajor_2_period
-def semimajor_2_period(a: _N, mu: _N) -> _N:
+def semimajor_2_period(a: _FN, mu: _FN) -> _FN:
     r"""
     Calculates the period from the semi-major axis.
 
@@ -530,7 +532,7 @@ def semimajor_2_period(a: _N, mu: _N) -> _N:
 
 
 # %% Functions - sidereal_2_long
-def sidereal_2_long(theta: _N, t: _N) -> _N:
+def sidereal_2_long(theta: _FN, t: _FN) -> _FN:
     r"""
     Converts a sidereal longitude to a geographic longitude.
 
@@ -580,8 +582,9 @@ def sidereal_2_long(theta: _N, t: _N) -> _N:
 
 
 # %% Functions - raan_2_mltan
-def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = False) -> _N:
+def raan_2_mltan(raan: _FN, time_jd: _FN, return_descending: bool = False) -> _FN:
     r"""
+    Convents RAAN to Mean Location Time of the Ascending Node.
 
     Examples
     --------
@@ -594,7 +597,7 @@ def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = False) -> _N:
     >>> mltan = raan_2_mltan(raan, time_jd)
     >>> mltan_hms = r_2_hms(mltan)
     >>> print(f"{mltan_hms[0]:2.0f}:{mltan_hms[1]:2.0f}:{mltan_hms[2]:.4f}")
-    17:56:20.1496
+    17:58:24.9631
 
     """
     # right ascension of the sun
@@ -606,8 +609,9 @@ def raan_2_mltan(raan: _N, time_jd: _N, return_descending: bool = False) -> _N:
 
 
 # %% Functions - jd_2_sidereal
-def jd_2_sidereal(time_jd):
+def jd_2_sidereal(time_jd: _FN) -> _FN:
     r"""
+    Converts a julian day to the local siderial time of day.
 
     Examples
     --------
@@ -619,36 +623,100 @@ def jd_2_sidereal(time_jd):
     >>> lst = jd_2_sidereal(time_jd)
 
     """
-
-    #  delta time in days since J2000
-    delta_time_days_J2000 = time_jd - JULIAN["jd_2000_01_01"]
-    # Time in Julian centuries
-    T = delta_time_days_J2000 * JULIAN["day"] / JULIAN["century"]
-    # Vallado eq 3-45, p191
-    gmst_sec = 67310.54841 + (876600 * ONE_HOUR + 8640184.812866) * T + 0.093104 * T**2 - 6.2e-6 * T**3
+    # days since J2000 and time in julian centuries
+    (Du, T) = jd_2_century(time_jd)
+    T2 = T * T
+    T3 = T2 * T
+    T4 = T3 * T
+    T5 = T4 * T
+    # Earth rotation angle and Greenwich Mean Sidereal Time (Astronomical Almanac, page B8)
+    theta = TAU * (0.7790_5727_32640 + 1.0027_3781_1911_35448 * Du)
+    gmstp_asec = 0.014_506 + 4612.156_534 * T + 1.391_5817 * T2 - 0.000_000_44 * T3 - 0.000_029_956 * T4 - 3.68e-8 * T5
+    gmst_rad = theta + ARCSEC2RAD * gmstp_asec
     # local sidereal time
-    lst = TAU * np.mod(gmst_sec / ONE_DAY, 1)
+    lst = np.mod(gmst_rad, TAU)
     return lst
 
 
-# %% Functions - quat_eci_2_ecf
-def quat_eci_2_ecf(time_jd):
+# %% Functions - quat_eci_2_ecf_approx
+def quat_eci_2_ecf_approx(time_jd: _FN) -> _FN:
     r"""
+    Calculate the ECI to ECF transformation assuming the Z axis is perfectly aligned.
 
     Examples
     --------
-    >>> from dstauffman.aerospace import quat_eci_2_ecf, numpy_to_jd
+    >>> from dstauffman.aerospace import quat_eci_2_ecf_approx, numpy_to_jd
     >>> from dstauffman import convert_datetime_to_np
     >>> import datetime
     >>> date = datetime.datetime(1992, 8, 20, 12, 14, 0)
     >>> time_jd = numpy_to_jd(convert_datetime_to_np(date))
-    >>> quat = quat_eci_2_ecf(time_jd)
+    >>> quat = quat_eci_2_ecf_approx(time_jd)
 
     """
     # calculate the local sidereal time for the given epoch
     lst = jd_2_sidereal(time_jd)
     # return the Z-axis rotation for the local time
     return qrot(3, lst)
+
+
+# %% Functions - quat_eci_2_ecf
+def quat_eci_2_ecf(time_jd: _FN, ignore_nutation: bool = False) -> _FN:
+    r"""
+    Calculate the ECI to ECF transformation.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import JULIAN, quat_eci_2_ecf
+    >>> import numpy as np
+    >>> time_jd = JULIAN["jd_2000_01_01"] + 23.5 * 365.25
+    >>> I2F = quat_eci_2_ecf(time_jd)
+    >>> with np.printoptions(precision=8):
+    ...     print(I2F)
+    [-1.01100010e-03  5.13279932e-04 -8.85626371e-01  4.64397077e-01]
+
+    """
+    # days since J2000 and time in julian centuries
+    (Du, T) = jd_2_century(time_jd)
+    T2 = T * T
+    T3 = T2 * T
+    T4 = T3 * T
+    T5 = T4 * T
+    # combined frame bias and precession
+    gamma_bar_asec = -0.052_928 + 10.556_378 * T + 0.493_2044 * T2 - 0.000_312_38 * T3 - 2.788e-6 * T4 + 2.60e-8 * T5
+    theta_bar_asec = 84381.412_819 - 46.811_016 * T + 0.051_1268 * T2 + 0.000_532_89 * T3 - 0.440e-6 * T4 - 1.76e-8 * T5
+    psi_bar_asec = -0.041_775 + 5038.481_484 * T + 1.558_4175 * T2 - 0.000_185_22 * T3 - 26.452e-6 * T4 - 1.48e-8 * T5
+    # add nutation
+    if ignore_nutation:
+        delta_psi_2000A: _FN = 0.0
+        delta_epsilon_2000A: _FN = 0.0
+    else:
+        # Accurate to only about 1 arcsecond
+        # fmt: off
+        delta_psi_2000A     = d_2_r(-0.0048 * np.sin(d_2_r(125.0 - 0.052_95 * Du)) - 0.0004 * np.sin(d_2_r(200.9 + 1.971_29 * Du)))
+        delta_epsilon_2000A = d_2_r(+0.0026 * np.cos(d_2_r(125.0 - 0.052_95 * Du)) + 0.0002 * np.cos(d_2_r(200.9 + 1.971_29 * Du)))
+        # fmt: on
+    delta_psi = delta_psi_2000A + (0.4697e-6 - 2.7774e-6 * T) * delta_psi_2000A
+    psi = ARCSEC2RAD * psi_bar_asec + delta_psi
+    epsilon_a_deg = 23.439_279_4444 - 0.013_010_213_61 * T - 5.0861e-8 * T2 + 5.565e-7 * T3 - 1.6e-10 * T4 - 1.2056e-11 * T5
+    epsilon_a = d_2_r(epsilon_a_deg)
+    delta_epsilon = delta_epsilon_2000A - 2.7774e-6 * T * delta_epsilon_2000A
+    true_obliquity_ecliptic = epsilon_a + delta_epsilon
+
+    # combined frame bias, nutation and precession corrections
+    R1 = qrot(1, -true_obliquity_ecliptic)
+    R2 = qrot(3, -psi)
+    R3 = qrot(1, ARCSEC2RAD * theta_bar_asec)
+    R4 = qrot(3, ARCSEC2RAD * gamma_bar_asec)
+    M = quat_mult(R1, quat_mult(R2, quat_mult(R3, R4)))
+
+    # Earth rotation corrections
+    Delta = d_2_r(125.004_555_01) + ARCSEC2RAD * (-6_962_890.5431 * T + 7.4722 * T2 + 0.007_702 * T3 - 0.000_059_39 * T4)
+    Ee = 1.0 / 15.0 * (delta_psi * np.cos(epsilon_a) + 0.002_64 * ARCSEC2RAD * np.sin(Delta) + 0.000_06 * ARCSEC2RAD * np.sin(2.0 * Delta))  # fmt: skip
+    gmst = jd_2_sidereal(time_jd)
+    gast = gmst + Ee
+    Q = quat_mult(qrot(3, gast), M)
+
+    return Q
 
 
 # %% Unit Test

@@ -13,7 +13,7 @@ from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import patch
 
-from slog import LogLevel
+from slog import capture_output, LogLevel
 
 from dstauffman import HAVE_NUMPY
 import dstauffman.aerospace as space
@@ -1007,6 +1007,71 @@ class Test_aerospace_quat_to_euler(unittest.TestCase):
     def test_bad_sequence(self) -> None:
         with self.assertRaises(AssertionError):
             space.quat_to_euler(self.zero_quat, np.array([1, 2]))
+
+
+# %% aerospace.quat_standards
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_quat_standards(unittest.TestCase):
+    r"""
+    Tests the quat_standards function with the following cases:
+        Default (scalar last, shuster)
+        scalar first, shuster
+        scalar last, hamilton
+        scalar first, hamilton
+    """
+
+    def setUp(self) -> None:
+        self.quat_class = lambda x, y, z, s: np.array([x, y, z, s])
+
+    def test_default(self) -> None:
+        def quat_mult_func(q1: _Q, q2: _Q) -> _Q:
+            return space.quat_mult(q1, q2)
+
+        with capture_output() as ctx:
+            scalar_first, is_hamilton = space.quat_standards(self.quat_class, quat_mult_func)
+        output = ctx.get_output()
+        ctx.close()
+        self.assertFalse(scalar_first)
+        self.assertFalse(is_hamilton)
+        self.assertEqual(output, "Scalar last\nMultiplication is Shuster")
+
+    def test_scalar_first(self) -> None:
+        def quat_mult_func(q1: _Q, q2: _Q) -> _Q:
+            out = space.quat_mult(np.array([q1[1], q1[2], q1[3], q1[0]]), np.array([q2[1], q2[2], q2[3], q2[0]]))
+            return self.quat_class(out[3], out[0], out[1], out[2])
+
+        with capture_output() as ctx:
+            scalar_first, is_hamilton = space.quat_standards(self.quat_class, quat_mult_func)
+        output = ctx.get_output()
+        ctx.close()
+        self.assertTrue(scalar_first)
+        self.assertFalse(is_hamilton)
+        self.assertEqual(output, "Scalar first\nMultiplication is Shuster")
+
+    def test_qmultl(self) -> None:
+        def quat_mult_func(q1: _Q, q2: _Q) -> _Q:
+            return space.quat_mult(q2, q1)
+
+        with capture_output() as ctx:
+            scalar_first, is_hamilton = space.quat_standards(self.quat_class, quat_mult_func)
+        output = ctx.get_output()
+        ctx.close()
+        self.assertFalse(scalar_first)
+        self.assertTrue(is_hamilton)
+        self.assertEqual(output, "Scalar last\nMultiplication is Hamilton")
+
+    def test_qmultl_scalar_first(self) -> None:
+        def quat_mult_func(q1: _Q, q2: _Q) -> _Q:
+            out = space.quat_mult(np.array([q2[1], q2[2], q2[3], q2[0]]), np.array([q1[1], q1[2], q1[3], q1[0]]))
+            return self.quat_class(out[3], out[0], out[1], out[2])
+
+        with capture_output() as ctx:
+            scalar_first, is_hamilton = space.quat_standards(self.quat_class, quat_mult_func)
+        output = ctx.get_output()
+        ctx.close()
+        self.assertTrue(scalar_first)
+        self.assertTrue(is_hamilton)
+        self.assertEqual(output, "Scalar first\nMultiplication is Hamilton")
 
 
 # %% Unit test execution

@@ -23,18 +23,18 @@ from .orbit_conv  import anomaly_eccentric_2_mean, anomaly_eccentric_2_true, \
                              anomaly_true_2_eccentric, anomaly_true_2_hyperbolic, \
                              anomaly_true_2_mean, mean_motion_2_semimajor, period_2_semimajor, \
                              semimajor_2_mean_motion, semimajor_2_period, sidereal_2_long, \
-                             raan_2_mltan, jd_2_sidereal, quat_eci_2_ecf
-from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to_jd, d_2_dms, \
-                             dms_2_d, hms_2_r, r_2_hms, aer_2_rdr, aer_2_sez, geo_loc_2_ijk, \
-                             ijk_2_rdr, ijk_2_sez, long_2_sidereal, rdr_2_aer, rdr_2_ijk, \
-                             sez_2_aer, sez_2_ijk, rv_aer_2_ijk, rv_aer_2_sez, rv_ijk_2_aer, \
-                             rv_ijk_2_sez, rv_sez_2_aer, rv_sez_2_ijk, get_sun_radec, \
-                             beta_from_oe, eclipse_fraction
+                             raan_2_mltan, jd_2_sidereal, quat_eci_2_ecf_approx, quat_eci_2_ecf
+from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to_jd, jd_2_century, \
+                             d_2_dms, dms_2_d, hms_2_r, r_2_hms, aer_2_rdr, aer_2_sez, \
+                             geo_loc_2_ijk, ijk_2_rdr, ijk_2_sez, long_2_sidereal, rdr_2_aer, \
+                             rdr_2_ijk, sez_2_aer, sez_2_ijk, rv_aer_2_ijk, rv_aer_2_sez, \
+                             rv_ijk_2_aer, rv_ijk_2_sez, rv_sez_2_aer, rv_sez_2_ijk, \
+                             get_sun_radec, get_sun_radec_approx, beta_from_oe, eclipse_fraction
 from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv, advance_elements
 from .quat        import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks, quat_assertions, \
                              enforce_pos_scalar, qrot, quat_from_axis_angle, quat_angle_diff, \
                              quat_from_euler, quat_interp, quat_inv, quat_mult, quat_norm, \
-                             quat_prop, quat_times_vector, quat_to_euler
+                             quat_prop, quat_times_vector, quat_to_euler, quat_standards
 from .quat_opt    import qrot_single, quat_from_axis_angle_single, quat_interp_single, \
                              quat_inv_single, quat_mult_single, quat_norm_single, \
                              quat_prop_single, quat_times_vector_single, quat_to_dcm

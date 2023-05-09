@@ -228,7 +228,7 @@ def run_coverage(folder: Path, *, report: bool = True, cov_file: Optional[Path] 
 
     # Generate the HTML report
     if report:
-        cov.html_report(directory=cov_folder)
+        cov.html_report(directory=str(cov_folder))
 
     return return_code
 

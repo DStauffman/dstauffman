@@ -127,7 +127,7 @@ def bsr(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
 # %% Functions - prn_01_to_m11
 def prn_01_to_m11(bits: _I, *, inplace: bool = False) -> _I:
     r"""
-    Shifts bits from (0,1) to (1,-1)
+    Shifts bits from (0,1) to (1,-1).
 
     Parameters
     ----------
@@ -315,7 +315,7 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
         length specification
 
     Returns
-    ----------
+    -------
     prn : (N, ) ndarray
         psuedo-random number for specified satellite
 
@@ -500,9 +500,6 @@ def gps_to_utc_datetime(
     Calculates the gps date based on the elasped number of weeks using the
     built-in datetime abilities, then applies the time in seconds,
     then applies the GPS offset and returns the answer as a datetime or numpy.datetime64.
-
-    Parameters
-    ----------
 
     Parameters
     ----------

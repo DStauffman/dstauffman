@@ -20,7 +20,9 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    _N = Union[float, np.ndarray]
+    _N = np.typing.NDArray[np.float64]
+    _D = np.typing.NDArray[np.datetime64]
+    _FN = Union[float, _N]
 
 
 # %% Functions - d_2_r
@@ -30,11 +32,11 @@ def d_2_r(deg: float) -> float:
 
 
 @overload
-def d_2_r(deg: np.ndarray) -> np.ndarray:
+def d_2_r(deg: _N) -> _N:
     ...
 
 
-def d_2_r(deg: _N) -> _N:
+def d_2_r(deg: _FN) -> _FN:
     r"""Converts degrees to radians."""
     return DEG2RAD * deg
 
@@ -46,29 +48,29 @@ def r_2_d(rad: float) -> float:
 
 
 @overload
-def r_2_d(rad: np.ndarray) -> np.ndarray:
+def r_2_d(rad: _N) -> _N:
     ...
 
 
-def r_2_d(rad: _N) -> _N:
+def r_2_d(rad: _FN) -> _FN:
     r"""Converts radians to degrees."""
     return RAD2DEG * rad
 
 
 # %% Functions - norm
-def norm(x):
+def norm(x: _N) -> _N:
     r"""Alias to the magnitude function, calculating the vector magnitude."""
     return np.asanyarray(magnitude(x))
 
 
 # %% Functions - dot
-def dot(x, y):
+def dot(x: _N, y: _N) -> _N:
     r"""Dot product between two vectors."""
-    return np.sum(x * y, axis=0)
+    return np.sum(x * y, axis=0)  # type: ignore[no-any-return]
 
 
 # %% Functions - cross
-def cross(x, y):
+def cross(x: _N, y: _N) -> _N:
     r"""Cross product between two vectors."""
     return np.cross(x.T, y.T).T
 
@@ -80,11 +82,11 @@ def jd_to_numpy(time_jd: float) -> np.datetime64:
 
 
 @overload
-def jd_to_numpy(time_jd: np.ndarray) -> np.ndarray:
+def jd_to_numpy(time_jd: _N) -> _D:
     ...
 
 
-def jd_to_numpy(time_jd: _N) -> Union[np.datetime64, np.ndarray]:
+def jd_to_numpy(time_jd: _FN) -> Union[np.datetime64, _D]:
     r"""
     Converts a julian date to a numpy datetime64.
 
@@ -94,26 +96,26 @@ def jd_to_numpy(time_jd: _N) -> Union[np.datetime64, np.ndarray]:
     >>> time_jd = 2451546.5
     >>> date = jd_to_numpy(time_jd)
     >>> print(date)
-    2000-01-02T12:00:00.000000000
+    2000-01-03T00:00:00.000000000
 
     """
     delta_days = time_jd - JULIAN["jd_2000_01_01"]
-    out = np.datetime64("2000-01-01T00:00:00", NP_DATETIME_UNITS) + NP_ONE_DAY * delta_days
+    out = np.datetime64("2000-01-01T12:00:00", NP_DATETIME_UNITS) + NP_ONE_DAY * delta_days
     return out
 
 
 # %% Functions - numpy_to_jd
 @overload
-def numpy_to_jd(date: np.datetime64) -> np.float64:
+def numpy_to_jd(date: np.datetime64) -> float:
     ...
 
 
 @overload
-def numpy_to_jd(date: np.ndarray) -> np.ndarray:
+def numpy_to_jd(date: _D) -> _N:
     ...
 
 
-def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.ndarray]:
+def numpy_to_jd(date: Union[np.datetime64, _D]) -> Union[float, _N]:
     r"""
     Converts a numpy datetime64 into a julian date.
 
@@ -124,16 +126,51 @@ def numpy_to_jd(date: Union[np.datetime64, np.ndarray]) -> Union[np.float64, np.
     >>> date = np.datetime64("2000-01-02T12:00:00")
     >>> time_jd = numpy_to_jd(date)
     >>> print(time_jd)
-    2451546.5
+    2451546.0
 
     """
-    delta_days = (date - np.datetime64("2000-01-01T00:00:00", NP_DATETIME_UNITS)) / NP_ONE_DAY
+    delta_days = (date - np.datetime64("2000-01-01T12:00:00", NP_DATETIME_UNITS)) / NP_ONE_DAY
     out = delta_days + JULIAN["jd_2000_01_01"]
-    return out
+    return out  # type: ignore[return-value]
+
+
+# %% Functions - jd_2_century
+def jd_2_century(time_jd: _FN) -> Tuple[_FN, _FN]:
+    r"""
+    Converts a julian day to the fractional julian centuries since J2000.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import jd_2_century, JULIAN
+    >>> d0 = JULIAN["jd_2000_01_01"]
+    >>> time_jd = 10000 + d0
+    >>> (Du, T) = jd_2_century(time_jd)
+    >>> print(Du)
+    10000.0
+
+    >>> print(T)
+    0.2737850787132101
+
+    """
+    # delta time in days since J2000
+    Du = time_jd - JULIAN["jd_2000_01_01"]
+    # Time in Julian centuries
+    T = Du * JULIAN["day"] / JULIAN["century"]
+    return (Du, T)
 
 
 # %% Functions - d_2_dms
-def d_2_dms(x, /):
+@overload
+def d_2_dms(x: float, /) -> _N:
+    ...
+
+
+@overload
+def d_2_dms(x: _N, /) -> _N:
+    ...
+
+
+def d_2_dms(x: _FN, /) -> _N:
     r"""Converts an angle from degrees to degrees, minutes and seconds."""
     if np.ndim(x) > 1:
         raise ValueError("dms_2_d expects a vector as input.")
@@ -151,28 +188,38 @@ def d_2_dms(x, /):
 
 
 # %% Functions - dms_2_d
-def dms_2_d(x, /):
+def dms_2_d(x: _N, /) -> _N:
     r"""Converts an angle from degrees, minutes and seconds to degrees."""
     if x.shape[0] != 3:
         raise ValueError("d_2_dms expects a 3xN array as input.")
     # find fractional degrees by adding parts together
     out = x[0, ...] + x[1, ...] / ONE_MINUTE + x[2, ...] / ONE_HOUR
-    return out
+    return out  # type: ignore[no-any-return]
 
 
 # %% Functions - hms_2_r
-def hms_2_r(x, /):
+def hms_2_r(x: _N, /) -> _N:
     r"""Converts a time from hours, minutes and seconds to radians."""
     if x.shape[0] != 3:
         raise ValueError("hms_2_r expects a 3xN array as input.")
     # find fractional degrees by adding parts together
     hours = x[0, ...] + x[1, ...] / ONE_MINUTE + x[2, ...] / ONE_HOUR
     out = hours / 24 * TAU
-    return out
+    return out  # type: ignore[no-any-return]
 
 
 # %% Functions - r_2_hms
-def r_2_hms(x, /):
+@overload
+def r_2_hms(x: float, /) -> _N:
+    ...
+
+
+@overload
+def r_2_hms(x: _N, /) -> _N:
+    ...
+
+
+def r_2_hms(x: _FN, /) -> _N:
     r"""Converts an angle from radians to hours, minutes and seconds."""
     if np.ndim(x) > 1:
         raise ValueError("r_2_hms expects a vector as input.")
@@ -272,7 +319,6 @@ def ijk_2_rdr(ijk):
 def ijk_2_sez(ijk, geo_loc, time_jd):
     r"""Converts IJK coordinates to SEZ coordinates."""
 
-    # % Subfunctions
     def _find_D(L, theta):
         r"""Calculate the IJK to SEZ transformation matrix from L and theta."""
         # fmt: off
@@ -415,7 +461,6 @@ def sez_2_aer(sez):
 def sez_2_ijk(sez, geo_loc, time_jd):
     r"""Converts SEZ coordinates to IJK coordinates."""
 
-    # % Subfunctions
     def _find_D(L, theta):
         r"""Calculate the SEZ to IJK transformation matrix from L and theta."""
         # fmt: off
@@ -547,6 +592,66 @@ def rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd):
     return (r_ijk, v_ijk)
 
 
+# %% Functions - get_sun_radec_approx
+def get_sun_radec_approx(time_jd: _N) -> Tuple[_N, _N]:
+    r"""
+    Approximates the right ascension and declination angles to the Sun for the given julian time.
+
+    Guaranteed to be accurate to one arcminute (~0.000291 radians, ~0.0166667 degrees) of error between 1950-2050.
+
+    Parameters
+    ----------
+    time_jd : np.ndarray
+        Julian date
+
+    Returns
+    -------
+    ra : np.ndarray
+        Right ascension [rad]
+    dec : np.ndarray
+        Declination [rad]
+
+    Notes
+    -----
+    #.  Algorithm from Astronomical Almanac 2023, page C5.
+    #.  Written by David C. Stauffer in Apr 2023.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import get_sun_radec_approx, numpy_to_jd
+    >>> from dstauffman import convert_datetime_to_np
+    >>> import datetime
+    >>> date = datetime.datetime(2010, 6, 20, 15, 30, 45)
+    >>> np_date = convert_datetime_to_np(date)
+    >>> time_jd = numpy_to_jd(np_date)
+    >>> (ra, dec) = get_sun_radec_approx(time_jd)
+    >>> print(f"{ra:.3f}")
+    1.556
+
+    >>> print(f"{dec:.3f}")
+    0.409
+
+    """
+    # delta time in days since J2000
+    n = time_jd - JULIAN["jd_2000_01_01"]
+    # Mean longitude of the Sun, corrected for aberration
+    L = np.mod(4.89495 + 0.017202792 * n, TAU)  # np.mod(DEG2RAD * (280.460 + 0.9856474 * n), TAU)
+    # Mean anomaly of the Sun
+    g = np.mod(6.2400408 + 0.01720197 * n, TAU)  # np.mod(DEG2RAD * (357.528 + 0.9856003 * n), TAU)
+    # Ecliptic longitude
+    lamd = L + 0.033423 * np.sin(g) + 0.00034907 * np.sin(2 * g)  #  L + DEG2RAD * (1.915 * np.sin(g) + 0.020 * np.sin(2 * g))
+    # obliquity of ecliptic
+    epsilon = 0.409088 - 7e-9 * n  # DEG2RAD * (23.439 - 0.000_000_4 * n)
+
+    # right ascension
+    t = np.tan(0.5 * epsilon) ** 2
+    ra = lamd - t * np.sin(2.0 * lamd) + 0.5 * t**2 * np.sin(4.0 * lamd)
+    # declination
+    dec = np.arcsin(np.sin(epsilon) * np.sin(lamd))
+
+    return (ra, dec)
+
+
 # %% Functions - get_sun_radec
 @overload
 def get_sun_radec(time_jd: float) -> Tuple[float, float]:
@@ -554,7 +659,7 @@ def get_sun_radec(time_jd: float) -> Tuple[float, float]:
 
 
 @overload
-def get_sun_radec(time_jd: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
+def get_sun_radec(time_jd: _N) -> Tuple[_N, _N]:
     ...
 
 
@@ -564,11 +669,11 @@ def get_sun_radec(time_jd: float, return_early: bool) -> Tuple[float, float]:
 
 
 @overload
-def get_sun_radec(time_jd: np.ndarray, return_early: bool) -> Tuple[np.ndarray, np.ndarray]:
+def get_sun_radec(time_jd: _N, return_early: bool) -> Tuple[_N, _N]:
     ...
 
 
-def get_sun_radec(time_jd: _N, return_early: bool = False) -> Tuple[_N, _N]:
+def get_sun_radec(time_jd: _FN, return_early: bool = False) -> Tuple[_FN, _FN]:
     r"""
     Gets the right ascension and declination angles to the Sun for the given julian time.
 
@@ -601,7 +706,7 @@ def get_sun_radec(time_jd: _N, return_early: bool = False) -> Tuple[_N, _N]:
     >>> from dstauffman.aerospace import get_sun_radec, numpy_to_jd
     >>> from dstauffman import convert_datetime_to_np
     >>> import datetime
-    >>> date = datetime.datetime(2010, 6, 20, 15, 30, 45)
+    >>> date = datetime.datetime(2010, 6, 21, 3, 30, 45)
     >>> np_date = convert_datetime_to_np(date)
     >>> time_jd = numpy_to_jd(np_date)
     >>> (ra, dec) = get_sun_radec(time_jd)
@@ -612,17 +717,19 @@ def get_sun_radec(time_jd: _N, return_early: bool = False) -> Tuple[_N, _N]:
     0.409
 
     """
-    # delta time in days since J2000
-    delta_time_days_J2000 = time_jd - JULIAN["jd_2000_01_01"]
-    # Time in Julian centuries
-    T = delta_time_days_J2000 * JULIAN["day"] / JULIAN["century"]
+    # time in julian centuries
+    (_, T) = jd_2_century(time_jd)
+    T2 = T * T
+    T3 = T2 * T
+    T4 = T3 * T
+    T5 = T4 * T
     # (eq 25.2) Geometric mean longitude of the Sun, referred to the mean equinox of the date
-    Lo = np.mod(DEG2RAD * (280.46645 + 36000.76983 * T + 0.0003032 * T**2), TAU)
+    Lo = np.mod(DEG2RAD * (280.46645 + 36000.76983 * T + 0.0003032 * T2), TAU)
     # (eq 25.3) Mean anomaly of the Sun
-    M = np.mod(DEG2RAD * (357.52910 + 35999.05030 * T - 0.0001559 * T**2 - 0.00000048 * T**3), TAU)
+    M = np.mod(DEG2RAD * (357.52910 + 35999.05030 * T - 0.0001559 * T2 - 0.00000048 * T3), TAU)
     # Center of Sun
     C = DEG2RAD * (
-        (1.914600 - 0.004817 * T - 0.000014 * T**2) * np.sin(M)
+        (1.914600 - 0.004817 * T - 0.000014 * T2) * np.sin(M)
         + (0.019993 - 0.000101 * T) * np.sin(2 * M)
         + 0.000290 * np.sin(3 * M)
     )
@@ -634,10 +741,10 @@ def get_sun_radec(time_jd: _N, return_early: bool = False) -> Tuple[_N, _N]:
         + 26 * ONE_MINUTE
         + 21.406
         - 46.836769 * T
-        - 0.0001831 * T**2
-        + 0.00200340 * T**3
-        - 0.576e-6 * T**4
-        - 4.34e-8 * T**5
+        - 0.0001831 * T2
+        + 0.00200340 * T3
+        - 0.576e-6 * T4
+        - 4.34e-8 * T5
     )
     if return_early:
         return (sun_true_longitude, obliquity_of_ecliptic)
@@ -698,21 +805,21 @@ def eclipse_fraction(altitude: float, beta: float) -> float:
 
 
 @overload
-def eclipse_fraction(altitude: float, beta: np.ndarray) -> np.ndarray:
+def eclipse_fraction(altitude: float, beta: _N) -> _N:
     ...
 
 
 @overload
-def eclipse_fraction(altitude: np.ndarray, beta: float) -> np.ndarray:
+def eclipse_fraction(altitude: _N, beta: float) -> _N:
     ...
 
 
 @overload
-def eclipse_fraction(altitude: np.ndarray, beta: np.ndarray) -> np.ndarray:
-    ...
-
-
 def eclipse_fraction(altitude: _N, beta: _N) -> _N:
+    ...
+
+
+def eclipse_fraction(altitude: _FN, beta: _FN) -> _FN:
     r"""
     Gets the faction of the orbit period for which the satellite is in umbra.
 

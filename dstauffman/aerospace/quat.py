@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import doctest
 import logging
-from typing import List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Callable, List, Optional, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
@@ -26,7 +26,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
     _N = np.typing.NDArray[np.float64]
-    _Q = np.typing.NDArray[np.float64]
+    _Q = np.typing.NDArray[np.float64]  # shape (4,)
+    _Qs = np.typing.NDArray[np.float64]  # shape (4, N)  # TODO: don't make use of this yet
 
 # %% Loggers
 logger = logging.getLogger(__name__)
@@ -1169,6 +1170,69 @@ def quat_to_euler(quat: _Q, seq: Optional[Union[Tuple[int, int, int], List[int],
     if is_vector:
         euler = euler.flatten()
     return euler
+
+
+# %% quat_standards
+def quat_standards(
+    quat_class: Callable[[float, float, float, float], _Q], quat_mult_func: Callable[[_Q, _Q], _Q]
+) -> Tuple[bool, bool]:
+    r"""
+    Uses a defined test case to determine the relevant quaternion conventions.
+
+    Parameters
+    ----------
+    quat_class : Callable
+        Quaternion class, expected to be passed four input arguments
+    quat_mult_func : Callable
+        Quaternion multiplication function, expected to be passed two quaternion instances
+        and return a quaternion that can be zero indexed for its elements.
+
+    Returns
+    -------
+    scalar_first : bool
+        Whether the convention is scalar first or not
+    is_hamilton : bool
+        Whether the multiplication follows Hamiltonian conventions or not
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2023.
+
+    References
+    ----------
+    #.  Test as described by James J. Sorenson in his Hamilton vs Shuster Quaternion Math post.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import quat_standards, quat_mult
+    >>> import numpy as np
+    >>> quat_class = lambda x, y, z, s: np.array([x, y, z, s])
+    >>> quat_mult_func = quat_mult
+    >>> scalar_first, is_hamilton = quat_standards(quat_class, quat_mult_func)
+    Scalar last
+    Multiplication is Shuster
+
+    >>> print(scalar_first)
+    False
+
+    >>> print(is_hamilton)
+    False
+
+    """
+    q1 = quat_class(0.0, 1.0, 0.0, 0.0)
+    q2 = quat_class(0.0, 0.0, 1.0, 0.0)
+    q = quat_mult_func(q1, q2)
+    if abs(q[0]) < 1e-15:
+        scalar_first = True
+        assert abs(q[3]) >= 1.0 - 1e-15, f"Last component of: {q[3]} not close to +/- 1.0 in {q}"
+        is_hamilton = q[3] > 0.0
+    else:
+        scalar_first = False
+        assert abs(q[0]) >= 1.0 - 1e-15, f"First component of: {q[0]} not close to +/- 1.0 in {q}"
+        is_hamilton = q[0] > 0.0
+    print("Scalar " + ("first" if scalar_first else "last"))
+    print("Multiplication is " + ("Hamilton" if is_hamilton else "Shuster"))
+    return (scalar_first, is_hamilton)
 
 
 # %% Unit test

@@ -6,14 +6,22 @@ Notes
 #.  Written by David C. Stauffer in Jan 2015, moved to separate file in Jan 2017.
 """
 # %% Imports
+from __future__ import annotations
+
 import doctest
 from math import isinf, isnan
-from typing import List, Optional, Union
+from typing import List, Optional, Sequence, TYPE_CHECKING, Union
 import unittest
 
 from nubs import prob_to_rate_opt
 
 from dstauffman.units import MONTHS_PER_YEAR
+
+if TYPE_CHECKING:
+    import numpy as np
+
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
 
 
 # %% Functions - make_preamble
@@ -140,7 +148,9 @@ def make_conclusion(*, use_mini: bool = False) -> List[str]:
 
 
 # %% Functions - bins_to_str_ranges
-def bins_to_str_ranges(bins, dt=1, cutoff=1000):
+def bins_to_str_ranges(
+    bins: Union[Sequence[Union[int, float, str]], _I, _N], dt: Union[int, float] = 1, cutoff: Union[int, float] = 1000
+) -> List[str]:
     r"""
     Take a given bin vector, and returns a string representation with both boundaries.
 
@@ -183,7 +193,7 @@ def bins_to_str_ranges(bins, dt=1, cutoff=1000):
             out.append(left)
             continue
         # alias the right boundary
-        right = bins[r + 1] - dt
+        right = bins[r + 1] - dt  # type: ignore[operator]
         # check for large values, and replace appropriately
         if left == right:
             this_str = f"{left:g}"

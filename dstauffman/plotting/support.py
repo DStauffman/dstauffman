@@ -977,6 +977,9 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
     >>> plt.close(fig)
 
     """
+    if time is None and data is None and not bool(ax.lines):
+        warnings.warn("No data found on plot, so nothing was zoomed.")
+        return
     # If not given, find time/data from the plot itself
     if time is None:
         time = np.hstack([artist.get_xdata() for artist in ax.lines])
@@ -1674,6 +1677,7 @@ def get_classification(classify: str) -> Tuple[str, str]:
 def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = "", test: bool = False, location: str = "figure"):
     r"""
     Displays the classification in a box on each figure.
+
     Includes the option of printing another box for testing purposes.
 
     Parameters

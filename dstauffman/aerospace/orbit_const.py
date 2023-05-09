@@ -59,8 +59,7 @@ JULIAN: Dict[str, float] = {}
 JULIAN["day"] = 24.0 * 60.0 * 60.0  # [s]
 JULIAN["year"] = 365.25 * JULIAN["day"]  # [s]
 JULIAN["century"] = 36525.0 * JULIAN["day"]  # [s]
-JULIAN["jd_2000_01_01"] = 2451545.0  # Julian Date at 2000-01-01T12:00Z
-JULIAN["jd_2007_04_29"] = 2454220.0  # Julian Date at 2007-04-29T12:00Z
+JULIAN["jd_2000_01_01"] = 2451545.0  # Julian Date at 2000-01-01T12:00Z  [day]
 JULIAN["tg0_2000"] = 1.753368559  # Julian Date 2451544.5 (2000-01-01T00:00Z) [rad]
 JULIAN["tg0_2000_time"] = JULIAN["jd_2000_01_01"] - 0.5  # [rad]
 

@@ -7,7 +7,7 @@ Notes
 """
 
 # %% Constants
-version_info = (3, 3, 2)
+version_info = (3, 3, 4)
 
 # Below is data about the minor release history for potential use in deprecating older support.
 # For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html

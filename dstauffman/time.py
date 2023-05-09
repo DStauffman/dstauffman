@@ -32,9 +32,11 @@ else:
     from math import isfinite, nan  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    _AllDates = Union[None, int, float, datetime.datetime, datetime.date, np.ndarray, np.datetime64]
-    _NPDates = Union[np.datetime64, np.ndarray]
-    _NInt = np.typing.NDArray[np.int_]
+    _D = np.typing.NDArray[np.datetime64]
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+    _AllDates = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, _N, _D]
+    _NPDates = Union[np.datetime64, _D, _N]
 
 # %% Constants
 # maps other names of units to the ones expected by numpy
@@ -99,7 +101,7 @@ def get_np_time_units(date: Union[np.datetime64, np.timedelta64, str]) -> Option
 
 
 # %% Functions - get_ymd_from_np
-def get_ymd_from_np(date: _NPDates) -> Tuple[_NInt, _NInt, _NInt]:
+def get_ymd_from_np(date: _NPDates) -> Tuple[_I, _I, _I]:
     r"""
     Gets the year, month, and day for a given numpy datetime64.
 

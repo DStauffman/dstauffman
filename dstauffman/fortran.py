@@ -128,8 +128,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
     >>> from dstauffman.fortran import _parse_source
     >>> from dstauffman import get_root_dir
     >>> from pathlib import Path
-    >>> filename = get_root_dir().parent.parent.joinpath("forsat", "unit_tests", \
-    ...     "test_utils_unit_vec.f90")
+    >>> filename = get_root_dir().parent.parent.joinpath("forsat", "unit_tests", "test_utils_unit_vec.f90")
     >>> code = _parse_source(filename) # doctest: +SKIP
 
     """
@@ -532,8 +531,8 @@ def _write_makefile(
 
     """
 
-    # subfunction to build dependencies with checks for external or intrinsics
     def _build_dependencies(uses: Iterable[str]) -> List[str]:
+        r"""Build dependencies with checks for external or intrinsics."""
         # create sorted list of uses that are not intrinsic or external
         sorted_uses = sorted(
             list({x for x in uses if x not in _INTRINSIC_MODS and (external_sources is None or x not in external_sources)})

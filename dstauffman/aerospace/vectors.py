@@ -22,14 +22,16 @@ if HAVE_NUMPY:
 
 # %% Constants
 if TYPE_CHECKING:
-    _Numbers = Union[float, np.ndarray]
-    _Lists = Union[List[np.ndarray], Tuple[np.ndarray, ...], np.ndarray]
     _N = np.typing.NDArray[np.float64]
+    _V = np.typing.NDArray[np.float64]  # shape (3,)
+    _DCM = np.typing.NDArray[np.float64]  # shape (3, 3)
+    _FN = Union[float, _N]
+    _Lists = Union[List[_N], Tuple[_N, ...], _N]
 
 
 # %% Functions - rot
 @ncjit
-def rot(axis: int, angle: float) -> np.ndarray:
+def rot(axis: int, angle: float) -> _DCM:
     r"""
     Direction cosine matrix for rotation about a single axis.
 
@@ -90,7 +92,7 @@ def rot(axis: int, angle: float) -> np.ndarray:
 
 # %% Functions - drot
 @ncjit
-def drot(axis: int, angle: float) -> np.ndarray:
+def drot(axis: int, angle: float) -> _DCM:
     r"""
     Derivative of transformation matrix for rotation about a single axis.
 
@@ -150,7 +152,7 @@ def drot(axis: int, angle: float) -> np.ndarray:
 
 # %% Functions - vec_cross
 @ncjit
-def vec_cross(vec: np.ndarray) -> np.ndarray:
+def vec_cross(vec: _V) -> _DCM:
     r"""
     Returns the equivalent 3x3 matrix that would perform a cross product when multiplied.
 
@@ -265,12 +267,12 @@ def cart2sph(x: float, y: float, z: float) -> Tuple[float, float, float]:
 
 
 @overload
-def cart2sph(x: np.ndarray, y: np.ndarray, z: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def cart2sph(x: _N, y: _N, z: _N) -> Tuple[_N, _N, _N]:
     ...
 
 
 @ncjit
-def cart2sph(x: _Numbers, y: _Numbers, z: _Numbers) -> Tuple[_Numbers, _Numbers, _Numbers]:
+def cart2sph(x: _FN, y: _FN, z: _FN) -> Tuple[_FN, _FN, _FN]:
     r"""
     Converts cartesian X, Y, Z components to spherical Az, El, Radius.
 
@@ -316,12 +318,12 @@ def sph2cart(az: float, el: float, rad: float) -> Tuple[float, float, float]:
 
 
 @overload
-def sph2cart(az: np.ndarray, el: np.ndarray, rad: np.ndarray) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+def sph2cart(az: _N, el: _N, rad: _N) -> Tuple[_N, _N, _N]:
     ...
 
 
 @ncjit
-def sph2cart(az: _Numbers, el: _Numbers, rad: _Numbers) -> Tuple[_Numbers, _Numbers, _Numbers]:
+def sph2cart(az: _FN, el: _FN, rad: _FN) -> Tuple[_FN, _FN, _FN]:
     r"""
     Converts spherical Az, El and Radius to cartesian X, Y, Z components.
 
@@ -366,7 +368,7 @@ def sph2cart(az: _Numbers, el: _Numbers, rad: _Numbers) -> Tuple[_Numbers, _Numb
 
 # %% Funcctions - rv2dcm
 @ncjit
-def rv2dcm(vec: np.ndarray) -> np.ndarray:
+def rv2dcm(vec: _V) -> _DCM:
     r"""
     Convert a rotation vector into a direction cosine matrix.
 
@@ -399,7 +401,7 @@ def rv2dcm(vec: np.ndarray) -> np.ndarray:
      [ 0. -1.  0.]]
 
     """
-    dcm: np.ndarray = np.eye(3)
+    dcm: _DCM = np.eye(3)
     # Use np.dot instead of np.inner here as they are the same for 1D arrays, and np.dot compiles with numba
     mag = np.sqrt(np.dot(vec, vec))
     if mag != 0:

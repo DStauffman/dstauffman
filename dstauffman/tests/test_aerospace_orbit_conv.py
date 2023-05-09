@@ -298,6 +298,38 @@ pass  # TODO: write this
 # %% aerospace.sidereal_2_long
 pass  # TODO: write this
 
+# %% aerospace.raan_2_mltan
+pass  # TODO: write this
+
+
+# %% aerospace.jd_2_sidereal
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_jd_2_sidereal(unittest.TestCase):
+    r"""
+    Tests the aerospace.jd_2_sidereal function with the following cases:
+        Nominal
+    """
+
+    def test_nominal(self) -> None:
+        time_jd = 2460126.5  # UT1
+        lst = space.jd_2_sidereal(time_jd)
+        exp_lst = space.hms_2_r(np.array([18, 35, 10.4399]))  # from 2023 Astronomical Almanac, page B16
+        self.assertAlmostEqual(lst, exp_lst)
+
+    def test_vector(self) -> None:
+        time_jd = np.array([2460218.5, 2460264.5])  # UT1
+        lst = space.jd_2_sidereal(time_jd)
+        exp_lst = space.hms_2_r(np.array([[0, 3], [37, 39], [53.5338, 15.0808]]))
+        np.testing.assert_array_almost_equal(lst, exp_lst)
+
+
+# %% aerospace.quat_eci_2_ecf_approx
+pass  # TODO: write this
+
+# %% aerospace.quat_eci_2_ecf
+pass  # TODO: write this
+
+
 # %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

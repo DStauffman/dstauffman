@@ -117,7 +117,7 @@ def int2hex(num: int, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_char:
 
 
 # %% Functions - read_bit_stream
-def _read_bit_stream():
+def _read_bit_stream() -> None:
     pass  # TODO: write this
 
 

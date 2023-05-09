@@ -1,6 +1,7 @@
 r"""
-Support module file for the dstauffman.estimation code.  It defines the supporting code to use within
-the more generic batch parameter estimator included in the library.
+Support module file for the dstauffman.estimation code.
+
+Defines the supporting code to use within the more generic batch parameter estimator included in the library.
 
 Notes
 -----

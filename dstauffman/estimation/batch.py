@@ -574,7 +574,7 @@ def _finite_differences(
     *,
     two_sided: bool = False,
     normalized: bool = False,
-):
+) -> Tuple[_M, _N, _M]:
     r"""
     Perturb the state by a litte bit and calculate the numerical slope (Jacobian approximation).
 

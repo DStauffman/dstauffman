@@ -117,13 +117,13 @@ class Test_jd_to_numpy(unittest.TestCase):
     """
 
     def test_nominal(self) -> None:
-        jd = space.numpy_to_jd(np.datetime64("2000-01-01T00:00:00"))
+        jd = space.numpy_to_jd(np.datetime64("2000-01-01T12:00:00"))
         self.assertEqual(jd, 2451545.0)
 
     def test_vectorized(self) -> None:
         x = np.array([np.datetime64("2000-01-01T00:00:00"), np.datetime64("2000-01-01T12:00:00")])
         jd = space.numpy_to_jd(x)
-        np.testing.assert_array_equal(jd, np.array([2451545.0, 2451545.5]))
+        np.testing.assert_array_equal(jd, np.array([2451544.5, 2451545.0]))
 
 
 # %% aerospace.jd_to_numpy
@@ -136,10 +136,10 @@ class Test_aerospace_jd_to_numpy(unittest.TestCase):
 
     def test_nominal(self) -> None:
         date = space.jd_to_numpy(2451545.0)
-        self.assertEqual(date, np.datetime64("2000-01-01T00:00:00"))
+        self.assertEqual(date, np.datetime64("2000-01-01T12:00:00"))
 
     def test_vectorized(self) -> None:
-        jd = np.array([2451545.0, 2451545.5])
+        jd = np.array([2451544.5, 2451545.0])
         date = space.jd_to_numpy(jd)
         exp = np.array([np.datetime64("2000-01-01T00:00:00"), np.datetime64("2000-01-01T12:00:00")])
         np.testing.assert_array_equal(date, exp)
@@ -284,13 +284,13 @@ class Test_aerospace_get_sun_radec(unittest.TestCase):
 
     def test_nominal(self) -> None:
         (ra, dec) = space.get_sun_radec(self.time_jd)
-        self.assertAlmostEqual(ra, 1.5647769687035675, 14)  # TODO: get independent source for this
-        self.assertAlmostEqual(dec, 0.4090622181809259, 14)  # TODO: get independent source for this
+        self.assertAlmostEqual(ra, 1.5557002786752125, 14)  # TODO: get independent source for this
+        self.assertAlmostEqual(dec, 0.4090272497793529, 14)  # TODO: get independent source for this
 
     def test_return_early(self) -> None:
         (Ls, ob) = space.get_sun_radec(self.time_jd, return_early=True)
-        self.assertAlmostEqual(Ls, 1.5652736057656844, 14)  # TODO: get independent source for this
-        self.assertAlmostEqual(ob, 0.40906882950150103, 14)  # TODO: get independent source for this
+        self.assertAlmostEqual(Ls, 1.5569456630415757, 14)  # TODO: get independent source for this
+        self.assertAlmostEqual(ob, 0.40906883260993276, 14)  # TODO: get independent source for this
 
 
 # %% aerospace.beta_from_oe

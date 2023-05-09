@@ -46,7 +46,8 @@ if TYPE_CHECKING:
 # %% Enums - OrbitType
 class OrbitType(IntEnumPlus):
     r"""
-    Values for the possible orbit types, from {"elliptic", "parabolic", "hyperbolic"},
+    Values for the possible orbit types, from {"elliptic", "parabolic", "hyperbolic"}.
+
     Plus an "uninitialized" value.  Note that "circular" is not an option, but falls under elliptic.
 
     Examples
@@ -65,7 +66,7 @@ class OrbitType(IntEnumPlus):
 # %% Classes - Elements
 class Elements(Frozen):
     r"""
-    Orbital Elements class
+    Orbital Elements class.
 
     Attributes
     ----------
@@ -236,7 +237,7 @@ def _fix_instab(x, precision):
 # %% Functions - two_line_elements
 def two_line_elements(line1: str, line2: str) -> Elements:
     r"""
-    Convert two-line elements to elements structure
+    Convert two-line elements to elements structure.
 
     Parameters
     ----------
@@ -279,7 +280,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:
      type       = OrbitType.elliptic: 1
      equatorial = False
      circular   = False
-     t          = 2006-05-11T19:03:00.000016096
+     t          = 2006-05-12T07:03:00.000016096
 
     """
     if not line1.startswith("1"):
