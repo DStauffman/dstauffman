@@ -26,6 +26,7 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
+    _B = np.typing.NDArray[np.bool_]
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
 
@@ -297,6 +298,86 @@ def mat_divide(a: _M, b: _N, rcond: float = _EPS) -> Union[_N, _M]:
 
     """
     return np.linalg.lstsq(a, b, rcond=rcond)[0]
+
+
+# %% find_first
+def find_first(x: _B, /) -> int:
+    r"""
+    Finds the location of the first true occurrence in a logical array.
+
+    Return -1 if none are found.
+    Returns linear index position for higher order arrays.
+
+    Parameters
+    ----------
+    x : (N,) array of bool
+        Logical array
+
+    Returns
+    -------
+    int
+        Location of first true value, returns -1 if not found
+
+    See Also
+    --------
+    np.argmax, np.argmin
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2023.
+
+    Examples
+    --------
+    >>> from dstauffman import find_first
+    >>> x = np.array([0, 0, 1, 0, 1, 0, 0], dtype=bool)
+    >>> ix = find_first(x)
+    >>> print(ix)
+    2
+
+    """
+    if ~np.any(x):
+        return -1
+    return np.argmax(x)
+
+
+# %% find_last
+def find_last(x: _B, /) -> int:
+    r"""
+    Finds the location of the last true occurrence in a logical array.
+
+    Return -1 if none are found.
+    Returns linear index position for higher order arrays.
+
+    Parameters
+    ----------
+    x : (N,) array of bool
+        Logical array
+
+    Returns
+    -------
+    int
+        Location of last true value, returns ? if not found
+
+    See Also
+    --------
+    np.argmax, np.argmin
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2023.
+
+    Examples
+    --------
+    >>> from dstauffman import find_last
+    >>> x = np.array([0, 0, 1, 0, 1, 0, 0], dtype=bool)
+    >>> ix = find_last(x)
+    >>> print(ix)
+    4
+
+    """
+    if ~np.any(x):
+        return -1
+    return x.size - 1 - np.argmax(np.flip(x))
 
 
 # %% Unit test

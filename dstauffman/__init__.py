@@ -17,7 +17,7 @@ from .constants import HAVE_COVERAGE, HAVE_H5PY, HAVE_MPL, HAVE_DS, HAVE_NUMPY, 
                            NP_ONE_MINUTE, NP_ONE_HOUR, NP_ONE_DAY, NP_NAT
 from .fortran   import create_fortran_unit_tests, create_fortran_makefile
 from .latex     import make_preamble, make_conclusion, bins_to_str_ranges, latex_str
-from .matlab    import load_matlab, orth, subspace, mat_divide
+from .matlab    import load_matlab, orth, subspace, mat_divide, find_first, find_last
 from .multipass import MultipassExceptionWrapper, parfor_wrapper
 from .parser    import main, parse_wrapper, parse_commands, execute_command, \
                            process_command_line_options

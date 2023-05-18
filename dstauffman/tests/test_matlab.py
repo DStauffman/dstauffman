@@ -128,11 +128,11 @@ class Test_load_matlab(unittest.TestCase):
         np.testing.assert_array_equal(out["data"]["nc"][2]["m"], self.mat_nums)
 
 
-# %% estimation.orth
+# %% orth
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
-class Test_estimation_orth(unittest.TestCase):
+class Test_orth(unittest.TestCase):
     r"""
-    Tests the estimation.orth function with the following cases:
+    Tests the orth function with the following cases:
         Rank 3 matrix
         Rank 2 matrix
     """
@@ -160,11 +160,11 @@ class Test_estimation_orth(unittest.TestCase):
         np.testing.assert_array_almost_equal(Q, self.Q2)
 
 
-# %% estimation.subspace
+# %% subspace
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
-class Test_estimation_subspace(unittest.TestCase):
+class Test_subspace(unittest.TestCase):
     r"""
-    Tests the estimation.subspace function with the following cases:
+    Tests the subspace function with the following cases:
         Nominal
     """
 
@@ -193,11 +193,11 @@ class Test_estimation_subspace(unittest.TestCase):
         self.assertAlmostEqual(theta, self.theta)
 
 
-# %% estimation.mat_divide
+# %% mat_divide
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
-class Test_estimation_mat_divide(unittest.TestCase):
+class Test_mat_divide(unittest.TestCase):
     r"""
-    Tests the estimation.mat_divide function with the following cases:
+    Tests the mat_divide function with the following cases:
         Nominal
         Poorly-conditioned
     """
@@ -217,6 +217,58 @@ class Test_estimation_mat_divide(unittest.TestCase):
         x2 = dcs.mat_divide(a, b, rcond=1e-6)
         np.testing.assert_array_almost_equal(x1, exp, 2)
         np.testing.assert_array_almost_equal(x2, np.zeros(2), 2)
+
+
+# %% find_first
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_find_first(unittest.TestCase):
+    r"""
+    Tests the find_first function with the following cases:
+        Nominal
+        No trues
+        2D
+    """
+
+    def test_nominal(self) -> None:
+        x = np.array([0, 0, 1, 0, 1, 0, 0], dtype=bool)
+        ix = dcs.find_first(x)
+        self.assertEqual(ix, 2)
+
+    def test_none(self) -> None:
+        x = np.zeros(10, dtype=bool)
+        ix = dcs.find_first(x)
+        self.assertEqual(ix, -1)
+
+    def test_2d(self) -> None:
+        x = np.array([[0, 0, 0], [0, 0, 1], [0, 0, 1]], dtype=bool)
+        ix = dcs.find_first(x)
+        self.assertEqual(ix, 5)
+
+
+# %% find_last
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_find_last(unittest.TestCase):
+    r"""
+    Tests the find_last function with the following cases:
+        Nominal
+        No trues
+        2D
+    """
+
+    def test_nominal(self) -> None:
+        x = np.array([0, 0, 1, 0, 1, 1, 0, 0], dtype=bool)
+        ix = dcs.find_last(x)
+        self.assertEqual(ix, 5)
+
+    def test_none(self) -> None:
+        x = np.zeros(10, dtype=bool)
+        ix = dcs.find_last(x)
+        self.assertEqual(ix, -1)
+
+    def test_2d(self) -> None:
+        x = np.array([[1, 0, 0], [0, 0, 1], [0, 0, 0]], dtype=bool)
+        ix = dcs.find_last(x)
+        self.assertEqual(ix, 5)
 
 
 # %% Unit test execution
