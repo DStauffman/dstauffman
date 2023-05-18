@@ -172,12 +172,12 @@ def prob_to_rate(prob: Union[float, _N], time: Union[int, float] = 1) -> Union[f
     was_numpy = hasattr(prob, "ndim")
     prob = np.asanyarray(prob)
     # check ranges
-    if np.any(prob < 0):
+    if np.any(prob < 0.0):
         raise ValueError("Probability must be >= 0")
-    if np.any(prob > 1):
+    if np.any(prob > 1.0):
         raise ValueError("Probability must be <= 1")
     # calculate rate
-    rate = -np.log(1 - prob, out=np.full(prob.shape, -np.inf), where=prob != 1) / time
+    rate: _N = -np.log(1.0 - prob, out=np.full(prob.shape, -np.inf), where=prob != 1) / time
     # prevent code from returning a bunch of negative zeros when prob is exactly 0
     if rate.size == 1:
         if rate == 0.0:
@@ -186,7 +186,7 @@ def prob_to_rate(prob: Union[float, _N], time: Union[int, float] = 1) -> Union[f
         rate = np.abs(rate, out=rate, where=rate == 0.0)
     if not was_numpy and rate.size == 1:
         return float(rate)
-    return rate  # type: ignore[no-any-return]
+    return rate
 
 
 # %% Functions - rate_to_prob
@@ -243,11 +243,11 @@ def rate_to_prob(rate: Union[float, _N], time: Union[int, float] = 1) -> Union[f
 
     """
     # check ranges
-    if np.any(rate < 0):
+    if np.any(rate < 0.0):
         raise ValueError("Rate must be >= 0")
     # calculate probability
-    prob = 1 - np.exp(-rate * time)
-    return prob  # type: ignore[return-value]
+    prob = 1.0 - np.exp(-rate * time)
+    return prob
 
 
 # %% Functions - annual_rate_to_monthly_probability
@@ -519,6 +519,7 @@ def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np
 def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = True) -> _B:
     r"""
     Draws psuedo-random numbers from the given generator to compare to given factors.
+
     Has optimizations to ignore factors less than or equal to zero.
 
     Parameters

@@ -337,7 +337,7 @@ def find_first(x: _B, /) -> int:
     """
     if ~np.any(x):
         return -1
-    return np.argmax(x)
+    return int(np.argmax(x))
 
 
 # %% find_last
@@ -377,7 +377,7 @@ def find_last(x: _B, /) -> int:
     """
     if ~np.any(x):
         return -1
-    return x.size - 1 - np.argmax(np.flip(x))
+    return int(x.size - 1 - np.argmax(np.flip(x)))
 
 
 # %% Unit test

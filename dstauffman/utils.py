@@ -50,10 +50,11 @@ if HAVE_SCIPY:
 _ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked
 
 if TYPE_CHECKING:
+    _N = np.typing.NDArray[np.float64]
     _StrOrListStr = TypeVar("_StrOrListStr", str, List[str])
-    _SingleNum = Union[int, float, np.ndarray, np.datetime64]
-    _Lists = Union[np.ndarray, List[np.ndarray], Tuple[np.ndarray, ...]]
-    _Number = Union[float, int, np.ndarray]
+    _SingleNum = Union[int, float, _N, np.datetime64]
+    _Lists = Union[_N, List[_N], Tuple[_N, ...]]
+    _Number = Union[float, int, _N]
 
 
 # %% Functions - _nan_equal
