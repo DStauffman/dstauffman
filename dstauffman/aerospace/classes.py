@@ -12,7 +12,7 @@ from __future__ import annotations
 import copy
 import doctest
 from pathlib import Path
-from typing import Any, FrozenSet, List, Literal, Optional, overload, Set, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Any, FrozenSet, List, Literal, Optional, overload, Set, Tuple, TYPE_CHECKING, TypedDict, TypeVar, Union
 import unittest
 
 from dstauffman import chop_time, Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, save_method
@@ -23,11 +23,17 @@ if HAVE_NUMPY:
     import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import DTypeLike
+    from typing_extensions import NotRequired, Unpack
 
     _Chan = Union[List[str], Tuple[str, ...]]
     _Sets = Union[Set[str], FrozenSet[str]]
     _Time = Union[float, np.datetime64]
     _T = TypeVar("_T")
+
+    class _KfKwargs(TypedDict):
+        units: NotRequired[str]
+        num_innovs: NotRequired[int]
+        num_axes: NotRequired[int]
 
 
 # %% Support Functions
@@ -294,7 +300,7 @@ class Kf(Frozen):
         innov_class: Any = None,
         use_pv: bool = True,
         innov_chan: Optional[_Chan] = None,
-        **kwargs,
+        **kwargs: Unpack[_KfKwargs],
     ):
         r"""Initializes a new Kf instance."""
         self.name = name

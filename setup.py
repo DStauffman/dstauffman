@@ -50,15 +50,15 @@ setup(
     install_requires=[
         "h5py",
         "matplotlib",
-        "numba>=0.52",
-        "numpy>=1.20",
+        "numba>=0.57",
+        "numpy>=1.24",
         "pandas",
         "qtpy",  # wraps any of PyQt5, PyQt6, PySide2, or PySide6
         "pytest",
         "scipy",
         "tblib",
     ],
-    extra_require={"shading": ["datashader>=0.13"]},
+    extra_require={"shading": ["datashader>=0.15"]},
     python_requires=">=3.8",
     include_package_data=True,
     zip_safe=False,

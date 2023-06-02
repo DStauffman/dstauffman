@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "dstauffman"
-version = "3.3.4"
+version = "3.3.5"
 description = "Generic python utilities for Aerospace applications"
 license = "LGPLv3"
 authors = ["David C. Stauffer <dstauffman@yahoo.com>"]
@@ -37,14 +37,14 @@ python = ">=3.9, <3.12"
 nubs = {path = "../nubs/", develop = false}
 slog = {path = "../slog/", develop = false}
 black = {version = "^23.0", optional = true}
-datashader = {version = "^0.14", optional = true, python = "<3.11"}
+datashader = {version = "^0.14", optional = true}
 flake8 = {version = "^5.0", optional = true}
-h5py = {version = "^3.7", optional = true, python = "<3.11"}
+h5py = {version = "^3.7", optional = true}
 isort = {version = "^5.10", optional = true}
 matplotlib = {version = "^3.6", optional = true}
 mypy = {version = "^1.0", optional = true}
-numba = {version = "^0.56", optional = true, python = "<3.11"}
-numpy = {version = "^1.23", optional = true}
+numba = {version = "^0.57", optional = true}
+numpy = {version = "^1.24", optional = true}
 pandas = {version = "^1.5", optional = true}
 pylint = {version = "^2.15", optional = true}
 pyqt5 = {version = "^5.15", optional = true}
@@ -138,6 +138,7 @@ warn_unused_ignores    = true
 #disallow_untyped_calls = true
 #disallow_untyped_defs  = true
 no_implicit_optional   = true
+enable_incomplete_feature = "Unpack"
 files                  = [
     "$MYPY_CONFIG_FILE_DIR/dstauffman/**/*.py",
     "$MYPY_CONFIG_FILE_DIR/scripts/*.py"]

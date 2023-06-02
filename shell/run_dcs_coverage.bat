@@ -8,7 +8,7 @@ REM Remove the final slash if it exists to avoid double slashes in the added pat
 IF #%scripts_home1:~-1%# == #\# SET scripts_home=%scripts_home1:~0,-1%
 
 REM Set other paths
-SET tests_home=%scripts_home%\..\lmspace\tests
+SET tests_home=%scripts_home%\..\dstauffman\tests
 SET envs_home=C:\Users\%username%\Documents\venvs
 
 REM Run with only core Python

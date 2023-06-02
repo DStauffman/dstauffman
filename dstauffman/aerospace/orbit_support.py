@@ -868,6 +868,52 @@ def eclipse_fraction(altitude: _FN, beta: _FN) -> _FN:
     return eclipse
 
 
+# %% earth_radius_by_latitude
+@overload
+def earth_radius_by_latitude(latitude: float) -> float:
+    ...
+
+
+@overload
+def earth_radius_by_latitude(latitude: _N) -> _N:
+    ...
+
+
+def earth_radius_by_latitude(latitude: _FN) -> _FN:
+    r"""
+    Calculates the Earth radius at the given latitude for an ellipsoidal Earth.
+
+    Parameters
+    ----------
+    latitude: (N,) np.ndarray of float
+        Latitude [rad]
+
+    Returns
+    -------
+    (N,) np.ndarray of float
+        Earth radius [m]
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2023.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import earth_radius_by_latitude
+    >>> import numpy as np
+    >>> radius = earth_radius_by_latitude(np.array([0.0, np.pi/2]))
+    >>> with np.printoptions(precision=8):
+    ...     print(radius)
+    [6378137.  6356752.3]
+
+    """
+    a = EARTH["a"]
+    b = EARTH["b"]
+    cos_lat = np.cos(latitude)
+    sin_lat = np.sin(latitude)
+    return np.sqrt(((a**2 * cos_lat) ** 2 + (b**2 * sin_lat) ** 2) / ((a * cos_lat) ** 2 + (b * sin_lat) ** 2))
+
+
 # %% Unit Test
 if __name__ == "__main__":
     unittest.main(module="dstauffman.tests.test_aerospace_orbit_support", exit=False)

@@ -336,9 +336,9 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
 
     """
 
-    def bplus(x):
+    def bplus(x: _I) -> _I:
         r"""Does modulo 2 addition (exclusive or) on vector input."""
-        return np.mod(np.sum(x), 2)
+        return np.mod(np.sum(x), 2)  # type: ignore[no-any-return]
 
     # find which bits to mod based on the satellite number
     (bit1, bit2) = get_prn_bits(sat)

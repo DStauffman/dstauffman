@@ -10,7 +10,7 @@ Notes
 import datetime
 import unittest
 
-from dstauffman import convert_datetime_to_np, HAVE_NUMPY
+from dstauffman import convert_datetime_to_np, HAVE_NUMPY, issorted
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -300,6 +300,12 @@ pass  # TODO: write this
 # %% aerospace.eclipse_fraction
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_eclipse_fraction(unittest.TestCase):
+    r"""
+    Tests the aerospace.eclipse_fraction with the following cases:
+        Nominal
+        Bad Values
+    """
+
     def setUp(self) -> None:
         self.altitude = 16000.0
         self.beta = np.pi / 6
@@ -315,6 +321,32 @@ class Test_aerospace_eclipse_fraction(unittest.TestCase):
         exp = np.array([self.exp, np.nan, np.nan])
         fe = space.eclipse_fraction(altitude, beta)
         np.testing.assert_array_almost_equal(fe, exp, 14)
+
+
+# %% aerospace.earth_radius_by_latitude
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_earth_radius_by_latitude(unittest.TestCase):
+    r"""
+    Tests the aerospace.earth_radius_by_latitude function withthe following cases:
+        Equator
+        Pole
+        In-between
+    """
+
+    def test_equator(self) -> None:
+        earth_rad = space.earth_radius_by_latitude(0.0)
+        self.assertEqual(earth_rad, space.EARTH["a"])
+
+    def test_poles(self) -> None:
+        earth_rad = space.earth_radius_by_latitude(pi / 2)
+        self.assertEqual(earth_rad, space.EARTH["b"])
+
+    def test_between(self) -> None:
+        latitude = np.arange(0.05, 1.55, 0.05)
+        earth_rad = space.earth_radius_by_latitude(latitude)
+        self.assertTrue(np.all(earth_rad < space.EARTH["a"]))
+        self.assertTrue(np.all(earth_rad > space.EARTH["b"]))
+        self.assertTrue(issorted(earth_rad, descend=True))
 
 
 # %% Unit test execution

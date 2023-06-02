@@ -14,7 +14,7 @@ import doctest
 import os
 from pathlib import Path
 import sys
-from typing import Dict, FrozenSet, List, Optional, Set, Tuple, TYPE_CHECKING, Union
+from typing import Any, Dict, FrozenSet, List, Optional, Set, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import ReturnCodes
@@ -125,7 +125,7 @@ def run_unittests(names: str, verbose: bool = False) -> int:
 
 
 # %% run_pytests
-def run_pytests(folder: Path, *args, **kwargs) -> int:
+def run_pytests(folder: Path, *args: str, **kwargs: Any) -> int:
     r"""
     Runs all the unittests using pytest as the runner instead of unittest.
 
@@ -363,7 +363,7 @@ def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = T
 
     """
 
-    def _remove_pyc(file):
+    def _remove_pyc(file: Path) -> None:
         r"""Do the actual file removal."""
         # check for allowable extensions
         # fmt: off

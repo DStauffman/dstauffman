@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import doctest
 import logging
-from typing import Callable, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Callable, List, Optional, Tuple, TYPE_CHECKING, TypedDict, Union
 import unittest
 
 from slog import LogLevel
@@ -24,10 +24,17 @@ if HAVE_NUMPY:
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
+    from typing_extensions import NotRequired, Unpack
 
     _N = np.typing.NDArray[np.float64]
     _Q = np.typing.NDArray[np.float64]  # shape (4,)
     _Qs = np.typing.NDArray[np.float64]  # shape (4, N)  # TODO: don't make use of this yet
+
+    class _QuatAssertionKwargs(TypedDict):
+        precision: NotRequired[float]
+        skip_assertions: NotRequired[bool]
+        allow_nans: NotRequired[bool]
+
 
 # %% Loggers
 logger = logging.getLogger(__name__)
@@ -207,7 +214,7 @@ def enforce_pos_scalar(quat: _Q, inplace: bool = False) -> _Q:
 
 
 # %% Functions - qrot
-def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> _Q:
+def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     r"""
     Construct a quaternion expressing a rotation about a single axis.
 
@@ -278,7 +285,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs) -> _Q:
 
 
 # %% Functions - quat_from_axis_angle
-def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> _Q:
+def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     r"""
     Construct a quaternion expressing the given rotations about the given axes.
 
@@ -344,7 +351,7 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs) -> _Q:
 
 
 # %% Functions - quat_angle_diff
-def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs) -> Tuple[_Q, _Q]:
+def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]) -> Tuple[_Q, _Q]:
     r"""
     Calculate the angular difference between two quaternions.
 
@@ -446,7 +453,7 @@ def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs) -> Tuple[_Q, _Q]:
 
 
 # %% Functions - quat_from_euler
-def quat_from_euler(angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs) -> _Q:
+def quat_from_euler(angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     r"""
     Convert set(s) of euler angles to quaternion(s).
 
@@ -547,7 +554,7 @@ def quat_from_euler(angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs
 
 
 # %% Functions - quat_interp
-def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs) -> _Q:
+def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     r"""
     Interpolate quaternions from a monotonic time series of quaternions.
 
@@ -686,7 +693,7 @@ def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs) ->
 
 
 # %% Functions - quat_inv
-def quat_inv(q1: _Q, inplace: bool = False, **kwargs) -> _Q:
+def quat_inv(q1: _Q, inplace: bool = False, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     r"""
     Return the inverse of a normalized quaternions.
 
@@ -741,7 +748,7 @@ def quat_inv(q1: _Q, inplace: bool = False, **kwargs) -> _Q:
 
 
 # %% Functions - quat_mult
-def quat_mult(a: _Q, b: _Q, **kwargs) -> _Q:
+def quat_mult(a: _Q, b: _Q, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     r"""
     Multiply quaternions together.
 
@@ -841,7 +848,7 @@ def quat_mult(a: _Q, b: _Q, **kwargs) -> _Q:
 
 
 # %% Functions - quat_norm
-def quat_norm(x: _Q, /, inplace: bool = False, **kwargs) -> _Q:
+def quat_norm(x: _Q, /, inplace: bool = False, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     r"""
     Normalize each column of the input matrix.
 
@@ -885,7 +892,7 @@ def quat_norm(x: _Q, /, inplace: bool = False, **kwargs) -> _Q:
 
 
 # %% Functions - quat_prop
-def quat_prop(quat: _Q, delta_ang: _N, *, renorm: bool = True, **kwargs) -> _Q:
+def quat_prop(quat: _Q, delta_ang: _N, *, renorm: bool = True, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     r"""
     Approximate propagation of a quaternion using a small delta angle.
 
@@ -999,7 +1006,9 @@ def quat_times_vector(quat: _Q, v: _N) -> _Q:
 
 
 # %% Functions - quat_to_euler
-def quat_to_euler(quat: _Q, seq: Optional[Union[Tuple[int, int, int], List[int], _N]] = None, **kwargs) -> _N:
+def quat_to_euler(
+    quat: _Q, seq: Optional[Union[Tuple[int, int, int], List[int], _N]] = None, **kwargs: Unpack[_QuatAssertionKwargs]
+) -> _N:
     r"""
     Convert quaternion to Euler angles for one of 6 input angle sequences.
 

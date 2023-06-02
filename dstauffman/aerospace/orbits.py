@@ -12,12 +12,12 @@ from __future__ import annotations
 import copy
 import datetime
 import doctest
-from typing import Any, ClassVar, Literal, Optional, overload, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import Any, ClassVar, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import IntEnumPlus, is_dunder
 
-from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, HAVE_SCIPY, NP_DATETIME_FORM, NP_DATETIME_UNITS, RAD2DEG
+from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, HAVE_SCIPY, NP_DATETIME_FORM, NP_ONE_DAY, RAD2DEG
 from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH, PI, TAU
 from dstauffman.aerospace.orbit_conv import (
     anomaly_eccentric_2_mean,
@@ -37,10 +37,11 @@ if HAVE_SCIPY:
     from scipy.optimize import root
 
 if TYPE_CHECKING:
-    _B = Union[None, bool, np.ndarray]
-    _I = Union[None, int, np.ndarray]
-    _V = Union[None, float, np.ndarray]
-    _N = TypeVar("_N", float, np.ndarray)
+    _B = np.typing.NDArray[np.bool_]
+    _D = np.typing.NDArray[np.datetime64]
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+    _FN = Union[float, _N]
 
 
 # %% Enums - OrbitType
@@ -92,59 +93,43 @@ class Elements(Frozen):
     >>> elements = Elements()
     >>> elements.pprint()
     Elements
-     a          = None
-     e          = None
-     i          = None
-     W          = None
-     w          = None
-     vo         = None
-     p          = None
-     uo         = None
-     P          = None
-     lo         = None
-     T          = None
-     type       = OrbitType.uninitialized: 0
-     equatorial = False
-     circular   = False
-     t          = NaT
+     a          = []
+     e          = []
+     i          = []
+     W          = []
+     w          = []
+     vo         = []
+     p          = []
+     uo         = []
+     P          = []
+     lo         = []
+     T          = []
+     type       = []
+     equatorial = []
+     circular   = []
+     t          = []
 
     """
 
-    def __init__(self, num: Optional[int] = None):
-        if num is None:
-            # fmt: off
-            self.a: Optional[_V]  = None
-            self.e: Optional[_V]  = None
-            self.i: Optional[_V]  = None
-            self.W: Optional[_V]  = None
-            self.w: Optional[_V]  = None
-            self.vo: Optional[_V] = None
-            self.p: Optional[_V]  = None
-            self.uo: Optional[_V] = None
-            self.P: Optional[_V]  = None
-            self.lo: Optional[_V] = None
-            self.T: Optional[_V]  = None
-            self.type: _I         = OrbitType.uninitialized
-            self.equatorial: _B   = False
-            self.circular: _B     = False
-            self.t: np.datetime64 = np.datetime64("nat", NP_DATETIME_UNITS)
-            # fmt: on
-        else:
-            self.a = np.full(num, np.nan)
-            self.e = np.full(num, np.nan)
-            self.i = np.full(num, np.nan)
-            self.W = np.full(num, np.nan)
-            self.w = np.full(num, np.nan)
-            self.vo = np.full(num, np.nan)
-            self.p = np.full(num, np.nan)
-            self.uo = np.full(num, np.nan)
-            self.P = np.full(num, np.nan)
-            self.lo = np.full(num, np.nan)
-            self.T = np.full(num, np.nan)
-            self.type = np.full(num, OrbitType.uninitialized, dtype=int)
-            self.equatorial = np.zeros(num, dtype=bool)
-            self.circular = np.zeros(num, dtype=bool)
-            self.t = np.full(num, np.datetime64("nat"), dtype=NP_DATETIME_FORM)  # type: ignore[assignment]
+    def __init__(self, num: int = 0):
+        # fmt: off
+        self.a: _N          = np.full(num, np.nan)
+        self.e: _N          = np.full(num, np.nan)
+        self.i: _N          = np.full(num, np.nan)
+        self.W: _N          = np.full(num, np.nan)
+        self.w: _N          = np.full(num, np.nan)
+        self.vo: _N         = np.full(num, np.nan)
+        self.p: _N          = np.full(num, np.nan)
+        self.uo: _N         = np.full(num, np.nan)
+        self.P: _N          = np.full(num, np.nan)
+        self.lo: _N         = np.full(num, np.nan)
+        self.T: _N          = np.full(num, np.nan)
+        self.type: _I       = np.full(num, OrbitType.uninitialized, dtype=int)
+        self.equatorial: _B = np.zeros(num, dtype=bool)
+        self.circular: _B   = np.zeros(num, dtype=bool)
+        self.t: _D          = np.full(num, np.datetime64("nat"), dtype=NP_DATETIME_FORM)
+        # fmt: on
+        # TODO: squeeze to 0d if num == 1?
 
     def __eq__(self, other: Any) -> bool:
         # if not of the same type, then they are not equal
@@ -160,20 +145,13 @@ class Elements(Frozen):
             elif key in {"t"}:
                 if not np.all((np.isnat(x) & np.isnat(y)) | (x == y)):
                     return False
-            else:
-                if x is None and y is None:
-                    pass
-                elif x is None or y is None:
-                    return False
-                elif not np.allclose(x, y, rtol=1e-6, atol=1e-8, equal_nan=True):
-                    return False
+            elif not np.allclose(x, y, rtol=1e-6, atol=1e-8, equal_nan=True):
+                return False
         # if it made it all the way through the fields, then things must be equal
         return True
 
-    def __getitem__(self, key):
-        if self.a is None or isinstance(self.a, float):
-            raise IndexError("Elements is only a single instance and can not be indexed")
-        elements = Elements()
+    def __getitem__(self, key: int) -> Elements:
+        elements = Elements(1)
         for field, value in vars(self).items():
             setattr(elements, field, value[key])
         return elements
@@ -181,7 +159,7 @@ class Elements(Frozen):
     def combine(self, elements2: Elements, /, *, inplace: bool = False) -> Elements:
         r"""Combines two KfInnov structures together."""
         # allow an empty structure to be passed through
-        if self.a is None:
+        if self.a.size == 0:
             if inplace:
                 for key, value in vars(elements2).items():
                     setattr(self, key, value)
@@ -191,41 +169,51 @@ class Elements(Frozen):
             elements = self
         else:
             elements = copy.deepcopy(self)
-        if elements2.a is None:
+        if elements2.a.size == 0:
             return elements
         for key, value in vars(self).items():
             setattr(elements, key, np.hstack((value, getattr(elements2, key))))
         return elements
 
-    def print_orrery(self, index: Optional[int] = None):
+    def print_orrery(self, index: Optional[int] = None) -> None:
         r"""Prints the orbital elements as expected for the Orrery algorithms."""
         if index is None:
-            print(f"a = {self.a / 1000} km")  # type: ignore[operator]
+            print(f"a = {self.a / 1000} km")
             print(f"e = {self.e}")
-            print(f"i = {self.i * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[operator]
-            print(f"\N{GREEK CAPITAL LETTER OMEGA} = {self.W * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[operator]
-            print(f"\N{GREEK SMALL LETTER OMEGA} = {self.w * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[operator]
-            print(f"M = {self.vo * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)")  # type: ignore[operator]
+            print(f"i = {self.i * RAD2DEG} {DEGREE_SIGN}")
+            print(f"\N{GREEK CAPITAL LETTER OMEGA} = {self.W * RAD2DEG} {DEGREE_SIGN}")
+            print(f"\N{GREEK SMALL LETTER OMEGA} = {self.w * RAD2DEG} {DEGREE_SIGN}")
+            print(f"M = {self.vo * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)")
         else:
-            print(f"a = {self.a[index] / 1000} km")  # type: ignore[index]
-            print(f"e = {self.e[index]}")  # type: ignore[index]
-            print(f"i = {self.i[index] * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[index]
-            print(f"\N{GREEK CAPITAL LETTER OMEGA} = {self.W[index] * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[index]
-            print(f"\N{GREEK SMALL LETTER OMEGA} = {self.w[index] * RAD2DEG} {DEGREE_SIGN}")  # type: ignore[index]
-            print(f"M = {self.vo[index] * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)")  # type: ignore[index]
+            print(f"a = {self.a[index] / 1000} km")
+            print(f"e = {self.e[index]}")
+            print(f"i = {self.i[index] * RAD2DEG} {DEGREE_SIGN}")
+            print(f"\N{GREEK CAPITAL LETTER OMEGA} = {self.W[index] * RAD2DEG} {DEGREE_SIGN}")
+            print(f"\N{GREEK SMALL LETTER OMEGA} = {self.w[index] * RAD2DEG} {DEGREE_SIGN}")
+            print(f"M = {self.vo[index] * RAD2DEG} {DEGREE_SIGN} (TODO: actually nu, need M)")
 
 
 # %% Functions - _zero_divide
-def _zero_divide(x, y):
+def _zero_divide(x: _FN, y: _FN) -> _N:
+    """Divide two values, but return zero when the denominator is zero."""
     return np.divide(x, y, where=y != 0, out=np.zeros_like(y))
 
 
 # %% Functions - _inf_divide
-def _inf_divide(x, y):
-    return np.divide(x, y, where=y != 0, out=np.full(y.shape, np.inf))
+def _inf_divide(x: _FN, y: _FN) -> _N:
+    """Divde two values, but return positive infinity when the denominator is zero."""
+    return np.divide(x, y, where=y != 0, out=np.full(np.size(y), np.inf))
 
 
-def _fix_instab(x, precision):
+# %% Functions - _inf_multiply
+def _inf_multiply(x: _FN, y: _FN) -> _N:
+    """Multiply that returns zero for inf * 0 instead of nan."""
+    return np.multiply(x, y, where=(x != 0.0) & (y != 0.0), out=np.zeros_like(x))
+
+
+# %% Functions - _fix_instab
+def _fix_instab(x: _N, precision: float) -> None:
+    """Fix instabilities near positive/negative one before taking an arcsin by holding to +/-1."""
     ix = (x > 1.0) & (x < 1.0 + precision)
     if np.any(ix):
         x[ix] = 1.0
@@ -266,21 +254,21 @@ def two_line_elements(line1: str, line2: str) -> Elements:
     >>> elements = two_line_elements(line1,line2)
     >>> elements.pprint()
     Elements
-     a          = 6722154.278502964
-     e          = 0.0009556
-     i          = 0.9012583551325879
-     W          = 0.21395293168497687
-     w          = 3.294076834348782
-     vo         = 5.593365747043137
-     p          = 6722148.1400242
-     uo         = 8.88744258139192
-     P          = 3.5080297660337587
-     lo         = 9.101395513076895
-     T          = 5484.96289455295
-     type       = OrbitType.elliptic: 1
-     equatorial = False
-     circular   = False
-     t          = 2006-05-12T07:03:00.000016096
+     a          = [6722154.278502964]
+     e          = [0.0009556]
+     i          = [0.9012583551325879]
+     W          = [0.21395293168497687]
+     w          = [3.294076834348782]
+     vo         = [5.593365747043137]
+     p          = [6722148.1400242]
+     uo         = [8.88744258139192]
+     P          = [3.5080297660337587]
+     lo         = [9.101395513076895]
+     T          = [5484.96289455295]
+     type       = [1]
+     equatorial = [False]
+     circular   = [False]
+     t          = ['2006-05-12T07:03:00.000016096']
 
     """
     if not line1.startswith("1"):
@@ -348,22 +336,22 @@ def two_line_elements(line1: str, line2: str) -> Elements:
         + JULIAN["jd_2000_01_01"] - 0.5 + day - 1
     )
 
-    elements            = Elements()
-    elements.equatorial = False
-    elements.circular   = False
-    elements.a          = a
-    elements.e          = e
-    elements.i          = i
-    elements.W          = Omega
-    elements.w          = omega
-    elements.vo         = nu
-    elements.p          = p
-    elements.uo         = omega + nu
-    elements.P          = Omega + omega
-    elements.lo         = Omega + omega + nu
-    elements.T          = TAU * np.sqrt(a ** 3 / MU_EARTH)
-    elements.t          = jd_to_numpy(time)
-    elements.type       = OrbitType.elliptic
+    elements               = Elements(1)
+    elements.equatorial[:] = False
+    elements.circular[:]   = False
+    elements.a[:]          = a
+    elements.e[:]          = e
+    elements.i[:]          = i
+    elements.W[:]          = Omega
+    elements.w[:]          = omega
+    elements.vo[:]         = nu
+    elements.p[:]          = p
+    elements.uo[:]         = omega + nu
+    elements.P[:]          = Omega + omega
+    elements.lo[:]         = Omega + omega + nu
+    elements.T[:]          = TAU * np.sqrt(a ** 3 / MU_EARTH)
+    elements.t[:]          = jd_to_numpy(time)
+    elements.type[:]       = OrbitType.elliptic
     # fmt: on
 
     return elements
@@ -408,21 +396,21 @@ def rv_2_oe(
     >>> elements = rv_2_oe(r, v)
     >>> elements.pprint()
     Elements
-     a          = 1.0
-     e          = 0.0
-     i          = 0.0
-     W          = 0.0
-     w          = 0.0
-     vo         = 0.0
-     p          = 1.0
-     uo         = 0.0
-     P          = 0.0
-     lo         = 0.0
-     T          = 6.283185307179586
-     type       = OrbitType.elliptic: 1
-     equatorial = True
-     circular   = True
-     t          = NaT
+     a          = [1.]
+     e          = [0.]
+     i          = [0.]
+     W          = [0.]
+     w          = [0.]
+     vo         = [0.]
+     p          = [1.]
+     uo         = [0.]
+     P          = [0.]
+     lo         = [0.]
+     T          = [6.283185307179586]
+     type       = [1]
+     equatorial = [ True]
+     circular   = [ True]
+     t          = ['NaT']
 
     """
     # calculate angular momentum
@@ -447,7 +435,6 @@ def rv_2_oe(
     e_mag = norm(e)
 
     # get sizing information
-    is_scalar = h.ndim == 1
     num = e_mag.size
 
     # p
@@ -531,38 +518,21 @@ def rv_2_oe(
 
     # populate elements structure
     # fmt: off
-    if is_scalar:
-        elements = Elements()
-        elements.a          = float(a)
-        elements.e          = float(e_mag)
-        elements.i          = float(i)
-        elements.W          = float(W)
-        elements.w          = float(w)
-        elements.vo         = float(vo)
-        elements.p          = p
-        elements.uo         = float(uo)
-        elements.P          = float(P)
-        elements.lo         = float(lo)
-        elements.equatorial = bool(equatorial)
-        elements.type       = OrbitType(orbit_type)
-        elements.T          = float(T)
-        elements.circular   = bool(circular)
-    else:
-        elements               = Elements(num)
-        elements.a[:]          = a           # type: ignore[index]
-        elements.e[:]          = e_mag       # type: ignore[index]
-        elements.i[:]          = i           # type: ignore[index]
-        elements.W[:]          = W           # type: ignore[index]
-        elements.w[:]          = w           # type: ignore[index]
-        elements.vo[:]         = vo          # type: ignore[index]
-        elements.p[:]          = p           # type: ignore[index]
-        elements.uo[:]         = uo          # type: ignore[index]
-        elements.P[:]          = P           # type: ignore[index]
-        elements.lo[:]         = lo          # type: ignore[index]
-        elements.equatorial[:] = equatorial  # type: ignore[index]
-        elements.type[:]       = orbit_type  # type: ignore[index]
-        elements.T[:]          = T           # type: ignore[index]
-        elements.circular[:]   = circular    # type: ignore[index]
+    elements               = Elements(num)
+    elements.a[:]          = a
+    elements.e[:]          = e_mag
+    elements.i[:]          = i
+    elements.W[:]          = W
+    elements.w[:]          = w
+    elements.vo[:]         = vo
+    elements.p[:]          = p
+    elements.uo[:]         = uo
+    elements.P[:]          = P
+    elements.lo[:]         = lo
+    elements.equatorial[:] = equatorial
+    elements.type[:]       = orbit_type
+    elements.T[:]          = T
+    elements.circular[:]   = circular
     # fmt: on
 
     return elements
@@ -620,13 +590,13 @@ def oe_2_rv(
     Examples
     --------
     >>> from dstauffman.aerospace import Elements, oe_2_rv
-    >>> elements = Elements()
-    >>> elements.a  = 1
-    >>> elements.e  = 0
-    >>> elements.i  = 0
-    >>> elements.W  = 0
-    >>> elements.w  = 0
-    >>> elements.vo = 0
+    >>> elements = Elements(1)
+    >>> elements.a[:]  = 1
+    >>> elements.e[:]  = 0
+    >>> elements.i[:]  = 0
+    >>> elements.W[:]  = 0
+    >>> elements.w[:]  = 0
+    >>> elements.vo[:] = 0
     >>> (r, v) = oe_2_rv(elements)
     >>> print(r)
     [1. 0. 0.]
@@ -642,12 +612,7 @@ def oe_2_rv(
     W = elements.W
     w = elements.w
     nu = elements.vo
-    assert a is not None
-    assert e is not None
-    assert i is not None
-    assert W is not None
-    assert w is not None
-    assert nu is not None
+    num = a.size
 
     # adjust if angles are in degrees
     if unit:
@@ -660,20 +625,19 @@ def oe_2_rv(
 
     # % calculations
     # parameter
-    if elements.p is not None:
+    if np.all(~np.isnan(elements.p)):
         p = elements.p
     else:
-        p = a * (1.0 - e**2)
-    assert p is not None
+        p = _inf_multiply(a, (1.0 - e**2))
 
     # magnitude of r in PQW frame
-    r_mag = _zero_divide(p, (1 + e * np.cos(nu)))
+    r_mag = _zero_divide(p, (1.0 + e * np.cos(nu)))
 
     # r in PQW frame
-    r_PQW = np.array([r_mag * np.cos(nu), r_mag * np.sin(nu), 0.0])
+    r_PQW = np.vstack([_inf_multiply(r_mag, np.cos(nu)), _inf_multiply(r_mag, np.sin(nu)), np.zeros(num)])
 
     # v in PQW frame
-    v_PQW = np.sqrt(_zero_divide(mu, p)) * np.array([-np.sin(nu), e + np.cos(nu), 0.0])
+    v_PQW = np.sqrt(_zero_divide(mu, p)) * np.vstack([-np.sin(nu), e + np.cos(nu), np.zeros(num)])
 
     # cosine and sine terms
     cw = np.cos(w)
@@ -684,18 +648,39 @@ def oe_2_rv(
     si = np.sin(i)
 
     # transformation matrix
-    # TODO: create quaternion and use qrot instead
+    # TODO: create quaternion and use quat_mult instead
     # fmt: off
-    T = np.array([
-        [+cW * cw - sW * sw * ci, -cW * sw - sW * cw * ci, +sW * si],
-        [+sW * cw + cW * sw * ci, -sW * sw + cW * cw * ci, -cW * si],
-        [+sw * si               , +cw * si               ,      +ci],
+    # T = np.array([
+    #     [+cW * cw - sW * sw * ci, -cW * sw - sW * cw * ci, +sW * si],
+    #     [+sW * cw + cW * sw * ci, -sW * sw + cW * cw * ci, -cW * si],
+    #     [+sw * si               , +cw * si               ,      +ci],
+    # ])
+    T = np.vstack([
+        +cW * cw - sW * sw * ci, -cW * sw - sW * cw * ci, +sW * si,
+        +sW * cw + cW * sw * ci, -sW * sw + cW * cw * ci, -cW * si,
+        +sw * si               , +cw * si               ,      +ci,
     ])
-    # fmt: on
+    # fmt: onx
 
     # translate r & v into IJK frame
-    r = T @ r_PQW
-    v = T @ v_PQW
+    r = np.empty((3, num))
+    v = np.empty((3, num))
+    for ix in range(num):
+        r[:, ix] = np.array([
+            _inf_multiply(r_PQW[0, ix], T[0, ix]) + _inf_multiply(r_PQW[1, ix], T[1, ix]) + _inf_multiply(r_PQW[2, ix], T[2, ix]),
+            _inf_multiply(r_PQW[0, ix], T[3, ix]) + _inf_multiply(r_PQW[1, ix], T[4, ix]) + _inf_multiply(r_PQW[2, ix], T[6, ix]),
+            _inf_multiply(r_PQW[0, ix], T[6, ix]) + _inf_multiply(r_PQW[1, ix], T[7, ix]) + _inf_multiply(r_PQW[2, ix], T[8, ix]),
+        ])
+        v[:, ix] = np.array([
+            _inf_multiply(v_PQW[0, ix], T[0, ix]) + _inf_multiply(v_PQW[1, ix], T[1, ix]) + _inf_multiply(v_PQW[2, ix], T[2, ix]),
+            _inf_multiply(v_PQW[0, ix], T[3, ix]) + _inf_multiply(v_PQW[1, ix], T[4, ix]) + _inf_multiply(v_PQW[2, ix], T[6, ix]),
+            _inf_multiply(v_PQW[0, ix], T[6, ix]) + _inf_multiply(v_PQW[1, ix], T[7, ix]) + _inf_multiply(v_PQW[2, ix], T[8, ix]),
+        ])
+
+    if num == 1:
+        if return_PQW:
+            return (np.squeeze(r), np.squeeze(v), np.squeeze(r_PQW), np.squeeze(v_PQW), np.squeeze(T))
+        return (np.squeeze(r), np.squeeze(v))
 
     if return_PQW:
         return (r, v, r_PQW, v_PQW, T)
@@ -703,7 +688,7 @@ def oe_2_rv(
 
 
 # %% Functions - advance_elements
-def advance_elements(elements, mu, time):
+def advance_elements(elements: Elements, mu: float, time: float) -> Elements:
     r"""
     Takes the given orbital elements and advancing them in time.
 
@@ -720,37 +705,37 @@ def advance_elements(elements, mu, time):
     Examples
     --------
     >>> from dstauffman.aerospace import advance_elements, Elements, OrbitType, PI
-    >>> elements = Elements()
-    >>> elements.a = 7e6
-    >>> elements.e = 0.0
-    >>> elements.i = PI / 4
-    >>> elements.W = 0.0
-    >>> elements.w = 0.0
-    >>> elements.vo = 0.0
-    >>> elements.t = 0.0
-    >>> elements.type = OrbitType.elliptic
-    >>> elements.equatorial = True
-    >>> elements.circular = True
+    >>> elements = Elements(1)
+    >>> elements.a[:] = 7e6
+    >>> elements.e[:] = 0.0
+    >>> elements.i[:] = PI / 4
+    >>> elements.W[:] = 0.0
+    >>> elements.w[:] = 0.0
+    >>> elements.vo[:] = 0.0
+    >>> elements.t[:] = np.datetime64("2023-06-01T00:00:00")
+    >>> elements.type[:] = OrbitType.elliptic
+    >>> elements.equatorial[:] = True
+    >>> elements.circular[:] = True
     >>> mu = 3.9863e14
     >>> time = 600.0
     >>> new_elements = advance_elements(elements, mu, time)
     >>> new_elements.pprint()  # doctest: +ELLIPSIS
     Elements
-     a          = 7000000.0
-     e          = 0.0
-     i          = 0.7853981633974...
-     W          = 0.0
-     w          = 0.0
-     vo         = 0.646828549162...
-     p          = None
-     uo         = None
-     P          = None
-     lo         = None
-     T          = None
-     type       = OrbitType.elliptic: 1
-     equatorial = True
-     circular   = True
-     t          = 0.00694444444444...
+     a          = [7000000.]
+     e          = [0.]
+     i          = [0.7853981633974...
+     W          = [0.]
+     w          = [0.]
+     vo         = [0.646828549162...
+     p          = [nan]
+     uo         = [nan]
+     P          = [nan]
+     lo         = [nan]
+     T          = [nan]
+     type       = [1]
+     equatorial = [ True]
+     circular   = [ True]
+     t          = ['2023-06-01T00:10:00...
 
     """
     # pull out short names for easier calculations
@@ -758,10 +743,10 @@ def advance_elements(elements, mu, time):
     e = elements.e
     vo = elements.vo
     # initialize output to the same as the input
-    new_elements = Elements()
+    new_elements = Elements(a.size)
     for key, value in vars(elements).items():
         if not is_dunder(key):
-            setattr(new_elements, key, value)
+            getattr(new_elements, key)[:] = value
     if elements.type == OrbitType.elliptic:
         # initial mean anomaly
         Ei = anomaly_true_2_eccentric(vo, e)
@@ -796,8 +781,8 @@ def advance_elements(elements, mu, time):
         raise ValueError(f'Unexpected orbit type: "{type}"')
 
     # store update variables
-    new_elements.vo = nu
-    new_elements.t = elements.t + time / JULIAN["day"]
+    new_elements.vo[:] = nu
+    new_elements.t[:] = elements.t + NP_ONE_DAY * (time / JULIAN["day"])
     return new_elements
 
 
