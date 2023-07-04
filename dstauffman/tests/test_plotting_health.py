@@ -8,7 +8,9 @@ Notes
 """
 
 # %% Imports
-from typing import List, Optional
+from __future__ import annotations
+
+from typing import List, Optional, TYPE_CHECKING, Union
 import unittest
 
 from slog import capture_output
@@ -20,6 +22,10 @@ if HAVE_MPL:
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
+
+if TYPE_CHECKING:
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
 
 
 # %% plotting.TruthPlotter
@@ -158,12 +164,12 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
     def test_get_data1(self) -> None:
         truth = plot.TruthPlotter(self.x, self.y + 0.01, lo=self.y, hi=self.y + 0.03)
         data = truth.get_data(self.data, scale=2)
-        np.testing.assert_array_almost_equal(data, 2 * self.data)
+        np.testing.assert_array_almost_equal(data, 2 * self.data)  # type: ignore[arg-type]
 
     def test_get_data2(self) -> None:
         truth = plot.TruthPlotter(self.x, self.y + 0.01, lo=self.y, hi=self.y + 0.03)
         data = truth.get_data(self.data, scale=3, ix=0)
-        np.testing.assert_array_almost_equal(data, 3 * self.data[:, 0])
+        np.testing.assert_array_almost_equal(data, 3 * self.data[:, 0])  # type: ignore[arg-type]
 
     def tearDown(self) -> None:
         if self.fig is not None:
@@ -327,13 +333,13 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.time = np.arange(0, 10, 0.1) if HAVE_NUMPY else list(range(10))
-        self.data = np.sin(self.time) if HAVE_NUMPY else [x + 1.0 for x in self.time]  # type: ignore[attr-defined, call-overload]
+        self.time: Union[_N, List[int]] = np.arange(0, 10, 0.1) if HAVE_NUMPY else list(range(10))
+        self.data: Union[_N, List[float]] = np.sin(self.time) if HAVE_NUMPY else [x + 1.0 for x in self.time]
         self.label = "Sin"
         self.units = "population"
         self.opts = plot.Opts()
         self.opts.names = ["Name 1"]
-        self.truth = plot.TruthPlotter(self.time, np.cos(self.time))  # type: ignore[arg-type, call-overload]
+        self.truth = plot.TruthPlotter(self.time, np.cos(self.time))  # type: ignore[arg-type]
         self.data_matrix = np.column_stack((self.data, self.truth.data))  # type: ignore[arg-type]
         self.second_units = 1000000
         self.fig: Optional[List[plt.Figure]] = None
@@ -414,7 +420,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         self.fig = plot.plot_health_monte_carlo(self.time, self.data, self.label, self.units, self.opts, plot_as_diffs=True)
 
     def test_show_zero(self) -> None:
-        self.data += 1000
+        self.data += 1000  # type: ignore[operator]
         self.opts.show_zero = True
         self.fig = plot.plot_health_monte_carlo(self.time, self.data, self.label, self.units, opts=self.opts)
 
@@ -435,7 +441,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         self.fig = plot.plot_health_monte_carlo(np.arange(5), np.arange(5), "Line")
 
     def test_bad_3d(self) -> None:
-        bad_data = np.random.rand(self.time.shape[0], 4, 5)  # type: ignore[attr-defined]
+        bad_data = np.random.rand(self.time.shape[0], 4, 5)  # type: ignore[union-attr]
         with self.assertRaises(ValueError):
             plot.plot_health_monte_carlo(self.time, bad_data, self.label, opts=self.opts)
 
@@ -464,9 +470,9 @@ class Test_plotting_plot_population_pyramid(unittest.TestCase):
 
     def setUp(self) -> None:
         # fmt: off
-        self.age_bins = np.array([0, 5, 10, 15, 20, 1000], dtype=int) if HAVE_NUMPY else [0, 5, 1000]
-        self.male_per = np.array([100, 200, 300, 400, 500], dtype=int) if HAVE_NUMPY else [100, 200, 500]
-        self.fmal_per = np.array([125, 225, 325, 375, 450], dtype=int) if HAVE_NUMPY else [125, 225, 450]
+        self.age_bins: Union[_I, List[int]] = np.array([0, 5, 10, 15, 20, 1000], dtype=int) if HAVE_NUMPY else [0, 5, 1000]
+        self.male_per: Union[_I, List[int]] = np.array([100, 200, 300, 400, 500], dtype=int) if HAVE_NUMPY else [100, 200, 500]
+        self.fmal_per: Union[_I, List[int]] = np.array([125, 225, 325, 375, 450], dtype=int) if HAVE_NUMPY else [125, 225, 450]
         self.title    = "Test Title"
         self.opts     = plot.Opts()
         self.name1    = "M"

@@ -48,14 +48,13 @@ class _Example_Frozen(dcs.Frozen):
 class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     load: ClassVar[
         Callable[
-            [Optional[pathlib.Path], DefaultNamedArg(bool, "use_hdf5"), DefaultNamedArg(bool, "return_meta")],  # noqa: F821
+            [Optional[pathlib.Path], DefaultNamedArg(bool, "return_meta")],  # noqa: F821
             _Example_SaveAndLoad,
         ]
     ]
     save: Callable[
         [
             Optional[pathlib.Path],
-            DefaultNamedArg(bool, "use_hdf5"),  # noqa: F821
             DefaultNamedArg(dict, "meta"),  # noqa: F821
             DefaultNamedArg(set, "exclusions"),  # noqa: F821
         ],
@@ -377,16 +376,6 @@ class Test_SaveAndLoad(unittest.TestCase):
         results = self.results1_cls.load(self.save_path1)
         self.assertTrue(dcs.compare_two_classes(results, self.results1, suppress_output=True, compare_recursively=True))
 
-    def test_saving_pickle1(self) -> None:
-        self.results1.save(self.save_path1, use_hdf5=False)
-        results = self.results1_cls.load(self.save_path2, use_hdf5=False)
-        self.assertTrue(dcs.compare_two_classes(results, self.results1, suppress_output=True, compare_recursively=True))
-
-    def test_saving_pickle2(self) -> None:
-        self.results2.save(self.save_path2)
-        results = self.results2_cls.load(self.save_path2)
-        self.assertTrue(dcs.compare_two_classes(results, self.results2, suppress_output=True, compare_recursively=True))
-
     def test_no_filename(self) -> None:
         self.results1.save(None)
         with self.assertRaises(ValueError):
@@ -476,16 +465,6 @@ class Test_SaveAndLoad(unittest.TestCase):
         np.testing.assert_array_equal(results.y, self.results1.y)
         np.testing.assert_array_equal(results.x, orig)
         self.assertIsNone(results.z)
-
-    def test_bad_meta(self) -> None:
-        with self.assertRaises(ValueError) as err:
-            self.results1.save(self.save_path1, use_hdf5=False, meta={"num": 100})
-        self.assertEqual(str(err.exception), "meta information cannot be used with pickle files.")
-
-    def test_bad_exclusions(self) -> None:
-        with self.assertRaises(ValueError) as err:
-            self.results1.save(self.save_path1, use_hdf5=False, exclusions={"y",})  # fmt: skip
-        self.assertEqual(str(err.exception), "exclusions cannot be used with pickle files.")
 
     def tearDown(self) -> None:
         self.save_path1.unlink(missing_ok=True)
@@ -732,11 +711,11 @@ class Test_FixedDict(unittest.TestCase):
     def test_update_kwargs(self) -> None:
         self.fixed.freeze()
         dict2 = {"key1": 3}
-        self.fixed.update(**dict2)
+        self.fixed.update(**dict2)  # type: ignore[arg-type]
         self.assertEqual(self.fixed["key1"], 3)
         dict2["bad_key"] = 5
         with self.assertRaises(KeyError):
-            self.fixed.update(**dict2)
+            self.fixed.update(**dict2)  # type: ignore[arg-type]
 
     def test_isinstance(self) -> None:
         self.assertTrue(isinstance(self.fixed, Mapping))

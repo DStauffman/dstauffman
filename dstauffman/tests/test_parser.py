@@ -142,11 +142,10 @@ class Test_process_command_line_options(unittest.TestCase):
         # check expected defaults
         self.assertTrue(flags.use_display)
         self.assertTrue(flags.use_plotting)
-        self.assertTrue(flags.use_hdf5)
         self.assertIsNone(flags.log_level)
         # check that only the expected keys exist
         keys = {x for x in vars(flags) if not x.startswith("_")}
-        self.assertEqual(keys, {"log_level", "use_display", "use_hdf5", "use_plotting"})
+        self.assertEqual(keys, {"log_level", "use_display", "use_plotting"})
 
     def test_no_display(self) -> None:
         with capture_output() as ctx:
@@ -156,7 +155,6 @@ class Test_process_command_line_options(unittest.TestCase):
         ctx.close()
         self.assertFalse(flags.use_display)
         self.assertTrue(flags.use_plotting)
-        self.assertTrue(flags.use_hdf5)
         self.assertIsNone(flags.log_level)
         self.assertEqual(output, "Running without displaying any plots.")
 
@@ -168,21 +166,8 @@ class Test_process_command_line_options(unittest.TestCase):
         ctx.close()
         self.assertTrue(flags.use_display)
         self.assertFalse(flags.use_plotting)
-        self.assertTrue(flags.use_hdf5)
         self.assertIsNone(flags.log_level)
         self.assertEqual(output, "Running without making any plots.")
-
-    def test_no_hdf5(self) -> None:
-        with capture_output() as ctx:
-            with patch("sys.argv", ["name.py", "-nohdf5"]):
-                flags = dcs.process_command_line_options()
-        output = ctx.get_output()
-        ctx.close()
-        self.assertTrue(flags.use_display)
-        self.assertTrue(flags.use_plotting)
-        self.assertFalse(flags.use_hdf5)
-        self.assertIsNone(flags.log_level)
-        self.assertEqual(output, "Running without saving to HDF5 files.")
 
     def test_log_level1(self) -> None:
         with patch("dstauffman.parser.logger") as mocker:
@@ -190,7 +175,6 @@ class Test_process_command_line_options(unittest.TestCase):
                 flags = dcs.process_command_line_options()
         self.assertTrue(flags.use_display)
         self.assertTrue(flags.use_plotting)
-        self.assertTrue(flags.use_hdf5)
         self.assertEqual(flags.log_level, LogLevel.L8)
         mocker.log.assert_called_once_with(dcs.parser.LogLevel.L8, "Configuring Log Level at: %s", LogLevel.L8)
 
@@ -200,18 +184,16 @@ class Test_process_command_line_options(unittest.TestCase):
                 flags = dcs.process_command_line_options()
         self.assertTrue(flags.use_display)
         self.assertTrue(flags.use_plotting)
-        self.assertTrue(flags.use_hdf5)
         self.assertEqual(flags.log_level, logging.INFO)
         mocker.log.assert_called_once_with(logging.INFO, "Configuring Log Level at: %s", 20)
 
     def test_everything(self) -> None:
         logger = logging.getLogger("dstauffman.parser")  # Note: alternative syntax for mocker
         with patch.object(logger, "log") as mocker:
-            with patch("sys.argv", ["name.py", "-l5", "-nodisp", "-noplot", "-nohdf5"]):
+            with patch("sys.argv", ["name.py", "-l5", "-nodisp", "-noplot"]):
                 flags = dcs.process_command_line_options()
         self.assertFalse(flags.use_display)
         self.assertFalse(flags.use_plotting)
-        self.assertFalse(flags.use_hdf5)
         self.assertEqual(flags.log_level, LogLevel.L5)
         mocker.assert_called_once_with(dcs.parser.LogLevel.L5, "Configuring Log Level at: %s", LogLevel.L5)
 

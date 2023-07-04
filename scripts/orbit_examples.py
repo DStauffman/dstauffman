@@ -1,6 +1,4 @@
-"""
-Example script that matches the "Introduction to Space Flight" by Francis J Hale.
-"""
+"""Example script that matches the "Introduction to Space Flight" by Francis J Hale."""
 
 import numpy as np
 
@@ -21,12 +19,12 @@ oe.print_orrery()
 oe.pprint()
 oe2.pprint()
 
-np.testing.assert_array_almost_equal(oe.a, oe2.a, err_msg="a is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.e, oe2.e, err_msg="e is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.i, oe2.i, err_msg="i is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.w, oe2.w, err_msg="w is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.W, oe2.W, err_msg="W is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.vo, oe2.vo, err_msg="nu is different")  # type: ignore[arg-type]
+np.testing.assert_array_almost_equal(oe.a, oe2.a, err_msg="a is different")
+np.testing.assert_array_almost_equal(oe.e, oe2.e, err_msg="e is different")
+np.testing.assert_array_almost_equal(oe.i, oe2.i, err_msg="i is different")
+np.testing.assert_array_almost_equal(oe.w, oe2.w, err_msg="w is different")
+np.testing.assert_array_almost_equal(oe.W, oe2.W, err_msg="W is different")
+np.testing.assert_array_almost_equal(oe.vo, oe2.vo, err_msg="nu is different")
 
 # %% Intro to Space Flight Example
 r = np.array([-0.8, 0.6, 0.5])
@@ -108,18 +106,18 @@ print(f"{lo=}; {dcs.RAD2DEG*lo=}")
 oe = space.rv_2_oe(r, v, mu=mu)
 oe.pprint()
 
-np.testing.assert_array_almost_equal(oe.a, a, err_msg="a is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.e, e_mag, err_msg="e is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.i, i, err_msg="i is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.w, w, err_msg="w is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.W, W, err_msg="W is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.vo, vo, err_msg="nu is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.p, p, err_msg="p is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.uo, uo, err_msg="uo is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.P, P, err_msg="Pi is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.lo, lo, err_msg="lo is different")  # type: ignore[arg-type]
-np.testing.assert_array_almost_equal(oe.T, T, err_msg="T is different")  # type: ignore[arg-type]
-# np.testing.assert_array_almost_equal(oe.t, t, err_msg="t is different")  # type: ignore[arg-type]
+np.testing.assert_array_almost_equal(oe.a, a, err_msg="a is different")
+np.testing.assert_array_almost_equal(oe.e, e_mag, err_msg="e is different")
+np.testing.assert_array_almost_equal(oe.i, i, err_msg="i is different")
+np.testing.assert_array_almost_equal(oe.w, w, err_msg="w is different")
+np.testing.assert_array_almost_equal(oe.W, W, err_msg="W is different")
+np.testing.assert_array_almost_equal(oe.vo, vo, err_msg="nu is different")
+np.testing.assert_array_almost_equal(oe.p, p, err_msg="p is different")
+np.testing.assert_array_almost_equal(oe.uo, uo, err_msg="uo is different")
+np.testing.assert_array_almost_equal(oe.P, P, err_msg="Pi is different")
+np.testing.assert_array_almost_equal(oe.lo, lo, err_msg="lo is different")
+np.testing.assert_array_almost_equal(oe.T, T, err_msg="T is different")
+# np.testing.assert_array_almost_equal(oe.t, t, err_msg="t is different")
 
 
 # %% Example 3

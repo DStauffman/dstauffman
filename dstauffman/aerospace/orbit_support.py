@@ -20,8 +20,8 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    _N = np.typing.NDArray[np.float64]
     _D = np.typing.NDArray[np.datetime64]
+    _N = np.typing.NDArray[np.float64]
     _FN = Union[float, _N]
 
 
@@ -135,6 +135,16 @@ def numpy_to_jd(date: Union[np.datetime64, _D]) -> Union[float, _N]:
 
 
 # %% Functions - jd_2_century
+@overload
+def jd_2_century(time_jd: float) -> Tuple[float, float]:
+    ...
+
+
+@overload
+def jd_2_century(time_jd: _N) -> Tuple[_N, _N]:
+    ...
+
+
 def jd_2_century(time_jd: _FN) -> Tuple[_FN, _FN]:
     r"""
     Converts a julian day to the fractional julian centuries since J2000.
@@ -239,16 +249,16 @@ def r_2_hms(x: _FN, /) -> _N:
 
 
 # %% Functions - aer_2_rdr
-def aer_2_rdr(aer, geo_loc, time):
+def aer_2_rdr(aer: _N, geo_loc: _N, time_jd: _N) -> _N:
     r"""Converts Az/El/range to RA/Dec/range."""
     sez = aer_2_sez(aer)
-    ijk = sez_2_ijk(sez, geo_loc, time)
+    ijk = sez_2_ijk(sez, geo_loc, time_jd)
     rdr = ijk_2_rdr(ijk)
     return rdr
 
 
 # %% Functions - aer_2_sez
-def aer_2_sez(aer):
+def aer_2_sez(aer: _N) -> _N:
     r"""Converts Az/El/range to SEZ cartesian."""
     # pull out az, el and range
     az = aer[0, ...]
@@ -260,7 +270,7 @@ def aer_2_sez(aer):
 
 
 # %% Functions - geo_loc_2_ijk
-def geo_loc_2_ijk(geo_loc, time_jd):
+def geo_loc_2_ijk(geo_loc: _N, time_jd: _N) -> _N:
     r"""
     Converts a geographic location to IJK coordinates.
 
@@ -296,7 +306,7 @@ def geo_loc_2_ijk(geo_loc, time_jd):
 
 
 # %% Functions - ijk_2_rdr
-def ijk_2_rdr(ijk):
+def ijk_2_rdr(ijk: _N) -> _N:
     r"""Converts IJK cartesian to Ra/Dec/range."""
     # pull out i,j,k row vectors
     i = ijk[0, ...]
@@ -305,21 +315,21 @@ def ijk_2_rdr(ijk):
     # calculate magnitude of vectors
     rang = np.sqrt(i**2 + j**2 + k**2)  # TODO: use magnitude
     # find azimuth
-    ra = np.atan2(j, i)
+    ra = np.arctan2(j, i)
     # change from [-pi pi] to [0 2*pi]
     ra = np.mod(ra, TAU)
     # find elevation
-    de = np.atan2(k, np.sqrt(i**2 + j**2))
+    de = np.arctan2(k, np.sqrt(i**2 + j**2))
     # output array of values
     rdr = np.vstack((ra, de, rang))
     return rdr
 
 
 # %% Functions - ijk_2_sez
-def ijk_2_sez(ijk, geo_loc, time_jd):
+def ijk_2_sez(ijk: _N, geo_loc: _N, time_jd: _N) -> _N:
     r"""Converts IJK coordinates to SEZ coordinates."""
 
-    def _find_D(L, theta):
+    def _find_D(L: _FN, theta: _FN) -> _N:
         r"""Calculate the IJK to SEZ transformation matrix from L and theta."""
         # fmt: off
         return np.array([
@@ -414,19 +424,19 @@ def long_2_sidereal(lon: _N, time_jd: _N) -> _N:
 
 
 # %% Functions - rdr_2_aer
-def rdr_2_aer(rdr, geo_loc, time):
+def rdr_2_aer(rdr: _N, geo_loc: _N, time_jd: _N) -> _N:
     r"""Converts RA/Dec/range to Az/El/range."""
     # transform rdr to ijk frame
     ijk = rdr_2_ijk(rdr)
     # transform ijk frame to sez frame
-    sez = ijk_2_sez(ijk, geo_loc, time)
+    sez = ijk_2_sez(ijk, geo_loc, time_jd)
     # transford sez frame to aer frame
     aer = sez_2_aer(sez)
     return aer
 
 
 # %% Functions - rdr_2_ijk
-def rdr_2_ijk(rdr):
+def rdr_2_ijk(rdr: _N) -> _N:
     r"""Converts Ra/Dec/range to IJK cartesian."""
     # pull out components
     ra = rdr[0, ...]
@@ -438,7 +448,7 @@ def rdr_2_ijk(rdr):
 
 
 # %% Functions - sez_2_aer
-def sez_2_aer(sez):
+def sez_2_aer(sez: _N) -> _N:
     r"""Converts SEZ cartesian to Az/El/range."""
     # pull out x,y,z row vectors
     x = sez[0, ...]
@@ -447,21 +457,21 @@ def sez_2_aer(sez):
     # calculate magnitude of vectors
     rho = np.sqrt(x**2 + y**2 + z**2)  # TODO: use magnitude
     # find azimuth
-    az = np.atan2(y, -x)
+    az = np.arctan2(y, -x)
     # change range from (-pi,pi) to (0,2*pi)
     az = np.mod(az, TAU)
     # find elevation (note Elevation is in range (-pi/2:pi/2)
-    el = np.atan(z / np.sqrt(x**2 + y**2))
+    el = np.arctan(z / np.sqrt(x**2 + y**2))
     # output array of values
     aer = np.vstack((az, el, rho))
     return aer
 
 
 # %% Functions - sez_2_ijk
-def sez_2_ijk(sez, geo_loc, time_jd):
+def sez_2_ijk(sez: _N, geo_loc: _N, time_jd: _N) -> _N:
     r"""Converts SEZ coordinates to IJK coordinates."""
 
-    def _find_D(L, theta):
+    def _find_D(L: _FN, theta: _FN) -> _N:
         r"""Calculate the SEZ to IJK transformation matrix from L and theta."""
         # fmt: off
         return np.array([
@@ -512,7 +522,7 @@ def sez_2_ijk(sez, geo_loc, time_jd):
 
 
 # %% Functions - rv_aer_2_ijk
-def rv_aer_2_ijk(r_aer, v_aer, geo_loc, time_jd):
+def rv_aer_2_ijk(r_aer: _N, v_aer: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N]:
     r"""Converts position and velocity from Az/El/range to IJK cartesion."""
     # transform to SEZ frame
     (r_sez, v_sez) = rv_aer_2_sez(r_aer, v_aer)
@@ -522,7 +532,7 @@ def rv_aer_2_ijk(r_aer, v_aer, geo_loc, time_jd):
 
 
 # %% Functions - rv_aer_2_sez
-def rv_aer_2_sez(r_aer, v_aer):
+def rv_aer_2_sez(r_aer: _N, v_aer: _N) -> Tuple[_N, _N]:
     r"""Converts position and velocity from Az/El/range to SEZ cartesion."""
     # tranform position vector
     r_sez = aer_2_sez(r_aer)
@@ -547,7 +557,7 @@ def rv_aer_2_sez(r_aer, v_aer):
 
 
 # %% Functions - rv_ijk_2_aer
-def rv_ijk_2_aer(r_ijk, v_ijk, geo_loc, time_jd):
+def rv_ijk_2_aer(r_ijk: _N, v_ijk: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N]:
     r"""Converts position and velocity IJK cartesion to Az/El/range."""
     # transform from IJK frame to SEZ frame
     (r_sez, v_sez) = rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd)
@@ -557,7 +567,7 @@ def rv_ijk_2_aer(r_ijk, v_ijk, geo_loc, time_jd):
 
 
 # %% Functions - rv_ijk_2_sez
-def rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd):
+def rv_ijk_2_sez(r_ijk: _N, v_ijk: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N]:
     r"""Converts position and velocity from IJK to SEZ cartesian."""
     # transform position from SEZ to IJK frame
     r_sez = sez_2_ijk(r_ijk, geo_loc, time_jd)
@@ -567,7 +577,7 @@ def rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd):
 
 
 # %% Functions - rv_sez_2_aer
-def rv_sez_2_aer(r_sez, v_sez):
+def rv_sez_2_aer(r_sez: _N, v_sez: _N) -> Tuple[_N, _N]:
     r"""Converts position and velocity SEZ cartesion to Az/El/range."""
     # transform position from SEZ to AER frame
     r_aer = sez_2_aer(r_sez)
@@ -577,7 +587,7 @@ def rv_sez_2_aer(r_sez, v_sez):
 
 
 # %% Functions - rv_sez_2_ijk
-def rv_sez_2_ijk(r_sez, v_sez, geo_loc, time_jd):
+def rv_sez_2_ijk(r_sez: _N, v_sez: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N]:
     r"""Converts position and velocity SEZ to IJK cartesion."""
     # transform position from SEZ to IJK frame
     r_ijk = sez_2_ijk(r_sez, geo_loc, time_jd)
@@ -756,7 +766,7 @@ def get_sun_radec(time_jd: _FN, return_early: bool = False) -> Tuple[_FN, _FN]:
 
 
 # %% Functions - beta_from_oe
-def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> np.ndarray:
+def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> _N:
     r"""
     Calculates the beta angle between the sun and the orbit plane.
 

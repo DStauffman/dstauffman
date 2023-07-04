@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "dstauffman"
-version = "3.3.5"
+version = "3.4.1"
 description = "Generic python utilities for Aerospace applications"
 license = "LGPLv3"
 authors = ["David C. Stauffer <dstauffman@yahoo.com>"]
@@ -135,8 +135,8 @@ warn_return_any        = true
 warn_unused_configs    = true
 warn_unreachable       = true
 warn_unused_ignores    = true
-#disallow_untyped_calls = true
-#disallow_untyped_defs  = true
+disallow_untyped_calls = true
+disallow_untyped_defs  = true
 no_implicit_optional   = true
 enable_incomplete_feature = "Unpack"
 files                  = [

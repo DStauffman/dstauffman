@@ -660,12 +660,13 @@ def oe_2_rv(
         +sW * cw + cW * sw * ci, -sW * sw + cW * cw * ci, -cW * si,
         +sw * si               , +cw * si               ,      +ci,
     ])
-    # fmt: onx
+    # fmt: on
 
     # translate r & v into IJK frame
     r = np.empty((3, num))
     v = np.empty((3, num))
     for ix in range(num):
+        # fmt: off
         r[:, ix] = np.array([
             _inf_multiply(r_PQW[0, ix], T[0, ix]) + _inf_multiply(r_PQW[1, ix], T[1, ix]) + _inf_multiply(r_PQW[2, ix], T[2, ix]),
             _inf_multiply(r_PQW[0, ix], T[3, ix]) + _inf_multiply(r_PQW[1, ix], T[4, ix]) + _inf_multiply(r_PQW[2, ix], T[6, ix]),
@@ -676,6 +677,7 @@ def oe_2_rv(
             _inf_multiply(v_PQW[0, ix], T[3, ix]) + _inf_multiply(v_PQW[1, ix], T[4, ix]) + _inf_multiply(v_PQW[2, ix], T[6, ix]),
             _inf_multiply(v_PQW[0, ix], T[6, ix]) + _inf_multiply(v_PQW[1, ix], T[7, ix]) + _inf_multiply(v_PQW[2, ix], T[8, ix]),
         ])
+        # fmt: on
 
     if num == 1:
         if return_PQW:

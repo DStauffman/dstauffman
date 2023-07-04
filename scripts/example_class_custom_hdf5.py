@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import datetime
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Dict, Optional, TYPE_CHECKING
+from typing import Any, Callable, ClassVar, Dict, Optional
 
 import numpy as np
 
@@ -26,17 +26,14 @@ from dstauffman import (
     SaveAndLoad,
 )
 
-if TYPE_CHECKING:
-    from mypy_extensions import DefaultNamedArg
-
 
 # %% Classes
 class Results(Frozen, metaclass=SaveAndLoad):
     """Custom class using datetime64's that can be saved and loaded from HDF5 files."""
 
     # fmt: off
-    load: ClassVar[Callable[[Optional[Path], DefaultNamedArg(bool, "use_hdf5")], Results]]  # noqa: F821
-    save: Callable[[Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]  # noqa: F821
+    load: ClassVar[Callable[[Optional[Path]], Results]]  # noqa: F821
+    save: Callable[[Optional[Path]], None]  # noqa: F821
     # fmt: on
 
     def __init__(self, num: float = 0, date_zero: Optional[datetime.datetime] = None):

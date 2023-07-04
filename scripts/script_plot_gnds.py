@@ -34,8 +34,8 @@ num_states = 6
 num_axes   = 2  # fmt: skip
 num_innovs = 11
 
-t_bounds1 = np.arange(2, 8)
-t_bounds2 = dcs.convert_date(date_zero, "numpy", old_form="datetime") + dcs.NP_ONE_SECOND * t_bounds1  # type: ignore[operator]
+t_bounds1 = np.array([2, 8])
+t_bounds2 = dcs.convert_date(date_zero, "numpy", old_form="datetime") + dcs.NP_ONE_SECOND * t_bounds1  # type: ignore[call-overload, operator]
 
 bins = [-np.inf, -5e-6, -5e-7, 0.0, 5e-7, 5e-6, np.inf]
 
@@ -119,8 +119,8 @@ if plots["pos"]:
 if plots["fpl"]:
     f1 = plot.plot_innov_fplocs(kf1.innov, opts=opts1)
     f2 = plot.plot_innov_fplocs(kd1.innov, opts=opts2)
-    f3 = plot.plot_innov_fplocs(kf1.innov, opts=opts3, t_bounds=t_bounds1)
-    f4 = plot.plot_innov_fplocs(kd1.innov, opts=opts4, t_bounds=t_bounds2)
+    f3 = plot.plot_innov_fplocs(kf1.innov, opts=opts3, t_bounds=t_bounds1)  # type: ignore[arg-type]
+    f4 = plot.plot_innov_fplocs(kd1.innov, opts=opts4, t_bounds=t_bounds2)  # type: ignore[arg-type]
 
 if plots["inn"]:
     f1 = plot.plot_innovations(kf1.innov, kf2.innov, opts=opts1)
@@ -131,8 +131,8 @@ if plots["inn"]:
 if plots["his"]:
     f1 = plot.plot_innov_hist(kf1.innov, bins, opts=opts1)
     f2 = plot.plot_innov_hist(kd1.innov, bins, opts=opts2, normalize_spacing=True)
-    f3 = plot.plot_innov_hist(kf1.innov, bins, opts=opts3, show_pdf=True)
-    f4 = plot.plot_innov_hist(kd1.innov, bins, opts=opts4, normalize_spacing=True, show_pdf=True)
+    f3 = plot.plot_innov_hist(kf1.innov, bins, opts=opts3, show_cdf=True)
+    f4 = plot.plot_innov_hist(kd1.innov, bins, opts=opts4, normalize_spacing=True, show_cdf=True)
 
 if plots["cov"]:
     f1 = plot.plot_covariance(kf1, kf2, opts=opts1)

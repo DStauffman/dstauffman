@@ -187,7 +187,7 @@ if __name__ == "__main__":
         # fmt: on
 
         # make model plots
-        f0 = plot.plot_health_monte_carlo(time, results, "Output", opts=opts, truth=truth)
+        f0 = plot.plot_health_monte_carlo(time, results, "Output", opts=opts, truth=truth)  # type: ignore[arg-type]
         extra_plotter = lambda fig, ax: truth.plot_truth(ax[0], scale=1)  # type: ignore[attr-defined]  # pylint: disable=unnecessary-lambda-assignment
         f1 = plot.plot_time_history("Output vs. Time", time, results, opts=opts, extra_plotter=extra_plotter)
 

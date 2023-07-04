@@ -13,7 +13,7 @@ import datetime
 import doctest
 import re
 from time import gmtime, strftime
-from typing import Any, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Any, List, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     _D = np.typing.NDArray[np.datetime64]
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
-    _AllDates = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, _N, _D]
+    _AllDates = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64, _D, _I, _N]
     _NPDates = Union[np.datetime64, _D, _N]
 
 # %% Constants
@@ -500,7 +500,7 @@ def convert_date(
 
 
 # %% Functions - convert_time_units
-def convert_time_units(time, old_unit, new_unit):
+def convert_time_units(time: Union[int, float], old_unit: str, new_unit: str) -> Union[int, float]:
     r"""
     Converts the given time history from the old units to the new units.
 
@@ -542,7 +542,19 @@ def convert_time_units(time, old_unit, new_unit):
 
 
 # %% Functions - convert_datetime_to_np
-def convert_datetime_to_np(time, /, units=NP_DATETIME_UNITS):
+@overload
+def convert_datetime_to_np(time: datetime.datetime, /, units: str = ...) -> np.datetime64:
+    ...
+
+
+@overload
+def convert_datetime_to_np(time: List[datetime.datetime], /, units: str = ...) -> _D:
+    ...
+
+
+def convert_datetime_to_np(
+    time: Union[datetime.datetime, List[datetime.datetime]], /, units: str = NP_DATETIME_UNITS
+) -> Union[np.datetime64, _D]:
     r"""
     Convenience wrapper to convert a datetime.datetime to a numpy.datetime64 with the desired units.
 
@@ -580,7 +592,7 @@ def convert_datetime_to_np(time, /, units=NP_DATETIME_UNITS):
 
 
 # %% Functions - convert_duration_to_np
-def convert_duration_to_np(dt, /, units=NP_DATETIME_UNITS):
+def convert_duration_to_np(dt: datetime.timedelta, /, units: str = NP_DATETIME_UNITS) -> np.timedelta64:
     r"""Convenience wrapper to convert a datetime.timedelta to a numpy.timedelta64 with the desired units.
 
     Parameters
@@ -612,7 +624,7 @@ def convert_duration_to_np(dt, /, units=NP_DATETIME_UNITS):
 
 
 # %% Functions - convert_num_dt_to_np
-def convert_num_dt_to_np(dt, /, units="sec", np_units=NP_TIMEDELTA_FORM):
+def convert_num_dt_to_np(dt: Union[int, float], /, units: str = "sec", np_units: str = NP_TIMEDELTA_FORM) -> np.timedelta64:
     r"""Convenience wrapper to convert a number of seconds to a numpy.timedelta64 with the desired units.
 
     Parameters
@@ -641,7 +653,7 @@ def convert_num_dt_to_np(dt, /, units="sec", np_units=NP_TIMEDELTA_FORM):
 
     """
     units = _NP_MAP.get(units, units)
-    return np.timedelta64(dt, units).astype(np_units)
+    return np.timedelta64(dt, units).astype(np_units)  # type: ignore[arg-type, no-any-return]
 
 
 # %% Functions - get_delta_time_str

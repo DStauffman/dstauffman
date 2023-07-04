@@ -13,7 +13,7 @@ import datetime
 import os
 import pathlib
 import platform
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 import unittest
 
 from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
@@ -907,7 +907,7 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
         self.time_overlap   = np.arange(2, 11)
         self.xmin           = 1
         self.xmax           = 8
-        self.exp: Dict[str, Union[np.ndarray, List[int]]] = dict()
+        self.exp: plot.support._RmsIndices = {}  # type: ignore[typeddict-item]
         self.exp["one"]     = np.array([False,  True,  True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
         self.exp["two"]     = np.array([ True,  True,  True,  True,  True,  True,  True, False, False, False, False], dtype=bool)
         self.exp["overlap"] = np.array([ True,  True,  True,  True,  True,  True,  True, False, False], dtype=bool)
@@ -917,23 +917,23 @@ class Test_plotting_get_rms_indices(unittest.TestCase):
     def test_nominal(self) -> None:
         ix = plot.get_rms_indices(self.time_one, self.time_two, self.time_overlap, xmin=self.xmin, xmax=self.xmax)
         for key in ix.keys():
-            np.testing.assert_array_equal(ix[key], self.exp[key])
+            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
 
     def test_only_time_one(self) -> None:
-        self.exp["two"] = np.array([])
-        self.exp["overlap"] = np.array([])
+        self.exp["two"] = np.array([], dtype=bool)
+        self.exp["overlap"] = np.array([], dtype=bool)
         ix = plot.get_rms_indices(self.time_one, None, None, xmin=self.xmin, xmax=self.xmax)
         for key in ix.keys():
-            np.testing.assert_array_equal(ix[key], self.exp[key])
+            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
 
     def test_no_bounds(self) -> None:
-        self.exp["one"].fill(True)  # type: ignore[union-attr]
-        self.exp["two"].fill(True)  # type: ignore[union-attr]
-        self.exp["overlap"].fill(True)  # type: ignore[union-attr]
+        self.exp["one"].fill(True)
+        self.exp["two"].fill(True)
+        self.exp["overlap"].fill(True)
         self.exp["pts"] = [0, 12]
         ix = plot.get_rms_indices(self.time_one, self.time_two, self.time_overlap)
         for key in ix.keys():
-            np.testing.assert_array_equal(ix[key], self.exp[key])
+            np.testing.assert_array_equal(ix[key], self.exp[key])  # type: ignore[literal-required]
 
     def test_datetime64(self) -> None:
         pass  # TODO: write this

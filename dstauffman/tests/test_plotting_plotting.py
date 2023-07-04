@@ -226,7 +226,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.figs.append(plot.plot_time_history("Zero", np.array(0), np.array(0)))
 
     def test_1d(self) -> None:
-        self.figs.append(plot.plot_time_history("Line", np.arange(5), np.arange(5)))
+        self.figs.append(plot.plot_time_history("Line", np.arange(5), np.arange(5.0)))
 
     def test_bad_3d(self) -> None:
         bad_data = np.random.rand(self.time.shape[0], 4, 5)
@@ -331,19 +331,19 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
         self.figs.append(plot.plot_correlation_matrix(self.sym, plot_lower_only=False))
 
     def test_above_one(self) -> None:
-        large_data = self.data * 1000
+        large_data = self.data * 1000.0
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
 
     def test_above_one_part2(self) -> None:
-        large_data = self.data * 1000
+        large_data = self.data * 1000.0
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmax=2000))
 
     def test_below_one(self) -> None:
-        large_data = 1000 * (self.data - 0.5)
+        large_data = 1000.0 * (self.data - 0.5)
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
 
     def test_below_one_part2(self) -> None:
-        large_data = 1000 * (self.data - 0.5)
+        large_data = 1000.0 * (self.data - 0.5)
         self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmin=-2))
 
     def test_within_minus_one(self) -> None:
@@ -517,7 +517,7 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         data[8] = "no"
         data[5] = "unknown"
         bins = [b"yes", b"no"]
-        self.fig = plot.plot_histogram(self.description, data, bins, use_exact_counts=True)
+        self.fig = plot.plot_histogram(self.description, data, bins, use_exact_counts=True)  # type: ignore[arg-type]
 
     def test_missing_data(self) -> None:
         with self.assertRaises(ValueError):

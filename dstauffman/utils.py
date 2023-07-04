@@ -22,7 +22,23 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
-from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Set, Tuple, TYPE_CHECKING, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    Generator,
+    Iterable,
+    List,
+    Literal,
+    Optional,
+    overload,
+    Set,
+    Tuple,
+    TYPE_CHECKING,
+    TypedDict,
+    TypeVar,
+    Union,
+)
 import unittest
 import warnings
 
@@ -50,11 +66,32 @@ if HAVE_SCIPY:
 _ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked
 
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired, Unpack
+
+    _B = np.typing.NDArray[np.bool_]
+    _D = np.typing.NDArray[np.datetime64]
+    _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
     _StrOrListStr = TypeVar("_StrOrListStr", str, List[str])
     _SingleNum = Union[int, float, _N, np.datetime64]
     _Lists = Union[_N, List[_N], Tuple[_N, ...]]
     _Number = Union[float, int, _N]
+
+    class _PrintOptsKwArgs(TypedDict):
+        precision: NotRequired[Optional[int]]
+        threshold: NotRequired[Optional[int]]
+        edgeitems: NotRequired[Optional[int]]
+        linewidth: NotRequired[Optional[int]]
+        suppress: NotRequired[Optional[bool]]
+        nanstr: NotRequired[Optional[str]]
+        infstr: NotRequired[Optional[str]]
+        sign: NotRequired[Optional[Literal["-", "+", " "]]]
+        formatter: NotRequired[Dict[str, Callable]]
+        floatmode: NotRequired[Optional[Literal["fixed", "unique", "maxprec", "maxprec_equal"]]]
+
+    class _ButterKwArgs(TypedDict):
+        btype: NotRequired[Literal["lowpass", "highpass", "bandpass", "bandstop"]]
+        analog: NotRequired[bool]
 
 
 # %% Functions - _nan_equal
@@ -92,7 +129,7 @@ def _nan_equal(a: Any, b: Any, /, tolerance: Optional[float] = None) -> bool:  #
 
     """
 
-    def _is_nan(x) -> bool:
+    def _is_nan(x: Any) -> bool:
         try:
             out = isnan(x)
         except:
@@ -411,23 +448,23 @@ def compare_two_classes(
 
     """
 
-    def _not_true_print():
+    def _not_true_print() -> bool:
         r"""Set is_same to False and optionally prints information to the screen."""
         is_same = False
         if not suppress_output:
             print(f"{this_attr} is different from {name1} to {name2}.")
         return is_same
 
-    def _is_function(obj):
+    def _is_function(obj: Any) -> bool:
         r"""Determine whether the object is a function or not."""
         # need second part for Python compatibility for v2.7, which distinguishes unbound methods from functions.
         return inspect.isfunction(obj) or inspect.ismethod(obj) or inspect.isbuiltin(obj)
 
-    def _is_class_instance(obj):
+    def _is_class_instance(obj: Any) -> bool:
         r"""Determine whether the object is an instance of a class or not."""
         return hasattr(obj, "__dict__") and not _is_function(obj)  # and hasattr(obj, "__call__")
 
-    def _is_public(name):
+    def _is_public(name: str) -> bool:
         r"""Return True if the name is public, ie doesn't start with an underscore."""
         return not name.startswith("_")
 
@@ -823,7 +860,27 @@ def unit(data: _Lists, axis: int = 0) -> np.ndarray:
 
 
 # %% modd
-def modd(x1, x2, /, out=None):
+@overload
+def modd(x1: ArrayLike, x2: ArrayLike, /) -> None:
+    ...
+
+
+@overload
+def modd(x1: ArrayLike, x2: ArrayLike, /, out: Literal[None]) -> None:
+    ...
+
+
+@overload
+def modd(x1: ArrayLike, x2: ArrayLike, /, out: _I) -> _I:
+    ...
+
+
+@overload
+def modd(x1: ArrayLike, x2: ArrayLike, /, out: _N) -> _N:
+    ...
+
+
+def modd(x1: ArrayLike, x2: ArrayLike, /, out: Optional[Union[_I, _N]] = None) -> Optional[Union[_I, _N]]:
     r"""
     Return element-wise remainder of division, except that instead of zero it gives the divisor instead.
 
@@ -868,7 +925,7 @@ def modd(x1, x2, /, out=None):
 
 
 # %% is_np_int
-def is_np_int(x, /):
+def is_np_int(x: Any, /) -> bool:
     r"""
     Returns True if the input is an int or any form of an np.integer type.
 
@@ -908,7 +965,7 @@ def is_np_int(x, /):
 
 
 # %% np_digitize
-def np_digitize(x, /, bins, right=False):
+def np_digitize(x: ArrayLike, /, bins: ArrayLike, right: bool = False) -> _I:
     r"""
     Act as a wrapper to the numpy.digitize function with customizations.
 
@@ -959,7 +1016,7 @@ def np_digitize(x, /, bins, right=False):
 
     """
     # allow an empty x to pass through just fine
-    if x.size == 0:
+    if np.size(x) == 0:
         return np.array([], dtype=int)
 
     # check for NaNs
@@ -967,23 +1024,23 @@ def np_digitize(x, /, bins, right=False):
         raise ValueError("Some values were NaN.")
 
     # check the bounds
-    tolerance = None  # TODO: do I need a tolerance here?
-    bmin = bins[0] if tolerance is None else bins[0] - tolerance
-    bmax = bins[-1] if tolerance is None else bins[-1] + tolerance
+    tolerance: Optional[Union[int, float]] = None  # TODO: do I need a tolerance here?
+    bmin = bins[0] if tolerance is None else bins[0] - tolerance  # type: ignore[index, operator]
+    bmax = bins[-1] if tolerance is None else bins[-1] + tolerance  # type: ignore[index, operator]
     if right:
-        if np.any(x <= bmin) or np.any(x > bmax):
+        if np.any(x <= bmin) or np.any(x > bmax):  # type: ignore[operator]
             raise ValueError("Some values of x are outside the given bins.")
     else:
-        if np.any(x < bmin) or np.any(x >= bmax):
+        if np.any(x < bmin) or np.any(x >= bmax):  # type: ignore[operator]
             raise ValueError("Some values of x are outside the given bins.")
 
     # do the calculations by calling the numpy command and shift results by one
-    out = np.digitize(x, bins, right) - 1
-    return out
+    out = np.digitize(x, bins, right) - 1  # type: ignore[arg-type]
+    return out  # type: ignore[return-value]
 
 
 # %% histcounts
-def histcounts(x, /, bins, right=False):
+def histcounts(x: ArrayLike, /, bins: ArrayLike, right: bool = False) -> _I:
     r"""
     Count the number of points in each of the given bins.
 
@@ -1027,13 +1084,13 @@ def histcounts(x, /, bins, right=False):
     # get the bin number that each point is in
     ix_bin = np_digitize(x, bins, right=right)
     # count the number in each bin
-    hist = np.bincount(ix_bin, minlength=len(bins) - 1)
+    hist = np.bincount(ix_bin, minlength=len(bins) - 1)  # type: ignore[arg-type]
     return hist
 
 
 # %% full_print
 @contextmanager
-def full_print(**kwargs):
+def full_print(**kwargs: Unpack[_PrintOptsKwArgs]) -> Generator[None, None, None]:
     r"""
     Context manager for printing full numpy arrays.
 
@@ -1086,7 +1143,7 @@ def full_print(**kwargs):
     # get current options
     opt = np.get_printoptions()
     # update to print all elements and any other criteria specified
-    np.set_printoptions(threshold=threshold, **kwargs)
+    np.set_printoptions(threshold=threshold, **kwargs)  # type: ignore[arg-type, misc]
     # yield options for the context manager to do it's thing
     yield
     # reset the options back to what they were originally
@@ -1242,7 +1299,7 @@ def execute(
     *,
     ignored_codes: Optional[Iterable[int]] = None,
     env: Optional[Dict[str, str]] = None,
-):
+) -> Generator[str, None, int]:
     r"""
     Wrapper to subprocess that allows the screen to be updated for long running commands.
 
@@ -1466,7 +1523,7 @@ def get_username() -> str:
 
 
 # %% Functions - is_datetime
-def is_datetime(time: ArrayLike) -> bool:
+def is_datetime(time: Union[None, datetime.datetime, ArrayLike]) -> bool:
     r"""
     Determines if the given time is either a datetime.datetime or np.datetime64 or just a regular number.
 
@@ -1503,13 +1560,57 @@ def is_datetime(time: ArrayLike) -> bool:
 
     """
     out = False
-    if isinstance(time, datetime.datetime) or (hasattr(time, "dtype") and np.issubdtype(time.dtype, np.datetime64)):
+    if isinstance(time, datetime.datetime) or (hasattr(time, "dtype") and np.issubdtype(time.dtype, np.datetime64)):  # type: ignore[union-attr]
         out = True
     return out
 
 
 # %% Functions - intersect
-def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False):
+@overload
+def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[False] = ...) -> Union[_I, _N, _D]:
+    ...
+
+
+@overload
+def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[True]) -> Tuple[Union[_I, _N, _D], _I, _I]:
+    ...
+
+
+@overload
+def intersect(
+    a: ArrayLike,
+    b: ArrayLike,
+    /,
+    *,
+    tolerance: Union[int, float, np.int_, np.float64, np.timedelta64],
+    assume_unique: bool,
+    return_index: Literal[False] = ...,
+) -> Union[_I, _N, _D]:
+    ...
+
+
+@overload
+def intersect(
+    a: ArrayLike,
+    b: ArrayLike,
+    /,
+    *,
+    tolerance: Union[int, float, np.int_, np.float64, np.timedelta64],
+    assume_unique: bool,
+    return_index: Literal[True],
+) -> Tuple[Union[_I, _N, _D], _I, _I]:
+    ...
+
+
+def intersect(  # type: ignore[misc]
+    a: ArrayLike,
+    b: ArrayLike,
+    /,
+    *,
+    tolerance: Union[int, float, np.int_, np.float64, np.timedelta64] = 0,
+    assume_unique: bool = False,
+    return_indices: bool = False,
+) -> Union[Union[_I, _N, _D], Tuple[Union[_I, _N, _D], _I, _I]]:
     r"""
     Finds the intersect of two arrays given a numerical tolerance.
 
@@ -1568,25 +1669,27 @@ def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False
     """
     # allow a zero tolerance to be passed in and behave like the normal intersect command
     if hasattr(tolerance, "dtype") and np.issubdtype(tolerance.dtype, np.timedelta64):
-        tol_is_zero = tolerance.astype(np.int64) == 0  # Note that this avoids a numpy bug, see issue 6784
+        tol_is_zero = (
+            tolerance.astype(np.int64) == 0  # type: ignore[union-attr]
+        )  # Note that this avoids a numpy bug, see issue 6784  # type: ignore[union-attr]
     else:
         tol_is_zero = tolerance == 0
     if tol_is_zero:
-        return np.intersect1d(a, b, assume_unique=assume_unique, return_indices=return_indices)
+        return np.intersect1d(a, b, assume_unique=assume_unique, return_indices=return_indices)  # type: ignore[call-overload, no-any-return]
 
     # allow list and other array_like inputs (or just scalar floats)
     a = np.atleast_1d(np.asanyarray(a))
     b = np.atleast_1d(np.asanyarray(b))
-    tolerance = np.asanyarray(tolerance)
+    tolerance = np.asanyarray(tolerance)  # type: ignore[assignment]
 
     # check for datetimes and convert to integers
     is_dates = np.array([is_datetime(a), is_datetime(b)], dtype=bool)
     assert np.count_nonzero(is_dates) != 1, "Both arrays must be datetimes if either is."
     if np.any(is_dates):
-        orig_datetime = a.dtype
-        a = a.astype(np.int64)
-        b = b.astype(np.int64)
-        tolerance = tolerance.astype(np.int64)
+        orig_datetime = a.dtype  # type: ignore[union-attr]
+        a = a.astype(np.int64)  # type: ignore[union-attr]
+        b = b.astype(np.int64)  # type: ignore[union-attr]
+        tolerance = tolerance.astype(np.int64)  # type: ignore[union-attr]
 
     # check if largest component of a and b is too close to the tolerance floor (for floats)
     all_int = is_np_int(a) and is_np_int(b) and is_np_int(tolerance)
@@ -1599,8 +1702,8 @@ def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False
     half_tolerance = tolerance / 2
     if all_int:
         # allow for integer versions of half a quanta in either direction
-        lo_tol = np.floor(half_tolerance).astype(tolerance.dtype)
-        hi_tol = np.ceil(half_tolerance).astype(tolerance.dtype)
+        lo_tol = np.floor(half_tolerance).astype(tolerance.dtype)  # type: ignore[union-attr]
+        hi_tol = np.ceil(half_tolerance).astype(tolerance.dtype)  # type: ignore[union-attr]
     else:
         lo_tol = half_tolerance
         hi_tol = half_tolerance
@@ -1627,7 +1730,7 @@ def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False
     # calculate output
     # Note that a[ia] and b[ib] should be the same with a tolerance of 0, but not necessarily otherwise
     # This function returns the values from the first vector a
-    c = np.sort(a[ia])
+    c = np.sort(a[ia])  # type: ignore[index, call-overload]
     if np.any(is_dates):
         c = c.astype(orig_datetime)
     if return_indices:
@@ -1636,7 +1739,7 @@ def intersect(a, b, /, *, tolerance=0, assume_unique=False, return_indices=False
 
 
 # %% issorted
-def issorted(x, /, descend=False):
+def issorted(x: ArrayLike, /, descend: bool = False) -> bool:
     r"""
     Tells whether the given array is sorted or not.
 
@@ -1665,12 +1768,20 @@ def issorted(x, /, descend=False):
     """
     x = np.asanyarray(x)
     if descend:
-        return np.all(x[1:] <= x[:-1])
-    return np.all(x[:-1] <= x[1:])
+        return np.all(x[1:] <= x[:-1])  # type: ignore[return-value]
+    return np.all(x[:-1] <= x[1:])  # type: ignore[return-value]
 
 
 # %% zero_order_hold
-def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=False):
+def zero_order_hold(
+    x: ArrayLike,
+    xp: ArrayLike,
+    yp: ArrayLike,
+    *,
+    left: Union[int, float] = nan,
+    assume_sorted: bool = False,
+    return_indices: bool = False,
+) -> _N:
     r"""
     Interpolates a function by holding at the most recent value.
 
@@ -1718,7 +1829,7 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
         is_left = np.asanyarray(x) < xmin
         out = np.where(is_left, left, yp[ix])
         if return_indices:
-            return (out, np.where(is_left, None, ix))
+            return (out, np.where(is_left, None, ix))  # type: ignore[call-overload, return-value]
         return out
     if not HAVE_SCIPY:
         raise RuntimeError("You must have scipy available to run this.")
@@ -1729,7 +1840,16 @@ def zero_order_hold(x, xp, yp, *, left=nan, assume_sorted=False, return_indices=
 
 
 # %% linear_interp
-def linear_interp(x, xp, yp, *, left=None, right=None, assume_sorted=False, extrapolate=False):
+def linear_interp(
+    x: ArrayLike,
+    xp: ArrayLike,
+    yp: ArrayLike,
+    *,
+    left: Optional[Union[int, float]] = None,
+    right: Optional[Union[int, float]] = None,
+    assume_sorted: bool = False,
+    extrapolate: bool = False,
+) -> _N:
     r"""
     Interpolates a function using linear interpolation.
 
@@ -1784,6 +1904,7 @@ def linear_interp(x, xp, yp, *, left=None, right=None, assume_sorted=False, extr
     # use slower scipy version
     if not HAVE_SCIPY:
         raise RuntimeError("You must have scipy available to run this.")
+    fill_value: Union[None, str, Tuple[int, int], Tuple[float, float]]
     if extrapolate:
         bounds_error = False
         if left is None or right is None:
@@ -1794,13 +1915,22 @@ def linear_interp(x, xp, yp, *, left=None, right=None, assume_sorted=False, extr
         bounds_error = True
         fill_value = None
     func = interp1d(xp, yp, kind="linear", fill_value=fill_value, bounds_error=bounds_error, assume_sorted=False)
-    return func(x).astype(yp.dtype)
+    return func(x).astype(yp.dtype)  # type: ignore[no-any-return]
 
 
 # %% linear_lowpass_interp
 def linear_lowpass_interp(
-    x, xp, yp, *, assume_sorted=False, extrapolate=False, filt_order=2, filt_freq=0.01, filt_samp=1.0, **kwargs
-):
+    x: ArrayLike,
+    xp: ArrayLike,
+    yp: ArrayLike,
+    *,
+    assume_sorted: bool = False,
+    extrapolate: bool = False,
+    filt_order: int = 2,
+    filt_freq: float = 0.01,
+    filt_samp: float = 1.0,
+    **kwargs: Unpack[_ButterKwArgs],
+) -> _N:
     r"""
     Interpolates a function using linear interpolation along with a configurable low pass filter.
 
@@ -1860,11 +1990,28 @@ def linear_lowpass_interp(
     func = interp1d(xp, yp, kind="linear", bounds_error=bounds_error, fill_value=fill_value, assume_sorted=assume_sorted)
     temp = func(x).astype(yp.dtype)
     sos = butter(filt_order, filt_freq, fs=filt_samp, output="sos", **kwargs)
-    return sosfiltfilt(sos, temp)
+    return sosfiltfilt(sos, temp)  # type: ignore[no-any-return]
 
 
 # %% drop_following_time
-def drop_following_time(times, drop_starts, dt_drop):
+@overload
+def drop_following_time(times: _D, drop_starts: _D, dt_drop: np.datetime64) -> _B:
+    ...
+
+
+@overload
+def drop_following_time(times: _I, drop_starts: _I, dt_drop: int) -> _B:
+    ...
+
+
+@overload
+def drop_following_time(times: _N, drop_starts: _N, dt_drop: float) -> _B:
+    ...
+
+
+def drop_following_time(
+    times: Union[_D, _I, _N], drop_starts: Union[_D, _I, _N], dt_drop: Union[int, float, np.datetime64]
+) -> _B:
     r"""
     Drops the times within the dt_drop after drop_starts.
 

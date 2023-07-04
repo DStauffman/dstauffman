@@ -8,7 +8,7 @@ Notes
 
 # %% Imports
 import datetime
-from typing import List, Optional
+from typing import List, Optional, Tuple
 import unittest
 from unittest.mock import Mock, patch
 import warnings
@@ -305,39 +305,39 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             self.assertLess(abs(err["diff"][i]), 3.15)
 
     def test_use_mean(self) -> None:
-        self.figs = plot.make_quaternion_plot(
+        self.figs = plot.make_quaternion_plot(  # type: ignore[assignment]
             self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, use_mean=True
         )
 
     def test_no_rms_in_legend(self) -> None:
-        self.figs = plot.make_quaternion_plot(
+        self.figs = plot.make_quaternion_plot(  # type: ignore[assignment]
             self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, use_mean=True, show_rms=False
         )
 
     def test_plot_zero(self) -> None:
-        self.figs = plot.make_quaternion_plot(
+        self.figs = plot.make_quaternion_plot(  # type: ignore[assignment]
             self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, plot_zero=True
         )
 
     def test_disp_bounds(self) -> None:
-        self.figs = plot.make_quaternion_plot(
+        self.figs = plot.make_quaternion_plot(  # type: ignore[assignment]
             self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, disp_xmin=2, disp_xmax=5
         )
 
     def test_no_overlap(self) -> None:
         self.time_one = np.arange(11).astype(float)
         self.time_two = np.arange(2, 13) + 0.5  # type: ignore[assignment]
-        self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two)
+        self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two)  # type: ignore[assignment]
 
     def test_none1(self) -> None:
-        self.figs = plot.make_quaternion_plot(self.description, self.time_one, None, self.quat_one, None)
+        self.figs = plot.make_quaternion_plot(self.description, self.time_one, None, self.quat_one, None)  # type: ignore[assignment]
 
     def test_none2(self) -> None:
-        self.figs = plot.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)
+        self.figs = plot.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)  # type: ignore[assignment]
 
     @patch("dstauffman.plotting.generic.logger")
     def test_none3(self, mock_logger: Mock) -> None:
-        self.figs = plot.make_quaternion_plot("", None, None, None, None)
+        self.figs = plot.make_quaternion_plot("", None, None, None, None)  # type: ignore[assignment]
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(
             LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', "quat", ""
@@ -454,11 +454,11 @@ class Test_plotting_plot_states(unittest.TestCase):
         self.assertEqual(err.keys(), {"state"})
 
     def test_groups(self) -> None:
-        groups = [(0, 1, 2), (3, 4, 5), (6, 7, 8)]
+        groups: List[Tuple[int, ...]] = [(0, 1, 2), (3, 4, 5), (6, 7, 8)]
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="Mean of empty slice")
             with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
-                self.figs += plot.plot_states(self.gnd1, self.gnd2, groups=groups, opts=self.opts)
+                self.figs += plot.plot_states(self.gnd1, self.gnd2, groups=groups, opts=self.opts)  # type: ignore[arg-type]
         mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
 

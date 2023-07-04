@@ -565,7 +565,7 @@ class KfRecord(Frozen):
         self.z    = self.z[:, ix_keep].copy() if self.z is not None else None
         # fmt: on
 
-    def save(self, filename: Optional[Path] = None, use_hdf5: bool = True) -> None:
+    def save(self, filename: Optional[Path] = None) -> None:
         r"""
         Save the object to disk.
 
@@ -573,20 +573,18 @@ class KfRecord(Frozen):
         ----------
         filename : classs pathlib.Path
             Name of the file to save
-        use_hdf5 : bool, optional, defaults to False
-            Write as *.hdf5 instead of *.pkl
 
         """
         convert_times = hasattr(self.time, "dtype") and np.issubdtype(self.time.dtype, np.datetime64)  # type: ignore[union-attr]
         if convert_times:
             orig_type = self.time.dtype  # type: ignore[union-attr]
             self.time.dtype = np.int64  # type: ignore[misc, union-attr]
-        save_method(self, filename=filename, use_hdf5=use_hdf5)
+        save_method(self, filename=filename)
         if convert_times:
             self.time.dtype = orig_type  # type: ignore[misc, union-attr]
 
     @classmethod
-    def load(cls, filename: Optional[Path] = None, use_hdf5: bool = True) -> KfRecord:
+    def load(cls, filename: Optional[Path] = None) -> KfRecord:
         r"""
         Load the object from disk.
 
@@ -594,11 +592,9 @@ class KfRecord(Frozen):
         ----------
         filename : classs pathlib.Path
             Name of the file to load
-        use_hdf5 : bool, optional, defaults to False
-            Write as *.hdf5 instead of *.pkl
 
         """
-        out: KfRecord = load_method(cls, filename=filename, use_hdf5=use_hdf5)
+        out: KfRecord = load_method(cls, filename=filename)
         if hasattr(out.time, "dtype") and out.time.dtype == np.int64:  # type: ignore[union-attr]
             out.time.dtype = NP_DATETIME_FORM  # type: ignore[misc, union-attr]
         return out

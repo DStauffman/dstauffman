@@ -8,20 +8,43 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
 import doctest
+from typing import Dict, List, Optional, Sequence, Tuple, TYPE_CHECKING, TypedDict, Union
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY
+from dstauffman.estimation import BpeResults
 from dstauffman.plotting.plotting import Opts, plot_correlation_matrix, plot_time_history, setup_plots
 
 if HAVE_MPL:
+    from matplotlib.axis import Axis
+    from matplotlib.colors import Colormap, ListedColormap
+    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
 
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired, Unpack
+
+    _CM = Union[str, Colormap, ListedColormap]
+    _Figs = List[Figure]
+
+    class _BpeKwArgs(TypedDict):
+        colormap: NotRequired[_CM]
+        # TODO: populate the rest of this
+
 
 # %% Functions - plot_bpe_convergence
-def plot_bpe_convergence(costs, *, opts=None, fig_ax=None, skip_setup_plots=False):
+def plot_bpe_convergence(
+    costs: Sequence,
+    *,
+    opts: Optional[Opts] = None,
+    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    skip_setup_plots: bool = False,
+) -> Figure:
     r"""
     Plot the BPE convergence rate by iteration on a log scale.
 
@@ -96,7 +119,13 @@ def plot_bpe_convergence(costs, *, opts=None, fig_ax=None, skip_setup_plots=Fals
 
 
 # %% plot_bpe_results
-def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
+def plot_bpe_results(
+    bpe_results: BpeResults,
+    *,
+    opts: Optional[Opts] = None,
+    plots: Optional[Dict[str, bool]] = None,
+    **kwargs: Unpack[_BpeKwArgs],
+) -> _Figs:
     r"""Plot the results of estimation."""
     # hard-coded options
     label_values = False
@@ -129,7 +158,7 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
     kw_colormap = kwargs.pop("colormap", None)
 
     # preallocate output
-    figs = []
+    figs: _Figs = []
 
     # time based plots
     if plots["innovs"]:
@@ -139,7 +168,7 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
             colormap = kw_colormap if kw_colormap is not None else "bwr_r"
             temp_opts = opts.__class__(opts)
             temp_opts.disp_xmin = temp_opts.disp_xmax = temp_opts.rms_xmin = temp_opts.rms_xmax = None
-            fig = plot_time_history(
+            fig = plot_time_history(  # type: ignore[misc]
                 "Innovs Before and After",
                 time,
                 data,
@@ -149,7 +178,7 @@ def plot_bpe_results(bpe_results, *, opts=None, plots=None, **kwargs):
                 skip_setup_plots=True,
                 **kwargs,
             )
-            fig.axes[0].set_xlabel("Innovation Number")
+            fig.axes[0].set_xlabel("Innovation Number")  # type: ignore[union-attr]
             setup_plots(fig, opts=temp_opts)
             figs.append(fig)
         else:

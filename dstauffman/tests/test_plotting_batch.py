@@ -7,7 +7,9 @@ Notes
 """
 
 # %% Imports
-from typing import List, Union
+from __future__ import annotations
+
+from typing import List, TYPE_CHECKING, Union
 import unittest
 
 from slog import capture_output
@@ -20,6 +22,9 @@ if HAVE_MPL:
     from matplotlib.figure import Figure
 if HAVE_NUMPY:
     import numpy as np
+
+if TYPE_CHECKING:
+    _N = np.typing.NDArray[np.float64]
 
 
 # %% plotting.plot_bpe_convergence
@@ -34,20 +39,20 @@ class Test_plotting_plot_bpe_convergence(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.costs: Union[np.ndarray, List[float]] = np.array([1, 0.1, 0.05, 0.01]) if HAVE_NUMPY else [1.0, 0.1, 0.05, 0.01]
+        self.costs: Union[_N, List[float]] = np.array([1, 0.1, 0.05, 0.01]) if HAVE_NUMPY else [1.0, 0.1, 0.05, 0.01]
         self.opts = plot.Opts()
         self.opts.show_plot = False
         self.figs: List[Figure] = []
 
     def test_nominal(self) -> None:
-        self.figs.append(plot.plot_bpe_convergence(self.costs, opts=self.opts))
+        self.figs.append(plot.plot_bpe_convergence(self.costs, opts=self.opts))  # type: ignore[arg-type]
 
     def test_only_two_costs(self) -> None:
         costs: List[float] = [self.costs[i] for i in [0, 3]]
         self.figs.append(plot.plot_bpe_convergence(costs, opts=self.opts))
 
     def test_no_opts(self) -> None:
-        self.figs.append(plot.plot_bpe_convergence(self.costs))
+        self.figs.append(plot.plot_bpe_convergence(self.costs))  # type: ignore[arg-type]
 
     def test_no_costs(self) -> None:
         self.figs.append(plot.plot_bpe_convergence([], opts=self.opts))

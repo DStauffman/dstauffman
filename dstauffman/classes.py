@@ -24,6 +24,7 @@ from typing import (
     Iterable,
     List,
     Literal,
+    Mapping,
     NoReturn,
     Optional,
     overload,
@@ -31,6 +32,7 @@ from typing import (
     Tuple,
     Type,
     TYPE_CHECKING,
+    TypedDict,
     TypeVar,
     Union,
 )
@@ -59,11 +61,21 @@ if HAVE_PANDAS:
 
 # %% Constants
 if TYPE_CHECKING:
+    from typing_extensions import NotRequired, Unpack
+
     _T = TypeVar("_T")
     _C = TypeVar("_C", int, "Counter")
     _SingleNum = Union[int, float, ndarray, datetime64]
     _Sets = Union[Set[str], FrozenSet[str]]
     _Time = Union[float, datetime64]
+
+    class _PPrintKwArgs(TypedDict):
+        name: NotRequired[str]
+        indent: NotRequired[int]
+        align: NotRequired[bool]
+        disp: NotRequired[bool]
+        offset: NotRequired[int]
+        max_elements: NotRequired[Optional[int]]
 
 
 # %% Functions - _frozen
@@ -77,7 +89,7 @@ def _frozen(set_: Callable) -> Callable:
 
     """
 
-    def set_attr(self, name, value):
+    def set_attr(self: Any, name: str, value: Any) -> None:
         r"""Define a custom set_attr function (instead of default setattr)."""
         if hasattr(self, name):
             # If attribute already exists, simply set it
@@ -99,14 +111,14 @@ def _frozen(set_: Callable) -> Callable:
 
 # %% Methods - save_hdf5
 def save_hdf5(
-    self,
+    self: Any,
     filename: Optional[Path] = None,
     *,
     file: Optional[h5py.File] = None,
     base_group: str = "self",
     meta: Optional[Dict[str, Any]] = None,
     exclusions: Optional[_Sets] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     r"""
     Save the object to disk as an HDF5 file.
@@ -141,7 +153,15 @@ def save_hdf5(
 
     """
 
-    def _save_data(self, *, file: h5py.File, base_group: str, meta, exclusions, **kwargs):
+    def _save_data(
+        self: Any,
+        *,
+        file: h5py.File,
+        base_group: str,
+        meta: Optional[Dict[str, Any]],
+        exclusions: Optional[_Sets],
+        **kwargs: Any,
+    ) -> None:
         # alias keyword options
         compression = kwargs.pop("compression", "gzip")
         shuffle = kwargs.pop("shuffle", True)
@@ -314,7 +334,7 @@ def load_hdf5(
 
 
 # %% Methods - save_pickle
-def save_pickle(self, filename: Optional[Path] = None) -> None:
+def save_pickle(self: Any, filename: Optional[Path] = None) -> None:
     r"""
     Save a class instances to a pickle file.
 
@@ -358,13 +378,12 @@ def load_pickle(cls: Type[_T], filename: Optional[Path] = None) -> _T:  # pylint
 
 # %% Methods - save_method
 def save_method(
-    self,
+    self: Any,
     filename: Optional[Path] = None,
-    use_hdf5: bool = True,
     *,
     meta: Optional[Dict[str, Any]] = None,
     exclusions: Optional[_Sets] = None,
-    **kwargs,
+    **kwargs: Any,
 ) -> None:
     r"""
     Save the object to disk.
@@ -373,55 +392,48 @@ def save_method(
     ----------
     filename : class pathlib.Path
         Name of the file to save
-    use_hdf5 : bool, optional, defaults to False
-        Write as *.hdf5 instead of *.pkl
+    meta : dict, optional
+        Meta information to save to the file, keys are strings, values can be anything saveable to HDF5 datasets
+    exclusions : set, optional
+        Names of fields to exclude when saving to file
 
     """
     # exit if no filename is given
     if filename is None:
         return
-    if not use_hdf5:
-        # Version 1 (Pickle):
-        if meta is not None:
-            raise ValueError("meta information cannot be used with pickle files.")
-        if exclusions is not None:
-            raise ValueError("exclusions cannot be used with pickle files.")
-        save_pickle(self, filename.with_suffix(".pkl"))
+    if hasattr(self, "_save_convert_hdf5") and callable(self._save_convert_hdf5):  # pylint: disable=protected-access
+        restore_kwargs = self._save_convert_hdf5()  # pylint: disable=protected-access
     else:
-        # Version 2 (HDF5):
-        if hasattr(self, "_save_convert_hdf5") and callable(self._save_convert_hdf5):  # pylint: disable=protected-access
-            restore_kwargs = self._save_convert_hdf5()  # pylint: disable=protected-access
+        restore_kwargs = {}
+    try:
+        additional_exclusions = self._exclude_fields()  # pylint: disable=protected-access
+    except AttributeError:
+        pass
+    else:
+        if exclusions is None:
+            exclusions = set(additional_exclusions)
         else:
-            restore_kwargs = {}
-        try:
-            additional_exclusions = self._exclude_fields()  # pylint: disable=protected-access
-        except AttributeError:
-            pass
-        else:
-            if exclusions is None:
-                exclusions = set(additional_exclusions)
-            else:
-                exclusions |= set(additional_exclusions)
-        save_hdf5(self, filename, meta=meta, exclusions=exclusions, **kwargs)
-        if hasattr(self, "_save_restore_hdf5") and callable(self._save_restore_hdf5):  # pylint: disable=protected-access
-            self._save_restore_hdf5(**restore_kwargs)  # pylint: disable=protected-access
+            exclusions |= set(additional_exclusions)
+    save_hdf5(self, filename, meta=meta, exclusions=exclusions, **kwargs)
+    if hasattr(self, "_save_restore_hdf5") and callable(self._save_restore_hdf5):  # pylint: disable=protected-access
+        self._save_restore_hdf5(**restore_kwargs)  # pylint: disable=protected-access
 
 
 # %% Methods - load_method
 @overload
-def load_method(cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[False] = ..., **kwargs) -> _T:
+def load_method(cls: Type[_T], filename: Optional[Path], return_meta: Literal[False] = ..., **kwargs: Any) -> _T:
     ...
 
 
 @overload
 def load_method(
-    cls: Type[_T], filename: Optional[Path], use_hdf5: bool, return_meta: Literal[True], **kwargs
+    cls: Type[_T], filename: Optional[Path], return_meta: Literal[True], **kwargs: Any
 ) -> Tuple[_T, Dict[str, Any]]:
     ...
 
 
 def load_method(
-    cls: Type[_T], filename: Optional[Path] = None, use_hdf5: bool = True, return_meta: bool = False, **kwargs
+    cls: Type[_T], filename: Optional[Path] = None, return_meta: bool = False, **kwargs: Any
 ) -> Union[_T, Tuple[_T, Dict[str, Any]]]:
     r"""
     Load the object from disk.
@@ -430,27 +442,20 @@ def load_method(
     ----------
     filename : class pathlib.Path
         Name of the file to load
-    use_hdf5 : bool, optional, defaults to False
-        Write as *.hdf5 instead of *.pkl
+    return_meta : bool, optional, defaults to False
+        Return any meta information found in the file
 
     """
     if filename is None:
         raise ValueError("No file specified to load.")
-    if not use_hdf5:
-        # Version 1 (Pickle):
-        if return_meta:
-            raise ValueError("meta information cannot be used with pickle files.")
-        out = load_pickle(cls, filename.with_suffix(".pkl"))
-    else:
-        # Version 2 (HDF5):
-        out = load_hdf5(cls, filename, return_meta=return_meta)  # type: ignore[call-overload]
-        if hasattr(out, "_save_restore_hdf5") and callable(out._save_restore_hdf5):  # pylint: disable=protected-access
-            out._save_restore_hdf5(**kwargs)  # pylint: disable=protected-access
-    return out
+    out = load_hdf5(cls, filename, return_meta=return_meta)  # type: ignore[call-overload]
+    if hasattr(out, "_save_restore_hdf5") and callable(out._save_restore_hdf5):  # pylint: disable=protected-access
+        out._save_restore_hdf5(**kwargs)  # pylint: disable=protected-access
+    return out  # type: ignore[no-any-return]
 
 
 # %% save_convert_hdf5
-def save_convert_hdf5(self, **kwargs: Any) -> Dict[str, bool]:
+def save_convert_hdf5(self: Any, **kwargs: Any) -> Dict[str, bool]:
     r"""Supporting class for saving to HDF5."""
     if "datetime_fields" in kwargs:
         datetime_fields = kwargs["datetime_fields"]
@@ -469,7 +474,7 @@ def save_convert_hdf5(self, **kwargs: Any) -> Dict[str, bool]:
 
 
 # %% save_restore_hdf5
-def save_restore_hdf5(self, *, convert_dates: bool = False, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) -> None:  # pylint: disable=unused-argument
     r"""Supporting class for loading from HDF5."""
     if convert_dates:
         assert HAVE_NUMPY, "Must have numpy to convert dates."
@@ -496,7 +501,7 @@ def save_restore_hdf5(self, *, convert_dates: bool = False, **kwargs: Any) -> No
 
 
 # %% pprint
-def pprint(self, return_text: bool = False, **kwargs: Any) -> Optional[str]:
+def pprint(self: Any, return_text: bool = False, **kwargs: Any) -> Optional[str]:
     r"""Displays a pretty print version of the class."""
     name = kwargs.pop("name") if "name" in kwargs else self.__class__.__name__
     text = pprint_dict(self.__dict__, name=name, **kwargs)
@@ -512,7 +517,7 @@ def pprint_dict(
     align: bool = True,
     disp: bool = True,
     offset: int = 0,
-    max_elements=None,
+    max_elements: Optional[int] = None,
 ) -> str:
     r"""
     Print all the fields and their values.
@@ -685,7 +690,7 @@ def chop_time(
 
 # %% Functions - subsample_class
 def subsample_class(
-    self, skip: int = 30, start: int = 0, skip_fields: Union[FrozenSet[str], Optional[Set[str]]] = None
+    self: Any, skip: int = 30, start: int = 0, skip_fields: Union[FrozenSet[str], Optional[Set[str]]] = None
 ) -> None:
     r"""
     Subsamples the class instance to every `skip` data point.
@@ -756,21 +761,21 @@ class Frozen:
         __setattr__ = _frozen(type.__setattr__)
 
     @overload
-    def pprint(self, return_text: Literal[True], **kwargs) -> str:
+    def pprint(self: Any, return_text: Literal[True], **kwargs: Unpack[_PPrintKwArgs]) -> str:
         ...
 
     @overload
-    def pprint(self, return_text: Literal[False], **kwargs) -> None:
+    def pprint(self: Any, return_text: Literal[False], **kwargs: Unpack[_PPrintKwArgs]) -> None:
         ...
 
     @overload
-    def pprint(self, **kwargs) -> Optional[str]:
+    def pprint(self: Any, **kwargs: Unpack[_PPrintKwArgs]) -> Optional[str]:
         ...
 
-    def pprint(self, return_text: bool = False, **kwargs) -> Optional[str]:
+    def pprint(self: Any, return_text: bool = False, **kwargs: Unpack[_PPrintKwArgs]) -> Optional[str]:
         r"""Displays a pretty print version of the class."""
         name = kwargs.pop("name") if "name" in kwargs else self.__class__.__name__
-        text = pprint_dict(self.__dict__, name=name, **kwargs)
+        text = pprint_dict(self.__dict__, name=name, **kwargs)  # type: ignore[misc]
         return text if return_text else None
 
 
@@ -778,7 +783,7 @@ class Frozen:
 class SaveAndLoad(type):
     r"""Metaclass to add "save" and "load" methods to the given class."""
 
-    def __init__(cls, name, bases, dct):
+    def __init__(cls, name: Any, bases: Any, dct: Any):
         r"""Add the "save" and "load" classes if they are not already present."""
         if not hasattr(cls, "save"):
             setattr(cls, "save", save_method)
@@ -796,7 +801,7 @@ class SaveAndLoad(type):
 class SaveAndLoadPickle(type):
     r"""Metaclass to add "save" and "load" methods to the given class."""
 
-    def __init__(cls, name, bases, dct):
+    def __init__(cls, name: Any, bases: Any, dct: Any):
         r"""Add the "save" and "load" classes if they are not already present."""
         if not hasattr(cls, "save"):
             setattr(cls, "save", save_pickle)
@@ -982,13 +987,13 @@ class FixedDict(dict):
 
     """
 
-    def __new__(cls, *args, **kwargs) -> FixedDict:
+    def __new__(cls, *args: Any, **kwargs: Any) -> FixedDict:
         r"""Creats a new instance of the class."""
         instance = super().__new__(cls, *args, **kwargs)
         instance._frozen = False
         return instance
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         super().__init__(*args, **kwargs)
         self._frozen: bool = False
 
@@ -1036,7 +1041,7 @@ class FixedDict(dict):
         r"""D.pop(k[,d]) -> v, is not valid on a fixeddict, as it removes the key."""
         raise NotImplementedError
 
-    def update(self, mapping=(), **kwargs) -> None:  # type: ignore[override]
+    def update(self, mapping: Mapping[Any, Any] = (), **kwargs: Any) -> None:  # type: ignore[assignment, override]
         r"""
         D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
 

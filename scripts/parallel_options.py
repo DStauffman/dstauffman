@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 # %% Functions
-def func(num: int, pause) -> dict[str, int]:
+def func(num: int, pause: int | float) -> dict[str, int]:
     """Long-running function that sometimes errors."""
     if num in {5, 15}:
         raise RuntimeError(f"Bad things happened at {num}.")

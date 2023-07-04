@@ -97,7 +97,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
 
     def test_bad_description(self) -> None:
         with self.assertRaises(AssertionError):
-            plot.make_time_plot(None, 0, 0)
+            plot.make_time_plot(None, 0, 0)  # type: ignore[arg-type]
 
     def test_0d(self) -> None:
         self.fig = plot.make_time_plot("", np.array(5), np.array(10.0))
@@ -248,7 +248,7 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
 
     def test_bad_data(self) -> None:
         with self.assertRaises(AssertionError):
-            plot.make_error_bar_plot(None, self.time, self.data, self.mins, self.maxs)
+            plot.make_error_bar_plot(None, self.time, self.data, self.mins, self.maxs)  # type: ignore[arg-type]
 
     def tearDown(self) -> None:
         if self.fig:
@@ -300,7 +300,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_nominal(self) -> None:
         self.return_err = False
-        self.figs = plot.make_difference_plot(
+        self.figs = plot.make_difference_plot(  # type: ignore[assignment]
             self.description,
             self.time_one,
             self.time_two,
@@ -619,7 +619,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         )
 
     def test_disp_bounds(self) -> None:
-        self.figs = plot.make_difference_plot(
+        self.figs = plot.make_difference_plot(  # type: ignore[assignment]
             self.description,
             self.time_one,
             self.time_two,
@@ -635,7 +635,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.time_one = np.arange(11).astype(float)
         self.time_two = np.arange(2, 13) + 0.5  # type: ignore[assignment]
         self.return_err = False
-        self.figs = plot.make_difference_plot(
+        self.figs = plot.make_difference_plot(  # type: ignore[assignment]
             self.description,
             self.time_one,
             self.time_two,
@@ -669,14 +669,14 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         )
 
     def test_none1(self) -> None:
-        self.figs = plot.make_difference_plot(self.description, self.time_one, None, self.data_one, None)
+        self.figs = plot.make_difference_plot(self.description, self.time_one, None, self.data_one, None)  # type: ignore[assignment]
 
     def test_none2(self) -> None:
-        self.figs = plot.make_difference_plot(self.description, None, self.time_two, None, self.data_two)
+        self.figs = plot.make_difference_plot(self.description, None, self.time_two, None, self.data_two)  # type: ignore[assignment]
 
     @patch("dstauffman.plotting.generic.logger")
     def test_none3(self, mock_logger: Mock) -> None:
-        self.figs = plot.make_difference_plot("", None, None, None, None)
+        self.figs = plot.make_difference_plot("", None, None, None, None)  # type: ignore[assignment]
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(
             LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', "diff", ""
@@ -684,7 +684,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_bad_inputs(self) -> None:
         with self.assertRaises(AssertionError):
-            plot.make_difference_plot(None, None, None, None, None)
+            plot.make_difference_plot(None, None, None, None, None)  # type: ignore[arg-type]
 
     def tearDown(self) -> None:
         if self.figs:
@@ -770,7 +770,7 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
 
     def test_bad_inputs(self) -> None:
         with self.assertRaises(AssertionError):
-            plot.make_categories_plot(None, self.time, self.data, self.cats)
+            plot.make_categories_plot(None, self.time, self.data, self.cats)  # type: ignore[arg-type]
 
     @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader_cats(self) -> None:

@@ -40,3 +40,21 @@ data.c   = cdat;
 data.nc  = {row_nums, col_nums, x};
 
 save('test_nested.mat', '-v7.3', 'col_nums', 'row_nums', 'mat_nums', 'x', 'enum', 'cdat', 'data');
+
+%% File 6 - raw binary data
+% big endian
+fid = fopen('test_big_endian.bin', 'wb', 'ieee-be');
+assert(fid ~= -1);
+fwrite(fid, [uint32(3), uint32(2^32 - 3)], 'uint32');
+fwrite(fid, [uint32(3), uint32(2^16 + 3)], 'int32');
+fwrite(fid, single([0 1.5 -2.333333333333333333 pi]), 'single');
+fwrite(fid, [0 -1.5 pi exp(1)], 'double');
+fclose(fid);
+% little endian
+fid = fopen('test_little_endian.bin', 'wb', 'ieee-le');
+assert(fid ~= -1);
+fwrite(fid, [uint32(3), uint32(2^32 - 3)], 'uint32');
+fwrite(fid, [uint32(3), uint32(2^16 + 3)], 'int32');
+fwrite(fid, single([0 1.5 -2.333333333333333333 pi]), 'single');
+fwrite(fid, [0 -1.5 pi exp(1)], 'double');
+fclose(fid);

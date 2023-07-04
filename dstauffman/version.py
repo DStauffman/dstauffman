@@ -7,7 +7,7 @@ Notes
 """
 
 # %% Constants
-version_info = (3, 3, 5)
+version_info = (3, 4, 1)
 
 # Below is data about the minor release history for potential use in deprecating older support.
 # For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html
@@ -22,6 +22,7 @@ Feb 22, 2022: dstauffman 3.0
 May 24, 2022: dstauffman 3.1
 Aug 04, 2022: dstauffman 3.2
 Aug 10, 2022: dstauffman 3.3
+Jun 30, 2023: dstauffman 3.4
 """
 
 # Historical notes:
@@ -37,3 +38,4 @@ Aug 10, 2022: dstauffman 3.3
 # v3.1 Added support for using poetry as your dependency manager.
 # v3.2 Change the way capture_output works internally and moved it to only be within slog.
 # v3.3 Move nubs and slog to be their own module level dependencies.
+# v3.4 Removed the option to save as pickle files, using only HDF5 instead.

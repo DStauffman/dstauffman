@@ -14,7 +14,7 @@ from dataclasses import dataclass
 import doctest
 import logging
 import sys
-from typing import List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 import unittest
 
 from slog import activate_logging, LogLevel, ReturnCodes
@@ -29,7 +29,6 @@ class _Flags:
     log_level: Optional[int]
     use_display: bool
     use_plotting: bool
-    use_hdf5: bool
 
 
 # %% Functions - _print_bad_command
@@ -171,18 +170,15 @@ def process_command_line_options(log_start: Optional[Union[bool, str]] = None) -
     # get other settings
     use_display = "-nodisp" not in sys.argv
     use_plotting = "-noplot" not in sys.argv
-    use_hdf5 = "-nohdf5" not in sys.argv
 
     # log any non-defaults
     # fmt: off
-    print_func = lambda x: print(x) if log_level is None else lambda x: logger.log(LogLevel.L3, x)  # pylint: disable=unnecessary-lambda-assignment
+    print_func: Callable[[str], None] = lambda x: print(x) if log_level is None else lambda x: logger.log(LogLevel.L3, x)  # type: ignore[assignment]  # pylint: disable=unnecessary-lambda-assignment
     # fmt: on
     if not use_display:
         print_func("Running without displaying any plots.")
     if not use_plotting:
         print_func("Running without making any plots.")
-    if not use_hdf5:
-        print_func("Running without saving to HDF5 files.")
 
     # do operations based on those settings
     if use_plotting and not use_display:
@@ -191,7 +187,7 @@ def process_command_line_options(log_start: Optional[Union[bool, str]] = None) -
         suppress_plots()
 
     # return the settings
-    flags = _Flags(log_level=log_level, use_display=use_display, use_plotting=use_plotting, use_hdf5=use_hdf5)
+    flags = _Flags(log_level=log_level, use_display=use_display, use_plotting=use_plotting)
 
     return flags
 

@@ -1,20 +1,30 @@
-"""Script to use the plot_phases directly or threw a wrapper."""
+"""Script to use the plot_phases directly or threw a wrapper."""  # pylint: disable=redefined-outer-name
 
 # %% Imports
-import datetime
+from __future__ import annotations
 
+import datetime
+from typing import Callable, TYPE_CHECKING
+
+from matplotlib.axis import Axis
+from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
 import numpy as np
 
 from dstauffman import convert_datetime_to_np, NP_ONE_SECOND
 from dstauffman.plotting import COLOR_LISTS, make_time_plot, plot_phases
 
+if TYPE_CHECKING:
+    _D = np.typing.NDArray[np.datetime64]
+
 
 # %% Functions
-def extra_plotter(time_phases, labels="Times", group_all=True, use_legend=False):  # pylint: disable=redefined-outer-name
+def extra_plotter_func(
+    time_phases: _D, labels: str = "Times", group_all: bool = True, use_legend: bool = False
+) -> Callable[[Figure, Axis], None]:  # pylint: disable=redefined-outer-name
     """Wrapper to the plot_phases to be passed into other functions."""
 
-    def _plot_phases(fig, ax):  # pylint: disable=redefined-outer-name,unused-argument
+    def _plot_phases(fig: Figure, ax: Axis) -> None:  # pylint: disable=redefined-outer-name,unused-argument
         for this_axes in ax:
             plot_phases(this_axes, time_phases, labels=labels, group_all=group_all, use_legend=use_legend)
 
@@ -48,7 +58,7 @@ if __name__ == "__main__":
     temp = np.arange(601)
     time2 = convert_datetime_to_np(datetime.datetime(2022, 11, 11, 11, 0, 0, 0)) + temp * NP_ONE_SECOND
     data2 = np.vstack([np.sin(temp / 10), np.cos(temp / 20)])
-    extra_plotter = extra_plotter(time_phases, labels="Times", group_all=True, use_legend=False)
+    extra_plotter = extra_plotter_func(time_phases, labels="Times", group_all=True, use_legend=False)
     fig2 = make_time_plot(
         "Same Times",
         time2,
@@ -56,5 +66,5 @@ if __name__ == "__main__":
         time_units="numpy",
         elements=("Sin", "Cos"),
         label_vert_lines=False,
-        extra_plotter=extra_plotter,
+        extra_plotter=extra_plotter,  # type: ignore[arg-type]
     )

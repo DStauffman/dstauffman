@@ -14,7 +14,7 @@ import contextlib
 import doctest
 import logging
 from pathlib import Path
-from typing import Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Literal, Optional, overload, Tuple, TYPE_CHECKING, TypedDict, Union
 import unittest
 
 from slog import LogLevel
@@ -27,10 +27,18 @@ if HAVE_NUMPY:
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
+    from typing_extensions import NotRequired, Unpack
 
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
     _F = Union[float, _N]
+
+    class _OutlierKwArgs(TypedDict):
+        num_iters: NotRequired[int]
+        return_stats: NotRequired[bool]
+        inplace: NotRequired[bool]
+        hardmax: NotRequired[Optional[float]]
+
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -123,17 +131,21 @@ def fix_rollover(data: _N, roll: float, axis: int) -> _N:
 
 
 @overload
-def fix_rollover(data: _I, roll: int, axis: Optional[int], check_accel: bool, **kwargs) -> _I:
+def fix_rollover(data: _I, roll: int, axis: Optional[int], check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _I:
     ...
 
 
 @overload
-def fix_rollover(data: _N, roll: float, axis: Optional[int], check_accel: bool, **kwargs) -> _N:
+def fix_rollover(data: _N, roll: float, axis: Optional[int], check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _N:
     ...
 
 
 def fix_rollover(
-    data: Union[_I, _N], roll: Union[int, float], axis: Optional[int] = None, check_accel: bool = False, **kwargs
+    data: Union[_I, _N],
+    roll: Union[int, float],
+    axis: Optional[int] = None,
+    check_accel: bool = False,
+    **kwargs: Unpack[_OutlierKwArgs],
 ) -> Union[_I, _N]:
     r"""
     Unrolls data that has finite ranges and rollovers.
@@ -173,7 +185,7 @@ def fix_rollover(
 
     """
 
-    def comp_roll(comp, roll_ix, mode):
+    def comp_roll(comp: _I, roll_ix: _I, mode: str) -> None:
         # add final field to roll_ix so that final partition can be addressed
         roll_aug = np.hstack((roll_ix, num_el - 1))
         # loop only on original length of roll_ix
@@ -195,10 +207,10 @@ def fix_rollover(
         out = np.zeros_like(data)
         if axis == 0:
             for i in range(data.shape[1]):
-                out[:, i] = fix_rollover(data[:, i], roll, check_accel=check_accel, **kwargs)  # type: ignore[arg-type]
+                out[:, i] = fix_rollover(data[:, i], roll, check_accel=check_accel, **kwargs)  # type: ignore[call-overload]
         elif axis == 1:
             for i in range(data.shape[0]):
-                out[i, :] = fix_rollover(data[i, :], roll, check_accel=check_accel, **kwargs)  # type: ignore[arg-type]
+                out[i, :] = fix_rollover(data[i, :], roll, check_accel=check_accel, **kwargs)  # type: ignore[call-overload]
         else:
             raise ValueError(f'Unexpected axis: "{axis}".')
         return out
@@ -233,7 +245,7 @@ def fix_rollover(
     # optionally check accelerations
     if check_accel:
         acc = np.diff(out, 2)
-        clean_acc = remove_outliers(acc, **kwargs)
+        clean_acc = remove_outliers(acc, **kwargs)  # type: ignore[call-overload]
         bad_ix = np.flatnonzero(np.isnan(clean_acc) & ~np.isnan(acc))
         if bad_ix.size > 0:
             comp_roll(comp, bad_ix[acc[bad_ix] < 0] + 1, "++")
@@ -245,7 +257,7 @@ def fix_rollover(
     # double check for remaining rollovers
     if np.any(find_in_range(np.diff(out), min_=roll / 2, max_=-roll / 2)):
         logger.log(LogLevel.L6, "A rollover was fixed recursively")
-        out = fix_rollover(out, roll, check_accel=check_accel, **kwargs)  # type: ignore[arg-type]
+        out = fix_rollover(out, roll, check_accel=check_accel, **kwargs)  # type: ignore[call-overload]
     return out
 
 

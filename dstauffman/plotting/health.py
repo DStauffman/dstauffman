@@ -12,7 +12,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import Optional
+from typing import List, Optional, Tuple, TYPE_CHECKING, Union
 import unittest
 import warnings
 
@@ -40,10 +40,21 @@ from dstauffman.plotting.support import (
 
 if HAVE_MPL:
     import matplotlib as mpl
+    from matplotlib.axes import Axes
+    from matplotlib.colors import Colormap, ListedColormap
+    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
     from matplotlib.ticker import StrMethodFormatter
 if HAVE_NUMPY:
     import numpy as np
+
+if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
+
+    _CM = Union[str, Colormap, ListedColormap]
+    _I = np.typing.NDArray[np.int_]
+    _M = np.typing.NDArray[np.float64]  # 2D
+    _N = np.typing.NDArray[np.float64]
 
 
 # %% Classes - TruthPlotter
@@ -75,10 +86,10 @@ class TruthPlotter(Frozen):
 
     def __init__(
         self,
-        time: Optional[np.ndarray] = None,
-        data: Optional[np.ndarray] = None,
-        lo: Optional[np.ndarray] = None,
-        hi: Optional[np.ndarray] = None,
+        time: Optional[_N] = None,
+        data: Optional[_M] = None,
+        lo: Optional[_N] = None,
+        hi: Optional[_N] = None,
         type_: str = "normal",
         name: str = "Observed",
     ):
@@ -107,7 +118,7 @@ class TruthPlotter(Frozen):
         return self.data is None and self.data_lo is None and self.data_hi is None
 
     @staticmethod
-    def get_data(data, scale=1, ix=None):
+    def get_data(data: Optional[_M], scale: float = 1.0, ix: Optional[int] = None) -> Optional[_M]:
         r"""Scale and index the data, returning None if it is not there."""
         if data is None:
             return data
@@ -115,7 +126,9 @@ class TruthPlotter(Frozen):
             return scale * data
         return scale * data[:, ix]
 
-    def plot_truth(self, ax, scale=1, ix=None, *, hold_xlim=True, hold_ylim=False):
+    def plot_truth(
+        self, ax: Axes, scale: float = 1.0, ix: Optional[int] = None, *, hold_xlim: bool = True, hold_ylim: bool = False
+    ) -> None:
         r"""Add the information in the TruthPlotter instance to the given axes, with the optional scale."""
         # check for null case
         if self.is_null:
@@ -132,20 +145,20 @@ class TruthPlotter(Frozen):
             if this_data is not None and not np.all(np.isnan(this_data)):
                 ax.plot(self.time, this_data, ".-", color="0.5", linewidth=2, zorder=6)
             this_data = self.get_data(self.data_hi, scale, ix)
-            if self.data_hi is not None and not np.all(np.isnan(this_data)):
+            if self.data_hi is not None and not np.all(np.isnan(this_data)):  # type: ignore[arg-type]
                 ax.plot(self.time, this_data, ".-", color="0.5", linewidth=2, zorder=6)
         elif self.type_ == "errorbar":
             if self.data_lo is not None and self.data_hi is not None:
                 if ix is None:
-                    yerr = np.vstack((self.data - self.data_lo, self.data_hi - self.data))
+                    yerr = np.vstack((self.data - self.data_lo, self.data_hi - self.data))  # type: ignore[operator]
                     ax.errorbar(
-                        self.time, scale * self.data, scale * yerr, linestyle="None", marker="None", ecolor="c", zorder=6
+                        self.time, scale * self.data, scale * yerr, linestyle="None", marker="None", ecolor="c", zorder=6  # type: ignore[operator]
                     )
                 else:
-                    yerr = np.vstack((self.data[:, ix] - self.data_lo[:, ix], self.data_hi[:, ix] - self.data[:, ix])).T
+                    yerr = np.vstack((self.data[:, ix] - self.data_lo[:, ix], self.data_hi[:, ix] - self.data[:, ix])).T  # type: ignore[index]
                     ax.errorbar(
                         self.time,
-                        scale * self.data[:, ix],
+                        scale * self.data[:, ix],  # type: ignore[index]
                         scale * yerr[:, ix],
                         linestyle="None",
                         marker="None",
@@ -163,19 +176,19 @@ class TruthPlotter(Frozen):
 
 # %% Functions - plot_health_time_history
 def plot_health_time_history(
-    time,
-    data,
-    label,
-    units="",
-    opts=None,
+    time: ArrayLike,
+    data: Optional[ArrayLike],
+    label: str,
+    units: str = "",
+    opts: Optional[Opts] = None,
     *,
-    legend=None,
-    second_units=None,
-    ignore_empties=False,
-    data_lo=None,
-    data_hi=None,
-    colormap=None,
-):
+    legend: Optional[List[str]] = None,
+    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    ignore_empties: bool = False,
+    data_lo: Optional[_N] = None,
+    data_hi: Optional[_N] = None,
+    colormap: Optional[_CM] = None,
+) -> Figure:
     r"""
     Plot multiple metrics over time.
 
@@ -252,29 +265,29 @@ def plot_health_time_history(
     if ignore_plot_data(data, ignore_empties):
         print(" " + label + " plot skipped due to missing data.")
         return None
-    assert time.ndim == 1, "Time must be a 1D array."
+    assert time.ndim == 1, "Time must be a 1D array."  # type: ignore[union-attr]
 
     # ensure that data is at least 2D
     if data.ndim == 0:
         data = np.atleast_2d(data)
     elif data.ndim == 1:
-        data = data[:, np.newaxis]  # forces to grow in second dimension, instead of first
+        data = data[:, np.newaxis]  # forces to grow in second dimension, instead of first  # type: ignore[union-attr]
 
     # get shape information
-    if data.ndim == 2:
+    if data.ndim == 2:  # type: ignore[union-attr]
         normal = True
         num_loops = 1
-        num_bins = data.shape[1]
+        num_bins = data.shape[1]  # type: ignore[union-attr]
         names = [""]
-    elif data.ndim == 3:
-        assert len(opts.names) == data.shape[1], "Names must match the number of channels is the 3rd axis of data."
+    elif data.ndim == 3:  # type: ignore[union-attr]
+        assert len(opts.names) == data.shape[1], "Names must match the number of channels is the 3rd axis of data."  # type: ignore[union-attr]
         normal = False
-        num_loops = data.shape[1]
-        num_bins = data.shape[2]
+        num_loops = data.shape[1]  # type: ignore[union-attr]
+        num_bins = data.shape[2]  # type: ignore[union-attr]
         names = opts.names
     else:
         assert False, "Data must be 0D to 3D array."
-    assert time.shape[0] == data.shape[0], f"Time and data must be the same length. Current {time.shape=} and {data.shape=}"
+    assert time.shape[0] == data.shape[0], f"Time and data must be the same length. Current {time.shape=} and {data.shape=}"  # type: ignore[union-attr]
     if legend is not None:
         assert len(legend) == num_bins, "Number of data channels does not match the legend."
     else:
@@ -295,14 +308,14 @@ def plot_health_time_history(
         for j in range(num_loops):
             this_name = names[j] + " - " if names[j] else ""
             if normal:
-                this_data = data[:, i]
+                this_data = data[:, i]  # type: ignore[call-overload, index]
                 this_data_lo = data_lo[:, i] if data_lo is not None else None
                 this_data_hi = data_hi[:, i] if data_hi is not None else None
             else:
-                this_data = data[:, j, i]
+                this_data = data[:, j, i]  # type: ignore[call-overload, index]
                 this_data_lo = data_lo[:, j, i] if data_lo is not None else None
                 this_data_hi = data_hi[:, j, i] if data_hi is not None else None
-            if not ignore_plot_data(this_data, ignore_empties):
+            if not ignore_plot_data(this_data, ignore_empties):  # type: ignore[arg-type]
                 color_dt = j * 0.5 / num_loops
                 if j // 2:
                     this_color = whitten(cm.get_color(i), white=(0, 0, 0, 1), dt=color_dt)
@@ -339,20 +352,20 @@ def plot_health_time_history(
 
 # %% Functions - plot_health_monte_carlo
 def plot_health_monte_carlo(
-    time,
-    data,
-    label,
-    units="",
-    opts=None,
+    time: ArrayLike,
+    data: ArrayLike,
+    label: str,
+    units: str = "",
+    opts: Optional[Opts] = None,
     *,
-    plot_indiv=True,
-    truth=None,
-    plot_as_diffs=False,
-    second_units=None,
-    plot_sigmas=1,
-    plot_confidence=0,
-    colormap=None,
-):
+    plot_indiv: bool = True,
+    truth: Optional[TruthPlotter] = None,
+    plot_as_diffs: bool = False,
+    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    plot_sigmas: float = 1.0,
+    plot_confidence: float = 0.0,
+    colormap: Optional[_CM] = None,
+) -> Figure:
     r"""
     Plot the given data channel versus time, with a generic label argument.
 
@@ -447,25 +460,25 @@ def plot_health_monte_carlo(
         )
 
     # get number of different series
-    num_series = data.shape[1]
+    num_series = data.shape[1]  # type: ignore[union-attr]
 
     if plot_as_diffs:
         # build colormap
-        cm = ColorMap(colormap, num_colors=data.shape[1])
+        cm = ColorMap(colormap, num_colors=data.shape[1])  # type: ignore[union-attr]
         # calculate RMS
         if rms_in_legend:
-            rms_data = np.atleast_1d(rms(unit_mult * data, axis=0, ignore_nans=True))
+            rms_data = np.atleast_1d(rms(unit_mult * data, axis=0, ignore_nans=True))  # type: ignore[operator]
     else:
         # calculate the mean and std of data, while disabling warnings for time points that are all NaNs
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="Mean of empty slice")
             warnings.filterwarnings("ignore", message="Degrees of freedom <= 0 for slice.")
-            mean = np.nanmean(data, axis=1)
-            std = np.nanstd(data, axis=1)
+            mean = np.nanmean(data, axis=1)  # type: ignore[arg-type]
+            std = np.nanstd(data, axis=1)  # type: ignore[arg-type]
 
         # calculate an RMS
         if rms_in_legend:
-            rms_data = rms(unit_mult * mean, axis=0, ignore_nans=True)
+            rms_data = rms(unit_mult * mean, axis=0, ignore_nans=True)  # type: ignore[assignment]
 
     # alias the title
     this_title = label + " vs. Time"
@@ -476,13 +489,13 @@ def plot_health_monte_carlo(
     ax = fig.add_subplot(111)
     if plot_as_diffs:
         cm.set_colors(ax)
-        for ix in range(data.shape[1]):
+        for ix in range(data.shape[1]):  # type: ignore[union-attr]
             this_label = opts.get_names(ix)
             if not this_label:
                 this_label = f"Series {ix + 1}"
             if rms_in_legend:
                 this_label += f" (RMS: {rms_data[ix]:.2f})"
-            ax.plot(time, data[:, ix], ".-", linewidth=2, zorder=10, label=this_label)
+            ax.plot(time, data[:, ix], ".-", linewidth=2, zorder=10, label=this_label)  # type: ignore[call-overload, index]
     else:
         this_label = opts.get_names(0) + label
         if rms_in_legend:
@@ -499,9 +512,9 @@ def plot_health_monte_carlo(
             ax.plot(time, mean + conf_std, ".-", markersize=2, color="#2e8b57", zorder=7, label=conf_label)
             ax.plot(time, mean - conf_std, ".-", markersize=2, color="#2e8b57", zorder=7)
         # inidividual line plots
-        if plot_indiv and data.ndim > 1:
+        if plot_indiv and data.ndim > 1:  # type: ignore[union-attr]
             for ix in range(num_series):
-                ax.plot(time, data[:, ix], color="0.75", zorder=1)
+                ax.plot(time, data[:, ix], color="0.75", zorder=1)  # type: ignore[call-overload, index]
     # optionally plot truth (without changing the axis limits)
     if truth is not None:
         truth.plot_truth(ax)
@@ -527,7 +540,14 @@ def plot_health_monte_carlo(
 
 
 # %% Functions - plot_icer
-def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
+def plot_icer(
+    qaly: _N,
+    cost: _N,
+    ix_front: int,
+    baseline: Optional[int] = None,
+    names: Optional[List[str]] = None,
+    opts: Optional[Opts] = None,
+) -> Figure:
     r"""Plot the icer results."""
     # check optional inputs
     if opts is None:
@@ -546,11 +566,12 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
     if baseline is None:
         ax.plot(np.hstack((0, qaly[ix_front])), np.hstack((0, cost[ix_front])), "r-", label="ICERs")
     else:
-        ax.plot(np.hstack((0, qaly[ix_front[0]])), np.hstack((0, cost[ix_front[0]])), "r:")
+        ax.plot(np.hstack((0, qaly[ix_front[0]])), np.hstack((0, cost[ix_front[0]])), "r:")  # type: ignore[arg-type, index]
         ax.plot(np.hstack((qaly[baseline], qaly[ix_front])), np.hstack((cost[baseline], cost[ix_front])), "r-", label="ICERs")
     # Label each point
     dy = (lim[3] - lim[2]) / 100
     for i in range(cost.size):
+        assert names is not None, "You must give a list of names."
         ax.annotate(
             names[i],
             xy=(qaly[i], cost[i] + dy),
@@ -574,17 +595,17 @@ def plot_icer(qaly, cost, ix_front, baseline=None, names=None, opts=None):
 
 # %% Functions - plot_population_pyramid
 def plot_population_pyramid(
-    age_bins,
-    male_per,
-    fmal_per,
-    title="Population Pyramid",
+    age_bins: Union[_I, _N, List[int]],
+    male_per: Union[_I, _N, List[int]],
+    fmal_per: Union[_I, _N, List[int]],
+    title: str = "Population Pyramid",
     *,
-    opts=None,
-    name1="Male",
-    name2="Female",
-    color1="xkcd:blue",
-    color2="xkcd:red",
-):
+    opts: Optional[Opts] = None,
+    name1: str = "Male",
+    name2: str = "Female",
+    color1: Union[str, Tuple[float, ...]] = "xkcd:blue",
+    color2: Union[str, Tuple[float, ...]] = "xkcd:red",
+) -> Figure:
     r"""
     Plot the standard population pyramid.
 

@@ -49,8 +49,6 @@ else:
     from math import inf, isnan, nan  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    from mypy_extensions import DefaultNamedArg
-
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
 
@@ -262,7 +260,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     >>> bpe_results = BpeResults()
 
     """
-    save: Callable[[Optional[Path], DefaultNamedArg(bool, "use_hdf5")], None]  # noqa: F821
+    save: Callable[[Optional[Path]], None]  # noqa: F821
 
     def __init__(self) -> None:
         # fmt: off
@@ -360,7 +358,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         pprint_dict(dct2, name="Final parameters:", indent=8)
 
     @classmethod
-    def load(cls, filename: Optional[Path] = None, use_hdf5: bool = True) -> BpeResults:
+    def load(cls, filename: Optional[Path] = None) -> BpeResults:
         r"""
         Load the object from disk.
 
@@ -368,11 +366,9 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         ----------
         filename : classs pathlib.Path
             Name of the file to load
-        use_hdf5 : bool, optional, defaults to False
-            Write as *.hdf5 instead of *.pkl
 
         """
-        out: BpeResults = load_method(cls, filename=filename, use_hdf5=use_hdf5)
+        out: BpeResults = load_method(cls, filename=filename)
         out.num_evals = int(out.num_evals)
         out.num_iters = int(out.num_iters)
         out.costs = list(out.costs)

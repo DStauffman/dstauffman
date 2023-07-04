@@ -7,8 +7,10 @@ Notes
 """
 
 # %% Imports
-from collections import OrderedDict
+from __future__ import annotations
+
 import doctest
+from typing import List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman.constants import HAVE_NUMPY, HAVE_PANDAS
@@ -18,9 +20,55 @@ if HAVE_NUMPY:
 if HAVE_PANDAS:
     import pandas as pd
 
+if TYPE_CHECKING:
+    from matplotlib.figure import Figure
+    from numpy.typing import ArrayLike
+
+    from dstauffman.plotting import Opts as _Opts
+
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+
 
 # %% Functions - dist_enum_and_mons
-def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1, alpha=1, beta=1):
+@overload
+def dist_enum_and_mons(
+    num: int,
+    distribution: ArrayLike,
+    prng: np.random.RandomState,
+    *,
+    max_months: Literal[None] = ...,
+    start_num: int,
+    alpha: float,
+    beta: float,
+) -> _I:
+    ...
+
+
+@overload
+def dist_enum_and_mons(
+    num: int,
+    distribution: ArrayLike,
+    prng: np.random.RandomState,
+    *,
+    max_months: Union[int, _I],
+    start_num: int,
+    alpha: float,
+    beta: float,
+) -> _I:
+    ...
+
+
+def dist_enum_and_mons(
+    num: int,
+    distribution: ArrayLike,
+    prng: np.random.RandomState,
+    *,
+    max_months: Optional[Union[int, _I]] = None,
+    start_num: int = 1,
+    alpha: float = 1.0,
+    beta: float = 1.0,
+) -> Union[_I, Tuple[_I, _I]]:
     r"""
     Create a distribution for an enumerated state with a duration (such as a disease status).
 
@@ -36,9 +84,9 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
         Maximum number of months for being in each state
     start_num : int, optional
         Number to start counting from, default is 1
-    alpha : int, optional
+    alpha : float, optional
         The alpha parameter for the beta distribution
-    beta : int, optional
+    beta : float, optional
         The beta parameter for the beta distribution
 
     Returns
@@ -81,15 +129,22 @@ def dist_enum_and_mons(num, distribution, prng, *, max_months=None, start_num=1,
     # set the number of months in this state based on a beta distribution with the given
     # maximum number of months in each state
     if max_months is None:
-        return state
+        return state  # type: ignore[no-any-return]
     if np.isscalar(max_months):
-        max_months = np.full(len(distribution), max_months)
-    mons = np.ceil(max_months[state - start_num] * prng.beta(alpha, beta, num)).astype(int)
+        max_months = np.full(len(distribution), max_months)  # type: ignore[arg-type]
+    mons = np.ceil(max_months[state - start_num] * prng.beta(alpha, beta, num)).astype(int)  # type: ignore[index]
     return (state, mons)
 
 
 # %% Functions - icer
-def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
+def icer(
+    cost: ArrayLike,
+    qaly: ArrayLike,
+    names: Optional[List[str]] = None,
+    baseline: Optional[int] = None,
+    make_plot: bool = False,
+    opts: Optional[_Opts] = None,
+) -> Tuple[_N, _N, _N, _N, pd.DataFrame, Optional[Figure]]:
     r"""
     Calculate the incremental cost effectiveness ratios with steps to throw out dominated strategies.
 
@@ -161,13 +216,13 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     fig = None
 
     # check inputs
-    assert np.all(cost > 0), "Costs must be positive."
-    assert np.all(qaly > 0), "Qalys must be positive."
-    assert cost.shape == qaly.shape, "Cost and Qalys must have same size."
-    assert cost.size > 0, "Costs and Qalys cannot be empty."
+    assert np.all(cost > 0), "Costs must be positive."  # type: ignore[operator]
+    assert np.all(qaly > 0), "Qalys must be positive."  # type: ignore[operator]
+    assert cost.shape == qaly.shape, "Cost and Qalys must have same size."  # type: ignore[union-attr]
+    assert cost.size > 0, "Costs and Qalys cannot be empty."  # type: ignore[union-attr]
 
     # alias the number of strategies
-    num = cost.size
+    num = cost.size  # type: ignore[union-attr]
 
     # build an index order variable to keep track of strategies
     keep = list(range(num))
@@ -175,8 +230,8 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     # enter processing loop
     while True:
         # pull out current values based on evolving order mask
-        this_cost = cost[keep]
-        this_qaly = qaly[keep]
+        this_cost = cost[keep]  # type: ignore[call-overload, index]
+        this_qaly = qaly[keep]  # type: ignore[call-overload, index]
 
         # sort by cost
         ix_sort = np.argsort(this_cost)
@@ -212,7 +267,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
         break
 
     # save the final ordering
-    order = np.full(cost.shape, np.nan)
+    order = np.full(cost.shape, np.nan)  # type: ignore[union-attr]
     order[keep] = ix_sort
 
     # build an index to pull data out
@@ -221,8 +276,8 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
 
     # recalculate based on given baseline
     if baseline is not None:
-        inc_cost = np.diff(np.hstack((cost[baseline], cost[ix])))
-        inc_qaly = np.diff(np.hstack((qaly[baseline], qaly[ix])))
+        inc_cost = np.diff(np.hstack((cost[baseline], cost[ix])))  # type: ignore[arg-type, index]
+        inc_qaly = np.diff(np.hstack((qaly[baseline], qaly[ix])))  # type: ignore[arg-type, index]
         icer_out = np.divide(inc_cost, inc_qaly, out=np.full(inc_cost.shape, np.nan), where=inc_qaly != 0)
 
     # output as dataframe
@@ -238,10 +293,10 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
     full_inc_qalys[ix] = inc_qaly
     full_icers[ix] = icer_out
     # make into dictionary with more explicit column names
-    data = OrderedDict()
+    data: dict[str, list[str] | _N] = {}
     data["Strategy"] = names
-    data["Cost"] = cost
-    data["QALYs"] = qaly
+    data["Cost"] = cost  # type: ignore[assignment]
+    data["QALYs"] = qaly  # type: ignore[assignment]
     data["Increment_Costs"] = full_inc_costs
     data["Incremental_QALYs"] = full_inc_qalys
     data["ICER"] = full_icers
@@ -256,7 +311,7 @@ def icer(cost, qaly, names=None, baseline=None, make_plot=False, opts=None):
         # delayed import to eliminate circular imports
         from dstauffman.plotting import plot_icer  # pylint: disable=import-outside-toplevel
 
-        fig = plot_icer(qaly, cost, ix, baseline=baseline, names=names, opts=opts)
+        fig = plot_icer(qaly, cost, ix, baseline=baseline, names=names, opts=opts)  # type: ignore[arg-type]
 
     return (inc_cost, inc_qaly, icer_out, order, icer_data, fig)
 

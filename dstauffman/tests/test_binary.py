@@ -11,6 +11,9 @@ import unittest
 
 import dstauffman as dcs
 
+if dcs.HAVE_NUMPY:
+    import numpy as np
+
 
 # %% _pad_string
 class Test__pad_string(unittest.TestCase):
@@ -116,6 +119,23 @@ class Test_int2hex(unittest.TestCase):
     def test_upper(self) -> None:
         hex_str = dcs.int2hex(0xFEDCBA0, upper=True, sep=4)
         self.assertEqual(hex_str, "0xFED_CBA0")
+
+
+# %% split_bits
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_split_bits(unittest.TestCase):
+    r"""
+    Tests the dcs.split_bits function with the following cases:
+        TBD
+    """
+
+    def test_nominal(self) -> None:
+        bits = dcs.split_bits(np.array([0, 1, 2**16, 2**32 - 1], dtype=np.uint32))
+        exp = np.zeros((32, 4), dtype=bool)
+        exp[0, 1] = True
+        exp[16, 2] = True
+        exp[:, 3] = True
+        np.testing.assert_array_equal(bits, exp)
 
 
 # %% Unit test execution

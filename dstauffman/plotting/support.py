@@ -13,6 +13,7 @@ import datetime
 import doctest
 from functools import partial
 import gc
+import io
 from itertools import repeat
 import operator
 import os
@@ -20,7 +21,7 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Any, Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, TypedDict, Union
 import unittest
 import warnings
 
@@ -91,6 +92,24 @@ try:
 except ModuleNotFoundError:
     pass
 
+if TYPE_CHECKING:
+    _B = np.typing.NDArray[np.bool_]
+    _CM = Union[str, colors.Colormap, colors.ListedColormap]  # + ColorMap defined below
+    _D = np.typing.NDArray[np.datetime64]
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+    _M = np.typing.NDArray[np.float64]  # 2D
+    _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
+    _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N]
+    _Data = Union[int, float, _N, _M, List[_N], Tuple[_N]]
+
+    class _RmsIndices(TypedDict):
+        pts: List[int]
+        one: _B
+        two: _B
+        overlap: _B
+
+
 # %% Constants
 # Default colormap to use on certain plots
 DEFAULT_COLORMAP: str = "Dark2"  # "Paired", "Dark2", "tab10", "tab20"
@@ -147,7 +166,7 @@ _HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
 class _HoverButton(QPushButton):
     r"""Custom button that allows hovering and icons."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
         # initialize
         super().__init__(*args, **kwargs)
         # Enable mouse hover event tracking
@@ -159,11 +178,11 @@ class _HoverButton(QPushButton):
                 self.setIcon(this_arg)
                 self.setIconSize(QSize(24, 24))
 
-    def enterEvent(self, event):  # pylint: disable=unused-argument
+    def enterEvent(self, event: Any) -> None:  # pylint: disable=unused-argument
         r"""Draw border on hover."""
         self.setStyleSheet("border: 1px; border-style: solid;")  # pragma: no cover
 
-    def leaveEvent(self, event):  # pylint: disable=unused-argument
+    def leaveEvent(self, event: Any) -> None:  # pylint: disable=unused-argument
         r"""Delete border after hover."""
         self.setStyleSheet("border: 0px;")  # pragma: no cover
 
@@ -191,7 +210,7 @@ class MyCustomToolbar:
 
     """
 
-    def __init__(self, fig):
+    def __init__(self, fig: Figure) -> None:
         r"""Initialize the custom toolbar."""
         # check to see if a display exists and if not, then return without creating buttons
         if not _HAVE_DISPLAY:
@@ -200,7 +219,7 @@ class MyCustomToolbar:
         if QApplication.instance() is None:
             self.qapp = QApplication(sys.argv)  # pragma: no cover
         else:
-            self.qapp = QApplication.instance()
+            self.qapp = QApplication.instance()  # type: ignore[assignment]
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
         # to determine which figure actually triggered the button events.)
         self.fig_number = fig.number
@@ -226,11 +245,11 @@ class MyCustomToolbar:
         fig.canvas.toolbar.addWidget(self.btn_close_all)
         self.btn_close_all.clicked.connect(self._close_all)
 
-    def _close_all(self, *args):  # pylint: disable=unused-argument
+    def _close_all(self, *args: Any) -> None:  # pylint: disable=unused-argument
         r"""Close all the currently open plots."""
         close_all()
 
-    def next_plot(self, *args):  # pylint: disable=unused-argument
+    def next_plot(self, *args: Any) -> None:  # pylint: disable=unused-argument
         r"""Bring up the next plot in the series."""
         # get all the figure numbers
         all_figs = plt.get_fignums()
@@ -250,7 +269,7 @@ class MyCustomToolbar:
         # make it the active window
         fig.canvas.manager.window.raise_()
 
-    def prev_plot(self, *args):  # pylint: disable=unused-argument
+    def prev_plot(self, *args: Any) -> None:  # pylint: disable=unused-argument
         r"""Bring up the previous plot in the series."""
         # get all the figure numbers
         all_figs = plt.get_fignums()
@@ -310,12 +329,18 @@ class ColorMap(Frozen):
 
     """
 
-    def __init__(self, colormap=DEFAULT_COLORMAP, low=0, high=1, num_colors=None):
+    def __init__(
+        self,
+        colormap: Union[str, colors.ListedColormap, colors.Colormap, ColorMap] = DEFAULT_COLORMAP,
+        low: Union[int, float] = 0,
+        high: Union[int, float] = 1,
+        num_colors: Optional[int] = None,
+    ) -> None:
         self.num_colors = num_colors
         # check for optional inputs
         if self.num_colors is not None:
             low = 0
-            high = num_colors - 1
+            high = num_colors - 1  # type: ignore[operator]
         elif isinstance(colormap, colors.ListedColormap):
             low = 0
             high = colormap.N - 1
@@ -332,22 +357,22 @@ class ColorMap(Frozen):
                 low = 0
                 high = cmap.N - 1
         if cmap is None:
-            self.smap = colormap.get_smap()
+            self.smap = colormap.get_smap()  # type: ignore[union-attr]
         else:
             cnorm = colors.Normalize(vmin=low, vmax=high)
             self.smap = cmx.ScalarMappable(norm=cnorm, cmap=cmap)
         # must initialize the empty scalar mapplable to show the colorbar correctly
         self.smap.set_array([])
 
-    def get_color(self, value):
+    def get_color(self, value: Union[float, int]) -> Tuple[float, float, float, float]:
         r"""Get the color based on the scalar value."""
-        return self.smap.to_rgba(value)
+        return self.smap.to_rgba(value)  # type: ignore[no-any-return]
 
-    def get_smap(self):
+    def get_smap(self) -> cmx.ScalarMappable:
         r"""Return the smap being used."""
         return self.smap
 
-    def set_colors(self, ax):
+    def set_colors(self, ax: Axes) -> None:
         r"""Set the colors for the given axes based on internal instance information."""
         if self.num_colors is None:
             raise ValueError("You can't call ColorMap.set_colors unless it was given a num_colors input.")
@@ -471,7 +496,7 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
 
 
 # %% Functions - ignore_plot_data
-def ignore_plot_data(data, ignore_empties, col=None):
+def ignore_plot_data(data: Optional[_Data], ignore_empties: bool, col: Optional[int] = None) -> bool:
     r"""
     Determine whether to ignore this data or not.
 
@@ -515,8 +540,8 @@ def ignore_plot_data(data, ignore_empties, col=None):
     if col is None:
         ignore = np.all((data == 0) | np.isnan(data))
     else:
-        ignore = np.all((data[:, col] == 0) | np.isnan(data[:, col]))
-    return ignore
+        ignore = np.all((data[:, col] == 0) | np.isnan(data[:, col]))  # type: ignore[call-overload, index]
+    return ignore  # type: ignore[return-value]
 
 
 # %% Functions - whitten
@@ -842,7 +867,9 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
 
 
 # %% Functions - disp_xlimits
-def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
+def disp_xlimits(
+    fig_or_axis: Union[Figure, Axes, List[Union[Figure, Axes]]], xmin: Optional[_Time] = None, xmax: Optional[_Time] = None
+) -> None:
     r"""
     Set the xlimits to the specified xmin and xmax.
 
@@ -901,14 +928,14 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
         (old_xmin, old_xmax) = this_axis.get_xlim()
         # set the new limits
         if xmin is not None:
-            if is_datetime(xmin):
+            if is_datetime(xmin):  # type: ignore[arg-type]
                 new_xmin = np.maximum(date2num(xmin), old_xmin)
             else:
                 new_xmin = np.max([xmin, old_xmin])
         else:
             new_xmin = old_xmin
         if xmax is not None:
-            if is_datetime(xmax):
+            if is_datetime(xmax):  # type: ignore[arg-type]
                 new_xmax = np.minimum(date2num(xmax), old_xmax)
             else:
                 new_xmax = np.min([xmax, old_xmax])
@@ -924,7 +951,16 @@ def disp_xlimits(fig_or_axis, xmin=None, xmax=None):
 
 
 # %% Functions - zoom_ylim
-def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=None, pad=0.1):
+def zoom_ylim(
+    ax: Axes,
+    time: Optional[_Times] = None,
+    data: Optional[_Data] = None,
+    *,
+    t_start: _Time = -inf,
+    t_final: _Time = inf,
+    channel: Optional[int] = None,
+    pad: float = 0.1,
+) -> None:
     r"""
     Zooms the Y-axis to the data for the given time bounds, with an optional pad.
 
@@ -942,7 +978,7 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
         Final time to zoom data to
     channel : int, optional
         Column within 2D data to look at
-    pad : int
+    pad : float
         Amount of pad, as a percentage of delta range, to show around the plot bounds
 
     Notes
@@ -986,32 +1022,32 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
     if data is None:
         data = np.hstack([artist.get_ydata() for artist in ax.lines])
     # exit if the plotted data are not numeric
-    if not np.issubdtype(data.dtype, np.number):
+    if not np.issubdtype(data.dtype, np.number):  # type: ignore[union-attr]
         return
     # convert datetimes as appropriate for comparisons
     if is_datetime(time):
         time = date2num(time)
     # find the relevant time indices
-    ix_time = (time >= t_start) & (time <= t_final)
+    ix_time = (time >= t_start) & (time <= t_final)  # type: ignore[call-overload, operator]
     # exit if no data is in this time window
     if ~np.any(ix_time):
         warnings.warn("No data matched the given time interval.")
         return
     # pull out the minimums/maximums from the data
     if channel is None:
-        if data.ndim == 1:
-            this_ymin = np.min(data[ix_time])
-            this_ymax = np.max(data[ix_time])
+        if data.ndim == 1:  # type: ignore[union-attr]
+            this_ymin = np.min(data[ix_time])  # type: ignore[index]
+            this_ymax = np.max(data[ix_time])  # type: ignore[index]
         else:
-            this_ymin = np.min(data[ix_time, :])
-            this_ymax = np.max(data[ix_time, :])
+            this_ymin = np.min(data[ix_time, :])  # type: ignore[call-overload, index]
+            this_ymax = np.max(data[ix_time, :])  # type: ignore[call-overload, index]
     else:
-        this_ymin = np.min(data[ix_time, channel])
-        this_ymax = np.max(data[ix_time, channel])
+        this_ymin = np.min(data[ix_time, channel])  # type: ignore[call-overload, index]
+        this_ymax = np.max(data[ix_time, channel])  # type: ignore[call-overload, index]
     # optionally pad the bounds
-    if pad < 0:
+    if pad < 0.0:
         raise ValueError("The pad cannot be negative.")
-    if pad > 0:
+    if pad > 0.0:
         delta = this_ymax - this_ymin
         this_ymax += pad * delta
         this_ymin -= pad * delta
@@ -1023,7 +1059,7 @@ def zoom_ylim(ax, time=None, data=None, *, t_start=-inf, t_final=inf, channel=No
             this_ymax = 1
         else:
             # data is constant, pad by given amount or 10% if pad is zero
-            pad = pad if pad > 0 else 0.1
+            pad = pad if pad > 0.0 else 0.1
             this_ymin = (1 - pad) * this_ymin
             this_ymax = (1 + pad) * this_ymax
     # get the current limits
@@ -1099,7 +1135,7 @@ def rgb_ints_to_hex(int_tuple: Tuple[int, int, int]) -> str:
 
     """
 
-    def clamp(x, min_=0, max_=255):
+    def clamp(x: int, min_: int = 0, max_: int = 255) -> int:
         r"""Clamps a value within the specified minimum and maximum."""
         return max(min_, min(x, max_))
 
@@ -1312,7 +1348,14 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
 
 
 # %% Functions - get_rms_indices
-def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-inf, xmax=inf):
+def get_rms_indices(
+    time_one: Optional[_Times] = None,
+    time_two: Optional[_Times] = None,
+    time_overlap: Optional[_Times] = None,
+    *,
+    xmin: _Time = -inf,
+    xmax: _Time = inf,
+) -> _RmsIndices:
     r"""
     Gets the indices and time points for doing RMS calculations and plotting RMS lines.
 
@@ -1361,7 +1404,7 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
 
     """
 
-    def _process(time, t_bound, func):
+    def _process(time: Optional[_Times], t_bound: Optional[_Time], func: Callable) -> bool:
         r"""Determines if the given time should be processed."""
         if is_datetime(time):
             # if datetime, it's either the datetime.datetime version, or np.datetime64 version
@@ -1369,84 +1412,96 @@ def get_rms_indices(time_one=None, time_two=None, time_overlap=None, *, xmin=-in
                 # process if any of the data is in the bound
                 process = func(time, t_bound)
             else:
-                process = not np.isnat(time)
+                process = not np.isnat(time)  # type: ignore[arg-type]
         else:
             if time is None:
                 process = False
             else:
-                process = not np.isnan(time) and not np.isinf(time) and func(time, t_bound)
-        return process
+                process = not np.isnan(time) and not np.isinf(time) and func(time, t_bound)  # type: ignore[arg-type]
+        return process  # type: ignore[no-any-return]
 
     # TODO: functionalize this more so there is less repeated code
     # initialize output
-    ix = {"pts": [], "one": np.array([], dtype=bool), "two": np.array([], dtype=bool), "overlap": np.array([], dtype=bool)}
+    ix: _RmsIndices = {
+        "pts": [],
+        "one": np.array([], dtype=bool),
+        "two": np.array([], dtype=bool),
+        "overlap": np.array([], dtype=bool),
+    }
     # alias some flags
-    have1 = time_one is not None and np.size(time_one) > 0
-    have2 = time_two is not None and np.size(time_two) > 0
+    have1 = time_one is not None and np.size(time_one) > 0  # type: ignore[arg-type]
+    have2 = time_two is not None and np.size(time_two) > 0  # type: ignore[arg-type]
     have3 = time_overlap is not None
     # get the min/max times
     if have1:
         if have2:
             # have both
-            t_min = np.minimum(np.min(time_one), np.min(time_two))
-            t_max = np.maximum(np.max(time_one), np.max(time_two))
+            t_min = np.minimum(np.min(time_one), np.min(time_two))  # type: ignore[arg-type]
+            t_max = np.maximum(np.max(time_one), np.max(time_two))  # type: ignore[arg-type]
         else:
             # have only time 1
-            t_min = np.min(time_one)
-            t_max = np.max(time_one)
+            t_min = np.min(time_one)  # type: ignore[arg-type]
+            t_max = np.max(time_one)  # type: ignore[arg-type]
     else:
         if have2:
             # have only time 2
-            t_min = np.min(time_two)
-            t_max = np.max(time_two)
+            t_min = np.min(time_two)  # type: ignore[arg-type]
+            t_max = np.max(time_two)  # type: ignore[arg-type]
         else:
             # have neither time 1 nor time 2
             raise AssertionError("At least one time vector must be given.")
-    if _process(xmin, t_max, operator.lt):
+    if _process(xmin, t_max, operator.lt):  # type: ignore[arg-type]
         if have1:
-            p1_min = time_one >= xmin
+            p1_min = time_one >= xmin  # type: ignore[call-overload, operator]
         if have2:
-            p2_min = time_two >= xmin
+            p2_min = time_two >= xmin  # type: ignore[call-overload, operator]
         if have3:
-            p3_min = time_overlap >= xmin
-        ix["pts"].append(np.maximum(xmin, t_min))
+            p3_min = time_overlap >= xmin  # type: ignore[call-overload, operator]
+        ix["pts"].append(np.maximum(xmin, t_min))  # type: ignore[arg-type]
     else:
         if have1:
-            p1_min = np.ones(time_one.shape, dtype=bool)
+            p1_min = np.ones(time_one.shape, dtype=bool)  # type: ignore[union-attr]
         if have2:
-            p2_min = np.ones(time_two.shape, dtype=bool)
+            p2_min = np.ones(time_two.shape, dtype=bool)  # type: ignore[union-attr]
         if have3:
-            p3_min = np.ones(time_overlap.shape, dtype=bool)
+            p3_min = np.ones(time_overlap.shape, dtype=bool)  # type: ignore[union-attr]
         ix["pts"].append(t_min)
-    if _process(xmax, t_min, operator.gt):
+    if _process(xmax, t_min, operator.gt):  # type: ignore[arg-type]
         if have1:
-            p1_max = time_one <= xmax
+            p1_max = time_one <= xmax  # type: ignore[call-overload, operator]
         if have2:
-            p2_max = time_two <= xmax
+            p2_max = time_two <= xmax  # type: ignore[call-overload, operator]
         if have3:
-            p3_max = time_overlap <= xmax
-        ix["pts"].append(np.minimum(xmax, t_max))
+            p3_max = time_overlap <= xmax  # type: ignore[call-overload, operator]
+        ix["pts"].append(np.minimum(xmax, t_max))  # type: ignore[arg-type]
     else:
         if have1:
-            p1_max = np.ones(time_one.shape, dtype=bool)
+            p1_max = np.ones(time_one.shape, dtype=bool)  # type: ignore[union-attr]
         if have2:
-            p2_max = np.ones(time_two.shape, dtype=bool)
+            p2_max = np.ones(time_two.shape, dtype=bool)  # type: ignore[union-attr]
         if have3:
-            p3_max = np.ones(time_overlap.shape, dtype=bool)
+            p3_max = np.ones(time_overlap.shape, dtype=bool)  # type: ignore[union-attr]
         ix["pts"].append(t_max)
     assert len(ix["pts"]) == 2 and ix["pts"][0] <= ix["pts"][1], f'Time points aren\'t as expected: "{ix["pts"]}"'
     # calculate indices
     if have1:
-        ix["one"] = p1_min & p1_max
+        ix["one"] = p1_min & p1_max  # type: ignore[typeddict-item]
     if have2:
-        ix["two"] = p2_min & p2_max
+        ix["two"] = p2_min & p2_max  # type: ignore[typeddict-item]
     if have3:
-        ix["overlap"] = p3_min & p3_max
+        ix["overlap"] = p3_min & p3_max  # type: ignore[typeddict-item]
     return ix
 
 
 # %% Functions - plot_vert_lines
-def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
+def plot_vert_lines(
+    ax: Axes,
+    x: Union[Tuple[_Time, ...], List[_Time], _Times],
+    *,
+    show_in_legend: bool = True,
+    colormap: Optional[Union[_CM, ColorMap]] = None,
+    labels: Optional[Union[List[str], Tuple[str, ...]]] = None,
+) -> None:
     r"""
     Plots a vertical line at the RMS start and stop times.
 
@@ -1493,11 +1548,11 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
     # optional inputs
     if colormap is None:
         colormap = colors.ListedColormap([(1.0, 0.75, 0.0), (0.75, 0.75, 1.0)])
-    cm = ColorMap(colormap, num_colors=len(x))
+    cm = ColorMap(colormap, num_colors=len(x))  # type: ignore[arg-type]
     if labels is None:
         labels = ["RMS Start Time", "RMS Stop Time"]
     # plot vertical lines
-    for i, this_x in enumerate(x):
+    for i, this_x in enumerate(x):  # type: ignore[arg-type]
         this_color = cm.get_color(i)
         this_label = labels[i] if show_in_legend else ""
         ax.axvline(this_x, linestyle="--", color=this_color, marker="+", markeredgecolor="m", markersize=10, label=this_label)
@@ -1505,9 +1560,9 @@ def plot_vert_lines(ax, x, *, show_in_legend=True, colormap=None, labels=None):
 
 # %% plot_phases
 def plot_phases(
-    ax,
-    times,
-    colormap="tab10",
+    ax: Axes,
+    times: Union[_D, _N],
+    colormap: Union[str, ColorMap, colors.Colormap, colors.ListedColormap] = "tab10",
     labels: Optional[Union[List[str], str]] = None,
     *,
     group_all: bool = False,
@@ -1674,7 +1729,9 @@ def get_classification(classify: str) -> Tuple[str, str]:
 
 
 # %% Functions - plot_classification
-def plot_classification(ax: Axes, classification: str = "U", *, caveat: str = "", test: bool = False, location: str = "figure"):
+def plot_classification(
+    ax: Axes, classification: str = "U", *, caveat: str = "", test: bool = False, location: str = "figure"
+) -> None:
     r"""
     Displays the classification in a box on each figure.
 
@@ -1930,7 +1987,12 @@ def ci_from_z(z: Union[int, float]) -> float:
 
 
 # %% Functions - save_figs_to_pdf
-def save_figs_to_pdf(figs: Optional[Union[Figure, List[Figure]]] = None, filename: Path = Path("figs.pdf")) -> None:
+def save_figs_to_pdf(
+    figs: Optional[Union[Figure, List[Figure]]] = None,
+    filename: Path = Path("figs.pdf"),
+    *,
+    rasterized: bool = False,
+) -> None:
     r"""
     Saves the given figures to a PDF file.
 
@@ -1964,8 +2026,40 @@ def save_figs_to_pdf(figs: Optional[Union[Figure, List[Figure]]] = None, filenam
     if isinstance(figs, Figure):
         figs = [figs]
     assert isinstance(figs, list)
+    assert len(figs) > 0, "There must be at least one figure to create a PDF from."
 
-    # Create PDF
+    creation_date = datetime.datetime.now().strftime("%Y-%m-%d %H-%M-%S")
+
+    # Created PDF (rasterized form)
+    if rasterized:
+        # build a list of all the rasterized images using IO buffers
+        img_bufs = []
+        img_list = []
+        for fig in figs:
+            img_buf = io.BytesIO()
+            plt.savefig(img_buf, format="png")
+            img_list.append(Image.open(img_buf))
+            img_bufs.append(img_buf)
+        # save to PDF
+        dpi = int(plt.rcParams["figure.dpi"])
+        resolution = [int(x * dpi) for x in plt.rcParams["figure.figsize"]]
+        img_list[0].save(
+            filename,
+            "PDF",
+            save_all=True,
+            append_images=img_list[1:],
+            dpi=[dpi, dpi],
+            resolution=resolution,
+            title="PDF Figures",
+            author=get_username(),
+            creationDate=creation_date,
+            modDate=creation_date,
+        )
+        for img_buf in img_bufs:
+            img_buf.close()
+        return
+
+    # Create PDF (vectorized form)
     with PdfPages(filename) as pdf:
         for fig in figs:
             pdf.savefig(fig)
@@ -1974,8 +2068,8 @@ def save_figs_to_pdf(figs: Optional[Union[Figure, List[Figure]]] = None, filenam
         d = pdf.infodict()
         d["Title"] = "PDF Figures"
         d["Author"] = get_username()
-        d["CreationDate"] = datetime.datetime.now()
-        d["ModDate"] = d["CreationDate"]
+        d["CreationDate"] = creation_date
+        d["ModDate"] = creation_date
 
 
 # %% Functions - save_images_to_pdf
@@ -1984,7 +2078,7 @@ def save_images_to_pdf(
     folder: Optional[Path] = None,
     plot_type: str = "png",
     filename: Path = Path("figs.pdf"),
-):
+) -> None:
     r"""
     Uses figure names to find the already saved images and combine them into a PDF file.
 
@@ -2064,7 +2158,7 @@ def add_datashaders(
     how: str = "over",
     zorder: Optional[int] = None,
     alpha: float = 1.0,
-):
+) -> None:
     r"""Adds the collection of datashaders to the axes."""
     if not HAVE_DS:
         raise RuntimeError("You must have datashader installed to execute this.")

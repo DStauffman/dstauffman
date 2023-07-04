@@ -263,19 +263,10 @@ class Test_estimation_BpeResults(unittest.TestCase):
         self.bpe_results.save(self.filename)
         self.assertTrue(self.filename.is_file())
 
-    def test_save2(self) -> None:
-        self.bpe_results.save(self.filename, use_hdf5=False)
-        self.assertTrue(self.filename2.is_file())
-
     @unittest.skipIf(not HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_load(self) -> None:
         self.bpe_results.save(self.filename)
         bpe_results = estm.BpeResults.load(self.filename)
-        self.assertTrue(compare_two_classes(bpe_results, self.bpe_results, suppress_output=True))
-
-    def test_load2(self) -> None:
-        self.bpe_results.save(self.filename, use_hdf5=False)
-        bpe_results = estm.BpeResults.load(self.filename, use_hdf5=False)
         self.assertTrue(compare_two_classes(bpe_results, self.bpe_results, suppress_output=True))
 
     def test_str(self) -> None:

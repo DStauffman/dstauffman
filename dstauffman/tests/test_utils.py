@@ -7,11 +7,13 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
 import copy
 import os
 import pathlib
 import platform
-from typing import List, Union
+from typing import List, TYPE_CHECKING, Union
 import unittest
 from unittest.mock import patch
 
@@ -27,6 +29,10 @@ else:
     from math import nan
 if dcs.HAVE_SCIPY:
     from scipy.interpolate import interp1d
+
+if TYPE_CHECKING:
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
 
 
 # %% _nan_equal
@@ -916,7 +922,7 @@ class Test_modd(unittest.TestCase):
 
     def test_nominal(self) -> None:
         y = dcs.modd(self.x, self.mod)
-        np.testing.assert_array_equal(y, self.y)
+        np.testing.assert_array_equal(y, self.y)  # type: ignore[arg-type]
 
     def test_scalar(self) -> None:
         y = dcs.modd(4, 4)
@@ -924,11 +930,11 @@ class Test_modd(unittest.TestCase):
 
     def test_list1(self) -> None:
         y = dcs.modd([2, 4], 4)
-        np.testing.assert_array_equal(y, np.array([2, 4]))
+        np.testing.assert_array_equal(y, np.array([2, 4]))  # type: ignore[arg-type]
 
     def test_list2(self) -> None:
         y = dcs.modd(4, [3, 4])
-        np.testing.assert_array_equal(y, np.array([1, 4]))
+        np.testing.assert_array_equal(y, np.array([1, 4]))  # type: ignore[arg-type]
 
     def test_modify_inplace(self) -> None:
         out = np.zeros(self.x.shape, dtype=int)
@@ -1344,7 +1350,7 @@ class Test_intersect(unittest.TestCase):
     def test_nominal(self) -> None:
         a = np.array([1, 2, 4, 4, 6], dtype=int)
         b = np.array([0, 8, 2, 2, 5, 8, 6, 8, 8], dtype=int)
-        (c, ia, ib) = dcs.intersect(a, b, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([2, 6], dtype=int))
         np.testing.assert_array_equal(ia, np.array([1, 4], dtype=int))
         np.testing.assert_array_equal(ib, np.array([2, 6], dtype=int))
@@ -1352,7 +1358,7 @@ class Test_intersect(unittest.TestCase):
     def test_floats(self) -> None:
         a = np.array([1, 2.5, 4, 6])
         b = np.array([0, 8, 2.5, 4, 6])
-        (c, ia, ib) = dcs.intersect(a, b, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([2.5, 4, 6]))
         np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
         np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
@@ -1360,11 +1366,11 @@ class Test_intersect(unittest.TestCase):
     def test_unique(self) -> None:
         a = np.array([1, 2.5, 4, 6])
         b = np.array([0, 8, 2.5, 4, 6])
-        (c, ia, ib) = dcs.intersect(a, b, assume_unique=True, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, assume_unique=True, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([2.5, 4, 6]))
         np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
         np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=1e-7, assume_unique=True, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=1e-7, assume_unique=True, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([2.5, 4, 6]))
         np.testing.assert_array_equal(ia, np.array([1, 2, 3], dtype=int))
         np.testing.assert_array_equal(ib, np.array([2, 3, 4], dtype=int))
@@ -1378,7 +1384,7 @@ class Test_intersect(unittest.TestCase):
     def test_tolerance(self) -> None:
         a = np.array([1.0, 2.0, 3.1, 3.9, 4.0, 6.0])
         b = np.array([2.0, 3.0, 4.0, 5.0])
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=0.12, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=0.12, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([2.0, 3.1, 3.9, 4.0]))
         np.testing.assert_array_equal(ia, np.array([1, 2, 3, 4], dtype=int))
         np.testing.assert_array_equal(ib, np.array([0, 1, 2], dtype=int))
@@ -1386,21 +1392,21 @@ class Test_intersect(unittest.TestCase):
     def test_tolerance_no_ix(self) -> None:
         a = np.array([1.0, 3.0, 5.0, 7.0, 9.0])
         b = np.array([1.01, 2.02, 3.03, 4.04, 5.05, 6.06, 7.07, 8.08, 9.09])
-        c = dcs.intersect(a, b, tolerance=0.055, return_indices=False)
+        c = dcs.intersect(a, b, tolerance=0.055, return_indices=False)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([1.0, 3.0, 5.0]))
-        c2 = dcs.intersect(b, a, tolerance=0.055, return_indices=False)
+        c2 = dcs.intersect(b, a, tolerance=0.055, return_indices=False)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c2, np.array([1.01, 3.03, 5.05]))
 
     def test_scalars(self) -> None:
         a = 5
         b = 4.9
-        c = dcs.intersect(a, b, tolerance=0.5)
+        c = dcs.intersect(a, b, tolerance=0.5)  # type: ignore[call-overload]
         self.assertEqual(c, 5)
 
     def test_int(self) -> None:
         a = np.array([0, 4, 10, 20, 30, -40, 30])
         b = np.array([1, 5, 7, 31, -10, -40])
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([-40]))
         np.testing.assert_array_equal(ia, np.array([5]))
         np.testing.assert_array_equal(ib, np.array([5]))
@@ -1408,7 +1414,7 @@ class Test_intersect(unittest.TestCase):
     def test_int_even_tol(self) -> None:
         a = np.array([0, 4, 10, 20, 30, -40, 30])
         b = np.array([1, 5, 7, 31, -10, -40])
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=2, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=2, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([-40, 0, 4, 30]))
         np.testing.assert_array_equal(ia, np.array([0, 1, 4, 5]))
         np.testing.assert_array_equal(ib, np.array([0, 1, 3, 5]))
@@ -1416,7 +1422,7 @@ class Test_intersect(unittest.TestCase):
     def test_int_odd_tol(self) -> None:
         a = np.array([0, 4, 10, 20, 30, -40, 30])
         b = np.array([1, 5, 7, 31, -10, -40])
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=3, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=3, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30]))
         np.testing.assert_array_equal(ia, np.array([0, 1, 2, 4, 5]))
         np.testing.assert_array_equal(ib, np.array([0, 1, 2, 3, 5]))
@@ -1425,7 +1431,7 @@ class Test_intersect(unittest.TestCase):
         t_offset = 2**62
         a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
         b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([-40], dtype=np.int64) + t_offset)
         np.testing.assert_array_equal(ia, np.array([5]))
         np.testing.assert_array_equal(ib, np.array([5]))
@@ -1434,7 +1440,7 @@ class Test_intersect(unittest.TestCase):
         t_offset = 2**62
         a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
         b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=2, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=2, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, np.array([-40, 0, 4, 30], dtype=np.int64) + t_offset)
         np.testing.assert_array_equal(ia, np.array([0, 1, 4, 5]))
         np.testing.assert_array_equal(ib, np.array([0, 1, 3, 5]))
@@ -1443,7 +1449,7 @@ class Test_intersect(unittest.TestCase):
         t_offset = 2**62
         a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
         b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=3, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=3, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(ia, np.array([0, 1, 2, 4, 5]))
         np.testing.assert_array_equal(ib, np.array([0, 1, 2, 3, 5]))
         np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30], dtype=np.int64) + t_offset)
@@ -1452,7 +1458,7 @@ class Test_intersect(unittest.TestCase):
         t_offset = 2**62
         a = np.array([0, 4, 10, 20, 30, -40, 30], dtype=np.int64) + t_offset
         b = np.array([1, 5, 7, 31, -10, -40], dtype=np.int64) + t_offset
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=np.array(3), return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=np.array(3), return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(ia, np.array([0, 1, 2, 4, 5]))
         np.testing.assert_array_equal(ib, np.array([0, 1, 2, 3, 5]))
         np.testing.assert_array_equal(c, np.array([-40, 0, 4, 10, 30], dtype=np.int64) + t_offset)
@@ -1460,7 +1466,7 @@ class Test_intersect(unittest.TestCase):
     def test_empty(self) -> None:
         a = np.array([], dtype=int)
         b = np.array([1, 2, 3, 4])
-        c = dcs.intersect(a, b, tolerance=0.1)
+        c = dcs.intersect(a, b, tolerance=0.1)  # type: ignore[call-overload]
         self.assertEqual(len(c), 0)
 
     def test_datetimes(self) -> None:
@@ -1472,13 +1478,13 @@ class Test_intersect(unittest.TestCase):
         b = date_zero + dt
         # no tolerance
         exp = np.array([0, 1, 2, 4, 6, 7, 8, 9, 10])
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=0, return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, a[exp])
         np.testing.assert_array_equal(ia, exp)
         np.testing.assert_array_equal(ib, exp)
         # with tolerance
         exp = np.array([0, 1, 2, 3, 4, 6, 7, 8, 9, 10])
-        (c, ia, ib) = dcs.intersect(a, b, tolerance=np.timedelta64(10, "ms"), return_indices=True)
+        (c, ia, ib) = dcs.intersect(a, b, tolerance=np.timedelta64(10, "ms"), return_indices=True)  # type: ignore[call-overload]
         np.testing.assert_array_equal(c, a[exp])
         np.testing.assert_array_equal(ia, exp)
         np.testing.assert_array_equal(ib, exp)
@@ -1486,7 +1492,7 @@ class Test_intersect(unittest.TestCase):
     def test_quant_effects(self) -> None:
         # Note: this is an example where something slightly outside of the tolerance can still be matched.
         # TODO: is this really the expected answer or just a limit of this algorithm?
-        c = dcs.intersect(225409, 225449, tolerance=30)
+        c = dcs.intersect(225409, 225449, tolerance=30)  # type: ignore[call-overload]
         self.assertEqual(c, 225409)
 
 
@@ -1669,7 +1675,9 @@ class Test_linear_interp(unittest.TestCase):
         self.x = np.hstack((self.x1, self.x2, self.x3))
         self.y = np.hstack([self.y1, self.y2, self.y3])
         self.xp = np.array([1.0, 5.0, 9.0, 14.0])
-        (self.yp, self.ix, _) = dcs.intersect(self.x, self.xp, return_indices=True, tolerance=1e-10)
+        self.yp: _N
+        self.ix: _I
+        (self.yp, self.ix, _) = dcs.intersect(self.x, self.xp, return_indices=True, tolerance=1e-10)  # type: ignore[call-overload]
         self.yp = self.y[self.ix]
 
     def test_sorted(self) -> None:

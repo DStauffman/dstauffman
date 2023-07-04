@@ -41,7 +41,7 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
         self.per_lim = 0.01
 
     def test_calling(self) -> None:
-        (state, mons) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
+        (state, mons) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)  # type: ignore[call-overload]
         breakout = np.histogram(state, bins=[0.5, 1.5, 2.5, 3.5, 4.5])[0]
         breakout_per = breakout / self.num
         for ix in range(len(self.distribution)):
@@ -52,15 +52,15 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
         for i in range(4):
             temp = np.zeros(4)
             temp[i] = 1
-            (tb_state, _) = health.dist_enum_and_mons(self.num, temp, self.prng, max_months=self.max_months)
+            (tb_state, _) = health.dist_enum_and_mons(self.num, temp, self.prng, max_months=self.max_months)  # type: ignore[call-overload]
             self.assertTrue(np.all(tb_state == i + 1))
 
     def test_alpha_and_beta(self) -> None:
         pass  # TODO: write this
 
     def test_different_start_num(self) -> None:
-        (state1, mons1) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
-        (state2, mons2) = health.dist_enum_and_mons(
+        (state1, mons1) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)  # type: ignore[call-overload]
+        (state2, mons2) = health.dist_enum_and_mons(  # type: ignore[call-overload]
             self.num, self.distribution, self.prng, max_months=self.max_months, start_num=101
         )
         np.testing.assert_array_equal(set(state1), {1, 2, 3, 4})  # type: ignore[arg-type]
@@ -69,33 +69,33 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
         np.testing.assert_array_equal(set(mons2), {1})  # type: ignore[arg-type]
 
     def test_scalar_max_months(self) -> None:
-        (state1, mons1) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=1)
-        (state2, mons2) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=3)
+        (state1, mons1) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=1)  # type: ignore[call-overload]
+        (state2, mons2) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=3)  # type: ignore[call-overload]
         np.testing.assert_array_equal(set(state1), {1, 2, 3, 4})  # type: ignore[arg-type]
         np.testing.assert_array_equal(set(state2), {1, 2, 3, 4})  # type: ignore[arg-type]
         np.testing.assert_array_equal(set(mons1), {1})  # type: ignore[arg-type]
         np.testing.assert_array_equal(set(mons2), {1, 2, 3})  # type: ignore[arg-type]
 
     def test_max_months_is_none(self) -> None:
-        state = health.dist_enum_and_mons(self.num, self.distribution, self.prng)
+        state = health.dist_enum_and_mons(self.num, self.distribution, self.prng)  # type: ignore[call-overload]
         np.testing.assert_array_equal(set(state), {1, 2, 3, 4})  # type: ignore[arg-type]
 
     def test_single_num(self) -> None:
         self.num = 1
-        (state, mons) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
+        (state, mons) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)  # type: ignore[call-overload]
         self.assertIn(state[0], {1, 2, 3, 4})
         self.assertTrue(mons[0] <= max(self.max_months))
 
     def test_zero_num(self) -> None:
         self.num = 0
-        (state, mons) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)
+        (state, mons) = health.dist_enum_and_mons(self.num, self.distribution, self.prng, max_months=self.max_months)  # type: ignore[call-overload]
         self.assertTrue(len(state) == 0)
         self.assertTrue(len(mons) == 0)
 
     def test_unique_dists(self) -> None:
         num = 3
         dist = np.array([[0, 0, 0, 1], [1, 0, 0, 0], [0, 0.5, 0.5, 0]])
-        state = health.dist_enum_and_mons(num, dist, self.prng, start_num=1)
+        state = health.dist_enum_and_mons(num, dist, self.prng, start_num=1)  # type: ignore[call-overload]
         self.assertEqual(state[0], 4)
         self.assertEqual(state[1], 1)
         self.assertIn(state[2], {2, 3})
@@ -103,13 +103,13 @@ class Test_health_dist_enum_and_mons(unittest.TestCase):
     def test_bad_distribution1(self) -> None:
         dist = np.array([0, 0.1, 0.2])
         with self.assertRaises(AssertionError) as context:
-            health.dist_enum_and_mons(self.num, dist, self.prng)
+            health.dist_enum_and_mons(self.num, dist, self.prng)  # type: ignore[call-overload]
         self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
 
     def test_bad_distribution2(self) -> None:
         dist = np.array([0, 1.1, 0.2])
         with self.assertRaises(AssertionError) as context:
-            health.dist_enum_and_mons(self.num, dist, self.prng)
+            health.dist_enum_and_mons(self.num, dist, self.prng)  # type: ignore[call-overload]
         self.assertEqual(str(context.exception), "Given distribution doesn't sum to 1.")
 
 

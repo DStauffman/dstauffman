@@ -9,7 +9,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import Callable, TYPE_CHECKING
 import unittest
 from unittest.mock import patch
 
@@ -1021,7 +1021,7 @@ class Test_aerospace_quat_standards(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.quat_class = lambda x, y, z, s: np.array([x, y, z, s])
+        self.quat_class: Callable[[float, float, float, float], _Q] = lambda x, y, z, s: np.array([x, y, z, s])
 
     def test_default(self) -> None:
         def quat_mult_func(q1: _Q, q2: _Q) -> _Q:

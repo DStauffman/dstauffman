@@ -7,9 +7,13 @@ Notes
 """  # pylint: disable=too-many-lines
 
 # %% Imports
+from __future__ import annotations
+
+import datetime
 import doctest
 import logging
-from typing import Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Protocol, Tuple, TYPE_CHECKING, TypedDict, Union
 import unittest
 
 from slog import LogLevel
@@ -21,6 +25,9 @@ from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
 from dstauffman.plotting.support import COLOR_LISTS, ColorMap, get_nondeg_colorlists, get_rms_indices
 
 if HAVE_MPL:
+    from matplotlib.axis import Axis
+    from matplotlib.colors import Colormap, ListedColormap
+    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -28,6 +35,101 @@ if HAVE_NUMPY:
     inf = np.inf
 else:
     from math import inf
+
+if TYPE_CHECKING:
+    from typing_extensions import NotRequired, Unpack
+
+    _B = np.typing.NDArray[np.bool_]
+    _D = np.typing.NDArray[np.datetime64]
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+    _M = np.typing.NDArray[np.float64]  # 2D
+    _Q = np.typing.NDArray[np.float64]
+    _CM = Union[str, Colormap, ListedColormap]
+    _Data = Union[int, float, _N, _M, List[_N], Tuple[_N]]
+    _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
+    _Times = Union[int, float, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N], Tuple[_D]]
+    _DeltaTime = Union[int, float, np.timedelta64]
+    _Figs = List[Figure]
+
+    class _ExtraPlotter(Protocol):
+        def __call__(self, fig: Figure, ax: Axis) -> None:
+            ...
+
+    class _KfQuatKwargs(TypedDict):
+        name_one: NotRequired[str]
+        name_two: NotRequired[str]
+        save_plot: NotRequired[bool]
+        save_path: NotRequired[Path]
+        time_units: NotRequired[str]
+        start_date: NotRequired[str]
+        rms_xmin: NotRequired[_Time]
+        rms_xmax: NotRequired[_Time]
+        disp_xmin: NotRequired[_Time]
+        disp_xmax: NotRequired[_Time]
+        make_subplots: NotRequired[bool]
+        plot_components: NotRequired[bool]  # quat-only
+        single_lines: NotRequired[bool]
+        use_mean: NotRequired[bool]
+        label_vert_lines: NotRequired[bool]
+        plot_zero: NotRequired[bool]
+        show_rms: NotRequired[bool]
+        legend_loc: NotRequired[str]
+        second_units: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        show_extra: NotRequired[bool]
+        leg_scale: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        data_as_rows: NotRequired[bool]
+        tolerance: NotRequired[_DeltaTime]
+        use_zoh: NotRequired[bool]
+        extra_plotter: NotRequired[_ExtraPlotter]
+        use_datashader: NotRequired[bool]
+
+    class _KfDiffKwargs(TypedDict):
+        name_one: NotRequired[str]
+        name_two: NotRequired[str]
+        elements: NotRequired[Union[List[str], Tuple[str, ...]]]  # diff-only
+        units: NotRequired[str]  # diff-only
+        save_plot: NotRequired[bool]
+        save_path: NotRequired[Path]
+        time_units: NotRequired[str]
+        start_date: NotRequired[str]
+        rms_xmin: NotRequired[_Time]
+        rms_xmax: NotRequired[_Time]
+        disp_xmin: NotRequired[_Time]
+        disp_xmax: NotRequired[_Time]
+        make_subplots: NotRequired[bool]
+        single_lines: NotRequired[bool]
+        colormap: NotRequired[_CM]  # diff-only
+        use_mean: NotRequired[bool]
+        label_vert_lines: NotRequired[bool]
+        plot_zero: NotRequired[bool]
+        show_rms: NotRequired[bool]
+        legend_loc: NotRequired[str]
+        second_units: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        show_extra: NotRequired[bool]
+        leg_scale: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        data_as_rows: NotRequired[bool]
+        tolerance: NotRequired[_DeltaTime]
+        use_zoh: NotRequired[bool]
+        extra_plotter: NotRequired[_ExtraPlotter]
+        use_datashader: NotRequired[bool]
+        fig_ax: NotRequired[Tuple[Figure, Axis]]  # diff-only
+
+    class _SetsKwargs(TypedDict):
+        color_by: NotRequired[str]
+        legend_loc: NotRequired[str]
+        skip_setup_plots: NotRequired[bool]
+        hide_innovs: NotRequired[bool]
+        center_origin: NotRequired[bool]
+        units: NotRequired[str]
+        mag_ratio: NotRequired[float]
+        leg_scale: NotRequired[str]
+        colormap: NotRequired[_CM]
+        use_datashader: NotRequired[bool]
+        add_quiver: NotRequired[bool]
+        quiver_scale: NotRequired[float]
+        fig_ax: NotRequired[Tuple[Figure, Axis]]
+
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -40,38 +142,38 @@ _TRUTH_COLOR = "k"
 
 # %% Functions - make_quaternion_plot
 def make_quaternion_plot(
-    description,
-    time_one,
-    time_two,
-    quat_one,
-    quat_two,
+    description: str,
+    time_one: Optional[_Times],
+    time_two: Optional[_Times],
+    quat_one: Optional[_Q],
+    quat_two: Optional[_Q],
     *,
-    name_one="",
-    name_two="",
-    time_units="sec",
-    start_date="",
-    plot_components=True,
-    rms_xmin=-inf,
-    rms_xmax=inf,
-    disp_xmin=-inf,
-    disp_xmax=inf,
-    make_subplots=True,
-    single_lines=False,
-    use_mean=False,
-    plot_zero=False,
-    show_rms=True,
-    legend_loc="best",
-    show_extra=True,
-    second_units="micro",
-    leg_scale=None,
-    data_as_rows=True,
-    tolerance=0,
-    return_err=False,
-    use_zoh=False,
-    label_vert_lines=True,
-    extra_plotter=None,
-    use_datashader=False,
-):
+    name_one: str = "",
+    name_two: str = "",
+    time_units: str = "sec",
+    start_date: str = "",
+    plot_components: bool = True,
+    rms_xmin: _Time = -inf,
+    rms_xmax: _Time = inf,
+    disp_xmin: _Time = -inf,
+    disp_xmax: _Time = inf,
+    make_subplots: bool = True,
+    single_lines: bool = False,
+    use_mean: bool = False,
+    plot_zero: bool = False,
+    show_rms: bool = True,
+    legend_loc: str = "best",
+    show_extra: bool = True,
+    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = "micro",
+    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    data_as_rows: bool = True,
+    tolerance: _DeltaTime = 0,
+    return_err: bool = False,
+    use_zoh: bool = False,
+    label_vert_lines: bool = True,
+    extra_plotter: Optional[_ExtraPlotter] = None,
+    use_datashader: bool = False,
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Generic quaternion comparison plot for use in other wrapper functions.
 
@@ -187,7 +289,16 @@ def make_quaternion_plot(
 
 
 # %% plot_attitude
-def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
+def plot_attitude(
+    kf1: Optional[Kf] = None,
+    kf2: Optional[Kf] = None,
+    *,
+    truth: Optional[Kf] = None,
+    opts: Optional[Opts] = None,
+    return_err: bool = False,
+    fields: Optional[Dict[str, str]] = None,
+    **kwargs: Unpack[_KfQuatKwargs],
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Plots the attitude quaternion history.
 
@@ -298,8 +409,8 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     second_units = kwargs.pop("second_units", "micro")
 
     # initialize outputs
-    figs = []
-    err = {}
+    figs: _Figs = []
+    err: Dict[str, _N] = {}
     printed = False
 
     if truth is not None:
@@ -312,7 +423,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             logger.log(LogLevel.L4, "Plotting %s plots ...", description)
             printed = True
         # make plots
-        out = make_quaternion_plot(
+        out = make_quaternion_plot(  # type: ignore[misc]
             description,
             kf1.time,
             kf2.time,
@@ -340,7 +451,7 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
         )
         if return_err:
             figs += out[0]
-            err[field] = out[1]
+            err[field] = out[1]  # type: ignore[assignment]
         else:
             figs += out
 
@@ -354,7 +465,16 @@ def plot_attitude(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
 
 # %% plot_los
-def plot_los(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
+def plot_los(
+    kf1: Optional[Kf] = None,
+    kf2: Optional[Kf] = None,
+    *,
+    truth: Optional[Kf] = None,
+    opts: Optional[Opts] = None,
+    return_err: bool = False,
+    fields: Optional[Dict[str, str]] = None,
+    **kwargs: Unpack[_KfQuatKwargs],
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""Plots the Line of Sight histories."""
     if fields is None:
         fields = {"los": "LOS"}
@@ -363,7 +483,16 @@ def plot_los(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fie
 
 
 # %% plot_position
-def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
+def plot_position(
+    kf1: Optional[Kf] = None,
+    kf2: Optional[Kf] = None,
+    *,
+    truth: Optional[Kf] = None,
+    opts: Optional[Opts] = None,
+    return_err: bool = False,
+    fields: Optional[Dict[str, str]] = None,
+    **kwargs: Unpack[_KfDiffKwargs],
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Plots the position and velocity history.
 
@@ -468,7 +597,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
     # fmt: on
 
     # initialize outputs
-    figs = []
+    figs: _Figs = []
     err = {}
     printed = False
 
@@ -479,7 +608,7 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
             logger.log(LogLevel.L4, "Plotting %s plots ...", description)
             printed = True
         # make plots
-        out = make_difference_plot(
+        out = make_difference_plot(  # type: ignore[misc]
             description,
             kf1.time,
             kf2.time,
@@ -523,7 +652,16 @@ def plot_position(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
 
 # %% plot_velocity
-def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
+def plot_velocity(
+    kf1: Optional[Kf] = None,
+    kf2: Optional[Kf] = None,
+    *,
+    truth: Optional[Kf] = None,
+    opts: Optional[Opts] = None,
+    return_err: bool = False,
+    fields: Optional[Dict[str, str]] = None,
+    **kwargs: Unpack[_KfDiffKwargs],
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""Plots the Line of Sight histories."""
     if fields is None:
         fields = {"vel": "Velocity"}
@@ -533,23 +671,23 @@ def plot_velocity(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False
 
 # %% plot_innovations
 def plot_innovations(
-    kf1=None,
-    kf2=None,
+    kf1: Optional[KfInnov] = None,
+    kf2: Optional[KfInnov] = None,
     *,
-    truth=None,
-    opts=None,
-    return_err=False,
-    fields=None,
-    plot_by_status=False,
-    plot_by_number=False,
-    show_one=None,
-    show_two=None,
-    cat_names=None,
-    cat_colors=None,
-    number_field=None,
-    number_colors=None,
-    **kwargs,
-):
+    truth: Optional[Kf] = None,
+    opts: Optional[Opts] = None,
+    return_err: bool = False,
+    fields: Optional[Dict[str, str]] = None,
+    plot_by_status: bool = False,
+    plot_by_number: bool = False,
+    show_one: Optional[_B] = None,
+    show_two: Optional[_B] = None,
+    cat_names: Optional[Dict[Any, str]] = None,
+    cat_colors: Optional[_CM] = None,
+    number_field: Optional[Dict[str, str]] = None,
+    number_colors: Optional[_CM] = None,
+    **kwargs: Unpack[_KfDiffKwargs],
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Plots the Kalman Filter innovation histories.
 
@@ -696,7 +834,7 @@ def plot_innovations(
     # fmt: on
 
     # Initialize outputs
-    figs = []
+    figs: _Figs = []
     err = {}
     printed = False
 
@@ -712,22 +850,22 @@ def plot_innovations(
             units = "σ"
             this_second_units = "unity"
         else:
-            this_second_units = second_units
+            this_second_units = second_units  # type: ignore[assignment]
         field_one = getattr(kf1, field)
         field_two = getattr(kf2, field)
         if field_one is not None and show_one is not None:
-            t1 = kf1.time[show_one]
+            t1 = kf1.time[show_one]  # type: ignore[index]
             f1 = field_one[:, show_one]
         else:
             t1 = kf1.time
             f1 = field_one
         if field_two is not None and show_two is not None:
-            t2 = kf2.time[show_two]
+            t2 = kf2.time[show_two]  # type: ignore[index]
             f2 = field_two[:, show_two]
         else:
             t2 = kf2.time
             f2 = field_two
-        out = make_difference_plot(
+        out = make_difference_plot(  # type: ignore[misc]
             full_description,
             t1,
             t2,
@@ -763,7 +901,7 @@ def plot_innovations(
             figs += out
         this_ylabel = [e + " Innovation [" + units + "]" for e in elements]
         if plot_by_status and field_one is not None and kf1.status is not None:
-            figs += make_categories_plot(
+            figs += make_categories_plot(  # type: ignore[misc]
                 full_description + " by Category",
                 kf1.time,
                 field_one,
@@ -791,7 +929,7 @@ def plot_innovations(
                 **kwargs,
             )
         if plot_by_status and field_two is not None and kf2.status is not None:
-            figs += make_categories_plot(
+            figs += make_categories_plot(  # type: ignore[misc]
                 full_description + " by Category",
                 kf2.time,
                 field_two,
@@ -820,7 +958,7 @@ def plot_innovations(
             )
         if plot_by_number and field_one is not None and ~np.all(np.isnan(field_one)):
             this_number = None
-            quad_name: Optional[str] = None  # type: ignore[annotation-unchecked]
+            quad_name: Optional[str] = None
             for quad, quad_name in number_field.items():
                 if hasattr(kf1, quad):
                     this_number = getattr(kf1, quad)
@@ -828,7 +966,7 @@ def plot_innovations(
             if this_number is not None:
                 assert isinstance(quad_name, str), "quad_name should have been set in earlier for loop."
                 num_names = {num: quad_name + " " + str(num) for num in np.unique(this_number)}
-                figs += make_categories_plot(
+                figs += make_categories_plot(  # type: ignore[misc]
                     full_description + " by " + quad_name,
                     kf1.time,
                     field_one,
@@ -863,7 +1001,7 @@ def plot_innovations(
                     break
             if this_number is not None:
                 num_names = {num: quad_name + " " + str(num) for num in np.unique(this_number)}
-                figs += make_categories_plot(
+                figs += make_categories_plot(  # type: ignore[misc]
                     full_description + " by " + quad_name,
                     kf2.time,
                     field_two,
@@ -901,7 +1039,14 @@ def plot_innovations(
 
 
 # %% plot_innov_fplocs
-def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
+def plot_innov_fplocs(
+    kf1: Optional[KfInnov],
+    *,
+    opts: Optional[Opts] = None,
+    t_bounds: Optional[List[_Time]] = None,
+    mask: Optional[_B] = None,
+    **kwargs: Unpack[_SetsKwargs],
+) -> _Figs:
     r"""
     Plots the innovations on the focal plane, connecting the sighting and prediction with the innovation.
 
@@ -982,7 +1127,7 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
             innovs = kf1.innov
         else:
             fplocs = kf1.fploc[:, mask]
-            innovs = kf1.innov[:, mask]
+            innovs = kf1.innov[:, mask]  # type: ignore[index]
     else:
         ix = get_rms_indices(kf1.time, xmin=t_bounds[0], xmax=t_bounds[1])
         if mask is None:
@@ -990,10 +1135,10 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
         else:
             this_mask = mask & ix["one"]
         fplocs = kf1.fploc[:, this_mask]
-        innovs = kf1.innov[:, this_mask]
+        innovs = kf1.innov[:, this_mask]  # type: ignore[index]
 
     # call wrapper functions for most of the details
-    fig = make_connected_sets(description, fplocs, innovs, units=kf1.units, legend_loc=legend_loc, **kwargs)
+    fig = make_connected_sets(description, fplocs, innovs, units=kf1.units, legend_loc=legend_loc, **kwargs)  # type: ignore[misc]
 
     # Setup plots
     figs = [fig]
@@ -1005,17 +1150,17 @@ def plot_innov_fplocs(kf1, *, opts=None, t_bounds=None, mask=None, **kwargs):
 
 # %% plot_innov_hist
 def plot_innov_hist(
-    kf1,
-    bins,
+    kf1: Optional[KfInnov],
+    bins: Union[_N, List[float]],
     *,
-    opts=None,
-    fields=None,
-    normalize_spacing=False,
-    use_exact_counts=False,
-    show_pdf=False,
-    pdf_x=None,
-    pdf_y=None,
-):
+    opts: Optional[Opts] = None,
+    fields: Optional[Dict[str, str]] = None,
+    normalize_spacing: bool = False,
+    use_exact_counts: bool = False,
+    show_cdf: bool = False,
+    cdf_x: Optional[Union[float, List[float]]] = None,
+    cdf_y: Optional[Union[float, List[float]]] = None,
+) -> _Figs:
     r"""Plots the innovation histogram."""
     # check optional inputs
     if kf1 is None:
@@ -1034,7 +1179,7 @@ def plot_innov_hist(
         return []
     data = kf1.innov[0, :]
 
-    figs = []
+    figs: _Figs = []
     printed = False
 
     # % call wrapper functions for most of the details
@@ -1059,16 +1204,26 @@ def plot_innov_hist(
                 second_ylabel="Distribution [%]",
                 normalize_spacing=normalize_spacing,
                 use_exact_counts=use_exact_counts,
-                show_pdf=show_pdf,
-                pdf_x=pdf_x,
-                pdf_y=pdf_y,
+                show_cdf=show_cdf,
+                cdf_x=cdf_x,
+                cdf_y=cdf_y,
             )
             figs.append(fig)
     return figs
 
 
 # %% plot_covariance
-def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, groups=None, fields=None, **kwargs):
+def plot_covariance(
+    kf1: Optional[Kf] = None,
+    kf2: Optional[Kf] = None,
+    *,
+    truth: Optional[Kf] = None,
+    opts: Optional[Opts] = None,
+    return_err: bool = False,
+    groups: Optional[List[Union[int, _I, Tuple[int, ...]]]] = None,
+    fields: Optional[Dict[str, str]] = None,
+    **kwargs: Unpack[_KfDiffKwargs],
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Plots the Kalman Filter square root diagonal variance value.
 
@@ -1193,8 +1348,8 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
     # fmt: on
 
     # initialize output
-    figs = []
-    err = {}
+    figs: _Figs = []
+    err: Dict[str, Dict[str, _N]] = {}
 
     # % call wrapper functions for most of the details
     for field, description in fields.items():
@@ -1202,15 +1357,15 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
         err[field] = {}
         for ix, states in enumerate(groups):
             this_units = units if isinstance(units, str) else units[ix]
-            this_2units = second_units[ix] if isinstance(second_units, list) else second_units
+            this_2units = second_units[ix] if isinstance(second_units, list) else second_units  # type: ignore[index]
             this_ylabel = description + f" [{this_units}]"
             states = np.atleast_1d(states)
             if hasattr(kf1, "active") and kf1.active is not None:
-                (this_state_nums1, this_state_rows1, found_rows1) = intersect(kf1.active, states, return_indices=True)
+                (this_state_nums1, this_state_rows1, found_rows1) = intersect(kf1.active, states, return_indices=True)  # type: ignore[call-overload]
             else:
                 this_state_nums1 = np.array([], dtype=int)
             if hasattr(kf2, "active") and kf2.active is not None:
-                (this_state_nums2, this_state_rows2, found_rows2) = intersect(kf2.active, states, return_indices=True)
+                (this_state_nums2, this_state_rows2, found_rows2) = intersect(kf2.active, states, return_indices=True)  # type: ignore[call-overload]
             else:
                 this_state_nums2 = np.array([], dtype=int)
             this_state_nums = np.union1d(this_state_nums1, this_state_nums2)
@@ -1230,7 +1385,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
                 this_description = description + " for State " + ",".join(str(x) for x in this_state_nums)
                 this_elements = [elements[state] for state in this_state_nums]
                 colormap = get_nondeg_colorlists(len(this_elements))
-                out = make_difference_plot(
+                out = make_difference_plot(  # type: ignore[misc]
                     this_description,
                     kf1.time,
                     kf2.time,
@@ -1261,7 +1416,7 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
                 )
                 if return_err:
                     figs += out[0]
-                    err[field][f"Group {ix+1}"] = out[1]
+                    err[field][f"Group {ix+1}"] = out[1]  # type: ignore[assignment]
                 else:
                     figs += out
         logger.log(LogLevel.L4, "... done.")
@@ -1278,11 +1433,21 @@ def plot_covariance(kf1=None, kf2=None, *, truth=None, opts=None, return_err=Fal
 
 
 # %% plot_states
-def plot_states(kf1=None, kf2=None, *, truth=None, opts=None, return_err=False, fields=None, **kwargs):
+def plot_states(
+    kf1: Optional[Kf] = None,
+    kf2: Optional[Kf] = None,
+    *,
+    truth: Optional[Kf] = None,
+    opts: Optional[Opts] = None,
+    return_err: bool = False,
+    groups: Optional[List[Union[int, _I, Tuple[int, ...]]]] = None,
+    fields: Optional[Dict[str, str]] = None,
+    **kwargs: Unpack[_KfDiffKwargs],
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""Plots the Kalman Filter state histories."""
     if fields is None:
         fields = {"state": "State Estimates"}
-    out = plot_covariance(kf1, kf2, truth=truth, opts=opts, return_err=return_err, fields=fields, **kwargs)
+    out = plot_covariance(kf1, kf2, truth=truth, opts=opts, return_err=return_err, groups=groups, fields=fields, **kwargs)
     return out
 
 

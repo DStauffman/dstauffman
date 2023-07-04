@@ -9,6 +9,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+import datetime
 import doctest
 import logging
 from typing import Any, Callable, Dict, Iterable, List, Optional, Protocol, Tuple, TYPE_CHECKING, Union
@@ -47,6 +48,7 @@ from dstauffman.plotting.support import (
 if HAVE_MPL:
     from matplotlib.axis import Axis
     from matplotlib.collections import LineCollection
+    from matplotlib.colors import Colormap, ListedColormap
     from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
@@ -69,8 +71,16 @@ if TYPE_CHECKING:
         def __call__(self, fig: Figure, ax: Axis) -> None:
             ...
 
-    _Times = Union[int, float, np.ndarray, np.datetime64, List[np.ndarray]]
-    _Dt = Union[int, float, np.ndarray, np.timedelta64]
+    _B = np.typing.NDArray[np.bool_]
+    _D = np.typing.NDArray[np.datetime64]
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+    _M = np.typing.NDArray[np.float64]  # 2D
+    _CM = Union[str, Colormap, ListedColormap]
+    _Data = Union[int, float, _N, _M, List[_N], Tuple[_N]]
+    _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
+    _Times = Union[int, float, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N], Tuple[_D]]
+    _DeltaTime = Union[int, float, np.timedelta64]
     _Figs = List[Figure]
     _FuncLamb = Callable[[Any, Any], float]
 
@@ -82,28 +92,28 @@ logger = logging.getLogger(__name__)
 def make_generic_plot(
     plot_type: str,
     description: str,
-    time_one,
-    data_one,
+    time_one: Optional[_Times],
+    data_one: Optional[_Data],
     *,
-    time_two=None,
-    data_two=None,
-    mins=None,
-    maxs=None,
-    cats=None,
-    cat_names=None,
+    time_two: Optional[_Times] = None,
+    data_two: Optional[_Data] = None,
+    mins: Optional[Union[_N, _M]] = None,
+    maxs: Optional[Union[_N, _M]] = None,
+    cats: Optional[Iterable[Any]] = None,
+    cat_names: Optional[Dict[Any, str]] = None,
     name_one: str = "",
     name_two: str = "",
-    elements=None,
+    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
-    rms_xmin=-inf,
-    rms_xmax=inf,
-    disp_xmin=-inf,
-    disp_xmax=inf,
+    rms_xmin: _Time = -inf,
+    rms_xmax: _Time = inf,
+    disp_xmin: _Time = -inf,
+    disp_xmax: _Time = inf,
     single_lines: bool = False,
     make_subplots: bool = True,
-    colormap=DEFAULT_COLORMAP,
+    colormap: _CM = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
@@ -111,10 +121,10 @@ def make_generic_plot(
     legend_loc: str = "best",
     show_extra: bool = True,
     plot_components: bool = True,
-    second_units=None,
-    leg_scale=None,
-    ylabel=None,
-    tolerance=0,
+    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    ylabel: Optional[Union[str, List[str]]] = None,
+    tolerance: _DeltaTime = 0,
     return_err: bool = False,
     data_as_rows: bool = True,
     extra_plotter: Optional[_ExtraPlotter] = None,
@@ -122,7 +132,7 @@ def make_generic_plot(
     label_vert_lines: bool = True,
     use_datashader: bool = False,
     fig_ax: Optional[Tuple[Figure, Axis]] = None,
-):
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Generic plotting function called by all the other low level plots.
 
@@ -148,7 +158,7 @@ def make_generic_plot(
         vector history of maximums
     cats : (C, ) iterable
         Category values
-    cat_names : (C, ) list of str
+    cat_names : (C, ) dict of str for each cat in cats
         Category names
     name_one : str, optional
         name of data source one
@@ -323,17 +333,19 @@ def make_generic_plot(
             return out
         if have_data_one:
             assert not data_is_list
-            assert data_one.ndim == 2, f"Data must be 2D, not {data_one.ndim}"  # TODO: change this restriction
+            # TODO: remove this following restriction
+            assert data_one.ndim == 2, f"Data must be 2D, not {data_one.ndim}"  # type: ignore[union-attr]
         if have_data_two:
             assert not dat2_is_list
-            assert data_two.ndim == 2, f"Data must be 2D, not {data_two.ndim}"  # TODO: change this restriction
+            # TODO: remove this following restriction
+            assert data_two.ndim == 2, f"Data must be 2D, not {data_two.ndim}"  # type: ignore[union-attr]
         # convert rows/cols as necessary
         if not data_as_rows:
             # TODO: is this the best way or make branches lower?
             if have_data_one:
-                data_one = data_one.T
+                data_one = data_one.T  # type: ignore[union-attr]
             if have_data_two:
-                data_two = data_two.T
+                data_two = data_two.T  # type: ignore[union-attr]
     else:
         have_data_one = have_data_two = have_both = False
     if not time_is_list and time_one is not None:
@@ -354,6 +366,7 @@ def make_generic_plot(
 
     # determine which plotting function to use
     # fmt: off
+    plot_func: Callable
     if use_zoh:
         plot_func = lambda ax, *args, **kwargs: ax.step(*args, where="post", markerfacecolor="none", **kwargs)  # pylint: disable=unnecessary-lambda-assignment
     else:
@@ -362,7 +375,7 @@ def make_generic_plot(
 
     # get the categories
     if is_cat_plot:
-        unique_cats = set(cats)
+        unique_cats = set(cats)  # type: ignore[arg-type]
         num_cats = len(unique_cats)
         if cat_names is None:
             cat_names = {}
@@ -374,26 +387,26 @@ def make_generic_plot(
         cat_keys = np.array(list(cat_names.keys()), dtype=int)
 
     # calculate sizes
-    s0a = 0 if time_one is None else len(time_one) if time_is_list else 1
-    s0b = 0 if time_two is None else len(time_two) if time_is_list else 1
+    s0a = 0 if time_one is None else len(time_one) if time_is_list else 1  # type: ignore[arg-type]
+    s0b = 0 if time_two is None else len(time_two) if time_is_list else 1  # type: ignore[arg-type]
     if data_one is None:
         s1 = 0
     elif data_is_list:
-        s1 = len(data_one)
+        s1 = len(data_one)  # type: ignore[arg-type]
     elif data_as_rows:
-        s1 = data_one.shape[0]
+        s1 = data_one.shape[0]  # type: ignore[union-attr]
     else:
-        s1 = data_one.shape[1]
+        s1 = data_one.shape[1]  # type: ignore[union-attr]
         if is_quat_diff:
-            assert data_one.shape[0] == 4
+            assert data_one.shape[0] == 4  # type: ignore[union-attr]
     if data_two is None:
         s2 = 0
     elif dat2_is_list:
-        s2 = len(data_two)
+        s2 = len(data_two)  # type: ignore[arg-type]
     elif data_as_rows:
-        s2 = data_two.shape[0]
+        s2 = data_two.shape[0]  # type: ignore[union-attr]
     else:
-        s2 = data_two.shape[1]
+        s2 = data_two.shape[1]  # type: ignore[union-attr]
 
     # optional inputs
     if elements is None:
@@ -413,29 +426,29 @@ def make_generic_plot(
     # % Calculations
     # build RMS indices
     if data_is_list:
-        ix: Dict[str, Any] = {"one": [], "t_min": None, "t_max": None}
+        ix: Dict[str, Union[List[int], None, _B]] = {"one": [], "t_min": None, "t_max": None}
         for j in range(num_channels):
             if time_is_list:
-                temp_ix = get_rms_indices(time_one[j], xmin=rms_xmin, xmax=rms_xmax)
+                temp_ix = get_rms_indices(time_one[j], xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[index]
             else:
-                temp_ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)
-            ix["one"].append(temp_ix["one"])
+                temp_ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[arg-type]
+            ix["one"].append(temp_ix["one"])  # type: ignore[arg-type, union-attr]
             if j == 0:
                 ix["pts"] = temp_ix["pts"]
             else:
-                ix["pts"] = [min((ix["pts"][0], temp_ix["pts"][0])), max((ix["pts"][1], temp_ix["pts"][1]))]
+                ix["pts"] = [min((ix["pts"][0], temp_ix["pts"][0])), max((ix["pts"][1], temp_ix["pts"][1]))]  # type: ignore[index]
     elif doing_diffs:
         if have_both:
             # find overlapping times
-            (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)
+            (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)  # type: ignore[call-overload]
             # find differences
-            d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)
-            d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)
+            d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)  # type: ignore[arg-type]
+            d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)  # type: ignore[arg-type]
         else:
             time_overlap = None
-        ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)
+        ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[arg-type, assignment]
     else:
-        ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)
+        ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[arg-type, assignment]
     # create a colormap
     if doing_diffs:
         if is_quat_diff:
@@ -448,9 +461,9 @@ def make_generic_plot(
     # calculate the differences
     if doing_diffs and have_both:
         if is_quat_diff:
-            (nondeg_angle, nondeg_error) = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix])
+            (nondeg_angle, nondeg_error) = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix])  # type: ignore[call-overload, index]
         else:
-            diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]
+            diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]  # type: ignore[call-overload, index]
     # calculate the rms (or mean) values
     if show_rms or return_err:
         nans = np.full(num_channels, np.nan)  # TODO: num_channels should be 3 for is_quat_diff
@@ -464,20 +477,20 @@ def make_generic_plot(
             func_lamb = lambda x, y: np.nanmean(x, axis=y)  # type: ignore[assignment, return-value]  # pylint: disable=unnecessary-lambda-assignment
         if not doing_diffs and not is_cat_plot:
             if data_is_list:
-                data_func = [func_lamb(data_one[j][ix["one"][j]], None) for j in range(num_channels)]  # type: ignore[misc]
+                data_func = [func_lamb(data_one[j][ix["one"][j]], None) for j in range(num_channels)]  # type: ignore[misc, index]
             elif data_as_rows:
-                data_func = func_lamb(data_one[:, ix["one"]], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[assignment]
+                data_func = func_lamb(data_one[:, ix["one"]], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[arg-type, assignment, call-overload, index]
             else:
-                data_func = func_lamb(data_one[ix["one"], :], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[assignment]
+                data_func = func_lamb(data_one[ix["one"], :], 1) if np.any(ix["one"]) else np.full(num_channels, np.nan)  # type: ignore[arg-type, assignment, call-overload, index]
         if doing_diffs:
             # TODO: combine with non diff version
-            data_func = func_lamb(data_one[:, ix["one"]], 1) if have_data_one and np.any(ix["one"]) else nans  # type: ignore[assignment]
-            data2_func = func_lamb(data_two[:, ix["two"]], 1) if have_data_two and np.any(ix["two"]) else nans
+            data_func = func_lamb(data_one[:, ix["one"]], 1) if have_data_one and np.any(ix["one"]) else nans  # type: ignore[arg-type, assignment, call-overload, index]
+            data2_func = func_lamb(data_two[:, ix["two"]], 1) if have_data_two and np.any(ix["two"]) else nans  # type: ignore[arg-type, call-overload, index]
             if is_quat_diff:
-                nondeg_func = func_lamb(nondeg_error[:, ix["overlap"]], 1) if have_both and np.any(ix["overlap"]) else nans
-                mag_func = func_lamb(nondeg_angle[ix["overlap"]], 0) if have_both and np.any(ix["overlap"]) else nans[0:1]
+                nondeg_func = func_lamb(nondeg_error[:, ix["overlap"]], 1) if have_both and np.any(ix["overlap"]) else nans  # type: ignore[arg-type]
+                mag_func = func_lamb(nondeg_angle[ix["overlap"]], 0) if have_both and np.any(ix["overlap"]) else nans[0:1]  # type: ignore[arg-type]
             else:
-                nondeg_func = func_lamb(diffs[:, ix["overlap"]], 1) if have_both and np.any(ix["overlap"]) else nans
+                nondeg_func = func_lamb(diffs[:, ix["overlap"]], 1) if have_both and np.any(ix["overlap"]) else nans  # type: ignore[arg-type]
             # output errors
             err = {"one": data_func, "two": data2_func, "diff": nondeg_func}
             if is_quat_diff:
@@ -486,13 +499,13 @@ def make_generic_plot(
             data_func = {}
             for cat in ordered_cats:
                 if data_is_list:
-                    this_ix = ix["one"][j] & (cats[j] == cat)
-                    data_func[cat] = [func_lamb(data_one[j][this_ix], None) for j in range(num_channels)]  # type: ignore[assignment]
+                    this_ix = ix["one"][j] & (cats[j] == cat)  # type: ignore[index]
+                    data_func[cat] = [func_lamb(data_one[j][this_ix], None) for j in range(num_channels)]  # type: ignore[assignment, index]
                 else:
                     this_ix = ix["one"] & (cats == cat)
                     if np.any(this_ix):
                         data_func[cat] = (
-                            func_lamb(data_one[:, this_ix], 1) if data_as_rows else func_lamb(data_one[:, this_ix], 1)  # type: ignore[assignment]
+                            func_lamb(data_one[:, this_ix], 1) if data_as_rows else func_lamb(data_one[:, this_ix], 1)  # type: ignore[assignment, call-overload, index]
                         )
                     else:
                         data_func[cat] = np.full(num_channels, np.nan)
@@ -509,16 +522,17 @@ def make_generic_plot(
     if plot_type == "errorbar":
         # error calculation
         # TODO: handle data_is_list and rows cases
-        err_neg = data_one - mins
-        err_pos = maxs - data_one
+        err_neg = data_one - mins  # type: ignore[operator]
+        err_pos = maxs - data_one  # type: ignore[operator]
     elif plot_type == "bar":
         # TODO: handle data_is_list and rows cases
+        bottoms: Union[List[_N], _N, _M]
         if data_is_list:
-            bottoms = [np.cumsum(data_one[j]) for j in range(num_channels)]
+            bottoms = [np.cumsum(data_one[j]) for j in range(num_channels)]  # type: ignore[index]
         elif data_as_rows:
-            bottoms = np.concatenate((np.zeros((1, len(time_one))), np.cumsum(data_one, axis=0)), axis=0)
+            bottoms = np.concatenate((np.zeros((1, len(time_one))), np.cumsum(data_one, axis=0)), axis=0)  # type: ignore[arg-type]
         else:
-            bottoms = np.concatenate((np.zeros((len(time_one), 1)), np.cumsum(data_one, axis=1)), axis=1)
+            bottoms = np.concatenate((np.zeros((len(time_one), 1)), np.cumsum(data_one, axis=1)), axis=1)  # type: ignore[arg-type]
     elif plot_type == "scatter":
         symbol_one = "."
         symbol_two = "."
@@ -567,7 +581,7 @@ def make_generic_plot(
             num_cols = 1
             num_rows = 1
         if single_lines:
-            titles = [f"{description} {e} {cat_names[cat]}" for cat in ordered_cats for e in elements]
+            titles = [f"{description} {e} {cat_names[cat]}" for cat in ordered_cats for e in elements]  # type: ignore[index]
         else:
             titles = [f"{description} {e}" for e in elements]
     else:
@@ -654,13 +668,13 @@ def make_generic_plot(
                     else:
                         this_label += f" ({func_name}: {value})"
                 if is_cat_plot:
-                    this_time = time_one[ix_data] if time_is_list else time_one
+                    this_time = time_one[ix_data] if time_is_list else time_one  # type: ignore[index]
                     this_data = (
-                        data_one[ix_data] if data_is_list else data_one[ix_data, :] if data_as_rows else data_one[:, ix_data]
+                        data_one[ix_data] if data_is_list else data_one[ix_data, :] if data_as_rows else data_one[:, ix_data]  # type: ignore[call-overload, index]
                     )
                 elif not doing_diffs or (doing_diffs and have_data_one):
-                    this_time = time_one[j] if time_is_list else time_one
-                    this_data = data_one[j] if data_is_list else data_one[j, :] if data_as_rows else data_one[:, j]
+                    this_time = time_one[j] if time_is_list else time_one  # type: ignore[index]
+                    this_data = data_one[j] if data_is_list else data_one[j, :] if data_as_rows else data_one[:, j]  # type: ignore[call-overload, index]
                 if plot_type == "errorbar":
                     this_zorder = 3
                 elif doing_diffs:
@@ -686,14 +700,14 @@ def make_generic_plot(
                 elif is_cat_plot:
                     # % cat plot
                     # plot the full underlying line once
-                    if not use_datashader or this_time.size <= datashader_pts:
+                    if not use_datashader or this_time.size <= datashader_pts:  # type: ignore[union-attr]
                         plot_func(
                             this_axes, this_time, this_data, symbol_one, label="", color="xkcd:slate", linewidth=1, zorder=2
                         )
                     # plot the data with this category value
                     for k in ix_cat:
                         cat = ordered_cats[k]
-                        this_cat_name = cat_names[cat]
+                        this_cat_name = cat_names[cat]  # type: ignore[index]
                         if show_rms:
                             value = _LEG_FORMAT.format(unit_conv * data_func[cat][ix_data])  # type: ignore[index]
                             if new_units:
@@ -707,12 +721,12 @@ def make_generic_plot(
                         # Note: Use len(cat_keys) here instead of num_cats so that potentially missing categories
                         # won't mess up the color scheme by skipping colors
                         this_cat_ix = np.argmax(cat == cat_keys)
-                        this_color = cm.get_color(this_cat_ix + ix_data * len(cat_keys))
+                        this_color = cm.get_color(this_cat_ix + ix_data * len(cat_keys))  # type: ignore[arg-type]
                         if use_datashader and np.count_nonzero(this_cats) > datashader_pts:
                             temp = np.flatnonzero(this_cats)
                             ix_spot = temp[np.round(np.linspace(0, temp.size - 1, datashader_pts)).astype(int)]
                             this_axes.plot(
-                                this_time[ix_spot],
+                                this_time[ix_spot],  # type: ignore[index]
                                 this_data[ix_spot],
                                 linestyle="none",
                                 marker=".",
@@ -723,7 +737,7 @@ def make_generic_plot(
                             )
                             datashaders.append(
                                 {
-                                    "time": this_time[this_cats],
+                                    "time": this_time[this_cats],  # type: ignore[index]
                                     "data": this_data[this_cats],
                                     "ax": this_axes,
                                     "color": this_color,
@@ -731,7 +745,7 @@ def make_generic_plot(
                             )
                         else:
                             this_axes.plot(
-                                this_time[this_cats],
+                                this_time[this_cats],  # type: ignore[index]
                                 this_data[this_cats],
                                 linestyle=this_linestyle,
                                 marker=".",
@@ -748,8 +762,8 @@ def make_generic_plot(
                             this_color = cm.get_color(j + num_channels)
                         else:
                             this_color = cm.get_color(j)
-                        if use_datashader and this_time.size > datashader_pts:
-                            ix_spot = np.round(np.linspace(0, this_time.size - 1, datashader_pts)).astype(int)
+                        if use_datashader and this_time.size > datashader_pts:  # type: ignore[union-attr]
+                            ix_spot = np.round(np.linspace(0, this_time.size - 1, datashader_pts)).astype(int)  # type: ignore[union-attr]
                             if not np.issubdtype(this_data.dtype, np.number):
                                 (categories, ix_extras) = np.unique(this_data, return_index=True)
                                 temp_data = pd.Categorical(
@@ -758,7 +772,7 @@ def make_generic_plot(
                                 ix_spot = np.union1d(ix_spot, ix_extras)
                                 plot_func(
                                     this_axes,
-                                    this_time[ix_spot],
+                                    this_time[ix_spot],  # type: ignore[index]
                                     temp_data[ix_spot],
                                     symbol_one[0],
                                     markersize=4,
@@ -773,7 +787,7 @@ def make_generic_plot(
                             else:
                                 plot_func(
                                     this_axes,
-                                    this_time[ix_spot],
+                                    this_time[ix_spot],  # type: ignore[index]
                                     this_data[ix_spot],
                                     symbol_one[0],
                                     markersize=4,
@@ -795,7 +809,7 @@ def make_generic_plot(
                                 zorder=this_zorder,
                             )
                     if doing_diffs and have_data_two:
-                        this_data2 = data_two[j] if data_is_list else data_two[j, :] if data_as_rows else data_two[:, j]
+                        this_data2 = data_two[j] if data_is_list else data_two[j, :] if data_as_rows else data_two[:, j]  # type: ignore[call-overload, index]
                         this_label2 = f"{name_two} {elements[j]}" if name_two else str(elements[j])
                         this_color2 = cm.get_color(j + num_channels)
                         if show_rms and not is_quat_diff:
@@ -804,11 +818,11 @@ def make_generic_plot(
                                 this_label2 += f" ({func_name}: {value} {leg_units})"
                             else:
                                 this_label2 += f" ({func_name}: {value})"
-                        if use_datashader and time_two.size > datashader_pts:
-                            ix_spot = np.round(np.linspace(0, time_two.size - 1, datashader_pts)).astype(int)
+                        if use_datashader and time_two.size > datashader_pts:  # type: ignore[union-attr]
+                            ix_spot = np.round(np.linspace(0, time_two.size - 1, datashader_pts)).astype(int)  # type: ignore[union-attr]
                             plot_func(
                                 this_axes,
-                                time_two[ix_spot],
+                                time_two[ix_spot],  # type: ignore[index]
                                 this_data2[ix_spot],
                                 symbol_two[0],
                                 markersize=4,
@@ -834,7 +848,7 @@ def make_generic_plot(
                     this_axes.errorbar(
                         this_time,
                         this_data,
-                        yerr=np.vstack((err_neg[j, :], err_pos[j, :])),
+                        yerr=np.vstack((err_neg[j, :], err_pos[j, :])),  # type: ignore[index]
                         color="None",
                         ecolor=cm.get_color(j),
                         zorder=5,
@@ -894,7 +908,7 @@ def make_generic_plot(
             if show_extra:
                 if d1_miss_ix.size > 0:
                     this_axes.plot(
-                        time_one[d1_miss_ix],
+                        time_one[d1_miss_ix],  # type: ignore[index]
                         np.zeros(len(d1_miss_ix)),
                         "kx",
                         markersize=8,
@@ -904,7 +918,7 @@ def make_generic_plot(
                     )
                 if d2_miss_ix.size > 0:
                     this_axes.plot(
-                        time_two[d2_miss_ix],
+                        time_two[d2_miss_ix],  # type: ignore[index]
                         np.zeros(len(d2_miss_ix)),
                         "go",
                         markersize=8,
@@ -934,7 +948,7 @@ def make_generic_plot(
                 this_axes.set_title(description)
         elif doing_diffs and ((single_lines and i == num_rows) or (not single_lines and i == 1)):
             this_axes.set_title(description + " Difference")
-        if (time_is_list and len(time_one) > 0 and is_datetime(time_one[0])) or is_datetime(time_one) or is_datetime(time_two):
+        if (time_is_list and len(time_one) > 0 and is_datetime(time_one[0])) or is_datetime(time_one) or is_datetime(time_two):  # type: ignore[arg-type, index]
             this_axes.set_xlabel("Date")
             assert time_units in {"datetime", "numpy"}, f'Expected time units of "datetime" or "numpy", not "{time_units}".'
         else:
@@ -963,7 +977,7 @@ def make_generic_plot(
         # plot RMS lines
         if show_rms:
             vert_labels = None if not use_mean else ["Mean Start Time", "Mean Stop Time"]
-            plot_vert_lines(this_axes, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)
+            plot_vert_lines(this_axes, ix["pts"], show_in_legend=label_vert_lines, labels=vert_labels)  # type: ignore[arg-type]
 
     # plot any extra information through a generic callable
     if extra_plotter is not None:
@@ -995,29 +1009,29 @@ def make_generic_plot(
 
 # %% Functions - make_time_plot
 def make_time_plot(
-    description,
-    time,
-    data,
+    description: str,
+    time: Optional[_Times],
+    data: Optional[_Data],
     *,
     name: str = "",
-    elements=None,
+    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
-    rms_xmin=-inf,
-    rms_xmax=inf,
-    disp_xmin=-inf,
-    disp_xmax=inf,
+    rms_xmin: _Time = -inf,
+    rms_xmax: _Time = inf,
+    disp_xmin: _Time = -inf,
+    disp_xmax: _Time = inf,
     single_lines: bool = False,
-    colormap=DEFAULT_COLORMAP,
+    colormap: _CM = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
     ignore_empties: bool = False,
     legend_loc: str = "best",
-    second_units=None,
-    leg_scale=None,
-    ylabel=None,
+    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
     extra_plotter: Optional[_ExtraPlotter] = None,
     use_zoh: bool = False,
@@ -1025,7 +1039,7 @@ def make_time_plot(
     use_datashader: bool = False,
     fig_ax: Optional[Tuple[Figure, Axis]] = None,
     plot_type: str = "time",  # {"time", "scatter"}
-):
+) -> Figure:
     r"""
     Generic data versus time plotting routine.
 
@@ -1116,35 +1130,35 @@ def make_time_plot(
 
 # %% Functions - make_error_bar_plot
 def make_error_bar_plot(
-    description,
-    time,
-    data,
-    mins,
-    maxs,
+    description: str,
+    time: Optional[_Times],
+    data: Optional[_Data],
+    mins: Optional[Union[_N, _M]],
+    maxs: Optional[Union[_N, _M]],
     *,
-    elements=None,
+    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
-    rms_xmin=-inf,
-    rms_xmax=inf,
-    disp_xmin=-inf,
-    disp_xmax=inf,
+    rms_xmin: _Time = -inf,
+    rms_xmax: _Time = inf,
+    disp_xmin: _Time = -inf,
+    disp_xmax: _Time = inf,
     single_lines: bool = False,
-    colormap=DEFAULT_COLORMAP,
+    colormap: _CM = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
     legend_loc: str = "best",
-    second_units=None,
-    leg_scale=None,
-    ylabel=None,
+    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
     extra_plotter: Optional[_ExtraPlotter] = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     fig_ax: Optional[Tuple[Figure, Axis]] = None,
-):
+) -> Figure:
     r"""
     Generic plotting routine to make error bars.
 
@@ -1246,42 +1260,42 @@ def make_error_bar_plot(
 
 # %% Functions - make_difference_plot
 def make_difference_plot(
-    description,
-    time_one,
-    time_two,
-    data_one,
-    data_two,
+    description: str,
+    time_one: Optional[_Times],
+    time_two: Optional[_Times],
+    data_one: Optional[_Data],
+    data_two: Optional[_Data],
     *,
     name_one: str = "",
     name_two: str = "",
-    elements=None,
+    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
-    rms_xmin=-inf,
-    rms_xmax=inf,
-    disp_xmin=-inf,
-    disp_xmax=inf,
+    rms_xmin: _Time = -inf,
+    rms_xmax: _Time = inf,
+    disp_xmin: _Time = -inf,
+    disp_xmax: _Time = inf,
     make_subplots: bool = True,
     single_lines: bool = False,
-    colormap=DEFAULT_COLORMAP,
+    colormap: _CM = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
     legend_loc: str = "best",
     show_extra: bool = True,
-    second_units=None,
-    leg_scale=None,
-    ylabel=None,
+    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
-    tolerance=0,
+    tolerance: _DeltaTime = 0,
     return_err: bool = False,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     extra_plotter: Optional[_ExtraPlotter] = None,
     use_datashader: bool = False,
     fig_ax: Optional[Tuple[Figure, Axis]] = None,
-):
+) -> Union[_Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Generic difference comparison plot for use in other wrapper functions.
 
@@ -1403,38 +1417,38 @@ def make_difference_plot(
 
 # %% Functions - make_categories_plot
 def make_categories_plot(
-    description,
-    time,
-    data,
-    cats,
+    description: str,
+    time: Optional[_Times],
+    data: Optional[_Data],
+    cats: Optional[Iterable[Any]],
     *,
-    cat_names=None,
+    cat_names: Optional[Dict[Any, str]] = None,
     name: str = "",
-    elements=None,
+    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
-    rms_xmin=-inf,
-    rms_xmax=inf,
-    disp_xmin=-inf,
-    disp_xmax=inf,
+    rms_xmin: _Time = -inf,
+    rms_xmax: _Time = inf,
+    disp_xmin: _Time = -inf,
+    disp_xmax: _Time = inf,
     make_subplots: bool = True,
     single_lines: bool = False,
-    colormap=DEFAULT_COLORMAP,
+    colormap: _CM = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
     legend_loc: str = "best",
-    second_units=None,
-    leg_scale=None,
-    ylabel=None,
+    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     extra_plotter: Optional[_ExtraPlotter] = None,
     use_datashader: bool = False,
     fig_ax: Optional[Tuple[Figure, Axis]] = None,
-):
+) -> _Figs:
     r"""
     Data versus time plotting routine when grouped into categories.
 
@@ -1506,7 +1520,7 @@ def make_categories_plot(
     ...     plt.close(fig)
 
     """
-    return make_generic_plot(
+    return make_generic_plot(  # type: ignore[return-value]
         plot_type="cats",
         description=description,
         time_one=time,
@@ -1543,34 +1557,34 @@ def make_categories_plot(
 
 # %% Functions - make_bar_plot
 def make_bar_plot(
-    description,
-    time,
-    data,
+    description: str,
+    time: Optional[_Times],
+    data: Optional[_Data],
     *,
     name: str = "",
-    elements=None,
+    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
-    rms_xmin=-inf,
-    rms_xmax=inf,
-    disp_xmin=-inf,
-    disp_xmax=inf,
+    rms_xmin: _Time = -inf,
+    rms_xmax: _Time = inf,
+    disp_xmin: _Time = -inf,
+    disp_xmax: _Time = inf,
     single_lines: bool = False,
-    colormap=DEFAULT_COLORMAP,
+    colormap: _CM = DEFAULT_COLORMAP,
     use_mean: bool = True,
     plot_zero: bool = False,
     show_rms: bool = True,
     ignore_empties: bool = False,
     legend_loc: str = "best",
-    second_units=None,
-    ylabel=None,
+    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
     extra_plotter: Optional[_ExtraPlotter] = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     fig_ax: Optional[Tuple[Figure, Axis]] = None,
-):
+) -> Figure:
     r"""
     Plots a filled bar chart, using methods optimized for larger data sets.
 
@@ -1673,9 +1687,9 @@ def make_bar_plot(
 
 # %% make_connected_sets
 def make_connected_sets(
-    description,
-    points,
-    innovs,
+    description: str,
+    points: _M,
+    innovs: Optional[_M],
     *,
     color_by: str = "none",
     hide_innovs: bool = False,
@@ -1689,7 +1703,7 @@ def make_connected_sets(
     add_quiver: bool = False,
     quiver_scale: Optional[float] = None,
     fig_ax: Optional[Tuple[Figure, Axis]] = None,
-):
+) -> Figure:
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.
 
@@ -1809,7 +1823,7 @@ def make_connected_sets(
         ds_high     = None
         ds_color    = "xkcd:blue"
     elif color_by == "direction":
-        polar_ang   = RAD2DEG * np.arctan2(innovs[1, :], innovs[0, :])
+        polar_ang   = RAD2DEG * np.arctan2(innovs[1, :], innovs[0, :])  # type: ignore[index]
         innov_cmap  = ColorMap("hsv" if colormap is None else colormap, low=-180, high=180)  # hsv or twilight?
         colors_line = tuple(innov_cmap.get_color(x) for x in polar_ang[ix])
         colors_pred = colors_line
@@ -1820,7 +1834,7 @@ def make_connected_sets(
         ds_color = "hsv" if not isinstance(colormap, str) else colormap
     elif color_by == "magnitude":
         (new_units, unit_conv) = get_unit_conversion(leg_scale, units)
-        innov_mags = unit_conv * np.sqrt(np.sum(innovs**2, axis=0))
+        innov_mags = unit_conv * np.sqrt(np.sum(innovs**2, axis=0))  # type: ignore[operator]
         if mag_ratio is None:
             max_innov = np.max(innov_mags)
         else:
@@ -1886,7 +1900,7 @@ def make_connected_sets(
     else:
         ax.scatter(points[0, ix], points[1, ix], c=colors_pred, marker=".", label="Sighting", zorder=5)
     if add_quiver:
-        ax.quiver(points[0, ix], points[1, ix], innovs[0, ix], innovs[1, ix], color="xkcd:black", units="x", scale=quiver_scale)
+        ax.quiver(points[0, ix], points[1, ix], innovs[0, ix], innovs[1, ix], color="xkcd:black", units="x", scale=quiver_scale)  # type: ignore[index]
     if color_by not in null_options:
         cbar = fig.colorbar(innov_cmap.get_smap(), ax=ax, shrink=0.9)
         cbar_units = DEGREE_SIGN if color_by == "direction" else new_units

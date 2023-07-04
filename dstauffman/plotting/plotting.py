@@ -13,7 +13,7 @@ import datetime
 import doctest
 import logging
 from pathlib import Path
-from typing import List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Dict, List, Optional, Protocol, Tuple, TYPE_CHECKING, TypedDict, Union
 import unittest
 
 from slog import LogLevel
@@ -43,8 +43,10 @@ from dstauffman.plotting.support import (
 )
 
 if HAVE_MPL:
+    from matplotlib.axis import Axis
     from matplotlib.collections import PatchCollection
     import matplotlib.colors as colors
+    from matplotlib.figure import Figure
     from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
     import matplotlib.transforms as transforms
@@ -57,7 +59,140 @@ else:
     from math import inf, isfinite  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    _Date = Union[None, int, float, datetime.datetime, datetime.date, np.ndarray, np.datetime64]
+    from typing_extensions import NotRequired, Unpack
+
+    _D = np.typing.NDArray[np.datetime64]
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
+    _M = np.typing.NDArray[np.float64]  # 2D
+    _CM = Union[str, ColorMap, colors.Colormap, colors.ListedColormap]
+    _Data = Union[int, float, _N, _M, List[_N], Tuple[_N]]
+    _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
+    _Times = Union[int, float, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N], Tuple[_D]]
+    _DeltaTime = Union[int, float, np.timedelta64]
+    _Figs = List[Figure]
+
+    class _ExtraPlotter(Protocol):
+        def __call__(self, fig: Figure, ax: Axis) -> None:
+            ...
+
+    class _OptsKwargs(TypedDict):
+        case_name: NotRequired[str]
+        date_zero: NotRequired[datetime.datetime]
+        save_plot: NotRequired[bool]
+        save_path: NotRequired[Path]
+        show_plot: NotRequired[bool]
+        show_link: NotRequired[bool]
+        plot_type: NotRequired[str]
+        show_warn: NotRequired[bool]
+        sub_plots: NotRequired[bool]
+        sing_line: NotRequired[bool]
+        disp_xmin: NotRequired[_Time]
+        disp_xmax: NotRequired[_Time]
+        rms_xmin: NotRequired[_Time]
+        rms_xmax: NotRequired[_Time]
+        show_rms: NotRequired[bool]
+        use_mean: NotRequired[bool]
+        lab_vert: NotRequired[bool]
+        show_zero: NotRequired[bool]
+        quat_comp: NotRequired[bool]
+        show_xtra: NotRequired[bool]
+        time_base: NotRequired[str]
+        time_unit: NotRequired[str]
+        colormap: NotRequired[_CM]
+        leg_spot: NotRequired[str]
+        classify: NotRequired[str]
+        names: NotRequired[List[str]]
+
+    class _TimeKwargs(TypedDict):
+        name: NotRequired[str]
+        save_plot: NotRequired[bool]
+        save_path: NotRequired[Path]
+        elements: NotRequired[Union[List[str], Tuple[str, ...]]]
+        units: NotRequired[str]
+        time_units: NotRequired[str]
+        start_date: NotRequired[str]
+        rms_xmin: NotRequired[_Time]
+        rms_xmax: NotRequired[_Time]
+        disp_xmin: NotRequired[_Time]
+        disp_xmax: NotRequired[_Time]
+        single_lines: NotRequired[bool]
+        colormap: NotRequired[_CM]
+        use_mean: NotRequired[bool]
+        plot_zero: NotRequired[bool]
+        show_rms: NotRequired[bool]
+        legend_loc: NotRequired[str]
+        second_units: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        leg_scale: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        ylabel: NotRequired[Union[str, List[str]]]
+        data_as_rows: NotRequired[bool]
+        extra_plotter: NotRequired[_ExtraPlotter]
+        use_zoh: NotRequired[bool]
+        label_vert_lines: NotRequired[bool]
+        use_datashader: NotRequired[bool]
+        fig_ax: NotRequired[Tuple[Figure, Axis]]
+        plot_type: NotRequired[str]
+
+    class _DiffKwargs(TypedDict):
+        name_one: NotRequired[str]
+        name_two: NotRequired[str]
+        elements: NotRequired[Union[List[str], Tuple[str, ...]]]
+        units: NotRequired[str]
+        save_plot: NotRequired[bool]
+        save_path: NotRequired[Path]
+        time_units: NotRequired[str]
+        start_date: NotRequired[str]
+        rms_xmin: NotRequired[_Time]
+        rms_xmax: NotRequired[_Time]
+        disp_xmin: NotRequired[_Time]
+        disp_xmax: NotRequired[_Time]
+        make_subplots: NotRequired[bool]
+        single_lines: NotRequired[bool]
+        colormap: NotRequired[_CM]
+        use_mean: NotRequired[bool]
+        label_vert_lines: NotRequired[bool]
+        plot_zero: NotRequired[bool]
+        show_rms: NotRequired[bool]
+        legend_loc: NotRequired[str]
+        second_units: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        show_extra: NotRequired[bool]
+        leg_scale: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        data_as_rows: NotRequired[bool]
+        tolerance: NotRequired[_DeltaTime]
+        use_zoh: NotRequired[bool]
+        extra_plotter: NotRequired[_ExtraPlotter]
+        use_datashader: NotRequired[bool]
+        fig_ax: NotRequired[Tuple[Figure, Axis]]
+
+    class _BarKwargs(TypedDict):
+        name: NotRequired[str]
+        save_plot: NotRequired[bool]
+        save_path: NotRequired[Path]
+        elements: NotRequired[Union[List[str], Tuple[str, ...]]]
+        units: NotRequired[str]
+        time_units: NotRequired[str]
+        start_date: NotRequired[str]
+        rms_xmin: NotRequired[_Time]
+        rms_xmax: NotRequired[_Time]
+        disp_xmin: NotRequired[_Time]
+        disp_xmax: NotRequired[_Time]
+        single_lines: NotRequired[bool]
+        colormap: NotRequired[_CM]
+        use_mean: NotRequired[bool]
+        plot_zero: NotRequired[bool]
+        show_rms: NotRequired[bool]
+        legend_loc: NotRequired[str]
+        second_units: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        ylabel: NotRequired[Union[str, List[str]]]
+        data_as_rows: NotRequired[bool]
+        extra_plotter: NotRequired[_ExtraPlotter]
+        use_zoh: NotRequired[bool]
+        label_vert_lines: NotRequired[bool]
+        fig_ax: NotRequired[Tuple[Figure, Axis]]
+
+    class _HistKwargs(TypedDict):
+        legend_loc: NotRequired[str]
+
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -69,7 +204,7 @@ _Plotter: bool = True
 class Opts(Frozen):
     r"""Optional plotting configurations."""
 
-    def __init__(self, *args, **kwargs) -> None:
+    def __init__(self, *args: Optional[Opts], **kwargs: Unpack[_OptsKwargs]) -> None:
         r"""
         Default configuration for plots.
 
@@ -139,10 +274,10 @@ class Opts(Frozen):
         self.show_warn: bool  = not is_notebook()
         self.sub_plots: bool  = True
         self.sing_line: bool  = False
-        self.disp_xmin: _Date = -inf
-        self.disp_xmax: _Date =  inf
-        self.rms_xmin: _Date  = -inf
-        self.rms_xmax: _Date  =  inf
+        self.disp_xmin: _Time = -inf
+        self.disp_xmax: _Time =  inf
+        self.rms_xmin: _Time  = -inf
+        self.rms_xmax: _Time  =  inf
         self.show_rms: bool   = True
         self.use_mean: bool   = False
         self.lab_vert: bool   = True
@@ -224,12 +359,12 @@ class Opts(Frozen):
                 start_date = "  t(0) = " + temp_date.strftime(TIMESTR_FORMAT) + " Z"
         return start_date
 
-    def get_time_limits(self) -> Tuple[_Date, _Date, _Date, _Date]:
+    def get_time_limits(self) -> Tuple[_Time, _Time, _Time, _Time]:
         r"""Returns the display and RMS limits in the current time units."""
 
-        def _convert(value):
-            if value is not None and isfinite(value):
-                return convert_time_units(value, self.time_base, self.time_unit)
+        def _convert(value: _Time) -> _Time:
+            if value is not None and isfinite(value):  # type: ignore[arg-type]
+                return convert_time_units(value, self.time_base, self.time_unit)  # type: ignore[arg-type]
             return value
 
         if self.time_base == "datetime":
@@ -246,16 +381,16 @@ class Opts(Frozen):
         assert form in {"datetime", "numpy", "sec"}, f'Unexpected form of "{form}".'
         self.time_base = form
         self.time_unit = form
-        self.disp_xmin = convert_date(
+        self.disp_xmin = convert_date(  # type: ignore[assignment]
             self.disp_xmin, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
-        self.disp_xmax = convert_date(
+        self.disp_xmax = convert_date(  # type: ignore[assignment]
             self.disp_xmax, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
-        self.rms_xmin = convert_date(
+        self.rms_xmin = convert_date(  # type: ignore[assignment]
             self.rms_xmin, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
-        self.rms_xmax = convert_date(
+        self.rms_xmax = convert_date(  # type: ignore[assignment]
             self.rms_xmax, form=form, date_zero=self.date_zero, old_form=old_form, numpy_form=numpy_form
         )
         return self
@@ -302,7 +437,16 @@ def unsuppress_plots() -> None:
 
 
 # %% Functions - plot_time_history
-def plot_time_history(description, time, data, opts=None, *, ignore_empties=False, skip_setup_plots=False, **kwargs):
+def plot_time_history(
+    description: str,
+    time: Optional[_Times],
+    data: Optional[_Data],
+    opts: Optional[Opts] = None,
+    *,
+    ignore_empties: bool = False,
+    skip_setup_plots: bool = False,
+    **kwargs: Unpack[_TimeKwargs],
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Plot multiple metrics over time.
 
@@ -388,7 +532,7 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
     # fmt: on
 
     # call wrapper function for most of the details
-    fig = make_time_plot(
+    fig = make_time_plot(  # type: ignore[misc]
         description,
         time,
         data,
@@ -416,8 +560,17 @@ def plot_time_history(description, time, data, opts=None, *, ignore_empties=Fals
 
 # %% Functions - plot_time_difference
 def plot_time_difference(
-    description, time_one, data_one, time_two, data_two, opts=None, *, ignore_empties=False, skip_setup_plots=False, **kwargs
-):
+    description: str,
+    time_one: Optional[_Times],
+    data_one: Optional[_Data],
+    time_two: Optional[_Times],
+    data_two: Optional[_Data],
+    opts: Optional[Opts] = None,
+    *,
+    ignore_empties: bool = False,
+    skip_setup_plots: bool = False,
+    **kwargs: Unpack[_DiffKwargs],
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Plot multiple metrics over time.
 
@@ -512,7 +665,7 @@ def plot_time_difference(
     # fmt: on
 
     # call wrapper function for most of the details
-    fig = make_difference_plot(
+    fig = make_difference_plot(  # type: ignore[misc]
         description=description,
         time_one=time_one,
         time_two=time_two,
@@ -542,25 +695,25 @@ def plot_time_difference(
 
 # %% Functions - plot_correlation_matrix
 def plot_correlation_matrix(
-    data,
-    labels=None,
-    units="",
+    data: _M,
+    labels: Optional[Union[List[str], List[List[str]]]] = None,
+    units: str = "",
     *,
-    opts=None,
-    matrix_name="Correlation Matrix",
-    cmin=0,
-    cmax=1,
-    xlabel="",
-    ylabel="",
-    plot_lower_only=True,
-    label_values=False,
-    x_lab_rot=90,
-    colormap=None,
-    plot_border=None,
-    leg_scale="unity",
-    fig_ax=None,
-    skip_setup_plots=False,
-):
+    opts: Optional[Opts] = None,
+    matrix_name: str = "Correlation Matrix",
+    cmin: Union[int, float] = 0,
+    cmax: Union[int, float] = 1,
+    xlabel: str = "",
+    ylabel: str = "",
+    plot_lower_only: bool = True,
+    label_values: bool = False,
+    x_lab_rot: Union[int, float] = 90,
+    colormap: Optional[_CM] = None,
+    plot_border: Optional[str] = None,
+    leg_scale: str = "unity",
+    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    skip_setup_plots: bool = False,
+) -> Figure:
     r"""
     Visually plot a correlation matrix.
 
@@ -666,10 +819,10 @@ def plot_correlation_matrix(
     else:
         if isinstance(labels[0], list):
             xlab = labels[0]
-            ylab = labels[1]
+            ylab = labels[1]  # type: ignore[assignment]
         else:
-            xlab = labels
-            ylab = labels
+            xlab = labels  # type: ignore[assignment]
+            ylab = labels  # type: ignore[assignment]
     # check lengths
     if len(xlab) != m or len(ylab) != n:
         raise ValueError("Incorrectly sized labels.")
@@ -691,10 +844,10 @@ def plot_correlation_matrix(
     # test if outside the cmin to cmax range, and if so, adjust range.
     temp = np.min(data)
     if temp < cmin:
-        cmin = temp
+        cmin = temp  # type: ignore[assignment]
     temp = np.max(data)
     if temp > cmax:
-        cmax = temp
+        cmax = temp  # type: ignore[assignment]
 
     # determine which type of data to plot
     this_title = matrix_name + (" [" + new_units + "]" if new_units else "")
@@ -765,7 +918,16 @@ def plot_correlation_matrix(
 
 
 # %% Functions - plot_bar_breakdown
-def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=False, skip_setup_plots=False, **kwargs):
+def plot_bar_breakdown(
+    description: str,
+    time: Optional[_Times],
+    data: Optional[_Data],
+    opts: Optional[Opts] = None,
+    *,
+    ignore_empties: bool = False,
+    skip_setup_plots: bool = False,
+    **kwargs: Unpack[_BarKwargs],
+) -> Figure:
     r"""
     Plot the pie chart like breakdown by percentage in each category over time.
 
@@ -843,10 +1005,10 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
     units = "%"
 
     # call wrapper function for most of the details
-    fig = make_bar_plot(
+    fig = make_bar_plot(  # type: ignore[misc]
         description,
         time,
-        scale * data,
+        scale * data,  # type: ignore[arg-type, operator]
         units=units,
         time_units=time_units,
         start_date=start_date,
@@ -872,27 +1034,27 @@ def plot_bar_breakdown(description, time, data, opts=None, *, ignore_empties=Fal
 
 # %% Functions - plot_histogram
 def plot_histogram(
-    description,
-    data,
-    bins,
+    description: str,
+    data: _N,
+    bins: Union[_N, List[float]],
     *,
-    opts=None,
-    color="#1f77b4",
-    xlabel="Data",
-    ylabel="Number",
-    second_ylabel="Distribution [%]",
-    normalize_spacing=False,
-    use_exact_counts=False,
-    show_cdf=False,
-    cdf_x=None,
-    cdf_y=None,
-    cdf_colormap=None,
-    cdf_same_axis=False,
-    cdf_round_to_bin=False,
-    fig_ax=None,
-    skip_setup_plots=False,
-    **kwargs,
-):
+    opts: Optional[Opts] = None,
+    color: str = "#1f77b4",
+    xlabel: str = "Data",
+    ylabel: str = "Number",
+    second_ylabel: str = "Distribution [%]",
+    normalize_spacing: bool = False,
+    use_exact_counts: bool = False,
+    show_cdf: bool = False,
+    cdf_x: Optional[Union[float, List[float]]] = None,
+    cdf_y: Optional[Union[float, List[float]]] = None,
+    cdf_colormap: Optional[_CM] = None,
+    cdf_same_axis: bool = False,
+    cdf_round_to_bin: bool = False,
+    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    skip_setup_plots: bool = False,
+    **kwargs: Unpack[_HistKwargs],
+) -> Figure:
     r"""
     Creates a histogram plot of the given data and bins.
 
@@ -967,17 +1129,6 @@ def plot_histogram(
         opts = Opts()
     legend_loc = kwargs.pop("legend_loc", opts.leg_spot)
     assert not bool(kwargs), f"Unexpected keyword arguments were passed in: {list(kwargs.keys())}."
-    # create plot
-    if fig_ax is None:
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 1, 1)
-    else:
-        (fig, ax) = fig_ax
-    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
-        fig.canvas.manager.set_window_title(description)
-    else:
-        fig.canvas.manager.set_window_title(sup.get_text())
-    ax.set_title(description)
     if use_exact_counts:
         counts = np.array([np.count_nonzero(data == this_bin) for this_bin in bins], dtype=int)
     else:
@@ -1007,6 +1158,17 @@ def plot_histogram(
     if missing > 0:
         rects.append(Rectangle((plotting_bins[-1], 0), 1, missing))
     coll = PatchCollection(rects, facecolor=color, edgecolor="k", zorder=6)
+    # create plot
+    if fig_ax is None:
+        fig = plt.figure()
+        ax = fig.add_subplot(1, 1, 1)
+    else:
+        (fig, ax) = fig_ax
+    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
+        fig.canvas.manager.set_window_title(description)
+    else:
+        fig.canvas.manager.set_window_title(sup.get_text())
+    ax.set_title(description)
     ax.add_collection(coll)
     ax.grid(True)
     ax.set_xlabel(xlabel)
@@ -1065,10 +1227,10 @@ def plot_histogram(
             ax.step(cdf_bin, cdf, color=cm.get_color(0), label="CDF", zorder=8, transform=trans)
     if cdf_x is not None:
         try:
-            _ = len(cdf_x)
+            _ = len(cdf_x)  # type: ignore[arg-type]
         except TypeError:
-            cdf_x = [cdf_x]
-        for this_x in cdf_x:
+            cdf_x = [cdf_x]  # type: ignore[list-item]
+        for this_x in cdf_x:  # type: ignore[union-attr]
             this_ix = np.argmax(cdf_bin >= this_x)
             this_bin = cdf_scaled[this_ix] if normalize_spacing else cdf_bin[this_ix]
             this_cdf = cdf[this_ix]
@@ -1092,10 +1254,10 @@ def plot_histogram(
             )
     if cdf_y is not None:
         try:
-            _ = len(cdf_y)
+            _ = len(cdf_y)  # type: ignore[arg-type]
         except TypeError:
-            cdf_y = [cdf_y]
-        for this_cdf in cdf_y:
+            cdf_y = [cdf_y]  # type: ignore[list-item]
+        for this_cdf in cdf_y:  # type: ignore[union-attr]
             this_ix = np.argmax(cdf >= this_cdf)
             this_label = f"{100*this_cdf:.3g}p={cdf_bin[this_ix]:.3g}"
             this_bin = cdf_scaled[this_ix] if normalize_spacing else cdf_bin[this_ix]
@@ -1113,7 +1275,7 @@ def plot_histogram(
 
 
 # %% Functions - setup_plots
-def setup_plots(figs, opts):
+def setup_plots(figs: Union[Figure, _Figs], opts: Opts) -> None:
     r"""
     Combine common plot operations into one easy command.
 
