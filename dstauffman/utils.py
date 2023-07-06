@@ -1778,7 +1778,7 @@ def zero_order_hold(
     xp: ArrayLike,
     yp: ArrayLike,
     *,
-    left: Union[int, float] = nan,
+    left: Union[int, float, str] = nan,
     assume_sorted: bool = False,
     return_indices: bool = False,
 ) -> _N:

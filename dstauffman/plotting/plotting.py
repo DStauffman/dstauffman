@@ -13,7 +13,7 @@ import datetime
 import doctest
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Protocol, Tuple, TYPE_CHECKING, TypedDict, Union
+from typing import Dict, List, Optional, Tuple, TYPE_CHECKING, TypedDict, Union
 import unittest
 
 from slog import LogLevel
@@ -32,6 +32,7 @@ from dstauffman import (
 from dstauffman.plotting.generic import make_bar_plot, make_difference_plot, make_time_plot
 from dstauffman.plotting.support import (
     ColorMap,
+    ExtraPlotter,
     figmenu,
     get_classification,
     ignore_plot_data,
@@ -43,7 +44,7 @@ from dstauffman.plotting.support import (
 )
 
 if HAVE_MPL:
-    from matplotlib.axis import Axis
+    from matplotlib.axes import Axes
     from matplotlib.collections import PatchCollection
     import matplotlib.colors as colors
     from matplotlib.figure import Figure
@@ -66,21 +67,17 @@ if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
     _CM = Union[str, ColorMap, colors.Colormap, colors.ListedColormap]
-    _Data = Union[int, float, _N, _M, List[_N], Tuple[_N]]
+    _Data = Union[int, float, _I, _N, _M, List[Union[_I, _N]], Tuple[Union[_I, _N], ...]]
     _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
-    _Times = Union[int, float, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N], Tuple[_D]]
+    _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
     _DeltaTime = Union[int, float, np.timedelta64]
     _Figs = List[Figure]
 
-    class _ExtraPlotter(Protocol):
-        def __call__(self, fig: Figure, ax: Axis) -> None:
-            ...
-
     class _OptsKwargs(TypedDict):
         case_name: NotRequired[str]
-        date_zero: NotRequired[datetime.datetime]
+        date_zero: NotRequired[Optional[datetime.datetime]]
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Path]
+        save_path: NotRequired[Optional[Path]]
         show_plot: NotRequired[bool]
         show_link: NotRequired[bool]
         plot_type: NotRequired[str]
@@ -99,7 +96,7 @@ if TYPE_CHECKING:
         show_xtra: NotRequired[bool]
         time_base: NotRequired[str]
         time_unit: NotRequired[str]
-        colormap: NotRequired[_CM]
+        colormap: NotRequired[Optional[_CM]]
         leg_spot: NotRequired[str]
         classify: NotRequired[str]
         names: NotRequired[List[str]]
@@ -107,8 +104,8 @@ if TYPE_CHECKING:
     class _TimeKwargs(TypedDict):
         name: NotRequired[str]
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Path]
-        elements: NotRequired[Union[List[str], Tuple[str, ...]]]
+        save_path: NotRequired[Optional[Path]]
+        elements: NotRequired[Union[None, List[str], Tuple[str, ...]]]
         units: NotRequired[str]
         time_units: NotRequired[str]
         start_date: NotRequired[str]
@@ -117,29 +114,29 @@ if TYPE_CHECKING:
         disp_xmin: NotRequired[_Time]
         disp_xmax: NotRequired[_Time]
         single_lines: NotRequired[bool]
-        colormap: NotRequired[_CM]
+        colormap: NotRequired[Optional[_CM]]
         use_mean: NotRequired[bool]
         plot_zero: NotRequired[bool]
         show_rms: NotRequired[bool]
         legend_loc: NotRequired[str]
-        second_units: NotRequired[Union[str, int, float, Tuple[str, float]]]
-        leg_scale: NotRequired[Union[str, int, float, Tuple[str, float]]]
-        ylabel: NotRequired[Union[str, List[str]]]
+        second_units: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
+        leg_scale: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
+        ylabel: NotRequired[Union[None, str, List[str]]]
         data_as_rows: NotRequired[bool]
-        extra_plotter: NotRequired[_ExtraPlotter]
+        extra_plotter: NotRequired[Optional[ExtraPlotter]]
         use_zoh: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[Tuple[Figure, Axis]]
+        fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
         plot_type: NotRequired[str]
 
     class _DiffKwargs(TypedDict):
         name_one: NotRequired[str]
         name_two: NotRequired[str]
-        elements: NotRequired[Union[List[str], Tuple[str, ...]]]
+        elements: NotRequired[Union[None, List[str], Tuple[str, ...]]]
         units: NotRequired[str]
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Path]
+        save_path: NotRequired[Optional[Path]]
         time_units: NotRequired[str]
         start_date: NotRequired[str]
         rms_xmin: NotRequired[_Time]
@@ -148,27 +145,27 @@ if TYPE_CHECKING:
         disp_xmax: NotRequired[_Time]
         make_subplots: NotRequired[bool]
         single_lines: NotRequired[bool]
-        colormap: NotRequired[_CM]
+        colormap: NotRequired[Optional[_CM]]
         use_mean: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
         plot_zero: NotRequired[bool]
         show_rms: NotRequired[bool]
         legend_loc: NotRequired[str]
-        second_units: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        second_units: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
         show_extra: NotRequired[bool]
-        leg_scale: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        leg_scale: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
         data_as_rows: NotRequired[bool]
         tolerance: NotRequired[_DeltaTime]
         use_zoh: NotRequired[bool]
-        extra_plotter: NotRequired[_ExtraPlotter]
+        extra_plotter: NotRequired[Optional[ExtraPlotter]]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[Tuple[Figure, Axis]]
+        fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
 
     class _BarKwargs(TypedDict):
         name: NotRequired[str]
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Path]
-        elements: NotRequired[Union[List[str], Tuple[str, ...]]]
+        save_path: NotRequired[Optional[Path]]
+        elements: NotRequired[Union[None, List[str], Tuple[str, ...]]]
         units: NotRequired[str]
         time_units: NotRequired[str]
         start_date: NotRequired[str]
@@ -177,18 +174,18 @@ if TYPE_CHECKING:
         disp_xmin: NotRequired[_Time]
         disp_xmax: NotRequired[_Time]
         single_lines: NotRequired[bool]
-        colormap: NotRequired[_CM]
+        colormap: NotRequired[Optional[_CM]]
         use_mean: NotRequired[bool]
         plot_zero: NotRequired[bool]
         show_rms: NotRequired[bool]
         legend_loc: NotRequired[str]
-        second_units: NotRequired[Union[str, int, float, Tuple[str, float]]]
-        ylabel: NotRequired[Union[str, List[str]]]
+        second_units: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
+        ylabel: NotRequired[Union[None, str, List[str]]]
         data_as_rows: NotRequired[bool]
-        extra_plotter: NotRequired[_ExtraPlotter]
+        extra_plotter: NotRequired[Optional[ExtraPlotter]]
         use_zoh: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
-        fig_ax: NotRequired[Tuple[Figure, Axis]]
+        fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
 
     class _HistKwargs(TypedDict):
         legend_loc: NotRequired[str]
@@ -326,7 +323,7 @@ class Opts(Frozen):
             name = ""
         return name
 
-    def get_date_zero_str(self, date: Optional[Union[datetime.datetime, np.ndarray]] = None) -> str:
+    def get_date_zero_str(self, date: Optional[Union[datetime.datetime, List[int]]] = None) -> str:
         r"""
         Gets a string representation of date_zero, typically used to print on an X axis.
 
@@ -355,7 +352,7 @@ class Opts(Frozen):
             if isinstance(date, datetime.datetime):
                 start_date = "  t(0) = " + date.strftime(TIMESTR_FORMAT) + " Z"
             else:
-                temp_date = datetime.datetime(*date)
+                temp_date = datetime.datetime(*date)  # type: ignore[arg-type]
                 start_date = "  t(0) = " + temp_date.strftime(TIMESTR_FORMAT) + " Z"
         return start_date
 
@@ -710,8 +707,8 @@ def plot_correlation_matrix(
     x_lab_rot: Union[int, float] = 90,
     colormap: Optional[_CM] = None,
     plot_border: Optional[str] = None,
-    leg_scale: str = "unity",
-    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = "unity",
+    fig_ax: Optional[Tuple[Figure, Axes]] = None,
     skip_setup_plots: bool = False,
 ) -> Figure:
     r"""
@@ -1008,7 +1005,7 @@ def plot_bar_breakdown(
     fig = make_bar_plot(  # type: ignore[misc]
         description,
         time,
-        scale * data,  # type: ignore[arg-type, operator]
+        scale * data,  # type: ignore[operator]
         units=units,
         time_units=time_units,
         start_date=start_date,
@@ -1051,7 +1048,7 @@ def plot_histogram(
     cdf_colormap: Optional[_CM] = None,
     cdf_same_axis: bool = False,
     cdf_round_to_bin: bool = False,
-    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    fig_ax: Optional[Tuple[Figure, Axes]] = None,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_HistKwargs],
 ) -> Figure:

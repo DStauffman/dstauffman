@@ -351,7 +351,7 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_Qu
 
 
 # %% Functions - quat_angle_diff
-def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]) -> Tuple[_Q, _Q]:
+def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]) -> Tuple[_N, _Q]:
     r"""
     Calculate the angular difference between two quaternions.
 

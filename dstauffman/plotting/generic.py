@@ -12,7 +12,7 @@ from __future__ import annotations
 import datetime
 import doctest
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Protocol, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
@@ -36,6 +36,7 @@ from dstauffman.plotting.support import (
     ColorMap,
     DEFAULT_COLORMAP,
     disp_xlimits,
+    ExtraPlotter,
     fig_ax_factory,
     get_rms_indices,
     ignore_plot_data,
@@ -46,7 +47,7 @@ from dstauffman.plotting.support import (
 )
 
 if HAVE_MPL:
-    from matplotlib.axis import Axis
+    from matplotlib.axes import Axes
     from matplotlib.collections import LineCollection
     from matplotlib.colors import Colormap, ListedColormap
     from matplotlib.figure import Figure
@@ -66,20 +67,15 @@ _LEG_FORMAT = "{:1.3f}"
 _TRUTH_COLOR = "k"
 
 if TYPE_CHECKING:
-
-    class _ExtraPlotter(Protocol):
-        def __call__(self, fig: Figure, ax: Axis) -> None:
-            ...
-
     _B = np.typing.NDArray[np.bool_]
     _D = np.typing.NDArray[np.datetime64]
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
     _CM = Union[str, Colormap, ListedColormap]
-    _Data = Union[int, float, _N, _M, List[_N], Tuple[_N]]
+    _Data = Union[int, float, _I, _N, _M, List[Union[_I, _N]], Tuple[Union[_I, _N], ...]]
     _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
-    _Times = Union[int, float, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N], Tuple[_D]]
+    _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
     _DeltaTime = Union[int, float, np.timedelta64]
     _Figs = List[Figure]
     _FuncLamb = Callable[[Any, Any], float]
@@ -127,11 +123,11 @@ def make_generic_plot(
     tolerance: _DeltaTime = 0,
     return_err: bool = False,
     data_as_rows: bool = True,
-    extra_plotter: Optional[_ExtraPlotter] = None,
+    extra_plotter: Optional[ExtraPlotter] = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     use_datashader: bool = False,
-    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    fig_ax: Optional[Tuple[Figure, Axes]] = None,
 ) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Generic plotting function called by all the other low level plots.
@@ -349,9 +345,9 @@ def make_generic_plot(
     else:
         have_data_one = have_data_two = have_both = False
     if not time_is_list and time_one is not None:
-        time_one = np.atleast_1d(time_one)
+        time_one = np.atleast_1d(time_one)  # type: ignore[arg-type, assignment]
     if not time_is_list and time_two is not None:
-        time_two = np.atleast_1d(time_two)
+        time_two = np.atleast_1d(time_two)  # type: ignore[arg-type, assignment]
     if not data_is_list and data_one is not None:
         data_one = np.atleast_2d(data_one)
         assert data_one.ndim < 3, "data_one must be 0d, 1d or 2d."
@@ -431,7 +427,7 @@ def make_generic_plot(
             if time_is_list:
                 temp_ix = get_rms_indices(time_one[j], xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[index]
             else:
-                temp_ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[arg-type]
+                temp_ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)
             ix["one"].append(temp_ix["one"])  # type: ignore[arg-type, union-attr]
             if j == 0:
                 ix["pts"] = temp_ix["pts"]
@@ -446,9 +442,9 @@ def make_generic_plot(
             d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)  # type: ignore[arg-type]
         else:
             time_overlap = None
-        ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[arg-type, assignment]
+        ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[assignment]
     else:
-        ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[arg-type, assignment]
+        ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[assignment]
     # create a colormap
     if doing_diffs:
         if is_quat_diff:
@@ -461,7 +457,7 @@ def make_generic_plot(
     # calculate the differences
     if doing_diffs and have_both:
         if is_quat_diff:
-            (nondeg_angle, nondeg_error) = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix])  # type: ignore[call-overload, index]
+            (nondeg_angle, nondeg_error) = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix])  # type: ignore[arg-type, call-overload, index]
         else:
             diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]  # type: ignore[call-overload, index]
     # calculate the rms (or mean) values
@@ -1033,11 +1029,11 @@ def make_time_plot(
     leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
     ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
-    extra_plotter: Optional[_ExtraPlotter] = None,
+    extra_plotter: Optional[ExtraPlotter] = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     use_datashader: bool = False,
-    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    fig_ax: Optional[Tuple[Figure, Axes]] = None,
     plot_type: str = "time",  # {"time", "scatter"}
 ) -> Figure:
     r"""
@@ -1154,10 +1150,10 @@ def make_error_bar_plot(
     leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
     ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
-    extra_plotter: Optional[_ExtraPlotter] = None,
+    extra_plotter: Optional[ExtraPlotter] = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    fig_ax: Optional[Tuple[Figure, Axes]] = None,
 ) -> Figure:
     r"""
     Generic plotting routine to make error bars.
@@ -1292,9 +1288,9 @@ def make_difference_plot(
     return_err: bool = False,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    extra_plotter: Optional[_ExtraPlotter] = None,
+    extra_plotter: Optional[ExtraPlotter] = None,
     use_datashader: bool = False,
-    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    fig_ax: Optional[Tuple[Figure, Axes]] = None,
 ) -> Union[_Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Generic difference comparison plot for use in other wrapper functions.
@@ -1445,9 +1441,9 @@ def make_categories_plot(
     data_as_rows: bool = True,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    extra_plotter: Optional[_ExtraPlotter] = None,
+    extra_plotter: Optional[ExtraPlotter] = None,
     use_datashader: bool = False,
-    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    fig_ax: Optional[Tuple[Figure, Axes]] = None,
 ) -> _Figs:
     r"""
     Data versus time plotting routine when grouped into categories.
@@ -1580,10 +1576,10 @@ def make_bar_plot(
     second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
     ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
-    extra_plotter: Optional[_ExtraPlotter] = None,
+    extra_plotter: Optional[ExtraPlotter] = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    fig_ax: Optional[Tuple[Figure, Axes]] = None,
 ) -> Figure:
     r"""
     Plots a filled bar chart, using methods optimized for larger data sets.
@@ -1697,12 +1693,12 @@ def make_connected_sets(
     legend_loc: str = "best",
     units: str = "",
     mag_ratio: Optional[float] = None,
-    leg_scale: str = "unity",
+    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = "unity",
     colormap: Optional[Union[str, ColorMap]] = None,
     use_datashader: bool = False,
     add_quiver: bool = False,
     quiver_scale: Optional[float] = None,
-    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    fig_ax: Optional[Tuple[Figure, Axes]] = None,
 ) -> Figure:
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.

@@ -21,7 +21,7 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Any, Callable, Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, TypedDict, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, overload, Protocol, Tuple, TYPE_CHECKING, TypedDict, Union
 import unittest
 import warnings
 
@@ -100,8 +100,8 @@ if TYPE_CHECKING:
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
     _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
-    _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N]
-    _Data = Union[int, float, _N, _M, List[_N], Tuple[_N]]
+    _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
+    _Data = Union[int, float, _I, _N, _M, List[Union[_I, _N]], Tuple[Union[_I, _N], ...]]
 
     class _RmsIndices(TypedDict):
         pts: List[int]
@@ -185,6 +185,14 @@ class _HoverButton(QPushButton):
     def leaveEvent(self, event: Any) -> None:  # pylint: disable=unused-argument
         r"""Delete border after hover."""
         self.setStyleSheet("border: 0px;")  # pragma: no cover
+
+
+# %% Classes - ExtraPlotter
+class ExtraPlotter(Protocol):
+    r"""Custom Protocol to type the extra_plotter argument to all the plots."""
+
+    def __call__(self, fig: Figure, ax: Axes) -> None:
+        ...
 
 
 # %% Classes - MyCustomToolbar
@@ -1422,8 +1430,9 @@ def get_rms_indices(
 
     # TODO: functionalize this more so there is less repeated code
     # initialize output
+    temp: List[int] = []
     ix: _RmsIndices = {
-        "pts": [],
+        "pts": temp,
         "one": np.array([], dtype=bool),
         "two": np.array([], dtype=bool),
         "overlap": np.array([], dtype=bool),
@@ -1450,13 +1459,19 @@ def get_rms_indices(
         else:
             # have neither time 1 nor time 2
             raise AssertionError("At least one time vector must be given.")
+    p1_min: _B
+    p2_min: _B
+    p3_min: _B
+    p1_max: _B
+    p2_max: _B
+    p3_max: _B
     if _process(xmin, t_max, operator.lt):  # type: ignore[arg-type]
         if have1:
-            p1_min = time_one >= xmin  # type: ignore[call-overload, operator]
+            p1_min = time_one >= xmin  # type: ignore[assignment, call-overload, operator]
         if have2:
-            p2_min = time_two >= xmin  # type: ignore[call-overload, operator]
+            p2_min = time_two >= xmin  # type: ignore[assignment, call-overload, operator]
         if have3:
-            p3_min = time_overlap >= xmin  # type: ignore[call-overload, operator]
+            p3_min = time_overlap >= xmin  # type: ignore[assignment, call-overload, operator]
         ix["pts"].append(np.maximum(xmin, t_min))  # type: ignore[arg-type]
     else:
         if have1:
@@ -1468,11 +1483,11 @@ def get_rms_indices(
         ix["pts"].append(t_min)
     if _process(xmax, t_min, operator.gt):  # type: ignore[arg-type]
         if have1:
-            p1_max = time_one <= xmax  # type: ignore[call-overload, operator]
+            p1_max = time_one <= xmax  # type: ignore[assignment, call-overload, operator]
         if have2:
-            p2_max = time_two <= xmax  # type: ignore[call-overload, operator]
+            p2_max = time_two <= xmax  # type: ignore[assignment, call-overload, operator]
         if have3:
-            p3_max = time_overlap <= xmax  # type: ignore[call-overload, operator]
+            p3_max = time_overlap <= xmax  # type: ignore[assignment, call-overload, operator]
         ix["pts"].append(np.minimum(xmax, t_max))  # type: ignore[arg-type]
     else:
         if have1:
@@ -1485,11 +1500,11 @@ def get_rms_indices(
     assert len(ix["pts"]) == 2 and ix["pts"][0] <= ix["pts"][1], f'Time points aren\'t as expected: "{ix["pts"]}"'
     # calculate indices
     if have1:
-        ix["one"] = p1_min & p1_max  # type: ignore[typeddict-item]
+        ix["one"] = p1_min & p1_max
     if have2:
-        ix["two"] = p2_min & p2_max  # type: ignore[typeddict-item]
+        ix["two"] = p2_min & p2_max
     if have3:
-        ix["overlap"] = p3_min & p3_max  # type: ignore[typeddict-item]
+        ix["overlap"] = p3_min & p3_max
     return ix
 
 

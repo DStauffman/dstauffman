@@ -13,7 +13,7 @@ import datetime
 import doctest
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Protocol, Tuple, TYPE_CHECKING, TypedDict, Union
+from typing import Any, Dict, List, Optional, Tuple, TYPE_CHECKING, TypedDict, Union
 import unittest
 
 from slog import LogLevel
@@ -22,10 +22,10 @@ from dstauffman import HAVE_MPL, HAVE_NUMPY, intersect, is_datetime
 from dstauffman.aerospace import Kf, KfInnov
 from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, make_difference_plot, make_generic_plot
 from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
-from dstauffman.plotting.support import COLOR_LISTS, ColorMap, get_nondeg_colorlists, get_rms_indices
+from dstauffman.plotting.support import COLOR_LISTS, ColorMap, ExtraPlotter, get_nondeg_colorlists, get_rms_indices
 
 if HAVE_MPL:
-    from matplotlib.axis import Axis
+    from matplotlib.axes import Axes
     from matplotlib.colors import Colormap, ListedColormap
     from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
@@ -46,21 +46,17 @@ if TYPE_CHECKING:
     _M = np.typing.NDArray[np.float64]  # 2D
     _Q = np.typing.NDArray[np.float64]
     _CM = Union[str, Colormap, ListedColormap]
-    _Data = Union[int, float, _N, _M, List[_N], Tuple[_N]]
+    _Data = Union[int, float, _I, _N, _M, List[Union[_I, _N]], Tuple[Union[_I, _N], ...]]
     _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
-    _Times = Union[int, float, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N], Tuple[_D]]
+    _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
     _DeltaTime = Union[int, float, np.timedelta64]
     _Figs = List[Figure]
-
-    class _ExtraPlotter(Protocol):
-        def __call__(self, fig: Figure, ax: Axis) -> None:
-            ...
 
     class _KfQuatKwargs(TypedDict):
         name_one: NotRequired[str]
         name_two: NotRequired[str]
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Path]
+        save_path: NotRequired[Optional[Path]]
         time_units: NotRequired[str]
         start_date: NotRequired[str]
         rms_xmin: NotRequired[_Time]
@@ -75,22 +71,22 @@ if TYPE_CHECKING:
         plot_zero: NotRequired[bool]
         show_rms: NotRequired[bool]
         legend_loc: NotRequired[str]
-        second_units: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        second_units: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
         show_extra: NotRequired[bool]
-        leg_scale: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        leg_scale: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
         data_as_rows: NotRequired[bool]
         tolerance: NotRequired[_DeltaTime]
         use_zoh: NotRequired[bool]
-        extra_plotter: NotRequired[_ExtraPlotter]
+        extra_plotter: NotRequired[Optional[ExtraPlotter]]
         use_datashader: NotRequired[bool]
 
     class _KfDiffKwargs(TypedDict):
         name_one: NotRequired[str]
         name_two: NotRequired[str]
-        elements: NotRequired[Union[List[str], Tuple[str, ...]]]  # diff-only
+        elements: NotRequired[Union[None, List[str], Tuple[str, ...]]]  # diff-only
         units: NotRequired[str]  # diff-only
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Path]
+        save_path: NotRequired[Optional[Path]]
         time_units: NotRequired[str]
         start_date: NotRequired[str]
         rms_xmin: NotRequired[_Time]
@@ -99,21 +95,21 @@ if TYPE_CHECKING:
         disp_xmax: NotRequired[_Time]
         make_subplots: NotRequired[bool]
         single_lines: NotRequired[bool]
-        colormap: NotRequired[_CM]  # diff-only
+        colormap: NotRequired[Optional[_CM]]  # diff-only
         use_mean: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
         plot_zero: NotRequired[bool]
         show_rms: NotRequired[bool]
         legend_loc: NotRequired[str]
-        second_units: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        second_units: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
         show_extra: NotRequired[bool]
-        leg_scale: NotRequired[Union[str, int, float, Tuple[str, float]]]
+        leg_scale: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
         data_as_rows: NotRequired[bool]
         tolerance: NotRequired[_DeltaTime]
         use_zoh: NotRequired[bool]
-        extra_plotter: NotRequired[_ExtraPlotter]
+        extra_plotter: NotRequired[Optional[ExtraPlotter]]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[Tuple[Figure, Axis]]  # diff-only
+        fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]  # diff-only
 
     class _SetsKwargs(TypedDict):
         color_by: NotRequired[str]
@@ -122,13 +118,13 @@ if TYPE_CHECKING:
         hide_innovs: NotRequired[bool]
         center_origin: NotRequired[bool]
         units: NotRequired[str]
-        mag_ratio: NotRequired[float]
-        leg_scale: NotRequired[str]
-        colormap: NotRequired[_CM]
+        mag_ratio: NotRequired[Optional[float]]
+        leg_scale: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
+        colormap: NotRequired[Optional[_CM]]
         use_datashader: NotRequired[bool]
         add_quiver: NotRequired[bool]
-        quiver_scale: NotRequired[float]
-        fig_ax: NotRequired[Tuple[Figure, Axis]]
+        quiver_scale: NotRequired[Optional[float]]
+        fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
 
 
 # %% Globals
@@ -171,7 +167,7 @@ def make_quaternion_plot(
     return_err: bool = False,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    extra_plotter: Optional[_ExtraPlotter] = None,
+    extra_plotter: Optional[ExtraPlotter] = None,
     use_datashader: bool = False,
 ) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
@@ -792,6 +788,7 @@ def plot_innovations(
             temp = 0
         num_chan = max(num_chan, temp)
     # fmt: off
+    elements: Union[None, List[str], Tuple[str, ...]]
     elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f"Channel {i+1}" for i in range(num_chan)]
     elements     = kwargs.pop("elements", elements)
     units        = kwargs.pop("units", kf1.units)
@@ -899,7 +896,7 @@ def plot_innovations(
             err[field] = out[1]
         else:
             figs += out
-        this_ylabel = [e + " Innovation [" + units + "]" for e in elements]
+        this_ylabel = [e + " Innovation [" + units + "]" for e in elements] if elements is not None else None
         if plot_by_status and field_one is not None and kf1.status is not None:
             figs += make_categories_plot(  # type: ignore[misc]
                 full_description + " by Category",
@@ -1304,6 +1301,7 @@ def plot_covariance(
             temp = 0
         num_chan = max(num_chan, temp)
     # fmt: off
+    elements: Union[None, List[str], Tuple[str, ...]]
     elements     = kf1.chan if kf1.chan else kf2.chan if kf2.chan else [f"Channel {i+1}" for i in range(num_chan)]
     elements     = kwargs.pop("elements", elements)
     units        = kwargs.pop("units", "mixed")
@@ -1383,8 +1381,8 @@ def plot_covariance(
                 data_two = temp
             if have_data1 or have_data2:
                 this_description = description + " for State " + ",".join(str(x) for x in this_state_nums)
-                this_elements = [elements[state] for state in this_state_nums]
-                colormap = get_nondeg_colorlists(len(this_elements))
+                this_elements = [elements[state] for state in this_state_nums] if elements is not None else None
+                colormap = get_nondeg_colorlists(len(this_elements)) if this_elements is not None else None
                 out = make_difference_plot(  # type: ignore[misc]
                     this_description,
                     kf1.time,

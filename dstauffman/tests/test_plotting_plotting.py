@@ -7,8 +7,10 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
 import datetime
-from typing import List, Optional
+from typing import List, Optional, TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
 
@@ -25,6 +27,10 @@ if HAVE_NUMPY:
     inf = np.inf
 else:
     from math import inf
+
+if TYPE_CHECKING:
+    _I = np.typing.NDArray[np.int_]
+    _N = np.typing.NDArray[np.float64]
 
 
 # %% plotting.Opts
@@ -239,14 +245,14 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 
     def test_lists0(self) -> None:
         time = np.arange(100.0)
-        data = [np.zeros(100), np.ones(100)]
-        self.figs.append(plot.plot_time_history("", time, data))
+        data: List[_I] = [np.zeros(100, dtype=int), np.ones(100, dtype=int)]
+        self.figs.append(plot.plot_time_history("", time, data))  # type: ignore[arg-type]
 
     def test_lists1(self) -> None:
         time = np.arange(10)
-        data = [np.random.rand(10), 5 * np.random.rand(10)]
+        data: List[_N] = [np.random.rand(10), 5 * np.random.rand(10)]
         elements = ("Item 1", "5 Times")
-        self.figs.append(plot.plot_time_history(self.description, time, data, opts=self.opts, elements=elements))
+        self.figs.append(plot.plot_time_history(self.description, time, data, opts=self.opts, elements=elements))  # type: ignore[arg-type]
 
     def test_lists2(self) -> None:
         time = [np.arange(5.0), np.arange(10.0)]

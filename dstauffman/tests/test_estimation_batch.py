@@ -11,6 +11,7 @@ Notes
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import Any, Dict, List, Tuple, TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
@@ -458,7 +459,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
         self.opti_opts.output_folder  = None
-        self.opti_opts.output_results = ""
+        self.opti_opts.output_results = None
         self.opti_opts.params         = []
         # fmt: on
 
@@ -742,7 +743,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
         self.opti_opts.output_folder  = None
-        self.opti_opts.output_results = ""
+        self.opti_opts.output_results = None
         self.opti_opts.params         = []
         # fmt: on
 
@@ -925,7 +926,7 @@ class Test_estimation_validate_opti_opts(unittest.TestCase):
         self.opti_opts.get_param_func = str
         self.opti_opts.set_param_func = repr
         self.opti_opts.output_folder  = None
-        self.opti_opts.output_results = ""
+        self.opti_opts.output_results = None
         self.opti_opts.params         = [1, 2]  # type: ignore[list-item]
         # fmt: on
 
@@ -1012,7 +1013,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
         self.opti_opts.get_param_func = get_parameter
         self.opti_opts.set_param_func = set_parameter
         self.opti_opts.output_folder  = None
-        self.opti_opts.output_results = ""
+        self.opti_opts.output_results = None
         self.opti_opts.params         = []
         # fmt: on
 
@@ -1074,7 +1075,7 @@ class Test_estimation_run_bpe(unittest.TestCase):
         mock_logger.level = logging.CRITICAL
         self.opti_opts.max_iters = 1
         self.opti_opts.output_folder = get_tests_dir()
-        self.opti_opts.output_results = "temp_results.hdf5"
+        self.opti_opts.output_results = Path("temp_results.hdf5")
         estm.run_bpe(self.opti_opts)
         # TODO: test with more iterations and files?
 
@@ -1095,8 +1096,8 @@ class Test_estimation_run_bpe(unittest.TestCase):
         estm.run_bpe(self.opti_opts)
 
     def tearDown(self) -> None:
-        if self.opti_opts.output_results and self.opti_opts.output_folder is not None:
-            files = [self.opti_opts.output_results, "bpe_results_iter_1.hdf5", "cur_results_iter_1.hdf5"]
+        if self.opti_opts.output_results is not None and self.opti_opts.output_folder is not None:
+            files = (self.opti_opts.output_results, Path("bpe_results_iter_1.hdf5"), Path("cur_results_iter_1.hdf5"))
             for this_file in files:
                 self.opti_opts.output_folder.joinpath(this_file).unlink(missing_ok=True)
 

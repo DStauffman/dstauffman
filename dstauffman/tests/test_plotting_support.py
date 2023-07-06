@@ -967,7 +967,7 @@ class Test_plotting_plot_vert_lines(unittest.TestCase):
     def test_multiple_lines(self) -> None:
         labels = ["Line 1", "Line 2", "Line 3", "Line 4"]
         colormap = colors.ListedColormap(["r", "g", "b", "k"])
-        plot.plot_vert_lines(self.ax, [1, 2.5, 3.5, 8], show_in_legend=True, labels=labels, colormap=colormap)
+        plot.plot_vert_lines(self.ax, [1, 2.5, 3.5, 8], show_in_legend=True, labels=labels, colormap=colormap)  # type: ignore[arg-type]
         self.ax.legend()
 
     def test_multiple_unlabeled(self) -> None:

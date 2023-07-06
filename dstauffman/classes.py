@@ -456,7 +456,7 @@ def load_method(
 
 # %% save_convert_hdf5
 def save_convert_hdf5(self: Any, **kwargs: Any) -> Dict[str, bool]:
-    r"""Supporting class for saving to HDF5."""
+    r"""Supporting function for saving to HDF5."""
     if "datetime_fields" in kwargs:
         datetime_fields = kwargs["datetime_fields"]
     else:
@@ -475,7 +475,7 @@ def save_convert_hdf5(self: Any, **kwargs: Any) -> Dict[str, bool]:
 
 # %% save_restore_hdf5
 def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) -> None:  # pylint: disable=unused-argument
-    r"""Supporting class for loading from HDF5."""
+    r"""Supporting function for loading from HDF5."""
     if convert_dates:
         assert HAVE_NUMPY, "Must have numpy to convert dates."
         if "datetime_fields" in kwargs:

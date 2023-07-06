@@ -10,16 +10,18 @@ Notes
 # %% Imports
 from __future__ import annotations
 
+import datetime
 import doctest
+from pathlib import Path
 from typing import Dict, List, Optional, Sequence, Tuple, TYPE_CHECKING, TypedDict, Union
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY
 from dstauffman.estimation import BpeResults
-from dstauffman.plotting.plotting import Opts, plot_correlation_matrix, plot_time_history, setup_plots
+from dstauffman.plotting.plotting import ExtraPlotter, Opts, plot_correlation_matrix, plot_time_history, setup_plots
 
 if HAVE_MPL:
-    from matplotlib.axis import Axis
+    from matplotlib.axes import Axes
     from matplotlib.colors import Colormap, ListedColormap
     from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
@@ -31,10 +33,35 @@ if TYPE_CHECKING:
 
     _CM = Union[str, Colormap, ListedColormap]
     _Figs = List[Figure]
+    _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
 
     class _BpeKwArgs(TypedDict):
-        colormap: NotRequired[_CM]
-        # TODO: populate the rest of this
+        name: NotRequired[str]
+        save_plot: NotRequired[bool]
+        save_path: NotRequired[Optional[Path]]
+        units: NotRequired[str]
+        time_units: NotRequired[str]
+        start_date: NotRequired[str]
+        rms_xmin: NotRequired[_Time]
+        rms_xmax: NotRequired[_Time]
+        disp_xmin: NotRequired[_Time]
+        disp_xmax: NotRequired[_Time]
+        single_lines: NotRequired[bool]
+        colormap: NotRequired[Optional[_CM]]
+        use_mean: NotRequired[bool]
+        plot_zero: NotRequired[bool]
+        show_rms: NotRequired[bool]
+        legend_loc: NotRequired[str]
+        second_units: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
+        leg_scale: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
+        ylabel: NotRequired[Union[None, str, List[str]]]
+        data_as_rows: NotRequired[bool]
+        extra_plotter: NotRequired[Optional[ExtraPlotter]]
+        use_zoh: NotRequired[bool]
+        label_vert_lines: NotRequired[bool]
+        use_datashader: NotRequired[bool]
+        fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
+        plot_type: NotRequired[str]
 
 
 # %% Functions - plot_bpe_convergence
@@ -42,7 +69,7 @@ def plot_bpe_convergence(
     costs: Sequence,
     *,
     opts: Optional[Opts] = None,
-    fig_ax: Optional[Tuple[Figure, Axis]] = None,
+    fig_ax: Optional[Tuple[Figure, Axes]] = None,
     skip_setup_plots: bool = False,
 ) -> Figure:
     r"""

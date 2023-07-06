@@ -11,7 +11,8 @@ Notes
 from __future__ import annotations
 
 import logging
-from typing import Any, Dict, List, TYPE_CHECKING, Union
+from pathlib import Path
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 import unittest
 
 from dstauffman import FixedDict, Frozen, HAVE_NUMPY
@@ -42,9 +43,9 @@ class _Config(Frozen):
         self.log_level: int = logging.INFO
 
         # output folder/files
-        self.output_folder: str = ""
-        self.output_results: str = "results_model.hdf5"
-        self.output_params: str = "results_param.pkl"
+        self.output_folder: Optional[Path] = None
+        self.output_results: Optional[Path] = Path("results_model.hdf5")
+        self.output_params: Optional[Path] = Path("results_param.pkl")
 
         # Whether to save the final state information to disk
         self.save_final: bool = False

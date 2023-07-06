@@ -86,7 +86,7 @@ class OptiOpts(Frozen):
         self.get_param_func: Optional[Callable]   = None
         self.set_param_func: Optional[Callable]   = None
         self.output_folder: Optional[Path]        = None
-        self.output_results: str                  = "bpe_results.hdf5"
+        self.output_results: Optional[Path]       = Path("bpe_results.hdf5")
         self.params: Optional[List[OptiParam]]    = None
         self.start_func: Optional[Callable]       = None
         self.final_func: Optional[Callable]       = None
@@ -1231,8 +1231,8 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     >>> opti_opts.cost_args      = {"b": 2}
     >>> opti_opts.get_param_func = str
     >>> opti_opts.set_param_func = repr
-    >>> opti_opts.output_folder  = ""
-    >>> opti_opts.output_results = ""
+    >>> opti_opts.output_folder  = None
+    >>> opti_opts.output_results = None
     >>> opti_opts.params         = [1, 2]
 
     >>> is_valid = validate_opti_opts(opti_opts)
@@ -1250,6 +1250,12 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     assert isinstance(opti_opts.cost_args, dict), "Cost args must be a dictionary."
     assert callable(opti_opts.get_param_func), "Get parameters function must be callable."
     assert callable(opti_opts.set_param_func), "Get paramaters function must be callable."
+    assert opti_opts.output_folder is None or isinstance(
+        opti_opts.output_folder, Path
+    ), "Use None or pathlib.Path, not str for output_folder."
+    assert opti_opts.output_results is None or isinstance(
+        opti_opts.output_results, Path
+    ), "Use None or pathlib.Path, not str for output_results."
     # Must estimate at least one parameter (TODO: make work with zero?)
     assert isinstance(opti_opts.params, list) and len(opti_opts.params) > 0
     # Must be one of these two slope methods
@@ -1306,10 +1312,9 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
     two_sided = opti_opts.slope_method == "two_sided"
 
     # determine if saving data
-    is_saving = opti_opts.output_folder is not None and bool(opti_opts.output_results)
+    is_saving = opti_opts.output_folder is not None and opti_opts.output_results is not None
     if is_saving:
-        assert opti_opts.output_folder is not None
-        filename = opti_opts.output_folder / opti_opts.output_results
+        filename = opti_opts.output_folder / opti_opts.output_results  # type: ignore[operator]
 
     # TODO: write ability to resume from previously saved iteration results
     # initialize the output and current results instances

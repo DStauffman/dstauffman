@@ -358,9 +358,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:
 
 
 # %% Functions - rv_2_oe
-def rv_2_oe(
-    r: np.ndarray, v: np.ndarray, mu: Union[float, np.ndarray] = 1.0, unit: bool = False, precision: float = 1e-12
-) -> Elements:
+def rv_2_oe(r: _N, v: _N, mu: _FN = 1.0, unit: bool = False, precision: float = 1e-12) -> Elements:
     r"""
     Position and Velocity to Orbital Elements.
 
@@ -540,22 +538,18 @@ def rv_2_oe(
 
 # %% oe_2_rv
 @overload
-def oe_2_rv(
-    elements: Elements, mu: Union[float, np.ndarray] = ..., unit: bool = ..., *, return_PQW: Literal[False] = ...
-) -> Tuple[np.ndarray, np.ndarray]:
+def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[False] = ...) -> Tuple[_N, _N]:
     ...
 
 
 @overload
-def oe_2_rv(
-    elements: Elements, mu: Union[float, np.ndarray] = ..., unit: bool = ..., *, return_PQW: Literal[True]
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[True]) -> Tuple[_N, _N, _N, _N, _N]:
     ...
 
 
 def oe_2_rv(
-    elements: Elements, mu: Union[float, np.ndarray] = 1.0, unit: bool = False, *, return_PQW: bool = False
-) -> Union[Tuple[np.ndarray, np.ndarray], Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
+    elements: Elements, mu: _FN = 1.0, unit: bool = False, *, return_PQW: bool = False
+) -> Union[Tuple[_N, _N], Tuple[_N, _N, _N, _N, _N]]:
     r"""
     Orbital Elements to Position and Velocity.
 
