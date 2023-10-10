@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import doctest
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, TYPE_CHECKING, Union
+from typing import Any, Dict, List, Optional, overload, Set, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from nubs import ncjit
@@ -27,6 +27,7 @@ if HAVE_NUMPY:
 
 if TYPE_CHECKING:
     _B = np.typing.NDArray[np.bool_]
+    _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
 
@@ -378,6 +379,114 @@ def find_last(x: _B, /) -> int:
     if ~np.any(x):
         return -1
     return int(x.size - 1 - np.argmax(np.flip(x)))
+
+
+# %% prepend
+@overload
+def prepend(vec: _B, new: bool) -> _B:
+    ...
+
+
+@overload
+def prepend(vec: _I, new: int) -> _I:
+    ...
+
+
+@overload
+def prepend(vec: _N, new: float) -> _N:
+    ...
+
+
+def prepend(vec: Union[_B, _I, _N], new: Union[bool, int, float]) -> Union[_B, _I, _N]:
+    r"""
+    Add a value to the beginning of an array.
+
+    Parameters
+    ----------
+    vec : (N,) np.ndarray
+        Original array
+    new : float
+        Value to prepend
+
+    Returns
+    -------
+    (N+1,) np.ndarray
+        Prepended array
+
+    See Also
+    --------
+    np.hstack
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2023.
+
+    Examples
+    --------
+    >>> from dstauffman import prepend
+    >>> import numpy as np
+    >>> vec = np.array([2, 3, 5])
+    >>> new = 1
+    >>> x = prepend(vec, new)
+    >>> print(x)
+    [1 2 3 5]
+
+    """
+    return np.hstack([new, vec])
+
+
+# %% postpend
+@overload
+def postpend(vec: _B, new: bool) -> _B:
+    ...
+
+
+@overload
+def postpend(vec: _I, new: int) -> _I:
+    ...
+
+
+@overload
+def postpend(vec: _N, new: float) -> _N:
+    ...
+
+
+def postpend(vec: Union[_B, _I, _N], new: Union[bool, int, float]) -> Union[_B, _I, _N]:
+    r"""
+    Add a value to the beginning of an array.
+
+    Parameters
+    ----------
+    vec : (N,) np.ndarray
+        Original array
+    new : float
+        Value to append at the end (postpend)
+
+    Returns
+    -------
+    (N+1,) np.ndarray
+        Appended (new) array
+
+    See Also
+    --------
+    np.hstack
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2023.
+
+    Examples
+    --------
+    >>> from dstauffman import postpend
+    >>> import numpy as np
+    >>> vec = np.array([2, 3, 5])
+    >>> new = 7
+    >>> x = postpend(vec, new)
+    >>> print(x)
+    [2 3 5 7]
+
+    """
+    return np.hstack([vec, new])
 
 
 # %% Unit test

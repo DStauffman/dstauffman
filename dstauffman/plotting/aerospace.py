@@ -587,6 +587,7 @@ def plot_position(
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    show_extra   = kwargs.pop("show_extra", this_opts.show_xtra)
 
     # hard-coded defaults
     elements      = kwargs.pop("elements", ["x", "y", "z"])
@@ -634,6 +635,7 @@ def plot_position(
             single_lines=single_lines,
             show_rms=show_rms,
             legend_loc=legend_loc,
+            show_extra=show_extra,
             second_units=second_units,
             return_err=return_err,
             **kwargs,
@@ -834,6 +836,7 @@ def plot_innovations(
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    show_extra   = kwargs.pop("show_extra", this_opts.show_xtra)
     colormap     = kwargs.pop("colormap", this_opts.colormap)
     tolerance    = kwargs.pop("tolerance", 0)
     # fmt: on
@@ -893,6 +896,7 @@ def plot_innovations(
             show_rms=show_rms,
             single_lines=single_lines,
             legend_loc=legend_loc,
+            show_extra=show_extra,
             second_units=this_second_units,
             colormap=colormap,
             return_err=return_err,
@@ -1353,6 +1357,7 @@ def plot_covariance(
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    show_extra   = kwargs.pop("show_extra", this_opts.show_xtra)
     # fmt: on
 
     # initialize output
@@ -1416,6 +1421,7 @@ def plot_covariance(
                     show_rms=show_rms,
                     single_lines=single_lines,
                     legend_loc=legend_loc,
+                    show_extra=show_extra,
                     second_units=this_2units,
                     return_err=return_err,
                     ylabel=this_ylabel,

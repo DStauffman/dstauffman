@@ -666,6 +666,7 @@ def plot_time_difference(
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    show_extra   = kwargs.pop("show_extra", this_opts.show_xtra)
     # fmt: on
 
     # call wrapper function for most of the details
@@ -688,6 +689,7 @@ def plot_time_difference(
         plot_zero=plot_zero,
         show_rms=show_rms,
         legend_loc=legend_loc,
+        show_extra=show_extra,
         **kwargs,
     )
 

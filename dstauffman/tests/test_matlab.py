@@ -271,6 +271,90 @@ class Test_find_last(unittest.TestCase):
         self.assertEqual(ix, 5)
 
 
+# %% prepend
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_prepend(unittest.TestCase):
+    r"""
+    Tests the prepend function with the following cases:
+        Integer
+        Float
+        Boolean
+        Vector
+    """
+
+    def test_integer(self) -> None:
+        vec = np.array([2, 3, 5])
+        new = 1
+        exp = np.array([1, 2, 3, 5])
+        out = dcs.prepend(vec, new)
+        np.testing.assert_array_equal(out, exp)
+
+    def test_float(self) -> None:
+        vec = np.array([2.2, -3.3, 5.0])
+        new = -10.0
+        exp = np.array([-10.0, 2.2, -3.3, 5.0])
+        out = dcs.prepend(vec, new)
+        np.testing.assert_array_almost_equal(out, exp, 14)
+
+    def test_bool(self) -> None:
+        vec = np.array([True, True, True, False], dtype=bool)
+        new = False
+        exp = np.array([False, True, True, True, False], dtype=bool)
+        out = dcs.prepend(vec, new)
+        np.testing.assert_array_equal(out, exp)
+
+    def test_vec(self) -> None:
+        vec = np.array([2, 3, 5])
+        new = np.array([0, 1])
+        exp = np.array([0, 1, 2, 3, 5])
+        # TODO: should I allow this use case or throw it out within the function call?
+        # or just consider it a typing exception?
+        out = dcs.prepend(vec, new)  # type: ignore[call-overload]
+        np.testing.assert_array_equal(out, exp)
+
+
+# %% postpend
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_postpend(unittest.TestCase):
+    r"""
+    Tests the postpend function with the following cases:
+        Integer
+        Float
+        Boolean
+        Vector
+    """
+
+    def test_integer(self) -> None:
+        vec = np.array([2, 3, 5])
+        new = 10
+        exp = np.array([2, 3, 5, 10])
+        out = dcs.postpend(vec, new)
+        np.testing.assert_array_equal(out, exp)
+
+    def test_float(self) -> None:
+        vec = np.array([2.2, -3.3, 5.0])
+        new = -10.0
+        exp = np.array([2.2, -3.3, 5.0, -10.0])
+        out = dcs.postpend(vec, new)
+        np.testing.assert_array_almost_equal(out, exp, 14)
+
+    def test_bool(self) -> None:
+        vec = np.array([True, True, True, False], dtype=bool)
+        new = False
+        exp = np.array([True, True, True, False, False], dtype=bool)
+        out = dcs.postpend(vec, new)
+        np.testing.assert_array_equal(out, exp)
+
+    def test_vec(self) -> None:
+        vec = np.array([2, 3, 5])
+        new = np.array([0, 1])
+        exp = np.array([2, 3, 5, 0, 1])
+        # TODO: should I allow this use case or throw it out within the function call?
+        # or just consider it a typing exception?
+        out = dcs.postpend(vec, new)  # type: ignore[call-overload]
+        np.testing.assert_array_equal(out, exp)
+
+
 # %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)
