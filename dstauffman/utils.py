@@ -192,11 +192,6 @@ def find_in_range(
     ----------
     value : (N,) ndarray of float
         Value to compare against, which could be NaN
-
-    Returns
-    -------
-    valid : (N,) ndarray of bool
-        True or False flag for whether the person in the given range
     min_ : int or float, optional
         Minimum value to include in range
     max_ : int or float, optional
@@ -211,6 +206,11 @@ def find_in_range(
         Whether to include the left endpoint in the range
     right : bool, optional, default is False
         Whether to include the right endpoint in the range
+
+    Returns
+    -------
+    valid : (N,) ndarray of bool
+        True or False flag for whether the person in the given range
 
     Notes
     -----
@@ -1730,7 +1730,7 @@ def intersect(  # type: ignore[misc]
     # calculate output
     # Note that a[ia] and b[ib] should be the same with a tolerance of 0, but not necessarily otherwise
     # This function returns the values from the first vector a
-    c = np.sort(a[ia])  # type: ignore[index, call-overload]
+    c = np.sort(a[ia])  # type: ignore[index]
     if np.any(is_dates):
         c = c.astype(orig_datetime)
     if return_indices:
@@ -2009,8 +2009,27 @@ def drop_following_time(times: _N, drop_starts: _N, dt_drop: float) -> _B:
     ...
 
 
+@overload
+def drop_following_time(times: _D, drop_starts: _D, dt_drop: np.datetime64, *, reverse: bool) -> _B:
+    ...
+
+
+@overload
+def drop_following_time(times: _I, drop_starts: _I, dt_drop: int, *, reverse: bool) -> _B:
+    ...
+
+
+@overload
+def drop_following_time(times: _N, drop_starts: _N, dt_drop: float, *, reverse: bool) -> _B:
+    ...
+
+
 def drop_following_time(
-    times: Union[_D, _I, _N], drop_starts: Union[_D, _I, _N], dt_drop: Union[int, float, np.datetime64]
+    times: Union[_D, _I, _N],
+    drop_starts: Union[_D, _I, _N],
+    dt_drop: Union[int, float, np.datetime64],
+    *,
+    reverse: bool = False,
 ) -> _B:
     r"""
     Drops the times within the dt_drop after drop_starts.
@@ -2047,7 +2066,10 @@ def drop_following_time(
     drop_mask = np.zeros(times.size, dtype=bool)
     for drop_time in drop_starts:
         # drop the times within the specified window
-        drop_mask |= (times >= drop_time) & (times < drop_time + dt_drop)
+        if reverse:
+            drop_mask |= (times > drop_time - dt_drop) & (times <= drop_time)
+        else:
+            drop_mask |= (times >= drop_time) & (times < drop_time + dt_drop)
     return drop_mask
 
 

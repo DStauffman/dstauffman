@@ -23,7 +23,7 @@ from .plotting  import Opts, suppress_plots, unsuppress_plots, plot_time_history
                            plot_time_difference, plot_correlation_matrix, plot_bar_breakdown, \
                            plot_histogram, setup_plots
 from .support   import DEFAULT_COLORMAP, DEFAULT_CLASSIFICATION, COLOR_LISTS, ExtraPlotter, \
-                           MyCustomToolbar, ColorMap, is_notebook, close_all, \
+                           ListedColors, MyCustomToolbar, ColorMap, is_notebook, close_all, \
                            get_nondeg_colorlists, ignore_plot_data, whitten, get_figure_title, \
                            resolve_name, storefig, titleprefix, disp_xlimits, zoom_ylim, figmenu, \
                            rgb_ints_to_hex, get_screen_resolution, show_zero_ylim, \

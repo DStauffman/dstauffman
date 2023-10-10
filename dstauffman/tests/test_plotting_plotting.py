@@ -226,7 +226,9 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "All Zeros")
 
     def test_not_ndarray(self) -> None:
-        self.figs.append(plot.plot_time_history("Zero", 0, 0))
+        temp_fig = plot.plot_time_history("Zero", 0, 0)
+        assert isinstance(temp_fig, plt.Figure)
+        self.figs.append(temp_fig)
 
     def test_0d(self) -> None:
         self.figs.append(plot.plot_time_history("Zero", np.array(0), np.array(0)))
@@ -241,7 +243,9 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 
     def test_datetime(self) -> None:
         dates = np.datetime64("2020-01-11 12:00:00") + np.arange(0, 1000, 10).astype("timedelta64[ms]")
-        self.figs.append(plot.plot_time_history(self.description, dates, self.col_data, opts=self.opts, time_units="numpy"))
+        temp_fig = plot.plot_time_history(self.description, dates, self.col_data, opts=self.opts, time_units="numpy")
+        assert isinstance(temp_fig, plt.Figure)
+        self.figs.append(temp_fig)
 
     def test_lists0(self) -> None:
         time = np.arange(100.0)

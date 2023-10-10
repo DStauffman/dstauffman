@@ -79,6 +79,7 @@ if TYPE_CHECKING:
         use_zoh: NotRequired[bool]
         extra_plotter: NotRequired[Optional[ExtraPlotter]]
         use_datashader: NotRequired[bool]
+        classify: NotRequired[str]
 
     class _KfDiffKwargs(TypedDict):
         name_one: NotRequired[str]
@@ -110,6 +111,7 @@ if TYPE_CHECKING:
         extra_plotter: NotRequired[Optional[ExtraPlotter]]
         use_datashader: NotRequired[bool]
         fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]  # diff-only
+        classify: NotRequired[str]
 
     class _SetsKwargs(TypedDict):
         color_by: NotRequired[str]
@@ -373,7 +375,7 @@ def plot_attitude(
     is_date_o = opts.time_unit in {"numpy", "datetime"}
 
     # make local copy of opts that can be modified without changing the original
-    this_opts = opts.__class__(opts)
+    this_opts = Opts() if opts is None else opts.__class__(opts)
     # allow opts to convert as necessary
     if is_date_1 or is_date_2 and not is_date_o:
         this_opts.convert_dates("numpy", old_form=opts.time_base)
@@ -382,6 +384,8 @@ def plot_attitude(
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
     this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
+    if "classify" in kwargs:
+        this_opts.classify = kwargs.pop("classify")
 
     # alias opts
     # fmt: off
@@ -556,7 +560,7 @@ def plot_position(
     is_date_o = opts.time_unit in {"numpy", "datetime"}
 
     # make local copy of opts that can be modified without changing the original
-    this_opts = opts.__class__(opts)
+    this_opts = Opts() if opts is None else opts.__class__(opts)
     # allow opts to convert as necessary
     if is_date_1 or is_date_2 and not is_date_o:
         this_opts.convert_dates("numpy", old_form=opts.time_base)
@@ -565,6 +569,8 @@ def plot_position(
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
     this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
+    if "classify" in kwargs:
+        this_opts.classify = kwargs.pop("classify")
 
     # alias opts
     # fmt: off
@@ -801,7 +807,7 @@ def plot_innovations(
     is_date_o = opts.time_unit in {"numpy", "datetime"}
 
     # make local copy of opts that can be modified without changing the original
-    this_opts = opts.__class__(opts)
+    this_opts = Opts() if opts is None else opts.__class__(opts)
     # allow opts to convert as necessary
     if is_date_1 or is_date_2 and not is_date_o:
         this_opts.convert_dates("numpy", old_form=opts.time_base)
@@ -810,6 +816,8 @@ def plot_innovations(
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
     this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
+    if "classify" in kwargs:
+        this_opts.classify = kwargs.pop("classify")
 
     # alias opts
     # fmt: off
@@ -1220,7 +1228,7 @@ def plot_covariance(
     groups: Optional[List[Union[int, _I, Tuple[int, ...]]]] = None,
     fields: Optional[Dict[str, str]] = None,
     **kwargs: Unpack[_KfDiffKwargs],
-) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
+) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, Dict[str, _N]]]]:
     r"""
     Plots the Kalman Filter square root diagonal variance value.
 
@@ -1318,7 +1326,7 @@ def plot_covariance(
     is_date_o = opts.time_unit in {"numpy", "datetime"}
 
     # make local copy of opts that can be modified without changing the original
-    this_opts = opts.__class__(opts)
+    this_opts = Opts() if opts is None else opts.__class__(opts)
     # allow opts to convert as necessary
     if is_date_1 or is_date_2 and not is_date_o:
         this_opts.convert_dates("numpy", old_form=opts.time_base)
@@ -1327,6 +1335,8 @@ def plot_covariance(
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
     this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
+    if "classify" in kwargs:
+        this_opts.classify = kwargs.pop("classify")
 
     # alias opts
     # fmt: off

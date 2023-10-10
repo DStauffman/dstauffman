@@ -120,12 +120,12 @@ DEFAULT_CLASSIFICATION: str = ""
 if TYPE_CHECKING:
     _FigOrListFig = Union[Figure, List[Figure]]
 
-COLOR_LISTS: Dict[str, colors.ListedColormap] = {}
+COLOR_LISTS: Dict[str, ListedColors] = {}
 if HAVE_MPL:
     # fmt: off
     # default colormap
+    assert isinstance(mpl.colormaps[DEFAULT_COLORMAP], colors.ListedColormap), "Expecting a ListedColormap for the default."
     COLOR_LISTS["default"]  = mpl.colormaps[DEFAULT_COLORMAP]
-    assert isinstance(COLOR_LISTS["default"], colors.ListedColormap), "Expecting a ListedColormap for the default."
     # single colors
     COLOR_LISTS["same"]     = colors.ListedColormap(tuple(repeat(mpl.colormaps[DEFAULT_COLORMAP].colors[0], 8)))
     COLOR_LISTS["same_old"] = colors.ListedColormap(tuple(repeat("#1f77b4", 8)))
@@ -193,6 +193,13 @@ class ExtraPlotter(Protocol):
 
     def __call__(self, fig: Figure, ax: Axes) -> None:
         ...
+
+
+# %% Classes - ListedColors
+class ListedColors(Protocol):
+    r"""Custom Protocol to type the extra_plotter argument to all the plots."""
+    colors: Union[Tuple[str, ...], Tuple[Tuple[float, float, float], ...]]
+    N: int
 
 
 # %% Classes - MyCustomToolbar

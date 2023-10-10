@@ -1781,10 +1781,16 @@ class Test_drop_following_time(unittest.TestCase):
         self.dt_drop = 3
         self.exp = np.zeros(self.times.shape, dtype=bool)
         self.exp[np.array([5, 6, 7, 15, 16, 17, 18, 19, 25, 26, 27])] = True
+        self.exp_rev = np.zeros(self.times.shape, dtype=bool)
+        self.exp_rev[np.array([3, 4, 5, 13, 14, 15, 16, 17, 23, 24, 25])] = True
 
     def test_nominal(self) -> None:
         drop_mask = dcs.drop_following_time(self.times, self.drop_starts, self.dt_drop)
         np.testing.assert_array_equal(drop_mask, self.exp)
+
+    def test_reversed(self) -> None:
+        drop_mask = dcs.drop_following_time(self.times, self.drop_starts, self.dt_drop, reverse=True)
+        np.testing.assert_array_equal(drop_mask, self.exp_rev)
 
 
 # %% Unit test execution

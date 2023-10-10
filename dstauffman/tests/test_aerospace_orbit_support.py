@@ -267,6 +267,8 @@ class Test_aerospace_r_2_hms(unittest.TestCase):
 
 # %% aerospace.rv_sez_2_ijk
 
+# %% aerospace.get_sun_radec_approx
+
 
 # %% aerospace.get_sun_radec
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
@@ -291,6 +293,38 @@ class Test_aerospace_get_sun_radec(unittest.TestCase):
         (Ls, ob) = space.get_sun_radec(self.time_jd, return_early=True)
         self.assertAlmostEqual(Ls, 1.5569456630415757, 14)  # TODO: get independent source for this
         self.assertAlmostEqual(ob, 0.40906883260993276, 14)  # TODO: get independent source for this
+
+
+# %% aerospace.get_sun_distance
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_get_sun_distance(unittest.TestCase):
+    r"""
+    Tests the get_sun_distance function with the following cases:
+        Close & Far
+        Vectorized
+    """
+
+    def setUp(self) -> None:
+        date_jan = datetime.datetime(2023, 1, 5)
+        date_jul = datetime.datetime(2023, 7, 7)
+        np_date_jan = convert_datetime_to_np(date_jan)
+        np_date_jul = convert_datetime_to_np(date_jul)
+        self.time_jd_jan: float = space.numpy_to_jd(np_date_jan)
+        self.time_jd_jul: float = space.numpy_to_jd(np_date_jul)
+        self.dist_jan = 0.983_2959  # from Astronomical Almanac 2023, page C6
+        self.dist_jul = 1.016_6805  # from Astronomical Almanac 2023, page C14
+        self.limit = 4  # sig fig limit limits of current algorithm (0.0003 AU)
+
+    def test_nominal(self) -> None:
+        sun_dist_jan = space.get_sun_distance(self.time_jd_jan)
+        self.assertAlmostEqual(sun_dist_jan, self.dist_jan, self.limit)
+        sun_dist_jul = space.get_sun_distance(self.time_jd_jul)
+        self.assertAlmostEqual(sun_dist_jul, self.dist_jul, self.limit)
+
+    def test_vectorized(self) -> None:
+        sun_dist = space.get_sun_distance(np.array([self.time_jd_jan, self.time_jd_jul]))
+        exp = np.array([self.dist_jan, self.dist_jul])
+        np.testing.assert_array_almost_equal(sun_dist, exp, self.limit)
 
 
 # %% aerospace.beta_from_oe

@@ -58,7 +58,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         self.extra_plotter    = None
         self.use_zoh          = False
         self.label_vert_lines = True
-        self.fig: plt.Figure  = None
+        self.fig: Optional[plt.Figure] = None
         # fmt: on
 
     def test_simple(self) -> None:
@@ -216,7 +216,7 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
         self.ylabel           = None
         self.data_as_rows     = True
         self.label_vert_lines = True
-        self.fig: plt.Figure  = None
+        self.fig: Optional[plt.Figure] = None
         # fmt: on
 
     def test_nominal(self) -> None:

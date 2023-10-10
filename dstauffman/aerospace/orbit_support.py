@@ -765,6 +765,58 @@ def get_sun_radec(time_jd: _FN, return_early: bool = False) -> Tuple[_FN, _FN]:
     return (ra, dec)
 
 
+# %% Functions - get_sun_distance
+@overload
+def get_sun_distance(time_jd: float) -> float:
+    ...
+
+
+@overload
+def get_sun_distance(time_jd: _N) -> _N:
+    ...
+
+
+def get_sun_distance(time_jd: _FN) -> _FN:
+    r"""
+    Calculate the distance to the Sun from the Earth.
+
+    Guaranteed to be accurate to 0.0003 AU of error between 1950-2050.
+
+    Parameters
+    ----------
+    time_jd : np.ndarray
+        Julian date
+
+    Returns
+    -------
+    np.ndarray
+        Distance to the sun in AU
+
+    Notes
+    -----
+    #.  Algorithm from Astronomical Almanac 2023, page C5.
+    #.  Written by David C. Stauffer in August 2023.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import get_sun_distance, numpy_to_jd
+    >>> from dstauffman import convert_datetime_to_np
+    >>> import datetime
+    >>> date = datetime.datetime(2010, 6, 21, 3, 30, 45)
+    >>> np_date = convert_datetime_to_np(date)
+    >>> time_jd = numpy_to_jd(np_date)
+    >>> sun_dist_au = get_sun_distance(time_jd)
+    >>> print(f"{sun_dist_au:.5f}")
+    1.01624
+
+    """
+    # delta time in days since J2000
+    n = time_jd - JULIAN["jd_2000_01_01"]
+    # Mean anomaly of the Sun
+    g = np.mod(6.2400408 + 0.01720197 * n, TAU)
+    return 1.000_14 - 0.016_71 * np.cos(g) - 0.000_14 * np.cos(2 * g)  # type: ignore[no-any-return]
+
+
 # %% Functions - beta_from_oe
 def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> _N:
     r"""

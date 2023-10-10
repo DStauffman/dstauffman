@@ -129,6 +129,7 @@ if TYPE_CHECKING:
         use_datashader: NotRequired[bool]
         fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
         plot_type: NotRequired[str]
+        classify: NotRequired[str]
 
     class _DiffKwargs(TypedDict):
         name_one: NotRequired[str]
@@ -160,6 +161,7 @@ if TYPE_CHECKING:
         extra_plotter: NotRequired[Optional[ExtraPlotter]]
         use_datashader: NotRequired[bool]
         fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
+        classify: NotRequired[str]
 
     class _BarKwargs(TypedDict):
         name: NotRequired[str]
@@ -186,6 +188,7 @@ if TYPE_CHECKING:
         use_zoh: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
         fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
+        classify: NotRequired[str]
 
     class _HistKwargs(TypedDict):
         legend_loc: NotRequired[str]
@@ -510,6 +513,8 @@ def plot_time_history(
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
     this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
+    if "classify" in kwargs:
+        this_opts.classify = kwargs.pop("classify")
 
     # alias opts
     # fmt: off
@@ -643,6 +648,8 @@ def plot_time_difference(
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
     this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
+    if "classify" in kwargs:
+        this_opts.classify = kwargs.pop("classify")
 
     # alias opts
     # fmt: off
@@ -979,6 +986,8 @@ def plot_bar_breakdown(
     # opts overrides
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
     this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
+    if "classify" in kwargs:
+        this_opts.classify = kwargs.pop("classify")
 
     # alias opts
     # fmt: off
@@ -1272,7 +1281,7 @@ def plot_histogram(
 
 
 # %% Functions - setup_plots
-def setup_plots(figs: Union[Figure, _Figs], opts: Opts) -> None:
+def setup_plots(figs: Union[Figure, _Figs], opts: Opts, *, skip_tight: bool = False) -> None:
     r"""
     Combine common plot operations into one easy command.
 
@@ -1329,9 +1338,10 @@ def setup_plots(figs: Union[Figure, _Figs], opts: Opts) -> None:
             plot_classification(ax, classification, caveat=caveat, location="figure")
 
     # pack the figures
-    bottom = 0.03 if classification else 0.0
-    for fig in figs:
-        fig.tight_layout(rect=(0.0, bottom, 1.0, 0.97), h_pad=1.5, w_pad=1.5)
+    if not skip_tight:
+        bottom = 0.03 if classification else 0.0
+        for fig in figs:
+            fig.tight_layout(rect=(0.0, bottom, 1.0, 0.97), h_pad=1.5, w_pad=1.5)
 
     # things to do if displaying the plots
     if opts.show_plot and _Plotter:  # pragma: no cover
