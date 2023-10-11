@@ -1,7 +1,7 @@
 r"""Runs speed comparisons for the any and all commands."""
 
 # %% Imports
-from IPython import get_ipython  # type: ignore[import]
+from IPython import get_ipython  # type: ignore[import-not-found, unused-ignore]
 import numpy as np
 import pandas as pd
 

@@ -105,16 +105,16 @@ kd2.innov.time = dcs.convert_date(kf2.innov.time, "numpy", date_zero=date_zero)
 
 # %% Plots
 if plots["att"]:
-    f1 = plot.plot_attitude(kf1, kf2, opts=opts1)
-    f2 = plot.plot_attitude(kd1, kd2, opts=opts2, second_units=("mrad", 1e3))
-    f3 = plot.plot_attitude(kf1, kf2, opts=opts3, leg_scale="milli")
-    f4 = plot.plot_attitude(kd1, kd2, opts=opts4, leg_scale="milli", second_units=("nrad", 1e9))
+    f1 = plot.plot_attitude(kf1, kf2, opts=opts1)  # type: ignore[call-overload]
+    f2 = plot.plot_attitude(kd1, kd2, opts=opts2, second_units=("mrad", 1e3))  # type: ignore[call-overload]
+    f3 = plot.plot_attitude(kf1, kf2, opts=opts3, leg_scale="milli")  # type: ignore[call-overload]
+    f4 = plot.plot_attitude(kd1, kd2, opts=opts4, leg_scale="milli", second_units=("nrad", 1e9))  # type: ignore[call-overload]
 
 if plots["pos"]:
-    f1 = plot.plot_position(kf1, kf2, opts=opts1)
-    f2 = plot.plot_position(kd1, kd2, opts=opts2, second_units=("Mm", 1e-6))
-    f3 = plot.plot_position(kf1, kf2, opts=opts3, leg_scale="mega")
-    f4 = plot.plot_position(kd1, kd2, opts=opts4, leg_scale="milli", second_units=("Mm", 1e-6))
+    f1 = plot.plot_position(kf1, kf2, opts=opts1)  # type: ignore[call-overload]
+    f2 = plot.plot_position(kd1, kd2, opts=opts2, second_units=("Mm", 1e-6))  # type: ignore[call-overload]
+    f3 = plot.plot_position(kf1, kf2, opts=opts3, leg_scale="mega")  # type: ignore[call-overload]
+    f4 = plot.plot_position(kd1, kd2, opts=opts4, leg_scale="milli", second_units=("Mm", 1e-6))  # type: ignore[call-overload]
 
 if plots["fpl"]:
     f1 = plot.plot_innov_fplocs(kf1.innov, opts=opts1)
@@ -123,10 +123,10 @@ if plots["fpl"]:
     f4 = plot.plot_innov_fplocs(kd1.innov, opts=opts4, t_bounds=t_bounds2)  # type: ignore[arg-type]
 
 if plots["inn"]:
-    f1 = plot.plot_innovations(kf1.innov, kf2.innov, opts=opts1)
-    f2 = plot.plot_innovations(kd1.innov, kd2.innov, opts=opts2, second_units=("mm", 1e3))
-    f3 = plot.plot_innovations(kf1.innov, kf2.innov, opts=opts3, leg_scale="milli")
-    f4 = plot.plot_innovations(kd1.innov, kd2.innov, opts=opts4, leg_scale="milli", second_units=("nm", 1e9))
+    f1 = plot.plot_innovations(kf1.innov, kf2.innov, opts=opts1)  # type: ignore[call-overload]
+    f2 = plot.plot_innovations(kd1.innov, kd2.innov, opts=opts2, second_units=("mm", 1e3))  # type: ignore[call-overload]
+    f3 = plot.plot_innovations(kf1.innov, kf2.innov, opts=opts3, leg_scale="milli")  # type: ignore[call-overload]
+    f4 = plot.plot_innovations(kd1.innov, kd2.innov, opts=opts4, leg_scale="milli", second_units=("nm", 1e9))  # type: ignore[call-overload]
 
 if plots["his"]:
     f1 = plot.plot_innov_hist(kf1.innov, bins, opts=opts1)
@@ -135,15 +135,15 @@ if plots["his"]:
     f4 = plot.plot_innov_hist(kd1.innov, bins, opts=opts4, normalize_spacing=True, show_cdf=True)
 
 if plots["cov"]:
-    f1 = plot.plot_covariance(kf1, kf2, opts=opts1)
-    f2 = plot.plot_covariance(kd1, kd2, opts=opts2, second_units=("mrad", 1e3))
-    f3 = plot.plot_covariance(kf1, kf2, opts=opts3, leg_scale="milli")
-    f4 = plot.plot_covariance(kd1, kd2, opts=opts4, leg_scale="milli", second_units=("nrad", 1e9))
+    f1 = plot.plot_covariance(kf1, kf2, opts=opts1)  # type: ignore[call-overload]
+    f2 = plot.plot_covariance(kd1, kd2, opts=opts2, second_units=("mrad", 1e3))  # type: ignore[call-overload]
+    f3 = plot.plot_covariance(kf1, kf2, opts=opts3, leg_scale="milli")  # type: ignore[call-overload]
+    f4 = plot.plot_covariance(kd1, kd2, opts=opts4, leg_scale="milli", second_units=("nrad", 1e9))  # type: ignore[call-overload]
 
 if plots["los"]:
-    f = plot.plot_los(kf1, kf2, opts=opts2, leg_scale="milli", second_units="micro")
+    f = plot.plot_los(kf1, kf2, opts=opts2, leg_scale="milli", second_units="micro")  # type: ignore[call-overload]
 if plots["sts"]:
-    f = plot.plot_states(kd1, kd2, opts=opts1, leg_scale="mill", second_units=("nrad", 1e9))
+    f = plot.plot_states(kd1, kd2, opts=opts1, leg_scale="mill", second_units=("nrad", 1e9))  # type: ignore[call-overload]
 
 # Test PDF saving
 # plot.save_figs_to_pdf(f1 + f2 + f3 + f4, filename=dcs.get_output_dir() / "GND_plots.pdf")

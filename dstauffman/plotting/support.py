@@ -101,7 +101,7 @@ if TYPE_CHECKING:
     _M = np.typing.NDArray[np.float64]  # 2D
     _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
     _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
-    _Data = Union[int, float, _I, _N, _M, List[Union[_I, _N]], Tuple[Union[_I, _N], ...]]
+    _Data = Union[int, float, _I, _N, _M, List[_I], List[_N], List[Union[_I, _N]], Tuple[_I, ...], Tuple[_N, ...], Tuple[Union[_I, _N], ...]]  # fmt: skip
 
     class _RmsIndices(TypedDict):
         pts: List[int]
@@ -120,14 +120,14 @@ DEFAULT_CLASSIFICATION: str = ""
 if TYPE_CHECKING:
     _FigOrListFig = Union[Figure, List[Figure]]
 
-COLOR_LISTS: Dict[str, ListedColors] = {}
+COLOR_LISTS: Dict[str, colors.ListedColormap] = {}
 if HAVE_MPL:
     # fmt: off
     # default colormap
     assert isinstance(mpl.colormaps[DEFAULT_COLORMAP], colors.ListedColormap), "Expecting a ListedColormap for the default."
-    COLOR_LISTS["default"]  = mpl.colormaps[DEFAULT_COLORMAP]
+    COLOR_LISTS["default"]  = mpl.colormaps[DEFAULT_COLORMAP]  # type: ignore[assignment]
     # single colors
-    COLOR_LISTS["same"]     = colors.ListedColormap(tuple(repeat(mpl.colormaps[DEFAULT_COLORMAP].colors[0], 8)))
+    COLOR_LISTS["same"]     = colors.ListedColormap(tuple(repeat(mpl.colormaps[DEFAULT_COLORMAP].colors[0], 8)))  # type: ignore[attr-defined]
     COLOR_LISTS["same_old"] = colors.ListedColormap(tuple(repeat("#1f77b4", 8)))
     COLOR_LISTS["single"]   = colors.ListedColormap(("xkcd:red",))
     # doubles
@@ -140,14 +140,14 @@ if HAVE_MPL:
     COLOR_LISTS["quat"]     = colors.ListedColormap(("xkcd:red", "xkcd:green", "xkcd:blue", "xkcd:chocolate"))
     COLOR_LISTS["quat_off"] = colors.ListedColormap(("xkcd:fuchsia", "xkcd:lightgreen", "xkcd:cyan", "xkcd:brown"))
     # double combinations
-    COLOR_LISTS["dbl_diff"]    = colors.ListedColormap(COLOR_LISTS["dbl_off"].colors + COLOR_LISTS["double"].colors)
-    COLOR_LISTS["dbl_diff_r"]  = colors.ListedColormap(COLOR_LISTS["double"].colors + COLOR_LISTS["dbl_off"].colors)
+    COLOR_LISTS["dbl_diff"]    = colors.ListedColormap(COLOR_LISTS["dbl_off"].colors + COLOR_LISTS["double"].colors)  # type: ignore[arg-type, operator]
+    COLOR_LISTS["dbl_diff_r"]  = colors.ListedColormap(COLOR_LISTS["double"].colors + COLOR_LISTS["dbl_off"].colors)  # type: ignore[arg-type, operator]
     # triple combinations
-    COLOR_LISTS["vec_diff"]    = colors.ListedColormap(COLOR_LISTS["vec_off"].colors + COLOR_LISTS["vec"].colors)
-    COLOR_LISTS["vec_diff_r"]  = colors.ListedColormap(COLOR_LISTS["vec"].colors + COLOR_LISTS["vec_off"].colors)
+    COLOR_LISTS["vec_diff"]    = colors.ListedColormap(COLOR_LISTS["vec_off"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[arg-type, operator]
+    COLOR_LISTS["vec_diff_r"]  = colors.ListedColormap(COLOR_LISTS["vec"].colors + COLOR_LISTS["vec_off"].colors)  # type: ignore[arg-type, operator]
     # quad combinations
-    COLOR_LISTS["quat_diff"]   = colors.ListedColormap(COLOR_LISTS["quat_off"].colors + COLOR_LISTS["quat"].colors)
-    COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)
+    COLOR_LISTS["quat_diff"]   = colors.ListedColormap(COLOR_LISTS["quat_off"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[arg-type, operator]
+    COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)  # type: ignore[arg-type, operator]
     # fmt: on
 
 # %% Set Matplotlib global settings
@@ -195,13 +195,6 @@ class ExtraPlotter(Protocol):
         ...
 
 
-# %% Classes - ListedColors
-class ListedColors(Protocol):
-    r"""Custom Protocol to type the extra_plotter argument to all the plots."""
-    colors: Union[Tuple[str, ...], Tuple[Tuple[float, float, float], ...]]
-    N: int
-
-
 # %% Classes - MyCustomToolbar
 class MyCustomToolbar:
     r"""
@@ -237,7 +230,7 @@ class MyCustomToolbar:
             self.qapp = QApplication.instance()  # type: ignore[assignment]
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
         # to determine which figure actually triggered the button events.)
-        self.fig_number = fig.number
+        self.fig_number = fig.number  # type: ignore[attr-defined]
         # Check if you have a canvas to draw on, and if not, return without creating buttons
         if fig.canvas.toolbar is None or is_notebook():
             return
@@ -245,19 +238,19 @@ class MyCustomToolbar:
         icon = QIcon(str(get_images_dir() / "prev_plot.png"))
         self.btn_prev_plot = _HoverButton(icon, "")
         self.btn_prev_plot.setToolTip("Show the previous plot")
-        fig.canvas.toolbar.addWidget(self.btn_prev_plot)
+        fig.canvas.toolbar.addWidget(self.btn_prev_plot)  # type: ignore[attr-defined]
         self.btn_prev_plot.clicked.connect(self.prev_plot)
         # create buttons - Next Plot
         icon = QIcon(str(get_images_dir() / "next_plot.png"))
         self.btn_next_plot = _HoverButton(icon, "")
         self.btn_next_plot.setToolTip("Show the next plot")
-        fig.canvas.toolbar.addWidget(self.btn_next_plot)
+        fig.canvas.toolbar.addWidget(self.btn_next_plot)  # type: ignore[attr-defined]
         self.btn_next_plot.clicked.connect(self.next_plot)
         # create buttons - Close all
         icon = QIcon(str(get_images_dir() / "close_all.png"))
         self.btn_close_all = _HoverButton(icon, "")
         self.btn_close_all.setToolTip("Close all the open plots")
-        fig.canvas.toolbar.addWidget(self.btn_close_all)
+        fig.canvas.toolbar.addWidget(self.btn_close_all)  # type: ignore[attr-defined]
         self.btn_close_all.clicked.connect(self._close_all)
 
     def _close_all(self, *args: Any) -> None:  # pylint: disable=unused-argument
@@ -282,7 +275,8 @@ class MyCustomToolbar:
         # set the appropriate active figure
         fig = plt.figure(next_fig)
         # make it the active window
-        fig.canvas.manager.window.raise_()
+        assert (manager := fig.canvas.manager) is not None
+        manager.window.raise_()  # type: ignore[attr-defined]
 
     def prev_plot(self, *args: Any) -> None:  # pylint: disable=unused-argument
         r"""Bring up the previous plot in the series."""
@@ -302,7 +296,8 @@ class MyCustomToolbar:
         # set the appropriate active figure
         fig = plt.figure(prev_fig)
         # make it the active window
-        fig.canvas.manager.window.raise_()
+        assert (manager := fig.canvas.manager) is not None
+        manager.window.raise_()  # type: ignore[attr-defined]
 
 
 # %% Classes - ColorMap
@@ -346,7 +341,7 @@ class ColorMap(Frozen):
 
     def __init__(
         self,
-        colormap: Union[str, colors.ListedColormap, colors.Colormap, ColorMap] = DEFAULT_COLORMAP,
+        colormap: Optional[Union[_CM, ColorMap]] = DEFAULT_COLORMAP,
         low: Union[int, float] = 0,
         high: Union[int, float] = 1,
         num_colors: Optional[int] = None,
@@ -367,7 +362,7 @@ class ColorMap(Frozen):
         elif isinstance(colormap, type(self)):
             cmap = None
         else:
-            cmap = plt.get_cmap(colormap)
+            cmap = plt.get_cmap(colormap)  # type: ignore[arg-type]
             if isinstance(cmap, colors.ListedColormap):
                 low = 0
                 high = cmap.N - 1
@@ -381,7 +376,7 @@ class ColorMap(Frozen):
 
     def get_color(self, value: Union[float, int]) -> Tuple[float, float, float, float]:
         r"""Get the color based on the scalar value."""
-        return self.smap.to_rgba(value)  # type: ignore[no-any-return]
+        return self.smap.to_rgba(value)  # type: ignore[arg-type, return-value]
 
     def get_smap(self) -> cmx.ScalarMappable:
         r"""Return the smap being used."""
@@ -395,7 +390,7 @@ class ColorMap(Frozen):
             ax.set_prop_cycle("color", [self.get_color(i) for i in range(self.num_colors)])
         except AttributeError:  # pragma: no cover
             # for older matplotlib versions, use deprecated set_color_cycle
-            ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])
+            ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])  # type: ignore[attr-defined]
 
 
 # %% Functions - is_notebook
@@ -431,13 +426,13 @@ def is_notebook() -> bool:
 
 
 # %% Functions - close_all
-def close_all(figs: Optional[_FigOrListFig] = None) -> None:
+def close_all(fig: Optional[_FigOrListFig] = None) -> None:
     r"""
     Close all the open figures, or if a list is specified, then close all of them.
 
     Parameters
     ----------
-    figs : list of Figure, optional
+    fig : list of Figures or single Figure, optional
         Specific figures to be closed.
 
     Examples
@@ -447,17 +442,20 @@ def close_all(figs: Optional[_FigOrListFig] = None) -> None:
     >>> fig = plt.figure()
     >>> ax = fig.add_subplot(111)
     >>> _ = ax.plot(0, 0)
-    >>> close_all([fig])
+    >>> close_all(fig)
 
     """
     # Note that it's better to loop through and close the plots individually than to use
     # plt.close("all"), as that can sometimes cause the iPython kernel to quit #DCS: 2015-06-11
-    if figs is None:
+    if fig is None:
         for this_fig in plt.get_fignums():
             plt.close(this_fig)
     else:
-        for this_fig in figs:
-            plt.close(this_fig)
+        if isinstance(fig, Figure):
+            plt.close(fig)
+        else:
+            for this_fig in fig:  # type: ignore[assignment]
+                plt.close(this_fig)
     gc.collect()
 
 
@@ -494,17 +492,17 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
     if num_channels == 1:
         clist = colors.ListedColormap(("#1f77b4", "xkcd:blue", "#1f77b4"))
     elif num_channels == 2:
-        clist = colors.ListedColormap(COLOR_LISTS["dbl_diff_r"].colors + COLOR_LISTS["double"].colors)
+        clist = colors.ListedColormap(COLOR_LISTS["dbl_diff_r"].colors + COLOR_LISTS["double"].colors)  # type: ignore[arg-type, operator]
     elif num_channels == 3:
-        clist = colors.ListedColormap(COLOR_LISTS["vec_diff_r"].colors + COLOR_LISTS["vec"].colors)
+        clist = colors.ListedColormap(COLOR_LISTS["vec_diff_r"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[arg-type, operator]
     elif num_channels == 4:
-        clist = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)
+        clist = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[arg-type, operator]
     else:
         ix = [x % 10 for x in range(num_channels)]
         cmap1 = mpl.colormaps["tab10"]
         cmap2 = mpl.colormaps["tab20"]
         temp = (
-            tuple(cmap1.colors[x] for x in ix) + tuple(cmap2.colors[2 * x + 1] for x in ix) + tuple(cmap1.colors[x] for x in ix)
+            tuple(cmap1.colors[x] for x in ix) + tuple(cmap2.colors[2 * x + 1] for x in ix) + tuple(cmap1.colors[x] for x in ix)  # type: ignore[attr-defined]
         )
         clist = colors.ListedColormap(temp)
     return clist
@@ -635,24 +633,32 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tup
     """
     # preallocate if a warning should be thrown
     throw_warning = False
+    raw_title: Optional[str]
     # get the title of the figure canvas
-    raw_title = fig.canvas.manager.get_window_title()
-    if raw_title is None or raw_title == "image":
-        # special case when you have a displayless backend, check the suptitle, then the title
-        # from the first axes
-        throw_warning = True
-        if (sup := fig._suptitle) is not None:  # pylint: disable=protected-access
-            raw_title = sup.get_text()
-        else:
-            try:
-                raw_title = fig.axes[0].get_title()
-            except:
-                pass
-    if raw_title is None:
+    manager = fig.canvas.manager
+    if manager is None:
         raw_title = "None"
+        throw_warning = True
+    else:
+        raw_title = manager.get_window_title()
+        if raw_title is None or raw_title == "image":
+            # special case when you have a displayless backend, check the suptitle, then the title
+            # from the first axes
+            throw_warning = True
+            if (sup := fig._suptitle) is not None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+                raw_title = sup.get_text()
+            else:
+                try:
+                    raw_title = fig.axes[0].get_title()
+                except:
+                    pass
+        if raw_title is None:
+            raw_title = "None"
+    # by this point raw_title should always be set to something, either "None" or "image" or a valid value
+    assert raw_title is not None
     if raise_warning:
         return raw_title, throw_warning
-    return raw_title  # type: ignore[no-any-return]
+    return raw_title
 
 
 # %% Functions - resolve_name
@@ -862,11 +868,13 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
         figs = [fig]
     # loop through figures
     for this_fig in figs:
+        # get the manager
+        assert (manager := this_fig.canvas.manager) is not None
         # update canvas name
-        this_canvas_title = this_fig.canvas.manager.get_window_title()
-        this_fig.canvas.manager.set_window_title(prefix + " - " + this_canvas_title)
+        this_canvas_title = manager.get_window_title()
+        manager.set_window_title(prefix + " - " + this_canvas_title)
         # update the suptitle (if it exists)
-        if (sup := this_fig._suptitle) is not None:  # pylint: disable=protected-access
+        if (sup := this_fig._suptitle) is not None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
             sup.set_text(prefix + " - " + sup.get_text())
         elif process_all or sup is None:
             # get axes list and loop through them
@@ -1033,9 +1041,9 @@ def zoom_ylim(
         return
     # If not given, find time/data from the plot itself
     if time is None:
-        time = np.hstack([artist.get_xdata() for artist in ax.lines])
+        time = np.hstack([artist.get_xdata() for artist in ax.lines])  # type: ignore[attr-defined]
     if data is None:
-        data = np.hstack([artist.get_ydata() for artist in ax.lines])
+        data = np.hstack([artist.get_ydata() for artist in ax.lines])  # type: ignore[attr-defined]
     # exit if the plotted data are not numeric
     if not np.issubdtype(data.dtype, np.number):  # type: ignore[union-attr]
         return
@@ -1087,13 +1095,13 @@ def zoom_ylim(
 
 
 # %% Functions - figmenu
-def figmenu(figs: _FigOrListFig) -> None:
+def figmenu(fig: _FigOrListFig) -> None:
     r"""
     Add a custom toolbar to the figures.
 
     Parameters
     ----------
-    figs : class matplotlib.pyplot.Figure, or list of such
+    fig : class matplotlib.pyplot.Figure, or list of such
         List of figures
 
     Examples
@@ -1119,11 +1127,11 @@ def figmenu(figs: _FigOrListFig) -> None:
     """
     if not _HAVE_QT:
         return
-    if not isinstance(figs, list):
-        figs.toolbar_custom_ = MyCustomToolbar(figs)
+    if not isinstance(fig, list):
+        fig.toolbar_custom_ = MyCustomToolbar(fig)  # type: ignore[attr-defined]
     else:
-        for fig in figs:
-            fig.toolbar_custom_ = MyCustomToolbar(fig)
+        for this_fig in fig:
+            this_fig.toolbar_custom_ = MyCustomToolbar(this_fig)  # type: ignore[attr-defined]
 
 
 # %% rgb_ints_to_hex
@@ -1252,7 +1260,7 @@ def show_zero_ylim(ax: Axes) -> None:
 
 
 # %% Functions - plot_second_units_wrapper
-def plot_second_units_wrapper(ax: Axes, second_units: Union[None, int, float, Tuple[str, float]]) -> Axes:
+def plot_second_units_wrapper(ax: Axes, second_units: Union[None, int, float, Tuple[str, float]]) -> Optional[Axes]:
     r"""
     Wrapper to plot_second_yunits that allows numeric or dict options.
 
@@ -1357,9 +1365,9 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
     """
     # plot second Y axis
     ax2 = ax.twinx()
-    ax2.set_ylim(np.multiply(multiplier, ax.get_ylim()))
+    ax2.set_ylim(tuple(np.multiply(multiplier, ax.get_ylim())))
     ax2.set_ylabel(ylab)
-    return ax2
+    return ax2  # type: ignore[return-value]
 
 
 # %% Functions - get_rms_indices
@@ -1584,7 +1592,7 @@ def plot_vert_lines(
 def plot_phases(
     ax: Axes,
     times: Union[_D, _N],
-    colormap: Union[str, ColorMap, colors.Colormap, colors.ListedColormap] = "tab10",
+    colormap: Optional[Union[_CM, ColorMap]] = "tab10",
     labels: Optional[Union[List[str], str]] = None,
     *,
     group_all: bool = False,
@@ -1898,6 +1906,7 @@ def plot_classification(
     )
     # add border
     fig = ax.figure
+    assert fig is not None
     r1 = Rectangle(
         (0.0, 0.0), 1.0, 1.0, facecolor="none", edgecolor=color, clip_on=False, linewidth=3, transform=fig.transFigure
     )
@@ -1905,13 +1914,13 @@ def plot_classification(
 
 
 # %% Functions - align_plots
-def align_plots(figs: _FigOrListFig, pos: Optional[Tuple[int, int]] = None) -> None:
+def align_plots(fig: _FigOrListFig, pos: Optional[Tuple[int, int]] = None) -> None:
     """
     Aligns all the figures in one location.
 
     Parameters
     ----------
-    figs : list of matplotlib.Figure
+    fig : list or single instance of matplotlib.Figure
         List of figures to align together
 
     Notes
@@ -1931,18 +1940,25 @@ def align_plots(figs: _FigOrListFig, pos: Optional[Tuple[int, int]] = None) -> N
     >>> #plt.close(fig2)
 
     """
+    # force figs to be a list
+    if isinstance(fig, list):
+        figs = fig
+    else:
+        figs = [fig]
     # initialize position if given
     x_pos: Optional[int] = None
     y_pos: Optional[int] = None
     if pos is not None:
         (x_pos, y_pos) = pos
     # loop through figures
-    for fig in figs:
+    for this_fig in figs:
+        # get the manager
+        assert (manager := this_fig.canvas.manager) is not None
         # use position from first plot if you don't already have it
         if x_pos is None or y_pos is None:
-            (x_pos, y_pos, _, _) = fig.canvas.manager.window.geometry().getRect()
+            (x_pos, y_pos, _, _) = manager.window.geometry().getRect()  # type: ignore[attr-defined]
         # move the plot
-        fig.canvas.manager.window.move(x_pos, y_pos)
+        manager.window.move(x_pos, y_pos)  # type: ignore[attr-defined]
 
 
 # %% Functions - z_from_ci
@@ -2039,12 +2055,12 @@ def save_figs_to_pdf(
 
     Delete file and close figure
     >>> filename.unlink(missing_ok=True)
-    >>> close_all([fig])
+    >>> close_all(fig)
 
     """
     # Optional inputs
     if figs is None:
-        figs = plt.get_fignums()
+        figs = plt.get_fignums()  # type: ignore[assignment]
     if isinstance(figs, Figure):
         figs = [figs]
     assert isinstance(figs, list)
@@ -2138,7 +2154,7 @@ def save_images_to_pdf(
     >>> filename.unlink(missing_ok=True)
     >>> image_filename = folder / "test.png"
     >>> image_filename.unlink(missing_ok=True)
-    >>> close_all([fig])
+    >>> close_all(fig)
 
     """
     # Optional inputs
@@ -2318,21 +2334,22 @@ def fig_ax_factory(
         if bool(suptitle):
             this_title = suptitle[i] if isinstance(suptitle, list) else suptitle
             fig.suptitle(this_title)
-            fig.canvas.manager.set_window_title(this_title)
+            assert (manager := fig.canvas.manager) is not None
+            manager.set_window_title(this_title)
         figs.append(fig)
         axes.append(ax)
     fig_ax: Tuple[Tuple[Figure, Axes], ...]
     if is_1d:
         assert isinstance(num_axes, int)
         if num_axes == 1:
-            fig_ax = tuple((figs[f], axes[f]) for f in range(num_figs))
+            fig_ax = tuple((figs[f], axes[f]) for f in range(num_figs))  # type: ignore[misc]
         else:
-            fig_ax = tuple((figs[f], axes[f][i]) for f in range(num_figs) for i in range(num_axes))
+            fig_ax = tuple((figs[f], axes[f][i]) for f in range(num_figs) for i in range(num_axes))  # type: ignore[index, misc]
     else:
         if layout == "rowwise":
-            fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for i in range(num_row) for j in range(num_col))  # type: ignore[call-overload]
+            fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for i in range(num_row) for j in range(num_col))  # type: ignore[call-overload, index]
         elif layout == "colwise":
-            fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for j in range(num_col) for i in range(num_row))  # type: ignore[call-overload]
+            fig_ax = tuple((figs[f], axes[f][i, j]) for f in range(num_figs) for j in range(num_col) for i in range(num_row))  # type: ignore[call-overload, index]
     return fig_ax
 
 

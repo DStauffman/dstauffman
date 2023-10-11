@@ -12,7 +12,7 @@ from __future__ import annotations
 import datetime
 import doctest
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
 import unittest
 
 from slog import LogLevel
@@ -72,13 +72,14 @@ if TYPE_CHECKING:
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
-    _CM = Union[str, Colormap, ListedColormap]
-    _Data = Union[int, float, _I, _N, _M, List[Union[_I, _N]], Tuple[Union[_I, _N], ...]]
+    _CM = Union[str, Colormap, ListedColormap, ColorMap]
+    _Data = Union[int, float, _I, _N, _M, List[_I], List[_N], List[Union[_I, _N]], Tuple[_I, ...], Tuple[_N, ...], Tuple[Union[_I, _N], ...]]  # fmt: skip
     _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
     _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
     _DeltaTime = Union[int, float, np.timedelta64]
     _Figs = List[Figure]
     _FuncLamb = Callable[[Any, Any], float]
+    _SecUnits = Union[None, str, int, float, Tuple[str, float]]
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -109,7 +110,7 @@ def make_generic_plot(
     disp_xmax: _Time = inf,
     single_lines: bool = False,
     make_subplots: bool = True,
-    colormap: _CM = DEFAULT_COLORMAP,
+    colormap: Optional[_CM] = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
@@ -117,8 +118,8 @@ def make_generic_plot(
     legend_loc: str = "best",
     show_extra: bool = True,
     plot_components: bool = True,
-    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
-    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    second_units: _SecUnits = None,
+    leg_scale: _SecUnits = None,
     ylabel: Optional[Union[str, List[str]]] = None,
     tolerance: _DeltaTime = 0,
     return_err: bool = False,
@@ -326,7 +327,7 @@ def make_generic_plot(
             out: Tuple[_Figs, Dict[str, Optional[float]]] = ([], {"one": None, "two": None, "diff": None})
             if is_quat_diff:
                 out[1]["mag"] = None
-            return out
+            return out  # type: ignore[return-value]
         if have_data_one:
             assert not data_is_list
             # TODO: remove this following restriction
@@ -605,7 +606,7 @@ def make_generic_plot(
                 fig_ax = (fig_ax,)  # type: ignore[assignment]
     # gather figures
     assert fig_ax is not None
-    fig = fig_ax[0][0]
+    fig = fig_ax[0][0]  # type: ignore[index]
     if set_window_titles:
         if is_quat_diff and not make_subplots:
             fig.canvas.manager.set_window_title(description + " Components")
@@ -613,19 +614,19 @@ def make_generic_plot(
             fig.canvas.manager.set_window_title(description)
     if doing_diffs:
         if have_both and not make_subplots:
-            f2 = fig_ax[-1][0]
+            f2 = fig_ax[-1][0]  # type: ignore[index]
             if set_window_titles:
                 f2.canvas.manager.set_window_title(description + " Difference")
             figs = [fig, f2]
         else:
             figs = [fig]
     elif is_cat_plot:
-        figs = [fig_ax[i * num_rows * num_cols][0] for i in range(num_figs)]
+        figs = [fig_ax[i * num_rows * num_cols][0] for i in range(num_figs)]  # type: ignore[index]
         if set_window_titles:
             for fig, title in zip(figs, titles):
                 fig.canvas.manager.set_window_title(title)
     # gather axes
-    ax = [a for (f, a) in fig_ax]
+    ax = [a for (f, a) in fig_ax]  # type: ignore[misc]
     assert num_axes == len(ax), "There is a mismatch in the number of axes."
     # preallocate datashaders
     datashaders = []
@@ -981,7 +982,7 @@ def make_generic_plot(
             for fig in figs:
                 extra_plotter(fig=fig, ax=fig.axes)
         else:
-            extra_plotter(fig=fig, ax=ax)
+            extra_plotter(fig=fig, ax=ax)  # type: ignore[arg-type]
 
     # overlay the datashaders (with appropriate time units information)
     if bool(datashaders):
@@ -996,11 +997,11 @@ def make_generic_plot(
 
     if return_err:
         if fig_lists:
-            return (figs, err)
-        return (fig, err)
+            return (figs, err)  # type: ignore[return-value]
+        return (fig, err)  # type: ignore[return-value]
     if fig_lists:
         return figs
-    return fig
+    return fig  # type: ignore[no-any-return]
 
 
 # %% Functions - make_time_plot
@@ -1019,14 +1020,14 @@ def make_time_plot(
     disp_xmin: _Time = -inf,
     disp_xmax: _Time = inf,
     single_lines: bool = False,
-    colormap: _CM = DEFAULT_COLORMAP,
+    colormap: Optional[_CM] = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
     ignore_empties: bool = False,
     legend_loc: str = "best",
-    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
-    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    second_units: _SecUnits = None,
+    leg_scale: _SecUnits = None,
     ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
     extra_plotter: Optional[ExtraPlotter] = None,
@@ -1091,7 +1092,7 @@ def make_time_plot(
     >>> plt.close(fig)
 
     """
-    return make_generic_plot(
+    return make_generic_plot(  # type: ignore[return-value]
         plot_type=plot_type,
         description=description,
         time_one=time,
@@ -1141,13 +1142,13 @@ def make_error_bar_plot(
     disp_xmin: _Time = -inf,
     disp_xmax: _Time = inf,
     single_lines: bool = False,
-    colormap: _CM = DEFAULT_COLORMAP,
+    colormap: Optional[_CM] = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
     legend_loc: str = "best",
-    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
-    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    second_units: _SecUnits = None,
+    leg_scale: _SecUnits = None,
     ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
     extra_plotter: Optional[ExtraPlotter] = None,
@@ -1222,7 +1223,7 @@ def make_error_bar_plot(
     >>> plt.close(fig)
 
     """
-    return make_generic_plot(
+    return make_generic_plot(  # type: ignore[return-value]
         "errorbar",
         description=description,
         time_one=time,
@@ -1255,6 +1256,88 @@ def make_error_bar_plot(
 
 
 # %% Functions - make_difference_plot
+@overload
+def make_difference_plot(
+    description: str,
+    time_one: Optional[_Times],
+    time_two: Optional[_Times],
+    data_one: Optional[_Data],
+    data_two: Optional[_Data],
+    *,
+    name_one: str,
+    name_two: str,
+    elements: Optional[Union[List[str], Tuple[str, ...]]],
+    units: str,
+    time_units: str,
+    start_date: str,
+    rms_xmin: _Time,
+    rms_xmax: _Time,
+    disp_xmin: _Time,
+    disp_xmax: _Time,
+    make_subplots: bool,
+    single_lines: bool,
+    colormap: Optional[_CM] = DEFAULT_COLORMAP,
+    use_mean: bool,
+    plot_zero: bool,
+    show_rms: bool,
+    legend_loc: str,
+    show_extra: bool,
+    second_units: _SecUnits,
+    leg_scale: _SecUnits,
+    ylabel: Optional[Union[str, List[str]]],
+    data_as_rows: bool,
+    tolerance: _DeltaTime,
+    return_err: Literal[False] = ...,
+    use_zoh: bool,
+    label_vert_lines: bool,
+    extra_plotter: Optional[ExtraPlotter],
+    use_datashader: bool,
+    fig_ax: Optional[Tuple[Figure, Axes]],
+) -> _Figs:
+    ...
+
+
+@overload
+def make_difference_plot(
+    description: str,
+    time_one: Optional[_Times],
+    time_two: Optional[_Times],
+    data_one: Optional[_Data],
+    data_two: Optional[_Data],
+    *,
+    name_one: str,
+    name_two: str,
+    elements: Optional[Union[List[str], Tuple[str, ...]]],
+    units: str,
+    time_units: str,
+    start_date: str,
+    rms_xmin: _Time,
+    rms_xmax: _Time,
+    disp_xmin: _Time,
+    disp_xmax: _Time,
+    make_subplots: bool,
+    single_lines: bool,
+    colormap: Optional[_CM] = DEFAULT_COLORMAP,
+    use_mean: bool,
+    plot_zero: bool,
+    show_rms: bool,
+    legend_loc: str,
+    show_extra: bool,
+    second_units: _SecUnits,
+    leg_scale: _SecUnits,
+    ylabel: Optional[Union[str, List[str]]],
+    data_as_rows: bool,
+    tolerance: _DeltaTime,
+    return_err: Literal[True],
+    use_zoh: bool,
+    label_vert_lines: bool,
+    extra_plotter: Optional[ExtraPlotter],
+    use_datashader: bool,
+    fig_ax: Optional[Tuple[Figure, Axes]],
+) -> Tuple[_Figs, Dict[str, _N]]:
+    ...
+
+
 def make_difference_plot(
     description: str,
     time_one: Optional[_Times],
@@ -1274,14 +1357,14 @@ def make_difference_plot(
     disp_xmax: _Time = inf,
     make_subplots: bool = True,
     single_lines: bool = False,
-    colormap: _CM = DEFAULT_COLORMAP,
+    colormap: Optional[_CM] = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
     legend_loc: str = "best",
     show_extra: bool = True,
-    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
-    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    second_units: _SecUnits = None,
+    leg_scale: _SecUnits = None,
     ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
     tolerance: _DeltaTime = 0,
@@ -1372,7 +1455,7 @@ def make_difference_plot(
     ...     plt.close(fig)
 
     """
-    return make_generic_plot(
+    return make_generic_plot(  # type: ignore[return-value]
         "diff",
         description=description,
         time_one=time_one,
@@ -1430,13 +1513,13 @@ def make_categories_plot(
     disp_xmax: _Time = inf,
     make_subplots: bool = True,
     single_lines: bool = False,
-    colormap: _CM = DEFAULT_COLORMAP,
+    colormap: Optional[_CM] = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
     legend_loc: str = "best",
-    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
-    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    second_units: _SecUnits = None,
+    leg_scale: _SecUnits = None,
     ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
     use_zoh: bool = False,
@@ -1567,13 +1650,13 @@ def make_bar_plot(
     disp_xmin: _Time = -inf,
     disp_xmax: _Time = inf,
     single_lines: bool = False,
-    colormap: _CM = DEFAULT_COLORMAP,
+    colormap: Optional[_CM] = DEFAULT_COLORMAP,
     use_mean: bool = True,
     plot_zero: bool = False,
     show_rms: bool = True,
     ignore_empties: bool = False,
     legend_loc: str = "best",
-    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    second_units: _SecUnits = None,
     ylabel: Optional[Union[str, List[str]]] = None,
     data_as_rows: bool = True,
     extra_plotter: Optional[ExtraPlotter] = None,
@@ -1649,7 +1732,7 @@ def make_bar_plot(
 
     """
     leg_scale = ("%", 1.0)
-    return make_generic_plot(
+    return make_generic_plot(  # type: ignore[return-value]
         "bar",
         description=description,
         time_one=time,
@@ -1693,7 +1776,7 @@ def make_connected_sets(
     legend_loc: str = "best",
     units: str = "",
     mag_ratio: Optional[float] = None,
-    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = "unity",
+    leg_scale: _SecUnits = "unity",
     colormap: Optional[Union[str, ColorMap]] = None,
     use_datashader: bool = False,
     add_quiver: bool = False,
@@ -1836,7 +1919,7 @@ def make_connected_sets(
         else:
             sorted_innovs = np.sort(innov_mags)
             max_innov = sorted_innovs[int(np.ceil(mag_ratio * innov_mags.size)) - 1] if innov_mags.size > 0 else 0
-        innov_cmap = ColorMap(colormap="autumn_r" if colormap is None else colormap, low=0, high=max_innov)
+        innov_cmap  = ColorMap(colormap="autumn_r" if colormap is None else colormap, low=0, high=max_innov)
         colors_line = tuple(innov_cmap.get_color(x) for x in innov_mags[ix])
         colors_pred = colors_line
         extra_text  = " (Colored by Magnitude)"
@@ -1854,10 +1937,11 @@ def make_connected_sets(
         ax = fig.add_subplot(1, 1, 1)
     else:
         (fig, ax) = fig_ax
-    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
-        fig.canvas.manager.set_window_title(description + extra_text)
+    assert (manager := fig.canvas.manager) is not None
+    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+        manager.set_window_title(description + extra_text)
     else:
-        fig.canvas.manager.set_window_title(sup.get_text())
+        manager.set_window_title(sup.get_text())
 
     # build datashader information for use later
     color_key = "color" if ds_color.startswith("xkcd") else "colormap"
@@ -1883,7 +1967,7 @@ def make_connected_sets(
     # populate the normal plot, potentially with a subset of points
     if plot_innovs:
         ax.plot(points[0, ix], points[1, ix], ".", color=colors_meas, label="Sighting", zorder=5)
-        ax.scatter(predicts[0, ix], predicts[1, ix], c=colors_pred, marker=".", label="Predicted", zorder=8)
+        ax.scatter(predicts[0, ix], predicts[1, ix], c=colors_pred, marker=".", label="Predicted", zorder=8)  # type: ignore[arg-type]
         # create fake line to add to legend
         line_leg_color = colors_line if isinstance(colors_line, str) else "xkcd:black"
         ax.plot(np.nan, np.nan, "-", color=line_leg_color, label="Innov")
@@ -1891,10 +1975,10 @@ def make_connected_sets(
         segments = np.zeros((ix.size, 2, 2))
         segments[:, 0, :] = points[:, ix].T
         segments[:, 1, :] = predicts[:, ix].T
-        lines = LineCollection(segments, colors=colors_line, zorder=3)
+        lines = LineCollection(segments, colors=colors_line, zorder=3)  # type: ignore[arg-type]
         ax.add_collection(lines)
     else:
-        ax.scatter(points[0, ix], points[1, ix], c=colors_pred, marker=".", label="Sighting", zorder=5)
+        ax.scatter(points[0, ix], points[1, ix], c=colors_pred, marker=".", label="Sighting", zorder=5)  # type: ignore[arg-type]
     if add_quiver:
         ax.quiver(points[0, ix], points[1, ix], innovs[0, ix], innovs[1, ix], color="xkcd:black", units="x", scale=quiver_scale)  # type: ignore[index]
     if color_by not in null_options:

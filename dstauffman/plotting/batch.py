@@ -19,6 +19,7 @@ import unittest
 from dstauffman import HAVE_MPL, HAVE_NUMPY
 from dstauffman.estimation import BpeResults
 from dstauffman.plotting.plotting import ExtraPlotter, Opts, plot_correlation_matrix, plot_time_history, setup_plots
+from dstauffman.plotting.support import ColorMap
 
 if HAVE_MPL:
     from matplotlib.axes import Axes
@@ -31,7 +32,7 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from typing_extensions import NotRequired, Unpack
 
-    _CM = Union[str, Colormap, ListedColormap]
+    _CM = Union[str, Colormap, ListedColormap, ColorMap]
     _Figs = List[Figure]
     _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
 
@@ -124,17 +125,18 @@ def plot_bpe_convergence(
         ax = fig.add_subplot(111)
     else:
         (fig, ax) = fig_ax
-    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
-        fig.canvas.manager.set_window_title(this_title)
+    assert (manager := fig.canvas.manager) is not None
+    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+        manager.set_window_title(this_title)
     else:
-        fig.canvas.manager.set_window_title(sup.get_text())
+        manager.set_window_title(sup.get_text())
     # add an axis and plot the data
     ax.semilogy(time, costs, "b.-", linewidth=2)
     # add labels
     ax.set_xlabel("Iteration")
     ax.set_ylabel("Cost")
     ax.set_title(this_title)
-    ax.set_xticks(time)
+    ax.set_xticks(time)  # type: ignore[arg-type]
     if len(costs) > 0:
         ax.set_xticklabels(labels)
     # show a grid
@@ -205,7 +207,8 @@ def plot_bpe_results(
                 skip_setup_plots=True,
                 **kwargs,
             )
-            fig.axes[0].set_xlabel("Innovation Number")  # type: ignore[union-attr]
+            assert isinstance(fig, Figure)
+            fig.axes[0].set_xlabel("Innovation Number")
             setup_plots(fig, opts=temp_opts)
             figs.append(fig)
         else:

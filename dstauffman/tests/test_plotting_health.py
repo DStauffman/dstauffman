@@ -72,7 +72,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting0(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        self.fig.canvas.manager.set_window_title("Figure Title")  # type: ignore[union-attr]
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label="data")
         truth = plot.TruthPlotter()
@@ -80,7 +80,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting1(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        self.fig.canvas.manager.set_window_title("Figure Title")  # type: ignore[union-attr]
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label="data")
         truth = plot.TruthPlotter(self.x, self.y + 0.01, lo=self.y, hi=self.y + 0.03)
@@ -88,7 +88,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting2(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        self.fig.canvas.manager.set_window_title("Figure Title")  # type: ignore[union-attr]
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label="data")
         truth = plot.TruthPlotter(self.x, self.y + 0.01, lo=self.y, hi=self.y + 0.03, type_="errorbar")
@@ -96,7 +96,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting3(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        self.fig.canvas.manager.set_window_title("Figure Title")  # type: ignore[union-attr]
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label="data")
         truth = plot.TruthPlotter(self.x, None, lo=self.y, hi=self.y + 0.03)
@@ -104,7 +104,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting4(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        self.fig.canvas.manager.set_window_title("Figure Title")  # type: ignore[union-attr]
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label="data")
         truth = plot.TruthPlotter(self.x, self.y + 0.01, lo=None, hi=self.y + 0.03, type_="errorbar")
@@ -112,7 +112,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_plotting5(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        self.fig.canvas.manager.set_window_title("Figure Title")  # type: ignore[union-attr]
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label="data")
         truth = plot.TruthPlotter(self.x, self.y + 0.01, lo=self.y, hi=self.y + 0.03, type_="errorbar")
@@ -124,7 +124,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_dont_hold_limits(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        self.fig.canvas.manager.set_window_title("Figure Title")  # type: ignore[union-attr]
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label="data")
         truth = plot.TruthPlotter(self.x - 10, self.y, lo=self.y - 1000, hi=self.y + 1000, type_="errorbar")
@@ -132,7 +132,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_hold_limits(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        self.fig.canvas.manager.set_window_title("Figure Title")  # type: ignore[union-attr]
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label="data")
         truth = plot.TruthPlotter(self.x - 10, self.y, lo=self.y - 1000, hi=self.y + 1000, type_="errorbar")
@@ -140,7 +140,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
 
     def test_bad_type(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        self.fig.canvas.manager.set_window_title("Figure Title")  # type: ignore[union-attr]
         ax = self.fig.add_subplot(111)
         ax.plot(self.x, self.y, label="data")
         truth = plot.TruthPlotter(self.x, self.y + 0.01, lo=self.y, hi=self.y + 0.03, type_="bad type")
@@ -205,26 +205,29 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
         self.opts.show_plot = False
         self.legend = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
         self.second_units = 1000000
-        self.figs: List[plt.Figure] = []
+        self.fig: Optional[plt.Figure] = None
 
     def test_nominal(self) -> None:
-        self.figs.append(
-            plot.plot_health_time_history(
-                self.time, self.data, label=self.label, units=self.units, opts=self.opts, legend=self.legend
-            )
+        self.fig = plot.plot_health_time_history(
+            self.time, self.data, label=self.label, units=self.units, opts=self.opts, legend=self.legend
         )
+        self.assertIsNotNone(self.fig)
 
     def test_defaults(self) -> None:
-        self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label))
+        self.fig = plot.plot_health_time_history(self.time, self.data, self.label)
+        self.assertIsNotNone(self.fig)
 
     def test_with_units(self) -> None:
-        self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label, self.units))
+        self.fig = plot.plot_health_time_history(self.time, self.data, self.label, self.units)
+        self.assertIsNotNone(self.fig)
 
     def test_with_opts(self) -> None:
-        self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label, opts=self.opts))
+        self.fig = plot.plot_health_time_history(self.time, self.data, self.label, opts=self.opts)
+        self.assertIsNotNone(self.fig)
 
     def test_with_legend(self) -> None:
-        self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label, legend=self.legend))
+        self.fig = plot.plot_health_time_history(self.time, self.data, self.label, legend=self.legend)
+        self.assertIsNotNone(self.fig)
 
     def test_no_data(self) -> None:
         with capture_output() as ctx:
@@ -234,12 +237,14 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
         self.assertEqual(output, "plot skipped due to missing data.")
 
     def test_ignore_zeros(self) -> None:
-        self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label, ignore_empties=True))
+        self.fig = plot.plot_health_time_history(self.time, self.data, self.label, ignore_empties=True)
+        self.assertIsNotNone(self.fig)
 
     def test_ignore_zeros2(self) -> None:
         self.data[:, 1] = 0
         self.data[:, 3] = 0
-        self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label, ignore_empties=True))
+        self.fig = plot.plot_health_time_history(self.time, self.data, self.label, ignore_empties=True)
+        self.assertIsNotNone(self.fig)
 
     def test_ignore_zeros3(self) -> None:
         self.data = np.zeros(self.data.shape)
@@ -247,50 +252,55 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
             not_a_fig = plot.plot_health_time_history(self.time, self.data, label="All Zeros", ignore_empties=True)
         output = ctx.get_output()
         ctx.close()
-        self.assertIs(not_a_fig, None)
+        self.assertIsNone(not_a_fig)
         self.assertEqual(output, "All Zeros plot skipped due to missing data.")
 
     def test_colormap(self) -> None:
         self.opts.colormap = "Dark2"
         colormap = "Paired"
-        self.figs.append(
-            plot.plot_health_time_history(self.time, self.data, self.label, ignore_empties=True, colormap=colormap)
-        )
+        self.fig = plot.plot_health_time_history(self.time, self.data, self.label, ignore_empties=True, colormap=colormap)
+        self.assertIsNotNone(self.fig)
 
     def test_bad_legend(self) -> None:
         with self.assertRaises(AssertionError):
             plot.plot_health_time_history(self.time, self.data, self.label, legend=self.legend[:-1])
 
     def test_second_units1(self) -> None:
-        self.figs.append(
-            plot.plot_health_time_history(self.time, self.data, self.label, units="population", second_units=self.second_units)
+        self.fig = plot.plot_health_time_history(
+            self.time, self.data, self.label, units="population", second_units=self.second_units
         )
+        self.assertIsNotNone(self.fig)
 
     def test_second_units2(self) -> None:
         second_units = ("New ylabel [units]", 100)
-        self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label, second_units=second_units))
+        self.fig = plot.plot_health_time_history(self.time, self.data, self.label, second_units=second_units)
+        self.assertIsNotNone(self.fig)
 
     def test_single_point(self) -> None:
-        self.figs.append(plot.plot_health_time_history(self.time[1:], self.data[1:, :], self.label))
+        self.fig = plot.plot_health_time_history(self.time[1:], self.data[1:, :], self.label)
+        self.assertIsNotNone(self.fig)
 
     def test_show_zero(self) -> None:
         self.data += 1000
         self.opts.show_zero = True
-        self.figs.append(plot.plot_health_time_history(self.time, self.data, self.label, opts=self.opts))
+        self.fig = plot.plot_health_time_history(self.time, self.data, self.label, opts=self.opts)
+        self.assertIsNotNone(self.fig)
 
     def test_data_lo_and_hi(self) -> None:
-        self.figs.append(
-            plot.plot_health_time_history(self.time, self.data, self.label, data_lo=self.data - 1, data_hi=self.data + 1)
-        )
+        self.fig = plot.plot_health_time_history(self.time, self.data, self.label, data_lo=self.data - 1, data_hi=self.data + 1)
+        self.assertIsNotNone(self.fig)
 
     def test_not_ndarray(self) -> None:
-        self.figs.append(plot.plot_health_time_history(0, 0, "Zero"))
+        self.fig = plot.plot_health_time_history(0, 0, "Zero")
+        self.assertIsNotNone(self.fig)
 
     def test_0d(self) -> None:
-        self.figs.append(plot.plot_health_time_history(np.array(0), np.array(0), "Zero"))
+        self.fig = plot.plot_health_time_history(np.array(0), np.array(0), "Zero")
+        self.assertIsNotNone(self.fig)
 
     def test_1d(self) -> None:
-        self.figs.append(plot.plot_health_time_history(np.arange(5), np.arange(5), "Line"))
+        self.fig = plot.plot_health_time_history(np.arange(5), np.arange(5), "Line")
+        self.assertIsNotNone(self.fig)
 
     def test_3d(self) -> None:
         data3 = np.empty((self.data.shape[0], 3, self.data.shape[1]), dtype=float)
@@ -298,7 +308,8 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
         data3[:, 1, :] = self.data + 0.1
         data3[:, 2, :] = self.data + 0.2
         self.opts.names = ["Run 1", "Run 2", "Run 3"]
-        self.figs.append(plot.plot_health_time_history(self.time, data3, self.label, opts=self.opts))
+        self.fig = plot.plot_health_time_history(self.time, data3, self.label, opts=self.opts)
+        self.assertIsNotNone(self.fig)
 
     def test_bad_4d(self) -> None:
         bad_data = np.random.rand(self.time.shape[0], 4, 5, 1)
@@ -306,9 +317,8 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
             plot.plot_health_time_history(self.time, bad_data, self.label, opts=self.opts)
 
     def tearDown(self) -> None:
-        if self.figs:
-            for this_fig in self.figs:
-                plt.close(this_fig)
+        if self.fig is not None:
+            plt.close(self.fig)
 
 
 # %% plotting.plot_health_monte_carlo
@@ -342,7 +352,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         self.truth = plot.TruthPlotter(self.time, np.cos(self.time))  # type: ignore[arg-type]
         self.data_matrix = np.column_stack((self.data, self.truth.data))  # type: ignore[arg-type]
         self.second_units = 1000000
-        self.fig: Optional[List[plt.Figure]] = None
+        self.fig: Optional[plt.Figure] = None
 
     def test_normal(self) -> None:
         self.fig = plot.plot_health_monte_carlo(self.time, self.data, self.label, self.units)
@@ -473,13 +483,13 @@ class Test_plotting_plot_population_pyramid(unittest.TestCase):
         self.age_bins: Union[_I, List[int]] = np.array([0, 5, 10, 15, 20, 1000], dtype=int) if HAVE_NUMPY else [0, 5, 1000]
         self.male_per: Union[_I, List[int]] = np.array([100, 200, 300, 400, 500], dtype=int) if HAVE_NUMPY else [100, 200, 500]
         self.fmal_per: Union[_I, List[int]] = np.array([125, 225, 325, 375, 450], dtype=int) if HAVE_NUMPY else [125, 225, 450]
-        self.title    = "Test Title"
-        self.opts     = plot.Opts()
-        self.name1    = "M"
-        self.name2    = "W"
-        self.color1   = "k"
-        self.color2   = "w"
-        self.fig: Optional[List[plt.Figure]]
+        self.title  = "Test Title"
+        self.opts   = plot.Opts()
+        self.name1  = "M"
+        self.name2  = "W"
+        self.color1 = "k"
+        self.color2 = "w"
+        self.fig: Optional[plt.Figure] = None
         # fmt: on
 
     def test_nominal(self) -> None:

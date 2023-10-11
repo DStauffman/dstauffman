@@ -49,12 +49,9 @@ from dstauffman.units import MONTHS_PER_YEAR
 
 if HAVE_NUMPY:
     import numpy as np
-    from numpy import inf, logical_not, nan
-
-    if TYPE_CHECKING:
-        from numpy.typing import ArrayLike
+    from numpy import inf, isnan, logical_not, nan
 else:
-    from math import inf, isnan, nan
+    from math import inf, isnan, nan  # type: ignore[assignment]
 
     logical_not = lambda x: not x  # type: ignore[assignment]  # pylint: disable=unnecessary-lambda-assignment
 
@@ -62,10 +59,8 @@ if HAVE_SCIPY:
     from scipy.interpolate import interp1d
     from scipy.signal import butter, sosfiltfilt
 
-# %% Globals
-_ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked
-
 if TYPE_CHECKING:
+    from numpy.typing import ArrayLike
     from typing_extensions import NotRequired, Unpack
 
     _B = np.typing.NDArray[np.bool_]
@@ -73,7 +68,7 @@ if TYPE_CHECKING:
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
     _StrOrListStr = TypeVar("_StrOrListStr", str, List[str])
-    _SingleNum = Union[int, float, _N, np.datetime64]
+    _SingleNum = Union[int, float, np.datetime64, np.int32, np.int64, np.float64]
     _Lists = Union[_N, List[_N], Tuple[_N, ...]]
     _Number = Union[float, int, _N]
 
@@ -92,6 +87,10 @@ if TYPE_CHECKING:
     class _ButterKwArgs(TypedDict):
         btype: NotRequired[Literal["lowpass", "highpass", "bandpass", "bandstop"]]
         analog: NotRequired[bool]
+
+
+# %% Globals
+_ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked
 
 
 # %% Functions - _nan_equal
@@ -134,7 +133,7 @@ def _nan_equal(a: Any, b: Any, /, tolerance: Optional[float] = None) -> bool:  #
             out = isnan(x)
         except:
             return False
-        return out
+        return out  # type: ignore[no-any-return]
 
     try:
         if HAVE_NUMPY:
@@ -180,7 +179,7 @@ def find_in_range(
     max_: _SingleNum = inf,
     *,
     inclusive: bool = False,
-    mask: Optional[Union[bool, np.ndarray]] = None,
+    mask: Optional[Union[bool, _B]] = None,
     precision: _SingleNum = 0,
     left: bool = False,
     right: bool = False,
@@ -234,14 +233,14 @@ def find_in_range(
     # find those greater than the minimum bound
     if np.isfinite(min_):
         func = np.greater_equal if inclusive or left else np.greater
-        valid = func(value, min_ - precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
+        valid = func(value, min_ - precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[call-overload, operator]
     else:
         assert ~np.isnan(min_) and np.sign(min_) < 0, "The minimum should be -np.inf if not finite."
         valid = not_nan.copy()
     # combine with those less than the maximum bound
     if np.isfinite(max_):
         func = np.less_equal if inclusive or right else np.less
-        valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
+        valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[call-overload, operator]
     else:
         assert ~np.isnan(max_) and np.sign(max_) > 0, "The maximum should be np.inf if not finite."
     return valid  # type: ignore[no-any-return]
@@ -452,7 +451,7 @@ def compare_two_classes(
         r"""Set is_same to False and optionally prints information to the screen."""
         is_same = False
         if not suppress_output:
-            print(f"{this_attr} is different from {name1} to {name2}.")
+            print(f"{this_attr} is different from {name1} to {name2}.")  # pylint: disable=used-before-assignment
         return is_same
 
     def _is_function(obj: Any) -> bool:

@@ -7,7 +7,10 @@ Notes
 """  # pylint: disable=redefined-outer-name
 
 # %% Imports
+from __future__ import annotations
+
 import datetime
+from pathlib import Path
 from typing import Any, List, Tuple, TYPE_CHECKING
 
 import numpy as np
@@ -146,7 +149,7 @@ if __name__ == "__main__":
     opti_opts.get_param_func = get_parameter
     opti_opts.set_param_func = set_parameter
     opti_opts.output_folder  = dcs.get_output_dir() / datetime.datetime.now().strftime("%Y-%m-%d")
-    opti_opts.output_results = "bpe_results.hdf5"
+    opti_opts.output_results = Path("bpe_results.hdf5")
     opti_opts.params         = []
 
     # less common optimization settings

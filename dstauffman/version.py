@@ -7,7 +7,7 @@ Notes
 """
 
 # %% Constants
-version_info = (3, 4, 1)
+version_info = (3, 5, 0)
 
 # Below is data about the minor release history for potential use in deprecating older support.
 # For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html
@@ -23,6 +23,7 @@ May 24, 2022: dstauffman 3.1
 Aug 04, 2022: dstauffman 3.2
 Aug 10, 2022: dstauffman 3.3
 Jun 30, 2023: dstauffman 3.4
+Oct 11, 2023: dstauffman 3.5
 """
 
 # Historical notes:

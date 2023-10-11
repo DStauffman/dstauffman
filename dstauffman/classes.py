@@ -48,26 +48,26 @@ from dstauffman.utils import find_in_range
 if HAVE_H5PY:
     import h5py
 if HAVE_NUMPY:
-    from numpy import all as np_all, datetime64, inf, int64, ndarray, printoptions
+    from numpy import all as np_all, inf, int64, ndarray, printoptions
 else:
     from array import array as ndarray  # type: ignore[assignment]
     from math import inf
 
     from nubs import np_all  # type: ignore[no-redef]  # pylint: disable=ungrouped-imports
-
-    datetime64 = ndarray  # type: ignore[assignment, misc]
 if HAVE_PANDAS:
     from pandas import DataFrame
 
 # %% Constants
 if TYPE_CHECKING:
+    import numpy as np
     from typing_extensions import NotRequired, Unpack
 
+    _B = np.typing.NDArray[np.bool_]
     _T = TypeVar("_T")
     _C = TypeVar("_C", int, "Counter")
-    _SingleNum = Union[int, float, ndarray, datetime64]
+    _SingleNum = Union[int, float, np.datetime64, np.int32, np.int64, np.float64]
     _Sets = Union[Set[str], FrozenSet[str]]
-    _Time = Union[float, datetime64]
+    _Time = Union[float, np.datetime64]
 
     class _PPrintKwArgs(TypedDict):
         name: NotRequired[str]
@@ -613,7 +613,7 @@ def chop_time(
     ti: _Time = -inf,
     tf: _Time = inf,
     inclusive: bool = False,
-    mask: Optional[Union[bool, ndarray]] = None,
+    mask: Optional[Union[bool, _B]] = None,
     precision: _SingleNum = 0,
     left: bool = True,
     right: bool = True,

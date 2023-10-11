@@ -235,8 +235,8 @@ def icer(
 
         # sort by cost
         ix_sort = np.argsort(this_cost)
-        sorted_cost = this_cost[ix_sort]
-        sorted_qaly = this_qaly[ix_sort]
+        sorted_cost = this_cost[ix_sort]  # type: ignore[index]
+        sorted_qaly = this_qaly[ix_sort]  # type: ignore[index]
 
         # check for strongly dominated strategies
         if not np.all(np.diff(sorted_qaly) >= 0):
@@ -249,8 +249,8 @@ def icer(
             continue
 
         # calculate incremental costs
-        inc_cost = np.hstack((sorted_cost[0], np.diff(sorted_cost)))
-        inc_qaly = np.hstack((sorted_qaly[0], np.diff(sorted_qaly)))
+        inc_cost = np.hstack([sorted_cost[0], np.diff(sorted_cost)])  # type: ignore[index, list-item]
+        inc_qaly = np.hstack([sorted_qaly[0], np.diff(sorted_qaly)])  # type: ignore[index, list-item]
         icer_out = inc_cost / inc_qaly
 
         # check for weakly dominated strategies

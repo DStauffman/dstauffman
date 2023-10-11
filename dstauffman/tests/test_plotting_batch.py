@@ -113,7 +113,8 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
         plot.plot_bpe_results(self.bpe_results, plots={"innovs": False})
 
     def tearDown(self) -> None:
-        plot.close_all(self.figs)
+        if HAVE_MPL:
+            plot.close_all(self.figs)
 
 
 # %% Unit test execution

@@ -21,7 +21,7 @@ try:
 
     parse = version.parse
 except ModuleNotFoundError:
-    import setuptools  # type: ignore[import]
+    import setuptools  # type: ignore[import-untyped]
 
     parse = setuptools.version.pkg_resources.packaging.version.parse
 
@@ -51,7 +51,7 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike
 
-    _CM = Union[str, Colormap, ListedColormap]
+    _CM = Union[str, Colormap, ListedColormap, ColorMap]
     _I = np.typing.NDArray[np.int_]
     _M = np.typing.NDArray[np.float64]  # 2D
     _N = np.typing.NDArray[np.float64]
@@ -139,25 +139,25 @@ class TruthPlotter(Frozen):
         # plot the new data
         this_data = self.get_data(self.data, scale, ix)
         if this_data is not None and not np.all(np.isnan(this_data)):
-            ax.plot(self.time, this_data, "k.-", linewidth=2, zorder=8, label=self.name)
+            ax.plot(self.time, this_data, "k.-", linewidth=2, zorder=8, label=self.name)  # type: ignore[arg-type]
         if self.type_ == "normal":
             this_data = self.get_data(self.data_lo, scale, ix)
             if this_data is not None and not np.all(np.isnan(this_data)):
-                ax.plot(self.time, this_data, ".-", color="0.5", linewidth=2, zorder=6)
+                ax.plot(self.time, this_data, ".-", color="0.5", linewidth=2, zorder=6)  # type: ignore[arg-type]
             this_data = self.get_data(self.data_hi, scale, ix)
             if self.data_hi is not None and not np.all(np.isnan(this_data)):  # type: ignore[arg-type]
-                ax.plot(self.time, this_data, ".-", color="0.5", linewidth=2, zorder=6)
+                ax.plot(self.time, this_data, ".-", color="0.5", linewidth=2, zorder=6)  # type: ignore[arg-type]
         elif self.type_ == "errorbar":
             if self.data_lo is not None and self.data_hi is not None:
                 if ix is None:
                     yerr = np.vstack((self.data - self.data_lo, self.data_hi - self.data))  # type: ignore[operator]
                     ax.errorbar(
-                        self.time, scale * self.data, scale * yerr, linestyle="None", marker="None", ecolor="c", zorder=6  # type: ignore[operator]
+                        self.time, scale * self.data, scale * yerr, linestyle="None", marker="None", ecolor="c", zorder=6  # type: ignore[arg-type, operator]
                     )
                 else:
                     yerr = np.vstack((self.data[:, ix] - self.data_lo[:, ix], self.data_hi[:, ix] - self.data[:, ix])).T  # type: ignore[index]
                     ax.errorbar(
-                        self.time,
+                        self.time,  # type: ignore[arg-type]
                         scale * self.data[:, ix],  # type: ignore[index]
                         scale * yerr[:, ix],
                         linestyle="None",
@@ -188,7 +188,7 @@ def plot_health_time_history(
     data_lo: Optional[_N] = None,
     data_hi: Optional[_N] = None,
     colormap: Optional[_CM] = None,
-) -> Figure:
+) -> Optional[Figure]:
     r"""
     Plot multiple metrics over time.
 
@@ -301,7 +301,8 @@ def plot_health_time_history(
 
     # plot data
     fig = plt.figure()
-    fig.canvas.manager.set_window_title(this_title)
+    assert (manager := fig.canvas.manager) is not None
+    manager.set_window_title(this_title)
     ax = fig.add_subplot(111)
     cm.set_colors(ax)
     for i in range(num_bins):
@@ -484,7 +485,8 @@ def plot_health_monte_carlo(
     this_title = label + " vs. Time"
     # create the figure and set the title
     fig = plt.figure()
-    fig.canvas.manager.set_window_title(this_title)
+    assert (manager := fig.canvas.manager) is not None
+    manager.set_window_title(this_title)
     # add an axis and plot the data
     ax = fig.add_subplot(111)
     if plot_as_diffs:
@@ -555,7 +557,8 @@ def plot_icer(
     # create a figure and axis
     fig = plt.figure()
     title = "Cost Benefit Frontier"
-    fig.canvas.manager.set_window_title(title)
+    assert (manager := fig.canvas.manager) is not None
+    manager.set_window_title(title)
     ax = fig.add_subplot(111)
     # plot the data
     ax.plot(qaly, cost, "ko", label="strategies")
@@ -672,12 +675,13 @@ def plot_population_pyramid(
 
     # create the figure and axis and set the title
     fig = plt.figure()
-    fig.canvas.manager.set_window_title(title)
+    assert (manager := fig.canvas.manager) is not None
+    manager.set_window_title(title)
     ax = fig.add_subplot(111)
 
     # plot bars
-    ax.barh(y_values, -scale * male_per, 0.95, color=color1, label=name1)
-    ax.barh(y_values, +scale * fmal_per, 0.95, color=color2, label=name2)
+    ax.barh(y_values, -scale * male_per, 0.95, color=color1, label=name1)  # type: ignore[arg-type]
+    ax.barh(y_values, +scale * fmal_per, 0.95, color=color2, label=name2)  # type: ignore[arg-type]
 
     # make sure plot is symmetric about zero
     xlim = max(abs(x) for x in ax.get_xlim())
@@ -687,7 +691,7 @@ def plot_population_pyramid(
     ax.set_xlabel("Population [%]")
     ax.set_ylabel("Age [years]")
     ax.set_title(title)
-    ax.set_yticks(y_values)
+    ax.set_yticks(y_values)  # type: ignore[arg-type]
     ax.set_yticklabels(y_labels)
     if parse(mpl.__version__) >= parse("3.3.1"):
         # TODO: REMOVE IN THE FUTURE - PLACED TO AVOID WARNING - IT IS A BUG FROM MATPLOTLIB 3.3.1

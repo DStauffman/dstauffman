@@ -188,53 +188,70 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.opts           = plot.Opts()
         self.opts.show_plot = False
         self.elements       = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
-        self.figs: List[plt.Figure] = []
+        self.fig: Optional[plt.Figure] = None
         # fmt: on
 
     def test_nominal(self) -> None:
-        self.figs.append(plot.plot_time_history(self.description, self.time, self.row_data, opts=self.opts, data_as_rows=False))
+        this_fig = plot.plot_time_history(self.description, self.time, self.row_data, opts=self.opts, data_as_rows=False)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_defaults(self) -> None:
-        self.figs.append(plot.plot_time_history("", self.time, self.col_data))
+        this_fig = plot.plot_time_history("", self.time, self.col_data)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_with_units(self) -> None:
-        self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, units=self.units))
+        this_fig = plot.plot_time_history(self.description, self.time, self.col_data, units=self.units)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_with_opts(self) -> None:
-        self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, opts=self.opts))
+        this_fig = plot.plot_time_history(self.description, self.time, self.col_data, opts=self.opts)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     @patch("dstauffman.plotting.plotting.logger")
     def test_no_data(self, mock_logger: Mock) -> None:
-        plot.plot_time_history("", self.time, None)
+        this_fig = plot.plot_time_history("", self.time, None)
+        self.assertIs(this_fig, None)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "")
 
     def test_ignore_zeros(self) -> None:
-        self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True))
+        this_fig = plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_ignore_zeros2(self) -> None:
         self.col_data[1, :] = 0
         self.col_data[3, :] = 0
-        self.figs.append(plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True))
+        this_fig = plot.plot_time_history(self.description, self.time, self.col_data, ignore_empties=True)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     @patch("dstauffman.plotting.plotting.logger")
     def test_ignore_zeros3(self, mock_logger: Mock) -> None:
         self.col_data = np.zeros(self.col_data.shape)
-        not_a_fig = plot.plot_time_history("All Zeros", self.time, self.col_data, ignore_empties=True)
-        self.assertIs(not_a_fig, None)
+        this_fig = plot.plot_time_history("All Zeros", self.time, self.col_data, ignore_empties=True)
+        self.assertIs(this_fig, None)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "All Zeros")
 
     def test_not_ndarray(self) -> None:
-        temp_fig = plot.plot_time_history("Zero", 0, 0)
-        assert isinstance(temp_fig, plt.Figure)
-        self.figs.append(temp_fig)
+        this_fig = plot.plot_time_history("Zero", 0, 0)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_0d(self) -> None:
-        self.figs.append(plot.plot_time_history("Zero", np.array(0), np.array(0)))
+        this_fig = plot.plot_time_history("Zero", np.array(0), np.array(0))
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_1d(self) -> None:
-        self.figs.append(plot.plot_time_history("Line", np.arange(5), np.arange(5.0)))
+        this_fig = plot.plot_time_history("Line", np.arange(5), np.arange(5.0))
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_bad_3d(self) -> None:
         bad_data = np.random.rand(self.time.shape[0], 4, 5)
@@ -243,30 +260,35 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 
     def test_datetime(self) -> None:
         dates = np.datetime64("2020-01-11 12:00:00") + np.arange(0, 1000, 10).astype("timedelta64[ms]")
-        temp_fig = plot.plot_time_history(self.description, dates, self.col_data, opts=self.opts, time_units="numpy")
-        assert isinstance(temp_fig, plt.Figure)
-        self.figs.append(temp_fig)
+        this_fig = plot.plot_time_history(self.description, dates, self.col_data, opts=self.opts, time_units="numpy")
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_lists0(self) -> None:
         time = np.arange(100.0)
         data: List[_I] = [np.zeros(100, dtype=int), np.ones(100, dtype=int)]
-        self.figs.append(plot.plot_time_history("", time, data))  # type: ignore[arg-type]
+        this_fig = plot.plot_time_history("", time, data)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_lists1(self) -> None:
         time = np.arange(10)
         data: List[_N] = [np.random.rand(10), 5 * np.random.rand(10)]
         elements = ("Item 1", "5 Times")
-        self.figs.append(plot.plot_time_history(self.description, time, data, opts=self.opts, elements=elements))  # type: ignore[arg-type]
+        this_fig = plot.plot_time_history(self.description, time, data, opts=self.opts, elements=elements)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_lists2(self) -> None:
         time = [np.arange(5.0), np.arange(10.0)]
         data = [np.array([0.0, 0.1, 0.2, 0.3, 0.5]), np.arange(10.0)]
-        self.figs.append(plot.plot_time_history(self.description, time, data, opts=self.opts))
+        this_fig = plot.plot_time_history(self.description, time, data, opts=self.opts)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def tearDown(self) -> None:
-        if self.figs:
-            for this_fig in self.figs:
-                plt.close(this_fig)
+        if self.fig is not None:
+            plt.close(self.fig)
 
 
 # %% plotting.plot_correlation_matrix
@@ -288,7 +310,7 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
 
     def setUp(self) -> None:
         num = 10
-        self.figs: List[plt.Figure] = []
+        self.fig: Optional[plt.Figure] = None
         self.data = unit(np.random.rand(num, num), axis=0)
         self.labels = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
         self.units = "percentage"
@@ -304,89 +326,87 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
                     self.sym[i, j] = self.data[j, i]
 
     def test_normal(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data, self.labels))
+        self.fig = plot.plot_correlation_matrix(self.data, self.labels)
 
     def test_nonsquare(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data[:5, :3], [self.labels[:3], self.labels[:5]]))
+        self.fig = plot.plot_correlation_matrix(self.data[:5, :3], [self.labels[:3], self.labels[:5]])
 
     def test_default_labels(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data[:5, :3]))
+        self.fig = plot.plot_correlation_matrix(self.data[:5, :3])
 
     def test_type(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data, units=self.units))
+        self.fig = plot.plot_correlation_matrix(self.data, units=self.units)
 
     def test_all_args(self) -> None:
-        self.figs.append(
-            plot.plot_correlation_matrix(
-                self.data,
-                self.labels,
-                self.units,
-                opts=self.opts,
-                matrix_name=self.matrix_name,
-                cmin=0,
-                cmax=1,
-                xlabel="",
-                ylabel="",
-                plot_lower_only=False,
-                label_values=True,
-                x_lab_rot=180,
-                colormap="Paired",
-            )
+        self.fig = plot.plot_correlation_matrix(
+            self.data,
+            self.labels,
+            self.units,
+            opts=self.opts,
+            matrix_name=self.matrix_name,
+            cmin=0,
+            cmax=1,
+            xlabel="",
+            ylabel="",
+            plot_lower_only=False,
+            label_values=True,
+            x_lab_rot=180,
+            colormap="Paired",
         )
 
     def test_symmetric(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.sym))
+        self.fig = plot.plot_correlation_matrix(self.sym)
 
     def test_symmetric_all(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.sym, plot_lower_only=False))
+        self.fig = plot.plot_correlation_matrix(self.sym, plot_lower_only=False)
 
     def test_above_one(self) -> None:
         large_data = self.data * 1000.0
-        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
+        self.fig = plot.plot_correlation_matrix(large_data, self.labels)
 
     def test_above_one_part2(self) -> None:
         large_data = self.data * 1000.0
-        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmax=2000))
+        self.fig = plot.plot_correlation_matrix(large_data, self.labels, cmax=2000)
 
     def test_below_one(self) -> None:
         large_data = 1000.0 * (self.data - 0.5)
-        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
+        self.fig = plot.plot_correlation_matrix(large_data, self.labels)
 
     def test_below_one_part2(self) -> None:
         large_data = 1000.0 * (self.data - 0.5)
-        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmin=-2))
+        self.fig = plot.plot_correlation_matrix(large_data, self.labels, cmin=-2)
 
     def test_within_minus_one(self) -> None:
         large_data = self.data - 0.5
-        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels))
+        self.fig = plot.plot_correlation_matrix(large_data, self.labels)
 
     def test_within_minus_one_part2(self) -> None:
         large_data = self.data - 0.5
-        self.figs.append(plot.plot_correlation_matrix(large_data, self.labels, cmin=-1, cmax=1))
+        self.fig = plot.plot_correlation_matrix(large_data, self.labels, cmin=-1, cmax=1)
 
     def test_xlabel(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data, xlabel="Testing Label"))
+        self.fig = plot.plot_correlation_matrix(self.data, xlabel="Testing Label")
 
     def test_ylabel(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data, ylabel="Testing Label"))
+        self.fig = plot.plot_correlation_matrix(self.data, ylabel="Testing Label")
 
     def test_x_label_rotation(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data, self.labels, x_lab_rot=0))
+        self.fig = plot.plot_correlation_matrix(self.data, self.labels, x_lab_rot=0)
 
     def test_nans(self) -> None:
         self.data[0, 0] = np.nan
-        self.figs.append(plot.plot_correlation_matrix(self.data, self.labels))
+        self.fig = plot.plot_correlation_matrix(self.data, self.labels)
 
     def test_bad_labels(self) -> None:
         with self.assertRaises(ValueError):
-            self.figs.append(plot.plot_correlation_matrix(self.data, ["a"]))
+            plot.plot_correlation_matrix(self.data, ["a"])
 
     def test_label_values(self) -> None:
-        self.figs.append(plot.plot_correlation_matrix(self.data, label_values=True))
+        self.fig = plot.plot_correlation_matrix(self.data, label_values=True)
 
     def tearDown(self) -> None:
-        for i in range(len(self.figs)):
-            plt.close(self.figs.pop())
+        if self.fig is not None:
+            plt.close(self.fig)
 
 
 # %% plotting.plot_bar_breakdown
@@ -414,64 +434,80 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         self.elements = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
         self.opts = plot.Opts()
         self.opts.show_plot = False
-        self.figs: List[plt.Figure] = []
+        self.fig: Optional[plt.Figure] = None
 
     def test_nominal(self) -> None:
-        self.figs.append(
-            plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, elements=self.elements)
-        )
+        this_fig = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, elements=self.elements)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_defaults(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data))
+        this_fig = plot.plot_bar_breakdown(self.description, self.time, self.data)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_opts(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts))
+        this_fig = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_elements(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, elements=self.elements))
+        this_fig = plot.plot_bar_breakdown(self.description, self.time, self.data, elements=self.elements)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_ignore_zeros(self) -> None:
         self.data[:, 1] = 0
         self.data[:, 3] = np.nan
-        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, ignore_empties=True))
+        this_fig = plot.plot_bar_breakdown(self.description, self.time, self.data, ignore_empties=True)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     @patch("dstauffman.plotting.plotting.logger")
     def test_null_data(self, mock_logger: Mock) -> None:
-        plot.plot_bar_breakdown("", self.time, None)
+        this_fig = plot.plot_bar_breakdown("", self.time, None)
+        self.assertIs(this_fig, None)
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(LogLevel.L5, " %s plot skipped due to missing data.", "")
 
     def test_colormap(self) -> None:
         self.opts.colormap = "Dark2"
         colormap = "Paired"
-        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, colormap=colormap))
+        this_fig = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, colormap=colormap)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_bad_elements(self) -> None:
         with self.assertRaises(AssertionError):
             plot.plot_bar_breakdown(self.description, self.time, self.data, elements=self.elements[:-1])
 
     def test_single_point(self) -> None:
-        self.figs.append(plot.plot_bar_breakdown(self.description, self.time[:1], self.data[:, :1]))
+        this_fig = plot.plot_bar_breakdown(self.description, self.time[:1], self.data[:, :1])
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_new_colormap(self) -> None:
         self.opts.colormap = "seismic"
-        self.figs.append(plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts))
+        this_fig = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_datetime(self) -> None:
         dates = np.datetime64("2020-01-11 12:00:00") + np.arange(0, 7200, 120).astype("timedelta64[s]")
-        self.figs.append(plot.plot_bar_breakdown(self.description, dates, self.data, opts=self.opts, time_units="numpy"))
+        this_fig = plot.plot_bar_breakdown(self.description, dates, self.data, opts=self.opts, time_units="numpy")
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_data_as_rows(self) -> None:
-        self.figs.append(
-            plot.plot_bar_breakdown(
-                self.description, self.time, self.data.T.copy(), opts=self.opts, elements=self.elements, data_as_rows=False
-            )
+        this_fig = plot.plot_bar_breakdown(
+            self.description, self.time, self.data.T.copy(), opts=self.opts, elements=self.elements, data_as_rows=False
         )
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def tearDown(self) -> None:
-        if self.figs:
-            for this_fig in self.figs:
-                plt.close(this_fig)
+        if self.fig is not None:
+            plt.close(self.fig)
 
 
 # %% plotting.plot_histogram
@@ -558,7 +594,9 @@ class Test_plotting_setup_plots(unittest.TestCase):
 
     def setUp(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        manager = self.fig.canvas.manager
+        assert manager is not None
+        manager.set_window_title("Figure Title")
         ax = self.fig.add_subplot(111)
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)

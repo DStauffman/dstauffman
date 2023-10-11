@@ -68,7 +68,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
 
     def test_nominal(self) -> None:
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -102,7 +102,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_no_subplots(self) -> None:
         self.make_subplots = False
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -136,7 +136,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_no_components(self) -> None:
         self.plot_components = False
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -171,7 +171,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_no_start_date(self) -> None:
         self.start_date = ""
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -206,7 +206,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.quat_two.fill(np.nan)
         self.name_two = ""
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -239,7 +239,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
     def test_only_quat_two(self) -> None:
         self.name_one = ""
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -273,7 +273,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.rms_xmin = 5
         self.rms_xmax = 7
         self.return_err = True
-        (self.figs, err) = plot.make_quaternion_plot(
+        (self.figs, err) = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -305,39 +305,39 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             self.assertLess(abs(err["diff"][i]), 3.15)
 
     def test_use_mean(self) -> None:
-        self.figs = plot.make_quaternion_plot(  # type: ignore[assignment]
+        self.figs = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, use_mean=True
         )
 
     def test_no_rms_in_legend(self) -> None:
-        self.figs = plot.make_quaternion_plot(  # type: ignore[assignment]
+        self.figs = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, use_mean=True, show_rms=False
         )
 
     def test_plot_zero(self) -> None:
-        self.figs = plot.make_quaternion_plot(  # type: ignore[assignment]
+        self.figs = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, plot_zero=True
         )
 
     def test_disp_bounds(self) -> None:
-        self.figs = plot.make_quaternion_plot(  # type: ignore[assignment]
+        self.figs = plot.make_quaternion_plot(  # type: ignore[call-overload]
             self.description, self.time_one, self.time_two, self.quat_one, self.quat_two, disp_xmin=2, disp_xmax=5
         )
 
     def test_no_overlap(self) -> None:
-        self.time_one = np.arange(11).astype(float)
-        self.time_two = np.arange(2, 13) + 0.5  # type: ignore[assignment]
-        self.figs = plot.make_quaternion_plot(self.description, self.time_one, self.time_two, self.quat_one, self.quat_two)  # type: ignore[assignment]
+        time_one = np.arange(11.0).astype(float)
+        time_two = np.arange(2.0, 13.0) + 0.5
+        self.figs = plot.make_quaternion_plot(self.description, time_one, time_two, self.quat_one, self.quat_two)  # type: ignore[call-overload]
 
     def test_none1(self) -> None:
-        self.figs = plot.make_quaternion_plot(self.description, self.time_one, None, self.quat_one, None)  # type: ignore[assignment]
+        self.figs = plot.make_quaternion_plot(self.description, self.time_one, None, self.quat_one, None)  # type: ignore[call-overload]
 
     def test_none2(self) -> None:
-        self.figs = plot.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)  # type: ignore[assignment]
+        self.figs = plot.make_quaternion_plot(self.description, None, self.time_two, None, self.quat_two)  # type: ignore[call-overload]
 
     @patch("dstauffman.plotting.generic.logger")
     def test_none3(self, mock_logger: Mock) -> None:
-        self.figs = plot.make_quaternion_plot("", None, None, None, None)  # type: ignore[assignment]
+        self.figs = plot.make_quaternion_plot("", None, None, None, None)  # type: ignore[call-overload]
         mock_logger.log.assert_called_once()
         mock_logger.log.assert_called_with(
             LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', "quat", ""
@@ -435,19 +435,19 @@ class Test_plotting_plot_states(unittest.TestCase):
 
     def test_single(self) -> None:
         with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
-            self.figs += plot.plot_states(self.gnd1, opts=self.opts)
+            self.figs += plot.plot_states(self.gnd1, opts=self.opts)  # type: ignore[call-overload]
         mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
 
     def test_comp(self) -> None:
         with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
-            self.figs += plot.plot_states(self.gnd1, self.gnd2, opts=self.opts)
+            self.figs += plot.plot_states(self.gnd1, self.gnd2, opts=self.opts)  # type: ignore[call-overload]
         mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
 
     def test_errs(self) -> None:
         with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
-            (figs, err) = plot.plot_states(self.gnd1, self.gnd2, opts=self.opts, return_err=True)
+            (figs, err) = plot.plot_states(self.gnd1, self.gnd2, opts=self.opts, return_err=True)  # type: ignore[call-overload]
         mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
         self.figs += figs
@@ -458,7 +458,7 @@ class Test_plotting_plot_states(unittest.TestCase):
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="Mean of empty slice")
             with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
-                self.figs += plot.plot_states(self.gnd1, self.gnd2, groups=groups, opts=self.opts)  # type: ignore[arg-type]
+                self.figs += plot.plot_states(self.gnd1, self.gnd2, groups=groups, opts=self.opts)  # type: ignore[call-overload]
         mock_logger.log.assert_any_call(LogLevel.L4, "Plotting %s plots ...", "State Estimates")
         mock_logger.log.assert_called_with(LogLevel.L4, "... done.")
 

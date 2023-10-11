@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "dstauffman"
-version = "3.4.1"
+version = "3.5.0"
 description = "Generic python utilities for Aerospace applications"
 license = "LGPLv3"
 authors = ["David C. Stauffer <dstauffman@yahoo.com>"]
@@ -145,6 +145,7 @@ files                  = [
 mypy_path              = [
     "$MYPY_CONFIG_FILE_DIR/../nubs",
     "$MYPY_CONFIG_FILE_DIR/../slog"]
+untyped_calls_exclude  = ["matplotlib"]
 #linecount_report       = ".mypy_report"
 #any_exprs_report       = ".mypy_report"
 #html_report            = ".mypy_report"
@@ -158,7 +159,7 @@ module = [
     "coverage.*",
     "datashader.*",
     "h5py.*",
-    "matplotlib.*",
+    #"matplotlib.*",
     "numba.*",
     # "numpy.*",
     "pandas.*",

@@ -77,8 +77,8 @@ class Test_plotting_COLOR_LISTS(unittest.TestCase):
             self.assertIn(key, plot.COLOR_LISTS)
         colormap = plot.COLOR_LISTS["quat_diff"]
         self.assertEqual(colormap.N, 8)
-        self.assertEqual(colormap.colors[0], "xkcd:fuchsia")
-        self.assertEqual(colormap.colors[7], "xkcd:chocolate")
+        self.assertEqual(colormap.colors[0], "xkcd:fuchsia")  # type: ignore[index]
+        self.assertEqual(colormap.colors[7], "xkcd:chocolate")  # type: ignore[index, misc]
 
 
 # %% plotting._HoverButton
@@ -106,43 +106,44 @@ class Test_plotting_MyCustomToolbar(unittest.TestCase):
     def setUp(self) -> None:
         self.fig1 = plt.figure()
         self.fig2 = plt.figure()
-        self.fig1.toolbar_custom_ = plot.MyCustomToolbar(self.fig1)
-        self.fig2.toolbar_custom_ = plot.MyCustomToolbar(self.fig2)
+        # TODO: note that all these attr-defined are false positives in matplotlib v3.8
+        self.fig1.toolbar_custom_ = plot.MyCustomToolbar(self.fig1)  # type: ignore[attr-defined]
+        self.fig2.toolbar_custom_ = plot.MyCustomToolbar(self.fig2)  # type: ignore[attr-defined]
 
     def test_do_nothing(self) -> None:
-        self.assertEqual(plt.gcf().number, self.fig2.number)
+        self.assertEqual(plt.gcf().number, self.fig2.number)  # type: ignore[attr-defined]
 
     def test_next_plot(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)
-        self.assertEqual(plt.gcf().number, self.fig1.number)
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig1.number)  # type: ignore[attr-defined]
 
     def test_prev_plot(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
-        self.assertEqual(plt.gcf().number, self.fig1.number)
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig1.number)  # type: ignore[attr-defined]
 
     def test_close_all(self) -> None:
-        self.assertTrue(plt.fignum_exists(self.fig1.number))
-        self.assertTrue(plt.fignum_exists(self.fig2.number))
-        QTest.mouseClick(self.fig1.toolbar_custom_.btn_close_all, Qt.LeftButton)
-        self.assertFalse(plt.fignum_exists(self.fig1.number))
-        self.assertFalse(plt.fignum_exists(self.fig2.number))
+        self.assertTrue(plt.fignum_exists(self.fig1.number))  # type: ignore[attr-defined]
+        self.assertTrue(plt.fignum_exists(self.fig2.number))  # type: ignore[attr-defined]
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_close_all, Qt.LeftButton)  # type: ignore[attr-defined]
+        self.assertFalse(plt.fignum_exists(self.fig1.number))  # type: ignore[attr-defined]
+        self.assertFalse(plt.fignum_exists(self.fig2.number))  # type: ignore[attr-defined]
 
     def test_multiple_nexts(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)
-        self.assertEqual(plt.gcf().number, self.fig1.number)
-        QTest.mouseClick(self.fig1.toolbar_custom_.btn_next_plot, Qt.LeftButton)
-        self.assertEqual(plt.gcf().number, self.fig2.number)
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig1.number)  # type: ignore[attr-defined]
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig2.number)  # type: ignore[attr-defined]
 
     def test_multiple_prevs(self) -> None:
-        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
-        self.assertEqual(plt.gcf().number, self.fig1.number)
-        QTest.mouseClick(self.fig1.toolbar_custom_.btn_prev_plot, Qt.LeftButton)
-        self.assertEqual(plt.gcf().number, self.fig2.number)
+        QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig1.number)  # type: ignore[attr-defined]
+        QTest.mouseClick(self.fig1.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig2.number)  # type: ignore[attr-defined]
 
     def test_enter_and_exit_events(self) -> None:
         # TODO: this is not causing what I want to happen, the style changes aren't happening.
-        QTest.mouseMove(self.fig1.toolbar_custom_.btn_next_plot, delay=100)
-        QTest.mouseMove(self.fig1.toolbar_custom_.btn_prev_plot, delay=100)
+        QTest.mouseMove(self.fig1.toolbar_custom_.btn_next_plot, delay=100)  # type: ignore[attr-defined]
+        QTest.mouseMove(self.fig1.toolbar_custom_.btn_prev_plot, delay=100)  # type: ignore[attr-defined]
 
     def tearDown(self) -> None:
         plt.close(self.fig1)
@@ -247,23 +248,23 @@ class Test_plotting_close_all(unittest.TestCase):
     def test_nominal(self) -> None:
         fig1 = plt.figure()
         fig2 = plt.figure()
-        self.assertTrue(plt.fignum_exists(fig1.number))
-        self.assertTrue(plt.fignum_exists(fig2.number))
+        self.assertTrue(plt.fignum_exists(fig1.number))  # type: ignore[attr-defined]
+        self.assertTrue(plt.fignum_exists(fig2.number))  # type: ignore[attr-defined]
         plot.close_all()
-        self.assertFalse(plt.fignum_exists(fig1.number))
-        self.assertFalse(plt.fignum_exists(fig2.number))
+        self.assertFalse(plt.fignum_exists(fig1.number))  # type: ignore[attr-defined]
+        self.assertFalse(plt.fignum_exists(fig2.number))  # type: ignore[attr-defined]
 
-    def test_list(self) -> None:
+    def test_list_and_single_fig(self) -> None:
         fig1 = plt.figure()
         fig2 = plt.figure()
-        self.assertTrue(plt.fignum_exists(fig1.number))
-        self.assertTrue(plt.fignum_exists(fig2.number))
+        self.assertTrue(plt.fignum_exists(fig1.number))  # type: ignore[attr-defined]
+        self.assertTrue(plt.fignum_exists(fig2.number))  # type: ignore[attr-defined]
         plot.close_all([fig1])
-        self.assertFalse(plt.fignum_exists(fig1.number))
-        self.assertTrue(plt.fignum_exists(fig2.number))
-        plt.close(fig2)
-        self.assertFalse(plt.fignum_exists(fig1.number))
-        self.assertFalse(plt.fignum_exists(fig2.number))
+        self.assertFalse(plt.fignum_exists(fig1.number))  # type: ignore[attr-defined]
+        self.assertTrue(plt.fignum_exists(fig2.number))  # type: ignore[attr-defined]
+        plot.close_all(fig2)
+        self.assertFalse(plt.fignum_exists(fig1.number))  # type: ignore[attr-defined]
+        self.assertFalse(plt.fignum_exists(fig2.number))  # type: ignore[attr-defined]
 
 
 # %% plotting.get_nondeg_colorlists
@@ -282,52 +283,52 @@ class Test_plotting_get_nondeg_colorlists(unittest.TestCase):
     def test_one(self) -> None:
         clist = plot.get_nondeg_colorlists(1)
         self.assertEqual(clist.N, 3)
-        self.assertEqual(clist.colors[0], "#1f77b4")
-        self.assertEqual(clist.colors[1], "xkcd:blue")
-        self.assertEqual(clist.colors[2], "#1f77b4")
+        self.assertEqual(clist.colors[0], "#1f77b4")  # type: ignore[index]
+        self.assertEqual(clist.colors[1], "xkcd:blue")  # type: ignore[index]
+        self.assertEqual(clist.colors[2], "#1f77b4")  # type: ignore[index, misc]
 
     def test_two(self) -> None:
         clist = plot.get_nondeg_colorlists(2)
         self.assertEqual(clist.N, 6)
-        self.assertEqual(clist.colors[0], "xkcd:red")
-        self.assertEqual(clist.colors[2], "xkcd:fuchsia")
-        self.assertEqual(clist.colors[4], "xkcd:red")
+        self.assertEqual(clist.colors[0], "xkcd:red")  # type: ignore[index]
+        self.assertEqual(clist.colors[2], "xkcd:fuchsia")  # type: ignore[index, misc]
+        self.assertEqual(clist.colors[4], "xkcd:red")  # type: ignore[index, misc]
 
     def test_three(self) -> None:
         clist = plot.get_nondeg_colorlists(3)
         self.assertEqual(clist.N, 9)
-        self.assertEqual(clist.colors[0], "xkcd:red")
-        self.assertEqual(clist.colors[3], "xkcd:fuchsia")
-        self.assertEqual(clist.colors[6], "xkcd:red")
+        self.assertEqual(clist.colors[0], "xkcd:red")  # type: ignore[index]
+        self.assertEqual(clist.colors[3], "xkcd:fuchsia")  # type: ignore[index, misc]
+        self.assertEqual(clist.colors[6], "xkcd:red")  # type: ignore[index, misc]
 
     def test_four(self) -> None:
         clist = plot.get_nondeg_colorlists(4)
         self.assertEqual(clist.N, 12)
-        self.assertEqual(clist.colors[0], "xkcd:red")
-        self.assertEqual(clist.colors[4], "xkcd:fuchsia")
-        self.assertEqual(clist.colors[8], "xkcd:red")
+        self.assertEqual(clist.colors[0], "xkcd:red")  # type: ignore[index]
+        self.assertEqual(clist.colors[4], "xkcd:fuchsia")  # type: ignore[index, misc]
+        self.assertEqual(clist.colors[8], "xkcd:red")  # type: ignore[index, misc]
 
     def test_five_to_ten(self) -> None:
         cmap = mpl.colormaps["tab20"]
-        exp1 = cmap.colors[0]
-        exp2 = cmap.colors[1]
+        exp1 = cmap.colors[0]  # type: ignore[attr-defined]
+        exp2 = cmap.colors[1]  # type: ignore[attr-defined]
         for i in [5, 8, 10]:
             clist = plot.get_nondeg_colorlists(i)
             self.assertEqual(clist.N, 3 * i)
-            self.assertEqual(clist.colors[0], exp1)
-            self.assertEqual(clist.colors[i], exp2)
-            self.assertEqual(clist.colors[2 * i], exp1)
+            self.assertEqual(clist.colors[0], exp1)  # type: ignore[index]
+            self.assertEqual(clist.colors[i], exp2)  # type: ignore[index]
+            self.assertEqual(clist.colors[2 * i], exp1)  # type: ignore[index]
 
     def test_lots(self) -> None:
         cmap = mpl.colormaps["tab20"]
-        exp1 = cmap.colors[0]
-        exp2 = cmap.colors[1]
+        exp1 = cmap.colors[0]  # type: ignore[attr-defined]
+        exp2 = cmap.colors[1]  # type: ignore[attr-defined]
         for i in [11, 15, 20, 50]:
             clist = plot.get_nondeg_colorlists(i)
             self.assertEqual(clist.N, 3 * i)
-            self.assertEqual(clist.colors[0], exp1)
-            self.assertEqual(clist.colors[i], exp2)
-            self.assertEqual(clist.colors[2 * i], exp1)
+            self.assertEqual(clist.colors[0], exp1)  # type: ignore[index]
+            self.assertEqual(clist.colors[i], exp2)  # type: ignore[index]
+            self.assertEqual(clist.colors[2 * i], exp1)  # type: ignore[index]
 
 
 # %% plotting.ignore_plot_data
@@ -484,7 +485,8 @@ class Test_plotting_storefig(unittest.TestCase):
         cls.plot_type = "png"
         # create the figure and set the title
         cls.fig = plt.figure()
-        cls.fig.canvas.manager.set_window_title(cls.title)
+        assert (manager := cls.fig.canvas.manager) is not None
+        manager.set_window_title(cls.title)
         # add an axis and plot the data
         ax = cls.fig.add_subplot(111)
         ax.plot(cls.time, cls.data)
@@ -537,13 +539,14 @@ class Test_plotting_storefig(unittest.TestCase):
 
     def test_bad_characters(self) -> None:
         # change to bad name
-        self.fig.canvas.manager.set_window_title("Bad < > / names")
+        assert (manager := self.fig.canvas.manager) is not None
+        manager.set_window_title("Bad < > / names")
         if not _HAVE_DISPLAY:  # pragma: no cover
             self.fig.axes[0].set_title("Bad < > / names")
         # save file
         plot.storefig(self.fig, self.folder, self.plot_type, self.show_warn)
         # restore filename
-        self.fig.canvas.manager.set_window_title(self.title)
+        manager.set_window_title(self.title)
         if not _HAVE_DISPLAY:  # pragma: no cover
             self.fig.axes[0].set_title(self.title)
         # assert that file exists
@@ -577,7 +580,8 @@ class Test_plotting_titleprefix(unittest.TestCase):
         self.fig = plt.figure()
         self.title = "Figure Title"
         self.prefix = "Prefix"
-        self.fig.canvas.manager.set_window_title(self.title)
+        assert (manager := self.fig.canvas.manager) is not None
+        manager.set_window_title(self.title)
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)
         ax = self.fig.add_subplot(111)
@@ -658,7 +662,8 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
 
     def setUp(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Figure Title")
+        assert (manager := self.fig.canvas.manager) is not None
+        manager.set_window_title("Figure Title")
         self.ax = self.fig.add_subplot(111)
         self.time = np.arange(1, 10, 0.1)
         self.data = self.time**2
@@ -815,13 +820,15 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
         self.second_units = 100
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
-        self.assertEqual(ax2.get_ylabel(), "")
+        self.assertIsNotNone(ax2)
+        self.assertEqual(ax2.get_ylabel(), "")  # type: ignore[union-attr]
 
     def test_float(self) -> None:
         self.second_units = 100.0
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
-        self.assertEqual(ax2.get_ylabel(), "")
+        self.assertIsNotNone(ax2)
+        self.assertEqual(ax2.get_ylabel(), "")  # type: ignore[union-attr]
 
     def test_zero(self) -> None:
         self.second_units = 0.0
@@ -847,20 +854,23 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
         self.second_units = ("Better Units [µrad]", 1e6)
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
-        self.assertEqual(ax2.get_ylabel(), "Better Units [µrad]")
+        self.assertIsNotNone(ax2)
+        self.assertEqual(ax2.get_ylabel(), "Better Units [µrad]")  # type: ignore[union-attr]
 
     def test_units_only(self) -> None:
         self.second_units = ("mrad", 1e3)
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), self.ylabel)
-        self.assertEqual(ax2.get_ylabel(), "Value [mrad]")
+        self.assertIsNotNone(ax2)
+        self.assertEqual(ax2.get_ylabel(), "Value [mrad]")  # type: ignore[union-attr]
 
     def test_no_units(self) -> None:
         self.ax.set_ylabel("Value")
         self.second_units = ("New Value", 1e3)
         ax2 = plot.plot_second_units_wrapper(self.ax, self.second_units)
         self.assertEqual(self.ax.get_ylabel(), "Value")
-        self.assertEqual(ax2.get_ylabel(), "New Value")
+        self.assertIsNotNone(ax2)
+        self.assertEqual(ax2.get_ylabel(), "New Value")  # type: ignore[union-attr]
 
     def tearDown(self) -> None:
         plt.close(self.fig)
@@ -990,7 +1000,8 @@ class Test_plotting_plot_phases(unittest.TestCase):
 
     def setUp(self) -> None:
         self.fig = plt.figure()
-        self.fig.canvas.manager.set_window_title("Sine Wave")
+        assert (manager := self.fig.canvas.manager) is not None
+        manager.set_window_title("Sine Wave")
         self.ax = self.fig.add_subplot(111)
         time = np.arange(101)
         data = np.cos(time / 10)
@@ -1148,7 +1159,7 @@ class Test_plotting_add_datashaders(unittest.TestCase):
         self.datashaders[0]["color"] = "xkcd:black"
         self.datashaders.append({"color": "xkcd:blue", "ax": self.ax})
         self.datashaders[1]["time"] = np.arange(np.datetime64("now", "ns"), np.timedelta64(1, "m"), np.timedelta64(1, "s"))
-        self.datashaders[1]["data"] = np.random.rand(*self.datashaders[1]["time"].shape)
+        self.datashaders[1]["data"] = np.random.rand(*self.datashaders[1]["time"].shape)  # type: ignore[attr-defined]
         self.datashaders[1]["time_units"] = "numpy"
         plot.add_datashaders(self.datashaders)
 
@@ -1210,8 +1221,8 @@ class Test_fig_ax_factory(unittest.TestCase):
         self.assertEqual(len(self.fig_ax), 1)
         this_fig = self.fig_ax[0][0]  # type: ignore[index]
         if _HAVE_DISPLAY:  # pragma: no cover
-            self.assertEqual(this_fig.canvas.manager.get_window_title(), "Test Title")
-        self.assertEqual(this_fig._suptitle.get_text(), "Test Title")
+            self.assertEqual(this_fig.canvas.manager.get_window_title(), "Test Title")  # type: ignore[union-attr]
+        self.assertEqual(this_fig._suptitle.get_text(), "Test Title")  # type: ignore[union-attr]
 
     def test_passthrough(self) -> None:
         fig_ax = plot.fig_ax_factory(num_axes=3, passthrough=True)  # type: ignore[call-overload]

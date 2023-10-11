@@ -66,8 +66,8 @@ if TYPE_CHECKING:
     _I = np.typing.NDArray[np.int_]
     _N = np.typing.NDArray[np.float64]
     _M = np.typing.NDArray[np.float64]  # 2D
-    _CM = Union[str, ColorMap, colors.Colormap, colors.ListedColormap]
-    _Data = Union[int, float, _I, _N, _M, List[Union[_I, _N]], Tuple[Union[_I, _N], ...]]
+    _CM = Union[str, colors.Colormap, colors.ListedColormap, ColorMap]
+    _Data = Union[int, float, _I, _N, _M, List[_I], List[_N], List[Union[_I, _N]], Tuple[_I, ...], Tuple[_N, ...], Tuple[Union[_I, _N], ...]]  # fmt: skip
     _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
     _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
     _DeltaTime = Union[int, float, np.timedelta64]
@@ -446,7 +446,7 @@ def plot_time_history(
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_TimeKwargs],
-) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
+) -> Union[None, Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Plot multiple metrics over time.
 
@@ -572,7 +572,7 @@ def plot_time_difference(
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_DiffKwargs],
-) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
+) -> Union[None, Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
     r"""
     Plot multiple metrics over time.
 
@@ -670,7 +670,7 @@ def plot_time_difference(
     # fmt: on
 
     # call wrapper function for most of the details
-    fig = make_difference_plot(  # type: ignore[misc]
+    fig = make_difference_plot(  # type: ignore[call-overload, misc]
         description=description,
         time_one=time_one,
         time_two=time_two,
@@ -696,7 +696,7 @@ def plot_time_difference(
     # setup plots
     if not skip_setup_plots:
         setup_plots(fig, this_opts)
-    return fig
+    return fig  # type: ignore[no-any-return]
 
 
 # %% Functions - plot_correlation_matrix
@@ -867,10 +867,11 @@ def plot_correlation_matrix(
     else:
         (fig, ax) = fig_ax
     # set figure title
-    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
-        fig.canvas.manager.set_window_title(matrix_name)
+    assert (manager := fig.canvas.manager) is not None
+    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+        manager.set_window_title(matrix_name)
     else:
-        fig.canvas.manager.set_window_title(sup.get_text())
+        manager.set_window_title(sup.get_text())
     # set axis color to none
     ax.patch.set_facecolor("none")
     # set title
@@ -933,7 +934,7 @@ def plot_bar_breakdown(
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_BarKwargs],
-) -> Figure:
+) -> Optional[Figure]:
     r"""
     Plot the pie chart like breakdown by percentage in each category over time.
 
@@ -1172,23 +1173,24 @@ def plot_histogram(
         ax = fig.add_subplot(1, 1, 1)
     else:
         (fig, ax) = fig_ax
-    if (sup := fig._suptitle) is None:  # pylint: disable=protected-access
-        fig.canvas.manager.set_window_title(description)
+    assert (manager := fig.canvas.manager) is not None
+    if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
+        manager.set_window_title(description)
     else:
-        fig.canvas.manager.set_window_title(sup.get_text())
+        manager.set_window_title(sup.get_text())
     ax.set_title(description)
     ax.add_collection(coll)
     ax.grid(True)
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     if missing > 0:
-        ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins) + 1])
+        ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins) + 1))
     else:
-        ax.set_xlim([np.min(plotting_bins), np.max(plotting_bins)])
+        ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins)))
     if cdf_same_axis:
-        ax.set_ylim([0, data.size])
+        ax.set_ylim((0, data.size))
     else:
-        ax.set_ylim([0, 1.05 * np.max(counts)])
+        ax.set_ylim((0, 1.05 * np.max(counts)))
     if normalize_spacing:
         ax.set_xticks(plotting_bins)
         ax.set_xticklabels(xlab)
@@ -1204,7 +1206,7 @@ def plot_histogram(
     if using_cdf:
         # prepare the colormap
         if cdf_colormap is None:
-            cdf_colormap = colors.ListedColormap(([0, 0.8, 0], "r", "m"))
+            cdf_colormap = colors.ListedColormap(("xkcd:grass green", "xkcd:red", "xkcd:hot magenta"))
         cm = ColorMap(colormap=cdf_colormap, num_colors=3)
         # create fake items to add to legend
         p = Rectangle((0, 0), 1, 1, facecolor=color, linewidth=0, edgecolor="none")

@@ -47,7 +47,7 @@ def _any(x: Any) -> bool:
         return bool(x)
     if HAVE_NUMPY:
         return np.any(x)  # type: ignore[return-value]
-    return np_any(x)  # type: ignore[no-any-return]
+    return np_any(x)  # type: ignore[no-any-return]  # pylint: disable=used-before-assignment
 
 
 # %% Functions - anomaly_eccentric_2_mean

@@ -62,10 +62,12 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         # fmt: on
 
     def test_simple(self) -> None:
-        self.fig = plot.make_time_plot(self.description, self.time, self.data)
+        this_fig = plot.make_time_plot(self.description, self.time, self.data)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_nominal(self) -> None:
-        self.fig = plot.make_time_plot(
+        this_fig = plot.make_time_plot(
             self.description,
             self.time,
             self.data,
@@ -91,39 +93,53 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_scalars(self) -> None:
-        self.fig = plot.make_time_plot("", 0, 0)
+        this_fig = plot.make_time_plot("", 0, 0)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_bad_description(self) -> None:
         with self.assertRaises(AssertionError):
             plot.make_time_plot(None, 0, 0)  # type: ignore[arg-type]
 
     def test_0d(self) -> None:
-        self.fig = plot.make_time_plot("", np.array(5), np.array(10.0))
+        this_fig = plot.make_time_plot("", np.array(5), np.array(10.0))
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_list1(self) -> None:
         data = [self.data, self.data + 0.5, self.data + 1.0]
-        self.fig = plot.make_time_plot(self.description, self.time, data)
+        this_fig = plot.make_time_plot(self.description, self.time, data)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_list2(self) -> None:
         time = [self.time, self.time[:-1]]
         data = [self.data, 2 * self.data[:-1]]
-        self.fig = plot.make_time_plot(self.description, time, data)
+        this_fig = plot.make_time_plot(self.description, time, data)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_row_vectors(self) -> None:
         data = np.vstack((self.data, np.sin(self.time)))
-        self.fig = plot.make_time_plot(self.description, self.time, data)
+        this_fig = plot.make_time_plot(self.description, self.time, data)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_col_vectors(self) -> None:
         data = np.column_stack((self.data, np.sin(self.time)))
-        self.fig = plot.make_time_plot(self.description, self.time, data, data_as_rows=False)
+        this_fig = plot.make_time_plot(self.description, self.time, data, data_as_rows=False)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_datetimes(self) -> None:
         time = np.datetime64("2021-06-01T00:00:00", NP_DATETIME_UNITS) + np.round(self.time * NP_INT64_PER_SEC).astype(
             np.int64
         ).astype(NP_TIMEDELTA_FORM)
-        self.fig = plot.make_time_plot(
+        this_fig = plot.make_time_plot(
             self.description,
             time,
             self.data,
@@ -149,18 +165,24 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def test_strings(self) -> None:
         time = np.arange(100.0)
         data = np.full(100, "open", dtype="S6")
         data[10:20] = "closed"
-        self.fig = plot.make_time_plot(self.description, time, data, show_rms=False)
+        this_fig = plot.make_time_plot(self.description, time, data, show_rms=False)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader(self) -> None:
         time = np.linspace(0.0, 1000.0, 10**6)
         data = np.random.rand(10**6)
-        self.fig = plot.make_time_plot(self.description, time, data, use_datashader=True)
+        this_fig = plot.make_time_plot(self.description, time, data, use_datashader=True)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader_dates(self) -> None:
@@ -169,17 +191,21 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             np.int64
         ).astype(NP_TIMEDELTA_FORM)
         data = np.random.rand(10**6)
-        self.fig = plot.make_time_plot(self.description, time, data, time_units="numpy", use_datashader=True)
+        this_fig = plot.make_time_plot(self.description, time, data, time_units="numpy", use_datashader=True)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader_strings(self) -> None:
         time = np.linspace(0.0, 1000.0, 10**4)
         data = np.full(10**4, "open", dtype="S6")
         data[1000:2000] = "closed"
-        self.fig = plot.make_time_plot(self.description, time, data, show_rms=False, use_datashader=True)
+        this_fig = plot.make_time_plot(self.description, time, data, show_rms=False, use_datashader=True)
+        assert isinstance(this_fig, plt.Figure)
+        self.fig = this_fig
 
     def tearDown(self) -> None:
-        if self.fig:
+        if self.fig is not None:
             plt.close(self.fig)
 
 
@@ -282,7 +308,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.disp_xmax        = np.inf
         self.make_subplots    = True
         self.single_lines     = False
-        self.colormap         = ListedColormap(plot.COLOR_LISTS["dbl_diff"].colors + plot.COLOR_LISTS["double"].colors)
+        self.colormap         = ListedColormap(plot.COLOR_LISTS["dbl_diff"].colors + plot.COLOR_LISTS["double"].colors)  # type: ignore[arg-type, operator]
         self.use_mean         = False
         self.plot_zero        = False
         self.show_rms         = True
@@ -300,7 +326,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_nominal(self) -> None:
         self.return_err = False
-        self.figs = plot.make_difference_plot(  # type: ignore[assignment]
+        self.figs = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -335,7 +361,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_no_subplots(self) -> None:
         self.make_subplots = False
-        (self.figs, err) = plot.make_difference_plot(
+        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -370,7 +396,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_no_start_date(self) -> None:
         self.start_date = ""
-        (self.figs, err) = plot.make_difference_plot(
+        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -406,7 +432,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     def test_only_data_one(self) -> None:
         self.data_two.fill(np.nan)
         self.name_two = ""
-        (self.figs, err) = plot.make_difference_plot(
+        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -443,7 +469,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     def test_only_data_two(self) -> None:
         self.data_one = None  # type: ignore[assignment]
         self.name_one = ""
-        (self.figs, err) = plot.make_difference_plot(
+        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -480,7 +506,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
     def test_rms_bounds(self) -> None:
         self.rms_xmin = 5
         self.rms_xmax = 7
-        (self.figs, err) = plot.make_difference_plot(
+        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -515,7 +541,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_use_mean(self) -> None:
         self.use_mean = True
-        (self.figs, err) = plot.make_difference_plot(
+        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -550,7 +576,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_no_rms_in_legend(self) -> None:
         self.show_rms = False
-        (self.figs, err) = plot.make_difference_plot(
+        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -585,7 +611,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_plot_zero(self) -> None:
         self.plot_zero = True
-        (self.figs, err) = plot.make_difference_plot(
+        (self.figs, err) = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -619,7 +645,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         )
 
     def test_disp_bounds(self) -> None:
-        self.figs = plot.make_difference_plot(  # type: ignore[assignment]
+        self.figs = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
             self.time_one,
             self.time_two,
@@ -632,13 +658,13 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         )
 
     def test_no_overlap(self) -> None:
-        self.time_one = np.arange(11).astype(float)
-        self.time_two = np.arange(2, 13) + 0.5  # type: ignore[assignment]
+        time_one = np.arange(11.0)
+        time_two = np.arange(2.0, 13.0) + 0.5
         self.return_err = False
-        self.figs = plot.make_difference_plot(  # type: ignore[assignment]
+        self.figs = plot.make_difference_plot(  # type: ignore[call-overload]
             self.description,
-            self.time_one,
-            self.time_two,
+            time_one,
+            time_two,
             self.data_one,
             self.data_two,
             name_one=self.name_one,
@@ -669,14 +695,14 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         )
 
     def test_none1(self) -> None:
-        self.figs = plot.make_difference_plot(self.description, self.time_one, None, self.data_one, None)  # type: ignore[assignment]
+        self.figs = plot.make_difference_plot(self.description, self.time_one, None, self.data_one, None)  # type: ignore[call-overload]
 
     def test_none2(self) -> None:
-        self.figs = plot.make_difference_plot(self.description, None, self.time_two, None, self.data_two)  # type: ignore[assignment]
+        self.figs = plot.make_difference_plot(self.description, None, self.time_two, None, self.data_two)  # type: ignore[call-overload]
 
     @patch("dstauffman.plotting.generic.logger")
     def test_none3(self, mock_logger: Mock) -> None:
-        self.figs = plot.make_difference_plot("", None, None, None, None)  # type: ignore[assignment]
+        self.figs = plot.make_difference_plot("", None, None, None, None)  # type: ignore[call-overload]
         self.assertEqual(mock_logger.log.call_count, 1)
         mock_logger.log.assert_called_with(
             LogLevel.L5, 'No %s data was provided, so no plot was generated for "%s".', "diff", ""
@@ -684,7 +710,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 
     def test_bad_inputs(self) -> None:
         with self.assertRaises(AssertionError):
-            plot.make_difference_plot(None, None, None, None, None)  # type: ignore[arg-type]
+            plot.make_difference_plot(None, None, None, None, None)  # type: ignore[call-overload]
 
     def tearDown(self) -> None:
         if self.figs:
