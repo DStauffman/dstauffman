@@ -62,12 +62,11 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         # fmt: on
 
     def test_simple(self) -> None:
-        this_fig = plot.make_time_plot(self.description, self.time, self.data)
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot(self.description, self.time, self.data)
+        self.assertIsNotNone(self.fig)
 
     def test_nominal(self) -> None:
-        this_fig = plot.make_time_plot(
+        self.fig = plot.make_time_plot(
             self.description,
             self.time,
             self.data,
@@ -93,53 +92,46 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.assertIsNotNone(self.fig)
 
     def test_scalars(self) -> None:
-        this_fig = plot.make_time_plot("", 0, 0)
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot("", 0, 0)
+        self.assertIsNotNone(self.fig)
 
     def test_bad_description(self) -> None:
         with self.assertRaises(AssertionError):
             plot.make_time_plot(None, 0, 0)  # type: ignore[arg-type]
 
     def test_0d(self) -> None:
-        this_fig = plot.make_time_plot("", np.array(5), np.array(10.0))
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot("", np.array(5), np.array(10.0))
+        self.assertIsNotNone(self.fig)
 
     def test_list1(self) -> None:
         data = [self.data, self.data + 0.5, self.data + 1.0]
-        this_fig = plot.make_time_plot(self.description, self.time, data)
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot(self.description, self.time, data)
+        self.assertIsNotNone(self.fig)
 
     def test_list2(self) -> None:
         time = [self.time, self.time[:-1]]
         data = [self.data, 2 * self.data[:-1]]
-        this_fig = plot.make_time_plot(self.description, time, data)
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot(self.description, time, data)
+        self.assertIsNotNone(self.fig)
 
     def test_row_vectors(self) -> None:
         data = np.vstack((self.data, np.sin(self.time)))
-        this_fig = plot.make_time_plot(self.description, self.time, data)
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot(self.description, self.time, data)
+        self.assertIsNotNone(self.fig)
 
     def test_col_vectors(self) -> None:
         data = np.column_stack((self.data, np.sin(self.time)))
-        this_fig = plot.make_time_plot(self.description, self.time, data, data_as_rows=False)
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot(self.description, self.time, data, data_as_rows=False)
+        self.assertIsNotNone(self.fig)
 
     def test_datetimes(self) -> None:
         time = np.datetime64("2021-06-01T00:00:00", NP_DATETIME_UNITS) + np.round(self.time * NP_INT64_PER_SEC).astype(
             np.int64
         ).astype(NP_TIMEDELTA_FORM)
-        this_fig = plot.make_time_plot(
+        self.fig = plot.make_time_plot(
             self.description,
             time,
             self.data,
@@ -165,24 +157,21 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             use_zoh=self.use_zoh,
             label_vert_lines=self.label_vert_lines,
         )
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.assertIsNotNone(self.fig)
 
     def test_strings(self) -> None:
         time = np.arange(100.0)
         data = np.full(100, "open", dtype="S6")
         data[10:20] = "closed"
-        this_fig = plot.make_time_plot(self.description, time, data, show_rms=False)
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot(self.description, time, data, show_rms=False)
+        self.assertIsNotNone(self.fig)
 
     @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader(self) -> None:
         time = np.linspace(0.0, 1000.0, 10**6)
         data = np.random.rand(10**6)
-        this_fig = plot.make_time_plot(self.description, time, data, use_datashader=True)
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot(self.description, time, data, use_datashader=True)
+        self.assertIsNotNone(self.fig)
 
     @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader_dates(self) -> None:
@@ -191,18 +180,16 @@ class Test_plotting_make_time_plot(unittest.TestCase):
             np.int64
         ).astype(NP_TIMEDELTA_FORM)
         data = np.random.rand(10**6)
-        this_fig = plot.make_time_plot(self.description, time, data, time_units="numpy", use_datashader=True)
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot(self.description, time, data, time_units="numpy", use_datashader=True)
+        self.assertIsNotNone(self.fig)
 
     @unittest.skipIf(not HAVE_DS, "Skipping due to missing datashader dependency.")
     def test_datashader_strings(self) -> None:
         time = np.linspace(0.0, 1000.0, 10**4)
         data = np.full(10**4, "open", dtype="S6")
         data[1000:2000] = "closed"
-        this_fig = plot.make_time_plot(self.description, time, data, show_rms=False, use_datashader=True)
-        assert isinstance(this_fig, plt.Figure)
-        self.fig = this_fig
+        self.fig = plot.make_time_plot(self.description, time, data, show_rms=False, use_datashader=True)
+        self.assertIsNotNone(self.fig)
 
     def tearDown(self) -> None:
         if self.fig is not None:

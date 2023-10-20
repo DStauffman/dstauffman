@@ -21,7 +21,21 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import Any, Callable, Dict, List, Literal, Optional, overload, Protocol, Tuple, TYPE_CHECKING, TypedDict, Union
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    FrozenSet,
+    List,
+    Literal,
+    Optional,
+    overload,
+    Protocol,
+    Tuple,
+    TYPE_CHECKING,
+    TypedDict,
+    Union,
+)
 import unittest
 import warnings
 
@@ -160,6 +174,10 @@ if HAVE_MPL:
 # Whether a display exists to draw on or not
 # TODO: make this public?
 _HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
+
+_QUALITATIVE_COLORMAPS: FrozenSet[str] = frozenset(
+    {"Pastel1", "Pastel2", "Paired", "Accent", "Dark2", "Set1", "Set2", "Set3", "tab10", "tab20", "tab20b", "tab20c"}
+)
 
 
 # %% Classes - _HoverButton
@@ -362,7 +380,15 @@ class ColorMap(Frozen):
         elif isinstance(colormap, type(self)):
             cmap = None
         else:
-            cmap = plt.get_cmap(colormap)  # type: ignore[arg-type]
+            assert isinstance(colormap, str), "Only expecting string colormaps to get to this point."
+            if colormap in _QUALITATIVE_COLORMAPS:
+                # special case to always use in the given order
+                cmap = plt.get_cmap(colormap)
+                assert isinstance(cmap, colors.ListedColormap), "Qualitative colormaps are assumed to be listed."
+                low = 0
+                high = cmap.N - 1
+            else:
+                cmap = plt.get_cmap(colormap, self.num_colors)
             if isinstance(cmap, colors.ListedColormap):
                 low = 0
                 high = cmap.N - 1

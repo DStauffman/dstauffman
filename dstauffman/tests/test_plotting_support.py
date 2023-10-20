@@ -220,6 +220,16 @@ class Test_plotting_ColorMap(unittest.TestCase):
         self.assertEqual(green, (0.0, 0.5, 0, 1))
         self.assertEqual(blue, (0.0, 0, 1, 1))
 
+    def test_specific_cmaps(self) -> None:
+        cm_viridis = plot.ColorMap("viridis", num_colors=4)
+        exp_vir_color1 = (0.190631, 0.407061, 0.556089, 1.0)
+        self.assertEqual(cm_viridis.get_color(1), exp_vir_color1)
+        cm_tab10 = plot.ColorMap("tab10", num_colors=4)
+        exp_tab_color1 = (1.0, 0.4980392156862745, 0.054901960784313725, 1.0)
+        tab_color1 = cm_tab10.get_color(1)
+        for i in range(4):
+            self.assertAlmostEqual(tab_color1[i], exp_tab_color1[i], 12)
+
     def tearDown(self) -> None:
         if self.fig is not None:
             plt.close(self.fig)

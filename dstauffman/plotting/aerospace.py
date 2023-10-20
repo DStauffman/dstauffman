@@ -20,9 +20,23 @@ from slog import LogLevel
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY, intersect, is_datetime
 from dstauffman.aerospace import Kf, KfInnov
-from dstauffman.plotting.generic import make_categories_plot, make_connected_sets, make_difference_plot, make_generic_plot
+from dstauffman.plotting.generic import (
+    make_categories_plot,
+    make_connected_sets,
+    make_difference_plot,
+    make_generic_plot,
+    make_time_plot,
+)
 from dstauffman.plotting.plotting import Opts, plot_histogram, setup_plots
-from dstauffman.plotting.support import COLOR_LISTS, ColorMap, ExtraPlotter, get_nondeg_colorlists, get_rms_indices
+from dstauffman.plotting.support import (
+    COLOR_LISTS,
+    ColorMap,
+    ExtraPlotter,
+    fig_ax_factory,
+    get_nondeg_colorlists,
+    get_rms_indices,
+    plot_phases,
+)
 
 if HAVE_MPL:
     from matplotlib.axes import Axes
@@ -1756,6 +1770,88 @@ def plot_states(
         kf1, kf2, truth=truth, opts=opts, return_err=return_err, groups=groups, fields=fields, **kwargs
     )
     return out  # type: ignore[no-any-return]
+
+
+# %% Functions - plot_tci
+def plot_tci(
+    time: _D, data: _N, *, solar_cycles: Optional[_D] = None, solar_labels: Optional[List[str]] = None, opts: Optional[Opts] = None
+) -> Figure:
+    """
+    Plots the Thermosphere Climate Index (TCI).
+
+    Parameters
+    ----------
+    time : (N,)
+        Time
+    data : (N,)
+        Thermosphere Climate Index data
+    solar_cyles : (A,) optional
+        Solar cycle start times
+    solar_labels : (A,) list of str
+        Solar cycle labels
+    opts : class Opts, optional
+        Plotting options
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        Figure handle
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in October 2023.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import plot_tci
+    >>> from dstauffman.aerospace import read_solar_cycles, read_tci_data
+    >>> from dstauffman import get_data_dir
+    >>> from matplotlib.dates import date2num
+    >>> import numpy as np
+    >>> folder = get_data_dir()
+    >>> tci_file = folder / "tci_info.txt"
+    >>> tci_data = read_tci_data(tci_file)
+    >>> solar_file = folder / "Solar_Cycles.txt"
+    >>> solar_data = read_solar_cycles(solar_file)
+    >>> time = tci_data.Date.to_numpy()
+    >>> data = tci_data.TCI.to_numpy()
+    >>> data[data < 0.0] = np.nan
+    >>> solar_cycles = date2num(solar_data.Start[16:].to_numpy())
+    >>> solar_labels = [f"SC {name}" for name in solar_data.Solar_Cycle[16:]]
+    >>> fig = plot_tci(time, data, solar_cycles=solar_cycles, solar_labels=solar_labels)
+
+    Close plots
+    >>> import matplotlib.pyplot as plt
+    >>> plt.close(fig)
+
+    """
+    if opts is None:
+        opts = Opts()
+    # Find the quintiles
+    quintiles = np.nanpercentile(data, [20, 40, 60, 80, 100])
+    quintile_names = ("Cold", "Cool", "Neutral", "Warm", "Hot")
+    quintile_colors = ("xkcd:royal blue", "xkcd:azure", "xkcd:grey", "xkcd:tangerine", "xkcd:bright red")
+    # Create the figure
+    fig_ax: Tuple[Tuple[Figure, Axes]] = fig_ax_factory(1, 1)  # type: ignore[call-overload]
+    fig, ax = fig_ax[0]
+    # Plot the basic data
+    title = "Thermosphere Climate Index"
+    # fmt: off
+    make_time_plot(
+        title, time, data, units="W", second_units=("10^11 W", 1e-11), time_units="numpy",
+        fig_ax=fig_ax[0], show_rms=False, legend_loc="none", ylabel="Power [W]",
+    )
+    # fmt: on
+    # ax.set_xlabel("Year")
+    ax.set_ylim(0.0, 6.0e11)
+    fig.axes[1].set_ylim(0.0, 6.0)
+    if solar_cycles is not None:
+        plot_phases(ax, solar_cycles, labels=solar_labels)
+    for name, color, value in zip(quintile_names, quintile_colors, quintiles):
+        ax.axhline(value, label=name, color=color)
+        ax.annotate(name, (time[0], value), color=color, fontsize=16, verticalalignment="top", zorder=10)
+    setup_plots(fig, opts=opts)
+    return fig
 
 
 # %% Unit Test

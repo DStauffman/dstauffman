@@ -446,7 +446,7 @@ def plot_time_history(
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_TimeKwargs],
-) -> Union[None, Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
+) -> Optional[Figure]:
     r"""
     Plot multiple metrics over time.
 
