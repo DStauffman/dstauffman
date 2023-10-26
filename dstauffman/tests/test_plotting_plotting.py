@@ -20,6 +20,7 @@ from dstauffman import get_tests_dir, HAVE_MPL, HAVE_NUMPY, NP_DATETIME_FORM, NP
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
+    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -188,7 +189,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.opts           = plot.Opts()
         self.opts.show_plot = False
         self.elements       = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
-        self.fig: Optional[plt.Figure] = None
+        self.fig: Optional[Figure] = None
         # fmt: on
 
     def test_nominal(self) -> None:
@@ -297,7 +298,7 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
 
     def setUp(self) -> None:
         num = 10
-        self.fig: Optional[plt.Figure] = None
+        self.fig: Optional[Figure] = None
         self.data = unit(np.random.rand(num, num), axis=0)
         self.labels = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
         self.units = "percentage"
@@ -421,7 +422,7 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         self.elements = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
         self.opts = plot.Opts()
         self.opts.show_plot = False
-        self.fig: Optional[plt.Figure] = None
+        self.fig: Optional[Figure] = None
 
     def test_nominal(self) -> None:
         self.fig = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, elements=self.elements)
@@ -501,7 +502,7 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         self.description = "Histogram"
         self.data = np.array([0.5, 3.3, 1.0, 1.5, 1.5, 1.75, 2.5, 2.5])
         self.bins = np.array([0.0, 1.0, 2.0, 3.0, 5.0, 7.0])
-        self.fig: Optional[plt.Figure] = None
+        self.fig: Optional[Figure] = None
 
     def test_nominal(self) -> None:
         self.fig = plot.plot_histogram(self.description, self.data, self.bins)

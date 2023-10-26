@@ -137,7 +137,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
     # get the lines individually
     lines = text.split("\n")
     # create the output dictionary
-    code = []
+    code: List[_FortranSource] = []
     this_name = ""
     this_code: Optional[_FortranSource] = None
     for line in lines:

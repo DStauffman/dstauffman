@@ -19,6 +19,7 @@ from dstauffman import HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
+    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -37,7 +38,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.fig: Optional[plt.Figure] = None
+        self.fig: Optional[Figure] = None
         self.x = np.arange(0, 10, 0.1)
         self.y = np.sin(self.x)
         self.data = np.vstack((self.y, self.y + 0.01, self.y + 0.03)).T
@@ -205,7 +206,7 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
         self.opts.show_plot = False
         self.legend = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
         self.second_units = 1000000
-        self.fig: Optional[plt.Figure] = None
+        self.fig: Optional[Figure] = None
 
     def test_nominal(self) -> None:
         self.fig = plot.plot_health_time_history(
@@ -352,7 +353,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         self.truth = plot.TruthPlotter(self.time, np.cos(self.time))  # type: ignore[arg-type]
         self.data_matrix = np.column_stack((self.data, self.truth.data))  # type: ignore[arg-type]
         self.second_units = 1000000
-        self.fig: Optional[plt.Figure] = None
+        self.fig: Optional[Figure] = None
 
     def test_normal(self) -> None:
         self.fig = plot.plot_health_monte_carlo(self.time, self.data, self.label, self.units)
@@ -489,7 +490,7 @@ class Test_plotting_plot_population_pyramid(unittest.TestCase):
         self.name2  = "W"
         self.color1 = "k"
         self.color2 = "w"
-        self.fig: Optional[plt.Figure] = None
+        self.fig: Optional[Figure] = None
         # fmt: on
 
     def test_nominal(self) -> None:

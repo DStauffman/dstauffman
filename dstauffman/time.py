@@ -450,9 +450,16 @@ def convert_date(
                 datetime_units = get_np_time_units(numpy_form)
                 date_zero_np = np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)
                 if np.issubdtype(date.dtype, np.signedinteger):
-                    out[is_num] = (date_zero_np + (date[is_num].astype(np.int64) * 10**9).astype("timedelta64[ns]")).astype(numpy_form)  # fmt: skip
+                    # fmt: off
+                    out[is_num] = (date_zero_np + (  # pyright: ignore[reportOptionalSubscript]
+                        date[is_num].astype(np.int64) * 10**9).astype("timedelta64[ns]")
+                        ).astype(numpy_form)
+                    # fmt: on
                 else:
-                    out[is_num] = (date_zero_np + np.round(date[is_num] * 1e9).astype("timedelta64[ns]")).astype(numpy_form)
+                    # fmt: off
+                    out[is_num] = (  # pyright: ignore[reportOptionalSubscript]
+                        date_zero_np + np.round(date[is_num] * 1e9).astype("timedelta64[ns]")).astype(numpy_form)
+                    # fmt: on
         elif form == "matplotlib":  # pragma: no branch
             out = date.copy()
             if np.any(is_num):
@@ -480,7 +487,11 @@ def convert_date(
         elif form in time_forms:  # pragma: no branch
             out = np.full(date.shape, np.nan)
             if np.any(is_num):
-                out[is_num] = (date[is_num] - np.array(date_zero, dtype="datetime64[ns]")).astype("timedelta64[ns]").astype(np.int64) / 10**9  # fmt: skip
+                # fmt: off
+                out[is_num] = (  # pyright: ignore[reportOptionalSubscript]
+                    date[is_num] - np.array(date_zero, dtype="datetime64[ns]")
+                    ).astype("timedelta64[ns]").astype(np.int64) / 10**9
+                # fmt: on
     # from matplotlib
     elif old_form == "matplotlib":  # pragma: no branch
         is_num = np.isfinite(date)
@@ -490,7 +501,9 @@ def convert_date(
             out = np.full(date.shape, np.datetime64("nat"), dtype=numpy_form)
             if np.any(is_num):
                 # TODO: I don't like this method, but the dates.num2date always returns a timezone aware datetime
-                out[is_num] = np.array([x.replace(tzinfo=None) for x in dates.num2date(date[is_num])], dtype=numpy_form)
+                out[is_num] = np.array(  # pyright: ignore[reportOptionalSubscript]
+                    [x.replace(tzinfo=None) for x in dates.num2date(date[is_num])], dtype=numpy_form
+                )
         elif form in time_forms:  # pragma: no branch
             out = ONE_DAY * (date - dates.date2num(date_zero))
     # convert from seconds to other time forms if necessary

@@ -1391,7 +1391,7 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
     """
     # plot second Y axis
     ax2 = ax.twinx()
-    ax2.set_ylim(tuple(np.multiply(multiplier, ax.get_ylim())))
+    ax2.set_ylim(tuple(np.multiply(multiplier, ax.get_ylim())))  # type: ignore[arg-type]
     ax2.set_ylabel(ylab)
     return ax2  # type: ignore[return-value]
 
@@ -2354,7 +2354,7 @@ def fig_ax_factory(
     if passthrough:
         return tuple(None for _ in range(num_figs * num_row * num_col))
     figs: List[Figure] = []
-    axes: Union[List[Axes], List[List[Axes]], List[List[List[Axes]]]] = []
+    axes: Union[List[Axes], List[List[Axes]], List[List[List[Axes]]]] = []  # type: ignore[assignment]
     for i in range(num_figs):
         (fig, ax) = plt.subplots(num_row, num_col, sharex=sharex)
         if bool(suptitle):

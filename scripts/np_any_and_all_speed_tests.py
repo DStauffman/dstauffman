@@ -119,6 +119,7 @@ def parse_results(text: str) -> pd.DataFrame:
 # %% Script
 if __name__ == "__main__":
     ipython = get_ipython()
+    assert ipython is not None
     for i in [None, 0, 10, 100, 1000, 10000, 50000]:
         x = np.zeros(100000, dtype=bool)
         if x is not None:

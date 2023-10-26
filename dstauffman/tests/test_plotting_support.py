@@ -21,8 +21,10 @@ import dstauffman.plotting as plot
 
 if HAVE_MPL:
     import matplotlib as mpl
+    from matplotlib.axes import Axes
     import matplotlib.cm as cmx
     import matplotlib.colors as colors
+    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -169,7 +171,7 @@ class Test_plotting_ColorMap(unittest.TestCase):
         self.low        = 0
         self.high       = 1
         self.num_colors = 5
-        self.fig: Optional[plt.Figure] = None
+        self.fig: Optional[Figure] = None
         # fmt: on
 
     def test_nominal(self) -> None:
@@ -481,7 +483,7 @@ class Test_plotting_storefig(unittest.TestCase):
     title: str
     folder: pathlib.Path
     plot_type: str
-    fig: plt.Figure
+    fig: Figure
     this_filename: Optional[pathlib.Path]
     show_warn: bool
 
@@ -1116,8 +1118,8 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
     Tests the plotting.save_figs_to_pdf function with the following cases:
         TBD
     """
-    fig1: plt.Figure
-    fig2: plt.Figure
+    fig1: Figure
+    fig2: Figure
     filename: pathlib.Path
 
     @classmethod
@@ -1193,7 +1195,7 @@ class Test_fig_ax_factory(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.fig_ax: Union[Tuple[None, ...], Tuple[Tuple[plt.Figure, plt.Axes], ...]] = (None,)
+        self.fig_ax: Union[Tuple[None, ...], Tuple[Tuple[Figure, Axes], ...]] = (None,)
 
     def test_1d_rows(self) -> None:
         self.fig_ax = plot.fig_ax_factory(num_axes=4, layout="rows", sharex=True)  # type: ignore[call-overload]

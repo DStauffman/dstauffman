@@ -183,3 +183,20 @@ ignore-paths = "^(.*[/\\\\]|)tests[/\\\\]test_.*$"
 inherit = false
 convention = "numpy"
 add-ignore = ["D102", "D105", "D204"]
+
+[tool.pyright]
+include = ["dstauffman/**/*.py",
+    "scripts/*.py"]
+extraPaths = ["../nubs",
+    "../slog"]
+venvPath = "C:\\Users\\DStauffman\\Documents\\venvs"
+venv = "everything"
+pythonVersion = "3.11"
+pythonPlatform = "Windows"
+typeCheckingMode = "basic"
+deprecateTypingAliases = true
+reportGeneralTypeIssues = false
+reportUnboundVariable = false
+
+enableTypeIgnoreComments = true
+reportUnnecessaryTypeIgnoreComment = false

@@ -18,6 +18,7 @@ import dstauffman.health as health
 from dstauffman.plotting import Opts, suppress_plots
 
 if HAVE_MPL:
+    from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -134,7 +135,7 @@ class Test_health_icer(unittest.TestCase):
         self.inc_qaly = np.array([20.0, 10, 50])
         self.icer_out = np.array([12500.0, 50000, 60000])
         self.order = np.array([0.0, 1, np.nan, 2])
-        self.fig: Optional[plt.Figure] = None
+        self.fig: Optional[Figure] = None
 
     def test_slide_example(self) -> None:
         (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly)
@@ -249,7 +250,7 @@ class Test_health_icer(unittest.TestCase):
         np.testing.assert_array_equal(inc_qaly, self.inc_qaly, "Incremental QALY mismatch.")
         np.testing.assert_array_equal(icer_out, self.icer_out, "ICER mismatch.")
         np.testing.assert_array_equal(order, self.order, "Order mismatch.")
-        self.assertTrue(isinstance(self.fig, plt.Figure))
+        self.assertTrue(isinstance(self.fig, Figure))
 
     @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
     def test_plot2(self) -> None:
@@ -267,7 +268,7 @@ class Test_health_icer(unittest.TestCase):
         temp[0] = np.nan
         np.testing.assert_array_equal(icer_out, temp, "ICER mismatch.")
         np.testing.assert_array_equal(order, self.order, "Order mismatch.")
-        self.assertTrue(isinstance(self.fig, plt.Figure))
+        self.assertTrue(isinstance(self.fig, Figure))
 
     def tearDown(self) -> None:
         if self.fig is not None:

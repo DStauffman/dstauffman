@@ -569,19 +569,19 @@ def gps_to_utc_datetime(
         days_since_date_zero = week * DAYS_PER_WEEK + time / ONE_DAY
         # GPS offset for 1 Jan 1999 to 1 Jan 2006
         # Note: 9492 = datenum([2006 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero <  9492 + 13 / ONE_DAY] = -13
+        gps_to_utc_offset[days_since_date_zero <  9492 + 13 / ONE_DAY] = -13  # pyright: ignore[reportOptionalSubscript]
         # GPS offset for 1 Jan 2006 to 1 Jan 2009
         # Note: 10588 = datenum([2009 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 10588 + 14 / ONE_DAY] = -14
+        gps_to_utc_offset[days_since_date_zero < 10588 + 14 / ONE_DAY] = -14  # pyright: ignore[reportOptionalSubscript]
         # GPS offset for 1 Jan 2009 to 1 Jul 2012
         # Note: 11865 = datenum([2012 7 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 11865 + 15 / ONE_DAY] = -15
+        gps_to_utc_offset[days_since_date_zero < 11865 + 15 / ONE_DAY] = -15  # pyright: ignore[reportOptionalSubscript]
         # GPS offset for 1 Jul 2012 to 1 Jul 2015
         # Note: 12960 = datenum([2015 7 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 12960 + 16 / ONE_DAY] = -16
+        gps_to_utc_offset[days_since_date_zero < 12960 + 16 / ONE_DAY] = -16  # pyright: ignore[reportOptionalSubscript]
         # GPS offset for 1 Jul 2015 to 1 Jan 2017
         # Note: 13510 = datenum([2017 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 13510 + 17 / ONE_DAY] = -17
+        gps_to_utc_offset[days_since_date_zero < 13510 + 17 / ONE_DAY] = -17  # pyright: ignore[reportOptionalSubscript]
         # fmt: on
     else:
         gps_to_utc_offset = np.asanyarray(gps_to_utc_offset)
@@ -606,7 +606,7 @@ def gps_to_utc_datetime(
                 date_utc.append(start_week + datetime.timedelta(seconds=whole_sec, microseconds=micros))
         # fmt: on
     elif form == "numpy":
-        start_week_np = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY
+        start_week_np = NP_GPS_DATE_ZERO + DAYS_PER_WEEK * week * NP_ONE_DAY  # pyright: ignore[reportOptionalOperand]
         date_utc = start_week_np + (time + gps_to_utc_offset) * NP_ONE_SECOND
     else:
         raise ValueError(f'Unexpected value for form: "{form}".')

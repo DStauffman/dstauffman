@@ -1662,11 +1662,11 @@ def plot_covariance(
             have_data1 = data_one is not None and np.any(~np.isnan(data_one))
             have_data2 = data_two is not None and np.any(~np.isnan(data_two))
             if have_data1 and this_state_nums1.size < this_state_nums.size:
-                temp = np.full((this_state_nums.size, data_one.shape[1]), np.nan)
+                temp = np.full((this_state_nums.size, data_one.shape[1]), np.nan)  # pyright: ignore[reportOptionalMemberAccess]
                 temp[found_rows1, :] = data_one
                 data_one = temp
             if have_data2 and this_state_nums2.size < this_state_nums.size:
-                temp = np.full((this_state_nums.size, data_two.shape[1]), np.nan)
+                temp = np.full((this_state_nums.size, data_two.shape[1]), np.nan)  # pyright: ignore[reportOptionalMemberAccess]
                 temp[found_rows2, :] = data_two
                 data_two = temp
             if have_data1 or have_data2:
@@ -1774,7 +1774,12 @@ def plot_states(
 
 # %% Functions - plot_tci
 def plot_tci(
-    time: _D, data: _N, *, solar_cycles: Optional[_D] = None, solar_labels: Optional[List[str]] = None, opts: Optional[Opts] = None
+    time: _D,
+    data: _N,
+    *,
+    solar_cycles: Optional[_D] = None,
+    solar_labels: Optional[List[str]] = None,
+    opts: Optional[Opts] = None,
 ) -> Figure:
     """
     Plots the Thermosphere Climate Index (TCI).

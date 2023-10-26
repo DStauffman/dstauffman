@@ -351,10 +351,10 @@ def make_generic_plot(
         time_two = np.atleast_1d(time_two)  # type: ignore[arg-type, assignment]
     if not data_is_list and data_one is not None:
         data_one = np.atleast_2d(data_one)
-        assert data_one.ndim < 3, "data_one must be 0d, 1d or 2d."
+        assert data_one.ndim < 3, "data_one must be 0d, 1d or 2d."  # pyright: ignore[reportOptionalMemberAccess]
     if not dat2_is_list and data_two is not None:
         data_two = np.atleast_2d(data_two)
-        assert data_two.ndim < 3, "data_two must be 0d, 1d or 2d."
+        assert data_two.ndim < 3, "data_two must be 0d, 1d or 2d."  # pyright: ignore[reportOptionalMemberAccess]
 
     # check for valid data
     # TODO: implement this
@@ -864,11 +864,15 @@ def make_generic_plot(
                 this_data = nondeg_error[j, :] if is_quat_diff else diffs[j, :]
                 this_zorder = [8, 6, 5][j] if is_quat_diff else 5
                 this_color = cm_vec.get_color(j) if is_quat_diff else cm.get_color(j + 2 * num_channels)
-                if use_datashader and time_overlap.size > datashader_pts:
-                    ix_spot = np.round(np.linspace(0, time_overlap.size - 1, datashader_pts)).astype(int)
+                if use_datashader and time_overlap.size > datashader_pts:  # pyright: ignore[reportOptionalMemberAccess]
+                    # fmt: off
+                    ix_spot = np.round(np.linspace(
+                        0, time_overlap.size - 1, datashader_pts  # pyright: ignore[reportOptionalMemberAccess]
+                    )).astype(int)
+                    # fmt: on
                     plot_func(
                         this_axes,
-                        time_overlap[ix_spot],
+                        time_overlap[ix_spot],  # pyright: ignore[reportOptionalSubscript]
                         this_data[ix_spot],
                         ".",
                         markersize=4,
@@ -885,11 +889,15 @@ def make_generic_plot(
                     this_label = f"Angle ({func_name}: {value} {leg_units})"
                 else:
                     this_label = "Angle"
-                if use_datashader and time_overlap.size > datashader_pts:
-                    ix_spot = np.round(np.linspace(0, time_overlap.size - 1, datashader_pts)).astype(int)
+                if use_datashader and time_overlap.size > datashader_pts:  # pyright: ignore[reportOptionalMemberAccess]
+                    # fmt: off
+                    ix_spot = np.round(np.linspace(
+                        0, time_overlap.size - 1, datashader_pts  # pyright: ignore[reportOptionalMemberAccess]
+                    )).astype(int)
+                    # fmt: on
                     plot_func(
                         this_axes,
-                        time_overlap[ix_spot],
+                        time_overlap[ix_spot],  # pyright: ignore[reportOptionalSubscript]
                         this_data[ix_spot],
                         ".",
                         markersize=4,
