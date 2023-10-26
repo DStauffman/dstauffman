@@ -1365,6 +1365,24 @@ def setup_plots(figs: Union[Figure, _Figs], opts: Opts, *, skip_tight: bool = Fa
             print(f'Plots saved to <a href="{opts.save_path}">{opts.save_path}</a>')
 
 
+# %% save_zoomed_version
+def save_zoomed_version(
+    fig: Figure,
+    ax: Axes,
+    ylims: Optional[Tuple[float, float]],
+    *,
+    ax2: Optional[Axes] = None,
+    use_display: bool = True,
+    opts: Optional[Opts] = None,
+) -> None:
+    r"""
+    Create and save a zoomed version of the plot to disk.
+
+    """
+    if ylims is None:
+        return
+
+
 # %% Unit test
 if __name__ == "__main__":
     plt.ioff()
