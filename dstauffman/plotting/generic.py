@@ -67,11 +67,13 @@ _LEG_FORMAT = "{:1.3f}"
 _TRUTH_COLOR = "k"
 
 if TYPE_CHECKING:
-    _B = np.typing.NDArray[np.bool_]
-    _D = np.typing.NDArray[np.datetime64]
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
-    _M = np.typing.NDArray[np.float64]  # 2D
+    from numpy.typing import NDArray
+
+    _B = NDArray[np.bool_]
+    _D = NDArray[np.datetime64]
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
+    _M = NDArray[np.float64]  # 2D
     _CM = Union[str, Colormap, ListedColormap, ColorMap]
     _Data = Union[int, float, _I, _N, _M, List[_I], List[_N], List[Union[_I, _N]], Tuple[_I, ...], Tuple[_N, ...], Tuple[Union[_I, _N], ...]]  # fmt: skip
     _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]

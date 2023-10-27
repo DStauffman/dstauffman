@@ -49,12 +49,12 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     _CM = Union[str, Colormap, ListedColormap, ColorMap]
-    _I = np.typing.NDArray[np.int_]
-    _M = np.typing.NDArray[np.float64]  # 2D
-    _N = np.typing.NDArray[np.float64]
+    _I = NDArray[np.int_]
+    _M = NDArray[np.float64]  # 2D
+    _N = NDArray[np.float64]
 
 
 # %% Classes - TruthPlotter

@@ -22,7 +22,9 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    _Q = np.typing.NDArray[np.float64]
+    from numpy.typing import NDArray
+
+    _Q = NDArray[np.float64]
 
 
 # %% aerospace.QUAT_SIZE

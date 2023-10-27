@@ -22,9 +22,11 @@ if HAVE_NUMPY:
 
 # %% Constants
 if TYPE_CHECKING:
-    _N = np.typing.NDArray[np.float64]
-    _V = np.typing.NDArray[np.float64]  # shape (3,)
-    _DCM = np.typing.NDArray[np.float64]  # shape (3, 3)
+    from numpy.typing import NDArray
+
+    _N = NDArray[np.float64]
+    _V = NDArray[np.float64]  # shape (3,)
+    _DCM = NDArray[np.float64]  # shape (3, 3)
     _FN = Union[float, _N]
     _Lists = Union[List[_N], Tuple[_N, ...], _N]
 

@@ -26,10 +26,12 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    _B = np.typing.NDArray[np.bool_]
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
-    _M = np.typing.NDArray[np.float64]  # 2D
+    from numpy.typing import NDArray
+
+    _B = NDArray[np.bool_]
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
+    _M = NDArray[np.float64]  # 2D
 
 
 # %% Constants

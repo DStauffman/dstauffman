@@ -31,9 +31,10 @@ if dcs.HAVE_PANDAS:
 
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
+    from numpy.typing import NDArray
 
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
 
 
 # %% Locals classes for testing

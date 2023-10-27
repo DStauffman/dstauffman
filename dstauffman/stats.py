@@ -24,8 +24,10 @@ else:
     from math import sqrt  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    _B = np.typing.NDArray[np.bool_]
-    _N = np.typing.NDArray[np.float64]
+    from numpy.typing import NDArray
+
+    _B = NDArray[np.bool_]
+    _N = NDArray[np.float64]
 
 
 # %% Functions - convert_annual_to_monthly_probability

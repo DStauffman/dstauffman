@@ -20,8 +20,10 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    _D = np.typing.NDArray[np.datetime64]
-    _N = np.typing.NDArray[np.float64]
+    from numpy.typing import NDArray
+
+    _D = NDArray[np.datetime64]
+    _N = NDArray[np.float64]
     _FN = Union[float, _N]
 
 

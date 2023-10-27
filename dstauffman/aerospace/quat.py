@@ -23,12 +23,12 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
     from typing_extensions import NotRequired, Unpack
 
-    _N = np.typing.NDArray[np.float64]
-    _Q = np.typing.NDArray[np.float64]  # shape (4,)
-    _Qs = np.typing.NDArray[np.float64]  # shape (4, N)  # TODO: don't make use of this yet
+    _N = NDArray[np.float64]
+    _Q = NDArray[np.float64]  # shape (4,)
+    _Qs = NDArray[np.float64]  # shape (4, N)  # TODO: don't make use of this yet
 
     class _QuatAssertionKwargs(TypedDict):
         precision: NotRequired[float]

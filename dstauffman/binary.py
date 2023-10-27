@@ -21,8 +21,10 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    _B2 = np.typing.NDArray[np.bool_]  # 2D
-    _I = np.typing.NDArray[np.int_]
+    from numpy.typing import NDArray
+
+    _B2 = NDArray[np.bool_]  # 2D
+    _I = NDArray[np.int_]
 
 
 # %% Functions - _pad_string

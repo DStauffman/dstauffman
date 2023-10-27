@@ -20,9 +20,11 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    _D = np.typing.NDArray[np.datetime64]
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
+    from numpy.typing import NDArray
+
+    _D = NDArray[np.datetime64]
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
 
 # %% Constants
 GPS_DATE_ZERO = datetime.datetime(1980, 1, 6, 0, 0, 0)

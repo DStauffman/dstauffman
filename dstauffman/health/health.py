@@ -22,12 +22,12 @@ if HAVE_PANDAS:
 
 if TYPE_CHECKING:
     from matplotlib.figure import Figure
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
     from dstauffman.plotting import Opts as _Opts
 
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
 
 
 # %% Functions - dist_enum_and_mons

@@ -19,9 +19,9 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
 
-    _N = np.typing.NDArray[np.float64]
+    _N = NDArray[np.float64]
 
 # %% Constants
 # Earth's semi-major axis (ft)

@@ -18,7 +18,9 @@ if dcs.HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    _N = np.typing.NDArray[np.float64]
+    from numpy.typing import NDArray
+
+    _N = NDArray[np.float64]
 
 
 # %% Supporting functions

@@ -49,8 +49,10 @@ else:
     from math import inf, isnan, nan  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    _N = np.typing.NDArray[np.float64]
-    _M = np.typing.NDArray[np.float64]  # 2D
+    from numpy.typing import NDArray
+
+    _N = NDArray[np.float64]
+    _M = NDArray[np.float64]  # 2D
 
 # %% Globals
 logger = logging.getLogger(__name__)

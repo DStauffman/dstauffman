@@ -32,9 +32,11 @@ else:
     from math import isfinite, nan  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    _D = np.typing.NDArray[np.datetime64]
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
+    from numpy.typing import NDArray
+
+    _D = NDArray[np.datetime64]
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
     _AllDates = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64, _D, _I, _N]
     _NPDates = Union[np.datetime64, _D, _N]
 

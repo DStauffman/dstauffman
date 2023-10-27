@@ -37,10 +37,12 @@ if HAVE_SCIPY:
     from scipy.optimize import root
 
 if TYPE_CHECKING:
-    _B = np.typing.NDArray[np.bool_]
-    _D = np.typing.NDArray[np.datetime64]
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
+    from numpy.typing import NDArray
+
+    _B = NDArray[np.bool_]
+    _D = NDArray[np.datetime64]
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
     _FN = Union[float, _N]
 
 

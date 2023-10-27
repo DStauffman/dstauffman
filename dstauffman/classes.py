@@ -60,9 +60,10 @@ if HAVE_PANDAS:
 # %% Constants
 if TYPE_CHECKING:
     import numpy as np
+    from numpy.typing import NDArray
     from typing_extensions import NotRequired, Unpack
 
-    _B = np.typing.NDArray[np.bool_]
+    _B = NDArray[np.bool_]
     _T = TypeVar("_T")
     _C = TypeVar("_C", int, "Counter")
     _SingleNum = Union[int, float, np.datetime64, np.int32, np.int64, np.float64]

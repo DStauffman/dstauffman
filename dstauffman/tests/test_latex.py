@@ -23,7 +23,9 @@ else:
     from math import inf, nan
 
 if TYPE_CHECKING:
-    _I = np.typing.NDArray[np.int_]
+    from numpy.typing import NDArray
+
+    _I = NDArray[np.int_]
 
 
 # %% make_preamble

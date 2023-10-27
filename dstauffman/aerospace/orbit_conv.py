@@ -31,8 +31,10 @@ else:
 if HAVE_SCIPY:
     from scipy.optimize import root
 if TYPE_CHECKING:
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
+    from numpy.typing import NDArray
+
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
     _FN = Union[float, _N]
 
 # %% Globals

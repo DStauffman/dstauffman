@@ -19,9 +19,10 @@ from dstauffman.units import MONTHS_PER_YEAR
 
 if TYPE_CHECKING:
     import numpy as np
+    from numpy.typing import NDArray
 
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
 
 
 # %% Functions - make_preamble

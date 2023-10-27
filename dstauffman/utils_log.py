@@ -26,11 +26,11 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
     from typing_extensions import NotRequired, Unpack
 
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
     _F = Union[float, _N]
 
     class _OutlierKwArgs(TypedDict):

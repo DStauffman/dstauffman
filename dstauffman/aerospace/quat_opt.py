@@ -22,10 +22,12 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    _N = np.typing.NDArray[np.float64]
-    _Q = np.typing.NDArray[np.float64]  # shape (4,)
-    _V = np.typing.NDArray[np.float64]  # shape (3,)
-    _DCM = np.typing.NDArray[np.float64]  # shape (3, 3)
+    from numpy.typing import NDArray
+
+    _N = NDArray[np.float64]
+    _Q = NDArray[np.float64]  # shape (4,)
+    _V = NDArray[np.float64]  # shape (3,)
+    _DCM = NDArray[np.float64]  # shape (3, 3)
 
 
 # %% Functions - qrot_single

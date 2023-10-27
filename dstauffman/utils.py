@@ -60,13 +60,13 @@ if HAVE_SCIPY:
     from scipy.signal import butter, sosfiltfilt
 
 if TYPE_CHECKING:
-    from numpy.typing import ArrayLike
+    from numpy.typing import ArrayLike, NDArray
     from typing_extensions import NotRequired, Unpack
 
-    _B = np.typing.NDArray[np.bool_]
-    _D = np.typing.NDArray[np.datetime64]
-    _I = np.typing.NDArray[np.int_]
-    _N = np.typing.NDArray[np.float64]
+    _B = NDArray[np.bool_]
+    _D = NDArray[np.datetime64]
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
     _StrOrListStr = TypeVar("_StrOrListStr", str, List[str])
     _SingleNum = Union[int, float, np.datetime64, np.int32, np.int64, np.float64]
     _Lists = Union[_N, List[_N], Tuple[_N, ...]]
