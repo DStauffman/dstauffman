@@ -68,14 +68,14 @@ class TruthPlotter(Frozen):
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
     >>> fig = plt.figure()
-    >>> fig.canvas.manager.set_window_title('Figure Title')
+    >>> fig.canvas.manager.set_window_title("Figure Title")
     >>> x = np.arange(0, 10, 0.1)
     >>> y = np.sin(x)
     >>> truth = TruthPlotter(x, y+0.01, lo=y, hi=y+0.03)
     >>> ax = fig.add_subplot(111)
-    >>> _ = ax.plot(x, y, label='data')
+    >>> _ = ax.plot(x, y, label="data")
     >>> truth.plot_truth(ax)
-    >>> _ = ax.legend(loc='best')
+    >>> _ = ax.legend(loc="best")
 
     >>> plt.show(block=False) # doctest: +SKIP
 
@@ -95,7 +95,7 @@ class TruthPlotter(Frozen):
     ):
         self.time = time
         self.data = None
-        self.type_ = type_  # from {'normal', 'errorbar'}
+        self.type_ = type_  # from {"normal", "errorbar"}
         self.data_lo = lo
         self.data_hi = hi
         self.name = name
@@ -233,7 +233,7 @@ def plot_health_time_history(
     >>> from dstauffman.plotting import plot_health_time_history
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> description = 'Random Data'
+    >>> description = "Random Data"
     >>> time  = np.arange(0, 5, 1./12) + 2000
     >>> data  = np.random.rand(len(time), 5).cumsum(axis=1)
     >>> data  = 10 * data / np.expand_dims(data[:, -1], axis=1)
@@ -418,8 +418,8 @@ def plot_health_monte_carlo(
     >>> import numpy as np
     >>> time  = np.arange(0, 10, 0.1)
     >>> data  = np.sin(time)
-    >>> label = 'Sin'
-    >>> units = 'population'
+    >>> label = "Sin"
+    >>> units = "population"
     >>> fig   = plot_health_monte_carlo(time, data, label, units)
 
     Close plot
@@ -620,7 +620,7 @@ def plot_population_pyramid(
         Male population percentage in each bin
     fmal_per : (N,) array_like of int
         Female population percentage in each bin
-    title : str, optional, default is 'Population Pyramid'
+    title : str, optional, default is "Population Pyramid"
         Title for the plot
     opts : class Opts, optional
         Plotting options
