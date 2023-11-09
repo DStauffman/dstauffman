@@ -17,11 +17,11 @@ if HAVE_NUMPY:
     import numpy as np
 
 
-# %% estimation._update_information
+# %% estimation.smoother._update_information
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
-class Test_estimation__update_information(unittest.TestCase):
+class Test_estimation_smoother__update_information(unittest.TestCase):
     r"""
-    Tests the estimation._update_information function with the following cases:
+    Tests the estimation.smoother._update_information function with the following cases:
         TBD
     """
 

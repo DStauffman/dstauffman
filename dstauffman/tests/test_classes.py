@@ -153,6 +153,12 @@ class Test_save_and_load_hdf5(unittest.TestCase):
 # %% load_pickle - covered by SaveAndLoad
 # %% save_method - covered by SaveAndLoad
 # %% load_method - covered by SaveAndLoad
+# %% save_convert_hdf5
+# TODO: add me to Class examples
+# %% save_restore_hdf5
+# TODO: add me to Class examples
+# %% pprint
+# TODO: add me to Class examples
 
 
 # %% pprint_dict
@@ -304,7 +310,7 @@ class Test_subsample_class(unittest.TestCase):
 # %% Frozen
 class Test_Frozen(unittest.TestCase):
     r"""
-    Test the Frozen class with the following cases:
+    Tests the Frozen class with the following cases:
         normal mode
         add new attribute to existing instance
     """
@@ -334,7 +340,7 @@ class Test_Frozen(unittest.TestCase):
 # %% SaveAndLoad
 class Test_SaveAndLoad(unittest.TestCase):
     r"""
-    Tests SaveAndLoad metaclass with the following cases:
+    Tests the SaveAndLoad metaclass with the following cases:
         has methods (x4)
         save/load hdf5
         savel/oad pickle (x2)

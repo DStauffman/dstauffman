@@ -1,5 +1,5 @@
 r"""
-Test file for the `latex` module of the "dstauffman.health" library.
+Test file for the `latex` module of the "dstauffman" library.
 
 Notes
 -----
@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 # %% make_preamble
 class Test_make_preamble(unittest.TestCase):
     r"""
-    Tests the dcs.make_preamble function with the following cases:
+    Tests the make_preamble function with the following cases:
         Nominal
         Different size
         Minipage
@@ -77,7 +77,7 @@ class Test_make_preamble(unittest.TestCase):
 # %% make_conclusion
 class Test_make_conclusion(unittest.TestCase):
     r"""
-    Tests the dcs.make_conclusion function with the following cases:
+    Tests the make_conclusion function with the following cases:
         Nominal
         Minipage
     """
@@ -94,7 +94,7 @@ class Test_make_conclusion(unittest.TestCase):
 # %% bins_to_str_ranges
 class Test_bins_to_str_ranges(unittest.TestCase):
     r"""
-    Tests the dcs.bins_to_str_ranges function with the following cases:
+    Tests the bins_to_str_ranges function with the following cases:
         Nominal
         Different dt
         High cut-off
@@ -149,7 +149,7 @@ class Test_bins_to_str_ranges(unittest.TestCase):
 # %% latex_str
 class Test_latex_str(unittest.TestCase):
     r"""
-    Tests the dcs.latex_str function with the following cases:
+    Tests the latex_str function with the following cases:
         TBD
     """
 

@@ -97,7 +97,8 @@ class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
 class Test_aerospace_quat_interp_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_interp_single function with the following cases:
-        TBD
+        Nominal
+        Extrapolation
     """
 
     def setUp(self) -> None:
@@ -130,7 +131,7 @@ class Test_aerospace_quat_interp_single(unittest.TestCase):
         else:
             np.testing.assert_array_almost_equal(qout, -self.qout[:, 3])
 
-    def test_extra(self) -> None:
+    def test_extrapolation(self) -> None:
         with self.assertRaises(ValueError):
             space.quat_interp_single(self.time, self.quat, 10.0)
 
@@ -141,6 +142,7 @@ class Test_aerospace_quat_inv_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_inv_single function with the following cases:
         Single quat (x2 different quats)
+        In-place
     """
 
     def setUp(self) -> None:
@@ -176,6 +178,7 @@ class Test_aerospace_quat_mult_single(unittest.TestCase):
         Single quat (x2 different quats)
         Reverse order
         Quat array times scalar (x2 orders)
+        Inplace
     """
 
     def setUp(self) -> None:
@@ -223,6 +226,7 @@ class Test_aerospace_quat_norm_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_norm_single function with the following cases:
         Single quat (x3 different quats)
+        Inplace
     """
 
     def setUp(self) -> None:
@@ -266,6 +270,7 @@ class Test_aerospace_quat_prop_single(unittest.TestCase):
     Tests the aerospace.quat_prop_single function with the following cases:
         Nominal case
         Negative scalar
+        Inplace
     """
 
     def setUp(self) -> None:
@@ -299,7 +304,9 @@ class Test_aerospace_quat_prop_single(unittest.TestCase):
 class Test_aerospace_quat_times_vector_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_times_vector_single function with the following cases:
+        Integers
         Nominal
+        Inplace
     """
 
     def setUp(self) -> None:

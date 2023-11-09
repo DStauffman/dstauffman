@@ -21,7 +21,7 @@ from .health    import TruthPlotter, plot_health_time_history, plot_health_monte
                            plot_icer, plot_population_pyramid
 from .plotting  import Opts, suppress_plots, unsuppress_plots, plot_time_history, \
                            plot_time_difference, plot_correlation_matrix, plot_bar_breakdown, \
-                           plot_histogram, setup_plots
+                           plot_histogram, setup_plots, save_zoomed_version
 from .support   import DEFAULT_COLORMAP, DEFAULT_CLASSIFICATION, COLOR_LISTS, ExtraPlotter, \
                            MyCustomToolbar, ColorMap, is_notebook, close_all, \
                            get_nondeg_colorlists, ignore_plot_data, whitten, get_figure_title, \

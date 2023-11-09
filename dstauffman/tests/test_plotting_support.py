@@ -92,6 +92,15 @@ class Test_plotting__HoverButton(unittest.TestCase):
     pass  # TODO: write this
 
 
+# %% plotting.ExtraPlotter
+class Test_plotting_ExtraPlotter(unittest.TestCase):
+    r"""
+    Tests the plotting.ExtraPlotter function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% plotting.MyCustomToolbar
 @unittest.skipIf(not HAVE_MPL or not _HAVE_QT or not _HAVE_DISPLAY, "Skipping due to missing matplotlib/Qt/DISPLAY dependency.")
 class Test_plotting_MyCustomToolbar(unittest.TestCase):
@@ -415,6 +424,15 @@ class Test_plotting_whitten(unittest.TestCase):
     def test_blacken(self) -> None:
         new_color = plot.whitten((1.0, 0.4, 0.0, 0.5), white=(0.0, 0.0, 0.0, 0.0), dt=0.5)
         self.assertEqual(new_color, (0.5, 0.2, 0.0, 0.25))
+
+
+# %% plotting.get_figure_title
+class Test_plotting_get_figure_title(unittest.TestCase):
+    r"""
+    Tests the plotting.get_figure_title function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% plotting.resolve_name
@@ -1045,6 +1063,15 @@ class Test_plotting_plot_phases(unittest.TestCase):
         plt.close(self.fig)
 
 
+# %% plotting.get_classification
+class Test_plotting_get_classification(unittest.TestCase):
+    r"""
+    Tests the plotting.get_classification function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% plotting.plot_classification
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_classification(unittest.TestCase):
@@ -1111,6 +1138,15 @@ class Test_plotting_z_from_ci(unittest.TestCase):
             self.assertTrue(abs(z - exp_z) < 0.001, "{} and {} are more than 0.001 from each other.".format(z, exp_z))
 
 
+# %% plotting.ci_from_z
+class Test_plotting_ci_from_z(unittest.TestCase):
+    r"""
+    Tests the plotting.ci_from_z function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% plotting.save_figs_to_pdf
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_save_figs_to_pdf(unittest.TestCase):
@@ -1146,6 +1182,15 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
         plt.close(cls.fig1)
         plt.close(cls.fig2)
         cls.filename.unlink(missing_ok=True)
+
+
+# %% plotting.save_images_to_pdf
+class Test_plotting_save_images_to_pdf(unittest.TestCase):
+    r"""
+    Tests the plotting.save_images_to_pdf function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% plotting.add_datashaders
@@ -1188,7 +1233,7 @@ class Test_plotting_add_datashaders(unittest.TestCase):
 
 # %% plotting.fig_ax_factory
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
-class Test_fig_ax_factory(unittest.TestCase):
+class Test_plotting_fig_ax_factory(unittest.TestCase):
     r"""
     Tests the plotting.fig_ax_factory function with the following cases:
         TBD

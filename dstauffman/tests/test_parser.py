@@ -32,6 +32,15 @@ class Test__VALID_COMMANDS(unittest.TestCase):
         self.assertIn("version", dcs.parser._VALID_COMMANDS)
 
 
+# %% parser._Flags
+class Test_parser__Flags(unittest.TestCase):
+    r"""
+    Tests the parser._Flags function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% parser._print_bad_command
 class Test_parser__print_bad_command(unittest.TestCase):
     r"""

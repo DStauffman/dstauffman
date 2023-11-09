@@ -1312,7 +1312,7 @@ class Test_get_env_var(unittest.TestCase):
 # %% get_username
 class Test_get_username(unittest.TestCase):
     r"""
-    Tests the function with the following cases:
+    Tests the get_username function with the following cases:
         Windows
         Unix
     """
@@ -1733,11 +1733,11 @@ class Test_linear_interp(unittest.TestCase):
         np.testing.assert_array_almost_equal(y, exp, 12)
 
 
-# %% Test_linear_lowpass_interp
+# %% linear_lowpass_interp
 @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
 class Test_linear_lowpass_interp(unittest.TestCase):
     r"""
-    Tests the Test_linear_lowpass_interp function with the following cases:
+    Tests the linear_lowpass_interp function with the following cases:
         Nominal
         Alternative filter parameters
         Extrapolation

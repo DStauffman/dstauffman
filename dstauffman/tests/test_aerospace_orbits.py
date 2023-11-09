@@ -91,6 +91,42 @@ class Test_aerospace_Elements(unittest.TestCase):
         self.assertEqual(elements3, exp)
 
 
+# %% aerospace.orbits._zero_divide
+class Test_aerospace_orbits__zero_divide(unittest.TestCase):
+    r"""
+    Tests the aerospace.orbits._zero_divide function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
+# %% aerospace.orbits._inf_divide
+class Test_aerospace_orbits__inf_divide(unittest.TestCase):
+    r"""
+    Tests the aerospace.orbits._inf_divide function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
+# %% aerospace.orbits._inf_multiply
+class Test_aerospace_orbits__inf_multiply(unittest.TestCase):
+    r"""
+    Tests the aerospace.orbits._inf_multiply function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
+# %% aerospace.orbits._fix_instab
+class Test_aerospace_orbits__fix_instab(unittest.TestCase):
+    r"""
+    Tests the aerospace.orbits._fix_instab function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% aerospace.two_line_elements
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_two_line_elements(unittest.TestCase):
@@ -356,7 +392,12 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
 
 
 # %% aerospace.advance_elements
-pass  # TODO: write this
+class Test_aerospace_advance_elements(unittest.TestCase):
+    r"""
+    Tests the aerospace.advance_elements function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% Unit test execution

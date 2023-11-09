@@ -12,19 +12,19 @@ import unittest
 import dstauffman as dcs
 
 
-# %% _FortranSource
-class Test__FortranSource(unittest.TestCase):
+# %% fortran._FortranSource
+class Test_fortran__FortranSource(unittest.TestCase):
     r"""
-    Tests the _FortranSource class with the following cases:
+    Tests the fortran._FortranSource class with the following cases:
         TBD
     """
     pass  # TODO: write this
 
 
-# %% _parse_source
-class Test__parse_source(unittest.TestCase):
+# %% fortran._parse_source
+class Test_fortran__parse_source(unittest.TestCase):
     r"""
-    Tests the _parse_source function with the following cases:
+    Tests the fortran._parse_source function with the following cases:
         call the function
     """
 
@@ -69,28 +69,37 @@ class Test__parse_source(unittest.TestCase):
         self.filename.unlink(missing_ok=True)
 
 
-# %% _write_unit_test
-class Test__write_unit_test(unittest.TestCase):
+# %% fortran._write_unit_test
+class Test_fortran__write_unit_test(unittest.TestCase):
     r"""
-    Tests the _write_unit_test function with the following cases:
+    Tests the fortran._write_unit_test function with the following cases:
         TBD
     """
     pass  # TODO: write this
 
 
-# %% _write_all_unit_test
-class Test__write_all_unit_test(unittest.TestCase):
+# %% fortran._write_all_unit_test
+class Test_fortran__write_all_unit_test(unittest.TestCase):
     r"""
-    Tests the _write_all_unit_test function with the following cases:
+    Tests the fortran._write_all_unit_test function with the following cases:
         TBD
     """
     pass  # TODO: write this
 
 
-# %% _write_makefile
-class Test__write_makefile(unittest.TestCase):
+# %% fortran._get_template
+class Test_fortran__get_template(unittest.TestCase):
     r"""
-    Tests the _write_makefile function with the following cases:
+    Tests the fortran._get_template function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
+# %% fortran._write_makefile
+class Test_fortran__write_makefile(unittest.TestCase):
+    r"""
+    Tests the fortran._write_makefile function with the following cases:
         TBD
     """
     pass  # TODO: write this

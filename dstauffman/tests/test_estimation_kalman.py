@@ -50,6 +50,15 @@ class Test_estimation_calculate_kalman_gain(unittest.TestCase):
         self.assertAlmostEqual(K[0, 0], self.exp, 14)
 
 
+# %% estimation.calculate_kalman_gain_opt
+class Test_estimation_calculate_kalman_gain_opt(unittest.TestCase):
+    r"""
+    Tests the estimation.calculate_kalman_gain_opt function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% estimation.calculate_prediction
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_calculate_prediction(unittest.TestCase):
@@ -182,6 +191,15 @@ class Test_estimation_propagate_covariance(unittest.TestCase):
         self.assertEqual(self.P[0, 0], self.exp)
 
 
+# %% estimation.propagate_covariance_opt
+class Test_estimation_propagate_covariance_opt(unittest.TestCase):
+    r"""
+    Tests the estimation.propagate_covariance_opt function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% estimation.update_covariance
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_update_covariance(unittest.TestCase):
@@ -212,6 +230,15 @@ class Test_estimation_update_covariance(unittest.TestCase):
     def test_opt(self) -> None:
         estm.update_covariance_opt(self.P, self.K, self.H)
         self.assertEqual(self.P[-1, -1], self.exp)
+
+
+# %% estimation.update_covariance_opt
+class Test_estimation_update_covariance_opt(unittest.TestCase):
+    r"""
+    Tests the estimation.update_covariance_opt function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% Unit test execution

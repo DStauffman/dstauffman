@@ -710,7 +710,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_categories_plot(unittest.TestCase):
     r"""
-    Tests the plotting.make_categories_plot with the following cases:
+    Tests the plotting.make_categories_plot function with the following cases:
         Nominal
         Minimal
         TBD
@@ -800,11 +800,20 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
                 plt.close(this_fig)
 
 
+# %% plotting.make_bar_plot
+class Test_plotting_make_bar_plot(unittest.TestCase):
+    r"""
+    Tests the plotting.make_bar_plot function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% plotting.make_connected_sets
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
-class Test_plotting_make_connected_plots(unittest.TestCase):
+class Test_plotting_make_connected_sets(unittest.TestCase):
     r"""
-    Tests the plotting.make_connected_plots with the following cases:
+    Tests the plotting.make_connected_sets function with the following cases:
         Nominal
         Color by Quad
         Color by Magnitude

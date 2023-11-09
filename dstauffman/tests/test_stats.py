@@ -1,5 +1,5 @@
 r"""
-Test file for the `stats` module of the "dstauffman.health" library.
+Test file for the `stats` module of the "dstauffman" library.
 
 Notes
 -----
@@ -20,7 +20,7 @@ if dcs.HAVE_NUMPY:
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_convert_annual_to_monthly_probability(unittest.TestCase):
     r"""
-    Tests the dcs.convert_annual_to_monthly_probability function with the following cases:
+    Tests the convert_annual_to_monthly_probability function with the following cases:
         convert a vector from annual to monthly
         convert a scalar
         convert a number less than zero (raise error)
@@ -66,7 +66,7 @@ class Test_convert_annual_to_monthly_probability(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_convert_monthly_to_annual_probability(unittest.TestCase):
     r"""
-    Tests the dcs.convert_monthly_to_annual_probability function with the following cases:
+    Tests the convert_monthly_to_annual_probability function with the following cases:
         convert a vector from monthly to annual
         convert a scalar
         convert a number less than zero (raise error)
@@ -112,7 +112,7 @@ class Test_convert_monthly_to_annual_probability(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_prob_to_rate(unittest.TestCase):
     r"""
-    Tests the dcs.prob_to_rate function with the following cases:
+    Tests the prob_to_rate function with the following cases:
         convert a vector from monthly to annual
         convert a scalar
         convert a number less than zero (raise error)
@@ -158,7 +158,7 @@ class Test_prob_to_rate(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_rate_to_prob(unittest.TestCase):
     r"""
-    Tests the dcs.rate_to_prob function with the following cases:
+    Tests the rate_to_prob function with the following cases:
         convert a vector from monthly to annual
         convert a scalar
         convert a number less than zero (raise error)
@@ -204,7 +204,7 @@ class Test_rate_to_prob(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_annual_rate_to_monthly_probability(unittest.TestCase):
     r"""
-    Tests the dcs.annual_rate_to_monthly_probability function with the following cases:
+    Tests the annual_rate_to_monthly_probability function with the following cases:
         convert a vector from annual to monthly
         convert a scalar
         convert a number less than zero (raise error)
@@ -248,7 +248,7 @@ class Test_annual_rate_to_monthly_probability(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_monthly_probability_to_annual_rate(unittest.TestCase):
     r"""
-    Tests the dcs.monthly_probability_to_annual_rate function with the following cases:
+    Tests the monthly_probability_to_annual_rate function with the following cases:
         convert a vector from annual to monthly
         convert a scalar
         convert a number less than zero (raise error)
@@ -291,7 +291,7 @@ class Test_monthly_probability_to_annual_rate(unittest.TestCase):
 # %% combine_sets
 class Test_combine_sets(unittest.TestCase):
     r"""
-    Tests the dcs.combine_sets function with the following cases:
+    Tests the combine_sets function with the following cases:
         Normal use
         No deviation
         Empty set 1
@@ -374,7 +374,7 @@ class Test_combine_sets(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_bounded_normal_draw(unittest.TestCase):
     r"""
-    Tests the dcs.bounded_normal_draw function with the following cases:
+    Tests the bounded_normal_draw function with the following cases:
         Nominal
         No bounds
         Optional values
@@ -427,7 +427,7 @@ class Test_bounded_normal_draw(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_rand_draw(unittest.TestCase):
     r"""
-    Tests the dcs.rand_draw function with the following cases:
+    Tests the rand_draw function with the following cases:
         Nominal
         Negative and zero values
         Large values
@@ -464,7 +464,7 @@ class Test_rand_draw(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_ecdf(unittest.TestCase):
     r"""
-    Tests the dcs.ecdf function with the following cases:
+    Tests the ecdf function with the following cases:
         Nominal
         Integers
         List
@@ -506,7 +506,7 @@ class Test_ecdf(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_apply_prob_to_mask(unittest.TestCase):
     r"""
-    Tests the dcs.apply_prob_to_mask function with the following cases:
+    Tests the apply_prob_to_mask function with the following cases:
         Nominal
         Inplace
         Zero prob

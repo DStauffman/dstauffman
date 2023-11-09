@@ -23,6 +23,7 @@ class Test_aerospace_rot(unittest.TestCase):
     Tests the aerospace.rot function with the following cases:
         Reference 1, single axis
         Reference 2, single axis
+        Bad axis
     """
 
     def setUp(self) -> None:
@@ -83,6 +84,7 @@ class Test_aerospace_vec_cross(unittest.TestCase):
     r"""
     Tests the aerospace.vec_cross function with the following cases:
         Nominal
+        Floats
     """
 
     def setUp(self) -> None:

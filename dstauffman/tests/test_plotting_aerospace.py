@@ -402,6 +402,15 @@ class Test_plotting_plot_innov_fplocs(unittest.TestCase):
     pass  # TODO: write this
 
 
+# %% plotting.plot_innov_hist
+class Test_plotting_plot_innov_hist(unittest.TestCase):
+    r"""
+    Tests the plotting.plot_innov_hist function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% plotting.plot_covariance
 class Test_plotting_plot_covariance(unittest.TestCase):
     r"""
@@ -464,6 +473,15 @@ class Test_plotting_plot_states(unittest.TestCase):
 
     def tearDown(self) -> None:
         plot.close_all(self.figs)
+
+
+# %% plotting.plot_tci
+class Test_plotting_plot_tci(unittest.TestCase):
+    r"""
+    Tests the plotting.plot_tci function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% Unit test execution

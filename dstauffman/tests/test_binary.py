@@ -15,10 +15,10 @@ if dcs.HAVE_NUMPY:
     import numpy as np
 
 
-# %% _pad_string
-class Test__pad_string(unittest.TestCase):
+# %% binary._pad_string
+class Test_binary__pad_string(unittest.TestCase):
     r"""
-    Tests the dcs.binary._pad_string function with the following cases:
+    Tests the binary._pad_string function with the following cases:
         Nominal
         Evenly divided
         Optional arguments
@@ -55,7 +55,7 @@ class Test__pad_string(unittest.TestCase):
 # %% int2bin
 class Test_int2bin(unittest.TestCase):
     r"""
-    Tests the dcs.int2bin function with the following cases:
+    Tests the int2bin function with the following cases:
         Default
         Padded
         Separated
@@ -87,7 +87,7 @@ class Test_int2bin(unittest.TestCase):
 # %% int2hex
 class Test_int2hex(unittest.TestCase):
     r"""
-    Tests the dcs.int2hex function with the following cases:
+    Tests the int2hex function with the following cases:
         Default
         Padded
         Separated
@@ -125,7 +125,7 @@ class Test_int2hex(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_split_bits(unittest.TestCase):
     r"""
-    Tests the dcs.split_bits function with the following cases:
+    Tests the split_bits function with the following cases:
         TBD
     """
 
@@ -136,6 +136,15 @@ class Test_split_bits(unittest.TestCase):
         exp[16, 2] = True
         exp[:, 3] = True
         np.testing.assert_array_equal(bits, exp)
+
+
+# %% read_bit_stream
+class Test_read_bit_stream(unittest.TestCase):
+    r"""
+    Tests the read_bit_stream function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% Unit test execution

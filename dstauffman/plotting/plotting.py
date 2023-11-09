@@ -472,7 +472,7 @@ def plot_time_history(
 
     Returns
     -------
-    fig : object
+    fig : class matplotlib.figure.Figure
         figure handle, if None, no figure was created
 
     See Also
@@ -602,7 +602,7 @@ def plot_time_difference(
 
     Returns
     -------
-    fig : object
+    fig : class matplotlib.figure.Figure
         figure handle, if None, no figure was created
 
     See Also
@@ -763,8 +763,8 @@ def plot_correlation_matrix(
 
     Returns
     -------
-    fig : object
-        figure handle
+    fig : class matplotlib.figure.Figure
+        Figure handle
 
     Notes
     -----
@@ -956,8 +956,8 @@ def plot_bar_breakdown(
 
     Returns
     -------
-    fig : object
-        figure handle
+    fig : class matplotlib.figure.Figure
+        Figure handle
 
     Notes
     -----
@@ -1053,6 +1053,8 @@ def plot_histogram(
     xlabel: str = "Data",
     ylabel: str = "Number",
     second_ylabel: str = "Distribution [%]",
+    units: str = "",
+    formatter: str = ".3g",
     normalize_spacing: bool = False,
     use_exact_counts: bool = False,
     show_cdf: bool = False,
@@ -1086,6 +1088,10 @@ def plot_histogram(
         Name to put on y-axis
     second_ylabel : str, optional
         Name to put on second y-axis
+    units : str, optional
+        Units to label on the x-axis
+    formatter : str, optional
+        Formatter to use in the legend for CDF calculations
     normalize_spacing : bool, optional, default is False
         Whether to normalize all the bins to the same horizontal size
     use_exact_counts : bool, optional, default is False
@@ -1182,7 +1188,7 @@ def plot_histogram(
     ax.set_title(description)
     ax.add_collection(coll)
     ax.grid(True)
-    ax.set_xlabel(xlabel)
+    ax.set_xlabel(f"{xlabel} [{units}]" if units else xlabel)
     ax.set_ylabel(ylabel)
     if missing > 0:
         ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins) + 1))
@@ -1245,11 +1251,12 @@ def plot_histogram(
             this_ix = np.argmax(cdf_bin >= this_x)
             this_bin = cdf_scaled[this_ix] if normalize_spacing else cdf_bin[this_ix]
             this_cdf = cdf[this_ix]
+            this_label = format(this_x, formatter) + units + "=" + format(100 * this_cdf, formatter) + "%"
             ax.plot(
                 [0, 1],
                 [this_cdf, this_cdf],
                 color=cm.get_color(1),
-                label=f"{this_x:.3g}={100*this_cdf:.3g}p",
+                label=this_label,
                 zorder=9,
                 transform=ax.transAxes,
             )
@@ -1270,7 +1277,7 @@ def plot_histogram(
             cdf_y = [cdf_y]  # type: ignore[list-item]
         for this_cdf in cdf_y:  # type: ignore[union-attr]
             this_ix = np.argmax(cdf >= this_cdf)
-            this_label = f"{100*this_cdf:.3g}p={cdf_bin[this_ix]:.3g}"
+            this_label = format(100 * this_cdf, formatter) + "%=" + format(cdf_bin[this_ix], formatter) + units
             this_bin = cdf_scaled[this_ix] if normalize_spacing else cdf_bin[this_ix]
             ax.axvline(this_bin, label=this_label, color=cm.get_color(2), zorder=9)
             ax.plot(this_bin, cdf[this_ix], marker="x", color=cm.get_color(2), label="", zorder=10, transform=trans)
@@ -1379,9 +1386,59 @@ def save_zoomed_version(
     r"""
     Create and save a zoomed version of the plot to disk.
 
+    Parameters
+    ----------
+    fig : class matplotlib.figure.Figure
+        Figure handle
+    ax : class matplotlib.axes.Axes
+        Axes handle
+    ylims : tuple of 2 floats, optional
+        New y limits
+    ax2 : class matplotlib.axes.Axes, optional
+        Secondary axes to also scale
+    use_display : bool, optional, default if True
+        Whether there is a display to use when modifying the plot
+    opts : class Opts, optional
+        Additional plotting options, for this giving whether to save, where and what form
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import save_zoomed_version, plot_time_history, Opts
+    >>> import numpy as np
+    >>> time = np.arange(30.0)
+    >>> data = np.random.rand(30)
+    >>> data[10] = 1e5
+    >>> opts = Opts()
+    >>> fig = plot_time_history("Data vs Time", time, data, opts=opts)
+    >>> ax = fig.axes[0]
+    >>> ylims = (-2.0, 2.0)
+    >>> save_zoomed_version(fig, ax, ylims, opts=opts)
+
+    Close plots
+    >>> import matplotlib.pyplot as plt
+    >>> plt.close(fig)
+
     """
     if ylims is None:
         return
+    orig1 = ax.get_ylim()
+    if ax2 is not None:
+        orig2 = ax2.get_ylim()
+        fact = orig2[0] / orig1[0]
+    ax.set_ylim(ylims)
+    if ax2 is not None:
+        ax2.set_ylim(fact * ylims[0], fact * ylims[1])
+
+    if use_display:
+        if (manager := fig.canvas.manager) is not None:
+            manager.set_window_title(manager.get_window_title() + " (Zoomed)")
+        else:
+            ax.set_title(ax.get_title() + " (Zoomed)")
+    else:
+        ax.set_title(ax.get_title() + " (Zoomed)")
+    # resave zoomed plot
+    if opts is not None and opts.save_path:
+        storefig(fig, folder=opts.save_path, plot_type=opts.plot_type, show_warn=opts.show_warn)
 
 
 # %% Unit test

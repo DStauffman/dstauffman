@@ -111,19 +111,19 @@ class _Parameters(Frozen):
         self.models[1].field4["new"][1] = 444
 
 
-# %% estimation._get_sub_level
-class Test_estimation__get_sub_level(unittest.TestCase):
+# %% estimation.support._get_sub_level
+class Test_estimation_support__get_sub_level(unittest.TestCase):
     r"""
-    Tests the estimation._get_sub_level function with the following cases:
+    Tests the estimation.support._get_sub_level function with the following cases:
         TBD
     """
     pass  # TODO: write this
 
 
-# %% estimation._check_valid_param_name
-class Test_estimation__check_valid_param_name(unittest.TestCase):
+# %% estimation.support._check_valid_param_name
+class Test_estimation_support__check_valid_param_name(unittest.TestCase):
     r"""
-    Tests the estimation._check_valid_param_name function with the following cases:
+    Tests the estimation.support._check_valid_param_name function with the following cases:
         Nominal
         Dictionary parameter
         Bad param name

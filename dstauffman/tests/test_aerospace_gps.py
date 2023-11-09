@@ -18,6 +18,27 @@ if HAVE_NUMPY:
     import numpy as np
 
 
+# %% aerospace constants
+class Test_aerospace_gps_constants(unittest.TestCase):
+    r"""
+    Tests the aerospace GPS constants with the following cases:
+        Nominal
+        No numpy
+    """
+
+    def test_nominal(self) -> None:
+        self.assertIsInstance(space.GPS_DATE_ZERO, datetime.datetime)
+        self.assertIsInstance(space.ONE_DAY, int)
+        self.assertIsInstance(space.DAYS_PER_WEEK, int)
+        self.assertIsInstance(space.WEEK_ROLLOVER, int)
+
+    def test_numpy(self) -> None:
+        if HAVE_NUMPY:
+            self.assertIsInstance(space.NP_GPS_DATE_ZERO, np.datetime64)
+        else:
+            self.assertIsNone(space.NP_GPS_DATE_ZERO)
+
+
 # %% aerospace.bsl
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_bsl(unittest.TestCase):

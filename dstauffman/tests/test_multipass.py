@@ -1,5 +1,5 @@
 r"""
-Test file for the `matlab` module of the "dstauffman" library.
+Test file for the `multipass` module of the "dstauffman" library.
 
 Notes
 -----
@@ -30,6 +30,15 @@ def _model_wrapper(x: Optional[_N], y: Optional[_N]) -> _N:
     if y is None:
         raise RuntimeError("Bad value for y")  # pragma: no cover
     return x + np.sin(x) + np.cos(y * 2)  # type: ignore[no-any-return]
+
+
+# %% MultipassExceptionWrapper
+class Test_MultipassExceptionWrapper(unittest.TestCase):
+    r"""
+    Tests the MultipassExceptionWrapper function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% parfor_wrapper

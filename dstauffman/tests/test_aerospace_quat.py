@@ -1015,7 +1015,7 @@ class Test_aerospace_quat_to_euler(unittest.TestCase):
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_standards(unittest.TestCase):
     r"""
-    Tests the quat_standards function with the following cases:
+    Tests the aerospace.quat_standards function with the following cases:
         Default (scalar last, shuster)
         scalar first, shuster
         scalar last, hamilton

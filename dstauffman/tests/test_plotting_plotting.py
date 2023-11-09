@@ -281,6 +281,15 @@ class Test_plotting_plot_time_history(unittest.TestCase):
             plt.close(self.fig)
 
 
+# %% plotting.plot_time_difference
+class Test_plotting_plot_time_difference(unittest.TestCase):
+    r"""
+    Tests the plotting.plot_time_difference function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% plotting.plot_correlation_matrix
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_correlation_matrix(unittest.TestCase):
@@ -494,7 +503,7 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_plot_histogram(unittest.TestCase):
     r"""
-    Tests the plotting.setup_plots function with the following cases:
+    Tests the plotting.plot_histogram function with the following cases:
         Nominal
         All inputs
         Datetimes
@@ -630,6 +639,15 @@ class Test_plotting_setup_plots(unittest.TestCase):
 
     def tearDown(self) -> None:
         plt.close(self.fig)
+
+
+# %% plotting.save_zoomed_version
+class Test_plotting_save_zoomed_version(unittest.TestCase):
+    r"""
+    Tests the plotting.save_zoomed_version function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% Unit test execution

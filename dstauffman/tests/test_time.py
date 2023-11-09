@@ -476,7 +476,7 @@ class Test_convert_duration_to_np(unittest.TestCase):
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_convert_num_dt_to_np(unittest.TestCase):
     r"""
-    Tests the convert_datetime_to_np function with the following cases:
+    Tests the convert_num_dt_to_np function with the following cases:
         Nominal
         Built-in numpy units
         Map conversions

@@ -21,7 +21,7 @@ else:
 
 
 # %% aerospace.d_2_r
-class Test_d_2_r(unittest.TestCase):
+class Test_aerospace_d_2_r(unittest.TestCase):
     r"""
     Tests the aerospace.d_2_r function with the following cases:
         Single vector
@@ -39,7 +39,7 @@ class Test_d_2_r(unittest.TestCase):
 
 
 # %% aerospace.r_2_d
-class Test_r_2_d(unittest.TestCase):
+class Test_aerospace_r_2_d(unittest.TestCase):
     r"""
     Tests the aerospace.r_2_d function with the following cases:
         Single vector
@@ -58,7 +58,7 @@ class Test_r_2_d(unittest.TestCase):
 
 # %% aerospace.norm
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
-class Test_norm(unittest.TestCase):
+class Test_aerospace_norm(unittest.TestCase):
     r"""
     Tests the aerospace.norm function with the following cases:
         Single vector
@@ -76,7 +76,7 @@ class Test_norm(unittest.TestCase):
 
 # %% aerospace.dot
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
-class Test_dot(unittest.TestCase):
+class Test_aerospace_dot(unittest.TestCase):
     r"""
     Tests the aerospace.dot function with the following cases:
         Nominal
@@ -89,7 +89,7 @@ class Test_dot(unittest.TestCase):
 
 # %% aerospace.cross
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
-class Test_cross(unittest.TestCase):
+class Test_aerospace_cross(unittest.TestCase):
     r"""
     Tests the aerospace.cross function with the following cases:
         TBD
@@ -109,9 +109,29 @@ class Test_cross(unittest.TestCase):
 
 # %% aerospace.jd_to_numpy
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
-class Test_jd_to_numpy(unittest.TestCase):
+class Test_aerospace_jd_to_numpy(unittest.TestCase):
     r"""
     Tests the aerospace.jd_to_numpy function with the following cases:
+        Nominal
+        Vectorized
+    """
+
+    def test_nominal(self) -> None:
+        date = space.jd_to_numpy(2451545.0)
+        self.assertEqual(date, np.datetime64("2000-01-01T12:00:00"))
+
+    def test_vectorized(self) -> None:
+        jd = np.array([2451544.5, 2451545.0])
+        date = space.jd_to_numpy(jd)
+        exp = np.array([np.datetime64("2000-01-01T00:00:00"), np.datetime64("2000-01-01T12:00:00")])
+        np.testing.assert_array_equal(date, exp)
+
+
+# %% aerospace.numpy_to_jd
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_numpy_to_jd(unittest.TestCase):
+    r"""
+    Tests the aerospace.numpy_to_jd function with the following cases:
         Nominal
         Vectorized
     """
@@ -126,23 +146,13 @@ class Test_jd_to_numpy(unittest.TestCase):
         np.testing.assert_array_equal(jd, np.array([2451544.5, 2451545.0]))
 
 
-# %% aerospace.jd_to_numpy
-@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
-class Test_aerospace_jd_to_numpy(unittest.TestCase):
+# %% aerospace.jd_2_century
+class Test_aerospace_jd_2_century(unittest.TestCase):
     r"""
-    Tests the aerospace.jd_to_numpy function with the following cases:
-        Nominal
+    Tests the aerospace.jd_2_century function with the following cases:
+        TBD
     """
-
-    def test_nominal(self) -> None:
-        date = space.jd_to_numpy(2451545.0)
-        self.assertEqual(date, np.datetime64("2000-01-01T12:00:00"))
-
-    def test_vectorized(self) -> None:
-        jd = np.array([2451544.5, 2451545.0])
-        date = space.jd_to_numpy(jd)
-        exp = np.array([np.datetime64("2000-01-01T00:00:00"), np.datetime64("2000-01-01T12:00:00")])
-        np.testing.assert_array_equal(date, exp)
+    pass  # TODO: write this
 
 
 # %% aerospace.d_2_dms
@@ -236,45 +246,163 @@ class Test_aerospace_r_2_hms(unittest.TestCase):
 
 
 # %% aerospace.aer_2_rdr
+class Test_aerospace_aer_2_rdr(unittest.TestCase):
+    r"""
+    Tests the aerospace.aer_2_rdr function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.aer_2_sez
+class Test_aerospace_aer_2_sez(unittest.TestCase):
+    r"""
+    Tests the aerospace.aer_2_sez function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.geo_loc_2_ijk
+class Test_aerospace_geo_loc_2_ijk(unittest.TestCase):
+    r"""
+    Tests the aerospace.geo_loc_2_ijk function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.ijk_2_rdr
+class Test_aerospace_ijk_2_rdr(unittest.TestCase):
+    r"""
+    Tests the aerospace.ijk_2_rdr function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.ijk_2_sez
+class Test_aerospace_ijk_2_sez(unittest.TestCase):
+    r"""
+    Tests the aerospace.ijk_2_sez function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.long_2_sidereal
+class Test_aerospace_long_2_sidereal(unittest.TestCase):
+    r"""
+    Tests the aerospace.long_2_sidereal function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.rdr_2_aer
+class Test_aerospace_rdr_2_aer(unittest.TestCase):
+    r"""
+    Tests the aerospace.rdr_2_aer function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.rdr_2_ijk
+class Test_aerospace_rdr_2_ijk(unittest.TestCase):
+    r"""
+    Tests the aerospace.rdr_2_ijk function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.sez_2_aer
+class Test_aerospace_sez_2_aer(unittest.TestCase):
+    r"""
+    Tests the aerospace.sez_2_aer function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.sez_2_ijk
+class Test_aerospace_sez_2_ijk(unittest.TestCase):
+    r"""
+    Tests the aerospace.sez_2_ijk function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.rv_aer_2_ijk
+class Test_aerospace_rv_aer_2_ijk(unittest.TestCase):
+    r"""
+    Tests the aerospace.rv_aer_2_ijk function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.rv_aer_2_sez
+class Test_aerospace_rv_aer_2_sez(unittest.TestCase):
+    r"""
+    Tests the aerospace.rv_aer_2_sez function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.rv_ijk_2_aer
+class Test_aerospace_rv_ijk_2_aer(unittest.TestCase):
+    r"""
+    Tests the aerospace.rv_ijk_2_aer function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.rv_ijk_2_sez
+class Test_aerospace_rv_ijk_2_sez(unittest.TestCase):
+    r"""
+    Tests the aerospace.rv_ijk_2_sez function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.rv_sez_2_aer
+class Test_aerospace_rv_sez_2_aer(unittest.TestCase):
+    r"""
+    Tests the aerospace.rv_sez_2_aer function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.rv_sez_2_ijk
+class Test_aerospace_rv_sez_2_ijk(unittest.TestCase):
+    r"""
+    Tests the aerospace.rv_sez_2_ijk function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.get_sun_radec_approx
+class Test_aerospace_get_sun_radec_approx(unittest.TestCase):
+    r"""
+    Tests the aerospace.get_sun_radec_approx function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% aerospace.get_sun_radec
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_get_sun_radec(unittest.TestCase):
     r"""
-    Tests the get_sun_radec function with the following cases:
+    Tests the aerospace.get_sun_radec function with the following cases:
         Nominal
         Return early
     """
@@ -299,7 +427,7 @@ class Test_aerospace_get_sun_radec(unittest.TestCase):
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_get_sun_distance(unittest.TestCase):
     r"""
-    Tests the get_sun_distance function with the following cases:
+    Tests the aerospace.get_sun_distance function with the following cases:
         Close & Far
         Vectorized
     """
@@ -328,14 +456,19 @@ class Test_aerospace_get_sun_distance(unittest.TestCase):
 
 
 # %% aerospace.beta_from_oe
-pass  # TODO: write this
+class Test_aerospace_beta_from_oe(unittest.TestCase):
+    r"""
+    Tests the aerospace.beta_from_oe function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% aerospace.eclipse_fraction
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_eclipse_fraction(unittest.TestCase):
     r"""
-    Tests the aerospace.eclipse_fraction with the following cases:
+    Tests the aerospace.eclipse_fraction function with the following cases:
         Nominal
         Bad Values
     """
@@ -361,7 +494,7 @@ class Test_aerospace_eclipse_fraction(unittest.TestCase):
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_earth_radius_by_latitude(unittest.TestCase):
     r"""
-    Tests the aerospace.earth_radius_by_latitude function withthe following cases:
+    Tests the aerospace.earth_radius_by_latitude function with the following cases:
         Equator
         Pole
         In-between

@@ -19,10 +19,10 @@ if HAVE_NUMPY:
     import numpy as np
 
 
-# %% _any
-class Test_aerospace__any(unittest.TestCase):
+# %% aerospace.orbit_conv._any
+class Test_aerospace_orbit_conv__any(unittest.TestCase):
     r"""
-    Tests the aerospace._any function with the following cases:
+    Tests the aerospace.orbit_conv._any function with the following cases:
         Bool
         Int
         Float
@@ -52,7 +52,7 @@ class Test_aerospace__any(unittest.TestCase):
         self.assertFalse(space.orbit_conv._any([False, False, False]))
 
 
-# %% anomaly_eccentric_2_mean
+# %% aerospace.anomaly_eccentric_2_mean
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_anomaly_eccentric_2_mean(unittest.TestCase):
     r"""
@@ -171,10 +171,21 @@ class Test_aerospace_anomaly_eccentric_2_true(unittest.TestCase):
 
 
 # %% aerospace.anomaly_hyperbolic_2_mean
-pass  # TODO: write this
+class Test_aerospace_anomaly_hyperbolic_2_mean(unittest.TestCase):
+    r"""
+    Tests the aerospace.anomaly_hyperbolic_2_mean function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.anomaly_hyperbolic_2_true
-pass  # TODO: write this
+class Test_aerospace_anomaly_hyperbolic_2_true(unittest.TestCase):
+    r"""
+    Tests the aerospace.anomaly_hyperbolic_2_true function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% aerospace.anomaly_mean_2_eccentric
@@ -226,16 +237,39 @@ class Test_aerospace_anomaly_mean_2_eccentric(unittest.TestCase):
 
 
 # %% aerospace.anomaly_mean_2_true
-pass  # TODO: write this
+class Test_aerospace_anomaly_mean_2_true(unittest.TestCase):
+    r"""
+    Tests the aerospace.anomaly_mean_2_true function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.anomaly_true_2_eccentric
-pass  # TODO: write this
+class Test_aerospace_anomaly_true_2_eccentric(unittest.TestCase):
+    r"""
+    Tests the aerospace.anomaly_true_2_eccentric function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.anomaly_true_2_hyperbolic
-pass  # TODO: write this
+class Test_aerospace_anomaly_true_2_hyperbolic(unittest.TestCase):
+    r"""
+    Tests the aerospace.anomaly_true_2_hyperbolic function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.anomaly_true_2_mean
-pass  # TODO: write this
+class Test_aerospace_anomaly_true_2_mean(unittest.TestCase):
+    r"""
+    Tests the aerospace.anomaly_true_2_mean function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% aerospace.mean_motion_2_semimajor
@@ -287,19 +321,48 @@ class Test_aerospace_mean_motion_2_semimajor(unittest.TestCase):
 
 
 # %% aerospace.period_2_semimajor
-pass  # TODO: write this
+class Test_aerospace_period_2_semimajor(unittest.TestCase):
+    r"""
+    Tests the aerospace.period_2_semimajor function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.semimajor_2_mean_motion
-pass  # TODO: write this
+class Test_aerospace_semimajor_2_mean_motion(unittest.TestCase):
+    r"""
+    Tests the aerospace.semimajor_2_mean_motion function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.semimajor_2_period
-pass  # TODO: write this
+class Test_aerospace_semimajor_2_period(unittest.TestCase):
+    r"""
+    Tests the aerospace.semimajor_2_period function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.sidereal_2_long
-pass  # TODO: write this
+class Test_aerospace_sidereal_2_long(unittest.TestCase):
+    r"""
+    Tests the aerospace.sidereal_2_long function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.raan_2_mltan
-pass  # TODO: write this
+class Test_aerospace_raan_2_mltan(unittest.TestCase):
+    r"""
+    Tests the aerospace.raan_2_mltan function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% aerospace.jd_2_sidereal
@@ -324,10 +387,21 @@ class Test_aerospace_jd_2_sidereal(unittest.TestCase):
 
 
 # %% aerospace.quat_eci_2_ecf_approx
-pass  # TODO: write this
+class Test_aerospace_quat_eci_2_ecf_approx(unittest.TestCase):
+    r"""
+    Tests the aerospace.quat_eci_2_ecf_approx function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
 
 # %% aerospace.quat_eci_2_ecf
-pass  # TODO: write this
+class Test_aerospace_quat_eci_2_ecf(unittest.TestCase):
+    r"""
+    Tests the aerospace.quat_eci_2_ecf function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
 
 
 # %% Unit test execution

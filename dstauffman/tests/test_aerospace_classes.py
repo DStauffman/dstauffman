@@ -19,6 +19,15 @@ if HAVE_NUMPY:
     import numpy as np
 
 
+# %% aerospace.classes._chop_wrapper
+class Test_aerospace_classes__chop_wrapper(unittest.TestCase):
+    r"""
+    Tests the aerospace.classes._chop_wrapper function with the following cases:
+        TBD
+    """
+    pass  # TODO: write this
+
+
 # %% aerospace.KfInnov
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_KfInnov(unittest.TestCase):
