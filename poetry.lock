@@ -1363,7 +1363,7 @@ files = [
 
 [[package]]
 name = "nubs"
-version = "1.0.1"
+version = "1.1.0"
 description = "Extends the built-in Python logging module with some convenient functions and custom log levels."
 optional = false
 python-versions = ">=3.9, <3.13"
@@ -1371,7 +1371,8 @@ files = []
 develop = false
 
 [package.extras]
-static = ["black (>=23.0,<24.0)", "flake8 (>=5.0,<6.0)", "isort (>=5.10,<6.0)", "mypy (>=1.0,<2.0)", "pycodestyle (>=2.9,<3.0)", "pylint (>=2.15,<3.0)"]
+shader = ["numba (>=0.57,<0.58)"]
+static = ["black (>23.0)", "flake8 (>=6.0,<7.0)", "isort (>=5.10,<6.0)", "mypy (>=1.5,<2.0)", "pycodestyle (>=2.10,<3.0)", "pylint (>=2.16,<3.0)"]
 
 [package.source]
 type = "directory"
@@ -2301,7 +2302,7 @@ files = [
 
 [[package]]
 name = "slog"
-version = "1.0.1"
+version = "1.1.0"
 description = "Extends the built-in Python logging module with some convenient functions and custom log levels."
 optional = false
 python-versions = ">=3.9, <3.13"
@@ -2309,7 +2310,7 @@ files = []
 develop = false
 
 [package.extras]
-static = ["black (>=23.0,<24.0)", "flake8 (>=5.0,<6.0)", "isort (>=5.10,<6.0)", "mypy (>=1.0,<2.0)", "pycodestyle (>=2.9,<3.0)", "pylint (>=2.15,<3.0)"]
+static = ["black (>23.0)", "flake8 (>=6.0,<7.0)", "isort (>=5.9,<6.0)", "mypy (>=1.5,<2.0)", "pycodestyle (>=2.10,<3.0)", "pylint (>=2.16,<3.0)"]
 
 [package.source]
 type = "directory"
