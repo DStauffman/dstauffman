@@ -49,7 +49,7 @@ numpy = {version = "^1.24", optional = true}
 pandas = {version = "^1.5", optional = true}
 pylint = {version = "^2.16", optional = true}
 pyqt5 = {version = "^5.15.7", optional = true}
-pyqt5-stubs = {version = "^5.15.7", optional = true}
+pyqt5-stubs = {version = "^5.15", optional = true}
 pyqt5-sip = {version = "^12.11", optional = true}  # temp hack for poetry not grabbing it correctly
 pyqt5-qt5 = {version = "^5.15.7", optional = true}  # temp hack for poetry not grabbing it correctly
 pycodestyle = {version = "^2.10", optional = true}
