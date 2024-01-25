@@ -1482,7 +1482,7 @@ def get_env_var(env_key: str, default: Optional[str] = None) -> str:
 
     """
     if _ALLOWED_ENVS is not None:
-        if env_key not in _ALLOWED_ENVS:  # pylint: disable=unsupported-membership-test
+        if env_key not in _ALLOWED_ENVS:
             raise KeyError(f'The environment variable of "{env_key}" is not on the allowed list.')
     try:
         value = os.environ[env_key]

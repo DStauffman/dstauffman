@@ -53,7 +53,7 @@ else:
     from array import array as ndarray  # type: ignore[assignment]
     from math import inf
 
-    from nubs import np_all  # type: ignore[no-redef]  # pylint: disable=ungrouped-imports
+    from nubs import np_all  # type: ignore[no-redef]
 if HAVE_PANDAS:
     from pandas import DataFrame
 
@@ -475,7 +475,7 @@ def save_convert_hdf5(self: Any, **kwargs: Any) -> Dict[str, bool]:
 
 
 # %% save_restore_hdf5
-def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) -> None:  # pylint: disable=unused-argument
+def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) -> None:
     r"""Supporting function for loading from HDF5."""
     if convert_dates:
         assert HAVE_NUMPY, "Must have numpy to convert dates."
@@ -998,7 +998,7 @@ class FixedDict(dict):
         super().__init__(*args, **kwargs)
         self._frozen: bool = False
 
-    def __getitem__(self, k: Any) -> Any:  # pylint: disable=useless-super-delegation
+    def __getitem__(self, k: Any) -> Any:
         return super().__getitem__(k)
 
     def __setitem__(self, k: Any, v: Any) -> Any:
@@ -1010,7 +1010,7 @@ class FixedDict(dict):
     def __delitem__(self, k: Any) -> None:
         raise NotImplementedError
 
-    def __contains__(self, k: Any) -> Any:  # pylint: disable=useless-super-delegation
+    def __contains__(self, k: Any) -> Any:
         return super().__contains__(k)
 
     def __copy__(self) -> FixedDict:
@@ -1027,7 +1027,7 @@ class FixedDict(dict):
         # Call __new__ (and thus __init__) on unpickling.
         return ()
 
-    def get(self, k: Any, default: Optional[Any] = None) -> Any:  # pylint: disable=useless-super-delegation
+    def get(self, k: Any, default: Optional[Any] = None) -> Any:
         r""".get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
         return super().get(k, default)
 

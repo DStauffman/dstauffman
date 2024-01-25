@@ -173,7 +173,7 @@ def process_command_line_options(log_start: Optional[Union[bool, str]] = None) -
 
     # log any non-defaults
     # fmt: off
-    print_func: Callable[[str], None] = lambda x: print(x) if log_level is None else lambda x: logger.log(LogLevel.L3, x)  # type: ignore[assignment]  # pylint: disable=unnecessary-lambda-assignment
+    print_func: Callable[[str], None] = lambda x: print(x) if log_level is None else lambda x: logger.log(LogLevel.L3, x)  # type: ignore[assignment]
     # fmt: on
     if not use_display:
         print_func("Running without displaying any plots.")

@@ -48,6 +48,9 @@ def read_kp_ap_etc_data(filename: Path) -> pd.DataFrame:
     ]
     # fmt: on
     df = pd.read_table(filename, names=names, delim_whitespace=True, comment="#")
+    # convert year-month-day to a GMT value
+    df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"}, inplace=True)
+    df.insert(0, "GMT", pd.to_datetime(df[["year", "month", "day"]]))
     return df
 
 

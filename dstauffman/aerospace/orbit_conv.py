@@ -27,7 +27,7 @@ if HAVE_NUMPY:
 else:
     from math import sqrt  # type: ignore[assignment]
 
-    from nubs import np_any  # pylint: disable=ungrouped-imports
+    from nubs import np_any
 if HAVE_SCIPY:
     from scipy.optimize import root
 if TYPE_CHECKING:

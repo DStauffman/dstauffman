@@ -1842,6 +1842,8 @@ def plot_tci(
     fig, ax = fig_ax[0]
     # Plot the basic data
     title = "Thermosphere Climate Index"
+    assert (manager := fig.canvas.manager) is not None
+    manager.set_window_title(title)
     # fmt: off
     make_time_plot(
         title, time, data, units="W", second_units=("10^11 W", 1e-11), time_units="numpy",

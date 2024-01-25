@@ -1,26 +1,26 @@
-Solar Cycle 	Start (Minimum) (Y-M) 	Smoothed minimum SSN (start of cycle) 	Maximum (Y-M) 	Smoothed maximum SSN 	Average spots per day 	Time of Rise (Y-M) 	Duration (Y-M) 	100+ spots (days) 	150+ spots (days) 	200+ spots (days)
-Solar cycle 1 	1755-02 	14.0 	1761-06 	144 	(70) 	6-04 	11-04 			
-Solar cycle 2 	1766-06 	18.6 	1769-09 	193 	(99) 	3-03 	9-00 			
-Solar cycle 3 	1775-06 	12.0 	1778-05 	264 	(111) 	2-11 	9-03 			
-Solar cycle 4 	1784-09 	15.9 	1788-02 	235 	(103) 	3-05 	13-07 			
-Solar cycle 5 	1798-04 	5.3 	1805-02 	82 	(38) 	6-10 	12-03 			
-Solar cycle 6 	1810-07 	0.0 	1816-05 	81 	(31) 	5-10 	12-10 			
-Solar cycle 7 	1823-05 	0.1 	1829-11 	119 	(63) 	6-06 	10-06 			
-Solar cycle 8 	1833-11 	12.2 	1837-03 	245 	(112) 	3-04 	9-08 			
-Solar cycle 9 	1843-07 	17.6 	1848-02 	220 	(99) 	4-07 	12-05 			
-Solar cycle 10 	1855-12 	6.0 	1860-02 	186 	92 	4-02 	11-03 	1694 	898 	365
-Solar cycle 11 	1867-03 	9.9 	1870-08 	234 	89 	3-05 	11-09 	1595 	1013 	565
-Solar cycle 12 	1878-12 	3.7 	1883-12 	124 	57 	5-00 	11-03 	894 	291 	51
-Solar cycle 13 	1890-03 	8.3 	1894-01 	147 	65 	3-10 	11-10 	1137 	470 	150
-Solar cycle 14 	1902-01 	4.5 	1906-02 	107 	54 	4-01 	11-06 	824 	283 	67
-Solar cycle 15 	1913-07 	2.5 	1917-08 	176 	73 	4-01 	10-01 	1103 	573 	224
-Solar cycle 16 	1923-08 	9.3 	1928-04 	130 	68 	4-08 	10-01 	1006 	415 	122
-Solar cycle 17 	1933-09 	5.8 	1937-04 	199 	96 	3-07 	10-05 	1632 	901 	420
-Solar cycle 18 	1944-02 	12.9 	1947-05 	219 	109 	3-03 	10-02 	1778 	1177 	633
-Solar cycle 19 	1954-04 	5.1 	1958-03 	285 	129 	3-11 	10-06 	1933 	1532 	1089
-Solar cycle 20 	1964-10 	14.3 	1968-11 	157 	86 	4-01 	11-05 	1643 	726 	208
-Solar cycle 21 	1976-03 	17.8 	1979-12 	233 	111 	3-09 	10-06 	1872 	1313 	753
-Solar cycle 22 	1986-09 	13.5 	1989-11 	213 	106 	3-02 	9-11 	1662 	1124 	589
-Solar cycle 23 	1996-08 	11.2 	2001-11 	180 	82 	5-03 	12-04 	1651 	903 	343
-Solar cycle 24 	2008-12 	2.2 	2014-04 	116 	49 	5-04 	11-00 	709 	140 	3
-Solar cycle 25 	2019-12 	1.8 		Progressive: 121* (Mar 2023) (Same point last cycle: 98)				356 (Oct 14 2023) (Same point last cycle: 226)	107 (Oct 9 2023) (Same point last cycle: 39) 	10 (Oct 9 2023) (Same point last cycle: 0) 
+Solar Cycle	Start (Minimum) (Y-M)	Smoothed minimum SSN (start of cycle)	Maximum (Y-M)	Smoothed maximum SSN	Average spots per day	Time of Rise (Y-M)	Duration (Y-M)	100+ spots (days)	150+ spots (days)	200+ spots (days)
+Solar cycle 1	1755-02	14.0	1761-06	144	(70)	6-04	11-04
+Solar cycle 2	1766-06	18.6	1769-09	193	(99)	3-03	9-00
+Solar cycle 3	1775-06	12.0	1778-05	264	(111)	2-11	9-03
+Solar cycle 4	1784-09	15.9	1788-02	235	(103)	3-05	13-07
+Solar cycle 5	1798-04	5.3	1805-02	82	(38)	6-10	12-03
+Solar cycle 6	1810-07	0.0	1816-05	81	(31)	5-10	12-10
+Solar cycle 7	1823-05	0.1	1829-11	119	(63)	6-06	10-06
+Solar cycle 8	1833-11	12.2	1837-03	245	(112)	3-04	9-08
+Solar cycle 9	1843-07	17.6	1848-02	220	(99)	4-07	12-05
+Solar cycle 10	1855-12	6.0	1860-02	186	92	4-02	11-03	1694	898	365
+Solar cycle 11	1867-03	9.9	1870-08	234	89	3-05	11-09	1595	1013	565
+Solar cycle 12	1878-12	3.7	1883-12	124	57	5-00	11-03	894	291	51
+Solar cycle 13	1890-03	8.3	1894-01	147	65	3-10	11-10	1137	470	150
+Solar cycle 14	1902-01	4.5	1906-02	107	54	4-01	11-06	824	283	67
+Solar cycle 15	1913-07	2.5	1917-08	176	73	4-01	10-01	1103	573	224
+Solar cycle 16	1923-08	9.3	1928-04	130	68	4-08	10-01	1006	415	122
+Solar cycle 17	1933-09	5.8	1937-04	199	96	3-07	10-05	1632	901	420
+Solar cycle 18	1944-02	12.9	1947-05	219	109	3-03	10-02	1778	1177	633
+Solar cycle 19	1954-04	5.1	1958-03	285	129	3-11	10-06	1933	1532	1089
+Solar cycle 20	1964-10	14.3	1968-11	157	86	4-01	11-05	1643	726	208
+Solar cycle 21	1976-03	17.8	1979-12	233	111	3-09	10-06	1872	1313	753
+Solar cycle 22	1986-09	13.5	1989-11	213	106	3-02	9-11	1662	1124	589
+Solar cycle 23	1996-08	11.2	2001-11	180	82	5-03	12-04	1651	903	343
+Solar cycle 24	2008-12	2.2	2014-04	116	49	5-04	11-00	709	140	3
+Solar cycle 25	2019-12	1.8		Progressive: 125* (Jun 2023) (Same point SC24: 87)				406 (Jan 10 2024) (Same point SC24: 253)	126 (Jan 10 2024) (Same point SC24: 46)	9 (Jan 10 2024) (Same point SC24: 0)

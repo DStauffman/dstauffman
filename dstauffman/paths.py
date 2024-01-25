@@ -39,7 +39,7 @@ def get_root_dir() -> Path:
     p = .../dstauffman/dstauffman')
 
     """
-    # this folder is the root directory based on the location of this file (utils.py)
+    # this folder is the root directory based on the location of this file (paths.py)
     return Path(__file__).resolve().parent
 
 

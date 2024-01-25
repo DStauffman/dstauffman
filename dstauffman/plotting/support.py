@@ -1069,9 +1069,9 @@ def zoom_ylim(
         return
     # If not given, find time/data from the plot itself
     if time is None:
-        time = np.hstack([artist.get_xdata() for artist in ax.lines])  # type: ignore[attr-defined]
+        time = np.hstack([artist.get_xdata() for artist in ax.lines])
     if data is None:
-        data = np.hstack([artist.get_ydata() for artist in ax.lines])  # type: ignore[attr-defined]
+        data = np.hstack([artist.get_ydata() for artist in ax.lines])
     # exit if the plotted data are not numeric
     if not np.issubdtype(data.dtype, np.number):  # type: ignore[union-attr]
         return
@@ -1393,7 +1393,7 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
     """
     # plot second Y axis
     ax2 = ax.twinx()
-    ax2.set_ylim(tuple(np.multiply(multiplier, ax.get_ylim())))  # type: ignore[arg-type]
+    ax2.set_ylim(tuple(np.multiply(multiplier, ax.get_ylim())))
     ax2.set_ylabel(ylab)
     return ax2  # type: ignore[return-value]
 
@@ -2204,7 +2204,7 @@ def save_images_to_pdf(
     # Create PDF of images
     images = []
     for ix, fig in enumerate(figs):
-        fig_title = get_figure_title(fig)
+        fig_title = resolve_name(get_figure_title(fig))
         this_image = folder.joinpath(fig_title + "." + plot_type)
         image_rgba = Image.open(this_image)
         image_jpg = image_rgba.convert("RGB")
@@ -2356,7 +2356,7 @@ def fig_ax_factory(
     if passthrough:
         return tuple(None for _ in range(num_figs * num_row * num_col))
     figs: List[Figure] = []
-    axes: Union[List[Axes], List[List[Axes]], List[List[List[Axes]]]] = []  # type: ignore[assignment]
+    axes: Union[List[Axes], List[List[Axes]], List[List[List[Axes]]]] = []
     for i in range(num_figs):
         (fig, ax) = plt.subplots(num_row, num_col, sharex=sharex)
         if bool(suptitle):

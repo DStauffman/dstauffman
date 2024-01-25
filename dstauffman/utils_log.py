@@ -245,7 +245,7 @@ def fix_rollover(
     # optionally check accelerations
     if check_accel:
         acc = np.diff(out, 2)
-        clean_acc = remove_outliers(acc, **kwargs)  # type: ignore[call-overload]
+        clean_acc = remove_outliers(acc, **kwargs)
         bad_ix = np.flatnonzero(np.isnan(clean_acc) & ~np.isnan(acc))
         if bad_ix.size > 0:
             comp_roll(comp, bad_ix[acc[bad_ix] < 0] + 1, "++")
