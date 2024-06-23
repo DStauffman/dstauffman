@@ -7,7 +7,7 @@ Notes
 """
 
 # %% Constants
-version_info = (3, 5, 0)
+version_info = (3, 5, 1)
 
 # Below is data about the minor release history for potential use in deprecating older support.
 # For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html
@@ -40,3 +40,4 @@ Oct 11, 2023: dstauffman 3.5
 # v3.2 Change the way capture_output works internally and moved it to only be within slog.
 # v3.3 Move nubs and slog to be their own module level dependencies.
 # v3.4 Removed the option to save as pickle files, using only HDF5 instead.
+# v3.5 Remove unneeded dependencies on requests/urllib3 and keep in sync with other work.

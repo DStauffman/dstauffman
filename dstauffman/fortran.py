@@ -100,16 +100,10 @@ class _FortranSource(Frozen):
 
 # %% Functions - _parse_source
 @overload
-def _parse_source(filename: Path, assert_single: Literal[True] = ...) -> _FortranSource:
-    ...
-
-
+def _parse_source(filename: Path, assert_single: Literal[True] = ...) -> _FortranSource: ...
 @overload
-def _parse_source(filename: Path, assert_single: Literal[False]) -> List[_FortranSource]:
-    ...
-
-
-def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranSource, List[_FortranSource]]:
+def _parse_source(filename: Path, assert_single: Literal[False]) -> List[_FortranSource]: ...
+def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranSource, List[_FortranSource]]:  # noqa: C901
     r"""
     Parses the individual fortran source file into relevant information.
 
@@ -493,7 +487,7 @@ clean :
 
 
 # %% Functions - _write_makefile
-def _write_makefile(
+def _write_makefile(  # noqa: C901
     makefile: Path,
     code: List[_FortranSource],
     *,

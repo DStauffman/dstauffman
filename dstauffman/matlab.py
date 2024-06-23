@@ -33,13 +33,12 @@ if TYPE_CHECKING:
     _N = NDArray[np.float64]
     _M = NDArray[np.float64]  # 2D
 
-
 # %% Constants
 _EPS = float(np.finfo(float).eps) if HAVE_NUMPY else 2.220446049250313e-16
 
 
 # %% load_matlab
-def load_matlab(
+def load_matlab(  # noqa: C901
     filename: Union[str, Path],
     varlist: Optional[Union[List[str], Set[str], Tuple[str, ...]]] = None,
     *,
@@ -385,20 +384,11 @@ def find_last(x: _B, /) -> int:
 
 # %% prepend
 @overload
-def prepend(vec: _B, new: bool) -> _B:
-    ...
-
-
+def prepend(vec: _B, new: bool) -> _B: ...
 @overload
-def prepend(vec: _I, new: int) -> _I:
-    ...
-
-
+def prepend(vec: _I, new: int) -> _I: ...
 @overload
-def prepend(vec: _N, new: float) -> _N:
-    ...
-
-
+def prepend(vec: _N, new: float) -> _N: ...
 def prepend(vec: Union[_B, _I, _N], new: Union[bool, int, float]) -> Union[_B, _I, _N]:
     r"""
     Add a value to the beginning of an array.
@@ -439,20 +429,11 @@ def prepend(vec: Union[_B, _I, _N], new: Union[bool, int, float]) -> Union[_B, _
 
 # %% postpend
 @overload
-def postpend(vec: _B, new: bool) -> _B:
-    ...
-
-
+def postpend(vec: _B, new: bool) -> _B: ...
 @overload
-def postpend(vec: _I, new: int) -> _I:
-    ...
-
-
+def postpend(vec: _I, new: int) -> _I: ...
 @overload
-def postpend(vec: _N, new: float) -> _N:
-    ...
-
-
+def postpend(vec: _N, new: float) -> _N: ...
 def postpend(vec: Union[_B, _I, _N], new: Union[bool, int, float]) -> Union[_B, _I, _N]:
     r"""
     Add a value to the beginning of an array.

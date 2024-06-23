@@ -119,25 +119,13 @@ cm2ap = convert_monthly_to_annual_probability
 
 # %% Functions - prob_to_rate
 @overload
-def prob_to_rate(prob: float) -> float:
-    ...
-
-
+def prob_to_rate(prob: float) -> float: ...
 @overload
-def prob_to_rate(prob: _N) -> _N:
-    ...
-
-
+def prob_to_rate(prob: _N) -> _N: ...
 @overload
-def prob_to_rate(prob: float, time: Union[int, float]) -> float:
-    ...
-
-
+def prob_to_rate(prob: float, time: Union[int, float]) -> float: ...
 @overload
-def prob_to_rate(prob: _N, time: Union[int, float]) -> _N:
-    ...
-
-
+def prob_to_rate(prob: _N, time: Union[int, float]) -> _N: ...
 def prob_to_rate(prob: Union[float, _N], time: Union[int, float] = 1) -> Union[float, _N]:
     r"""
     Convert a given probability and time to a rate.
@@ -193,25 +181,13 @@ def prob_to_rate(prob: Union[float, _N], time: Union[int, float] = 1) -> Union[f
 
 # %% Functions - rate_to_prob
 @overload
-def rate_to_prob(rate: float) -> float:
-    ...
-
-
+def rate_to_prob(rate: float) -> float: ...
 @overload
-def rate_to_prob(rate: _N) -> _N:
-    ...
-
-
+def rate_to_prob(rate: _N) -> _N: ...
 @overload
-def rate_to_prob(rate: float, time: Union[int, float]) -> float:
-    ...
-
-
+def rate_to_prob(rate: float, time: Union[int, float]) -> float: ...
 @overload
-def rate_to_prob(rate: _N, time: Union[int, float]) -> _N:
-    ...
-
-
+def rate_to_prob(rate: _N, time: Union[int, float]) -> _N: ...
 def rate_to_prob(rate: Union[float, _N], time: Union[int, float] = 1) -> Union[float, _N]:
     r"""
     Convert a given rate and time to a probability.
@@ -254,15 +230,9 @@ def rate_to_prob(rate: Union[float, _N], time: Union[int, float] = 1) -> Union[f
 
 # %% Functions - annual_rate_to_monthly_probability
 @overload
-def annual_rate_to_monthly_probability(rate: float) -> float:
-    ...
-
-
+def annual_rate_to_monthly_probability(rate: float) -> float: ...
 @overload
-def annual_rate_to_monthly_probability(rate: _N) -> _N:
-    ...
-
-
+def annual_rate_to_monthly_probability(rate: _N) -> _N: ...
 def annual_rate_to_monthly_probability(rate: Union[float, _N]) -> Union[float, _N]:
     r"""
     Convert a given annual rate to a monthly probability.
@@ -303,15 +273,9 @@ def annual_rate_to_monthly_probability(rate: Union[float, _N]) -> Union[float, _
 
 # %% Functions - monthly_probability_to_annual_rate
 @overload
-def monthly_probability_to_annual_rate(prob: float) -> float:
-    ...
-
-
+def monthly_probability_to_annual_rate(prob: float) -> float: ...
 @overload
-def monthly_probability_to_annual_rate(prob: _N) -> _N:
-    ...
-
-
+def monthly_probability_to_annual_rate(prob: _N) -> _N: ...
 def monthly_probability_to_annual_rate(prob: Union[float, _N]) -> Union[float, _N]:
     r"""
     Convert a given monthly probability to an annual rate.

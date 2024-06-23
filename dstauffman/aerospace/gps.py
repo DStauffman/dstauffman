@@ -372,22 +372,17 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
 
 # %% Functions - gps_to_datetime
 @overload
-def gps_to_datetime(week: Union[int, _I], time: Union[int, float, _I, _N]) -> Union[datetime.datetime, List[datetime.datetime]]:
-    ...
-
-
+def gps_to_datetime(
+    week: Union[int, _I], time: Union[int, float, _I, _N]
+) -> Union[datetime.datetime, List[datetime.datetime]]: ...
 @overload
 def gps_to_datetime(
     week: Union[int, _I], time: Union[int, float, _I, _N], form: Literal["datetime"] = ...
-) -> Union[datetime.datetime, List[datetime.datetime]]:
-    ...
-
-
+) -> Union[datetime.datetime, List[datetime.datetime]]: ...
 @overload
-def gps_to_datetime(week: Union[int, _I], time: Union[int, float, _I, _N], form: Literal["numpy"]) -> Union[np.datetime64, _D]:
-    ...
-
-
+def gps_to_datetime(
+    week: Union[int, _I], time: Union[int, float, _I, _N], form: Literal["numpy"]
+) -> Union[np.datetime64, _D]: ...
 def gps_to_datetime(
     week: Union[int, _I], time: Union[int, float, _I, _N], form: Literal["datetime", "numpy"] = "datetime"
 ) -> Union[datetime.datetime, List[datetime.datetime], np.datetime64, _D]:
@@ -469,27 +464,18 @@ def gps_to_datetime(
 @overload
 def gps_to_utc_datetime(
     week: Union[int, _I], time: Union[int, float, _I, _N]
-) -> Union[datetime.datetime, List[datetime.datetime]]:
-    ...
-
-
+) -> Union[datetime.datetime, List[datetime.datetime]]: ...
 @overload
 def gps_to_utc_datetime(
     week: Union[int, _I],
     time: Union[int, float, _I, _N],
     gps_to_utc_offset: Optional[Union[int, _I]],
     form: Literal["datetime"] = ...,
-) -> Union[datetime.datetime, List[datetime.datetime]]:
-    ...
-
-
+) -> Union[datetime.datetime, List[datetime.datetime]]: ...
 @overload
 def gps_to_utc_datetime(
     week: Union[int, _I], time: Union[int, float, _I, _N], gps_to_utc_offset: Optional[Union[int, _I]], form: Literal["numpy"]
-) -> Union[np.datetime64, _D]:
-    ...
-
-
+) -> Union[np.datetime64, _D]: ...
 def gps_to_utc_datetime(
     week: Union[int, _I],
     time: Union[int, float, _I, _N],

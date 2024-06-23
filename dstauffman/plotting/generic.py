@@ -80,7 +80,7 @@ if TYPE_CHECKING:
     _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
     _DeltaTime = Union[int, float, np.timedelta64]
     _Figs = List[Figure]
-    _FuncLamb = Callable[[Any, Any], float]
+    _FuncLamb = Callable[[Any, Any], Union[float, np.float64]]
     _SecUnits = Union[None, str, int, float, Tuple[str, float]]
 
 # %% Globals
@@ -88,7 +88,7 @@ logger = logging.getLogger(__name__)
 
 
 # %% Functions - make_generic_plot
-def make_generic_plot(
+def make_generic_plot(  # noqa: C901
     plot_type: str,
     description: str,
     time_one: Optional[_Times],
@@ -473,7 +473,7 @@ def make_generic_plot(
             func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)  # pylint: disable=unnecessary-lambda-assignment
         else:
             func_name = "Mean"
-            func_lamb = lambda x, y: np.nanmean(x, axis=y)  # type: ignore[assignment, return-value]  # pylint: disable=unnecessary-lambda-assignment
+            func_lamb = lambda x, y: np.nanmean(x, axis=y)  # pylint: disable=unnecessary-lambda-assignment
         if not doing_diffs and not is_cat_plot:
             if data_is_list:
                 data_func = [func_lamb(data_one[j][ix["one"][j]], None) for j in range(num_channels)]  # type: ignore[misc, index]
@@ -887,7 +887,7 @@ def make_generic_plot(
                     plot_func(this_axes, time_overlap, this_data, ".-", markersize=4, label=this_label, color=this_color)
             if is_quat_diff and not plot_components or (single_lines and (i + 1) % num_channels == 0):
                 if show_rms:
-                    value = _LEG_FORMAT.format(leg_conv * mag_func)  # type: ignore[operator]
+                    value = _LEG_FORMAT.format(leg_conv * mag_func)
                     this_label = f"Angle ({func_name}: {value} {leg_units})"
                 else:
                     this_label = "Angle"
@@ -1303,10 +1303,7 @@ def make_difference_plot(
     extra_plotter: Optional[ExtraPlotter],
     use_datashader: bool,
     fig_ax: Optional[Tuple[Figure, Axes]],
-) -> _Figs:
-    ...
-
-
+) -> _Figs: ...
 @overload
 def make_difference_plot(
     description: str,
@@ -1344,10 +1341,7 @@ def make_difference_plot(
     extra_plotter: Optional[ExtraPlotter],
     use_datashader: bool,
     fig_ax: Optional[Tuple[Figure, Axes]],
-) -> Tuple[_Figs, Dict[str, _N]]:
-    ...
-
-
+) -> Tuple[_Figs, Dict[str, _N]]: ...
 def make_difference_plot(
     description: str,
     time_one: Optional[_Times],
@@ -1775,7 +1769,7 @@ def make_bar_plot(
 
 
 # %% make_connected_sets
-def make_connected_sets(
+def make_connected_sets(  # noqa: C901
     description: str,
     points: _M,
     innovs: Optional[_M],

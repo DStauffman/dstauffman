@@ -293,15 +293,9 @@ def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = 
 
 # %% Functions - round_time
 @overload
-def round_time(x: np.datetime64, /, t_round: np.timedelta64) -> np.datetime64:
-    ...
-
-
+def round_time(x: np.datetime64, /, t_round: np.timedelta64) -> np.datetime64: ...
 @overload
-def round_time(x: np.ndarray, /, t_round: np.timedelta64) -> np.ndarray:
-    ...
-
-
+def round_time(x: np.ndarray, /, t_round: np.timedelta64) -> np.ndarray: ...
 def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
     r"""
     Rounding function that handles either numpy datetimes or doubles (seconds).
@@ -352,7 +346,7 @@ def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
 
 
 # %% Functions - convert_date
-def convert_date(
+def convert_date(  # noqa: C901
     date: Any,
     form: str,
     date_zero: Optional[datetime.datetime] = None,
@@ -558,15 +552,9 @@ def convert_time_units(time: Union[int, float], old_unit: str, new_unit: str) ->
 
 # %% Functions - convert_datetime_to_np
 @overload
-def convert_datetime_to_np(time: datetime.datetime, /, units: str = ...) -> np.datetime64:
-    ...
-
-
+def convert_datetime_to_np(time: datetime.datetime, /, units: str = ...) -> np.datetime64: ...
 @overload
-def convert_datetime_to_np(time: List[datetime.datetime], /, units: str = ...) -> _D:
-    ...
-
-
+def convert_datetime_to_np(time: List[datetime.datetime], /, units: str = ...) -> _D: ...
 def convert_datetime_to_np(
     time: Union[datetime.datetime, List[datetime.datetime]], /, units: str = NP_DATETIME_UNITS
 ) -> Union[np.datetime64, _D]:

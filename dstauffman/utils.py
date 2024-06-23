@@ -70,7 +70,7 @@ if TYPE_CHECKING:
     _StrOrListStr = TypeVar("_StrOrListStr", str, List[str])
     _SingleNum = Union[int, float, np.datetime64, np.int32, np.int64, np.float64]
     _Lists = Union[_N, List[_N], Tuple[_N, ...]]
-    _Number = Union[float, int, _N]
+    _NF = Union[float, np.float64, _N]
 
     class _PrintOptsKwArgs(TypedDict):
         precision: NotRequired[Optional[int]]
@@ -94,7 +94,9 @@ _ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variabl
 
 
 # %% Functions - _nan_equal
-def _nan_equal(a: Any, b: Any, /, tolerance: Optional[float] = None) -> bool:  # pylint: disable=too-many-return-statements
+def _nan_equal(  # pylint: disable=too-many-return-statements  # noqa: C901
+    a: Any, b: Any, /, tolerance: Optional[float] = None
+) -> bool:
     r"""
     Test ndarrays for equality, but ignore NaNs.
 
@@ -248,21 +250,14 @@ def find_in_range(
 
 # %% Functions - rms
 @overload
-def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> Union[float, int]:
-    ...
-
-
+def rms(
+    data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...
+) -> Union[float, np.float64]: ...
 @overload
-def rms(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _Number:
-    ...
-
-
+def rms(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _NF: ...
 @overload
-def rms(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> np.ndarray:
-    ...
-
-
-def rms(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
+def rms(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> NDArray[np.float64]: ...
+def rms(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ignore_nans: bool = False) -> _NF:
     r"""
     Calculate the root mean square of a number series.
 
@@ -322,21 +317,12 @@ def rms(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ign
 
 # %% Functions - rss
 @overload
-def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> Union[float, int]:
-    ...
-
-
+def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> float: ...
 @overload
-def rss(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _Number:
-    ...
-
-
+def rss(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _NF: ...
 @overload
-def rss(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> np.ndarray:
-    ...
-
-
-def rss(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
+def rss(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> NDArray[np.float64]: ...
+def rss(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ignore_nans: bool = False) -> _NF:
     r"""
     Calculate the root sum square of a number series.
 
@@ -391,11 +377,11 @@ def rss(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ign
         else:
             out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
     # return the result
-    return out  # type: ignore[return-value]
+    return out  # type: ignore[no-any-return]
 
 
 # %% Functions - compare_two_classes
-def compare_two_classes(
+def compare_two_classes(  # noqa: C901
     c1: Any,
     c2: Any,
     /,
@@ -565,7 +551,7 @@ def compare_two_classes(
 
 
 # %% Functions - compare_two_dicts
-def compare_two_dicts(
+def compare_two_dicts(  # noqa: C901
     d1: Mapping[Any, Any],
     d2: Mapping[Any, Any],
     /,
@@ -860,25 +846,13 @@ def unit(data: _Lists, axis: int = 0) -> np.ndarray:
 
 # %% modd
 @overload
-def modd(x1: ArrayLike, x2: ArrayLike, /) -> None:
-    ...
-
-
+def modd(x1: ArrayLike, x2: ArrayLike, /) -> None: ...
 @overload
-def modd(x1: ArrayLike, x2: ArrayLike, /, out: Literal[None]) -> None:
-    ...
-
-
+def modd(x1: ArrayLike, x2: ArrayLike, /, out: Literal[None]) -> None: ...
 @overload
-def modd(x1: ArrayLike, x2: ArrayLike, /, out: _I) -> _I:
-    ...
-
-
+def modd(x1: ArrayLike, x2: ArrayLike, /, out: _I) -> _I: ...
 @overload
-def modd(x1: ArrayLike, x2: ArrayLike, /, out: _N) -> _N:
-    ...
-
-
+def modd(x1: ArrayLike, x2: ArrayLike, /, out: _N) -> _N: ...
 def modd(x1: ArrayLike, x2: ArrayLike, /, out: Optional[Union[_I, _N]] = None) -> Optional[Union[_I, _N]]:
     r"""
     Return element-wise remainder of division, except that instead of zero it gives the divisor instead.
@@ -1026,12 +1000,26 @@ def np_digitize(x: ArrayLike, /, bins: ArrayLike, right: bool = False) -> _I:
     tolerance: Optional[Union[int, float]] = None  # TODO: do I need a tolerance here?
     bmin = bins[0] if tolerance is None else bins[0] - tolerance  # type: ignore[index, operator]
     bmax = bins[-1] if tolerance is None else bins[-1] + tolerance  # type: ignore[index, operator]
+    bad_bounds = False
     if right:
         if np.any(x <= bmin) or np.any(x > bmax):  # type: ignore[operator]
-            raise ValueError("Some values of x are outside the given bins.")
+            bad_bounds = True
+            bad_left = np.flatnonzero(x <= bmin)  # type: ignore[operator]
+            bad_right = np.flatnonzero(x > bmax)  # type: ignore[operator]
     else:
         if np.any(x < bmin) or np.any(x >= bmax):  # type: ignore[operator]
-            raise ValueError("Some values of x are outside the given bins.")
+            bad_bounds = True
+            bad_left = np.flatnonzero(x < bmin)  # type: ignore[operator]
+            bad_right = np.flatnonzero(x >= bmax)  # type: ignore[operator]
+    if bad_bounds:
+        message = f"Some values ({len(bad_left)}, {len(bad_right)}) of x are outside the given bins ([{bmin}, {bmax}])."  # type: ignore[str-bytes-safe]
+        if bad_left.size > 0:
+            message += f" Such as {x[bad_left[0]]}"  # type: ignore[index,str-bytes-safe]
+            if bad_right.size > 0:
+                message += f" and {x[bad_right[0]]}"  # type: ignore[index,str-bytes-safe]
+        elif bad_right.size > 0:
+            message += f" Such as {x[bad_right[0]]}"  # type: ignore[index,str-bytes-safe]
+        raise ValueError(message)
 
     # do the calculations by calling the numpy command and shift results by one
     out = np.digitize(x, bins, right) - 1  # type: ignore[arg-type]
@@ -1151,15 +1139,9 @@ def full_print(**kwargs: Unpack[_PrintOptsKwArgs]) -> Generator[None, None, None
 
 # %% line_wrap
 @overload
-def line_wrap(text: str, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> str:
-    ...
-
-
+def line_wrap(text: str, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> str: ...
 @overload
-def line_wrap(text: List[str], wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> List[str]:
-    ...
-
-
+def line_wrap(text: List[str], wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> List[str]: ...
 def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> _StrOrListStr:
     r"""
     Wrap lines of text to the specified length, breaking at any whitespace characters.
@@ -1224,15 +1206,9 @@ def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: in
 
 # %% combine_per_year
 @overload
-def combine_per_year(data: None, func: Callable[..., Any]) -> None:
-    ...
-
-
+def combine_per_year(data: None, func: Callable[..., Any]) -> None: ...
 @overload
-def combine_per_year(data: np.ndarray, func: Callable[..., Any]) -> np.ndarray:
-    ...
-
-
+def combine_per_year(data: np.ndarray, func: Callable[..., Any]) -> np.ndarray: ...
 def combine_per_year(data: Optional[np.ndarray], func: Optional[Callable[..., Any]] = None) -> Optional[np.ndarray]:
     r"""
     Combine the time varying values over one year increments using a supplied function.
@@ -1349,8 +1325,7 @@ def execute(
         env=env,
     )
     # intermittenly read output lines
-    for stdout_line in iter(popen.stdout.readline, ""):  # type: ignore[union-attr]
-        yield stdout_line
+    yield from iter(popen.stdout.readline, "")  # type: ignore[union-attr]
     # once done, close and get return codes
     popen.stdout.close()  # type: ignore[union-attr]
     return_code = popen.wait()
@@ -1566,15 +1541,9 @@ def is_datetime(time: Union[None, datetime.datetime, ArrayLike]) -> bool:
 
 # %% Functions - intersect
 @overload
-def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[False] = ...) -> Union[_I, _N, _D]:
-    ...
-
-
+def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[False] = ...) -> Union[_I, _N, _D]: ...
 @overload
-def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[True]) -> Tuple[Union[_I, _N, _D], _I, _I]:
-    ...
-
-
+def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[True]) -> Tuple[Union[_I, _N, _D], _I, _I]: ...
 @overload
 def intersect(
     a: ArrayLike,
@@ -1584,10 +1553,7 @@ def intersect(
     tolerance: Union[int, float, np.int_, np.float64, np.timedelta64],
     assume_unique: bool,
     return_index: Literal[False] = ...,
-) -> Union[_I, _N, _D]:
-    ...
-
-
+) -> Union[_I, _N, _D]: ...
 @overload
 def intersect(
     a: ArrayLike,
@@ -1597,10 +1563,7 @@ def intersect(
     tolerance: Union[int, float, np.int_, np.float64, np.timedelta64],
     assume_unique: bool,
     return_index: Literal[True],
-) -> Tuple[Union[_I, _N, _D], _I, _I]:
-    ...
-
-
+) -> Tuple[Union[_I, _N, _D], _I, _I]: ...
 def intersect(  # type: ignore[misc]
     a: ArrayLike,
     b: ArrayLike,
@@ -1994,35 +1957,17 @@ def linear_lowpass_interp(
 
 # %% drop_following_time
 @overload
-def drop_following_time(times: _D, drop_starts: _D, dt_drop: np.datetime64) -> _B:
-    ...
-
-
+def drop_following_time(times: _D, drop_starts: _D, dt_drop: np.datetime64) -> _B: ...
 @overload
-def drop_following_time(times: _I, drop_starts: _I, dt_drop: int) -> _B:
-    ...
-
-
+def drop_following_time(times: _I, drop_starts: _I, dt_drop: int) -> _B: ...
 @overload
-def drop_following_time(times: _N, drop_starts: _N, dt_drop: float) -> _B:
-    ...
-
-
+def drop_following_time(times: _N, drop_starts: _N, dt_drop: float) -> _B: ...
 @overload
-def drop_following_time(times: _D, drop_starts: _D, dt_drop: np.datetime64, *, reverse: bool) -> _B:
-    ...
-
-
+def drop_following_time(times: _D, drop_starts: _D, dt_drop: np.datetime64, *, reverse: bool) -> _B: ...
 @overload
-def drop_following_time(times: _I, drop_starts: _I, dt_drop: int, *, reverse: bool) -> _B:
-    ...
-
-
+def drop_following_time(times: _I, drop_starts: _I, dt_drop: int, *, reverse: bool) -> _B: ...
 @overload
-def drop_following_time(times: _N, drop_starts: _N, dt_drop: float, *, reverse: bool) -> _B:
-    ...
-
-
+def drop_following_time(times: _N, drop_starts: _N, dt_drop: float, *, reverse: bool) -> _B: ...
 def drop_following_time(
     times: Union[_D, _I, _N],
     drop_starts: Union[_D, _I, _N],

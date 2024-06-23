@@ -41,10 +41,7 @@ def dist_enum_and_mons(
     start_num: int,
     alpha: float,
     beta: float,
-) -> _I:
-    ...
-
-
+) -> _I: ...
 @overload
 def dist_enum_and_mons(
     num: int,
@@ -55,10 +52,7 @@ def dist_enum_and_mons(
     start_num: int,
     alpha: float,
     beta: float,
-) -> _I:
-    ...
-
-
+) -> _I: ...
 def dist_enum_and_mons(
     num: int,
     distribution: ArrayLike,

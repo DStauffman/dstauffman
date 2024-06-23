@@ -29,15 +29,9 @@ if TYPE_CHECKING:
 
 # %% Functions - calculate_kalman_gain
 @overload
-def calculate_kalman_gain(P: _M, H: _M, R: _M, *, use_inverse: bool, return_innov_cov: Literal[False] = ...) -> _M:
-    ...
-
-
+def calculate_kalman_gain(P: _M, H: _M, R: _M, *, use_inverse: bool, return_innov_cov: Literal[False] = ...) -> _M: ...
 @overload
-def calculate_kalman_gain(P: _M, H: _M, R: _M, *, use_inverse: bool, return_innov_cov: Literal[True]) -> Tuple[_M, _M]:
-    ...
-
-
+def calculate_kalman_gain(P: _M, H: _M, R: _M, *, use_inverse: bool, return_innov_cov: Literal[True]) -> Tuple[_M, _M]: ...
 def calculate_kalman_gain(
     P: _M, H: _M, R: _M, *, use_inverse: bool = False, return_innov_cov: bool = False
 ) -> Union[_M, Tuple[_M, _M]]:

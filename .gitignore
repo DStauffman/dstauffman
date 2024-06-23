@@ -72,6 +72,7 @@ dstauffman.egg-info/*
 # =========================
 .mypy_cache/*
 .mypy_report/*
+.dmypy.json
 
 # =========================
 # LaTeX Files #

@@ -60,6 +60,7 @@ class OrbitType(IntEnumPlus):
     OrbitType.elliptic: 1
 
     """
+
     uninitialized: ClassVar[int] = 0
     elliptic: ClassVar[int] = 1
     parabolic: ClassVar[int] = 2
@@ -225,7 +226,7 @@ def _fix_instab(x: _N, precision: float) -> None:
 
 
 # %% Functions - two_line_elements
-def two_line_elements(line1: str, line2: str) -> Elements:
+def two_line_elements(line1: str, line2: str) -> Elements:  # noqa: C901
     r"""
     Convert two-line elements to elements structure.
 
@@ -540,15 +541,9 @@ def rv_2_oe(r: _N, v: _N, mu: _FN = 1.0, unit: bool = False, precision: float = 
 
 # %% oe_2_rv
 @overload
-def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[False] = ...) -> Tuple[_N, _N]:
-    ...
-
-
+def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[False] = ...) -> Tuple[_N, _N]: ...
 @overload
-def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[True]) -> Tuple[_N, _N, _N, _N, _N]:
-    ...
-
-
+def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[True]) -> Tuple[_N, _N, _N, _N, _N]: ...
 def oe_2_rv(
     elements: Elements, mu: _FN = 1.0, unit: bool = False, *, return_PQW: bool = False
 ) -> Union[Tuple[_N, _N], Tuple[_N, _N, _N, _N, _N]]:

@@ -87,7 +87,9 @@ def unsuppress_quat_checks() -> None:
 
 
 # %% Functions - quat_assertions
-def quat_assertions(quat: _Q, *, precision: float = 1e-12, skip_assertions: bool = False, allow_nans: bool = False) -> None:
+def quat_assertions(  # noqa: C901
+    quat: _Q, *, precision: float = 1e-12, skip_assertions: bool = False, allow_nans: bool = False
+) -> None:
     r"""
     Check assertions about valid quaternions.
 
@@ -258,7 +260,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwarg
     try:
         axis_set = set(axis)  # type: ignore[arg-type]
     except TypeError:
-        axis_set = {axis}
+        axis_set = {axis}  # type: ignore[arg-type]
     assert len(axis_set - {1, 2, 3}) == 0, f"axis_set = {axis_set}"
     # calculations
     quat: np.ndarray
@@ -453,7 +455,9 @@ def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]
 
 
 # %% Functions - quat_from_euler
-def quat_from_euler(angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
+def quat_from_euler(  # noqa: C901
+    angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs: Unpack[_QuatAssertionKwargs]
+) -> _Q:
     r"""
     Convert set(s) of euler angles to quaternion(s).
 
@@ -554,7 +558,7 @@ def quat_from_euler(angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs
 
 
 # %% Functions - quat_interp
-def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
+def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:  # noqa: C901
     r"""
     Interpolate quaternions from a monotonic time series of quaternions.
 
@@ -1006,7 +1010,7 @@ def quat_times_vector(quat: _Q, v: _N) -> _Q:
 
 
 # %% Functions - quat_to_euler
-def quat_to_euler(
+def quat_to_euler(  # noqa: C901
     quat: _Q, seq: Optional[Union[Tuple[int, int, int], List[int], _N]] = None, **kwargs: Unpack[_QuatAssertionKwargs]
 ) -> _N:
     r"""

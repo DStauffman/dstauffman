@@ -53,8 +53,8 @@ setup(
         "numba>=0.57",
         "numpy>=1.24",
         "pandas",
-        "qtpy",  # wraps any of PyQt5, PyQt6, PySide2, or PySide6
         "pytest",
+        "qtpy",  # wraps any of PyQt5, PyQt6, PySide2, or PySide6
         "scipy",
         "tblib",
     ],

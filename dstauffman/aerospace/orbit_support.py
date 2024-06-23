@@ -29,15 +29,9 @@ if TYPE_CHECKING:
 
 # %% Functions - d_2_r
 @overload
-def d_2_r(deg: float) -> float:
-    ...
-
-
+def d_2_r(deg: float) -> float: ...
 @overload
-def d_2_r(deg: _N) -> _N:
-    ...
-
-
+def d_2_r(deg: _N) -> _N: ...
 def d_2_r(deg: _FN) -> _FN:
     r"""Converts degrees to radians."""
     return DEG2RAD * deg
@@ -45,15 +39,9 @@ def d_2_r(deg: _FN) -> _FN:
 
 # %% Functions r_2_d
 @overload
-def r_2_d(rad: float) -> float:
-    ...
-
-
+def r_2_d(rad: float) -> float: ...
 @overload
-def r_2_d(rad: _N) -> _N:
-    ...
-
-
+def r_2_d(rad: _N) -> _N: ...
 def r_2_d(rad: _FN) -> _FN:
     r"""Converts radians to degrees."""
     return RAD2DEG * rad
@@ -79,15 +67,9 @@ def cross(x: _N, y: _N) -> _N:
 
 # %% Functions - jd_to_numpy
 @overload
-def jd_to_numpy(time_jd: float) -> np.datetime64:
-    ...
-
-
+def jd_to_numpy(time_jd: float) -> np.datetime64: ...
 @overload
-def jd_to_numpy(time_jd: _N) -> _D:
-    ...
-
-
+def jd_to_numpy(time_jd: _N) -> _D: ...
 def jd_to_numpy(time_jd: _FN) -> Union[np.datetime64, _D]:
     r"""
     Converts a julian date to a numpy datetime64.
@@ -108,15 +90,9 @@ def jd_to_numpy(time_jd: _FN) -> Union[np.datetime64, _D]:
 
 # %% Functions - numpy_to_jd
 @overload
-def numpy_to_jd(date: np.datetime64) -> float:
-    ...
-
-
+def numpy_to_jd(date: np.datetime64) -> float: ...
 @overload
-def numpy_to_jd(date: _D) -> _N:
-    ...
-
-
+def numpy_to_jd(date: _D) -> _N: ...
 def numpy_to_jd(date: Union[np.datetime64, _D]) -> Union[float, _N]:
     r"""
     Converts a numpy datetime64 into a julian date.
@@ -138,15 +114,9 @@ def numpy_to_jd(date: Union[np.datetime64, _D]) -> Union[float, _N]:
 
 # %% Functions - jd_2_century
 @overload
-def jd_2_century(time_jd: float) -> Tuple[float, float]:
-    ...
-
-
+def jd_2_century(time_jd: float) -> Tuple[float, float]: ...
 @overload
-def jd_2_century(time_jd: _N) -> Tuple[_N, _N]:
-    ...
-
-
+def jd_2_century(time_jd: _N) -> Tuple[_N, _N]: ...
 def jd_2_century(time_jd: _FN) -> Tuple[_FN, _FN]:
     r"""
     Converts a julian day to the fractional julian centuries since J2000.
@@ -173,15 +143,9 @@ def jd_2_century(time_jd: _FN) -> Tuple[_FN, _FN]:
 
 # %% Functions - d_2_dms
 @overload
-def d_2_dms(x: float, /) -> _N:
-    ...
-
-
+def d_2_dms(x: float, /) -> _N: ...
 @overload
-def d_2_dms(x: _N, /) -> _N:
-    ...
-
-
+def d_2_dms(x: _N, /) -> _N: ...
 def d_2_dms(x: _FN, /) -> _N:
     r"""Converts an angle from degrees to degrees, minutes and seconds."""
     if np.ndim(x) > 1:
@@ -222,15 +186,9 @@ def hms_2_r(x: _N, /) -> _N:
 
 # %% Functions - r_2_hms
 @overload
-def r_2_hms(x: float, /) -> _N:
-    ...
-
-
+def r_2_hms(x: float, /) -> _N: ...
 @overload
-def r_2_hms(x: _N, /) -> _N:
-    ...
-
-
+def r_2_hms(x: _N, /) -> _N: ...
 def r_2_hms(x: _FN, /) -> _N:
     r"""Converts an angle from radians to hours, minutes and seconds."""
     if np.ndim(x) > 1:
@@ -328,7 +286,7 @@ def ijk_2_rdr(ijk: _N) -> _N:
 
 
 # %% Functions - ijk_2_sez
-def ijk_2_sez(ijk: _N, geo_loc: _N, time_jd: _N) -> _N:
+def ijk_2_sez(ijk: _N, geo_loc: _N, time_jd: _N) -> _N:  # noqa: C901
     r"""Converts IJK coordinates to SEZ coordinates."""
 
     def _find_D(L: _FN, theta: _FN) -> _N:
@@ -470,7 +428,7 @@ def sez_2_aer(sez: _N) -> _N:
 
 
 # %% Functions - sez_2_ijk
-def sez_2_ijk(sez: _N, geo_loc: _N, time_jd: _N) -> _N:
+def sez_2_ijk(sez: _N, geo_loc: _N, time_jd: _N) -> _N:  # noqa: C901
     r"""Converts SEZ coordinates to IJK coordinates."""
 
     def _find_D(L: _FN, theta: _FN) -> _N:
@@ -666,25 +624,13 @@ def get_sun_radec_approx(time_jd: _N) -> Tuple[_N, _N]:
 
 # %% Functions - get_sun_radec
 @overload
-def get_sun_radec(time_jd: float) -> Tuple[float, float]:
-    ...
-
-
+def get_sun_radec(time_jd: float) -> Tuple[float, float]: ...
 @overload
-def get_sun_radec(time_jd: _N) -> Tuple[_N, _N]:
-    ...
-
-
+def get_sun_radec(time_jd: _N) -> Tuple[_N, _N]: ...
 @overload
-def get_sun_radec(time_jd: float, return_early: bool) -> Tuple[float, float]:
-    ...
-
-
+def get_sun_radec(time_jd: float, return_early: bool) -> Tuple[float, float]: ...
 @overload
-def get_sun_radec(time_jd: _N, return_early: bool) -> Tuple[_N, _N]:
-    ...
-
-
+def get_sun_radec(time_jd: _N, return_early: bool) -> Tuple[_N, _N]: ...
 def get_sun_radec(time_jd: _FN, return_early: bool = False) -> Tuple[_FN, _FN]:
     r"""
     Gets the right ascension and declination angles to the Sun for the given julian time.
@@ -769,15 +715,9 @@ def get_sun_radec(time_jd: _FN, return_early: bool = False) -> Tuple[_FN, _FN]:
 
 # %% Functions - get_sun_distance
 @overload
-def get_sun_distance(time_jd: float) -> float:
-    ...
-
-
+def get_sun_distance(time_jd: float) -> float: ...
 @overload
-def get_sun_distance(time_jd: _N) -> _N:
-    ...
-
-
+def get_sun_distance(time_jd: _N) -> _N: ...
 def get_sun_distance(time_jd: _FN) -> _FN:
     r"""
     Calculate the distance to the Sun from the Earth.
@@ -864,25 +804,13 @@ def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> _N:
 
 # %% Functions - eclipse_fraction
 @overload
-def eclipse_fraction(altitude: float, beta: float) -> float:
-    ...
-
-
+def eclipse_fraction(altitude: float, beta: float) -> float: ...
 @overload
-def eclipse_fraction(altitude: float, beta: _N) -> _N:
-    ...
-
-
+def eclipse_fraction(altitude: float, beta: _N) -> _N: ...
 @overload
-def eclipse_fraction(altitude: _N, beta: float) -> _N:
-    ...
-
-
+def eclipse_fraction(altitude: _N, beta: float) -> _N: ...
 @overload
-def eclipse_fraction(altitude: _N, beta: _N) -> _N:
-    ...
-
-
+def eclipse_fraction(altitude: _N, beta: _N) -> _N: ...
 def eclipse_fraction(altitude: _FN, beta: _FN) -> _FN:
     r"""
     Gets the faction of the orbit period for which the satellite is in umbra.
@@ -934,15 +862,9 @@ def eclipse_fraction(altitude: _FN, beta: _FN) -> _FN:
 
 # %% earth_radius_by_latitude
 @overload
-def earth_radius_by_latitude(latitude: float) -> float:
-    ...
-
-
+def earth_radius_by_latitude(latitude: float) -> float: ...
 @overload
-def earth_radius_by_latitude(latitude: _N) -> _N:
-    ...
-
-
+def earth_radius_by_latitude(latitude: _N) -> _N: ...
 def earth_radius_by_latitude(latitude: _FN) -> _FN:
     r"""
     Calculates the Earth radius at the given latitude for an ellipsoidal Earth.

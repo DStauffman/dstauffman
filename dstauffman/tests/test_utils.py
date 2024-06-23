@@ -294,7 +294,7 @@ class Test_rms(unittest.TestCase):
 
     def test_all_nans(self) -> None:
         x = np.full((4, 3), np.nan)
-        out: Union[float, np.ndarray] = dcs.rms(x, ignore_nans=True)
+        out: Union[float, np.float64, _N] = dcs.rms(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
         out = dcs.rms(x, axis=0, ignore_nans=True)
         assert isinstance(out, np.ndarray)
@@ -412,7 +412,7 @@ class Test_rss(unittest.TestCase):
 
     def test_all_nans(self) -> None:
         x = np.full((4, 3), np.nan)
-        out: Union[float, np.ndarray] = dcs.rss(x, ignore_nans=True)
+        out: Union[float, np.float64, _N] = dcs.rss(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
         out = dcs.rss(x, axis=0, ignore_nans=True)
         assert isinstance(out, np.ndarray)
@@ -738,6 +738,7 @@ class Test_read_text_file(unittest.TestCase):
         read a file that exists
         read a file that does not exist (raise error)
     """
+
     folder: pathlib.Path
     contents: str
     filepath: pathlib.Path
@@ -780,6 +781,7 @@ class Test_write_text_file(unittest.TestCase):
         write a file
         write a bad file location (raise error)
     """
+
     folder: pathlib.Path
     contents: str
     filepath: pathlib.Path
@@ -1269,6 +1271,7 @@ class Test_execute(unittest.TestCase):
     Tests the execute function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -1278,6 +1281,7 @@ class Test_execute_wrapper(unittest.TestCase):
     Tests the execute_wrapper function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -1336,6 +1340,7 @@ class Test_is_datetime(unittest.TestCase):
     Tests the is_datetime function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -1634,6 +1639,7 @@ class Test_zero_order_hold(unittest.TestCase):
         np.testing.assert_array_equal(y, y_exp)
         np.testing.assert_array_equal(ix, ix_exp)
 
+    @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_indices_not_sorted(self) -> None:
         xp      = np.array([0, 10, 5, 15])
         yp      = np.array([0, 1, 2, 3])
@@ -1710,6 +1716,7 @@ class Test_linear_interp(unittest.TestCase):
         y = dcs.linear_interp(self.x, xp, yp, left=0.5, right=1000.0, extrapolate=True)
         np.testing.assert_array_almost_equal(y, exp, 12)
 
+    @unittest.skipIf(not dcs.HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_extrapolation_scipy(self) -> None:
         xp = self.xp.copy()
         yp = self.yp.copy()

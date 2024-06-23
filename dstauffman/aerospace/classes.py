@@ -48,10 +48,7 @@ def _chop_wrapper(
     inplace: bool = ...,
     return_ends: Literal[True],
     subclasses: _Sets = ...,
-) -> Tuple[_T, _T, _T]:
-    ...
-
-
+) -> Tuple[_T, _T, _T]: ...
 @overload
 def _chop_wrapper(
     orig: _T,
@@ -63,10 +60,7 @@ def _chop_wrapper(
     inplace: bool = ...,
     return_ends: Literal[False] = ...,
     subclasses: _Sets = ...,
-) -> _T:
-    ...
-
-
+) -> _T: ...
 def _chop_wrapper(
     orig: _T,
     exclude: _Sets,
@@ -219,9 +213,7 @@ class KfInnov(Frozen):
     @overload
     def chop(
         self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., inplace: bool = ..., return_ends: Literal[True]
-    ) -> Tuple[KfInnov, KfInnov, KfInnov]:
-        ...
-
+    ) -> Tuple[KfInnov, KfInnov, KfInnov]: ...
     @overload
     def chop(
         self,
@@ -231,9 +223,7 @@ class KfInnov(Frozen):
         include_last: bool = ...,
         inplace: bool = ...,
         return_ends: Literal[False] = ...,
-    ) -> KfInnov:
-        ...
-
+    ) -> KfInnov: ...
     def chop(
         self,
         ti: Optional[_Time] = None,
@@ -355,7 +345,7 @@ class Kf(Frozen):
                 setattr(self, innov_name, func(time_dtype=time_dtype, chan=innov_chan, **kwargs))
             self._subclasses = frozenset(innov_class.keys())
 
-    def save(self, filename: Optional[Path] = None) -> None:
+    def save(self, filename: Optional[Path] = None) -> None:  # noqa: C901
         r"""Save the object to disk as an HDF5 file."""
         # exit if no filename is given
         if filename is None:
@@ -393,7 +383,7 @@ class Kf(Frozen):
                         grp.create_dataset(key, data=value)
 
     @classmethod
-    def load(cls, filename: Optional[Path] = None, subclasses: _Sets = frozenset({"innov"})) -> Kf:
+    def load(cls, filename: Optional[Path] = None, subclasses: _Sets = frozenset({"innov"})) -> Kf:  # noqa: C901
         r"""Load the object from disk."""
         if filename is None:
             raise ValueError("No file specified to load.")
@@ -456,9 +446,7 @@ class Kf(Frozen):
     @overload
     def chop(
         self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., inplace: bool = ..., return_ends: Literal[True]
-    ) -> Tuple[Kf, Kf, Kf]:
-        ...
-
+    ) -> Tuple[Kf, Kf, Kf]: ...
     @overload
     def chop(
         self,
@@ -468,9 +456,7 @@ class Kf(Frozen):
         include_last: bool = ...,
         inplace: bool = ...,
         return_ends: Literal[False] = ...,
-    ) -> Kf:
-        ...
-
+    ) -> Kf: ...
     def chop(
         self,
         ti: Optional[_Time] = None,
@@ -625,9 +611,7 @@ class KfRecord(Frozen):
     @overload
     def chop(
         self, ti: _Time = ..., tf: _Time = ..., *, include_last: bool = ..., inplace: bool = ..., return_ends: Literal[True]
-    ) -> Tuple[KfRecord, KfRecord, KfRecord]:
-        ...
-
+    ) -> Tuple[KfRecord, KfRecord, KfRecord]: ...
     @overload
     def chop(
         self,
@@ -637,9 +621,7 @@ class KfRecord(Frozen):
         include_last: bool = ...,
         inplace: bool = ...,
         return_ends: Literal[False] = ...,
-    ) -> KfRecord:
-        ...
-
+    ) -> KfRecord: ...
     def chop(
         self,
         ti: Optional[_Time] = None,

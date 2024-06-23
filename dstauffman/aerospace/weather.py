@@ -55,7 +55,7 @@ def read_kp_ap_etc_data(filename: Path) -> pd.DataFrame:
 
 
 # %% Functions - load_solar_cycles
-def read_solar_cycles(filename: Path) -> pd.DataFrame:
+def read_solar_cycles(filename: Path) -> pd.DataFrame:  # noqa: C901
     """Read the solar cycle history."""
 
     def _get_duration(text: str) -> Union[int, float]:

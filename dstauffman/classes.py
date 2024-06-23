@@ -111,7 +111,7 @@ def _frozen(set_: Callable) -> Callable:
 
 
 # %% Methods - save_hdf5
-def save_hdf5(
+def save_hdf5(  # noqa: C901
     self: Any,
     filename: Optional[Path] = None,
     *,
@@ -222,42 +222,24 @@ def save_hdf5(
 
 # %% Methods - load_hdf5
 @overload
-def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[False] = ...) -> _T:
-    ...
-
-
+def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[False] = ...) -> _T: ...
 @overload
 def load_hdf5(
     cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]],
     filename: Optional[Path],
     return_meta: Literal[False] = ...,
-) -> Type[Any]:
-    ...
-
-
+) -> Type[Any]: ...
 @overload
-def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[False] = ...) -> Type[Any]:
-    ...
-
-
+def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[False] = ...) -> Type[Any]: ...
 @overload
-def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[_T, Dict[str, Any]]:
-    ...
-
-
+def load_hdf5(cls: Type[_T], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[_T, Dict[str, Any]]: ...
 @overload
 def load_hdf5(
     cls: Union[Dict[str, None], List[str], Set[str], Tuple[str, ...]], filename: Optional[Path], return_meta: Literal[True]
-) -> Tuple[Type[Any], Dict[str, Any]]:
-    ...
-
-
+) -> Tuple[Type[Any], Dict[str, Any]]: ...
 @overload
-def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[Type[Any], Dict[str, Any]]:
-    ...
-
-
-def load_hdf5(
+def load_hdf5(cls: Literal[None], filename: Optional[Path], return_meta: Literal[True]) -> Tuple[Type[Any], Dict[str, Any]]: ...
+def load_hdf5(  # noqa: C901
     cls: Union[None, Type[_T], Dict[str, None], List[str], Set[str], Tuple[str, ...]],
     filename: Optional[Path] = None,
     return_meta: bool = False,
@@ -422,17 +404,11 @@ def save_method(
 
 # %% Methods - load_method
 @overload
-def load_method(cls: Type[_T], filename: Optional[Path], return_meta: Literal[False] = ..., **kwargs: Any) -> _T:
-    ...
-
-
+def load_method(cls: Type[_T], filename: Optional[Path], return_meta: Literal[False] = ..., **kwargs: Any) -> _T: ...
 @overload
 def load_method(
     cls: Type[_T], filename: Optional[Path], return_meta: Literal[True], **kwargs: Any
-) -> Tuple[_T, Dict[str, Any]]:
-    ...
-
-
+) -> Tuple[_T, Dict[str, Any]]: ...
 def load_method(
     cls: Type[_T], filename: Optional[Path] = None, return_meta: bool = False, **kwargs: Any
 ) -> Union[_T, Tuple[_T, Dict[str, Any]]]:
@@ -475,7 +451,7 @@ def save_convert_hdf5(self: Any, **kwargs: Any) -> Dict[str, bool]:
 
 
 # %% save_restore_hdf5
-def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) -> None:
+def save_restore_hdf5(self: Any, *, convert_dates: bool = False, **kwargs: Any) -> None:  # noqa: C901
     r"""Supporting function for loading from HDF5."""
     if convert_dates:
         assert HAVE_NUMPY, "Must have numpy to convert dates."
@@ -510,7 +486,7 @@ def pprint(self: Any, return_text: bool = False, **kwargs: Any) -> Optional[str]
 
 
 # %% pprint_dict
-def pprint_dict(
+def pprint_dict(  # noqa: C901
     dct: Dict[Any, Any],
     *,
     name: str = "",
@@ -755,6 +731,7 @@ class Frozen:
     instances.
 
     """
+
     # freeze the set attributes function based on the above `frozen` funcion
     __setattr__ = _frozen(object.__setattr__)
 
@@ -762,17 +739,11 @@ class Frozen:
         __setattr__ = _frozen(type.__setattr__)
 
     @overload
-    def pprint(self: Any, return_text: Literal[True], **kwargs: Unpack[_PPrintKwArgs]) -> str:
-        ...
-
+    def pprint(self: Any, return_text: Literal[True], **kwargs: Unpack[_PPrintKwArgs]) -> str: ...
     @overload
-    def pprint(self: Any, return_text: Literal[False], **kwargs: Unpack[_PPrintKwArgs]) -> None:
-        ...
-
+    def pprint(self: Any, return_text: Literal[False], **kwargs: Unpack[_PPrintKwArgs]) -> None: ...
     @overload
-    def pprint(self: Any, **kwargs: Unpack[_PPrintKwArgs]) -> Optional[str]:
-        ...
-
+    def pprint(self: Any, **kwargs: Unpack[_PPrintKwArgs]) -> Optional[str]: ...
     def pprint(self: Any, return_text: bool = False, **kwargs: Unpack[_PPrintKwArgs]) -> Optional[str]:
         r"""Displays a pretty print version of the class."""
         name = kwargs.pop("name") if "name" in kwargs else self.__class__.__name__
@@ -881,13 +852,9 @@ class Counter(Frozen):
         return Counter(abs(self._val))
 
     @overload
-    def __add__(self, other: int) -> int:
-        ...
-
+    def __add__(self, other: int) -> int: ...
     @overload
-    def __add__(self, other: Counter) -> Counter:
-        ...
-
+    def __add__(self, other: Counter) -> Counter: ...
     def __add__(self, other: _C) -> _C:
         if isinstance(other, Counter):
             return Counter(self._val + other._val)
@@ -908,13 +875,9 @@ class Counter(Frozen):
         return self.__add__(other)
 
     @overload
-    def __sub__(self, other: int) -> int:
-        ...
-
+    def __sub__(self, other: int) -> int: ...
     @overload
-    def __sub__(self, other: Counter) -> Counter:
-        ...
-
+    def __sub__(self, other: Counter) -> Counter: ...
     def __sub__(self, other: _C) -> _C:
         if isinstance(other, Counter):
             return Counter(self._val - other._val)

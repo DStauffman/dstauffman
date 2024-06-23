@@ -214,7 +214,9 @@ def get_time_factor(unit: str) -> int:
 
 
 # %% Functions - get_unit_conversion
-def get_unit_conversion(conversion: Union[None, str, int, float, Tuple[str, float]], units: str = "") -> Tuple[str, float]:
+def get_unit_conversion(  # noqa: C901
+    conversion: Union[None, str, int, float, Tuple[str, float]], units: str = ""
+) -> Tuple[str, float]:
     r"""
     Acts as a wrapper to unit conversions for legends in plots and for scaling second axes.
 

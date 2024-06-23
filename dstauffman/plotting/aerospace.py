@@ -188,10 +188,7 @@ def make_quaternion_plot(
     label_vert_lines: bool,
     extra_plotter: Optional[ExtraPlotter],
     use_datashader: bool,
-) -> _Figs:
-    ...
-
-
+) -> _Figs: ...
 @overload
 def make_quaternion_plot(
     description: str,
@@ -225,10 +222,7 @@ def make_quaternion_plot(
     label_vert_lines: bool,
     extra_plotter: Optional[ExtraPlotter],
     use_datashader: bool,
-) -> Tuple[_Figs, Dict[str, _N]]:
-    ...
-
-
+) -> Tuple[_Figs, Dict[str, _N]]: ...
 def make_quaternion_plot(
     description: str,
     time_one: Optional[_Times],
@@ -387,10 +381,7 @@ def plot_attitude(
     return_err: Literal[False] = ...,
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfQuatKwargs],
-) -> _Figs:
-    ...
-
-
+) -> _Figs: ...
 @overload
 def plot_attitude(
     kf1: Optional[Kf],
@@ -401,11 +392,8 @@ def plot_attitude(
     return_err: Literal[True],
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfQuatKwargs],
-) -> Tuple[_Figs, Dict[str, _N]]:
-    ...
-
-
-def plot_attitude(
+) -> Tuple[_Figs, Dict[str, _N]]: ...
+def plot_attitude(  # noqa: C901
     kf1: Optional[Kf] = None,
     kf2: Optional[Kf] = None,
     *,
@@ -593,10 +581,7 @@ def plot_los(
     return_err: Literal[False] = ...,
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfQuatKwargs],
-) -> _Figs:
-    ...
-
-
+) -> _Figs: ...
 @overload
 def plot_los(
     kf1: Optional[Kf],
@@ -607,10 +592,7 @@ def plot_los(
     return_err: Literal[True],
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfQuatKwargs],
-) -> Tuple[_Figs, Dict[str, _N]]:
-    ...
-
-
+) -> Tuple[_Figs, Dict[str, _N]]: ...
 def plot_los(
     kf1: Optional[Kf] = None,
     kf2: Optional[Kf] = None,
@@ -639,10 +621,7 @@ def plot_position(
     return_err: Literal[False] = ...,
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfDiffKwargs],
-) -> _Figs:
-    ...
-
-
+) -> _Figs: ...
 @overload
 def plot_position(
     kf1: Optional[Kf],
@@ -653,11 +632,8 @@ def plot_position(
     return_err: Literal[True],
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfDiffKwargs],
-) -> Tuple[_Figs, Dict[str, _N]]:
-    ...
-
-
-def plot_position(
+) -> Tuple[_Figs, Dict[str, _N]]: ...
+def plot_position(  # noqa: C901
     kf1: Optional[Kf] = None,
     kf2: Optional[Kf] = None,
     *,
@@ -840,10 +816,7 @@ def plot_velocity(
     return_err: Literal[False] = ...,
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfDiffKwargs],
-) -> _Figs:
-    ...
-
-
+) -> _Figs: ...
 @overload
 def plot_velocity(
     kf1: Optional[Kf],
@@ -854,10 +827,7 @@ def plot_velocity(
     return_err: Literal[True],
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfDiffKwargs],
-) -> Tuple[_Figs, Dict[str, _N]]:
-    ...
-
-
+) -> Tuple[_Figs, Dict[str, _N]]: ...
 def plot_velocity(
     kf1: Optional[Kf] = None,
     kf2: Optional[Kf] = None,
@@ -894,10 +864,7 @@ def plot_innovations(
     number_field: Optional[Dict[str, str]],
     number_colors: Optional[_CM],
     **kwargs: Unpack[_KfDiffKwargs],
-) -> _Figs:
-    ...
-
-
+) -> _Figs: ...
 @overload
 def plot_innovations(
     kf1: Optional[KfInnov],
@@ -916,11 +883,8 @@ def plot_innovations(
     number_field: Optional[Dict[str, str]],
     number_colors: Optional[_CM],
     **kwargs: Unpack[_KfDiffKwargs],
-) -> Tuple[_Figs, Dict[str, _N]]:
-    ...
-
-
-def plot_innovations(
+) -> Tuple[_Figs, Dict[str, _N]]: ...
+def plot_innovations(  # noqa: C901
     kf1: Optional[KfInnov] = None,
     kf2: Optional[KfInnov] = None,
     *,
@@ -1479,10 +1443,7 @@ def plot_covariance(
     groups: Optional[List[Union[int, _I, Tuple[int, ...]]]],
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfDiffKwargs],
-) -> _Figs:
-    ...
-
-
+) -> _Figs: ...
 @overload
 def plot_covariance(
     kf1: Optional[Kf],
@@ -1494,11 +1455,8 @@ def plot_covariance(
     groups: Optional[List[Union[int, _I, Tuple[int, ...]]]],
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfDiffKwargs],
-) -> Tuple[_Figs, Dict[str, Dict[str, _N]]]:
-    ...
-
-
-def plot_covariance(
+) -> Tuple[_Figs, Dict[str, Dict[str, _N]]]: ...
+def plot_covariance(  # noqa: C901
     kf1: Optional[Kf] = None,
     kf2: Optional[Kf] = None,
     *,
@@ -1734,10 +1692,7 @@ def plot_states(
     groups: Optional[List[Union[int, _I, Tuple[int, ...]]]],
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfDiffKwargs],
-) -> _Figs:
-    ...
-
-
+) -> _Figs: ...
 @overload
 def plot_states(
     kf1: Optional[Kf],
@@ -1749,10 +1704,7 @@ def plot_states(
     groups: Optional[List[Union[int, _I, Tuple[int, ...]]]],
     fields: Optional[Dict[str, str]],
     **kwargs: Unpack[_KfDiffKwargs],
-) -> Tuple[_Figs, Dict[str, _N]]:
-    ...
-
-
+) -> Tuple[_Figs, Dict[str, _N]]: ...
 def plot_states(
     kf1: Optional[Kf] = None,
     kf2: Optional[Kf] = None,

@@ -124,9 +124,9 @@ class Test_get_factors(unittest.TestCase):
     def test_bad_numbers(self) -> None:
         # Note, this is an outdated API, so it should crash
         with self.assertRaises(ValueError):
-            dcs.get_factors(10)
+            dcs.get_factors(10)  # type: ignore[arg-type]
         with self.assertRaises(ValueError):
-            dcs.get_factors(0.3)
+            dcs.get_factors(0.3)  # type: ignore[arg-type]
 
     def test_english_units(self) -> None:
         names = ["arcminute", "arcsecond", "milliarcsecond", "microarcsecond", "arcsecond^2"]

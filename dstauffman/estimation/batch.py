@@ -262,6 +262,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
     >>> bpe_results = BpeResults()
 
     """
+
     save: Callable[[Optional[Path]], None]  # noqa: F821
 
     def __init__(self) -> None:
@@ -393,6 +394,7 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
       Best Params: None
 
     """
+
     load: ClassVar[Callable[[Optional[Path]], "CurrentResults"]]
     save: Callable[[Optional[Path]], None]
 
@@ -444,10 +446,7 @@ def _function_wrapper(
     model_args: Dict[str, Any],
     cost_args: Dict[str, Any],
     return_results: Literal[False] = ...,
-) -> _N:
-    ...
-
-
+) -> _N: ...
 @overload
 def _function_wrapper(
     *,
@@ -456,10 +455,7 @@ def _function_wrapper(
     model_args: Dict[str, Any],
     cost_args: Dict[str, Any],
     return_results: Literal[True],
-) -> Tuple[_N, _N]:
-    ...
-
-
+) -> Tuple[_N, _N]: ...
 def _function_wrapper(
     *,
     model_func: Callable,
@@ -564,7 +560,7 @@ def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: Dict[str
 
 
 # %% _finite_differences
-def _finite_differences(
+def _finite_differences(  # noqa: C901
     opti_opts: OptiOpts,
     model_args: Dict[str, Any],
     bpe_results: BpeResults,
@@ -943,7 +939,7 @@ def _double_dogleg(
 
 
 # %% _dogleg_search
-def _dogleg_search(
+def _dogleg_search(  # noqa: C901
     opti_opts: OptiOpts,
     model_args: Dict[str, Any],
     bpe_results: BpeResults,
@@ -1269,7 +1265,7 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
 
 
 # %% run_bpe
-def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:
+def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:  # noqa: C901
     r"""
     Run the batch parameter estimator with the given model optimization options.
 

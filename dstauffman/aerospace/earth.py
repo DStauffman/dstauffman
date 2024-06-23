@@ -36,22 +36,13 @@ _b = _a * (1.0 - 1.0 / _finv)
 @overload
 def geod2ecf(
     lat: ArrayLike, lon: Literal[None] = ..., alt: Literal[None] = ..., *, units: str = ..., output: str = ...
-) -> Union[_N, Tuple[_N, _N, _N]]:
-    ...
-
-
+) -> Union[_N, Tuple[_N, _N, _N]]: ...
 @overload
-def geod2ecf(lat: ArrayLike, lon: ArrayLike, alt: ArrayLike, *, units: str = ..., output: Literal["combined"] = ...) -> _N:
-    ...
-
-
+def geod2ecf(lat: ArrayLike, lon: ArrayLike, alt: ArrayLike, *, units: str = ..., output: Literal["combined"] = ...) -> _N: ...
 @overload
 def geod2ecf(
     lat: ArrayLike, lon: ArrayLike, alt: ArrayLike, *, units: str = ..., output: Literal["split"]
-) -> Tuple[_N, _N, _N]:
-    ...
-
-
+) -> Tuple[_N, _N, _N]: ...
 def geod2ecf(
     lat: ArrayLike,
     lon: Optional[ArrayLike] = None,
@@ -140,24 +131,15 @@ def geod2ecf(
 @overload
 def ecf2geod(
     x: ArrayLike, y: Literal[None] = ..., z: Literal[None] = ..., *, units: str = ..., output: str = ..., algorithm: str = ...
-) -> Union[_N, Tuple[_N, _N, _N]]:
-    ...
-
-
+) -> Union[_N, Tuple[_N, _N, _N]]: ...
 @overload
 def ecf2geod(
     x: ArrayLike, y: ArrayLike, z: ArrayLike, *, units: str = ..., output: Literal["combined"] = ..., algorithm: str = ...
-) -> _N:
-    ...
-
-
+) -> _N: ...
 @overload
 def ecf2geod(
     x: ArrayLike, y: ArrayLike, z: ArrayLike, *, units: str = ..., output: Literal["split"], algorithm: str = ...
-) -> Tuple[_N, _N, _N]:
-    ...
-
-
+) -> Tuple[_N, _N, _N]: ...
 def ecf2geod(
     x: ArrayLike,
     y: Optional[ArrayLike] = None,

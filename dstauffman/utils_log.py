@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
     _I = NDArray[np.int_]
     _N = NDArray[np.float64]
-    _F = Union[float, _N]
+    _F = Union[float, np.float64, _N]
 
     class _OutlierKwArgs(TypedDict):
         num_iters: NotRequired[int]
@@ -111,36 +111,18 @@ def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
 
 # %% Functions - fix_rollover
 @overload
-def fix_rollover(data: _I, roll: int) -> _I:
-    ...
-
-
+def fix_rollover(data: _I, roll: int) -> _I: ...
 @overload
-def fix_rollover(data: _N, roll: float) -> _N:
-    ...
-
-
+def fix_rollover(data: _N, roll: float) -> _N: ...
 @overload
-def fix_rollover(data: _I, roll: int, axis: int) -> _I:
-    ...
-
-
+def fix_rollover(data: _I, roll: int, axis: int) -> _I: ...
 @overload
-def fix_rollover(data: _N, roll: float, axis: int) -> _N:
-    ...
-
-
+def fix_rollover(data: _N, roll: float, axis: int) -> _N: ...
 @overload
-def fix_rollover(data: _I, roll: int, axis: Optional[int], check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _I:
-    ...
-
-
+def fix_rollover(data: _I, roll: int, axis: Optional[int], check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _I: ...
 @overload
-def fix_rollover(data: _N, roll: float, axis: Optional[int], check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _N:
-    ...
-
-
-def fix_rollover(
+def fix_rollover(data: _N, roll: float, axis: Optional[int], check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _N: ...
+def fix_rollover(  # noqa: C901
     data: Union[_I, _N],
     roll: Union[int, float],
     axis: Optional[int] = None,
@@ -263,15 +245,9 @@ def fix_rollover(
 
 # %% remove_outliers
 @overload
-def remove_outliers(x: ArrayLike, /) -> _N:
-    ...
-
-
+def remove_outliers(x: ArrayLike, /) -> _N: ...
 @overload
-def remove_outliers(x: ArrayLike, /, sigma: float) -> _N:
-    ...
-
-
+def remove_outliers(x: ArrayLike, /, sigma: float) -> _N: ...
 @overload
 def remove_outliers(
     x: ArrayLike,
@@ -283,10 +259,7 @@ def remove_outliers(
     return_stats: Literal[False] = ...,
     inplace: bool,
     hardmax: Optional[float],
-) -> _N:
-    ...
-
-
+) -> _N: ...
 @overload
 def remove_outliers(
     x: ArrayLike,
@@ -298,10 +271,7 @@ def remove_outliers(
     return_stats: Literal[True],
     inplace: bool,
     hardmax: Optional[float],
-) -> Tuple[_N, int, _F, _F]:
-    ...
-
-
+) -> Tuple[_N, int, _F, _F]: ...
 def remove_outliers(
     x: ArrayLike,
     /,

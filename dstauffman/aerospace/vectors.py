@@ -264,15 +264,9 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
 
 # %% Functions - cart2sph
 @overload
-def cart2sph(x: float, y: float, z: float) -> Tuple[float, float, float]:
-    ...
-
-
+def cart2sph(x: float, y: float, z: float) -> Tuple[float, float, float]: ...
 @overload
-def cart2sph(x: _N, y: _N, z: _N) -> Tuple[_N, _N, _N]:
-    ...
-
-
+def cart2sph(x: _N, y: _N, z: _N) -> Tuple[_N, _N, _N]: ...
 @ncjit
 def cart2sph(x: _FN, y: _FN, z: _FN) -> Tuple[_FN, _FN, _FN]:
     r"""
@@ -315,15 +309,9 @@ def cart2sph(x: _FN, y: _FN, z: _FN) -> Tuple[_FN, _FN, _FN]:
 
 # %% Functions - sph2cart
 @overload
-def sph2cart(az: float, el: float, rad: float) -> Tuple[float, float, float]:
-    ...
-
-
+def sph2cart(az: float, el: float, rad: float) -> Tuple[float, float, float]: ...
 @overload
-def sph2cart(az: _N, el: _N, rad: _N) -> Tuple[_N, _N, _N]:
-    ...
-
-
+def sph2cart(az: _N, el: _N, rad: _N) -> Tuple[_N, _N, _N]: ...
 @ncjit
 def sph2cart(az: _FN, el: _FN, rad: _FN) -> Tuple[_FN, _FN, _FN]:
     r"""

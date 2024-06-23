@@ -211,8 +211,7 @@ class _HoverButton(QPushButton):
 class ExtraPlotter(Protocol):
     r"""Custom Protocol to type the extra_plotter argument to all the plots."""
 
-    def __call__(self, fig: Figure, ax: Axes) -> None:
-        ...
+    def __call__(self, fig: Figure, ax: Axes) -> None: ...
 
 
 # %% Classes - MyCustomToolbar
@@ -615,15 +614,9 @@ def whitten(color: Tuple[float, ...], white: Tuple[float, ...] = (1.0, 1.0, 1.0,
 
 # %% Functions - get_figure_title
 @overload
-def get_figure_title(fig: Figure, raise_warning: Literal[False] = ...) -> str:
-    ...
-
-
+def get_figure_title(fig: Figure, raise_warning: Literal[False] = ...) -> str: ...
 @overload
-def get_figure_title(fig: Figure, raise_warning: Literal[True]) -> Tuple[str, bool]:
-    ...
-
-
+def get_figure_title(fig: Figure, raise_warning: Literal[True]) -> Tuple[str, bool]: ...
 def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tuple[str, bool]]:
     r"""
     Gets the name of the given figure.  First trying the canvas, then the suptitle, then the title.
@@ -918,7 +911,7 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
 
 
 # %% Functions - disp_xlimits
-def disp_xlimits(
+def disp_xlimits(  # noqa: C901
     fig_or_axis: Union[Figure, Axes, List[Union[Figure, Axes]]], xmin: Optional[_Time] = None, xmax: Optional[_Time] = None
 ) -> None:
     r"""
@@ -1002,7 +995,7 @@ def disp_xlimits(
 
 
 # %% Functions - zoom_ylim
-def zoom_ylim(
+def zoom_ylim(  # noqa: C901
     ax: Axes,
     time: Optional[_Times] = None,
     data: Optional[_Data] = None,
@@ -1399,7 +1392,7 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
 
 
 # %% Functions - get_rms_indices
-def get_rms_indices(
+def get_rms_indices(  # noqa: C901
     time_one: Optional[_Times] = None,
     time_two: Optional[_Times] = None,
     time_overlap: Optional[_Times] = None,
@@ -1787,7 +1780,7 @@ def get_classification(classify: str) -> Tuple[str, str]:
 
 
 # %% Functions - plot_classification
-def plot_classification(
+def plot_classification(  # noqa: C901
     ax: Axes, classification: str = "U", *, caveat: str = "", test: bool = False, location: str = "figure"
 ) -> None:
     r"""
@@ -2280,10 +2273,7 @@ def fig_ax_factory(
     layout: str,
     sharex: bool,
     passthrough: Literal[False] = ...,
-) -> Tuple[Tuple[Figure, Axes], ...]:
-    ...
-
-
+) -> Tuple[Tuple[Figure, Axes], ...]: ...
 @overload
 def fig_ax_factory(
     num_figs: Optional[int],
@@ -2293,11 +2283,8 @@ def fig_ax_factory(
     layout: str,
     sharex: bool,
     passthrough: Literal[True],
-) -> Tuple[None, ...]:
-    ...
-
-
-def fig_ax_factory(
+) -> Tuple[None, ...]: ...
+def fig_ax_factory(  # noqa: C901
     num_figs: Optional[int] = None,
     num_axes: Union[int, List[int]] = 1,
     *,
