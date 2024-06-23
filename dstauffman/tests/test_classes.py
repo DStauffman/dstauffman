@@ -249,7 +249,7 @@ class Test_pprint_dict(unittest.TestCase):
         lines3 = text3.split("\n")
         self.assertEqual(lines1[1], " a   = [0 1 2 ... 7 8 9]")
         self.assertEqual(lines2[1], " a   = [0 1 2 3 4 5 6 7 8 9]")
-        if dcs.IS_WINDOWS and np.__version__.startswith("1.0"):
+        if dcs.IS_WINDOWS and np.__version__.startswith("1."):
             self.assertEqual(lines3[1], " a   = <ndarray int32 (10,)>")  # pragma: no cover
         else:
             self.assertEqual(lines3[1], " a   = <ndarray int64 (10,)>")
