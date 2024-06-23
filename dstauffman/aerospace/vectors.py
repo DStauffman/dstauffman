@@ -251,7 +251,10 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
     # if desired, use cross product result, which is more accurate for small differences, but has
     # an ambiguity for angles greater than pi/2 (90 deg).  Use the dot product result to resolve
     # the ambiguity.
-    cross_prod = np.cross(vec1.T, vec2.T).T
+    if vec1.shape[0] == 2 and vec2.shape[0] == 2:
+        cross_prod = (vec1.T[..., 0] * vec2.T[..., 1] - vec1.T[..., 1] * vec2.T[..., 0]).T
+    else:
+        cross_prod = np.cross(vec1.T, vec2.T).T
     temp = np.sqrt(np.sum(cross_prod**2, axis=0))
     # return dot product result for sums greater than 1 (due to small numerical inconsistencies near 180 deg separation)
     if temp.ndim == 0:

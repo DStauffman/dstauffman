@@ -637,8 +637,8 @@ def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Un
 
     # Given times
     # find desired points that are contained in input time vector
-    ix_known = np.in1d(ti, time, assume_unique=True)
-    ix_input = np.in1d(time, ti, assume_unique=True)
+    ix_known = np.isin(ti, time, assume_unique=True)
+    ix_input = np.isin(time, ti, assume_unique=True)
 
     # set quaternions directly to known values
     qout[:, ix_known] = quat[:, ix_input]
