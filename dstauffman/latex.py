@@ -5,6 +5,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in Jan 2015, moved to separate file in Jan 2017.
 """
+
 # %% Imports
 from __future__ import annotations
 

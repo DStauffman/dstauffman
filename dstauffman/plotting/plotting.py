@@ -701,7 +701,7 @@ def plot_time_difference(
 
 
 # %% Functions - plot_correlation_matrix
-def plot_correlation_matrix(
+def plot_correlation_matrix(  # noqa: C901
     data: _M,
     labels: Optional[Union[List[str], List[List[str]]]] = None,
     units: str = "",
@@ -850,10 +850,10 @@ def plot_correlation_matrix(
         cmin = -1
     # test if outside the cmin to cmax range, and if so, adjust range.
     temp = np.min(data)
-    if temp < cmin:
+    if temp < cmin:  # pylint: disable=consider-using-min-builtin
         cmin = temp  # type: ignore[assignment]
     temp = np.max(data)
-    if temp > cmax:
+    if temp > cmax:  # pylint: disable=consider-using-max-builtin
         cmax = temp  # type: ignore[assignment]
 
     # determine which type of data to plot
@@ -1043,7 +1043,7 @@ def plot_bar_breakdown(
 
 
 # %% Functions - plot_histogram
-def plot_histogram(
+def plot_histogram(  # noqa: C901
     description: str,
     data: _N,
     bins: Union[_N, List[float]],
@@ -1293,7 +1293,7 @@ def plot_histogram(
 
 
 # %% Functions - setup_plots
-def setup_plots(figs: Union[Figure, _Figs], opts: Opts, *, skip_tight: bool = False) -> None:
+def setup_plots(figs: Union[Figure, _Figs], opts: Opts, *, skip_tight: bool = False) -> None:  # noqa: C901
     r"""
     Combine common plot operations into one easy command.
 

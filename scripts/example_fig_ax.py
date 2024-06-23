@@ -5,6 +5,7 @@ Notes
 -----
 #.  Written by David C. Stauffer in January 2022.
 """
+
 from typing import Optional
 
 import matplotlib.pyplot as plt

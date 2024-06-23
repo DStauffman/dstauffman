@@ -44,6 +44,7 @@ class Test_aerospace_suppress_checks(unittest.TestCase):
     Tests the suppress_quat_checks and unsupress_quat_checks functions with the following cases:
         Suppress and Unsuppress
     """
+
     orig_flag: bool
 
     @classmethod

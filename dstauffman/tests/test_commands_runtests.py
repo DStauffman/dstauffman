@@ -139,6 +139,7 @@ class Test_commands_parse_coverage(unittest.TestCase):
     Tests the commands.parse_coverage function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -148,6 +149,7 @@ class Test_commands_execute_coverage(unittest.TestCase):
     Tests the commands.execute_coverage function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 

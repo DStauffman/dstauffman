@@ -27,6 +27,7 @@ class Test_run_docstrings(unittest.TestCase):
     Tests the run_docstrings function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -36,6 +37,7 @@ class Test_run_unittests(unittest.TestCase):
     Tests the run_unittests function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -45,6 +47,7 @@ class Test_run_pytests(unittest.TestCase):
     Tests the run_pytests function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -54,6 +57,7 @@ class Test_run_coverage(unittest.TestCase):
     Tests the run_coverage function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -69,6 +73,7 @@ class Test_find_repo_issues(unittest.TestCase):
         Bad New Lines
         Ignore tabs
     """
+
     folder: pathlib.Path
     linesep: str
     files: List[pathlib.Path]

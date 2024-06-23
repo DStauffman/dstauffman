@@ -38,6 +38,7 @@ class Test_parser__Flags(unittest.TestCase):
     Tests the parser._Flags function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -62,6 +63,7 @@ class Test_main(unittest.TestCase):
     Tests the main function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 

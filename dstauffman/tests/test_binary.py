@@ -144,6 +144,7 @@ class Test_read_bit_stream(unittest.TestCase):
     Tests the read_bit_stream function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 

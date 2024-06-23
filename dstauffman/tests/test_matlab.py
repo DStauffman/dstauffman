@@ -22,6 +22,7 @@ if dcs.HAVE_NUMPY:
 # %% Classes
 class _Gender(IntEnumPlus):
     r"""Enumeration to match the MATLAB one from the test cases."""
+
     # fmt: off
     null: ClassVar[int]        = 0
     female: ClassVar[int]      = 1

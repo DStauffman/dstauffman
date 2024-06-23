@@ -53,7 +53,7 @@ class MultipassExceptionWrapper:
 
 
 # %% Functions - parfor_wrapper
-def parfor_wrapper(
+def parfor_wrapper(  # noqa: C901
     func: Callable,
     args: Iterable,
     *,

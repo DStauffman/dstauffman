@@ -234,7 +234,7 @@ def run_coverage(folder: Path, *, report: bool = True, cov_file: Optional[Path] 
 
 
 # %% find_repo_issues
-def find_repo_issues(
+def find_repo_issues(  # noqa: C901
     folder: Path,
     extensions: Union[FrozenSet[str], Set[str], Tuple[str, ...], str, None] = frozenset((".m", ".py")),
     *,
@@ -388,7 +388,7 @@ def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = T
 
 
 # %% Functions - get_python_definitions
-def get_python_definitions(text: str, *, include_private: bool = False) -> List[str]:
+def get_python_definitions(text: str, *, include_private: bool = False) -> List[str]:  # noqa: C901
     r"""
     Get all public class and def names from the text of the file.
 

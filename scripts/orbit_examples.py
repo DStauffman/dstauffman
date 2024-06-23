@@ -119,7 +119,6 @@ np.testing.assert_array_almost_equal(oe.lo, lo, err_msg="lo is different")
 np.testing.assert_array_almost_equal(oe.T, T, err_msg="T is different")
 # np.testing.assert_array_almost_equal(oe.t, t, err_msg="t is different")
 
-
 # %% Example 3
 r = np.array([-0.0707033342747565, 0.07070333427475654, 0.00027774964281135])
 v = np.array([-2.2585415009051526, -2.2138180776640843, 8.7845325527614843e-05])

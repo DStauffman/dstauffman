@@ -142,6 +142,7 @@ class Test_plotting_Plotter(unittest.TestCase):
     Tests the plotting.Plotter class with the following cases:
         Suppress and Unsuppress
     """
+
     orig_flag: bool
 
     @classmethod
@@ -287,6 +288,7 @@ class Test_plotting_plot_time_difference(unittest.TestCase):
     Tests the plotting.plot_time_difference function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -647,6 +649,7 @@ class Test_plotting_save_zoomed_version(unittest.TestCase):
     Tests the plotting.save_zoomed_version function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 

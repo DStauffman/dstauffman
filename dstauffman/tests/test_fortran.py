@@ -18,6 +18,7 @@ class Test_fortran__FortranSource(unittest.TestCase):
     Tests the fortran._FortranSource class with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -75,6 +76,7 @@ class Test_fortran__write_unit_test(unittest.TestCase):
     Tests the fortran._write_unit_test function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -84,6 +86,7 @@ class Test_fortran__write_all_unit_test(unittest.TestCase):
     Tests the fortran._write_all_unit_test function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -93,6 +96,7 @@ class Test_fortran__get_template(unittest.TestCase):
     Tests the fortran._get_template function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -102,6 +106,7 @@ class Test_fortran__write_makefile(unittest.TestCase):
     Tests the fortran._write_makefile function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -111,6 +116,7 @@ class Test_create_fortran_unit_tests(unittest.TestCase):
     Tests the create_fortran_unit_tests function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -120,6 +126,7 @@ class Test_create_fortran_makefile(unittest.TestCase):
     Tests the create_fortran_makefile function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 

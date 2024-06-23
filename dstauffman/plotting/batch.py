@@ -148,7 +148,7 @@ def plot_bpe_convergence(
 
 
 # %% plot_bpe_results
-def plot_bpe_results(
+def plot_bpe_results(  # noqa: C901
     bpe_results: BpeResults,
     *,
     opts: Optional[Opts] = None,

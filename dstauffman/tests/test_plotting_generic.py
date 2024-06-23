@@ -806,6 +806,7 @@ class Test_plotting_make_bar_plot(unittest.TestCase):
     Tests the plotting.make_bar_plot function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 

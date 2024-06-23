@@ -117,6 +117,7 @@ class Test_estimation_support__get_sub_level(unittest.TestCase):
     Tests the estimation.support._get_sub_level function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -130,6 +131,7 @@ class Test_estimation_support__check_valid_param_name(unittest.TestCase):
         Bad attribute name
         Element of vector
     """
+
     param: _Parameters
 
     @classmethod

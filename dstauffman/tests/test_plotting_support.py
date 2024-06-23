@@ -89,6 +89,7 @@ class Test_plotting__HoverButton(unittest.TestCase):
     Tests the plotting._HoverButton class with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -98,6 +99,7 @@ class Test_plotting_ExtraPlotter(unittest.TestCase):
     Tests the plotting.ExtraPlotter function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -432,6 +434,7 @@ class Test_plotting_get_figure_title(unittest.TestCase):
     Tests the plotting.get_figure_title function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -496,6 +499,7 @@ class Test_plotting_storefig(unittest.TestCase):
         saving to a bad folder location (should raise error)
         specifying a bad plot type (should raise error)
     """
+
     time: np.ndarray
     data: np.ndarray
     title: str
@@ -1069,6 +1073,7 @@ class Test_plotting_get_classification(unittest.TestCase):
     Tests the plotting.get_classification function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -1115,6 +1120,7 @@ class Test_plotting_align_plots(unittest.TestCase):
     Tests the plotting.align_plots function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -1144,6 +1150,7 @@ class Test_plotting_ci_from_z(unittest.TestCase):
     Tests the plotting.ci_from_z function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
@@ -1154,6 +1161,7 @@ class Test_plotting_save_figs_to_pdf(unittest.TestCase):
     Tests the plotting.save_figs_to_pdf function with the following cases:
         TBD
     """
+
     fig1: Figure
     fig2: Figure
     filename: pathlib.Path
@@ -1190,6 +1198,7 @@ class Test_plotting_save_images_to_pdf(unittest.TestCase):
     Tests the plotting.save_images_to_pdf function with the following cases:
         TBD
     """
+
     pass  # TODO: write this
 
 
