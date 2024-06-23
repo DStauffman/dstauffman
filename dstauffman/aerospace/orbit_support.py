@@ -141,6 +141,53 @@ def jd_2_century(time_jd: _FN) -> Tuple[_FN, _FN]:
     return (Du, T)
 
 
+# %% Functions - mjd_to_numpy
+@overload
+def mjd_to_numpy(time_mjd: float) -> np.datetime64: ...
+@overload
+def mjd_to_numpy(time_mjd: _N) -> _D: ...
+def mjd_to_numpy(time_mjd: _FN) -> Union[np.datetime64, _D]:
+    r"""
+    Converts a modified julian date to a numpy datetime64.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import mjd_to_numpy
+    >>> time_mjd = 51546.0
+    >>> date = mjd_to_numpy(time_mjd)
+    >>> print(date)
+    2000-01-03T00:00:00.000000000
+
+    """
+    delta_days = time_mjd - (JULIAN["jd_2000_01_01"] - JULIAN["mjd_origin"])
+    out = np.datetime64("2000-01-01T12:00:00", NP_DATETIME_UNITS) + NP_ONE_DAY * delta_days
+    return out
+
+
+# %% Functions - numpy_to_mjd
+@overload
+def numpy_to_mjd(date: np.datetime64) -> float: ...
+@overload
+def numpy_to_mjd(date: _D) -> _N: ...
+def numpy_to_mjd(date: Union[np.datetime64, _D]) -> Union[float, _N]:
+    r"""
+    Converts a numpy datetime64 into a modified julian date.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import numpy_to_mjd
+    >>> import numpy as np
+    >>> date = np.datetime64("2000-01-02T12:00:00")
+    >>> time_mjd = numpy_to_mjd(date)
+    >>> print(time_mjd)
+    51545.5
+
+    """
+    delta_days = (date - np.datetime64("2000-01-01T12:00:00", NP_DATETIME_UNITS)) / NP_ONE_DAY
+    out = delta_days + (JULIAN["jd_2000_01_01"] - JULIAN["mjd_origin"])
+    return out  # type: ignore[return-value]
+
+
 # %% Functions - d_2_dms
 @overload
 def d_2_dms(x: float, /) -> _N: ...

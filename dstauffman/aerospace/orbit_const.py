@@ -62,6 +62,7 @@ JULIAN["century"] = 36525.0 * JULIAN["day"]  # [s]
 JULIAN["jd_2000_01_01"] = 2451545.0  # Julian Date at 2000-01-01T12:00Z  [day]
 JULIAN["tg0_2000"] = 1.753368559  # Julian Date 2451544.5 (2000-01-01T00:00Z) [rad]
 JULIAN["tg0_2000_time"] = JULIAN["jd_2000_01_01"] - 0.5  # [rad]
+JULIAN["mjd_origin"] = 2400000.5  # Modified Julian Date origin in Julian Days, 1858-11-17T00:00:00Z [day]
 
 # Speed of light (c)
 SPEED_OF_LIGHT = 299792458.0  # [m/s]

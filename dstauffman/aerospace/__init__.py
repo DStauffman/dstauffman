@@ -26,12 +26,12 @@ from .orbit_conv  import anomaly_eccentric_2_mean, anomaly_eccentric_2_true, \
                              semimajor_2_mean_motion, semimajor_2_period, sidereal_2_long, \
                              raan_2_mltan, jd_2_sidereal, quat_eci_2_ecf_approx, quat_eci_2_ecf
 from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to_jd, jd_2_century, \
-                             d_2_dms, dms_2_d, hms_2_r, r_2_hms, aer_2_rdr, aer_2_sez, \
-                             geo_loc_2_ijk, ijk_2_rdr, ijk_2_sez, long_2_sidereal, rdr_2_aer, \
-                             rdr_2_ijk, sez_2_aer, sez_2_ijk, rv_aer_2_ijk, rv_aer_2_sez, \
-                             rv_ijk_2_aer, rv_ijk_2_sez, rv_sez_2_aer, rv_sez_2_ijk, \
-                             get_sun_radec_approx, get_sun_radec, get_sun_distance, beta_from_oe, \
-                             eclipse_fraction, earth_radius_by_latitude
+                             mjd_to_numpy, numpy_to_mjd, d_2_dms, dms_2_d, hms_2_r, r_2_hms, \
+                             aer_2_rdr, aer_2_sez, geo_loc_2_ijk, ijk_2_rdr, ijk_2_sez, \
+                             long_2_sidereal, rdr_2_aer, rdr_2_ijk, sez_2_aer, sez_2_ijk, \
+                             rv_aer_2_ijk, rv_aer_2_sez, rv_ijk_2_aer, rv_ijk_2_sez, rv_sez_2_aer, \
+                             rv_sez_2_ijk, get_sun_radec_approx, get_sun_radec, get_sun_distance, \
+                             beta_from_oe, eclipse_fraction, earth_radius_by_latitude
 from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv, advance_elements
 from .quat        import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks, quat_assertions, \
                              enforce_pos_scalar, qrot, quat_from_axis_angle, quat_angle_diff, \

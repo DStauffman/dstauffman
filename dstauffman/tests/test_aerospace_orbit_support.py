@@ -156,6 +156,45 @@ class Test_aerospace_jd_2_century(unittest.TestCase):
     pass  # TODO: write this
 
 
+# %% aerospace.mjd_to_numpy
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_mjd_to_numpy(unittest.TestCase):
+    r"""
+    Tests the aerospace.mjd_to_numpy function with the following cases:
+        Nominal
+        Vectorized
+    """
+
+    def test_nominal(self) -> None:
+        date = space.mjd_to_numpy(51544.5)
+        self.assertEqual(date, np.datetime64("2000-01-01T12:00:00"))
+
+    def test_vectorized(self) -> None:
+        jd = np.array([51544.5, 51545.0])
+        date = space.mjd_to_numpy(jd)
+        exp = np.array([np.datetime64("2000-01-01T12:00:00"), np.datetime64("2000-01-02T00:00:00")])
+        np.testing.assert_array_equal(date, exp)
+
+
+# %% aerospace.numpy_to_mjd
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_numpy_to_mjd(unittest.TestCase):
+    r"""
+    Tests the aerospace.numpy_to_mjd function with the following cases:
+        Nominal
+        Vectorized
+    """
+
+    def test_nominal(self) -> None:
+        jd = space.numpy_to_mjd(np.datetime64("2000-01-02T00:00:00"))
+        self.assertEqual(jd, 51545.0)
+
+    def test_vectorized(self) -> None:
+        x = np.array([np.datetime64("2000-01-01T00:00:00"), np.datetime64("2000-01-01T12:00:00")])
+        jd = space.numpy_to_mjd(x)
+        np.testing.assert_array_equal(jd, np.array([51544.0, 51544.5]))
+
+
 # %% aerospace.d_2_dms
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_d_2_dms(unittest.TestCase):
