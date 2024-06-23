@@ -33,7 +33,6 @@ from dstauffman import (
     MultipassExceptionWrapper,
     parfor_wrapper,
     pprint_dict,
-    rss,
     SaveAndLoad,
     setup_dir,
 )
@@ -49,10 +48,12 @@ else:
     from math import inf, isnan, nan  # type: ignore[assignment]
 
 if TYPE_CHECKING:
-    from numpy.typing import NDArray
+    from numpy.typing import ArrayLike, NDArray
 
+    _I = NDArray[np.int_]
     _N = NDArray[np.float64]
     _M = NDArray[np.float64]  # 2D
+    _Number = Union[int, float, _I, _N]
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -435,6 +436,75 @@ def _print_divider(new_line: bool = True, level: int = LogLevel.L5) -> None:
     if new_line:
         logger.log(level, " ")
     logger.log(level, "******************************")
+
+
+# %% Functions - _calc_sum_squares
+@overload
+def _calc_sum_squares(
+    data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...
+) -> Union[float, int]: ...
+@overload
+def _calc_sum_squares(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _Number: ...
+@overload
+def _calc_sum_squares(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> NDArray: ...
+def _calc_sum_squares(
+    data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ignore_nans: bool = False
+) -> _Number:
+    r"""
+    Calculate the sum of squares of a number series.
+
+    Parameters
+    ----------
+    data : array_like
+        input data
+    axis : int, optional
+        Axis along which RMS is computed. The default is to compute the RMS of the flattened array.
+    keepdims : bool, optional
+        If true, the axes which are reduced are left in the result as dimensions with size one.
+        With this option, the result will broadcast correctly against the original `data`.
+
+    Returns
+    -------
+    out : ndarray
+        RSS results
+
+    See Also
+    --------
+    numpy.sum, numpy.nansum, numpy.conj
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in April 2016.
+
+    Examples
+    --------
+    >>> from dstauffman.estimation.batch import _calc_sum_squares
+    >>> _calc_sum_squares([0, 1, 0, -1])
+    2
+
+    """
+    # check for empty data
+    if not np.isscalar(data) and len(data) == 0:  # type: ignore[arg-type]
+        return np.nan
+    # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
+    if not ignore_nans:
+        out = np.sum(data * np.conj(data), axis=axis, keepdims=keepdims)
+    else:
+        # check for all NaNs case
+        if np.all(np.isnan(data)):
+            if axis is None:
+                out = np.nan
+            else:
+                assert isinstance(data, np.ndarray)
+                if keepdims:
+                    shape = (*data.shape[:axis], 1, *data.shape[axis + 1 :])
+                else:
+                    shape = (*data.shape[:axis], *data.shape[axis + 1 :])
+                out = np.full(shape, np.nan)
+        else:
+            out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
+    # return the result
+    return out  # type: ignore[return-value]
 
 
 # %% _function_wrapper
@@ -1044,7 +1114,7 @@ def _dogleg_search(  # noqa: C901
         bpe_results.num_evals += 1
 
         # evaluate the cost function at the new parameter values
-        sum_sq_innov = rss(innovs, ignore_nans=True)
+        sum_sq_innov = _calc_sum_squares(innovs, ignore_nans=True)
         if opti_opts.is_max_like:
             trial_cost = 0.5 * (sum_sq_innov + log_det_B)
         else:
@@ -1351,7 +1421,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:  # noqa: C901
     # initialize current results
     # fmt: off
     cur_results.trust_rad = opti_opts.trust_radius
-    cur_results.cost      = 0.5 * rss(cur_results.innovs, ignore_nans=True)
+    cur_results.cost      = 0.5 * _calc_sum_squares(cur_results.innovs, ignore_nans=True)
     cur_results.params    = opti_opts.get_param_func(names=names, **model_args)
     assert cur_results.params is not None
 
@@ -1446,7 +1516,7 @@ def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:  # noqa: C901
         return_results=True,
     )
     bpe_results.num_evals += 1
-    cur_results.cost = 0.5 * rss(cur_results.innovs, ignore_nans=True)
+    cur_results.cost = 0.5 * _calc_sum_squares(cur_results.innovs, ignore_nans=True)
     bpe_results.final_innovs = cur_results.innovs.copy()
     bpe_results.final_params = cur_results.params.copy()
     bpe_results.final_cost   = cur_results.cost  # fmt: skip

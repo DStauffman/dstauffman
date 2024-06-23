@@ -348,12 +348,14 @@ def rss(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ign
     Notes
     -----
     #.  Written by David C. Stauffer in April 2016.
+    #.  Bug fixed by David C. Stauffer in February 2024 to actually take the square root.
 
     Examples
     --------
     >>> from dstauffman import rss
-    >>> rss([0, 1, 0., -1])
-    2.0
+    >>> out = rss([0, 1, 0., -1])
+    >>> print(f"{out:.8f}")
+    1.41421356
 
     """
     # check for empty data
@@ -361,7 +363,7 @@ def rss(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ign
         return np.nan
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
-        out = np.sum(data * np.conj(data), axis=axis, keepdims=keepdims)
+        out = np.sqrt(np.sum(data * np.conj(data), axis=axis, keepdims=keepdims))
     else:
         # check for all NaNs case
         if np.all(np.isnan(data)):
@@ -375,7 +377,7 @@ def rss(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ign
                     shape = (*data.shape[:axis], *data.shape[axis + 1 :])
                 out = np.full(shape, np.nan)
         else:
-            out = np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims)
+            out = np.sqrt(np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims))
     # return the result
     return out  # type: ignore[no-any-return]
 

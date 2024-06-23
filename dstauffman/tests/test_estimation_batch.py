@@ -12,13 +12,13 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, TYPE_CHECKING
+from typing import Any, Dict, List, Tuple, TYPE_CHECKING, Union
 import unittest
 from unittest.mock import Mock, patch
 
 from slog import capture_output, LogLevel
 
-from dstauffman import compare_two_classes, Frozen, get_tests_dir, HAVE_H5PY, HAVE_NUMPY, rss
+from dstauffman import compare_two_classes, Frozen, get_tests_dir, HAVE_H5PY, HAVE_NUMPY
 import dstauffman.estimation as estm
 
 if HAVE_NUMPY:
@@ -368,6 +368,124 @@ class Test_estimation_batch__print_divider(unittest.TestCase):
         # TODO: how to test that this wouldn't log anything?
 
 
+# %% estimation.batch._calc_sum_squares
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_estimation_batch__calc_sum_squares(unittest.TestCase):
+    r"""
+    Tests the estimation.batch._calc_sum_squares function with the following cases:
+        sum of squares on just a scalar input
+        normal sum of squares on vector input
+        sum of squares on vector with axis specified
+        sum of squares on vector with bad axis specified
+        sum of squares on matrix without keeping dimensions, no axis
+        sum of squares on matrix without keeping dimensions, axis 0
+        sum of squares on matrix without keeping dimensions, axis 1
+        sum of squares on matrix with keeping dimensions
+        sum of squares on complex numbers
+        sum of squares on complex numbers that would return a real if done incorrectly
+    """
+
+    def setUp(self) -> None:
+        # fmt: off
+        self.inputs1   = np.array([0, 1, 0, -1])
+        self.outputs1  = 2
+        self.inputs2   = [[0, 1, 0, -1], [1, 1, 1, 1]]
+        self.outputs2a = 6
+        self.outputs2b = np.array([1, 2, 1, 2])
+        self.outputs2c = np.array([2, 4])
+        self.outputs2d = np.array([[2], [4]])
+        self.inputs3   = np.hstack((self.inputs1, np.nan))
+        self.inputs4   = [[0, 0, np.nan], [1, np.nan, 1]]
+        self.outputs4a = 2
+        self.outputs4b = np.array([1, 0, 1])
+        self.outputs4c = np.array([0, 2])
+        # fmt: on
+
+    def test_scalar_input(self) -> None:
+        out = estm.batch._calc_sum_squares(-1.5)
+        self.assertEqual(out, 1.5**2)
+
+    def test_empty(self) -> None:
+        out = estm.batch._calc_sum_squares([])
+        self.assertTrue(np.isnan(out))
+
+    def test_rss_series(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs1)
+        self.assertAlmostEqual(out, self.outputs1)
+
+    def test_axis_drop1a(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs1, axis=0)
+        assert isinstance(out, np.int_)  # type: ignore[unreachable]
+        self.assertAlmostEqual(out, self.outputs1)  # type: ignore[unreachable]
+
+    def test_axis_drop1b(self) -> None:
+        with self.assertRaises(ValueError):
+            estm.batch._calc_sum_squares(self.inputs1, axis=1)
+
+    def test_axis_drop2a(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs2)
+        self.assertAlmostEqual(out, self.outputs2a)
+
+    def test_axis_drop2b(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs2, axis=0, keepdims=False)
+        np.testing.assert_array_almost_equal(out, self.outputs2b)
+
+    def test_axis_drop2c(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs2, axis=1, keepdims=False)
+        np.testing.assert_array_almost_equal(out, self.outputs2c)
+
+    def test_axis_keep(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs2, axis=1, keepdims=True)
+        np.testing.assert_array_almost_equal(out, self.outputs2d)
+
+    def test_complex_sum_squares(self) -> None:
+        out = estm.batch._calc_sum_squares(1.5j)
+        self.assertEqual(out, 1.5**2)
+
+    def test_complex_conj(self) -> None:
+        out = estm.batch._calc_sum_squares(np.array([1 + 1j, 1 - 1j]))
+        self.assertAlmostEqual(out, 4)
+
+    def test_with_nans(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs3, ignore_nans=False)
+        self.assertTrue(np.isnan(out))
+
+    def test_ignore_nans1(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs3, ignore_nans=True)
+        self.assertAlmostEqual(out, self.outputs1)
+
+    def test_ignore_nans2(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs4, ignore_nans=True)
+        self.assertAlmostEqual(out, self.outputs4a)
+
+    def test_ignore_nans3(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs4, ignore_nans=True, axis=0)
+        np.testing.assert_array_almost_equal(out, self.outputs4b)
+
+    def test_ignore_nans4(self) -> None:
+        out = estm.batch._calc_sum_squares(self.inputs4, ignore_nans=True, axis=1)
+        np.testing.assert_array_almost_equal(out, self.outputs4c)
+
+    def test_all_nans(self) -> None:
+        x = np.full((4, 3), np.nan)
+        out: Union[float, np.ndarray] = estm.batch._calc_sum_squares(x, ignore_nans=True)
+        self.assertTrue(np.isnan(out))
+        out = estm.batch._calc_sum_squares(x, axis=0, ignore_nans=True)
+        assert isinstance(out, np.ndarray)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (3,))
+        out = estm.batch._calc_sum_squares(x, axis=1, ignore_nans=True)
+        assert isinstance(out, np.ndarray)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (4,))
+        out = estm.batch._calc_sum_squares(x, axis=0, ignore_nans=True, keepdims=True)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (1, 3))
+        out = estm.batch._calc_sum_squares(x, axis=1, ignore_nans=True, keepdims=True)
+        self.assertTrue(np.all(np.isnan(out)))
+        self.assertEqual(out.shape, (4, 1))
+
+
 # %% estimation.batch._function_wrapper
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_estimation_batch__function_wrapper(unittest.TestCase):
@@ -485,7 +603,7 @@ class Test_estimation_batch__finite_differences(unittest.TestCase):
         )
         self.bpe_results.num_evals += 1
         self.cur_results.trust_rad = self.opti_opts.trust_radius
-        self.cur_results.cost = 0.5 * rss(self.cur_results.innovs, ignore_nans=True)
+        self.cur_results.cost = 0.5 * estm.batch._calc_sum_squares(self.cur_results.innovs, ignore_nans=True)
         names = estm.OptiParam.get_names(self.opti_opts.params)
         self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)
 
@@ -769,7 +887,7 @@ class Test_estimation_batch__dogleg_search(unittest.TestCase):
         )
         self.bpe_results.num_evals += 1
         self.cur_results.trust_rad = self.opti_opts.trust_radius
-        self.cur_results.cost = 0.5 * rss(self.cur_results.innovs, ignore_nans=True)
+        self.cur_results.cost = 0.5 * estm.batch._calc_sum_squares(self.cur_results.innovs, ignore_nans=True)
         names = estm.OptiParam.get_names(self.opti_opts.params)
         self.cur_results.params = self.opti_opts.get_param_func(names=names, **self.model_args)
 

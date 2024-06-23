@@ -332,22 +332,22 @@ class Test_rss(unittest.TestCase):
     def setUp(self) -> None:
         # fmt: off
         self.inputs1   = np.array([0, 1, 0, -1])
-        self.outputs1  = 2
+        self.outputs1  = np.sqrt(2.0)
         self.inputs2   = [[0, 1, 0, -1], [1, 1, 1, 1]]
-        self.outputs2a = 6
-        self.outputs2b = np.array([1, 2, 1, 2])
-        self.outputs2c = np.array([2, 4])
-        self.outputs2d = np.array([[2], [4]])
+        self.outputs2a = np.sqrt(6.0)
+        self.outputs2b = np.array([1.0, np.sqrt(2), 1.0, np.sqrt(2.0)])
+        self.outputs2c = np.array([np.sqrt(2.0), 2.0])
+        self.outputs2d = np.array([[np.sqrt(2.0)], [2.0]])
         self.inputs3   = np.hstack((self.inputs1, np.nan))
         self.inputs4   = [[0, 0, np.nan], [1, np.nan, 1]]
-        self.outputs4a = 2
-        self.outputs4b = np.array([1, 0, 1])
-        self.outputs4c = np.array([0, 2])
+        self.outputs4a = np.sqrt(2.0)
+        self.outputs4b = np.array([1.0, 0.0, 1.0])
+        self.outputs4c = np.array([0.0, np.sqrt(2.0)])
         # fmt: on
 
     def test_scalar_input(self) -> None:
         out = dcs.rss(-1.5)
-        self.assertEqual(out, 1.5**2)
+        self.assertEqual(out, 1.5)
 
     def test_empty(self) -> None:
         out = dcs.rss([])
@@ -359,8 +359,7 @@ class Test_rss(unittest.TestCase):
 
     def test_axis_drop1a(self) -> None:
         out = dcs.rss(self.inputs1, axis=0)
-        assert isinstance(out, np.int_)  # type: ignore[unreachable]
-        self.assertAlmostEqual(out, self.outputs1)  # type: ignore[unreachable]
+        self.assertAlmostEqual(out, self.outputs1)
 
     def test_axis_drop1b(self) -> None:
         with self.assertRaises(ValueError):
@@ -384,11 +383,11 @@ class Test_rss(unittest.TestCase):
 
     def test_complex_rss(self) -> None:
         out = dcs.rss(1.5j)
-        self.assertEqual(out, 1.5**2)
+        self.assertEqual(out, 1.5)
 
     def test_complex_conj(self) -> None:
         out = dcs.rss(np.array([1 + 1j, 1 - 1j]))
-        self.assertAlmostEqual(out, 4)
+        self.assertAlmostEqual(out, 2.0)
 
     def test_with_nans(self) -> None:
         out = dcs.rss(self.inputs3, ignore_nans=False)
@@ -1014,6 +1013,10 @@ class Test_np_digitize(unittest.TestCase):
     def test_bad_max(self) -> None:
         with self.assertRaises(ValueError):
             dcs.np_digitize(np.array([5, 25]), self.bins)
+
+    def test_bad_both(self) -> None:
+        with self.assertRaises(ValueError):
+            dcs.np_digitize(np.array([25, -5, 5]), self.bins)
 
     def test_empty(self) -> None:
         out = dcs.np_digitize(np.array([]), self.bins)
