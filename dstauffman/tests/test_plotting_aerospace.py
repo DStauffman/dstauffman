@@ -348,6 +348,16 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
             plot.close_all(self.figs)
 
 
+# %% plotting.plot_quaternion
+class Test_plotting_plot_quaternion(unittest.TestCase):
+    r"""
+    Tests the plotting.plot_quaternion function with the following cases:
+        TBD
+    """
+
+    pass  # TODO: write this
+
+
 # %% plotting.plot_attitude
 class Test_plotting_plot_attitude(unittest.TestCase):
     r"""

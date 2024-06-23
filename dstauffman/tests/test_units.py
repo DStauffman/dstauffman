@@ -44,7 +44,7 @@ class Test_Constants(unittest.TestCase):
 
     def test_missing(self) -> None:
         for field in vars(dcs.units):
-            if field.isupper():
+            if field.isupper() and not field.startswith("_"):
                 self.assertTrue(field in self.master, "Test is missing: {}".format(field))
 
 

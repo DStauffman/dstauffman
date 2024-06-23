@@ -18,7 +18,7 @@ import unittest
 
 from slog import LogLevel
 
-from dstauffman import HAVE_MPL, HAVE_NUMPY, intersect, is_datetime
+from dstauffman import HAVE_MPL, HAVE_NUMPY, intersect, is_datetime, np_digitize
 from dstauffman.aerospace import Kf, KfInnov
 from dstauffman.plotting.generic import (
     make_categories_plot,
@@ -41,7 +41,9 @@ from dstauffman.plotting.support import (
 if HAVE_MPL:
     from matplotlib.axes import Axes
     from matplotlib.colors import Colormap, ListedColormap
+    from matplotlib.dates import date2num
     from matplotlib.figure import Figure
+    from matplotlib.patches import Rectangle
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
     import numpy as np
@@ -368,6 +370,195 @@ def make_quaternion_plot(
         label_vert_lines=label_vert_lines,
         use_datashader=use_datashader,
     )
+
+
+# %% plot_quaternion
+@overload
+def plot_quaternion(
+    description: str,
+    time_one: Optional[_Times],
+    time_two: Optional[_Times],
+    quat_one: Optional[_Q],
+    quat_two: Optional[_Q],
+    *,
+    opts: Optional[Opts],
+    return_err: Literal[False] = ...,
+    **kwargs: Unpack[_KfQuatKwargs],
+) -> _Figs: ...
+@overload
+def plot_quaternion(
+    description: str,
+    time_one: Optional[_Times],
+    time_two: Optional[_Times],
+    quat_one: Optional[_Q],
+    quat_two: Optional[_Q],
+    *,
+    opts: Optional[Opts],
+    return_err: Literal[True],
+    **kwargs: Unpack[_KfQuatKwargs],
+) -> Tuple[_Figs, _N]: ...
+def plot_quaternion(  # noqa: C901
+    description: str,
+    time_one: Optional[_Times],
+    time_two: Optional[_Times],
+    quat_one: Optional[_Q],
+    quat_two: Optional[_Q],
+    *,
+    opts: Optional[Opts] = None,
+    return_err: bool = False,
+    **kwargs: Unpack[_KfQuatKwargs],
+) -> Union[_Figs, Tuple[_Figs, _N]]:
+    r"""
+    Plots the attitude quaternion history without making explicit Kf classes.
+
+    Parameters
+    ----------
+    description : str
+        name of the data being plotted, used as title
+    time_one : (A,) array_like
+        time history for channel one, [sec] or datetime64
+    time_two : (B,) array_like
+        time history for channel two, [sec] or datetime64
+    quat_one : (4,) or (4, A) ndarray, or (A, 4) ndarray if data_as_rows is False
+        quaternion history for channel one
+    quat_two : (4,) or (4, B) ndarray, or (B, 4) ndarray if data_as_rows is False
+        quaternion history for channel two
+    opts : class Opts, optional
+        Plotting options
+    return_err : bool, optional, default is False
+        Whether the function should return the error differences in addition to the figure handles
+
+    Returns
+    -------
+    fig_hand : list of class matplotlib.figure.Figure
+        Figure handles
+    err : dict
+        Numerical outputs of comparison
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import Opts, plot_quaternion
+    >>> from dstauffman.aerospace import quat_from_euler, quat_mult, quat_norm
+    >>> import numpy as np
+
+    >>> q1 = quat_norm(np.array([0.1, -0.2, 0.3, 0.4]))
+    >>> dq = quat_from_euler(1e-6*np.array([-300, 100, 200]), [3, 1, 2])
+    >>> q2 = quat_mult(dq, q1)
+
+    >>> time_one = np.arange(11)
+    >>> quat_one = np.tile(q1[:, np.newaxis], (1, time_one.size))
+
+    >>> time_two = np.arange(2, 13)
+    >>> quat_two = np.tile(q2[:, np.newaxis], (1, time_two.size))
+    >>> quat_two[3,4] += 50e-6
+    >>> quat_two = quat_norm(quat_two)
+
+    >>> opts = Opts()
+    >>> opts.case_name = "test_plot"
+    >>> opts.quat_comp = True
+    >>> opts.sub_plots = True
+
+    >>> fig_hand = plot_quaternion("Quaternion", time_one, time_two, quat_one, quat_two, \
+    ...                            opts=opts, name_one="KF1", name_two="KF2")
+
+    Close plots
+    >>> import matplotlib.pyplot as plt
+    >>> for fig in fig_hand:
+    ...     plt.close(fig)
+
+    """
+    # check optional inputs
+    if opts is None:
+        opts = Opts()
+
+    # alias keywords
+    name_one = kwargs.pop("name_one", "")
+    name_two = kwargs.pop("name_two", "")
+
+    # determine if converting units
+    is_date_1 = is_datetime(time_one)
+    is_date_2 = is_datetime(time_two)
+    is_date_o = opts.time_unit in {"numpy", "datetime"}
+
+    # make local copy of opts that can be modified without changing the original
+    this_opts = Opts() if opts is None else opts.__class__(opts)
+    # allow opts to convert as necessary
+    if is_date_1 or is_date_2 and not is_date_o:
+        this_opts.convert_dates("numpy", old_form=opts.time_base)
+    elif is_date_o and not is_date_1 and not is_date_2:
+        this_opts.convert_dates("sec", old_form=opts.time_base)
+    # opts overrides
+    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
+    this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
+    if "classify" in kwargs:
+        this_opts.classify = kwargs.pop("classify")
+
+    # alias opts
+    # fmt: off
+    time_units   = kwargs.pop("time_units", this_opts.time_base)
+    start_date   = kwargs.pop("start_date", this_opts.get_date_zero_str())
+    rms_xmin     = kwargs.pop("rms_xmin", this_opts.rms_xmin)
+    rms_xmax     = kwargs.pop("rms_xmax", this_opts.rms_xmax)
+    disp_xmin    = kwargs.pop("disp_xmin", this_opts.disp_xmin)
+    disp_xmax    = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    sub_plots    = kwargs.pop("make_subplots", this_opts.sub_plots)
+    plot_comps   = kwargs.pop("plot_components", this_opts.quat_comp)
+    single_lines = kwargs.pop("single_lines", this_opts.sing_line)
+    use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
+    lab_vert     = kwargs.pop("label_vert_lines", this_opts.lab_vert)
+    plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
+    show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
+    legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    # fmt: on
+
+    # hard-coded defaults
+    second_units = kwargs.pop("second_units", "micro")
+
+    # initialize outputs
+    figs: _Figs = []
+
+    # print status
+    logger.log(LogLevel.L4, "Plotting %s plots ...", description)
+
+    # make plots
+    out = make_quaternion_plot(  # type: ignore[call-overload, misc]
+        description,
+        time_one,
+        time_two,
+        quat_one,
+        quat_two,
+        name_one=name_one,
+        name_two=name_two,
+        time_units=time_units,
+        start_date=start_date,
+        rms_xmin=rms_xmin,
+        rms_xmax=rms_xmax,
+        disp_xmin=disp_xmin,
+        disp_xmax=disp_xmax,
+        make_subplots=sub_plots,
+        plot_components=plot_comps,
+        single_lines=single_lines,
+        use_mean=use_mean,
+        label_vert_lines=lab_vert,
+        plot_zero=plot_zero,
+        show_rms=show_rms,
+        legend_loc=legend_loc,
+        second_units=second_units,
+        return_err=return_err,
+        **kwargs,
+    )
+    if return_err:
+        figs += out[0]
+        err: _N = out[1]
+    else:
+        figs += out
+
+    # Setup plots
+    setup_plots(figs, opts)
+    logger.log(LogLevel.L4, "... done.")
+    if return_err:
+        return (figs, err)
+    return figs
 
 
 # %% plot_attitude
@@ -1810,6 +2001,91 @@ def plot_tci(
     for name, color, value in zip(quintile_names, quintile_colors, quintiles):
         ax.axhline(value, label=name, color=color)
         ax.annotate(name, (time[0], value), color=color, fontsize=16, verticalalignment="top", zorder=10)
+    setup_plots(fig, opts=opts)
+    return fig
+
+
+# %% Functions - plot_kp
+def plot_kp(
+    time: _D,
+    data: _N,
+    *,
+    opts: Optional[Opts] = None,
+) -> Figure:
+    """
+    Plots the K planetary index 3-hourly data.
+
+    Parameters
+    ----------
+    time : (N,)
+        Time
+    data : (N,)
+        Thermosphere Climate Index data
+    opts : class Opts, optional
+        Plotting options
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+        Figure handle
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in May 2024.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import plot_kp
+    >>> from dstauffman.aerospace import read_kp_ap_nowcast
+    >>> from dstauffman import get_data_dir
+    >>> import numpy as np
+    >>> folder = get_data_dir()
+    >>> kp_file = folder / "Kp_ap_nowcast.txt"
+    >>> kp_data = read_kp_ap_nowcast(kp_file)
+    >>> time = kp_data.GMT.to_numpy()
+    >>> data = kp_data.Kp.to_numpy()
+    >>> data[data < 0.0] = np.nan
+    >>> fig = plot_kp(time, data)
+
+    Close plots
+    >>> import matplotlib.pyplot as plt
+    >>> plt.close(fig)
+
+    """
+    if opts is None:
+        opts = Opts()
+    # calculate the colors
+    kp_bins = np.array([-1e-5, 5.0, 6.0, 7.0, 8.0, 8.99, 100.0])
+    delta_time = 0.120  # days
+    data_clean = np.where(np.isnan(data) | (data < 0.0), 0.0, data)
+    kp_color_ix = np_digitize(data_clean, kp_bins, right=True)
+    kp_colormap = ListedColormap(
+        ("xkcd:easter green", "xkcd:dandelion", "xkcd:tangerine", "xkcd:orange", "xkcd:bright red", "xkcd:red")
+    )
+    # create the figure
+    fig_ax: Tuple[Tuple[Figure, Axes]] = fig_ax_factory(1, 1)  # type: ignore[call-overload]
+    fig, ax = fig_ax[0]
+    # plot the data
+    title = "Estimated Planetary K index (3 hour data)"
+    assert (manager := fig.canvas.manager) is not None
+    manager.set_window_title(title)
+    ax.plot([time[0], time[-1]], [data[0], data[-1]], ".", alpha=0.05)
+    for t, d, b in zip(date2num(time), data, kp_color_ix):
+        if ~np.isnan(d):
+            ax.add_patch(
+                Rectangle(
+                    (t, 0),
+                    delta_time,
+                    d,
+                    facecolor=kp_colormap.colors[b],  # type: ignore[index]
+                    edgecolor="none",
+                )
+            )
+    ax.set_ylabel("Kp index")
+    ax.grid(True)
+    ax.set_ylim(0.0, 9.0)
+    ax.set_title(title)
+
     setup_plots(fig, opts=opts)
     return fig
 

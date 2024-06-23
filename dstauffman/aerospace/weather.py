@@ -34,7 +34,7 @@ def read_tci_data(filename: Path) -> pd.DataFrame:
 
     names = ["Date", "TCI"]
     converters = {"Date": _convert_m_d_y}
-    df = pd.read_table(filename, delim_whitespace=True, names=names, converters=converters)
+    df = pd.read_table(filename, sep=r"\s+", names=names, converters=converters)
     return df
 
 
@@ -47,10 +47,21 @@ def read_kp_ap_etc_data(filename: Path) -> pd.DataFrame:
         "ap1", "ap2", "ap3", "ap4", "ap5", "ap6", "ap7", "ap8", "Ap", "SN", "F10.7obs", "F10.7adj", "D",
     ]
     # fmt: on
-    df = pd.read_table(filename, names=names, delim_whitespace=True, comment="#")
+    df = pd.read_table(filename, names=names, sep=r"\s+", comment="#")
     # convert year-month-day to a GMT value
     df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"}, inplace=True)
     df.insert(0, "GMT", pd.to_datetime(df[["year", "month", "day"]]))
+    return df
+
+
+# %% Functions - read_kp_ap_nowcast
+def read_kp_ap_nowcast(filename: Path) -> pd.DataFrame:
+    """Read the every 3 hour Kp and Ap data."""
+    names = ["YYY", "MM", "DD", "hour_start", "hour_middle", "days", "days_m", "Kp", "ap", "D"]
+    df = pd.read_table(filename, names=names, sep=r"\s+", comment="#")
+    # convert year-moth-day to a GMT value (including hour)
+    df.rename(columns={"YYY": "year", "MM": "month", "DD": "day"}, inplace=True)
+    df.insert(0, "GMT", pd.to_datetime(df[["year", "month", "day"]]) + pd.to_timedelta(df.hour_start, "hour"))
     return df
 
 
