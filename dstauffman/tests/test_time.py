@@ -355,7 +355,9 @@ class Test_convert_date(unittest.TestCase):
         out = dcs.convert_date(dates, "numpy", old_form="datetime")
         np.testing.assert_array_equal(out, np.array([self.np2, self.numpy]))  # type: ignore[arg-type]
         if dcs.HAVE_MPL:  # pragma: no branch
-            with warnings.catch_warnings(action="ignore", category=DeprecationWarning):
+            with warnings.catch_warnings():
+                warnings.filterwarnings(action="ignore", category=DeprecationWarning)  # numpy v1
+                warnings.filterwarnings(action="ignore", category=UserWarning)  # numpy v2
                 out = dcs.convert_date(dates, "matplotlib", old_form="datetime")
             np.testing.assert_array_equal(out, np.array([self.mpl2, self.matplotlib]))  # type: ignore[arg-type]
         out = dcs.convert_date([self.seconds, self.seconds], "numpy", self.date_zero, old_form="sec")
