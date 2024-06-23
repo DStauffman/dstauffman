@@ -474,15 +474,24 @@ def close_all(fig: Optional[_FigOrListFig] = None) -> None:
     """
     # Note that it's better to loop through and close the plots individually than to use
     # plt.close("all"), as that can sometimes cause the iPython kernel to quit #DCS: 2015-06-11
-    if fig is None:
-        for this_fig in plt.get_fignums():
-            plt.close(this_fig)
-    else:
-        if isinstance(fig, Figure):
-            plt.close(fig)
-        else:
-            for this_fig in fig:  # type: ignore[assignment]
+    # Note that it's better to clean the figure, then close it to really ensure the memory is
+    # returned #DCS: 2024-05-28
+    # Note that we are filtering matplotlib UserWarning's to avoid bug
+    # https://github.com/matplotlib/matplotlib/issues/9970 #DCS: 2024-06-10
+    with warnings.catch_warnings():
+        warnings.filterwarnings(action="ignore", category=UserWarning, module=r"matplotlib\..*")
+        if fig is None:
+            for this_fig in plt.get_fignums():
+                plt.figure(this_fig).clear()
                 plt.close(this_fig)
+        else:
+            if isinstance(fig, Figure):
+                fig.clear()
+                plt.close(fig)
+            else:
+                for this_fig in fig:  # type: ignore[assignment]
+                    this_fig.clear()
+                    plt.close(this_fig)
     gc.collect()
 
 

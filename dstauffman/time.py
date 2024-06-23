@@ -444,7 +444,10 @@ def convert_date(  # noqa: C901
             out = np.full(date.shape, np.datetime64("nat"), dtype=numpy_form)
             if np.any(is_num):
                 datetime_units = get_np_time_units(numpy_form)
-                date_zero_np = np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)
+                with warnings.catch_warnings(action="ignore", category=DeprecationWarning):
+                    date_zero_np = (
+                        np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)
+                    )
                 if np.issubdtype(date.dtype, np.signedinteger):
                     # fmt: off
                     out[is_num] = (date_zero_np + (  # pyright: ignore[reportOptionalSubscript]
@@ -464,7 +467,8 @@ def convert_date(  # noqa: C901
     elif old_form == "datetime":
         is_num = date is not None
         if form == "numpy":
-            out = np.array(date, dtype=numpy_form)
+            with warnings.catch_warnings(action="ignore", category=DeprecationWarning):
+                out = np.array(date, dtype=numpy_form)
         elif form == "matplotlib":
             out = dates.date2num(date) if is_num else np.nan
         elif form in time_forms:  # pragma: no branch
@@ -477,17 +481,18 @@ def convert_date(  # noqa: C901
     elif old_form == "numpy":
         is_num = ~np.isnat(date)
         if form == "datetime":
-            out = datetime.datetime.utcfromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9) if is_num else None  # fmt: skip
+            out = datetime.datetime.fromtimestamp(date.astype("datetime64[ns]").astype(np.int64) / 10**9, tz=datetime.UTC) if is_num else None  # fmt: skip
         elif form == "matplotlib":
             out = dates.date2num(date)
         elif form in time_forms:  # pragma: no branch
             out = np.full(date.shape, np.nan)
             if np.any(is_num):
-                # fmt: off
-                out[is_num] = (  # pyright: ignore[reportOptionalSubscript]
-                    date[is_num] - np.array(date_zero, dtype="datetime64[ns]")
-                    ).astype("timedelta64[ns]").astype(np.int64) / 10**9
-                # fmt: on
+                with warnings.catch_warnings(action="ignore", category=DeprecationWarning):
+                    # fmt: off
+                    out[is_num] = (  # pyright: ignore[reportOptionalSubscript]
+                        date[is_num] - np.array(date_zero, dtype="datetime64[ns]")
+                        ).astype("timedelta64[ns]").astype(np.int64) / 10**9
+                    # fmt: on
     # from matplotlib
     elif old_form == "matplotlib":  # pragma: no branch
         is_num = np.isfinite(date)

@@ -9,7 +9,7 @@ Notes
 # %% Imports
 import doctest
 from math import pi
-from typing import Tuple, Union
+from typing import Dict, Tuple, Union
 import unittest
 
 # %% Constants - Unit Conversions
@@ -36,9 +36,42 @@ CM2IN: float = 1 / 2.54
 DEGREE_SIGN: str = "\N{DEGREE SIGN}"  # degree sign, also u"\u00b0" ° or chr(176)
 MICRO_SIGN: str = "\N{MICRO SIGN}"  # micro sign, also u"\u00b5" μ or chr(181), note this is different than chr(956)
 
+# Prefixes, inverses, and labels
+_PREFIXES: Dict[str, Tuple[float, float, str]] = {
+    "yotta": (1e24, 1e-24, "Y"),
+    "zetta": (1e21, 1e-21, "Z"),
+    "exa": (1e18, 1e-18, "E"),
+    "peta": (1e15, 1e-15, "P"),
+    "tera": (1e12, 1e-12, "T"),
+    "giga": (1e9, 1e-9, "G"),
+    "mega": (1e6, 1e-6, "M"),
+    "kilo": (1e3, 1e-3, "k"),
+    "hecto": (1e2, 1e-2, "h"),
+    "deca": (1e1, 1e-1, "da"),
+    "unity": (1.0, 1.0, ""),
+    "deci": (1e-1, 1e1, "d"),
+    "centi": (1e-2, 1e2, "c"),
+    "milli": (1e-3, 1e3, "m"),
+    "micro": (1e-6, 1e6, MICRO_SIGN),
+    "nano": (1e-9, 1e9, "n"),
+    "pico": (1e-12, 1e12, "p"),
+    "femto": (1e-15, 1e15, "f"),
+    "atto": (1e-18, 1e18, "a"),
+    "zepto": (1e-21, 1e21, "z"),
+    "yocto": (1e-24, 1e24, "y"),
+    # Special cases
+    "percentage": (0.01, 100.0, "%"),
+    # below follow some stupid english units for rotation angles (try to never use them!)
+    "arcminute": (1.0 / ONE_MINUTE * DEG2RAD, ONE_MINUTE / DEG2RAD, "amin"),
+    "arcsecond": (ARCSEC2RAD, RAD2ARCSEC, "asec"),
+    "arcsecond^2": (ARCSEC2RAD**2, RAD2ARCSEC**2, "asec^2"),
+    "milliarcsecond": (1e3 * ARCSEC2RAD, 1e-3 * RAD2ARCSEC, "mas"),
+    "microarcsecond": (1e6 * ARCSEC2RAD, 1e-6 * RAD2ARCSEC, MICRO_SIGN + "as"),
+}
+
 
 # %% get_factors
-def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[float, str]:
+def get_factors(prefix: str, inverse: bool = False) -> Tuple[float, str]:
     r"""
     Get the multiplication factor and unit label for the desired units.
 
@@ -83,93 +116,10 @@ def get_factors(prefix: Union[str, int, float], inverse: bool = False) -> Tuple[
 
     """
     # fmt: off
-    # find the desired units and label prefix
-    if prefix == "yotta":
-        mult  = 1e24 if not inverse else 1e-24
-        label = "Y"
-    elif prefix == "zetta":
-        mult  = 1e21 if not inverse else 1e-21
-        label = "Z"
-    elif prefix == "exa":
-        mult  = 1e18 if not inverse else 1e-18
-        label = "E"
-    elif prefix == "peta":
-        mult  = 1e15 if not inverse else 1e-15
-        label = "P"
-    elif prefix == "tera":
-        mult  = 1e12 if not inverse else 1e-12
-        label = "T"
-    elif prefix == "giga":
-        mult  = 1e9 if not inverse else 1e-9
-        label = "G"
-    elif prefix == "mega":
-        mult  = 1e6 if not inverse else 1e-6
-        label = "M"
-    elif prefix == "kilo":
-        mult  = 1e3 if not inverse else 1e-3
-        label = "k"
-    elif prefix == "hecto":
-        mult  = 1e2 if not inverse else 1e-2
-        label = "h"
-    elif prefix == "deca":
-        mult  = 1e1 if not inverse else 1e-1
-        label = "da"
-    elif prefix == "unity":
-        mult  = 1.0
-        label = ""
-    elif prefix == "deci":
-        mult  = 1e-1 if not inverse else 1e1
-        label = "d"
-    elif prefix == "centi":
-        mult  = 1e-2 if not inverse else 1e2
-        label = "c"
-    elif prefix == "milli":
-        mult  = 1e-3 if not inverse else 1e3
-        label = "m"
-    elif prefix == "micro":
-        mult  = 1e-6 if not inverse else 1e6
-        label = MICRO_SIGN
-    elif prefix == "nano":
-        mult  = 1e-9 if not inverse else 1e9
-        label = "n"
-    elif prefix == "pico":
-        mult  = 1e-12 if not inverse else 1e12
-        label = "p"
-    elif prefix == "femto":
-        mult  = 1e-15 if not inverse else 1e15
-        label = "f"
-    elif prefix == "atto":
-        mult  = 1e-18 if not inverse else 1e18
-        label = "a"
-    elif prefix == "zepto":
-        mult  = 1e-21 if not inverse else 1e21
-        label = "z"
-    elif prefix == "yocto":
-        mult  = 1e-24 if not inverse else 1e24
-        label = "y"
-    # Special cases
-    elif prefix == "percentage":
-        mult  = 0.01 if not inverse else 100.0
-        label = "%"
-    # below follow some stupid english units for rotation angles (try to never use them!)
-    elif prefix == "arcminute":
-        mult  = 1.0 / ONE_MINUTE * DEG2RAD if not inverse else ONE_MINUTE / DEG2RAD
-        label = "amin"
-    elif prefix == "arcsecond":
-        mult  = ARCSEC2RAD if not inverse else RAD2ARCSEC
-        label = "asec"
-    elif prefix == "arcsecond^2":
-        mult  = ARCSEC2RAD ** 2 if not inverse else RAD2ARCSEC ** 2
-        label = "asec^2"
-    elif prefix == "milliarcsecond":
-        mult  = 1e3 * ARCSEC2RAD if not inverse else 1e-3 * RAD2ARCSEC
-        label = "mas"
-    elif prefix == "microarcsecond":
-        mult  = 1e6 * ARCSEC2RAD if not inverse else 1e-6 * RAD2ARCSEC
-        label = MICRO_SIGN + "as"
-    else:
+    if prefix not in _PREFIXES:
         raise ValueError("Unexpected value for units prefix.")
-    # fmt: on
+    (forward, backward, label) = _PREFIXES[prefix]
+    mult = forward if not inverse else backward
     return (mult, label)
 
 

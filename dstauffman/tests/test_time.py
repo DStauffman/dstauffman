@@ -9,6 +9,7 @@ Notes
 # %% Imports
 import datetime
 import unittest
+import warnings
 
 import dstauffman as dcs
 
@@ -189,8 +190,8 @@ class Test_convert_date(unittest.TestCase):
 
     def setUp(self) -> None:
         self.seconds = 3725.5
-        self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0)
-        self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000)
+        self.date_zero = datetime.datetime(2020, 6, 1, 0, 0, 0, tzinfo=datetime.UTC)
+        self.datetime = datetime.datetime(2020, 6, 1, 1, 2, 5, 500000, tzinfo=datetime.UTC)
         self.date = datetime.date(2022, 1, 17)
         if dcs.HAVE_NUMPY:
             self.numpy = np.datetime64("2020-06-01 01:02:05.500000", "ns")
@@ -349,12 +350,14 @@ class Test_convert_date(unittest.TestCase):
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_datetime_lists(self) -> None:
-        dates = [self.datetime, self.date]
+        # DCS: note that this avoids a bug in matplotlib by controlling the order of elements in this list
+        dates = [self.date, self.datetime]
         out = dcs.convert_date(dates, "numpy", old_form="datetime")
-        np.testing.assert_array_equal(out, np.array([self.numpy, self.np2]))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(out, np.array([self.np2, self.numpy]))  # type: ignore[arg-type]
         if dcs.HAVE_MPL:  # pragma: no branch
-            out = dcs.convert_date(dates, "matplotlib", old_form="datetime")
-            np.testing.assert_array_equal(out, np.array([self.matplotlib, self.mpl2]))  # type: ignore[arg-type]
+            with warnings.catch_warnings(action="ignore", category=DeprecationWarning):
+                out = dcs.convert_date(dates, "matplotlib", old_form="datetime")
+            np.testing.assert_array_equal(out, np.array([self.mpl2, self.matplotlib]))  # type: ignore[arg-type]
         out = dcs.convert_date([self.seconds, self.seconds], "numpy", self.date_zero, old_form="sec")
         np.testing.assert_array_equal(out, np.array([self.numpy, self.numpy]))  # type: ignore[arg-type]
 
