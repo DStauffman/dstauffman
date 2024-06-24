@@ -23,4 +23,4 @@ Solar cycle 21	1976-03	17.8	1979-12	233	111	3-09	10-06	1872	1313	753
 Solar cycle 22	1986-09	13.5	1989-11	213	106	3-02	9-11	1662	1124	589
 Solar cycle 23	1996-08	11.2	2001-11	180	82	5-03	12-04	1651	903	343
 Solar cycle 24	2008-12	2.2	2014-04	116	49	5-04	11-00	709	140	3
-Solar cycle 25	2019-12	1.8		Progressive: 125* (Jun 2023) (Same point SC24: 87)				406 (Jan 10 2024) (Same point SC24: 253)	126 (Jan 10 2024) (Same point SC24: 46)	9 (Jan 10 2024) (Same point SC24: 0)
+Solar cycle 25	2019-12	1.8		Progressive: 125* (Jun 2023)				451 (Mar 23 2024) (Same point SC24: 266)	138 (Mar 23 2024) (Same point SC24: 46)	10 (Mar 23 2024) (Same point SC24: 0)

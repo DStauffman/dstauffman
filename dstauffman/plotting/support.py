@@ -699,7 +699,7 @@ def resolve_name(name: str, force_win: bool | None = None, rep_token: str = "_",
     Examples
     --------
     >>> from dstauffman.plotting import resolve_name
-    >>> name = "(U//FOUO) Bad name /\ <>!"
+    >>> name = r"(U//FOUO) Bad name /\ <>!"
     >>> force_win = True
     >>> new_name = resolve_name(name, force_win=force_win)
     >>> print(new_name)
@@ -1439,7 +1439,7 @@ def get_rms_indices(  # noqa: C901
     >>> xmax         = 8
     >>> ix = get_rms_indices(time_one, time_two, time_overlap, xmin=xmin, xmax=xmax)
     >>> print(ix["pts"])
-    [1, 8]
+    [np.int64(1), np.int64(8)]
 
     """
 

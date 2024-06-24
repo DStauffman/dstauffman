@@ -477,7 +477,8 @@ def _calc_sum_squares(data: ArrayLike, axis: int | None = None, keepdims: bool =
     Examples
     --------
     >>> from dstauffman.estimation.batch import _calc_sum_squares
-    >>> _calc_sum_squares([0, 1, 0, -1])
+    >>> out = _calc_sum_squares([0, 1, 0, -1])
+    >>> print(out)
     2
 
     """

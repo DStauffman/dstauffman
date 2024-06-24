@@ -269,8 +269,9 @@ def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
     Examples
     --------
     >>> from dstauffman import rms
-    >>> rms([0, 1, 0., -1])
-    0.7071067811865476
+    >>> out = rms([0, 1, 0., -1])
+    >>> print(f"{out:.12f}")
+    0.707106781187
 
     """
     # check for empty data

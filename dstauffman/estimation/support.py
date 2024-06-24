@@ -146,7 +146,7 @@ def get_parameter(param: Any, names: list[str]) -> list[Any]:
     >>> names = ["param.config.log_level", "param.models[0].field1", "param.models[1].field2[2]", "param.models[1].field3['b'][1]"]
     >>> values = get_parameter(param, names)
     >>> print([x for x in values]) #doctest: +NORMALIZE_WHITESPACE
-    [20, 100, 300, 2.5]
+    [20, 100, np.int64(300), np.float64(2.5)]
 
     """
     # initialized the output values
