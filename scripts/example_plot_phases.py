@@ -21,10 +21,10 @@ if TYPE_CHECKING:
 # %% Functions
 def extra_plotter_func(
     time_phases: _D, labels: str = "Times", group_all: bool = True, use_legend: bool = False
-) -> Callable[[Figure, Axes], None]:  # pylint: disable=redefined-outer-name
+) -> Callable[[Figure, Axes], None]:
     """Wrapper to the plot_phases to be passed into other functions."""
 
-    def _plot_phases(fig: Figure, ax: Axes) -> None:  # pylint: disable=redefined-outer-name,unused-argument
+    def _plot_phases(fig: Figure, ax: Axes) -> None:  # pylint: disable=unused-argument
         for this_axes in ax:  # type: ignore[attr-defined]
             plot_phases(this_axes, time_phases, labels=labels, group_all=group_all, use_legend=use_legend)
 

@@ -4,7 +4,7 @@ Example script for plotting data from many similar runs, such as in a Monte Carl
 Notes
 -----
 #.  Written by David C. Stauffer in May 2015.
-"""
+"""  # pylint: disable=redefined-outer-name
 
 # %% Imports
 import datetime
@@ -17,9 +17,10 @@ import dstauffman.plotting as plot
 
 # %% Functions - build_months
 def build_months(date_zero: datetime.datetime, num_months: int = 12) -> list[datetime.datetime]:
+    """Build a list of all the months starting on day one for the given month."""
     out = [date_zero]
     temp = date_zero
-    for i in range(1, num_months):
+    for _ in range(1, num_months):
         temp += datetime.timedelta(days=32)
         temp = temp.replace(day=1)
         out.append(temp)
