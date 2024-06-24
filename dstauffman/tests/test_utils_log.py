@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import contextlib
 import time
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
 
@@ -139,7 +139,7 @@ class Test_fix_rollover(unittest.TestCase):
         self.data2 = np.array([], dtype=int)
         self.exp   = np.array([1, 2, 3, 4, 5, 6, 7, 8, 10, 13, 14, 13, 12, 9])
         self.roll  = 7
-        self.axis: Optional[int] = None
+        self.axis: int | None = None
         # fmt: on
 
     def test_nominal(self, mock_logger: Mock) -> None:

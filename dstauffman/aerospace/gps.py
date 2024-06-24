@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import datetime
 import doctest
-from typing import Dict, List, Literal, NoReturn, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Literal, NoReturn, overload, TYPE_CHECKING
 import unittest
 
 from dstauffman import HAVE_NUMPY, NP_DATETIME_UNITS, NP_ONE_DAY, NP_ONE_SECOND
@@ -162,7 +162,7 @@ def prn_01_to_m11(bits: _I, *, inplace: bool = False) -> _I:
 
 
 # %% Functions - get_prn_bits
-def get_prn_bits(sat: int) -> Tuple[int, int]:
+def get_prn_bits(sat: int) -> tuple[int, int]:
     r"""
     Gets the bit numbers to generate the desired prn sequence.
 
@@ -198,7 +198,7 @@ def get_prn_bits(sat: int) -> Tuple[int, int]:
     6
 
     """
-    prn_bits: Dict[int, Tuple[int, int]] = {}
+    prn_bits: dict[int, tuple[int, int]] = {}
     prn_bits[1] = (2, 6)
     prn_bits[2] = (3, 7)
     prn_bits[3] = (4, 8)
@@ -242,7 +242,7 @@ def get_prn_bits(sat: int) -> Tuple[int, int]:
 
 
 # %% Functions - correlate_prn
-def correlate_prn(prn1: _I, prn2: _I, shift: Union[int, _I], form: Literal["zero-one", "one-one"]) -> _N:
+def correlate_prn(prn1: _I, prn2: _I, shift: int | _I, form: Literal["zero-one", "one-one"]) -> _N:
     r"""
     Correlates two PRN codes with an optional shift.
 
@@ -372,20 +372,16 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
 
 # %% Functions - gps_to_datetime
 @overload
-def gps_to_datetime(
-    week: Union[int, _I], time: Union[int, float, _I, _N]
-) -> Union[datetime.datetime, List[datetime.datetime]]: ...
+def gps_to_datetime(week: int | _I, time: int | float | _I | _N) -> datetime.datetime | list[datetime.datetime]: ...
 @overload
 def gps_to_datetime(
-    week: Union[int, _I], time: Union[int, float, _I, _N], form: Literal["datetime"] = ...
-) -> Union[datetime.datetime, List[datetime.datetime]]: ...
+    week: int | _I, time: int | float | _I | _N, form: Literal["datetime"] = ...
+) -> datetime.datetime | list[datetime.datetime]: ...
 @overload
+def gps_to_datetime(week: int | _I, time: int | float | _I | _N, form: Literal["numpy"]) -> np.datetime64 | _D: ...
 def gps_to_datetime(
-    week: Union[int, _I], time: Union[int, float, _I, _N], form: Literal["numpy"]
-) -> Union[np.datetime64, _D]: ...
-def gps_to_datetime(
-    week: Union[int, _I], time: Union[int, float, _I, _N], form: Literal["datetime", "numpy"] = "datetime"
-) -> Union[datetime.datetime, List[datetime.datetime], np.datetime64, _D]:
+    week: int | _I, time: int | float | _I | _N, form: Literal["datetime", "numpy"] = "datetime"
+) -> datetime.datetime | list[datetime.datetime] | np.datetime64 | _D:
     r"""
     Converts a GPS week and time to a Python datetime.
 
@@ -436,7 +432,7 @@ def gps_to_datetime(
         week[ix] += num_rollovers * WEEK_ROLLOVER
 
     # GPS start week
-    date_gps: Union[datetime.datetime, List[datetime.datetime], np.datetime64]
+    date_gps: datetime.datetime | list[datetime.datetime] | np.datetime64
     if form == "datetime":
         # fmt: off
         if np.size(week) == 1:
@@ -462,26 +458,24 @@ def gps_to_datetime(
 
 # %% Functions - gps_to_utc_datetime
 @overload
-def gps_to_utc_datetime(
-    week: Union[int, _I], time: Union[int, float, _I, _N]
-) -> Union[datetime.datetime, List[datetime.datetime]]: ...
+def gps_to_utc_datetime(week: int | _I, time: int | float | _I | _N) -> datetime.datetime | list[datetime.datetime]: ...
 @overload
 def gps_to_utc_datetime(
-    week: Union[int, _I],
-    time: Union[int, float, _I, _N],
-    gps_to_utc_offset: Optional[Union[int, _I]],
+    week: int | _I,
+    time: int | float | _I | _N,
+    gps_to_utc_offset: int | _I | None,
     form: Literal["datetime"] = ...,
-) -> Union[datetime.datetime, List[datetime.datetime]]: ...
+) -> datetime.datetime | list[datetime.datetime]: ...
 @overload
 def gps_to_utc_datetime(
-    week: Union[int, _I], time: Union[int, float, _I, _N], gps_to_utc_offset: Optional[Union[int, _I]], form: Literal["numpy"]
-) -> Union[np.datetime64, _D]: ...
+    week: int | _I, time: int | float | _I | _N, gps_to_utc_offset: int | _I | None, form: Literal["numpy"]
+) -> np.datetime64 | _D: ...
 def gps_to_utc_datetime(
-    week: Union[int, _I],
-    time: Union[int, float, _I, _N],
-    gps_to_utc_offset: Optional[Union[int, _I]] = None,
+    week: int | _I,
+    time: int | float | _I | _N,
+    gps_to_utc_offset: int | _I | None = None,
     form: Literal["datetime", "numpy"] = "datetime",
-) -> Union[datetime.datetime, List[datetime.datetime], np.datetime64, _D]:
+) -> datetime.datetime | list[datetime.datetime] | np.datetime64 | _D:
     r"""
     Converts a GPS week and time to UTC time as a datetime.
 
@@ -575,7 +569,7 @@ def gps_to_utc_datetime(
         gps_to_utc_offset = np.asanyarray(gps_to_utc_offset)
 
     # GPS start week
-    date_utc: Union[datetime.datetime, List[datetime.datetime], np.datetime64, _D]
+    date_utc: datetime.datetime | list[datetime.datetime] | np.datetime64 | _D
     if form == "datetime":
         # fmt: off
         if np.size(week) == 1:

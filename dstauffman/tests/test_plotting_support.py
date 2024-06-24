@@ -13,7 +13,7 @@ import datetime
 import os
 import pathlib
 import platform
-from typing import Optional, Tuple, Union
+from typing import TYPE_CHECKING
 import unittest
 
 from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
@@ -39,6 +39,11 @@ except ImportError:
     _HAVE_QT = False
 
 _HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+    _N = NDArray[np.float64]
 
 
 # %% plotting.DEFAULT_COLORMAP
@@ -182,7 +187,7 @@ class Test_plotting_ColorMap(unittest.TestCase):
         self.low        = 0
         self.high       = 1
         self.num_colors = 5
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
         # fmt: on
 
     def test_nominal(self) -> None:
@@ -500,13 +505,13 @@ class Test_plotting_storefig(unittest.TestCase):
         specifying a bad plot type (should raise error)
     """
 
-    time: np.ndarray
-    data: np.ndarray
+    time: _N
+    data: _N
     title: str
     folder: pathlib.Path
     plot_type: str
     fig: Figure
-    this_filename: Optional[pathlib.Path]
+    this_filename: pathlib.Path | None
     show_warn: bool
 
     @classmethod
@@ -838,7 +843,7 @@ class Test_plotting_plot_second_units_wrapper(unittest.TestCase):
     def setUp(self) -> None:
         self.description = "Values over time"
         self.ylabel = "Value [rad]"
-        self.second_units: Union[None, int, float, Tuple[str, float]] = None
+        self.second_units: int | float | tuple[str, float] | None = None
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111)
         self.ax.plot([1, 5, 10], [1e-6, 3e-6, 2.5e-6], ".-")
@@ -1249,7 +1254,7 @@ class Test_plotting_fig_ax_factory(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.fig_ax: Union[Tuple[None, ...], Tuple[Tuple[Figure, Axes], ...]] = (None,)
+        self.fig_ax: tuple[tuple[Figure, Axes], ...] | tuple[None, ...] = (None,)
 
     def test_1d_rows(self) -> None:
         self.fig_ax = plot.fig_ax_factory(num_axes=4, layout="rows", sharex=True)  # type: ignore[call-overload]

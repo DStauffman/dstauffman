@@ -13,7 +13,7 @@ import copy
 import os
 import pathlib
 import platform
-from typing import List, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import patch
 
@@ -294,7 +294,7 @@ class Test_rms(unittest.TestCase):
 
     def test_all_nans(self) -> None:
         x = np.full((4, 3), np.nan)
-        out: Union[float, np.float64, _N] = dcs.rms(x, ignore_nans=True)
+        out: float | np.float64 | _N = dcs.rms(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
         out = dcs.rms(x, axis=0, ignore_nans=True)
         assert isinstance(out, np.ndarray)
@@ -411,7 +411,7 @@ class Test_rss(unittest.TestCase):
 
     def test_all_nans(self) -> None:
         x = np.full((4, 3), np.nan)
-        out: Union[float, np.float64, _N] = dcs.rss(x, ignore_nans=True)
+        out: float | np.float64 | _N = dcs.rss(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
         out = dcs.rss(x, axis=0, ignore_nans=True)
         assert isinstance(out, np.ndarray)
@@ -1075,7 +1075,7 @@ class Test_full_print(unittest.TestCase):
     """
 
     @staticmethod
-    def _norm_output(lines: List[str]) -> List[str]:
+    def _norm_output(lines: list[str]) -> list[str]:
         out = []
         for line in lines:
             # normalize whitespace
@@ -1228,11 +1228,11 @@ class Test_combine_per_year(unittest.TestCase):
 
     def test_1D(self) -> None:
         data2 = dcs.combine_per_year(self.data, func=self.func1)
-        np.testing.assert_array_almost_equal(data2, self.data2)
+        np.testing.assert_array_almost_equal(data2, self.data2)  # type: ignore[arg-type]
 
     def test_2D(self) -> None:
         data2 = dcs.combine_per_year(self.data3, func=self.func1)
-        np.testing.assert_array_almost_equal(data2, self.data4)
+        np.testing.assert_array_almost_equal(data2, self.data4)  # type: ignore[arg-type]
 
     def test_data_is_none(self) -> None:
         data2 = dcs.combine_per_year(None, func=self.func1)
@@ -1246,18 +1246,18 @@ class Test_combine_per_year(unittest.TestCase):
     def test_non12_months1d(self) -> None:
         data = np.arange(125) // 12
         data2 = dcs.combine_per_year(data, func=self.func1)
-        np.testing.assert_array_almost_equal(data2, self.data2)
+        np.testing.assert_array_almost_equal(data2, self.data2)  # type: ignore[arg-type]
 
     def test_non12_months2d(self) -> None:
         data = np.arange(125) // 12
         data3 = np.column_stack((data, data))
         data2 = dcs.combine_per_year(data3, func=self.func1)
-        np.testing.assert_array_almost_equal(data2, self.data4)
+        np.testing.assert_array_almost_equal(data2, self.data4)  # type: ignore[arg-type]
 
     def test_other_funcs(self) -> None:
         data2a = dcs.combine_per_year(self.data, func=self.func1)
         data2b = dcs.combine_per_year(self.data, func=self.func2)
-        np.testing.assert_array_almost_equal(12 * data2a, data2b)
+        np.testing.assert_array_almost_equal(12 * data2a, data2b)  # type: ignore[arg-type, operator]
 
     def test_bad_func1(self) -> None:
         with self.assertRaises(AssertionError):

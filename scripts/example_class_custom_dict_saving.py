@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import datetime
 from pathlib import Path
-from typing import Callable, ClassVar, Dict, Optional, Tuple, TYPE_CHECKING
+from typing import Callable, ClassVar, TYPE_CHECKING
 
 import numpy as np
 
@@ -40,14 +40,14 @@ class Results(Frozen, metaclass=SaveAndLoad):
     data: _N
     date: _D
     name: str
-    meta: Dict[str, str]
+    meta: dict[str, str]
 
     # fmt: off
-    load: ClassVar[Callable[[Optional[Path], DefaultNamedArg(bool, "convert_dates")], Results]]  # noqa: F821
-    save: Callable[[Optional[Path]], None]  # noqa: F821
+    load: ClassVar[Callable[[Path | None, DefaultNamedArg(bool, "convert_dates")], Results]]  # noqa: F821
+    save: Callable[[Path | None], None]  # noqa: F821
     # fmt: on
 
-    def __init__(self, num: float = 0, date_zero: Optional[datetime.datetime] = None, name: str = ""):
+    def __init__(self, num: float = 0, date_zero: datetime.datetime | None = None, name: str = ""):
         self.time = np.arange(num)
         self.data = np.random.rand(*self.time.shape)
         self.date = np.full(self.time.shape, np.datetime64("NaT", NP_DATETIME_UNITS))
@@ -58,15 +58,15 @@ class Results(Frozen, metaclass=SaveAndLoad):
             self.date[:] = convert_datetime_to_np(date_zero) + (NP_ONE_SECOND * self.time).astype(np.int64)
 
     @staticmethod
-    def _datetime_fields() -> Tuple[str, ...]:
+    def _datetime_fields() -> tuple[str, ...]:
         return ("date",)
 
     @staticmethod
-    def _string_fields() -> Tuple[str, ...]:
+    def _string_fields() -> tuple[str, ...]:
         return ("name",)
 
     @staticmethod
-    def _exclude_fields() -> Tuple[str, ...]:
+    def _exclude_fields() -> tuple[str, ...]:
         return ("meta",)
 
 

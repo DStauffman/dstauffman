@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import doctest
 import logging
-from typing import Any, TYPE_CHECKING, Union
+from typing import Any, TYPE_CHECKING
 import unittest
 
 from slog import LogLevel
@@ -35,7 +35,7 @@ if TYPE_CHECKING:
 
     _I = NDArray[np.int_]
     _N = NDArray[np.float64]
-    _FN = Union[float, _N]
+    _FN = float | _N
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -49,7 +49,7 @@ def _any(x: Any) -> bool:
         return bool(x)
     if HAVE_NUMPY:
         return np.any(x)  # type: ignore[return-value]
-    return np_any(x)  # type: ignore[no-any-return]  # pylint: disable=used-before-assignment
+    return np_any(x)  # type: ignore[no-any-return]
 
 
 # %% Functions - anomaly_eccentric_2_mean

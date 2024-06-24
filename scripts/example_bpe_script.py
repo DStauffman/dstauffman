@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import datetime
 from pathlib import Path
-from typing import Any, List, Tuple, TYPE_CHECKING
+from typing import Any, TYPE_CHECKING
 
 import numpy as np
 
@@ -51,7 +51,7 @@ class SimParams(dcs.Frozen):
 
 
 # %% Functions - _get_truth_index
-def _get_truth_index(results_time: _N, truth_time: _N) -> Tuple[_I, _I]:
+def _get_truth_index(results_time: _N, truth_time: _N) -> tuple[_I, _I]:
     r"""Find the indices to the truth data from the results time."""
     # Hard-coded values
     precision = 1e-7
@@ -93,7 +93,7 @@ def cost_wrapper(  # pylint: disable=unused-argument
 
 
 # %% Functions - get_parameter
-def get_parameter(sim_params: SimParams, *, names: List[str]) -> Any:
+def get_parameter(sim_params: SimParams, *, names: list[str]) -> Any:
     r"""Get the model parameters."""
     num = len(names)
     values = np.full(num, np.nan)
@@ -106,7 +106,7 @@ def get_parameter(sim_params: SimParams, *, names: List[str]) -> Any:
 
 
 # %% Functions - set_parameter
-def set_parameter(sim_params: SimParams, *, names: List[str], values: List[Any]) -> None:
+def set_parameter(sim_params: SimParams, *, names: list[str], values: list[Any]) -> None:
     r"""Set the model parameters."""
     num = len(names)
     assert len(values) == num, "Names and Values must have the same length."

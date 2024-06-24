@@ -7,7 +7,6 @@ Notes
 """
 
 # %% Imports
-from typing import List
 import unittest
 
 import dstauffman as dcs
@@ -21,9 +20,9 @@ class Test_Constants(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.ints: List[str] = ["ONE_MINUTE", "ONE_HOUR", "ONE_DAY", "MONTHS_PER_YEAR"]
-        self.flts: List[str] = ["RAD2DEG", "DEG2RAD", "ARCSEC2RAD", "RAD2ARCSEC", "FT2M", "M2FT", "IN2CM", "CM2IN"]
-        self.strs: List[str] = ["DEGREE_SIGN", "MICRO_SIGN"]
+        self.ints: list[str] = ["ONE_MINUTE", "ONE_HOUR", "ONE_DAY", "MONTHS_PER_YEAR"]
+        self.flts: list[str] = ["RAD2DEG", "DEG2RAD", "ARCSEC2RAD", "RAD2ARCSEC", "FT2M", "M2FT", "IN2CM", "CM2IN"]
+        self.strs: list[str] = ["DEGREE_SIGN", "MICRO_SIGN"]
         self.master = set(self.ints) | set(self.flts) | set(self.strs)
 
     def test_values(self) -> None:

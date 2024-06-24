@@ -13,7 +13,7 @@ from __future__ import annotations
 import datetime
 import doctest
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple, TYPE_CHECKING, TypedDict, Union
+from typing import NotRequired, Sequence, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY
@@ -30,16 +30,14 @@ if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
-    from typing_extensions import NotRequired, Unpack
-
-    _CM = Union[str, Colormap, ListedColormap, ColorMap]
-    _Figs = List[Figure]
-    _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
+    _CM = str | Colormap | ListedColormap | ColorMap
+    _Figs = list[Figure]
+    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | None
 
     class _BpeKwArgs(TypedDict):
         name: NotRequired[str]
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Optional[Path]]
+        save_path: NotRequired[Path | None]
         units: NotRequired[str]
         time_units: NotRequired[str]
         start_date: NotRequired[str]
@@ -48,20 +46,20 @@ if TYPE_CHECKING:
         disp_xmin: NotRequired[_Time]
         disp_xmax: NotRequired[_Time]
         single_lines: NotRequired[bool]
-        colormap: NotRequired[Optional[_CM]]
+        colormap: NotRequired[_CM | None]
         use_mean: NotRequired[bool]
         plot_zero: NotRequired[bool]
         show_rms: NotRequired[bool]
         legend_loc: NotRequired[str]
-        second_units: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
-        leg_scale: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
-        ylabel: NotRequired[Union[None, str, List[str]]]
+        second_units: NotRequired[str | int | float | tuple[str, float] | None]
+        leg_scale: NotRequired[str | int | float | tuple[str, float] | None]
+        ylabel: NotRequired[str | list[str] | None]
         data_as_rows: NotRequired[bool]
-        extra_plotter: NotRequired[Optional[ExtraPlotter]]
+        extra_plotter: NotRequired[ExtraPlotter | None]
         use_zoh: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
+        fig_ax: NotRequired[tuple[Figure, Axes] | None]
         plot_type: NotRequired[str]
 
 
@@ -69,8 +67,8 @@ if TYPE_CHECKING:
 def plot_bpe_convergence(
     costs: Sequence,
     *,
-    opts: Optional[Opts] = None,
-    fig_ax: Optional[Tuple[Figure, Axes]] = None,
+    opts: Opts | None = None,
+    fig_ax: tuple[Figure, Axes] | None = None,
     skip_setup_plots: bool = False,
 ) -> Figure:
     r"""
@@ -151,8 +149,8 @@ def plot_bpe_convergence(
 def plot_bpe_results(  # noqa: C901
     bpe_results: BpeResults,
     *,
-    opts: Optional[Opts] = None,
-    plots: Optional[Dict[str, bool]] = None,
+    opts: Opts | None = None,
+    plots: dict[str, bool] | None = None,
     **kwargs: Unpack[_BpeKwArgs],
 ) -> _Figs:
     r"""Plot the results of estimation."""

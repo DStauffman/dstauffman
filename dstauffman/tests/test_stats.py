@@ -7,7 +7,6 @@ Notes
 """
 
 # %% Imports
-from typing import Dict
 import unittest
 
 import dstauffman as dcs
@@ -410,7 +409,7 @@ class Test_bounded_normal_draw(unittest.TestCase):
         self.assertTrue(self.std - 1 < std < self.std + 1)
 
     def test_optional_values(self) -> None:
-        values: Dict[str, float] = {}
+        values: dict[str, float] = {}
         out = dcs.bounded_normal_draw(self.num, values, "", self.prng)
         mean = np.mean(out)
         std = np.std(out)

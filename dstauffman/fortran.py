@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import doctest
 from pathlib import Path
-from typing import Dict, Iterable, List, Literal, Optional, overload, Union
+from typing import Iterable, Literal, overload
 import unittest
 
 from dstauffman.classes import Frozen
@@ -48,10 +48,10 @@ class _FortranSource(Frozen):
         # fmt: off
         self.prog_name: str         = prog_name
         self.mod_name: str          = mod_name
-        self.uses: List[str]        = []
-        self.types: List[str]       = []
-        self.functions: List[str]   = []
-        self.subroutines: List[str] = []
+        self.uses: list[str]        = []
+        self.types: list[str]       = []
+        self.functions: list[str]   = []
+        self.subroutines: list[str] = []
         self.prefix: str            = ""
         # fmt: on
 
@@ -102,8 +102,8 @@ class _FortranSource(Frozen):
 @overload
 def _parse_source(filename: Path, assert_single: Literal[True] = ...) -> _FortranSource: ...
 @overload
-def _parse_source(filename: Path, assert_single: Literal[False]) -> List[_FortranSource]: ...
-def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranSource, List[_FortranSource]]:  # noqa: C901
+def _parse_source(filename: Path, assert_single: Literal[False]) -> list[_FortranSource]: ...
+def _parse_source(filename: Path, assert_single: bool = True) -> _FortranSource | list[_FortranSource]:  # noqa: C901
     r"""
     Parses the individual fortran source file into relevant information.
 
@@ -131,9 +131,9 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
     # get the lines individually
     lines = text.split("\n")
     # create the output dictionary
-    code: List[_FortranSource] = []
+    code: list[_FortranSource] = []
     this_name = ""
-    this_code: Optional[_FortranSource] = None
+    this_code: _FortranSource | None = None
     for line in lines:
         this_line = line.strip().lower()
         if not this_line:
@@ -210,7 +210,7 @@ def _parse_source(filename: Path, assert_single: bool = True) -> Union[_FortranS
 
 
 # %% Functions - _write_unit_test
-def _write_unit_test(filename: Path, code: _FortranSource, header: Optional[str] = None) -> None:
+def _write_unit_test(filename: Path, code: _FortranSource, header: str | None = None) -> None:
     r"""
     Writes a unit test for the given module.
 
@@ -262,7 +262,7 @@ def _write_unit_test(filename: Path, code: _FortranSource, header: Optional[str]
 
 
 # %% Functions - _write_all_unit_test
-def _write_all_unit_test(filename: Path, all_code: List[_FortranSource], header: Optional[str] = None) -> None:
+def _write_all_unit_test(filename: Path, all_code: list[_FortranSource], header: str | None = None) -> None:
     r"""
     Writes a wrapper run_all_tests program to run all the unit tests.
 
@@ -341,8 +341,8 @@ def _get_template(
     is_debug: bool = False,
     build: str = "",
     *,
-    fcflags: Optional[Dict[str, str]] = None,
-    dbflags: Optional[Dict[str, str]] = None,
+    fcflags: dict[str, str] | None = None,
+    dbflags: dict[str, str] | None = None,
     use_preprocessor: bool = False,
 ) -> str:
     r"""
@@ -489,15 +489,15 @@ clean :
 # %% Functions - _write_makefile
 def _write_makefile(  # noqa: C901
     makefile: Path,
-    code: List[_FortranSource],
+    code: list[_FortranSource],
     *,
-    template: Optional[str] = None,
-    program: Optional[str] = None,
+    template: str | None = None,
+    program: str | None = None,
     compiler: str = "gfortran",
     is_debug: bool = False,
-    sources: Optional[Iterable[str]] = None,
-    external_sources: Optional[Iterable[str]] = None,
-    replacements: Optional[Dict[str, str]] = None,
+    sources: Iterable[str] | None = None,
+    external_sources: Iterable[str] | None = None,
+    replacements: dict[str, str] | None = None,
 ) -> None:
     r"""
     Reads the given makefile template and inserts the relevant rules based on the given source code.
@@ -525,7 +525,7 @@ def _write_makefile(  # noqa: C901
 
     """
 
-    def _build_dependencies(uses: Iterable[str]) -> List[str]:
+    def _build_dependencies(uses: Iterable[str]) -> list[str]:
         r"""Build dependencies with checks for external or intrinsics."""
         # create sorted list of uses that are not intrinsic or external
         sorted_uses = sorted(
@@ -671,9 +671,9 @@ def _write_makefile(  # noqa: C901
 def create_fortran_unit_tests(
     folder: Path,
     *,
-    template: Optional[str] = None,
-    external_sources: Optional[Iterable[str]] = None,
-    header: Optional[str] = None,
+    template: str | None = None,
+    external_sources: Iterable[str] | None = None,
+    header: str | None = None,
 ) -> None:
     r"""
     Parses the given folder for Fortran unit test files to build programs that will execute them.
@@ -738,12 +738,12 @@ def create_fortran_makefile(
     folder: Path,
     makefile: Path,
     program: str,
-    sources: List[str],
+    sources: list[str],
     *,
     compiler: str = "gfortran",
     is_debug: bool = True,
-    template: Optional[str] = None,
-    replacements: Optional[Dict[str, str]] = None,
+    template: str | None = None,
+    replacements: dict[str, str] | None = None,
 ) -> None:
     r"""
     Parses the given folder for Fortran source files to build a makefile.

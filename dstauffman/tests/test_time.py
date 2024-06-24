@@ -164,7 +164,7 @@ class Test_round_time(unittest.TestCase):
     def test_seconds(self) -> None:
         date_out = dcs.round_time(self.x_sec, self.t_round)
         expected = np.array([0.0, 0.2, 0.4, 0.4, 0.6, 0.6])
-        np.testing.assert_array_almost_equal(date_out, expected, 14)
+        np.testing.assert_array_almost_equal(date_out, expected, 14)  # type: ignore[arg-type]
 
     def test_numpy(self) -> None:
         date_out = dcs.round_time(self.x_np, self.t_round)

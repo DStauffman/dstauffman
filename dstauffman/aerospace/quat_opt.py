@@ -89,7 +89,7 @@ def quat_from_axis_angle_single(axis: _V, angle: float) -> _Q:
 
     Parameters
     ----------
-    axis : (3, ) np.ndarray of float
+    axis : (3, ) numpy.ndarray of float
         Unit vector
     angle : float
         angle of rotation in radians

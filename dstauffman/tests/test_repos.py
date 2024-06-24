@@ -12,7 +12,6 @@ from __future__ import annotations
 import contextlib
 import os
 import pathlib
-from typing import List
 import unittest
 from unittest.mock import patch
 
@@ -76,7 +75,7 @@ class Test_find_repo_issues(unittest.TestCase):
 
     folder: pathlib.Path
     linesep: str
-    files: List[pathlib.Path]
+    files: list[pathlib.Path]
     bad1: str
     bad2: str
 
@@ -293,7 +292,7 @@ class Test_get_python_definitions(unittest.TestCase):
     def test_overload(self) -> None:
         funcs = dcs.get_python_definitions(
             "@overload\ndef fun(x: int, x: Literal[False]) -> int: ...\n\n@overload\ndef fun(x: int, x: Literal[True]) -> float: ...\n"
-            + "\ndef fun(x: int, x: bool = False) -> Union[int, float]:\n    pass\n\n"
+            + "\ndef fun(x: int, x: bool = False) -> int | float:\n    pass\n\n"
         )
         self.assertEqual(funcs, ["fun"])
 

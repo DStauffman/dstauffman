@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import doctest
 import logging
-from typing import Callable, List, Optional, Tuple, TYPE_CHECKING, TypedDict, Union
+from typing import Callable, NotRequired, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from slog import LogLevel
@@ -24,7 +24,6 @@ if HAVE_NUMPY:
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
-    from typing_extensions import NotRequired, Unpack
 
     _N = NDArray[np.float64]
     _Q = NDArray[np.float64]  # shape (4,)
@@ -263,7 +262,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwarg
         axis_set = {axis}  # type: ignore[arg-type]
     assert len(axis_set - {1, 2, 3}) == 0, f"axis_set = {axis_set}"
     # calculations
-    quat: np.ndarray
+    quat: _Q | _Qs
     if np.isscalar(angle) and np.isscalar(axis):
         # optimized scalar case
         quat = np.array([0, 0, 0, np.cos(angle / 2)])  # type: ignore[operator]
@@ -293,9 +292,9 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_Qu
 
     Parameters
     ----------
-    axis : (3, ) on (3, N) np.ndarray of float
+    axis : (3, ) on (3, N) numpy.ndarray of float
         Unit vector(s)
-    angle : float or (N, ) np.ndarray of float
+    angle : float or (N, ) numpy.ndarray of float
         angle of rotation(s) in radians
 
     Returns
@@ -353,7 +352,7 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_Qu
 
 
 # %% Functions - quat_angle_diff
-def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]) -> Tuple[_N, _Q]:
+def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]) -> tuple[_N, _Q]:
     r"""
     Calculate the angular difference between two quaternions.
 
@@ -456,7 +455,7 @@ def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]
 
 # %% Functions - quat_from_euler
 def quat_from_euler(  # noqa: C901
-    angles: ArrayLike, seq: Optional[ArrayLike] = None, **kwargs: Unpack[_QuatAssertionKwargs]
+    angles: ArrayLike, seq: ArrayLike | None = None, **kwargs: Unpack[_QuatAssertionKwargs]
 ) -> _Q:
     r"""
     Convert set(s) of euler angles to quaternion(s).
@@ -941,7 +940,7 @@ def quat_prop(quat: _Q, delta_ang: _N, *, renorm: bool = True, **kwargs: Unpack[
     # compute angle rate matrix (note: transposed to make 'F' order), use it to compute a delta
     # quaternion, and then propagate by adding the delta
     # fmt: off
-    quat_new: np.ndarray = quat + 0.5 * np.array([
+    quat_new: _Q | _Qs = quat + 0.5 * np.array([
         [      0      , -delta_ang[2],   delta_ang[1], -delta_ang[0]],
         [ delta_ang[2],       0      ,  -delta_ang[0], -delta_ang[1]],
         [-delta_ang[1],  delta_ang[0],       0       , -delta_ang[2]],
@@ -1011,7 +1010,7 @@ def quat_times_vector(quat: _Q, v: _N) -> _Q:
 
 # %% Functions - quat_to_euler
 def quat_to_euler(  # noqa: C901
-    quat: _Q, seq: Optional[Union[Tuple[int, int, int], List[int], _N]] = None, **kwargs: Unpack[_QuatAssertionKwargs]
+    quat: _Q, seq: tuple[int, int, int] | list[int] | _N | None = None, **kwargs: Unpack[_QuatAssertionKwargs]
 ) -> _N:
     r"""
     Convert quaternion to Euler angles for one of 6 input angle sequences.
@@ -1188,7 +1187,7 @@ def quat_to_euler(  # noqa: C901
 # %% quat_standards
 def quat_standards(
     quat_class: Callable[[float, float, float, float], _Q], quat_mult_func: Callable[[_Q, _Q], _Q]
-) -> Tuple[bool, bool]:
+) -> tuple[bool, bool]:
     r"""
     Uses a defined test case to determine the relevant quaternion conventions.
 

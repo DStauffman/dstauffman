@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import datetime
 from pathlib import Path
-from typing import Any, Callable, ClassVar, Dict, Optional
+from typing import Any, Callable, ClassVar
 
 import numpy as np
 
@@ -32,11 +32,11 @@ class Results(Frozen, metaclass=SaveAndLoad):
     """Custom class using datetime64's that can be saved and loaded from HDF5 files."""
 
     # fmt: off
-    load: ClassVar[Callable[[Optional[Path]], Results]]  # noqa: F821
-    save: Callable[[Optional[Path]], None]  # noqa: F821
+    load: ClassVar[Callable[[Path | None], Results]]  # noqa: F821
+    save: Callable[[Path | None], None]  # noqa: F821
     # fmt: on
 
-    def __init__(self, num: float = 0, date_zero: Optional[datetime.datetime] = None):
+    def __init__(self, num: float = 0, date_zero: datetime.datetime | None = None):
         self.time = np.arange(num)
         self.data = np.random.rand(*self.time.shape)
         self.date = np.full(self.time.shape, np.datetime64("NaT", NP_DATETIME_UNITS))
@@ -44,7 +44,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
             assert date_zero is not None
             self.date[:] = convert_datetime_to_np(date_zero) + (NP_ONE_SECOND * self.time).astype(np.int64)
 
-    def _save_convert_hdf5(self) -> Dict[str, Any]:
+    def _save_convert_hdf5(self) -> dict[str, Any]:
         self.date = self.date.astype(np.int64)
         return {}
 

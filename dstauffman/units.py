@@ -9,7 +9,6 @@ Notes
 # %% Imports
 import doctest
 from math import pi
-from typing import Dict, Tuple, Union
 import unittest
 
 # %% Constants - Unit Conversions
@@ -37,7 +36,7 @@ DEGREE_SIGN: str = "\N{DEGREE SIGN}"  # degree sign, also u"\u00b0" ° or chr(17
 MICRO_SIGN: str = "\N{MICRO SIGN}"  # micro sign, also u"\u00b5" μ or chr(181), note this is different than chr(956)
 
 # Prefixes, inverses, and labels
-_PREFIXES: Dict[str, Tuple[float, float, str]] = {
+_PREFIXES: dict[str, tuple[float, float, str]] = {
     "yotta": (1e24, 1e-24, "Y"),
     "zetta": (1e21, 1e-21, "Z"),
     "exa": (1e18, 1e-18, "E"),
@@ -71,7 +70,7 @@ _PREFIXES: Dict[str, Tuple[float, float, str]] = {
 
 
 # %% get_factors
-def get_factors(prefix: str, inverse: bool = False) -> Tuple[float, str]:
+def get_factors(prefix: str, inverse: bool = False) -> tuple[float, str]:
     r"""
     Get the multiplication factor and unit label for the desired units.
 
@@ -165,8 +164,8 @@ def get_time_factor(unit: str) -> int:
 
 # %% Functions - get_unit_conversion
 def get_unit_conversion(  # noqa: C901
-    conversion: Union[None, str, int, float, Tuple[str, float]], units: str = ""
-) -> Tuple[str, float]:
+    conversion: str | int | float | tuple[str, float] | None, units: str = ""
+) -> tuple[str, float]:
     r"""
     Acts as a wrapper to unit conversions for legends in plots and for scaling second axes.
 

@@ -8,7 +8,6 @@ Notes
 
 # %% Imports
 import datetime
-from typing import List, Optional, Tuple
 import unittest
 from unittest.mock import Mock, patch
 import warnings
@@ -63,7 +62,7 @@ class Test_plotting_make_quaternion_plot(unittest.TestCase):
         self.return_err       = False
         self.use_zoh          = False
         self.label_vert_lines = True
-        self.figs: Optional[List[Figure]] = None
+        self.figs: list[Figure] | None = None
         # fmt: on
 
     def test_nominal(self) -> None:
@@ -458,7 +457,7 @@ class Test_plotting_plot_states(unittest.TestCase):
         self.gnd2.state.fill(0.99)  # type: ignore[union-attr]
         self.opts = plot.Opts()
         self.opts.show_plot = False
-        self.figs: List[Figure] = []
+        self.figs: list[Figure] = []
 
     def test_single(self) -> None:
         with patch("dstauffman.plotting.aerospace.logger") as mock_logger:
@@ -481,7 +480,7 @@ class Test_plotting_plot_states(unittest.TestCase):
         self.assertEqual(err.keys(), {"state"})
 
     def test_groups(self) -> None:
-        groups: List[Tuple[int, ...]] = [(0, 1, 2), (3, 4, 5), (6, 7, 8)]
+        groups: list[tuple[int, ...]] = [(0, 1, 2), (3, 4, 5), (6, 7, 8)]
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message="Mean of empty slice")
             with patch("dstauffman.plotting.aerospace.logger") as mock_logger:

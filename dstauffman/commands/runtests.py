@@ -14,7 +14,6 @@ from pathlib import Path
 import platform
 import subprocess
 import sys
-from typing import List
 import unittest
 
 from slog import ReturnCodes
@@ -23,7 +22,7 @@ from dstauffman import get_root_dir, get_tests_dir, list_python_files, run_cover
 
 
 # %% Functions - parse_tests
-def parse_tests(input_args: List[str]) -> argparse.Namespace:
+def parse_tests(input_args: list[str]) -> argparse.Namespace:
     r"""
     Parser for the tests command.
 
@@ -137,7 +136,7 @@ def execute_tests(args: argparse.Namespace) -> int:
 
 
 # %% Functions - parse_coverage
-def parse_coverage(input_args: List[str]) -> argparse.Namespace:
+def parse_coverage(input_args: list[str]) -> argparse.Namespace:
     r"""
     Parser for the coverage command.
 

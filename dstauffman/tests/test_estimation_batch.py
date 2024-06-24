@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Tuple, TYPE_CHECKING, Union
+from typing import Any, TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
 
@@ -54,7 +54,7 @@ class SimParams(Frozen):
 
 
 # Functions - _get_truth_index
-def _get_truth_index(results_time: _N, truth_time: _N) -> Tuple[_I, _I]:
+def _get_truth_index(results_time: _N, truth_time: _N) -> tuple[_I, _I]:
     r"""Finds the indices to the truth data from the results time."""
     # Hard-coded values
     precision = 1e-7
@@ -94,7 +94,7 @@ def cost_wrapper(results_data: _N, *, results_time: _N, truth_time: _N, truth_da
 
 
 # Functions - get_parameter
-def get_parameter(sim_params: SimParams, *, names: List[str]) -> _N:
+def get_parameter(sim_params: SimParams, *, names: list[str]) -> _N:
     r"""Simple example parameter getter."""
     num = len(names)
     values = np.full(num, np.nan)
@@ -107,7 +107,7 @@ def get_parameter(sim_params: SimParams, *, names: List[str]) -> _N:
 
 
 # Functions - set_parameter
-def set_parameter(sim_params: SimParams, *, names: List[str], values: _N) -> None:
+def set_parameter(sim_params: SimParams, *, names: list[str], values: _N) -> None:
     r"""Simple example parameter setter."""
     num = len(names)
     assert len(values) == num, "Names and Values must have the same length."
@@ -468,7 +468,7 @@ class Test_estimation_batch__calc_sum_squares(unittest.TestCase):
 
     def test_all_nans(self) -> None:
         x = np.full((4, 3), np.nan)
-        out: Union[float, np.ndarray] = estm.batch._calc_sum_squares(x, ignore_nans=True)
+        out: int | float | _I | _N = estm.batch._calc_sum_squares(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
         out = estm.batch._calc_sum_squares(x, axis=0, ignore_nans=True)
         assert isinstance(out, np.ndarray)
@@ -499,8 +499,8 @@ class Test_estimation_batch__function_wrapper(unittest.TestCase):
     def setUp(self) -> None:
         self.results = np.array([1, 2, np.nan])
         self.innovs = np.array([1, 2, 0])
-        self.model_args: Dict[str, Any] = {}
-        self.cost_args: Dict[str, Any] = {}
+        self.model_args: dict[str, Any] = {}
+        self.cost_args: dict[str, Any] = {}
         self.model_func = lambda *args, **kwargs: np.array([1, 2, np.nan])
         self.cost_func = lambda *args, **kwargs: np.array([1, 2, np.nan])
 

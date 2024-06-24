@@ -3,7 +3,6 @@
 # %% Imports
 from copy import deepcopy
 import datetime
-from typing import Dict
 
 import numpy as np
 
@@ -12,7 +11,7 @@ import dstauffman.aerospace as space
 import dstauffman.plotting as plot
 
 # %% Flags
-plots: Dict[str, bool] = {}
+plots: dict[str, bool] = {}
 plots["att"] = True
 plots["pos"] = False
 plots["inn"] = False
@@ -60,8 +59,8 @@ kf1.innov.fploc = np.random.rand(2, num_innovs)
 # %% KF2
 kf2        = space.Kf()
 kf2.name   = "KF2"
-kf2.time   = np.arange(2, 13)
-kf2.att    = np.tile(q2[:, np.newaxis], (1, kf2.time.size))
+kf2.time   = np.arange(2, 13)  # type: ignore[assignment]
+kf2.att    = np.tile(q2[:, np.newaxis], (1, kf2.time.size))  # type: ignore[union-attr]
 kf2.att[3, 4] += 50e-6
 kf2.att    = space.quat_norm(kf2.att)
 kf2.pos    = kf1.pos[:, [2, 3, 4, 5, 6, 7, 8, 9, 10, 0, 1]] - 1e5

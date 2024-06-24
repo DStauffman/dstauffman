@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Literal, overload, TYPE_CHECKING
 import unittest
 
 from nubs import ncjit
@@ -31,10 +31,10 @@ if TYPE_CHECKING:
 @overload
 def calculate_kalman_gain(P: _M, H: _M, R: _M, *, use_inverse: bool, return_innov_cov: Literal[False] = ...) -> _M: ...
 @overload
-def calculate_kalman_gain(P: _M, H: _M, R: _M, *, use_inverse: bool, return_innov_cov: Literal[True]) -> Tuple[_M, _M]: ...
+def calculate_kalman_gain(P: _M, H: _M, R: _M, *, use_inverse: bool, return_innov_cov: Literal[True]) -> tuple[_M, _M]: ...
 def calculate_kalman_gain(
     P: _M, H: _M, R: _M, *, use_inverse: bool = False, return_innov_cov: bool = False
-) -> Union[_M, Tuple[_M, _M]]:
+) -> _M | tuple[_M, _M]:
     r"""
     Calculates K, the Kalman Gain matrix.
 
@@ -85,7 +85,7 @@ def calculate_kalman_gain(
 
 
 @ncjit
-def calculate_kalman_gain_opt(P: _M, H: _M, R: _M) -> Tuple[_M, _M]:
+def calculate_kalman_gain_opt(P: _M, H: _M, R: _M) -> tuple[_M, _M]:
     r"""Calculate the Kalman gain, in a way optimized for use with numba."""
     Pz = H @ P @ H.T + R
     K = mat_divide(Pz.T, (P @ H.T).T).T
@@ -94,7 +94,7 @@ def calculate_kalman_gain_opt(P: _M, H: _M, R: _M) -> Tuple[_M, _M]:
 
 # %% Functions - calculate_prediction
 @ncjit
-def calculate_prediction(H: _M, state: _N, const: Optional[_N] = None) -> _N:
+def calculate_prediction(H: _M, state: _N, const: _N | None = None) -> _N:
     r"""
     Calculates u, the measurement prediction.
 
@@ -243,7 +243,7 @@ def calculate_delta_state(K: _M, z: _N) -> _N:
 
 
 # %% Functions - propagate_covariance
-def propagate_covariance(P: _M, phi: _M, Q: _M, *, gamma: Optional[_M] = None, inplace: bool = True) -> _M:
+def propagate_covariance(P: _M, phi: _M, Q: _M, *, gamma: _M | None = None, inplace: bool = True) -> _M:
     r"""
     Propagates the covariance forward in time.
 
@@ -293,7 +293,7 @@ def propagate_covariance(P: _M, phi: _M, Q: _M, *, gamma: Optional[_M] = None, i
 
 
 @ncjit
-def propagate_covariance_opt(P: _M, phi: _M, Q: _M, gamma: Optional[_M] = None) -> None:
+def propagate_covariance_opt(P: _M, phi: _M, Q: _M, gamma: _M | None = None) -> None:
     r"""Propagate the covariance in time, in a way optimized for use with numba."""
     if gamma is None:
         P[:] = phi @ P @ phi.T + Q

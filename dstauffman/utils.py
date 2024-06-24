@@ -22,23 +22,7 @@ from pathlib import Path
 import shlex
 import subprocess
 import sys
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    Generator,
-    Iterable,
-    List,
-    Literal,
-    Optional,
-    overload,
-    Set,
-    Tuple,
-    TYPE_CHECKING,
-    TypedDict,
-    TypeVar,
-    Union,
-)
+from typing import Any, Callable, Generator, Iterable, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, TypeVar, Unpack
 import unittest
 import warnings
 
@@ -61,28 +45,28 @@ if HAVE_SCIPY:
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
-    from typing_extensions import NotRequired, Unpack
 
     _B = NDArray[np.bool_]
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
     _N = NDArray[np.float64]
-    _StrOrListStr = TypeVar("_StrOrListStr", str, List[str])
-    _SingleNum = Union[int, float, np.datetime64, np.int32, np.int64, np.float64]
-    _Lists = Union[_N, List[_N], Tuple[_N, ...]]
-    _NF = Union[float, np.float64, _N]
+    _StrOrListStr = TypeVar("_StrOrListStr", str, list[str])
+    _SingleNum = int | float | np.datetime64 | np.int32 | np.int64 | np.float64
+    _Lists = _N | list[_N] | tuple[_N, ...]
+    _NF = float | np.float64 | _N
+    _Array = _B | _D | _I | _N
 
     class _PrintOptsKwArgs(TypedDict):
-        precision: NotRequired[Optional[int]]
-        threshold: NotRequired[Optional[int]]
-        edgeitems: NotRequired[Optional[int]]
-        linewidth: NotRequired[Optional[int]]
-        suppress: NotRequired[Optional[bool]]
-        nanstr: NotRequired[Optional[str]]
-        infstr: NotRequired[Optional[str]]
-        sign: NotRequired[Optional[Literal["-", "+", " "]]]
-        formatter: NotRequired[Dict[str, Callable]]
-        floatmode: NotRequired[Optional[Literal["fixed", "unique", "maxprec", "maxprec_equal"]]]
+        precision: NotRequired[int | None]
+        threshold: NotRequired[int | None]
+        edgeitems: NotRequired[int | None]
+        linewidth: NotRequired[int | None]
+        suppress: NotRequired[bool | None]
+        nanstr: NotRequired[str | None]
+        infstr: NotRequired[str | None]
+        sign: NotRequired[Literal["-" | "+" | " "] | None]
+        formatter: NotRequired[dict[str, Callable]]
+        floatmode: NotRequired[Literal["fixed" | "unique" | "maxprec" | "maxprec_equal"] | None]
 
     class _ButterKwArgs(TypedDict):
         btype: NotRequired[Literal["lowpass", "highpass", "bandpass", "bandstop"]]
@@ -90,12 +74,12 @@ if TYPE_CHECKING:
 
 
 # %% Globals
-_ALLOWED_ENVS: Optional[Dict[str, str]] = None  # allows any environment variables to be invoked
+_ALLOWED_ENVS: dict[str, str] | None = None  # allows any environment variables to be invoked
 
 
 # %% Functions - _nan_equal
 def _nan_equal(  # pylint: disable=too-many-return-statements  # noqa: C901
-    a: Any, b: Any, /, tolerance: Optional[float] = None
+    a: Any, b: Any, /, tolerance: float | None = None
 ) -> bool:
     r"""
     Test ndarrays for equality, but ignore NaNs.
@@ -181,11 +165,11 @@ def find_in_range(
     max_: _SingleNum = inf,
     *,
     inclusive: bool = False,
-    mask: Optional[Union[bool, _B]] = None,
+    mask: bool | _B | None = None,
     precision: _SingleNum = 0,
     left: bool = False,
     right: bool = False,
-) -> np.ndarray:
+) -> _D | _I | _N:
     r"""
     Finds values in the given range.
 
@@ -250,14 +234,12 @@ def find_in_range(
 
 # %% Functions - rms
 @overload
-def rms(
-    data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...
-) -> Union[float, np.float64]: ...
+def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> float | np.float64: ...
 @overload
 def rms(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _NF: ...
 @overload
 def rms(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> NDArray[np.float64]: ...
-def rms(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ignore_nans: bool = False) -> _NF:
+def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore_nans: bool = False) -> _NF:
     r"""
     Calculate the root mean square of a number series.
 
@@ -322,7 +304,7 @@ def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore
 def rss(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _NF: ...
 @overload
 def rss(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> NDArray[np.float64]: ...
-def rss(data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ignore_nans: bool = False) -> _NF:
+def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore_nans: bool = False) -> _NF:
     r"""
     Calculate the root sum square of a number series.
 
@@ -388,12 +370,12 @@ def compare_two_classes(  # noqa: C901
     c2: Any,
     /,
     suppress_output: bool = False,
-    names: Optional[Union[Tuple[str, str], List[str]]] = None,
+    names: tuple[str, str] | list[str] | None = None,
     ignore_callables: bool = True,
     compare_recursively: bool = True,
     is_subset: bool = False,
-    tolerance: Optional[float] = None,
-    exclude: Optional[Set[str]] = None,
+    tolerance: float | None = None,
+    exclude: set[str] | None = None,
 ) -> bool:
     r"""
     Compare two classes by going through all their public attributes and showing that they are equal.
@@ -439,7 +421,7 @@ def compare_two_classes(  # noqa: C901
         r"""Set is_same to False and optionally prints information to the screen."""
         is_same = False
         if not suppress_output:
-            print(f"{this_attr} is different from {name1} to {name2}.")  # pylint: disable=used-before-assignment
+            print(f"{this_attr} is different from {name1} to {name2}.")
         return is_same
 
     def _is_function(obj: Any) -> bool:
@@ -558,10 +540,10 @@ def compare_two_dicts(  # noqa: C901
     d2: Mapping[Any, Any],
     /,
     suppress_output: bool = False,
-    names: Optional[Union[Tuple[str, str], List[str]]] = None,
+    names: tuple[str, str] | list[str] | None = None,
     is_subset: bool = False,
-    tolerance: Optional[float] = None,
-    exclude: Optional[Set[str]] = None,
+    tolerance: float | None = None,
+    exclude: set[str] | None = None,
 ) -> bool:
     r"""
     Compare two dictionaries for the same keys, and the same value of those keys.
@@ -656,7 +638,7 @@ def compare_two_dicts(  # noqa: C901
 
 
 # %% Functions - read_text_file
-def read_text_file(filename: Union[str, Path], encoding: str = "utf-8") -> str:
+def read_text_file(filename: str | Path, encoding: str = "utf-8") -> str:
     r"""
     Open and read a complete text file.
 
@@ -708,7 +690,7 @@ def read_text_file(filename: Union[str, Path], encoding: str = "utf-8") -> str:
 
 
 # %% Functions - write_text_file
-def write_text_file(filename: Union[str, Path], text: str, encoding: str = "utf-8") -> None:
+def write_text_file(filename: str | Path, text: str, encoding: str = "utf-8") -> None:
     r"""
     Open and write the specified text to a file.
 
@@ -751,7 +733,7 @@ def write_text_file(filename: Union[str, Path], text: str, encoding: str = "utf-
 
 
 # %% Functions - magnitude
-def magnitude(data: _Lists, axis: int = 0) -> Union[float, np.ndarray]:
+def magnitude(data: _Lists, axis: int = 0) -> float | _N:
     r"""
     Return a vector of magnitudes for each subvector along a specified dimension.
 
@@ -795,20 +777,20 @@ def magnitude(data: _Lists, axis: int = 0) -> Union[float, np.ndarray]:
 
 
 # %% Functions - unit
-def unit(data: _Lists, axis: int = 0) -> np.ndarray:
+def unit(data: _Lists, axis: int = 0) -> _N:
     r"""
     Normalize a matrix into unit vectors along a specified dimension.
 
     Parameters
     ----------
-    data : ndarray
+    data : numpy.ndarray
         Data
     axis : int, optional
         Axis upon which to normalize, defaults to first axis (i.e. column normalization for 2D matrices)
 
     Returns
     -------
-    norm_data : ndarray
+    norm_data : numpy.ndarray
         Normalized data
 
     See Also
@@ -842,7 +824,7 @@ def unit(data: _Lists, axis: int = 0) -> np.ndarray:
     # check for zero vectors, and replace magnitude with 1 to make them unchanged
     mag[mag == 0] = 1
     # calculate the new normalized data
-    norm_data: np.ndarray = data / mag
+    norm_data: _N = data / mag
     return norm_data
 
 
@@ -855,7 +837,7 @@ def modd(x1: ArrayLike, x2: ArrayLike, /, out: Literal[None]) -> None: ...
 def modd(x1: ArrayLike, x2: ArrayLike, /, out: _I) -> _I: ...
 @overload
 def modd(x1: ArrayLike, x2: ArrayLike, /, out: _N) -> _N: ...
-def modd(x1: ArrayLike, x2: ArrayLike, /, out: Optional[Union[_I, _N]] = None) -> Optional[Union[_I, _N]]:
+def modd(x1: ArrayLike, x2: ArrayLike, /, out: _I | _N | None = None) -> _I | _N | None:
     r"""
     Return element-wise remainder of division, except that instead of zero it gives the divisor instead.
 
@@ -999,7 +981,7 @@ def np_digitize(x: ArrayLike, /, bins: ArrayLike, right: bool = False) -> _I:
         raise ValueError("Some values were NaN.")
 
     # check the bounds
-    tolerance: Optional[Union[int, float]] = None  # TODO: do I need a tolerance here?
+    tolerance: int | float | None = None  # TODO: do I need a tolerance here?
     bmin = bins[0] if tolerance is None else bins[0] - tolerance  # type: ignore[index, operator]
     bmax = bins[-1] if tolerance is None else bins[-1] + tolerance  # type: ignore[index, operator]
     bad_bounds = False
@@ -1143,7 +1125,7 @@ def full_print(**kwargs: Unpack[_PrintOptsKwArgs]) -> Generator[None, None, None
 @overload
 def line_wrap(text: str, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> str: ...
 @overload
-def line_wrap(text: List[str], wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> List[str]: ...
+def line_wrap(text: list[str], wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> list[str]: ...
 def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: int = 4, line_cont: str = "\\") -> _StrOrListStr:
     r"""
     Wrap lines of text to the specified length, breaking at any whitespace characters.
@@ -1186,7 +1168,7 @@ def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: in
     # create the pad for any newline
     pad = " " * indent
     # initialize output
-    out: List[str] = []
+    out: list[str] = []
     # loop through text lines
     for this_line in text_list:
         # determine if too long
@@ -1210,8 +1192,8 @@ def line_wrap(text: _StrOrListStr, wrap: int = 80, min_wrap: int = 0, indent: in
 @overload
 def combine_per_year(data: None, func: Callable[..., Any]) -> None: ...
 @overload
-def combine_per_year(data: np.ndarray, func: Callable[..., Any]) -> np.ndarray: ...
-def combine_per_year(data: Optional[np.ndarray], func: Optional[Callable[..., Any]] = None) -> Optional[np.ndarray]:
+def combine_per_year(data: _Array, func: Callable[..., Any]) -> _Array: ...
+def combine_per_year(data: _Array | None, func: Callable[..., Any] | None = None) -> _Array | None:
     r"""
     Combine the time varying values over one year increments using a supplied function.
 
@@ -1271,11 +1253,11 @@ def combine_per_year(data: Optional[np.ndarray], func: Optional[Callable[..., An
 
 # %% Functions - execute
 def execute(
-    command: Union[str, List[str]],
+    command: str | list[str],
     folder: Path,
     *,
-    ignored_codes: Optional[Iterable[int]] = None,
-    env: Optional[Dict[str, str]] = None,
+    ignored_codes: Iterable[int] | None = None,
+    env: dict[str, str] | None = None,
 ) -> Generator[str, None, int]:
     r"""
     Wrapper to subprocess that allows the screen to be updated for long running commands.
@@ -1352,15 +1334,15 @@ def execute(
 
 # %% Functions - execute_wrapper
 def execute_wrapper(
-    command: Union[str, List[str]],
+    command: str | list[str],
     folder: Path,
     *,
     dry_run: bool = False,
-    ignored_codes: Optional[Iterable[int]] = None,
-    filename: Optional[Path] = None,
-    env: Optional[Dict[str, str]] = None,
+    ignored_codes: Iterable[int] | None = None,
+    filename: Path | None = None,
+    env: dict[str, str] | None = None,
     print_status: bool = True,
-) -> Union[ReturnCodes, List[str]]:
+) -> ReturnCodes | list[str]:
     r"""
     Wrapper to the wrapper to subprocess with options to print the command do dry-runs.
 
@@ -1431,7 +1413,7 @@ def execute_wrapper(
 
 
 # %% Functions - get_env_var
-def get_env_var(env_key: str, default: Optional[str] = None) -> str:
+def get_env_var(env_key: str, default: str | None = None) -> str:
     r"""
     Return an environment variable assuming is has been set.
 
@@ -1499,7 +1481,7 @@ def get_username() -> str:
 
 
 # %% Functions - is_datetime
-def is_datetime(time: Union[None, datetime.datetime, ArrayLike]) -> bool:
+def is_datetime(time: datetime.datetime | ArrayLike | None) -> bool:
     r"""
     Determines if the given time is either a datetime.datetime or np.datetime64 or just a regular number.
 
@@ -1543,38 +1525,38 @@ def is_datetime(time: Union[None, datetime.datetime, ArrayLike]) -> bool:
 
 # %% Functions - intersect
 @overload
-def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[False] = ...) -> Union[_I, _N, _D]: ...
+def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[False] = ...) -> _I | _N | _D: ...
 @overload
-def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[True]) -> Tuple[Union[_I, _N, _D], _I, _I]: ...
+def intersect(a: ArrayLike, b: ArrayLike, /, *, return_index: Literal[True]) -> tuple[_I | _N | _D, _I, _I]: ...
 @overload
 def intersect(
     a: ArrayLike,
     b: ArrayLike,
     /,
     *,
-    tolerance: Union[int, float, np.int_, np.float64, np.timedelta64],
+    tolerance: int | float | np.int_ | np.float64 | np.timedelta64,
     assume_unique: bool,
     return_index: Literal[False] = ...,
-) -> Union[_I, _N, _D]: ...
+) -> _I | _N | _D: ...
 @overload
 def intersect(
     a: ArrayLike,
     b: ArrayLike,
     /,
     *,
-    tolerance: Union[int, float, np.int_, np.float64, np.timedelta64],
+    tolerance: int | float | np.int_ | np.float64 | np.timedelta64,
     assume_unique: bool,
     return_index: Literal[True],
-) -> Tuple[Union[_I, _N, _D], _I, _I]: ...
+) -> tuple[_I | _N | _D, _I, _I]: ...
 def intersect(  # type: ignore[misc]
     a: ArrayLike,
     b: ArrayLike,
     /,
     *,
-    tolerance: Union[int, float, np.int_, np.float64, np.timedelta64] = 0,
+    tolerance: int | float | np.int_ | np.float64 | np.timedelta64 = 0,
     assume_unique: bool = False,
     return_indices: bool = False,
-) -> Union[Union[_I, _N, _D], Tuple[Union[_I, _N, _D], _I, _I]]:
+) -> _I | _N | _D | tuple[_I | _N | _D, _I, _I]:
     r"""
     Finds the intersect of two arrays given a numerical tolerance.
 
@@ -1742,7 +1724,7 @@ def zero_order_hold(
     xp: ArrayLike,
     yp: ArrayLike,
     *,
-    left: Union[int, float, str] = nan,
+    left: int | float | str = nan,
     assume_sorted: bool = False,
     return_indices: bool = False,
 ) -> _N:
@@ -1809,8 +1791,8 @@ def linear_interp(
     xp: ArrayLike,
     yp: ArrayLike,
     *,
-    left: Optional[Union[int, float]] = None,
-    right: Optional[Union[int, float]] = None,
+    left: int | float | None = None,
+    right: int | float | None = None,
     assume_sorted: bool = False,
     extrapolate: bool = False,
 ) -> _N:
@@ -1868,7 +1850,7 @@ def linear_interp(
     # use slower scipy version
     if not HAVE_SCIPY:
         raise RuntimeError("You must have scipy available to run this.")
-    fill_value: Union[None, str, Tuple[int, int], Tuple[float, float]]
+    fill_value: str | tuple[int, int] | tuple[float, float] | None
     if extrapolate:
         bounds_error = False
         if left is None or right is None:
@@ -1971,9 +1953,9 @@ def drop_following_time(times: _I, drop_starts: _I, dt_drop: int, *, reverse: bo
 @overload
 def drop_following_time(times: _N, drop_starts: _N, dt_drop: float, *, reverse: bool) -> _B: ...
 def drop_following_time(
-    times: Union[_D, _I, _N],
-    drop_starts: Union[_D, _I, _N],
-    dt_drop: Union[int, float, np.datetime64],
+    times: _D | _I | _N,
+    drop_starts: _D | _I | _N,
+    dt_drop: int | float | np.datetime64,
     *,
     reverse: bool = False,
 ) -> _B:

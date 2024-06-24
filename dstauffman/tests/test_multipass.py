@@ -9,7 +9,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import unittest
 
 import dstauffman as dcs
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 
 # %% Supporting functions
-def _model_wrapper(x: Optional[_N], y: Optional[_N]) -> _N:
+def _model_wrapper(x: _N | None, y: _N | None) -> _N:
     if x is None:
         raise ValueError("Bad value for x")
     if y is None:

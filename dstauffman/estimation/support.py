@@ -11,7 +11,7 @@ Notes
 
 # %% Imports
 import doctest
-from typing import Any, List, Union
+from typing import Any
 import unittest
 
 from dstauffman import HAVE_NUMPY
@@ -65,7 +65,7 @@ def _get_sub_level(this_sub: Any, part: str) -> Any:
     temp_sub = getattr(this_sub, sub_parts[0])
     this_index = sub_parts[1].split("]")[0]
     try:
-        this_key: Union[int, str] = int(this_index)
+        this_key: int | str = int(this_index)
     except:
         this_key = this_index.replace('"', "").replace("'", "")
     this_value = temp_sub[this_key]
@@ -122,7 +122,7 @@ def _check_valid_param_name(param: Any, name: str) -> bool:
 
 
 # %% get_parameter
-def get_parameter(param: Any, names: List[str]) -> List[Any]:
+def get_parameter(param: Any, names: list[str]) -> list[Any]:
     r"""
     Gets the desired parameter by name.
 
@@ -170,7 +170,7 @@ def get_parameter(param: Any, names: List[str]) -> List[Any]:
 
 
 # %% set_parameter
-def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
+def set_parameter(param: Any, names: list[str], values: list[Any]) -> None:
     r"""
     Sets the desired parameter by a given name.
 
@@ -219,7 +219,7 @@ def set_parameter(param: Any, names: List[str], values: List[Any]) -> None:
         sub_parts = parts[level].split("[")
         this_index = sub_parts[1].split("]")[0]
         try:
-            this_key: Union[int, str] = int(this_index)
+            this_key: int | str = int(this_index)
         except:
             this_key = this_index.replace('"', "").replace("'", "")
         # set the value once on the last level

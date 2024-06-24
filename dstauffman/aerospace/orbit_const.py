@@ -10,7 +10,6 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import Dict, Tuple, Union
 import unittest
 
 from dstauffman import DEG2RAD, HAVE_NUMPY
@@ -30,7 +29,7 @@ TAU = 2 * PI
 G = 6.67430e-11  # [m**3/(kg*s**2)] (+/- 22ppm) 2018 CODATA
 
 # Solar System Masses
-SS_MASSES: Dict[str, float] = {
+SS_MASSES: dict[str, float] = {
     "sun": 1.9891e30,
     "mercury": 3.3022e23,
     "venus": 4.8690e24,
@@ -55,7 +54,7 @@ MU_SUN = G * SS_MASSES["sun"]  # [m**3/s**2]
 MU_EARTH = G * SS_MASSES["earth"]  # [m**3/s**2]
 
 # Julian times
-JULIAN: Dict[str, float] = {}
+JULIAN: dict[str, float] = {}
 JULIAN["day"] = 24.0 * 60.0 * 60.0  # [s]
 JULIAN["year"] = 365.25 * JULIAN["day"]  # [s]
 JULIAN["century"] = 36525.0 * JULIAN["day"]  # [s]
@@ -71,7 +70,7 @@ SPEED_OF_LIGHT = 299792458.0  # [m/s]
 ECLIPTIC = 84381.412 / 3600 * DEG2RAD  # [rad] (+/- 0.005 arcsec)
 
 # Earth model constants
-EARTH: Dict[str, float] = {}
+EARTH: dict[str, float] = {}
 EARTH["omega"] = TAU / SIDEREAL_DAY  # [rad/s]
 EARTH["a"] = 6378137.0  # [m]
 EARTH["b"] = 6356752.3  # [m]
@@ -80,7 +79,7 @@ EARTH["j2"] = -0.00108263  # first aspherical perturbation
 EARTH["sf"] = 1353.0  # solar flux [W/m**2]
 
 # Location of Palo Alto, CA, USA
-PALO_ALTO: Dict[str, Union[float, Tuple[float, float, float]]] = {}
+PALO_ALTO: dict[str, float | tuple[float, float, float]] = {}
 PALO_ALTO["lat"] = 37.429289 * DEG2RAD  # North [rad]
 PALO_ALTO["lng"] = -122.138162 * DEG2RAD  # East [rad]
 PALO_ALTO["alt"] = 4.0  # Altitude [m]

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import doctest
 from math import isinf, isnan
-from typing import List, Optional, Sequence, TYPE_CHECKING, Union
+from typing import Sequence, TYPE_CHECKING
 import unittest
 
 from nubs import prob_to_rate_opt
@@ -34,9 +34,9 @@ def make_preamble(
     size: str = r"\small",
     *,
     use_mini: bool = False,
-    short_cap: Optional[str] = None,
+    short_cap: str | None = None,
     numbered: bool = True,
-) -> List[str]:
+) -> list[str]:
     r"""
     Write the table header and preamble.
 
@@ -119,7 +119,7 @@ def make_preamble(
 
 
 # %% Functions - make_conclusion
-def make_conclusion(*, use_mini: bool = False) -> List[str]:
+def make_conclusion(*, use_mini: bool = False) -> list[str]:
     r"""
     Write closing tags at the end of the table.
 
@@ -151,8 +151,8 @@ def make_conclusion(*, use_mini: bool = False) -> List[str]:
 
 # %% Functions - bins_to_str_ranges
 def bins_to_str_ranges(
-    bins: Union[Sequence[Union[int, float, str]], _I, _N], dt: Union[int, float] = 1, cutoff: Union[int, float] = 1000
-) -> List[str]:
+    bins: Sequence[int | float | str] | _I | _N, dt: int | float = 1, cutoff: int | float = 1000
+) -> list[str]:
     r"""
     Take a given bin vector, and returns a string representation with both boundaries.
 
@@ -211,7 +211,7 @@ def bins_to_str_ranges(
 
 # %% Functions - latex_str
 def latex_str(
-    value: Union[int, float, str], digits: int = -1, fixed: bool = False, cmp2ar: bool = False, capped: int = 1073741823
+    value: int | float | str, digits: int = -1, fixed: bool = False, cmp2ar: bool = False, capped: int = 1073741823
 ) -> str:  # 1073741823 = 2**30-1
     r"""
     Formats a given value for display in a LaTeX document.

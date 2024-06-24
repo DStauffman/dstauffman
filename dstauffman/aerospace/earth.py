@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Literal, overload, TYPE_CHECKING
 import unittest
 
 from dstauffman import HAVE_NUMPY, M2FT
@@ -36,21 +36,21 @@ _b = _a * (1.0 - 1.0 / _finv)
 @overload
 def geod2ecf(
     lat: ArrayLike, lon: Literal[None] = ..., alt: Literal[None] = ..., *, units: str = ..., output: str = ...
-) -> Union[_N, Tuple[_N, _N, _N]]: ...
+) -> _N | tuple[_N, _N, _N]: ...
 @overload
 def geod2ecf(lat: ArrayLike, lon: ArrayLike, alt: ArrayLike, *, units: str = ..., output: Literal["combined"] = ...) -> _N: ...
 @overload
 def geod2ecf(
     lat: ArrayLike, lon: ArrayLike, alt: ArrayLike, *, units: str = ..., output: Literal["split"]
-) -> Tuple[_N, _N, _N]: ...
+) -> tuple[_N, _N, _N]: ...
 def geod2ecf(
     lat: ArrayLike,
-    lon: Optional[ArrayLike] = None,
-    alt: Optional[ArrayLike] = None,
+    lon: ArrayLike | None = None,
+    alt: ArrayLike | None = None,
     *,
     units: str = "m",
     output: str = "combined",
-) -> Union[_N, Tuple[_N, _N, _N]]:
+) -> _N | tuple[_N, _N, _N]:
     r"""
     Converts geodetic latitude, longitude, and altitude to earth centered, earth fixed (ECF) coordinates.
 
@@ -131,7 +131,7 @@ def geod2ecf(
 @overload
 def ecf2geod(
     x: ArrayLike, y: Literal[None] = ..., z: Literal[None] = ..., *, units: str = ..., output: str = ..., algorithm: str = ...
-) -> Union[_N, Tuple[_N, _N, _N]]: ...
+) -> _N | tuple[_N, _N, _N]: ...
 @overload
 def ecf2geod(
     x: ArrayLike, y: ArrayLike, z: ArrayLike, *, units: str = ..., output: Literal["combined"] = ..., algorithm: str = ...
@@ -139,16 +139,16 @@ def ecf2geod(
 @overload
 def ecf2geod(
     x: ArrayLike, y: ArrayLike, z: ArrayLike, *, units: str = ..., output: Literal["split"], algorithm: str = ...
-) -> Tuple[_N, _N, _N]: ...
+) -> tuple[_N, _N, _N]: ...
 def ecf2geod(
     x: ArrayLike,
-    y: Optional[ArrayLike] = None,
-    z: Optional[ArrayLike] = None,
+    y: ArrayLike | None = None,
+    z: ArrayLike | None = None,
     *,
     units: str = "m",
     output: str = "combined",
     algorithm: str = "gersten",
-) -> Union[_N, Tuple[_N, _N, _N]]:
+) -> _N | tuple[_N, _N, _N]:
     r"""
     Converts a vector of earth centered, earth fixed coordinates to geodetic latitude, longitude, and altitude.
 

@@ -9,7 +9,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from typing import List, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 import unittest
 
 import dstauffman as dcs
@@ -105,7 +105,7 @@ class Test_bins_to_str_ranges(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.bins: Union[_I, List[int]]
+        self.bins: _I | list[int]
         if dcs.HAVE_NUMPY:
             self.bins = np.array([0, 20, 40, 60, 10000], dtype=int)
         else:
@@ -133,7 +133,7 @@ class Test_bins_to_str_ranges(unittest.TestCase):
         self.assertEqual(out, ["0-19", "20+", "40+", "60+"])
 
     def test_single_ranges(self) -> None:
-        x: Union[_I, List[int]]
+        x: _I | list[int]
         if dcs.HAVE_NUMPY:
             x = np.array([0, 1, 5, 6, 10000], dtype=int)
         else:

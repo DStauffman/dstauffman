@@ -12,7 +12,7 @@ from __future__ import annotations
 import copy
 import datetime
 import doctest
-from typing import Any, ClassVar, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Any, ClassVar, Literal, overload, TYPE_CHECKING
 import unittest
 
 from slog import IntEnumPlus, is_dunder
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
     _N = NDArray[np.float64]
-    _FN = Union[float, _N]
+    _FN = float | _N
 
 
 # %% Enums - OrbitType
@@ -178,7 +178,7 @@ class Elements(Frozen):
             setattr(elements, key, np.hstack((value, getattr(elements2, key))))
         return elements
 
-    def print_orrery(self, index: Optional[int] = None) -> None:
+    def print_orrery(self, index: int | None = None) -> None:
         r"""Prints the orbital elements as expected for the Orrery algorithms."""
         if index is None:
             print(f"a = {self.a / 1000} km")
@@ -541,12 +541,12 @@ def rv_2_oe(r: _N, v: _N, mu: _FN = 1.0, unit: bool = False, precision: float = 
 
 # %% oe_2_rv
 @overload
-def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[False] = ...) -> Tuple[_N, _N]: ...
+def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[False] = ...) -> tuple[_N, _N]: ...
 @overload
-def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[True]) -> Tuple[_N, _N, _N, _N, _N]: ...
+def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[True]) -> tuple[_N, _N, _N, _N, _N]: ...
 def oe_2_rv(
     elements: Elements, mu: _FN = 1.0, unit: bool = False, *, return_PQW: bool = False
-) -> Union[Tuple[_N, _N], Tuple[_N, _N, _N, _N, _N]]:
+) -> tuple[_N, _N] | tuple[_N, _N, _N, _N, _N]:
     r"""
     Orbital Elements to Position and Velocity.
 

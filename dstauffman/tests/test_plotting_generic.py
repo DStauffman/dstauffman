@@ -8,7 +8,6 @@ Notes
 
 # %% Imports
 import datetime
-from typing import List, Optional
 import unittest
 from unittest.mock import Mock, patch
 
@@ -59,7 +58,7 @@ class Test_plotting_make_time_plot(unittest.TestCase):
         self.extra_plotter    = None
         self.use_zoh          = False
         self.label_vert_lines = True
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
         # fmt: on
 
     def test_simple(self) -> None:
@@ -230,7 +229,7 @@ class Test_plotting_make_error_bar_plot(unittest.TestCase):
         self.ylabel           = None
         self.data_as_rows     = True
         self.label_vert_lines = True
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
         # fmt: on
 
     def test_nominal(self) -> None:
@@ -309,7 +308,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.return_err       = True
         self.use_zoh          = False
         self.label_vert_lines = True
-        self.figs: Optional[List[Figure]] = None
+        self.figs: list[Figure] | None = None
         # fmt: on
 
     def test_nominal(self) -> None:
@@ -746,7 +745,7 @@ class Test_plotting_make_categories_plot(unittest.TestCase):
         self.data_as_rows     = True
         self.use_zoh          = False
         self.label_vert_lines = True
-        self.figs: Optional[List[Figure]] = None
+        self.figs: list[Figure] | None = None
         # fmt: on
 
     def test_nominal(self) -> None:
@@ -825,7 +824,7 @@ class Test_plotting_make_connected_sets(unittest.TestCase):
         self.description = "Focal Plane Sightings"
         self.points = 2 * np.random.rand(2, 100) - 1.0
         self.innovs = 0.1 * np.random.randn(*self.points.shape)
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
 
     def test_nominal(self) -> None:
         self.fig = plot.make_connected_sets(self.description, self.points, self.innovs)

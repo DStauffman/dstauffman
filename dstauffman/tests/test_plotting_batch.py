@@ -9,7 +9,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from typing import List, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 import unittest
 
 from slog import capture_output
@@ -41,16 +41,16 @@ class Test_plotting_plot_bpe_convergence(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.costs: Union[_N, List[float]] = np.array([1, 0.1, 0.05, 0.01]) if HAVE_NUMPY else [1.0, 0.1, 0.05, 0.01]
+        self.costs: _N | list[float] = np.array([1, 0.1, 0.05, 0.01]) if HAVE_NUMPY else [1.0, 0.1, 0.05, 0.01]
         self.opts = plot.Opts()
         self.opts.show_plot = False
-        self.figs: List[Figure] = []
+        self.figs: list[Figure] = []
 
     def test_nominal(self) -> None:
         self.figs.append(plot.plot_bpe_convergence(self.costs, opts=self.opts))  # type: ignore[arg-type]
 
     def test_only_two_costs(self) -> None:
-        costs: List[float] = [self.costs[i] for i in [0, 3]]
+        costs: list[float] = [self.costs[i] for i in [0, 3]]
         self.figs.append(plot.plot_bpe_convergence(costs, opts=self.opts))
 
     def test_no_opts(self) -> None:
@@ -71,7 +71,7 @@ class Test_plotting_plot_bpe_results(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.figs: List[Figure] = []
+        self.figs: list[Figure] = []
         self.bpe_results = BpeResults()
         self.opts = plot.Opts()
         self.plots = {"innovs": True, "convergence": True, "correlation": True, "info_svd": True, "covariance": True}

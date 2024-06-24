@@ -8,7 +8,6 @@ Notes
 
 # %% Imports
 import argparse
-from typing import List
 import unittest
 
 from slog import capture_output
@@ -66,7 +65,7 @@ class Test_commands_parse_help(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.args: List[str] = []
+        self.args: list[str] = []
         self.expected = argparse.Namespace()
 
     def test_nominal(self) -> None:
@@ -82,7 +81,7 @@ class Test_commands_parse_version(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.args: List[str] = []
+        self.args: list[str] = []
         self.expected = argparse.Namespace()
 
     def test_nominal(self) -> None:

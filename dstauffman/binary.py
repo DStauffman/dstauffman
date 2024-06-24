@@ -12,7 +12,7 @@ from __future__ import annotations
 import doctest
 import os
 import struct
-from typing import BinaryIO, Optional, TYPE_CHECKING
+from typing import BinaryIO, TYPE_CHECKING
 import unittest
 
 from dstauffman.constants import HAVE_NUMPY
@@ -133,7 +133,7 @@ def int2hex(num: int, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_char:
 
 
 # %% Functions - split_bits
-def split_bits(x: _I, num_bits: Optional[int] = None) -> _B2:
+def split_bits(x: _I, num_bits: int | None = None) -> _B2:
     r"""
     Split integers into rows of true/false by bit position.
 

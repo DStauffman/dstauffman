@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import Dict, List, overload, Tuple, TYPE_CHECKING, Union
+from typing import overload, TYPE_CHECKING
 import unittest
 
 from dstauffman.constants import HAVE_NUMPY
@@ -123,10 +123,10 @@ def prob_to_rate(prob: float) -> float: ...
 @overload
 def prob_to_rate(prob: _N) -> _N: ...
 @overload
-def prob_to_rate(prob: float, time: Union[int, float]) -> float: ...
+def prob_to_rate(prob: float, time: int | float) -> float: ...
 @overload
-def prob_to_rate(prob: _N, time: Union[int, float]) -> _N: ...
-def prob_to_rate(prob: Union[float, _N], time: Union[int, float] = 1) -> Union[float, _N]:
+def prob_to_rate(prob: _N, time: int | float) -> _N: ...
+def prob_to_rate(prob: float | _N, time: int | float = 1) -> float | _N:
     r"""
     Convert a given probability and time to a rate.
 
@@ -185,10 +185,10 @@ def rate_to_prob(rate: float) -> float: ...
 @overload
 def rate_to_prob(rate: _N) -> _N: ...
 @overload
-def rate_to_prob(rate: float, time: Union[int, float]) -> float: ...
+def rate_to_prob(rate: float, time: int | float) -> float: ...
 @overload
-def rate_to_prob(rate: _N, time: Union[int, float]) -> _N: ...
-def rate_to_prob(rate: Union[float, _N], time: Union[int, float] = 1) -> Union[float, _N]:
+def rate_to_prob(rate: _N, time: int | float) -> _N: ...
+def rate_to_prob(rate: float | _N, time: int | float = 1) -> float | _N:
     r"""
     Convert a given rate and time to a probability.
 
@@ -233,7 +233,7 @@ def rate_to_prob(rate: Union[float, _N], time: Union[int, float] = 1) -> Union[f
 def annual_rate_to_monthly_probability(rate: float) -> float: ...
 @overload
 def annual_rate_to_monthly_probability(rate: _N) -> _N: ...
-def annual_rate_to_monthly_probability(rate: Union[float, _N]) -> Union[float, _N]:
+def annual_rate_to_monthly_probability(rate: float | _N) -> float | _N:
     r"""
     Convert a given annual rate to a monthly probability.
 
@@ -276,7 +276,7 @@ def annual_rate_to_monthly_probability(rate: Union[float, _N]) -> Union[float, _
 def monthly_probability_to_annual_rate(prob: float) -> float: ...
 @overload
 def monthly_probability_to_annual_rate(prob: _N) -> _N: ...
-def monthly_probability_to_annual_rate(prob: Union[float, _N]) -> Union[float, _N]:
+def monthly_probability_to_annual_rate(prob: float | _N) -> float | _N:
     r"""
     Convert a given monthly probability to an annual rate.
 
@@ -319,7 +319,7 @@ mp2ar = monthly_probability_to_annual_rate
 
 
 # %% Functions - combine_sets
-def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -> Tuple[int, float, float]:
+def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -> tuple[int, float, float]:
     r"""
     Combine the mean and standard deviations for two non-overlapping sets of data.
 
@@ -415,7 +415,7 @@ def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -
 
 
 # %% Functions - bounded_normal_draw
-def bounded_normal_draw(num: int, values: Dict[str, float], field: str, prng: np.random.RandomState) -> np.ndarray:
+def bounded_normal_draw(num: int, values: dict[str, float], field: str, prng: np.random.RandomState) -> _N:
     r"""
     Create a normalized distribution with the given mean and standard deviations.
 
@@ -542,7 +542,7 @@ def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = 
 
 
 # %% Functions - ecdf
-def ecdf(y: Union[float, List[float], _N], /) -> Tuple[_N, _N]:
+def ecdf(y: float | list[float] | _N, /) -> tuple[_N, _N]:
     r"""
     Calculate the empirical cumulative distribution function, as in Matlab's ecdf function.
 

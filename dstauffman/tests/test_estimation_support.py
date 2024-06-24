@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
+from typing import Any, TYPE_CHECKING
 import unittest
 
 from dstauffman import FixedDict, Frozen, HAVE_NUMPY
@@ -45,9 +45,9 @@ class _Config(Frozen):
         self.log_level: int = logging.INFO
 
         # output folder/files
-        self.output_folder: Optional[Path] = None
-        self.output_results: Optional[Path] = Path("results_model.hdf5")
-        self.output_params: Optional[Path] = Path("results_param.pkl")
+        self.output_folder: Path | None = None
+        self.output_results: Path | None = Path("results_model.hdf5")
+        self.output_params: Path | None = Path("results_param.pkl")
 
         # Whether to save the final state information to disk
         self.save_final: bool = False
@@ -78,11 +78,11 @@ class _Model(Frozen):
 
     def __init__(self) -> None:
         self.field1: int = 1
-        self.field2: Union[_I, List[int]] = np.array([1, 2, 3]) if HAVE_NUMPY else [1, 2, 3]
-        self.field3: Dict[str, Union[int, float, _N, List[float]]] = (
+        self.field2: _I | list[int] = np.array([1, 2, 3]) if HAVE_NUMPY else [1, 2, 3]
+        self.field3: dict[str, int | float | _N | list[float]] = (
             {"a": 5, "b": np.array([1.5, 2.5, 10.0])} if HAVE_NUMPY else {"a": 5, "b": [1.5, 2.5, 10.0]}
         )
-        self.field4: Dict[str, Any] = FixedDict()
+        self.field4: dict[str, Any] = FixedDict()
         self.field4["new"] = np.array([3, 4, 5]) if HAVE_NUMPY else [3, 4, 5]
         self.field4["old"] = "4 - 6"
         self.field4.freeze()
@@ -103,7 +103,7 @@ class _Parameters(Frozen):
     def __init__(self) -> None:
         self.config = _Config()
         self.model = _Model()
-        self.models: List[_Model] = [_Model(), _Model()]
+        self.models: list[_Model] = [_Model(), _Model()]
         self.models[0].field1 = 100
         self.models[1].field1 = 200
         self.models[1].field2[2] = 300

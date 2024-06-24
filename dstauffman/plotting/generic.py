@@ -12,7 +12,7 @@ from __future__ import annotations
 import datetime
 import doctest
 import logging
-from typing import Any, Callable, Dict, Iterable, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, Iterable, Literal, overload, TYPE_CHECKING
 import unittest
 
 from slog import LogLevel
@@ -74,14 +74,14 @@ if TYPE_CHECKING:
     _I = NDArray[np.int_]
     _N = NDArray[np.float64]
     _M = NDArray[np.float64]  # 2D
-    _CM = Union[str, Colormap, ListedColormap, ColorMap]
-    _Data = Union[int, float, _I, _N, _M, List[_I], List[_N], List[Union[_I, _N]], Tuple[_I, ...], Tuple[_N, ...], Tuple[Union[_I, _N], ...]]  # fmt: skip
-    _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
-    _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
-    _DeltaTime = Union[int, float, np.timedelta64]
-    _Figs = List[Figure]
-    _FuncLamb = Callable[[Any, Any], Union[float, np.float64]]
-    _SecUnits = Union[None, str, int, float, Tuple[str, float]]
+    _CM = str | Colormap | ListedColormap | ColorMap
+    _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
+    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | None
+    _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
+    _DeltaTime = int | float | np.timedelta64
+    _Figs = list[Figure]
+    _FuncLamb = Callable[[Any, Any], float | np.float64]
+    _SecUnits = str | int | float | tuple[str, float] | None
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -91,18 +91,18 @@ logger = logging.getLogger(__name__)
 def make_generic_plot(  # noqa: C901
     plot_type: str,
     description: str,
-    time_one: Optional[_Times],
-    data_one: Optional[_Data],
+    time_one: _Times | None,
+    data_one: _Data | None,
     *,
-    time_two: Optional[_Times] = None,
-    data_two: Optional[_Data] = None,
-    mins: Optional[Union[_N, _M]] = None,
-    maxs: Optional[Union[_N, _M]] = None,
-    cats: Optional[Iterable[Any]] = None,
-    cat_names: Optional[Dict[Any, str]] = None,
+    time_two: _Times | None = None,
+    data_two: _Data | None = None,
+    mins: _N | _M | None = None,
+    maxs: _N | _M | None = None,
+    cats: Iterable[Any] | None = None,
+    cat_names: dict[Any, str] | None = None,
     name_one: str = "",
     name_two: str = "",
-    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
+    elements: list[str] | tuple[str, ...] | None = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
@@ -112,7 +112,7 @@ def make_generic_plot(  # noqa: C901
     disp_xmax: _Time = inf,
     single_lines: bool = False,
     make_subplots: bool = True,
-    colormap: Optional[_CM] = DEFAULT_COLORMAP,
+    colormap: _CM | None = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
@@ -122,16 +122,16 @@ def make_generic_plot(  # noqa: C901
     plot_components: bool = True,
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
-    ylabel: Optional[Union[str, List[str]]] = None,
+    ylabel: str | list[str] | None = None,
     tolerance: _DeltaTime = 0,
     return_err: bool = False,
     data_as_rows: bool = True,
-    extra_plotter: Optional[ExtraPlotter] = None,
+    extra_plotter: ExtraPlotter | None = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     use_datashader: bool = False,
-    fig_ax: Optional[Tuple[Figure, Axes]] = None,
-) -> Union[Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
+    fig_ax: tuple[Figure, Axes] | None = None,
+) -> Figure | _Figs | tuple[_Figs, dict[str, _N]]:
     r"""
     Generic plotting function called by all the other low level plots.
 
@@ -203,7 +203,7 @@ def make_generic_plot(  # noqa: C901
         Name and conversion factor to use for scaling data to a second Y axis and in legend if leg_scale=None
     leg_scale : str or tuple of (str, float), optional
         Name and conversion factor to use for scaling data in the legend differently
-    ylabel : str or List[str], optional
+    ylabel : str or list[str], optional
         Labels to put on the Y axes, potentially by element
     tolerance : float, optional
         Tolerance for what is considered the same point in time for difference plots [sec] or [datetime64]
@@ -326,7 +326,7 @@ def make_generic_plot(  # noqa: C901
             if not return_err:
                 return []
             # TODO: return NaNs instead of None for this case?
-            out: Tuple[_Figs, Dict[str, Optional[float]]] = ([], {"one": None, "two": None, "diff": None})
+            out: tuple[_Figs, dict[str, float | None]] = ([], {"one": None, "two": None, "diff": None})
             if is_quat_diff:
                 out[1]["mag"] = None
             return out  # type: ignore[return-value]
@@ -425,7 +425,7 @@ def make_generic_plot(  # noqa: C901
     # % Calculations
     # build RMS indices
     if data_is_list:
-        ix: Dict[str, Union[List[int], None, _B]] = {"one": [], "t_min": None, "t_max": None}
+        ix: dict[str, list[int] | _B | None] = {"one": [], "t_min": None, "t_max": None}
         for j in range(num_channels):
             if time_is_list:
                 temp_ix = get_rms_indices(time_one[j], xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[index]
@@ -439,7 +439,7 @@ def make_generic_plot(  # noqa: C901
     elif doing_diffs:
         if have_both:
             # find overlapping times
-            (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)  # type: ignore[call-overload]
+            (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)  # type: ignore[call-overload, misc]
             # find differences
             d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)  # type: ignore[arg-type]
             d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)  # type: ignore[arg-type]
@@ -467,7 +467,7 @@ def make_generic_plot(  # noqa: C901
     if show_rms or return_err:
         nans = np.full(num_channels, np.nan)  # TODO: num_channels should be 3 for is_quat_diff
         func_lamb: _FuncLamb
-        data_func: Union[_FuncLamb, List[_FuncLamb], Dict[Any, np.ndarray]]
+        data_func: _FuncLamb | list[_FuncLamb] | dict[Any, _N]
         if not use_mean:
             func_name = "RMS"
             func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)  # pylint: disable=unnecessary-lambda-assignment
@@ -525,7 +525,7 @@ def make_generic_plot(  # noqa: C901
         err_pos = maxs - data_one  # type: ignore[operator]
     elif plot_type == "bar":
         # TODO: handle data_is_list and rows cases
-        bottoms: Union[List[_N], _N, _M]
+        bottoms: list[_N] | _N | _M
         if data_is_list:
             bottoms = [np.cumsum(data_one[j]) for j in range(num_channels)]  # type: ignore[index]
         elif data_as_rows:
@@ -1017,11 +1017,11 @@ def make_generic_plot(  # noqa: C901
 # %% Functions - make_time_plot
 def make_time_plot(
     description: str,
-    time: Optional[_Times],
-    data: Optional[_Data],
+    time: _Times | None,
+    data: _Data | None,
     *,
     name: str = "",
-    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
+    elements: list[str] | tuple[str, ...] | None = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
@@ -1030,7 +1030,7 @@ def make_time_plot(
     disp_xmin: _Time = -inf,
     disp_xmax: _Time = inf,
     single_lines: bool = False,
-    colormap: Optional[_CM] = DEFAULT_COLORMAP,
+    colormap: _CM | None = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
@@ -1038,13 +1038,13 @@ def make_time_plot(
     legend_loc: str = "best",
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
-    ylabel: Optional[Union[str, List[str]]] = None,
+    ylabel: str | list[str] | None = None,
     data_as_rows: bool = True,
-    extra_plotter: Optional[ExtraPlotter] = None,
+    extra_plotter: ExtraPlotter | None = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
     use_datashader: bool = False,
-    fig_ax: Optional[Tuple[Figure, Axes]] = None,
+    fig_ax: tuple[Figure, Axes] | None = None,
     plot_type: str = "time",  # {"time", "scatter"}
 ) -> Figure:
     r"""
@@ -1138,12 +1138,12 @@ def make_time_plot(
 # %% Functions - make_error_bar_plot
 def make_error_bar_plot(
     description: str,
-    time: Optional[_Times],
-    data: Optional[_Data],
-    mins: Optional[Union[_N, _M]],
-    maxs: Optional[Union[_N, _M]],
+    time: _Times | None,
+    data: _Data | None,
+    mins: _N | _M | None,
+    maxs: _N | _M | None,
     *,
-    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
+    elements: list[str] | tuple[str, ...] | None = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
@@ -1152,19 +1152,19 @@ def make_error_bar_plot(
     disp_xmin: _Time = -inf,
     disp_xmax: _Time = inf,
     single_lines: bool = False,
-    colormap: Optional[_CM] = DEFAULT_COLORMAP,
+    colormap: _CM | None = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
     legend_loc: str = "best",
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
-    ylabel: Optional[Union[str, List[str]]] = None,
+    ylabel: str | list[str] | None = None,
     data_as_rows: bool = True,
-    extra_plotter: Optional[ExtraPlotter] = None,
+    extra_plotter: ExtraPlotter | None = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    fig_ax: Optional[Tuple[Figure, Axes]] = None,
+    fig_ax: tuple[Figure, Axes] | None = None,
 ) -> Figure:
     r"""
     Generic plotting routine to make error bars.
@@ -1269,14 +1269,14 @@ def make_error_bar_plot(
 @overload
 def make_difference_plot(
     description: str,
-    time_one: Optional[_Times],
-    time_two: Optional[_Times],
-    data_one: Optional[_Data],
-    data_two: Optional[_Data],
+    time_one: _Times | None,
+    time_two: _Times | None,
+    data_one: _Data | None,
+    data_two: _Data | None,
     *,
     name_one: str,
     name_two: str,
-    elements: Optional[Union[List[str], Tuple[str, ...]]],
+    elements: list[str] | tuple[str, ...] | None,
     units: str,
     time_units: str,
     start_date: str,
@@ -1286,7 +1286,7 @@ def make_difference_plot(
     disp_xmax: _Time,
     make_subplots: bool,
     single_lines: bool,
-    colormap: Optional[_CM] = DEFAULT_COLORMAP,
+    colormap: _CM | None = DEFAULT_COLORMAP,
     use_mean: bool,
     plot_zero: bool,
     show_rms: bool,
@@ -1294,27 +1294,27 @@ def make_difference_plot(
     show_extra: bool,
     second_units: _SecUnits,
     leg_scale: _SecUnits,
-    ylabel: Optional[Union[str, List[str]]],
+    ylabel: str | list[str] | None,
     data_as_rows: bool,
     tolerance: _DeltaTime,
     return_err: Literal[False] = ...,
     use_zoh: bool,
     label_vert_lines: bool,
-    extra_plotter: Optional[ExtraPlotter],
+    extra_plotter: ExtraPlotter | None,
     use_datashader: bool,
-    fig_ax: Optional[Tuple[Figure, Axes]],
+    fig_ax: tuple[Figure, Axes] | None,
 ) -> _Figs: ...
 @overload
 def make_difference_plot(
     description: str,
-    time_one: Optional[_Times],
-    time_two: Optional[_Times],
-    data_one: Optional[_Data],
-    data_two: Optional[_Data],
+    time_one: _Times | None,
+    time_two: _Times | None,
+    data_one: _Data | None,
+    data_two: _Data | None,
     *,
     name_one: str,
     name_two: str,
-    elements: Optional[Union[List[str], Tuple[str, ...]]],
+    elements: list[str] | tuple[str, ...] | None,
     units: str,
     time_units: str,
     start_date: str,
@@ -1324,7 +1324,7 @@ def make_difference_plot(
     disp_xmax: _Time,
     make_subplots: bool,
     single_lines: bool,
-    colormap: Optional[_CM] = DEFAULT_COLORMAP,
+    colormap: _CM | None = DEFAULT_COLORMAP,
     use_mean: bool,
     plot_zero: bool,
     show_rms: bool,
@@ -1332,26 +1332,26 @@ def make_difference_plot(
     show_extra: bool,
     second_units: _SecUnits,
     leg_scale: _SecUnits,
-    ylabel: Optional[Union[str, List[str]]],
+    ylabel: str | list[str] | None,
     data_as_rows: bool,
     tolerance: _DeltaTime,
     return_err: Literal[True],
     use_zoh: bool,
     label_vert_lines: bool,
-    extra_plotter: Optional[ExtraPlotter],
+    extra_plotter: ExtraPlotter | None,
     use_datashader: bool,
-    fig_ax: Optional[Tuple[Figure, Axes]],
-) -> Tuple[_Figs, Dict[str, _N]]: ...
+    fig_ax: tuple[Figure, Axes] | None,
+) -> tuple[_Figs, dict[str, _N]]: ...
 def make_difference_plot(
     description: str,
-    time_one: Optional[_Times],
-    time_two: Optional[_Times],
-    data_one: Optional[_Data],
-    data_two: Optional[_Data],
+    time_one: _Times | None,
+    time_two: _Times | None,
+    data_one: _Data | None,
+    data_two: _Data | None,
     *,
     name_one: str = "",
     name_two: str = "",
-    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
+    elements: list[str] | tuple[str, ...] | None = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
@@ -1361,7 +1361,7 @@ def make_difference_plot(
     disp_xmax: _Time = inf,
     make_subplots: bool = True,
     single_lines: bool = False,
-    colormap: Optional[_CM] = DEFAULT_COLORMAP,
+    colormap: _CM | None = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
@@ -1369,16 +1369,16 @@ def make_difference_plot(
     show_extra: bool = True,
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
-    ylabel: Optional[Union[str, List[str]]] = None,
+    ylabel: str | list[str] | None = None,
     data_as_rows: bool = True,
     tolerance: _DeltaTime = 0,
     return_err: bool = False,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    extra_plotter: Optional[ExtraPlotter] = None,
+    extra_plotter: ExtraPlotter | None = None,
     use_datashader: bool = False,
-    fig_ax: Optional[Tuple[Figure, Axes]] = None,
-) -> Union[_Figs, Tuple[_Figs, Dict[str, _N]]]:
+    fig_ax: tuple[Figure, Axes] | None = None,
+) -> _Figs | tuple[_Figs, dict[str, _N]]:
     r"""
     Generic difference comparison plot for use in other wrapper functions.
 
@@ -1389,7 +1389,7 @@ def make_difference_plot(
     -------
     fig : class matplotlib.Figure
         figure handle
-    err : Dict
+    err : dict
         Differences
 
     See Also
@@ -1501,13 +1501,13 @@ def make_difference_plot(
 # %% Functions - make_categories_plot
 def make_categories_plot(
     description: str,
-    time: Optional[_Times],
-    data: Optional[_Data],
-    cats: Optional[Iterable[Any]],
+    time: _Times | None,
+    data: _Data | None,
+    cats: Iterable[Any] | None,
     *,
-    cat_names: Optional[Dict[Any, str]] = None,
+    cat_names: dict[Any, str] | None = None,
     name: str = "",
-    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
+    elements: list[str] | tuple[str, ...] | None = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
@@ -1517,20 +1517,20 @@ def make_categories_plot(
     disp_xmax: _Time = inf,
     make_subplots: bool = True,
     single_lines: bool = False,
-    colormap: Optional[_CM] = DEFAULT_COLORMAP,
+    colormap: _CM | None = DEFAULT_COLORMAP,
     use_mean: bool = False,
     plot_zero: bool = False,
     show_rms: bool = True,
     legend_loc: str = "best",
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
-    ylabel: Optional[Union[str, List[str]]] = None,
+    ylabel: str | list[str] | None = None,
     data_as_rows: bool = True,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    extra_plotter: Optional[ExtraPlotter] = None,
+    extra_plotter: ExtraPlotter | None = None,
     use_datashader: bool = False,
-    fig_ax: Optional[Tuple[Figure, Axes]] = None,
+    fig_ax: tuple[Figure, Axes] | None = None,
 ) -> _Figs:
     r"""
     Data versus time plotting routine when grouped into categories.
@@ -1641,11 +1641,11 @@ def make_categories_plot(
 # %% Functions - make_bar_plot
 def make_bar_plot(
     description: str,
-    time: Optional[_Times],
-    data: Optional[_Data],
+    time: _Times | None,
+    data: _Data | None,
     *,
     name: str = "",
-    elements: Optional[Union[List[str], Tuple[str, ...]]] = None,
+    elements: list[str] | tuple[str, ...] | None = None,
     units: str = "",
     time_units: str = "sec",
     start_date: str = "",
@@ -1654,19 +1654,19 @@ def make_bar_plot(
     disp_xmin: _Time = -inf,
     disp_xmax: _Time = inf,
     single_lines: bool = False,
-    colormap: Optional[_CM] = DEFAULT_COLORMAP,
+    colormap: _CM | None = DEFAULT_COLORMAP,
     use_mean: bool = True,
     plot_zero: bool = False,
     show_rms: bool = True,
     ignore_empties: bool = False,
     legend_loc: str = "best",
     second_units: _SecUnits = None,
-    ylabel: Optional[Union[str, List[str]]] = None,
+    ylabel: str | list[str] | None = None,
     data_as_rows: bool = True,
-    extra_plotter: Optional[ExtraPlotter] = None,
+    extra_plotter: ExtraPlotter | None = None,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
-    fig_ax: Optional[Tuple[Figure, Axes]] = None,
+    fig_ax: tuple[Figure, Axes] | None = None,
 ) -> Figure:
     r"""
     Plots a filled bar chart, using methods optimized for larger data sets.
@@ -1772,20 +1772,20 @@ def make_bar_plot(
 def make_connected_sets(  # noqa: C901
     description: str,
     points: _M,
-    innovs: Optional[_M],
+    innovs: _M | None,
     *,
     color_by: str = "none",
     hide_innovs: bool = False,
     center_origin: bool = False,
     legend_loc: str = "best",
     units: str = "",
-    mag_ratio: Optional[float] = None,
+    mag_ratio: float | None = None,
     leg_scale: _SecUnits = "unity",
-    colormap: Optional[Union[str, ColorMap]] = None,
+    colormap: str | ColorMap | None = None,
     use_datashader: bool = False,
     add_quiver: bool = False,
-    quiver_scale: Optional[float] = None,
-    fig_ax: Optional[Tuple[Figure, Axes]] = None,
+    quiver_scale: float | None = None,
+    fig_ax: tuple[Figure, Axes] | None = None,
 ) -> Figure:
     r"""
     Plots two sets of X-Y pairs, with lines drawn between them.
@@ -1889,9 +1889,9 @@ def make_connected_sets(  # noqa: C901
         ix = np.arange(points.shape[1])
 
     # color options
-    colors_line: Union[str, ColorMap, Tuple[Any, ...]]
-    colors_pred: Union[str, ColorMap, Tuple[Any, ...]]
-    ds_value: Optional[np.ndarray]
+    colors_line: str | ColorMap | tuple[Any, ...]
+    colors_pred: str | ColorMap | tuple[Any, ...]
+    ds_value: _N | None
     # fmt: off
     if color_by in null_options:
         colors_line = "xkcd:red"

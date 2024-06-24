@@ -14,7 +14,7 @@ import logging
 import multiprocessing
 import sys
 import traceback
-from typing import Any, Callable, Iterable, List, Optional, TYPE_CHECKING
+from typing import Any, Callable, Iterable, TYPE_CHECKING
 import unittest
 import warnings
 
@@ -44,8 +44,8 @@ class MultipassExceptionWrapper:
         # save exception
         self.ee = ee
         # save traceback
-        # Note: sys.exc_info: Union[Tuple[None, None, None], Tuple[BaseException, Any, TracebackType]]
-        self.tb: Optional[TracebackType] = sys.exc_info()[2]
+        # Note: sys.exc_info: tuple[None, None, None] | tuple[BaseException, Any, TracebackType]
+        self.tb: TracebackType | None = sys.exc_info()[2]
 
     def re_raise(self) -> None:
         r"""Re-raise a previously saved exception and traceback."""
@@ -59,7 +59,7 @@ def parfor_wrapper(  # noqa: C901
     *,
     results: Any = None,
     use_parfor: bool = True,
-    max_cores: Optional[int] = -1,
+    max_cores: int | None = -1,
     ignore_errors: bool = False,
 ) -> Any:
     r"""
@@ -113,7 +113,7 @@ def parfor_wrapper(  # noqa: C901
         num_cores = multiprocessing.cpu_count()
     else:
         num_cores = min((multiprocessing.cpu_count(), max_cores))
-    errors: List[MultipassExceptionWrapper] = []
+    errors: list[MultipassExceptionWrapper] = []
     if use_parfor and num_cores > 1:
         # parallel loop
         with multiprocessing.get_context("spawn").Pool(num_cores) as pool:

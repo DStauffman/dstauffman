@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import List, overload, Tuple, TYPE_CHECKING, Union
+from typing import overload, TYPE_CHECKING
 import unittest
 
 from nubs import ncjit
@@ -27,8 +27,8 @@ if TYPE_CHECKING:
     _N = NDArray[np.float64]
     _V = NDArray[np.float64]  # shape (3,)
     _DCM = NDArray[np.float64]  # shape (3, 3)
-    _FN = Union[float, _N]
-    _Lists = Union[List[_N], Tuple[_N, ...], _N]
+    _FN = float | _N
+    _Lists = list[_N] | tuple[_N, ...] | _N
 
 
 # %% Functions - rot
@@ -188,7 +188,7 @@ def vec_cross(vec: _V) -> _DCM:
 
 
 # %% Functions - vec_angle
-def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bool = True) -> Union[float, _N]:
+def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bool = True) -> float | _N:
     r"""
     Calculates the angle between two unit vectors.
 
@@ -267,11 +267,11 @@ def vec_angle(vec1: _Lists, vec2: _Lists, use_cross: bool = True, normalized: bo
 
 # %% Functions - cart2sph
 @overload
-def cart2sph(x: float, y: float, z: float) -> Tuple[float, float, float]: ...
+def cart2sph(x: float, y: float, z: float) -> tuple[float, float, float]: ...
 @overload
-def cart2sph(x: _N, y: _N, z: _N) -> Tuple[_N, _N, _N]: ...
+def cart2sph(x: _N, y: _N, z: _N) -> tuple[_N, _N, _N]: ...
 @ncjit
-def cart2sph(x: _FN, y: _FN, z: _FN) -> Tuple[_FN, _FN, _FN]:
+def cart2sph(x: _FN, y: _FN, z: _FN) -> tuple[_FN, _FN, _FN]:
     r"""
     Converts cartesian X, Y, Z components to spherical Az, El, Radius.
 
@@ -312,11 +312,11 @@ def cart2sph(x: _FN, y: _FN, z: _FN) -> Tuple[_FN, _FN, _FN]:
 
 # %% Functions - sph2cart
 @overload
-def sph2cart(az: float, el: float, rad: float) -> Tuple[float, float, float]: ...
+def sph2cart(az: float, el: float, rad: float) -> tuple[float, float, float]: ...
 @overload
-def sph2cart(az: _N, el: _N, rad: _N) -> Tuple[_N, _N, _N]: ...
+def sph2cart(az: _N, el: _N, rad: _N) -> tuple[_N, _N, _N]: ...
 @ncjit
-def sph2cart(az: _FN, el: _FN, rad: _FN) -> Tuple[_FN, _FN, _FN]:
+def sph2cart(az: _FN, el: _FN, rad: _FN) -> tuple[_FN, _FN, _FN]:
     r"""
     Converts spherical Az, El and Radius to cartesian X, Y, Z components.
 

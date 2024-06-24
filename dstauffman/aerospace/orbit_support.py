@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import overload, Tuple, TYPE_CHECKING, Union
+from typing import overload, TYPE_CHECKING
 import unittest
 
 from dstauffman import ARCSEC2RAD, DEG2RAD, HAVE_NUMPY, magnitude, NP_DATETIME_UNITS, NP_ONE_DAY, ONE_HOUR, ONE_MINUTE, RAD2DEG
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
     _D = NDArray[np.datetime64]
     _N = NDArray[np.float64]
-    _FN = Union[float, _N]
+    _FN = float | _N
 
 
 # %% Functions - d_2_r
@@ -70,7 +70,7 @@ def cross(x: _N, y: _N) -> _N:
 def jd_to_numpy(time_jd: float) -> np.datetime64: ...
 @overload
 def jd_to_numpy(time_jd: _N) -> _D: ...
-def jd_to_numpy(time_jd: _FN) -> Union[np.datetime64, _D]:
+def jd_to_numpy(time_jd: _FN) -> np.datetime64 | _D:
     r"""
     Converts a julian date to a numpy datetime64.
 
@@ -93,7 +93,7 @@ def jd_to_numpy(time_jd: _FN) -> Union[np.datetime64, _D]:
 def numpy_to_jd(date: np.datetime64) -> float: ...
 @overload
 def numpy_to_jd(date: _D) -> _N: ...
-def numpy_to_jd(date: Union[np.datetime64, _D]) -> Union[float, _N]:
+def numpy_to_jd(date: np.datetime64 | _D) -> float | _N:
     r"""
     Converts a numpy datetime64 into a julian date.
 
@@ -114,10 +114,10 @@ def numpy_to_jd(date: Union[np.datetime64, _D]) -> Union[float, _N]:
 
 # %% Functions - jd_2_century
 @overload
-def jd_2_century(time_jd: float) -> Tuple[float, float]: ...
+def jd_2_century(time_jd: float) -> tuple[float, float]: ...
 @overload
-def jd_2_century(time_jd: _N) -> Tuple[_N, _N]: ...
-def jd_2_century(time_jd: _FN) -> Tuple[_FN, _FN]:
+def jd_2_century(time_jd: _N) -> tuple[_N, _N]: ...
+def jd_2_century(time_jd: _FN) -> tuple[_FN, _FN]:
     r"""
     Converts a julian day to the fractional julian centuries since J2000.
 
@@ -146,7 +146,7 @@ def jd_2_century(time_jd: _FN) -> Tuple[_FN, _FN]:
 def mjd_to_numpy(time_mjd: float) -> np.datetime64: ...
 @overload
 def mjd_to_numpy(time_mjd: _N) -> _D: ...
-def mjd_to_numpy(time_mjd: _FN) -> Union[np.datetime64, _D]:
+def mjd_to_numpy(time_mjd: _FN) -> np.datetime64 | _D:
     r"""
     Converts a modified julian date to a numpy datetime64.
 
@@ -169,7 +169,7 @@ def mjd_to_numpy(time_mjd: _FN) -> Union[np.datetime64, _D]:
 def numpy_to_mjd(date: np.datetime64) -> float: ...
 @overload
 def numpy_to_mjd(date: _D) -> _N: ...
-def numpy_to_mjd(date: Union[np.datetime64, _D]) -> Union[float, _N]:
+def numpy_to_mjd(date: np.datetime64 | _D) -> float | _N:
     r"""
     Converts a numpy datetime64 into a modified julian date.
 
@@ -529,7 +529,7 @@ def sez_2_ijk(sez: _N, geo_loc: _N, time_jd: _N) -> _N:  # noqa: C901
 
 
 # %% Functions - rv_aer_2_ijk
-def rv_aer_2_ijk(r_aer: _N, v_aer: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N]:
+def rv_aer_2_ijk(r_aer: _N, v_aer: _N, geo_loc: _N, time_jd: _N) -> tuple[_N, _N]:
     r"""Converts position and velocity from Az/El/range to IJK cartesion."""
     # transform to SEZ frame
     (r_sez, v_sez) = rv_aer_2_sez(r_aer, v_aer)
@@ -539,7 +539,7 @@ def rv_aer_2_ijk(r_aer: _N, v_aer: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N
 
 
 # %% Functions - rv_aer_2_sez
-def rv_aer_2_sez(r_aer: _N, v_aer: _N) -> Tuple[_N, _N]:
+def rv_aer_2_sez(r_aer: _N, v_aer: _N) -> tuple[_N, _N]:
     r"""Converts position and velocity from Az/El/range to SEZ cartesion."""
     # tranform position vector
     r_sez = aer_2_sez(r_aer)
@@ -564,7 +564,7 @@ def rv_aer_2_sez(r_aer: _N, v_aer: _N) -> Tuple[_N, _N]:
 
 
 # %% Functions - rv_ijk_2_aer
-def rv_ijk_2_aer(r_ijk: _N, v_ijk: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N]:
+def rv_ijk_2_aer(r_ijk: _N, v_ijk: _N, geo_loc: _N, time_jd: _N) -> tuple[_N, _N]:
     r"""Converts position and velocity IJK cartesion to Az/El/range."""
     # transform from IJK frame to SEZ frame
     (r_sez, v_sez) = rv_ijk_2_sez(r_ijk, v_ijk, geo_loc, time_jd)
@@ -574,7 +574,7 @@ def rv_ijk_2_aer(r_ijk: _N, v_ijk: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N
 
 
 # %% Functions - rv_ijk_2_sez
-def rv_ijk_2_sez(r_ijk: _N, v_ijk: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N]:
+def rv_ijk_2_sez(r_ijk: _N, v_ijk: _N, geo_loc: _N, time_jd: _N) -> tuple[_N, _N]:
     r"""Converts position and velocity from IJK to SEZ cartesian."""
     # transform position from SEZ to IJK frame
     r_sez = sez_2_ijk(r_ijk, geo_loc, time_jd)
@@ -584,7 +584,7 @@ def rv_ijk_2_sez(r_ijk: _N, v_ijk: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N
 
 
 # %% Functions - rv_sez_2_aer
-def rv_sez_2_aer(r_sez: _N, v_sez: _N) -> Tuple[_N, _N]:
+def rv_sez_2_aer(r_sez: _N, v_sez: _N) -> tuple[_N, _N]:
     r"""Converts position and velocity SEZ cartesion to Az/El/range."""
     # transform position from SEZ to AER frame
     r_aer = sez_2_aer(r_sez)
@@ -594,7 +594,7 @@ def rv_sez_2_aer(r_sez: _N, v_sez: _N) -> Tuple[_N, _N]:
 
 
 # %% Functions - rv_sez_2_ijk
-def rv_sez_2_ijk(r_sez: _N, v_sez: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N]:
+def rv_sez_2_ijk(r_sez: _N, v_sez: _N, geo_loc: _N, time_jd: _N) -> tuple[_N, _N]:
     r"""Converts position and velocity SEZ to IJK cartesion."""
     # transform position from SEZ to IJK frame
     r_ijk = sez_2_ijk(r_sez, geo_loc, time_jd)
@@ -610,7 +610,7 @@ def rv_sez_2_ijk(r_sez: _N, v_sez: _N, geo_loc: _N, time_jd: _N) -> Tuple[_N, _N
 
 
 # %% Functions - get_sun_radec_approx
-def get_sun_radec_approx(time_jd: _N) -> Tuple[_N, _N]:
+def get_sun_radec_approx(time_jd: _N) -> tuple[_N, _N]:
     r"""
     Approximates the right ascension and declination angles to the Sun for the given julian time.
 
@@ -618,14 +618,14 @@ def get_sun_radec_approx(time_jd: _N) -> Tuple[_N, _N]:
 
     Parameters
     ----------
-    time_jd : np.ndarray
+    time_jd : numpy.ndarray
         Julian date
 
     Returns
     -------
-    ra : np.ndarray
+    ra : numpy.ndarray
         Right ascension [rad]
-    dec : np.ndarray
+    dec : numpy.ndarray
         Declination [rad]
 
     Notes
@@ -671,34 +671,34 @@ def get_sun_radec_approx(time_jd: _N) -> Tuple[_N, _N]:
 
 # %% Functions - get_sun_radec
 @overload
-def get_sun_radec(time_jd: float) -> Tuple[float, float]: ...
+def get_sun_radec(time_jd: float) -> tuple[float, float]: ...
 @overload
-def get_sun_radec(time_jd: _N) -> Tuple[_N, _N]: ...
+def get_sun_radec(time_jd: _N) -> tuple[_N, _N]: ...
 @overload
-def get_sun_radec(time_jd: float, return_early: bool) -> Tuple[float, float]: ...
+def get_sun_radec(time_jd: float, return_early: bool) -> tuple[float, float]: ...
 @overload
-def get_sun_radec(time_jd: _N, return_early: bool) -> Tuple[_N, _N]: ...
-def get_sun_radec(time_jd: _FN, return_early: bool = False) -> Tuple[_FN, _FN]:
+def get_sun_radec(time_jd: _N, return_early: bool) -> tuple[_N, _N]: ...
+def get_sun_radec(time_jd: _FN, return_early: bool = False) -> tuple[_FN, _FN]:
     r"""
     Gets the right ascension and declination angles to the Sun for the given julian time.
 
     Parameters
     ----------
-    time_jd : np.ndarray
+    time_jd : numpy.ndarray
         Julian date
     return_early : bool, optional, default is False
         Whether to return early with solar longitude and obliquity instead of ra and dec
 
     Returns
     -------
-    ra : np.ndarray
+    ra : numpy.ndarray
         Right ascension [rad]
-    dec : np.ndarray
+    dec : numpy.ndarray
         Declination [rad]
     ~ or ~
-    sun_true_longitude : np.ndarray
+    sun_true_longitude : numpy.ndarray
         Solar longitude [rad]
-    obliquity_of_ecliptic : np.ndarray
+    obliquity_of_ecliptic : numpy.ndarray
         Obliquity of the ecliptic plane [rad]
 
     Notes
@@ -773,12 +773,12 @@ def get_sun_distance(time_jd: _FN) -> _FN:
 
     Parameters
     ----------
-    time_jd : np.ndarray
+    time_jd : numpy.ndarray
         Julian date
 
     Returns
     -------
-    np.ndarray
+    numpy.ndarray
         Distance to the sun in AU
 
     Notes
@@ -813,11 +813,11 @@ def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> _N:
 
     Parameters
     ----------
-    raan : np.ndarray
+    raan : numpy.ndarray
         Right ascension of the ascending node
-    inclination : np.ndarray
+    inclination : numpy.ndarray
         Inclination of the orbit plane
-    time_jd : np.ndarray
+    time_jd : numpy.ndarray
         Julian date
 
     Returns
@@ -864,14 +864,14 @@ def eclipse_fraction(altitude: _FN, beta: _FN) -> _FN:
 
     Parameters
     ----------
-    altitude : np.ndarray
+    altitude : numpy.ndarray
         Spacecraft altitude [m]
-    beta : np.ndarray
+    beta : numpy.ndarray
         Sun beta angle [rad]
 
     Returns
     -------
-    eclipse : np.ndarray
+    eclipse : numpy.ndarray
         Fraction of orbit period spent in Earth eclipse
 
     Notes
@@ -918,12 +918,12 @@ def earth_radius_by_latitude(latitude: _FN) -> _FN:
 
     Parameters
     ----------
-    latitude: (N,) np.ndarray of float
+    latitude: (N,) numpy.ndarray of float
         Latitude [rad]
 
     Returns
     -------
-    (N,) np.ndarray of float
+    (N,) numpy.ndarray of float
         Earth radius [m]
 
     Notes
@@ -944,7 +944,7 @@ def earth_radius_by_latitude(latitude: _FN) -> _FN:
     b = EARTH["b"]
     cos_lat = np.cos(latitude)
     sin_lat = np.sin(latitude)
-    return np.sqrt(((a**2 * cos_lat) ** 2 + (b**2 * sin_lat) ** 2) / ((a * cos_lat) ** 2 + (b * sin_lat) ** 2))
+    return np.sqrt(((a**2 * cos_lat) ** 2 + (b**2 * sin_lat) ** 2) / ((a * cos_lat) ** 2 + (b * sin_lat) ** 2))  # type: ignore[no-any-return]
 
 
 # %% Unit Test

@@ -11,7 +11,6 @@ Notes
 import doctest
 from functools import lru_cache
 from pathlib import Path
-from typing import List
 import unittest
 
 from slog import is_dunder
@@ -148,7 +147,7 @@ def get_output_dir() -> Path:
 
 
 # %% Functions - list_python_files
-def list_python_files(folder: Path, recursive: bool = False, include_all: bool = False) -> List[Path]:
+def list_python_files(folder: Path, recursive: bool = False, include_all: bool = False) -> list[Path]:
     r"""
     Returns a list of all non dunder python files in the folder.
 

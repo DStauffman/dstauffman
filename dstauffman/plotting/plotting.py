@@ -13,7 +13,7 @@ import datetime
 import doctest
 import logging
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, TYPE_CHECKING, TypedDict, Union
+from typing import NotRequired, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from slog import LogLevel
@@ -61,24 +61,23 @@ else:
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
-    from typing_extensions import NotRequired, Unpack
 
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
     _N = NDArray[np.float64]
     _M = NDArray[np.float64]  # 2D
-    _CM = Union[str, colors.Colormap, colors.ListedColormap, ColorMap]
-    _Data = Union[int, float, _I, _N, _M, List[_I], List[_N], List[Union[_I, _N]], Tuple[_I, ...], Tuple[_N, ...], Tuple[Union[_I, _N], ...]]  # fmt: skip
-    _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
-    _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
-    _DeltaTime = Union[int, float, np.timedelta64]
-    _Figs = List[Figure]
+    _CM = str | colors.Colormap | colors.ListedColormap | ColorMap
+    _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
+    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | None
+    _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
+    _DeltaTime = int | float | np.timedelta64
+    _Figs = list[Figure]
 
     class _OptsKwargs(TypedDict):
         case_name: NotRequired[str]
-        date_zero: NotRequired[Optional[datetime.datetime]]
+        date_zero: NotRequired[datetime.datetime | None]
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Optional[Path]]
+        save_path: NotRequired[Path | None]
         show_plot: NotRequired[bool]
         show_link: NotRequired[bool]
         plot_type: NotRequired[str]
@@ -97,16 +96,16 @@ if TYPE_CHECKING:
         show_xtra: NotRequired[bool]
         time_base: NotRequired[str]
         time_unit: NotRequired[str]
-        colormap: NotRequired[Optional[_CM]]
+        colormap: NotRequired[_CM | None]
         leg_spot: NotRequired[str]
         classify: NotRequired[str]
-        names: NotRequired[List[str]]
+        names: NotRequired[list[str]]
 
     class _TimeKwargs(TypedDict):
         name: NotRequired[str]
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Optional[Path]]
-        elements: NotRequired[Union[None, List[str], Tuple[str, ...]]]
+        save_path: NotRequired[Path | None]
+        elements: NotRequired[list[str] | tuple[str, ...] | None]
         units: NotRequired[str]
         time_units: NotRequired[str]
         start_date: NotRequired[str]
@@ -115,30 +114,30 @@ if TYPE_CHECKING:
         disp_xmin: NotRequired[_Time]
         disp_xmax: NotRequired[_Time]
         single_lines: NotRequired[bool]
-        colormap: NotRequired[Optional[_CM]]
+        colormap: NotRequired[_CM | None]
         use_mean: NotRequired[bool]
         plot_zero: NotRequired[bool]
         show_rms: NotRequired[bool]
         legend_loc: NotRequired[str]
-        second_units: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
-        leg_scale: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
-        ylabel: NotRequired[Union[None, str, List[str]]]
+        second_units: NotRequired[str | int | float | tuple[str, float] | None]
+        leg_scale: NotRequired[str | int | float | tuple[str, float] | None]
+        ylabel: NotRequired[str | list[str] | None]
         data_as_rows: NotRequired[bool]
-        extra_plotter: NotRequired[Optional[ExtraPlotter]]
+        extra_plotter: NotRequired[ExtraPlotter | None]
         use_zoh: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
+        fig_ax: NotRequired[tuple[Figure, Axes] | None]
         plot_type: NotRequired[str]
         classify: NotRequired[str]
 
     class _DiffKwargs(TypedDict):
         name_one: NotRequired[str]
         name_two: NotRequired[str]
-        elements: NotRequired[Union[None, List[str], Tuple[str, ...]]]
+        elements: NotRequired[list[str] | tuple[str, ...] | None]
         units: NotRequired[str]
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Optional[Path]]
+        save_path: NotRequired[Path | None]
         time_units: NotRequired[str]
         start_date: NotRequired[str]
         rms_xmin: NotRequired[_Time]
@@ -147,28 +146,28 @@ if TYPE_CHECKING:
         disp_xmax: NotRequired[_Time]
         make_subplots: NotRequired[bool]
         single_lines: NotRequired[bool]
-        colormap: NotRequired[Optional[_CM]]
+        colormap: NotRequired[_CM | None]
         use_mean: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
         plot_zero: NotRequired[bool]
         show_rms: NotRequired[bool]
         legend_loc: NotRequired[str]
-        second_units: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
+        second_units: NotRequired[str | int | float | tuple[str, float] | None]
         show_extra: NotRequired[bool]
-        leg_scale: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
+        leg_scale: NotRequired[str | int | float | tuple[str, float] | None]
         data_as_rows: NotRequired[bool]
         tolerance: NotRequired[_DeltaTime]
         use_zoh: NotRequired[bool]
-        extra_plotter: NotRequired[Optional[ExtraPlotter]]
+        extra_plotter: NotRequired[ExtraPlotter | None]
         use_datashader: NotRequired[bool]
-        fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
+        fig_ax: NotRequired[tuple[Figure, Axes] | None]
         classify: NotRequired[str]
 
     class _BarKwargs(TypedDict):
         name: NotRequired[str]
         save_plot: NotRequired[bool]
-        save_path: NotRequired[Optional[Path]]
-        elements: NotRequired[Union[None, List[str], Tuple[str, ...]]]
+        save_path: NotRequired[Path | None]
+        elements: NotRequired[list[str] | tuple[str, ...] | None]
         units: NotRequired[str]
         time_units: NotRequired[str]
         start_date: NotRequired[str]
@@ -177,18 +176,18 @@ if TYPE_CHECKING:
         disp_xmin: NotRequired[_Time]
         disp_xmax: NotRequired[_Time]
         single_lines: NotRequired[bool]
-        colormap: NotRequired[Optional[_CM]]
+        colormap: NotRequired[_CM | None]
         use_mean: NotRequired[bool]
         plot_zero: NotRequired[bool]
         show_rms: NotRequired[bool]
         legend_loc: NotRequired[str]
-        second_units: NotRequired[Union[None, str, int, float, Tuple[str, float]]]
-        ylabel: NotRequired[Union[None, str, List[str]]]
+        second_units: NotRequired[str | int | float | tuple[str, float] | None]
+        ylabel: NotRequired[str | list[str] | None]
         data_as_rows: NotRequired[bool]
-        extra_plotter: NotRequired[Optional[ExtraPlotter]]
+        extra_plotter: NotRequired[ExtraPlotter | None]
         use_zoh: NotRequired[bool]
         label_vert_lines: NotRequired[bool]
-        fig_ax: NotRequired[Optional[Tuple[Figure, Axes]]]
+        fig_ax: NotRequired[tuple[Figure, Axes] | None]
         classify: NotRequired[str]
 
     class _HistKwargs(TypedDict):
@@ -205,7 +204,7 @@ _Plotter: bool = True
 class Opts(Frozen):
     r"""Optional plotting configurations."""
 
-    def __init__(self, *args: Optional[Opts], **kwargs: Unpack[_OptsKwargs]) -> None:
+    def __init__(self, *args: Opts | None, **kwargs: Unpack[_OptsKwargs]) -> None:
         r"""
         Default configuration for plots.
 
@@ -266,9 +265,9 @@ class Opts(Frozen):
         """
         # fmt: off
         self.case_name: str   = ""
-        self.date_zero: Optional[datetime.datetime] = None
+        self.date_zero: datetime.datetime | None = None
         self.save_plot: bool  = False
-        self.save_path: Optional[Path] = None
+        self.save_path: Path | None = None
         self.show_plot: bool  = True
         self.show_link: bool  = False
         self.plot_type: str   = "png"
@@ -287,10 +286,10 @@ class Opts(Frozen):
         self.show_xtra: bool  = True
         self.time_base: str   = "sec"
         self.time_unit: str   = "sec"
-        self.colormap:Optional[ Union[str, ColorMap]] = None
+        self.colormap: str | ColorMap | None = None
         self.leg_spot: str    = "best"
         self.classify: str    = ""
-        self.names: List[str] = []
+        self.names: list[str] = []
         # fmt: on
         for arg in args:
             if arg is None:
@@ -327,7 +326,7 @@ class Opts(Frozen):
             name = ""
         return name
 
-    def get_date_zero_str(self, date: Optional[Union[datetime.datetime, List[int]]] = None) -> str:
+    def get_date_zero_str(self, date: datetime.datetime | list[int] | None = None) -> str:
         r"""
         Gets a string representation of date_zero, typically used to print on an X axis.
 
@@ -360,7 +359,7 @@ class Opts(Frozen):
                 start_date = "  t(0) = " + temp_date.strftime(TIMESTR_FORMAT) + " Z"
         return start_date
 
-    def get_time_limits(self) -> Tuple[_Time, _Time, _Time, _Time]:
+    def get_time_limits(self) -> tuple[_Time, _Time, _Time, _Time]:
         r"""Returns the display and RMS limits in the current time units."""
 
         def _convert(value: _Time) -> _Time:
@@ -440,14 +439,14 @@ def unsuppress_plots() -> None:
 # %% Functions - plot_time_history
 def plot_time_history(
     description: str,
-    time: Optional[_Times],
-    data: Optional[_Data],
-    opts: Optional[Opts] = None,
+    time: _Times | None,
+    data: _Data | None,
+    opts: Opts | None = None,
     *,
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_TimeKwargs],
-) -> Optional[Figure]:
+) -> Figure | None:
     r"""
     Plot multiple metrics over time.
 
@@ -564,16 +563,16 @@ def plot_time_history(
 # %% Functions - plot_time_difference
 def plot_time_difference(
     description: str,
-    time_one: Optional[_Times],
-    data_one: Optional[_Data],
-    time_two: Optional[_Times],
-    data_two: Optional[_Data],
-    opts: Optional[Opts] = None,
+    time_one: _Times | None,
+    data_one: _Data | None,
+    time_two: _Times | None,
+    data_two: _Data | None,
+    opts: Opts | None = None,
     *,
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_DiffKwargs],
-) -> Union[None, Figure, _Figs, Tuple[_Figs, Dict[str, _N]]]:
+) -> Figure | _Figs | tuple[_Figs, dict[str, _N]] | None:
     r"""
     Plot multiple metrics over time.
 
@@ -703,22 +702,22 @@ def plot_time_difference(
 # %% Functions - plot_correlation_matrix
 def plot_correlation_matrix(  # noqa: C901
     data: _M,
-    labels: Optional[Union[List[str], List[List[str]]]] = None,
+    labels: list[str] | list[list[str]] | None = None,
     units: str = "",
     *,
-    opts: Optional[Opts] = None,
+    opts: Opts | None = None,
     matrix_name: str = "Correlation Matrix",
-    cmin: Union[int, float] = 0,
-    cmax: Union[int, float] = 1,
+    cmin: int | float = 0,
+    cmax: int | float = 1,
     xlabel: str = "",
     ylabel: str = "",
     plot_lower_only: bool = True,
     label_values: bool = False,
-    x_lab_rot: Union[int, float] = 90,
-    colormap: Optional[_CM] = None,
-    plot_border: Optional[str] = None,
-    leg_scale: Optional[Union[str, int, float, Tuple[str, float]]] = "unity",
-    fig_ax: Optional[Tuple[Figure, Axes]] = None,
+    x_lab_rot: int | float = 90,
+    colormap: _CM | None = None,
+    plot_border: str | None = None,
+    leg_scale: str | int | float | tuple[str, float] | None = "unity",
+    fig_ax: tuple[Figure, Axes] | None = None,
     skip_setup_plots: bool = False,
 ) -> Figure:
     r"""
@@ -928,14 +927,14 @@ def plot_correlation_matrix(  # noqa: C901
 # %% Functions - plot_bar_breakdown
 def plot_bar_breakdown(
     description: str,
-    time: Optional[_Times],
-    data: Optional[_Data],
-    opts: Optional[Opts] = None,
+    time: _Times | None,
+    data: _Data | None,
+    opts: Opts | None = None,
     *,
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_BarKwargs],
-) -> Optional[Figure]:
+) -> Figure | None:
     r"""
     Plot the pie chart like breakdown by percentage in each category over time.
 
@@ -1046,9 +1045,9 @@ def plot_bar_breakdown(
 def plot_histogram(  # noqa: C901
     description: str,
     data: _N,
-    bins: Union[_N, List[float]],
+    bins: _N | list[float],
     *,
-    opts: Optional[Opts] = None,
+    opts: Opts | None = None,
     color: str = "#1f77b4",
     xlabel: str = "Data",
     ylabel: str = "Number",
@@ -1058,12 +1057,12 @@ def plot_histogram(  # noqa: C901
     normalize_spacing: bool = False,
     use_exact_counts: bool = False,
     show_cdf: bool = False,
-    cdf_x: Optional[Union[float, List[float], Tuple[float, ...]]] = None,
-    cdf_y: Optional[Union[float, List[float], Tuple[float, ...]]] = None,
-    cdf_colormap: Optional[_CM] = None,
+    cdf_x: float | list[float] | tuple[float, ...] | None = None,
+    cdf_y: float | list[float] | tuple[float, ...] | None = None,
+    cdf_colormap: _CM | None = None,
     cdf_same_axis: bool = False,
     cdf_round_to_bin: bool = False,
-    fig_ax: Optional[Tuple[Figure, Axes]] = None,
+    fig_ax: tuple[Figure, Axes] | None = None,
     skip_setup_plots: bool = False,
     **kwargs: Unpack[_HistKwargs],
 ) -> Figure:
@@ -1293,7 +1292,7 @@ def plot_histogram(  # noqa: C901
 
 
 # %% Functions - setup_plots
-def setup_plots(figs: Union[Figure, _Figs], opts: Opts, *, skip_tight: bool = False) -> None:  # noqa: C901
+def setup_plots(figs: Figure | _Figs, opts: Opts, *, skip_tight: bool = False) -> None:  # noqa: C901
     r"""
     Combine common plot operations into one easy command.
 
@@ -1377,11 +1376,11 @@ def setup_plots(figs: Union[Figure, _Figs], opts: Opts, *, skip_tight: bool = Fa
 def save_zoomed_version(
     fig: Figure,
     ax: Axes,
-    ylims: Optional[Tuple[float, float]],
+    ylims: tuple[float, float] | None,
     *,
-    ax2: Optional[Axes] = None,
+    ax2: Axes | None = None,
     use_display: bool = True,
-    opts: Optional[Opts] = None,
+    opts: Opts | None = None,
 ) -> None:
     r"""
     Create and save a zoomed version of the plot to disk.

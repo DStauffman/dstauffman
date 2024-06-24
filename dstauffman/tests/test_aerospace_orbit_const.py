@@ -7,7 +7,6 @@ Notes
 """
 
 # %% Imports
-from typing import List
 import unittest
 
 import dstauffman.aerospace as space
@@ -20,7 +19,7 @@ class Test_orbits_all_values(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.float: List[str] = [
+        self.float: list[str] = [
             "PI",
             "TAU",
             "G",
@@ -32,8 +31,8 @@ class Test_orbits_all_values(unittest.TestCase):
             "SPEED_OF_LIGHT",
             "ECLIPTIC",
         ]
-        self.dicts: List[str] = ["SS_MASSES", "JULIAN", "EARTH", "PALO_ALTO"]
-        self.extra: List[str] = ["DEG2RAD", "HAVE_NUMPY"]  # imported constants
+        self.dicts: list[str] = ["SS_MASSES", "JULIAN", "EARTH", "PALO_ALTO"]
+        self.extra: list[str] = ["DEG2RAD", "HAVE_NUMPY"]  # imported constants
         self.master = set(self.float) | set(self.dicts) | set(self.extra)
 
     def test_values(self) -> None:

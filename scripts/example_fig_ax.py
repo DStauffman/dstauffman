@@ -6,8 +6,6 @@ Notes
 #.  Written by David C. Stauffer in January 2022.
 """
 
-from typing import Optional
-
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -84,8 +82,8 @@ if __name__ == "__main__":
     plot_lower_only = True
     label_values = True
     x_lab_rot = 90
-    colormap: Optional[str] = None
-    plot_border: Optional[str] = None
+    colormap: str | None = None
+    plot_border: str | None = None
     leg_scale = "centi"
     fig_ex2 = plot_correlation_matrix(
         data,

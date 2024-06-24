@@ -13,7 +13,7 @@ import datetime
 import doctest
 import re
 from time import gmtime, strftime
-from typing import Any, List, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Any, overload, TYPE_CHECKING
 import unittest
 import warnings
 
@@ -37,8 +37,9 @@ if TYPE_CHECKING:
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
     _N = NDArray[np.float64]
-    _AllDates = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64, _D, _I, _N]
-    _NPDates = Union[np.datetime64, _D, _N]
+    _TD = NDArray[np.timedelta64]
+    _AllDates = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | _D | _I | _N | None
+    _NPDates = np.datetime64 | _D | _N
 
 # %% Constants
 # maps other names of units to the ones expected by numpy
@@ -57,7 +58,7 @@ _NP_MAP = {
 
 
 # %% Functions - get_np_time_units
-def get_np_time_units(date: Union[np.datetime64, np.timedelta64, str]) -> Optional[str]:
+def get_np_time_units(date: np.datetime64 | np.timedelta64 | str) -> str | None:
     r"""
     Gets the units for a given datetime64 or timedelta64.
 
@@ -103,7 +104,7 @@ def get_np_time_units(date: Union[np.datetime64, np.timedelta64, str]) -> Option
 
 
 # %% Functions - get_ymd_from_np
-def get_ymd_from_np(date: _NPDates) -> Tuple[_I, _I, _I]:
+def get_ymd_from_np(date: _NPDates) -> tuple[_I, _I, _I]:
     r"""
     Gets the year, month, and day for a given numpy datetime64.
 
@@ -135,7 +136,7 @@ def get_ymd_from_np(date: _NPDates) -> Tuple[_I, _I, _I]:
 
 
 # %% Functions - round_datetime
-def round_datetime(dt: Optional[datetime.datetime] = None, /, round_to_sec: int = 60, floor: bool = False) -> datetime.datetime:
+def round_datetime(dt: datetime.datetime | None = None, /, round_to_sec: int = 60, floor: bool = False) -> datetime.datetime:
     r"""
     Round a datetime object to any time lapse in seconds.
 
@@ -186,7 +187,13 @@ def round_datetime(dt: Optional[datetime.datetime] = None, /, round_to_sec: int 
 
 
 # %% Functions - round_np_datetime
-def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, floor: bool = False) -> np.datetime64:
+@overload
+def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, floor: bool = False) -> np.datetime64: ...
+@overload
+def round_np_datetime(date_in: _D, /, time_delta: _TD, floor: bool = False) -> _D: ...
+def round_np_datetime(
+    date_in: np.datetime64 | _D, /, time_delta: np.timedelta64 | _TD, floor: bool = False
+) -> np.datetime64 | _D:
     r"""
     Rounds a numpy datetime64 time to the specified delta.
 
@@ -225,24 +232,24 @@ def round_np_datetime(date_in: np.datetime64, /, time_delta: np.timedelta64, flo
 
     """
     # check for consistent types
-    assert (t1 := get_np_time_units(date_in)) == (
-        t2 := get_np_time_units(time_delta)
+    assert (t1 := get_np_time_units(date_in)) == (  # type: ignore[arg-type]
+        t2 := get_np_time_units(time_delta)  # type: ignore[arg-type]
     ), f'The time refernce types must be the same, not "{t1}" and "{t2}".'
     # check the 64 bit integer representations
-    date_in_int: np.ndarray = date_in.astype(np.int64)  # type: ignore[assignment]
-    dt_int: np.ndarray = time_delta.astype(np.int64)  # type: ignore[assignment]
+    date_in_int: _I = date_in.astype(np.int64)  # type: ignore[assignment]
+    dt_int: _I = time_delta.astype(np.int64)  # type: ignore[assignment]
     # quantize to the desired unit
     if floor:
         quants = date_in_int // dt_int
     else:
         quants = date_in_int // dt_int + ((date_in_int % dt_int) // (dt_int // 2))
     # scale and convert back to datetime outputs
-    date_out: np.datetime64 = (dt_int * quants).astype(date_in.dtype)
+    date_out: _D = (dt_int * quants).astype(date_in.dtype)
     return date_out
 
 
 # %% Functions - round_num_datetime
-def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = False) -> np.ndarray:
+def round_num_datetime(date_in: _N, /, time_delta: float, floor: bool = False) -> _N:
     r"""
     Rounds a numerical datetime to the given value.
 
@@ -287,7 +294,7 @@ def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = 
         rounded = np.floor(quants)
     else:
         rounded = np.round(quants)
-    date_out: np.ndarray = rounded * time_delta
+    date_out: _N = rounded * time_delta
     return date_out
 
 
@@ -295,7 +302,7 @@ def round_num_datetime(date_in: np.ndarray, /, time_delta: float, floor: bool = 
 @overload
 def round_time(x: np.datetime64, /, t_round: np.timedelta64) -> np.datetime64: ...
 @overload
-def round_time(x: np.ndarray, /, t_round: np.timedelta64) -> np.ndarray: ...
+def round_time(x: _D, /, t_round: np.timedelta64) -> _D: ...
 def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
     r"""
     Rounding function that handles either numpy datetimes or doubles (seconds).
@@ -349,7 +356,7 @@ def round_time(x: _NPDates, /, t_round: np.timedelta64) -> _NPDates:
 def convert_date(  # noqa: C901
     date: Any,
     form: str,
-    date_zero: Optional[datetime.datetime] = None,
+    date_zero: datetime.datetime | None = None,
     *,
     old_form: str = "sec",
     numpy_form: str = "datetime64[ns]",
@@ -446,7 +453,8 @@ def convert_date(  # noqa: C901
                 datetime_units = get_np_time_units(numpy_form)
                 # with warnings.catch_warnings(action="ignore", category=UserWarning):
                 with warnings.catch_warnings():
-                    warnings.filterwarnings(action="ignore", category=DeprecationWarning)  # numpy v1 (remove eventually and colapse back to one line)
+                    # DCS: Note: 2024-06-23 remove suppression of DeprecationWarning eventually and colapse back to one line
+                    warnings.filterwarnings(action="ignore", category=DeprecationWarning)  # numpy v1
                     warnings.filterwarnings(action="ignore", category=UserWarning)  # numpy v2
                     date_zero_np = (
                         np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)
@@ -521,7 +529,7 @@ def convert_date(  # noqa: C901
 
 
 # %% Functions - convert_time_units
-def convert_time_units(time: Union[int, float], old_unit: str, new_unit: str) -> Union[int, float]:
+def convert_time_units(time: int | float, old_unit: str, new_unit: str) -> int | float:
     r"""
     Converts the given time history from the old units to the new units.
 
@@ -566,10 +574,10 @@ def convert_time_units(time: Union[int, float], old_unit: str, new_unit: str) ->
 @overload
 def convert_datetime_to_np(time: datetime.datetime, /, units: str = ...) -> np.datetime64: ...
 @overload
-def convert_datetime_to_np(time: List[datetime.datetime], /, units: str = ...) -> _D: ...
+def convert_datetime_to_np(time: list[datetime.datetime], /, units: str = ...) -> _D: ...
 def convert_datetime_to_np(
-    time: Union[datetime.datetime, List[datetime.datetime]], /, units: str = NP_DATETIME_UNITS
-) -> Union[np.datetime64, _D]:
+    time: datetime.datetime | list[datetime.datetime], /, units: str = NP_DATETIME_UNITS
+) -> np.datetime64 | _D:
     r"""
     Convenience wrapper to convert a datetime.datetime to a numpy.datetime64 with the desired units.
 
@@ -639,12 +647,12 @@ def convert_duration_to_np(dt: datetime.timedelta, /, units: str = NP_DATETIME_U
 
 
 # %% Functions - convert_num_dt_to_np
-def convert_num_dt_to_np(dt: Union[int, float], /, units: str = "sec", np_units: str = NP_TIMEDELTA_FORM) -> np.timedelta64:
+def convert_num_dt_to_np(dt: int | float, /, units: str = "sec", np_units: str = NP_TIMEDELTA_FORM) -> np.timedelta64:
     r"""Convenience wrapper to convert a number of seconds to a numpy.timedelta64 with the desired units.
 
     Parameters
     ----------
-    dt: np.ndarray of float
+    dt: numpy.ndarray of float
         time duration [sec]
     units : str, optional
         Units to use within numpy.datetime64
@@ -673,8 +681,8 @@ def convert_num_dt_to_np(dt: Union[int, float], /, units: str = "sec", np_units:
 
 # %% Functions - get_delta_time_str
 def get_delta_time_str(
-    start_time: Union[datetime.datetime, datetime.timedelta],
-    final_time: Optional[datetime.datetime] = None,
+    start_time: datetime.datetime | datetime.timedelta,
+    final_time: datetime.datetime | None = None,
     *,
     format_: str = "%H:%M:%S",
 ) -> str:

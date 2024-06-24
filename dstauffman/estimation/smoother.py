@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import Optional, Tuple, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import unittest
 
 from nubs import ncjit
@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
 # %% _update_information
 @ncjit
-def _update_information(H: _M, Pz: _M, z: _N, K: _M, lambda_bar: _N, LAMBDA_bar: _N) -> Tuple[_N, _N]:
+def _update_information(H: _M, Pz: _M, z: _N, K: _M, lambda_bar: _N, LAMBDA_bar: _N) -> tuple[_N, _N]:
     r"""
     Update information vector and matrix using innovation.
 
@@ -88,7 +88,7 @@ def _update_information(H: _M, Pz: _M, z: _N, K: _M, lambda_bar: _N, LAMBDA_bar:
 
 
 # %% bf_smoother
-def bf_smoother(kf_record: KfRecord, lambda_bar: Optional[_N] = None, LAMBDA_bar: Optional[_M] = None) -> Tuple[_M, _M, _N]:
+def bf_smoother(kf_record: KfRecord, lambda_bar: _N | None = None, LAMBDA_bar: _M | None = None) -> tuple[_M, _M, _N]:
     r"""
     Modified Bryson Frasier smoother.
 
@@ -214,7 +214,7 @@ def bf_smoother(kf_record: KfRecord, lambda_bar: Optional[_N] = None, LAMBDA_bar
         LAMBDA_bar = stm.T @ LAMBDA_hat @ stm
         # %Compute smoothed state update from forward filtered state and backward
         # propagated information vector
-        x_delta[:, i] = -P @ lambda_bar
+        x_delta[:, i] = -P @ lambda_bar  # type: ignore[operator]
         # Update information
         (lambda_hat, LAMBDA_hat) = _update_information(H, Pz, z, K, lambda_bar, LAMBDA_bar)
 

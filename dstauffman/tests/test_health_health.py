@@ -10,7 +10,6 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from typing import Optional
 import unittest
 
 from dstauffman import HAVE_MPL, HAVE_NUMPY, HAVE_PANDAS
@@ -135,7 +134,7 @@ class Test_health_icer(unittest.TestCase):
         self.inc_qaly = np.array([20.0, 10, 50])
         self.icer_out = np.array([12500.0, 50000, 60000])
         self.order = np.array([0.0, 1, np.nan, 2])
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
 
     def test_slide_example(self) -> None:
         (inc_cost, inc_qaly, icer_out, order, icer_data, self.fig) = health.icer(self.cost, self.qaly)

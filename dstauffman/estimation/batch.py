@@ -19,7 +19,7 @@ from itertools import repeat
 import logging
 from pathlib import Path
 import time
-from typing import Any, Callable, ClassVar, Dict, List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Any, Callable, ClassVar, Literal, overload, TYPE_CHECKING
 import unittest
 
 from nubs import ncjit
@@ -53,7 +53,7 @@ if TYPE_CHECKING:
     _I = NDArray[np.int_]
     _N = NDArray[np.float64]
     _M = NDArray[np.float64]  # 2D
-    _Number = Union[int, float, _I, _N]
+    _Number = int | float | _I | _N
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -82,32 +82,32 @@ class OptiOpts(Frozen):
     def __init__(self) -> None:
         # fmt: off
         # specifically required settings
-        self.model_func: Optional[Callable]       = None
-        self.model_args: Optional[Dict[str, Any]] = None
-        self.cost_func: Optional[Callable]        = None
-        self.cost_args: Optional[Dict[str, Any]]  = None
-        self.get_param_func: Optional[Callable]   = None
-        self.set_param_func: Optional[Callable]   = None
-        self.output_folder: Optional[Path]        = None
-        self.output_results: Optional[Path]       = Path("bpe_results.hdf5")
-        self.params: Optional[List[OptiParam]]    = None
-        self.start_func: Optional[Callable]       = None
-        self.final_func: Optional[Callable]       = None
+        self.model_func: Callable | None       = None
+        self.model_args: dict[str, Any] | None = None
+        self.cost_func: Callable | None        = None
+        self.cost_args: dict[str, Any] | None  = None
+        self.get_param_func: Callable | None   = None
+        self.set_param_func: Callable | None   = None
+        self.output_folder: Path | None        = None
+        self.output_results: Path | None       = Path("bpe_results.hdf5")
+        self.params: list[OptiParam] | None    = None
+        self.start_func: Callable | None       = None
+        self.final_func: Callable | None       = None
 
         # less common optimization settings
-        self.slope_method: str        = "one_sided"  # from {"one_sided", "two_sided"}
-        self.is_max_like: bool        = False
-        self.search_method: str       = "trust_region"  # from {"trust_region", "levenberg_marquardt"}
-        self.max_iters: int           = 10
-        self.tol_cosmax_grad: float   = 1e-4
-        self.tol_delta_step: float    = 1e-20
-        self.tol_delta_cost: float    = 1e-20
-        self.step_limit: int          = 5
-        self.x_bias: float            = 0.8
-        self.grow_radius: float       = 2.0
-        self.shrink_radius: float     = 0.5
-        self.trust_radius: float      = 1.0
-        self.max_cores: Optional[int] = None  # set to a number to parallelize, use -1 for all
+        self.slope_method: str      = "one_sided"  # from {"one_sided", "two_sided"}
+        self.is_max_like: bool      = False
+        self.search_method: str     = "trust_region"  # from {"trust_region", "levenberg_marquardt"}
+        self.max_iters: int         = 10
+        self.tol_cosmax_grad: float = 1e-4
+        self.tol_delta_step: float  = 1e-20
+        self.tol_delta_cost: float  = 1e-20
+        self.step_limit: int        = 5
+        self.x_bias: float          = 0.8
+        self.grow_radius: float     = 2.0
+        self.shrink_radius: float   = 0.5
+        self.trust_radius: float    = 1.0
+        self.max_cores: int | None  = None  # set to a number to parallelize, use -1 for all
         # fmt: on
 
     def __eq__(self, other: Any) -> bool:
@@ -197,7 +197,7 @@ class OptiParam(Frozen):
         return True
 
     @staticmethod
-    def get_array(opti_param: List[OptiParam], type_: str = "best") -> _N:
+    def get_array(opti_param: list[OptiParam], type_: str = "best") -> _N:
         r"""
         Get a numpy vector of all the optimization parameters for the desired type.
 
@@ -232,7 +232,7 @@ class OptiParam(Frozen):
         return out
 
     @staticmethod
-    def get_names(opti_param: List["OptiParam"]) -> List[str]:
+    def get_names(opti_param: list["OptiParam"]) -> list[str]:
         r"""
         Get the names of the optimization parameters as a list.
 
@@ -264,23 +264,23 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
 
     """
 
-    save: Callable[[Optional[Path]], None]  # noqa: F821
+    save: Callable[[Path | None], None]  # noqa: F821
 
     def __init__(self) -> None:
         # fmt: off
-        self.param_names: Optional[List[bytes]] = None
-        self.begin_params: Optional[_N]         = None
-        self.begin_innovs: Optional[_N]         = None
-        self.begin_cost: Optional[float]        = None
-        self.num_evals: int                     = 0
-        self.num_iters: int                     = 0
-        self.costs: List[float]                 = []
-        self.correlation: Optional[_M]          = None
-        self.info_svd: Optional[_M]             = None
-        self.covariance: Optional[_M]           = None
-        self.final_params: Optional[_N]         = None
-        self.final_innovs: Optional[_N]         = None
-        self.final_cost: Optional[float]        = None
+        self.param_names: list[bytes] | None = None
+        self.begin_params: _N | None         = None
+        self.begin_innovs: _N | None         = None
+        self.begin_cost: float | None        = None
+        self.num_evals: int                  = 0
+        self.num_iters: int                  = 0
+        self.costs: list[float]              = []
+        self.correlation: _M | None          = None
+        self.info_svd: _M | None             = None
+        self.covariance: _M | None           = None
+        self.final_params: _N | None         = None
+        self.final_innovs: _N | None         = None
+        self.final_cost: float | None        = None
         # fmt: on
 
     def __str__(self) -> str:
@@ -362,7 +362,7 @@ class BpeResults(Frozen, metaclass=SaveAndLoad):
         pprint_dict(dct2, name="Final parameters:", indent=8)
 
     @classmethod
-    def load(cls, filename: Optional[Path] = None) -> BpeResults:
+    def load(cls, filename: Path | None = None) -> BpeResults:
         r"""
         Load the object from disk.
 
@@ -396,15 +396,15 @@ class CurrentResults(Frozen, metaclass=SaveAndLoad):
 
     """
 
-    load: ClassVar[Callable[[Optional[Path]], "CurrentResults"]]
-    save: Callable[[Optional[Path]], None]
+    load: ClassVar[Callable[[Path | None], "CurrentResults"]]
+    save: Callable[[Path | None], None]
 
     def __init__(self) -> None:
         # fmt: off
-        self.trust_rad: Optional[float] = None
-        self.params: Optional[_N]       = None
-        self.innovs: Optional[_N]       = None
-        self.cost: Optional[float]      = None
+        self.trust_rad: float | None = None
+        self.params: _N | None       = None
+        self.innovs: _N | None       = None
+        self.cost: float | None      = None
         # fmt: on
 
     def __str__(self) -> str:
@@ -442,14 +442,12 @@ def _print_divider(new_line: bool = True, level: int = LogLevel.L5) -> None:
 @overload
 def _calc_sum_squares(
     data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...
-) -> Union[float, int]: ...
+) -> float | int: ...
 @overload
 def _calc_sum_squares(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _Number: ...
 @overload
 def _calc_sum_squares(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> NDArray: ...
-def _calc_sum_squares(
-    data: ArrayLike, axis: Optional[int] = None, keepdims: bool = False, ignore_nans: bool = False
-) -> _Number:
+def _calc_sum_squares(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore_nans: bool = False) -> _Number:
     r"""
     Calculate the sum of squares of a number series.
 
@@ -513,8 +511,8 @@ def _function_wrapper(
     *,
     model_func: Callable,
     cost_func: Callable,
-    model_args: Dict[str, Any],
-    cost_args: Dict[str, Any],
+    model_args: dict[str, Any],
+    cost_args: dict[str, Any],
     return_results: Literal[False] = ...,
 ) -> _N: ...
 @overload
@@ -522,18 +520,18 @@ def _function_wrapper(
     *,
     model_func: Callable,
     cost_func: Callable,
-    model_args: Dict[str, Any],
-    cost_args: Dict[str, Any],
+    model_args: dict[str, Any],
+    cost_args: dict[str, Any],
     return_results: Literal[True],
-) -> Tuple[_N, _N]: ...
+) -> tuple[_N, _N]: ...
 def _function_wrapper(
     *,
     model_func: Callable,
     cost_func: Callable,
-    model_args: Dict[str, Any],
-    cost_args: Dict[str, Any],
+    model_args: dict[str, Any],
+    cost_args: dict[str, Any],
     return_results: bool = False,
-) -> Union[_N, Tuple[_N, _N]]:
+) -> _N | tuple[_N, _N]:
     r"""
     Wrap the call to the model function.
 
@@ -591,7 +589,7 @@ def _function_wrapper(
 
 
 # %% _parfor_function_wrapper
-def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: Dict[str, Any]) -> Union[_N, MultipassExceptionWrapper]:
+def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: dict[str, Any]) -> _N | MultipassExceptionWrapper:
     r"""
     Wrapper to _function_wrapper specifically for the purposes of parallelizing the inner loop evaluations.
 
@@ -632,13 +630,13 @@ def _parfor_function_wrapper(opti_opts: OptiOpts, msg: str, model_args: Dict[str
 # %% _finite_differences
 def _finite_differences(  # noqa: C901
     opti_opts: OptiOpts,
-    model_args: Dict[str, Any],
+    model_args: dict[str, Any],
     bpe_results: BpeResults,
     cur_results: CurrentResults,
     *,
     two_sided: bool = False,
     normalized: bool = False,
-) -> Tuple[_M, _N, _M]:
+) -> tuple[_M, _N, _M]:
     r"""
     Perturb the state by a litte bit and calculate the numerical slope (Jacobian approximation).
 
@@ -905,7 +903,7 @@ def _check_for_convergence(opti_opts: OptiOpts, cosmax: float, delta_step_len: f
 @ncjit
 def _double_dogleg(
     delta_param: _N, gradient: _M, grad_hessian_grad: float, x_bias: _N, trust_radius: float
-) -> Tuple[_N, float, float, str]:
+) -> tuple[_N, float, float, str]:
     r"""
     Compute a double dog-leg parameter search.
 
@@ -1011,7 +1009,7 @@ def _double_dogleg(
 # %% _dogleg_search
 def _dogleg_search(  # noqa: C901
     opti_opts: OptiOpts,
-    model_args: Dict[str, Any],
+    model_args: dict[str, Any],
     bpe_results: BpeResults,
     cur_results: CurrentResults,
     delta_param: _N,
@@ -1335,7 +1333,7 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
 
 
 # %% run_bpe
-def run_bpe(opti_opts: OptiOpts) -> Tuple[BpeResults, Any]:  # noqa: C901
+def run_bpe(opti_opts: OptiOpts) -> tuple[BpeResults, Any]:  # noqa: C901
     r"""
     Run the batch parameter estimator with the given model optimization options.
 

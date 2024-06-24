@@ -21,21 +21,7 @@ from pathlib import Path
 import platform
 import re
 import sys
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    FrozenSet,
-    List,
-    Literal,
-    Optional,
-    overload,
-    Protocol,
-    Tuple,
-    TYPE_CHECKING,
-    TypedDict,
-    Union,
-)
+from typing import Any, Callable, Literal, overload, Protocol, TYPE_CHECKING, TypedDict
 import unittest
 import warnings
 
@@ -110,17 +96,17 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _B = NDArray[np.bool_]
-    _CM = Union[str, colors.Colormap, colors.ListedColormap]  # + ColorMap defined below
+    _CM = str | colors.Colormap | colors.ListedColormap  # + ColorMap defined below
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
     _N = NDArray[np.float64]
     _M = NDArray[np.float64]  # 2D
-    _Time = Union[None, int, float, datetime.datetime, datetime.date, np.datetime64, np.int_, np.float64]
-    _Times = Union[int, float, datetime.datetime, np.datetime64, _D, _I, _N, List[_N], List[_D], Tuple[_N, ...], Tuple[_D, ...]]
-    _Data = Union[int, float, _I, _N, _M, List[_I], List[_N], List[Union[_I, _N]], Tuple[_I, ...], Tuple[_N, ...], Tuple[Union[_I, _N], ...]]  # fmt: skip
+    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | None
+    _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...] | None  # fmt: skip
+    _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...] | None  # fmt: skip
 
     class _RmsIndices(TypedDict):
-        pts: List[int]
+        pts: list[int]
         one: _B
         two: _B
         overlap: _B
@@ -134,9 +120,9 @@ DEFAULT_COLORMAP: str = "Dark2"  # "Paired", "Dark2", "tab10", "tab20"
 DEFAULT_CLASSIFICATION: str = ""
 
 if TYPE_CHECKING:
-    _FigOrListFig = Union[Figure, List[Figure]]
+    _FigOrListFig = Figure | list[Figure]
 
-COLOR_LISTS: Dict[str, colors.ListedColormap] = {}
+COLOR_LISTS: dict[str, colors.ListedColormap] = {}
 if HAVE_MPL:
     # fmt: off
     # default colormap
@@ -177,7 +163,7 @@ if HAVE_MPL:
 # TODO: make this public?
 _HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
 
-_QUALITATIVE_COLORMAPS: FrozenSet[str] = frozenset(
+_QUALITATIVE_COLORMAPS: frozenset[str] = frozenset(
     {"Pastel1", "Pastel2", "Paired", "Accent", "Dark2", "Set1", "Set2", "Set3", "tab10", "tab20", "tab20b", "tab20c"}
 )
 
@@ -360,10 +346,10 @@ class ColorMap(Frozen):
 
     def __init__(
         self,
-        colormap: Optional[Union[_CM, ColorMap]] = DEFAULT_COLORMAP,
-        low: Union[int, float] = 0,
-        high: Union[int, float] = 1,
-        num_colors: Optional[int] = None,
+        colormap: _CM | ColorMap | None = DEFAULT_COLORMAP,
+        low: int | float = 0,
+        high: int | float = 1,
+        num_colors: int | None = None,
     ) -> None:
         self.num_colors = num_colors
         # check for optional inputs
@@ -401,7 +387,7 @@ class ColorMap(Frozen):
         # must initialize the empty scalar mapplable to show the colorbar correctly
         self.smap.set_array([])
 
-    def get_color(self, value: Union[float, int]) -> Tuple[float, float, float, float]:
+    def get_color(self, value: float | int) -> tuple[float, float, float, float]:
         r"""Get the color based on the scalar value."""
         return self.smap.to_rgba(value)  # type: ignore[arg-type, return-value]
 
@@ -453,7 +439,7 @@ def is_notebook() -> bool:
 
 
 # %% Functions - close_all
-def close_all(fig: Optional[_FigOrListFig] = None) -> None:
+def close_all(fig: _FigOrListFig | None = None) -> None:
     r"""
     Close all the open figures, or if a list is specified, then close all of them.
 
@@ -490,7 +476,7 @@ def close_all(fig: Optional[_FigOrListFig] = None) -> None:
                 plt.close(fig)
             else:
                 for this_fig in fig:  # type: ignore[assignment]
-                    this_fig.clear()
+                    this_fig.clear()  # type: ignore[attr-defined]
                     plt.close(this_fig)
     gc.collect()
 
@@ -545,7 +531,7 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
 
 
 # %% Functions - ignore_plot_data
-def ignore_plot_data(data: Optional[_Data], ignore_empties: bool, col: Optional[int] = None) -> bool:
+def ignore_plot_data(data: _Data | None, ignore_empties: bool, col: int | None = None) -> bool:
     r"""
     Determine whether to ignore this data or not.
 
@@ -594,7 +580,7 @@ def ignore_plot_data(data: Optional[_Data], ignore_empties: bool, col: Optional[
 
 
 # %% Functions - whitten
-def whitten(color: Tuple[float, ...], white: Tuple[float, ...] = (1.0, 1.0, 1.0, 1.0), dt: float = 0.30) -> Tuple[float, ...]:
+def whitten(color: tuple[float, ...], white: tuple[float, ...] = (1.0, 1.0, 1.0, 1.0), dt: float = 0.30) -> tuple[float, ...]:
     r"""
     Shift an RGBA color towards white.
 
@@ -625,8 +611,8 @@ def whitten(color: Tuple[float, ...], white: Tuple[float, ...] = (1.0, 1.0, 1.0,
 @overload
 def get_figure_title(fig: Figure, raise_warning: Literal[False] = ...) -> str: ...
 @overload
-def get_figure_title(fig: Figure, raise_warning: Literal[True]) -> Tuple[str, bool]: ...
-def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tuple[str, bool]]:
+def get_figure_title(fig: Figure, raise_warning: Literal[True]) -> tuple[str, bool]: ...
+def get_figure_title(fig: Figure, raise_warning: bool = False) -> str | tuple[str, bool]:
     r"""
     Gets the name of the given figure.  First trying the canvas, then the suptitle, then the title.
 
@@ -663,7 +649,7 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tup
     """
     # preallocate if a warning should be thrown
     throw_warning = False
-    raw_title: Optional[str]
+    raw_title: str | None
     # get the title of the figure canvas
     manager = fig.canvas.manager
     if manager is None:
@@ -692,7 +678,7 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> Union[str, Tup
 
 
 # %% Functions - resolve_name
-def resolve_name(name: str, force_win: Optional[bool] = None, rep_token: str = "_", strip_classification: bool = True) -> str:
+def resolve_name(name: str, force_win: bool | None = None, rep_token: str = "_", strip_classification: bool = True) -> str:
     r"""
     Resolves the given name to something that can be saved on the current OS.
 
@@ -748,8 +734,8 @@ def resolve_name(name: str, force_win: Optional[bool] = None, rep_token: str = "
 # %% Functions - storefig
 def storefig(
     fig: _FigOrListFig,
-    folder: Optional[Union[str, Path]] = None,
-    plot_type: Union[str, List[str]] = "png",
+    folder: str | Path | None = None,
+    plot_type: str | list[str] = "png",
     show_warn: bool = True,
 ) -> None:
     r"""
@@ -817,7 +803,7 @@ def storefig(
         folder = Path(folder).resolve()
     # make sure types is a list
     if not isinstance(plot_type, list):
-        types: List[str] = []
+        types: list[str] = []
         types.append(plot_type)
     else:
         types = plot_type
@@ -921,7 +907,7 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
 
 # %% Functions - disp_xlimits
 def disp_xlimits(  # noqa: C901
-    fig_or_axis: Union[Figure, Axes, List[Union[Figure, Axes]]], xmin: Optional[_Time] = None, xmax: Optional[_Time] = None
+    fig_or_axis: Figure | Axes | list[Figure | Axes], xmin: _Time | None = None, xmax: _Time | None = None
 ) -> None:
     r"""
     Set the xlimits to the specified xmin and xmax.
@@ -1006,12 +992,12 @@ def disp_xlimits(  # noqa: C901
 # %% Functions - zoom_ylim
 def zoom_ylim(  # noqa: C901
     ax: Axes,
-    time: Optional[_Times] = None,
-    data: Optional[_Data] = None,
+    time: _Times | None = None,
+    data: _Data | None = None,
     *,
     t_start: _Time = -inf,
     t_final: _Time = inf,
-    channel: Optional[int] = None,
+    channel: int | None = None,
     pad: float = 0.1,
 ) -> None:
     r"""
@@ -1165,7 +1151,7 @@ def figmenu(fig: _FigOrListFig) -> None:
 
 
 # %% rgb_ints_to_hex
-def rgb_ints_to_hex(int_tuple: Tuple[int, int, int]) -> str:
+def rgb_ints_to_hex(int_tuple: tuple[int, int, int]) -> str:
     r"""
     Convert a tuple of ints with (0, 255) to the equivalent hex color code.
 
@@ -1198,7 +1184,7 @@ def rgb_ints_to_hex(int_tuple: Tuple[int, int, int]) -> str:
 
 
 # %% Functions - get_screen_resolution
-def get_screen_resolution() -> Tuple[int, int]:
+def get_screen_resolution() -> tuple[int, int]:
     r"""
     Gets the current monitor screen resolution.
 
@@ -1290,7 +1276,7 @@ def show_zero_ylim(ax: Axes) -> None:
 
 
 # %% Functions - plot_second_units_wrapper
-def plot_second_units_wrapper(ax: Axes, second_units: Union[None, int, float, Tuple[str, float]]) -> Optional[Axes]:
+def plot_second_units_wrapper(ax: Axes, second_units: int | float | tuple[str, float] | None) -> Axes | None:
     r"""
     Wrapper to plot_second_yunits that allows numeric or dict options.
 
@@ -1402,9 +1388,9 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
 
 # %% Functions - get_rms_indices
 def get_rms_indices(  # noqa: C901
-    time_one: Optional[_Times] = None,
-    time_two: Optional[_Times] = None,
-    time_overlap: Optional[_Times] = None,
+    time_one: _Times | None = None,
+    time_two: _Times | None = None,
+    time_overlap: _Times | None = None,
     *,
     xmin: _Time = -inf,
     xmax: _Time = inf,
@@ -1457,7 +1443,7 @@ def get_rms_indices(  # noqa: C901
 
     """
 
-    def _process(time: Optional[_Times], t_bound: Optional[_Time], func: Callable) -> bool:
+    def _process(time: _Times | None, t_bound: _Time | None, func: Callable) -> bool:
         r"""Determines if the given time should be processed."""
         if is_datetime(time):
             # if datetime, it's either the datetime.datetime version, or np.datetime64 version
@@ -1475,7 +1461,7 @@ def get_rms_indices(  # noqa: C901
 
     # TODO: functionalize this more so there is less repeated code
     # initialize output
-    temp: List[int] = []
+    temp: list[int] = []
     ix: _RmsIndices = {
         "pts": temp,
         "one": np.array([], dtype=bool),
@@ -1556,11 +1542,11 @@ def get_rms_indices(  # noqa: C901
 # %% Functions - plot_vert_lines
 def plot_vert_lines(
     ax: Axes,
-    x: Union[Tuple[_Time, ...], List[_Time], _Times],
+    x: tuple[_Time, ...] | list[_Time] | _Times,
     *,
     show_in_legend: bool = True,
-    colormap: Optional[Union[_CM, ColorMap]] = None,
-    labels: Optional[Union[List[str], Tuple[str, ...]]] = None,
+    colormap: _CM | ColorMap | None = None,
+    labels: list[str] | tuple[str, ...] | None = None,
 ) -> None:
     r"""
     Plots a vertical line at the RMS start and stop times.
@@ -1621,9 +1607,9 @@ def plot_vert_lines(
 # %% plot_phases
 def plot_phases(
     ax: Axes,
-    times: Union[_D, _N],
-    colormap: Optional[Union[_CM, ColorMap]] = "tab10",
-    labels: Optional[Union[List[str], str]] = None,
+    times: _D | _N,
+    colormap: _CM | ColorMap | None = "tab10",
+    labels: list[str] | str | None = None,
     *,
     group_all: bool = False,
     use_legend: bool = False,
@@ -1730,7 +1716,7 @@ def plot_phases(
 
 
 # %% Functions - get_classification
-def get_classification(classify: str) -> Tuple[str, str]:
+def get_classification(classify: str) -> tuple[str, str]:
     r"""
     Gets the classification and any caveats from the text in the classify string.
 
@@ -1944,7 +1930,7 @@ def plot_classification(  # noqa: C901
 
 
 # %% Functions - align_plots
-def align_plots(fig: _FigOrListFig, pos: Optional[Tuple[int, int]] = None) -> None:
+def align_plots(fig: _FigOrListFig, pos: tuple[int, int] | None = None) -> None:
     """
     Aligns all the figures in one location.
 
@@ -1976,8 +1962,8 @@ def align_plots(fig: _FigOrListFig, pos: Optional[Tuple[int, int]] = None) -> No
     else:
         figs = [fig]
     # initialize position if given
-    x_pos: Optional[int] = None
-    y_pos: Optional[int] = None
+    x_pos: int | None = None
+    y_pos: int | None = None
     if pos is not None:
         (x_pos, y_pos) = pos
     # loop through figures
@@ -1992,7 +1978,7 @@ def align_plots(fig: _FigOrListFig, pos: Optional[Tuple[int, int]] = None) -> No
 
 
 # %% Functions - z_from_ci
-def z_from_ci(ci: Union[int, float]) -> float:
+def z_from_ci(ci: int | float) -> float:
     r"""
     Calculates the Z score that matches the desired confidence interval.
 
@@ -2024,7 +2010,7 @@ def z_from_ci(ci: Union[int, float]) -> float:
 
 
 # %% Functions - ci_from_z
-def ci_from_z(z: Union[int, float]) -> float:
+def ci_from_z(z: int | float) -> float:
     r"""
     Calculates the confidence interval that matches the Z score.
 
@@ -2056,7 +2042,7 @@ def ci_from_z(z: Union[int, float]) -> float:
 
 # %% Functions - save_figs_to_pdf
 def save_figs_to_pdf(
-    figs: Optional[Union[Figure, List[Figure]]] = None,
+    figs: Figure | list[Figure] | None = None,
     filename: Path = Path("figs.pdf"),
     *,
     rasterized: bool = False,
@@ -2066,7 +2052,7 @@ def save_figs_to_pdf(
 
     Parameters
     ----------
-    figs : figure or List[figure] or None
+    figs : figure or list[figure] or None
         Figures to save, None means save all open figures
     filename : str, optional
         Name of the file to save the figures to, defaults to "figs.pdf" in the current folder
@@ -2142,8 +2128,8 @@ def save_figs_to_pdf(
 
 # %% Functions - save_images_to_pdf
 def save_images_to_pdf(
-    figs: Optional[Union[Figure, List[Figure]]] = None,
-    folder: Optional[Path] = None,
+    figs: Figure | list[Figure] | None = None,
+    folder: Path | None = None,
     plot_type: str = "png",
     filename: Path = Path("figs.pdf"),
 ) -> None:
@@ -2152,7 +2138,7 @@ def save_images_to_pdf(
 
     Parameters
     ----------
-    figs : figure or List[figure] or None
+    figs : figure or list[figure] or None
         Figures to save, None means save all open figures
     folder : Path, optional
         Folder to load the figures from
@@ -2197,7 +2183,7 @@ def save_images_to_pdf(
         folder = Path.cwd()
 
     # create the metadata
-    meta: Dict[str, Union[str, datetime.datetime]] = {}
+    meta: dict[str, str | datetime.datetime] = {}
     meta["Title"] = "PDF Figures"
     meta["Author"] = get_username()
     meta["CreationDate"] = datetime.datetime.now()
@@ -2220,11 +2206,11 @@ def save_images_to_pdf(
 
 # %% add_datashaders
 def add_datashaders(
-    datashaders: List[Dict[str, Any]],
+    datashaders: list[dict[str, Any]],
     threshold: float = 0.8,
     max_px: int = 6,
     how: str = "over",
-    zorder: Optional[int] = None,
+    zorder: int | None = None,
     alpha: float = 1.0,
 ) -> None:
     r"""Adds the collection of datashaders to the axes."""
@@ -2275,33 +2261,33 @@ def add_datashaders(
 # %% fig_ax_factory
 @overload
 def fig_ax_factory(
-    num_figs: Optional[int],
-    num_axes: Union[int, List[int]],
+    num_figs: int | None,
+    num_axes: int | list[int],
     *,
-    suptitle: Union[str, List[str]],
+    suptitle: str | list[str],
     layout: str,
     sharex: bool,
     passthrough: Literal[False] = ...,
-) -> Tuple[Tuple[Figure, Axes], ...]: ...
+) -> tuple[tuple[Figure, Axes], ...]: ...
 @overload
 def fig_ax_factory(
-    num_figs: Optional[int],
-    num_axes: Union[int, List[int]],
+    num_figs: int | None,
+    num_axes: int | list[int],
     *,
-    suptitle: Union[str, List[str]],
+    suptitle: str | list[str],
     layout: str,
     sharex: bool,
     passthrough: Literal[True],
-) -> Tuple[None, ...]: ...
+) -> tuple[None, ...]: ...
 def fig_ax_factory(  # noqa: C901
-    num_figs: Optional[int] = None,
-    num_axes: Union[int, List[int]] = 1,
+    num_figs: int | None = None,
+    num_axes: int | list[int] = 1,
     *,
-    suptitle: Union[str, List[str]] = "",
+    suptitle: str | list[str] = "",
     layout: str = "rows",
     sharex: bool = True,
     passthrough: bool = False,
-) -> Union[Tuple[Tuple[Figure, Axes], ...], Tuple[None, ...]]:
+) -> tuple[tuple[Figure, Axes], ...] | tuple[None, ...]:
     r"""
     Creates the figures and axes for use in a given plotting function.
 
@@ -2351,8 +2337,8 @@ def fig_ax_factory(  # noqa: C901
         num_figs = 1
     if passthrough:
         return tuple(None for _ in range(num_figs * num_row * num_col))
-    figs: List[Figure] = []
-    axes: Union[List[Axes], List[List[Axes]], List[List[List[Axes]]]] = []
+    figs: list[Figure] = []
+    axes: list[Axes] | list[list[Axes]] | list[list[list[Axes]]] = []
     for i in range(num_figs):
         (fig, ax) = plt.subplots(num_row, num_col, sharex=sharex)
         if bool(suptitle):
@@ -2362,7 +2348,7 @@ def fig_ax_factory(  # noqa: C901
             manager.set_window_title(this_title)
         figs.append(fig)
         axes.append(ax)
-    fig_ax: Tuple[Tuple[Figure, Axes], ...]
+    fig_ax: tuple[tuple[Figure, Axes], ...]
     if is_1d:
         assert isinstance(num_axes, int)
         if num_axes == 1:

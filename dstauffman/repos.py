@@ -14,7 +14,7 @@ import doctest
 import os
 from pathlib import Path
 import sys
-from typing import Any, Dict, FrozenSet, List, Optional, Set, Tuple, TYPE_CHECKING, Union
+from typing import Any, TYPE_CHECKING
 import unittest
 
 from slog import ReturnCodes
@@ -37,7 +37,7 @@ if TYPE_CHECKING:
 
 
 # %% run_docstrings
-def run_docstrings(files: List[Path], verbose: bool = False) -> int:
+def run_docstrings(files: list[Path], verbose: bool = False) -> int:
     r"""
     Runs all the docstrings in the given files.
 
@@ -155,7 +155,7 @@ def run_pytests(folder: Path, *args: str, **kwargs: Any) -> int:
         suppress_plots()
     # Note: need to do this next part to keep GUI testing from closing the instance with sys.exit
     # open a qapp
-    qapp: Union[None, QApplication, QCoreApplication]
+    qapp: QApplication | QCoreApplication | None
     try:
         from qtpy.QtWidgets import QApplication  # pylint: disable=import-outside-toplevel
     except ModuleNotFoundError:
@@ -177,7 +177,7 @@ def run_pytests(folder: Path, *args: str, **kwargs: Any) -> int:
 
 
 # %% run_coverage
-def run_coverage(folder: Path, *, report: bool = True, cov_file: Optional[Path] = None) -> int:
+def run_coverage(folder: Path, *, report: bool = True, cov_file: Path | None = None) -> int:
     r"""
     Wraps the pytests with a Code Coverage report.
 
@@ -236,13 +236,13 @@ def run_coverage(folder: Path, *, report: bool = True, cov_file: Optional[Path] 
 # %% find_repo_issues
 def find_repo_issues(  # noqa: C901
     folder: Path,
-    extensions: Union[FrozenSet[str], Set[str], Tuple[str, ...], str, None] = frozenset((".m", ".py")),
+    extensions: frozenset[str] | set[str] | tuple[str, ...] | str | None = frozenset((".m", ".py")),
     *,
     list_all: bool = False,
     check_tabs: bool = True,
     trailing: bool = False,
-    exclusions: Optional[Union[Tuple[Path, ...], Path]] = None,
-    check_eol: Optional[str] = None,
+    exclusions: tuple[Path, ...] | Path | None = None,
+    check_eol: str | None = None,
     show_execute: bool = False,
 ) -> bool:
     r"""
@@ -282,7 +282,7 @@ def find_repo_issues(  # noqa: C901
 
     """
 
-    def _is_excluded(path: Path, exclusions: Optional[Tuple[Path, ...]]) -> bool:
+    def _is_excluded(path: Path, exclusions: tuple[Path, ...] | None) -> bool:
         if exclusions is None:
             return False
         for this_exclusion in exclusions:
@@ -388,7 +388,7 @@ def delete_pyc(folder: Path, recursive: bool = True, *, print_progress: bool = T
 
 
 # %% Functions - get_python_definitions
-def get_python_definitions(text: str, *, include_private: bool = False) -> List[str]:  # noqa: C901
+def get_python_definitions(text: str, *, include_private: bool = False) -> list[str]:  # noqa: C901
     r"""
     Get all public class and def names from the text of the file.
 
@@ -414,7 +414,7 @@ def get_python_definitions(text: str, *, include_private: bool = False) -> List[
     cap_letters = frozenset("ABCDEFGHIJKLMNOPQRSTUVWXYZ")
     extended_letters = frozenset(cap_letters & {"_"})
     assert len(cap_letters) == 26
-    funcs: List[str] = []
+    funcs: list[str] = []
     skip_next = False
     skip_strs = False
     for line in text.split("\n"):
@@ -447,7 +447,7 @@ def get_python_definitions(text: str, *, include_private: bool = False) -> List[
 
 
 # %% Functions - make_python_init
-def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, filename: Optional[Path] = None) -> str:
+def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, filename: Path | None = None) -> str:
     r"""
     Make the Python __init__.py file based on the files/definitions found within the specified folder.
 
@@ -508,7 +508,7 @@ def make_python_init(folder: Path, *, lineup: bool = True, wrap: int = 100, file
     max_len = max(len(x) for x in results)
     indent = len("from . import ") + max_len + 4
     # start building text output
-    text: List[str] = []
+    text: list[str] = []
     # loop through results and build text output
     for key in sorted(results):
         pad = " " * (max_len - len(key)) if lineup else ""
@@ -532,9 +532,9 @@ def write_unit_test_templates(
     output: Path,
     *,
     author: str = "unknown",
-    exclude: Optional[Union[Path, Tuple[Path, ...]]] = None,
+    exclude: Path | tuple[Path, ...] | None = None,
     recursive: bool = True,
-    repo_subs: Optional[Dict[str, str]] = None,
+    repo_subs: dict[str, str] | None = None,
     add_classification: bool = False,
 ) -> None:
     r"""
@@ -552,7 +552,7 @@ def write_unit_test_templates(
         Names to exclude
     recursive : bool, optional
         Whether to process recursively
-    repo_subs : Dict[str, str], optional
+    repo_subs : dict[str, str], optional
         Repository names to replace
     add_classification : bool, optional
         Whether to add a classification to the headers

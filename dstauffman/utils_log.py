@@ -14,7 +14,7 @@ import contextlib
 import doctest
 import logging
 from pathlib import Path
-from typing import Literal, Optional, overload, Tuple, TYPE_CHECKING, TypedDict, Union
+from typing import Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from slog import LogLevel
@@ -27,17 +27,16 @@ if HAVE_NUMPY:
 
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
-    from typing_extensions import NotRequired, Unpack
 
     _I = NDArray[np.int_]
     _N = NDArray[np.float64]
-    _F = Union[float, np.float64, _N]
+    _F = float | np.float64 | _N
 
     class _OutlierKwArgs(TypedDict):
         num_iters: NotRequired[int]
         return_stats: NotRequired[bool]
         inplace: NotRequired[bool]
-        hardmax: NotRequired[Optional[float]]
+        hardmax: NotRequired[float | None]
 
 
 # %% Globals
@@ -45,7 +44,7 @@ logger = logging.getLogger(__name__)
 
 
 # %% Functions - setup_dir
-def setup_dir(folder: Union[str, Path], recursive: bool = False) -> None:
+def setup_dir(folder: str | Path, recursive: bool = False) -> None:
     r"""
     Clear the contents for existing folders or instantiates the directory if it doesn't exist.
 
@@ -119,16 +118,16 @@ def fix_rollover(data: _I, roll: int, axis: int) -> _I: ...
 @overload
 def fix_rollover(data: _N, roll: float, axis: int) -> _N: ...
 @overload
-def fix_rollover(data: _I, roll: int, axis: Optional[int], check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _I: ...
+def fix_rollover(data: _I, roll: int, axis: int | None, check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _I: ...
 @overload
-def fix_rollover(data: _N, roll: float, axis: Optional[int], check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _N: ...
+def fix_rollover(data: _N, roll: float, axis: int | None, check_accel: bool, **kwargs: Unpack[_OutlierKwArgs]) -> _N: ...
 def fix_rollover(  # noqa: C901
-    data: Union[_I, _N],
-    roll: Union[int, float],
-    axis: Optional[int] = None,
+    data: _I | _N,
+    roll: int | float,
+    axis: int | None = None,
     check_accel: bool = False,
     **kwargs: Unpack[_OutlierKwArgs],
-) -> Union[_I, _N]:
+) -> _I | _N:
     r"""
     Unrolls data that has finite ranges and rollovers.
 
@@ -253,36 +252,36 @@ def remove_outliers(
     x: ArrayLike,
     /,
     sigma: float,
-    axis: Optional[int],
+    axis: int | None,
     *,
     num_iters: int,
     return_stats: Literal[False] = ...,
     inplace: bool,
-    hardmax: Optional[float],
+    hardmax: float | None,
 ) -> _N: ...
 @overload
 def remove_outliers(
     x: ArrayLike,
     /,
     sigma: float,
-    axis: Optional[int],
+    axis: int | None,
     *,
     num_iters: int,
     return_stats: Literal[True],
     inplace: bool,
-    hardmax: Optional[float],
-) -> Tuple[_N, int, _F, _F]: ...
+    hardmax: float | None,
+) -> tuple[_N, int, _F, _F]: ...
 def remove_outliers(
     x: ArrayLike,
     /,
     sigma: float = 3.0,
-    axis: Optional[int] = None,
+    axis: int | None = None,
     *,
     num_iters: int = 3,
     return_stats: bool = False,
     inplace: bool = False,
-    hardmax: Optional[float] = None,
-) -> Union[_N, Tuple[_N, int, _F, _F]]:
+    hardmax: float | None = None,
+) -> _N | tuple[_N, int, _F, _F]:
     r"""
     Removes the outliers from a data set based on the RMS of the points in the set.
 

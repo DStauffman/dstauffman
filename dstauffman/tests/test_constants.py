@@ -7,7 +7,6 @@ Notes
 """
 
 # %% Imports
-from typing import List
 import unittest
 
 import dstauffman as dcs
@@ -23,9 +22,9 @@ class Test_all_values(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.ints: List[str] = ["INT_TOKEN", "NP_INT64_PER_SEC"]
-        self.strs: List[str] = ["NP_DATETIME_FORM", "NP_DATETIME_UNITS", "NP_TIMEDELTA_FORM"]
-        self.bool: List[str] = [
+        self.ints: list[str] = ["INT_TOKEN", "NP_INT64_PER_SEC"]
+        self.strs: list[str] = ["NP_DATETIME_FORM", "NP_DATETIME_UNITS", "NP_TIMEDELTA_FORM"]
+        self.bool: list[str] = [
             "HAVE_COVERAGE",
             "HAVE_DS",
             "HAVE_H5PY",
@@ -36,8 +35,8 @@ class Test_all_values(unittest.TestCase):
             "HAVE_SCIPY",
             "IS_WINDOWS",
         ]
-        self.xtra: List[str] = ["NP_ONE_DAY", "NP_ONE_HOUR", "NP_ONE_MINUTE", "NP_ONE_SECOND"]
-        self.nats: List[str] = ["NP_NAT"]
+        self.xtra: list[str] = ["NP_ONE_DAY", "NP_ONE_HOUR", "NP_ONE_MINUTE", "NP_ONE_SECOND"]
+        self.nats: list[str] = ["NP_NAT"]
         self.master = set(self.ints) | set(self.strs) | set(self.bool) | set(self.xtra) | set(self.nats)
 
     def test_values(self) -> None:

@@ -10,7 +10,6 @@ Notes
 import argparse
 import doctest
 from pathlib import Path
-from typing import FrozenSet, List, Optional, Set, Union
 import unittest
 
 from slog import ReturnCodes
@@ -19,7 +18,7 @@ from dstauffman import find_repo_issues, make_python_init
 
 
 # %% Functions - parse_enforce
-def parse_enforce(input_args: List[str]) -> argparse.Namespace:
+def parse_enforce(input_args: list[str]) -> argparse.Namespace:
     r"""
     Parser for enforce command.
 
@@ -100,14 +99,14 @@ def execute_enforce(args: argparse.Namespace) -> int:
     trailing = args.trailing
     exclusions = args.skip
     show_execute = args.execute
-    check_eol: Optional[str]
+    check_eol: str | None
     if args.windows:
         check_eol = "\r\n"
     elif args.unix:
         check_eol = "\n"
     else:
         check_eol = None
-    extensions: Optional[Union[Set[str], FrozenSet[str]]]
+    extensions: set[str] | frozenset[str] | None
     if args.extensions is None:
         extensions = frozenset(def_extensions)
     elif len(args.extensions) == 1 and args.extensions[0] == "*":
@@ -132,7 +131,7 @@ def execute_enforce(args: argparse.Namespace) -> int:
 
 
 # %% Functions - parse_make_init
-def parse_make_init(input_args: List[str]) -> argparse.Namespace:
+def parse_make_init(input_args: list[str]) -> argparse.Namespace:
     r"""
     Parser for make_init command.
 

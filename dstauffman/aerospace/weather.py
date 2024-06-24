@@ -12,7 +12,6 @@ from __future__ import annotations
 import datetime
 import doctest
 from pathlib import Path
-from typing import Union
 import unittest
 
 from dstauffman import HAVE_NUMPY, HAVE_PANDAS, NP_NAT
@@ -69,7 +68,7 @@ def read_kp_ap_nowcast(filename: Path) -> pd.DataFrame:
 def read_solar_cycles(filename: Path) -> pd.DataFrame:  # noqa: C901
     """Read the solar cycle history."""
 
-    def _get_duration(text: str) -> Union[int, float]:
+    def _get_duration(text: str) -> int | float:
         if not text:
             return np.nan
         (y, m) = text.split("-")
@@ -78,17 +77,17 @@ def read_solar_cycles(filename: Path) -> pd.DataFrame:  # noqa: C901
     def _get_solar_cycle(text: str) -> int:
         return int(text.split("Solar cycle ")[-1])
 
-    def _get_date(text: str) -> Union[datetime.datetime, np.datetime64]:
+    def _get_date(text: str) -> datetime.datetime | np.datetime64:
         if not text:
             return NP_NAT
         return datetime.datetime.strptime(text.strip(), "%Y-%m")
 
-    def _remove_parens(text: str) -> Union[int, float]:
+    def _remove_parens(text: str) -> int | float:
         if not text:
             return np.nan
         return int(text.replace("(", "").replace(")", ""))
 
-    def _parse_ongoing(text: str) -> Union[int, float]:
+    def _parse_ongoing(text: str) -> int | float:
         if not text:
             return np.nan
         try:

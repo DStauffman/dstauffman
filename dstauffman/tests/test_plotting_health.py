@@ -10,7 +10,7 @@ Notes
 # %% Imports
 from __future__ import annotations
 
-from typing import List, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 import unittest
 
 from slog import capture_output
@@ -40,7 +40,7 @@ class Test_plotting_TruthPlotter(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
         self.x = np.arange(0, 10, 0.1)
         self.y = np.sin(self.x)
         self.data = np.vstack((self.y, self.y + 0.01, self.y + 0.03)).T
@@ -208,7 +208,7 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
         self.opts.show_plot = False
         self.legend = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
         self.second_units = 1000000
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
 
     def test_nominal(self) -> None:
         self.fig = plot.plot_health_time_history(
@@ -346,8 +346,8 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.time: Union[_N, List[int]] = np.arange(0, 10, 0.1) if HAVE_NUMPY else list(range(10))
-        self.data: Union[_N, List[float]] = np.sin(self.time) if HAVE_NUMPY else [x + 1.0 for x in self.time]
+        self.time: _N | list[int] = np.arange(0, 10, 0.1) if HAVE_NUMPY else list(range(10))
+        self.data: _N | list[float] = np.sin(self.time) if HAVE_NUMPY else [x + 1.0 for x in self.time]
         self.label = "Sin"
         self.units = "population"
         self.opts = plot.Opts()
@@ -355,7 +355,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         self.truth = plot.TruthPlotter(self.time, np.cos(self.time))  # type: ignore[arg-type]
         self.data_matrix = np.column_stack((self.data, self.truth.data))  # type: ignore[arg-type]
         self.second_units = 1000000
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
 
     def test_normal(self) -> None:
         self.fig = plot.plot_health_monte_carlo(self.time, self.data, self.label, self.units)
@@ -484,16 +484,16 @@ class Test_plotting_plot_population_pyramid(unittest.TestCase):
 
     def setUp(self) -> None:
         # fmt: off
-        self.age_bins: Union[_I, List[int]] = np.array([0, 5, 10, 15, 20, 1000], dtype=int) if HAVE_NUMPY else [0, 5, 1000]
-        self.male_per: Union[_I, List[int]] = np.array([100, 200, 300, 400, 500], dtype=int) if HAVE_NUMPY else [100, 200, 500]
-        self.fmal_per: Union[_I, List[int]] = np.array([125, 225, 325, 375, 450], dtype=int) if HAVE_NUMPY else [125, 225, 450]
+        self.age_bins: _I | list[int] = np.array([0, 5, 10, 15, 20, 1000], dtype=int) if HAVE_NUMPY else [0, 5, 1000]
+        self.male_per: _I | list[int] = np.array([100, 200, 300, 400, 500], dtype=int) if HAVE_NUMPY else [100, 200, 500]
+        self.fmal_per: _I | list[int] = np.array([125, 225, 325, 375, 450], dtype=int) if HAVE_NUMPY else [125, 225, 450]
         self.title  = "Test Title"
         self.opts   = plot.Opts()
         self.name1  = "M"
         self.name2  = "W"
         self.color1 = "k"
         self.color2 = "w"
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
         # fmt: on
 
     def test_nominal(self) -> None:

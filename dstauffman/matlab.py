@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import doctest
 from pathlib import Path
-from typing import Any, Dict, List, Optional, overload, Set, Tuple, TYPE_CHECKING, Union
+from typing import Any, overload, TYPE_CHECKING
 import unittest
 
 from nubs import ncjit
@@ -39,12 +39,12 @@ _EPS = float(np.finfo(float).eps) if HAVE_NUMPY else 2.220446049250313e-16
 
 # %% load_matlab
 def load_matlab(  # noqa: C901
-    filename: Union[str, Path],
-    varlist: Optional[Union[List[str], Set[str], Tuple[str, ...]]] = None,
+    filename: str | Path,
+    varlist: list[str] | set[str] | tuple[str, ...] | None = None,
     *,
     squeeze: bool = True,
-    enums: Optional[Dict[str, Any]] = None,
-) -> Dict[str, Any]:
+    enums: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     r"""
     Load simple arrays from a MATLAB v7.3 HDF5 based *.mat file.
 
@@ -74,13 +74,13 @@ def load_matlab(  # noqa: C901
 
     def _load(
         file: h5py.Group,
-        varlist: Optional[Union[List[str], Set[str], Tuple[str, ...]]],
+        varlist: list[str] | set[str] | tuple[str, ...] | None,
         squeeze: bool,
-        enums: Optional[Dict[str, Any]],
-    ) -> Dict[str, Any]:
+        enums: dict[str, Any] | None,
+    ) -> dict[str, Any]:
         r"""Wrapped subfunction so it can be called recursively."""
         # initialize output
-        out: Dict[str, Any] = {}
+        out: dict[str, Any] = {}
         # loop through keys, keys are the MATLAB variable names, like TELM
         for key in file:
             # skip keys that are not in the given varlist
@@ -254,7 +254,7 @@ def subspace(A: _M, B: _M) -> float:
 
 # %% mat_divide
 @ncjit
-def mat_divide(a: _M, b: _N, rcond: float = _EPS) -> Union[_N, _M]:
+def mat_divide(a: _M, b: _N, rcond: float = _EPS) -> _N | _M:
     r"""
     Solves the least square solution for x in A*x = b.
 
@@ -389,20 +389,20 @@ def prepend(vec: _B, new: bool) -> _B: ...
 def prepend(vec: _I, new: int) -> _I: ...
 @overload
 def prepend(vec: _N, new: float) -> _N: ...
-def prepend(vec: Union[_B, _I, _N], new: Union[bool, int, float]) -> Union[_B, _I, _N]:
+def prepend(vec: _B | _I | _N, new: bool | int | float) -> _B | _I | _N:
     r"""
     Add a value to the beginning of an array.
 
     Parameters
     ----------
-    vec : (N,) np.ndarray
+    vec : (N,) numpy.ndarray
         Original array
     new : float
         Value to prepend
 
     Returns
     -------
-    (N+1,) np.ndarray
+    (N+1,) numpy.ndarray
         Prepended array
 
     See Also
@@ -434,20 +434,20 @@ def postpend(vec: _B, new: bool) -> _B: ...
 def postpend(vec: _I, new: int) -> _I: ...
 @overload
 def postpend(vec: _N, new: float) -> _N: ...
-def postpend(vec: Union[_B, _I, _N], new: Union[bool, int, float]) -> Union[_B, _I, _N]:
+def postpend(vec: _B | _I | _N, new: bool | int | float) -> _B | _I | _N:
     r"""
     Add a value to the beginning of an array.
 
     Parameters
     ----------
-    vec : (N,) np.ndarray
+    vec : (N,) numpy.ndarray
         Original array
     new : float
         Value to append at the end (postpend)
 
     Returns
     -------
-    (N+1,) np.ndarray
+    (N+1,) numpy.ndarray
         Appended (new) array
 
     See Also

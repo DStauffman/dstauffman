@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import datetime
-from typing import List, Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 import unittest
 from unittest.mock import Mock, patch
 
@@ -192,7 +192,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
         self.opts           = plot.Opts()
         self.opts.show_plot = False
         self.elements       = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
         # fmt: on
 
     def test_nominal(self) -> None:
@@ -260,13 +260,13 @@ class Test_plotting_plot_time_history(unittest.TestCase):
 
     def test_lists0(self) -> None:
         time = np.arange(100.0)
-        data: List[_I] = [np.zeros(100, dtype=int), np.ones(100, dtype=int)]
+        data: list[_I] = [np.zeros(100, dtype=int), np.ones(100, dtype=int)]
         self.fig = plot.plot_time_history("", time, data)
         self.assertIsNotNone(self.fig)
 
     def test_lists1(self) -> None:
         time = np.arange(10)
-        data: List[_N] = [np.random.rand(10), 5 * np.random.rand(10)]
+        data: list[_N] = [np.random.rand(10), 5 * np.random.rand(10)]
         elements = ("Item 1", "5 Times")
         self.fig = plot.plot_time_history(self.description, time, data, opts=self.opts, elements=elements)
         self.assertIsNotNone(self.fig)
@@ -311,7 +311,7 @@ class Test_plotting_plot_correlation_matrix(unittest.TestCase):
 
     def setUp(self) -> None:
         num = 10
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
         self.data = unit(np.random.rand(num, num), axis=0)
         self.labels = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
         self.units = "percentage"
@@ -435,7 +435,7 @@ class Test_plotting_plot_bar_breakdown(unittest.TestCase):
         self.elements = ["Value 1", "Value 2", "Value 3", "Value 4", "Value 5"]
         self.opts = plot.Opts()
         self.opts.show_plot = False
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
 
     def test_nominal(self) -> None:
         self.fig = plot.plot_bar_breakdown(self.description, self.time, self.data, opts=self.opts, elements=self.elements)
@@ -515,7 +515,7 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         self.description = "Histogram"
         self.data = np.array([0.5, 3.3, 1.0, 1.5, 1.5, 1.75, 2.5, 2.5])
         self.bins = np.array([0.0, 1.0, 2.0, 3.0, 5.0, 7.0])
-        self.fig: Optional[Figure] = None
+        self.fig: Figure | None = None
 
     def test_nominal(self) -> None:
         self.fig = plot.plot_histogram(self.description, self.data, self.bins)

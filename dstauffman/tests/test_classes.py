@@ -13,7 +13,7 @@ from collections.abc import Mapping
 import copy
 import pathlib
 import pickle
-from typing import Callable, ClassVar, List, Optional, TYPE_CHECKING, Union
+from typing import Callable, ClassVar, TYPE_CHECKING
 import unittest
 
 from slog import capture_output
@@ -39,31 +39,31 @@ if TYPE_CHECKING:
 
 # %% Locals classes for testing
 class _Example_Frozen(dcs.Frozen):
-    def __init__(self, dummy: Optional[int] = None):
-        self.field_one: Union[int, str] = 1
+    def __init__(self, dummy: int | None = None):
+        self.field_one: int | str = 1
         self.field_two: int = 2
         self.field_ten: int = 10
-        self.dummy: Optional[int] = dummy if dummy is not None else 0
+        self.dummy: int | None = dummy if dummy is not None else 0
 
 
 class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     load: ClassVar[
         Callable[
-            [Optional[pathlib.Path], DefaultNamedArg(bool, "return_meta")],  # noqa: F821
+            [pathlib.Path | None, DefaultNamedArg(bool, "return_meta")],  # noqa: F821
             _Example_SaveAndLoad,
         ]
     ]
     save: Callable[
         [
-            Optional[pathlib.Path],
+            pathlib.Path | None,
             DefaultNamedArg(dict, "meta"),  # noqa: F821
             DefaultNamedArg(set, "exclusions"),  # noqa: F821
         ],
         None,
     ]
-    x: Union[_I, List[int]]
-    y: Union[_I, List[int]]
-    z: Optional[int]
+    x: _I | list[int]
+    y: _I | list[int]
+    z: int | None
 
     def __init__(self) -> None:
         if dcs.HAVE_NUMPY:
@@ -76,10 +76,10 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
 
 
 class _Example_SaveAndLoadPickle(dcs.Frozen, metaclass=dcs.SaveAndLoadPickle):
-    load: ClassVar[Callable[[Optional[pathlib.Path]], _Example_SaveAndLoadPickle]]
-    save: Callable[[Optional[pathlib.Path]], None]
-    a: Union[_I, List[int]]
-    b: Union[_I, List[int]]
+    load: ClassVar[Callable[[pathlib.Path | None], _Example_SaveAndLoadPickle]]
+    save: Callable[[pathlib.Path | None], None]
+    a: _I | list[int]
+    b: _I | list[int]
 
     def __init__(self) -> None:
         if dcs.HAVE_NUMPY:

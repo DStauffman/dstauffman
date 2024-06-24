@@ -12,18 +12,9 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import List, Optional, Tuple, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING
 import unittest
 import warnings
-
-try:
-    from packaging import version
-
-    parse = version.parse
-except ModuleNotFoundError:
-    import setuptools  # type: ignore[import-untyped]
-
-    parse = setuptools.version.pkg_resources.packaging.version.parse
 
 from dstauffman import bins_to_str_ranges, Frozen, get_unit_conversion, HAVE_MPL, HAVE_NUMPY, rms
 from dstauffman.plotting.plotting import Opts, setup_plots
@@ -39,7 +30,6 @@ from dstauffman.plotting.support import (
 )
 
 if HAVE_MPL:
-    import matplotlib as mpl
     from matplotlib.axes import Axes
     from matplotlib.colors import Colormap, ListedColormap
     from matplotlib.figure import Figure
@@ -51,7 +41,7 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
-    _CM = Union[str, Colormap, ListedColormap, ColorMap]
+    _CM = str | Colormap | ListedColormap | ColorMap
     _I = NDArray[np.int_]
     _M = NDArray[np.float64]  # 2D
     _N = NDArray[np.float64]
@@ -86,10 +76,10 @@ class TruthPlotter(Frozen):
 
     def __init__(
         self,
-        time: Optional[_N] = None,
-        data: Optional[_M] = None,
-        lo: Optional[_N] = None,
-        hi: Optional[_N] = None,
+        time: _N | None = None,
+        data: _M | None = None,
+        lo: _N | None = None,
+        hi: _N | None = None,
         type_: str = "normal",
         name: str = "Observed",
     ):
@@ -118,7 +108,7 @@ class TruthPlotter(Frozen):
         return self.data is None and self.data_lo is None and self.data_hi is None
 
     @staticmethod
-    def get_data(data: Optional[_M], scale: float = 1.0, ix: Optional[int] = None) -> Optional[_M]:
+    def get_data(data: _M | None, scale: float = 1.0, ix: int | None = None) -> _M | None:
         r"""Scale and index the data, returning None if it is not there."""
         if data is None:
             return data
@@ -127,7 +117,7 @@ class TruthPlotter(Frozen):
         return scale * data[:, ix]
 
     def plot_truth(
-        self, ax: Axes, scale: float = 1.0, ix: Optional[int] = None, *, hold_xlim: bool = True, hold_ylim: bool = False
+        self, ax: Axes, scale: float = 1.0, ix: int | None = None, *, hold_xlim: bool = True, hold_ylim: bool = False
     ) -> None:
         r"""Add the information in the TruthPlotter instance to the given axes, with the optional scale."""
         # check for null case
@@ -177,18 +167,18 @@ class TruthPlotter(Frozen):
 # %% Functions - plot_health_time_history
 def plot_health_time_history(
     time: ArrayLike,
-    data: Optional[ArrayLike],
+    data: ArrayLike | None,
     label: str,
     units: str = "",
-    opts: Optional[Opts] = None,
+    opts: Opts | None = None,
     *,
-    legend: Optional[List[str]] = None,
-    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    legend: list[str] | None = None,
+    second_units: str | int | float | tuple[str, float] | None = None,
     ignore_empties: bool = False,
-    data_lo: Optional[_N] = None,
-    data_hi: Optional[_N] = None,
-    colormap: Optional[_CM] = None,
-) -> Optional[Figure]:
+    data_lo: _N | None = None,
+    data_hi: _N | None = None,
+    colormap: _CM | None = None,
+) -> Figure | None:
     r"""
     Plot multiple metrics over time.
 
@@ -357,15 +347,15 @@ def plot_health_monte_carlo(
     data: ArrayLike,
     label: str,
     units: str = "",
-    opts: Optional[Opts] = None,
+    opts: Opts | None = None,
     *,
     plot_indiv: bool = True,
-    truth: Optional[TruthPlotter] = None,
+    truth: TruthPlotter | None = None,
     plot_as_diffs: bool = False,
-    second_units: Optional[Union[str, int, float, Tuple[str, float]]] = None,
+    second_units: str | int | float | tuple[str, float] | None = None,
     plot_sigmas: float = 1.0,
     plot_confidence: float = 0.0,
-    colormap: Optional[_CM] = None,
+    colormap: _CM | None = None,
 ) -> Figure:
     r"""
     Plot the given data channel versus time, with a generic label argument.
@@ -546,9 +536,9 @@ def plot_icer(
     qaly: _N,
     cost: _N,
     ix_front: int,
-    baseline: Optional[int] = None,
-    names: Optional[List[str]] = None,
-    opts: Optional[Opts] = None,
+    baseline: int | None = None,
+    names: list[str] | None = None,
+    opts: Opts | None = None,
 ) -> Figure:
     r"""Plot the icer results."""
     # check optional inputs
@@ -598,16 +588,16 @@ def plot_icer(
 
 # %% Functions - plot_population_pyramid
 def plot_population_pyramid(
-    age_bins: Union[_I, _N, List[int]],
-    male_per: Union[_I, _N, List[int]],
-    fmal_per: Union[_I, _N, List[int]],
+    age_bins: _I | _N | list[int],
+    male_per: _I | _N | list[int],
+    fmal_per: _I | _N | list[int],
     title: str = "Population Pyramid",
     *,
-    opts: Optional[Opts] = None,
+    opts: Opts | None = None,
     name1: str = "Male",
     name2: str = "Female",
-    color1: Union[str, Tuple[float, ...]] = "xkcd:blue",
-    color2: Union[str, Tuple[float, ...]] = "xkcd:red",
+    color1: str | tuple[float, ...] = "xkcd:blue",
+    color2: str | tuple[float, ...] = "xkcd:red",
 ) -> Figure:
     r"""
     Plot the standard population pyramid.
@@ -693,9 +683,7 @@ def plot_population_pyramid(
     ax.set_title(title)
     ax.set_yticks(y_values)  # type: ignore[arg-type]
     ax.set_yticklabels(y_labels)
-    if parse(mpl.__version__) >= parse("3.3.1"):
-        # TODO: REMOVE IN THE FUTURE - PLACED TO AVOID WARNING - IT IS A BUG FROM MATPLOTLIB 3.3.1
-        ax.set_xticks(ax.get_xticks().tolist())
+    ax.set_xticks(ax.get_xticks().tolist())
     ax.set_xticklabels(np.abs(ax.get_xticks()))
     ax.legend(loc=legend_loc)
 

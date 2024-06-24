@@ -10,7 +10,7 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import List, Literal, Optional, overload, Tuple, TYPE_CHECKING, Union
+from typing import Literal, overload, TYPE_CHECKING
 import unittest
 
 from dstauffman.constants import HAVE_NUMPY, HAVE_PANDAS
@@ -48,7 +48,7 @@ def dist_enum_and_mons(
     distribution: ArrayLike,
     prng: np.random.RandomState,
     *,
-    max_months: Union[int, _I],
+    max_months: int | _I,
     start_num: int,
     alpha: float,
     beta: float,
@@ -58,11 +58,11 @@ def dist_enum_and_mons(
     distribution: ArrayLike,
     prng: np.random.RandomState,
     *,
-    max_months: Optional[Union[int, _I]] = None,
+    max_months: int | _I | None = None,
     start_num: int = 1,
     alpha: float = 1.0,
     beta: float = 1.0,
-) -> Union[_I, Tuple[_I, _I]]:
+) -> _I | tuple[_I, _I]:
     r"""
     Create a distribution for an enumerated state with a duration (such as a disease status).
 
@@ -134,11 +134,11 @@ def dist_enum_and_mons(
 def icer(
     cost: ArrayLike,
     qaly: ArrayLike,
-    names: Optional[List[str]] = None,
-    baseline: Optional[int] = None,
+    names: list[str] | None = None,
+    baseline: int | None = None,
     make_plot: bool = False,
-    opts: Optional[_Opts] = None,
-) -> Tuple[_N, _N, _N, _N, pd.DataFrame, Optional[Figure]]:
+    opts: _Opts | None = None,
+) -> tuple[_N, _N, _N, _N, pd.DataFrame, Figure | None]:
     r"""
     Calculate the incremental cost effectiveness ratios with steps to throw out dominated strategies.
 

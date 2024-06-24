@@ -5,7 +5,7 @@ from __future__ import annotations
 
 import copy
 from pathlib import Path
-from typing import Callable, ClassVar, Optional, Set, TYPE_CHECKING
+from typing import Callable, ClassVar, TYPE_CHECKING
 
 import numpy as np
 
@@ -28,8 +28,8 @@ class MyData(dcs.Frozen, metaclass=dcs.SaveAndLoad):
     ver: str
 
     # fmt: off
-    load: ClassVar[Callable[[Optional[Path], DefaultNamedArg(bool, "convert_dates")], MyData]]  # noqa: F821
-    save: Callable[[Optional[Path], DefaultNamedArg(dict, "meta"), DefaultNamedArg(Optional[Set[str]], "exclusions")], None]  # noqa: F821
+    load: ClassVar[Callable[[Path | None, DefaultNamedArg(bool, "convert_dates")], MyData]]  # noqa: F821
+    save: Callable[[Path | None, DefaultNamedArg(dict, "meta"), DefaultNamedArg(set[str] | None, "exclusions")], None]  # noqa: F821
     # fmt: on
 
     def __init__(self, num: int = 0, ver: str = ""):
@@ -42,8 +42,8 @@ class MyCollection(dict, metaclass=dcs.SaveAndLoad):  # type: ignore[misc]
     """Class based wrapper that is just a simple dictionary."""
 
     # fmt: off
-    load: ClassVar[Callable[[Optional[Path], DefaultNamedArg(bool, "convert_dates")], MyData]]  # noqa: F821
-    save: Callable[[Optional[Path], DefaultNamedArg(dict, "meta"), DefaultNamedArg(Optional[Set[str]], "exclusions")], None]  # noqa: F821
+    load: ClassVar[Callable[[Path | None, DefaultNamedArg(bool, "convert_dates")], MyData]]  # noqa: F821
+    save: Callable[[Path | None, DefaultNamedArg(dict, "meta"), DefaultNamedArg(set[str] | None, "exclusions")], None]  # noqa: F821
     # fmt: on
 
 

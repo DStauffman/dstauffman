@@ -14,7 +14,7 @@ from dataclasses import dataclass
 import doctest
 import logging
 import sys
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Callable
 import unittest
 
 from slog import activate_logging, LogLevel, ReturnCodes
@@ -26,7 +26,7 @@ _VALID_COMMANDS = frozenset({"coverage", "enforce", "help", "make_init", "tests"
 
 @dataclass(frozen=True)
 class _Flags:
-    log_level: Optional[int]
+    log_level: int | None
     use_display: bool
     use_plotting: bool
 
@@ -50,7 +50,7 @@ def main() -> int:
 
 
 # %% Functions - parse_wrapper
-def parse_wrapper(args: List[str]) -> Tuple[str, argparse.Namespace]:
+def parse_wrapper(args: list[str]) -> tuple[str, argparse.Namespace]:
     r"""Wrapper function to parse out the command name from the rest of the arguments."""
     # check for no command option
     if len(args) >= 1:
@@ -68,7 +68,7 @@ def parse_wrapper(args: List[str]) -> Tuple[str, argparse.Namespace]:
 
 
 # %% Functions - parse_commands
-def parse_commands(command: str, args: List[str]) -> argparse.Namespace:
+def parse_commands(command: str, args: list[str]) -> argparse.Namespace:
     r"""
     Splits the parsing based on the name of the command.
 
@@ -117,7 +117,7 @@ def execute_command(command: str, args: argparse.Namespace) -> int:
     if command in _VALID_COMMANDS:
         # If valid, then call the appropriate method, so help calls execute_help etc.
         func = getattr(commands, "execute_" + command)
-        rc: Optional[int] = func(args)
+        rc: int | None = func(args)
     else:
         _print_bad_command(command)
         rc = ReturnCodes.bad_command
@@ -127,7 +127,7 @@ def execute_command(command: str, args: argparse.Namespace) -> int:
 
 
 # %% process_command_line_options
-def process_command_line_options(log_start: Optional[Union[bool, str]] = None) -> _Flags:
+def process_command_line_options(log_start: bool | str | None = None) -> _Flags:
     r"""
     Parses sys.argv to determine any command line options for use in scripts.
 
