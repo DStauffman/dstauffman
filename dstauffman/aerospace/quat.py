@@ -16,7 +16,7 @@ import unittest
 
 from slog import LogLevel
 
-from dstauffman import HAVE_NUMPY, INT_TOKEN
+from dstauffman import HAVE_NUMPY, INT_TOKEN, magnitude
 from dstauffman.aerospace.quat_opt import quat_to_dcm
 
 if HAVE_NUMPY:
@@ -259,7 +259,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwarg
     try:
         axis_set = set(axis)  # type: ignore[arg-type]
     except TypeError:
-        axis_set = {axis}  # type: ignore[arg-type]
+        axis_set = {axis}
     assert len(axis_set - {1, 2, 3}) == 0, f"axis_set = {axis_set}"
     # calculations
     quat: _Q | _Qs
@@ -349,6 +349,46 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_Qu
     enforce_pos_scalar(quat, inplace=True)
     quat_assertions(quat, **kwargs)
     return quat
+
+
+# %% Functions - quat_from_rotation_vector
+def quat_from_rotation_vector(rv: ArrayLike, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
+    r"""
+    Construct quaternion(s) expressing the given rotation vector(s).
+
+    Parameters
+    ---------
+    rv: (3, ) on (3, N) numpy.ndarray of float
+        vector(s) where the magnitude gives the amount of rotation
+
+    Returns
+    -------
+    quat : ndarray, (4, ) or (4, N)
+        quaternion representing the given rotation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in June 2024.
+
+    References
+    ----------
+    #.  A quaternion is given by [x*s, y*s, z*s, c] where c = cos(theta/2) and sin=(theta/2)
+        See: https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import quat_from_rotation_vector
+    >>> import numpy as np
+    >>> rv = 5/180*np.pi * np.sqrt([9/50, 16/50, 0.5])
+    >>> quat = quat_from_rotation_vector(rv)
+    >>> with np.printoptions(precision=8):
+    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    [0.01850614 0.02467485 0.03084356 0.99904822]
+
+    """
+    angle = magnitude(rv, axis=0)  # type: ignore[arg-type]
+    axis = rv / np.where(angle != 0.0, angle, 1.0)
+    return quat_from_axis_angle(axis, angle, **kwargs)
 
 
 # %% Functions - quat_angle_diff

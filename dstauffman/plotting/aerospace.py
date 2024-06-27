@@ -2019,7 +2019,7 @@ def plot_kp(
     time : (N,)
         Time
     data : (N,)
-        Thermosphere Climate Index data
+        Planetary K index
     opts : class Opts, optional
         Plotting options
 

@@ -34,10 +34,12 @@ from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to
                              beta_from_oe, eclipse_fraction, earth_radius_by_latitude
 from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv, advance_elements
 from .quat        import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks, quat_assertions, \
-                             enforce_pos_scalar, qrot, quat_from_axis_angle, quat_angle_diff, \
-                             quat_from_euler, quat_interp, quat_inv, quat_mult, quat_norm, \
-                             quat_prop, quat_times_vector, quat_to_euler, quat_standards
-from .quat_opt    import qrot_single, quat_from_axis_angle_single, quat_interp_single, \
+                             enforce_pos_scalar, qrot, quat_from_axis_angle, \
+                             quat_from_rotation_vector, quat_angle_diff, quat_from_euler, \
+                             quat_interp, quat_inv, quat_mult, quat_norm, quat_prop, \
+                             quat_times_vector, quat_to_euler, quat_standards
+from .quat_opt    import qrot_single, quat_from_axis_angle_single, \
+                             quat_from_rotation_vector_single, quat_interp_single, \
                              quat_inv_single, quat_mult_single, quat_norm_single, \
                              quat_prop_single, quat_times_vector_single, quat_to_dcm
 from .vectors     import rot, drot, vec_cross, vec_angle, cart2sph, sph2cart, rv2dcm

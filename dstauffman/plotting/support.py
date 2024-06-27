@@ -460,7 +460,7 @@ def close_all(fig: _FigOrListFig | None = None) -> None:
     """
     # Note that it's better to loop through and close the plots individually than to use
     # plt.close("all"), as that can sometimes cause the iPython kernel to quit #DCS: 2015-06-11
-    # Note that it's better to clean the figure, then close it to really ensure the memory is
+    # Note that it's better to clear the figure, then close it to really ensure the memory is
     # returned #DCS: 2024-05-28
     # Note that we are filtering matplotlib UserWarning's to avoid bug
     # https://github.com/matplotlib/matplotlib/issues/9970 #DCS: 2024-06-10
@@ -1379,9 +1379,15 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
     >>> plt.close(fig)
 
     """
+    # calculate new limits, with checks for overflows
+    try:
+        with np.errstate(over="raise"):
+            new_limits = tuple(np.multiply(multiplier, ax.get_ylim()))
+    except FloatingPointError:
+        new_limits = (np.finfo(float).min, np.finfo(float).max)
     # plot second Y axis
     ax2 = ax.twinx()
-    ax2.set_ylim(tuple(np.multiply(multiplier, ax.get_ylim())))
+    ax2.set_ylim(new_limits)
     ax2.set_ylabel(ylab)
     return ax2  # type: ignore[return-value]
 

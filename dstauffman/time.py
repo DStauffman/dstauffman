@@ -451,11 +451,7 @@ def convert_date(  # noqa: C901
             out = np.full(date.shape, np.datetime64("nat"), dtype=numpy_form)
             if np.any(is_num):
                 datetime_units = get_np_time_units(numpy_form)
-                # with warnings.catch_warnings(action="ignore", category=UserWarning):
-                with warnings.catch_warnings():
-                    # DCS: Note: 2024-06-23 remove suppression of DeprecationWarning eventually and colapse back to one line
-                    warnings.filterwarnings(action="ignore", category=DeprecationWarning)  # numpy v1
-                    warnings.filterwarnings(action="ignore", category=UserWarning)  # numpy v2
+                with warnings.catch_warnings(action="ignore", category=UserWarning):
                     date_zero_np = (
                         np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)
                     )
@@ -478,9 +474,7 @@ def convert_date(  # noqa: C901
     elif old_form == "datetime":
         is_num = date is not None
         if form == "numpy":
-            with warnings.catch_warnings():
-                warnings.filterwarnings(action="ignore", category=DeprecationWarning)  # numpy v1
-                warnings.filterwarnings(action="ignore", category=UserWarning)  # numpy v2
+            with warnings.catch_warnings(action="ignore", category=UserWarning):
                 out = np.array(date, dtype=numpy_form)
         elif form == "matplotlib":
             out = dates.date2num(date) if is_num else np.nan
@@ -500,9 +494,7 @@ def convert_date(  # noqa: C901
         elif form in time_forms:  # pragma: no branch
             out = np.full(date.shape, np.nan)
             if np.any(is_num):
-                with warnings.catch_warnings():
-                    warnings.filterwarnings(action="ignore", category=DeprecationWarning)  # numpy v1
-                    warnings.filterwarnings(action="ignore", category=UserWarning)  # numpy v2
+                with warnings.catch_warnings(action="ignore", category=UserWarning):
                     # fmt: off
                     out[is_num] = (  # pyright: ignore[reportOptionalSubscript]
                         date[is_num] - np.array(date_zero, dtype="datetime64[ns]")

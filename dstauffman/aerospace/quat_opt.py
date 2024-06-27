@@ -120,11 +120,58 @@ def quat_from_axis_angle_single(axis: _V, angle: float) -> _Q:
     [0.01850614 0.02467485 0.03084356 0.99904822]
 
     """
-    if axis[0] == 0 and axis[1] == 0 and axis[2] == 0:
+    if axis[0] == 0.0 and axis[1] == 0.0 and axis[2] == 0.0:
         return np.array([0.0, 0.0, 0.0, 1.0])
-    c = np.cos(angle / 2)
-    s = np.sin(angle / 2)
-    if c < 0:
+    c = np.cos(angle / 2.0)
+    s = np.sin(angle / 2.0)
+    if c < 0.0:
+        return np.array([-axis[0] * s, -axis[1] * s, -axis[2] * s, -c])
+    return np.array([axis[0] * s, axis[1] * s, axis[2] * s, c])
+
+
+# %% Functions - quat_from_rotation_vector_single
+@ncjit
+def quat_from_rotation_vector_single(rv: _V) -> _Q:
+    r"""
+    Construct a quaternion expressing the given rotation vector.
+
+    Parameters
+    ----------
+    rv : (3, ) numpy.ndarray of float
+        Rotation vector, where the magnitude gives the amount of rotation
+
+    Returns
+    -------
+    quat : ndarray, (4,)
+        quaternion representing the given rotation
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in June 2024.
+
+    References
+    ----------
+    #.  A quaternion is given by [x*s, y*s, z*s, c] where c = cos(theta/2) and sin=(theta/2)
+        See: https://en.wikipedia.org/wiki/Quaternions_and_spatial_rotation
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import quat_from_rotation_vector_single
+    >>> import numpy as np
+    >>> rv = 5/180*np.pi * np.sqrt([9/50, 16/50, 0.5])
+    >>> quat = quat_from_rotation_vector_single(rv)
+    >>> with np.printoptions(precision=8):
+    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    [0.01850614 0.02467485 0.03084356 0.99904822]
+
+    """
+    if rv[0] == 0.0 and rv[1] == 0.0 and rv[2] == 0.0:
+        return np.array([0.0, 0.0, 0.0, 1.0])
+    angle = np.sqrt(np.sum(rv * np.conj(rv)))
+    axis = rv / angle
+    c = np.cos(angle / 2.0)
+    s = np.sin(angle / 2.0)
+    if c < 0.0:
         return np.array([-axis[0] * s, -axis[1] * s, -axis[2] * s, -c])
     return np.array([axis[0] * s, axis[1] * s, axis[2] * s, c])
 
