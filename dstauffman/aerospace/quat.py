@@ -357,7 +357,7 @@ def quat_from_rotation_vector(rv: ArrayLike, **kwargs: Unpack[_QuatAssertionKwar
     Construct quaternion(s) expressing the given rotation vector(s).
 
     Parameters
-    ---------
+    ----------
     rv: (3, ) on (3, N) numpy.ndarray of float
         vector(s) where the magnitude gives the amount of rotation
 

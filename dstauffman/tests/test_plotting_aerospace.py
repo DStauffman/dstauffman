@@ -25,6 +25,74 @@ if HAVE_NUMPY:
     import numpy as np
 
 
+# %% plotting.minimize_names
+class Test_minimize_names(unittest.TestCase):
+    r"""
+    Tests the plotting.minimize_names function with the following cases:
+        Nominal with numbers
+    """
+
+    def test_nominal(self) -> None:
+        out = plot.minimize_names(("1", "2", "3"))
+        self.assertEqual(out, "1,2,3")
+
+    def test_single(self) -> None:
+        out = plot.minimize_names(("Single Name",))
+        self.assertEqual(out, "Single Name")
+
+    def test_same_names(self) -> None:
+        names = ("Gyro Bias", "Gyro Bias", "Gyro Bias")
+        exp = "Gyro Bias,,"
+        out = plot.minimize_names(names)
+        self.assertEqual(out, exp)
+
+    def test_similar_names(self) -> None:
+        names = ("Gyro Bias", "Gyro Bias ARW", "Gyro Bias RRW")
+        exp = "Gyro Bias, ARW, RRW"
+        out = plot.minimize_names(names)
+        self.assertEqual(out, exp)
+
+    def test_almost_same_names(self) -> None:
+        names = ("Attitude X", "Attitude Y", "Attitude Z")
+        exp = "Attitude X,Y,Z"
+        out = plot.minimize_names(names)
+        self.assertEqual(out, exp)
+
+    def test_bad_numbers(self) -> None:
+        out = plot.minimize_names(("11", "12", "13"))
+        self.assertEqual(out, "11,12,13")
+
+    def test_combine(self) -> None:
+        names = ("Gyro Bias 1", "Gyro Bias 2", "Gyro Bias 444")
+        exp = "Gyro Bias 1,2,444"
+        out = plot.minimize_names(names)
+        self.assertEqual(out, exp)
+
+    def test_bad_combine(self) -> None:
+        names = ("Gyro Bias 21", "Gyro Bias 22", "Gyro Bias 24")
+        exp = "Gyro Bias 21,22,24"
+        out = plot.minimize_names(names)
+        self.assertEqual(out, exp)
+
+    def test_mixed(self) -> None:
+        names = ("Gyro Bias 1", "Gyro Bias 2", "Gyro Bias 3", "Gyro Drift 1", "Gyro Drift 5")
+        exp = "Gyro Bias 1,Bias 2,Bias 3,Drift 1,Drift 5"
+        out = plot.minimize_names(names)
+        self.assertEqual(out, exp)
+
+    def test_seperator(self) -> None:
+        names = ("Gyro Bias 1", "Gyro Bias 2", "Gyro Bias 4", "Gyro Bias 5")
+        exp = "Gyro Bias 1||2||4||5"
+        out = plot.minimize_names(names, sep="||")
+        self.assertEqual(out, exp)
+
+    def test_no_matches(self) -> None:
+        names = ("Bias 1", "Scale Factor 2", "Misalignment 3")
+        exp = "Bias 1, Scale Factor 2, Misalignment 3"
+        out = plot.minimize_names(names, sep=", ")
+        self.assertEqual(out, exp)
+
+
 # %% plotting.make_quaternion_plot
 @unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_make_quaternion_plot(unittest.TestCase):

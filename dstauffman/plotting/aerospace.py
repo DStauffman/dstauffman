@@ -155,6 +155,62 @@ _LEG_FORMAT = "{:1.3f}"
 _TRUTH_COLOR = "k"
 
 
+# %% Functions - minimize_names
+def minimize_names(names: tuple[str, ...], *, sep: str = ",") -> str:
+    r"""
+    Combine the unique characters in a name to make them simpler.
+
+    Parameters
+    ----------
+    names : tuple[str, ...]
+        Names of the fields to be combined
+    sep : str, optional, default is ","
+        String to combine between the shortened names
+
+    Returns
+    -------
+    str
+        Combined string of shortened names
+
+    See Also
+    --------
+    plot_covariance
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in July 2024
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import minimize_names
+    >>> names = ("Gyro Bias 1", "Gyro Bias 2", "Gyro Bias 3")
+    >>> print(minimize_names(names))
+    Gyro Bias 1,2,3
+
+    """
+    if len(names) == 0:
+        return ""
+    if len(names) == 1:
+        return names[0]
+    all_chars = set()
+    for name in names:
+        all_chars |= set(name)
+    if len(all_chars - frozenset({"1", "2", "3", "4", "5", "6", "7", "8", "9", "0"})) == 0:
+        return sep.join(names)
+    min_len = min(len(name) for name in names)
+    for i in range(min_len):
+        if names[0][i].isdigit():
+            match = i
+            break
+        shorts = {name[:i + 1] for name in names}
+        if len(shorts) > 1:
+            match = i
+            break
+    else:
+        match = i + 1
+    return names[0][:match] + sep.join(name[match:] for name in names)
+
+
 # %% Functions - make_quaternion_plot
 @overload
 def make_quaternion_plot(
@@ -1819,7 +1875,8 @@ def plot_covariance(  # noqa: C901
                 temp[found_rows2, :] = data_two
                 data_two = temp
             if have_data1 or have_data2:
-                this_description = description + " for State " + ",".join(str(x) for x in this_state_nums)
+                state_names = tuple(str(state) if elements is None else elements[state] for state in this_state_nums)
+                this_description = description + " for State " + minimize_names(state_names)
                 this_elements = [elements[state] for state in this_state_nums] if elements is not None else None
                 colormap = get_nondeg_colorlists(len(this_elements)) if this_elements is not None else None
                 out = make_difference_plot(  # type: ignore[call-overload, misc]
