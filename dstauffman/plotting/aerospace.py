@@ -526,10 +526,6 @@ def plot_quaternion(  # noqa: C901
     if opts is None:
         opts = Opts()
 
-    # alias keywords
-    name_one = kwargs.pop("name_one", "")
-    name_two = kwargs.pop("name_two", "")
-
     # determine if converting units
     is_date_1 = is_datetime(time_one)
     is_date_2 = is_datetime(time_two)
@@ -564,6 +560,8 @@ def plot_quaternion(  # noqa: C901
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    show_extra   = kwargs.pop("show_extra", this_opts.show_xtra)
+    name_one, name_two = this_opts.get_name_one_and_two(kwargs)
     # fmt: on
 
     # hard-coded defaults
@@ -598,6 +596,7 @@ def plot_quaternion(  # noqa: C901
         plot_zero=plot_zero,
         show_rms=show_rms,
         legend_loc=legend_loc,
+        show_extra=show_extra,
         second_units=second_units,
         return_err=return_err,
         **kwargs,
@@ -717,10 +716,6 @@ def plot_attitude(  # noqa: C901
     if fields is None:
         fields = {"att": "Attitude Quaternion"}
 
-    # alias keywords
-    name_one = kwargs.pop("name_one", kf1.name)
-    name_two = kwargs.pop("name_two", kf2.name)
-
     # determine if converting units
     is_date_1 = is_datetime(kf1.time)
     is_date_2 = is_datetime(kf2.time)
@@ -755,6 +750,7 @@ def plot_attitude(  # noqa: C901
     plot_zero    = kwargs.pop("plot_zero", this_opts.show_zero)
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
+    name_one, name_two = this_opts.get_name_one_and_two(kwargs, kf1=kf1, kf2=kf2)
     # fmt: on
 
     # hard-coded defaults
@@ -1239,9 +1235,6 @@ def plot_innovations(  # noqa: C901
         number_field = {"quad": "Quad", "sca": "SCA"}
 
     # aliases and defaults
-    name_one = kwargs.pop("name_one", kf1.name)
-    name_two = kwargs.pop("name_two", kf2.name)
-    description = name_one if name_one else name_two if name_two else ""
     num_chan = 0
     for key in fields.keys():
         if getattr(kf1, key) is not None:
@@ -1295,6 +1288,8 @@ def plot_innovations(  # noqa: C901
     show_extra   = kwargs.pop("show_extra", this_opts.show_xtra)
     colormap     = kwargs.pop("colormap", this_opts.colormap)
     tolerance    = kwargs.pop("tolerance", 0)
+    name_one, name_two = this_opts.get_name_one_and_two(kwargs, kf1=kf1, kf2=kf2)
+    description = name_one if name_one else name_two if name_two else ""
     # fmt: on
 
     # Initialize outputs
@@ -1798,8 +1793,6 @@ def plot_covariance(  # noqa: C901
     elements     = kwargs.pop("elements", elements)
     units        = kwargs.pop("units", "mixed")
     second_units = kwargs.pop("second_units", "micro")
-    name_one     = kwargs.pop("name_one", kf1.name)
-    name_two     = kwargs.pop("name_two", kf2.name)
     # fmt: on
     if groups is None:
         groups = list(range(num_chan))
@@ -1838,6 +1831,7 @@ def plot_covariance(  # noqa: C901
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
     show_extra   = kwargs.pop("show_extra", this_opts.show_xtra)
+    name_one, name_two = this_opts.get_name_one_and_two(kwargs, kf1=kf1, kf2=kf2)
     # fmt: on
 
     # initialize output

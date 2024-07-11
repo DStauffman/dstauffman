@@ -460,7 +460,7 @@ def make_generic_plot(  # noqa: C901
     # calculate the differences
     if doing_diffs and have_both:
         if is_quat_diff:
-            (nondeg_angle, nondeg_error) = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix])  # type: ignore[arg-type, call-overload, index]
+            (nondeg_angle, nondeg_error) = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix], allow_nans=True)  # type: ignore[arg-type, call-overload, index]
         else:
             diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]  # type: ignore[call-overload, index]
     # calculate the rms (or mean) values

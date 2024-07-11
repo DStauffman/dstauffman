@@ -29,6 +29,7 @@ from dstauffman import (
     histcounts,
     np_digitize,
 )
+from dstauffman.aerospace import Kf, KfInnov
 from dstauffman.plotting.generic import make_bar_plot, make_difference_plot, make_time_plot
 from dstauffman.plotting.support import (
     ColorMap,
@@ -72,6 +73,7 @@ if TYPE_CHECKING:
     _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
     _DeltaTime = int | float | np.timedelta64
     _Figs = list[Figure]
+    _Gnds = Kf | KfInnov | None
 
     class _OptsKwargs(TypedDict):
         case_name: NotRequired[str]
@@ -192,6 +194,10 @@ if TYPE_CHECKING:
 
     class _HistKwargs(TypedDict):
         legend_loc: NotRequired[str]
+
+    class _NameKwargs(TypedDict):
+        name_one: NotRequired[str]
+        name_two: NotRequired[str]
 
 
 # %% Globals
@@ -325,6 +331,12 @@ class Opts(Frozen):
         else:
             name = ""
         return name
+
+    def get_name_one_and_two(self, kwargs: _NameKwargs, *, kf1: _Gnds = None, kf2: _Gnds = None) -> tuple[str, str]:
+        r"""Get the first and second names from kwargs, or class names, or this opts structure."""
+        name_one = kwargs.pop("name_one", kf1.name if kf1 is not None and bool(kf1.name) else self.get_names(0))
+        name_two = kwargs.pop("name_two", kf2.name if kf2 is not None and bool(kf2.name) else self.get_names(1))
+        return (name_one, name_two)
 
     def get_date_zero_str(self, date: datetime.datetime | list[int] | None = None) -> str:
         r"""
@@ -667,6 +679,7 @@ def plot_time_difference(
     show_rms     = kwargs.pop("show_rms", this_opts.show_rms)
     legend_loc   = kwargs.pop("legend_loc", this_opts.leg_spot)
     show_extra   = kwargs.pop("show_extra", this_opts.show_xtra)
+    name_one, name_two = this_opts.get_name_one_and_two(kwargs)
     # fmt: on
 
     # call wrapper function for most of the details
@@ -676,6 +689,8 @@ def plot_time_difference(
         time_two=time_two,
         data_one=data_one,
         data_two=data_two,
+        name_one=name_one,
+        name_two=name_two,
         time_units=time_units,
         start_date=start_date,
         rms_xmin=rms_xmin,
