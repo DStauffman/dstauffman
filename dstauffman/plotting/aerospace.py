@@ -182,7 +182,7 @@ def minimize_names(names: tuple[str, ...], *, sep: str = ",") -> str:
 
     Examples
     --------
-    >>> from dstauffman.aerospace import minimize_names
+    >>> from dstauffman.plotting import minimize_names
     >>> names = ("Gyro Bias 1", "Gyro Bias 2", "Gyro Bias 3")
     >>> print(minimize_names(names))
     Gyro Bias 1,2,3
@@ -202,7 +202,7 @@ def minimize_names(names: tuple[str, ...], *, sep: str = ",") -> str:
         if names[0][i].isdigit():
             match = i
             break
-        shorts = {name[:i + 1] for name in names}
+        shorts = {name[: i + 1] for name in names}
         if len(shorts) > 1:
             match = i
             break
