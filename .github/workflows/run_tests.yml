@@ -3,7 +3,7 @@ name: Run Unit Tests via Pytest
 on: [push]
 
 jobs:
-  build
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
