@@ -24,19 +24,23 @@ jobs:
         python -m pip install wheel
         python -m pip install coverage[toml] pytest
         deactivate
-    - name: Checkout nubs
+    - name: Clone nubs
       uses: actions/checkout@v4
       with:
-        repository: dstauffman/nubs
-        path: nubs
-    - name: Checkout slog
+        repository: DStauffman/nubs
+        path: ${{ github.workspace }}/nubs_repo
+    - name: Clone slog
       uses: actions/checkout@v4
       with:
-        repository: dstauffman/slog
-        path: slog
+        repository: DStauffman/slog
+        path: ${{ github.workspace }}/slog_repo
+    - name: Set PYTHONPATH
+      run: |
+        echo "PYTHONPATH=${{ github.workspace }}/nubs_repo:${{ github.workspace }}/slog_repo" >> "$GITHUB_ENV"
     - name: Test core_only with pytest
       run: |
         pwd
         ls -l
+        echo $PYTHONPATH
         source core_only/bin/activate
         python -m dstauffman tests
