@@ -259,7 +259,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwarg
     try:
         axis_set = set(axis)  # type: ignore[arg-type]
     except TypeError:
-        axis_set = {axis}
+        axis_set = {axis}  # type: ignore[arg-type]
     assert len(axis_set - {1, 2, 3}) == 0, f"axis_set = {axis_set}"
     # calculations
     quat: _Q | _Qs

@@ -13,7 +13,7 @@ import datetime
 import doctest
 import logging
 from pathlib import Path
-from typing import NotRequired, TYPE_CHECKING, TypedDict, Unpack
+from typing import Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from slog import LogLevel
@@ -573,16 +573,45 @@ def plot_time_history(
 
 
 # %% Functions - plot_time_difference
+@overload
 def plot_time_difference(
     description: str,
     time_one: _Times | None,
     data_one: _Data | None,
     time_two: _Times | None,
     data_two: _Data | None,
-    opts: Opts | None = None,
     *,
+    opts: Opts | None,
+    ignore_empties: bool,
+    skip_setup_plots: bool,
+    return_err: Literal[False] = ...,
+    **kwargs: Unpack[_DiffKwargs],
+) -> _Figs: ...
+@overload
+def plot_time_difference(
+    description: str,
+    time_one: _Times | None,
+    data_one: _Data | None,
+    time_two: _Times | None,
+    data_two: _Data | None,
+    *,
+    opts: Opts | None,
+    ignore_empties: bool,
+    skip_setup_plots: bool,
+    return_err: Literal[True],
+    **kwargs: Unpack[_DiffKwargs],
+) -> tuple[_Figs, dict[str, _N]]: ...
+def plot_time_difference(
+    description: str,
+    time_one: _Times | None,
+    data_one: _Data | None,
+    time_two: _Times | None,
+    data_two: _Data | None,
+    *,
+    opts: Opts | None = None,
     ignore_empties: bool = False,
     skip_setup_plots: bool = False,
+    return_err: bool = False,
     **kwargs: Unpack[_DiffKwargs],
 ) -> Figure | _Figs | tuple[_Figs, dict[str, _N]] | None:
     r"""
@@ -671,6 +700,7 @@ def plot_time_difference(
     rms_xmax     = kwargs.pop("rms_xmax", this_opts.rms_xmax)
     disp_xmin    = kwargs.pop("disp_xmin", this_opts.disp_xmin)
     disp_xmax    = kwargs.pop("disp_xmax", this_opts.disp_xmax)
+    sub_plots    = kwargs.pop("make_subplots", this_opts.sub_plots)
     single_lines = kwargs.pop("single_lines", this_opts.sing_line)
     colormap     = kwargs.pop("colormap", this_opts.colormap)
     use_mean     = kwargs.pop("use_mean", this_opts.use_mean)
@@ -682,8 +712,14 @@ def plot_time_difference(
     name_one, name_two = this_opts.get_name_one_and_two(kwargs)
     # fmt: on
 
+    # initialize outputs
+    figs: _Figs = []
+
+    # print status
+    logger.log(LogLevel.L4, "Plotting %s plots ...", description)
+
     # call wrapper function for most of the details
-    fig = make_difference_plot(  # type: ignore[call-overload, misc]
+    out = make_difference_plot(  # type: ignore[call-overload, misc]
         description=description,
         time_one=time_one,
         time_two=time_two,
@@ -697,6 +733,7 @@ def plot_time_difference(
         rms_xmax=rms_xmax,
         disp_xmin=disp_xmin,
         disp_xmax=disp_xmax,
+        make_subplots=sub_plots,
         single_lines=single_lines,
         colormap=colormap,
         use_mean=use_mean,
@@ -705,13 +742,22 @@ def plot_time_difference(
         show_rms=show_rms,
         legend_loc=legend_loc,
         show_extra=show_extra,
+        return_err=return_err,
         **kwargs,
     )
+    if return_err:
+        figs += out[0]
+        err: dict[str, _N] = out[1]
+    else:
+        figs += out
 
     # setup plots
     if not skip_setup_plots:
-        setup_plots(fig, this_opts)
-    return fig  # type: ignore[no-any-return]
+        setup_plots(figs, this_opts)
+    logger.log(LogLevel.L4, "... done.")
+    if return_err:
+        return (figs, err)
+    return figs
 
 
 # %% Functions - plot_correlation_matrix

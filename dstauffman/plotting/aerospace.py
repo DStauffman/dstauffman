@@ -437,6 +437,7 @@ def plot_quaternion(
     quat_two: _Q | None,
     *,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[False] = ...,
     **kwargs: Unpack[_KfQuatKwargs],
 ) -> _Figs: ...
@@ -449,9 +450,10 @@ def plot_quaternion(
     quat_two: _Q | None,
     *,
     opts: Opts | None,
+    skip_setup_plots: bool,
     return_err: Literal[True],
     **kwargs: Unpack[_KfQuatKwargs],
-) -> tuple[_Figs, _N]: ...
+) -> tuple[_Figs, dict[str, _N]]: ...
 def plot_quaternion(  # noqa: C901
     description: str,
     time_one: _Times | None,
@@ -460,9 +462,10 @@ def plot_quaternion(  # noqa: C901
     quat_two: _Q | None,
     *,
     opts: Opts | None = None,
+    skip_setup_plots: bool = False,
     return_err: bool = False,
     **kwargs: Unpack[_KfQuatKwargs],
-) -> _Figs | tuple[_Figs, _N]:
+) -> _Figs | tuple[_Figs, dict[str, _N]]:
     r"""
     Plots the attitude quaternion history without making explicit Kf classes.
 
@@ -480,6 +483,8 @@ def plot_quaternion(  # noqa: C901
         quaternion history for channel two
     opts : class Opts, optional
         Plotting options
+    skip_setup_plots : bool, optional, default is False
+        Whether to skip the setup_plots step, in case you are manually adding to an existing axis
     return_err : bool, optional, default is False
         Whether the function should return the error differences in addition to the figure handles
 
@@ -603,12 +608,13 @@ def plot_quaternion(  # noqa: C901
     )
     if return_err:
         figs += out[0]
-        err: _N = out[1]
+        err: dict[str, _N] = out[1]
     else:
         figs += out
 
     # Setup plots
-    setup_plots(figs, opts)
+    if not skip_setup_plots:
+        setup_plots(figs, opts)
     logger.log(LogLevel.L4, "... done.")
     if return_err:
         return (figs, err)
@@ -987,8 +993,7 @@ def plot_position(  # noqa: C901
     units         = kwargs.pop("units", default_units)
     second_units  = kwargs.pop("second_units", "kilo")
     colormap      = get_nondeg_colorlists(3)
-    name_one      = kwargs.pop("name_one", kf1.name)
-    name_two      = kwargs.pop("name_two", kf2.name)
+    name_one, name_two = this_opts.get_name_one_and_two(kwargs, kf1=kf1, kf2=kf2)
     # fmt: on
 
     # initialize outputs

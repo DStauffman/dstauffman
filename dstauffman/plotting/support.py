@@ -104,6 +104,7 @@ if TYPE_CHECKING:
     _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | None
     _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...] | None  # fmt: skip
     _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...] | None  # fmt: skip
+    _FigOrListFig = Figure | list[Figure]
 
     class _RmsIndices(TypedDict):
         pts: list[int]
@@ -118,9 +119,6 @@ DEFAULT_COLORMAP: str = "Dark2"  # "Paired", "Dark2", "tab10", "tab20"
 
 # Whether to include a classification on any generated plots
 DEFAULT_CLASSIFICATION: str = ""
-
-if TYPE_CHECKING:
-    _FigOrListFig = Figure | list[Figure]
 
 COLOR_LISTS: dict[str, colors.ListedColormap] = {}
 if HAVE_MPL:
@@ -2353,7 +2351,7 @@ def fig_ax_factory(  # noqa: C901
             assert (manager := fig.canvas.manager) is not None
             manager.set_window_title(this_title)
         figs.append(fig)
-        axes.append(ax)
+        axes.append(ax)  # type: ignore[arg-type]
     fig_ax: tuple[tuple[Figure, Axes], ...]
     if is_1d:
         assert isinstance(num_axes, int)

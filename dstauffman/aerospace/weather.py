@@ -80,10 +80,14 @@ def read_solar_cycles(filename: Path) -> pd.DataFrame:  # noqa: C901
     def _get_date(text: str) -> datetime.datetime | np.datetime64:
         if not text:
             return NP_NAT
+        if text.startswith("("):
+            return NP_NAT
         return datetime.datetime.strptime(text.strip(), "%Y-%m")
 
     def _remove_parens(text: str) -> int | float:
         if not text:
+            return np.nan
+        if text.startswith("Progr"):
             return np.nan
         return int(text.replace("(", "").replace(")", ""))
 
@@ -94,7 +98,7 @@ def read_solar_cycles(filename: Path) -> pd.DataFrame:  # noqa: C901
             return int(text)
         except ValueError:
             pass
-        if text.startswith("Progressive: "):
+        if text.startswith("Progr: "):
             return int(text.split(" ")[1].replace("*", ""))
         return int(text.split(" ")[0])
 
@@ -107,9 +111,6 @@ def read_solar_cycles(filename: Path) -> pd.DataFrame:  # noqa: C901
         "Average_spots_per_day",
         "Time_of_Rise_mons",
         "Duration_mons",
-        "100+ spots days",
-        "150+ spots days",
-        "200+ spots days",
     ]
     converters = {
         "Solar_Cycle": _get_solar_cycle,
@@ -118,9 +119,6 @@ def read_solar_cycles(filename: Path) -> pd.DataFrame:  # noqa: C901
         "Time_of_Rise_mons": _get_duration,
         "Duration_mons": _get_duration,
         "Smoothed_max_SSN": _parse_ongoing,
-        "100+ spots days": _parse_ongoing,
-        "150+ spots days": _parse_ongoing,
-        "200+ spots days": _parse_ongoing,
         "Average_spots_per_day": _remove_parens,
     }
     df = pd.read_table(filename, sep="\t", skiprows=1, names=names, converters=converters)
