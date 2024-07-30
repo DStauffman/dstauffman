@@ -18,7 +18,6 @@ classifiers = [
     "Intended Audience :: Science/Research",
     "Natural Language :: English",
     "Programming Language :: Python :: 3",
-    "Programming Langauge :: Python :: 3.9",
     "Programming Langauge :: Python :: 3.10",
     "Programming Langauge :: Python :: 3.11",
     "Programming Langauge :: Python :: 3.12",
@@ -194,6 +193,7 @@ typeCheckingMode = "basic"
 deprecateTypingAliases = true
 reportGeneralTypeIssues = false
 reportUnboundVariable = false
+reportOptionalMemberAccess = true
 
 enableTypeIgnoreComments = true
 reportUnnecessaryTypeIgnoreComment = false

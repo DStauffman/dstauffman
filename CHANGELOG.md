@@ -1,11 +1,16 @@
 # Change Log
 
+## June 2024 (by David C. Stauffer)
+
+* Drop support for Python v3.9, and use newer typing features like dict, list, tuple and | for Union
+
 ## November 2020 (by David C. Stauffer)
 
 * Made to work with just core Python, although with very limited functionality
 
 ## July 2020 (by David C. Stauffer)
 
+* Add logging and batch estimation capabilities
 * Split the plotting portions into a separate submodule, which allows for delayed importing of matplotlib
 * Put aerospace, estimation, and health into submodules
 

@@ -856,7 +856,7 @@ def make_generic_plot(  # noqa: C901
         else:
             # % Difference plot
             for j in loop_counter:
-                if single_lines and i % num_channels != j and not is_quat_diff or (is_quat_diff and not plot_components):
+                if single_lines and i % num_channels != j or (is_quat_diff and not plot_components):
                     continue
                 if show_rms:
                     value = _LEG_FORMAT.format(leg_conv * nondeg_func[j])  # type: ignore[index]
@@ -885,7 +885,7 @@ def make_generic_plot(  # noqa: C901
                     datashaders.append({"time": time_overlap, "data": this_data, "ax": this_axes, "color": this_color})
                 else:
                     plot_func(this_axes, time_overlap, this_data, ".-", markersize=4, label=this_label, color=this_color)
-            if is_quat_diff and not plot_components or (single_lines and (i + 1) % num_channels == 0):
+            if is_quat_diff and not plot_components and (not single_lines or (i + 1) % num_channels == 0):
                 if show_rms:
                     value = _LEG_FORMAT.format(leg_conv * mag_func)
                     this_label = f"Angle ({func_name}: {value} {leg_units})"
@@ -963,11 +963,26 @@ def make_generic_plot(  # noqa: C901
         if ylabel is None:
             if is_diff_plot:
                 if is_quat_diff:
-                    this_axes.set_ylabel("Quaternion Components [dimensionless]")
+                    if not single_lines:
+                        this_axes.set_ylabel(f"Quaternion Components [{units}]")
+                    else:
+                        if i % num_channels == 0:
+                            fig_ax[i][0].supylabel("Quaternion Components")  # type: ignore[index]
+                        this_axes.set_ylabel(f"{elements[i % num_channels]} [{units}]")
                 else:
-                    this_axes.set_ylabel(f"{description} Difference [{units}]")
+                    if not single_lines:
+                        this_axes.set_ylabel(f"{description} Difference [{units}]")
+                    else:
+                        if i % num_channels == 0:
+                            fig_ax[i][0].supylabel(description)  # type: ignore[index]
+                        this_axes.set_ylabel(f"{elements[i % num_channels]} [{units}]")
             else:
-                this_axes.set_ylabel(f"{description} [{units}]")
+                if not single_lines:
+                    this_axes.set_ylabel(f"{description} [{units}]")
+                else:
+                    if i % num_channels == 0:
+                        fig_ax[i][0].supylabel(description)  # type: ignore[index]
+                    this_axes.set_ylabel(f"{elements[i % num_channels]} [{units}]")
         else:
             this_ylabel = ylabel[i] if isinstance(ylabel, list) else ylabel
             if is_diff_plot:

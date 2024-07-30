@@ -59,7 +59,7 @@ setup(
         "tblib>=1.7",
     ],
     extra_require={"shading": ["datashader>=0.15"]},
-    python_requires=">=3.8",
+    python_requires=">=3.10",
     include_package_data=True,
     zip_safe=False,
 )
