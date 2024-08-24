@@ -259,7 +259,7 @@ def quat_inv_single(q1: _Q, inplace: bool = False) -> _Q:
     Returns
     -------
     ndarray, (4, )
-        inverse quaterion
+        inverse quaternion
 
     See Also
     --------

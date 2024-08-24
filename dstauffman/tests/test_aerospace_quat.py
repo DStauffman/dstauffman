@@ -961,6 +961,16 @@ class Test_aerospace_quat_prop(unittest.TestCase):
         quat = space.quat_prop(np.array([1.0, 0.0, 0.0, 0.0]), -self.delta_ang)
         self.assertGreater(quat[3], 0)
 
+    def test_cross_terms(self) -> None:
+        quat = np.array([0.1, -0.2, 0.3, 0.35])
+        delta_ang = np.array([0.1, -0.005, 0.123])
+        qexp = np.array([0.10595, -0.192025, 0.331275, 0.32605])
+        qout = space.quat_prop(quat, delta_ang, renorm=False, skip_assertions=True)
+        np.testing.assert_array_almost_equal(qout, qexp, 12)
+        qexp_norm = np.array([0.20614606650844464, -0.3736215046841348, 0.6445591145123643, 0.6343928738563319])
+        qout_norm = space.quat_prop(quat, delta_ang)
+        np.testing.assert_array_almost_equal(qout_norm, qexp_norm, 12)
+
     def test_no_renorm(self) -> None:
         with self.assertRaises(AssertionError):
             space.quat_prop(self.quat, self.delta_ang, renorm=False)

@@ -242,7 +242,7 @@ class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
         week = np.array([1782, 1783])
         time = np.array([425916, 4132])
         date_utc = space.gps_to_utc_datetime(week, time)
-        exp = [datetime.datetime(2014, 3, 6, 22, 18, 19), datetime.datetime(2014, 3, 9, 1, 8, 35)]
+        exp = [datetime.datetime(2014, 3, 6, 22, 18, 20), datetime.datetime(2014, 3, 9, 1, 8, 36)]
         self.assertEqual(date_utc, exp)
 
     def test_wrapped(self) -> None:
@@ -256,7 +256,7 @@ class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
         week = np.array([1782, 1783])
         time = np.array([425916, 4132])
         date_utc = space.gps_to_utc_datetime(week, time, form="numpy")  # type: ignore[call-overload]
-        exp = np.array([np.datetime64("2014-03-06T22:18:19", "ns"), np.datetime64("2014-03-09T01:08:35", "ns")])
+        exp = np.array([np.datetime64("2014-03-06T22:18:20", "ns"), np.datetime64("2014-03-09T01:08:36", "ns")])
         np.testing.assert_array_equal(date_utc, exp)
 
     def test_manual_leap_seconds(self) -> None:

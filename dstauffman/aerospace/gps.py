@@ -456,6 +456,105 @@ def gps_to_datetime(
     return date_gps
 
 
+# %% Functions - get_gps_to_utc_offset
+def get_gps_to_utc_offset(days_since_gps_date_zero: int | float | _I |_N):
+    """
+    Calculate the GPS to UTC offset given the (fractional) number of days since GPS origin.
+
+    Parameters
+    ----------
+    days_since_gps_date_zero: (N, ) ndarray
+        Days (in continuous GPS reference, since GPS Date Zero (1980-Jan-06))
+
+    Returns
+    -------
+    gps_to_utc_offset
+
+    Change Log
+    ----------
+    #.  Functionalize separately by David C. Stauffer in August 2024 and expanded to include
+        all leap from the start of GPS epoch 0. Also fixed bug where later results where
+        wiping earlier ones.
+
+    References
+    ----------
+    Recent Leap Seconds:
+        1999 JAN 01 = JD 2451179.5,  TAI-UTC=  32.0,  GPS-UTC = 13
+        2006 JAN 01 = JD 2453736.5,  TAI-UTC=  33.0,  GPS-UTC = 14
+        2009 JAN 01 = JD 2454832.5,  TAI-UTC=  34.0,  GPS-UTC = 15
+        2012 JUL 01 = JD 2456109.5,  TAI-UTC=  35.0,  GPS-UTC = 16
+        2015 JUL 01 = JD 2457204.5,  TAI-UTC=  36.0,  GPS-UTC = 17
+        2017 JAN 01 = JD 2457754.5,  TAI-UTC=  37.0,  GPS-UTC = 18
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import get_gps_to_utc_offset
+    >>> gps_to_utc_offset = get_gps_to_utc_offset(11111)
+    >>> assert gps_to_utc_offset == -15
+
+    """
+    assert np.all(days_since_gps_date_zero >= 0), "Days since origin must be positive."
+    # initialize output to last known offset starting from Jan 1, 2017
+    gps_to_utc_offset = np.full(np.shape(days_since_gps_date_zero), -18, dtype=int)
+    # fmt: off
+    # GPS offset for 1 Jul 2015 to 1 Jan 2017
+    # Note: 13510 = (datetime.datetime(2017, 1, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero < 13510 + 17 / ONE_DAY] = -17
+    # GPS offset for 1 Jul 2012 to 1 Jul 2015
+    # Note: 12960 = (datetime.datetime(2015, 7, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero < 12960 + 16 / ONE_DAY] = -16
+    # GPS offset for 1 Jan 2009 to 1 Jul 2012
+    # Note: 11865 = (datetime.datetime(2012, 7, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero < 11865 + 15 / ONE_DAY] = -15
+    # GPS offset for 1 Jan 2006 to 1 Jan 2009
+    # Note: 10588 = (datetime.datetime(2009, 1, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero < 10588 + 14 / ONE_DAY] = -14
+    # GPS offset for 1 Jan 1999 to 1 Jan 2006
+    # Note: 9492 = (datetime.datetime(2006, 1, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  9492 + 13 / ONE_DAY] = -13
+    # GPS offset for 1 Jul 1997 to 1 Jan 1999
+    # Note: 6935 = (datetime.datetime(1999, 1, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  6935 + 12 / ONE_DAY] = -12
+    # GPS offset for 1 Jan 1996 to 1 Jul 1997
+    # Note: 6386 = (datetime.datetime(1997, 7, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  6386 + 11 / ONE_DAY] = -11
+    # GPS offset for 1 Jul 1994 to 1 Jan 1996
+    # Note: 5839 = (datetime.datetime(1996, 1, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  5839 + 10 / ONE_DAY] = -10
+    # GPS offset for 1 Jul 1993 to 1 Jul 1994
+    # Note: 5290 = (datetime.datetime(1994, 7, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  5290 +  9 / ONE_DAY] = -9
+    # GPS offset for 1 Jul 1992 to 1 Jul 1993
+    # Note: 4925 = (datetime.datetime(1993, 7, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  4925 +  8 / ONE_DAY] = -8
+    # GPS offset for 1 Jan 1991 to 1 Jul 1992
+    # Note: 4560 = (datetime.datetime(1992, 7, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  4560 +  7 / ONE_DAY] = -7
+    # GPS offset for 1 Jan 1990 to 1 Jan 1991
+    # Note: 4013 = (datetime.datetime(1991, 1, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  4013 +  6 / ONE_DAY] = -6
+    # GPS offset for 1 Jan 1988 to 1 Jan 1990
+    # Note: 3648 = (datetime.datetime(1990, 1, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  3648 +  5 / ONE_DAY] = -5
+    # GPS offset for 1 Jul 1985 to 1 Jan 1988
+    # Note: 2917 = (datetime.datetime(1988, 1, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  2917 +  4 / ONE_DAY] = -4
+    # GPS offset for 1 Jul 1983 to 1 Jul 1985
+    # Note: 2003 = (datetime.datetime(1985, 7, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  2003 +  3 / ONE_DAY] = -3
+    # GPS offset for 1 Jul 1982 to 1 Jul 1983
+    # Note: 1272 = (datetime.datetime(1983, 7, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <  1272 +  2 / ONE_DAY] = -2
+    # GPS offset for 1 Jul 1981 to 1 Jul 1982
+    # Note: 907 = (datetime.datetime(1982, 7, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <   907 +  1 / ONE_DAY] = -1
+    # GPS offset for 6 Jan 1980 to 1 Jul 1981
+    # Note: 542 = (datetime.datetime(1981, 7, 1) - datetime.datetime(1980, 1, 6)).days
+    gps_to_utc_offset[days_since_gps_date_zero <   542] = 0
+    # fmt: on
+    return gps_to_utc_offset
+
+
 # %% Functions - gps_to_utc_datetime
 @overload
 def gps_to_utc_datetime(week: int | _I, time: int | float | _I | _N) -> datetime.datetime | list[datetime.datetime]: ...
@@ -512,16 +611,6 @@ def gps_to_utc_datetime(
         second at GPS midnight rather than UTC midnight.
     #.  Translated into Python by David C. Stauffer in July 2021.
 
-    References
-    ----------
-    Recent Leap Seconds:
-        1999 JAN 01 = JD 2451179.5,  TAI-UTC=  32.0,  GPS-UTC = 13
-        2006 JAN 01 = JD 2453736.5,  TAI-UTC=  33.0,  GPS-UTC = 14
-        2009 JAN 01 = JD 2454832.5,  TAI-UTC=  34.0,  GPS-UTC = 15
-        2012 JUL 01 = JD 2456109.5,  TAI-UTC=  35.0,  GPS-UTC = 16
-        2015 JUL 01 = JD 2457204.5,  TAI-UTC=  36.0,  GPS-UTC = 17
-        2017 JAN 01 = JD 2457754.5,  TAI-UTC=  37.0,  GPS-UTC = 18
-
     Examples
     --------
     >>> from dstauffman.aerospace import gps_to_utc_datetime
@@ -530,8 +619,8 @@ def gps_to_utc_datetime(
     >>> week     = np.array([1782, 1783])
     >>> time     = np.array([425916, 4132])
     >>> date_utc = gps_to_utc_datetime(week, time)
-    >>> assert(date_utc[0] == datetime.datetime(2014, 3, 6, 22, 18, 19))
-    >>> assert(date_utc[1] == datetime.datetime(2014, 3, 9,  1,  8, 35))
+    >>> assert(date_utc[0] == datetime.datetime(2014, 3, 6, 22, 18, 20))
+    >>> assert(date_utc[1] == datetime.datetime(2014, 3, 9,  1,  8, 36))
 
     """
     week = np.asanyarray(week)
@@ -545,28 +634,9 @@ def gps_to_utc_datetime(
 
     # check for optional inputs
     if gps_to_utc_offset is None:
-        # fmt: off
-        # offset starting from Jan 1, 2017
-        gps_to_utc_offset = np.full(week.shape, -18)
         days_since_date_zero = week * DAYS_PER_WEEK + time / ONE_DAY
-        # GPS offset for 1 Jan 1999 to 1 Jan 2006
-        # Note: 9492 = datenum([2006 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero <  9492 + 13 / ONE_DAY] = -13  # pyright: ignore[reportOptionalSubscript]
-        # GPS offset for 1 Jan 2006 to 1 Jan 2009
-        # Note: 10588 = datenum([2009 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 10588 + 14 / ONE_DAY] = -14  # pyright: ignore[reportOptionalSubscript]
-        # GPS offset for 1 Jan 2009 to 1 Jul 2012
-        # Note: 11865 = datenum([2012 7 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 11865 + 15 / ONE_DAY] = -15  # pyright: ignore[reportOptionalSubscript]
-        # GPS offset for 1 Jul 2012 to 1 Jul 2015
-        # Note: 12960 = datenum([2015 7 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 12960 + 16 / ONE_DAY] = -16  # pyright: ignore[reportOptionalSubscript]
-        # GPS offset for 1 Jul 2015 to 1 Jan 2017
-        # Note: 13510 = datenum([2017 1 1 0 0 0]) - datenum(date_zero)
-        gps_to_utc_offset[days_since_date_zero < 13510 + 17 / ONE_DAY] = -17  # pyright: ignore[reportOptionalSubscript]
-        # fmt: on
-    else:
-        gps_to_utc_offset = np.asanyarray(gps_to_utc_offset)
+        gps_to_utc_offset = get_gps_to_utc_offset(days_since_date_zero)
+    gps_to_utc_offset = np.asanyarray(gps_to_utc_offset)
 
     # GPS start week
     date_utc: datetime.datetime | list[datetime.datetime] | np.datetime64 | _D

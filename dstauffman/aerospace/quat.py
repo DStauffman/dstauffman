@@ -750,7 +750,7 @@ def quat_inv(q1: _Q, inplace: bool = False, **kwargs: Unpack[_QuatAssertionKwarg
     Returns
     -------
     q2 : ndarray, (4,) or (4, N)
-        inverse quaterion
+        inverse quaternion
 
     See Also
     --------
