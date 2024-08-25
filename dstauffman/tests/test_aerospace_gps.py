@@ -227,6 +227,74 @@ class Test_aerospace_gps_to_datetime(unittest.TestCase):
             space.gps_to_datetime(1, 1, form="bad_form")  # type: ignore[call-overload]
 
 
+# %% aerospace.get_gps_to_utc_offset
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_get_gps_to_utc_offset(unittest.TestCase):
+    r"""
+    Tests the aerospace.get_gps_to_utc_offset function with the following cases:
+        Recent
+        Bounds
+        Close changes
+    """
+
+    def test_recent(self) -> None:
+        gps_days = (datetime.datetime.now() - datetime.datetime(1980, 1, 6)).days
+        gps_to_utc_offset = space.get_gps_to_utc_offset(gps_days)
+        self.assertEqual(gps_to_utc_offset, -18)
+
+    def test_bounds(self) -> None:
+        for date, offset in [
+            (datetime.datetime(1980, 3, 1),   0), (datetime.datetime(1980, 9, 1),   0),
+            (datetime.datetime(1981, 3, 1),   0), (datetime.datetime(1981, 9, 1),  -1),
+            (datetime.datetime(1982, 3, 1),  -1), (datetime.datetime(1982, 9, 1),  -2),
+            (datetime.datetime(1983, 3, 1),  -2), (datetime.datetime(1983, 9, 1),  -3),
+            (datetime.datetime(1984, 3, 1),  -3), (datetime.datetime(1984, 9, 1),  -3),
+            (datetime.datetime(1985, 3, 1),  -3), (datetime.datetime(1985, 9, 1),  -4),
+            (datetime.datetime(1986, 3, 1),  -4), (datetime.datetime(1986, 9, 1),  -4),
+            (datetime.datetime(1987, 3, 1),  -4), (datetime.datetime(1987, 9, 1),  -4),
+            (datetime.datetime(1988, 3, 1),  -5), (datetime.datetime(1988, 9, 1),  -5),
+            (datetime.datetime(1989, 3, 1),  -5), (datetime.datetime(1989, 9, 1),  -5),
+            (datetime.datetime(1990, 3, 1),  -6), (datetime.datetime(1990, 9, 1),  -6),
+            (datetime.datetime(1991, 3, 1),  -7), (datetime.datetime(1991, 9, 1),  -7),
+            (datetime.datetime(1992, 3, 1),  -7), (datetime.datetime(1992, 9, 1),  -8),
+            (datetime.datetime(1993, 3, 1),  -8), (datetime.datetime(1993, 9, 1),  -9),
+            (datetime.datetime(1994, 3, 1),  -9), (datetime.datetime(1994, 9, 1), -10),
+            (datetime.datetime(1995, 3, 1), -10), (datetime.datetime(1995, 9, 1), -10),
+            (datetime.datetime(1996, 3, 1), -11), (datetime.datetime(1996, 9, 1), -11),
+            (datetime.datetime(1997, 3, 1), -11), (datetime.datetime(1997, 9, 1), -12),
+            (datetime.datetime(1998, 3, 1), -12), (datetime.datetime(1998, 9, 1), -12),
+            (datetime.datetime(1999, 3, 1), -13), (datetime.datetime(1999, 9, 1), -13),
+            (datetime.datetime(2000, 3, 1), -13), (datetime.datetime(2000, 9, 1), -13),
+            (datetime.datetime(2001, 3, 1), -13), (datetime.datetime(2001, 9, 1), -13),
+            (datetime.datetime(2002, 3, 1), -13), (datetime.datetime(2002, 9, 1), -13),
+            (datetime.datetime(2003, 3, 1), -13), (datetime.datetime(2003, 9, 1), -13),
+            (datetime.datetime(2004, 3, 1), -13), (datetime.datetime(2004, 9, 1), -13),
+            (datetime.datetime(2005, 3, 1), -13), (datetime.datetime(2005, 9, 1), -13),
+            (datetime.datetime(2006, 3, 1), -14), (datetime.datetime(2006, 9, 1), -14),
+            (datetime.datetime(2007, 3, 1), -14), (datetime.datetime(2007, 9, 1), -14),
+            (datetime.datetime(2008, 3, 1), -14), (datetime.datetime(2008, 9, 1), -14),
+            (datetime.datetime(2009, 3, 1), -15), (datetime.datetime(2009, 9, 1), -15),
+            (datetime.datetime(2010, 3, 1), -15), (datetime.datetime(2010, 9, 1), -15),
+            (datetime.datetime(2011, 3, 1), -15), (datetime.datetime(2011, 9, 1), -15),
+            (datetime.datetime(2012, 3, 1), -15), (datetime.datetime(2012, 9, 1), -16),
+            (datetime.datetime(2013, 3, 1), -16), (datetime.datetime(2013, 9, 1), -16),
+            (datetime.datetime(2014, 3, 1), -16), (datetime.datetime(2014, 9, 1), -16),
+            (datetime.datetime(2015, 3, 1), -16), (datetime.datetime(2015, 9, 1), -17),
+            (datetime.datetime(2016, 3, 1), -17), (datetime.datetime(2016, 9, 1), -17),
+            (datetime.datetime(2017, 3, 1), -18), (datetime.datetime(2017, 9, 1), -18),
+            (datetime.datetime(2018, 3, 1), -18), (datetime.datetime(2018, 9, 1), -18),
+        ]:  # fmt: skip
+            gps_days = (date - datetime.datetime(1980, 1, 6)).days
+            gps_to_utc_offset = space.get_gps_to_utc_offset(gps_days)
+            self.assertEqual(gps_to_utc_offset, offset, f"For date {date}")
+
+        def test_close_changes(self) -> None:
+            gps_days = np.array([13509.999999, 13510.0, 13510.0 + 15/86400, 13510.0 + 20/86400])
+            gps_to_utc_offset = space.get_gps_to_utc_offset(gps_days)
+            exp = np.array([-17, -17, -17, -18])
+            np.testing.assert_array_equal(gps_to_utc_offset, exp)
+
+
 # %% aerospace.gps_to_utc_datetime
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_gps_to_utc_datetime(unittest.TestCase):
