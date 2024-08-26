@@ -288,11 +288,11 @@ class Test_aerospace_get_gps_to_utc_offset(unittest.TestCase):
             gps_to_utc_offset = space.get_gps_to_utc_offset(gps_days)
             self.assertEqual(gps_to_utc_offset, offset, f"For date {date}")
 
-        def test_close_changes(self) -> None:
-            gps_days = np.array([13509.999999, 13510.0, 13510.0 + 15/86400, 13510.0 + 20/86400])
-            gps_to_utc_offset = space.get_gps_to_utc_offset(gps_days)
-            exp = np.array([-17, -17, -17, -18])
-            np.testing.assert_array_equal(gps_to_utc_offset, exp)
+    def test_close_changes(self) -> None:
+        gps_days_array = np.array([13509.999999, 13510.0, 13510.0 + 15 / 86400, 13510.0 + 20 / 86400])
+        gps_to_utc_offset = space.get_gps_to_utc_offset(gps_days_array)
+        exp = np.array([-17, -17, -17, -18])
+        np.testing.assert_array_equal(gps_to_utc_offset, exp)
 
 
 # %% aerospace.gps_to_utc_datetime

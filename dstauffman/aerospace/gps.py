@@ -457,7 +457,7 @@ def gps_to_datetime(
 
 
 # %% Functions - get_gps_to_utc_offset
-def get_gps_to_utc_offset(days_since_gps_date_zero: int | float | _I |_N):
+def get_gps_to_utc_offset(days_since_gps_date_zero: int | float | _I | _N) -> _N:
     """
     Calculate the GPS to UTC offset given the (fractional) number of days since GPS origin.
 
@@ -601,7 +601,7 @@ def gps_to_utc_datetime(
     # check for optional inputs
     if gps_to_utc_offset is None:
         days_since_date_zero = week * DAYS_PER_WEEK + time / ONE_DAY
-        gps_to_utc_offset = get_gps_to_utc_offset(days_since_date_zero)
+        gps_to_utc_offset = get_gps_to_utc_offset(days_since_date_zero)  # type: ignore[assignment]
     gps_to_utc_offset = np.asanyarray(gps_to_utc_offset)
 
     # GPS start week
