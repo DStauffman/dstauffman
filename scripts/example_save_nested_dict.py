@@ -15,8 +15,9 @@ import dstauffman as dcs
 
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
+    from numpy.typing import NDArray
 
-    _N = np.typing.NDArray[np.float64]
+    _N = NDArray[np.float64]
 
 
 # %% Classes

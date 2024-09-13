@@ -644,13 +644,57 @@ class Test_plotting_setup_plots(unittest.TestCase):
 
 
 # %% plotting.save_zoomed_version
+@unittest.skipIf(not HAVE_MPL, "Skipping due to missing matplotlib dependency.")
 class Test_plotting_save_zoomed_version(unittest.TestCase):
     r"""
     Tests the plotting.save_zoomed_version function with the following cases:
         TBD
     """
 
-    pass  # TODO: write this
+    def setUp(self) -> None:
+        self.fig = plt.figure()
+        manager = self.fig.canvas.manager
+        assert manager is not None
+        manager.set_window_title("Figure Title")
+        self.ax = self.fig.add_subplot(111)
+        x = np.arange(0, 10, 0.1)
+        y = 4.5 * np.sin(x)
+        self.ax.plot(x, y)
+        self.ax.set_title("X vs Y")
+        self.ax.set_xlabel("time [years]")
+        self.ax.set_ylabel("value [radians]")
+        self.ax.set_ylim((-5.0, 5.0))
+        self.opts = plot.Opts()
+        self.opts.case_name = "Testing"
+        self.opts.show_plot = True
+        self.opts.save_plot = False
+        self.opts.save_path = get_tests_dir()
+
+    def test_no_change(self) -> None:
+        init_ylim = self.ax.get_ylim()
+        ylims = None
+        plot.save_zoomed_version(self.fig, self.ax, ylims, opts=self.opts)
+        self.assertEqual(self.ax.get_ylim(), init_ylim)
+
+    def test_nominal(self) -> None:
+        ylims = (-0.2, 0.2)
+        self.assertNotEqual(self.ax.get_ylim(), ylims)
+        plot.save_zoomed_version(self.fig, self.ax, ylims, opts=self.opts)
+        self.assertEqual(self.ax.get_ylim(), ylims)
+
+    def test_dual_axis(self) -> None:
+        init_ylim = self.ax.get_ylim()
+        ax2 = self.ax.twinx()
+        ax2.set_ylim((init_ylim[0] * 1e3, init_ylim[1] * 1e3))
+        ax2.set_ylabel("New Axis")
+        ylims = (init_ylim[0] * 10, init_ylim[1] * 10)
+        self.assertEqual(self.ax.get_ylim(), init_ylim)
+        plot.save_zoomed_version(self.fig, self.ax, ylims, opts=self.opts, ax2=ax2)
+        self.assertEqual(self.ax.get_ylim(), ylims)
+        self.assertEqual(ax2.get_ylim(), (init_ylim[0] * 1e4, init_ylim[1] * 1e4))
+
+    def tearDown(self) -> None:
+        plt.close(self.fig)
 
 
 # %% Unit test execution

@@ -15,7 +15,9 @@ from dstauffman import convert_datetime_to_np, NP_ONE_SECOND
 from dstauffman.plotting import COLOR_LISTS, make_time_plot, plot_phases
 
 if TYPE_CHECKING:
-    _D = np.typing.NDArray[np.datetime64]
+    from numpy.typing import NDArray
+
+    _D = NDArray[np.datetime64]
 
 
 # %% Functions

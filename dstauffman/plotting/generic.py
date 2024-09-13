@@ -123,6 +123,7 @@ def make_generic_plot(  # noqa: C901
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
     ylabel: str | list[str] | None = None,
+    ylims: tuple[int, int] | tuple[float, float] | None = None,
     tolerance: _DeltaTime = 0,
     return_err: bool = False,
     data_as_rows: bool = True,
@@ -947,6 +948,8 @@ def make_generic_plot(  # noqa: C901
         # set Y display limits
         if plot_zero:
             show_zero_ylim(this_axes)
+        if ylims is not None:
+            this_axes.set_ylim(ylims)
         # format display of plot
         if i == 0:
             if is_quat_diff:
@@ -1054,6 +1057,7 @@ def make_time_plot(
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
     ylabel: str | list[str] | None = None,
+    ylims: tuple[int, int] | tuple[float, float] | None = None,
     data_as_rows: bool = True,
     extra_plotter: ExtraPlotter | None = None,
     use_zoh: bool = False,
@@ -1141,6 +1145,7 @@ def make_time_plot(
         second_units=second_units,
         leg_scale=leg_scale,
         ylabel=ylabel,
+        ylims=ylims,
         data_as_rows=data_as_rows,
         extra_plotter=extra_plotter,
         use_zoh=use_zoh,
@@ -1175,6 +1180,7 @@ def make_error_bar_plot(
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
     ylabel: str | list[str] | None = None,
+    ylims: tuple[int, int] | tuple[float, float] | None = None,
     data_as_rows: bool = True,
     extra_plotter: ExtraPlotter | None = None,
     use_zoh: bool = False,
@@ -1272,6 +1278,7 @@ def make_error_bar_plot(
         second_units=second_units,
         leg_scale=leg_scale,
         ylabel=ylabel,
+        ylims=ylims,
         data_as_rows=data_as_rows,
         extra_plotter=extra_plotter,
         use_zoh=use_zoh,
@@ -1310,6 +1317,7 @@ def make_difference_plot(
     second_units: _SecUnits,
     leg_scale: _SecUnits,
     ylabel: str | list[str] | None,
+    ylims: tuple[int, int] | tuple[float, float] | None,
     data_as_rows: bool,
     tolerance: _DeltaTime,
     return_err: Literal[False] = ...,
@@ -1348,6 +1356,7 @@ def make_difference_plot(
     second_units: _SecUnits,
     leg_scale: _SecUnits,
     ylabel: str | list[str] | None,
+    ylims: tuple[int, int] | tuple[float, float] | None,
     data_as_rows: bool,
     tolerance: _DeltaTime,
     return_err: Literal[True],
@@ -1385,6 +1394,7 @@ def make_difference_plot(
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
     ylabel: str | list[str] | None = None,
+    ylims: tuple[int, int] | tuple[float, float] | None = None,
     data_as_rows: bool = True,
     tolerance: _DeltaTime = 0,
     return_err: bool = False,
@@ -1502,6 +1512,7 @@ def make_difference_plot(
         second_units=second_units,
         leg_scale=leg_scale,
         ylabel=ylabel,
+        ylims=ylims,
         tolerance=tolerance,
         return_err=return_err,
         data_as_rows=data_as_rows,
@@ -1540,6 +1551,7 @@ def make_categories_plot(
     second_units: _SecUnits = None,
     leg_scale: _SecUnits = None,
     ylabel: str | list[str] | None = None,
+    ylims: tuple[int, int] | tuple[float, float] | None = None,
     data_as_rows: bool = True,
     use_zoh: bool = False,
     label_vert_lines: bool = True,
@@ -1644,6 +1656,7 @@ def make_categories_plot(
         second_units=second_units,
         leg_scale=leg_scale,
         ylabel=ylabel,
+        ylims=ylims,
         data_as_rows=data_as_rows,
         use_zoh=use_zoh,
         label_vert_lines=label_vert_lines,
@@ -1677,6 +1690,7 @@ def make_bar_plot(
     legend_loc: str = "best",
     second_units: _SecUnits = None,
     ylabel: str | list[str] | None = None,
+    ylims: tuple[int, int] | tuple[float, float] | None = None,
     data_as_rows: bool = True,
     extra_plotter: ExtraPlotter | None = None,
     use_zoh: bool = False,
@@ -1775,6 +1789,7 @@ def make_bar_plot(
         second_units=second_units,
         leg_scale=leg_scale,
         ylabel=ylabel,
+        ylims=ylims,
         data_as_rows=data_as_rows,
         extra_plotter=extra_plotter,
         use_zoh=use_zoh,

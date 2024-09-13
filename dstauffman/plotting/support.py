@@ -140,14 +140,14 @@ if HAVE_MPL:
     COLOR_LISTS["quat"]     = colors.ListedColormap(("xkcd:red", "xkcd:green", "xkcd:blue", "xkcd:chocolate"))
     COLOR_LISTS["quat_off"] = colors.ListedColormap(("xkcd:fuchsia", "xkcd:lightgreen", "xkcd:cyan", "xkcd:brown"))
     # double combinations
-    COLOR_LISTS["dbl_diff"]    = colors.ListedColormap(COLOR_LISTS["dbl_off"].colors + COLOR_LISTS["double"].colors)  # type: ignore[arg-type, operator]
-    COLOR_LISTS["dbl_diff_r"]  = colors.ListedColormap(COLOR_LISTS["double"].colors + COLOR_LISTS["dbl_off"].colors)  # type: ignore[arg-type, operator]
+    COLOR_LISTS["dbl_diff"]    = colors.ListedColormap(COLOR_LISTS["dbl_off"].colors + COLOR_LISTS["double"].colors)  # type: ignore[operator]
+    COLOR_LISTS["dbl_diff_r"]  = colors.ListedColormap(COLOR_LISTS["double"].colors + COLOR_LISTS["dbl_off"].colors)  # type: ignore[operator]
     # triple combinations
-    COLOR_LISTS["vec_diff"]    = colors.ListedColormap(COLOR_LISTS["vec_off"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[arg-type, operator]
-    COLOR_LISTS["vec_diff_r"]  = colors.ListedColormap(COLOR_LISTS["vec"].colors + COLOR_LISTS["vec_off"].colors)  # type: ignore[arg-type, operator]
+    COLOR_LISTS["vec_diff"]    = colors.ListedColormap(COLOR_LISTS["vec_off"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[operator]
+    COLOR_LISTS["vec_diff_r"]  = colors.ListedColormap(COLOR_LISTS["vec"].colors + COLOR_LISTS["vec_off"].colors)  # type: ignore[operator]
     # quad combinations
-    COLOR_LISTS["quat_diff"]   = colors.ListedColormap(COLOR_LISTS["quat_off"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[arg-type, operator]
-    COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)  # type: ignore[arg-type, operator]
+    COLOR_LISTS["quat_diff"]   = colors.ListedColormap(COLOR_LISTS["quat_off"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
+    COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)  # type: ignore[operator]
     # fmt: on
 
 # %% Set Matplotlib global settings
@@ -512,11 +512,11 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
     if num_channels == 1:
         clist = colors.ListedColormap(("#1f77b4", "xkcd:blue", "#1f77b4"))
     elif num_channels == 2:
-        clist = colors.ListedColormap(COLOR_LISTS["dbl_diff_r"].colors + COLOR_LISTS["double"].colors)  # type: ignore[arg-type, operator]
+        clist = colors.ListedColormap(COLOR_LISTS["dbl_diff_r"].colors + COLOR_LISTS["double"].colors)  # type: ignore[operator]
     elif num_channels == 3:
-        clist = colors.ListedColormap(COLOR_LISTS["vec_diff_r"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[arg-type, operator]
+        clist = colors.ListedColormap(COLOR_LISTS["vec_diff_r"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[operator]
     elif num_channels == 4:
-        clist = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[arg-type, operator]
+        clist = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
     else:
         ix = [x % 10 for x in range(num_channels)]
         cmap1 = mpl.colormaps["tab10"]
@@ -1387,7 +1387,7 @@ def plot_second_yunits(ax: Axes, ylab: str, multiplier: float) -> Axes:
     ax2 = ax.twinx()
     ax2.set_ylim(new_limits)
     ax2.set_ylabel(ylab)
-    return ax2  # type: ignore[return-value]
+    return ax2
 
 
 # %% Functions - get_rms_indices
@@ -2351,7 +2351,7 @@ def fig_ax_factory(  # noqa: C901
             assert (manager := fig.canvas.manager) is not None
             manager.set_window_title(this_title)
         figs.append(fig)
-        axes.append(ax)  # type: ignore[arg-type]
+        axes.append(ax)
     fig_ax: tuple[tuple[Figure, Axes], ...]
     if is_1d:
         assert isinstance(num_axes, int)

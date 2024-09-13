@@ -229,7 +229,7 @@ def find_in_range(
         valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[call-overload, operator]
     else:
         assert ~np.isnan(max_) and np.sign(max_) > 0, "The maximum should be np.inf if not finite."
-    return valid  # type: ignore[no-any-return]
+    return valid
 
 
 # %% Functions - rms

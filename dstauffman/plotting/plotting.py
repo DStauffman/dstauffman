@@ -124,6 +124,7 @@ if TYPE_CHECKING:
         second_units: NotRequired[str | int | float | tuple[str, float] | None]
         leg_scale: NotRequired[str | int | float | tuple[str, float] | None]
         ylabel: NotRequired[str | list[str] | None]
+        ylims: NotRequired[tuple[int, int] | tuple[float, float] | None]
         data_as_rows: NotRequired[bool]
         extra_plotter: NotRequired[ExtraPlotter | None]
         use_zoh: NotRequired[bool]
@@ -1497,7 +1498,7 @@ def save_zoomed_version(
     else:
         ax.set_title(ax.get_title() + " (Zoomed)")
     # resave zoomed plot
-    if opts is not None and opts.save_path:
+    if opts is not None and opts.save_path and opts.save_plot:
         storefig(fig, folder=opts.save_path, plot_type=opts.plot_type, show_warn=opts.show_warn)
 
 
