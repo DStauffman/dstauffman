@@ -1485,7 +1485,12 @@ def save_zoomed_version(
     orig1 = ax.get_ylim()
     if ax2 is not None:
         orig2 = ax2.get_ylim()
-        fact = orig2[0] / orig1[0]
+        if orig1[0] != 0 and orig2[0] != 0:
+            fact = orig2[0] / orig1[0]
+        elif orig1[1] != 0 and orig2[1] != 0:
+            fact = orig2[1] / orig1[1]
+        else:
+            raise ValueError("Unable to determine scale factor when limits are both zero.")
     ax.set_ylim(ylims)
     if ax2 is not None:
         ax2.set_ylim(fact * ylims[0], fact * ylims[1])

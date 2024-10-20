@@ -134,7 +134,7 @@ def quat_assertions(  # noqa: C901
             if allow_nans:
                 assert np.all(nans), "Quaternions with NaNs must have NaNs for every component."
             else:
-                assert False, "NaNs are not allow in quaternion."
+                assert False, "NaNs are not allowed in quaternion."
         else:
             assert -1 <= quat[0] <= 1, f'Quaternion has bad range in x value: "{quat[0]}"'
             assert -1 <= quat[1] <= 1, f'Quaternion has bad range in y value: "{quat[1]}"'
@@ -147,7 +147,7 @@ def quat_assertions(  # noqa: C901
                 temp = "Quaternions with NaNs must have NaNs for every component."
                 assert set(np.count_nonzero(nans, axis=0)).issubset({0, 4}), temp
             else:
-                assert False, "NaNs are not allow in quaternion."
+                assert False, "NaNs are not allowed in quaternion."
         ix = ~np.isnan(quat[0, :])
         assert np.all(-1 <= quat[0, ix]) and np.all(
             quat[0, ix] <= 1

@@ -946,7 +946,7 @@ def make_generic_plot(  # noqa: C901
         else:
             zoom_ylim(this_axes, t_start=xlim[0], t_final=xlim[1])
         # set Y display limits
-        if plot_zero:
+        if plot_zero or is_diff_plot:
             show_zero_ylim(this_axes)
         if ylims is not None:
             this_axes.set_ylim(ylims)

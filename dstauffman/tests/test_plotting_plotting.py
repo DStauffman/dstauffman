@@ -693,6 +693,21 @@ class Test_plotting_save_zoomed_version(unittest.TestCase):
         self.assertEqual(self.ax.get_ylim(), ylims)
         self.assertEqual(ax2.get_ylim(), (init_ylim[0] * 1e4, init_ylim[1] * 1e4))
 
+    def test_dual_zero_axis(self) -> None:
+        self.ax.set_ylim((0, 5))
+        ax2 = self.ax.twinx()
+        ax2.set_ylim((0, 1))
+        plot.save_zoomed_version(self.fig, self.ax, (-1, 1), opts=self.opts, ax2=ax2)
+        self.assertEqual(self.ax.get_ylim(), (-1, 1))
+        self.assertEqual(ax2.get_ylim(), (-0.2, 0.2))
+
+    def test_bad_limits(self) -> None:
+        self.ax.set_ylim((0, 5))
+        ax2 = self.ax.twinx()
+        ax2.set_ylim((-1, 0))
+        with self.assertRaises(ValueError):
+            plot.save_zoomed_version(self.fig, self.ax, (-1, 1), opts=self.opts, ax2=ax2)
+
     def tearDown(self) -> None:
         plt.close(self.fig)
 

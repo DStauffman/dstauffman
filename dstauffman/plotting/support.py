@@ -89,6 +89,7 @@ if HAVE_SCIPY:
     import scipy.stats as st
 try:
     from PIL import Image
+    from PIL.PngImagePlugin import PngInfo
 except ModuleNotFoundError:
     pass
 
@@ -402,6 +403,27 @@ class ColorMap(Frozen):
         except AttributeError:  # pragma: no cover
             # for older matplotlib versions, use deprecated set_color_cycle
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])  # type: ignore[attr-defined]
+
+    def _repr_png_(self):
+        """Generate a PNG representation of the Colormap."""
+        pixels = np.zeros((64, 512, 4), dtype=np.uint8)
+        cuts = np.floor(np.linspace(0, 512, self.num_colors + 1)).astype(int)
+        for i in range(self.num_colors):
+            pixels[:, cuts[i]:cuts[i+1], :] = 255*np.asanyarray(self.get_color(i))
+        png_bytes = io.BytesIO()
+        title = "ColorMap"
+        author = "dstauffman.plotting"
+        try:
+            # for when PIL is not installed
+            pnginfo = PngInfo()
+        except:
+            return None
+        pnginfo.add_text("Title", title)
+        pnginfo.add_text("Description", title)
+        pnginfo.add_text("Author", author)
+        pnginfo.add_text("Software", author)
+        Image.fromarray(pixels).save(png_bytes, format="png", pnginfo=pnginfo)
+        return png_bytes.getvalue()
 
 
 # %% Functions - is_notebook

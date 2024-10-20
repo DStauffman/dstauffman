@@ -21,6 +21,7 @@ classifiers = [
     "Programming Langauge :: Python :: 3.10",
     "Programming Langauge :: Python :: 3.11",
     "Programming Langauge :: Python :: 3.12",
+    "Programming Langauge :: Python :: 3.13",
     "Topic :: Scientific/Engineering",
     "Topic :: Scientific/Engineering :: Astronomy",
     "Topic :: Scientific/Engineering :: Information Analysis",
@@ -36,16 +37,17 @@ include = ["CHANGELOG.md", "LICENSE.txt", "MANIFEST.in", "pyproject.toml", "READ
 python = ">=3.10, <3.13"
 nubs = {path = "../nubs/", develop = false}
 slog = {path = "../slog/", develop = false}
-black = {version = ">23.0", optional = true}
-datashader = {version = "^0.15", optional = true}
+black = {version = ">24.0", optional = true}
+datashader = {version = "^0.15", optional = true, python = "<3.13"}
 flake8 = {version = "^6.0", optional = true}
 h5py = {version = "^3.7", optional = true}
 isort = {version = "^5.10", optional = true}
 matplotlib = {version = "^3.7", optional = true}
 mypy = {version = "^1.5", optional = true}
-numba = {version = "^0.57", optional = true}
+numba = {version = "^0.57", optional = true, python = "<3.13"}
 numpy = {version = "^1.24, ^2.0", optional = true}
 pandas = {version = "^1.5", optional = true}
+pyarrow = {version = "^14.0", optional = true, python = "<3.13"}
 pylint = {version = "^2.16", optional = true}
 pyqt5 = {version = "^5.15.7", optional = true}
 pyqt5-stubs = {version = "^5.15", optional = true}
@@ -65,7 +67,7 @@ pytest-cov = "^4.0"
 
 [tool.poetry.extras]
 # Note: use combination of numeric and static for mypy type checking (excludes numba/datashader, which can confuse mypy)
-numeric = ["h5py", "matplotlib", "numpy", "pandas", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
+numeric = ["h5py", "matplotlib", "numpy", "pandas", "pyarrow", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
 shader = ["datashader", "h5py", "matplotlib", "numba", "numpy", "pandas", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
 spyder = ["spyder-kernels"]
 static = ["black", "flake8", "isort", "mypy", "pycodestyle", "pylint", "PyQt5-stubs"]
@@ -75,7 +77,7 @@ dcs = "dstauffman.__main__:main"
 
 [tool.black]
 line-length = 128
-target_version = ["py39", "py310", "py311"]
+target_version = ["py310", "py311", "py312"]
 
 [tool.coverage.run]
 branch = true
@@ -118,7 +120,7 @@ directory = "coverage_html_report"
 output = "coverage_html_report/coverage.xml"
 
 [tool.isort]
-py_version = 311
+py_version = 312
 profile = "black"
 line_length = 128
 combine_as_imports = true
@@ -187,9 +189,9 @@ extraPaths = ["../nubs",
 exclude = []
 venvPath = "C:\\Users\\DStauffman\\Documents\\venvs"
 venv = "everything"
-pythonVersion = "3.11"
-pythonPlatform = "Windows"
-typeCheckingMode = "basic"
+pythonVersion = "3.12"
+pythonPlatform = "Windows"  # "All"?
+typeCheckingMode = "basic"  # "strict"?
 deprecateTypingAliases = true
 reportGeneralTypeIssues = false
 reportUnboundVariable = false

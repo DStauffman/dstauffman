@@ -295,7 +295,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.disp_xmax        = np.inf
         self.make_subplots    = True
         self.single_lines     = False
-        self.colormap         = ListedColormap(plot.COLOR_LISTS["dbl_diff"].colors + plot.COLOR_LISTS["double"].colors)  # type: ignore[arg-type, operator]
+        self.colormap         = ListedColormap(plot.COLOR_LISTS["dbl_diff"].colors + plot.COLOR_LISTS["double"].colors)  # type: ignore[operator]
         self.use_mean         = False
         self.plot_zero        = False
         self.show_rms         = True
