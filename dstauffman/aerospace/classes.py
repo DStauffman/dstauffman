@@ -89,8 +89,8 @@ def _chop_wrapper(
         right = copy.deepcopy(orig)
         tl = np.datetime64("nat") if use_dates else -np.inf
         tr = np.datetime64("nat") if use_dates else np.inf
-        chop_time(left, time_field="time", exclude=exclude, ti=tl, tf=ti, right=False)  # type: ignore[arg-type]
-        chop_time(right, time_field="time", exclude=exclude, ti=tf, tf=tr, left=False)  # type: ignore[arg-type]
+        chop_time(left, time_field="time", exclude=exclude, ti=tl, tf=ti, right=False)
+        chop_time(right, time_field="time", exclude=exclude, ti=tf, tf=tr, left=False)
     out = orig if inplace else copy.deepcopy(orig)
     chop_time(out, time_field="time", exclude=exclude, ti=ti, tf=tf, right=include_last)
     if subclasses is not None:

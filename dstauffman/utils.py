@@ -225,7 +225,7 @@ def find_in_range(
         valid = not_nan.copy()
     # combine with those less than the maximum bound
     if np.isfinite(max_):
-        func = np.less_equal if inclusive or right else np.less
+        func = np.less_equal if inclusive or right else np.less  # type: ignore[assignment]
         valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[call-overload, operator]
     else:
         assert ~np.isnan(max_) and np.sign(max_) > 0, "The maximum should be np.inf if not finite."

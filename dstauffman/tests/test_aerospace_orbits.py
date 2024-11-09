@@ -387,12 +387,12 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
                                 oe.circular[:] = True if e == 0 else False
                                 (r, v) = space.oe_2_rv(oe)
                                 oe2 = space.rv_2_oe(r, v)
-                                self.assertAlmostEqual(oe.a, oe2.a, msg="a is different")
-                                self.assertAlmostEqual(oe.e, oe2.e, msg="e is different")
-                                self.assertAlmostEqual(oe.i, oe2.i, msg="i is different")
-                                self.assertAlmostEqual(oe.w, oe2.w, msg="w is different")
-                                self.assertAlmostEqual(oe.W, oe2.W, msg="W is different")
-                                self.assertAlmostEqual(oe.vo, oe2.vo, msg="nu is different")
+                                np.testing.assert_array_almost_equal(oe.a, oe2.a, err_msg="a is different")
+                                np.testing.assert_array_almost_equal(oe.e, oe2.e, err_msg="e is different")
+                                np.testing.assert_array_almost_equal(oe.i, oe2.i, err_msg="i is different")
+                                np.testing.assert_array_almost_equal(oe.w, oe2.w, err_msg="w is different")
+                                np.testing.assert_array_almost_equal(oe.W, oe2.W, err_msg="W is different")
+                                np.testing.assert_array_almost_equal(oe.vo, oe2.vo, err_msg="nu is different")
 
 
 # %% aerospace.advance_elements

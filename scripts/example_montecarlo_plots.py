@@ -60,4 +60,4 @@ if __name__ == "__main__":
     # %% Create the plots
     fig1 = plot.plot_time_history("Results vs Time", np_dates, all_data.T, opts=opts)
 
-    fig2 = plot.plot_health_monte_carlo(time, all_data, "Results vs Time", units="", opts=opts)
+    fig2 = plot.plot_health_monte_carlo("Results vs Time", time, all_data, units="", opts=opts)

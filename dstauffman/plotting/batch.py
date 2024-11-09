@@ -134,7 +134,7 @@ def plot_bpe_convergence(
     ax.set_xlabel("Iteration")
     ax.set_ylabel("Cost")
     ax.set_title(this_title)
-    ax.set_xticks(time)  # type: ignore[arg-type]
+    ax.set_xticks(time)
     if len(costs) > 0:
         ax.set_xticklabels(labels)
     # show a grid

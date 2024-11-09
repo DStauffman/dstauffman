@@ -167,12 +167,12 @@ class TruthPlotter(Frozen):
 
 # %% Functions - plot_health_time_history
 def plot_health_time_history(  # noqa: C901
+    description: str,
     time: ArrayLike,
     data: ArrayLike | None,
-    label: str,
+    *,
     units: str = "",
     opts: Opts | None = None,
-    *,
     legend: list[str] | None = None,
     second_units: str | int | float | tuple[str, float] | None = None,
     ignore_empties: bool = False,
@@ -185,13 +185,13 @@ def plot_health_time_history(  # noqa: C901
 
     Parameters
     ----------
+    description : str
+        Name to label on the plots
     time : 1D ndarray
         time history
     data : 1D, 2D or 3D ndarray
         data for corresponding time history, time is first dimension, last dimension is bin
         middle dimension if 3D is the cycle
-    label : str
-        Name to label on the plots
     units : str, optional
         units of the data to be displayed on the plot
     opts : class Opts, optional
@@ -228,7 +228,7 @@ def plot_health_time_history(  # noqa: C901
     >>> time  = np.arange(0, 5, 1./12) + 2000
     >>> data  = np.random.rand(len(time), 5).cumsum(axis=1)
     >>> data  = 10 * data / np.expand_dims(data[:, -1], axis=1)
-    >>> fig   = plot_health_time_history(time, data, description)
+    >>> fig   = plot_health_time_history(description, time, data)
 
     Close plot
     >>> plt.close(fig)
@@ -254,7 +254,7 @@ def plot_health_time_history(  # noqa: C901
 
     # check for valid data
     if ignore_plot_data(data, ignore_empties):
-        print(" " + label + " plot skipped due to missing data.")
+        print(" " + description + " plot skipped due to missing data.")
         return None
     assert time.ndim == 1, "Time must be a 1D array."  # type: ignore[union-attr]
 
@@ -285,7 +285,7 @@ def plot_health_time_history(  # noqa: C901
         legend = [f"Channel {i + 1}" for i in range(num_bins)]
 
     # process other inputs
-    this_title = label + " vs. Time"
+    this_title = description + " vs. Time"
 
     # get colormap based on high and low limits
     cm = ColorMap(colormap, num_colors=num_bins)
@@ -293,7 +293,7 @@ def plot_health_time_history(  # noqa: C901
     # plot data
     fig = plt.figure()
     assert (manager := fig.canvas.manager) is not None
-    manager.set_window_title(this_title)
+    manager.set_window_title(description)
     ax = fig.add_subplot(111)
     cm.set_colors(ax)
     for i in range(num_bins):
@@ -321,7 +321,7 @@ def plot_health_time_history(  # noqa: C901
 
     # add labels and legends
     ax.set_xlabel("Time [" + time_units + "]")
-    ax.set_ylabel(label + unit_text)
+    ax.set_ylabel(description + unit_text)
     ax.set_title(this_title)
     ax.legend(loc=legend_loc)
     ax.grid(True)
@@ -344,12 +344,12 @@ def plot_health_time_history(  # noqa: C901
 
 # %% Functions - plot_health_monte_carlo
 def plot_health_monte_carlo(  # noqa: C901
+    description: str,
     time: ArrayLike,
     data: ArrayLike,
-    label: str,
+    *,
     units: str = "",
     opts: Opts | None = None,
-    *,
     plot_indiv: bool = True,
     truth: TruthPlotter | None = None,
     plot_as_diffs: bool = False,
@@ -407,11 +407,11 @@ def plot_health_monte_carlo(  # noqa: C901
     >>> from dstauffman.plotting import plot_health_monte_carlo
     >>> import matplotlib.pyplot as plt
     >>> import numpy as np
-    >>> time  = np.arange(0, 10, 0.1)
-    >>> data  = np.sin(time)
-    >>> label = "Sin"
+    >>> description = "Sin"
+    >>> time = np.arange(0, 10, 0.1)
+    >>> data = np.sin(time)
     >>> units = "population"
-    >>> fig   = plot_health_monte_carlo(time, data, label, units)
+    >>> fig = plot_health_monte_carlo(description, time, data, units=units)
 
     Close plot
     >>> plt.close(fig)
@@ -473,7 +473,7 @@ def plot_health_monte_carlo(  # noqa: C901
             rms_data = rms(unit_mult * mean, axis=0, ignore_nans=True)  # type: ignore[assignment]
 
     # alias the title
-    this_title = label + " vs. Time"
+    this_title = description + " vs. Time"
     # create the figure and set the title
     fig = plt.figure()
     assert (manager := fig.canvas.manager) is not None
@@ -490,7 +490,7 @@ def plot_health_monte_carlo(  # noqa: C901
                 this_label += f" (RMS: {rms_data[ix]:.2f})"
             ax.plot(time, data[:, ix], ".-", linewidth=2, zorder=10, label=this_label)  # type: ignore[call-overload, index]
     else:
-        this_label = opts.get_names(0) + label
+        this_label = opts.get_names(0) + description
         if rms_in_legend:
             this_label += f" (RMS: {rms_data:.2f})"
         ax.plot(time, mean, ".-", linewidth=2, color="#0000cd", zorder=10, label=this_label)
@@ -513,7 +513,7 @@ def plot_health_monte_carlo(  # noqa: C901
         truth.plot_truth(ax)
     # add labels and legends
     ax.set_xlabel("Time [" + time_units + "]")
-    ax.set_ylabel(label + unit_text)
+    ax.set_ylabel(description + unit_text)
     ax.set_title(this_title)
     if show_legend:
         ax.legend(loc=legend_loc)
@@ -593,7 +593,7 @@ def plot_population_pyramid(
     age_bins: _I | _N | list[int],
     male_per: _I | _N | list[int],
     fmal_per: _I | _N | list[int],
-    title: str = "Population Pyramid",
+    description: str = "Population Pyramid",
     *,
     opts: Opts | None = None,
     name1: str = "Male",
@@ -612,7 +612,7 @@ def plot_population_pyramid(
         Male population percentage in each bin
     fmal_per : (N,) array_like of int
         Female population percentage in each bin
-    title : str, optional, default is "Population Pyramid"
+    description : str, optional, default is "Population Pyramid"
         Title for the plot
     opts : class Opts, optional
         Plotting options
@@ -668,12 +668,12 @@ def plot_population_pyramid(
     # create the figure and axis and set the title
     fig = plt.figure()
     assert (manager := fig.canvas.manager) is not None
-    manager.set_window_title(title)
+    manager.set_window_title(description)
     ax = fig.add_subplot(111)
 
     # plot bars
-    ax.barh(y_values, -scale * male_per, 0.95, color=color1, label=name1)  # type: ignore[arg-type]
-    ax.barh(y_values, +scale * fmal_per, 0.95, color=color2, label=name2)  # type: ignore[arg-type]
+    ax.barh(y_values, -scale * male_per, 0.95, color=color1, label=name1)
+    ax.barh(y_values, +scale * fmal_per, 0.95, color=color2, label=name2)
 
     # make sure plot is symmetric about zero
     xlim = max(abs(x) for x in ax.get_xlim())
@@ -682,8 +682,8 @@ def plot_population_pyramid(
     # add labels
     ax.set_xlabel("Population [%]")
     ax.set_ylabel("Age [years]")
-    ax.set_title(title)
-    ax.set_yticks(y_values)  # type: ignore[arg-type]
+    ax.set_title(description)
+    ax.set_yticks(y_values)
     ax.set_yticklabels(y_labels)
     ax.set_xticks(ax.get_xticks().tolist())
     ax.set_xticklabels(np.abs(ax.get_xticks()))

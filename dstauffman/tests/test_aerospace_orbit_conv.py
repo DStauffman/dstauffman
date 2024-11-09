@@ -388,7 +388,7 @@ class Test_aerospace_jd_2_sidereal(unittest.TestCase):
         time_jd = 2460126.5  # UT1
         lst = space.jd_2_sidereal(time_jd)
         exp_lst = space.hms_2_r(np.array([18, 35, 10.4399]))  # from 2023 Astronomical Almanac, page B16
-        self.assertAlmostEqual(lst, exp_lst)
+        self.assertAlmostEqual(lst, exp_lst)  # type: ignore[misc]
 
     def test_vector(self) -> None:
         time_jd = np.array([2460218.5, 2460264.5])  # UT1
