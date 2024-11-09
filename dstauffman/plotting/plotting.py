@@ -764,7 +764,7 @@ def plot_time_difference(
 # %% Functions - plot_correlation_matrix
 def plot_correlation_matrix(  # noqa: C901
     data: _M,
-    labels: list[str] | list[list[str]] | None = None,
+    labels: list[str] | tuple[str, ...] | list[list[str]] | None = None,
     units: str = "",
     *,
     opts: Opts | None = None,

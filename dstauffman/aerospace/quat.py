@@ -987,6 +987,7 @@ def quat_prop(quat: _Q, delta_ang: _N, *, renorm: bool = True, **kwargs: Unpack[
         [ delta_ang[0],  delta_ang[1],   delta_ang[2],       0      ],
     ]).T @ quat
     # fmt: on
+    # TODO: write nonlinear form
     # ensure positive scalar component
     if quat_new[3] < 0:
         quat_new[:] = -quat_new

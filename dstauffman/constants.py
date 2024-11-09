@@ -50,8 +50,16 @@ try:
     import numpy as np
 
     HAVE_NUMPY = True
+    try:
+        import keras
+
+        assert keras
+        HAVE_KERAS = True
+    except ModuleNotFoundError:
+        HAVE_KERAS = False
 except ModuleNotFoundError:
     HAVE_NUMPY = False
+    HAVE_KERAS = False
 try:
     import pandas as pd
 

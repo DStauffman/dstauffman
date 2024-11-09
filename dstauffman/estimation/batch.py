@@ -1008,7 +1008,7 @@ def _double_dogleg(
 
 
 # %% _dogleg_search
-def _dogleg_search(  # noqa: C901
+def _dogleg_search(  # pylint: disable=too-many-positional-arguments  # noqa: C901
     opti_opts: OptiOpts,
     model_args: dict[str, Any],
     bpe_results: BpeResults,

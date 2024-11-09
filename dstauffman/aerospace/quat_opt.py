@@ -176,6 +176,92 @@ def quat_from_rotation_vector_single(rv: _V) -> _Q:
     return np.array([axis[0] * s, axis[1] * s, axis[2] * s, c])
 
 
+# %% Functions - quat_angle_diff_single
+@ncjit
+def quat_angle_diff_single(quat1: _Q, quat2: _Q) -> _Q:
+    r"""
+    Calculate the angular difference between two quaternions.
+
+    This function takes two quaternions and calculates a delta quaternion between them.
+    It then uses the delta quaternion to generate both a total angular difference, and an
+    angular difference expressed in X, Y, Z components based on the axis of rotation,
+    expressed in the original frame of the quat1 input quaternion.  This function uses full
+    trignometric functions instead of any small angle approximations.
+
+    Parameters
+    ----------
+    quat1 : ndarray (4,)
+        quaternion one
+    quat2 : ndarray (4,)
+        quaternion two
+
+    Returns
+    -------
+    comp  : ndarray (3,)
+        angle components in x, y, z frame [rad]
+
+    References
+    ----------
+    This function is based on this representation of a unit quaternion:
+    quat = [[nx * sin(theta/2)]
+            [ny * sin(theta/2)]
+            [nz * sin(theta/2)]
+            [   cos(theta/2)  ]]
+    Where: <nx,ny,nz> are the three components of a unit vector of rotation axis and
+           theta is the angle of rotation
+
+    Notes
+    -----
+    #.  Additional keyword arguments are passed on to quat_assertions function.
+    #.  Adapted from GARSE by David C. Stauffer in April 2015.
+    #.  Split into compiled single version by David C. Stauffer in October 2024.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import qrot_single, quat_mult_single, quat_angle_diff_single
+    >>> import numpy as np
+    >>> quat1 = np.array([0.5, 0.5, 0.5, 0.5])
+    >>> dq1 = qrot_single(1, 0.001)
+    >>> dq2 = qrot_single(2, 0.05)
+    >>> quat2 = quat_mult_single(dq1,quat1)
+    >>> comp = quat_angle_diff_single(quat1, quat2)
+    >>> with np.printoptions(precision=8):
+    ...     print(comp)  # doctest: +NORMALIZE_WHITESPACE
+    [0.001 0.    0.   ]
+
+    """
+    # calculate delta quaternion
+    dq = quat_mult_single(quat2, quat_inv_single(quat1))
+
+    # pull vector components out of delta quaternion
+    dv = dq[0:3]
+
+    # sum vector components to get sin(theta/2)^2
+    mag2 = np.sum(dv**2)
+
+    # take square root to get sin(theta/2)
+    mag = np.sqrt(mag2)
+
+    # take inverse sine to get theta/2
+    theta_over_2 = np.arcsin(mag)
+
+    # multiply by 2 to get theta
+    theta = 2 * theta_over_2
+
+    # set any magnitude that is identically 0 to be 1 instead
+    # to avoid a divide by zero warning.
+    if mag == 0:
+        mag = 1
+
+    # normalize vector components
+    nv = dv / mag
+
+    # find angle expressed in x, y, z components based on normalized vector
+    comp = nv * theta
+
+    return comp  # type: ignore[no-any-return]
+
+
 # %% Functions - quat_interp_single
 @ncjit
 def quat_interp_single(time: _N, quat: _Q, ti: _N) -> _Q:
@@ -336,14 +422,13 @@ def quat_mult_single(a: _Q, b: _Q, inplace: bool = False) -> _Q:
 
     """
     c = a if inplace else a.copy()
-    # single quaternion inputs case (note: transposed to make "F" order)
     # fmt: off
     c[:] = np.array([
-        [ a[3], -a[2],  a[1], -a[0]],
-        [ a[2],  a[3], -a[0], -a[1]],
-        [-a[1],  a[0],  a[3], -a[2]],
-        [ a[0],  a[1],  a[2],  a[3]],
-    ]).T @ b
+        +b[0] * a[3] + b[1] * a[2] - b[2] * a[1] + b[3] * a[0],
+        -b[0] * a[2] + b[1] * a[3] + b[2] * a[0] + b[3] * a[1],
+        +b[0] * a[1] - b[1] * a[0] + b[2] * a[3] + b[3] * a[2],
+        -b[0] * a[0] - b[1] * a[1] - b[2] * a[2] + b[3] * a[3],
+    ])
     # fmt: on
     # enforce positive scalar component
     if c[3] < 0:
@@ -399,7 +484,7 @@ def quat_norm_single(x: _Q, inplace: bool = False) -> _Q:
 
 # %% Functions - quat_prop_single
 @ncjit
-def quat_prop_single(quat: _Q, delta_ang: _V, inplace: bool = False, renorm: bool = False) -> _Q:
+def quat_prop_single(quat: _Q, delta_ang: _V, use_approx: bool = False, inplace: bool = False, renorm: bool = True) -> _Q:
     r"""
     Approximate propagation of a quaternion using a small delta angle.
 
@@ -425,7 +510,6 @@ def quat_prop_single(quat: _Q, delta_ang: _V, inplace: bool = False, renorm: boo
     -----
     #.  Adapted from GARSE by David C. Stauffer in April 2015.
     #.  Optimized for numba by David C. Stauffer in February 2021.
-    #.  Note that this version does not renormalize the quaternion.
 
     Examples
     --------
@@ -433,27 +517,43 @@ def quat_prop_single(quat: _Q, delta_ang: _V, inplace: bool = False, renorm: boo
     >>> import numpy as np
     >>> quat      = np.array([0., 0., 0., 1.])
     >>> delta_ang = np.array([0.01, 0.02, 0.03])
-    >>> quat_new  = quat_prop_single(quat, delta_ang)
+    >>> quat_new  = quat_prop_single(quat, delta_ang, use_approx=True, renorm=False)
     >>> print(quat_new)  # doctest: +NORMALIZE_WHITESPACE
     [0.005 0.01 0.015 1. ]
 
-    >>> quat_new_norm = quat_norm_single(quat_new)
+    >>> quat_new = quat_prop_single(quat, delta_ang)
     >>> with np.printoptions(precision=8):
-    ...     print(quat_new_norm) # doctest: +NORMALIZE_WHITESPACE
-    [0.00499913  0.00999825  0.01499738  0.99982505]
+    ...     print(quat_new) # doctest: +NORMALIZE_WHITESPACE
+    [0.00499971 0.00999942 0.01499913 0.99982501]
+
+    >>> quat_new = quat_prop_single(quat, delta_ang, use_approx=True)
+    >>> with np.printoptions(precision=8):
+    ...     print(quat_new) # doctest: +NORMALIZE_WHITESPACE
+    [0.00499913 0.00999825 0.01499738 0.99982505]
 
     """
     quat_new = quat if inplace else quat.copy()
     # compute angle rate matrix (note: transposed to make "F" order), use it to compute a delta
     # quaternion, and then propagate by adding the delta
     # fmt: off
-    quat_new += 0.5 * np.array([
-        [      0      , -delta_ang[2],  delta_ang[1], -delta_ang[0]],
-        [ delta_ang[2],       0      , -delta_ang[0], -delta_ang[1]],
-        [-delta_ang[1],  delta_ang[0],      0       , -delta_ang[2]],
-        [ delta_ang[0],  delta_ang[1],  delta_ang[2],       0      ],
-    ]).T @ quat
+    if use_approx:
+        quat_new += 0.5 * np.array([
+            [      0      , -delta_ang[2],  delta_ang[1], -delta_ang[0]],
+            [ delta_ang[2],       0      , -delta_ang[0], -delta_ang[1]],
+            [-delta_ang[1],  delta_ang[0],      0       , -delta_ang[2]],
+            [ delta_ang[0],  delta_ang[1],  delta_ang[2],       0      ],
+        ]).T @ quat
     # fmt: on
+    else:
+        dq_mag = np.sqrt(np.sum(delta_ang**2))
+        delta_quat = np.array([0.0, 0.0, 0.0, 1.0])
+        if dq_mag > 1e-14:
+            fact = np.sin(dq_mag / 2) / dq_mag
+            delta_quat[0] = fact * delta_ang[0]
+            delta_quat[1] = fact * delta_ang[1]
+            delta_quat[2] = fact * delta_ang[2]
+            delta_quat[3] = np.cos(dq_mag / 2)
+        quat_new[:] = quat_mult_single(delta_quat, quat)
     # ensure positive scalar component
     if quat_new[3] < 0:
         quat_new[:] = -quat_new

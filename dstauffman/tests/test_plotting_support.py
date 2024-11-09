@@ -77,11 +77,15 @@ class Test_plotting_COLOR_LISTS(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        self.keys = ["default", "single", "double", "vec", "quat", "dbl_diff", "vec_diff", "quat_diff"]
+        self.exp_keys = {
+            "default", "same", "same_old", "single",
+            "double", "vec", "quat", "dbl_off", "vec_off", "quat_off",
+            "dbl_diff", "vec_diff", "quat_diff", "dbl_diff_r", "vec_diff_r", "quat_diff_r",
+            "dbl_comp", "vec_comp", "quat_comp", "dbl_comp_r", "vec_comp_r", "quat_comp_r",
+        }  # fmt: skip
 
     def test_nominal(self) -> None:
-        for key in self.keys:
-            self.assertIn(key, plot.COLOR_LISTS)
+        self.assertEqual(set(plot.COLOR_LISTS.keys()), self.exp_keys)
         colormap = plot.COLOR_LISTS["quat_diff"]
         self.assertEqual(colormap.N, 8)
         self.assertEqual(colormap.colors[0], "xkcd:fuchsia")  # type: ignore[index]
@@ -237,6 +241,17 @@ class Test_plotting_ColorMap(unittest.TestCase):
         self.assertEqual(red, (1.0, 0, 0, 1))
         self.assertEqual(green, (0.0, 0.5, 0, 1))
         self.assertEqual(blue, (0.0, 0, 1, 1))
+
+    def test_colormap_rollovers(self) -> None:
+        colormap = colors.ListedColormap(["r", "g", "b"])
+        cm = plot.ColorMap(colormap, num_colors=12)
+        self.assertEqual(cm.get_color(0), (1.0, 0.0, 0.0, 1.0))
+        self.assertEqual(cm.get_color(1), (1.0, 0.0, 0.0, 1.0))
+        self.assertEqual(cm.get_color(4), (0.0, 0.5, 0.0, 1.0))
+        self.assertEqual(cm.get_color(10), (0.0, 0.0, 1.0, 1.0))
+        self.assertEqual(cm.get_color(11), (0.0, 0.0, 1.0, 1.0))
+        self.assertEqual(cm.get_color(12), (0.0, 0.0, 1.0, 1.0))
+        self.assertEqual(cm.get_color(20), (0.0, 0.0, 1.0, 1.0))
 
     def test_specific_cmaps(self) -> None:
         cm_viridis = plot.ColorMap("viridis", num_colors=4)

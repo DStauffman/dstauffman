@@ -92,6 +92,38 @@ class Test_aerospace_quat_from_axis_angle_single(unittest.TestCase):
         np.testing.assert_array_equal(quat, np.array([0.0, 0.0, 0.0, 1.0]))
 
 
+# %% aerospace.quat_angle_diff_single
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_quat_angle_diff_single(unittest.TestCase):
+    r"""
+    Tests the aerospace.quat_angle_diff_single function with the following cases:
+        TBD
+    """
+
+    def setUp(self) -> None:
+        # fmt: off
+        self.quat1 = np.array([0.5, 0.5, 0.5, 0.5])
+        self.dq1   = space.qrot(1, 0.001)
+        self.dq2   = space.qrot(2, 0.05)
+        self.dqq1  = space.quat_mult(self.dq1, self.quat1)
+        self.dqq2  = space.quat_mult(self.dq2, self.quat1)
+        self.comp1 = np.array([0.001, 0.0, 0.0])
+        self.comp2 = np.array([0.0, 0.05, 0.0])
+        # fmt: on
+
+    def test_nominal1(self) -> None:
+        comp = space.quat_angle_diff_single(self.quat1, self.dqq1)
+        np.testing.assert_array_almost_equal(comp, self.comp1)
+
+    def test_nominal2(self) -> None:
+        comp = space.quat_angle_diff_single(self.quat1, self.dqq2)
+        np.testing.assert_array_almost_equal(comp, self.comp2)
+
+    def test_zero_diff(self) -> None:
+        comp = space.quat_angle_diff_single(self.quat1, self.quat1)
+        np.testing.assert_array_almost_equal(comp, 0)
+
+
 # %% aerospace.quat_from_rotation_vector_single
 @unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_aerospace_quat_from_rotation_vector_single(unittest.TestCase):
@@ -309,22 +341,26 @@ class Test_aerospace_quat_norm_single(unittest.TestCase):
 class Test_aerospace_quat_prop_single(unittest.TestCase):
     r"""
     Tests the aerospace.quat_prop_single function with the following cases:
-        Nominal case
+        Nominal case (Linear and Non-linear, with and without renorm)
         Negative scalar
         Inplace
+        Inplace approximation
     """
 
     def setUp(self) -> None:
         self.quat = np.array([0.0, 0.0, 0.0, 1.0])
         self.delta_ang = np.array([0.01, 0.02, 0.03])
-        self.quat_new = np.array([0.005, 0.01, 0.015, 1.0])
-        self.quat_new_norm = np.array([0.00499912522962, 0.00999825045924, 0.01499737568886, 0.99982504592411])
+        self.quat_new_approx = np.array([0.005, 0.01, 0.015, 1.0])
+        self.quat_new_appx_norm = np.array([0.00499912522962, 0.00999825045924, 0.01499737568886, 0.99982504592411])
+        self.quat_new = np.array([0.004999708338, 0.009999416677, 0.014999125015, 0.999825005104])
 
     def test_nominal(self) -> None:
         quat = space.quat_prop_single(self.quat, self.delta_ang)
         np.testing.assert_array_almost_equal(quat, self.quat_new, 12)
-        quat_norm = space.quat_norm_single(quat)
-        np.testing.assert_array_almost_equal(quat_norm, self.quat_new_norm, 12)
+        quat_norm = space.quat_prop_single(self.quat, self.delta_ang, use_approx=True, renorm=False)
+        np.testing.assert_array_almost_equal(quat_norm, self.quat_new_approx, 12)
+        quat_norm = space.quat_prop_single(self.quat, self.delta_ang, use_approx=True)
+        np.testing.assert_array_almost_equal(quat_norm, self.quat_new_appx_norm, 12)
 
     def test_negative_scalar(self) -> None:
         quat = space.quat_prop_single(np.array([1.0, 0.0, 0.0, 0.0]), self.delta_ang)
@@ -337,7 +373,12 @@ class Test_aerospace_quat_prop_single(unittest.TestCase):
         self.assertGreater(np.max(np.abs(quat - self.quat)), 0.004)
         quat = space.quat_prop_single(self.quat, self.delta_ang, inplace=True)
         self.assertIs(quat, self.quat)
-        self.assertLess(np.max(np.abs(quat - self.quat_new)), 1e-8)
+        self.assertLess(np.max(np.abs(quat - self.quat_new)), 1e-12)
+
+    def test_inplace_approx(self) -> None:
+        quat = space.quat_prop_single(self.quat, self.delta_ang, use_approx=True, inplace=True)
+        self.assertIs(quat, self.quat)
+        self.assertLess(np.max(np.abs(quat - self.quat_new_appx_norm)), 1e-12)
 
 
 # %% aerospace.quat_times_vector_single

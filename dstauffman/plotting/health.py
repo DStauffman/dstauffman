@@ -78,6 +78,7 @@ class TruthPlotter(Frozen):
         self,
         time: _N | None = None,
         data: _M | None = None,
+        *,
         lo: _N | None = None,
         hi: _N | None = None,
         type_: str = "normal",
@@ -116,7 +117,7 @@ class TruthPlotter(Frozen):
             return scale * data
         return scale * data[:, ix]
 
-    def plot_truth(
+    def plot_truth(  # noqa: C901
         self, ax: Axes, scale: float = 1.0, ix: int | None = None, *, hold_xlim: bool = True, hold_ylim: bool = False
     ) -> None:
         r"""Add the information in the TruthPlotter instance to the given axes, with the optional scale."""
@@ -165,7 +166,7 @@ class TruthPlotter(Frozen):
 
 
 # %% Functions - plot_health_time_history
-def plot_health_time_history(
+def plot_health_time_history(  # noqa: C901
     time: ArrayLike,
     data: ArrayLike | None,
     label: str,
@@ -342,7 +343,7 @@ def plot_health_time_history(
 
 
 # %% Functions - plot_health_monte_carlo
-def plot_health_monte_carlo(
+def plot_health_monte_carlo(  # noqa: C901
     time: ArrayLike,
     data: ArrayLike,
     label: str,
@@ -536,6 +537,7 @@ def plot_icer(
     qaly: _N,
     cost: _N,
     ix_front: int,
+    *,
     baseline: int | None = None,
     names: list[str] | None = None,
     opts: Opts | None = None,

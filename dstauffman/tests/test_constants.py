@@ -28,6 +28,7 @@ class Test_all_values(unittest.TestCase):
             "HAVE_COVERAGE",
             "HAVE_DS",
             "HAVE_H5PY",
+            "HAVE_KERAS",
             "HAVE_MPL",
             "HAVE_NUMPY",
             "HAVE_PANDAS",

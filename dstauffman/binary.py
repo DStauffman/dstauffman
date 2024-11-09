@@ -93,7 +93,7 @@ def int2bin(num: int, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_char:
 
 
 # %% Functions - int2hex
-def int2hex(num: int, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_char: str = "_", upper: bool = False) -> str:
+def int2hex(num: int, *, pad: int = 0, sep: int = 0, pad_char: str = "0", sep_char: str = "_", upper: bool = False) -> str:
     r"""
     Convert a given integer to a hexadecimal string representation.
 

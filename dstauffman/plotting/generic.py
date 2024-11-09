@@ -32,7 +32,6 @@ from dstauffman import (
 from dstauffman.aerospace import quat_angle_diff
 from dstauffman.plotting.support import (
     add_datashaders,
-    COLOR_LISTS,
     ColorMap,
     DEFAULT_COLORMAP,
     disp_xlimits,
@@ -288,6 +287,32 @@ def make_generic_plot(  # noqa: C901
     """
     # hard-coded values
     datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
+
+    # possible plotting functions
+    def _plot_linear(ax: Axes, time: _Times | None, data: _Data | None, symbol: str, *args: Any, **kwargs: Any) -> None:
+        """Plots a normal linear plot with passthrough options."""
+        assert len(args) == 0, "Unexpected positional arguments."
+        assert time is not None
+        assert data is not None
+        try:
+            if np.all(np.isnan(data)):
+                return
+        except TypeError:
+            pass  # like categorical data that cannot be safely coerced to NaNs
+        ax.plot(time, data, symbol, markerfacecolor="none", **kwargs)  # type: ignore[arg-type]
+
+    def _plot_zoh(ax: Axes, time: _Times | None, data: _Data | None, symbol: str, *args: Any, **kwargs: Any) -> None:
+        """Plots a zero-order hold step plot with passthrough options."""
+        assert len(args) == 0, "Unexpected positional arguments."
+        assert time is not None
+        assert data is not None
+        try:
+            if np.all(np.isnan(data)):
+                return
+        except TypeError:
+            pass  # like categorical data that cannot be safely coerced to NaNs
+        ax.step(time, data, symbol, where="post", markerfacecolor="none", **kwargs)  # type: ignore[arg-type]
+
     # some basic flags and checks
     assert plot_type in {
         "time",
@@ -368,9 +393,9 @@ def make_generic_plot(  # noqa: C901
     # fmt: off
     plot_func: Callable
     if use_zoh:
-        plot_func = lambda ax, *args, **kwargs: ax.step(*args, where="post", markerfacecolor="none", **kwargs)  # pylint: disable=unnecessary-lambda-assignment
+        plot_func = _plot_zoh
     else:
-        plot_func = lambda ax, *args, **kwargs: ax.plot(*args, markerfacecolor="none", **kwargs)  # pylint: disable=unnecessary-lambda-assignment
+        plot_func = _plot_linear
     # fmt: on
 
     # get the categories
@@ -451,8 +476,6 @@ def make_generic_plot(  # noqa: C901
         ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[assignment]
     # create a colormap
     if doing_diffs:
-        if is_quat_diff:
-            cm_vec = ColorMap(COLOR_LISTS["vec"])
         cm = ColorMap(colormap=colormap, num_colors=3 * num_channels)
     elif is_cat_plot:
         cm = ColorMap(colormap=colormap, num_colors=len(cat_keys) * num_channels)
@@ -866,7 +889,7 @@ def make_generic_plot(  # noqa: C901
                     this_label = elements[j]
                 this_data = nondeg_error[j, :] if is_quat_diff else diffs[j, :]
                 this_zorder = [8, 6, 5][j] if is_quat_diff else 5
-                this_color = cm_vec.get_color(j) if is_quat_diff else cm.get_color(j + 2 * num_channels)
+                this_color = cm.get_color(j + 2 * num_channels)
                 if use_datashader and time_overlap.size > datashader_pts:  # pyright: ignore[reportOptionalMemberAccess]
                     # fmt: off
                     ix_spot = np.round(np.linspace(
@@ -905,13 +928,13 @@ def make_generic_plot(  # noqa: C901
                         ".",
                         markersize=4,
                         label=this_label,
-                        color=cm_vec.get_color(0),
+                        color=cm.get_color(8),
                         linestyle="none",
                     )
-                    datashaders.append({"time": time_overlap, "data": this_data, "ax": this_axes, "color": cm_vec.get_color(0)})
+                    datashaders.append({"time": time_overlap, "data": this_data, "ax": this_axes, "color": cm.get_color(8)})
                 else:
                     plot_func(
-                        this_axes, time_overlap, nondeg_angle, ".-", markersize=4, label=this_label, color=cm_vec.get_color(0)
+                        this_axes, time_overlap, nondeg_angle, ".-", markersize=4, label=this_label, color=cm.get_color(8)
                     )
             if show_extra:
                 if d1_miss_ix.size > 0:
@@ -953,7 +976,7 @@ def make_generic_plot(  # noqa: C901
         # format display of plot
         if i == 0:
             if is_quat_diff:
-                this_axes.set_title(description + " Quaternion Components")
+                this_axes.set_title(description + " Components")
             else:
                 this_axes.set_title(description)
         elif doing_diffs and ((single_lines and i == num_rows) or (not single_lines and i == 1)):
@@ -1010,7 +1033,7 @@ def make_generic_plot(  # noqa: C901
             for fig in figs:
                 extra_plotter(fig=fig, ax=fig.axes)
         else:
-            extra_plotter(fig=fig, ax=ax)  # type: ignore[arg-type]
+            extra_plotter(fig=fig, ax=ax)
 
     # overlay the datashaders (with appropriate time units information)
     if bool(datashaders):

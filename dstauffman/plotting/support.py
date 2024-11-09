@@ -143,12 +143,18 @@ if HAVE_MPL:
     # double combinations
     COLOR_LISTS["dbl_diff"]    = colors.ListedColormap(COLOR_LISTS["dbl_off"].colors + COLOR_LISTS["double"].colors)  # type: ignore[operator]
     COLOR_LISTS["dbl_diff_r"]  = colors.ListedColormap(COLOR_LISTS["double"].colors + COLOR_LISTS["dbl_off"].colors)  # type: ignore[operator]
+    COLOR_LISTS["dbl_comp"]    = colors.ListedColormap(COLOR_LISTS["dbl_diff"].colors + COLOR_LISTS["double"].colors)  # type: ignore[operator]
+    COLOR_LISTS["dbl_comp_r"]  = colors.ListedColormap(COLOR_LISTS["dbl_diff_r"].colors + COLOR_LISTS["double"].colors)  # type: ignore[operator]
     # triple combinations
     COLOR_LISTS["vec_diff"]    = colors.ListedColormap(COLOR_LISTS["vec_off"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[operator]
     COLOR_LISTS["vec_diff_r"]  = colors.ListedColormap(COLOR_LISTS["vec"].colors + COLOR_LISTS["vec_off"].colors)  # type: ignore[operator]
+    COLOR_LISTS["vec_comp"]    = colors.ListedColormap(COLOR_LISTS["vec_diff"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[operator]
+    COLOR_LISTS["vec_comp_r"]  = colors.ListedColormap(COLOR_LISTS["vec_diff_r"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[operator]
     # quad combinations
     COLOR_LISTS["quat_diff"]   = colors.ListedColormap(COLOR_LISTS["quat_off"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
     COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)  # type: ignore[operator]
+    COLOR_LISTS["quat_comp"]   = colors.ListedColormap(COLOR_LISTS["quat_diff"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
+    COLOR_LISTS["quat_comp_r"] = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
     # fmt: on
 
 # %% Set Matplotlib global settings
@@ -196,7 +202,7 @@ class _HoverButton(QPushButton):
 class ExtraPlotter(Protocol):
     r"""Custom Protocol to type the extra_plotter argument to all the plots."""
 
-    def __call__(self, fig: Figure, ax: Axes) -> None: ...
+    def __call__(self, fig: Figure, ax: list[Axes]) -> None: ...
 
 
 # %% Classes - MyCustomToolbar
@@ -404,12 +410,18 @@ class ColorMap(Frozen):
             # for older matplotlib versions, use deprecated set_color_cycle
             ax.set_color_cycle([self.get_color(i) for i in range(self.num_colors)])  # type: ignore[attr-defined]
 
-    def _repr_png_(self):
+    def _repr_png_(self) -> bytes | None:
         """Generate a PNG representation of the Colormap."""
         pixels = np.zeros((64, 512, 4), dtype=np.uint8)
-        cuts = np.floor(np.linspace(0, 512, self.num_colors + 1)).astype(int)
-        for i in range(self.num_colors):
-            pixels[:, cuts[i]:cuts[i+1], :] = 255*np.asanyarray(self.get_color(i))
+        if self.num_colors is not None:
+            cuts = np.floor(np.linspace(0, 512, self.num_colors + 1)).astype(int)
+            for i in range(self.num_colors):
+                pixels[:, cuts[i] : cuts[i + 1], :] = 255 * np.asanyarray(self.get_color(i))
+        else:
+            assert self.smap.norm.vmin is not None
+            assert self.smap.norm.vmax is not None
+            for i, j in enumerate(np.linspace(self.smap.norm.vmin, self.smap.norm.vmax, 255.0)):  # type: ignore[call-overload]
+                pixels[:, 2 * i : 2 * (i + 1)] = 255 * np.asanyarray(self.get_color(j))
         png_bytes = io.BytesIO()
         title = "ColorMap"
         author = "dstauffman.plotting"
@@ -2233,6 +2245,7 @@ def save_images_to_pdf(
 # %% add_datashaders
 def add_datashaders(
     datashaders: list[dict[str, Any]],
+    *,
     threshold: float = 0.8,
     max_px: int = 6,
     how: str = "over",

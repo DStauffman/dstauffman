@@ -17,7 +17,6 @@ from dstauffman import HAVE_DS, HAVE_MPL, HAVE_NUMPY, NP_DATETIME_UNITS, NP_INT6
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
-    from matplotlib.colors import ListedColormap
     from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
 if HAVE_NUMPY:
@@ -295,7 +294,7 @@ class Test_plotting_make_difference_plot(unittest.TestCase):
         self.disp_xmax        = np.inf
         self.make_subplots    = True
         self.single_lines     = False
-        self.colormap         = ListedColormap(plot.COLOR_LISTS["dbl_diff"].colors + plot.COLOR_LISTS["double"].colors)  # type: ignore[operator]
+        self.colormap         = plot.COLOR_LISTS["dbl_comp"]
         self.use_mean         = False
         self.plot_zero        = False
         self.show_rms         = True

@@ -4,7 +4,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "dstauffman"
-version = "3.6.0"
+version = "3.7.0"
 description = "Generic python utilities for Aerospace applications"
 license = "LGPLv3"
 authors = ["David C. Stauffer <dstauffman@yahoo.com>"]
@@ -160,6 +160,7 @@ module = [
     "coverage.*",
     "datashader.*",
     "h5py.*",
+    "keras.*",
     "numba.*",
     "pandas.*",
     "PIL.*",

@@ -134,6 +134,7 @@ def dist_enum_and_mons(
 def icer(
     cost: ArrayLike,
     qaly: ArrayLike,
+    *,
     names: list[str] | None = None,
     baseline: int | None = None,
     make_plot: bool = False,

@@ -388,7 +388,7 @@ def make_quaternion_plot(
     ...     plt.close(fig)
 
     """
-    colormap = ColorMap(COLOR_LISTS["quat_diff"])
+    colormap = ColorMap(COLOR_LISTS["quat_comp"])
     return make_generic_plot(  # type: ignore[return-value]
         "quat",
         description=description,

@@ -319,7 +319,9 @@ mp2ar = monthly_probability_to_annual_rate
 
 
 # %% Functions - combine_sets
-def combine_sets(n1: int, u1: float, s1: float, n2: int, u2: float, s2: float) -> tuple[int, float, float]:
+def combine_sets(  # pylint: disable=too-many-positional-arguments
+    n1: int, u1: float, s1: float, n2: int, u2: float, s2: float
+) -> tuple[int, float, float]:
     r"""
     Combine the mean and standard deviations for two non-overlapping sets of data.
 

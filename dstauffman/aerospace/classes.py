@@ -515,7 +515,7 @@ class KfRecord(Frozen):
     """
 
     def __init__(
-        self, num_points: int = 0, num_states: int = 0, num_active: int = 0, num_axes: int = 0, time_dtype: DTypeLike = float
+        self, num_points: int = 0, *, num_states: int = 0, num_active: int = 0, num_axes: int = 0, time_dtype: DTypeLike = float
     ):
         self.time: _N | _D | None
         self.P: _N | None

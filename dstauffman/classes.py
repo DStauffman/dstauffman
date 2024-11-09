@@ -580,6 +580,7 @@ def pprint_dict(  # noqa: C901
 def chop_time(
     self: Any,
     time_field: str,
+    *,
     exclude: _Sets | None = None,
     ti: _Time = -inf,
     tf: _Time = inf,
