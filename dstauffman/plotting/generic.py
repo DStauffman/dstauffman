@@ -79,7 +79,7 @@ if TYPE_CHECKING:
     _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
     _DeltaTime = int | float | np.timedelta64
     _Figs = list[Figure]
-    _FuncLamb = Callable[[Any, Any], float | np.float64]
+    _FuncLamb = Callable[[_I | _N, int | None], float | np.float64 | _N]
     _SecUnits = str | int | float | tuple[str, float] | None
 
 # %% Globals
@@ -288,6 +288,21 @@ def make_generic_plot(  # noqa: C901
     # hard-coded values
     datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
 
+    # possible RMS/mean functions
+    def _nan_rms(x: _I | _N, axis: int | None) -> float | np.float64 | _N:
+        """Calculate the RMS while ignoring NaNs."""
+        try:
+            return rms(x, axis=axis, ignore_nans=True)
+        except TypeError:
+            return np.nan
+
+    def _nan_mean(x: _I | _N, axis: int | None) -> float | np.float64 | _N:
+        """Calculate the mean while ignoring NaNs."""
+        try:
+            return np.nanmean(x, axis=axis)
+        except TypeError:
+            return np.nan
+
     # possible plotting functions
     def _plot_linear(ax: Axes, time: _Times | None, data: _Data | None, symbol: str, *args: Any, **kwargs: Any) -> None:
         """Plots a normal linear plot with passthrough options."""
@@ -494,10 +509,10 @@ def make_generic_plot(  # noqa: C901
         data_func: _FuncLamb | list[_FuncLamb] | dict[Any, _N]
         if not use_mean:
             func_name = "RMS"
-            func_lamb = lambda x, y: rms(x, axis=y, ignore_nans=True)  # pylint: disable=unnecessary-lambda-assignment
+            func_lamb = _nan_rms
         else:
             func_name = "Mean"
-            func_lamb = lambda x, y: np.nanmean(x, axis=y)  # pylint: disable=unnecessary-lambda-assignment
+            func_lamb = _nan_mean
         if not doing_diffs and not is_cat_plot:
             if data_is_list:
                 data_func = [func_lamb(data_one[j][ix["one"][j]], None) for j in range(num_channels)]  # type: ignore[misc, index]

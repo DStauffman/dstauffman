@@ -31,8 +31,8 @@ if TYPE_CHECKING:
 # %% _update_information
 @ncjit
 def _update_information(  # pylint: disable=too-many-positional-arguments
-    H: _M, Pz: _M, z: _N, K: _M, lambda_bar: _N, LAMBDA_bar: _N
-) -> tuple[_N, _N]:
+    H: _M, Pz: _M, z: _N, K: _M, lambda_bar: _N, LAMBDA_bar: _M
+) -> tuple[_N, _M]:
     r"""
     Update information vector and matrix using innovation.
 

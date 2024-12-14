@@ -7,13 +7,22 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 import unittest
 
-from dstauffman import HAVE_NUMPY
+from dstauffman import HAVE_NUMPY, HAVE_SCIPY, intersect, issorted, NP_DATETIME_UNITS, NP_ONE_SECOND
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
     import numpy as np
+
+if TYPE_CHECKING:
+    from numpy.typing import NDArray
+
+    _I = NDArray[np.int_]
+    _N = NDArray[np.float64]
 
 
 # %% aerospace.rot
@@ -327,6 +336,101 @@ class Test_aerospace_rv2dcm(unittest.TestCase):
         quat = space.quat_norm(np.hstack((vec / mag * np.sin(mag / 2), np.cos(mag / 2))))
         exp = space.quat_to_dcm(quat)
         np.testing.assert_array_almost_equal(dcm, exp, decimal=14)
+
+
+# %% aerospace.linear_interp
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_linear_interp(unittest.TestCase):
+    r"""
+    Tests the aerospace.linear_interp function with the following cases:
+        Single axis
+        Unsorted
+        Extrapolate
+        Vector axis
+        Date single axis
+        Date vector axis
+        Vector lowpass (x4)
+    """
+
+    def setUp(self) -> None:
+        self.x1 = np.arange(1.0, 5.1, 0.1)  # 40 pts
+        self.x2 = np.arange(5.2, 9.2, 0.2)  # 20 pts
+        self.x3 = np.arange(9.5, 14.5, 0.5)  # 10 pts
+        self.m1 = 2.0
+        self.m2 = -1.0
+        self.m3 = 5.0
+        self.b0 = -8.0
+        self.y1 = self.m1 * (self.x1 - self.x1[0]) + self.b0 + self.m1
+        self.y2 = self.m2 * (self.x2 - self.x2[0]) + self.y1[-1] + 0.2 * self.m2
+        self.y3 = self.m3 * (self.x3 - self.x3[0]) + self.y2[-1] + 0.5 * self.m3
+        self.x = np.hstack((self.x1, self.x2, self.x3))
+        self.y = np.hstack([self.y1, self.y2, self.y3])
+        self.xp = np.array([1.0, 5.0, 9.0, 14.0])
+        self.yp: _N
+        self.ix: _I
+        (self.yp, self.ix, _) = intersect(self.x, self.xp, return_indices=True, tolerance=1e-10)  # type: ignore[call-overload]
+        self.yp = self.y[self.ix]
+
+    def test_nominal(self) -> None:
+        y = space.interp_vector(self.x, self.xp, self.yp)
+        np.testing.assert_array_almost_equal(y, self.y, 12)
+
+    @unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
+    def test_unsorted(self) -> None:
+        ix = np.arange(self.xp.size)
+        while issorted(ix):
+            np.random.shuffle(ix)
+        y = space.interp_vector(self.x, self.xp[ix], self.yp[ix], assume_sorted=False)
+        np.testing.assert_array_almost_equal(y, self.y, 12)
+
+    def test_extrapolate_numpy(self) -> None:
+        xp = self.xp.copy()
+        yp = self.yp.copy()
+        xp[0] = self.x[5]
+        yp[0] = self.y[5]
+        xp[-1] = self.x[-5]
+        yp[-1] = self.y[-5]
+        exp = self.y.copy()
+        exp[0:5] = 0.5
+        exp[-4:] = 1000.0
+        with self.assertRaises(ValueError) as context:
+            space.interp_vector(self.x, xp, yp, left=0.5, right=1000.0)
+        self.assertEqual(str(context.exception), "Desired points outside given xp array and extrapolation is False")
+        y = space.interp_vector(self.x, xp, yp, left=0.5, right=1000.0, extrapolate=True)
+        np.testing.assert_array_almost_equal(y, exp, 12)
+
+    def test_vector(self) -> None:
+        yp = np.vstack([self.yp, self.yp])
+        y = space.interp_vector(self.x, self.xp, yp)
+        exp = np.vstack([self.y, self.y])
+        np.testing.assert_array_almost_equal(y, exp, 12)
+
+    def test_date_single(self) -> None:
+        x = np.datetime64("2024-12-25T00:00:00", NP_DATETIME_UNITS) + self.x * NP_ONE_SECOND
+        xp = np.datetime64("2024-12-25T00:00:00", NP_DATETIME_UNITS) + self.xp * NP_ONE_SECOND
+        y = space.interp_vector(x, xp, self.yp)
+        np.testing.assert_array_almost_equal(y, self.y, 12)
+
+    def test_date_vector(self) -> None:
+        x = np.datetime64("2024-12-25T00:00:00", NP_DATETIME_UNITS) + self.x * NP_ONE_SECOND
+        xp = np.datetime64("2024-12-25T00:00:00", NP_DATETIME_UNITS) + self.xp * NP_ONE_SECOND
+        yp = np.vstack([self.yp, self.yp])
+        y = space.interp_vector(x, xp, yp)
+        exp = np.vstack([self.y, self.y])
+        np.testing.assert_array_almost_equal(y, exp, 12)
+
+    def test_lowpass(self) -> None:
+        x = np.arange(0, 10.1, 0.1)
+        xp = np.array([0.0, 5.0, 10.0])
+        yp = np.array([[0.0, 5.0, 0.0], [1.0, 5.0, 1.0]])
+        y = space.interp_vector(x, xp, yp, btype="lowpass", filt_order=4)
+        self.assertTrue(np.all(y < 5.0))
+
+    def test_bad_arguments(self) -> None:
+        with self.assertRaises(TypeError):
+            space.interp_vector(self.x, self.xp, self.yp, filt_order=2)
+        with self.assertRaises(TypeError):
+            space.interp_vector(self.x, self.xp, self.yp, btype="lowpass", left=np.nan)
 
 
 # %% Unit test execution

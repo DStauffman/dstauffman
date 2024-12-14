@@ -213,6 +213,95 @@ class Test_aerospace_ecf2geod(unittest.TestCase):
         np.testing.assert_array_almost_equal(lla, self.lla, decimal=self.decimal)
 
 
+# %% aerospace.find_earth_intersect
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_find_earth_intersect(unittest.TestCase):
+    r"""
+    Tests the aerospace.find_earth_intersect function with the following cases:
+        Nominal
+        Backside
+        Units
+        Outputs
+    """
+
+    def setUp(self) -> None:
+        self.position = np.array([1e7, 1e7, 1e7])
+        self.pointing = np.array([-0.7274, -0.3637, -0.5819])
+        # TODO: prefer more independent check
+        self.exp = np.array([1125440.234789282, 5562720.117394641, 2900596.1955236234])
+        self.exp_back = np.array([-5465847.317492539, 2267076.3412537305, -2372252.6176091656])
+
+    def test_nominal(self) -> None:
+        earth_vec = space.find_earth_intersect(self.position, self.pointing)
+        np.testing.assert_array_almost_equal(earth_vec, self.exp)
+
+    def test_backside(self) -> None:
+        earth_vec = space.find_earth_intersect(self.position, self.pointing, use_backside=True)
+        np.testing.assert_array_almost_equal(earth_vec, self.exp_back)
+
+    def test_units(self) -> None:
+        earth_vec = space.find_earth_intersect(M2FT * self.position, self.pointing, units="ft")
+        np.testing.assert_array_almost_equal(earth_vec, M2FT * self.exp)
+
+    def test_array0(self) -> None:
+        earth_vec = space.find_earth_intersect(self.position[:, np.newaxis], self.pointing[:, np.newaxis])
+        np.testing.assert_array_almost_equal(earth_vec, self.exp)
+
+    def test_array1(self) -> None:
+        position = np.vstack([self.position, self.position]).T
+        pointing = np.vstack([self.pointing, self.pointing]).T
+        exp = np.vstack([self.exp, self.exp]).T
+        earth_vec = space.find_earth_intersect(position, pointing)
+        np.testing.assert_array_almost_equal(earth_vec, exp)
+
+
+# %% aerospace.find_earth_intersect_wrapper
+@unittest.skipIf(not HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_aerospace_find_earth_intersect_wrapper(unittest.TestCase):
+    r"""
+    Tests the aerospace.find_earth_intersect_wrapper function with the following cases:
+        Nominal
+        Backside
+        Units
+        Outputs
+    """
+
+    def setUp(self) -> None:
+        self.position_eci = np.array([1e7, 1e7, 1e7])
+        self.q_body_eci = np.array([0.0, 0.0, 0.0, 1.0])
+        self.vec_body = np.array([-0.7274, -0.3637, -0.5819])
+        self.q_eci2ecf = np.array([0.0, 0.0, 0.0, 1.0])
+        # TODO: prefer more independent check
+        self.exp = np.array([0.4751993792689207, 1.3711726022232205, -0.0422516567632556])
+        self.exp_back = np.array([-0.38360520629857753, 2.748417646936549, -0.03960468713194132])
+
+    def test_nominal(self) -> None:
+        earth_lla = space.find_earth_intersect_wrapper(self.position_eci, self.q_body_eci, self.vec_body, self.q_eci2ecf)
+        np.testing.assert_array_almost_equal(earth_lla, self.exp)
+
+    def test_backside(self) -> None:
+        earth_lla = space.find_earth_intersect_wrapper(self.position_eci, self.q_body_eci, self.vec_body, self.q_eci2ecf, use_backside=True)  # fmt: skip
+        np.testing.assert_array_almost_equal(earth_lla, self.exp_back)
+
+    def test_units(self) -> None:
+        earth_lla = space.find_earth_intersect_wrapper(M2FT * self.position_eci, self.q_body_eci, self.vec_body, self.q_eci2ecf, units="ft")  # fmt: skip
+        exp = self.exp.copy()
+        exp[2] *= M2FT
+        np.testing.assert_array_almost_equal(earth_lla, exp)
+
+    def test_output(self) -> None:
+        earth_lat, earth_lon, earth_alt = space.find_earth_intersect_wrapper(self.position_eci, self.q_body_eci, self.vec_body, self.q_eci2ecf, output="split")  # fmt: skip
+        np.testing.assert_array_almost_equal(earth_lat, self.exp[0])
+        np.testing.assert_array_almost_equal(earth_lon, self.exp[1])
+        np.testing.assert_array_almost_equal(earth_alt, self.exp[2])
+
+    def test_vectorized(self) -> None:
+        pos = np.column_stack([self.position_eci, -self.position_eci])
+        earth_lla = space.find_earth_intersect_wrapper(pos, self.q_body_eci, self.vec_body, self.q_eci2ecf)
+        exp = np.column_stack([self.exp, np.array([-self.exp_back[0], self.exp_back[1] - np.pi, self.exp_back[2]])])
+        np.testing.assert_array_almost_equal(earth_lla, exp)
+
+
 # %% Unit test execution
 if __name__ == "__main__":
     unittest.main(exit=False)

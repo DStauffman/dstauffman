@@ -14,6 +14,7 @@ from typing import Literal, overload, TYPE_CHECKING
 import unittest
 
 from dstauffman import HAVE_NUMPY, M2FT
+from dstauffman.aerospace.quat import quat_times_vector
 
 if HAVE_NUMPY:
     import numpy as np
@@ -22,6 +23,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     _N = NDArray[np.float64]
+    _Q = NDArray[np.float64]
+    _V = NDArray[np.float64]
 
 # %% Constants
 # Earth's semi-major axis (ft)
@@ -282,6 +285,83 @@ def ecf2geod(
     if output == "split":
         return (lat, lon, alt)
     raise ValueError(f'Unexpected value for output: "{output}"')
+
+
+# %% Functions - find_earth_intersect
+def find_earth_intersect(
+    position: _V,
+    pointing: _V,
+    *,
+    units: str = "m",
+    use_backside: bool = False,
+) -> _N | tuple[_N, _N, _N]:
+    """Find where a given body unit vector may intersect the Earth."""
+    # Note equations derived using sympy and Earth Ellipsoid:
+    # import sympy
+    # px, py, pz, ux, uy, uz, a, b, d = sympy.symbols("px py pz ux uy uz a b d")
+    # solutions = sympy.solve((px + d*ux)**2/a**2 + (py + d*uy)**2/a**2 + (pz + d*uz)**2/b**2 - 1, d)
+
+    # determine units (TODO: do I really want to support both?)
+    if units == "m":
+        a = _a
+        b = _b
+    elif units == "ft":
+        a = _a * M2FT
+        b = _b * M2FT
+    else:
+        raise ValueError(f'Unexpected value for units: "{units}"')
+
+    px = position[0, ...]
+    py = position[1, ...]
+    pz = position[2, ...]
+    ux = pointing[0, ...]
+    uy = pointing[1, ...]
+    uz = pointing[2, ...]
+
+    component = -(a**2) * pz * uz - b**2 * px * ux - b**2 * py * uy
+    radical = (
+        a**4*uz**2 + a**2*b**2*ux**2 + a**2*b**2*uy**2 - a**2*px**2*uz**2 + 2*a**2*px*pz*ux*uz
+        - a**2*py**2*uz**2 + 2*a**2*py*pz*uy*uz - a**2*pz**2*ux**2 - a**2*pz**2*uy**2
+        - b**2*px**2*uy**2 + 2*b**2*px*py*ux*uy - b**2*py**2*ux**2
+    )  # fmt: skip
+    magnitude = a**2 * uz**2 + b**2 * ux**2 + b**2 * uy**2
+    if magnitude.size == 1:
+        if magnitude == 0:
+            magnitude = 1.0
+    else:
+        magnitude[magnitude == 0] = 1
+
+    if use_backside:
+        d = (component + b * np.sqrt(radical, where=radical >= 0, out=np.full(radical.shape, np.nan))) / magnitude
+    else:
+        d = (component - b * np.sqrt(radical, where=radical >= 0, out=np.full(radical.shape, np.nan))) / magnitude
+    return np.squeeze(np.vstack([px + d * ux, py + d * uy, pz + d * uz]))
+
+
+# %% Functions - find_earth_intersect_wrapper
+def find_earth_intersect_wrapper(
+    position_eci: _V,
+    q_body_eci: _Q,
+    vec_body: _V,
+    q_eci2ecf: _Q,
+    *,
+    units: str = "m",
+    output: str = "combined",
+    algorithm: str = "gersten",
+    use_backside: bool = False,
+) -> _N | tuple[_N, _N, _N]:
+    """Find where a given body unit vector may intersect the Earth with given quaternion rotations."""
+    pointing_eci = quat_times_vector(q_body_eci, vec_body)
+    if False:  # pylint: disable=using-constant-test
+        # Do calculations in ECI
+        earth_eci = find_earth_intersect(position_eci, pointing_eci, units=units, use_backside=use_backside)  # type: ignore[unreachable]
+        earth_ecf = quat_times_vector(q_eci2ecf, earth_eci)
+    else:
+        # Do calculations in ECF
+        position_ecf = quat_times_vector(q_eci2ecf, position_eci)
+        pointing_ecf = quat_times_vector(q_eci2ecf, pointing_eci)
+        earth_ecf = find_earth_intersect(position_ecf, pointing_ecf, units=units, use_backside=use_backside)
+    return ecf2geod(earth_ecf, units=units, output=output, algorithm=algorithm)
 
 
 # %% Unit test

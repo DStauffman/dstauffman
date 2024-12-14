@@ -20,6 +20,7 @@ from .generic   import make_generic_plot, make_time_plot, make_error_bar_plot, \
                            make_connected_sets
 from .health    import TruthPlotter, plot_health_time_history, plot_health_monte_carlo, \
                            plot_icer, plot_population_pyramid
+from .maps      import get_map_data, plot_map
 from .plotting  import Opts, suppress_plots, unsuppress_plots, plot_time_history, \
                            plot_time_difference, plot_correlation_matrix, plot_bar_breakdown, \
                            plot_histogram, setup_plots, save_zoomed_version

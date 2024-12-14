@@ -12,7 +12,7 @@ Notes
 # %% Imports
 # fmt: off
 from .classes     import KfInnov, Kf, KfRecord
-from .earth       import geod2ecf, ecf2geod
+from .earth       import geod2ecf, ecf2geod, find_earth_intersect, find_earth_intersect_wrapper
 from .gps         import GPS_DATE_ZERO, ONE_DAY, DAYS_PER_WEEK, WEEK_ROLLOVER, NP_GPS_DATE_ZERO, \
                              bsl, bsr, prn_01_to_m11, get_prn_bits, correlate_prn, generate_prn, \
                              gps_to_datetime, get_gps_to_utc_offset, gps_to_utc_datetime
@@ -46,7 +46,7 @@ from .quat_opt    import qrot_single, quat_from_axis_angle_single, \
                              quat_interp_single, quat_inv_single, quat_mult_single, \
                              quat_norm_single, quat_prop_single, quat_times_vector_single, \
                              quat_to_dcm
-from .vectors     import rot, drot, vec_cross, vec_angle, cart2sph, sph2cart, rv2dcm
+from .vectors     import rot, drot, vec_cross, vec_angle, cart2sph, sph2cart, rv2dcm, interp_vector
 from .weather     import read_tci_data, read_kp_ap_etc_data, read_kp_ap_nowcast, read_solar_cycles
 # fmt: on
 

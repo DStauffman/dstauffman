@@ -290,7 +290,7 @@ class Test_plotting_plot_health_time_history(unittest.TestCase):
         self.assertIsNotNone(self.fig)
 
     def test_data_lo_and_hi(self) -> None:
-        self.fig = plot.plot_health_time_history(self.description, self.time, self.data, data_lo=self.data - 1, data_hi=self.data + 1)
+        self.fig = plot.plot_health_time_history(self.description, self.time, self.data, data_lo=self.data - 1, data_hi=self.data + 1)  # fmt: skip
         self.assertIsNotNone(self.fig)
 
     def test_not_ndarray(self) -> None:
@@ -381,7 +381,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units=self.units, opts=self.opts)
 
     def test_diffs(self) -> None:
-        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data_matrix, units=self.units, plot_as_diffs=True)
+        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data_matrix, units=self.units, plot_as_diffs=True)  # fmt: skip
 
     def test_diffs_and_opts(self) -> None:
         self.fig = plot.plot_health_monte_carlo(
@@ -389,7 +389,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         )
 
     def test_group(self) -> None:
-        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units=self.units, opts=self.opts, plot_indiv=False)
+        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units=self.units, opts=self.opts, plot_indiv=False)  # fmt: skip
 
     def test_colormap(self) -> None:
         self.opts.colormap = "Dark2"
@@ -398,7 +398,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
     def test_colormap2(self) -> None:
         self.opts.colormap = "Dark2"
         colormap = "Paired"
-        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units=self.units, opts=self.opts, colormap=colormap)
+        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units=self.units, opts=self.opts, colormap=colormap)  # fmt: skip
 
     def test_array_data1(self) -> None:
         data = np.column_stack((self.data, self.data))
@@ -409,11 +409,11 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
         self.fig = plot.plot_health_monte_carlo(self.description, self.time, data, units=self.units, plot_as_diffs=True)
 
     def test_second_units1(self) -> None:
-        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units=self.units, second_units=self.second_units)
+        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units=self.units, second_units=self.second_units)  # fmt: skip
 
     def test_second_units2(self) -> None:
         second_units = ("New ylabel [units]", 100)
-        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units="percentage", second_units=second_units)
+        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units="percentage", second_units=second_units)  # fmt: skip
 
     def test_simple(self) -> None:
         self.fig = plot.plot_health_monte_carlo("Text", 0, 0)
@@ -430,7 +430,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
 
     def test_no_rms_in_legend2(self) -> None:
         self.opts.show_rms = False
-        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units=self.units, opts=self.opts, plot_as_diffs=True)
+        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data, units=self.units, opts=self.opts, plot_as_diffs=True)  # fmt: skip
 
     def test_show_zero(self) -> None:
         self.data += 1000  # type: ignore[operator]
@@ -442,7 +442,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
 
     @unittest.skipIf(not HAVE_SCIPY, "Skipping due to missing scipy dependency.")
     def test_plot_confidence(self) -> None:
-        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data_matrix, units=self.units, plot_confidence=0.95)
+        self.fig = plot.plot_health_monte_carlo(self.description, self.time, self.data_matrix, units=self.units, plot_confidence=0.95)  # fmt: skip
 
     def test_not_ndarray(self) -> None:
         self.fig = plot.plot_health_monte_carlo("Zero", 0, 0)

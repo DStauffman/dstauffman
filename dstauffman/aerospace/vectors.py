@@ -10,12 +10,12 @@ Notes
 from __future__ import annotations
 
 import doctest
-from typing import overload, TYPE_CHECKING
+from typing import Callable, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from nubs import ncjit
 
-from dstauffman import HAVE_NUMPY, unit
+from dstauffman import HAVE_NUMPY, is_datetime, linear_interp, linear_lowpass_interp, unit
 
 if HAVE_NUMPY:
     import numpy as np
@@ -24,11 +24,21 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+    _D = NDArray[np.datetime64]
     _N = NDArray[np.float64]
     _V = NDArray[np.float64]  # shape (3,)
     _DCM = NDArray[np.float64]  # shape (3, 3)
     _FN = float | _N
     _Lists = list[_N] | tuple[_N, ...] | _N
+
+    class _InterpKwArgs(TypedDict):
+        btype: NotRequired[Literal["linear", "lowpass", "highpass", "bandpass", "bandstop"]]
+        left: NotRequired[int | float | None]
+        right: NotRequired[int | float | None]
+        analog: NotRequired[bool]
+        filt_order: NotRequired[int]
+        filt_freq: NotRequired[float]
+        filt_samp: NotRequired[float]
 
 
 # %% Functions - rot
@@ -404,6 +414,92 @@ def rv2dcm(vec: _V) -> _DCM:
         dcm *= c
         dcm += -s * vec_cross(v) + (1 - c) * np.outer(v, v)
     return dcm
+
+
+# %% interp_vector
+def interp_vector(
+    x: _N | _D,
+    xp: _N | _D,
+    yp: _N | _V,
+    *,
+    assume_sorted: bool = False,
+    extrapolate: bool = False,
+    **kwargs: Unpack[_InterpKwArgs],
+) -> _V:
+    r"""
+    Interpolates each component of a vector, with options for convert numpy datetimes to int64.
+
+    Parameters
+    ----------
+    x : array_like
+        The x-coordinates at which to evaluate the interpolated values.
+    xp: 1-D sequence of floats
+        The x-coordinates of the data points, must be increasing if argument period is not specified. Otherwise, xp is internally sorted after normalizing the periodic boundaries with xp = xp % period.
+    yp: 1-D sequence of float or complex
+        The y-coordinates of the data points, same length as xp.
+    assume_sorted : bool, optional, default is False
+        Whether you can assume the data is sorted and do simpler (i.e. faster) calculations
+    extrapolate : bool, optional, default is False
+        Whether to allow function to extrapolate data on either end
+    left: int or float, optional, default is yp[0]
+        Value to use for any value less than all points in xp
+    right: int or float, optional, default is yp[-1]
+        Value to use for any value greater than all points in xp
+    filt_order : int, optional, default is 2
+        Low pass filter order
+    filt_freq : float, optional, default is 0.01
+        Default filter frequency
+    filt_samp : float, optional, default is 1.0
+        Default filter sample rate
+    kwargs : Any
+        Additional key-word arguments to pass through to scipy.signal.butter
+
+    Returns
+    -------
+    y : float or complex (corresponding to yp) or ndarray
+        The interpolated values, same shape as x.
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in December 2024.
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import interp_vector
+    >>> import numpy as np
+    >>> xp = np.array([0.0, 111.0, 2000.0, 5000.0])
+    >>> yp = np.array([0.0, 1.0, -2.0, 3.0])
+    >>> x = np.arange(0.0, 6001.0)
+    >>> y = interp_vector(x, xp, yp, extrapolate=True)
+
+    """
+    if x_is_datetime := is_datetime(x):
+        assert is_datetime(xp), "Both x and xp must be datetime if either one is."
+
+    func: Callable[[_N | _D, _N | _D, _N | _V, Unpack[_InterpKwArgs]], _V]
+    # fmt: off
+    if "btype" not in kwargs or kwargs["btype"] == "linear":
+        if x_is_datetime:
+            func = lambda x, xp, yp, **kwargs: linear_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)
+        else:
+            func = lambda x, xp, yp, **kwargs: linear_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)
+    else:
+        if x_is_datetime:
+            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)
+        else:
+            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)
+    # fmt: on
+
+    if yp.ndim == 1:
+        # if not vectorized, then just call the functions directly
+        return func(x, xp, yp, **kwargs)
+
+    num_axis = yp.shape[0]
+    num_pts = np.size(x)
+    out = np.empty((num_axis, num_pts), dtype=yp.dtype)
+    for i in range(num_axis):
+        out[i, :] = func(x, xp, yp[i, :], **kwargs)
+    return out
 
 
 # %% Unit test

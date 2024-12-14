@@ -546,11 +546,11 @@ def get_nondeg_colorlists(num_channels: int) -> colors.ListedColormap:
     if num_channels == 1:
         clist = colors.ListedColormap(("#1f77b4", "xkcd:blue", "#1f77b4"))
     elif num_channels == 2:
-        clist = colors.ListedColormap(COLOR_LISTS["dbl_diff_r"].colors + COLOR_LISTS["double"].colors)  # type: ignore[operator]
+        clist = COLOR_LISTS["dbl_comp_r"]
     elif num_channels == 3:
-        clist = colors.ListedColormap(COLOR_LISTS["vec_diff_r"].colors + COLOR_LISTS["vec"].colors)  # type: ignore[operator]
+        clist = COLOR_LISTS["vec_comp_r"]
     elif num_channels == 4:
-        clist = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
+        clist = COLOR_LISTS["quat_comp_r"]
     else:
         ix = [x % 10 for x in range(num_channels)]
         cmap1 = mpl.colormaps["tab10"]
