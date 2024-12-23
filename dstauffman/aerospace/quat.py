@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import doctest
 import logging
-from typing import Callable, NotRequired, TYPE_CHECKING, TypedDict, Unpack
+from typing import Callable, Final, NotRequired, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
 from slog import LogLevel
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 # %% Constants
 # Number of elements that should be in a quaternion
-QUAT_SIZE = 4
+QUAT_SIZE: Final[int] = 4
 
 # %% Master flags
 # Flag controls whether any quaternion solutions are run

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import doctest
 from pathlib import Path
-from typing import Any, overload, TYPE_CHECKING
+from typing import Any, Final, overload, TYPE_CHECKING
 import unittest
 
 from nubs import ncjit
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     _M = NDArray[np.float64]  # 2D
 
 # %% Constants
-_EPS = float(np.finfo(float).eps) if HAVE_NUMPY else 2.220446049250313e-16
+_EPS: Final[float] = float(np.finfo(float).eps) if HAVE_NUMPY else 2.220446049250313e-16
 
 
 # %% load_matlab

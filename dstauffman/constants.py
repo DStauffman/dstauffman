@@ -8,6 +8,7 @@ Notes
 
 # %% Imports
 import os
+from typing import Final
 import unittest
 import warnings
 
@@ -95,22 +96,22 @@ if not HAVE_H5PY:
 
 # %% Constants
 # A specified integer token value to use when you need one
-INT_TOKEN: int = -1
+INT_TOKEN: Final[int] = -1
 
 # Whether we are currently on Windows or not
-IS_WINDOWS: bool = os.name == "nt"
+IS_WINDOWS: Final[bool] = os.name == "nt"
 
 # Interval units for numpy dates and times
-NP_DATETIME_UNITS: str = "ns"
+NP_DATETIME_UNITS: Final[str] = "ns"
 
 # Interval form to use for storing data as np.datetime64's
-NP_DATETIME_FORM: str = "datetime64[ns]"
+NP_DATETIME_FORM: Final[str] = "datetime64[ns]"
 
 # Interval form to use for storing data as np.timedelta64's
-NP_TIMEDELTA_FORM: str = "timedelta64[ns]"
+NP_TIMEDELTA_FORM: Final[str] = "timedelta64[ns]"
 
 # Scale factor for converting numpy time forms to seconds (nanoseconds per second)
-NP_INT64_PER_SEC: int = 10**9
+NP_INT64_PER_SEC: Final[int] = 10**9
 
 # % Numpy constants
 if HAVE_NUMPY:

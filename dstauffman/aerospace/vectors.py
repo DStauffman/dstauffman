@@ -20,7 +20,6 @@ from dstauffman import HAVE_NUMPY, is_datetime, linear_interp, linear_lowpass_in
 if HAVE_NUMPY:
     import numpy as np
 
-# %% Constants
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
@@ -473,8 +472,7 @@ def interp_vector(
     >>> y = interp_vector(x, xp, yp, extrapolate=True)
 
     """
-    if x_is_datetime := is_datetime(x):
-        assert is_datetime(xp), "Both x and xp must be datetime if either one is."
+    assert (x_is_datetime := is_datetime(x)) ^ (not is_datetime(xp)), "Both x and xp must be datetime if either one is."
 
     func: Callable[[_N | _D, _N | _D, _N | _V, Unpack[_InterpKwArgs]], _V]
     # fmt: off

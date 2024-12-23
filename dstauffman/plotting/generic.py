@@ -566,11 +566,11 @@ def make_generic_plot(  # noqa: C901
         # TODO: handle data_is_list and rows cases
         bottoms: list[_N] | _N | _M
         if data_is_list:
-            bottoms = [np.cumsum(data_one[j]) for j in range(num_channels)]  # type: ignore[index]
+            bottoms = [np.cumsum(np.ma.masked_invalid(data_one[j])) for j in range(num_channels)]  # type: ignore[index]
         elif data_as_rows:
-            bottoms = np.concatenate((np.zeros((1, len(time_one))), np.cumsum(data_one, axis=0)), axis=0)  # type: ignore[arg-type]
+            bottoms = np.concatenate((np.zeros((1, len(time_one))), np.cumsum(np.ma.masked_invalid(data_one), axis=0)), axis=0)  # type: ignore[arg-type]
         else:
-            bottoms = np.concatenate((np.zeros((len(time_one), 1)), np.cumsum(data_one, axis=1)), axis=1)  # type: ignore[arg-type]
+            bottoms = np.concatenate((np.zeros((len(time_one), 1)), np.cumsum(np.ma.masked_invalid(data_one), axis=1)), axis=1)  # type: ignore[arg-type]
     elif plot_type == "scatter":
         symbol_one = "."
         symbol_two = "."
