@@ -15,21 +15,13 @@ from typing import Callable, ClassVar, TYPE_CHECKING
 
 import numpy as np
 
-from dstauffman import (
-    compare_two_classes,
-    convert_datetime_to_np,
-    Frozen,
-    get_tests_dir,
-    NP_DATETIME_UNITS,
-    NP_ONE_SECOND,
-    SaveAndLoad,
-)
+from dstauffman import compare_two_classes, convert_datetime_to_np, Frozen, get_tests_dir, NP_NAT, NP_ONE_SECOND, SaveAndLoad
 
 if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
     from numpy.typing import NDArray
 
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
     _D = NDArray[np.datetime64]
 
 
@@ -51,7 +43,7 @@ class Results(Frozen, metaclass=SaveAndLoad):
     def __init__(self, num: float = 0, date_zero: datetime.datetime | None = None, name: str = ""):
         self.time = np.arange(num)
         self.data = np.random.rand(*self.time.shape)
-        self.date = np.full(self.time.shape, np.datetime64("NaT", NP_DATETIME_UNITS))
+        self.date = np.full(self.time.shape, NP_NAT)
         self.name = name
         self.meta = {"who": "cares"}
         if num > 0:

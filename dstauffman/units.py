@@ -14,27 +14,27 @@ import unittest
 
 # %% Constants - Unit Conversions
 # Time
-ONE_MINUTE: Final[int] = 60
-ONE_HOUR: Final[int] = 3600
-ONE_DAY: Final[int] = 86400
-MONTHS_PER_YEAR: Final[int] = 12
+ONE_MINUTE: Final = 60
+ONE_HOUR: Final = 3600
+ONE_DAY: Final = 86400
+MONTHS_PER_YEAR: Final = 12
 
 # Angle
-RAD2DEG: Final[float] = 180.0 / pi
-DEG2RAD: Final[float] = pi / 180.0
+RAD2DEG: Final = 180.0 / pi
+DEG2RAD: Final = pi / 180.0
 
-ARCSEC2RAD: Final[float] = 1.0 / ONE_HOUR * DEG2RAD
-RAD2ARCSEC: Final[float] = ONE_HOUR * RAD2DEG
+ARCSEC2RAD: Final = 1.0 / ONE_HOUR * DEG2RAD
+RAD2ARCSEC: Final = ONE_HOUR * RAD2DEG
 
 # Length
-FT2M: Final[float] = 0.3048
-M2FT: Final[float] = 1 / 0.3048
-IN2CM: Final[float] = 2.54
-CM2IN: Final[float] = 1 / 2.54
+FT2M: Final = 0.3048
+M2FT: Final = 1 / 0.3048
+IN2CM: Final = 2.54
+CM2IN: Final = 1 / 2.54
 
 # Symbols
-DEGREE_SIGN: Final[str] = "\N{DEGREE SIGN}"  # degree sign, also u"\u00b0" ° or chr(176)
-MICRO_SIGN: Final[str] = "\N{MICRO SIGN}"  # micro sign, also u"\u00b5" μ or chr(181), note this is different than chr(956)
+DEGREE_SIGN: Final = "\N{DEGREE SIGN}"  # degree sign, also u"\u00b0" ° or chr(176)
+MICRO_SIGN: Final = "\N{MICRO SIGN}"  # micro sign, also u"\u00b5" μ or chr(181), note this is different than chr(956)
 
 # Prefixes, inverses, and labels
 _PREFIXES: dict[str, tuple[float, float, str]] = {

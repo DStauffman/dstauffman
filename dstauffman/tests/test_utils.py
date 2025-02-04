@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 
 # %% _nan_equal
@@ -180,8 +180,8 @@ class Test_find_in_range(unittest.TestCase):
 
     def test_dates(self) -> None:
         value = np.datetime64("2020-09-01 00:00:00", "ns") + 10**9 * np.arange(0, 5 * 60, 30, dtype=np.int64)
-        value[2] = np.datetime64("nat")
-        value[7] = np.datetime64("nat")
+        value[2] = np.datetime64("nat", "ns")
+        value[7] = np.datetime64("nat", "ns")
         tmin = np.datetime64("2020-09-01 00:02:00", "ns")
         tmax = np.datetime64("2020-09-01 00:04:00", "ns")
         exp = np.array([0, 0, 0, 0, 1, 1, 1, 0, 1, 0], dtype=bool)
@@ -294,7 +294,7 @@ class Test_rms(unittest.TestCase):
 
     def test_all_nans(self) -> None:
         x = np.full((4, 3), np.nan)
-        out: float | np.float64 | _N = dcs.rms(x, ignore_nans=True)
+        out: float | _N = dcs.rms(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
         out = dcs.rms(x, axis=0, ignore_nans=True)
         assert isinstance(out, np.ndarray)
@@ -411,7 +411,7 @@ class Test_rss(unittest.TestCase):
 
     def test_all_nans(self) -> None:
         x = np.full((4, 3), np.nan)
-        out: float | np.float64 | _N = dcs.rss(x, ignore_nans=True)
+        out: float | _N = dcs.rss(x, ignore_nans=True)
         self.assertTrue(np.isnan(out))
         out = dcs.rss(x, axis=0, ignore_nans=True)
         assert isinstance(out, np.ndarray)

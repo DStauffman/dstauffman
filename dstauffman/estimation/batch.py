@@ -51,8 +51,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
-    _M = NDArray[np.float64]  # 2D
+    _N = NDArray[np.floating]
+    _M = NDArray[np.floating]  # 2D
     _Number = int | float | _I | _N
 
 # %% Globals

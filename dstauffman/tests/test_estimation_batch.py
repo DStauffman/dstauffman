@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 
 # %% Setup for testing

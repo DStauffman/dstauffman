@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 # %% Constants
 GPS_DATE_ZERO = datetime.datetime(1980, 1, 6, 0, 0, 0)
@@ -364,8 +364,8 @@ def generate_prn(sat: int, length: int = 1023) -> _I:
         prn[i] = xgi
 
         # shift generators
-        g1 = np.hstack((g1n, g1[:-1]))
-        g2 = np.hstack((g2n, g2[:-1]))
+        g1 = np.hstack((g1n, g1[:-1]))  # type: ignore[assignment]
+        g2 = np.hstack((g2n, g2[:-1]))  # type: ignore[assignment]
 
     return prn
 

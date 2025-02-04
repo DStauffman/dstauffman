@@ -12,12 +12,12 @@ from __future__ import annotations
 import copy
 import datetime
 import doctest
-from typing import Any, ClassVar, Literal, overload, TYPE_CHECKING
+from typing import Any, Literal, overload, TYPE_CHECKING
 import unittest
 
 from slog import IntEnumPlus, is_dunder
 
-from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, HAVE_SCIPY, NP_DATETIME_FORM, NP_ONE_DAY, RAD2DEG
+from dstauffman import DEGREE_SIGN, Frozen, HAVE_NUMPY, HAVE_SCIPY, NP_DATETIME_FORM, NP_NAT, NP_ONE_DAY, RAD2DEG
 from dstauffman.aerospace.orbit_const import JULIAN, MU_EARTH, PI, TAU
 from dstauffman.aerospace.orbit_conv import (
     anomaly_eccentric_2_mean,
@@ -42,7 +42,7 @@ if TYPE_CHECKING:
     _B = NDArray[np.bool_]
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
     _FN = float | _N
 
 
@@ -61,10 +61,10 @@ class OrbitType(IntEnumPlus):
 
     """
 
-    uninitialized: ClassVar[int] = 0
-    elliptic: ClassVar[int] = 1
-    parabolic: ClassVar[int] = 2
-    hyperbolic: ClassVar[int] = 3
+    uninitialized = 0
+    elliptic = 1
+    parabolic = 2
+    hyperbolic = 3
 
 
 # %% Classes - Elements
@@ -130,7 +130,7 @@ class Elements(Frozen):
         self.type: _I       = np.full(num, OrbitType.uninitialized, dtype=int)
         self.equatorial: _B = np.zeros(num, dtype=bool)
         self.circular: _B   = np.zeros(num, dtype=bool)
-        self.t: _D          = np.full(num, np.datetime64("nat"), dtype=NP_DATETIME_FORM)
+        self.t: _D          = np.full(num, NP_NAT, dtype=NP_DATETIME_FORM)
         # fmt: on
         # TODO: squeeze to 0d if num == 1?
 

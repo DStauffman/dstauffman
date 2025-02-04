@@ -25,9 +25,9 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
-    _N = NDArray[np.float64]
-    _Q = NDArray[np.float64]  # shape (4,)
-    _Qs = NDArray[np.float64]  # shape (4, N)  # TODO: don't make use of this yet
+    _N = NDArray[np.floating]
+    _Q = NDArray[np.floating]  # shape (4,)
+    _Qs = NDArray[np.floating]  # shape (4, N)  # TODO: don't make use of this yet
 
     class _QuatAssertionKwargs(TypedDict):
         precision: NotRequired[float]
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 # %% Constants
 # Number of elements that should be in a quaternion
-QUAT_SIZE: Final[int] = 4
+QUAT_SIZE: Final = 4
 
 # %% Master flags
 # Flag controls whether any quaternion solutions are run
@@ -209,7 +209,7 @@ def enforce_pos_scalar(quat: _Q, inplace: bool = False) -> _Q:
             qout[:] = -qout
         return qout
     negs = np.zeros(qout.shape[1], dtype=bool)
-    negs = np.less(qout[3, :], 0, out=negs, where=~np.isnan(qout[3, :]))
+    negs = np.less(qout[3, :], 0, out=negs, where=~np.isnan(qout[3, :]))  # type: ignore[assignment]
     qout[:, negs] = -qout[:, negs]
     return qout
 
@@ -266,20 +266,20 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwarg
     if np.isscalar(angle) and np.isscalar(axis):
         # optimized scalar case
         quat = np.array([0, 0, 0, np.cos(angle / 2)])  # type: ignore[operator]
-        quat[axis - 1] = np.sin(angle / 2)  # type: ignore[operator]
+        quat[axis - 1] = np.sin(angle / 2)  # type: ignore[index, operator]
     elif np.isscalar(axis):
         # single axis, multiple angle case
         quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # type: ignore[operator]
-        quat[axis - 1, :] = np.sin(angle / 2)  # type: ignore[operator]
+        quat[axis - 1, :] = np.sin(angle / 2)  # type: ignore[index, operator]
     elif np.isscalar(angle):
         # single angle, multiple axis case
         quat = np.tile(np.array([[0], [0], [0], [np.cos(angle / 2)]]), (1, np.size(axis)))  # type: ignore[operator]
-        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[operator]
+        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[index, operator]
     else:
         # multiple axis, multiple angle case
         assert np.size(axis) == np.size(angle)
         quat = np.vstack((np.zeros((3, np.size(angle))), np.expand_dims(np.cos(angle / 2), axis=0)))  # type: ignore[operator]
-        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[operator]
+        quat[axis - 1, np.arange(np.size(axis))] = np.sin(angle / 2)  # type: ignore[index, operator]
     enforce_pos_scalar(quat, inplace=True)
     quat_assertions(quat, **kwargs)
     return quat
@@ -660,7 +660,7 @@ def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Un
         if ti in time:
             ix = np.where(ti == time)[0]
             if not ix:  # pragma: no branch
-                qout = quat[:, ix]
+                qout = quat[:, ix]  # type: ignore[assignment]
                 return qout
 
     # Check time bounds
@@ -730,7 +730,7 @@ def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Un
 
     # Drop result for single time point to single dimension
     if num == 1:
-        qout = qout[:, 0]
+        qout = qout[:, 0]  # type: ignore[assignment]
 
     return qout
 
@@ -1221,7 +1221,7 @@ def quat_to_euler(  # noqa: C901
 
     # optionally flatten result and then return answer
     if is_vector:
-        euler = euler.flatten()
+        euler = euler.flatten()  # type: ignore[assignment]
     return euler
 
 

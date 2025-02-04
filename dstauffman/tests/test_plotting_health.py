@@ -28,7 +28,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 
 # %% plotting.TruthPlotter
@@ -348,7 +348,7 @@ class Test_plotting_plot_health_monte_carlo(unittest.TestCase):
     def setUp(self) -> None:
         self.description = "Sin"
         self.time: _N | list[int] = np.arange(0, 10, 0.1) if HAVE_NUMPY else list(range(10))
-        self.data: _N | list[float] = np.sin(self.time) if HAVE_NUMPY else [x + 1.0 for x in self.time]
+        self.data: _N | list[float] = np.sin(self.time) if HAVE_NUMPY else [x + 1.0 for x in self.time]  # type: ignore[assignment, misc]
         self.units = "population"
         self.opts = plot.Opts()
         self.opts.names = ["Name 1"]

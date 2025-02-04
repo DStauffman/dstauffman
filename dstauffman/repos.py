@@ -76,7 +76,7 @@ def run_docstrings(files: list[Path], verbose: bool = False) -> int:
             print("******************************")
             print("******************************")
             print(f'Testing "{file}":')
-        (failure_count, _) = doctest.testfile(file, report=True, verbose=verbose, module_relative=False)  # type: ignore[arg-type, misc]
+        (failure_count, _) = doctest.testfile(file, report=True, verbose=verbose, module_relative=False)  # type: ignore[arg-type]
         if failure_count > 0:
             had_failure = True
     return_code = ReturnCodes.test_failures if had_failure else ReturnCodes.clean

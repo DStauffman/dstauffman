@@ -12,7 +12,7 @@ from __future__ import annotations
 from collections.abc import Mapping
 import copy
 import pathlib
-import pickle
+import pickle  # nosec: B301
 from typing import Callable, ClassVar, TYPE_CHECKING
 import unittest
 
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 
 # %% Locals classes for testing
@@ -75,32 +75,7 @@ class _Example_SaveAndLoad(dcs.Frozen, metaclass=dcs.SaveAndLoad):
         self.z = None
 
 
-class _Example_SaveAndLoadPickle(dcs.Frozen, metaclass=dcs.SaveAndLoadPickle):
-    load: ClassVar[Callable[[pathlib.Path | None], _Example_SaveAndLoadPickle]]
-    save: Callable[[pathlib.Path | None], None]
-    a: _I | list[int]
-    b: _I | list[int]
-
-    def __init__(self) -> None:
-        if dcs.HAVE_NUMPY:
-            self.a = np.array([1, 2, 3])
-            self.b = np.array([4, 5, 6])
-        else:
-            self.a = [1, 2, 3]
-            self.b = [4, 5, 6]
-
-
 class _Example_No_Override(object, metaclass=dcs.SaveAndLoad):
-    @staticmethod
-    def save() -> int:
-        return 1
-
-    @staticmethod
-    def load() -> int:
-        return 2
-
-
-class _Example_No_Override2(object, metaclass=dcs.SaveAndLoadPickle):
     @staticmethod
     def save() -> int:
         return 1
@@ -149,8 +124,6 @@ class Test_save_and_load_hdf5(unittest.TestCase):
         self.filename.unlink(missing_ok=True)
 
 
-# %% save_pickle - covered by SaveAndLoad
-# %% load_pickle - covered by SaveAndLoad
 # %% save_method - covered by SaveAndLoad
 # %% load_method - covered by SaveAndLoad
 # %% save_convert_hdf5
@@ -343,35 +316,20 @@ class Test_SaveAndLoad(unittest.TestCase):
     Tests the SaveAndLoad metaclass with the following cases:
         has methods (x4)
         save/load hdf5
-        savel/oad pickle (x2)
     """
 
     def setUp(self) -> None:
         folder = dcs.get_tests_dir()
-        self.results1_cls = _Example_SaveAndLoad
-        self.results1 = self.results1_cls()
-        self.results2_cls = _Example_SaveAndLoadPickle
-        self.results2 = self.results2_cls()
-        self.save_path1 = folder / "results_test_save.hdf5"
-        self.save_path2 = folder / "results_test_save.pkl"
+        self.results_cls = _Example_SaveAndLoad
+        self.results = self.results_cls()
+        self.save_path = folder / "results_test_save.hdf5"
 
     def test_save1(self) -> None:
-        self.assertTrue(hasattr(self.results1, "save"))
-        self.assertTrue(hasattr(self.results1, "load"))
+        self.assertTrue(hasattr(self.results, "save"))
+        self.assertTrue(hasattr(self.results, "load"))
 
     def test_save2(self) -> None:
-        self.assertTrue(hasattr(self.results2, "save"))
-        self.assertTrue(hasattr(self.results2, "load"))
-
-    def test_save3(self) -> None:
         temp = _Example_No_Override()
-        self.assertTrue(hasattr(temp, "save"))
-        self.assertTrue(hasattr(temp, "load"))
-        self.assertEqual(temp.save(), 1)
-        self.assertEqual(temp.load(), 2)
-
-    def test_save4(self) -> None:
-        temp = _Example_No_Override2()
         self.assertTrue(hasattr(temp, "save"))
         self.assertTrue(hasattr(temp, "load"))
         self.assertEqual(temp.save(), 1)
@@ -379,113 +337,102 @@ class Test_SaveAndLoad(unittest.TestCase):
 
     @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_saving_hdf5(self) -> None:
-        self.results1.save(self.save_path1)
-        results = self.results1_cls.load(self.save_path1)
-        self.assertTrue(dcs.compare_two_classes(results, self.results1, suppress_output=True, compare_recursively=True))
+        self.results.save(self.save_path)
+        results = self.results_cls.load(self.save_path)
+        self.assertTrue(dcs.compare_two_classes(results, self.results, suppress_output=True, compare_recursively=True))
 
     def test_no_filename(self) -> None:
-        self.results1.save(None)
+        self.results.save(None)
         with self.assertRaises(ValueError):
-            self.results1_cls.load(None)
+            self.results_cls.load(None)
 
     @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_classes_none(self) -> None:
-        self.results1.z = 5
-        self.results1.save(self.save_path1)
-        results = dcs.load_hdf5(None, self.save_path1)
-        np.testing.assert_array_equal(results.x, self.results1.x)
-        np.testing.assert_array_equal(results.y, self.results1.y)
+        self.results.z = 5
+        self.results.save(self.save_path)
+        results = dcs.load_hdf5(None, self.save_path)
+        np.testing.assert_array_equal(results.x, self.results.x)
+        np.testing.assert_array_equal(results.y, self.results.y)
         self.assertEqual(results.z, 5)
 
     @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_classes_dict(self) -> None:
-        self.results1.z = 5
-        self.results1.save(self.save_path1)
-        results = dcs.load_hdf5({"y": None}, self.save_path1)
+        self.results.z = 5
+        self.results.save(self.save_path)
+        results = dcs.load_hdf5({"y": None}, self.save_path)
         self.assertFalse(hasattr(results, "x"))
-        np.testing.assert_array_equal(results.y, self.results1.y)
+        np.testing.assert_array_equal(results.y, self.results.y)
         self.assertFalse(hasattr(results, "z"))
 
     @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_classless_list(self) -> None:
-        self.results1.z = 5
-        self.results1.save(self.save_path1)
-        results = dcs.load_hdf5(["x", "y"], self.save_path1)
-        np.testing.assert_array_equal(results.x, self.results1.x)
-        np.testing.assert_array_equal(results.y, self.results1.y)
+        self.results.z = 5
+        self.results.save(self.save_path)
+        results = dcs.load_hdf5(["x", "y"], self.save_path)
+        np.testing.assert_array_equal(results.x, self.results.x)
+        np.testing.assert_array_equal(results.y, self.results.y)
         self.assertFalse(hasattr(results, "z"))
 
     @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_classless_set(self) -> None:
-        self.results1.z = 5
-        self.results1.save(self.save_path1)
-        results = dcs.load_hdf5({"x", "z"}, self.save_path1)
-        np.testing.assert_array_equal(results.x, self.results1.x)
+        self.results.z = 5
+        self.results.save(self.save_path)
+        results = dcs.load_hdf5({"x", "z"}, self.save_path)
+        np.testing.assert_array_equal(results.x, self.results.x)
         self.assertFalse(hasattr(results, "y"))
         self.assertEqual(results.z, 5)
 
     @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_classless_tuple(self) -> None:
-        self.results1.z = 5
-        self.results1.save(self.save_path1)
-        results = dcs.load_hdf5(("x", "y", "z"), self.save_path1)
-        np.testing.assert_array_equal(results.x, self.results1.x)
-        np.testing.assert_array_equal(results.y, self.results1.y)
+        self.results.z = 5
+        self.results.save(self.save_path)
+        results = dcs.load_hdf5(("x", "y", "z"), self.save_path)
+        np.testing.assert_array_equal(results.x, self.results.x)
+        np.testing.assert_array_equal(results.y, self.results.y)
         self.assertEqual(results.z, 5)
 
     @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_bad_class_field(self) -> None:
-        dcs.save_hdf5({"x": self.results1.x, "y": self.results1.y, "z": self.results1.z, "new": 5}, self.save_path1)
+        dcs.save_hdf5({"x": self.results.x, "y": self.results.y, "z": self.results.z, "new": 5}, self.save_path)
         with self.assertRaises(AttributeError):
-            self.results1_cls.load(self.save_path1)
-        results = dcs.load_hdf5(None, self.save_path1)
-        np.testing.assert_array_equal(results.x, self.results1.x)
-        np.testing.assert_array_equal(results.y, self.results1.y)
+            self.results_cls.load(self.save_path)
+        results = dcs.load_hdf5(None, self.save_path)
+        np.testing.assert_array_equal(results.x, self.results.x)
+        np.testing.assert_array_equal(results.y, self.results.y)
         self.assertFalse(hasattr(results, "z"))
         self.assertEqual(results.new, 5)
 
     @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_meta(self) -> None:
-        meta = {"num_pts": len(self.results1.x)}
-        self.results1.save(self.save_path1, meta=meta, compression=None, shuffle=False)  # type: ignore[call-arg]
-        results = self.results1_cls.load(self.save_path1)
-        self.assertTrue(dcs.compare_two_classes(results, self.results1, suppress_output=True, compare_recursively=True))
-        (results2, meta2) = self.results1_cls.load(self.save_path1, return_meta=True)  # type: ignore[misc]
-        self.assertTrue(dcs.compare_two_classes(results2, self.results1, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
+        meta = {"num_pts": len(self.results.x)}
+        self.results.save(self.save_path, meta=meta, compression=None, shuffle=False)  # type: ignore[call-arg]
+        results = self.results_cls.load(self.save_path)
+        self.assertTrue(dcs.compare_two_classes(results, self.results, suppress_output=True, compare_recursively=True))
+        (results2, meta2) = self.results_cls.load(self.save_path, return_meta=True)  # type: ignore[misc]
+        self.assertTrue(dcs.compare_two_classes(results2, self.results, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
         self.assertEqual(meta2, meta)  # type: ignore[has-type]
 
     @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_compression_and_shuffle(self) -> None:
-        self.results1.save(self.save_path1, compression=6, shuffle=True)  # type: ignore[call-arg]
-        results = self.results1_cls.load(self.save_path1)
-        self.assertTrue(dcs.compare_two_classes(results, self.results1, suppress_output=True, compare_recursively=True))
-        (results2, meta2) = self.results1_cls.load(self.save_path1, return_meta=True)  # type: ignore[misc]
-        self.assertTrue(dcs.compare_two_classes(results2, self.results1, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
+        self.results.save(self.save_path, compression=6, shuffle=True)  # type: ignore[call-arg]
+        results = self.results_cls.load(self.save_path)
+        self.assertTrue(dcs.compare_two_classes(results, self.results, suppress_output=True, compare_recursively=True))
+        (results2, meta2) = self.results_cls.load(self.save_path, return_meta=True)  # type: ignore[misc]
+        self.assertTrue(dcs.compare_two_classes(results2, self.results, suppress_output=True, compare_recursively=True))  # type: ignore[has-type]
         self.assertEqual(meta2, {})  # type: ignore[has-type]
 
     @unittest.skipIf(not dcs.HAVE_H5PY, "Skipping due to missing h5py dependency.")
     def test_exclusions(self) -> None:
-        orig = self.results1.x.copy()
-        self.results1.save(self.save_path1, exclusions={"x", "z"})
-        self.results1.x = "Not original"  # type: ignore[assignment]
-        results = self.results1_cls.load(self.save_path1)
-        np.testing.assert_array_equal(results.y, self.results1.y)
+        orig = self.results.x.copy()
+        self.results.save(self.save_path, exclusions={"x", "z"})
+        self.results.x = "Not original"  # type: ignore[assignment]
+        results = self.results_cls.load(self.save_path)
+        np.testing.assert_array_equal(results.y, self.results.y)
         np.testing.assert_array_equal(results.x, orig)
         self.assertIsNone(results.z)
 
     def tearDown(self) -> None:
-        self.save_path1.unlink(missing_ok=True)
-        self.save_path2.unlink(missing_ok=True)
-
-
-# %% SaveAndLoadPickle
-class Test_SaveAndLoadPickle(unittest.TestCase):
-    r"""
-    Tests the SaveAndLoadPickle class with the following cases:
-        TBD
-    """
-
-    pass  # TODO: write this
+        self.save_path.unlink(missing_ok=True)
 
 
 # %% Counter
@@ -757,7 +704,7 @@ class Test_FixedDict(unittest.TestCase):
 
     def test_pickling(self) -> None:
         data = pickle.dumps(self.fixed)
-        new = pickle.loads(data)
+        new = pickle.loads(data)  # nosec: B301
         self.assertEqual(self.fixed, new)
         self.assertEqual(self.fixed._frozen, new._frozen)
 

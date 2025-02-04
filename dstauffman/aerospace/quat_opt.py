@@ -24,10 +24,10 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    _N = NDArray[np.float64]
-    _Q = NDArray[np.float64]  # shape (4,)
-    _V = NDArray[np.float64]  # shape (3,)
-    _DCM = NDArray[np.float64]  # shape (3, 3)
+    _N = NDArray[np.floating]
+    _Q = NDArray[np.floating]  # shape (4,)
+    _V = NDArray[np.floating]  # shape (3,)
+    _DCM = NDArray[np.floating]  # shape (3, 3)
 
 
 # %% Functions - qrot_single

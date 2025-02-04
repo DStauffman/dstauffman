@@ -21,7 +21,7 @@ from dstauffman import (
     Frozen,
     get_tests_dir,
     NP_DATETIME_FORM,
-    NP_DATETIME_UNITS,
+    NP_NAT,
     NP_ONE_SECOND,
     SaveAndLoad,
 )
@@ -39,17 +39,17 @@ class Results(Frozen, metaclass=SaveAndLoad):
     def __init__(self, num: float = 0, date_zero: datetime.datetime | None = None):
         self.time = np.arange(num)
         self.data = np.random.rand(*self.time.shape)
-        self.date = np.full(self.time.shape, np.datetime64("NaT", NP_DATETIME_UNITS))
+        self.date = np.full(self.time.shape, NP_NAT)
         if num > 0:
             assert date_zero is not None
             self.date[:] = convert_datetime_to_np(date_zero) + (NP_ONE_SECOND * self.time).astype(np.int64)
 
     def _save_convert_hdf5(self) -> dict[str, Any]:
-        self.date = self.date.astype(np.int64)
+        self.date = self.date.astype(np.int64)  # type: ignore[assignment]
         return {}
 
     def _save_restore_hdf5(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
-        self.date = self.date.astype(NP_DATETIME_FORM)
+        self.date = self.date.astype(NP_DATETIME_FORM)  # type: ignore[assignment]
 
 
 # %% Main function

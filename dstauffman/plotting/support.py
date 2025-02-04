@@ -100,9 +100,9 @@ if TYPE_CHECKING:
     _CM = str | colors.Colormap | colors.ListedColormap  # + ColorMap defined below
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
-    _M = NDArray[np.float64]  # 2D
-    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | None
+    _N = NDArray[np.floating]
+    _M = NDArray[np.floating]  # 2D
+    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | None
     _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...] | None  # fmt: skip
     _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...] | None  # fmt: skip
     _FigOrListFig = Figure | list[Figure]
@@ -240,7 +240,7 @@ class MyCustomToolbar:
             self.qapp = QApplication.instance()  # type: ignore[assignment]
         # Store the figure number for use later (Note this works better than relying on plt.gcf()
         # to determine which figure actually triggered the button events.)
-        self.fig_number = fig.number  # type: ignore[attr-defined]
+        self.fig_number = fig.number
         # Check if you have a canvas to draw on, and if not, return without creating buttons
         if fig.canvas.toolbar is None or is_notebook():
             return
@@ -420,7 +420,7 @@ class ColorMap(Frozen):
         else:
             assert self.smap.norm.vmin is not None
             assert self.smap.norm.vmax is not None
-            for i, j in enumerate(np.linspace(self.smap.norm.vmin, self.smap.norm.vmax, 255.0)):  # type: ignore[call-overload]
+            for i, j in enumerate(np.linspace(self.smap.norm.vmin, self.smap.norm.vmax, 255)):
                 pixels[:, 2 * i : 2 * (i + 1)] = 255 * np.asanyarray(self.get_color(j))
         png_bytes = io.BytesIO()
         title = "ColorMap"
@@ -1137,9 +1137,9 @@ def zoom_ylim(  # noqa: C901
     (old_ymin, old_ymax) = ax.get_ylim()
     # compare the new bounds to the old ones and update as appropriate
     if this_ymin > old_ymin:
-        ax.set_ylim(bottom=this_ymin)
+        ax.set_ylim(bottom=this_ymin)  # type: ignore[arg-type]
     if this_ymax < old_ymax:
-        ax.set_ylim(top=this_ymax)
+        ax.set_ylim(top=this_ymax)  # type: ignore[arg-type]
 
 
 # %% Functions - figmenu
@@ -1639,7 +1639,7 @@ def plot_vert_lines(
     for i, this_x in enumerate(x):  # type: ignore[arg-type]
         this_color = cm.get_color(i)
         this_label = labels[i] if show_in_legend else ""
-        ax.axvline(this_x, linestyle="--", color=this_color, marker="+", markeredgecolor="m", markersize=10, label=this_label)
+        ax.axvline(this_x, linestyle="--", color=this_color, marker="+", markeredgecolor="m", markersize=10, label=this_label)  # type: ignore[arg-type]
 
 
 # %% plot_phases

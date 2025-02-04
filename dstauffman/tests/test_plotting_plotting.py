@@ -33,7 +33,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 
 # %% plotting.Opts
@@ -274,7 +274,7 @@ class Test_plotting_plot_time_history(unittest.TestCase):
     def test_lists2(self) -> None:
         time = [np.arange(5.0), np.arange(10.0)]
         data = [np.array([0.0, 0.1, 0.2, 0.3, 0.5]), np.arange(10.0)]
-        self.fig = plot.plot_time_history(self.description, time, data, opts=self.opts)
+        self.fig = plot.plot_time_history(self.description, time, data, opts=self.opts)  # type: ignore[arg-type]
         self.assertIsNotNone(self.fig)
 
     def tearDown(self) -> None:

@@ -71,15 +71,15 @@ if TYPE_CHECKING:
     _B = NDArray[np.bool_]
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
-    _M = NDArray[np.float64]  # 2D
+    _N = NDArray[np.floating]
+    _M = NDArray[np.floating]  # 2D
     _CM = str | Colormap | ListedColormap | ColorMap
     _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
-    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | None
+    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | None
     _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
     _DeltaTime = int | float | np.timedelta64
     _Figs = list[Figure]
-    _FuncLamb = Callable[[_I | _N, int | None], float | np.float64 | _N]
+    _FuncLamb = Callable[[_I | _N, int | None], float | _N]
     _SecUnits = str | int | float | tuple[str, float] | None
 
 # %% Globals
@@ -289,17 +289,17 @@ def make_generic_plot(  # noqa: C901
     datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
 
     # possible RMS/mean functions
-    def _nan_rms(x: _I | _N, axis: int | None) -> float | np.float64 | _N:
+    def _nan_rms(x: _I | _N, axis: int | None) -> float | _N:
         """Calculate the RMS while ignoring NaNs."""
         try:
             return rms(x, axis=axis, ignore_nans=True)
         except TypeError:
             return np.nan
 
-    def _nan_mean(x: _I | _N, axis: int | None) -> float | np.float64 | _N:
+    def _nan_mean(x: _I | _N, axis: int | None) -> float | _N:
         """Calculate the mean while ignoring NaNs."""
         try:
-            return np.nanmean(x, axis=axis)
+            return np.nanmean(x, axis=axis)  # type: ignore[return-value]
         except TypeError:
             return np.nan
 
@@ -566,11 +566,11 @@ def make_generic_plot(  # noqa: C901
         # TODO: handle data_is_list and rows cases
         bottoms: list[_N] | _N | _M
         if data_is_list:
-            bottoms = [np.cumsum(np.ma.masked_invalid(data_one[j])) for j in range(num_channels)]  # type: ignore[index]
+            bottoms = [np.cumsum(np.ma.masked_invalid(data_one[j])) for j in range(num_channels)]  # type: ignore[index, no-untyped-call]
         elif data_as_rows:
-            bottoms = np.concatenate((np.zeros((1, len(time_one))), np.cumsum(np.ma.masked_invalid(data_one), axis=0)), axis=0)  # type: ignore[arg-type]
+            bottoms = np.concatenate((np.zeros((1, len(time_one))), np.cumsum(np.ma.masked_invalid(data_one), axis=0)), axis=0)  # type: ignore[arg-type, no-untyped-call]
         else:
-            bottoms = np.concatenate((np.zeros((len(time_one), 1)), np.cumsum(np.ma.masked_invalid(data_one), axis=1)), axis=1)  # type: ignore[arg-type]
+            bottoms = np.concatenate((np.zeros((len(time_one), 1)), np.cumsum(np.ma.masked_invalid(data_one), axis=1)), axis=1)  # type: ignore[arg-type, no-untyped-call]
     elif plot_type == "scatter":
         symbol_one = "."
         symbol_two = "."

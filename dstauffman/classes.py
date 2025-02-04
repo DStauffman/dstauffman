@@ -14,7 +14,6 @@ from __future__ import annotations
 import copy
 import doctest
 from pathlib import Path
-import pickle
 import sys
 from typing import (
     Any,
@@ -60,7 +59,7 @@ if TYPE_CHECKING:
     _B = NDArray[np.bool_]
     _T = TypeVar("_T")
     _C = TypeVar("_C", int, "Counter")
-    _SingleNum = int | float | np.datetime64 | np.int32 | np.int64 | np.float64
+    _SingleNum = int | float | np.datetime64
     _Sets = set[str] | frozenset[str]
     _Time = float | np.datetime64
 
@@ -307,49 +306,6 @@ def load_hdf5(  # type: ignore[misc]  # noqa: C901
             _load_dataset(out, group=group, prefix=f"/{key}", limit_fields=limit_fields)
     if return_meta:
         return (out, meta)  # type: ignore[return-value]
-    return out
-
-
-# %% Methods - save_pickle
-def save_pickle(self: Any, filename: Path | None = None) -> None:
-    r"""
-    Save a class instances to a pickle file.
-
-    Parameters
-    ----------
-    results : list
-        List of the objects to save
-    filename : str
-        Name of the file to load
-
-    """
-    # exit if no filename is given
-    if filename is None:
-        return
-    with open(filename, "wb") as file:
-        pickle.dump(self, file)
-
-
-# %% Methods - load_pickle
-def load_pickle(cls: Type[_T], filename: Path | None = None) -> _T:  # pylint: disable=unused-argument
-    r"""
-    Load a class instance from a pickle file.
-
-    Parameters
-    ----------
-    filename : str
-        Name of the file to load
-
-    Returns
-    -------
-    results : list
-        List of the objects found within the file
-
-    """
-    if filename is None:
-        raise ValueError("No file specified to load.")
-    with open(filename, "rb") as file:
-        out: _T = pickle.load(file)
     return out
 
 
@@ -759,19 +715,6 @@ class SaveAndLoad(type):
         if not hasattr(cls, "_save_restore_hdf5"):
             setattr(cls, "_save_restore_hdf5", save_restore_hdf5)
 
-        super().__init__(name, bases, dct)
-
-
-# %% MetaClasses - SaveAndLoadPickle
-class SaveAndLoadPickle(type):
-    r"""Metaclass to add "save" and "load" methods to the given class."""
-
-    def __init__(cls, name: Any, bases: Any, dct: Any):
-        r"""Add the "save" and "load" classes if they are not already present."""
-        if not hasattr(cls, "save"):
-            setattr(cls, "save", save_pickle)
-        if not hasattr(cls, "load"):
-            setattr(cls, "load", classmethod(load_pickle))
         super().__init__(name, bases, dct)
 
 

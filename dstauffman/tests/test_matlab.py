@@ -8,7 +8,6 @@ Notes
 """
 
 # %% Imports
-from typing import ClassVar
 import unittest
 
 from slog import IntEnumPlus
@@ -24,12 +23,12 @@ class _Gender(IntEnumPlus):
     r"""Enumeration to match the MATLAB one from the test cases."""
 
     # fmt: off
-    null: ClassVar[int]        = 0
-    female: ClassVar[int]      = 1
-    male: ClassVar[int]        = 2
-    uncirc_male: ClassVar[int] = 3
-    circ_male: ClassVar[int]   = 4
-    non_binary: ClassVar[int]  = 5
+    null        = 0
+    female      = 1
+    male        = 2
+    uncirc_male = 3
+    circ_male   = 4
+    non_binary  = 5
     # fmt: on
 
 

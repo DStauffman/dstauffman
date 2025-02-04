@@ -23,8 +23,8 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    _Q = NDArray[np.float64]  # shape (..., 4)
-    _V = NDArray[np.float64]  # shape (..., 3)
+    _Q = NDArray[np.floating]  # shape (..., 4)
+    _V = NDArray[np.floating]  # shape (..., 3)
 
 
 # %% Functions - enforce_pos_scalar_keras

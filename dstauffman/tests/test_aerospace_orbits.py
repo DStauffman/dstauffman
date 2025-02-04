@@ -9,7 +9,7 @@ Notes
 # %% Imports
 import unittest
 
-from dstauffman import get_data_dir, HAVE_NUMPY, NP_DATETIME_FORM, read_text_file
+from dstauffman import get_data_dir, HAVE_NUMPY, NP_DATETIME_FORM, NP_NAT, read_text_file
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -242,7 +242,7 @@ class Test_aerospace_rv_2_oe(unittest.TestCase):
         exp1.type[:]       = space.OrbitType.elliptic
         exp1.equatorial[:] = True
         exp1.circular[:]   = True
-        exp1.t[:]          = np.datetime64("nat")
+        exp1.t[:]          = NP_NAT
         exp2               = space.Elements(1)
         exp2.a[:]          = np.inf
         exp2.e[:]          = 1.0
@@ -258,7 +258,7 @@ class Test_aerospace_rv_2_oe(unittest.TestCase):
         exp2.type[:]       = space.OrbitType.elliptic
         exp2.equatorial[:] = True
         exp2.circular[:]   = False
-        exp2.t[:]          = np.datetime64("nat")
+        exp2.t[:]          = NP_NAT
         # fmt: on
         oe1 = space.rv_2_oe(r0, self.v1)
         self.assertEqual(oe1, exp1)
@@ -310,7 +310,7 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
         self.oe.type[:]       = space.OrbitType.elliptic
         self.oe.equatorial[:] = False
         self.oe.circular[:]   = False
-        self.oe.t[:]          = np.datetime64("nat")
+        self.oe.t[:]          = NP_NAT
         # fmt: on
 
     def test_nominal(self) -> None:
@@ -342,7 +342,7 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
         oe1.type[:]       = space.OrbitType.elliptic
         oe1.equatorial[:] = True
         oe1.circular[:]   = True
-        oe1.t[:]          = np.datetime64("nat")
+        oe1.t[:]          = NP_NAT
         oe2               = space.Elements(1)
         oe2.a[:]          = np.inf
         oe2.e[:]          = 1.0
@@ -358,7 +358,7 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
         oe2.type[:]       = space.OrbitType.parabolic
         oe2.equatorial[:] = True
         oe2.circular[:]   = False
-        oe2.t[:]          = np.datetime64("nat")
+        oe2.t[:]          = NP_NAT
         # fmt: on
         (r, v) = space.oe_2_rv(oe1)
         np.testing.assert_array_equal(r, r0)

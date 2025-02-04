@@ -93,7 +93,10 @@ class Test_aerospace_geod2ecf(unittest.TestCase):
         np.testing.assert_array_almost_equal(xyz, M2FT * self.xyz, decimal=self.decimal)
 
     def test_closed_loop(self) -> None:
-        lats = DEG2RAD * np.arange(-90.0, 91.0, 1.0)  # TODO: sofair has problems at the poles!
+        # Note: sofair has problems near the poles in double precision
+        # gersten is not that accurate, especially in altitude
+        # olson is the best overall, with good performance and accuracy, despite being an approximation
+        lats = DEG2RAD * np.arange(-90.0, 91.0, 1.0)
         num_lats = lats.size
         longs = DEG2RAD * np.linspace(-180.0, 180.0, num_lats)
         num_alts = 10
@@ -106,15 +109,15 @@ class Test_aerospace_geod2ecf(unittest.TestCase):
         for ix in range(num_alts):
             xyz = space.geod2ecf(np.vstack((lats, longs, np.full(num_lats, alts[ix]))))
             assert isinstance(xyz, np.ndarray)  # TODO: typing should figure this out based on overloads
-            lla = space.ecf2geod(xyz, algorithm="gersten")
+            lla = space.ecf2geod(xyz, algorithm="olson")
             assert isinstance(lla, np.ndarray)  # TODO: typing should figure this out based on overloads
             lat_errs[:, ix] = (lla[0, :] - lats) * self.a
             lon_errs[:, ix] = (lla[1, :] - longs) * self.a
             alt_errs[:, ix] = lla[2, :] - alts[ix]
 
-        np.testing.assert_allclose(lat_errs, np.zeros(err_shape), atol=0.5)
-        np.testing.assert_allclose(lon_errs, np.zeros(err_shape), atol=1e-6)
-        np.testing.assert_allclose(alt_errs, np.zeros(err_shape), atol=0.1)
+        np.testing.assert_allclose(lat_errs, np.zeros(err_shape), atol=1e-8)
+        np.testing.assert_allclose(lon_errs, np.zeros(err_shape), atol=1e-8)
+        np.testing.assert_allclose(alt_errs, np.zeros(err_shape), atol=1e-8)
 
     def test_bad_units(self) -> None:
         with self.assertRaises(ValueError) as err:

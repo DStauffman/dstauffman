@@ -29,8 +29,8 @@ if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
-    _F = float | np.float64 | _N
+    _N = NDArray[np.floating]
+    _F = float | _N
 
     class _OutlierKwArgs(TypedDict):
         num_iters: NotRequired[int]

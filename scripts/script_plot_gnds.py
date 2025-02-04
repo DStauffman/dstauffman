@@ -34,7 +34,7 @@ num_axes   = 2  # fmt: skip
 num_innovs = 11
 
 t_bounds1 = np.array([2, 8])
-t_bounds2 = dcs.convert_date(date_zero, "numpy", old_form="datetime") + dcs.NP_ONE_SECOND * t_bounds1  # type: ignore[call-overload, operator]
+t_bounds2 = dcs.convert_date(date_zero, "numpy", old_form="datetime") + dcs.NP_ONE_SECOND * t_bounds1  # type: ignore[operator]
 
 bins = [-np.inf, -5e-6, -5e-7, 0.0, 5e-7, 5e-6, np.inf]
 

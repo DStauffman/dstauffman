@@ -17,7 +17,7 @@ from typing import Any, overload, TYPE_CHECKING
 import unittest
 import warnings
 
-from dstauffman.constants import HAVE_MPL, HAVE_NUMPY, NP_DATETIME_UNITS, NP_INT64_PER_SEC, NP_TIMEDELTA_FORM
+from dstauffman.constants import HAVE_MPL, HAVE_NUMPY, NP_DATETIME_UNITS, NP_INT64_PER_SEC, NP_NAT, NP_TIMEDELTA_FORM
 from dstauffman.units import get_time_factor, ONE_DAY
 from dstauffman.utils import is_datetime
 
@@ -36,9 +36,9 @@ if TYPE_CHECKING:
 
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
     _TD = NDArray[np.timedelta64]
-    _AllDates = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | _D | _I | _N | None
+    _AllDates = int | float | datetime.datetime | datetime.date | np.datetime64 | _D | _I | _N | None
     _NPDates = np.datetime64 | _D | _N
 
 # %% Constants
@@ -448,12 +448,12 @@ def convert_date(  # noqa: C901
         if form == "datetime":
             out = date_zero + datetime.timedelta(seconds=date) if is_num else None  # type: ignore[assignment, operator]
         elif form == "numpy":
-            out = np.full(date.shape, np.datetime64("nat"), dtype=numpy_form)
+            out = np.full(date.shape, NP_NAT, dtype=numpy_form)
             if np.any(is_num):
                 datetime_units = get_np_time_units(numpy_form)
                 with warnings.catch_warnings(action="ignore", category=UserWarning):
                     date_zero_np = (
-                        np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)
+                        np.datetime64(date_zero) if datetime_units is None else np.datetime64(date_zero, datetime_units)  # type: ignore[call-overload]
                     )
                 if np.issubdtype(date.dtype, np.signedinteger):
                     # fmt: off
@@ -506,7 +506,7 @@ def convert_date(  # noqa: C901
         if form == "datetime":
             out = dates.num2date(date) if is_num else None
         elif form == "numpy":
-            out = np.full(date.shape, np.datetime64("nat"), dtype=numpy_form)
+            out = np.full(date.shape, NP_NAT, dtype=numpy_form)
             if np.any(is_num):
                 # TODO: I don't like this method, but the dates.num2date always returns a timezone aware datetime
                 out[is_num] = np.array(  # pyright: ignore[reportOptionalSubscript]
@@ -601,9 +601,9 @@ def convert_datetime_to_np(
     if isinstance(time, list):
         out = np.empty(len(time), dtype="datetime64[" + units + "]")
         for ix, t in enumerate(time):
-            out[ix] = np.datetime64(t, units)
+            out[ix] = np.datetime64(t, units)  # type: ignore[call-overload]
         return out
-    return np.datetime64(time, units)
+    return np.datetime64(time, units)  # type: ignore[call-overload, no-any-return]
 
 
 # %% Functions - convert_duration_to_np
@@ -635,7 +635,7 @@ def convert_duration_to_np(dt: datetime.timedelta, /, units: str = NP_DATETIME_U
     5400000000000 nanoseconds
 
     """
-    return np.timedelta64(dt, units)
+    return np.timedelta64(dt, units)  # type: ignore[call-overload, no-any-return]
 
 
 # %% Functions - convert_num_dt_to_np
@@ -668,7 +668,7 @@ def convert_num_dt_to_np(dt: int | float, /, units: str = "sec", np_units: str =
 
     """
     units = _NP_MAP.get(units, units)
-    return np.timedelta64(dt, units).astype(np_units)  # type: ignore[arg-type, no-any-return]
+    return np.timedelta64(dt, units).astype(np_units)  # type: ignore[call-overload, no-any-return]
 
 
 # %% Functions - get_delta_time_str

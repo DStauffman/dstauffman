@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from dstauffman.plotting import Opts as _Opts
 
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 
 # %% Functions - dist_enum_and_mons

@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from mypy_extensions import DefaultNamedArg
     from numpy.typing import NDArray
 
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 
 # %% Classes
@@ -86,8 +86,8 @@ if __name__ == "__main__":
 
     # %% Example 3
     data3 = MyData(num_pts)
-    data3.time[:] = first["time"]
-    data3.data[:] = first["data"]
+    data3.time[:] = first["time"]  # type: ignore[call-overload]
+    data3.data[:] = first["data"]  # type: ignore[call-overload]
     data3.ver = first["ver"]  # type: ignore[assignment]
     filename3 = folder / "test_file3.hdf5"
     data3.save(filename3, meta=meta, exclusions=exclusions)

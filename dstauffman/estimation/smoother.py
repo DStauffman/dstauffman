@@ -24,8 +24,8 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    _N = NDArray[np.float64]
-    _M = NDArray[np.float64]  # 2D
+    _N = NDArray[np.floating]
+    _M = NDArray[np.floating]  # 2D
 
 
 # %% _update_information

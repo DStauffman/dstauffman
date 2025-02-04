@@ -16,21 +16,23 @@ from pathlib import Path
 from typing import NotRequired, TYPE_CHECKING, TypedDict, Unpack
 import unittest
 
-from dstauffman import DEG2RAD, get_data_dir, HAVE_MPL, HAVE_NUMPY, RAD2DEG, unit
+from dstauffman import DEG2RAD, get_data_dir, HAVE_MPL, HAVE_NUMPY, M2FT, RAD2DEG, unit
+from dstauffman.aerospace import EARTH, geod2ecf, sph2cart
 from dstauffman.plotting.plotting import ColorMap, ExtraPlotter, Opts, setup_plots
 
 if HAVE_MPL:
     from matplotlib.colors import ListedColormap
     from matplotlib.figure import Figure
     import matplotlib.pyplot as plt
+    from mpl_toolkits.mplot3d.art3d import Poly3DCollection  # type: ignore[import-untyped]
 if HAVE_NUMPY:
     import numpy as np
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    _N = NDArray[np.float64]
-    _M = NDArray[np.float64]  # 2D
+    _N = NDArray[np.floating]
+    _M = NDArray[np.floating]  # 2D
 
     class _PlotMapKwargs(TypedDict):
         save_plot: NotRequired[bool]
@@ -97,12 +99,12 @@ def plot_map(  # noqa: C901
     units: str = "deg",
     latlon_units: str = "rad",
     opts: Opts | None = None,
-    xy_events: tuple[tuple[float, float], ...] | None = None,
-    xy_annotations: tuple[str, ...] | None = None,
-    xy_colors: tuple[str, ...] | None = None,
+    xy_events: tuple[tuple[float, float], ...] | list[tuple[float, float]] | None = None,
+    xy_annotations: tuple[str, ...] | list[str] | None = None,
+    xy_colors: tuple[str, ...] | list[str] | None = None,
     land_colors: str = "same",
     color_by: tuple[str, _N] | None = None,
-    cbar_colormap: str | None = None,
+    cbar_colormap: str | None | ColorMap = None,
     map_labels: dict[str, tuple[float, float]] | None = None,
     map_colors: dict[str, int | str] | None = None,
     dir_skip: int | None = None,
@@ -256,6 +258,211 @@ def plot_map(  # noqa: C901
     # set limits
     ax.set_xlim((-180.0, 180.0) if units == "deg" else (-np.pi, np.pi))
     ax.set_ylim((-90.0, 90.0) if units == "deg" else (-np.pi / 2, np.pi / 2))
+
+    # plot any extra information through a generic callable
+    if extra_plotter is not None:
+        extra_plotter(fig=fig, ax=[ax])
+
+    # call advanced tools
+    if not skip_setup_plots:
+        setup_plots(fig, this_opts)
+
+    return fig
+
+
+# %% Functions - plot_map_3d
+def plot_map_3d(  # noqa: C901
+    map_data: dict[str, _M] | None = None,
+    lat: _N | None = None,
+    lon: _N | None = None,
+    alt: _N | None = None,
+    *,
+    title: str = "Orbit",
+    units: str = "deg",
+    latlon_units: str = "rad",
+    earth_units: str = "m",
+    opts: Opts | None = None,
+    lla_events: tuple[tuple[float, float, float], ...] | list[tuple[float, float, float]] | None = None,
+    lla_annotations: tuple[str, ...] | list[str] | None = None,
+    lla_colors: tuple[str, ...] | list[str] | None = None,
+    land_colors: str = "same",
+    color_by: tuple[str, _N] | None = None,
+    cbar_colormap: str | None | ColorMap = None,
+    map_labels: dict[str, tuple[float, float]] | None = None,
+    map_colors: dict[str, int | str] | None = None,
+    dir_skip: int | None = None,
+    extra_plotter: ExtraPlotter | None = None,
+    skip_setup_plots: bool = False,
+    **kwargs: Unpack[_PlotMapKwargs],
+) -> Figure:
+    """
+    Plots the given 3D map.
+
+    Parameters
+    ----------
+    map_data : dict by name of Lat/Lon data
+        Map data to plot
+    lat : (N,)
+        Additional Latitude data to plot, optional [rad]
+    lon : (N,)
+        Additional Longitude data to plot, optional [rad]
+    alt : (N,)
+        Additional altitude data to plot, optional [m]
+
+    Returns
+    -------
+    fig : matplot.figure.Figure
+        Map figure
+
+    Notes
+    -----
+    #.  This 3D map has some major limitations with clipping and such. Consider it experimental.
+
+    Examples
+    --------
+    >>> from dstauffman.plotting import plot_map_3d
+    >>> fig = plot_map_3d()  # doctest: +SKIP
+
+    """
+    # make local copy of opts that can be modified without changing the original
+    this_opts = Opts() if opts is None else opts.__class__(opts)
+    # opts overrides
+    this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
+    this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
+    if "classify" in kwargs:
+        this_opts.classify = kwargs.pop("classify")
+
+    # checks
+    assert units in {"deg", "rad"}, "Unexpected units"
+    assert latlon_units in {"deg", "rad"}, "Unexpected lat/lon units"
+    assert earth_units in {"m", "ft", "EU", "km"}  # TODO: implement these
+    map_scale = DEG2RAD if units == "deg" else 1.0
+    latlon_scale = DEG2RAD if latlon_units == "deg" else 1.0
+    if earth_units == "m":
+        earth_radius = EARTH["a"]
+    elif earth_units == "ft":
+        earth_radius = M2FT * EARTH["a"]
+    elif earth_units == "EU":
+        earth_radius = 1.0
+    elif earth_units == "km":
+        earth_radius = 1e-3 * EARTH["a"]
+    else:
+        raise ValueError(f"Unexpected option for earth_units: {earth_units}")
+
+    # load data
+    if map_data is None:
+        map_data, _, _map_colors = get_map_data()
+    else:
+        _map_colors = None
+    if map_colors is None:
+        if _map_colors is None:
+            _, _, map_colors = get_map_data()  # type: ignore[assignment]
+        else:
+            map_colors = _map_colors  # type: ignore[assignment]
+    assert map_colors is not None
+    land_names = list(map_data.keys())
+    map_lat = [map_scale * map_data[name][0, ...] for name in land_names]
+    map_lon = [map_scale * map_data[name][1, ...] for name in land_names]
+
+    fig = plt.figure()
+    assert (manager := fig.canvas.manager) is not None
+    manager.set_window_title(title)
+    ax = fig.add_subplot(1, 1, 1, projection="3d")
+    if land_colors == "none":
+        land_cmap = ColorMap(ListedColormap((kwargs.pop("land_colormap", "xkcd:white"),)))
+        background = kwargs.pop("background", "xkcd:white")
+        border = kwargs.pop("border", "C0")
+        linewidth = 0.3
+    elif land_colors == "same":
+        land_cmap = ColorMap(ListedColormap((kwargs.pop("land_colormap", "xkcd:light green"),)))
+        background = kwargs.pop("background", "xkcd:pale blue")
+        border = kwargs.pop("border", "xkcd:green")
+        linewidth = 0.3
+    elif land_colors == "multi":
+        land_colormap = kwargs.pop("land_colormap", "rainbow_r")  # use tab10 as default?
+        land_10_colors = ColorMap(num_colors=10, colormap=land_colormap)
+        list_colors: list[str | tuple[float, float, float, float]] = []
+        for name in land_names:
+            if isinstance(mcolor := map_colors[name], str):
+                list_colors.append(mcolor)
+            else:
+                list_colors.append(land_10_colors.get_color(mcolor))
+        land_cmap = ColorMap(ListedColormap(list_colors), num_colors=len(land_names))
+        background = kwargs.pop("background", "xkcd:pale blue")
+        border = kwargs.pop("border", "xkcd:black")
+        linewidth = 0.3
+    else:
+        raise ValueError(f"Unexpected value for land_colors: {land_colors}")
+    # Plot globe
+    az, el = np.mgrid[0.0 : 2 * np.pi : 24j, -np.pi : np.pi : 12j]  # type: ignore[misc]
+    x, y, z = sph2cart(az, el, 0.9999 * earth_radius)
+    for i in range(x.shape[0] - 1):  # type: ignore[attr-defined]
+        for j in range(x.shape[1] - 1):  # type: ignore[attr-defined]
+            indices = [(i, j), (i + 1, j), (i + 1, j + 1), (i, j + 1), (i, j)]
+            verts = np.array([[x[k], y[k], z[k]] for k in indices])  # type: ignore[index]
+            poly = Poly3DCollection(verts[np.newaxis, :, :], facecolor=background, edgecolor="none", zorder=1)
+            ax.add_collection3d(poly)  # type: ignore[attr-defined]
+
+    # Plot land borders
+    colors = tuple(land_cmap.get_color(x) for x in range(len(land_names)))
+    for la, lo, c in zip(map_lat, map_lon, colors):
+        x, y, z = geod2ecf(la, lo, np.zeros_like(la), output="split")  # type: ignore[assignment]
+        verts = [list(zip(x, y, z))]  # type: ignore[assignment, call-overload]
+        poly = Poly3DCollection(verts, color=c, edgecolor=border, alpha=0.9, linewidth=linewidth, zorder=2)
+        ax.add_collection3d(poly)  # type: ignore[attr-defined]
+    ax.set_title(title)
+    ax.grid(True)
+    ax.set_box_aspect([1, 1, 1])  # type: ignore[arg-type]
+    ax.set_xlabel(f"X [{earth_units}]")
+    ax.set_ylabel(f"Y [{earth_units}]")
+    ax.set_zlabel(f"Z [{earth_units}]")  # type: ignore[attr-defined]
+
+    # Plot ground/orbit track
+    if lat is not None and lon is not None:
+        if color_by is not None:
+            cbar_title = color_by[0]
+            cbar_data = color_by[1]
+            cbar_cmap = ColorMap(
+                colormap="autumn_r" if cbar_colormap is None else cbar_colormap,
+                low=float(np.nanmin(cbar_data)),
+                high=float(np.nanmax(cbar_data)),
+            )
+            colors = tuple(cbar_cmap.get_color(x) for x in cbar_data)
+        else:
+            colors = "xkcd:orange"  # type: ignore[assignment]
+        if alt is None:
+            alt = np.zeros_like(lat)
+        x, y, z = geod2ecf(lat, lon, alt, output="split")  # type: ignore[assignment]
+        ax.scatter(x, y, z, s=10, c=colors, label="Trace", zorder=6)  # type: ignore[misc]
+        if dir_skip is not None:
+            ang = unit(np.vstack([np.diff(lon), np.diff(lat), np.diff(alt) / earth_radius]), axis=0)
+            ax.quiver(
+                latlon_scale * lon[0:-1:dir_skip],
+                latlon_scale * lat[0:-1:dir_skip],
+                alt[0:-1:dir_skip],
+                ang[0, ::dir_skip],
+                ang[1, ::dir_skip],
+                ang[2, ::dir_skip],
+                zorder=8,
+                pivot="tail",
+            )
+        if color_by is not None:
+            cbar = fig.colorbar(cbar_cmap.get_smap(), ax=ax, orientation="horizontal")
+            cbar.ax.set_ylabel(cbar_title)
+
+    # Plot specific events
+    if lla_events is not None:
+        for i in range(len(lla_events)):  # pylint: disable=consider-using-enumerate
+            event_x, event_y, event_z = geod2ecf(np.asanyarray(lla_events[i]), output="split")
+            lla_color = lla_colors[i] if lla_colors is not None else "xkcd:green"
+            lla_annot = lla_annotations[i] if lla_annotations is not None else None
+            ax.scatter(event_x, event_y, event_z, color=lla_color, sizes=[50], zorder=9)
+            if lla_annot is not None:
+                ax.text(event_x, event_y, event_z, lla_annot, zdir="z", fontweight="bold", fontsize=12, zorder=9)  # type: ignore[arg-type]
+    if map_labels is not None:
+        for map_label, map_latlon in map_labels.items():
+            map_x, map_y, map_z = geod2ecf(DEG2RAD * map_latlon[0], DEG2RAD * map_latlon[1], 0.0, output="split")
+            ax.text(map_x, map_y, map_z, map_label, zdir="x", fontsize=8, horizontalalignment="center", zorder=3)  # type: ignore[arg-type]
 
     # plot any extra information through a generic callable
     if extra_plotter is not None:

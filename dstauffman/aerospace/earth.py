@@ -22,9 +22,9 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
-    _N = NDArray[np.float64]
-    _Q = NDArray[np.float64]
-    _V = NDArray[np.float64]
+    _N = NDArray[np.floating]
+    _Q = NDArray[np.floating]
+    _V = NDArray[np.floating]
 
 # %% Constants
 # Earth's semi-major axis (ft)
@@ -143,14 +143,14 @@ def ecf2geod(
 def ecf2geod(
     x: ArrayLike, y: ArrayLike, z: ArrayLike, *, units: str = ..., output: Literal["split"], algorithm: str = ...
 ) -> tuple[_N, _N, _N]: ...
-def ecf2geod(
+def ecf2geod(  # noqa: C901
     x: ArrayLike,
     y: ArrayLike | None = None,
     z: ArrayLike | None = None,
     *,
     units: str = "m",
     output: str = "combined",
-    algorithm: str = "gersten",
+    algorithm: str = "olson",
 ) -> _N | tuple[_N, _N, _N]:
     r"""
     Converts a vector of earth centered, earth fixed coordinates to geodetic latitude, longitude, and altitude.
@@ -177,7 +177,17 @@ def ecf2geod(
     X axis of the ECEF frame is lined up with the prime meridian,
     the Z axis is through the north pole, and the Y axis completes a right handed
     coordinate system. It also assumes q > 0 in the algorithm which corresponds
-    to the magnitude of x being greater than ~43 km.
+    to the magnitude of x being greater than ~43 km. Sofair has numerical precision issues near
+    the poles unless done in quad precision, which currently is not available in numpy (quaddtype
+    has active development as of Sep 2024 though).
+
+    The "olson" algorithm is based off of this original paper:
+    Olson, D. K., Converting Earth-Centered, Earth-Fixed Coordinates to
+    Geodetic Coordinates, IEEE Transactions on Aerospace and Electronic
+    Systems, 32 (1996) 473-476.
+
+    The "olson" algorithm is technically a polynomial approximation, but runs in similar time and
+    with far more numerical precision (about 5-6 orders of magnitude better)
 
     Parameters
     ----------
@@ -191,8 +201,8 @@ def ecf2geod(
         Units, default of "m" for meters, "ft" for feet is also valid
     output : str, optional, default is "combined"
         Whether output is "combined" for a (3, N) or "split" for (x, y, z) outputs
-    algorithm : str, optional, default is "gersten"
-        Algorithm to use, from {"gersten", "sofair"}
+    algorithm : str, optional, default is "olson"
+        Algorithm to use, from {"gersten", "sofair", "olson"}
 
     Returns
     -------
@@ -209,6 +219,7 @@ def ecf2geod(
         and the "sofair" version in Redy.
     #.  Expanded by David C. Stauffer in July 2021 to allow for "m" or "ft", and 3xN matrices or
         three 1xN vectors for both inputs and outputs.
+    #.  Expanded by David C. Stauffer in January 2025 to include far more accurate "Olson" algorithm.
 
     Examples
     --------
@@ -277,6 +288,59 @@ def ecf2geod(
         lat = delta + np.arcsin(ang, out=np.full(ang.shape, np.nan), where=np.abs(ang) <= 1.0)
         lon = np.arctan2(y, x)
         alt = r - a * (1 - flattening * sin_sq_delta - fsq / 2.0 * sin_sq_2delta * (a_over_r - 0.25))
+    elif algorithm == "olson":
+        # WGS-84 ellipsoid parameters
+        flattening = 1.0 / _finv
+
+        # Derived parameters
+        e2 = flattening * (2.0 - flattening)
+        a1 = a * e2
+        a2 = a1 * a1
+        a3 = a1 * e2 / 2
+        a4 = 2.5 * a2
+        a5 = a1 + a3
+        a6 = 1.0 - e2
+
+        w = np.sqrt(np.square(x) + np.square(y))
+        zp = np.abs(z)
+        w2 = w * w
+        r2 = np.square(z) + w2
+        r = np.sqrt(r2)
+        s2 = np.square(z) / r2
+        c2 = w2 / r2
+        u = a2 / r
+        v = a3 - a4 / r
+
+        c = np.full(r.shape, np.nan)
+        s = np.full(r.shape, np.nan)
+        ss = np.full(r.shape, np.nan)
+        lat = np.full(r.shape, np.nan)
+        ix = c2 > 0.3
+        ix2 = ~ix
+        if np.any(ix):
+            s[ix] = (zp[ix] / r[ix]) * (1 + c2[ix] * (a1 + u[ix] + s2[ix] * v[ix]) / r[ix])
+            ixs = ix & (s <= 1.0)  # prevents arcsin and sqrt from being invalid
+            np.arcsin(s, out=lat, where=ixs)
+            np.multiply(s, s, out=ss, where=ixs)
+            np.sqrt(1.0 - ss, out=c, where=ixs)
+        if np.any(ix2):
+            c[ix2] = (w[ix2] / r[ix2]) * (1 - s2[ix2] * (a5 - u[ix2] - c2[ix2] * v[ix2]) / r[ix2])
+            ixc = ix2 & (c <= 1.0)  # prevents arccos and sqrt from being invalid
+            np.arccos(c, out=lat, where=ixc)
+            ss[ixc] = 1 - c[ixc] * c[ixc]
+            np.sqrt(ss, out=s, where=ixc)
+        g = 1.0 - e2 * ss
+        rg = a / np.sqrt(g)
+        rf = a6 * rg
+        u = w - rg * c
+        v = zp - rf * s
+        f = c * u + s * v
+        m = c * v - s * u
+        p = m / (rf / g + f)
+        lat += p
+        lat[np.asanyarray(z) < 0.0] *= -1
+        lon = np.arctan2(y, x)
+        alt = f + m * p / 2
     else:
         raise ValueError(f'Unknown algorithm: "{algorithm}"')
 

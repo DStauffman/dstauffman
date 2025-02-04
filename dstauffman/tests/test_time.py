@@ -195,7 +195,7 @@ class Test_convert_date(unittest.TestCase):
         self.date = datetime.date(2022, 1, 17)
         if dcs.HAVE_NUMPY:
             self.numpy = np.datetime64("2020-06-01 01:02:05.500000", "ns")
-            self.nat = np.datetime64("nat")
+            self.nat = np.datetime64("nat", "ns")
             self.np2 = np.datetime64("2022-01-17 00:00:00", "ns")
         if dcs.HAVE_MPL:
             self.matplotlib = dates.date2num(self.datetime)
@@ -514,7 +514,7 @@ class Test_convert_num_dt_to_np(unittest.TestCase):
         for key, value in map_.items():
             dt = 90
             out = dcs.convert_num_dt_to_np(dt, units=key)
-            exp = np.timedelta64(90, value).astype(dcs.NP_TIMEDELTA_FORM)
+            exp = np.timedelta64(90, value).astype(dcs.NP_TIMEDELTA_FORM)  # type: ignore[call-overload]
             self.assertEqual(out, exp)
 
 

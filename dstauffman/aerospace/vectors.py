@@ -24,9 +24,9 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _D = NDArray[np.datetime64]
-    _N = NDArray[np.float64]
-    _V = NDArray[np.float64]  # shape (3,)
-    _DCM = NDArray[np.float64]  # shape (3, 3)
+    _N = NDArray[np.floating]
+    _V = NDArray[np.floating]  # shape (3,)
+    _DCM = NDArray[np.floating]  # shape (3, 3)
     _FN = float | _N
     _Lists = list[_N] | tuple[_N, ...] | _N
 
@@ -478,14 +478,14 @@ def interp_vector(
     # fmt: off
     if "btype" not in kwargs or kwargs["btype"] == "linear":
         if x_is_datetime:
-            func = lambda x, xp, yp, **kwargs: linear_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)
+            func = lambda x, xp, yp, **kwargs: linear_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
         else:
-            func = lambda x, xp, yp, **kwargs: linear_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)
+            func = lambda x, xp, yp, **kwargs: linear_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
     else:
         if x_is_datetime:
-            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)
+            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x.view(np.int64), xp.view(np.int64), yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
         else:
-            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)
+            func = lambda x, xp, yp, **kwargs: linear_lowpass_interp(x, xp, yp, assume_sorted=assume_sorted, extrapolate=extrapolate, **kwargs)  # pylint: disable=unnecessary-lambda-assignment
     # fmt: on
 
     if yp.ndim == 1:

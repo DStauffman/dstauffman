@@ -58,12 +58,12 @@ if TYPE_CHECKING:
     _B = NDArray[np.bool_]
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
-    _M = NDArray[np.float64]  # 2D
-    _Q = NDArray[np.float64]
+    _N = NDArray[np.floating]
+    _M = NDArray[np.floating]  # 2D
+    _Q = NDArray[np.floating]
     _CM = str | Colormap | ListedColormap | ColorMap
     _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
-    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | None
+    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | None
     _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
     _DeltaTime = int | float | np.timedelta64
     _Figs = list[Figure]
@@ -2056,8 +2056,8 @@ def plot_tci(
     if solar_cycles is not None:
         plot_phases(ax, solar_cycles, labels=solar_labels)
     for name, color, value in zip(quintile_names, quintile_colors, quintiles):
-        ax.axhline(value, label=name, color=color)
-        ax.annotate(name, (time[0], value), color=color, fontsize=16, verticalalignment="top", zorder=10)
+        ax.axhline(value, label=name, color=color)  # type: ignore[arg-type]
+        ax.annotate(name, (time[0], value), color=color, fontsize=16, verticalalignment="top", zorder=10)  # type: ignore[arg-type]
     setup_plots(fig, opts=opts)
     return fig
 
@@ -2133,7 +2133,7 @@ def plot_kp(
                 Rectangle(
                     (t, 0),
                     delta_time,
-                    d,
+                    d,  # type: ignore[arg-type]
                     facecolor=kp_colormap.colors[b],  # type: ignore[index]
                     edgecolor="none",
                 )

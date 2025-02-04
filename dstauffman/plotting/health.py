@@ -43,8 +43,8 @@ if TYPE_CHECKING:
 
     _CM = str | Colormap | ListedColormap | ColorMap
     _I = NDArray[np.int_]
-    _M = NDArray[np.float64]  # 2D
-    _N = NDArray[np.float64]
+    _M = NDArray[np.floating]  # 2D
+    _N = NDArray[np.floating]
 
 
 # %% Classes - TruthPlotter

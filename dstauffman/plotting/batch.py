@@ -32,7 +32,7 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     _CM = str | Colormap | ListedColormap | ColorMap
     _Figs = list[Figure]
-    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | None
+    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | None
 
     class _BpeKwArgs(TypedDict):
         name: NotRequired[str]

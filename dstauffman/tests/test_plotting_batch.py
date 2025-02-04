@@ -26,7 +26,7 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 
 # %% plotting.plot_bpe_convergence

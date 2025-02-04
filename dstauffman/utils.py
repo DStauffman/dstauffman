@@ -49,11 +49,11 @@ if TYPE_CHECKING:
     _B = NDArray[np.bool_]
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
     _StrOrListStr = TypeVar("_StrOrListStr", str, list[str])
-    _SingleNum = int | float | np.datetime64 | np.int32 | np.int64 | np.float64
+    _SingleNum = int | float | np.datetime64
     _Lists = _N | list[_N] | tuple[_N, ...]
-    _NF = float | np.float64 | _N
+    _NF = float | _N
     _Array = _B | _D | _I | _N
 
     class _PrintOptsKwArgs(TypedDict):
@@ -219,14 +219,14 @@ def find_in_range(
     # find those greater than the minimum bound
     if np.isfinite(min_):
         func = np.greater_equal if inclusive or left else np.greater
-        valid = func(value, min_ - precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[call-overload, operator]
+        valid = func(value, min_ - precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
     else:
         assert ~np.isnan(min_) and np.sign(min_) < 0, "The minimum should be -np.inf if not finite."
         valid = not_nan.copy()
     # combine with those less than the maximum bound
     if np.isfinite(max_):
         func = np.less_equal if inclusive or right else np.less  # type: ignore[assignment]
-        valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[call-overload, operator]
+        valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
     else:
         assert ~np.isnan(max_) and np.sign(max_) > 0, "The maximum should be np.inf if not finite."
     return valid
@@ -234,11 +234,11 @@ def find_in_range(
 
 # %% Functions - rms
 @overload
-def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> float | np.float64: ...
+def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> float: ...
 @overload
 def rms(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _NF: ...
 @overload
-def rms(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> NDArray[np.float64]: ...
+def rms(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> _N: ...
 def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore_nans: bool = False) -> _NF:
     r"""
     Calculate the root mean square of a number series.
@@ -304,7 +304,7 @@ def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore
 @overload
 def rss(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _NF: ...
 @overload
-def rss(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> NDArray[np.float64]: ...
+def rss(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> _N: ...
 def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore_nans: bool = False) -> _NF:
     r"""
     Calculate the root sum square of a number series.
@@ -345,6 +345,7 @@ def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
     if not np.isscalar(data) and len(data) == 0:  # type: ignore[arg-type]
         return np.nan
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
+    out: _NF
     if not ignore_nans:
         out = np.sqrt(np.sum(data * np.conj(data), axis=axis, keepdims=keepdims))
     else:
@@ -362,7 +363,7 @@ def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
         else:
             out = np.sqrt(np.nansum(data * np.conj(data), axis=axis, keepdims=keepdims))
     # return the result
-    return out  # type: ignore[no-any-return]
+    return out
 
 
 # %% Functions - compare_two_classes
@@ -1250,7 +1251,7 @@ def combine_per_year(data: _Array | None, func: Callable[..., Any] | None = None
             data2 = func(np.reshape(data[: num_year * MONTHS_PER_YEAR, :], (num_year, MONTHS_PER_YEAR, num_chan)), axis=1)
     # optionally squeeze the vector case back to 1D
     if is_1d:
-        data2 = data2.squeeze(axis=1)
+        data2 = data2.squeeze(axis=1)  # type: ignore[assignment]
     return data2
 
 
@@ -1537,7 +1538,7 @@ def intersect(
     b: ArrayLike,
     /,
     *,
-    tolerance: int | float | np.int_ | np.float64 | np.timedelta64,
+    tolerance: int | float | np.timedelta64,
     assume_unique: bool,
     return_index: Literal[False] = ...,
 ) -> _I | _N | _D: ...
@@ -1547,7 +1548,7 @@ def intersect(
     b: ArrayLike,
     /,
     *,
-    tolerance: int | float | np.int_ | np.float64 | np.timedelta64,
+    tolerance: int | float | np.timedelta64,
     assume_unique: bool,
     return_index: Literal[True],
 ) -> tuple[_I | _N | _D, _I, _I]: ...
@@ -1556,7 +1557,7 @@ def intersect(  # type: ignore[misc]
     b: ArrayLike,
     /,
     *,
-    tolerance: int | float | np.int_ | np.float64 | np.timedelta64 = 0,
+    tolerance: int | float | np.timedelta64 = 0,
     assume_unique: bool = False,
     return_indices: bool = False,
 ) -> _I | _N | _D | tuple[_I | _N | _D, _I, _I]:
@@ -1638,7 +1639,7 @@ def intersect(  # type: ignore[misc]
         orig_datetime = a.dtype  # type: ignore[union-attr]
         a = a.astype(np.int64)  # type: ignore[union-attr]
         b = b.astype(np.int64)  # type: ignore[union-attr]
-        tolerance = tolerance.astype(np.int64)  # type: ignore[union-attr]
+        tolerance = tolerance.astype(np.int64)  # type: ignore[assignment, union-attr]
 
     # check if largest component of a and b is too close to the tolerance floor (for floats)
     all_int = is_np_int(a) and is_np_int(b) and is_np_int(tolerance)

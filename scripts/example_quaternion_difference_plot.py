@@ -1,7 +1,6 @@
 """Plot some quaternion differences."""
 
 # %% Imports
-import matplotlib.colors as colors
 import numpy as np
 
 from dstauffman.aerospace import quat_from_euler, quat_mult, quat_norm
@@ -33,9 +32,6 @@ if __name__ == "__main__":
     # make plots
     figs1 = plot_quaternion("Quaternion", time_one, time_two, quat_one, quat_two, opts=opts)  # type: ignore[call-overload]
 
-    colormap = ColorMap(
-        colors.ListedColormap(COLOR_LISTS["quat_off"].colors + COLOR_LISTS["quat"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[arg-type, operator]
-    )
     figs2 = plot_time_difference(  # type: ignore[call-overload]
         "State Differences",
         time_one,
@@ -44,7 +40,7 @@ if __name__ == "__main__":
         quat_two,
         opts=opts,
         elements=("X", "Y", "Z", "S"),
-        colormap=colormap,
+        colormap=COLOR_LISTS["quat_comp"],
         units="rad",
         second_units="micro",
     )

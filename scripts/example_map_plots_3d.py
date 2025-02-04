@@ -17,9 +17,14 @@ def _extra_plotter_factory() -> plot.ExtraPlotter:
     """Create a plotter to highlight the zero latitude and longitudes."""
 
     def _extra_plotter(fig: Figure, ax: list[Axes]) -> None:  # pylint: disable=unused-argument
+        az = np.linspace(0, 2 * np.pi, 100)
+        el = np.zeros_like(az)
+        rad = np.full(az.shape, space.EARTH["a"])
+        x1, y1, z1 = space.sph2cart(az, el, rad)
+        x2, y2, z2 = space.sph2cart(el, az, rad)
         for this_axes in ax:
-            this_axes.axvline(0, color="xkcd:brick red", linewidth=2, label="Prime Meridian")
-            this_axes.axhline(0, color="xkcd:dark red", linewidth=2, label="Equator")
+            this_axes.plot(x1, y1, z1, color="xkcd:brick red", linewidth=2, label="Prime Meridian")
+            this_axes.plot(x2, y2, z2, color="xkcd:dark red", linewidth=2, label="Equator")
 
     return _extra_plotter
 
@@ -27,7 +32,7 @@ def _extra_plotter_factory() -> plot.ExtraPlotter:
 # %% Script
 if __name__ == "__main__":
     # simple Earth plot
-    fig1 = plot.plot_map()
+    fig1 = plot.plot_map_3d()
 
     # create Opts
     opts = plot.Opts()
@@ -48,39 +53,35 @@ if __name__ == "__main__":
         r, v = space.oe_2_rv(new_oe)
         pos_eci[:, i] = r
 
-    time_jd = space.numpy_to_jd(time)
-    I2F = space.quat_eci_2_ecf(time_jd)
-    pos_ecf = space.quat_times_vector(I2F, pos_eci)  # type: ignore[arg-type]
+    lat, lon, alt = space.ecf2geod(pos_eci, output="split")
 
-    lat, lon, alt = space.ecf2geod(pos_ecf, output="split")
+    # no colors, with orbit
+    fig2 = plot.plot_map_3d(None, lat, lon, land_colors="none")
 
-    # no colors, with ground track
-    fig2 = plot.plot_map(None, lat, lon, land_colors="none")
-
-    # ground track colored by altitude, multicolor countries
+    # orbit colored by altitude, multicolor countries
     map_data, map_labels, map_colors = plot.get_map_data()
     color_by = ("Altitude [km]", 1e-3 * alt)
-    fig3 = plot.plot_map(map_data, lat, lon, land_colors="multi", color_by=color_by, dir_skip=12, title="ISS orbit")
+    fig3 = plot.plot_map_3d(map_data, lat, lon, alt, land_colors="multi", color_by=color_by, dir_skip=12, title="ISS orbit")
 
-    # ground track with event
-    xy_events: tuple[tuple[float, float], ...] = ((lon[10], lat[10]),)
-    xy_annotations: tuple[str, ...] = ("ISS",)
-    fig4 = plot.plot_map(None, lat, lon, land_colors="same", color_by=color_by, cbar_colormap="spring",
-        title="Event", xy_events=xy_events, xy_annotations=xy_annotations)  # fmt: skip  # noqa: E128
+    # orbit with event (satellite location)
+    lla_events: tuple[tuple[float, float, float], ...] = ((lon[10], lat[10], alt[10]),)
+    lla_annotations: tuple[str, ...] = ("ISS",)
+    fig4 = plot.plot_map_3d(None, lat, lon, alt, land_colors="same", color_by=color_by, cbar_colormap="spring",
+        title="Event", lla_events=lla_events, lla_annotations=lla_annotations)  # fmt: skip  # noqa: E128
 
-    # ground track with multiple events and custom colors
+    # orbit with multiple events and custom colors
     m = len(lat) // 2
-    xy_events = ((lon[0], lat[0]), (lon[m], lat[m]))
-    xy_annotations = ("Rev Start", "Rev Middle")
-    xy_colors = ("xkcd:green", "xkcd:red")
+    lla_events = ((lon[0], lat[0], alt[0]), (lon[m], lat[m], alt[m]))
+    lla_annotations = ("Rev Start", "Rev Middle")
+    lla_colors = ("xkcd:green", "xkcd:red")
     map_colors2: dict[str, str | int] = defaultdict(lambda: "xkcd:green")
     map_colors2["United States of America"] = "xkcd:white"
     map_colors2["Mexico"] = 0
     map_colors2["Canada"] = 5
-    fig5 = plot.plot_map(None, lat, lon, land_colors="multi", color_by=color_by, map_colors=map_colors2,
-        title="Custom Colors", xy_events=xy_events, xy_annotations=xy_annotations, xy_colors=xy_colors,  # noqa: E128
+    fig5 = plot.plot_map_3d(None, lat, lon, alt, land_colors="multi", color_by=color_by, map_colors=map_colors2,
+        title="Custom Colors", lla_events=lla_events, lla_annotations=lla_annotations, lla_colors=lla_colors,  # noqa: E128
         background="xkcd:cyan", border="xkcd:yellow", land_colormap="tab10")  # fmt: skip  # noqa: E128
 
     # map with labels and extra plotter
     extra_plotter = _extra_plotter_factory()
-    fig6 = plot.plot_map(map_data, land_colors="multi", map_labels=map_labels, extra_plotter=extra_plotter)
+    fig6 = plot.plot_map_3d(map_data, land_colors="multi", map_labels=map_labels, extra_plotter=extra_plotter)

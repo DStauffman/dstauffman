@@ -254,7 +254,7 @@ class Test_aerospace_hms_2_r(unittest.TestCase):
 
     def test_nominal(self) -> None:
         x = space.hms_2_r(self.hms)
-        self.assertAlmostEqual(x, self.exp, 14)  # type: ignore[misc]
+        self.assertAlmostEqual(x, self.exp, 14)  # type: ignore[arg-type]
 
     def test_vector(self) -> None:
         x = space.hms_2_r(np.array([[0.0, 0.0, 0], self.hms, [8.0, 0.0, 0.0], [23, 59, 60]]).T)

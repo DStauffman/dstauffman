@@ -65,11 +65,11 @@ if TYPE_CHECKING:
 
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
-    _M = NDArray[np.float64]  # 2D
+    _N = NDArray[np.floating]
+    _M = NDArray[np.floating]  # 2D
     _CM = str | colors.Colormap | colors.ListedColormap | ColorMap
     _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
-    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | np.int_ | np.float64 | None
+    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | None
     _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
     _DeltaTime = int | float | np.timedelta64
     _Figs = list[Figure]
@@ -1222,7 +1222,7 @@ def plot_histogram(  # noqa: C901
             xlab += ["Unbinned Data"]
         plotting_bins = np.arange(num)
     else:
-        plotting_bins = np.asanyarray(bins).copy()
+        plotting_bins = np.asanyarray(bins).copy()  # type: ignore[assignment]
         ix_pinf = np.isinf(plotting_bins) & (np.sign(plotting_bins) > 0)
         ix_ninf = np.isinf(plotting_bins) & (np.sign(plotting_bins) < 0)
         if np.any(ix_pinf):
@@ -1286,7 +1286,7 @@ def plot_histogram(  # noqa: C901
             cdf_bin = plotting_bins
         else:
             cdf = np.hstack([np.arange(data.size) / data.size, 1.0])
-            cdf_bin = np.hstack([0.0, np.sort(data)])
+            cdf_bin = np.hstack([0.0, np.sort(data)])  # type: ignore[assignment]
     if show_cdf:
         # plot the CDF
         if not cdf_same_axis:
@@ -1442,6 +1442,7 @@ def save_zoomed_version(
     *,
     ax2: Axes | None = None,
     use_display: bool = True,
+    title_post: str = " (Zoomed)",
     opts: Opts | None = None,
 ) -> None:
     r"""
@@ -1459,6 +1460,8 @@ def save_zoomed_version(
         Secondary axes to also scale
     use_display : bool, optional, default if True
         Whether there is a display to use when modifying the plot
+    title_post : str, optional, default is " (Zoomed)"
+        String to post-pend to the end of the title
     opts : class Opts, optional
         Additional plotting options, for this giving whether to save, where and what form
 
@@ -1470,10 +1473,11 @@ def save_zoomed_version(
     >>> data = np.random.rand(30)
     >>> data[10] = 1e5
     >>> opts = Opts()
-    >>> fig = plot_time_history("Data vs Time", time, data, opts=opts)
+    >>> fig = plot_time_history("Data vs Time", time, data, opts=opts, second_units=("milli", 1e-3))
     >>> ax = fig.axes[0]
+    >>> ax2 = fig.axes[1]
     >>> ylims = (-2.0, 2.0)
-    >>> save_zoomed_version(fig, ax, ylims, opts=opts)
+    >>> save_zoomed_version(fig, ax, ylims, opts=opts, ax2=ax2)
 
     Close plots
     >>> import matplotlib.pyplot as plt
@@ -1497,11 +1501,11 @@ def save_zoomed_version(
 
     if use_display:
         if (manager := fig.canvas.manager) is not None:
-            manager.set_window_title(manager.get_window_title() + " (Zoomed)")
+            manager.set_window_title(manager.get_window_title() + title_post)
         else:
-            ax.set_title(ax.get_title() + " (Zoomed)")
+            ax.set_title(ax.get_title() + title_post)
     else:
-        ax.set_title(ax.get_title() + " (Zoomed)")
+        ax.set_title(ax.get_title() + title_post)
     # resave zoomed plot
     if opts is not None and opts.save_path and opts.save_plot:
         storefig(fig, folder=opts.save_path, plot_type=opts.plot_type, show_warn=opts.show_warn)

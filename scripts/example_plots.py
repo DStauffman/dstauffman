@@ -18,7 +18,7 @@ if __name__ == "__main__":
     # random data
     data = np.random.rand(10, 10)
     # normalize the random data
-    data = dcs.unit(data, axis=0)
+    data[:] = dcs.unit(data, axis=0)
     # labels for the plot
     labels = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j"]
     # make some symmetric data

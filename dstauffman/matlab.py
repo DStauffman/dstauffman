@@ -30,11 +30,11 @@ if TYPE_CHECKING:
 
     _B = NDArray[np.bool_]
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
-    _M = NDArray[np.float64]  # 2D
+    _N = NDArray[np.floating]
+    _M = NDArray[np.floating]  # 2D
 
 # %% Constants
-_EPS: Final[float] = float(np.finfo(float).eps) if HAVE_NUMPY else 2.220446049250313e-16
+_EPS: Final = float(np.finfo(float).eps) if HAVE_NUMPY else 2.220446049250313e-16
 
 
 # %% load_matlab

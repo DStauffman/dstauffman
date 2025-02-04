@@ -23,7 +23,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _D = NDArray[np.datetime64]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
     _FN = float | _N
 
 
@@ -109,7 +109,7 @@ def numpy_to_jd(date: np.datetime64 | _D) -> float | _N:
     """
     delta_days = (date - np.datetime64("2000-01-01T12:00:00", NP_DATETIME_UNITS)) / NP_ONE_DAY
     out = delta_days + JULIAN["jd_2000_01_01"]
-    return out  # type: ignore[return-value]
+    return out
 
 
 # %% Functions - jd_2_century
@@ -185,7 +185,7 @@ def numpy_to_mjd(date: np.datetime64 | _D) -> float | _N:
     """
     delta_days = (date - np.datetime64("2000-01-01T12:00:00", NP_DATETIME_UNITS)) / NP_ONE_DAY
     out = delta_days + (JULIAN["jd_2000_01_01"] - JULIAN["mjd_origin"])
-    return out  # type: ignore[return-value]
+    return out
 
 
 # %% Functions - d_2_dms
@@ -506,7 +506,7 @@ def sez_2_ijk(sez: _N, geo_loc: _N, time_jd: _N) -> _N:  # noqa: C901
     # then transform the SEZ vector from the IJK frame to the SEZ frame
     if n == 1 and length == 1:
         D = _find_D(L, theta)
-        sez_in_ijk = D @ sez
+        sez_in_ijk[:] = D @ sez
     elif n == 1 and length != 1:
         for i in range(length):
             D = _find_D(L[i], theta[i])
@@ -944,7 +944,7 @@ def earth_radius_by_latitude(latitude: _FN) -> _FN:
     b = EARTH["b"]
     cos_lat = np.cos(latitude)
     sin_lat = np.sin(latitude)
-    return np.sqrt(((a**2 * cos_lat) ** 2 + (b**2 * sin_lat) ** 2) / ((a * cos_lat) ** 2 + (b * sin_lat) ** 2))  # type: ignore[no-any-return]
+    return np.sqrt(((a**2 * cos_lat) ** 2 + (b**2 * sin_lat) ** 2) / ((a * cos_lat) ** 2 + (b * sin_lat) ** 2))
 
 
 # %% Unit Test

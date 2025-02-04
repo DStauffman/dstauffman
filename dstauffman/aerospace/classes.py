@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, Literal, NotRequired, overload, TYPE_CHECKING, TypedDict, TypeVar, Unpack
 import unittest
 
-from dstauffman import chop_time, Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, save_method
+from dstauffman import chop_time, Frozen, HAVE_H5PY, HAVE_NUMPY, is_datetime, load_method, NP_DATETIME_FORM, NP_NAT, save_method
 
 if HAVE_H5PY:
     import h5py
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     _B = NDArray[np.bool_]
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
     _Chan = list[str] | tuple[str, ...]
     _Sets = set[str] | frozenset[str]
     _Time = float | np.datetime64
@@ -79,16 +79,16 @@ def _chop_wrapper(
     assert orig.time is not None, "You can't chop an uninitialized time field."  # type: ignore[attr-defined]
     use_dates = is_datetime(orig.time)  # type: ignore[attr-defined]
     if ti is None:
-        ti = np.datetime64("nat") if use_dates else -np.inf
+        ti = NP_NAT if use_dates else -np.inf
     if tf is None:
-        tf = np.datetime64("nat") if use_dates else np.inf
+        tf = NP_NAT if use_dates else np.inf
     assert ti is not None
     assert tf is not None
     if return_ends:
         left = copy.deepcopy(orig)
         right = copy.deepcopy(orig)
-        tl = np.datetime64("nat") if use_dates else -np.inf
-        tr = np.datetime64("nat") if use_dates else np.inf
+        tl = NP_NAT if use_dates else -np.inf
+        tr = NP_NAT if use_dates else np.inf
         chop_time(left, time_field="time", exclude=exclude, ti=tl, tf=ti, right=False)
         chop_time(right, time_field="time", exclude=exclude, ti=tf, tf=tr, left=False)
     out = orig if inplace else copy.deepcopy(orig)

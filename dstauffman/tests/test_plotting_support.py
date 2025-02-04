@@ -16,7 +16,7 @@ import platform
 from typing import TYPE_CHECKING
 import unittest
 
-from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS
+from dstauffman import get_tests_dir, HAVE_DS, HAVE_MPL, HAVE_NUMPY, HAVE_SCIPY, IS_WINDOWS, NP_NAT
 import dstauffman.plotting as plot
 
 if HAVE_MPL:
@@ -43,7 +43,7 @@ _HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 
 # %% plotting.DEFAULT_COLORMAP
@@ -133,34 +133,34 @@ class Test_plotting_MyCustomToolbar(unittest.TestCase):
         self.fig2.toolbar_custom_ = plot.MyCustomToolbar(self.fig2)  # type: ignore[attr-defined]
 
     def test_do_nothing(self) -> None:
-        self.assertEqual(plt.gcf().number, self.fig2.number)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig2.number)
 
     def test_next_plot(self) -> None:
         QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[attr-defined]
-        self.assertEqual(plt.gcf().number, self.fig1.number)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig1.number)
 
     def test_prev_plot(self) -> None:
         QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[attr-defined]
-        self.assertEqual(plt.gcf().number, self.fig1.number)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig1.number)
 
     def test_close_all(self) -> None:
-        self.assertTrue(plt.fignum_exists(self.fig1.number))  # type: ignore[attr-defined]
-        self.assertTrue(plt.fignum_exists(self.fig2.number))  # type: ignore[attr-defined]
+        self.assertTrue(plt.fignum_exists(self.fig1.number))
+        self.assertTrue(plt.fignum_exists(self.fig2.number))
         QTest.mouseClick(self.fig1.toolbar_custom_.btn_close_all, Qt.LeftButton)  # type: ignore[attr-defined]
-        self.assertFalse(plt.fignum_exists(self.fig1.number))  # type: ignore[attr-defined]
-        self.assertFalse(plt.fignum_exists(self.fig2.number))  # type: ignore[attr-defined]
+        self.assertFalse(plt.fignum_exists(self.fig1.number))
+        self.assertFalse(plt.fignum_exists(self.fig2.number))
 
     def test_multiple_nexts(self) -> None:
         QTest.mouseClick(self.fig2.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[attr-defined]
-        self.assertEqual(plt.gcf().number, self.fig1.number)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig1.number)
         QTest.mouseClick(self.fig1.toolbar_custom_.btn_next_plot, Qt.LeftButton)  # type: ignore[attr-defined]
-        self.assertEqual(plt.gcf().number, self.fig2.number)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig2.number)
 
     def test_multiple_prevs(self) -> None:
         QTest.mouseClick(self.fig2.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[attr-defined]
-        self.assertEqual(plt.gcf().number, self.fig1.number)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig1.number)
         QTest.mouseClick(self.fig1.toolbar_custom_.btn_prev_plot, Qt.LeftButton)  # type: ignore[attr-defined]
-        self.assertEqual(plt.gcf().number, self.fig2.number)  # type: ignore[attr-defined]
+        self.assertEqual(plt.gcf().number, self.fig2.number)
 
     def test_enter_and_exit_events(self) -> None:
         # TODO: this is not causing what I want to happen, the style changes aren't happening.
@@ -291,23 +291,23 @@ class Test_plotting_close_all(unittest.TestCase):
     def test_nominal(self) -> None:
         fig1 = plt.figure()
         fig2 = plt.figure()
-        self.assertTrue(plt.fignum_exists(fig1.number))  # type: ignore[attr-defined]
-        self.assertTrue(plt.fignum_exists(fig2.number))  # type: ignore[attr-defined]
+        self.assertTrue(plt.fignum_exists(fig1.number))
+        self.assertTrue(plt.fignum_exists(fig2.number))
         plot.close_all()
-        self.assertFalse(plt.fignum_exists(fig1.number))  # type: ignore[attr-defined]
-        self.assertFalse(plt.fignum_exists(fig2.number))  # type: ignore[attr-defined]
+        self.assertFalse(plt.fignum_exists(fig1.number))
+        self.assertFalse(plt.fignum_exists(fig2.number))
 
     def test_list_and_single_fig(self) -> None:
         fig1 = plt.figure()
         fig2 = plt.figure()
-        self.assertTrue(plt.fignum_exists(fig1.number))  # type: ignore[attr-defined]
-        self.assertTrue(plt.fignum_exists(fig2.number))  # type: ignore[attr-defined]
+        self.assertTrue(plt.fignum_exists(fig1.number))
+        self.assertTrue(plt.fignum_exists(fig2.number))
         plot.close_all([fig1])
-        self.assertFalse(plt.fignum_exists(fig1.number))  # type: ignore[attr-defined]
-        self.assertTrue(plt.fignum_exists(fig2.number))  # type: ignore[attr-defined]
+        self.assertFalse(plt.fignum_exists(fig1.number))
+        self.assertTrue(plt.fignum_exists(fig2.number))
         plot.close_all(fig2)
-        self.assertFalse(plt.fignum_exists(fig1.number))  # type: ignore[attr-defined]
-        self.assertFalse(plt.fignum_exists(fig2.number))  # type: ignore[attr-defined]
+        self.assertFalse(plt.fignum_exists(fig1.number))
+        self.assertFalse(plt.fignum_exists(fig2.number))
 
 
 # %% plotting.get_nondeg_colorlists
@@ -696,8 +696,8 @@ class Test_plotting_disp_xlimits(unittest.TestCase):
         plot.disp_xlimits(self.fig, xmax=np.inf)
 
     def test_nat(self) -> None:
-        plot.disp_xlimits(self.fig, xmin=np.datetime64("nat"), xmax=self.xmax)
-        plot.disp_xlimits(self.fig, xmax=np.datetime64("nat"), xmin=self.xmin)
+        plot.disp_xlimits(self.fig, xmin=NP_NAT, xmax=self.xmax)
+        plot.disp_xlimits(self.fig, xmax=NP_NAT, xmin=self.xmin)
 
     def test_datetime(self) -> None:
         plot.disp_xlimits(self.fig, xmin=np.inf, xmax=datetime.datetime(2020, 4, 15, 0, 0, 0))

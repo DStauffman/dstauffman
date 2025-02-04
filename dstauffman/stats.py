@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from numpy.typing import NDArray
 
     _B = NDArray[np.bool_]
-    _N = NDArray[np.float64]
+    _N = NDArray[np.floating]
 
 
 # %% Functions - convert_annual_to_monthly_probability
@@ -476,7 +476,7 @@ def bounded_normal_draw(num: int, values: dict[str, float], field: str, prng: np
     if this_std == 0:
         out = np.full(num, this_mean)
     else:
-        out = prng.normal(this_mean, this_std, size=num)
+        out = prng.normal(this_mean, this_std, size=num)  # type: ignore[assignment]
     # enforce the min and maxes
     np.minimum(out, this_max, out)
     np.maximum(out, this_min, out)
