@@ -4,7 +4,7 @@
 import numpy as np
 
 from dstauffman.aerospace import quat_from_euler, quat_mult, quat_norm
-from dstauffman.plotting import COLOR_LISTS, ColorMap, Opts, plot_quaternion, plot_time_difference
+from dstauffman.plotting import COLOR_LISTS, Opts, plot_quaternion, plot_time_difference
 
 # %% Script
 if __name__ == "__main__":
