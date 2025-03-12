@@ -1106,9 +1106,10 @@ def plot_bar_breakdown(
 # %% Functions - plot_histogram
 def plot_histogram(  # noqa: C901
     description: str,
-    data: _N,
-    bins: _N | list[float],
+    data: _I | _N | None,
+    bins: _I | _N | list[float] | list[int],
     *,
+    counts: _N | None = None,
     opts: Opts | None = None,
     color: str = "#1f77b4",
     xlabel: str = "Data",
@@ -1139,6 +1140,8 @@ def plot_histogram(  # noqa: C901
         data to bin into buckets
     bins : (A, ) ndarray
         boundaries of the bins to use for the histogram
+    counts : (A, ) ndarray, optional
+        If specified, use this already processed oucnts instead of data
     opts : class Opts, optional
         plotting options
     color : str or RGB or RGBA code, optional
@@ -1206,14 +1209,24 @@ def plot_histogram(  # noqa: C901
         opts = Opts()
     legend_loc = kwargs.pop("legend_loc", opts.leg_spot)
     assert not bool(kwargs), f"Unexpected keyword arguments were passed in: {list(kwargs.keys())}."
-    if use_exact_counts:
-        counts = np.array([np.count_nonzero(data == this_bin) for this_bin in bins], dtype=int)
+    missing: int
+    if counts is None:
+        assert data is not None
+        data_size = np.size(data)
+        if use_exact_counts:
+            counts = np.array([np.count_nonzero(data == this_bin) for this_bin in bins], dtype=int)
+        else:
+            # TODO: optionally allow this to not include 100% of the data by disabling some error
+            # checks in np_digitize?
+            counts = histcounts(data, bins)  # type: ignore[assignment]
+        missing = int(data_size - np.sum(counts))  # type: ignore[arg-type]
     else:
-        # TODO: optionally allow this to not include 100% of the data by disabling some error
-        # checks in np_digitize?
-        counts = histcounts(data, bins)
-    missing = data.size - np.sum(counts)
+        assert data is None
+        data_size = 1
+        missing = 0
+    assert counts is not None, "counts should always be set from this point forward."
     num = np.size(bins)
+    plotting_bins: _I | _N
     if normalize_spacing or use_exact_counts:
         xlab = [str(i) for i in bins]
         if use_exact_counts:
@@ -1222,13 +1235,13 @@ def plot_histogram(  # noqa: C901
             xlab += ["Unbinned Data"]
         plotting_bins = np.arange(num)
     else:
-        plotting_bins = np.asanyarray(bins).copy()  # type: ignore[assignment]
+        plotting_bins = np.asanyarray(bins).copy()
         ix_pinf = np.isinf(plotting_bins) & (np.sign(plotting_bins) > 0)
         ix_ninf = np.isinf(plotting_bins) & (np.sign(plotting_bins) < 0)
         if np.any(ix_pinf):
-            plotting_bins[ix_pinf] = np.max(data)
+            plotting_bins[ix_pinf] = np.max(data) if data is not None else 1e10
         if np.any(ix_ninf):
-            plotting_bins[ix_ninf] = np.min(data)
+            plotting_bins[ix_ninf] = np.min(data) if data is not None else -1e10
     rects = []
     for i in range(num - 1):
         rects.append(Rectangle((plotting_bins[i], 0), plotting_bins[i + 1] - plotting_bins[i], counts[i]))
@@ -1252,13 +1265,13 @@ def plot_histogram(  # noqa: C901
     ax.set_xlabel(f"{xlabel} [{units}]" if units else xlabel)
     ax.set_ylabel(ylabel)
     if missing > 0:
-        ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins) + 1))
+        ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins) + 1))  # type: ignore[arg-type]
     else:
-        ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins)))
+        ax.set_xlim((np.min(plotting_bins), np.max(plotting_bins)))  # type: ignore[arg-type]
     if cdf_same_axis:
-        ax.set_ylim((0, data.size))
+        ax.set_ylim((0, data_size))
     else:
-        ax.set_ylim((0, 1.05 * np.max(counts)))
+        ax.set_ylim((0, 1.05 * np.max(counts)))  # type: ignore[arg-type]
     if normalize_spacing:
         ax.set_xticks(plotting_bins)
         ax.set_xticklabels(xlab)
@@ -1268,7 +1281,7 @@ def plot_histogram(  # noqa: C901
         else:
             ax.set_xticks(plotting_bins[:-1] + 0.5)
         ax.set_xticklabels(xlab)
-    plot_second_yunits(ax, ylab=second_ylabel, multiplier=100 / data.size)
+    plot_second_yunits(ax, ylab=second_ylabel, multiplier=100 / data_size)
     # Optionally add CDF information
     using_cdf = show_cdf or cdf_x is not None or cdf_y is not None
     if using_cdf:
@@ -1282,11 +1295,16 @@ def plot_histogram(  # noqa: C901
         trans = transforms.blended_transform_factory(ax.transData, ax.transAxes)
         # create the CDF
         if cdf_round_to_bin:
-            cdf = np.hstack([0, np.cumsum(counts)]) / data.size
+            if data is not None:
+                cdf = np.hstack([0.0, np.cumsum(counts)]) / data_size
+            else:
+                cdf = np.cumsum(counts)
             cdf_bin = plotting_bins
         else:
-            cdf = np.hstack([np.arange(data.size) / data.size, 1.0])
-            cdf_bin = np.hstack([0.0, np.sort(data)])  # type: ignore[assignment]
+            if data is None:
+                raise ValueError("CDF bins must be rounded to the bin edges if you specified counts instead of data.")
+            cdf = np.hstack([np.arange(data_size) / data_size, 1.0])
+            cdf_bin = np.hstack([0.0, np.sort(data)])
     if show_cdf:
         # plot the CDF
         if not cdf_same_axis:

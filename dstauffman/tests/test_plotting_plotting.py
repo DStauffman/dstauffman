@@ -515,6 +515,7 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         self.description = "Histogram"
         self.data = np.array([0.5, 3.3, 1.0, 1.5, 1.5, 1.75, 2.5, 2.5])
         self.bins = np.array([0.0, 1.0, 2.0, 3.0, 5.0, 7.0])
+        self.counts = np.array([0.1, 0.2, 0.1, 0.15, 0.15, 0.3])
         self.fig: Figure | None = None
 
     def test_nominal(self) -> None:
@@ -564,6 +565,19 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         self.fig = plot.plot_histogram(
             self.description, np.array([1, 1, 1, 2, 3, 3, 3]), np.array([0, 3, 6]), use_exact_counts=True
         )
+
+    def test_counts_replacement1(self) -> None:
+        self.fig = plot.plot_histogram(self.description, None, self.bins, counts=self.counts)
+
+    def test_counts_replacement2(self) -> None:
+        self.fig = plot.plot_histogram(self.description, None, self.bins, counts=self.counts, second_ylabel="%", show_cdf=True, cdf_round_to_bin=True)
+
+    def test_counts_replacement3(self) -> None:
+        with self.assertRaises(ValueError):
+            plot.plot_histogram(self.description, None, self.bins, counts=self.counts, show_cdf=True)
+
+    def test_counts_replacement4(self) -> None:
+        self.fig = plot.plot_histogram(self.description, None, np.array([-np.inf, 0, np.inf]), counts=np.array([0.2, 0.5, 0.3]))
 
     def tearDown(self) -> None:
         if self.fig:
