@@ -130,7 +130,8 @@ if HAVE_MPL:
     # single colors
     COLOR_LISTS["same"]     = colors.ListedColormap(tuple(repeat(mpl.colormaps[DEFAULT_COLORMAP].colors[0], 8)))  # type: ignore[attr-defined]
     COLOR_LISTS["same_old"] = colors.ListedColormap(tuple(repeat("#1f77b4", 8)))
-    COLOR_LISTS["single"]   = colors.ListedColormap(("xkcd:red",))
+    COLOR_LISTS["single"]   = colors.ListedColormap(("#1f77b4",))  # tab20 first color
+    COLOR_LISTS["sing_off"] = colors.ListedColormap(("#aec7e8",))  # tab20 second color
     # doubles
     COLOR_LISTS["double"]   = colors.ListedColormap(("xkcd:red", "xkcd:blue"))
     COLOR_LISTS["dbl_off"]  = colors.ListedColormap(("xkcd:fuchsia", "xkcd:cyan"))
@@ -140,6 +141,11 @@ if HAVE_MPL:
     # quads
     COLOR_LISTS["quat"]     = colors.ListedColormap(("xkcd:red", "xkcd:green", "xkcd:blue", "xkcd:chocolate"))
     COLOR_LISTS["quat_off"] = colors.ListedColormap(("xkcd:fuchsia", "xkcd:lightgreen", "xkcd:cyan", "xkcd:brown"))
+    # single combinations
+    COLOR_LISTS["sing_diff"]   = colors.ListedColormap(COLOR_LISTS["sing_off"].colors + COLOR_LISTS["single"].colors)  # type: ignore[operator]
+    COLOR_LISTS["sing_diff_r"] = colors.ListedColormap(COLOR_LISTS["single"].colors + COLOR_LISTS["sing_off"].colors)  # type: ignore[operator]
+    COLOR_LISTS["sing_comp"]   = colors.ListedColormap(("xkcd:red", "xkcd:green", "xkcd:blue"))  # Note: this intentionally breaks the pattern
+    COLOR_LISTS["sing_comp_r"] = colors.ListedColormap(("xkcd:blue", "xkcd:green", "xkcd:red"))  # Note: this intentionally breaks the pattern
     # double combinations
     COLOR_LISTS["dbl_diff"]    = colors.ListedColormap(COLOR_LISTS["dbl_off"].colors + COLOR_LISTS["double"].colors)  # type: ignore[operator]
     COLOR_LISTS["dbl_diff_r"]  = colors.ListedColormap(COLOR_LISTS["double"].colors + COLOR_LISTS["dbl_off"].colors)  # type: ignore[operator]
@@ -342,7 +348,7 @@ class ColorMap(Frozen):
     >>> _ = ax.plot(time, np.sin(time), color=cm.get_color(0))
     >>> _ = ax.plot(time, np.cos(time), color=cm.get_color(1))
     >>> _ = ax.legend(["Sin", "Cos"])
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
 
     Close plot
     >>> plt.close(fig)
@@ -812,7 +818,7 @@ def storefig(
     >>> y = np.sin(x)
     >>> _ = ax.plot(x, y)
     >>> _ = ax.set_title("X vs Y")
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
     >>> folder = get_tests_dir()
     >>> plot_type = "png"
     >>> storefig(fig, folder, plot_type)
@@ -897,10 +903,10 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
     >>> y = np.sin(x)
     >>> _ = ax.plot(x, y)
     >>> _ = ax.set_title("X vs Y")
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
     >>> prefix = "Baseline"
     >>> titleprefix(fig, prefix)
-    >>> plt.draw() # doctest: +SKIP
+    >>> plt.draw()  # doctest: +SKIP
 
     Close plot
     >>> plt.close(fig)
@@ -971,11 +977,11 @@ def disp_xlimits(  # noqa: C901
     >>> y = np.sin(x)
     >>> _ = ax.plot(x, y)
     >>> _ = ax.set_title("X vs Y")
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
     >>> xmin = 2
     >>> xmax = 5
     >>> disp_xlimits(fig, xmin, xmax)
-    >>> plt.draw() # doctest: +SKIP
+    >>> plt.draw()  # doctest: +SKIP
 
     Close plot
     >>> plt.close(fig)
@@ -1068,17 +1074,17 @@ def zoom_ylim(  # noqa: C901
     >>> data = time ** 2
     >>> _ = ax.plot(time, data)
     >>> _ = ax.set_title("X vs Y")
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
 
     Zoom X-axis and show how Y doesn't rescale
     >>> t_start = 3
     >>> t_final = 5.0001
     >>> disp_xlimits(fig, t_start, t_final)
-    >>> plt.draw() # doctest: +SKIP
+    >>> plt.draw()  # doctest: +SKIP
 
     Force Y-axis to rescale to data
     >>> zoom_ylim(ax, time, data, t_start=t_start, t_final=t_final, pad=0)
-    >>> plt.draw() # doctest: +SKIP
+    >>> plt.draw()  # doctest: +SKIP
 
     Close plot
     >>> plt.close(fig)
@@ -1166,7 +1172,7 @@ def figmenu(fig: _FigOrListFig) -> None:
     >>> _ = ax.set_title("X vs Y")
     >>> _ = ax.set_xlabel("time [years]")
     >>> _ = ax.set_ylabel("value [radians]")
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
     >>> figmenu(fig)
 
     Close plot
@@ -1240,7 +1246,7 @@ def get_screen_resolution() -> tuple[int, int]:
     --------
     >>> from dstauffman.plotting import get_screen_resolution
     >>> (screen_width, screen_height) = get_screen_resolution()
-    >>> print("{}x{}".format(screen_width, screen_height)) # doctest: +SKIP
+    >>> print("{}x{}".format(screen_width, screen_height))  # doctest: +SKIP
 
     """
     # if you don't have a display, then return zeros
@@ -1680,7 +1686,7 @@ def plot_phases(
     >>> colors = COLOR_LISTS["quat"]
     >>> plot_phases(ax, times, colors, labels, use_legend=False)
     >>> _ = ax.legend(loc="best")
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
 
     Close plot
     >>> plt.close(fig)
@@ -1852,19 +1858,19 @@ def plot_classification(  # noqa: C901
     >>> ax1 = fig1.add_subplot(111)
     >>> _ = ax1.plot([0, 10], [0, 10], ".-b")
     >>> plot_classification(ax1, "U", test=False, location="figure")
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
 
     >>> fig2 = plt.figure()
     >>> ax2 = fig2.add_subplot(111)
     >>> _ = ax2.plot(0, 0)
     >>> plot_classification(ax2, "S", caveat="//MADE UP CAVEAT", test=True, location="figure")
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
 
     >>> fig3 = plt.figure()
     >>> ax3 = fig3.add_subplot(111)
     >>> _ = ax3.plot(1, 1)
     >>> plot_classification(ax3, "C", test=True, location="axis")
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
 
     >>> plt.close(fig1)
     >>> plt.close(fig2)

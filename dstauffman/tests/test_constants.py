@@ -37,27 +37,27 @@ class Test_all_values(unittest.TestCase):
             "IS_WINDOWS",
         ]
         self.xtra: list[str] = ["NP_ONE_DAY", "NP_ONE_HOUR", "NP_ONE_MINUTE", "NP_ONE_SECOND"]
-        self.nats: list[str] = ["NP_NAT"]
+        self.nats: list[str] = ["NP_NAT", "NP_DATETIME_MIN", "NP_DATETIME_MAX"]
         self.master = set(self.ints) | set(self.strs) | set(self.bool) | set(self.xtra) | set(self.nats)
 
     def test_values(self) -> None:
         # confirm that all the expected values exist and have the correct type
         for key in self.ints:
-            self.assertTrue(isinstance(getattr(dcs, key), int))
+            self.assertTrue(isinstance(getattr(dcs, key), int), f"Problem with {key}")
         for key in self.strs:
-            self.assertTrue(isinstance(getattr(dcs, key), str))
+            self.assertTrue(isinstance(getattr(dcs, key), str), f"Problem with {key}")
         for key in self.bool:
-            self.assertTrue(isinstance(getattr(dcs, key), bool))
+            self.assertTrue(isinstance(getattr(dcs, key), bool), f"Problem with {key}")
         for key in self.xtra:
             if dcs.HAVE_NUMPY:
-                self.assertTrue(isinstance(getattr(dcs, key), np.timedelta64))
+                self.assertTrue(isinstance(getattr(dcs, key), np.timedelta64), f"Problem with {key}")
             else:
-                self.assertIsNone(getattr(dcs, key))
+                self.assertIsNone(getattr(dcs, key), f"Problem with {key}")
         for key in self.nats:
             if dcs.HAVE_NUMPY:
-                self.assertTrue(isinstance(getattr(dcs, key), np.datetime64))
+                self.assertTrue(isinstance(getattr(dcs, key), np.datetime64), f"Problem with {key}")
             else:
-                self.assertIsNone(getattr(dcs, key))
+                self.assertIsNone(getattr(dcs, key), f"Problem with {key}")
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_np_times(self) -> None:
@@ -70,7 +70,7 @@ class Test_all_values(unittest.TestCase):
     def test_missing(self) -> None:
         for field in vars(dcs.constants):
             if field.isupper():
-                self.assertTrue(field in self.master, "Test is missing: {}".format(field))
+                self.assertTrue(field in self.master, f"Test is missing: {field}")
 
 
 # %% Unit test execution

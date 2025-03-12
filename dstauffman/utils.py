@@ -229,7 +229,7 @@ def find_in_range(
         valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
     else:
         assert ~np.isnan(max_) and np.sign(max_) > 0, "The maximum should be np.inf if not finite."
-    return valid
+    return valid  # type: ignore[no-any-return]
 
 
 # %% Functions - rms
@@ -768,7 +768,7 @@ def magnitude(data: _Lists, axis: int = 0) -> float | _N:
     >>> data = np.array([[1, 0, -1], [0, 0, 0], [0, 0, 1]])
     >>> mag = magnitude(data, axis=0)
     >>> with np.printoptions(precision=8):
-    ...     print(mag) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(mag)  # doctest: +NORMALIZE_WHITESPACE
     [1. 0. 1.41421356]
 
     """
@@ -812,7 +812,7 @@ def unit(data: _Lists, axis: int = 0) -> _N:
     >>> data = np.array([[1, 0, -1], [0, 0, 0], [0, 0, 1]])
     >>> norm_data = unit(data, axis=0)
     >>> with np.printoptions(precision=8):
-    ...     print(norm_data) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(norm_data)  # doctest: +NORMALIZE_WHITESPACE
     [[ 1. 0. -0.70710678]
      [ 0. 0.  0.        ]
      [ 0. 0.  0.70710678]]
@@ -879,7 +879,7 @@ def modd(x1: ArrayLike, x2: ArrayLike, /, out: _I | _N | None = None) -> _I | _N
     x1 = np.asanyarray(x1)
     if out is None:
         y = np.mod(x1 - 1, x2) + 1
-        return y
+        return y  # type: ignore[no-any-return]
     np.mod(x1 - 1, x2, out)
     np.add(out, 1, out)  # needed to force add to be inplace operation
     return out
@@ -1088,7 +1088,7 @@ def full_print(**kwargs: Unpack[_PrintOptsKwArgs]) -> Generator[None, None, None
     >>> np.set_printoptions(threshold=10)
     >>> a = np.zeros((10, 5))
     >>> a[3, :] = 1.23
-    >>> print(a) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(a)  # doctest: +NORMALIZE_WHITESPACE
     [[0. 0. 0. 0. 0.]
      [0. 0. 0. 0. 0.]
      [0. 0. 0. 0. 0.]
@@ -1294,7 +1294,7 @@ def execute(
     >>> command = "ls"
     >>> folder  = pathlib.Path.cwd()
     >>> # Note that this command may not work right within the IPython console, it's intended for command windows.
-    >>> execute(command, folder) # doctest: +SKIP
+    >>> execute(command, folder)  # doctest: +SKIP
 
     """
     # overlay environment variables
@@ -1379,7 +1379,7 @@ def execute_wrapper(
     >>> command = "ls"
     >>> folder  = pathlib.Path.cwd()
     >>> dry_run = True
-    >>> rc = execute_wrapper(command, folder, dry_run=dry_run) # doctest: +ELLIPSIS
+    >>> rc = execute_wrapper(command, folder, dry_run=dry_run)  # doctest: +ELLIPSIS
     Would execute "ls" in "..."
 
     """
@@ -1850,7 +1850,7 @@ def linear_interp(
             if np.any(x < xp[0]) or np.any(x > xp[-1]):
                 raise ValueError("Desired points outside given xp array and extrapolation is False")
         out = np.interp(x, xp, yp, left=left, right=right)
-        return out
+        return out  # type: ignore[no-any-return]
     # use slower scipy version
     if not HAVE_SCIPY:
         raise RuntimeError("You must have scipy available to run this.")

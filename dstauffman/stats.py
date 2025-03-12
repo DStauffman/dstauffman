@@ -19,10 +19,6 @@ from dstauffman.units import MONTHS_PER_YEAR
 if HAVE_NUMPY:
     import numpy as np
 
-    sqrt = np.sqrt
-else:
-    from math import sqrt  # type: ignore[assignment]
-
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
@@ -61,7 +57,7 @@ def convert_annual_to_monthly_probability(annual: _N) -> _N:
     >>> annual  = np.array([0, 0.1, 1])
     >>> monthly = convert_annual_to_monthly_probability(annual)
     >>> with np.printoptions(precision=8):
-    ...     print(monthly) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(monthly)  # doctest: +NORMALIZE_WHITESPACE
     [0. 0.00874161  1. ]
 
     """
@@ -73,7 +69,7 @@ def convert_annual_to_monthly_probability(annual: _N) -> _N:
     # convert to equivalent probability and return result
     out = np.full(annual.shape, -np.inf)
     monthly = 1.0 - np.exp(np.log(1.0 - annual, out=out, where=annual != 1.0) / MONTHS_PER_YEAR)
-    return monthly  # type: ignore[no-any-return]
+    return monthly
 
 
 # %% Functions - convert_monthly_to_annual_probability
@@ -98,7 +94,7 @@ def convert_monthly_to_annual_probability(monthly: _N) -> _N:
     >>> monthly = np.array([0, 0.1, 1])
     >>> annual = convert_monthly_to_annual_probability(monthly)
     >>> with np.printoptions(precision=8):
-    ...     print(annual) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(annual)  # doctest: +NORMALIZE_WHITESPACE
     [0. 0.71757046 1. ]
 
     """
@@ -154,7 +150,7 @@ def prob_to_rate(prob: float | _N, time: int | float = 1) -> float | _N:
     >>> time = 3
     >>> rate = prob_to_rate(prob, time)
     >>> with np.printoptions(precision=8):
-    ...     print(rate) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(rate)  # doctest: +NORMALIZE_WHITESPACE
     [0. 0.03512017 inf]
 
     """
@@ -216,7 +212,7 @@ def rate_to_prob(rate: float | _N, time: int | float = 1) -> float | _N:
     >>> time = 1./12
     >>> prob = rate_to_prob(rate, time)
     >>> with np.printoptions(precision=8):
-    ...     print(prob) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(prob)  # doctest: +NORMALIZE_WHITESPACE
     [0. 0.00829871 0.07995559 0.99975963 1. ]
 
     """
@@ -262,7 +258,7 @@ def annual_rate_to_monthly_probability(rate: float | _N) -> float | _N:
     >>> rate = np.array([0, 0.5, 1, 5, np.inf])
     >>> prob = annual_rate_to_monthly_probability(rate)
     >>> with np.printoptions(precision=8):
-    ...     print(prob) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(prob)  # doctest: +NORMALIZE_WHITESPACE
     [0. 0.04081054 0.07995559 0.34075937 1. ]
 
     """
@@ -304,7 +300,7 @@ def monthly_probability_to_annual_rate(prob: float | _N) -> float | _N:
     >>> import numpy as np
     >>> prob = np.array([0, 0.04081054, 0.07995559, 0.34075937, 1])
     >>> rate = monthly_probability_to_annual_rate(prob)
-    >>> print(" ".join(("{:.2f}".format(x) for x in rate))) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(" ".join(("{:.2f}".format(x) for x in rate)))  # doctest: +NORMALIZE_WHITESPACE
     0.00 0.50 1.00 5.00 inf
 
     """
@@ -316,171 +312,6 @@ def monthly_probability_to_annual_rate(prob: float | _N) -> float | _N:
 # %% Functions - ar2mp
 ar2mp = annual_rate_to_monthly_probability
 mp2ar = monthly_probability_to_annual_rate
-
-
-# %% Functions - combine_sets
-def combine_sets(  # pylint: disable=too-many-positional-arguments
-    n1: int, u1: float, s1: float, n2: int, u2: float, s2: float
-) -> tuple[int, float, float]:
-    r"""
-    Combine the mean and standard deviations for two non-overlapping sets of data.
-
-    This function combines two non-overlapping data sets, given a number of samples, mean
-    and standard deviation for the two data sets.  It first calculates the total number of samples
-    then calculates the total mean using a weighted average, and then calculates the combined
-    standard deviation using an equation found on wikipedia.  It also checks for special cases
-    where either data set is empty or if only one total point is in the combined set.
-
-    Parameters
-    ----------
-    n1 : int
-        number of points in data set 1
-    u1 : float
-        mean of data set 1
-    s1 : float
-        standard deviation of data set 1
-    n2 : int
-        number of points in data set 2
-    u2 : float
-        mean of data set 2
-    s2 : float
-        standard deviation of data set 2
-
-    Returns
-    -------
-    n  : int
-        number of points in the combined data set
-    u  : float
-        mean of the combined data set
-    s  : float
-        standard deviation of the combined data set
-
-    See Also
-    --------
-    np.mean, np.std
-
-    References
-    ----------
-    #.  http://en.wikipedia.org/wiki/Standard_deviation#Sample-based_statistics, on 8/7/12
-
-    Notes
-    -----
-    #.  Written in Matlab by David C. Stauffer in Jul 2012.
-    #.  Ported to Python by David C. Stauffer in May 2015.
-    #.  Could be expanded to broadcast and handle array inputs.
-
-    Examples
-    --------
-    >>> from dstauffman import combine_sets
-    >>> n1 = 5
-    >>> u1 = 1
-    >>> s1 = 0.5
-    >>> n2 = 10
-    >>> u2 = 2
-    >>> s2 = 0.25
-    >>> (n, u, s) = combine_sets(n1, u1, s1, n2, u2, s2)
-    >>> print(n)
-    15
-    >>> print(u) # doctest: +ELLIPSIS
-    1.666666...67
-    >>> print(s)
-    0.591356390810466
-
-    """
-    # assertions
-    assert n1 >= 0
-    assert n2 >= 0
-    assert s1 >= 0.0
-    assert s2 >= 0.0
-    # combine total number of samples
-    n = n1 + n2
-    # check for zero case
-    if n == 0:
-        u = 0.0
-        s = 0.0
-        return (n, u, s)
-    # calculate the combined mean
-    u = 1 / n * (n1 * u1 + n2 * u2)
-    # calculate the combined standard deviation
-    if n != 1:
-        s = sqrt(1 / (n - 1) * ((n1 - 1) * s1**2 + n1 * u1**2 + (n2 - 1) * s2**2 + n2 * u2**2 - n * u**2))
-    else:
-        # special case where one of the data sets is empty
-        if n1 == 1:
-            s = s1
-        elif n2 == 1:
-            s = s2
-        else:
-            # shouldn't be able to ever reach this line with assertions on
-            raise ValueError("Total samples are 1, but neither data set has only one item.")  # pragma: no cover
-    return (n, u, s)
-
-
-# %% Functions - bounded_normal_draw
-def bounded_normal_draw(num: int, values: dict[str, float], field: str, prng: np.random.RandomState) -> _N:
-    r"""
-    Create a normalized distribution with the given mean and standard deviations.
-
-    Includes options for min and max bounds, all taken from a dictionary with the specified `field`
-    name.
-
-    Parameters
-    ----------
-    num : int
-        Number of random draws to make
-    values : dict
-        Dictionary of mean, std, min and max values
-    field : str
-        Name of field that is prepended to the values
-    prng : class numpy.random.RandomState
-        Pseudo-random number generator
-
-    Returns
-    -------
-    out : ndarray (N,)
-        Normalized random numbers
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in March 2017.
-
-    Examples
-    --------
-    >>> from dstauffman import bounded_normal_draw
-    >>> import numpy as np
-    >>> num   = 10
-    >>> values = {"last_mean": 2, "last_std": 0.5, "last_min": 1, "last_max": 3}
-    >>> field  = "last"
-    >>> prng   = np.random.RandomState()
-    >>> out    = bounded_normal_draw(num, values, field, prng)
-
-    """
-    # get values from the dictionary
-    try:
-        this_mean = values[field + "_mean"]
-    except KeyError:
-        this_mean = 0
-    try:
-        this_std = values[field + "_std"]
-    except KeyError:
-        this_std = 1
-    try:
-        this_min = values[field + "_min"]
-    except KeyError:
-        this_min = -np.inf
-    try:
-        this_max = values[field + "_max"]
-    except KeyError:
-        this_max = np.inf
-    # calculate the normal distribution
-    if this_std == 0:
-        out = np.full(num, this_mean)
-    else:
-        out = prng.normal(this_mean, this_std, size=num)  # type: ignore[assignment]
-    # enforce the min and maxes
-    np.minimum(out, this_max, out)
-    np.maximum(out, this_min, out)
-    return out
 
 
 # %% Functions - rand_draw
@@ -541,43 +372,6 @@ def rand_draw(chances: _N, prng: np.random.RandomState, *, check_bounds: bool = 
     # set those who were always going to be chosen
     is_set[chances >= 1] = True
     return is_set
-
-
-# %% Functions - ecdf
-def ecdf(y: float | list[float] | _N, /) -> tuple[_N, _N]:
-    r"""
-    Calculate the empirical cumulative distribution function, as in Matlab's ecdf function.
-
-    Parameters
-    ----------
-    array_like of float
-        Input samples
-
-    Returns
-    -------
-    x : ndarray of float
-        cumulative probability
-    f : ndarray of float
-        function values evaluated at the points returned in x
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in February 2021.
-
-    Examples
-    --------
-    >>> from dstauffman import ecdf
-    >>> import numpy as np
-    >>> y = np.random.rand(1000)
-    >>> (x, f) = ecdf(y)
-    >>> exp = np.arange(0.001, 1.001, 0.001)
-    >>> print(np.max(np.abs(f - exp)) < 0.05)
-    True
-
-    """
-    f, counts = np.unique(y, return_counts=True)
-    x = np.cumsum(counts) / np.size(y)
-    return (x, f)
 
 
 # %% Functions - apply_prob_to_mask

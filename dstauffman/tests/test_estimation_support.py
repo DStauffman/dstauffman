@@ -15,7 +15,7 @@ from pathlib import Path
 from typing import Any, TYPE_CHECKING
 import unittest
 
-from dstauffman import FixedDict, Frozen, HAVE_NUMPY
+from dstauffman import Frozen, HAVE_NUMPY
 import dstauffman.estimation as estm
 
 if HAVE_NUMPY:
@@ -82,10 +82,9 @@ class _Model(Frozen):
         self.field3: dict[str, int | float | _N | list[float]] = (
             {"a": 5, "b": np.array([1.5, 2.5, 10.0])} if HAVE_NUMPY else {"a": 5, "b": [1.5, 2.5, 10.0]}
         )
-        self.field4: dict[str, Any] = FixedDict()
+        self.field4: dict[str, Any] = {}
         self.field4["new"] = np.array([3, 4, 5]) if HAVE_NUMPY else [3, 4, 5]
         self.field4["old"] = "4 - 6"
-        self.field4.freeze()
 
 
 # %% Classes - _Parameters

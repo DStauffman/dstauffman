@@ -67,7 +67,7 @@ def qrot_single(axis: int, angle: float) -> _Q:
     >>> import numpy as np
     >>> quat = qrot_single(3, np.pi/2)
     >>> with np.printoptions(precision=8):
-    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(quat)  # doctest: +NORMALIZE_WHITESPACE
     [0. 0. 0.70710678  0.70710678]
 
     """
@@ -116,7 +116,7 @@ def quat_from_axis_angle_single(axis: _V, angle: float) -> _Q:
     >>> angle = 5/180*np.pi
     >>> quat = quat_from_axis_angle_single(axis, angle)
     >>> with np.printoptions(precision=8):
-    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(quat)  # doctest: +NORMALIZE_WHITESPACE
     [0.01850614 0.02467485 0.03084356 0.99904822]
 
     """
@@ -161,7 +161,7 @@ def quat_from_rotation_vector_single(rv: _V) -> _Q:
     >>> rv = 5/180*np.pi * np.sqrt([9/50, 16/50, 0.5])
     >>> quat = quat_from_rotation_vector_single(rv)
     >>> with np.printoptions(precision=8):
-    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(quat)  # doctest: +NORMALIZE_WHITESPACE
     [0.01850614 0.02467485 0.03084356 0.99904822]
 
     """
@@ -294,7 +294,7 @@ def quat_interp_single(time: _N, quat: _Q, ti: _N) -> _Q:
     >>> quat = np.array([[0., 0.5], [0., -0.5], [0., -0.5], [1., 0.5]], order="F")
     >>> ti = 3.
     >>> qout = quat_interp_single(time, quat, ti)
-    >>> print(np.array_str(qout, precision=8, suppress_small=True)) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(np.array_str(qout, precision=8, suppress_small=True))  # doctest: +NORMALIZE_WHITESPACE
     [ 0.28867513 -0.28867513 -0.28867513  0.8660254 ]
 
     """
@@ -362,7 +362,7 @@ def quat_inv_single(q1: _Q, inplace: bool = False) -> _Q:
     >>> q1 = qrot_single(1, pi/2)
     >>> q2 = quat_inv_single(q1)
     >>> with np.printoptions(precision=8):
-    ...     print(q2) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(q2)  # doctest: +NORMALIZE_WHITESPACE
     [-0.70710678 -0. -0. 0.70710678]
 
     """
@@ -417,7 +417,7 @@ def quat_mult_single(a: _Q, b: _Q, inplace: bool = False) -> _Q:
     >>> a = qrot_single(1, pi/2)
     >>> b = qrot_single(2, pi)
     >>> c = quat_mult_single(a, b)
-    >>> print(np.array_str(c, precision=8, suppress_small=True)) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(np.array_str(c, precision=8, suppress_small=True))  # doctest: +NORMALIZE_WHITESPACE
     [ 0. 0.70710678 -0.70710678 0. ]
 
     """
@@ -471,7 +471,7 @@ def quat_norm_single(x: _Q, inplace: bool = False) -> _Q:
     >>> x = np.array([0.1, 0., 0., 1.])
     >>> y = quat_norm_single(x)
     >>> with np.printoptions(precision=8):
-    ...     print(y) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(y)  # doctest: +NORMALIZE_WHITESPACE
     [0.09950372 0. 0. 0.99503719]
 
     """
@@ -523,12 +523,12 @@ def quat_prop_single(quat: _Q, delta_ang: _V, use_approx: bool = False, inplace:
 
     >>> quat_new = quat_prop_single(quat, delta_ang)
     >>> with np.printoptions(precision=8):
-    ...     print(quat_new) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(quat_new)  # doctest: +NORMALIZE_WHITESPACE
     [0.00499971 0.00999942 0.01499913 0.99982501]
 
     >>> quat_new = quat_prop_single(quat, delta_ang, use_approx=True)
     >>> with np.printoptions(precision=8):
-    ...     print(quat_new) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(quat_new)  # doctest: +NORMALIZE_WHITESPACE
     [0.00499913 0.00999825 0.01499738 0.99982505]
 
     """
@@ -605,7 +605,7 @@ def quat_times_vector_single(quat: _Q, v: _V, inplace: bool = False) -> _Q:
     >>> quat = np.array([0., 1., 0., 0.])
     >>> v = np.array([1., 0., 0.])
     >>> vec = quat_times_vector_single(quat, v)
-    >>> print(vec) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(vec)  # doctest: +NORMALIZE_WHITESPACE
     [-1. 0. 0.]
 
     """
@@ -646,7 +646,7 @@ def quat_to_dcm(quat: _Q) -> _DCM:
     >>> import numpy as np
     >>> quat = np.array([0.5, -0.5, 0.5, 0.5])
     >>> dcm = quat_to_dcm(quat)
-    >>> print(dcm) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(dcm)  # doctest: +NORMALIZE_WHITESPACE
     [[ 0.  0.  1.]
      [-1.  0.  0.]
      [ 0. -1.  0.]]

@@ -157,7 +157,7 @@ class OptiParam(Frozen):
     >>> params.append(OptiParam("frequency", best=20, min_=1, max_=1000, typical=60, minstep=0.01))
     >>> params.append(OptiParam("phase", best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
-    >>> print(OptiParam.get_array(params, "best")) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(OptiParam.get_array(params, "best"))  # doctest: +NORMALIZE_WHITESPACE
     [ 2.5 20. 180. ]
 
     >>> print(OptiParam.get_names(params))
@@ -216,7 +216,7 @@ class OptiParam(Frozen):
         >>> params.append(OptiParam("frequency", best=20, min_=1, max_=1000, typical=60, minstep=0.01))
         >>> params.append(OptiParam("phase", best=180, min_=0, max_=360, typical=100, minstep=0.1))
 
-        >>> print(OptiParam.get_array(params, "best")) # doctest: +NORMALIZE_WHITESPACE
+        >>> print(OptiParam.get_array(params, "best"))  # doctest: +NORMALIZE_WHITESPACE
         [ 2.5 20. 180. ]
 
         """
@@ -997,7 +997,7 @@ def _double_dogleg(
                 # angle between Cauchy and Newton-Cauchy is less than 90 deg
                 new_cau_weighting = tr_sq_minus_cau_sq / (cau_dot_new_minus_cau + discr)
             # save these results
-            step_scale = new_cau_weighting
+            step_scale = float(new_cau_weighting)
             step_type = "Newton-Cauchy"
             new_delta_param = cauchy_pt + new_cau_weighting * new_minus_cau
 

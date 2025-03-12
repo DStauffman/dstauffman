@@ -252,6 +252,43 @@ def subspace(A: _M, B: _M) -> float:
     return theta  # type: ignore[no-any-return]
 
 
+# %% Functions - ecdf
+def ecdf(y: float | list[float] | _N, /) -> tuple[_N, _N]:
+    r"""
+    Calculate the empirical cumulative distribution function, as in Matlab's ecdf function.
+
+    Parameters
+    ----------
+    array_like of float
+        Input samples
+
+    Returns
+    -------
+    x : ndarray of float
+        cumulative probability
+    f : ndarray of float
+        function values evaluated at the points returned in x
+
+    Notes
+    -----
+    #.  Written by David C. Stauffer in February 2021.
+
+    Examples
+    --------
+    >>> from dstauffman import ecdf
+    >>> import numpy as np
+    >>> y = np.random.rand(1000)
+    >>> (x, f) = ecdf(y)
+    >>> exp = np.arange(0.001, 1.001, 0.001)
+    >>> print(np.max(np.abs(f - exp)) < 0.05)
+    True
+
+    """
+    f, counts = np.unique(y, return_counts=True)
+    x = np.cumsum(counts) / np.size(y)
+    return (x, f)
+
+
 # %% mat_divide
 @ncjit
 def mat_divide(a: _M, b: _N, rcond: float = _EPS) -> _N | _M:

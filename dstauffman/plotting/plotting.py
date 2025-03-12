@@ -1167,7 +1167,7 @@ def plot_histogram(  # noqa: C901
         Colors/colormap to use for CDF lines
     cdf_same_axis : bool, optional, default is False
         Whether to use the same axis for the CDF, or to create a secondary one
-    cdF_round_to_bin : bool, optional, default is False
+    cdf_round_to_bin : bool, optional, default is False
         Whether to round the CDF crossings to bin edges
     fig_ax : (fig, ax) tuple, optional
         Figure and axis to use, otherwise create new ones
@@ -1384,7 +1384,7 @@ def setup_plots(figs: Figure | _Figs, opts: Opts, *, skip_tight: bool = False) -
     >>> _ = ax.set_title("X vs Y")
     >>> _ = ax.set_xlabel("time [years]")
     >>> _ = ax.set_ylabel("value [radians]")
-    >>> plt.show(block=False) # doctest: +SKIP
+    >>> plt.show(block=False)  # doctest: +SKIP
     >>> opts = Opts()
     >>> opts.case_name = "Testing"
     >>> opts.show_plot = True

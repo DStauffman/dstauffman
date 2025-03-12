@@ -209,7 +209,7 @@ def enforce_pos_scalar(quat: _Q, inplace: bool = False) -> _Q:
             qout[:] = -qout
         return qout
     negs = np.zeros(qout.shape[1], dtype=bool)
-    negs = np.less(qout[3, :], 0, out=negs, where=~np.isnan(qout[3, :]))  # type: ignore[assignment]
+    negs = np.less(qout[3, :], 0, out=negs, where=~np.isnan(qout[3, :]))
     qout[:, negs] = -qout[:, negs]
     return qout
 
@@ -251,7 +251,7 @@ def qrot(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_QuatAssertionKwarg
     >>> import numpy as np
     >>> quat = qrot(3, np.pi/2)
     >>> with np.printoptions(precision=8):
-    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(quat)  # doctest: +NORMALIZE_WHITESPACE
     [0. 0. 0.70710678  0.70710678]
 
     """
@@ -319,7 +319,7 @@ def quat_from_axis_angle(axis: ArrayLike, angle: ArrayLike, **kwargs: Unpack[_Qu
     >>> angle = 5/180*np.pi
     >>> quat = quat_from_axis_angle(axis, angle)
     >>> with np.printoptions(precision=8):
-    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(quat)  # doctest: +NORMALIZE_WHITESPACE
     [0.01850614 0.02467485 0.03084356 0.99904822]
 
     """
@@ -382,7 +382,7 @@ def quat_from_rotation_vector(rv: ArrayLike, **kwargs: Unpack[_QuatAssertionKwar
     >>> rv = 5/180*np.pi * np.sqrt([9/50, 16/50, 0.5])
     >>> quat = quat_from_rotation_vector(rv)
     >>> with np.printoptions(precision=8):
-    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(quat)  # doctest: +NORMALIZE_WHITESPACE
     [0.01850614 0.02467485 0.03084356 0.99904822]
 
     """
@@ -441,10 +441,10 @@ def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]
     >>> quat2 = np.column_stack((quat_mult(dq1,quat1), quat_mult(dq2,quat1)))
     >>> (theta, comp) = quat_angle_diff(quat1, quat2)
     >>> with np.printoptions(precision=8):
-    ...     print(theta) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(theta)  # doctest: +NORMALIZE_WHITESPACE
     [0.001  0.05 ]
     >>> with np.printoptions(precision=8):
-    ...     print(comp) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(comp)  # doctest: +NORMALIZE_WHITESPACE
     [[0.001  0.   ]
      [0.     0.05 ]
      [0.     0.   ]]
@@ -538,7 +538,7 @@ def quat_from_euler(  # noqa: C901
     >>> seq = np.array([3, 2, 1])
     >>> quat = quat_from_euler(angles, seq)
     >>> with np.printoptions(precision=8):
-    ...     print(quat) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(quat)  # doctest: +NORMALIZE_WHITESPACE
     [[0.01504849  0.03047982]
      [0.00992359  0.02438147]
      [0.00514916  0.02073308]
@@ -630,7 +630,7 @@ def quat_interp(time: _N, quat: _Q, ti: _N, inclusive: bool = True, **kwargs: Un
     >>> quat = np.column_stack((qrot(1, 0), qrot(1, np.pi/2), qrot(1, np.pi)))
     >>> ti = np.array([1, 2, 4.5, 5])
     >>> qout = quat_interp(time, quat, ti)
-    >>> print(np.array_str(qout, precision=8, suppress_small=True)) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(np.array_str(qout, precision=8, suppress_small=True))  # doctest: +NORMALIZE_WHITESPACE
     [[0. 0.38268343 0.98078528 1. ]
      [0. 0.         0.         0. ]
      [0. 0.         0.         0. ]
@@ -769,7 +769,7 @@ def quat_inv(q1: _Q, inplace: bool = False, **kwargs: Unpack[_QuatAssertionKwarg
     >>> q1 = qrot(1, pi/2)
     >>> q2 = quat_inv(q1)
     >>> with np.printoptions(precision=8):
-    ...     print(q2) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(q2)  # doctest: +NORMALIZE_WHITESPACE
     [-0.70710678 -0. -0. 0.70710678]
 
     """
@@ -832,7 +832,7 @@ def quat_mult(a: _Q, b: _Q, **kwargs: Unpack[_QuatAssertionKwargs]) -> _Q:
     >>> a = qrot(1, pi/2)
     >>> b = qrot(2, pi)
     >>> c = quat_mult(a, b)
-    >>> print(np.array_str(c, precision=8, suppress_small=True)) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(np.array_str(c, precision=8, suppress_small=True))  # doctest: +NORMALIZE_WHITESPACE
     [ 0. 0.70710678 -0.70710678 0. ]
 
     """
@@ -923,7 +923,7 @@ def quat_norm(x: _Q, /, inplace: bool = False, **kwargs: Unpack[_QuatAssertionKw
     >>> x = np.array([0.1, 0, 0, 1])
     >>> y = quat_norm(x)
     >>> with np.printoptions(precision=8):
-    ...     print(y) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(y)  # doctest: +NORMALIZE_WHITESPACE
     [0.09950372 0. 0. 0.99503719]
 
     """
@@ -972,7 +972,7 @@ def quat_prop(quat: _Q, delta_ang: _N, *, renorm: bool = True, **kwargs: Unpack[
     >>> delta_ang = np.array([0.01, 0.02, 0.03])
     >>> quat_new  = quat_prop(quat, delta_ang)
     >>> with np.printoptions(precision=8):
-    ...     print(quat_new) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(quat_new)  # doctest: +NORMALIZE_WHITESPACE
     [0.00499913  0.00999825  0.01499738  0.99982505]
 
     """
@@ -1037,7 +1037,7 @@ def quat_times_vector(quat: _Q, v: _N) -> _Q:
     >>> quat = np.array([[0, 1, 0, 0], [1, 0, 0, 0]]).T
     >>> v = np.array([[1, 0, 0], [2, 0, 0]]).T
     >>> vec = quat_times_vector(quat, v)
-    >>> print(vec) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(vec)  # doctest: +NORMALIZE_WHITESPACE
     [[-1  2]
      [ 0  0]
      [ 0  0]]
@@ -1093,7 +1093,7 @@ def quat_to_euler(  # noqa: C901
     >>> seq = [3, 1, 2]
     >>> euler = quat_to_euler(quat, seq)
     >>> with np.printoptions(precision=8):
-    ...     print(euler) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(euler)  # doctest: +NORMALIZE_WHITESPACE
     [[-0.         -3.14159265]
      [ 0.          0.        ]
      [ 3.14159265 -0.        ]]

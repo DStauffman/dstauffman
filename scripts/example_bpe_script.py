@@ -68,7 +68,7 @@ def _get_truth_index(results_time: _N, truth_time: _N) -> tuple[_I, _I]:
 # %% Functions - sim_model
 def sim_model(sim_params: SimParams) -> _N:
     r"""Run the simple example simulation model."""
-    return sim_params.magnitude * np.sin(  # type: ignore[no-any-return]
+    return sim_params.magnitude * np.sin(
         2 * np.pi * sim_params.frequency * sim_params.time / 1000 + sim_params.phase * np.pi / 180
     )
 
@@ -76,7 +76,7 @@ def sim_model(sim_params: SimParams) -> _N:
 # %% Functions - truth
 def truth(time: _N, magnitude: float = 5.0, frequency: float = 10.0, phase: float = 90.0) -> _N:
     r"""Return true values for simple example truth data."""
-    return magnitude * np.sin(2 * np.pi * frequency * time / 1000 + phase * np.pi / 180)  # type: ignore[no-any-return]
+    return magnitude * np.sin(2 * np.pi * frequency * time / 1000 + phase * np.pi / 180)
 
 
 # %% Functions - cost_wrapper
@@ -132,11 +132,8 @@ if __name__ == "__main__":
     sim_params = SimParams(time, magnitude=3.5, frequency=12.0, phase=180.0)
 
     # Truth data
-    # fmt: off
     truth_time = np.arange(-10.0, 201.0)
     truth_data = truth(truth_time)
-    truth      = plot.TruthPlotter(truth_time, truth_data)  # type: ignore[assignment]
-    # fmt: on
 
     # Logger
     lg.activate_logging(lg.LogLevel.L8)
@@ -192,8 +189,9 @@ if __name__ == "__main__":
         # fmt: on
 
         # make model plots
-        f0 = plot.plot_health_monte_carlo(time, results, "Output", opts=opts, truth=truth)  # type: ignore[arg-type]
-        extra_plotter = lambda fig, ax: truth.plot_truth(ax[0], scale=1)  # type: ignore[attr-defined]  # pylint: disable=unnecessary-lambda-assignment
+        extra_plotter = lambda fig, ax: ax[0].plot(  # pylint: disable=unnecessary-lambda-assignment
+            truth_time, truth_data, ".-", color="xkcd:black", zorder=8, label="Observed"
+        )
         f1 = plot.plot_time_history("Output vs. Time", time, results, opts=opts, extra_plotter=extra_plotter)
 
         # make BPE plots

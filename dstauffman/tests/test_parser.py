@@ -25,9 +25,7 @@ class Test__VALID_COMMANDS(unittest.TestCase):
 
     def test_nominal(self) -> None:
         self.assertIn("coverage", dcs.parser._VALID_COMMANDS)
-        self.assertIn("enforce", dcs.parser._VALID_COMMANDS)
         self.assertIn("help", dcs.parser._VALID_COMMANDS)
-        self.assertIn("make_init", dcs.parser._VALID_COMMANDS)
         self.assertIn("tests", dcs.parser._VALID_COMMANDS)
         self.assertIn("version", dcs.parser._VALID_COMMANDS)
 

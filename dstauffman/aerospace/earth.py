@@ -391,7 +391,7 @@ def find_earth_intersect(
     magnitude = a**2 * uz**2 + b**2 * ux**2 + b**2 * uy**2
     if magnitude.size == 1:
         if magnitude == 0:
-            magnitude = 1.0
+            magnitude = 1.0  # type: ignore[assignment]
     else:
         magnitude[magnitude == 0] = 1
 

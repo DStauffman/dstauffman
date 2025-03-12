@@ -15,7 +15,6 @@ oe2 = space.rv_2_oe(r, v, mu=space.MU_EARTH)
 
 print(r, v)
 print(r / space.EARTH["a"], v / space.EARTH["a"])
-oe.print_orrery()
 oe.pprint()
 oe2.pprint()
 
@@ -25,6 +24,11 @@ np.testing.assert_array_almost_equal(oe.i, oe2.i, err_msg="i is different")
 np.testing.assert_array_almost_equal(oe.w, oe2.w, err_msg="w is different")
 np.testing.assert_array_almost_equal(oe.W, oe2.W, err_msg="W is different")
 np.testing.assert_array_almost_equal(oe.vo, oe2.vo, err_msg="nu is different")
+
+print("Keplerian elements")
+oe.print_keplerian()
+print("Equinoctial elements")
+oe.print_equinoctial()
 
 # %% Intro to Space Flight Example
 r = np.array([-0.8, 0.6, 0.5])

@@ -92,7 +92,7 @@ def execute_tests(args: argparse.Namespace) -> int:
     >>> from dstauffman.commands import execute_tests
     >>> from argparse import Namespace
     >>> args = Namespace(coverage=None, cov_file=None, docstrings=False, library=None, unittest=False, verbose=False)
-    >>> execute_tests(args) # doctest: +SKIP
+    >>> execute_tests(args)  # doctest: +SKIP
 
     """
     # alias options
@@ -124,7 +124,7 @@ def execute_tests(args: argparse.Namespace) -> int:
             if coverage:
                 return_code = run_coverage(folder, cov_file=cov_file, report=False)
             else:
-                return_code = run_pytests(folder)
+                return_code = run_pytests(folder)  # ["-n", "auto"]
         else:
             if coverage:
                 print("Unable to run coverage with the unittest tool, please try pytest instead.")
@@ -199,7 +199,7 @@ def execute_coverage(args: argparse.Namespace) -> int:
     >>> from dstauffman.commands import execute_coverage
     >>> from argparse import Namespace
     >>> args = Namespace(no_report=False)
-    >>> execute_coverage(args) # doctest: +SKIP
+    >>> execute_coverage(args)  # doctest: +SKIP
 
     """
     # alias options

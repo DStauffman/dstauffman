@@ -217,7 +217,7 @@ def dms_2_d(x: _N, /) -> _N:
         raise ValueError("d_2_dms expects a 3xN array as input.")
     # find fractional degrees by adding parts together
     out = x[0, ...] + x[1, ...] / ONE_MINUTE + x[2, ...] / ONE_HOUR
-    return out  # type: ignore[no-any-return]
+    return out
 
 
 # %% Functions - hms_2_r
@@ -228,7 +228,7 @@ def hms_2_r(x: _N, /) -> _N:
     # find fractional degrees by adding parts together
     hours = x[0, ...] + x[1, ...] / ONE_MINUTE + x[2, ...] / ONE_HOUR
     out = hours / 24 * TAU
-    return out  # type: ignore[no-any-return]
+    return out
 
 
 # %% Functions - r_2_hms
@@ -292,7 +292,7 @@ def geo_loc_2_ijk(geo_loc: _N, time_jd: _N) -> _N:
     >>> import numpy as np
     >>> R = geo_loc_2_ijk(np.array([0.65, -2.13, 4.]), 2454587)
     >>> with np.printoptions(precision=5):
-    ...     print(R) # doctest: +NORMALIZE_WHITESPACE
+    ...     print(R)  # doctest: +NORMALIZE_WHITESPACE
     [[  641795.75243]
      [-5043096.63067]
      [ 3838833.11215]]
@@ -368,7 +368,7 @@ def ijk_2_sez(ijk: _N, geo_loc: _N, time_jd: _N) -> _N:  # noqa: C901
     # then transform the SEZ vector from the IJK frame to the SEZ frame
     if n == 1 and length == 1:
         D = _find_D(L, theta)
-        sez = D * sez_in_ijk
+        sez = D * sez_in_ijk  # type: ignore[assignment]
     elif n == 1 and length != 1:
         for i in range(length):
             D = _find_D(L[i], theta[i])
@@ -807,7 +807,11 @@ def get_sun_distance(time_jd: _FN) -> _FN:
 
 
 # %% Functions - beta_from_oe
-def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> _N:
+@overload
+def beta_from_oe(raan: float, inclination: float, time_jd: float) -> float: ...
+@overload
+def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> _N: ...
+def beta_from_oe(raan: _FN, inclination: _FN, time_jd: _FN) -> _FN:
     r"""
     Calculates the beta angle between the sun and the orbit plane.
 

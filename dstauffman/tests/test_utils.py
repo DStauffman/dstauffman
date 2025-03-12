@@ -539,32 +539,6 @@ class Test_compare_two_classes(unittest.TestCase):
         self.assertEqual(output, '"c1" and "c2" are not the same.')
         self.assertFalse(is_same)
 
-    def test_custom_dicts(self) -> None:
-        delattr(self.c1, "b")
-        delattr(self.c1, "c")
-        delattr(self.c2, "b")
-        delattr(self.c2, "d")
-        self.c1.e = dcs.FixedDict()  # type: ignore[attr-defined]
-        self.c1.e["key1"] = 1  # type: ignore[attr-defined]
-        self.c1.e.freeze()  # type: ignore[attr-defined]
-        self.c2.e = dcs.FixedDict()  # type: ignore[attr-defined]
-        self.c2.e["key1"] = 1  # type: ignore[attr-defined]
-        with capture_output() as ctx:
-            is_same = dcs.compare_two_classes(self.c1, self.c2)
-        output = ctx.get_output()
-        ctx.close()
-        self.assertEqual(output, '"c1.e" and "c2.e" are the same.\n"c1" and "c2" are the same.')
-        self.assertTrue(is_same)
-        self.c1.e["key1"] += 1  # type: ignore[attr-defined]
-        with capture_output() as ctx:
-            is_same = dcs.compare_two_classes(self.c1, self.c2)
-        output = ctx.get_output()
-        ctx.close()
-        self.assertEqual(
-            output, 'key1 is different.\n"c1.e" and "c2.e" are not the same.\n' + '"c1" and "c2" are not the same.'
-        )
-        self.assertFalse(is_same)
-
     def test_mismatched_subclasses(self) -> None:
         self.c4.e = 5  # type: ignore[attr-defined]
         with capture_output() as ctx:

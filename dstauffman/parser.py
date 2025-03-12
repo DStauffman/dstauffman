@@ -21,7 +21,7 @@ from slog import activate_logging, LogLevel, ReturnCodes
 
 # %% Globals
 logger = logging.getLogger(__name__)
-_VALID_COMMANDS = frozenset({"coverage", "enforce", "help", "make_init", "tests", "version"})
+_VALID_COMMANDS = frozenset({"coverage", "help", "tests", "version"})
 
 
 @dataclass(frozen=True)

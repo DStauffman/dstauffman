@@ -45,11 +45,11 @@ class Results(Frozen, metaclass=SaveAndLoad):
             self.date[:] = convert_datetime_to_np(date_zero) + (NP_ONE_SECOND * self.time).astype(np.int64)
 
     def _save_convert_hdf5(self) -> dict[str, Any]:
-        self.date = self.date.astype(np.int64)  # type: ignore[assignment]
+        self.date = self.date.astype(np.int64)
         return {}
 
     def _save_restore_hdf5(self, **kwargs: Any) -> None:  # pylint: disable=unused-argument
-        self.date = self.date.astype(NP_DATETIME_FORM)  # type: ignore[assignment]
+        self.date = self.date.astype(NP_DATETIME_FORM)
 
 
 # %% Main function

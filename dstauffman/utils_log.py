@@ -71,7 +71,7 @@ def setup_dir(folder: str | Path, recursive: bool = False) -> None:
     Examples
     --------
     >>> from dstauffman import setup_dir
-    >>> setup_dir(r"C:\Temp\test_folder") # doctest: +SKIP
+    >>> setup_dir(r"C:\Temp\test_folder")  # doctest: +SKIP
 
     """
     # convert older string API to paths
@@ -161,7 +161,7 @@ def fix_rollover(  # noqa: C901
     >>> data = np.array([1, 2, 3, 4, 5, 6, 0, 1,  3,  6,  0,  6,  5, 2])
     >>> roll = 7
     >>> out  = fix_rollover(data, roll)
-    >>> print(out) # doctest: +NORMALIZE_WHITESPACE
+    >>> print(out)  # doctest: +NORMALIZE_WHITESPACE
     [ 1 2 3 4 5 6 7 8 10 13 14 13 12 9]
 
     """

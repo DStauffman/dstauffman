@@ -69,7 +69,7 @@ def _get_truth_index(results_time: _N, truth_time: _N) -> tuple[_I, _I]:
 # Functions - sim_model
 def sim_model(sim_params: SimParams) -> _N:
     r"""Simple example simulation model."""
-    return sim_params.magnitude * np.sin(  # type: ignore[no-any-return]
+    return sim_params.magnitude * np.sin(
         2 * np.pi * sim_params.frequency * sim_params.time / 1000 + sim_params.phase * np.pi / 180
     )
 
@@ -77,7 +77,7 @@ def sim_model(sim_params: SimParams) -> _N:
 # Functions - truth
 def truth(time: _N, magnitude: float = 5.0, frequency: float = 10.0, phase: float = 90.0) -> _N:
     r"""Simple example truth data."""
-    return magnitude * np.sin(2 * np.pi * frequency * time / 1000 + phase * np.pi / 180)  # type: ignore[no-any-return]  # pragma: no cover
+    return magnitude * np.sin(2 * np.pi * frequency * time / 1000 + phase * np.pi / 180)  # pragma: no cover
 
 
 # Functions - cost_wrapper

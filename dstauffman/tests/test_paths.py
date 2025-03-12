@@ -87,7 +87,7 @@ class Test_list_python_files(unittest.TestCase):
 
     def setUp(self) -> None:
         self.folder = dcs.get_root_dir() / "commands"
-        self.expected = [self.folder / x for x in ["help.py", "repos.py", "runtests.py"]]
+        self.expected = [self.folder / x for x in ["help.py", "runtests.py"]]
 
     def test_nominal(self) -> None:
         files = dcs.list_python_files(self.folder)

@@ -193,6 +193,48 @@ class Test_subspace(unittest.TestCase):
         self.assertAlmostEqual(theta, self.theta)
 
 
+# %% ecdf
+@unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
+class Test_ecdf(unittest.TestCase):
+    r"""
+    Tests the ecdf function with the following cases:
+        Nominal
+        Integers
+        List
+        Not unique
+    """
+
+    def test_nominal(self) -> None:
+        y = np.random.rand(10000)
+        (x, f) = dcs.ecdf(y)
+        dt = x[1] - x[0]
+        exp = np.arange(x[0], x[-1] + dt, dt)
+        np.testing.assert_array_almost_equal(f, exp, 1)
+
+    def test_integers(self) -> None:
+        y = np.array([0, 0, 0, 1, 1])
+        (x, f) = dcs.ecdf(y)
+        np.testing.assert_array_almost_equal(x, np.array([0.6, 1.0]), 14)
+        np.testing.assert_array_equal(f, np.array([0, 1]))
+
+    def test_list(self) -> None:
+        y = [0.0, 0.1, 0.2, 0.8, 0.9, 1.0]
+        (x, f) = dcs.ecdf(y)
+        np.testing.assert_array_almost_equal(x, np.arange(1, 7) / 6, 14)
+        np.testing.assert_array_equal(f, y)
+
+    def test_scalar(self) -> None:
+        (x, f) = dcs.ecdf(0.5)
+        np.testing.assert_array_equal(x, np.array([1.0]))
+        np.testing.assert_array_equal(f, np.array([0.5]))
+
+    def test_unique(self) -> None:
+        y = np.array([0.0, 0.0, 0.0, 0.5, 0.5, 0.5, 1.0])
+        (x, f) = dcs.ecdf(y)
+        np.testing.assert_array_almost_equal(x, np.array([3 / 7, 6 / 7, 1.0]), 14)
+        np.testing.assert_array_equal(f, np.array([0.0, 0.5, 1.0]))
+
+
 # %% mat_divide
 @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
 class Test_mat_divide(unittest.TestCase):

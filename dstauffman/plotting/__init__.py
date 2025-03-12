@@ -18,8 +18,6 @@ from .batch     import plot_bpe_convergence, plot_bpe_results
 from .generic   import make_generic_plot, make_time_plot, make_error_bar_plot, \
                            make_difference_plot, make_categories_plot, make_bar_plot, \
                            make_connected_sets
-from .health    import TruthPlotter, plot_health_time_history, plot_health_monte_carlo, \
-                           plot_icer, plot_population_pyramid
 from .maps      import get_map_data, plot_map, plot_map_3d
 from .plotting  import Opts, suppress_plots, unsuppress_plots, plot_time_history, \
                            plot_time_difference, plot_correlation_matrix, plot_bar_breakdown, \

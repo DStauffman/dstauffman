@@ -30,7 +30,7 @@ def print_help(help_file: Path | None = None) -> int:
     Examples
     --------
     >>> from dstauffman.commands import print_help
-    >>> print_help() # doctest: +SKIP
+    >>> print_help()  # doctest: +SKIP
 
     """
     if help_file is None:
@@ -148,7 +148,7 @@ def execute_help(args: argparse.Namespace) -> int:  # pylint: disable=unused-arg
     --------
     >>> from dstauffman.commands import execute_help
     >>> args = []
-    >>> execute_help(args) # doctest: +SKIP
+    >>> execute_help(args)  # doctest: +SKIP
 
     """
     return_code = print_help()
@@ -174,7 +174,7 @@ def execute_version(args: argparse.Namespace) -> int:  # pylint: disable=unused-
     --------
     >>> from dstauffman.commands import execute_version
     >>> args = []
-    >>> execute_version(args) # doctest: +SKIP
+    >>> execute_version(args)  # doctest: +SKIP
 
     """
     return_code = print_version()

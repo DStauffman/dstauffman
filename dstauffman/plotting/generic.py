@@ -464,31 +464,38 @@ def make_generic_plot(  # noqa: C901
         assert s2 in (0, 4), "Must be a 4-element quaternion"
 
     # % Calculations
-    # build RMS indices
-    if data_is_list:
-        ix: dict[str, list[int] | _B | None] = {"one": [], "t_min": None, "t_max": None}
-        for j in range(num_channels):
-            if time_is_list:
-                temp_ix = get_rms_indices(time_one[j], xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[index]
-            else:
-                temp_ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)
-            ix["one"].append(temp_ix["one"])  # type: ignore[arg-type, union-attr]
-            if j == 0:
-                ix["pts"] = temp_ix["pts"]
-            else:
-                ix["pts"] = [min((ix["pts"][0], temp_ix["pts"][0])), max((ix["pts"][1], temp_ix["pts"][1]))]  # type: ignore[index]
-    elif doing_diffs:
+    # calculate the differences
+    if doing_diffs:
         if have_both:
             # find overlapping times
             (time_overlap, d1_diff_ix, d2_diff_ix) = intersect(time_one, time_two, tolerance=tolerance, return_indices=True)  # type: ignore[call-overload, misc]
             # find differences
             d1_miss_ix = np.setxor1d(np.arange(len(time_one)), d1_diff_ix)  # type: ignore[arg-type]
             d2_miss_ix = np.setxor1d(np.arange(len(time_two)), d2_diff_ix)  # type: ignore[arg-type]
+            if is_quat_diff:
+                (nondeg_angle, nondeg_error) = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix], allow_nans=True)  # type: ignore[arg-type, call-overload, index]
+            else:
+                diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]  # type: ignore[call-overload, index]
         else:
             time_overlap = None
-        ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[assignment]
-    else:
-        ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[assignment]
+    # build RMS indices
+    if show_rms or return_err:
+        if data_is_list:
+            ix: dict[str, list[int] | _B | None] = {"one": [], "t_min": None, "t_max": None}
+            for j in range(num_channels):
+                if time_is_list:
+                    temp_ix = get_rms_indices(time_one[j], xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[index]
+                else:
+                    temp_ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)
+                ix["one"].append(temp_ix["one"])  # type: ignore[arg-type, union-attr]
+                if j == 0:
+                    ix["pts"] = temp_ix["pts"]
+                else:
+                    ix["pts"] = [min((ix["pts"][0], temp_ix["pts"][0])), max((ix["pts"][1], temp_ix["pts"][1]))]  # type: ignore[index]
+        elif doing_diffs:
+            ix = get_rms_indices(time_one, time_two, time_overlap, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[assignment]
+        else:
+            ix = get_rms_indices(time_one, xmin=rms_xmin, xmax=rms_xmax)  # type: ignore[assignment]
     # create a colormap
     if doing_diffs:
         cm = ColorMap(colormap=colormap, num_colors=3 * num_channels)
@@ -496,12 +503,6 @@ def make_generic_plot(  # noqa: C901
         cm = ColorMap(colormap=colormap, num_colors=len(cat_keys) * num_channels)
     else:
         cm = ColorMap(colormap=colormap, num_colors=num_channels)
-    # calculate the differences
-    if doing_diffs and have_both:
-        if is_quat_diff:
-            (nondeg_angle, nondeg_error) = quat_angle_diff(data_one[:, d1_diff_ix], data_two[:, d2_diff_ix], allow_nans=True)  # type: ignore[arg-type, call-overload, index]
-        else:
-            diffs = data_two[:, d2_diff_ix] - data_one[:, d1_diff_ix]  # type: ignore[call-overload, index]
     # calculate the rms (or mean) values
     if show_rms or return_err:
         nans = np.full(num_channels, np.nan)  # TODO: num_channels should be 3 for is_quat_diff

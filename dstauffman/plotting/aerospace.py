@@ -1849,7 +1849,7 @@ def plot_covariance(  # noqa: C901
         err[field] = {}
         for ix, states in enumerate(groups):
             this_units = units if isinstance(units, str) else units[ix]
-            this_2units = second_units[ix] if isinstance(second_units, list) else second_units  # type: ignore[index]
+            this_2units = second_units[ix] if isinstance(second_units, list) else second_units
             this_ylabel = description + f" [{this_units}]"
             states = np.atleast_1d(states)
             if hasattr(kf1, "active") and kf1.active is not None:

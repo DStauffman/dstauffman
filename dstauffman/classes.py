@@ -6,30 +6,15 @@ Notes
 #.  Written by David C. Stauffer in March 2015.
 #.  Added mutable integer Counter class in January 2016.
 #.  Updated by David C. Stauffer in June 2020 to make MetaClass methods public for direct use if desired.
-"""  # pylint: disable=too-many-lines
+"""
 
 # %% Imports
 from __future__ import annotations
 
-import copy
 import doctest
 from pathlib import Path
 import sys
-from typing import (
-    Any,
-    Callable,
-    Iterable,
-    Literal,
-    Mapping,
-    NoReturn,
-    NotRequired,
-    overload,
-    Type,
-    TYPE_CHECKING,
-    TypedDict,
-    TypeVar,
-    Unpack,
-)
+from typing import Any, Callable, Literal, NotRequired, overload, Type, TYPE_CHECKING, TypedDict, TypeVar, Unpack
 import unittest
 import warnings
 
@@ -58,7 +43,6 @@ if TYPE_CHECKING:
 
     _B = NDArray[np.bool_]
     _T = TypeVar("_T")
-    _C = TypeVar("_C", int, "Counter")
     _SingleNum = int | float | np.datetime64
     _Sets = set[str] | frozenset[str]
     _Time = float | np.datetime64
@@ -716,258 +700,6 @@ class SaveAndLoad(type):
             setattr(cls, "_save_restore_hdf5", save_restore_hdf5)
 
         super().__init__(name, bases, dct)
-
-
-# %% Classes - Counter
-class Counter(Frozen):
-    r"""
-    Mutable integer counter wrapper class.
-
-    Has methods for comparisons, negations, adding and subtracting, hashing for sets, and sorting.
-
-    Parameters
-    ----------
-    other : int
-        Initial value
-
-    Notes
-    -----
-    #.  Written by David C. Stauffer in January 2016.
-
-    Examples
-    --------
-    >>> from dstauffman import Counter
-    >>> c = Counter(0)
-    >>> c += 1
-    >>> print(c)
-    1
-
-    """
-
-    def __init__(self, other: Any = 0):
-        self._val = int(other)
-
-    def __eq__(self, other: Any) -> bool:
-        if isinstance(other, Counter):
-            return self._val == other._val
-        return self._val == other  # type: ignore[no-any-return]
-
-    def __lt__(self, other: Any) -> bool:
-        if isinstance(other, Counter):
-            return self._val < other._val
-        return self._val < other  # type: ignore[no-any-return]
-
-    def __le__(self, other: Any) -> bool:
-        if isinstance(other, Counter):
-            return self._val <= other._val
-        return self._val <= other  # type: ignore[no-any-return]
-
-    def __gt__(self, other: Any) -> bool:
-        if isinstance(other, Counter):
-            return self._val > other._val
-        return self._val > other  # type: ignore[no-any-return]
-
-    def __ge__(self, other: Any) -> bool:
-        if isinstance(other, Counter):
-            return self._val >= other._val
-        return self._val >= other  # type: ignore[no-any-return]
-
-    def __hash__(self) -> int:
-        return hash(self._val)
-
-    def __index__(self) -> int:
-        return self._val
-
-    def __pos__(self) -> Counter:
-        return Counter(self._val)
-
-    def __neg__(self) -> Counter:
-        return Counter(-self._val)
-
-    def __abs__(self) -> Counter:
-        return Counter(abs(self._val))
-
-    @overload
-    def __add__(self, other: int) -> int: ...
-    @overload
-    def __add__(self, other: Counter) -> Counter: ...
-    def __add__(self, other: _C) -> _C:
-        if isinstance(other, Counter):
-            return Counter(self._val + other._val)
-        if isinstance(other, int):
-            return self._val + other
-        return NotImplemented
-
-    def __iadd__(self, other: _C) -> Counter:  # type: ignore[misc]
-        if isinstance(other, Counter):
-            self._val += other._val
-        elif isinstance(other, int):
-            self._val += other
-        else:
-            return NotImplemented
-        return self
-
-    def __radd__(self, other: _C) -> _C:
-        return self.__add__(other)
-
-    @overload
-    def __sub__(self, other: int) -> int: ...
-    @overload
-    def __sub__(self, other: Counter) -> Counter: ...
-    def __sub__(self, other: _C) -> _C:
-        if isinstance(other, Counter):
-            return Counter(self._val - other._val)
-        if isinstance(other, int):
-            return self._val - other
-        return NotImplemented
-
-    def __isub__(self, other: _C) -> Counter:  # type: ignore[misc]
-        if isinstance(other, Counter):
-            self._val -= other._val
-        elif isinstance(other, int):
-            self._val -= other
-        else:
-            return NotImplemented
-        return self
-
-    def __rsub__(self, other: _C) -> _C:
-        return -self.__sub__(other)
-
-    def __truediv__(self, other: int | float) -> float:
-        if isinstance(other, (float, int)):
-            return self._val / other
-        return NotImplemented  # type: ignore[unreachable]
-
-    def __floordiv__(self, other: _C) -> _C:
-        if isinstance(other, Counter):
-            return Counter(self._val // other._val)
-        if isinstance(other, int):
-            return self._val // other
-        return NotImplemented
-
-    def __mod__(self, other: _C) -> _C:
-        if isinstance(other, Counter):
-            return Counter(self._val % other._val)
-        if isinstance(other, int):
-            return self._val % other
-        return NotImplemented
-
-    def __str__(self) -> str:
-        return str(self._val)
-
-    def __repr__(self) -> str:
-        return f"Counter({self._val})"
-
-
-# %% FixedDict
-class FixedDict(dict):
-    r"""
-    A dictionary with immutable keys, but mutable values.
-
-    Notes
-    -----
-    #.  Taken from http://stackoverflow.com/questions/14816341/define-a-python-dictionary-
-        with-immutable-keys-but-mutable-values by bereal.
-    #.  Modified by David C. Stauffer in January 2017 to include alternative initializations
-        and freeze methods.
-    #.  Updated by David C. Stauffer in November 2017 to include __new__ method. Otherwise instances
-        could be made that wouldn't have a self._frozen attribute.  Also added an empty
-        __getnewargs__ method to ensure that pickling calls the __new__ method.
-
-    Examples
-    --------
-    >>> from dstauffman import FixedDict
-    >>> fixed = FixedDict({"key1": 1, "key2": None})
-    >>> assert "key1" in fixed
-
-    >>> fixed.freeze()
-    >>> fixed["new_key"] = 5 # doctest: +IGNORE_EXCEPTION_DETAIL
-    Traceback (most recent call last):
-    KeyError: "new_key"
-
-    """
-
-    def __new__(cls, *args: Any, **kwargs: Any) -> FixedDict:
-        r"""Creats a new instance of the class."""
-        instance = super().__new__(cls, *args, **kwargs)
-        instance._frozen = False
-        return instance
-
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        super().__init__(*args, **kwargs)
-        self._frozen: bool = False
-
-    def __getitem__(self, k: Any) -> Any:
-        return super().__getitem__(k)
-
-    def __setitem__(self, k: Any, v: Any) -> Any:
-        if self._frozen:
-            if k not in self:
-                raise KeyError(k)
-        return super().__setitem__(k, v)
-
-    def __delitem__(self, k: Any) -> None:
-        raise NotImplementedError
-
-    def __contains__(self, k: Any) -> Any:
-        return super().__contains__(k)
-
-    def __copy__(self) -> FixedDict:
-        new = type(self)(self.items())
-        new._frozen = self._frozen
-        return new
-
-    def __deepcopy__(self, memo: Any) -> FixedDict:
-        new = type(self)((k, copy.deepcopy(v, memo)) for (k, v) in self.items())
-        new._frozen = self._frozen
-        return new
-
-    def __getnewargs__(self) -> tuple:
-        # Call __new__ (and thus __init__) on unpickling.
-        return ()
-
-    def get(self, k: Any, default: Any | None = None) -> Any:
-        r""".get(k[,d]) -> D[k] if k in D, else d.  d defaults to None."""
-        return super().get(k, default)
-
-    def setdefault(self, k: Any, default: Any | None = None) -> Any:
-        r"""D.setdefault(k[,d]) -> D.get(k,d), also set D[k]=d if k not in D."""
-        if self._frozen:
-            if k not in self:
-                raise KeyError(k)
-        return super().setdefault(k, default)
-
-    def pop(self, k: Any) -> NoReturn:  # type: ignore[override]
-        r"""D.pop(k[,d]) -> v, is not valid on a fixeddict, as it removes the key."""
-        raise NotImplementedError
-
-    def update(self, mapping: Mapping[Any, Any] = (), **kwargs: Any) -> None:  # type: ignore[assignment, override]
-        r"""
-        D.update([E, ]**F) -> None.  Update D from dict/iterable E and F.
-
-        If E is present and has a .keys() method, then does:  for k in E: D[k] = E[k]
-        If E is present and lacks a .keys() method, then does:  for k, v in E: D[k] = v
-        In either case, this is followed by: for k in F:  D[k] = F[k]
-        """
-        # check if valid keys otherwise, raise error
-        if self._frozen:
-            for k in mapping:
-                if k not in self:
-                    raise KeyError(k)
-            for k in kwargs:
-                if k not in self:
-                    raise KeyError(k)
-        # otherwise keys are good, pass on to super
-        super().update(mapping, **kwargs)
-
-    @classmethod
-    def fromkeys(cls, keys: Iterable) -> Any:  # type: ignore[override]
-        """Returns a new dict with keys from iterable and values equal to value."""
-        return super().fromkeys(k for k in keys)
-
-    def freeze(self) -> None:
-        """Freeze the internal dictionary, such that no more keys may be added."""
-        self._frozen = True
 
 
 # %% Unit test
