@@ -1141,7 +1141,7 @@ def plot_histogram(  # noqa: C901
     bins : (A, ) ndarray
         boundaries of the bins to use for the histogram
     counts : (A, ) ndarray, optional
-        If specified, use this already processed oucnts instead of data
+        If specified, use this already processed counts instead of data
     opts : class Opts, optional
         plotting options
     color : str or RGB or RGBA code, optional

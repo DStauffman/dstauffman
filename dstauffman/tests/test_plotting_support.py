@@ -1063,13 +1063,14 @@ class Test_plotting_plot_phases(unittest.TestCase):
         self.times2 = np.array([[5, 20, 60, 90], [10, 60, 90, 95]])
         self.ax.plot(time, data, ".-")
         self.colormap = "tab10"
+        self.cm = colors.ListedColormap(("red", "green", "xkcd:red", "xkcd:green"))
         self.labels = ["Part 1", "Phase 2", "Watch Out", "Final"]
 
     def test_single_time(self) -> None:
         plot.plot_phases(self.ax, self.times, self.colormap, self.labels)
 
     def test_with_end_times(self) -> None:
-        plot.plot_phases(self.ax, self.times2, self.colormap, self.labels)
+        plot.plot_phases(self.ax, self.times2, self.cm, self.labels)
 
     def test_no_labels(self) -> None:
         plot.plot_phases(self.ax, self.times, colormap=self.colormap)
@@ -1082,6 +1083,15 @@ class Test_plotting_plot_phases(unittest.TestCase):
 
     def test_group_all(self) -> None:
         plot.plot_phases(self.ax, self.times, group_all=True, labels=self.labels[0], colormap="red")
+
+    def test_tuple(self) -> None:
+        plot.plot_phases(self.ax, (10, 30), labels=["Phase"])
+
+    def test_tuple2(self) -> None:
+        plot.plot_phases(self.ax, (self.times2[0, :], self.times2[1, :]), colormap=self.colormap, labels=self.labels)
+
+    def test_list(self) -> None:
+        plot.plot_phases(self.ax, list(self.times), self.cm, self.labels)
 
     def tearDown(self) -> None:
         plt.close(self.fig)

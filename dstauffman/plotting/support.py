@@ -1649,9 +1649,9 @@ def plot_vert_lines(
 
 
 # %% plot_phases
-def plot_phases(
+def plot_phases(  # noqa: C901
     ax: Axes,
-    times: _D | _N,
+    times: _D | _N | list[float] | list[np.datetime64] | tuple[_D, _D] | tuple[_N, _N] | tuple[float, float],
     colormap: _CM | ColorMap | None = "tab10",
     labels: list[str] | str | None = None,
     *,
@@ -1692,29 +1692,34 @@ def plot_phases(
     >>> plt.close(fig)
 
     """
-    # get number of segments
-    if times.ndim == 1:
-        num_segments = times.size
-    else:
-        num_segments = times.shape[1]
-
-    # check for optional arguments
-    if not group_all:
-        cm = ColorMap(colormap=colormap, num_colors=num_segments)
-    elif colormap == "tab10":
-        # change to responsible default for group_all case
-        colormap = "xkcd:black"
-
     # get the limits of the plot
     xlims = ax.get_xlim()
     ylims = ax.get_ylim()
 
-    # create second row of times if not specified (assumes each phase goes all the way to the next one)
-    if times.ndim == 1:
-        times = np.vstack((times, np.hstack((times[1:], max(times[-1], xlims[1])))))
+    # get number of segments and list out times
+    if isinstance(times, tuple):
+        assert len(times) == 2, "Expect exactly two elements in tuple."
+        t1 = np.atleast_1d(times[0])
+        t2 = np.atleast_1d(times[1])
+        assert t1.size == t2.size, "Expecting both time vectors to be the same size."
+    elif isinstance(times, list) or times.ndim == 1:
+        t1 = np.asanyarray(times)
+        t2 = np.hstack((times[1:], max(times[-1], xlims[1])))  # type: ignore[arg-type, type-var]
+    elif times.ndim == 2:
+        t1 = times[0, :]
+        t2 = times[1, :]
+    else:
+        raise ValueError("Unexpected size for times.")
+
+    # check for optional arguments
+    if not group_all:
+        cm = ColorMap(colormap=colormap, num_colors=np.size(t1))
+    elif colormap == "tab10":
+        # change to responsible default for group_all case
+        colormap = "xkcd:black"
 
     # loop through all the phases
-    for i in range(num_segments):
+    for i, (x1, x2) in enumerate(zip(t1, t2)):
         # get the label and color for this phase
         this_color = cm.get_color(i) if not group_all else colormap
         if labels is not None:
@@ -1727,9 +1732,6 @@ def plot_phases(
             else:
                 assert isinstance(labels, list), "Labels must be a list if not grouping all."
                 this_label = labels[i]
-        # get the locations for this phase
-        x1 = times[0, i]
-        x2 = times[1, i]
         # create the shaded box
         ax.axvspan(
             x1,

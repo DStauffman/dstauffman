@@ -570,7 +570,9 @@ class Test_plotting_plot_histogram(unittest.TestCase):
         self.fig = plot.plot_histogram(self.description, None, self.bins, counts=self.counts)
 
     def test_counts_replacement2(self) -> None:
-        self.fig = plot.plot_histogram(self.description, None, self.bins, counts=self.counts, second_ylabel="%", show_cdf=True, cdf_round_to_bin=True)
+        self.fig = plot.plot_histogram(
+            self.description, None, self.bins, counts=self.counts, second_ylabel="%", show_cdf=True, cdf_round_to_bin=True
+        )
 
     def test_counts_replacement3(self) -> None:
         with self.assertRaises(ValueError):
