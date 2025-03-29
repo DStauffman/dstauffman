@@ -539,8 +539,8 @@ class Test_plotting_storefig(unittest.TestCase):
         cls.plot_type = "png"
         # create the figure and set the title
         cls.fig = plt.figure()
-        assert (manager := cls.fig.canvas.manager) is not None
-        manager.set_window_title(cls.title)
+        assert cls.fig.canvas.manager is not None
+        cls.fig.canvas.manager.set_window_title(cls.title)
         # add an axis and plot the data
         ax = cls.fig.add_subplot(111)
         ax.plot(cls.time, cls.data)
@@ -593,7 +593,8 @@ class Test_plotting_storefig(unittest.TestCase):
 
     def test_bad_characters(self) -> None:
         # change to bad name
-        assert (manager := self.fig.canvas.manager) is not None
+        manager = self.fig.canvas.manager
+        assert manager is not None
         manager.set_window_title("Bad < > / names")
         if not _HAVE_DISPLAY:  # pragma: no cover
             self.fig.axes[0].set_title("Bad < > / names")
@@ -634,8 +635,8 @@ class Test_plotting_titleprefix(unittest.TestCase):
         self.fig = plt.figure()
         self.title = "Figure Title"
         self.prefix = "Prefix"
-        assert (manager := self.fig.canvas.manager) is not None
-        manager.set_window_title(self.title)
+        assert self.fig.canvas.manager is not None
+        self.fig.canvas.manager.set_window_title(self.title)
         x = np.arange(0, 10, 0.1)
         y = np.sin(x)
         ax = self.fig.add_subplot(111)
@@ -716,8 +717,8 @@ class Test_plotting_zoom_ylim(unittest.TestCase):
 
     def setUp(self) -> None:
         self.fig = plt.figure()
-        assert (manager := self.fig.canvas.manager) is not None
-        manager.set_window_title("Figure Title")
+        assert self.fig.canvas.manager is not None
+        self.fig.canvas.manager.set_window_title("Figure Title")
         self.ax = self.fig.add_subplot(111)
         self.time = np.arange(1, 10, 0.1)
         self.data = self.time**2
@@ -1054,8 +1055,8 @@ class Test_plotting_plot_phases(unittest.TestCase):
 
     def setUp(self) -> None:
         self.fig = plt.figure()
-        assert (manager := self.fig.canvas.manager) is not None
-        manager.set_window_title("Sine Wave")
+        assert self.fig.canvas.manager is not None
+        self.fig.canvas.manager.set_window_title("Sine Wave")
         self.ax = self.fig.add_subplot(111)
         time = np.arange(101)
         data = np.cos(time / 10)

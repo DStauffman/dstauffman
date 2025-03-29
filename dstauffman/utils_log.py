@@ -184,7 +184,8 @@ def fix_rollover(  # noqa: C901
 
     # call recursively when specifying an axis on 2D data
     if axis is not None:
-        assert data.ndim == 2, "Must be a 2D array when axis is specified"
+        if data.ndim != 2:
+            raise AssertionError("Must be a 2D array when axis is specified")
         out = np.zeros_like(data)
         if axis == 0:
             for i in range(data.shape[1]):

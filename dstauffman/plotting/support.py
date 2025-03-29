@@ -291,8 +291,8 @@ class MyCustomToolbar:
         # set the appropriate active figure
         fig = plt.figure(next_fig)
         # make it the active window
-        assert (manager := fig.canvas.manager) is not None
-        manager.window.raise_()  # type: ignore[attr-defined]
+        assert fig.canvas.manager is not None
+        fig.canvas.manager.window.raise_()  # type: ignore[attr-defined]
 
     def prev_plot(self, *args: Any) -> None:  # pylint: disable=unused-argument
         r"""Bring up the previous plot in the series."""
@@ -312,8 +312,8 @@ class MyCustomToolbar:
         # set the appropriate active figure
         fig = plt.figure(prev_fig)
         # make it the active window
-        assert (manager := fig.canvas.manager) is not None
-        manager.window.raise_()  # type: ignore[attr-defined]
+        assert fig.canvas.manager is not None
+        fig.canvas.manager.window.raise_()  # type: ignore[attr-defined]
 
 
 # %% Classes - ColorMap
@@ -689,8 +689,7 @@ def get_figure_title(fig: Figure, raise_warning: bool = False) -> str | tuple[st
     throw_warning = False
     raw_title: str | None
     # get the title of the figure canvas
-    manager = fig.canvas.manager
-    if manager is None:
+    if (manager := fig.canvas.manager) is None:
         raw_title = "None"
         throw_warning = True
     else:
@@ -923,7 +922,8 @@ def titleprefix(fig: _FigOrListFig, prefix: str = "", process_all: bool = False)
     # loop through figures
     for this_fig in figs:
         # get the manager
-        assert (manager := this_fig.canvas.manager) is not None
+        manager = this_fig.canvas.manager
+        assert manager is not None
         # update canvas name
         this_canvas_title = manager.get_window_title()
         manager.set_window_title(prefix + " - " + this_canvas_title)
@@ -2015,7 +2015,8 @@ def align_plots(fig: _FigOrListFig, pos: tuple[int, int] | None = None) -> None:
     # loop through figures
     for this_fig in figs:
         # get the manager
-        assert (manager := this_fig.canvas.manager) is not None
+        manager = this_fig.canvas.manager
+        assert manager is not None
         # use position from first plot if you don't already have it
         if x_pos is None or y_pos is None:
             (x_pos, y_pos, _, _) = manager.window.geometry().getRect()  # type: ignore[attr-defined]
@@ -2391,8 +2392,8 @@ def fig_ax_factory(  # noqa: C901
         if bool(suptitle):
             this_title = suptitle[i] if isinstance(suptitle, list) else suptitle
             fig.suptitle(this_title)
-            assert (manager := fig.canvas.manager) is not None
-            manager.set_window_title(this_title)
+            assert fig.canvas.manager is not None
+            fig.canvas.manager.set_window_title(this_title)
         figs.append(fig)
         axes.append(ax)
     fig_ax: tuple[tuple[Figure, Axes], ...]

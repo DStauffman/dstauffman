@@ -265,6 +265,7 @@ class Test_aerospace_qrot(unittest.TestCase):
         quat = space.qrot(self.null, self.angle)
         np.testing.assert_array_almost_equal(quat, self.null_quat)
 
+    @unittest.skipIf(not __debug__, "Skipping due to __debug__ mode being off.")
     def test_vector_mismatch(self) -> None:
         with self.assertRaises(AssertionError):
             space.qrot(self.axis, np.array([self.angle, self.angle2]))
@@ -1085,6 +1086,7 @@ class Test_aerospace_quat_to_euler(unittest.TestCase):
             with self.assertRaises(ValueError):
                 space.quat_to_euler(self.zero_quat, np.array(this_seq))
 
+    @unittest.skipIf(not __debug__, "Skipping due to __debug__ mode being off.")
     def test_bad_sequence(self) -> None:
         with self.assertRaises(AssertionError):
             space.quat_to_euler(self.zero_quat, np.array([1, 2]))

@@ -221,14 +221,16 @@ def find_in_range(
         func = np.greater_equal if inclusive or left else np.greater
         valid = func(value, min_ - precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
     else:
-        assert ~np.isnan(min_) and np.sign(min_) < 0, "The minimum should be -np.inf if not finite."
+        if np.isnan(min_) or np.sign(min_) > 0:
+            raise AssertionError("The minimum should be -np.inf if not finite.")
         valid = not_nan.copy()
     # combine with those less than the maximum bound
     if np.isfinite(max_):
         func = np.less_equal if inclusive or right else np.less  # type: ignore[assignment]
         valid &= func(value, max_ + precision, out=np.zeros(value.shape, dtype=bool), where=not_nan)  # type: ignore[operator]
     else:
-        assert ~np.isnan(max_) and np.sign(max_) > 0, "The maximum should be np.inf if not finite."
+        if np.isnan(max_) or np.sign(max_) < 0:
+            raise AssertionError("The maximum should be np.inf if not finite.")
     return valid  # type: ignore[no-any-return]
 
 
@@ -1000,13 +1002,13 @@ def np_digitize(x: ArrayLike, /, bins: ArrayLike, right: bool = False) -> _I:
             bad_left = np.flatnonzero(x < bmin)  # type: ignore[operator]
             bad_right = np.flatnonzero(x >= bmax)  # type: ignore[operator]
     if bad_bounds:
-        message = f"Some values ({len(bad_left)}, {len(bad_right)}) of x are outside the given bins ([{bmin}, {bmax}])."  # type: ignore[str-bytes-safe]
+        message = f"Some values ({len(bad_left)} left, {len(bad_right)} right) of x are outside the given bins ([{bmin}, {bmax}])."  # type: ignore[str-bytes-safe]
         if bad_left.size > 0:
-            message += f" Such as {x[bad_left[0]]}"  # type: ignore[index,str-bytes-safe]
+            message += f" Such as {np.atleast_1d(x)[bad_left[0]]}"
             if bad_right.size > 0:
-                message += f" and {x[bad_right[0]]}"  # type: ignore[index,str-bytes-safe]
+                message += f" and {np.atleast_1d(x)[bad_right[0]]}"
         elif bad_right.size > 0:
-            message += f" Such as {x[bad_right[0]]}"  # type: ignore[index,str-bytes-safe]
+            message += f" Such as {np.atleast_1d(x)[bad_right[0]]}"
         raise ValueError(message)
 
     # do the calculations by calling the numpy command and shift results by one
@@ -1227,7 +1229,8 @@ def combine_per_year(data: _Array | None, func: Callable[..., Any] | None = None
 
     """
     # check that a function was provided
-    assert func is not None and callable(func), "A callable function must be provided."
+    if func is None or not callable(func):
+        raise AssertionError("A callable function must be provided.")
     # check for null case and exit
     if data is None:
         return None
@@ -1636,9 +1639,9 @@ def intersect(  # type: ignore[misc]
     is_dates = np.array([is_datetime(a), is_datetime(b)], dtype=bool)
     assert np.count_nonzero(is_dates) != 1, "Both arrays must be datetimes if either is."
     if np.any(is_dates):
-        orig_datetime = a.dtype  # type: ignore[union-attr]
-        a = a.astype(np.int64)  # type: ignore[union-attr]
-        b = b.astype(np.int64)  # type: ignore[union-attr]
+        orig_datetime = a.dtype
+        a = a.astype(np.int64)
+        b = b.astype(np.int64)
         tolerance = tolerance.astype(np.int64)  # type: ignore[assignment, union-attr]
 
     # check if largest component of a and b is too close to the tolerance floor (for floats)
@@ -1680,7 +1683,7 @@ def intersect(  # type: ignore[misc]
     # calculate output
     # Note that a[ia] and b[ib] should be the same with a tolerance of 0, but not necessarily otherwise
     # This function returns the values from the first vector a
-    c = np.sort(a[ia])  # type: ignore[index]
+    c = np.sort(a[ia])
     if np.any(is_dates):
         c = c.astype(orig_datetime)
     if return_indices:

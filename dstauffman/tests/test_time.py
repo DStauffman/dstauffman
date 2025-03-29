@@ -117,7 +117,7 @@ class Test_round_np_datetime(unittest.TestCase):
         # fmt: on
 
     def test_nominal(self) -> None:
-        date_out = dcs.round_np_datetime(self.date_in, self.time_delta)
+        date_out = dcs.round_np_datetime(self.date_in, self.time_delta)  # type: ignore[call-overload]
         np.testing.assert_array_equal(date_out, self.expected)
 
 
@@ -332,7 +332,7 @@ class Test_convert_date(unittest.TestCase):
             self.assertTrue(isnan(out))  # type: ignore[arg-type]
 
     def test_no_date_zero_error(self) -> None:
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             dcs.convert_date(self.seconds, "datetime")
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
@@ -344,30 +344,30 @@ class Test_convert_date(unittest.TestCase):
     def test_numpy_vectors(self) -> None:
         dates = np.array([self.numpy, self.nat], dtype="datetime64[ns]")
         out = dcs.convert_date(dates, "sec", self.date_zero, old_form="numpy", numpy_form="datetime64[ms]")
-        np.testing.assert_array_equal(out, np.array([self.seconds, nan]))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(out, np.array([self.seconds, nan]))
         out = dcs.convert_date(dates, "matplotlib", self.date_zero, old_form="numpy", numpy_form="datetime64[ms]")
-        np.testing.assert_array_equal(out, np.array([self.matplotlib, nan]))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(out, np.array([self.matplotlib, nan]))
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_datetime_lists(self) -> None:
         # DCS: note that this avoids a bug in matplotlib by controlling the order of elements in this list
         dates = [self.date, self.datetime]
         out = dcs.convert_date(dates, "numpy", old_form="datetime")
-        np.testing.assert_array_equal(out, np.array([self.np2, self.numpy]))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(out, np.array([self.np2, self.numpy]))
         if dcs.HAVE_MPL:  # pragma: no branch
             with warnings.catch_warnings(action="ignore", category=UserWarning):
                 out = dcs.convert_date(dates, "matplotlib", old_form="datetime")
-            np.testing.assert_array_equal(out, np.array([self.mpl2, self.matplotlib]))  # type: ignore[arg-type]
+            np.testing.assert_array_equal(out, np.array([self.mpl2, self.matplotlib]))
         out = dcs.convert_date([self.seconds, self.seconds], "numpy", self.date_zero, old_form="sec")
-        np.testing.assert_array_equal(out, np.array([self.numpy, self.numpy]))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(out, np.array([self.numpy, self.numpy]))
 
     @unittest.skipIf(not dcs.HAVE_MPL, "Skipping due to missing matplotlib dependency.")
     def test_seconds_vectors(self) -> None:
         dates = np.array([self.seconds, -inf, inf, nan])
         out = dcs.convert_date(dates, "matplotlib", self.date_zero, old_form="sec")
-        np.testing.assert_array_equal(out, np.array([self.matplotlib, -inf, inf, nan]))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(out, np.array([self.matplotlib, -inf, inf, nan]))
         out = dcs.convert_date(dates, "numpy", self.date_zero, old_form="sec")
-        np.testing.assert_array_equal(out, np.array([self.numpy, self.nat, self.nat, self.nat], dtype="datetime64[ns]"))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(out, np.array([self.numpy, self.nat, self.nat, self.nat], dtype="datetime64[ns]"))
 
     @unittest.skipIf(not dcs.HAVE_MPL, "Skipping due to missing matplotlib dependency.")
     def test_mpl_vectors(self) -> None:
@@ -375,7 +375,7 @@ class Test_convert_date(unittest.TestCase):
         out = dcs.convert_date(dates, "sec", self.date_zero, old_form="matplotlib")
         np.testing.assert_array_almost_equal(out, np.array([self.seconds, -inf, inf, nan]))  # type: ignore[arg-type]
         out = dcs.convert_date(dates, "numpy", self.date_zero, old_form="matplotlib")
-        np.testing.assert_array_equal(out, np.array([self.numpy, self.nat, self.nat, self.nat], dtype="datetime64[ns]"))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(out, np.array([self.numpy, self.nat, self.nat, self.nat], dtype="datetime64[ns]"))
 
     @unittest.skipIf(not dcs.HAVE_NUMPY, "Skipping due to missing numpy dependency.")
     def test_numpy_floats_and_ints(self) -> None:
@@ -383,12 +383,12 @@ class Test_convert_date(unittest.TestCase):
         times2 = np.arange(10, dtype=int)
         exp = self.numpy + 10**9 * np.arange(10).astype(np.int64)
         out = dcs.convert_date(times1, "numpy", self.datetime)
-        np.testing.assert_array_equal(out, exp)  # type: ignore[arg-type]
+        np.testing.assert_array_equal(out, exp)
         out = dcs.convert_date(times2, "numpy", self.datetime)
-        np.testing.assert_array_equal(out, exp)  # type: ignore[arg-type]
+        np.testing.assert_array_equal(out, exp)
 
     def test_future_forms(self) -> None:
-        with self.assertRaises(AssertionError):
+        with self.assertRaises(ValueError):
             dcs.convert_date(self.seconds / dcs.ONE_MINUTE, "min", self.date_zero, old_form="sec")
 
 

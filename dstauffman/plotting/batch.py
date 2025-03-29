@@ -123,11 +123,11 @@ def plot_bpe_convergence(
         ax = fig.add_subplot(111)
     else:
         (fig, ax) = fig_ax
-    assert (manager := fig.canvas.manager) is not None
+    assert fig.canvas.manager is not None
     if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
-        manager.set_window_title(this_title)
+        fig.canvas.manager.set_window_title(this_title)
     else:
-        manager.set_window_title(sup.get_text())
+        fig.canvas.manager.set_window_title(sup.get_text())
     # add an axis and plot the data
     ax.semilogy(time, costs, "b.-", linewidth=2)
     # add labels

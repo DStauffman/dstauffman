@@ -106,10 +106,10 @@ class Test_aerospace_KfInnov(unittest.TestCase):
         self.assertIsNot(innov.innov, innov2.innov)
         self.assertIsNot(innov.norm, innov2.norm)
         self.assertIsNot(innov.status, innov2.status)
-        np.testing.assert_array_equal(innov.time, innov2.time)  # type: ignore[arg-type]
-        np.testing.assert_array_equal(innov.innov, innov2.innov)  # type: ignore[arg-type]
-        np.testing.assert_array_equal(innov.norm, innov2.norm)  # type: ignore[arg-type]
-        np.testing.assert_array_equal(innov.status, innov2.status)  # type: ignore[arg-type]
+        np.testing.assert_array_equal(innov.time, innov2.time)
+        np.testing.assert_array_equal(innov.innov, innov2.innov)
+        np.testing.assert_array_equal(innov.norm, innov2.norm)
+        np.testing.assert_array_equal(innov.status, innov2.status)
 
     def test_combine_nominal(self) -> None:
         innov1 = space.KfInnov(name="Name 1", units="m", chan=("X", "Y"), num_innovs=30, num_axes=2, time_dtype=float)
@@ -312,7 +312,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         kf.save(self.filename)
         kf2 = space.Kf.load(self.filename)
         self.assertEqual(kf.chan, kf2.chan)
-        np.testing.assert_array_equal(kf.time, kf2.time)  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf.time, kf2.time)
 
     def test_combine_nominal(self) -> None:
         kf1 = space.Kf(
@@ -346,7 +346,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         kf3 = kf1.combine(kf2)
         self.assertEqual(kf3.name, "Name 1")
         self.assertEqual(kf3.chan, ("a", "b", "c", "d", "e", "f"))
-        np.testing.assert_array_equal(kf3.time, np.arange(90.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf3.time, np.arange(90.0))
         self.assertEqual(kf3.att.shape, (4, 90))  # type: ignore[union-attr]
         self.assertEqual(kf3.pos.shape, (3, 90))  # type: ignore[union-attr]
         self.assertEqual(kf3.vel.shape, (3, 90))  # type: ignore[union-attr]
@@ -449,9 +449,9 @@ class Test_aerospace_Kf(unittest.TestCase):
         self.assertEqual(kf3.chan, ("dx", "dy", "dz"))
         self.assertEqual(kf3.innov.units, "m")
         self.assertEqual(kf3.innov.chan, ("X", "Y"))
-        np.testing.assert_array_equal(kf2.time, np.arange(10.0, 20.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf2.time, np.arange(10.0, 20.0))
         np.testing.assert_array_equal(kf2.innov.time, np.arange(10.0, 20.0, 0.5))
-        np.testing.assert_array_equal(kf3.time, np.arange(20.0, 41.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf3.time, np.arange(20.0, 41.0))
         np.testing.assert_array_equal(kf3.innov.time, np.arange(20.0, 40.5, 0.5))
         self.assertEqual(kf2.att.shape, (4, 10))  # type: ignore[union-attr]
         self.assertEqual(kf2.innov.innov.shape, (2, 20))
@@ -479,7 +479,7 @@ class Test_aerospace_Kf(unittest.TestCase):
         self.assertEqual(kf.chan, ("dx", "dy", "dz"))
         self.assertEqual(kf.innov.units, "m")
         self.assertEqual(kf.innov.chan, ("X", "Y"))
-        np.testing.assert_array_equal(kf2.time, np.arange(10.0, 21.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf2.time, np.arange(10.0, 21.0))
         self.assertEqual(kf2.att.shape, (4, 11))  # type: ignore[union-attr]
         np.testing.assert_array_equal(kf2.innov.time, np.arange(10.0, 20.5, 0.5))
         self.assertEqual(kf2.innov.innov.shape, (2, 21))
@@ -506,15 +506,15 @@ class Test_aerospace_Kf(unittest.TestCase):
             self.assertEqual(this.chan, ("dx", "dy", "dz"))
             self.assertEqual(this.innov.units, "m")
             self.assertEqual(this.innov.chan, ("X", "Y"))
-        np.testing.assert_array_equal(kf2.time, np.arange(10.0, 21.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf2.time, np.arange(10.0, 21.0))
         self.assertEqual(kf2.att.shape, (4, 11))  # type: ignore[union-attr]
         np.testing.assert_array_equal(kf2.innov.time, np.arange(10.0, 20.5, 0.5))
         self.assertEqual(kf2.innov.innov.shape, (2, 21))
-        np.testing.assert_array_equal(kf3.time, np.arange(0.0, 10.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf3.time, np.arange(0.0, 10.0))
         self.assertEqual(kf3.att.shape, (4, 10))  # type: ignore[union-attr]
         np.testing.assert_array_equal(kf3.innov.time, np.arange(5.0, 10.0, 0.5))
         self.assertEqual(kf3.innov.innov.shape, (2, 10))
-        np.testing.assert_array_equal(kf4.time, np.arange(21.0, 60.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf4.time, np.arange(21.0, 60.0))
         self.assertEqual(kf4.att.shape, (4, 39))  # type: ignore[union-attr]
         np.testing.assert_array_equal(kf4.innov.time, np.arange(20.5, 60.0, 0.5))
         self.assertEqual(kf4.innov.innov.shape, (2, 79))  # fix
@@ -609,7 +609,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         kf_record2 = space.KfRecord(num_points=60, num_states=9, num_active=6, num_axes=3, time_dtype=float)
         kf_record2.time[:] = np.arange(30.0, 90.0)  # type: ignore[index]
         kf_record3 = kf_record1.combine(kf_record2)
-        np.testing.assert_array_equal(kf_record3.time, np.arange(90.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf_record3.time, np.arange(90.0))
         self.assertEqual(kf_record3.P.shape, (6, 6, 90), "P shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record3.stm.shape, (6, 6, 90), "stm shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record3.H.shape, (3, 9, 90), "H shape mismatch.")  # type: ignore[union-attr]
@@ -622,7 +622,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         kf_record2 = space.KfRecord(num_points=60, num_states=6, num_active=3, num_axes=2, time_dtype=float)
         kf_record2.time[:] = np.arange(30.0, 90.0)  # type: ignore[index]
         kf_record3 = kf_record1.combine(kf_record2)
-        np.testing.assert_array_equal(kf_record3.time, np.arange(30.0, 90.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf_record3.time, np.arange(30.0, 90.0))
         self.assertEqual(kf_record3.P.shape, (3, 3, 60), "P shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record3.stm.shape, (3, 3, 60), "stm shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record3.H.shape, (2, 6, 60), "H shape mismatch.")  # type: ignore[union-attr]
@@ -638,7 +638,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         kf_record3 = kf_record1.combine(kf_record2, inplace=True)
         self.assertIs(kf_record1, kf_record3)
         np.testing.assert_array_equal(
-            kf_record3.time,  # type: ignore[arg-type]
+            kf_record3.time,
             self.date_zero + (10**9 * np.arange(90, dtype=np.int64)).astype(NP_TIMEDELTA_FORM),
         )
         self.assertEqual(kf_record3.P.shape, (6, 6, 90), "P shape mismatch.")  # type: ignore[union-attr]
@@ -659,9 +659,9 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         kf_record2 = kf_record.chop(ti=10, tf=20, include_last=False)
         kf_record3 = kf_record.chop(ti=20, tf=40, include_last=True)
         self.assertIsNot(kf_record, kf_record2)
-        np.testing.assert_array_equal(kf_record.time, np.arange(60.0))  # type: ignore[arg-type]
-        np.testing.assert_array_equal(kf_record2.time, np.arange(10.0, 20.0))  # type: ignore[arg-type]
-        np.testing.assert_array_equal(kf_record3.time, np.arange(20.0, 41.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf_record.time, np.arange(60.0))
+        np.testing.assert_array_equal(kf_record2.time, np.arange(10.0, 20.0))
+        np.testing.assert_array_equal(kf_record3.time, np.arange(20.0, 41.0))
         self.assertEqual(kf_record2.stm.shape, (6, 6, 10))  # type: ignore[union-attr]
         self.assertEqual(kf_record2.H.shape, (3, 9, 10))  # type: ignore[union-attr]
         self.assertEqual(kf_record2.Pz.shape, (3, 3, 10))  # type: ignore[union-attr]
@@ -678,7 +678,7 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         kf_record.time[:] = np.arange(30.0)  # type: ignore[index]
         kf_record2 = kf_record.chop(ti=10, tf=20, inplace=True)
         self.assertIs(kf_record, kf_record2)
-        np.testing.assert_array_equal(kf_record2.time, np.arange(10.0, 21.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf_record2.time, np.arange(10.0, 21.0))
         self.assertEqual(kf_record2.P.shape, (3, 3, 11), "P shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record2.stm.shape, (3, 3, 11), "stm shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record2.H.shape, (2, 6, 11), "H shape mismatch.")  # type: ignore[union-attr]
@@ -690,21 +690,21 @@ class Test_aerospace_KfRecord(unittest.TestCase):
         kf_record = space.KfRecord(num_points=60, num_states=6, num_active=3, num_axes=2, time_dtype=float)
         (kf_record3, kf_record2, kf_record4) = kf_record.chop(ti=10, tf=20, return_ends=True)
         self.assertIsNot(kf_record, kf_record2)
-        np.testing.assert_array_equal(kf_record2.time, np.arange(10.0, 21.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf_record2.time, np.arange(10.0, 21.0))
         self.assertEqual(kf_record2.P.shape, (3, 3, 11), "P shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record2.stm.shape, (3, 3, 11), "stm shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record2.H.shape, (2, 6, 11), "H shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record2.Pz.shape, (2, 2, 11), "Pz shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record2.K.shape, (3, 2, 11), "K shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record2.z.shape, (2, 11), "z shape mismatch.")  # type: ignore[union-attr]
-        np.testing.assert_array_equal(kf_record3.time, np.arange(0.0, 10.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf_record3.time, np.arange(0.0, 10.0))
         self.assertEqual(kf_record3.P.shape, (3, 3, 10), "P shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record3.stm.shape, (3, 3, 10), "stm shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record3.H.shape, (2, 6, 10), "H shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record3.Pz.shape, (2, 2, 10), "Pz shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record3.K.shape, (3, 2, 10), "K shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record3.z.shape, (2, 10), "z shape mismatch.")  # type: ignore[union-attr]
-        np.testing.assert_array_equal(kf_record4.time, np.arange(21.0, 60.0))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(kf_record4.time, np.arange(21.0, 60.0))
         self.assertEqual(kf_record4.P.shape, (3, 3, 39), "P shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record4.stm.shape, (3, 3, 39), "stm shape mismatch.")  # type: ignore[union-attr]
         self.assertEqual(kf_record4.H.shape, (2, 6, 39), "H shape mismatch.")  # type: ignore[union-attr]

@@ -899,7 +899,7 @@ class Test_modd(unittest.TestCase):
 
     def test_nominal(self) -> None:
         y = dcs.modd(self.x, self.mod)
-        np.testing.assert_array_equal(y, self.y)  # type: ignore[arg-type]
+        np.testing.assert_array_equal(y, self.y)
 
     def test_scalar(self) -> None:
         y = dcs.modd(4, 4)
@@ -907,11 +907,11 @@ class Test_modd(unittest.TestCase):
 
     def test_list1(self) -> None:
         y = dcs.modd([2, 4], 4)
-        np.testing.assert_array_equal(y, np.array([2, 4]))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(y, np.array([2, 4]))
 
     def test_list2(self) -> None:
         y = dcs.modd(4, [3, 4])
-        np.testing.assert_array_equal(y, np.array([1, 4]))  # type: ignore[arg-type]
+        np.testing.assert_array_equal(y, np.array([1, 4]))
 
     def test_modify_inplace(self) -> None:
         out = np.zeros(self.x.shape, dtype=int)
@@ -1007,6 +1007,13 @@ class Test_np_digitize(unittest.TestCase):
     def test_for_nans(self) -> None:
         with self.assertRaises(ValueError):
             dcs.np_digitize(np.array([1, 10, np.nan]), self.bins)
+
+    def test_scalars(self) -> None:
+        with self.assertRaises(ValueError) as err:
+            dcs.np_digitize(-0.5, [0.0, 1.0])
+        self.assertEqual(
+            str(err.exception), "Some values (1 left, 0 right) of x are outside the given bins ([0.0, 1.0]). Such as -0.5"
+        )
 
 
 # %% histcounts

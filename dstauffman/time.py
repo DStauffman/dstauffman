@@ -410,8 +410,10 @@ def convert_date(  # noqa: C901
     # fmt: on
     all_forms = date_forms | time_forms
     # data checks
-    assert form in all_forms, f'Unexpected form of "{form}".'
-    assert old_form in all_forms, f'Unexpected old_form of "{old_form}".'
+    if form not in all_forms:
+        raise ValueError(f'Unexpected form of "{form}".')
+    if old_form not in all_forms:
+        raise ValueError(f'Unexpected old_form of "{old_form}".')
     # exit if not changing anything
     if form == old_form:
         return date  # type: ignore[no-any-return]
@@ -439,8 +441,10 @@ def convert_date(  # noqa: C901
             is_actual_date = np.any(isfinite(date))  # type: ignore[assignment]
     # check for bad date_zero
     if form in time_forms or (old_form in time_forms and is_actual_date):
-        assert date_zero is not None, "You must specify a date_zero."
-        assert isinstance(date_zero, datetime.datetime), "The date_zero is expected to be a datetime object."
+        if date_zero is None:
+            raise ValueError("You must specify a date_zero.")
+        if not isinstance(date_zero, datetime.datetime):
+            raise ValueError("The date_zero is expected to be a datetime object.")
     # do all possible conversions
     # from seconds
     if old_form in time_forms:

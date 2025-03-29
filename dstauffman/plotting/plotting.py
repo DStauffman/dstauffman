@@ -929,11 +929,11 @@ def plot_correlation_matrix(  # noqa: C901
     else:
         (fig, ax) = fig_ax
     # set figure title
-    assert (manager := fig.canvas.manager) is not None
+    assert fig.canvas.manager is not None
     if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
-        manager.set_window_title(matrix_name)
+        fig.canvas.manager.set_window_title(matrix_name)
     else:
-        manager.set_window_title(sup.get_text())
+        fig.canvas.manager.set_window_title(sup.get_text())
     # set axis color to none
     ax.patch.set_facecolor("none")
     # set title
@@ -1254,11 +1254,11 @@ def plot_histogram(  # noqa: C901
         ax = fig.add_subplot(1, 1, 1)
     else:
         (fig, ax) = fig_ax
-    assert (manager := fig.canvas.manager) is not None
+    assert fig.canvas.manager is not None
     if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
-        manager.set_window_title(description)
+        fig.canvas.manager.set_window_title(description)
     else:
-        manager.set_window_title(sup.get_text())
+        fig.canvas.manager.set_window_title(sup.get_text())
     ax.set_title(description)
     ax.add_collection(coll)
     ax.grid(True)

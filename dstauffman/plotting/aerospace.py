@@ -2042,8 +2042,8 @@ def plot_tci(
     fig, ax = fig_ax[0]
     # Plot the basic data
     title = "Thermosphere Climate Index"
-    assert (manager := fig.canvas.manager) is not None
-    manager.set_window_title(title)
+    assert fig.canvas.manager is not None
+    fig.canvas.manager.set_window_title(title)
     # fmt: off
     make_time_plot(
         title, time, data, units="W", second_units=("10^11 W", 1e-11), time_units="numpy",
@@ -2124,8 +2124,8 @@ def plot_kp(
     fig, ax = fig_ax[0]
     # plot the data
     title = "Estimated Planetary K index (3 hour data)"
-    assert (manager := fig.canvas.manager) is not None
-    manager.set_window_title(title)
+    assert fig.canvas.manager is not None
+    fig.canvas.manager.set_window_title(title)
     ax.plot([time[0], time[-1]], [data[0], data[-1]], ".", alpha=0.05)
     for t, d, b in zip(date2num(time), data, kp_color_ix):
         if ~np.isnan(d):

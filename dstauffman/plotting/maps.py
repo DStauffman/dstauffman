@@ -167,8 +167,8 @@ def plot_map(  # noqa: C901
     map_lon = [map_data[name][1, ...] for name in land_names]
 
     fig = plt.figure()
-    assert (manager := fig.canvas.manager) is not None
-    manager.set_window_title(title)
+    assert fig.canvas.manager is not None
+    fig.canvas.manager.set_window_title(title)
     ax = fig.add_subplot(1, 1, 1)
     if land_colors == "none":
         land_cmap = ColorMap(ListedColormap((kwargs.pop("land_colormap", "xkcd:white"),)))
@@ -365,8 +365,8 @@ def plot_map_3d(  # noqa: C901
     map_lon = [map_scale * map_data[name][1, ...] for name in land_names]
 
     fig = plt.figure()
-    assert (manager := fig.canvas.manager) is not None
-    manager.set_window_title(title)
+    assert fig.canvas.manager is not None
+    fig.canvas.manager.set_window_title(title)
     ax = fig.add_subplot(1, 1, 1, projection="3d")
     if land_colors == "none":
         land_cmap = ColorMap(ListedColormap((kwargs.pop("land_colormap", "xkcd:white"),)))

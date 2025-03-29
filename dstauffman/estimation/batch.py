@@ -1288,6 +1288,10 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     opti_opts : class OptiOpts
         Optimization options
 
+    Notes
+    -----
+    #.  Explicitly raises AssertionError so that it is never disabled.
+
     Examples
     --------
     >>> from dstauffman.estimation import OptiOpts, validate_opti_opts
@@ -1311,24 +1315,31 @@ def validate_opti_opts(opti_opts: OptiOpts) -> bool:
     _print_divider(new_line=False, level=LogLevel.L5)
     logger.log(LogLevel.L5, "Validating optimization options.")
     # Must have specified all parameters
-    assert callable(opti_opts.model_func), "Model function must be callable."
-    assert isinstance(opti_opts.model_args, dict), "Model args must be a dictionary."
-    assert callable(opti_opts.cost_func), "Cost function must be callable."
-    assert isinstance(opti_opts.cost_args, dict), "Cost args must be a dictionary."
-    assert callable(opti_opts.get_param_func), "Get parameters function must be callable."
-    assert callable(opti_opts.set_param_func), "Get paramaters function must be callable."
-    assert opti_opts.output_folder is None or isinstance(
-        opti_opts.output_folder, Path
-    ), "Use None or pathlib.Path, not str for output_folder."
-    assert opti_opts.output_results is None or isinstance(
-        opti_opts.output_results, Path
-    ), "Use None or pathlib.Path, not str for output_results."
+    if not callable(opti_opts.model_func):
+        raise AssertionError("Model function must be callable.")
+    if not isinstance(opti_opts.model_args, dict):
+        raise AssertionError("Model args must be a dictionary.")
+    if not callable(opti_opts.cost_func):
+        raise AssertionError("Cost function must be callable.")
+    if not isinstance(opti_opts.cost_args, dict):
+        raise AssertionError("Cost args must be a dictionary.")
+    if not callable(opti_opts.get_param_func):
+        raise AssertionError("Get parameters function must be callable.")
+    if not callable(opti_opts.set_param_func):
+        raise AssertionError("Get paramaters function must be callable.")
+    if opti_opts.output_folder is not None and not isinstance(opti_opts.output_folder, Path):
+        raise AssertionError("Use None or pathlib.Path, not str for output_folder.")
+    if opti_opts.output_results is not None and not isinstance(opti_opts.output_results, Path):
+        raise AssertionError("Use None or pathlib.Path, not str for output_results.")
     # Must estimate at least one parameter (TODO: make work with zero?)
-    assert isinstance(opti_opts.params, list) and len(opti_opts.params) > 0
+    if not isinstance(opti_opts.params, list) or len(opti_opts.params) < 1:
+        raise AssertionError("Must Estimation at least one parameter.")
     # Must be one of these two slope methods
-    assert opti_opts.slope_method in {"one_sided", "two_sided"}
+    if opti_opts.slope_method not in {"one_sided", "two_sided"}:
+        raise AssertionError(f"Unknown slope_method of {opti_opts.slope_method}")
     # Must be one of these two seach methods
-    assert opti_opts.search_method in {"trust_region", "levenberg_marquardt"}
+    if opti_opts.search_method not in {"trust_region", "levenberg_marquardt"}:
+        raise AssertionError(f"Unknown search_method of {opti_opts.search_method}")
     # Return True to signify that everything validated correctly
     return True
 

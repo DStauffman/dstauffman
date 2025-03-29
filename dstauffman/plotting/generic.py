@@ -306,7 +306,8 @@ def make_generic_plot(  # noqa: C901
     # possible plotting functions
     def _plot_linear(ax: Axes, time: _Times | None, data: _Data | None, symbol: str, *args: Any, **kwargs: Any) -> None:
         """Plots a normal linear plot with passthrough options."""
-        assert len(args) == 0, "Unexpected positional arguments."
+        if len(args) != 0:
+            raise AssertionError("Unexpected positional arguments.")
         assert time is not None
         assert data is not None
         try:
@@ -318,7 +319,8 @@ def make_generic_plot(  # noqa: C901
 
     def _plot_zoh(ax: Axes, time: _Times | None, data: _Data | None, symbol: str, *args: Any, **kwargs: Any) -> None:
         """Plots a zero-order hold step plot with passthrough options."""
-        assert len(args) == 0, "Unexpected positional arguments."
+        if len(args) != 0:
+            raise AssertionError("Unexpected positional arguments.")
         assert time is not None
         assert data is not None
         try:
@@ -329,7 +331,7 @@ def make_generic_plot(  # noqa: C901
         ax.step(time, data, symbol, where="post", markerfacecolor="none", **kwargs)  # type: ignore[arg-type]
 
     # some basic flags and checks
-    assert plot_type in {
+    if plot_type not in {
         "time",
         "scatter",
         "bar",
@@ -340,8 +342,10 @@ def make_generic_plot(  # noqa: C901
         "differencs",
         "quat",
         "quaternion",
-    }, f"Unexpected plot type: {plot_type}."
-    assert isinstance(description, str), "The description should be a string, check your argument order."
+    }:
+        raise ValueError(f"Unexpected plot type: {plot_type}.")
+    if not isinstance(description, str):
+        raise AssertionError("The description should be a string, check your argument order.")
     if use_datashader:
         assert HAVE_PANDAS and HAVE_DS, "You must have pandas and datashader to run datashader plots."
     doing_diffs = plot_type in {"diff", "differences", "quat", "quaternions"}
@@ -356,9 +360,8 @@ def make_generic_plot(  # noqa: C901
     if is_cat_plot:
         assert cats is not None, f"You must pass in the categories if doing a {plot_type} plot."
     if doing_diffs:
-        assert (
-            not data_is_list and not dat2_is_list
-        ), "Data can't be lists for diffs right now."  # TODO: remove this restriction
+        if data_is_list or dat2_is_list:
+            raise AssertionError("Data can't be lists for diffs right now.")  # TODO: remove this restriction
         have_data_one = data_one is not None and np.any(~np.isnan(data_one))
         have_data_two = data_two is not None and np.any(~np.isnan(data_two))
         have_both = have_data_one and have_data_two
@@ -394,10 +397,12 @@ def make_generic_plot(  # noqa: C901
         time_two = np.atleast_1d(time_two)  # type: ignore[arg-type, assignment]
     if not data_is_list and data_one is not None:
         data_one = np.atleast_2d(data_one)
-        assert data_one.ndim < 3, "data_one must be 0d, 1d or 2d."  # pyright: ignore[reportOptionalMemberAccess]
+        if data_one.ndim >= 3:  # pyright: ignore[reportOptionalMemberAccess]
+            raise AssertionError("data_one must be 0d, 1d or 2d.")
     if not dat2_is_list and data_two is not None:
         data_two = np.atleast_2d(data_two)
-        assert data_two.ndim < 3, "data_two must be 0d, 1d or 2d."  # pyright: ignore[reportOptionalMemberAccess]
+        if data_two.ndim >= 3:  # pyright: ignore[reportOptionalMemberAccess]
+            raise AssertionError("data_two must be 0d, 1d or 2d.")
 
     # check for valid data
     # TODO: implement this
@@ -453,15 +458,19 @@ def make_generic_plot(  # noqa: C901
         elements = [f"Channel {i+1}" for i in range(np.max((s1, s2)))]
     # find number of elements being plotted
     num_channels = len(elements)
-    assert num_channels == np.maximum(
-        s1, s2
-    ), f"The given elements need to match the data sizes, got {num_channels} and {np.maximum(s1, s2)}."
-    assert s0a in (0, 1, num_channels), "The time doesn't match the number of elements."
-    assert s0b in (0, 1, num_channels), "The time doesn't match the number of elements."
-    assert s1 in (0, s2) or s2 == 0, f"Sizes of data channels must be consistent, got {s1} and {s2}."
+    if num_channels != np.maximum(s1, s2):
+        raise AssertionError(f"The given elements need to match the data sizes, got {num_channels} and {np.maximum(s1, s2)}.")
+    if s0a not in (0, 1, num_channels):
+        raise AssertionError("The time doesn't match the number of elements.")
+    if s0b not in (0, 1, num_channels):
+        raise AssertionError("The time doesn't match the number of elements.")
+    if s1 not in (0, s2) and s2 != 0:
+        raise AssertionError(f"Sizes of data channels must be consistent, got {s1} and {s2}.")
     if is_quat_diff:
-        assert s1 in (0, 4), "Must be a 4-element quaternion"
-        assert s2 in (0, 4), "Must be a 4-element quaternion"
+        if s1 not in (0, 4):
+            raise AssertionError("Must be a 4-element quaternion")
+        if s2 not in (0, 4):
+            raise AssertionError("Must be a 4-element quaternion")
 
     # % Calculations
     # calculate the differences
@@ -2010,11 +2019,11 @@ def make_connected_sets(  # noqa: C901
         ax = fig.add_subplot(1, 1, 1)
     else:
         (fig, ax) = fig_ax
-    assert (manager := fig.canvas.manager) is not None
+    assert fig.canvas.manager is not None
     if (sup := fig._suptitle) is None:  # type: ignore[attr-defined]  # pylint: disable=protected-access
-        manager.set_window_title(description + extra_text)
+        fig.canvas.manager.set_window_title(description + extra_text)
     else:
-        manager.set_window_title(sup.get_text())
+        fig.canvas.manager.set_window_title(sup.get_text())
 
     # build datashader information for use later
     color_key = "color" if ds_color.startswith("xkcd") else "colormap"

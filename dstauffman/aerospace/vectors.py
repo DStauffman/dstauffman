@@ -473,7 +473,8 @@ def interp_vector(
     >>> y = interp_vector(x, xp, yp, extrapolate=True)
 
     """
-    assert (x_is_datetime := is_datetime(x)) ^ (not is_datetime(xp)), "Both x and xp must be datetime if either one is."
+    x_is_datetime = is_datetime(x)
+    assert x_is_datetime ^ (not is_datetime(xp)), "Both x and xp must be datetime if either one is."
 
     func: Callable[[_N | _D, _N | _D, _N | _V, Unpack[_InterpKwArgs]], _V]
     # fmt: off
