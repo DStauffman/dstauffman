@@ -105,6 +105,7 @@ if TYPE_CHECKING:
 
     class _TimeKwargs(TypedDict):
         name: NotRequired[str]
+        case_name: NotRequired[str]
         save_plot: NotRequired[bool]
         save_path: NotRequired[Path | None]
         elements: NotRequired[list[str] | tuple[str, ...] | None]
@@ -524,6 +525,7 @@ def plot_time_history(
     # make local copy of opts that can be modified without changing the original
     this_opts = Opts() if opts is None else opts.__class__(opts)
     # opts overrides
+    this_opts.case_name = kwargs.pop("case_name", this_opts.case_name)
     this_opts.save_plot = kwargs.pop("save_plot", this_opts.save_plot)
     this_opts.save_path = kwargs.pop("save_path", this_opts.save_path)
     if "classify" in kwargs:

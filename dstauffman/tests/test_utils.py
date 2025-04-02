@@ -789,6 +789,20 @@ class Test_write_text_file(unittest.TestCase):
         ctx.close()
         self.assertEqual(output, r'Unable to open file "AA:\non_existent_path\bad_file.txt" for writing.')
 
+    def test_append_file(self) -> None:
+        dcs.write_text_file(self.filepath, self.contents)
+        with open(self.filepath, "rt") as file:
+            text = file.read()
+        self.assertEqual(text, self.contents)
+        dcs.write_text_file(self.filepath, "New Contents\n")
+        with open(self.filepath, "rt") as file:
+            text = file.read()
+        self.assertEqual(text, "New Contents\n")
+        dcs.write_text_file(self.filepath, "Additional Notes.\n\n", append=True)
+        with open(self.filepath, "rt") as file:
+            text = file.read()
+        self.assertEqual(text, "New Contents\nAdditional Notes.\n\n")
+
     @classmethod
     def tearDownClass(cls) -> None:
         cls.filepath.unlink(missing_ok=True)

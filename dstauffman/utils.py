@@ -652,6 +652,8 @@ def read_text_file(filename: str | Path, encoding: str = "utf-8") -> str:
     ----------
     filename : str or class pathlib.Path
         fullpath name of the file to read
+    encoding : str, optional, default is "utf-8"
+        Encoding used to write file
 
     Returns
     -------
@@ -696,7 +698,7 @@ def read_text_file(filename: str | Path, encoding: str = "utf-8") -> str:
 
 
 # %% Functions - write_text_file
-def write_text_file(filename: str | Path, text: str, encoding: str = "utf-8") -> None:
+def write_text_file(filename: str | Path, text: str, encoding: str = "utf-8", *, append: bool = False) -> None:
     r"""
     Open and write the specified text to a file.
 
@@ -706,6 +708,10 @@ def write_text_file(filename: str | Path, text: str, encoding: str = "utf-8") ->
         fullpath name of the file to read
     text : str
         text to be written to the file
+    encoding : str, optional, default is "utf-8"
+        Encoding used to write file
+    append : bool, optional, default is False
+        Whether to append to an existing file
 
     Raises
     ------
@@ -727,9 +733,10 @@ def write_text_file(filename: str | Path, text: str, encoding: str = "utf-8") ->
     >>> filename.unlink()
 
     """
+    mode = "at" if append else "wt"
     try:
         # open file for writing
-        with open(filename, "wt", encoding=encoding) as file:
+        with open(filename, mode, encoding=encoding) as file:
             # write file
             file.write(text)
     except:
@@ -1347,6 +1354,7 @@ def execute_wrapper(
     dry_run: bool = False,
     ignored_codes: Iterable[int] | None = None,
     filename: Path | None = None,
+    append: bool = False,
     env: dict[str, str] | None = None,
     print_status: bool = True,
 ) -> ReturnCodes | list[str]:
@@ -1365,6 +1373,8 @@ def execute_wrapper(
         If given, a list of non-zero error codes to ignore
     filename : class pathlib.Path, optional, default is to not write
         Name of the file to write the output to, ignore if empty string
+    append : bool, optional, default is False
+        Whether to append to the given filename if it already exists
     env : dict, optional
         Dictionary of environment variables to update for the call
     print_status : bool, optional, default is True
@@ -1415,7 +1425,7 @@ def execute_wrapper(
         lines = list(execute(command_list, folder, ignored_codes=ignored_codes, env=env))
     # optionally write to text file if a filename is given
     if filename is not None:
-        write_text_file(filename, "".join(lines))
+        write_text_file(filename, "".join(lines), append=append)
     return lines
 
 
