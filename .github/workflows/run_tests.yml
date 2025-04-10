@@ -2,45 +2,238 @@ name: Run Unit Tests via Pytest
 
 on: [push]
 
+env:
+  DCS_TESTS_DIR: "${{ github.workspace }}/dstauffman/tests"
+  DCS_SHELL_DIR: "${{ github.workspace }}/shell"
+  PY_VERSION: "3.13"
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.12"]
-
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+    - name: Check out repository
+      uses: actions/checkout@v4
+
+    - name: Install uv and set the python version
+      uses: astral-sh/setup-uv@v5
       with:
-        python-version: ${{ matrix.python-version }}
+        enable-cache: true
+        cache-local-path: "${{ github.workspace }}/uv_cache"
+        python-version: $PY_VERSION
+
+    - name: Set up Python $PY_VERSION
+      run: uv python install --python 
+
     - name: Install Dependencies for each environment
       run: |
-        python -m pip install --upgrade pip
-        python -m venv --upgrade-deps core_only
+        uv venv core_only --python $PY_VERSION
         source core_only/bin/activate
-        python -m pip install --upgrade pip
-        python -m pip install wheel
-        python -m pip install coverage[toml] pytest
+        uv pip install coverage[toml] pytest
         deactivate
+        
+        uv venv static --python $PY_VERSION
+        source static/bin/activate
+        uv pip install black coverage flake8 h5py isort matplotlib mypy numpy pandas pylint pylint-exit PyQt5 PyQt5-Stubs pytest pytest-cov qtpy scipy tblib
+        deactivate
+        
+        uv venv everything --python $PY_VERSION
+        source everything/bin/activate
+        uv pip install coverage dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas PyQt5 pytest pytest-cov qtpy scipy tblib
+        deactivate
+
     - name: Clone nubs
       uses: actions/checkout@v4
       with:
         repository: DStauffman/nubs
         path: ${{ github.workspace }}/nubs_repo
+
     - name: Clone slog
       uses: actions/checkout@v4
       with:
         repository: DStauffman/slog
         path: ${{ github.workspace }}/slog_repo
+
     - name: Set PYTHONPATH
       run: |
         echo "PYTHONPATH=${{ github.workspace }}/nubs_repo:${{ github.workspace }}/slog_repo" >> "$GITHUB_ENV"
+
+  static:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Mypy static analysis
+      continue-on-error: true
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source static/bin/activate
+        python --version
+        mypy --version
+        mypy
+
+    - name: Flake8 static analysis
+      continue-on-error: true
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source static/bin/activate
+        python --version
+        flake8 --version
+        flake8 .
+
+    - name: Pylint static analysis
+      continue-on-error: true
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source static/bin/activate
+        python --version
+        pylint --version
+        pylint lmspace || pylint-exit $?
+        pylint nubs || pylint-exit $?
+        pylint slog || pylint-exit $?
+        pylint scripts || pylint-exit $?
+
+    - name: black static analysis
+      continue-on-error: true
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source static/bin/activate
+        python --version
+        black --version
+        black . --check
+
+    - name: isort static analysis
+    continue-on-error: true
+    run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source static/bin/activate
+        isort --version
+        isort . --diff
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [build]
+    steps:
     - name: Test core_only with pytest
       run: |
         pwd
         ls -l
         echo $PYTHONPATH
         source core_only/bin/activate
-        python -m dstauffman tests
+        python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.core
+
+    - name: Test nubs on core_only
+      if: always()
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source core_only/bin/activate
+        python -m lmspace tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_core
+
+    - name: Test slog on core_only
+      if: always()
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source core_only/bin/activate
+        python -m lmspace tests --library slog --coverage --cov_file $DCS_SHELL_DIR/.coverage.slog_core
+
+    - name: Test without numba using static
+      if: always()
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source static/bin/activate
+        python -m lmspace tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.no_numba
+
+    - name: Test full library with everything
+      if: always()
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source everything/bin/activate
+        python -m lmspace tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.full
+
+    - name: Test nubs with everything
+      if: always()
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source everything/bin/activate
+        python -m lmspace tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_full
+
+    - name: Combine coverage reports
+      if: always()
+      run: |
+        pwd
+        ls -l
+        export COVERAGE_FILE=$LMS_SHELL_DIR/.coverage.imports
+        export COVERAGE_RCFILE=${{ github.workspace }}/pyproject.toml
+        export PYTHONPATH=${{ github.workspace }}:$PYTHONPATH
+        echo $PYTHONPATH
+        source core_only/bin/activate
+        coverage run $LMS_TESTS_DIR/test_commands_help.py
+        deactivate
+        source static/bin/activate
+        coverage run --append $LMS_TESTS_DIR/test_version.py
+        deactivate
+        source everything/bin/activate
+        coverage run --append $LMS_TESTS_DIR/test_version.py
+
+    - name: Test core_only with unittest
+      if: always()
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source core_only/bin/activate
+        python -m lmspace tests -u
+
+    - name: Test docstrings
+      if: always()
+      run: |
+        pwd
+        ls -l
+        echo $PYTHONPATH
+        source everything/bin/activate
+        python -m lmspace tests -d
+
+  coverage:
+    runs-on: ubuntu-latest
+    needs: [build, test]
+    steps:
+    - name: Make the coverage reports
+      run: |
+        source static/bin/activate
+        cd $DCS_SHELL_DIR
+        pwd
+        ls -la
+        export COVERAGE_FILE=.coverage
+        coverage --version
+        coverage combine --keep
+        coverage html --rcfile ${{ github.workspace }}/pyproject.toml
+        coverage xml --rcfile ${{ github.workspace }}/pyproject.toml
+
+  deploy:
+    if_merged:
+      if: ${{ github.event.pull_request.merged }}
+      runs-on: ubuntu-latest
+      needs: [build, test]
+      steps:
+      - name: Publish to Pypi
+        run: |
+          # source setuptools/bin/activate
+          echo "Publishing to Pypi (TODO: not yet written)" 
+          # python -m build
