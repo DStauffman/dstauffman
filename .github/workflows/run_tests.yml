@@ -25,23 +25,17 @@ jobs:
     - name: Set up Python
       run: uv python install
       
-    - name: Restore cached .core_only
+    - name: Restore caches
+      id: cache-restore
       uses: actions/cache/restore@v4
       with:
-        key: core_only-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .core_only
-      
-    - name: Restore cached .static
-      uses: actions/cache/restore@v4
-      with:
-        key: static-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .static
-      
-    - name: Restore cached .everything
-      uses: actions/cache/restore@v4
-      with:
-        key: everything-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .everything
+        path: |
+            .core_only
+            .static
+            .everything
+            .nubs_repo
+            .slog_repo
+        key: ${{ runner.os }}-cache
 
     - name: Install Dependencies for each environment
       run: |
@@ -61,24 +55,6 @@ jobs:
         uv pip install coverage dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas PyQt5 pytest pytest-cov qtpy scipy tblib
         deactivate
 
-    - name: Save cached core_only
-      uses: actions/cache/save@v4
-      with:
-        key: core_only-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .core_only
-
-    - name: Save cached static
-      uses: actions/cache/save@v4
-      with:
-        key: static-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .static
-
-    - name: Save cached everything
-      uses: actions/cache/save@v4
-      with:
-        key: everything-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .everything
-
     - name: Clone nubs
       uses: actions/checkout@v4
       with:
@@ -91,27 +67,33 @@ jobs:
         repository: DStauffman/slog
         path: ${{ github.workspace }}/.slog_repo
 
+    - name: Save caches
+      id: cache-save
+      uses: actions/cache/save@v4
+      with:
+        path: |
+            .core_only
+            .static
+            .everything
+            .nubs_repo
+            .slog_repo
+        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+
   static:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-    - name: Restore cached .core_only
+    - name: Restore caches
+      id: cache-restore
       uses: actions/cache/restore@v4
       with:
-        key: core_only-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .core_only
-      
-    - name: Restore cached .static
-      uses: actions/cache/restore@v4
-      with:
-        key: static-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .static
-      
-    - name: Restore cached .everything
-      uses: actions/cache/restore@v4
-      with:
-        key: everything-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .everything
+        path: |
+            .core_only
+            .static
+            .everything
+            .nubs_repo
+            .slog_repo
+        key: ${{ runner.os }}-cache
 
     - name: Mypy static analysis
       continue-on-error: true
@@ -174,23 +156,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
-    - name: Restore cached .core_only
+    - name: Restore caches
+      id: cache-restore
       uses: actions/cache/restore@v4
       with:
-        key: core_only-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .core_only
-      
-    - name: Restore cached .static
-      uses: actions/cache/restore@v4
-      with:
-        key: static-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .static
-      
-    - name: Restore cached .everything
-      uses: actions/cache/restore@v4
-      with:
-        key: everything-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .everything
+        path: |
+            .core_only
+            .static
+            .everything
+            .nubs_repo
+            .slog_repo
+        key: ${{ runner.os }}-cache
 
     - name: Test core_only with pytest
       run: |
@@ -285,11 +261,17 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build, test]
     steps:
-    - name: Restore cached .static
+    - name: Restore caches
+      id: cache-restore
       uses: actions/cache/restore@v4
       with:
-        key: static-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
-        path: .static
+        path: |
+            .core_only
+            .static
+            .everything
+            .nubs_repo
+            .slog_repo
+        key: ${{ runner.os }}-cache
 
     - name: Make the coverage reports
       run: |
