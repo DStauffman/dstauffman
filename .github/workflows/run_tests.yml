@@ -15,6 +15,7 @@ jobs:
 
     - name: Install uv and set the python version
       uses: astral-sh/setup-uv@v5
+      id: setup_python
       with:
         enable-cache: true
         cache-local-path: "${{ github.workspace }}/uv_cache"
@@ -22,23 +23,60 @@ jobs:
 
     - name: Set up Python
       run: uv python install
+      
+    - name: Restore cached .core_only
+      uses: actions/cache/restore@v4
+      with:
+        key: core_only-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .core_only
+      
+    - name: Restore cached .static
+      uses: actions/cache/restore@v4
+      with:
+        key: static-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .static
+      
+    - name: Restore cached .everything
+      uses: actions/cache/restore@v4
+      with:
+        key: everything-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .everything
 
     - name: Install Dependencies for each environment
       run: |
-        uv venv core_only
-        source core_only/bin/activate
+        uv venv .core_only
+        ls -la
+        source .core_only/bin/activate
         uv pip install coverage[toml] pytest
         deactivate
         
-        uv venv static
-        source static/bin/activate
+        uv venv .static
+        source .static/bin/activate
         uv pip install black coverage flake8 h5py isort matplotlib mypy numpy pandas pylint pylint-exit PyQt5 PyQt5-Stubs pytest pytest-cov qtpy scipy tblib
         deactivate
         
-        uv venv everything
-        source everything/bin/activate
+        uv venv .everything
+        source .everything/bin/activate
         uv pip install coverage dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas PyQt5 pytest pytest-cov qtpy scipy tblib
         deactivate
+
+    - name: Save cached core_only
+      uses: actions/cache/save@v4
+      with:
+        key: core_only-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .core_only
+
+    - name: Save cached static
+      uses: actions/cache/save@v4
+      with:
+        key: static-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .static
+
+    - name: Save cached everything
+      uses: actions/cache/save@v4
+      with:
+        key: everything-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .everything
 
     - name: Clone nubs
       uses: actions/checkout@v4
@@ -60,13 +98,31 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
+    - name: Restore cached .core_only
+      uses: actions/cache/restore@v4
+      with:
+        key: core_only-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .core_only
+      
+    - name: Restore cached .static
+      uses: actions/cache/restore@v4
+      with:
+        key: static-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .static
+      
+    - name: Restore cached .everything
+      uses: actions/cache/restore@v4
+      with:
+        key: everything-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .everything
+
     - name: Mypy static analysis
       continue-on-error: true
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source static/bin/activate
+        source .static/bin/activate
         python --version
         mypy --version
         mypy
@@ -75,9 +131,9 @@ jobs:
       continue-on-error: true
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source static/bin/activate
+        source .static/bin/activate
         python --version
         flake8 --version
         flake8 .
@@ -86,9 +142,9 @@ jobs:
       continue-on-error: true
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source static/bin/activate
+        source .static/bin/activate
         python --version
         pylint --version
         pylint lmspace || pylint-exit $?
@@ -100,9 +156,9 @@ jobs:
       continue-on-error: true
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source static/bin/activate
+        source .static/bin/activate
         python --version
         black --version
         black . --check
@@ -111,9 +167,9 @@ jobs:
       continue-on-error: true
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source static/bin/activate
+        source .static/bin/activate
         isort --version
         isort . --diff
 
@@ -124,99 +180,105 @@ jobs:
     - name: Test core_only with pytest
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source core_only/bin/activate
+        source .core_only/bin/activate
         python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.core
 
     - name: Test nubs on core_only
       if: always()
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source core_only/bin/activate
+        source .core_only/bin/activate
         python -m lmspace tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_core
 
     - name: Test slog on core_only
       if: always()
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source core_only/bin/activate
+        source .core_only/bin/activate
         python -m lmspace tests --library slog --coverage --cov_file $DCS_SHELL_DIR/.coverage.slog_core
 
     - name: Test without numba using static
       if: always()
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source static/bin/activate
+        source .static/bin/activate
         python -m lmspace tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.no_numba
 
     - name: Test full library with everything
       if: always()
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source everything/bin/activate
+        source .everything/bin/activate
         python -m lmspace tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.full
 
     - name: Test nubs with everything
       if: always()
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source everything/bin/activate
+        source .everything/bin/activate
         python -m lmspace tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_full
 
-    - name: Combine coverage reports
+    - name: Run coverage reports
       if: always()
       run: |
         pwd
-        ls -l
+        ls -la
         export COVERAGE_FILE=$LMS_SHELL_DIR/.coverage.imports
         export COVERAGE_RCFILE=${{ github.workspace }}/pyproject.toml
         export PYTHONPATH=${{ github.workspace }}:$PYTHONPATH
         echo $PYTHONPATH
-        source core_only/bin/activate
+        source .core_only/bin/activate
         coverage run $LMS_TESTS_DIR/test_commands_help.py
         deactivate
-        source static/bin/activate
+        source .static/bin/activate
         coverage run --append $LMS_TESTS_DIR/test_version.py
         deactivate
-        source everything/bin/activate
+        source .everything/bin/activate
         coverage run --append $LMS_TESTS_DIR/test_version.py
 
     - name: Test core_only with unittest
       if: always()
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source core_only/bin/activate
+        source .core_only/bin/activate
         python -m lmspace tests -u
 
     - name: Test docstrings
       if: always()
       run: |
         pwd
-        ls -l
+        ls -la
         echo $PYTHONPATH
-        source everything/bin/activate
+        source .everything/bin/activate
         python -m lmspace tests -d
 
   coverage:
     runs-on: ubuntu-latest
     needs: [build, test]
     steps:
+    - name: Restore cached .static
+      uses: actions/cache/restore@v4
+      with:
+        key: static-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .static
+
     - name: Make the coverage reports
       run: |
-        source static/bin/activate
+        source .static/bin/activate
         cd $DCS_SHELL_DIR
         pwd
         ls -la
