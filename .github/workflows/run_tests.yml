@@ -5,6 +5,7 @@ on: [push]
 env:
   DCS_TESTS_DIR: "${{ github.workspace }}/dstauffman/tests"
   DCS_SHELL_DIR: "${{ github.workspace }}/shell"
+  PYTHONPATH: "${{ github.workspace }}/.nubs_repo:${{ github.workspace }}/.slog_repo"
 
 jobs:
   build:
@@ -18,7 +19,7 @@ jobs:
       id: setup_python
       with:
         enable-cache: true
-        cache-local-path: "${{ github.workspace }}/uv_cache"
+        cache-local-path: "${{ github.workspace }}/.uv_cache"
         python-version: 3.13
 
     - name: Set up Python
@@ -82,17 +83,13 @@ jobs:
       uses: actions/checkout@v4
       with:
         repository: DStauffman/nubs
-        path: ${{ github.workspace }}/nubs_repo
+        path: ${{ github.workspace }}/.nubs_repo
 
     - name: Clone slog
       uses: actions/checkout@v4
       with:
         repository: DStauffman/slog
-        path: ${{ github.workspace }}/slog_repo
-
-    - name: Set PYTHONPATH
-      run: |
-        echo "PYTHONPATH=${{ github.workspace }}/nubs_repo:${{ github.workspace }}/slog_repo" >> "$GITHUB_ENV"
+        path: ${{ github.workspace }}/.slog_repo
 
   static:
     runs-on: ubuntu-latest
@@ -177,6 +174,24 @@ jobs:
     runs-on: ubuntu-latest
     needs: [build]
     steps:
+    - name: Restore cached .core_only
+      uses: actions/cache/restore@v4
+      with:
+        key: core_only-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .core_only
+      
+    - name: Restore cached .static
+      uses: actions/cache/restore@v4
+      with:
+        key: static-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .static
+      
+    - name: Restore cached .everything
+      uses: actions/cache/restore@v4
+      with:
+        key: everything-${{ runner.os }}-${{ steps.setup_python.outputs.python-version }}
+        path: .everything
+
     - name: Test core_only with pytest
       run: |
         pwd
