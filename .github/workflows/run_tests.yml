@@ -108,8 +108,8 @@ jobs:
         black . --check
 
     - name: isort static analysis
-    continue-on-error: true
-    run: |
+      continue-on-error: true
+      run: |
         pwd
         ls -l
         echo $PYTHONPATH
