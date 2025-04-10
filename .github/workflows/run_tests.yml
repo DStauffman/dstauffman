@@ -5,7 +5,7 @@ on: [push]
 env:
   DCS_TESTS_DIR: "${{ github.workspace }}/.dstauffman/dstauffman/tests"
   DCS_SHELL_DIR: "${{ github.workspace }}/.dstauffman/shell"
-  PYTHONPATH: "${{ github.workspace }}/.nubs_repo:${{ github.workspace }}/.slog_repo"
+  PYTHONPATH: "${{ github.workspace }}/.dstauffman:${{ github.workspace }}/.nubs_repo:${{ github.workspace }}/.slog_repo"
 
 jobs:
   build:
@@ -103,6 +103,7 @@ jobs:
 
     - name: Mypy static analysis
       continue-on-error: true
+      working-directory: ${{ github.workspace }}/.dstauffman
       run: |
         pwd
         ls -la
@@ -114,6 +115,7 @@ jobs:
 
     - name: Flake8 static analysis
       continue-on-error: true
+      working-directory: ${{ github.workspace }}/.dstauffman
       run: |
         pwd
         ls -la
@@ -125,6 +127,7 @@ jobs:
 
     - name: Pylint static analysis
       continue-on-error: true
+      working-directory: ${{ github.workspace }}/.dstauffman
       run: |
         pwd
         ls -la
@@ -139,6 +142,7 @@ jobs:
 
     - name: black static analysis
       continue-on-error: true
+      working-directory: ${{ github.workspace }}/.dstauffman
       run: |
         pwd
         ls -la
@@ -150,6 +154,7 @@ jobs:
 
     - name: isort static analysis
       continue-on-error: true
+      working-directory: ${{ github.workspace }}/.dstauffman
       run: |
         pwd
         ls -la
