@@ -3,9 +3,9 @@ name: Run Unit Tests via Pytest
 on: [push]
 
 env:
-  DCS_TESTS_DIR: "${{ github.workspace }}/.dstauffman/dstauffman/tests"
-  DCS_SHELL_DIR: "${{ github.workspace }}/.dstauffman/shell"
-  PYTHONPATH: "${{ github.workspace }}/.dstauffman:${{ github.workspace }}/.nubs_repo:${{ github.workspace }}/.slog_repo"
+  DCS_TESTS_DIR: "${{ github.workspace }}/dstauffman/tests"
+  DCS_SHELL_DIR: "${{ github.workspace }}/shell"
+  PYTHONPATH: "${{ github.workspace }}/.nubs_repo:${{ github.workspace }}/.slog_repo"
 
 jobs:
   build:
@@ -13,33 +13,15 @@ jobs:
     steps:
     - name: Check out repository
       uses: actions/checkout@v4
-      with:
-        repository: ${{ github.repository }}
-        path: ${{ github.workspace }}/.dstauffman
 
     - name: Install uv and set the python version
       uses: astral-sh/setup-uv@v5
       id: setup_python
       with:
-        #enable-cache: true
-        #cache-local-path: "${{ github.workspace }}/.uv_cache"
         python-version: 3.13
 
     - name: Set up Python
       run: uv python install
-      
-    - name: Restore caches
-      id: cache-restore
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-            ${{ github.workspace }}/.core_only
-            ${{ github.workspace }}/.static
-            ${{ github.workspace }}/.everything
-            ${{ github.workspace }}/.dstauffman
-            ${{ github.workspace }}/.nubs_repo
-            ${{ github.workspace }}/.slog_repo
-        key: ${{ runner.os }}-cache
 
     - name: Install Dependencies for each environment
       run: |
@@ -71,39 +53,8 @@ jobs:
         repository: DStauffman/slog
         path: ${{ github.workspace }}/.slog_repo
 
-    - name: Save caches
-      id: cache-save
-      uses: actions/cache/save@v4
-      with:
-        path: |
-            ${{ github.workspace }}/.core_only
-            ${{ github.workspace }}/.static
-            ${{ github.workspace }}/.everything
-            ${{ github.workspace }}/.dstauffman
-            ${{ github.workspace }}/.nubs_repo
-            ${{ github.workspace }}/.slog_repo
-        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
-
-  static:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-    - name: Restore caches
-      id: cache-restore
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-            ${{ github.workspace }}/.core_only
-            ${{ github.workspace }}/.static
-            ${{ github.workspace }}/.everything
-            ${{ github.workspace }}/.dstauffman
-            ${{ github.workspace }}/.nubs_repo
-            ${{ github.workspace }}/.slog_repo
-        key: ${{ runner.os }}-cache
-
     - name: Mypy static analysis
       continue-on-error: true
-      working-directory: ${{ github.workspace }}/.dstauffman
       run: |
         pwd
         ls -la
@@ -115,7 +66,6 @@ jobs:
 
     - name: Flake8 static analysis
       continue-on-error: true
-      working-directory: ${{ github.workspace }}/.dstauffman
       run: |
         pwd
         ls -la
@@ -127,7 +77,6 @@ jobs:
 
     - name: Pylint static analysis
       continue-on-error: true
-      working-directory: ${{ github.workspace }}/.dstauffman
       run: |
         pwd
         ls -la
@@ -142,7 +91,6 @@ jobs:
 
     - name: black static analysis
       continue-on-error: true
-      working-directory: ${{ github.workspace }}/.dstauffman
       run: |
         pwd
         ls -la
@@ -154,7 +102,6 @@ jobs:
 
     - name: isort static analysis
       continue-on-error: true
-      working-directory: ${{ github.workspace }}/.dstauffman
       run: |
         pwd
         ls -la
@@ -163,23 +110,8 @@ jobs:
         isort --version
         isort . --diff
 
-  test:
-    runs-on: ubuntu-latest
-    needs: [build]
-    steps:
-    - name: Restore caches
-      id: cache-restore
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-            .core_only
-            .static
-            .everything
-            .nubs_repo
-            .slog_repo
-        key: ${{ runner.os }}-cache
-
     - name: Test core_only with pytest
+      if: always()
       run: |
         pwd
         ls -la
@@ -267,21 +199,6 @@ jobs:
         echo $PYTHONPATH
         source .everything/bin/activate
         python -m dstauffman tests -d
-
-  coverage:
-    runs-on: ubuntu-latest
-    needs: [build, test]
-    steps:
-    - name: Restore caches
-      id: cache-restore
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-            ${{ github.workspace }}/.static
-            ${{ github.workspace }}/.dstauffman
-            ${{ github.workspace }}/.nubs_repo
-            ${{ github.workspace }}/.slog_repo
-        key: ${{ runner.os }}-cache
 
     - name: Make the coverage reports
       run: |
