@@ -18,8 +18,8 @@ jobs:
       uses: astral-sh/setup-uv@v5
       id: setup_python
       with:
-        enable-cache: true
-        cache-local-path: "${{ github.workspace }}/.uv_cache"
+        #enable-cache: true
+        #cache-local-path: "${{ github.workspace }}/.uv_cache"
         python-version: 3.13
 
     - name: Set up Python
@@ -35,6 +35,7 @@ jobs:
             .everything
             .nubs_repo
             .slog_repo
+            dstauffman
         key: ${{ runner.os }}-cache
 
     - name: Install Dependencies for each environment
@@ -126,7 +127,7 @@ jobs:
         source .static/bin/activate
         python --version
         pylint --version
-        pylint lmspace || pylint-exit $?
+        pylint dstauffman || pylint-exit $?
         pylint nubs || pylint-exit $?
         pylint slog || pylint-exit $?
         pylint scripts || pylint-exit $?
@@ -183,7 +184,7 @@ jobs:
         ls -la
         echo $PYTHONPATH
         source .core_only/bin/activate
-        python -m lmspace tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_core
+        python -m dstauffman tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_core
 
     - name: Test slog on core_only
       if: always()
@@ -192,7 +193,7 @@ jobs:
         ls -la
         echo $PYTHONPATH
         source .core_only/bin/activate
-        python -m lmspace tests --library slog --coverage --cov_file $DCS_SHELL_DIR/.coverage.slog_core
+        python -m dstauffman tests --library slog --coverage --cov_file $DCS_SHELL_DIR/.coverage.slog_core
 
     - name: Test without numba using static
       if: always()
@@ -201,7 +202,7 @@ jobs:
         ls -la
         echo $PYTHONPATH
         source .static/bin/activate
-        python -m lmspace tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.no_numba
+        python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.no_numba
 
     - name: Test full library with everything
       if: always()
@@ -210,7 +211,7 @@ jobs:
         ls -la
         echo $PYTHONPATH
         source .everything/bin/activate
-        python -m lmspace tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.full
+        python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.full
 
     - name: Test nubs with everything
       if: always()
@@ -219,7 +220,7 @@ jobs:
         ls -la
         echo $PYTHONPATH
         source .everything/bin/activate
-        python -m lmspace tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_full
+        python -m dstauffman tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_full
 
     - name: Run coverage reports
       if: always()
@@ -246,7 +247,7 @@ jobs:
         ls -la
         echo $PYTHONPATH
         source .core_only/bin/activate
-        python -m lmspace tests -u
+        python -m dstauffman tests -u
 
     - name: Test docstrings
       if: always()
@@ -255,7 +256,7 @@ jobs:
         ls -la
         echo $PYTHONPATH
         source .everything/bin/activate
-        python -m lmspace tests -d
+        python -m dstauffman tests -d
 
   coverage:
     runs-on: ubuntu-latest
