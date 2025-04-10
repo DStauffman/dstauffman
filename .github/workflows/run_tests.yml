@@ -3,8 +3,8 @@ name: Run Unit Tests via Pytest
 on: [push]
 
 env:
-  DCS_TESTS_DIR: "${{ github.workspace }}/dstauffman/tests"
-  DCS_SHELL_DIR: "${{ github.workspace }}/shell"
+  DCS_TESTS_DIR: "${{ github.workspace }}/.dstauffman/dstauffman/tests"
+  DCS_SHELL_DIR: "${{ github.workspace }}/.dstauffman/shell"
   PYTHONPATH: "${{ github.workspace }}/.nubs_repo:${{ github.workspace }}/.slog_repo"
 
 jobs:
@@ -13,6 +13,9 @@ jobs:
     steps:
     - name: Check out repository
       uses: actions/checkout@v4
+      with:
+        repository: ${{ github.repository }}
+        path: ${{ github.workspace }}/.dstauffman
 
     - name: Install uv and set the python version
       uses: astral-sh/setup-uv@v5
@@ -30,12 +33,12 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: |
-            .core_only
-            .static
-            .everything
-            .nubs_repo
-            .slog_repo
-            dstauffman
+            ${{ github.workspace }}/.core_only
+            ${{ github.workspace }}/.static
+            ${{ github.workspace }}/.everything
+            ${{ github.workspace }}/.dstauffman
+            ${{ github.workspace }}/.nubs_repo
+            ${{ github.workspace }}/.slog_repo
         key: ${{ runner.os }}-cache
 
     - name: Install Dependencies for each environment
@@ -73,11 +76,12 @@ jobs:
       uses: actions/cache/save@v4
       with:
         path: |
-            .core_only
-            .static
-            .everything
-            .nubs_repo
-            .slog_repo
+            ${{ github.workspace }}/.core_only
+            ${{ github.workspace }}/.static
+            ${{ github.workspace }}/.everything
+            ${{ github.workspace }}/.dstauffman
+            ${{ github.workspace }}/.nubs_repo
+            ${{ github.workspace }}/.slog_repo
         key: ${{ steps.cache-restore.outputs.cache-primary-key }}
 
   static:
@@ -89,11 +93,12 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: |
-            .core_only
-            .static
-            .everything
-            .nubs_repo
-            .slog_repo
+            ${{ github.workspace }}/.core_only
+            ${{ github.workspace }}/.static
+            ${{ github.workspace }}/.everything
+            ${{ github.workspace }}/.dstauffman
+            ${{ github.workspace }}/.nubs_repo
+            ${{ github.workspace }}/.slog_repo
         key: ${{ runner.os }}-cache
 
     - name: Mypy static analysis
@@ -227,18 +232,18 @@ jobs:
       run: |
         pwd
         ls -la
-        export COVERAGE_FILE=$LMS_SHELL_DIR/.coverage.imports
+        export COVERAGE_FILE=$DCS_SHELL_DIR/.coverage.imports
         export COVERAGE_RCFILE=${{ github.workspace }}/pyproject.toml
         export PYTHONPATH=${{ github.workspace }}:$PYTHONPATH
         echo $PYTHONPATH
         source .core_only/bin/activate
-        coverage run $LMS_TESTS_DIR/test_commands_help.py
+        coverage run $DCS_TESTS_DIR/test_commands_help.py
         deactivate
         source .static/bin/activate
-        coverage run --append $LMS_TESTS_DIR/test_version.py
+        coverage run --append $DCS_TESTS_DIR/test_version.py
         deactivate
         source .everything/bin/activate
-        coverage run --append $LMS_TESTS_DIR/test_version.py
+        coverage run --append $DCS_TESTS_DIR/test_version.py
 
     - name: Test core_only with unittest
       if: always()
@@ -267,11 +272,10 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: |
-            .core_only
-            .static
-            .everything
-            .nubs_repo
-            .slog_repo
+            ${{ github.workspace }}/.static
+            ${{ github.workspace }}/.dstauffman
+            ${{ github.workspace }}/.nubs_repo
+            ${{ github.workspace }}/.slog_repo
         key: ${{ runner.os }}-cache
 
     - name: Make the coverage reports
