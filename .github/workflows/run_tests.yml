@@ -5,7 +5,6 @@ on: [push]
 env:
   DCS_TESTS_DIR: "${{ github.workspace }}/dstauffman/tests"
   DCS_SHELL_DIR: "${{ github.workspace }}/shell"
-  PY_VERSION: "3.13"
 
 jobs:
   build:
@@ -19,24 +18,24 @@ jobs:
       with:
         enable-cache: true
         cache-local-path: "${{ github.workspace }}/uv_cache"
-        python-version: $PY_VERSION
+        python-version: 3.13
 
-    - name: Set up Python $PY_VERSION
-      run: uv python install --python $PY_VERSION
+    - name: Set up Python
+      run: uv python install
 
     - name: Install Dependencies for each environment
       run: |
-        uv venv core_only --python $PY_VERSION
+        uv venv core_only
         source core_only/bin/activate
         uv pip install coverage[toml] pytest
         deactivate
         
-        uv venv static --python $PY_VERSION
+        uv venv static
         source static/bin/activate
         uv pip install black coverage flake8 h5py isort matplotlib mypy numpy pandas pylint pylint-exit PyQt5 PyQt5-Stubs pytest pytest-cov qtpy scipy tblib
         deactivate
         
-        uv venv everything --python $PY_VERSION
+        uv venv everything
         source everything/bin/activate
         uv pip install coverage dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas PyQt5 pytest pytest-cov qtpy scipy tblib
         deactivate
