@@ -52,7 +52,7 @@ make_envs:
   - source everything/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage datashader fastparquet h5py matplotlib mypy numba numpy pandas pyarrow PyQt5 pytest pytest-cov qtpy scipy tblib
+  - python -m pip install coverage datashader h5py matplotlib mypy numba numpy pandas pyarrow PyQt5 pytest pytest-cov qtpy scipy tblib
   - python -m pip install dask[dataframe]  # Fixes missing dask-expr dependency
   - deactivate
   - virtualenv poetry

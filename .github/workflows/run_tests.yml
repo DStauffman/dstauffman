@@ -9,6 +9,7 @@ env:
   VENV_ROOT_DIR: "${{ github.workspace }}"
   PYTHONPATH: "${{ github.workspace }}/dstauffman_repo:${{ github.workspace }}/nubs_repo:${{ github.workspace }}/slog_repo"
   PYPROJECT_TOLM: "${{ github.workspace }}/pyproject.toml"
+  QT_QPA_PLATFORM: "offscreen"
 
 jobs:
   build:
@@ -111,12 +112,14 @@ jobs:
         python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.core
 
     - name: Test nubs on core_only
+      working-directory: ${{ github.workspace }}/nubs_repo
       if: always()
       run: |
         source $VENV_ROOT_DIR/core_only/bin/activate
         python -m dstauffman tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_core
 
     - name: Test slog on core_only
+      working-directory: ${{ github.workspace }}/slog_repo
       if: always()
       run: |
         source $VENV_ROOT_DIR/core_only/bin/activate
@@ -135,6 +138,7 @@ jobs:
         python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.full
 
     - name: Test nubs with everything
+      working-directory: ${{ github.workspace }}/nubs_repo
       if: always()
       run: |
         source $VENV_ROOT_DIR/everything/bin/activate

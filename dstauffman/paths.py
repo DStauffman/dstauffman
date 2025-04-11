@@ -35,7 +35,7 @@ def get_root_dir() -> Path:
     --------
     >>> from dstauffman import get_root_dir
     >>> print("p = ", repr(get_root_dir()))  # doctest: +ELLIPSIS
-    p = .../dstauffman/dstauffman')
+    p = .../dstauffman')
 
     """
     # this folder is the root directory based on the location of this file (paths.py)
@@ -61,7 +61,7 @@ def get_tests_dir() -> Path:
     --------
     >>> from dstauffman import get_tests_dir
     >>> print("p = ", repr(get_tests_dir()))  # doctest: +ELLIPSIS
-    p = .../dstauffman/tests')
+    p = .../tests')
 
     """
     # this folder is the "tests" subfolder
@@ -87,7 +87,7 @@ def get_data_dir() -> Path:
     --------
     >>> from dstauffman import get_data_dir
     >>> print("p = ", repr(get_data_dir()))  # doctest: +ELLIPSIS
-    p = .../dstauffman/data')
+    p = .../data')
 
     """
     # this folder is the "data" subfolder
@@ -113,7 +113,7 @@ def get_images_dir() -> Path:
     --------
     >>> from dstauffman import get_images_dir
     >>> print("p = ", repr(get_images_dir()))  # doctest: +ELLIPSIS
-    p = .../dstauffman/images')
+    p = .../images')
 
     """
     # this folder is the "images" subfolder
@@ -139,7 +139,7 @@ def get_output_dir() -> Path:
     --------
     >>> from dstauffman import get_output_dir
     >>> print("p = ", repr(get_output_dir()))  # doctest: +ELLIPSIS
-    p = .../dstauffman/results')
+    p = .../results')
 
     """
     # this folder is the "results" subfolder
