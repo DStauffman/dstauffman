@@ -3,136 +3,128 @@ name: Run Unit Tests via Pytest
 on: [push]
 
 env:
-  DCS_TESTS_DIR: "${{ github.workspace }}/.dstauffman/dstauffman/tests"
-  DCS_SHELL_DIR: "${{ github.workspace }}/.dstauffman/shell"
-  PYTHONPATH: "${{ github.workspace }}/.dstauffman:${{ github.workspace }}/.nubs_repo:${{ github.workspace }}/.slog_repo"
+  DCS_ROOT_DIR: "${{ github.workspace }}/dstauffman_repo"
+  DCS_TESTS_DIR: "${{ github.workspace }}/dstauffman_repo/dstauffman/tests"
+  DCS_SHELL_DIR: "${{ github.workspace }}/dstauffman_repo/shell"
+  PYPROJECT_TOLM: "${{ github.workspace }}/dstauffman_repo/pyproject.toml"
+  VENV_ROOT_DIR: "${{ github.workspace }}"
+  PYTHONPATH: "${{ github.workspace }}/dstauffman_repo:${{ github.workspace }}/nubs_repo:${{ github.workspace }}/slog_repo"
+  QT_QPA_PLATFORM: "offscreen"
 
 jobs:
-  build:
+  basic_tests:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.13"]
     steps:
     - name: Check out repository
       uses: actions/checkout@v4
       with:
-        repository: ${{ github.repository }}
-        path: ${{ github.workspace }}/.dstauffman
-
-    - name: Install uv and set the python version
-      uses: astral-sh/setup-uv@v5
-      id: setup_python
-      with:
-        #enable-cache: true
-        #cache-local-path: "${{ github.workspace }}/.uv_cache"
-        python-version: 3.13
-
-    - name: Set up Python
-      run: uv python install
-      
-    - name: Restore caches
-      id: cache-restore
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-            ${{ github.workspace }}/.core_only
-            ${{ github.workspace }}/.static
-            ${{ github.workspace }}/.everything
-            ${{ github.workspace }}/.dstauffman
-            ${{ github.workspace }}/.nubs_repo
-            ${{ github.workspace }}/.slog_repo
-        key: ${{ runner.os }}-cache
-
-    - name: Install Dependencies for each environment
-      run: |
-        uv venv .core_only
-        ls -la
-        source .core_only/bin/activate
-        uv pip install coverage[toml] pytest
-        deactivate
-        
-        uv venv .static
-        source .static/bin/activate
-        uv pip install black coverage flake8 h5py isort matplotlib mypy numpy pandas pylint pylint-exit PyQt5 PyQt5-Stubs pytest pytest-cov qtpy scipy tblib
-        deactivate
-        
-        uv venv .everything
-        source .everything/bin/activate
-        uv pip install coverage dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas PyQt5 pytest pytest-cov qtpy scipy tblib
-        deactivate
+        path: ${{ github.workspace }}/dstauffman_repo
 
     - name: Clone nubs
       uses: actions/checkout@v4
       with:
         repository: DStauffman/nubs
-        path: ${{ github.workspace }}/.nubs_repo
+        path: ${{ github.workspace }}/nubs_repo
 
     - name: Clone slog
       uses: actions/checkout@v4
       with:
         repository: DStauffman/slog
-        path: ${{ github.workspace }}/.slog_repo
+        path: ${{ github.workspace }}/slog_repo
 
-    - name: Save caches
-      id: cache-save
-      uses: actions/cache/save@v4
+    - name: Install uv and set the python version
+      uses: astral-sh/setup-uv@v5
+      id: setup_uv
       with:
-        path: |
-            ${{ github.workspace }}/.core_only
-            ${{ github.workspace }}/.static
-            ${{ github.workspace }}/.everything
-            ${{ github.workspace }}/.dstauffman
-            ${{ github.workspace }}/.nubs_repo
-            ${{ github.workspace }}/.slog_repo
-        key: ${{ steps.cache-restore.outputs.cache-primary-key }}
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up Python
+      run: uv python install
+
+    - name: Install Dependencies for each environment
+      run: |
+        uv venv core_only
+        source $VENV_ROOT_DIR/core_only/bin/activate
+        deactivate
+        uv venv everything
+        source $VENV_ROOT_DIR/everything/bin/activate
+        uv pip install dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas PyQt5 pytest-cov qtpy scipy tblib
+        deactivate
+
+    - name: Test core_only with unittest
+      if: always()
+      run: |
+        source $VENV_ROOT_DIR/core_only/bin/activate
+        python -m dstauffman tests -u
+
+    - name: Test docstrings
+      if: always()
+      run: |
+        source $VENV_ROOT_DIR/everything/bin/activate
+        python -m dstauffman tests -d
 
   static:
     runs-on: ubuntu-latest
-    needs: [build]
     steps:
-    - name: Restore caches
-      id: cache-restore
-      uses: actions/cache/restore@v4
+    - name: Check out repository
+      uses: actions/checkout@v4
       with:
-        path: |
-            ${{ github.workspace }}/.core_only
-            ${{ github.workspace }}/.static
-            ${{ github.workspace }}/.everything
-            ${{ github.workspace }}/.dstauffman
-            ${{ github.workspace }}/.nubs_repo
-            ${{ github.workspace }}/.slog_repo
-        key: ${{ runner.os }}-cache
+        path: ${{ github.workspace }}/dstauffman_repo
+
+    - name: Clone nubs
+      uses: actions/checkout@v4
+      with:
+        repository: DStauffman/nubs
+        path: ${{ github.workspace }}/nubs_repo
+
+    - name: Clone slog
+      uses: actions/checkout@v4
+      with:
+        repository: DStauffman/slog
+        path: ${{ github.workspace }}/slog_repo
+
+    - name: Install uv and set the python version
+      uses: astral-sh/setup-uv@v5
+      id: setup_uv
+      with:
+        python-version: "3.13"
+
+    - name: Set up Python
+      run: uv python install
+
+    - name: Install Dependencies for each environment
+      run: |
+        uv venv static
+        source $VENV_ROOT_DIR/static/bin/activate
+        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy scipy tblib
+        deactivate
 
     - name: Mypy static analysis
-      continue-on-error: true
-      working-directory: ${{ github.workspace }}/.dstauffman
+      working-directory: ${{ env.DCS_ROOT_DIR }}
+      if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .static/bin/activate
+        source $VENV_ROOT_DIR/static/bin/activate
         python --version
         mypy --version
         mypy
 
     - name: Flake8 static analysis
-      continue-on-error: true
-      working-directory: ${{ github.workspace }}/.dstauffman
+      working-directory: ${{ env.DCS_ROOT_DIR }}
+      if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .static/bin/activate
+        source $VENV_ROOT_DIR/static/bin/activate
         python --version
         flake8 --version
         flake8 .
 
     - name: Pylint static analysis
-      continue-on-error: true
-      working-directory: ${{ github.workspace }}/.dstauffman
+      working-directory: ${{ env.DCS_ROOT_DIR }}
+      if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .static/bin/activate
+        source $VENV_ROOT_DIR/static/bin/activate
         python --version
         pylint --version
         pylint dstauffman || pylint-exit $?
@@ -141,156 +133,132 @@ jobs:
         pylint scripts || pylint-exit $?
 
     - name: black static analysis
-      continue-on-error: true
-      working-directory: ${{ github.workspace }}/.dstauffman
+      working-directory: ${{ env.DCS_ROOT_DIR }}
+      if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .static/bin/activate
+        source $VENV_ROOT_DIR/static/bin/activate
         python --version
         black --version
         black . --check
 
     - name: isort static analysis
-      continue-on-error: true
-      working-directory: ${{ github.workspace }}/.dstauffman
+      working-directory: ${{ env.DCS_ROOT_DIR }}
+      if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .static/bin/activate
+        source $VENV_ROOT_DIR/static/bin/activate
         isort --version
         isort . --diff
 
-  test:
+  full_tests:
     runs-on: ubuntu-latest
-    needs: [build]
+    strategy:
+      matrix:
+        python-version: ["3.13"]
     steps:
-    - name: Restore caches
-      id: cache-restore
-      uses: actions/cache/restore@v4
+    - name: Check out repository
+      uses: actions/checkout@v4
       with:
-        path: |
-            .core_only
-            .static
-            .everything
-            .nubs_repo
-            .slog_repo
-        key: ${{ runner.os }}-cache
+        path: ${{ github.workspace }}/dstauffman_repo
+
+    - name: Clone nubs
+      uses: actions/checkout@v4
+      with:
+        repository: DStauffman/nubs
+        path: ${{ github.workspace }}/nubs_repo
+
+    - name: Clone slog
+      uses: actions/checkout@v4
+      with:
+        repository: DStauffman/slog
+        path: ${{ github.workspace }}/slog_repo
+
+    - name: Install uv and set the python version
+      uses: astral-sh/setup-uv@v5
+      id: setup_uv
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Set up Python
+      run: uv python install
+
+    - name: Install Dependencies for each environment
+      run: |
+        uv venv core_only
+        source $VENV_ROOT_DIR/core_only/bin/activate
+        uv pip install pytest-cov
+        deactivate
+        uv venv static
+        source $VENV_ROOT_DIR/static/bin/activate
+        uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy scipy tblib
+        deactivate
+        uv venv everything
+        source $VENV_ROOT_DIR/everything/bin/activate
+        uv pip install dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas PyQt5 pytest-cov qtpy scipy tblib
+        deactivate
 
     - name: Test core_only with pytest
+      working-directory: ${{ env.DCS_ROOT_DIR }}
+      if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .core_only/bin/activate
+        source $VENV_ROOT_DIR/core_only/bin/activate
         python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.core
 
     - name: Test nubs on core_only
+      working-directory: ${{ github.workspace }}/nubs_repo
       if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .core_only/bin/activate
+        source $VENV_ROOT_DIR/core_only/bin/activate
         python -m dstauffman tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_core
 
     - name: Test slog on core_only
+      working-directory: ${{ github.workspace }}/slog_repo
       if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .core_only/bin/activate
+        source $VENV_ROOT_DIR/core_only/bin/activate
         python -m dstauffman tests --library slog --coverage --cov_file $DCS_SHELL_DIR/.coverage.slog_core
 
     - name: Test without numba using static
+      working-directory: ${{ env.DCS_ROOT_DIR }}
       if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .static/bin/activate
+        source $VENV_ROOT_DIR/static/bin/activate
         python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.no_numba
 
     - name: Test full library with everything
+      working-directory: ${{ env.DCS_ROOT_DIR }}
       if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .everything/bin/activate
+        source $VENV_ROOT_DIR/everything/bin/activate
         python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.full
 
     - name: Test nubs with everything
+      working-directory: ${{ github.workspace }}/nubs_repo
       if: always()
       run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .everything/bin/activate
+        source $VENV_ROOT_DIR/everything/bin/activate
         python -m dstauffman tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_full
 
     - name: Run coverage reports
+      working-directory: ${{ env.DCS_ROOT_DIR }}
       if: always()
       run: |
-        pwd
-        ls -la
         export COVERAGE_FILE=$DCS_SHELL_DIR/.coverage.imports
-        export COVERAGE_RCFILE=${{ github.workspace }}/pyproject.toml
-        export PYTHONPATH=${{ github.workspace }}:$PYTHONPATH
-        echo $PYTHONPATH
-        source .core_only/bin/activate
+        export COVERAGE_RCFILE=$PYPROJEC_TOLM
+        source $VENV_ROOT_DIR/core_only/bin/activate
         coverage run $DCS_TESTS_DIR/test_commands_help.py
         deactivate
-        source .static/bin/activate
+        source $VENV_ROOT_DIR/static/bin/activate
         coverage run --append $DCS_TESTS_DIR/test_version.py
         deactivate
-        source .everything/bin/activate
+        source $VENV_ROOT_DIR/everything/bin/activate
         coverage run --append $DCS_TESTS_DIR/test_version.py
 
-    - name: Test core_only with unittest
-      if: always()
-      run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .core_only/bin/activate
-        python -m dstauffman tests -u
-
-    - name: Test docstrings
-      if: always()
-      run: |
-        pwd
-        ls -la
-        echo $PYTHONPATH
-        source .everything/bin/activate
-        python -m dstauffman tests -d
-
-  coverage:
-    runs-on: ubuntu-latest
-    needs: [build, test]
-    steps:
-    - name: Restore caches
-      id: cache-restore
-      uses: actions/cache/restore@v4
-      with:
-        path: |
-            ${{ github.workspace }}/.static
-            ${{ github.workspace }}/.dstauffman
-            ${{ github.workspace }}/.nubs_repo
-            ${{ github.workspace }}/.slog_repo
-        key: ${{ runner.os }}-cache
-
     - name: Make the coverage reports
+      working-directory: ${{ env.DCS_SHELL_DIR }}
       run: |
-        source .static/bin/activate
-        cd $DCS_SHELL_DIR
-        pwd
-        ls -la
+        source $VENV_ROOT_DIR/static/bin/activate
         export COVERAGE_FILE=.coverage
         coverage --version
         coverage combine --keep
-        coverage html --rcfile ${{ github.workspace }}/pyproject.toml
-        coverage xml --rcfile ${{ github.workspace }}/pyproject.toml
+        coverage html --rcfile $PYPROJECT_TOLM
+        coverage xml --rcfile $PYPROJECT_TOLM

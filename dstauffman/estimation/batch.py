@@ -1279,7 +1279,7 @@ def _analyze_results(opti_opts: OptiOpts, bpe_results: BpeResults, jacobian: _M,
 
 
 # %% validate_opti_opts
-def validate_opti_opts(opti_opts: OptiOpts) -> bool:
+def validate_opti_opts(opti_opts: OptiOpts) -> bool:  # noqa: C901
     r"""
     Validate the optimization options.
 

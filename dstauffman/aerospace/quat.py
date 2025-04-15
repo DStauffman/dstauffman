@@ -16,7 +16,7 @@ import unittest
 
 from slog import LogLevel
 
-from dstauffman import HAVE_NUMPY, INT_TOKEN, magnitude
+from dstauffman import HAVE_NUMPY, INT_TOKEN, is_datetime, magnitude, NP_ONE_SECOND, postpend
 from dstauffman.aerospace.quat_opt import quat_to_dcm
 
 if HAVE_NUMPY:
@@ -25,9 +25,11 @@ if HAVE_NUMPY:
 if TYPE_CHECKING:
     from numpy.typing import ArrayLike, NDArray
 
+    _D = NDArray[np.datetime64]
     _N = NDArray[np.floating]
     _Q = NDArray[np.floating]  # shape (4,)
     _Qs = NDArray[np.floating]  # shape (4, N)  # TODO: don't make use of this yet
+    _Vs = NDArray[np.floating]  # shape (3, N)
 
     class _QuatAssertionKwargs(TypedDict):
         precision: NotRequired[float]
@@ -1240,6 +1242,58 @@ def quat_to_euler(  # noqa: C901
     if is_vector:
         euler = euler.flatten()  # type: ignore[assignment]
     return euler
+
+
+# %% convert_att_quat_to_body_rate
+def convert_att_quat_to_body_rate(
+    time: _N | _D, quat: _Qs, *, append: bool = True, **kwargs: Unpack[_QuatAssertionKwargs]
+) -> _Vs:
+    """
+    Convert a time history of attitude quaternions into the equivalent body rates that would produce them.
+
+    Parameters
+    ----------
+    time : (N,)
+        Time vector
+    quat : (4, N)
+        Attitude quaternion history
+
+    Returns
+    -------
+    rates (3, N)
+        Body rate history
+
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import convert_att_quat_to_body_rate, quat_prop
+    >>> import numpy as np
+    >>> num_pts = 5
+    >>> rates = np.tile(np.array([[0.01], [0.02], [-0.03]]), num_pts)
+    >>> dt = 0.1
+    >>> time = np.arange(0, num_pts*dt, dt)
+    >>> init_quat = np.array([0.5, 0.5, -0.5, 0.5])
+    >>> quat = np.empty((4, num_pts))
+    >>> quat[:, 0] = init_quat
+    >>> for i in range(1, num_pts):
+    ...     quat[:, i] = quat_prop(quat[:, i-1], rates[:, i-1])
+    >>> exp = 1/dt * rates
+    >>> out = convert_att_quat_to_body_rate(time, quat)
+    >>> np.testing.assert_array_almost_equal(out, exp, decimal=4)
+
+    """
+    if quat.ndim < 2 or quat.shape[1] < 2:
+        # Note: could return NaNs instead?
+        raise QuatAssertionError("Must have a time history of quaternions to calculate rate.")
+    _, delta_error = quat_angle_diff(quat[:, :-1], quat[:, 1:], **kwargs)
+    if is_datetime(time):
+        dt = np.diff(time) / NP_ONE_SECOND
+    else:
+        dt = np.diff(time)
+    rates = delta_error / dt
+    if append:
+        return postpend(rates, rates[..., -1:])  # type: ignore[call-overload, no-any-return]
+    return rates
 
 
 # %% quat_standards

@@ -996,7 +996,7 @@ def make_generic_plot(  # noqa: C901
         # set Y display limits
         if plot_zero or is_diff_plot:
             show_zero_ylim(this_axes)
-        if ylims is not None:
+        if ylims is not None and not is_diff_plot:
             this_axes.set_ylim(ylims)
         # format display of plot
         if i == 0:
