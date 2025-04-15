@@ -33,11 +33,12 @@ from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to
                              rv_sez_2_ijk, get_sun_radec_approx, get_sun_radec, get_sun_distance, \
                              beta_from_oe, eclipse_fraction, earth_radius_by_latitude
 from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv, advance_elements
-from .quat        import QUAT_SIZE, suppress_quat_checks, unsuppress_quat_checks, quat_assertions, \
-                             enforce_pos_scalar, qrot, quat_from_axis_angle, \
-                             quat_from_rotation_vector, quat_angle_diff, quat_from_euler, \
-                             quat_interp, quat_inv, quat_mult, quat_norm, quat_prop, \
-                             quat_times_vector, quat_to_euler, quat_standards
+from .quat        import QUAT_SIZE, QuatAssertionError, suppress_quat_checks, \
+                             unsuppress_quat_checks, quat_assertions, enforce_pos_scalar, qrot, \
+                             quat_from_axis_angle, quat_from_rotation_vector, quat_angle_diff, \
+                             quat_from_euler, quat_interp, quat_inv, quat_mult, quat_norm, \
+                             quat_prop, quat_times_vector, quat_to_euler, \
+                             convert_att_quat_to_body_rate, quat_standards
 from .quat_keras  import enforce_pos_scalar_keras, qrot_keras, quat_inv_keras, quat_norm_keras, \
                              quat_mult_keras, quat_prop_keras, quat_times_vector_keras, \
                              quat_angle_diff_keras

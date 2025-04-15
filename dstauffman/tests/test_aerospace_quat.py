@@ -15,7 +15,7 @@ from unittest.mock import patch
 
 from slog import capture_output, LogLevel
 
-from dstauffman import HAVE_NUMPY
+from dstauffman import HAVE_NUMPY, NP_DATETIME_UNITS, NP_ONE_SECOND
 import dstauffman.aerospace as space
 
 if HAVE_NUMPY:
@@ -1090,6 +1090,85 @@ class Test_aerospace_quat_to_euler(unittest.TestCase):
     def test_bad_sequence(self) -> None:
         with self.assertRaises(AssertionError):
             space.quat_to_euler(self.zero_quat, np.array([1, 2]))
+
+
+# %% aerospace.convert_att_quat_to_body_rate
+@unittest.skipIf(not HAVE_NUMPY, "")
+class Test_aerospace_convert_att_quat_to_body_rate(unittest.TestCase):
+    r"""
+    Tests the aerospace.convert_att_quat_to_body_rate function with the following cases:
+        Nominal seconds
+        Nominal datetime64
+        Zero rates
+        Single quat
+        Two quats
+    """
+
+    def test_nominal(self) -> None:
+        num_pts = 5
+        rates = np.tile(np.array([[0.01], [0.02], [-0.03]]), num_pts)
+        dt = 0.1
+        time = np.arange(0, num_pts * dt, dt)
+        init_quat = np.array([0.5, 0.5, -0.5, 0.5])
+        quat = np.empty((4, num_pts))
+        quat[:, 0] = init_quat
+        for i in range(1, num_pts):
+            quat[:, i] = space.quat_prop(quat[:, i - 1], rates[:, i - 1])
+        exp = 1 / dt * rates
+        out = space.convert_att_quat_to_body_rate(time, quat)
+        np.testing.assert_array_almost_equal(out, exp, decimal=4)
+
+    def test_datetime64(self) -> None:
+        num_pts = 12
+        rates = np.tile(np.array([[-0.01], [0.05], [-0.03]]), num_pts)
+        dt = 0.1 * NP_ONE_SECOND
+        time = np.datetime64("2025-04-10T13:50:00", NP_DATETIME_UNITS) + np.arange(0, num_pts * dt, dt)
+        init_quat = np.array([-0.5, 0.5, -0.5, 0.5])
+        quat = np.empty((4, num_pts))
+        quat[:, 0] = init_quat
+        for i in range(1, num_pts):
+            quat[:, i] = space.quat_prop(quat[:, i - 1], rates[:, i - 1])
+        exp = 10.0 * rates
+        out = space.convert_att_quat_to_body_rate(time, quat)
+        np.testing.assert_array_almost_equal(out, exp, decimal=4)
+
+    def test_zero_rates(self) -> None:
+        time = np.arange(0.0, 10.5, 0.5)
+        quat = np.tile(np.array([0.5, -0.5, -0.5, 0.5])[:, np.newaxis], (1, len(time)))
+        rate = space.convert_att_quat_to_body_rate(time, quat)
+        exp = np.zeros((3, len(time)))
+        np.testing.assert_array_equal(rate, exp)
+        # as datetime64
+        time2 = np.datetime64("2025-04-10T13:50:00", NP_DATETIME_UNITS) + time * NP_ONE_SECOND
+        rate = space.convert_att_quat_to_body_rate(time2, quat)
+        np.testing.assert_array_equal(rate, exp)
+
+    def test_single_quat(self) -> None:
+        with self.assertRaises(AssertionError):
+            space.convert_att_quat_to_body_rate(np.array([0.0]), np.array([-0.5, -0.5, -0.5, 0.5]))
+
+    def test_two_quats(self) -> None:
+        quat1 = np.array([0.5, -0.5, -0.5, 0.5])
+        rate = np.array([-0.1, -0.2, -0.3])
+        dt = 10.0
+        quat2 = space.quat_prop(quat1, rate)
+        time = np.array([100.0, 100.0 + dt])
+        quat = np.vstack([quat1, quat2]).T
+        exp = 1 / dt * np.vstack([rate, rate]).T
+        out = space.convert_att_quat_to_body_rate(time, quat)
+        np.testing.assert_array_almost_equal(out, exp, decimal=3)
+
+    def test_no_append(self) -> None:
+        quat1 = np.array([0.5, -0.5, -0.5, 0.5])
+        rate = np.array([-0.001, -0.002, -0.003])
+        dt = 0.2
+        quat2 = space.quat_prop(quat1, rate)
+        quat3 = space.quat_prop(quat1, 2 * rate)
+        time = np.array([10.0, 10.0 + dt, 10.0 + 2 * dt])
+        quat = np.vstack([quat1, quat2, quat3]).T
+        exp = 1 / dt * np.vstack([rate, rate]).T
+        out = space.convert_att_quat_to_body_rate(time, quat, append=False)
+        np.testing.assert_array_almost_equal(out, exp, decimal=5)
 
 
 # %% aerospace.quat_standards

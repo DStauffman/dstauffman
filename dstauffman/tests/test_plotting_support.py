@@ -39,6 +39,7 @@ except ImportError:
     _HAVE_QT = False
 
 _HAVE_DISPLAY = IS_WINDOWS or bool(os.environ.get("DISPLAY", None))
+_HAVE_QT_PLATFORM = "QT_QPA_PLATFORM" not in os.environ or os.environ["QT_QPA_PLATFORM"] != "offscreen"
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
@@ -807,7 +808,7 @@ class Test_plotting_rgb_ints_to_hex(unittest.TestCase):
 
 
 # %% plotting.get_screen_resolution
-@unittest.skipIf(not _HAVE_QT, "Skipping due to missing Qt dependency.")
+@unittest.skipIf(not _HAVE_QT or not _HAVE_QT_PLATFORM, "Skipping due to missing Qt/display dependency.")
 class Test_plotting_get_screen_resolution(unittest.TestCase):
     r"""
     Tests the plotting.get_screen_resolution function with the following cases:
