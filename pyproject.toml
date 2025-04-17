@@ -1,16 +1,21 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=77.0"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry]
+[project]
 name = "dstauffman"
-version = "3.7.0"
+version = "3.8.0"
 description = "Generic python utilities for Aerospace applications"
-license = "LGPLv3"
-authors = ["David C. Stauffer <dstauffman@yahoo.com>"]
-maintainers = ["David C. Stauffer <dstauffman@yahoo.com>"]
 readme = "README.rst"
-repository = "https://github.com/DStauffman/dstauffman"
+dependencies = ["nubs", "slog"]
+requires-python = ">=3.10,<4.0"
+authors = [
+  {name = "David C. Stauffer", email = "dstauffman@yahoo.com"},
+]
+maintainers = [
+  {name = "David C. Stauffer", email = "dstauffman@yahoo.com"},
+]
+license = { file = "LICENSE" }
 keywords = ["numerical", "analysis", "plotting", "quaternions", "estimation"]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -31,49 +36,28 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
     "Typing :: Typed",
 ]
-include = ["CHANGELOG.md", "LICENSE.txt", "MANIFEST.in", "pyproject.toml", "README.rst", "*.png", "*.pdf", "*.rst", "*.tex", "*.bat", "*.sh"]
 
-[tool.poetry.dependencies]
-python = ">=3.10, <3.13"
-nubs = {path = "../nubs/", develop = false}
-slog = {path = "../slog/", develop = false}
-black = {version = ">24.0", optional = true}
-datashader = {version = "^0.15", optional = true, python = "<3.13"}
-flake8 = {version = "^6.0", optional = true}
-h5py = {version = "^3.7", optional = true}
-isort = {version = "^5.10", optional = true}
-matplotlib = {version = "^3.7", optional = true}
-mypy = {version = "^1.5", optional = true}
-numba = {version = "^0.57", optional = true, python = "<3.13"}
-numpy = {version = "^1.24, ^2.0", optional = true}
-pandas = {version = "^1.5", optional = true}
-pyarrow = {version = "^14.0", optional = true, python = "<3.13"}
-pylint = {version = "^2.16", optional = true}
-pyqt5 = {version = "^5.15.7", optional = true}
-pyqt5-stubs = {version = "^5.15", optional = true}
-pyqt5-sip = {version = "^12.11", optional = true}  # temp hack for poetry not grabbing it correctly
-pyqt5-qt5 = {version = "^5.15.7", optional = true}  # temp hack for poetry not grabbing it correctly
-pycodestyle = {version = "^2.10", optional = true}
-pytest = {version = "^7.4", optional = true}
-pytest-cov = {version = "^4.0", optional = true}
-qtpy = {version = "^2.2", optional = true}  # wraps any of PyQt5, PyQt6, PySide2, or PySide6
-scipy = {version = "^1.10", optional = true}
-spyder-kernels = {version = "^2.4", optional = true}
-tblib = {version = "^1.7", optional = true}
+[project.optional-dependencies]
+# Note: static excludes numba/datashader for mypy type checking (as they don't play well together)
+numeric = ["h5py>=3.7", "matplotlib>=3.7", "numpy>=2.0", "pandas>=2.0", "pyarrow>=14.0", "PyQt5>=5.15.11", "pyqt5-sip>=12.11", "pyqt5-qt5>=5.15.2", "qtpy>=2.2", "scipy>=1.10", "tblib>=1.7"]
+shader = ["dstauffman[numeric]", "datashader>=0.15", "numba>=0.57"]
+spyder = ["spyder-kernels>=2.4"]
+static = ["dstauffman[numeric]", "black>=25.0", "flake8>=6.0", "isort>=5.10", "mypy>=1.5", "pycodestyle>=2.10", "pylint>=2.16", "PyQt5-stubs>=5.15"]
+test = ["pytest>=7.4", "pytest-cov>=4.0"]
 
-[tool.poetry.dev-dependencies]
-pytest = "^7.4"
-pytest-cov = "^4.0"
+[project.urls]
+Repository = "https://github.com/DStauffman/dstauffman"
+Issues = "https://github.com/DStauffman/dstauffman/issues"
+Changelog = "https://github.com/DStauffman/dstauffman/blob/main/CHANGELOG.md"
 
-[tool.poetry.extras]
-# Note: use combination of numeric and static for mypy type checking (excludes numba/datashader, which can confuse mypy)
-numeric = ["h5py", "matplotlib", "numpy", "pandas", "pyarrow", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
-shader = ["datashader", "h5py", "matplotlib", "numba", "numpy", "pandas", "PyQt5", "pyqt5-sip", "pyqt5-qt5", "qtpy", "scipy", "tblib"]
-spyder = ["spyder-kernels"]
-static = ["black", "flake8", "isort", "mypy", "pycodestyle", "pylint", "PyQt5-stubs"]
-
-[tool.poetry.scripts]
+[project.scripts]
 dcs = "dstauffman.__main__:main"
+
+[tool.setuptools.package-data]
+dstauffman = ["CHANGELOG.md", "LICENSE.txt", "MANIFEST.in", "pyproject.toml", "README.rst", "*.png", "*.pdf", "*.rst", "*.tex", "*.bat", "*.sh"]
+
+[tool.bandit]
+skips = ["B101"]
 
 [tool.black]
 line-length = 128
@@ -197,6 +181,5 @@ deprecateTypingAliases = true
 reportGeneralTypeIssues = false
 reportUnboundVariable = false
 reportOptionalMemberAccess = true
-
 enableTypeIgnoreComments = true
 reportUnnecessaryTypeIgnoreComment = false

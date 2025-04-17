@@ -19,7 +19,7 @@ cache:
   - static
   - everything
   - core_only
-  - poetry
+  - setuptools
 
 stages:
   - Environments
@@ -31,36 +31,33 @@ stages:
 make_envs:
   stage: Environments
   script:
-  - apt-get update -qq && apt-get install -y -qq libopengl0
   # Create virtual environments
-  - python --version
-  - pip install --upgrade pip
-  - pip install virtualenv
+  - python3 --version
+  - pip3 install --upgrade pip
+  - pip3 install virtualenv
   - virtualenv core_only
   - source core_only/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage[toml] pytest
+  - python -m pip install pytest-cov
   - deactivate
   - virtualenv static
   - source static/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install black coverage flake8 h5py isort matplotlib mypy numpy pandas pyarrow pylint pylint-exit PyQt5 PyQt5-stubs pytest pytest-cov qtpy scipy tblib
+  - python -m pip install --timeout 100 --retries 10 black flake8 h5py isort matplotlib mypy numpy pandas pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy scipy tblib
   - deactivate
   - virtualenv everything
   - source everything/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install coverage datashader h5py matplotlib mypy numba numpy pandas pyarrow PyQt5 pytest pytest-cov qtpy scipy tblib
-  - python -m pip install dask[dataframe]  # Fixes missing dask-expr dependency
+  - python -m pip install --timeout 100 --retries 10 dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas pyarrow PyQt5 pytest-cov qtpy scipy tblib
   - deactivate
-  - virtualenv poetry
-  - source poetry/bin/activate
+  - virtualenv setuptools
+  - source setuptools/bin/activate
   - python -m pip install --upgrade pip
   - python -m pip install wheel
-  - python -m pip install poetry
-  - python -m pip install twine  # GitLab doesn't fully support poetry for publishing yet, use twine instead
+  - python -m pip install build twine
   - deactivate
 
 mypy:
@@ -271,12 +268,7 @@ build_code:
   except:
   - branches
   script:
-  - source poetry/bin/activate
+  - source setuptools/bin/activate
   - echo "Publishing to $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/pypi"
-  - poetry --version
-  - poetry build
-  - poetry config repositories.github "$CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/pypi"
-  - poetry config http-basic.gitlab gitlab-ci-token "$CI_JOB_TOKEN"
-  # Note: GitLab doesn't fully support poetry for publishing yet, use twine instead
-  # - poetry publish --repository github
+  - python -m build
   - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*

@@ -7,7 +7,7 @@ Notes
 """
 
 # %% Constants
-version_info = (3, 7, 0)
+version_info = (3, 8, 0)
 
 # Below is data about the minor release history for potential use in deprecating older support.
 # For inspiration, see: https://numpy.org/neps/nep-0029-deprecation_policy.html
@@ -26,6 +26,7 @@ Jun 30, 2023: dstauffman 3.4
 Oct 11, 2023: dstauffman 3.5
 Jun 23, 2024: dstauffman 3.6
 Nov 04, 2024: dstauffman 3.7
+Apr 16, 2025: dstauffman 3.8
 """
 
 # Historical notes:
@@ -45,3 +46,4 @@ Nov 04, 2024: dstauffman 3.7
 # v3.5 Remove unneeded dependencies on requests/urllib3 and keep in sync with other work.
 # v3.6 Only support Python v3.10+ using newer typing syntax for dict, tuple, list and | for Union.
 # v3.7 Support keras (tensorflow/torch/jax) for quaternion routines. Add Python v3.13 support.
+# v3.8 Ditch poetry entirely, use setuptools (and uv instead)

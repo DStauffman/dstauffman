@@ -1,5 +1,9 @@
 # Change Log
 
+## February 2025 (by David C. Stauffer
+
+* Drop explicit ClassVar typing for enums
+
 ## June 2024 (by David C. Stauffer)
 
 * Drop support for Python v3.9, and use newer typing features like dict, list, tuple and | for Union
