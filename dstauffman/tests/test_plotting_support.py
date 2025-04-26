@@ -83,6 +83,7 @@ class Test_plotting_COLOR_LISTS(unittest.TestCase):
             "double", "vec", "quat", "dbl_off", "vec_off", "quat_off",
             "sing_diff", "dbl_diff", "vec_diff", "quat_diff", "sing_diff_r", "dbl_diff_r", "vec_diff_r", "quat_diff_r",
             "sing_comp", "dbl_comp", "vec_comp", "quat_comp", "sing_comp_r", "dbl_comp_r", "vec_comp_r", "quat_comp_r",
+            "matlab", "matlab_old",
         }  # fmt: skip
 
     def test_nominal(self) -> None:

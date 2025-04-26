@@ -161,6 +161,9 @@ if HAVE_MPL:
     COLOR_LISTS["quat_diff_r"] = colors.ListedColormap(COLOR_LISTS["quat"].colors + COLOR_LISTS["quat_off"].colors)  # type: ignore[operator]
     COLOR_LISTS["quat_comp"]   = colors.ListedColormap(COLOR_LISTS["quat_diff"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
     COLOR_LISTS["quat_comp_r"] = colors.ListedColormap(COLOR_LISTS["quat_diff_r"].colors + COLOR_LISTS["quat"].colors)  # type: ignore[operator]
+    # Matlab
+    COLOR_LISTS["matlab"]      = colors.ListedColormap(("#0072bd", "#d95319", "#edb120", "#7e2f8e", "#77ac30", "#4dbeee", "#a2142f"))
+    COLOR_LISTS["matlab_old"]  = colors.ListedColormap(("#0000ff", "#008000", "#ff0000", "#00bfbf", "#bf00bf", "#bfbf00", "#404040"))
     # fmt: on
 
 # %% Set Matplotlib global settings

@@ -1,25 +1,22 @@
 image: python:latest
 
-# Change pip's cache directory to be inside the project directory since we can
-# only cache local items.
 variables:
-  PIP_CACHE_DIR: "$CI_PROJECT_DIR/.cache/pip"
   DCS_TESTS_DIR: "$CI_PROJECT_DIR/dstauffman/tests"
   DCS_SHELL_DIR: "$CI_PROJECT_DIR/shell"
   QT_QPA_PLATFORM: "offscreen"
+  CACHE_DIR: "$CI_PROJECT_DIR/.cache"
+  UV_CACHE_DIR: "$CACHE_DIR/uv"
+  PIP_CACHE_DIR: "$CACHE_DIR/pip"
+  UV_LINK_MODE: "copy"
 
-# Pip's cache doesn't store the python packages
-# https://pip.pypa.io/en/stable/reference/pip_install/#caching
-#
-# If you want to also cache the installed packages, you have to install
-# them in a virtualenv and cache it as well.
 cache:
   paths:
-  - .cache/pip
-  - static
-  - everything
-  - core_only
-  - setuptools
+  - $PIP_CACHE_DIR
+  - $UV_CACHE_DIR
+  - $CACHE_DIR/core_only
+  - $CACHE_DIR/static
+  - $CACHE_DIR/everything
+  - $CACHE_DIR/setuptools
 
 stages:
   - Environments
@@ -31,34 +28,28 @@ stages:
 make_envs:
   stage: Environments
   script:
-  # Create virtual environments
   - python3 --version
-  - pip3 install --upgrade pip
-  - pip3 install virtualenv
-  - virtualenv core_only
-  - source core_only/bin/activate
-  - python -m pip install --upgrade pip
-  - python -m pip install wheel
-  - python -m pip install pytest-cov
+  - python3 -m pip config set global.index-url https://$EFOSS_USERNAME:$EFOSS_TOKEN@nexus.global.lmco.com/repository/pypi-proxy/simple/
+  - python3 -m pip install --upgrade pip
+  - python3 -m pip install --upgrade uv
+  - uv --version
+  - uv venv --allow-existing $CACHE_DIR/core_only
+  - source $CACHE_DIR/core_only/bin/activate
+  - uv pip install pytest-cov
   - deactivate
-  - virtualenv static
-  - source static/bin/activate
-  - python -m pip install --upgrade pip
-  - python -m pip install wheel
-  - python -m pip install --timeout 100 --retries 10 black flake8 h5py isort matplotlib mypy numpy pandas pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy scipy tblib
+  - uv venv --allow-existing $CACHE_DIR/static
+  - source $CACHE_DIR/static/bin/activate
+  - uv pip install black flake8 h5py isort matplotlib mypy numpy pandas pyarrow pylint pylint-exit PyQt5 PyQt5-Stubs pytest-cov qtpy scipy tblib
   - deactivate
-  - virtualenv everything
-  - source everything/bin/activate
-  - python -m pip install --upgrade pip
-  - python -m pip install wheel
-  - python -m pip install --timeout 100 --retries 10 dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas pyarrow PyQt5 pytest-cov qtpy scipy tblib
+  - uv venv --allow-existing $CACHE_DIR/everything
+  - source $CACHE_DIR/everything/bin/activate
+  - uv pip install dask[dataframe] datashader h5py matplotlib mypy numba numpy pandas pyarrow PyQt5 pytest-cov qtpy scipy tblib
   - deactivate
-  - virtualenv setuptools
-  - source setuptools/bin/activate
-  - python -m pip install --upgrade pip
-  - python -m pip install wheel
-  - python -m pip install build twine
+  - uv venv --allow-existing $CACHE_DIR/setuptools
+  - source $CACHE_DIR/setuptools/bin/activate
+  - uv pip install build twine
   - deactivate
+  - uv cache prune --ci
 
 mypy:
   stage: Static Analysis
@@ -66,7 +57,7 @@ mypy:
   script:
   - pwd
   - ls -l
-  - source static/bin/activate
+  - source $CACHE_DIR/static/bin/activate
   - python --version
   - mypy --version
   - mypy
@@ -77,7 +68,7 @@ flake8:
   script:
   - pwd
   - ls -l
-  - source static/bin/activate
+  - source $CACHE_DIR/static/bin/activate
   - python --version
   - flake8 --version
   - flake8 .
@@ -88,7 +79,7 @@ pylint:
   script:
   - pwd
   - ls -l
-  - source static/bin/activate
+  - source $CACHE_DIR/static/bin/activate
   - python --version
   - pylint --version
   - pylint dstauffman || pylint-exit $?
@@ -102,7 +93,7 @@ black:
   script:
   - pwd
   - ls -l
-  - source static/bin/activate
+  - source $CACHE_DIR/static/bin/activate
   - python --version
   - black --version
   - black . --check
@@ -113,9 +104,10 @@ isort:
   script:
   - pwd
   - ls -l
-  - source static/bin/activate
+  - source $CACHE_DIR/static/bin/activate
+  - python --version
   - isort --version
-  - isort . --diff
+  - isort . --diff --skip .cache
 
 core_test:
   stage: Test
@@ -127,7 +119,7 @@ core_test:
   script:
   - pwd
   - ls -l
-  - source core_only/bin/activate
+  - source $CACHE_DIR/core_only/bin/activate
   - python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.core
 
 nubs_test:
@@ -140,7 +132,7 @@ nubs_test:
   script:
   - pwd
   - ls -l
-  - source core_only/bin/activate
+  - source $CACHE_DIR/core_only/bin/activate
   - python -m dstauffman tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_core
 
 slog_test:
@@ -153,7 +145,7 @@ slog_test:
   script:
   - pwd
   - ls -l
-  - source core_only/bin/activate
+  - source $CACHE_DIR/core_only/bin/activate
   - python -m dstauffman tests --library slog --coverage --cov_file $DCS_SHELL_DIR/.coverage.slog_core
 
 no_numba_test:
@@ -166,7 +158,7 @@ no_numba_test:
   script:
   - pwd
   - ls -l
-  - source static/bin/activate
+  - source $CACHE_DIR/static/bin/activate
   - python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.no_numba
 
 unit_test:
@@ -179,7 +171,7 @@ unit_test:
   script:
   - pwd
   - ls -l
-  - source everything/bin/activate
+  - source $CACHE_DIR/everything/bin/activate
   - python -m dstauffman tests --coverage --cov_file $DCS_SHELL_DIR/.coverage.full
 
 nubs_full_test:
@@ -192,7 +184,7 @@ nubs_full_test:
   script:
   - pwd
   - ls -l
-  - source everything/bin/activate
+  - source $CACHE_DIR/everything/bin/activate
   - python -m dstauffman tests --library nubs --coverage --cov_file $DCS_SHELL_DIR/.coverage.nubs_full
 
 import_test:
@@ -208,13 +200,13 @@ import_test:
   - export COVERAGE_FILE=$DCS_SHELL_DIR/.coverage.imports
   - export COVERAGE_RCFILE=$CI_PROJECT_DIR/pyproject.toml
   - export PYTHONPATH=$CI_PROJECT_DIR:$PYTHONPATH
-  - source core_only/bin/activate
+  - source $CACHE_DIR/core_only/bin/activate
   - coverage run $DCS_TESTS_DIR/test_commands_help.py
   - deactivate
-  - source static/bin/activate
+  - source $CACHE_DIR/static/bin/activate
   - coverage run --append $DCS_TESTS_DIR/test_version.py
   - deactivate
-  - source everything/bin/activate
+  - source $CACHE_DIR/everything/bin/activate
   - coverage run --append $DCS_TESTS_DIR/test_version.py
 
 basic_test:
@@ -223,7 +215,7 @@ basic_test:
   script:
   - pwd
   - ls -l
-  - source core_only/bin/activate
+  - source $CACHE_DIR/core_only/bin/activate
   - python -m dstauffman tests -u
 
 doc_test:
@@ -232,7 +224,7 @@ doc_test:
   script:
   - pwd
   - ls -l
-  - source everything/bin/activate
+  - source $CACHE_DIR/everything/bin/activate
   - python -m dstauffman tests -d
 
 coverage_report:
@@ -249,7 +241,7 @@ coverage_report:
         coverage_format: cobertura
         path: $DCS_SHELL_DIR/coverage_html_report/coverage.xml
   script:
-  - source static/bin/activate
+  - source $CACHE_DIR/static/bin/activate
   - cd $DCS_SHELL_DIR
   - pwd
   - ls -la
@@ -268,7 +260,7 @@ build_code:
   except:
   - branches
   script:
-  - source setuptools/bin/activate
+  - source $CACHE_DIR/setuptools/bin/activate
   - echo "Publishing to $CI_API_V4_URL/projects/$CI_PROJECT_ID/packages/pypi"
   - python -m build
   - TWINE_PASSWORD=${CI_JOB_TOKEN} TWINE_USERNAME=gitlab-ci-token python -m twine upload --repository-url ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/packages/pypi dist/*
