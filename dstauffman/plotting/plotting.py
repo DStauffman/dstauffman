@@ -294,7 +294,7 @@ class Opts(Frozen):
         self.show_xtra: bool  = True
         self.time_base: str   = "sec"
         self.time_unit: str   = "sec"
-        self.colormap: str | ColorMap | None = None
+        self.colormap: _CM | None = None
         self.leg_spot: str    = "best"
         self.classify: str    = ""
         self.names: list[str] = []

@@ -48,7 +48,8 @@ from .quat_opt    import qrot_single, quat_from_axis_angle_single, \
                              quat_norm_single, quat_prop_single, quat_times_vector_single, \
                              quat_to_dcm
 from .vectors     import rot, drot, vec_cross, vec_angle, cart2sph, sph2cart, rv2dcm, interp_vector
-from .weather     import read_tci_data, read_kp_ap_etc_data, read_kp_ap_nowcast, read_solar_cycles
+from .weather     import AP_TO_KP, read_tci_data, read_kp_ap_etc_data, read_kp_ap_nowcast, \
+                             read_solar_cycles
 # fmt: on
 
 # %% Unit test

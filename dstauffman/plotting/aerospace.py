@@ -614,7 +614,7 @@ def plot_quaternion(  # noqa: C901
 
     # Setup plots
     if not skip_setup_plots:
-        setup_plots(figs, opts)
+        setup_plots(figs, this_opts)
     logger.log(LogLevel.L4, "... done.")
     if return_err:
         return (figs, err)

@@ -22,6 +22,38 @@ if HAVE_PANDAS:
     import pandas as pd
 
 
+# %% Constants
+AP_TO_KP: dict[int, float] = {}
+AP_TO_KP[0] = 0.000  # "0o"
+AP_TO_KP[2] = 0.333  # "0+"
+AP_TO_KP[3] = 0.667  # "1-"
+AP_TO_KP[4] = 1.000  # "1o"
+AP_TO_KP[5] = 1.333  # "1+"
+AP_TO_KP[6] = 1.667  # "2-"
+AP_TO_KP[7] = 2.000  # "2o"
+AP_TO_KP[9] = 2.333  # "2+"
+AP_TO_KP[12] = 2.667  # "3-"
+AP_TO_KP[15] = 3.000  # "3o"
+AP_TO_KP[18] = 3.333  # "3+"
+AP_TO_KP[22] = 3.667  # "4-"
+AP_TO_KP[27] = 4.000  # "4o"
+AP_TO_KP[32] = 4.333  # "4+"
+AP_TO_KP[39] = 4.667  # "5-"
+AP_TO_KP[48] = 5.000  # "5o"
+AP_TO_KP[56] = 5.333  # "5+"
+AP_TO_KP[67] = 5.667  # "6-"
+AP_TO_KP[80] = 6.000  # "6o"
+AP_TO_KP[94] = 6.333  # "6+"
+AP_TO_KP[111] = 6.667  # "7-"
+AP_TO_KP[132] = 7.000  # "7o"
+AP_TO_KP[154] = 7.333  # "7+"
+AP_TO_KP[179] = 7.667  # "8-"
+AP_TO_KP[207] = 8.000  # "8o"
+AP_TO_KP[236] = 8.333  # "8+"
+AP_TO_KP[300] = 8.667  # "9-"
+AP_TO_KP[400] = 9.000  # "9o"
+
+
 # %% Functions - read_tci_data
 def read_tci_data(filename: Path) -> pd.DataFrame:
     r"""Reads the TCI data from files provided online."""

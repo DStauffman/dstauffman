@@ -2313,7 +2313,7 @@ def add_datashaders(
 @overload
 def fig_ax_factory(
     num_figs: int | None,
-    num_axes: int | list[int],
+    num_axes: int | tuple[int, int],
     *,
     suptitle: str | list[str],
     layout: str,
@@ -2323,7 +2323,7 @@ def fig_ax_factory(
 @overload
 def fig_ax_factory(
     num_figs: int | None,
-    num_axes: int | list[int],
+    num_axes: int | tuple[int, int],
     *,
     suptitle: str | list[str],
     layout: str,
@@ -2332,7 +2332,7 @@ def fig_ax_factory(
 ) -> tuple[None, ...]: ...
 def fig_ax_factory(  # noqa: C901
     num_figs: int | None = None,
-    num_axes: int | list[int] = 1,
+    num_axes: int | tuple[int, int] = 1,
     *,
     suptitle: str | list[str] = "",
     layout: str = "rows",
@@ -2344,12 +2344,18 @@ def fig_ax_factory(  # noqa: C901
 
     Parameters
     ----------
-    num_figs
-    suptitle
-    num_axes
-    layout
-    sharex
-    passthrough
+    num_figs : int
+        Number of igures to produce
+    num_axes : int or (int, int)
+        Number of axes
+    suptitle : str
+        Title to put over all axes
+    layout : str
+        Axes layout, from {"rows", "cols", "rowwise", "colwise"}
+    sharex : bool
+        Whether to share the X axis
+    passthrough : bool
+        Whether to include everything and return a tuple of None's with the correct length
 
     Notes
     -----
@@ -2382,8 +2388,8 @@ def fig_ax_factory(  # noqa: C901
         is_1d = False
         if layout not in {"rowwise", "colwise"}:
             raise ValueError(f'Unexpected layout: "{layout}".')
-        num_row = num_axes[0]
-        num_col = num_axes[1]
+        assert len(num_axes) == 2, "Expected a tuple with exactly two elements."
+        num_row, num_col = num_axes
     if num_figs is None:
         num_figs = 1
     if passthrough:
