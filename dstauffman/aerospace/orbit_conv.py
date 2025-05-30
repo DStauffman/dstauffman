@@ -35,7 +35,8 @@ if TYPE_CHECKING:
 
     _I = NDArray[np.int_]
     _N = NDArray[np.floating]
-    _FN = float | _N
+    _Q = NDArray[np.floating]  # (4,)
+    _FN = float | np.floating | _N
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -662,7 +663,7 @@ def quat_eci_2_ecf_approx(time_jd: _FN) -> _FN:
 
 
 # %% Functions - quat_eci_2_ecf
-def quat_eci_2_ecf(time_jd: _FN, ignore_nutation: bool = False) -> _FN:
+def quat_eci_2_ecf(time_jd: _FN, ignore_nutation: bool = False) -> _Q:
     r"""
     Calculate the ECI to ECF transformation.
 

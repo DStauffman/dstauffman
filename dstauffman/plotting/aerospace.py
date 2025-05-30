@@ -62,12 +62,12 @@ if TYPE_CHECKING:
     _M = NDArray[np.floating]  # 2D
     _Q = NDArray[np.floating]
     _CM = str | Colormap | ListedColormap | ColorMap
-    _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
-    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | None
-    _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
-    _DeltaTime = int | float | np.timedelta64
+    _Data = int | float | np.floating | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
+    _Time = int | float | np.floating | datetime.datetime | datetime.date | np.datetime64 | None
+    _Times = int | float | np.floating | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
+    _DeltaTime = int | float | np.floating | np.timedelta64
     _Figs = list[Figure]
-    _SecUnits = str | int | float | tuple[str, float] | None
+    _SecUnits = str | int | float | np.floating | tuple[str, float] | tuple[str, np.floating] | None
 
     class _KfQuatKwargs(TypedDict):
         name_one: NotRequired[str]
@@ -510,7 +510,7 @@ def plot_quaternion(  # noqa: C901
 
     >>> time_two = np.arange(2, 13)
     >>> quat_two = np.tile(q2[:, np.newaxis], (1, time_two.size))
-    >>> quat_two[3,4] += 50e-6
+    >>> quat_two[3, 4] += 50e-6
     >>> quat_two = quat_norm(quat_two)
 
     >>> opts = Opts()
@@ -696,7 +696,7 @@ def plot_attitude(  # noqa: C901
     >>> kf2.name = "KF2"
     >>> kf2.time = np.arange(2, 13)
     >>> kf2.att  = np.tile(q2[:, np.newaxis], (1, kf2.time.size))
-    >>> kf2.att[3,4] += 50e-6
+    >>> kf2.att[3, 4] += 50e-6
     >>> kf2.att = quat_norm(kf2.att)
 
     >>> opts = Opts()

@@ -167,10 +167,10 @@ def ecf2geod(  # noqa: C901
     4.  Altitudes are not significantly negative (intended for spacecraft).
 
     The "sofair" algorithm is based off of this original paper:
-    Sofair, I., Improved Method for Calculating Exact Geodetic Latitude and Altitude,
-    Journal of Guidance, Control, and Dynamics, Vol. 20, No. 4, 1997, pp. 824826.
+    Sofair, I., "Improved Method for Calculating Exact Geodetic Latitude and Altitude",
+    Journal of Guidance, Control, and Dynamics, Vol. 20, No. 4, 1997, pp. 824-826.
     and Sofair's revised version:
-    Sofair, I., Improved Method for Calculating Exact Geodetic Latitude and Altitude Revisited,
+    Sofair, I., "Improved Method for Calculating Exact Geodetic Latitude and Altitude Revisited",
     Journal of Guidance, Control, and Dynamics, Vol. 23, No. 2, 2000, pp. 369.
 
     Assumes:

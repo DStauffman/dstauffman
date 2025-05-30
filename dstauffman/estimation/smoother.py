@@ -38,7 +38,7 @@ def _update_information(  # pylint: disable=too-many-positional-arguments
 
     Reference
     ---------
-    #.  Bierman, Gerald J., "Kalman Filter Related Smoothers," Appendix X.A of "Factorization
+    #.  Bierman, Gerald J., "Kalman Filter Related Smoothers", Appendix X.A of "Factorization
         Methods for Discrete Sequential Estimation", Academic Press, 1977.
         (Equations A.15 and A.16)
 
@@ -122,7 +122,7 @@ def bf_smoother(kf_record: KfRecord, lambda_bar: _N | None = None, LAMBDA_bar: _
 
     References
     ----------
-    #.  Bierman, Gerald J., "Kalman Filter Related Smoothers," Appendix X.A of "Factorization
+    #.  Bierman, Gerald J., "Kalman Filter Related Smoothers", Appendix X.A of "Factorization
         Methods for Discrete Sequential Estimation", Academic Press, 1977.
 
     Examples

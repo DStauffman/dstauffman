@@ -53,7 +53,7 @@ if TYPE_CHECKING:
     _StrOrListStr = TypeVar("_StrOrListStr", str, list[str])
     _SingleNum = int | float | np.datetime64
     _Lists = _N | list[_N] | tuple[_N, ...]
-    _NF = float | _N
+    _FN = float | np.floating | _N
     _Array = _B | _D | _I | _N
 
     class _PrintOptsKwArgs(TypedDict):
@@ -236,12 +236,12 @@ def find_in_range(
 
 # %% Functions - rms
 @overload
-def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> float: ...
+def rms(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> np.floating: ...
 @overload
-def rms(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _NF: ...
+def rms(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> np.floating | _N: ...
 @overload
 def rms(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> _N: ...
-def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore_nans: bool = False) -> _NF:
+def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore_nans: bool = False) -> np.floating | _N:
     r"""
     Calculate the root mean square of a number series.
 
@@ -278,7 +278,7 @@ def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
     """
     # check for empty data
     if not np.isscalar(data) and len(data) == 0:  # type: ignore[arg-type]
-        return np.nan
+        return np.array(np.nan)
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
     if not ignore_nans:
         out = np.sqrt(np.mean(data * np.conj(data), axis=axis, keepdims=keepdims))  # type: ignore[arg-type]
@@ -302,12 +302,12 @@ def rms(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
 
 # %% Functions - rss
 @overload
-def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> float: ...
+def rss(data: ArrayLike, axis: Literal[None] = ..., keepdims: bool = ..., ignore_nans: bool = ...) -> np.floating: ...
 @overload
-def rss(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> _NF: ...
+def rss(data: ArrayLike, axis: int, keepdims: Literal[False] = ..., ignore_nans: bool = ...) -> np.floating | _N: ...
 @overload
 def rss(data: ArrayLike, axis: int, keepdims: Literal[True], ignore_nans: bool = ...) -> _N: ...
-def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore_nans: bool = False) -> _NF:
+def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore_nans: bool = False) -> np.floating | _N:
     r"""
     Calculate the root sum square of a number series.
 
@@ -345,16 +345,15 @@ def rss(data: ArrayLike, axis: int | None = None, keepdims: bool = False, ignore
     """
     # check for empty data
     if not np.isscalar(data) and len(data) == 0:  # type: ignore[arg-type]
-        return np.nan
+        return np.array(np.nan)
     # do the root-mean-square, but use x * conj(x) instead of square(x) to handle complex numbers correctly
-    out: _NF
     if not ignore_nans:
         out = np.sqrt(np.sum(data * np.conj(data), axis=axis, keepdims=keepdims))
     else:
         # check for all NaNs case
         if np.all(np.isnan(data)):
             if axis is None:
-                out = np.nan
+                out = np.array(np.nan)
             else:
                 assert isinstance(data, np.ndarray)
                 if keepdims:
@@ -746,7 +745,7 @@ def write_text_file(filename: str | Path, text: str, encoding: str = "utf-8", *,
 
 
 # %% Functions - magnitude
-def magnitude(data: _Lists, axis: int = 0) -> float | _N:
+def magnitude(data: _Lists, axis: int = 0) -> np.floating | _N:
     r"""
     Return a vector of magnitudes for each subvector along a specified dimension.
 

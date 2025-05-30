@@ -74,13 +74,13 @@ if TYPE_CHECKING:
     _N = NDArray[np.floating]
     _M = NDArray[np.floating]  # 2D
     _CM = str | Colormap | ListedColormap | ColorMap
-    _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
-    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | None
-    _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
-    _DeltaTime = int | float | np.timedelta64
+    _Data = int | float | np.floating | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
+    _Time = int | float | np.floating | datetime.datetime | datetime.date | np.datetime64 | None
+    _Times = int | float | np.floating | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
+    _DeltaTime = int | float | np.floating | np.timedelta64
     _Figs = list[Figure]
-    _FuncLamb = Callable[[_I | _N, int | None], float | _N]
-    _SecUnits = str | int | float | tuple[str, float] | None
+    _FuncLamb = Callable[[_I | _N, int | None], np.floating | _N]
+    _SecUnits = str | int | float | np.floating | tuple[str, float] | tuple[str, np.floating] | None
 
 # %% Globals
 logger = logging.getLogger(__name__)
@@ -289,19 +289,19 @@ def make_generic_plot(  # noqa: C901
     datashader_pts = 2000  # Plot this many points on top of datashader plots, or skip if fewer exist
 
     # possible RMS/mean functions
-    def _nan_rms(x: _I | _N, axis: int | None) -> float | _N:
+    def _nan_rms(x: _I | _N, axis: int | None) -> np.floating | _N:
         """Calculate the RMS while ignoring NaNs."""
         try:
             return rms(x, axis=axis, ignore_nans=True)
         except TypeError:
-            return np.nan
+            return np.array(np.nan)
 
-    def _nan_mean(x: _I | _N, axis: int | None) -> float | _N:
+    def _nan_mean(x: _I | _N, axis: int | None) -> np.floating | _N:
         """Calculate the mean while ignoring NaNs."""
         try:
-            return np.nanmean(x, axis=axis)  # type: ignore[return-value]
+            return np.nanmean(x, axis=axis)
         except TypeError:
-            return np.nan
+            return np.array(np.nan)
 
     # possible plotting functions
     def _plot_linear(ax: Axes, time: _Times | None, data: _Data | None, symbol: str, *args: Any, **kwargs: Any) -> None:
@@ -570,8 +570,8 @@ def make_generic_plot(  # noqa: C901
     if plot_type == "errorbar":
         # error calculation
         # TODO: handle data_is_list and rows cases
-        err_neg = data_one - mins  # type: ignore[operator]
-        err_pos = maxs - data_one  # type: ignore[operator]
+        err_neg = data_one - mins  # type: ignore[call-overload, operator]
+        err_pos = maxs - data_one  # type: ignore[call-overload, operator]
     elif plot_type == "bar":
         # TODO: handle data_is_list and rows cases
         bottoms: list[_N] | _N | _M
@@ -2068,7 +2068,7 @@ def make_connected_sets(  # noqa: C901
         cbar_units = DEGREE_SIGN if color_by == "direction" else new_units
         cbar.ax.set_ylabel("Innovation " + color_by.capitalize() + " [" + cbar_units + "]")
     ax.set_title(description + extra_text)
-    ax.set_xlabel("FP X Loc [" + units + "]")  # TODO: pass in X,Y labels
+    ax.set_xlabel("FP X Loc [" + units + "]")  # TODO: pass in X, Y labels
     ax.set_ylabel("FP Y Loc [" + units + "]")
     ax.grid(True)
     if center_origin:

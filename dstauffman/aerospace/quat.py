@@ -442,7 +442,7 @@ def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]
             [ny * sin(theta/2)]
             [nz * sin(theta/2)]
             [   cos(theta/2)  ]]
-    Where: <nx,ny,nz> are the three components of a unit vector of rotation axis and
+    Where: <nx, ny, nz> are the three components of a unit vector of rotation axis and
            theta is the angle of rotation
 
     Notes
@@ -457,7 +457,7 @@ def quat_angle_diff(quat1: _Q, quat2: _Q, **kwargs: Unpack[_QuatAssertionKwargs]
     >>> quat1 = np.array([0.5, 0.5, 0.5, 0.5])
     >>> dq1 = qrot(1, 0.001)
     >>> dq2 = qrot(2, 0.05)
-    >>> quat2 = np.column_stack((quat_mult(dq1,quat1), quat_mult(dq2,quat1)))
+    >>> quat2 = np.column_stack((quat_mult(dq1, quat1), quat_mult(dq2, quat1)))
     >>> (theta, comp) = quat_angle_diff(quat1, quat2)
     >>> with np.printoptions(precision=8):
     ...     print(theta)  # doctest: +NORMALIZE_WHITESPACE

@@ -65,6 +65,14 @@ class Test_aerospace_Elements(unittest.TestCase):
         elements2 = space.Elements()
         self.assertEqual(elements1, elements2)
 
+    def test_length(self) -> None:
+        elements1 = space.Elements()
+        elements2 = space.Elements(1)
+        elements3 = space.Elements(5)
+        self.assertEqual(len(elements1), 0)
+        self.assertEqual(len(elements2), 1)
+        self.assertEqual(len(elements3), 5)
+
     def test_preallocated(self) -> None:
         elements = space.Elements(self.num)
         for key in self.floats:
@@ -537,6 +545,16 @@ class Test_aerospace_oe_2_rv(unittest.TestCase):
                                 np.testing.assert_array_almost_equal(oe.w, oe2.w, err_msg="w is different")
                                 np.testing.assert_array_almost_equal(oe.W, oe2.W, err_msg="W is different")
                                 np.testing.assert_array_almost_equal(oe.vo, oe2.vo, err_msg="nu is different")
+
+
+# %% aerospace.advance_true_anomaly
+class Test_aerospace_advance_true_anomaly(unittest.TestCase):
+    r"""
+    Tests the aerospace.advance_true_anomaly function with the following cases:
+        TBD
+    """
+
+    pass  # TODO: write this
 
 
 # %% aerospace.advance_elements

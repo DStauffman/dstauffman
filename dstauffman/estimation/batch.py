@@ -673,7 +673,7 @@ def _finite_differences(  # noqa: C901
 
     References
     ----------
-    #.  Conn, Andrew R., Gould, Nicholas, Toint, Philippe, "Trust-Region Methods," MPS-SIAM Series
+    #.  Conn, Andrew R., Gould, Nicholas, Toint, Philippe, "Trust-Region Methods", MPS-SIAM Series
         on Optimization, 2000.
 
     """

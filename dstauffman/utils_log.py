@@ -30,7 +30,7 @@ if TYPE_CHECKING:
 
     _I = NDArray[np.int_]
     _N = NDArray[np.floating]
-    _F = float | _N
+    _FN = float | np.floating | _N
 
     class _OutlierKwArgs(TypedDict):
         num_iters: NotRequired[int]
@@ -271,7 +271,7 @@ def remove_outliers(
     return_stats: Literal[True],
     inplace: bool,
     hardmax: float | None,
-) -> tuple[_N, int, _F, _F]: ...
+) -> tuple[_N, int, _FN, _FN]: ...
 def remove_outliers(
     x: ArrayLike,
     /,
@@ -282,7 +282,7 @@ def remove_outliers(
     return_stats: bool = False,
     inplace: bool = False,
     hardmax: float | None = None,
-) -> _N | tuple[_N, int, _F, _F]:
+) -> _N | tuple[_N, int, _FN, _FN]:
     r"""
     Removes the outliers from a data set based on the RMS of the points in the set.
 
@@ -356,7 +356,7 @@ def remove_outliers(
             rms_initial: _N = np.squeeze(rms_all)
         ix_bad = np.greater(np.abs(y), rms_all * sigma, out=np.zeros(y.shape, dtype=bool), where=~np.isnan(y))
         y[ix_bad] = np.nan
-    rms_removed: _F = rms(y, axis=axis, ignore_nans=True)
+    rms_removed: _FN = rms(y, axis=axis, ignore_nans=True)
     num_replaced = np.count_nonzero(np.isnan(y)) - num_nans
     num_removed = num_replaced - num_hard
     logger.log(LogLevel.L6, "Number of NaNs = %s", num_nans)

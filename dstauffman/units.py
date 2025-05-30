@@ -7,10 +7,17 @@ Notes
 """
 
 # %% Imports
+from __future__ import annotations
+
 import doctest
 from math import pi
-from typing import Final
+from typing import Final, TYPE_CHECKING
 import unittest
+
+if TYPE_CHECKING:
+    import numpy as np
+
+    _nf = np.floating
 
 # %% Constants - Unit Conversions
 # Time
@@ -165,7 +172,7 @@ def get_time_factor(unit: str) -> int:
 
 # %% Functions - get_unit_conversion
 def get_unit_conversion(  # noqa: C901
-    conversion: str | int | float | tuple[str, float] | None, units: str = ""
+    conversion: str | int | float | _nf | tuple[str, float] | tuple[str, _nf] | None, units: str = ""
 ) -> tuple[str, float]:
     r"""
     Acts as a wrapper to unit conversions for legends in plots and for scaling second axes.
@@ -214,7 +221,8 @@ def get_unit_conversion(  # noqa: C901
     if isinstance(conversion, (int, float)):
         return ("", conversion)
     if not isinstance(conversion, str):
-        return (conversion[0], conversion[1])
+        assert isinstance(conversion, tuple) and len(conversion) == 2, "Expect a tuple with exactly two elements."
+        return (conversion[0], float(conversion[1]))
     if conversion == "percentage":
         return ("%", 100)
     (unit_mult, label) = get_factors(conversion, inverse=True)

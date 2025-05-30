@@ -23,7 +23,8 @@ class Test_Constants(unittest.TestCase):
         self.ints: list[str] = ["ONE_MINUTE", "ONE_HOUR", "ONE_DAY", "MONTHS_PER_YEAR"]
         self.flts: list[str] = ["RAD2DEG", "DEG2RAD", "ARCSEC2RAD", "RAD2ARCSEC", "FT2M", "M2FT", "IN2CM", "CM2IN"]
         self.strs: list[str] = ["DEGREE_SIGN", "MICRO_SIGN"]
-        self.master = set(self.ints) | set(self.flts) | set(self.strs)
+        self.ignore: list[str] = ["TYPE_CHECKING"]
+        self.master = set(self.ignore) | set(self.ints) | set(self.flts) | set(self.strs)
 
     def test_values(self) -> None:
         # confirm that all the expected values exist and have the correct type

@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     _N = NDArray[np.floating]
     _V = NDArray[np.floating]  # shape (3,)
     _DCM = NDArray[np.floating]  # shape (3, 3)
-    _FN = float | _N
+    _FN = float | np.floating | _N
     _Lists = list[_N] | tuple[_N, ...] | _N
 
     class _InterpKwArgs(TypedDict):

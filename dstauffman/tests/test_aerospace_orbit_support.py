@@ -467,17 +467,17 @@ class Test_aerospace_get_sun_radec(unittest.TestCase):
     def setUp(self) -> None:
         date = datetime.datetime(2010, 6, 20, 15, 30, 45)
         np_date = convert_datetime_to_np(date)
-        self.time_jd: float = space.numpy_to_jd(np_date)
+        self.time_jd = space.numpy_to_jd(np_date)
 
     def test_nominal(self) -> None:
         (ra, dec) = space.get_sun_radec(self.time_jd)
-        self.assertAlmostEqual(ra, 1.5557002786752125, 14)  # TODO: get independent source for this
-        self.assertAlmostEqual(dec, 0.4090272497793529, 14)  # TODO: get independent source for this
+        self.assertAlmostEqual(ra, 1.5557002786752125, 14)  # type: ignore[misc]  # TODO: get independent source for this
+        self.assertAlmostEqual(dec, 0.4090272497793529, 14)  # type: ignore[misc]  # TODO: get independent source for this
 
     def test_return_early(self) -> None:
         (Ls, ob) = space.get_sun_radec(self.time_jd, return_early=True)
-        self.assertAlmostEqual(Ls, 1.5569456630415757, 14)  # TODO: get independent source for this
-        self.assertAlmostEqual(ob, 0.40906883260993276, 14)  # TODO: get independent source for this
+        self.assertAlmostEqual(Ls, 1.5569456630415757, 14)  # type: ignore[misc]  # TODO: get independent source for this
+        self.assertAlmostEqual(ob, 0.40906883260993276, 14)  # type: ignore[misc]  # TODO: get independent source for this
 
 
 # %% aerospace.get_sun_distance
@@ -494,17 +494,17 @@ class Test_aerospace_get_sun_distance(unittest.TestCase):
         date_jul = datetime.datetime(2023, 7, 7)
         np_date_jan = convert_datetime_to_np(date_jan)
         np_date_jul = convert_datetime_to_np(date_jul)
-        self.time_jd_jan: float = space.numpy_to_jd(np_date_jan)
-        self.time_jd_jul: float = space.numpy_to_jd(np_date_jul)
+        self.time_jd_jan = space.numpy_to_jd(np_date_jan)
+        self.time_jd_jul = space.numpy_to_jd(np_date_jul)
         self.dist_jan = 0.983_2959  # from Astronomical Almanac 2023, page C6
         self.dist_jul = 1.016_6805  # from Astronomical Almanac 2023, page C14
         self.limit = 4  # sig fig limit limits of current algorithm (0.0003 AU)
 
     def test_nominal(self) -> None:
         sun_dist_jan = space.get_sun_distance(self.time_jd_jan)
-        self.assertAlmostEqual(sun_dist_jan, self.dist_jan, self.limit)
+        self.assertAlmostEqual(sun_dist_jan, self.dist_jan, self.limit)  # type: ignore[misc]
         sun_dist_jul = space.get_sun_distance(self.time_jd_jul)
-        self.assertAlmostEqual(sun_dist_jul, self.dist_jul, self.limit)
+        self.assertAlmostEqual(sun_dist_jul, self.dist_jul, self.limit)  # type: ignore[misc]
 
     def test_vectorized(self) -> None:
         sun_dist = space.get_sun_distance(np.array([self.time_jd_jan, self.time_jd_jul]))
@@ -538,7 +538,7 @@ class Test_aerospace_eclipse_fraction(unittest.TestCase):
 
     def test_nominal(self) -> None:
         fe = space.eclipse_fraction(self.altitude, self.beta)
-        self.assertAlmostEqual(fe, self.exp, 14)
+        self.assertAlmostEqual(fe, self.exp, 14)  # type: ignore[misc]
 
     def test_bad_values(self) -> None:
         altitude = np.array([self.altitude, np.nan, -1000000.0])

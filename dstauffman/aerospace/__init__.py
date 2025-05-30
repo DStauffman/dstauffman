@@ -32,7 +32,8 @@ from .orbit_support import d_2_r, r_2_d, norm, dot, cross, jd_to_numpy, numpy_to
                              rv_aer_2_ijk, rv_aer_2_sez, rv_ijk_2_aer, rv_ijk_2_sez, rv_sez_2_aer, \
                              rv_sez_2_ijk, get_sun_radec_approx, get_sun_radec, get_sun_distance, \
                              beta_from_oe, eclipse_fraction, earth_radius_by_latitude
-from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv, advance_elements
+from .orbits      import OrbitType, Elements, two_line_elements, rv_2_oe, oe_2_rv, \
+                             advance_true_anomaly, advance_elements
 from .quat        import QUAT_SIZE, QuatAssertionError, suppress_quat_checks, \
                              unsuppress_quat_checks, quat_assertions, enforce_pos_scalar, qrot, \
                              quat_from_axis_angle, quat_from_rotation_vector, quat_angle_diff, \

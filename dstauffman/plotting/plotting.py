@@ -68,10 +68,10 @@ if TYPE_CHECKING:
     _N = NDArray[np.floating]
     _M = NDArray[np.floating]  # 2D
     _CM = str | colors.Colormap | colors.ListedColormap | ColorMap
-    _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
-    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | None
-    _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
-    _DeltaTime = int | float | np.timedelta64
+    _Data = int | float | np.floating | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...]  # fmt: skip
+    _Time = int | float | np.floating | datetime.datetime | datetime.date | np.datetime64 | None
+    _Times = int | float | np.floating | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...]  # fmt: skip
+    _DeltaTime = int | float | np.floating | np.timedelta64
     _Figs = list[Figure]
     _Gnds = Kf | KfInnov | None
 
@@ -229,7 +229,7 @@ class Opts(Frozen):
         .show_link : bool
             Flag to show a link to the folder where the plots were saved
         .plot_type : str
-            Type of plot to save to disk, from {"png","jpg","fig","emf"}
+            Type of plot to save to disk, from {"png", "jpg", "fig", "emf"}
         .show_warn : bool
             Whether to show warning if saving by title instead of window (i.e. no display is found)
         .sub_plots : bool

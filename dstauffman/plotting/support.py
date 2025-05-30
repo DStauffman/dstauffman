@@ -102,9 +102,9 @@ if TYPE_CHECKING:
     _I = NDArray[np.int_]
     _N = NDArray[np.floating]
     _M = NDArray[np.floating]  # 2D
-    _Time = int | float | datetime.datetime | datetime.date | np.datetime64 | None
-    _Times = int | float | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...] | None  # fmt: skip
-    _Data = int | float | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...] | None  # fmt: skip
+    _Time = int | float | np.floating | datetime.datetime | datetime.date | np.datetime64 | None
+    _Times = int | float | np.floating | datetime.datetime | np.datetime64 | _D | _I | _N | list[_N] | list[_D] | tuple[_N, ...] | tuple[_D, ...] | None  # fmt: skip
+    _Data = int | float | np.floating | _I | _N | _M | list[_I] | list[_N] | list[_I | _N] | tuple[_I, ...] | tuple[_N, ...] | tuple[_I | _N, ...] | None  # fmt: skip
     _FigOrListFig = Figure | list[Figure]
 
     class _RmsIndices(TypedDict):

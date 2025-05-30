@@ -24,12 +24,14 @@ if TYPE_CHECKING:
 
     _D = NDArray[np.datetime64]
     _N = NDArray[np.floating]
-    _FN = float | _N
+    _FN = float | np.floating | _N
 
 
 # %% Functions - d_2_r
 @overload
 def d_2_r(deg: float) -> float: ...
+@overload
+def d_2_r(deg: np.floating) -> np.floating: ...
 @overload
 def d_2_r(deg: _N) -> _N: ...
 def d_2_r(deg: _FN) -> _FN:
@@ -40,6 +42,8 @@ def d_2_r(deg: _FN) -> _FN:
 # %% Functions r_2_d
 @overload
 def r_2_d(rad: float) -> float: ...
+@overload
+def r_2_d(rad: np.floating) -> np.floating: ...
 @overload
 def r_2_d(rad: _N) -> _N: ...
 def r_2_d(rad: _FN) -> _FN:
@@ -69,6 +73,8 @@ def cross(x: _N, y: _N) -> _N:
 @overload
 def jd_to_numpy(time_jd: float) -> np.datetime64: ...
 @overload
+def jd_to_numpy(time_jd: np.floating) -> _D: ...
+@overload
 def jd_to_numpy(time_jd: _N) -> _D: ...
 def jd_to_numpy(time_jd: _FN) -> np.datetime64 | _D:
     r"""
@@ -90,10 +96,10 @@ def jd_to_numpy(time_jd: _FN) -> np.datetime64 | _D:
 
 # %% Functions - numpy_to_jd
 @overload
-def numpy_to_jd(date: np.datetime64) -> float: ...
+def numpy_to_jd(date: np.datetime64) -> np.floating: ...
 @overload
 def numpy_to_jd(date: _D) -> _N: ...
-def numpy_to_jd(date: np.datetime64 | _D) -> float | _N:
+def numpy_to_jd(date: np.datetime64 | _D) -> np.floating | _N:
     r"""
     Converts a numpy datetime64 into a julian date.
 
@@ -115,6 +121,8 @@ def numpy_to_jd(date: np.datetime64 | _D) -> float | _N:
 # %% Functions - jd_2_century
 @overload
 def jd_2_century(time_jd: float) -> tuple[float, float]: ...
+@overload
+def jd_2_century(time_jd: np.floating) -> tuple[np.floating, np.floating]: ...
 @overload
 def jd_2_century(time_jd: _N) -> tuple[_N, _N]: ...
 def jd_2_century(time_jd: _FN) -> tuple[_FN, _FN]:
@@ -145,6 +153,8 @@ def jd_2_century(time_jd: _FN) -> tuple[_FN, _FN]:
 @overload
 def mjd_to_numpy(time_mjd: float) -> np.datetime64: ...
 @overload
+def mjd_to_numpy(time_mjd: np.floating) -> np.datetime64: ...
+@overload
 def mjd_to_numpy(time_mjd: _N) -> _D: ...
 def mjd_to_numpy(time_mjd: _FN) -> np.datetime64 | _D:
     r"""
@@ -166,10 +176,10 @@ def mjd_to_numpy(time_mjd: _FN) -> np.datetime64 | _D:
 
 # %% Functions - numpy_to_mjd
 @overload
-def numpy_to_mjd(date: np.datetime64) -> float: ...
+def numpy_to_mjd(date: np.datetime64) -> np.floating: ...
 @overload
 def numpy_to_mjd(date: _D) -> _N: ...
-def numpy_to_mjd(date: np.datetime64 | _D) -> float | _N:
+def numpy_to_mjd(date: np.datetime64 | _D) -> np.floating | _N:
     r"""
     Converts a numpy datetime64 into a modified julian date.
 
@@ -192,6 +202,8 @@ def numpy_to_mjd(date: np.datetime64 | _D) -> float | _N:
 @overload
 def d_2_dms(x: float, /) -> _N: ...
 @overload
+def d_2_dms(x: np.floating, /) -> _N: ...
+@overload
 def d_2_dms(x: _N, /) -> _N: ...
 def d_2_dms(x: _FN, /) -> _N:
     r"""Converts an angle from degrees to degrees, minutes and seconds."""
@@ -211,8 +223,9 @@ def d_2_dms(x: _FN, /) -> _N:
 
 
 # %% Functions - dms_2_d
-def dms_2_d(x: _N, /) -> _N:
+def dms_2_d(x: _N, /) -> np.floating | _N:
     r"""Converts an angle from degrees, minutes and seconds to degrees."""
+    x = np.asanyarray(x)
     if x.shape[0] != 3:
         raise ValueError("d_2_dms expects a 3xN array as input.")
     # find fractional degrees by adding parts together
@@ -221,8 +234,9 @@ def dms_2_d(x: _N, /) -> _N:
 
 
 # %% Functions - hms_2_r
-def hms_2_r(x: _N, /) -> _N:
+def hms_2_r(x: _N, /) -> np.floating | _N:
     r"""Converts a time from hours, minutes and seconds to radians."""
+    x = np.asanyarray(x)
     if x.shape[0] != 3:
         raise ValueError("hms_2_r expects a 3xN array as input.")
     # find fractional degrees by adding parts together
@@ -234,6 +248,8 @@ def hms_2_r(x: _N, /) -> _N:
 # %% Functions - r_2_hms
 @overload
 def r_2_hms(x: float, /) -> _N: ...
+@overload
+def r_2_hms(x: np.floating, /) -> _N: ...
 @overload
 def r_2_hms(x: _N, /) -> _N: ...
 def r_2_hms(x: _FN, /) -> _N:
@@ -315,7 +331,7 @@ def geo_loc_2_ijk(geo_loc: _N, time_jd: _N) -> _N:
 # %% Functions - ijk_2_rdr
 def ijk_2_rdr(ijk: _N) -> _N:
     r"""Converts IJK cartesian to Ra/Dec/range."""
-    # pull out i,j,k row vectors
+    # pull out i, j, k row vectors
     i = ijk[0, ...]
     j = ijk[1, ...]
     k = ijk[2, ...]
@@ -457,7 +473,7 @@ def rdr_2_ijk(rdr: _N) -> _N:
 # %% Functions - sez_2_aer
 def sez_2_aer(sez: _N) -> _N:
     r"""Converts SEZ cartesian to Az/El/range."""
-    # pull out x,y,z row vectors
+    # pull out x, y, z row vectors
     x = sez[0, ...]
     y = sez[1, ...]
     z = sez[2, ...]
@@ -465,7 +481,7 @@ def sez_2_aer(sez: _N) -> _N:
     rho = np.sqrt(x**2 + y**2 + z**2)  # TODO: use magnitude
     # find azimuth
     az = np.arctan2(y, -x)
-    # change range from (-pi,pi) to (0,2*pi)
+    # change range from (-pi, pi) to (0, 2*pi)
     az = np.mod(az, TAU)
     # find elevation (note Elevation is in range (-pi/2:pi/2)
     el = np.arctan(z / np.sqrt(x**2 + y**2))
@@ -610,7 +626,13 @@ def rv_sez_2_ijk(r_sez: _N, v_sez: _N, geo_loc: _N, time_jd: _N) -> tuple[_N, _N
 
 
 # %% Functions - get_sun_radec_approx
-def get_sun_radec_approx(time_jd: _N) -> tuple[_N, _N]:
+@overload
+def get_sun_radec_approx(time_jd: float) -> tuple[np.floating, np.floating]: ...
+@overload
+def get_sun_radec_approx(time_jd: np.floating) -> tuple[np.floating, np.floating]: ...
+@overload
+def get_sun_radec_approx(time_jd: _N) -> tuple[_N, _N]: ...
+def get_sun_radec_approx(time_jd: _FN) -> tuple[np.floating, np.floating] | tuple[_N, _N]:
     r"""
     Approximates the right ascension and declination angles to the Sun for the given julian time.
 
@@ -671,14 +693,18 @@ def get_sun_radec_approx(time_jd: _N) -> tuple[_N, _N]:
 
 # %% Functions - get_sun_radec
 @overload
-def get_sun_radec(time_jd: float) -> tuple[float, float]: ...
+def get_sun_radec(time_jd: float) -> tuple[np.floating, np.floating]: ...
+@overload
+def get_sun_radec(time_jd: np.floating) -> tuple[np.floating, np.floating]: ...
 @overload
 def get_sun_radec(time_jd: _N) -> tuple[_N, _N]: ...
 @overload
-def get_sun_radec(time_jd: float, return_early: bool) -> tuple[float, float]: ...
+def get_sun_radec(time_jd: float, return_early: bool) -> tuple[np.floating, np.floating]: ...
+@overload
+def get_sun_radec(time_jd: np.floating, return_early: bool) -> tuple[np.floating, np.floating]: ...
 @overload
 def get_sun_radec(time_jd: _N, return_early: bool) -> tuple[_N, _N]: ...
-def get_sun_radec(time_jd: _FN, return_early: bool = False) -> tuple[_FN, _FN]:
+def get_sun_radec(time_jd: _FN, return_early: bool = False) -> tuple[np.floating, np.floating] | tuple[_N, _N]:
     r"""
     Gets the right ascension and declination angles to the Sun for the given julian time.
 
@@ -752,7 +778,7 @@ def get_sun_radec(time_jd: _FN, return_early: bool = False) -> tuple[_FN, _FN]:
         - 4.34e-8 * T5
     )
     if return_early:
-        return (sun_true_longitude, obliquity_of_ecliptic)
+        return (sun_true_longitude, obliquity_of_ecliptic)  # type: ignore[return-value]
     # right ascension
     ra = np.mod(np.arctan2(np.cos(obliquity_of_ecliptic) * np.sin(sun_true_longitude), np.cos(sun_true_longitude)), TAU)
     # declination
@@ -762,10 +788,12 @@ def get_sun_radec(time_jd: _FN, return_early: bool = False) -> tuple[_FN, _FN]:
 
 # %% Functions - get_sun_distance
 @overload
-def get_sun_distance(time_jd: float) -> float: ...
+def get_sun_distance(time_jd: float) -> np.floating: ...
+@overload
+def get_sun_distance(time_jd: np.floating) -> np.floating: ...
 @overload
 def get_sun_distance(time_jd: _N) -> _N: ...
-def get_sun_distance(time_jd: _FN) -> _FN:
+def get_sun_distance(time_jd: _FN) -> np.floating | _N:
     r"""
     Calculate the distance to the Sun from the Earth.
 
@@ -808,10 +836,12 @@ def get_sun_distance(time_jd: _FN) -> _FN:
 
 # %% Functions - beta_from_oe
 @overload
-def beta_from_oe(raan: float, inclination: float, time_jd: float) -> float: ...
+def beta_from_oe(raan: float, inclination: float, time_jd: float) -> np.floating: ...
+@overload
+def beta_from_oe(raan: np.floating, inclination: np.floating, time_jd: np.floating) -> np.floating: ...
 @overload
 def beta_from_oe(raan: _N, inclination: _N, time_jd: _N) -> _N: ...
-def beta_from_oe(raan: _FN, inclination: _FN, time_jd: _FN) -> _FN:
+def beta_from_oe(raan: _FN, inclination: _FN, time_jd: _FN) -> np.floating | _N:
     r"""
     Calculates the beta angle between the sun and the orbit plane.
 
@@ -855,14 +885,14 @@ def beta_from_oe(raan: _FN, inclination: _FN, time_jd: _FN) -> _FN:
 
 # %% Functions - eclipse_fraction
 @overload
-def eclipse_fraction(altitude: float, beta: float) -> float: ...
+def eclipse_fraction(altitude: float, beta: float) -> np.floating: ...
 @overload
 def eclipse_fraction(altitude: float, beta: _N) -> _N: ...
 @overload
 def eclipse_fraction(altitude: _N, beta: float) -> _N: ...
 @overload
 def eclipse_fraction(altitude: _N, beta: _N) -> _N: ...
-def eclipse_fraction(altitude: _FN, beta: _FN) -> _FN:
+def eclipse_fraction(altitude: _FN, beta: _FN) -> np.floating | _N:
     r"""
     Gets the faction of the orbit period for which the satellite is in umbra.
 
@@ -913,10 +943,12 @@ def eclipse_fraction(altitude: _FN, beta: _FN) -> _FN:
 
 # %% earth_radius_by_latitude
 @overload
-def earth_radius_by_latitude(latitude: float) -> float: ...
+def earth_radius_by_latitude(latitude: float) -> np.floating: ...
+@overload
+def earth_radius_by_latitude(latitude: np.floating) -> np.floating: ...
 @overload
 def earth_radius_by_latitude(latitude: _N) -> _N: ...
-def earth_radius_by_latitude(latitude: _FN) -> _FN:
+def earth_radius_by_latitude(latitude: _FN) -> np.floating | _N:
     r"""
     Calculates the Earth radius at the given latitude for an ellipsoidal Earth.
 

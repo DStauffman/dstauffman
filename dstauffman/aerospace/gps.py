@@ -129,7 +129,7 @@ def bsr(bits: _I, shift: int = 1, *, inplace: bool = False) -> _I:
 # %% Functions - prn_01_to_m11
 def prn_01_to_m11(bits: _I, *, inplace: bool = False) -> _I:
     r"""
-    Shifts bits from (0,1) to (1,-1).
+    Shifts bits from (0, 1) to (1, -1).
 
     Parameters
     ----------
@@ -281,7 +281,7 @@ def correlate_prn(prn1: _I, prn2: _I, shift: int | _I, form: Literal["zero-one",
     """
     # process inputs based on form
     if form == "zero-one":
-        # change PRNs from (0,1) to (1,-1)
+        # change PRNs from (0, 1) to (1, -1)
         prn1 = 1 * (prn1 == 0) + -1 * (prn1 == 1)
         prn2 = 1 * (prn2 == 0) + -1 * (prn2 == 1)
     elif form == "one-one":

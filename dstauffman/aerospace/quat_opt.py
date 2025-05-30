@@ -207,7 +207,7 @@ def quat_angle_diff_single(quat1: _Q, quat2: _Q) -> _Q:
             [ny * sin(theta/2)]
             [nz * sin(theta/2)]
             [   cos(theta/2)  ]]
-    Where: <nx,ny,nz> are the three components of a unit vector of rotation axis and
+    Where: <nx, ny, nz> are the three components of a unit vector of rotation axis and
            theta is the angle of rotation
 
     Notes
@@ -223,7 +223,7 @@ def quat_angle_diff_single(quat1: _Q, quat2: _Q) -> _Q:
     >>> quat1 = np.array([0.5, 0.5, 0.5, 0.5])
     >>> dq1 = qrot_single(1, 0.001)
     >>> dq2 = qrot_single(2, 0.05)
-    >>> quat2 = quat_mult_single(dq1,quat1)
+    >>> quat2 = quat_mult_single(dq1, quat1)
     >>> comp = quat_angle_diff_single(quat1, quat2)
     >>> with np.printoptions(precision=8):
     ...     print(comp)  # doctest: +NORMALIZE_WHITESPACE

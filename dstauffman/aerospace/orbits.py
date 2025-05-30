@@ -31,6 +31,7 @@ from dstauffman.aerospace.orbit_conv import (
     mean_motion_2_semimajor,
 )
 from dstauffman.aerospace.orbit_support import cross, d_2_r, dot, jd_to_numpy, norm, r_2_d
+from dstauffman.aerospace.quat import quat_times_vector
 
 if HAVE_NUMPY:
     import numpy as np
@@ -44,7 +45,8 @@ if TYPE_CHECKING:
     _D = NDArray[np.datetime64]
     _I = NDArray[np.int_]
     _N = NDArray[np.floating]
-    _FN = float | _N
+    _Q = NDArray[np.floating]  # (4,)
+    _FN = float | np.floating | _N
 
 
 # %% Enums - OrbitType
@@ -153,6 +155,9 @@ class Elements(Frozen):
                 return False
         # if it made it all the way through the fields, then things must be equal
         return True
+
+    def __len__(self) -> int:
+        return np.size(self.a)
 
     def __getitem__(self, key: int) -> Elements:
         elements = Elements(1)
@@ -270,7 +275,7 @@ def two_line_elements(line1: str, line2: str) -> Elements:  # noqa: C901
     >>> from dstauffman.aerospace import two_line_elements
     >>> line1 = "1 25544U 98067A   06132.29375000  .00013633  00000-0  92740-4 0  9181"
     >>> line2 = "2 25544  51.6383  12.2586 0009556 188.7367 320.5459 15.75215761427503"
-    >>> elements = two_line_elements(line1,line2)
+    >>> elements = two_line_elements(line1, line2)
     >>> elements.pprint()
     Elements
      a          = 6722154.278502964
@@ -384,9 +389,9 @@ def rv_2_oe(r: _N, v: _N, mu: _FN = 1.0, unit: bool = False, precision: float = 
     Parameters
     ----------
     r : (3, N) ndarray
-        Position vector
+        Position vector (in ECI)
     v : (3, N) ndarray
-        Velocity vector
+        Velocity vector (in ECI)
     mu : float or (N, ) ndarray, optional
         Gravitational constant times the sum of the masses
     unit : bool, optional
@@ -555,15 +560,15 @@ def rv_2_oe(r: _N, v: _N, mu: _FN = 1.0, unit: bool = False, precision: float = 
 @overload
 def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[False] = ...) -> tuple[_N, _N]: ...
 @overload
-def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[True]) -> tuple[_N, _N, _N, _N, _N]: ...
+def oe_2_rv(elements: Elements, mu: _FN = ..., unit: bool = ..., *, return_PQW: Literal[True]) -> tuple[_N, _N, _N, _N, _Q]: ...
 def oe_2_rv(
     elements: Elements, mu: _FN = 1.0, unit: bool = False, *, return_PQW: bool = False
-) -> tuple[_N, _N] | tuple[_N, _N, _N, _N, _N]:
+) -> tuple[_N, _N] | tuple[_N, _N, _N, _N, _Q]:
     r"""
     Orbital Elements to Position and Velocity.
 
     This function takes a given elements structure containing subfields for
-    a,e,i,W,w,vo scalars and calculates the position and velocity vectors r & v.
+    a, e, i, W, w, vo scalars and calculates the position and velocity vectors r & v.
 
     Parameters
     ----------
@@ -574,7 +579,8 @@ def oe_2_rv(
     unit : bool, optional, default is False
         Units to return, where True changes to degrees
     return_PQW : bool, optional, default is False
-        Whether to return position and velocity in PQW frame, along with the transformation
+        Whether to return position and velocity in PQW (perifocal coordinate) frame,
+        along with the transformation
 
     Returns
     -------
@@ -583,7 +589,7 @@ def oe_2_rv(
     (The next three values are usually treated as optional outputs)
     r_PQW : 3x1 position vector in PQW frame
     v_PQW : 3x1 velocity vector in PQW frame
-    T     : transformation matrix
+    Q     : transformation quaternion
 
     Notes
     -----
@@ -643,69 +649,119 @@ def oe_2_rv(
     v_PQW = np.sqrt(_zero_divide(mu, p)) * np.vstack([-np.sin(nu), e + np.cos(nu), np.zeros(num)])
 
     # cosine and sine terms
-    cw = np.cos(w)
-    sw = np.sin(w)
-    cW = np.cos(W)
-    sW = np.sin(W)
-    ci = np.cos(i)
-    si = np.sin(i)
+    ci2 = np.cos(i / 2)
+    si2 = np.sin(i / 2)
+    cwm = np.cos((W - w) / 2)
+    cwp = np.cos((W + w) / 2)
+    swm = np.sin((W - w) / 2)
+    swp = np.sin((W + w) / 2)
 
-    # transformation matrix
-    # TODO: create quaternion and use quat_mult instead
-    # fmt: off
-    # T = np.array([
-    #     [+cW * cw - sW * sw * ci, -cW * sw - sW * cw * ci, +sW * si],
-    #     [+sW * cw + cW * sw * ci, -sW * sw + cW * cw * ci, -cW * si],
-    #     [+sw * si               , +cw * si               ,      +ci],
-    # ])
-    T = np.vstack([
-        +cW * cw - sW * sw * ci, -cW * sw - sW * cw * ci, +sW * si,
-        +sW * cw + cW * sw * ci, -sW * sw + cW * cw * ci, -cW * si,
-        +sw * si               , +cw * si               ,      +ci,
-    ])
-    # fmt: on
+    # transformation quaternion
+    # import sympy
+    # w, i, W = sympy.symbols('w i W')
+    # Q = sympy.Quaternion.from_euler([-w, -i, -W], "ZXZ")
+    Q = np.vstack([-si2 * cwm, -si2 * swm, -swp * ci2, +ci2 * cwp])
 
     # translate r & v into IJK frame
-    r = np.empty((3, num))
-    v = np.empty((3, num))
-    for ix in range(num):
-        # fmt: off
-        r[:, ix] = np.array([
-            _inf_multiply(r_PQW[0, ix], T[0, ix]) + _inf_multiply(r_PQW[1, ix], T[1, ix]) + _inf_multiply(r_PQW[2, ix], T[2, ix]),
-            _inf_multiply(r_PQW[0, ix], T[3, ix]) + _inf_multiply(r_PQW[1, ix], T[4, ix]) + _inf_multiply(r_PQW[2, ix], T[6, ix]),
-            _inf_multiply(r_PQW[0, ix], T[6, ix]) + _inf_multiply(r_PQW[1, ix], T[7, ix]) + _inf_multiply(r_PQW[2, ix], T[8, ix]),
-        ])
-        v[:, ix] = np.array([
-            _inf_multiply(v_PQW[0, ix], T[0, ix]) + _inf_multiply(v_PQW[1, ix], T[1, ix]) + _inf_multiply(v_PQW[2, ix], T[2, ix]),
-            _inf_multiply(v_PQW[0, ix], T[3, ix]) + _inf_multiply(v_PQW[1, ix], T[4, ix]) + _inf_multiply(v_PQW[2, ix], T[6, ix]),
-            _inf_multiply(v_PQW[0, ix], T[6, ix]) + _inf_multiply(v_PQW[1, ix], T[7, ix]) + _inf_multiply(v_PQW[2, ix], T[8, ix]),
-        ])
-        # fmt: on
+    r = quat_times_vector(Q, r_PQW)
+    v = quat_times_vector(Q, v_PQW)
 
     if num == 1:
         if return_PQW:
-            return (np.squeeze(r), np.squeeze(v), np.squeeze(r_PQW), np.squeeze(v_PQW), np.squeeze(T))
+            return (np.squeeze(r), np.squeeze(v), np.squeeze(r_PQW), np.squeeze(v_PQW), np.squeeze(Q))
         return (np.squeeze(r), np.squeeze(v))
 
     if return_PQW:
-        return (r, v, r_PQW, v_PQW, T)
+        return (r, v, r_PQW, v_PQW, Q)
     return (r, v)
 
 
+# %% Functions - advance_true_anomaly
+def advance_true_anomaly(a: _FN, e: _FN, vo: _FN, mu: _FN, time: _FN) -> _FN:
+    """
+    Advances the true anomaly.
+
+    Takes the semimajor axis and eccentricity, along with mu (gravity constant) to advance the
+    given true anomaly by the given time.
+
+    Parameters
+    ----------
+    a : float or numpy.ndarray
+        Semimajor axis
+    e : float or numpy.ndarray
+        Eccentricity
+    vo : float or numpy.ndarray
+        True Anomaly
+    mu : float or numpy.ndarray
+        Gravitational Constant for the large body
+    time : float or numpy.ndarray
+        Delta time in seconds to advance the true anomaly by
+
+    Examples
+    --------
+    >>> from dstauffman.aerospace import advance_true_anomaly
+    >>> a = 7e6
+    >>> e = 0.0
+    >>> vo = 0.0
+    >>> mu = 3.9863e14
+    >>> time = 600.0
+    >>> nu = advance_true_anomaly(a, e, vo, mu, time)
+    >>> print(nu)  # doctest: +ELLIPSIS
+    0.646828549162...
+
+    """
+    if np.all(e < 1.0):  # elliptic
+        # initial mean anomaly
+        Ei = anomaly_true_2_eccentric(vo, e)
+        Mi = anomaly_eccentric_2_mean(Ei, e)
+        # find new mean anomaly based on delta time
+        M = np.mod(np.sqrt(mu / a**3) * time + Mi, TAU)
+        # solve transcendental function for E
+        temp = root(lambda E: M - E + e * np.sin(E), PI)
+        E = temp.x[0]
+        # calculate the new true anomaly from the eccentric anomaly
+        nu = anomaly_eccentric_2_true(E, e)
+    elif np.all(e == 1.0):  # parabolic
+        Ei = 0
+        Mi = anomaly_eccentric_2_mean(Ei, e)  # find new mean anomaly based on delta time
+        M = np.mod(np.sqrt(mu / a**3) * time + Mi, TAU)
+        # solve transcendental function for E
+        temp = root(lambda E: M - E + e * np.sin(E), PI)
+        E = temp.x[0]
+        # calculate the new true anomaly from the eccentric anomaly
+        nu = anomaly_eccentric_2_true(E, e)
+    elif np.all(e > 1.0):  # hyperbolic
+        Fi = anomaly_true_2_hyperbolic(vo, e)
+        Mi = anomaly_hyperbolic_2_mean(Fi, e)
+        # find new mean anomaly based on delta time
+        M = np.mod(np.sqrt(mu / (-a) ** 3) * time + Mi, TAU)
+        # solve transcendental function for F
+        temp = root(lambda F: M + F - e * np.sinh(F), PI)
+        F = temp.x[0]
+        # calculate the new true anomaly from the eccentric anomaly
+        nu = anomaly_hyperbolic_2_true(F, e)
+    else:
+        raise ValueError(f'Unexpected orbit type: "{type}"')
+    return nu
+
+
 # %% Functions - advance_elements
-def advance_elements(elements: Elements, mu: float, time: float) -> Elements:
+def advance_elements(elements: Elements, mu: _FN, time: _FN) -> Elements:
     r"""
     Takes the given orbital elements and advancing them in time.
 
     Parameters
     ----------
-    elements : class
+    elements : class Elements
+        Orbital Elements to advance
     mu : float
+        Gravitational Constant for the large body
     time : float
+        Delta time in seconds to advance the elements by
 
     Notes
     -----
-    #.  The only parameter that will change is the true anomaly.
+    #.  The only parameters that will change are the true anomaly and the time stamp.
 
     Examples
     --------
@@ -743,48 +799,13 @@ def advance_elements(elements: Elements, mu: float, time: float) -> Elements:
      t          = 2023-06-01T00:10:00...
 
     """
-    # pull out short names for easier calculations
-    a = elements.a
-    e = elements.e
-    vo = elements.vo
     # initialize output to the same as the input
-    new_elements = Elements(np.size(a))
+    new_elements = Elements(len(elements))
     for key, value in vars(elements).items():
         if not is_dunder(key):
             setattr(new_elements, key, value)
-    if elements.type == OrbitType.elliptic:
-        # initial mean anomaly
-        Ei = anomaly_true_2_eccentric(vo, e)
-        Mi = anomaly_eccentric_2_mean(Ei, e)
-        # find new mean anomaly based on delta time
-        M = np.mod(np.sqrt(mu / a**3) * time + Mi, TAU)
-        # solve transcendental function for E
-        temp = root(lambda E: M - E + e * np.sin(E), PI)
-        E = temp.x[0]
-        # calculate the new true anomaly from the eccentric anomaly
-        nu = anomaly_eccentric_2_true(E, e)
-    elif elements.type == OrbitType.parabolic:
-        Ei = 0
-        Mi = anomaly_eccentric_2_mean(Ei, e)  # find new mean anomaly based on delta time
-        M = np.mod(np.sqrt(mu / a**3) * time + Mi, TAU)
-        # solve transcendental function for E
-        temp = root(lambda E: M - E + e * np.sin(E), PI)
-        E = temp.x[0]
-        # calculate the new true anomaly from the eccentric anomaly
-        nu = anomaly_eccentric_2_true(E, e)
-    elif elements.type == OrbitType.hyperbolic:
-        Fi = anomaly_true_2_hyperbolic(vo, e)
-        Mi = anomaly_hyperbolic_2_mean(Fi, e)
-        # find new mean anomaly based on delta time
-        M = np.mod(np.sqrt(mu / (-a) ** 3) * time + Mi, TAU)
-        # solve transcendental function for F
-        temp = root(lambda F: M + F - e * np.sinh(F), PI)
-        F = temp.x[0]
-        # calculate the new true anomaly from the eccentric anomaly
-        nu = anomaly_hyperbolic_2_true(F, e)
-    else:
-        raise ValueError(f'Unexpected orbit type: "{type}"')
-
+    # advance the elements
+    nu = advance_true_anomaly(elements.a, elements.e, elements.vo, mu, time)
     # store update variables
     new_elements.vo = nu
     new_elements.t = elements.t + NP_ONE_DAY * (time / JULIAN["day"])

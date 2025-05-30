@@ -145,7 +145,7 @@ class Test_orth(unittest.TestCase):
         )
         self.A2 = np.array([[1, 0, 1], [0, 1, 0], [1, 0, 1]])
         self.r2 = 2
-        self.Q2 = np.array([[-0.70710678, 0.0,], [0.0, 1.0], [-0.70710678, 0.0]])  # fmt: skip
+        self.Q2 = np.array([[-0.70710678, 0.0], [0.0, 1.0], [-0.70710678, 0.0]])  # fmt: skip
 
     def test_rank3(self) -> None:
         r = np.linalg.matrix_rank(self.A1)
